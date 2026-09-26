@@ -195,6 +195,9 @@ public static class DokumanUclari
         //   olmadan kurumsal dokuman yuklenemiyordu - her dokumanin bir karta
         //   asilmasi gerekiyordu.
         "klasor" => "klasor",
+        // BAŞVURU İSTEK KAĞIDI (dış kurum/dış doktor): dışarıdan gelen istek
+        //   kağıdının taraması başvuruya (belge) eklenir - kaynak_id belge id.
+        "belge" => "belge",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 

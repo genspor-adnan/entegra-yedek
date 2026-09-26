@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { KodSecim, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
 import { c } from '../../dil/ceviri';
+import { api } from '../../api/istemci';
+import { guvenli, mesaj } from '../mesaj';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -113,8 +115,10 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
                                  bolumHatasi, personelHatasi, turHatasi,
-                                 kendiIstegi, onKendiIstegi }: {
+                                 kendiIstegi, onKendiIstegi, belgeId }: {
   bilgi: BasvuruBilgi;
+  /** Kaydedilmiş başvurunun belge id'si - dış istek kağıdı taraması buna eklenir. */
+  belgeId?: number;
   /**
    * LAB / GORUNTULEME KURUMU (364, kullanici): bu kurumlarda basvuru zaten
    * "Laboratuvar / Görüntüleme"dir - tur sorulmaz, poliklinik odasi yoktur ve
@@ -233,9 +237,36 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kilitli, bilgi.sozlesmeId, sozlesmeListesi.map(z => z.id).join(',')]);
 
+  // DIŞ İSTEK KAĞIDI (kullanıcı): başvuru dış kurum ya da dış doktordan
+  //   geliyorsa istek kağıdını tarayıp başvuruya (belge) doküman olarak ekle.
+  //   Yalnız dış başvuruda görünür; kaydedilmemiş başvuruda pasif.
+  const dosyaRef = useRef<HTMLInputElement>(null);
+  const [istekSayi, setIstekSayi] = useState(0);
+  const disBasvuru = !!odeyenKurumId || !!personelAd;
+  const istekKagidiYukle = async (dosya: File | undefined) => {
+    if (!dosya || !belgeId) return;
+    await guvenli(async () => {
+      const liste = await api.dokumanYukle('belge', belgeId, dosya, false);
+      setIstekSayi(liste.length);
+      mesaj(`İstek kağıdı yüklendi (${liste.length} belge).`);
+    });
+  };
+
   return (
     <div className="kagrup">
-      <h6>{c('Başvuru Bilgileri')}</h6>
+      <h6>{c('Başvuru Bilgileri')}
+        {disBasvuru && <>
+          <input ref={dosyaRef} type="file" accept="image/*,application/pdf" style={{ display: 'none' }}
+                 onChange={e => { void istekKagidiYukle(e.target.files?.[0]); e.currentTarget.value = '' }} />
+          <button type="button" className="d" style={{ marginLeft: 10, fontWeight: 400 }}
+                  disabled={!belgeId}
+                  title={belgeId ? 'Dış kurum/doktor istek kağıdını tara/yükle'
+                                 : 'Önce başvuruyu kaydedin'}
+                  onClick={() => dosyaRef.current?.click()}>
+            📎 İstek Kağıdı {istekSayi > 0 ? `(${istekSayi})` : '(Tara / Yükle)'}
+          </button>
+        </>}
+      </h6>
       {/* PROTOKOL NO BURADA YOK (kullanici): kartin BASLIK seridinde zaten
           "Protokol No" hucresi var - ayni salt okunur numarayi iki yerde
           gostermek sekmede bos yer harciyordu. */}

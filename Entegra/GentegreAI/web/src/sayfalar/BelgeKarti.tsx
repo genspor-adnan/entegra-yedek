@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -50,7 +50,6 @@ import {
 } from './belgeKartiKurallari';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
-import { BankoSerbestBar } from '../bilesenler/belge/BankoSerbestBar';
 import { c } from '../dil/ceviri';
 
 interface Props {
@@ -468,6 +467,37 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const eBelgeYok = !bilgi.eBelge;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = etkinBelgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+
+  /** DOKTOR İSTEMİ (banko): hekimin muayenede açtığı bekleyen (ücretlendirilmemiş)
+   *  lab/radyoloji istemleri. Varsa araç çubuğunda "Doktor İstemi" düğmesi aktif;
+   *  ücretlendirilince satır sayısı değişir → yeniden çekilir. */
+  const [doktorIstem, setDoktorIstem] = useState<{ toplam: number;
+    lab: { tetkik: string }[]; radyoloji: { tetkik: string }[] } | null>(null);
+  useEffect(() => {
+    if (!basvuruMu || kayitliId <= 0) { setDoktorIstem(null); return }
+    let iptal = false;
+    api.basvuruBekleyenIstem(kayitliId)
+       .then(d => { if (!iptal) setDoktorIstem(d) })
+       .catch(() => { if (!iptal) setDoktorIstem(null) });
+    return () => { iptal = true };
+  }, [basvuruMu, kayitliId, satirlar.length]);
+
+  async function doktorIstemiUcretlendir() {
+    if (!doktorIstem || doktorIstem.toplam === 0) return;
+    const liste = [...doktorIstem.lab, ...doktorIstem.radyoloji].map(x => `• ${x.tetkik}`).join('\n');
+    if (!await onay(`Doktorun istediği ${doktorIstem.toplam} tetkik ücrete eklenecek:
+
+${liste}
+
+Devam edilsin mi?`)) return;
+    try {
+      const y = await api.basvuruIstemUcretlendir(kayitliId);
+      const okunan = await api.belgeOku(kayitliId);
+      setSonuc(okunan);
+      setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
+      mesaj(y.mesaj);
+    } catch (h) { mesaj(hataMetni(h)) }
+  }
 
   /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
   /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi).
@@ -1235,7 +1265,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           // Secili hastanin karti DOGRUDAN acilir (781) - arada arama
           //   penceresi yok (dugme zaten hasta secili degilken pasif).
           hastaKartiAc={() => { if (cari?.id) arama.setHastaKartId(cari.id) }}
-          radyolojiIstemi={() => arama.setIstem(true)}
+          doktorIstemVar={(doktorIstem?.toplam ?? 0) > 0}
+          doktorIstemSayi={doktorIstem?.toplam ?? 0}
+          doktorIstemi={doktorIstemiUcretlendir}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
         />
@@ -1304,12 +1336,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           />
         )}
 
-        {/* BANKO KAPISI (912): poliklinikte hekimin açtığı lab/radyoloji
-            isteği "ücretlendirme bekliyor" durumundadır - banko buradan
-            serbest bırakınca çalışma listelerine düşer. Bekleyen yoksa çizilmez. */}
-        {basvuruMu && kayitliId > 0 && (
-          <BankoSerbestBar belgeId={kayitliId} yenileAnahtari={satirlar.length} />
-        )}
 
         <BelgeBaslik
           aktifSekme={aktifSekme ?? ''}
@@ -1568,6 +1594,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         {aktifSekme === 'basvuru' && (
           <BasvuruSekmesi
             bilgi={basvuruBilgi}
+            belgeId={kayitliId}
             degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
             kilitli={kilitli}
             tarih={tarih} setTarih={setTarih}

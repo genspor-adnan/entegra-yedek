@@ -23,4 +23,10 @@ export const basvuruIstemUclari = {
     gonder<{ lab: number; radyoloji: number; toplam: number; mesaj: string }>(
       `/api/basvuru/${belgeId}/istem-serbest`,
       { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null }),
+
+  /** Doktor istemlerini ücretlendir: bekleyen istemlerin hizmetlerini ücret
+   *  satırı olarak başvuruya ekler (fiyat + iskonto + karşılama); istemler
+   *  serbest kalır (worklist'e düşer). */
+  basvuruIstemUcretlendir: (belgeId: number) =>
+    gonder<{ eklenen: number; mesaj: string }>(`/api/basvuru/${belgeId}/istem-ucretlendir`, {}),
 };

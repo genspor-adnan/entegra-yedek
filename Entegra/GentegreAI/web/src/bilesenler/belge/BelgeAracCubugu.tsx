@@ -15,7 +15,7 @@ export function BelgeAracCubugu({
   siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
-  hastaKartiAc, acilBasvuru, hastaVar, radyolojiIstemi,
+  hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -57,8 +57,11 @@ export function BelgeAracCubugu({
   acilBasvuru?(): void;
   /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
   hastaVar?: boolean;
-  /** Basvurudan RADYOLOJI ISTEMI acar (304) - ic istem. */
-  radyolojiIstemi?(): void;
+  /** DOKTOR İSTEMİ: hekimin muayenede açtığı bekleyen lab/radyoloji istemlerini
+   *  ücretlendirir (belge_satir). Yalnız bekleyen istem varsa aktif. */
+  doktorIstemi?(): void;
+  doktorIstemVar?: boolean;
+  doktorIstemSayi?: number;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -116,14 +119,15 @@ export function BelgeAracCubugu({
       <button className="d" disabled title={c('Randevudan başvuru açma henüz bağlanmadı.')}>
         📅 Randevudan Getir
       </button>
-      {/* RADYOLOJI ISTEMI (304): coklu tetkik secer, her biri ayri accession
-          alir ve ucretleri BU basvuruya eklenir. */}
-      <button className="d" disabled={!hastaVar || kilitli}
-              title={hastaVar ? 'Bu başvuruya radyoloji tetkiki iste'
-                              : 'Önce hasta seçin.'}
-              onClick={() => radyolojiIstemi?.()}>
-        ☢️ Radyoloji İstemi
-      </button>
+      {/* DOKTOR İSTEMİ: hekimin muayenede açtığı bekleyen istemleri ücretlendirir.
+          Yalnız bekleyen doktor istemi varsa görünür/aktif olur (kullanıcı kuralı).
+          İstem YALNIZ başvurudan/muayeneden açılır; buradan boş kart açılmaz. */}
+      {doktorIstemVar && (
+        <button className="d bir" disabled={kilitli}
+                title="Doktorun istediği tetkikleri ücretlendir ve çalışma listesine düşür"
+                onClick={() => doktorIstemi?.()}>
+          🩺 Doktor İstemi{doktorIstemSayi ? ` (${doktorIstemSayi})` : ''}
+        </button>)}
       {/* Acil basvuru: turu Acil, gelis seklini Ambulans yapar - kayit kabul
           memuru acil kapisinda iki combo yerine tek dugmeye bassin. */}
       <button className="d" disabled={kilitli}
