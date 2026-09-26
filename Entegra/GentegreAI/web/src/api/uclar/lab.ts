@@ -33,6 +33,9 @@ export const labUclari = {
    */
   labIstemAc: (govde: { belgeId?: number;
                         hastaId?: number; disKurumId?: number;
+                        /** Dış kurum kabulünde açılan başvurunun sözleşmesi (913):
+                         *  gönderen kurumun birden çok sözleşmesi varsa zorunlu. */
+                        sozlesmeId?: number | null;
                         satirlar: { tetkikId?: number; panelId?: number }[];
                         oncelik?: number; klinikBilgi?: string; taniIcd?: string;
                         /** Akılcı istem kararları (873): uyarı alan tetkik için gerekçe kodu. */

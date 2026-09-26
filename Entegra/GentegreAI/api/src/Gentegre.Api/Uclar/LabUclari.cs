@@ -27,6 +27,10 @@ public static partial class LabUclari
     public sealed record IstemIstegi(int BelgeId, LabServisi.IstemSatiriIstegi[]? Satirlar,
                                      short? Oncelik, string? KlinikBilgi, string? TaniIcd,
                                      int? HastaId = null, int? DisKurumId = null,
+                                     /// <summary>Dış kurum kabulünde açılan başvurunun sözleşmesi (913):
+                                     /// gönderen kurumun birden çok sözleşmesi varsa SEÇİLMELİDİR
+                                     /// (tekse sunucu kendisi atar).</summary>
+                                     int? SozlesmeId = null,
                                      /// <summary>Akılcı istem kararları (873): uyarı alan tetkik için gerekçe kodu.</summary>
                                      LabServisi.AkilciKarar[]? Akilci = null);
     public sealed record AkilciKontrolIstegi(int HastaId, int? HekimId, int[] TetkikIdler);
@@ -403,6 +407,9 @@ public static partial class LabUclari
                     ["fiyatListesiId"] = listeId, ["kampanyaId"] = kampanyaId,
                     // Başvuru türü 5 = Laboratuvar / Görüntüleme; ödeyen = gönderen kurum.
                     ["basvuruTuru"] = (short)5, ["odeyenKurumId"] = dk,
+                    // SÖZLEŞME (913): kurumun birden çok sözleşmesi varsa istek
+                    //   taşır; tekse null gider ve tetik kendisi atar.
+                    ["sozlesmeId"] = istek.SozlesmeId,
                     ["aciklama"] = "Dış kurum numune kabul",
                 };
                 var (yeniBelgeId, _) = await belgeDepo.KaydetAsync(
