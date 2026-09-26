@@ -65,6 +65,10 @@ public static partial class RadyolojiUclari
     /// hepsine gecer.
     /// </summary>
     public sealed record TetkikIstegi(int HizmetId, short? Oncelik, short? Kontrast);
+    /// <summary>İstem kartı düzenlenebilir alanları (mockup). Hasta/tetkik/ödeyen
+    /// kurum başvurudan gelir, burada değişmez.</summary>
+    public sealed record IstemGuncelleIstegi(string? KlinikBilgi, string? OnTani, short? Oncelik,
+        short? Kontrast, decimal? KontrastMl, int? SeriSayisi, int? GoruntuSayisi);
     public sealed record IstemIstegi(
         int HastaId, int? BelgeId, int? IstekHekimId, string? DisHekimAd,
         int? IstekKurumId, string? OnTani, string? KlinikBilgi, short? Oncelik,
@@ -380,12 +384,16 @@ public static partial class RadyolojiUclari
                              kontrast, ekleyen,
                              mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi,
                              randevu_id, serbest, accession_no)
-                        -- serbest=1 (912): KAYIT-KABUL/BANKO yolu; istem burada
-                        --   zaten ücretlendirme akışıyla açılıyor, çekim listesini
-                        --   beklemez. Banko kapısı yalnız MUAYENE isteğine (doktor) uygulanır.
+                        -- serbest (913): ücret girilene kadar çekim listesine
+                        --   DÜŞMEZ. Ücret satırları aşağıda (UcretEkle/kabul)
+                        --   eklenince belge_satir tetiği serbest yapar. Acil/
+                        --   yatan başvuru fn içinde bypass edilir.
                         values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
                                 coalesce(@p13, 1), coalesce(@p14, 1),
-                                coalesce(@p15, 1), coalesce(@p16, 0), @p17, 1,
+                                coalesce(@p15, 1), coalesce(@p16, 0), @p17,
+                                public.fn_istem_serbest(
+                                    (select basvuru_turu from public.belge_basvuru where id = @p1)::smallint,
+                                    @p5::smallint, @p1),
                                 -- ACCESSION NO AYARDAN (634): tur 903 sablonu
                                 --   varsa numara verilir, yoksa BOS kalir
                                 --   (bugunku davranis). DICOM/MWL tarafinda
@@ -436,11 +444,29 @@ public static partial class RadyolojiUclari
             //   bölüşümü ve toplamlar orada çözülüyor; burada ikinci bir
             //   hesap yolu açmak ikisinin sapmasi demek olurdu.
             var uyarilar = new List<string>();
-            if (istek.UcretEkle && belgeId is int ucretBelgeId && ucretBelgeId > 0)
+            // ÜCRET (913): kabulde başvuru açıldıysa ücret HER ZAMAN eklenir -
+            //   ödeyen kurum + ücret girilmeden istem çekim listesine düşmez.
+            //   UcretEkle bayrağı geriye dönük uyum için ayrıca kabul edilir.
+            if ((istek.UcretEkle || istek.BasvuruAc) && belgeId is int ucretBelgeId && ucretBelgeId > 0)
             {
                 var (belge, satirlar) = await BelgeGovdesi.OkuAsync(baglanti, ucretBelgeId, iptal);
 
                 var sira = satirlar.Count;
+                // SÖZLEŞME İSKONTOSU (914): radyoloji kalemlerine sözleşmenin
+                //   radyoloji iskontosu uygulanır (baz = özel fiyat listesi).
+                var radIskonto = await baglanti.TekDegerAsync<int>("""
+                    select coalesce(s.rad_iskonto, 0)
+                      from public.belge_basvuru bb
+                      join public.kurum_sozlesme s on s.id = bb.sozlesme_id
+                     where bb.id = @p0
+                    """, null, [ucretBelgeId], iptal);
+                // Kurum payı = karşılama (ödeyen kurum yüzdesi) - kurum öder.
+                var radKarsilama = await baglanti.TekDegerAsync<decimal>("""
+                    select coalesce(s.varsayilan_karsilama, 0)
+                      from public.belge_basvuru bb
+                      join public.kurum_sozlesme s on s.id = bb.sozlesme_id
+                     where bb.id = @p0
+                    """, null, [ucretBelgeId], iptal);
                 for (var i = 0; i < istek.Tetkikler.Count; i++)
                 {
                     var t = istek.Tetkikler[i];
@@ -486,6 +512,10 @@ public static partial class RadyolojiUclari
                         ["hizmetId"] = t.HizmetId,
                         ["miktar"] = 1m,
                         ["birimFiyat"] = fiyat,
+                        ["iskonto"] = (decimal)radIskonto,
+                        // Sözleşme iskontosu ÖN-ONAYLI: eşik onayına takılmasın.
+                        ["iskontoKilit"] = radIskonto > 0 ? 1 : 0,
+                        ["pay"] = (int)radKarsilama,
                         ["kdv"] = kdv,
                         ["dovizCinsi"] = "TL",
                         ["aciklama"] = accessionlar[i],
@@ -507,6 +537,13 @@ public static partial class RadyolojiUclari
                      where s.belge_id = @p0 and s.aciklama = i.accession_no
                        and i.belge_satir_id is null and i.id = any(@p1)
                     """, null, [ucretBelgeId, idler.ToArray()], iptal);
+
+                // KARŞILAMA DAĞILIMI (915): ödeyen kurum payını üret - "Kurumu
+                //   Öder" türünde tutar kurum kovasına, hasta payı 0.
+                await baglanti.CalistirAsync(
+                    "select public.fn_belge_satir_dagilim_tazele(id) "
+                  + "from public.belge_satir where belge_id = @p0 and hizmet_id is not null",
+                    null, [ucretBelgeId], iptal);
             }
 
             // Kabul ekrani kaydettikten sonra PROTOKOL numarasini ve tutari

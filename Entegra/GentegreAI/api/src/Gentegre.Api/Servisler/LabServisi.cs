@@ -158,9 +158,9 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                     personel_id, durum, oncelik, kaynak, klinik_bilgi, tani_icd,
                     ekleyen, dis_kurum_id, serbest)
             values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7, @p9,
-                    public.fn_istem_serbest(@p2::smallint,
+                    public.fn_istem_serbest(
                         (select basvuru_turu from public.belge_basvuru where id = @p0)::smallint,
-                        @p4::smallint, @p8::smallint))
+                        @p4::smallint, @p0))
             returning id
             """, islem,
             [belgeId is > 0 ? belgeId : null, b.HastaId, b.SubeId,

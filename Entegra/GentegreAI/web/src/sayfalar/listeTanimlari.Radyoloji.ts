@@ -15,9 +15,13 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
     kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji Çalışma Listesi',
     yol: 'Radyoloji › Çalışma Listesi',
-    // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id) - kartYolu farkli
-    //   yazilirsa cift tik tanimsiz rotaya gider ve ana sayfaya duser.
+    // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id).
     kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    // OZEL KART (mockup radyoloji_istem_karti.html): generic form yerine
+    //   RadyolojiIstemKarti bileseni - akis seridi + kontrol listesi + cekim
+    //   alanlari generic karta sigmaz. LISTELER dongusu /radyoloji/:id kaydini
+    //   uretmez; App.tsx'te ozel route devreye girer.
+    ozelKart: true,
     // Cekim oncesi kontrol listesi (310) kart DETAYI degil: sorular
     //   modaliteye gore uretilir, satir ekle/sil'li grid yanlis olurdu.
     yerTutucuSekmeler: ['Kontrol Listesi'],

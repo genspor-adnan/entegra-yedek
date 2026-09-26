@@ -92,6 +92,89 @@ public static partial class RadyolojiUclari
             return Results.Ok(akis);
         });
 
+        // GET /istem/{id}/kart-detay - İSTEM KARTI (mockup radyoloji_istem_karti.html)
+        //   başlık + istem bilgisi + çekim/görüntü alanları tek çağrıda. Akış
+        //   şeridi /akis, kontrol listesi /kontrol'den gelir.
+        grup.MapGet("/istem/{id:int}/kart-detay", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var kart = await baglanti.TekAsync("""
+                select i.id, i.accession_no as "accessionNo", i.durum, i.oncelik,
+                       i.modalite,
+                       case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG'
+                            when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA'
+                            when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end as "modaliteAdi",
+                       coalesce(dd.ad,'') as "durumAdi",
+                       coalesce(od.ad,'') as "oncelikAdi",
+                       i.hasta_id as "hastaId",
+                       coalesce(nullif(trim(h.ad||' '||h.soyad),''), h.unvan, '') as "hastaAdi",
+                       case coalesce(th.cinsiyet,0) when 1 then 'E' when 2 then 'K' else '' end as cinsiyet,
+                       case when th.dogum_tarihi is null then null
+                            else extract(year from age(th.dogum_tarihi))::int end as yas,
+                       coalesce(h.telefon,'') as telefon,
+                       coalesce(hz.kod,'') as "tetkikKodu", coalesce(hz.ad,'') as "tetkikAdi",
+                       coalesce(nullif(ih.unvan,''), nullif(i.dis_hekim_ad,''), '') as "isteyenHekim",
+                       coalesce(ik.unvan,'') as "isteyenKurum",
+                       i.belge_id as "belgeId", coalesce(b.belge_no,'') as protokol, b.belge_tarihi as "protokolTarihi",
+                       coalesce(i.on_tani,'') as "onTani", coalesce(i.klinik_bilgi,'') as "klinikBilgi",
+                       coalesce(ok.unvan,'') as "odeyenKurum",
+                       coalesce(cz.ad,'') as cihaz, coalesce(cz.kod,'') as "cihazKodu",
+                       coalesce(tk.unvan,'') as tekniker,
+                       i.cekim_tarihi as "cekimTarihi",
+                       i.kontrast, coalesce(i.kontrast_ml,0) as "kontrastMl",
+                       coalesce(i.seri_sayisi,0) as "seriSayisi", coalesce(i.goruntu_sayisi,0) as "goruntuSayisi",
+                       i.dlp, i.ctdi, coalesce(i.study_uid,'') as "studyUid"
+                  from public.radyoloji_istem i
+                  left join public.taraf h on h.id = i.hasta_id
+                  left join public.taraf_hasta th on th.id = i.hasta_id
+                  left join public.hizmet hz on hz.id = i.hizmet_id
+                  left join public.taraf ih on ih.id = i.istek_hekim_id
+                  left join public.taraf ik on ik.id = i.istek_kurum_id
+                  left join public.belge b on b.id = i.belge_id
+                  left join public.belge_basvuru bb on bb.id = b.id
+                  left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+                  left join public.radyoloji_cihaz cz on cz.id = i.cihaz_id
+                  left join public.taraf tk on tk.id = i.tekniker_id
+                  left join public.kod_deger dd on dd.deger = i.durum and dd.dil = 0
+                        and dd.liste_id = (select id from public.kod_liste where kod = 'rad.istem_durum')
+                  left join public.kod_deger od on od.deger = i.oncelik and od.dil = 0
+                        and od.liste_id = (select id from public.kod_liste where kod = 'rad.oncelik')
+                 where i.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+            return Results.Ok(kart);
+        });
+
+        // PUT /istem/{id} - İSTEM KARTI düzenlenebilir alanları (mockup).
+        //   Hasta/tetkik/ödeyen kurum başvurudan gelir, BURADA DEĞİŞMEZ; yalnız
+        //   klinik alanlar + çekim/görüntü bilgisi güncellenir.
+        grup.MapPut("/istem/{id:int}", async (
+            int id, IstemGuncelleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var n = await baglanti.CalistirAsync("""
+                update public.radyoloji_istem
+                   set klinik_bilgi = @p1, on_tani = @p2, oncelik = @p3,
+                       kontrast = @p4, kontrast_ml = @p5,
+                       seri_sayisi = @p6, goruntu_sayisi = @p7,
+                       degistiren = @p8, degistirme_tarihi = now()::timestamp
+                 where id = @p0
+                """, null,
+                [id, istek.KlinikBilgi ?? "", istek.OnTani ?? "", (short)(istek.Oncelik ?? 1),
+                 (short)(istek.Kontrast ?? 0), istek.KontrastMl,
+                 istek.SeriSayisi, istek.GoruntuSayisi, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+            return Results.Ok(new { id, mesaj = "İstem güncellendi.", izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------ kontrol listesi (310) ----
         // Sorular MODALITEYE gore gelir; yanit varsa uzerine binmis olarak.
         grup.MapGet("/istem/{id:int}/kontrol", async (

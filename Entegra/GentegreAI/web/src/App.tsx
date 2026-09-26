@@ -32,6 +32,7 @@ import { TeleradFatura } from './sayfalar/TeleradFatura';
 import { EnabizPanosu } from './sayfalar/EnabizPanosu';
 import { Hakedisim } from './sayfalar/Hakedisim';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
+import { RadyolojiIstemKarti } from './sayfalar/RadyolojiIstemKarti';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
@@ -223,6 +224,7 @@ function Yollar() {
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}
+        {yetki('radyoloji-istem') && <Route path="/radyoloji/:id" element={<RadyolojiIstemKarti />} />}
         {/* Rapor CIKTISI (303): hastaya verilen belge - yazma ekranindan ayri
             sayfa, yazdirma tarayicinin kendi diyalogu. */}
         {yetki('radyoloji') && <Route path="/radyoloji/cikti/:id" element={<RadyolojiRaporCikti />} />}

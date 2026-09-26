@@ -1080,9 +1080,12 @@ public static class AksiyonKatalogu
             //   (rad.rapor_yaz / rad.rapor_onayla) uzerinden yonetilir.
             ["radyoloji-liste"] = new AksiyonTanimi[]
             {
-                new("radyoloji.yeni",     "＋ Yeni İstem", "radyoloji", Kisayol: "Ctrl+N",
-                    KaynakKodu: "radyoloji", Islem: Islem.Ekle, Sira: 10),
-                new("radyoloji.duzenle",  "✎ Düzenle", "radyoloji", Kisayol: "Enter",
+                // "Yeni İstem" YOK (kullanıcı kuralı): radyoloji istemi YALNIZ
+                //   başvurudan açılır - kayıt-kabul (dış hasta → başvuru + istem)
+                //   ya da muayeneden hekim isteği. Çalışma listesi bir İŞ
+                //   listesidir; buradan boş kart açmak başvurusuz (ücretsiz,
+                //   ödeyensiz) istem üretirdi.
+                new("radyoloji.duzenle",  "✎ Aç / Düzenle", "radyoloji", Kisayol: "Enter",
                     KaynakKodu: "radyoloji", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 20),
                 // RANDEVU (316): radyolojide randevu CIHAZA verilir; kayit yine
@@ -1623,7 +1626,16 @@ public static class AksiyonKatalogu
             //   uretimi. Uc uzerinden acilan istemde tup plani zaten calisir.
             ["lab-istem-liste"] =
             [
-                .. Crud("lab-istem", "lab-istem", "lab"),
+                // "Yeni İstem" YOK (kullanıcı kuralı, radyolojiyle aynı): lab
+                //   istemi YALNIZ başvurudan açılır - kayıt-kabul (dış kurum →
+                //   başvuru + istem) ya da muayeneden hekim isteği. Boş kart
+                //   başvurusuz (ücretsiz/ödeyensiz) istem üretirdi. Crud'un
+                //   "yeni"si bu yüzden alınmadı; düzenle/sil/yazdır elle.
+                new("lab-istem.duzenle", "✎ Aç / Düzenle", "lab-istem", Kisayol: "Enter",
+                    KaynakKodu: "lab", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("lab-istem.sil", "🗑 Sil", "lab-istem", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "lab", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                Yazdir(),
                 // REFLEKTİF İSTEM (873 §7): lab uzmanı sonuç sonrası ek tetkik ister.
                 new("lab.reflektif", "🔁 Reflektif tetkik ekle", "lab", Hedef: "araccubugu2,sagtus,palet",
                     AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 45, UrunModu: 2,

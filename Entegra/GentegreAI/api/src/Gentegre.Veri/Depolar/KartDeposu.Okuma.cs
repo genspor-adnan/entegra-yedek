@@ -236,6 +236,9 @@ public sealed partial class KartDeposu
         {
             if (!kart.TryGetValue(alan.Ad, out var deger) || deger is null) continue;
             var anahtar = deger.ToString() ?? "";
+            // BOŞ KOD: çözülecek ad yok - Convert.ToInt32('') FormatException
+            //   atıyordu; boş değerli kod alanı (ör. seçilmemiş) kartı çökertmesin.
+            if (string.IsNullOrWhiteSpace(anahtar)) continue;
 
             if (alan.SabitKodlar is { } sabit)
             {
@@ -485,7 +488,10 @@ public sealed partial class KartDeposu
                 $"select id, ad from {KodTablosuDogrula(tablo)} where aktif = 1 " +
                 portalSuzgeci +
                 " order by case when id::text = '0' then 0 else 1 end, ad",
-                par, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.GetString(1)), iptal))
+                // AD NULL OLABILIR: lookup kaynagindaki satirin adi bos ise
+                //   (kurum kartinda ad yerine unvan kullanan taraf, eksik veri)
+                //   TUM kart cokmesin - bos ad guvenle okunur.
+                par, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.IsDBNull(1) ? "" : r.GetString(1)), iptal))
             .ToDictionary(x => x.Id, x => x.Ad, StringComparer.Ordinal);
     }
 

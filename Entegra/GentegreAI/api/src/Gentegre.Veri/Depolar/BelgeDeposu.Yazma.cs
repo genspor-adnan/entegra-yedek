@@ -367,7 +367,7 @@ public sealed partial class BelgeDeposu
             "adet", "miktar", "birim", "birim_carpan", "birim_fiyat",
             // KDV DAHIL birim fiyat (371) - ekranda gosterilen ve hastaya
             //   soylenen rakam; matrah bundan turetilir.
-            "birim_fiyat_kdvli", "iskonto", "iskonto2", "kdv",
+            "birim_fiyat_kdvli", "iskonto", "iskonto2", "iskonto_kilit", "kdv",
             "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
             // KDV dahil satir tutari (372) - belge toplaminin dayanagi.
             "tutar_kdvli",
@@ -392,7 +392,8 @@ public sealed partial class BelgeDeposu
         {
             belgeId, sira, tur, stokId, hizmetId, masrafId, JsonMetin(satir, "aciklama"),
             adet, miktar, (int)JsonSayi(satir, "birim", 0), birimCarpan,
-            birimFiyat, birimFiyatKdvli, iskonto, iskonto2, (short)kdv,
+            birimFiyat, birimFiyatKdvli, iskonto, iskonto2,
+            (short)JsonSayi(satir, "iskontoKilit", 0), (short)kdv,
             (short)JsonSayi(satir, "otvYuzde", 0), JsonOndalik(satir, "otvMiktar", 0),
             (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar, tutarKdvli,
             dovizCinsi, dovizBirimFiyat, dovizTutar, kur,

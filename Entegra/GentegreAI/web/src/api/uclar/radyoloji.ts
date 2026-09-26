@@ -2,6 +2,22 @@ import { istek, gonder } from '../cekirdek';
 
 /** Radyoloji: istem, worklist, rapor, randevu, kritik bulgu. */
 export const radyolojiUclari = {
+  // İSTEM KARTI (mockup radyoloji_istem_karti.html): başlık + istem bilgisi +
+  //   çekim alanları tek çağrı; akış şeridi ve kontrol listesi ayrı uçlardan.
+  radyolojiKartDetay: (id: number) =>
+    istek<Record<string, unknown>>(`/api/radyoloji/istem/${id}/kart-detay`),
+  radyolojiAkis: (id: number) =>
+    istek<Record<string, unknown>>(`/api/radyoloji/istem/${id}/akis`),
+  radyolojiIstemGuncelle: (id: number, govde: {
+    klinikBilgi?: string; onTani?: string; oncelik?: number;
+    kontrast?: number; kontrastMl?: number | null;
+    seriSayisi?: number | null; goruntuSayisi?: number | null;
+  }) => gonder<{ id: number; mesaj: string }>(`/api/radyoloji/istem/${id}`, govde, 'PUT'),
+  radyolojiKontrol: (id: number) =>
+    istek<{ sorular: { soruId: number; soru: string; yanitTipi: number; zorunlu: number;
+                       yanit: string; kayitZamani: string | null; kaydeden: string }[] }>(
+      `/api/radyoloji/istem/${id}/kontrol`),
+
   // ---------------------------------------------------------- radyoloji ----
   // RAPOR EKRANI (283): acilista ihtiyac duyulan HER SEY tek istekte gelir -
   //   istem, rapor, bolumler, sablonlar, makrolar, skorlar, hasta gecmisi ve
