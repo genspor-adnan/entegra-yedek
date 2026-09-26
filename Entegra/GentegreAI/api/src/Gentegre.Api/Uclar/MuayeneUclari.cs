@@ -862,7 +862,7 @@ public static class MuayeneUclari
                     insert into public.radyoloji_istem
                            (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                             istek_hekim_id, on_tani, klinik_bilgi, aciklama, serbest, accession_no)
-                    values (@p0, @p1, @p2, @p3, @p8, 1, @p4, @p5, @p6, @p7, @p7,
+                    values (@p0, @p1, @p2, @p3, @p9, 1, @p4, @p5, @p6, @p7, @p7,
                             public.fn_istem_serbest(
                                 (select basvuru_turu from public.belge_basvuru where id = @p1)::smallint,
                                 @p4::smallint, @p1),

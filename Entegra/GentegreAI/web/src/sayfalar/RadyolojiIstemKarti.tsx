@@ -125,9 +125,9 @@ export function RadyolojiIstemKarti() {
             <button className="d bir" onClick={() => void kaydet()}>💾 Kaydet</button>
             <button className="d" onClick={() => { setForm(k ? formAl(k) : null); setDuzen(false) }}>Vazgeç</button>
           </> : <>
-            {yetki('radyoloji', 'degistir') &&
+            {yetki('radyoloji-istem', 'degistir') &&
               <button className="d" onClick={() => { setForm(k ? formAl(k) : null); setDuzen(true) }}>✎ Düzenle</button>}
-            {yetki('radyoloji') && durum >= 2 && durum < 5 &&
+            {yetki('radyoloji', 'degistir') && durum >= 2 && durum < 5 &&
               <button className="d bir" onClick={() => git(`/radyoloji/rapor/${istemId}`)}>✎ Rapor Yaz</button>}
             {durum >= 3 &&
               <button className="d" onClick={() => git(`/radyoloji/rapor/${istemId}`)}>📄 Raporu Aç</button>}

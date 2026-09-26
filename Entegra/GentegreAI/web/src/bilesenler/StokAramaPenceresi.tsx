@@ -529,7 +529,11 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               {satirlar.map((r, i) => (
                 <tr key={`${r.tip}-${r.id}`} className={i === secili ? 'secili' : ''}
                     onMouseEnter={() => setSecili(i)}
-                    onClick={() => void sec(r)}>
+                    /* TEK TIK = SEÇ · ÇİFT TIK = 1 ADET EKLE (fiyat penceresi
+                       açılmaz, kullanıcı). Miktar/fiyat için "Miktar Ekle
+                       (Shift+Enter)" düğmesi kalır. */
+                    onClick={() => setSecili(i)}
+                    onDoubleClick={() => void sec(r, true)}>
                   {/* TUR YALNIZ IKON (kullanici): uc satir tipini ayirmak icin
                       rozet metni gereksiz genislik yiyordu. Ad yine erisilebilir
                       - imlec ustune gelince baslik cikar. */}
