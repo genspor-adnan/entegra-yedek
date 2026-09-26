@@ -1268,6 +1268,9 @@ Devam edilsin mi?`)) return;
           doktorIstemVar={(doktorIstem?.toplam ?? 0) > 0}
           doktorIstemSayi={doktorIstem?.toplam ?? 0}
           doktorIstemi={doktorIstemiUcretlendir}
+          // Başvuru iptali: yalnız başvuru sekmesi doluyken - ücret kalemi ya da
+          //   (bekleyen) doktor istemi varsa diğer sekmelerde veri var demektir.
+          basvuruIptalGorunur={basvuruMu && satirlar.length === 0 && (doktorIstem?.toplam ?? 0) === 0}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
         />

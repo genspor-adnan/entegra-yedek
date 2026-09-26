@@ -46,9 +46,13 @@ public sealed class DokumanDeposu
         //   olarak gonderiyor; sonucun yanindaki sayi tek basina bulgunun
         //   tamami degil. kaynak_id ISTEM SATIRI kimligidir (sonuc duzeltilip
         //   yeni satir acilsa da egri tetkige bagli kalir).
+        //   "belge" (başvuru dış istek kağıdı): dış kurum/dış doktordan gelen
+        //   başvuruda hastanın getirdiği istek kağıdı taranıp başvuruya eklenir;
+        //   kaynak_id BELGE (başvuru) kimliğidir. SGK/sigorta faturalamasında
+        //   "istem belgesi nerede" sorusunun başvuru düzeyindeki cevabı.
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
-              "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc" };
+              "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

@@ -16,6 +16,7 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
+  basvuruIptalGorunur,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -62,6 +63,9 @@ export function BelgeAracCubugu({
   doktorIstemi?(): void;
   doktorIstemVar?: boolean;
   doktorIstemSayi?: number;
+  /** Başvuru İptal düğmesi görünür mü: yalnız başvuru sekmesi doluyken (ücret
+   *  kalemi / doktor istemi yoksa). Diğer sekmelerde veri varsa iptal gizlenir. */
+  basvuruIptalGorunur?: boolean;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -147,9 +151,13 @@ export function BelgeAracCubugu({
 
       <span className="ayrac" />
 
-      <button className="d teh" disabled title={c('Başvuru iptali henüz bağlanmadı (F7).')}>
-        ✕ Başvuruyu İptal Et
-      </button>
+      {/* İPTAL yalnız BAŞVURU SEKMESİ doluyken görünür (kullanıcı): ücret
+          kalemi ya da doktor istemi girildiyse - yani diğer sekmelerde veri
+          varsa - başvuru iptal edilemez, düğme gizlenir. */}
+      {basvuruIptalGorunur && (
+        <button className="d teh" disabled title={c('Başvuru iptali henüz bağlanmadı (F7).')}>
+          ✕ Başvuruyu İptal Et
+        </button>)}
     </>
   )}
 
