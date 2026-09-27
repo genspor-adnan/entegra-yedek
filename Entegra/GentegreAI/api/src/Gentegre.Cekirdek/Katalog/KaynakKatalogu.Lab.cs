@@ -41,6 +41,14 @@ public static partial class KaynakKatalogu
             // KISA AD listede (mockup): cihaz ve rapor basligindaki ad budur -
             //   iki tetkigin uzun adi benzerken kisa adi ayirir.
             new("kisaAd", "t.kisa_ad", "metin", "Kısa Ad", Genislik: 110),
+            // İSTEM SAYISI (kullanici: "en cok istenen en ustte"): tetkigin
+            //   simdiye kadar kac istem satirinda gectigi. Hekimin istem
+            //   ekraninda "en cok istenen" siralamasini besler; katalog
+            //   listesinde gizli, yalniz siralama/sorgu icin.
+            new("istemSay",
+                "(select count(*) from public.lab_istem_satir s where s.tetkik_id = t.id)",
+                                 "sayi", "İstem", Hizalama: "sag", Genislik: 70,
+                                 Varsayilan: false, Filtrelenebilir: false),
             new("bolumAdi",
                 "case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon' "
                 + "when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji' "

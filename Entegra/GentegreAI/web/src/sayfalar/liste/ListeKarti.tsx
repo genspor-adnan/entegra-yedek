@@ -18,6 +18,7 @@ import { GebeIzlemModali } from '../../bilesenler/GebeIzlemModali';
 import { EnabizButonu } from '../../bilesenler/EnabizButonu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
+import { LabIstemSepetiModal } from '../../bilesenler/lab/LabIstemSepetiModal';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -82,6 +83,8 @@ export function ListeKarti({
   const [asiHasta, setAsiHasta] = useState<{ id: number; ad: string } | null>(null);
   const [izlemHasta, setIzlemHasta] = useState<{ id: number; ad: string } | null>(null);
   const [gebeHasta, setGebeHasta] = useState<{ id: number; ad: string } | null>(null);
+  // HEKİM LAB İSTEM SEPETİ (kullanici): muayeneId set olunca sepet modalı açılır.
+  const [labIstem, setLabIstem] = useState<number | null>(null);
   const { aksiyonVar } = useOturum();
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
@@ -103,6 +106,11 @@ export function ListeKarti({
       {enabizMesaj && (
         <EnabizMesajModali hastaId={enabizMesaj.hastaId} hastaAdi={enabizMesaj.hastaAdi}
                            belgeId={enabizMesaj.belgeId} onKapat={() => setEnabizMesaj(null)} />
+      )}
+      {labIstem !== null && (
+        <LabIstemSepetiModal muayeneId={labIstem}
+          onKapat={() => setLabIstem(null)}
+          onBitti={() => setKartTazele(t => t + 1)} />
       )}
       <GenForm
         kaynak={tanim.kaynak}
@@ -211,8 +219,7 @@ export function ListeKarti({
                       <>
                         <div className="muayene-arac">
                           <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.istemLab',
-                                                              { id: Number(kartId) })}>
+                                  onClick={() => setLabIstem(Number(kartId))}>
                             ＋ Laboratuvar
                           </button>
                           <button type="button" className="d"
