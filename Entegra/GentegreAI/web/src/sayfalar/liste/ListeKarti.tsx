@@ -431,6 +431,9 @@ export function ListeKarti({
                   {/* İstem açma İstem & Sonuçlar sekmesindeki grid başlığında
                       "＋ İstem"; Şablon Uygula da Fizik Muayene sekmesinde var -
                       üstteki tek düğmeler kaldırıldı (kullanıcı). */}
+                  {/* MUAYENE ÖZETİ (kullanıcı): bulgulardan özeti derler
+                      (rapora / e-Nabız'a giden metin). */}
+                  {dugme('muayene.ozet', '📖 Muayene Özeti')}
                   {/* e-NABIZ MESAJI (877, KTS H7): hekim ekranından hastanın
                       e-Nabız profiline düz metin bilgilendirme. Aksiyon
                       kataloğuna girmiyor - liste satırında değil, KART
