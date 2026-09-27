@@ -110,9 +110,10 @@ public static class BasvuruIstemUclari
 
         // DOKTOR İSTEMİNİ ÜCRETLENDİR: başvurunun bekleyen (serbest=0) lab/
         //   radyoloji istemlerinin hizmetlerini ÜCRET satırı olarak başvuruya
-        //   ekler (fiyat listesi + sözleşme iskontosu + karşılama). Ücret satırı
-        //   eklenince belge_satir tetiği istemleri serbest bırakır (worklist'e
-        //   düşer). Banko "Doktor İstemi" düğmesinden çağırır.
+        //   ekler (fiyat listesi + sözleşme iskontosu + karşılama). Banko
+        //   "Doktor İstemi" düğmesinden çağırır. İstemler burada serbest
+        //   BIRAKILMAZ - hasta vazgeçebilir; serbest bırakma başvuru KAYDINDA
+        //   (fn_basvuru_istem_serbest_uygula) yapılır.
         grup.MapPost("/{belgeId:int}/istem-ucretlendir", async (
             int belgeId, SerbestIstegi? istek, VeriKaynagi veri, BelgeDeposu belgeDepo,
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
@@ -186,11 +187,14 @@ public static class BasvuruIstemUclari
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
             // Karşılama dağılımı (915) - kurum payı.
             await b.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(id) from public.belge_satir where belge_id=@p0 and hizmet_id is not null", null, [belgeId], iptal);
-            // İstem-bazlı serbest bırak (919): ücreti girilen tetkiğin istemi düşer.
-            await b.CalistirAsync("select public.fn_basvuru_istem_serbest_uygula(@p0)", null, [belgeId], iptal);
+            // NOT: serbest bırakma BURADA YAPILMAZ (kullanici: "başvuru kaydedilip
+            //   kapanınca istemler lab/radyolojide görünmeli"). Hasta pahalı
+            //   tetkikten vazgeçip başvuruyu kaydetmeden kapatabilir; istem o
+            //   ana kadar bekler. Serbest bırakma başvuru KAYDINDA (BelgeUclari
+            //   POST/PUT → fn_basvuru_istem_serbest_uygula) yapılır.
 
             return Results.Ok(new { eklenen = hizmetler.Count,
-                                    mesaj = $"{hizmetler.Count} doktor istemi ücretlendirildi ve çalışma listesine düştü.",
+                                    mesaj = $"{hizmetler.Count} doktor istemi ücretlendirildi; başvuru kaydedilince çalışma listesine düşer.",
                                     izlemeNo = baglam.IzlemeNo });
         });
     }
