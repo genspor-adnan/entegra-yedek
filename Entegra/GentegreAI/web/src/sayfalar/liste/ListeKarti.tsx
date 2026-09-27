@@ -20,6 +20,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { LabIstemSepetiModal } from '../../bilesenler/lab/LabIstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
+import { RadyolojiIstemSepetiModal } from '../../bilesenler/radyoloji/RadyolojiIstemSepetiModal';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -88,6 +89,8 @@ export function ListeKarti({
   const [labIstem, setLabIstem] = useState<number | null>(null);
   // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
+  // GÖRÜNTÜLEME İSTEM SEPETİ (kullanici: "görüntü istem de lab gibi desende").
+  const [radyolojiIstem, setRadyolojiIstem] = useState<number | null>(null);
   const { aksiyonVar } = useOturum();
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
@@ -119,6 +122,11 @@ export function ListeKarti({
         <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
           onKapat={() => setRaporModal(null)}
           onKaydedildi={() => setKartTazele(t => t + 1)} />
+      )}
+      {radyolojiIstem !== null && (
+        <RadyolojiIstemSepetiModal muayeneId={radyolojiIstem}
+          onKapat={() => setRadyolojiIstem(null)}
+          onBitti={() => setKartTazele(t => t + 1)} />
       )}
       <GenForm
         kaynak={tanim.kaynak}
@@ -244,8 +252,7 @@ export function ListeKarti({
                             ＋ Laboratuvar
                           </button>
                           <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.istemGoruntuleme',
-                                                              { id: Number(kartId) })}>
+                                  onClick={() => setRadyolojiIstem(Number(kartId))}>
                             ＋ Görüntüleme
                           </button>
                         </div>
