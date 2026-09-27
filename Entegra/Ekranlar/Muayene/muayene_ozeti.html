@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Özeti — Uzman Hekim — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1200px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+
+  /* Kimlik şeridi */
+  .kimlik{display:flex;align-items:center;gap:14px;padding:8px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kimlik .ad{font-weight:bold;font-size:13px;color:var(--navy)}
+  .kimlik .mini{color:var(--muted);font-size:11px}
+  .kimlik .sp{margin-left:auto}
+
+  /* İçerik: sol özet metni + sağ derleme kaynakları */
+  .gvd{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:0}
+  @media(max-width:980px){.gvd{grid-template-columns:1fr}}
+  .sol{padding:12px 14px;border-right:1px solid var(--line2)}
+  .sag{padding:12px 14px;background:#fafcfe}
+
+  .blk{margin:0 0 12px}
+  .blk h6{margin:0 0 5px;font-size:11.5px;color:#2c4a6b;text-transform:uppercase;letter-spacing:.3px;
+    border-bottom:1px solid var(--line2);padding-bottom:3px;display:flex;align-items:center;gap:6px}
+  .blk h6 .sp{margin-left:auto;text-transform:none;letter-spacing:0}
+  .blk p{margin:3px 0;line-height:1.55}
+  .blk .list{margin:2px 0;padding-left:16px;line-height:1.6}
+  .blk .list li{margin:1px 0}
+
+  /* Özet metni (rapora/e-Nabız'a giden) */
+  .ozet{border:1px solid var(--line);border-radius:4px;background:#fff;padding:10px 12px;
+    line-height:1.65;min-height:180px;white-space:pre-wrap}
+  .ozet .cizgi{color:var(--muted)}
+  .kutu-ipuc{font-size:11px;color:var(--muted);margin:6px 2px 0}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:11.5px}
+  .kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600}
+
+  .mini-tab{width:100%;border-collapse:collapse}
+  .mini-tab td{padding:3px 4px;border-bottom:1px solid var(--line2);font-size:11.5px;vertical-align:top}
+  .mini-tab td.sag{text-align:right;color:var(--muted);white-space:nowrap}
+
+  .statusbar{display:flex;gap:14px;padding:6px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1200px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📖 Muayene Özeti <span class="sp">Gentegre AI · Muayene · Uzman Hekim</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">🔄 Yeniden Derle</div>
+    <div class="btn">📋 Kopyala</div>
+    <div class="sepv"></div>
+    <div class="btn">🖨 Yazdır</div>
+    <div class="btn">📄 PDF</div>
+    <div class="sepv"></div>
+    <div class="btn ok">🩺 e-Nabız'a Gönder</div>
+    <div class="sp"></div>
+    <div class="btn">✕ Kapat</div>
+  </div>
+
+  <div class="kimlik">
+    <span class="ad">Erhan Savaş</span>
+    <span class="mini">39 E · 123456****· Prot. MB-2026-000418</span>
+    <span class="rz mavi">Dahiliye</span>
+    <span class="rz">Dr. Barış Güneş</span>
+    <span class="sp"></span>
+    <span class="mini">Muayene: 27.09.2026 10:22 · Süre 12 dk</span>
+    <span class="rz sari">Taslak</span>
+  </div>
+
+  <div class="gvd">
+    <!-- SOL: derlenen özet metni -->
+    <div class="sol">
+      <div class="blk">
+        <h6>Muayene Özeti <span class="sp rz ok">bulgulardan derlendi</span></h6>
+        <div class="ozet">Hasta 2 gündür öksürük ve ateş şikâyetiyle başvurdu. Ateş 38.4°C, nabız 96, SpO₂ %96, TA 120/80.
+Genel durum iyi, bilinç açık, koopere. Solunum sistemi: bilateral ronküs; diğer sistem muayeneleri doğal.
+Ön tanı akut bronşit (J20.9). Tam kan sayımı ve CRP istendi; akciğer grafisi planlandı.
+Semptomatik tedavi başlandı, 3 gün istirahat verildi. Kontrol önerildi.</div>
+        <div class="kutu-ipuc">Bu metin şablon alanları + bulgular + tanı + istem/sonuçlardan otomatik derlenir; hekim düzeltebilir. Rapora ve e-Nabız paketine (USS 106) giden özet budur.</div>
+      </div>
+
+      <div class="blk">
+        <h6>Şikâyet & Hikâye</h6>
+        <p>2 gündür öksürük, ateş, halsizlik. Balgam yok. Nefes darlığı tariflemiyor.</p>
+      </div>
+
+      <div class="blk">
+        <h6>Değerlendirme / Plan</h6>
+        <ul class="list">
+          <li>Akut bronşit — semptomatik tedavi.</li>
+          <li>Tetkik sonuçlarına göre antibiyotik değerlendirilecek.</li>
+          <li>3 gün istirahat, bol sıvı; şikâyet artarsa kontrol.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SAĞ: derlemeyi besleyen kaynaklar -->
+    <div class="sag">
+      <div class="blk">
+        <h6>Vital Bulgular</h6>
+        <dl class="kv">
+          <dt>TA</dt><dd>120/80 mmHg</dd>
+          <dt>Nabız</dt><dd>96 /dk</dd>
+          <dt>Ateş</dt><dd>38.4 °C <span class="rz kir">↑</span></dd>
+          <dt>SpO₂</dt><dd>%96</dd>
+          <dt>Solunum</dt><dd>18 /dk</dd>
+          <dt>Ağrı (VAS)</dt><dd>3/10</dd>
+        </dl>
+      </div>
+
+      <div class="blk">
+        <h6>Tanılar (ICD-10)</h6>
+        <table class="mini-tab">
+          <tr><td><b>J20.9</b> Akut bronşit</td><td class="sag"><span class="rz mavi">Ön · Ana</span></td></tr>
+          <tr><td><b>R50.9</b> Ateş</td><td class="sag"><span class="rz">Yan</span></td></tr>
+        </table>
+      </div>
+
+      <div class="blk">
+        <h6>İstemler & Sonuçlar</h6>
+        <table class="mini-tab">
+          <tr><td>🧪 Tam Kan Sayımı (Hemogram)</td><td class="sag"><span class="rz sari">bekliyor</span></td></tr>
+          <tr><td>🧪 CRP</td><td class="sag"><span class="rz ok">sonuç ↑</span></td></tr>
+          <tr><td>📷 Akciğer grafisi (PA)</td><td class="sag"><span class="rz sari">çekim bekliyor</span></td></tr>
+        </table>
+      </div>
+
+      <div class="blk">
+        <h6>Reçete</h6>
+        <table class="mini-tab">
+          <tr><td>Parasetamol 500 mg tb</td><td class="sag">2×1</td></tr>
+          <tr><td>Asetilsistein 600 mg efervesan</td><td class="sag">1×1</td></tr>
+        </table>
+      </div>
+
+      <div class="blk">
+        <h6>Rapor</h6>
+        <table class="mini-tab">
+          <tr><td>İstirahat · 3 gün</td><td class="sag"><span class="rz sari">taslak</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kaynak: şablon + bulgu + tanı + istem/sonuç + reçete + rapor</span>
+    <span class="sp">Tamamla → başvuru tahakkuk · e-Nabız 103 + 106 · özet PDF · hasta portalı</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Muayene Özeti</b> ekranı: hekimin muayenede girdiği tüm parçaların TEK metinde derlenmiş hâli.
+  Sol blokta düzenlenebilir <b>özet metni</b> (rapora ve e-Nabız'a giden); sağ blokta metni besleyen
+  kaynaklar (vital, tanı, istem/sonuç, reçete, rapor) özet olarak. <b>🔄 Yeniden Derle</b> bulgu/şablon
+  değişince metni tazeler (<code>muayene.ozet</code> → <code>muayeneOzetDerle</code>);
+  hekim elle düzeltirse düzeltme korunur. <b>e-Nabız'a Gönder</b> USS 106 paketini oluşturur.
+</div>
+</body>
+</html>

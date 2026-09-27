@@ -450,7 +450,7 @@ export function ListeKarti({
                                 onMesaj={() => setEnabizMesaj({
                                   hastaId: satir.hastaId, hastaAdi: satir.hastaAdi,
                                   belgeId: Number(d.belgeId ?? 0) || null })} />
-                  {dugme('muayene.tamamla', '✓ Tamamla')}
+                  {dugme('muayene.tamamla', '✓ Tamamla', 'd onay')}
                 </>
               ) : (
                 // GOZ MUAYENESI (mockup goz_detayli_muayene.html araç çubuğu):
