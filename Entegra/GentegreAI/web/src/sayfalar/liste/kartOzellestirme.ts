@@ -193,6 +193,18 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
                   'Ön Segment', 'Fundus', 'Motilite · Pupil · Alan',
                   'Gonyoskopi & Ek Testler', 'Tanı & Plan'],
   },
+
+  // ------------------------------------------------- muayene şablonu ----
+  // Mockup `Ekranlar/Muayene/muayene_sablonlari.html`: şablonun ALAN tablosu
+  //   (Sıra · Alan · Tip · Seçenekler/birim · Zorunlu · Normal metni). Temiz
+  //   grid kipi (üstte ＋Alan / düzenle / sil), Sistem-Grup ve Kod ile Taraf
+  //   sütunları gridde gizli - mockup'taki sade görünüm.
+  'muayene-sablon': {
+    detaySecenekleri: {
+      alanlar: { gridKipi: true, gridGizli: ['grup', 'kod', 'tarafSorulur'] },
+    },
+    sekmeSirasi: ['Tanım', 'Kapsam', 'Alanlar'],
+  },
 };
 
 /** Kartın özelleştirmesi; tanımsızsa boş nesne - çağıran koşul yazmasın. */
