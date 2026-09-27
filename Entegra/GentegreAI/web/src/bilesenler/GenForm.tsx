@@ -134,7 +134,10 @@ interface Props {
                                      cubugundaki uclardan yapilir. */
                                  salt?: boolean;
                                  /** Baslikta "＋" yok: satiri sunucu ucu acar. */
-                                 ekleGizli?: boolean }>;
+                                 ekleGizli?: boolean;
+                                 /** "＋" bu işlevi çağırır (satır ekleme yerine) -
+                                     ör. tanıda ICD arama penceresi. */
+                                 yeni?: () => void }>;
   /**
    * DETAY SEKMESI GRID YERINE TEK KAYIT IZGARASI: en ustteki satir (detayin
    * kendi siralamasina gore SONUNCU olcum) mockup'taki gibi etiket + kutu

@@ -202,6 +202,9 @@ interface Props {
    * boş satır açmak yarım kayıt üretirdi.
    */
   ekleGizli?: boolean;
+  /** Verilirse başlıktaki "＋" bu işlevi çağırır (satır ekleme yerine) - ör.
+   *  tanı gridinde ＋ ICD arama penceresini açar. Buton daima etkin. */
+  onYeni?: () => void;
   /**
    * SATIR SILME DUGMESI GIZLI (536, kullanici: "satir ekleme ve silme
    * simdilik gorunmez olsun, dursun ama gorunmesin"). Yetenek DURUYOR -
@@ -357,7 +360,7 @@ function UrunAramaKutusu({ deger, yerTutucu, kilitli, saltOkunur, onAc }: {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
-                               silGizli,
+                               silGizli, onYeni,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
@@ -913,11 +916,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   tek anlamli alani secilecek KISI - once bos satir acip sonra
                   hucreden arama penceresini actirmak fazladan bir adimdi.
                   Ayri bir arama dugmesi de yok: iki dugme ayni isi yapiyordu. */}
-              {!ekleGizli && (
+              {(!ekleGizli || onYeni) && (
               <button type="button" className="d bir ikon-dugme"
-                      title={tarafAlani ? `${tarafAlani.baslik} ara ve ekle` : 'Yeni satır'}
-                      disabled={!satirEklenebilir}
+                      title={onYeni ? 'Ekle'
+                             : tarafAlani ? `${tarafAlani.baslik} ara ve ekle` : 'Yeni satır'}
+                      disabled={!onYeni && !satirEklenebilir}
                       onClick={() => {
+                        if (onYeni) { onYeni(); return }
                         if (tarafAlani) { setTarafAramaAcik(true); return }
                         if (modalDuzenle) modalAc('yeni'); else satirEkle();
                       }}>＋</button>

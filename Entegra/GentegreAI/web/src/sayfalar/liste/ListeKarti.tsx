@@ -205,20 +205,9 @@ export function ListeKarti({
                     {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
                         "tumu normal" - ikisi de SUNUCU ucuna gider, satirlari
                         istemci degistirmez. */}
-                    {baslik.startsWith('Tanı') && (
-                      <div className="muayene-arac">
-                        {/* Tek mavi dugme (kullanici): ICD kodu/adi SORULUR,
-                            katalog aramasi ve ekleme sunucuda. */}
-                        <button type="button" className="d bir"
-                                onClick={() => setIcdAramaAcik(true)}>
-                          ＋ ICD-10 Ekle
-                        </button>
-                        {/* Kaldir/duzenle GRID BASLIGINDA (ikonlu kip):
-                            secili satira uygulanir. */}
-                        {/* Sık / son / önceki listeleri ARAMA PENCERESINDE
-                            (kullanıcı): tek yerde, aramayla aynı akışta. */}
-                      </div>
-                    )}
+                    {/* TANI: ＋ (ICD ekle) + düzenle/sil TEK BARDA - grid
+                        başlığında (kullanıcı). Ayrı üst araç çubuğu kaldırıldı;
+                        ＋ artık grid başlığındaki onYeni ile ICD aramayı açar. */}
                     {/* FIZIK MUAYENE (kullanıcı): üstte butonlar; altında
                         "Muayene Şablonu" + "Muayene Bulguları" alanları TEK
                         SATIR (mfz-tek-satir), bulgu grid tam genişlik sola
@@ -351,7 +340,12 @@ export function ListeKarti({
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
         gizliDetaylar={kartOzel.gizliDetaylar}
-        detayGrupta={kartOzel.detayGrupta}
+        detayGrupta={tanim.kaynak === 'muayene' && kartOzel.detayGrupta?.tanilar
+          ? { ...kartOzel.detayGrupta,
+              // TANI ＋ = ICD arama (grid başlığında, düzenle/sil ile aynı bar).
+              tanilar: { ...kartOzel.detayGrupta.tanilar,
+                         yeni: () => setIcdAramaAcik(true) } }
+          : kartOzel.detayGrupta}
         detayIzgara={kartOzel.detayIzgara}
         seritAlanlari={kartOzel.seritAlanlari}
         // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde

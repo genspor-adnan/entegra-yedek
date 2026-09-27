@@ -39,7 +39,8 @@ export interface KartGrupSarmalayiciOzellikleri {
   /** Gruba GOMULU detaylar (mockup "Fizik Muayene"): ayri sekme degil. */
   detayGrupta?: Record<string, { grup: string; salt?: boolean; gridKipi?: boolean;
                                  sinif?: string; sade?: boolean; ekleGizli?: boolean;
-                                 gizli?: string[]; etiket?: string[]; ustte?: boolean }>;
+                                 gizli?: string[]; etiket?: string[]; ustte?: boolean;
+                                 yeni?: () => void }>;
   detayIzgara?: Record<string, { sinif?: string; baslik?: string;
                                  alanSirasi?: string[]; not?: ReactNode }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
@@ -126,6 +127,7 @@ export function KartGrupSarmalayici({
                 kutuSinif={detayGrupta?.[d.ad]?.sinif}
                 sadeGrid={detayGrupta?.[d.ad]?.sade}
                 ekleGizli={detayGrupta?.[d.ad]?.ekleGizli}
+                onYeni={detayGrupta?.[d.ad]?.yeni}
                 gizliAlanlar={detayGrupta?.[d.ad]?.gizli
                   ? new Set(detayGrupta[d.ad].gizli) : undefined}
                 etiketAlanlari={detayGrupta?.[d.ad]?.etiket

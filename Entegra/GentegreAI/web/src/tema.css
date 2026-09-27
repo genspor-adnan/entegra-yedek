@@ -3415,6 +3415,8 @@ input.skt-gecmis {
 .kagrup.tani-gridi { margin: 0 10px 0 0; border: 0; background: transparent;
                      padding: 0 }
 .kagrup.tani-gridi > h6 { padding-left: 0 }
+/* Tanı gridi dış çerçevesi tamamen kalksın (kullanıcı) - tablo kenarlığı da. */
+.kagrup.tani-gridi > .detay-tablo, .kagrup.tani-gridi table { border: 0 }
 .kaynak-arama-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
 .kaynak-arama-arac .ara-kutu { flex: 1; min-width: 180px }
 
