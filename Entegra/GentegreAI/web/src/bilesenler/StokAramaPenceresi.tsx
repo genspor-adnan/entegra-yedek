@@ -6,6 +6,7 @@ import { type Kosul, type ListeSatiri, URUN_GENOTIP, hataMetni } from '../api/so
 import { para } from './bicim';
 import { aramaSirala } from './aramaSirasi';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { onay } from './mesaj';
 import { c } from '../dil/ceviri';
 
 
@@ -33,7 +34,7 @@ function kisaAdSirasi(satir: Record<string, unknown>, aranan: string): number {
 
 export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
                                     eklenen, fiyatListesiId, sgkBaglami, bolumId,
-                                    hizmetEkFiltre }: {
+                                    hizmetEkFiltre, zatenVarMi }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -50,6 +51,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    * yoksa "eklendi mi?" diye pencereyi kapatip bakmak gerekiyordu.
    */
   eklenen?: { sayi: number; son: string };
+  /**
+   * MUKERRER KONTROL (kullanici): eklenmek istenen urun belgeye DAHA ONCE
+   * eklendiyse `true` doner. Cift tik / Enter ile eklemede once uyarilir,
+   * kullanici onaylarsa yine de eklenir. Verilmezse kontrol yapilmaz.
+   */
+  zatenVarMi?(satir: ListeSatiri): boolean;
   /**
    * BELGENIN FIYAT LISTESI (495, kullanici: "arama ekranında fiyatları
    * göreyim"): verilirse Fiyat sutunu KART fiyatini degil bu listenin
@@ -370,6 +377,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    */
   const [uretiliyor, setUretiliyor] = useState(false);
   const sec = async (r: ListeSatiri, hizli = false) => {
+    // MUKERRER (kullanici): urun zaten ekliyse uyar, tekrar eklensin mi sor.
+    if (zatenVarMi?.(r)) {
+      const ad = String(r.ad ?? r.kisaAd ?? r.stokAdi ?? '').trim();
+      const devam = await onay(`"${ad || 'Bu kalem'}" belgeye zaten eklenmiş. Yine de tekrar eklensin mi?`);
+      if (!devam) return;
+    }
     if (r.tip !== 'ilac') { onSec(r, hizli); return }
     if (uretiliyor) return;
     setUretiliyor(true);

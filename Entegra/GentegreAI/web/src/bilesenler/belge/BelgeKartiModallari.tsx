@@ -330,6 +330,11 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           // KULLANIM SIRASI (550): basvuruda hizmetler bu poliklinigin
           //   gecmisine gore siralanir.
           bolumId={bolumId}
+          // MUKERRER KONTROL (kullanici): ayni stok/hizmet belgede zaten varsa
+          //   cift tik / Enter ile eklemeden once uyarilir.
+          zatenVarMi={r => satirlar.some(s => r.tip === 'hizmet'
+            ? s.hizmetId === Number(r.id)
+            : s.stokId === Number(r.id))}
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
           // HIZLI EKLEME (786): kalem penceresi acilmadan gride dustugu icin
           //   sayaci BURASI artirir - pencere yoluyla eklemede sayaci kalem

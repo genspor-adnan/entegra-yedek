@@ -39,7 +39,11 @@ public static class BasvuruIstemUclari
                                    from public.lab_istem_satir s
                                    join public.lab_tetkik t on t.id = s.tetkik_id
                                   where s.istem_id = i.id and s.durum <> 0), '') as tetkikler,
-                       coalesce((select nullif(trim(t.bolum), '')
+                       coalesce((select case t.bolum
+                                     when 1 then 'Biyokimya' when 2 then 'Hematoloji'
+                                     when 3 then 'Hormon' when 4 then 'Mikrobiyoloji'
+                                     when 5 then 'Seroloji' when 6 then 'Koagülasyon'
+                                     when 7 then 'İdrar' else 'Laboratuvar' end
                                    from public.lab_istem_satir s
                                    join public.lab_tetkik t on t.id = s.tetkik_id
                                   where s.istem_id = i.id and s.durum <> 0
