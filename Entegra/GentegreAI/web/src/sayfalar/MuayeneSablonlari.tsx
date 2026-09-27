@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { GenForm } from '../bilesenler/GenForm';
+import { kartOzellestirme } from './liste/kartOzellestirme';
 import type { ListeSatiri } from '../api/sozlesme';
 
 /**
@@ -30,15 +32,25 @@ export function MuayeneSablonlari() {
   const [alanlar, setAlanlar] = useState<Record<string, unknown>[]>([]);
   const [paneller, setPaneller] = useState<ListeSatiri[]>([]);
   const [makrolar, setMakrolar] = useState<ListeSatiri[]>([]);
+  // DÜZENLEME MODALI (kullanıcı: "her branş için modal kartı açılsın").
+  const [duzenle, setDuzenle] = useState<number | 'yeni' | null>(null);
+  const sablonOzel = kartOzellestirme('muayene-sablon');
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const y = await api.liste('muayene-sablon', { sayfa: 1, boyut: 200 });
-        setSablonlar(y.satirlar);
-        if (y.satirlar[0]) setSeciliId(Number(y.satirlar[0].id));
-      } catch { /* boş kalır */ }
-    })();
+  const sablonlariYukle = useCallback(async () => {
+    try {
+      const y = await api.liste('muayene-sablon', { sayfa: 1, boyut: 200 });
+      setSablonlar(y.satirlar);
+      setSeciliId(o => o ?? (y.satirlar[0] ? Number(y.satirlar[0].id) : null));
+    } catch { /* boş kalır */ }
+  }, []);
+  useEffect(() => { void sablonlariYukle() }, [sablonlariYukle]);
+
+  // Modal kaydedince listeyi + seçili şablonun alanlarını tazele.
+  const alanlariYukle = useCallback(async (id: number) => {
+    try {
+      const k = await api.kartOku('muayene-sablon', id);
+      setAlanlar((k.detaylar?.alanlar ?? []) as Record<string, unknown>[]);
+    } catch { setAlanlar([]) }
   }, []);
 
   useEffect(() => {
@@ -79,7 +91,12 @@ export function MuayeneSablonlari() {
       {sekme === 0 && (
         <div className="msb-iki">
           <div className="msb-sol">
-            <div className="msb-arac">Şablonlar <span className="msb-not">{sablonlar.length}</span></div>
+            <div className="msb-arac" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button type="button" className="d bir" onClick={() => setDuzenle('yeni')}>＋ Şablon</button>
+              <button type="button" className="d" disabled={seciliId == null}
+                onClick={() => seciliId != null && setDuzenle(seciliId)}>✎ Düzenle</button>
+              <span className="msb-not" style={{ marginLeft: 'auto' }}>{sablonlar.length} şablon</span>
+            </div>
             <table className="msb-dg"><thead><tr>
               <th>Şablon</th><th>Branş</th><th className="orta">Kapsam</th><th className="orta">Durum</th>
             </tr></thead><tbody>
@@ -87,7 +104,8 @@ export function MuayeneSablonlari() {
                 const id = Number(r.id);
                 return (
                   <tr key={id} className={seciliId === id ? 'sel' : ''}
-                    style={{ cursor: 'pointer' }} onClick={() => setSeciliId(id)}>
+                    style={{ cursor: 'pointer' }} onClick={() => setSeciliId(id)}
+                    onDoubleClick={() => setDuzenle(id)} title="Çift tık: düzenle">
                     <td>{m(r.ad)}</td>
                     <td>{m(r.bolumAdi) || m(r.branch) || 'Tümü'}</td>
                     <td className="orta">{kapsam(r)}</td>
@@ -204,6 +222,19 @@ export function MuayeneSablonlari() {
             Kurallar şimdilik bilgilendirme amaçlı gösterilir; yapılandırma kaynağı bağlandığında düzenlenebilir olacak.
           </div>
         </div>
+      )}
+
+      {/* BRANŞ ŞABLONU DÜZENLEME MODALI (GenForm - Tanım/Kapsam/Alanlar). */}
+      {duzenle !== null && (
+        <GenForm kaynak="muayene-sablon" id={duzenle}
+          onKapat={() => setDuzenle(null)}
+          onKaydedildi={mid => {
+            void sablonlariYukle();
+            if (typeof mid === 'number') { setSeciliId(mid); void alanlariYukle(mid) }
+            setDuzenle(null);
+          }}
+          detaySecenekleri={sablonOzel.detaySecenekleri}
+          sekmeSirasi={sablonOzel.sekmeSirasi} />
       )}
     </div>
   );
