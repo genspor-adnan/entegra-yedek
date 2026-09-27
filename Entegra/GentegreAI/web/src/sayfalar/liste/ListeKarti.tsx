@@ -219,27 +219,31 @@ export function ListeKarti({
                             (kullanıcı): tek yerde, aramayla aynı akışta. */}
                       </div>
                     )}
+                    {/* FIZIK MUAYENE TEK SATIR (kullanıcı): solda butonlar,
+                        SAĞINDA muayene şablonu + bulguları aynı satırda. */}
                     {baslik === 'Fizik Muayene' && (
-                      <div className="muayene-arac">
-                        {/* Sıra (kullanıcı): solda "Tümü normal", sağında
-                            "Şablon Uygula"; şablon alanları + bulgular altta. */}
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.normal',
-                                                            { id: Number(kartId) })}>
-                          ☑ Tümü normal işaretle
-                        </button>
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.sablon',
-                                                            { id: Number(kartId) })}>
-                          📋 Şablon Uygula
-                        </button>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        <div className="muayene-arac" style={{ flex: '0 0 auto' }}>
+                          <button type="button" className="d"
+                                  onClick={() => void aksiyon('muayene.normal',
+                                                              { id: Number(kartId) })}>
+                            ☑ Tümü normal işaretle
+                          </button>
+                          <button type="button" className="d"
+                                  onClick={() => void aksiyon('muayene.sablon',
+                                                              { id: Number(kartId) })}>
+                            📋 Şablon Uygula
+                          </button>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 280 }}>{icerik}</div>
                       </div>
                     )}
                     {/* ISTEM & SONUCLAR (mockup): BAG GRIDI CIZILMEZ - hedef
                         tablo/id teknik alanlar, hekime bir sey soylemiyor;
                         "gordum" isareti panelde dugme. Sekme mockup'taki
                         gibi arac cubugu + tek istem tablosu + ayrintilar. */}
-                    {baslik.includes('Sonuç') ? (
+                    {baslik === 'Fizik Muayene' ? null
+                     : baslik.includes('Sonuç') ? (
                       <MuayeneIstemSonuc muayeneId={Number(kartId)}
                         onIstemAc={() => setIstem(Number(kartId))}
                         onDegisti={() => setKartTazele(t => t + 1)} />
