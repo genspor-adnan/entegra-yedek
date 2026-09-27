@@ -19,7 +19,7 @@ public static class BelgeUclari
         // POST /api/belge - yeni belge (sozlesme §4)
         grup.MapPost("/", async (
             BelgeYazmaIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Ekle);
@@ -44,6 +44,12 @@ public static class BelgeUclari
             await ctx.RequestServices
                      .GetRequiredService<Servisler.LabServisi>()
                      .BasvurudanIstemTamamlaAsync(id, baglam, iptal);
+
+            // BEKLEYEN İSTEMLERİ SERBEST BIRAK (919, kullanıcı): başvuru
+            //   kaydedilince, ÜCRET SATIRI GİRİLEN tetkiklerin bekleyen istemleri
+            //   laboratuvara/röntgene düşer. Vazgeçilen (ücreti girilmeyen)
+            //   tetkiğin istemi bekleyen kalır - istem-bazlı.
+            await veri.CalistirAsync("select public.fn_basvuru_istem_serbest_uygula(@p0)", [id], iptal);
 
             var kayit = await depo.OkuAsync(id, iptal)
                         ?? throw GentegreHatasi.Bulunamadi();
@@ -246,7 +252,7 @@ public static class BelgeUclari
         //   depoda: e-Belge gonderilmis / faturalanmis / duzenleme suresi gecmis.
         grup.MapPut("/{id:int}", async (
             int id, BelgeYazmaIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
@@ -270,6 +276,10 @@ public static class BelgeUclari
             await ctx.RequestServices
                      .GetRequiredService<Servisler.LabServisi>()
                      .BasvurudanIstemTamamlaAsync(belgeId, baglam, iptal);
+
+            // Kaydedince ücret satırı girilen tetkiğin bekleyen istemini serbest
+            //   bırak (919, istem-bazlı) - vazgeçilen bekleyen kalır.
+            await veri.CalistirAsync("select public.fn_basvuru_istem_serbest_uygula(@p0)", [belgeId], iptal);
 
             var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti

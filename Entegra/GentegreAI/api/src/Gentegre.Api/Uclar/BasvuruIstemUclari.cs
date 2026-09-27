@@ -167,6 +167,8 @@ public static class BasvuruIstemUclari
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
             // Karşılama dağılımı (915) - kurum payı.
             await b.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(id) from public.belge_satir where belge_id=@p0 and hizmet_id is not null", null, [belgeId], iptal);
+            // İstem-bazlı serbest bırak (919): ücreti girilen tetkiğin istemi düşer.
+            await b.CalistirAsync("select public.fn_basvuru_istem_serbest_uygula(@p0)", null, [belgeId], iptal);
 
             return Results.Ok(new { eklenen = hizmetler.Count,
                                     mesaj = $"{hizmetler.Count} doktor istemi ücretlendirildi ve çalışma listesine düştü.",
