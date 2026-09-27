@@ -3249,6 +3249,11 @@ input.skt-gecmis {
 /* MUAYENE KARTI IKI PANEL (461) - mockup muayene_karti.html ".ikiPanel":
    solda anamnez formu, sagda vital + gunun sonuclari. Dar ekranda alt alta
    duser (metin tasmasin, kutular bozulmasin). */
+/* KIRMIZI SİL DÜĞMESİ (kullanıcı): silme aksiyonu kırmızı. */
+.d.sil { color: #fff; background: var(--hata, #c0392b); border-color: var(--hata, #c0392b) }
+.d.sil:hover:not(:disabled) { filter: brightness(0.92) }
+.d.sil:disabled { color: #fff; background: #d9a8a2; border-color: #d9a8a2; cursor: default }
+
 /* İSTEM ÖZETİ (kullanıcı): butonlar gridin üstünde, dış çerçeve YOK. */
 .istem-ozet.cerceve-yok { border: 0; padding: 0; background: transparent; box-shadow: none }
 .istem-ozet.cerceve-yok > .detay-tablo { border: 0 }
