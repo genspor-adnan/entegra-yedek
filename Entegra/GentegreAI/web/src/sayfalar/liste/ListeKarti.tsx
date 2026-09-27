@@ -146,6 +146,7 @@ export function ListeKarti({
                 : icerik)
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? (baslik, icerik, _deger, izgaraCiz) => (
+            <div className="muayene-sekme-zemin">{
               baslik.includes('Anamnez')
                 // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,
                 //   sagda SON vital olcumu. Hekim sikayeti yazarken
@@ -247,6 +248,7 @@ export function ListeKarti({
                     ) : icerik}
                   </>
                 )
+            }</div>
             )
           : undefined}
         // MUAYENE BAGLAM SERIDI (461, mockup muayene_karti.html): hasta,

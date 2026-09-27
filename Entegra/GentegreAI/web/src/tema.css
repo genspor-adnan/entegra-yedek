@@ -3288,9 +3288,9 @@ input.skt-gecmis {
 .mfz-tek-satir .detay-tablo, .mfz-tek-satir table { width: 100%; margin-left: 0 }
 .mfz-tek-satir > .kagrup, .mfz-tek-satir .kagrup { margin-left: 0 }
 
-/* ANAMNEZ sekmesi zemini açık gri (kullanıcı). */
-.muayene-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px;
-  background: #f4f5f7; border-radius: 8px; padding: 10px }
+/* MUAYENE sekmeleri zemini açık gri (kullanıcı: anamnez + diğer sekmeler). */
+.muayene-sekme-zemin { background: #f4f5f7; border-radius: 8px; padding: 10px }
+.muayene-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px }
 @media (max-width: 1180px) { .muayene-ikili { grid-template-columns: 1fr } }
 .muayene-ikili .mi-sol, .muayene-ikili .mi-sag { min-width: 0 }
 
