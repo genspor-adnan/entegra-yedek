@@ -40,7 +40,8 @@ export function LabIstemSepetiModal({ muayeneId, hastaId, onKapat, onBitti }: {
 }) {
   const [bolum, setBolum] = useState('');
   const [arama, setArama] = useState('');
-  const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
+  // Satır başına tür: tetkik + panel karışık gelebilir (Hemogram/TİT panel'dir).
+  const [satirlar, setSatirlar] = useState<{ satir: ListeSatiri; tur: 'tetkik' | 'panel' }[]>([]);
   const [yukleniyor, setYukleniyor] = useState(false);
   const [sepet, setSepet] = useState<Map<string, Kalem>>(new Map());
   const [acil, setAcil] = useState(false);
@@ -66,33 +67,52 @@ export function LabIstemSepetiModal({ muayeneId, hastaId, onKapat, onBitti }: {
         ? { op: 'or', kosullar: ['kod', 'ad', 'kisaAd'].map(alan => ({
             alan, op: 'icerir' as const, deger: metin })) }
         : undefined;
+      // lab-panel'de kisaAd kolonu yok - panel araması yalnız kod/ad.
+      const panelFiltre: Kosul | undefined = metin
+        ? { op: 'or', kosullar: ['kod', 'ad'].map(alan => ({
+            alan, op: 'icerir' as const, deger: metin })) }
+        : undefined;
+
       if (bolum === 'P') {
-        const p = await api.liste('lab-panel', { sayfa: 1, boyut: 100, filtre: metinFiltre });
-        setSatirlar(p.satirlar);
-      } else {
-        const bolFiltre: Kosul | undefined = bolum
-          ? { alan: 'bolum', op: 'esit', deger: Number(bolum) } : undefined;
-        const filtre: Kosul | undefined = metinFiltre && bolFiltre
-          ? { op: 'and', kosullar: [metinFiltre, bolFiltre] }
-          : (metinFiltre ?? bolFiltre);
-        const t = await api.liste('lab-tetkik', { sayfa: 1, boyut: 200, filtre });
-        // EN ÇOK İSTENEN ÜSTTE (kullanici): istemSay'e göre azalan; eşitlikte kod.
-        const sirali = [...t.satirlar].sort((a, b) =>
-          Number(b.istemSay ?? 0) - Number(a.istemSay ?? 0)
-          || String(a.kod ?? '').localeCompare(String(b.kod ?? ''), 'tr'));
-        setSatirlar(sirali);
+        // Yalnız paneller.
+        const p = await api.liste('lab-panel', { sayfa: 1, boyut: 100, filtre: panelFiltre });
+        setSatirlar(p.satirlar.map(s => ({ satir: s, tur: 'panel' as const })));
+        return;
       }
+
+      // PANELLER (Hemogram, TİT gibi) ayrı tablodadır (kullanici: "hemogram/tit
+      //   aradım gelmedi"). Bölümü yok, o yüzden aramada VEYA "Tümü"de üstte
+      //   gösterilir; belirli bir bölüm seçiliyken aramasız listeye karışmaz.
+      const panelIster = bolum === '' || !!metin;
+      const [t, p] = await Promise.all([
+        api.liste('lab-tetkik', {
+          sayfa: 1, boyut: 200,
+          filtre: metinFiltre && bolum
+            ? { op: 'and', kosullar: [metinFiltre, { alan: 'bolum', op: 'esit', deger: Number(bolum) }] }
+            : (metinFiltre ?? (bolum ? { alan: 'bolum', op: 'esit', deger: Number(bolum) } : undefined)),
+        }),
+        panelIster
+          ? api.liste('lab-panel', { sayfa: 1, boyut: 100, filtre: panelFiltre })
+          : Promise.resolve({ satirlar: [] as ListeSatiri[] }),
+      ]);
+      // EN ÇOK İSTENEN ÜSTTE (kullanici): istemSay'e göre azalan; eşitlikte kod.
+      const tetkikler = [...t.satirlar].sort((a, b) =>
+        Number(b.istemSay ?? 0) - Number(a.istemSay ?? 0)
+        || String(a.kod ?? '').localeCompare(String(b.kod ?? ''), 'tr'));
+      // Paneller listenin BAŞINDA (sık istenen toplu isteklerdir).
+      setSatirlar([
+        ...p.satirlar.map(s => ({ satir: s, tur: 'panel' as const })),
+        ...tetkikler.map(s => ({ satir: s, tur: 'tetkik' as const })),
+      ]);
     } catch { /* liste bos kalir */ }
     setYukleniyor(false);
   }
 
-  const panelModu = bolum === 'P';
-  const sepetKalem = (r: ListeSatiri): Kalem => ({
-    id: Number(r.id), kod: String(r.kod ?? ''), ad: String(r.ad ?? ''),
-    tur: panelModu ? 'panel' : 'tetkik',
+  const sepetKalem = (r: ListeSatiri, tur: 'tetkik' | 'panel'): Kalem => ({
+    id: Number(r.id), kod: String(r.kod ?? ''), ad: String(r.ad ?? ''), tur,
   });
-  const ekleCikar = (r: ListeSatiri) => {
-    const k = sepetKalem(r);
+  const ekleCikar = (r: ListeSatiri, tur: 'tetkik' | 'panel') => {
+    const k = sepetKalem(r, tur);
     const a = anahtar(k.tur, k.id);
     setSepet(s => { const n = new Map(s); n.has(a) ? n.delete(a) : n.set(a, k); return n });
   };
@@ -164,7 +184,7 @@ export function LabIstemSepetiModal({ muayeneId, hastaId, onKapat, onBitti }: {
         {/* SAĞ: arama + tetkik listesi */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <input ref={kutu} value={arama} onChange={e => setArama(e.target.value)}
-            placeholder={panelModu ? 'Panel ara…' : 'Tetkik ara (kod / ad)…'}
+            placeholder="Tetkik / panel ara (Hemogram, TİT, kod…)"
             style={{ padding: '8px 10px', fontSize: 14, border: '1px solid #cbd5e0',
               borderRadius: 6, marginBottom: 8 }} />
           <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #eef', borderRadius: 6,
@@ -174,22 +194,23 @@ export function LabIstemSepetiModal({ muayeneId, hastaId, onKapat, onBitti }: {
               <div style={{ padding: 12, color: '#889' }}>Sonuç yok.</div>}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <tbody>
-                {satirlar.map(r => {
-                  const k = sepetKalem(r);
+                {satirlar.map(({ satir: r, tur }) => {
+                  const k = sepetKalem(r, tur);
                   const secili = sepet.has(anahtar(k.tur, k.id));
                   return (
-                    <tr key={`${k.tur}${k.id}`} onClick={() => ekleCikar(r)}
+                    <tr key={`${k.tur}${k.id}`} onClick={() => ekleCikar(r, tur)}
                       className="secilebilir" style={{ borderTop: '1px solid #f0f3f7',
                         background: secili ? '#eaf6ec' : undefined, cursor: 'pointer' }}>
                       <td style={{ width: 28, padding: '5px 6px', textAlign: 'center' }}>
                         <input type="checkbox" checked={secili} readOnly tabIndex={-1} /></td>
-                      <td style={{ width: 88, padding: '5px 6px', color: '#667', fontFamily: 'monospace' }}>
+                      <td style={{ width: 30, padding: '5px 2px', textAlign: 'center' }}>
+                        {tur === 'panel' ? '📦' : ''}</td>
+                      <td style={{ width: 82, padding: '5px 6px', color: '#667', fontFamily: 'monospace' }}>
                         {String(r.kod ?? '')}</td>
                       <td style={{ padding: '5px 6px' }}>{String(r.ad ?? '')}</td>
-                      {!panelModu && (
-                        <td style={{ width: 56, padding: '5px 8px', textAlign: 'right', color: '#9aa' }}
-                          title="Bugüne kadar istenme sayısı">{Number(r.istemSay ?? 0) || ''}</td>
-                      )}
+                      <td style={{ width: 56, padding: '5px 8px', textAlign: 'right', color: '#9aa' }}
+                        title="Bugüne kadar istenme sayısı">
+                        {tur === 'tetkik' ? (Number(r.istemSay ?? 0) || '') : ''}</td>
                     </tr>
                   );
                 })}
