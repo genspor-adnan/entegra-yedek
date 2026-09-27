@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -49,6 +49,8 @@ import {
   dagilimRotasi, iskontoEkranLimiti,
 } from './belgeKartiKurallari';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
+import { DoktorIstemModal } from '../bilesenler/belge/DoktorIstemModal';
+import type { BekleyenIstemYaniti } from '../api/uclar/basvuruIstem';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
 import { c } from '../dil/ceviri';
 
@@ -471,8 +473,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   /** DOKTOR İSTEMİ (banko): hekimin muayenede açtığı bekleyen (ücretlendirilmemiş)
    *  lab/radyoloji istemleri. Varsa araç çubuğunda "Doktor İstemi" düğmesi aktif;
    *  ücretlendirilince satır sayısı değişir → yeniden çekilir. */
-  const [doktorIstem, setDoktorIstem] = useState<{ toplam: number;
-    lab: { tetkik: string }[]; radyoloji: { tetkik: string }[] } | null>(null);
+  const [doktorIstem, setDoktorIstem] = useState<BekleyenIstemYaniti | null>(null);
   useEffect(() => {
     if (!basvuruMu || kayitliId <= 0) { setDoktorIstem(null); return }
     let iptal = false;
@@ -482,20 +483,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     return () => { iptal = true };
   }, [basvuruMu, kayitliId, satirlar.length]);
 
-  async function doktorIstemiUcretlendir() {
-    if (!doktorIstem || doktorIstem.toplam === 0) return;
-    const liste = [...doktorIstem.lab, ...doktorIstem.radyoloji].map(x => `• ${x.tetkik}`).join('\n');
-    if (!await onay(`Doktorun istediği ${doktorIstem.toplam} tetkik ücrete eklenecek:
-
-${liste}
-
-Devam edilsin mi?`)) return;
+  const [doktorModal, setDoktorModal] = useState(false);
+  // Modal "Ücrete Ekle" sonrası: belgeyi yeniden oku (yeni kalemler + toplam),
+  //   modalı kapat. Bekleyen sayısı satır değişimiyle yeniden çekilir.
+  async function doktorIstemBitti() {
+    setDoktorModal(false);
     try {
-      const y = await api.basvuruIstemUcretlendir(kayitliId);
       const okunan = await api.belgeOku(kayitliId);
       setSonuc(okunan);
       setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
-      mesaj(y.mesaj);
     } catch (h) { mesaj(hataMetni(h)) }
   }
 
@@ -1267,7 +1263,7 @@ Devam edilsin mi?`)) return;
           hastaKartiAc={() => { if (cari?.id) arama.setHastaKartId(cari.id) }}
           doktorIstemVar={(doktorIstem?.toplam ?? 0) > 0}
           doktorIstemSayi={doktorIstem?.toplam ?? 0}
-          doktorIstemi={doktorIstemiUcretlendir}
+          doktorIstemi={() => setDoktorModal(true)}
           // Başvuru iptali: yalnız başvuru sekmesi doluyken - ücret kalemi ya da
           //   (bekleyen) doktor istemi varsa diğer sekmelerde veri var demektir.
           basvuruIptalGorunur={basvuruMu && satirlar.length === 0 && (doktorIstem?.toplam ?? 0) === 0}
@@ -1672,6 +1668,10 @@ Devam edilsin mi?`)) return;
         {/* Kartin ustune acilan BUTUN pencereler (cari/stok/kalem/tahsilat/
             donusum/termin/prim/istem) tek bilesende: BelgeKartiModallari.
             Kart yalniz "hangisi acik" durumunu tutar. */}
+        {doktorModal && doktorIstem && (
+          <DoktorIstemModal belgeId={kayitliId} veri={doktorIstem}
+            onKapat={() => setDoktorModal(false)} onTamam={() => void doktorIstemBitti()} />
+        )}
         <BelgeKartiModallari
           kayitliId={kayitliId} tur={tur} bilgi={bilgi} basvuruMu={basvuruMu}
           alisMi={alisMi} irsaliyeMi={irsaliyeMi} siparisMi={siparisMi}

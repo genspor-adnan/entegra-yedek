@@ -6,7 +6,7 @@ import { gonder, istek } from '../cekirdek';
  * bırakınca çalışma listelerine düşer. Ödeme ayrı - serbest = ücretlendirildi/
  * kabule hazır, tahsilat sonraya kalabilir.
  */
-export interface BekleyenIstem { tur: 'lab' | 'radyoloji'; id: number; oncelik: number; tetkik: string }
+export interface BekleyenIstem { tur: 'lab' | 'radyoloji'; id: number; oncelik: number; tetkik: string; kategori: string }
 export interface BekleyenIstemYaniti {
   lab: BekleyenIstem[];
   radyoloji: BekleyenIstem[];
@@ -27,6 +27,7 @@ export const basvuruIstemUclari = {
   /** Doktor istemlerini ücretlendir: bekleyen istemlerin hizmetlerini ücret
    *  satırı olarak başvuruya ekler (fiyat + iskonto + karşılama); istemler
    *  serbest kalır (worklist'e düşer). */
-  basvuruIstemUcretlendir: (belgeId: number) =>
-    gonder<{ eklenen: number; mesaj: string }>(`/api/basvuru/${belgeId}/istem-ucretlendir`, {}),
+  basvuruIstemUcretlendir: (belgeId: number, ids?: { lab?: number[]; radyoloji?: number[] }) =>
+    gonder<{ eklenen: number; mesaj: string }>(`/api/basvuru/${belgeId}/istem-ucretlendir`,
+      { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null }),
 };

@@ -38,23 +38,32 @@ public static class BasvuruIstemUclari
                        coalesce((select string_agg(t.ad, ', ' order by t.ad)
                                    from public.lab_istem_satir s
                                    join public.lab_tetkik t on t.id = s.tetkik_id
-                                  where s.istem_id = i.id and s.durum <> 0), '') as tetkikler
+                                  where s.istem_id = i.id and s.durum <> 0), '') as tetkikler,
+                       coalesce((select nullif(trim(t.bolum), '')
+                                   from public.lab_istem_satir s
+                                   join public.lab_tetkik t on t.id = s.tetkik_id
+                                  where s.istem_id = i.id and s.durum <> 0
+                                  order by s.id limit 1), 'Laboratuvar') as kategori
                   from public.lab_istem i
                  where i.belge_id = @p0 and i.serbest = 0 and i.durum <> 9
                  order by i.id
                 """, null, [belgeId],
                 o => new { tur = "lab", id = o.GetInt32(0), oncelik = o.GetInt16(1),
-                           tetkik = o.GetString(2) }, iptal);
+                           tetkik = o.GetString(2), kategori = o.GetString(3) }, iptal);
 
             var rad = await b.ListeAsync("""
-                select i.id, i.oncelik, coalesce(hz.ad, '') as tetkik
+                select i.id, i.oncelik, coalesce(hz.ad, '') as tetkik,
+                       'Radyoloji · ' || case i.modalite when 1 then 'BT' when 2 then 'MR'
+                            when 3 then 'USG' when 4 then 'Röntgen' when 5 then 'Mamografi'
+                            when 6 then 'DEXA' when 7 then 'Anjiyo' when 8 then 'Skopi'
+                            else 'Görüntüleme' end as kategori
                   from public.radyoloji_istem i
                   left join public.hizmet hz on hz.id = i.hizmet_id
                  where i.belge_id = @p0 and i.serbest = 0 and i.durum <> 0
                  order by i.id
                 """, null, [belgeId],
                 o => new { tur = "radyoloji", id = o.GetInt32(0), oncelik = o.GetInt16(1),
-                           tetkik = o.GetString(2) }, iptal);
+                           tetkik = o.GetString(2), kategori = o.GetString(3) }, iptal);
 
             return Results.Ok(new { lab, radyoloji = rad,
                                     toplam = lab.Count + rad.Count,
@@ -101,12 +110,16 @@ public static class BasvuruIstemUclari
         //   eklenince belge_satir tetiği istemleri serbest bırakır (worklist'e
         //   düşer). Banko "Doktor İstemi" düğmesinden çağırır.
         grup.MapPost("/{belgeId:int}/istem-ucretlendir", async (
-            int belgeId, VeriKaynagi veri, BelgeDeposu belgeDepo, BaglamCozucu cozucu,
-            HttpContext ctx, CancellationToken iptal) =>
+            int belgeId, SerbestIstegi? istek, VeriKaynagi veri, BelgeDeposu belgeDepo,
+            BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            // Seçili istem id'leri (grid'den); boşsa TÜM bekleyenler ücretlenir.
+            var labIds = istek?.LabIstemIdler ?? [];
+            var radIds = istek?.RadyolojiIstemIdler ?? [];
+            var hepsi = labIds.Length == 0 && radIds.Length == 0;
 
             // Faturalanacak hizmetler: radyoloji istemin hizmeti; lab istemin
             //   tetkiklerinin hizmeti. Zaten başvuruda ücret satırı olan hizmet
@@ -116,17 +129,19 @@ public static class BasvuruIstemUclari
                   from (
                     select i.hizmet_id as hid from public.radyoloji_istem i
                      where i.belge_id = @p0 and i.serbest = 0 and i.durum <> 0 and i.hizmet_id is not null
+                       and (@p1::bool or i.id = any(@p3))
                     union
                     select t.hizmet_id from public.lab_istem i
                       join public.lab_istem_satir s on s.istem_id = i.id
                       join public.lab_tetkik t on t.id = s.tetkik_id
                      where i.belge_id = @p0 and i.serbest = 0 and i.durum <> 9 and s.durum <> 0
                        and t.hizmet_id is not null
+                       and (@p1::bool or i.id = any(@p2))
                   ) q
                   join public.hizmet hz on hz.id = q.hid
                  where not exists (select 1 from public.belge_satir bs
                                     where bs.belge_id = @p0 and bs.hizmet_id = hz.id)
-                """, null, [belgeId], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
+                """, null, [belgeId, hepsi, labIds, radIds], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
 
             if (hizmetler.Count == 0)
                 return Results.Ok(new { eklenen = 0, mesaj = "Ücretlendirilecek bekleyen doktor istemi yok.",
