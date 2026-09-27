@@ -1,6 +1,5 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
-import { akilciEngelKodu, akilciUyariAkisi, type AkilciKarar } from './akilciIstem';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -41,9 +40,7 @@ export async function muayeneAksiyonu(
       && kod !== 'muayene.normal' && kod !== 'muayene.taniOnceki'
       && kod !== 'muayene.taniSik' && kod !== 'muayene.taniAra'
       && kod !== 'muayene.taniSil' && kod !== 'muayene.raporImza'
-      && kod !== 'muayene.raporSil'
-      && kod !== 'muayene.istem' && kod !== 'muayene.istemLab'
-      && kod !== 'muayene.istemGoruntuleme') return false;
+      && kod !== 'muayene.raporSil') return false;
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir muayene seçin.'); return true }
@@ -215,100 +212,8 @@ export async function muayeneAksiyonu(
     return true;
   }
 
-  // ISTEM AC: asil kayit MODUL tablosunda acilir (radyoloji calisma listesi);
-  //   muayene_istem yalnizca bag ve durum satiridir. Sonuc geldiginde durum
-  //   TETIKLE yansir (418) - modul kodlarina "muayene_istem'i de guncelle"
-  //   satiri eklemek, birini unutunca sessizce bozulan bir bag birakirdi.
-  if (kod === 'muayene.istem' || kod === 'muayene.istemLab'
-      || kod === 'muayene.istemGoruntuleme') {
-    await guvenli(async () => {
-      // ISTEM TURU: listede TEK dugme oldugu icin sorulur; muayene kartinin
-      //   istem sekmesinde mockup'taki gibi AYRI dugmeler var, orada tur
-      //   zaten belli. Laboratuvar istemi lab_istem'de acilir ve tup plani +
-      //   barkod uretir; goruntuleme radyoloji calisma listesine duser.
-      const tur = kod === 'muayene.istemLab' ? '1'
-                : kod === 'muayene.istemGoruntuleme' ? '2'
-                : await secimSor('İstem türü?', [
-                    { kod: '1', ad: '🧪 Laboratuvar' },
-                    { kod: '2', ad: '📷 Görüntüleme' },
-                  ]);
-      if (!tur) return;
-
-      if (tur === '1') {
-        const paneller = await api.liste('lab-panel', { sayfa: 1, boyut: 50 });
-        const tetkikler = await api.liste('lab-tetkik', { sayfa: 1, boyut: 100 });
-        const secenekler = [
-          ...paneller.satirlar.map(r => ({
-            kod: `P${r.id}`, ad: `📦 ${String(r.ad ?? '')}` })),
-          ...tetkikler.satirlar.map(r => ({
-            kod: `T${r.id}`, ad: `${String(r.kod ?? '')} · ${String(r.ad ?? '')}` })),
-        ];
-        if (secenekler.length === 0) { mesaj('Tetkik kataloğu boş.'); return }
-
-        const secim = await secimSor('Hangi tetkik / panel istensin?', secenekler);
-        if (!secim) return;
-
-        // AKILCI TEST İSTEMİ (873): sunucu gerekçesiz uyarıda 422 AKILCI_UYARI
-        //   döner; hekime sorulur (gerekçe / vazgeç) ve kararla yeniden
-        //   gönderilir. Panelden açılan tetkik uyarı alırsa sunucu tetkik
-        //   kimliğiyle söyler; vazgeçilen tetkik panelden düşmez, panel
-        //   yerine kalan tetkikler tek tek gönderilir.
-        const istek = {
-          tur: 1, aciliyet: 1,
-          tetkikIdler: secim.startsWith('T') ? [Number(secim.slice(1))] : [] as number[],
-          panelIdler: secim.startsWith('P') ? [Number(secim.slice(1))] : [] as number[],
-          akilci: [] as AkilciKarar[],
-        };
-        const hastaId = Number(satir?.tarafId ?? satir?.hastaId ?? 0) || undefined;
-        for (let deneme = 0; deneme < 4; deneme++) {
-          try {
-            const y = await api.muayeneIstemAc(id, istek);
-            mesaj(y.mesaj);
-            b.tazele();
-            return;
-          } catch (h) {
-            if (!akilciEngelKodu(h)) throw h;
-            const karar = await akilciUyariAkisi(h, hastaId);
-            if (!karar) return;
-            istek.akilci = [...istek.akilci, ...karar.akilci];
-            if (karar.cikar.length > 0) {
-              if (istek.panelIdler.length > 0) {
-                mesaj('Panelin bir tetkiğinden vazgeçildi; paneli tek tek tetkik olarak isteyin.');
-                return;
-              }
-              istek.tetkikIdler = istek.tetkikIdler.filter(t => !karar.cikar.includes(t));
-              if (istek.tetkikIdler.length === 0) { mesaj('İstemde tetkik kalmadı; istem açılmadı.'); return }
-            }
-          }
-        }
-        return;
-      }
-
-      // YALNIZ RADYOLOJI TETKIKLERI (459/460): modalitesi olmayan hizmetle
-      //   acilan istem sunucuda reddediliyor - listeye koymak, kullaniciya
-      //   secilemeyecek satir teklif etmek demekti.
-      const hizmetler = await api.liste('hizmet', {
-        sayfa: 1, boyut: 100,
-        filtre: { alan: 'modalite', op: 'buyuk', deger: 0 },
-      });
-      if (hizmetler.satirlar.length === 0) {
-        mesaj('Modalitesi tanımlı radyoloji tetkiki yok '
-            + '(Stok & Hizmet > Hizmet kartından modalite seçin).');
-        return;
-      }
-
-      const secim = await secimSor('Hangi tetkik istensin?',
-        hizmetler.satirlar.slice(0, 40).map(r => ({
-          kod: String(r.id), ad: String(r.ad ?? ''),
-        })));
-      if (!secim) return;
-
-      const y = await api.muayeneIstemAc(id, { tur: 2, hizmetId: Number(secim), aciliyet: 1 });
-      mesaj(y.mesaj);
-      b.tazele();
-    });
-    return true;
-  }
+  // (Eski tek-düğme "İstem Aç" secimSor akışı kaldırıldı - istem artık İstem &
+  //   Sonuçlar sekmesindeki grid başlığında "＋ İstem" birleşik modalıyla.)
 
   if (kod === 'muayene.ozet') {
     await guvenli(async () => {
