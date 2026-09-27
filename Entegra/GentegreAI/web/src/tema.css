@@ -3238,9 +3238,10 @@ input.skt-gecmis {
   padding: 5px 8px; min-width: 0;
 }
 .kart-baglam .kb-bas { font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
-/* HASTA kutusu vurgusu (kullanıcı): mockup gibi pembe/kırmızı çerçeve. */
+/* HASTA kutusu vurgusu (kullanıcı: "içi değil DIŞI pembe"): dolgu yok,
+   çevresi pembe/kırmızı çerçeve. */
 .kart-baglam .kb-hasta .kb-bas { color: #b3261e; font-weight: 700 }
-.kart-baglam .kb-hasta .kb-kutu { border-color: #f0b8b1; background: #fdf1ef }
+.kart-baglam .kb-hasta .kb-kutu { border: 2px solid #e88a80; box-shadow: 0 0 0 2px #fbe4e1 }
 .kart-baglam .kb-ic {
   font-size: 11.5px; line-height: 1.6; display: flex; flex-wrap: wrap;
   gap: 4px; align-items: center; min-width: 0;
