@@ -173,10 +173,10 @@ export function ListeKarti({
                               onClick={() => setRaporModal({ muayeneId: Number(kartId), tur: 1 })}>
                         📋 Rapor şablonu ▾
                       </button>
-                      <button type="button" className="d sil"
+                      <button type="button" className="d sil" title="Rapor Sil"
                               onClick={() => void aksiyon('muayene.raporSil',
                                                           { id: Number(kartId) })}>
-                        🗑 Rapor Sil
+                        🗑
                       </button>
                       <button type="button" className="d bir"
                               onClick={() => void aksiyon('muayene.raporImza',
