@@ -3288,6 +3288,42 @@ input.skt-gecmis {
 .mfz-tek-satir .detay-tablo, .mfz-tek-satir table { width: 100%; margin-left: 0 }
 .mfz-tek-satir > .kagrup, .mfz-tek-satir .kagrup { margin-left: 0 }
 
+/* MUAYENE ŞABLONLARI ekranı (mockup muayene_sablonlari.html). */
+.msb-win { background: #fff; border: 1px solid var(--cizgi, #cdd6e0); border-radius: 6px; overflow: hidden; margin: 8px }
+.msb-title { background: linear-gradient(#2b5c95, #1c4374); color: #fff; padding: 8px 12px;
+  font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px }
+.msb-title .msb-sp { margin-left: auto; font-weight: 400; opacity: .85; font-size: 11px }
+.msb-sekmeler { display: flex; gap: 2px; padding: 6px 10px 0; background: #f3f6fa; border-bottom: 1px solid var(--cizgi, #cdd6e0); flex-wrap: wrap }
+.msb-sekme { border: 1px solid var(--cizgi, #cdd6e0); border-bottom: none; border-radius: 4px 4px 0 0;
+  padding: 6px 12px; font-size: 11.5px; background: #e7edf4; color: #4d5d6e; cursor: pointer }
+.msb-sekme.on { background: #fff; color: #14315a; font-weight: 700; position: relative; top: 1px }
+.msb-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 0 }
+@media (max-width: 900px) { .msb-iki { grid-template-columns: 1fr } }
+.msb-sol { border-right: 1px solid var(--cizgi2, #e3e9f0) }
+.msb-arac { padding: 7px 12px; font-weight: 700; color: #2c4a6b; background: linear-gradient(#f4f7fb, #e7eef6);
+  border-bottom: 1px solid var(--cizgi2, #e3e9f0); font-size: 12px }
+.msb-arac .msb-not { font-weight: 400; color: var(--soluk, #6b7a8b); margin-left: 6px }
+.msb-dg { width: 100%; border-collapse: collapse }
+.msb-dg th { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi, #cdd6e0);
+  text-align: left; padding: 6px 8px; font-size: 11px; color: #3a5573; font-weight: 700; white-space: nowrap }
+.msb-dg td { border-bottom: 1px solid var(--cizgi2, #eef2f6); padding: 5px 8px; font-size: 11.5px }
+.msb-dg tr.sel td { background: #d7e7fb }
+.msb-dg .orta { text-align: center } .msb-dg .sag { text-align: right }
+.msb-alt { color: var(--soluk, #6b7a8b); font-size: 10.5px }
+.msb-metin { color: #33506e; max-width: 640px }
+.msb-bos { color: var(--soluk, #6b7a8b); text-align: center; padding: 14px }
+.msb-rz { display: inline-block; border-radius: 9px; padding: 1px 8px; font-size: 10.5px; border: 1px solid var(--cizgi, #cdd6e0) }
+.msb-rz.ok { background: #e2f3e8; color: #2e7d46; border-color: #bfe3cb }
+.msb-rz.pas { background: #eceff2; color: #6b7a8b }
+.msb-ic { padding: 8px 12px; color: var(--soluk, #6b7a8b); font-size: 11px; line-height: 1.6 }
+.msb-ic code { background: #f2f6fa; border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 3px; padding: 0 4px }
+.msb-bilgi { padding: 16px; color: #4d5d6e; font-size: 12.5px; line-height: 1.7 }
+.msb-bilgi b { color: #1f2d3a }
+.msb-kural { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; padding: 14px }
+@media (max-width: 760px) { .msb-kural { grid-template-columns: 1fr } }
+.msb-fld label { display: block; font-size: 10.5px; color: var(--soluk, #6b7a8b); margin-bottom: 3px }
+.msb-inp { border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px; background: #f4f6f9; padding: 6px 8px; font-size: 11.5px }
+
 /* MUAYENE sekmeleri zemini açık gri (kullanıcı: anamnez + diğer sekmeler). */
 .muayene-sekme-zemin { background: #f4f5f7; border-radius: 8px; padding: 10px }
 .muayene-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px }

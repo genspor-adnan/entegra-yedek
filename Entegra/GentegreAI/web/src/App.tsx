@@ -33,6 +33,7 @@ import { EnabizPanosu } from './sayfalar/EnabizPanosu';
 import { Hakedisim } from './sayfalar/Hakedisim';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiIstemKarti } from './sayfalar/RadyolojiIstemKarti';
+import { MuayeneSablonlari } from './sayfalar/MuayeneSablonlari';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
@@ -248,6 +249,9 @@ function Yollar() {
         )}
         {yetki('ariza.talep') && (
           <Route path="/ariza-bildir" element={<ArizaBildir />} />
+        )}
+        {yetki('muayene') && (
+          <Route path="/muayene-sablon" element={<MuayeneSablonlari />} />
         )}
         {/* DIS (706): hasta karti (odontogram + plan) ve gunluk akis ozel
             sayfalardir - generic liste/kart odontogrami cizemez. */}

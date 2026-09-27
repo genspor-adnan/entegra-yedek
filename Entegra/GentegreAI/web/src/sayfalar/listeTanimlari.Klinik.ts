@@ -563,6 +563,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   bulgu satiri olarak acilir ve "normal" isaretlenir.
     kaynak: 'muayene-sablon', rota: 'muayene-sablon', baslik: 'Muayene Şablonları',
     yol: 'Muayene › Muayene Ayarları › Muayene Şablonları',
+    // ÖZEL SAYFA (mockup muayene_sablonlari.html): iki panel + 6 sekme -
+    //   generic liste/kart yerine MuayeneSablonlari bileşeni.
+    ozelSayfa: true,
     kartYolu: '/muayene-sablon', kartBaslik: 'Muayene Şablonu',
     aksiyonEkrani: 'cari-liste',
     cipler: [
