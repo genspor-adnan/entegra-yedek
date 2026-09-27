@@ -104,9 +104,15 @@ export const listeUclari = {
   muayeneRaporImzala: (raporId: number) =>
     gonder<{ mesaj: string }>(`/api/muayene/rapor/${raporId}/imzala`, {}),
 
-  /** Yeni taslak rapor ekler (tur şablonu). Grid'de açılır, hekim doldurur. */
-  muayeneRaporEkle: (muayeneId: number, tur: number, altTur?: number) =>
-    gonder<{ raporId: number; mesaj: string }>(`/api/muayene/${muayeneId}/rapor`, { tur, altTur }),
+  /** Yeni rapor: modal ön bilgilerle açılır, tarih/gün/açıklama/ICD ile kaydedilir. */
+  muayeneRaporEkle: (muayeneId: number, govde: { tur: number; altTur?: number;
+                     baslangic?: string; gun?: number; bitis?: string;
+                     aciklama?: string; icdKod?: string }) =>
+    gonder<{ raporId: number; mesaj: string }>(`/api/muayene/${muayeneId}/rapor`, govde),
+
+  /** Taslak rapor sil (imzalı silinmez). */
+  muayeneRaporSil: (raporId: number) =>
+    istek<{ mesaj: string }>(`/api/muayene/rapor/${raporId}`, { method: 'DELETE' }),
 
   /** Kartin tani satirlari (arac cubugundaki sil icin). */
   muayeneTanilari: (muayeneId: number) =>

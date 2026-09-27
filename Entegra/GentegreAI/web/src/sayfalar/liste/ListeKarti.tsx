@@ -19,6 +19,7 @@ import { EnabizButonu } from '../../bilesenler/EnabizButonu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { LabIstemSepetiModal } from '../../bilesenler/lab/LabIstemSepetiModal';
+import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -85,6 +86,8 @@ export function ListeKarti({
   const [gebeHasta, setGebeHasta] = useState<{ id: number; ad: string } | null>(null);
   // HEKİM LAB İSTEM SEPETİ (kullanici): muayeneId set olunca sepet modalı açılır.
   const [labIstem, setLabIstem] = useState<number | null>(null);
+  // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
+  const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
   const { aksiyonVar } = useOturum();
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
@@ -111,6 +114,11 @@ export function ListeKarti({
         <LabIstemSepetiModal muayeneId={labIstem}
           onKapat={() => setLabIstem(null)}
           onBitti={() => setKartTazele(t => t + 1)} />
+      )}
+      {raporModal && (
+        <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
+          onKapat={() => setRaporModal(null)}
+          onKaydedildi={() => setKartTazele(t => t + 1)} />
       )}
       <GenForm
         kaynak={tanim.kaynak}
@@ -158,14 +166,17 @@ export function ListeKarti({
                   <>
                     <div className="muayene-arac">
                       <button type="button" className="d"
-                              onClick={() => void aksiyon('muayene.raporEkle',
-                                                          { id: Number(kartId) })}>
+                              onClick={() => setRaporModal({ muayeneId: Number(kartId), tur: 1 })}>
                         ＋ Rapor
                       </button>
                       <button type="button" className="d"
-                              onClick={() => void aksiyon('muayene.raporSablon',
-                                                          { id: Number(kartId) })}>
+                              onClick={() => setRaporModal({ muayeneId: Number(kartId), tur: 1 })}>
                         📋 Rapor şablonu ▾
+                      </button>
+                      <button type="button" className="d sil"
+                              onClick={() => void aksiyon('muayene.raporSil',
+                                                          { id: Number(kartId) })}>
+                        🗑 Rapor Sil
                       </button>
                       <button type="button" className="d bir"
                               onClick={() => void aksiyon('muayene.raporImza',

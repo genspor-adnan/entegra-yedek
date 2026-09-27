@@ -41,7 +41,7 @@ export async function muayeneAksiyonu(
       && kod !== 'muayene.normal' && kod !== 'muayene.taniOnceki'
       && kod !== 'muayene.taniSik' && kod !== 'muayene.taniAra'
       && kod !== 'muayene.taniSil' && kod !== 'muayene.raporImza'
-      && kod !== 'muayene.raporEkle' && kod !== 'muayene.raporSablon'
+      && kod !== 'muayene.raporSil'
       && kod !== 'muayene.istem' && kod !== 'muayene.istemLab'
       && kod !== 'muayene.istemGoruntuleme') return false;
 
@@ -85,25 +85,24 @@ export async function muayeneAksiyonu(
     return true;
   }
 
-  // RAPOR EKLE / ŞABLONDAN EKLE (mockup rapor araç çubuğu "＋ Rapor" /
-  //   "📋 Rapor şablonu ▾"): taslak rapor açar; satır grid'de belirir, hekim
-  //   tarih/gün/açıklama/ICD girip e-İmzalar. Şablon = rapor TÜRÜ (İstirahat /
-  //   Sağlık durumu / İlaç kullanım / İş göremezlik).
-  if (kod === 'muayene.raporEkle' || kod === 'muayene.raporSablon') {
+  // RAPOR SİL (mockup "🗑"): yalnız TASLAK rapor silinir - imzalı/onaylı
+  //   rapor yasal kayıttır, silinmez (uç de reddeder).
+  if (kod === 'muayene.raporSil') {
     await guvenli(async () => {
-      let tur = 1; // ＋ Rapor: varsayılan İstirahat
-      if (kod === 'muayene.raporSablon') {
-        const secim = await secimSor('Rapor şablonu (tür)?', [
-          { kod: '1', ad: '🛌 İstirahat' },
-          { kod: '2', ad: '🩺 Sağlık durumu' },
-          { kod: '3', ad: '💊 İlaç kullanım (SUT)' },
-          { kod: '4', ad: '📋 İş göremezlik' },
-        ]);
-        if (!secim) return;
-        tur = Number(secim);
-      }
-      const y = await api.muayeneRaporEkle(id, tur);
-      mesaj(y.mesaj);
+      const y = await api.muayeneRaporlari(id);
+      const taslak = y.raporlar.filter(r => Number(r.durum ?? 0) === 1);
+      if (taslak.length === 0) { mesaj('Silinecek taslak rapor yok (imzalı rapor silinemez).'); return }
+      const secim = taslak.length === 1
+        ? String(taslak[0].id)
+        : await secimSor('Hangi taslak rapor silinsin?', taslak.map(r => ({
+            kod: String(r.id),
+            ad: `#${String(r.id)} · ${String(r.baslangic ?? '').slice(0, 10)}`
+              + ` · ${String(r.gun ?? 0)} gün · ${String(r.icdKod ?? '')}`,
+          })));
+      if (!secim) return;
+      if (!await onay('Taslak rapor silinecek. Onaylıyor musunuz?', true)) return;
+      const s = await api.muayeneRaporSil(Number(secim));
+      mesaj(s.mesaj);
       b.tazele();
     });
     return true;

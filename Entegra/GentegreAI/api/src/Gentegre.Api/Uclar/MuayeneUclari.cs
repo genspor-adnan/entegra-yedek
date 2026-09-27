@@ -567,15 +567,23 @@ public static class MuayeneUclari
             baglam.YetkiIste("muayene", Islem.Degistir);
             await using var baglanti = await veri.AcAsync(iptal);
 
+            var gun = istek.Gun ?? 0;
             var yeniId = await baglanti.TekDegerAsync<int?>(
                 "insert into public.muayene_rapor " +
-                "  (muayene_id, hasta_id, hekim_id, tur, alt_tur, baslangic, durum, " +
-                "   sube_id, ekleyen, rapor_no) " +
+                "  (muayene_id, hasta_id, hekim_id, tur, alt_tur, baslangic, bitis, gun, " +
+                "   aciklama, icd_kod, durum, sube_id, ekleyen, rapor_no) " +
                 "select m.id, m.taraf_id, m.personel_id, @p1::smallint, @p2::smallint, " +
-                "       current_date, 1, coalesce(m.sube_id, @p3), @p4, '' " +
+                "       coalesce(@p5::date, current_date), " +
+                // Bitiş verilmişse o; yoksa gün>0 ise başlangıç+gün-1 (istirahat dâhil).
+                "       coalesce(@p6::date, case when @p7 > 0 " +
+                "            then coalesce(@p5::date, current_date) + (@p7 - 1) else null end), " +
+                "       @p7::smallint, @p8, @p9, 1, coalesce(m.sube_id, @p3), @p4, '' " +
                 "  from public.muayene m where m.id = @p0 " +
                 "returning id",
-                null, [id, istek.Tur, istek.AltTur ?? 0, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+                null, [id, istek.Tur, istek.AltTur ?? 0, baglam.SubeId ?? 0, baglam.KullaniciId,
+                       string.IsNullOrWhiteSpace(istek.Baslangic) ? null : istek.Baslangic,
+                       string.IsNullOrWhiteSpace(istek.Bitis) ? null : istek.Bitis,
+                       gun, istek.Aciklama ?? "", istek.IcdKod ?? ""], iptal);
 
             if (yeniId is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Muayene bulunamadı." } });
@@ -583,6 +591,28 @@ public static class MuayeneUclari
             return Results.Ok(new { raporId = yeniId.Value,
                                     mesaj = "Taslak rapor eklendi - tarih/gün/açıklama girip e-İmzalayın.",
                                     izlemeNo = baglam.IzlemeNo });
+        });
+
+        // DELETE /api/muayene/rapor/{raporId} - TASLAK rapor sil (mockup "🗑").
+        //   İmzalı/onaylı rapor silinmez (yasal kayıt).
+        grup.MapDelete("/rapor/{raporId:int}", async (
+            int raporId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var durum = await baglanti.TekDegerAsync<int?>(
+                "select durum from public.muayene_rapor where id = @p0", null, [raporId], iptal);
+            if (durum is null)
+                return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Rapor bulunamadı." } });
+            if (durum != 1)
+                throw GentegreHatasi.IsKurali("İmzalanmış/onaylı rapor silinemez.");
+
+            await baglanti.CalistirAsync("delete from public.muayene_rapor where id = @p0 and durum = 1",
+                null, [raporId], iptal);
+            return Results.Ok(new { raporId, mesaj = "Taslak rapor silindi.", izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/muayene/rapor/{raporId}/imzala
@@ -1194,8 +1224,10 @@ public static class MuayeneUclari
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);
 
-    /// <summary>Yeni taslak rapor: Tür 1 İstirahat · 2 Sağlık durumu · 3 İlaç kullanım · 4 İş göremezlik.</summary>
-    public sealed record RaporEkleIstegi(int Tur, int? AltTur);
+    /// <summary>Yeni rapor: Tür 1 İstirahat · 2 Sağlık durumu · 3 İlaç kullanım · 4 İş göremezlik.
+    /// Modal ön bilgilerle açılır; tarih/gün/açıklama/ICD doldurulup kaydedilir.</summary>
+    public sealed record RaporEkleIstegi(int Tur, int? AltTur, string? Baslangic,
+                                         int? Gun, string? Bitis, string? Aciklama, string? IcdKod);
 
     /// <summary>
     /// Bekleme ekranı için adı kısaltır: "Ayşe Yılmaz" → "A. Y***".
