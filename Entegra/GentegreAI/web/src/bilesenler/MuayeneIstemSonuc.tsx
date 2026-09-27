@@ -124,16 +124,15 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
           laboratuvar ve görüntüleme TEK listede - hekim için "istem" tek
           kavramdır, modülü değil sonucu arar. Ayrıntı (tetkik satırları,
           kültür, rapor) aşağıdaki kutularda kalır. */}
-      <div className="kagrup istem-ozet">
-        <h6>
+      <div className="istem-ozet cerceve-yok">
+        {/* Butonlar GRIDIN ÜZERINDE, dış çerçeve YOK (kullanıcı). */}
+        <div className="muayene-arac" style={{ alignItems: 'center' }}>
           {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>＋ İstem</button>}
           <button type="button" className="d sil" title="Seçili istemi sil"
             disabled={!secili} onClick={() => void sil()}>🗑</button>
-          {' '}İstemler <span className="not">
-          {veri.istemler.length + veri.radyoloji.length} istem
-        </span></h6>
-        <div className="not ic" style={{ marginTop: -4, marginBottom: 4 }}>
-          Silmek için satırı seçin (sonuçlanmış/çekilmiş istem silinemez).
+          <span className="not" style={{ marginLeft: 6 }}>
+            {veri.istemler.length + veri.radyoloji.length} istem · silmek için satırı seçin
+            (sonuçlanmış/çekilmiş silinemez)</span>
         </div>
         <table className="detay-tablo">
           <thead>

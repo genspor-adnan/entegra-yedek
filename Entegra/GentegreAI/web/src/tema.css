@@ -3249,6 +3249,11 @@ input.skt-gecmis {
 /* MUAYENE KARTI IKI PANEL (461) - mockup muayene_karti.html ".ikiPanel":
    solda anamnez formu, sagda vital + gunun sonuclari. Dar ekranda alt alta
    duser (metin tasmasin, kutular bozulmasin). */
+/* İSTEM ÖZETİ (kullanıcı): butonlar gridin üstünde, dış çerçeve YOK. */
+.istem-ozet.cerceve-yok { border: 0; padding: 0; background: transparent; box-shadow: none }
+.istem-ozet.cerceve-yok > .detay-tablo { border: 0 }
+.istem-ozet.cerceve-yok > .detay-tablo > thead > tr > th { border-top: 0 }
+
 /* FIZIK MUAYENE (kullanıcı): "Muayene Şablonu" + "Muayene Bulguları" alanları
    TEK SATIR yan yana; bulgu grid tam genişlik, sola yaslı (kutu genişlik
    dayatmasını sıfırla). */
