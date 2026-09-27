@@ -157,6 +157,16 @@ export function ListeKarti({
                   //   imza SUNUCU ucunda (eksik rapor reddedilir).
                   <>
                     <div className="muayene-arac">
+                      <button type="button" className="d"
+                              onClick={() => void aksiyon('muayene.raporEkle',
+                                                          { id: Number(kartId) })}>
+                        ＋ Rapor
+                      </button>
+                      <button type="button" className="d"
+                              onClick={() => void aksiyon('muayene.raporSablon',
+                                                          { id: Number(kartId) })}>
+                        📋 Rapor şablonu ▾
+                      </button>
                       <button type="button" className="d bir"
                               onClick={() => void aksiyon('muayene.raporImza',
                                                           { id: Number(kartId) })}>

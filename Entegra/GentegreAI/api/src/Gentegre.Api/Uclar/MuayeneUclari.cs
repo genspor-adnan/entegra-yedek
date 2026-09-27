@@ -555,6 +555,36 @@ public static class MuayeneUclari
             return Results.Ok(new { id, raporlar = satirlar, izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/muayene/{id}/rapor - yeni TASLAK rapor (mockup rapor araç
+        //   çubuğu "＋ Rapor" / "📋 Rapor şablonu ▾"). Tür şablonu seçilir;
+        //   satır grid'de açılır, hekim tarih/gün/açıklama/ICD'yi doldurup
+        //   e-İmzalar. hasta/hekim/şube muayeneden gelir.
+        grup.MapPost("/{id:int}/rapor", async (
+            int id, RaporEkleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var yeniId = await baglanti.TekDegerAsync<int?>(
+                "insert into public.muayene_rapor " +
+                "  (muayene_id, hasta_id, hekim_id, tur, alt_tur, baslangic, durum, " +
+                "   sube_id, ekleyen, rapor_no) " +
+                "select m.id, m.taraf_id, m.personel_id, @p1::smallint, @p2::smallint, " +
+                "       current_date, 1, coalesce(m.sube_id, @p3), @p4, '' " +
+                "  from public.muayene m where m.id = @p0 " +
+                "returning id",
+                null, [id, istek.Tur, istek.AltTur ?? 0, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+
+            if (yeniId is null)
+                return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Muayene bulunamadı." } });
+
+            return Results.Ok(new { raporId = yeniId.Value,
+                                    mesaj = "Taslak rapor eklendi - tarih/gün/açıklama girip e-İmzalayın.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/rapor/{raporId}/imzala
         //   İMZA RAPORU KİLİTLER: imzalanan metin SGK'ya giden metindir.
         //   EKSİK RAPOR İMZALANMAZ: tür, başlangıç, gün ve tanı olmadan
@@ -1163,6 +1193,9 @@ public static class MuayeneUclari
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);
+
+    /// <summary>Yeni taslak rapor: Tür 1 İstirahat · 2 Sağlık durumu · 3 İlaç kullanım · 4 İş göremezlik.</summary>
+    public sealed record RaporEkleIstegi(int Tur, int? AltTur);
 
     /// <summary>
     /// Bekleme ekranı için adı kısaltır: "Ayşe Yılmaz" → "A. Y***".

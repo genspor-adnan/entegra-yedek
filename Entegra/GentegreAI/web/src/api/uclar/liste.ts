@@ -104,6 +104,10 @@ export const listeUclari = {
   muayeneRaporImzala: (raporId: number) =>
     gonder<{ mesaj: string }>(`/api/muayene/rapor/${raporId}/imzala`, {}),
 
+  /** Yeni taslak rapor ekler (tur şablonu). Grid'de açılır, hekim doldurur. */
+  muayeneRaporEkle: (muayeneId: number, tur: number, altTur?: number) =>
+    gonder<{ raporId: number; mesaj: string }>(`/api/muayene/${muayeneId}/rapor`, { tur, altTur }),
+
   /** Kartin tani satirlari (arac cubugundaki sil icin). */
   muayeneTanilari: (muayeneId: number) =>
     istek<{ tanilar: { id: number; kod: string; ad: string; tur: number }[] }>(
