@@ -872,6 +872,33 @@ public static partial class LabUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // DELETE /api/lab/istem/{id} - yanlış açılan lab istemini sil (muayene
+        //   grid'i "🗑"). Güvence: sonucu girilmiş / onaylı istem silinmez.
+        grup.MapDelete("/istem/{id:int}", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab", Islem.Sil);
+            await using var b = await veri.AcAsync(iptal);
+
+            var durum = await b.TekDegerAsync<int?>(
+                "select durum from public.lab_istem where id = @p0", null, [id], iptal);
+            if (durum is null)
+                return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            if (durum >= 4)
+                throw GentegreHatasi.IsKurali("Sonuçlanmış/onaylı istem silinemez.");
+            var sonucVar = await b.TekDegerAsync<bool>(
+                "select exists(select 1 from public.lab_sonuc s " +
+                "  join public.lab_istem_satir t on t.id = s.istem_satir_id " +
+                " where t.istem_id = @p0)", null, [id], iptal);
+            if (sonucVar)
+                throw GentegreHatasi.IsKurali("Sonucu girilmiş istem silinemez.");
+
+            await b.CalistirAsync("select public.fn_lab_istem_sil(@p0)", null, [id], iptal);
+            return Results.Ok(new { id, mesaj = "Lab istemi silindi.", izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/lab/basvuru/{belgeId}/istemler - muayene "İstem & Sonuçlar"
         //   sekmesi: başvurunun istemleri ve tamamlanma durumu.
         grup.MapGet("/basvuru/{belgeId:int}/istemler", async (

@@ -262,6 +262,32 @@ public static partial class RadyolojiUclari
         //
         // Her tetkik AYRI istem olur: PACS ve raporlama accession bazlıdır,
         //   iki tetkiği tek isteme koymak raporu da tek yapardı.
+        // DELETE /api/radyoloji/istem/{id} - yanlış açılan görüntüleme istemini
+        //   sil (muayene grid'i "🗑"). Güvence: çekilmiş/raporlanmış silinmez.
+        grup.MapDelete("/istem/{id:int}", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Sil);
+            await using var b = await veri.AcAsync(iptal);
+
+            var r = await b.TekAsync(
+                "select coalesce(durum,0), (cekim_tarihi is not null) as cekildi " +
+                "  from public.radyoloji_istem where id = @p0",
+                null, [id], o => new { Durum = o.GetInt32(0), Cekildi = o.GetBoolean(1) }, iptal);
+            if (r is null)
+                return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            var raporVar = await b.TekDegerAsync<bool>(
+                "select exists(select 1 from public.radyoloji_rapor where istem_id = @p0)",
+                null, [id], iptal);
+            if (r.Cekildi || raporVar || r.Durum >= 2)
+                throw GentegreHatasi.IsKurali("Çekilmiş/raporlanmış görüntüleme istemi silinemez.");
+
+            await b.CalistirAsync("select public.fn_radyoloji_istem_sil(@p0)", null, [id], iptal);
+            return Results.Ok(new { id, mesaj = "Görüntüleme istemi silindi.", izlemeNo = baglam.IzlemeNo });
+        });
+
         grup.MapPost("/istem", async (
             IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>

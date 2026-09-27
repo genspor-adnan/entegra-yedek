@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { guvenli, mesaj } from './mesaj';
+import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat } from './bicim';
 import { c } from '../dil/ceviri';
 
@@ -48,13 +48,21 @@ const sayiMetni = (v: unknown, b = 2): string => {
                             : String(v);
 };
 
-export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
+export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
+  muayeneId: number;
+  /** Grid başlığındaki "＋ İstem" düğmesi (birleşik istem modalını açar). */
+  onIstemAc?: () => void;
+  /** İstem silinince kartın diğer sayaçlarını tazelemek için. */
+  onDegisti?: () => void;
+}) {
   const git = useNavigate();
   const [veri, setVeri] = useState<{
     belgeId: number | null; istemler: Satir[]; sonuclar: Satir[];
     kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  // Seçili istem (özet grid seçilebilir desende - kırmızı 🗑 bunu siler).
+  const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji'; id: number } | null>(null);
 
   const yukle = useCallback(async () => {
     try { setVeri(await api.muayeneSonuclari(muayeneId) as never) }
@@ -62,6 +70,18 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
   }, [muayeneId]);
 
   useEffect(() => { void yukle() }, [yukle]);
+
+  const sil = () => guvenli(async () => {
+    if (!secili) { mesaj('Önce silinecek istemi seçin.'); return }
+    if (!await onay('Seçili istem silinecek. Onaylıyor musunuz?', true)) return;
+    const y = secili.tur === 'lab'
+      ? await api.labIstemSil(secili.id)
+      : await api.radyolojiIstemSil(secili.id);
+    mesaj(y.mesaj);
+    setSecili(null);
+    await yukle();
+    onDegisti?.();
+  });
 
   const gordu = (bagId: number) => guvenli(async () => {
     await api.muayeneIstemGordu(bagId);
@@ -76,9 +96,12 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
   if (bosMu) {
     return (
       <div className="kagrup">
+        <div className="muayene-arac">
+          {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>＋ İstem</button>}
+        </div>
         <p className="not ic">
-          Bu muayene ve başvurusu için açılmış istem yok. İstem açmak için
-          listedeki “🧪 İstem Aç” düğmesini kullanın.
+          Bu muayene ve başvurusu için açılmış istem yok. Lab / radyoloji istemi
+          açmak için “＋ İstem” düğmesini kullanın.
         </p>
       </div>
     );
@@ -102,9 +125,16 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
           kavramdır, modülü değil sonucu arar. Ayrıntı (tetkik satırları,
           kültür, rapor) aşağıdaki kutularda kalır. */}
       <div className="kagrup istem-ozet">
-        <h6>İstemler <span className="not">
+        <h6>
+          {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>＋ İstem</button>}
+          <button type="button" className="d sil" title="Seçili istemi sil"
+            disabled={!secili} onClick={() => void sil()}>🗑</button>
+          {' '}İstemler <span className="not">
           {veri.istemler.length + veri.radyoloji.length} istem
         </span></h6>
+        <div className="not ic" style={{ marginTop: -4, marginBottom: 4 }}>
+          Silmek için satırı seçin (sonuçlanmış/çekilmiş istem silinemez).
+        </div>
         <table className="detay-tablo">
           <thead>
             <tr>
@@ -121,8 +151,11 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
               const adlar = satirlar.slice(0, 3).map(s => String(s.ad ?? '')).join(', ');
               const durum = Number(i.durum ?? 1);
               const acil = Number(i.oncelik ?? 1) === 3;
+              const secli = secili?.tur === 'lab' && secili.id === istemId;
               return (
-                <tr key={`L${istemId}`}>
+                <tr key={`L${istemId}`} className={`secilebilir${secli ? ' secili' : ''}`}
+                  style={{ cursor: 'pointer', background: secli ? '#dbe8f7' : undefined }}
+                  onClick={() => setSecili({ tur: 'lab', id: istemId })}>
                   <td>Lab</td>
                   <td>
                     <b>{String(i.istemNo ?? '')}</b>
@@ -152,8 +185,12 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
             {veri.radyoloji.map(r => {
               const durum = Number(r.durum ?? 0);
               const sonuc = String(r.sonuc ?? '').trim();
+              const rid = Number(r.id);
+              const secli = secili?.tur === 'radyoloji' && secili.id === rid;
               return (
-                <tr key={`R${String(r.id)}`}>
+                <tr key={`R${String(r.id)}`} className={`secilebilir${secli ? ' secili' : ''}`}
+                  style={{ cursor: 'pointer', background: secli ? '#dbe8f7' : undefined }}
+                  onClick={() => setSecili({ tur: 'radyoloji', id: rid })}>
                   <td>{c('Görüntüleme')}</td>
                   <td>{String(r.tetkik ?? '')}</td>
                   <td className="hiza-orta sonuk">—</td>

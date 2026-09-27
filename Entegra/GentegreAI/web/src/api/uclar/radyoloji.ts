@@ -13,6 +13,9 @@ export const radyolojiUclari = {
     kontrast?: number; kontrastMl?: number | null;
     seriSayisi?: number | null; goruntuSayisi?: number | null;
   }) => gonder<{ id: number; mesaj: string }>(`/api/radyoloji/istem/${id}`, govde, 'PUT'),
+  /** Yanlış açılan görüntüleme istemini sil (çekilmiş/raporlanmış silinemez). */
+  radyolojiIstemSil: (id: number) =>
+    istek<{ mesaj: string }>(`/api/radyoloji/istem/${id}`, { method: 'DELETE' }),
   radyolojiKontrol: (id: number) =>
     istek<{ sorular: { soruId: number; soru: string; yanitTipi: number; zorunlu: number;
                        yanit: string; kayitZamani: string | null; kaydeden: string }[] }>(

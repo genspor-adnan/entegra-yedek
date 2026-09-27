@@ -43,6 +43,10 @@ export const labUclari = {
     gonder<{ id: number; istemNo: string; barkodlar: string[];
              tetkikSayisi: number; mesaj: string }>('/api/lab/istem', govde),
 
+  /** Yanlış açılan lab istemini sil (sonuçlanmış/onaylı silinemez). */
+  labIstemSil: (id: number) =>
+    istek<{ mesaj: string }>(`/api/lab/istem/${id}`, { method: 'DELETE' }),
+
   // ------------------------------------------------ AKILCI TEST İSTEMİ (873) --
   /** İstem göndermeden önce uyarılar (branş / tekrar süresi / basamak / kapalı) + SKRS gerekçe seçenekleri. */
   labAkilciKontrol: (govde: { hastaId: number; hekimId?: number; tetkikIdler: number[] }) =>

@@ -18,9 +18,8 @@ import { GebeIzlemModali } from '../../bilesenler/GebeIzlemModali';
 import { EnabizButonu } from '../../bilesenler/EnabizButonu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
-import { LabIstemSepetiModal } from '../../bilesenler/lab/LabIstemSepetiModal';
+import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
-import { RadyolojiIstemSepetiModal } from '../../bilesenler/radyoloji/RadyolojiIstemSepetiModal';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -85,12 +84,11 @@ export function ListeKarti({
   const [asiHasta, setAsiHasta] = useState<{ id: number; ad: string } | null>(null);
   const [izlemHasta, setIzlemHasta] = useState<{ id: number; ad: string } | null>(null);
   const [gebeHasta, setGebeHasta] = useState<{ id: number; ad: string } | null>(null);
-  // HEKİM LAB İSTEM SEPETİ (kullanici): muayeneId set olunca sepet modalı açılır.
-  const [labIstem, setLabIstem] = useState<number | null>(null);
+  // BİRLEŞİK İSTEM SEPETİ (kullanici: "lab ve radyoloji tek istem ekranı,
+  //   sekmeli"): muayeneId set olunca modal açılır.
+  const [istem, setIstem] = useState<number | null>(null);
   // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
-  // GÖRÜNTÜLEME İSTEM SEPETİ (kullanici: "görüntü istem de lab gibi desende").
-  const [radyolojiIstem, setRadyolojiIstem] = useState<number | null>(null);
   const { aksiyonVar } = useOturum();
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
@@ -113,20 +111,15 @@ export function ListeKarti({
         <EnabizMesajModali hastaId={enabizMesaj.hastaId} hastaAdi={enabizMesaj.hastaAdi}
                            belgeId={enabizMesaj.belgeId} onKapat={() => setEnabizMesaj(null)} />
       )}
-      {labIstem !== null && (
-        <LabIstemSepetiModal muayeneId={labIstem}
-          onKapat={() => setLabIstem(null)}
+      {istem !== null && (
+        <IstemSepetiModal muayeneId={istem}
+          onKapat={() => setIstem(null)}
           onBitti={() => setKartTazele(t => t + 1)} />
       )}
       {raporModal && (
         <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
           onKapat={() => setRaporModal(null)}
           onKaydedildi={() => setKartTazele(t => t + 1)} />
-      )}
-      {radyolojiIstem !== null && (
-        <RadyolojiIstemSepetiModal muayeneId={radyolojiIstem}
-          onKapat={() => setRadyolojiIstem(null)}
-          onBitti={() => setKartTazele(t => t + 1)} />
       )}
       <GenForm
         kaynak={tanim.kaynak}
@@ -245,19 +238,9 @@ export function ListeKarti({
                         "gordum" isareti panelde dugme. Sekme mockup'taki
                         gibi arac cubugu + tek istem tablosu + ayrintilar. */}
                     {baslik.includes('Sonuç') ? (
-                      <>
-                        <div className="muayene-arac">
-                          <button type="button" className="d"
-                                  onClick={() => setLabIstem(Number(kartId))}>
-                            ＋ Laboratuvar
-                          </button>
-                          <button type="button" className="d"
-                                  onClick={() => setRadyolojiIstem(Number(kartId))}>
-                            ＋ Görüntüleme
-                          </button>
-                        </div>
-                        <MuayeneIstemSonuc muayeneId={Number(kartId)} />
-                      </>
+                      <MuayeneIstemSonuc muayeneId={Number(kartId)}
+                        onIstemAc={() => setIstem(Number(kartId))}
+                        onDegisti={() => setKartTazele(t => t + 1)} />
                     ) : icerik}
                   </>
                 )
