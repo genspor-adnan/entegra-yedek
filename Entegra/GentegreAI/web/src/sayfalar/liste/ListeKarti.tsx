@@ -221,15 +221,17 @@ export function ListeKarti({
                     )}
                     {baslik === 'Fizik Muayene' && (
                       <div className="muayene-arac">
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.sablon',
-                                                            { id: Number(kartId) })}>
-                          📋 Şablon Uygula
-                        </button>
+                        {/* Sıra (kullanıcı): solda "Tümü normal", sağında
+                            "Şablon Uygula"; şablon alanları + bulgular altta. */}
                         <button type="button" className="d"
                                 onClick={() => void aksiyon('muayene.normal',
                                                             { id: Number(kartId) })}>
                           ☑ Tümü normal işaretle
+                        </button>
+                        <button type="button" className="d"
+                                onClick={() => void aksiyon('muayene.sablon',
+                                                            { id: Number(kartId) })}>
+                          📋 Şablon Uygula
                         </button>
                       </div>
                     )}
