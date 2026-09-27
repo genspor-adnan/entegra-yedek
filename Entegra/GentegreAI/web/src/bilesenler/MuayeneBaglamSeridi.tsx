@@ -113,7 +113,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
     <div className="kart-baglam">
       {/* ETIKET KUTUNUN USTUNDE (kullanici): kutu icinde ilk satiri
           yiyordu; disarida durunca kutunun tamami veriye kaliyor. */}
-      <div className="kb-hucre">
+      <div className="kb-hucre kb-hasta">
         <div className="kb-bas">Hasta</div>
         <div className="kb-kutu">
         <div className="kb-ic">

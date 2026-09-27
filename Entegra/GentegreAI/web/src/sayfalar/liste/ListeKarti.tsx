@@ -20,6 +20,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
+import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -89,6 +90,8 @@ export function ListeKarti({
   const [istem, setIstem] = useState<number | null>(null);
   // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
+  // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
+  const [ozetModal, setOzetModal] = useState<number | null>(null);
   const { aksiyonVar } = useOturum();
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
@@ -120,6 +123,9 @@ export function ListeKarti({
         <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
           onKapat={() => setRaporModal(null)}
           onKaydedildi={() => setKartTazele(t => t + 1)} />
+      )}
+      {ozetModal !== null && (
+        <MuayeneOzetiModal muayeneId={ozetModal} onKapat={() => setOzetModal(null)} />
       )}
       <GenForm
         kaynak={tanim.kaynak}
@@ -431,9 +437,10 @@ export function ListeKarti({
                   {/* İstem açma İstem & Sonuçlar sekmesindeki grid başlığında
                       "＋ İstem"; Şablon Uygula da Fizik Muayene sekmesinde var -
                       üstteki tek düğmeler kaldırıldı (kullanıcı). */}
-                  {/* MUAYENE ÖZETİ (kullanıcı): bulgulardan özeti derler
-                      (rapora / e-Nabız'a giden metin). */}
-                  {dugme('muayene.ozet', '📖 Muayene Özeti')}
+                  {/* MUAYENE ÖZETİ (kullanıcı: "mockup gibi"): sol özet metni +
+                      sağ kaynaklar modalı (MuayeneOzetiModal). */}
+                  <button type="button" className="d"
+                          onClick={() => setOzetModal(Number(kartId))}>📖 Muayene Özeti</button>
                   {/* e-NABIZ MESAJI (877, KTS H7): hekim ekranından hastanın
                       e-Nabız profiline düz metin bilgilendirme. Aksiyon
                       kataloğuna girmiyor - liste satırında değil, KART

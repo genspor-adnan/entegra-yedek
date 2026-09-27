@@ -3238,6 +3238,9 @@ input.skt-gecmis {
   padding: 5px 8px; min-width: 0;
 }
 .kart-baglam .kb-bas { font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
+/* HASTA kutusu vurgusu (kullanıcı): mockup gibi pembe/kırmızı çerçeve. */
+.kart-baglam .kb-hasta .kb-bas { color: #b3261e; font-weight: 700 }
+.kart-baglam .kb-hasta .kb-kutu { border-color: #f0b8b1; background: #fdf1ef }
 .kart-baglam .kb-ic {
   font-size: 11.5px; line-height: 1.6; display: flex; flex-wrap: wrap;
   gap: 4px; align-items: center; min-width: 0;
@@ -3249,6 +3252,21 @@ input.skt-gecmis {
 /* MUAYENE KARTI IKI PANEL (461) - mockup muayene_karti.html ".ikiPanel":
    solda anamnez formu, sagda vital + gunun sonuclari. Dar ekranda alt alta
    duser (metin tasmasin, kutular bozulmasin). */
+/* MUAYENE ÖZETİ (mockup muayene_ozeti.html): sol özet metni + sağ kaynaklar. */
+.ozet-gvd { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 0; min-height: 340px }
+@media (max-width: 900px) { .ozet-gvd { grid-template-columns: 1fr } }
+.ozet-sol { padding: 4px 14px 4px 2px; border-right: 1px solid var(--cizgi2, #e3e9f0) }
+.ozet-sag { padding: 4px 2px 4px 14px; background: var(--yuz2, #fafcfe) }
+.ozet-sol > h6, .ozet-blk > h6 { margin: 0 0 5px; font-size: 11.5px; color: #2c4a6b;
+  text-transform: uppercase; letter-spacing: .3px; border-bottom: 1px solid var(--cizgi2, #e3e9f0);
+  padding-bottom: 3px }
+.ozet-metin { width: 100%; min-height: 220px; resize: vertical; border: 1px solid var(--cizgi, #cbd5e0);
+  border-radius: 4px; padding: 10px 12px; font: inherit; line-height: 1.6 }
+.ozet-blk { margin: 0 0 12px }
+.ozet-mini { width: 100%; border-collapse: collapse }
+.ozet-mini td { padding: 3px 4px; border-bottom: 1px solid var(--cizgi2, #eef2f6); font-size: 12px; vertical-align: top }
+.ozet-mini td.sag { text-align: right; color: var(--soluk, #6b7a8b); white-space: nowrap }
+
 /* KIRMIZI SİL DÜĞMESİ (kullanıcı): silme aksiyonu kırmızı. */
 .d.sil { color: #fff; background: var(--hata, #c0392b); border-color: var(--hata, #c0392b) }
 .d.sil:hover:not(:disabled) { filter: brightness(0.92) }
