@@ -79,9 +79,11 @@ public sealed class KullaniciDeposu
             rakam = rakam[2..];
         rakam = rakam.TrimStart('0');
 
-        // TCKN: yalniz 11 haneli rakam dizisi TCKN sayilir - 4 haneli bir
-        //   sicil numarasini "kimlik no" diye eslestirmek yanlis kisiyi acardi.
-        var tckn = rakam.Length == 11 ? rakam : "";
+        // KIMLIK/VERGI NO: 11 haneli TCKN veya 10 haneli VKN tam eslesir
+        //   (kullanici: "1234567890 kimlikno lu dr ile login yapamadim" - test
+        //   hekiminin vkno'su 10 haneli). Kisa (4 haneli) sicil numarasi bir
+        //   vkno/tckn'ye ESIT olamayacagi icin yanlis kisi eslesmez.
+        var tckn = rakam.Length is 10 or 11 ? rakam : "";
 
         var liste = await _veri.ListeAsync(Secim + """
              where lower(k.kod) = @p0
