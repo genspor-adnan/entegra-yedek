@@ -3240,8 +3240,10 @@ input.skt-gecmis {
 .kart-baglam .kb-bas { font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
 /* HASTA hücresi vurgusu (kullanıcı: "kutunun DIŞI ZEMİN pembe"): kutu normal,
    çevresindeki alan pembe zemin. */
-.kart-baglam .kb-hasta { background: #fbe4e1; border-radius: 6px; padding: 4px 6px }
+.kart-baglam .kb-hasta { background: #fbe4e1; border-radius: 8px; padding: 10px 12px }
 .kart-baglam .kb-hasta .kb-bas { color: #b3261e; font-weight: 700 }
+/* Kutu pembe zeminin İÇİNDE, kenardan boşluklu dursun (bir dış daha zemin). */
+.kart-baglam .kb-hasta .kb-kutu { margin-top: 2px }
 .kart-baglam .kb-ic {
   font-size: 11.5px; line-height: 1.6; display: flex; flex-wrap: wrap;
   gap: 4px; align-items: center; min-width: 0;
