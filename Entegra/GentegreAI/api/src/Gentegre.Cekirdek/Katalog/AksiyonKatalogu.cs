@@ -110,7 +110,15 @@ public static class AksiyonKatalogu
                      ekleAdi: "＋ Hareket", yazdir: true),
             ["hasta-liste"] =
             [
-                .. Crud("hasta", "hasta", "hasta"),
+                // SİL ÜST ARAÇ ÇUBUĞUNDA (kullanici: "ekle duzenle saginda Sil"):
+                //   Crud varsayilani Sil'i yalniz sag tus/palete koyar.
+                .. Crud("hasta", "hasta", "hasta", silHedef: "araccubugu,sagtus,palet"),
+                // BAŞVURU EKLE (kullanici: "2. siraya Başvuru Ekle"): secili
+                //   hastaya kabul/başvuru acar (varsa kapanmamis basvuru acilir).
+                new("hasta.basvuru-ekle", "📝 Başvuru Ekle", "belge",
+                    Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "belge",
+                    Islem: Islem.Ekle, KayitGerekir: true, Sira: 15, UrunModu: 2,
+                    Ipucu: "Seçili hastaya başvuru/kabul açar"),
                 // FORM MOTORU (740): hastanın formları (onam, değerlendirme, beyan).
                 new("form.hasta-formlar", "📋 Formlar", "form", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "form.istek", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
                 // PORTAL DAVETI (822): hastaya SMS/e-posta ile tek kullanimlik

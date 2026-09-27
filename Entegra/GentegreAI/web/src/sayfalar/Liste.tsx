@@ -516,6 +516,15 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                          ek?: string) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
 
+    // BAŞVURU EKLE (kullanici): hasta listesinde seçili hastaya başvuru aç
+    //   (varsa kapanmamış başvurusu açılır, yoksa yeni). 2. sıra düğmesi.
+    if (kod === 'hasta.basvuru-ekle') {
+      const s = satir ?? seciliSatir;
+      if (!s) { mesaj('Önce bir hasta seçin.'); return }
+      await basvuruAc(Number(s.id), String(s.unvan ?? s.ad ?? s.id));
+      return;
+    }
+
     try {
       // TOPLU e-BELGE (183): coklu secimde Hazırla/Gönder tek istekte calisir.
       //   Gelen kutusu ve e-Belge ciktilari ayni "ebelge.*" kodlarini
