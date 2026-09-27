@@ -219,11 +219,13 @@ export function ListeKarti({
                             (kullanıcı): tek yerde, aramayla aynı akışta. */}
                       </div>
                     )}
-                    {/* FIZIK MUAYENE TEK SATIR (kullanıcı): solda butonlar,
-                        SAĞINDA muayene şablonu + bulguları aynı satırda. */}
+                    {/* FIZIK MUAYENE (kullanıcı): üstte butonlar; altında
+                        "Muayene Şablonu" + "Muayene Bulguları" alanları TEK
+                        SATIR (mfz-tek-satir), bulgu grid tam genişlik sola
+                        yaslı. */}
                     {baslik === 'Fizik Muayene' && (
-                      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                        <div className="muayene-arac" style={{ flex: '0 0 auto' }}>
+                      <>
+                        <div className="muayene-arac">
                           <button type="button" className="d"
                                   onClick={() => void aksiyon('muayene.normal',
                                                               { id: Number(kartId) })}>
@@ -235,8 +237,8 @@ export function ListeKarti({
                             📋 Şablon Uygula
                           </button>
                         </div>
-                        <div style={{ flex: 1, minWidth: 280 }}>{icerik}</div>
-                      </div>
+                        <div className="mfz-tek-satir">{icerik}</div>
+                      </>
                     )}
                     {/* ISTEM & SONUCLAR (mockup): BAG GRIDI CIZILMEZ - hedef
                         tablo/id teknik alanlar, hekime bir sey soylemiyor;
