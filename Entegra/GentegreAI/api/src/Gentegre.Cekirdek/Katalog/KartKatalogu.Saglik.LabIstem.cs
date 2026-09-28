@@ -214,8 +214,19 @@ public static partial class KartKatalogu
                     Yazilabilir: false),
                 new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim",
                     Yazilabilir: false),
-                new("referans", "referans", "metin", EnFazlaUzunluk: 60,
-                    Baslik: "Referans Aralığı", Yazilabilir: false),
+                // REFERANS CANLI (kullanıcı: "istem kartında referans gelmedi"):
+                //   stored aynası sonuç girilene kadar boş; boşsa hastanın
+                //   yaş/cinsiyetine göre fn_lab_referans'tan CANLI türet.
+                new("referans",
+                    "coalesce(nullif(referans, ''), (select case "
+                    + "when r.alt is not null and r.ust is not null "
+                    + "then replace(trim_scale(r.alt)::text, '.', ',') || ' – ' "
+                    + "|| replace(trim_scale(r.ust)::text, '.', ',') "
+                    + "when coalesce(r.metin, '') <> '' then r.metin else '' end "
+                    + "from public.fn_lab_referans(tetkik_id, "
+                    + "(select li.taraf_id from public.lab_istem li where li.id = istem_id), "
+                    + "current_date, cihaz_id) r))",
+                    "metin", Baslik: "Referans Aralığı", Yazilabilir: false),
                 new("isaret", "isaret", "kod", SabitKodlar: LabIsaretKodlari,
                     Baslik: "Değerlendirme", Yazilabilir: false),
                 new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_cihaz_lookup",
