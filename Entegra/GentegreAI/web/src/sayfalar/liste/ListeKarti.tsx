@@ -21,6 +21,7 @@ import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
+import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
 import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -232,6 +233,9 @@ export function ListeKarti({
                                                               { id: Number(kartId) })}>
                             📋 Şablon Uygula
                           </button>
+                          {/* Bölüme uygun hazır şablon rozeti - basınca uygular. */}
+                          <MuayeneSablonRozeti muayeneId={Number(kartId)}
+                            onUygulandi={() => setKartTazele(t => t + 1)} />
                         </div>
                         <div className="mfz-tek-satir">{icerik}</div>
                       </>
