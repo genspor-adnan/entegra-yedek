@@ -89,7 +89,7 @@ export function BelgeAracCubugu({
               (782, kullanici): dugme bir kayit islemi yapiyor, ekran acmiyor -
               "Aç" kelimesi yeni bir pencere bekletiyordu. */}
           {kaydediyor ? '💾 Kaydediliyor…'
-            : basvuruMu ? '💾 Başvuruyu Kaydet (Protokol Ver)' : '💾 Kaydet'}
+            : basvuruMu ? '💾 Kaydet (Protokol Ver)' : '💾 Kaydet'}
         </button>}
   {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
   {!basvuruMu && (
