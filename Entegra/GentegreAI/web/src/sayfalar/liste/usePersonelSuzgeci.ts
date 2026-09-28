@@ -19,27 +19,39 @@ export function usePersonelSuzgeci(
   const [rol, setRol] = useState<number | ''>('');
   const [roller, setRoller] = useState<SuzgecRolu[]>([]);
   const [rolBolumleri, setRolBolumleri] = useState<string[]>([]);
+  // SISTEMDE KAYITLI PERSONELDE GEÇEN bölümler (kullanıcı): bölüm ağacı yalnız
+  //   personeli olan dallarla sınırlanır.
+  const [bolumIzinli, setBolumIzinli] = useState<number[] | undefined>(undefined);
   const { yetki } = useOturum();
   // Rol listesi `rol` yetkisi ister; yetkisi olmayanda combo hic cizilmez -
   //   403 alip bos combo gostermektense sormuyoruz.
   const rolSuzgeciVar = !!rolSuzgeci && yetki('rol');
 
-  // ROL LISTESI KADRO BILGISIYLE (846): combo agac cizebilsin diye roller
-  //   `profil-rolleri` ucundan alinir - dogrudan `rol` listesinde bolum/ust
-  //   kolonu yok (hiyerarsi sablon haritasinda, SablonKadro). Ayni yetkiyi
-  //   ("rol" gor) istedigi icin ek bir kapi acmiyor.
+  // BÖLÜM + ROL COMBOLARI KAYITLI PERSONELDEN (kullanıcı: "sistemde kayıtlı
+  //   personel listesinden getir"): personel listesinden GEÇEN bölüm ve roller
+  //   toplanır - kullanılmayan tanımlar combolarda çıkmaz. Sayfalamayı aşmak
+  //   için tek büyük sayfa çekilir (personel sayısı mütevazı).
   useEffect(() => {
-    if (!rolSuzgeciVar) { setRoller([]); setRolBolumleri([]); return }
+    if (!bolumSuzgeci && !rolSuzgeciVar) { setRoller([]); setRolBolumleri([]); setBolumIzinli(undefined); return }
     void guvenli(async () => {
-      const y = await api.profilRolleri();
-      setRoller((y.roller ?? [])
-        .filter(r => r.aktif)
-        .map(r => ({ id: r.id, kod: r.kod, ad: r.ad,
-                     bolum: r.bolum || 'Diğer', ust: r.ust ?? null,
-                     sira: r.sira ?? 0 })));
-      setRolBolumleri(y.bolumler ?? []);
+      const y = await api.liste(kaynak, { sayfa: 1, boyut: 1000 });
+      const bolumSet = new Set<number>();
+      const rolMap = new Map<number, string>();
+      for (const r of y.satirlar) {
+        const bid = Number(r.departmanId ?? 0);
+        if (bid > 0) bolumSet.add(bid);
+        const rid = Number(r.rolId ?? 0);
+        if (rid > 0 && !rolMap.has(rid)) rolMap.set(rid, String(r.rolAdi ?? '').trim() || `Rol ${rid}`);
+      }
+      setBolumIzinli(bolumSuzgeci ? [...bolumSet] : undefined);
+      if (rolSuzgeciVar) {
+        setRoller([...rolMap.entries()]
+          .map(([id, ad]) => ({ id, kod: '', ad, bolum: 'Diğer', ust: null, sira: 0 }))
+          .sort((a, b) => a.ad.localeCompare(b.ad, 'tr')));
+        setRolBolumleri([]);
+      } else { setRoller([]); setRolBolumleri([]) }
     });
-  }, [rolSuzgeciVar]);
+  }, [bolumSuzgeci, rolSuzgeciVar, kaynak]);
   // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
   useEffect(() => { setBolum(null); setRol('') }, [kaynak]);
 
@@ -58,7 +70,7 @@ export function usePersonelSuzgeci(
          : { op: 'and', kosullar };
   }, [bolumSuzgeci, rolSuzgeci, bolum, rol]);
 
-  return { bolum, setBolum, rol, setRol, roller, rolBolumleri, rolSuzgeciVar, filtre };
+  return { bolum, setBolum, rol, setRol, roller, rolBolumleri, rolSuzgeciVar, bolumIzinli, filtre };
 }
 
 export type PersonelSuzgeci = ReturnType<typeof usePersonelSuzgeci>;

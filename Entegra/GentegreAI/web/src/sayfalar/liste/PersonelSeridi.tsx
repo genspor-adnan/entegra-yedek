@@ -16,6 +16,7 @@ export function PersonelSeridi(
       {bolumSuzgeci && (
         <BolumSuzgeci
           deger={s.bolum?.id ?? null}
+          izinliIdler={s.bolumIzinli}
           onDegis={(id, agac) => s.setBolum(id === null ? null : { id, agac })}
         />
       )}
