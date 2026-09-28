@@ -80,6 +80,7 @@ export async function labAksiyonu(
   kod: string,
   satir: ListeSatiri | null | undefined,
   b: LabBaglam,
+  secililer?: ListeSatiri[] | null,
 ): Promise<boolean> {
   if (!kod.startsWith('lab.')) return false;
   // Crud() lab-tetkik.yeni / .duzenle / .sil uretir - onlar Liste'nin kendi
@@ -108,6 +109,11 @@ export async function labAksiyonu(
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir kayıt seçin.'); return true }
+  // TOPLU ONAY (kullanıcı): birden çok tetkik seçiliyse hepsi onaylanır.
+  //   Seçim yoksa/tekse aktif satır. Yalnız onay/panik aksiyonları kullanır.
+  const secIdler = (secililer && secililer.length > 0
+    ? secililer.map(s => Number(s.id)).filter(n => n > 0)
+    : [id]);
 
   // SONUC GIRISI: pencere acilir, yazma ve kural motoru orada.
   if (kod === 'lab.sonuc-gir') { b.sonucGir?.(id); return true }
@@ -269,19 +275,27 @@ export async function labAksiyonu(
     // ------------------------------------------------------------ sonuç ---
     case 'lab.teknik-onay':
       await guvenli(async () => {
-        mesaj((await api.labSonucOnayla(id, 1)).mesaj);
+        for (const sid of secIdler) await api.labSonucOnayla(sid, 1);
+        mesaj(secIdler.length > 1 ? `${secIdler.length} sonuç teknik onaylandı.`
+                                  : 'Sonuç teknik onaylandı.');
         b.tazele();
       });
       return true;
 
     case 'lab.onayla': {
-      const panik = Number(satir?.panik ?? 0) === 1;
-      if (panik && !await onay(
-        'Bu sonuç PANİK DEĞER.\n\n'
+      // Seçimde panik değer varsa tek sefer uyar (herhangi biri panikse).
+      const panikVar = (secililer && secililer.length > 0
+        ? secililer.some(s => Number(s.panik ?? 0) === 1)
+        : Number(satir?.panik ?? 0) === 1);
+      if (panikVar && !await onay(
+        (secIdler.length > 1 ? 'Seçili sonuçlardan biri PANİK DEĞER.\n\n'
+                             : 'Bu sonuç PANİK DEĞER.\n\n')
         + 'Onaylamadan önce hekime bildirim yapıldığından emin olun.\n'
         + 'Onaylansın mı?')) return true;
       await guvenli(async () => {
-        mesaj((await api.labSonucOnayla(id, 2)).mesaj);
+        for (const sid of secIdler) await api.labSonucOnayla(sid, 2);
+        mesaj(secIdler.length > 1 ? `${secIdler.length} sonuç uzman onayıyla yayınlandı.`
+                                  : 'Sonuç uzman onayıyla yayınlandı.');
         b.tazele();
       });
       return true;

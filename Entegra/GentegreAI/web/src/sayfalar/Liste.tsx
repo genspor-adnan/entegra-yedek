@@ -635,7 +635,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
         sonucGir: istemId => setSonucGirisi(istemId),
-      })) return;
+      }, secililer)) return;
 
       if (await mikroAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
