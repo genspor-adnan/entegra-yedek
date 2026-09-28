@@ -188,9 +188,9 @@ public static partial class KaynakKatalogu
               + "  left join public.taraf k on k.id = bb.odeyen_kurum_id",
         SabitKosul: "b.tur = 19 and coalesce(b.durum, 0) <> 2",
         SubeKolonu: "b.sube_id",
-        // Once oncelik (acil/oncelikli), sonra kayit sirasi - listedeki sira
-        //   cagirma sirasidir; kullanicinin siralamayi bilmesi gerekmesin.
-        VarsayilanSirala: "bb.oncelik desc, b.belge_tarihi asc, b.id asc",
+        // TARİH/SAAT DESC (kullanıcı): en yeni başvuru üstte. Öncelik (acil/
+        //   öncelikli) ikincil - aynı anda gelen kayıtlarda acil öne çıkar.
+        VarsayilanSirala: "b.belge_tarihi desc, bb.oncelik desc, b.id desc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",          "b.id",              "sayi",  "Id", Varsayilan: false),
