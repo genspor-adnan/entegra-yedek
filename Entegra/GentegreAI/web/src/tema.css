@@ -3283,8 +3283,9 @@ input.skt-gecmis {
 /* FIZIK MUAYENE (kullanıcı): "Muayene Şablonu" + "Muayene Bulguları" alanları
    TEK SATIR yan yana; bulgu grid tam genişlik, sola yaslı (kutu genişlik
    dayatmasını sıfırla). */
-.mfz-tek-satir .alan-izgara { display: flex; flex-wrap: wrap; gap: 8px 16px }
-.mfz-tek-satir .alan-izgara > .alan { flex: 1 1 260px; min-width: 240px }
+/* Muayene Şablonu + Muayene Bulguları alanları GİZLİ (kullanıcı): şablon
+   düğmeden, bulgu özeti Muayene Özeti'nden gelir - sekme ve bulgu grid kalır. */
+.mfz-tek-satir .alan-izgara { display: none }
 .mfz-tek-satir .detay-tablo, .mfz-tek-satir table { width: 100%; margin-left: 0 }
 .mfz-tek-satir > .kagrup, .mfz-tek-satir .kagrup { margin-left: 0 }
 

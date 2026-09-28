@@ -7,5 +7,5 @@
  *
  * Sol menü "Oturum" bölümünde görünür. Yeni yayında güncelle.
  */
-export const SURUM = '26.09.28.1573';
+export const SURUM = '26.09.28.1574';
 export const SURUM_ETIKET = SURUM;

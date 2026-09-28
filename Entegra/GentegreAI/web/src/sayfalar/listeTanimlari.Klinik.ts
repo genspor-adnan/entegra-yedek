@@ -653,11 +653,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   hekime bir sey soylemiyor. Kalan alanlar (Tur, Bolum, Hekim, Baslama,
     //   Bitis, isteyen muayene) kart govdesinde degil, baglam seridindeki
     //   "Bugun" kutusundan acilan pencerede (Liste.seritSarmalayici).
-    // sablonId/bulguOzet KART ALANI OLARAK GİZLİ (kullanıcı): şablon "Şablon
-    //   Uygula" düğmesinden gelir, bulgu özeti "Muayene Özeti" ekranında
-    //   derlenir - fizik muayene sekmesinde combo/kutu olarak durmasın.
     gizliKartAlanlari: ['tarafId', 'durum', 'belgeId', 'muayeneNo', 'muayeneTarihi',
-                        'randevuId', 'sablonId', 'bulguOzet'],
+                        'randevuId'],
     aksiyonEkrani: 'muayene-liste',
     tarihAlani: 'muayeneTarihi',
     cipler: [
