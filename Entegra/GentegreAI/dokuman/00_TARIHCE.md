@@ -17745,3 +17745,73 @@ kırılmıştı — `deger` artık ada eşit, kod `skrs_kod`'da. Testlerin harit
 sorgusu `coalesce(nullif(skrs_kod,''), deger)`'e çevrildi: SKRS-kodlu ögeler
 koda, düz ögeler değere bakıyor. API **555/555** (0 `[ATLANDI]`), web
 **721/721**, tsc temiz.
+
+---
+
+## 27–28.09.2026 — Poliklinik akışı, muayene kartı, lab sonuç/referans (911–961)
+
+Poliklinik banko kapısından muayene kartına, lab istem/sonuç akışına ve muayene
+şablonlarına kadar geniş bir HBYS oturumu. Aşağıdakilerin tümü **PG-only web
+ürününde** (Delphi'ye dokunulmadı) ve hastaneye yayınlandı.
+
+### Başvuru → istem banko kapısı ve ücretlendirme
+
+* **Poliklinik kapısı:** hekimin muayenede açtığı lab/radyoloji isteği önce
+  başvuruya `serbest=0` düşer; acil/yatan/dış/banko kaynaklı istem `serbest=1`
+  gelir (`fn_istem_serbest(basvuru_turu, oncelik, kaynak)`, kaynak-temelli).
+* **Doktor İstemi ücretlendir:** banko "Doktor İstemi" düğmesi — bekleyen
+  istemler **kategori-gruplu seçilebilir grid** (iskonto ekranı gibi); seçilenler
+  ücret satırı olur (fiyat + sözleşme iskontosu + karşılama). Serbest bırakma
+  **anında değil**, başvuru KAYDINDA (`fn_basvuru_istem_serbest_uygula`) —
+  hasta pahalı tetkikten vazgeçebilir.
+* **Dış kurum kabulleri** de başvuru üzerinden; sözleşme (özel fiyat + lab %10 /
+  radyoloji %15 iskonto), kurum %100 karşılama; istek kağıdı tarama.
+* **Mükerrer kimlik/telefon/e-posta** (hasta+personel), TCKN doğrulama opsiyonel.
+
+### Muayene kartı
+
+* **İstem ekranı birleşti:** tek "＋ İstem" düğmesi → Laboratuvar/Radyoloji
+  sekmeli sepet modalı (sol kategori, üst arama, sağ liste en-çok-istenen üstte,
+  ortak sepet). Hemogram/TİT gibi **paneller** aramada gelir.
+* **İstem & Sonuçlar** gridi seçilebilir; başlıkta ＋İstem + kırmızı 🗑 (silme
+  güvenceli: sonuçlanmış/çekilmiş silinmez — `fn_lab_istem_sil` / `fn_radyoloji_istem_sil`).
+* **Rapor:** ＋Rapor / şablon → ön bilgili modal (tür/başlangıç/gün/bitiş/ICD),
+  kırmızı 🗑; imzalı rapor silinmez.
+* **Muayene Özeti** ekranı (mockup): düzenlenebilir özet + kaynaklar
+  (tanı/istem-sonuç/reçete/rapor).
+* **Fizik muayene:** şablon/bulgu alanları gizli (şablon düğmeden, özet
+  ekranından); **bölüme uygun şablon rozeti** tek-tıkla uygular; "Tümü normal"
+  solda. Bağlam şeridi "Hasta" kutusu pembe zemin, sekmeler açık gri.
+* Üst araç çubuğu sadeleşti: Muayene Özeti eklendi, İstem Aç/Şablon Uygula
+  kaldırıldı; **Tamamla** yeşil.
+
+### Muayene Şablonları
+
+* `/muayene-sablon` **özel 6 sekmeli ekran** (mockup): Fizik Muayene Şablonları
+  (liste + alan tablosu, modal düzenleme), İstem Panelleri, Metin Makroları,
+  Kurallar; Sık Tanılar / Reçete Şablonları bilgi paneli (kaynak yok).
+* **12 hazır branş şablonu** (dahiliye, aile, kardiyoloji, göğüs, nöroloji,
+  ortopedi, dermatoloji, KBB, üroloji, kadın doğum, pediatri, psikiyatri) —
+  sistem alanları + normal metinleri (`921`, idempotent).
+
+### Lab sonuç ve referans
+
+* **Manuel sonuç girişi:** Laboratuvar İstemleri → 🧪 Sonuç Gir (istemin tüm
+  tetkikleri tek pencerede).
+* **Referans aralıkları yaş/cinsiyete göre** (`922`): kök neden — generic
+  satırlar `yas_alt=0 yas_ust=0` olduğu için erişkin eşleşmiyordu; hepsi
+  0..43800 güne çevrildi + ALP/ALT/AST/GGT/Kreatinin/Ürik Asit/Ferritin/HGB/HCT/
+  RBC için erişkin E/K + pediatrik bantlar. İstem kartı "Sonuç Gir" sekmesinde
+  referans **canlı** (`fn_lab_referans`, stored boşsa türetilir).
+* **Sonuç Onay Kuyruğu:** çoklu tetkik seçip **toplu teknik/uzman onay** (panik
+  değer varsa tek sefer uyarı).
+
+### Diğer
+
+* Hasta listesi: **♿ Başvuru Aç** (2. sıra, ana menü ikonu); toolbar'da Sil.
+* Personel filtre **bölüm/rol comboları kayıtlı personelden**.
+* Hekim çalışma listesi **tarih/saat DESC**.
+* Giriş: 10 haneli VKN / 11 haneli TCKN ile de eşleşir; Oturum bölümünde kod
+  yerine **ünvan+ad+soyad**.
+* Yeni göç dosyaları: `920` (istem silme fn'leri), `921` (branş şablon seed),
+  `922` (lab referans yaş/cinsiyet). Hastaneye yayınlandı (920–922 uygulandı).
