@@ -34,7 +34,12 @@ public sealed class KullaniciDeposu
     public KullaniciDeposu(VeriKaynagi veri) => _veri = veri;
 
     private const string Secim = """
-        select k.id, k.kod, coalesce(t.unvan, '') as ad, k.parola_hash,
+        select k.id, k.kod,
+               -- Görünen ad = ünvan + ad + soyad (kullanıcı: Oturum bölümünde
+               --   kod yerine tam ad). Personelde ad/soyad dolu; sistem
+               --   kullanıcısında yalnız ünvan olabilir - boşları atla.
+               coalesce(nullif(trim(concat_ws(' ', t.unvan, t.ad, t.soyad)), ''),
+                        nullif(t.unvan, ''), k.kod) as ad, k.parola_hash,
                k.parola_degismeli, k.rol_id, coalesce(r.ad, '') as rol_adi,
                -- EK ROLLER (665): kisinin ana isinin yaninda tasidigi gorevler.
                coalesce((select string_agg(er.ad, ', ' order by er.ad)

@@ -73,7 +73,7 @@ export function BelgeAracCubugu({
   {mevcutBelge
     ? (duzenlenebilir
         ? <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
-            {kaydediyor ? '💾 Kaydediliyor…' : '💾 Değişiklikleri Kaydet'}
+            {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
           </button>
         : <button className="d onay" disabled
                   title="e-Belge gönderilmiş ya da faturalanmış belge değiştirilemez; iptal edip yeniden kesin.">
