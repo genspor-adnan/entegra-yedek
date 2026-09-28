@@ -115,7 +115,7 @@ public static class AksiyonKatalogu
                 .. Crud("hasta", "hasta", "hasta", silHedef: "araccubugu,sagtus,palet"),
                 // BAŞVURU EKLE (kullanici: "2. siraya Başvuru Ekle"): secili
                 //   hastaya kabul/başvuru acar (varsa kapanmamis basvuru acilir).
-                new("hasta.basvuru-ekle", "📝 Başvuru Ekle", "belge",
+                new("hasta.basvuru-ekle", "♿ Başvuru Aç", "belge",
                     Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "belge",
                     Islem: Islem.Ekle, KayitGerekir: true, Sira: 15, UrunModu: 2,
                     Ipucu: "Seçili hastaya başvuru/kabul açar"),
