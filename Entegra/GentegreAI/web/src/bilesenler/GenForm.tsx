@@ -81,6 +81,9 @@ interface Props {
       muayene durumu. Kart alan izgarasinda ayri bir kutu tutmaktansa
       basligda durur (kullanici). */
   baslikEk?(deger: Record<string, Deger>): React.ReactNode;
+  /** Basliktaki "surum" (xmin) rozeti cizilmez (kullanici, muayene karti:
+      hekime anlam ifade etmiyor). Eszamanlilik korumasi rozetten bagimsiz. */
+  surumGizli?: boolean;
   /** Kaydet/Sil'in yanina ekran-ozel EYLEM dugmeleri (mockup muayene kartinda
       "Muayeneye Al · Tamamla · Istem Ac · Sablon"). Dugmeler yalnizca ucu
       cagirir; kural sunucuda kalir. */
@@ -252,7 +255,7 @@ const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
 export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, yerTutucuSekmeler,
-                          ustBaglam, altBilgi, ekAraclar, baslikEk,
+                          ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
   const { kullanici } = useOturum();
@@ -1295,7 +1298,7 @@ Yine de yeni kayıt eklensin mi?`);
               )}
             </span>
           )}
-          {surum && <span className="rozet gri">surum {surum}</span>}
+          {surum && !surumGizli && <span className="rozet gri">surum {surum}</span>}
           {baslikEk?.(deger)}
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>

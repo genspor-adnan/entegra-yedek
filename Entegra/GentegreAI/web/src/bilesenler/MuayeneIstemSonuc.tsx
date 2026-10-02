@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -7,20 +7,24 @@ import { tarihSaat } from './bicim';
 import { c } from '../dil/ceviri';
 
 /**
- * MUAYENE › İSTEM & SONUÇLAR (443).
+ * MUAYENE › İSTEM & SONUÇLAR (443; düzen: mockup muayene_karti_v2.html).
+ *
+ * <b>İki panel.</b> Solda istem listesi (bu muayenede istenen / başvuruya
+ * gelen), sağda SEÇİLİ istemin sonuçları. Eskiden her istemin sonuç tablosu
+ * alt alta diziliyordu; on istemli bir başvuruda hekim aradığı sonucu
+ * kaydırarak buluyordu. Listede satıra tıklamak sonucu yanında açar.
  *
  * <b>Bağ satırı yetmez.</b> Kartın kendi gridi "şu istem açıldı" der;
- * hekimin ihtiyacı SONUCUN KENDİSİDİR. Yalnız bağ gösterilseydi hekim her
- * sonuç için laboratuvar ekranına gitmek zorunda kalırdı - muayene
- * sırasında olmayacak bir şey.
+ * hekimin ihtiyacı SONUCUN KENDİSİDİR.
  *
  * <b>Yalnız onaylı sonuçlar görünür.</b> Laboratuvarın doğrulamadığı bir
  * sayıya göre tedavi başlatılmamalı; bekleyen tetkik "sonuç bekleniyor"
- * olarak listelenir - eksikliğin kendisi de bilgidir.
+ * olarak listelenir - eksikliğin kendisi de bilgidir. "Önceki" sütunu da
+ * yalnız onaylı önceki sonucu gösterir (sunucu).
  *
  * <b>"Gördüm" ayrı bir olaydır</b>: sonucun gelmesi ile hekimin görmesi
- * farklı şeylerdir. Panik değer teyidi ve "sonuç bekliyor" rozetinin
- * kapanması bu işarete bağlı.
+ * farklı şeylerdir. Panik değer teyidi bu işarete bağlı - panikli istemde
+ * işaret sonuç panelinin altında kırmızı şerit olarak istenir.
  */
 
 type Satir = Record<string, unknown>;
@@ -28,10 +32,6 @@ type Satir = Record<string, unknown>;
 const BOLUM: Record<number, string> = {
   1: 'Biyokimya', 2: 'Hematoloji', 3: 'Hormon', 4: 'Mikrobiyoloji',
   5: 'Seroloji', 6: 'Koagülasyon', 7: 'İdrar', 9: 'Diğer',
-};
-
-const BAYRAK: Record<string, string> = {
-  LL: '↓↓', HH: '↑↑', L: '↓', H: '↑', N: '',
 };
 
 const ISTEM_DURUM: Record<number, string> = {
@@ -48,9 +48,19 @@ const sayiMetni = (v: unknown, b = 2): string => {
                             : String(v);
 };
 
+/** "142" / "142,5" -> sayı; metin sonuç (pozitif, +++) -> null. */
+const sayiyaCevir = (v: unknown): number | null => {
+  if (v === null || v === undefined) return null;
+  const s = Number(String(v).trim().replace(',', '.'));
+  return Number.isFinite(s) && String(v).trim() !== '' ? s : null;
+};
+
+/** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
+type Kalem = { tur: 'lab' | 'radyoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
+
 export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   muayeneId: number;
-  /** Grid başlığındaki "＋ İstem" düğmesi (birleşik istem modalını açar). */
+  /** Araç çubuğundaki "＋ İstem Sepeti" düğmesi (birleşik istem modalını açar). */
   onIstemAc?: () => void;
   /** İstem silinince kartın diğer sayaçlarını tazelemek için. */
   onDegisti?: () => void;
@@ -61,7 +71,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
     kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
-  // Seçili istem (özet grid seçilebilir desende - kırmızı 🗑 bunu siler).
+  // Seçili istem: sağ panel bunu gösterir, kırmızı 🗑 bunu siler.
   const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji'; id: number } | null>(null);
 
   const yukle = useCallback(async () => {
@@ -70,6 +80,31 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   }, [muayeneId]);
 
   useEffect(() => { void yukle() }, [yukle]);
+
+  const kalemler = useMemo<Kalem[]>(() => {
+    if (!veri) return [];
+    const lab = veri.istemler.map(i => {
+      const id = Number(i.id);
+      return {
+        tur: 'lab' as const, id, ham: i, bagli: Number(i.bagId ?? 0) > 0,
+        panik: veri.sonuclar.some(s => Number(s.istemId) === id && Number(s.panik ?? 0) === 1),
+      };
+    });
+    const rad = veri.radyoloji.map(r => ({
+      tur: 'radyoloji' as const, id: Number(r.id), ham: r,
+      bagli: Number(r.bagId ?? 0) > 0, panik: false,
+    }));
+    return [...lab, ...rad];
+  }, [veri]);
+
+  // VARSAYILAN SEÇİM: panikli istem varsa o (hekimin ilk görmesi gereken),
+  //   yoksa listenin ilki. Seçili istem silinince/kaybolunca yeniden seçilir.
+  useEffect(() => {
+    if (kalemler.length === 0) { if (secili) setSecili(null); return }
+    if (secili && kalemler.some(k => k.tur === secili.tur && k.id === secili.id)) return;
+    const ilk = kalemler.find(k => k.panik) ?? kalemler.find(k => k.bagli) ?? kalemler[0];
+    setSecili({ tur: ilk.tur, id: ilk.id });
+  }, [kalemler, secili]);
 
   const sil = () => guvenli(async () => {
     if (!secili) { mesaj('Önce silinecek istemi seçin.'); return }
@@ -92,275 +127,295 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!veri) return <div className="yukleniyor">Yükleniyor…</div>;
 
-  const bosMu = veri.istemler.length === 0 && veri.radyoloji.length === 0;
-  if (bosMu) {
+  const arac = (
+    <div className="muayene-arac" style={{ alignItems: 'center' }}>
+      {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>{c('＋ İstem Sepeti')}</button>}
+      <button type="button" className="d sil" title={c('Seçili istemi sil')}
+        disabled={!secili} onClick={() => void sil()}>🗑</button>
+      <span className="not" style={{ marginLeft: 6 }}>
+        {kalemler.length} {c('istem · silmek için satırı seçin (sonuçlanmış/çekilmiş silinemez)')}
+      </span>
+    </div>
+  );
+
+  if (kalemler.length === 0) {
     return (
-      <div className="kagrup">
-        <div className="muayene-arac">
-          {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>＋ İstem</button>}
-        </div>
+      <div className="istem-sonuc">
+        {arac}
         <p className="not ic">
-          Bu muayene ve başvurusu için açılmış istem yok. Lab / radyoloji istemi
-          açmak için “＋ İstem” düğmesini kullanın.
+          {c('Bu muayene ve başvurusu için açılmış istem yok. Lab / radyoloji istemi açmak için “＋ İstem Sepeti” düğmesini kullanın.')}
         </p>
       </div>
     );
   }
 
-  const panikVar = veri.sonuclar.some(s => Number(s.panik ?? 0) === 1);
+  const panikVar = kalemler.some(k => k.panik);
+  const bagliKalemler = kalemler.filter(k => k.bagli);
+  const digerKalemler = kalemler.filter(k => !k.bagli);
+  const secKalem = secili ? kalemler.find(k => k.tur === secili.tur && k.id === secili.id) : undefined;
+
+  const satirCiz = (k: Kalem) => {
+    const sec = secili?.tur === k.tur && secili.id === k.id;
+    const anahtar = `${k.tur}${k.id}`;
+    const ortak = {
+      className: `secilebilir${sec ? ' secili' : ''}${k.panik ? ' panik' : ''}`,
+      style: { cursor: 'pointer' },
+      onClick: () => setSecili({ tur: k.tur, id: k.id }),
+    };
+    if (k.tur === 'lab') {
+      const i = k.ham;
+      const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === k.id);
+      const adlar = satirlar.slice(0, 3).map(s => String(s.ad ?? '')).join(', ');
+      const durum = Number(i.durum ?? 1);
+      return (
+        <tr key={anahtar} {...ortak}>
+          <td>Lab</td>
+          <td className="isn-ad">
+            <b>{String(i.istemNo ?? '')}</b>
+            {adlar && <span className="not"> · {adlar}
+              {satirlar.length > 3 ? ` +${satirlar.length - 3}` : ''}</span>}
+          </td>
+          <td className="hiza-orta">
+            {Number(i.oncelik ?? 1) === 3 ? <span className="rozet hata">{c('Acil')}</span> : '—'}
+          </td>
+          <td className="hiza-orta">{i.istemTarihi ? tarihSaat(i.istemTarihi) : '—'}</td>
+          <td className="hiza-orta">
+            <span className={`rozet ${durum === 5 ? 'olumlu' : durum === 9 ? 'gri' : 'uyari'}`}>
+              {ISTEM_DURUM[durum] ?? ''}
+            </span>
+            {k.panik && <> <span className="rozet hata">{c('Panik')}</span></>}
+          </td>
+        </tr>
+      );
+    }
+    const r = k.ham;
+    const durum = Number(r.durum ?? 0);
+    return (
+      <tr key={anahtar} {...ortak}>
+        <td>{c('Görüntüleme')}</td>
+        <td className="isn-ad">{String(r.tetkik ?? '')}</td>
+        <td className="hiza-orta">—</td>
+        <td className="hiza-orta">{r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}</td>
+        <td className="hiza-orta">
+          <span className={`rozet ${r.onayTarihi ? 'olumlu' : 'uyari'}`}>
+            {r.onayTarihi ? c('Raporlandı')
+              : r.cekimTarihi ? c('Rapor bekliyor')
+              : durum >= 2 ? c('Çekimde') : c('Sırada')}
+          </span>
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <div className="istem-sonuc">
+      {arac}
       {/* PANİK UYARISI EN ÜSTTE: hekimin görmesi gereken tek şey buysa,
-          tabloların arasında kaybolmamalı. */}
+          listenin arasında kaybolmamalı. */}
       {panikVar && (
         <div className="uyari-kutusu">
-          ⚠ Bu başvuruda PANİK DEĞER var — aşağıdaki tabloda ↑↑/↓↓ ile
-          işaretli satırlara bakın.
+          {c('⚠ Bu başvuruda PANİK DEĞER var — ilgili istem solda “Panik” ile işaretli.')}
         </div>
       )}
 
-      {/* İSTEM ÖZETİ (mockup muayene_karti.html "İstem & Sonuçlar" tablosu):
-          laboratuvar ve görüntüleme TEK listede - hekim için "istem" tek
-          kavramdır, modülü değil sonucu arar. Ayrıntı (tetkik satırları,
-          kültür, rapor) aşağıdaki kutularda kalır. */}
-      <div className="istem-ozet cerceve-yok">
-        {/* Butonlar GRIDIN ÜZERINDE, dış çerçeve YOK (kullanıcı). */}
-        <div className="muayene-arac" style={{ alignItems: 'center' }}>
-          {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>＋ İstem</button>}
-          <button type="button" className="d sil" title="Seçili istemi sil"
-            disabled={!secili} onClick={() => void sil()}>🗑</button>
-          <span className="not" style={{ marginLeft: 6 }}>
-            {veri.istemler.length + veri.radyoloji.length} istem · silmek için satırı seçin
-            (sonuçlanmış/çekilmiş silinemez)</span>
+      <div className="isn-iki">
+        <div className="isn-sol">
+          <table className="detay-tablo secilebilir">
+            <thead>
+              <tr>
+                <th>{c('Tür')}</th><th>{c('Tetkik / İşlem')}</th>
+                <th className="hiza-orta">{c('Aciliyet')}</th>
+                <th className="hiza-orta">{c('İstem')}</th>
+                <th className="hiza-orta">{c('Durum')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bagliKalemler.length > 0 && (
+                <tr className="isn-grup"><td colSpan={5}>{c('Bu muayenede istenen')}</td></tr>
+              )}
+              {bagliKalemler.map(satirCiz)}
+              {digerKalemler.length > 0 && (
+                <tr className="isn-grup"><td colSpan={5}>{c('Başvuruya gelen')}</td></tr>
+              )}
+              {digerKalemler.map(satirCiz)}
+            </tbody>
+          </table>
         </div>
+
+        <div className="isn-sag">
+          {!secKalem ? (
+            <p className="not ic">{c('Sonucunu görmek için soldan bir istem seçin.')}</p>
+          ) : secKalem.tur === 'lab'
+            ? <LabSonucPaneli istem={secKalem.ham} veri={veri}
+                onRapor={() => git(`/lab/rapor/${secKalem.id}`)}
+                onGordu={gordu} />
+            : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LabSonucPaneli({ istem: i, veri, onRapor, onGordu }: {
+  istem: Satir;
+  veri: { sonuclar: Satir[]; kulturler: Satir[]; vakalar: Satir[] };
+  onRapor: () => void;
+  onGordu: (bagId: number) => void;
+}) {
+  const istemId = Number(i.id);
+  const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === istemId);
+  const kultur = veri.kulturler.filter(k => Number(k.istemId) === istemId);
+  const vaka = veri.vakalar.filter(v => Number(v.istemId) === istemId);
+  const bagId = Number(i.bagId ?? 0);
+  const gorulen = i.hekimGordu ? tarihSaat(i.hekimGordu) : '';
+  const panik = satirlar.some(s => Number(s.panik ?? 0) === 1);
+  const sonOnay = satirlar.map(s => String(s.onayZamani ?? '')).filter(Boolean).sort().pop();
+
+  return (
+    <div className="kagrup">
+      <h6>
+        <b>{String(i.istemNo ?? '')}</b>
+        <span className="rozet">{ISTEM_DURUM[Number(i.durum ?? 1)] ?? ''}</span>
+        <span className="not">
+          {String(i.onayli ?? 0)}/{String(i.tetkik ?? 0)} {c('onaylı')}
+          {sonOnay ? ` · ${tarihSaat(sonOnay)}` : ''}
+        </span>
+        <span style={{ marginLeft: 'auto' }} />
+        {/* SONUÇ RAPORU: hastaya verilen belge - aynı istemin sayısal,
+            kültür ve genetik sonuçları tek kâğıtta. */}
+        <button className="d" onClick={onRapor}>{c('🖨 Sonuç Raporu')}</button>
+        {bagId > 0 && gorulen && <span className="rozet olumlu">{c('Görüldü')} · {gorulen}</span>}
+        {bagId > 0 && !gorulen && !panik && (
+          <button className="d bir" onClick={() => onGordu(bagId)}>{c('👁 Gördüm')}</button>
+        )}
+      </h6>
+
+      {satirlar.length > 0 && (
         <table className="detay-tablo">
           <thead>
             <tr>
-              <th>Tür</th><th>{c('Tetkik / İşlem')}</th><th className="hiza-orta">{c('Aciliyet')}</th>
-              <th>{c('Nerede')}</th><th className="hiza-orta">İstem</th>
-              <th className="hiza-orta">{c('Numune / Çekim')}</th>
-              <th>Sonuç</th><th className="hiza-orta">Durum</th>
+              <th>{c('Test')}</th><th className="sag">{c('Sonuç')}</th><th>{c('Birim')}</th>
+              <th>{c('Referans')}</th><th className="hiza-orta">{c('Bayrak')}</th>
+              <th className="hiza-orta">{c('Önceki')}</th>
             </tr>
           </thead>
           <tbody>
-            {veri.istemler.map(i => {
-              const istemId = Number(i.id);
-              const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === istemId);
-              const adlar = satirlar.slice(0, 3).map(s => String(s.ad ?? '')).join(', ');
-              const durum = Number(i.durum ?? 1);
-              const acil = Number(i.oncelik ?? 1) === 3;
-              const secli = secili?.tur === 'lab' && secili.id === istemId;
+            {satirlar.map((s, n) => {
+              const bayrak = String(s.bayrak ?? '');
+              const ref = String(s.referansMetin ?? '').trim() !== ''
+                ? String(s.referansMetin)
+                : (s.referansAlt !== null || s.referansUst !== null)
+                  ? `${sayiMetni(s.referansAlt)} – ${sayiMetni(s.referansUst)}`
+                  : '';
+              // SONUCU OLMAYAN SATIR DA GÖRÜNÜR: "bekleniyor" bilgisi
+              //   hekim için sonucun kendisi kadar önemlidir.
+              const bekliyor = !s.deger;
+              const satirPanik = Number(s.panik ?? 0) === 1;
+              const simdi = sayiyaCevir(s.deger);
+              const once = sayiyaCevir(s.onceki);
+              const yon = simdi !== null && once !== null && simdi !== once
+                ? (simdi > once ? ' ↑' : ' ↓') : '';
               return (
-                <tr key={`L${istemId}`} className={`secilebilir${secli ? ' secili' : ''}`}
-                  style={{ cursor: 'pointer', background: secli ? '#dbe8f7' : undefined }}
-                  onClick={() => setSecili({ tur: 'lab', id: istemId })}>
-                  <td>Lab</td>
+                <tr key={n} className={satirPanik ? 'panik' : ''}>
                   <td>
-                    <b>{String(i.istemNo ?? '')}</b>
-                    {adlar && <span className="sonuk"> · {adlar}
-                      {satirlar.length > 3 ? ` +${satirlar.length - 3}` : ''}</span>}
+                    {satirPanik ? <b>{String(s.ad ?? '')}</b> : String(s.ad ?? '')}
+                    <span className="not"> {String(s.kod ?? '')}</span>
+                    <span className="not">{' · '}{BOLUM[Number(s.bolum ?? 0)] ?? ''}</span>
                   </td>
-                  <td className="hiza-orta">
-                    {acil ? <span className="rozet hata">Acil</span> : '—'}
+                  <td className="sag">
+                    {bekliyor
+                      ? <span className="not">{c('sonuç bekleniyor')}</span>
+                      : <b className={satirPanik || bayrak === 'LL' || bayrak === 'HH' ? 'isn-vurgu' : ''}>
+                          {String(s.deger)}</b>}
                   </td>
-                  <td>Laboratuvar</td>
+                  <td>{String(s.birim ?? '')}</td>
+                  <td>{ref || '—'}</td>
                   <td className="hiza-orta">
-                    {i.istemTarihi ? tarihSaat(i.istemTarihi) : '—'}
+                    {satirPanik ? <span className="rozet hata">{c('PANİK')}</span>
+                      : bayrak === 'HH' || bayrak === 'LL' ? <span className="rozet hata">{bayrak}</span>
+                      : bayrak === 'H' || bayrak === 'L' ? <span className="rozet uyari">{bayrak}</span>
+                      : ''}
+                    {Number(s.deltaUyari ?? 0) === 1 && (
+                      <span className="not" title={c('Önceki sonuçtan belirgin sapma')}>{' '}Δ</span>
+                    )}
                   </td>
-                  {/* Numune zamanı istem SATIRINDA tutulur (tüp bazlı) -
-                      özet satırında tek bir zaman yok. */}
-                  <td className="hiza-orta sonuk">—</td>
-                  <td>{String(i.onayli ?? 0)}/{String(i.tetkik ?? 0)} onaylı</td>
-                  <td className="hiza-orta">
-                    <span className={`rozet ${durum === 5 ? 'olumlu'
-                                              : durum === 9 ? 'gri' : 'uyari'}`}>
-                      {ISTEM_DURUM[durum] ?? ''}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-            {veri.radyoloji.map(r => {
-              const durum = Number(r.durum ?? 0);
-              const sonuc = String(r.sonuc ?? '').trim();
-              const rid = Number(r.id);
-              const secli = secili?.tur === 'radyoloji' && secili.id === rid;
-              return (
-                <tr key={`R${String(r.id)}`} className={`secilebilir${secli ? ' secili' : ''}`}
-                  style={{ cursor: 'pointer', background: secli ? '#dbe8f7' : undefined }}
-                  onClick={() => setSecili({ tur: 'radyoloji', id: rid })}>
-                  <td>{c('Görüntüleme')}</td>
-                  <td>{String(r.tetkik ?? '')}</td>
-                  <td className="hiza-orta sonuk">—</td>
-                  <td>Radyoloji</td>
-                  <td className="hiza-orta sonuk">—</td>
-                  <td className="hiza-orta">
-                    {r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}
-                  </td>
-                  <td>{sonuc ? sonuc.slice(0, 80) : (r.onayTarihi ? 'rapor onaylı' : '—')}</td>
-                  <td className="hiza-orta">
-                    <span className={`rozet ${r.onayTarihi ? 'olumlu' : 'uyari'}`}>
-                      {r.onayTarihi ? 'Raporlandı'
-                        : r.cekimTarihi ? 'Rapor bekliyor'
-                        : durum >= 2 ? 'Çekimde' : 'Sırada'}
-                    </span>
+                  <td className="hiza-orta not"
+                    title={s.oncekiZamani ? tarihSaat(s.oncekiZamani) : undefined}>
+                    {s.onceki ? `${String(s.onceki)}${yon}` : '—'}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-      </div>
+      )}
 
-      {veri.istemler.map(i => {
-        const istemId = Number(i.id);
-        const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === istemId);
-        const kultur = veri.kulturler.filter(k => Number(k.istemId) === istemId);
-        const vaka = veri.vakalar.filter(v => Number(v.istemId) === istemId);
-        const bagId = Number(i.bagId ?? 0);
-        const gorulen = i.hekimGordu ? tarihSaat(i.hekimGordu) : '';
+      {kultur.map(k => (
+        <div className="ic" key={`k${k.id}`}>
+          <b>🦠 {String(k.tetkik ?? '')}:</b> {String(k.ozet ?? '')}
+          {Number(k.abSayisi ?? 0) > 0 && (
+            <span className="not"> · {String(k.abSayisi)} {c('antibiyotik raporlandı')}</span>
+          )}
+          {Number(k.kritik ?? 0) === 1 && (
+            <span className="rozet uyari" style={{ marginLeft: 6 }}>{c('Kritik')}</span>
+          )}
+          {String(k.onRapor ?? '').trim() !== '' && !k.onayZamani && (
+            <div className="not">{c('Ön rapor')}: {String(k.onRapor)}</div>
+          )}
+          {String(k.uzmanYorum ?? '').trim() !== '' && (
+            <div className="not">{String(k.uzmanYorum)}</div>
+          )}
+        </div>
+      ))}
 
-        return (
-          <div className="kagrup" key={istemId}>
-            <h6>
-              <b>{String(i.istemNo ?? '')}</b>
-              <span className="rozet">{ISTEM_DURUM[Number(i.durum ?? 1)] ?? ''}</span>
-              {Number(i.oncelik ?? 1) === 3 && <span className="rozet uyari">Acil</span>}
-              <span className="not">
-                {i.istemTarihi ? tarihSaat(i.istemTarihi) : ''}
-                {' · '}{String(i.onayli ?? 0)}/{String(i.tetkik ?? 0)} onaylı
-              </span>
-              <span style={{ marginLeft: 'auto' }} />
-              {/* SONUÇ RAPORU: hastaya verilen belge - aynı istemin sayısal,
-                  kültür ve genetik sonuçları tek kâğıtta. */}
-              <button className="d" onClick={() => git(`/lab/rapor/${istemId}`)}>{c('🖨 Sonuç Raporu')}</button>
-              {bagId > 0 && (gorulen
-                ? <span className="rozet olumlu">Görüldü · {gorulen}</span>
-                : <button className="d bir" onClick={() => void gordu(bagId)}>
-                    👁 Gördüm
-                  </button>)}
-            </h6>
+      {vaka.map(v => (
+        <div className="ic" key={`g${v.id}`}>
+          <b>🧬 {String(v.test ?? '')} ({String(v.vakaNo ?? '')}):</b>{' '}
+          {String(v.ozet ?? '')}
+          {Number(v.varyantSayisi ?? 0) > 0 && (
+            <span className="not"> · {String(v.varyantSayisi)} {c('varyant raporlandı')}</span>
+          )}
+          {String(v.oneriler ?? '').trim() !== '' && (
+            <div className="not">{c('Öneriler')}: {String(v.oneriler)}</div>
+          )}
+        </div>
+      ))}
 
-            {satirlar.length > 0 && (
-              <table className="detay-tablo">
-                <thead>
-                  <tr>
-                    <th>Tetkik</th><th>Sonuç</th><th>Birim</th><th>Referans</th>
-                    <th>{c('Değ.')}</th><th>Onay</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {satirlar.map((s, n) => {
-                    const bayrak = String(s.bayrak ?? '');
-                    const ref = String(s.referansMetin ?? '').trim() !== ''
-                      ? String(s.referansMetin)
-                      : (s.referansAlt !== null || s.referansUst !== null)
-                        ? `${sayiMetni(s.referansAlt)} – ${sayiMetni(s.referansUst)}`
-                        : '';
-                    // SONUCU OLMAYAN SATIR DA GÖRÜNÜR: "bekleniyor" bilgisi
-                    //   hekim için sonucun kendisi kadar önemlidir.
-                    const bekliyor = !s.deger;
-                    return (
-                      <tr key={n} className={Number(s.panik ?? 0) === 1 ? 'panik' : ''}>
-                        <td>
-                          {String(s.ad ?? '')}
-                          <span className="not"> {String(s.kod ?? '')}</span>
-                          <span className="not">
-                            {' · '}{BOLUM[Number(s.bolum ?? 0)] ?? ''}
-                          </span>
-                        </td>
-                        <td className="sag">
-                          {bekliyor
-                            ? <span className="not">sonuç bekleniyor</span>
-                            : <b>{String(s.deger)}</b>}
-                        </td>
-                        <td>{String(s.birim ?? '')}</td>
-                        <td>{ref || '—'}</td>
-                        <td className={bayrak === 'LL' || bayrak === 'HH' ? 'vurgu' : ''}>
-                          {BAYRAK[bayrak] ?? ''}
-                          {Number(s.deltaUyari ?? 0) === 1 && (
-                            <span className="not" title={c('Önceki sonuçtan belirgin sapma')}>
-                              {' '}Δ
-                            </span>
-                          )}
-                        </td>
-                        <td className="not">
-                          {s.onayZamani ? tarihSaat(s.onayZamani) : ''}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-
-            {kultur.map(k => (
-              <div className="ic" key={`k${k.id}`}>
-                <b>🦠 {String(k.tetkik ?? '')}:</b> {String(k.ozet ?? '')}
-                {Number(k.abSayisi ?? 0) > 0 && (
-                  <span className="not"> · {String(k.abSayisi)} antibiyotik raporlandı</span>
-                )}
-                {Number(k.kritik ?? 0) === 1 && (
-                  <span className="rozet uyari" style={{ marginLeft: 6 }}>Kritik</span>
-                )}
-                {String(k.onRapor ?? '').trim() !== '' && !k.onayZamani && (
-                  <div className="not">Ön rapor: {String(k.onRapor)}</div>
-                )}
-                {String(k.uzmanYorum ?? '').trim() !== '' && (
-                  <div className="not">{String(k.uzmanYorum)}</div>
-                )}
-              </div>
-            ))}
-
-            {vaka.map(v => (
-              <div className="ic" key={`g${v.id}`}>
-                <b>🧬 {String(v.test ?? '')} ({String(v.vakaNo ?? '')}):</b>{' '}
-                {String(v.ozet ?? '')}
-                {Number(v.varyantSayisi ?? 0) > 0 && (
-                  <span className="not"> · {String(v.varyantSayisi)} varyant raporlandı</span>
-                )}
-                {String(v.oneriler ?? '').trim() !== '' && (
-                  <div className="not">Öneriler: {String(v.oneriler)}</div>
-                )}
-              </div>
-            ))}
-          </div>
-        );
-      })}
-
-      {veri.radyoloji.length > 0 && (
-        <div className="kagrup">
-          <h6>{c('Görüntüleme')}</h6>
-          <table className="detay-tablo">
-            <thead>
-              <tr><th>Tetkik</th><th>Çekim</th><th>Rapor</th><th>Sonuç</th><th /></tr>
-            </thead>
-            <tbody>
-              {veri.radyoloji.map((r, n) => {
-                const bagId = Number(r.bagId ?? 0);
-                return (
-                  <tr key={n}>
-                    <td>{String(r.tetkik ?? '')}</td>
-                    <td>{r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}</td>
-                    <td>
-                      {String(r.raporNo ?? '') || (r.onayTarihi ? 'onaylı' : 'bekliyor')}
-                    </td>
-                    <td>{String(r.sonuc ?? '').slice(0, 160) || '—'}</td>
-                    <td>
-                      {bagId > 0 && (r.hekimGordu
-                        ? <span className="rozet olumlu">{c('Görüldü')}</span>
-                        : <button className="d" onClick={() => void gordu(bagId)}>
-                            👁 Gördüm
-                          </button>)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* PANİK TEYİDİ: "gördüm" işareti panikli istemde düz düğme değil,
+          sonucun hemen altında kırmızı şerit - atlanamayacak yerde. */}
+      {panik && bagId > 0 && !gorulen && (
+        <div className="isn-panik">
+          <span>⚠ {c('Panik değer — okunduğunu onaylayın')}</span>
+          <span style={{ marginLeft: 'auto' }} />
+          <button className="d" onClick={() => onGordu(bagId)}>{c('✔ Okudum, haberdarım')}</button>
         </div>
       )}
+    </div>
+  );
+}
+
+function RadyolojiPaneli({ r, onGordu }: { r: Satir; onGordu: (bagId: number) => void }) {
+  const bagId = Number(r.bagId ?? 0);
+  const sonuc = String(r.sonuc ?? '').trim();
+  return (
+    <div className="kagrup">
+      <h6>
+        <b>{String(r.tetkik ?? '')}</b>
+        <span className={`rozet ${r.onayTarihi ? 'olumlu' : 'uyari'}`}>
+          {r.onayTarihi ? c('Raporlandı') : r.cekimTarihi ? c('Rapor bekliyor') : c('Sırada')}
+        </span>
+        <span className="not">
+          {r.cekimTarihi ? `${c('çekim')} ${tarihSaat(r.cekimTarihi)}` : ''}
+          {String(r.raporNo ?? '') ? ` · ${String(r.raporNo)}` : ''}
+        </span>
+        <span style={{ marginLeft: 'auto' }} />
+        {bagId > 0 && (r.hekimGordu
+          ? <span className="rozet olumlu">{c('Görüldü')} · {tarihSaat(r.hekimGordu)}</span>
+          : <button className="d bir" onClick={() => onGordu(bagId)}>{c('👁 Gördüm')}</button>)}
+      </h6>
+      <div className="ic">
+        {sonuc || <span className="not">{r.onayTarihi ? c('Raporda sonuç bölümü yok.') : c('Rapor henüz onaylanmadı.')}</span>}
+      </div>
     </div>
   );
 }

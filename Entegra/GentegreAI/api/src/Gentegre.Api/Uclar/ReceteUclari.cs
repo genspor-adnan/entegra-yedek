@@ -363,8 +363,13 @@ public static class ReceteUclari
     private static async Task<List<string>> UyarilariTopla(VeriKaynagi veri, int hastaId,
         string barkod, CancellationToken iptal)
     {
+        // SINIF ESLESMESI (935): madde degil ayni ilac sinifi (ATC 3. duzey) -
+        //   ornegin penisilin alerjisinde amoksisilin. Metin ayri: hekim
+        //   "ayni madde" ile "capraz reaksiyon riski"ni ayirt etsin.
         var uyarilar = await veri.ListeAsync("""
-            select 'ALERJİ: ' || a.etken
+            select case when a.eslesme = 'sinif' then 'ALERJİ (aynı ilaç sınıfı): '
+                        else 'ALERJİ: ' end
+                 || coalesce(nullif(a.etken, ''), 'kayıtlı alerji')
                  || case a.siddet when 4 then ' (anafilaksi)' when 3 then ' (şiddetli)'
                                   when 2 then ' (orta)' else '' end
                  || case when a.reaksiyon <> '' then ' - ' || a.reaksiyon else '' end

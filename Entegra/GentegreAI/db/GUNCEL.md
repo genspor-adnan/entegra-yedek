@@ -176,7 +176,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hizmet_paket_kapsam` | `925_basvuru_istem_serbest_panel.sql` | — |
 | `fn_hizmet_puan` | `550_hizmet_kullanim_puani.sql` | — |
 | `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
-| `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
+| `fn_ilac_alerji_kontrol` | `935_ilac_alerji_sinif.sql` | 413_recete.sql, 414_metin_sadelestir.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_kamu_iskonto` | `407_sgk_ek4a_iskonto.sql` | — |

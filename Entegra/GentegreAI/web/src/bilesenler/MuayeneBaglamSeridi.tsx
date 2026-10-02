@@ -20,6 +20,23 @@ type Satir = Record<string, unknown>;
 
 const metin = (v: unknown) => String(v ?? '').trim();
 
+/**
+ * ŞERİTTE KISA AD (kullanıcı: "alerji/kronik ve ilaçlar çok yer kaplıyor"):
+ * ilaç/etken adının ilk rakamlı kelimeye kadarki kısmı, en çok iki kelime -
+ * "DEPOSİLİN 1.200.000 I.U. ENJEKSİYONLUK…" -> "DEPOSİLİN". Tam ad rozetin
+ * ipucunda ve tıklayınca açılan pencerede kalır.
+ */
+const kisaAd = (ad: string) => {
+  const kelimeler: string[] = [];
+  for (const k of ad.split(/\s+/).filter(Boolean)) {
+    if (/\d/.test(k) || kelimeler.length === 2) break;
+    kelimeler.push(k);
+  }
+  return kelimeler.join(' ') || ad;
+};
+/** Şeritte gösterilen en çok rozet; fazlası "+n". */
+const SERIT_ROZET = 3;
+
 const ZAMAN = (v: unknown, saatli: boolean) => {
   const d = v ? new Date(String(v)) : null;
   if (!d || Number.isNaN(d.getTime())) return '';
@@ -39,6 +56,32 @@ async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
     });
     return (y.satirlar ?? []) as Satir[];
   } catch { return [] }
+}
+
+/**
+ * KART BAŞLIĞINDA DOSYA + PROTOKOL NO (kullanıcı: teknik "sürüm" rozetinin
+ * yerine). Kart değerinde numaralar yok (kod alanları id tutar); şeritle
+ * aynı yoldan muayene listesinin tek satırı okunur.
+ */
+export function MuayeneBaslikNumaralari({ muayeneId }: { muayeneId: number }) {
+  const [no, setNo] = useState<{ dosya: string; protokol: string } | null>(null);
+  useEffect(() => {
+    if (!(muayeneId > 0)) { setNo(null); return }
+    let iptal = false;
+    void api.liste('muayene', { sayfa: 1, boyut: 1,
+      filtre: { alan: 'id', op: 'esit', deger: muayeneId } })
+      .then(y => {
+        const r = (y.satirlar?.[0] ?? null) as Satir | null;
+        if (!iptal) setNo(r ? { dosya: metin(r.dosyaNo), protokol: metin(r.protokolNo) } : null);
+      }).catch(() => { /* baslik zorunlu degil */ });
+    return () => { iptal = true };
+  }, [muayeneId]);
+  if (!no || (!no.dosya && !no.protokol)) return null;
+  return (
+    <span className="rozet gri" title={c('Dosya no · Protokol no')}>
+      {[no.dosya, no.protokol].filter(Boolean).join(' · ')}
+    </span>
+  );
 }
 
 export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
@@ -100,7 +143,6 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPencere(tur) }
     },
   } : {};
-  const protokol = metin(ust?.protokolNo);
   const bolum = metin(ust?.bolumAdi);
   const hekim = metin(ust?.hekimAdi);
   const cinsiyet = metin(ust?.cinsiyetKisa);
@@ -133,14 +175,8 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
             </span>
           )}
         </div>
-        {/* Dosya ve protokol numarasi ADIN ALTINDA (kullanici): ad satirini
-            uzatmiyor. ETIKETSIZ (kullanici): numaralarin bicimi kendini
-            soyluyor, "Dosya"/"Protokol" kelimeleri satiri sisiriyordu. */}
-        <div className="kb-ic sonuk">
-          {metin(ust?.dosyaNo) ? <span>{metin(ust?.dosyaNo)}</span> : null}
-          {protokol ? <span>· {protokol}</span> : null}
-          {!metin(ust?.dosyaNo) && !protokol ? <span>—</span> : null}
-        </div>
+        {/* Dosya ve protokol numarasi KART BASLIGINDA (kullanici: surum
+            rozetinin yerine) - MuayeneBaslikNumaralari. */}
         </div>
       </div>
 
@@ -149,25 +185,42 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
         {/* TIKLANINCA EKLE / DUZENLE (kullanici): hastanin alerji ve kronik
             tanilari muayeneden cikmadan girilir. */}
         <div className={`kb-kutu${hastaIdSerit > 0 ? ' kb-tikla' : ''}`} {...tikla('alerji')}>
-        <div className="kb-ic">
+        <div className="kb-ic kb-ozet">
           {/* ALERJİ YOKSA DA YAZILIR: boş kutu "bakılmadı" ile "yok"u
               ayırt ettirmez; mockup da "Alerji: yok" rozetini gösteriyor. */}
           {alerji.length === 0
             ? <span className={`rozet ${yuklendi ? 'olumlu' : 'gri'}`}>
                 {yuklendi ? 'Alerji: yok' : 'Alerji: …'}
               </span>
-            : alerji.slice(0, 4).map((a, i) => (
-                <span key={i} className="rozet hata"
-                      title={`${metin(a.turAdi)} · ${metin(a.reaksiyon)}`}>
-                  {metin(a.etken) || metin(a.etkenMadde) || 'Alerji'}
-                </span>
-              ))}
-          {kronik.slice(0, 4).map((k, i) => (
-            <span key={`k${i}`} className="rozet uyari" title={metin(k.icdKod)}>
-              {metin(k.taniAd) || metin(k.icdKod)}
-            </span>
-          ))}
-          {kronik.length > 4 && <span className="rozet gri">+{kronik.length - 4}</span>}
+            : alerji.slice(0, SERIT_ROZET).map((a, i) => {
+                const ad = metin(a.etken) || metin(a.etkenMadde) || 'Alerji';
+                return (
+                  <span key={i} className="rozet hata"
+                        title={`${ad} · ${metin(a.turAdi)} · ${metin(a.reaksiyon)}`}>
+                    {kisaAd(ad)}
+                  </span>
+                );
+              })}
+          {/* KRONİK: tanı ADI, KOD YOK (kullanıcı: "buralarda kod istemiyorum");
+              uzun ad rozet genişliğinde "…" ile kesilir, tamamı ipucunda.
+              Alerjilerle birlikte en çok SERIT_ROZET rozet; fazlası "+n". */}
+          {kronik.slice(0, Math.max(0, SERIT_ROZET - Math.min(alerji.length, SERIT_ROZET)))
+            .map((k, i) => (
+              <span key={`k${i}`} className="rozet uyari" title={metin(k.taniAd) || metin(k.icdKod)}>
+                {metin(k.taniAd) || metin(k.icdKod)}
+              </span>
+            ))}
+          {(() => {
+            const gizli = Math.max(0, alerji.length - SERIT_ROZET)
+              + Math.max(0, kronik.length - Math.max(0, SERIT_ROZET - Math.min(alerji.length, SERIT_ROZET)));
+            return gizli > 0 && (
+              <span className="rozet gri kb-fazla"
+                    title={[...alerji.map(a => metin(a.etken) || metin(a.etkenMadde)),
+                            ...kronik.map(k => metin(k.taniAd) || metin(k.icdKod))].join('\n')}>
+                +{gizli}
+              </span>
+            );
+          })()}
         </div>
         </div>
       </div>
@@ -175,21 +228,29 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       <div className="kb-hucre">
         <div className="kb-bas">{c('Aktif ilaçlar')}{hastaIdSerit > 0 ? <span className="kb-kalem" title="Düzenle" aria-label="Düzenle"> ✎</span> : null}</div>
         <div className={`kb-kutu${hastaIdSerit > 0 ? ' kb-tikla' : ''}`} {...tikla('ilac')}>
-        <div className="kb-ic">
+        <div className="kb-ic kb-ozet">
           {ilac.length === 0
             ? <span className={`rozet ${yuklendi ? 'olumlu' : 'gri'}`}>
                 {yuklendi ? 'Aktif ilaç: yok' : 'Aktif ilaç: …'}
               </span>
             : (
               <>
-                {/* AKTIF ILACLAR ROZET (kullanici): alerji / kronik ile ayni gorunum. */}
-                {ilac.slice(0, 4).map((x, i) => (
-                  <span key={i} className="rozet mavi kb-ilac" title={ilacAdi(metin(x.etkenMadde))}>
-                    {ilacAdi(metin(x.ilacAd))}
-                    {metin(x.doz) ? ` · ${metin(x.doz)}` : ''}
+                {/* KISA AD, DOZSUZ (kullanıcı: özet): tam ad + doz + etken ipucunda. */}
+                {ilac.slice(0, SERIT_ROZET).map((x, i) => {
+                  const ad = ilacAdi(metin(x.ilacAd));
+                  return (
+                    <span key={i} className="rozet mavi kb-ilac"
+                          title={[ad, metin(x.doz), ilacAdi(metin(x.etkenMadde))].filter(Boolean).join(' · ')}>
+                      {kisaAd(ad)}
+                    </span>
+                  );
+                })}
+                {ilac.length > SERIT_ROZET && (
+                  <span className="rozet gri kb-fazla"
+                        title={ilac.slice(SERIT_ROZET).map(x => ilacAdi(metin(x.ilacAd))).join('\n')}>
+                    +{ilac.length - SERIT_ROZET}
                   </span>
-                ))}
-                {ilac.length > 4 && <span className="rozet gri">+{ilac.length - 4}</span>}
+                )}
               </>
             )}
         </div>
@@ -212,7 +273,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
              onKeyDown={e => {
                if (onBugun && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onBugun() }
              }}>
-        <div className="kb-ic">
+        <div className="kb-ic kb-tek" title={[bolum, hekim, bas ? `${bas} – ${bit || "…"}` : ""].filter(Boolean).join(" · ")}>
           {bolum ? <span>{bolum}</span> : null}
           {hekim ? <span className="sonuk">· {hekim}</span> : null}
           {/* "n sonuc bekliyor" GOSTERILMEZ (kullanici): bekleyen istemler

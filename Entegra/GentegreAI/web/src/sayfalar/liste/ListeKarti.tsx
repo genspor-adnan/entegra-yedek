@@ -3,7 +3,7 @@ import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/LabMikroOzet';
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
-import { MuayeneBaglamSeridi } from '../../bilesenler/MuayeneBaglamSeridi';
+import { MuayeneBaglamSeridi, MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneSonucOzeti } from '../../bilesenler/MuayeneSonucOzeti';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
@@ -340,14 +340,21 @@ export function ListeKarti({
         // DURUM BASLIKTA ROZET (kullanici): alan izgarasinda kutu tutmak
         //   yerine kartin ustunde - hasta/protokol/tarih bilgisi zaten
         //   baglam seridinde, izgara yalnizca YAZILAN alanlara kaliyor.
+        // SURUM YERINE DOSYA + PROTOKOL NO (kullanici): numaralar hasta
+        //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
+        surumGizli={tanim.kaynak === 'muayene'}
         baslikEk={tanim.kaynak === 'muayene'
           ? (d) => {
               const kod = String(d.durum ?? '');
               const ad = MUAYENE_DURUM[kod] ?? '';
-              if (!ad) return null;
               const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri'
                           : kod === '2' ? 'uyari' : 'mavi';
-              return <span className={`rozet ${sinif}`}>{ad}</span>;
+              return (
+                <>
+                  <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
+                  {ad && <span className={`rozet ${sinif}`}>{ad}</span>}
+                </>
+              );
             }
           // LAB ISTEM NUMARASI BASLIKTA (kullanici: "kaydedince otomatik
           //   olsun, duzenle diye girince baslikta gorsun"). Numara artik

@@ -834,6 +834,10 @@ istenen tetkik de o hastanın o başvurusuna aittir ve hekimi ilgilendirir.
 Bağ satırı olmayan istemlerde "Gördüm" düğmesi çıkmaz (işaretlenecek bir bağ
 yoktur), sonuçlar yine görünür.
 
+**Önceki değer** (`sonuclar[].onceki`, `oncekiZamani`): aynı hastanın aynı
+tetkikinin bu istemden önceki son **onaylı** sonucu; yoksa `null`. Hekim
+eğilimi kümülatif ekrana gitmeden görür.
+
 **Yalnız ONAYLI sonuçlar** döner; onaylanmamış tetkik "sonuç bekleniyor"
 olarak listelenir — eksikliğin kendisi de hekim için bilgidir.
 

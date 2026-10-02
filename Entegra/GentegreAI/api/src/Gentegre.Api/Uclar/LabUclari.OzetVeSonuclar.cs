@@ -165,19 +165,35 @@ public static partial class LabUclari
             // SONUÇ SATIRLARI: yalnız ONAYLI olanlar. Onaylanmamış değeri
             //   hekime göstermek, laboratuvarın henüz doğrulamadığı bir
             //   sayıya göre tedavi başlatılmasına yol açar.
+            //
+            // ÖNCEKİ DEĞER: aynı hastanın aynı tetkikinin bu istemden ÖNCEKİ
+            //   son onaylı sonucu - hekim "128'den 142'ye çıktı" bilgisini
+            //   kümülatif ekrana gitmeden görsün. Onaysız önceki değer de
+            //   gösterilmez (yukarıdaki kuralın aynısı).
             var sonuclar = await veri.ListeAsync("""
                 select s.istem_id as "istemId", t.kod, t.ad, t.bolum, t.tur as "tetkikTur",
                        ls.deger_metin as deger, ls.birim, ls.bayrak, ls.panik,
                        ls.delta_uyari as "deltaUyari", ls.referans_alt as "referansAlt",
                        ls.referans_ust as "referansUst", ls.referans_metin as "referansMetin",
                        ls.olcum_zamani as "olcumZamani", ls.onay_zamani as "onayZamani",
-                       ls.yorum, s.durum as "satirDurum"
+                       ls.yorum, s.durum as "satirDurum",
+                       onc.deger_metin as onceki, onc.onay_zamani as "oncekiZamani"
                   from public.lab_istem_satir s
+                  join public.lab_istem ci on ci.id = s.istem_id
                   join public.lab_tetkik t on t.id = s.tetkik_id
                   left join lateral (
                         select * from public.lab_sonuc x
                          where x.istem_satir_id = s.id and x.durum = 3
                          order by x.id desc limit 1) ls on true
+                  left join lateral (
+                        select x2.deger_metin, x2.onay_zamani
+                          from public.lab_istem i3
+                          join public.lab_istem_satir s3 on s3.istem_id = i3.id
+                          join public.lab_sonuc x2 on x2.istem_satir_id = s3.id
+                         where i3.taraf_id = ci.taraf_id and i3.durum <> 9
+                           and i3.id <> ci.id and i3.istem_tarihi < ci.istem_tarihi
+                           and s3.tetkik_id = s.tetkik_id and x2.durum = 3
+                         order by i3.istem_tarihi desc, x2.id desc limit 1) onc on true
                  where s.durum <> 0
                    and s.istem_id in (
                         select i2.id from public.lab_istem i2

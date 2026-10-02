@@ -151,8 +151,13 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
 
   const oneriSec = (r: ListeSatiri) => {
     const madde = metin(r.etkenMadde);
-    // Etken madde seçildiyse (ad = madde) etkene madde yazılır, marka seçildiyse marka.
-    setD(o => ({ ...o, etken: metin(r.ad), etkenMadde: madde || o.etkenMadde }));
+    // MADDE İLE ARANDIYSA ETKEN = MADDE (kullanıcı: "penisilin" yazıp DEVAPEN'i
+    //   seçti, Etken'e DEVAPEN geldi). Alerji maddeye karşıdır; marka yalnız
+    //   kullanıcı MARKA ADIYLA aradıysa yazılır. Etken madde her durumda dolar.
+    const a = aramaMetni.trim().toLocaleLowerCase('tr');
+    const markaIleArandi = metin(r.ad).toLocaleLowerCase('tr').includes(a);
+    const etken = !markaIleArandi && madde ? madde : metin(r.ad);
+    setD(o => ({ ...o, etken, etkenMadde: madde || o.etkenMadde }));
     setAtc(metin(r.atcKod));
     setAramaMetni('');
     setOneriler([]);

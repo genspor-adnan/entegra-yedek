@@ -6,6 +6,8 @@ import { KronikTaniKarti } from './hasta/KronikTaniKarti';
 import { IlacKaydiKarti } from './hasta/IlacKaydiKarti';
 import { GecmisOlayKarti } from './hasta/GecmisOlayKarti';
 import type { ListeSatiri } from '../api/sozlesme';
+import { api } from '../api/istemci';
+import { guvenli, mesaj, onay } from './mesaj';
 import { c } from '../dil/ceviri';
 
 /**
@@ -41,6 +43,18 @@ export function HastaKayitPenceresi({ baslik, hastaId, hastaAdi, muayeneId, bolu
                                     varsayilan?: Record<string, number | string | boolean> } | null>(null);
   const [tazele, setTazele] = useState(0);
   const kartKapandi = () => { setKart(null); setTazele(t => t + 1); onDegisti() };
+  // SİL (kullanıcı: "gridlere silme butonları da ekle"): yanlış girilmiş kayıt
+  //   için. Yetki ve log (silmeden ÖNCE tam satır) sunucuda; ekran onay ister.
+  //   İyileşen kronik / bırakılan ilaç için silme değil kartta "pasif" doğru
+  //   yoldur - onay metni bunu söyler.
+  const sil = (b: HastaKayitBolumu, s: ListeSatiri) => guvenli(async () => {
+    if (!await onay(c('Seçili kayıt silinecek. Yalnız yanlış girilmiş kayıt için kullanın; geçerliliği biten kayıt kartta pasif yapılır. Onaylıyor musunuz?'), true)) return;
+    await api.kartSil(b.kaynak, Number(s.id));
+    mesaj(c('Kayıt silindi.'));
+    setSecili(m => ({ ...m, [b.kaynak]: null }));
+    setTazele(t => t + 1);
+    onDegisti();
+  });
   // SABIT FILTRE NESNESI SABIT: her cizimde yeni nesne GenGrid'i yeniden yukletir.
   const filtre = useMemo(() => ({ alan: 'hastaId', op: 'esit' as const, deger: hastaId }), [hastaId]);
 
@@ -63,6 +77,10 @@ export function HastaKayitPenceresi({ baslik, hastaId, hastaAdi, muayeneId, bolu
                           aria-label={c('Düzenle')}
                           title={s ? c('Seçili kaydı düzenle') : c('Önce satır seçin')}
                           onClick={() => s && setKart({ kaynak: b.kaynak, id: Number(s.id) })}>✎</button>
+                  <button type="button" className="d sil ikon-dugme" disabled={!s}
+                          aria-label={c('Sil')}
+                          title={s ? c('Seçili kaydı sil') : c('Önce satır seçin')}
+                          onClick={() => s && void sil(b, s)}>🗑</button>
                 </span>
                 <h6>{b.baslik}</h6>
               </div>

@@ -2132,7 +2132,8 @@ input.skt-gecmis {
 /* MUAYENE > ISTEM & SONUCLAR (443): kart sekmesinin icinde duran sonuc
    paneli. Kutu ve tablo bicimi ORTAK (.kagrup + .detay-tablo); burada
    yalnizca sekme icindeki bosluk ayarlanir. */
-.istem-sonuc { margin-top: 10px }
+/* Arac cubugu sekme cubuguna yakin (kullanici: "ustte fazla bosluk"): zeminin 10px ust dolgusu bu sekmede geri alinir. */
+.istem-sonuc { margin-top: -10px }
 .istem-sonuc .kagrup { margin-bottom: 10px }
 .istem-sonuc .kagrup > h6 { flex-wrap: wrap; gap: 6px }
 .istem-sonuc .kagrup > h6 .d { height: 20px; font-size: 11px }
@@ -6179,3 +6180,60 @@ textarea.fm-giris { resize: vertical }
 .ms-fieldset { border: 0; margin: 0; padding: 0; min-width: 0 }
 .ms-fieldset[disabled] input, .ms-fieldset[disabled] select { background: var(--yuz2) }
 .ms-salt { margin: 8px 10px 0 }
+
+/* MUAYENE › İSTEM & SONUÇLAR iki panel (mockup muayene_karti_v2.html):
+   solda istem listesi, sağda seçili istemin sonucu. `.istem-sonuc
+   .detay-tablo`nun calc genişliği/kenar boşluğu panel içinde taşırdı -
+   burada sıfırlanır (kural sonra geldiği için kazanır). */
+.isn-iki { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px; align-items: start; margin-top: 8px }
+@media (max-width: 1100px) { .isn-iki { grid-template-columns: 1fr } }
+.isn-iki .detay-tablo { width: 100%; margin: 0 }
+.isn-iki .kagrup { margin: 0 }
+.isn-iki .kagrup .detay-tablo { border-left: 0; border-right: 0 }
+.isn-iki td.isn-ad { white-space: normal }
+.isn-iki tr.isn-grup td { background: var(--yuz2); color: var(--soluk);
+  font-weight: 700; font-size: 11px; cursor: default }
+.isn-iki .isn-vurgu { color: var(--hata) }
+.isn-panik { display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  background: var(--hatazem); color: var(--hata); border-top: 1px solid var(--hatakenar);
+  font-weight: 700; font-size: 11.5px }
+
+/* BAGLAM SERIDI OZET (kullanici: "alerji/kronik ve ilaclar cok yer
+   kapliyor"): bu iki kutu TEK SATIR - rozet kisa ad, sigmayan "…" ile
+   kesilir, "+n" hep gorunur. Tam liste ipucunda ve tiklayinca pencerede. */
+.kart-baglam .kb-ozet { flex-wrap: nowrap; overflow: hidden; line-height: 1.4 }
+.kart-baglam .kb-ozet .rozet { min-width: 0; max-width: 140px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto }
+.kart-baglam .kb-ozet .kb-fazla { flex: 0 0 auto; max-width: none }
+.kart-baglam .kb-ozet .kb-ilac + .kb-ilac::before { content: none }
+/* Baglam seridi kutulari ACIK GRI (kullanici: "hasta bilgileri baslikta beyaz
+   zemini de acik gri yap"); tiklanir kutuda hover bir ton koyu. */
+.kart-baglam .kb-kutu { background: var(--yuz2) }
+.kart-baglam .kb-kutu.kb-tikla:hover { background: var(--cizgi2) }
+/* Gri kutular ICERIK YUKSEKLIGINDE (kullanici: "satir yuksekligine gore"):
+   kutu hucreyi doldurmaz - tek satirlik kutu tek satir boyu kalir, yalniz
+   iki satirlik "Bugun" uzun. */
+.kart-baglam .kb-hucre > .kb-kutu { flex: none }
+/* Pembe hucre de ICERIKTE biter (kullanici: "hasta adinin altindan bitebilir"):
+   hucreler satir boyunca uzamaz, yalniz iki satirlik "Bugun" uzun kalir. */
+.kart-baglam { align-items: start }
+/* "Bugun" TEK SATIR (kullanici: "tarih de ust satirdan devam etsin"): sigmayan
+   kisim "…" ile kesilir, tamami ipucunda. */
+.kart-baglam .kb-tek { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.kart-baglam .kb-tek > span + span { margin-left: 4px }
+/* Pembe hucreler TEK SERIT (kullanici: "pembe kutularin aralarini birlestir"):
+   aralik yok, yuvarlak kose yalniz iki uçta. Pencere (modal) da bu div'in
+   cocugu oldugu icin :last-child degil sira numarasi kullanilir. */
+.kart-baglam { gap: 0 }
+.kart-baglam .kb-hucre { border-radius: 0; align-self: stretch }
+.kart-baglam .kb-hucre:nth-child(1) { border-radius: 8px 0 0 8px }
+.kart-baglam .kb-hucre:nth-child(4) { border-radius: 0 8px 8px 0 }
+/* Serit zemini de PEMBE (kullanici): hucre ile cevre ayni renk, kenar bosluk
+   gorunmez - tum serit tek pembe bant. */
+.kart-baglam { background: #fbe4e1 }
+/* Pembe bant INCE (kullanici: "kalin, ust ve alttan kirp"): serit, hucre ve
+   kutu dolgulari dusuruldu. */
+.kart-baglam { padding: 2px 10px }
+.kart-baglam .kb-hucre { padding: 4px 8px 6px }
+.kart-baglam .kb-kutu { padding: 2px 8px }
