@@ -144,7 +144,11 @@ interface Props {
                                  ekleGizli?: boolean;
                                  /** "＋" bu işlevi çağırır (satır ekleme yerine) -
                                      ör. tanıda ICD arama penceresi. */
-                                 yeni?: () => void }>;
+                                 yeni?: () => void;
+                                 /** Sütun başlığının sağına içerik (alan adıyla). */
+                                 kolonBaslikEk?: Record<string, React.ReactNode>;
+                                 /** Önerili kutu: alan -> öneri listesi kolonu. */
+                                 oneri?: Record<string, string> }>;
   /**
    * DETAY SEKMESI GRID YERINE TEK KAYIT IZGARASI: en ustteki satir (detayin
    * kendi siralamasina gore SONUNCU olcum) mockup'taki gibi etiket + kutu
@@ -245,6 +249,11 @@ export interface EkSekmeBaglami {
   meta: KartMetaYaniti | null;
   /** Detay sekmesindeki satir adedi (ör. panelde kac antibiyotik var). */
   detaySayisi(ad: string): number;
+  /** Detayin guncel satirlari (or. muayene ozetinde son vital olcumu). */
+  detaySatirlari(ad: string): Record<string, Deger>[];
+  /** Basligi verilen metinle BASLAYAN sekmeye gecer (ozet kutusundan
+      "Tani"ya, "e-Recete"ye...). Bulamazsa bir sey yapmaz. */
+  sekmeyeGit(baslikBasi: string): void;
 }
 
 /**
@@ -1819,6 +1828,11 @@ Yine de yeni kayıt eklensin mi?`);
         && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz({
              deger, meta,
              detaySayisi: ad => detaylar[ad]?.guncel.length ?? 0,
+             detaySatirlari: ad => (detaylar[ad]?.guncel ?? []) as Record<string, Deger>[],
+             sekmeyeGit: b => {
+               const s = sekmeler.find(x => x.baslik.startsWith(b));
+               if (s) setAktifSekme(s.anahtar);
+             },
            })}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (

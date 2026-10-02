@@ -4,8 +4,9 @@ import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/LabMikroOzet';
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaglamSeridi, MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
+import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
+import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
-import { MuayeneSonucOzeti } from '../../bilesenler/MuayeneSonucOzeti';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import {
   useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi,
@@ -114,6 +115,11 @@ export function ListeKarti({
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
   // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
   const [ozetModal, setOzetModal] = useState<number | null>(null);
+  /** Vucut semasi penceresi (Sablon Muayene sekmesi). */
+  const [vucutAcik, setVucutAcik] = useState(false);
+  /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
+      listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
+  const [kayitSayaci, setKayitSayaci] = useState(0);
   const { aksiyonVar } = useOturum();
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
@@ -202,52 +208,16 @@ export function ListeKarti({
             // MAKRO: bütün muayene sekmelerinde kısayol + boşluk metne açılır.
             <div className="muayene-sekme-zemin"
                  onKeyDownCapture={e => makroTusu(e, makrolar, parcalar?.alanDegistir)}>{
-              // "Muayene" (eski adı Anamnez - yeniden başlatılmamış API).
-              (baslik === 'Muayene' || baslik.includes('Anamnez'))
-                // MUAYENE IKI PANEL (kullanici): SOLDA sikayet/hikaye ve ALTINDA
-                //   RECETE gridi ("sikayet hikaye altina recete gridini tasi");
-                //   SAGDA TANI gridi, altinda bugunun sonuclari ("tani gridini
-                //   saga sonuc gridi uzerine al"). Hekim yazarken tani ve
-                //   receteyi ayni ekranda gorur.
-                ? (
-                  <div className="muayene-ikili">
-                    <div className="mi-sol">
-                      {/* DIKTE KAYNAGI: basliktaki 🎤 Dikte bu sekmenin GUNCEL
-                          alan okuyucu/yazicisini kullanir (ref her cizimde
-                          tazelenir). Cizime bir sey eklemez. */}
-                      {(() => {
-                        if (parcalar) dikteKaynak.current = {
-                          oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
-                        return null;
-                      })()}
-                      {/* Sikayet/hikaye · RECETE · Degerlendirme/Plan + Cikis
-                          sekli (kullanici: "recete altina tasi"). */}
-                      {parcalar ? parcalar.altGrupCiz('') : icerik}
-                      <MuayeneReceteSekmesi
-                        veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
-                        muayeneId={Number(kartId)}
-                        tazele={() => setKartTazele(t => t + 1)} />
-                      {parcalar?.altGrupCiz('Değerlendirme')}
-                    </div>
-                    <div className="mi-sag">
-                      {parcalar?.tablolar.tanilar}
-                      <MuayeneSonucOzeti muayeneId={Number(kartId)} />
-                    </div>
-                  </div>
-                )
+              // "MUAYENE" SEKMESI KALDIRILDI (kullanici 02.10.2026): alanlari Sablon
+              //   Muayene'de, tani Tani (ICD-10)'da, recete e-Recete'de, ozet ilk
+              //   sekmede (MuayeneOzetSekmesi).
                 // "Vital Bulgular" (eski adi "Tani (ICD-10)" - yeniden
                 //   baslatilmamis API icin tanınır).
-                : (baslik === 'Vital Bulgular' || baslik.startsWith('Tanı')) ? (
-                  // VITAL BULGULAR TANI SEKMESINDE (kullanici: "vital bulgulari
-                  //   tani sekmesine tasi"): solda degerlendirme/plan/cikis,
-                  //   sagda muayenenin SON olcumu - duzenlenebilir izgara.
-                  //   Sira mockup: tansiyon/nabiz/SpO2 · ates/solunum/agri ·
-                  //   boy-kilo/BKI/bel.
-                  <div className="muayene-ikili">
-                    <div className="mi-sol">{icerik}</div>
-                    <div className="mi-sag">{izgaraCiz?.('vitaller')}</div>
-                  </div>
-                )
+                // TANI (ICD-10) SEKMESI (kullanici: eski haline): tani gridi
+                //   ustte + e-Nabiz gonderim bilgisi. Vital izgarasi Sablon
+                //   Muayene sekmesinde. "Vital Bulgular" yeniden baslatilmamis
+                //   API icin taninir.
+                (baslik === 'Vital Bulgular' || baslik.startsWith('Tanı')) ? icerik
                 : baslik === 'Rapor' ? (
                   // MOCKUP RAPOR ARAC CUBUGU: rapor ekleme grid basliginda,
                   //   imza SUNUCU ucunda (eksik rapor reddedilir).
@@ -301,22 +271,60 @@ export function ListeKarti({
                         yaslı. */}
                     {sablonMuayeneMi(baslik) && (
                       <>
-                        <div className="muayene-arac">
-                          <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.normal',
-                                                              { id: Number(kartId) })}>
-                            ☑ Tümü normal işaretle
-                          </button>
-                          <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.sablon',
-                                                              { id: Number(kartId) })}>
-                            📋 Şablon Uygula
-                          </button>
-                          {/* Bölüme uygun hazır şablon rozeti - basınca uygular. */}
-                          <MuayeneSablonRozeti muayeneId={Number(kartId)}
-                            onUygulandi={() => setKartTazele(t => t + 1)} />
+                        {/* TUMU NORMAL · SABLON UYGULA · SABLON ROZETI artik bulgu
+                            gridinin "Bulgu" basliginin SAGINDA (kullanici) -
+                            detayGrupta.bulgular.kolonBaslikEk. */}
+                        {/* VITAL SAGDA (kullanici: "vital bulgulari sablon
+                            muayeneye al"; mockup muayene_karti_v2): solda
+                            fizik muayene, sagda muayenenin SON olcumu -
+                            duzenlenebilir izgara, gecmis olcumler altta. */}
+                        {/* SIKAYET / HIKAYE / PLAN DA BURADA (kullanici: "sikayet/
+                            hikayeyi de diger tarafa al"; mockup muayene_karti_v2):
+                            solda Anamnez · fizik muayene · Degerlendirme, sagda
+                            vital. Ilk sekme derlenmis "Muayene Özeti". */}
+                        <div className="muayene-ikili msb-ikili">
+                          <div className="mi-sol">
+                            {/* DIKTE KAYNAGI: basliktaki Dikte bu sekmenin GUNCEL
+                                alan okuyucu/yazicisini kullanir. Cizime bir sey eklemez. */}
+                            {(() => {
+                              if (parcalar) dikteKaynak.current = {
+                                oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
+                              return null;
+                            })()}
+                            {parcalar?.altGrupCiz('Anamnez')}
+                            {/* FIZIK MUAYENE DUGMELERI GRIDIN HEMEN USTUNDE (kullanici). */}
+                            <div className="muayene-arac mfz-arac">
+                              <button type="button" className="d"
+                                      onClick={() => void aksiyon('muayene.normal', { id: Number(kartId) })}>
+                                ☑ {c('Tümü normal işaretle')}
+                              </button>
+                              <button type="button" className="d"
+                                      onClick={() => void aksiyon('muayene.sablon', { id: Number(kartId) })}>
+                                📋 {c('Şablon Uygula')}
+                              </button>
+                              {/* Bölüme uygun hazır şablon rozeti - basınca uygular. */}
+                              <MuayeneSablonRozeti muayeneId={Number(kartId)}
+                                onUygulandi={() => setKartTazele(t => t + 1)} />
+                              {/* Vucut semasi SAGA YASLI (kullanici). */}
+                              <button type="button" className="d" style={{ marginLeft: 'auto' }}
+                                      onClick={() => setVucutAcik(true)}>
+                                🧍 {c('Vücut şeması')}
+                              </button>
+                            </div>
+                            {vucutAcik && (
+                              <VucutSemasi muayeneId={Number(kartId)}
+                                onKapat={() => setVucutAcik(false)}
+                                onKaydedildi={() => setKartTazele(t => t + 1)} />
+                            )}
+                            <div className="mfz-tek-satir">{parcalar?.tablolar.bulgular ?? icerik}</div>
+                          </div>
+                          {/* DEGERLENDIRME / PLAN + CIKIS SAGDA, vitalin altinda: bulgu
+                              tablosu uzun, altta kalsa kaydirmadan gorunmuyordu. */}
+                          <div className="mi-sag">
+                            {izgaraCiz?.('vitaller')}
+                            {parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
+                          </div>
                         </div>
-                        <div className="mfz-tek-satir">{icerik}</div>
                       </>
                     )}
                     {/* ISTEM & SONUCLAR (mockup): BAG GRIDI CIZILMEZ - hedef
@@ -409,8 +417,22 @@ export function ListeKarti({
                ciz: baglam => <LabMikroOzet kaynak={tanim.kaynak} baglam={baglam} /> }]
           : tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
           ? [
-              // e-RECETE AYRI SEKME DEGIL: Muayene sekmesinde sikayet/hikaye
-              //   altinda (kullanici).
+              // MUAYENE OZETI ILK SEKME (kullanici, mockup muayene_karti_v2):
+              //   yazilanin derlenmis gorunumu + tamamlama kontrolu.
+              { anahtar: 'ozel:ozet', baslik: 'Muayene Özeti',
+                ciz: baglam => (
+                  <MuayeneOzetSekmesi baglam={baglam} muayeneId={Number(kartId)}
+                    sekme={sekmeVerisi.veri} tazele={kartTazele * 1000 + kayitSayaci} />
+                ) },
+              // e-RECETE YINE AYRI SEKME (kullanici 02.10.2026: "recete
+              //   sekmesini geri getir") - Muayene sekmesinden alindi.
+              { anahtar: 'ozel:recete', baslik: 'e-Reçete',
+                ciz: () => (
+                  <MuayeneReceteSekmesi
+                    veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
+                    muayeneId={Number(kartId)}
+                    tazele={() => setKartTazele(t => t + 1)} />
+                ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },
@@ -631,6 +653,7 @@ export function ListeKarti({
         onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);
+          setKayitSayaci(t => t + 1);
           // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat
           //   geldigi ekrana doner; kart yoluna ara gecis gereksiz gecmis birakirdi.
           // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.

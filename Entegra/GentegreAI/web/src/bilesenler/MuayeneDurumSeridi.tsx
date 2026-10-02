@@ -56,12 +56,23 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
   const tamamlandi = sayi(satir.durum) === 2;
   // `uyari` SUNUCUDA hesaplanir (panik sonuc / alerji / tanisiz / sonuc geldi)
   //   ve listede de ayni kolon gosterilir - iki yerde iki kural olmasin.
-  const uyari = String(satir.uyari ?? '').trim();
+  // BANT UYARISI ALERJISIZ (kullanici: alerji bilgisi ustteki seritte zaten var).
+  const uyari = String(satir.uyariBant ?? '').trim();
+  // OZET ROZETLERI (kullanici: ozet sekmesindeki vital/ana tani/recete/karar
+  //   kutulari bu banda rozet oldu). Metinler sunucudan hazir gelir.
+  const vital = String(satir.sonVital ?? '').trim();
+  const ilac = sayi(satir.receteIlac);
+  const imzasiz = sayi(satir.receteImzasiz) > 0;
+  const cikisHam = String(satir.cikisSekliAdi ?? '').trim().toLocaleLowerCase('tr');
+  const cikis = cikisHam ? cikisHam.charAt(0).toLocaleUpperCase('tr') + cikisHam.slice(1) : '';
 
   return (
     <div className="muayene-uyari muayene-durum">
+      <span className={`rozet ${vital ? 'mavi' : 'gri'}`} title="Son vital ölçüm">
+        {vital ? `Vital: ${vital}` : 'Vital ölçüm yok'}
+      </span>
       {/* ANA TANI ZORUNLU: e-Nabız 103 paketi ve provizyon onu bekler. */}
-      <span className={anaTani ? 'rozet olumlu' : 'rozet uyari'}>
+      <span className={anaTani ? 'rozet olumlu' : 'rozet uyari'} title={anaTani || undefined}>
         {anaTani ? `Ana tanı: ${anaTani}` : 'Ana tanı girilmedi'}
       </span>
       {tani > 1 && <span className="sonuk">{tani} tanı</span>}
@@ -73,16 +84,18 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
         </span>
       )}
       {bekleyen > 0 && <span className="rozet uyari">{bekleyen} sonuç bekliyor</span>}
+      {ilac > 0 && (
+        <span className={`rozet ${imzasiz ? 'uyari' : 'olumlu'}`}>
+          Reçete: {ilac} ilaç{imzasiz ? ' · imzasız' : ''}
+        </span>
+      )}
+      {cikis && <span className="rozet gri" title="Çıkış şekli">Karar: {cikis}</span>}
       {/* Sure de ROZET (kullanici): banttaki diger olculer rozet, sure duz
           metin kaldigi icin bandin ortasinda kayboluyordu. */}
       {gecen && (
         <span className="rozet gri">{tamamlandi ? 'süre' : 'açık'} {gecen}</span>
       )}
-      <span className="sonuk">
-        {tamamlandi
-          ? 'Tamamlandı → başvuru tahakkuka düştü'
-          : 'Tamamla → başvuru tahakkuk · e-Nabız paketi'}
-      </span>
+      {/* "Tamamla → tahakkuk" aciklamasi kaldirildi (kullanici): bant tek satir kalsin. */}
     </div>
   );
 }

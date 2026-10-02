@@ -10,6 +10,37 @@
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>
+    /// Muayene satirinin TEK uyarisi (oncelik: panik · alerji · tanisiz ·
+    /// sonuc geldi). Listede tum dallar; muayene kartinin bilgi bandinda
+    /// alerji dali yok (alerji baglam seridinde zaten gorunuyor).
+    /// </summary>
+    private static string UyariSql(bool alerjiDahil) => """
+        case
+          when exists (
+            select 1 from public.lab_istem li
+              join public.lab_istem_satir ls on ls.istem_id = li.id
+              join public.lab_sonuc so on so.istem_satir_id = ls.id
+             where li.belge_id = m.belge_id and so.panik = 1)
+            then 'PANİK sonuç'
+        """ + (alerjiDahil ? """
+          when exists (
+            select 1 from public.hasta_alerji al
+             where al.hasta_id = m.taraf_id and coalesce(al.aktif, 1) = 1)
+            then 'Alerji kaydı var'
+        """ : "") + """
+          when m.durum = 3 and not exists (
+            select 1 from public.tani ta where ta.muayene_id = m.id)
+            then 'Tanı girilmedi'
+          when m.durum = 2 and exists (
+            select 1 from public.lab_istem li
+              join public.lab_istem_satir ls on ls.istem_id = li.id
+              join public.lab_sonuc so on so.istem_satir_id = ls.id
+             where li.belge_id = m.belge_id and so.onay_zamani is not null)
+            then 'Sonuç geldi'
+          else '' end
+        """;
+
     private static KaynakTanimi Muayene() => new(
         Ad: "muayene",
         YetkiKodu: "muayene",
@@ -70,32 +101,14 @@ public static partial class KaynakKatalogu
             //   muayeneden acilan istemi baglar; bankodan/kabulden acilan
             //   tetkik yalnizca belge (basvuru) uzerinden gorunur. Ilk surum
             //   bag tablosuna bakiyordu ve uyari hep bos kaliyordu.
-            new("uyari",
-                """
-                case
-                  when exists (
-                    select 1 from public.lab_istem li
-                      join public.lab_istem_satir ls on ls.istem_id = li.id
-                      join public.lab_sonuc so on so.istem_satir_id = ls.id
-                     where li.belge_id = m.belge_id and so.panik = 1)
-                    then 'PANİK sonuç'
-                  when exists (
-                    select 1 from public.hasta_alerji al
-                     where al.hasta_id = m.taraf_id and coalesce(al.aktif, 1) = 1)
-                    then 'Alerji kaydı var'
-                  when m.durum = 3 and not exists (
-                    select 1 from public.tani ta where ta.muayene_id = m.id)
-                    then 'Tanı girilmedi'
-                  when m.durum = 2 and exists (
-                    select 1 from public.lab_istem li
-                      join public.lab_istem_satir ls on ls.istem_id = li.id
-                      join public.lab_sonuc so on so.istem_satir_id = ls.id
-                     where li.belge_id = m.belge_id and so.onay_zamani is not null)
-                    then 'Sonuç geldi'
-                  else '' end
-                """,                      "metin", "Uyarı", Hizalama: "orta",
+            new("uyari", UyariSql(alerjiDahil: true),                      "metin", "Uyarı", Hizalama: "orta",
                                           Bicim: "rozet", Genislik: 140,
                                           Filtrelenebilir: false, Siralanabilir: false),
+            // BANT UYARISI (kullanici: "Alerji kaydi var rozetine gerek yok, ustte
+            //   zaten bilgisi var"): ayni oncelik, alerji dali YOK - aksi halde
+            //   alerjili hastada "Tani girilmedi" / "Sonuc geldi" de kaybolurdu.
+            new("uyariBant", UyariSql(alerjiDahil: false), "metin", "Uyarı (bant)",
+                Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
 
             new("turAdi",
                 "case m.tur when 2 then 'Uzaktan' when 3 then 'Konsültasyon' "
@@ -127,6 +140,33 @@ public static partial class KaynakKatalogu
                 + "where s.muayene_id = m.id and s.sonuc_durum in (0, 1))",
                                                      "sayi",  "Bekleyen İstem", Hizalama: "orta",
                                                      Genislik: 120, Varsayilan: false),
+            // BILGI BANDI ROZETLERI (kullanici: ozet kutulari "surenin oldugu
+            //   bolume rozet yap"): son vital, recete ve karar. Metin SUNUCUDA
+            //   kurulur - bant hesap yapmaz; listede varsayilan gorunmez.
+            new("sonVital",
+                "coalesce((select concat_ws(' · ', "
+                + "  case when v.sistolik > 0 then v.sistolik::text || '/' || coalesce(v.diyastolik::text, '') end, "
+                + "  case when v.nabiz > 0 then 'nb ' || v.nabiz end, "
+                + "  case when v.spo2 > 0 then 'SpO₂ %' || v.spo2 end) "
+                + "from public.muayene_vital v where v.muayene_id = m.id "
+                + "order by v.zaman desc nulls last, v.id desc limit 1), '')",
+                                                     "metin", "Son Vital", Genislik: 160,
+                                                     Varsayilan: false, Filtrelenebilir: false,
+                                                     Siralanabilir: false),
+            new("receteIlac",
+                "(select count(*) from public.recete_satir s "
+                + "join public.recete r on r.id = s.recete_id where r.muayene_id = m.id)",
+                                                     "sayi",  "Reçete İlaç", Hizalama: "orta",
+                                                     Genislik: 90, Varsayilan: false),
+            new("receteImzasiz",
+                "(select count(*) from public.recete r "
+                + "where r.muayene_id = m.id and r.durum = 1 and r.imza_zamani is null)",
+                                                     "sayi",  "İmzasız Reçete", Hizalama: "orta",
+                                                     Genislik: 90, Varsayilan: false),
+            new("cikisSekliAdi",
+                "coalesce(public.fn_skrs_ad('cikis.sekli', m.cikis_sekli), '')",
+                                                     "metin", "Çıkış Şekli", Genislik: 160,
+                                                     Varsayilan: false, Filtrelenebilir: false),
             new("durumAdi",
                 "case m.durum when 0 then 'İptal' when 2 then 'Sonuç Bekliyor' "
                 + "when 3 then 'Tamamlandı' when 4 then 'Ek Not' else 'Açık' end",

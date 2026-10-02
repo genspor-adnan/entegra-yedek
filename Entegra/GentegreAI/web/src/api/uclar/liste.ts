@@ -153,6 +153,28 @@ export const listeUclari = {
     gonder<{ mesaj: string }>(`/api/recete/${receteId}/imzala`, {}),
 
   /** Muayene kartinin ek sekmeleri (e-Recete, konsultasyon, ucret, gecmis). */
+  /** Tamamlama kontrol listesi (ozet sekmesi): "Tamamla"nin kurali, tamam
+      olanlarla birlikte - kural sunucuda, ekran yalniz cizer. */
+  muayeneTamamlamaKontrol: (muayeneId: number) =>
+    istek<{ muayeneId: number; tamamlandi: boolean;
+            kontroller: { alan: string; ad: string; tamam: boolean; mesaj: string }[] }>(
+      `/api/muayene/${muayeneId}/tamamlama-kontrol`),
+
+  /** Vucut semasi: secili bolgeler + not (sablonun tip 5 bulgu satiri). */
+  muayeneVucutSemasi: (muayeneId: number) =>
+    istek<{ bolgeler: string[]; not: string }>(`/api/muayene/${muayeneId}/vucut-semasi`),
+  muayeneVucutSemasiKaydet: (muayeneId: number, govde: { bolgeler: string[]; not: string }) =>
+    gonder<{ mesaj: string; metin: string }>(`/api/muayene/${muayeneId}/vucut-semasi`, govde),
+
+  /** Kaydedilmis bulgulardan metin - YAZMAZ (ozet sekmesi). */
+  muayeneBulguMetni: (muayeneId: number) =>
+    istek<{ metin: string }>(`/api/muayene/${muayeneId}/bulgu-metni`),
+  /** EKRANDAKI (kaydedilmemis) bulgu satirlarindan metin - YAZMAZ. */
+  muayeneBulguMetniOnizle: (muayeneId: number, satirlar: {
+    sablonAlanId: number; normal: boolean; degerMetin: string | null;
+    degerSayi: number | null; taraf: number | null }[]) =>
+    gonder<{ metin: string }>(`/api/muayene/${muayeneId}/bulgu-metni`, { satirlar }),
+
   muayeneSekmeVerisi: (muayeneId: number) =>
     istek<{
       belgeId: number | null; ustMuayeneId: number | null; tanilar: string;

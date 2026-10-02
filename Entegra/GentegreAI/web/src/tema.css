@@ -6237,3 +6237,127 @@ textarea.fm-giris { resize: vertical }
 .kart-baglam { padding: 2px 10px }
 .kart-baglam .kb-hucre { padding: 4px 8px 6px }
 .kart-baglam .kb-kutu { padding: 2px 8px }
+
+/* MUAYENE OZETI SEKMESI (mockup Ekranlar/Muayene/muayene_karti_v2.html):
+   ustte bes ozet kutusu (tiklaninca ilgili sekme), solda derlenmis metin,
+   sagda tamamlama kontrolu / bekleyen istemler / son muayeneler. */
+.moz-kutular { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px }
+@media (max-width: 1000px) { .moz-kutular { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.moz-kutu { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz); padding: 6px 10px; min-width: 0 }
+.moz-kutu.tikla { cursor: pointer }
+.moz-kutu.tikla:hover { border-color: var(--vurgu) }
+.moz-kb { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--soluk) }
+.moz-kd { font-size: 15px; font-weight: 700; color: var(--yazi2, var(--yazi)); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.moz-kd small { font-size: 10.5px; font-weight: 400; color: var(--soluk) }
+.moz-sp { margin-left: auto; display: inline-flex; gap: 6px; align-items: center }
+.moz-kisa { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+.moz-gvd { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; align-items: start }
+@media (max-width: 1000px) { .moz-gvd { grid-template-columns: 1fr } }
+.moz .kagrup { margin: 0 0 10px }
+.moz-bas { display: flex; align-items: center; gap: 8px }
+.moz-ic { padding: 8px 12px; line-height: 1.6; font-size: 12px }
+.moz-ic h6 { margin: 10px 0 2px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px }
+.moz-ic h6:first-child { margin-top: 0 }
+.moz-ic p { margin: 0; white-space: pre-wrap }
+.moz-r { margin-left: 4px }
+.moz-panik { color: var(--hata); font-weight: 700 }
+.moz-liste { list-style: none; margin: 0; padding: 0 }
+.moz-liste li { display: flex; gap: 6px; align-items: center; padding: 5px 10px; border-bottom: 1px solid var(--cizgi2); font-size: 11.5px; min-width: 0 }
+.moz-liste li:last-child { border-bottom: 0 }
+.moz-liste li.eksik { background: var(--uyarizem) }
+
+/* e-RECETE SEKMESI = recete karti GOMULU (mockup recete_karti.html):
+   ust arac cubugu, altta kartla ayni govde; sekme zemininde beyaz kutu. */
+.rk-gomulu { background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: var(--r) }
+.rk-gomulu > .rk-arac { padding: 6px 8px; margin: 0; border-bottom: 1px solid var(--cizgi2);
+  background: var(--yuz2); align-items: center }
+.rk-secici { margin-bottom: 8px }
+.rk-sol .recete-grid .numaralama-bas h6 { display: flex; gap: 8px; align-items: center }
+/* BILGI BANDI TEK SATIR (kullanici): sigmazsa rozetler daralir, uzun metin
+   "…" ile kesilir (tamami title'da). Sure ve kisa rozetler daralmaz. */
+.muayene-durum { flex-wrap: nowrap; overflow: hidden }
+.muayene-durum > * { flex: 0 0 auto; white-space: nowrap }
+.muayene-durum > .rozet { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.muayene-durum > .rozet.olumlu, .muayene-durum > .rozet.mavi { flex: 0 1 auto }
+/* SIKAYET / HIKAYE TEK SATIR (kullanici: "cok kalin, 1 satir yeter"): kutu
+   bir satir boyunda; uzun metin icin kosesinden asagi cekilebilir. */
+.muayene-ikili .mi-sol .alan textarea[data-alan="sikayet"],
+.muayene-ikili .mi-sol .alan textarea[data-alan="hikaye"] {
+  height: 26px; min-height: 26px; padding-top: 3px; padding-bottom: 3px;
+  line-height: 18px; resize: vertical; overflow-y: auto }
+/* Bant tek satira inince cok ince kaldi (kullanici): dikey dolgu artti. */
+.muayene-durum.muayene-uyari { padding: 8px 10px }
+.muayene-durum > .rozet { padding-top: 2px; padding-bottom: 2px }
+/* overflow:hidden flex cocugunun min-height'ini 0 yapar - ust sutun bandi
+   sikistirip rozetleri kirpiyordu ("cok incelmis"). Bant kuculmez. */
+.muayene-durum.muayene-uyari { flex-shrink: 0 }
+
+/* SUTUN BASLIGINDA EK (kolonBaslikEk): baslik solda, dugmeler sagda. */
+.kolon-baslik-ek { display: flex; align-items: center; gap: 8px }
+.kolon-baslik-ek .kbe-ic { margin-left: auto; display: inline-flex; gap: 4px; align-items: center;
+  font-weight: 400 }
+.kolon-baslik-ek .kbe-ic .d { height: 22px; font-size: 11px; padding: 0 8px }
+.kolon-baslik-ek .kbe-ic { flex-wrap: nowrap; white-space: nowrap }
+.kolon-baslik-ek .kbe-ic > * { height: 22px; font-size: 11px }
+.mfz-tek-satir table { table-layout: auto }
+/* SABLON MUAYENE SEKMESI (kullanici): ust bosluk az, sikayet/hikaye
+   etiketi kutunun SOLUNDA (tek satirlik kutuda ustte etiket yer yiyordu). */
+.muayene-ikili.msb-ikili { margin-top: -10px }
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="sikayet"]),
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="hikaye"]) {
+  grid-template-columns: 60px 1fr; column-gap: 8px; align-items: start }
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="sikayet"]) > .etiket,
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="hikaye"]) > .etiket {
+  grid-column: 1; text-align: right; padding-top: 5px }
+.muayene-ikili .mi-sol .alan > textarea[data-alan="sikayet"],
+.muayene-ikili .mi-sol .alan > textarea[data-alan="hikaye"] { grid-column: 2 }
+.kolon-baslik-ek .kbe-ic .d { min-width: 26px; padding: 0 5px }
+/* Bulgu gridinde SISTEM sutunu %20 dar (kullanici; 215 -> 172 px). */
+.bulgu-gridi .detay-tablo thead th:first-child { width: 172px }
+/* Sikayet/hikaye satirinda makro ipucu kutunun ALTINDA (etiket sutununa
+   sikisip satir satir kiriliyordu). */
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="sikayet"]) > :not(.etiket):not(textarea),
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="hikaye"]) > :not(.etiket):not(textarea) { grid-column: 2 }
+/* Otomatik tablo duzeni fazla genisligi Sistem sutununa da dagitiyordu;
+   sabit duzende Sistem 172 px, kalan Bulgu sutununa. */
+.bulgu-gridi .detay-tablo { table-layout: fixed }
+.bulgu-gridi .detay-tablo thead th:nth-child(2) { width: 60px }
+.bulgu-gridi .detay-tablo thead th:last-child:not(:nth-child(3)) { width: 24px }
+/* Sikayet/Hikaye etiketi SOLA YASLI (kullanici). */
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="sikayet"]) > .etiket,
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="hikaye"]) > .etiket { text-align: left }
+/* Sikayet/Hikaye etiketi bulgu gridindeki sistem adi ("Genel gorunum") ile
+   AYNI yazi: 11.5px, normal kalinlik, ana yazi rengi (kullanici). */
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="sikayet"]) > .etiket,
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="hikaye"]) > .etiket {
+  font-size: 11.5px; font-weight: 400; color: var(--yazi) }
+/* Fizik muayene dugmeleri gridin hemen ustunde, bosluksuz. */
+.muayene-arac.mfz-arac { margin: 10px 0 4px; align-items: center }
+/* Degerlendirme / Plan kutusunun SOL etiketi yok (kullanici): grup basligi
+   "Degerlendirme / Sonuc" yeterli; kutu tam genislik. */
+.muayene-ikili .mi-sag .alan:has(> textarea[data-alan="karar"]) { grid-template-columns: 1fr }
+.muayene-ikili .mi-sag .alan:has(> textarea[data-alan="karar"]) > .etiket { display: none }
+.muayene-ikili .mi-sag .alan:has(> textarea[data-alan="karar"]) > * { grid-column: 1 }
+
+/* VUCUT SEMASI penceresi: solda on/arka figur, sagda secilenler + not. */
+.vs-gvd { display: grid; grid-template-columns: auto minmax(260px, 1fr); gap: 16px; padding: 10px }
+@media (max-width: 800px) { .vs-gvd { grid-template-columns: 1fr } }
+.vs-figurler { display: flex; gap: 16px }
+.vs-figur { margin: 0; text-align: center }
+.vs-figur figcaption { font-size: 11px; color: var(--soluk); margin-bottom: 4px; font-weight: 700 }
+.vs-figur svg { width: 170px; height: auto; display: block }
+.vs-bolge { fill: var(--yuz2); stroke: var(--cizgi); stroke-width: 1; cursor: pointer }
+.vs-bolge:hover { fill: var(--mor2) }
+.vs-bolge:focus-visible { outline: none; stroke: var(--vurgu); stroke-width: 2 }
+.vs-bolge.on { fill: #f3a9a3; stroke: var(--hata) }
+.vs-sag h6 { margin: 0 0 6px; font-size: 11.5px }
+.vs-cipler { display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; margin-bottom: 10px }
+.vs-cip { cursor: pointer; border: 1px solid var(--cizgi2) }
+.vs-not { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--soluk) }
+.vs-not textarea { font: inherit; font-size: 12px; padding: 4px 6px; border: 1px solid var(--cizgi); border-radius: var(--r); resize: vertical; color: var(--yazi); background: var(--yuz) }
+/* Cikis Sekli etiketi SOLA YASLI (kullanici). */
+.muayene-ikili .mi-sag .alan.alan-cikisSekli > .etiket { text-align: left }
+/* Bulgu gridi arac cubuguyla AYNI hizada (kullanici): gridin 10px kenar boslugu yok. */
+.bulgu-gridi .detay-kaydir { margin-left: 0; margin-right: 0 }
+.detay-tablo input.oneri-kutu { width: 100% }

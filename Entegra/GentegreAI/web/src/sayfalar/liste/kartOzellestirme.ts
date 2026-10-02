@@ -122,16 +122,18 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     // "Muayene" = eski Anamnez, "Şablon Muayene" = eski Fizik Muayene
     //   (kullanıcı). Eski adlar sırada kalır: yeni sekme adlarını bilmeyen
     //   (yeniden başlatılmamış) API ile de sıra bozulmasın.
-    sekmeSirasi: ['Muayene', 'Anamnez', 'Şablon Muayene', 'Fizik Muayene', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
-                  'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
+    sekmeSirasi: ['Muayene Özeti', 'Muayene', 'Anamnez', 'Şablon Muayene', 'Fizik Muayene', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
+                  'e-Reçete', 'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
                   'Dosyalar'],
-    // VİTAL BULGULAR SEKMESİ YOK (kullanıcı): ölçüm TANI sekmesinin sağ
-    //   panelinde düzenleniyor (önce anamnez/Muayene sekmesindeydi) - aynı veriyi iki sekmede göstermek hangisinin
+    // VİTAL ÖLÇÜM ŞABLON MUAYENE SEKMESİNİN SAĞ PANELİNDE (kullanıcı, 02.10.2026;
+    //   önce Tanı/Vital sekmesindeydi) - aynı veriyi iki sekmede göstermek hangisinin
     //   geçerli olduğunu belirsiz bırakıyordu.
     gizliDetaylar: ['vitaller'],
     detayGrupta: {
       bulgular: {
-        grup: ['Şablon Muayene', 'Fizik Muayene'], gizli: ['degerSayi', 'taraf'],
+        grup: ['Şablon Muayene', 'Fizik Muayene'], gizli: ['degerSayi', 'taraf', 'oneriler'],
+        // BULGU COMBO (kullanıcı, db/936): şablon alanının önerileri açılır liste.
+        oneri: { degerMetin: 'oneriler' },
         etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
         // Çerçeve, başlık ve "+ Satır"/sil yok (kullanıcı): satırlar
         //   ŞABLONDAN açılır, elle satır eklemek sistem listesini bozar.
@@ -150,8 +152,10 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
       //   adı "Anamnez" yeniden başlatılmamış API içindir.
       tanilar: {
         // Not sütunu da gizli (kullanıcı: "tanı gridinden not sütunu kaldır").
-        grup: ['Muayene', 'Anamnez'], gizli: ['sira', 'baslangicTarihi', 'kesinlik', 'kronik', 'notMetni'],
-        sinif: 'tani-gridi', gridKipi: true, ekleGizli: true,
+        // TANI (ICD-10) SEKMESİNE GERİ (kullanıcı 02.10.2026: "eski haline
+        //   geri getir") - Muayene sekmesinin sağ panelinden alındı.
+        grup: ['Tanı (ICD-10)', 'Vital Bulgular'], gizli: ['sira', 'baslangicTarihi', 'kesinlik', 'kronik', 'notMetni'],
+        sinif: 'tani-gridi', ustte: true, gridKipi: true, ekleGizli: true,
       },
     },
     // VİTAL BULGULAR MOCKUP IZGARASI: son ölçüm etiket + kutu ızgarasında,

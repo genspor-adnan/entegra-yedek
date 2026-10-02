@@ -47,11 +47,17 @@ const zaman = (v: unknown) => {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-export function ReceteKarti({ receteId, onKapat, onDegisti }: {
+export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }: {
   receteId: number;
   onKapat(): void;
   /** Reçete değişince (kayıt, imza, ilaç) çağırana haber. */
   onDegisti?(): void;
+  /** PENCERESİZ (muayene kartının e-Reçete sekmesi - kullanıcı: "recete_karti
+      mockup'ı gibi yap"): aynı gövde sekmenin içinde çizilir; düğmeler üstte,
+      kimlik şeridi yok (muayene kartı zaten hastayı gösteriyor). */
+  gomulu?: boolean;
+  /** Gömülü kipte araç çubuğuna eklenen düğmeler (ör. reçete şablonu). */
+  ekAraclar?: React.ReactNode;
 }) {
   const [kart, setKart] = useState<Record<string, unknown> | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
@@ -103,6 +109,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti }: {
   const filtre = useMemo(() => ({ alan: 'receteId', op: 'esit' as const, deger: receteId }), [receteId]);
 
   if (!kart) {
+    if (gomulu)
+      return hata ? <div className="hata-kutusu">{hata}</div>
+                  : <div className="yukleniyor-satir">{c('Yükleniyor…')}</div>;
     return (
       <Modal baslik={c('Reçete')} buyutmeYok onKapat={onKapat}
              alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
@@ -172,13 +181,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti }: {
   const d = DURUM[durum] ?? DURUM[1];
   const turAdi = TURLER.find(t => t.kod === sayi(kart.tur))?.ad ?? 'Normal';
 
-  return (
-    <>
-      <Modal
-        baslik={`${c('Reçete')} — ${d.ad}${receteNo ? ` · ${receteNo}` : ''}`}
-        ekSinif="kart-recete"
-        onKapat={onKapat}
-        ustSerit={(
+  const kimlik = (
           <div className="rk-kimlik">
             <b className="rk-ad">{hastaAdi || '—'}</b>
             {metin(muayene?.protokolNo) && <span className="sonuk">{c('Protokol')} {metin(muayene?.protokolNo)}</span>}
@@ -197,8 +200,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti }: {
               </span>
             ))}
           </div>
-        )}
-        alt={<>
+  );
+
+  const dugmeler = (<>
           {taslak && (
             <button type="button" className="d bir" disabled={!degisti} onClick={() => void kaydet()}>
               💾 {c('Kaydet')}
@@ -219,12 +223,18 @@ export function ReceteKarti({ receteId, onKapat, onDegisti }: {
               🕘 {c('Önceki reçeteyi kopyala')}
             </button>
           )}
+          {gomulu && ekAraclar}
           <span style={{ marginLeft: 'auto' }} />
+          {gomulu && <span className={`rozet ${d.sinif}`}>{d.ad}{receteNo ? ` · ${receteNo}` : ''}</span>}
           {taslak && (
             <button type="button" className="d teh" onClick={() => void sil()}>🗑 {c('Sil')}</button>
           )}
-          <button type="button" className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
-        </>}>
+          {!gomulu && (
+            <button type="button" className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
+          )}
+        </>);
+
+  const govde = (<>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="rk-govde">
           <div className="rk-sol">
@@ -348,13 +358,38 @@ export function ReceteKarti({ receteId, onKapat, onDegisti }: {
             </div>
           </div>
         </div>
-      </Modal>
+  </>);
+
+  return (
+    <>
+      {gomulu
+        ? <div className="rk-gomulu"><div className="muayene-arac rk-arac">{dugmeler}</div>{govde}</div>
+        : (
+          <Modal
+            baslik={`${c('Reçete')} — ${d.ad}${receteNo ? ` · ${receteNo}` : ''}`}
+            ekSinif="kart-recete"
+            onKapat={onKapat}
+            ustSerit={kimlik}
+            alt={dugmeler}>
+            {govde}
+          </Modal>
+        )}
 
       {aramaAcik && (
         <KaynakArama
           kaynak="ilac" baslik="İlaç ara (barkod / ad / etken madde)"
           kodAlani="barkod" adAlani="ad"
           ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+          // YZ ÖNERİSİ: etken madde -> katalog ürünleri; alerjiyle çakışan sunucuda
+          //   elenir, doz önerilmez. Eklemede alerji/etkileşim uyarısı yine çalışır.
+          yz={async () => {
+            const y = await api.muayeneYzIlacOnerisi(muayeneId);
+            return {
+              satirlar: y.oneriler.map(o => ({ kod: o.barkod, barkod: o.barkod, ad: o.ad, gerekce: o.gerekce })),
+              notlar: [...y.notlar, ...(y.oneriler.length === 0 ? ['YZ bu bilgilerle ilaç önermedi.'] : [])],
+              uyari: y.uyari,
+            };
+          }}
           onKapat={() => setAramaAcik(false)}
           onSec={satir => {
             setAramaAcik(false);

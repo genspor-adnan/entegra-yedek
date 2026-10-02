@@ -381,6 +381,10 @@ public static partial class KartKatalogu
                 Baslik: "İsteyen Muayene (Konsültasyon)", Grup: "Kimlik", AltGrup: "Süre"),
 
             // ------------------------------------------ muayene (anamnez) ----
+            // SABLON MUAYENE SEKMESINDE (kullanici 02.10.2026, mockup
+            //   muayene_karti_v2: "sikayet/hikayeyi de diger tarafa al"). Ilk
+            //   sekme artik derlenmis "Muayene Özeti" (istemci ozel sekmesi);
+            //   yazilan alanlarin hepsi Sablon Muayene sekmesinde.
             // SEKME ADI "Muayene" (kullanici: "anamnez rename Muayene"); alanlar
             //   yine anamnez alanlari.
             // SIKAYET/HIKAYE COK SATIRLI (mockup muayene_karti.html): kolon `text`
@@ -388,9 +392,9 @@ public static partial class KartKatalogu
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikâyet", Grup: "Muayene"),
+                Baslik: "Şikâyet", Grup: "Şablon Muayene", AltGrup: "Anamnez"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Hikâye", Grup: "Muayene"),
+                Baslik: "Hikâye", Grup: "Şablon Muayene", AltGrup: "Anamnez"),
             // OZGECMIS / SOYGECMIS / ALISKANLIK KARTTA YOK (kullanici: "anamnez
             //   sekmesinden ozgecmis, soygecmis, aliskanliklar editleri kaldir,
             //   onlarin yerine tani gridini tasi"). Kolonlar ve eski veri durur;
@@ -415,13 +419,13 @@ public static partial class KartKatalogu
             //   karar cumlesi tek satirlik kutuya sigmiyordu (uzun metin
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Değerlendirme / Plan", Grup: "Muayene", AltGrup: "Değerlendirme"),
+                Baslik: "Değerlendirme / Plan", Grup: "Şablon Muayene", AltGrup: "Değerlendirme / Sonuç"),
             // CIKIS SEKLI (627): hastanin muayene sonundaki durumu - USS 106'nin
             //   ZORUNLU alani. Varsayilani "iyilesderek cikis"; sevk, olum,
             //   tedaviyi reddetme gibi haller burada secilir. Liste SKRS'nin
             //   kendisi (609), ayri bir esleme yok.
             new("cikisSekli", "cikis_sekli", "kod", KodListesi: "cikis.sekli",
-                Baslik: "Çıkış Şekli", Grup: "Muayene", AltGrup: "Değerlendirme"),
+                Baslik: "Çıkış Şekli", Grup: "Şablon Muayene", AltGrup: "Değerlendirme / Sonuç"),
             // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
             //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
@@ -455,15 +459,15 @@ public static partial class KartKatalogu
                 AltGrup: "Konsültasyon"),
 
             // -------------------------------------------------- gönderim ----
-            // SEKME ADI "Vital Bulgular" (kullanici: "Tani sekmesi rename Vital
-            //   Bulgular"): tanilar Muayene sekmesinde, bu sekmede vital izgarasi
-            //   ve e-Nabiz gonderim bilgisi kaldi.
+            // SEKME ADI YINE "Tanı (ICD-10)" (kullanici 02.10.2026: "vital
+            //   bulgular sekmesini eski haline geri getir"): tani gridi + e-Nabiz
+            //   gonderim bilgisi; vital izgarasi Sablon Muayene sekmesinde.
             new("enabizDurum", "enabiz_durum", "kod", Yazilabilir: false,
-                Baslik: "e-Nabız Durumu", Grup: "Vital Bulgular", AltGrup: "Gönderim"),
+                Baslik: "e-Nabız Durumu", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
             new("tamamlayanId", "tamamlayan_id", "sayi", Yazilabilir: false,
-                Baslik: "Tamamlayan", Grup: "Vital Bulgular", AltGrup: "Gönderim"),
+                Baslik: "Tamamlayan", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
             new("tamamlanma", "tamamlanma", "tarih", Yazilabilir: false,
-                Baslik: "Tamamlanma", Grup: "Vital Bulgular", AltGrup: "Gönderim")
+                Baslik: "Tamamlanma", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim")
         },
         Detaylar: new DetayTanimi[]
         {
@@ -556,6 +560,12 @@ public static partial class KartKatalogu
                 new("degerMetin", "deger_metin", "metin", Baslik: "Bulgu"),
                 new("degerSayi", "deger_sayi", "sayi", Baslik: "Değer"),
                 new("taraf", "taraf", "kod", SabitKodlar: TarafKodlari, Baslik: "Taraf"),
+                // ONERI LISTESI (936): bulgu kutusu acilir liste - sablon alaninin
+                //   onerileri, yoksa secenekli alanin secenekleri. Salt okunur;
+                //   hekim listeden secer ya da serbest yazar.
+                new("oneriler", "(select coalesce(x.oneriler, x.secenekler)::text "
+                    + "from public.muayene_sablon_alan x where x.id = muayene_bulgu.sablon_alan_id)",
+                    "metin", Yazilabilir: false, Baslik: "Öneriler"),
             }, SubeKolonu: null, Sirala: "id asc",
                Baslik: "Bulgular", LogTabloId: 964),
 
@@ -675,6 +685,10 @@ public static partial class KartKatalogu
                 // SECENEKLER (Secenekli tip): JSON dizi ["yok","+1","+2"]. Kart
                 //   ekrani cip duzenleyicisiyle yazar; muayenede combo olur.
                 new("secenekler", "secenekler", "json", EnFazlaUzunluk: 2000, Baslik: "Seçenekler"),
+                // ONERILER (936, kullanici: "sablon ayarlara ekle, istersem
+                //   degistiririm"): serbest metin alaninin bulgu kutusundaki
+                //   acilir listesi. Kisit degil - hekim serbest de yazar.
+                new("oneriler", "oneriler", "json", EnFazlaUzunluk: 4000, Baslik: "Öneriler"),
                 new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
                 // "Normal" isaretlenince rapora yazilacak hazir cumle: hekim
                 //   her normal bulgu icin ayni metni yazmasin.

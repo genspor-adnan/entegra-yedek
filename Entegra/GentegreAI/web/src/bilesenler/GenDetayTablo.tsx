@@ -205,6 +205,12 @@ interface Props {
   /** Verilirse başlıktaki "＋" bu işlevi çağırır (satır ekleme yerine) - ör.
    *  tanı gridinde ＋ ICD arama penceresini açar. Buton daima etkin. */
   onYeni?: () => void;
+  /** Sütun BAŞLIĞININ SAĞINA ekrana özel içerik (alan adıyla) - ör. fizik
+   *  muayenede "Bulgu" başlığının yanında "Tümü normal · Şablon Uygula". */
+  kolonBaslikEk?: Record<string, React.ReactNode>;
+  /** ÖNERİLİ KUTU (combo): alan adı -> satırda öneri listesini (JSON metin
+   *  dizisi) taşıyan kolon. Kutu açılır liste olur; serbest yazı da kalır. */
+  oneriAlanlari?: Record<string, string>;
   /**
    * SATIR SILME DUGMESI GIZLI (536, kullanici: "satir ekleme ve silme
    * simdilik gorunmez olsun, dursun ama gorunmesin"). Yetenek DURUYOR -
@@ -357,10 +363,21 @@ function UrunAramaKutusu({ deger, yerTutucu, kilitli, saltOkunur, onAc }: {
   );
 }
 
+/** Satırdaki öneri kolonu: JSON metin dizisi (sunucudan text) ya da dizi. */
+function oneriListesi(ham: unknown): string[] {
+  if (Array.isArray(ham)) return ham.map(String).filter(Boolean);
+  const m = String(ham ?? '').trim();
+  if (!m.startsWith('[')) return [];
+  try {
+    const d = JSON.parse(m) as unknown;
+    return Array.isArray(d) ? d.map(String).filter(Boolean) : [];
+  } catch { return [] }
+}
+
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
-                               silGizli, onYeni,
+                               silGizli, onYeni, kolonBaslikEk, oneriAlanlari,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
@@ -631,6 +648,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       // KAMPANYA (268, kullanici): iskonto tipi TUTAR ise doviz varsayilan
       //   YEREL PARA; YÜZDE ise doviz anlamsizdir (yuzde birimsizdir) - alan
       //   temizlenir ve hucre "%" gosterir.
+      // FIZIK MUAYENE BULGUSU (kullanici: "edite bir sey yazildiginda/secildiginde
+      //   normal check'i kalksin"): yazilan bulgu "normal" degildir - isaret kalirsa
+      //   ozet ve rapor bulguyu degil normal metnini yazar.
+      if (meta.ad === 'bulgular' && alan === 'degerMetin' && String(deger ?? '').trim() !== '') {
+        yeni.normal = 0;
+      }
       if (kampanyaSatiri && 'iskontoTipi' in degisiklikler) {
         yeni.dovizCinsi = Number(degisiklikler.iskontoTipi) === 2
           ? (yeni.dovizCinsi || 'TL') : '';
@@ -1071,7 +1094,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               </>
             )}
             {gridAlanlari.map(a => (
-              <th key={a.ad}>{kolonBasligi(a)}{a.zorunlu && ' *'}</th>
+              <th key={a.ad}>
+                {kolonBaslikEk?.[a.ad]
+                  ? <div className="kolon-baslik-ek"><span>{kolonBasligi(a)}{a.zorunlu && ' *'}</span>
+                      <span className="kbe-ic">{kolonBaslikEk[a.ad]}</span></div>
+                  : <>{kolonBasligi(a)}{a.zorunlu && ' *'}</>}
+              </th>
             ))}
             {!modalDuzenle && !saltOkunur && <th />}
           </tr>
@@ -1471,6 +1499,21 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       disabled={saltOkunur || !a.yazilabilir}
                       onChange={e => hucreDegis(i, a.ad, e.target.value)}
                     />
+                  ) : oneriAlanlari?.[a.ad] && oneriListesi(satir[oneriAlanlari[a.ad]]).length > 0 ? (
+                    // ONERILI KUTU (combo): listeden secilir ya da serbest yazilir.
+                    <>
+                      <input
+                        className="oneri-kutu"
+                        list={`oneri-${meta.ad}-${i}-${a.ad}`}
+                        value={String(satir[a.ad] ?? '')}
+                        maxLength={a.enFazlaUzunluk ?? undefined}
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                      />
+                      <datalist id={`oneri-${meta.ad}-${i}-${a.ad}`}>
+                        {oneriListesi(satir[oneriAlanlari[a.ad]]).map(o => <option key={o} value={o} />)}
+                      </datalist>
+                    </>
                   ) : (
                     <input
                       className={a.tip === 'sayi' || a.tip === 'para' || a.tip === 'ondalik'

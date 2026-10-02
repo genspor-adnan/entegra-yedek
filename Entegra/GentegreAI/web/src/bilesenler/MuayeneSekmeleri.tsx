@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { KaynakArama } from './KaynakArama';
-import { GenGrid } from './GenGrid';
 import { ReceteKarti } from './recete/ReceteKarti';
-import type { ListeSatiri } from '../api/sozlesme';
 import type { SablonTercihleri } from '../api/uclar/liste';
 import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat, para } from './bicim';
@@ -70,13 +68,18 @@ function Kabuk({ hata, veri, children }:
 }
 
 /**
- * e-REÇETE (mockup muayene_karti.html "e-Reçete" paneli).
+ * e-REÇETE SEKMESİ (mockup Ekranlar/Muayene/recete_karti.html - kullanıcı:
+ * "e-reçete sekmesini recete_karti gibi yap").
  *
- * Araç çubuğu · reçete başlığı (tür · provizyon · tanı · açıklama) · ilaç
- * tablosu. <b>Yazma yolu SUNUCU uçlarıdır</b>: ilaç ekleme reçeteyi yoksa
- * açar, uyarıyı ekleme ANINDA döndürür (hekim ilacı seçerken görsün, on ilaç
- * yazıp imzaya basınca değil) ve imza reçeteyi kilitler. İstemci sırayı
- * kurmaz, kuralı tekrarlamaz.
+ * Gövde REÇETE KARTININ KENDİSİ (ReceteKarti, gömülü kip): reçete bilgileri
+ * (tür · tanılar · açıklama), ilaç gridi, sağda alerji/etkileşim bandı,
+ * aktif ilaçlar, imza ve Medula. Kart ile sekme AYNI bileşen - kural iki
+ * yerde yazılmaz. <b>Yazma yolu SUNUCU uçlarıdır</b>: ilaç ekleme reçeteyi
+ * yoksa açar ve uyarıyı ekleme ANINDA döndürür; imza reçeteyi kilitler.
+ *
+ * Gösterilen reçete: açık TASLAK, yoksa en son reçete. Muayenede birden çok
+ * reçete varsa üstte seçici çıkar. Hiç reçete yoksa boş durum: ilk ilaç
+ * eklenince reçete sunucuda açılır.
  */
 export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
   veri: SekmeVerisi | null; hata: string | null;
@@ -84,15 +87,8 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
   tazele(): void;
 }) {
   const [aramaAcik, setAramaAcik] = useState(false);
-  /** Gridde ONAY KUTUSU işaretli ilaç satırları (kırmızı Sil bunlara uygulanır). */
-  const [isaretli, setIsaretli] = useState<ListeSatiri[]>([]);
-  /** Gridde tıklanan (odaktaki) satır - Düzenle işaret yoksa bunu açar. */
-  const [secili, setSecili] = useState<ListeSatiri | null>(null);
-  /** Açık reçete kartı (Düzenle): ilaçlar detayında doz/periyot/süre/kutu/tarif. */
-  const [kartReceteId, setKartReceteId] = useState<number | null>(null);
-  /** Grid yeniden okunsun (ekle/sil sonrası). */
-  const [gridTazele, setGridTazele] = useState(0);
-  const yenile = () => { setGridTazele(t => t + 1); setIsaretli([]); tazele() };
+  /** Kullanıcının seçtiği reçete (birden çok reçetede); null = varsayılan. */
+  const [secilenId, setSecilenId] = useState<number | null>(null);
   /** Bölüm / doktor şablonlarının reçete şablonları (931). */
   const [sablonReceteleri, setSablonReceteleri] = useState<SablonTercihleri['receteler']>([]);
   useEffect(() => {
@@ -115,38 +111,34 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
         await api.receteSatirGuncelle(y.receteId, y.satirId, { kullanimSekli: s.kullanimSekli });
       ((y.uyarilar ?? []) as { metin?: string }[]).forEach(u => uyarilar.push(`${s.ilac}: ${u.metin ?? ''}`));
     }
-    yenile();
+    tazele();
     mesaj(`${r.grup}: ${r.satirlar.length} ilaç yazıldı.`
       + (uyarilar.length ? `\n\nUYARI:\n· ${uyarilar.join('\n· ')}` : ''));
   });
 
-  /** Seçilen ilacı ekler; sunucudan dönen uyarıyı hekime gösterir. */
+  /** İlk ilaç (reçete yokken): sunucu reçeteyi açar, uyarıyı döndürür. */
   const ilacEkle = (barkod: string, ad: string) => guvenli(async () => {
     const y = await api.receteIlacEkle(muayeneId, { barkod });
     const uyari = (y.uyarilar ?? []) as { metin?: string }[];
     if (uyari.length)
       mesaj(`${ad} eklendi.\n\nUYARI:\n· ${uyari.map(u => u.metin ?? '').join('\n· ')}`);
-    yenile();
+    tazele();
   });
 
-  /** İşaretli ilaçları çıkarır. İMZALI REÇETEDEN İLAÇ ÇIKMAZ - kural uçta;
-      imzalı satır işaretliyse sunucunun mesajı gösterilir. */
-  const sil = () => guvenli(async () => {
-    if (isaretli.length === 0) return;
-    if (!await onay(`${isaretli.length} ilaç reçeteden çıkarılacak. Onaylıyor musunuz?`)) return;
-    for (const s of isaretli)
-      await api.receteIlacSil(sayi(s.receteId), sayi(s.id));
-    yenile();
-  });
+  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayi(b.id) - sayi(a.id));
+  const varsayilan = receteler.find(r => sayi(r.durum) === 1) ?? receteler[0];
+  const gosterilen = receteler.find(r => sayi(r.id) === secilenId) ?? varsayilan;
 
-  // SABIT FILTRE NESNESI SABIT KALMALI: her cizimde yeni nesne GenGrid'i
-  //   yeniden yukletir (yanip sonme).
-  const filtre = useMemo(() => ({ alan: 'muayeneId', op: 'esit' as const, deger: muayeneId }),
-                         [muayeneId]);
-  // DUZENLE hedefi: isaretli ilk satir, yoksa gridde secili satir.
-  const duzenlenecek = isaretli[0] ?? secili;
-  const acikRecete = veri?.receteler.find(r => sayi(r.durum) === 1);
-  const uyariVar = (veri?.receteSatirlari ?? []).some(s => metin(s.uyari) !== '');
+  const sablonSecici = sablonReceteleri.length > 0 && (
+    <select className="recete-sablon" value="" aria-label={c('Reçete şablonundan yaz')}
+            title={c('Bölüm / doktor şablonundaki hazır reçeteyi yazar')}
+            onChange={e => { if (e.target.value !== '') void sablondanYaz(Number(e.target.value)) }}>
+      <option value="">📋 {c('Şablondan…')}</option>
+      {sablonReceteleri.map((r, i) => (
+        <option key={`${r.sablon}-${r.grup}`} value={i}>{r.grup} ({r.satirlar.length}) · {r.sablon}</option>
+      ))}
+    </select>
+  );
 
   return (
     <Kabuk hata={hata} veri={veri}>
@@ -155,8 +147,6 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
           kaynak="ilac" baslik="İlaç ara (barkod / ad / etken madde)"
           kodAlani="barkod" adAlani="ad"
           ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
-          // YZ ÖNERİSİ: etken madde -> katalog ürünleri; alerjiyle çakışan sunucuda
-          //   elenir, doz önerilmez. Eklemede alerji/etkileşim uyarısı yine çalışır.
           yz={async () => {
             const y = await api.muayeneYzIlacOnerisi(muayeneId);
             return {
@@ -173,98 +163,42 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
         />
       )}
 
-      {/* RECETE ILAC GRIDI (kullanici: "GenGrid yap.. basa check.. uste
-          + Ilac butonu, sagina kirmizi sil"). Ilaclar muayenenin TUM
-          receteleriyle tek gridde; "Reçete" kolonu taslak/imzali ayrimini
-          gosterir. */}
-      <div className="kagrup recete-grid">
-        <div className="numaralama-bas bitisik">
-          <span className="baslik-eylem">
-            {/* Kopyala + Ilac'in SOLUNDA (kullanici). */}
+      {/* BIRDEN COK RECETE: hangisinin gosterildigi secilir (taslak once). */}
+      {receteler.length > 1 && (
+        <div className="muayene-arac rk-secici">
+          {receteler.map(r => (
+            <button key={sayi(r.id)} type="button"
+                    className={`d${sayi(r.id) === sayi(gosterilen?.id) ? ' bir' : ''}`}
+                    onClick={() => setSecilenId(sayi(r.id))}>
+              {metin(r.receteNo) || `#${sayi(r.id)}`} · {sayi(r.durum) === 1 ? c('Taslak')
+                : sayi(r.durum) === 4 ? c('İptal') : c('İmzalı')}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {gosterilen ? (
+        <ReceteKarti key={sayi(gosterilen.id)} receteId={sayi(gosterilen.id)} gomulu
+          ekAraclar={sayi(gosterilen.durum) === 1 ? sablonSecici : null}
+          onKapat={() => { setSecilenId(null); tazele() }}
+          onDegisti={tazele} />
+      ) : (
+        // BOS DURUM: recete henuz yok - ilk ilac eklenince sunucuda acilir.
+        <div className="kagrup rk-bos">
+          <div className="muayene-arac">
+            <button type="button" className="d bir" onClick={() => setAramaAcik(true)}>＋ {c('İlaç')}</button>
             <button type="button" className="d"
                     onClick={() => void guvenli(async () => {
                       const y = await api.receteOncekiKopyala(muayeneId);
                       mesaj(y.mesaj);
-                      yenile();
+                      tazele();
                     })}>
               🕘 {c('Önceki reçeteyi kopyala')}
             </button>
-            {/* REÇETE ŞABLONU (931): bölüm / doktor şablon kartında tanımlı. */}
-            {sablonReceteleri.length > 0 && (
-              <select className="recete-sablon" value="" aria-label={c('Reçete şablonundan yaz')}
-                      title={c('Bölüm / doktor şablonundaki hazır reçeteyi yazar')}
-                      onChange={e => { if (e.target.value !== '') void sablondanYaz(Number(e.target.value)) }}>
-                <option value="">📋 {c('Şablondan…')}</option>
-                {sablonReceteleri.map((r, i) => (
-                  <option key={`${r.sablon}-${r.grup}`} value={i}>{r.grup} ({r.satirlar.length}) · {r.sablon}</option>
-                ))}
-              </select>
-            )}
-            <button type="button" className="d bir" onClick={() => setAramaAcik(true)}>
-              ＋ {c('İlaç')}
-            </button>
-            {/* DUZENLE (kullanici: "+ Ilac saginda"): recete KARTINI acar -
-                ilaclar detayinda doz/periyot/sure/kutu/tarif. Imzali recete
-                degismez (kural sunucuda). */}
-            {/* Duzenle ve Sil YALNIZ IKON (kullanici); ne yaptigi title'da. */}
-            <button type="button" className="d ikon-dugme" disabled={!duzenlenecek}
-                    aria-label={c('Düzenle')}
-                    title={duzenlenecek ? c('Reçeteyi düzenle') : c('Önce satır seçin')}
-                    onClick={() => duzenlenecek && setKartReceteId(sayi(duzenlenecek.receteId))}>
-              ✎
-            </button>
-            <button type="button" className="d teh ikon-dugme" disabled={isaretli.length === 0}
-                    aria-label={c('Sil')}
-                    title={isaretli.length ? `${c('İşaretli ilaçları çıkar')} (${isaretli.length})`
-                                           : c('Önce satır işaretleyin')}
-                    onClick={() => void sil()}>
-              🗑
-            </button>
-            {acikRecete && (
-              <button type="button" className="d bir"
-                      onClick={() => void guvenli(async () => {
-                        if (!await onay('Reçete imzalanacak. İmzalanan reçete '
-                                      + 'değiştirilemez, ilaçlar hastanın aktif ilaç '
-                                      + 'listesine işlenir. Onaylıyor musunuz?')) return;
-                        const y = await api.receteImzala(sayi(acikRecete.id));
-                        mesaj(y.mesaj);
-                        yenile();
-                      })}>
-                ✍ {c('e-İmzala')}
-              </button>
-            )}
-          </span>
-          {/* Recete etiketi ve rozetler DUGMELERIN SAGINDA (kullanici). */}
-          <h6>
-            {c('Reçete')}
-            {acikRecete && <span className="rozet uyari">{metin(acikRecete.receteNo) || c('Taslak')}</span>}
-            {veri && veri.receteSatirlari.length > 0 && (
-              <span className={`rozet ${uyariVar ? 'hata' : 'olumlu'}`}>
-                {uyariVar ? '⚠ Etkileşim / alerji uyarısı var' : 'Etkileşim / alerji: temiz'}
-              </span>
-            )}
-          </h6>
+            {sablonSecici}
+          </div>
+          <p className="not ic">{c('Bu muayenede reçete yok. İlk ilaç eklenince reçete taslak olarak açılır.')}</p>
         </div>
-        <GenGrid
-          key={`recete-satir-${muayeneId}-${gridTazele}`}
-          kaynak="recete-satir"
-          gomulu
-          seritGizli
-          aramaGizli
-          boyut={50}
-          sabitFiltre={filtre}
-          onIsaretliDegisti={setIsaretli}
-          onSecimDegisti={setSecili}
-          onSatirAc={satir => setKartReceteId(sayi(satir.receteId))}
-        />
-      </div>
-
-      {/* RECETE KARTI (mockup recete_karti.html): tür, tanılar, ilaç satırı
-          düzeltme, imza ve Medula tek pencerede. */}
-      {kartReceteId !== null && kartReceteId > 0 && (
-        <ReceteKarti receteId={kartReceteId}
-          onKapat={() => { setKartReceteId(null); yenile() }}
-          onDegisti={() => setGridTazele(t => t + 1)} />
       )}
     </Kabuk>
   );

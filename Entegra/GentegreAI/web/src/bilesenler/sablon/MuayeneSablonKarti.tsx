@@ -52,7 +52,7 @@ const bosTercihler = (): Record<TercihAd, DetayDurumu> =>
   Object.fromEntries(TERCIHLER.map(t => [t.ad, bosDetay()])) as Record<TercihAd, DetayDurumu>;
 const tercihDegisti = (x: DetayDurumu) =>
   x.silinen.length > 0 || JSON.stringify(x.guncel) !== JSON.stringify(x.ilk);
-const GIZLI_ALAN = new Set(['secenekler']);
+const GIZLI_ALAN = new Set(['secenekler', 'oneriler']);
 /** Seçenekli tip (katalog SablonAlanTipKodlari: 3 = Seçenekli). */
 const SECENEKLI = 3;
 
@@ -66,22 +66,28 @@ export function secenekOku(v: unknown): string[] {
 }
 
 /**
- * SEÇENEK DÜZENLEYİCİSİ (kullanıcı: "seçenekleri de kartta düzenlenebilir
- * yap"): seçili alanın seçenekleri çip olarak - ekle (Enter), çıkar (✕),
- * sola/sağa taşı. JSON dizi olarak satıra yazılır; kayıt kartın Kaydet'iyle.
+ * SEÇENEK / ÖNERİ DÜZENLEYİCİSİ (kullanıcı: "seçenekleri de kartta
+ * düzenlenebilir yap"; "önerileri şablon ayarlara ekle, istersem
+ * değiştiririm"): seçili alanın listesi çip olarak - ekle (Enter), çıkar
+ * (✕), sola/sağa taşı. "Seçenekli" tipte SEÇENEKLER (kısıt), diğer tiplerde
+ * bulgu kutusunun ÖNERİLERİ (açılır liste, serbest yazı da serbest).
+ * JSON dizi olarak satıra yazılır; kayıt kartın Kaydet'iyle.
  */
 function SecenekDuzenleyici({ satir, salt, onDegis }: {
   satir: Record<string, unknown> | null;
   salt?: boolean;
-  onDegis(json: string | null): void;
+  /** alan: hangi kolona yazılacağı ('secenekler' | 'oneriler'). */
+  onDegis(json: string | null, alan: 'secenekler' | 'oneriler'): void;
 }) {
   const [yeni, setYeni] = useState('');
   if (!satir) return (
     <div className="ms-secenek"><h6>{c('Seçenekler')}</h6>
       <p className="not">{c('Gridden bir alan seçin (satır başındaki kutu).')}</p></div>
   );
-  const liste = secenekOku(satir.secenekler);
-  const yaz = (l: string[]) => onDegis(l.length ? JSON.stringify(l) : null);
+  const secenekli = Number(satir.tip ?? 0) === SECENEKLI;
+  const alan = secenekli ? 'secenekler' : 'oneriler';
+  const liste = secenekOku(satir[alan]);
+  const yaz = (l: string[]) => onDegis(l.length ? JSON.stringify(l) : null, alan);
   const ekle = () => {
     const d = yeni.trim();
     if (!d || liste.some(x => x.toLocaleLowerCase('tr') === d.toLocaleLowerCase('tr'))) { setYeni(''); return }
@@ -92,15 +98,14 @@ function SecenekDuzenleyici({ satir, salt, onDegis }: {
     if (j < 0 || j >= liste.length) return;
     const l = [...liste]; [l[i], l[j]] = [l[j], l[i]]; yaz(l);
   };
-  const secenekli = Number(satir.tip ?? 0) === SECENEKLI;
   return (
     <fieldset className="ms-secenek ms-fieldset" disabled={salt}>
-      <h6>{c('Seçenekler')} — {String(satir.ad ?? '')}</h6>
+      <h6>{secenekli ? c('Seçenekler') : c('Öneriler')} — {String(satir.ad ?? '')}</h6>
       {!secenekli && (
-        <p className="not">{c('Seçenekler yalnız "Seçenekli" tipte kullanılır; bu alanın tipi farklı.')}</p>
+        <p className="not">{c('Muayenede bulgu kutusunda açılır liste olarak çıkar; hekim listeden seçer ya da serbest yazar.')}</p>
       )}
       <div className="ms-cipler">
-        {liste.length === 0 && <span className="sonuk">{c('Seçenek yok.')}</span>}
+        {liste.length === 0 && <span className="sonuk">{secenekli ? c('Seçenek yok.') : c('Öneri yok.')}</span>}
         {liste.map((x, i) => (
           <span key={`${x}-${i}`} className={`ms-cip${String(satir.normalMetni ?? '') === x ? ' normal' : ''}`}>
             <button type="button" aria-label={`${x} ${c('sola')}`} disabled={i === 0} onClick={() => tasi(i, -1)}>‹</button>
@@ -111,7 +116,9 @@ function SecenekDuzenleyici({ satir, salt, onDegis }: {
         ))}
       </div>
       <div className="ms-secenek-ekle">
-        <input value={yeni} maxLength={60} placeholder={c('Yeni seçenek… (Enter)')} aria-label={c('Yeni seçenek')}
+        <input value={yeni} maxLength={secenekli ? 60 : 120}
+               placeholder={secenekli ? c('Yeni seçenek… (Enter)') : c('Yeni öneri… (Enter)')}
+               aria-label={secenekli ? c('Yeni seçenek') : c('Yeni öneri')}
                onChange={e => setYeni(e.target.value)}
                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); ekle() } }} />
         <button type="button" className="d" onClick={ekle}>＋ {c('Ekle')}</button>
@@ -473,8 +480,8 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
                                modalDuzenle ikonlu
                                gizliAlanlar={GIZLI_ALAN} onSecim={alanSecildi} />
                 <SecenekDuzenleyici salt={salt} satir={seciliAlan === null ? null : alanlar.guncel[seciliAlan] ?? null}
-                  onDegis={yeni => setAlanlar(o => ({ ...o, guncel: o.guncel.map((r, i) =>
-                    i === seciliAlan ? { ...r, secenekler: yeni } : r) }))} />
+                  onDegis={(yeni, alan) => setAlanlar(o => ({ ...o, guncel: o.guncel.map((r, i) =>
+                    i === seciliAlan ? { ...r, [alan]: yeni } : r) }))} />
               </div>
               <p className="not">
                 {c('Normal metni olan alan muayenede "☑ Tümü normal" ile tek tıkla dolar; yazılmış bulgu ezilmez.')}

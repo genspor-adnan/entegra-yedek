@@ -140,6 +140,29 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/tamamlama-kontrol - ozet sekmesinin kontrol
+        //   listesi (kullanici, mockup muayene_karti_v2). "Tamamla"nin
+        //   reddedecegi maddeler ONCEDEN, tamam olanlarla birlikte: hekim
+        //   neyin eksik oldugunu Tamamla'ya basmadan gorur. Kural istemcide
+        //   tekrar yazilmaz - ayni yardimci.
+        grup.MapGet("/{id:int}/tamamlama-kontrol", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var m = await TamamlamaVerisiAsync(baglanti, null, id, kilitle: false, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadi.");
+            var kontroller = await TamamlamaKontrolleriAsync(baglanti, null, id, m, iptal);
+            return Results.Ok(new
+            {
+                muayeneId = id, tamamlandi = m.Durum == 3,
+                kontroller = kontroller.Select(k => new { alan = k.Alan, ad = k.Ad, tamam = k.Tamam, mesaj = k.Mesaj }),
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         // POST /api/muayene/{id}/tamamla
         grup.MapPost("/{id:int}/tamamla", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri,
@@ -152,29 +175,7 @@ public static class MuayeneUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var m = await baglanti.TekAsync("""
-                select m.durum, m.belge_id, btrim(m.sikayet), btrim(m.karar),
-                       (select count(*) from public.tani t
-                         where t.muayene_id = m.id and t.tur = 1),
-                       (select count(*) from public.muayene_istem s
-                         where s.muayene_id = m.id and s.sonuc_durum in (0, 1)),
-                       -- e-NABIZ 103/106'NIN ZORUNLU ALANLARI (628):
-                       --   baslangic zamani, cikis sekli ve basvurunun
-                       --   SYS takip numarasi.
-                       (m.baslangic is not null),
-                       coalesce(public.fn_skrs_kod('cikis.sekli', m.cikis_sekli), ''),
-                       coalesce((select bb.sys_takip_no from public.belge_basvuru bb
-                                  where bb.id = m.belge_id), '')
-                  from public.muayene m where m.id = @p0 for update
-                """, islem, [id], o => new
-                {
-                    Durum = o.GetInt16(0),
-                    BelgeId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
-                    Sikayet = o.GetString(2), Karar = o.GetString(3),
-                    AnaTani = o.GetInt64(4), BekleyenIstem = o.GetInt64(5),
-                    Baslatildi = o.GetBoolean(6), CikisKodu = o.GetString(7),
-                    Takip = o.GetString(8),
-                }, iptal);
+            var m = await TamamlamaVerisiAsync(baglanti, islem, id, kilitle: true, iptal);
 
             if (m is null) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
@@ -184,29 +185,10 @@ public static class MuayeneUclari
             // TAMAMLAMA KURALI (muayene sureci, adim 10). Eksikler TEK SEFERDE
             //   sayilir: hekime "once tani gir", sonra "sikayet de lazim"
             //   demek ekrani iki kez kapattirirdi.
-            var eksikler = new List<AlanHatasi>();
-            if (m.AnaTani == 0) eksikler.Add(new("tanilar", "Ana tani zorunlu."));
-            if (m.Sikayet.Length == 0) eksikler.Add(new("sikayet", "Sikayet zorunlu."));
-            if (m.Karar.Length == 0) eksikler.Add(new("karar", "Degerlendirme / plan zorunlu."));
-
-            // e-NABIZ'IN ZORUNLU ALANLARI DA BURADA DURDURUR (628).
-            //
-            // 103 ve 106 muayene tamamlanirken uretilir; USS o paketleri
-            //   eksik alanla REDDEDIYOR ve hata hekime SAATLER SONRA, kuyruk
-            //   ekraninda donuyordu - o sirada muayene kilitli ve duzeltmek
-            //   icin geri acmak gerekiyor. Kontrol tamamlama anina alindi:
-            //     · MUAYENE_BASLANGIC_TARIHI (103) -> muayeneye alinmis olmali
-            //     · CIKIS_SEKLI (106)              -> SKRS listesinde gecerli kod
-            //   Gercek vaka: CIKIS_SEKLI bos gonderildi, "E1014 ... eksik
-            //   elemanlar var: CIKIS_SEKLI" (paket 652).
-            if (!m.Baslatildi)
-                eksikler.Add(new("baslangic",
-                    "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali."));
-            if (m.CikisKodu.Length == 0)
-                eksikler.Add(new("cikisSekli",
-                    "Cikis sekli secilmeli (e-Nabiz cikis bildiriminin zorunlu alani)."));
-            // BÖLÜM / DOKTOR ŞABLON KURALLARI (931) - aynı listeye, tek seferde.
-            eksikler.AddRange(await MuayeneSablonUclari.KuralEksikleriAsync(baglanti, islem, id, iptal));
+            //   Kural TEK YERDE (TamamlamaKontrolleriAsync): ozet sekmesinin
+            //   kontrol listesi de ayni listeyi gosterir.
+            var eksikler = (await TamamlamaKontrolleriAsync(baglanti, islem, id, m, iptal))
+                .Where(k => !k.Tamam).Select(k => new AlanHatasi(k.Alan, k.Mesaj)).ToList();
             if (eksikler.Count > 0)
                 throw GentegreHatasi.Dogrulama(
                     "Muayene tamamlanamaz: " + string.Join(" ", eksikler.Select(x => x.Mesaj)),
@@ -1033,6 +1015,137 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // VÜCUT ŞEMASI (kullanıcı: Şablon Muayene'de "Vücut şeması" düğmesi;
+        //   seçim: "bölge seç, bulguya yaz"). Seçilen bölgeler + not şablonun
+        //   VÜCUT ŞEMASI (tip 5) satırına yazılır: metin deger_metin'e (özete
+        //   ve rapora giden), yapısal liste deger_json'a (pencere yeniden
+        //   açılınca işaretli gelsin). Şablonda tip 5 satır yoksa şablona
+        //   "Vücut şeması" alanı EKLENİR - bulgu satırı şablon alanı ister.
+        grup.MapGet("/{id:int}/vucut-semasi", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var json = await baglanti.TekDegerAsync<string>("""
+                select coalesce((select b.deger_json::text
+                                   from public.muayene_bulgu b
+                                   join public.muayene_sablon_alan a on a.id = b.sablon_alan_id
+                                  where b.muayene_id = @p0 and a.tip = 5
+                                  order by b.id limit 1), '')
+                """, null, [id], iptal) ?? "";
+            var bolgeler = new List<string>();
+            var not = "";
+            if (json.Length > 0)
+            {
+                using var d = System.Text.Json.JsonDocument.Parse(json);
+                if (d.RootElement.TryGetProperty("bolgeler", out var b) && b.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    bolgeler.AddRange(b.EnumerateArray().Select(x => x.GetString() ?? "").Where(x => x.Length > 0));
+                if (d.RootElement.TryGetProperty("not", out var n)) not = n.GetString() ?? "";
+            }
+            return Results.Ok(new { id, bolgeler, not, izlemeNo = baglam.IzlemeNo });
+        });
+
+        grup.MapPost("/{id:int}/vucut-semasi", async (
+            int id, VucutSemasiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            var bolgeler = (istek.Bolgeler ?? [])
+                .Select(x => (x ?? "").Trim()).Where(x => x.Length > 0)
+                .Distinct().ToList();
+            var not = (istek.Not ?? "").Trim();
+            if (bolgeler.Count > 40 || bolgeler.Any(x => x.Length > 60))
+                throw GentegreHatasi.Dogrulama("Bölge listesi geçersiz.", [new("bolgeler", "En çok 40 bölge, her biri 60 karakter.")]);
+            if (not.Length > 500)
+                throw GentegreHatasi.Dogrulama("Not çok uzun.", [new("not", "En çok 500 karakter.")]);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var m = await baglanti.TekAsync(
+                "select durum, sablon_id from public.muayene where id = @p0 for update",
+                islem, [id], o => new { Durum = o.GetInt16(0), SablonId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadı.");
+            if (m.Durum == 3)
+                throw GentegreHatasi.IsKurali("Tamamlanmış muayenenin bulgusu değiştirilemez.");
+            if (m.SablonId is null)
+                throw GentegreHatasi.IsKurali("Önce muayene şablonu seçin ya da uygulayın.");
+
+            var alanId = await baglanti.TekDegerAsync<int?>(
+                "select id from public.muayene_sablon_alan where sablon_id = @p0 and tip = 5 order by sira, id limit 1",
+                islem, [m.SablonId], iptal);
+            if (alanId is null)
+            {
+                await baglanti.CalistirAsync("""
+                    insert into public.muayene_sablon_alan (sablon_id, kod, ad, tip, sira, ekleyen)
+                    values (@p0, 'vucutsema', 'Vücut şeması', 5,
+                            coalesce((select max(sira) from public.muayene_sablon_alan where sablon_id = @p0), 0) + 1,
+                            @p1)
+                    on conflict (sablon_id, kod) do nothing
+                    """, islem, [m.SablonId, baglam.KullaniciId], iptal);
+                alanId = await baglanti.TekDegerAsync<int?>(
+                    "select id from public.muayene_sablon_alan where sablon_id = @p0 and kod = 'vucutsema'",
+                    islem, [m.SablonId], iptal);
+            }
+
+            var metin = string.Join(", ", bolgeler) + (not.Length > 0 ? (bolgeler.Count > 0 ? " — " : "") + not : "");
+            var json = System.Text.Json.JsonSerializer.Serialize(new { bolgeler, not });
+            await baglanti.CalistirAsync("""
+                insert into public.muayene_bulgu (muayene_id, sablon_alan_id, normal, deger_metin, deger_json, ekleyen)
+                values (@p0, @p1, 0, nullif(@p2, ''), case when @p2 = '' then null else @p3::jsonb end, @p4)
+                on conflict (muayene_id, sablon_alan_id) do update
+                   set normal = 0, deger_metin = excluded.deger_metin, deger_json = excluded.deger_json,
+                       degistiren = @p4, degistirme_tarihi = now()
+                """, islem, [id, alanId!.Value, metin, json, baglam.KullaniciId], iptal);
+
+            var ozet = await OzetDerleAsync(baglanti, islem, id, iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { id, bolgeler, metin, bulguOzet = ozet,
+                                    mesaj = bolgeler.Count == 0 && not.Length == 0
+                                        ? "Vücut şeması temizlendi." : "Vücut şeması bulguya yazıldı.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/muayene/{id}/bulgu-metni - kaydedilmis bulgulardan metin,
+        //   YAZMADAN (Muayene Ozeti sekmesi). bulgu_ozet alani hekimin
+        //   duzeltebildigi rapor metnidir; ozet sekmesi gridin GUNCEL halini
+        //   gosterir (kullanici: "sistemde degisiklik yaptim ozete yansimadi").
+        grup.MapGet("/{id:int}/bulgu-metni", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var metin = await BulguMetniAsync(baglanti, null, id, iptal);
+            return Results.Ok(new { id, metin, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/{id}/bulgu-metni { satirlar } - EKRANDAKI (henuz
+        //   kaydedilmemis) satirlardan metin; HICBIR SEY YAZMAZ (kullanici:
+        //   "sistemde yazdiklarim ozete yansimadi" - Kaydet'e basmadan ozet
+        //   sekmesine geciyordu). Alan adi/normal metni sablondan okunur.
+        grup.MapPost("/{id:int}/bulgu-metni", async (
+            int id, BulguMetniIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            var satirlar = (istek.Satirlar ?? []).Take(500).Select(x => new
+            {
+                sablon_alan_id = x.SablonAlanId, normal = x.Normal ? 1 : 0,
+                deger_metin = x.DegerMetin, deger_sayi = x.DegerSayi, taraf = x.Taraf ?? 0,
+            });
+            await using var baglanti = await veri.AcAsync(iptal);
+            var metin = await BulguMetniAsync(baglanti, null, id, iptal,
+                System.Text.Json.JsonSerializer.Serialize(satirlar));
+            return Results.Ok(new { id, metin, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/{id}/ozet-derle - bulgulardan metin üret
         //   Rapora ve e-Nabız 103'e giden metin BUDUR. Hekim üzerine yazabilir;
         //   derleme metni EZER çünkü çağıran zaten "bulgulardan yeniden üret"
@@ -1378,35 +1491,118 @@ public static class MuayeneUclari
     /// Boş bırakılan ve normal işaretlenmemiş alan metne HİÇ GİRMEZ: "Batın:"
     /// diye boş bir satır, muayene edilmediğini değil özensizliği gösterirdi.
     /// </summary>
+    private sealed record TamamlamaVerisi(short Durum, int? BelgeId, string Sikayet, string Karar,
+        long AnaTani, long BekleyenIstem, bool Baslatildi, string CikisKodu, string Takip);
+
+    /// <summary>Tamamlama kuralinin okudugu alanlar (Tamamla'da satir kilitli).</summary>
+    private static Task<TamamlamaVerisi?> TamamlamaVerisiAsync(Npgsql.NpgsqlConnection baglanti,
+        Npgsql.NpgsqlTransaction? islem, int id, bool kilitle, CancellationToken iptal) =>
+        baglanti.TekAsync("""
+            select m.durum, m.belge_id, btrim(m.sikayet), btrim(m.karar),
+                   (select count(*) from public.tani t
+                     where t.muayene_id = m.id and t.tur = 1),
+                   (select count(*) from public.muayene_istem s
+                     where s.muayene_id = m.id and s.sonuc_durum in (0, 1)),
+                   -- e-NABIZ 103/106'NIN ZORUNLU ALANLARI (628):
+                   --   baslangic zamani, cikis sekli ve basvurunun
+                   --   SYS takip numarasi.
+                   (m.baslangic is not null),
+                   coalesce(public.fn_skrs_kod('cikis.sekli', m.cikis_sekli), ''),
+                   coalesce((select bb.sys_takip_no from public.belge_basvuru bb
+                              where bb.id = m.belge_id), '')
+              from public.muayene m where m.id = @p0
+            """ + (kilitle ? " for update" : ""), islem, [id], o => new TamamlamaVerisi(
+                o.GetInt16(0), o.IsDBNull(1) ? null : o.GetInt32(1),
+                o.GetString(2), o.GetString(3), o.GetInt64(4), o.GetInt64(5),
+                o.GetBoolean(6), o.GetString(7), o.GetString(8)), iptal);
+
+    /// <summary>
+    /// TAMAMLAMA KURALI (muayene sureci, adim 10) - TEK YER. Tamam olanlar da
+    /// listede: ozet sekmesi kontrol listesini buradan cizer, Tamamla
+    /// tamam olmayanlari tek seferde reddeder.
+    /// </summary>
+    private static async Task<List<(string Alan, string Ad, bool Tamam, string Mesaj)>> TamamlamaKontrolleriAsync(
+        Npgsql.NpgsqlConnection baglanti, Npgsql.NpgsqlTransaction? islem, int id,
+        TamamlamaVerisi m, CancellationToken iptal)
+    {
+        var k = new List<(string Alan, string Ad, bool Tamam, string Mesaj)>
+        {
+            ("tanilar", "Ana tanı", m.AnaTani > 0, "Ana tani zorunlu."),
+            ("sikayet", "Şikâyet", m.Sikayet.Length > 0, "Sikayet zorunlu."),
+            ("karar", "Değerlendirme / plan", m.Karar.Length > 0, "Degerlendirme / plan zorunlu."),
+            // e-NABIZ'IN ZORUNLU ALANLARI DA BURADA DURDURUR (628).
+            //
+            // 103 ve 106 muayene tamamlanirken uretilir; USS o paketleri
+            //   eksik alanla REDDEDIYOR ve hata hekime SAATLER SONRA, kuyruk
+            //   ekraninda donuyordu - o sirada muayene kilitli ve duzeltmek
+            //   icin geri acmak gerekiyor. Kontrol tamamlama anina alindi:
+            //     · MUAYENE_BASLANGIC_TARIHI (103) -> muayeneye alinmis olmali
+            //     · CIKIS_SEKLI (106)              -> SKRS listesinde gecerli kod
+            //   Gercek vaka: CIKIS_SEKLI bos gonderildi, "E1014 ... eksik
+            //   elemanlar var: CIKIS_SEKLI" (paket 652).
+            ("baslangic", "Muayeneye alındı", m.Baslatildi,
+                "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali."),
+            ("cikisSekli", "Çıkış şekli", m.CikisKodu.Length > 0,
+                "Cikis sekli secilmeli (e-Nabiz cikis bildiriminin zorunlu alani)."),
+        };
+        // BÖLÜM / DOKTOR ŞABLON KURALLARI (931) - aynı listeye, tek seferde.
+        foreach (var e in await MuayeneSablonUclari.KuralEksikleriAsync(baglanti, islem, id, iptal))
+            k.Add((e.Alan, e.Mesaj, false, e.Mesaj));
+        return k;
+    }
+
     private static async Task<string> OzetDerleAsync(Npgsql.NpgsqlConnection baglanti,
         Npgsql.NpgsqlTransaction islem, int muayeneId, CancellationToken iptal)
     {
+        var metin = await BulguMetniAsync(baglanti, islem, muayeneId, iptal);
+        await baglanti.CalistirAsync(
+            "update public.muayene set bulgu_ozet = @p1 where id = @p0",
+            islem, [muayeneId, metin], iptal);
+        return metin;
+    }
+
+    /// <summary>
+    /// Bulgu satirlarindan metin - YAZMAZ. "Normal" isaretsiz VE bulgusu bos
+    /// satir metne girmez (kullanici: "check yok ve edit girilmediyse ozete
+    /// o satir gelmesin"); normal isaretli satir sablonun normal metniyle,
+    /// bulgusu yazili satir yazilan bulguyla gelir.
+    /// </summary>
+    private static async Task<string> BulguMetniAsync(Npgsql.NpgsqlConnection baglanti,
+        Npgsql.NpgsqlTransaction? islem, int muayeneId, CancellationToken iptal,
+        string? satirJson = null)
+    {
+        // KAYNAK: kayitli satirlar ya da (ozet sekmesi) ekrandaki KAYDEDILMEMIS
+        //   satirlar - bicim kurali ayni, tek yerde.
+        var kaynak = satirJson is null
+            ? "public.muayene_bulgu b"
+            : "jsonb_to_recordset(@p1::jsonb) as b(sablon_alan_id int, normal int, "
+              + "deger_metin text, deger_sayi numeric, taraf int)";
+        var kosul = satirJson is null ? "b.muayene_id = @p0" : "true";
         var satirlar = await baglanti.ListeAsync("""
             select coalesce(nullif(a.grup, ''), a.ad) as baslik,
-                   case when b.normal = 1 and a.normal_metni <> '' then a.normal_metni
+                   -- NORMAL ISARETLI: yazilan bulgu > sablonun normal metni > 'Doğal'
+                   --   (normal metni tanimsiz isaretli satir ozetten DUSUYORDU).
+                   case when b.normal = 1 then coalesce(nullif(btrim(b.deger_metin), ''),
+                                                        nullif(a.normal_metni, ''), 'Doğal')
                         else coalesce(nullif(btrim(b.deger_metin), ''),
                                       case when b.deger_sayi is null then ''
                                            else b.deger_sayi::text || ' ' || a.birim end) end,
                    case b.taraf when 1 then 'Sag' when 2 then 'Sol'
                                 when 3 then 'Bilateral' else '' end
-              from public.muayene_bulgu b
+              from {{KAYNAK}}
               join public.muayene_sablon_alan a on a.id = b.sablon_alan_id
-             where b.muayene_id = @p0
+             where {{KOSUL}}
              order by a.sira asc, a.id asc
-            """, islem, [muayeneId],
+            """.Replace("{{KAYNAK}}", kaynak).Replace("{{KOSUL}}", kosul),
+            islem, satirJson is null ? [muayeneId] : [muayeneId, satirJson],
             o => (Baslik: o.GetString(0), Deger: o.GetString(1), Taraf: o.GetString(2)),
             iptal);
 
-        var metin = string.Join("\n", satirlar
+        return string.Join("\n", satirlar
             .Where(x => x.Deger.Trim().Length > 0)
             .Select(x => x.Taraf.Length > 0
                 ? $"{x.Baslik} ({x.Taraf}): {x.Deger}"
                 : $"{x.Baslik}: {x.Deger}"));
-
-        await baglanti.CalistirAsync(
-            "update public.muayene set bulgu_ozet = @p1 where id = @p0",
-            islem, [muayeneId, metin], iptal);
-        return metin;
     }
 
     /// <summary>
@@ -1470,6 +1666,14 @@ public static class MuayeneUclari
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);
+
+    /// <summary>Ozet onizlemesi icin ekrandaki bulgu satiri.</summary>
+    public sealed record BulguSatiri(int SablonAlanId, bool Normal, string? DegerMetin,
+        decimal? DegerSayi, int? Taraf);
+    public sealed record BulguMetniIstegi(BulguSatiri[]? Satirlar);
+
+    /// <summary>Vücut şeması: seçilen bölge adları + serbest not.</summary>
+    public sealed record VucutSemasiIstegi(string[]? Bolgeler, string? Not);
 
     /// <summary>Tanı ekleme: ICD penceresinde seçili kesinlik (1 Kesin · 2 Ön) ve
     /// taraf; tür (SKRS tani.turu) isteğe bağlı. Tür verilmezse Ön tanı = tür 3,

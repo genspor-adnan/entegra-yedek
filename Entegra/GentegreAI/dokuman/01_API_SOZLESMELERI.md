@@ -838,6 +838,29 @@ yoktur), sonuçlar yine görünür.
 tetkikinin bu istemden önceki son **onaylı** sonucu; yoksa `null`. Hekim
 eğilimi kümülatif ekrana gitmeden görür.
 
+## 9.8a Muayene › Tamamlama kontrolü
+
+```http
+GET /api/muayene/{id}/tamamlama-kontrol  // { tamamlandi, kontroller: [{ alan, ad, tamam, mesaj }] }
+```
+
+`POST /api/muayene/{id}/tamamla`'nın kuralı **önceden ve tamam olanlarla birlikte**: ana tanı,
+şikâyet, değerlendirme/plan, muayeneye alınmış olma, çıkış şekli + bölüm/doktor şablon
+kuralları (931). İki uç aynı yardımcıyı kullanır (`TamamlamaKontrolleriAsync`); muayene
+kartının "Muayene Özeti" sekmesi listeyi buradan çizer, kuralı istemcide tekrar yazmaz.
+
+## 9.8b Muayene › Vücut şeması
+
+```http
+GET  /api/muayene/{id}/vucut-semasi  // { bolgeler: string[], not }
+POST /api/muayene/{id}/vucut-semasi  // { bolgeler, not } -> { metin, bulguOzet, mesaj }
+```
+
+Seçilen bölge adları + not, muayenenin şablonundaki **tip 5 (Vücut şeması)** bulgu satırına
+yazılır: metin `deger_metin`'e (özet/rapor), liste `deger_json`'a. Şablonda tip 5 alan yoksa
+şablona `vucutsema` alanı eklenir. Şablonsuz muayene 422; tamamlanmış muayene 422. Boş seçim
+satırı temizler.
+
 **Yalnız ONAYLI sonuçlar** döner; onaylanmamış tetkik "sonuç bekleniyor"
 olarak listelenir — eksikliğin kendisi de hekim için bilgidir.
 
