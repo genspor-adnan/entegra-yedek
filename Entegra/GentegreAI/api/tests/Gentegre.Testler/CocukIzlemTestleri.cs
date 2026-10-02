@@ -72,7 +72,7 @@ public sealed class CocukIzlemTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Persentil_LMS_formuluyle_hesaplanir_egri_yoksa_NULL_doner()
     {
         if (!_olgu.Baglandi(nameof(Persentil_LMS_formuluyle_hesaplanir_egri_yoksa_NULL_doner)))
@@ -123,7 +123,7 @@ public sealed class CocukIzlemTestleri(VeritabaniOlgusu olgu)
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Paket_209_uretilir_ve_KILO_GRAMA_cevrilir()
     {
         if (!_olgu.Baglandi(nameof(Paket_209_uretilir_ve_KILO_GRAMA_cevrilir))) return;
@@ -166,7 +166,7 @@ public sealed class CocukIzlemTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, hastaId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_izlem_sirasi_IKI_KEZ_yazilamaz()
     {
         if (!_olgu.Baglandi(nameof(Ayni_izlem_sirasi_IKI_KEZ_yazilamaz))) return;

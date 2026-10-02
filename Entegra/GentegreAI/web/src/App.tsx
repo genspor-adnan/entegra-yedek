@@ -1,3 +1,4 @@
+import { ReceteKartiSayfa, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { modUyar } from './api/sozlesme';
@@ -5,87 +6,93 @@ import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
 import { PortalKabuk } from './sayfalar/portal/PortalKabuk';
-import { PortalDavet } from './sayfalar/portal/PortalDavet';
-import { BelgeKarti } from './sayfalar/BelgeKarti';
-import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
-import { StokAyarlar } from './sayfalar/StokAyarlar';
-import { KasaAyarlar } from './sayfalar/KasaAyarlar';
-import { IceriAlma } from './sayfalar/IceriAlma';
-import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
-import { CalismaPlani } from './sayfalar/CalismaPlani';
-import { AmeliyatCizelge } from './sayfalar/AmeliyatCizelge';
-import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
-import { KatalogAyarlar } from './sayfalar/KatalogAyarlar';
-import { DepartmanGorev } from './sayfalar/DepartmanGorev';
-import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
-import { KurumProfili } from './sayfalar/KurumProfili';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
-import { GenelAyarlar } from './sayfalar/GenelAyarlar';
-import { Mesajlar } from './sayfalar/Mesajlar';
-import { Kategoriler } from './sayfalar/Kategoriler';
-import { YapayZeka } from './sayfalar/YapayZeka';
-import { UtsSorgu } from './sayfalar/UtsSorgu';
-import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
-import { TeleradyolojiPanosu } from './sayfalar/TeleradyolojiPanosu';
-import { TeleradFatura } from './sayfalar/TeleradFatura';
-import { EnabizPanosu } from './sayfalar/EnabizPanosu';
-import { Hakedisim } from './sayfalar/Hakedisim';
-import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
-import { RadyolojiIstemKarti } from './sayfalar/RadyolojiIstemKarti';
-import { MuayeneSablonlari } from './sayfalar/MuayeneSablonlari';
-import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
-import { LabRaporCikti } from './sayfalar/LabRaporCikti';
-import { GozSemaCikti } from './sayfalar/GozSemaCikti';
-import { BelgeYazisi } from './sayfalar/BelgeYazisi';
-import { ServisCizelge } from './sayfalar/ServisCizelge';
-import { ArizaBildir } from './sayfalar/ariza/ArizaBildir';
-import { ZiyaretMobil } from './sayfalar/servis/ZiyaretMobil';
-import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
-import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
-import { DisLabEtiket } from './sayfalar/dis/DisLabEtiket';
-import { BzbhPanosu } from './sayfalar/BzbhPanosu';
-import { EnabizGunSonu } from './sayfalar/EnabizGunSonu';
-import { LabArsiv } from './sayfalar/LabArsiv';
-import { DisSeansKarti } from './sayfalar/dis/DisSeansKarti';
-import { DisPlanKarti } from './sayfalar/dis/DisPlanKarti';
-import { FtrProgramKarti } from './sayfalar/ftr/FtrProgramKarti';
-import { FtrSeansKarti } from './sayfalar/ftr/FtrSeansKarti';
-import { FtrPano } from './sayfalar/ftr/FtrPano';
-import { FormAcik } from './sayfalar/form/FormAcik';
-import { FormDoldur } from './sayfalar/form/FormDoldur';
-import { HastaFormlari } from './sayfalar/form/HastaFormlari';
-import { FormKutuphane } from './sayfalar/form/FormKutuphane';
-import { FormSablonEditor } from './sayfalar/form/FormSablonEditor';
-import { IsgPano } from './sayfalar/isg/IsgPano';
-import { IsgCalisanKarti } from './sayfalar/isg/IsgCalisanKarti';
-import { IsgTakvim } from './sayfalar/isg/IsgTakvim';
-import { CagriOperator } from './sayfalar/cagri/CagriOperator';
-import { CagriKarti } from './sayfalar/cagri/CagriKarti';
-import { CagriGiden } from './sayfalar/cagri/CagriGiden';
-import { CagriSupervizor } from './sayfalar/cagri/CagriSupervizor';
-import { CagriSantral } from './sayfalar/cagri/CagriSantral';
-import { SterilPano } from './sayfalar/steril/SterilPano';
-import { SterilDonguKarti } from './sayfalar/steril/SterilDonguKarti';
-import { SterilIzlenebilirlik } from './sayfalar/steril/SterilIzlenebilirlik';
-import { SterilAyarlar } from './sayfalar/steril/SterilAyarlar';
-import { MedulaHastaKabul } from './sayfalar/medula/MedulaHastaKabul';
-import { MedulaHizmetKayit } from './sayfalar/medula/MedulaHizmetKayit';
-import { MedulaFaturaDonem } from './sayfalar/medula/MedulaFaturaDonem';
-import { MedulaKuyruk } from './sayfalar/medula/MedulaKuyruk';
-import { LabKkGrafik } from './sayfalar/LabKkGrafik';
-import { LabEtiket } from './sayfalar/LabEtiket';
-import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
-import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
 import { calismaOku } from './bilesenler/calismaTercihi';
-import { Dokumler } from './sayfalar/Dokumler';
 import { useOtomatikTamamlamaKapali } from './bilesenler/otomatikTamamlama';
 import { c } from './dil/ceviri';
+import { tembel } from './bilesenler/TembelSayfa';
+
+// Ekran kodlari ROTAYA ILK GIRISTE yuklenir (denetim 28.09.2026): kabuk, giris,
+//   parola ekrani, liste ve panel hemen; digerleri tembel (bilesenler/TembelSayfa).
+const PortalDavet = tembel(() => import('./sayfalar/portal/PortalDavet'), 'PortalDavet');
+const BelgeKarti = tembel(() => import('./sayfalar/BelgeKarti'), 'BelgeKarti');
+const KasaIslemKarti = tembel(() => import('./sayfalar/KasaIslemKarti'), 'KasaIslemKarti');
+const StokAyarlar = tembel(() => import('./sayfalar/StokAyarlar'), 'StokAyarlar');
+const KasaAyarlar = tembel(() => import('./sayfalar/KasaAyarlar'), 'KasaAyarlar');
+const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
+const RandevuAyarlar = tembel(() => import('./sayfalar/RandevuAyarlar'), 'RandevuAyarlar');
+const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
+const AmeliyatCizelge = tembel(() => import('./sayfalar/AmeliyatCizelge'), 'AmeliyatCizelge');
+const KayitKabulAyarlar = tembel(() => import('./sayfalar/KayitKabulAyarlar'), 'KayitKabulAyarlar');
+const KatalogAyarlar = tembel(() => import('./sayfalar/KatalogAyarlar'), 'KatalogAyarlar');
+const DepartmanGorev = tembel(() => import('./sayfalar/DepartmanGorev'), 'DepartmanGorev');
+const FirmaBilgileri = tembel(() => import('./sayfalar/FirmaBilgileri'), 'FirmaBilgileri');
+const KurumProfili = tembel(() => import('./sayfalar/KurumProfili'), 'KurumProfili');
+const GenelAyarlar = tembel(() => import('./sayfalar/GenelAyarlar'), 'GenelAyarlar');
+const Mesajlar = tembel(() => import('./sayfalar/Mesajlar'), 'Mesajlar');
+const MuayeneSablonlari = tembel(() => import('./sayfalar/MuayeneSablonlari'), 'MuayeneSablonlari');
+const Kategoriler = tembel(() => import('./sayfalar/Kategoriler'), 'Kategoriler');
+const YapayZeka = tembel(() => import('./sayfalar/YapayZeka'), 'YapayZeka');
+const YzKontor = tembel(() => import('./sayfalar/YzKontor'), 'YzKontor');
+const UtsSorgu = tembel(() => import('./sayfalar/UtsSorgu'), 'UtsSorgu');
+const RadyolojiPanosu = tembel(() => import('./sayfalar/RadyolojiPanosu'), 'RadyolojiPanosu');
+const TeleradyolojiPanosu = tembel(() => import('./sayfalar/TeleradyolojiPanosu'), 'TeleradyolojiPanosu');
+const TeleradFatura = tembel(() => import('./sayfalar/TeleradFatura'), 'TeleradFatura');
+const EnabizPanosu = tembel(() => import('./sayfalar/EnabizPanosu'), 'EnabizPanosu');
+const Hakedisim = tembel(() => import('./sayfalar/Hakedisim'), 'Hakedisim');
+const RadyolojiRapor = tembel(() => import('./sayfalar/RadyolojiRapor'), 'RadyolojiRapor');
+const RadyolojiIstemKarti = tembel(() => import('./sayfalar/RadyolojiIstemKarti'), 'RadyolojiIstemKarti');
+const RadyolojiRaporCikti = tembel(() => import('./sayfalar/RadyolojiRaporCikti'), 'RadyolojiRaporCikti');
+const LabRaporCikti = tembel(() => import('./sayfalar/LabRaporCikti'), 'LabRaporCikti');
+const GozSemaCikti = tembel(() => import('./sayfalar/GozSemaCikti'), 'GozSemaCikti');
+const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi');
+const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
+const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
+const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
+const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
+const DisGunlukAkis = tembel(() => import('./sayfalar/dis/DisGunlukAkis'), 'DisGunlukAkis');
+const DisLabEtiket = tembel(() => import('./sayfalar/dis/DisLabEtiket'), 'DisLabEtiket');
+const BzbhPanosu = tembel(() => import('./sayfalar/BzbhPanosu'), 'BzbhPanosu');
+const EnabizGunSonu = tembel(() => import('./sayfalar/EnabizGunSonu'), 'EnabizGunSonu');
+const LabArsiv = tembel(() => import('./sayfalar/LabArsiv'), 'LabArsiv');
+const DisSeansKarti = tembel(() => import('./sayfalar/dis/DisSeansKarti'), 'DisSeansKarti');
+const DisPlanKarti = tembel(() => import('./sayfalar/dis/DisPlanKarti'), 'DisPlanKarti');
+const FtrProgramKarti = tembel(() => import('./sayfalar/ftr/FtrProgramKarti'), 'FtrProgramKarti');
+const FtrSeansKarti = tembel(() => import('./sayfalar/ftr/FtrSeansKarti'), 'FtrSeansKarti');
+const FtrPano = tembel(() => import('./sayfalar/ftr/FtrPano'), 'FtrPano');
+const FormAcik = tembel(() => import('./sayfalar/form/FormAcik'), 'FormAcik');
+const FormDoldur = tembel(() => import('./sayfalar/form/FormDoldur'), 'FormDoldur');
+const HastaFormlari = tembel(() => import('./sayfalar/form/HastaFormlari'), 'HastaFormlari');
+const FormKutuphane = tembel(() => import('./sayfalar/form/FormKutuphane'), 'FormKutuphane');
+const FormSablonEditor = tembel(() => import('./sayfalar/form/FormSablonEditor'), 'FormSablonEditor');
+const IsgPano = tembel(() => import('./sayfalar/isg/IsgPano'), 'IsgPano');
+const IsgCalisanKarti = tembel(() => import('./sayfalar/isg/IsgCalisanKarti'), 'IsgCalisanKarti');
+const IsgTakvim = tembel(() => import('./sayfalar/isg/IsgTakvim'), 'IsgTakvim');
+const CagriOperator = tembel(() => import('./sayfalar/cagri/CagriOperator'), 'CagriOperator');
+const CagriKarti = tembel(() => import('./sayfalar/cagri/CagriKarti'), 'CagriKarti');
+const CagriGiden = tembel(() => import('./sayfalar/cagri/CagriGiden'), 'CagriGiden');
+const CagriSupervizor = tembel(() => import('./sayfalar/cagri/CagriSupervizor'), 'CagriSupervizor');
+const CagriSantral = tembel(() => import('./sayfalar/cagri/CagriSantral'), 'CagriSantral');
+const SterilPano = tembel(() => import('./sayfalar/steril/SterilPano'), 'SterilPano');
+const SterilDonguKarti = tembel(() => import('./sayfalar/steril/SterilDonguKarti'), 'SterilDonguKarti');
+const SterilIzlenebilirlik = tembel(() => import('./sayfalar/steril/SterilIzlenebilirlik'), 'SterilIzlenebilirlik');
+const SterilAyarlar = tembel(() => import('./sayfalar/steril/SterilAyarlar'), 'SterilAyarlar');
+const MedulaHastaKabul = tembel(() => import('./sayfalar/medula/MedulaHastaKabul'), 'MedulaHastaKabul');
+const MedulaHizmetKayit = tembel(() => import('./sayfalar/medula/MedulaHizmetKayit'), 'MedulaHizmetKayit');
+const MedulaFaturaDonem = tembel(() => import('./sayfalar/medula/MedulaFaturaDonem'), 'MedulaFaturaDonem');
+const MedulaKuyruk = tembel(() => import('./sayfalar/medula/MedulaKuyruk'), 'MedulaKuyruk');
+const LabKkGrafik = tembel(() => import('./sayfalar/LabKkGrafik'), 'LabKkGrafik');
+const LabEtiket = tembel(() => import('./sayfalar/LabEtiket'), 'LabEtiket');
+const SatisAyarlar = tembel(() => import('./sayfalar/BelgeAyarlar'), 'SatisAyarlar');
+const AlisAyarlar = tembel(() => import('./sayfalar/BelgeAyarlar'), 'AlisAyarlar');
+const IskontoOnaylari = tembel(() => import('./sayfalar/IskontoOnaylari'), 'IskontoOnaylari');
+const Dokumler = tembel(() => import('./sayfalar/Dokumler'), 'Dokumler');
 
 function Yollar() {
-  const { kullanici, yukleniyor, yetki } = useOturum();
+  const { kullanici, yukleniyor, yetki, oturumHatasi, yenidenDene, cikisYap } = useOturum();
   const konum = useLocation();
 
   // ACIK FORM SAYFASI (740): /f/{kod} - hastanin telefonunda, OTURUMSUZ. Giris
@@ -98,6 +105,20 @@ function Yollar() {
     return <Routes><Route path="/davet/:jeton" element={<PortalDavet />} /></Routes>;
 
   if (yukleniyor) return <div className="tam-ekran-bilgi">{c('Yukleniyor…')}</div>;
+  // GECICI OTURUM HATASI (denetim 28.09.2026 #11): token duruyor ama profil
+  //   okunamadi (ag / 5xx). Giris ekrani DEGIL (oturum silinmedi), korumali
+  //   ekran da DEGIL (profil dogrulanmadi) - yalniz yeniden deneme.
+  if (!kullanici && oturumHatasi)
+    return (
+      <div className="tam-ekran-bilgi" role="alert">
+        <p>{c('Sunucuya şu an ulaşılamıyor; oturumunuz korunuyor.')}</p>
+        <p className="sonuk">{oturumHatasi}</p>
+        <button className="d bir" type="button" onClick={() => void yenidenDene()}>
+          {c('Yeniden Dene')}
+        </button>{' '}
+        <button className="d" type="button" onClick={() => void cikisYap()}>{c('Çıkış')}</button>
+      </div>
+    );
   if (!kullanici) return <Giris />;
   // ZORUNLU PAROLA DEGISIMI (667): varsayilan parolayla (kart id) giren kisi
   //   once kendi parolasini belirler - bayrak dusene kadar HICBIR rota
@@ -176,6 +197,7 @@ function Yollar() {
             urun modunda. Ekranlar simdilik kapsam sayfasi. */}
         {yetki('mesaj') && <Route path="/mesajlar" element={<Mesajlar />} />}
         {yetki('ai') && <Route path="/yapay-zeka" element={<YapayZeka />} />}
+        {yetki('ai.kontor') && <Route path="/yz-kontor" element={<YzKontor />} />}
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
@@ -257,6 +279,28 @@ function Yollar() {
             sayfalardir - generic liste/kart odontogrami cizemez. */}
         {/* Dis hasta karti MODALDIR (kullanici): arkada Dis Hastalari listesi,
             ustte odontogram + plan penceresi - generic kartlarla ayni his. */}
+        {/* RECETE ve ALERJI KARTLARI OZEL (mockup Ekranlar/Muayene/recete_karti,
+            alerji_karti): liste arkada, kart ustte - diger kartlarla ayni his. */}
+        {(() => {
+          const l = (rota: string) => LISTELER.find(x => (x.rota ?? x.kaynak) === rota);
+          const rotalar: { rota: string; kart: React.ReactNode }[] = [
+            { rota: 'recete', kart: <ReceteKartiSayfa listeYolu="/recete" /> },
+            { rota: 'medula-recete', kart: <ReceteKartiSayfa listeYolu="/medula-recete" /> },
+            { rota: 'hasta-alerji', kart: <AlerjiKartiSayfa /> },
+            { rota: 'hasta-kronik', kart: <KronikTaniKartiSayfa /> },
+            { rota: 'hasta-ilac', kart: <IlacKaydiKartiSayfa /> },
+            { rota: 'hasta-gecmis', kart: <GecmisOlayKartiSayfa /> },
+          ];
+          return rotalar.map(r => {
+            const t = l(r.rota);
+            return t && yetki(t.yetkiKodu) ? (
+              <Route key={`${r.rota}-ozel`} path={`/${r.rota}/:id`} element={<>
+                <Liste tanim={t} />
+                {r.kart}
+              </>} />
+            ) : null;
+          });
+        })()}
         {yetki('dis.hasta') && (
           <Route path="/dis-hasta/:hastaId" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'dis-hasta')!} />

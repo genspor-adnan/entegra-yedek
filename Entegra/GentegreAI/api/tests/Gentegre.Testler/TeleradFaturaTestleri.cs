@@ -82,7 +82,7 @@ public sealed class TeleradFaturaTestleri(VeritabaniOlgusu olgu)
             [kurum, DateTime.Today.AddDays(-30), DateTime.Today],
             OkuyucuGenisletmeleri.Sozluk, CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Donem_isleri_TEK_faturada_toplanir()
     {
         if (!_olgu.Baglandi(nameof(Donem_isleri_TEK_faturada_toplanir))) return;
@@ -104,7 +104,7 @@ public sealed class TeleradFaturaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Faturalanmis_istek_IKINCI_KEZ_gelmez()
     {
         if (!_olgu.Baglandi(nameof(Faturalanmis_istek_IKINCI_KEZ_gelmez))) return;
@@ -129,7 +129,7 @@ public sealed class TeleradFaturaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Onaylanmamis_is_faturaya_GIRMEZ()
     {
         if (!_olgu.Baglandi(nameof(Onaylanmamis_is_faturaya_GIRMEZ))) return;
@@ -148,7 +148,7 @@ public sealed class TeleradFaturaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task SLA_kacan_is_AYRI_satirda_ve_iskontolu()
     {
         if (!_olgu.Baglandi(nameof(SLA_kacan_is_AYRI_satirda_ve_iskontolu))) return;
@@ -171,7 +171,7 @@ public sealed class TeleradFaturaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Eksik_is_SESSIZCE_atlanmaz()
     {
         if (!_olgu.Baglandi(nameof(Eksik_is_SESSIZCE_atlanmaz))) return;

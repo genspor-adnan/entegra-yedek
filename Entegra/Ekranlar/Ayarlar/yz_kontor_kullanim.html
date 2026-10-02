@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YZ Kontör &amp; Kullanım — Mockup (Gentegre AI · Ayarlar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --mor:#6a3fb5;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;color:var(--ink)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+
+  /* KPI */
+  .kpi{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:10px;padding:12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .k{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:9px 11px}
+  .k .e{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .k .d{font-size:22px;font-weight:bold;color:var(--navy);margin-top:3px}
+  .k .d small{font-size:12px;color:var(--muted);font-weight:normal}
+  .k .a{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .bar{height:8px;border-radius:4px;background:#e9eef4;margin-top:7px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#5cb87a,#3f9a5e)}
+  .bar.uyari i{background:linear-gradient(90deg,#e6b44f,#c98a12)}
+  .k.bakiye{border-color:#bfe3cb;background:linear-gradient(#f5fbf7,#fff)}
+
+  /* sekme */
+  .katab{display:flex;gap:2px;padding:0 10px;background:var(--head);border-bottom:1px solid var(--line)}
+  .kat{padding:7px 14px;cursor:pointer;border:1px solid transparent;border-bottom:none;border-radius:4px 4px 0 0;color:#3a5573;margin-top:4px}
+  .kat.on{background:#fff;border-color:var(--line);font-weight:bold;color:var(--navy);margin-bottom:-1px}
+  .kat .b{display:inline-block;margin-left:5px;background:#e3ecf7;color:#2f6db3;border-radius:8px;padding:0 6px;font-size:10px}
+  .govde{padding:12px}
+
+  .iki{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff}
+  .kutu h6{margin:0;padding:7px 10px;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);font-size:11.5px;color:#2c4a6b}
+  .kutu .ic{padding:10px}
+
+  /* grafik */
+  .grafik{display:flex;align-items:flex-end;gap:3px;height:150px;padding:6px 4px 0;border-bottom:1px solid var(--line2)}
+  .grafik .g{flex:1;display:flex;flex-direction:column-reverse;gap:1px;cursor:default}
+  .grafik .g span{display:block;border-radius:1px}
+  .s-tani{background:#2f6db3}.s-tetkik{background:#3f9a5e}.s-ilac{background:#c98a12}.s-rehber{background:#8e7cc3}
+  .eks{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;padding:3px 2px 0}
+  .lej{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#3a5573}
+  .lej i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
+  .dagilim .satir{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line2)}
+  .dagilim .satir:last-child{border-bottom:0}
+  .dagilim .cubuk{height:12px;background:#e9eef4;border-radius:3px;overflow:hidden}
+  .dagilim .cubuk i{display:block;height:100%}
+
+  .dg{overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f5f9fe}
+  .sag{text-align:right}.orta{text-align:center}.sonuk{color:var(--muted)}
+  .art{color:var(--ok);font-weight:bold}.eksi{color:var(--kirmizi)}
+
+  .arama{display:flex;gap:8px;align-items:center;padding:0 0 8px;flex-wrap:wrap}
+  .arama .kutuara{flex:1;min-width:220px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap;cursor:pointer}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  .form{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld .inp{border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 8px;min-height:26px}
+  .fld .inp.salt{background:#f4f6f9;color:#4d5d6e}
+  .tam{grid-column:1/-1}
+  .anah{display:flex;gap:6px;align-items:center}
+  .sw{display:inline-block;width:30px;height:16px;border-radius:8px;background:#3f9a5e;position:relative;vertical-align:middle}
+  .sw::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}
+  .sw.kap{background:#c5ced8}.sw.kap::after{right:auto;left:2px}
+
+  .bant{margin:0 0 10px;padding:8px 10px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;color:#24466f;line-height:1.55}
+  .bant.sari{border-color:#f2ddbf;background:#fdf6e3;color:#6d4c10}
+  .bant.kir{border-color:#f3c4bf;background:#fbe9e7;color:#8a1f18}
+
+  .maske{font-family:Consolas,monospace;font-size:11px;background:#f7f9fc;border:1px solid var(--line2);border-radius:3px;padding:8px 10px;white-space:pre-wrap;line-height:1.5}
+  .maske mark{background:#fff2c2;padding:0 2px}
+  .liste{margin:0;padding-left:18px;line-height:1.7}
+  .ok-i{color:var(--ok)}.no-i{color:var(--kirmizi)}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+  /* modal */
+  .perde{position:fixed;inset:0;background:rgba(15,30,50,.35);display:flex;align-items:center;justify-content:center;z-index:10}
+  .modal{width:min(520px,94vw);background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 12px 40px rgba(20,40,70,.3)}
+  .modal .title{border-radius:4px 4px 0 0}
+  .modal .ic{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+  .modal .alt{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;background:var(--head);border-top:1px solid var(--line)}
+  .paket{display:flex;gap:6px;flex-wrap:wrap}
+  .paket .chip{padding:4px 12px}
+
+  /* planlar */
+  .planlar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .plan{border:1px solid var(--line);border-radius:6px;background:#fff;padding:14px;display:flex;flex-direction:column;gap:6px;position:relative;cursor:pointer}
+  .plan:hover{border-color:#9dbbe0}
+  .plan.sec{border:2px solid var(--accent);box-shadow:0 0 0 3px #d7e7fb;padding:13px}
+  .plan .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .plan .fiyat{font-size:24px;font-weight:bold;color:var(--ink)}
+  .plan .fiyat small{font-size:12px;color:var(--muted);font-weight:normal}
+  .plan .kont{font-size:12px;color:#2c4a6b;font-weight:bold}
+  .plan ul{margin:4px 0 0;padding-left:16px;line-height:1.7;color:#3a5573;font-size:11.5px}
+  .plan .rozetust{position:absolute;top:-10px;right:12px}
+  .plan .birim{font-size:10.5px;color:var(--muted)}
+  .donem{display:inline-flex;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:10px}
+  .donem span{padding:4px 14px;font-size:11px;cursor:pointer;color:var(--muted)}
+  .donem span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .ekpaket{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .ekpaket .p{border:1px dashed var(--line);border-radius:4px;padding:8px;text-align:center;cursor:pointer;background:#fbfcfe}
+  .ekpaket .p.sec{border:2px solid var(--accent);background:#eef4fc;padding:7px}
+  .ekpaket .p b{display:block;font-size:14px;color:var(--navy)}
+  /* sihirbaz */
+  .modal.genis{width:min(940px,96vw)}
+  .adimlar{display:flex;gap:0;padding:8px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .adim{flex:1;display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11.5px}
+  .adim i{display:inline-flex;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);align-items:center;justify-content:center;font-style:normal;font-size:11px;background:#fff}
+  .adim.on{color:var(--navy);font-weight:bold}.adim.on i{background:var(--accent);border-color:var(--accent);color:#fff}
+  .adim.bitti i{background:#3f9a5e;border-color:#3f9a5e;color:#fff}
+  .modal .gov{padding:14px;max-height:70vh;overflow:auto}
+  .ozet{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;padding:10px;line-height:1.8}
+  .ozet .t{display:flex;justify-content:space-between}
+  .ozet .t.top{border-top:1px solid var(--line2);margin-top:4px;padding-top:4px;font-weight:bold;font-size:13px}
+  .guvenli{border:2px solid #bfe3cb;border-radius:6px;background:#fff;padding:12px}
+  .guvenli .bas{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:bold;margin-bottom:10px}
+  .kart{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+  .logolar{display:flex;gap:6px;margin-top:8px}
+  .logolar span{border:1px solid var(--line);border-radius:3px;padding:2px 8px;font-size:10px;color:#3a5573;background:#fff;font-weight:bold}
+  .taksit{display:flex;gap:6px;flex-wrap:wrap}
+  .sonuc{text-align:center;padding:20px}
+  .sonuc .ik{font-size:42px}
+  .onay{display:flex;gap:6px;align-items:flex-start;font-size:11px;color:#3a5573;margin-top:8px}
+  .onay u{color:var(--accent);cursor:pointer}
+  @media (max-width:900px){.planlar{grid-template-columns:1fr}.ekpaket{grid-template-columns:1fr 1fr}.kart{grid-template-columns:1fr}}
+
+  .not{max-width:1400px;margin:12px auto;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1000px){.kpi{grid-template-columns:1fr 1fr}.iki{grid-template-columns:1fr}.form{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🤖 YZ Kontör &amp; Kullanım
+    <span class="sp">Ayarlar › Yapay Zekâ › Kontör &amp; Kullanım</span></div>
+
+  <div class="toolbar">
+    <button class="btn primary" onclick="satinAl()">💳 Kontör Satın Al</button>
+    <button class="btn" onclick="sekme('plan')">📦 Planım</button>
+    <button class="btn pas" title="Yalnız satıcı (Gentegre) destek ekibi">± Düzeltme / İade</button>
+    <div class="sepv"></div>
+    <button class="btn">⟳ Yenile</button>
+    <button class="btn">⬇ Excel</button>
+    <span class="sp"></span>
+    <span class="rz mavi">Sağlayıcı: Groq · openai/gpt-oss-120b</span>
+    <span class="rz sari">TEST ortamı</span>
+    <span class="rz ok">🔒 Anonimleştirme açık</span>
+    <span class="rz ok">● Model aktif</span>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi">
+    <div class="k bakiye">
+      <div class="e">Kontör bakiyesi</div>
+      <div class="d">86 <small>kontör</small></div>
+      <div class="bar"><i style="width:86%"></i></div>
+      <div class="a">Plan: <b>Profesyonel</b> · 14 Eki'de +2.000 yenilenir · ≈ 86 öneri hakkı</div>
+    </div>
+    <div class="k">
+      <div class="e">Bugün</div>
+      <div class="d">14 <small>/ 500 çağrı</small></div>
+      <div class="bar"><i style="width:3%"></i></div>
+      <div class="a">Günlük sınır: rehber + YZ önerileri birlikte</div>
+    </div>
+    <div class="k">
+      <div class="e">Bu ay harcanan</div>
+      <div class="d">214 <small>kontör</small></div>
+      <div class="a">Geçen ay 168 · <span class="art">▲ %27</span></div>
+    </div>
+    <div class="k">
+      <div class="e">Ortalama yanıt</div>
+      <div class="d">1,4 <small>sn</small></div>
+      <div class="a">Tanı 1,5 · Tetkik 0,9 · İlaç 0,9 sn</div>
+    </div>
+    <div class="k">
+      <div class="e">Başarısız çağrı</div>
+      <div class="d">3 <small>bu ay</small></div>
+      <div class="a">Ücretlendirilmedi · son: zaman aşımı</div>
+    </div>
+  </div>
+
+  <div class="katab" role="tablist">
+    <div class="kat on" data-s="ozet" onclick="sekme('ozet')">Özet</div>
+    <div class="kat" data-s="hareket" onclick="sekme('hareket')">Hareketler <span class="b">128</span></div>
+    <div class="kat" data-s="kullanici" onclick="sekme('kullanici')">Kullanıcıya Göre</div>
+    <div class="kat" data-s="plan" onclick="sekme('plan')">Plan &amp; Faturalar</div>
+    <div class="kat" data-s="ayar" onclick="sekme('ayar')">Ayarlar</div>
+    <div class="kat" data-s="gizlilik" onclick="sekme('gizlilik')">Gizlilik &amp; Denetim</div>
+  </div>
+
+  <div class="govde">
+    <!-- ÖZET -->
+    <section data-p="ozet">
+      <div class="iki">
+        <div class="kutu">
+          <h6>Son 30 gün — günlük çağrı (özelliğe göre)</h6>
+          <div class="ic">
+            <div class="grafik" id="grafik"></div>
+            <div class="eks"><span>31 Ağu</span><span>15 Eyl</span><span>29 Eyl</span></div>
+            <div class="lej">
+              <span><i class="s-tani"></i>Tanı önerisi</span>
+              <span><i class="s-tetkik"></i>Tetkik önerisi</span>
+              <span><i class="s-ilac"></i>İlaç önerisi</span>
+              <span><i class="s-rehber"></i>YZ Rehber</span>
+            </div>
+          </div>
+        </div>
+        <div class="kutu">
+          <h6>Bu ay — özelliğe göre kontör</h6>
+          <div class="ic dagilim">
+            <div class="satir"><span>🩺 Tanı</span><div class="cubuk"><i class="s-tani" style="width:46%"></i></div><b class="sag">98</b></div>
+            <div class="satir"><span>🔬 Tetkik</span><div class="cubuk"><i class="s-tetkik" style="width:22%"></i></div><b class="sag">47</b></div>
+            <div class="satir"><span>💊 İlaç</span><div class="cubuk"><i class="s-ilac" style="width:19%"></i></div><b class="sag">41</b></div>
+            <div class="satir"><span>❓ Rehber</span><div class="cubuk"><i class="s-rehber" style="width:13%"></i></div><b class="sag">28</b></div>
+          </div>
+          <h6 style="border-top:1px solid var(--line)">Öneri kalitesi (bu ay)</h6>
+          <div class="ic">
+            <div class="dagilim">
+              <div class="satir"><span>Kabul edilen</span><div class="cubuk"><i style="width:61%;background:#3f9a5e"></i></div><b class="sag">%61</b></div>
+              <div class="satir"><span>Katalogda yok</span><div class="cubuk"><i style="width:4%;background:#c98a12"></i></div><b class="sag">%4</b></div>
+              <div class="satir"><span>Alerjiyle elenen</span><div class="cubuk"><i style="width:2%;background:#b3261e"></i></div><b class="sag">%2</b></div>
+            </div>
+            <div class="sonuk" style="margin-top:6px">Kabul = önerilen kodun/ilacın aynı muayenede eklenmesi.</div>
+          </div>
+        </div>
+      </div>
+      <div class="bant sari" style="margin-top:12px">
+        ⚠ Bakiye <b>uyarı eşiğinin (20)</b> altına düşünce yöneticilere bildirim gider; bakiye bitince YZ
+        önerileri kapanır, <b>rehber katalog cevabıyla çalışmaya devam eder</b>. Başarısız çağrıdan kontör düşülmez.
+      </div>
+    </section>
+
+    <!-- HAREKETLER -->
+    <section data-p="hareket" hidden>
+      <div class="arama">
+        <div class="kutuara">🔍 Kullanıcı, muayene no, açıklama…</div>
+        <span class="chip on">Tümü</span><span class="chip">Yükleme</span><span class="chip">Harcama</span>
+        <span class="chip">Düzeltme / İade</span>
+        <span class="sepv"></span>
+        <span class="chip">🩺 Tanı</span><span class="chip">🔬 Tetkik</span><span class="chip">💊 İlaç</span><span class="chip">❓ Rehber</span>
+        <span class="chip">📅 Bu ay ▾</span>
+      </div>
+      <div class="dg kutu">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Tür</th><th>Özellik</th><th>Muayene</th><th>Kullanıcı</th>
+            <th>Model</th><th class="sag">Jeton</th><th class="sag">Süre</th><th class="sag">Miktar</th><th class="sag">Bakiye</th><th>Açıklama</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>29.09.2026 19:42</td><td><span class="rz kir">Harcama</span></td><td>🩺 Tanı</td><td>#11</td><td>Dr. Elif Kaya</td><td class="sonuk">gpt-oss-120b</td><td class="sag">1.159</td><td class="sag">1,5 sn</td><td class="sag eksi">−1</td><td class="sag">86</td><td>5 öneri · 1 kırmızı bayrak</td></tr>
+            <tr><td>29.09.2026 19:40</td><td><span class="rz kir">Harcama</span></td><td>💊 İlaç</td><td>#11</td><td>Dr. Elif Kaya</td><td class="sonuk">gpt-oss-120b</td><td class="sag">884</td><td class="sag">0,9 sn</td><td class="sag eksi">−1</td><td class="sag">87</td><td>4 öneri · 1 alerjiyle elendi</td></tr>
+            <tr><td>29.09.2026 19:38</td><td><span class="rz kir">Harcama</span></td><td>🔬 Tetkik</td><td>#11</td><td>Dr. Elif Kaya</td><td class="sonuk">gpt-oss-120b</td><td class="sag">1.402</td><td class="sag">0,9 sn</td><td class="sag eksi">−1</td><td class="sag">88</td><td>2 lab · 0 görüntüleme</td></tr>
+            <tr><td>29.09.2026 19:31</td><td><span class="rz pas">Başarısız</span></td><td>🩺 Tanı</td><td>#10</td><td>Dr. Mert Ak</td><td class="sonuk">gpt-oss-120b</td><td class="sag">—</td><td class="sag">30,0 sn</td><td class="sag sonuk">0</td><td class="sag">89</td><td>Zaman aşımı — ücretlendirilmedi</td></tr>
+            <tr><td>29.09.2026 18:55</td><td><span class="rz kir">Harcama</span></td><td>❓ Rehber</td><td>—</td><td>Banko 2</td><td class="sonuk">gpt-oss-120b</td><td class="sag">612</td><td class="sag">0,8 sn</td><td class="sag eksi">−1</td><td class="sag">89</td><td>"Hasta nasıl kurum değiştirir?"</td></tr>
+            <tr><td>29.09.2026 18:20</td><td><span class="rz ok">Yükleme</span></td><td>—</td><td>—</td><td>Yönetici</td><td class="sonuk">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag art">+90</td><td class="sag">100</td><td>Test yüklemesi (Groq denemesi)</td></tr>
+            <tr><td>20.09.2026 12:58</td><td><span class="rz mavi">Düzeltme</span></td><td>—</td><td>—</td><td>Yönetici</td><td class="sonuk">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag art">+10</td><td class="sag">10</td><td>Açılış bakiyesi</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sonuk" style="margin-top:6px">Muayene numarası tıklanınca muayene kartı açılır (yetkisi olana). Modele giden metin burada <b>saklanmaz</b>; yalnız sayılar.</div>
+    </section>
+
+    <!-- KULLANICI -->
+    <section data-p="kullanici" hidden>
+      <div class="arama">
+        <div class="kutuara">🔍 Kullanıcı / bölüm…</div>
+        <span class="chip on">Bu ay</span><span class="chip">Son 7 gün</span><span class="chip">Bugün</span>
+      </div>
+      <div class="dg kutu">
+        <table>
+          <thead><tr>
+            <th>Kullanıcı</th><th>Bölüm</th><th class="orta">🩺 Tanı</th><th class="orta">🔬 Tetkik</th><th class="orta">💊 İlaç</th><th class="orta">❓ Rehber</th>
+            <th class="sag">Kontör</th><th class="orta">Kabul oranı</th><th>Son kullanım</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>Dr. Elif Kaya</td><td>İç Hastalıkları</td><td class="orta">42</td><td class="orta">18</td><td class="orta">15</td><td class="orta">3</td><td class="sag"><b>78</b></td><td class="orta"><span class="rz ok">%68</span></td><td>29.09.2026 19:42</td></tr>
+            <tr><td>Dr. Mert Ak</td><td>Kulak Burun Boğaz</td><td class="orta">31</td><td class="orta">12</td><td class="orta">14</td><td class="orta">0</td><td class="sag"><b>57</b></td><td class="orta"><span class="rz ok">%59</span></td><td>29.09.2026 19:31</td></tr>
+            <tr><td>Dr. Selin Er</td><td>Çocuk Sağlığı</td><td class="orta">25</td><td class="orta">17</td><td class="orta">12</td><td class="orta">1</td><td class="sag"><b>55</b></td><td class="orta"><span class="rz sari">%44</span></td><td>28.09.2026 16:05</td></tr>
+            <tr><td>Banko 2</td><td>Kayıt Kabul</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td><td class="orta">24</td><td class="sag"><b>24</b></td><td class="orta sonuk">—</td><td>29.09.2026 18:55</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PLAN & FATURALAR -->
+    <section data-p="plan" hidden>
+      <div class="iki">
+        <div class="kutu">
+          <h6>Mevcut plan</h6>
+          <div class="ic form" style="grid-template-columns:repeat(3,1fr)">
+            <div class="fld"><label>Plan</label><div class="inp"><b>Profesyonel</b> <span class="rz mavi">Aylık</span></div></div>
+            <div class="fld"><label>Aylık kontör</label><div class="inp">2.000</div></div>
+            <div class="fld"><label>Tutar</label><div class="inp">2.490 ₺ + KDV / ay</div></div>
+            <div class="fld"><label>Dönem</label><div class="inp">14 Eyl – 13 Eki 2026</div></div>
+            <div class="fld"><label>Sonraki yenileme</label><div class="inp">14.10.2026 · otomatik</div></div>
+            <div class="fld"><label>Kayıtlı kart</label><div class="inp">VISA •••• 4242 <span class="sonuk">(ödeme kuruluşunda)</span></div></div>
+            <div class="fld"><label>Devreden kontör</label><div class="inp">Kullanılmayan kontör <b>1 dönem</b> devreder</div></div>
+            <div class="fld"><label>Aşımda</label><div class="inp">Bakiye biterse YZ kapanır · <b>ek paket</b> alınabilir</div></div>
+            <div class="fld"><label>Otomatik ek paket</label><div class="inp anah"><span class="sw kap"></span> Kapalı (bakiye &lt; 20 olunca 500 al)</div></div>
+          </div>
+          <div class="ic" style="display:flex;gap:6px;padding-top:0">
+            <button class="btn primary" onclick="satinAl()">⬆ Planı Değiştir</button>
+            <button class="btn" onclick="satinAl(true)">＋ Ek Paket Al</button>
+            <button class="btn">💳 Kartı Güncelle</button>
+            <span class="sp"></span>
+            <button class="btn">Aboneliği İptal Et</button>
+          </div>
+        </div>
+        <div class="kutu">
+          <h6>Faturalar &amp; ödemeler</h6>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Tarih</th><th>Açıklama</th><th class="sag">Tutar</th><th>Durum</th><th>e-Fatura</th></tr></thead>
+              <tbody>
+                <tr><td>14.09.2026</td><td>Profesyonel · Eylül</td><td class="sag">2.988,00 ₺</td><td><span class="rz ok">Ödendi</span></td><td>📄 PDF</td></tr>
+                <tr><td>02.09.2026</td><td>Ek paket 500</td><td class="sag">778,80 ₺</td><td><span class="rz ok">Ödendi</span></td><td>📄 PDF</td></tr>
+                <tr><td>14.08.2026</td><td>Başlangıç · Ağustos</td><td class="sag">1.068,00 ₺</td><td><span class="rz ok">Ödendi</span></td><td>📄 PDF</td></tr>
+                <tr><td>14.07.2026</td><td>Başlangıç · Temmuz</td><td class="sag">1.068,00 ₺</td><td><span class="rz kir">Kart reddedildi → 2. denemede ödendi</span></td><td>📄 PDF</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AYARLAR -->
+    <section data-p="ayar" hidden>
+      <div class="kutu" style="margin-bottom:12px">
+        <h6>Kontör kuralları</h6>
+        <div class="ic form">
+          <div class="fld"><label>Çağrı ücreti (kontör)</label><div class="inp">1</div></div>
+          <div class="fld"><label>Günlük çağrı sınırı (kurum)</label><div class="inp">500</div></div>
+          <div class="fld"><label>Uyarı eşiği</label><div class="inp">20</div></div>
+          <div class="fld"><label>Kullanıcı başına günlük sınır</label><div class="inp">60 <span class="sonuk">(0 = sınırsız)</span></div></div>
+          <div class="fld"><label>Uyarı alacak roller</label><div class="inp">Yönetici, Başhekim</div></div>
+          <div class="fld"><label>Model</label><div class="inp anah"><span class="sw"></span> Aktif</div></div>
+        </div>
+      </div>
+      <div class="iki">
+        <div class="kutu">
+          <h6>Özellikler — aç / kapa ve yetki</h6>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Özellik</th><th>Nerede</th><th class="orta">Açık</th><th>Yetki (aksiyon)</th><th class="sag">Ücret</th></tr></thead>
+              <tbody>
+                <tr><td>🩺 Tanı önerisi</td><td>ICD tanı arama › 🤖 YZ Önerisi</td><td class="orta"><span class="sw"></span></td><td><code>muayene.yz_oneri</code></td><td class="sag">1</td></tr>
+                <tr><td>🔬 Tetkik önerisi</td><td>İstem ekranı › 🤖 YZ Önerisi</td><td class="orta"><span class="sw"></span></td><td><code>muayene.yz_oneri</code></td><td class="sag">1</td></tr>
+                <tr><td>💊 İlaç önerisi</td><td>Reçete › İlaç ara › 🤖 YZ Önerisi</td><td class="orta"><span class="sw"></span></td><td><code>muayene.yz_oneri</code></td><td class="sag">1</td></tr>
+                <tr><td>❓ YZ Rehber</td><td>Sağ alt yardım asistanı</td><td class="orta"><span class="sw"></span></td><td class="sonuk">herkes</td><td class="sag">1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="kutu">
+          <h6>Sağlayıcı (salt okunur)</h6>
+          <div class="ic form" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Sağlayıcı</label><div class="inp salt">OpenAI uyumlu (Groq)</div></div>
+            <div class="fld"><label>Model</label><div class="inp salt">openai/gpt-oss-120b</div></div>
+            <div class="fld"><label>Düşünme düzeyi</label><div class="inp salt">low</div></div>
+            <div class="fld"><label>Zaman aşımı</label><div class="inp salt">30 sn</div></div>
+            <div class="fld tam"><label>API anahtarı</label><div class="inp salt">•••••••••••• (sunucuda; ekranda gösterilmez, veritabanına yazılmaz)</div></div>
+          </div>
+          <div class="ic" style="padding-top:0">
+            <div class="bant sari" style="margin:0">Sağlayıcı ve anahtar <b>sunucu ayarıdır</b> (ortam değişkeni / gizli dosya);
+              bu ekrandan değiştirilmez. Test sağlayıcısı üretimde gerçek hasta verisiyle kullanılmaz.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GİZLİLİK -->
+    <section data-p="gizlilik" hidden>
+      <div class="iki">
+        <div class="kutu">
+          <h6>Modele giden örnek metin (maskeli)</h6>
+          <div class="ic">
+<div class="maske">Yaş: 27 yaş
+Cinsiyet: Kadın
+Bölüm: Kulak Burun Boğaz
+Şikâyet: <mark>[kişi] [kişi]</mark> 2 gündür boğaz ağrısı, yutkunma güçlüğü, ateş (TC <mark>[kimlik-no]</mark>)
+Hikâye: Öksürük yok. Titreme var.
+Muayene bulguları: Tonsiller hipertrofik, üzerinde beyaz eksüda; ön servikal lenf nodları hassas
+Vital: ateş 38.7 °C, nabız 102/dk
+Alerjiler: Penisilin (döküntü)
+Kullandığı ilaçlar (etken madde): yok</div>
+            <div class="sonuk" style="margin-top:6px">Sarı: sunucuda maskelenen yerler. Metin veritabanına kaydedilmez.</div>
+          </div>
+        </div>
+        <div class="kutu">
+          <h6>Gönderilen / gönderilmeyen</h6>
+          <div class="ic">
+            <ul class="liste">
+              <li class="ok-i">✓ Yaş (yıl; 2 yaş altı ay), cinsiyet, bölüm</li>
+              <li class="ok-i">✓ Şikâyet, hikâye, bulgular, son vital</li>
+              <li class="ok-i">✓ Mevcut / kronik tanılar, alerji ve ilaç etken maddeleri</li>
+              <li class="no-i">✗ Ad, soyad, anne / baba adı, hekim adı</li>
+              <li class="no-i">✗ TC kimlik / pasaport no, doğum tarihi, adres, telefon, e-posta</li>
+              <li class="no-i">✗ Protokol / muayene numarası</li>
+            </ul>
+            <div class="bant" style="margin-top:10px">
+              Öneriler <b>katalogla doğrulanır</b>: ICD kodu katalogda yoksa, lab kodu listede yoksa, ilaç
+              kataloğunda ürün bulunamazsa gösterilmez; alerjiyle çakışan ilaç elenir. Karar hekimindir;
+              hiçbir öneri kendiliğinden kayda yazılmaz.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="statusbar">
+    <span>Son güncelleme: 29.09.2026 19:45</span><span>Bakiye: <b>86</b></span><span>Bugün: 14 çağrı · 12 kontör</span>
+    <span class="sp">Kaynak: ai_kontor · ai_kontor_hareket · ai_rehber_log</span>
+  </div>
+</div>
+
+<!-- KONTÖR SATIN AL (müşteri, kredi kartı) -->
+<div class="perde" id="perde" hidden onclick="if(event.target===this)kapat()">
+  <div class="modal genis">
+    <div class="title">💳 Kontör Satın Al <span class="sp">Gentegre YZ · güvenli ödeme</span></div>
+    <div class="adimlar">
+      <div class="adim on" data-a="1"><i>1</i>Plan / paket</div>
+      <div class="adim" data-a="2"><i>2</i>Fatura bilgileri</div>
+      <div class="adim" data-a="3"><i>3</i>Kartla ödeme</div>
+      <div class="adim" data-a="4"><i>4</i>Sonuç</div>
+    </div>
+    <div class="gov">
+      <!-- 1 PLAN -->
+      <div data-adim="1">
+        <div class="donem"><span class="on" onclick="donem(this,1)">Aylık</span><span onclick="donem(this,12)">Yıllık (2 ay bedava)</span></div>
+        <div class="planlar">
+          <div class="plan" data-plan="Başlangıç" data-ay="890" data-kontor="500" onclick="planSec(this)">
+            <div class="ad">Başlangıç</div>
+            <div class="fiyat"><span class="tl">890</span> ₺ <small>+ KDV / <span class="per">ay</span></small></div>
+            <div class="kont">500 kontör / ay</div>
+            <div class="birim">≈ 1,78 ₺ / öneri</div>
+            <ul>
+              <li>Tanı · tetkik · ilaç önerisi</li>
+              <li>YZ Rehber (yardım asistanı)</li>
+              <li>1–3 hekimli muayenehane için</li>
+              <li>Kullanılmayan kontör devretmez</li>
+              <li>E-posta destek</li>
+            </ul>
+          </div>
+          <div class="plan sec" data-plan="Profesyonel" data-ay="2490" data-kontor="2000" onclick="planSec(this)">
+            <span class="rozetust rz mavi">⭐ En çok tercih edilen</span>
+            <div class="ad">Profesyonel</div>
+            <div class="fiyat"><span class="tl">2.490</span> ₺ <small>+ KDV / <span class="per">ay</span></small></div>
+            <div class="kont">2.000 kontör / ay</div>
+            <div class="birim">≈ 1,25 ₺ / öneri</div>
+            <ul>
+              <li>Başlangıç'taki her şey</li>
+              <li>Poliklinik / tıp merkezi (≈ 10 hekim)</li>
+              <li>Kullanılmayan kontör <b>1 dönem devreder</b></li>
+              <li>Kullanıcı başına günlük sınır ayarı</li>
+              <li>Kullanım raporları (Excel)</li>
+            </ul>
+          </div>
+          <div class="plan" data-plan="Kurumsal" data-ay="8990" data-kontor="10000" onclick="planSec(this)">
+            <div class="ad">Kurumsal</div>
+            <div class="fiyat"><span class="tl">8.990</span> ₺ <small>+ KDV / <span class="per">ay</span></small></div>
+            <div class="kont">10.000 kontör / ay</div>
+            <div class="birim">≈ 0,90 ₺ / öneri</div>
+            <ul>
+              <li>Profesyonel'deki her şey</li>
+              <li>Hastane (çok şube) için</li>
+              <li>Kontör <b>şubelere paylaştırma</b></li>
+              <li>Sözleşmeli / yerel model seçeneği (KVKK)</li>
+              <li>Öncelikli destek · SLA</li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-weight:bold;color:#2c4a6b">…ya da tek seferlik ek paket (plan değişmez)</div>
+        <div class="ekpaket">
+          <div class="p" data-plan="Ek paket 250" data-tek="449" data-kontor="250" onclick="ekSec(this)"><b>250</b>449 ₺</div>
+          <div class="p" data-plan="Ek paket 500" data-tek="649" data-kontor="500" onclick="ekSec(this)"><b>500</b>649 ₺</div>
+          <div class="p" data-plan="Ek paket 1.000" data-tek="1.190" data-kontor="1000" onclick="ekSec(this)"><b>1.000</b>1.190 ₺</div>
+          <div class="p" data-plan="Ek paket 5.000" data-tek="4.990" data-kontor="5000" onclick="ekSec(this)"><b>5.000</b>4.990 ₺</div>
+        </div>
+        <div class="sonuk" style="margin-top:8px">Fiyatlar örnektir. Ek paket kontörleri dönem sonunda silinmez (12 ay geçerli).</div>
+      </div>
+
+      <!-- 2 FATURA -->
+      <div data-adim="2" hidden>
+        <div class="iki">
+          <div class="form" style="grid-template-columns:1fr 1fr">
+            <div class="fld tam"><label>Fatura unvanı</label><div class="inp">Örnek Tıp Merkezi Sağlık Hiz. Ltd. Şti.</div></div>
+            <div class="fld"><label>VKN / TCKN</label><div class="inp">1234567890</div></div>
+            <div class="fld"><label>Vergi dairesi</label><div class="inp">Kadıköy</div></div>
+            <div class="fld tam"><label>Adres</label><div class="inp">Moda Cd. No:1 Kadıköy / İstanbul</div></div>
+            <div class="fld"><label>Fatura e-postası</label><div class="inp">muhasebe@ornektip.com</div></div>
+            <div class="fld"><label>e-Fatura mükellefi</label><div class="inp">Evet (GİB listesinden)</div></div>
+            <div class="fld tam"><label>Sipariş / PO no (isteğe bağlı)</label><div class="inp sonuk">—</div></div>
+          </div>
+          <div class="ozet" id="ozet2"></div>
+        </div>
+        <div class="sonuk" style="margin-top:8px">Bilgiler kurum kartından gelir; değiştirilirse bir sonraki faturada da kullanılır.</div>
+      </div>
+
+      <!-- 3 ÖDEME -->
+      <div data-adim="3" hidden>
+        <div class="iki">
+          <div class="guvenli">
+            <div class="bas">🔒 Ödeme kuruluşunun güvenli formu <span class="rz ok">3D Secure</span></div>
+            <div class="kart">
+              <div class="fld"><label>Kart numarası</label><div class="inp">4242 4242 4242 4242</div></div>
+              <div class="fld"><label>Son kullanma</label><div class="inp">12 / 28</div></div>
+              <div class="fld"><label>CVC</label><div class="inp">•••</div></div>
+              <div class="fld" style="grid-column:1/-1"><label>Kart üzerindeki ad</label><div class="inp">AHMET YILMAZ</div></div>
+            </div>
+            <div class="fld" style="margin-top:10px"><label>Taksit (yalnız yıllık planda)</label>
+              <div class="taksit"><span class="chip on">Tek çekim</span><span class="chip">3 taksit</span><span class="chip">6 taksit</span></div></div>
+            <div class="onay"><input type="checkbox" checked> <span>Kartım <b>ödeme kuruluşunda</b> saklansın; plan her ay otomatik yenilensin (istediğim zaman iptal edebilirim).</span></div>
+            <div class="onay"><input type="checkbox" checked> <span><u>Mesafeli Hizmet Sözleşmesi</u>, <u>Ön Bilgilendirme Formu</u> ve <u>YZ Kullanım Koşulları</u>nı okudum, kabul ediyorum.</span></div>
+            <div class="logolar"><span>VISA</span><span>MasterCard</span><span>TROY</span><span>AMEX</span></div>
+          </div>
+          <div>
+            <div class="ozet" id="ozet3"></div>
+            <div class="bant" style="margin-top:10px">
+              Kart bilgisi <b>Gentegre sunucusuna hiç gelmez</b>: form ödeme kuruluşunun sayfasıdır
+              (iframe / yönlendirme, PCI-DSS). Biz yalnız ödeme sonucunu ve kartın son 4 hanesini alırız.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 SONUÇ -->
+      <div data-adim="4" hidden>
+        <div class="sonuc">
+          <div class="ik">✅</div>
+          <div style="font-size:16px;font-weight:bold;color:var(--ok);margin:6px 0">Ödeme alındı — kontör yüklendi</div>
+          <div id="sonucMetin" style="color:#3a5573;line-height:1.8"></div>
+          <div class="sonuk" style="margin-top:8px">e-Fatura muhasebe@ornektip.com adresine gönderildi · İşlem no: GYZ-2026-000418</div>
+        </div>
+        <div class="bant kir" style="margin-top:6px">
+          <b>Başarısız olsaydı:</b> "Kart reddedildi (banka: yetersiz bakiye)" — kontör yüklenmez, tekrar denenebilir;
+          3D doğrulaması yarıda kalırsa işlem 15 dk sonra otomatik iptal olur.
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <button class="btn" id="geriBtn" onclick="adimGit(-1)">‹ Geri</button>
+      <span class="sp"></span>
+      <button class="btn" onclick="kapat()">Vazgeç</button>
+      <button class="btn primary" id="ileriBtn" onclick="adimGit(1)">Devam ›</button>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Mockup notları</b> — gerçek veriler dev DB'den değil, örnek.<br>
+  • Mevcut tablolar: <code>ai_kontor</code> (bakiye, çağrı ücreti, model_aktif, günlük sınır, uyarı eşiği),
+    <code>ai_kontor_hareket</code> (tür 1 yükleme · 2 harcama · 3 düzeltme · 4 iade, jeton), <code>ai_rehber_log</code>.<br>
+  • Ekran için eklenmesi gerekenler: hareket satırına <code>ozellik</code> (tani/tetkik/ilac/rehber), <code>muayene_id</code>,
+    <code>sure_ms</code>, <code>basarili</code> kolonları (bugün açıklama metninde); kullanıcı başına günlük sınır; özellik bazında aç/kapa;
+    <code>muayene.yz_oneri</code> aksiyon yetkisi; "kabul oranı" için önerilen kodun aynı muayenede eklenip eklenmediğinin izi.<br>
+  • Başarısız çağrı şu an hareket yazmıyor (ücretsiz); ekranda görünmesi için 0 tutarlı "başarısız" satırı yazılmalı.<br>
+  • <b>Satın alma (müşteri, kredi kartı):</b> ödeme kuruluşu (iyzico / PayTR / Param vb.) hosted form + 3D Secure;
+    kart verisi bize gelmez (PCI-DSS kapsamı dışı kalırız). Akış: <code>POST /api/ai/kontor/siparis</code> (plan/paket → sipariş
+    + ödeme oturumu) → ödeme sayfası → kuruluşun <b>imzalı webhook</b>'u → sipariş "ödendi" → <code>ai_kontor_hareket</code>
+    tür 1 yükleme + e-Fatura. Kontör <b>yalnız webhook ile</b> yüklenir, tarayıcıdan gelen "başarılı" dönüşüne güvenilmez.<br>
+  • Yeni tablolar: <code>ai_plan</code> (ad, aylık kontör, fiyat, devretme), <code>ai_abonelik</code> (plan, dönem, sonraki yenileme,
+    ödeme kuruluşu abonelik/kart token'ı, durum), <code>ai_siparis</code> (tutar, KDV, durum, ödeme kuruluşu işlem no, fatura no).
+    Kart token'ı ödeme kuruluşunundur; biz yalnız referansını ve son 4 haneyi tutarız.<br>
+  • Planlar satıcı tarafında (Gentegre merkez) tanımlanır, müşteri DB'sinde yalnız seçili plan ve bakiye durur.
+    Müşteri başına ayrı DB olduğundan ödeme merkezi bir sipariş servisinden geçer.<br>
+  • "± Düzeltme / İade" yalnız satıcı destek ekibinin (merkez) işi; müşteri ekranında pasif.
+</div>
+
+<script>
+  function sekme(s){
+    document.querySelectorAll('.kat').forEach(k=>k.classList.toggle('on',k.dataset.s===s));
+    document.querySelectorAll('section[data-p]').forEach(p=>p.hidden=p.dataset.p!==s);
+  }
+  // ---- satın alma sihirbazı
+  let adim=1, secim=null, carpan=1;
+  const tl=n=>n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';
+  function satinAl(ek){
+    document.getElementById('perde').hidden=false; adim=1;
+    if(ek){ekSec(document.querySelector('.ekpaket .p:nth-child(2)'))}
+    else{planSec(document.querySelector('.plan.sec')||document.querySelector('.plan'))}
+    goster();
+  }
+  function kapat(){document.getElementById('perde').hidden=true}
+  function donem(el,c){carpan=c;el.parentElement.querySelectorAll('span').forEach(x=>x.classList.toggle('on',x===el));
+    document.querySelectorAll('.plan').forEach(p=>{const ay=+p.dataset.ay;
+      p.querySelector('.tl').textContent=(c===12?ay*10:ay).toLocaleString('tr-TR');
+      p.querySelector('.per').textContent=c===12?'yıl':'ay'});
+    const s=document.querySelector('.plan.sec'); if(s)planSec(s);}
+  function planSec(el){document.querySelectorAll('.plan,.ekpaket .p').forEach(x=>x.classList.remove('sec'));el.classList.add('sec');
+    const ay=+el.dataset.ay, tutar=carpan===12?ay*10:ay;
+    secim={ad:el.dataset.plan+(carpan===12?' (yıllık)':' (aylık)'),tutar,kontor:+el.dataset.kontor*(carpan===12?12:1),abonelik:true};}
+  function ekSec(el){document.querySelectorAll('.plan,.ekpaket .p').forEach(x=>x.classList.remove('sec'));el.classList.add('sec');
+    secim={ad:el.dataset.plan,tutar:+el.dataset.tek.replace('.',''),kontor:+el.dataset.kontor,abonelik:false};}
+  function ozetHtml(){const kdv=secim.tutar*0.2;
+    return `<div class="t"><span>${secim.ad}</span><b>${secim.kontor.toLocaleString('tr-TR')} kontör</b></div>
+      <div class="t"><span>Tutar</span><span>${tl(secim.tutar)}</span></div>
+      <div class="t"><span>KDV %20</span><span>${tl(kdv)}</span></div>
+      <div class="t top"><span>Ödenecek</span><span>${tl(secim.tutar+kdv)}</span></div>
+      <div class="sonuk">${secim.abonelik?'Otomatik yenilenir · istediğiniz zaman iptal':'Tek seferlik · 12 ay geçerli'}</div>`;}
+  function goster(){
+    document.querySelectorAll('[data-adim]').forEach(d=>d.hidden=+d.dataset.adim!==adim);
+    document.querySelectorAll('.adim').forEach(a=>{const n=+a.dataset.a;a.classList.toggle('on',n===adim);a.classList.toggle('bitti',n<adim)});
+    document.getElementById('geriBtn').style.visibility=(adim>1&&adim<4)?'visible':'hidden';
+    const ileri=document.getElementById('ileriBtn');
+    ileri.textContent=adim===3?'🔒 Öde':adim===4?'Kapat':'Devam ›';
+    ileri.className='btn '+(adim===3?'ok':'primary');
+    if(secim){document.getElementById('ozet2').innerHTML=ozetHtml();document.getElementById('ozet3').innerHTML=ozetHtml();
+      document.getElementById('sonucMetin').innerHTML=`<b>${secim.ad}</b> · ${secim.kontor.toLocaleString('tr-TR')} kontör yüklendi · yeni bakiye <b>${(86+secim.kontor).toLocaleString('tr-TR')}</b><br>Ödenen: ${tl(secim.tutar*1.2)}`;}
+  }
+  function adimGit(y){ if(adim===4&&y>0){kapat();return} adim=Math.min(4,Math.max(1,adim+y)); goster(); }
+  // 30 günlük örnek yığılı çubuk grafik
+  (function(){
+    const g=document.getElementById('grafik');let t=7;
+    for(let i=0;i<30;i++){
+      const hs=(i%7===5||i%7===6)?0.25:1; t=(t*37+11)%23;
+      const v=[Math.round((3+t%6)*hs),Math.round((1+t%4)*hs),Math.round((1+t%3)*hs),Math.round((1+(t>>1)%3)*hs)];
+      const c=document.createElement('div');c.className='g';
+      c.title=`Tanı ${v[0]} · Tetkik ${v[1]} · İlaç ${v[2]} · Rehber ${v[3]}`;
+      ['s-tani','s-tetkik','s-ilac','s-rehber'].forEach((s,j)=>{const b=document.createElement('span');b.className=s;b.style.height=(v[j]*9)+'px';c.appendChild(b)});
+      g.appendChild(c);
+    }
+  })();
+</script>
+</body>
+</html>

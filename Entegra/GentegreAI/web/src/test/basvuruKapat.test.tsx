@@ -24,8 +24,10 @@ const liste = vi.fn();
 const belgeOku = vi.fn();
 const secimSor = vi.fn();
 
-vi.mock('../api/istemci', () => ({
+vi.mock('../api/istemci', async () => ({
   api: {
+    // Başvuru → istem uçları (912): ortak, tip denetimli taklit.
+    ...(await import('./taklit/basvuruIstem')).basvuruIstemTaklidi,
     liste: (k: string, i: unknown) => liste(k, i),
     belgeOku: (id: number) => belgeOku(id),
     ayarlar: () => Promise.resolve([{ anahtar: 'genel.yerel_para', deger: 'TL' }]),

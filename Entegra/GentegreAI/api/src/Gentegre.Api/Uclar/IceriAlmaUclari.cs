@@ -34,7 +34,7 @@ public static class IceriAlmaUclari
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
 
             var hedefler = IceriAlma.Hedefler
                 // Kullanicinin YAZAMADIGI hedef listelenmez: secilince
@@ -73,7 +73,7 @@ public static class IceriAlmaUclari
             BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
 
             var form = await ctx.Request.ReadFormAsync(iptal);
             var hedef = IceriAlma.HedefBul(form["hedef"].ToString());
@@ -135,7 +135,7 @@ public static class IceriAlmaUclari
             BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
 
             var form = await ctx.Request.ReadFormAsync(iptal);
             var hedef = IceriAlma.HedefBul(form["hedef"].ToString());
@@ -196,7 +196,7 @@ public static class IceriAlmaUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
 
             var kayitlar = await veri.ListeAsync(
                 "select y.id, y.hedef, y.dosya_adi, y.satir_sayisi, y.eklenen, y.guncellenen, "
@@ -222,7 +222,7 @@ public static class IceriAlmaUclari
             BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
 
             var kurallar = await veri.ListeAsync(
                 "select k.id, k.ad, k.hedef, k.baslik_imzasi, k.esleme::text, k.aktif, "
@@ -296,7 +296,7 @@ public static class IceriAlmaUclari
             string hedef, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("veri.iceri-al");
+            baglam.AksiyonGorIste("veri.iceri-al");
             var h = IceriAlma.HedefBul(hedef);
             baglam.YetkiIste(IceriAlma.YetkiKodu(h), Islem.Gor);
 

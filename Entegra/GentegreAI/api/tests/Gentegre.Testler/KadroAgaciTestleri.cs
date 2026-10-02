@@ -57,7 +57,7 @@ public sealed class KadroAgaciTestleri(VeritabaniOlgusu olgu)
             .Select(m => m.Groups["b"].Value)];
     }
 
-    [Fact(DisplayName = "Kadro haritasındaki her rol gerçekten var")]
+    [VtFact(DisplayName = "Kadro haritasındaki her rol gerçekten var")]
     public async Task Haritadaki_roller_var()
     {
         if (!_olgu.Baglandi(nameof(Haritadaki_roller_var))) return;

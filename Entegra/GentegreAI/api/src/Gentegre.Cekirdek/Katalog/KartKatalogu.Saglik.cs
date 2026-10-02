@@ -149,6 +149,29 @@ public static partial class KartKatalogu
         ["bulguOzet"] = "Muayene Bulguları", ["karar"] = "Değerlendirme / Plan"
     };
 
+    /// <summary>
+    /// Şablon kuralları (931). "zorunlu_*" kodları muayene TAMAMLA'da
+    /// denetlenir (<c>MuayeneSablonUclari.KuralEksikleriAsync</c>); yeni kod
+    /// eklenirse denetimi de yazılmalı - denetlenmeyen kural seçtirilmez.
+    /// </summary>
+    private static readonly Dictionary<string, string> SablonKuralKodlari = new()
+    {
+        ["zorunlu_hikaye"] = "Hikâye zorunlu",
+        ["zorunlu_bulgu"] = "Şablon muayenede en az bir bulgu zorunlu",
+        ["zorunlu_vital"] = "En az bir vital ölçüm zorunlu",
+        ["zorunlu_ek_tani"] = "Ana tanıya ek en az bir tanı zorunlu"
+    };
+
+    /// <summary>Şablon kural kodları (tamamlama denetimi ve testler).</summary>
+    public static IReadOnlyDictionary<string, string> SablonKurallari => SablonKuralKodlari;
+
+    /// <summary>İlacın kullanım şekli (reçete satırı ile aynı kodlar).</summary>
+    private static readonly Dictionary<string, string> IlacKullanimKodlari = new()
+    {
+        ["0"] = "—", ["1"] = "Ağızdan", ["2"] = "Damardan", ["3"] = "Kas içi",
+        ["4"] = "Cilt altı", ["5"] = "Haricen", ["6"] = "Solunum", ["7"] = "Rektal"
+    };
+
     private static readonly Dictionary<string, string> TaniKesinlikKodlari = new()
     {
         ["1"] = "Kesin", ["2"] = "Ön", ["3"] = "Şüpheli", ["4"] = "Dışlandı"
@@ -158,6 +181,12 @@ public static partial class KartKatalogu
     {
         ["0"] = "—", ["1"] = "Sağ", ["2"] = "Sol", ["3"] = "Bilateral"
     };
+
+    /// <summary>Tanı satırının taraf seçenekleri (ICD arama penceresi de kullanır).</summary>
+    public static IReadOnlyDictionary<string, string> TaniTarafKodlari => TarafKodlari;
+
+    /// <summary>Tanı kesinliği (1 Kesin · 2 Ön · 3 Şüpheli · 4 Dışlandı).</summary>
+    public static IReadOnlyDictionary<string, string> TaniKesinlikSecenekleri => TaniKesinlikKodlari;
 
     /// <summary>Vital olcumun kaynagi: elle mi, cihazdan mi, hasta beyani mi.</summary>
     private static readonly Dictionary<string, string> VitalKaynakKodlari = new()
@@ -351,45 +380,48 @@ public static partial class KartKatalogu
             new("ustMuayeneId", "ust_muayene_id", "sayi",
                 Baslik: "İsteyen Muayene (Konsültasyon)", Grup: "Kimlik", AltGrup: "Süre"),
 
-            // --------------------------------------------------- anamnez ----
+            // ------------------------------------------ muayene (anamnez) ----
+            // SEKME ADI "Muayene" (kullanici: "anamnez rename Muayene"); alanlar
+            //   yine anamnez alanlari.
             // SIKAYET/HIKAYE COK SATIRLI (mockup muayene_karti.html): kolon `text`
             //   ama sinir verilmedigi icin kart TEK SATIRLIK kutu ciziyordu -
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikâyet", Grup: "Anamnez"),
+                Baslik: "Şikâyet", Grup: "Muayene"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Hikâye", Grup: "Anamnez"),
-            // Ozgecmis / soygecmis / aliskanlik BURADA SERBEST NOTTUR; yapisal
-            //   karsiliklari hastanin tibbi gecmisinde (Faz 1 ortak platform)
-            //   yasar - muayene aninda yazilan not oraya islenir.
-            new("ozgecmisNotu", "ozgecmis_notu", "metin", Baslik: "Özgeçmiş",
-                Grup: "Anamnez"),
-            new("soygecmisNotu", "soygecmis_notu", "metin", Baslik: "Soygeçmiş",
-                Grup: "Anamnez"),
-            new("aliskanlikNotu", "aliskanlik_notu", "metin", Baslik: "Alışkanlıklar",
-                Grup: "Anamnez"),
+                Baslik: "Hikâye", Grup: "Muayene"),
+            // OZGECMIS / SOYGECMIS / ALISKANLIK KARTTA YOK (kullanici: "anamnez
+            //   sekmesinden ozgecmis, soygecmis, aliskanliklar editleri kaldir,
+            //   onlarin yerine tani gridini tasi"). Kolonlar ve eski veri durur;
+            //   form motoru, goz seridi ve "onceki muayeneden kopyala" kolonu
+            //   dogrudan okur. Yapisal karsiliklari hastanin tibbi gecmisinde.
 
-            // --------------------------------------------- fizik muayene ----
+            // ------------------------------- sablon muayene (fizik muayene) ----
+            // SEKME ADI "Şablon Muayene" (kullanici: "Fizik Muayene rename Şablon
+            //   Muayene"): bulgular brans sablonundan acilir.
             new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_muayene_sablon_lookup",
-                Baslik: "Muayene Şablonu", Grup: "Fizik Muayene"),
+                Baslik: "Muayene Şablonu", Grup: "Şablon Muayene"),
             // Sablondan DERLENEN metin: rapora ve e-Nabiz pakete giden budur.
             //   Bulgular sekmesindeki alanlardan uretilir, hekim duzeltebilir.
             new("bulguOzet", "bulgu_ozet", "metin", Baslik: "Muayene Bulguları",
-                Grup: "Fizik Muayene"),
+                Grup: "Şablon Muayene"),
 
             // ---------------------------------------------- tani / karar ----
+            // MUAYENE SEKMESINDE, RECETENIN ALTINDA (kullanici: "Degerlendirme /
+            //   Plan ve cikis seklini recete altina tasi"): AltGrup "Degerlendirme"
+            //   ekranin bu iki alani receteden sonra cizmesini saglar.
             // Degerlendirme/plan SERBEST METIN: rapora ve e-Nabiz'a giden
             //   karar cumlesi tek satirlik kutuya sigmiyordu (uzun metin
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
+                Baslik: "Değerlendirme / Plan", Grup: "Muayene", AltGrup: "Değerlendirme"),
             // CIKIS SEKLI (627): hastanin muayene sonundaki durumu - USS 106'nin
             //   ZORUNLU alani. Varsayilani "iyilesderek cikis"; sevk, olum,
             //   tedaviyi reddetme gibi haller burada secilir. Liste SKRS'nin
             //   kendisi (609), ayri bir esleme yok.
             new("cikisSekli", "cikis_sekli", "kod", KodListesi: "cikis.sekli",
-                Baslik: "Çıkış Şekli", Grup: "Tanı (ICD-10)"),
+                Baslik: "Çıkış Şekli", Grup: "Muayene", AltGrup: "Değerlendirme"),
             // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
             //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
@@ -423,12 +455,15 @@ public static partial class KartKatalogu
                 AltGrup: "Konsültasyon"),
 
             // -------------------------------------------------- gönderim ----
+            // SEKME ADI "Vital Bulgular" (kullanici: "Tani sekmesi rename Vital
+            //   Bulgular"): tanilar Muayene sekmesinde, bu sekmede vital izgarasi
+            //   ve e-Nabiz gonderim bilgisi kaldi.
             new("enabizDurum", "enabiz_durum", "kod", Yazilabilir: false,
-                Baslik: "e-Nabız Durumu", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
+                Baslik: "e-Nabız Durumu", Grup: "Vital Bulgular", AltGrup: "Gönderim"),
             new("tamamlayanId", "tamamlayan_id", "sayi", Yazilabilir: false,
-                Baslik: "Tamamlayan", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
+                Baslik: "Tamamlayan", Grup: "Vital Bulgular", AltGrup: "Gönderim"),
             new("tamamlanma", "tamamlanma", "tarih", Yazilabilir: false,
-                Baslik: "Tamamlanma", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim")
+                Baslik: "Tamamlanma", Grup: "Vital Bulgular", AltGrup: "Gönderim")
         },
         Detaylar: new DetayTanimi[]
         {
@@ -619,7 +654,13 @@ public static partial class KartKatalogu
             new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_personel_lookup",
                 Baslik: "Hekim (kişisel)", Grup: "Kapsam"),
             new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
-                Baslik: "Bölüm (branş)", Grup: "Kapsam")
+                Baslik: "Bölüm (branş)", Grup: "Kapsam"),
+            // 927: bolum varsayilani DUGMENIN isi (ayni bolumde eskisini kaldirir);
+            //   kaynak sablon "Kopyala (bana)" izidir - ikisi de elle yazilmaz.
+            new("varsayilan", "varsayilan", "mantik", Yazilabilir: false,
+                Baslik: "Bölüm varsayılanı", Grup: "Kapsam"),
+            new("kaynakSablonId", "kaynak_sablon_id", "sayi", Yazilabilir: false,
+                Baslik: "Kopyalandığı şablon", Grup: "Kapsam")
         },
         Detaylar: new DetayTanimi[]
         {
@@ -631,6 +672,9 @@ public static partial class KartKatalogu
                 new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Kod"),
                 new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Alan"),
                 new("tip", "tip", "kod", SabitKodlar: SablonAlanTipKodlari, Baslik: "Tip"),
+                // SECENEKLER (Secenekli tip): JSON dizi ["yok","+1","+2"]. Kart
+                //   ekrani cip duzenleyicisiyle yazar; muayenede combo olur.
+                new("secenekler", "secenekler", "json", EnFazlaUzunluk: 2000, Baslik: "Seçenekler"),
                 new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
                 // "Normal" isaretlenince rapora yazilacak hazir cumle: hekim
                 //   her normal bulgu icin ayni metni yazmasin.
@@ -639,7 +683,70 @@ public static partial class KartKatalogu
                 new("tarafSorulur", "taraf_sorulur", "mantik", Baslik: "Taraf Sorulur"),
                 new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
             }, SubeKolonu: null, Sirala: "sira asc, id asc",
-               Baslik: "Alanlar", LogTabloId: 967)
+               Baslik: "Alanlar", LogTabloId: 967),
+            // HEKİM TERCİHLERİ (931): ayrı sayfa sekmeleriydi, bölüm/doktor
+            //   bilgisi yoktu. Şablonun detayı olunca kapsamı şablonunki,
+            //   "Kopyala (bana)" hepsini çoğaltır, yetki şablonunki.
+            new("tanilar", "public.muayene_sablon_tani", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                // ICD KODU METIN: 20 bin satirlik katalog combo olamaz, kart
+                //   ekrani ICD arama penceresiyle satir ekler.
+                new("icdKod", "icd_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 10,
+                    Baslik: "ICD-10"),
+                new("taniAd", "(select x.ad from public.icd x where x.kod = muayene_sablon_tani.icd_kod)",
+                    "metin", Yazilabilir: false, Baslik: "Tanı"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "sira asc, id asc",
+               Baslik: "Sık Tanılar", LogTabloId: 1370),
+            new("receteler", "public.muayene_sablon_recete", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                // AYNI GRUP ADI = TEK REÇETE: "Üst solunum yolu" iki ilaç satırı.
+                new("grup", "grup", "metin", Zorunlu: true, EnFazlaUzunluk: 80, Baslik: "Reçete Şablonu"),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("ilacBarkod", "ilac_barkod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                    Baslik: "Barkod"),
+                new("ilacAd", "ilac_ad", "metin", EnFazlaUzunluk: 200, Baslik: "İlaç"),
+                new("doz", "doz", "metin", EnFazlaUzunluk: 20, Baslik: "Doz"),
+                new("periyot", "periyot", "metin", EnFazlaUzunluk: 20, Baslik: "Periyot"),
+                new("kullanimSekli", "kullanim_sekli", "kod", SabitKodlar: IlacKullanimKodlari,
+                    Baslik: "Kullanım"),
+                new("sureGun", "sure_gun", "sayi", Baslik: "Gün"),
+                new("kutu", "kutu", "sayi", Baslik: "Kutu"),
+                new("icdKod", "icd_kod", "metin", EnFazlaUzunluk: 10, Baslik: "Bağlı Tanı"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
+            }, SubeKolonu: null, Sirala: "grup asc, sira asc, id asc",
+               Baslik: "Reçete Şablonları", LogTabloId: 1371),
+            new("paneller", "public.muayene_sablon_panel", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("panelId", "panel_id", "kod", Zorunlu: true,
+                    KodTablosu: "public.v_lab_panel_lookup", Baslik: "Panel"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "sira asc, id asc",
+               Baslik: "İstem Panelleri", LogTabloId: 1372),
+            new("makrolar", "public.muayene_sablon_makro", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("kisayol", "kisayol", "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kısayol"),
+                new("alan", "alan", "kod", SabitKodlar: MakroAlanKodlari, Baslik: "Alan"),
+                new("metin", "metin", "metin", Zorunlu: true, Baslik: "Metin"),
+                // 932: muayenede alana yazildikca sunucu artirir; elle yazilmaz.
+                new("kullanim", "kullanim", "sayi", Yazilabilir: false, Baslik: "Kullanım"),
+            }, SubeKolonu: null, Sirala: "sira asc, id asc",
+               Baslik: "Metin Makroları", LogTabloId: 1373),
+            new("kurallar", "public.muayene_sablon_kural", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("kod", "kod", "kod", Zorunlu: true, SabitKodlar: SablonKuralKodlari, Baslik: "Kural"),
+                new("aktif", "aktif", "mantik", Baslik: "Aktif"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "id asc",
+               Baslik: "Kurallar", LogTabloId: 1374)
         });
 
     /// <summary>METİN MAKROSU KARTI (411) — kısayoldan hazır metin.</summary>

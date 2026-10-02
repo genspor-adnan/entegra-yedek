@@ -27,6 +27,9 @@ public sealed class TercihDeposu
             //   evde gece) ve localStorage'da kalir.
             "gorunum",   // {yogunluk, listeSatir, acilisEkrani}
             "bildirim",  // {olaylar:{<kod>:{zil,masaustu}}, sessiz:{...}}
+            // ICD arama penceresinde SON secilen kesinlik/taraf (kullanici: "en
+            //   son ne secili biraktiysa ekran acildiginda o secili gelsin").
+            "taniEkle",  // {kesinlik, taraf}
         };
 
     /// <summary>Bir degerin ust siniri: favori listesi birkac yuz bayttir.</summary>

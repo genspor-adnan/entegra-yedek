@@ -227,10 +227,13 @@ public static class DokumanYonetimUclari
         //   Kart üzerinden de yapılabilir; liste ekranında toplu iş için ayrı uç.
         grup.MapPost("/{id:int}/tasi", async (
             int id, TasiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            // Dokuman yonetimi yetkisi, dokumanin KENDI kaynagina erisimin
+            //   yerine gecmez (tekrar denetim #1).
+            await erisim.IsteAsync(baglam, id, Islem.Degistir, iptal);
 
             var etkilenen = await veri.CalistirAsync("""
                 update public.dokuman
@@ -262,10 +265,14 @@ public static class DokumanYonetimUclari
         //   kod ilk satır olarak taşındı, kimliksiz uç aynen çalışıyor.
         grup.MapPost("/{id:int}/paylasim", async (
             int id, PaylasimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            // Link KIMLIKSIZ okumadir: icerigi goremeyen (or. baska subenin lab
+            //   sonucu) link uretemez.
+            await erisim.IsteAsync(baglam, id, Islem.Degistir, iptal);
+            await erisim.IsteAsync(baglam, id, Islem.Gor, iptal);
 
             var gizlilik = await veri.TekDegerAsync<short>(
                 "select gizlilik from public.dokuman where id = @p0", [id], iptal);
@@ -304,10 +311,14 @@ public static class DokumanYonetimUclari
         // POST /api/dokuman-yonetim/paylasim/{paylasimId}/iptal
         grup.MapPost("/paylasim/{paylasimId:int}/iptal", async (
             int paylasimId, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            var hedef = await veri.TekDegerAsync<int?>(
+                "select dokuman_id from public.dokuman_paylasim where id = @p0", [paylasimId], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Paylasim linki bulunamadi.");
+            await erisim.IsteAsync(baglam, hedef, Islem.Degistir, iptal);
 
             // Kod SILINMEZ, iptal DAMGALANIR: silinen kod bir sure sonra
             //   yeniden uretilebilir ve eski alici erisim kazanirdi.
@@ -335,7 +346,7 @@ public static class DokumanYonetimUclari
         //   nereden yüklendiğidir ve değişirse kart galerisi dosyayı kaybeder.
         grup.MapPost("/{id:int}/baglanti", async (
             int id, BaglantiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
@@ -343,6 +354,9 @@ public static class DokumanYonetimUclari
             if (string.IsNullOrWhiteSpace(istek.Kaynak) || istek.KaynakId <= 0)
                 throw GentegreHatasi.Dogrulama("Kaynak ve kayit gerekli.",
                     [new("kaynak", "Baglanacak kayit secilmeli.")]);
+            // Hem dokumana hem BAGLANACAK kayda erisim gerekir.
+            await erisim.IsteAsync(baglam, id, Islem.Degistir, iptal);
+            await erisim.KaynakIsteAsync(baglam, istek.Kaynak, istek.KaynakId, Islem.Degistir, iptal);
 
             var eklenen = await veri.CalistirAsync("""
                 insert into public.dokuman_iliski (dokuman_id, kaynak, kaynak_id, rol, ekleyen)
@@ -365,10 +379,14 @@ public static class DokumanYonetimUclari
         // DELETE /api/dokuman-yonetim/baglanti/{iliskiId}
         grup.MapDelete("/baglanti/{iliskiId:int}", async (
             int iliskiId, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            var hedef = await veri.TekDegerAsync<int?>(
+                "select dokuman_id from public.dokuman_iliski where id = @p0", [iliskiId], iptal)
+                ?? throw GentegreHatasi.IsKurali("Baglanti bulunamadi. Birincil baglanti kaldirilamaz.");
+            await erisim.IsteAsync(baglam, hedef, Islem.Degistir, iptal);
 
             var silinen = await veri.CalistirAsync(
                 "delete from public.dokuman_iliski where id = @p0", [iliskiId], iptal);
@@ -383,10 +401,11 @@ public static class DokumanYonetimUclari
         // POST /api/dokuman-yonetim/{id}/surum - yeni sürüm aç (taslak)
         grup.MapPost("/{id:int}/surum", async (
             int id, SurumIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            await erisim.IsteAsync(baglam, id, Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -443,10 +462,14 @@ public static class DokumanYonetimUclari
         grup.MapPost("/surum/{surumId:int}/onaya-gonder", async (
             int surumId, BaglamCozucu cozucu, VeriKaynagi veri,
             Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
+            var hedef = await veri.TekDegerAsync<int?>(
+                "select dokuman_id from public.dokuman_surum where id = @p0", [surumId], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Sürüm bulunamadı.");
+            await erisim.IsteAsync(baglam, hedef, Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 

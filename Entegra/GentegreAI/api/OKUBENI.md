@@ -1,4 +1,4 @@
-# Gentegre AI — API (F0-04 iskeleti)
+# Gentegre AI — API
 
 ASP.NET Core (.NET 10) + Npgsql. Yalnız PostgreSQL; MSSQL bağımlılığı yok.
 
@@ -20,7 +20,9 @@ Veritabanı docker `gentegre-pg18` (port 5434, db `gentegre_ai`) — bağlantı 
 | `POST /api/kimlik/yenile` | `{refreshToken}` → yeni ikili (eski iptal olur) |
 | `POST /api/kimlik/cikis` | `{refreshToken}` → oturumu kapatır |
 | `GET  /api/kimlik/ben` | Profil + çözülmüş yetkiler (aksiyonlar + kaynaklar) |
-| `POST /api/kimlik/parola` | `{eskiParola, yeniParola}` → parola değiştirir, oturumları kapatır |
+| `POST /api/kimlik/parola` | `{eskiParola, yeniParola}` → parola değiştirir, diğer oturumları kapatır, bu cihaza **yeni token ikilisi** döner |
+| `POST /api/kimlik/ilk-parola/kod` | `{kod, tcknSon4}` → parolası boş hesabın kayıtlı kanalına kod (cevap her durumda aynı) |
+| `POST /api/kimlik/ilk-parola` | `{kod, dogrulamaKodu, yeniParola}` → ilk parola (tek kullanımlık kodla) |
 | `GET  /api/kimlik/subeler` | Kullanıcının giriş/işlem yapabildiği şubeler + aktif şube + yazma hakkı |
 | `POST /api/kimlik/sube` | `{subeId}` → çalışma şubesini değiştirir, yeni access token |
 | `GET  /api/liste` | Kullanıcının görebildiği liste kaynakları |
@@ -38,8 +40,8 @@ Veritabanı docker `gentegre-pg18` (port 5434, db `gentegre_ai`) — bağlantı 
 | `GET  /api/aksiyon/{ekran}?kayitId=` | Aksiyon kataloğu (§7) — araç çubuğu / sağ tuş / komut paleti tek kaynaktan |
 | `GET  /api/aksiyon` | Tanımlı ekran adları |
 
-Liste kaynakları: `cari`, `stok`, `belge`, `personel`, `hizmet`, `masraf`, `mali-hareket`,
-`e-belge`, `islem-log`. Kart kaynakları: `cari`, `stok` (belge ayrı sözleşme — §4).
+Liste ve kart kaynaklarının güncel listesi kodun kendisidir: `KaynakKatalogu*.cs` /
+`KartKatalogu*.cs` (ve çalışırken `GET /api/liste`, `GET /api/kart`). Belge ayrı sözleşme — §4.
 
 Geliştirmede OpenAPI belgesi: `GET /openapi/v1.json`.
 
@@ -65,9 +67,31 @@ yetkisi denemesi için (`belge.maliyetOrt` gizli).
   yeniden yüklenir.
 - **Alan yetkisi kolonu sorgudan çıkarır**, yanıttan sonradan silmez — yetkisiz değer
   ne SQL'e ne log'a düşer.
-- **Şube filtresi sunucuda eklenir.** `X-Sube-Id` başlığı yalnızca öneri; kullanıcının
-  `kullanici_sube` kaydı yoksa `403`. Ana veri (cari, stok) şubeler arası ortaktır,
+- **Şube filtresi sunucuda eklenir.** `X-Sube-Id` başlığı yalnızca öneri: yetkisiz şube
+  `403`, sayı olmayan başlık `400`. Ana veri (cari, stok) şubeler arası ortaktır,
   şube filtresi yalnız hareket kaynaklarına uygulanır.
+- **Şubesiz oturum kapalıdır** (denetim 28.09.2026). Aktif/yetkili şubesi kalmayan
+  kullanıcının token'ı geçerli kalsa da şubeye bağlı her uç `403` döner ve yazamaz;
+  "şube yok" hiçbir zaman "bütün şubeler" demek değildir. İstisna uçlar
+  (`/ben`, `/parola`, `/subeler`, `/hesabim`…) `SinirliOturumaAcik(...)` ile
+  TEK TEK işaretlenir (`AraKatman/IstekBaglami.cs`).
+- **Oturum kapısı** (`AraKatman/OturumKapisi.cs`): her kimlikli istekte hesabın
+  güncel durumu okunur — pasif hesap `401`, `parola_degismeli = 1` iken yalnız
+  profil/parola uçları, diğerleri `403 PAROLA_DEGISMELI`. Zorunlu parola değişimi
+  arayüzde değil SUNUCUDA uygulanır.
+- **Rol kümesi istek başına DB'den**: token'daki `rolId` karar vermez; ana + ek
+  roller (`fn_kullanici_rolleri`) `IstekBaglami.RolIdleri`'ne okunur. Test seviyesi
+  yetki `fn_lab_tetkik_izin_roller` ile bu kümeye sorulur.
+- **Aksiyon = yazma** (varsayılan): `AksiyonIste` salt okuma şubesinde `403`;
+  yalnız okuyan aksiyon `AksiyonGorIste` ile açıkça ayrılır.
+- **Özel uçlarda kayıt kapsamı**: kimliği yoldan alan uç, liste ile AYNI kuralı
+  `KayitErisimi` ile uygular (katalog kaynağının sorgusu + tek kimlik); kapsam
+  dışı = `404` (var olmayanla aynı). Laboratuvar grafik/rapor/istem/geçmiş uçları
+  bu kapıdan geçer.
+- **Doküman erişimi** (`AraKatman/DokumanErisimi.cs`): doküman kimliğiyle gelen
+  HER işlem dokümanın gerçek `kaynak/kaynak_id`'sini DB'den okur; kart yolunda URL
+  ile eşleşmezse `404`. Kaynak türü → yetki + katalog kapsamı tablosu bu dosyada;
+  yeni doküman kaynağı eklerken buraya kural yazılmazsa tür KAPALI kalır.
 - **Şube seçimi giriş akışının parçası.** Girişte `subeId` gönderilebilir (yetkisizse 403);
   gönderilmezse varsayılan şube ile token verilir ve çok şubeli kullanıcıda
   `subeSecimiGerekli: true` döner — istemci seçim ekranı gösterir. Aktif şube sırayla
@@ -79,6 +103,15 @@ yetkisi denemesi için (`belge.maliyetOrt` gizli).
   o taraf kayıtlarını döner; satır yoksa kapsam sınırsızdır.
 - **Refresh rotation + tekrar kullanım tespiti**: yenilemede eski token iptal olur;
   iptal edilmiş token yeniden gelirse `oturum.aile_id`'nin tamamı iptal edilir.
+  Eski satırın kilitlenmesi (`FOR UPDATE`), kapatılması ve yeni satır **tek
+  transaction**; aile iptali hata dönmeden commit edilir. Eşzamanlı aynı refresh ile
+  en fazla bir yenileme başarılı olur.
+- **İlk parola iki adım**: TCKN son 4 yalnız kayıtlı kanala tek kullanımlık kod
+  göndertir; parolayı kod belirler (`ParolaSifirlamaServisi`). Hesap sayacı + kilit ve
+  IP başına deneme sınırı; IP yalnız güvenilen proxy'nin `X-Forwarded-For`'undan
+  (`Guvenlik:GuvenilenProxyler`, varsayılan loopback).
+- **Arka plan işçileri kapatılabilir**: `ArkaPlan:Kapali=true` (bildirim, zamanlı iş,
+  cihaz/ORU dinleyicileri çalışmaz) — bütünleşme testlerinin test sunucusu içindir.
 - **Hata gövdesi tek biçim** (§1.2): `{hata:{kod, mesaj, izlemeNo, alanlar?}}`.
   Beklenmeyen hatada iç ayrıntı kullanıcıya gitmez, `hata_log`'a yazılır; izleme
   numarası ayrıca `X-Izleme-No` başlığında döner.

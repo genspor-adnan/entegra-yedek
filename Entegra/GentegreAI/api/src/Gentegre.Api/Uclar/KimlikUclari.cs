@@ -50,7 +50,8 @@ public static class KimlikUclari
                 yazma = baglam.SubeYazma,
                 subeler = baglam.Subeler
             });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         grup.MapGet("/ben", async (
             BaglamCozucu cozucu, KullaniciDeposu kullanicilar, VeriKaynagi veri,
@@ -116,7 +117,8 @@ public static class KimlikUclari
                                    .Select(y => new KaynakYetkisi(y.Kod, y.Gor, y.Ekle, y.Degistir, y.Sil))
                                    .OrderBy(k => k.Kod).ToList()
             });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Hepsi);
 
         // MARKA (anonim, 502): giris ekrani hangi urunun kapisi oldugunu
         //   OTURUM ACILMADAN bilmeli - "Gentegre" yazan sabit baslik, HBYS
@@ -131,14 +133,24 @@ public static class KimlikUclari
             return Results.Ok(new { urunModu = mod });
         });
 
-        // ILK PAROLA (anonim): otomatik acilan hesap sahibinin kendi parolasini
-        //   belirlemesi. Kimlik kaniti TCKN son 4 (bkz. KimlikServisi).
-        grup.MapPost("/ilk-parola", async (
-            IlkParolaIstegi istek, KimlikServisi servis, HttpContext ctx,
+        // ILK PAROLA (anonim, denetim 28.09.2026 #5): iki adim. TCKN son 4
+        //   yalniz kod gondermenin on kosulu; parolayi kayitli kanala giden
+        //   tek kullanimlik kod belirler (bkz. ParolaSifirlamaServisi).
+        //   1. adimin cevabi HER DURUMDA aynidir - hesap varligi sizmaz.
+        grup.MapPost("/ilk-parola/kod", async (
+            IlkParolaIstegi istek, Servisler.ParolaSifirlamaServisi servis, HttpContext ctx,
             CancellationToken iptal) =>
         {
-            await servis.IlkParolaAsync(istek, Ip(ctx),
-                ctx.Request.Headers.UserAgent.ToString(), iptal);
+            await servis.IlkParolaKodGonderAsync(istek.Kod, istek.TcknSon4, Ip(ctx), Istemci(ctx), iptal);
+            return Results.Ok(new { mesaj = Servisler.ParolaSifirlamaServisi.IlkParolaGenelMesaj });
+        }).AllowAnonymous();
+
+        grup.MapPost("/ilk-parola", async (
+            IlkParolaIstegi istek, Servisler.ParolaSifirlamaServisi servis, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            await servis.IlkParolaBelirleAsync(istek.Kod, istek.DogrulamaKodu, istek.YeniParola,
+                Ip(ctx), Istemci(ctx), iptal);
             return Results.Ok(new { mesaj = "Parolanız tanımlandı, giriş yapabilirsiniz." });
         }).AllowAnonymous();
 
@@ -182,9 +194,11 @@ public static class KimlikUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            await servis.ParolaDegistirAsync(baglam.KullaniciId, istek, iptal);
-            return Results.NoContent();
-        }).RequireAuthorization();
+            // Yeni token cifti doner: diger oturumlar kapanir, bu cihaz devam eder.
+            return Results.Ok(await servis.ParolaDegistirAsync(baglam.KullaniciId, baglam.SubeId,
+                istek, Ip(ctx), Istemci(ctx), iptal));
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Hepsi);
 
         grup.MapPost("/dil", async (
             DilDegistirIstegi istek, KimlikServisi servis, BaglamCozucu cozucu,
@@ -193,7 +207,8 @@ public static class KimlikUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await servis.DilDegistirAsync(baglam.KullaniciId, istek, iptal);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         // ------------------------------------- KULLANICI AYARLARI (669) ----
         // Hepsi KISININ KENDI hesabi uzerinde calisir; kullanici kimligi
@@ -223,7 +238,8 @@ public static class KimlikUclari
                     ? Array.Empty<string>()
                     : h.EkRoller.Split(", ", StringSplitOptions.RemoveEmptyEntries),
             });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         grup.MapPut("/iletisim", async (
             IletisimIstegi istek, KullaniciDeposu depo, BaglamCozucu cozucu,
@@ -238,7 +254,8 @@ public static class KimlikUclari
                 throw GentegreHatasi.Dogrulama("E-posta adresi geçersiz.");
             await depo.IletisimGuncelleAsync(baglam.KullaniciId, eposta, cep, iptal);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         grup.MapGet("/oturumlar", async (
             OturumDeposu depo, BaglamCozucu cozucu, HttpContext ctx,
@@ -258,7 +275,8 @@ public static class KimlikUclari
                 //   bu yuzden kesin degil - etiket de "bu tarayıcı" der.
                 buCihaz = o.Ip == ip && o.Istemci == istemci,
             }));
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         grup.MapPost("/oturumlar/{oturumId:long}/kapat", async (
             long oturumId, OturumDeposu depo, BaglamCozucu cozucu, HttpContext ctx,
@@ -270,7 +288,8 @@ public static class KimlikUclari
             var kapanan = await depo.KendiOturumunuKapatAsync(baglam.KullaniciId, oturumId, iptal);
             if (kapanan == 0) return Results.NotFound();
             return Results.Ok(new { kapanan });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
 
         grup.MapGet("/giris-gecmisi", async (
             KullaniciDeposu depo, BaglamCozucu cozucu, HttpContext ctx,
@@ -283,7 +302,8 @@ public static class KimlikUclari
                 tarih = g.Tarih, basarili = g.Basarili, sebep = g.Sebep,
                 ip = g.Ip, istemci = g.Istemci,
             }));
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+          .SinirliOturumaAcik(SinirliOturum.Subesiz);
     }
 
     // Giris/yenileme baglam COZULMEDEN once calisir (henuz kimlik yok) -

@@ -83,7 +83,7 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hafta_SATtan_ve_BEKLENEN_DOGUMDAN_hesaplanir()
     {
         if (!_olgu.Baglandi(nameof(Hafta_SATtan_ve_BEKLENEN_DOGUMDAN_hesaplanir))) return;
@@ -104,7 +104,7 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
             "select public.fn_gebelik_hafta(null, null)", null, CancellationToken.None));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_hastada_IKI_ACIK_dosya_olmaz()
     {
         if (!_olgu.Baglandi(nameof(Ayni_hastada_IKI_ACIK_dosya_olmaz))) return;
@@ -133,7 +133,7 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, hastaId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Paket_221_KILOYU_CEVIRMEZ_ve_riskleri_TEKRARLI_gonderir()
     {
         if (!_olgu.Baglandi(nameof(Paket_221_KILOYU_CEVIRMEZ_ve_riskleri_TEKRARLI_gonderir)))
@@ -190,7 +190,7 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, hastaId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Paket_223_SAT_ve_ONCEKI_DOGUM_ister()
     {
         if (!_olgu.Baglandi(nameof(Paket_223_SAT_ve_ONCEKI_DOGUM_ister))) return;
@@ -239,7 +239,7 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, hastaId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sonuc_kaydi_DOSYAYI_KAPATIR_ve_224_uretilir()
     {
         if (!_olgu.Baglandi(nameof(Sonuc_kaydi_DOSYAYI_KAPATIR_ve_224_uretilir))) return;

@@ -21,7 +21,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
 
     // ---------------------------------------------------------------- barkod
 
-    [Fact]
+    [VtFact]
     public async Task Barkod_kontrol_hanesi_TEK_HANE_HATASINI_yakalar()
     {
         if (!_olgu.Baglandi(nameof(Barkod_kontrol_hanesi_TEK_HANE_HATASINI_yakalar))) return;
@@ -44,7 +44,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
             "select public.fn_lab_barkod_kontrol(@p0)", [bozuk]));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Barkod_HER_SEFERINDE_FARKLI()
     {
         if (!_olgu.Baglandi(nameof(Barkod_HER_SEFERINDE_FARKLI))) return;
@@ -57,7 +57,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
 
     // ---------------------------------------------------------------- bayrak
 
-    [Theory]
+    [VtTheory]
     // deger, alt, ust, panikAlt, panikUst, beklenen
     [InlineData(5.0, 4.0, 10.0, null, null, "N")]
     [InlineData(12.5, 4.0, 10.0, null, null, "H")]
@@ -83,7 +83,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
 
     // -------------------------------------------------------------- referans
 
-    [Fact]
+    [VtFact]
     public async Task Referans_EN_DAR_yas_araligini_secer()
     {
         if (!_olgu.Baglandi(nameof(Referans_EN_DAR_yas_araligini_secer))) return;
@@ -152,7 +152,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
 
     // ----------------------------------------------------------------- cihaz
 
-    [Fact]
+    [VtFact]
     public async Task Cihaz_kodu_ESLESME_YOKSA_tetkik_koduna_duser()
     {
         if (!_olgu.Baglandi(nameof(Cihaz_kodu_ESLESME_YOKSA_tetkik_koduna_duser))) return;
@@ -199,7 +199,7 @@ public class LabTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Calisma_listesi_YALNIZ_KABUL_EDILMIS_numuneyi_verir()
     {
         if (!_olgu.Baglandi(nameof(Calisma_listesi_YALNIZ_KABUL_EDILMIS_numuneyi_verir)))

@@ -2,6 +2,30 @@ import {
   type ListeIstegi, type ListeYaniti, } from '../sozlesme';
 import { istek, gonder, dosyaYukle } from '../cekirdek';
 
+/** YZ tanı önerisi yanıtı: öneri hekime; kod ICD kataloğunda doğrulanmış. */
+export interface YzTaniOnerisiYaniti {
+  oneriler: { kod: string; ad: string; olasilik: 'yuksek' | 'orta' | 'dusuk'; gerekce: string }[];
+  kirmiziBayrak: string; eksikBilgi: string; atilanKod: number; model: string; uyari: string;
+}
+
+/** Muayenede uygulanabilecek şablon (933). oncelik 0 doktorun, 1 bölüm ortak, 2 diğer. */
+export interface MuayeneSablonSecenek {
+  id: number; ad: string; tur: number; varsayilan: boolean; oncelik: number;
+  doktor: string; alanSayisi: number;
+}
+
+/** Muayene şablonu hekim tercihleri (931) - muayeneye uygulanan şablonlardan. */
+export interface SablonTercihleri {
+  tanilar: { kod: string; ad: string }[];
+  receteler: { sablon: string; grup: string; satirlar: {
+    barkod: string; ilac: string; doz: string; periyot: string; kullanimSekli: number;
+    sureGun: number; kutu: number; aciklama: string; icdKod: string }[] }[];
+  paneller: { id: number; kod: string; ad: string }[];
+  /** kaynak 's' şablon makrosu, 'k' kurum makrosu (metin_makro); id kullanım sayacı için. */
+  makrolar: { kisayol: string; alan: string; metin: string; kaynak?: 's' | 'k'; id?: number;
+              kullanim?: number }[];
+}
+
 /** Liste kaynaklari ve kolon metasi. */
 export const listeUclari = {
   // -------------------------------------------------------------- liste ----
@@ -34,16 +58,37 @@ export const listeUclari = {
 
   /** Tani onerileri: bu HASTANIN onceki tanilari + bu HEKIMIN son 90 gunde
       en cok yazdiklari (mockup "Onceki tanilar" / "Sik kullandiklarim"). */
+  /** YZ tanı önerisi: bağlam sunucuda toplanır ve anonimleştirilir; kodlar katalogla doğrulanır. */
+  muayeneYzTaniOnerisi: (muayeneId: number) =>
+    gonder<YzTaniOnerisiYaniti>(`/api/muayene/${muayeneId}/yz-tani-onerisi`, {}),
+  /** YZ tetkik önerisi: lab kodu katalog listesinden, görüntüleme radyoloji hizmetinden. */
+  muayeneYzTetkikOnerisi: (muayeneId: number) =>
+    gonder<{ oneriler: { tur: 'tetkik' | 'panel' | 'radyoloji'; id: number; kod: string; ad: string; gerekce: string }[];
+             not: string; atilan: number; model: string; uyari: string }>(
+      `/api/muayene/${muayeneId}/yz-tetkik-onerisi`, {}),
+  /** YZ ilaç önerisi: etken madde -> katalog ürünleri; alerjiyle çakışan elenir; doz yok. */
+  muayeneYzIlacOnerisi: (muayeneId: number) =>
+    gonder<{ oneriler: { barkod: string; ad: string; etken: string; gerekce: string }[];
+             notlar: string[]; model: string; uyari: string }>(
+      `/api/muayene/${muayeneId}/yz-ilac-onerisi`, {}),
   muayeneTaniOnerileri: (muayeneId: number) =>
     istek<{
       onceki: { kod: string; ad: string; kronik: number; son: string }[];
       sik: { kod: string; ad: string; adet: number }[];
     }>(`/api/muayene/${muayeneId}/tani-onerileri`),
 
-  /** Listeden secilen ICD kodunu tani satiri olarak ekler (ana tani varsa EK). */
-  muayeneTaniEkle: (muayeneId: number, icdKod: string) =>
-    gonder<{ eklendi: boolean; mesaj: string }>(
-      `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
+  /** Listeden secilen ICD kodunu tani satiri olarak ekler. Tur verilmezse ilk
+      tani ANA, sonrakiler EK; ANA secilip ana tani varsa sunucu EK yazar. */
+  muayeneTaniEkle: (muayeneId: number, icdKod: string,
+                    secim: { tur?: number | null; taraf?: number | null;
+                             kesinlik?: number | null } = {}) =>
+    gonder<{ eklendi: boolean; mesaj: string; tur?: number }>(
+      `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, secim),
+
+  /** ICD arama penceresindeki TÜR (Kesin / Ön tanı = kesinlik) ve TARAF secenekleri. */
+  muayeneTaniSecenekleri: () =>
+    istek<{ kesinlikler: { kod: number; ad: string }[]; taraflar: { kod: number; ad: string }[] }>(
+      '/api/muayene/tani-secenekleri'),
 
   /** ILAC SECILIRKEN alerji/tekrar uyarisi (yazmadan once gorunsun). */
   receteKontrol: (hastaId: number, barkod: string) =>
@@ -61,6 +106,42 @@ export const listeUclari = {
   receteIlacSil: (receteId: number, satirId: number) =>
     istek<{ mesaj: string }>(`/api/recete/${receteId}/ilac/${satirId}`,
                              { method: 'DELETE' }),
+
+  // ------------------------------------------------ muayene sablonlari (927) ----
+  /** Sablonu kullaniciya (doktora ozel) kopyalar, alanlariyla. */
+  sablonKopyala: (id: number) =>
+    gonder<{ id: number; kod: string; mesaj: string }>(`/api/muayene-sablon/${id}/kopyala`, {}),
+  /** Bolum varsayilani yapar (bolumde tek; eskisi kalkar). */
+  sablonVarsayilan: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/muayene-sablon/${id}/varsayilan`, {}),
+  /** Son 30 gun kullanim: toplam, doktora gore, son muayeneler. */
+  sablonKullanim: (id: number) =>
+    istek<{ toplam30: number; doktorSayisi: number;
+            doktorlar: { ad: string; adet: number }[];
+            son: { muayeneId: number; tarih: string; hasta: string; doktor: string }[] }>(
+      `/api/muayene-sablon/${id}/kullanim`),
+  /** Sablon ve alanlarinin degisiklik kaydi (islem_log). */
+  sablonGecmis: (id: number) =>
+    istek<{ satirlar: { tarih: string; kullanici: string; islemTipi: number; alan: boolean;
+                        bolum?: string; bilgi: string }[] }>(
+      `/api/muayene-sablon/${id}/gecmis`),
+  /** Muayeneye uygulanan şablonların hekim tercihleri (931): sık tanı, reçete şablonu, panel, makro. */
+  /** Muayenede uygulanabilecek şablonlar öncelik sırasıyla (933): 0 doktorun,
+      1 bölüm ortak, 2 diğer; `onerilen` doktorunki yoksa bölüm varsayılanı. */
+  muayeneSablonlari: (muayeneId: number) =>
+    istek<{ sablonlar: MuayeneSablonSecenek[]; onerilen: MuayeneSablonSecenek | null }>(
+      `/api/muayene-sablon/muayene/${muayeneId}/sablonlar`),
+  /** Muayenede alana yazılan makronun kullanım sayısını artırır (932). */
+  makroKullanim: (kaynak: 's' | 'k', id: number) =>
+    gonder<{ izlemeNo: string }>('/api/muayene-sablon/makro-kullanim', { kaynak, id }),
+  muayeneSablonTercihleri: (muayeneId: number) =>
+    istek<SablonTercihleri>(`/api/muayene-sablon/muayene/${muayeneId}/tercihler`),
+
+  /** Taslak recetede ilac satirini duzeltir (doz/periyot/kullanim/sure/kutu/tarif). */
+  receteSatirGuncelle: (receteId: number, satirId: number, g: {
+    doz?: string; periyot?: string; kullanimSekli?: number; sureGun?: number;
+    kutu?: number; aciklama?: string;
+  }) => gonder<{ mesaj: string }>(`/api/recete/${receteId}/ilac/${satirId}`, g, 'PUT'),
 
   /** Hastanin son imzali recetesindeki ilaclari bu muayenenin recetesine kopyalar. */
   receteOncekiKopyala: (muayeneId: number) =>

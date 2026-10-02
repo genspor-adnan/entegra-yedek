@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reçete Kartı — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff}
+  .btn.ikon{padding:5px 8px}
+  .btn[disabled]{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+
+  /* Kimlik şeridi */
+  .kimlik{display:flex;align-items:center;gap:14px;padding:8px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kimlik .ad{font-weight:bold;font-size:13px;color:var(--navy)}
+  .kimlik .mini{color:var(--muted);font-size:11px}
+
+  .gvd{display:grid;grid-template-columns:minmax(0,1fr) 330px}
+  @media(max-width:1000px){.gvd{grid-template-columns:1fr}}
+  .sol{padding:12px 14px;border-right:1px solid var(--line2);background:#f4f5f7}
+  .sag{padding:12px 14px;background:#fafcfe;display:flex;flex-direction:column;gap:12px}
+
+  .kutu{background:#fff;border:1px solid var(--line2);border-radius:4px;margin:0 0 12px;overflow:hidden}
+  .kutu > h6{margin:0;padding:6px 10px;font-size:11px;color:#2c4a6b;background:linear-gradient(#f6f9fc,#eaf0f6);
+    border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:6px}
+  .kutu > h6 .sp{margin-left:auto}
+  .ic{padding:10px}
+
+  /* alanlar */
+  .alanlar{display:grid;grid-template-columns:180px 1fr;gap:10px 14px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:5px 7px;background:#fff;min-height:27px}
+  .tur-sec{display:flex;gap:4px;flex-wrap:wrap}
+  .tur{border:1px solid var(--line);border-radius:3px;padding:4px 9px;font-size:11px;background:#fff;display:flex;gap:5px;align-items:center}
+  .tur i{width:10px;height:10px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+  .tur.on{border-color:#2f6db3;background:var(--sel);font-weight:bold}
+  .tanilar{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+
+  /* ilaç gridi */
+  .arac{display:flex;gap:4px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{background:var(--head);color:#3a5470;font-weight:bold;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:5px 6px;border-bottom:1px solid var(--line2);vertical-align:top}
+  tr.sec td{background:var(--sel)}
+  td.c, th.c{text-align:center} td.r, th.r{text-align:right}
+  .kucuk{color:var(--muted);font-size:10.5px}
+  .uyari-satir td{background:#fff6f5}
+
+  .bant{border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.5}
+  .bant.kir{background:#fbe9e7;border:1px solid #f3c4bf;color:#7d1f1a}
+  .bant.sari{background:#fdf6e3;border:1px solid #f2ddbf;color:#6b4c12}
+  .kv{display:grid;grid-template-columns:110px 1fr;gap:4px 8px;font-size:11.5px}
+  .kv .k{color:var(--muted)}
+  .blk h6{margin:0 0 6px;font-size:11px;color:#2c4a6b;text-transform:uppercase;letter-spacing:.3px;
+    border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .chips{display:flex;gap:4px;flex-wrap:wrap}
+  .not{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .alt{display:flex;gap:10px;align-items:center;padding:7px 12px;border-top:1px solid var(--line);background:var(--head);font-size:11px;color:var(--muted)}
+  .aciklama{max-width:1240px;margin:14px auto 0;color:#4d5d6e;font-size:11.5px;line-height:1.6}
+  .aciklama h4{margin:0 0 4px;color:var(--navy)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">💊 Reçete — Taslak <span class="rz sari" style="margin-left:6px">R-2026-000142</span>
+    <span class="sp">Esc ile kapanır · 🗖</span></div>
+
+  <!-- ARAÇ ÇUBUĞU: imza ve Medula DÜĞMELERİN işi (alanlar salt okunur) -->
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn ok">✍ e-İmzala</span>
+    <span class="btn" title="İmzalı reçete Medula'ya gönderilir">📤 Medula'ya Gönder</span>
+    <span class="btn">🖨 Yazdır</span>
+    <span class="sepv"></span>
+    <span class="btn">🕘 Önceki reçeteyi kopyala</span>
+    <span class="sp"></span>
+    <span class="btn danger">🗑 Sil</span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+
+  <!-- KİMLİK: hasta + muayene bağlamı, reçetenin kimin/nerede yazıldığı -->
+  <div class="kimlik">
+    <span class="ad">AYŞE YILMAZ</span>
+    <span class="mini">TC 123******78 · K · 42 yaş</span>
+    <span class="mini">Muayene <b>#11</b> · İç Hastalıkları · Dr. Mehmet Kaya</span>
+    <span class="mini">29.09.2026 10:42</span>
+    <span class="sp"></span>
+    <span class="rz sari">Taslak</span>
+    <span class="rz">Normal reçete</span>
+    <span class="rz kir" title="Etken madde: amoksisilin">⚠ Alerji: Penisilin</span>
+  </div>
+
+  <div class="gvd">
+    <div class="sol">
+      <!-- REÇETE BİLGİLERİ -->
+      <div class="kutu">
+        <h6>Reçete bilgileri</h6>
+        <div class="ic alanlar">
+          <div class="fld">
+            <label>Reçete türü</label>
+            <div class="tur-sec">
+              <span class="tur on"><i style="background:#fff"></i>Normal</span>
+              <span class="tur"><i style="background:#e54848"></i>Kırmızı</span>
+              <span class="tur"><i style="background:#3fa45b"></i>Yeşil</span>
+              <span class="tur"><i style="background:#8a55c9"></i>Mor</span>
+              <span class="tur"><i style="background:#f0932b"></i>Turuncu</span>
+            </div>
+          </div>
+          <div class="fld">
+            <label>Tanılar (muayeneden — değiştirilemez)</label>
+            <div class="tanilar">
+              <span class="rz ok">J03.9 Akut tonsillit · ANA</span>
+              <span class="rz">R50.9 Ateş</span>
+              <span class="kucuk">tanı Muayene sekmesinde girilir</span>
+            </div>
+          </div>
+          <div class="fld" style="grid-column:1/-1">
+            <label>Açıklama (reçeteye basılır)</label>
+            <div class="inp">Tedavi sonunda kontrole gelmesi önerildi.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- İLAÇLAR: işaretli satırlara toplu işlem; düzenleme satırda -->
+      <div class="kutu">
+        <div class="arac">
+          <span class="btn">🕘 Kopyala</span>
+          <span class="btn primary">＋ İlaç</span>
+          <span class="btn ikon" title="Düzenle">✎</span>
+          <span class="btn ikon danger" title="İşaretli ilaçları çıkar (1)">🗑</span>
+          <b style="margin-left:6px;color:#2c4a6b">İlaçlar</b>
+          <span class="rz kir">⚠ 1 etkileşim / alerji uyarısı</span>
+          <span class="sp"></span>
+          <span class="kucuk">3 ilaç · 4 kutu</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th class="c" style="width:26px">☐</th><th>İlaç</th><th>Etken madde</th>
+            <th class="c">Doz</th><th class="c">Periyot</th><th>Kullanım</th>
+            <th class="c">Süre</th><th class="r">Kutu</th><th>Tarif</th><th>Uyarı</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="c">☐</td>
+              <td><b>PAROL 500 MG 20 TB</b><div class="kucuk">8699514010012</div></td>
+              <td>parasetamol</td><td class="c">1x1</td><td class="c">3x1</td><td>Ağızdan</td>
+              <td class="c">5 gün</td><td class="r">1</td><td>Tok karnına</td><td></td>
+            </tr>
+            <tr class="sec uyari-satir">
+              <td class="c">☑</td>
+              <td><b>AUGMENTIN BID 1000 MG 14 TB</b><div class="kucuk">8699522090011</div></td>
+              <td>amoksisilin + klavulanat</td><td class="c">1x1</td><td class="c">2x1</td><td>Ağızdan</td>
+              <td class="c">7 gün</td><td class="r">1</td><td></td>
+              <td><span class="rz kir" title="Hasta alerjisi ile aynı etken">Alerji: penisilin</span>
+                <div class="kucuk">gerekçe: “test dozu tolere edildi”</div></td>
+            </tr>
+            <tr>
+              <td class="c">☐</td>
+              <td><b>STREPSILS PASTİL 24</b><div class="kucuk">8699800010019</div></td>
+              <td>amilmetakrezol</td><td class="c">1</td><td class="c">4x1</td><td>Ağızdan</td>
+              <td class="c">5 gün</td><td class="r">2</td><td>Emilerek</td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="not">
+        Satıra tık = seç · çift tık = düzenle · başlıktaki kutu = hepsini seç.
+        İmzalanan reçeteden ilaç çıkarılamaz; ilaçlar hastanın <b>aktif ilaç</b> listesine işlenir.
+      </div>
+    </div>
+
+    <!-- SAĞ: kontroller ve gönderim (salt okunur) -->
+    <div class="sag">
+      <div class="bant kir">
+        <b>⚠ Alerji uyarısı</b><br>
+        AUGMENTIN BID — <b>amoksisilin</b>, hastanın <b>penisilin</b> alerjisiyle aynı gruptan.
+        Hekim gerekçeyle geçti; gerekçe reçete satırında kalır.
+      </div>
+      <div class="bant sari">
+        <b>Etkileşim</b><br>Kayıtlı aktif ilaçlarla etkileşim bulunmadı.
+      </div>
+
+      <div class="blk">
+        <h6>Hastanın aktif ilaçları</h6>
+        <div class="chips">
+          <span class="rz mavi">Beloc Zok 50 mg · 1x1</span>
+          <span class="rz mavi">Glifor 1000 mg · 2x1</span>
+        </div>
+      </div>
+
+      <div class="blk">
+        <h6>İmza ve Medula</h6>
+        <div class="kv">
+          <span class="k">Reçete no</span><span>R-2026-000142</span>
+          <span class="k">İmza</span><span class="kucuk">— (imzalanmadı)</span>
+          <span class="k">Medula gönderim</span><span class="kucuk">—</span>
+          <span class="k">Medula sonucu</span><span class="kucuk">Medula kapısı açık değil</span>
+          <span class="k">Provizyon</span><span>Muayene takibi <b>TK-88231</b></span>
+        </div>
+        <div class="not" style="margin-top:6px">Bu alanları düğmeler yazar; elle "imzalı" yapılamaz.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alt">
+    <span>Kaydeden: Dr. Mehmet Kaya · 29.09.2026 10:44</span>
+    <span class="sp"></span>
+    <span>Durum: <b>Taslak</b> → e-İmzala → Medula Kabul</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Kurallar (ekrana yansıyan)</h4>
+  • Reçete bir <b>belgedir</b>: imzalanınca değişmez; ilaç adı satıra kopyalanır (katalog değişse de eski reçete aynı kalır).<br>
+  • Tanılar muayeneden gelir, reçetede seçilmez (ana + ek tanılar).<br>
+  • Alerji/etkileşim uyarısı <b>engel değil</b>: hekim gerekçe yazarak geçer, gerekçe satırda saklanır.<br>
+  • Kırmızı/yeşil reçetede tür seçimi ilaç ekleme kontrolünü değiştirir (kontrollü madde).<br>
+  • İmza ve Medula alanları salt okunur; düğmeler (e-İmzala, Medula'ya Gönder) yazar.
+</div>
+</body>
+</html>

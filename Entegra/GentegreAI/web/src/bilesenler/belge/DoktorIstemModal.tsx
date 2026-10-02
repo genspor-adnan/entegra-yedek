@@ -2,15 +2,29 @@ import { useState } from 'react';
 import { api } from '../../api/istemci';
 import { Modal } from '../Modal';
 import { guvenli, mesaj } from '../mesaj';
+import { paraYaz } from '../bicim';
 import type { BekleyenIstem, BekleyenIstemYaniti } from '../../api/uclar/basvuruIstem';
 
 /**
- * DOKTOR İSTEMİ — ÜCRETE EKLE (kullanıcı: "kategoriye göre gruplu seçilebilir
- * grid, iskonto gibi"). Hekimin muayenede açtığı bekleyen (serbest=0) lab/
- * radyoloji istemleri kategoriye göre gruplu listelenir; banko SEÇTİKLERİNİ
- * ücrete ekler (fiyat + iskonto + karşılama). Hasta pahalı tetkikten
- * vazgeçerse işareti kaldırılır - yalnız seçilenler laboratuvara/röntgene düşer.
+ * DOKTOR İSTEMİ — ÜCRETE EKLE. Hekimin muayenede açtığı bekleyen (serbest=0)
+ * lab/radyoloji istemleri GRID olarak listelenir (kullanıcı): Laboratuvar ve
+ * Görüntüleme diye iki grup, varsayılan HEPSİ seçili. Banko seçtiklerini
+ * ücrete ekler; hasta pahalı tetkikten vazgeçerse işareti kaldırılır - yalnız
+ * seçilenler laboratuvara/röntgene düşer.
+ *
+ * FİYATLAR sağda, HASTANIN KURUMUNA göre: başvurunun fiyat listesi +
+ * sözleşme iskontosu. Rakamlar sunucudan gelir (ücretlendirmeyle aynı
+ * kural); ekran yalnızca seçili satırların tutarlarını grup ve genel toplam
+ * olarak toplar. Asıl belge toplamı ücrete eklendikten sonra dip toplamdadır.
  */
+const GRUPLAR: { tur: BekleyenIstem['tur']; ad: string; ic: string }[] = [
+  { tur: 'lab', ad: 'Laboratuvar', ic: '🧪' },
+  { tur: 'radyoloji', ad: 'Görüntüleme', ic: '📷' },
+];
+
+const sag: React.CSSProperties = { textAlign: 'right', padding: '5px 8px', whiteSpace: 'nowrap' };
+const hucre: React.CSSProperties = { padding: '5px 8px' };
+
 export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
   belgeId: number;
   veri: BekleyenIstemYaniti;
@@ -22,20 +36,17 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
   const [secili, setSecili] = useState<Set<string>>(() => new Set(hepsi.map(anahtar)));
   const [mesgul, setMesgul] = useState(false);
 
-  // Kategoriye göre grupla (sıra: kategori adı).
-  const gruplar = new Map<string, BekleyenIstem[]>();
-  for (const x of hepsi) {
-    const g = gruplar.get(x.kategori) ?? [];
-    g.push(x); gruplar.set(x.kategori, g);
-  }
-  const kategoriler = [...gruplar.keys()].sort((a, b) => a.localeCompare(b, 'tr'));
+  const grupSatirlari = (tur: BekleyenIstem['tur']) => hepsi.filter(x => x.tur === tur);
+  const seciliToplam = (satirlar: BekleyenIstem[]) =>
+    satirlar.filter(x => secili.has(anahtar(x))).reduce((t, x) => t + (x.tutar ?? 0), 0);
 
+  // Satıra tıklamak ANINDA seçer/kaldırır.
   const tikla = (k: string) => setSecili(s => {
     const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n;
   });
-  const grupTikla = (kat: string, ac: boolean) => setSecili(s => {
+  const grupTikla = (tur: BekleyenIstem['tur'], ac: boolean) => setSecili(s => {
     const n = new Set(s);
-    for (const x of gruplar.get(kat) ?? []) { const k = anahtar(x); ac ? n.add(k) : n.delete(k); }
+    for (const x of grupSatirlari(tur)) { const k = anahtar(x); ac ? n.add(k) : n.delete(k); }
     return n;
   });
 
@@ -52,51 +63,100 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
     setMesgul(false);
   };
 
+  const genelToplam = seciliToplam(hepsi);
+
   return (
-    <Modal baslik="🩺 Doktor İstemleri — Ücrete Ekle" onKapat={onKapat} dar
+    <Modal baslik="🩺 Doktor İstemleri — Ücrete Ekle" onKapat={onKapat}
       alt={<>
         <button className="d bir" disabled={mesgul || secili.size === 0}
           onClick={() => void ucretle()}>✓ Seçilenleri Ücrete Ekle ({secili.size})</button>
         <button className="d" onClick={onKapat}>Kapat</button>
       </>}>
-      <div style={{ padding: '4px 2px', fontSize: 12, color: '#667' }}>
-        Hekimin istediği tetkikler. Hasta vazgeçtiyse işareti kaldır; yalnız seçilenler
-        ücrete eklenir ve çalışma listesine düşer.
+      <div style={{ display: 'flex', gap: 12, padding: '4px 2px', fontSize: 12, color: '#667' }}>
+        <span>Hekimin istediği tetkikler. Hasta vazgeçtiyse işareti kaldır; yalnız seçilenler
+          ücrete eklenir ve çalışma listesine düşer.</span>
+        <span style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }} title="Fiyatların dayanağı">
+          Kurum: <b>{veri.kurum || 'Ücretli (kurum yok)'}</b>
+          {veri.sozlesme ? <> · {veri.sozlesme}</> : null}
+        </span>
       </div>
-      {kategoriler.map(kat => {
-        const satirlar = gruplar.get(kat)!;
-        const tumSecili = satirlar.every(x => secili.has(anahtar(x)));
-        return (
-          <div key={kat} style={{ margin: '8px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#eef4fb',
-              borderLeft: '4px solid #2b6cb0', padding: '4px 8px', borderRadius: '0 4px 4px 0',
-              fontWeight: 700, fontSize: 13, color: '#1a365d' }}>
-              <input type="checkbox" checked={tumSecili}
-                onChange={e => grupTikla(kat, e.target.checked)} />
-              {kat} <span style={{ marginLeft: 'auto', fontWeight: 400, opacity: 0.7 }}>{satirlar.length}</span>
-            </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <tbody>
-                {satirlar.map(x => {
-                  const k = anahtar(x);
-                  return (
-                    <tr key={k} style={{ borderTop: '1px solid #eef' }}
-                      onClick={() => tikla(k)} className="secilebilir">
-                      <td style={{ width: 30, padding: '5px 8px' }}>
-                        <input type="checkbox" checked={secili.has(k)} onChange={() => tikla(k)}
-                          onClick={e => e.stopPropagation()} /></td>
-                      <td style={{ width: 34, padding: '5px 4px' }}>{x.tur === 'lab' ? '🧪' : '📷'}</td>
-                      <td style={{ padding: '5px 8px' }}>{x.tetkik}</td>
-                      <td style={{ width: 70, padding: '5px 8px', textAlign: 'right' }}>
-                        {x.oncelik >= 2 ? <span className="rz kir">Acil</span> : ''}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        );
-      })}
+
+      <table className="doktor-istem-grid"
+             style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ background: '#f4f6fa', color: '#445', textAlign: 'left' }}>
+            <th style={{ width: 30 }} />
+            <th style={hucre}>Tetkik</th>
+            <th style={hucre}>Kategori</th>
+            <th style={{ ...hucre, width: 60 }}>Öncelik</th>
+            <th style={{ ...sag, width: 100 }}>Fiyat</th>
+            <th style={{ ...sag, width: 60 }}>İsk. %</th>
+            <th style={{ ...sag, width: 110 }}>Tutar</th>
+          </tr>
+        </thead>
+        {GRUPLAR.map(g => {
+          const satirlar = grupSatirlari(g.tur);
+          if (satirlar.length === 0) return null;
+          const seciliSayi = satirlar.filter(x => secili.has(anahtar(x))).length;
+          return (
+            <tbody key={g.tur}>
+              <tr style={{ background: '#eef4fb', color: '#1a365d', fontWeight: 700 }}>
+                <td style={hucre}>
+                  <input type="checkbox" checked={seciliSayi === satirlar.length}
+                    ref={el => { if (el) el.indeterminate = seciliSayi > 0 && seciliSayi < satirlar.length }}
+                    onChange={e => grupTikla(g.tur, e.target.checked)} />
+                </td>
+                <td style={hucre} colSpan={5}>
+                  {g.ic} {g.ad}{' '}
+                  <span style={{ fontWeight: 400, opacity: 0.7 }}>{seciliSayi}/{satirlar.length}</span>
+                </td>
+                <td style={sag}>{paraYaz(seciliToplam(satirlar))}</td>
+              </tr>
+              {satirlar.map(x => {
+                const k = anahtar(x);
+                const sec = secili.has(k);
+                return (
+                  <tr key={k} onClick={() => tikla(k)} className="secilebilir"
+                      style={{ borderTop: '1px solid #eef', cursor: 'pointer',
+                               background: sec ? undefined : '#fafafa',
+                               color: sec ? undefined : '#999' }}>
+                    <td style={hucre}>
+                      <input type="checkbox" checked={sec} onChange={() => tikla(k)}
+                        onClick={e => e.stopPropagation()} />
+                    </td>
+                    <td style={hucre}>
+                      {x.tetkik}
+                      {x.ucrette && <span className="rz" style={{ marginLeft: 6 }}
+                        title="Bu hizmet başvuruda zaten ücretli; tekrar eklenmez">ücrette</span>}
+                      {x.hizmetYok && <span className="rz kir" style={{ marginLeft: 6 }}
+                        title="Tetkiğin hizmet kartı tanımsız; fiyatlanamaz">hizmet yok</span>}
+                    </td>
+                    <td style={hucre}>{x.kategori}</td>
+                    <td style={hucre}>{x.oncelik >= 2 ? <span className="rz kir">Acil</span> : ''}</td>
+                    <td style={sag}>{paraYaz(x.fiyat)}</td>
+                    <td style={sag}>{x.iskonto ? `%${x.iskonto}` : ''}</td>
+                    <td style={{ ...sag, fontWeight: 600 }}>{paraYaz(x.tutar)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          );
+        })}
+        <tfoot>
+          {GRUPLAR.filter(g => grupSatirlari(g.tur).length > 0).map(g => (
+            <tr key={g.tur} style={{ color: '#445' }}>
+              <td />
+              <td colSpan={5} style={{ ...sag }}>{g.ic} {g.ad} (seçili)</td>
+              <td style={sag}>{paraYaz(seciliToplam(grupSatirlari(g.tur)))}</td>
+            </tr>
+          ))}
+          <tr style={{ borderTop: '2px solid #2b6cb0', fontWeight: 700, color: '#1a365d' }}>
+            <td />
+            <td colSpan={5} style={sag}>Seçilenlerin toplamı ({secili.size})</td>
+            <td style={sag}>{paraYaz(genelToplam)}</td>
+          </tr>
+        </tfoot>
+      </table>
     </Modal>
   );
 }

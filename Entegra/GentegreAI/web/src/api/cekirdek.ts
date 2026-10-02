@@ -29,6 +29,8 @@ export const oturum = {
     if (y.kullanici?.subeId) localStorage.setItem(ANAHTAR.sube, String(y.kullanici.subeId));
   },
   subeYaz(id: number) { localStorage.setItem(ANAHTAR.sube, String(id)) },
+  /** Saklanan sube artik yetkili degilse (403) secim birakilir; oturum kalir. */
+  subeSil() { localStorage.removeItem(ANAHTAR.sube) },
   temizle() { Object.values(ANAHTAR).forEach(a => localStorage.removeItem(a)) },
 };
 
@@ -40,27 +42,33 @@ export const oturum = {
  */
 let yenilemeIslemi: Promise<boolean> | null = null;
 
-async function yenile(): Promise<boolean> {
-  const refresh = oturum.refresh;
-  if (!refresh) return false;
+/** Tarayici sekmeleri arasi kilit (Web Locks) - yoksa yalniz sekme ici birlestirme. */
+type Kilitler = { request<T>(ad: string, f: () => Promise<T>): Promise<T> };
+const kilitler = (): Kilitler | undefined =>
+  (globalThis.navigator as { locks?: Kilitler } | undefined)?.locks;
+
+/**
+ * @param kullanilanAccess 401 alan istegin tasidigi access token. Kilit
+ *   beklenirken baska sekme yenilediyse depodaki token artik farklidir; bu
+ *   durumda sunucuya GITMEDEN yeni token'la tekrar denenir.
+ */
+async function yenile(kullanilanAccess?: string | null): Promise<boolean> {
+  if (!oturum.refresh) return false;
 
   yenilemeIslemi ??= (async () => {
     try {
-      const yanit = await fetch(`${TABAN}/api/kimlik/yenile`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: refresh }),
-      });
-      // OTURUMU YALNIZ SUNUCU REDDEDINCE SIL (401/403). Sunucu yeniden
-      //   baslarken (502/503) ya da gecici hata verirken token silmek
-      //   calisan herkesi disari atiyordu - kullanici hicbir sey yapmadigi
-      //   halde giris ekranina duser ve yazdigi form kaybolurdu.
-      if (yanit.status === 401 || yanit.status === 403) { oturum.temizle(); return false }
-      if (!yanit.ok) return false;
-      oturum.yaz(await yanit.json() as GirisYaniti);
-      return true;
-    } catch {
-      return false;
+      // SEKMELER ARASI TEK YENILEME (denetim 28.09.2026 #6): iki sekme ayni
+      //   refresh ile yenilerse sunucu ikincisini "tekrar kullanim" sayar ve
+      //   AILEYI iptal eder - iki sekme de disari duser. Sunucu korumasi
+      //   dogru; cozum istemcilerin ayni anda yenilememesi. Kilidi alan
+      //   sekme once bakar: token kilit beklenirken yenilendiyse yeter.
+      const calis = async (): Promise<boolean> => {
+        if (kullanilanAccess !== undefined && oturum.access && oturum.access !== kullanilanAccess)
+          return true;
+        return sunucudaYenile();
+      };
+      const k = kilitler();
+      return k ? await k.request('gentegre.yenile', calis) : await calis();
     } finally {
       setTimeout(() => { yenilemeIslemi = null }, 0);
     }
@@ -68,6 +76,35 @@ async function yenile(): Promise<boolean> {
 
   return yenilemeIslemi;
 }
+
+async function sunucudaYenile(): Promise<boolean> {
+  const refresh = oturum.refresh;
+  if (!refresh) return false;
+  try {
+    const yanit = await fetch(`${TABAN}/api/kimlik/yenile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refresh }),
+    });
+    // OTURUMU YALNIZ SUNUCU REDDEDINCE SIL (401/403). Sunucu yeniden
+    //   baslarken (502/503) ya da gecici hata verirken token silmek
+    //   calisan herkesi disari atiyordu - kullanici hicbir sey yapmadigi
+    //   halde giris ekranina duser ve yazdigi form kaybolurdu.
+    if (yanit.status === 401 || yanit.status === 403) { oturum.temizle(); return false }
+    if (!yanit.ok) return false;
+    oturum.yaz(await yanit.json() as GirisYaniti);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * OTURUM TAZELEME SINYALI: sunucu hesabin durumunun degistigini soyledi
+ * (or. parola degistirme zorunlu hale geldi). Oturum baglami dinler ve
+ * /ben'i yeniden okur - ekran kendi kararini sunucudan alir.
+ */
+export const OTURUM_TAZELE_OLAYI = 'gentegre:oturum-tazele';
 
 /**
  * TEK CEKIRDEK: basliklar + 401 yenileme + hata govdesi cozumleme.
@@ -83,13 +120,14 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
     ...(jsonGovde ? { 'Content-Type': 'application/json' } : {}),
     ...(secenek.headers as Record<string, string> ?? {}),
   };
-  if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
+  const access = oturum.access;
+  if (access) basliklar.Authorization = `Bearer ${access}`;
   // Aktif sube her istekte tasinir; sunucu yetkiyi yine de kendisi dogrular.
   if (oturum.subeId) basliklar['X-Sube-Id'] = String(oturum.subeId);
 
   const yanit = await fetch(`${TABAN}${yol}`, { ...secenek, headers: basliklar });
 
-  if (yanit.status === 401 && tekrar && await yenile())
+  if (yanit.status === 401 && tekrar && await yenile(access))
     return ham(yol, secenek, jsonGovde, false);
 
   if (!yanit.ok) {
@@ -101,6 +139,10 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
     }
     // SON HATA İZİ (871): yalnız kod - asistan "bu hata ne demek" diye açıklar.
     hataIziKaydet(govde.kod, (govde.engel as { kod?: string } | undefined)?.kod);
+    // Parola degisimi oturum sirasinda zorunlu olduysa ekran /ben'i
+    //   yeniden okusun: parola ekrani sunucunun kararina gore acilir.
+    if (govde.kod === 'PAROLA_DEGISMELI' && typeof window !== 'undefined')
+      window.dispatchEvent(new Event(OTURUM_TAZELE_OLAYI));
     throw new ApiHatasi(yanit.status, govde);
   }
   return yanit;

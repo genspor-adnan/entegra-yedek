@@ -32,6 +32,22 @@ X-Sube-Id: -1                 // opsiyonel; yoksa kullanıcının varsayılan ş
 
 JWT içeriği: `kullaniciId`, `rolId`, `subeler[]`, `yetkiSurumu`. Yetki listesi token'a gömülmez — sunucu her istekte rolden çözer (yetki değişimi anında etkili olsun). Yetki çözümü DB'de `fn_kullanici_yetkileri(kullaniciId)`; `yetkiSurumu` karşılığı `rol.yetki_surumu` ve rolün yetkisi değiştiğinde trigger ile artar.
 
+**Token'daki `rolId` karar vermez (28.09.2026).** Etkili rol kümesi (ana + ek,
+`fn_kullanici_rolleri`) her istekte DB'den okunur; ana rol değişikliği ve ek rol
+ekleme/çıkarma aynı token'la bir sonraki istekte geçerlidir. Test seviyesi yetki
+(889) bu kümeyle `fn_lab_tetkik_izin_roller(tetkik, roller[], islem)` üzerinden
+sorulur — liste, istem detayı, grafik, rapor ve sonuç uçları aynı fonksiyonu kullanır.
+
+**Oturum kapısı (her kimlikli istekte, sunucuda):**
+
+| Durum | Sonuç |
+|---|---|
+| Hesap pasif (`aktif = 0`) | 401 — token geçerli olsa da |
+| `parola_degismeli = 1` | 403 `PAROLA_DEGISMELI` — yalnız `GET /ben`, `POST /parola` (ve anonim `cikis`) çalışır; yenileme ve şube değiştirme kapıyı aşmaz. Bayrak token alındıktan sonra açılırsa da geçerlidir |
+| Aktif/yetkili şube YOK | 403 `YASAK` — şubeye bağlı her uç kapalı; "şube yok" hiçbir zaman "bütün şubeler" değildir. Yalnız profil/parola/şube listesi/hesabım uçları açık |
+| `X-Sube-Id` sayı değil | 400 `DOGRULAMA` (sessizce token şubesine düşülmez) |
+| `X-Sube-Id` yetkisiz şube | 403 |
+
 **Karar (19.08.2026): 30 dk access token + döner (rotating) refresh token.**
 
 ```http
@@ -41,7 +57,20 @@ POST /api/kimlik/yenile    { "refreshToken": "…" }             -> yeni ikili (
 POST /api/kimlik/cikis     { "refreshToken": "…" }             -> oturum kapatılır
 GET  /api/kimlik/subeler                                       -> yetkili şubeler + aktif şube + yazma hakkı
 POST /api/kimlik/sube      { "subeId": 3 }                     -> çalışma şubesini değiştirir (yeni access token)
+POST /api/kimlik/parola    { "eskiParola", "yeniParola" }      -> YENİ token ikilisi (diğer oturumlar kapanır)
+POST /api/kimlik/ilk-parola/kod { "kod", "tcknSon4" }          -> { mesaj } — HER DURUMDA aynı cevap
+POST /api/kimlik/ilk-parola     { "kod", "dogrulamaKodu", "yeniParola" } -> parolası BOŞ hesaba parola
 ```
+
+**İlk parola iki adımdır (28.09.2026).** TCKN son 4 yalnız kayıtlı telefona /
+e-postaya tek kullanımlık kod (10 dk, 5 yanlış deneme) göndermenin ön koşuludur;
+parolayı o kod belirler. Birinci adımın cevabı hesap var/yok, TCKN doğru/yanlış
+ayırt etmez. Yanlış TCKN ve yanlış kod normal girişin hatalı-giriş sayacını ve
+kilidini işletir; ayrıca istemci IP'si başına 15 dk'da en çok 20 başarısız anonim
+parola denemesi (`IS_KURALI` 422). IP, yalnız güvenilen proxy'nin (`Guvenlik:
+GuvenilenProxyler`, varsayılan loopback) eklediği `X-Forwarded-For`'dan çözülür.
+Kayıtlı iletişim bilgisi olmayan hesap bu yoldan açılamaz: yönetici "personel
+hesapları" ile zorunlu parola değişimli varsayılan parola atar.
 
 **Şube seçimi giriş akışının parçasıdır.** Kullanıcı adı/parola doğrulandıktan sonra:
 `subeId` gönderildiyse kullanıcının o şubede yetkisi **olmak zorunda** (yoksa 403);
@@ -57,8 +86,8 @@ Aktif şube sırayla `X-Sube-Id` başlığı → token'daki şube → varsayıla
 |---|---|
 | Access token | 30 dk, saklanmaz. Yetki değişimi en geç 30 dk içinde etkili olur (token'daki `yetkiSurumu` eskiyse sunucu hemen yeniden çözer) |
 | Refresh token | 30 gün, DB'de **SHA-256 özeti** tutulur (`oturum.refresh_hash`) — DB sızsa token işe yaramaz |
-| Rotation | Her yenilemede yeni refresh verilir, eskisi `iptal_nedeni = 'yenilendi'` ile kapanır |
-| Tekrar kullanım | İptal edilmiş bir refresh yeniden kullanılırsa `oturum.aile_id`'nin **tamamı** iptal edilir (token çalınmış kabul edilir) |
+| Rotation | Her yenilemede yeni refresh verilir, eskisi `iptal_nedeni = 'yenilendi'` ile kapanır. Eski satırın kilitlenip kapatılması ve yeni satır **tek transaction**; yanıt commit'ten sonra döner. Aynı refresh ile eşzamanlı isteklerde en fazla biri başarılı olur; yeni satır yazılamazsa eski token tükenmez |
+| Tekrar kullanım | İptal edilmiş bir refresh yeniden kullanılırsa `oturum.aile_id`'nin **tamamı** iptal edilir (token çalınmış kabul edilir); iptal hata dönmeden önce commit edilir. İstemci sekmeler arası tek yenileme yapar (Web Locks) — bu korumayı gevşetmeden |
 | Kilit | `guvenlik.hatali_giris_siniri` (5) ard arda hata → `guvenlik.kilit_dakika` (15) kilit; denemeler `giris_denemesi` tablosunda |
 | Parola | bcrypt (`fn_parola_ata` / `fn_parola_dogru`). Göçmüş kullanıcılarda `parola_degismeli = 1` — ilk girişte belirlenir |
 
@@ -87,6 +116,7 @@ Tüm hatalar aynı gövdeyi döner (HTTP durum kodu ayrıca anlamlıdır):
 | `DOGRULAMA` | 400 | Alan doğrulaması; `alanlar[]` dolu |
 | `YETKISIZ` | 401 | Kimlik yok/süresi dolmuş |
 | `YASAK` | 403 | Yetki yok (işlem menüde de görünmemeliydi) |
+| `PAROLA_DEGISMELI` | 403 | Hesap parolasını değiştirmek zorunda; istemci `/ben`'i tazeleyip parola ekranını açar (§1.1) |
 | `BULUNAMADI` | 404 | Kayıt yok ya da kullanıcının kapsamı dışında |
 | `CAKISMA` | 409 | Eşzamanlılık; `guncelDeger` ile birlikte döner |
 | `IS_KURALI` | 422 | Ör. "Bu cariye ait fatura var, silinemez." |
@@ -432,8 +462,9 @@ Araç çubuğu, sağ tuş menüsü ve komut paleti **aynı kaynaktan** üretilir
 
 | Katman | Nasıl |
 |---|---|
-| Kayıt kapsamı | Şube/firma filtresi sunucuda eklenir; istekte gelmez |
-| İşlem yetkisi | Aksiyon kataloğu + uç nokta kontrolü (iki yerde de) |
+| Kayıt kapsamı | Şube/firma filtresi sunucuda eklenir; istekte gelmez. Kimliği yoldan alan ÖZEL uçlar aynı kuralı `KayitErisimi` kapısıyla uygular (katalog kaynağının sayım sorgusu + tek kimlik): kapsam dışı kayıt, var olmayanla aynı **404**'ü alır |
+| Doküman | Her doküman işlemi (içerik, liste, ekle, düzenle, varsayılan, sil, paylaşım linki, DMS taşı/sürüm/bağlantı/onay) `DokumanErisimi`'nden geçer: dokümanın GERÇEK bağı (`dokuman.kaynak/kaynak_id`) DB'den okunur, kart yolunda URL ile eşleşmek zorundadır; kaynak türünün yetkisi + o kaydın katalog kapsamı uygulanır; lab sonucu satır kapsamı + tetkik izniyle. Tanınmayan kaynak türü kapalı; yetkisizlik ve kapsam dışı **404**. Şube logosu ve e-Belge şablonu oturumlu herkese okunur. "Kendi kartı" istisnası gerçek sahipliğe bağlıdır. Paylaşım linki yalnız içeriği görebilen üretebilir |
+| İşlem yetkisi | Aksiyon kataloğu + uç nokta kontrolü (iki yerde de). Uç tarafında aksiyon **varsayılan olarak yazma** sayılır (`AksiyonIste`: salt okuma şubesinde 403); yalnız okuyan aksiyon `AksiyonGorIste` ile açıkça ayrılır |
 | Alan yetkisi | Yetkisiz alan yanıt gövdesinden **çıkarılır** (`stok.maliyet`, `taraf.risk`) |
 | Yazma | `PUT/POST` gövdesinde yetkisiz alan gelirse **403**, sessizce yok sayılmaz |
 

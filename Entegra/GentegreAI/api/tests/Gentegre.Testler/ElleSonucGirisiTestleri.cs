@@ -27,7 +27,7 @@ public sealed class ElleSonucGirisiTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 0,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("lab.sonuc", 0, true, true, true, true)], []),
     };
 
@@ -71,7 +71,7 @@ public sealed class ElleSonucGirisiTestleri(VeritabaniOlgusu olgu)
             "delete from public.lab_istem where id = @p0", [istemId], CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Elle_girilen_sonuc_YAZILIR_ve_satira_ELLE_damgasi_duser()
     {
         if (!_olgu.Baglandi(nameof(Elle_girilen_sonuc_YAZILIR_ve_satira_ELLE_damgasi_duser)))
@@ -110,7 +110,7 @@ public sealed class ElleSonucGirisiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_satira_IKINCI_yazim_oncekini_IPTAL_eder()
     {
         if (!_olgu.Baglandi(nameof(Ayni_satira_IKINCI_yazim_oncekini_IPTAL_eder))) return;

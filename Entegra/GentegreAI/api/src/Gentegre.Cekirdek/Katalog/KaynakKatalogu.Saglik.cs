@@ -38,7 +38,11 @@ public static partial class KaynakKatalogu
                                                      Genislik: 110, Varsayilan: false),
             new("tcNo",          "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
                                                      Genislik: 110, Varsayilan: false),
-            new("bolumAdi",      "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 150),
+            // BOLUM ADI KODSUZ (kullanici: "Ic Hastaliklari solundaki kod (157)
+            //   olmasin"): lookup gorunumu adin basina SKRS kodunu ekliyor;
+            //   liste ve kart baglam seridi departmanin kendi adini gosterir.
+            new("bolumAdi",      "coalesce((select x.ad from public.departman x where x.id = m.bolum_id), '')",
+                                 "metin", "Bölüm", Genislik: 150),
             new("hekimAdi",      "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
             // KANAL (461, mockup muayene_listesi.html "Kanal"): hastanin nasil
             //   geldigi - uzaktan (teletip) muayene ile yuz yuze ayni listede
@@ -285,20 +289,29 @@ public static partial class KaynakKatalogu
         Ad: "muayene-sablon",
         YetkiKodu: "muayene",
         Kaynak: "public.muayene_sablon s "
-              + "  left join public.v_personel_lookup p on p.id = s.hekim_id "
-              + "  left join public.v_departman_lookup d on d.id = s.bolum_id",
-        VarsayilanSirala: "s.sira asc, s.ad asc",
+              + "  left join public.v_personel_lookup p on p.id = s.hekim_id",
+        // STANDART LISTE (933, kullanici: "sablonlar listesi gorunumunu de standart
+        //   liste deseni yap"): agac yerine genel liste; bolum ve doktor ayri
+        //   kolon, kapsam rozeti. Sira: bolum, doktor-ozel once degil - bolum
+        //   ortak once (doktorun kopyasi altinda gorunsun), sonra sira/ad.
+        VarsayilanSirala: "(select x.ad from public.departman x where x.id = s.bolum_id) asc nulls last, "
+                        + "s.hekim_id asc nulls first, s.varsayilan desc, s.sira asc, s.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "s.id",       "sayi",  "Id", Varsayilan: false),
-            new("kod",      "s.kod",      "metin", "Kod", Hizalama: "orta", Genislik: 110),
+            new("kod",      "s.kod",      "metin", "Kod", Hizalama: "orta", Genislik: 120),
             new("ad",       "s.ad",       "metin", "Şablon", Genislik: 240),
+            // BOLUM KODSUZ (lookup gorunumu SKRS kodunu basa ekliyor).
+            new("bolumAdi",
+                "coalesce((select x.ad from public.departman x where x.id = s.bolum_id), '')",
+                                          "metin", "Bölüm", Genislik: 190, Filtrelenebilir: false),
+            new("doktorAdi", "coalesce(p.ad, '')", "metin", "Doktor", Genislik: 170,
+                                          Filtrelenebilir: false),
             new("kapsamAdi",
-                "case when s.hekim_id is not null then coalesce(p.ad, 'Kişisel') "
-                + "when s.bolum_id is not null then coalesce(d.ad, 'Branş') "
-                + "else 'Kurum' end",
+                "case when s.hekim_id is not null then 'Doktora özel' "
+                + "when s.bolum_id is not null then 'Bölüm ortak' else 'Genel' end",
                                           "metin", "Kapsam", Hizalama: "orta",
-                                          Bicim: "rozet", Genislik: 160,
+                                          Bicim: "rozet", Genislik: 120,
                                           Filtrelenebilir: false),
             new("turAdi",
                 "case s.tur when 2 then 'Anamnez' when 3 then 'Sistem Sorgusu' "
@@ -306,16 +319,29 @@ public static partial class KaynakKatalogu
                                           "metin", "Tür", Hizalama: "orta", Genislik: 130,
                                           Filtrelenebilir: false),
             new("tur",      "s.tur",      "kod",   "Tür Kodu", Varsayilan: false),
+            new("varsayilan", "s.varsayilan", "mantik", "⭐ Varsayılan", Hizalama: "orta", Genislik: 95),
             new("alanSayisi",
                 "(select count(*) from public.muayene_sablon_alan a where a.sablon_id = s.id)",
                                           "sayi",  "Alan", Hizalama: "orta", Genislik: 70),
+            // KULLANIM: muayene.sablon_id uygulanan sablonu tutuyor - ayri sayac yok.
+            new("kullanim30",
+                "(select count(*) from public.muayene m where m.sablon_id = s.id "
+                + " and m.muayene_tarihi >= now() - interval '30 days')",
+                                          "sayi", "Kullanım (30 gün)", Hizalama: "orta", Genislik: 115,
+                                          Filtrelenebilir: false),
+            new("sonKullanim",
+                "(select max(m.muayene_tarihi) from public.muayene m where m.sablon_id = s.id)",
+                                          "tarih", "Son kullanım", Hizalama: "orta",
+                                          Bicim: "dd.MM.yyyy HH:mm", Genislik: 130, Filtrelenebilir: false),
             new("aciklama", "s.aciklama", "metin", "Açıklama", Genislik: 280,
                                           Varsayilan: false),
             new("sira",     "s.sira",     "sayi",  "Sıra", Hizalama: "orta", Genislik: 70,
                                           Varsayilan: false),
             new("durum",    "s.durum",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
             new("hekimId",  "coalesce(s.hekim_id, 0)", "sayi", "Hekim Id", Varsayilan: false),
-            new("bolumId",  "coalesce(s.bolum_id, 0)", "sayi", "Bölüm Id", Varsayilan: false)
+            new("bolumId",  "coalesce(s.bolum_id, 0)", "sayi", "Bölüm Id", Varsayilan: false),
+            new("kaynakSablonId", "coalesce(s.kaynak_sablon_id, 0)", "sayi", "Kaynak Şablon Id",
+                                          Varsayilan: false)
         });
 
     /// <summary>

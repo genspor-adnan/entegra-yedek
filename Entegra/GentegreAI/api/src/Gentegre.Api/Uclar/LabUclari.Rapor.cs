@@ -31,11 +31,13 @@ public static partial class LabUclari
         // YALNIZ ONAYLI SONUÇLAR: onaylanmamış değer hastaya verilen belgeye
         // giremez - taslak rapor "geçici" damgasıyla basılır.
         grup.MapGet("/rapor/{istemId:int}", async (
-            int istemId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
-            CancellationToken iptal) =>
+            int istemId, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Gor);
+            // KAYIT KAPSAMI (denetim #3): rapor, istem listesiyle aynı kapsamda.
+            await erisim.IsteAsync(baglam, "lab-istem", istemId, "İstem bulunamadı.", iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -100,9 +102,9 @@ public static partial class LabUclari
                    --   izinsiz role BASILMAZ. Kac tanesinin gizlendigi
                    --   asagida ayrica doner - sessizce eksik rapor, yanlis
                    --   rapordur.
-                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
+                   and public.fn_lab_tetkik_izin_roller(s.tetkik_id, @p1, 'gor')
                  order by t.bolum, s.sira, t.kod
-                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [istemId, baglam.RolIdleri.ToArray()], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KÜLTÜR: rapor bölümü izolat + antibiyogram. Antibiyogramda
             //   YALNIZ bildir = 1 satırlar - kademeli bildirim kararı burada
@@ -126,9 +128,9 @@ public static partial class LabUclari
                   left join public.lab_numune n on n.id = k.numune_id
                   left join public.taraf o on o.id = k.onay_id
                  where k.istem_id = @p0 and k.durum <> 0
-                   and public.fn_lab_tetkik_izin(k.tetkik_id, @p1, 'gor')
+                   and public.fn_lab_tetkik_izin_roller(k.tetkik_id, @p1, 'gor')
                  order by k.id
-                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [istemId, baglam.RolIdleri.ToArray()], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var izolatlar = await baglanti.ListeAsync("""
                 select u.id, u.kultur_id as "kulturId", u.izolat_no as "izolatNo",
@@ -242,9 +244,9 @@ public static partial class LabUclari
                   from public.v_lab_sonuc_grafik g
                   join public.lab_istem_satir s on s.id = g.satir_id
                  where g.istem_id = @p0 and g.raporda = 1 and s.durum <> 0
-                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
+                   and public.fn_lab_tetkik_izin_roller(s.tetkik_id, @p1, 'gor')
                  order by g.sira, g.id
-                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [istemId, baglam.RolIdleri.ToArray()], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // GIZLENEN TETKIK SAYISI (889): rapor eksik basiliyorsa bunu
             //   SOYLEMEK zorunda - hekim, gormedigi bir satirin hic
@@ -252,8 +254,8 @@ public static partial class LabUclari
             var gizlenen = await baglanti.TekDegerAsync<int>("""
                 select count(*)::int from public.lab_istem_satir s
                  where s.istem_id = @p0 and s.durum <> 0
-                   and not public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
-                """, null, [istemId, baglam.RolId], iptal);
+                   and not public.fn_lab_tetkik_izin_roller(s.tetkik_id, @p1, 'gor')
+                """, null, [istemId, baglam.RolIdleri.ToArray()], iptal);
 
             return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram,
                                     vakalar, varyantlar, kurum, gizlenen, grafikler,

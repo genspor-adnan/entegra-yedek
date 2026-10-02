@@ -59,6 +59,53 @@ public static partial class KaynakKatalogu
         });
 
     /// <summary>
+    /// REÇETE İLAÇLARI — muayene kartının Muayene sekmesindeki ilaç gridi
+    /// (kullanıcı: "reçete-ilaç gridini GenGrid yap, başa check, üste + İlaç
+    /// ve kırmızı sil"). Muayeneye göre süzülür (`muayeneId` sabit filtre);
+    /// ekleme/silme reçete uçlarında kalır (imzalı reçeteden ilaç çıkmaz).
+    /// </summary>
+    private static KaynakTanimi ReceteSatir() => new(
+        Ad: "recete-satir",
+        YetkiKodu: "muayene",
+        Kaynak: "public.recete_satir s "
+              + "  join public.recete r on r.id = s.recete_id",
+        SubeKolonu: "r.sube_id",
+        VarsayilanSirala: "r.id desc, s.sira, s.id",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "s.id",          "sayi",  "Id", Varsayilan: false),
+            new("receteId",   "s.recete_id",   "sayi",  "Reçete Id", Varsayilan: false),
+            new("muayeneId",  "r.muayene_id",  "sayi",  "Muayene Id", Varsayilan: false),
+            new("receteNo",   "r.recete_no",   "metin", "Reçete No", Hizalama: "orta",
+                                               Genislik: 110, Varsayilan: false),
+            new("ilac",       "s.ilac_ad",     "metin", "İlaç", Genislik: 240),
+            new("barkod",     "s.ilac_barkod", "metin", "Barkod", Genislik: 120),
+            new("doz",        "s.doz",         "metin", "Doz", Hizalama: "orta", Genislik: 70),
+            new("periyot",    "s.periyot",     "metin", "Periyot", Hizalama: "orta", Genislik: 80),
+            new("kullanim",
+                "case s.kullanim_sekli when 1 then 'Ağızdan' when 2 then 'Damardan' "
+                + "when 3 then 'Kas içi' when 4 then 'Cilt altı' when 5 then 'Haricen' "
+                + "when 6 then 'Solunum' when 7 then 'Rektal' else '' end",
+                                               "metin", "Kullanım", Genislik: 100,
+                                               Filtrelenebilir: false),
+            new("sureGun",    "s.sure_gun",    "sayi",  "Süre (gün)", Hizalama: "orta", Genislik: 80),
+            new("kutu",       "s.kutu",        "sayi",  "Kutu", Hizalama: "sag", Genislik: 60),
+            new("aciklama",   "s.aciklama",    "metin", "Not", Genislik: 160),
+            new("uyari",      "s.etkilesim_uyari", "metin", "Uyarı", Genislik: 160),
+            new("receteDurumAdi",
+                "case r.durum when 2 then 'İmzalı' when 3 then 'Medula Kabul' "
+                + "when 4 then 'İptal' else 'Taslak' end",
+                                               "metin", "Reçete", Hizalama: "orta",
+                                               Bicim: "rozet", Genislik: 100,
+                                               Filtrelenebilir: false),
+            new("receteDurum", "r.durum",      "kod",   "Reçete Durum Kodu", Varsayilan: false),
+            // Satir duzeltme penceresi (recete karti) kodu ister, ad degil.
+            new("kullanimSekli", "s.kullanim_sekli", "kod", "Kullanım Kodu", Varsayilan: false),
+            new("etkenMadde", "coalesce((select i.etken_madde from public.ilac i where i.barkod = s.ilac_barkod limit 1), '')",
+                                               "metin", "Etken Madde", Genislik: 160, Filtrelenebilir: false),
+        });
+
+    /// <summary>
     /// HASTA ALERJİLERİ (413) — etken madde bazlı.
     ///
     /// Marka adı üzerinden tutmak, aynı etkeni taşıyan başka markayı

@@ -25,6 +25,13 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class ReceteUclari
 {
+    /// <summary>Reçete satırı düzeltme: verilmeyen alan değişmez.</summary>
+    public sealed record SatirIstegi(string? Doz, string? Periyot, short? KullanimSekli,
+                                     short? SureGun, short? Kutu, string? Aciklama);
+
+    private static string? Kirp(string? s, int n) =>
+        s is null ? null : (s.Trim().Length > n ? s.Trim()[..n] : s.Trim());
+
     /// <summary>Reçeteye eklenecek ilaç. Ad ve etken madde katalogdan alınır.</summary>
     public sealed record IlacIstegi(string Barkod, string? Doz, string? Periyot,
                                     int? SureGun, int? Kutu, string? Aciklama,
@@ -164,6 +171,53 @@ public static class ReceteUclari
                 { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
 
             return Results.Ok(new { id, satirId, mesaj = "Ilac cikarildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // PUT /api/recete/{id}/ilac/{satirId} - taslak reçetede ilaç satırını düzelt
+        //   (reçete kartı, mockup Ekranlar/Muayene/recete_karti.html): doz,
+        //   periyot, kullanım şekli, süre, kutu ve tarif. İLAÇ DEĞİŞMEZ - başka
+        //   ilaç gerekiyorsa satır çıkarılıp yenisi eklenir (etkileşim/alerji
+        //   kontrolü eklemede çalışır). İMZALI REÇETEYE DOKUNULMAZ.
+        grup.MapPut("/{id:int}/ilac/{satirId:int}", async (
+            int id, int satirId, SatirIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            if (istek.Kutu is < 1 or > 99)
+                throw GentegreHatasi.Dogrulama("Kutu 1-99 arasi olmali.");
+            if (istek.SureGun is < 0 or > 365)
+                throw GentegreHatasi.Dogrulama("Sure 0-365 gun olmali.");
+            if (istek.KullanimSekli is < 0 or > 7)
+                throw GentegreHatasi.Dogrulama("Gecersiz kullanim sekli.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var durum = await baglanti.TekDegerAsync<int>(
+                "select durum from public.recete where id = @p0", null, [id], iptal);
+            if (durum != 1)
+                throw GentegreHatasi.IsKurali(
+                    "Imzalanmis ya da iptal edilmis recetede ilac degistirilemez.");
+
+            var yazilan = await baglanti.CalistirAsync("""
+                update public.recete_satir
+                   set doz = coalesce(@p2, doz),
+                       periyot = coalesce(@p3, periyot),
+                       kullanim_sekli = coalesce(@p4, kullanim_sekli),
+                       sure_gun = coalesce(@p5, sure_gun),
+                       kutu = coalesce(@p6, kutu),
+                       aciklama = coalesce(@p7, aciklama),
+                       degistiren = @p8, degistirme_tarihi = now()
+                 where id = @p0 and recete_id = @p1
+                """, null,
+                [satirId, id, Kirp(istek.Doz, 20), Kirp(istek.Periyot, 20),
+                 istek.KullanimSekli, istek.SureGun, istek.Kutu, Kirp(istek.Aciklama, 200),
+                 baglam.KullaniciId], iptal);
+            if (yazilan == 0) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
+
+            return Results.Ok(new { id, satirId, mesaj = "Ilac guncellendi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

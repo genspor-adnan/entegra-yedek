@@ -10,7 +10,13 @@
 #
 #  Delphi PG pilotunun veritabanina (gentegre) DOKUNMAZ.
 #  Kullanim: powershell -ExecutionPolicy Bypass -File .\kur.ps1
-#            .\kur.ps1 -SadeceSema      (MSSQL'den veri cekmeden)
+#            .\kur.ps1 -SadeceSema      (MSSQL'den veri cekmeden - GUNCEL semanin
+#                                        tamami, bos kurulum tohumuyla)
+#
+#  GOC UYGULAMA KURALLARI db\araclar\goc_uygula.ps1'dedir (denetim 28.09.2026
+#  #9/#10): dosya + defter tek islem, eszamanli kuruluma karsi kilit, bos
+#  kurulumda tohum ve MSSQL aktarim adimlari (db\kurulum). Cikis kodu:
+#  0 tamam · 1 hata · 2 dis veri on kosulu (SKRS) bekleniyor.
 #  NOT: Saf ASCII + UTF-8 BOM (Windows PowerShell 5.1 uyumu icin).
 # ============================================================================
 param(
@@ -72,38 +78,27 @@ function PsqlKomut([string]$Sql, [string]$Hedef) {
                     psql -h $PgHost -p $PgPort -U $Kul -d $Hedef -tA)
 }
 
-# ---- GOC DEFTERI ------------------------------------------------------------
-# Hangi goc dosyasinin bu veritabaninda calistigi DB'de tutulur. Gocler
-#   idempotent yazilsa da (create if not exists / on conflict) kayit tutmak
-#   "bu veritabani hangi surumde" sorusunun tek cevabidir. Ayni tablo sunucu
-#   tarafinda da kullaniliyor (yayin/sunucu-guncelle.sh) - iki taraf ayni.
-function GocDefteriKur() {
-  PsqlKomut @"
-create table if not exists public.goc_gecmisi (
-    dosya      varchar(200) primary key,
-    uygulama   timestamp not null default now()::timestamp
-);
-comment on table public.goc_gecmisi is
-  'Bu veritabaninda calistirilmis db/NNN_*.sql goc dosyalari (kur.ps1 / yayinla.ps1).';
-"@ $Db | Out-Null
-}
-
-function GocUygulandiMi([string]$Ad) {
-  return [bool](PsqlKomut ("select 1 from public.goc_gecmisi where dosya = '" + $Ad + "'") $Db)
-}
-
-function GocIsaretle([string]$Ad) {
-  PsqlKomut ("insert into public.goc_gecmisi(dosya) values ('" + $Ad +
-             "') on conflict (dosya) do nothing") $Db | Out-Null
-}
-
-# Defterde varsa ATLA - "sadece sema" gibi kismi calistirmalar zaten uygulanmis
-#   dosyalari yeniden calistirmasin (idempotent olsalar da gereksiz ve yavas).
-function GocCalistir([string]$Ad) {
-  if (GocUygulandiMi $Ad) { Adim ($Ad + " (zaten uygulanmis, atlandi)"); return }
-  Adim $Ad
-  PsqlDosya (Join-Path $Dizin $Ad) $Db
-  GocIsaretle $Ad
+# ---- GOC UYGULAYICI ---------------------------------------------------------
+# Uygulama, defter ve kilit kurallari TEK yerde: araclar\goc_uygula.ps1
+#   (sunucu esi: yayin\goc_uygula.sh). Bu betik yalniz SIRAYI ve MSSQL
+#   aktarimini yonetir.
+$Uygulayici = Join-Path $Dizin "araclar\goc_uygula.ps1"
+function Goc([string[]]$Liste, [switch]$Bos) {
+  # Liste DOSYAYLA verilir: 900 dosya adi komut satiri sinirini (32K) asar.
+  $listeYolu = [System.IO.Path]::GetTempFileName()
+  [System.IO.File]::WriteAllLines($listeYolu, $Liste)
+  $a = @("-ExecutionPolicy", "Bypass", "-File", $Uygulayici, "-Kap", $Kap, "-Db", $Db,
+         "-Kul", $Kul, "-Parola", $Parola, "-Dizin", $Dizin, "-ListeDosyasi", $listeYolu)
+  if ($PgHost -ne "") { $a += @("-PgHost", $PgHost, "-PgPort", $PgPort) }
+  if ($Bos) { $a += "-BosKurulum" }
+  & powershell @a
+  $kod = $LASTEXITCODE
+  Remove-Item $listeYolu -ErrorAction SilentlyContinue
+  if ($kod -eq 2) {
+    Write-Host "Kurulum DIS VERI bekliyor (yukarida). On kosul saglaninca ayni komutu yeniden calistirin." -ForegroundColor Yellow
+    exit 2
+  }
+  if ($kod -ne 0) { Kotu "goc basarisiz"; exit 1 }
 }
 
 # ---- 1. veritabani
@@ -119,74 +114,67 @@ if (-not $var) {
              " LOCALE_PROVIDER icu ICU_LOCALE 'tr-TR' LOCALE 'en_US.utf8'") "postgres" | Out-Null
 }
 
-GocDefteriKur
+# ---- SIRA (tek kaynak): sema -> [MSSQL aktarimi] -> goc -> kimlik -> kalan
+$Sema1   = @("001_sema_taraf.sql", "002_stg_kaynak_tablolar.sql",
+             "010_sema_ortak.sql", "011_sema_stok.sql", "012_sema_belge.sql",
+             "015_sema_log_ebelge.sql", "016_arama_indeksleri.sql", "017_sema_sube_rol.sql")
+# SIRA ONEMLI: taraf -> stok/kalem/referans -> belge/hareket; 019 goc SONRASI
+#   (sube_id degerleri duzeldikten sonra NOT NULL + FK zorlanabilir).
+$Goc     = @("003_goc_taraf.sql", "013_goc_faz1.sql", "014_goc_belge.sql", "018_goc_sube_rol.sql",
+             "019_sema_cok_sube.sql")
+# Kimlik/yetki: sema 019'dan SONRA (admin kullanicisi varsayilan subeye baglanir).
+$Kimlik  = @("020_sema_kimlik.sql", "021_goc_kimlik.sql", "022_sema_sube_ebelge.sql",
+             "023_sema_belge_hesap.sql", "024_fn_belge_diptoplam.sql",
+             "025_fn_belge_no.sql", "026_doviz_tutar_kurali.sql")
+# 027 ve sonrasi: dosya sirasi.
+$Kalan   = @(Get-ChildItem $Dizin -Filter "*.sql" |
+             Where-Object { $_.Name -match '^(\d{3})_' -and [int]$Matches[1] -ge 27 } |
+             Sort-Object Name | ForEach-Object { $_.Name })
 
 if ($TemelAl) {
-  Adim "Temel alma: mevcut veritabani goc defterine isaretleniyor (SQL calistirilmaz)"
-  $hepsi = Get-ChildItem $Dizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3}_' } | Sort-Object Name
-  foreach ($g in $hepsi) { GocIsaretle $g.Name }
+  # DIKKAT: SQL CALISTIRMAZ, butun dosyalari "uygulandi" isaretler. Yalniz
+  #   semasi baska yoldan (dump) gelmis veritabani icindir; defteri toptan
+  #   doldurmak gercek gecmisi gizler (denetim #8) - kayitlar 'temel_al'
+  #   yontemiyle ayrilir.
+  Adim "Temel alma: goc defterine 'temel_al' ile isaretleniyor (SQL calistirilmaz)"
+  PsqlKomut @"
+create table if not exists public.goc_gecmisi (dosya varchar(200) primary key,
+    uygulama timestamp not null default now()::timestamp);
+alter table public.goc_gecmisi add column if not exists ozet varchar(64);
+alter table public.goc_gecmisi add column if not exists yontem varchar(20);
+"@ $Db | Out-Null
+  foreach ($g in ($Sema1 + $Goc + $Kimlik + $Kalan)) {
+    PsqlKomut ("insert into public.goc_gecmisi(dosya, yontem) values ('" + $g +
+               "', 'temel_al') on conflict (dosya) do nothing") $Db | Out-Null
+  }
   Adim ("Defterde " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli.")
   return
 }
 
-# ---- 2/3. semalar
-GocCalistir "001_sema_taraf.sql"
-GocCalistir "002_stg_kaynak_tablolar.sql"
-
-# ---- Faz 1 semasi (veri gocu ayri adimda)
-foreach ($f in @("010_sema_ortak.sql", "011_sema_stok.sql", "012_sema_belge.sql", "015_sema_log_ebelge.sql", "016_arama_indeksleri.sql", "017_sema_sube_rol.sql")) {
-  GocCalistir $f
-}
-
 if ($SadeceSema) {
-  # Kimlik semasi gocten bagimsiz; sadece-sema kurulumunda da olusur
-  # (sube tablosu bos oldugu icin admin kullanicisi subeye baglanmaz).
-  GocCalistir "020_sema_kimlik.sql"
-  Adim "SadeceSema verildi - veri cekilmedi, goc calistirilmadi."
+  # MSSQL KAYNAGI YOK: tum zincir tek siraya, bos kurulum kipinde. Aktarim
+  #   adimlari (db\kurulum\aktarim_adimlari.txt) calistirilmaz ve deftere
+  #   'aktarim_yok' yazilir; her bekleyen dosyadan once tohum
+  #   (db\kurulum\000_bos_kurulum.sql) eksik sube/depo/kod listesini tamamlar.
+  #   Onceden bu secenek 020'de duruyordu - 027 ve sonrasi HIC kurulmuyordu.
+  Adim "SadeceSema: guncel sema, MSSQL aktarimi olmadan"
+  Goc ($Sema1 + $Goc + $Kimlik + $Kalan) -Bos
+  Adim ("Goc defteri: " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli")
+  Write-Host ""
+  Write-Host ("Bitti. Veritabani: " + $Db + " (sema, bos kurulum)") -ForegroundColor Green
   return
 }
 
-# ---- 4. MSSQL -> stg  (COPY ile; FATBASLIK/FATURA/KASA icin $Yil filtresi)
+Goc $Sema1
+
+# ---- MSSQL -> stg  (COPY ile; FATBASLIK/FATURA/KASA icin $Yil filtresi)
 Adim "MSSQL kaynak tablolari aktariliyor (goc_al.ps1)"
 & powershell -ExecutionPolicy Bypass -File (Join-Path $Dizin "goc_al.ps1") `
     -Kap $Kap -Db $Db -Sema "stg" -Kul $Kul -Parola $Parola `
     -MssqlServer $MssqlServer -MssqlDb $MssqlDb -MssqlUser $MssqlUser -MssqlPass $MssqlPass -Yil $Yil
 if ($LASTEXITCODE -ne 0) { throw "kaynak aktarimi basarisiz" }
 
-# ---- 5. goc (SIRA ONEMLI: taraf -> stok/kalem/referans -> belge/hareket)
-foreach ($f in @("003_goc_taraf.sql", "013_goc_faz1.sql", "014_goc_belge.sql", "018_goc_sube_rol.sql")) {
-  GocCalistir $f
-}
-
-# 019 goc SONRASI: sube_id degerleri duzeldikten sonra NOT NULL + FK zorlanabilir
-GocCalistir "019_sema_cok_sube.sql"
-
-# Kimlik/yetki: sema 019'dan SONRA (admin kullanicisi varsayilan subeye baglanir),
-#   ardindan eski KULLANICI/ROLLER/YETKI gocu.
-foreach ($f in @("020_sema_kimlik.sql", "021_goc_kimlik.sql", "022_sema_sube_ebelge.sql",
-                 "023_sema_belge_hesap.sql", "024_fn_belge_diptoplam.sql",
-                 "025_fn_belge_no.sql", "026_doviz_tutar_kurali.sql")) {
-  GocCalistir $f
-}
-
-# ---- 6. KALAN TUM GOCLER (027...)
-#
-# BU ADIM EKSIKTI: betik 026'da bitiyordu, oysa klasorde 190'in uzerinde goc
-# dosyasi var. Yani "sifirdan kurulum" aslinda calismiyordu - gelistirme
-# veritabani elle uygulanan goclerle ayakta duruyordu ve hangi dosyanin
-# uygulandigi hicbir yerde yazmiyordu.
-#
-# Ayni defter (goc_gecmisi) SUNUCUDA zaten vardi (yayin/sunucu-guncelle.sh);
-# yerelde yoktu. Artik iki taraf ayni mekanizmayi kullaniyor: dosya adina gore
-# bir kez uygulanir, tekrar calistirmak zararsizdir.
-Adim "Kalan gocler (027+)"
-$kalan = Get-ChildItem $Dizin -Filter "*.sql" |
-         Where-Object { $_.Name -match '^(\d{3})_' -and [int]$Matches[1] -ge 27 } |
-         Sort-Object Name
-foreach ($g in $kalan) {
-  if (GocUygulandiMi $g.Name) { continue }
-  GocCalistir $g.Name
-}
+Goc ($Goc + $Kimlik + $Kalan)
 Adim ("Goc defteri: " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli")
 
 Write-Host ""

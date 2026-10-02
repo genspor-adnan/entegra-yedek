@@ -36,7 +36,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
             o => new Dagilim(o.GetDecimal(0), o.GetDecimal(1), o.GetDecimal(2),
                              o.GetDecimal(3), o.GetDecimal(4), o.GetDecimal(5)));
 
-    [Fact]
+    [VtFact]
     public async Task Ozel_hastada_tutarin_tamami_ek_katkidir()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -49,7 +49,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(0m, d.Sgk + d.Oss + d.HastaProvizyon + d.Katilim);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Oss_provizyonu_kalani_hastaya_birakir()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -62,7 +62,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(d.Tutar, d.Sgk + d.Oss + d.HastaProvizyon + d.HastaEkKatki);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tss_kovalari_toplanip_satir_tutari_olur()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -80,7 +80,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(100m, d.Katilim);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tss_de_sigorta_az_onaylarsa_fark_hastaya_yazilmaz()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -94,7 +94,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(2900m, d.Tutar);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Karma_da_sgk_sonrasi_kalani_sigorta_ve_hasta_paylasir()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -117,7 +117,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(d.Tutar, d.Sgk + d.Oss + d.HastaProvizyon + d.HastaEkKatki);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Karma_da_sgk_kapatilirsa_rota_oss_ye_doner()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -136,7 +136,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(0m, d.Katilim);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sgk_da_satir_sut_ve_ek_katkidan_dogar()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
@@ -158,7 +158,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(700m, d2.Sgk);
     }
 
-    [Theory]
+    [VtTheory]
     // tur, alt kurum, sgk kullan → rota
     [InlineData(1, 0, 1, 1)]      // Özel
     [InlineData(2, 201, 1, 2)]    // ÖSS
@@ -178,7 +178,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal((short)beklenen, rota);
     }
 
-    [Theory]
+    [VtTheory]
     // Prim planı KABA grupla çalışır: 1/4 hasta, 2/3 kurum, 5 hiçbiri.
     [InlineData(1, 1)] [InlineData(4, 1)]
     [InlineData(2, 2)] [InlineData(3, 2)]
@@ -193,7 +193,7 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal((short)grup, sonuc);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Alt_kurum_sozlesmenin_turune_uymali()
     {
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;

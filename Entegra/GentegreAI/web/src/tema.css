@@ -657,6 +657,12 @@ table.grid tr.flt input {
   margin-top: 5px; position: relative; top: 1px; display: flex; align-items: center; gap: 6px; user-select: none;
 }
 .katab .kat:hover { color: var(--yazi2) }
+.katab .katab-buyut {
+  margin-left: auto; flex: none; align-self: center; border: 1px solid var(--cizgi); background: var(--yuz);
+  color: var(--soluk); border-radius: 3px; padding: 1px 7px; font-size: 13px; line-height: 20px; cursor: pointer;
+  position: sticky; right: 0;
+}
+.katab .katab-buyut:hover, .katab .katab-buyut[aria-pressed="true"] { color: var(--yazi2); border-color: var(--mor) }
 .katab .kat.on { color: var(--yazi2); font-weight: 700; background: var(--yuz); border-bottom: 1px solid var(--yuz) }
 .katab .kat .b {
   background: #cdd9e6; color: #34506e; border-radius: 9px; font-size: 10px; padding: 0 5px;
@@ -968,6 +974,16 @@ input.skt-gecmis {
 
 /* Otomatik doldurulan alanin altindaki aciklama (ör. "24.08.2026 kuru"). */
 .alan-notu { color: var(--soluk); font-size: 11px }
+/* önerilen muayene şablonu rozeti (933): doktorunki yeşil, bölümünkü mavi */
+.rozet.sablon-onerisi { cursor: pointer; border: 1px solid var(--cizgi) }
+/* muayene metin makrosu ipucu (931): alanın altında geçerli kısayollar */
+.makro-ipucu { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 3px;
+  color: var(--soluk); font-size: 10.5px; line-height: 1.4 }
+.makro-ipucu button { padding: 0 6px; border: 1px solid var(--cizgi); border-radius: 8px;
+  background: var(--yuz2); color: var(--yazi2); font: 10.5px ui-monospace, Consolas, monospace;
+  line-height: 1.5; cursor: pointer }
+.makro-ipucu button:hover { border-color: var(--vurgu, #2b6cb0); color: var(--vurgu, #2b6cb0) }
+.makro-ipucu small { font-size: 10px }
 .kod-ad { color: var(--soluk); font-size: 11px }
 
 .detay-tablo { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11.5px }
@@ -978,6 +994,10 @@ input.skt-gecmis {
 }
 .detay-tablo td { padding: 5px 7px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6 }
 .detay-tablo tbody tr.secili td { background: var(--mor2) }
+/* Arama penceresinde ISARETLI (coklu secim) satir: imlec satirindan ayri,
+   daha acik ton + sol serit - ikisi ayni anda gorunebilir. */
+.detay-tablo tbody tr.isaretli td { background: color-mix(in srgb, var(--mor2) 55%, transparent) }
+.detay-tablo tbody tr.isaretli td:first-child { box-shadow: inset 3px 0 0 var(--mor) }
 /* Grid kipinde satirin tamami tiklanabilir - imlec bunu soylesin. */
 .detay-tablo.secilebilir-satir tbody tr { cursor: pointer }
 .detay-tablo input, .detay-tablo select {
@@ -3327,6 +3347,24 @@ input.skt-gecmis {
 
 /* MUAYENE sekmeleri zemini açık gri (kullanıcı: anamnez + diğer sekmeler). */
 .muayene-sekme-zemin { background: #f4f5f7; border-radius: 8px; padding: 10px }
+/* Govdenin 14px kenari da AYNI gri (kullanici: "kenarinda beyaz cerceve
+   kaldi" - Muayene ve Vital Bulgular): muayene kartinin TUM sekmelerinde
+   pencere govdesi gri. */
+.kart-muayene .kagov { background: #f4f5f7 }
+/* RECETE ILAC GRIDI TAM OTURUR (kullanici: "kenarlarinda bosluklar var..
+   grid her yone genisleyip tam otursun"): gomulu GenGrid'in sayfa dolgusu,
+   cip seridi boslugu ve ic kutu cercevesi recete kutusunda sifirlanir. */
+.recete-grid { display: flex; flex-direction: column }
+.recete-grid .sahne { padding: 0; overflow: visible }
+.recete-grid .cipler { padding: 4px 8px }
+.recete-grid .cipler:empty { display: none }
+.recete-grid .kutu { border: 0; border-radius: 0; margin: 0; box-shadow: none }
+.recete-grid .gridwrap, .recete-grid table.grid { width: 100% }
+/* Alt durum cubugu (kayit sayisi / sayfa) YOK (kullanici): recetede birkac
+   ilac var, sayac bilgi vermiyor. */
+.recete-grid .altbilgi { display: none }
+/* Tani gridinde de alt durum cubugu YOK (kullanici). */
+.tani-gridi .detay-altbilgi { display: none }
 .muayene-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px }
 @media (max-width: 1180px) { .muayene-ikili { grid-template-columns: 1fr } }
 .muayene-ikili .mi-sol, .muayene-ikili .mi-sag { min-width: 0 }
@@ -3449,9 +3487,13 @@ input.skt-gecmis {
 .bulgu-gridi table td:nth-child(2) { width: 60px; text-align: center }
 
 /* Tanı tablosu (mockup tanı paneli): ICD KODU DAR (kullanıcı: %60 küçülsün),
-   kalan genişlik tanı adına gider - okunan kolon odur. */
+   kalan genişlik tanı adına gider - okunan kolon odur. İlk sütun grid
+   kipinin SEÇİM KUTUSU (standart 30px, kullanıcı: "check sütunu çok geniş");
+   ICD kodu ikinci sütun. */
 .tani-gridi table th:first-child,
-.tani-gridi table td:first-child { width: 96px }
+.tani-gridi table td:first-child { width: 30px }
+.tani-gridi table th:nth-child(2),
+.tani-gridi table td:nth-child(2) { width: 96px }
 
 /* VITAL BULGULAR IZGARASI (mockup muayene_karti.html): alanlar UC SUTUN,
    etiket ustte - grid satirinda 14 sayisal kolon yan yana okunmuyordu. */
@@ -3465,6 +3507,10 @@ input.skt-gecmis {
 .kaynak-arama { display: flex; flex-direction: column; gap: 8px }
 .kaynak-arama .ara-kutu { width: 100% }
 .kaynak-arama .ara-kutu input { width: 100% }
+/* YZ tanı önerisi: gerekçe satırın altında, olasılık rozeti adın yanında */
+.kaynak-arama .yz-gerekce { color: var(--yazi2); font-size: 11px; margin-top: 2px }
+.kaynak-arama .yz-olasilik { margin-left: 6px; font-size: 10px }
+.kaynak-arama .yz-not { margin: 0; display: flex; flex-direction: column; gap: 3px; font-size: 12px }
 .kaynak-arama tr.tiklanir { cursor: pointer }
 .kaynak-arama tr.tiklanir:hover { background: var(--mor2) }
 
@@ -3479,6 +3525,14 @@ input.skt-gecmis {
 .kagrup.tani-gridi > .detay-tablo, .kagrup.tani-gridi table { border: 0 }
 .kaynak-arama-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
 .kaynak-arama-arac .ara-kutu { flex: 1; min-width: 180px }
+.kaynak-arama-secim { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 8px }
+.kaynak-arama-secim label { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--sonuk, inherit) }
+.kaynak-arama-secim select { min-width: 140px }
+.kaynak-arama tbody tr.eklendi td:not(:first-child) { color: var(--yesil, #2e7d32) }
+.kaynak-arama-secilen { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; font-size: 12px }
+.kaynak-arama-cip { display: inline-flex; align-items: center; gap: 4px; max-width: 260px; padding: 2px 4px 2px 8px;
+  border-radius: 12px; background: color-mix(in srgb, var(--mor2) 55%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.kaynak-arama-cip button { border: 0; background: none; cursor: pointer; padding: 0 4px; line-height: 1 }
 
 /* Anamnez sağ panelindeki vital ızgarası: üç sütun, etiket üstte; "Tansiyon"
    ve "Boy / Kilo" tek etiket altında İKİ kutu (mockup .ikili). */
@@ -5840,3 +5894,288 @@ textarea.fm-giris { resize: vertical }
 .enabiz-dugme { display: inline-flex; align-items: center; gap: 5px }
 .enabiz-logo { height: 14px; width: auto; display: block }
 .enabiz-isaret { font-size: 13px; line-height: 1 }
+
+/* MUAYENE DIKTESI (kullanici): hedef alan + baslat/durdur, duzeltilebilir metin. */
+.muayene-dikte { display: flex; flex-direction: column; gap: 8px }
+.muayene-dikte .mdikte-arac { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.muayene-dikte .mdikte-arac label { display: flex; align-items: center; gap: 6px; font-size: 12px }
+.muayene-dikte textarea { width: 100%; resize: vertical; font: inherit }
+.muayene-dikte .md-gecici { min-height: 22px; font-size: 12px; color: var(--soluk); font-style: italic }
+.muayene-dikte .md-gecici.var { font-size: 14px; color: var(--yazi2); font-style: normal;
+  background: var(--yuz2); border-left: 3px solid var(--mor); padding: 4px 8px; border-radius: 3px }
+.muayene-dikte .md-kayit { animation: md-nabiz 1.2s ease-in-out infinite }
+@keyframes md-nabiz { 50% { opacity: .45 } }
+.muayene-dikte .md-seviye { display: inline-block; width: 90px; height: 6px; border-radius: 3px; background: var(--cizgi2); overflow: hidden }
+.muayene-dikte .md-seviye i { display: block; height: 100%; background: var(--yesil, #2e7d32); transition: width .08s linear }
+.muayene-dikte .md-tani { font-size: 11px }
+.muayene-dikte .md-alan { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px }
+.muayene-dikte .md-alan.aktif { border-color: var(--mor); box-shadow: 0 0 0 2px color-mix(in srgb, var(--mor) 25%, transparent) }
+.muayene-dikte .md-alan-bas { display: flex; align-items: center; gap: 8px; font-size: 12px }
+
+/* Baglam seridi kutu basligindaki DUZENLE isareti yalniz kalem ikonu (kullanici). */
+.kart-baglam .kb-bas .kb-kalem { color: var(--mor); font-size: 11px; margin-left: 4px }
+
+/* =====================================================================
+   RECETE KARTI (rk-) ve ALERJI KARTI (ak-) - mockup
+   Ekranlar/Muayene/recete_karti.html · alerji_karti.html
+   ===================================================================== */
+.kawin.kart-recete { width: min(1240px, 96vw) }
+.kawin.kart-alerji { width: min(900px, 96vw) }
+.kawin.kart-recete .kagov, .kawin.kart-alerji .kagov { padding: 0; background: #f4f5f7 }
+.rk-kimlik { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 7px 12px;
+  background: var(--yuz); border-bottom: 1px solid var(--cizgi2); font-size: 12px }
+.rk-kimlik .rk-ad { font-size: 13px; color: var(--yazi2) }
+.rk-kimlik .rk-bosluk { margin-left: auto }
+.rk-govde { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 0 }
+.ak-govde { grid-template-columns: minmax(0, 1fr) 280px }
+@media (max-width: 1000px) { .rk-govde { grid-template-columns: 1fr } }
+.rk-sol { padding: 12px 14px; border-right: 1px solid var(--cizgi2); min-width: 0 }
+.rk-sag { padding: 12px 14px; background: var(--yuz); display: flex; flex-direction: column; gap: 12px }
+.rk-alanlar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 16px; padding: 10px }
+.rk-fld { display: flex; flex-direction: column; gap: 3px; min-width: 0 }
+.rk-fld > label { font-size: 10.5px; color: var(--soluk) }
+.rk-tam { grid-column: 1 / -1 }
+.rk-tur-sec { display: flex; gap: 4px; flex-wrap: wrap }
+.rk-tur { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--cizgi); border-radius: 3px;
+  padding: 4px 9px; font-size: 11px; background: var(--yuz); color: inherit; cursor: pointer }
+.rk-tur i { width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, .18) }
+.rk-tur.on { border-color: var(--mor); background: var(--mor2); font-weight: 700 }
+.rk-tur:disabled { cursor: default; opacity: .75 }
+.rk-tanilar { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; min-height: 26px }
+.rk-bant { border-radius: 4px; padding: 8px 10px; font-size: 11.5px; line-height: 1.5; display: flex; flex-direction: column; gap: 3px }
+.rk-bant.hata { background: #fbe9e7; border: 1px solid #f3c4bf; color: #7d1f1a }
+.rk-bant.olumlu { background: #e2f3e8; border: 1px solid #bfe3cb; color: #2e7d46 }
+.rk-bant.mavi { background: #eef4fc; border: 1px solid #cfe0f5; color: #1f4f86 }
+.rk-blk h6 { margin: 0 0 6px; font-size: 11px; color: var(--yazi2); text-transform: uppercase; letter-spacing: .3px;
+  border-bottom: 1px solid var(--cizgi2); padding-bottom: 3px }
+.rk-chips { display: flex; gap: 4px; flex-wrap: wrap }
+.rk-kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; font-size: 11.5px }
+.rk-kv > span:nth-child(odd) { color: var(--soluk) }
+.rk-satir { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px }
+.rk-satir > p { grid-column: 1 / -1; margin: 0 }
+.rk-satir label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--soluk) }
+.ak-alanlar { display: grid; gap: 10px; padding: 10px }
+.ak-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.ak-zor { color: #b23b3b }
+.ak-seg { display: flex; gap: 4px; flex-wrap: wrap }
+.ak-seg button { border: 1px solid var(--cizgi); border-radius: 3px; padding: 4px 10px; font-size: 11px;
+  background: var(--yuz); color: inherit; cursor: pointer }
+.ak-seg button.on { border-color: var(--mor); background: var(--mor2); font-weight: 700 }
+.ak-siddet button.s1.on { background: #e2f3e8; border-color: #3f9a5e; color: #2e7d46 }
+.ak-siddet button.s2.on { background: #fdf6e3; border-color: #d9a441; color: #8a6218 }
+.ak-siddet button.s3.on { background: #fde9d9; border-color: #e0843a; color: #8a4312 }
+.ak-siddet button.s4.on { background: #fbe9e7; border-color: #b3261e; color: #b3261e }
+.ak-durum button.d1.on { background: #fdf6e3; border-color: #d9a441; color: #8a6218 }
+.ak-durum button.d2.on { background: #e2f3e8; border-color: #3f9a5e; color: #2e7d46 }
+.ak-durum button.d3.on { background: #eef0f3; border-color: #9aa8b6; color: #4d5d6e }
+.ak-uyum button.u1.on { background: #e2f3e8; border-color: #3f9a5e; color: #2e7d46 }
+.ak-uyum button.u2.on { background: #fdf6e3; border-color: #d9a441; color: #8a6218 }
+.ak-uyum button.u3.on { background: #fbe9e7; border-color: #b3261e; color: #b3261e }
+.ak-arama { position: relative }
+.ak-oneri { position: absolute; left: 0; right: 0; top: 100%; z-index: 5; margin-top: 2px; background: var(--yuz);
+  border: 1px solid var(--cizgi); border-radius: 3px; box-shadow: 0 4px 12px rgba(20, 40, 70, .14) }
+.ak-oneri button { display: flex; width: 100%; gap: 8px; align-items: baseline; text-align: left; border: 0;
+  border-bottom: 1px solid var(--cizgi2); background: none; padding: 5px 8px; cursor: pointer; color: inherit }
+.ak-oneri button:last-child { border-bottom: 0 }
+.ak-oneri button:hover { background: var(--mor2) }
+.ak-oneri button .sonuk { margin-left: auto; font-size: 10.5px }
+.ak-salt { border: 1px solid var(--cizgi2); border-radius: 3px; padding: 5px 7px; min-height: 27px; background: var(--yuz2) }
+.ak-hizli { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px }
+.ak-hizli button { border: 1px dashed var(--cizgi); border-radius: 9px; padding: 1px 8px; font-size: 10.5px;
+  background: var(--yuz); color: var(--soluk); cursor: pointer }
+.ak-hizli button.on { border-style: solid; border-color: var(--mor); background: var(--mor2); color: var(--mor) }
+.ak-kutu { display: flex; align-items: center; gap: 6px; font-size: 12px }
+.ak-liste { margin: 0; padding-left: 16px; line-height: 1.8 }
+
+/* GECMIS OLAY KARTI (go-) - mockup Ekranlar/Muayene/gecmis_olay_karti.html */
+.kawin.kart-gecmis { width: min(960px, 96vw) }
+.go-govde { grid-template-columns: minmax(0, 1fr) 300px }
+.go-turler { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 10px }
+@media (max-width: 860px) { .go-turler { grid-template-columns: repeat(3, 1fr) } }
+.go-tur { display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer; color: inherit;
+  border: 1px solid var(--cizgi); border-left: 4px solid var(--go-renk); border-radius: 4px; background: var(--yuz); padding: 6px 8px }
+.go-tur b { font-size: 11.5px }
+.go-tur small { color: var(--soluk); font-size: 10px }
+.go-tur.on { background: var(--mor2); border-color: var(--mor); border-left-color: var(--go-renk);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mor) 20%, transparent) }
+.go-uc { display: grid; grid-template-columns: 1fr 1.2fr 1.3fr; gap: 10px }
+.go-yil { float: right; font-size: 10px; display: inline-flex; align-items: center; gap: 3px }
+.go-filtre { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 6px }
+.go-filtre button { font-size: 10px; border: 1px solid var(--cizgi); border-radius: 9px; padding: 0 7px;
+  background: var(--yuz); color: inherit; cursor: pointer }
+.go-filtre button.on { background: var(--mor2); border-color: var(--mor) }
+.go-cizgi { position: relative; margin: 0; padding: 0 0 0 16px; list-style: none }
+.go-cizgi::before { content: ""; position: absolute; left: 5px; top: 4px; bottom: 4px; width: 2px; background: var(--cizgi2) }
+.go-cizgi li { position: relative; padding: 2px 0 6px }
+.go-cizgi li::before { content: ""; position: absolute; left: -15px; top: 7px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--go-renk); box-shadow: 0 0 0 2px var(--yuz) }
+.go-cizgi li button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; text-align: left;
+  border: 0; background: none; padding: 1px 4px; border-radius: 3px; cursor: pointer; color: inherit; font-size: 11.5px }
+.go-cizgi li button:hover, .go-cizgi li.secili button { background: var(--mor2) }
+.go-yil-etiket { font-weight: 700; color: var(--yazi2); font-size: 11px }
+
+/* =====================================================================
+   MUAYENE SABLONLARI (ms-) - bolum ve doktora gore liste + sablon karti
+   mockup Ekranlar/Muayene/muayene_sablon_listesi · muayene_sablon_karti
+   ===================================================================== */
+.ms-liste { display: flex; flex-direction: column; min-height: 0 }
+.ms-ayrac { width: 1px; height: 20px; background: var(--cizgi) }
+.ms-uc { display: grid; grid-template-columns: 250px minmax(0, 1fr) 320px; min-height: 480px }
+@media (max-width: 1200px) { .ms-uc { grid-template-columns: 230px minmax(0, 1fr) } .ms-onz { display: none } }
+.ms-agac { border-right: 1px solid var(--cizgi2); background: var(--yuz2); padding: 6px 0; font-size: 11.5px; overflow: auto }
+.ms-agac-bas { padding: 4px 10px; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--soluk) }
+.ms-d1, .ms-d2 { display: flex; align-items: center; gap: 6px; width: 100%; border: 0; background: none; text-align: left;
+  padding: 4px 10px; cursor: pointer; color: inherit; font: inherit }
+.ms-d1 { font-weight: 700; color: var(--yazi2) }
+.ms-d2 { padding-left: 28px }
+.ms-d1:hover, .ms-d2:hover { background: var(--yuz) }
+.ms-d1.on, .ms-d2.on { background: var(--mor2); box-shadow: inset 3px 0 0 var(--mor) }
+.ms-ok { width: 10px; color: var(--soluk) }
+.ms-say { margin-left: auto; font-size: 10px; color: var(--soluk); background: var(--yuz); border-radius: 8px; padding: 0 6px; font-weight: 400 }
+.ms-grid { overflow: auto; min-width: 0 }
+.ms-grid tr.ms-g1 td { background: color-mix(in srgb, var(--mor2) 55%, var(--yuz)); font-weight: 700; color: var(--yazi2) }
+.ms-grid tr.ms-g2 td { background: var(--yuz2); font-weight: 700; padding-left: 22px }
+.ms-grid td.ms-ad { padding-left: 30px }
+.ms-grid tr.secili td { background: var(--mor2) }
+.ms-grid tr.ms-pasif td { color: var(--soluk) }
+.ms-yildiz { color: #e0a800 }
+.ms-kullanim { display: inline-flex; align-items: center; gap: 5px }
+.ms-kullanim i { display: inline-block; height: 6px; border-radius: 3px; background: linear-gradient(#5cb87a, #3f9a5e) }
+.ms-onz { border-left: 1px solid var(--cizgi2); padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; overflow: auto }
+.ms-onz-ad { font-weight: 700; color: var(--yazi2); margin-bottom: 4px }
+.ms-alan { display: flex; gap: 6px; padding: 3px 0; border-bottom: 1px dashed var(--cizgi2); font-size: 11.5px }
+.ms-alan .sonuk { margin-left: auto; font-size: 10px }
+.ms-durum { display: flex; gap: 14px; justify-content: space-between; padding: 5px 12px; background: var(--yuz2);
+  border-top: 1px solid var(--cizgi); font-size: 11px }
+/* kart */
+.kawin.kart-sablon { width: min(1180px, 96vw) }
+.kawin.kart-sablon .kagov { background: #f4f5f7 }
+.ms-govde { display: flex; flex-direction: column; gap: 0 }
+.ms-alanlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; padding: 10px }
+.ms-iki { grid-column: span 2 }
+.ms-tam { grid-column: 1 / -1 }
+.ms-bant { margin: 0 10px 10px }
+.ms-alan-sekme .not { margin: 6px 2px }
+/* hekim tercihleri (931): sık tanı · reçete şablonu · panel · makro · kural */
+.ms-tercih .not { margin: 6px 2px }
+.ms-tercih-arac { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap }
+.ms-tercih-arac label { font-size: 11px; color: var(--yazi2) }
+.ms-tercih-arac input { width: min(320px, 60vw) }
+
+/* =====================================================================
+   YZ KONTÖR & KULLANIM (934) — mockup Ekranlar/Ayarlar/yz_kontor_kullanim.html
+   ===================================================================== */
+.yk-rozetler { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 12px }
+.yk-kpi { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 10px; padding: 8px 12px 12px }
+@media (max-width: 1000px) { .yk-kpi { grid-template-columns: 1fr 1fr } }
+.yk-k { border: 1px solid var(--cizgi); border-radius: 4px; background: var(--yuz); padding: 9px 11px }
+.yk-k .e { font-size: 10.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px }
+.yk-k .d { font-size: 22px; font-weight: 700; color: var(--yazi); margin-top: 3px }
+.yk-k .d small { font-size: 12px; color: var(--soluk); font-weight: 400 }
+.yk-k .a { font-size: 10.5px; color: var(--soluk); margin-top: 3px }
+.yk-bakiye { border-color: #bfe3cb; background: linear-gradient(#f5fbf7, var(--yuz)) }
+.yk-bakiye.az { border-color: #f2ddbf; background: linear-gradient(#fdf6e3, var(--yuz)) }
+.yk-bar { height: 8px; border-radius: 4px; background: var(--yuz2); margin-top: 7px; overflow: hidden }
+.yk-bar i { display: block; height: 100%; background: linear-gradient(90deg, #5cb87a, #3f9a5e) }
+.yk-art { color: #2e7d46; font-weight: 700 }
+.yk-eksi { color: #b3261e }
+.yk-govde { padding: 12px }
+.yk-iki { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px }
+@media (max-width: 1000px) { .yk-iki { grid-template-columns: 1fr } }
+.yk-s-tani { background: #2f6db3 } .yk-s-tetkik { background: #3f9a5e }
+.yk-s-ilac { background: #c98a12 } .yk-s-rehber { background: #8e7cc3 }
+.yk-grafik { display: flex; align-items: flex-end; gap: 3px; height: 140px; padding: 6px 4px 0; border-bottom: 1px solid var(--cizgi) }
+.yk-g { flex: 1; display: flex; flex-direction: column-reverse; gap: 1px; min-height: 2px }
+.yk-g span { display: block; border-radius: 1px }
+.yk-eks { display: flex; justify-content: space-between; color: var(--soluk); font-size: 10px; padding: 3px 2px 0 }
+.yk-lej { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 11px }
+.yk-lej i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px }
+.yk-dagilim .yk-satir { display: grid; grid-template-columns: 120px 1fr 60px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--cizgi2) }
+.yk-dagilim .yk-satir b { text-align: right }
+.yk-cubuk { height: 12px; background: var(--yuz2); border-radius: 3px; overflow: hidden }
+.yk-cubuk i { display: block; height: 100% }
+.yk-bant { margin: 12px 0 0 }
+.yk-suz { margin-bottom: 8px; flex-wrap: wrap }
+.yk-ayrac { width: 1px; height: 20px; background: var(--cizgi) }
+.yk-tablo td, .yk-tablo th { white-space: nowrap }
+.yk-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; padding: 10px }
+.yk-form.iki { grid-template-columns: 1fr 1fr }
+.yk-form .tam { grid-column: 1 / -1 }
+@media (max-width: 800px) { .yk-form, .yk-form.iki { grid-template-columns: 1fr } }
+.yk-fs { border: 0; margin: 0; padding: 0; min-width: 0 }
+.yk-dugmeler { display: flex; gap: 6px; padding: 10px; flex-wrap: wrap }
+.yk-maske { font-family: Consolas, monospace; font-size: 11px; background: var(--yuz2); border: 1px solid var(--cizgi2); border-radius: 3px; padding: 8px 10px; margin: 10px; white-space: pre-wrap }
+.yk-liste { margin: 10px; padding-left: 18px; line-height: 1.8 }
+.yk-liste .ok { color: #2e7d46 } .yk-liste .yok { color: #b3261e }
+/* satın al penceresi */
+.kawin.yk-satin { width: min(960px, 96vw) }
+.yk-adimlar { display: flex; padding: 8px 12px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+.yk-adim { flex: 1; display: flex; align-items: center; gap: 6px; color: var(--soluk); font-size: 11.5px }
+.yk-adim i { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--cizgi); align-items: center; justify-content: center; font-style: normal; font-size: 11px; background: var(--yuz) }
+.yk-adim.on { color: var(--yazi); font-weight: 700 } .yk-adim.on i { background: #2f6db3; border-color: #2f6db3; color: #fff }
+.yk-adim.bitti i { background: #3f9a5e; border-color: #3f9a5e; color: #fff }
+.yk-sgov { padding: 12px }
+.yk-donem { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 14px; overflow: hidden; margin-bottom: 10px }
+.yk-donem button { border: 0; background: var(--yuz); padding: 4px 14px; font-size: 11px; cursor: pointer; color: var(--soluk) }
+.yk-donem button.on { background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-weight: 700 }
+.yk-planlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px }
+@media (max-width: 800px) { .yk-planlar { grid-template-columns: 1fr } }
+.yk-plan { position: relative; display: flex; flex-direction: column; gap: 5px; text-align: left; border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz); padding: 14px; cursor: pointer; font: inherit; color: inherit }
+.yk-plan:hover { border-color: #9dbbe0 }
+.yk-plan.sec { border: 2px solid #2f6db3; box-shadow: 0 0 0 3px #d7e7fb; padding: 13px }
+.yk-plan .ad { font-size: 14px; font-weight: 700 }
+.yk-plan .fiyat { font-size: 22px; font-weight: 700 }
+.yk-plan .fiyat small { font-size: 12px; color: var(--soluk); font-weight: 400 }
+.yk-plan .kont { font-weight: 700; color: #2c4a6b }
+.yk-plan ul { margin: 4px 0 0; padding-left: 16px; line-height: 1.7; font-size: 11.5px }
+.yk-ust { position: absolute; top: -10px; right: 12px }
+.yk-ekbas { margin: 12px 0 6px; font-weight: 700 }
+.yk-ekpaket { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px }
+@media (max-width: 800px) { .yk-ekpaket { grid-template-columns: 1fr 1fr } }
+.yk-p { border: 1px dashed var(--cizgi); border-radius: 4px; padding: 8px; text-align: center; background: var(--yuz); cursor: pointer; font: inherit; color: inherit }
+.yk-p b { display: block; font-size: 14px }
+.yk-p.sec { border: 2px solid #2f6db3; background: #eef4fc; padding: 7px }
+.yk-ozet { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz2); padding: 10px; line-height: 1.9; align-self: start }
+.yk-ozet > div { display: flex; justify-content: space-between; gap: 10px }
+.yk-ozet .top { border-top: 1px solid var(--cizgi); margin-top: 4px; padding-top: 4px; font-weight: 700; font-size: 13px }
+.yk-guvenli { border: 2px solid #bfe3cb; border-radius: 6px; padding: 12px }
+.yk-guvenli .bas { display: flex; align-items: center; gap: 8px; color: #2e7d46; font-weight: 700; margin-bottom: 8px }
+.yk-onay { display: flex; gap: 6px; align-items: flex-start; font-size: 11.5px; margin-top: 10px }
+.yk-logolar { display: flex; gap: 6px; margin-top: 6px }
+.yk-logolar span { border: 1px solid var(--cizgi); border-radius: 3px; padding: 2px 8px; font-size: 10px; font-weight: 700; color: var(--yazi2) }
+.yk-sonuc { text-align: center; padding: 22px; line-height: 1.8 }
+.yk-sonuc .ik { font-size: 42px }
+.yk-sonuc .bas { font-size: 16px; font-weight: 700 }
+.yk-sonuc .bas.ok { color: #2e7d46 } .yk-sonuc .bas.hata { color: #b3261e }
+.ms-onizleme tr.ms-grup td { background: var(--yuz2); font-weight: 700; color: var(--yazi2) }
+.ms-onz-arac { display: flex; gap: 8px; align-items: center; margin-bottom: 6px }
+.ms-kpi { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px }
+.ms-kpi > div { flex: 1; min-width: 150px; border: 1px solid var(--cizgi2); border-radius: 4px; padding: 8px 10px; background: var(--yuz);
+  display: flex; flex-direction: column }
+.ms-kpi span { font-size: 10.5px; color: var(--soluk) }
+.ms-kpi b { font-size: 18px; color: var(--yazi2) }
+.ms-kpi small { font-size: 10.5px; color: var(--soluk) }
+.ms-cubuklar { padding: 8px 12px }
+.ms-cubuk { display: grid; grid-template-columns: 180px 1fr 40px; align-items: center; gap: 8px; font-size: 11.5px; padding: 3px 0 }
+.ms-cubuk i { display: block; height: 8px; border-radius: 4px; background: linear-gradient(#4d8fd6, #2f6db3) }
+.ms-log { margin: 0; padding: 0; list-style: none }
+.ms-log li { display: flex; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); font-size: 11.5px }
+.ms-log li .sonuk { min-width: 130px }
+.ms-ic { padding: 8px 10px }
+
+.ms-alan-iki { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 10px; align-items: start }
+@media (max-width: 1000px) { .ms-alan-iki { grid-template-columns: 1fr } }
+.ms-secenek { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); padding: 8px 10px }
+.ms-secenek h6 { margin: 0 0 6px; font-size: 11px; color: var(--yazi2) }
+.ms-cipler { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px }
+.ms-cip { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--cizgi); border-radius: 12px;
+  padding: 1px 4px 1px 6px; background: var(--yuz2); font-size: 11.5px }
+.ms-cip.normal { background: #e2f3e8; border-color: #bfe3cb; color: #2e7d46 }
+.ms-cip button { border: 0; background: none; cursor: pointer; padding: 0 3px; color: var(--soluk); font-size: 11px }
+.ms-cip button:disabled { opacity: .3; cursor: default }
+.ms-secenek-ekle { display: flex; gap: 4px }
+.ms-secenek-ekle input { flex: 1; min-width: 0 }
+
+.ms-fieldset { border: 0; margin: 0; padding: 0; min-width: 0 }
+.ms-fieldset[disabled] input, .ms-fieldset[disabled] select { background: var(--yuz2) }
+.ms-salt { margin: 8px 10px 0 }

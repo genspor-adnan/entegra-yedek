@@ -20,7 +20,7 @@ public class BildirimKuyruguTestleri : IClassFixture<VeritabaniOlgusu>
 
     private const string TestAlicisi = "5559999999";
 
-    [Fact]
+    [VtFact]
     public async Task SablondanKuyruga_degiskenlerDolar()
     {
         if (!_olgu.Baglandi(nameof(SablondanKuyruga_degiskenlerDolar))) return;
@@ -50,7 +50,7 @@ public class BildirimKuyruguTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(id!.Value); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kuyruk_AYNI_SATIRI_IKI_KEZ_VERMEZ()
     {
         if (!_olgu.Baglandi(nameof(Kuyruk_AYNI_SATIRI_IKI_KEZ_VERMEZ))) return;
@@ -102,7 +102,7 @@ public class BildirimKuyruguTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(id!.Value); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task PasifSablon_KUYRUGA_KONMAZ()
     {
         if (!_olgu.Baglandi(nameof(PasifSablon_KUYRUGA_KONMAZ))) return;
@@ -130,7 +130,7 @@ public class BildirimKuyruguTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task AliciBos_ISE_REDDEDILIR()
     {
         if (!_olgu.Baglandi(nameof(AliciBos_ISE_REDDEDILIR))) return;

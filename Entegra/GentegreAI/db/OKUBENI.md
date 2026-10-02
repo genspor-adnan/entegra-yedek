@@ -1,4 +1,4 @@
-# Gentegre AI — veritabanı (Faz 0 / F0-03a)
+# Gentegre AI — veritabanı
 
 Ürün **yalnız PostgreSQL** üzerinde çalışır (proje dosyası §8b, kararlar K11/K12).
 MSSQL yalnız göçün kaynağıdır; çalışma zamanında bağımlılık yoktur.
@@ -57,7 +57,7 @@ zorunlu bağ → `not null` + FK; opsiyonel bağ ve tarihlerde NULL serbest.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\kur.ps1              # tam kurulum + göç
-powershell -ExecutionPolicy Bypass -File .\kur.ps1 -SadeceSema  # yalnız şema
+powershell -ExecutionPolicy Bypass -File .\kur.ps1 -SadeceSema  # MSSQL'siz: bos kurulum (asagida)
 powershell -ExecutionPolicy Bypass -File .\kur.ps1 -TemelAl     # var olan DB'yi deftere işaretle
 ```
 
@@ -75,7 +75,43 @@ Artık iki taraf aynı mekanizmayı kullanır: dosya adına göre bir kez uygula
 betiği tekrar çalıştırmak yalnız **yeni** göçleri işler.
 
 Elle kurulmuş bir veritabanını deftere tanıtmak için `-TemelAl` (hiçbir SQL
-çalıştırmaz, yalnız işaretler).
+çalıştırmaz, yalnız `yontem = 'temel_al'` ile işaretler). **Genel çözüm olarak
+kullanmayın**: defteri toptan doldurmak gerçek geçmişi gizler.
+
+### Uygulama kuralları (28.09.2026 — `araclar/goc_uygula.ps1`, sunucu eşi `yayin/goc_uygula.sh`)
+
+- **Dosya + defter kaydı TEK işlem**: ortada patlayan göç önceki ifadeleri de defter
+  kaydını da geri alır. Yalnız ÜST DÜZEYDE bir ifadenin tamamı `BEGIN`/`COMMIT`/
+  `ROLLBACK`/`END` [WORK|TRANSACTION] ya da `START TRANSACTION` olan dosya **işlem
+  dışı** çalışır (`yontem = 'islem_disi'`; dosya yalnız kendi BEGIN/COMMIT aralığında
+  atomiktir). Tespit: yorum, metin sabiti ve `$tag$` gövdesi tek geçişte ayıklanır,
+  kalan metin `;` ile ifadelere bölünür — DO/fonksiyon gövdesindeki `end;` ve
+  `case … end;` transaction sayılmaz (tekrar denetim 28.09.2026: eski satır-başı
+  araması bunları sayıyor, normal dosyaları yarım bırakıyordu).
+- **Kilit**: `pg_advisory` (7340928) — iki güncelleyici aynı dosyayı iki kez uygulayamaz.
+- **Defter**: `dosya`, `ozet` (sha256, LF'e normalize), `yontem`
+  (`islem` · `islem_disi` · `aktarim_yok` · `temel_al` · `tohum`). Eski kayıtlarda ozet
+  YOKTUR (doğrulanmamış) — geçmiş için bugün özet uydurulmaz.
+- **Çıkış kodu**: 0 tamam · 1 hata · 2 dış veri ön koşulu (`kurulum/dis_veri_onkosullari.txt`).
+- **Boş kurulum** (`-SadeceSema`; sunucuda defter ve stg boşken kendiliğinden): her
+  bekleyen dosyadan önce `kurulum/000_bos_kurulum.sql` (şube, depo, standart kod
+  listeleri — idempotent); MSSQL aktarımı gerektiren dosyalar
+  (`kurulum/aktarim_adimlari.txt`, ÖLÇÜLEREK çıkarıldı) çalıştırılmaz,
+  `aktarim_yok` yazılır.
+- **Bilinen sınır**: zincir 521/559'da SKRS verisi ister (çıkış 2; API'den SKRS
+  senkronu sonrası aynı komut kaldığı yerden devam eder). 560 ve sonrası tarihsel
+  veri düzeltmelerine dayanır; bugünkü SKRS listeleriyle boş veritabanında
+  tamamlanmayabilir (ayrıntı: `dokuman/DENETIM_DUZELTME_SONUCU_2026-09-28.md`).
+
+### Defter uzlaştırma raporu (salt okunur)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\araclar\goc_uzlastir.ps1 -Db gentegre_ai -Cikti rapor.md
+```
+
+Defterde olmayan her dosyayı oluşturduğu nesnelere bakarak sınıflar (`ETKI_VAR`,
+`ETKI_KISMI`, `EKSIK`, `BELIRSIZ`) — sınıf KANIT derecesidir, "uygulandı" hükmü değil.
+Veritabanına yazmaz (oturum `default_transaction_read_only`).
 
 ## Yürürlükteki tanım nerede? (`GUNCEL.md`)
 

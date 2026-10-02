@@ -102,7 +102,7 @@ public sealed class LabGonderenPrimiTestleri(VeritabaniOlgusu olgu)
             + " where belge_satir_id = @p0 and rol = 1 order by taraf_id",
             t, [satir], o => o.GetInt32(0), Iptal);
 
-    [Fact(DisplayName = "Lab: kendi adına gönderen dış hekim Gönderen olur")]
+    [VtFact(DisplayName = "Lab: kendi adına gönderen dış hekim Gönderen olur")]
     public async Task KendiAdinaHekim()
     {
         if (!_olgu.Baglandi(nameof(KendiAdinaHekim))) return;
@@ -121,7 +121,7 @@ public sealed class LabGonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Lab: kurum adına gelen işte prim kuruma, hekime değil")]
+    [VtFact(DisplayName = "Lab: kurum adına gelen işte prim kuruma, hekime değil")]
     public async Task KurumAdina()
     {
         if (!_olgu.Baglandi(nameof(KurumAdina))) return;
@@ -143,7 +143,7 @@ public sealed class LabGonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Lab: iç personelin istemi gönderen primi doğurmaz")]
+    [VtFact(DisplayName = "Lab: iç personelin istemi gönderen primi doğurmaz")]
     public async Task IcPersonelPrimYok()
     {
         if (!_olgu.Baglandi(nameof(IcPersonelPrimYok))) return;
@@ -162,7 +162,7 @@ public sealed class LabGonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Lab: ücret kalemi SONRA eklenince rol yazılır")]
+    [VtFact(DisplayName = "Lab: ücret kalemi SONRA eklenince rol yazılır")]
     public async Task KalemSonraGelir()
     {
         if (!_olgu.Baglandi(nameof(KalemSonraGelir))) return;
@@ -182,7 +182,7 @@ public sealed class LabGonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Lab: belgede farklı göndericiler varsa otomatik rol yazılmaz")]
+    [VtFact(DisplayName = "Lab: belgede farklı göndericiler varsa otomatik rol yazılmaz")]
     public async Task FarkliGondericiRolYazmaz()
     {
         if (!_olgu.Baglandi(nameof(FarkliGondericiRolYazmaz))) return;

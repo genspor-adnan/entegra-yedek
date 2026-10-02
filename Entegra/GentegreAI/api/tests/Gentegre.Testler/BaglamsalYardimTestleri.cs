@@ -25,7 +25,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
 
     private static IstekBaglami Baglam(IEnumerable<AlanYetkisi>? alanlar = null, params string[] kodlar) => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 1, IzlemeNo = "test",
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 1, IzlemeNo = "test",
         Yetkiler = new YetkiSeti(1,
             kodlar.Select(k => new YetkiKaydi(k, 0, true, true, true, true)), alanlar ?? []),
     };
@@ -302,7 +302,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Klinik_soru_MODELE_GITMEZ_ve_gunluk_MASKELI_yazilir()
     {
         if (!_olgu.Baglandi(nameof(Klinik_soru_MODELE_GITMEZ_ve_gunluk_MASKELI_yazilir))) return;
@@ -330,7 +330,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal("hasta", son.Ekran);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Akilci_kural_sorusu_KATALOGDAN_cevaplanir_yetkisiz_kullaniciya_verilmez()
     {
         if (!_olgu.Baglandi(nameof(Akilci_kural_sorusu_KATALOGDAN_cevaplanir_yetkisiz_kullaniciya_verilmez))) return;
@@ -353,7 +353,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.NotEqual(RehberServisi.KaynakKural, yok.KaynakTuru);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sohbet_BASKA_SUBEDEN_ve_BASKA_KULLANICIDAN_gorunmez()
     {
         if (!_olgu.Baglandi(nameof(Sohbet_BASKA_SUBEDEN_ve_BASKA_KULLANICIDAN_gorunmez))) return;
@@ -376,7 +376,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await veri.CalistirAsync("delete from public.ai_sohbet where id = @p0", [id]); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ekran_baglami_ucu_YETKISIZ_ekranda_yetki_sorusu_onerir_kayit_icerigi_okumaz()
     {
         if (!_olgu.Baglandi(nameof(Ekran_baglami_ucu_YETKISIZ_ekranda_yetki_sorusu_onerir_kayit_icerigi_okumaz))) return;

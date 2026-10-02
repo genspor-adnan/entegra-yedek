@@ -42,9 +42,14 @@ public sealed partial class KartDeposu
                     parametreler.Add(baglam.SubeId);
                 }
 
+                // jsonb kolonu metin parametreyle cast'siz yazilamaz (ana kartla
+                //   ayni kural: KartDeposu.EkleAsync).
+                var jsonKolonlar = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var (alanAdi, deger) in degerler)
                 {
-                    kolonlar.Add(detay.Alanlar.First(a => a.Ad == alanAdi).Kolon);
+                    var alan = detay.Alanlar.First(a => a.Ad == alanAdi);
+                    kolonlar.Add(alan.Kolon);
+                    if (alan.Tip == "json") jsonKolonlar.Add(alan.Kolon);
                     parametreler.Add(deger);
                 }
 
@@ -61,7 +66,8 @@ public sealed partial class KartDeposu
                         }
 
                 var yerTutucular = Enumerable.Range(0, parametreler.Count)
-                    .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture));
+                    .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture)
+                                 + (jsonKolonlar.Contains(kolonlar[i]) ? "::jsonb" : ""));
 
                 var sql = $"insert into {detay.Tablo} ({string.Join(", ", kolonlar)}) " +
                           $"values ({string.Join(", ", yerTutucular)}) returning {detay.IdKolonu}";
@@ -101,8 +107,9 @@ public sealed partial class KartDeposu
 
                 foreach (var (alanAdi, deger) in degerler)
                 {
-                    var kolon = detay.Alanlar.First(a => a.Ad == alanAdi).Kolon;
-                    atamalar.Add($"{kolon} = @p{parametreler.Count.ToString(CultureInfo.InvariantCulture)}");
+                    var alan = detay.Alanlar.First(a => a.Ad == alanAdi);
+                    var cast = alan.Tip == "json" ? "::jsonb" : "";
+                    atamalar.Add($"{alan.Kolon} = @p{parametreler.Count.ToString(CultureInfo.InvariantCulture)}{cast}");
                     parametreler.Add(deger);
                 }
 

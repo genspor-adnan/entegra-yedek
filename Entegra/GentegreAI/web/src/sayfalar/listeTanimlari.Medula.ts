@@ -53,7 +53,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
   {
     // e-REÇETE: reçete listesinin Medula görünümü - imzala, gönder, sil.
     kaynak: 'recete', rota: 'medula-recete', aksiyonEkrani: 'medula-recete-liste', baslik: 'e-Reçete (Medula)',
-    yol: 'Medula › e-Reçete', kartYolu: '/medula-recete', kartBaslik: 'Reçete', tarihAlani: 'tarih',
+    yol: 'Medula › e-Reçete', kartYolu: '/medula-recete', kartBaslik: 'Reçete', ozelKart: true, tarihAlani: 'tarih',
     cipler: [
       { ad: 'Taslak',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'İmzalı',       filtre: { alan: 'durum', op: 'esit', deger: 2 } },

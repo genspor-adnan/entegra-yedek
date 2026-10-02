@@ -132,6 +132,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 285
@@ -140,6 +144,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
+        ExplicitTop = 282
+        ExplicitHeight = 328
         object PanelAlt: TPanel
           Left = 1
           Top = 159
@@ -155,6 +161,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
+          ExplicitTop = 162
           DesignSize = (
             1102
             165)
@@ -819,6 +826,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
+          ExplicitHeight = 137
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -1693,6 +1701,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.CustomButtons.Buttons = <>
         Properties.Images = Tablo.PNGImageList2
         OnChange = PageUstChange
+        ExplicitTop = 102
         ClientRectBottom = 176
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -1700,6 +1709,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 11
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2342,16 +2355,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
                 Caption = 'Kaynak:'
                 Transparent = True
               end
-              object lbKaynakFaturaNo: TcxDBLabel
+              object lbKaynakFaturaNo: TcxLabel
                 Left = 139
                 Top = 105
-                DataBinding.DataField = 'KAYNAKBELGENO'
-                DataBinding.DataSource = DtsFatBaslik
                 Style.TextColor = clNavy
                 Transparent = True
                 OnClick = LbIrsaliyeBilgileriClick
-                Height = 21
-                Width = 135
               end
               object cxDBLabel2: TcxDBLabel
                 Left = -351
@@ -2399,6 +2408,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
                 DataBinding.DataSource = DtsFatBaslik
                 Style.Color = clWindow
                 TabOrder = 16
+                OnKeyUp = EditFatNoKeyUp
                 Width = 114
               end
               object EditFATURASERI: TcxDBTextEdit
@@ -2617,6 +2627,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 19
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2781,6 +2795,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = DetayEkrPage
       OnExitPage = DetayEkrExitPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3194,6 +3210,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -3254,6 +3272,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 554
         AnchorX = 1110
       end
       object GridYorum: TcxGrid
@@ -4231,8 +4250,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     OnNewRecord = FATBASLIKNewRecord
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'SELECT F.*, '
-      'KAYNAKBELGENO=dbo.fn_KaynakBelgeNolariStrOlarakGetir(F.TUR,F.ID)'
+      'SELECT F.* '
       'FROM FATBASLIK F Left outer join DOVIZCINSLERI D on  '
       'F.DIL=D.DIL and F.DOVIZ_CINSI=D.DOVIZ'
       'WHERE F.ID = :Par')

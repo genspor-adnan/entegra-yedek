@@ -6,11 +6,26 @@ import { gonder, istek } from '../cekirdek';
  * bırakınca çalışma listelerine düşer. Ödeme ayrı - serbest = ücretlendirildi/
  * kabule hazır, tahsilat sonraya kalabilir.
  */
-export interface BekleyenIstem { tur: 'lab' | 'radyoloji'; id: number; oncelik: number; tetkik: string; kategori: string }
+export interface BekleyenIstem {
+  tur: 'lab' | 'radyoloji'; id: number; oncelik: number; tetkik: string; kategori: string;
+  /** Başvurunun kurum fiyat listesinden birim fiyat toplamı (ücretlendirmeyle AYNI kural). */
+  fiyat: number;
+  /** Sözleşme iskontosu (%): lab / görüntüleme ayrı. */
+  iskonto: number;
+  /** Ücrete eklenince yazılacak tutar (iskontolu). */
+  tutar: number;
+  /** Tetkiğin fiyatlanacak hizmet kartı tanımsız. */
+  hizmetYok: boolean;
+  /** Hizmet(ler) zaten başvuruda ücretli - tekrar eklenmez. */
+  ucrette: boolean;
+}
 export interface BekleyenIstemYaniti {
   lab: BekleyenIstem[];
   radyoloji: BekleyenIstem[];
   toplam: number;
+  /** Ödeyen kurum ve sözleşme adı (fiyatın dayanağı). */
+  kurum?: string;
+  sozlesme?: string;
 }
 
 export const basvuruIstemUclari = {

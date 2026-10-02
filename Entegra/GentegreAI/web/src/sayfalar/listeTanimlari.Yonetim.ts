@@ -233,6 +233,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Yönetim', menuSira: 101, menuAltGrup: 'Güvenlik', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
   },
   {
+    // YZ KONTOR & KULLANIM (934, mockup Ekranlar/Ayarlar/yz_kontor_kullanim.html):
+    //   bakiye, kullanim, plan / kontor satin alma (kredi karti - odeme kurulusu
+    //   formunda), kurum YZ ayarlari. Liste degil, ozel sayfa.
+    kaynak: 'yz-kontor', rota: 'yz-kontor', ozelSayfa: true,
+    baslik: 'YZ Kontör & Kullanım', yol: 'Yönetim › YZ Kontör & Kullanım',
+    menuGrup: 'Yönetim', menuSira: 15, menuAd: 'YZ Kontör & Kullanım', ic: '🤖', yetkiKodu: 'ai.kontor',
+  },
+  {
     // DOKUMLER & ISTATISTIK (686): kosul verilerek tasarlanan, kaydedilip
     //   tekrar calistirilan dokum; capraz tablo, kiyas, baski onizleme.
     //   Tasarimci Yonetim'de TEK yer; liste ekranlarindan calistirma

@@ -48,7 +48,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         public HttpClient CreateClient(string name) => new();
     }
 
-    [Fact]
+    [VtFact]
     public async Task SYSMessage_govdesi_kilavuz_kurallarina_uyar()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -120,7 +120,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Silme_paketi_govdesini_TAKIP_NUMARASINDAN_uretir()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -153,7 +153,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Uretici_USS_alan_adlari_ve_yollarini_yazar()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -205,7 +205,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task SKRS_kodlu_alanlar_kod_ve_sistem_tasir()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -253,7 +253,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gonderilmis_101_icin_301_SILME_paketi_uretilir()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -321,7 +321,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hasta_tipi_KARTTAN_turetilir_liste_basindan_degil()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -377,7 +377,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yeni_kayitta_SYSTakipNo_alani_BOS_ama_VAR_olur()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -498,7 +498,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal("20260912-ABC123", (string)kimlik.Invoke(null, [cevap])!);
     }
 
-    [Fact]
+    [VtFact]
     public async Task SKRS_kodu_degisince_YENI_paket_uretilir()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -549,7 +549,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kodu_olmayan_SKRS_alani_HIC_YAZILMAZ()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;
@@ -603,7 +603,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Islem_paketinde_HER_KALEM_AYRI_grup_olur()
     {
         if (!_olgu.Baglandi(nameof(EnabizXmlTestleri))) return;

@@ -27,20 +27,16 @@ public static partial class LabUclari
     {
         // GET /api/lab/satir/{id}/grafik - tetkikin grafikleri.
         grup.MapGet("/satir/{id:int}/grafik", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
-            CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.sonuc", Islem.Gor);
 
-            // TEST SEVİYESİNDE YETKİ (889): grafik sonucun parçasıdır, sonucu
-            //   göremeyen eğrisini de göremez.
-            var izin = await veri.TekDegerAsync<bool?>("""
-                select public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
-                  from public.lab_istem_satir s where s.id = @p0
-                """, [id, baglam.RolId], iptal);
-            if (izin is false)
-                throw GentegreHatasi.Yasak("Bu tetkikin sonucunu görme yetkiniz yok.");
+            // KAYIT KAPSAMI (denetim #3): satırın istemi aktif şubede / portal
+            //   kapsamında olmalı; TEST SEVİYESİNDE YETKİ (889/923) güncel rol
+            //   kümesiyle sorulur - sonucu göremeyen eğrisini de göremez.
+            await erisim.LabSatirIsteAsync(baglam, id, iptal);
 
             var satirlar = await veri.ListeAsync("""
                 select id, tur, baslik, dokuman_id as "dokumanId", content_type as "contentType",
@@ -61,10 +57,12 @@ public static partial class LabUclari
         //   grafiğin hasta dosyasında olmasının tek yoludur.
         grup.MapPost("/satir/{id:int}/grafik", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, DokumanDeposu dokumanlar,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("lab.grafik.yukle");
+            // Başka şubenin / kapsam dışı hastanın satırına dosya asılamaz.
+            await erisim.LabSatirIsteAsync(baglam, id, iptal);
 
             var form = await ctx.Request.ReadFormAsync(iptal);
             var dosya = form.Files.GetFile("dosya")
@@ -110,10 +108,11 @@ public static partial class LabUclari
         // PUT /api/lab/grafik/{id} - tür / başlık / raporda bayrağı.
         grup.MapPut("/grafik/{id:int}", async (
             int id, GrafikDuzenleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.sonuc", Islem.Degistir);
+            await GrafikErisimIsteAsync(veri, erisim, baglam, id, iptal);
 
             var etkilenen = await veri.CalistirAsync("""
                 update public.lab_sonuc_grafik
@@ -138,11 +137,12 @@ public static partial class LabUclari
         //   (hash-dedup) ve doküman deposunun kendi silme/erişim kuralları
         //   var; burada yalnız sonuç-grafik bağı kopar.
         grup.MapDelete("/grafik/{id:int}", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
-            CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.sonuc", Islem.Degistir);
+            await GrafikErisimIsteAsync(veri, erisim, baglam, id, iptal);
 
             var etkilenen = await veri.CalistirAsync(
                 "delete from public.lab_sonuc_grafik where id = @p0", [id], iptal);
@@ -151,5 +151,24 @@ public static partial class LabUclari
             return Results.Ok(new { id, mesaj = "Grafik kaldırıldı.",
                                     izlemeNo = baglam.IzlemeNo });
         });
+    }
+
+    /// <summary>
+    /// Grafik kaydı kimliğinden SATIR kapısına: değiştirme ve silme de
+    /// okumayla aynı kapsamdan geçer. Olmayan grafik ile kapsam dışı grafik
+    /// aynı 404'ü alır.
+    /// </summary>
+    internal static async Task GrafikErisimIsteAsync(VeriKaynagi veri, KayitErisimi erisim,
+        IstekBaglami baglam, int grafikId, CancellationToken iptal)
+    {
+        var satirId = await veri.TekDegerAsync<int?>(
+            "select istem_satir_id from public.lab_sonuc_grafik where id = @p0",
+            [grafikId], iptal);
+        if (satirId is not { } s) throw GentegreHatasi.Bulunamadi("Grafik bulunamadı.");
+        try { await erisim.LabSatirIsteAsync(baglam, s, iptal); }
+        catch (GentegreHatasi h) when (h.Kod == HataKodu.Bulunamadi)
+        {
+            throw GentegreHatasi.Bulunamadi("Grafik bulunamadı.");
+        }
     }
 }

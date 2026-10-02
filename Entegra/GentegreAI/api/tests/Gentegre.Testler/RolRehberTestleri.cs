@@ -54,7 +54,7 @@ public sealed class RolRehberTestleri(VeritabaniOlgusu olgu)
         Assert.DoesNotContain("yapabilir", k);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Rol_yetkileri_EKRANLARA_cozulur()
     {
         if (!_olgu.Baglandi(nameof(Rol_yetkileri_EKRANLARA_cozulur))) return;
@@ -86,7 +86,7 @@ public sealed class RolRehberTestleri(VeritabaniOlgusu olgu)
         Assert.True(islem > 0, "Kayıt Kabul rolünde hiç işlem yetkisi yok.");
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sinir_tasiyan_yetki_ISLEM_listesinde_sayilmaz()
     {
         if (!_olgu.Baglandi(nameof(Sinir_tasiyan_yetki_ISLEM_listesinde_sayilmaz))) return;

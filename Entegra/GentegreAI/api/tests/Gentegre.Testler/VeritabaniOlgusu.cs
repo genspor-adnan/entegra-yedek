@@ -5,12 +5,21 @@ namespace Gentegre.Testler;
 /// <summary>
 /// VERİTABANI GEREKTİREN TESTLER İÇİN ORTAK BAĞLAM.
 ///
-/// Bağlantı dizesi <c>GENTEGRE_TEST_DB</c> ortam değişkeninden gelir; yoksa
-/// yerel geliştirme veritabanı denenir. Bağlanılamıyorsa test SINIFI ATLANIR
-/// (hata vermez): birim testleri her makinede çalışmalı, veritabanı olmayan
-/// bir CI adımında kırmızı görmek gürültüden başka bir şey değil.
+/// <para><b>Bağlantı AÇIKÇA verilir</b> (denetim 28.09.2026): dize yalnız
+/// <c>GENTEGRE_TEST_DB</c> ortam değişkeninden gelir. Eskiden değişken yoksa
+/// paylaşılan geliştirme veritabanına (<c>gentegre_ai</c>) sessizce
+/// bağlanılıyordu - testler kendi satırlarını açıp silse de ortak veriye
+/// yazıyordu. Artık varsayılan YOK; hedef veritabanının adı ayrıca
+/// doğrulanır (adında <c>test</c> geçmeyen veritabanında testler
+/// çalışmaz).</para>
 ///
-/// <para>Testler KENDİ VERİSİNİ açar ve siler; ortak veriye dokunmaz.</para>
+/// <para><b>Atla / başarısız ol:</b> değişken yoksa DB testleri
+/// <see cref="VtFactAttribute"/> ile xUnit'te AÇIKÇA "atlandı" görünür (yeşil
+/// değil). <c>GENTEGRE_TEST_ZORUNLU=1</c> (CI bütünleşme aşaması) verildiğinde
+/// atlama yoktur: değişken yoksa ya da veritabanına ulaşılamıyorsa test
+/// BAŞARISIZ olur.</para>
+///
+/// <para>Testler KENDİ VERİSİNİ açar ve siler.</para>
 /// </summary>
 public sealed class VeritabaniOlgusu : IDisposable
 {
@@ -19,32 +28,38 @@ public sealed class VeritabaniOlgusu : IDisposable
 
     public VeritabaniOlgusu()
     {
-        var dizge = Environment.GetEnvironmentVariable("GENTEGRE_TEST_DB")
-            ?? "Host=localhost;Port=5434;Database=gentegre_ai;Username=postgres;Password=FETAGEN";
-        try
+        var dizge = TestVeritabani.Dizge;
+        if (dizge is null)
         {
-            var veri = new VeriKaynagi(dizge);
-            // Gerçekten bağlanabiliyor muyuz: açılışta bir kez denenir.
-            veri.TekDegerAsync<int>("select 1", null).GetAwaiter().GetResult();
-            Veri = veri;
+            AtlamaSebebi = TestVeritabani.YokSebebi;
+            if (TestVeritabani.Zorunlu)
+                throw new InvalidOperationException(
+                    "GENTEGRE_TEST_ZORUNLU=1 ama GENTEGRE_TEST_DB tanımlı değil - veritabanı testleri atlanamaz.");
+            return;
         }
-        catch (Exception h)
-        {
-            AtlamaSebebi = $"Veritabanına bağlanılamadı ({h.GetType().Name}): {h.Message}";
-        }
+
+        // Dize AÇIKÇA verilmişse bağlanamamak ya da yanlış hedef bir HATADIR:
+        //   "atlandı" deyip yeşil geçmek, bozuk ortamı saklardı.
+        var veri = new VeriKaynagi(dizge);
+        var ad = veri.TekDegerAsync<string>("select current_database()", null)
+                     .GetAwaiter().GetResult() ?? "";
+        if (!ad.Contains("test", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(
+                $"GENTEGRE_TEST_DB '{ad}' veritabanını gösteriyor; testler yalnız adında " +
+                "'test' geçen, test amaçlı veritabanında çalışır (paylaşılan DB'ye fixture yazılmaz).");
+        Veri = veri;
     }
 
     /// <summary>
-    /// Bağlantı yoksa testi ATLAR; varsa kaynağı verir.
-    ///
-    /// xUnit v2'de çalışma anında "atla" yok; bu yüzden testler
-    /// <see cref="Baglandi"/> ile başlar ve bağlantı yoksa sessizce döner.
-    /// Kırmızı yerine "yeşil ama çalışmadı" da yanıltıcı olurdu - bu yüzden
-    /// atlanan her test konsola sebebini yazar.
+    /// Bağlantı yoksa testi durdurur. DB testleri <see cref="VtFactAttribute"/>
+    /// ile işaretli olduğu için bu yol yalnız işaretsiz bir DB testinde işler;
+    /// zorunlu modda hata, değilse sebep konsola yazılır.
     /// </summary>
     public bool Baglandi(string testAdi)
     {
         if (Veri is not null) return true;
+        if (TestVeritabani.Zorunlu)
+            throw new InvalidOperationException($"{testAdi}: {AtlamaSebebi}");
         Console.WriteLine($"[ATLANDI] {testAdi}: {AtlamaSebebi}");
         return false;
     }
@@ -52,4 +67,38 @@ public sealed class VeritabaniOlgusu : IDisposable
     public VeriKaynagi Gerekli() => Veri!;
 
     public void Dispose() => Veri?.DisposeAsync().AsTask().GetAwaiter().GetResult();
+}
+
+/// <summary>Test veritabanı ayarları - tek yer.</summary>
+public static class TestVeritabani
+{
+    public static string? Dizge =>
+        Environment.GetEnvironmentVariable("GENTEGRE_TEST_DB") is { Length: > 0 } d ? d : null;
+
+    /// <summary>CI bütünleşme aşaması: DB testleri atlanamaz.</summary>
+    public static bool Zorunlu =>
+        Environment.GetEnvironmentVariable("GENTEGRE_TEST_ZORUNLU") == "1";
+
+    public const string YokSebebi =
+        "GENTEGRE_TEST_DB tanımlı değil - veritabanı testleri atlandı " +
+        "(zorunlu çalıştırma için GENTEGRE_TEST_ZORUNLU=1).";
+
+    /// <summary>xUnit atlama metni: null = çalıştır.</summary>
+    public static string? AtlamaMetni => Dizge is null && !Zorunlu ? YokSebebi : null;
+}
+
+/// <summary>
+/// VERİTABANI TESTİ. <c>GENTEGRE_TEST_DB</c> yoksa xUnit sonucunda AÇIKÇA
+/// "atlandı" görünür (xUnit 2: <c>Skip</c> keşif anında verilir); zorunlu
+/// modda asla atlanmaz.
+/// </summary>
+public sealed class VtFactAttribute : FactAttribute
+{
+    public VtFactAttribute() { if (TestVeritabani.AtlamaMetni is { } s) Skip = s; }
+}
+
+/// <summary><see cref="VtFactAttribute"/>'ün veri güdümlü karşılığı.</summary>
+public sealed class VtTheoryAttribute : TheoryAttribute
+{
+    public VtTheoryAttribute() { if (TestVeritabani.AtlamaMetni is { } s) Skip = s; }
 }

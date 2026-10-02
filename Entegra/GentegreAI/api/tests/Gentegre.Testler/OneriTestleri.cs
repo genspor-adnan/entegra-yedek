@@ -25,7 +25,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
     private static IstekBaglami Baglam(params string[] kodlar) => new()
     {
         KullaniciId = 1,
-        RolId = 1,
+        RolId = 1, RolIdleri = [1], SubeYazma = true,
         SubeId = 1,
         Yetkiler = new YetkiSeti(1,
             kodlar.Select(k => new YetkiKaydi(k, 0, true, true, true, true)),
@@ -42,7 +42,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
             [turler]);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Basvuru_kaydinda_BASVURU_kurallari_calisir()
     {
         if (!_olgu.Baglandi(nameof(Basvuru_kaydinda_BASVURU_kurallari_calisir))) return;
@@ -61,7 +61,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.DoesNotContain(y.Oneriler, o => o.Kod.StartsWith("belge.", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Fatura_kaydinda_BELGE_kurallari_calisir()
     {
         if (!_olgu.Baglandi(nameof(Fatura_kaydinda_BELGE_kurallari_calisir))) return;
@@ -76,7 +76,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.DoesNotContain(y.Oneriler, o => o.Kod.StartsWith("basvuru.", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yetkisi_olmayan_kaynagin_ONERISI_uretilmez()
     {
         if (!_olgu.Baglandi(nameof(Yetkisi_olmayan_kaynagin_ONERISI_uretilmez))) return;
@@ -99,7 +99,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.NotEmpty(yetkili.Oneriler);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gizlenen_kural_SUSAR_ve_geri_acilir()
     {
         if (!_olgu.Baglandi(nameof(Gizlenen_kural_SUSAR_ve_geri_acilir))) return;
@@ -137,7 +137,7 @@ public class OneriTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains(geri.Oneriler, o => o.Kod == kod);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bozuk_kural_PANELI_dusurmez()
     {
         if (!_olgu.Baglandi(nameof(Bozuk_kural_PANELI_dusurmez))) return;

@@ -93,7 +93,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
             """, [belgeId, hizmetId, gerekce]);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kuralsiz_hizmet_herkese_uygulanir()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
@@ -111,7 +111,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         Assert.True(await SatirYazAsync(veri, erkek, hizmet) > 0);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yanlis_cinsiyete_hizmet_eklenemez()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
@@ -134,7 +134,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         Assert.True(await SatirYazAsync(veri, kadin, dogum) > 0);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yas_alt_siniri_altindaki_hastaya_eklenemez()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
@@ -154,7 +154,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         Assert.True(await SatirYazAsync(veri, yetiskin, psa) > 0);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yas_ust_siniri_asilirsa_eklenemez()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
@@ -170,7 +170,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         await Assert.ThrowsAnyAsync<Exception>(() => SatirYazAsync(veri, buyuk, cocuk));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gerekce_yazilirsa_kural_asilir_ve_iz_kalir()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
@@ -186,7 +186,7 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         Assert.Equal("Erkekte meme kanseri suphesi", not);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hasta_olmayan_carinin_faturasinda_kural_aranmaz()
     {
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;

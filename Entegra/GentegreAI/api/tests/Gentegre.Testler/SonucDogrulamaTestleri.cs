@@ -25,7 +25,7 @@ public sealed class SonucDogrulamaTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 0,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("lab.sonuc", 0, true, true, true, true)], []),
     };
 
@@ -72,7 +72,7 @@ public sealed class SonucDogrulamaTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bos_ve_anlamsiz_sonuc_YAZILAMAZ()
     {
         if (!_olgu.Baglandi(nameof(Bos_ve_anlamsiz_sonuc_YAZILAMAZ))) return;
@@ -110,7 +110,7 @@ public sealed class SonucDogrulamaTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Olcum_araligi_disi_deger_YAZILIR_ama_OTO_ONAYLANMAZ()
     {
         if (!_olgu.Baglandi(nameof(Olcum_araligi_disi_deger_YAZILIR_ama_OTO_ONAYLANMAZ))) return;
@@ -152,7 +152,7 @@ public sealed class SonucDogrulamaTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Metin_tetkikte_TANIMSIZ_deger_reddedilir()
     {
         if (!_olgu.Baglandi(nameof(Metin_tetkikte_TANIMSIZ_deger_reddedilir))) return;

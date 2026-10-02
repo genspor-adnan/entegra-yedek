@@ -45,10 +45,11 @@ public sealed class EnabizPortalIstemcisi
                    coalesce(e.kullanici_adi, ''), coalesce(e.sifre, ''), coalesce(e.kurum_kodu, '')
               from public.entegrasyon_hesap e
              where e.kod = 'ENABIZ_HBYS' and e.aktif = 1
+               -- Adresi bos hesap "kapi kapali" sayilir: satir hic donmez.
+               and coalesce(nullif(case when e.test_mi = 1 then e.test_url else e.url end, ''), '') <> ''
              limit 1
             """, null, [],
-            o => o.GetString(0).Length == 0 ? null
-               : new Hesap(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3)),
+            o => new Hesap(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3)),
             iptal);
 
     /// <summary>

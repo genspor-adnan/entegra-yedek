@@ -46,8 +46,10 @@ const varsayilanListe = vi.fn(
   (_tur: number, _tarafId: number, kurumId?: number | null) =>
     Promise.resolve({ listeId: kurumId === 4987 ? 9 : null, ad: '', yon: 2, kdvDahil: 0 }));
 
-vi.mock('../api/istemci', () => ({
+vi.mock('../api/istemci', async () => ({
   api: {
+    // Başvuru → istem uçları (912): ortak, tip denetimli taklit.
+    ...(await import('./taklit/basvuruIstem')).basvuruIstemTaklidi,
     liste: (kaynak: string, istek: unknown) => liste(kaynak, istek),
     basvuruKaynaklari: () => basvuruKaynaklari(),
     belgeOku: (id: number) => belgeOku(id),

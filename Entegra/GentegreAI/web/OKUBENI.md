@@ -1,4 +1,4 @@
-# Gentegre AI — Web arayüzü (F0-06)
+# Gentegre AI — Web arayüzü
 
 React 19 + TypeScript + Vite. Sunucu sözleşmesini (`dokuman/01_API_SOZLESMELERI.md`)
 doğrudan tüketir; alan adları sunucudakiyle birebir aynıdır — arada çevrim katmanı yoktur.
@@ -106,12 +106,24 @@ Ekran başına dosya yok: `sayfalar/Liste.tsx` içindeki **`LISTELER`** dizisi h
 hem rotaları hem de ekranları üretir. Yeni liste eklemek = sunucuda `KaynakKatalogu`'na kaynak
 tanımlamak + buraya bir satır yazmak. Kolonlar, filtrelenebilirlik ve yetki sunucudan gelir.
 
-Şu an dokuz liste: cari, stok, belge, personel, hizmet, masraf, mali-hareket, e-belge, islem-log.
+Güncel liste kümesi `LISTELER` dizisinin kendisidir (sayı burada tutulmaz).
 
 **Liste altındaki detay sekmeleri (mockup'taki alt panel) şimdilik yapılmadı** — ekranlar sade
 grid; karar kullanıcıya ait.
 
-## Sıradaki
+## Oturum ve ekran yükleme
 
-- Belge kart ekranı (düzeltme/silme), taslak listesi
-- Aksiyonların gerçek işlere bağlanması (Excel aktarımı, e-Fatura gönderimi)
+- **Geçici hata oturumu silmez** (`kimlik/OturumBaglami.tsx`): açılıştaki `/ben`
+  ağ/zaman aşımı/5xx ile dönmezse token'lar korunur, "Yeniden Dene" gösterilir,
+  korumalı ekran açılmaz. Yalnız kesin kimlik reddi (401 ve refresh de reddedildi)
+  oturumu temizler; saklanan şube yetkisizse (403) seçim bırakılıp bir kez denenir.
+- **Sekmeler arası tek yenileme** (`api/cekirdek.ts`): 401'de refresh Web Locks
+  kilidiyle yapılır; kilidi bekleyen sekme token'ın bu arada yenilendiğini görürse
+  sunucuya gitmez. Sunucu tekrar kullanılan refresh'te aileyi kapatır — iki sekmenin
+  aynı anda yenilemesi ikisini de dışarı atardı.
+- `PAROLA_DEGISMELI` (403) gelirse profil tazelenir ve parola ekranı açılır.
+- **Rota bazlı yükleme** (`bilesenler/TembelSayfa.tsx`): kabuk, giriş, parola ekranı,
+  liste ve panel hemen; diğer ekranların kodu rotaya ilk girişte gelir (Suspense +
+  parça yüklenemezse "yeniden dene"). Rota ağacı ve yetki kapıları değişmez.
+- Test taklitleri: uç nesnesine bağlı, tip denetimli ortak taklitler `test/taklit/`
+  altında (`satisfies` ile gerçek imzaya bağlı; uca fonksiyon eklenince derleme kırılır).

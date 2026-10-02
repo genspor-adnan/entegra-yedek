@@ -201,7 +201,9 @@ public static partial class MedulaUclari
                        count(*) filter (where medula_fatura_id is not null and fatura_durum = 3)::int
                   from t
                 """, null, [bas, son, sube, (decimal)esik], o => new { hizmetEksik = o.GetInt32(0), hatali = o.GetInt32(1), farkli = o.GetInt32(2),
-                                                                         faturasiz = o.GetInt32(3), donemde = o.GetInt32(4) }, iptal)!;
+                                                                         faturasiz = o.GetInt32(3), donemde = o.GetInt32(4) }, iptal)
+                // Agregat sorgu her zaman tek satir doner - donmemesi imkansiz durum.
+                ?? throw new InvalidOperationException("Donem engel ozeti okunamadi.");
             var engeller = new List<string>();
             if (engel.hizmetEksik > 0) engeller.Add($"{engel.hizmetEksik} takipte hizmet kaydı eksik");
             if (engel.hatali > 0) engeller.Add($"{engel.hatali} takipte hatalı hizmet kaydı");

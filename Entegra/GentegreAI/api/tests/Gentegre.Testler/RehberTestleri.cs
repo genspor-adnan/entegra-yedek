@@ -22,7 +22,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
     private static IstekBaglami Baglam(params string[] kodlar) => new()
     {
         KullaniciId = 1,
-        RolId = 1,
+        RolId = 1, RolIdleri = [1], SubeYazma = true,
         SubeId = 1,
         Yetkiler = new YetkiSeti(1,
             kodlar.Select(k => new YetkiKaydi(k, 0, true, true, true, true)),
@@ -54,7 +54,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.DoesNotContain("acilir", k);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bilinen_soru_KONU_ADIMLARINI_dondurur()
     {
         if (!_olgu.Baglandi(nameof(Bilinen_soru_KONU_ADIMLARINI_dondurur))) return;
@@ -73,7 +73,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains(y.Adimlar, a => a.Rota == "/hasta");
     }
 
-    [Fact]
+    [VtFact]
     public async Task YETKISIZ_iste_adim_verilmez()
     {
         if (!_olgu.Baglandi(nameof(YETKISIZ_iste_adim_verilmez))) return;
@@ -91,7 +91,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains("yetki", y.Cevap, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yetkisi_olmayan_EKRAN_onerilmez()
     {
         if (!_olgu.Baglandi(nameof(Yetkisi_olmayan_EKRAN_onerilmez))) return;
@@ -108,7 +108,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains(y.OnerilenEkranlar, e => e.Rota == "/belge");
     }
 
-    [Fact]
+    [VtFact]
     public async Task Anlamsiz_soruda_CEVAP_UYDURULMAZ()
     {
         if (!_olgu.Baglandi(nameof(Anlamsiz_soruda_CEVAP_UYDURULMAZ))) return;
@@ -158,7 +158,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         return File.ReadAllText(yol);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Soru_gunluge_yazilir()
     {
         if (!_olgu.Baglandi(nameof(Soru_gunluge_yazilir))) return;
@@ -182,7 +182,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
     // ------------------------------------------------ FAZ 2: bağlamsal yardım
 
-    [Fact]
+    [VtFact]
     public async Task Bu_ekranda_ne_yapabilirim_AKTIF_EKRANI_anlatir()
     {
         if (!_olgu.Baglandi(nameof(Bu_ekranda_ne_yapabilirim_AKTIF_EKRANI_anlatir))) return;
@@ -199,7 +199,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.NotEmpty(y.OnerilenAksiyonlar);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Baglamsal_yardim_YETKILI_dugmeleri_sayar()
     {
         if (!_olgu.Baglandi(nameof(Baglamsal_yardim_YETKILI_dugmeleri_sayar))) return;
@@ -215,7 +215,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.DoesNotContain(y.OnerilenAksiyonlar, a => a.Kod.Contains("onay.uzman"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Alan_sorusu_KOLON_METADATASINDAN_cevaplanir()
     {
         if (!_olgu.Baglandi(nameof(Alan_sorusu_KOLON_METADATASINDAN_cevaplanir))) return;
@@ -230,7 +230,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Empty(y.Adimlar);          // alan açıklaması adım değildir
     }
 
-    [Fact]
+    [VtFact]
     public async Task Baglamsal_soru_YETKISIZ_ekranda_katalog_yoluna_duser()
     {
         if (!_olgu.Baglandi(nameof(Baglamsal_soru_YETKISIZ_ekranda_katalog_yoluna_duser)))
@@ -254,7 +254,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.False(y.Ekran.Yetkili);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil()
     {
         if (!_olgu.Baglandi(nameof(Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil))) return;

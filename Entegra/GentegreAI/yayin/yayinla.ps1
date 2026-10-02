@@ -149,12 +149,13 @@ foreach ($k in $secilen) {
     Get-ChildItem (Join-Path $kok 'db') -Filter '*.sql' |
         Where-Object { $_.Name -match '^\d{3}_' } |
         Copy-Item -Destination $dbHedef
-    # SIFIRDAN kurulan veritabani icin baslangic tohumu (sube + depo):
-    #   numarali goclerin ilk halkalari bunlari MSSQL'den getiriyor, MSSQL'i
-    #   olmayan yeni kurulumda o adim atlaniyor ve 020 dayanacagi kaydi
-    #   bulamiyor. Idempotent - dolu veritabaninda hicbir sey yapmaz.
-    $tohum = Join-Path $kok 'db\kurulum\000_bos_kurulum.sql'
-    if (Test-Path $tohum) { Copy-Item $tohum (Join-Path $gecici 'bos_kurulum.sql') }
+    # KURULUM DOSYALARI (tek kaynak, db/kurulum): bos kurulum tohumu, MSSQL
+    #   aktarim adimlari listesi, dis veri on kosullari. Sunucudaki goc
+    #   uygulayici (goc_uygula.sh) bunlari paketten okur.
+    Copy-Item (Join-Path $kok 'db\kurulum') (Join-Path $gecici 'kurulum') -Recurse
+    # Goc uygulayici: satir sonu LF (sunucu-guncelle.sh ile ayni sebep, asagida).
+    [System.IO.File]::WriteAllText((Join-Path $gecici 'goc_uygula.sh'),
+        ((Get-Content (Join-Path $PSScriptRoot 'goc_uygula.sh') -Raw) -replace "`r`n", "`n"))
     Bilgi "$((Get-ChildItem $dbHedef -Filter *.sql).Count) goc dosyasi"
 
     # ----------------------------------------------------------- paketle ----

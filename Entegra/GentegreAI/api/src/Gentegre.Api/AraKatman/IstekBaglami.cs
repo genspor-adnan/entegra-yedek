@@ -14,10 +14,24 @@ namespace Gentegre.Api.AraKatman;
 public sealed class IstekBaglami
 {
     public int KullaniciId { get; init; }
+    /// <summary>
+    /// GUNCEL ANA ROL - veritabanindan, istek basina (denetim 28.09.2026 #7).
+    /// Token'daki `rolId` talebi KULLANILMAZ: rol degisince 30 dakika eski
+    /// rolle calismak demekti.
+    /// </summary>
     public int RolId { get; init; }
+    /// <summary>
+    /// ETKILI ROL KUMESI (ana + ek, <c>fn_kullanici_rolleri</c>). Tetkik
+    /// kisiti (889) bu kumeyle sorulur - tek rol parametresi ek rolleri
+    /// gormuyordu.
+    /// </summary>
+    public IReadOnlyList<int> RolIdleri { get; init; } = Array.Empty<int>();
     public int? SubeId { get; init; }
-    /// <summary>Aktif subede yazma hakki (rol_sube.yazma). 0 ise sube salt okunur.</summary>
-    public bool SubeYazma { get; init; } = true;
+    /// <summary>
+    /// Aktif subede yazma hakki (rol_sube.yazma). 0 ise sube salt okunur.
+    /// Varsayilan KAPALI: subesiz baglam yazamaz (denetim #1).
+    /// </summary>
+    public bool SubeYazma { get; init; }
     public YetkiSeti Yetkiler { get; init; } = default!;
     public IReadOnlyList<int> Kapsam { get; init; } = Array.Empty<int>();
     /// <summary>
@@ -74,15 +88,69 @@ public sealed class IstekBaglami
             throw GentegreHatasi.Yasak();
 
         // Rol yetkisi yetmez: kullanici bu SUBEDE salt okuyucu olabilir.
-        if (islem != Islem.Gor && !SubeYazma)
-            throw GentegreHatasi.Yasak("Bu subede yalnizca goruntuleme yetkiniz var.");
+        if (islem != Islem.Gor) YazmaIste();
     }
 
+    /// <summary>
+    /// YAZAN AKSIYON (denetim #2). Aksiyon yetkisi rol yetkisidir, sube salt
+    /// okuma kuralini ICERMEZ: fiyat listesi uretimi yalniz bu kapidan
+    /// geciyordu ve salt okuyucu subede satir yazabiliyordu. Varsayilan
+    /// YAZMA sayilir - okuyan aksiyon <see cref="AksiyonGorIste"/> ile acikca
+    /// ayrilir; unutulan aksiyon acik degil kapali kalsin.
+    /// </summary>
     public void AksiyonIste(string aksiyonKodu)
+    {
+        AksiyonGorIste(aksiyonKodu);
+        YazmaIste();
+    }
+
+    /// <summary>Yalniz OKUYAN aksiyon (onizleme, gecmis, sablon): salt okuma subesinde de calisir.</summary>
+    public void AksiyonGorIste(string aksiyonKodu)
     {
         if (!Yetkiler.AksiyonVar(aksiyonKodu))
             throw GentegreHatasi.Yasak();
     }
+
+    /// <summary>
+    /// Aktif subede yazma hakki. Subesiz baglam da YAZAMAZ - "sube yok" hic
+    /// bir zaman "her subeye yaz" anlamina gelmez.
+    /// </summary>
+    public void YazmaIste()
+    {
+        if (!SubeYazma)
+            throw GentegreHatasi.Yasak("Bu subede yalnizca goruntuleme yetkiniz var.");
+    }
+}
+
+/// <summary>
+/// SINIRLI OTURUMDA ACIK UC (denetim 28.09.2026 #1, #4). Varsayilan olarak
+/// her kimlikli uc (a) aktif bir sube ve (b) parolasi degismis bir hesap
+/// ister. Yalniz bu isaretle eslenen uclar - profil, parola degistirme,
+/// sube listesi - bu kosullar saglanmadan calisir. Istisna gruba degil TEK
+/// UCA verilir.
+/// </summary>
+[Flags]
+public enum SinirliOturum
+{
+    Yok = 0,
+    /// <summary>Kullanicinin aktif subesi yokken de calisir.</summary>
+    Subesiz = 1,
+    /// <summary>Hesapta <c>parola_degismeli = 1</c> iken de calisir.</summary>
+    ParolaDegismeli = 2,
+    Hepsi = Subesiz | ParolaDegismeli
+}
+
+public sealed record SinirliOturumIzni(SinirliOturum Izin);
+
+public static class SinirliOturumUzantilari
+{
+    public static TBuilder SinirliOturumaAcik<TBuilder>(this TBuilder b, SinirliOturum izin)
+        where TBuilder : IEndpointConventionBuilder
+        => b.WithMetadata(new SinirliOturumIzni(izin));
+
+    public static bool SinirliOturumaAcikMi(this HttpContext ctx, SinirliOturum izin)
+        => ctx.GetEndpoint()?.Metadata.GetMetadata<SinirliOturumIzni>() is { } m
+           && (m.Izin & izin) == izin;
 }
 
 public sealed class BaglamCozucu
@@ -103,7 +171,13 @@ public sealed class BaglamCozucu
     {
         var kullaniciId = TalepSayi(ctx, Talep.KullaniciId)
             ?? throw GentegreHatasi.Yetkisiz();
-        var rolId = TalepSayi(ctx, Talep.RolId) ?? 0;
+
+        // ROL KUMESI HER ISTEKTE DB'DEN (denetim #7): token'daki rol, rol
+        //   degisikliginden sonra da 30 dk gecerli kaliyordu. Bos kume =
+        //   hesap pasif (fn_kullanici_rolleri aktif = 1 ister).
+        var roller = await _kullanicilar.RolleriAsync(kullaniciId, iptal);
+        if (roller.Count == 0) throw GentegreHatasi.Yetkisiz();
+        var rolId = roller.FirstOrDefault(r => r.Ana).RolId;
 
         var yetkiler = await _yetkiCozucu.CozAsync(kullaniciId, iptal);
         var kapsam = await _kullanicilar.KapsamAsync(kullaniciId, iptal);
@@ -115,6 +189,13 @@ public sealed class BaglamCozucu
             : kullaniciId;
         var subeler = await _kullanicilar.SubeleriAsync(kullaniciId, iptal);
         var subeId = SubeCoz(ctx, subeler);
+        // SUBESIZ OTURUM (denetim #1): son sube yetkisi kaldirilan kullanicinin
+        //   token'i gecerli kalir; subeId null iken sube suzgeci hic eklenmiyor
+        //   ve "sube yok" fiilen "butun subeler" oluyordu. Sube gerektiren her
+        //   uc burada kapanir; yalniz acikca isaretlenen profil/parola uclari
+        //   (SinirliOturum.Subesiz) calisir.
+        if (subeId is null && !ctx.SinirliOturumaAcikMi(SinirliOturum.Subesiz))
+            throw GentegreHatasi.Yasak("Calisabileceginiz aktif bir sube tanimli degil.");
         // Kimlik bicimi (679) ONBELLEKLI okunur: her istekte sorgu atmak
         //   ayarin kendisinden pahali olurdu.
         var kimlikKurali = await _kimlik.KuralAsync(subeId ?? 0, iptal);
@@ -123,8 +204,9 @@ public sealed class BaglamCozucu
         {
             KullaniciId = kullaniciId,
             RolId = rolId,
+            RolIdleri = roller.Select(r => r.RolId).Distinct().ToArray(),
             SubeId = subeId,
-            SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,
+            SubeYazma = subeId is { } sid && subeler.Any(s => s.Id == sid && s.Yazma),
             Yetkiler = yetkiler,
             Kapsam = kapsam,
             PortalTuru = portalTuru,
@@ -147,9 +229,13 @@ public sealed class BaglamCozucu
     {
         if (subeler.Count == 0) return null;
 
-        if (ctx.Request.Headers.TryGetValue("X-Sube-Id", out var basligi) &&
-            int.TryParse(basligi.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var istenen))
+        if (ctx.Request.Headers.TryGetValue("X-Sube-Id", out var basligi))
         {
+            // BOZUK BASLIK REDDEDILIR (denetim #1): sessizce token subesine
+            //   dusmek istemcinin hangi subede calistigini belirsiz birakir.
+            if (!int.TryParse(basligi.ToString(), NumberStyles.Integer,
+                              CultureInfo.InvariantCulture, out var istenen))
+                throw GentegreHatasi.Dogrulama("X-Sube-Id basligi gecersiz.");
             if (subeler.Any(s => s.Id == istenen)) return istenen;
             throw GentegreHatasi.Yasak("Bu subede calisma yetkiniz yok.");
         }

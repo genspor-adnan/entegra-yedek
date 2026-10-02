@@ -91,7 +91,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
             + "  (select belge_id from public.belge_satir where id = @p0))",
             t, [satir], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Pay_ADEDE_gore_bolunur()
     {
         if (!_olgu.Baglandi(nameof(Pay_ADEDE_gore_bolunur))) return;
@@ -122,7 +122,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Atanmamis_isin_payi_BOSTA_kalir()
     {
         if (!_olgu.Baglandi(nameof(Atanmamis_isin_payi_BOSTA_kalir))) return;
@@ -147,7 +147,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task DIS_radyolog_da_PAY_alir()
     {
         if (!_olgu.Baglandi(nameof(DIS_radyolog_da_PAY_alir))) return;
@@ -176,7 +176,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task DIS_hekime_OTEKI_roller_kapali()
     {
         if (!_olgu.Baglandi(nameof(DIS_hekime_OTEKI_roller_kapali))) return;
@@ -213,7 +213,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task ELLE_yazilmis_rol_ezilmez()
     {
         if (!_olgu.Baglandi(nameof(ELLE_yazilmis_rol_ezilmez))) return;
@@ -241,7 +241,7 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tekrar_calistirmak_GUVENLI()
     {
         if (!_olgu.Baglandi(nameof(Tekrar_calistirmak_GUVENLI))) return;

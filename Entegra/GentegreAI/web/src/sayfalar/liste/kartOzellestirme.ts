@@ -119,30 +119,39 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     // MOCKUP SIRASI (muayene_karti.html): hekimin iş akışı - önce anamnez ve
     //   muayene, sonra tanı, istem, reçete/rapor, en sonda sevk, ücret, geçmiş
     //   ve dosyalar.
-    sekmeSirasi: ['Anamnez', 'Fizik Muayene', 'Tanı', 'İstem & Sonuçlar',
-                  'e-Reçete', 'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
+    // "Muayene" = eski Anamnez, "Şablon Muayene" = eski Fizik Muayene
+    //   (kullanıcı). Eski adlar sırada kalır: yeni sekme adlarını bilmeyen
+    //   (yeniden başlatılmamış) API ile de sıra bozulmasın.
+    sekmeSirasi: ['Muayene', 'Anamnez', 'Şablon Muayene', 'Fizik Muayene', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
+                  'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
                   'Dosyalar'],
-    // VİTAL BULGULAR SEKMESİ YOK (kullanıcı): ölçüm anamnez sekmesinin sağ
-    //   panelinde düzenleniyor - aynı veriyi iki sekmede göstermek hangisinin
+    // VİTAL BULGULAR SEKMESİ YOK (kullanıcı): ölçüm TANI sekmesinin sağ
+    //   panelinde düzenleniyor (önce anamnez/Muayene sekmesindeydi) - aynı veriyi iki sekmede göstermek hangisinin
     //   geçerli olduğunu belirsiz bırakıyordu.
     gizliDetaylar: ['vitaller'],
     detayGrupta: {
       bulgular: {
-        grup: 'Fizik Muayene', gizli: ['degerSayi', 'taraf'],
+        grup: ['Şablon Muayene', 'Fizik Muayene'], gizli: ['degerSayi', 'taraf'],
         etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
         // Çerçeve, başlık ve "+ Satır"/sil yok (kullanıcı): satırlar
         //   ŞABLONDAN açılır, elle satır eklemek sistem listesini bozar.
         sade: true,
       },
-      // TANI TABLOSU "Tanı / Karar" SEKMESİNDE (mockup): ICD · Tür · Kesinlik ·
+      // TANI TABLOSU (mockup'ta "Tanı / Karar" sekmesindeydi): ICD · Tür · Kesinlik ·
       //   Taraf · Kronik · Not. `sira` ve `baslangicTarihi` mockup'ta yok -
       //   sıralama sunucuda, kronik tarihi hastanın Kronik Tanılar ekranında.
       // GRID KİPİ (kullanıcı): satır başında tek seçim kutusu, üst satırda
       //   düzenle/sil ikonları, düzenleme MODALDE. Satır EKLEME kapalı - ICD
       //   kodu "＋ ICD-10 Ekle" ucundan gelir, boş satır yarım kayıt olurdu.
+      // SEÇİMLER YALNIZ TÜR VE TARAF (kullanıcı): kesinlik ve kronik gizli -
+      //   kayıtta varsayılanları kalır (kesinlik 1, kronik 0).
+      // MUAYENE SEKMESİNDE, ŞİKÂYET/HİKÂYE'NİN ALTINDA (kullanıcı: özgeçmiş /
+      //   soygeçmiş / alışkanlık kutularının yerine tanı gridi). Eski sekme
+      //   adı "Anamnez" yeniden başlatılmamış API içindir.
       tanilar: {
-        grup: 'Tanı (ICD-10)', gizli: ['sira', 'baslangicTarihi'],
-        sinif: 'tani-gridi', ustte: true, gridKipi: true, ekleGizli: true,
+        // Not sütunu da gizli (kullanıcı: "tanı gridinden not sütunu kaldır").
+        grup: ['Muayene', 'Anamnez'], gizli: ['sira', 'baslangicTarihi', 'kesinlik', 'kronik', 'notMetni'],
+        sinif: 'tani-gridi', gridKipi: true, ekleGizli: true,
       },
     },
     // VİTAL BULGULAR MOCKUP IZGARASI: son ölçüm etiket + kutu ızgarasında,
@@ -151,7 +160,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     detayIzgara: {
       vitaller: {
         baslik: 'Vital bulgular', sinif: 'vital-izgara-kip',
-        // Anamnez panelindeki sıra (kullanıcı): tansiyon, nabız, SpO2 · ateş,
+        // Tanı sekmesi panelindeki sıra (kullanıcı): tansiyon, nabız, SpO2 · ateş,
         //   solunum, ağrı · boy-kilo, BKİ, bel. Glukoz/GKS ve ölçüm kimliği
         //   Vital Bulgular sekmesinde.
         alanSirasi: ['sistolik', 'nabiz', 'spo2', 'ates', 'solunum', 'agriVas',

@@ -71,7 +71,7 @@ public sealed class TeleradPortalTestleri(VeritabaniOlgusu olgu)
             """, t, [kurum, sube, ekleyen, Guid.NewGuid().ToString("N")[..10]],
             CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Portal_kullanicisi_KENDI_kurumu_adina_acar()
     {
         if (!_olgu.Baglandi(nameof(Portal_kullanicisi_KENDI_kurumu_adina_acar))) return;
@@ -94,7 +94,7 @@ public sealed class TeleradPortalTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_istegi_GORUNTU_BEKLENIYOR_dogar()
     {
         if (!_olgu.Baglandi(nameof(Portal_istegi_GORUNTU_BEKLENIYOR_dogar))) return;
@@ -126,7 +126,7 @@ public sealed class TeleradPortalTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_MERKEZIN_alanlarini_degistiremez()
     {
         if (!_olgu.Baglandi(nameof(Portal_MERKEZIN_alanlarini_degistiremez))) return;
@@ -164,7 +164,7 @@ public sealed class TeleradPortalTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dis_kurum_rolu_ISTEK_ACABILIR()
     {
         if (!_olgu.Baglandi(nameof(Dis_kurum_rolu_ISTEK_ACABILIR))) return;

@@ -46,10 +46,10 @@ public static class ListeUclari
                 // PORTAL KAPSAMI (794): dis doktor/dis kurum/hasta yalniz kendi
                 //   kayitlarini gorur; kural kaynak katalogunda.
                 baglam.PortalTuru, hekimId,
-                // TEST SEVIYESINDE YETKI KISITI (889): kisitli tetkikin sonucu
-                //   yalniz izinli rollere doner; kural KaynakKatalogu.TetkikKisiti
-                //   haritasindaki kaynaklarda isler.
-                baglam.RolId);
+                // TEST SEVIYESINDE YETKI KISITI (889/923): kisitli tetkikin
+                //   sonucu yalniz izinli rollere doner; GUNCEL rol kumesi
+                //   (ana + ek) sorulur, token'daki rol degil.
+                baglam.RolIdleri);
 
             return Results.Ok(yanit);
         });

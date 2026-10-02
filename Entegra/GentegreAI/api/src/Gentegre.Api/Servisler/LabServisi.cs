@@ -316,6 +316,8 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
             //     açılır ve üçü aynı tüpe bağlanır.
             //   Paneli atlayıp yalnız tetkiğe bakmak, hemogram gibi
             //   faturalanan her paketi görmezden gelmek olurdu.
+            //   * CHECK-UP   - ücrette TEK satır (hizmet.paket); içinde panel
+            //     ve tek tetkikler var, hepsi aynı istemde açılır (925).
             //
             // "ZATEN İSTEMİ VAR MI" SORUSU YAPRAK TETKİK ÜZERİNDEN: panel de
             //   sonunda tetkiklere açılıyor, o yüzden iki tür aynı ölçüyle
@@ -326,20 +328,21 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                       from public.belge_satir bs
                      where bs.belge_id = @p0 and bs.hizmet_id is not null
                 ),
-                -- Yaprak tetkikler: dogrudan bagli olan + panel icerigi.
+                -- Tetkikler: kalemin KAPSADIGI her hizmet (925) - kendisi,
+                --   panel icerigi, check-up > panel > parametre. Satirin
+                --   paneli: yoldaki EN YAKIN lab_panel (check-up'taki
+                --   hemogram parametresi hemogram panelinden dogar).
                 aday as (
-                    select t.id as tetkik_id, null::integer as panel_id
+                    select t.id as tetkik_id,
+                           (select p.id
+                              from unnest(ks.yol) with ordinality u(hid, n)
+                              join public.lab_panel p on p.hizmet_id = u.hid and p.durum = 0
+                             where u.n < array_length(ks.yol, 1)
+                             order by u.n desc limit 1) as panel_id
                       from kalem k
+                     cross join lateral public.fn_hizmet_paket_kapsam(k.hizmet_id) ks
                       join public.lab_tetkik t
-                        on t.hizmet_id = k.hizmet_id and t.durum = 0
-                    union all
-                    select t.id, p.id
-                      from kalem k
-                      join public.lab_panel p
-                        on p.hizmet_id = k.hizmet_id and p.durum = 0
-                      join public.fn_hizmet_paket_ac(p.hizmet_id, 1) a on true
-                      join public.lab_tetkik t
-                        on t.hizmet_id = a.hizmet_id and t.durum = 0
+                        on t.hizmet_id = ks.hizmet_id and t.durum = 0
                 )
                 select distinct a.tetkik_id, a.panel_id
                   from aday a

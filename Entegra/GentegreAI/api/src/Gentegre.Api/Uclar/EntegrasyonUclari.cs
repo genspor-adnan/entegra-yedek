@@ -780,6 +780,8 @@ public static class EntegrasyonUclari
                 }
             }
 
+            // Uc deneme de govde getirmediyse (istisnasiz bos donus) sayfa kesilir.
+            if (govde is null) return (kayitlar, sayfa, true);
             using var belge = JsonDocument.Parse(govde);
             if (!belge.RootElement.TryGetProperty("sonuc", out var sonuc)
                 || sonuc.ValueKind != JsonValueKind.Object) break;

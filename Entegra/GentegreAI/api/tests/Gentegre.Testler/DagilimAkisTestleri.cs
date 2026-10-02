@@ -189,7 +189,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
 
     // -------------------------------------------------------------- testler --
 
-    [Fact]
+    [VtFact]
     public async Task Ozel_hastada_tutarin_tamami_hastaya_yazilir()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -209,7 +209,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(0m, k.Sgk + k.Oss + k.HastaProvizyon + k.Katilim);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Oss_sozlesmesinde_karsilama_orani_kovalari_boler()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -237,7 +237,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(150m, k2.HastaProvizyon);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tss_de_sut_ve_ttb_listeleri_birlikte_calisir()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -268,7 +268,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(k.Tutar, k.Sgk + k.Oss + k.HastaProvizyon + k.HastaEkKatki);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Karma_da_sgk_kapatilinca_provizyon_ttb_uzerinden_yurur()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -319,7 +319,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(500m, kapali.HastaProvizyon);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sgk_da_satir_sut_ve_ek_katkidan_dogar_katilim_ciro_disi()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -345,7 +345,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(k.Tutar, k.Sgk + k.Oss + k.HastaProvizyon + k.HastaEkKatki);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sgk_basvurusunda_alt_kurum_zorunlu()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -363,7 +363,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Contains("devredilen kurum", hata.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iki_sozlesmeli_kurumda_secim_zorunlu_tek_sozlesme_otomatik()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -409,7 +409,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Contains("seçin", hata.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kapatilmis_satira_tazeleme_dokunmaz()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -438,7 +438,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(200m, k.HastaProvizyon);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kova_toplami_satir_tutarini_tutmali()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -461,7 +461,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Contains("tutmuyor", hata.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Katilim_payi_tahsilati_SGK_carisine_emanet_yazilir()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
@@ -517,7 +517,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         //   oradan silinir (FK sırası tek yerde dursun).
     }
 
-    [Fact]
+    [VtFact]
     public async Task Elle_sabitlenen_dagilima_tazeleme_dokunmaz()
     {
         if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;

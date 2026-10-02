@@ -140,6 +140,47 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [secili, setSecili] = useState(0);
+  /**
+   * ISARETLI SATIRLAR (kullanici: "soldaki secme check'i tekrar koy, satir
+   * tiklaninca aninda secilsin"): coklu secim. Satir NESNESIYLE tutulur -
+   * arama degisip satir listeden cikinca da isaret korunur ve eklenir.
+   */
+  const [isaretli, setIsaretli] = useState<Map<string, ListeSatiri>>(() => new Map());
+  const isaretAnahtari = (r: ListeSatiri) => `${String(r.tip)}-${String(r.id)}`;
+  const isaretDegistir = (r: ListeSatiri) => setIsaretli(m => {
+    const n = new Map(m);
+    const k = isaretAnahtari(r);
+    n.has(k) ? n.delete(k) : n.set(k, r);
+    return n;
+  });
+  /** Shift ile aralık seçiminin başlangıç satırı (son düz / Ctrl tık). */
+  const [capa, setCapa] = useState(0);
+  /**
+   * SATIR TIKLAMA (kullanici: "default tekli seçim.. ctrl veya shift ile
+   * çoklu seçim") - Windows liste davranisi:
+   *   düz tık   -> yalniz bu satir isaretli (isaretliyse isareti kalkar)
+   *   Ctrl tık  -> bu satiri ekle / cikar
+   *   Shift tık -> capadan bu satira aralik (Ctrl+Shift: araligi ekler)
+   * Soldaki kutu Ctrl gibi davranir (tek tek toplamak isteyen icin).
+   */
+  const satirTikla = (e: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean },
+                      i: number, r: ListeSatiri) => {
+    setSecili(i);
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (e.shiftKey) {
+      const [a, b] = capa <= i ? [capa, i] : [i, capa];
+      setIsaretli(m => {
+        const n = ctrl ? new Map(m) : new Map<string, ListeSatiri>();
+        for (const x of satirlar.slice(a, b + 1)) n.set(isaretAnahtari(x), x);
+        return n;
+      });
+      return;
+    }
+    setCapa(i);
+    // SEÇİLİ SATIRA TIK SEÇİMİ KALDIRIR (kullanıcı: "seçip kaldırabilelim").
+    if (ctrl || isaretli.has(isaretAnahtari(r))) { isaretDegistir(r); return }
+    setIsaretli(new Map([[isaretAnahtari(r), r]]));
+  };
   /** Liste / Son Aranan / Sik Aranan - GenGrid ile ayni (kullanici_arama). */
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   /**
@@ -287,7 +328,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
         : birlesik;
 
       setSatirlar(sirali);
-      setSecili(0);
+      setSecili(0); setCapa(0);
 
       // LISTE FIYATLARI (495): arama sonucu geldikten sonra tek istekte
       //   cozulur; liste yoksa kart fiyati gosterilmeye devam eder.
@@ -351,7 +392,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     if (etkin) {
       if (!oncekiEtkin.current) {
         setArama('');
-        setSecili(0);
+        setSecili(0); setCapa(0);
+        setIsaretli(new Map());
         void ara('', aramaGorunumu);
         oneGelis.current = Date.now();
       }
@@ -405,6 +447,17 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     } finally { setUretiliyor(false) }
   };
 
+  /** Isaretlenenleri sirayla 1'er adet ekler (her biri tek tek eklemeyle ayni yol). */
+  const [topluEkleniyor, setTopluEkleniyor] = useState(false);
+  const isaretlileriEkle = async () => {
+    if (topluEkleniyor || isaretli.size === 0) return;
+    setTopluEkleniyor(true);
+    try {
+      for (const r of isaretli.values()) await sec(r, true);
+      setIsaretli(new Map());
+    } finally { setTopluEkleniyor(false) }
+  };
+
   const tus = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(i => Math.min(i + 1, satirlar.length - 1)) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(i => Math.max(i - 1, 0)) }
@@ -454,6 +507,13 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
               🔢 Miktar Ekle (Shift+Enter)
             </button>
+            {isaretli.size > 0 && (
+              <button className="d bir" disabled={topluEkleniyor}
+                      title={c('İşaretli kalemleri 1\'er adet, liste fiyatıyla ekler')}
+                      onClick={() => void isaretlileriEkle()}>
+                ✓ Seçilenleri Ekle ({isaretli.size})
+              </button>
+            )}
             {eklenen && eklenen.sayi > 0 && (
               <span className="kapt stok-ara-eklendi">
                 ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
@@ -506,6 +566,19 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
           <table className="detay-tablo secilebilir">
             <thead>
               <tr>
+                {/* SECIM KUTUSU EN SOLDA (kullanici). */}
+                <th style={{ width: 30 }} className="hiza-orta">
+                  <input type="checkbox" title={c('Listedekilerin tümünü seç / bırak')}
+                    checked={satirlar.length > 0 && satirlar.every(r => isaretli.has(isaretAnahtari(r)))}
+                    onChange={e => setIsaretli(m => {
+                      const n = new Map(m);
+                      for (const r of satirlar) {
+                        if (e.target.checked) n.set(isaretAnahtari(r), r);
+                        else n.delete(isaretAnahtari(r));
+                      }
+                      return n;
+                    })} />
+                </th>
                 <th style={{ width: 34 }} className="hiza-orta" title="Tür"></th>
                 {/* KATEGORI KODUN SOLUNDA (kullanici): ayni ad birden fazla
                     kalemde gecebiliyor ("MUAYENE"); hangi daldan oldugu kodu
@@ -540,13 +613,22 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
             </thead>
             <tbody>
               {satirlar.map((r, i) => (
-                <tr key={`${r.tip}-${r.id}`} className={i === secili ? 'secili' : ''}
+                <tr key={`${r.tip}-${r.id}`}
+                    className={[i === secili ? 'secili' : '',
+                                isaretli.has(isaretAnahtari(r)) ? 'isaretli' : ''].join(' ')}
                     onMouseEnter={() => setSecili(i)}
-                    /* TEK TIK = SEÇ · ÇİFT TIK = 1 ADET EKLE (fiyat penceresi
-                       açılmaz, kullanıcı). Miktar/fiyat için "Miktar Ekle
-                       (Shift+Enter)" düğmesi kalır. */
-                    onClick={() => setSecili(i)}
+                    /* TEK TIK = YALNIZ BU SATIR · Ctrl/Shift = ÇOKLU (kullanıcı) ·
+                       ÇİFT TIK = 1 ADET EKLE (fiyat penceresi açılmaz). Miktar/
+                       fiyat için "Miktar Ekle (Shift+Enter)" düğmesi kalır.
+                       Shift+tık metin seçmesin diye mousedown engellenir. */
+                    onMouseDown={e => { if (e.shiftKey) e.preventDefault() }}
+                    onClick={e => satirTikla(e, i, r)}
                     onDoubleClick={() => void sec(r, true)}>
+                  <td className="hiza-orta">
+                    <input type="checkbox" checked={isaretli.has(isaretAnahtari(r))}
+                      onClick={e => e.stopPropagation()}
+                      onChange={() => { setSecili(i); setCapa(i); isaretDegistir(r) }} />
+                  </td>
                   {/* TUR YALNIZ IKON (kullanici): uc satir tipini ayirmak icin
                       rozet metni gereksiz genislik yiyordu. Ad yine erisilebilir
                       - imlec ustune gelince baslik cikar. */}
@@ -593,7 +675,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={10} className="bos">{c('Kayıt yok')}</td></tr>
+                <tr><td colSpan={11} className="bos">{c('Kayıt yok')}</td></tr>
               )}
             </tbody>
           </table>

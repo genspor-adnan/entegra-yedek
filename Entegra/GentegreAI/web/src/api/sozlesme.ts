@@ -7,7 +7,10 @@ export type HataKodu =
   | 'CAKISMA' | 'IS_KURALI' | 'SUNUCU'
   // Hesap var ama parolasi hic tanimlanmamis - giris ekrani parola belirleme
   //   adimina gecer.
-  | 'ILK_PAROLA';
+  | 'ILK_PAROLA'
+  // Oturum gecerli ama hesap parolasini degistirmek ZORUNDA (denetim
+  //   28.09.2026 #4) - sunucu yalniz profil/parola/cikis uclarini acar.
+  | 'PAROLA_DEGISMELI';
 
 export interface AlanHatasi { alan: string; mesaj: string }
 

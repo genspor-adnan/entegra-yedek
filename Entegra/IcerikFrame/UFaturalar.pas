@@ -371,6 +371,7 @@ type
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TFaturalarAramaFrame;
     FSayfali : TSayfaliListe;   // SAYFALI liste (merkezi yardimci, Utablo)
+    FSonGridAyarAdi : string;   // en son geri yuklenen kayitli grid duzeni (JvTimer1Timer)
     // "Yeni Giden" (TUR=15) sekmesi icin gonderim tarihi araligi (son 2 is gunu)
     FYeniGidenBas, FYeniGidenBit: TDateTime;
     FEBelgeStyleYeni: TcxStyle;
@@ -802,8 +803,18 @@ begin
      15,16,17 : GridFatListeTviewDURUM.RepositoryItem := Tablo.RepFaturaGidenDurum;
     end;
 
-  Tablo.GridAyarRestore('AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False), GridFatListeTview );
-  KayitliDuzeniAyikla;
+  // Kayitli duzen YALNIZ belge turu / ek-alan secimi degisince yuklenir. Her yenilemede
+  //   yuklemek kullanicinin grid filtresini siliyordu (GridAyarRestore kayitli FILTRE'yi
+  //   yukler ya da Filter.Clear yapar): ilk filtre secimi TSayfaliListe'yi tam-liste
+  //   requery'sine sokar, requery buraya gelir ve filtre kaybolur -> "ilk filtre calismiyor,
+  //   ikincide calisiyor" (ikincide zaten tam modda, requery yok). Siralama temizligi de
+  //   (KayitliDuzeniAyikla) ayni sebeple yalniz duzen yuklenince yapilir.
+  if FSonGridAyarAdi <> 'AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False) then
+  begin
+    FSonGridAyarAdi := 'AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False);
+    Tablo.GridAyarRestore(FSonGridAyarAdi, GridFatListeTview);
+    KayitliDuzeniAyikla;
+  end;
 
   Self.Align := alClient;
   GridFatListe.LookAndFeel.ScrollbarMode := sbmClassic;

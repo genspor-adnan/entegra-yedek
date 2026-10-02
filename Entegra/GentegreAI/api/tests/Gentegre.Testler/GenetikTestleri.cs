@@ -24,7 +24,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
 
     // ------------------------------------------------------------- ACMG
 
-    [Fact]
+    [VtFact]
     public async Task ACMG_patojenik_kombinasyonlari()
     {
         if (!_olgu.Baglandi(nameof(ACMG_patojenik_kombinasyonlari))) return;
@@ -40,7 +40,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(5, await SinifAsync(veri, "PS4", "PP1_Strong", "PM2", "PP3", "PP5"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task ACMG_guc_eki_KODUN_KENDI_SINIFINI_EZER()
     {
         if (!_olgu.Baglandi(nameof(ACMG_guc_eki_KODUN_KENDI_SINIFINI_EZER))) return;
@@ -57,7 +57,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(4, await SinifAsync(veri, "PM2", "PM1", "PM5"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task ACMG_benign_ve_CELISKILI_kanit()
     {
         if (!_olgu.Baglandi(nameof(ACMG_benign_ve_CELISKILI_kanit))) return;
@@ -134,7 +134,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
             values (@p0, @p1, @p2, @p3, @p4) returning id
             """, [vakaId, gen, hgvs, acmg, (short)(ikincil ? 1 : 0)]);
 
-    [Fact]
+    [VtFact]
     public async Task Varyant_sinifi_KANITTAN_turetilir_ve_raporlama_varsayilani_kurulur()
     {
         if (!_olgu.Baglandi(
@@ -176,7 +176,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, vakaId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Uzman_sinifi_ezerse_kural_UZERINE_YAZMAZ()
     {
         if (!_olgu.Baglandi(nameof(Uzman_sinifi_ezerse_kural_UZERINE_YAZMAZ))) return;
@@ -208,7 +208,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, vakaId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Vaka_ozeti_POZITIF_VUS_NEGATIF_ayrimini_yapar()
     {
         if (!_olgu.Baglandi(nameof(Vaka_ozeti_POZITIF_VUS_NEGATIF_ayrimini_yapar))) return;
@@ -245,7 +245,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, vakaId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ikincil_bulgu_hasta_ISTEMIYORSA_raporlanmaz()
     {
         if (!_olgu.Baglandi(nameof(Ikincil_bulgu_hasta_ISTEMIYORSA_raporlanmaz))) return;
@@ -268,7 +268,7 @@ public class GenetikTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, vakaId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bilgi_bankasi_sinifi_degisince_YENIDEN_DEGERLENDIRME_listesine_duser()
     {
         if (!_olgu.Baglandi(

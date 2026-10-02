@@ -22,7 +22,7 @@ public class RadyolojiKuralTestleri : IClassFixture<VeritabaniOlgusu>
             "select coalesce(min(id), 0) from public.hizmet "
             + (modaliteli ? "where coalesce(modalite, 0) > 0" : "where coalesce(modalite, 0) = 0"));
 
-    [Fact]
+    [VtFact]
     public async Task Modalitesiz_hizmetle_istem_ACILAMAZ()
     {
         if (!_olgu.Baglandi(nameof(Modalitesiz_hizmetle_istem_ACILAMAZ))) return;
@@ -42,7 +42,7 @@ public class RadyolojiKuralTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains("radyoloji tetkiki degil", h.MessageText, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Modalite_HIZMETTEN_kopyalanir()
     {
         if (!_olgu.Baglandi(nameof(Modalite_HIZMETTEN_kopyalanir))) return;

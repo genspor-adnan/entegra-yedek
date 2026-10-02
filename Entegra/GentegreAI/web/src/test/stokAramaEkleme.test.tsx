@@ -101,4 +101,52 @@ describe('stok arama: ekleme hızları (786)', () => {
     await waitFor(() => expect(onSec).toHaveBeenCalledTimes(2));
     expect(onSec.mock.calls[1][1]).toBe(false);
   });
+
+  it("TEKLİ SEÇİM varsayılan; Ctrl ve Shift ile çoklu, seçilenler 1'er adet eklenir", async () => {
+    const IKINCI = { id: 10, tip: 'hizmet', ad: 'Kontrol Muayenesi', kod: '401020', fiyat: 500 };
+    const UCUNCU = { id: 11, tip: 'hizmet', ad: 'Konsültasyon', kod: '401030', fiyat: 700 };
+    // Pencere stok/hizmet/ilac kaynaklarini ayri sorar: satirlar yalniz hizmetten.
+    liste.mockImplementation((kaynak: string) => Promise.resolve(kaynak === 'hizmet'
+      ? { satirlar: [SATIR, IKINCI, UCUNCU], toplamKayit: 3 } : { satirlar: [], toplamKayit: 0 }));
+    const { onSec } = ciz();
+    // Pencere portalda; onceki testlerin penceresi de govdede kalabilir - SON pencere.
+    const pencere = () => [...document.querySelectorAll('.stok-arama')].at(-1)!;
+    await waitFor(() => expect(pencere()?.querySelectorAll('tbody tr').length).toBe(3));
+    const satirlar = [...pencere().querySelectorAll('tbody tr')] as HTMLElement[];
+    const kutu = (s: HTMLElement) => s.querySelector('input[type=checkbox]') as HTMLInputElement;
+    const isaret = () => satirlar.map(s => kutu(s).checked);
+    const tikla = async (s: HTMLElement, o: MouseEventInit = {}) => {
+      await act(async () => { s.dispatchEvent(new MouseEvent('click', { bubbles: true, ...o })) });
+    };
+
+    // Düz tık: yalnız o satır (öncekini bırakır), ekleme YOK.
+    await tikla(satirlar[0]);
+    await tikla(satirlar[1]);
+    expect(isaret()).toEqual([false, true, false]);
+    expect(onSec).not.toHaveBeenCalled();
+
+    // Ctrl: ekle / çıkar.
+    await tikla(satirlar[0], { ctrlKey: true });
+    expect(isaret()).toEqual([true, true, false]);
+    await tikla(satirlar[1], { ctrlKey: true });
+    expect(isaret()).toEqual([true, false, false]);
+
+    // Shift: çapadan aralık.
+    await tikla(satirlar[0]);                        // çapa 0, yalnız 0
+    await tikla(satirlar[2], { shiftKey: true });    // 0..2
+    expect(isaret()).toEqual([true, true, true]);
+
+    // Ctrl ile biri çıkarılır, kalan ikisi eklenir.
+    await tikla(satirlar[1], { ctrlKey: true });
+    const dugme = [...document.querySelectorAll('.stok-ara-eylem button')]
+      .reverse().find(b => (b.textContent ?? '').includes('Seçilenleri Ekle')) as HTMLButtonElement;
+    expect(dugme.textContent).toContain('(2)');
+    await act(async () => { dugme.click() });
+    await waitFor(() => expect(onSec).toHaveBeenCalledTimes(2));
+    // Satırlar ada göre: Diş (9) · Konsültasyon (11) · Kontrol (10) - ortadaki çıktı.
+    expect(onSec.mock.calls.map(c => (c[0] as { id: number }).id)).toEqual([9, 10]);
+    expect(onSec.mock.calls.every(c => c[1] === true)).toBe(true);
+    // Eklenince işaretler temizlenir.
+    await waitFor(() => expect(kutu(satirlar[0]).checked).toBe(false));
+  });
 });

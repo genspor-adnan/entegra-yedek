@@ -49,7 +49,7 @@ public sealed class KorunanSatirTestleri(VeritabaniOlgusu olgu)
         return m.Groups["govde"].Value;
     }
 
-    [Fact]
+    [VtFact]
     public async Task NoAction_bagli_tablolar_korunan_sorgusunda()
     {
         if (!_olgu.Baglandi(nameof(NoAction_bagli_tablolar_korunan_sorgusunda))) return;

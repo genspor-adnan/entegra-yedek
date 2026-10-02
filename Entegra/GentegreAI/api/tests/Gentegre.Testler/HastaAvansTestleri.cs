@@ -74,7 +74,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
         return satirlar.Count > 0 ? satirlar[0] : null;
     }
 
-    [Fact]
+    [VtFact]
     public async Task Alinan_kullanilan_kalan_ve_durum()
     {
         if (!_olgu.Baglandi(nameof(Alinan_kullanilan_kalan_ve_durum))) return;
@@ -109,7 +109,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bakiye_yalniz_KALANI_sayar()
     {
         if (!_olgu.Baglandi(nameof(Bakiye_yalniz_KALANI_sayar))) return;
@@ -129,7 +129,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Damgasiz_tahsilat_kapaninca_listeden_duser()
     {
         if (!_olgu.Baglandi(nameof(Damgasiz_tahsilat_kapaninca_listeden_duser))) return;
@@ -148,7 +148,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hasta_olmayan_carinin_avansi_listede_yok()
     {
         if (!_olgu.Baglandi(nameof(Hasta_olmayan_carinin_avansi_listede_yok))) return;
@@ -163,7 +163,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iptal_edilen_tahsilat_avans_sayilmaz()
     {
         if (!_olgu.Baglandi(nameof(Iptal_edilen_tahsilat_avans_sayilmaz))) return;

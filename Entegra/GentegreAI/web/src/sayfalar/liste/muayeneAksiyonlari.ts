@@ -52,14 +52,17 @@ export async function muayeneAksiyonu(
   //   sablonu ikinci kez uygulamak yazilmis bulguyu silmez.
   if (kod === 'muayene.sablon') {
     await guvenli(async () => {
-      const liste = await api.liste('muayene-sablon', { sayfa: 1, boyut: 50,
-        filtre: { alan: 'durum', op: 'esit', deger: 1 } });
-      if (liste.satirlar.length === 0) { mesaj('Tanımlı şablon yok.'); return }
+      // ÖNCELİK SIRASI SUNUCUDAN (933): doktorun şablonları, sonra bölüm ortak
+      //   (⭐ önce), sonra diğerleri; başka doktorun kişisel şablonu gelmez.
+      const ss = await api.muayeneSablonlari(id);
+      if (ss.sablonlar.length === 0) { mesaj('Tanımlı şablon yok.'); return }
+      const kapsam = ['👤 Doktorun', '🩺 Bölüm', 'Diğer'];
 
       const secim = await secimSor('Hangi şablon uygulansın?',
-        liste.satirlar.map(r => ({
+        ss.sablonlar.map(r => ({
           kod: String(r.id),
-          ad: `${r.ad} · ${r.kapsamAdi} · ${r.alanSayisi} alan`,
+          ad: `${r.id === ss.onerilen?.id ? '✓ ' : ''}${r.ad} · ${kapsam[r.oncelik] ?? ''}`
+            + `${r.varsayilan ? ' ⭐' : ''} · ${r.alanSayisi} alan`,
         })));
       if (!secim) return;
 

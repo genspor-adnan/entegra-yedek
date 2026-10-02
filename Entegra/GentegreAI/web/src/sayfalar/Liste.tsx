@@ -108,6 +108,7 @@ import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
 import { teleradAksiyonu } from './liste/teleradAksiyonlari';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { useTaniEkleTercihi } from '../bilesenler/taniEkleTercihi';
 import { usePortalBaslik, usePortaldaMi } from './portal/portalBaslik';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
 import { randevuAksiyonu } from './liste/randevuAksiyonlari';
@@ -226,6 +227,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [muayeneBilgiAcik, setMuayeneBilgiAcik] = useState(false);
   /** ICD arama penceresi açık mı (tanı sekmesi "＋ ICD-10 Ekle"). */
   const [icdAramaAcik, setIcdAramaAcik] = useState(false);
+  /** ICD penceresindeki TÜR (Kesin / Ön) ve TARAF seçimi - son seçim hesapta
+      hatırlanır (kullanıcı). */
+  const tani = useTaniEkleTercihi(icdAramaAcik, kullanici?.id);
   /** Kartı sunucudan yeniden okutur: ekran düğmeleri (tanı ekle, şablon
       uygula, tümü normal...) satırı SUNUCUDA açar; kart onu ancak yeniden
       okuyunca gösterir. */
@@ -1508,18 +1512,52 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           const y = await api.muayeneTaniOnerileri(Number(kartId));
           return y.onceki.map(t => ({ kod: t.kod, ad: t.ad }));
         }}
+        // ŞABLON TANILARI (931): muayenenin bölüm / doktor şablonlarının sık tanıları.
+        sablonBaslik="Şablon Tanıları"
+        // YZ ÖNERİSİ: bağlam SUNUCUDA toplanır ve anonimleştirilir (ad, soyad,
+        //   kimlik no gitmez); ekran yalnız muayene numarasını yollar.
+        yz={async () => {
+          const y = await api.muayeneYzTaniOnerisi(Number(kartId));
+          const notlar = [
+            y.kirmiziBayrak && `⚠ ${y.kirmiziBayrak}`,
+            y.eksikBilgi && `❓ ${y.eksikBilgi}`,
+            y.atilanKod > 0 && `${y.atilanKod} öneri ICD kataloğunda bulunamadığı için gösterilmedi.`,
+            y.oneriler.length === 0 && 'YZ bu bilgilerle öneri üretmedi; şikâyet / bulgu ekleyip tekrar deneyin.',
+          ].filter((x): x is string => !!x);
+          return { satirlar: y.oneriler, notlar, uyari: y.uyari };
+        }}
+        sablon={async () => (await api.muayeneSablonTercihleri(Number(kartId))).tanilar}
+        // ÇOK SEÇİM (kullanıcı): pencere her seçimde kapanmaz; eklenen tanı
+        //   ✓ ile işaretlenir, tanı gridi arkada tazelenir. "Kapat" ile çıkılır.
+        acikKalir
+        ustSecimler={<>
+          <label>Tür
+            <select value={tani.kesinlik} aria-label="Tanı türü"
+                    onChange={e => tani.setKesinlik(Number(e.target.value))}>
+              {tani.kesinlikler.map(t => <option key={t.kod} value={t.kod}>{t.ad}</option>)}
+            </select>
+          </label>
+          <label>Taraf
+            <select value={tani.taraf} aria-label="Taraf"
+                    onChange={e => tani.setTaraf(Number(e.target.value))}>
+              {tani.taraflar.map(t => <option key={t.kod} value={t.kod}>{t.ad}</option>)}
+            </select>
+          </label>
+        </>}
         onKapat={() => setIcdAramaAcik(false)}
-        onSec={satir => {
-          setIcdAramaAcik(false);
-          void guvenli(async () => {
-            const y = await api.muayeneTaniEkle(Number(kartId), String(satir.kod));
-            // SAYAÇ SEÇİM ANINDA (461): kayıt kaydedilmese bile hekim o kodla
-            //   çalışmıştır; sayacı kaydetmeye bağlamak listeyi geç doldurur.
-            void api.katalogKullanildi('icd', String(satir.kod)).catch(() => {});
-            mesaj(y.mesaj);
-            setYenile(t => t + 1);
-            setKartTazele(t => t + 1);
-          });
+        onSec={async satir => {
+          try {
+            await api.muayeneTaniEkle(Number(kartId), String(satir.kod),
+                                      { kesinlik: tani.kesinlik, taraf: tani.taraf });
+          } catch (h) {
+            mesaj(hataMetni(h));
+            throw h;
+          }
+          // SAYAÇ SEÇİM ANINDA (461): kayıt kaydedilmese bile hekim o kodla
+          //   çalışmıştır; sayacı kaydetmeye bağlamak listeyi geç doldurur.
+          void api.katalogKullanildi('icd', String(satir.kod)).catch(() => {});
+          setYenile(t => t + 1);
+          setKartTazele(t => t + 1);
         }}
       />
     )}

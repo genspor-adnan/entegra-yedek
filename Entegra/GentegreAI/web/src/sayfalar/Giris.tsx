@@ -19,8 +19,10 @@ export function Giris() {
   const [hata, setHata] = useState<string | null>(null);
   const [bekliyor, setBekliyor] = useState(false);
   // ILK GIRIS (kullanici): personel eklenince acilan hesabin parolasi bostur;
-  //   kisi burada kendi parolasini tanimlar. Kimlik kaniti TCKN son 4.
-  const [ilkAcik, setIlkAcik] = useState(false);
+  //   kisi burada kendi parolasini tanimlar. IKI ADIM (denetim 28.09.2026 #5):
+  //   1. kullanici + TCKN son 4 -> kayitli kanala kod, 2. kod + yeni parola.
+  //   TCKN son 4 tek basina parola belirlemeye yetmez.
+  const [ilkAdim, setIlkAdim] = useState<0 | 1 | 2>(0);
   const [tcknSon4, setTcknSon4] = useState('');
   const [yeni1, setYeni1] = useState('');
   const [yeni2, setYeni2] = useState('');
@@ -69,13 +71,20 @@ export function Giris() {
   async function ilkParola(e: React.FormEvent) {
     e.preventDefault();
     setHata(null); setBilgi(null);
-    if (yeni1 !== yeni2) { setHata('Parolalar aynı değil.'); return }
+    if (ilkAdim === 2 && yeni1 !== yeni2) { setHata('Parolalar aynı değil.'); return }
     setBekliyor(true);
     try {
-      const y = await api.ilkParola(kod, tcknSon4, yeni1);
+      if (ilkAdim === 1) {
+        // Sunucu her durumda ayni cevabi verir; kod gelmediyse "yeniden iste".
+        const y = await api.ilkParolaKod(kod, tcknSon4);
+        setBilgi(y.mesaj);
+        setIlkAdim(2);
+        return;
+      }
+      const y = await api.ilkParola(kod, dogrulamaKodu, yeni1);
       setBilgi(y.mesaj);
-      setIlkAcik(false);
-      setParola(''); setYeni1(''); setYeni2(''); setTcknSon4('');
+      setIlkAdim(0);
+      setParola(''); setYeni1(''); setYeni2(''); setTcknSon4(''); setDogrulamaKodu('');
     } catch (h) {
       setHata(hataMetni(h));
     } finally {
@@ -132,7 +141,7 @@ export function Giris() {
       // Hesap var ama parolasi HIC tanimlanmamis: dogrudan parola belirleme
       //   ekranina gecilir (kullanici: "sifre bossa user pass ekrani direk ciksin").
       if (h instanceof ApiHatasi && h.hata.kod === 'ILK_PAROLA') {
-        setIlkAcik(true);
+        setIlkAdim(1);
         setHata(null);
         setBilgi(h.hata.mesaj);
       } else {
@@ -202,37 +211,63 @@ export function Giris() {
     );
   }
 
-  if (ilkAcik) {
+  if (ilkAdim > 0) {
     return (
       <div className="giris-sayfa">
         <form key="ilk-parola" className="giris-kart" onSubmit={ilkParola}>
           {marka}
-          <p className="alt-baslik">{c('İlk giriş — parolanızı belirleyin')}</p>
+          <p className="alt-baslik">
+            {ilkAdim === 1 ? c('İlk giriş — kimliğinizi doğrulayın')
+                           : c('İlk giriş — kodu ve yeni parolayı yazın')}
+          </p>
           <label>
             Kullanıcı (sicil no)
-            <input value={kod} onChange={e => setKod(e.target.value)} autoFocus />
+            <input value={kod} onChange={e => setKod(e.target.value)} autoFocus={ilkAdim === 1}
+                   readOnly={ilkAdim === 2} />
           </label>
-          <label>
-            Kimlik No — son 4 hane
-            <input value={tcknSon4} maxLength={4} inputMode="numeric"
-                   onChange={e => setTcknSon4(e.target.value.replace(/\D/g, ''))} />
-          </label>
-          <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
-                   onChange={e => setYeni1(e.target.value)} />
-          </label>
-          <label>
-            Yeni parola (tekrar)
-            <input type="password" value={yeni2} autoComplete="new-password"
-                   onChange={e => setYeni2(e.target.value)} />
-          </label>
-          <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+          {ilkAdim === 1 ? (
+            <>
+              <label>
+                Kimlik No — son 4 hane
+                <input value={tcknSon4} maxLength={4} inputMode="numeric"
+                       onChange={e => setTcknSon4(e.target.value.replace(/\D/g, ''))} />
+              </label>
+              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>
+                Bilgiler doğruysa hesabınızda kayıtlı cep telefonuna (yoksa e-posta adresine)
+                6 haneli doğrulama kodu gönderilir. Kayıtlı iletişim bilginiz yoksa yöneticinize başvurun.
+              </p>
+            </>
+          ) : (
+            <>
+              <label>
+                Doğrulama kodu
+                <input value={dogrulamaKodu} maxLength={6} inputMode="numeric" autoFocus autoComplete="one-time-code"
+                       onChange={e => setDogrulamaKodu(e.target.value.replace(/\D/g, ''))} />
+              </label>
+              <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
+                       onChange={e => setYeni1(e.target.value)} />
+              </label>
+              <label>
+                Yeni parola (tekrar)
+                <input type="password" value={yeni2} autoComplete="new-password"
+                       onChange={e => setYeni2(e.target.value)} />
+              </label>
+              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+            </>
+          )}
           {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
           {hata && <div className="hata-kutusu">{hata}</div>}
           <button type="submit" disabled={bekliyor}>
-            {bekliyor ? 'Bekleyin…' : 'Parolayı Belirle'}
+            {bekliyor ? 'Bekleyin…' : ilkAdim === 1 ? 'Kod Gönder' : 'Parolayı Belirle'}
           </button>
+          {ilkAdim === 2 && (
+            <button type="button" className="d" style={{ marginTop: 8 }}
+                    onClick={() => { setIlkAdim(1); setHata(null); setBilgi(null) }}>
+              Kodu yeniden iste
+            </button>
+          )}
           <button type="button" className="d" style={{ marginTop: 8 }}
-                  onClick={() => { setIlkAcik(false); setHata(null) }}>
+                  onClick={() => { setIlkAdim(0); setHata(null) }}>
             Girişe dön
           </button>
         </form>

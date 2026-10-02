@@ -67,7 +67,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         return (id, s!.Durum, s.Ihlaller);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Westgard_1_3s_RET_uretir()
     {
         if (!_olgu.Baglandi(nameof(Westgard_1_3s_RET_uretir))) return;
@@ -84,7 +84,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Westgard_2_2s_AYNI_YONDE_ardisik_iki_olcumde_tetiklenir()
     {
         if (!_olgu.Baglandi(nameof(Westgard_2_2s_AYNI_YONDE_ardisik_iki_olcumde_tetiklenir)))
@@ -111,7 +111,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Westgard_4_1s_kaymayi_UYARI_olarak_yakalar()
     {
         if (!_olgu.Baglandi(nameof(Westgard_4_1s_kaymayi_UYARI_olarak_yakalar))) return;
@@ -134,7 +134,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Westgard_R_4s_AYNI_CALISMADA_iki_seviye_arasinda_bakar()
     {
         if (!_olgu.Baglandi(nameof(Westgard_R_4s_AYNI_CALISMADA_iki_seviye_arasinda_bakar)))
@@ -162,7 +162,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task KK_RET_iken_oto_onay_KAPANIR()
     {
         if (!_olgu.Baglandi(nameof(KK_RET_iken_oto_onay_KAPANIR))) return;
@@ -189,7 +189,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kumulatif_istatistik_RET_EDILEN_olcumu_saymaz()
     {
         if (!_olgu.Baglandi(nameof(Kumulatif_istatistik_RET_EDILEN_olcumu_saymaz))) return;
@@ -217,7 +217,7 @@ public class KaliteKontrolTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, lotId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yururlukteki_hedef_ESIK_asilinca_laboratuvar_kumulatifine_gecer()
     {
         if (!_olgu.Baglandi(

@@ -350,6 +350,7 @@ public static partial class KaynakKatalogu
         Ekle(MuayeneSablon());
         Ekle(MetinMakro());
         Ekle(Recete());
+        Ekle(ReceteSatir());
         Ekle(HastaAlerji());
         Ekle(HastaIlac());
         // Hasta tibbi gecmisi (420): kronik tani, gecmis olay, ozet.

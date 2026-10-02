@@ -18,6 +18,9 @@ public sealed record KullaniciKaydi(
     short HataliGiris,
     DateTime? KilitBitis);
 
+/// <summary>Oturum kapisi (denetim 28.09.2026 #4): hesabin istek anindaki durumu.</summary>
+public sealed record HesapDurumu(bool Aktif, bool ParolaDegismeli);
+
 /// <summary>Kullanici Ayarlari > Hesabim (669): kisinin kendi hesap ozeti.</summary>
 public sealed record HesapBilgisi(
     string Eposta, string CepTel, DateTime? ParolaTarihi, DateTime? SonGiris,
@@ -443,6 +446,29 @@ public sealed class KullaniciDeposu
                 o.Metin("ulke_kod"), o.Metin("telefon_kodu"),
                 o.Metin("zaman_dilimi"), o.Metin("para_birimi")),
             iptal);
+
+    /// <summary>
+    /// ETKILI ROLLER (665): ana rol (<c>Ana = true</c>) + ek roller, GUNCEL
+    /// haliyle. Hesap pasifse bos doner - fn_kullanici_rolleri aktif = 1 ister.
+    /// Istek baglami bunu her istekte okur; token'daki rol yalniz ipucudur.
+    /// </summary>
+    public Task<List<(int RolId, bool Ana)>> RolleriAsync(int kullaniciId,
+        CancellationToken iptal = default)
+        => _veri.ListeAsync(
+            "select rol_id, ana from public.fn_kullanici_rolleri(@p0) order by ana desc, rol_id",
+            new object?[] { kullaniciId }, o => (o.GetInt32(0), o.GetInt16(1) == 1), iptal);
+
+    /// <summary>
+    /// ZORUNLU PAROLA DEGISIMI (denetim #4): hesap parola degistirmek zorunda
+    /// mi, ya da hic aktif degil mi. Istek basina okunur - bayrak token
+    /// alindiktan SONRA acilsa da bir sonraki istekte gecerlidir.
+    /// </summary>
+    public Task<HesapDurumu?> OturumDurumuAsync(int kullaniciId,
+        CancellationToken iptal = default)
+        => _veri.TekAsync(
+            "select aktif, parola_degismeli from public.taraf_kullanici where id = @p0",
+            new object?[] { kullaniciId },
+            o => new HesapDurumu(o.Bayrak("aktif"), o.Bayrak("parola_degismeli")), iptal);
 
     /// <summary>
     /// Kayit kapsami (eski YETKIALANI). Bos liste = kapsam SINIRSIZ;

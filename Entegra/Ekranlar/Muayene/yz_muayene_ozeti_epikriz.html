@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YZ Muayene Özeti &amp; Epikriz — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --mor:#6a3fb5;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;color:var(--ink)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.yz{border-color:#7b5cc4;background:linear-gradient(#9b7fe0,#6a3fb5);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;cursor:not-allowed}
+  .btn.kucuk{padding:2px 8px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.gri{background:#eceff2;color:#6b7a8b}
+
+  /* ust ekran secici (mockup gezinme) */
+  .gez{max-width:1400px;margin:0 auto 10px;display:flex;gap:6px}
+  .gez span{border:1px solid var(--line);border-radius:14px;padding:5px 14px;background:#fff;cursor:pointer;color:#3a5573}
+  .gez span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+
+  /* hasta seridi */
+  .serit{display:flex;gap:14px;align-items:center;padding:7px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit b{color:var(--navy)}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+
+  .iki{display:grid;grid-template-columns:minmax(0,1fr) 360px;background:#f4f5f7}
+  @media(max-width:1100px){.iki{grid-template-columns:1fr}}
+  .sol{padding:10px 12px;border-right:1px solid var(--line2)}
+  .sag{padding:10px 12px;background:#fafcfe;display:flex;flex-direction:column;gap:10px}
+  .kutu{background:#fff;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .kutu h6{margin:0;padding:6px 10px;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);font-size:11.5px;color:#2c4a6b;display:flex;gap:6px;align-items:center}
+  .kutu h6 .sp{margin-left:auto;font-weight:normal}
+  .kutu .ic{padding:9px 10px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:4px 7px;font-size:11.5px;line-height:1.5}
+  .alanlar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  /* YZ ozet */
+  .modlar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+  .mod{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);cursor:pointer}
+  .mod.on{background:linear-gradient(#9b7fe0,#6a3fb5);border-color:#6a3fb5;color:#fff;font-weight:bold}
+  .yzmetin{line-height:1.85;font-size:12.5px;padding:10px 12px;border:1px solid #ddd0f2;border-radius:4px;background:linear-gradient(#fbf9ff,#fff)}
+  .yzmetin .cm{border-radius:2px;padding:0 1px}
+  .yzmetin .cm:hover{background:#eef4fc}
+  .kyn{display:inline-block;font-size:9.5px;font-weight:bold;border-radius:3px;padding:0 4px;margin-left:2px;vertical-align:1px;cursor:help}
+  .k-s{background:#e7eef6;color:#2f6db3}.k-h{background:#e2f3e8;color:#2e7d46}.k-b{background:#f1ecfa;color:#6a3fb5}
+  .k-v{background:#fdf6e3;color:#8a6218}.k-t{background:#fbe9e7;color:#b3261e}.k-i{background:#e8f4f8;color:#1f6f8b}.k-l{background:#eef0ff;color:#3b4db3}
+  .yzmetin .dayanaksiz{background:#fff2c2;border-bottom:2px dashed #d9a12b}
+  .lej{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:10.5px;color:var(--muted)}
+  .durumbant{display:flex;gap:8px;align-items:center;padding:7px 10px;border-radius:4px;margin-bottom:8px;border:1px solid #ddd0f2;background:#f7f3ff;color:#4b2f86}
+  .durumbant.ok{border-color:#bfe3cb;background:#effaf2;color:#1f5e33}
+  .uyarilar{list-style:none;margin:0;padding:0}
+  .uyarilar li{display:flex;gap:6px;padding:5px 0;border-bottom:1px dashed var(--line2);font-size:11.5px}
+  .uyarilar li:last-child{border-bottom:0}
+  .ikon{width:16px;text-align:center}
+
+  /* epikriz */
+  .bol{background:#fff;border:1px solid var(--line2);border-radius:4px;margin:0 0 8px;overflow:hidden}
+  .bol .bb{display:flex;align-items:center;gap:8px;padding:5px 10px;background:linear-gradient(#f6f9fc,#eaf0f6);border-bottom:1px solid var(--line2);font-size:11px;font-weight:bold;color:#2c4a6b}
+  .bol .bb .sp{margin-left:auto;display:flex;gap:4px;align-items:center;font-weight:normal}
+  .bol .mt{padding:8px 10px;line-height:1.65;white-space:pre-wrap}
+  .bol.kilit .mt{background:#f7f9fb;color:#33475b}
+  .fark{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line2)}
+  .fark>div{padding:8px 10px;line-height:1.6;white-space:pre-wrap}
+  .fark .eski{background:#fdf7f6;border-right:1px solid var(--line2)}
+  .fark .yeni{background:#f7f3ff}
+  .fark .ust{font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;letter-spacing:.3px}
+  del{background:#fbe0dd;color:#8a1f18;text-decoration:line-through}
+  ins{background:#e2f3e8;color:#1f5e33;text-decoration:none}
+  .bol.kabul .bb{background:linear-gradient(#effaf2,#e2f3e8)}
+  .bol.ret .bb{background:linear-gradient(#f7f7f7,#eceff2)}
+  .kaynaklar{list-style:none;margin:0;padding:0}
+  .kaynaklar li{display:flex;gap:6px;align-items:center;padding:4px 0;font-size:11.5px}
+  .kaynaklar li .sonuk{margin-left:auto}
+  .kontrol li{display:flex;gap:6px;padding:4px 0;font-size:11.5px}
+  .sonuk{color:var(--muted)}
+  .kaydirma{display:flex;gap:8px;align-items:center}
+  .kaydirma input{flex:1}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)} .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .yukleniyor{display:flex;gap:8px;align-items:center;color:#6a3fb5;padding:14px}
+  .nokta{width:8px;height:8px;border-radius:50%;background:#6a3fb5;animation:n 1s infinite}
+  .nokta:nth-child(2){animation-delay:.2s}.nokta:nth-child(3){animation-delay:.4s}
+  @keyframes n{0%,100%{opacity:.25}50%{opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="gez">
+  <span class="on" data-g="ozet" onclick="gez('ozet')">1 · Muayene Özeti (YZ)</span>
+  <span data-g="epikriz" onclick="gez('epikriz')">2 · Epikriz (YZ destekli)</span>
+</div>
+
+<!-- ============================================================ OZET -->
+<div class="win" data-e="ozet">
+  <div class="title">🩺 Muayene Kartı — #1042 <span class="sp">Muayene › Poliklinik › İç Hastalıkları</span></div>
+  <div class="serit">
+    <b>A•••• Y•••••</b><span class="sonuk">42 yaş · Kadın</span><span class="rz mavi">SGK</span>
+    <span>Dr. Elif Kaya · İç Hastalıkları</span><span class="sonuk">29.09.2026 10:12 · 14 dk</span>
+    <span class="sp"></span><span class="rz ok">Muayenede</span>
+  </div>
+  <div class="toolbar">
+    <button class="btn">💾 Kaydet</button><button class="btn ok">✓ Tamamla</button>
+    <div class="sepv"></div>
+    <button class="btn">🔬 İstem</button><button class="btn">💊 Reçete</button><button class="btn">🎙 Dikte</button>
+    <button class="btn yz" onclick="uret()">🤖 YZ Özet</button>
+    <span class="sp"></span><span class="rz mor">🤖 1 kontör / özet</span>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on">Muayene</div><div class="sekme">Şablon Muayene</div><div class="sekme">Vital Bulgular</div>
+    <div class="sekme">İstem &amp; Sonuçlar</div><div class="sekme">Epikriz</div><div class="sekme">Geçmiş</div>
+  </div>
+
+  <div class="iki">
+    <div class="sol">
+      <div class="alanlar">
+        <div class="fld"><label>Şikâyet <span class="kyn k-s">Ş</span></label><div class="inp">3 gündür halsizlik, çarpıntı, susama</div></div>
+        <div class="fld"><label>Hikâye <span class="kyn k-h">H</span></label><div class="inp">DM tanısı 5 yıl, metformin kullanıyor; son 2 haftadır ilacını düzensiz almış. Ateş yok.</div></div>
+        <div class="fld"><label>Muayene bulguları <span class="kyn k-b">B</span></label><div class="inp">Genel durum orta, bilinç açık. Mukozalar kuru. Kalp ritmik, taşikardik. Batın rahat.</div></div>
+        <div class="fld"><label>Vital <span class="kyn k-v">V</span></label><div class="inp">TA 105/65 · Nabız 112/dk · Ateş 36,8 °C · SpO₂ %98</div></div>
+        <div class="fld"><label>Tanılar <span class="kyn k-t">T</span></label><div class="inp">E11.9 Tip 2 DM (ana) · E86 Hacim azalması (ek)</div></div>
+        <div class="fld"><label>Tetkik <span class="kyn k-l">L</span></label><div class="inp">Glukoz 386 mg/dL ↑ · HbA1c %10,2 ↑ · Na 131 ↓ · İdrar keton (+)</div></div>
+        <div class="fld" style="grid-column:1/-1"><label>Reçete <span class="kyn k-i">İ</span></label><div class="inp">Metformin 1000 mg 2×1 · Bol sıvı · Kontrol 1 hafta</div></div>
+      </div>
+
+      <div class="kutu" style="margin-top:10px">
+        <h6>🤖 YZ Muayene Özeti <span class="rz sari" id="durumRz">Taslak — hekim onayı bekliyor</span>
+          <span class="sp sonuk" id="meta">gpt-oss-120b · 1,6 sn · 1 kontör</span></h6>
+        <div class="ic">
+          <div class="modlar">
+            <span class="mod on" data-m="hekim" onclick="mod('hekim')">Hekim notu (klinik)</span>
+            <span class="mod" data-m="hasta" onclick="mod('hasta')">Hasta için (sade dil)</span>
+            <span class="mod" data-m="sevk" onclick="mod('sevk')">Sevk / konsültasyon özeti</span>
+            <span class="sp"></span>
+            <span class="sonuk" style="align-self:center">Uzunluk:</span>
+            <span class="mod on" data-u="kisa">Kısa</span><span class="mod" data-u="orta">Orta</span>
+          </div>
+          <div id="yukleniyor" class="yukleniyor" hidden><span class="nokta"></span><span class="nokta"></span><span class="nokta"></span> YZ özet hazırlıyor…</div>
+          <div class="yzmetin" id="metin"></div>
+          <div class="lej">
+            <span><span class="kyn k-s">Ş</span> şikâyet</span><span><span class="kyn k-h">H</span> hikâye</span>
+            <span><span class="kyn k-b">B</span> bulgu</span><span><span class="kyn k-v">V</span> vital</span>
+            <span><span class="kyn k-l">L</span> lab</span><span><span class="kyn k-t">T</span> tanı</span><span><span class="kyn k-i">İ</span> reçete</span>
+            <span><span class="dayanaksiz" style="padding:0 4px">sarı</span> = kaynakta karşılığı bulunamadı → kontrol edin</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn" onclick="uret()">🔄 Yeniden üret</button>
+            <button class="btn">✎ Düzenle</button>
+            <button class="btn">⧉ Kopyala</button>
+            <span class="sp"></span>
+            <button class="btn pas" id="hastaya" title="Önce onaylayın">📤 Hasta portalına gönder</button>
+            <button class="btn ok" id="onayBtn" onclick="onayla()">✓ Onayla ve karta kaydet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <div class="kutu">
+        <h6>⚠ Eksik / dikkat</h6>
+        <div class="ic">
+          <ul class="uyarilar">
+            <li><span class="ikon">❗</span><span><b>Çıkış şekli</b> girilmemiş — e-Nabız çıkış bildirimi için zorunlu.</span></li>
+            <li><span class="ikon">❓</span><span>Kan gazı / pH yok: <b>keton (+)</b> ile birlikte DKA dışlanmalı mı?</span></li>
+            <li><span class="ikon">ℹ</span><span>Na 131 düzeltilmiş değer hesaplanmadı (glukoz 386).</span></li>
+          </ul>
+          <div class="sonuk" style="margin-top:6px">Uyarılar öneridir; tamamlamayı durdurmaz (yasal zorunlular hariç).</div>
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>🔒 Modele giden (maskeli)</h6>
+        <div class="ic sonuk" style="line-height:1.6">
+          42 yaş, kadın, İç Hastalıkları · şikâyet, hikâye, bulgu, vital, lab, tanı, reçete.<br>
+          <b>Gitmeyen:</b> ad, soyad, TC no, doğum tarihi, protokol no, hekim adı.
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>🧾 Özet geçmişi</h6>
+        <div class="ic">
+          <ul class="uyarilar">
+            <li><span class="ikon">🤖</span><span>10:26 YZ taslağı (hekim notu) <span class="sonuk">· 1 kontör</span></span></li>
+            <li><span class="ikon">✎</span><span>10:27 Dr. Elif Kaya düzenledi (2 cümle)</span></li>
+            <li id="gecmisOnay" hidden><span class="ikon">✓</span><span>10:28 Dr. Elif Kaya onayladı</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Kayıt: <code>muayene.ai_ozet</code> · <code>ai_ozet_onayli</code></span><span>Onaysız özet hasta portalına ve epikrize GİTMEZ</span></div>
+</div>
+
+<!-- ============================================================ EPIKRIZ -->
+<div class="win" data-e="epikriz" hidden>
+  <div class="title">📄 Epikriz — Muayene #1042 <span class="sp">Muayene Kartı › Epikriz sekmesi</span></div>
+  <div class="serit">
+    <b>A•••• Y•••••</b><span class="sonuk">42 yaş · Kadın</span><span>Dr. Elif Kaya · İç Hastalıkları</span>
+    <span class="sp"></span><span class="rz sari">Taslak</span><span class="rz mor">🤖 3 bölüm YZ önerisi</span>
+  </div>
+  <div class="toolbar">
+    <button class="btn">⟳ Sistemden derle</button>
+    <button class="btn yz" onclick="yzEpikriz()">🤖 YZ ile anlatı bölümlerini yaz</button>
+    <div class="sepv"></div>
+    <button class="btn" onclick="hepsi(true)">✓ Tüm önerileri kabul et</button>
+    <button class="btn" onclick="hepsi(false)">✗ Tümünü reddet</button>
+    <span class="sp"></span>
+    <button class="btn">👁 Önizleme (A4)</button><button class="btn primary">✍ İmzala &amp; e-Nabız'a gönder</button>
+  </div>
+
+  <div class="iki">
+    <div class="sol" id="bolumler">
+      <div class="bol kilit">
+        <div class="bb">1 · Başvuru nedeni <span class="sp"><span class="rz gri">🔒 Sistemden</span></span></div>
+        <div class="mt">3 gündür halsizlik, çarpıntı, susama.</div>
+      </div>
+
+      <div class="bol" data-b="oyku">
+        <div class="bb">2 · Öykü <span class="sp"><span class="rz mor">🤖 YZ önerisi</span>
+          <button class="btn kucuk" onclick="karar(this,true)">✓ Kabul</button><button class="btn kucuk" onclick="karar(this,false)">✗ Ret</button></span></div>
+        <div class="fark">
+          <div class="eski"><div class="ust">Mevcut (şikâyet + hikâye birleşimi)</div>DM tanısı 5 yıl, metformin kullanıyor; son 2 haftadır ilacını düzensiz almış. Ateş yok.</div>
+          <div class="yeni"><div class="ust">YZ önerisi</div>5 yıldır tip 2 DM tanısıyla metformin kullanan hastanın <ins>son 2 haftadır ilaç uyumu bozulmuş</ins>; 3 gündür halsizlik, çarpıntı ve susama yakınması <ins>gelişmiş</ins>. Ateş tanımlamıyor.</div>
+        </div>
+      </div>
+
+      <div class="bol kilit">
+        <div class="bb">3 · Muayene bulguları &amp; vital <span class="sp"><span class="rz gri">🔒 Sistemden</span></span></div>
+        <div class="mt">Genel durum orta, bilinç açık. Mukozalar kuru. Kalp ritmik, taşikardik. Batın rahat.
+TA 105/65 mmHg · Nabız 112/dk · Ateş 36,8 °C · SpO₂ %98</div>
+      </div>
+
+      <div class="bol kilit">
+        <div class="bb">4 · Tetkik sonuçları <span class="sp"><span class="rz gri">🔒 Sistemden (değerler)</span></span></div>
+        <div class="mt">Glukoz 386 mg/dL (H) · HbA1c %10,2 (H) · Sodyum 131 mmol/L (L) · İdrar keton (+)</div>
+      </div>
+
+      <div class="bol kilit">
+        <div class="bb">5 · Tanılar <span class="sp"><span class="rz gri">🔒 ICD-10 — YZ değiştiremez</span></span></div>
+        <div class="mt">E11.9 Tip 2 diyabetes mellitus, komplikasyonsuz (ana) · E86 Hacim azalması (ek)</div>
+      </div>
+
+      <div class="bol" data-b="seyir">
+        <div class="bb">6 · Değerlendirme / seyir <span class="sp"><span class="rz mor">🤖 YZ önerisi</span>
+          <button class="btn kucuk" onclick="karar(this,true)">✓ Kabul</button><button class="btn kucuk" onclick="karar(this,false)">✗ Ret</button></span></div>
+        <div class="fark">
+          <div class="eski"><div class="ust">Mevcut (değerlendirme / plan)</div>Hiperglisemi. Sıvı, ilaç düzenlendi.</div>
+          <div class="yeni"><div class="ust">YZ önerisi</div><del>Hiperglisemi.</del> <ins>İlaç uyumsuzluğuna bağlı hiperglisemi ve klinik dehidratasyon (taşikardi, kuru mukozalar, Na 131) değerlendirildi.</ins> Sıvı <ins>replasmanı önerildi,</ins> <ins>metformin tedavisine uyum</ins> düzenlendi. <span class="dayanaksiz" title="Kaynakta karşılığı yok: kan gazı istenmemiş">Kan gazında asidoz saptanmadı.</span></div>
+        </div>
+      </div>
+
+      <div class="bol kilit">
+        <div class="bb">7 · Tedavi / reçete <span class="sp"><span class="rz gri">🔒 Reçeteden — YZ değiştiremez</span></span></div>
+        <div class="mt">Metformin 1000 mg tablet 2×1 · 30 gün</div>
+      </div>
+
+      <div class="bol" data-b="oneri">
+        <div class="bb">8 · Sonuç &amp; öneriler <span class="sp"><span class="rz mor">🤖 YZ önerisi</span>
+          <button class="btn kucuk" onclick="karar(this,true)">✓ Kabul</button><button class="btn kucuk" onclick="karar(this,false)">✗ Ret</button></span></div>
+        <div class="fark">
+          <div class="eski"><div class="ust">Mevcut</div>Kontrol 1 hafta.</div>
+          <div class="yeni"><div class="ust">YZ önerisi</div>Günde en az 2–2,5 L sıvı alımı, evde açlık ve tokluk kan şekeri takibi önerildi. <ins>İlacını düzenli kullanması gerektiği anlatıldı.</ins> Bulantı-kusma, bilinç değişikliği ya da nefes darlığında acile başvurması söylendi. Kontrol: 1 hafta sonra, açlık glukozu ve elektrolitlerle.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <div class="kutu">
+        <h6>🤖 YZ'nin kullanacağı kaynaklar</h6>
+        <div class="ic">
+          <ul class="kaynaklar">
+            <li><input type="checkbox" checked> Bu muayene (şikâyet, hikâye, bulgu, vital) <span class="sonuk">zorunlu</span></li>
+            <li><input type="checkbox" checked> Lab sonuçları (bu başvuru) <span class="sonuk">4 anormal</span></li>
+            <li><input type="checkbox"> Radyoloji raporları <span class="sonuk">yok</span></li>
+            <li><input type="checkbox" checked> Önceki 3 muayene özeti (onaylı) <span class="sonuk">2 adet</span></li>
+            <li><input type="checkbox" checked> Kronik tanılar, alerjiler, kullandığı ilaçlar</li>
+          </ul>
+          <div class="fld" style="margin-top:8px"><label>Üslup</label>
+            <div class="modlar"><span class="mod on">Resmî tıbbi</span><span class="mod">Kısa</span></div></div>
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>✅ Epikriz kontrol listesi <span class="sp sonuk" id="kontrolSay">6 / 8</span></h6>
+        <div class="ic">
+          <ul class="uyarilar kontrol">
+            <li>✓ Başvuru nedeni</li><li>✓ Öykü</li><li>✓ Muayene bulguları</li><li>✓ Tetkik sonuçları</li>
+            <li>✓ Ana tanı (ICD-10)</li><li>✓ Tedavi</li>
+            <li style="color:var(--kirmizi)">✗ Çıkış şekli</li>
+            <li style="color:var(--uyari)" id="oneriKontrol">◐ Öneriler / kontrol tarihi (YZ önerisi bekliyor)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>🛡 Güvenlik kuralları</h6>
+        <div class="ic sonuk" style="line-height:1.6">
+          • YZ yalnız <b>anlatı</b> bölümlerini (öykü, seyir, öneriler) yazar.<br>
+          • Tanı kodu, ilaç, doz ve tetkik değeri <b>sistemden</b> gelir; YZ değiştiremez.<br>
+          • Sunucu her cümleyi kaynak alanlarla eşler; karşılığı olmayan <span class="dayanaksiz" style="padding:0 3px">sarı</span> işaretlenir
+            (örnekte "kan gazında asidoz saptanmadı" — kan gazı istenmemiş).<br>
+          • Kabul edilmeyen öneri epikrize girmez; imza hekimde.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>🤖 gpt-oss-120b · 2,3 sn · 1 kontör</span><span>Kabul: <b id="kabulSay">0</b> / 3</span><span>İmza öncesi sarı işaretli cümle kalmamalı</span></div>
+</div>
+
+<div class="not">
+  <b>Mockup notları</b> — hasta verisi uydurmadır.<br>
+  • <b>Muayene özeti:</b> <code>POST /api/muayene/{id}/yz-ozet {mod: hekim|hasta|sevk, uzunluk}</code>. Bağlam YZ tanı önerisindekiyle aynı
+    anonim yoldan (<code>YzTaniOnerisi.Topla</code>). Model her cümle için kaynak alan etiketi döndürür; sunucu etiketi ve sayısal değerleri
+    kaynak metinde doğrular, doğrulanamayanı <b>dayanaksız</b> işaretler. Sonuç <code>muayene.ai_ozet</code>, onay <code>ai_ozet_onayli</code>
+    (+ onaylayan, zaman). Onaysız özet portal / epikriz / sevke gitmez.<br>
+  • <b>Epikriz:</b> mevcut deterministik derleme (<code>muayene_epikriz.html</code>) aynen kalır; YZ yalnız anlatı bölümlerine
+    <b>fark</b> önerir, her bölüm tek tek kabul / ret. Kilitli bölümler (tanı, reçete, tetkik değerleri) modele bağlam olarak gider
+    ama çıktısı kullanılmaz.<br>
+  • <b>Hasta dili</b> modu: tıbbi terimleri sadeleştirir, tanı kodu yazmaz, tedavi değişikliği önermez; portal ve bilgilendirme çıktısı içindir.<br>
+  • Kontör: özet 1, epikriz 1 (YZ Kontör ekranında yeni özellikler: <code>ozet</code>, <code>epikriz</code>; aç / kapa).<br>
+  • Dikkat listesi (eksik alan, tutarsızlık) kural + YZ karışık: yasal zorunlu alanlar kuraldan, klinik "düşünülmeli mi" soruları YZ'den.
+</div>
+
+<script>
+  const METIN = {
+    hekim: [
+      ['42 yaşında kadın hasta, <b>3 gündür halsizlik, çarpıntı ve susama</b> yakınmasıyla başvurdu.', 's'],
+      ['5 yıldır tip 2 DM tanısıyla metformin kullanıyor; <b>son 2 haftadır ilaç uyumu bozulmuş</b>.', 'h'],
+      ['Muayenede mukozalar kuru, taşikardik (<b>nabız 112/dk</b>, TA 105/65).', 'b v'],
+      ['Glukoz <b>386 mg/dL</b>, HbA1c %10,2, Na 131, idrar ketonu pozitif.', 'l'],
+      ['Tip 2 DM (E11.9) ve hacim azalması (E86) tanıları kondu; metformin düzenlendi, sıvı önerildi, 1 hafta sonra kontrol.', 't i'],
+      ['Kan gazında asidoz saptanmadı.', 'x'],
+    ],
+    hasta: [
+      ['3 gündür yorgunluk, kalp çarpıntısı ve çok su içme isteği nedeniyle geldiniz.', 's'],
+      ['Şeker ilacınızı son iki haftadır düzenli almadığınız için kan şekeriniz yükselmiş ve vücudunuz sıvı kaybetmiş.', 'h l'],
+      ['İlacınızı her gün sabah ve akşam yemekle birlikte alın, bol su için (günde 2–2,5 litre).', 'i'],
+      ['Evde şekerinizi ölçüp not edin. Kusma, bilinç bulanıklığı ya da nefes darlığı olursa hemen acile başvurun.', 'i'],
+      ['1 hafta sonra kontrole gelin.', 'i'],
+    ],
+    sevk: [
+      ['42 y K. Bilinen T2DM (metformin), 2 hf ilaç uyumsuzluğu.', 'h'],
+      ['Başvuru: 3 gün halsizlik, çarpıntı, polidipsi.', 's'],
+      ['FM: mukozalar kuru, taşikardi 112/dk, TA 105/65.', 'b v'],
+      ['Lab: Glu 386, HbA1c %10,2, Na 131, idrar keton (+).', 'l'],
+      ['Ön tanı: T2DM hiperglisemi + hacim azalması; DKA dışlanması için kan gazı önerilir.', 't'],
+    ],
+  };
+  const ETIKET = {s:['Ş','k-s'],h:['H','k-h'],b:['B','k-b'],v:['V','k-v'],l:['L','k-l'],t:['T','k-t'],i:['İ','k-i']};
+  let secMod = 'hekim';
+  function ciz(){
+    const m = document.getElementById('metin');
+    m.innerHTML = METIN[secMod].map(([c,k])=>{
+      if(k==='x') return `<span class="cm dayanaksiz" title="Kaynakta karşılığı yok: kan gazı istenmemiş — silin ya da düzeltin">${c}</span>`;
+      return `<span class="cm">${c}</span>` + k.split(' ').map(x=>`<span class="kyn ${ETIKET[x][1]}" title="Kaynak alanı">${ETIKET[x][0]}</span>`).join('');
+    }).join(' ');
+  }
+  function mod(m){ secMod=m; document.querySelectorAll('.mod[data-m]').forEach(x=>x.classList.toggle('on',x.dataset.m===m)); uret(); }
+  function uret(){
+    const y=document.getElementById('yukleniyor'), m=document.getElementById('metin');
+    y.hidden=false; m.style.opacity=.35;
+    setTimeout(()=>{ y.hidden=true; m.style.opacity=1; ciz(); onayli(false); }, 700);
+  }
+  function onayli(v){
+    document.getElementById('durumRz').className = 'rz ' + (v?'ok':'sari');
+    document.getElementById('durumRz').textContent = v ? '✓ Onaylandı — Dr. Elif Kaya 10:28' : 'Taslak — hekim onayı bekliyor';
+    document.getElementById('hastaya').classList.toggle('pas', !v);
+    document.getElementById('hastaya').title = v ? '' : 'Önce onaylayın';
+    document.getElementById('gecmisOnay').hidden = !v;
+  }
+  function onayla(){
+    if (secMod==='hekim' && document.querySelector('#metin .dayanaksiz')) {
+      if (!confirm('Kaynakta karşılığı olmayan (sarı) cümle var. Yine de onaylansın mı?')) return;
+    }
+    onayli(true);
+  }
+  function gez(e){
+    document.querySelectorAll('.gez span').forEach(x=>x.classList.toggle('on',x.dataset.g===e));
+    document.querySelectorAll('[data-e]').forEach(x=>x.hidden=x.dataset.e!==e);
+  }
+  function karar(btn, kabul){
+    const b = btn.closest('.bol'); b.classList.toggle('kabul', kabul); b.classList.toggle('ret', !kabul);
+    say();
+  }
+  function hepsi(k){ document.querySelectorAll('.bol[data-b]').forEach(b=>{b.classList.toggle('kabul',k);b.classList.toggle('ret',!k)}); say(); }
+  function say(){
+    const n = document.querySelectorAll('.bol.kabul').length;
+    document.getElementById('kabulSay').textContent = n;
+    const oneriKabul = document.querySelector('.bol[data-b="oneri"]').classList.contains('kabul');
+    const li = document.getElementById('oneriKontrol');
+    li.textContent = oneriKabul ? '✓ Öneriler / kontrol tarihi' : '◐ Öneriler / kontrol tarihi (YZ önerisi bekliyor)';
+    li.style.color = oneriKabul ? '' : 'var(--uyari)';
+    document.getElementById('kontrolSay').textContent = (oneriKabul ? 7 : 6) + ' / 8';
+  }
+  function yzEpikriz(){ document.querySelectorAll('.bol[data-b]').forEach(b=>{b.classList.remove('kabul','ret'); b.style.opacity=.4; setTimeout(()=>b.style.opacity=1,600)}); say(); }
+  ciz();
+</script>
+</body>
+</html>

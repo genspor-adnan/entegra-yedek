@@ -17815,3 +17815,224 @@ Poliklinik banko kapısından muayene kartına, lab istem/sonuç akışına ve m
   yerine **ünvan+ad+soyad**.
 * Yeni göç dosyaları: `920` (istem silme fn'leri), `921` (branş şablon seed),
   `922` (lab referans yaş/cinsiyet). Hastaneye yayınlandı (920–922 uygulandı).
+
+---
+
+## 28.09.2026 — Denetim düzeltmeleri (şube/kayıt erişimi, oturum, göç uygulayıcı)
+
+Ayrıntı ve kanıt: `DENETIM_DUZELTME_SONUCU_2026-09-28.md` (denetim: `DENETIM_2026-09-28.md`).
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| — | **Şubesiz oturum kapalı**: aktif şube yoksa şubeye bağlı her uç 403; istisna uçlar tek tek işaretlenir (`SinirliOturumaAcik`) | `null` şube "bütün şubeler" demek oluyordu |
+| — | **Aksiyon varsayılan yazmadır** (`AksiyonIste`); okuyan aksiyon `AksiyonGorIste` | Salt okuma şubesinde fiyat listesi üretilebiliyordu |
+| — | **Özel uçlarda kayıt kapsamı katalogdan** (`KayitErisimi`): kapsam dışı = 404 | Kuralı her uçta yeniden yazmak bir uçta unutulmak demekti |
+| — | **Rol kümesi istek başına DB'den**; tetkik izni `fn_lab_tetkik_izin_roller` (923) | Token'daki rol 30 dk eski kalıyordu, ek roller hiç sorulmuyordu |
+| — | **Zorunlu parola sunucuda** (`OturumKapisi`, `PAROLA_DEGISMELI`) | Yalnız arayüzde uygulanıyordu |
+| — | **İlk parola = TCKN son 4 + kayıtlı kanala tek kullanımlık kod** | TCKN son 4 tek başına 10.000 ihtimalli, sınırsız denemeli bir kapıydı |
+| — | **Refresh rotation tek transaction**; web sekmeler arası tek yenileme | Eşzamanlı 16 yenilemeden 15'i ayrı dal açıyordu |
+| — | **Göç + defter tek işlem, advisory kilit, özet/yöntem**; `kur.ps1` ve sunucu aynı kural | Yarım şema / deftersiz uygulama / çift uygulama mümkündü |
+| — | Veritabanı testleri yalnız `GENTEGRE_TEST_DB`; yoksa AÇIKÇA atlanır, zorunlu kipte kırmızı | Paylaşılan DB'ye sessiz düşüş ve "sessiz yeşil" |
+
+### Yapılanlar
+
+* Yeni göçler: `923` (rol kümesiyle tetkik izni), `924` (aykırı satırı olmayan 4
+  `NOT VALID` kısıtı doğrular). Yalnız izole test DB'de uygulandı; dev DB bekliyor.
+* `db/araclar/goc_uygula.ps1`, `yayin/goc_uygula.sh`, `db/araclar/goc_uzlastir.ps1`
+  (salt okunur defter raporu), `db/kurulum/aktarim_adimlari.txt`,
+  `db/kurulum/dis_veri_onkosullari.txt`; boş kurulum tohumunun tablo yokken
+  patlaması düzeltildi.
+* Web: geçici `/ben` hatası oturumu silmiyor; 72 ekran rota bazlı yükleniyor
+  (ana JS 2,49 MB → 1,56 MB); başvuru testlerinin taklitleri ortak ve tip denetimli.
+* API nullable uyarıları 14 → 0; test projesi `Gentegre.slnx`'te.
+
+## 28.09.2026 — Panel / check-up tek ücret satırı (925–926)
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| — | **Panelden istenen tetkik panelin hizmetiyle TEK satır ücretlenir** (TİT, hemogram…); doktor istemi penceresi de paneli tek satır gösterir | Kullanıcı: *"ücrete aktarıldığında tek satır gelmelidir… şu anda alt parametreleriyle geliyor"* |
+| — | **Check-up = paket hizmet** (`hizmet.paket` + `hizmet_paket`), başvuruda TEK ücret satırı; lab istemi paket içeriğinden açılır | Kullanıcı: *"check-up'lar da ücret satırında tek olmalı"* |
+| — | "Ücrette mi / serbest mi" sorusu ücret satırının **kapsamı** üzerinden (`fn_hizmet_paket_kapsam`: kök + ara panel + yaprak) | `fn_hizmet_paket_ac` yalnız yaprak döner; panel/check-up satırı eşleşmiyordu |
+
+### Yapılanlar
+
+* `925`: `fn_hizmet_paket_kapsam`; `fn_basvuru_istem_serbest_uygula` panel ve
+  check-up kapsamını tanır. `926`: "Check-up Paketleri" kategorisi + 5 paket
+  (Erkek Temel/Kapsamlı, Kadın Temel/Kapsamlı/40 Yaş Üstü), içerik SUT koduyla;
+  fiyat varsayılan satış listesine içerik toplamının %80'i (50 TL'ye yuvarlı),
+  listede satır varsa dokunulmaz. Yalnız izole test DB'de uygulandı.
+* API: bekleyen-istem/ücretlendir paneli tek satır verir; check-up içindeki
+  istem "ücrette" sayılır, ayrıca ücretlenmez. `BasvurudanIstemTamamlaAsync`
+  check-up satırından istem açar, parametreler en yakın panelle işaretlenir.
+* Test: `PaketUcretSatiriTestleri` (4).
+* Tanı ekleme (muayene): tanı gridinde seçim yalnız Tür ve Taraf. ICD arama
+  penceresi çok seçimli (tık işaretler/kaldırır, Shift aralık, "Seçilenleri
+  Ekle" sırayla ekler ve kapatır; hata alan satır işaretli kalır). Pencerede
+  Tür (Kesin / Ön Tanı → SKRS tür 3 + kesinlik 2) ve Taraf (Sağ/Sol/Bilateral)
+  seçicileri; son seçim `taniEkle` kullanıcı tercihinde. Uçlar:
+  `GET /api/muayene/tani-secenekleri`, `POST …/tani/{icd}` gövdesi
+  `{kesinlik, taraf, tur?}`.
+* Stok/hizmet arama: düz tık tekli, Ctrl ekle/çıkar, Shift aralık.
+* Hasta listesi: eski "Sigorta / Kurum" kolonu sunucuda varsayılan dışı
+  (istemci gizlemesi kaldırıldı - eski API ile kolon kayboluyordu).
+* Muayene kartı yerleşimi (kullanıcı): "Anamnez" → **Muayene**, "Fizik Muayene"
+  → **Şablon Muayene**. Muayene sekmesi solda şikâyet/hikâye · reçete ilaç
+  gridi (GenGrid, yeni `recete-satir` liste kaynağı; ＋ İlaç / işaretlileri Sil)
+  · Değerlendirme/Plan + Çıkış Şekli (AltGrup "Değerlendirme"); sağda tanı
+  gridi + bugünkü sonuçlar. Özgeçmiş/soygeçmiş/alışkanlık kartta yok (kolon
+  durur). Vital bulgular Tanı sekmesinde. e-Reçete ayrı sekmesi kaldırıldı.
+  Kart altyapısı: `SekmeParcalari` (alanlar / gömülü tablolar / altGrupCiz),
+  `detayGrupta.grup` çoklu ad, GenGrid `onIsaretliDegisti`.
+
+## 29.09.2026 — Reçete ve alerji kartları (mockup'lı), muayene düzeni
+
+* Mockup: `Ekranlar/Muayene/recete_karti.html`, `alerji_karti.html`.
+* `ReceteKarti` (web/bilesenler/recete): tür (renkli), muayene tanıları (salt
+  okunur), açıklama, ilaç gridi (`recete-satir`, satır düzeltme penceresi),
+  alerji/etkileşim paneli, aktif ilaçlar, imza/Medula (salt okunur);
+  düğmeler duruma göre (taslak: Kaydet/e-İmzala/Kopyala/Sil · imzalı:
+  Medula'ya Gönder). Yeni uç `PUT /api/recete/{id}/ilac/{satirId}` (yalnız
+  taslak; ilaç değişmez, doz/periyot/kullanım/süre/kutu/tarif).
+* `AlerjiKarti` (web/bilesenler/hasta): tür seçici, ilaç kataloğundan etken
+  arama (etken madde + ATC dolar), hızlı reaksiyon çipleri, şiddet, kaynak,
+  doğrulandı/aktif; sağda etkisi, aynı etkeni taşıyan ilaçlar, diğer
+  alerjiler. Silme yerine **Pasif yap** (aktif=0). "Kaydet ve yeni".
+* Liste ekranları (Reçeteler, Medula e-Reçete, Alerjiler) `ozelKart` ile bu
+  kartları açar; muayene şeridindeki Alerji / Aktif ilaç kutuları ve
+  muayenedeki reçete gridi de aynı kartları kullanır.
+* Muayene: dikte penceresi (3 alan, fare hangi alandaysa, açılınca dinler);
+  bağlam şeridi sadeleşti (tanı, tür, süre, bekleyen rozetleri kalktı; alerji
+  ve aktif ilaç kutuları tıklanınca ekle/düzenle); bölüm adı kodsuz.
+* Kronik tanı ve kullanılan ilaç kartları da mockup'lı (`KronikTaniKarti`,
+  `IlacKaydiKarti`; mockup `kronik_tani_karti.html`, `kullanilan_ilac_karti.html`):
+  ICD / ilaç kataloğundan arama, silme yerine "Geçmişe al" (durum 3 + bitiş) ve
+  "İlacı bıraktı" (aktif 0, uyum 3, bitiş); aynı ICD'de aktif kayıt varsa o
+  açılır (istemci kuralı); ilaçta hasta alerjisiyle madde çakışma uyarısı.
+  Listeler (Kronik Tanılar, Kullanılan İlaçlar) `ozelKart` ile bu kartları açar.
+* Geçmiş olay kartı mockup'lı (`GecmisOlayKarti`, mockup `gecmis_olay_karti.html`):
+  6 renkli tür (ameliyat/girişim → hizmet kataloğu kategori 5, aşı → aşı listesi
+  SKRS kodu, diğerleri serbest), "yalnız yıl" (1 Ocak saklanır, yalnız yıl
+  gösterilir), sağda tür renkli zaman çizgisi (tıklanan olay açılır); Sil yalnız
+  yanlış kayıt için. Liste (Geçmiş Olaylar) `ozelKart`.
+* **Muayene şablonları bölüm ve doktora göre** (mockup `muayene_sablon_listesi.html`,
+  `muayene_sablon_karti.html`): Şablonlar ekranının ilk sekmesi yeniden yazıldı —
+  Bölüm › Doktor ağacı, gruplu grid (varsayılan ⭐, 30 gün kullanım, son kullanım),
+  çipler (Benim / Bölüm ortak / Doktora özel / Varsayılanlar / Pasif), sağda önizleme;
+  kart 5 sekme (Genel · Alanlar · Önizleme · Kullanım · Geçmiş). `927`: `varsayilan`
+  (bölüm başına tek, kısmi benzersiz indeks) + `kaynak_sablon_id`; uçlar
+  `/api/muayene-sablon/{id}/kopyala|varsayilan|kullanim|gecmis`; kullanım
+  `muayene.sablon_id`'den. `928`: 921 şablonları bölüme bağlandı, 8 bölüme yeni şablon
+  (Acil, Göz, Genel Cerrahi, Endokrin, Gastro, Nefroloji, FTR, Anestezi) + genel
+  anamnez / sistem sorgusu; her bölümde ⭐ varsayılan. Doktorlar "Kopyala (bana)" ile
+  kendi şablonlarına alıp değiştirir.
+* **Doktor yalnız kendi şablonunu düzenler** (`929`, yetki `muayene.sablon_yonet` —
+  yönetici rolü): genel kart uçları "muayene-sablon" için
+  `MuayeneSablonUclari.YazmaKuraliAsync` çağırır (başkasının / bölüm ortak şablonu
+  değiştirme-silme yok, yeni şablon yalnız kendi adına, doktor alanı değiştirilemez);
+  bölüm varsayılanı yalnız yetkiliyle. Kart yetkisizde salt okunur + "Kopyala (bana)".
+  Şablon alanlarında seçenekler kartta çip olarak düzenlenir; detay yazımı `json`
+  alanlarını artık `::jsonb` ile yazar.
+* **Başhekim de şablon yönetir** (`930`): `muayene.sablon_yonet` başhekim rolüne
+  verildi (standart rol tanımı `StandartRolUclari` da taşır). Yönetici (admin) 929'dan
+  beri yetkili.
+* **Hekim tercihleri şablon kartında** (`931`): sık tanılar, reçete şablonları, istem
+  panelleri, metin makroları ve kurallar sayfanın ayrı sekmeleriydi ve bölüm/doktor
+  bilgisi taşımıyordu; artık muayene şablonunun detayları (`muayene_sablon_tani /
+  _recete / _panel / _makro / _kural`, log 1370-1374). Kapsam şablonunki, "Kopyala
+  (bana)" hepsini çoğaltır, yetki şablonunki. Muayeneye bölümündeki ortak şablonlar +
+  doktorun kendi şablonları + uygulanmış şablon uygulanır (`fn_muayene_sablon_kapsami`,
+  `GET /api/muayene-sablon/muayene/{id}/tercihler`). Kullanım: ICD aramasında
+  "📋 Şablon Tanıları", reçete gridinde "📋 Şablondan…" (gruptaki ilaçlar sırayla),
+  aktif `zorunlu_*` kuralları (hikâye / bulgu / vital / ek tanı) TAMAMLA'da denetlenir.
+  Tohum: 14 branşa sık tanı, 10 branşa istem paneli (yalnız boş şablona).
+  Paneller: istem ekranı Laboratuvar › "⭐ Şablon Panelleri" kategorisiyle açılır.
+  Makrolar: muayene alanında kısayol + boşluk/Tab metne açılır (şablon makroları +
+  kurum `metin_makro`, çakışmada şablonunki; alan elemanlarına `data-alan` eklendi).
+  İstem ekranında "Yükleniyor…" erken dönen dallarda kalıyordu (finally).
+  Makro ipucu: şikayet / hikâye / bulgular / değerlendirme alanlarının altında geçerli
+  kısayollar çip olarak (üzerine gelince açılacak metin); GenForm'a `alanIpucu` eklendi.
+  Çipe tık metni alana yazar: alan odaktaysa imlecin yerine, değilse sona; arada tek boşluk
+  (`makroEkle`). `alanIpucu` alanın yazıcısını da verir.
+* **Makro kullanım sayısı** (`932`): `muayene_sablon_makro.kullanim` eklendi (kurum
+  `metin_makro.kullanim` vardı ama artan yoktu). Muayenede makro alana yazılınca (ipucu
+  çipi ya da kısayol + boşluk) `POST /api/muayene-sablon/makro-kullanim {kaynak s|k, id}`
+  sayacı artırır; tercih yanıtı makronun kaynağını ve id'sini taşır. Şablon kartında
+  "Kullanım" kolonu salt okunur. Yan düzeltme: alerji / ilaç / kronik / şablon kartlarında
+  durum düğmeleri (Pasif yap, İlacı bıraktı…) kayıt okunmadan görünüyordu - yüklenirken tık
+  sürümsüz yazım gönderirdi; şablon kartında kilit bandı sahip bilinmeden çıkıyordu.
+* **Makro çipleri kullanıma göre sıralı**: tercih yanıtı `kullanim` taşır; çok kullanılan
+  önce, eşitlikte alana özel. Sıra sayfa açılırken okunur - tıkta çip yer değiştirmez.
+* **Doktorun şablonu önce** (`933`): `fn_muayene_sablon_kapsami` muayenenin doktorunun o
+  bölümde şablonu VARSA yalnız onları, yoksa bölüm ortakları döndürür (uygulanmış şablon her
+  durumda). Kurallar istisna (`p_kural = true`): bölüm ortak kuralları doktorun şablonu olsa
+  da uygulanır. Yeni `GET /api/muayene-sablon/muayene/{id}/sablonlar` öncelik sırası (doktorun ›
+  bölüm ⭐ › diğer, başka doktorun kişisel şablonu hariç) ve `onerilen`; rozet bölüm adından
+  tahmin yerine bunu gösterir (👤 doktorun / 🩺 bölüm), "Şablon Uygula" listesi aynı sırada.
+* **Şablon listesi: üst çubuk standart liste gibi**: standart `<Liste>`e çevirme denendi,
+  kullanıcı ağacı geri istedi. Ağaç + gruplu grid + önizleme (`MuayeneSablonListesi`) KALDI;
+  yalnız üst kısım GenGrid gibi: `sayfabas` başlık satırı (başlık · yol · sağda
+  `arac-cubugu`) ve 🔍 arama kutulu `cipler` şeridi. Kaynak kataloğunda Bölüm · Doktor ·
+  Kapsam (Doktora özel / Bölüm ortak / Genel) kolonları ve bölüm-önce varsayılan sıra kaldı.
+  `donguselImport` testi SCC tabanlı yapıldı: DFS zinciri gezinti sırasına bağlıydı, alakasız
+  import aynı eski kümeyi 20 "yeni döngü" diye raporluyordu; artık bilinen 34 dosyalık kümeye
+  katılan ya da ayrı oluşan döngü raporlanır.
+* Şablon kartı sekme sırası: Genel · Alanlar · Önizleme · Metin Makroları · Sık Tanılar ·
+  Reçete Şablonları · İstem Panelleri · Kurallar · Kullanım · Geçmiş.
+* **YZ önerisi: tanı · tetkik · ilaç** (kullanıcı: "ICD tanı arama ekranına YZ Önerisi…
+  kimlik no ad soyad kullanılmaz" + "tetkik istem ve reçeteye de"). Uçlar
+  `POST /api/muayene/{id}/yz-tani-onerisi`, `/yz-tetkik-onerisi`, `/yz-ilac-onerisi`.
+  Bağlam SUNUCUDA toplanır (`YzTaniOnerisi.Topla`): yaş, cinsiyet, bölüm, şikâyet, hikâye,
+  bulgular, son vital, mevcut/kronik tanılar, alerji ve ilaç etken maddeleri, istenmiş
+  tetkikler, reçete; ad/soyad/kimlik no/doğum tarihi/hekim adı GİTMEZ, serbest metin
+  `PiiMaske` + hasta/anne/baba/hekim adlarının sözcük olarak silinmesiyle süzülür.
+  Doğrulama: ICD kodu katalogda (aktif) yoksa atılır, ad katalogdan; lab önerisi modele
+  verilen aktif tetkik/panel listesinden KOD; görüntüleme modalite + bölge → radyoloji
+  hizmetinde eşleşme (eş anlamlılar: batın/abdominal, akciğer/toraks…); ilaç etken madde →
+  katalog ürünleri (≤3), alerjiyle çakışan sunucuda elenir, doz önerilmez. Kontör rehberle
+  ortak (`KontorDurumAsync`/`KontorDusAsync` internal; günlük sınır "YZ önerisi" hareketlerini
+  de sayar), başarısız çağrı ücretsiz. Ekran: ICD aramada "🤖 YZ Önerisi" (gerekçe + olasılık
+  rozeti + kırmızı bayrak / eksik bilgi notu), istem ekranında "🤖 YZ Önerisi" kategorisi
+  (lab + görüntüleme birlikte, grup türden), reçete ilaç aramasında aynı düğme. Model anahtarı
+  yoksa uç "yapılandırılmamış" iş kuralı hatası döner (dev'de anahtar yok).
+* **OpenAI uyumlu model sağlayıcısı (test)**: `Ai:Saglayici = "openai"` →
+  `OpenAiUyumluSaglayici` (/chat/completions; Ollama / LM Studio yerel anahtarsız, Groq /
+  OpenRouter anahtarlı). Anahtar `AI_API_KEY` → `Ai:ApiAnahtar` → `gizli/ai-anahtar-openai.txt`
+  (git dışı). Geliştirme ayarı Groq `llama-3.3-70b-versatile`'a bağlı; varsayılan hâlâ
+  Anthropic. Aynı sağlayıcıyı YZ rehberi de kullanır. Groq hesabında llama-3.3 yok →
+  `openai/gpt-oss-120b` + `Ai:AkilYurutme = "low"` (`reasoning_effort`; düşünme jetonu
+  çıktı sınırını yemesin). Uydurma muayeneyle uçtan uca denendi (tanı ~1,5 sn, tetkik ~0,9 sn,
+  ilaç ~0,9 sn). Denemeden çıkan düzeltmeler: kırmızı bayrak kod değil cümle; ilaç yönergesi
+  ilk basamak/kılavuz, rezerv-toksik yok, Türkçe INN yazımı; katalog aramasına İngilizce→
+  Türkçe yazım yedeği (`TurkceYazim`: azithromycin→azitromisin); alerji elemesine çapraz
+  gruplar (penisilin↔amoksisilin, NSAİİ, sülfonamid, sefalosporin, kinolon, makrolid);
+  ürünlerde ağızdan form önce.
+* **YZ Kontör & Kullanım ekranı** (`934`, mockup `Ekranlar/Ayarlar/yz_kontor_kullanim.html`;
+  kullanıcı: "KK girip benden kontör alabilecek müşteri" + "3 değişik plan"). Menü Yönetim ›
+  YZ Kontör & Kullanım (`/yz-kontor`, yetki `ai.kontor`; satın alma aksiyonu
+  `ai.kontor_satin_al` - yönetici, başhekim). Göstergeler, 30 günlük kullanım (özelliğe göre),
+  Hareketler, Kullanıcıya Göre, Plan & Faturalar, Ayarlar (kurum/kullanıcı günlük sınırı,
+  uyarı eşiği, özellik aç/kapa, otomatik ek paket; çağrı ücreti satıcının), Gizlilik.
+  Kullanım izi: `ai_kontor_hareket` + özellik / muayene / süre / başarılı / sipariş; başarısız
+  çağrı 0 tutarla yazılır. Kontör kapısı (`KontorDurumAsync`) özellik kapalıysa ve kullanıcı
+  sınırı dolmuşsa da durdurur. Planlar `ai_plan` (Başlangıç 500 / Profesyonel 2.000 / Kurumsal
+  10.000 kontör; fiyatlar örnek), ek paketler `ai_paket`, `ai_abonelik`, `ai_siparis`.
+  SATIN ALMA: sipariş sunucuda fiyatlanır (istemci yalnız kod), kart verisi hiçbir tabloya
+  girmez; kontörü yalnız `AiKontorUclari.SiparisSonuclandirAsync` yükler (idempotent - aynı
+  bildirim iki kez gelirse bir kez). Ödeme kuruluşu seçilmedi: `Odeme:Saglayici = simulasyon`
+  (varsayılan) iken ödeme adımı kart alanı olmadan "başarılı / reddedildi" seçer ve simülasyon
+  ucu webhook'un yerine geçer. Kalan: gerçek ödeme kuruluşu + webhook, otomatik yenileme işi,
+  otomatik ek paket alımı, merkezi (çok müşterili) sipariş servisi, öneri kabul oranı.
+* **iyzico Ödeme Formu** (`Odeme:Saglayici = "iyzico"`): `IyzicoIstemcisi` (SDK yok; IYZWSv2
+  HMAC-SHA256 imza; `checkoutform/initialize` + `checkoutform/auth/ecom/detail`). Sipariş iyzico
+  formunu açar (tutar KDV dahil, sepet/konuşma no = sipariş, yıllık planda 1/2/3/6 taksit),
+  token siparişte; müşteri iyzico sayfasında öder, iyzico tarayıcıyı `POST /api/ai/kontor/
+  iyzico/donus`'a (AllowAnonymous) döndürür, API sonucu iyzico'ya SORAR ve `Dogrula`
+  (SUCCESS + aynı sipariş no + aynı tutar + fraud=1) geçerse kontörü yükler, sonra
+  `/yz-kontor?siparis=ID` ekranı sonuç penceresi açar. Anahtar `IYZICO_API_KEY` /
+  `IYZICO_SECRET_KEY` ya da `gizli/iyzico-anahtar.txt` (2 satır, git dışı); adresler
+  `Odeme:Iyzico` (sandbox varsayılan). Dev hâlâ simülasyonda (anahtar bekleniyor).
+  Kalan: iyzico webhook (async bildirim), abonelik (iyzico Subscription API) ile otomatik yenileme.

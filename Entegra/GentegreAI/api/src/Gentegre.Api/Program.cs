@@ -29,6 +29,12 @@ if (args.Contains("--yardim-dizin"))
 
 var kurucu = WebApplication.CreateBuilder(args);
 
+// ARKA PLAN ISCILERI (bildirim, zamanli is, cihaz/ORU dinleyicileri) test
+//   sunucusunda KAPATILABILIR: `ArkaPlan:Kapali=true`. Butunlesme testleri
+//   gercek SMS/e-posta gondermemeli, cihaz portu dinlememeli (denetim
+//   28.09.2026 - test sunucusunda dis entegrasyon yok).
+var arkaPlanAcik = !kurucu.Configuration.GetValue<bool>("ArkaPlan:Kapali");
+
 // Turkce siralama/bicimlendirme - InvariantGlobalization kapali (Directory.Build.props).
 var kultur = new CultureInfo("tr-TR");
 CultureInfo.DefaultThreadCurrentCulture = kultur;
@@ -59,7 +65,7 @@ kurucu.Services.AddScoped<BildirimDeposu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimHesaplari>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimGondericiFabrikasi>();
 kurucu.Services.AddHttpClient("bildirim");
-kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
@@ -80,7 +86,7 @@ kurucu.Services.AddHttpClient("katalog");
 //   Isci SINGLETON (hosted) ama elle calistirma ucundan da cagriliyor -
 //   bu yuzden ayrica singleton olarak kaydedilip hosted servis ondan alinir.
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.ZamanliIsIscisi>();
-kurucu.Services.AddHostedService(s => s.GetRequiredService<Gentegre.Api.Servisler.ZamanliIsIscisi>());
+if (arkaPlanAcik) kurucu.Services.AddHostedService(s => s.GetRequiredService<Gentegre.Api.Servisler.ZamanliIsIscisi>());
 kurucu.Services.AddScoped<KisiDeposu>();
 kurucu.Services.AddScoped<StokDurumDeposu>();
 kurucu.Services.AddScoped<RandevuAyarDeposu>();
@@ -131,9 +137,21 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisLabServisi>();
 kurucu.Services.AddHttpClient("ai");
 kurucu.Services.AddSingleton(kurucu.Configuration.GetSection("Ai")
     .Get<Gentegre.Api.Servisler.ModelSecenekleri>() ?? new Gentegre.Api.Servisler.ModelSecenekleri());
-kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IModelSaglayici,
-                             Gentegre.Api.Servisler.AnthropicSaglayici>();
+// SAGLAYICI SECIMI: Ai:Saglayici = "openai" -> OpenAI uyumlu uc (Ollama/LM Studio
+//   yerel, Groq/OpenRouter bulut; test/ucretsiz). Varsayilan Anthropic.
+if (string.Equals(kurucu.Configuration["Ai:Saglayici"], "openai", StringComparison.OrdinalIgnoreCase))
+    kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IModelSaglayici,
+                                 Gentegre.Api.Servisler.OpenAiUyumluSaglayici>();
+else
+    kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IModelSaglayici,
+                                 Gentegre.Api.Servisler.AnthropicSaglayici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberModeli>();
+// ODEME (934): iyzico Odeme Formu - anahtarlar IYZICO_API_KEY / IYZICO_SECRET_KEY ya da
+//   gizli/iyzico-anahtar.txt; Odeme:Saglayici = iyzico | simulasyon (varsayilan).
+kurucu.Services.AddHttpClient("odeme");
+kurucu.Services.AddSingleton(kurucu.Configuration.GetSection("Odeme:Iyzico")
+    .Get<Gentegre.Api.Servisler.IyzicoSecenekleri>() ?? new Gentegre.Api.Servisler.IyzicoSecenekleri());
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IyzicoIstemcisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
 // YARDIM DİZİNİ (871): dokuman/yardim/*.md belgeleri bellekte dizinlenir (tek örnek);
 //   Ai:YardimKlasoru ile klasör verilebilir. Belge yoksa asistan katalogla çalışır.
@@ -143,18 +161,18 @@ kurucu.Services.AddSingleton(s => new Gentegre.Api.Servisler.Yardim.YardimDizini
     s.GetRequiredService<ILogger<Gentegre.Api.Servisler.Yardim.YardimDizini>>()));
 // AI KONTROLLU ONERI (449): kayittaki eksikleri isaret eder, yazmaz.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.OneriServisi>();
-kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 // TELERADYOLOJI TESLIMI (814): ORU uretici + MLLP istemci + kuyruk iscisi.
 //   Istemci TEK ORNEK: yalniz TCP yapiyor, durum tasimiyor.
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MllpIstemci>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradTeslimServisi>();
-kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeslimKuyrukIscisi>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeslimKuyrukIscisi>();
 // GELEN ORU (817): disaridan gelen rapor. Dinleyici AYRI - cihaz portu lab
 //   analizorune, bu teleradyoloji raporuna bakiyor; port ayardan gelir.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradGelenServisi>();
 // PORTAL DAVETI (822): jeton uretimi + bildirim kuyrugu - TEK yer.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PortalDavetServisi>();
-kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeleradOruDinleyici>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeleradOruDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddScoped<UtsDeposu>();
@@ -167,6 +185,10 @@ kurucu.Services.AddSingleton<LogDeposu>();
 kurucu.Services.AddScoped<KimlikServisi>();
 kurucu.Services.AddScoped<ParolaSifirlamaServisi>();
 kurucu.Services.AddScoped<BaglamCozucu>();
+// Ozel uclarin tek kayit erisim kapisi (denetim 28.09.2026 #3).
+kurucu.Services.AddScoped<KayitErisimi>();
+// Doküman işlemlerinin tek erişim kapısı (tekrar denetim 28.09.2026 #1).
+kurucu.Services.AddScoped<DokumanErisimi>();
 kurucu.Services.AddSingleton<JwtUretici>();
 kurucu.Services.AddSingleton<YetkiCozucu>();
 
@@ -180,6 +202,19 @@ kurucu.Services.ConfigureHttpJsonOptions(o =>
 });
 
 var guvenlik = kurucu.Configuration.GetSection("Guvenlik").Get<GuvenlikAyarlari>() ?? new();
+
+// ISTEMCI IP'SI (denetim 28.09.2026 #5): nginx arkasinda RemoteIpAddress
+//   hep 127.0.0.1'dir - IP bazli deneme siniri herkesi tek istemci sayardi.
+//   X-Forwarded-For YALNIZ guvenilen proxy'den (varsayilan loopback) kabul
+//   edilir ve yalniz SON atlama (proxy'nin gordugu adres) alinir: istemcinin
+//   basliga kendi yazdigi adresler dikkate alinmaz.
+kurucu.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor;
+    o.ForwardLimit = 1;
+    foreach (var adres in guvenlik.GuvenilenProxyler)
+        if (System.Net.IPAddress.TryParse(adres, out var ip)) o.KnownProxies.Add(ip);
+});
 
 kurucu.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
@@ -248,10 +283,14 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.GelenBelgeAktar>();
 var uygulama = kurucu.Build();
 
 // ------------------------------------------------------------------- boru hatti ----
+uygulama.UseForwardedHeaders();
 uygulama.UseMiddleware<HataAraKatmani>();
 uygulama.UseCors();
 uygulama.UseAuthentication();
 uygulama.UseAuthorization();
+// OTURUM KAPISI (denetim 28.09.2026 #4): pasif hesap ve zorunlu parola
+//   degisimi SUNUCUDA - istemcideki yonlendirme tek basina koruma degildi.
+uygulama.UseMiddleware<OturumKapisi>();
 
 if (uygulama.Environment.IsDevelopment())
     uygulama.MapOpenApi();
@@ -294,6 +333,8 @@ uygulama.BildirimUclariniEkle();
 uygulama.KatalogUclariniEkle();
 uygulama.MuayeneUclariniEkle();
 uygulama.ReceteUclariniEkle();
+uygulama.MuayeneSablonUclariniEkle();
+uygulama.AiKontorUclariniEkle();
 uygulama.EnabizUclariniEkle();
 uygulama.ItsUclariniEkle();
 uygulama.ZamanliIsUclariniEkle();

@@ -83,7 +83,7 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
             returning id
             """, [hastaId, belgeId, asiId, doz], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_doz_IKI_KEZ_yazilamaz_ve_iptal_kaydi_SILMEZ()
     {
         if (!_olgu.Baglandi(nameof(Ayni_doz_IKI_KEZ_yazilamaz_ve_iptal_kaydi_SILMEZ))) return;
@@ -114,7 +114,7 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, asiId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Paket_207_REHBERDEKI_alanlarla_uretilir()
     {
         if (!_olgu.Baglandi(nameof(Paket_207_REHBERDEKI_alanlarla_uretilir))) return;
@@ -154,7 +154,7 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, asiId, belgeId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task SKRS_kodu_olmayan_asi_ASI_OGESI_URETMEZ()
     {
         if (!_olgu.Baglandi(nameof(SKRS_kodu_olmayan_asi_ASI_OGESI_URETMEZ))) return;

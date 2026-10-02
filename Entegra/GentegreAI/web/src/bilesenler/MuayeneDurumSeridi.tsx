@@ -60,16 +60,18 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
 
   return (
     <div className="muayene-uyari muayene-durum">
-      {uyari && (
-        <span className={`rozet ${uyari.startsWith('PANİK') ? 'hata' : 'uyari'}`}>
-          {uyari}
-        </span>
-      )}
       {/* ANA TANI ZORUNLU: e-Nabız 103 paketi ve provizyon onu bekler. */}
       <span className={anaTani ? 'rozet olumlu' : 'rozet uyari'}>
         {anaTani ? `Ana tanı: ${anaTani}` : 'Ana tanı girilmedi'}
       </span>
       {tani > 1 && <span className="sonuk">{tani} tanı</span>}
+      {/* UYARI (Sonuç geldi / panik / alerji) "sonuç bekliyor"un SOLUNDA
+          (kullanici): sonuc rozetleri yan yana okunur. */}
+      {uyari && (
+        <span className={`rozet ${uyari.startsWith('PANİK') ? 'hata' : 'uyari'}`}>
+          {uyari}
+        </span>
+      )}
       {bekleyen > 0 && <span className="rozet uyari">{bekleyen} sonuç bekliyor</span>}
       {/* Sure de ROZET (kullanici): banttaki diger olculer rozet, sure duz
           metin kaldigi icin bandin ortasinda kayboluyordu. */}

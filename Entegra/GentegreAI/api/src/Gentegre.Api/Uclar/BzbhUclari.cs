@@ -120,7 +120,9 @@ public static class BzbhUclari
                  where id = @p0
                 """, null, [id],
                 o => new { vaka = o.GetInt32(0),
-                           belirti = o.IsDBNull(1) ? (DateTime?)null : o.GetDateTime(1) }, iptal)!;
+                           belirti = o.IsDBNull(1) ? (DateTime?)null : o.GetDateTime(1) }, iptal)
+                // Bu arada silinmis kayit: sessiz null degil, 404.
+                ?? throw GentegreHatasi.Bulunamadi("Bildirim bulunamadı.");
 
             var eksik = new List<AlanHatasi>();
             if (son.vaka == 0) eksik.Add(new("vakaTipi", "Vaka tipi seçilmeli (şüpheli / olası / kesin)."));

@@ -92,7 +92,7 @@ public static partial class TeleradUclari
             VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("telerad.faturala");
+            baglam.AksiyonGorIste("telerad.faturala");
 
             await using var baglanti = await veri.AcAsync(iptal);
             return Results.Ok(await OzetAsync(baglanti, kurumId, baslangic, bitis, iptal));

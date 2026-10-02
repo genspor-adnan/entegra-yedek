@@ -1267,8 +1267,8 @@
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 179
-    Top = 60
+    Left = 195
+    Top = 92
     ParamData = <
       item
         Name = 'Par'
@@ -1509,8 +1509,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 37
-    Top = 54
+    Left = 61
+    Top = 38
     object infoMenu: TMenuItem
       Caption = 'info'
       ImageIndex = 53

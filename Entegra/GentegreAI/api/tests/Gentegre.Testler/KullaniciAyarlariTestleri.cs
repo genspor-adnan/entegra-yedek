@@ -18,7 +18,7 @@ public class KullaniciAyarlariTestleri : IClassFixture<VeritabaniOlgusu>
     private readonly VeritabaniOlgusu _olgu;
     public KullaniciAyarlariTestleri(VeritabaniOlgusu olgu) => _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Baskasinin_oturumu_kapatilamaz()
     {
         if (!_olgu.Baglandi(nameof(Baskasinin_oturumu_kapatilamaz))) return;
@@ -51,7 +51,7 @@ public class KullaniciAyarlariTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ek_rol_yetkiyi_artirir_ve_en_yuksek_tavan_kazanir()
     {
         if (!_olgu.Baglandi(nameof(Ek_rol_yetkiyi_artirir_ve_en_yuksek_tavan_kazanir))) return;
@@ -106,7 +106,7 @@ public class KullaniciAyarlariTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sistem_rolu_silinemez()
     {
         if (!_olgu.Baglandi(nameof(Sistem_rolu_silinemez))) return;

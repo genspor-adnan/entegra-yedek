@@ -50,7 +50,7 @@ public sealed class BelgeTahsilatGorunumuTestleri(VeritabaniOlgusu olgu)
         return (hasta, avans);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Avans_mahsubu_KENDI_turuyle_ve_DAGITILAN_tutarla_gorunur()
     {
         if (!_olgu.Baglandi(nameof(Avans_mahsubu_KENDI_turuyle_ve_DAGITILAN_tutarla_gorunur)))
@@ -85,7 +85,7 @@ public sealed class BelgeTahsilatGorunumuTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Avans_belgeye_baglansa_bile_IKI_KEZ_gorunmez()
     {
         if (!_olgu.Baglandi(nameof(Avans_belgeye_baglansa_bile_IKI_KEZ_gorunmez))) return;
@@ -114,7 +114,7 @@ public sealed class BelgeTahsilatGorunumuTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Normal_tahsilat_KENDI_turuyle_kalir()
     {
         if (!_olgu.Baglandi(nameof(Normal_tahsilat_KENDI_turuyle_kalir))) return;
@@ -148,7 +148,7 @@ public sealed class BelgeTahsilatGorunumuTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Avans_turu_ELLE_secilemez_kasa_kartinda_cikmaz()
     {
         if (!_olgu.Baglandi(nameof(Avans_turu_ELLE_secilemez_kasa_kartinda_cikmaz))) return;

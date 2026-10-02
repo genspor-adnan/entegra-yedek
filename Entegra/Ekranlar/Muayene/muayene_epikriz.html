@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Epikriz Sekmesi — Muayene Kartı — Uzman Hekim — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+
+  /* ---- EPIKRIZ SEKMESI ---- */
+  .epk{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:0;background:#f4f5f7}
+  @media(max-width:1100px){.epk{grid-template-columns:1fr}}
+  .epk-sol{padding:10px 12px;border-right:1px solid var(--line2)}
+  .epk-sag{padding:10px 12px;background:#fafcfe;display:flex;flex-direction:column;gap:10px}
+  .earac{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .earac .durum{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .bol{background:#fff;border:1px solid var(--line2);border-radius:4px;margin:0 0 8px;overflow:hidden}
+  .bol .bb{display:flex;align-items:center;gap:8px;padding:5px 10px;background:linear-gradient(#f6f9fc,#eaf0f6);
+    border-bottom:1px solid var(--line2);font-size:11px;font-weight:bold;color:#2c4a6b}
+  .bol .bb .kyn{font-weight:normal;color:var(--muted);font-size:10.5px}
+  .bol .bb .sp{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .bol .mt{padding:8px 10px;line-height:1.6;white-space:pre-wrap;min-height:34px}
+  .bol .mt .an{background:#fff3cd;border-radius:2px;padding:0 2px}
+  .bol.duz .bb:after{content:"elle düzenlendi";margin-left:6px;font-weight:normal;font-size:9.5px;color:#8a6218;
+    background:#fdf6e3;border:1px solid #f2ddbf;border-radius:8px;padding:0 6px}
+  .mini{border:1px solid var(--line);border-radius:3px;padding:2px 7px;font-size:10.5px;background:#fff;color:#4d5d6e}
+  .kyl{list-style:none;margin:0;padding:0}
+  .kyl li{display:flex;gap:6px;align-items:center;padding:3px 0;font-size:11.5px;border-bottom:1px dashed var(--line2)}
+  .kyl li .sonuk{margin-left:auto}
+  .blk2 h6{margin:0 0 6px;font-size:11px;color:#2c4a6b;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .a4{background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px rgba(20,40,70,.12);padding:12px 14px;font-size:9.5px;line-height:1.5;aspect-ratio:1/1.35;overflow:hidden}
+  .a4 .ab{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:4px;margin-bottom:6px}
+  .a4 h5{margin:6px 0 2px;font-size:9.5px;color:var(--navy);text-transform:uppercase}
+  .a4 .imza{margin-top:10px;text-align:right;color:var(--muted)}
+  .gon{display:grid;grid-template-columns:1fr auto;gap:4px 8px;font-size:11.5px}
+  .gon .k{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Muayene — Mehmet Kaya · 58 E · Dahiliye <span class="sp">Protokol 2026/20390 · Uzm. Dr. Ali Koç · başladı 10:28 · 12 dk · muayene.id 8812</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn ok">✔ Muayeneyi Tamamla</div>
+    <div class="sepv"></div><div class="btn">💊 e-Reçete</div><div class="btn">🔬 İstem</div><div class="btn">📄 Rapor</div><div class="btn">↗ Sevk / Konsültasyon</div><div class="btn">🗓 Kontrol Randevusu</div>
+    <div class="sepv"></div><div class="btn">📋 Şablon ▾</div><div class="btn">📋 Önceki muayeneden kopyala</div><div class="btn">🎙 Dikte</div><div class="btn">🤖 AI Özet</div>
+    <div class="sepv"></div><div class="btn">🖨 Muayene Özeti</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4" style="background:#fff8f0">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">Mehmet Kaya · 12345678901 · 58 E · SGK</div></div>
+    <div class="fld"><label>Alerji / Kronik</label><div class="inp ro"><span class="rz kir">Alerji: yok</span> <span class="rz sari">DM tip 2 (E11)</span> <span class="rz sari">HT (I10)</span> <span class="rz sari">Hiperlipidemi</span></div></div>
+    <div class="fld"><label>Aktif ilaçlar</label><div class="inp ro">Metformin 1000 2×1 · Ramipril 5 1×1 · Atorvastatin 20 1×1 <span class="sonuk">· e-Nabız ✔</span></div></div>
+    <div class="fld"><label>Bugün</label><div class="inp ro">Acilden yönlendirme · <span class="rz kir">Troponin 412 panik</span> · <span class="rz ok">EKG çekildi</span></div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme">Muayene</div><div class="sekme">Şablon Muayene</div><div class="sekme">Vital Bulgular</div><div class="sekme">İstem &amp; Sonuçlar</div><div class="sekme">Rapor</div><div class="sekme">Sevk / Konsültasyon</div><div class="sekme on">Epikriz <span class="rz sari" style="margin-left:4px">taslak</span></div><div class="sekme">İşlem &amp; Ücret</div><div class="sekme">Geçmiş</div><div class="sekme">Dosyalar</div>
+  </div>
+
+  <!-- EPIKRIZ: muayenenin hasta / sevk edilen hekim için ÖZETİ. Bölümler kartın
+       kendi verisinden DERLENİR (her bölümün kaynağı başlıkta yazar); hekim
+       düzenler, imzalar. İmzadan sonra metin kilitlenir; e-Nabız'a ve hasta
+       portalına gider. -->
+  <div class="epk">
+    <div class="epk-sol">
+      <div class="earac">
+        <div class="btn primary">⟳ Muayeneden derle</div>
+        <div class="btn">🤖 AI ile sadeleştir</div>
+        <div class="btn">📋 Şablon ▾</div>
+        <div class="sepv"></div>
+        <div class="btn ok">✍ e-İmzala</div>
+        <div class="btn">🖨 Yazdır / PDF</div>
+        <div class="btn">📤 e-Nabız'a gönder</div>
+        <div class="btn">📱 Hastaya gönder</div>
+        <div class="durum"><span class="rz sari">Taslak</span><span class="sonuk">son derleme 10:41</span></div>
+      </div>
+
+      <div class="bol"><div class="bb">1 · Başvuru nedeni / şikâyet <span class="kyn">← Muayene › Şikâyet</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">Göğüste baskı hissi, 2 saattir; sol kola yayılıyor, terleme.</div></div>
+
+      <div class="bol duz"><div class="bb">2 · Öykü <span class="kyn">← Hikâye + özgeçmiş + alışkanlık</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">İstirahatte başlayan retrosternal ağrı, 20 dk sürüp tekrarlıyor; nefes darlığı eşlik ediyor. DM tip 2 (2018), HT (2015), hiperlipidemi. Apendektomi (1998). Sigarayı 3 yıl önce bırakmış (20 p/y). Babada MI (61 y).</div></div>
+
+      <div class="bol"><div class="bb">3 · Fizik muayene ve vital bulgular <span class="kyn">← Şablon Muayene + Vital</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">TA <span class="an">158/96 mmHg</span>, nabız 96/dk, SpO₂ %95, ateş 36,8 °C.
+Kardiyovasküler: ritmik, üfürüm yok. Solunum: bazallerde ince raller. Diğer sistemler olağan.</div></div>
+
+      <div class="bol"><div class="bb">4 · Tetkik sonuçları <span class="kyn">← İstem &amp; Sonuçlar (yalnız seçilenler)</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">Troponin I: <span class="an">412 ng/L (PANİK, ref &lt;19)</span> · CK-MB 38 U/L ↑ · Glukoz 214 mg/dL ↑ · HbA1c %8,4 ↑
+EKG: V1–V4'te ST elevasyonu.</div></div>
+
+      <div class="bol"><div class="bb">5 · Tanılar <span class="kyn">← Muayene › Tanı gridi</span>
+        <span class="sp"><span class="mini">↻</span></span></div>
+        <div class="mt"><b>I21.0</b> Akut transmural miyokard enfarktüsü, ön duvar (ana tanı)
+E11.9 Tip 2 diyabet · I10 Esansiyel hipertansiyon</div></div>
+
+      <div class="bol"><div class="bb">6 · Uygulanan tedavi / reçete <span class="kyn">← Reçete + uygulanan işlemler</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">Asetilsalisilik asit 300 mg çiğnetildi, klopidogrel 600 mg yükleme, heparin 5000 IU iv.
+Reçete R-2026-000142: —</div></div>
+
+      <div class="bol"><div class="bb">7 · Sonuç ve öneriler <span class="kyn">← Değerlendirme / Plan + Çıkış şekli</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">Akut ön duvar MI tanısıyla primer PKG için kardiyoloji kliniğine sevk edildi. Hasta ve yakınına bilgi verildi.
+Çıkış şekli: <b>Sevk</b> — Ankara Şehir Hastanesi Kardiyoloji (112 ambulans ile).</div></div>
+
+      <div class="bol"><div class="bb">8 · Kontrol / sevk <span class="kyn">← Sevk + Kontrol randevusu</span>
+        <span class="sp"><span class="mini">↻</span><span class="mini">✎</span></span></div>
+        <div class="mt">Sevk: Kardiyoloji (acil). Taburculuk sonrası Dahiliye kontrolü: 2 hafta (DM ve HT düzenlemesi).</div></div>
+    </div>
+
+    <div class="epk-sag">
+      <div class="blk2">
+        <h6>Epikrize girecekler</h6>
+        <ul class="kyl">
+          <li>☑ Şikâyet · öykü <span class="sonuk">Muayene</span></li>
+          <li>☑ Özgeçmiş · alışkanlık <span class="sonuk">tıbbi özet</span></li>
+          <li>☑ Fizik muayene <span class="sonuk">6 sistem</span></li>
+          <li>☑ Vital <span class="sonuk">son ölçüm</span></li>
+          <li>☑ Anormal / panik sonuçlar <span class="sonuk">4</span></li>
+          <li>☐ Normal sonuçlar <span class="sonuk">18</span></li>
+          <li>☑ Radyoloji / EKG raporu <span class="sonuk">1</span></li>
+          <li>☑ Reçete ve uygulanan ilaçlar</li>
+          <li>☐ Aktif ilaç listesi (kronik)</li>
+        </ul>
+        <div class="sonuk" style="margin-top:4px">Seçim değişince "⟳ Muayeneden derle" yeniden oluşturur; elle düzenlenen bölüm korunur (sorulur).</div>
+      </div>
+
+      <div class="blk2">
+        <h6>Önizleme (A4)</h6>
+        <div class="a4">
+          <div class="ab"><b>EPİKRİZ</b><span>Protokol 2026/20390 · 29.09.2026</span></div>
+          <div><b>Mehmet Kaya</b> · 58 E · TC 123******01 · SGK</div>
+          <div>Dahiliye · Uzm. Dr. Ali Koç · 10:28–10:52</div>
+          <h5>Başvuru nedeni</h5>Göğüste baskı hissi, 2 saattir…
+          <h5>Tanılar</h5>I21.0 Akut ön duvar MI (ana) · E11.9 · I10
+          <h5>Tetkik</h5>Troponin I 412 ng/L (panik) · EKG: V1–V4 ST↑
+          <h5>Sonuç</h5>Primer PKG için kardiyolojiye sevk…
+          <div class="imza">e-İmza: — (taslak)</div>
+        </div>
+      </div>
+
+      <div class="blk2">
+        <h6>Gönderim</h6>
+        <div class="gon">
+          <span class="k">İmza</span><span>—</span>
+          <span class="k">e-Nabız (epikriz)</span><span class="rz">bekliyor</span>
+          <span class="k">Hasta portalı / SMS</span><span class="rz">—</span>
+          <span class="k">Sevk edilen kurum</span><span class="rz mavi">sevk ile gider</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Epikriz <b>taslak</b> · 8 bölüm · 2'si elle düzenlendi</span><span class="sp">İmzalanınca metin kilitlenir; düzeltme "yeni sürüm" ile yapılır.</span></div>
+</div>
+
+<div style="max-width:1400px;margin:14px auto 0;color:#4d5d6e;font-size:11.5px;line-height:1.6">
+  <h4 style="margin:0 0 4px;color:#14315a">Kurallar (ekrana yansıyan)</h4>
+  • Epikriz muayenenin <b>türetilmiş özeti</b>dir: her bölüm kartın kendi verisinden derlenir, başlıkta kaynağı yazar (↻ o bölümü yeniden derler).<br>
+  • Hekim bölümü düzenleyebilir; <b>elle düzenlenen</b> bölüm işaretlenir ve yeniden derlemede üzerine yazılmadan önce sorulur.<br>
+  • Tetkiklerden varsayılan olarak yalnız <b>anormal / panik</b> sonuçlar girer; sağdaki listeden normaller de eklenebilir.<br>
+  • <b>e-İmza</b> ile kilitlenir; imzalı epikriz e-Nabız'a gönderilir, hastaya portal/SMS ile iletilebilir, sevk varsa sevk edilen kuruma eklenir.<br>
+  • Muayene tamamlanırken epikriz taslakta kalmışsa uyarı verilir (engel değil).
+</div>
+</body>
+</html>

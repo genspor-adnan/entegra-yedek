@@ -53,7 +53,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
                and d.gecerlilik >= now()::timestamp
             """, t, [Ozet(jeton)], Iptal);
 
-    [Fact]
+    [VtFact]
     public async Task Jeton_duz_saklanmaz()
     {
         if (!_olgu.Baglandi(nameof(Jeton_duz_saklanmaz))) return;
@@ -73,7 +73,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gecerli_davet_bulunur()
     {
         if (!_olgu.Baglandi(nameof(Gecerli_davet_bulunur))) return;
@@ -86,7 +86,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Suresi_dolan_davet_gecmez()
     {
         if (!_olgu.Baglandi(nameof(Suresi_dolan_davet_gecmez))) return;
@@ -100,7 +100,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kullanilan_davet_ikinci_kez_gecmez()
     {
         if (!_olgu.Baglandi(nameof(Kullanilan_davet_ikinci_kez_gecmez))) return;
@@ -117,7 +117,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ikinci_davet_eskisini_kapatir()
     {
         if (!_olgu.Baglandi(nameof(Ikinci_davet_eskisini_kapatir))) return;
@@ -137,7 +137,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_jeton_iki_kez_yazilamaz()
     {
         if (!_olgu.Baglandi(nameof(Ayni_jeton_iki_kez_yazilamaz))) return;
@@ -155,7 +155,7 @@ public sealed class PortalDavetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Davet_sablonlari_tanimli()
     {
         if (!_olgu.Baglandi(nameof(Davet_sablonlari_tanimli))) return;

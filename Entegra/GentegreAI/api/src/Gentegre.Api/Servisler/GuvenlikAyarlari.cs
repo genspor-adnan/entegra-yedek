@@ -12,4 +12,10 @@ public sealed class GuvenlikAyarlari
     public string Hedef { get; set; } = "gentegre-ai-istemci";
     public int JwtDakika { get; set; } = 30;
     public int RefreshGun { get; set; } = 30;
+    /// <summary>
+    /// GUVENILEN PROXY'LER (denetim 28.09.2026 #5): X-Forwarded-For yalniz bu
+    /// adreslerden gelirse okunur. Bos = yalniz loopback (nginx ayni makinede,
+    /// 127.0.0.1'e proxy_pass). Istemcinin kendi yazdigi basliga guvenilmez.
+    /// </summary>
+    public string[] GuvenilenProxyler { get; set; } = [];
 }

@@ -22,19 +22,24 @@ public static class DokumanUclari
     {
         var grup = yol.MapGroup("/api/dokuman/{kartAdi}/{kaynakId:long}").WithTags("Dokuman").RequireAuthorization();
 
+        // ERISIM (tekrar denetim 28.09.2026 #1): kart yetkisi + KAYDIN kapsami
+        //   (DokumanErisimi). Dokuman kimligiyle gelen islemlerde dokumanin
+        //   GERCEK bagi URL'deki kart/kayitla eslesmek zorunda.
         grup.MapGet("/", async (
-            string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo,
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Gor);
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, null, Islem.Gor, iptal);
             return Results.Ok(await depo.ListeleAsync(FizikselKaynak(kartAdi), kaynakId, iptal));
         });
 
         grup.MapPost("/", async (
-            string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo,
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, null, Islem.Degistir, iptal);
 
             var form = await ctx.Request.ReadFormAsync(iptal);
             var dosya = form.Files.GetFile("dosya")
@@ -62,10 +67,10 @@ public static class DokumanUclari
         // gercek anahtar dokumanId, kaynakId sadece yol icin (kullanilmiyor).
         grup.MapPost("/{dokumanId:int}/varsayilan", async (
             string kartAdi, long kaynakId, int dokumanId, BaglamCozucu cozucu, DokumanDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, dokumanId, Islem.Degistir, iptal);
             var liste = await depo.VarsayilanYapAsync(dokumanId,
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
@@ -73,10 +78,13 @@ public static class DokumanUclari
 
         grup.MapPut("/{dokumanId:int}", async (
             string kartAdi, long kaynakId, int dokumanId, DuzenleIstegi istek, BaglamCozucu cozucu,
-            DokumanDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            DokumanDeposu depo, DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, dokumanId, Islem.Degistir, iptal);
+            // XSLT kaydi baska ture tasinabiliyor (KaynakId): HEDEF kayitta da hak gerekir.
+            if (istek.KaynakId is { } hedef && hedef != kaynakId)
+                await erisim.KaynakIsteAsync(baglam, FizikselKaynak(kartAdi), hedef, Islem.Degistir, iptal);
             var liste = await depo.DuzenleAsync(dokumanId, istek.Ad, istek.BelgeTuru,
                 baglam.Yazma, iptal,
                 istek.KaynakId, istek.Yon, istek.Varsayilan);
@@ -85,10 +93,11 @@ public static class DokumanUclari
 
         grup.MapDelete("/{dokumanId:int}", async (
             string kartAdi, long kaynakId, int dokumanId, BaglamCozucu cozucu, DokumanDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            // Kendi karti istisnasi URL'ye degil GERCEK sahiplige bagli (DokumanErisimi).
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, dokumanId, Islem.Degistir, iptal);
             var liste = await depo.SilAsync(dokumanId,
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
@@ -96,10 +105,12 @@ public static class DokumanUclari
 
         grup.MapPost("/{dokumanId:int}/paylas", async (
             string kartAdi, long kaynakId, int dokumanId, BaglamCozucu cozucu, DokumanDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            // PAYLASIM KODU = kimliksiz okuma: ICERIGI gorme hakki olmayan kod uretemez.
+            await KartIsteAsync(baglam, erisim, kartAdi, kaynakId, dokumanId, Islem.Degistir, iptal);
+            await erisim.IsteAsync(baglam, dokumanId, Islem.Gor, iptal);
             var kod = await depo.PaylasAsync(dokumanId,
                 baglam.Yazma, iptal);
             return Results.Ok(new { kod });
@@ -112,8 +123,19 @@ public static class DokumanUclari
     public static void DokumanIcerikUcunuEkle(this IEndpointRouteBuilder yol)
     {
         yol.MapGet("/api/dokuman-icerik/{dokumanId:int}", async (
-            int dokumanId, DokumanDeposu depo, CancellationToken iptal) =>
+            int dokumanId, DokumanDeposu depo, BaglamCozucu cozucu,
+            DokumanErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
+            // HER KAYNAK TURU AYNI KAPIDAN (tekrar denetim #1): dokumanin gercek
+            //   bagi + o turun yetkisi + kaydin kapsami. Lab sonucu satir kapsami
+            //   ve tetkik izniyle. Kapsam disi = bulunamadi (varlik sizdirilmaz).
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            try { await erisim.IsteAsync(baglam, dokumanId, Islem.Gor, iptal); }
+            catch (GentegreHatasi h) when (h.Kod is HataKodu.Bulunamadi or HataKodu.Yasak)
+            {
+                return Results.NotFound();
+            }
+
             var icerik = await depo.IcerikAsync(dokumanId, iptal);
             return icerik is null
                 ? Results.NotFound()
@@ -168,8 +190,33 @@ public static class DokumanUclari
         });
     }
 
+    /// <summary>
+    /// Kart yolu erisimi: gercek kart adinda kart yetkisi (kendi karti haric) +
+    /// dokuman/kayit kapsami. Dokuman kimligi verildiyse dokumanin GERCEK bagi
+    /// URL'deki kaynak/kayitla eslesmek zorunda.
+    /// </summary>
+    private static async Task KartIsteAsync(IstekBaglami baglam, DokumanErisimi erisim,
+        string kartAdi, long kaynakId, int? dokumanId, Islem islem, CancellationToken iptal)
+    {
+        var fiziksel = FizikselKaynak(kartAdi);
+        var kendi = fiziksel == "taraf" && kaynakId == baglam.KullaniciId;
+        // Kart adi (cari, personel...) kendi yetki koduyla; fiziksel ad
+        //   (liste ekrani "taraf", "lab-sonuc" gonderir) yalniz kapiyla.
+        if (!kendi && !FizikselAdlar.Contains(kartAdi)) baglam.YetkiIste(YetkiKodu(kartAdi), islem);
+        if (dokumanId is { } d)
+            await erisim.BagliIsteAsync(baglam, d, fiziksel, kaynakId, islem, iptal);
+        else
+            await erisim.KaynakIsteAsync(baglam, fiziksel, kaynakId, islem, iptal);
+    }
+
+    /// <summary>Kart adi yerine dogrudan fiziksel kaynak adiyla gelen yollar (doküman listesi).</summary>
+    private static readonly HashSet<string> FizikselAdlar =
+        new(StringComparer.Ordinal) { "taraf", "lab-sonuc", "masraf-beyan", "servis-ziyaret" };
+
     private static string FizikselKaynak(string kartAdi) => kartAdi switch
     {
+        // Doküman listesi satirin kendi kaynagini gonderir.
+        "taraf" or "lab-sonuc" or "masraf-beyan" or "servis-ziyaret" => kartAdi,
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -201,14 +248,9 @@ public static class DokumanUclari
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 
-    /// <summary>
-    /// PROFİL FOTOĞRAFI (kullanıcı ayarları): kişi KENDİ personel kartının
-    /// resmini personel yetkisi olmadan görür/yükler/siler. Kullanıcı kimliği
-    /// personel kartı kimliğidir (taraf_kullanici.id = taraf.id); başkasının
-    /// kartı için yine kart yetkisi aranır.
-    /// </summary>
-    private static bool KendiKartiMi(string kartAdi, long kaynakId, IstekBaglami baglam)
-        => kartAdi == "personel" && kaynakId == baglam.KullaniciId;
+    // PROFİL FOTOĞRAFI (kullanıcı ayarları): kişi KENDİ kartının resmini kart
+    //   yetkisi olmadan görür/yükler/siler - istisna artık dokümanın GERÇEK
+    //   sahipliğine bağlı (DokumanErisimi.KendiKartiMi), URL'ye değil.
 
     // Kisi kendi yetki kodu yok, cari'yi kullanir (bkz. KisiUclari.cs).
     private static string YetkiKodu(string kartAdi) => kartAdi switch

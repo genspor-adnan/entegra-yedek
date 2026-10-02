@@ -33,6 +33,35 @@ export interface AiRehberYaniti {
 }
 
 /** Yapay zeka rehberi, bağlamsal yardım ve model çağrıları. */
+/** YZ kontör özeti (934). */
+export interface AiKontorOzet {
+  kontor: { bakiye: number; cagriUcreti: number; uyariEsigi: number; modelAktif: boolean; gunlukSinir: number;
+            kullaniciGunlukSinir: number; ozRehber: boolean; ozTani: boolean; ozTetkik: boolean; ozIlac: boolean;
+            otomatikEkPaket: string; bugunCagri: number; bugunKontor: number; buAy: number; gecenAy: number;
+            basarisizAy: number };
+  sureler: { ozellik: string; ortalamaMs: number }[];
+  seri: { gun: string; ozellik: string; adet: number }[];
+  dagilim: { ozellik: string; cagri: number; kontor: number }[];
+  abonelik: AiAbonelik | null;
+  saglayici: { tur: string; model: string; hazir: boolean; akilYurutme: string; zamanAsimiSn: number;
+               adres: string; test: boolean };
+  odemeSaglayici: string;
+}
+export interface AiAbonelik {
+  durum: number; planKod: string; planAd: string; aylikKontor: number; donemAy: number;
+  donemBaslangic: string | null; sonrakiYenileme: string | null; kartSon4: string; kartMarka: string;
+  tutar: number; devreder: boolean;
+}
+export interface AiPlan {
+  kod: string; ad: string; aylikKontor: number; aylikFiyat: number; yillikFiyat: number;
+  devreder: boolean; oneCikan: boolean; ozellikler: string[];
+}
+export interface AiKontorHareket {
+  id: number; tarih: string; tur: number; ozellik: string; muayeneId: number | null; kullanici: string;
+  jeton: number; sureMs: number | null; miktar: number; bakiye: number; aciklama: string; basarili: boolean;
+  siparisId: number | null;
+}
+
 export const yapayZekaUclari = {
   // ------------------------------------------------------ AI REHBER ---
   /**
@@ -109,4 +138,38 @@ export const yapayZekaUclari = {
   aiGeriBildirim: (mesajId: number, deger: number) =>
     gonder<{ tamam: boolean }>('/api/ai/geribildirim', { mesajId, deger }),
 
+
+  // ------------------------------------------------ YZ kontör (934) ----
+  /** Göstergeler, 30 günlük seri, özellik dağılımı, abonelik, sağlayıcı. */
+  aiKontorOzet: () => istek<AiKontorOzet>('/api/ai/kontor/ozet'),
+  aiKontorHareketler: (f: { tur?: number; ozellik?: string; gun?: number }) =>
+    istek<{ satirlar: AiKontorHareket[] }>(`/api/ai/kontor/hareketler?${new URLSearchParams(
+      Object.entries(f).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)]))}`),
+  aiKontorKullanicilar: (gun: number) =>
+    istek<{ satirlar: { kullanici: string; tani: number; tetkik: number; ilac: number; rehber: number;
+                        kontor: number; son: string }[] }>(`/api/ai/kontor/kullanicilar?gun=${gun}`),
+  aiKontorPlanlar: () =>
+    istek<{ planlar: AiPlan[]; paketler: { kod: string; kontor: number; fiyat: number }[];
+            abonelik: AiAbonelik | null; kdvOrani: number; odemeSaglayici: string }>('/api/ai/kontor/planlar'),
+  aiKontorSiparisler: () =>
+    istek<{ satirlar: { id: number; tarih: string; tur: number; aciklama: string; kontor: number; toplam: number;
+                        durum: number; hata: string; faturaNo: string; odemeTarihi: string | null }[] }>('/api/ai/kontor/siparisler'),
+  aiKontorAyar: (a: Partial<{ gunlukSinir: number; kullaniciGunlukSinir: number; uyariEsigi: number; modelAktif: boolean;
+                               ozRehber: boolean; ozTani: boolean; ozTetkik: boolean; ozIlac: boolean; otomatikEkPaket: string }>) =>
+    gonder<{ mesaj: string }>('/api/ai/kontor/ayar', a, 'PUT'),
+  /** Sipariş: tutar SUNUCUDA hesaplanır. Ödeme kuruluşu formunda ödenir (kart bu sunucuya gelmez). */
+  aiKontorSiparis: (s: { tur: 'plan' | 'paket'; kod: string; donemAy?: number;
+                         fatura: { unvan: string; vkn: string; vergiDairesi: string; adres: string; eposta: string;
+                                   il?: string } }) =>
+    gonder<{ siparisId: number; kontor: number; tutar: number; kdv: number; toplam: number;
+             odemeSaglayici: string; odemeAdresi: string | null }>('/api/ai/kontor/siparis', s),
+  /** TEST: ödeme kuruluşu bildiriminin yerine geçer (Odeme:Saglayici = simulasyon). */
+  aiKontorSimulasyon: (siparisId: number, basarili: boolean) =>
+    gonder<{ durum: number; yeniBakiye: number; faturaNo: string; mesaj: string }>(
+      `/api/ai/kontor/siparis/${siparisId}/simulasyon`, { basarili }),
+  aiAbonelikIptal: () => gonder<{ mesaj: string }>('/api/ai/kontor/abonelik/iptal', {}),
+  /** Ödeme dönüşünde (iyzico) sipariş sonucu. */
+  aiKontorSiparisDurum: (id: number) =>
+    istek<{ durum: number; kontor: number; toplam: number; hata: string; faturaNo: string; yeniBakiye: number }>(
+      `/api/ai/kontor/siparis/${id}`),
 };

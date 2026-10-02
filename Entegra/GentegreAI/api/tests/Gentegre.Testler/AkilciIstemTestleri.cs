@@ -22,7 +22,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
 
     private static IstekBaglami Baglam(int kullanici, params string[] kodlar) => new()
     {
-        KullaniciId = kullanici, RolId = 1, SubeId = 1, IzlemeNo = "test",
+        KullaniciId = kullanici, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 1, IzlemeNo = "test",
         Yetkiler = new YetkiSeti(1, kodlar.Select(k => new YetkiKaydi(k, 0, true, true, true, true)), []),
     };
 
@@ -105,7 +105,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
             [hasta, hekim, sube, tetkikler],
             o => new KontrolSatiri(o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetString(3)));
 
-    [Fact]
+    [VtFact]
     public async Task Brans_disi_hekim_UYARI_alir_yetkili_brans_temiz_gecer()
     {
         if (!_olgu.Baglandi(nameof(Brans_disi_hekim_UYARI_alir_yetkili_brans_temiz_gecer))) return;
@@ -121,7 +121,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Empty(await KontrolAsync(d.Veri, d.Hasta, null, 1, d.Tetkik));   // banko: branş denetlenmez
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sure_dolmadan_tekrar_UYARI_son_sonuclarla_doner()
     {
         if (!_olgu.Baglandi(nameof(Sure_dolmadan_tekrar_UYARI_son_sonuclarla_doner))) return;
@@ -164,7 +164,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal(1L, iptal);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Basamak_3_testi_2_basamak_subede_ENGEL_kapali_test_ENGEL()
     {
         if (!_olgu.Baglandi(nameof(Basamak_3_testi_2_basamak_subede_ENGEL_kapali_test_ENGEL))) return;
@@ -197,7 +197,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await veri.CalistirAsync("update public.sube set basamak = @p0 where id = 1", [eskiBasamak]); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Refleks_kural_esik_asilinca_hedef_tetkigi_ayni_isteme_ekler()
     {
         if (!_olgu.Baglandi(nameof(Refleks_kural_esik_asilinca_hedef_tetkigi_ayni_isteme_ekler))) return;
@@ -229,7 +229,7 @@ public class AkilciIstemTestleri : IClassFixture<VeritabaniOlgusu>
             "select count(*) from public.lab_akilci_gerekce where hasta_id = @p0 and kural_turu = 'refleks'", [d.Hasta]));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Reflektif_istem_lab_uzmani_satiri_kaynak_2_ile_ekler()
     {
         if (!_olgu.Baglandi(nameof(Reflektif_istem_lab_uzmani_satiri_kaynak_2_ile_ekler))) return;

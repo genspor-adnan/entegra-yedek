@@ -133,6 +133,8 @@ public static class KartUclari
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
             // HASTA (kullanıcı kuralı): aynı kimlik numaralı hasta varsa yeni kayıt açılmaz.
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
+            // MUAYENE ŞABLONU (929): doktor yalnız KENDİ şablonunu açar.
+            await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, null, iptal);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
                 baglam.Yazma, iptal);
 
@@ -212,6 +214,7 @@ public static class KartUclari
             var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
+            await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, id, iptal);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
                 okunabilir, baglam.Yazma, iptal);
@@ -259,12 +262,13 @@ public static class KartUclari
 
         // ------------------------------------------------------------- sil ----
         grup.MapDelete("/{kaynak}/{id:long}", async (
-            string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo,
+            string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
+            await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
 
             // Silme logu kartin TAM halini saklar - alan yetkisiyle kirpilmis
             // kume degil, butun alanlar okunur ("Geri Al" eksik satir diriltmesin).

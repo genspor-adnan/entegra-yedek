@@ -40,10 +40,9 @@ DAMGA=$(date +%Y%m%d-%H%M%S)
 TEMEL_AL=0
 [ "${1:-}" = "--temel-al" ] && TEMEL_AL=1
 
-# MSSQL'DEN VERI GOCU ADIMLARI: kaynak MSSQL'i olmayan YENI kurulumda
-#   calistirilamaz (stg semasi bos). Bos kurulumda "uygulandi" isaretlenir -
-#   sema goclerinin sirasi bozulmasin, ama olmayan veri aranmasin.
-GOC_ADIMLARI="002_stg_kaynak_tablolar.sql 003_goc_taraf.sql 013_goc_faz1.sql 014_goc_belge.sql 018_goc_sube_rol.sql 021_goc_kimlik.sql 079_stg_kasa_master.sql 080_goc_kasa.sql 081_goc_legacy_bacak.sql"
+# MSSQL aktarim adimlari, bos kurulum tohumu ve dis veri on kosullari artik
+#   pakette db/kurulum altinda (tek kaynak) - goc_uygula.sh okur.
+YEDEK_DIZIN=${YEDEK_DIZIN:-$KOK/yedek}
 
 bilgi() { echo "  $*"; }
 hata()  { echo "HATA: $*" >&2; exit 1; }
@@ -56,60 +55,36 @@ bilgi "kurulum: $DB -> $YOL ($KAP:$PORT)"
 bilgi "paket acildi: $(du -sh "$GECICI" | cut -f1)"
 
 # ----------------------------------------------------------------- DB gocu ---
-# Uygulanan gocler DB'de tutulur; ayni dosya iki kez calistirilmaz. Gocler
-#   idempotent yazilsa da (create if not exists / on conflict) kayit tutmak
-#   "hangi surum sunucuda" sorusunun tek cevabidir.
-# NOTICE'ler bastirilir: psql onlari STDERR'e yazar, yerelde yayinla.ps1'i
-#   calistiran PowerShell de native STDERR'i HATA sayip yayini yarida kesiyordu
-#   ("relation goc_gecmisi already exists, skipping" gibi zararsiz bir satir).
-psqlq -q <<'SQL'
-create table if not exists public.goc_gecmisi (
-    dosya      varchar(200) primary key,
-    uygulama   timestamp not null default now()::timestamp
-);
-comment on table public.goc_gecmisi is
-  'Sunucuda calistirilmis db/NNN_*.sql goc dosyalari (yayinla.ps1).';
-SQL
-
-# BOS KURULUM TOHUMU: sube ve varsayilan depo. Idempotent - dolu kurulumda
-#   hicbir sey yapmaz, bos kurulumda 020 ve 116 dayanacaklari kaydi bulur.
-if [ -f "$GECICI/bos_kurulum.sql" ]; then
-    psqlq -q < "$GECICI/bos_kurulum.sql" || hata "bos kurulum tohumu basarisiz"
-fi
-
-# MSSQL kaynagi var mi: stg semasinda tablo varsa GERCEK GOC kurulumudur.
-STG=$(psqlq -tA -c "select count(*) from information_schema.tables where table_schema = 'stg'")
-[ "${STG:-0}" -gt 0 ] && BOS_KURULUM=0 || BOS_KURULUM=1
-
+# Uygulama kurallari goc_uygula.sh'ta (yerel esi db/araclar/goc_uygula.ps1):
+#   dosya + defter TEK islem, eszamanli guncelleyiciye karsi kilit, bos
+#   kurulumda tohum + aktarim adimlari, dis veri on kosulunda 2 ile cikis.
+#
+# DB GERI ALINMAZ (denetim 28.09.2026 #10): asagidaki saglik kontrolu
+#   duserse API ve web ONCEKI surume doner ama uygulanmis goc YERINDE KALIR.
+#   Bu yuzden (1) gocler ekleyici yazilir - onceki kod yeni semayla calismali;
+#   (2) bekleyen goc varsa once pg_dump yedegi alinir. Semayi geri dondurmek
+#   gerekirse yol bu yedektir, otomatik degildir.
 if [ -d "$GECICI/db" ]; then
-    UYGULANAN=0; ATLANAN=0; GOC_ATLANAN=0
-    for D in $(ls "$GECICI"/db/*.sql 2>/dev/null | sort); do
-        AD=$(basename "$D")
-        VAR=$(psqlq -tA -c "select 1 from public.goc_gecmisi where dosya = '$AD'")
-        [ -n "$VAR" ] && { ATLANAN=$((ATLANAN+1)); continue; }
-
-        # Bos kurulumda MSSQL veri gocu adimlari CALISTIRILMAZ, isaretlenir.
-        if [ "$BOS_KURULUM" = "1" ] && echo " $GOC_ADIMLARI " | grep -q " $AD "; then
-            psqlq -q -c "insert into public.goc_gecmisi(dosya) values ('$AD')"
-            GOC_ATLANAN=$((GOC_ATLANAN+1)); continue
-        fi
-
-        if [ "$TEMEL_AL" = "1" ]; then
-            psqlq -q -c "insert into public.goc_gecmisi(dosya) values ('$AD')"
-            UYGULANAN=$((UYGULANAN+1))
-            continue
-        fi
-
-        bilgi "goc: $AD"
-        # Goc PATLARSA yayindan cikilir: yarim sema ile yeni kodu acmak,
-        #   eski kodu birakmaktan daha kotudur.
-        psqlq -v ON_ERROR_STOP=1 -q < "$D" || hata "goc basarisiz: $AD (kod DEGISTIRILMEDI)"
-        psqlq -q -c "insert into public.goc_gecmisi(dosya) values ('$AD')"
-        UYGULANAN=$((UYGULANAN+1))
+    BEKLEYEN=0
+    # Ilk kurulumda defter henuz yok: hata "bekleyen = hepsi" demektir.
+    UYGULANMIS=" $( (psqlq -tA -c "select dosya from public.goc_gecmisi" 2>/dev/null || true) | tr '\n' ' ') "
+    for D in "$GECICI"/db/[0-9][0-9][0-9]_*.sql; do
+        [ -e "$D" ] || continue
+        case "$UYGULANMIS" in *" $(basename "$D") "*) ;; *) BEKLEYEN=$((BEKLEYEN+1)) ;; esac
     done
-    [ "$TEMEL_AL" = "1" ] \
-        && bilgi "goc: $UYGULANAN dosya 'uygulandi' isaretlendi (calistirilmadi), $ATLANAN zaten kayitli" \
-        || bilgi "goc: $UYGULANAN yeni, $ATLANAN atlandi${GOC_ATLANAN:+, $GOC_ATLANAN veri-gocu adimi bos kurulumda atlandi}"
+    if [ "$BEKLEYEN" -gt 0 ] && [ "$TEMEL_AL" != "1" ]; then
+        mkdir -p "$YEDEK_DIZIN"
+        docker exec "$PG" pg_dump -U postgres -Fc "$DB" > "$YEDEK_DIZIN/$DB-$DAMGA.dump" \
+            || hata "goc oncesi yedek alinamadi - goc CALISTIRILMADI"
+        bilgi "goc oncesi yedek: $YEDEK_DIZIN/$DB-$DAMGA.dump ($BEKLEYEN bekleyen goc)"
+        ls -1t "$YEDEK_DIZIN/$DB-"*.dump 2>/dev/null | tail -n +6 | xargs -r rm -f   # son 5 yedek
+    fi
+    set +e
+    DB="$DB" PG="$PG" bash "$GECICI/goc_uygula.sh" "$GECICI" $([ "$TEMEL_AL" = "1" ] && echo --temel-al)
+    GOC_KOD=$?
+    set -e
+    [ "$GOC_KOD" = "2" ] && hata "goc dis veri on kosulu bekliyor (yukaridaki mesaj) - kod DEGISTIRILMEDI"
+    [ "$GOC_KOD" != "0" ] && hata "goc basarisiz - kod DEGISTIRILMEDI (islem geri alindi; yedek: $YEDEK_DIZIN)"
 fi
 
 # -------------------------------------------------------------------- web ---

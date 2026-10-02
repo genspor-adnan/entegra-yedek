@@ -1,64 +1,32 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import type { MuayeneSablonSecenek } from '../api/uclar/liste';
 import { guvenli, mesaj } from './mesaj';
 
 /**
- * BÖLÜME UYGUN ŞABLON ROZETİ (kullanıcı): "Şablon Uygula" sağında, muayenenin
- * bölümüne göre rozet içinde şablon adı (ör. bölüm Üroloji ise "Üroloji", İç
- * Hastalıkları ise "İç Hastalıkları"). Basınca o bölümün hazır şablonu
- * uygulanır (bulgular alta dolar). Eşleşen şablon yoksa rozet çizilmez.
+ * ÖNERİLEN ŞABLON ROZETİ: "Şablon Uygula" sağında tek tıkla uygulanacak şablon.
+ *
+ * Seçim SUNUCUDA (933, kullanıcı: "muayene sırasında doktor adına şablon varsa
+ * onu kullansın yoksa genel branş şablonu kullanılsın"): muayenenin doktorunun
+ * o bölümdeki fizik muayene şablonu; yoksa bölüm varsayılanı (⭐), yoksa bölümün
+ * ortak şablonu. Eskiden bölüm ADINDAN şablon adı tahmin ediliyordu - bölüm/doktor
+ * bağı (927) varken tahmin hem gereksiz hem yanıltıcıydı. Öneri yoksa rozet çizilmez.
  */
-const norm = (s: string) => s.toLocaleLowerCase('tr').replace(/[^a-zçğıöşü ]/g, ' ').replace(/\s+/g, ' ').trim();
-
-// Bölüm adı → hazır şablon kodu eş anlamlıları (ad birebir tutmayanlar).
-const ES: { anahtar: string; kod: string }[] = [
-  { anahtar: 'ic hastaliklari', kod: 'dahiliye' },
-  { anahtar: 'dahiliye', kod: 'dahiliye' },
-  { anahtar: 'cocuk', kod: 'pediatri' },
-  { anahtar: 'pediatri', kod: 'pediatri' },
-  { anahtar: 'kadin', kod: 'kadindogum' },
-  { anahtar: 'kulak burun', kod: 'kbb' },
-  { anahtar: 'kbb', kod: 'kbb' },
-  { anahtar: 'ruh sagligi', kod: 'psikiyatri' },
-  { anahtar: 'gogus', kod: 'gogus' },
-  { anahtar: 'aile hekim', kod: 'aile' },
-];
-
 export function MuayeneSablonRozeti({ muayeneId, onUygulandi }:
   { muayeneId: number; onUygulandi(): void }) {
-  const [bolumAd, setBolumAd] = useState('');
-  const [sablon, setSablon] = useState<{ id: number; ad: string } | null>(null);
+  const [sablon, setSablon] = useState<MuayeneSablonSecenek | null>(null);
   const [mesgul, setMesgul] = useState(false);
 
   useEffect(() => {
     let iptal = false;
-    void (async () => {
-      try {
-        const my = await api.liste('muayene', { sayfa: 1, boyut: 1,
-          filtre: { alan: 'id', op: 'esit', deger: muayeneId } });
-        const bad = String(my.satirlar[0]?.bolumAdi ?? '').trim();
-        if (iptal) return;
-        setBolumAd(bad);
-        if (!bad) { setSablon(null); return }
-
-        const sy = await api.liste('muayene-sablon', { sayfa: 1, boyut: 200,
-          filtre: { alan: 'durum', op: 'esit', deger: 1 } });
-        if (iptal) return;
-        const nb = norm(bad);
-        const kodHedef = ES.find(e => nb.includes(e.anahtar))?.kod;
-        const bul = sy.satirlar.find(r => {
-          const na = norm(String(r.ad ?? ''));
-          const nk = norm(String(r.kod ?? ''));
-          return (kodHedef && nk === kodHedef)
-            || na.includes(nb) || nb.includes(na.split(' ')[0]);
-        });
-        setSablon(bul ? { id: Number(bul.id), ad: String(bul.ad ?? '') } : null);
-      } catch { if (!iptal) setSablon(null) }
-    })();
+    void api.muayeneSablonlari(muayeneId)
+      .then(y => { if (!iptal) setSablon(y.onerilen) })
+      .catch(() => { if (!iptal) setSablon(null) });
     return () => { iptal = true };
   }, [muayeneId]);
 
-  if (!bolumAd || !sablon) return null;
+  if (!sablon) return null;
+  const doktorun = sablon.oncelik === 0;
 
   const uygula = () => guvenli(async () => {
     setMesgul(true);
@@ -70,11 +38,10 @@ export function MuayeneSablonRozeti({ muayeneId, onUygulandi }:
   });
 
   return (
-    <button type="button" className="rozet mavi" disabled={mesgul}
-      title={`${bolumAd} bölümü şablonu (${sablon.ad}) uygula`}
-      style={{ cursor: 'pointer', border: '1px solid #cfe0f5' }}
+    <button type="button" className={`rozet ${doktorun ? 'olumlu' : 'mavi'} sablon-onerisi`} disabled={mesgul}
+      title={`${doktorun ? 'Doktorun kendi şablonu' : 'Bölüm şablonu'}: ${sablon.ad} — tıklayın, uygulansın`}
       onClick={() => void uygula()}>
-      🩺 {bolumAd}
+      {doktorun ? '👤' : '🩺'} {sablon.ad}
     </button>
   );
 }

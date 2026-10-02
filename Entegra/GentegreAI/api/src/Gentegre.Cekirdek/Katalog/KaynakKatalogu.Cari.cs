@@ -723,8 +723,26 @@ public static partial class KaynakKatalogu
             //   varsayilan sirasidir; kolon menusundeki tasima bunu ezer.
             //   Sigorta = hastanin bagli oldugu anlasmali kurum
             //   (taraf_hasta.kurum_id) - hasta seridi de bunu okur.
+            //   VARSAYILAN KOLONLARDA DEGIL (Varsayilan: false): listenin
+            //   Kurum'u artik son basvurunun kurumu (asagida); bu kolon seritte
+            //   ve kartta. Gizleme SUNUCUDA - web'de gizlenince eski API ile
+            //   calisan ekranda Kurum kolonu tamamen kayboluyordu.
             new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
-                Genislik: 180),
+                Genislik: 180, Varsayilan: false),
+            // SON BASVURU KURUMU (kullanici: "hastalar listesinde kurum
+            //   sutununa hastanin basvuru yaptigi son kurum gelsin"): en yeni
+            //   basvurunun (tur 19) ODEYEN kurumu. O basvuruda kurum yoksa
+            //   (ucretli) ya da hic basvuru yoksa hastanin karttaki bagli
+            //   kurumuna duser. Son Basvuru kolonuyla AYNI siralama (tarih,
+            //   sonra id) - iki kolon ayni basvuruyu anlatsin.
+            new("sonKurum",
+                "coalesce((select nullif(k.unvan, '') from public.belge b "
+                + "   join public.belge_basvuru bb on bb.id = b.id "
+                + "   left join public.taraf k on k.id = bb.odeyen_kurum_id "
+                + "  where b.taraf_id = t.id and b.tur = 19 "
+                + "  order by b.belge_tarihi desc, b.id desc limit 1), "
+                + " nullif(sg.unvan, ''), '')",
+                                   "metin", "Kurum", Genislik: 180),
             new("sonBasvuru",
                 "(select max(b.belge_tarihi) from public.belge b "
                 + " where b.taraf_id = t.id and b.tur = 19)",

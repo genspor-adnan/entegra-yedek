@@ -24,7 +24,7 @@ public sealed class KararSiniriTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 0,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("lab.sonuc", 0, true, true, true, true)], []),
     };
 
@@ -86,7 +86,7 @@ public sealed class KararSiniriTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Referans_araliginda_olan_deger_HEDEFIN_DISINDA_olabilir()
     {
         if (!_olgu.Baglandi(nameof(Referans_araliginda_olan_deger_HEDEFIN_DISINDA_olabilir)))
@@ -120,7 +120,7 @@ public sealed class KararSiniriTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hedefteki_deger_NOT_URETMEZ_ve_not_SONUCA_DONAR()
     {
         if (!_olgu.Baglandi(nameof(Hedefteki_deger_NOT_URETMEZ_ve_not_SONUCA_DONAR))) return;
@@ -179,7 +179,7 @@ public sealed class KararSiniriTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yon_2_sinirda_ALTINDA_kalmak_uyarir()
     {
         if (!_olgu.Baglandi(nameof(Yon_2_sinirda_ALTINDA_kalmak_uyarir))) return;

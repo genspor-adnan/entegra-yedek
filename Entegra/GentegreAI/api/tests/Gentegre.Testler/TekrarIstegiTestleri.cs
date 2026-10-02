@@ -23,7 +23,7 @@ public sealed class TekrarIstegiTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 0,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("lab.sonuc", 0, true, true, true, true)], []),
     };
 
@@ -76,7 +76,7 @@ public sealed class TekrarIstegiTestleri(VeritabaniOlgusu olgu)
             "select durum from public.lab_istem_satir where id = @p0", [satirId],
             CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_satirda_IKINCI_acik_talep_acilamaz_ve_tur_satir_durumunu_belirler()
     {
         if (!_olgu.Baglandi(nameof(Ayni_satirda_IKINCI_acik_talep_acilamaz_ve_tur_satir_durumunu_belirler)))
@@ -113,7 +113,7 @@ public sealed class TekrarIstegiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yeni_sonuc_yazilinca_talep_KENDILIGINDEN_kapanir()
     {
         if (!_olgu.Baglandi(nameof(Yeni_sonuc_yazilinca_talep_KENDILIGINDEN_kapanir))) return;
@@ -149,7 +149,7 @@ public sealed class TekrarIstegiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iptal_GEREKCE_ister_ve_satiri_eski_haline_dondurur()
     {
         if (!_olgu.Baglandi(nameof(Iptal_GEREKCE_ister_ve_satiri_eski_haline_dondurur))) return;

@@ -344,7 +344,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
         if (model is null || !model.Hazir) return null;
         if (ekranlar.Count == 0 && vuruslar.Count == 0) return null;   // dayanak yok
 
-        var (izin, ucret, sebep) = await KontorDurumAsync(baglanti, iptal);
+        var (izin, ucret, sebep) = await KontorDurumAsync(baglanti, iptal, "rehber", baglam.KullaniciId);
         if (!izin)
         {
             if (sebep.Length > 0) uyarilar.Add(sebep);
@@ -381,7 +381,8 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             var logK = await LogAsync(baglanti, baglam, soru, KaynakKapsamDisi, "model:kapsam-disi",
                                       cikti.Guven, istek, ekran, kronometre, iptal, cikti.Model,
                                       cikti.GirisJeton, cikti.CikisJeton, ucret, enjeksiyon: enjeksiyon);
-            await KontorDusAsync(baglanti, baglam, ucret, jeton, logK, cikti.Model, iptal);
+            await KontorDusAsync(baglanti, baglam, ucret, jeton, logK, cikti.Model, iptal,
+                                 sureMs: (int)kronometre.ElapsedMilliseconds);
             return new Yanit(
                 "Bu konu asistanın kapsamı dışında (tıbbi karar ya da sistem dışı bir istek). "
                 + "Ekranın nasıl kullanıldığını sorabilirsiniz.",
@@ -405,7 +406,8 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
                                    cikti.CikisJeton, ucret,
                                    string.Join(",", atiflar.Select(a => a.Id)), enjeksiyon);
         // KONTÖR ÇAĞRI BAŞARILI OLUNCA DÜŞÜLÜR.
-        await KontorDusAsync(baglanti, baglam, ucret, jeton, logId, cikti.Model, iptal);
+        await KontorDusAsync(baglanti, baglam, ucret, jeton, logId, cikti.Model, iptal,
+                             sureMs: (int)kronometre.ElapsedMilliseconds);
 
         var aksiyonKaynagi = ekran is { Bulundu: true, Yetkili: true } ? ekran.Kaynak
                              : oneriler.FirstOrDefault()?.Kaynak ?? "";
@@ -553,31 +555,51 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
     }
 
     // ------------------------------------------------------------- kontör --
-    private static async Task<(bool Izin, decimal Ucret, string Sebep)> KontorDurumAsync(
-        NpgsqlConnection baglanti, CancellationToken iptal)
+    /// <summary>
+    /// KONTÖR KAPISI (rehber ve YZ önerileri ortak; 934). Sırayla: model açık mı,
+    /// özellik açık mı (<c>oz_*</c>), bakiye, kurum günlük sınırı (rehber log +
+    /// YZ önerisi hareketleri), kullanıcı günlük sınırı. <paramref name="ozellik"/>:
+    /// rehber / tani / tetkik / ilac.
+    /// </summary>
+    public static async Task<(bool Izin, decimal Ucret, string Sebep)> KontorDurumAsync(
+        NpgsqlConnection baglanti, CancellationToken iptal, string ozellik = "rehber", int? kullaniciId = null)
     {
         var satir = await baglanti.TekAsync("""
             select k.bakiye, k.cagri_ucreti as "ucret", k.model_aktif as "aktif",
-                   k.gunluk_cagri_siniri as "sinir",
+                   k.gunluk_cagri_siniri as "sinir", k.kullanici_gunluk_siniri as "ksinir",
+                   case @p0 when 'tani' then k.oz_tani when 'tetkik' then k.oz_tetkik
+                            when 'ilac' then k.oz_ilac else k.oz_rehber end as "ozacik",
                    (select count(*) from public.ai_rehber_log l
-                     where l.kaynak = 5 and l.tarih >= current_date) as "bugun"
+                     where l.kaynak = 5 and l.tarih >= current_date)
+                   + (select count(*) from public.ai_kontor_hareket h
+                       where h.tur = 2 and h.ozellik in ('tani', 'tetkik', 'ilac')
+                         and h.tarih >= current_date) as "bugun",
+                   (select count(*) from public.ai_kontor_hareket h
+                     where h.tur = 2 and h.basarili = 1 and h.kullanici_id = @p1
+                       and h.tarih >= current_date) as "kbugun"
               from public.ai_kontor k where k.id = 1
-            """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+            """, null, [ozellik, kullaniciId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
         if (satir is null) return (false, 0m, "");
 
         var ucret = Convert.ToDecimal(satir["ucret"]);
         if (Convert.ToInt16(satir["aktif"]) != 1) return (false, ucret, "");
+        if (Convert.ToInt16(satir["ozacik"]) != 1)
+            return (false, ucret, "Bu YZ özelliği kurumda kapalı (YZ Kontör › Ayarlar).");
 
         var bakiye = Convert.ToDecimal(satir["bakiye"]);
         if (bakiye < ucret)
             return (false, ucret,
                     "AI kontörü bitti; cevaplar şimdilik katalog ve yardım belgelerinden üretiliyor "
-                    + "(kontör yüklemesi yönetici işi).");
+                    + "(YZ Kontör ekranından kontör satın alınabilir).");
 
         var sinir = Convert.ToInt32(satir["sinir"]);
         if (sinir > 0 && Convert.ToInt64(satir["bugun"]) >= sinir)
             return (false, ucret,
                     "Bugünkü AI çağrı sınırına ulaşıldı; cevaplar katalogdan üretiliyor.");
+
+        var ksinir = Convert.ToInt32(satir["ksinir"]);
+        if (kullaniciId is not null && ksinir > 0 && Convert.ToInt64(satir["kbugun"]) >= ksinir)
+            return (false, ucret, $"Kişisel günlük YZ sınırınıza ({ksinir}) ulaştınız.");
 
         return (true, ucret, "");
     }
@@ -587,9 +609,11 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
         await baglanti.TekDegerAsync<decimal>(
             "select bakiye from public.ai_kontor where id = 1", null, [], iptal);
 
-    private static async Task KontorDusAsync(
+    /// <summary>Başarılı çağrının kontörü + kullanım izi (özellik, muayene, süre).</summary>
+    internal static async Task KontorDusAsync(
         NpgsqlConnection baglanti, IstekBaglami baglam, decimal ucret, int jeton,
-        long? logId, string modelAdi, CancellationToken iptal)
+        long? logId, string modelAdi, CancellationToken iptal, string? aciklama = null,
+        string ozellik = "rehber", int? muayeneId = null, int? sureMs = null)
     {
         if (ucret <= 0) return;
         await baglanti.CalistirAsync("""
@@ -599,13 +623,29 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             """, null, [ucret], iptal);
         await baglanti.CalistirAsync("""
             insert into public.ai_kontor_hareket
-                   (tur, miktar, bakiye, aciklama, kullanici_id, rehber_log_id, jeton)
+                   (tur, miktar, bakiye, aciklama, kullanici_id, rehber_log_id, jeton,
+                    ozellik, muayene_id, sure_ms, basarili)
             values (2, @p0, (select bakiye from public.ai_kontor where id = 1),
-                    @p1, @p2, @p3, @p4)
+                    @p1, @p2, @p3, @p4, @p5, @p6, @p7, 1)
             """, null,
-            [ucret, "AI rehber cevabı (" + modelAdi + ")", baglam.KullaniciId, logId, jeton],
+            [ucret, aciklama ?? "AI rehber cevabı (" + modelAdi + ")", baglam.KullaniciId, logId, jeton,
+             ozellik, muayeneId, sureMs],
             iptal);
     }
+
+    /// <summary>
+    /// BAŞARISIZ ÇAĞRI İZİ (934): ücret 0, basarili 0 - ekranda "ücretlendirilmedi"
+    /// olarak görünür. Günlük sınıra sayılmaz.
+    /// </summary>
+    internal static Task BasarisizYazAsync(
+        NpgsqlConnection baglanti, IstekBaglami baglam, string ozellik, int? muayeneId, int sureMs,
+        string sebep, CancellationToken iptal)
+        => baglanti.CalistirAsync("""
+            insert into public.ai_kontor_hareket
+                   (tur, miktar, bakiye, aciklama, kullanici_id, ozellik, muayene_id, sure_ms, basarili)
+            values (2, 0, (select bakiye from public.ai_kontor where id = 1), @p0, @p1, @p2, @p3, @p4, 0)
+            """, null, [sebep.Length > 300 ? sebep[..300] : sebep, baglam.KullaniciId, ozellik, muayeneId, sureMs],
+            iptal);
 
     // -------------------------------------------------------- rol tanımı ---
     /// <summary>

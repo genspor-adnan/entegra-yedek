@@ -425,6 +425,11 @@ public static class StandartRolUclari
                Y("ameliyathane.talep"), T("ameliyathane.salon"),
                A("ameliyathane.not_imzala"), A("ameliyathane.iptal"),
                T("acil"), T("acil.pano"),
+               // Muayene sablonlari (929): bolum ortak sablonlar ve bolum
+               //   varsayilani basHekimin karari; doktor kendi sablonunu yonetir.
+               A("muayene.sablon_yonet"),
+               // YZ kontör (934): kullanım izleme, kurum ayarları, kontör satın alma.
+               H("ai.kontor"), A("ai.kontor_satin_al"),
                // Kalite: hedefi belirleyen ve donemi kesinlestiren imza.
                H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"),
                // Hakedis: hekim primini onaylayan tibbi imza.

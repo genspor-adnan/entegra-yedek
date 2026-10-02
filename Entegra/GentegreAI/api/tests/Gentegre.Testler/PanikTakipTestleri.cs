@@ -68,7 +68,7 @@ public sealed class PanikTakipTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bildirilmeyen_panik_HEKIME_gider_ve_YUKSELTILIR()
     {
         if (!_olgu.Baglandi(nameof(Bildirilmeyen_panik_HEKIME_gider_ve_YUKSELTILIR))) return;
@@ -136,7 +136,7 @@ public sealed class PanikTakipTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId, sonucId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Panik_kaydi_BILDIRIMLE_degil_TEYITLE_kapanir()
     {
         if (!_olgu.Baglandi(nameof(Panik_kaydi_BILDIRIMLE_degil_TEYITLE_kapanir))) return;

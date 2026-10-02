@@ -106,7 +106,7 @@ public class DisLabTestleri : IClassFixture<VeritabaniOlgusu>
         return id;
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gonderim_numarasi_YILA_gore_artar()
     {
         if (!_olgu.Baglandi(nameof(Gonderim_numarasi_YILA_gore_artar))) return;
@@ -121,7 +121,7 @@ public class DisLabTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.NotEqual(a, b);
     }
 
-    [Fact]
+    [VtFact]
     public async Task AYNI_TETKIK_iki_kez_gonderilemez()
     {
         if (!_olgu.Baglandi(nameof(AYNI_TETKIK_iki_kez_gonderilemez))) return;
@@ -142,7 +142,7 @@ public class DisLabTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, disLabId, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dis_lab_REDDEDINCE_ayni_tetkik_yeniden_gonderilebilir()
     {
         if (!_olgu.Baglandi(nameof(Dis_lab_REDDEDINCE_ayni_tetkik_yeniden_gonderilebilir)))
@@ -169,7 +169,7 @@ public class DisLabTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, disLabId, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Geciken_gorunumu_SOZLESME_TATini_asani_listeler()
     {
         if (!_olgu.Baglandi(nameof(Geciken_gorunumu_SOZLESME_TATini_asani_listeler)))
@@ -206,7 +206,7 @@ public class DisLabTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, disLabId, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Gonderilen_satir_DIS_LAB_durumuna_gecer()
     {
         if (!_olgu.Baglandi(nameof(Gonderilen_satir_DIS_LAB_durumuna_gecer))) return;

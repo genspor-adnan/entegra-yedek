@@ -23,6 +23,24 @@ public sealed class ModelSecenekleri
     public bool Aktif { get; set; } = true;
 
     /// <summary>
+    /// SAĞLAYICI: "anthropic" (varsayılan) ya da "openai" = OpenAI uyumlu
+    /// /chat/completions ucu. İkincisi TEST / ücretsiz seçenekler içindir:
+    /// yerel Ollama (<c>http://localhost:11434/v1/chat/completions</c>, anahtar
+    /// yok, veri makineden çıkmaz), LM Studio, Groq, OpenRouter. OpenAI uyumlu
+    /// sağlayıcıda anahtar <c>AI_API_KEY</c> ortam değişkeni → <c>Ai:ApiAnahtar</c>
+    /// → dosya sırasıyla aranır; yerel adreste anahtar gerekmez.
+    /// </summary>
+    public string Saglayici { get; set; } = "anthropic";
+
+    /// <summary>
+    /// Akıl yürütme modellerinde (ör. openai/gpt-oss-*) düşünme düzeyi
+    /// ("low" / "medium" / "high"); OpenAI uyumlu uca <c>reasoning_effort</c>
+    /// olarak gider. Boşsa gönderilmez. Düşünme jetonları çıktı sınırından
+    /// yer: "low" hem hızlı hem sınıra takılmaz.
+    /// </summary>
+    public string AkilYurutme { get; set; } = "";
+
+    /// <summary>
     /// Rehber için Haiku yeter: cevap kısa, bağlam katalogdan hazır geliyor -
     /// pahalı model burada doğruluk değil yalnız üslup katardı.
     /// </summary>
@@ -197,6 +215,114 @@ public sealed class AnthropicSaglayici : IModelSaglayici
         {
             _gunluk.LogWarning(h, "AI model çağrısı yapılamadı");
             return null;   // katalog cevabına düşülür
+        }
+    }
+}
+
+/// <summary>
+/// OPENAI UYUMLU SAĞLAYICI (<c>Ai:Saglayici = "openai"</c>) - test ve ücretsiz
+/// seçenekler için: Ollama / LM Studio (yerel, anahtarsız, veri makineden
+/// çıkmaz), Groq, OpenRouter (bulut, anahtarlı). Sözleşme Anthropic'inkiyle
+/// aynı: hata → <c>null</c>, kontör düşülmez.
+///
+/// <b>Bulut ücretsiz katmanlarında</b> gönderilen metin sağlayıcının eğitim
+/// verisine girebilir; YZ önerileri anonim bağlam yollasa da gerçek hasta
+/// verisiyle yalnız yerel ya da sözleşmeli sağlayıcı kullanılmalı.
+/// </summary>
+public sealed class OpenAiUyumluSaglayici : IModelSaglayici
+{
+    private readonly IHttpClientFactory _http;
+    private readonly ModelSecenekleri _ayar;
+    private readonly ILogger<OpenAiUyumluSaglayici> _gunluk;
+    private readonly string _anahtar;
+
+    public OpenAiUyumluSaglayici(IHttpClientFactory http, ModelSecenekleri ayar,
+                                 IHostEnvironment ortam, ILogger<OpenAiUyumluSaglayici> gunluk)
+    {
+        _http = http;
+        _ayar = ayar;
+        _gunluk = gunluk;
+        _anahtar = AnahtarBul(ayar, ortam.ContentRootPath);
+        gunluk.LogInformation("AI: OpenAI uyumlu sağlayıcı {Uc} · model {Model}{Anahtar}",
+            ayar.Uc, ayar.Model, _anahtar.Length > 0 ? " · anahtarlı" : " · anahtarsız");
+    }
+
+    /// <summary>Yerel adres (Ollama / LM Studio) anahtarsız çalışır.</summary>
+    public static bool Yerel(string uc) =>
+        Uri.TryCreate(uc, UriKind.Absolute, out var u)
+        && (u.IsLoopback || u.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
+
+    public bool Hazir => _ayar.Aktif && _ayar.Uc.Length > 0 && (_anahtar.Length > 0 || Yerel(_ayar.Uc));
+    public string Ad => _ayar.Model;
+
+    private static string AnahtarBul(ModelSecenekleri ayar, string icerikKok)
+    {
+        var ortam = Environment.GetEnvironmentVariable("AI_API_KEY");
+        if (!string.IsNullOrWhiteSpace(ortam)) return ortam.Trim();
+        if (!string.IsNullOrWhiteSpace(ayar.ApiAnahtar)) return ayar.ApiAnahtar.Trim();
+        var yol = string.IsNullOrWhiteSpace(ayar.AnahtarDosyasi)
+            ? Path.Combine(icerikKok, "gizli", "ai-anahtar-openai.txt") : ayar.AnahtarDosyasi;
+        try { if (File.Exists(yol)) return File.ReadAllText(yol).Trim(); }
+        catch (IOException) { /* okunamayan dosya = anahtar yok */ }
+        return "";
+    }
+
+    public async Task<ModelYaniti?> IsteAsync(ModelIstegi istek, CancellationToken iptal)
+    {
+        if (!Hazir) return null;
+        var alanlar = new Dictionary<string, object>
+        {
+            ["model"] = _ayar.Model,
+            ["max_tokens"] = _ayar.AzamiCikisJeton,
+            ["temperature"] = (double)_ayar.Sicaklik,
+            ["stream"] = false,
+            ["messages"] = new[]
+            {
+                new { role = "system", content = istek.Sistem },
+                new { role = "user", content = istek.Kullanici },
+            },
+        };
+        if (_ayar.AkilYurutme.Length > 0) alanlar["reasoning_effort"] = _ayar.AkilYurutme;
+        var govde = JsonSerializer.Serialize(alanlar);
+        try
+        {
+            var istemci = _http.CreateClient("ai");
+            istemci.Timeout = TimeSpan.FromSeconds(_ayar.ZamanAsimiSn);
+            using var mesaj = new HttpRequestMessage(HttpMethod.Post, _ayar.Uc)
+            {
+                Content = new StringContent(govde, Encoding.UTF8, "application/json"),
+            };
+            if (_anahtar.Length > 0) mesaj.Headers.Add("Authorization", "Bearer " + _anahtar);
+
+            using var yanit = await istemci.SendAsync(mesaj, iptal);
+            var metin = await yanit.Content.ReadAsStringAsync(iptal);
+            if (!yanit.IsSuccessStatusCode)
+            {
+                _gunluk.LogWarning("AI (OpenAI uyumlu) çağrı başarısız ({Kod}): {Ozet}",
+                                   (int)yanit.StatusCode, metin.Length > 300 ? metin[..300] : metin);
+                return null;
+            }
+            using var belge = JsonDocument.Parse(metin);
+            var kok = belge.RootElement;
+            var yazi = "";
+            if (kok.TryGetProperty("choices", out var secenekler) && secenekler.GetArrayLength() > 0
+                && secenekler[0].TryGetProperty("message", out var m)
+                && m.TryGetProperty("content", out var icerik))
+                yazi = icerik.GetString() ?? "";
+            int giris = 0, cikis = 0;
+            if (kok.TryGetProperty("usage", out var k))
+            {
+                if (k.TryGetProperty("prompt_tokens", out var g) && g.ValueKind == JsonValueKind.Number) giris = g.GetInt32();
+                if (k.TryGetProperty("completion_tokens", out var c) && c.ValueKind == JsonValueKind.Number) cikis = c.GetInt32();
+            }
+            var ad = kok.TryGetProperty("model", out var mv) ? mv.GetString() ?? _ayar.Model : _ayar.Model;
+            yazi = yazi.Trim();
+            return yazi.Length == 0 ? null : new ModelYaniti(yazi, giris, cikis, ad);
+        }
+        catch (Exception h) when (h is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _gunluk.LogWarning(h, "AI (OpenAI uyumlu) çağrı yapılamadı");
+            return null;
         }
     }
 }

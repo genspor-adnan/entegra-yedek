@@ -353,7 +353,7 @@ type
     LabelFatNo: TcxLabel;
     cbIrsaliyeli: TcxDBCheckBox;
     cxLabel1: TcxLabel;
-    lbKaynakFaturaNo: TcxDBLabel;
+    lbKaynakFaturaNo: TcxLabel;
     cxDBLabel2: TcxDBLabel;
     EditFatTarih: TcxDBDateEdit;
     EditFaturaSaat: TcxDBTimeEdit;
@@ -702,6 +702,8 @@ type
     procedure FormActivate(Sender: TObject);
     procedure PopupMenuYazPopup(Sender: TObject);
     procedure LabelNavlunSigortaClick(Sender: TObject);
+    procedure EditFatNoKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
 
   private
     { Private declarations }
@@ -766,6 +768,7 @@ type
     procedure FatbaslikUserNavlunSigortaAlanlariOlustur;
     procedure NavlunSigortaBilgileriDuzenle;
     procedure NavlunSigortaGorunumAyarla;
+    procedure KaynakBelgeNoGoster;
     procedure GenIniListeOku(const ARegistryAnahtar: string; AListe: TStrings);
     function FaturaIhracatJsonOku(AFaturaID: Integer): string;
     procedure FaturaIhracatJsonKaydet(AFaturaID: Integer; const AJson: string);
@@ -4164,6 +4167,7 @@ begin
   if TabFatbaslik.FieldByName('MERKEZID').AsString <>'' then
      EditSRMMerkezi.Text := Tablo.AciklamaGetir('SRMMERKEZI', 'MERKEZADI', TabFatbaslik.FieldByName('MERKEZID').AsInteger);
   NavlunSigortaGorunumAyarla;
+  KaynakBelgeNoGoster;
 end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforeEdit(DataSet: TDataSet);
@@ -4187,14 +4191,35 @@ begin
 end;
 
 procedure TFaturaWizardDlg.FATBASLIKAfterOpen(DataSet: TDataSet);
-// KAYNAKBELGENO hesaplanan kolondur (fn_KaynakBelgeNolariStrOlarakGetir), FATBASLIK'te yok.
-//   UpdateTableName='FATBASLIK' ile FireDAC UPDATE'e bu kolonu da koymaya kalkar -> "Invalid
-//   column name". Guncelleme/anahtar bayraklari kaldirilir (salt okunur gosterim).
-//   Kolon buraya EKLENDI: lbKaynakFaturaNo bu alana bagliydi ama TabFatbaslik 'SELECT F.*'
-//   ile aciliyordu -> alan hic yoktu, "Kaynak:" etiketi hep bos (gri kutu) kaliyordu.
+// DIKKAT: TabFatbaslik CANLI (UpdateTableName='FATBASLIK') bir dataset'tir; SQL'ine FATBASLIK'te
+//   KARSILIGI OLMAYAN hesaplanan kolon (ornek: KAYNAKBELGENO=dbo.fn_KaynakBelgeNolariStrOlarakGetir)
+//   EKLENMEZ. FireDAC boyle bir kolonu guncelleme tablosunun kolonu sanip INSERT/UPDATE'e koyar ->
+//   "Invalid column name 'KAYNAKBELGENO'". AfterOpen'da ProviderFlags:=[] demek YETMIYOR: acilis
+//   sirasinda veri-farkindali kontroller (ImmediatePost'lu combo/checkbox olaylari) AfterOpen'dan
+//   ONCE Edit+Post tetikleyebiliyor, DML o anda eski bayraklarla uretiliyor (fiyat listesi secilip
+//   "yeniden duzenle" onaylaninca alinan hata buydu). Hesaplanan deger etikete kodla yazilir.
 begin
-   if TabFatbaslik.FindField('KAYNAKBELGENO') <> nil then
-      TabFatbaslik.FieldByName('KAYNAKBELGENO').ProviderFlags := [];
+   KaynakBelgeNoGoster;
+end;
+
+procedure TFaturaWizardDlg.KaynakBelgeNoGoster;
+// "Kaynak:" etiketi: belgenin donusturuldugu kaynak belge no(lari). Canli dataset'e kolon olarak
+//   eklenemez (yukaridaki nota bak), bu yuzden tek skaler sorgu ile okunur.
+var
+  LID, LTur: Integer;
+begin
+  if not TabFatbaslik.Active then
+  begin
+    lbKaynakFaturaNo.Caption := '';
+    Exit;
+  end;
+  LID := TabFatbaslik.FieldByName('ID').AsInteger;
+  LTur := TabFatbaslik.FieldByName('TUR').AsInteger;
+  if (LID <= 0) or (TabFatbaslik.State = dsInsert) then
+    lbKaynakFaturaNo.Caption := ''
+  else
+    lbKaynakFaturaNo.Caption := VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'select dbo.fn_KaynakBelgeNolariStrOlarakGetir(&TUR,&ID)', ['&TUR', '&ID'], [LTur, LID], True));
 end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforeOpen(DataSet: TDataSet);
@@ -5018,7 +5043,7 @@ begin
                  'Adet=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI=408 AND F2.YERID=F.ID),0), ';
   if TabFatbaslik.FieldByName('TUR').AsInteger = 10 then
     SQLStr[8] := '			BelgeNo=COALESCE(NULLIF(FB.IRSALIYENO,''''),NULLIF(FB.FATURANO,''''),''''),Tarih=FB.FATURATARIH, '+
-                 'Adet=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI=408 AND F2.YERID=F.ID),0), ';
+                 'Adet=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI IN (408,'+IntToStr(TabNo_IADE_ALISBELGE)+') AND F2.YERID=F.ID AND F2.ADET>0),0), ';
   //SQLStr[8] := '		  Adet=F.ADET-isnull((select sum(F2.ADET) from FATURA F2 inner join FATBASLIK FB2 on F2.FATBASID=FB2.ID where FB2.TIPI=2 and F2.TUR=1 and F2.YERI in (416,417) and F2.YERID=F.ID),0.0), ';
   SQLStr[9] := '      Birim=F.BIRIM,Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,  FBID=FB.ID, FID=F.ID, Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
   // Seçim listesinde birim kodu yerine açıklaması gösterilir; lot/seri birimin hemen yanında tutulur.
@@ -5062,7 +5087,9 @@ begin
      SQLStr[13] := 'FATBASLIK FB inner join FATURA F on F.FATBASID=FB.ID '+
                    'LEFT JOIN STOKIZLEME SI on SI.BASLIKID=F.FATBASID and SI.SATIRID=F.ID '+
                    'LEFT JOIN STOKSERILOT SL on SL.ID=SI.SERILOTID ';
-     SQLStr[14] := '  where 1=1 ';
+     // Stok izlemede kalani bitmis (faturaya donusmus / iade alinmis) satirlar listelenmez;
+     //   izleme kaydi olmayan (lot/seri takipsiz) satirlar Adet>0 filtresine birakilir.
+     SQLStr[14] := '  where (SI.ID is null or SI.KALAN>0) ';
   end
   else begin
      SQLStr[13] := 'FATBASLIK FB inner join FATURA F on F.FATBASID=FB.ID ';
@@ -5154,7 +5181,10 @@ begin
       // VALIDASYON: iade edilen belgenin GIB e-belge no'su 3 seri(harf) + 13 rakam = 16 hane.
       //   Gelen fatura/irsaliyede faturano harf de icerebilir (seri kismi); bu yuzden toplam
       //   uzunluk degil RAKAM sayisi kontrol edilir. Rakam 13 degilse schematron reddi -> uyar.
-      if (EFaturaKullanimda > 0) or EIrsaliyeKullanimda then begin
+      //   Yalniz iade FATURASI icin: e-Irsaliye'de iade tipi/BillingReference yok, alis iade
+      //   irsaliyesinde (TUR=10) kaynak satis irsaliyesi no'su GIB'e referans olarak gitmez.
+      if ((EFaturaKullanimda > 0) or EIrsaliyeKullanimda) and
+         (TabFatbaslik.FieldByName('TUR').AsInteger <> 10) then begin
         var LBelgeNo := Trim(st[4]);
         var LRakamSay := 0;
         for var K := Low(string) to High(LBelgeNo) do
@@ -5569,13 +5599,14 @@ end;
 procedure TFaturaWizardDlg.FaturaKoanAyarlar1Click(Sender: TObject);
 begin
   Tablo.KocanAyarlariniGetir(TabFatbaslik.FieldByName('TUR').AsInteger);
-
 end;
 
 procedure TFaturaWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
    // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
    // TEKRAR sorMA (cift onay kaldirildi). Close -> FormCloseQuery -> KaydetmeSorusu.
+   if TabFatbaslik.State in [dsEdit, dsInsert] then
+       TabFatbaslik.cancel;
    Close;
 end;
 
@@ -6039,7 +6070,7 @@ begin
       EditFATURASERI.Text + EditFatNo.Text + ' '+FWNoluFatura, TabFatbaslik.FieldByName('ID').AsInteger, TabFatbaslik.FieldByName('MASRAFID').AsInteger);
   end else begin
       Tarih:=EditFatTarih.Date;
-    PlanID := Tablo.KasaSihirbazBaslat(EkleDegistir, PlanID, 71, 0, TabFatbaslik.FieldByName('REHBERID').AsInteger, Tarih,
+      PlanID := Tablo.KasaSihirbazBaslat(EkleDegistir, PlanID, 71, 0, TabFatbaslik.FieldByName('REHBERID').AsInteger, Tarih,
       Tablo.GENINI.BugunTrhSaat, 0, TabFatbaslik.FieldByName('FATURA_TUTARI').AsExtended, TabFatbaslik.FieldByName('KUR').AsString,
       EditFATURASERI.Text +  EditFatNo.Text +' '+ FWNoluFatura, TabFatbaslik.FieldByName('ID').AsInteger, TabFatbaslik.FieldByName('MASRAFID').AsInteger);
   end;
@@ -6127,7 +6158,7 @@ var
 begin
   if (DETAY.active)and(TabFatbaslik.active) then begin
     if DETAY.State = dsEdit then
-      DETAY.Post;
+       DETAY.Post;
     i := 0;
     if DETAY.Recordcount > 0 then begin
       DETAY.First;
@@ -6282,6 +6313,14 @@ begin
         TabFatura.Post;
      end;
   end;
+end;
+
+procedure TFaturaWizardDlg.EditFatNoKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
+begin
+   if TabFatbaslik.FieldByName('FATURANO').AsString='' then
+      TabFatbaslik.FieldByName('FATURASERI').AsString := ''
+   else
+      TabFatbaslik.FieldByName('FATURASERI').AsString := '0';
 end;
 
 procedure TFaturaWizardDlg.EditILPropertiesInitPopup(Sender: TObject);

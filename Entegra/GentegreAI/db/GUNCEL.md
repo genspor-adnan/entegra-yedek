@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (478 ad, 124 tanesi birden cok dosyada)
+## Fonksiyonlar (487 ad, 129 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -18,12 +18,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ameliyat_salon_cakisma` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_sayim_uyum` | `715_ameliyathane.sql` | — |
 | `fn_ara_metin` | `027_arama_normalize.sql` | — |
+| `fn_ariza_talep_ac` | `911_ariza_talep_modulu.sql` | — |
 | `fn_avans_iade_toplam` | `780_avans_iadesi.sql` | — |
 | `fn_baslik_harf` | `653_baslik_harfi_kisaltma_ek.sql` | 630_baslik_harf.sql, 651_hizmet_adi_baslik_harfi.sql, 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_baslik_kelime` | `630_baslik_harf.sql` | — |
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_basvuru_hekim_dis_mi` | `578_basvuru_hekim_kaynagi.sql` | — |
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
+| `fn_basvuru_istem_serbest_uygula` | `925_basvuru_istem_serbest_panel.sql` | 919_istem_bazli_serbest.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
 | `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
@@ -66,7 +68,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_dagilim_coz` | `603_ek_katki_kaldirildi.sql` | 594_dagilim_coz_ve_onizleme.sql, 595_katki_yalniz_tss_sgk.sql, 602_sut_bedeli_iskontosuz.sql |
 | `fn_dagilim_onizle` | `594_dagilim_coz_ve_onizleme.sql` | — |
 | `fn_dagilim_pay_grubu` | `470_belge_satir_dagilim.sql` | — |
-| `fn_dagilim_rota` | `597_tss_sgk_kullanilmasin.sql` | 470_belge_satir_dagilim.sql, 493_kurum_turu_kurumu_oder.sql |
+| `fn_dagilim_rota` | `915_dagilim_rota_kurum_oder.sql` | 470_belge_satir_dagilim.sql, 493_kurum_turu_kurumu_oder.sql, 597_tss_sgk_kullanilmasin.sql |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
 | `fn_demirbas_is_emri_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_demirbas_kalib_no_uret` | `731_tedarik_numaralari.sql` | — |
@@ -171,6 +173,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hizmet_paket_ac` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `fn_hizmet_paket_derinlik` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `fn_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
+| `fn_hizmet_paket_kapsam` | `925_basvuru_istem_serbest_panel.sql` | — |
 | `fn_hizmet_puan` | `550_hizmet_kullanim_puani.sql` | — |
 | `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
@@ -183,6 +186,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_isg_aylik_dk` | `741_isg_modulu.sql` | — |
 | `fn_isg_periyot_ay` | `741_isg_modulu.sql` | — |
 | `fn_iskonto_talep_karar` | `783_iskonto_kendi_onayi_ve_esik.sql` | 662_iskonto_onay.sql, 673_iskonto_kalem_orani.sql |
+| `fn_istem_serbest` | `918_istem_serbest_kaynak_temelli.sql` | 912_istem_banko_kapisi.sql, 913_istem_ucret_kapisi.sql |
 | `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |
 | `fn_izin_gun` | `751_dini_bayram_ve_yerel_tatil.sql` | 743_izin_modulu.sql, 749_resmi_tatil.sql |
 | `fn_izin_hak_gun` | `743_izin_modulu.sql` | — |
@@ -201,7 +205,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kategori_aktiflik_yay` | `527_profil_kategori.sql` | — |
 | `fn_kategori_ust_zinciri` | `558_prim_kategori_alt_agac.sql` | — |
 | `fn_kdv_cevir` | `202_fn_fiyat_listesi.sql` | — |
-| `fn_kimlik_kurali` | `679_kimlik_bicimi.sql` | — |
+| `fn_kimlik_kurali` | `916_kimlik_kurali_default_serbest.sql` | 679_kimlik_bicimi.sql |
 | `fn_klinik_donem_araligi` | `713_klinik_kalite_motor.sql` | — |
 | `fn_klinik_donem_hesapla` | `713_klinik_kalite_motor.sql` | — |
 | `fn_klinik_gosterge_donem_hesapla` | `711_klinik_kalite.sql` | — |
@@ -254,6 +258,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_genetik_ozet` | `439_lab_genetik.sql` | — |
 | `fn_lab_indeks_etki` | `444_lab_serum_indeksi.sql` | — |
 | `fn_lab_istem_no_uret` | `634_hasta_belge_numaralari.sql` | 633_lab_istem_no_ayari.sql |
+| `fn_lab_istem_sil` | `920_muayene_istem_sil.sql` | — |
 | `fn_lab_istem_sonuc_zamani` | `486_lab_tetkik_calisma_zamani.sql` | — |
 | `fn_lab_karar_notu` | `896_lab_karar_siniri.sql` | — |
 | `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
@@ -275,13 +280,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_tekrar_iste` | `891_lab_tekrar_istegi.sql` | — |
 | `fn_lab_tekrar_karsila` | `891_lab_tekrar_istegi.sql` | — |
 | `fn_lab_tetkik_bolum` | `529_lab_tetkik_katalogu_skrs.sql` | — |
-| `fn_lab_tetkik_izin` | `889_lab_tetkik_yetki.sql` | — |
+| `fn_lab_tetkik_izin` | `923_lab_tetkik_izin_roller.sql` | 889_lab_tetkik_yetki.sql |
+| `fn_lab_tetkik_izin_roller` | `923_lab_tetkik_izin_roller.sql` | — |
 | `fn_lab_tetkik_numune` | `529_lab_tetkik_katalogu_skrs.sql` | — |
 | `fn_lab_tetkik_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | 486_lab_tetkik_calisma_zamani.sql |
 | `fn_lab_westgard` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
 | `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
+| `fn_muayene_sablon_kapsami` | `933_muayene_sablon_doktor_oncelik.sql` | 931_muayene_sablon_tercihleri.sql |
 | `fn_muh_hesap_coz` | `138_ceksenet_muhasebe_eslestirme.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
 | `fn_muhasebe_donem_kontrol` | `147_donem_kontrol_timestamp.sql` | 074_muhasebe.sql |
 | `fn_muhasebe_fis_no_uret` | `087_numara_kesme_duzeltmesi.sql` | 074_muhasebe.sql |
@@ -320,6 +327,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_rad_modalite_kod` | `810_bakanlik_hekim_ve_modalite.sql` | — |
 | `fn_rad_rol_tazele` | `825_gonderen_primi_kendi_adina.sql` | 326_radyoloji_prim_rol.sql, 332_prim_zamani.sql |
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
+| `fn_radyoloji_istem_sil` | `920_muayene_istem_sil.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `809_bakanlik_rapor_parcalari.sql` | 284_radyoloji_operasyon.sql |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
@@ -396,6 +404,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
 | `tg_belge_satir_iskonto_esik` | `792_sorumlu_kendi_tavani.sql` | 783_iskonto_kendi_onayi_ve_esik.sql |
 | `tg_belge_satir_iskonto_kilit` | `681_iskonto_kilit_koruma.sql` | 662_iskonto_onay.sql |
+| `tg_belge_satir_istem_serbest` | `913_istem_ucret_kapisi.sql` | — |
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
@@ -487,7 +496,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (302 ad, 63 tanesi birden cok dosyada)
+## Gorunumler (303 ad, 63 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -502,6 +511,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_acil_yatak_lookup` | `716_acil_servis.sql` | — |
 | `v_alt_kurum_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_ameliyat_salon_lookup` | `715_ameliyathane.sql` | — |
+| `v_ariza_talep` | `911_ariza_talep_modulu.sql` | — |
 | `v_asi_skrs_eksik` | `898_asi_modulu.sql` | — |
 | `v_asi_uygulama` | `898_asi_modulu.sql` | — |
 | `v_banka_lookup` | `109_banka.sql` | — |
@@ -734,7 +744,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_radyoloji_protokol_malzeme` | `320_radyoloji_sarf.sql` | — |
 | `v_radyoloji_teslim_takip` | `318_radyoloji_takip_listeleri.sql` | — |
 | `v_radyoloji_tetkik` | `304_radyoloji_istem_acma.sql` | — |
-| `v_radyoloji_worklist` | `296_belge_basvuru.sql` | 283_radyoloji_cekirdek.sql |
+| `v_radyoloji_worklist` | `912_istem_banko_kapisi.sql` | 283_radyoloji_cekirdek.sql, 296_belge_basvuru.sql |
 | `v_randevu_bolum_lookup` | `718_hekim_calisma_plani.sql` | 251_departman.sql, 254_departman_kod.sql, 256_departman_durum.sql |
 | `v_randevu_tetkik_sure` | `317_randevu_tetkik_uyum.sql` | — |
 | `v_resmi_tatil` | `751_dini_bayram_ve_yerel_tatil.sql` | 749_resmi_tatil.sql, 750_tatil_duzeltmeleri.sql |

@@ -4,4 +4,11 @@
     <Project Path="src/Gentegre.Cekirdek/Gentegre.Cekirdek.csproj" />
     <Project Path="src/Gentegre.Veri/Gentegre.Veri.csproj" />
   </Folder>
+  <!-- Testler cozumun parcasi (denetim 28.09.2026): `dotnet build` testleri de
+       derler, `dotnet test` cozum uzerinden testleri bulur. Veritabani testleri
+       GENTEGRE_TEST_DB olmadan ACIKCA atlanir; CI butunlesme asamasinda
+       GENTEGRE_TEST_ZORUNLU=1 ile atlama yasaktir (bkz. tests/.../OKUBENI.md). -->
+  <Folder Name="/tests/">
+    <Project Path="tests/Gentegre.Testler/Gentegre.Testler.csproj" />
+  </Folder>
 </Solution>

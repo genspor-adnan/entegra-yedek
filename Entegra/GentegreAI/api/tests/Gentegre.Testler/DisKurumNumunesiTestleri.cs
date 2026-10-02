@@ -21,7 +21,7 @@ public sealed class DisKurumNumunesiTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Kaynak_dis_kurum_ise_GONDEREN_KURUM_zorunlu()
     {
         if (!_olgu.Baglandi(nameof(Kaynak_dis_kurum_ise_GONDEREN_KURUM_zorunlu))) return;
@@ -56,7 +56,7 @@ public sealed class DisKurumNumunesiTestleri(VeritabaniOlgusu olgu)
     /// satırları ve öteki modüllerin düzenekleri yerinde kalmalı - geniş bir
     /// kısıt eklendiğinde tam burası kırılmıştı.
     /// </summary>
-    [Fact]
+    [VtFact]
     public async Task Belgesiz_istem_KAYNAK_1_ISE_kabul_edilir()
     {
         if (!_olgu.Baglandi(nameof(Belgesiz_istem_KAYNAK_1_ISE_kabul_edilir))) return;

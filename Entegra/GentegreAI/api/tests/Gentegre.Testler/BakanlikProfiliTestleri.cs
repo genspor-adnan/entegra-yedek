@@ -86,7 +86,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // ------------------------------------------------------------ parçalar ----
 
-    [Fact]
+    [VtFact]
     public async Task Bolum_basligindan_parca_numarasi_turer()
     {
         if (!_olgu.Baglandi(nameof(Bolum_basligindan_parca_numarasi_turer))) return;
@@ -106,7 +106,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Taninmayan_baslik_parcasiz_kalir()
     {
         if (!_olgu.Baglandi(nameof(Taninmayan_baslik_parcasiz_kalir))) return;
@@ -121,7 +121,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // ------------------------------------------------------- 50 karakter ----
 
-    [Fact]
+    [VtFact]
     public async Task Kisa_bulgular_gonderilemez()
     {
         if (!_olgu.Baglandi(nameof(Kisa_bulgular_gonderilemez))) return;
@@ -137,7 +137,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sonuc_bolumu_bos_ise_gonderilemez()
     {
         if (!_olgu.Baglandi(nameof(Sonuc_bolumu_bos_ise_gonderilemez))) return;
@@ -153,7 +153,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dolu_rapor_gonderilebilir()
     {
         if (!_olgu.Baglandi(nameof(Dolu_rapor_gonderilebilir))) return;
@@ -172,7 +172,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // ------------------------------------------------------- onay kapısı ----
 
-    [Fact]
+    [VtFact]
     public async Task Ayar_kapaliyken_onay_engellenmez()
     {
         if (!_olgu.Baglandi(nameof(Ayar_kapaliyken_onay_engellenmez))) return;
@@ -190,7 +190,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayar_acikken_onay_engellenir()
     {
         if (!_olgu.Baglandi(nameof(Ayar_acikken_onay_engellenir))) return;
@@ -210,7 +210,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // --------------------------------------------------------- modalite ----
 
-    [Theory]
+    [VtTheory]
     [InlineData((short)1, "CT")]
     [InlineData((short)2, "MR")]
     [InlineData((short)4, "CR")]
@@ -224,7 +224,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
             "select public.fn_rad_modalite_kod(@p0)", null, [modalite], Iptal));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Eslenmemis_modalite_bos_doner()
     {
         if (!_olgu.Baglandi(nameof(Eslenmemis_modalite_bos_doner))) return;
@@ -238,7 +238,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // --------------------------------------------------------- kontrast ----
 
-    [Fact]
+    [VtFact]
     public async Task Kontrast_obx17_bicimi()
     {
         if (!_olgu.Baglandi(nameof(Kontrast_obx17_bicimi))) return;
@@ -261,7 +261,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kontrast_yoksa_obx17_yazilmaz()
     {
         if (!_olgu.Baglandi(nameof(Kontrast_yoksa_obx17_yazilmaz))) return;
@@ -283,7 +283,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // -------------------------------------------------------- accession ----
 
-    [Fact]
+    [VtFact]
     public async Task Bakanlik_kurumunda_accession_zorunlu()
     {
         if (!_olgu.Baglandi(nameof(Bakanlik_kurumunda_accession_zorunlu))) return;
@@ -303,7 +303,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_kurumda_accession_tekrar_edemez()
     {
         if (!_olgu.Baglandi(nameof(Ayni_kurumda_accession_tekrar_edemez))) return;
@@ -329,7 +329,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kapali_kurumda_accession_serbest()
     {
         if (!_olgu.Baglandi(nameof(Kapali_kurumda_accession_serbest))) return;
@@ -350,7 +350,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
 
     // ------------------------------------------------------ eksik listesi ----
 
-    [Fact]
+    [VtFact]
     public async Task Eksik_listesi_alan_adlariyla_doner()
     {
         if (!_olgu.Baglandi(nameof(Eksik_listesi_alan_adlariyla_doner))) return;
@@ -374,7 +374,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kapali_kurumda_eksik_listesi_bos()
     {
         if (!_olgu.Baglandi(nameof(Kapali_kurumda_eksik_listesi_bos))) return;
@@ -393,7 +393,7 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hekim_tckn_bicimi_denetlenir()
     {
         if (!_olgu.Baglandi(nameof(Hekim_tckn_bicimi_denetlenir))) return;

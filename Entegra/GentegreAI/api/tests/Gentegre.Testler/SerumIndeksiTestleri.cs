@@ -62,7 +62,7 @@ public class SerumIndeksiTestleri : IClassFixture<VeritabaniOlgusu>
         return (s!.Durum, s.Uyari);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Hemoliz_POTASYUMU_etkiler_SODYUMU_etkilemez()
     {
         if (!_olgu.Baglandi(nameof(Hemoliz_POTASYUMU_etkiler_SODYUMU_etkilemez))) return;
@@ -87,7 +87,7 @@ public class SerumIndeksiTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Uyari_ile_RET_esikleri_ayri()
     {
         if (!_olgu.Baglandi(nameof(Uyari_ile_RET_esikleri_ayri))) return;
@@ -107,7 +107,7 @@ public class SerumIndeksiTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Olculmemis_indeks_etki_uretmez()
     {
         if (!_olgu.Baglandi(nameof(Olculmemis_indeks_etki_uretmez))) return;
@@ -123,7 +123,7 @@ public class SerumIndeksiTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Birden_cok_indeks_EN_AGIR_sonucu_verir()
     {
         if (!_olgu.Baglandi(nameof(Birden_cok_indeks_EN_AGIR_sonucu_verir))) return;
@@ -146,7 +146,7 @@ public class SerumIndeksiTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Varsayilan_esik_teste_ozel_esikle_EZILIR()
     {
         if (!_olgu.Baglandi(nameof(Varsayilan_esik_teste_ozel_esikle_EZILIR))) return;

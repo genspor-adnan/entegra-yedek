@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { c, ilacAdi } from '../dil/ceviri';
+import { HastaKayitPenceresi } from './HastaKayitPenceresi';
 
 /**
  * MUAYENE BAĞLAM ŞERİDİ (461) — mockup `Ekranlar/Muayene/muayene_karti.html`
@@ -28,14 +29,6 @@ const ZAMAN = (v: unknown, saatli: boolean) => {
 };
 
 /** "25 dk" · "1 sa 05 dk" - baslamamissa bos. Bitis yoksa SUREN muayene. */
-function sure(baslangic: unknown, bitis: unknown): string {
-  const b = baslangic ? new Date(String(baslangic)).getTime() : NaN;
-  if (!Number.isFinite(b)) return '';
-  const s = bitis ? new Date(String(bitis)).getTime() : Date.now();
-  const dk = Math.max(0, Math.round((s - b) / 60000));
-  return dk < 60 ? `${dk} dk`
-                 : `${Math.floor(dk / 60)} sa ${String(dk % 60).padStart(2, '0')} dk`;
-}
 
 /** Listeyi bir kez çeker; hata olursa şerit sessizce boş kalır. */
 async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
@@ -58,6 +51,9 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
   const [kronik, setKronik] = useState<Satir[]>([]);
   const [ilac, setIlac] = useState<Satir[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
+  /** Acik hasta kayitlari penceresi (alerji+kronik ya da aktif ilac). */
+  const [pencere, setPencere] = useState<'alerji' | 'ilac' | null>(null);
+  const [tazele, setTazele] = useState(0);
 
   useEffect(() => {
     if (!(muayeneId > 0)) { setYuklendi(true); return }
@@ -90,24 +86,29 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       setYuklendi(true);
     })();
     return () => { iptal = true };
-  }, [muayeneId]);
+  }, [muayeneId, tazele]);
 
   if (!(muayeneId > 0)) return null;
 
   const hastaAdi = metin(ust?.hastaAdi);
+  const hastaIdSerit = Number(ust?.tarafId ?? 0);
+  /** Kutuyu tiklanir yapar (fare + klavye). */
+  const tikla = (tur: 'alerji' | 'ilac') => hastaIdSerit > 0 ? {
+    role: 'button', tabIndex: 0, title: c('Ekle / düzenle'),
+    onClick: () => setPencere(tur),
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPencere(tur) }
+    },
+  } : {};
   const protokol = metin(ust?.protokolNo);
   const bolum = metin(ust?.bolumAdi);
   const hekim = metin(ust?.hekimAdi);
-  const tur = metin(ust?.turAdi);
-  const bekleyen = Number(ust?.bekleyenIstem ?? 0);
-  const anaTani = metin(ust?.anaTani);
   const cinsiyet = metin(ust?.cinsiyetKisa);
   const yas = metin(ust?.yasMetni);
   // Muayenenin gun icindeki penceresi: "06.09.2026 15:24 – 15:49 · 25 dk".
   //   Bitis bossa muayene SURUYOR - gecen sure yine yazilir.
   const bas = ZAMAN(ust?.baslangic, true);
   const bit = ZAMAN(ust?.bitis ?? ust?.tamamlanma, false);
-  const gecen = sure(ust?.baslangic, ust?.bitis ?? ust?.tamamlanma);
 
   return (
     <div className="kart-baglam">
@@ -144,8 +145,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       </div>
 
       <div className="kb-hucre">
-        <div className="kb-bas">{c('Alerji / Kronik')}</div>
-        <div className="kb-kutu">
+        <div className="kb-bas">{c('Alerji / Kronik')}{hastaIdSerit > 0 ? <span className="kb-kalem" title="Düzenle" aria-label="Düzenle"> ✎</span> : null}</div>
+        {/* TIKLANINCA EKLE / DUZENLE (kullanici): hastanin alerji ve kronik
+            tanilari muayeneden cikmadan girilir. */}
+        <div className={`kb-kutu${hastaIdSerit > 0 ? ' kb-tikla' : ''}`} {...tikla('alerji')}>
         <div className="kb-ic">
           {/* ALERJİ YOKSA DA YAZILIR: boş kutu "bakılmadı" ile "yok"u
               ayırt ettirmez; mockup da "Alerji: yok" rozetini gösteriyor. */}
@@ -170,17 +173,20 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       </div>
 
       <div className="kb-hucre">
-        <div className="kb-bas">{c('Aktif ilaçlar')}</div>
-        <div className="kb-kutu">
+        <div className="kb-bas">{c('Aktif ilaçlar')}{hastaIdSerit > 0 ? <span className="kb-kalem" title="Düzenle" aria-label="Düzenle"> ✎</span> : null}</div>
+        <div className={`kb-kutu${hastaIdSerit > 0 ? ' kb-tikla' : ''}`} {...tikla('ilac')}>
         <div className="kb-ic">
           {ilac.length === 0
-            ? <span className="sonuk">{yuklendi ? 'Kayıtlı ilaç yok' : '…'}</span>
+            ? <span className={`rozet ${yuklendi ? 'olumlu' : 'gri'}`}>
+                {yuklendi ? 'Aktif ilaç: yok' : 'Aktif ilaç: …'}
+              </span>
             : (
               <>
+                {/* AKTIF ILACLAR ROZET (kullanici): alerji / kronik ile ayni gorunum. */}
                 {ilac.slice(0, 4).map((x, i) => (
-                  <span key={i} className="kb-ilac" title={ilacAdi(metin(x.etkenMadde))}>
+                  <span key={i} className="rozet mavi kb-ilac" title={ilacAdi(metin(x.etkenMadde))}>
                     {ilacAdi(metin(x.ilacAd))}
-                    {metin(x.doz) ? <span className="sonuk"> {metin(x.doz)}</span> : null}
+                    {metin(x.doz) ? ` · ${metin(x.doz)}` : ''}
                   </span>
                 ))}
                 {ilac.length > 4 && <span className="rozet gri">+{ilac.length - 4}</span>}
@@ -197,7 +203,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           muayene) modalda acilir (kullanici): bu alanlar arada bir duzeltilir,
           kart izgarasinda surekli yer kaplamalari gerekmiyor. */}
       <div className="kb-hucre">
-        <div className="kb-bas">Bugün{onBugun ? <span className="sonuk"> · düzenle</span> : null}</div>
+        <div className="kb-bas">Bugün{onBugun ? <span className="kb-kalem" title="Düzenle" aria-label="Düzenle"> ✎</span> : null}</div>
         <div className={`kb-kutu${onBugun ? ' kb-tikla' : ''}`}
              role={onBugun ? 'button' : undefined}
              tabIndex={onBugun ? 0 : undefined}
@@ -209,28 +215,37 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
         <div className="kb-ic">
           {bolum ? <span>{bolum}</span> : null}
           {hekim ? <span className="sonuk">· {hekim}</span> : null}
-          {bekleyen > 0 && (
-            <span className="rozet uyari">{bekleyen} sonuç bekliyor</span>
-          )}
-          {anaTani ? <span className="rozet olumlu" title={c('Ana tanı')}>{anaTani}</span> : null}
-          {!tur && !bolum && !hekim && bekleyen === 0 && !anaTani
-            && <span className="sonuk">—</span>}
-        </div>
-        {/* ALT SATIR (kullanici): baslama tarihi-saati, bitis saati ve sure. */}
-        <div className="kb-ic sonuk">
+          {/* "n sonuc bekliyor" GOSTERILMEZ (kullanici): bekleyen istemler
+              Istem & Sonuclar sekmesinde. */}
+          {/* TARIH-SAAT VE SURE "sonuc bekliyor" rozetinin SAGINDA, TEK SATIR
+              (kullanici): ayri alt satir kalkti. Sure rozet - bandaki
+              olculerle ayni gorunum. */}
           {bas ? (
             <>
-              <span>{bas} – {bit || '…'}</span>
-              {/* Sure ROZET (kullanici): bandaki olculerle ayni gorunum. */}
-              {gecen ? <span className="rozet gri">{gecen}</span> : null}
+              <span className="sonuk">{bas} – {bit || '…'}</span>
+              {/* SURE Bugun kutusunda GOSTERILMEZ (kullanici): durum bandinda var. */}
             </>
-          ) : <span>{c('Muayeneye alınmadı')}</span>}
-          {/* Muayene turu (Yuz yuze / Online) SURENIN SAGINDA (kullanici):
-              ust satir bolum ve hekime kaliyor. */}
-          {tur ? <span className="rozet gri">{tur}</span> : null}
+          ) : <span className="sonuk">{c('Muayeneye alınmadı')}</span>}
+          {/* ANA TANI ve MUAYENE TURU (Yuz yuze) GOSTERILMEZ (kullanici: "cok
+              bilgi var.. taniyi kaldir.. yuz yuzeyi kaldir"): tani Muayene
+              sekmesindeki gridde, tur kimlik penceresinde. */}
         </div>
         </div>
       </div>
+      {pencere && hastaIdSerit > 0 && (
+        <HastaKayitPenceresi
+          baslik={pencere === 'alerji' ? `${c('Alerji / Kronik')} — ${hastaAdi}` : `${c('Aktif ilaçlar')} — ${hastaAdi}`}
+          hastaId={hastaIdSerit}
+          hastaAdi={hastaAdi}
+          muayeneId={muayeneId}
+          bolumler={pencere === 'alerji'
+            ? [{ kaynak: 'hasta-alerji', baslik: c('Alerjiler'),
+                 ekVarsayilan: { kayitMuayeneId: muayeneId } },
+               { kaynak: 'hasta-kronik', baslik: c('Kronik hastalıklar') }]
+            : [{ kaynak: 'hasta-ilac', baslik: c('Kullanılan ilaçlar') }]}
+          onKapat={() => setPencere(null)}
+          onDegisti={() => setTazele(t => t + 1)} />
+      )}
     </div>
   );
 }

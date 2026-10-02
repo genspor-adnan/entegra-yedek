@@ -190,8 +190,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
     // Acik borc HASTA SERIDI icin katalogda duruyor (basvuru kartinin
     //   ustundeki serit onu okuyor) ama gridde gosterilmez.
-    //   KURUM (sigortaAdi) ARTIK GORUNUR (kullanici: "son basvuru soluna
-    //   Kurumu ekle") - katalogda da Son Basvuru'nun oncesine alindi.
+    //   KURUM = SON BASVURUNUN KURUMU (kullanici: "hastanin basvuru yaptigi
+    //   son kurum gelsin"): `sonKurum`, Son Basvuru'nun solunda. Karttaki
+    //   bagli kurum (sigortaAdi) sunucuda varsayilan-disi - burada GIZLENMEZ:
+    //   yeni kolonu bilmeyen API'de listenin Kurum'u o kolondur.
     gizliKolonlar: ['acikBorc'],
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
@@ -459,7 +461,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   imzalaninca degismez, ilac adi satira kopyalanir.
     kaynak: 'recete', rota: 'recete', baslik: 'Reçeteler',
     yol: 'Muayene › Reçeteler',
-    kartYolu: '/recete', kartBaslik: 'Reçete',
+    // OZEL KART (mockup recete_karti.html): /recete/:id ReceteKarti acar.
+    kartYolu: '/recete', kartBaslik: 'Reçete', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     tarihAlani: 'tarih',
     cipler: [
@@ -512,7 +515,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   unutuldugunda sonraki hekimin eksik bilgiyle karar vermesi demekti.
     kaynak: 'hasta-kronik', rota: 'hasta-kronik', baslik: 'Kronik Tanılar',
     yol: 'Muayene › Kronik Tanılar',
-    kartYolu: '/hasta-kronik', kartBaslik: 'Kronik Tanı',
+    kartYolu: '/hasta-kronik', kartBaslik: 'Kronik Tanı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
       { ad: 'Aktif',  filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -525,7 +528,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // GECMIS OLAYLAR (420) - ameliyat / girisim / yatis / asi / travma.
     kaynak: 'hasta-gecmis', rota: 'hasta-gecmis', baslik: 'Geçmiş Olaylar',
     yol: 'Muayene › Geçmiş Olaylar',
-    kartYolu: '/hasta-gecmis', kartBaslik: 'Geçmiş Olay',
+    kartYolu: '/hasta-gecmis', kartBaslik: 'Geçmiş Olay', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     tarihAlani: 'tarih',
     urunModu: 2, modul: 'muayene', menuAd: 'Geçmiş Olaylar', menuGizli: true, ic: '🏥', yetkiKodu: 'muayene',
@@ -535,7 +538,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   ayni etkeni tasiyan baska markayi kacirirdi.
     kaynak: 'hasta-alerji', rota: 'hasta-alerji', baslik: 'Hasta Alerjileri',
     yol: 'Muayene › Alerjiler',
-    kartYolu: '/hasta-alerji', kartBaslik: 'Alerji Kaydı',
+    kartYolu: '/hasta-alerji', kartBaslik: 'Alerji Kaydı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
@@ -549,7 +552,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   kismini kullanmaz. Etkilesim kontrolu KULLANILANA bakar.
     kaynak: 'hasta-ilac', rota: 'hasta-ilac', baslik: 'Kullanılan İlaçlar',
     yol: 'Muayene › Kullanılan İlaçlar',
-    kartYolu: '/hasta-ilac', kartBaslik: 'İlaç Kaydı',
+    kartYolu: '/hasta-ilac', kartBaslik: 'İlaç Kaydı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
@@ -563,8 +566,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   bulgu satiri olarak acilir ve "normal" isaretlenir.
     kaynak: 'muayene-sablon', rota: 'muayene-sablon', baslik: 'Muayene Şablonları',
     yol: 'Muayene › Muayene Ayarları › Muayene Şablonları',
-    // ÖZEL SAYFA (mockup muayene_sablonlari.html): iki panel + 6 sekme -
-    //   generic liste/kart yerine MuayeneSablonlari bileşeni.
+    // ÖZEL SAYFA (mockup muayene_sablon_listesi.html): Bölüm › Doktor ağacı +
+    //   gruplu grid + önizleme (MuayeneSablonListesi). 933'te standart listeye
+    //   çevrildi, kullanıcı ağacı geri istedi; üst çubuk standart liste gibi.
     ozelSayfa: true,
     kartYolu: '/muayene-sablon', kartBaslik: 'Muayene Şablonu',
     aksiyonEkrani: 'cari-liste',

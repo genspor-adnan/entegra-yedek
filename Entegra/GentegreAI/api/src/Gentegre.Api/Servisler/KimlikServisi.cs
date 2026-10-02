@@ -4,6 +4,7 @@ using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace Gentegre.Api.Servisler;
 
@@ -154,13 +155,26 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz();
 
         var hash = JwtUretici.Hashle(refreshToken);
-        var oturum = await _oturumlar.HashIleBulAsync(hash, iptal)
+
+        // ATOMIK ROTATION (denetim 28.09.2026 #6): eski satirin okunmasi,
+        //   kapatilmasi ve yeni satirin acilmasi TEK baglanti + TEK islem.
+        //   Satir kilidi (FOR UPDATE) ayni token'la gelen ikinci istegi
+        //   bekletir; o, birincinin sonucunu (iptal edilmis satir) gorur.
+        //   Islem commit edilmeden yanit donmez: yeni satir yazilamazsa eski
+        //   token TUKENMEMIS kalir (rollback).
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        var oturum = await OturumDeposu.KilitleAsync(baglanti, islem, hash, iptal)
                      ?? throw GentegreHatasi.Yetkisiz();
 
-        // TEKRAR KULLANIM: iptal edilmis token yeniden geldi -> aile komple iptal.
+        // TEKRAR KULLANIM: iptal edilmis token yeniden geldi -> aile komple
+        //   iptal. Iptal hata donmeden ONCE commit edilir; aksi halde hata
+        //   yolundaki rollback aile iptalini de geri alirdi.
         if (oturum.IptalTarihi is not null)
         {
-            await _oturumlar.AileIptalAsync(oturum.AileId, "tekrar_kullanim", iptal);
+            await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "tekrar_kullanim", iptal);
+            await islem.CommitAsync(iptal);
             throw GentegreHatasi.Yetkisiz("Oturum guvenlik nedeniyle sonlandirildi, yeniden giris yapin.");
         }
 
@@ -170,16 +184,22 @@ public sealed class KimlikServisi
         var kullanici = await _kullanicilar.IdIleBulAsync(oturum.KullaniciId, iptal);
         if (kullanici is null || !kullanici.Aktif)
         {
-            await _oturumlar.AileIptalAsync(oturum.AileId, "kullanici_pasif", iptal);
+            await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "kullanici_pasif", iptal);
+            await islem.CommitAsync(iptal);
             throw GentegreHatasi.Yetkisiz();
         }
 
-        await _oturumlar.IptalAsync(oturum.Id, "yenilendi", iptal);
+        // Kilit altinda satir acik olmali; degilse (beklenmeyen) yeni dal ACILMAZ.
+        if (await OturumDeposu.IptalAsync(baglanti, islem, oturum.Id, "yenilendi", iptal) != 1)
+            throw GentegreHatasi.Yetkisiz();
 
         var subeler = await _kullanicilar.SubeleriAsync(kullanici.TarafId, iptal);
         var subeId = SubeSec(oturum.SubeId, subeler);
 
-        return await TokenUretAsync(kullanici, subeler, subeId, oturum.AileId, oturum.Id, ip, istemci, iptal);
+        var yanit = await TokenUretAsync(kullanici, subeler, subeId, oturum.AileId, oturum.Id,
+                                         ip, istemci, iptal, baglanti, islem);
+        await islem.CommitAsync(iptal);
+        return yanit;
     }
 
     public async Task CikisAsync(string refreshToken, CancellationToken iptal = default)
@@ -189,8 +209,14 @@ public sealed class KimlikServisi
         if (oturum is not null) await _oturumlar.IptalAsync(oturum.Id, "cikis", iptal);
     }
 
-    public async Task ParolaDegistirAsync(int kullaniciId, ParolaDegistirIstegi istek,
-                                          CancellationToken iptal = default)
+    /// <summary>
+    /// Parola degisir, ACIK OTURUMLARIN HEPSI kapanir ve bu cihaz icin YENI
+    /// bir oturum (yeni aile) acilir. Eskiden yanit bos donuyordu: access
+    /// token 30 dk sonra bitince refresh de iptal edilmis oldugu icin kisi
+    /// parolasini degistirdigi ekrandan atiliyordu.
+    /// </summary>
+    public async Task<GirisYaniti> ParolaDegistirAsync(int kullaniciId, int? subeId,
+        ParolaDegistirIstegi istek, string ip, string istemci, CancellationToken iptal = default)
     {
         var kullanici = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal)
                         ?? throw GentegreHatasi.Yetkisiz();
@@ -231,6 +257,12 @@ public sealed class KimlikServisi
 
         // Parola degisince acik oturumlar kapanir.
         await _oturumlar.KullaniciOturumlariniKapatAsync(kullaniciId, "parola_degisti", iptal);
+
+        var guncel = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal)
+                     ?? throw GentegreHatasi.Yetkisiz();
+        var subeler = await _kullanicilar.SubeleriAsync(kullaniciId, iptal);
+        return await TokenUretAsync(guncel, subeler, SubeSec(subeId, subeler), null, null,
+                                    ip, istemci, iptal);
     }
 
     /// <summary>
@@ -270,47 +302,9 @@ public sealed class KimlikServisi
         return (acilan, parolasiz.Count);
     }
 
-    /// <summary>
-    /// ILK PAROLA (kullanici: "kullanici ilk giriste pass tanimlasin").
-    /// Otomatik acilan hesaplarin parolasi BOSTUR; kisi kendi parolasini
-    /// burada belirler. Kimlik kaniti olarak TCKN'nin SON 4 HANESI istenir -
-    /// yoksa kullanici kodunu bilen herkes baskasinin hesabini ele gecirirdi.
-    /// Parolasi zaten tanimli hesapta calismaz (normal "parola degistir" akisi).
-    /// </summary>
-    public async Task IlkParolaAsync(IlkParolaIstegi istek, string ip, string istemci,
-                                     CancellationToken iptal = default)
-    {
-        var kod = (istek.Kod ?? "").Trim().ToLowerInvariant();
-        var (kullanici, _) = kod.Length > 0
-            ? await _kullanicilar.EsnekBulAsync(kod, iptal)
-            : (null, false);
-
-        // Kullanici var mi / parolasi bos mu SIZDIRILMAZ - tek mesaj.
-        const string ortakHata = "Kullanıcı adı ya da kimlik doğrulaması hatalı.";
-        if (kullanici is null || !kullanici.Aktif || kullanici.ParolaHash.Length > 0)
-        {
-            await _gunluk.GirisDenemesiAsync(kod, kullanici?.TarafId, ip, istemci, false,
-                                             "ilk_parola", iptal);
-            throw GentegreHatasi.Yetkisiz(ortakHata);
-        }
-
-        var tckn = (await _kullanicilar.TcknAsync(kullanici.TarafId, iptal) ?? "").Trim();
-        var son4 = (istek.TcknSon4 ?? "").Trim();
-        if (tckn.Length < 4 || son4.Length != 4 || !tckn.EndsWith(son4, StringComparison.Ordinal))
-        {
-            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false,
-                                             "ilk_parola_tckn", iptal);
-            throw GentegreHatasi.Yetkisiz(ortakHata);
-        }
-
-        var enAz = await AyarAsync("guvenlik.parola_min_uzunluk", ParolaKurali.VarsayilanEnAz, iptal);
-        ParolaKurali.Dogrula(istek.YeniParola, enAz);
-
-        var hash = BCrypt.Net.BCrypt.HashPassword(istek.YeniParola, workFactor: 12);
-        await _kullanicilar.ParolaAtaAsync(kullanici.TarafId, hash, degismeli: false, iptal);
-        await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, true,
-                                         "ilk_parola", iptal);
-    }
+    // ILK PAROLA (parolasi bos hesap) artik ParolaSifirlamaServisi'nde: TCKN
+    //   son 4 tek basina parola belirleyemez, kayitli kanala giden tek
+    //   kullanimlik kod gerekir (denetim 28.09.2026 #5).
 
     public async Task DilDegistirAsync(int kullaniciId, DilDegistirIstegi istek,
                                        CancellationToken iptal = default)
@@ -325,7 +319,8 @@ public sealed class KimlikServisi
     // ------------------------------------------------------------------ ic ----
     private async Task<GirisYaniti> TokenUretAsync(KullaniciKaydi kullanici,
         IReadOnlyList<SubeOzeti> subeler, int? subeId, Guid? aileId, long? oncekiId,
-        string ip, string istemci, CancellationToken iptal)
+        string ip, string istemci, CancellationToken iptal,
+        NpgsqlConnection? baglanti = null, NpgsqlTransaction? islem = null)
     {
         var dakika = await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal);
         var gun = await AyarAsync("guvenlik.refresh_gun", _ayar.RefreshGun, iptal);
@@ -337,8 +332,13 @@ public sealed class KimlikServisi
         // Veritabanina yazilacak: AN (UTC), duvar saati degil (667).
         var refreshBitis = Saat.An.AddDays(gun);
 
-        await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aileId, oncekiId,
-            subeId, ip, istemci, iptal);
+        // Yenilemede satir, eski satiri kapatan AYNI islemle yazilir (#6).
+        if (baglanti is not null)
+            await OturumDeposu.AcAsync(baglanti, islem, kullanici.TarafId, hash, refreshBitis,
+                aileId, oncekiId, subeId, ip, istemci, iptal);
+        else
+            await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aileId, oncekiId,
+                subeId, ip, istemci, iptal);
 
         return new GirisYaniti
         {
@@ -434,7 +434,8 @@ public sealed class KimlikServisi
         ParolaDegismeli = kullanici.ParolaDegismeli,
         YetkiSurumu = kullanici.YetkiSurumu,
         SubeId = subeId,
-        SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,
+        // Subesiz oturum YAZAMAZ (denetim #1) - istek baglamiyla ayni kural.
+        SubeYazma = subeId is { } sid && subeler.Any(s => s.Id == sid && s.Yazma),
         Subeler = subeler,
         UrunModu = urunModu,
         Moduller = moduller,

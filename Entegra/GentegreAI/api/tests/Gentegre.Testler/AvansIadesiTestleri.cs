@@ -58,7 +58,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
             + "  from public.v_hasta_avans a where a.kasa_islem_id = @p0",
             t, [avansId], OkuyucuGenisletmeleri.Sozluk, CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Iade_KALANDAN_duser_ve_durumu_degistirir()
     {
         if (!_olgu.Baglandi(nameof(Iade_KALANDAN_duser_ve_durumu_degistirir))) return;
@@ -86,7 +86,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iade_KALANI_asamaz()
     {
         if (!_olgu.Baglandi(nameof(Iade_KALANI_asamaz))) return;
@@ -103,7 +103,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kullanilmis_avansin_KALANI_kadar_iade_edilir()
     {
         if (!_olgu.Baglandi(nameof(Kullanilmis_avansin_KALANI_kadar_iade_edilir))) return;
@@ -136,7 +136,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iade_edilen_avans_MAHSUP_edilemez()
     {
         if (!_olgu.Baglandi(nameof(Iade_edilen_avans_MAHSUP_edilemez))) return;
@@ -162,7 +162,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iade_TAHSILAT_turunde_olamaz()
     {
         if (!_olgu.Baglandi(nameof(Iade_TAHSILAT_turunde_olamaz))) return;
@@ -181,7 +181,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iade_AVANSIN_SAHIBINE_yapilir()
     {
         if (!_olgu.Baglandi(nameof(Iade_AVANSIN_SAHIBINE_yapilir))) return;
@@ -202,7 +202,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iptal_edilen_iade_KALANI_geri_verir()
     {
         if (!_olgu.Baglandi(nameof(Iptal_edilen_iade_KALANI_geri_verir))) return;

@@ -59,7 +59,7 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Contains(aksiyonlar!, a => a.Kod == "enabiz-kod-esleme.duzenle");
     }
 
-    [Fact]
+    [VtFact]
     public async Task Rehber_katalogu_YENI_EKRANLARI_bilir()
     {
         if (!_olgu.Baglandi(nameof(Rehber_katalogu_YENI_EKRANLARI_bilir))) return;
@@ -77,7 +77,7 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Enabiz_SURECI_rehberde_anlatilir()
     {
         if (!_olgu.Baglandi(nameof(Enabiz_SURECI_rehberde_anlatilir))) return;
@@ -134,7 +134,7 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.DoesNotContain("skrs_klinik_kod", kaynak, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [VtFact]
     public async Task SKRS_klinik_LOOKUPU_var()
     {
         if (!_olgu.Baglandi(nameof(SKRS_klinik_LOOKUPU_var))) return;

@@ -7,7 +7,7 @@ import { RandevuOzetSeridi } from '../RandevuOzetSeridi';
 import { RandevuTetkikUyum } from '../RandevuTetkikUyum';
 import type { Deger } from '../kartAlanCizim';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
-import type { SekmeTanimi } from '../kartSekmeleri';
+import type { SekmeParcalari, SekmeTanimi } from '../kartSekmeleri';
 
 export interface KartGrupSarmalayiciOzellikleri {
   /** Acik sekme (tur === 'grup' oldugu YERDE cagrilir). */
@@ -37,14 +37,15 @@ export interface KartGrupSarmalayiciOzellikleri {
                      uygula?: (deger: string) => void } | null): void;
   secilenAdlar: Record<string, string>;
   /** Gruba GOMULU detaylar (mockup "Fizik Muayene"): ayri sekme degil. */
-  detayGrupta?: Record<string, { grup: string; salt?: boolean; gridKipi?: boolean;
+  detayGrupta?: Record<string, { grup: string | readonly string[]; salt?: boolean; gridKipi?: boolean;
                                  sinif?: string; sade?: boolean; ekleGizli?: boolean;
                                  gizli?: string[]; etiket?: string[]; ustte?: boolean;
                                  yeni?: () => void }>;
   detayIzgara?: Record<string, { sinif?: string; baslik?: string;
                                  alanSirasi?: string[]; not?: ReactNode }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
-                    izgaraCiz?: (detayAd: string) => ReactNode): ReactNode;
+                    izgaraCiz?: (detayAd: string) => ReactNode,
+                    parcalar?: SekmeParcalari): ReactNode;
 }
 
 /**
@@ -63,9 +64,9 @@ export function KartGrupSarmalayici({
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
   setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici,
 }: KartGrupSarmalayiciOzellikleri) {
-        const govde = (
+        const grupCiz = (sekme: typeof aktif) => (
         <KartGrupSekmesi
-          aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
+          aktif={sekme} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
           deger={deger} setDeger={setDeger}
           detaylar={detaylar} setDetaylar={setDetaylar}
@@ -76,6 +77,7 @@ export function KartGrupSarmalayici({
           secilenAdlar={secilenAdlar}
         />
         );
+        const govde = grupCiz(aktif);
         const tam = kaynak === 'randevu' ? (
           <>
             {govde}
@@ -114,7 +116,9 @@ export function KartGrupSarmalayici({
         // GRUBA GOMULU DETAY (mockup "Fizik Muayene"): sablon alanlarinin
         //   ALTINDA sistem/normal/bulgu tablosu - ayri sekme degil.
         const gomulu = (meta?.detaylar ?? [])
-          .filter(d => detayGrupta?.[d.ad]?.grup === aktif.baslik);
+          // Grup birden çok ad alabilir (sekme yeniden adlandırılınca eski ad
+          //   da tanınsın - eski API ile çalışan ekran detayı kaybetmesin).
+          .filter(d => ([] as string[]).concat(detayGrupta?.[d.ad]?.grup ?? []).includes(aktif.baslik));
         const tablolar = gomulu.map(d => (
               <GenDetayTablo
                 key={d.ad}
@@ -161,6 +165,16 @@ export function KartGrupSarmalayici({
             </div>
           );
         };
+        // PARCALAR: ekran gomulu tabloyu alanlardan ayri yere koyabilsin.
+        const parcalar: SekmeParcalari = {
+          alanlar: tam,
+          tablolar: Object.fromEntries(gomulu.map((d, i) => [d.ad, tablolar[i]])),
+          alanDegistir,
+          altGrupCiz: alt => {
+            const alanlar = aktif.alanlar.filter(a => (a.altGrup ?? '') === alt);
+            return alanlar.length ? grupCiz({ ...aktif, alanlar }) : null;
+          },
+        };
         return sekmeSarmalayici
-          ? sekmeSarmalayici(aktif.baslik, tumu, deger, izgaraCiz) : tumu;
+          ? sekmeSarmalayici(aktif.baslik, tumu, deger, izgaraCiz, parcalar) : tumu;
 }

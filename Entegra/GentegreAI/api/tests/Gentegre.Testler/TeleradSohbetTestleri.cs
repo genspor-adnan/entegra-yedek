@@ -52,7 +52,7 @@ public sealed class TeleradSohbetTestleri(VeritabaniOlgusu olgu)
             returning id
             """, t, [istekId, baslik], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_is_icin_TEK_sohbet()
     {
         if (!_olgu.Baglandi(nameof(Ayni_is_icin_TEK_sohbet))) return;
@@ -73,7 +73,7 @@ public sealed class TeleradSohbetTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Serbest_sohbetler_KAYNAKSIZ_kalabilir()
     {
         if (!_olgu.Baglandi(nameof(Serbest_sohbetler_KAYNAKSIZ_kalabilir))) return;
@@ -92,7 +92,7 @@ public sealed class TeleradSohbetTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Is_sohbetinin_basligi_KAYITTAN_gelir()
     {
         if (!_olgu.Baglandi(nameof(Is_sohbetinin_basligi_KAYITTAN_gelir))) return;
@@ -131,7 +131,7 @@ public sealed class TeleradSohbetTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dis_kurum_rolu_MESAJLASABILIR_ama_duzenleyemez()
     {
         if (!_olgu.Baglandi(nameof(Dis_kurum_rolu_MESAJLASABILIR_ama_duzenleyemez))) return;

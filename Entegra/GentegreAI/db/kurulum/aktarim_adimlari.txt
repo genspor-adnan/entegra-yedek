@@ -1,0 +1,16 @@
+# MSSQL'DEN VERI AKTARIMI GEREKTIREN GOC DOSYALARI (tek kaynak).
+#
+# Bos kurulumda (MSSQL kaynagi yok) bu dosyalar CALISTIRILMAZ; goc defterine
+# `yontem = 'aktarim_yok'` ile yazilir - "uygulandi" ile karistirilmaz.
+#
+# Liste DOSYA ADI KALIBINDAN degil, OLCULEREK cikarildi (28.09.2026): butun
+# zincir bos bir veritabaninda, bos stg tablolariyla calistirildi. Adi "goc"
+# olan dosyalarin cogu (002, 003, 013, 018, 021, 079, 080, 081) bos stg ile
+# SORUNSUZ calisir ve sonraki goclerin dayandigi sema/fonksiyonu da kurar
+# (or. 003 fn_etiket_anahtar'i tanimlar, 022 onu kullanir; 033 stg
+# tablolarinin VARLIGINA dayanir) - bu yuzden listede DEGIL. Yalniz stg'deki
+# MSSQL kolonlarina (goc_al.ps1'in getirdigi) dayanan dosya burada durur.
+#
+# Okuyanlar: db/araclar/goc_uygula.ps1 (kur.ps1 -SadeceSema),
+#            yayin/goc_uygula.sh (sunucu). Satir basi # yorumdur.
+014_goc_belge.sql

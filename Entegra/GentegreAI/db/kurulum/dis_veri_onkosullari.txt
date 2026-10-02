@@ -1,0 +1,12 @@
+# DIS VERI ON KOSULU OLAN GOC DOSYALARI (tek kaynak).
+#
+# Bu dosyalar kendi icinde "veri yoksa DUR" korumasi tasir (raise exception):
+# SKRS kod listeleri disaridan (Saglik.NET) gelir, gocle uretilemez. Bos
+# kurulumda zincir bu dosyada BILEREK durur. Goc uygulayici bu listedeki bir
+# dosya basarisiz olursa asagidaki ON KOSULU yazar ve 2 koduyla cikar
+# ("dis veri bekliyor") - on kosul saglaninca ayni komut kaldigi yerden devam
+# eder (uygulanan dosyalar defterde).
+#
+# Bicim: dosya|on kosul
+521_skrs_katalog_kurulum.sql|SKRS ambari bos: API'yi calistirip Entegrasyon > SKRS ile SUT, TIBBI ISLEM PUAN BILGISI ve LOINC listelerini cekin (POST /api/entegrasyon/{id}/skrs-ham?ad=...).
+559_bolum_gorev_skrs.sql|SKRS kod listeleri bos: Entegrasyon > SKRS Senkron ile skrs.klinik ve hekim.brans listelerini doldurun.

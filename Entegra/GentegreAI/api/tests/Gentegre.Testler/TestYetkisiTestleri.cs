@@ -27,7 +27,7 @@ public sealed class TestYetkisiTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam(int rolId) => new()
     {
-        KullaniciId = 1, RolId = rolId, SubeId = 0,
+        KullaniciId = 1, RolId = rolId, RolIdleri = [rolId], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(rolId,
             [new YetkiKaydi("lab.sonuc", 0, true, true, true, true),
              new YetkiKaydi("lab.onay", 1, true, true, true, true)], []),
@@ -81,7 +81,7 @@ public sealed class TestYetkisiTestleri(VeritabaniOlgusu olgu)
             "select public.fn_lab_tetkik_izin(@p0, @p1, @p2)", [tetkikId, rolId, islem],
             CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Kisiti_OLMAYAN_tetkik_herkese_acik()
     {
         if (!_olgu.Baglandi(nameof(Kisiti_OLMAYAN_tetkik_herkese_acik))) return;
@@ -105,7 +105,7 @@ public sealed class TestYetkisiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, izinli, yasak); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tek_kisit_satiri_tetkiki_HERKESE_KAPATIR()
     {
         if (!_olgu.Baglandi(nameof(Tek_kisit_satiri_tetkiki_HERKESE_KAPATIR))) return;
@@ -139,7 +139,7 @@ public sealed class TestYetkisiTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, izinli, yasak); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yetkisiz_rol_kisitli_tetkiki_ISTEYEMEZ()
     {
         if (!_olgu.Baglandi(nameof(Yetkisiz_rol_kisitli_tetkiki_ISTEYEMEZ))) return;

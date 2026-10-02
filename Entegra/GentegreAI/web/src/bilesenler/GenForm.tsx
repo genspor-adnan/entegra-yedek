@@ -25,7 +25,7 @@ import {
 } from './kartDegisim';
 import {
   alanGruplari, sekmeleriKur, detaySekmeAnahtari, grupSekmeAnahtari,
-  KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi,
+  KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi, type SekmeParcalari,
 } from './kartSekmeleri';
 import { TekKayit } from './TekKayit';
 import { GenGrid } from './GenGrid';
@@ -66,7 +66,11 @@ interface Props {
                     /** Bir DETAYI (ör. vitaller) etiket+kutu ızgarası olarak
                         istenen yere çizer - anamnez sekmesinin sağ paneline
                         düzenlenebilir vital ızgarası koymak için. */
-                    izgaraCiz?: (detayAd: string) => React.ReactNode): React.ReactNode;
+                    izgaraCiz?: (detayAd: string) => React.ReactNode,
+                    /** Sekmenin PARÇALARI ayrı ayrı: alanlar ve gruba gömülü
+                        tablolar (detay adıyla) - ekran bir tabloyu alanlardan
+                        ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
+                    parcalar?: SekmeParcalari): React.ReactNode;
   /** SERIDIN USTUNDE cizilen ekran-ozel baglam kutulari (or. muayene kartinda
       hasta/alerji/aktif ilac - mockup muayene_karti.html). Kart degerini alir
       cunku hangi hastanin gosterilecegi karttan cikar. */
@@ -125,7 +129,7 @@ interface Props {
    * `gizli` o gride cizilmeyecek alanlar, `etiket` ise kutu yerine DUZ METIN
    * cizilecek alanlar (satirin kimligi - sunucunun yazdigi degerler).
    */
-  detayGrupta?: Record<string, { grup: string; gizli?: string[]; etiket?: string[];
+  detayGrupta?: Record<string, { grup: string | readonly string[]; gizli?: string[]; etiket?: string[];
                                  sinif?: string; ustte?: boolean; sade?: boolean;
                                  /** GenGrid gorunumu: satir ici kutu yok,
                                      hucreler duz metin (liste gridi gibi). */
@@ -191,6 +195,11 @@ interface Props {
    * diyor ama goremiyorum" diyordu.
    */
   tazeleAnahtari?: number;
+  /** Pencere tam ekran olmaz ve kayitli tam ekran tercihini almaz (kartin
+      icinden acilan yardimci kart; ör. muayenedeki reçete düzenleme). */
+  buyutmeYok?: boolean;
+  /** Alanin altinda gosterilecek ipucu (ör. muayene makro kisayollari). */
+  alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
   /** Bu EKRANDA zorunlu sayilacak alanlar (ör. Aday kartinda "Temsilci").
       Katalogda zorunlu YAPILMAZ: ayni alan Musteri kartinda bos olabilir ve
       eski kayitlarin duzenlenmesini kilitlerdi. */
@@ -241,10 +250,11 @@ export interface EkSekmeBaglami {
  */
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, onMevcutKayit, yerTutucuSekmeler,
+
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
-                          gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
+                          gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
   const { kullanici } = useOturum();
   const yeniMi = id === 'yeni';
   // Dis hekim (305) de ad/soyad ile calisir: unvan gosterilmez, ad+soyaddan
@@ -885,6 +895,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
      sekmeSirasi, detaylar]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
+  /**
+   * SEKMEYI BUYUT (kullanici: "sekmeler hizasinda saga yanasik sekmeyi
+   * maksimum yapma butonu.. ustteki kaydet butonuna kadar"): sekmenin
+   * ustundeki seritler (baglam + kimlik) gizlenir, sekme Kaydet araç
+   * cubuguna kadar uzar. Kart turu basina HATIRLANIR (tarayicida).
+   */
+  const sekmeMaksAnahtar = `kartSekmeMaks.${kaynak}`;
+  const [sekmeMaks, setSekmeMaks] = useState(() => {
+    try { return localStorage.getItem(sekmeMaksAnahtar) === '1' } catch { return false }
+  });
+  const sekmeMaksDegis = () => setSekmeMaks(m => {
+    try { localStorage.setItem(sekmeMaksAnahtar, m ? '0' : '1') } catch { /* sart degil */ }
+    return !m;
+  });
   const kayitAnahtari = `${kaynak}:${id}`;
   const ilkSekmeAnahtari = sekmeler[0]?.anahtar ?? null;
   useEffect(() => {
@@ -1158,7 +1182,7 @@ Yine de yeni kayıt eklensin mi?`);
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok}
         ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">{c('Yukleniyor…')}</div>
       </Modal>
@@ -1166,7 +1190,7 @@ Yine de yeni kayıt eklensin mi?`);
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok}
         ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
@@ -1180,7 +1204,7 @@ Yine de yeni kayıt eklensin mi?`);
   const { altGruplaVar, renderAlanListesi } = alanCizici({
     kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
-    secilenAdlar,
+    secilenAdlar, alanIpucu,
     aramaAc: (alanAdi, kaynakAdi, uygula) =>
       setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi, uygula }),
     listeDuzenle: a => {
@@ -1201,6 +1225,7 @@ Yine de yeni kayıt eklensin mi?`);
     <Modal
       baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+      buyutmeYok={buyutmeYok}
         // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
         //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
         //   sinifi tek basina her kartin "durum" alanini etkilerdi.
@@ -1275,7 +1300,7 @@ Yine de yeni kayıt eklensin mi?`);
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>
       }
-      ustSerit={(
+      ustSerit={sekmeMaks && sekmeler.length > 1 ? undefined : (
         <>
         {/* EKRAN-OZEL BAGLAM (461): kimlik seridinin USTUNDE. Muayenede
             alerji/kronik/aktif ilac hekimin yazarken gormesi gereken bilgi -
@@ -1338,6 +1363,11 @@ Yine de yeni kayıt eklensin mi?`);
               }</span>}
             </div>
           ))}
+          {/* SEKMEYI BUYUT: sekme hizasinda, SAGA yanasik. */}
+          <button type="button" className="katab-buyut"
+                  aria-pressed={sekmeMaks}
+                  title={sekmeMaks ? 'Üst bilgileri göster' : 'Sekmeyi büyüt (üst bilgileri gizle)'}
+                  onClick={sekmeMaksDegis}>{sekmeMaks ? '🗗' : '⛶'}</button>
         </div>
       )}
       onKapat={kapatIstendi}

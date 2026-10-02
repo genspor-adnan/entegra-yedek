@@ -48,7 +48,7 @@ public sealed class SablonYetkiKodlariTestleri(VeritabaniOlgusu olgu)
             .Select(m => m.Groups["kod"].Value).Distinct()];
     }
 
-    [Fact(DisplayName = "Şablonlardaki yetki kodları katalogda var")]
+    [VtFact(DisplayName = "Şablonlardaki yetki kodları katalogda var")]
     public async Task Sablon_yetki_kodlari_gercek()
     {
         if (!_olgu.Baglandi(nameof(Sablon_yetki_kodlari_gercek))) return;
@@ -70,7 +70,7 @@ public sealed class SablonYetkiKodlariTestleri(VeritabaniOlgusu olgu)
             "Katalogda karşılığı olmayan yetki deseni: " + string.Join(", ", eksik));
     }
 
-    [Fact(DisplayName = "Onay basamaklarının yetkisi en az bir şablonda var")]
+    [VtFact(DisplayName = "Onay basamaklarının yetkisi en az bir şablonda var")]
     public async Task Onay_basamaklarinin_sahibi_var()
     {
         if (!_olgu.Baglandi(nameof(Onay_basamaklarinin_sahibi_var))) return;

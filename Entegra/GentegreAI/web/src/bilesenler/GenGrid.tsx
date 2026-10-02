@@ -155,6 +155,9 @@ interface Props {
   /** Satir secimi degisince cagrilir - disaridaki dugmeler (Ekstre gibi) buna gore
       aktif/pasif olur. */
   onSecimDegisti?(satir: ListeSatiri | null): void;
+  /** ONAY KUTUSU İŞARETLİ satırlar değişince (yüklü sayfa) - gömülü gridin
+      üstündeki toplu eylem düğmeleri için (ör. reçete ilaçlarını sil). */
+  onIsaretliDegisti?(satirlar: ListeSatiri[]): void;
   /** Arac cubugu dugmesine acilir alt menu (ör. "＋ Tahsilat" -> Nakit/Banka/...). */
   altSecenekler?: Record<string, AltSecenek[]>;
   /** Bu EKRANDA gizlenecek kolon adlari (katalogda varsayilan gelse bile).
@@ -224,7 +227,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum,
-                          onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
+                          onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
+                          yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
   //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
@@ -365,6 +369,21 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           satirSecimiDegistir, satirTiklandi, sayfaIdleri,
           hepsiSecili, hepsiRef } =
     useGridSecimi({ satirlar, kaynak, sayfa, seciliBaslangicId, onSecimDegisti });
+  // Isaretli satirlar disari (gomulu gridin toplu eylemleri). Ref: cagiranin
+  //   her cizimde yeni fonksiyon vermesi dongu kurmasin.
+  const isaretliBildir = useRef(onIsaretliDegisti);
+  isaretliBildir.current = onIsaretliDegisti;
+  //   Yalniz isaretli KUME degisince bildirilir: her yuklemede bos liste
+  //   bildirmek cagiranı yeniden cizdirip grid'i yeniden yukletiyordu
+  //   (kullanici: "ilac gridi surekli yanip sonuyor").
+  const sonIsaretli = useRef('');
+  useEffect(() => {
+    const liste = satirlar.filter((sr, i) => secili.has(String(sr.id ?? i)));
+    const anahtar = liste.map((sr, i) => String(sr.id ?? i)).join(',');
+    if (anahtar === sonIsaretli.current) return;
+    sonIsaretli.current = anahtar;
+    isaretliBildir.current?.(liste);
+  }, [secili, satirlar]);
 
   // Aksiyonlar secili kayda gore yeniden cozulur: "belge zaten gonderilmis" gibi
   //   kosullar sunucuda degerlendirilir, istemci kural yazmaz.

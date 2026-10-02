@@ -176,7 +176,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
 
     // -------------------------------------------------------------- testler --
 
-    [Fact]
+    [VtFact]
     public async Task Sut_listesi_bossa_sgk_payi_sifir_kalir()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;
@@ -193,7 +193,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         Assert.Equal((short)0, k.SgkListeElle);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ekrandan_verilen_sut_bedeli_sgk_kovasina_girer()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;
@@ -213,7 +213,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         Assert.Equal(2800m, k.Sgk + k.Oss);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sonraki_tazeleme_ekrandan_gireni_ezmez()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;
@@ -238,7 +238,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         Assert.Equal((short)1, k.SgkListeElle);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sifir_da_gecerli_cevaptir_sgk_odemiyor()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;
@@ -256,7 +256,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         Assert.Equal((short)1, k.SgkListeElle);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sut_listesi_doluysa_bedel_sorulmadan_gelir()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;
@@ -279,7 +279,7 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         Assert.Equal(2800m, k.Tutar);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Oss_rotasinda_sut_bedeli_aranmaz()
     {
         if (!_olgu.Baglandi(nameof(SutBedeliTestleri))) return;

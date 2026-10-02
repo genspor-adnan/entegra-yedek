@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { KartAlanMeta, KartDetayMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 import type { Deger } from './kartAlanCizim';
 
@@ -99,7 +100,7 @@ export function sekmeleriKur(secenek: {
    * (mockup muayene_karti.html "Fizik Muayene": ust satirda sablon, altinda
    * sistem/normal/bulgu tablosu - iki ayri sekme degil).
    */
-  detayGrupta?: Record<string, { grup: string }>;
+  detayGrupta?: Record<string, { grup: string | readonly string[] }>;
   /**
    * SEKMESI ACILMAYACAK detaylar. Detay ekranda BASKA bir yerde cizildiginde
    * (or. vitaller anamnez sekmesinin sag panelinde) ayrica sekme acmak ayni
@@ -278,4 +279,18 @@ export function sekmeleriKur(secenek: {
   }
 
   return s;
+}
+
+/** Grup sekmesinin parçaları: alan ızgarası ve gömülü detay tabloları - ekran
+    bir tabloyu alanlardan ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
+export interface SekmeParcalari {
+  alanlar: ReactNode;
+  tablolar: Record<string, ReactNode>;
+  /** Sekmenin YALNIZ bir alt grubunun alanlarını çizer ('' = alt grupsuz
+      alanlar) - ekran alanları bölüp araya kendi panelini koyabilsin
+      (muayene: şikâyet/hikâye · reçete · değerlendirme/plan). */
+  altGrupCiz(altGrup: string): ReactNode;
+  /** Kartin bir alanini yazar (kaydedilmemis degisiklik olarak - Kaydet ile
+      gider). Ekran-ozel paneller icin (ör. muayenede dikte metni). */
+  alanDegistir(ad: string, deger: Deger): void;
 }

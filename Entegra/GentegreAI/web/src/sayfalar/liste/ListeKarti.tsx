@@ -22,7 +22,16 @@ import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
+import { MakroIpucu } from '../../bilesenler/MakroIpucu';
+
+/** Makro açılan muayene alanları (katalog MakroAlanKodlari ile aynı). */
+const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
+import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
+import { c } from '../../dil/ceviri';
+import { mesaj } from '../../bilesenler/mesaj';
+import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
@@ -33,6 +42,12 @@ const MUAYENE_DURUM: Record<string, string> = {
   '1': 'Açık', '2': 'Sonuç Bekliyor', '3': 'Tamamlandı',
   '4': 'Ek Not Eklendi', '0': 'İptal',
 };
+
+
+/** "Şablon Muayene" sekmesi (eski adı Fizik Muayene - kullanıcı yeniden adlandırdı;
+    eski ad yeniden başlatılmamış API için tanınır). */
+const sablonMuayeneMi = (baslik: string) =>
+  baslik === 'Şablon Muayene' || baslik === 'Fizik Muayene';
 
 export interface ListeKartiOzellikleri {
   tanim: ListeTanimi;
@@ -89,11 +104,29 @@ export function ListeKarti({
   // BİRLEŞİK İSTEM SEPETİ (kullanici: "lab ve radyoloji tek istem ekranı,
   //   sekmeli"): muayeneId set olunca modal açılır.
   const [istem, setIstem] = useState<number | null>(null);
+  /** DIKTE penceresi + kartin GUNCEL alan okuyucu/yazicisi. Ref her cizimde
+      tazelenir: pencere acikken yapilan ekleme bir sonrakinde bayat degerle
+      ezilmesin. */
+  const [dikteAcik, setDikteAcik] = useState(false);
+  const dikteKaynak = useRef<{ oku(ad: string): string;
+                               yaz(ad: string, v: string): void } | null>(null);
   // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
   // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
   const [ozetModal, setOzetModal] = useState<number | null>(null);
   const { aksiyonVar } = useOturum();
+  /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
+      tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
+  const [makrolar, setMakrolar] = useState<Makro[]>([]);
+  const muayeneKarti = tanim.kaynak === 'muayene' && kartId !== null && kartId !== 'yeni';
+  useEffect(() => {
+    if (!muayeneKarti) { setMakrolar([]); return }
+    let iptal = false;
+    void api.muayeneSablonTercihleri(Number(kartId))
+      .then(y => { if (!iptal) setMakrolar(y.makrolar) })
+      .catch(() => { /* makro yoksa kısayol açılmaz, yazım etkilenmez */ });
+    return () => { iptal = true };
+  }, [muayeneKarti, kartId, kartTazele]);
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
 
@@ -120,6 +153,19 @@ export function ListeKarti({
           onKapat={() => setIstem(null)}
           onBitti={() => setKartTazele(t => t + 1)} />
       )}
+      {dikteAcik && (
+        <MuayeneDikte
+          hedefler={[{ ad: 'sikayet', baslik: 'Şikâyet' },
+                     { ad: 'hikaye', baslik: 'Hikâye' },
+                     { ad: 'karar', baslik: 'Değerlendirme / Plan' }]}
+          degerOku={ad => dikteKaynak.current?.oku(ad) ?? ''}
+          onYaz={(ad, v) => {
+            // Muayene sekmesi hic cizilmediyse yazici yok (kart baska sekmede acildi).
+            if (!dikteKaynak.current) { mesaj('Önce Muayene sekmesini açın.'); return }
+            dikteKaynak.current.yaz(ad, v);
+          }}
+          onKapat={() => setDikteAcik(false)} />
+      )}
       {raporModal && (
         <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
           onKapat={() => setRaporModal(null)}
@@ -140,33 +186,66 @@ export function ListeKarti({
         //   Alanlar girdi, takvim SONUC - ikisi ayni sekmede olmali ki
         //   kullanici "bu ayarla sonuc ne zaman cikar" sorusunu kaydetmeden
         //   gorebilsin. Hesap sunucuda.
+        // MAKRO IPUCU (kullanici): makro alanlarinin altinda gecerli kisayollar.
+        //   Yalniz makro katalogundaki metin alanlari (KartKatalogu
+        //   MakroAlanKodlari) - vital/kod alanlarinda kisayol anlamsiz.
+        alanIpucu={muayeneKarti
+          ? (ad, yaz) => MAKRO_ALANLARI.has(ad) ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz} /> : null
+          : undefined}
         sekmeSarmalayici={tanim.kaynak === 'lab-tetkik'
           ? (baslik, icerik, deger) => (
               baslik.includes('Çalışma Zamanları')
                 ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
                 : icerik)
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (baslik, icerik, _deger, izgaraCiz) => (
-            <div className="muayene-sekme-zemin">{
-              baslik.includes('Anamnez')
-                // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,
-                //   sagda SON vital olcumu. Hekim sikayeti yazarken
-                //   tansiyonu ayni ekranda gormeli - vital ayri sekmede
-                //   kalirsa bakilmadan yazilir.
+          ? (baslik, icerik, deger, izgaraCiz, parcalar) => (
+            // MAKRO: bütün muayene sekmelerinde kısayol + boşluk metne açılır.
+            <div className="muayene-sekme-zemin"
+                 onKeyDownCapture={e => makroTusu(e, makrolar, parcalar?.alanDegistir)}>{
+              // "Muayene" (eski adı Anamnez - yeniden başlatılmamış API).
+              (baslik === 'Muayene' || baslik.includes('Anamnez'))
+                // MUAYENE IKI PANEL (kullanici): SOLDA sikayet/hikaye ve ALTINDA
+                //   RECETE gridi ("sikayet hikaye altina recete gridini tasi");
+                //   SAGDA TANI gridi, altinda bugunun sonuclari ("tani gridini
+                //   saga sonuc gridi uzerine al"). Hekim yazarken tani ve
+                //   receteyi ayni ekranda gorur.
                 ? (
                   <div className="muayene-ikili">
-                    <div className="mi-sol">{icerik}</div>
+                    <div className="mi-sol">
+                      {/* DIKTE KAYNAGI: basliktaki 🎤 Dikte bu sekmenin GUNCEL
+                          alan okuyucu/yazicisini kullanir (ref her cizimde
+                          tazelenir). Cizime bir sey eklemez. */}
+                      {(() => {
+                        if (parcalar) dikteKaynak.current = {
+                          oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
+                        return null;
+                      })()}
+                      {/* Sikayet/hikaye · RECETE · Degerlendirme/Plan + Cikis
+                          sekli (kullanici: "recete altina tasi"). */}
+                      {parcalar ? parcalar.altGrupCiz('') : icerik}
+                      <MuayeneReceteSekmesi
+                        veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
+                        muayeneId={Number(kartId)}
+                        tazele={() => setKartTazele(t => t + 1)} />
+                      {parcalar?.altGrupCiz('Değerlendirme')}
+                    </div>
                     <div className="mi-sag">
-                      {/* VITAL IZGARASI DUZENLENEBILIR (kullanici): okunur
-                          panel yerine muayenenin SON olcumu - hekim sikayeti
-                          yazarken tansiyonu ayni ekranda girer. Sira mockup:
-                          tansiyon/nabiz/SpO2 · ates/solunum/agri ·
-                          boy-kilo/BKI/bel. */}
-                      {izgaraCiz?.('vitaller')}
-                      {/* Mockup'ta vitalin ALTINDA "Bugunku sonuclar": hekim
-                          anamnezi yazarken bugun ne ciktigini yaninda ister. */}
+                      {parcalar?.tablolar.tanilar}
                       <MuayeneSonucOzeti muayeneId={Number(kartId)} />
                     </div>
+                  </div>
+                )
+                // "Vital Bulgular" (eski adi "Tani (ICD-10)" - yeniden
+                //   baslatilmamis API icin tanınır).
+                : (baslik === 'Vital Bulgular' || baslik.startsWith('Tanı')) ? (
+                  // VITAL BULGULAR TANI SEKMESINDE (kullanici: "vital bulgulari
+                  //   tani sekmesine tasi"): solda degerlendirme/plan/cikis,
+                  //   sagda muayenenin SON olcumu - duzenlenebilir izgara.
+                  //   Sira mockup: tansiyon/nabiz/SpO2 · ates/solunum/agri ·
+                  //   boy-kilo/BKI/bel.
+                  <div className="muayene-ikili">
+                    <div className="mi-sol">{icerik}</div>
+                    <div className="mi-sag">{izgaraCiz?.('vitaller')}</div>
                   </div>
                 )
                 : baslik === 'Rapor' ? (
@@ -220,7 +299,7 @@ export function ListeKarti({
                         "Muayene Şablonu" + "Muayene Bulguları" alanları TEK
                         SATIR (mfz-tek-satir), bulgu grid tam genişlik sola
                         yaslı. */}
-                    {baslik === 'Fizik Muayene' && (
+                    {sablonMuayeneMi(baslik) && (
                       <>
                         <div className="muayene-arac">
                           <button type="button" className="d"
@@ -244,7 +323,7 @@ export function ListeKarti({
                         tablo/id teknik alanlar, hekime bir sey soylemiyor;
                         "gordum" isareti panelde dugme. Sekme mockup'taki
                         gibi arac cubugu + tek istem tablosu + ayrintilar. */}
-                    {baslik === 'Fizik Muayene' ? null
+                    {sablonMuayeneMi(baslik) ? null
                      : baslik.includes('Sonuç') ? (
                       <MuayeneIstemSonuc muayeneId={Number(kartId)}
                         onIstemAc={() => setIstem(Number(kartId))}
@@ -323,16 +402,8 @@ export function ListeKarti({
                ciz: baglam => <LabMikroOzet kaynak={tanim.kaynak} baglam={baglam} /> }]
           : tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
           ? [
-              { anahtar: 'ozel:recete', baslik: 'e-Reçete',
-                ciz: () => (
-                  <MuayeneReceteSekmesi
-                    veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
-                    muayeneId={Number(kartId)}
-                    // Recetenin tanisi muayenenin ANA + ek tanilaridir; ayri
-                    //   sorulacak bir sey degil (mockup da okunur gosteriyor).
-                    tanilar={sekmeVerisi.veri?.tanilar ?? ''}
-                    tazele={() => setKartTazele(t => t + 1)} />
-                ) },
+              // e-RECETE AYRI SEKME DEGIL: Muayene sekmesinde sikayet/hikaye
+              //   altinda (kullanici).
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },
@@ -348,7 +419,7 @@ export function ListeKarti({
                                             saltOkunur={false} /> },
             ]
           : undefined}
-        // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
+        // VITAL BULGULAR SEKMESI YOK (kullanici): olcum TANI sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
         gizliDetaylar={kartOzel.gizliDetaylar}
@@ -440,8 +511,14 @@ export function ListeKarti({
               return tanim.kaynak === 'muayene' ? (
                 <>
                   {dugme('muayene.al', '▶ Muayeneye Al')}
+                  {/* DIKTE (kullanici: "Muayeneye Al sagina"): sikayet / hikaye /
+                      degerlendirme serbest metnine ses ile yazim; metin hekim
+                      onaylayinca alanin SONUNA eklenir, kayit Kaydet ile. */}
+                  <button type="button" className="d" onClick={() => setDikteAcik(true)}>
+                    🎤 {c('Dikte')}
+                  </button>
                   {/* İstem açma İstem & Sonuçlar sekmesindeki grid başlığında
-                      "＋ İstem"; Şablon Uygula da Fizik Muayene sekmesinde var -
+                      "＋ İstem"; Şablon Uygula da Şablon Muayene sekmesinde var -
                       üstteki tek düğmeler kaldırıldı (kullanıcı). */}
                   {/* MUAYENE ÖZETİ (kullanıcı: "mockup gibi"): sol özet metni +
                       sağ kaynaklar modalı (MuayeneOzetiModal). */}

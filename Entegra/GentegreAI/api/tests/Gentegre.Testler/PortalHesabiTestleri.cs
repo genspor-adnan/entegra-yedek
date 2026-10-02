@@ -50,7 +50,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
             "select id from public.rol where portal_turu = @p0 order by id limit 1",
             t, [tur], Iptal);
 
-    [Fact]
+    [VtFact]
     public async Task Kurum_hesabi_kisinin_kaydinda_kapsam_kurumda()
     {
         if (!_olgu.Baglandi(nameof(Kurum_hesabi_kisinin_kaydinda_kapsam_kurumda))) return;
@@ -66,7 +66,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Devirsiz_hesapta_kapsam_kisinin_kendisi()
     {
         if (!_olgu.Baglandi(nameof(Devirsiz_hesapta_kapsam_kisinin_kendisi))) return;
@@ -82,7 +82,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kurum_ici_rolde_kapsam_devri_reddedilir()
     {
         if (!_olgu.Baglandi(nameof(Kurum_ici_rolde_kapsam_devri_reddedilir))) return;
@@ -102,7 +102,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kapsam_yalniz_cariye_devredilir()
     {
         if (!_olgu.Baglandi(nameof(Kapsam_yalniz_cariye_devredilir))) return;
@@ -122,7 +122,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kendi_kaydina_devir_bosa_dusurulur()
     {
         if (!_olgu.Baglandi(nameof(Kendi_kaydina_devir_bosa_dusurulur))) return;
@@ -142,7 +142,7 @@ public sealed class PortalHesabiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_erisimi_ayri_yetkidir()
     {
         if (!_olgu.Baglandi(nameof(Portal_erisimi_ayri_yetkidir))) return;

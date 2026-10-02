@@ -565,11 +565,13 @@ public static partial class LabUclari
 
         // GET /api/lab/istem/{id} - istem + numune + sonuç (rapor/ekran kaynağı).
         grup.MapGet("/istem/{id:int}", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
-            CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Gor);
+            // KAYIT KAPSAMI (denetim #3): liste ile aynı şube/portal kuralı.
+            await erisim.IsteAsync(baglam, "lab-istem", id, "İstem bulunamadı.", iptal);
 
             // Mockup lab_istem_numune_kabul.html sag panel: hasta satiri
             //   "Ayse Yilmaz · 39 K · 1234567****" - yas/cinsiyet ve MASKELI
@@ -730,9 +732,9 @@ public static partial class LabUclari
                    -- TEST SEVIYESINDE YETKI (889, KTS L7): kisitli tetkikin
                    --   satiri izinsiz role HIC donmez. Yanittan sonradan
                    --   silmek, satir sayisini ve toplamlari bozardi.
-                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
+                   and public.fn_lab_tetkik_izin_roller(s.tetkik_id, @p1, 'gor')
                  order by s.sira, s.id
-                """, [id, baglam.RolId],
+                """, [id, baglam.RolIdleri.ToArray()],
                 o => new {
                     SatirId = o.GetInt32(0), Kod = o.GetString(1), Ad = o.GetString(2),
                     Durum = o.GetInt16(3),
@@ -960,11 +962,13 @@ public static partial class LabUclari
         //   ONAYLI sonuclari), tekrarlar (ayni istemdeki oteki calismalar)
         //   ve bu sonucun kendi delta bilgisi.
         grup.MapGet("/satir/{id:int}/gecmis", async (
-            int id, int? adet, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
-            CancellationToken iptal) =>
+            int id, int? adet, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.sonuc", Islem.Gor);
+            // Geçmiş hastanın ÖNCEKİ sonuçlarıdır: satır kapsamı + tetkik izni.
+            await erisim.LabSatirIsteAsync(baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
 
             var satirlar = await b.ListeAsync("""

@@ -92,7 +92,7 @@ public sealed class PortalKapsamiTestleri(VeritabaniOlgusu olgu)
         Assert.DoesNotContain("dis_kurum_id = @p", sorgu.Sql);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_rolu_BASKA_rolle_birlesemez()
     {
         if (!_olgu.Baglandi(nameof(Portal_rolu_BASKA_rolle_birlesemez))) return;
@@ -124,7 +124,7 @@ public sealed class PortalKapsamiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_turu_ROLLERDEN_cozulur()
     {
         if (!_olgu.Baglandi(nameof(Portal_turu_ROLLERDEN_cozulur))) return;
@@ -202,7 +202,7 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Rol_PORTAL_damgasini_tasir()
     {
         if (!_olgu.Baglandi(nameof(Rol_PORTAL_damgasini_tasir))) return;
@@ -213,7 +213,7 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
             [], CancellationToken.None));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kurum_ICI_ekranlar_roldEN_kalkti()
     {
         if (!_olgu.Baglandi(nameof(Kurum_ICI_ekranlar_roldEN_kalkti))) return;
@@ -261,7 +261,7 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
     public Task Dis_doktor_roluNUN_her_yetkisi_kapsamli()
         => KapsamliMiAsync("dis_doktor", PortalKapsam.DisDoktor);
 
-    [Fact]
+    [VtFact]
     public async Task Dis_doktor_rolu_PORTAL_ve_ucretsiz()
     {
         if (!_olgu.Baglandi(nameof(Dis_doktor_rolu_PORTAL_ve_ucretsiz))) return;

@@ -16,7 +16,7 @@ public sealed class ListeDeposu
     public async Task<ListeYaniti> SorgulaAsync(KaynakTanimi kaynak, ListeIstegi istek,
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
         string izlemeNo, int? kullaniciId, CancellationToken iptal = default,
-        short portalTuru = 0, int? hekimId = null, int? rolId = null)
+        short portalTuru = 0, int? hekimId = null, IReadOnlyList<int>? tetkikRolleri = null)
     {
         var kronometre = Stopwatch.StartNew();
 
@@ -25,9 +25,9 @@ public sealed class ListeDeposu
         //   baskasinin kaydini cizer.
         SorguUretici Uretici() => portalTuru > 0
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
-                  { HekimId = hekimId, RolId = rolId }
+                  { HekimId = hekimId, TetkikRolleri = tetkikRolleri }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
-            : new SorguUretici(kaynak) { HekimId = hekimId, RolId = rolId };
+            : new SorguUretici(kaynak) { HekimId = hekimId, TetkikRolleri = tetkikRolleri };
 
         var satirUretici = Uretici();
         var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam, kullaniciId);

@@ -100,7 +100,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         return satirlar.ToDictionary(x => x.Kod, x => x.Bildir, StringComparer.Ordinal);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Birinci_basamakta_duyarli_VARSA_genis_spektrum_GIZLENIR()
     {
         if (!_olgu.Baglandi(nameof(Birinci_basamakta_duyarli_VARSA_genis_spektrum_GIZLENIR)))
@@ -129,7 +129,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Birinci_basamak_TAMAMEN_direncliyse_ikinci_basamak_ACILIR()
     {
         if (!_olgu.Baglandi(nameof(Birinci_basamak_TAMAMEN_direncliyse_ikinci_basamak_ACILIR)))
@@ -154,7 +154,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iki_basamak_da_direncliyse_KISITLI_ajan_raporlanir()
     {
         if (!_olgu.Baglandi(nameof(Iki_basamak_da_direncliyse_KISITLI_ajan_raporlanir)))
@@ -177,7 +177,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kombinasyon_ajani_UST_BASAMAGI_KAPATMAZ()
     {
         if (!_olgu.Baglandi(nameof(Kombinasyon_ajani_UST_BASAMAGI_KAPATMAZ))) return;
@@ -203,7 +203,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Uriner_ajan_IDRAR_DISI_numunede_raporlanmaz()
     {
         if (!_olgu.Baglandi(nameof(Uriner_ajan_IDRAR_DISI_numunede_raporlanmaz))) return;
@@ -226,7 +226,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Uzman_karari_kademeli_bildirimi_EZMEZ()
     {
         if (!_olgu.Baglandi(nameof(Uzman_karari_kademeli_bildirimi_EZMEZ))) return;
@@ -255,7 +255,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kultur_ozeti_UREME_YOKU_da_yazar()
     {
         if (!_olgu.Baglandi(nameof(Kultur_ozeti_UREME_YOKU_da_yazar))) return;
@@ -320,7 +320,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
                                      StringComparer.Ordinal);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dogal_direncli_ajan_BASKA_SECENEK_YOKKEN_BILE_raporlanmaz()
     {
         if (!_olgu.Baglandi(nameof(Dogal_direncli_ajan_BASKA_SECENEK_YOKKEN_BILE_raporlanmaz)))
@@ -364,7 +364,7 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Organizmaya_ozel_panel_GENEL_BASAMAGI_ezer()
     {
         if (!_olgu.Baglandi(nameof(Organizmaya_ozel_panel_GENEL_BASAMAGI_ezer))) return;

@@ -30,7 +30,7 @@ public sealed class DisKurumRolleriTestleri(VeritabaniOlgusu olgu)
             null, [rolKodu], o => o.GetString(0), Iptal);
     }
 
-    [Fact(DisplayName = "Kurum portalında birden çok rol var: rol seçimi zorunlu")]
+    [VtFact(DisplayName = "Kurum portalında birden çok rol var: rol seçimi zorunlu")]
     public async Task KurumPortalindaCokRol()
     {
         if (!_olgu.Baglandi(nameof(KurumPortalindaCokRol))) return;
@@ -53,7 +53,7 @@ public sealed class DisKurumRolleriTestleri(VeritabaniOlgusu olgu)
         Assert.Contains("dis_kurum_yonetici", roller);
     }
 
-    [Fact(DisplayName = "Yönetici rolünde tıbbi yetki YOK")]
+    [VtFact(DisplayName = "Yönetici rolünde tıbbi yetki YOK")]
     public async Task YoneticiTibbiYetkiTasimaz()
     {
         if (!_olgu.Baglandi(nameof(YoneticiTibbiYetkiTasimaz))) return;
@@ -68,7 +68,7 @@ public sealed class DisKurumRolleriTestleri(VeritabaniOlgusu olgu)
             Assert.DoesNotContain(tibbi, yetkiler);
     }
 
-    [Fact(DisplayName = "Klinik rolünde mali yetki YOK")]
+    [VtFact(DisplayName = "Klinik rolünde mali yetki YOK")]
     public async Task KlinikMaliYetkiTasimaz()
     {
         if (!_olgu.Baglandi(nameof(KlinikMaliYetkiTasimaz))) return;
@@ -83,7 +83,7 @@ public sealed class DisKurumRolleriTestleri(VeritabaniOlgusu olgu)
         Assert.DoesNotContain("cari", yetkiler);
     }
 
-    [Fact(DisplayName = "portal.mali yetkisi yalnız Yönetici rolünde")]
+    [VtFact(DisplayName = "portal.mali yetkisi yalnız Yönetici rolünde")]
     public async Task MaliYetkiTekRolde()
     {
         if (!_olgu.Baglandi(nameof(MaliYetkiTekRolde))) return;

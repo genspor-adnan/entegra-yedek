@@ -59,7 +59,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
             returning id
             """, t, [kurum, erisim, oncelik, goruntu, gecenDk], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Istek_numarasi_ve_SOZLESME_kendiliginden()
     {
         if (!_olgu.Baglandi(nameof(Istek_numarasi_ve_SOZLESME_kendiliginden))) return;
@@ -83,7 +83,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task SLA_GORUNTU_geldigi_an_baslar()
     {
         if (!_olgu.Baglandi(nameof(SLA_GORUNTU_geldigi_an_baslar))) return;
@@ -108,7 +108,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Atama_GECMISI_kendiliginden_yazilir()
     {
         if (!_olgu.Baglandi(nameof(Atama_GECMISI_kendiliginden_yazilir))) return;
@@ -152,7 +152,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Onayda_SLA_asimi_KARARI_verilir()
     {
         if (!_olgu.Baglandi(nameof(Onayda_SLA_asimi_KARARI_verilir))) return;
@@ -178,7 +178,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Okuma_ve_teslim_ZAMANLARI_tetikte_dogar()
     {
         if (!_olgu.Baglandi(nameof(Okuma_ve_teslim_ZAMANLARI_tetikte_dogar))) return;
@@ -224,7 +224,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_erisim_numarasi_IKI_KEZ_girilemez()
     {
         if (!_olgu.Baglandi(nameof(Ayni_erisim_numarasi_IKI_KEZ_girilemez))) return;
@@ -262,7 +262,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         Assert.Contains(kaynak.Kolonlar, k => k.Ad == "slaRiskli");
     }
 
-    [Fact]
+    [VtFact]
     public async Task SLA_kacan_satir_SUNUCUDA_renklenir()
     {
         if (!_olgu.Baglandi(nameof(SLA_kacan_satir_SUNUCUDA_renklenir))) return;
@@ -299,7 +299,7 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sozlesmesiz_kurum_UYARI_rengiyle_gelir()
     {
         if (!_olgu.Baglandi(nameof(Sozlesmesiz_kurum_UYARI_rengiyle_gelir))) return;

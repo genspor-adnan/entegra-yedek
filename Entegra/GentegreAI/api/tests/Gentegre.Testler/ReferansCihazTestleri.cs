@@ -25,7 +25,7 @@ public sealed class ReferansCihazTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 0,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("lab.sonuc", 0, true, true, true, true)], []),
     };
 
@@ -80,7 +80,7 @@ public sealed class ReferansCihazTestleri(VeritabaniOlgusu olgu)
              where tetkik_id is not null
             """, [tetkikId, hastaId, cihazId], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Cihaza_ozel_aralik_GENEL_araligi_ezer()
     {
         if (!_olgu.Baglandi(nameof(Cihaza_ozel_aralik_GENEL_araligi_ezer))) return;
@@ -103,7 +103,7 @@ public sealed class ReferansCihazTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, cihazId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sonuc_yazilirken_CIHAZIN_araligi_satira_donar()
     {
         if (!_olgu.Baglandi(nameof(Sonuc_yazilirken_CIHAZIN_araligi_satira_donar))) return;

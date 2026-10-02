@@ -15,6 +15,11 @@
 -- değil, yeni bir kurulumun başlangıç koşuludur.
 -- =====================================================================
 
+-- TABLO YOKKEN DE CALISIR (28.09.2026): PL/pgSQL bir IF kosulunu TUMUYLE
+--   planlar; "to_regclass(..) is not null and not exists (select .. from
+--   depo)" depo tablosu henuz yokken hata veriyordu - tohum ilk goclerden
+--   once calistiginda (bos veritabani) kurulum burada kiriliyordu. Tabloya
+--   dokunan her ifade, varligi AYRI bir IF ile sinandiktan sonra calisir.
 do $$
 declare v_sube integer;
 begin
@@ -22,19 +27,17 @@ begin
         insert into public.sube (kod, ad, unvan, varsayilan)
         select 'MERKEZ', 'Merkez', 'Merkez', 1
          where not exists (select 1 from public.sube);
+        select min(id) into v_sube from public.sube;
     end if;
 
-    if to_regclass('public.depo') is not null
-       and not exists (select 1 from public.depo) then
-        select min(id) into v_sube from public.sube;
+    -- Depo 010'da, sube 017'de acilir: depo, sube ACILDIKTAN sonra tohumlanir
+    --   (sube_id bos kalmasin).
+    if to_regclass('public.depo') is not null and v_sube is not null then
         -- Depo tablosunda KOD kolonu yok: ad + varsayilan yeter.
         insert into public.depo (ad, durum, varsayilan, sube_id)
-        values ('Anadepo', 1, 1, coalesce(v_sube, 0));
+        select 'Anadepo', 1, 1, v_sube
+         where not exists (select 1 from public.depo);
     end if;
-
-    raise notice 'bos kurulum: sube=%, depo=%',
-        (select count(*) from public.sube),
-        coalesce((select count(*)::text from public.depo), 'tablo yok');
 end $$;
 
 -- ------------------------------------------------- standart kod listeleri ---

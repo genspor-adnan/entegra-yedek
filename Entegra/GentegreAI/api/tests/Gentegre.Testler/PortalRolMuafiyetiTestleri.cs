@@ -23,7 +23,7 @@ public sealed class PortalRolMuafiyetiTestleri(VeritabaniOlgusu olgu)
     private readonly VeritabaniOlgusu _olgu = olgu;
     private static readonly CancellationToken Iptal = CancellationToken.None;
 
-    [Fact(DisplayName = "Haritaya portal rolü yazılamaz")]
+    [VtFact(DisplayName = "Haritaya portal rolü yazılamaz")]
     public async Task Haritaya_portal_rolu_girmez()
     {
         if (!_olgu.Baglandi(nameof(Haritaya_portal_rolu_girmez))) return;
@@ -47,7 +47,7 @@ public sealed class PortalRolMuafiyetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Harita uygulanınca portal rolü kapanmaz")]
+    [VtFact(DisplayName = "Harita uygulanınca portal rolü kapanmaz")]
     public async Task Uygulama_portal_rolunu_kapatmaz()
     {
         if (!_olgu.Baglandi(nameof(Uygulama_portal_rolunu_kapatmaz))) return;
@@ -78,7 +78,7 @@ public sealed class PortalRolMuafiyetiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Kurum içi rol haritayla kapanmaya devam eder")]
+    [VtFact(DisplayName = "Kurum içi rol haritayla kapanmaya devam eder")]
     public async Task Ic_rol_hala_kapanir()
     {
         if (!_olgu.Baglandi(nameof(Ic_rol_hala_kapanir))) return;

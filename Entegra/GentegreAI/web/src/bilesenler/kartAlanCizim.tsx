@@ -65,13 +65,16 @@ export interface AlanCizimBaglami {
    * Verilmezse etiket duz metin kalir.
    */
   listeDuzenle?(alan: KartAlanMeta): void;
+  /** Alanin ALTINDA gosterilecek ekran ipucu (ör. muayene metin makrolari, 931);
+      `yaz` alanin kendi yazicisidir (ipucundan alana deger yazmak icin). */
+  alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
 }
 
 export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
           bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc,
-          listeDuzenle } = b;
+          listeDuzenle, alanIpucu } = b;
 
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
@@ -297,6 +300,9 @@ export function alanCizici(b: AlanCizimBaglami) {
         //   sozlesmeye yeni bayrak eklemek gerekmedi.
         <textarea
           key={a.ad}
+          // data-alan: kart duzeyindeki klavye yakalayicilari (muayene metin
+          //   makrosu, 931) hangi alanda yazildigini bilsin.
+          data-alan={a.ad}
           rows={4}
           value={String(deger[a.ad] ?? '')}
           maxLength={a.enFazlaUzunluk ?? undefined}
@@ -306,6 +312,7 @@ export function alanCizici(b: AlanCizimBaglami) {
       ) : (
         <input
           key={a.ad}
+          data-alan={a.ad}
           // Tarih alani TAKVIM kutusu olur; deger ham ISO gelir ("2026-08-24T00:00:00")
           //   ve type=date bunu GOSTEREMEZ - 10 karaktere kirpilir. Eskiden duz metin
           //   kutusuydu ve kullanici ISO damgasini goruyordu.
@@ -378,6 +385,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           <span className="alan-notu">{kurNotu}</span>
         )}
         {alanHatalari[a.ad] && <span className="alan-hata">{alanHatalari[a.ad]}</span>}
+        {!salt && a.yazilabilir && alanIpucu?.(a.ad, v => alanDegistir(a.ad, v))}
       </label>
     );
 

@@ -41,7 +41,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
     private static IstekBaglami Baglam(params string[] kodlar) => new()
     {
         KullaniciId = 1,
-        RolId = 1,
+        RolId = 1, RolIdleri = [1], SubeYazma = true,
         SubeId = 1,
         Yetkiler = new YetkiSeti(1,
             kodlar.Select(k => new YetkiKaydi(k, 0, true, true, true, true)), []),
@@ -114,7 +114,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
             "update public.ai_kontor set bakiye = @p0, model_aktif = @p1 where id = 1",
             [eski?.Bakiye ?? 0m, eski?.Aktif ?? (short)1]);
 
-    [Fact]
+    [VtFact]
     public async Task Model_cevabi_KONTOR_duser_ve_gunluge_yazar()
     {
         if (!_olgu.Baglandi(nameof(Model_cevabi_KONTOR_duser_ve_gunluge_yazar))) return;
@@ -152,7 +152,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await KontorGeriAlAsync(eski); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kontor_yoksa_MODEL_CAGRILMAZ()
     {
         if (!_olgu.Baglandi(nameof(Kontor_yoksa_MODEL_CAGRILMAZ))) return;
@@ -175,7 +175,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await KontorGeriAlAsync(eski); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Model_dusunce_KATALOG_cevabi_verilir()
     {
         if (!_olgu.Baglandi(nameof(Model_dusunce_KATALOG_cevabi_verilir))) return;
@@ -199,7 +199,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await KontorGeriAlAsync(eski); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yetkisiz_ekran_MODELE_GONDERILMEZ()
     {
         if (!_olgu.Baglandi(nameof(Yetkisiz_ekran_MODELE_GONDERILMEZ))) return;
@@ -229,7 +229,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         finally { await KontorGeriAlAsync(eski); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Katalog_KONUYU_bulduysa_model_cagrilmaz()
     {
         if (!_olgu.Baglandi(nameof(Katalog_KONUYU_bulduysa_model_cagrilmaz))) return;

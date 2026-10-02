@@ -82,7 +82,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
             + " where i.id = @p0 and r.rol = 2 order by r.taraf_id",
             t, [istem], o => o.GetInt32(0), Iptal);
 
-    [Fact(DisplayName = "Kendi adına gönderen dış hekim Gönderen olur")]
+    [VtFact(DisplayName = "Kendi adına gönderen dış hekim Gönderen olur")]
     public async Task KendiAdinaGonderenHekim()
     {
         if (!_olgu.Baglandi(nameof(KendiAdinaGonderenHekim))) return;
@@ -98,7 +98,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Kurum adına gelen işte hekim prim almaz, Gönderen kurumdur")]
+    [VtFact(DisplayName = "Kurum adına gelen işte hekim prim almaz, Gönderen kurumdur")]
     public async Task KurumAdinaGonderenHekimAlmaz()
     {
         if (!_olgu.Baglandi(nameof(KurumAdinaGonderenHekimAlmaz))) return;
@@ -122,7 +122,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "İç hekim İsteyen kalır, Gönderen olmaz")]
+    [VtFact(DisplayName = "İç hekim İsteyen kalır, Gönderen olmaz")]
     public async Task IcHekimIsteyen()
     {
         if (!_olgu.Baglandi(nameof(IcHekimIsteyen))) return;
@@ -161,7 +161,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
             "select istek_kurum_id from public.radyoloji_istem where id = @p0",
             t, [istem], Iptal);
 
-    [Fact(DisplayName = "Bağlı hekimin istemi kurumu bağlı kurumdan alır (826)")]
+    [VtFact(DisplayName = "Bağlı hekimin istemi kurumu bağlı kurumdan alır (826)")]
     public async Task BagliHekimKurumuOtomatik()
     {
         if (!_olgu.Baglandi(nameof(BagliHekimKurumuOtomatik))) return;
@@ -180,7 +180,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Kurum elle boşaltılırsa tetik geri doldurmaz (kendi adına)")]
+    [VtFact(DisplayName = "Kurum elle boşaltılırsa tetik geri doldurmaz (kendi adına)")]
     public async Task ElleBosaltilanKurumGeriDolmaz()
     {
         if (!_olgu.Baglandi(nameof(ElleBosaltilanKurumGeriDolmaz))) return;
@@ -203,7 +203,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Bağımsız hekimin istemi kurumsuz kalır")]
+    [VtFact(DisplayName = "Bağımsız hekimin istemi kurumsuz kalır")]
     public async Task BagimsizHekimKurumsuz()
     {
         if (!_olgu.Baglandi(nameof(BagimsizHekimKurumsuz))) return;
@@ -220,7 +220,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Elle seçilmiş kurum hekimin bağlı kurumunu EZMEZ")]
+    [VtFact(DisplayName = "Elle seçilmiş kurum hekimin bağlı kurumunu EZMEZ")]
     public async Task ElleSecilenKurumKorunur()
     {
         if (!_olgu.Baglandi(nameof(ElleSecilenKurumKorunur))) return;
@@ -264,7 +264,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
             + "values ('GONDEREN PRIMI LAB HASTA', @p1, 1, @p0) returning id",
             t, [sube, $"GPL{Guid.NewGuid().ToString("N")[..8]}"], Iptal);
 
-    [Fact(DisplayName = "Lab isteminde kurum bağlı kurumdan dolar (827)")]
+    [VtFact(DisplayName = "Lab isteminde kurum bağlı kurumdan dolar (827)")]
     public async Task LabKurumuOtomatik()
     {
         if (!_olgu.Baglandi(nameof(LabKurumuOtomatik))) return;
@@ -281,7 +281,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "Lab: elle boşaltılan kurum geri dolmaz")]
+    [VtFact(DisplayName = "Lab: elle boşaltılan kurum geri dolmaz")]
     public async Task LabElleBosaltilanKurum()
     {
         if (!_olgu.Baglandi(nameof(LabElleBosaltilanKurum))) return;
@@ -302,7 +302,7 @@ public sealed class GonderenPrimiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact(DisplayName = "İç personelin bağlı carisi istem kurumu SAYILMAZ (827)")]
+    [VtFact(DisplayName = "İç personelin bağlı carisi istem kurumu SAYILMAZ (827)")]
     public async Task IcPersonelBagliCariKurumOlmaz()
     {
         if (!_olgu.Baglandi(nameof(IcPersonelBagliCariKurumOlmaz))) return;

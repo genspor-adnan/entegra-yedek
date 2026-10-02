@@ -25,7 +25,7 @@ public sealed class CiftOnayTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam(int kullanici) => new()
     {
-        KullaniciId = kullanici, RolId = 1, SubeId = 0,
+        KullaniciId = kullanici, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 0,
         Yetkiler = new YetkiSeti(1,
             [new YetkiKaydi("lab.sonuc", 0, true, true, true, true),
              new YetkiKaydi("lab.onay", 1, true, true, true, true)], []),
@@ -90,7 +90,7 @@ public sealed class CiftOnayTestleri(VeritabaniOlgusu olgu)
                                  CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Cift_onay_ZORUNLUYSA_uzman_teknik_onayi_BEKLER()
     {
         if (!_olgu.Baglandi(nameof(Cift_onay_ZORUNLUYSA_uzman_teknik_onayi_BEKLER))) return;
@@ -123,7 +123,7 @@ public sealed class CiftOnayTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, tetkikId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dort_goz_ACIKKEN_ayni_kisi_ikinci_onayi_VEREMEZ()
     {
         if (!_olgu.Baglandi(nameof(Dort_goz_ACIKKEN_ayni_kisi_ikinci_onayi_VEREMEZ))) return;
@@ -163,7 +163,7 @@ public sealed class CiftOnayTestleri(VeritabaniOlgusu olgu)
         }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Cift_onay_zorunluyken_OTO_ONAY_devre_disi()
     {
         if (!_olgu.Baglandi(nameof(Cift_onay_zorunluyken_OTO_ONAY_devre_disi))) return;

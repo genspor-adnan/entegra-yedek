@@ -27,7 +27,7 @@ public sealed class PortalSorgusuCalisirTestleri(VeritabaniOlgusu olgu)
     public static TheoryData<short> PortalTurleri()
         => new(PortalKapsam.DisDoktor, PortalKapsam.DisKurum, PortalKapsam.Hasta);
 
-    [Theory(DisplayName = "Portal kaynaklarının SQL'i veritabanında çalışır")]
+    [VtTheory(DisplayName = "Portal kaynaklarının SQL'i veritabanında çalışır")]
     [MemberData(nameof(PortalTurleri))]
     public async Task Portal_kaynaklari_calisir(short portalTuru)
     {

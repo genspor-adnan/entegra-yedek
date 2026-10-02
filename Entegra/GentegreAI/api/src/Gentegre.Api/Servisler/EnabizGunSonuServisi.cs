@@ -77,10 +77,13 @@ public sealed class EnabizGunSonuServisi
                                      where aktif = 1)
             """, islem, [gunId], iptal);
 
+        // Agregat (count/sum) HER ZAMAN tek satir doner; bos donmesi imkansiz
+        //   durumdur - sessiz null yerine acik hata.
         var ozet = await baglanti.TekAsync("""
             select count(*)::int, coalesce(sum(sayi), 0)::int
               from public.enabiz_gun_sonu_satir where gun_sonu_id = @p0
-            """, islem, [gunId], o => new { Olcut = o.GetInt32(0), Toplam = o.GetInt32(1) }, iptal)!;
+            """, islem, [gunId], o => new { Olcut = o.GetInt32(0), Toplam = o.GetInt32(1) }, iptal)
+            ?? throw new InvalidOperationException("Gun sonu ozeti okunamadi.");
 
         await islem.CommitAsync(iptal);
 
@@ -186,7 +189,8 @@ public sealed class EnabizGunSonuServisi
         var ozet = await baglanti.TekAsync("""
             select count(distinct klinik_kodu)::int, count(*)::int
               from public.enabiz_ay_sonu_satir where ay_sonu_id = @p0
-            """, islem, [ayId], o => new { Klinik = o.GetInt32(0), Satir = o.GetInt32(1) }, iptal)!;
+            """, islem, [ayId], o => new { Klinik = o.GetInt32(0), Satir = o.GetInt32(1) }, iptal)
+            ?? throw new InvalidOperationException("Ay sonu ozeti okunamadi.");
 
         await islem.CommitAsync(iptal);
 

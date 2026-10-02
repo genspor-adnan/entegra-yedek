@@ -38,9 +38,17 @@ export const kimlikUclari = {
   parolaUnuttumDogrula: (kod: string, dogrulamaKodu: string, yeniParola: string) =>
     gonder<{ mesaj: string }>('/api/kimlik/parola-unuttum/dogrula', { kod, dogrulamaKodu, yeniParola }),
 
-  /** Ilk giris: otomatik acilan hesabin parolasini kisi kendisi tanimlar. */
-  ilkParola: (kod: string, tcknSon4: string, yeniParola: string) =>
-    gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, tcknSon4, yeniParola }),
+  /**
+   * ILK PAROLA (denetim 28.09.2026 #5) iki adim: TCKN son 4 yalniz kayitli
+   * telefona / e-postaya kod gondertir; parolayi o tek kullanimlik kod
+   * belirler. 1. adimin cevabi her durumda aynidir (hesap varligi sizmaz).
+   */
+  ilkParolaKod: (kod: string, tcknSon4: string) =>
+    gonder<{ mesaj: string }>('/api/kimlik/ilk-parola/kod', { kod, tcknSon4 }),
+
+  /** Ilk parola - 2. adim: kod + yeni parola. */
+  ilkParola: (kod: string, dogrulamaKodu: string, yeniParola: string) =>
+    gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, dogrulamaKodu, yeniParola }),
 
   /**
    * PORTAL DAVETI (822) - OTURUMSUZ. Baglanti gecerli mi, kime ait.
@@ -56,8 +64,15 @@ export const kimlikUclari = {
     gonder<{ tamam: boolean; kod: string; mesaj: string }>(
       '/api/davet/kullan', { jeton, tcknSon4, yeniParola }),
 
-  parolaDegistir: (eskiParola: string, yeniParola: string) =>
-    gonder<void>('/api/kimlik/parola', { eskiParola, yeniParola }),
+  /**
+   * Parola degisince sunucu TUM oturumlari kapatir ve bu cihaz icin yeni
+   * token cifti doner - saklanmazsa 30 dk sonra kisi disari duserdi.
+   */
+  parolaDegistir: async (eskiParola: string, yeniParola: string) => {
+    const y = await gonder<GirisYaniti | undefined>('/api/kimlik/parola', { eskiParola, yeniParola });
+    if (y?.accessToken) oturum.yaz(y);
+    return y;
+  },
 
   dilDegistir: (dil: number) =>
     gonder<void>('/api/kimlik/dil', { dil }),

@@ -13,6 +13,10 @@ public static class HataKodu
     /// <summary>401 - hesap var ama parolasi HIC tanimlanmamis; istemci
     /// dogrudan "parolani belirle" ekranini acar (kullanici istegi).</summary>
     public const string IlkParola  = "ILK_PAROLA";
+    /// <summary>403 - oturum gecerli ama hesap parolasini DEGISTIRMEK zorunda
+    /// (<c>parola_degismeli = 1</c>). Yalniz profil / parola / cikis uclari
+    /// calisir; istemci parola ekranini acar (denetim 28.09.2026 #4).</summary>
+    public const string ParolaDegismeli = "PAROLA_DEGISMELI";
 
     public static int HttpDurumu(string kod) => kod switch
     {
@@ -20,6 +24,7 @@ public static class HataKodu
         IlkParola  => 401,
         Yetkisiz   => 401,
         Yasak      => 403,
+        ParolaDegismeli => 403,
         Bulunamadi => 404,
         Cakisma    => 409,
         IsKurali   => 422,

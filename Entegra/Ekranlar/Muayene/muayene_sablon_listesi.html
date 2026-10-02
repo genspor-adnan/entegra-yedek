@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Şablonları Listesi — Bölüm ve Doktora Göre — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+
+  /* ---- ŞABLON LİSTESİ: sol bölüm/doktor ağacı + grid + sağ önizleme ---- */
+  .uc3{display:grid;grid-template-columns:250px minmax(0,1fr) 320px;min-height:520px}
+  @media(max-width:1200px){.uc3{grid-template-columns:230px minmax(0,1fr)} .onz{display:none}}
+  .agac{border-right:1px solid var(--line2);background:#f7f9fc;padding:6px 0;font-size:11.5px}
+  .agac .ab{padding:4px 10px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .agac .d1,.agac .d2{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:default}
+  .agac .d1{font-weight:bold;color:#2c4a6b}
+  .agac .d2{padding-left:28px;color:#3b4a5a}
+  .agac .say{margin-left:auto;font-size:10px;color:var(--muted);background:#eef2f6;border-radius:8px;padding:0 6px}
+  .agac .on{background:var(--sel);box-shadow:inset 3px 0 0 #2f6db3}
+  .agac .ok{width:10px;color:var(--muted)}
+  .dg tr.grup td{background:#eef3f9;font-weight:bold;color:#2c4a6b}
+  .dg tr.grup2 td{background:#f7f9fc;font-weight:bold;color:#3b4a5a}
+  .dg tr.grup2 td:first-child{padding-left:22px}
+  .dg td.ad2{padding-left:30px}
+  .yldz{color:#e0a800}
+  .kap{display:inline-flex;gap:3px;align-items:center}
+  .cubuk{display:inline-block;height:6px;border-radius:3px;background:linear-gradient(#5cb87a,#3f9a5e);vertical-align:middle}
+  .onz{border-left:1px solid var(--line2);background:#fafcfe;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .onz h6{margin:0 0 6px;font-size:11px;color:#2c4a6b;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .onz .kv{display:grid;grid-template-columns:90px 1fr;gap:3px 8px;font-size:11.5px}
+  .onz .kv span:nth-child(odd){color:var(--muted)}
+  .alan{display:flex;gap:6px;align-items:center;padding:3px 0;border-bottom:1px dashed var(--line2);font-size:11.5px}
+  .alan .tip{margin-left:auto;font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Muayene Şablonları <span class="sp">Muayene › Şablonlar · bölüm ve doktora göre · 48 şablon</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni şablon</div><div class="btn">✎ Düzenle</div><div class="btn">⧉ Kopyala (bana)</div>
+    <div class="btn">⭐ Bölüm varsayılanı yap</div>
+    <div class="sepv"></div><div class="btn">⏸ Pasif yap</div><div class="btn">↕ Sırala</div>
+    <div class="sepv"></div><div class="btn">⤓ Dışa aktar</div><div class="btn">⤒ İçe aktar</div>
+    <div class="btn sp">🩺 Muayenede dene</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Şablon adı, kod, alan…</div>
+    <span class="chip on">Tümü (48)</span><span class="chip">Benim (6)</span><span class="chip">Bölüm ortak (21)</span><span class="chip">Doktora özel (27)</span><span class="chip">⭐ Varsayılanlar (9)</span><span class="chip">Pasif (4)</span>
+    <span class="sepv"></span><span class="chip">Fizik muayene</span><span class="chip">Anamnez</span><span class="chip">Sistem sorgusu</span>
+  </div>
+
+  <div class="uc3">
+    <!-- SOL: UZMANLIK › HEKİM ağacı. Bölüm düğümü = o branşın ORTAK
+         şablonları + doktorlarının şablonları; doktor düğümü = yalnız o doktor. -->
+    <div class="agac">
+      <div class="ab">Bölüm › Doktor</div>
+      <div class="d1"><span class="ok">▾</span>🏥 Tümü<span class="say">48</span></div>
+      <div class="d1 on"><span class="ok">▾</span>İç Hastalıkları<span class="say">14</span></div>
+      <div class="d2">👥 Bölüm ortak<span class="say">6</span></div>
+      <div class="d2">👨‍⚕️ Uzm. Dr. Ali Koç<span class="say">4</span></div>
+      <div class="d2">👩‍⚕️ Uzm. Dr. Selin Aydın<span class="say">3</span></div>
+      <div class="d2">👨‍⚕️ Dr. Mehmet Kaya<span class="say">1</span></div>
+      <div class="d1"><span class="ok">▸</span>Kardiyoloji<span class="say">7</span></div>
+      <div class="d1"><span class="ok">▸</span>Göz Hastalıkları<span class="say">6</span></div>
+      <div class="d1"><span class="ok">▸</span>Kadın Hastalıkları ve Doğum<span class="say">5</span></div>
+      <div class="d1"><span class="ok">▸</span>Çocuk Sağlığı ve Hastalıkları<span class="say">5</span></div>
+      <div class="d1"><span class="ok">▸</span>Ortopedi ve Travmatoloji<span class="say">4</span></div>
+      <div class="d1"><span class="ok">▸</span>Kulak Burun Boğaz<span class="say">3</span></div>
+      <div class="d1"><span class="ok">▸</span>Acil Tıp<span class="say">2</span></div>
+      <div class="d1"><span class="ok">▸</span>Genel (tüm bölümler)<span class="say">2</span></div>
+    </div>
+
+    <!-- ORTA: GRID bölüm > doktor gruplu. Kapsam: Bölüm ortak (doktorsiz)
+         ya da Doktora özel. ⭐ = bölümde muayene açılınca önerilen şablon. -->
+    <div class="dg"><table>
+      <thead><tr>
+        <th style="width:26px">☐</th><th>Şablon</th><th class="orta">Kod</th><th class="orta">Tür</th>
+        <th class="orta">Kapsam</th><th class="orta">Alan</th><th class="orta">Kullanım (30 gün)</th>
+        <th class="orta">Son kullanım</th><th class="orta">Durum</th>
+      </tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="9">▾ İç Hastalıkları · 14 şablon</td></tr>
+        <tr class="grup2"><td colspan="9">👥 Bölüm ortak · 6</td></tr>
+        <tr class="sel"><td>☑</td><td class="ad2"><span class="yldz">⭐</span> <b>Dahiliye — genel fizik muayene</b></td><td class="orta">DAH-GEN</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Bölüm ortak</td><td class="orta">12</td><td class="orta"><span class="cubuk" style="width:60px"></span> 184</td><td class="orta">bugün 10:28</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Dahiliye — kardiyovasküler odaklı</td><td class="orta">DAH-KVS</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Bölüm ortak</td><td class="orta">9</td><td class="orta"><span class="cubuk" style="width:26px"></span> 71</td><td class="orta">dün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Dahiliye — sistem sorgusu</td><td class="orta">DAH-SS</td><td class="orta"><span class="rz">Sistem sorgusu</span></td><td class="orta">Bölüm ortak</td><td class="orta">10</td><td class="orta"><span class="cubuk" style="width:40px"></span> 122</td><td class="orta">bugün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Diyabet kontrol muayenesi</td><td class="orta">DAH-DM</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Bölüm ortak</td><td class="orta">8</td><td class="orta"><span class="cubuk" style="width:18px"></span> 44</td><td class="orta">3 gün önce</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="grup2"><td colspan="9">👨‍⚕️ Uzm. Dr. Ali Koç · 4</td></tr>
+        <tr><td>☐</td><td class="ad2">Göğüs ağrısı — hızlı değerlendirme</td><td class="orta">AK-GA</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">7</td><td class="orta"><span class="cubuk" style="width:22px"></span> 53</td><td class="orta">bugün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">HT takip anamnezi</td><td class="orta">AK-HT</td><td class="orta"><span class="rz">Anamnez</span></td><td class="orta">Doktora özel</td><td class="orta">6</td><td class="orta"><span class="cubuk" style="width:14px"></span> 31</td><td class="orta">2 gün önce</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Tiroid nodülü muayenesi</td><td class="orta">AK-TIR</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">5</td><td class="orta"><span class="cubuk" style="width:6px"></span> 7</td><td class="orta">3 hafta önce</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr style="color:#8a98a8"><td>☐</td><td class="ad2">Eski — genel muayene (2025)</td><td class="orta">AK-ESK</td><td class="orta"><span class="rz">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">11</td><td class="orta">0</td><td class="orta">6 ay önce</td><td class="orta"><span class="rz">Pasif</span></td></tr>
+        <tr class="grup2"><td colspan="9">👩‍⚕️ Uzm. Dr. Selin Aydın · 3</td></tr>
+        <tr><td>☐</td><td class="ad2">Obezite değerlendirme</td><td class="orta">SA-OB</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">9</td><td class="orta"><span class="cubuk" style="width:20px"></span> 38</td><td class="orta">dün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Anemi öyküsü</td><td class="orta">SA-AN</td><td class="orta"><span class="rz">Anamnez</span></td><td class="orta">Doktora özel</td><td class="orta">5</td><td class="orta"><span class="cubuk" style="width:9px"></span> 15</td><td class="orta">1 hafta önce</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>☐</td><td class="ad2">Karaciğer hastalığı muayenesi</td><td class="orta">SA-KC</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">8</td><td class="orta"><span class="cubuk" style="width:5px"></span> 4</td><td class="orta">2 hafta önce</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="grup2"><td colspan="9">👨‍⚕️ Dr. Mehmet Kaya · 1</td></tr>
+        <tr><td>☐</td><td class="ad2">Üst solunum yolu enfeksiyonu</td><td class="orta">MK-USYE</td><td class="orta"><span class="rz mavi">Fizik muayene</span></td><td class="orta">Doktora özel</td><td class="orta">6</td><td class="orta"><span class="cubuk" style="width:30px"></span> 89</td><td class="orta">bugün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="grup"><td colspan="9">▸ Kardiyoloji · 7 şablon</td></tr>
+        <tr class="grup"><td colspan="9">▸ Göz Hastalıkları · 6 şablon</td></tr>
+        <tr class="grup"><td colspan="9">▸ Kadın Hastalıkları ve Doğum · 5 şablon</td></tr>
+      </tbody>
+    </table></div>
+
+    <!-- SAĞ: seçili şablonun özeti ve alanları (muayenede nasıl açılır). -->
+    <div class="onz">
+      <div>
+        <h6>Seçili şablon</h6>
+        <div style="font-weight:bold;color:#14315a;margin-bottom:4px"><span class="yldz">⭐</span> Dahiliye — genel fizik muayene</div>
+        <div class="kv">
+          <span>Bölüm</span><span>İç Hastalıkları (157)</span>
+          <span>Kapsam</span><span>Bölüm ortak · tüm dahiliye doktorları</span>
+          <span>Tür</span><span>Fizik muayene</span>
+          <span>Varsayılan</span><span>İç Hastalıkları polikliniğinde muayene açılınca önerilir</span>
+          <span>Oluşturan</span><span>Uzm. Dr. Ali Koç · 12.03.2026</span>
+          <span>Kullanım</span><span>184 muayene / 30 gün · 7 doktor</span>
+        </div>
+      </div>
+      <div>
+        <h6>Alanlar (12)</h6>
+        <div class="alan">Genel durum<span class="tip">metin + normal</span></div>
+        <div class="alan">Baş-boyun<span class="tip">metin + normal</span></div>
+        <div class="alan">Kardiyovasküler<span class="tip">metin + normal</span></div>
+        <div class="alan">Solunum<span class="tip">metin + normal</span></div>
+        <div class="alan">Batın<span class="tip">metin + normal</span></div>
+        <div class="alan">Ekstremite<span class="tip">seçenekli</span></div>
+        <div class="alan">Nörolojik<span class="tip">metin + normal</span></div>
+        <div class="alan" style="color:#6b7a8b">… 5 alan daha</div>
+      </div>
+      <div class="sonuk" style="font-size:11px;line-height:1.5">
+        Doktora özel şablon yalnız sahibinin muayenesinde önerilir; "⧉ Kopyala (bana)" ortak şablonu doktorun kendi şablonu olarak çoğaltır, ortak şablon değişmez.
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>48 şablon · 9 bölüm · 17 doktor</span><span>Seçili: 1</span><span class="sp">Çift tık = şablon kartını aç · Gruplama: Bölüm › Doktor</span></div>
+</div>
+
+<div style="max-width:1400px;margin:14px auto 0;color:#4d5d6e;font-size:11.5px;line-height:1.6">
+  <h4 style="margin:0 0 4px;color:#14315a">Kurallar (ekrana yansıyan)</h4>
+  • Şablonlar <b>bölüme (bölüm)</b> ve <b>doktora</b> göre gruplanır: doktoru boş şablon o bölümün <b>ortak</b> şablonudur, doktoru dolu şablon <b>doktora özel</b>dir.<br>
+  • Muayenede önerilen sıra: doktorun kendi şablonları → bölüm ortak (⭐ varsayılan en üstte) → genel şablonlar.<br>
+  • Doktor yalnız kendi şablonunu düzenler; ortak şablonu "⧉ Kopyala (bana)" ile kendine alır. Ortak şablonu bölüm sorumlusu / yönetici düzenler.<br>
+  • Kullanılmayan şablon silinmez, <b>pasif</b> yapılır (geçmiş muayenelerde hangi şablonun kullanıldığı kalır).
+</div>
+</body>
+</html>

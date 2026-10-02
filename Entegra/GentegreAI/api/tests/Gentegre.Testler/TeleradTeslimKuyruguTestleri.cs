@@ -65,7 +65,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         return (istek, kurum);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Raporsuz_is_kuyruga_alinmaz()
     {
         if (!_olgu.Baglandi(nameof(Raporsuz_is_kuyruga_alinmaz))) return;
@@ -82,7 +82,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Portal_kanalinda_kuyruk_kullanilmaz()
     {
         if (!_olgu.Baglandi(nameof(Portal_kanalinda_kuyruk_kullanilmaz))) return;
@@ -99,7 +99,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bakanlik_kapaliyken_hedef_2_reddedilir()
     {
         if (!_olgu.Baglandi(nameof(Bakanlik_kapaliyken_hedef_2_reddedilir))) return;
@@ -115,7 +115,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_is_ve_hedef_icin_tek_satir()
     {
         if (!_olgu.Baglandi(nameof(Ayni_is_ve_hedef_icin_tek_satir))) return;
@@ -140,7 +140,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Teslim_edilmis_satir_yeniden_beklemeye_dusmez()
     {
         if (!_olgu.Baglandi(nameof(Teslim_edilmis_satir_yeniden_beklemeye_dusmez))) return;
@@ -162,7 +162,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Theory]
+    [VtTheory]
     [InlineData((short)1, "00:01:00")]
     [InlineData((short)3, "00:15:00")]
     [InlineData((short)5, "04:00:00")]
@@ -178,7 +178,7 @@ public sealed class TeleradTeslimKuyruguTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(beklenen, s);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Otomatik_kuyruklama_ayari_kapali_dogar()
     {
         if (!_olgu.Baglandi(nameof(Otomatik_kuyruklama_ayari_kapali_dogar))) return;

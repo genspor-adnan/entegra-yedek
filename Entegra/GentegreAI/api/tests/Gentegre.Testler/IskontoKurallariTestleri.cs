@@ -47,7 +47,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
             "select coalesce(nullif(deger, '')::numeric, 0) from public.referans "
             + " where anahtar = 'basvuru.iskonto_onay_esik'", t, [], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Esik_ustu_iskonto_ONAYSIZ_yazilamaz()
     {
         if (!_olgu.Baglandi(nameof(Esik_ustu_iskonto_ONAYSIZ_yazilamaz))) return;
@@ -67,7 +67,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Esik_altinda_iskonto_serbest()
     {
         if (!_olgu.Baglandi(nameof(Esik_altinda_iskonto_serbest))) return;
@@ -85,7 +85,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task ONAYDAN_gelen_satir_esikten_muaf()
     {
         if (!_olgu.Baglandi(nameof(ONAYDAN_gelen_satir_esikten_muaf))) return;
@@ -110,7 +110,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task ERP_belgesinde_kural_islemez()
     {
         if (!_olgu.Baglandi(nameof(ERP_belgesinde_kural_islemez))) return;
@@ -131,7 +131,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kendi_talebini_onaylayamaz()
     {
         if (!_olgu.Baglandi(nameof(Kendi_talebini_onaylayamaz))) return;
@@ -153,7 +153,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kendi_talebini_REDDEDEMEZ_de()
     {
         if (!_olgu.Baglandi(nameof(Kendi_talebini_REDDEDEMEZ_de))) return;
@@ -177,7 +177,7 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task BASKASI_onaylayabilir()
     {
         if (!_olgu.Baglandi(nameof(BASKASI_onaylayabilir))) return;
@@ -247,7 +247,7 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
             + " where onay_id = @p0 and sira = @p1",
             t, [onayId, sira, kullanici, durum], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_kisi_IKINCI_basamagi_imzalayamaz()
     {
         if (!_olgu.Baglandi(nameof(Ayni_kisi_IKINCI_basamagi_imzalayamaz))) return;
@@ -265,7 +265,7 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task BASKASI_ikinci_basamagi_imzalar()
     {
         if (!_olgu.Baglandi(nameof(BASKASI_ikinci_basamagi_imzalar))) return;
@@ -286,7 +286,7 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task RET_de_imzadir_ayni_kisi_tekrar_karar_veremez()
     {
         if (!_olgu.Baglandi(nameof(RET_de_imzadir_ayni_kisi_tekrar_karar_veremez))) return;
@@ -305,7 +305,7 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task BILGI_ISTEME_imza_sayilmaz()
     {
         if (!_olgu.Baglandi(nameof(BILGI_ISTEME_imza_sayilmaz))) return;
@@ -352,7 +352,7 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
              where r.kod = @p0 and y.kod = @p1
             """, [rol, yetki], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Birim_imzasi_BANKODA_degil_SORUMLUDA()
     {
         if (!_olgu.Baglandi(nameof(Birim_imzasi_BANKODA_degil_SORUMLUDA))) return;
@@ -364,7 +364,7 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "iskonto_onay"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Her_basamak_AYRI_rolde()
     {
         if (!_olgu.Baglandi(nameof(Her_basamak_AYRI_rolde))) return;
@@ -396,7 +396,7 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
             Assert.Equal(0, await YetkiSayisiAsync(veri, "yonetici", kod));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ust_yonetim_SALT_OKUMA_ama_imza_atar()
     {
         if (!_olgu.Baglandi(nameof(Ust_yonetim_SALT_OKUMA_ama_imza_atar))) return;
@@ -417,7 +417,7 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(1, await YetkiSayisiAsync(veri, "ust_yonetim", "belge.iskonto_onay_ust"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sorumlu_bankonun_EKRANLARINI_tasir()
     {
         if (!_olgu.Baglandi(nameof(Sorumlu_bankonun_EKRANLARINI_tasir))) return;
@@ -478,7 +478,7 @@ public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
         return (satir, esik, tavan);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Basamak_sahibi_ESIK_USTUNU_dogrudan_uygular()
     {
         if (!_olgu.Baglandi(nameof(Basamak_sahibi_ESIK_USTUNU_dogrudan_uygular))) return;
@@ -502,7 +502,7 @@ public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kendi_TAVANINI_asamaz()
     {
         if (!_olgu.Baglandi(nameof(Kendi_TAVANINI_asamaz))) return;
@@ -522,7 +522,7 @@ public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Imza_sahibi_OLMAYAN_icin_esik_aynen_isler()
     {
         if (!_olgu.Baglandi(nameof(Imza_sahibi_OLMAYAN_icin_esik_aynen_isler))) return;

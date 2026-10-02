@@ -35,7 +35,7 @@ public sealed class SterilTestleri(VeritabaniOlgusu olgu) : IClassFixture<Verita
     private static async Task IndikatorAsync(NpgsqlConnection b, NpgsqlTransaction t, int dongu, short tur, short sonuc)
         => await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, sonuc, okuma_zamani) values (@p0, @p1, @p2, now())", t, [dongu, tur, sonuc], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Paket_kullanilabilirlik_kurali()
     {
         if (!_olgu.Baglandi(nameof(Paket_kullanilabilirlik_kurali))) return;
@@ -57,7 +57,7 @@ public sealed class SterilTestleri(VeritabaniOlgusu olgu) : IClassFixture<Verita
         Assert.Equal(0, await K(await PaketAsync(b, t, "TP-8", b1, dongu, 1, "null")));                // henüz sterilde
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bowie_dick_bugun_kurali()
     {
         if (!_olgu.Baglandi(nameof(Bowie_dick_bugun_kurali))) return;
@@ -76,7 +76,7 @@ public sealed class SterilTestleri(VeritabaniOlgusu olgu) : IClassFixture<Verita
         Assert.Equal(1, await Bd());                                     // bugün geçti
     }
 
-    [Fact]
+    [VtFact]
     public async Task Geri_cagirma_kapsami_son_negatif_biyolojikten_sonrasi()
     {
         if (!_olgu.Baglandi(nameof(Geri_cagirma_kapsami_son_negatif_biyolojikten_sonrasi))) return;

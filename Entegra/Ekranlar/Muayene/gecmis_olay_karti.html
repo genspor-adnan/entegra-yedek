@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geçmiş Olay Kartı — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    /* olay türü renkleri - zaman çizgisi ve seçici aynı rengi kullanır */
+    --t1:#b3261e; --t2:#e0843a; --t3:#2f6db3; --t4:#2e7d46; --t5:#8a6218; --t6:#6a3fb5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:960px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .kimlik{display:flex;align-items:center;gap:14px;padding:8px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kimlik .ad{font-weight:bold;font-size:13px;color:var(--navy)}
+  .kimlik .mini{color:var(--muted);font-size:11px}
+  .gvd{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+  @media(max-width:860px){.gvd{grid-template-columns:1fr}}
+  .sol{padding:12px 14px;border-right:1px solid var(--line2);background:#f4f5f7}
+  .sag{padding:12px 14px;background:#fafcfe;display:flex;flex-direction:column;gap:12px}
+  .kutu{background:#fff;border:1px solid var(--line2);border-radius:4px;margin:0 0 12px;overflow:hidden}
+  .kutu > h6{margin:0;padding:6px 10px;font-size:11px;color:#2c4a6b;background:linear-gradient(#f6f9fc,#eaf0f6);border-bottom:1px solid var(--line2)}
+  .ic{padding:10px;display:grid;gap:10px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .zor{color:#b23b3b}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:5px 7px;background:#fff;min-height:27px;display:flex;align-items:center;gap:6px}
+  .inp.odak{border-color:#2f6db3;box-shadow:0 0 0 2px rgba(47,109,179,.18)}
+  .ph{color:#9aa8b6}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .uc{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px}
+  .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .seg span{border:1px solid var(--line);border-radius:3px;padding:4px 10px;font-size:11px;background:#fff}
+  .seg span.on{border-color:#2f6db3;background:var(--sel);font-weight:bold}
+  /* tür kartları: ikon + ad, renkli sol çizgi */
+  .turler{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  @media(max-width:860px){.turler{grid-template-columns:repeat(3,1fr)}}
+  .tur{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:4px;background:#fff;
+    padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+  .tur b{font-size:11.5px}
+  .tur small{color:var(--muted);font-size:10px}
+  .tur.on{background:var(--sel);border-color:#2f6db3;border-left-color:var(--c);box-shadow:0 0 0 2px rgba(47,109,179,.18)}
+  .oneri{border:1px solid var(--line);border-radius:3px;background:#fff;margin-top:2px;box-shadow:0 4px 12px rgba(20,40,70,.12)}
+  .oneri div{padding:5px 8px;border-bottom:1px solid var(--line2);display:flex;gap:8px}
+  .oneri div:last-child{border-bottom:none}
+  .oneri div.sec{background:var(--sel)}
+  .kucuk{color:var(--muted);font-size:10.5px}
+  .oneri .kucuk{margin-left:auto}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .bant{border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.5;background:#eef4fc;border:1px solid #cfe0f5;color:#1f4f86}
+  .blk h6{margin:0 0 6px;font-size:11px;color:#2c4a6b;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line2);padding-bottom:3px;display:flex;gap:6px;align-items:center}
+  .blk h6 .sp{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:normal}
+  /* zaman çizgisi */
+  .zc{position:relative;margin:0;padding:0 0 0 16px;list-style:none}
+  .zc:before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line2)}
+  .zc li{position:relative;padding:3px 0 7px}
+  .zc li:before{content:"";position:absolute;left:-15px;top:7px;width:10px;height:10px;border-radius:50%;
+    background:var(--c);box-shadow:0 0 0 2px #fff}
+  .zc .yil{font-weight:bold;color:var(--navy);font-size:11px}
+  .zc .ne{display:block}
+  .zc li.yeni .ne{font-weight:bold}
+  .zc li.yeni:after{content:"yeni";position:absolute;right:0;top:3px;font-size:9.5px;color:#2f6db3}
+  .filtre{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px}
+  .filtre span{font-size:10px;border:1px solid var(--line);border-radius:9px;padding:0 6px;background:#fff}
+  .filtre span.on{background:var(--sel);border-color:#2f6db3}
+  .alt{display:flex;gap:10px;align-items:center;padding:7px 12px;border-top:1px solid var(--line);background:var(--head);font-size:11px;color:var(--muted)}
+  .aciklama{max-width:960px;margin:14px auto 0;color:#4d5d6e;font-size:11.5px;line-height:1.6}
+  .aciklama h4{margin:0 0 4px;color:var(--navy)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🗓 Geçmiş Olay — Yeni <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">💾＋ Kaydet ve yeni</span>
+    <span class="sp"></span>
+    <span class="btn danger" title="Yalnız yanlış girilmiş kayıt için">🗑 Sil</span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+  <div class="kimlik">
+    <span class="ad">AYŞE YILMAZ</span>
+    <span class="mini">TC 123******78 · K · 42 yaş</span>
+    <span class="mini">Muayene <b>#11</b>'de giriliyor</span>
+    <span class="sp"></span>
+    <span class="rz">6 geçmiş olay</span>
+  </div>
+  <div class="gvd">
+    <div class="sol">
+      <div class="kutu">
+        <h6>Olay türü</h6>
+        <div class="ic">
+          <!-- TÜR seçimi alanların etiketini ve aranacak kataloğu belirler -->
+          <div class="turler">
+            <div class="tur on" style="--c:var(--t1)"><b>🔪 Ameliyat</b><small>SUT'tan işlem</small></div>
+            <div class="tur" style="--c:var(--t2)"><b>🩺 Girişim</b><small>endoskopi, biyopsi…</small></div>
+            <div class="tur" style="--c:var(--t3)"><b>🛏 Yatış</b><small>servis, süre</small></div>
+            <div class="tur" style="--c:var(--t4)"><b>💉 Aşı</b><small>SKRS aşı listesi</small></div>
+            <div class="tur" style="--c:var(--t5)"><b>🩹 Travma</b><small>kaza, kırık</small></div>
+            <div class="tur" style="--c:var(--t6)"><b>🩸 Transfüzyon</b><small>kan ürünü</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kutu">
+        <h6>Olay — Ameliyat</h6>
+        <div class="ic">
+          <!-- Ameliyat/Girişim: SUT işlem kataloğundan aranır, kod SUT kodu olur.
+               Aşı: SKRS aşı listesinden, kod aşı kodu. Diğerleri serbest metin. -->
+          <div class="fld">
+            <label>İşlem (SUT kataloğundan) <span class="zor">*</span></label>
+            <div class="inp odak">🔍 <span>apendek</span><span class="ph">…</span></div>
+            <div class="oneri">
+              <div class="sec"><b>Apendektomi</b><span class="kucuk">SUT 612460</span></div>
+              <div>Laparoskopik apendektomi<span class="kucuk">SUT 612470</span></div>
+            </div>
+            <div class="ipucu">Katalogda yoksa serbest yazılabilir; kod boş kalır.</div>
+          </div>
+          <div class="uc">
+            <div class="fld"><label>Kod (SUT / aşı)</label><div class="inp">612460</div></div>
+            <div class="fld"><label>Tarih</label><div class="inp">1998 <span class="kucuk" style="margin-left:auto">yıl yeter</span></div></div>
+            <div class="fld"><label>Kurum</label><div class="inp">Ankara Numune EAH</div></div>
+          </div>
+          <div class="fld">
+            <label>Kaynak</label>
+            <div class="seg"><span>Hekim</span><span class="on">Hasta beyanı</span><span>e-Nabız</span><span>Dış kurum</span></div>
+          </div>
+          <div class="fld"><label>Not</label><div class="inp">Komplikasyonsuz; genel anestezi.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <div class="bant"><b>Nerede görünür?</b><br>
+        Tıbbi özetin "Ameliyat / girişim · Aşı" bölümünde ve muayenede hasta öyküsünde.
+        Aşılar e-Nabız aşı kayıtlarıyla karşılaştırılır.</div>
+      <div class="blk">
+        <h6>Hastanın geçmişi <span class="sp kucuk">zaman çizgisi</span></h6>
+        <div class="filtre"><span class="on">Tümü</span><span>Ameliyat</span><span>Aşı</span><span>Yatış</span></div>
+        <ul class="zc">
+          <li class="yeni" style="--c:var(--t1)"><span class="yil">1998</span><span class="ne">Apendektomi <span class="kucuk">· Ameliyat</span></span></li>
+          <li style="--c:var(--t4)"><span class="yil">10.2025</span><span class="ne">İnfluenza aşısı <span class="kucuk">· Aşı</span></span></li>
+          <li style="--c:var(--t4)"><span class="yil">2024</span><span class="ne">Pnömokok (PCV13) <span class="kucuk">· Aşı</span></span></li>
+          <li style="--c:var(--t2)"><span class="yil">2023</span><span class="ne">Kolonoskopi — polip yok <span class="kucuk">· Girişim</span></span></li>
+          <li style="--c:var(--t3)"><span class="yil">2021</span><span class="ne">Pnömoni, 5 gün <span class="kucuk">· Yatış · Dahiliye</span></span></li>
+          <li style="--c:var(--t5)"><span class="yil">2016</span><span class="ne">Sol radius kırığı <span class="kucuk">· Travma</span></span></li>
+        </ul>
+        <div class="kucuk">Satıra tıklayınca o olay açılır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span>e-Nabız'dan gelen olaylar "e-Nabız" kaynağıyla görünür.</span></div>
+</div>
+
+<div class="aciklama"><h4>Kurallar (ekrana yansıyan)</h4>
+  • <b>Tür</b> alan etiketlerini ve aramayı belirler: Ameliyat / Girişim → SUT işlem kataloğu (kod = SUT kodu),
+  Aşı → SKRS aşı listesi (kod = aşı kodu), Yatış / Travma / Transfüzyon → serbest metin.<br>
+  • <b>Tarih</b> tam bilinmeyebilir: hasta beyanında yıl ya da ay/yıl yeter.<br>
+  • Geçmiş olay bir <b>olgudur</b> (pasif hâli yok): yalnız yanlış girilen kayıt silinir.<br>
+  • Sağdaki zaman çizgisi hastanın bütün olaylarını tarih sırasıyla ve tür rengiyle gösterir; tıklanan olay açılır.
+</div>
+</body>
+</html>

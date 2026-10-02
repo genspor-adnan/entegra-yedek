@@ -32,7 +32,7 @@ public sealed class ProfilRolleriTestleri(VeritabaniOlgusu olgu)
         => b.TekDegerAsync<short>("select aktif from public.rol where kod = @p0",
                                   t, [kod], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Harita_rol_aktifine_UYGULANIR()
     {
         if (!_olgu.Baglandi(nameof(Harita_rol_aktifine_UYGULANIR))) return;
@@ -53,7 +53,7 @@ public sealed class ProfilRolleriTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Haritada_OLMAYAN_role_dokunulmaz()
     {
         if (!_olgu.Baglandi(nameof(Haritada_OLMAYAN_role_dokunulmaz))) return;
@@ -74,7 +74,7 @@ public sealed class ProfilRolleriTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yonetici_ve_atanmamis_PASIFE_ALINAMAZ()
     {
         if (!_olgu.Baglandi(nameof(Yonetici_ve_atanmamis_PASIFE_ALINAMAZ))) return;
@@ -102,7 +102,7 @@ public sealed class ProfilRolleriTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Bos_tip_reddedilir()
     {
         if (!_olgu.Baglandi(nameof(Bos_tip_reddedilir))) return;
@@ -133,7 +133,7 @@ public sealed class OnayBasamakSahibiTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Yonetici_artik_IMZA_atmaz_ama_ekrani_gorur()
     {
         if (!_olgu.Baglandi(nameof(Yonetici_artik_IMZA_atmaz_ama_ekrani_gorur))) return;
@@ -161,7 +161,7 @@ public sealed class OnayBasamakSahibiTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(1, ekran);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sahipsiz_basamak_GORUNUR()
     {
         if (!_olgu.Baglandi(nameof(Sahipsiz_basamak_GORUNUR))) return;
@@ -203,7 +203,7 @@ public sealed class CagriMerkeziRolleriTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Cagri_merkezi_PARA_ekranlarini_gormez()
     {
         if (!_olgu.Baglandi(nameof(Cagri_merkezi_PARA_ekranlarini_gormez))) return;
@@ -218,7 +218,7 @@ public sealed class CagriMerkeziRolleriTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(0, sayi);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ajan_randevu_SILEMEZ_sorumlu_siler()
     {
         if (!_olgu.Baglandi(nameof(Ajan_randevu_SILEMEZ_sorumlu_siler))) return;

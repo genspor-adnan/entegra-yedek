@@ -140,6 +140,7 @@ var
   TempStream: TStream;
   Stream2: TStream;
   FlNm, DumpDir: string;
+  LHam: string;   // baglanti pasiflestirilmis, gorsel ozellikleri DOKUNULMAMIS sablon
   DegiskenAdList, DegiskenDegerList : TStringList;
 
   procedure OncekiDegiskenleriKaydet;
@@ -197,14 +198,12 @@ begin
           Text := TRegEx.Replace(Text,
             '(<Tfrx(ADO|FD)Database\b[^>]*?)\sLoginPrompt="True"', '$1 LoginPrompt="False"',
             [roIgnoreCase]);
-          // FireDAC report definitions are kept as-is; only unstable visual metadata is stripped.
-          Text := TRegEx.Replace(Text, '\sPropData="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sStyle="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sFrame\.Typ="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sFont\.Style="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sFrame\.Style="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sFrame\.Width="[^"]*"', '', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '\sFont\.Charset="[^"]*"', '', [roIgnoreCase]);
+          // Gorsel ozellikler (Font.Style=bold, PropData=RichText icerigi, cerceve...)
+          //   burada SILINMEZ: eskiden kosulsuz siliniyordu -> tasarimcida bold/RichText
+          //   onizlemede gorunuyor, kaydedip normal calistirinca bold duz, RichText bos
+          //   geliyordu. Sadelestirme yalniz sablon oldugu gibi YUKLENEMEZSE (eski FR
+          //   surumu kalintisi) asagidaki geri donus dalinda yapilir.
+          LHam := Text;
           TempStream.Size := 0;
           SaveToStream(TempStream);
           DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';
@@ -226,7 +225,30 @@ begin
 
         TempStream.Position := 0;
         try
-          frxReport1.LoadFromStream(TempStream);
+          try
+            frxReport1.LoadFromStream(TempStream);
+          except
+            // Oldugu gibi yuklenemedi: eski davranis - kararsiz gorsel ozellikleri
+            //   ayiklayip bir kez daha dene (hata olursa asagida dump + mesaj).
+            frxReport1.Clear;
+            with TStringList.Create do
+            try
+              Text := LHam;
+              Text := TRegEx.Replace(Text, '\sPropData="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sStyle="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sFrame\.Typ="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sFont\.Style="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sFrame\.Style="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sFrame\.Width="[^"]*"', '', [roIgnoreCase]);
+              Text := TRegEx.Replace(Text, '\sFont\.Charset="[^"]*"', '', [roIgnoreCase]);
+              TempStream.Size := 0;
+              SaveToStream(TempStream);
+            finally
+              Free;
+            end;
+            TempStream.Position := 0;
+            frxReport1.LoadFromStream(TempStream);
+          end;
         except
           on E: Exception do begin
             DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';

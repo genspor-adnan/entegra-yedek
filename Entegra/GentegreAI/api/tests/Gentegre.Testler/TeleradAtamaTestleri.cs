@@ -101,7 +101,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         => b.TekDegerAsync<int?>("select public.fn_telerad_radyolog_oner(@p0)",
                                  t, [istek], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Nobetci_onerilir()
     {
         if (!_olgu.Baglandi(nameof(Nobetci_onerilir))) return;
@@ -118,7 +118,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ilk_uyan_kural_KAZANIR()
     {
         if (!_olgu.Baglandi(nameof(Ilk_uyan_kural_KAZANIR))) return;
@@ -142,7 +142,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dolu_radyolog_ATLANIR()
     {
         if (!_olgu.Baglandi(nameof(Dolu_radyolog_ATLANIR))) return;
@@ -170,7 +170,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yedek_nobetci_EN_SONA_duser()
     {
         if (!_olgu.Baglandi(nameof(Yedek_nobetci_EN_SONA_duser))) return;
@@ -189,7 +189,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kural_uymazsa_is_SIRADA_kalir()
     {
         if (!_olgu.Baglandi(nameof(Kural_uymazsa_is_SIRADA_kalir))) return;
@@ -214,7 +214,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_radyolog_IKI_NOBETTE_olamaz()
     {
         if (!_olgu.Baglandi(nameof(Ayni_radyolog_IKI_NOBETTE_olamaz))) return;
@@ -235,7 +235,7 @@ public sealed class TeleradAtamaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Otomatik_atama_gecmise_OTOMATIK_diye_duser()
     {
         if (!_olgu.Baglandi(nameof(Otomatik_atama_gecmise_OTOMATIK_diye_duser))) return;

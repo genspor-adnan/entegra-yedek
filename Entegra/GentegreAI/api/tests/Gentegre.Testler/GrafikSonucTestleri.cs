@@ -87,7 +87,7 @@ public sealed class GrafikKaydiTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Bos_grafik_KABUL_EDILMEZ_ve_raporda_bayragi_suzer()
     {
         if (!_olgu.Baglandi(nameof(Bos_grafik_KABUL_EDILMEZ_ve_raporda_bayragi_suzer))) return;

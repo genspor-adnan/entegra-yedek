@@ -96,6 +96,11 @@ const IKI_ANLAMLI = [
   //   da daraltirdi; portal icin ayri bir liste bileseni yazmak ise ayni
   //   ekranin iki kopyasini bakim etmek olurdu.
   'basrow', 'cip', 'cipler', 'sahne', 'sayfabas',
+  // RECETE ILAC GRIDI (kullanici: "grid her yone genisleyip tam otursun",
+  //   "alt durum cubugunu kaldir") — BILINCLI: muayene kartindaki gomulu
+  //   GenGrid'in dis kutusu, sarmalayicisi ve alt bilgisi YALNIZ `.recete-grid`
+  //   icinde sifirlaniyor; global liste ekranlari etkilenmiyor.
+  'altbilgi', 'gridwrap',
 ];
 
 const GORUNUM = /\b(width|height|border|background|position|display|padding|flex)\b/;

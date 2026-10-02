@@ -25,7 +25,7 @@ public sealed class DisKurumBasvurusuTestleri(VeritabaniOlgusu olgu)
 
     private static IstekBaglami Baglam() => new()
     {
-        KullaniciId = 1, RolId = 1, SubeId = 1,
+        KullaniciId = 1, RolId = 1, RolIdleri = [1], SubeYazma = true, SubeId = 1,
         Yetkiler = new YetkiSeti(1, [new YetkiKaydi("belge", 0, true, true, true, true)], []),
     };
 
@@ -111,7 +111,7 @@ public sealed class DisKurumBasvurusuTestleri(VeritabaniOlgusu olgu)
             [kurumId], CancellationToken.None);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dis_kurum_istemi_BASVURU_acar_ve_tetkikleri_ucretlendirir()
     {
         if (!_olgu.Baglandi(nameof(Dis_kurum_istemi_BASVURU_acar_ve_tetkikleri_ucretlendirir)))
@@ -157,7 +157,7 @@ public sealed class DisKurumBasvurusuTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId, kurumId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Ikinci_kayit_MUKERRER_satir_yazmaz_yeni_tetkigi_ekler()
     {
         if (!_olgu.Baglandi(nameof(Ikinci_kayit_MUKERRER_satir_yazmaz_yeni_tetkigi_ekler)))
@@ -205,7 +205,7 @@ public sealed class DisKurumBasvurusuTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId, kurumId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sonuclandi_durumunda_KURUMA_TAHAKKUK_kesilir()
     {
         if (!_olgu.Baglandi(nameof(Sonuclandi_durumunda_KURUMA_TAHAKKUK_kesilir))) return;
@@ -253,7 +253,7 @@ public sealed class DisKurumBasvurusuTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, istemId, kurumId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dis_kurum_OLMAYAN_istemde_basvuru_acilmaz()
     {
         if (!_olgu.Baglandi(nameof(Dis_kurum_OLMAYAN_istemde_basvuru_acilmaz))) return;

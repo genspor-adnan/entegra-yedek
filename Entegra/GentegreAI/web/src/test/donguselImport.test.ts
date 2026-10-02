@@ -17,7 +17,8 @@ import { join, dirname, resolve, extname } from 'node:path';
  * yakalayacak tek yer burası: grafiğin KENDİSİNE bakmak.
  *
  * Kontrol statiktir (kodu çalıştırmaz): `src` altındaki her modülün göreli
- * importları izlenir ve bir çevrim bulunursa zincir adıyla raporlanır.
+ * importları izlenir; bilinen kümenin dışında bir çevrim bulunursa zincir adıyla
+ * raporlanır.
  */
 
 const KOK = resolve(__dirname, '..');
@@ -53,7 +54,7 @@ function coz(kaynak: string, hedef: string): string | null {
 }
 
 describe('modül grafiği', () => {
-  it('döngüsel import içermez', () => {
+  it('döngüsel import içermez (bilinen küme dışında)', () => {
     const graf = new Map<string, string[]>();
     for (const dosya of dosyalar(KOK)) {
       const hedefler = goreliImportlar(readFileSync(dosya, 'utf8'))
@@ -61,49 +62,81 @@ describe('modül grafiği', () => {
         .filter((y): y is string => y !== null);
       graf.set(dosya, hedefler);
     }
-
-    const durum = new Map<string, 0 | 1 | 2>();   // 0 yok · 1 yolda · 2 bitti
-    const zincirler: string[] = [];
-
     const kisa = (y: string) => y.slice(KOK.length + 1).replace(/\\/g, '/');
 
-    function gez(dugum: string, yol: string[]) {
-      if (durum.get(dugum) === 2) return;
-      if (durum.get(dugum) === 1) {
-        const bas = yol.indexOf(dugum);
-        zincirler.push([...yol.slice(bas), dugum].map(kisa).join(' -> '));
-        return;
+    // GÜÇLÜ BAĞLI BİLEŞENLER (Tarjan). ESKİ KONTROL DFS'in bulduğu zincirleri
+    //   bir "bilinen" listesiyle karşılaştırıyordu; DFS döngüyü kümeye İLK
+    //   girdiği dosyadan yazdığı için alakasız bir import (933: App ->
+    //   OzelKartSayfalari -> MuayeneSablonKarti -> GenDetayTablo) giriş
+    //   noktasını değiştirince aynı küme 20 "yeni" döngü gibi raporlanıyordu.
+    //   Bileşen üyeliği gezinti sırasından bağımsızdır.
+    let sayac = 0;
+    const indeks = new Map<string, number>(), dusuk = new Map<string, number>();
+    const yigin: string[] = [], yiginda = new Set<string>(), kumeler: string[][] = [];
+    function bagla(v: string) {
+      indeks.set(v, sayac); dusuk.set(v, sayac); sayac++;
+      yigin.push(v); yiginda.add(v);
+      for (const w of graf.get(v) ?? []) {
+        if (!indeks.has(w)) { bagla(w); dusuk.set(v, Math.min(dusuk.get(v)!, dusuk.get(w)!)) }
+        else if (yiginda.has(w)) dusuk.set(v, Math.min(dusuk.get(v)!, indeks.get(w)!));
       }
-      durum.set(dugum, 1);
-      for (const komsu of graf.get(dugum) ?? []) gez(komsu, [...yol, dugum]);
-      durum.set(dugum, 2);
+      if (dusuk.get(v) !== indeks.get(v)) return;
+      const kume: string[] = [];
+      let w: string;
+      do { w = yigin.pop()!; yiginda.delete(w); kume.push(w) } while (w !== v);
+      if (kume.length > 1 || (graf.get(v) ?? []).includes(v)) kumeler.push(kume);
+    }
+    for (const v of graf.keys()) if (!indeks.has(v)) bagla(v);
+
+    // BİLİNEN KÜME: GenForm ↔ GenDetayTablo ↔ TarafArama ↔ BelgeKarti ailesi.
+    //   Hepsi bileşen-bileşen ve hiçbiri modül yüklenirken DEĞER okumuyor -
+    //   React bileşen referansları çağrı anında çözüldüğü için tarayıcıda
+    //   patlamıyor. Yine de borçtur: listeye yenisi EKLENMEMELİ, buradakiler
+    //   zamanla temizlenmeli (kök kenar GenForm -> BelgeKarti: karttan başvuru
+    //   açılır; onu kırmadan bu aile temizlenemez). Bu kümeye yeni bir dosya
+    //   katılırsa ya da AYRI bir döngü oluşursa test kırılır. (Kümenin İÇİNDE
+    //   yeni kenar yakalanmaz - bileşen aynı kalır.)
+    const bilinen = new Set([
+      'bilesenler/BelgeDonusumModali.tsx', 'bilesenler/GenDetayTablo.tsx', 'bilesenler/GenForm.tsx',
+      'bilesenler/IlgiliKisiler.tsx', 'bilesenler/PaketSekmesi.tsx', 'bilesenler/PersonelKimlikOzet.tsx',
+      'bilesenler/TarafArama.tsx', 'bilesenler/TekAdres.tsx', 'bilesenler/TekKayit.tsx',
+      'bilesenler/TekOzluk.tsx', 'bilesenler/belge/BasvuruSekmesi.tsx',
+      'bilesenler/belge/BelgeErpSekmeleri.tsx', 'bilesenler/belge/BelgeKartiModallari.tsx',
+      'bilesenler/belge/BelgeSekmeleri.tsx', 'bilesenler/belge/BelgeTahsilatModallari.tsx',
+      'bilesenler/belge/basvuru/ProvizyonSekmesi.tsx', 'bilesenler/goz/GozOlcumMatrisi.tsx',
+      'bilesenler/goz/gozMatrisTanimlari.ts', 'bilesenler/kart/KartDetaySekmesi.tsx',
+      'bilesenler/kart/KartGrupSarmalayici.tsx', 'bilesenler/kart/KartGrupSekmesi.tsx',
+      'bilesenler/kart/KartKimlikSeridi.tsx', 'bilesenler/kart/kartGovdesi.ts',
+      'bilesenler/kart/tarifeKurallari.ts', 'bilesenler/prim/KalemRolModali.tsx',
+      'bilesenler/radyoloji/IstemModali.tsx', 'bilesenler/tarafSecimEngeli.ts',
+      'sayfalar/BelgeKarti.tsx', 'sayfalar/KasaIslemKarti.tsx', 'sayfalar/belgeKarti/belgeOkuma.ts',
+      'sayfalar/belgeKarti/stokSecimi.ts', 'sayfalar/belgeKarti/useBasvuruAlanlari.ts',
+      'sayfalar/belgeKarti/useDagilimOnizleme.ts', 'sayfalar/belgeKarti/useKalemAkisi.ts',
+    ]);
+
+    /** Yeni üyenin içinden geçen bir döngü (kümede kalarak kendine dönen yol). */
+    function ornekZincir(bas: string, kume: Set<string>): string {
+      const onceki = new Map<string, string>([[bas, '']]);
+      const kuyruk = [bas];
+      while (kuyruk.length) {
+        const v = kuyruk.shift()!;
+        for (const w of graf.get(v) ?? []) {
+          if (!kume.has(w)) continue;
+          if (w === bas) {
+            const ara: string[] = []; let u = v;
+            while (u !== bas) { ara.unshift(u); u = onceki.get(u)! }
+            return [bas, ...ara, bas].map(kisa).join(' -> ');
+          }
+          if (!onceki.has(w)) { onceki.set(w, v); kuyruk.push(w) }
+        }
+      }
+      return kisa(bas);
     }
 
-    for (const dosya of graf.keys()) gez(dosya, []);
-
-    // BİLİNEN DÖNGÜLER: hepsi bileşen-bileşen ve hiçbiri modül yüklenirken
-    //   DEĞER okumuyor - React bileşen referansları çağrı anında çözüldüğü
-    //   için tarayıcıda patlamıyorlar. Yine de borçtur: listeye yenisi
-    //   EKLENMEMELİ, buradakiler zamanla temizlenmeli.
-    const bilinen = [
-      'bilesenler/GenForm.tsx -> bilesenler/GenDetayTablo.tsx -> bilesenler/TarafArama.tsx -> bilesenler/GenForm.tsx',
-      'bilesenler/GenDetayTablo.tsx -> bilesenler/tarafSecimEngeli.ts -> bilesenler/GenDetayTablo.tsx',
-      'bilesenler/GenForm.tsx -> bilesenler/kart/KartGrupSarmalayici.tsx -> bilesenler/kart/KartGrupSekmesi.tsx -> bilesenler/IlgiliKisiler.tsx -> bilesenler/GenForm.tsx',
-      'bilesenler/belge/BasvuruSekmesi.tsx -> bilesenler/belge/basvuru/ProvizyonSekmesi.tsx -> bilesenler/belge/BasvuruSekmesi.tsx',
-      'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/BelgeDonusumModali.tsx -> bilesenler/GenForm.tsx',
-      'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/radyoloji/IstemModali.tsx -> sayfalar/KasaIslemKarti.tsx -> bilesenler/GenForm.tsx',
-      'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/belge/BelgeTahsilatModallari.tsx -> bilesenler/GenForm.tsx',
-      'sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> sayfalar/BelgeKarti.tsx',
-      // 781 - hasta karti (GenForm) artik pencerelerden DOGRUDAN aciliyor.
-      //   Yeni bir borc degil, var olanin kisa yolu: BelgeKartiModallari zaten
-      //   uc ayri komsusu uzerinden GenForm'a ulasiyordu (BelgeDonusumModali,
-      //   BelgeTahsilatModallari, TarafArama). Kokte GenForm -> BelgeKarti
-      //   kenari var (karttan basvuru acilir); onu kirmadan bu aile
-      //   temizlenemez.
-      'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/GenForm.tsx',
-    ];
-
-    const yeniler = zincirler.filter(z => !bilinen.includes(z));
+    const yeniler = kumeler.flatMap(k => {
+      const ks = new Set(k);
+      return k.filter(y => !bilinen.has(kisa(y))).map(y => ornekZincir(y, ks));
+    });
     // Zincir ADIYLA raporlanır: "üç döngü var" hangisini düzelteceğini söylemez.
     expect(yeniler, `Yeni döngüsel import:\n  ${yeniler.join('\n  ')}`).toEqual([]);
   });

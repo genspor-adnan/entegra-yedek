@@ -30,7 +30,7 @@ public sealed class CagriTestleri(VeritabaniOlgusu olgu) : IClassFixture<Veritab
             values ('TEST ÇAĞRI ARAYAN', 101, 1, 1, @p0, @p1) returning id
             """, t, [cep, sube], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Arayan_numara_bicimden_bagimsiz_bulunur()
     {
         if (!_olgu.Baglandi(nameof(Arayan_numara_bicimden_bagimsiz_bulunur))) return;
@@ -52,7 +52,7 @@ public sealed class CagriTestleri(VeritabaniOlgusu olgu) : IClassFixture<Veritab
         Assert.Equal(0, hic);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sla_kuyruk_esigine_gore_hesaplanir()
     {
         if (!_olgu.Baglandi(nameof(Sla_kuyruk_esigine_gore_hesaplanir))) return;
@@ -81,7 +81,7 @@ public sealed class CagriTestleri(VeritabaniOlgusu olgu) : IClassFixture<Veritab
         Assert.Equal(1L, await b.TekDegerAsync<long>("select kacan_bugun from public.v_cagri_kuyruk where id = @p0", t, [kuyruk], CancellationToken.None));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kampanya_kisisi_aranacak_kurali()
     {
         if (!_olgu.Baglandi(nameof(Kampanya_kisisi_aranacak_kurali))) return;

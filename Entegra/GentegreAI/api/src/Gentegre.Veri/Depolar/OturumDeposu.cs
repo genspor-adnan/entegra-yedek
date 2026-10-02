@@ -1,3 +1,5 @@
+using Npgsql;
+
 namespace Gentegre.Veri.Depolar;
 
 public sealed record OturumKaydi(
@@ -25,17 +27,73 @@ public sealed class OturumDeposu
         CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = _veri.Komut(baglanti, """
+        return await AcAsync(baglanti, null, kullaniciId, refreshHash, bitis, aileId, oncekiId,
+                             subeId, ip, istemci, iptal);
+    }
+
+    /// <summary>Ayni baglanti/islem icinde yeni oturum satiri (atomik rotation).</summary>
+    public static async Task<(long Id, Guid AileId)> AcAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction? islem, int kullaniciId, string refreshHash, DateTime bitis,
+        Guid? aileId, long? oncekiId, int? subeId, string ip, string istemci,
+        CancellationToken iptal = default)
+    {
+        await using var komut = baglanti.Komut("""
             insert into public.oturum
                 (kullanici_id, aile_id, refresh_hash, onceki_oturum_id, sube_id, ip, istemci, bitis_tarihi)
             values (@p0, coalesce(@p1, gen_random_uuid()), @p2, @p3, @p4, @p5, @p6, @p7)
             returning id, aile_id
-            """, new object?[] { kullaniciId, aileId, refreshHash, oncekiId, subeId, ip, istemci, bitis });
+            """, islem, kullaniciId, aileId, refreshHash, oncekiId, subeId, ip, istemci, bitis);
 
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         await okuyucu.ReadAsync(iptal);
         return (okuyucu.GetInt64(0), okuyucu.GetGuid(1));
     }
+
+    /// <summary>
+    /// ATOMIK ROTATION (denetim 28.09.2026 #6): refresh satirini SATIR
+    /// KILIDIYLE okur. Ayni token'la gelen ikinci istek, birincinin islemi
+    /// bitene kadar bu satirda bekler ve sonra satiri IPTAL EDILMIS gorur -
+    /// iki istek ayni "acik" durumu birlikte okuyup iki gecerli dal
+    /// uretemez.
+    /// </summary>
+    public static Task<OturumKaydi?> KilitleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        string refreshHash, CancellationToken iptal = default)
+        => baglanti.TekAsync("""
+            select id, kullanici_id, aile_id, bitis_tarihi, iptal_tarihi, iptal_nedeni, sube_id
+              from public.oturum where refresh_hash = @p0
+               for update
+            """, islem, [refreshHash],
+            o => new OturumKaydi(o.GetInt64(0), o.Sayi("kullanici_id"), o.GetGuid(2),
+                                 o.GetDateTime(3), o.Tarih("iptal_tarihi"), o.Metin("iptal_nedeni"),
+                                 o.SayiNull("sube_id")),
+            iptal);
+
+    /// <summary>Islem icinde tek satiri kapatir; kapanan satir sayisini doner (0 = zaten kapali).</summary>
+    public static Task<int> IptalAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        long id, string neden, CancellationToken iptal = default)
+        => baglanti.CalistirAsync("""
+            update public.oturum
+               set iptal_tarihi = now()::timestamp, iptal_nedeni = @p1
+             where id = @p0 and iptal_tarihi is null
+            """, islem, [id, neden], iptal);
+
+    /// <summary>Islem icinde ailenin acik tum satirlarini kapatir.</summary>
+    public static Task<int> AileIptalAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        Guid aileId, string neden, CancellationToken iptal = default)
+        => baglanti.CalistirAsync("""
+            update public.oturum
+               set iptal_tarihi = now()::timestamp, iptal_nedeni = @p1
+             where aile_id = @p0 and iptal_tarihi is null
+            """, islem, [aileId, neden], iptal);
+
+    /// <summary>Islem icinde kullanicinin butun acik oturumlarini kapatir.</summary>
+    public static Task<int> KullaniciOturumlariniKapatAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int kullaniciId, string neden, CancellationToken iptal = default)
+        => baglanti.CalistirAsync("""
+            update public.oturum
+               set iptal_tarihi = now()::timestamp, iptal_nedeni = @p1
+             where kullanici_id = @p0 and iptal_tarihi is null
+            """, islem, [kullaniciId, neden], iptal);
 
     public Task<OturumKaydi?> HashIleBulAsync(string refreshHash, CancellationToken iptal = default)
         => _veri.TekAsync("""

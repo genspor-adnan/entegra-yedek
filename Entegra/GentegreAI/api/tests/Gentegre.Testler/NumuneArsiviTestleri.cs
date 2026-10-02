@@ -74,7 +74,7 @@ public sealed class NumuneArsiviTestleri(VeritabaniOlgusu olgu)
         veri.TekDegerAsync<int>("select public.fn_lab_arsiv_koy(@p0, @p1, @p2, 1)",
                                 [numuneId, kutuId, goz], CancellationToken.None);
 
-    [Fact]
+    [VtFact]
     public async Task Ayni_goze_IKINCI_tup_konulamaz_ve_izgara_disi_goz_reddedilir()
     {
         if (!_olgu.Baglandi(nameof(Ayni_goze_IKINCI_tup_konulamaz_ve_izgara_disi_goz_reddedilir)))
@@ -125,7 +125,7 @@ public sealed class NumuneArsiviTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, uniteId, kutuId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Cikarma_ZINCIRE_yazar_ve_goz_bosalir()
     {
         if (!_olgu.Baglandi(nameof(Cikarma_ZINCIRE_yazar_ve_goz_bosalir))) return;
@@ -161,7 +161,7 @@ public sealed class NumuneArsiviTestleri(VeritabaniOlgusu olgu)
         finally { await TemizleAsync(veri, uniteId, kutuId, istemId); }
     }
 
-    [Fact]
+    [VtFact]
     public async Task Saklama_suresi_TETKIKE_ozel_kurali_kullanir_ve_imha_listesi_dolar()
     {
         if (!_olgu.Baglandi(nameof(Saklama_suresi_TETKIKE_ozel_kurali_kullanir_ve_imha_listesi_dolar)))

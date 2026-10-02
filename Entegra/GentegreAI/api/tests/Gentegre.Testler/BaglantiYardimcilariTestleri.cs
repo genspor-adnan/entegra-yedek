@@ -24,7 +24,7 @@ public sealed class BaglantiYardimcilariTestleri(VeritabaniOlgusu olgu)
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
 
-    [Fact]
+    [VtFact]
     public async Task Parametresiz_sorgu_NULL_dizi_ile_calisir()
     {
         if (!_olgu.Baglandi(nameof(Parametresiz_sorgu_NULL_dizi_ile_calisir))) return;
@@ -43,7 +43,7 @@ public sealed class BaglantiYardimcilariTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(1, await b.TekDegerAsync<int>("select 1", null, [], CancellationToken.None));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yer_tutucu_rol_DURUYOR()
     {
         if (!_olgu.Baglandi(nameof(Yer_tutucu_rol_DURUYOR))) return;

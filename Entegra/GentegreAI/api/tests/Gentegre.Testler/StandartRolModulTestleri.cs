@@ -44,7 +44,7 @@ public sealed class StandartRolModulTestleri(VeritabaniOlgusu olgu)
             .Select(m => (m.Groups["rol"].Value, m.Groups["modul"].Value)).ToList();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Haritadaki_modul_kodlari_KATALOGDA_var()
     {
         if (!_olgu.Baglandi(nameof(Haritadaki_modul_kodlari_KATALOGDA_var))) return;
@@ -93,7 +93,7 @@ public sealed class StandartRolModulTestleri(VeritabaniOlgusu olgu)
         Assert.Equal("yatan_hasta", harita["yatan_hemsire"]);
     }
 
-    [Fact]
+    [VtFact]
     public async Task Sistem_rolleri_SILINEMEZ_ama_pasife_alinabilir()
     {
         if (!_olgu.Baglandi(nameof(Sistem_rolleri_SILINEMEZ_ama_pasife_alinabilir))) return;

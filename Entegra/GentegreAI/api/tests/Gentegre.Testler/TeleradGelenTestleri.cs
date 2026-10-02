@@ -47,7 +47,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
             "select public.fn_telerad_gelen_istek(@p0, @p1, @p2)",
             t, [accession, skrs, tckn], Iptal);
 
-    [Fact]
+    [VtFact]
     public async Task Accession_ve_skrs_ile_eslesir()
     {
         if (!_olgu.Baglandi(nameof(Accession_ve_skrs_ile_eslesir))) return;
@@ -62,7 +62,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Skrs_yoksa_tckn_dogrular()
     {
         if (!_olgu.Baglandi(nameof(Skrs_yoksa_tckn_dogrular))) return;
@@ -77,7 +77,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Accession_bossa_eslesme_yok()
     {
         if (!_olgu.Baglandi(nameof(Accession_bossa_eslesme_yok))) return;
@@ -87,7 +87,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         Assert.Null(await EslesAsync(b, null!, "", "77003", "12345678901"));
     }
 
-    [Fact]
+    [VtFact]
     public async Task Iki_aday_varsa_hicbiri_secilmez()
     {
         if (!_olgu.Baglandi(nameof(Iki_aday_varsa_hicbiri_secilmez))) return;
@@ -106,7 +106,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Tek_aday_varsa_accession_yeter()
     {
         if (!_olgu.Baglandi(nameof(Tek_aday_varsa_accession_yeter))) return;
@@ -123,7 +123,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Yanlis_skrs_tckn_ile_kurtarilir()
     {
         if (!_olgu.Baglandi(nameof(Yanlis_skrs_tckn_ile_kurtarilir))) return;
@@ -139,7 +139,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Mukerrer_kontrol_no_yazilamaz()
     {
         if (!_olgu.Baglandi(nameof(Mukerrer_kontrol_no_yazilamaz))) return;
@@ -160,7 +160,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Kontrol_nosuz_kayitlar_cakismaz()
     {
         if (!_olgu.Baglandi(nameof(Kontrol_nosuz_kayitlar_cakismaz))) return;
@@ -178,7 +178,7 @@ public sealed class TeleradGelenTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
-    [Fact]
+    [VtFact]
     public async Task Dinleme_portu_kapali_dogar()
     {
         if (!_olgu.Baglandi(nameof(Dinleme_portu_kapali_dogar))) return;

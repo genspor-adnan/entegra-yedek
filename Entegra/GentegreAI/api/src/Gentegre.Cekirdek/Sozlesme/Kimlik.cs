@@ -29,11 +29,19 @@ public sealed class ParolaDegistirIstegi
 }
 
 /// <summary>Ilk parola belirleme - otomatik acilmis hesabin parolasi bostur.</summary>
+/// <summary>
+/// ILK PAROLA (denetim 28.09.2026 #5) iki adimlidir:
+/// <c>/ilk-parola/kod</c> {Kod, TcknSon4} kayitli kanala kod gonderir;
+/// <c>/ilk-parola</c> {Kod, DogrulamaKodu, YeniParola} parolayi belirler.
+/// TCKN son 4 tek basina parola belirlemeye YETMEZ.
+/// </summary>
 public sealed class IlkParolaIstegi
 {
     public string Kod { get; set; } = "";
-    /// <summary>Kimlik kaniti: TCKN'nin son 4 hanesi.</summary>
+    /// <summary>1. adim: kod gondermenin on kosulu - TCKN'nin son 4 hanesi.</summary>
     public string TcknSon4 { get; set; } = "";
+    /// <summary>2. adim: kayitli kanala giden 6 haneli tek kullanimlik kod.</summary>
+    public string DogrulamaKodu { get; set; } = "";
     public string YeniParola { get; set; } = "";
 }
 
