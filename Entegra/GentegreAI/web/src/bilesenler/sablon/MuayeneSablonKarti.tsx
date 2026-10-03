@@ -522,7 +522,7 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
             <div className="ms-onizleme">
               <div className="ms-onz-arac">
                 <span className="d">☑ {c('Tümü normal işaretle')}</span>
-                <span className="sonuk">{c('muayene kartı › Şablon Muayene sekmesi')}</span>
+                <span className="sonuk">{c('muayene kartı › Muayene sekmesi')}</span>
               </div>
               <table className="detay-tablo">
                 <thead><tr><th>{c('Sistem')}</th><th className="hiza-orta">{c('Normal')}</th><th>{c('Bulgu')}</th><th>{c('Taraf')}</th></tr></thead>

@@ -70,6 +70,9 @@ public sealed class AyarDeposu
         "randevu.baslangic_saat", "randevu.bitis_saat", "randevu.slot_dk",
         "randevu.varsayilan_sure", "randevu.calisma_gunleri",
         "randevu.ogle_baslangic", "randevu.ogle_bitis",
+        // RANDEVU KURALLARI (748/943): izinli doktora ve calisma plani disina
+        //   randevu - 0 engelle, 1 yalniz uyar. Calisma Sablonlari > Varsayilanlar.
+        "randevu.izinli_hekim", "randevu.mesai_disi",
         // RANDEVU HATIRLATMASI (399): acik mi ve randevudan KAC SAAT once.
         //   Kapatilabilir olmasi sart - SMS ucretli, her kurum istemez.
         "randevu.hatirlatma_acik", "randevu.hatirlatma_saat",

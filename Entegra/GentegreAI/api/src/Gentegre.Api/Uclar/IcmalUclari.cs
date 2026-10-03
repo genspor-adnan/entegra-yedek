@@ -67,7 +67,7 @@ public static class IcmalUclari
             var satirlar = await baglanti.ListeAsync("""
                 select s.id as "satirId", b.id as "belgeId", b.belge_no as "belgeNo",
                        b.belge_tarihi as "belgeTarihi",
-                       coalesce(h.unvan, '') as "hasta",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hasta",
                        coalesce(hz.ad, st.ad, '') as "kalem",
                        s.tutar, (dg.sgk + dg.oss) as "kurumTutar",
                        dg.sgk as "sgkTutar", dg.oss as "ossTutar",
@@ -169,7 +169,7 @@ public static class IcmalUclari
             var icmal = await baglanti.TekAsync("""
                 select i.id, i.kurum_id as "kurumId", i.durum, i.toplam,
                        i.donem_bas as "donemBas", i.donem_bit as "donemBit",
-                       coalesce(t.unvan, '') as "kurumAdi", i.sube_id as "subeId"
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as "kurumAdi", i.sube_id as "subeId"
                   from public.kurum_icmal i
                   left join public.taraf t on t.id = i.kurum_id
                  where i.id = @p0

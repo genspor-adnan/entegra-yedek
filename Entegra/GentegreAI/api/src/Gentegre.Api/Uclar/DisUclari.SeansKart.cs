@@ -32,8 +32,8 @@ public static partial class DisUclari
             baglam.YetkiIste("dis.seans", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var seans = await b.TekAsync("""
-                select s.id, s.hasta_id, t.unvan, extract(year from age(current_date, th.dogum_tarihi))::int as yas,
-                       s.hekim_id, coalesce(h.unvan, ''), s.asistan_id, coalesce(a.unvan, ''), s.unit_id, coalesce(u.kod || ' · ' || u.ad, ''),
+                select s.id, s.hasta_id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, extract(year from age(current_date, th.dogum_tarihi))::int as yas,
+                       s.hekim_id, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), s.asistan_id, coalesce(public.fn_taraf_ad(a.unvan, a.ad, a.soyad)::varchar(120), ''), s.unit_id, coalesce(u.kod || ' · ' || u.ad, ''),
                        s.plan_id, coalesce(p.plan_no, ''), s.randevu_id, s.belge_id, coalesce(bl.belge_no, ''),
                        s.baslangic, s.bitis, s.sure_dk, s.durum, s.anestezi_tur, s.anestezi_ilac, s.anestezi_doz, s.anestezi_saat,
                        s.uygulama_notu, s.komplikasyon, s.hastaya_talimat, s.sonraki_plan, s.sterilizasyon_paket,

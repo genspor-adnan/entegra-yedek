@@ -48,7 +48,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "cari",
         Kaynak: "public.taraf t",
         SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1)",
-        VarsayilanSirala: "t.unvan asc",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         KapsamKolonu: "t.id",
         Kolonlar: new KolonTanimi[]
         {
@@ -56,7 +56,7 @@ public static partial class KaynakKatalogu
             // Kod dar: cari kodlari "329.01.417" gibi kisa, kolon bosuna
             //   genisleyip unvani sikistiriyordu.
             new("kod",          "t.kod",           "metin", "Kod", Genislik: 110),
-            new("unvan",        "t.unvan",         "metin", "Unvan"),
+            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan"),
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
             // TCKN listede MASKELI (kullanici): ilk 3 + son 2 acik. 10 haneli
             //   VKN dokunulmadan kalir; ham deger gizli kolonda (arama icin).
@@ -89,7 +89,7 @@ public static partial class KaynakKatalogu
             //   goruluyordu. Deger yine id, gosterim ad.
             new("kategori",     "(select k.ad from public.kategori k where k.id = t.kategori)",
                                                     "metin", "Kategori",      Varsayilan: false),
-            new("temsilci",     "(select p.unvan from public.taraf p where p.id = t.temsilci)",
+            new("temsilci",     "(select public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) as unvan from public.taraf p where p.id = t.temsilci)",
                                                     "metin", "Temsilci",      Varsayilan: false),
             new("efatura",      "t.efatura",       "mantik","e-Fatura",      Hizalama: "orta"),
             new("durum",        "t.durum",         "kod",   "Durum",         Hizalama: "orta"),
@@ -112,7 +112,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "cari",                    // ayri yetki kodu yok - cari yetkisiyle yonetiliyor
         Kaynak: "public.taraf t",
         SabitKosul: "t.kisi = 1",
-        VarsayilanSirala: "t.unvan asc",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         KapsamKolonu: "t.bag_id",
         Kolonlar: new KolonTanimi[]
         {
@@ -121,11 +121,11 @@ public static partial class KaynakKatalogu
             //   icerir" filtresi (cari ile ORTAK arama mantigi) bu kolonu arar, yoksa
             //   "Bilinmeyen alan: kod" 400 hatasi.
             new("kod",          "t.kod",           "metin", "Kisi Kodu",     Varsayilan: false),
-            new("unvan",        "t.unvan",         "metin", "Unvan"),
+            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan"),
             // Gizli - GenGrid "gengrid olmali" (cari kartinda gomulu İlgili Kişiler) sabitFiltre
             //   "bagId = @tarafId" burayla calisir; kendi kolonu gorunmez, sadece filtrelenir.
             new("bagId",        "t.bag_id",        "sayi",  "Bagli Cari Id", Varsayilan: false, Filtrelenebilir: true),
-            new("bagliCari",    "(select c.unvan from public.taraf c where c.id = t.bag_id)",
+            new("bagliCari",    "(select public.fn_taraf_ad(c.unvan, c.ad, c.soyad)::varchar(120) as unvan from public.taraf c where c.id = t.bag_id)",
                                                     "metin", "Cari (Firma)", Genislik: 180),
             new("departman",    "t.departman",     "kod",   "Bölüm"),
             new("gorev",        "t.gorev",         "metin", "Gorev"),
@@ -218,7 +218,7 @@ public static partial class KaynakKatalogu
                 "when 4 then 'Acil' else 'Normal' end",
                                             "metin", "Öncelik", Hizalama: "orta"),
             new("oncelik",   "g.oncelik",   "sayi",  "Öncelik Kodu", Varsayilan: false),
-            new("sorumlu",   "coalesce(so.unvan, '')", "metin", "Sorumlu", Genislik: 180),
+            new("sorumlu",   "coalesce(public.fn_taraf_ad(so.unvan, so.ad, so.soyad)::varchar(120), '')", "metin", "Sorumlu", Genislik: 180),
             new("baslangic", "g.baslangic", "tarih", "Başlama", Hizalama: "orta",
                                             Bicim: "dd.MM.yyyy HH:mm"),
             new("termin",    "g.termin",    "tarih", "Termin", Hizalama: "orta",
@@ -229,7 +229,7 @@ public static partial class KaynakKatalogu
                 "then 'Gecikti' else '' end",
                                             "metin", "Gecikme", Hizalama: "orta"),
             new("ilerleme",  "g.ilerleme",  "sayi",  "İlerleme %", Hizalama: "sag"),
-            new("cari",      "coalesce(ta.unvan, '')", "metin", "İlgili Cari", Genislik: 200),
+            new("cari",      "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')", "metin", "İlgili Cari", Genislik: 200),
             new("proje",     "coalesce(pr.ad, '')",    "metin", "Proje", Varsayilan: false),
             new("aciklama",  "g.aciklama",  "metin", "Açıklama", Genislik: 240, Varsayilan: false),
         });
@@ -253,12 +253,12 @@ public static partial class KaynakKatalogu
             left join public.rol r on r.id = tk.rol_id
             """,
         SabitKosul: "t.personel = 1",
-        VarsayilanSirala: "t.unvan asc",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "t.id",            "sayi",  "Id",        Varsayilan: false),
             new("kod",          "t.kod",           "metin", "Sicil No"),
-            new("unvan",        "t.unvan",         "metin", "Ad Soyad"),
+            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Ad Soyad"),
             // Ad Soyad'in SAGINDA: departman / gorev / rol / ise giris (kullanici).
             new("departmanAdi", TarafKatalog.DepartmanAdi,
                                                    "metin", "Bölüm"),
@@ -353,7 +353,7 @@ public static partial class KaynakKatalogu
                                          and kd.deger::text = nullif(po.brans, '')
             """,
         SabitKosul: "t.personel = 1 and po.dis_hekim = 1",
-        VarsayilanSirala: "t.unvan asc",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         SubeKolonu: null,
         Kolonlar: new KolonTanimi[]
         {
@@ -363,11 +363,11 @@ public static partial class KaynakKatalogu
             //   ile 400 donuyor (kisi listesinde ayni cozum).
             new("kod",      "t.kod",    "metin", "Kod", Varsayilan: false),
             // AD SOYAD = unvan oneki + ad + soyad. Onek ayri kolonda DEGIL,
-            //   t.unvan icinde durur (306) - kart kaydederken "Op.Dr. Kerem
+            //   public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) icinde durur (306) - kart kaydederken "Op.Dr. Kerem
             //   ATALAY" olarak yazilir. Unvan bos kalmis (disaridan/toplu
             //   eklenmis) kayitta ad+soyada duser, satir bos gorunmesin.
             new("unvan",
-                "coalesce(nullif(btrim(t.unvan), ''), "
+                "coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), "
                 + "btrim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')))",
                                         "metin", "Ad Soyad", Genislik: 220),
             // BRANS ARTIK GOREV AGACINDAN (577): kart `taraf.gorev_id`
@@ -388,7 +388,7 @@ public static partial class KaynakKatalogu
             new("departman", "coalesce(t.departman, 0)", "sayi", "Bölüm Id",
                 Varsayilan: false),
             // Kurum: artik yalniz KAYITLI cari (308) - serbest metin alani yok.
-            new("kurum",    "coalesce(k.unvan, '')",
+            new("kurum",    "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')",
                                         "metin", "Kurum", Genislik: 220),
             new("tescilNo", "po.tescil_no", "metin", "Tescil No"),
             new("cepTel",   "t.cep_tel", "metin", "Cep"),
@@ -411,7 +411,7 @@ public static partial class KaynakKatalogu
             // TEMSILCI: hekimi bizim adimiza kim takip ediyor - DURUM'un
             //   solunda (kullanici). Kod degil ADIYLA gosterilir.
             new("temsilci",
-                "(select p.unvan from public.taraf p where p.id = t.temsilci)",
+                "(select public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) as unvan from public.taraf p where p.id = t.temsilci)",
                                         "metin", "Temsilci", Genislik: 160),
             new("durum",    "t.durum",  "kod",   "Durum", Hizalama: "orta"),
         });
@@ -446,7 +446,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "i.id",        "sayi",  "Id", Varsayilan: false),
-            new("kurumAdi",  "coalesce(t.unvan, \'\')", "metin", "Kurum", Genislik: 230),
+            new("kurumAdi",  "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), \'\')", "metin", "Kurum", Genislik: 230),
             new("donemBas",  "i.donem_bas", "tarih", "Dönem Başlama", Hizalama: "orta"),
             new("donemBit",  "i.donem_bit", "tarih", "Dönem Bitiş",   Hizalama: "orta"),
             new("satirSayisi",
@@ -727,7 +727,7 @@ public static partial class KaynakKatalogu
             //   Kurum'u artik son basvurunun kurumu (asagida); bu kolon seritte
             //   ve kartta. Gizleme SUNUCUDA - web'de gizlenince eski API ile
             //   calisan ekranda Kurum kolonu tamamen kayboluyordu.
-            new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
+            new("sigortaAdi", "coalesce(public.fn_taraf_ad(sg.unvan, sg.ad, sg.soyad)::varchar(120), '')", "metin", "Sigorta / Kurum",
                 Genislik: 180, Varsayilan: false),
             // SON BASVURU KURUMU (kullanici: "hastalar listesinde kurum
             //   sutununa hastanin basvuru yaptigi son kurum gelsin"): en yeni
@@ -736,12 +736,12 @@ public static partial class KaynakKatalogu
             //   kurumuna duser. Son Basvuru kolonuyla AYNI siralama (tarih,
             //   sonra id) - iki kolon ayni basvuruyu anlatsin.
             new("sonKurum",
-                "coalesce((select nullif(k.unvan, '') from public.belge b "
+                "coalesce((select nullif(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') from public.belge b "
                 + "   join public.belge_basvuru bb on bb.id = b.id "
                 + "   left join public.taraf k on k.id = bb.odeyen_kurum_id "
                 + "  where b.taraf_id = t.id and b.tur = 19 "
                 + "  order by b.belge_tarihi desc, b.id desc limit 1), "
-                + " nullif(sg.unvan, ''), '')",
+                + " nullif(public.fn_taraf_ad(sg.unvan, sg.ad, sg.soyad)::varchar(120), ''), '')",
                                    "metin", "Kurum", Genislik: 180),
             new("sonBasvuru",
                 "(select max(b.belge_tarihi) from public.belge b "
@@ -835,12 +835,12 @@ public static partial class KaynakKatalogu
         Kaynak: "public.taraf_kullanici k "
               + "join public.rol r on r.id = k.rol_id "
               + "left join public.taraf t on t.id = k.id",
-        VarsayilanSirala: "coalesce(t.unvan, k.kod) asc",
+        VarsayilanSirala: "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), k.kod) asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "k.id",   "sayi",  "Id", Varsayilan: false),
             new("kod",       "k.kod",  "metin", "Kullanıcı Kodu", Genislik: 150),
-            new("kisi",      "coalesce(t.unvan, '')", "metin", "Kişi", Genislik: 220),
+            new("kisi",      "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')", "metin", "Kişi", Genislik: 220),
             // BOLUM ve GOREV, KISININ SAGINDA (kullanici: "kullanıcı listesinde
             //   kişi sağına bölüm ve görev sütunları da ekle"): "bu hesap kimin"
             //   sorusunun cevabi yalniz ad degil - ayni adli iki kisi ya da

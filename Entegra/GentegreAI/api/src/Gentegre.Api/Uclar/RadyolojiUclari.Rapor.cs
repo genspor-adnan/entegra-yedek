@@ -34,17 +34,17 @@ public static partial class RadyolojiUclari
 
             var istem = await baglanti.TekAsync("""
                 select i.id, i.accession_no as "accessionNo", i.durum, i.oncelik, i.modalite,
-                       i.hasta_id as "hastaId", coalesce(h.unvan, '') as "hastaAdi",
+                       i.hasta_id as "hastaId", coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi",
                        coalesce(hs.cinsiyet, 0) as cinsiyet, hs.dogum_tarihi as "dogumTarihi",
                        i.hizmet_id as "hizmetId",
                        coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') as "tetkikAdi",
                        i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
-                       coalesce(ih.unvan, nullif(i.dis_hekim_ad, ''), '') as "isteyen",
+                       coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
                        i.cekim_tarihi as "cekimTarihi", i.kritik,
                        coalesce(cz.ad, '') as "cihazAdi",
                        i.seri_sayisi as "seriSayisi", i.goruntu_sayisi as "goruntuSayisi",
                        i.study_uid as "studyUid",
-                       i.belge_id as "belgeId", coalesce(ok.unvan, '') as "odeyenKurum"
+                       i.belge_id as "belgeId", coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum"
                   from public.radyoloji_istem i
                   left join public.taraf h on h.id = i.hasta_id
                   left join public.taraf_hasta hs on hs.id = i.hasta_id
@@ -64,8 +64,8 @@ public static partial class RadyolojiUclari
             var rapor = await baglanti.TekAsync("""
                 select r.id, r.sablon_id as "sablonId", r.sablon_surum as "sablonSurum",
                        r.durum, r.kilit, r.ust_rapor_id as "ustRaporId",
-                       coalesce(yz.unvan, '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
-                       coalesce(on_.unvan, '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                       coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
+                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
                        -- BAKANLIK OBX-13 (811): iki ayri degerlendirme.
                        r.istem_nedeni_puan as "istemNedeniPuan",
                        r.cekim_kalite_puan as "cekimKalitePuan"
@@ -128,7 +128,7 @@ public static partial class RadyolojiUclari
             var gecmis = await baglanti.ListeAsync("""
                 select i.id, i.accession_no as "accessionNo", coalesce(hz.ad, '') as "tetkikAdi",
                        coalesce(i.cekim_tarihi, i.ekleme_tarihi) as tarih,
-                       coalesce(on_.unvan, '') as "raporlayan",
+                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "raporlayan",
                        coalesce((select left(b.metin, 120) from public.radyoloji_rapor_bolum b
                                   join public.radyoloji_rapor r2 on r2.id = b.rapor_id
                                  where r2.istem_id = i.id and b.baslik ilike '%sonu%'
@@ -175,20 +175,20 @@ public static partial class RadyolojiUclari
             var rapor = await baglanti.TekAsync("""
                 select r.id, r.rapor_no as "raporNo", r.durum, r.kilit,
                        r.ust_rapor_id as "ustRaporId",
-                       coalesce(yz.unvan, '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
-                       coalesce(on_.unvan, '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                       coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
+                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
                        i.id as "istemId", i.accession_no as "accessionNo",
                        i.modalite, i.cekim_tarihi as "cekimTarihi",
                        i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
                        i.kontrast, coalesce(cz.ad, '') as "cihazAdi",
                        coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') as "tetkikAdi",
-                       coalesce(h.unvan, '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
                        coalesce(h.vkno, '') as "hastaTc",
                        hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
-                       coalesce(ih.unvan, nullif(i.dis_hekim_ad, ''), '') as "isteyen",
-                       coalesce(ik.unvan, '') as "isteyenKurum",
+                       coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
+                       coalesce(public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120), '') as "isteyenKurum",
                        coalesce(b.belge_no, '') as "protokolNo",
-                       coalesce(ok.unvan, '') as "odeyenKurum"
+                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum"
                   from public.radyoloji_rapor r
                   join public.radyoloji_istem i on i.id = r.istem_id
                   left join public.taraf yz on yz.id = r.yazan_id
@@ -231,7 +231,7 @@ public static partial class RadyolojiUclari
             //   düzeltme ayrı kayıttır, orijinal metin değişmez.
             var ekler = await baglanti.ListeAsync("""
                 select r.id, r.rapor_no as "raporNo", r.onay_tarihi as "onayTarihi",
-                       coalesce(on_.unvan, '') as "onaylayan",
+                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan",
                        coalesce((select string_agg(b.metin, E'\n' order by b.sira)
                                    from public.radyoloji_rapor_bolum b
                                   where b.rapor_id = r.id and coalesce(b.yazdir, 1) = 1), '') as metin

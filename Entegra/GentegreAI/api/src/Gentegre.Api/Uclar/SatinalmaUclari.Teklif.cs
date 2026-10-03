@@ -288,7 +288,7 @@ public static partial class SatinalmaUclari
             await islem.CommitAsync(iptal);
 
             var siralama = await baglanti.ListeAsync("""
-                select f.firma_id as "firmaId", coalesce(t.unvan, '') as unvan,
+                select f.firma_id as "firmaId", coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan,
                        f.tutar, f.teslim_gun as "teslimGun", f.garanti_ay as "garantiAy",
                        f.puan_fiyat as "puanFiyat", f.puan_teslim as "puanTeslim",
                        f.puan_garanti as "puanGaranti", f.puan_performans as "puanPerformans",
@@ -336,7 +336,7 @@ public static partial class SatinalmaUclari
 
             var kazanan = await baglanti.TekAsync("""
                 select f.durum, f.tutar, f.eleme_neden as "elemeNeden",
-                       coalesce(t.unvan, '') as unvan
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan
                   from public.satinalma_teklif_firma f
                   left join public.taraf t on t.id = f.firma_id
                  where f.teklif_id = @p0 and f.firma_id = @p1

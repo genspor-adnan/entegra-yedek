@@ -92,7 +92,7 @@ public static partial class LabUclari
             var numune = await veri.TekAsync("""
                 select n.id, n.barkod, n.numune_tipi as "numuneTipi",
                        n.tup_tipi as "tupTipi", n.durum, i.istem_no as "istemNo",
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan) as hasta,
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)) as hasta,
                        n.alim_zamani as "alimZamani",
                        public.fn_lab_arsiv_saklama_gun(n.id) as "saklamaGun"
                   from public.lab_numune n

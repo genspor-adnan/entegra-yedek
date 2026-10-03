@@ -15,7 +15,9 @@ import { c } from '../../dil/ceviri';
  * yalnız Medula'ya gönderilir. İmza ve Medula alanları SALT OKUNUR; onları
  * düğmeler (uçlar) yazar.
  *
- * Tanılar muayeneden gelir (reçetede seçilmez). Alerji / etkileşim uyarısı
+ * Tanı reçetede GÖSTERİLMEZ (kullanıcı: "reçetedeki tanıyı kaldır"); tanı
+ * muayenede girilir ve sunucu tarafı onu muayeneden okur.
+ * Alerji / etkileşim uyarısı
  * ENGEL değil: ilaç eklenirken sunucu uyarır, geçilen uyarı satırda kalır ve
  * sağ panelde listelenir.
  */
@@ -47,7 +49,7 @@ const zaman = (v: unknown) => {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }: {
+export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam }: {
   receteId: number;
   onKapat(): void;
   /** Reçete değişince (kayıt, imza, ilaç) çağırana haber. */
@@ -58,6 +60,10 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
   gomulu?: boolean;
   /** Gömülü kipte araç çubuğuna eklenen düğmeler (ör. reçete şablonu). */
   ekAraclar?: React.ReactNode;
+  /** İLAÇ ARAMAYI AÇ İSTEĞİ (muayene özeti › kontrol listesi "Reçete"): kart
+      yüklenince taslaksa arama açılır; istek her durumda tüketilir. */
+  ilacAra?: boolean;
+  onIlacAraTamam?(): void;
 }) {
   const [kart, setKart] = useState<Record<string, unknown> | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
@@ -67,7 +73,6 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
   const [tur, setTur] = useState(0);
   const [aciklama, setAciklama] = useState('');
   const [muayene, setMuayene] = useState<ListeSatiri | null>(null);
-  const [tanilar, setTanilar] = useState<{ kod: string; ad: string; tur: number }[]>([]);
   const [alerjiler, setAlerjiler] = useState<ListeSatiri[]>([]);
   const [aktifIlac, setAktifIlac] = useState<ListeSatiri[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
@@ -90,10 +95,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
       setAciklama(metin(y.kart.aciklama));
       const muayeneId = sayi(y.kart.muayeneId);
       const hastaId = sayi(y.kart.hastaId);
-      const [m, t, a, i, s] = await Promise.all([
+      const [m, a, i, s] = await Promise.all([
         api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: muayeneId } })
            .then(r => r.satirlar[0] ?? null).catch(() => null),
-        api.muayeneTanilari(muayeneId).then(r => r.tanilar).catch(() => []),
         api.liste('hasta-alerji', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
            .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => []),
         api.liste('hasta-ilac', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
@@ -101,12 +105,18 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
         api.liste('recete-satir', { sayfa: 1, boyut: 200, filtre: { alan: 'receteId', op: 'esit', deger: receteId } })
            .then(r => r.satirlar).catch(() => []),
       ]);
-      setMuayene(m); setTanilar(t); setAlerjiler(a); setAktifIlac(i); setSatirlar(s);
+      setMuayene(m); setAlerjiler(a); setAktifIlac(i); setSatirlar(s);
       setHata(null);
     } catch (h) { setHata(hataMetni(h)) }
   }, [receteId]);
 
   useEffect(() => { void yukle() }, [yukle, tazele]);
+  useEffect(() => {
+    if (!ilacAra || !kart) return;
+    if (sayi(kart.durum) === 1) setAramaAcik(true);
+    onIlacAraTamam?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ilacAra, kart]);
 
   const yenile = () => { setTazele(t => t + 1); setIsaretli([]); onDegisti?.() };
   const filtre = useMemo(() => ({ alan: 'receteId', op: 'esit' as const, deger: receteId }), [receteId]);
@@ -291,33 +301,21 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
         <div className="rk-govde">
           <div className="rk-sol">
             <div className="kagrup">
-              <h6>{c('Reçete bilgileri')}</h6>
-              <div className="rk-alanlar">
-                <div className="rk-fld">
-                  <label>{c('Reçete türü')}</label>
-                  <div className="rk-tur-sec" role="radiogroup" aria-label={c('Reçete türü')}>
-                    {TURLER.map(t => (
-                      <button key={t.kod} type="button" role="radio" aria-checked={tur === t.kod}
-                              disabled={!taslak}
-                              className={`rk-tur${tur === t.kod ? ' on' : ''}`}
-                              onClick={() => setTur(t.kod)}>
-                        <i style={{ background: t.renk }} />{t.ad}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="rk-fld">
-                  <label>{c('Tanılar (muayeneden — değiştirilemez)')}</label>
-                  <div className="rk-tanilar">
-                    {tanilar.length === 0 && <span className="sonuk">{c('Tanı yok — Muayene sekmesinde girilir')}</span>}
-                    {tanilar.map(t => (
-                      <span key={t.kod} className={`rozet ${t.tur === 1 ? 'olumlu' : 'gri'}`}>
-                        {t.kod} {t.ad}{t.tur === 1 ? ' · ANA' : ''}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* TÜR SEÇİMİ BAŞLIKTA (kullanıcı: "reçete türü başlığı olmadan
+                  reçete bilgileri başlığına yerleştir"). Varsayılan Normal:
+                  sunucu yeni reçeteyi tür 0 ile açar. */}
+              <h6 className="rk-bilgi-bas">{c('Reçete bilgileri')}
+                <span className="rk-tur-sec rk-tur-sag" role="radiogroup" aria-label={c('Reçete türü')}>
+                  {TURLER.map(t => (
+                    <button key={t.kod} type="button" role="radio" aria-checked={tur === t.kod}
+                            disabled={!taslak}
+                            className={`rk-tur${tur === t.kod ? ' on' : ''}`}
+                            onClick={() => setTur(t.kod)}>
+                      <i style={{ background: t.renk }} />{t.ad}
+                    </button>
+                  ))}
+                </span>
+              </h6>
             </div>
 
             {/* ILACLAR: ayni GenGrid deseni (muayenedeki recete gridi) -

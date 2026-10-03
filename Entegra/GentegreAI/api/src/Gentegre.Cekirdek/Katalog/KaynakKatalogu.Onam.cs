@@ -58,7 +58,7 @@ public static partial class KaynakKatalogu
             new("id",         "o.id",       "sayi",  "Id", Varsayilan: false),
             new("tarih",      "o.tarih",    "tarih", "Tarih", Hizalama: "orta",
                                             Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
-            new("kisi",       "t.unvan",    "metin", "Kişi", Genislik: 220),
+            new("kisi",       "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Kişi", Genislik: 220),
             new("onamAdi",    "m.ad",       "metin", "Onam", Genislik: 260),
             new("surum",      "o.surum",    "sayi",  "Sürüm", Hizalama: "orta", Genislik: 80),
             // SONUC rozet: onam listesinde okunacak TEK sey "verdi mi".
@@ -76,7 +76,7 @@ public static partial class KaynakKatalogu
             new("kanal",      "o.kanal",    "kod",   "Kanal Kodu", Varsayilan: false),
             // VEREN kisi hasta degilse (veli/vasi) listede gorunur - bos ise
             //   onami kisinin KENDISI vermistir.
-            new("verenKisi",  "coalesce(v.unvan, '')", "metin", "Veren (vekil)", Genislik: 200,
+            new("verenKisi",  "coalesce(public.fn_taraf_ad(v.unvan, v.ad, v.soyad)::varchar(120), '')", "metin", "Veren (vekil)", Genislik: 200,
                                             Varsayilan: false),
             new("yakinlik",   "o.veren_yakinlik", "metin", "Yakınlık", Varsayilan: false),
             new("kaynakTur",  "o.kaynak_tur", "kod", "Kaynak Türü", Varsayilan: false),
@@ -139,7 +139,7 @@ public static partial class KaynakKatalogu
                                              Genislik: 100, Filtrelenebilir: false),
             new("kanal",      "b.kanal",     "kod",   "Kanal Kodu", Varsayilan: false),
             new("alici",      "b.alici",     "metin", "Alıcı", Genislik: 180),
-            new("kisi",       "coalesce(t.unvan, '')", "metin", "Kişi", Genislik: 200),
+            new("kisi",       "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')", "metin", "Kişi", Genislik: 200),
             new("sablonAdi",  "coalesce(s.ad, '')", "metin", "Şablon", Genislik: 180),
             new("konu",       "b.konu",      "metin", "Konu", Genislik: 200, Varsayilan: false),
             new("govde",      "b.govde",     "metin", "Gövde", Varsayilan: false),

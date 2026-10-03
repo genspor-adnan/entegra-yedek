@@ -223,7 +223,7 @@ public static class PortalDavetUclari
         Npgsql.NpgsqlConnection b, string jeton, CancellationToken iptal)
         => b.TekAsync("""
             select d.id, d.taraf_id as "tarafId", d.deneme,
-                   coalesce(t.unvan, '') as unvan, coalesce(t.vkno, '') as tckn
+                   coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan, coalesce(t.vkno, '') as tckn
               from public.portal_davet d
               join public.taraf t on t.id = d.taraf_id
              where d.jeton_ozet = @p0

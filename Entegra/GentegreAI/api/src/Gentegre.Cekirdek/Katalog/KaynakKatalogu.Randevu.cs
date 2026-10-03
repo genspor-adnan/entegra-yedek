@@ -29,13 +29,13 @@ public static partial class KaynakKatalogu
             // BOLUM ve HEKIM en basta (kullanici).
             new("bolumAdi", RandevuKatalog.BolumAdi, "metin", "Bölüm", Genislik: 130),
             new("bolum",      "rv.bolum",     "sayi",  "Bölüm Kodu", Varsayilan: false),
-            new("hekim",      "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 160),
+            new("hekim",      "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 160),
             // KAYNAK (316): poliklinikte hekim, radyolojide cihaz. Tek kolonda
             //   birlesik gostermek listeyi okunur tutuyor.
             new("cihaz",      "coalesce(cz.ad, '')", "metin", "Cihaz", Genislik: 160),
             new("cihazId",    "rv.cihaz_id",  "sayi",  "Cihaz Id", Varsayilan: false),
             new("hekimId",    "rv.hekim_id",  "sayi",  "Hekim Id", Varsayilan: false),
-            new("hasta",      "coalesce(p.unvan, '')", "metin", "Hasta", Genislik: 170),
+            new("hasta",      "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 170),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
             new("tarih",      "rv.baslangic::date", "tarih", "Tarih", Hizalama: "orta"),
             new("saat",       "to_char(rv.baslangic, 'HH24:MI')", "metin", "Saat",

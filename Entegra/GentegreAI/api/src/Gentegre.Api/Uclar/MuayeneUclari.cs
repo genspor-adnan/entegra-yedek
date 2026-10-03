@@ -158,7 +158,7 @@ public static class MuayeneUclari
             return Results.Ok(new
             {
                 muayeneId = id, tamamlandi = m.Durum == 3,
-                kontroller = kontroller.Select(k => new { alan = k.Alan, ad = k.Ad, tamam = k.Tamam, mesaj = k.Mesaj }),
+                kontroller = kontroller.Select(k => new { alan = k.Alan, ad = k.Ad, tamam = k.Tamam, mesaj = k.Mesaj, zorunlu = k.Zorunlu }),
                 izlemeNo = baglam.IzlemeNo,
             });
         });
@@ -188,7 +188,7 @@ public static class MuayeneUclari
             //   Kural TEK YERDE (TamamlamaKontrolleriAsync): ozet sekmesinin
             //   kontrol listesi de ayni listeyi gosterir.
             var eksikler = (await TamamlamaKontrolleriAsync(baglanti, islem, id, m, iptal))
-                .Where(k => !k.Tamam).Select(k => new AlanHatasi(k.Alan, k.Mesaj)).ToList();
+                .Where(k => k.Zorunlu && !k.Tamam).Select(k => new AlanHatasi(k.Alan, k.Mesaj)).ToList();
             if (eksikler.Count > 0)
                 throw GentegreHatasi.Dogrulama(
                     "Muayene tamamlanamaz: " + string.Join(" ", eksikler.Select(x => x.Mesaj)),
@@ -286,9 +286,11 @@ public static class MuayeneUclari
         });
 
         // POST /api/muayene/{id}/sablon/{sablonId} - şablonu muayeneye uygula
-        //   Şablon alanları bulgu satırı olarak AÇILIR ve hepsi "normal"
-        //   işaretlenir. Hekimin işi böylece "hepsini yaz" değil "sapanı
-        //   düzelt" olur - poliklinikte fark buradadır.
+        //   Şablon alanları bulgu satırı olarak AÇILIR, "normal" İŞARETSİZ
+        //   (kullanıcı: "sistem tümüyle check olmadan gelmeli; istenirse
+        //   hepsini işaretle butonuna basılmalı"). Hepsini normal yapmak
+        //   hekimin bilinçli eylemi: "Tümü normal işaretle" (muayene.normal) -
+        //   muayene edilmemiş sistem kendiliğinden "doğal" görünmesin.
         //   Var olan bulgular KORUNUR: şablon değiştirmek yazılmış bulguyu
         //   silmemeli.
         grup.MapPost("/{id:int}/sablon/{sablonId:int}", async (
@@ -308,7 +310,7 @@ public static class MuayeneUclari
 
             var acilan = await baglanti.CalistirAsync("""
                 insert into public.muayene_bulgu (muayene_id, sablon_alan_id, normal)
-                select @p0, a.id, 1
+                select @p0, a.id, 0
                   from public.muayene_sablon_alan a
                  where a.sablon_id = @p1
                 on conflict (muayene_id, sablon_alan_id) do nothing
@@ -1374,7 +1376,7 @@ public static class MuayeneUclari
                        degistiren = @p1, degistirme_tarihi = now()
                  where bb.id = @p0
                 returning bb.cagirma_zamani, bb.sira_no,
-                          (select t.unvan from public.belge b
+                          (select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan from public.belge b
                              join public.taraf t on t.id = b.taraf_id where b.id = bb.id)
                 """, islem, [belgeId, baglam.KullaniciId], o => new
                 {
@@ -1492,7 +1494,8 @@ public static class MuayeneUclari
     /// diye boş bir satır, muayene edilmediğini değil özensizliği gösterirdi.
     /// </summary>
     private sealed record TamamlamaVerisi(short Durum, int? BelgeId, string Sikayet, string Karar,
-        long AnaTani, long BekleyenIstem, bool Baslatildi, string CikisKodu, string Takip);
+        long AnaTani, long BekleyenIstem, bool Baslatildi, string CikisKodu, string Takip,
+        long Istem, long Recete);
 
     /// <summary>Tamamlama kuralinin okudugu alanlar (Tamamla'da satir kilitli).</summary>
     private static Task<TamamlamaVerisi?> TamamlamaVerisiAsync(Npgsql.NpgsqlConnection baglanti,
@@ -1509,45 +1512,58 @@ public static class MuayeneUclari
                    (m.baslangic is not null),
                    coalesce(public.fn_skrs_kod('cikis.sekli', m.cikis_sekli), ''),
                    coalesce((select bb.sys_takip_no from public.belge_basvuru bb
-                              where bb.id = m.belge_id), '')
+                              where bb.id = m.belge_id), ''),
+                   -- KONTROL LISTESI BILGI MADDELERI (istem / recete): zorunlu
+                   --   degil, ozet sekmesinde "yapildi mi" diye gorunur.
+                   (select count(*) from public.muayene_istem s where s.muayene_id = m.id),
+                   (select count(*) from public.recete r
+                     where r.muayene_id = m.id and r.durum <> 4
+                       and exists (select 1 from public.recete_satir rs where rs.recete_id = r.id))
               from public.muayene m where m.id = @p0
             """ + (kilitle ? " for update" : ""), islem, [id], o => new TamamlamaVerisi(
                 o.GetInt16(0), o.IsDBNull(1) ? null : o.GetInt32(1),
                 o.GetString(2), o.GetString(3), o.GetInt64(4), o.GetInt64(5),
-                o.GetBoolean(6), o.GetString(7), o.GetString(8)), iptal);
+                o.GetBoolean(6), o.GetString(7), o.GetString(8),
+                o.GetInt64(9), o.GetInt64(10)), iptal);
 
     /// <summary>
     /// TAMAMLAMA KURALI (muayene sureci, adim 10) - TEK YER. Tamam olanlar da
     /// listede: ozet sekmesi kontrol listesini buradan cizer, Tamamla
-    /// tamam olmayanlari tek seferde reddeder.
+    /// tamam olmayan ZORUNLU maddeleri tek seferde reddeder. Zorunlu=false
+    /// maddeler (istem, recete) yalniz bilgidir: her muayenede olmazlar.
     /// </summary>
-    private static async Task<List<(string Alan, string Ad, bool Tamam, string Mesaj)>> TamamlamaKontrolleriAsync(
+    private static async Task<List<(string Alan, string Ad, bool Tamam, string Mesaj, bool Zorunlu)>> TamamlamaKontrolleriAsync(
         Npgsql.NpgsqlConnection baglanti, Npgsql.NpgsqlTransaction? islem, int id,
         TamamlamaVerisi m, CancellationToken iptal)
     {
-        var k = new List<(string Alan, string Ad, bool Tamam, string Mesaj)>
+        // SIRA HEKIMIN IS AKISI (kullanici): muayeneye al > sikayet/hikaye >
+        //   ana tani > istem > recete > degerlendirme/sonuc > cikis sekli.
+        var k = new List<(string Alan, string Ad, bool Tamam, string Mesaj, bool Zorunlu)>
         {
-            ("tanilar", "Ana tanı", m.AnaTani > 0, "Ana tani zorunlu."),
-            ("sikayet", "Şikâyet", m.Sikayet.Length > 0, "Sikayet zorunlu."),
-            ("karar", "Değerlendirme / plan", m.Karar.Length > 0, "Degerlendirme / plan zorunlu."),
-            // e-NABIZ'IN ZORUNLU ALANLARI DA BURADA DURDURUR (628).
-            //
-            // 103 ve 106 muayene tamamlanirken uretilir; USS o paketleri
-            //   eksik alanla REDDEDIYOR ve hata hekime SAATLER SONRA, kuyruk
-            //   ekraninda donuyordu - o sirada muayene kilitli ve duzeltmek
-            //   icin geri acmak gerekiyor. Kontrol tamamlama anina alindi:
-            //     · MUAYENE_BASLANGIC_TARIHI (103) -> muayeneye alinmis olmali
-            //     · CIKIS_SEKLI (106)              -> SKRS listesinde gecerli kod
-            //   Gercek vaka: CIKIS_SEKLI bos gonderildi, "E1014 ... eksik
-            //   elemanlar var: CIKIS_SEKLI" (paket 652).
             ("baslangic", "Muayeneye alındı", m.Baslatildi,
-                "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali."),
+                "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali.", true),
+            ("sikayet", "Şikâyet / Hikâye", m.Sikayet.Length > 0, "Sikayet zorunlu.", true),
+            ("tanilar", "Ana tanı", m.AnaTani > 0, "Ana tani zorunlu.", true),
+            ("istem", "İstem", m.Istem > 0, "Bu muayenede istem yok.", false),
+            ("recete", "Reçete", m.Recete > 0, "Bu muayenede reçete yok.", false),
+            ("karar", "Değerlendirme / Sonuç", m.Karar.Length > 0, "Degerlendirme / sonuc zorunlu.", true),
             ("cikisSekli", "Çıkış şekli", m.CikisKodu.Length > 0,
-                "Cikis sekli secilmeli (e-Nabiz cikis bildiriminin zorunlu alani)."),
+                "Cikis sekli secilmeli (e-Nabiz cikis bildiriminin zorunlu alani).", true),
         };
+        // e-NABIZ'IN ZORUNLU ALANLARI DA BURADA DURDURUR (628): listedeki
+        //   "Muayeneye alındı" ve "Çıkış şekli" maddeleri.
+        //
+        // 103 ve 106 muayene tamamlanirken uretilir; USS o paketleri
+        //   eksik alanla REDDEDIYOR ve hata hekime SAATLER SONRA, kuyruk
+        //   ekraninda donuyordu - o sirada muayene kilitli ve duzeltmek
+        //   icin geri acmak gerekiyor. Kontrol tamamlama anina alindi:
+        //     · MUAYENE_BASLANGIC_TARIHI (103) -> muayeneye alinmis olmali
+        //     · CIKIS_SEKLI (106)              -> SKRS listesinde gecerli kod
+        //   Gercek vaka: CIKIS_SEKLI bos gonderildi, "E1014 ... eksik
+        //   elemanlar var: CIKIS_SEKLI" (paket 652).
         // BÖLÜM / DOKTOR ŞABLON KURALLARI (931) - aynı listeye, tek seferde.
         foreach (var e in await MuayeneSablonUclari.KuralEksikleriAsync(baglanti, islem, id, iptal))
-            k.Add((e.Alan, e.Mesaj, false, e.Mesaj));
+            k.Add((e.Alan, e.Mesaj, false, e.Mesaj, true));
         return k;
     }
 

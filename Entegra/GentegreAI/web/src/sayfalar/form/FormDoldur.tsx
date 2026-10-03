@@ -8,6 +8,7 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { FormCizici, SAHIP_ADI, skorHesapla, zorunluEksikler } from '../../bilesenler/form/FormCizici';
 import { ImzaKanvas } from '../../bilesenler/form/ImzaKanvas';
 import { c as cev } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * FORM DOLDURMA (iç ekran / tablet) `/form-doldur/:id` — mockuplar
@@ -33,7 +34,8 @@ export function FormDoldur() {
   const durumS = konum.state as { geri?: string } | null;
   const geri = durumS?.geri ?? sorgu.get('geri') ?? '/form-istek';
   const kapat = useCallback(() => git(geri), [git, geri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
 
   const [k, setK] = useState<FormIstekKarti | null>(null);
   const [hata, setHata] = useState<string | null>(null);

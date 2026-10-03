@@ -952,7 +952,7 @@ public static class TeknikServisUclari
                    coalesce(g.sikayet, '')    as sikayet,
                    coalesce(g.telefon, '')    as telefon,
                    coalesce(g.bildiren, '')   as bildiren,
-                   coalesce(mt.unvan, d.ad, '') as taraf_adi,
+                   coalesce(public.fn_taraf_ad(mt.unvan, mt.ad, mt.soyad)::varchar(120), d.ad, '') as taraf_adi,
                    coalesce(nullif(tc.ad, ''), nullif(g.cihaz_metni, ''), d.ad, '')
                                               as cihaz,
                    -- ADRES ÖNCE CİHAZIN: aynı müşterinin iki şubesi olabilir

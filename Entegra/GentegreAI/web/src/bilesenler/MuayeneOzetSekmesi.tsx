@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { tarihSaat } from './bicim';
 import { c, ilacAdi } from '../dil/ceviri';
+import { Modal } from './Modal';
 import type { EkSekmeBaglami } from './GenForm';
 import type { SekmeVerisi } from './MuayeneSekmeleri';
 
@@ -22,19 +23,32 @@ type Satir = Record<string, unknown>;
 const m = (v: unknown) => String(v ?? '').trim();
 const sayi = (v: unknown) => Number(v ?? 0);
 
-export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele }: {
+/** Kontrol listesinden tetiklenen, sekme dışında yaşayan eylemler (kart
+    penceresinin state'i: istem sepeti, ICD araması, reçete ilaç araması). */
+export interface OzetEylemleri {
+  muayeneyeAl(): void;
+  taniEkle(): void;
+  istemAc(): void;
+  ilacEkle(): void;
+}
+
+export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler }: {
   baglam: EkSekmeBaglami;
   muayeneId: number;
   sekme: SekmeVerisi | null;
   /** Kart her kaydedildiğinde artar - kontrol listesi ve sonuçlar tazelenir. */
   tazele: number;
+  eylemler: OzetEylemleri;
 }) {
   const [sonuc, setSonuc] = useState<{ istemler: Satir[]; sonuclar: Satir[]; radyoloji: Satir[] } | null>(null);
   /** Fizik muayene metni: KAYDEDILMIS bulgu satirlarindan, sunucuda derlenir
       (bulgu_ozet alani rapor metnidir, hekim duzeltmis olabilir; bu sekme
       gridin guncel halini gosterir). */
   const [bulguMetni, setBulguMetni] = useState('');
-  const [kontrol, setKontrol] = useState<{ ad: string; tamam: boolean; mesaj: string; alan: string }[] | null>(null);
+  const [kontrol, setKontrol] = useState<{ ad: string; tamam: boolean; mesaj: string; alan: string; zorunlu: boolean }[] | null>(null);
+  const [tamamlandi, setTamamlandi] = useState(false);
+  /** Çıkış şekli seçim penceresi (kontrol listesinde "Çıkış şekli"ne tık). */
+  const [cikisAcik, setCikisAcik] = useState(false);
 
   useEffect(() => {
     let iptal = false;
@@ -55,7 +69,8 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele }: {
     void api.muayeneBulguMetniOnizle(muayeneId, satirlar)
       .then(y => { if (!iptal) setBulguMetni(y.metin) }).catch(() => {});
     void api.muayeneTamamlamaKontrol(muayeneId)
-      .then(y => { if (!iptal) setKontrol(y.kontroller) }).catch(() => {});
+      .then(y => { if (!iptal) { setKontrol(y.kontroller); setTamamlandi(y.tamamlandi) } })
+      .catch(() => {});
     return () => { iptal = true };
   }, [muayeneId, tazele]);
 
@@ -91,16 +106,65 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele }: {
     <><h6>{baslik}</h6><p>{ic}</p></>
   );
 
-  const eksikSay = (kontrol ?? []).filter(k => !k.tamam).length;
+  const eksikSay = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
+
+  // KONTROL MADDESİNE TIK = EKSİĞİ GİDEREN YER (kullanıcı): ilgili sekme ve
+  //   varsa yeni-kayıt penceresi. Tamamlanmış / salt okunur kartta tıklanmaz.
+  //   Şablon kuralı maddeleri (931) eşlenmez.
+  // GİRİLMİŞ MADDE (tanı / istem / reçete tamam): yalnız sekmesi açılır, yeni
+  //   kayıt penceresi AÇILMAZ (kullanıcı) - hekim girileni görmek istiyor.
+  const eylemVar = !tamamlandi && !baglam.saltOkunur;
+  const tikla: Record<string, (tamam: boolean) => void> = {
+    baslangic: () => eylemler.muayeneyeAl(),
+    sikayet: () => git('Muayene'),
+    tanilar: tamam => { git('Tanı'); if (!tamam) eylemler.taniEkle() },
+    istem: tamam => { git('İstem'); if (!tamam) eylemler.istemAc() },
+    recete: tamam => { git('e-Reçete'); if (!tamam) eylemler.ilacEkle() },
+    karar: () => git('Muayene'),
+    cikisSekli: () => setCikisAcik(true),
+  };
+  /** SATIRIN SAĞINDAKİ EYLEM İKONU (kullanıcı): tıklayınca ne olacağını söyler. */
+  const ikon: Record<string, [string, string]> = {
+    baslangic: ['▶', 'Muayeneye al'],
+    sikayet: ['✎', 'Muayene sekmesinde yaz'],
+    tanilar: ['＋', 'Tanı ekle'],
+    istem: ['🔬', 'İstem aç'],
+    recete: ['💊', 'İlaç ekle'],
+    karar: ['✎', 'Muayene sekmesinde yaz'],
+    cikisSekli: ['☰', 'Listeden seç'],
+  };
+  /** Girilmiş tanı / istem / reçete: ikon "sekmeye git" olur. */
+  const sekmeyeGiden: Record<string, [string, string]> = {
+    tanilar: ['↗', 'Tanı sekmesine git'],
+    istem: ['↗', 'İstem sekmesine git'],
+    recete: ['↗', 'e-Reçete sekmesine git'],
+  };
+  // ÇIKIŞ ŞEKLİ PENCEREDE SEÇİLİR (kullanıcı: "sabit orada olmasın, tıklanınca
+  //   liste modal çıksın"): seçenekler kart metasındaki SKRS listesi, seçim
+  //   kartın normal Kaydet yolundan yazılır.
+  const cikisKodlari = baglam.meta?.alanlar.find(a => a.ad === 'cikisSekli')?.kodlar ?? {};
 
   return (
     <div className="moz">
+      {cikisAcik && (
+        <Modal baslik={c('Çıkış şekli')} dar enUst buyutmeYok onKapat={() => setCikisAcik(false)}
+               alt={<button type="button" className="d" onClick={() => setCikisAcik(false)}>{c('Vazgeç')}</button>}>
+          <ul className="moz-liste moz-cikis">
+            {Object.entries(cikisKodlari).map(([kod, ad]) => (
+              <li key={kod} className={`tik${kod === m(d.cikisSekli) ? ' secili' : ''}`}
+                  onClick={() => { setCikisAcik(false); baglam.alanYaz('cikisSekli', kod, true) }}>
+                {kod === m(d.cikisSekli) ? '●' : '○'} {ad}
+              </li>
+            ))}
+          </ul>
+        </Modal>
+      )}
       {/* OZET KUTULARI bilgi bandina rozet oldu (kullanici; MuayeneDurumSeridi). */}
       <div className="moz-gvd">
         <div className="kagrup moz-metin">
           <h6 className="moz-bas">{c('Muayene özeti')}
             <span className="moz-sp not">{c('diğer sekmelerden derlenir')}</span>
-            <button type="button" className="d" onClick={() => git('Şablon')}>✎ {c('Düzenle')}</button>
+            <button type="button" className="d" onClick={() => git('Muayene')}>✎ {c('Düzenle')}</button>
           </h6>
           <div className="moz-ic">
             {m(d.sikayet) && bolum(c('Şikâyet'), m(d.sikayet))}
@@ -116,9 +180,9 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele }: {
                   {m(s.ad)} {m(s.deger)} {m(s.birim)} ({sayi(s.panik) === 1 ? c('panik') : m(s.bayrak)})</span></span>)))}
             {ilaclar.length > 0 && bolum(c('Tedavi'),
               ilaclar.map(r => ilacAdi(m(r.ilac))).join(' · '))}
-            {m(d.karar) && bolum(c('Değerlendirme / Plan'), m(d.karar))}
+            {m(d.karar) && bolum(c('Değerlendirme / Sonuç'), m(d.karar))}
             {!m(d.sikayet) && !m(d.hikaye) && !m(d.karar) && tanilar.length === 0 && (
-              <p className="not">{c('Henüz bir şey yazılmadı — Şablon Muayene sekmesinden başlayın.')}</p>
+              <p className="not">{c('Henüz bir şey yazılmadı — Muayene sekmesinden başlayın.')}</p>
             )}
           </div>
         </div>
@@ -130,8 +194,22 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele }: {
                 : eksikSay === 0 ? c('hazır') : `${eksikSay} ${c('eksik')}`}</span></h6>
             <ul className="moz-liste">
               {(kontrol ?? []).map((k, i) => (
-                <li key={i} className={k.tamam ? '' : 'eksik'} title={k.tamam ? undefined : k.mesaj}>
-                  {k.tamam ? '✅' : '⚠'} {k.ad}
+                // BILGI MADDESI (istem / reçete) eksikse uyarı değil soluk "–":
+                //   her muayenede olmaz, Tamamla'yı engellemez.
+                <li key={i} className={(k.tamam ? '' : k.zorunlu ? 'eksik' : 'soluk')
+                                         + (eylemVar && tikla[k.alan] ? ' tik' : '')}
+                    title={k.tamam ? undefined : k.mesaj}
+                    onClick={eylemVar && tikla[k.alan] ? () => tikla[k.alan](k.tamam) : undefined}>
+                  {k.tamam ? '✅' : k.zorunlu ? '⚠' : '–'} {k.ad}
+                  <span className="moz-sp">
+                    {k.alan === 'cikisSekli' && cikisKodlari[m(d.cikisSekli)] && (
+                      <span className="not">{cikisKodlari[m(d.cikisSekli)]}</span>
+                    )}
+                    {eylemVar && ikon[k.alan] && (() => {
+                      const [i, t] = (k.tamam && sekmeyeGiden[k.alan]) || ikon[k.alan];
+                      return <span className="moz-ikon" title={c(t)}>{i}</span>;
+                    })()}
+                  </span>
                 </li>
               ))}
             </ul>

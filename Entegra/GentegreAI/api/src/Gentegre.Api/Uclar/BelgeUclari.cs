@@ -100,11 +100,11 @@ public static class BelgeUclari
             // ODEYEN KURUMLAR: anlasmali kurumlar (taraf.kurum = 1), tum
             //   cariler degil. `tur` ekranda rotayi belirler (Özel/SGK/ÖSS).
             var kurumlar = await baglanti.ListeAsync("""
-                select t.id, t.unvan as ad, coalesce(k.tur, 0) as tur
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(k.tur, 0) as tur
                   from public.taraf t
                   left join public.taraf_kurum k on k.id = t.id
                  where t.kurum = 1 and t.durum = 1
-                 order by t.unvan
+                 order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1), tur = o.GetInt32(2) },
                 iptal);
@@ -171,13 +171,13 @@ public static class BelgeUclari
                 """;
 
             var odeyenler = await baglanti.ListeAsync($"""
-                select bb.odeyen_kurum_id as id, min(ok.unvan) as ad, count(*) as adet
+                select bb.odeyen_kurum_id as id, min(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120)) as ad, count(*) as adet
                   from public.belge b
                   join public.belge_basvuru bb on bb.id = b.id
                   join public.taraf ok on ok.id = bb.odeyen_kurum_id
                 {suz}
                  group by bb.odeyen_kurum_id
-                 order by min(ok.unvan)
+                 order by min(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120))
                 """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var bolumler = await baglanti.ListeAsync($"""
@@ -195,7 +195,7 @@ public static class BelgeUclari
                 """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var doktorlar = await baglanti.ListeAsync($"""
-                select x.hekim_id as id, min(hk.unvan) as ad, count(*) as adet
+                select x.hekim_id as id, min(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120)) as ad, count(*) as adet
                   from (select coalesce(bb.personel_id, r.hekim_id) as hekim_id
                           from public.belge b
                           left join public.belge_basvuru bb on bb.id = b.id
@@ -205,7 +205,7 @@ public static class BelgeUclari
                         {suz}) x
                   join public.taraf hk on hk.id = x.hekim_id
                  group by x.hekim_id
-                 order by min(hk.unvan)
+                 order by min(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120))
                 """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { odeyenler, bolumler, doktorlar });

@@ -312,12 +312,12 @@ public static partial class LabUclari
                        i.istem_tarihi as "istemTarihi", i.oncelik,
                        i.klinik_bilgi as "klinikBilgi",
                        h.id as "hastaId",
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan) as hasta,
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)) as hasta,
                        coalesce(h.kod, '') as "hastaNo",
                        hs.dogum_tarihi as "dogumTarihi",
                        coalesce(hs.cinsiyet, 0) as cinsiyet,
                        coalesce(b.belge_no, '') as protokol,
-                       coalesce(p.unvan, '') as hekim,
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as hekim,
                        -- Tüpteki tetkikler: teknisyen "bu tüpe ne çalışılacak"
                        --   sorusunu etiketten cevaplayabilmeli.
                        coalesce((select string_agg(t2.kod, ', ' order by s2.sira)

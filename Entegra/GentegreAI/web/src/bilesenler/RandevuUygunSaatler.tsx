@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
-import { type RandevuBolumDugumu, hataMetni } from '../api/sozlesme';
+import { type CalismaBlok, type RandevuBolumDugumu, hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
 
 /**
@@ -8,8 +8,11 @@ import { c } from '../dil/ceviri';
  * için o günün slotları. Dolu saatler çizili ve tıklanamaz, seçili saat
  * maviyle işaretli; boş bir saate tıklamak kartın başlangıcını oraya taşır.
  *
- * Saat düzeni MİRAS zinciriyle çözülür (251): hekimin kendi ayarı → bölümün
- * ayarı → Genel Ayarlar. Kartın kendi süresi slot adımını değiştirmez; süre
+ * SAAT DÜZENİ ÇALIŞMA PLANINDAN (kullanıcı: "çalışma planları varken randevu
+ * ayarlarına gerek kaldı mı"): doktorun o günkü blokları ve blokların slot
+ * süresi; öğle arası iki blok arasındaki boşluktur, izinli / kapalı gün
+ * sebebiyle yazılır. Doktorun HİÇ planı yoksa eski miras zinciri (251):
+ * hekimin kendi ayarı → bölümün ayarı → Genel Ayarlar. Kartın kendi süresi slot adımını değiştirmez; süre
  * yalnız DOLULUK hesabında kullanılır (20 dk'lık randevu iki 15 dk'lık slotu
  * kapatır).
  */
@@ -52,6 +55,22 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   const [agac, setAgac] = useState<RandevuBolumDugumu[]>([]);
   const [genel, setGenel] = useState<Ayar>(VARSAYILAN);
   const [hata, setHata] = useState('');
+  /** Doktorun o gunku plan bloklari; planli=false ise ayarlar kullanilir. */
+  const [plan, setPlan] = useState<{ planli: boolean; bloklar: CalismaBlok[] } | null>(null);
+  useEffect(() => {
+    if (!hekimId || !tarih) { setPlan(null); return }
+    let iptal = false;
+    api.calismaPlani({ bas: tarih, bit: tarih, hekimId })
+      .then(y => { if (!iptal) setPlan({ planli: y.hekimler.some(h => h.id === hekimId)
+                                                 || y.bloklar.length > 0,
+                                         bloklar: y.bloklar.filter(b => b.hekimId === hekimId) }) })
+      .catch(() => { if (!iptal) setPlan(null) /* plan okunamazsa ayarlar */ });
+    return () => { iptal = true };
+  }, [hekimId, tarih]);
+  const planli = !!plan?.planli;
+  const calisma = (plan?.bloklar ?? []).filter(b => b.saatBas && b.saatBit);
+  const kapaliGun = planli && calisma.length === 0
+    ? (plan?.bloklar ?? []).find(b => b.kaynak === 3 || b.kaynak === 4) : undefined;
 
   // Genel ayarlar + bölüm/hekim düzeni: kart açıkken bir kez.
   useEffect(() => {
@@ -123,13 +142,22 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   useEffect(() => { void yukle() }, [yukle]);
 
   const slotlar = useMemo(() => {
+    if (planli) {
+      // Her blok kendi slot suresiyle; bloklar arasi bosluk = ogle / ara.
+      const liste: number[] = [];
+      calisma.forEach(b => {
+        const adim = Math.max(5, Number(b.slotDk) || ayar.slotDk);
+        for (let t = dk(String(b.saatBas)); t < dk(String(b.saatBit)); t += adim) liste.push(t);
+      });
+      return [...new Set(liste)].sort((a, b) => a - b);
+    }
     const bas = dk(ayar.baslangicSaat);
     const bit = dk(ayar.bitisSaat);
     if (!Number.isFinite(bas) || !Number.isFinite(bit)) return [];
     const liste: number[] = [];
     for (let t = bas; t < bit; t += ayar.slotDk) liste.push(t);
     return liste;
-  }, [ayar]);
+  }, [ayar, planli, calisma]);
 
   const secili = dk(seciliSaat);
   const ogleBas = dk(ayar.ogleBaslangic);
@@ -138,7 +166,10 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   /** Slot, süresi boyunca dolu bir randevuyla ya da öğle arasıyla çakışıyor mu. */
   const kapali = (t: number) => {
     const son = t + (Number(sureDk) || ayar.slotDk);
-    if (Number.isFinite(ogleBas) && Number.isFinite(ogleBit)
+    // Plan: randevu suresi blogun disina tasiyorsa kapali (ogle = bloklar arasi).
+    if (planli) {
+      if (!calisma.some(b => t >= dk(String(b.saatBas)) && son <= dk(String(b.saatBit)))) return true;
+    } else if (Number.isFinite(ogleBas) && Number.isFinite(ogleBit)
         && t < ogleBit && son > ogleBas) return true;
     return dolu.some(d => t < d.bit && son > d.bas);
   };
@@ -178,7 +209,9 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
         })}
         {slotlar.length === 0 && (
           <span style={{ fontSize: 11.5, opacity: .7 }}>
-            Bu hekim için çalışma saati tanımlı değil.
+            {kapaliGun ? `${kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? c('İzinli') : c('Kapalı'))} — ${c('bu gün randevu verilemez.')}`
+             : planli ? c('Doktorun bu gün çalışma planı yok.')
+             : c('Bu doktor için çalışma saati tanımlı değil.')}
           </span>
         )}
       </div>

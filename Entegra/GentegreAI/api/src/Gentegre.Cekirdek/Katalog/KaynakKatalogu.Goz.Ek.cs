@@ -33,7 +33,7 @@ public static partial class KaynakKatalogu
             new("hastaId",   "k.hasta_id",      "sayi", "Hasta Id", Varsayilan: false),
             new("tarih",     "k.ekleme_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                                 Bicim: "dd.MM.yyyy"),
-            new("hasta",     "t.unvan",         "metin", "Hasta", Genislik: 220),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Hasta", Genislik: 220),
             new("goz",
                 "case k.goz when 1 then 'OD' when 2 then 'OS' when 3 then 'OU' else '' end",
                                                 "metin", "Göz", Hizalama: "orta", Bicim: "rozet",
@@ -181,11 +181,11 @@ public static partial class KaynakKatalogu
         SabitKosul: "t.hasta = 1 and (exists (select 1 from public.goz_muayene gm where gm.hasta_id = t.id) "
                   + "or exists (select 1 from public.goz_hastalik_takip gt where gt.hasta_id = t.id) "
                   + "or exists (select 1 from public.goz_islem gi where gi.hasta_id = t.id))",
-        VarsayilanSirala: "t.unvan",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",
         Kolonlar: new KolonTanimi[]
         {
             new("id",    "t.id",    "sayi",  "Id", Varsayilan: false),
-            new("hasta", "t.unvan", "metin", "Hasta", Genislik: 240),
+            new("hasta", "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)", "metin", "Hasta", Genislik: 240),
             new("kod",   "coalesce(t.kod, '')", "metin", "Hasta No", Genislik: 110),
             // BCVA ve GİB göz bazlı AYRI kolon: hekim ikisini karşılaştırarak
             //   okur ("sağ 0,3 sol 1,0" tek başına bir bulgudur).

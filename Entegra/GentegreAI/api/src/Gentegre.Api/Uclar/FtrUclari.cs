@@ -370,12 +370,12 @@ public static class FtrUclari
                 sonrakiUygulama = o.Metin("sonraki_uygulama"), yapilanlar = o.Metin("yapilanlar"),
             }, iptal);
             var fizyoterapistler = await b.ListeAsync("""
-                select t.id, t.unvan, (select count(*) from public.ftr_seans s where s.fizyoterapist_id = t.id and s.tarih = @p0 and s.durum <> 5)::int,
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, (select count(*) from public.ftr_seans s where s.fizyoterapist_id = t.id and s.tarih = @p0 and s.durum <> 5)::int,
                        (select count(*) from public.ftr_seans s where s.fizyoterapist_id = t.id and s.tarih = @p0 and s.durum = 3)::int,
                        (select count(*) from public.ftr_seans s where s.fizyoterapist_id = t.id and s.tarih = @p0 and s.durum = 2)::int
                   from public.taraf t where t.id in (select fizyoterapist_id from public.ftr_seans where tarih = @p0 and fizyoterapist_id is not null
                                                      union select fizyoterapist_id from public.ftr_program where durum in (2, 3) and fizyoterapist_id is not null)
-                 order by t.unvan
+                 order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [g], o => new { id = o.GetInt32(0), ad = o.GetString(1), bugun = o.GetInt32(2), yapilan = o.GetInt32(3), suren = o.GetInt32(4) }, iptal);
             return Results.Ok(new { gun = g, uniteId = u, uniteler, kabinler, seanslar, fizyoterapistler, simdi = DateTime.UtcNow });
         });

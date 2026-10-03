@@ -1,6 +1,40 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+/** Acik pencereler, acilis sirasiyla (Esc'i en ustteki isler). */
+const PENCERE_YIGINI: { enUst: boolean }[] = [];
+
+/**
+ * ESC YALNIZ EN USTTEKI PENCEREYI KAPATIR (kullanici: istem penceresinde Esc
+ * muayene kartini da kapatiyordu). Her pencere kendi window dinleyicisiyle
+ * Esc'i yakaliyordu - ust uste acik pencerelerin HEPSI birden kapaniyordu.
+ * Acilis sirasi modul yigininda tutulur; `enUst` pencere (mesaj/onay) sonra
+ * acilmis normal pencereden de ustte sayilir - gorunen o. Modal disinda
+ * kendi kabugunu cizen kartlar (dis, FTR, ISG...) da bu kancayi kullanir.
+ * `kapat` ref'te: satir ici fonksiyon her cizimde yenilenir, dinleyici yeniden
+ * kurulursa yigindaki yer kaymamali.
+ */
+export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
+  const kapatRef = useRef(kapat);
+  kapatRef.current = kapat;
+  useEffect(() => {
+    const ben = { enUst };
+    PENCERE_YIGINI.push(ben);
+    const tus = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      const ust = [...PENCERE_YIGINI].reverse().find(p => p.enUst)
+               ?? PENCERE_YIGINI[PENCERE_YIGINI.length - 1];
+      if (ust === ben) kapatRef.current?.();
+    };
+    window.addEventListener('keydown', tus);
+    return () => {
+      window.removeEventListener('keydown', tus);
+      const i = PENCERE_YIGINI.indexOf(ben);
+      if (i >= 0) PENCERE_YIGINI.splice(i, 1);
+    };
+  }, [enUst]);
+}
+
 /**
  * Kart/pencere kabugu - kart ekranlari ve secim pencereleri ayni cerceveyi
  * paylasir. GenForm'dan AYRI dosyada: paket sekmesi gibi bilesenler modali
@@ -48,11 +82,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
   onKapat?(): void;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') onKapat?.() };
-    window.addEventListener('keydown', tus);
-    return () => window.removeEventListener('keydown', tus);
-  }, [onKapat]);
+  useEscIleKapat(onKapat, enUst);
 
   // YUKSEKLIK KILIDI (kullanici): sekme degisince pencere ALCALMASIN -
   //   icerik buyudukce yukselir, o yukseklik minHeight olarak korunur.

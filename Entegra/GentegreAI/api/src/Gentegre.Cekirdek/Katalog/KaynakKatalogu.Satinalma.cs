@@ -31,7 +31,7 @@ public static partial class KaynakKatalogu
             new("talepNo", "t.talep_no", "metin", "Talep No", Genislik: 120),
             new("tarih", "t.tarih", "tarih", "Tarih", Hizalama: "orta", Genislik: 110),
             new("departmanAd", "coalesce(d.ad, '')", "metin", "İsteyen Birim", Genislik: 150),
-            new("isteyenAd", "coalesce(i.unvan, '')", "metin", "İsteyen", Genislik: 150,
+            new("isteyenAd", "coalesce(public.fn_taraf_ad(i.unvan, i.ad, i.soyad)::varchar(120), '')", "metin", "İsteyen", Genislik: 150,
                 Varsayilan: false),
             // İlk kalem + kalan sayısı: liste satırı neyin talebi olduğunu
             //   söylemeli, karta girmeden.
@@ -158,7 +158,7 @@ public static partial class KaynakKatalogu
                 Filtrelenebilir: false),
             new("durum", "k.durum", "kod", "Durum Kodu", Varsayilan: false,
                 Kodlar: SaTeklifDurumKodlari),
-            new("kararFirma", "coalesce(f.unvan, '')", "metin", "Kazanan", Genislik: 170),
+            new("kararFirma", "coalesce(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), '')", "metin", "Kazanan", Genislik: 170),
             // EN DÜŞÜK TEKLİF ALINMADIYSA gerekçe zorunlu: listede işaretlensin,
             //   denetimde ilk bakılan budur.
             new("enDusukAlindi",
@@ -194,7 +194,7 @@ public static partial class KaynakKatalogu
             new("belgeNo", "coalesce(b.belge_no, '')", "metin", "Sipariş No", Genislik: 130),
             new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta",
                 Genislik: 110),
-            new("firmaAd", "coalesce(f.unvan, '')", "metin", "Tedarikçi", Genislik: 190),
+            new("firmaAd", "coalesce(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), '')", "metin", "Tedarikçi", Genislik: 190),
             new("tutar", "b.genel_toplam", "para", "Tutar", Hizalama: "sag", Genislik: 130),
             new("sozTeslim", "s.soz_teslim", "tarih", "Söz Verilen", Hizalama: "orta",
                 Genislik: 110),
@@ -244,7 +244,7 @@ public static partial class KaynakKatalogu
         {
             new("id", "k.id", "sayi", "Id", Varsayilan: false),
             new("faturaNo", "coalesce(b.belge_no, '')", "metin", "Fatura", Genislik: 140),
-            new("firmaAd", "coalesce(f.unvan, '')", "metin", "Tedarikçi", Genislik: 190),
+            new("firmaAd", "coalesce(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), '')", "metin", "Tedarikçi", Genislik: 190),
             new("siparisNo", "coalesce(sp.belge_no, '')", "metin", "Sipariş", Genislik: 130),
             new("siparisTutar", "k.siparis_tutar", "para", "Sipariş", Hizalama: "sag",
                 Genislik: 120),
@@ -295,7 +295,7 @@ public static partial class KaynakKatalogu
             new("tarih", "k.tarih", "tarih", "Tarih", Hizalama: "orta", Genislik: 110),
             new("irsaliyeNo", "coalesce(i.belge_no, '')", "metin", "İrsaliye", Genislik: 130),
             new("siparisNo", "coalesce(sp.belge_no, '')", "metin", "Sipariş", Genislik: 130),
-            new("firmaAd", "coalesce(f.unvan, '')", "metin", "Tedarikçi", Genislik: 190),
+            new("firmaAd", "coalesce(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), '')", "metin", "Tedarikçi", Genislik: 190),
             new("kalem", "k.kalem", "sayi", "Kalem", Hizalama: "sag", Genislik: 80),
             // EKSİK ve RET AYRI SAYILIR: "5 kalemde eksik var" ile "2 kalem
             //   reddedildi" farklı iki sorudur - biri miktar, öteki kalite.

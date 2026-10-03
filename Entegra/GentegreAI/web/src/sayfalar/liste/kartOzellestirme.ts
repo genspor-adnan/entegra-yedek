@@ -119,10 +119,11 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     // MOCKUP SIRASI (muayene_karti.html): hekimin iş akışı - önce anamnez ve
     //   muayene, sonra tanı, istem, reçete/rapor, en sonda sevk, ücret, geçmiş
     //   ve dosyalar.
-    // "Muayene" = eski Anamnez, "Şablon Muayene" = eski Fizik Muayene
-    //   (kullanıcı). Eski adlar sırada kalır: yeni sekme adlarını bilmeyen
-    //   (yeniden başlatılmamış) API ile de sıra bozulmasın.
-    sekmeSirasi: ['Muayene Özeti', 'Muayene', 'Anamnez', 'Şablon Muayene', 'Fizik Muayene', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
+    // "Özet" = eski Muayene Özeti, "Muayene" = eski Şablon Muayene / Fizik
+    //   Muayene (kullanıcı; Anamnez alanları da bu sekmede). Eski adlar sırada
+    //   kalır: yeni sekme adlarını bilmeyen (yeniden başlatılmamış) API ile de
+    //   sıra bozulmasın.
+    sekmeSirasi: ['Özet', 'Muayene', 'Şablon Muayene', 'Fizik Muayene', 'Anamnez', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
                   'e-Reçete', 'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
                   'Dosyalar'],
     // VİTAL ÖLÇÜM ŞABLON MUAYENE SEKMESİNİN SAĞ PANELİNDE (kullanıcı, 02.10.2026;
@@ -131,7 +132,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     gizliDetaylar: ['vitaller'],
     detayGrupta: {
       bulgular: {
-        grup: ['Şablon Muayene', 'Fizik Muayene'], gizli: ['degerSayi', 'taraf', 'oneriler'],
+        grup: ['Muayene', 'Şablon Muayene', 'Fizik Muayene'], gizli: ['degerSayi', 'taraf', 'oneriler'],
         // BULGU COMBO (kullanıcı, db/936): şablon alanının önerileri açılır liste.
         oneri: { degerMetin: 'oneriler' },
         etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
@@ -164,6 +165,9 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     detayIzgara: {
       vitaller: {
         baslik: 'Vital bulgular', sinif: 'vital-izgara-kip',
+        // SEYREK KULLANILIYOR (kullanıcı): ölçüm yoksa yalnız başlık, varsa
+        //   açık; başlığa tıklayınca açılır ve girilir.
+        katlanir: true,
         // Tanı sekmesi panelindeki sıra (kullanıcı): tansiyon, nabız, SpO2 · ateş,
         //   solunum, ağrı · boy-kilo, BKİ, bel. Glukoz/GKS ve ölçüm kimliği
         //   Vital Bulgular sekmesinde.

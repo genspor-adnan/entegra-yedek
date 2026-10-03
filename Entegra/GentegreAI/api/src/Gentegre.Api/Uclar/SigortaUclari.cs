@@ -274,7 +274,7 @@ public static class SigortaUclari
             select p.id, p.belge_id, p.provizyon_no, p.kurum_ref_no, p.durum, p.tip,
                    p.talep_toplam, p.sirket_payi, p.hasta_payi, p.karar_tipi,
                    p.red_nedeni, p.provizyon_tarihi, s.ad as saglayici,
-                   coalesce(k.unvan, '') as kurum
+                   coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as kurum
               from public.sigorta_provizyon p
               join public.sigorta_saglayici s on s.id = p.saglayici_id
               left join public.sigorta_hesap h on h.id = p.hesap_id

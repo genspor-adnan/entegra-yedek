@@ -150,7 +150,7 @@ public static partial class RadyolojiUclari
             // Acik = yazilmis ama onaylanmamis rapor (taslak / on rapor).
             //   Asistan raporlari onaya duser: "onaylanan" uzman onayini sayar.
             var radyologlar = await baglanti.ListeAsync("""
-                select coalesce(t.unvan, '(atanmamış)') as radyolog,
+                select coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '(atanmamış)') as radyolog,
                        count(*) filter (where r.durum < 3)                as "acik",
                        count(*) filter (where r.onay_tarihi::date = @p0)  as "onaylanan",
                        coalesce(avg(extract(epoch from (r.onay_tarihi - r.yazma_tarihi)) / 60)
@@ -160,7 +160,7 @@ public static partial class RadyolojiUclari
                   left join public.taraf t on t.id = coalesce(r.yazan_id, r.onaylayan_id)
                  where (@p1::int is null or i.sube_id = @p1)
                    and (r.durum < 3 or r.onay_tarihi::date = @p0)
-                 group by t.unvan
+                 group by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                  order by 2 desc, 3 desc
                 """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -324,7 +324,7 @@ public static partial class RadyolojiUclari
             var satirlar = await baglanti.ListeAsync("""
                 select i.id, i.accession_no as "accessionNo", i.modalite,
                        coalesce(kd.ad, '') as "modaliteAdi",
-                       coalesce(h.unvan, '') as hasta, i.hasta_id as "hastaId",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hasta, i.hasta_id as "hastaId",
                        coalesce(hz.ad, '') as tetkik, i.hizmet_id as "hizmetId",
                        i.oncelik,
                        -- SURE: tetkikin protokolu (314) - takvimde slot boyu bu.

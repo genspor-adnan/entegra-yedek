@@ -70,7 +70,7 @@ public static partial class YatanUclari
                 select od.id, od.tur, od.ad, od.doz, od.birim, od.yol, od.siklik,
                        od.saatler::text, od.baslangic, od.bitis, od.durum,
                        od.sozel_order, od.onay_tarihi,
-                       coalesce(h.unvan, '')  as hekim,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')  as hekim,
                        coalesce(ky.ad, '')    as yol_ad,
                        coalesce(kt.ad, '')    as tur_ad,
                        -- SON UYGULAYAN çizelgenin son sütunu: "kim verdi"
@@ -78,7 +78,7 @@ public static partial class YatanUclari
                        -- DIŞ COALESCE ŞART: alt sorgu HİÇ SATIR dönmezse
                        --   (henüz uygulama yok) sonuç NULL olur; içerideki
                        --   coalesce yalnız satır varken çalışır.
-                       coalesce((select coalesce(t.unvan, '')
+                       coalesce((select coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')
                           from public.order_uygulama u2
                           left join public.taraf t on t.id = u2.uygulayan_id
                          where u2.order_id = od.id and u2.uygulanan is not null
@@ -124,7 +124,7 @@ public static partial class YatanUclari
             var dozlar = await baglanti.ListeAsync("""
                 select u.id, u.order_id, u.planlanan, u.uygulanan, u.durum,
                        u.atlama_nedeni, u.gecikme_nedeni, u.miktar, u.barkod,
-                       u.elle_dogrulandi, coalesce(t.unvan, '') as uygulayan
+                       u.elle_dogrulandi, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as uygulayan
                   from public.order_uygulama u
                   join public.yatis_order od on od.id = u.order_id
                   left join public.taraf t on t.id = u.uygulayan_id

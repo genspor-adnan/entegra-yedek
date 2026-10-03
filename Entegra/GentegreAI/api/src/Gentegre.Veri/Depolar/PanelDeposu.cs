@@ -224,12 +224,12 @@ public sealed class PanelDeposu
         //   panel cevabi. Borclu taraf (negatif) ayri satirda gorunur.
         var bakiyeler = new List<PanelSatiri>();
         await using (var komut = new NpgsqlCommand("""
-            select t.id, coalesce(t.unvan, ''),
+            select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                    case when sum(e.yerel_borc - e.yerel_alacak) >= 0 then 'Alacak' else 'Borç' end,
                    abs(sum(e.yerel_borc - e.yerel_alacak)) as bakiye
               from public.v_cari_ekstre e
               join public.taraf t on t.id = e.taraf_id
-             group by t.id, t.unvan
+             group by t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
             having abs(sum(e.yerel_borc - e.yerel_alacak)) > 0
              order by 4 desc
              limit 8

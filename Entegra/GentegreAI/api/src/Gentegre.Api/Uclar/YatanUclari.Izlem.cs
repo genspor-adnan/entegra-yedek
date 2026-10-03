@@ -65,7 +65,7 @@ public static partial class YatanUclari
                 select i.id, i.zaman, i.sistolik, i.diyastolik, i.nabiz, i.solunum,
                        i.ates, i.spo2, i.agri_vas, i.gks, i.kan_sekeri, i.erken_uyari,
                        i.bildirim_zamani, i.not_metin,
-                       coalesce(t.unvan, '') as olcen
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as olcen
                   from public.yatis_izlem i
                   left join public.taraf t on t.id = i.olcen_id
                  where i.yatis_id = @p0
@@ -92,7 +92,7 @@ public static partial class YatanUclari
 
             var sivilar = await baglanti.ListeAsync("""
                 select s.id, s.zaman, s.yon, s.tur, s.miktar_ml, s.aciklama,
-                       coalesce(t.unvan, '') as kaydeden,
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as kaydeden,
                        coalesce(k.ad, '')    as tur_ad
                   from public.yatis_sivi s
                   left join public.taraf t on t.id = s.ekleyen
@@ -148,7 +148,7 @@ public static partial class YatanUclari
             //   "eskimiş" tanımını kullansın.
             var riskler = await baglanti.ListeAsync("""
                 select r.id, r.zaman, r.olcek, r.puan, r.risk_duzeyi, r.onlem,
-                       coalesce(t.unvan, '') as degerlendiren,
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as degerlendiren,
                        coalesce(k.ad, '')    as olcek_ad,
                        (extract(epoch from (now() - r.zaman)) / 3600)::int as saat_once
                   from public.yatis_risk r

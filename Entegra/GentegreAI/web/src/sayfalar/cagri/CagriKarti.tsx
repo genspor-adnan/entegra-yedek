@@ -6,6 +6,7 @@ import type { CagriKart as Kart } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { Al, sureYaz } from './ortak';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * ÇAĞRI KARTI `/cagri/:id` (Çağrı Merkezi 839) — mockup
@@ -31,7 +32,8 @@ export function CagriKarti() {
   const durumS = konum.state as { geri?: string } | null;
   const geri = durumS?.geri ?? sorgu.get('geri') ?? '/cagri';
   const kapat = useCallback(() => git(geri), [git, geri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
   const [k, setK] = useState<Kart | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [sekme, setSekme] = useState<Sekme>('ilgili');

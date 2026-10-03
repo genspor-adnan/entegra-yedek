@@ -50,7 +50,7 @@ public static partial class LabUclari
                        k.direkt_baki, k.gram_sonuc, k.numune_kalite, k.on_rapor,
                        k.on_rapor_zamani, k.kritik, k.ekk_bildirim, k.uzman_yorum,
                        k.onay_zamani, coalesce(n.barkod, ''), k.hasta_id,
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan),
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)),
                        public.fn_lab_kultur_ozet(k.id)
                   from public.lab_kultur k
                   join public.lab_tetkik t on t.id = k.tetkik_id

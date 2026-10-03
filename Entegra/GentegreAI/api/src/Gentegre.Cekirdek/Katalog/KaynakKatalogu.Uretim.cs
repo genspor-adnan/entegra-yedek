@@ -186,7 +186,7 @@ public static partial class KaynakKatalogu
             new("saatUcreti", "m.saat_ucreti", "para", "Saat Ücreti", Hizalama: "sag",
                                      Bicim: "#,##0.00", Genislik: 120),
             new("fason", "m.fason", "mantik", "Fason", Hizalama: "orta", Genislik: 80),
-            new("fasonTaraf", "coalesce(f.unvan, '')", "metin", "Fason Tedarikçi",
+            new("fasonTaraf", "coalesce(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), '')", "metin", "Fason Tedarikçi",
                                      Genislik: 200, Varsayilan: false),
             new("durumAdi",
                 "case m.durum when 1 then 'Pasif' else 'Aktif' end",

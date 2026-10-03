@@ -26,7 +26,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "k.id",       "sayi",  "Id", Varsayilan: false),
-            new("hastaAdi", "h.unvan",    "metin", "Hasta", Genislik: 200),
+            new("hastaAdi", "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
             new("icdKod",   "k.icd_kod",  "metin", "ICD", Hizalama: "orta", Genislik: 90),
             new("taniAd",   "k.tani_ad",  "metin", "Tanı", Genislik: 300),
             new("baslangic","k.baslangic","tarih", "Başlangıç", Hizalama: "orta",
@@ -56,7 +56,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "o.id",       "sayi",  "Id", Varsayilan: false),
-            new("hastaAdi", "h.unvan",    "metin", "Hasta", Genislik: 200),
+            new("hastaAdi", "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
             new("turAdi",
                 "case o.tur when 2 then 'Girişim' when 3 then 'Yatış' when 4 then 'Aşı' "
                 + "when 5 then 'Travma' when 6 then 'Transfüzyon' else 'Ameliyat' end",
@@ -82,11 +82,11 @@ public static partial class KaynakKatalogu
         Ad: "hasta-tibbi-ozet",
         YetkiKodu: "muayene",
         Kaynak: "public.v_hasta_tibbi_ozet o join public.taraf h on h.id = o.hasta_id",
-        VarsayilanSirala: "o.son_muayene desc nulls last, h.unvan asc",
+        VarsayilanSirala: "o.son_muayene desc nulls last, public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120) asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "o.hasta_id",     "sayi",  "Id", Varsayilan: false),
-            new("hastaAdi",     "h.unvan",        "metin", "Hasta", Genislik: 220),
+            new("hastaAdi",     "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",        "metin", "Hasta", Genislik: 220),
             new("dosyaNo",      "h.kod",          "metin", "Dosya No", Hizalama: "orta",
                                                   Genislik: 110),
             new("tcNo",         "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",

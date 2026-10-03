@@ -447,7 +447,7 @@ public sealed class OnayBildirimi
     {
         var k = await baglanti.TekAsync("""
             select coalesce(k.eposta, '') as eposta, coalesce(k.cep_tel, '') as cep,
-                   coalesce(nullif(t.unvan, ''), k.kod) as ad
+                   coalesce(nullif(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), k.kod) as ad
               from public.taraf_kullanici k
               left join public.taraf t on t.id = k.id
              where k.id = @p0

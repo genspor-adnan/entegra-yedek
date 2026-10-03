@@ -248,9 +248,12 @@ public static partial class KartKatalogu
             // Kisi'deki "kisi" alani ile ayni sebep: YeniKayitVarsayilanlari'ndaki
             //   "personel"=1 buraya yazilabilsin diye tanimli, UI'da gizli (GenForm.tsx).
             new("personel",  "personel",   "mantik", Baslik: "Personel"),
-            // "unvan" da UI'da GIZLI (gizli Set, GenForm.tsx) - ad+soyad'dan turetilir,
-            //   ayrica DUZENLENMEZ, sadece DB NOT NULL kisitini karsilamak icin gonderilir.
-            new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan"),
+            // "unvan" UI'da GIZLI (gizli Set, GenForm.tsx). PERSONELDE YALNIZ ONEK
+            //   (940, kullanici: "personelde unvan tam adi tutmasin, sadece Dr. veya
+            //   Prof.Dr. gibi olsun"): kartin unvan combo'sundan gelir, unvansiz
+            //   personelde BOS. Gorunen ad public.fn_taraf_ad(unvan, ad, soyad).
+            //   Zorunlu degil; hasta kartinda (tam ad) yeniden zorunlu yapilir.
+            new("unvan",     "unvan",      "metin", EnFazlaUzunluk: 120, Baslik: "Unvan"),
             new("kod",       "kod",        "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Sicil No", Grup: "Kimlik"),
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 50, Baslik: "Ad", Grup: "Kimlik"),
             new("soyad",     "soyad",      "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
@@ -467,33 +470,9 @@ public static partial class KartKatalogu
                 new("tarih",       "tarih",       "metin", EnFazlaUzunluk: 10, Baslik: "Tarih/Yıl"),
                 new("gecerlilik",  "gecerlilik",  "metin", EnFazlaUzunluk: 60, Baslik: "Geçerlilik")
             }, Sirala: "tarih desc nulls last, id desc", LogTabloId: 905, Baslik: "Eğitim / Sertifika"),
-            // HEKIMIN RANDEVU DUZENI (252, kullanici: "personelde Randevu
-            //   Verilebilir seciliyse Randevu sekmesi olusur ve bu personele
-            //   ait randevu ayarlari gorunur, istenirse duzenlenebilir").
-            //   Randevu Ayarlari > Bölümler ekranindaki AYNI satir - iki yerden
-            //   de duzenlenebilir, veri tek yerde (randevu_bolum_ayar).
-            //   Bos birakilan alan bolumden, o da Genel Ayarlar'dan devralinir.
-            new DetayTanimi("randevuAyar", "public.randevu_bolum_ayar", "hekim_id",
-            new KartAlani[]
-            {
-                new("id",              "id",              "sayi",  Yazilabilir: false),
-                new("departmanId",     "departman_id",    "kod",   Zorunlu: true,
-                    KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm"),
-                new("baslangicSaat",   "baslangic_saat",  "metin", EnFazlaUzunluk: 5,
-                    Baslik: "Başlama"),
-                new("bitisSaat",       "bitis_saat",      "metin", EnFazlaUzunluk: 5, Baslik: "Bitiş"),
-                new("ogleBaslangic",   "ogle_baslangic",  "metin", EnFazlaUzunluk: 5,
-                    Baslik: "Öğle Başl."),
-                new("ogleBitis",       "ogle_bitis",      "metin", EnFazlaUzunluk: 5,
-                    Baslik: "Öğle Bitiş"),
-                new("slotDk",          "slot_dk",         "sayi",  Baslik: "Aralık (dk)"),
-                new("varsayilanSure",  "varsayilan_sure", "sayi",  Baslik: "Süre (dk)"),
-                new("calismaGunleri",  "calisma_gunleri", "metin", EnFazlaUzunluk: 20,
-                    Baslik: "Günler (1 Pzt … 7 Paz)"),
-                new("aktif",           "aktif",           "mantik", Baslik: "Randevuya Açık"),
-                new("aciklama",        "aciklama",        "metin", EnFazlaUzunluk: 300,
-                    Baslik: "Açıklama"),
-            }, SubeKolonu: null, LogTabloId: 912, Baslik: "Randevu Ayarları")
+            // HEKIMIN RANDEVU DUZENI SEKMESI KALDIRILDI: randevu saatleri artik
+            //   CALISMA PLANINDAN gelir (hekim_calisma_sablon) - randevu_bolum_ayar
+            //   satirlari yalniz plani olmayan doktorun eski yedek duzenidir.
         },
         SilmeEngelleri: new[]
         {

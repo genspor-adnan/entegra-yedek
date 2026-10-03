@@ -41,6 +41,10 @@ public sealed class OturumKapisi
             var durum = await kullanicilar.OturumDurumuAsync(kullaniciId, ctx.RequestAborted);
             if (durum is null || !durum.Aktif)
                 throw GentegreHatasi.Yetkisiz();
+            // ROL ATANMAMIS (kullanici): rolu oturum acikken "Rol Atanmamis"a
+            //   cekilen kisi bir sonraki istekte duser - token suresini beklemez.
+            if (durum.RolAtanmamis)
+                throw GentegreHatasi.Yetkisiz(Servisler.KimlikServisi.RolYokMesaji);
 
             if (durum.ParolaDegismeli && !ctx.SinirliOturumaAcikMi(SinirliOturum.ParolaDegismeli))
                 throw new GentegreHatasi(HataKodu.ParolaDegismeli,

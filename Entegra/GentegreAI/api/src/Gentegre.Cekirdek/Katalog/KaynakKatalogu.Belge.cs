@@ -50,7 +50,7 @@ public static partial class KaynakKatalogu
             //   oldugundan bos gosterilir.
             new("saticiAdi",
                 "case when coalesce(b.satici_id, 0) = 0 then '' " +
-                "else coalesce(st.unvan, '') end",
+                "else coalesce(public.fn_taraf_ad(st.unvan, st.ad, st.soyad)::varchar(120), '') end",
                                                  "metin", "Satış Temsilcisi",
                                                  Genislik: 150, Varsayilan: false,
                                                  Siralanabilir: false, Filtrelenebilir: false),
@@ -136,7 +136,7 @@ public static partial class KaynakKatalogu
             //   Varsayilan kapali - ERP listelerinde kalabaligi artirmasin,
             //   basvuru listesi kolonSirasi ile aciyor.
             new("odeyenKurumAdi",
-                "coalesce((select ok.unvan from public.taraf ok " +
+                "coalesce((select public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120) as unvan from public.taraf ok " +
                 "           where ok.id = (select bb.odeyen_kurum_id " +
                 "                            from public.belge_basvuru bb " +
                 "                           where bb.id = b.id)), '')",
@@ -184,10 +184,10 @@ public static partial class KaynakKatalogu
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
             new("doktor",
-                "coalesce((select hk.unvan from public.belge_basvuru bb " +
+                "coalesce((select public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120) as unvan from public.belge_basvuru bb " +
                 "            join public.taraf hk on hk.id = bb.personel_id " +
                 "           where bb.id = b.id), " +
-                "         (select hk.unvan from public.randevu r " +
+                "         (select public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120) as unvan from public.randevu r " +
                 "            join public.taraf hk on hk.id = r.hekim_id " +
                 "           where r.belge_id = b.id order by r.id limit 1), '')",
                                                       "metin", "Doktor", Genislik: 160,
@@ -264,12 +264,12 @@ public static partial class KaynakKatalogu
             //   numunesinde cari GONDEREN KURUMDUR, onun adini "hasta" diye
             //   yazmak yanlis bilgi olurdu.
             new("hastaAdi",
-                "coalesce((select coalesce(nullif(trim(h.unvan), ''), " +
+                "coalesce((select coalesce(nullif(trim(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)), ''), " +
                 "                  trim(h.ad || ' ' || h.soyad)) " +
                 "            from public.belge_basvuru bb " +
                 "            join public.taraf h on h.id = bb.hasta_id " +
                 "           where bb.id = b.id), " +
-                "         (select coalesce(nullif(trim(t2.unvan), ''), " +
+                "         (select coalesce(nullif(trim(public.fn_taraf_ad(t2.unvan, t2.ad, t2.soyad)::varchar(120)), ''), " +
                 "                  trim(t2.ad || ' ' || t2.soyad)) " +
                 "            from public.taraf t2 " +
                 "           where t2.id = b.taraf_id " +
@@ -558,7 +558,7 @@ public static partial class KaynakKatalogu
                                                       "metin", "Araç / Şoför", Genislik: 170,
                                                       Varsayilan: false),
             // Teslim eden bos ise satis temsilcisi gosterilir (mockup'taki davranis).
-            new("teslimEden",    "coalesce(te.unvan, sc.unvan)", "metin", "Teslim Eden",
+            new("teslimEden",    "coalesce(public.fn_taraf_ad(te.unvan, te.ad, te.soyad)::varchar(120), public.fn_taraf_ad(sc.unvan, sc.ad, sc.soyad)::varchar(120))", "metin", "Teslim Eden",
                                                       Varsayilan: false),
             // Faturalama durumu GIZLI: Hedef kolonu zaten hangi faturaya donustugunu
             //   (ya da donusmedigini) gosteriyor; ikisi ayni bilgiyi tekrarliyordu.
@@ -611,7 +611,7 @@ public static partial class KaynakKatalogu
             new("belgeTuru",      "e.belge_turu",       "kod",   "Belge Turu", Hizalama: "orta"),
             new("yon",            "e.yon",              "kod",   "Yon",       Hizalama: "orta"),
             new("belgeNo",        "e.belge_no",         "metin", "Belge No"),
-            new("tarafUnvan",     "t.unvan",            "metin", "Cari"),
+            new("tarafUnvan",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",            "metin", "Cari"),
             new("gondericiVkno",  "e.gonderici_vkno",   "metin", "Gonderici VKN", Varsayilan: false),
             new("durum",          "e.durum",            "kod",   "Durum",     Hizalama: "orta"),
             new("gibDurumKodu",   "e.gib_durum_kodu",   "metin", "GIB Kodu",  Varsayilan: false),
@@ -696,7 +696,7 @@ public static partial class KaynakKatalogu
             new("belgeTarihi",     "e.belge_tarihi",      "tarih", "Tarih",    Hizalama: "orta",
                                                            Bicim: "dd.MM.yyyy", Genislik: 105),
             // Gonderici carimiz degilse taraf bos kalir - JSON'dan gelen unvan gosterilir.
-            new("gondericiUnvan",  "coalesce(nullif(t.unvan, ''), e.gonderici_unvan)",
+            new("gondericiUnvan",  "coalesce(nullif(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), e.gonderici_unvan)",
                                                           "metin", "Gönderici", Genislik: 260),
             new("gondericiVkno",   "e.gonderici_vkno",    "metin", "Vergi/Kimlik No", Hizalama: "orta", Genislik: 115),
             new("tutar",           "e.tutar",             "para",  "Tutar",    Hizalama: "sag",

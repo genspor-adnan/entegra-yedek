@@ -43,7 +43,7 @@ public static class HastaUclari
 
     // AKTİF kayıtlar (durum = 1): pasif kayıt ne engeller ne uyarır.
     private static string KayitSecimi(string rolKol) => $"""
-        select t.id, coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, ''), coalesce(t.kod, ''), h.dogum_tarihi
+        select t.id, coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), coalesce(t.kod, ''), h.dogum_tarihi
           from public.taraf t left join public.taraf_hasta h on h.id = t.id
          where t.{rolKol} = 1 and coalesce(t.durum, 0) = 1 and (@p1::int is null or t.id <> @p1)
         """;

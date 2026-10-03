@@ -41,7 +41,7 @@ public static partial class DisUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var unitler = await baglanti.ListeAsync("""
-                select u.id, u.kod, u.ad, u.tur, coalesce(h.unvan, '') as hekim
+                select u.id, u.kod, u.ad, u.tur, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim
                   from public.dis_unit u left join public.taraf h on h.id = u.varsayilan_hekim_id
                  where u.aktif = 1 and (u.sube_id = @p0 or @p0 = 0)
                  order by u.kod
@@ -140,7 +140,7 @@ public static partial class DisUclari
             await using var baglanti = await veri.AcAsync(iptal);
             var eski = await baglanti.TekAsync("""
                 select r.sube_id, r.bolum, r.hekim_id, r.hasta_id, r.sure_dk, r.aciklama, r.hizmet_id,
-                       r.unit_id, r.plan_satir_id, r.lab_isemri_id, r.durum, t.unvan
+                       r.unit_id, r.plan_satir_id, r.lab_isemri_id, r.durum, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan
                   from public.randevu r join public.taraf t on t.id = r.hasta_id where r.id = @p0
                 """, null, [id], o => new
             {

@@ -6,6 +6,7 @@ import type { HastaFormlari as Veri } from '../../api/uclar/form';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, listeSor, mesaj, onay } from '../../bilesenler/mesaj';
 import { c } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * HASTA FORMLARI `/hasta-formlar/:hastaId` (form motoru 740) — mockup
@@ -28,7 +29,8 @@ export function HastaFormlari() {
   const kaynakTur = sorgu.get('kaynakTur') ? Number(sorgu.get('kaynakTur')) : undefined;
   const kaynakId = sorgu.get('kaynakId') ? Number(sorgu.get('kaynakId')) : undefined;
   const kapat = useCallback(() => git(geri), [git, geri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
 
   const [v, setV] = useState<Veri | null>(null);
   const [hata, setHata] = useState<string | null>(null);

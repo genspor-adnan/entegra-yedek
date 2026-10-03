@@ -243,8 +243,8 @@ public static partial class KaynakKatalogu
             new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "Çıkış Deposu", Genislik: 180),
             new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Giriş Deposu", Genislik: 180),
             // Sorumluluk devri: eski transferlerde bos olabilir (alan 100'de eklendi).
-            new("teslimEden",  "coalesce(te.unvan, '')", "metin", "Teslim Eden", Genislik: 180),
-            new("teslimAlan",  "coalesce(ta.unvan, '')", "metin", "Teslim Alan", Genislik: 180),
+            new("teslimEden",  "coalesce(public.fn_taraf_ad(te.unvan, te.ad, te.soyad)::varchar(120), '')", "metin", "Teslim Eden", Genislik: 180),
+            new("teslimAlan",  "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')", "metin", "Teslim Alan", Genislik: 180),
         }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
 
     // ------------------------------------------------------ stoktan talep ----
@@ -276,7 +276,7 @@ public static partial class KaynakKatalogu
             new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "İstenen Depo", Genislik: 180),
             new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Teslim Deposu", Genislik: 180),
-            new("talepEden",   "coalesce(ta.unvan, '')", "metin", "Talep Eden", Genislik: 200),
+            new("talepEden",   "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')", "metin", "Talep Eden", Genislik: 200),
             // Talep KARSILANDI mi: F8 sayaci (0 acik / 1 kismi / 2 kapandi).
             new("karsilanma",
                 "case b.kapanma_durum when 2 then 'Karşılandı' when 1 then 'Kısmi' else 'Bekliyor' end",
@@ -322,7 +322,7 @@ public static partial class KaynakKatalogu
                 new("tipi",        "b.tipi",         "sayi",  "Tip Kodu", Hizalama: "orta", Varsayilan: false),
                 new("depo",        "coalesce(d.ad, '')", "metin", giris ? "Giriş Deposu" : "Çıkış Deposu",
                                                       Genislik: 180),
-                new("sorumlu",     "coalesce(sc.unvan, '')", "metin", "Sorumlu", Genislik: 180),
+                new("sorumlu",     "coalesce(public.fn_taraf_ad(sc.unvan, sc.ad, sc.soyad)::varchar(120), '')", "metin", "Sorumlu", Genislik: 180),
                 // Tutar muhasebe fisinin (F7) matrahi - fiste KDV yok.
                 new("genelToplam", "b.genel_toplam", "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
             }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());

@@ -7,11 +7,11 @@ import { c } from '../dil/ceviri';
  * MUAYENE DİKTESİ (kullanıcı: "muayeneye dikte ekle").
  *
  * Göz dikte penceresinin (705) sade karşılığı: hedef yalnız SERBEST METİN
- * alanları (Şikâyet, Hikâye, Değerlendirme / Plan) - kodlu alan (tanı, çıkış
+ * alanları (Şikâyet, Hikâye, Değerlendirme / Sonuç) - kodlu alan (tanı, çıkış
  * şekli) dikteyle yazılmaz, yanlış duyulan bir kod sessizce kayda geçerdi.
  *
  * <b>ÜÇ ALAN, FARE NEREDEYSE ORAYA</b> (kullanıcı): Şikâyet, Hikâye ve
- * Değerlendirme / Plan kartın güncel metniyle açılır; fare hangi alanın
+ * Değerlendirme / Sonuç kartın güncel metniyle açılır; fare hangi alanın
  * üstündeyse (ya da hangisine tıklandıysa) dikte onun SONUNA yazar.
  *
  * <b>Karta kendiliğinden yazılmaz.</b> Hekim alanlarda görür ve düzeltir;

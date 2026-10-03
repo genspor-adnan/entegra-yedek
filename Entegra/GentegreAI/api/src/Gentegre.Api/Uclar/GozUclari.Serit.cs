@@ -38,7 +38,7 @@ public static partial class GozUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var kimlik = await baglanti.TekAsync("""
-                select t.unvan                                as hasta,
+                select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)                                as hasta,
                        -- TİPSİZ `null` DALI OLMAZ: CASE'in bir dalı `unknown`
                        --   kalınca sürücü sonucu çözemiyor ("22P02"). Null da
                        --   tiplenir.
@@ -48,7 +48,7 @@ public static partial class GozUclari
                        coalesce(t.kod, '')                    as hasta_no,
                        coalesce(m.muayene_no, '')             as protokol,
                        m.muayene_tarihi,
-                       coalesce(h.unvan, '')                  as hekim,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')                  as hekim,
                        coalesce(d.ad, '')                     as bolum,
                        coalesce(m.sikayet, '')                as sikayet,
                        coalesce(m.ozgecmis_notu, '')          as ozgecmis,

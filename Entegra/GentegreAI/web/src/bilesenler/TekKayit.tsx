@@ -13,6 +13,9 @@ interface Props {
   onDegis(yeni: DetayDurumu): void;
   /** Kutu basligi; verilmezse detayin kendi basligi. */
   baslik?: string;
+  /** KATLANIR KUTU (vital): baslik tiklaninca cagrilir; onek ok isaretidir. */
+  onBaslikTikla?(): void;
+  baslikOnEk?: React.ReactNode;
   /** Kutunun altinda aciklama satiri. */
   not?: React.ReactNode;
   /** Verilirse alanlar TEK kutu yerine YAN YANA kutulara bolunur (or. sube
@@ -71,7 +74,8 @@ interface Props {
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
                            alanSirasi, dislar, ustAlanlar, aramaAc, secilenAdlar,
-                           ekAlanlar, ekAlanlarSira, cerceveSiz }: Props) {
+                           ekAlanlar, ekAlanlarSira, cerceveSiz,
+                           onBaslikTikla, baslikOnEk }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -222,7 +226,8 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
   return (
     <div className="kasira">
       <div className="kagrup">
-        <h6>{baslik ?? meta.baslik}</h6>
+        <h6 className={onBaslikTikla ? 'katlanir-bas' : undefined} onClick={onBaslikTikla}>
+          {baslikOnEk}{baslik ?? meta.baslik}</h6>
         <div className="alan-izgara tek-sutun">
           {cizimler}
         </div>

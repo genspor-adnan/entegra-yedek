@@ -6,6 +6,7 @@ import type { SterilDonguKart as Kart, SterilEtiket } from '../../api/uclar/ster
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { Al, DurumRozeti, Etiket, SonucRozeti, zaman } from './ortak';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * DÖNGÜ KARTI `/steril-dongu/:id` (868) — mockup dis_steril_dongu_karti.html. Modal:
@@ -35,7 +36,8 @@ export function SterilDonguKarti() {
     } catch (h) { setHata(hataMetni(h)) }
   }, [id]);
   useEffect(() => { if (id) void yukle() }, [id, yukle]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
   const duzenle = yetki('steril.dongu', 'degistir');
 
   const bitir = async () => {

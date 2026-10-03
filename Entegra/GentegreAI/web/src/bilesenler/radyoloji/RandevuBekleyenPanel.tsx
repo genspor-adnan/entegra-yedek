@@ -97,7 +97,10 @@ export function RandevuBekleyenPanel({ secili, onSecim, onRandevuModali, yenile 
   return (
     <div className="bekleyen-panel">
       <div className="bekleyen-bas">
-        <b>{c('Randevu Bekleyen')}</b>
+        {/* Ne oldugu ipucunda (kullanici: "Randevu Bekleyen ne demek?"). */}
+        <b title={c('Hekimin istediği ama henüz çekim saati verilmemiş radyoloji tetkikleri. '
+                    + 'Satırı takvimdeki cihaz sütununda boş saate sürükleyin ya da seçip boş saate tıklayın.')}>
+          {c('Randevu Bekleyen İstemler')}</b>
         <span className="bekleyen-sayi">{suzulmus.length}</span>
         <button type="button" className="d" title={c('Listeyi tazele')}
                 onClick={() => void yukle()}>⟳</button>

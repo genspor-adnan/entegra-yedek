@@ -41,10 +41,10 @@ public static partial class YatanUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var yatis = await baglanti.TekAsync("""
-                select y.dosya_no, t.unvan as hasta, y.giris_tarihi, y.cikis_tarihi,
+                select y.dosya_no, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as hasta, y.giris_tarihi, y.cikis_tarihi,
                        (coalesce(y.cikis_tarihi, now())::date - y.giris_tarihi::date) as gun,
-                       coalesce(d.ad, '') as klinik, coalesce(h.unvan, '') as hekim,
-                       coalesce(k.unvan, '') as odeyen, y.odeyen_kurum_id,
+                       coalesce(d.ad, '') as klinik, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim,
+                       coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as odeyen, y.odeyen_kurum_id,
                        y.provizyon_no, y.cikis_tani_kodu, y.durum
                   from public.yatis y
                   join public.taraf t on t.id = y.hasta_id

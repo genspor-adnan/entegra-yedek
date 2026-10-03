@@ -41,7 +41,7 @@ public static partial class KaynakKatalogu
             new("id",       "y.id",       "sayi",  "Id", Varsayilan: false),
             new("hastaId",  "y.hasta_id", "sayi",  "Hasta Id", Varsayilan: false),
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 110),
-            new("hasta",    "t.unvan",    "metin", "Hasta", Genislik: 220),
+            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 220),
             new("yasCinsiyet",
                 "case when th.dogum_tarihi is null then '' "
                 + "     else extract(year from age(th.dogum_tarihi))::int::text end "
@@ -50,7 +50,7 @@ public static partial class KaynakKatalogu
                                           Filtrelenebilir: false),
             new("dosyaNo",  "y.dosya_no", "metin", "Dosya No", Genislik: 140),
             new("klinik",   "coalesce(d.ad, '')", "metin", "Klinik", Genislik: 160),
-            new("hekim",    "coalesce(h.unvan, '')", "metin", "Sorumlu Hekim", Genislik: 180),
+            new("hekim",    "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Sorumlu Hekim", Genislik: 180),
             new("girisTarihi", "y.giris_tarihi", "tarih", "Yatış", Hizalama: "orta",
                                           Bicim: "dd.MM.yyyy HH:mm"),
             // GÜN SAYISI HESAPLI ve uzun yatış hem klinik hem mali bir sinyal:
@@ -60,7 +60,7 @@ public static partial class KaynakKatalogu
                                           "sayi", "Gün", Hizalama: "orta", Genislik: 70,
                                           Filtrelenebilir: false),
             new("tani",     "y.yatis_tani_kodu", "metin", "Tanı", Genislik: 120),
-            new("odeyen",   "coalesce(k.unvan, '')", "metin", "Ödeyen", Genislik: 160),
+            new("odeyen",   "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')", "metin", "Ödeyen", Genislik: 160),
             // PROVİZYON LİSTEDE: "reddedildi" rozetini taburcu gününde görmek
             //   geç olur - o gün hastadan ücret istemek ya da faturayı kuruma
             //   yazamamak demektir.
@@ -182,7 +182,7 @@ public static partial class KaynakKatalogu
             new("id",       "od.id",      "sayi", "Id", Varsayilan: false),
             new("yatisId",  "od.yatis_id","sayi", "Yatış Id", Varsayilan: false),
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 100),
-            new("hasta",    "t.unvan",    "metin", "Hasta", Genislik: 200),
+            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
             new("turAdi",
                 "case od.tur when 1 then 'İlaç' when 2 then 'Serum / sıvı' "
                 + "when 3 then 'Tetkik' when 4 then 'Görüntüleme' when 5 then 'Konsültasyon' "
@@ -202,7 +202,7 @@ public static partial class KaynakKatalogu
                                           Bicim: "dd.MM.yyyy HH:mm"),
             new("bitis",    "od.bitis",   "tarih", "Bitiş", Hizalama: "orta",
                                           Bicim: "dd.MM.yyyy HH:mm"),
-            new("hekim",    "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 170),
+            new("hekim",    "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170),
             // SÖZEL ORDER uygulanır ama imzasız kalmaz: telefonla verilen
             //   talimat verilmemiş sayılmaz, imzasız da bırakılmaz.
             new("sozelDurum",
@@ -248,7 +248,7 @@ public static partial class KaynakKatalogu
             new("id",        "u.id",       "sayi", "Id", Varsayilan: false),
             new("yatisId",   "od.yatis_id","sayi", "Yatış Id", Varsayilan: false),
             new("yatak",     "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 100),
-            new("hasta",     "t.unvan",    "metin", "Hasta", Genislik: 200),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
             new("order",     "od.ad",      "metin", "Order", Genislik: 240),
             new("planlanan", "u.planlanan","tarih", "Planlanan", Hizalama: "orta",
                                            Bicim: "dd.MM.yyyy HH:mm"),
@@ -275,7 +275,7 @@ public static partial class KaynakKatalogu
                                            "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
                                            Genislik: 130, Filtrelenebilir: false),
             new("durum",     "u.durum",    "kod",  "Durum Kodu", Varsayilan: false),
-            new("uygulayan", "coalesce(p.unvan, '')", "metin", "Uygulayan", Genislik: 170),
+            new("uygulayan", "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Uygulayan", Genislik: 170),
             new("atlamaNedeni", "u.atlama_nedeni", "metin", "Atlama Nedeni", Genislik: 200),
             // Barkodsuz uygulama engellenmez (acil durum) ama işaretlenir:
             //   ikisini aynı göstermek kontrolü kâğıt üstünde bırakmak olurdu.
@@ -346,7 +346,7 @@ public static partial class KaynakKatalogu
             new("id",       "i.id",        "sayi",  "Id", Varsayilan: false),
             new("yatisId",  "i.yatis_id",  "sayi",  "Yatış Id", Varsayilan: false),
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 100),
-            new("hasta",    "t.unvan",     "metin", "Hasta", Genislik: 200),
+            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",     "metin", "Hasta", Genislik: 200),
             new("klinik",   "coalesce(d.ad, '')",   "metin", "Klinik", Genislik: 150),
             new("zaman",    "i.zaman",     "tarih", "Zaman", Hizalama: "orta",
                                            Bicim: "dd.MM.yyyy HH:mm"),
@@ -369,7 +369,7 @@ public static partial class KaynakKatalogu
                 "case when i.bildirim_zamani is not null then 1 else 0 end",
                                            "mantik", "Hekime bildirildi", Hizalama: "orta",
                                            Genislik: 120, Filtrelenebilir: false),
-            new("olcen",    "coalesce(p.unvan, '')", "metin", "Ölçen", Genislik: 160),
+            new("olcen",    "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Ölçen", Genislik: 160),
             new("not",      "i.not_metin", "metin", "Gözlem", Genislik: 260),
             // EŞİĞİ AŞAN SATIR RENKLENİR (`satirRengi` sözleşmesi): sayıya
             //   bakıp kendi eşiğini hatırlamayı beklemek, yoğun bir günde
@@ -413,7 +413,7 @@ public static partial class KaynakKatalogu
             new("tarih",    "th.tarih",    "tarih", "Tarih", Hizalama: "orta",
                                            Bicim: "dd.MM.yyyy"),
             new("dosyaNo",  "y.dosya_no",  "metin", "Dosya No", Genislik: 120),
-            new("hasta",    "t.unvan",     "metin", "Hasta", Genislik: 200),
+            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",     "metin", "Hasta", Genislik: 200),
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 100),
             new("klinik",   "coalesce(d.ad, '')",   "metin", "Klinik", Genislik: 150),
             new("kaynakAdi",

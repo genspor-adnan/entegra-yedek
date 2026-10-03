@@ -52,7 +52,7 @@ public static partial class LabUclari
                        g.dna_saflik, g.kapsama_yuzde, g.ort_derinlik, g.kontaminasyon,
                        g.cinsiyet_dogrulama, g.sonuc_ozeti, g.uzman_yorum, g.oneriler,
                        g.sinirliliklar, g.onay_zamani, g.hedef_bitis, g.hasta_id,
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan),
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)),
                        coalesce(p.kod || ' · ' || p.ad, ''), coalesce(r.kod, ''),
                        coalesce(n.barkod, ''), t.kod, t.ad,
                        public.fn_lab_genetik_ozet(g.id), g.istem_id, g.istem_satir_id,
@@ -246,7 +246,7 @@ public static partial class LabUclari
 
             var liste = await veri.ListeAsync("""
                 select y.varyant_id, y.vaka_id, y.vaka_no, y.hasta_id,
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan),
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)),
                        y.gen_sembol, y.hgvs_c, y.rapor_sinif, y.guncel_sinif,
                        y.degerlendirme_tarihi
                   from public.v_lab_varyant_yeniden y

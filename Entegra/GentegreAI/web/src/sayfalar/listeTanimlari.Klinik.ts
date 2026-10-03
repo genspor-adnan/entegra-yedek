@@ -152,9 +152,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Randevu', menuAd: 'Çalışma Planları', ic: '🗓', yetkiKodu: 'randevu.plan', menuSira: 20,
   },
   {
-    kaynak: 'calisma-sablon', rota: 'calisma-sablon', aksiyonEkrani: 'calisma-sablon-liste', baslik: 'Çalışma Şablonları',
+    // OZEL LISTE (mockup calisma_sablonlari_listesi.html): sayfa sayfalar/calisma.
+    kaynak: 'calisma-sablon', rota: 'calisma-sablon', ozelSayfa: true, aksiyonEkrani: 'calisma-sablon-liste', baslik: 'Çalışma Şablonları',
     yol: 'Randevu › Çalışma Şablonları',
-    kartYolu: '/calisma-sablon', kartBaslik: 'Çalışma Şablonu',
+    kartYolu: '/calisma-sablon', kartBaslik: 'Çalışma Şablonu', ozelKart: true,
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
@@ -163,9 +164,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan', menuSira: 80,
   },
   {
-    kaynak: 'calisma-istisna', rota: 'calisma-istisna', aksiyonEkrani: 'calisma-istisna-liste', baslik: 'İzin & İstisnalar',
+    // OZEL LISTE (mockup izin_istisnalar_listesi.html).
+    kaynak: 'calisma-istisna', rota: 'calisma-istisna', ozelSayfa: true, aksiyonEkrani: 'calisma-istisna-liste', baslik: 'İzin & İstisnalar',
     yol: 'Randevu › İzin & İstisnalar',
-    kartYolu: '/calisma-istisna', kartBaslik: 'Çalışma İstisnası',
+    kartYolu: '/calisma-istisna', kartBaslik: 'İzin & İstisna', ozelKart: true,
     tarihAlani: 'basTarih',
     cipler: [
       { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -174,14 +176,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'İzin & İstisnalar', ic: '🏖', yetkiKodu: 'randevu.plan', menuSira: 85,
-  },
-  {
-    // Randevu Ayarlari (243): gun/saat duzeni + Bölümler sekmesi (251).
-    kaynak: 'randevu-ayarlar', ozelSayfa: true, baslik: 'Randevu Ayarları',
-    yol: 'Randevu › Randevu Ayarları',
-    urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Randevu Ayarları', ic: '⚙️',
-    yetkiKodu: 'randevu', menuSira: 90,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
@@ -246,7 +240,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   yaninda ne kadari tahsil edildigi (kullanici).
                     'tarafId', 'acikKapali', 'maliyetOrt', 'tipiAdi',
                     'odeyenKurumId', 'bolumId', 'doktorId', 'tahsilatDurum',
-                    'matrah', 'kdvTutari'],
+                    'matrah', 'kdvTutari',
+    //   CARI ve HEDEF de yok (kullanici: "basvuru listesinden cari ve hedef
+    //   kaldir"): hasta kendi kolonunda, donusum combo'su seritte.
+                    'tarafUnvan', 'hedef'],
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
@@ -260,8 +257,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   TSS / Karma police ayri sartlarla calisir, odeme rotasini o belirler.
     //   HASTA kolonu CARI DEGIL (658, kullanici: "basvuru 3990 da hasta adi
     //   yok"): dis kurum numunesinde cari GONDEREN KURUMDUR, hasta ayri
-    //   alanda durur. "Cari" kolonu listede kalir ama hasta kendi
-    //   kolonundan okunur - ikisi ayni sey degil.
+    //   alanda durur. Hasta kendi kolonundan okunur - "Cari" kolonu
+    //   sonradan listeden kaldirildi (kullanici).
     kolonSirasi: ['belgeTarihi', 'tamamlanma', 'belgeNo', 'hastaAdi',
                   'odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],

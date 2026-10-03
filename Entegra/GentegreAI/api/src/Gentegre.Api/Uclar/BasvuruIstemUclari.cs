@@ -263,7 +263,7 @@ public static class BasvuruIstemUclari
             select bl.taraf_id, bl.kampanya_id,
                    coalesce(s.lab_iskonto, 0), coalesce(s.rad_iskonto, 0),
                    coalesce(s.varsayilan_karsilama, 0),
-                   coalesce(nullif(k.unvan, ''), ''), coalesce(s.ad, '')
+                   coalesce(nullif(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), ''), ''), coalesce(s.ad, '')
               from public.belge bl
               left join public.belge_basvuru bb on bb.id = bl.id
               left join public.kurum_sozlesme s on s.id = bb.sozlesme_id

@@ -63,7 +63,7 @@ public static partial class DisUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var hasta = await baglanti.TekAsync("""
-                select t.id, t.unvan, t.cep_tel, th.dogum_tarihi,
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, t.cep_tel, th.dogum_tarihi,
                        extract(year from age(current_date, th.dogum_tarihi))::int as yas,
                        coalesce(th.cinsiyet, 0)::int as cinsiyet,
                        (select string_agg(coalesce(nullif(a.etken, ''), a.etken_madde), ', ') from public.hasta_alerji a where a.hasta_id = t.id and a.aktif = 1) as alerji,
@@ -73,7 +73,7 @@ public static partial class DisUclari
                        (select string_agg(coalesce(nullif(i.ilac_ad, ''), i.etken_madde), ', ' order by i.id) from public.hasta_ilac i where i.hasta_id = t.id and i.aktif = 1 and (i.bitis is null or i.bitis >= current_date)) as ilac,
                        (select m.muayene_tarihi from public.muayene m where m.taraf_id = t.id
                          order by m.muayene_tarihi desc limit 1) as son_muayene,
-                       (select coalesce(h.unvan, '') from public.muayene m
+                       (select coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') from public.muayene m
                           left join public.taraf h on h.id = m.personel_id
                          where m.taraf_id = t.id order by m.muayene_tarihi desc limit 1) as son_hekim,
                        (select dm.dental_anamnez from public.dis_muayene dm where dm.hasta_id = t.id
@@ -119,7 +119,7 @@ public static partial class DisUclari
             //   yapılmıştı"yı görsün, yeni işlem ekleyince yeni plan açılır.
             var plan = await baglanti.TekAsync("""
                 select p.id, p.plan_no, p.durum, p.varyant, p.toplam, p.indirim, p.net,
-                       coalesce(h.unvan, '') as hekim, p.ekleme_tarihi::date as tarih,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim, p.ekleme_tarihi::date as tarih,
                        p.hasta_onay_zamani, p.proforma_no, p.gecerlilik_bitis, p.fiyat_listesi_id,
                        (select coalesce(sum(s.net), 0) from public.dis_tedavi_plani_satir s
                          where s.plan_id = p.id and s.durum = 3) as yapilan,
@@ -155,7 +155,7 @@ public static partial class DisUclari
 
             // TEDAVİ GEÇMİŞİ: seans işlemleri (yapılan + süren), en yeni üstte.
             var gecmis = await baglanti.ListeAsync("""
-                select i.id, s.baslangic, coalesce(h.unvan, '') as hekim, i.dis_no, i.yuzeyler,
+                select i.id, s.baslangic, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim, i.dis_no, i.yuzeyler,
                        hz.ad as islem, i.seans_no,
                        coalesce(ps.seans_sayisi, 1) as seans_sayisi, i.tamamlandi,
                        coalesce(p.plan_no, '') as plan_no,
@@ -267,7 +267,7 @@ public static partial class DisUclari
     {
         var liste = await baglanti.ListeAsync("""
             select s.id, s.faz, s.sira, s.dis_no, s.dis_nolar, s.yuzeyler, s.hizmet_id, hz.ad as islem,
-                   coalesce(h.unvan, '') as hekim, s.seans_sayisi, s.yapilan_seans,
+                   coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim, s.seans_sayisi, s.yapilan_seans,
                    s.liste_fiyat, s.iskonto, s.net, s.ucret_kurali, s.lab_gerekir, s.lab_isemri_id,
                    s.durum, s.tamamlanma, s.aciklama,
                    (select min(x.baslangic) from public.dis_seans_islem i join public.dis_seans x on x.id = i.seans_id

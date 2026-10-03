@@ -89,7 +89,7 @@ public static partial class GozUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var m = await baglanti.TekAsync("""
-                select gm.hasta_id, t.unvan, (mu.tamamlanma is not null) as kapali,
+                select gm.hasta_id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, (mu.tamamlanma is not null) as kapali,
                        gm.dilate, mu.muayene_tarihi
                   from public.goz_muayene gm
                   join public.muayene mu on mu.id = gm.muayene_id
@@ -108,7 +108,7 @@ public static partial class GozUclari
                 select c.id, c.goz, c.sema_turu, c.surum, c.kilitli, c.svg,
                        c.uretilen_metin, c.aciklama,
                        coalesce(c.degistirme_tarihi, c.ekleme_tarihi) as zaman,
-                       coalesce(t.unvan, '') as kullanici
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as kullanici
                   from public.goz_cizim c
                   left join public.taraf t on t.id = c.ekleyen
                  where c.goz_muayene_id = @p0

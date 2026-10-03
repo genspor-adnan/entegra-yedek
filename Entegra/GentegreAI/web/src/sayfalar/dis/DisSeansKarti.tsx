@@ -10,6 +10,7 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { TarafSecici } from '../../bilesenler/TarafArama';
 import { para, tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * SEANS KARTI — mockup `Ekranlar/Dis Klinigi/dis_seans_kaydi.html` (Uygulama
@@ -36,7 +37,8 @@ export function DisSeansKarti() {
   const geri = durum?.geri ?? '/dis-seans';
   const ustGeri = durum?.ustGeri;
   const kapat = useCallback(() => git(geri, ustGeri ? { state: { geri: ustGeri } } : undefined), [git, geri, ustGeri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
 
   const yeni = param === 'yeni';
   const id = yeni ? 0 : Number(param ?? 0);

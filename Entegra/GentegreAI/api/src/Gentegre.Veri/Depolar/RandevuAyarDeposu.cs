@@ -53,7 +53,7 @@ public sealed class RandevuAyarDeposu
               from public.departman d
              where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
             union all
-            select d.id, d.ad, t.id, t.unvan, 1
+            select d.id, d.ad, t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, 1
               from public.departman d
               join public.taraf t on t.departman = d.id and t.personel = 1
              where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
@@ -168,7 +168,25 @@ public sealed class RandevuAyarDeposu
     /// bolum randevusuz kabul olur. Cikar: bolumun sablonlari pasiflenir,
     /// randevusuz kabul kalkar.
     /// </summary>
-    public async Task<int> BolumIsaretleAsync(int departmanId, bool bolumMu, int kullaniciId = 0, CancellationToken iptal = default)
+    /// <summary>
+    /// BOLUMUN DOKTORLARI (Calisma Sablonlari > Bolum penceresi): bolumdeki
+    /// aktif hekim/personel ve o bolumde AKTIF sablonu olup olmadigi - pencere
+    /// "sablonu yok, acilacak" / "zaten aktif sablonu var" diye listeler.
+    /// </summary>
+    public Task<List<(int Id, string Ad, bool SablonVar)>> BolumDoktorlariAsync(int departmanId,
+        CancellationToken iptal = default)
+        => _veri.ListeAsync("""
+            select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120),
+                   exists (select 1 from public.hekim_calisma_sablon s
+                            where s.hekim_id = t.id and s.departman_id = @p0 and s.aktif = 1)
+              from public.taraf t
+             where t.departman = @p0 and coalesce(t.durum, 1) = 1 and (t.hekim = 1 or t.personel = 1)
+             order by 2
+            """, new object?[] { departmanId },
+            o => (o.GetInt32(0), o.GetString(1), o.GetBoolean(2)), iptal);
+
+    public async Task<int> BolumIsaretleAsync(int departmanId, bool bolumMu, int kullaniciId = 0,
+        IReadOnlyCollection<int>? hekimIdleri = null, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         if (!bolumMu)
@@ -179,21 +197,37 @@ public sealed class RandevuAyarDeposu
             k0.Parameters.AddWithValue("p0", departmanId); k0.Parameters.AddWithValue("p1", kullaniciId);
             return await k0.ExecuteNonQueryAsync(iptal);
         }
+        // VARSAYILAN DUZEN (Calisma Sablonlari > Varsayilanlar): ogle arasi
+        //   tanimliysa iki blok (bas-ogle_bas, ogle_bit-bitis), yoksa tek blok.
+        // DOKTOR SECIMI: hekimIdleri verilirse yalniz onlara (pencerede
+        //   isaretlenenler); verilmezse bolumde sablonu olmayan herkese.
         await using var k = new NpgsqlCommand("""
-            insert into public.hekim_calisma_sablon (hekim_id, departman_id, ad, gunler, bas1, bit1, slot_dk, aciklama, ekleyen)
-            select t.id, @p0, 'Standart hafta',
-                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.calisma_gunleri'), ''), '1,2,3,4,5'),
-                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.baslangic_saat'), ''), '09:00')::time,
-                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.bitis_saat'), ''), '18:00')::time,
-                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.slot_dk'), '')::int, 15),
-                   'Randevu Ayarları › Bölüm ekle', @p1
-              from public.taraf t
+            with v as (
+                select coalesce(nullif((select deger from public.referans where anahtar = 'randevu.calisma_gunleri'), ''), '1,2,3,4,5') as gunler,
+                       coalesce(nullif((select deger from public.referans where anahtar = 'randevu.baslangic_saat'), ''), '09:00') as bas,
+                       coalesce(nullif((select deger from public.referans where anahtar = 'randevu.bitis_saat'), ''), '18:00') as bit,
+                       nullif((select deger from public.referans where anahtar = 'randevu.ogle_baslangic'), '') as ogle_bas,
+                       nullif((select deger from public.referans where anahtar = 'randevu.ogle_bitis'), '') as ogle_bit,
+                       coalesce(nullif((select deger from public.referans where anahtar = 'randevu.slot_dk'), '')::int, 15) as slot)
+            insert into public.hekim_calisma_sablon (hekim_id, departman_id, ad, gunler, bas1, bit1, bas2, bit2, slot_dk, aciklama, ekleyen)
+            select t.id, @p0, 'Standart hafta', v.gunler,
+                   v.bas,
+                   case when v.ogle_bas is not null and v.ogle_bit is not null then v.ogle_bas else v.bit end,
+                   case when v.ogle_bas is not null and v.ogle_bit is not null then v.ogle_bit else '' end,
+                   case when v.ogle_bas is not null and v.ogle_bit is not null then v.bit else '' end,
+                   v.slot, 'Çalışma Şablonları › Bölümü randevuya aç', @p1
+              from public.taraf t cross join v
              where t.departman = @p0 and coalesce(t.durum, 1) = 1 and (t.hekim = 1 or t.personel = 1)
+               and (cardinality(@p2::int[]) = 0 or t.id = any(@p2::int[]))
                and not exists (select 1 from public.hekim_calisma_sablon s where s.hekim_id = t.id and s.departman_id = @p0 and s.aktif = 1)
             """, baglanti);
         k.Parameters.AddWithValue("p0", departmanId); k.Parameters.AddWithValue("p1", kullaniciId);
+        k.Parameters.AddWithValue("p2", (hekimIdleri ?? Array.Empty<int>()).ToArray());
         var eklenen = await k.ExecuteNonQueryAsync(iptal);
-        if (eklenen == 0)
+        // HEKIMSIZ bolum (acil, lab, radyoloji): randevusuz kabul. Doktoru olan
+        //   ama pencerede kimse secilmeyen bolum bu dala DUSMEZ.
+        var doktorVar = (await BolumDoktorlariAsync(departmanId, iptal)).Count > 0;
+        if (eklenen == 0 && !doktorVar)
         {
             // Hekimsiz bolum (acil, lab, radyoloji): randevusuz kabul.
             await using var k2 = new NpgsqlCommand("update public.departman set randevusuz_kabul = 1 where id = @p0", baglanti);

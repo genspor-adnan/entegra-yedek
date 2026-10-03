@@ -38,7 +38,7 @@ public static class EnabizUclari
                 select p.id, p.paket_no as "paketNo", t.kod as "turKod", t.ad as "turAdi",
                        t.uss_paket_kodu as "ussPaket", t.uss_surum as "ussSurum",
                        p.islem, p.kaynak_tur as "kaynakTur", p.kaynak_id as "kaynakId",
-                       coalesce(h.unvan, '') as "hastaAdi", p.hasta_id as "hastaId",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", p.hasta_id as "hastaId",
                        coalesce(k.ad, '') as "hekimAdi",
                        p.olay_tarihi as "olayTarihi", p.uretim_tarihi as "uretimTarihi",
                        p.son_tarih as "sonTarih", p.planlanan, p.durum, p.deneme,

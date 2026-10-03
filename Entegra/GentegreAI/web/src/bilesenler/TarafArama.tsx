@@ -32,6 +32,16 @@ interface TarafSatiri {
   aramaSay?: unknown;
 }
 
+/**
+ * KAYNAGA OZEL EK ARAMA ALANLARI: metin `kod`/`unvan`/telefonun yaninda bu
+ * alanlarda da aranir. Basvuru hekimi (kullanici: "Doktor / Personel
+ * aramasinda hem doktor hem bolum aransin"): "kardiyo" yazan o bolumun
+ * hekimlerini bulur.
+ */
+const KAYNAK_EK_ARAMA: Record<string, string[]> = {
+  'basvuru-hekim': ['bolumAdi'],
+};
+
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   if (kaynak === 'kisi') return 'Kişi';
   if (kaynak === 'personel') return 'Personel';
@@ -207,20 +217,27 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
       //   bosluklu olsa da bulunur. En az 4 rakam: "12" gibi kisa parcalar
       //   butun listeyi getirmesin.
       const rakamlar = metin.replace(/\D/g, '');
-      const filtre = metin.trim()
-        ? { op: 'or' as const, kosullar: [
-            { alan: 'kod', op: 'icerir' as const, deger: metin.trim() },
-            { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
-            ...(rakamlar.length >= 4
-              ? [{ alan: 'telefonHam', op: 'icerir' as const, deger: rakamlar }]
-              : []),
-          ] }
-        : undefined;
-      // Cagiranin sabit kosulu (ör. "pasif ve vefat hastalar gelmesin") metin
-      //   filtresiyle AND'lenir.
-      const tamFiltre: Kosul | undefined = ekFiltre
-        ? (filtre ? { op: 'and' as const, kosullar: [ekFiltre, filtre] } : ekFiltre)
-        : filtre;
+      // KAYNAGA OZEL EK ARAMA ALANLARI (KAYNAK_EK_ARAMA): filtre kaynak basina
+      //   kurulur - ek alan baska kaynakta yok, ortak filtreye koymak o
+      //   kaynagi 400 DOGRULAMA ile dusururdu.
+      const filtreOlustur = (k: string): Kosul | undefined => {
+        const filtre = metin.trim()
+          ? { op: 'or' as const, kosullar: [
+              { alan: 'kod', op: 'icerir' as const, deger: metin.trim() },
+              { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
+              ...(KAYNAK_EK_ARAMA[k] ?? []).map(alan =>
+                ({ alan, op: 'icerir' as const, deger: metin.trim() })),
+              ...(rakamlar.length >= 4
+                ? [{ alan: 'telefonHam', op: 'icerir' as const, deger: rakamlar }]
+                : []),
+            ] }
+          : undefined;
+        // Cagiranin sabit kosulu (ör. "pasif ve vefat hastalar gelmesin") metin
+        //   filtresiyle AND'lenir.
+        return ekFiltre
+          ? (filtre ? { op: 'and' as const, kosullar: [ekFiltre, filtre] } : ekFiltre)
+          : filtre;
+      };
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunumParam = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       // BIR KAYNAK DUSERSE OTEKILER GOSTERILIR (kullanici: "isteyen hekim
@@ -230,7 +247,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
       //   calismiyor gibi gorunuyordu. Hangi kaynagin dustugu de yazilir:
       //   "hicbir sey bulunamadi" ile "o liste okunamadi" ayri seylerdir.
       const sonuclar = await Promise.allSettled(
-        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: tamFiltre,
+        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: filtreOlustur(k),
                                           gorunum: gorunumParam })));
       const dusenler = kaynaklar.filter((_, i) => sonuclar[i].status === 'rejected');
       if (dusenler.length === kaynaklar.length) {

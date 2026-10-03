@@ -101,7 +101,7 @@ public static partial class GozUclari
             // EN UZUN BEKLEYEN kim ve nerede: sayının yanında ADI da dursun -
             //   "31 dk" tek başına kimseyi harekete geçirmiyor.
             var enUzun = await baglanti.TekAsync("""
-                select t.unvan, i.istasyon,
+                select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, i.istasyon,
                        (extract(epoch from (now() - i.giris)) / 60)::int as dk
                   from public.goz_ziyaret_istasyon i
                   join public.taraf t on t.id = i.hasta_id
@@ -145,7 +145,7 @@ public static partial class GozUclari
                        count(*)::int                                   as sayi,
                        -- ODADAKİ İŞ: en son giren hasta o kaynağı KULLANIYOR,
                        --   ötekiler sırada bekliyor.
-                       (array_agg(t.unvan order by i.giris desc))[1]    as hasta,
+                       (array_agg(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) order by i.giris desc))[1]    as hasta,
                        (array_agg(i.istasyon order by i.giris desc))[1] as istasyon,
                        (array_agg((extract(epoch from (now() - i.giris)) / 60)::int
                                   order by i.giris desc))[1]            as sure_dk,
@@ -177,7 +177,7 @@ public static partial class GozUclari
                      where i.giris >= @p0 and i.giris < @p1
                        and i.personel_id is not null
                 )
-                select p.unvan,
+                select public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) as unvan,
                        count(*) filter (where g.cikis is not null)::int   as tamamlanan,
                        count(*) filter (where g.cikis is null)::int       as bekleyen,
                        coalesce(round(avg(extract(epoch from (g.cikis - g.giris)) / 60)
@@ -187,8 +187,8 @@ public static partial class GozUclari
                                 filter (where g.cikis is null), 0)        as en_uzun_dk
                   from gun g
                   join public.taraf p on p.id = g.personel_id
-                 group by p.unvan
-                 order by count(*) filter (where g.cikis is null) desc, p.unvan
+                 group by public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120)
+                 order by count(*) filter (where g.cikis is null) desc, public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120)
                 """, null, [gunBas, gunSon], o => new
             {
                 personel = o.GetString(0),

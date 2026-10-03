@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çalışma Şablonu Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr 90px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.kisa{width:64px;justify-content:center}
+  .combo{position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .govde{display:grid;grid-template-columns:1fr 330px;gap:0}
+  .sol{border-right:1px solid var(--line2)}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);display:flex;gap:8px;align-items:center;
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0}
+  .grp h4 .ek{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .grp .iz.uc{grid-template-columns:1fr 1fr 1fr}
+  .grp .iz .tam{grid-column:1 / -1}
+  /* GUN SECIMI: "1,2,3" metni yerine 7 dugme */
+  .gunler{display:flex;gap:4px}
+  .gun{width:44px;text-align:center;border:1px solid var(--line);border-radius:3px;padding:4px 0;background:#fff;font-size:11.5px}
+  .gun.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .gun.hs{opacity:.6}
+  /* BLOKLAR */
+  .blok{display:flex;gap:6px;align-items:center;padding:4px 0}
+  .blok .etk{width:120px;color:var(--muted);font-size:11px}
+  .blok .tire{color:var(--muted)}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .onay{display:flex;gap:6px;align-items:center;font-size:11.5px}
+  .kutu{width:13px;height:13px;border:1px solid #8aa0b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+  /* ONIZLEME: gunluk zaman cizgisi */
+  .zaman{padding:8px 12px 12px}
+  .zsatir{display:grid;grid-template-columns:42px 1fr 70px;gap:8px;align-items:center;height:22px}
+  .zsatir .g{font-size:11px;color:var(--muted)}
+  .serit{position:relative;height:14px;background:repeating-linear-gradient(90deg,#f1f4f8 0 calc(100%/11 - 1px),#e2e8ef calc(100%/11 - 1px) calc(100%/11));border-radius:2px}
+  .serit i{position:absolute;top:0;bottom:0;background:#9cc1ea;border:1px solid #5e93cf;border-radius:2px}
+  .serit i.ek{background:#b9e1c6;border-color:#5fae7a}
+  .zsatir .s{font-size:10.5px;color:var(--muted);text-align:right}
+  .zcetvel{display:grid;grid-template-columns:42px 1fr 70px;gap:8px;font-size:9.5px;color:var(--muted)}
+  .zcetvel div:nth-child(2){display:flex;justify-content:space-between}
+  /* SAG PANEL */
+  .sag .grp{margin:12px 12px 0}
+  .uyari{margin:10px 12px 0;padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px}
+  .bilgi{margin:10px 12px 0;padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  table.dg{border-collapse:collapse;width:100%;font-size:11px}
+  table.dg th{background:var(--head2);text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);font-weight:normal;color:var(--muted)}
+  table.dg td{padding:4px 6px;border-bottom:1px solid var(--line2)}
+  .sayi{font-weight:bold;color:var(--navy)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  /* LISTE + MODALLAR (ikinci bolum) */
+  .grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal}
+  .grid td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .modallar{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:14px;background:rgba(20,40,70,.06)}
+  .modal{background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(20,40,70,.18)}
+  .modal .mbas{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:6px 10px;font-weight:bold;font-size:12px;display:flex}
+  .modal .mbas span{margin-left:auto;font-weight:normal;opacity:.8;font-size:10.5px}
+  .modal .mgov{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .modal .malt{display:flex;gap:6px;justify-content:flex-end;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2)}
+  .aciklama{max-width:1080px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  /* ACILIR / KAPANIR BOLUMLER (kullanici: "sekmeler acilir olsun"): basliga tikla. */
+  .grp > h4{cursor:pointer;user-select:none}
+  .grp > h4::before{content:"▾";color:var(--muted);font-size:10px;width:10px}
+  .grp.kapali > h4::before{content:"▸"}
+  .grp.kapali > h4{border-bottom:none;border-radius:4px}
+  .grp.kapali > :not(h4){display:none}
+</style>
+</head>
+<body>
+
+<!-- ================================================================ KART -->
+<div class="win">
+  <div class="title">📋 Çalışma Şablonu — Dr. Aslı Demir · Kardiyoloji
+    <span class="sp">Randevu › Çalışma Şablonları · takvim, uygun saatler ve kayıt kontrolü bu şablondan türer</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="btn">⏸ Pasife Al</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <!-- Kimlik seridi: her sekmede sabit -->
+  <div class="idstrip">
+    <div class="fld"><label class="req">Doktor</label>
+      <div class="inp big combo">Dr. Aslı Demir</div></div>
+    <div class="fld"><label class="req">Bölüm</label>
+      <div class="inp combo">Kardiyoloji</div></div>
+    <div class="fld"><label>Şube</label>
+      <div class="inp combo">Tümü</div></div>
+    <div class="fld"><label>Şablon Adı</label>
+      <div class="inp">Standart hafta</div></div>
+    <div class="fld"><label>Durum</label>
+      <div class="inp"><span class="chip c-ok">Aktif</span></div></div>
+  </div>
+
+  <div class="govde">
+    <div class="sol">
+
+      <div class="grp">
+        <h4>🗓 Haftalık Düzen <span class="ek">günlere tıklayın · bloklar her seçili gün için geçerli</span></h4>
+        <div class="iz">
+          <div class="fld tam"><label class="req">Çalışma günleri</label>
+            <div class="gunler">
+              <div class="gun on">Pzt</div><div class="gun on">Sal</div><div class="gun on">Çar</div>
+              <div class="gun on">Per</div><div class="gun on">Cum</div><div class="gun hs">Cmt</div><div class="gun hs">Paz</div>
+            </div></div>
+
+          <div class="fld tam"><label class="req">Çalışma blokları</label>
+            <div class="blok"><span class="etk">1. blok (sabah)</span>
+              <div class="inp kisa">09:00</div><span class="tire">–</span><div class="inp kisa">12:30</div></div>
+            <div class="blok"><span class="etk">2. blok (öğleden sonra)</span>
+              <div class="inp kisa">13:30</div><span class="tire">–</span><div class="inp kisa">17:00</div>
+              <div class="btn kucuk">✕</div></div>
+            <div class="blok"><span class="etk"></span>
+              <span style="color:var(--muted);font-size:11px">Bloklar arası boşluk = öğle arası (12:30–13:30). Tek blok da girilebilir.</span></div>
+          </div>
+
+          <div class="fld tam"><label class="req">Randevu aralığı (slot)</label>
+            <div class="cipler">
+              <span class="cip">10 dk</span><span class="cip">15 dk</span><span class="cip on">20 dk</span>
+              <span class="cip">30 dk</span><span class="cip">45 dk</span><span class="cip">60 dk</span>
+            </div></div>
+        </div>
+
+        <!-- Canli onizleme -->
+        <div class="zaman">
+          <div class="zcetvel"><div></div><div><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span></div><div></div></div>
+          <div class="zsatir"><span class="g">Pzt</span><div class="serit"><i style="left:9.1%;width:31.8%"></i><i style="left:50%;width:31.8%"></i></div><span class="s">21 slot</span></div>
+          <div class="zsatir"><span class="g">Sal</span><div class="serit"><i style="left:9.1%;width:31.8%"></i><i style="left:50%;width:31.8%"></i></div><span class="s">21 slot</span></div>
+          <div class="zsatir"><span class="g">Çar</span><div class="serit"><i style="left:9.1%;width:31.8%"></i><i style="left:50%;width:31.8%"></i></div><span class="s">21 slot</span></div>
+          <div class="zsatir"><span class="g">Per</span><div class="serit"><i style="left:9.1%;width:31.8%"></i><i style="left:50%;width:31.8%"></i></div><span class="s">21 slot</span></div>
+          <div class="zsatir"><span class="g">Cum</span><div class="serit"><i style="left:9.1%;width:31.8%"></i><i style="left:50%;width:31.8%"></i></div><span class="s">21 slot</span></div>
+          <div class="zsatir"><span class="g" style="opacity:.5">Cmt</span><div class="serit"></div><span class="s">—</span></div>
+          <div class="zsatir"><span class="g" style="opacity:.5">Paz</span><div class="serit"></div><span class="s">—</span></div>
+        </div>
+      </div>
+
+      <div class="grp kapali">
+        <h4>📡 Kanal & Kota</h4>
+        <div class="iz uc">
+          <div class="fld tam"><label>Hangi kanaldan randevu alınabilir</label>
+            <div style="display:flex;gap:16px">
+              <span class="onay"><span class="kutu">✔</span>Banko / telefon</span>
+              <span class="onay"><span class="kutu">✔</span>Hasta portalı</span>
+              <span class="onay"><span class="kutu"></span>Çağrı merkezi</span>
+            </div></div>
+          <div class="fld"><label>Günlük kota (0 = sınırsız)</label><div class="inp">0</div></div>
+          <div class="fld"><label>Portal payı %</label><div class="inp">30</div></div>
+          <div class="fld"><label>Kontrol hastası payı %</label><div class="inp">20</div></div>
+        </div>
+      </div>
+
+      <div class="grp kapali">
+        <h4>📆 Geçerlilik</h4>
+        <div class="iz uc">
+          <div class="fld"><label>Tekrar</label>
+            <div class="cipler"><span class="cip on">Her hafta</span><span class="cip">İki haftada bir</span></div></div>
+          <div class="fld"><label class="req">Başlangıç</label><div class="inp">01.10.2026</div></div>
+          <div class="fld"><label>Bitiş (boş = süresiz)</label><div class="inp"></div></div>
+          <div class="fld tam"><label>Açıklama</label><div class="inp">Eylül sonrası standart poliklinik düzeni.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: etki paneli -->
+    <div class="sag">
+      <div class="grp">
+        <h4>📊 Bu şablonun etkisi</h4>
+        <div class="iz" style="grid-template-columns:1fr 1fr">
+          <div class="fld"><label>Haftalık slot</label><div><span class="sayi">105</span> (5 gün × 21)</div></div>
+          <div class="fld"><label>Haftalık çalışma</label><div><span class="sayi">35</span> saat</div></div>
+          <div class="fld"><label>Önümüzdeki 2 hafta</label><div><span class="sayi">34</span> randevu dolu</div></div>
+          <div class="fld"><label>Doluluk</label><div><span class="sayi">%16</span></div></div>
+        </div>
+      </div>
+
+      <div class="uyari">⚠ <b>3 randevu</b> yeni saatlerin dışında kalıyor (12:30–13:30 arası).
+        Kaydedince bu randevular <b>"mesai dışı"</b> taralı görünür; yeniden saat vermek için
+        listeyi açın. <span style="text-decoration:underline">Randevuları göster</span></div>
+
+      <div class="grp kapali">
+        <h4>Doktorun diğer şablonları</h4>
+        <table class="dg">
+          <tr><th>Şablon</th><th>Bölüm</th><th>Günler</th><th>Durum</th></tr>
+          <tr><td>Standart hafta</td><td>Kardiyoloji</td><td>Pzt–Cum</td><td><span class="chip c-ok">Bu kart</span></td></tr>
+          <tr><td>Efor testi</td><td>Kardiyoloji</td><td>Cmt</td><td><span class="chip c-ok">Aktif</span></td></tr>
+          <tr><td>Yaz düzeni 2026</td><td>Kardiyoloji</td><td>Pzt–Per</td><td><span class="chip c-gri">Süresi bitti</span></td></tr>
+        </table>
+      </div>
+
+      <div class="bilgi">ℹ Aynı gün ve saatte <b>iki aktif şablon çakışırsa</b> kayıt engellenir
+        ("Efor testi" ile çakışma yok). İzin, kongre ve saat değişikliği şablonu değiştirmeden
+        <b>İzin &amp; İstisnalar</b>'dan girilir.</div>
+    </div>
+  </div>
+
+  <div class="ozet">
+    <span>Şablon No: <b>ŞB-0042</b></span>
+    <span>Oluşturan: <b>admin · 01.10.2026 09:12</b></span>
+    <span>Son değişiklik: <b>Dr. Aslı Demir · 02.10.2026 16:40</b></span>
+  </div>
+</div>
+
+<!-- ======================================== LISTE ARAC CUBUGU + MODALLAR -->
+<div class="win">
+  <div class="title">📋 Çalışma Şablonları <span class="sp">Randevu › Ayarlar › Çalışma Şablonları — liste araç çubuğu ve iki pencere</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Şablon</div>
+    <div class="btn">🏥 Bölüm</div>
+    <div class="btn">⚙ Varsayılanlar</div>
+    <span style="margin-left:10px" class="cipler"><span class="cip on">Aktif</span><span class="cip">Tümü</span></span>
+    <div class="inp sp" style="width:220px;color:var(--muted)">🔍 Doktor / bölüm ara…</div>
+  </div>
+  <table class="grid">
+    <tr><th>Doktor</th><th>Bölüm</th><th>Şablon</th><th>Günler</th><th>Saatler</th><th>Slot</th><th>Kanallar</th><th>Geçerlilik</th><th>Durum</th></tr>
+    <tr><td>Dr. Aslı Demir</td><td>Kardiyoloji</td><td>Standart hafta</td><td>Pzt–Cum</td><td>09:00–12:30 · 13:30–17:00</td><td>20 dk</td><td>Banko · Portal</td><td>01.10.2026 –</td><td><span class="chip c-ok">Aktif</span></td></tr>
+    <tr><td>Dr. Aslı Demir</td><td>Kardiyoloji</td><td>Efor testi</td><td>Cmt</td><td>09:00–13:00</td><td>30 dk</td><td>Banko</td><td>01.10.2026 –</td><td><span class="chip c-ok">Aktif</span></td></tr>
+    <tr><td>Dr. Barış Güneş</td><td>İç Hastalıkları</td><td>Standart hafta</td><td>Pzt–Cmt</td><td>09:00–18:00</td><td>30 dk</td><td>Banko · Portal · Çağrı</td><td>29.08.2026 –</td><td><span class="chip c-ok">Aktif</span></td></tr>
+  </table>
+
+  <div class="modallar">
+    <!-- 🏥 BOLUM -->
+    <div class="modal">
+      <div class="mbas">🏥 Bölümü randevuya aç / kapat <span>eski "＋ Bölüm / ✕"</span></div>
+      <div class="mgov">
+        <div class="fld"><label class="req">Bölüm</label><div class="inp combo">Göz Hastalıkları</div></div>
+        <div class="fld"><label>Bu bölümdeki doktorlar</label>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span class="onay"><span class="kutu">✔</span>Op.Dr. Kerem Atalay <span style="color:var(--muted)">— şablonu yok, açılacak</span></span>
+            <span class="onay"><span class="kutu">✔</span>Dr. Selin Aydın <span style="color:var(--muted)">— şablonu yok, açılacak</span></span>
+            <span class="onay"><span class="kutu"></span>Dr. Burak Şen <span style="color:var(--muted)">— zaten aktif şablonu var</span></span>
+          </div></div>
+        <div class="bilgi" style="margin:0">Seçili her doktora <b>"Standart hafta"</b> şablonu varsayılan saatlerle
+          (Pzt–Cmt · 09:00–18:00 · 30 dk) açılır; sonra kartından düzenlenir. Doktoru olmayan bölüm
+          <b>randevusuz kabul</b> olarak işaretlenir.</div>
+      </div>
+      <div class="malt"><div class="btn danger">⏸ Bölümü randevuya kapat</div><div class="btn primary">✔ Randevuya aç</div><div class="btn">Vazgeç</div></div>
+    </div>
+
+    <!-- ⚙ VARSAYILANLAR -->
+    <div class="modal">
+      <div class="mbas">⚙ Varsayılanlar ve kurallar <span>eski "Randevu Ayarları"</span></div>
+      <div class="mgov">
+        <div style="font-weight:bold;color:var(--navy);font-size:11.5px">Yeni şablonun varsayılanı</div>
+        <div class="fld"><label>Günler</label>
+          <div class="gunler"><div class="gun on">Pzt</div><div class="gun on">Sal</div><div class="gun on">Çar</div><div class="gun on">Per</div><div class="gun on">Cum</div><div class="gun on">Cmt</div><div class="gun hs">Paz</div></div></div>
+        <div class="fld"><label>Bloklar</label>
+          <div class="blok" style="padding:0"><div class="inp kisa">09:00</div><span class="tire">–</span><div class="inp kisa">12:30</div>
+            <span style="width:10px"></span><div class="inp kisa">13:30</div><span class="tire">–</span><div class="inp kisa">18:00</div></div></div>
+        <div class="fld"><label>Slot</label>
+          <div class="cipler"><span class="cip">15 dk</span><span class="cip">20 dk</span><span class="cip on">30 dk</span></div></div>
+        <div style="font-weight:bold;color:var(--navy);font-size:11.5px;margin-top:4px">Randevu kuralları</div>
+        <div class="fld"><label>Mesai dışına randevu</label>
+          <div class="cipler"><span class="cip on">Engelle</span><span class="cip">Yalnız uyar</span></div></div>
+        <div class="fld"><label>İzinli doktora randevu</label>
+          <div class="cipler"><span class="cip on">Engelle</span><span class="cip">Yalnız uyar</span></div></div>
+      </div>
+      <div class="malt"><div class="btn primary">💾 Kaydet</div><div class="btn">Vazgeç</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <b>NOT (mockup):</b> Çalışma şablonu randevu düzeninin <b>tek kaynağıdır</b>: randevu takvimi
+  (saat aralığı, slot, günler, taralı mesai dışı hücreler), randevu kartındaki uygun saatler ve
+  kayıt anındaki "mesai dışı" kontrolü bu şablondan türer. Değişiklikler önceki tasarıma göre:
+  <b>(1)</b> gün listesi "1,2,3" metni yerine 7 gün düğmesi; <b>(2)</b> iki blok ve aradaki boşluk
+  öğle arası olarak açık yazılır, canlı önizleme günlük slot sayısını gösterir; <b>(3)</b> kanallar
+  harf yerine onay kutusu; <b>(4)</b> sağ panel kaydetmeden önce etkisini söyler — dışarıda kalacak
+  randevu sayısı ve çakışan şablon. Liste araç çubuğunda <b>🏥 Bölüm</b> (bölümü randevuya toplu açma /
+  kapatma) ve <b>⚙ Varsayılanlar</b> (yeni şablonun varsayılan düzeni + mesai dışı / izinli doktor
+  kuralları) eski "Randevu Ayarları" ekranının yerini alır; o ekran menüden kalkar.
+  Kanal ve kota alanları bugün kaydediliyor ama henüz uygulanmıyor (ayrı iş).
+</div>
+<script>
+  // Bolum basligina tiklayinca acilir / kapanir (mockup).
+  document.querySelectorAll('.grp > h4').forEach(h =>
+    h.addEventListener('click', () => h.parentElement.classList.toggle('kapali')));
+</script>
+</body>
+</html>

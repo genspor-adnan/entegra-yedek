@@ -237,7 +237,7 @@ public static partial class RadyolojiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             return Results.Ok(await baglanti.ListeAsync("""
                 select t.id, t.tur, t.teslim_zamani as "teslimZamani",
-                       coalesce(p.unvan, '') as "teslimEden", t.alan_ad as "alanAd",
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as "teslimEden", t.alan_ad as "alanAd",
                        t.alan_yakinlik as "alanYakinlik",
                        t.kimlik_dogrulandi as "kimlikDogrulandi", t.aciklama
                   from public.radyoloji_teslim t
@@ -305,7 +305,7 @@ public static partial class RadyolojiUclari
             return Results.Ok(await baglanti.ListeAsync("""
                 select k.id, k.durum, k.gerekce, k.gorus,
                        k.gonderim_zamani as "gonderimZamani", k.donus_zamani as "donusZamani",
-                       coalesce(h.unvan, '') as "hekim", coalesce(kr.unvan, '') as "kurum"
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hekim", coalesce(public.fn_taraf_ad(kr.unvan, kr.ad, kr.soyad)::varchar(120), '') as "kurum"
                   from public.radyoloji_konsultasyon k
                   left join public.taraf h on h.id = k.hekim_id
                   left join public.taraf kr on kr.id = k.kurum_id

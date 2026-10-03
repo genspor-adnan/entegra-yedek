@@ -482,7 +482,7 @@ public static class FormUclari
 
     private static Task<HastaSatiri?> HastaOkuAsync(NpgsqlConnection b, int hastaId, CancellationToken iptal)
         => b.TekAsync("""
-            select t.id, coalesce(nullif(trim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')), ''), t.unvan, ''),
+            select t.id, coalesce(nullif(trim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')), ''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                    coalesce(t.cep_tel, ''), coalesce(t.eposta, ''), coalesce(t.vkno, ''), extract(year from h.dogum_tarihi)::int
               from public.taraf t left join public.taraf_hasta h on h.id = t.id where t.id = @p0
             """, null, [hastaId], o => new HastaSatiri(o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetString(3), o.GetString(4), o.IsDBNull(5) ? null : o.GetInt32(5)), iptal);
@@ -539,7 +539,7 @@ public static class FormUclari
         var ozet = Ozet(temiz);
         return await b.TekAsync("""
             select i.id, i.durum, i.son_gecerlilik, i.sube_id, s.ad, s.aile,
-                   coalesce(nullif(trim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')), ''), t.unvan, ''), coalesce(t.vkno, ''), extract(year from h.dogum_tarihi)::int,
+                   coalesce(nullif(trim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')), ''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), coalesce(t.vkno, ''), extract(year from h.dogum_tarihi)::int,
                    i.dogrulama_deneme, s.tanim::text, i.taslak::text, i.cevap::text, i.surum, i.gonderim, i.riza_zamani, i.oturum_anahtari, i.dogrulandi,
                    (i.son_gecerlilik is not null and i.son_gecerlilik < now()),
                    (i.oturum_anahtari <> '' and i.dogrulandi is not null and i.dogrulandi > now() - make_interval(mins => @p1))

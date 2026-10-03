@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çalışma Şablonları Listesi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip b{font-weight:bold;color:var(--muted);margin-left:3px}
+  .cip.on b{color:var(--navy)}
+  /* OZET SERIDI */
+  .ozetler{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f7f9fc)}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.dikkat{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.dikkat .v,.kpi.dikkat .a{color:var(--warn)}
+  .kpi .bag{color:var(--accent);text-decoration:underline}
+  /* GRID */
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .grid th.sirali::after{content:" ▲";font-size:9px}
+  .grid td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .grid tr.secili td{background:#eef5fd}
+  .grid tr.pasif td{color:#9aa7b5}
+  .grid tr.pasif .gn i.on{background:#cfd8e2;border-color:#b9c4d0}
+  .grid tr.grupbas td{background:#f7f9fc;font-weight:bold;color:var(--navy);padding:4px 8px;border-bottom:1px solid var(--line)}
+  .grid tr.grupbas td span{font-weight:normal;color:var(--muted);margin-left:6px}
+  .grid tr.cakisma td{background:#fdf1f0}
+  .kutu{width:13px;height:13px;border:1px solid #8aa0b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+  .dr{font-weight:bold;color:var(--navy)}
+  .dr small{display:block;font-weight:normal;color:var(--muted);font-size:10.5px}
+  /* GUN NOKTALARI: 7 kutu */
+  .gn{display:inline-flex;gap:2px}
+  .gn i{width:16px;height:16px;border:1px solid var(--line2);border-radius:2px;font-style:normal;font-size:9px;display:inline-flex;align-items:center;justify-content:center;color:#b0bccb;background:#fff}
+  .gn i.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .gn i.iki{background:repeating-linear-gradient(135deg,var(--sel) 0 3px,#fff 3px 6px);border-color:var(--selbd);color:var(--navy)}
+  /* SAAT SERIDI: 07-20 */
+  .ss{display:flex;flex-direction:column;gap:2px;min-width:150px}
+  .ss .t{font-size:10.5px;color:var(--ink)}
+  .ss .bar{position:relative;height:6px;background:#eef1f5;border-radius:3px}
+  .ss .bar i{position:absolute;top:0;bottom:0;background:#9cc1ea;border-radius:3px}
+  .kanal{display:inline-flex;gap:2px}
+  .kanal span{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:10px;color:#b0bccb}
+  .kanal span.on{border-color:#bcd2ef;background:#e3ecfa;color:#2f5c9e;font-weight:bold}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .sayi{text-align:center}
+  .doluluk{display:flex;align-items:center;gap:5px}
+  .doluluk .b{width:46px;height:6px;background:#eef1f5;border-radius:3px;overflow:hidden}
+  .doluluk .b i{display:block;height:100%;background:#5fae7a}
+  .doluluk .b i.yuk{background:#e0a33a}
+  .alt{display:flex;gap:6px;align-items:center;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .alt b{color:var(--ink)}
+  .toplu{display:flex;gap:4px;align-items:center;padding:6px 10px;background:#eef5fd;border-bottom:1px solid #bcd2ef;color:#2f5c9e;font-size:11px}
+  .uyari{margin:10px 12px;padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px;display:flex;gap:8px;align-items:center}
+  .uyari .doktorlar{display:flex;gap:4px;flex-wrap:wrap}
+  .uyari .doktorlar span{background:#fff;border:1px solid var(--warnbd);border-radius:10px;padding:1px 8px}
+  .aciklama{max-width:1180px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Çalışma Şablonları
+    <span class="sp">Randevu › Ayarlar › Çalışma Şablonları · randevu düzeninin tek kaynağı</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Şablon</div>
+    <div class="btn">🏥 Bölüm</div>
+    <div class="btn">⚙ Varsayılanlar</div>
+    <span class="ayrac"></span>
+    <span class="cipler">
+      <span class="cip on">Aktif <b>50</b></span>
+      <span class="cip">Pasif <b>4</b></span>
+      <span class="cip">Süresi biten <b>2</b></span>
+      <span class="cip">Tümü <b>56</b></span>
+    </span>
+    <span class="ayrac"></span>
+    <div class="inp combo" style="width:150px">Bölüm: Tümü</div>
+    <div class="inp combo" style="width:110px">Şube: Tümü</div>
+    <span class="cipler"><span class="cip on">Doktora göre grupla</span></span>
+    <div class="inp sp" style="width:200px;color:var(--muted)">🔍 Doktor / bölüm ara…</div>
+  </div>
+
+  <!-- OZET: ne durumda? -->
+  <div class="ozetler">
+    <div class="kpi"><span class="k">Aktif şablon</span><span class="v">50</span><span class="a">47 doktor · 31 bölüm</span></div>
+    <div class="kpi"><span class="k">Haftalık kapasite</span><span class="v">5.124 slot</span><span class="a">önümüzdeki 2 hafta doluluk %38</span></div>
+    <div class="kpi dikkat"><span class="k">Şablonu olmayan doktor</span><span class="v">3</span><span class="a">randevu listelerinde görünmüyor · <span class="bag">göster</span></span></div>
+    <div class="kpi dikkat"><span class="k">30 gün içinde süresi bitecek</span><span class="v">2</span><span class="a">"Yaz düzeni 2026", "Efor testi" · <span class="bag">göster</span></span></div>
+  </div>
+
+  <div class="uyari">⚠ <b>Şablonu olmayan doktorlar</b> — randevu verilemez:
+    <span class="doktorlar"><span>Op.Dr. Kerem Atalay · Göz</span><span>Dr. Selin Aydın · Göz</span><span>Dr. Mert Er · Üroloji</span></span>
+    <span class="btn kucuk sp">＋ Şablon aç</span></div>
+
+  <!-- TOPLU ISLEM: satir isaretlenince gorunur -->
+  <div class="toplu">☑ <b>2 şablon seçili</b>
+    <span class="btn kucuk">⧉ Başka doktora kopyala…</span>
+    <span class="btn kucuk">📆 Bitiş tarihi ver…</span>
+    <span class="btn kucuk">⏸ Pasife al</span>
+    <span class="btn kucuk">🏖 Seçili doktorlara izin / istisna…</span>
+    <span class="sp" style="color:var(--muted)">Seçimi kaldır ✕</span></div>
+
+  <table class="grid">
+    <tr>
+      <th style="width:28px"><span class="kutu"></span></th>
+      <th class="sirali">Doktor · Bölüm</th><th>Şube</th><th>Şablon</th><th>Günler</th><th>Saatler</th>
+      <th class="sayi">Slot</th><th>Kanal</th><th>Geçerlilik</th><th>2 hafta doluluk</th><th>Durum</th>
+    </tr>
+
+    <tr class="grupbas"><td colspan="11">Dr. Aslı Demir <span>Kardiyoloji · 2 şablon · haftada 36 saat</span></td></tr>
+    <tr class="secili">
+      <td><span class="kutu">✔</span></td>
+      <td><div class="dr">Dr. Aslı Demir<small>Kardiyoloji</small></div></td>
+      <td>Tümü</td><td>Standart hafta</td>
+      <td><span class="gn"><i class="on">P</i><i class="on">S</i><i class="on">Ç</i><i class="on">P</i><i class="on">C</i><i>C</i><i>P</i></span></td>
+      <td><div class="ss"><span class="t">09:00–12:30 · 13:30–17:00</span><div class="bar"><i style="left:15.4%;width:26.9%"></i><i style="left:50%;width:26.9%"></i></div></div></td>
+      <td class="sayi">20 dk</td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span>Ç</span></span></td>
+      <td>01.10.2026 –</td>
+      <td><span class="doluluk"><span class="b"><i style="width:16%"></i></span>%16</span></td>
+      <td><span class="chip c-ok">Aktif</span></td>
+    </tr>
+    <tr class="secili">
+      <td><span class="kutu">✔</span></td>
+      <td><div class="dr">Dr. Aslı Demir<small>Kardiyoloji</small></div></td>
+      <td>Merkez</td><td>Efor testi</td>
+      <td><span class="gn"><i>P</i><i>S</i><i>Ç</i><i>P</i><i>C</i><i class="on">C</i><i>P</i></span></td>
+      <td><div class="ss"><span class="t">09:00–13:00</span><div class="bar"><i style="left:15.4%;width:30.8%"></i></div></div></td>
+      <td class="sayi">30 dk</td>
+      <td><span class="kanal"><span class="on">B</span><span>P</span><span>Ç</span></span></td>
+      <td>01.10 – <b style="color:var(--warn)">31.10.2026</b></td>
+      <td><span class="doluluk"><span class="b"><i class="yuk" style="width:88%"></i></span>%88</span></td>
+      <td><span class="chip c-bek">28 gün kaldı</span></td>
+    </tr>
+
+    <tr class="grupbas"><td colspan="11">Dr. Barış Güneş <span>İç Hastalıkları · 1 şablon · haftada 45 saat</span></td></tr>
+    <tr>
+      <td><span class="kutu"></span></td>
+      <td><div class="dr">Dr. Barış Güneş<small>İç Hastalıkları</small></div></td>
+      <td>Tümü</td><td>Standart hafta</td>
+      <td><span class="gn"><i class="on">P</i><i class="on">S</i><i class="on">Ç</i><i class="on">P</i><i class="on">C</i><i class="on">C</i><i>P</i></span></td>
+      <td><div class="ss"><span class="t">09:00–18:00</span><div class="bar"><i style="left:15.4%;width:69.2%"></i></div></div></td>
+      <td class="sayi">30 dk</td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span class="on">Ç</span></span></td>
+      <td>29.08.2026 –</td>
+      <td><span class="doluluk"><span class="b"><i style="width:52%"></i></span>%52</span></td>
+      <td><span class="chip c-ok">Aktif</span></td>
+    </tr>
+
+    <tr class="grupbas"><td colspan="11">Dr. Ceren Çelik <span>Kulak Burun Boğaz · 2 şablon</span></td></tr>
+    <tr>
+      <td><span class="kutu"></span></td>
+      <td><div class="dr">Dr. Ceren Çelik<small>Kulak Burun Boğaz</small></div></td>
+      <td>Tümü</td><td>Sabah polikliniği</td>
+      <td><span class="gn"><i class="iki">P</i><i>S</i><i class="iki">Ç</i><i>P</i><i class="iki">C</i><i>C</i><i>P</i></span></td>
+      <td><div class="ss"><span class="t">08:30–12:00</span><div class="bar"><i style="left:11.5%;width:26.9%"></i></div></div></td>
+      <td class="sayi">15 dk</td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span>Ç</span></span></td>
+      <td>İki haftada bir · 05.10 –</td>
+      <td><span class="doluluk"><span class="b"><i style="width:31%"></i></span>%31</span></td>
+      <td><span class="chip c-ok">Aktif</span></td>
+    </tr>
+    <tr class="pasif">
+      <td><span class="kutu"></span></td>
+      <td><div class="dr">Dr. Ceren Çelik<small>Kulak Burun Boğaz</small></div></td>
+      <td>Tümü</td><td>Yaz düzeni 2026</td>
+      <td><span class="gn"><i class="on">P</i><i class="on">S</i><i class="on">Ç</i><i class="on">P</i><i>C</i><i>C</i><i>P</i></span></td>
+      <td><div class="ss"><span class="t">08:00–14:00</span><div class="bar"><i style="left:7.7%;width:46.2%"></i></div></div></td>
+      <td class="sayi">20 dk</td>
+      <td><span class="kanal"><span class="on">B</span><span>P</span><span>Ç</span></span></td>
+      <td>01.06 – 31.08.2026</td>
+      <td>—</td>
+      <td><span class="chip c-gri">Süresi bitti</span></td>
+    </tr>
+  </table>
+
+  <div class="alt">Kayıt: <b>56</b> · gösterilen <b>50</b> (aktif) · <span class="sp">‹ Önceki</span> <b>1 / 3</b> <span>Sonraki ›</span></div>
+</div>
+
+<div class="aciklama">
+  <b>NOT (mockup):</b> Liste "hangi doktor ne zaman çalışıyor ve neresi eksik" sorusunu tek bakışta
+  cevaplar. Bugünkü generic listeye göre değişiklikler:
+  <b>(1)</b> günler metin ("Pzt, Sal…") yerine <b>7 kutu</b>; iki haftada bir çalışılan gün taralı;
+  <b>(2)</b> saatler metnin altında 07–20 arası <b>mini şerit</b> — öğle arası boşluk olarak görünür;
+  <b>(3)</b> kanallar <b>B / P / Ç</b> rozetleri (açık olan renkli);
+  <b>(4)</b> <b>2 hafta doluluk</b> çubuğu (kartın etki panelindeki hesap; %80 üstü turuncu);
+  <b>(5)</b> durum çipi: Aktif · Pasif · Süresi bitti · "N gün kaldı" (30 gün içinde bitecek);
+  <b>(6)</b> varsayılan <b>doktora göre grup</b> — bir doktorun birden çok şablonu alt alta, grup başlığında
+  haftalık toplam saat; iki aktif şablon aynı saatte çakışırsa satır kırmızı zeminli (kayıt zaten engellenir,
+  eski veride görünür olsun diye);
+  <b>(7)</b> üstte <b>özet şeridi</b>: aktif şablon, haftalık kapasite, <b>şablonu olmayan doktor</b> (randevu
+  listesinde görünmeyen) ve <b>süresi bitecek</b> şablon — ikisi uyarı rengiyle, tıklanınca listeyi süzer;
+  <b>(8)</b> satır işaretlenince <b>toplu işlem</b> şeridi: başka doktora kopyala, bitiş tarihi ver, pasife al,
+  seçili doktorlara izin / istisna. Çipler sayılarıyla gelir. 🏥 Bölüm / ⚙ Varsayılanlar aynen kalır.
+  Satıra çift tık şablon kartını açar.
+</div>
+</body>
+</html>

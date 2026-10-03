@@ -15,7 +15,7 @@ npm run build        # tsc -b + vite build
 API adresi `.env` içinde (`VITE_API=http://localhost:5180`). API'nin CORS listesinde
 `http://localhost:5173` var (`api/src/Gentegre.Api/appsettings.json`).
 
-Giriş: `admin` / `Gentegre!2026` — çok şubeli olduğu için şube seçim adımı gelir.
+Giriş (dev DB): `admin` / `Genotip!2026` — çok şubeli olduğu için şube seçim adımı gelir.
 
 ## Yapı
 

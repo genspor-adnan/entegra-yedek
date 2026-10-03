@@ -494,7 +494,7 @@ public static partial class SterilUclari
             int gonderilen = 0, hata = 0;
             foreach (var t in tarafIdleri)
             {
-                var kisi = await b.TekAsync("select coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, ''), coalesce(nullif(t.cep_tel, ''), t.telefon, ''), (select to_char(max(k.zaman), 'DD.MM.YYYY') from public.steril_paket_kullanim k where k.taraf_id = t.id) from public.taraf t where t.id = @p0", null, [t],
+                var kisi = await b.TekAsync("select coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), coalesce(nullif(t.cep_tel, ''), t.telefon, ''), (select to_char(max(k.zaman), 'DD.MM.YYYY') from public.steril_paket_kullanim k where k.taraf_id = t.id) from public.taraf t where t.id = @p0", null, [t],
                     o => new { ad = o.GetString(0), tel = o.GetString(1), tarih = o.IsDBNull(2) ? "" : o.GetString(2) }, iptal);
                 if (kisi is null || kisi.tel == "") { hata++; continue; }
                 try

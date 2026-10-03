@@ -30,7 +30,7 @@ public static partial class KaynakKatalogu
             new("barkod", "coalesce(n.barkod, '')", "metin", "Barkod", Hizalama: "orta",
                                  Genislik: 140),
             new("hastaAdi",
-                "coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan)",
+                "coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120))",
                                  "metin", "Hasta", Genislik: 200),
             new("tetkikAd", "t.ad", "metin", "Tetkik", Genislik: 200),
             new("ekimZamani", "k.ekim_zamani", "tarih", "Ekim", Hizalama: "orta",

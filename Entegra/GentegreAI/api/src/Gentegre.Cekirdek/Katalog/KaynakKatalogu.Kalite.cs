@@ -205,7 +205,7 @@ public static partial class KaynakKatalogu
                                  Genislik: 90),
             new("lot", "o.lot", "metin", "Lot", Hizalama: "orta", Genislik: 110),
             new("aciklama", "o.aciklama", "metin", "Açıklama", Genislik: 400),
-            new("kullanici", "coalesce(k.unvan, '')", "metin", "Kaydeden",
+            new("kullanici", "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')", "metin", "Kaydeden",
                                  Genislik: 180, Varsayilan: false),
         });
 

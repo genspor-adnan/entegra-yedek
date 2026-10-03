@@ -33,6 +33,10 @@ public sealed class KimlikServisi
         _ayar = ayar.Value;
     }
 
+    /// <summary>Rol atanmamis hesabin giris / oturum mesaji (tek metin).</summary>
+    public const string RolYokMesaji =
+        "Hesabiniza rol atanmamis - sisteme giris icin yoneticinizden rol isteyin.";
+
     public async Task<GirisYaniti> GirisAsync(GirisIstegi istek, string ip, string istemci,
                                               CancellationToken iptal = default)
     {
@@ -90,6 +94,14 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz("Kullanici adi ya da parola hatali.");
         }
 
+        // ROL ATANMAMIS HESAP GIREMEZ (kullanici). Parola DOGRULANDIKTAN sonra
+        //   bakilir: once bakilsa yanlis parolayla hesabin varligi sizardi.
+        if (kullanici.RolAtanmamis)
+        {
+            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "rol_yok", iptal);
+            throw GentegreHatasi.Yetkisiz(RolYokMesaji);
+        }
+
         await _kullanicilar.GirisBasariliAsync(kullanici.TarafId, ip, iptal);
         await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, true, "giris", iptal);
 
@@ -144,7 +156,8 @@ public sealed class KimlikServisi
                 await HekimRoluAsync(subeId, iptal),
                 await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal),
-                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal))
+                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal),
+                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal))
         };
     }
 
@@ -187,6 +200,13 @@ public sealed class KimlikServisi
             await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "kullanici_pasif", iptal);
             await islem.CommitAsync(iptal);
             throw GentegreHatasi.Yetkisiz();
+        }
+        // Rolu sonradan "Rol Atanmamis"a cekilen kisi oturumunu yenileyemez.
+        if (kullanici.RolAtanmamis)
+        {
+            await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "rol_yok", iptal);
+            await islem.CommitAsync(iptal);
+            throw GentegreHatasi.Yetkisiz(RolYokMesaji);
         }
 
         // Kilit altinda satir acik olmali; degilse (beklenmeyen) yeni dal ACILMAZ.
@@ -353,7 +373,8 @@ public sealed class KimlikServisi
                 await HekimRoluAsync(subeId, iptal),
                 await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal),
-                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal))
+                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal),
+                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal))
         };
     }
 
@@ -416,8 +437,9 @@ public sealed class KimlikServisi
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
         IReadOnlyList<string> moduller, int hekimRolu,
         (string Kod, string Ad, short MenuBolgeli) kurumTipi = default,
-        decimal iskontoEsigi = 0m, short portalTuru = 0) => new()
+        decimal iskontoEsigi = 0m, short portalTuru = 0, bool hekimKisitli = false) => new()
     {
+        HekimKisitli = hekimKisitli,
         // PORTAL TURU (806): giris yanitinda da tasinir - sayfa yenilenmeden
         //   once ekran portal kullanicisina anlamsiz dugmeyi gostermesin.
         PortalTuru = portalTuru,

@@ -28,7 +28,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "prim",
         Kaynak: "public.v_prim_rol_aday a join public.taraf t on t.id = a.id",
         SabitKosul: "coalesce(a.durum, 1) = 1",
-        VarsayilanSirala: "t.unvan asc",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         SubeKolonu: null,
         Kolonlar: new KolonTanimi[]
         {
@@ -36,7 +36,7 @@ public static partial class KaynakKatalogu
             // KOD arama icin gerekli: jenerik arama serbest metni "kod icerir"
             //   kosuluyla da ariyor - kolon yoksa "Bilinmeyen alan: kod".
             new("kod",   "t.kod", "metin", "Kod", Genislik: 110),
-            new("unvan", "t.unvan", "metin", "Ad Soyad", Genislik: 260),
+            new("unvan", "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)", "metin", "Ad Soyad", Genislik: 260),
             // ROL: arama BU KOLONLA suzuluyor (ekFiltre) - planin rolu.
             new("rol",   "a.rol", "sayi",  "Rol Kodu", Varsayilan: false),
             new("tip",
@@ -104,7 +104,7 @@ public static partial class KaynakKatalogu
                                            Filtrelenebilir: false),
             new("odeyenTipi", "p.odeyen_tipi", "sayi", "Ödeyen Tipi Kodu",
                                            Varsayilan: false),
-            new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum",
+            new("kurum",     "coalesce(public.fn_taraf_ad(ku.unvan, ku.ad, ku.soyad)::varchar(120), '')", "metin", "Ödeyen Kurum",
                                            Genislik: 190, Varsayilan: false),
             new("baslangic", "p.baslangic", "tarih", "Başlangıç", Genislik: 110),
             new("bitis",     "p.bitis",     "tarih", "Bitiş", Genislik: 110),
@@ -243,7 +243,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "h.id",        "sayi",  "Id", Varsayilan: false),
-            new("kisi",      "coalesce(t.unvan, '')", "metin", "Kişi", Genislik: 220),
+            new("kisi",      "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')", "metin", "Kişi", Genislik: 220),
             new("tarafId",   "h.taraf_id",  "sayi",  "Kişi Id", Varsayilan: false),
             new("donemBaslangic", "h.donem_baslangic", "tarih", "Dönem Başı", Genislik: 120),
             new("donemBitis",     "h.donem_bitis",     "tarih", "Dönem Sonu", Genislik: 120),

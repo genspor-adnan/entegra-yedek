@@ -45,10 +45,11 @@ const MUAYENE_DURUM: Record<string, string> = {
 };
 
 
-/** "Şablon Muayene" sekmesi (eski adı Fizik Muayene - kullanıcı yeniden adlandırdı;
-    eski ad yeniden başlatılmamış API için tanınır). */
+/** "Muayene" sekmesi (eski adları Fizik Muayene → Şablon Muayene - kullanıcı yeniden
+    adlandırdı; eski adlar yeniden başlatılmamış API için tanınır). Yalnız muayene
+    kartında çağrılır - İSG'nin "Muayene" grubu buraya gelmez. */
 const sablonMuayeneMi = (baslik: string) =>
-  baslik === 'Şablon Muayene' || baslik === 'Fizik Muayene';
+  baslik === 'Muayene' || baslik === 'Şablon Muayene' || baslik === 'Fizik Muayene';
 
 export interface ListeKartiOzellikleri {
   tanim: ListeTanimi;
@@ -115,8 +116,11 @@ export function ListeKarti({
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
   // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
   const [ozetModal, setOzetModal] = useState<number | null>(null);
-  /** Vucut semasi penceresi (Sablon Muayene sekmesi). */
+  /** Vucut semasi penceresi (Muayene sekmesi). */
   const [vucutAcik, setVucutAcik] = useState(false);
+  /** e-Recete sekmesine "ilac aramayi ac" istegi (ozet kontrol listesi);
+      sekme acilip aramayi actiginda tuketilir. */
+  const [receteIlacAra, setReceteIlacAra] = useState(false);
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
   const [kayitSayaci, setKayitSayaci] = useState(0);
@@ -163,7 +167,7 @@ export function ListeKarti({
         <MuayeneDikte
           hedefler={[{ ad: 'sikayet', baslik: 'Şikâyet' },
                      { ad: 'hikaye', baslik: 'Hikâye' },
-                     { ad: 'karar', baslik: 'Değerlendirme / Plan' }]}
+                     { ad: 'karar', baslik: 'Değerlendirme / Sonuç' }]}
           degerOku={ad => dikteKaynak.current?.oku(ad) ?? ''}
           onYaz={(ad, v) => {
             // Muayene sekmesi hic cizilmediyse yazici yok (kart baska sekmede acildi).
@@ -281,7 +285,7 @@ export function ListeKarti({
                         {/* SIKAYET / HIKAYE / PLAN DA BURADA (kullanici: "sikayet/
                             hikayeyi de diger tarafa al"; mockup muayene_karti_v2):
                             solda Anamnez · fizik muayene · Degerlendirme, sagda
-                            vital. Ilk sekme derlenmis "Muayene Özeti". */}
+                            vital. Ilk sekme derlenmis "Özet". */}
                         <div className="muayene-ikili msb-ikili">
                           <div className="mi-sol">
                             {/* DIKTE KAYNAGI: basliktaki Dikte bu sekmenin GUNCEL
@@ -419,10 +423,16 @@ export function ListeKarti({
           ? [
               // MUAYENE OZETI ILK SEKME (kullanici, mockup muayene_karti_v2):
               //   yazilanin derlenmis gorunumu + tamamlama kontrolu.
-              { anahtar: 'ozel:ozet', baslik: 'Muayene Özeti',
+              { anahtar: 'ozel:ozet', baslik: 'Özet',
                 ciz: baglam => (
                   <MuayeneOzetSekmesi baglam={baglam} muayeneId={Number(kartId)}
-                    sekme={sekmeVerisi.veri} tazele={kartTazele * 1000 + kayitSayaci} />
+                    sekme={sekmeVerisi.veri} tazele={kartTazele * 1000 + kayitSayaci}
+                    eylemler={{
+                      muayeneyeAl: () => void aksiyon('muayene.al', { id: Number(kartId) }),
+                      taniEkle: () => setIcdAramaAcik(true),
+                      istemAc: () => setIstem(Number(kartId)),
+                      ilacEkle: () => setReceteIlacAra(true),
+                    }} />
                 ) },
               // e-RECETE YINE AYRI SEKME (kullanici 02.10.2026: "recete
               //   sekmesini geri getir") - Muayene sekmesinden alindi.
@@ -431,7 +441,9 @@ export function ListeKarti({
                   <MuayeneReceteSekmesi
                     veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
                     muayeneId={Number(kartId)}
-                    tazele={() => setKartTazele(t => t + 1)} />
+                    tazele={() => setKartTazele(t => t + 1)}
+                    ilacAra={receteIlacAra}
+                    onIlacAraTamam={() => setReceteIlacAra(false)} />
                 ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}

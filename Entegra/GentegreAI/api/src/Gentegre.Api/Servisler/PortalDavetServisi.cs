@@ -53,7 +53,7 @@ public sealed class PortalDavetServisi(VeriKaynagi veri, BildirimDeposu bildirim
             out var s) ? s : 48;
 
         var kisi = await b.TekAsync("""
-            select t.id, coalesce(t.unvan, '') as unvan, coalesce(t.vkno, '') as tckn,
+            select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan, coalesce(t.vkno, '') as tckn,
                    coalesce(t.cep_tel, '') as cep, coalesce(t.eposta, '') as eposta,
                    k.id as "hesapVar",
                    case when coalesce(k.parola_hash, '') = '' then 1 else 0 end as "parolasiz"

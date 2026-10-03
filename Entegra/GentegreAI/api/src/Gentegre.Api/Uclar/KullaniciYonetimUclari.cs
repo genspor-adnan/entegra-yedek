@@ -219,7 +219,7 @@ public static class KullaniciYonetimUclari
             baglam.YetkiIste("kullanici", Islem.Gor);
 
             var satirlar = await veri.ListeAsync("""
-                select l.tarih, l.islem_tipi, coalesce(k.unvan, '') as kullanici,
+                select l.tarih, l.islem_tipi, coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as kullanici,
                        coalesce(l.ip, '') as ip, coalesce(l.bilgi->>'islem', '') as islem
                   from public.islem_log l
                   left join public.taraf k on k.id = l.kullanici_id

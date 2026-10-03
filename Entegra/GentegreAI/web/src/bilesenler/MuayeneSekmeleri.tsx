@@ -81,10 +81,14 @@ function Kabuk({ hata, veri, children }:
  * reçete varsa üstte seçici çıkar. Hiç reçete yoksa boş durum: ilk ilaç
  * eklenince reçete sunucuda açılır.
  */
-export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
+export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, onIlacAraTamam }: {
   veri: SekmeVerisi | null; hata: string | null;
   muayeneId: number;
   tazele(): void;
+  /** İLAÇ ARAMAYI AÇ (özet › kontrol listesi "Reçete"): taslak varsa onun
+      araması, yoksa ilk ilacın araması (sunucu yeni taslak açar). */
+  ilacAra?: boolean;
+  onIlacAraTamam?(): void;
 }) {
   const [aramaAcik, setAramaAcik] = useState(false);
   /** Kullanıcının seçtiği reçete (birden çok reçetede); null = varsayılan. */
@@ -128,6 +132,16 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
   const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayi(b.id) - sayi(a.id));
   const varsayilan = receteler.find(r => sayi(r.durum) === 1) ?? receteler[0];
   const gosterilen = receteler.find(r => sayi(r.id) === secilenId) ?? varsayilan;
+  const taslakGosteriliyor = sayi(gosterilen?.durum) === 1;
+
+  // Taslak gösteriliyorsa istek ReceteKarti'ye geçer (aramayı o açar);
+  //   taslak yoksa (reçete yok ya da hepsi imzalı) burada açılır.
+  useEffect(() => {
+    if (!ilacAra || !veri || taslakGosteriliyor) return;
+    setAramaAcik(true);
+    onIlacAraTamam?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ilacAra, veri, taslakGosteriliyor]);
 
   const sablonSecici = sablonReceteleri.length > 0 && (
     <select className="recete-sablon" value="" aria-label={c('Reçete şablonundan yaz')}
@@ -179,6 +193,7 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele }: {
 
       {gosterilen ? (
         <ReceteKarti key={sayi(gosterilen.id)} receteId={sayi(gosterilen.id)} gomulu
+          ilacAra={ilacAra && taslakGosteriliyor} onIlacAraTamam={onIlacAraTamam}
           ekAraclar={sayi(gosterilen.durum) === 1 ? sablonSecici : null}
           onKapat={() => { setSecilenId(null); tazele() }}
           onDegisti={tazele} />

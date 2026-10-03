@@ -3,6 +3,9 @@ namespace Gentegre.Cekirdek.Katalog;
 /// <summary>
 /// HEKİM ÇALIŞMA PLANI (711) kartları: şablon (tekrar eden kural) ve istisna.
 /// Bayrak yerine geçen model - hekim "randevu verilebilir" = aktif şablonu var.
+/// Ekranda ÖZEL KARTLA açılır (945, web <c>bilesenler/calisma</c>); alan listesi
+/// yazma sözleşmesidir. Yeni istisna "Bekliyor" (0) açılır - yalnız onaylı
+/// istisna planı kapatır, "✔ Onayla" 1'e çeker (onaylayan tetikle yazılır).
 /// </summary>
 public static partial class KartKatalogu
 {
@@ -24,7 +27,7 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",           "id",            "sayi",  Yazilabilir: false),
-            new("hekimId",      "hekim_id",      "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Hekim", Grup: "Kimlik"),
+            new("hekimId",      "hekim_id",      "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Doktor", Grup: "Kimlik"),
             new("departmanId",  "departman_id",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             new("subeId",       "sube_id",       "kod",   KodTablosu: "public.v_sube_lookup", Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),
             new("ad",           "ad",            "metin", EnFazlaUzunluk: 80, Baslik: "Şablon Adı", Grup: "Kimlik"),
@@ -52,11 +55,11 @@ public static partial class KartKatalogu
         Tablo: "public.hekim_calisma_istisna",
         LogTabloId: LogCalismaIstisna,
         SubeKolonu: null,
-        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["tur"] = (short)1, ["durum"] = (short)1, ["basTarih"] = "@simdi", ["bitTarih"] = "@simdi" },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["tur"] = (short)1, ["durum"] = (short)0, ["basTarih"] = "@simdi", ["bitTarih"] = "@simdi" },
         Alanlar: new KartAlani[]
         {
             new("id",           "id",            "sayi",  Yazilabilir: false),
-            new("hekimId",      "hekim_id",      "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Hekim", Grup: "Kimlik"),
+            new("hekimId",      "hekim_id",      "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Doktor", Grup: "Kimlik"),
             new("tur",          "tur",           "kod",   Zorunlu: true, KodListesi: "calisma.istisna_tur", Baslik: "Tür", Grup: "Kimlik"),
             new("departmanId",  "departman_id",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm (boş = tümü)", Grup: "Kimlik"),
             new("subeId",       "sube_id",       "kod",   KodTablosu: "public.v_sube_lookup", Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),

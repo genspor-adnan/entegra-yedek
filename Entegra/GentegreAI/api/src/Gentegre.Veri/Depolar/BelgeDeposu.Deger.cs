@@ -61,12 +61,12 @@ public sealed partial class BelgeDeposu
                    b.taraf_adres as "tarafAdres", b.taraf_ilce as "tarafIlce", b.taraf_il as "tarafIl",
                    b.cikis_depo_id as "cikisDepoId", cd.ad as "cikisDepoAdi",
                    b.giris_depo_id as "girisDepoId", gd.ad as "girisDepoAdi",
-                   b.satici_id as "saticiId", sc.unvan as "saticiAdi",
+                   b.satici_id as "saticiId", public.fn_taraf_ad(sc.unvan, sc.ad, sc.soyad)::varchar(120) as "saticiAdi",
                    -- BASVURU UZANTISI (296, belge_basvuru 1:1): basvurulan
                    --   bolum ve hekim. Randevusuz acilan basvuruda da
                    --   girilebilsin diye BELGEDE tutulur, randevudan okunmaz.
                    bb.bolum_id as "bolumId", coalesce(bl.ad, '') as "bolumAdi",
-                   bb.personel_id as "personelId", coalesce(hk.unvan, '') as "personelAdi",
+                   bb.personel_id as "personelId", coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), '') as "personelAdi",
                    -- SOZLESME / ALT KURUM / SGK KATKISI (469) GERI DE OKUNUR:
                    --   yaziliyorlardi ama yanitta hic donmuyorlardi. Kart
                    --   acilinca "Sözleşme" combosu bos geliyor, kullanici
@@ -104,7 +104,7 @@ public sealed partial class BelgeDeposu
                    bp.sgk_mustehaklik_zaman as "sgkMustehaklikZaman",
                    bp.sgk_sevkli as "sgkSevkli", bp.sgk_sevk_kurum as "sgkSevkKurum",
                    bp.oss_kurum_id as "ossKurumId",
-                   coalesce(ok2.unvan, '') as "ossKurumAdi",
+                   coalesce(public.fn_taraf_ad(ok2.unvan, ok2.ad, ok2.soyad)::varchar(120), '') as "ossKurumAdi",
                    bp.oss_durum as "ossDurum", bp.oss_provizyon_no as "ossProvizyonNo",
                    bp.oss_provizyon_tarihi as "ossProvizyonTarihi",
                    bp.oss_gecerlilik as "ossGecerlilik",
@@ -128,16 +128,16 @@ public sealed partial class BelgeDeposu
                    --   CARISINI yaziyordu - dis kurum numunesinde cari gonderen
                    --   KURUMDUR. Ad sunucudan gelir ki ekran ikinci bir istek
                    --   atmasin; hasta_id bossa belgenin tarafi hastadir.
-                   coalesce(hs.unvan, '') as "hastaUnvan",
+                   coalesce(public.fn_taraf_ad(hs.unvan, hs.ad, hs.soyad)::varchar(120), '') as "hastaUnvan",
                    bb.odeyen_kurum_id as "odeyenKurumId",
-                   coalesce(ok.unvan, '') as "odeyenKurumAdi",
+                   coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurumAdi",
                    -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum
                    --   bos deger dondurur, sozlesme (alan adlari) degismedi.
                    sv.teslim_sekli as "teslimSekli",
                    sv.arac_plaka as "aracPlaka", sv.sofor_ad as "soforAd",
                    sv.sofor_tckn as "soforTckn", sv.teslim_eden_id as "teslimEdenId",
-                   td.unvan as "teslimEdenAdi",
-                   sv.teslim_alan_id as "teslimAlanId", ta.unvan as "teslimAlanAdi",
+                   public.fn_taraf_ad(td.unvan, td.ad, td.soyad)::varchar(120) as "teslimEdenAdi",
+                   sv.teslim_alan_id as "teslimAlanId", public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120) as "teslimAlanAdi",
                    b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
                    -- Belgenin fiyat listesi (205) + adi: kart basliginda gosterilir.
                    b.fiyat_listesi_id as "fiyatListesiId",

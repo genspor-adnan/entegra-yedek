@@ -235,7 +235,7 @@ public sealed class UtsDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
             select b.tur, b.belge_no, b.belge_tarihi, coalesce(b.sube_id, 0),
-                   coalesce(b.taraf_id, 0), coalesce(t.unvan, ''),
+                   coalesce(b.taraf_id, 0), coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                    coalesce(t.uts_kurum_no, '')
               from public.belge b
               left join public.taraf t on t.id = b.taraf_id

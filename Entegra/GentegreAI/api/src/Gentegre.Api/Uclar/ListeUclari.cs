@@ -31,11 +31,11 @@ public static class ListeUclari
                     await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             if (kolonlar.Count == 0) throw GentegreHatasi.Yasak("Bu listede gorebileceginiz kolon yok.");
 
-            // HEKIM KISITI: planli hekim yalniz kendine gelen hastalari gorur; banko /
+            // HEKIM KISITI: hekim yalniz kendine gelen hastalari gorur; banko /
             //   yonetici tum listeyi. Kural kaynak haritasinda (KaynakKatalogu.HekimKisiti).
             int? hekimId = null;
             if (KaynakKatalogu.HekimKolonu(tanim.Ad) is not null
-                && await veri.TekDegerAsync<int>("select public.fn_hekim_planli(@p0)", [baglam.KullaniciId], iptal) == 1)
+                && await veri.TekDegerAsync<int>(KaynakKatalogu.HekimKisitliSql, [baglam.KullaniciId], iptal) == 1)
                 hekimId = baglam.KullaniciId;
 
             var yanit = await depo.SorgulaAsync(tanim, istek ?? new ListeIstegi(), kolonlar,

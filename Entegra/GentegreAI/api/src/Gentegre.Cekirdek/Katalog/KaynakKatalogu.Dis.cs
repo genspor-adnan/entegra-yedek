@@ -174,7 +174,7 @@ public static partial class KaynakKatalogu
         {
             new("id",       "l.id",       "sayi",  "Id", Varsayilan: false),
             new("ad",       "l.ad",       "metin", "Laboratuvar", Genislik: 200),
-            new("cari",     "t.unvan",    "metin", "Tedarikçi Cari", Genislik: 200),
+            new("cari",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Tedarikçi Cari", Genislik: 200),
             new("slaGun",   "l.sla_gun",  "sayi",  "SLA (gün)", Hizalama: "sag", Genislik: 80),
             new("dijital",  "l.dijital",  "mantik", "Dijital", Hizalama: "orta"),
             new("kurye",    "l.kurye_gunleri", "metin", "Kurye Günleri", Genislik: 120),
@@ -196,7 +196,7 @@ public static partial class KaynakKatalogu
         {
             new("id",        "o.id",       "sayi",  "Id", Varsayilan: false),
             new("planNo",    "p.plan_no",  "metin", "Plan", Genislik: 110),
-            new("hasta",     "t.unvan",    "metin", "Hasta", Genislik: 200),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
             new("hastaId",   "p.hasta_id", "sayi",  "Hasta Id", Varsayilan: false),
             new("toplam",    "o.toplam",   "para",  "Toplam", Hizalama: "sag"),
             new("pesinat",   "o.pesinat",  "para",  "Peşinat", Hizalama: "sag"),

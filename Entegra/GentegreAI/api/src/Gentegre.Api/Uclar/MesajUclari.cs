@@ -194,11 +194,11 @@ public static class MesajUclari
             //   seferinde bütün akışı taşımasın.
             var mesajlar = await baglanti.ListeAsync("""
                 select m.id, m.gonderen_id as "gonderenId",
-                       coalesce(nullif(btrim(t.unvan), ''), t.kod) as gonderen,
+                       coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), t.kod) as gonderen,
                        m.tip, case when m.durum = 2 then '' else m.metin end as metin,
                        m.tarih, m.durum, m.sabit, m.yanit_id as "yanitId",
                        (select left(y.metin, 120) from public.mesaj y where y.id = m.yanit_id) as "yanitMetin",
-                       (select coalesce(nullif(btrim(t2.unvan), ''), t2.kod)
+                       (select coalesce(nullif(btrim(public.fn_taraf_ad(t2.unvan, t2.ad, t2.soyad)::varchar(120)), ''), t2.kod)
                           from public.mesaj y join public.taraf t2 on t2.id = y.gonderen_id
                          where y.id = m.yanit_id) as "yanitGonderen",
                        -- Okundu: karşı tarafın son okuma damgası bu mesajı geçtiyse.
@@ -324,7 +324,7 @@ public static class MesajUclari
 
             var uyeler = await baglanti.ListeAsync("""
                 select u.kullanici_id as "kullaniciId",
-                       coalesce(nullif(btrim(t.unvan), ''), t.kod) as ad,
+                       coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), t.kod) as ad,
                        u.rol, u.son_okuma as "sonOkuma",
                        coalesce(p.gorev, '') as gorev, coalesce(t.telefon, '') as telefon,
                        coalesce(t.eposta, '') as eposta
@@ -351,7 +351,7 @@ public static class MesajUclari
 
             var sabitler = await baglanti.ListeAsync("""
                 select m.id, m.metin, m.tarih,
-                       coalesce(nullif(btrim(t.unvan), ''), t.kod) as gonderen
+                       coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), t.kod) as gonderen
                   from public.mesaj m join public.taraf t on t.id = m.gonderen_id
                  where m.sohbet_id = @p0 and m.sabit = 1 and m.durum = 1
                  order by m.tarih desc
@@ -360,7 +360,7 @@ public static class MesajUclari
             // KÜNYE (mockup sağ panel): kişi sohbetinde karşı tarafın kartı -
             //   grup sohbetinde anlamı yok, null döner.
             var kunye = await baglanti.TekAsync("""
-                select t.id, coalesce(nullif(btrim(t.unvan), ''), t.kod) as ad,
+                select t.id, coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), t.kod) as ad,
                        t.kod,
                        coalesce(p.gorev, '') as gorev,
                        coalesce(t.telefon, '') as telefon, coalesce(t.cep_tel, '') as cep,
@@ -376,7 +376,7 @@ public static class MesajUclari
                        -- BAGLI CARI (mockup kunyesinde "Cari" satiri + "Cari
                        --   Kartini Ac"): kisi bir cariye bagliysa gosterilir.
                        t.bag_id as "cariId",
-                       coalesce((select coalesce(nullif(btrim(b.unvan), ''), b.kod)
+                       coalesce((select coalesce(nullif(btrim(public.fn_taraf_ad(b.unvan, b.ad, b.soyad)::varchar(120)), ''), b.kod)
                                    from public.taraf b where b.id = t.bag_id), '') as cari
                   from public.v_mesaj_sohbet v
                   join public.taraf t on t.id = v.karsi_id
@@ -440,13 +440,13 @@ public static class MesajUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var kisiler = await baglanti.ListeAsync("""
-                select k.id, coalesce(nullif(btrim(t.unvan), ''), k.kod) as ad,
+                select k.id, coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), k.kod) as ad,
                        coalesce(p.gorev, '') as gorev
                   from public.taraf_kullanici k
                   join public.taraf t on t.id = k.id
                   left join public.taraf_personel p on p.id = k.id
                  where k.aktif = 1 and k.id <> @p0
-                   and (@p1 = '' or coalesce(t.unvan, '') ilike '%' || @p1 || '%'
+                   and (@p1 = '' or coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') ilike '%' || @p1 || '%'
                         or k.kod ilike '%' || @p1 || '%')
                  order by ad limit 50
                 """, null, [baglam.KullaniciId, ara ?? ""], OkuyucuGenisletmeleri.Sozluk, iptal);

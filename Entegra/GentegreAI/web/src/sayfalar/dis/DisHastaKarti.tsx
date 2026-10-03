@@ -15,6 +15,7 @@ import { DisIconFormu } from '../../bilesenler/dis/DisIconFormu';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { StokAramaPenceresi } from '../../bilesenler/StokAramaPenceresi';
 import { c as cev } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * DİŞ HASTA KARTI — mockup `Ekranlar/Dis Klinigi/dis_hasta_karti_v5.html`.
@@ -78,11 +79,8 @@ export function DisHastaKarti() {
   // Buradan acilan generic kart/listeler (odeme plani, lab isleri, genel hasta
   //   karti) ?geri= ile bu sayfaya doner; ozel kartlar (seans, plan) state.geri alir.
   const geriParam = encodeURIComponent(konum.pathname);
-  useEffect(() => {
-    const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() };
-    window.addEventListener('keydown', f);
-    return () => window.removeEventListener('keydown', f);
-  }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
   const [kart, setKart] = useState<Kart | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);

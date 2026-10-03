@@ -62,10 +62,10 @@ public static partial class KaynakKatalogu
             //   cozum yoksa satirin taraf_id cari'sinin kodu (kullanici).
             new("kod",        "case when l.ust_tablo_id in (71, 73) then kut.kod when l.tablo_id in (71, 73) then kt.kod when l.tablo_id = 88 then ks.kod when l.tablo_id = 30 then coalesce(nullif(kb.belge_no, ''), l.bilgi->>'belgeNo') when l.tablo_id = 908 then ki.islem_no::text when l.tablo_id = 903 then kr.kod else ktr.kod end",
                                                                 "metin", "Kod"),
-            new("ad",         "case when l.ust_tablo_id in (71, 73) then kut.unvan when l.tablo_id in (71, 73) then kt.unvan when l.tablo_id = 88 then ks.ad when l.tablo_id = 30 then coalesce(nullif(kb.taraf_unvan, ''), l.bilgi->>'tarafUnvan', ktr.unvan) when l.tablo_id = 908 then coalesce(nullif(ki.taraf_unvan, ''), l.bilgi->>'tarafUnvan', ktr.unvan) when l.tablo_id = 903 then kr.ad else ktr.unvan end",
+            new("ad",         "case when l.ust_tablo_id in (71, 73) then public.fn_taraf_ad(kut.unvan, kut.ad, kut.soyad)::varchar(120) when l.tablo_id in (71, 73) then public.fn_taraf_ad(kt.unvan, kt.ad, kt.soyad)::varchar(120) when l.tablo_id = 88 then ks.ad when l.tablo_id = 30 then coalesce(nullif(kb.taraf_unvan, ''), l.bilgi->>'tarafUnvan', public.fn_taraf_ad(ktr.unvan, ktr.ad, ktr.soyad)::varchar(120)) when l.tablo_id = 908 then coalesce(nullif(ki.taraf_unvan, ''), l.bilgi->>'tarafUnvan', public.fn_taraf_ad(ktr.unvan, ktr.ad, ktr.soyad)::varchar(120)) when l.tablo_id = 903 then kr.ad else public.fn_taraf_ad(ktr.unvan, ktr.ad, ktr.soyad)::varchar(120) end",
                                                                 "metin", "Ad"),
             new("kayitId",    "l.kayit_id",                    "sayi",  "Kayıt Id",  Hizalama: "sag"),
-            new("kullanici",  "k.unvan",                       "metin", "Kullanıcı"),
+            new("kullanici",  "public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120)",                       "metin", "Kullanıcı"),
             new("ip",         "l.ip",                          "metin", "IP"),
             new("ustTabloId", TabloAdiIfade("l.ust_tablo_id"), "metin", "Ust Tablo", Varsayilan: false),
             new("ustKayitId", "l.ust_kayit_id",                "sayi",  "Ust Kayit", Varsayilan: false),

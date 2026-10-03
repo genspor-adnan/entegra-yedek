@@ -134,12 +134,12 @@ public sealed class DisKurumBasvurusu(
                         matrah, kdv_tutari, genel_toplam, ekleyen)
                 -- kdv_durum METIN ('Dahil'/'Hariç'/'Muaf'): liste fiyatlari
                 --   KDV dahil tutuluyor, belge de dahil calisir.
-                select @p0, @p1, t.id, t.unvan, @p2, @p3, @p4, 0, 'Dahil', @p5,
+                select @p0, @p1, t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, @p2, @p3, @p4, 0, 'Dahil', @p5,
                        -- Açıklamada HASTA ADI da durur: belgeye bakan
                        --   kişi numunenin kime ait olduğunu kolon
                        --   aramadan görsün.
                        'Dış kurum numunesi · Hasta: '
-                         || coalesce((select coalesce(nullif(trim(x.unvan), ''),
+                         || coalesce((select coalesce(nullif(trim(public.fn_taraf_ad(x.unvan, x.ad, x.soyad)::varchar(120)), ''),
                                                      trim(x.ad || ' ' || x.soyad))
                                         from public.taraf x where x.id = @p9), '?')
                          || ' · İstem ' || @p6::text,

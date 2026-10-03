@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
-import { type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { type CalismaBlok, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { c as cev } from '../dil/ceviri';
 
 /**
@@ -57,8 +57,15 @@ function haftaBasi(t: Date) {
 
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                  bolum, hekimId, hekimler = [], cihazlar = [],
-                                 yanPanel, onBirak, onKapatmaIste }: {
+                                 yanPanel, onBirak, onKapatmaIste,
+                                 gorunumBaslangic, onGorunumDegisti, hekimSabit }: {
   ayarlar?: Partial<Ayarlar>;
+  /** Kullanici kisitli hekim: doktor sutunlu gorunum yok (kendi adi sabit). */
+  hekimSabit?: boolean;
+  /** Son secilen gorunum (kullanicinin kaldigi yer - randevuTercihi). */
+  gorunumBaslangic?: Gorunum;
+  /** Gorunum degisince haber verir (son secim saklansin diye). */
+  onGorunumDegisti?(g: Gorunum): void;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
   hekimId?: number;
@@ -105,12 +112,26 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
-  const ayar = { ...VARSAYILAN, ...ayarlar };
-  const [gorunum, setGorunum] = useState<Gorunum>('gun');
+  // TANIMSIZ ALAN VARSAYILANI EZMEZ: ayarlar yuklenmeden once gelen
+  //   `calismaGunleri: undefined` varsayilani silip haftalik gorunumu
+  //   ("kaldigi yerden" haftalik acilinca) cokertiyordu.
+  const ayar = { ...VARSAYILAN, ...Object.fromEntries(
+    Object.entries(ayarlar ?? {}).filter(([, v]) => v !== undefined)) } as typeof VARSAYILAN;
+  // Kisitli hekimde kayitli "doktor" gorunumu gunluge duser (o dugme yok).
+  const [gorunum, setGorunumIc] = useState<Gorunum>(
+    hekimSabit && gorunumBaslangic === 'hekim' ? 'gun' : (gorunumBaslangic ?? 'gun'));
+  const setGorunum = (g: Gorunum) => { setGorunumIc(g); onGorunumDegisti?.(g) };
   const [gun, setGun] = useState(() => isoGun(new Date()));
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [hata, setHata] = useState('');
   const [yukleniyor, setYukleniyor] = useState(false);
+  /**
+   * CALISMA PLANI BLOKLARI (kullanici: "calisma planlari varken randevu
+   * ayarlarina gerek kaldi mi" -> takvim PLANDAN cizilir): saat araligi, slot
+   * suresi, gunler ve mesai disi / izinli / kapali hucreler bloklardan gelir.
+   * Plan hic yoksa (bos dizi) takvim eski ayarlarla calisir.
+   */
+  const [bloklar, setBloklar] = useState<CalismaBlok[]>([]);
 
   // Gorunume gore tarih araligi.
   const gunler = useMemo(() => {
@@ -123,8 +144,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       const t = new Date(bas);
       t.setDate(bas.getDate() + i);
       return isoGun(t);
-    }).filter((_, i) => ayar.calismaGunleri.includes(i + 1));
-  }, [gorunum, gun, ayar.calismaGunleri]);
+    });
+  }, [gorunum, gun]);
 
   const yukle = useCallback(async () => {
     if (gunler.length === 0) return;
@@ -147,7 +168,17 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     } catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
   }, [gunler, bolum, hekimId]);
 
+  const planYukle = useCallback(async () => {
+    if (gunler.length === 0 || gorunum === 'cihaz') { setBloklar([]); return }
+    try {
+      const y = await api.calismaPlani({ bas: gunler[0], bit: gunler[gunler.length - 1],
+                                         hekimId: hekimId ?? null, departmanId: bolum ?? null });
+      setBloklar(y.bloklar);
+    } catch { setBloklar([]) /* plan okunamazsa takvim ayarlarla calisir */ }
+  }, [gunler, gorunum, bolum, hekimId]);
+
   useEffect(() => { void yukle() }, [yukle, yenile]);
+  useEffect(() => { void planYukle() }, [planYukle, yenile]);
 
   /**
    * Bekleyen istem paneli açıkken takvim CİHAZ görünümüyle açılır: panelden
@@ -155,22 +186,69 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * görünüm değiştirmeye zorlamak gereksiz. Bir kez uygulanır - sonradan
    * kullanıcı başka görünüme geçerse orada kalır.
    */
+  /** YAN PANEL ACIK MI (kullanici: "acilir kapanir olsa"): son durum tarayicida
+      hatirlanir; kapaliyken takvim tum genisligi alir. */
+  const [yanAcik, setYanAcikIc] = useState(() => {
+    try { return localStorage.getItem('randevu.yanPanel') !== '0' } catch { return true }
+  });
+  const setYanAcik = (a: boolean) => {
+    setYanAcikIc(a);
+    try { localStorage.setItem('randevu.yanPanel', a ? '1' : '0') } catch { /* yok say */ }
+  };
   const ilkCihazGorunumu = useRef(false);
   useEffect(() => {
     if (!yanPanel || cihazlar.length === 0 || ilkCihazGorunumu.current) return;
     ilkCihazGorunumu.current = true;
-    setGorunum('cihaz');
+    // Kullanicinin kayitli son gorunumu varsa ona dokunulmaz (kaldigi yer).
+    if (gorunumBaslangic) return;
+    setGorunumIc('cihaz');
   }, [yanPanel, cihazlar.length]);
 
-  // Saat dilimleri (slot).
+  /** Calisma bloklari (saatli) - mesai / izin / kapali satirlari ayri. */
+  const calisma = useMemo(() => bloklar.filter(b => b.saatBas && b.saatBit), [bloklar]);
+  /** Plan bu gorunumde var mi: yoksa takvim ayarlarla calisir, hucre taranmaz. */
+  const planVar = bloklar.length > 0;
+
+  // SLOT SURESI: plandaki en kisa slot (secili doktorun kendi slotu), yoksa ayar.
+  const adim = useMemo(() => {
+    const plandan = calisma.map(b => Number(b.slotDk)).filter(x => x >= 5);
+    return plandan.length ? Math.min(...plandan) : Math.max(5, Number(ayar.slotDk) || 15);
+  }, [calisma, ayar.slotDk]);
+
+  // Saat dilimleri (slot): plan bloklarinin en erken basi - en gec sonu.
+  //   MESAI DISINA yazilmis randevu da aralikta kalir: tarali zeminde gorunur,
+  //   takvimin kenarindan dusup kaybolmaz.
   const slotlar = useMemo(() => {
-    const bas = dk(ayar.baslangicSaat);
-    const bit = dk(ayar.bitisSaat);
-    const adim = Math.max(5, Number(ayar.slotDk) || 15);
+    let bas = dk(ayar.baslangicSaat);
+    let bit = dk(ayar.bitisSaat);
+    if (calisma.length) {
+      bas = Math.min(...calisma.map(b => dk(String(b.saatBas))));
+      bit = Math.max(...calisma.map(b => dk(String(b.saatBit))));
+    }
+    satirlar.forEach(r => {
+      const b = dk(String(r.saat ?? ''));
+      if (!r.saat) return;
+      bas = Math.min(bas, b);
+      bit = Math.max(bit, b + Math.max(Number(r.sureDk) || adim, adim));
+    });
+    bas = Math.floor(bas / adim) * adim;
     const liste: number[] = [];
     for (let t = bas; t < bit; t += adim) liste.push(t);
     return liste;
-  }, [ayar.baslangicSaat, ayar.bitisSaat, ayar.slotDk]);
+  }, [ayar.baslangicSaat, ayar.bitisSaat, calisma, satirlar, adim]);
+
+  /**
+   * GOSTERILEN GUNLER (haftalik): planda calisma / izin / kapali kaydi olan
+   * gunler + randevusu olan gunler. Plan yoksa eski ayar (calisma gunleri).
+   */
+  const gorunenGunler = useMemo(() => {
+    if (gorunum !== 'hafta') return gunler;
+    const planli = new Set(bloklar.map(b => String(b.gun).slice(0, 10)));
+    const dolu = new Set(satirlar.map(r => String(r.tarih ?? '').slice(0, 10)));
+    return gunler.filter((g, i) => planVar
+      ? planli.has(g) || dolu.has(g)
+      : ayar.calismaGunleri.includes(i + 1) || dolu.has(g));
+  }, [gorunum, gunler, bloklar, satirlar, planVar, ayar.calismaGunleri]);
 
   /**
    * SUTUNLAR: gunluk/haftalik gorunumde GUN, hekim gorunumunde HEKIM. Hucre
@@ -185,7 +263,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       const liste = hekimId ? hekimler.filter(h => h.id === hekimId) : hekimler;
       return liste.map(h => ({ anahtar: `h${h.id}`, baslik: h.ad, gun, hekim: h.id }));
     }
-    return gunler.map(g => {
+    return gorunenGunler.map(g => {
       const t = new Date(g);
       return {
         anahtar: g,
@@ -194,7 +272,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         hekim: undefined,
       };
     });
-  }, [gorunum, gunler, gun, hekimler, hekimId, cihazlar]);
+  }, [gorunum, gorunenGunler, gun, hekimler, hekimId, cihazlar]);
 
   /**
    * KAPALI ARALIKLAR (318): cihazin bakim/ariza/tatil kapatmalari ve ogle
@@ -240,15 +318,36 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
 
   /** Hucre kapali mi (318): sutunun cihazinda o slotu ortenkapatma. */
   const kapali = (sutun: Sutun, slot: number) => {
-    if (sutun.cihaz === undefined) return undefined;
-    const adim = Math.max(5, Number(ayar.slotDk) || 15);
-    return kapatmalar.find(k => k.cihazId === sutun.cihaz && k.gun === sutun.gun
-                                && k.bas < slot + adim && k.bit > slot);
+    if (sutun.cihaz !== undefined)
+      return kapatmalar.find(k => k.cihazId === sutun.cihaz && k.gun === sutun.gun
+                                  && k.bas < slot + adim && k.bit > slot);
+    return planKapali(sutun, slot);
+  };
+
+  /**
+   * PLANA GORE KAPALI HUCRE: secili doktorun (doktor sutununda o sutunun,
+   * suzgecte secili doktorun) o gun IZINLI / KAPALI olmasi ya da saatin
+   * calisma blogunun disinda kalmasi. Doktor secili degilse bolumdeki
+   * bloklarin BIRLESIMI - kimse calismiyorsa mesai disi. Kural (kayit
+   * engeli) veritabani tetiginde; burasi yalniz gorunum.
+   */
+  const planKapali = (sutun: Sutun, slot: number) => {
+    if (!planVar) return undefined;
+    const doktor = sutun.hekim ?? hekimId;
+    const gunun = bloklar.filter(b => String(b.gun).slice(0, 10) === sutun.gun
+                                      && (doktor === undefined || b.hekimId === doktor));
+    const metin = (m: string) => ({ cihazId: 0, bas: slot, bit: slot + adim, gun: sutun.gun, metin: m });
+    const acik = gunun.some(b => b.saatBas && b.saatBit
+                                 && dk(String(b.saatBas)) < slot + adim && dk(String(b.saatBit)) > slot);
+    if (acik) return undefined;
+    const kapaliGun = gunun.find(b => !b.saatBas && (b.kaynak === 3 || b.kaynak === 4));
+    if (kapaliGun && !gunun.some(b => b.saatBas))
+      return metin(kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? cev('İzinli') : cev('Kapalı')));
+    return metin(cev('Mesai dışı'));
   };
 
   /** sutun + slot -> o aralikta baslayan randevular. */
   const hucre = (sutun: Sutun, slot: number) => {
-    const adim = Math.max(5, Number(ayar.slotDk) || 15);
     return satirlar.filter(r => {
       if (String(r.tarih ?? '').slice(0, 10) !== sutun.gun) return false;
       if (sutun.hekim !== undefined && Number(r.hekimId) !== sutun.hekim) return false;
@@ -284,7 +383,6 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     setSuruklu(false);
     const bas = secim ? Math.min(secim.bas, slot) : slot;
     const bit = secim ? Math.max(secim.bit, slot) : slot;
-    const adim = Math.max(5, Number(ayar.slotDk) || 15);
     if (bas === bit) {
       // Tek hücre = tiklama: eskisi gibi o saate yeni randevu. Hekim
       //   gorunumunde SUTUNUN hekimi de forma tasinir.
@@ -324,9 +422,13 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                 onClick={() => setGorunum('gun')}>Günlük</button>
         <button type="button" className={`cip${gorunum === 'hafta' ? ' on' : ''}`}
                 onClick={() => setGorunum('hafta')}>{cev('Haftalık')}</button>
-        {/* Hekim gorunumu: secili GUN icin sutunlar hekimlerdir (kullanici). */}
-        <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
-                onClick={() => setGorunum('hekim')}>Hekim</button>
+        {/* Doktor gorunumu: secili GUN icin sutunlar doktorlardir (kullanici).
+            Kisitli hekimde YOK (kullanici: "uzman doktor rolunde Doktor filtre
+            butonu gorunmez") - yalniz kendi randevularini goruyor. */}
+        {!hekimSabit && (
+          <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
+                  onClick={() => setGorunum('hekim')}>{cev('Doktor')}</button>
+        )}
         {/* CIHAZ gorunumu yalniz cihaz tanimliysa (316) - poliklinik
             kurulumunda bu buton hic cikmaz. */}
         {cihazlar.length > 0 && (
@@ -348,7 +450,6 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                          : 'Önce cihaz sütununda bir saat aralığı işaretleyin'}
                   onClick={() => {
                     if (!secim || secim.cihaz === undefined) return;
-                    const adim = Math.max(5, Number(ayar.slotDk) || 15);
                     const bas = Math.min(secim.bas, secim.bit);
                     const bit = Math.max(secim.bas, secim.bit) + adim;
                     onKapatmaIste(secim.cihaz, `${secim.gun}T${saatMetni(bas)}`,
@@ -361,8 +462,17 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className={yanPanel ? 'takvim-duzen' : undefined}>
-      {yanPanel && (
+      {yanPanel && !yanAcik && (
+        // KAPALI: dar dikey serit - tiklayinca panel acilir.
+        <button type="button" className="takvim-yan-kapali" onClick={() => setYanAcik(true)}
+                title={cev('Randevu bekleyen istemleri göster')}>
+          ▸ <span>{cev('Randevu Bekleyen İstemler')}</span>
+        </button>
+      )}
+      {yanPanel && yanAcik && (
         <div className="takvim-yan">
+          <button type="button" className="d takvim-yan-gizle" onClick={() => setYanAcik(false)}
+                  title={cev('Paneli gizle - takvim tam genişlikte açılır')}>◂ {cev('Gizle')}</button>
           {gorunum !== 'cihaz' && cihazlar.length > 0 && (
             // Panelden sürüklenen istem yalnız cihaz sütununa düşer - başka
             //   görünümdeyken kullanıcı boşuna uğraşmasın.
@@ -405,7 +515,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                   //   her satirda "Bakım" tekrar etmesi takvimi okunmaz yapardi.
                   const kapatmaBasi = kapaliBlok
                     && kapaliBlok.bas >= slot
-                    && kapaliBlok.bas < slot + Math.max(5, Number(ayar.slotDk) || 15);
+                    && kapaliBlok.bas < slot + adim;
                   return (
                     <td key={sut.anahtar + slot}
                         className={hedef ? 'birak-hedef' : undefined}

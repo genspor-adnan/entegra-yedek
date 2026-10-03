@@ -64,7 +64,7 @@ public static partial class KaynakKatalogu
             // Protokol: muayene hangi basvurudan dogdu - kabul ile klinigin bagi.
             new("protokolNo",    "coalesce(b.belge_no, '')", "metin", "Protokol",
                                                      Hizalama: "orta", Genislik: 120),
-            new("hastaAdi",      "h.unvan",          "metin", "Hasta", Genislik: 220),
+            new("hastaAdi",      "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",          "metin", "Hasta", Genislik: 220),
             new("dosyaNo",       "h.kod",            "metin", "Dosya No", Hizalama: "orta",
                                                      Genislik: 110, Varsayilan: false),
             new("tcNo",          "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
@@ -82,11 +82,13 @@ public static partial class KaynakKatalogu
             //   Muayenenin TURU (kontrol/konsultasyon) ayri bilgidir ve
             //   "Tür" kolonunda durur - ikisini tek kolona sikistirmak
             //   "Kontrol" ile "Online"i ayni sutunda yarisirdi.
-            new("kanal",
-                "case m.tur when 2 then 'Online' else 'Yüz yüze' end",
-                                          "metin", "Kanal", Hizalama: "orta",
-                                          Bicim: "rozet", Genislik: 110,
-                                          Filtrelenebilir: false),
+            // DURUM KANALIN YERINDE (kullanici: "kanal-durum yer degistir").
+            new("durumAdi",
+                "case m.durum when 0 then 'İptal' when 2 then 'Sonuç Bekliyor' "
+                + "when 3 then 'Tamamlandı' when 4 then 'Ek Not' else 'Açık' end",
+                                                     "metin", "Durum", Hizalama: "orta",
+                                                     Bicim: "rozet", Genislik: 130,
+                                                     Filtrelenebilir: false),
 
             // UYARI (461): hekimin satira bakmadan once gormesi gerekeni TEK
             //   kolonda toplar. Sira ONEM sirasi: panik deger > alerji >
@@ -167,12 +169,12 @@ public static partial class KaynakKatalogu
                 "coalesce(public.fn_skrs_ad('cikis.sekli', m.cikis_sekli), '')",
                                                      "metin", "Çıkış Şekli", Genislik: 160,
                                                      Varsayilan: false, Filtrelenebilir: false),
-            new("durumAdi",
-                "case m.durum when 0 then 'İptal' when 2 then 'Sonuç Bekliyor' "
-                + "when 3 then 'Tamamlandı' when 4 then 'Ek Not' else 'Açık' end",
-                                                     "metin", "Durum", Hizalama: "orta",
-                                                     Bicim: "rozet", Genislik: 130,
-                                                     Filtrelenebilir: false),
+            // KANAL DURUMUN ESKI YERINDE (kullanici: "kanal-durum yer degistir").
+            new("kanal",
+                "case m.tur when 2 then 'Online' else 'Yüz yüze' end",
+                                          "metin", "Kanal", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 110,
+                                          Filtrelenebilir: false),
             new("durum",         "m.durum",          "kod",   "Durum Kodu", Varsayilan: false),
             new("tarafId",       "m.taraf_id",       "sayi",  "Hasta Id", Varsayilan: false),
             new("belgeId",       "m.belge_id",       "sayi",  "Başvuru Id", Varsayilan: false),
@@ -248,7 +250,7 @@ public static partial class KaynakKatalogu
                                                     Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("protokolNo",  "coalesce(b.belge_no, '')", "metin", "Protokol",
                                                     Hizalama: "orta", Genislik: 130),
-            new("hastaAdi",    "h.unvan",           "metin", "Hasta", Genislik: 220),
+            new("hastaAdi",    "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",           "metin", "Hasta", Genislik: 220),
             new("dosyaNo",     "h.kod",             "metin", "Dosya No", Hizalama: "orta",
                                                     Genislik: 110, Varsayilan: false),
             new("tcNo",        "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
@@ -257,7 +259,7 @@ public static partial class KaynakKatalogu
             //   bolume, sonra hangi hekime bakiliyor - siralama okuma sirasi.
             new("bolumAdi",    "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 140),
             new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 170),
-            new("kurumAdi",    "coalesce(k.unvan, 'Özel')", "metin", "Kurum", Genislik: 150),
+            new("kurumAdi",    "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), 'Özel')", "metin", "Kurum", Genislik: 150),
             new("oncelikAdi",
                 "case bb.oncelik when 2 then 'Acil' when 1 then 'Öncelikli' else '' end",
                                                     "metin", "Öncelik", Hizalama: "orta",

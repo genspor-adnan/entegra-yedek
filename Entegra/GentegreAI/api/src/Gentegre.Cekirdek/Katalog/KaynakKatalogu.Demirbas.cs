@@ -33,7 +33,7 @@ public static partial class KaynakKatalogu
                 Siralanabilir: false, Filtrelenebilir: false),
             new("lokasyon",  "d.lokasyon",  "kod",   "Lokasyon Kodu", Hizalama: "orta", Varsayilan: false),
             new("zimmetAdi",
-                "coalesce((select t.unvan from public.taraf t where t.id = d.zimmet_taraf_id), '')",
+                "coalesce((select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan from public.taraf t where t.id = d.zimmet_taraf_id), '')",
                 "metin", "Zimmet", Genislik: 160, Siralanabilir: false, Filtrelenebilir: false),
             new("alisTarihi", "d.alis_tarihi", "tarih", "Alış Tarihi", Hizalama: "orta"),
             new("alisTutari", "d.alis_tutari", "para",  "Alış Tutarı",

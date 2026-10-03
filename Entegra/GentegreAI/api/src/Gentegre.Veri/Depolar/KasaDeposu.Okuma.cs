@@ -31,7 +31,7 @@ public sealed partial class KasaDeposu
         var bacaklar = new List<IDictionary<string, object?>>();
         await using (var komut = new NpgsqlCommand("""
             select m.id, m.sira, m.rol, m.hesap_turu as "hesapTuru", m.hesap_id as "hesapId",
-                   h.ad as "hesapAdi", m.taraf_id as "tarafId", t.unvan as "tarafUnvan",
+                   h.ad as "hesapAdi", m.taraf_id as "tarafId", public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as "tarafUnvan",
                    m.masraf_id as "masrafId", ms.ad as "masrafAdi",
                    m.hizmet_id as "hizmetId", hz.ad as "hizmetAdi",
                    m.proje_id as "projeId", p.ad as "projeAdi",

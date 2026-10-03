@@ -584,7 +584,7 @@ public static partial class LabUclari
             var basli = await veri.TekAsync("""
                 select i.id, i.istem_no, i.istem_tarihi, i.durum, i.oncelik,
                        i.taraf_id, coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''),
-                                            h.unvan) as hasta,
+                                            public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)) as hasta,
                        i.klinik_bilgi, i.tani_icd, i.hedef_bitis, i.belge_id,
                        case coalesce(th.cinsiyet, 0)
                             when 1 then 'E' when 2 then 'K' else '' end as cinsiyet,
@@ -611,7 +611,7 @@ public static partial class LabUclari
                        case i.kaynak when 2 then 'Teletıp' when 3 then 'Banko'
                             when 4 then 'Dış kurum' when 5 then 'Check-up'
                             else 'Muayene istemi' end as kaynak_ad,
-                       coalesce(dk.unvan, '') as dis_kurum,
+                       coalesce(public.fn_taraf_ad(dk.unvan, dk.ad, dk.soyad)::varchar(120), '') as dis_kurum,
                        -- UYARI BANDI: sonucu ya da numune alimini degistiren
                        --   her sey hasta kartindan gelir (v_hasta_tibbi_ozet).
                        coalesce(o.alerjiler, '') as alerjiler,
@@ -1110,7 +1110,7 @@ public static partial class LabUclari
             var n = await veri.TekAsync("""
                 select n.id, n.barkod, n.durum, n.numune_tipi, n.tup_tipi,
                        n.istem_id, i.istem_no, i.oncelik, n.hasta_id,
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan),
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)),
                        n.alim_zamani, n.kabul_zamani,
                        (select count(*) from public.lab_istem_satir s
                          where s.numune_id = n.id and s.durum <> 0)

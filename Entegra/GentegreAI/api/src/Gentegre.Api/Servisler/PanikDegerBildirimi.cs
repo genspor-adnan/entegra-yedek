@@ -59,10 +59,10 @@ public sealed class PanikDegerBildirimi
             select t.id, coalesce(nullif(t.ad, ''), t.kod) as test,
                    coalesce(nullif(ls.deger_metin, ''), t.sonuc, '') as sonuc,
                    coalesce(nullif(ls.birim, ''), t.birim, '') as birim,
-                   coalesce(h.unvan, '')       as hasta,
+                   coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')       as hasta,
                    coalesce(b.belge_no, '')    as protokol,
                    coalesce(p.cep_tel, '')     as hekim_tel,
-                   coalesce(p.unvan, '')       as hekim,
+                   coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')       as hekim,
                    coalesce(i.sube_id, 0)      as sube_id
               from public.lab_istem_satir t
               join public.lab_istem i on i.id = t.istem_id

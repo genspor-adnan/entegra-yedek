@@ -16,10 +16,12 @@ public sealed record KullaniciKaydi(
     long YetkiSurumu,
     bool Aktif,
     short HataliGiris,
-    DateTime? KilitBitis);
+    DateTime? KilitBitis,
+    /// <summary>Ana rol "Rol Atanmamış": sisteme giremez (ek rol olsa da).</summary>
+    bool RolAtanmamis);
 
 /// <summary>Oturum kapisi (denetim 28.09.2026 #4): hesabin istek anindaki durumu.</summary>
-public sealed record HesapDurumu(bool Aktif, bool ParolaDegismeli);
+public sealed record HesapDurumu(bool Aktif, bool ParolaDegismeli, bool RolAtanmamis);
 
 /// <summary>Kullanici Ayarlari > Hesabim (669): kisinin kendi hesap ozeti.</summary>
 public sealed record HesapBilgisi(
@@ -36,13 +38,24 @@ public sealed class KullaniciDeposu
     private readonly VeriKaynagi _veri;
     public KullaniciDeposu(VeriKaynagi veri) => _veri = veri;
 
-    private const string Secim = """
+    /// <summary>
+    /// ROL ATANMAMIS HESAP GIREMEZ (kullanici: "rol atanmamislar sisteme giris
+    /// yapamaz" · "ana rol atanmadiysa hic giremez"): EK ROL bu kurali
+    /// DELMEZ. Rol `kod = 'atanmamis'` ile taninir (id kuruluma gore degisir).
+    /// </summary>
+    private const string RolAtanmamisIfade = """
+        exists (select 1 from public.rol ra where ra.id = k.rol_id and ra.kod = 'atanmamis')
+        """;
+
+    private static readonly string Secim = """
         select k.id, k.kod,
-               -- Görünen ad = ünvan + ad + soyad (kullanıcı: Oturum bölümünde
-               --   kod yerine tam ad). Personelde ad/soyad dolu; sistem
-               --   kullanıcısında yalnız ünvan olabilir - boşları atla.
-               coalesce(nullif(trim(concat_ws(' ', t.unvan, t.ad, t.soyad)), ''),
-                        nullif(t.unvan, ''), k.kod) as ad, k.parola_hash,
+               -- Görünen ad (kullanıcı: Oturum bölümünde kod yerine tam ad)
+               --   TEK YERDEN: fn_taraf_ad (940) - personelde unvan yalnız önek
+               --   ("Dr."), ad+soyadı fonksiyon ekler. Üstüne ayrıca ad/soyad
+               --   eklemek adı iki kez yazıyordu ("Dr. Alim Sarı Alim Sarı").
+               coalesce(nullif(trim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''),
+                        nullif(trim(concat_ws(' ', t.ad, t.soyad)), ''),
+                        k.kod) as ad, k.parola_hash,
                k.parola_degismeli, k.rol_id, coalesce(r.ad, '') as rol_adi,
                -- EK ROLLER (665): kisinin ana isinin yaninda tasidigi gorevler.
                coalesce((select string_agg(er.ad, ', ' order by er.ad)
@@ -53,11 +66,12 @@ public sealed class KullaniciDeposu
                -- Yetki damgasi ROL KUMESINDEN gelir (665): ana rolun sayaci tek
                --   basina ek rol degisimini gormezdi.
                public.fn_kullanici_yetki_surumu(k.id) as yetki_surumu,
-               k.aktif, k.hatali_giris, k.kilit_bitis
+               k.aktif, k.hatali_giris, k.kilit_bitis,
+               {{ROL_ATANMAMIS}} as rol_atanmamis
           from public.taraf_kullanici k
           join public.rol r   on r.id = k.rol_id
           left join public.taraf t on t.id = k.id
-        """;
+        """.Replace("{{ROL_ATANMAMIS}}", RolAtanmamisIfade);
 
     public Task<KullaniciKaydi?> KodIleBulAsync(string kod, CancellationToken iptal = default)
         => _veri.TekAsync(Secim + " where k.kod = @p0", new object?[] { kod }, Cevir, iptal);
@@ -87,18 +101,24 @@ public sealed class KullaniciDeposu
             rakam = rakam[2..];
         rakam = rakam.TrimStart('0');
 
-        // KIMLIK/VERGI NO: 11 haneli TCKN veya 10 haneli VKN tam eslesir
-        //   (kullanici: "1234567890 kimlikno lu dr ile login yapamadim" - test
-        //   hekiminin vkno'su 10 haneli). Kisa (4 haneli) sicil numarasi bir
-        //   vkno/tckn'ye ESIT olamayacagi icin yanlis kisi eslesmez.
-        var tckn = rakam.Length is 10 or 11 ? rakam : "";
+        // KIMLIK/VERGI NO: girdi YALNIZ RAKAMSA her uzunlukta tam eslesir
+        //   (kullanici: "1234567890 kimlikno lu dr ile login yapamadim" ·
+        //   "112233 kimlikno ile login oldum ceren beklerken alim geldi").
+        //   Eskiden yalniz 10/11 hane deneniyordu - "kisa sicil no bir kimlik
+        //   no'ya esit olamaz" varsayimi kayitli 6 haneli kimlik no'da coktu:
+        //   kimlik no hic denenmedi, ayni rakamlar baska birinin SICIL NO'su
+        //   olarak eslesti ve kullanici BASKASININ hesabina girdi. Simdi iki
+        //   kisi eslesirse sonuc BELIRSIZ (asagida) - tahminle hesap secilmez.
+        var yalinRakam = new string(g.Where(char.IsDigit).ToArray());
+        var tckn = yalinRakam.Length >= 4 && yalinRakam.Length == g.Count(c => !char.IsWhiteSpace(c))
+            ? yalinRakam : "";
 
         var liste = await _veri.ListeAsync(Secim + """
              where lower(k.kod) = @p0
                 or lower(nullif(t.kod, '')) = @p0
                 or lower(nullif(k.eposta, '')) = @p0
                 or lower(nullif(t.eposta, '')) = @p0
-                or lower(nullif(t.unvan, '')) = @p0
+                or lower(nullif(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')) = @p0
                 or (coalesce(t.ad, '') <> '' and coalesce(t.soyad, '') <> ''
                     and lower(trim(t.ad || ' ' || t.soyad)) = @p0)
                 or (@p2 <> '' and regexp_replace(coalesce(t.vkno, ''), '[^0-9]', '', 'g') = @p2)
@@ -116,6 +136,11 @@ public sealed class KullaniciDeposu
         };
     }
 
+    /// <summary>Kullanici hekim kisitina tabi mi (KaynakKatalogu.HekimKisitliSql).</summary>
+    public async Task<bool> HekimKisitliAsync(int tarafId, CancellationToken iptal = default)
+        => await _veri.TekDegerAsync<int>(Gentegre.Cekirdek.Katalog.KaynakKatalogu.HekimKisitliSql,
+                                          new object?[] { tarafId }, iptal) == 1;
+
     public Task<KullaniciKaydi?> IdIleBulAsync(int tarafId, CancellationToken iptal = default)
         => _veri.TekAsync(Secim + " where k.id = @p0", new object?[] { tarafId }, Cevir, iptal);
 
@@ -123,7 +148,7 @@ public sealed class KullaniciDeposu
         o.Sayi("id"), o.Metin("kod"), o.Metin("ad"), o.Metin("parola_hash"),
         o.Bayrak("parola_degismeli"), o.Sayi("rol_id"), o.Metin("rol_adi"),
         o.Metin("ek_rol_adlari"), (short)o.Sayi("dil"), o.Uzun("yetki_surumu"), o.Bayrak("aktif"),
-        (short)o.Sayi("hatali_giris"), o.Tarih("kilit_bitis"));
+        (short)o.Sayi("hatali_giris"), o.Tarih("kilit_bitis"), o.Bayrak("rol_atanmamis"));
 
     /// <summary>
     /// PERSONELE OTOMATIK KULLANICI HESABI (kullanici: "personel ekleyince
@@ -235,7 +260,7 @@ public sealed class KullaniciDeposu
                                from public.kullanici_rol kr
                                join public.rol er on er.id = kr.rol_id
                               where kr.kullanici_id = k.id), '') as ek_roller,
-                   coalesce(t.unvan, '') as unvan,
+                   coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan,
                    coalesce((select g.ad from public.personel_gorev g
                               where g.id = t.gorev_id), t.gorev, '') as gorev
               from public.taraf_kullanici k
@@ -466,9 +491,11 @@ public sealed class KullaniciDeposu
     public Task<HesapDurumu?> OturumDurumuAsync(int kullaniciId,
         CancellationToken iptal = default)
         => _veri.TekAsync(
-            "select aktif, parola_degismeli from public.taraf_kullanici where id = @p0",
+            "select k.aktif, k.parola_degismeli, " + RolAtanmamisIfade + " as rol_atanmamis "
+            + "from public.taraf_kullanici k where k.id = @p0",
             new object?[] { kullaniciId },
-            o => new HesapDurumu(o.Bayrak("aktif"), o.Bayrak("parola_degismeli")), iptal);
+            o => new HesapDurumu(o.Bayrak("aktif"), o.Bayrak("parola_degismeli"),
+                                 o.Bayrak("rol_atanmamis")), iptal);
 
     /// <summary>
     /// Kayit kapsami (eski YETKIALANI). Bos liste = kapsam SINIRSIZ;

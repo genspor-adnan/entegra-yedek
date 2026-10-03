@@ -159,7 +159,8 @@ export const listeUclari = {
       olanlarla birlikte - kural sunucuda, ekran yalniz cizer. */
   muayeneTamamlamaKontrol: (muayeneId: number) =>
     istek<{ muayeneId: number; tamamlandi: boolean;
-            kontroller: { alan: string; ad: string; tamam: boolean; mesaj: string }[] }>(
+            /** zorunlu=false: bilgi maddesi (istem, reçete) - Tamamla'yı engellemez. */
+            kontroller: { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }[] }>(
       `/api/muayene/${muayeneId}/tamamlama-kontrol`),
 
   /** Vucut semasi: secili bolgeler + not (sablonun tip 5 bulgu satiri). */

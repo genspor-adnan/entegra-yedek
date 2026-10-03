@@ -93,7 +93,7 @@ public static class PrimUclari
 
             var satirlar = await baglanti.ListeAsync("""
                 select r.id, r.rol, coalesce(kd.ad, '') as "rolAdi",
-                       r.taraf_id as "tarafId", coalesce(t.unvan, '') as kisi,
+                       r.taraf_id as "tarafId", coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as kisi,
                        r.pay_yuzde as "payYuzde", r.kaynak
                   from public.belge_satir_rol r
                   left join public.taraf t on t.id = r.taraf_id
@@ -106,7 +106,7 @@ public static class PrimUclari
             // Bu kalemden DOGMUS primler: rol degistirilince ne olacagini
             //   kullanici gormeli (kesinlesmis satir yeniden hesaplanmaz).
             var primler = await baglanti.ListeAsync("""
-                select hs.id, hs.taraf_id as "tarafId", coalesce(t.unvan, '') as kisi,
+                select hs.id, hs.taraf_id as "tarafId", coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as kisi,
                        hs.rol, hs.tarih, hs.taban, hs.deger, hs.tutar, hs.durum
                   from public.hakedis_satir hs
                   left join public.taraf t on t.id = hs.taraf_id

@@ -103,7 +103,7 @@ public static partial class MedulaUclari
             }, iptal);
 
             var kesintiler = await b.ListeAsync("""
-                select k.id, k.medula_fatura_id, f.medula_fatura_no, t.unvan, f.takip_no, k.sut_kodu, k.kesinti_kodu, k.aciklama, k.tutar,
+                select k.id, k.medula_fatura_id, f.medula_fatura_no, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, f.takip_no, k.sut_kodu, k.kesinti_kodu, k.aciklama, k.tutar,
                        k.itiraz_durum, k.itiraz_zaman, k.sonuc_zaman, k.iade_tutar, dn.yil, dn.ay
                   from public.medula_kesinti k
                   join public.medula_fatura f on f.id = k.medula_fatura_id

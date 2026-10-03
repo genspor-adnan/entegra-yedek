@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { KartGrupSekmesi } from './KartGrupSekmesi';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { TekKayit } from '../TekKayit';
@@ -43,7 +43,9 @@ export interface KartGrupSarmalayiciOzellikleri {
                                  yeni?: () => void; kolonBaslikEk?: Record<string, ReactNode>;
                                  oneri?: Record<string, string> }>;
   detayIzgara?: Record<string, { sinif?: string; baslik?: string;
-                                 alanSirasi?: string[]; not?: ReactNode }>;
+                                 alanSirasi?: string[]; not?: ReactNode;
+                                 /** Veri yoksa yalniz baslik (kapali), varsa acik. */
+                                 katlanir?: boolean }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
                     izgaraCiz?: (detayAd: string) => ReactNode,
                     parcalar?: SekmeParcalari): ReactNode;
@@ -154,17 +156,30 @@ export function KartGrupSarmalayici({
           const d = (meta?.detaylar ?? []).find(x => x.ad === detayAd);
           if (!d) return null;
           const ayar = detayIzgara?.[detayAd] ?? {};
+          const durum = detaylar[d.ad] ?? bosDetay();
+          const kutu = (acik: boolean, tikla?: () => void) => acik ? (
+            <TekKayit
+              meta={d}
+              durum={durum}
+              saltOkunur={salt || d.saltOkunur}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
+              baslik={ayar.baslik ?? d.baslik}
+              alanSirasi={ayar.alanSirasi}
+              not={ayar.not}
+              onBaslikTikla={tikla}
+              baslikOnEk={tikla ? <span className="katlanir-ok">▾ </span> : undefined}
+            />
+          ) : (
+            <div className="kasira"><div className="kagrup katlanir-kapali">
+              <h6 className="katlanir-bas" onClick={tikla}>
+                <span className="katlanir-ok">▸ </span>{ayar.baslik ?? d.baslik}</h6>
+            </div></div>
+          );
           return (
             <div className={ayar.sinif}>
-              <TekKayit
-                meta={d}
-                durum={detaylar[d.ad] ?? bosDetay()}
-                saltOkunur={salt || d.saltOkunur}
-                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
-                baslik={ayar.baslik ?? d.baslik}
-                alanSirasi={ayar.alanSirasi}
-                not={ayar.not}
-              />
+              {ayar.katlanir
+                ? <KatlanirIzgara dolu={durum.guncel.length > 0} ciz={kutu} />
+                : kutu(true)}
             </div>
           );
         };
@@ -180,4 +195,18 @@ export function KartGrupSarmalayici({
         };
         return sekmeSarmalayici
           ? sekmeSarmalayici(aktif.baslik, tumu, deger, izgaraCiz, parcalar) : tumu;
+}
+
+/**
+ * KATLANIR IZGARA (kullanici: "vital bulgular seyrek kullaniliyor"): veri
+ * yoksa yalniz baslik, varsa acik. Baslik tiklaninca acilir/kapanir; sonradan
+ * veri gelirse (kart tazelendi) kendiliginden acilir.
+ */
+function KatlanirIzgara({ dolu, ciz }: {
+  dolu: boolean;
+  ciz(acik: boolean, tikla: () => void): ReactNode;
+}) {
+  const [acik, setAcik] = useState(dolu);
+  useEffect(() => { if (dolu) setAcik(true) }, [dolu]);
+  return <>{ciz(acik, () => setAcik(a => !a))}</>;
 }

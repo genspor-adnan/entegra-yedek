@@ -41,7 +41,7 @@ public static partial class DisUclari
             baglam.YetkiIste("dis.lab", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var kartlar = await b.ListeAsync("""
-                select i.id, i.isemri_no, i.hasta_id, t.unvan, coalesce(h.unvan, ''), i.hekim_id, i.lab_id, l.ad, coalesce(l.sla_gun, 0),
+                select i.id, i.isemri_no, i.hasta_id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), i.hekim_id, i.lab_id, l.ad, coalesce(l.sla_gun, 0),
                        i.dis_nolar, i.is_turu, i.malzeme, i.renk, i.olcu_tipi, i.ek_istek,
                        i.gonderim_tarihi, i.beklenen_tarih, i.teslim_tarihi, i.asama, i.kalite_kontrol, i.lab_fiyat, i.hasta_fiyat,
                        i.plan_satir_id, coalesce(p.plan_no, ''), coalesce(ps.sira, 0), coalesce(hz.ad, ''),
@@ -133,7 +133,7 @@ public static partial class DisUclari
             // Okutan ekranda hangi işi ilerlettiğini görmeli: aynı yanıtta
             //   hasta ve iş bilgisi döner - yanlış etiketi okutmak sessiz kalmasın.
             var kart = await baglanti.TekAsync("""
-                select i.id, i.isemri_no, t.unvan, i.dis_nolar, l.ad, i.asama
+                select i.id, i.isemri_no, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, i.dis_nolar, l.ad, i.asama
                   from public.dis_lab_isemri i
                   join public.taraf t on t.id = i.hasta_id
                   join public.dis_lab l on l.id = i.lab_id

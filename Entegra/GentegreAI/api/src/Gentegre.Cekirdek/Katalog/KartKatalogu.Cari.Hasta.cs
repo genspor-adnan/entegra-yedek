@@ -20,6 +20,9 @@ public static partial class KartKatalogu
             //   reddeder. Kart tarafinda zorunluluk kalkti ki otomatik modda
             //   kullanici gereksiz yere numara uydurmasin.
             "kod" => a with { Baslik = "Dosya No", Zorunlu = false },
+            // Hastada unvan TAM AD (ad+soyad'dan turetilir) - zorunlu kalir;
+            //   personeldeki onek kurali (940) hastaya uygulanmaz.
+            "unvan" => a with { Zorunlu = true },
             // TCKN DOGRULAMASI (kullanici: "hasta bilgide tckn kontrolü yap"):
             //   hastanin kimlik numarasi MEDULA provizyonuna, e-Nabiz
             //   gonderimine ve e-Belge alici bilgisine gidiyor. Bos

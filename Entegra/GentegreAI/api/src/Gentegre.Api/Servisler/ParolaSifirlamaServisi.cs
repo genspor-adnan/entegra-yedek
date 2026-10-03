@@ -194,7 +194,7 @@ public sealed class ParolaSifirlamaServisi(
         //   kendi alanına düşer. E-posta yine önce hesabın kendi adresi.
         var iletisim = await b.TekAsync("""
             select coalesce(nullif(t.cep_tel, ''), nullif(k.cep_tel, ''), ''), coalesce(nullif(k.eposta, ''), t.eposta, ''),
-                   coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, '')
+                   coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')
               from public.taraf_kullanici k join public.taraf t on t.id = k.id where k.id = @p0
             """, null, [kullanici.TarafId], o => new { tel = o.GetString(0), eposta = o.GetString(1), ad = o.GetString(2) }, iptal);
         var tel = Rakamlar(iletisim?.tel);

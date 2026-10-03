@@ -43,6 +43,9 @@ export function CalismaPlani() {
   const [gorunum, setGorunum] = useState<Gorunum>('hekim');
   const [bugun, setBugun] = useState<Awaited<ReturnType<typeof api.calismaBugun>> | null>(null);
   const [secili, setSecili] = useState<CalismaBlok | null>(null);
+  // SATIR SEÇİMİ (kullanıcı): işaretli doktorla "İzin / İstisna" kartı doktoru
+  //   dolu ve KİLİTLİ açar. İstisna tek doktorludur - tek satır işaretlenir.
+  const [isaretli, setIsaretli] = useState<{ hekimId: number; ad: string } | null>(null);
 
   const gunler = useMemo(() => Array.from({ length: 7 }, (_, i) => { const d = new Date(bas); d.setDate(d.getDate() + i); return d }), [bas]);
   const yukle = useCallback(async () => {
@@ -58,11 +61,11 @@ export function CalismaPlani() {
   const bloklar = veri?.bloklar ?? [];
   // Satırlar: hekim görünümünde hekim × bölüm, bölüm görünümünde bölüm × hekim.
   const satirlar = useMemo(() => {
-    const m = new Map<string, { baslik: string; alt: string; bloklar: CalismaBlok[] }>();
+    const m = new Map<string, { baslik: string; alt: string; hekimId: number; hekim: string; bloklar: CalismaBlok[] }>();
     for (const b of bloklar) {
       const k = gorunum === 'bolum' ? `${b.departmanId}|${b.hekimId}` : `${b.hekimId}|${b.departmanId}|${b.subeId}`;
       const sb = veri?.subeler.find(s => s.id === b.subeId)?.ad ?? '';
-      const r = m.get(k) ?? { baslik: gorunum === 'bolum' ? b.departman || 'Bölümsüz' : b.hekim, alt: gorunum === 'bolum' ? b.hekim : `${b.departman}${sb ? ' · ' + sb : ''}`, bloklar: [] };
+      const r = m.get(k) ?? { baslik: gorunum === 'bolum' ? b.departman || 'Bölümsüz' : b.hekim, alt: gorunum === 'bolum' ? b.hekim : `${b.departman}${sb ? ' · ' + sb : ''}`, hekimId: b.hekimId, hekim: b.hekim, bloklar: [] };
       r.bloklar.push(b); m.set(k, r);
     }
     return [...m.entries()].sort((a, b) => a[1].baslik.localeCompare(b[1].baslik, 'tr') || a[1].alt.localeCompare(b[1].alt, 'tr'));
@@ -84,7 +87,9 @@ export function CalismaPlani() {
       <div className="sayfabas"><div className="basrow"><h1>Çalışma Planları</h1><span className="yol">{c('Randevu › Çalışma Planları')}</span>
         <div className="sag" style={{ display: 'flex', gap: 6 }}>
           {yazar && <button className="d bir" onClick={() => git('/calisma-sablon/yeni')}>＋ Şablon</button>}
-          {yazar && <button className="d" onClick={() => git('/calisma-istisna/yeni')}>🏖 İzin / İstisna</button>}
+          {yazar && <button className="d" title={isaretli ? `${isaretli.ad} için` : c('Satır işaretlenirse doktor kartta sabit gelir')}
+            onClick={() => git(isaretli ? `/calisma-istisna/yeni?hekimId=${isaretli.hekimId}&sabit=1&geri=%2Fcalisma-plani` : '/calisma-istisna/yeni?geri=%2Fcalisma-plani')}>
+            🏖 İzin / İstisna{isaretli ? ` — ${isaretli.ad}` : ''}</button>}
           <button className="d" onClick={() => git('/calisma-sablon')}>{c('📋 Şablonlar')}</button>
           <button className="d" onClick={() => git('/calisma-istisna')}>{c('İstisnalar')}</button>
           <button className="d" onClick={() => git('/randevu')}>{c('📅 Takvim')}</button>
@@ -111,7 +116,10 @@ export function CalismaPlani() {
               <div className="cp-hb">{gorunum === 'bolum' ? 'Bölüm · Hekim' : 'Hekim · Bölüm'}</div>
               {gunler.map((d, i) => <div key={i} className={`cp-hb${iso(d) === bugunIso ? ' bugun' : ''}`}>{GUN_AD[i]} {d.getDate()}</div>)}
               {satirlar.map(([k, r]) => (<div key={k} style={{ display: 'contents' }}>
-                <div className="cp-hk">{r.baslik}<small>{r.alt}</small></div>
+                <label className="cp-hk cp-hk-sec" title={c('İşaretle: İzin / İstisna bu doktor için açılır')}>
+                  <input type="checkbox" checked={isaretli?.hekimId === r.hekimId}
+                         onChange={e => setIsaretli(e.target.checked ? { hekimId: r.hekimId, ad: r.hekim } : null)} />
+                  <span>{r.baslik}<small>{r.alt}</small></span></label>
                 {gunler.map((d, i) => { const g = iso(d); const bl = r.bloklar.filter(b => String(b.gun).slice(0, 10) === g); return (
                   <div key={i}>{bl.length ? bl.map((b, j) => <Blok key={j} b={b} />) : <div className="cp-blok bos">—</div>}</div>) })}
               </div>))}
@@ -133,7 +141,7 @@ export function CalismaPlani() {
                   <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                     {secili.sablonId && <button className="d" onClick={() => git(`/calisma-sablon/${secili.sablonId}?geri=%2Fcalisma-plani`)}>📋 Şablonu aç</button>}
                     {secili.istisnaId && <button className="d" onClick={() => git(`/calisma-istisna/${secili.istisnaId}?geri=%2Fcalisma-plani`)}>🏖 İstisnayı aç</button>}
-                    {yazar && !KAPALI(secili.kaynak) && <button className="d" onClick={() => git(`/calisma-istisna/yeni?hekimId=${secili.hekimId}&geri=%2Fcalisma-plani`)}>＋ Bu hekime istisna</button>}
+                    {yazar && !KAPALI(secili.kaynak) && <button className="d" onClick={() => git(`/calisma-istisna/yeni?hekimId=${secili.hekimId}&sabit=1&geri=%2Fcalisma-plani`)}>＋ Bu doktora istisna</button>}
                     {secili.kaynak === 4 && <button className="d" onClick={() => git('/personel-izin')}>🌴 İzinlere git</button>}
                     <button className="d" onClick={() => git(`/randevu?hekimId=${secili.hekimId}`)}>📅 Randevuları</button>
                   </div>

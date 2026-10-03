@@ -226,8 +226,8 @@ public static partial class AmeliyathaneUclari
                a.plan_baslangic as ""planBaslangic"", a.plan_sure_dk as ""planSureDk"",
                a.salona_alma as ""salonaAlma"", a.kesi_zamani as ""kesiZamani"",
                a.bitis_zamani as ""bitisZamani"", a.salondan_cikis as ""salondanCikis"",
-               coalesce(h.unvan, '') as ""hastaAd"",
-               coalesce(c.unvan, '') as ""cerrahAd"",
+               coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as ""hastaAd"",
+               coalesce(public.fn_taraf_ad(c.unvan, c.ad, c.soyad)::varchar(120), '') as ""cerrahAd"",
                coalesce(a.iptal_neden, '') as ""iptalNeden"",
                coalesce(a.gecikme_neden, '') as ""gecikmeNeden"",
                coalesce(a.salona_alma, a.plan_baslangic) as bas,
@@ -424,8 +424,8 @@ public static partial class AmeliyathaneUclari
                        a.bitis_zamani as "bitisZamani", a.salondan_cikis as "salondanCikis",
                        a.plan_disi as "planDisi", a.iptal_neden as "iptalNeden",
                        coalesce(s.kod || ' · ' || s.ad, '') as salon,
-                       coalesce(h.unvan, '') as "hastaAd",
-                       coalesce(c.unvan, '') as "cerrahAd",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAd",
+                       coalesce(public.fn_taraf_ad(c.unvan, c.ad, c.soyad)::varchar(120), '') as "cerrahAd",
                        -- Cerrahi süre KESİDEN bitişe; masa süresiyle karıştırılmasın.
                        case when a.kesi_zamani is null then null
                             else round(extract(epoch from
@@ -749,7 +749,7 @@ public static partial class AmeliyathaneUclari
                 select k.id, k.asama, k.sira, k.madde_metin as "maddeMetin",
                        k.isaretli, k.not_metni as "notMetni",
                        k.isaret_zamani as "isaretZamani",
-                       coalesce(p.unvan, '') as "isaretleyen",
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as "isaretleyen",
                        coalesce(m.zorunlu, 1) as zorunlu
                   from public.ameliyat_kontrol k
                   left join public.ameliyat_kontrol_madde m on m.id = k.madde_id

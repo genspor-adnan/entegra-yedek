@@ -60,7 +60,7 @@ public static class KullaniciPortalUclari
 
             await using var b = await veri.AcAsync(iptal);
             var satir = await b.TekAsync("""
-                select t.id, t.unvan, coalesce(t.vkno, '') as vkno,
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(t.vkno, '') as vkno,
                        coalesce(t.kisi, 0) as kisi, coalesce(t.musteri, 0) as musteri,
                        coalesce(t.hasta, 0) as hasta,
                        coalesce(p.dis_hekim, 0) as "disHekim",
@@ -74,7 +74,7 @@ public static class KullaniciPortalUclari
                        --   kart numarası yazdırmak, zaten kayıtlı olan bilgiyi
                        --   ikinci kez sormak olurdu.
                        t.bag_id as "bagliKurumId",
-                       coalesce(bk.unvan, '') as "bagliKurumAdi"
+                       coalesce(public.fn_taraf_ad(bk.unvan, bk.ad, bk.soyad)::varchar(120), '') as "bagliKurumAdi"
                   from public.taraf t
                   left join public.taraf bk on bk.id = t.bag_id
                   left join public.taraf_personel p on p.id = t.id
@@ -149,7 +149,7 @@ public static class KullaniciPortalUclari
             };
 
             var adaylar = await b.ListeAsync($"""
-                select t.id, coalesce(t.unvan, '') as unvan, k.kod,
+                select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan, k.kod,
                        coalesce(r.ad, '') as "rolAdi",
                        coalesce(r.portal_turu, 0) as "rolPortal",
                        coalesce(r.sistem, 0) as "rolSistem",
@@ -237,7 +237,7 @@ public static class KullaniciPortalUclari
             await using var b = await veri.AcAsync(iptal);
 
             var taraf = await b.TekAsync("""
-                select t.id, t.unvan, coalesce(t.vkno, '') as vkno, coalesce(t.kod, '') as kod,
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(t.vkno, '') as vkno, coalesce(t.kod, '') as kod,
                        coalesce(t.kisi, 0) as kisi, coalesce(t.musteri, 0) as musteri,
                        coalesce(t.hasta, 0) as hasta, coalesce(t.durum, 1) as durum,
                        coalesce(p.dis_hekim, 0) as "disHekim",

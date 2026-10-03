@@ -55,13 +55,17 @@ export function kartGovdesiKur(g: {
         })),
   };
 
-  // Personel'de "unvan" hic gosterilmiyor/duzenlenmiyor (kullanici: ad/soyad
-  //   kullanilsin) - DB'de NOT NULL oldugu icin Kaydet'te ad+soyad'dan burada
-  //   birlestirilip eklenir.
-  if (personelGibiKart || kaynak === 'hasta-aday') {
+  // PERSONEL / DIS DOKTOR: unvan YALNIZ ONEK (940, kullanici: "personelde
+  //   unvan tam adi tutmasin, sadece Dr. veya Prof.Dr. gibi olsun"). Unvansiz
+  //   kiside BOS gonderilir - eski tam ad kalmasin; gorunen ad sunucuda
+  //   fn_taraf_ad(unvan, ad, soyad).
+  if (kaynak === 'personel' || kaynak === 'dis-hekim') {
+    govde.kart.unvan = unvanOneki;
+  } else if (personelGibiKart || kaynak === 'hasta-aday') {
+    // HASTA: unvan TAM AD - DB'de NOT NULL, ad+soyad'dan birlestirilir.
     const ad = String(deger.ad ?? '').trim();
     const soyad = String(deger.soyad ?? '').trim();
-    const unvanMetni = [unvanOneki, ad, soyad].filter(Boolean).join(' ');
+    const unvanMetni = [ad, soyad].filter(Boolean).join(' ');
     if (unvanMetni) govde.kart.unvan = unvanMetni;
   }
   // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan ayrica

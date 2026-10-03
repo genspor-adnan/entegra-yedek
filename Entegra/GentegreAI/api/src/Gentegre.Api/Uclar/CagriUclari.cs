@@ -42,7 +42,7 @@ public static partial class CagriUclari
     private const int KaynakTurKampanyaKisi = 42;
 
     /// <summary>Yeni satırlarda görünen kişi adı ve telefonu (taraf takma adı <c>t</c>).</summary>
-    private const string TarafAdi = "coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, '')";
+    private const string TarafAdi = "coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')";
     private const string TarafTel = "coalesce(nullif(t.cep_tel,''), t.telefon, '')";
 
     /// <summary>cagri_agent.durum</summary>

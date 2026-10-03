@@ -275,14 +275,14 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             Tarihi. Kayit kabul memurunun sirasiyla sordugu dort alan; tur,
             gelis sekli ve oda arkaya duser. */}
         <label className="alan">
-          {/* Lab/goruntulemede "Başvurulan Bölüm" degil sadece "Bölüm"
-              (kullanici): hasta bir poliklinige basvurmuyor, tetkik yaptiriyor. */}
+          {/* Etiket her kurumda "Bölüm" (kullanici: "Başvurulan Bölüm rename
+              Bölüm"; lab/goruntulemede zaten oyleydi). */}
           {/* KENDI ISTEGIYLE gelen hastada bolum ZORUNLU DEGIL ve
               ISARETLENMEZ (kullanici): bolum "hangi bolume gonderildi"
               demektir - gonderen yoksa dayanagi da yok. Alan kilitlenir ve
               bos kalir, zorunluluk yildizi da duser. */}
           <span className={'etiket' + (kendiIstegi ? '' : ' zorunlu-isaret')}>
-            {gonderenModu ? 'Bölüm' : 'Başvurulan Bölüm'}</span>
+            {c('Bölüm')}</span>
           <select value={bolumId ?? ''} disabled={kilitli || kendiIstegi}
                   onChange={e => {
                     const y = e.target.value ? Number(e.target.value) : null;
@@ -342,7 +342,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
            hekimde combo okunmuyordu ve hekimin O GUN kac hasta aldigi hicbir
            yerde gorunmuyordu - memur yuku dengeleyemiyordu. Pencere
            Hekim · Bölüm · Bugünkü Başvuru kolonlariyla acilir. */
-        <TarafSecici etiket="Hekim / Personel" kaynaklar={['basvuru-hekim']}
+        <TarafSecici etiket="Doktor / Personel" kaynaklar={['basvuru-hekim']}
                      deger={personelAd}
                      kilitli={kilitli}
                      zorunlu hata={personelHatasi}

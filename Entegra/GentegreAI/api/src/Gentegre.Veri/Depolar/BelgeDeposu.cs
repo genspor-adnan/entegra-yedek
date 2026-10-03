@@ -402,7 +402,7 @@ public sealed partial class BelgeDeposu
         //   kullanicinin yazdigi deger kabul edilir (sozlesme §4/2).
         if (tarafId > 0)
         await using (var komut = new NpgsqlCommand("""
-            select t.unvan, t.fatura_unvan, t.vkno, t.vd
+            select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, t.fatura_unvan, t.vkno, t.vd
               from public.taraf t where t.id = @p0
             """, baglanti, islem))
         {

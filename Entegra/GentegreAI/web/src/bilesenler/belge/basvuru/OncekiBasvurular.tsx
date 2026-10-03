@@ -60,7 +60,7 @@ export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }
             <th style={{ width: 130 }}>Protokol</th>
             <th style={{ width: 140 }}>Tarih</th>
             <th>Bölüm</th>
-            <th>{c('Hekim / Personel')}</th>
+            <th>{c('Doktor / Personel')}</th>
             <th>Ödeyen Kurum</th>
             <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>
             <th style={{ width: 110 }}>{c('Kapanma')}</th>

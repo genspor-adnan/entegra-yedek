@@ -524,7 +524,7 @@ public static class AiUclari
             case "cari_vadesi_gecen":
             {
                 var satirlar = await baglanti.ListeAsync("""
-                    select t.id as "cariId", coalesce(nullif(btrim(t.unvan), ''), t.kod) as cari,
+                    select t.id as "cariId", coalesce(nullif(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), t.kod) as cari,
                            round(sum(h.borc - h.alacak), 2) as bakiye,
                            (current_date - min(coalesce(h.plan_tarihi, h.islem_tarihi))::date)::int
                                as "geciken_gun"

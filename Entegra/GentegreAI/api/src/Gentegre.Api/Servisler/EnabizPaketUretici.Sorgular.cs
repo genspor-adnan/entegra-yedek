@@ -308,7 +308,7 @@ public sealed partial class EnabizPaketUretici
                   from public.belge b join public.taraf h on h.id = b.taraf_id
                  where b.id = @p0
                 union all select 'HASTA_KIMLIK_BILGILERI/AD',
-                       coalesce(nullif(h.ad, ''), h.unvan), 'taraf.ad', '', '', ''
+                       coalesce(nullif(h.ad, ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)), 'taraf.ad', '', '', ''
                   from public.belge b join public.taraf h on h.id = b.taraf_id
                  where b.id = @p0
                 union all select 'HASTA_KIMLIK_BILGILERI/SOYAD',
@@ -1385,17 +1385,17 @@ public sealed partial class EnabizPaketUretici
                 --   Son kelime soyad, oncesi ad sayilir - "AYSE NUR YILMAZ" ->
                 --   "AYSE NUR" + "YILMAZ". Tek kelimelik unvanda ikisi de ayni.
                 union all select 'BULASICI_HASTALIK_BILDIRIM/BILDIRIM_KIMLIK_BILGISI/AD',
-                       case when position(' ' in btrim(t.unvan)) = 0 then btrim(t.unvan)
-                            else btrim(left(btrim(t.unvan),
-                                            length(btrim(t.unvan))
-                                            - position(' ' in reverse(btrim(t.unvan))))) end,
+                       case when position(' ' in btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120))) = 0 then btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120))
+                            else btrim(left(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)),
+                                            length(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)))
+                                            - position(' ' in reverse(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)))))) end,
                        'taraf.unvan (ad kismi)', '', '', ''
                   from public.bzbh_bildirim b join public.taraf t on t.id = b.hasta_id
                  where b.id = @p0
                 union all select 'BULASICI_HASTALIK_BILDIRIM/BILDIRIM_KIMLIK_BILGISI/SOYAD',
-                       case when position(' ' in btrim(t.unvan)) = 0 then btrim(t.unvan)
-                            else btrim(right(btrim(t.unvan),
-                                             position(' ' in reverse(btrim(t.unvan))) - 1)) end,
+                       case when position(' ' in btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120))) = 0 then btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120))
+                            else btrim(right(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)),
+                                             position(' ' in reverse(btrim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)))) - 1)) end,
                        'taraf.unvan (soyad kismi)', '', '', ''
                   from public.bzbh_bildirim b join public.taraf t on t.id = b.hasta_id
                  where b.id = @p0

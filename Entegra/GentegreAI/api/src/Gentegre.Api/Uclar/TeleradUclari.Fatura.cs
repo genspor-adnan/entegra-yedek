@@ -260,7 +260,7 @@ public static partial class TeleradUclari
         DateTime bitis, CancellationToken iptal)
     {
         var kurum = await baglanti.TekAsync("""
-            select k.taraf_id as "tarafId", coalesce(t.unvan, '') as unvan,
+            select k.taraf_id as "tarafId", coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan,
                    coalesce(t.vkno, '') as vkno, coalesce(t.vd, '') as vd,
                    -- DÖNEMDE GEÇERLİ SÖZLEŞME: ücret modeli ve ceza oranı
                    --   oradan okunur (istekteki ücret zaten kopyalanmıştı).

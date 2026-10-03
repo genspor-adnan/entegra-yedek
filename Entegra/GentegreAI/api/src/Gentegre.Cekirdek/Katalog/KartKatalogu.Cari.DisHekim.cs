@@ -43,8 +43,8 @@ public static partial class KartKatalogu
         {
             new("id",       "id",       "sayi",  Yazilabilir: false),
             new("personel", "personel", "mantik", Gizli: true),
-            // Unvan ad+soyaddan turetilir (personel kartiyla ayni kural).
-            new("unvan",    "unvan",    "metin", Zorunlu: true, EnFazlaUzunluk: 120,
+            // Unvan YALNIZ ONEK (Dr., Op.Dr.) - personel kartiyla ayni kural (940).
+            new("unvan",    "unvan",    "metin", EnFazlaUzunluk: 120,
                 Baslik: "Unvan", Gizli: true),
             new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 50,
                 Baslik: "Ad", Grup: "Kimlik"),

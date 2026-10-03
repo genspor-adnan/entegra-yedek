@@ -73,11 +73,11 @@ public sealed partial class BelgeDeposu
                    -- Kurum payi kuruma faturalanirken KIMLIK de kurumundur:
                    --   unvan ve vergi bilgisi hastadan kopyalanirsa fatura
                    --   yanlis kisiye kesilmis gorunur (289).
-                   ok.unvan as odeyen_unvan, ok.vkno as odeyen_vkno,
+                   public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120) as odeyen_unvan, ok.vkno as odeyen_vkno,
                    -- SGK CARISI (468): TSS/Karma'da SGK payi ODEYENDEN farkli
                    --   bir cariye faturalanir; sozlesmeden okunur.
                    sz.sgk_kurum_id,
-                   (select t2.unvan from public.taraf t2 where t2.id = sz.sgk_kurum_id)
+                   (select public.fn_taraf_ad(t2.unvan, t2.ad, t2.soyad)::varchar(120) as unvan from public.taraf t2 where t2.id = sz.sgk_kurum_id)
                      as sgk_kurum_unvan,
                    ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,

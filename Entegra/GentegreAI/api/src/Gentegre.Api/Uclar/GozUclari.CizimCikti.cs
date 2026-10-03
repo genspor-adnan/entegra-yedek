@@ -139,10 +139,10 @@ public static partial class GozUclari
                        coalesce(b.belge_no, mu.muayene_no, '') as protokol,
                        mu.muayene_tarihi as "muayeneTarihi",
                        (mu.tamamlanma is not null) as kapali,
-                       coalesce(h.unvan, '') as hasta, coalesce(h.kod, '') as "hastaNo",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hasta, coalesce(h.kod, '') as "hastaNo",
                        coalesce(h.vkno, '') as "hastaTc",
                        hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
-                       coalesce(hk.unvan, '') as hekim,
+                       coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), '') as hekim,
                        gm.dilate, coalesce(gm.dilatasyon_ilac, '') as "dilatasyonIlac",
                        gm.sube_id as "subeId"
                   from public.goz_muayene gm
@@ -160,7 +160,7 @@ public static partial class GozUclari
                        c.id, c.goz, c.sema_turu as "semaTuru", c.surum, c.kilitli,
                        c.uretilen_metin as "uretilenMetin",
                        coalesce(c.degistirme_tarihi, c.ekleme_tarihi) as zaman,
-                       coalesce(t.unvan, '') as kullanici
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as kullanici
                   from public.goz_cizim c
                   left join public.taraf t on t.id = c.ekleyen
                  where c.goz_muayene_id = @p0

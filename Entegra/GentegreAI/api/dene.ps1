@@ -13,7 +13,7 @@
 param(
   [string]$Adres   = "http://localhost:5180",
   [string]$Kod     = "admin",
-  [string]$Parola  = "Gentegre!2026",
+  [string]$Parola  = "Genotip!2026",
   [int]$SubeId     = 1,
   [ValidateSet("hepsi","cari","stok","belge","liste")]
   [string]$Islem   = "hepsi"

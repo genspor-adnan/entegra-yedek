@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
  * REÇETE ve ALERJİ KARTLARI (mockup Ekranlar/Muayene/recete_karti ·
  * alerji_karti). Kurallar:
  *   * reçete: taslakta tür/açıklama yazılır; imzalıda düzenleme düğmeleri
- *     yok, Medula'ya Gönder var; tanılar muayeneden okunur;
+ *     yok, Medula'ya Gönder var; tanı reçetede GÖSTERİLMEZ (muayenede girilir);
  *   * alerji: hızlı reaksiyon çipi metne ekler/çıkarır; yeni kayıt hastayı ve
  *     açan muayeneyi yazar; "Pasif yap" silmez, aktif=0 yazar.
  */
@@ -38,13 +38,14 @@ describe('reçete kartı', () => {
     api.muayeneTanilari.mockResolvedValue({ tanilar: [{ id: 1, kod: 'J03.9', ad: 'Akut tonsillit', tur: 1 }] });
   });
 
-  it('taslak: tanı muayeneden görünür, tür değişince Kaydet yalnız tür/açıklama yazar', async () => {
+  it('taslak: tanı gösterilmez, tür değişince Kaydet yalnız tür/açıklama yazar', async () => {
     api.kartOku.mockResolvedValue({ kart: { id: 5, muayeneId: 11, hastaId: 3, tur: 0, aciklama: '',
                                             durum: 1, surum: 'x1' }, yetki: {}, izlemeNo: '' });
     api.kartGuncelle.mockResolvedValue({ kart: { id: 5, tur: 1, durum: 1, surum: 'x2' } });
     render(<ReceteKarti receteId={5} onKapat={() => {}} />);
-    await waitFor(() => expect(document.body.textContent).toContain('J03.9'));
-    expect(document.body.textContent).toContain('AYŞE YILMAZ');
+    await waitFor(() => expect(document.body.textContent).toContain('AYŞE YILMAZ'));
+    expect(document.body.textContent).not.toContain('J03.9');
+    expect(api.muayeneTanilari).not.toHaveBeenCalled();
 
     await act(async () => { screen.getByRole('radio', { name: /Kırmızı/ }).click() });
     await act(async () => { screen.getByText(/Kaydet/).closest('button')!.click() });

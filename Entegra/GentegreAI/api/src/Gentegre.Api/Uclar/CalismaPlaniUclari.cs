@@ -6,14 +6,16 @@ namespace Gentegre.Api.Uclar;
 
 /// <summary>
 /// HEKİM ÇALIŞMA PLANI (711) - türetilen haftalık plan ve "bugün çalışanlar".
-/// Şablon/istisna kayıtları generic kartla; burada yalnız türetme
+/// Şablon/istisna kayıtları generic kartla (kart hesapları: CalismaPlaniUclari.Kart); burada türetme
 /// (<c>fn_hekim_calisma_bloklari</c>) ve kayıt kabulün bugün listesi.
 /// </summary>
-public static class CalismaPlaniUclari
+public static partial class CalismaPlaniUclari
 {
     public static void CalismaPlaniUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/calisma-plani").WithTags("CalismaPlani").RequireAuthorization();
+        KartUclariniEkle(grup);
+        ListeUclariniEkle(grup);
 
         // Haftalık (ya da verilen aralık) türetilmiş bloklar. sube 0 = tüm şubeler.
         grup.MapGet("/", async (
@@ -45,9 +47,9 @@ public static class CalismaPlaniUclari
                 aciklama = o.GetString(14), randevu = o.GetInt32(15),
             }, iptal);
             var hekimler = await b.ListeAsync("""
-                select distinct t.id, t.unvan, coalesce(t.departman::integer, 0)
+                select distinct t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(t.departman::integer, 0)
                   from public.hekim_calisma_sablon s join public.taraf t on t.id = s.hekim_id
-                 where s.aktif = 1 order by t.unvan
+                 where s.aktif = 1 order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [], o => new { id = o.GetInt32(0), ad = o.GetString(1), departmanId = o.GetInt32(2) }, iptal);
             var bolumler = await b.ListeAsync("""
                 select d.id, d.ad, d.randevusuz_kabul from public.departman d

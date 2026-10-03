@@ -23,8 +23,9 @@ const KasaIslemKarti = tembel(() => import('./sayfalar/KasaIslemKarti'), 'KasaIs
 const StokAyarlar = tembel(() => import('./sayfalar/StokAyarlar'), 'StokAyarlar');
 const KasaAyarlar = tembel(() => import('./sayfalar/KasaAyarlar'), 'KasaAyarlar');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
-const RandevuAyarlar = tembel(() => import('./sayfalar/RandevuAyarlar'), 'RandevuAyarlar');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
+const CalismaSablonListesi = tembel(() => import('./sayfalar/calisma/CalismaSablonListesi'), 'CalismaSablonListesi');
+const CalismaIstisnaListesi = tembel(() => import('./sayfalar/calisma/CalismaIstisnaListesi'), 'CalismaIstisnaListesi');
 const AmeliyatCizelge = tembel(() => import('./sayfalar/AmeliyatCizelge'), 'AmeliyatCizelge');
 const KayitKabulAyarlar = tembel(() => import('./sayfalar/KayitKabulAyarlar'), 'KayitKabulAyarlar');
 const KatalogAyarlar = tembel(() => import('./sayfalar/KatalogAyarlar'), 'KatalogAyarlar');
@@ -209,9 +210,14 @@ function Yollar() {
         {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar') && <Route path="/iceri-alma" element={<IceriAlma />} />}
-        {yetki('randevu') && <Route path="/randevu-ayarlar" element={<RandevuAyarlar />} />}
+        {/* Eski "Randevu Ayarlari" adresi Calisma Sablonlari'na gider (ayarlar orada). */}
+        <Route path="/randevu-ayarlar" element={<Navigate to="/calisma-sablon" replace />} />
         {/* Calisma plani (711): sablon + istisnadan turetilen haftalik plan. */}
         {yetki('randevu.plan') && <Route path="/calisma-plani" element={<CalismaPlani />} />}
+        {/* Calisma sablonlari / izin & istisnalar: ozel liste; kart AYNI
+            rotada (:id?) ustte acilir - liste suzgeci kart acilip kapaninca kaybolmaz. */}
+        {yetki('randevu.plan') && <Route path="/calisma-sablon/:id?" element={<CalismaSablonListesi />} />}
+        {yetki('randevu.plan') && <Route path="/calisma-istisna/:id?" element={<CalismaIstisnaListesi />} />}
         {/* Ameliyathane masa cizelgesi (719): generic liste satir cizer, blok
             cizmez - "hangi masa ne zaman bos" sorusu kendi sayfasini ister. */}
         {yetki('ameliyathane.plan') && <Route path="/ameliyat-cizelge" element={<AmeliyatCizelge />} />}

@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 const { MuayeneDikte, sozluNoktalama } = await import('../bilesenler/MuayeneDikte');
 
 const HEDEFLER = [{ ad: 'sikayet', baslik: 'Şikâyet' }, { ad: 'hikaye', baslik: 'Hikâye' },
-                  { ad: 'karar', baslik: 'Değerlendirme / Plan' }];
+                  { ad: 'karar', baslik: 'Değerlendirme / Sonuç' }];
 
 /** Sahte tarayıcı ses tanıyıcı: testten "söylet". */
 class SahteTaniyici {
@@ -63,10 +63,10 @@ describe('muayene diktesi', () => {
       .toBe('üç gündür var, geceleri artıyor');
 
     // Fare Değerlendirme'ye geçti -> sonraki cümle oraya.
-    const kararKutu = screen.getByLabelText('Değerlendirme / Plan').closest('.md-alan') as HTMLElement;
+    const kararKutu = screen.getByLabelText('Değerlendirme / Sonuç').closest('.md-alan') as HTMLElement;
     await act(async () => { fireEvent.mouseEnter(kararKutu) });
     await act(async () => { t.soyle('istirahat önerildi') });
-    expect((screen.getByLabelText('Değerlendirme / Plan') as HTMLTextAreaElement).value)
+    expect((screen.getByLabelText('Değerlendirme / Sonuç') as HTMLTextAreaElement).value)
       .toBe('istirahat önerildi');
     expect((screen.getByLabelText('Hikâye') as HTMLTextAreaElement).value)
       .toBe('üç gündür var, geceleri artıyor');

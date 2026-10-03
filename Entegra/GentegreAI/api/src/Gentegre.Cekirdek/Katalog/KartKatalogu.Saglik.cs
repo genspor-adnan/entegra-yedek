@@ -146,7 +146,7 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> MakroAlanKodlari = new()
     {
         [""] = "Tüm alanlar", ["sikayet"] = "Şikayet", ["hikaye"] = "Hikaye",
-        ["bulguOzet"] = "Muayene Bulguları", ["karar"] = "Değerlendirme / Plan"
+        ["bulguOzet"] = "Muayene Bulguları", ["karar"] = "Değerlendirme / Sonuç"
     };
 
     /// <summary>
@@ -392,9 +392,9 @@ public static partial class KartKatalogu
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikâyet", Grup: "Şablon Muayene", AltGrup: "Anamnez"),
+                Baslik: "Şikâyet", Grup: "Muayene", AltGrup: "Anamnez"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Hikâye", Grup: "Şablon Muayene", AltGrup: "Anamnez"),
+                Baslik: "Hikâye", Grup: "Muayene", AltGrup: "Anamnez"),
             // OZGECMIS / SOYGECMIS / ALISKANLIK KARTTA YOK (kullanici: "anamnez
             //   sekmesinden ozgecmis, soygecmis, aliskanliklar editleri kaldir,
             //   onlarin yerine tani gridini tasi"). Kolonlar ve eski veri durur;
@@ -402,14 +402,15 @@ public static partial class KartKatalogu
             //   dogrudan okur. Yapisal karsiliklari hastanin tibbi gecmisinde.
 
             // ------------------------------- sablon muayene (fizik muayene) ----
-            // SEKME ADI "Şablon Muayene" (kullanici: "Fizik Muayene rename Şablon
-            //   Muayene"): bulgular brans sablonundan acilir.
+            // SEKME ADI "Muayene" (kullanici: "Fizik Muayene rename Şablon
+            //   Muayene", sonra "Şablon Muayene rename Muayene"): bulgular brans
+            //   sablonundan acilir.
             new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_muayene_sablon_lookup",
-                Baslik: "Muayene Şablonu", Grup: "Şablon Muayene"),
+                Baslik: "Muayene Şablonu", Grup: "Muayene"),
             // Sablondan DERLENEN metin: rapora ve e-Nabiz pakete giden budur.
             //   Bulgular sekmesindeki alanlardan uretilir, hekim duzeltebilir.
             new("bulguOzet", "bulgu_ozet", "metin", Baslik: "Muayene Bulguları",
-                Grup: "Şablon Muayene"),
+                Grup: "Muayene"),
 
             // ---------------------------------------------- tani / karar ----
             // MUAYENE SEKMESINDE, RECETENIN ALTINDA (kullanici: "Degerlendirme /
@@ -419,13 +420,13 @@ public static partial class KartKatalogu
             //   karar cumlesi tek satirlik kutuya sigmiyordu (uzun metin
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Değerlendirme / Plan", Grup: "Şablon Muayene", AltGrup: "Değerlendirme / Sonuç"),
+                Baslik: "Değerlendirme / Sonuç", Grup: "Muayene", AltGrup: "Değerlendirme / Sonuç"),
             // CIKIS SEKLI (627): hastanin muayene sonundaki durumu - USS 106'nin
             //   ZORUNLU alani. Varsayilani "iyilesderek cikis"; sevk, olum,
             //   tedaviyi reddetme gibi haller burada secilir. Liste SKRS'nin
             //   kendisi (609), ayri bir esleme yok.
             new("cikisSekli", "cikis_sekli", "kod", KodListesi: "cikis.sekli",
-                Baslik: "Çıkış Şekli", Grup: "Şablon Muayene", AltGrup: "Değerlendirme / Sonuç"),
+                Baslik: "Çıkış Şekli", Grup: "Muayene", AltGrup: "Değerlendirme / Sonuç"),
             // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
             //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,

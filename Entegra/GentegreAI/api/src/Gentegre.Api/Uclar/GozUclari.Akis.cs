@@ -53,7 +53,7 @@ public static partial class GozUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var satir = await baglanti.TekAsync("""
-                select i.id, t.unvan, i.istasyon, i.oda, i.cagri_zamani
+                select i.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, i.istasyon, i.oda, i.cagri_zamani
                   from public.goz_ziyaret_istasyon i
                   join public.taraf t on t.id = i.hasta_id
                  where i.cikis is null
@@ -116,7 +116,7 @@ public static partial class GozUclari
             var mevcut = await baglanti.TekAsync("""
                 select i.belge_id, i.hasta_id, i.sube_id, i.istasyon, i.cikis,
                        i.dilatasyon_zamani, i.sira_no, i.oda, i.personel_id,
-                       t.unvan
+                       public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan
                   from public.goz_ziyaret_istasyon i
                   join public.taraf t on t.id = i.hasta_id
                  where i.id = @p0

@@ -92,7 +92,7 @@ public static class IzinUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var p = await baglanti.TekAsync("""
-                select coalesce(nullif(t.unvan, ''), '') as ad, t.personel,
+                select coalesce(nullif(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), '') as ad, t.personel,
                        p.sube_id as "subeId"
                   from public.taraf t
                   left join public.taraf_personel p on p.id = t.id

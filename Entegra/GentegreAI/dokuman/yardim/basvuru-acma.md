@@ -31,7 +31,7 @@ Başvuru, hastanın o günkü kabulünün belgesidir (protokol). Kalemler (muaye
 - Ödeyen kurum SGK ya da özel sigorta ise provizyon adımı gerekir; kurum bilgisi eksikken fatura kesilemez.
 
 ## Alanlar
-Kart "Başvuru" sekmesinde üstte hasta şeridi: Dosya No / SYS Takip No, Doğum / Cinsiyet, Hekim / Personel, Kapanma, Açık Belge, Açık Tahsilat, Avans.
+Kart "Başvuru" sekmesinde üstte hasta şeridi: Dosya No / SYS Takip No, Doğum / Cinsiyet, Doktor / Personel, Kapanma, Açık Belge, Açık Tahsilat, Avans.
 Başvuru alanları: Hasta, Ödeyen Kurum (kurum), Sözleşme / Poliçe / Alt Kurum, Bölüm (poliklinik), Hekim, başvuru türü ve tarih (zorunluluk işaretleri doğrulanacak).
 "Provizyon" sekmesi: Özel Sigorta Provizyonu / Tamamlayıcı Sigorta Provizyonu, Sigorta Şirketi, Müstehaklık (Müstehak / Müstehak değil / Sorgulanmadı), Sevkli mi?, Karşılama %, Onaylanan Tutar, Hastadan / Kurumdan payı, Hastaya kesilecek / Kuruma kesilecek.
 "Kalemler" sekmesi: hizmet satırları (miktar, fiyat, iskonto); "Tahsilat" sekmesi: alınan ödemeler; "Önceki Başvurular" kutusu: hastanın geçmiş protokolleri (çift tık açar).

@@ -43,7 +43,7 @@ public static partial class KaynakKatalogu
                                                "sayi",  "Kutu", Hizalama: "orta", Genislik: 70),
             new("karsiGln",   "b.karsi_gln",   "metin", "Karşı GLN", Hizalama: "orta",
                                                Genislik: 130),
-            new("karsiAd",    "coalesce(k.unvan, '')", "metin", "Karşı Taraf", Genislik: 200),
+            new("karsiAd",    "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')", "metin", "Karşı Taraf", Genislik: 200),
             new("belgeNo",    "coalesce(bg.belge_no, '')", "metin", "Belge", Hizalama: "orta",
                                                Genislik: 140, Varsayilan: false),
             new("durumAdi",
@@ -106,7 +106,7 @@ public static partial class KaynakKatalogu
             new("id",           "i.id",           "sayi",  "Id", Varsayilan: false),
             new("istemNo",      "i.istem_no",     "metin", "İstem No", Hizalama: "orta",
                                                   Genislik: 120),
-            new("hastaAdi",     "h.unvan",        "metin", "Hasta", Genislik: 200),
+            new("hastaAdi",     "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",        "metin", "Hasta", Genislik: 200),
             // YAS/CINSIYET tek kolonda ("39 K"): iki ayri dar kolon yerine
             //   mockup'taki gibi tek okunur birim - referans araligi ve tup
             //   hacmi kararini birlikte etkilerler.
@@ -138,7 +138,7 @@ public static partial class KaynakKatalogu
             //   ikisini ayni kolonda gosteriyor ("Deniz Tip Merkezi (dis)").
             new("hekimAdi",
                 "case when i.dis_kurum_id is not null "
-                + "     then coalesce(dk.unvan, '') || ' (dış)' "
+                + "     then coalesce(public.fn_taraf_ad(dk.unvan, dk.ad, dk.soyad)::varchar(120), '') || ' (dış)' "
                 + "     else coalesce(p.ad, '') end",
                                                   "metin", "İsteyen", Genislik: 180,
                                                   Filtrelenebilir: false),
@@ -214,7 +214,7 @@ public static partial class KaynakKatalogu
                 + "             when 3 then 'Banko' when 4 then 'Dış kurum' "
                 + "             when 5 then 'Check-up' else '' end "
                 + "|| case when i.dis_kurum_id is not null "
-                + "        then ' · ' || coalesce(dk.unvan, '') else '' end",
+                + "        then ' · ' || coalesce(public.fn_taraf_ad(dk.unvan, dk.ad, dk.soyad)::varchar(120), '') else '' end",
                                                   "metin", "Kaynak",
                                                   Hizalama: "orta", Bicim: "rozet",
                                                   Genislik: 150),

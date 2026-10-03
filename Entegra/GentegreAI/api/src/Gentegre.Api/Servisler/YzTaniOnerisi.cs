@@ -134,7 +134,7 @@ public static partial class YzTaniOnerisi
             select h.dogum_tarihi, coalesce(h.cinsiyet, 0),
                    coalesce((select d.ad from public.departman d where d.id = m.bolum_id), ''),
                    coalesce(m.sikayet, ''), coalesce(m.hikaye, ''), coalesce(m.karar, ''),
-                   coalesce(t.ad, ''), coalesce(t.soyad, ''), coalesce(t.unvan, ''),
+                   coalesce(t.ad, ''), coalesce(t.soyad, ''), coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                    coalesce(h.ana_adi, ''), coalesce(h.baba_adi, ''),
                    coalesce(p.ad, ''), coalesce(p.soyad, ''), m.taraf_id
               from public.muayene m

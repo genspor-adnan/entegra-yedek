@@ -86,7 +86,7 @@ public static partial class KaynakKatalogu
             new("id",       "k.id",       "sayi",  "Id", Varsayilan: false),
             new("sira",     "k.sira",     "sayi",  "Sıra", Hizalama: "sag", Genislik: 70),
             new("ad",       "k.ad",       "metin", "Kural", Genislik: 220),
-            new("kurumAdi", "coalesce(kt.unvan, 'Tüm kurumlar')", "metin", "Kurum",
+            new("kurumAdi", "coalesce(public.fn_taraf_ad(kt.unvan, kt.ad, kt.soyad)::varchar(120), 'Tüm kurumlar')", "metin", "Kurum",
                                               Genislik: 190),
             new("modaliteAdi",
                 "case k.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' "
@@ -105,7 +105,7 @@ public static partial class KaynakKatalogu
                 + "|| case when k.gunler = '' then '' else ' · ' || k.gunler end",
                 "metin", "Saat / Gün", Genislik: 150, Filtrelenebilir: false),
             new("hedefAdi",
-                "case k.hedef_tur when 2 then coalesce(rt.unvan, '(radyolog silinmiş)') "
+                "case k.hedef_tur when 2 then coalesce(public.fn_taraf_ad(rt.unvan, rt.ad, rt.soyad)::varchar(120), '(radyolog silinmiş)') "
                 + "when 3 then 'En az yüklü' else 'O anki nöbetçi' end",
                 "metin", "Hedef", Genislik: 180, Filtrelenebilir: false),
             new("hedefTur", "k.hedef_tur", "kod", "Hedef Kodu", Varsayilan: false,

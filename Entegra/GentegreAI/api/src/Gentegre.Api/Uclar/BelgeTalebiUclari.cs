@@ -202,7 +202,7 @@ public static class BelgeTalebiUclari
             var t = await baglanti.TekAsync("""
                 select b.durum, b.adet, b.talep_no,
                        b.yazi_baslik, b.yazi_metin, b.yazi_tarihi,
-                       coalesce(tr.unvan, '')   as personel_ad,
+                       coalesce(public.fn_taraf_ad(tr.unvan, tr.ad, tr.soyad)::varchar(120), '')   as personel_ad,
                        -- ANTET TEK KAYNAKTAN (772): `v_sube_antet`. Logo da
                        --   onun kolonu - resmî yazıda kurum logosu beklenir.
                        coalesce(su.unvan, '')   as kurum_unvan,

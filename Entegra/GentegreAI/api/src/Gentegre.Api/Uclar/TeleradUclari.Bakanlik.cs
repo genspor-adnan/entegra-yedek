@@ -62,7 +62,7 @@ public static partial class TeleradUclari
                        coalesce(rp.istem_nedeni_puan, 0)           as "istemNedeniPuan",
                        coalesce(rp.cekim_kalite_puan, 0)           as "cekimKalitePuan",
                        coalesce(t.vkno, '')                        as "radyologTckn",
-                       coalesce(t.unvan, '')                       as "radyolog",
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')                       as "radyolog",
                        rp.onay_tarihi                              as "onayTarihi",
                        case when i.radyoloji_istem_id is null then ''
                             else public.fn_rad_kontrast_obx17(i.radyoloji_istem_id) end

@@ -117,8 +117,8 @@ public static partial class KaynakKatalogu
             new("hastaId",   "gm.hasta_id",  "sayi", "Hasta Id", Varsayilan: false),
             new("tarih",     "m.muayene_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                              Bicim: "dd.MM.yyyy HH:mm"),
-            new("hasta",     "t.unvan",      "metin", "Hasta", Genislik: 220),
-            new("hekim",     "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 180),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 220),
+            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 180),
             new("turAdi",
                 "case gm.muayene_turu when 1 then 'Tam' when 2 then 'Kontrol' "
                 + "when 3 then 'Postop' when 4 then 'Acil' when 5 then 'Tarama' "
@@ -186,7 +186,7 @@ public static partial class KaynakKatalogu
         {
             new("id",        "g.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "g.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
-            new("hasta",     "t.unvan",       "metin", "Hasta", Genislik: 220),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
             new("goz",       GozTarafIfade,   "metin", "Göz", Hizalama: "orta",
                                               Bicim: "rozet", Genislik: 70, Filtrelenebilir: false),
             new("gozKod",    "g.goz",         "kod",  "Göz Kodu", Varsayilan: false),
@@ -210,7 +210,7 @@ public static partial class KaynakKatalogu
                                               "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
                                               Genislik: 130, Filtrelenebilir: false),
             new("durum",     "g.durum",       "kod",  "Durum Kodu", Varsayilan: false),
-            new("degerlendiren", "coalesce(d.unvan, '')", "metin", "Değerlendiren", Genislik: 170),
+            new("degerlendiren", "coalesce(public.fn_taraf_ad(d.unvan, d.ad, d.soyad)::varchar(120), '')", "metin", "Değerlendiren", Genislik: 170),
             // KALİTE listede: düşük sinyalli OCT'nin ölçümü trende girerse
             //   "incelme" sanılan şey aslında kötü çekimdir.
             new("kalite",    "g.kalite",      "sayi", "Kalite", Hizalama: "orta", Genislik: 80),
@@ -243,7 +243,7 @@ public static partial class KaynakKatalogu
         {
             new("id",        "g.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "g.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
-            new("hasta",     "t.unvan",       "metin", "Hasta", Genislik: 220),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
             new("goz",       GozTarafIfade,   "metin", "Göz", Hizalama: "orta",
                                               Bicim: "rozet", Genislik: 70, Filtrelenebilir: false),
             new("gozKod",    "g.goz",         "kod",  "Göz Kodu", Varsayilan: false),
@@ -280,7 +280,7 @@ public static partial class KaynakKatalogu
                 + "   || case when am.iol_guc is null then '' else ' · ' || am.iol_guc || ' D' end end,"
                 + " '')",
                                               "metin", "Detay", Genislik: 230, Filtrelenebilir: false),
-            new("hekim",     "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 180),
+            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 180),
             new("planlananTarih", "g.planlanan_tarih", "tarih", "Planlanan", Hizalama: "orta",
                                               Bicim: "dd.MM.yyyy HH:mm"),
             new("uygulamaZamani", "g.uygulama_zamani", "tarih", "Uygulama", Hizalama: "orta",
@@ -333,8 +333,8 @@ public static partial class KaynakKatalogu
             new("receteNo",  "r.recete_no",   "metin", "Reçete No", Genislik: 140),
             new("tarih",     "r.ekleme_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                               Bicim: "dd.MM.yyyy"),
-            new("hasta",     "t.unvan",       "metin", "Hasta", Genislik: 220),
-            new("hekim",     "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 170),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
+            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170),
             new("turAdi",
                 "case r.tur when 1 then 'Uzak' when 2 then 'Yakın' when 3 then 'Bifokal' "
                 + "when 4 then 'Progresif' when 5 then 'Ara mesafe' when 6 then 'Güneş' else '' end",
@@ -366,7 +366,7 @@ public static partial class KaynakKatalogu
                                               "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
                                               Genislik: 130, Filtrelenebilir: false),
             new("durum",     "r.durum",       "kod",  "Durum Kodu", Varsayilan: false),
-            new("optik",     "coalesce(o.unvan, '')", "metin", "Optik", Genislik: 180),
+            new("optik",     "coalesce(public.fn_taraf_ad(o.unvan, o.ad, o.soyad)::varchar(120), '')", "metin", "Optik", Genislik: 180),
             new("gecerlilikBitis", "r.gecerlilik_bitis", "tarih", "Geçerlilik", Hizalama: "orta",
                                               Bicim: "dd.MM.yyyy"),
             new("sgkHak",    "r.sgk_hak",     "mantik", "SGK hakkı", Hizalama: "orta",
@@ -394,7 +394,7 @@ public static partial class KaynakKatalogu
         {
             new("id",        "g.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "g.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
-            new("hasta",     "t.unvan",       "metin", "Hasta", Genislik: 220),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
             new("goz",       GozTarafIfade,   "metin", "Göz", Hizalama: "orta",
                                               Bicim: "rozet", Genislik: 70, Filtrelenebilir: false),
             new("gozKod",    "g.goz",         "kod",  "Göz Kodu", Varsayilan: false),
@@ -405,7 +405,7 @@ public static partial class KaynakKatalogu
                                               "metin", "Hastalık", Genislik: 180, Filtrelenebilir: false),
             new("hastalik",  "g.hastalik",    "kod",  "Hastalık Kodu", Varsayilan: false),
             new("evre",      "g.evre",        "metin", "Evre", Genislik: 130),
-            new("hekim",     "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 170),
+            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170),
             new("hedefGib",  "g.hedef_gib",   "sayi", "Hedef GİB", Hizalama: "sag", Genislik: 100,
                                               Bicim: "0.0"),
             new("sonrakiKontrol", "g.sonraki_kontrol", "tarih", "Sonraki Kontrol", Hizalama: "orta",
@@ -459,7 +459,7 @@ public static partial class KaynakKatalogu
             new("yazilan",   "d.yazilan",     "metin", "Yazılan", Genislik: 280),
             new("eylem",     "d.eylem",       "metin", "Komut eylemi", Genislik: 200),
             new("kapsamAdi",
-                "case d.kapsam when 1 then 'Kurum' else coalesce(k.unvan, 'Kullanıcı') end",
+                "case d.kapsam when 1 then 'Kurum' else coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), 'Kullanıcı') end",
                                               "metin", "Kapsam", Genislik: 160,
                                               Filtrelenebilir: false),
             new("kapsam",    "d.kapsam",      "kod",  "Kapsam Kodu", Varsayilan: false),

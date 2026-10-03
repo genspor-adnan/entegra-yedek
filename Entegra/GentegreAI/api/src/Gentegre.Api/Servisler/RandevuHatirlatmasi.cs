@@ -52,7 +52,7 @@ public sealed class RandevuHatirlatmasi
 
         var r = await _veri.TekAsync("""
             select r.baslangic, r.durum, coalesce(r.sube_id, 0) as sube_id,
-                   coalesce(t.unvan, '')   as hasta,
+                   coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')   as hasta,
                    coalesce(t.cep_tel, '') as telefon,
                    coalesce(d.ad, '')      as bolum,
                    -- Kurum adi SUBEDEN: cok subeli kurumda hasta hangi subeye

@@ -31,7 +31,7 @@ public static partial class KaynakKatalogu
                                               Genislik: 130),
             new("tarih",      "r.ekleme_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                               Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
-            new("hastaAdi",   "h.unvan",      "metin", "Hasta", Genislik: 220),
+            new("hastaAdi",   "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 220),
             new("hekimAdi",   "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
             new("turAdi",
                 "case r.tur when 1 then 'Kırmızı' when 2 then 'Yeşil' when 3 then 'Mor' "
@@ -119,7 +119,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "a.id",        "sayi",  "Id", Varsayilan: false),
-            new("hastaAdi",  "h.unvan",     "metin", "Hasta", Genislik: 220),
+            new("hastaAdi",  "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",     "metin", "Hasta", Genislik: 220),
             new("turAdi",
                 "case a.tur when 2 then 'Gıda' when 3 then 'Çevresel' when 4 then 'Lateks' "
                 + "when 5 then 'Kontrast' else 'İlaç' end",
@@ -158,7 +158,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",         "i.id",         "sayi",  "Id", Varsayilan: false),
-            new("hastaAdi",   "h.unvan",      "metin", "Hasta", Genislik: 200),
+            new("hastaAdi",   "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 200),
             new("ilacAd",     "i.ilac_ad",    "metin", "İlaç", Genislik: 280),
             new("etkenMadde", "i.etken_madde","metin", "Etken Madde", Genislik: 200),
             new("barkod",     "i.ilac_barkod","metin", "Barkod", Hizalama: "orta",

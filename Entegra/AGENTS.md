@@ -133,7 +133,7 @@ powershell -ExecutionPolicy Bypass -File GentegreAI\db\kur.ps1   # create DB + a
 powershell -ExecutionPolicy Bypass -File GentegreAI\yayin\yayinla.ps1   # deploy to 46.36.201.170/ai
 ```
 
-Dev DB is docker **`gentegre-pg18`** (port 5434, db `gentegre_ai`, ICU `tr-TR`). Dev login `admin` / `Gentegre!2026`.
+Dev DB is docker **`gentegre-pg18`** (port 5434, db `gentegre_ai`, ICU `tr-TR`). Dev login `admin` / `Genotip!2026` (the install default `Gentegre!2026` was changed on the dev DB).
 
 **Tests (web product only — the Delphi app still has none).** `api/tests/Gentegre.Testler` is an xUnit project (~26 classes, mostly HBYS: lab, mikrobiyoloji, e-Nabız, ilaç/karekod, dağıtım, kalite kontrol). Two things about it are easy to get wrong:
 

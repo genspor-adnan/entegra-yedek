@@ -33,9 +33,9 @@ public static partial class DisUclari
             await using var b = await veri.AcAsync(iptal);
 
             var plan = await b.TekAsync("""
-                select p.id, p.plan_no, p.hasta_id, t.unvan, coalesce(t.vkno, ''),
+                select p.id, p.plan_no, p.hasta_id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(t.vkno, ''),
                        extract(year from age(current_date, th.dogum_tarihi))::int as yas, coalesce(th.cinsiyet, 0),
-                       p.hekim_id, coalesce(h.unvan, ''), p.muayene_id, m.baslangic as muayene_tarih,
+                       p.hekim_id, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), p.muayene_id, m.baslangic as muayene_tarih,
                        p.varyant, p.ana_plan_id, coalesce(ap.plan_no, ''), p.durum,
                        p.fiyat_listesi_id, coalesce(fl.ad, ''), p.odeyen_kurum_id, coalesce(k.ad, ''),
                        p.toplam, p.indirim, p.net, p.odeme_secenegi, coalesce(p.taksit_sayisi, 0), p.proforma_no,
@@ -94,7 +94,7 @@ public static partial class DisUclari
 
             // Seans programı: plana bağlı seanslar + o seansta hangi satırlar işlendi.
             var seanslar = await b.ListeAsync("""
-                select x.id, x.baslangic, x.bitis, x.sure_dk, x.durum, coalesce(u.kod || ' · ' || u.ad, ''), coalesce(h.unvan, ''),
+                select x.id, x.baslangic, x.bitis, x.sure_dk, x.durum, coalesce(u.kod || ' · ' || u.ad, ''), coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''),
                        coalesce((select string_agg('#' || coalesce(ps.sira, 0) || ' ' || hz.ad || case when i.plan_satir_id is null then '' else ' ' || i.seans_no || '/' || coalesce(ps.seans_sayisi, 1) end, ' · ' order by i.id)
                                    from public.dis_seans_islem i join public.hizmet hz on hz.id = i.hizmet_id
                                    left join public.dis_tedavi_plani_satir ps on ps.id = i.plan_satir_id
@@ -116,7 +116,7 @@ public static partial class DisUclari
 
             // Planlanmış (henüz seansa girmemiş) randevular: satır bazlı.
             var randevular = await b.ListeAsync("""
-                select r.id, r.baslangic, r.sure_dk, r.durum, r.plan_satir_id, coalesce(u.kod || ' · ' || u.ad, ''), coalesce(h.unvan, '')
+                select r.id, r.baslangic, r.sure_dk, r.durum, r.plan_satir_id, coalesce(u.kod || ' · ' || u.ad, ''), coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')
                   from public.randevu r
                   join public.dis_tedavi_plani_satir s on s.id = r.plan_satir_id
                   left join public.dis_unit u on u.id = r.unit_id

@@ -841,13 +841,14 @@ eğilimi kümülatif ekrana gitmeden görür.
 ## 9.8a Muayene › Tamamlama kontrolü
 
 ```http
-GET /api/muayene/{id}/tamamlama-kontrol  // { tamamlandi, kontroller: [{ alan, ad, tamam, mesaj }] }
+GET /api/muayene/{id}/tamamlama-kontrol  // { tamamlandi, kontroller: [{ alan, ad, tamam, mesaj, zorunlu }] }
 ```
 
-`POST /api/muayene/{id}/tamamla`'nın kuralı **önceden ve tamam olanlarla birlikte**: ana tanı,
-şikâyet, değerlendirme/plan, muayeneye alınmış olma, çıkış şekli + bölüm/doktor şablon
-kuralları (931). İki uç aynı yardımcıyı kullanır (`TamamlamaKontrolleriAsync`); muayene
-kartının "Muayene Özeti" sekmesi listeyi buradan çizer, kuralı istemcide tekrar yazmaz.
+`POST /api/muayene/{id}/tamamla`'nın kuralı **önceden ve tamam olanlarla birlikte**, hekimin iş
+akışı sırasıyla: muayeneye alınmış olma, şikâyet / hikâye, ana tanı, istem, reçete,
+değerlendirme / sonuç, çıkış şekli + bölüm/doktor şablon kuralları (931). `zorunlu: false`
+maddeler (istem, reçete) yalnız bilgidir — eksik olmaları Tamamla'yı engellemez. İki uç aynı yardımcıyı kullanır (`TamamlamaKontrolleriAsync`); muayene
+kartının "Özet" sekmesi listeyi buradan çizer, kuralı istemcide tekrar yazmaz.
 
 ## 9.8b Muayene › Vücut şeması
 

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İzin & İstisnalar Listesi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#5fb57c,#2e7d46);color:#fff;font-weight:bold}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip b{font-weight:bold;color:var(--muted);margin-left:3px}
+  .cip.on b{color:var(--navy)}
+  .cip.bek b{color:var(--warn)}
+  .gorunum{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .gorunum span{padding:3px 10px;font-size:11px;background:#fff}
+  .gorunum span.on{background:var(--sel);color:var(--navy);font-weight:bold}
+  .ikinci{display:flex;gap:6px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .ikinci .k{font-size:10.5px;color:var(--muted)}
+  /* OZET */
+  .ozetler{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f7f9fc)}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.uyari{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.uyari .v,.kpi.uyari .a{color:var(--warn)}
+  .kpi.kirmizi{border-color:#e4b7b2;background:#fdf1f0}
+  .kpi.kirmizi .v,.kpi.kirmizi .a{color:#8f3d36}
+  .kpi .bag{text-decoration:underline}
+  /* GRID */
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .grid th.sirali::after{content:" ▼";font-size:9px}
+  .grid td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .grid tr.secili td{background:#eef5fd}
+  .grid tr.ik td{background:#fafbfc;color:#5d6b7a}
+  .grid tr.iptal td{color:#9aa7b5;text-decoration:line-through}
+  .grid tr.iptal td:last-child,.grid tr.iptal td:first-child{text-decoration:none}
+  .grid tr.gecmis td{color:#8c99a8}
+  .kutu{width:13px;height:13px;border:1px solid #8aa0b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+  .kutu.yok{border-style:dashed;opacity:.5}
+  .dr{font-weight:bold;color:var(--navy)}
+  .dr small{display:block;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .tur{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap;border:1px solid}
+  .t-izin{background:#f8e1df;color:#8f3d36;border-color:#e4b7b2}
+  .t-kongre{background:#efe6fa;color:#6b3fa0;border-color:#ddc9f2}
+  .t-saat{background:#fdf1dc;color:#8a6414;border-color:#f0d9a8}
+  .t-ek{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .t-kapali{background:#e9ecf0;color:#4b5866;border-color:#cfd6de}
+  .t-ik{background:#fff;color:#5d6b7a;border-color:#cfd6de;border-style:dashed}
+  .tarih b{color:var(--ink)}
+  .tarih small{display:block;color:var(--muted);font-size:10.5px}
+  .tarih .simdi{color:#2e7d46;font-weight:bold}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .etk{display:flex;flex-direction:column;gap:1px;font-size:11px}
+  .etk .acik{color:#8f3d36;font-weight:bold}
+  .etk .tamam{color:#2e7d46}
+  .kim{font-size:10.5px;color:var(--muted);line-height:1.35}
+  .kim b{color:var(--ink);font-weight:normal}
+  .alt{display:flex;gap:6px;align-items:center;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .alt b{color:var(--ink)}
+  .toplu{display:flex;gap:4px;align-items:center;padding:6px 10px;background:#eef5fd;border-bottom:1px solid #bcd2ef;color:#2f5c9e;font-size:11px}
+  /* ZAMAN CIZELGESI GORUNUMU */
+  .zc{padding:10px 12px}
+  .zc-ust,.zc-sat{display:grid;grid-template-columns:170px repeat(28,1fr);align-items:center}
+  .zc-ust div{font-size:9.5px;color:var(--muted);text-align:center;padding:2px 0;border-left:1px solid var(--line2)}
+  .zc-ust div.hs{background:#f5f7fa}
+  .zc-ust div.bugun{background:#e3ecfa;color:#2f5c9e;font-weight:bold}
+  .zc-ust .hafta{grid-column:span 7;border-left:1px solid var(--line);font-weight:bold;color:var(--navy);text-align:left;padding-left:4px}
+  .zc-sat{height:30px;border-top:1px solid var(--line2);position:relative}
+  .zc-sat .ad{font-size:11px;font-weight:bold;color:var(--navy);padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .zc-sat .ad small{display:block;font-weight:normal;color:var(--muted);font-size:9.5px}
+  .zc-sat .cub{height:18px;border-radius:3px;font-size:10px;font-weight:bold;display:flex;align-items:center;padding:0 5px;overflow:hidden;white-space:nowrap;border:1px solid}
+  .zc-sat .cub.bekliyor{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.55) 0 4px,transparent 4px 8px)}
+  .lejant{display:flex;gap:10px;flex-wrap:wrap;padding:0 12px 10px;font-size:10.5px;color:var(--muted);align-items:center}
+  .aciklama{max-width:1180px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ LISTE -->
+<div class="win">
+  <div class="title">🏖 İzin &amp; İstisnalar
+    <span class="sp">Randevu › Ayarlar › İzin &amp; İstisnalar · şablonu değiştirmeden planı ezen kayıtlar</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni İzin / İstisna</div>
+    <span class="ayrac"></span>
+    <span class="cipler">
+      <span class="cip bek on">Onay bekliyor <b>3</b></span>
+      <span class="cip">Onaylı <b>18</b></span>
+      <span class="cip">İptal <b>2</b></span>
+      <span class="cip">Tümü <b>23</b></span>
+    </span>
+    <span class="ayrac"></span>
+    <span class="gorunum"><span class="on">☰ Liste</span><span>▬ Zaman çizelgesi</span></span>
+    <div class="inp sp" style="width:200px;color:var(--muted)">🔍 Doktor / açıklama ara…</div>
+  </div>
+  <div class="ikinci">
+    <span class="k">Tür:</span>
+    <span class="cipler">
+      <span class="cip on">Tümü</span><span class="cip">🏖 İzin</span><span class="cip">🎓 Kongre / eğitim</span>
+      <span class="cip">🕘 Saat değişikliği</span><span class="cip">➕ Ek mesai</span><span class="cip">⛔ Kapalı</span>
+      <span class="cip">🌴 İK izni</span>
+    </span>
+    <span class="ayrac"></span>
+    <span class="k">Dönem:</span>
+    <span class="cipler"><span class="cip">Bu hafta</span><span class="cip on">Önümüzdeki 30 gün</span><span class="cip">Geçmiş</span></span>
+    <div class="inp" style="width:96px">03.10.2026</div><span style="color:var(--muted)">–</span><div class="inp" style="width:96px">02.11.2026</div>
+    <div class="inp combo" style="width:130px">Bölüm: Tümü</div>
+  </div>
+
+  <div class="ozetler">
+    <div class="kpi uyari"><span class="k">Onay bekleyen</span><span class="v">3</span><span class="a">en eskisi 2 gündür bekliyor</span></div>
+    <div class="kpi kirmizi"><span class="k">İşlem bekleyen randevu</span><span class="v">9</span><span class="a">kapanan günlerde, aktarılmamış · <span class="bag">göster</span></span></div>
+    <div class="kpi"><span class="k">Bugün izinli / kongrede</span><span class="v">2 doktor</span><span class="a">Dr. Aslı Demir, Dr. Emre Arslan</span></div>
+    <div class="kpi"><span class="k">Önümüzdeki 30 gün</span><span class="v">11 kayıt</span><span class="a">4 izin · 2 kongre · 3 saat değ. · 2 ek mesai</span></div>
+  </div>
+
+  <div class="toplu">☑ <b>2 kayıt seçili</b> (ikisi de onay bekliyor)
+    <span class="btn kucuk ok">✔ Seçilileri onayla</span>
+    <span class="btn kucuk">✖ İptal et</span>
+    <span class="sp" style="color:var(--muted)">Seçimi kaldır ✕</span></div>
+
+  <table class="grid">
+    <tr>
+      <th style="width:28px"><span class="kutu"></span></th>
+      <th>Tür</th><th>Doktor · Bölüm</th><th class="sirali">Tarih</th><th>Saat</th>
+      <th>Etkilenen randevu</th><th>Durum</th><th>Açıklama</th><th>Giren / Onaylayan</th>
+    </tr>
+    <tr class="secili">
+      <td><span class="kutu">✔</span></td>
+      <td><span class="tur t-kongre">🎓 Kongre / eğitim</span></td>
+      <td><div class="dr">Dr. Aslı Demir<small>Kardiyoloji · tüm bölümler</small></div></td>
+      <td class="tarih"><b>12–16.10.2026</b><small>5 gün · 9 gün sonra</small></td>
+      <td>gün boyu</td>
+      <td><div class="etk"><span class="acik">7 randevu · 2 işlem bekliyor</span><span class="tamam">5 aktarıldı / kaydırıldı</span></div></td>
+      <td><span class="chip c-bek">Onay bekliyor</span></td>
+      <td>Avrupa Kardiyoloji Kongresi — Barselona</td>
+      <td class="kim">Giren: <b>Dr. Aslı Demir</b> · 03.10<br>Onaylayan: —</td>
+    </tr>
+    <tr class="secili">
+      <td><span class="kutu">✔</span></td>
+      <td><span class="tur t-saat">🕘 Saat değişikliği</span></td>
+      <td><div class="dr">Dr. Barış Güneş<small>İç Hastalıkları</small></div></td>
+      <td class="tarih"><b>20.10.2026</b><small>1 gün · Salı</small></td>
+      <td>13:00–18:00</td>
+      <td><div class="etk"><span class="acik">3 randevu sabah saatinde</span></div></td>
+      <td><span class="chip c-bek">Onay bekliyor</span></td>
+      <td>Sabah idari toplantı</td>
+      <td class="kim">Giren: <b>Sekreter Ayşe</b> · 02.10<br>Onaylayan: —</td>
+    </tr>
+    <tr>
+      <td><span class="kutu"></span></td>
+      <td><span class="tur t-izin">🏖 İzin</span></td>
+      <td><div class="dr">Dr. Emre Arslan<small>Deri ve Zührevi Hastalıklar</small></div></td>
+      <td class="tarih"><b>01–07.10.2026</b><small class="simdi">● şu an devam ediyor</small></td>
+      <td>gün boyu</td>
+      <td><div class="etk"><span class="tamam">✔ 4 randevu aktarıldı</span></div></td>
+      <td><span class="chip c-ok">Onaylı</span></td>
+      <td>Mazeret — aile</td>
+      <td class="kim">Giren: <b>admin</b> · 28.09<br>Onaylayan: <b>Başhekim</b> · 29.09</td>
+    </tr>
+    <tr class="ik">
+      <td><span class="kutu yok" title="İK izni burada düzenlenmez"></span></td>
+      <td><span class="tur t-ik">🌴 İK izni</span></td>
+      <td><div class="dr">Dr. Aslı Demir<small>Kardiyoloji</small></div></td>
+      <td class="tarih"><b>02–06.11.2026</b><small>5 gün · Yıllık izin</small></td>
+      <td>gün boyu</td>
+      <td><div class="etk"><span>0 randevu</span></div></td>
+      <td><span class="chip c-ok">Onaylı</span></td>
+      <td>Yıllık izin <span style="color:var(--muted)">· İzinler ekranından yönetilir ↗</span></td>
+      <td class="kim">İK · izin no İZ-2026-0412</td>
+    </tr>
+    <tr>
+      <td><span class="kutu"></span></td>
+      <td><span class="tur t-ek">➕ Ek mesai</span></td>
+      <td><div class="dr">Dr. Ceren Çelik<small>Kulak Burun Boğaz</small></div></td>
+      <td class="tarih"><b>17.10.2026</b><small>1 gün · Cumartesi</small></td>
+      <td>09:00–13:00 · <span style="color:var(--muted)">Banko, Portal</span></td>
+      <td><div class="etk"><span class="tamam">+12 slot açıldı · 5 dolu</span></div></td>
+      <td><span class="chip c-ok">Onaylı</span></td>
+      <td>Bekleyen ameliyat kontrolleri</td>
+      <td class="kim">Giren: <b>admin</b> · 01.10<br>Onaylayan: <b>admin</b> · 01.10</td>
+    </tr>
+    <tr>
+      <td><span class="kutu"></span></td>
+      <td><span class="tur t-kapali">⛔ Kapalı</span></td>
+      <td><div class="dr">Tüm doktorlar<small>Göz Hastalıkları (bölüm)</small></div></td>
+      <td class="tarih"><b>29.10.2026</b><small>1 gün · Cumhuriyet Bayramı</small></td>
+      <td>gün boyu</td>
+      <td><div class="etk"><span>0 randevu</span></div></td>
+      <td><span class="chip c-ok">Onaylı</span></td>
+      <td>Resmi tatil</td>
+      <td class="kim">Giren: <b>admin</b> · 15.09<br>Onaylayan: <b>admin</b> · 15.09</td>
+    </tr>
+    <tr class="iptal">
+      <td><span class="kutu"></span></td>
+      <td><span class="tur t-izin">🏖 İzin</span></td>
+      <td><div class="dr">Dr. Deniz Kara<small>Gastroenteroloji</small></div></td>
+      <td class="tarih"><b>23.10.2026</b><small>1 gün</small></td>
+      <td>gün boyu</td>
+      <td><div class="etk"><span>—</span></div></td>
+      <td><span class="chip c-gri">İptal</span></td>
+      <td>Vazgeçildi</td>
+      <td class="kim">Giren: <b>admin</b> · 30.09</td>
+    </tr>
+  </table>
+  <div class="alt">Kayıt: <b>23</b> · gösterilen <b>7</b> · İK izinleri salt okunur listelenir <span class="sp">‹ Önceki</span> <b>1 / 1</b> <span>Sonraki ›</span></div>
+</div>
+
+<!-- ============================================== ZAMAN CIZELGESI GORUNUMU -->
+<div class="win">
+  <div class="title">🏖 İzin &amp; İstisnalar — ▬ Zaman çizelgesi görünümü
+    <span class="sp">aynı süzgeç · doktor × 4 hafta · çubuğa tıkla = kart</span></div>
+  <div class="zc">
+    <div class="zc-ust">
+      <div style="border:0"></div>
+      <div class="hafta">5–11 Ekim</div><div class="hafta">12–18 Ekim</div><div class="hafta">19–25 Ekim</div><div class="hafta">26 Eki – 1 Kas</div>
+    </div>
+    <div class="zc-ust">
+      <div style="border:0"></div>
+      <div>P</div><div>S</div><div>Ç</div><div>P</div><div>C</div><div class="hs">C</div><div class="hs">P</div>
+      <div>P</div><div>S</div><div>Ç</div><div>P</div><div>C</div><div class="hs">C</div><div class="hs">P</div>
+      <div>P</div><div>S</div><div>Ç</div><div>P</div><div>C</div><div class="hs">C</div><div class="hs">P</div>
+      <div>P</div><div>S</div><div>Ç</div><div>P</div><div>C</div><div class="hs">C</div><div class="hs">P</div>
+    </div>
+    <div class="zc-sat"><div class="ad">Dr. Aslı Demir<small>Kardiyoloji</small></div>
+      <div class="cub t-kongre bekliyor" style="grid-column:9 / span 5">🎓 Kongre · onay bekliyor</div></div>
+    <div class="zc-sat"><div class="ad">Dr. Barış Güneş<small>İç Hastalıkları</small></div>
+      <div class="cub t-saat bekliyor" style="grid-column:17 / span 1">🕘</div></div>
+    <div class="zc-sat"><div class="ad">Dr. Ceren Çelik<small>KBB</small></div>
+      <div class="cub t-ek" style="grid-column:14 / span 1">➕</div></div>
+    <div class="zc-sat"><div class="ad">Dr. Emre Arslan<small>Deri</small></div>
+      <div class="cub t-izin" style="grid-column:2 / span 3">🏖 İzin</div></div>
+    <div class="zc-sat"><div class="ad">Göz Hastalıkları<small>bölüm</small></div>
+      <div class="cub t-kapali" style="grid-column:26 / span 1">⛔</div></div>
+  </div>
+  <div class="lejant">
+    <span class="tur t-izin">🏖 İzin</span><span class="tur t-kongre">🎓 Kongre</span><span class="tur t-saat">🕘 Saat değişikliği</span>
+    <span class="tur t-ek">➕ Ek mesai</span><span class="tur t-kapali">⛔ Kapalı</span><span class="tur t-ik">🌴 İK izni</span>
+    <span>taralı çubuk = onay bekliyor</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <b>NOT (mockup):</b> Liste "kim, ne zaman, neden yok ve hastalara ne oldu" sorusunu cevaplar. Bugünkü
+  generic listeye göre değişiklikler:
+  <b>(1)</b> varsayılan çip <b>Onay bekliyor</b> (yalnız onaylı istisna planı kapatır — iş bekleyenler önde);
+  çipler sayılı; tür ve dönem çipleri ikinci satırda;
+  <b>(2)</b> tür <b>renkli rozet</b> (kartın tür düğmeleriyle aynı ikonlar), saat sütunu "gün boyu" ya da
+  saat aralığı + ek mesai kanalları; Saat / "–" iki ayrı kolon kalkar;
+  <b>(3)</b> tarih tek hücrede aralık + gün sayısı + "N gün sonra" / <b>"şu an devam ediyor"</b>;
+  <b>(4)</b> <b>etkilenen randevu</b> sayı değil durum: kaç tanesi hâlâ işlem bekliyor (kırmızı), kaçı
+  aktarıldı / kaydırıldı (yeşil); ek mesaide açılan slot;
+  <b>(5)</b> <b>İK izni</b> satırları listeye salt okunur düşer (kesikli rozet, işaret kutusu pasif, "İzinler
+  ekranından yönetilir") — doktorun neden olmadığı tek listede görünür;
+  <b>(6)</b> giren / onaylayan sütunu (945'in onay izi);
+  <b>(7)</b> özet şeridi: onay bekleyen, <b>işlem bekleyen randevu</b>, bugün izinli doktor, 30 günlük dağılım;
+  <b>(8)</b> toplu <b>onayla / iptal et</b>;
+  <b>(9)</b> ikinci görünüm <b>zaman çizelgesi</b>: doktor × 4 hafta, çubuk = istisna (taralı = onay bekliyor) —
+  çakışan izinleri ("aynı hafta iki kardiyolog yok") görmek için.
+  Satıra çift tık istisna kartını açar; İK izni satırı İzinler ekranına gider.
+</div>
+</body>
+</html>

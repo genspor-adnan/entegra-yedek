@@ -45,7 +45,7 @@ public static partial class TeleradUclari
                 select i.id, i.istek_no as "istekNo", i.kurum_id as "kurumId",
                        i.atanan_radyolog_id as "radyologId",
                        k.taraf_id as "kurumTarafId",
-                       coalesce(t.unvan, '') as "kurumAdi"
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as "kurumAdi"
                   from public.telerad_istek i
                   join public.telerad_kurum k on k.id = i.kurum_id
                   left join public.taraf t on t.id = k.taraf_id

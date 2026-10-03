@@ -2,12 +2,63 @@ import type { CalismaPlaniYaniti } from '../sozlesme';
 import type { AcikOturum, GirisDenemesi } from './kimlik';
 import {
   type AyarSatiri, type YardimKaydi,
-  type RandevuBolumDugumu, type RandevuAyarYazma,
+  type RandevuBolumDugumu,
   } from '../sozlesme';
 import { istek, gonder } from '../cekirdek';
 import type {
   UtsSorguYaniti, UtsBildirimYaniti, UtsBelgeBildirimYaniti, UtsHazirlaYaniti,
 } from '../tipler';
+
+export interface CalismaSablonTaslak {
+  id: number | null; hekimId: number; departmanId: number | null; gunler: string;
+  bas1: string; bit1: string; bas2: string | null; bit2: string | null;
+  slotDk: number; tekrar: number; gecerliBas: string; gecerliBit: string | null;
+}
+export interface CalismaSablonEtki {
+  randevu14: number; kapasite14: number; doluluk: number;
+  disarida: { id: number; baslangic: string; sureDk: number; hasta: string }[];
+  cakisan: { id: number; ad: string; departman: string; saat: string }[];
+  digerleri: { id: number; ad: string; departman: string; gunler: string; aktif: boolean; gecerliBit: string | null }[];
+  kayit: { ekleyen: string; eklemeTarihi: string; degistiren: string; degistirmeTarihi: string | null } | null;
+}
+export interface CalismaIstisnaBaglam {
+  haftaBas: string;
+  hafta: { gun: string; saatBas: string | null; saatBit: string | null; kaynak: number; istisnaTur: number | null; istisnaId: number | null; departman: string; aciklama: string; sablon: string }[];
+  randevular: { id: number; baslangic: string; sureDk: number; hastaId: number; hasta: string; tip: string; telefonVar: boolean }[];
+  yakin: { id: number; bas: string; bit: string; tur: string; onayli: boolean; kaynak: 'istisna' | 'ik'; aciklama: string }[];
+  doktorlar: { id: number; ad: string; ayniBolum: boolean }[];
+  kayit: { ekleyen: string; eklemeTarihi: string; onaylayan: string; onayTarihi: string | null } | null;
+}
+
+const sorguMetni = (g: Record<string, unknown>) => Object.entries(g)
+  .filter(([, v]) => v !== undefined && v !== null && v !== '')
+  .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&');
+
+export interface CalismaSablonSatiri {
+  id: number; hekimId: number; hekim: string; departmanId: number; departman: string; subeId?: number | null; sube: string; ad: string;
+  gunler: string; bas1: string; bit1: string; bas2?: string | null; bit2?: string | null; slotDk: number; kanallar: string; tekrar: number;
+  gecerliBas: string; gecerliBit?: string | null; aktif: boolean; biten: boolean; doluluk?: number | null; cakisma: boolean;
+}
+export interface CalismaSablonListe {
+  satirlar: CalismaSablonSatiri[];
+  sayac: { aktif: number; pasif: number; biten: number; tumu: number };
+  ozet: {
+    aktifSablon: number; doktor: number; bolum: number; haftalikSlot: number; doluluk: number;
+    sablonsuz: { id: number; ad: string; departman: string; departmanId: number }[];
+    bitecek: { id: number; ad: string; hekim: string; gecerliBit: string }[];
+  };
+}
+export interface CalismaIstisnaSatiri {
+  kaynak: 'istisna' | 'ik'; id: number; tur: number; hekimId: number; hekim: string; departman: string; bolumSecili: boolean;
+  bas: string; bit: string; saatBas?: string | null; saatBit?: string | null; kanallar: string; durum: number; aciklama: string;
+  ikTur: string; izinNo: string; giren: string; eklemeTarihi: string; onaylayan: string; onayTarihi?: string | null;
+  bekleyen: number; ekDolu: number; slotDk: number;
+}
+export interface CalismaIstisnaListe {
+  satirlar: CalismaIstisnaSatiri[];
+  sayac: { bekliyor: number; onayli: number; iptal: number; tumu: number };
+  ozet: { onayBekleyen: number; enEskiGun: number; islemBekleyenRandevu: number; bugunYok: string[]; otuzGun: number; otuzGunTur: Record<string, number> };
+}
 
 /** Randevu bolumleri, ayarlar, zamanli isler, katalog, bildirim, tercih, ÜTS. */
 export const ayarUclari = {
@@ -15,16 +66,35 @@ export const ayarUclari = {
   // Randevu Ayarlari > Bolumler (251): randevu verilen bolumler, hekimleri ve
   //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.
   randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
-  randevuBolumAyarYaz: (istek_: RandevuAyarYazma) =>
-    gonder<{ tamam: boolean }>('/api/randevu/bolum-ayar', istek_, 'PUT'),
   /** Hekim çalışma planı (711): türetilmiş bloklar ve bugün çalışanlar. */
   calismaPlani: (g: { bas?: string; bit?: string; hekimId?: number | null; departmanId?: number | null; sube?: number | null } = {}) =>
     istek<CalismaPlaniYaniti>('/api/calisma-plani?' + Object.entries(g).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')),
   calismaBugun: (gun?: string, sube?: number | null) =>
     istek<{ gun: string; subeId: number; satirlar: { departmanId: number; departman: string; hekimId: number; hekim: string; saatler: string; kaynak: number; kanallar: string; randevu: number; gelen: number; simdi: boolean }[]; randevusuz: { id: number; ad: string }[] }>(
       `/api/calisma-plani/bugun?${gun ? `gun=${gun}&` : ''}${sube ? `sube=${sube}` : ''}`),
-  randevuBolumIsaretle: (departmanId: number, bolumMu: boolean) =>
-    gonder<{ tamam: boolean }>('/api/randevu/bolum', { departmanId, bolumMu }, 'PUT'),
+  // Çalışma şablonu / izin & istisna kartları (945): kaydetmeden önceki hesaplar.
+  calismaSablonVarsayilan: () =>
+    istek<{ gunler: string; bas1: string; bit1: string; bas2: string | null; bit2: string | null; slotDk: number }>('/api/calisma-plani/sablon-varsayilan'),
+  calismaSablonEtki: (s: CalismaSablonTaslak) => gonder<CalismaSablonEtki>('/api/calisma-plani/sablon-etki', s),
+  calismaIstisnaBaglam: (g: { hekimId: number; bas: string; bit: string; tur?: number; saatBas?: string; saatBit?: string; departmanId?: number | null; id?: number | null }) =>
+    istek<CalismaIstisnaBaglam>('/api/calisma-plani/istisna-baglam?' + Object.entries(g).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')),
+  calismaIstisnaRandevu: (islem: 'iptal' | 'aktar' | 'kaydir' | 'sms', randevuIdleri: number[], hedefHekimId?: number, mesaj?: string) =>
+    gonder<{ sonuc: { id: number; basarili: boolean; mesaj: string }[] }>('/api/calisma-plani/istisna-randevu', { islem, randevuIdleri, hedefHekimId, mesaj }),
+  // Çalışma şablonları / izin & istisnalar LİSTELERİ.
+  calismaSablonListe: (g: { durum?: string; departmanId?: number | ''; subeId?: number | ''; ara?: string }) =>
+    istek<CalismaSablonListe>('/api/calisma-plani/sablon-liste?' + sorguMetni(g)),
+  calismaSablonToplu: (islem: 'pasif' | 'bitis' | 'kopyala', idler: number[], ek: { bitis?: string; hedefHekimId?: number } = {}) =>
+    gonder<{ sonuc: { id: number; basarili: boolean; mesaj: string }[] }>('/api/calisma-plani/sablon-toplu', { islem, idler, ...ek }),
+  calismaIstisnaListe: (g: { durum?: string; tur?: string; bas?: string; bit?: string; departmanId?: number | ''; ara?: string }) =>
+    istek<CalismaIstisnaListe>('/api/calisma-plani/istisna-liste?' + sorguMetni(g)),
+  calismaIstisnaToplu: (islem: 'onayla' | 'iptal', idler: number[]) =>
+    gonder<{ sonuc: { id: number; basarili: boolean; mesaj: string }[] }>('/api/calisma-plani/istisna-toplu', { islem, idler }),
+  /** Bolumu randevuya ac / kapat. hekimIdleri: isaretli doktorlar (bos = sablonu olmayan herkes). */
+  randevuBolumIsaretle: (departmanId: number, bolumMu: boolean, hekimIdleri?: number[]) =>
+    gonder<{ tamam: boolean; eklenen: number }>('/api/randevu/bolum', { departmanId, bolumMu, hekimIdleri }, 'PUT'),
+  /** Bolumun doktorlari + o bolumde aktif calisma sablonu var mi. */
+  randevuBolumDoktorlari: (departmanId: number) =>
+    istek<{ doktorlar: { id: number; ad: string; sablonVar: boolean }[] }>(`/api/randevu/bolum/${departmanId}/doktorlar`),
 
   // ---------------------------------------------------------- ayarlar ----
   ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),

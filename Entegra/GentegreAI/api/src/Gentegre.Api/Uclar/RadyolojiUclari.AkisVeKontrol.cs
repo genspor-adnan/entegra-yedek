@@ -35,7 +35,7 @@ public static partial class RadyolojiUclari
 
             var odeme = await baglanti.TekAsync("""
                 select k.kurum_id as "kurumId",
-                       coalesce(t.unvan, '') as "kurumAd",
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as "kurumAd",
                        coalesce(k.police_no, '') as "policeNo"
                   from public.taraf_hasta_kurum k
                   left join public.taraf t on t.id = k.kurum_id
@@ -72,8 +72,8 @@ public static partial class RadyolojiUclari
                          where t.istem_id = i.id) as "teslimZamani",
                        coalesce(r.durum, 0) as "raporDurum",
                        coalesce(r.rapor_no, '') as "raporNo",
-                       coalesce(ry.unvan, '') as "raporYazan",
-                       coalesce(ek.unvan, '') as "olusturan",
+                       coalesce(public.fn_taraf_ad(ry.unvan, ry.ad, ry.soyad)::varchar(120), '') as "raporYazan",
+                       coalesce(public.fn_taraf_ad(ek.unvan, ek.ad, ek.soyad)::varchar(120), '') as "olusturan",
                        -- BEKLEME (kalite gostergesi): istemden cekime kac dakika.
                        case when i.cekim_tarihi is null then null
                             else round(extract(epoch from
@@ -112,19 +112,19 @@ public static partial class RadyolojiUclari
                        coalesce(dd.ad,'') as "durumAdi",
                        coalesce(od.ad,'') as "oncelikAdi",
                        i.hasta_id as "hastaId",
-                       coalesce(nullif(trim(h.ad||' '||h.soyad),''), h.unvan, '') as "hastaAdi",
+                       coalesce(nullif(trim(h.ad||' '||h.soyad),''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi",
                        case coalesce(th.cinsiyet,0) when 1 then 'E' when 2 then 'K' else '' end as cinsiyet,
                        case when th.dogum_tarihi is null then null
                             else extract(year from age(th.dogum_tarihi))::int end as yas,
                        coalesce(h.telefon,'') as telefon,
                        coalesce(hz.kod,'') as "tetkikKodu", coalesce(hz.ad,'') as "tetkikAdi",
-                       coalesce(nullif(ih.unvan,''), nullif(i.dis_hekim_ad,''), '') as "isteyenHekim",
-                       coalesce(ik.unvan,'') as "isteyenKurum",
+                       coalesce(nullif(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120),''), nullif(i.dis_hekim_ad,''), '') as "isteyenHekim",
+                       coalesce(public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120),'') as "isteyenKurum",
                        i.belge_id as "belgeId", coalesce(b.belge_no,'') as protokol, b.belge_tarihi as "protokolTarihi",
                        coalesce(i.on_tani,'') as "onTani", coalesce(i.klinik_bilgi,'') as "klinikBilgi",
-                       coalesce(ok.unvan,'') as "odeyenKurum",
+                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120),'') as "odeyenKurum",
                        coalesce(cz.ad,'') as cihaz, coalesce(cz.kod,'') as "cihazKodu",
-                       coalesce(tk.unvan,'') as tekniker,
+                       coalesce(public.fn_taraf_ad(tk.unvan, tk.ad, tk.soyad)::varchar(120),'') as tekniker,
                        i.cekim_tarihi as "cekimTarihi",
                        i.kontrast, coalesce(i.kontrast_ml,0) as "kontrastMl",
                        coalesce(i.seri_sayisi,0) as "seriSayisi", coalesce(i.goruntu_sayisi,0) as "goruntuSayisi",
@@ -190,7 +190,7 @@ public static partial class RadyolojiUclari
                 select s.id as "soruId", s.soru, s.yanit_tipi as "yanitTipi",
                        s.zorunlu, coalesce(k.yanit, '') as yanit,
                        k.kayit_zamani as "kayitZamani",
-                       coalesce(p.unvan, '') as "kaydeden"
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as "kaydeden"
                   from public.radyoloji_istem i
                   join public.radyoloji_kontrol_soru s
                     on s.aktif = 1 and (s.modalite is null or s.modalite = i.modalite)

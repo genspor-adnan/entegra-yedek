@@ -158,11 +158,11 @@ public static partial class KaynakKatalogu
               + "  join public.taraf t on t.id = k.taraf_id "
               + "  left join public.radyoloji_sablon s on s.id = k.rapor_sablon_id",
         SubeKolonu: "k.sube_id",
-        VarsayilanSirala: "t.unvan",
+        VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "k.id",        "sayi",  "Id", Varsayilan: false),
-            new("unvan",     "t.unvan",     "metin", "Kurum", Genislik: 240),
+            new("unvan",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",     "metin", "Kurum", Genislik: 240),
             new("yonAdi",
                 "case k.yon when 2 then 'Giden' when 3 then 'İki yön' else 'Gelen' end",
                 "metin", "Yön", Hizalama: "orta", Genislik: 100, Bicim: "rozet",
@@ -341,11 +341,11 @@ public static partial class KaynakKatalogu
               + "  join public.telerad_kurum k on k.id = s.kurum_id "
               + "  join public.taraf t on t.id = k.taraf_id "
               + "  left join public.fiyat_listesi f on f.id = s.fiyat_listesi_id",
-        VarsayilanSirala: "s.baslangic desc, t.unvan",
+        VarsayilanSirala: "s.baslangic desc, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "s.id",        "sayi",  "Id", Varsayilan: false),
-            new("kurumAdi",  "t.unvan",     "metin", "Kurum", Genislik: 220),
+            new("kurumAdi",  "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",     "metin", "Kurum", Genislik: 220),
             new("baslangic", "s.baslangic", "tarih", "Başlangıç", Hizalama: "orta"),
             new("bitis",     "s.bitis",     "tarih", "Bitiş", Hizalama: "orta"),
             new("ucretModeliAdi",

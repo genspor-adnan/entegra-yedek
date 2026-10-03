@@ -121,7 +121,7 @@ public static partial class YatanUclari
             baglam.YetkiIste("yatan", Islem.Gor);
 
             var ozet = await veri.TekAsync("""
-                select t.unvan                                   as hasta,
+                select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)                                   as hasta,
                        case when th.dogum_tarihi is null then null
                             else extract(year from age(th.dogum_tarihi))::int end as yas,
                        coalesce(th.cinsiyet, 0)                  as cinsiyet,
@@ -129,8 +129,8 @@ public static partial class YatanUclari
                        coalesce(o.kod, '')                       as oda,
                        coalesce(o.izolasyon, 0)                  as izolasyon,
                        coalesce(d.ad, '')                        as klinik,
-                       coalesce(h.unvan, '')                     as hekim,
-                       coalesce(k.unvan, '')                     as odeyen,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')                     as hekim,
+                       coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')                     as odeyen,
                        y.provizyon_no, y.giris_tarihi, y.cikis_tarihi,
                        (coalesce(y.cikis_tarihi, now())::date - y.giris_tarihi::date) as gun,
                        y.durum, y.yatis_turu, y.gelis_sekli,
@@ -345,7 +345,7 @@ public static partial class YatanUclari
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var hasta = await baglanti.TekAsync("""
-                select t.unvan, coalesce(th.cinsiyet, 0) as cinsiyet
+                select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(th.cinsiyet, 0) as cinsiyet
                   from public.taraf t
                   left join public.taraf_hasta th on th.id = t.id
                  where t.id = @p0

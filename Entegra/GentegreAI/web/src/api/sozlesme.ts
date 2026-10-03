@@ -174,6 +174,12 @@ export interface KullaniciOzeti {
    */
   portalTuru?: number;
   /**
+   * HEKIM KISITI: kullanici yalniz kendi muayene / calisma listesi / randevu
+   * satirlarini gorur (suzme SUNUCUDA). Arayuz bununla hekim seciciyi kendi
+   * adina kilitler.
+   */
+  hekimKisitli?: boolean;
+  /**
    * PORTALDA KAPSAMI ACIK kaynak adlari (796 V2). Yetki tek basina yetmiyor:
    * kurali `false` olan ekran acilsa BOS gelir - portal menusu bununla
    * suzulur. Ic kullanicida bos dizi.

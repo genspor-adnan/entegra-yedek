@@ -37,7 +37,7 @@ public sealed class KayitErisimi
         // HEKIM KISITI: liste ucundaki kuralin aynisi (ListeUclari).
         int? hekimId = null;
         if (KaynakKatalogu.HekimKolonu(tanim.Ad) is not null
-            && await _veri.TekDegerAsync<int>("select public.fn_hekim_planli(@p0)",
+            && await _veri.TekDegerAsync<int>(KaynakKatalogu.HekimKisitliSql,
                                               [baglam.KullaniciId], iptal) == 1)
             hekimId = baglam.KullaniciId;
 

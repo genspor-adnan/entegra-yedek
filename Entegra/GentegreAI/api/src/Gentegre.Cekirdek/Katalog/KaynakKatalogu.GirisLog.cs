@@ -41,7 +41,7 @@ public static partial class KaynakKatalogu
             // GIRISE YAZILAN metin: kullanici kodu / sicil / e-posta / cep /
             //   TCKN / ad soyad. Kullanici bulunamadiginda tek ipucu budur.
             new("kod", "g.kod", "metin", "Girilen Kimlik"),
-            new("kullanici", "coalesce(k.unvan, '')", "metin", "Kullanıcı"),
+            new("kullanici", "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')", "metin", "Kullanıcı"),
             new("kullaniciKod", "coalesce(tk.kod, '')", "metin", "Kullanıcı Kodu",
                 Varsayilan: false),
             new("sebep", SebepIfade(), "metin", "Ayrıntı"),

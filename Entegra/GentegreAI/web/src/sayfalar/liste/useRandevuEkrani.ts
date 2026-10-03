@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { useOturum } from '../../kimlik/OturumBaglami';
+import { randevuTercihiOku, randevuTercihiYaz } from './randevuTercihi';
 import type { Kosul, RandevuBolumDugumu } from '../../api/sozlesme';
 import type { BekleyenIstem } from '../../bilesenler/radyoloji/RandevuBekleyenPanel';
 
@@ -28,8 +30,18 @@ export function useRandevuEkrani(
   //   tarih sağında listelenip filtrelensin"): tek uctan hem bolum hem hekim
   //   listesi gelir (Randevu Ayarlari > Bölümler ile ayni kaynak).
   const [agac, setAgac] = useState<RandevuBolumDugumu[]>([]);
-  const [bolum, setBolum] = useState<number | ''>('');
-  const [hekim, setHekim] = useState<number | ''>('');
+  // KALDIGI YERDEN (kullanici): bolum ve doktor son secimle acilir.
+  const { kullanici } = useOturum();
+  const [bolum, setBolumIc] = useState<number | ''>(() => randevuTercihiOku(kullanici?.id).bolum ?? '');
+  const [secilenHekim, setSecilenHekimIc] = useState<number | ''>(() => randevuTercihiOku(kullanici?.id).hekim ?? '');
+  const setBolum = (b: number | '') => { setBolumIc(b); randevuTercihiYaz(kullanici?.id, { bolum: b }) };
+  const setSecilenHekim = (h: number | '') => { setSecilenHekimIc(h); randevuTercihiYaz(kullanici?.id, { hekim: h }) };
+  // KISITLI HEKIM (kullanici: "uzman doktor sadece kendi adina acilmis
+  //   randevulari gorur - sadece kendi adi gelsin ve degisemesin"): secici
+  //   kendi adina SABIT. Suzme sunucuda (HekimKisiti); burasi yalniz gorunum.
+  const kendiHekim = kullanici?.hekimKisitli ? kullanici.id : null;
+  const hekim: number | '' = kendiHekim ?? secilenHekim;
+  const setHekim = (h: number | '') => { if (kendiHekim === null) setSecilenHekim(h) };
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
   const [aralik, setAralik] = useState<{ baslangic: string; sureDk: number;
                                          hekimId?: number; cihazId?: number } | null>(null);
@@ -139,9 +151,14 @@ export function useRandevuEkrani(
     // Hekimin BOLUMU de tasinir: takvimde bir hekim sutununda saat secilince
     //   kartta bolum de dolu gelsin (kullanici: "dr bolumu belli, kartta
     //   bolumu doldursun").
-    return dugumler.flatMap(d =>
+    const hepsi = dugumler.flatMap(d =>
       d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad, bolum: d.departmanId })));
-  }, [agac, bolum]);
+    if (kendiHekim === null) return hepsi;
+    // Kisitli hekim: yalniz kendisi. Randevu bolumlerinde tanimli degilse de
+    //   (plan henuz yok) adi gorunsun - secici bos kalmasin.
+    const kendisi = hepsi.find(x => x.id === kendiHekim);
+    return [kendisi ?? { id: kendiHekim, ad: kullanici?.ad ?? '', bolum: undefined as number | undefined }];
+  }, [agac, bolum, kendiHekim, kullanici?.ad]);
 
   /** Hekimin bolumu (takvim sutunundan gelen hekim icin). */
   const hekimBolumu = (h?: number) =>
@@ -171,7 +188,7 @@ export function useRandevuEkrani(
     tazele();
   };
 
-  return { agac, bolum, setBolum, hekim, setHekim, aralik, setAralik,
+  return { agac, bolum, setBolum, hekim, setHekim, hekimSabit: kendiHekim !== null, aralik, setAralik,
            cihazlar, bekleyenSecili, setBekleyenSecili,
            filtre, takvimAyarlari, hekimSecenekleri, hekimBolumu, bekleyeneRandevuVer };
 }

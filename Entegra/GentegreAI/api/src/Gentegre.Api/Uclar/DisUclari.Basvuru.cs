@@ -39,7 +39,7 @@ public static partial class DisUclari
         //   Birden çok kayıt varsa SGK ana ödeyicidir; ÖSS tamamlayıcı olarak
         //   provizyon tablosunda ayrı alanda durur (299).
         var kurum = await baglanti.TekAsync("""
-            select k.kurum_id, k.tur, k.sozlesme_id, coalesce(t.unvan, '') as unvan
+            select k.kurum_id, k.tur, k.sozlesme_id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as unvan
               from public.taraf_hasta_kurum k
               left join public.taraf t on t.id = k.kurum_id
              where k.hasta_id = @p0 and k.aktif = 1
@@ -79,7 +79,7 @@ public static partial class DisUclari
             insert into public.belge
                    (tur, tipi, taraf_id, taraf_unvan, belge_no, belge_tarihi, sube_id, durum,
                     kdv_durum, fiyat_listesi_id, aciklama, matrah, kdv_tutari, genel_toplam, ekleyen)
-            select @p0, @p1, t.id, t.unvan, @p2, now(), @p3, 0, 'Dahil', @p4,
+            select @p0, @p1, t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, @p2, now(), @p3, 0, 'Dahil', @p4,
                    'Diş seansı - akıştan açıldı', 0, 0, 0, @p5
               from public.taraf t where t.id = @p6
             returning id

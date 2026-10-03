@@ -71,7 +71,7 @@ public static partial class AmeliyathaneUclari
             var a = await baglanti.TekAsync("""
                 select a.id, a.ameliyat_no as "ameliyatNo", a.hasta_id as "hastaId",
                        a.belge_id as "belgeId", a.yatis_id as "yatisId", a.durum,
-                       coalesce(h.unvan, '') as "hastaAd",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAd",
                        coalesce(b.belge_no, '') as "belgeNo",
                        (select y.belge_id from public.yatis y where y.id = a.yatis_id) as "yatisBelgeId"
                   from public.ameliyat a

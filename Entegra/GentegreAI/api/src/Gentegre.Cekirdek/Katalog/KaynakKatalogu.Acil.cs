@@ -33,7 +33,7 @@ public static partial class KaynakKatalogu
             //   kolon yapsaydık listede biri hep boş dururdu.
             new("hastaAd",
                 "case when b.kimliksiz = 1 then coalesce(nullif(b.gecici_ad, ''), 'Kimliksiz')" +
-                " else coalesce(h.unvan, '') end",
+                " else coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') end",
                 "metin", "Hasta", Genislik: 200,
                 Siralanabilir: false, Filtrelenebilir: false),
             new("hastaId",    "b.hasta_id",    "sayi",  "Hasta Id", Varsayilan: false),
@@ -60,7 +60,7 @@ public static partial class KaynakKatalogu
                 Bicim: "dd.MM HH:mm", Genislik: 115),
             new("yatakKod",   "coalesce(y.kod, '')", "metin", "Yatak", Hizalama: "orta",
                 Genislik: 85, Siralanabilir: false, Filtrelenebilir: false),
-            new("hekimAd",    "coalesce(d.unvan, '')", "metin", "Hekim", Genislik: 150,
+            new("hekimAd",    "coalesce(public.fn_taraf_ad(d.unvan, d.ad, d.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 150,
                 Siralanabilir: false, Filtrelenebilir: false),
             // v_acil_sure'den - burada yeniden hesaplanmaz (bkz sınıf başlığı).
             new("toplamDk",   "v.toplam_dk",   "sayi",  "Süre (dk)", Hizalama: "sag",
@@ -128,7 +128,7 @@ public static partial class KaynakKatalogu
                 Genislik: 130, Siralanabilir: false, Filtrelenebilir: false),
             new("hastaAd",
                 "case when b.kimliksiz = 1 then coalesce(nullif(b.gecici_ad, ''), 'Kimliksiz')" +
-                " else coalesce(h.unvan, '') end",
+                " else coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') end",
                 "metin", "Hasta", Genislik: 185,
                 Siralanabilir: false, Filtrelenebilir: false),
             new("bolumAd",   "coalesce(d.ad, '')", "metin", "Hedef Bölüm", Genislik: 160,

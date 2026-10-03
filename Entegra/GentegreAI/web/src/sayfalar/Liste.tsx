@@ -108,6 +108,7 @@ import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
 import { teleradAksiyonu } from './liste/teleradAksiyonlari';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { randevuTercihiOku, randevuTercihiYaz } from './liste/randevuTercihi';
 import { useTaniEkleTercihi } from '../bilesenler/taniEkleTercihi';
 import { usePortalBaslik, usePortaldaMi } from './portal/portalBaslik';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
@@ -395,8 +396,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   ("Numune Uygunsuz", "Teknik Onay", "Bekleyen Çekim"). Portal
   //   kullanicisinin kuyrugu yok; kapsam zaten sunucuda daraltiyor - ilk cip
   //   ona hep BOS liste gosteriyordu. Cipler ekranda kalir, isteyen daraltir.
-  const [cipIndeks, setCipIndeks] = useState(() => (
-    (urlDegeri || portalda) && suzgecsizCip !== null ? suzgecsizCip : 0));
+  const [cipIndeks, setCipIndeksIc] = useState(() => (
+    (urlDegeri || portalda) && suzgecsizCip !== null ? suzgecsizCip
+    // RANDEVU: kullanicinin son sectigi durum cipi (kaldigi yer - randevuTercihi).
+    : tanim.kaynak === 'randevu'
+      ? Math.min(randevuTercihiOku(kullanici?.id).cip ?? 0, (cipler?.length ?? 1) - 1)
+      : 0));
+  const setCipIndeks = (i: number) => {
+    setCipIndeksIc(i);
+    if (tanim.kaynak === 'randevu') randevuTercihiYaz(kullanici?.id, { cip: i });
+  };
 
   /**
    * URL FILTRESI SONRADAN GELIRSE de suzgecsiz cipe gec.
@@ -1049,12 +1058,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
               <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
             ))}
           </select>
-          <select value={randevuEkran.hekim} title="Hekim"
+          <select value={randevuEkran.hekim} title={c('Doktor')}
+                  disabled={randevuEkran.hekimSabit}
                   onChange={e => randevuEkran.setHekim(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">{c('Tüm Hekimler')}</option>
+            {/* Kisitli hekimde "Tum Doktorlar" yok: secici kendi adina sabit. */}
+            {!randevuEkran.hekimSabit && <option value="">{c('Tüm Doktorlar')}</option>}
             {randevuEkran.hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select>
-          {(randevuEkran.bolum !== '' || randevuEkran.hekim !== '') && (
+          {(randevuEkran.bolum !== '' || (randevuEkran.hekim !== '' && !randevuEkran.hekimSabit)) && (
             <button type="button" className="kapat" title={c('Bölüm/hekim filtresini kaldır')}
                     onClick={() => { randevuEkran.setBolum(''); randevuEkran.setHekim('') }}>×</button>
           )}
@@ -1217,12 +1228,19 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       // LAB KANBAN (711): Lab Is Emirleri listesinin "Kanban" gorunumu -
       //   kolon = asama, surukle-birak = asama gecisi.
+      // RANDEVU: Liste / Takvim secimi de kaldigi yerden (randevuTercihi).
+      gorunumBaslangic={tanim.kaynak === 'randevu' ? randevuTercihiOku(kullanici?.id).liste : undefined}
+      onGorunumDegisti={tanim.kaynak === 'randevu' ? g => randevuTercihiYaz(kullanici?.id, { liste: g }) : undefined}
       ekGorunum={tanim.kaynak === 'dis-lab-isemri' ? { ad: 'Kanban', ik: '🗂', icerik: <DisLabPano yenile={yenile} /> }
       : tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',
         icerik: (
           <RandevuTakvimi
             ayarlar={randevuEkran.takvimAyarlari}
+            // KALDIGI YER: son takvim gorunumu (Gun/Hafta/Hekim/Cihaz).
+            gorunumBaslangic={randevuTercihiOku(kullanici?.id).gorunum}
+            onGorunumDegisti={g => randevuTercihiYaz(kullanici?.id, { gorunum: g })}
+            hekimSabit={randevuEkran.hekimSabit}
             bolum={randevuEkran.bolum === '' ? undefined : randevuEkran.bolum}
             hekimId={randevuEkran.hekim === '' ? undefined : randevuEkran.hekim}
             yenile={yenile}

@@ -71,7 +71,7 @@ public static partial class KaynakKatalogu
                 Kodlar: DbDurumKodlari),
             new("yedekHavuz", "d.yedek_havuz", "kod", "Yedek Havuzu", Hizalama: "orta",
                 Genislik: 110, Kodlar: DbEvetHayirKodlari),
-            new("zimmetAd", "coalesce(z.unvan, '')", "metin", "Zimmet", Genislik: 160,
+            new("zimmetAd", "coalesce(public.fn_taraf_ad(z.unvan, z.ad, z.soyad)::varchar(120), '')", "metin", "Zimmet", Genislik: 160,
                 Varsayilan: false),
             new("garantiBitis", "d.garanti_bitis", "tarih", "Garanti", Hizalama: "orta",
                 Genislik: 110, Varsayilan: false),
@@ -129,7 +129,7 @@ public static partial class KaynakKatalogu
             new("gecerlilik", "k.gecerlilik", "tarih", "Geçerlilik", Hizalama: "orta",
                 Genislik: 110),
             new("yapanAd",
-                "coalesce(nullif(f.unvan, ''), nullif(y.unvan, ''), '')",
+                "coalesce(nullif(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), ''), nullif(public.fn_taraf_ad(y.unvan, y.ad, y.soyad)::varchar(120), ''), '')",
                 "metin", "Yapan", Genislik: 170, Filtrelenebilir: false),
             // İZLENEBİLİRLİK: ölçen cihazın kendi kalibrasyonu geçerli olmalı.
             //   Geçersizse ölçüm bir sayıdır, delil değildir - listede uyarsın.
@@ -209,7 +209,7 @@ public static partial class KaynakKatalogu
             new("durum", "e.durum", "kod", "Durum Kodu", Varsayilan: false,
                 Kodlar: DbIsEmriDurumKodlari),
             new("yapanAd",
-                "coalesce(nullif(f.unvan, ''), nullif(y.unvan, ''), '')",
+                "coalesce(nullif(public.fn_taraf_ad(f.unvan, f.ad, f.soyad)::varchar(120), ''), nullif(public.fn_taraf_ad(y.unvan, y.ad, y.soyad)::varchar(120), ''), '')",
                 "metin", "Yapan", Genislik: 160, Filtrelenebilir: false),
             new("planlanan", "e.planlanan", "tarih", "Planlanan", Hizalama: "orta",
                 Genislik: 110),

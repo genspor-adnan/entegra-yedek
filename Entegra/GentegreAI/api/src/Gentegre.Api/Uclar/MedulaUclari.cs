@@ -45,11 +45,11 @@ public static partial class MedulaUclari
             baglam.YetkiIste("medula", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var hasta = await b.TekAsync("""
-                select t.id, t.unvan, coalesce(t.vkno, '') as tckn, th.dogum_tarihi,
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan, coalesce(t.vkno, '') as tckn, th.dogum_tarihi,
                        extract(year from age(current_date, th.dogum_tarihi))::int as yas, coalesce(th.cinsiyet, 0)::int,
                        (select k.tur from public.taraf_hasta_kurum k where k.hasta_id = t.id and k.aktif = 1
                          order by case k.tur when 3 then 0 when 4 then 1 when 2 then 2 else 3 end limit 1) as kurum_tur,
-                       (select x.unvan from public.taraf_hasta_kurum k join public.taraf x on x.id = k.kurum_id
+                       (select public.fn_taraf_ad(x.unvan, x.ad, x.soyad)::varchar(120) as unvan from public.taraf_hasta_kurum k join public.taraf x on x.id = k.kurum_id
                          where k.hasta_id = t.id and k.aktif = 1 order by case k.tur when 3 then 0 else 1 end limit 1) as kurum_adi
                   from public.taraf t left join public.taraf_hasta th on th.id = t.id where t.id = @p0
                 """, null, [hastaId], o => new
@@ -70,7 +70,7 @@ public static partial class MedulaUclari
                 """, null, [hastaId], TakipOku, iptal);
 
             var receteler = await b.ListeAsync("""
-                select r.id, r.recete_no, r.ekleme_tarihi, r.durum, r.medula_recete_no, r.medula_sonuc, coalesce(h.unvan, ''),
+                select r.id, r.recete_no, r.ekleme_tarihi, r.durum, r.medula_recete_no, r.medula_sonuc, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''),
                        (select count(*) from public.recete_satir s where s.recete_id = r.id)::int
                   from public.recete r left join public.taraf h on h.id = r.hekim_id
                  where r.hasta_id = @p0 order by r.id desc limit 20

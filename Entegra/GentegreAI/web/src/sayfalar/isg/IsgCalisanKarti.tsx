@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay, secimSor } from '../../bilesenler/mesaj';
 import { MARUZIYET } from './IsgPano';
 import { c as cev } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * ÇALIŞAN KARTI `/isg-calisan/:id` (İSG 741) — mockup Ekranlar/ISG/isg_calisan_karti.html.
@@ -28,7 +29,8 @@ export function IsgCalisanKarti() {
   const durumS = konum.state as { geri?: string } | null;
   const geri = durumS?.geri ?? sorgu.get('geri') ?? '/isg-calisan';
   const kapat = useCallback(() => git(geri), [git, geri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
   const [k, setK] = useState<Kart | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [sekme, setSekme] = useState<Sekme>('kimlik');

@@ -45,7 +45,7 @@ Liste ve kart kaynaklarının güncel listesi kodun kendisidir: `KaynakKatalogu*
 
 Geliştirmede OpenAPI belgesi: `GET /openapi/v1.json`.
 
-Kurulum kullanıcısı `admin` / `Gentegre!2026` (ilk girişte değiştirilmeli).
+Kurulum kullanıcısı `admin` / `Gentegre!2026` (ilk girişte değiştirilmeli). Geliştirme DB'sinde (`gentegre-pg18`) güncel parola `Genotip!2026`.
 Dev veritabanında ayrıca `testokur` / `Test!2026` var — `salt_okur` rolü, alan
 yetkisi denemesi için (`belge.maliyetOrt` gizli).
 

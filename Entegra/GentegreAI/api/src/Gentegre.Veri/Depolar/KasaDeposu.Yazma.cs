@@ -293,7 +293,7 @@ public sealed partial class KasaDeposu
         if (Metin(islem, "tarafUnvan").Length > 0) return;
 
         await using var komut = baglanti.Komut(
-            "select coalesce(nullif(fatura_unvan, ''), unvan) as unvan from public.taraf where id = @p0", tx,
+            "select coalesce(nullif(fatura_unvan, ''), public.fn_taraf_ad(unvan, ad, soyad)::varchar(120)) as unvan from public.taraf where id = @p0", tx,
             tarafId.Value);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))

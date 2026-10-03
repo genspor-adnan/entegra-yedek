@@ -99,7 +99,7 @@ public static partial class KartKatalogu
             //   ise secilebilir "Dış Kurum", degilse salt okunur "Kurum"
             //   (kartAlanCizim'deki lab-istem kurali).
             new("kurumAdi",
-                "(select coalesce(t.unvan, '') from public.belge_basvuru bb "
+                "(select coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') from public.belge_basvuru bb "
                 + "  join public.taraf t on t.id = bb.odeyen_kurum_id "
                 + " where bb.id = lab_istem.belge_id)",
                 "metin", Yazilabilir: false,

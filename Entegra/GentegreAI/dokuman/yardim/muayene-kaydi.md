@@ -32,8 +32,8 @@ Muayene, başvurudan doğan hekim kaydıdır: şikâyet, hikâye, vital bulgular
 
 ## Alanlar
 Üst şerit: hasta, protokol, muayene no, kayıt tarihi ve durum (sekmelerde sabit); Tür, Bölüm, Hekim, Başlama, Bitiş "Bugün" kutusundan açılan pencerede.
-**Muayene** sekmesi: solda **Şikâyet (tamamlamada zorunlu)**, Hikâye, altında **reçete ilaç gridi** (＋ İlaç, işaretlileri 🗑 Sil, önceki reçeteyi kopyala, e-İmzala), altında **Değerlendirme / Plan (zorunlu)** ve **Çıkış Şekli (zorunlu, e-Nabız)**; sağda **tanı gridi** (＋ ICD-10 ile eklenir; Tür, Taraf) ve altında bugünkü sonuçlar.
-**Şablon Muayene** (fizik muayene): Muayene Şablonu, Muayene Bulguları; detay "Bulgular" (Sistem, Normal, Bulgu, Değer, Taraf) ve "Vital Bulgular" (Tansiyon, Nabız, SpO₂, Ateş, Solunum, Ağrı VAS, Boy / Kilo, BKİ, Bel çevresi, Parmak glukoz, GKS, ölçüm zamanı).
+**Özet** sekmesi (ilk sekme): yazılanların derlenmiş görünümü ve tamamlama kontrolü.
+**Muayene** sekmesi (anamnez + fizik muayene): solda **Şikâyet (tamamlamada zorunlu)**, Hikâye, Muayene Şablonu, Muayene Bulguları ve detay "Bulgular" (Sistem, Normal, Bulgu, Değer, Taraf); sağda "Vital Bulgular" (Tansiyon, Nabız, SpO₂, Ateş, Solunum, Ağrı VAS, Boy / Kilo, BKİ, Bel çevresi, Parmak glukoz, GKS, ölçüm zamanı), altında **Değerlendirme / Sonuç (zorunlu)** ve **Çıkış Şekli (zorunlu, e-Nabız)**.
 **Vital Bulgular** sekmesi: e-Nabız gönderim bilgileri ve sağ panelde **vital bulgular** (son ölçüm, düzenlenebilir).
 **Sevk / Konsültasyon**: Karar, Sevk edilen tesis, Klinik, Sevk nedeni, Sevk notu, Ambulans, Ambulans saati, Kontrol (gün), Vaka Türü.
 **Rapor** detayı: Tür, Alt tür, Rapor No, Başlangıç, Bitiş, Süre (gün), Tanı, Açıklama, İmza, Durum.
@@ -53,10 +53,10 @@ Sağ tuş / kart araç çubuğu: `muayene.istem` **🔬 İstem Aç** (Laboratuva
 1. **Muayene › Çalışma Listesi**'ni açın; **📢 Sıradakini Çağır** ya da satırı seçip **🔔 Seçileni Çağır**.
 2. Hasta girince **🩺 Muayeneye Al**; kart açılır ve başlangıç zamanı yazılır.
 3. Muayene sekmesinde Şikâyet ve hikâyeyi yazın, sağdaki tanı gridinden tanıları ekleyin; reçeteler şikâyetin altında görünür.
-4. Şablon Muayene sekmesinde **📋 Şablon Uygula**, normal sistemleri **☑ Tümü Normal** ile işaretleyin, bulguları yazın.
+4. Muayene sekmesinde **📋 Şablon Uygula**, normal sistemleri **☑ Tümü Normal** ile işaretleyin, bulguları yazın.
 5. Muayene sekmesindeki tanı gridinde ICD-10 arayın ya da **🕘 Önceki Tanılar / ⭐ Sık Tanılarım**'dan seçin; en az bir **ana** tanı olmalı.
 6. Gerekirse **🔬 İstem Aç** ile lab / görüntüleme isteyin; sonuçları aynı kartın İstem & Sonuçlar sekmesinde görüp "Gördüm" işaretleyin.
-7. Değerlendirme / Plan ve Çıkış Şekli'ni doldurun; reçete için Reçeteler ekranını kullanın.
+7. Değerlendirme / Sonuç ve Çıkış Şekli'ni doldurun; reçete için Reçeteler ekranını kullanın.
 8. **✔ Tamamla**: onay sorusundan sonra kayıt kilitlenir.
 
 ## Durumlar
@@ -70,7 +70,7 @@ Sağ tuş / kart araç çubuğu: `muayene.istem` **🔬 İstem Aç** (Laboratuva
 - Şablon kartının **Sık Tanılar · Reçete Şablonları · İstem Panelleri · Metin Makroları · Kurallar** sekmeleri o bölüm/doktora özeldir: ICD aramasında **📋 Şablon Tanıları**, reçetede **📋 Şablondan…** olarak çıkar; paneller istem ekranında **⭐ Şablon Panelleri** kategorisidir; makro kısayolu alanda yazılıp boşluk basılınca metne açılır; aktif kurallar (hikâye / bulgu / vital / ek tanı zorunlu) **Tamamla**'da denetlenir.
 
 ## Sık görülen hata ve uyarılar
-- **"Muayene tamamlanamaz: Ana tanı zorunlu. Şikayet zorunlu. Değerlendirme / plan zorunlu."** (DOGRULAMA) → eksikler tek seferde sayılır; hepsini doldurup tekrar deneyin.
+- **"Muayene tamamlanamaz: Sikayet zorunlu. Ana tani zorunlu. Degerlendirme / sonuc zorunlu."** (DOGRULAMA) → eksikler tek seferde sayılır; hepsini doldurup tekrar deneyin.
 - **"Muayene başlatılmamış - 'Muayeneye Al' ile başlangıç zamanı yazılmalı."** → önce ▶ Muayeneye Al.
 - **"Çıkış şekli seçilmeli (e-Nabız çıkış bildiriminin zorunlu alanı)."** → Muayene sekmesinde (reçetenin altında) Çıkış Şekli'ni seçin.
 - **"Muayene zaten tamamlanmış." / "Tamamlanmış muayeneye istem eklenemez."** (IS_KURALI) → kapanmış kayıt; yeni işlem için yeni başvuru / muayene.

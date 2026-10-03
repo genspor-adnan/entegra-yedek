@@ -91,7 +91,7 @@ public static partial class KaynakKatalogu
                 + "  where p.kaynak_tur = 2 and m.id = p.kaynak_id), '')",
                                               "metin", "Protokol No",
                                               Hizalama: "orta", Genislik: 150),
-            new("hastaAdi",  "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 200),
+            new("hastaAdi",  "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 200),
             new("hekimAdi",  "coalesce(k.ad, '')", "metin", "Hekim", Genislik: 170,
                                               Varsayilan: false),
             new("olayTarihi","p.olay_tarihi", "tarih", "Olay", Hizalama: "orta",

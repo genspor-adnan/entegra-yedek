@@ -500,7 +500,7 @@ public static partial class SatinalmaUclari
                 select b.id,
                        coalesce(nullif(b.belge_no, ''), '#' || b.id) as "belgeNo",
                        b.tur, b.belge_tarihi as "belgeTarihi",
-                       coalesce(t.unvan, '')                        as "tedarikci",
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')                        as "tedarikci",
                        (select count(*) from public.belge_satir s
                          where s.belge_id = b.id)                   as "satir",
                        -- SİPARİŞ BAĞI VARSA TAŞINIR, UYDURULMAZ: irsaliye bir
@@ -519,7 +519,7 @@ public static partial class SatinalmaUclari
                    and not exists (select 1 from public.satinalma_kabul k
                                     where k.belge_id = b.id)
                    and (@p1 = '' or coalesce(b.belge_no, '') ilike '%' || @p1 || '%'
-                        or coalesce(t.unvan, '') ilike '%' || @p1 || '%')
+                        or coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') ilike '%' || @p1 || '%')
                  order by b.belge_tarihi desc, b.id desc
                  limit 50
                 """, null, [baglam.SubeId, (ara ?? "").Trim()],

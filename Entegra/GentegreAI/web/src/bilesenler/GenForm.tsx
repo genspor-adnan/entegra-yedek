@@ -161,7 +161,9 @@ interface Props {
                                  /** Yalnız bu alanlar, verilen sırayla. */
                                  alanSirasi?: string[];
                                  /** Gecmis listesinde CIZILMEYECEK alanlar. */
-                                 gecmisGizli?: string[] }>;
+                                 gecmisGizli?: string[];
+                                 /** Veri yoksa yalniz baslik (kapali), varsa acik. */
+                                 katlanir?: boolean }>;
   /**
    * KENDI SEKMESINDE cizilen detaya ekran-ozel secenekler (gizli kolon, grid
    * kipi, sade cerceve). `detayGrupta` yalnizca bir GRUBA gomulen detaya
@@ -254,6 +256,11 @@ export interface EkSekmeBaglami {
   /** Basligi verilen metinle BASLAYAN sekmeye gecer (ozet kutusundan
       "Tani"ya, "e-Recete"ye...). Bulamazsa bir sey yapmaz. */
   sekmeyeGit(baslikBasi: string): void;
+  /** Kart alanina yazar; `kaydet` verilirse ardindan normal Kaydet yolu
+      calisir (ozet sekmesindeki hizli secim). Salt okunur kartta yazmaz. */
+  alanYaz(ad: string, v: Deger, kaydet?: boolean): void;
+  /** Kart salt okunur mu (yetki yok) - ozet sekmesi hizli eylemleri kapatir. */
+  saltOkunur: boolean;
 }
 
 /**
@@ -643,7 +650,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
       let m: KartMetaYaniti = kullanici?.urunModu === 2 ? kilitli : {
         ...kilitli,
         alanlar: kilitli.alanlar.filter(a => a.ad !== 'randevuVerilebilir'),
-        detaylar: kilitli.detaylar.filter(d => d.ad !== 'randevuAyar'),
       };
       setMeta(m);
       setYetki(m.yetki);
@@ -824,6 +830,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
       return yeni;
     });
   }, [meta, kaynak]);
+
+  /**
+   * EK SEKMEDEN "YAZ VE KAYDET" (muayene ozeti: cikis sekli kontrol listesinde
+   * secilir). Kayit, deger state'e islendikten SONRAKI cizimde calisir -
+   * ayni tikta kaydet() bayat degeri gonderirdi. Yol normal Kaydet'in aynisi
+   * (dogrulama, surum, onKaydedildi) ama kart KAPANMAZ: hekim ozette kalir.
+   */
+  const [kayitIstegi, setKayitIstegi] = useState(0);
+  useEffect(() => {
+    if (kayitIstegi > 0) void kaydet(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kayitIstegi]);
 
   /**
    * Arama modalindan donen secimi YERINE yazar: alan kartin kendi alaniysa
@@ -1025,7 +1043,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   //   baska kartin degisikligi buraya sizmasin.
   useEffect(() => { ekKaydetTemizle(); return () => ekKaydetTemizle() }, [kaynak, id]);
 
-  async function kaydet() {
+  /** `acikKal`: kayittan sonra kart kapanmaz, yeni surumle yeniden yuklenir. */
+  async function kaydet(acikKal = false) {
     // ADAY HASTA (266): dosya no CEP NUMARASI, unvan ad+soyad. Ikisi de kartta
   //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
   // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
@@ -1158,6 +1177,7 @@ Yine de yeni kayıt eklensin mi?`);
       await ekKaydetleriCalistir();
 
       onKaydedildi?.(Number(yanit.kart.id));
+      if (acikKal && !yeniMi) { await yukle(); return; }
       onKapat?.();
       return;
     } catch (h) {
@@ -1833,6 +1853,12 @@ Yine de yeni kayıt eklensin mi?`);
                const s = sekmeler.find(x => x.baslik.startsWith(b));
                if (s) setAktifSekme(s.anahtar);
              },
+             alanYaz: (ad, v, kaydetSonra) => {
+               if (salt) return;
+               alanDegistir(ad, v);
+               if (kaydetSonra) setKayitIstegi(n => n + 1);
+             },
+             saltOkunur: salt,
            })}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (

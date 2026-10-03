@@ -33,8 +33,8 @@ public static partial class KaynakKatalogu
             new("kurumRefNo",  "p.kurum_ref_no", "metin", "Kurum Ref.",
                                           Hizalama: "orta", Genislik: 150,
                                           Varsayilan: false),
-            new("hastaAd",  "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 220),
-            new("kurumAd",  "coalesce(kr.unvan, '')", "metin", "Sigorta Şirketi",
+            new("hastaAd",  "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 220),
+            new("kurumAd",  "coalesce(public.fn_taraf_ad(kr.unvan, kr.ad, kr.soyad)::varchar(120), '')", "metin", "Sigorta Şirketi",
                                           Genislik: 200),
             new("saglayici","sg.ad",      "metin", "Sağlayıcı", Genislik: 160,
                                           Varsayilan: false),
@@ -94,12 +94,12 @@ public static partial class KaynakKatalogu
               + "  join public.entegrasyon_hesap e on e.id = h.hesap_id "
               + "  left join public.taraf k on k.id = h.kurum_id "
               + "  left join public.sube sb on sb.id = h.sube_id",
-        VarsayilanSirala: "s.ad asc, k.unvan asc",
+        VarsayilanSirala: "s.ad asc, public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120) asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "h.id",   "sayi",  "Id", Varsayilan: false),
             new("saglayici", "s.ad",   "metin", "Sağlayıcı", Genislik: 200),
-            new("kurumAd",   "coalesce(k.unvan, '')", "metin", "Sigorta Şirketi",
+            new("kurumAd",   "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '')", "metin", "Sigorta Şirketi",
                                        Genislik: 240),
             new("hesapKod",  "e.kod",  "metin", "Entegrasyon Hesabı", Genislik: 160),
             new("ortam",

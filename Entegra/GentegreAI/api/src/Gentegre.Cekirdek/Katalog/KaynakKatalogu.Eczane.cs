@@ -33,7 +33,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id", "k.id", "sayi", "Id", Varsayilan: false),
-            new("hastaAd", "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 160),
+            new("hastaAd", "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 160),
             new("yer", "coalesce(d.ad, '') || coalesce(' · ' || nullif(yt.kod, ''), '')",
                 "metin", "Servis / Yatak", Genislik: 150, Filtrelenebilir: false),
             new("ilac", "coalesce(o.ad, '')", "metin", "İlaç", Genislik: 200),
@@ -57,8 +57,8 @@ public static partial class KaynakKatalogu
             new("duzey", "k.duzey", "kod", "Düzey Kodu", Varsayilan: false,
                 Kodlar: EcDuzeyKodlari),
             new("bulgu", "k.bulgu", "metin", "Bulgu", Genislik: 300),
-            new("hekimAd", "coalesce(hk.unvan, '')", "metin", "Hekim", Genislik: 130),
-            new("eczaciAd", "coalesce(ec.unvan, '')", "metin", "Eczacı", Genislik: 130),
+            new("hekimAd", "coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 130),
+            new("eczaciAd", "coalesce(public.fn_taraf_ad(ec.unvan, ec.ad, ec.soyad)::varchar(120), '')", "metin", "Eczacı", Genislik: 130),
             new("kararAdi",
                 "case k.karar when 0 then 'Bekliyor' when 1 then 'Uygun'" +
                 " when 2 then 'Öneri yapıldı' when 3 then 'Durduruldu' else '' end",
@@ -95,13 +95,13 @@ public static partial class KaynakKatalogu
                   left join public.stok_seri_lot l on l.id = z.seri_lot_id
                   left join public.taraf hz on hz.id = z.hazirlayan_id",
         SubeKolonu: "z.sube_id",
-        VarsayilanSirala: "u.planlanan, d.ad, h.unvan",
+        VarsayilanSirala: "u.planlanan, d.ad, public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",
         Kolonlar: new KolonTanimi[]
         {
             new("id", "z.id", "sayi", "Id", Varsayilan: false),
             new("planlanan", "u.planlanan", "zaman", "Saat", Genislik: 130,
                 Bicim: "HH:mm"),
-            new("hastaAd", "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 160),
+            new("hastaAd", "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 160),
             new("yer", "coalesce(d.ad, '') || coalesce(' · ' || nullif(yt.kod, ''), '')",
                 "metin", "Servis / Yatak", Genislik: 150, Filtrelenebilir: false),
             new("ilac", "coalesce(nullif(s.ad, ''), o.ad, '')", "metin", "İlaç", Genislik: 200),
@@ -110,7 +110,7 @@ public static partial class KaynakKatalogu
             new("skt", "l.son_kullanma_tarihi", "tarih", "SKT", Hizalama: "orta",
                 Genislik: 100, Bicim: "MM.yyyy"),
             new("dozBarkod", "z.doz_barkod", "metin", "Doz Barkodu", Genislik: 150),
-            new("hazirlayanAd", "coalesce(hz.unvan, '')", "metin", "Hazırlayan", Genislik: 140),
+            new("hazirlayanAd", "coalesce(public.fn_taraf_ad(hz.unvan, hz.ad, hz.soyad)::varchar(120), '')", "metin", "Hazırlayan", Genislik: 140),
             // ÇİFT KONTROL yüksek riskli ilaçta zorunlu: yapılıp yapılmadığı
             //   listede görünsün, karta girmeden.
             new("kontrolVar",
@@ -150,7 +150,7 @@ public static partial class KaynakKatalogu
                 "metin", "Tür", Hizalama: "orta", Genislik: 110, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("tur", "p.tur", "kod", "Tür Kodu", Varsayilan: false, Kodlar: EcHazirlamaTurKodlari),
-            new("hastaAd", "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 170),
+            new("hastaAd", "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 170),
             new("protokol", "p.protokol", "metin", "Protokol", Genislik: 240),
             new("kur",
                 "case when p.kur_toplam > 0 then p.kur_no::text || ' / ' || p.kur_toplam::text" +
@@ -186,9 +186,9 @@ public static partial class KaynakKatalogu
                 Filtrelenebilir: false),
             new("sonKullanim", "p.son_kullanim", "zaman", "Son Kullanım", Genislik: 140,
                 Varsayilan: false),
-            new("hazirlayanAd", "coalesce(hz.unvan, '')", "metin", "Hazırlayan",
+            new("hazirlayanAd", "coalesce(public.fn_taraf_ad(hz.unvan, hz.ad, hz.soyad)::varchar(120), '')", "metin", "Hazırlayan",
                 Genislik: 140, Varsayilan: false),
-            new("dogrulayanAd", "coalesce(dg.unvan, '')", "metin", "Doğrulayan",
+            new("dogrulayanAd", "coalesce(public.fn_taraf_ad(dg.unvan, dg.ad, dg.soyad)::varchar(120), '')", "metin", "Doğrulayan",
                 Genislik: 140, Varsayilan: false),
             new("hastaId", "p.hasta_id", "sayi", "Hasta Id", Varsayilan: false),
             new("subeId", "p.sube_id", "sayi", "Şube", Varsayilan: false),
@@ -229,7 +229,7 @@ public static partial class KaynakKatalogu
                 Filtrelenebilir: false),
             new("karar", "i.karar", "kod", "Karar Kodu", Varsayilan: false,
                 Kodlar: EcIadeKararKodlari),
-            new("kararVerenAd", "coalesce(kv.unvan, '')", "metin", "Karar Veren",
+            new("kararVerenAd", "coalesce(public.fn_taraf_ad(kv.unvan, kv.ad, kv.soyad)::varchar(120), '')", "metin", "Karar Veren",
                 Genislik: 140, Varsayilan: false),
             new("stokId", "i.stok_id", "sayi", "Stok Id", Varsayilan: false),
             new("subeId", "i.sube_id", "sayi", "Şube", Varsayilan: false),
@@ -312,10 +312,10 @@ public static partial class KaynakKatalogu
             new("receteRenk", "f.recete_renk", "kod", "Reçete Kodu", Varsayilan: false,
                 Kodlar: EcReceteRenkKodlari),
             new("receteNo", "f.recete_no", "metin", "Reçete No", Genislik: 130),
-            new("hastaAd", "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 150),
+            new("hastaAd", "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 150),
             new("departmanAd", "coalesce(d.ad, '')", "metin", "Birim", Genislik: 140),
-            new("teslimEdenAd", "coalesce(te.unvan, '')", "metin", "Teslim Eden", Genislik: 140),
-            new("teslimAlanAd", "coalesce(ta.unvan, '')", "metin", "Teslim Alan", Genislik: 140),
+            new("teslimEdenAd", "coalesce(public.fn_taraf_ad(te.unvan, te.ad, te.soyad)::varchar(120), '')", "metin", "Teslim Eden", Genislik: 140),
+            new("teslimAlanAd", "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')", "metin", "Teslim Alan", Genislik: 140),
             // ÇİFT İMZA: teslim eden ve alan ayrı kişi olmalı. Eksikse
             //   listede görünsün - defter denetiminde ilk bakılan budur.
             new("ciftImza",

@@ -46,9 +46,8 @@ export async function muayeneAksiyonu(
   if (!id) { mesaj('Önce bir muayene seçin.'); return true }
   const hasta = String(satir?.hastaAdi ?? '');
 
-  // SABLON UYGULA: alanlar bulgu satiri olarak acilir ve hepsi "normal"
-  //   isaretlenir. Hekimin isi boylece "hepsini yaz" degil "sapani duzelt"
-  //   olur - poliklinikte fark buradadir. Var olan bulgular korunur, yani
+  // SABLON UYGULA: alanlar bulgu satiri olarak ISARETSIZ acilir (kullanici);
+  //   hepsini normal yapmak "Tumu normal isaretle" ile hekimin eylemidir. Var olan bulgular korunur, yani
   //   sablonu ikinci kez uygulamak yazilmis bulguyu silmez.
   if (kod === 'muayene.sablon') {
     await guvenli(async () => {
@@ -238,8 +237,24 @@ export async function muayeneAksiyonu(
     return true;
   }
 
-  if (!await onay(`${hasta} muayenesi tamamlansın mı?\n\n`
-                + 'Kayıt kilitlenir, başvuru tahakkuka döner ve e-Nabız kuyruğuna girer.'))
+  // TAMAMLAMA KONTROLÜ ÖNCE (kullanıcı: "tamamla'ya basınca kontrol yap ve
+  //   uyar"): eksikler onay sorulmadan, tek mesajda. Kural SUNUCUNUN (özet
+  //   sekmesiyle aynı uç); kontrol okunamazsa Tamamla yine sunucuda denetlenir.
+  const kontrol = await api.muayeneTamamlamaKontrol(id).catch(() => null);
+  if (kontrol?.tamamlandi) { mesaj('Muayene zaten tamamlanmış.'); return true }
+  const eksik = (kontrol?.kontroller ?? []).filter(k => k.zorunlu && !k.tamam);
+  if (eksik.length) {
+    mesaj('Muayene tamamlanamaz. Eksikler:\n\n· '
+        + eksik.map(k => k.ad).join('\n· ')
+        + '\n\nÖzet sekmesindeki tamamlama kontrolünden eksiğe gidebilirsiniz.');
+    return true;
+  }
+  // Bilgi maddeleri (istem / reçete) engellemez, onayda hatırlatılır.
+  const bilgi = (kontrol?.kontroller ?? []).filter(k => !k.zorunlu && !k.tamam).map(k => k.ad);
+
+  if (!await onay(`${hasta ? `${hasta} muayenesi` : 'Muayene'} tamamlansın mı?\n\n`
+                + 'Kayıt kilitlenir, başvuru tahakkuka döner ve e-Nabız kuyruğuna girer.'
+                + (bilgi.length ? `\n\nBilgi: bu muayenede ${bilgi.join(' ve ').toLocaleLowerCase('tr-TR')} yok.` : '')))
     return true;
 
   await guvenli(async () => {

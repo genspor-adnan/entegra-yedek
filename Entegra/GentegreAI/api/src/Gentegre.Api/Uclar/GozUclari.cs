@@ -186,7 +186,7 @@ public static partial class GozUclari
             // SON ZİYARETLER: kaç muayene, ne zaman, hangi türde.
             var ziyaretler = await veri.ListeAsync("""
                 select gm.id, m.muayene_tarihi, gm.muayene_turu,
-                       coalesce(h.unvan, '') as hekim, gm.dilate
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim, gm.dilate
                   from public.goz_muayene gm
                   join public.muayene m on m.id = gm.muayene_id
                   left join public.taraf h on h.id = m.personel_id

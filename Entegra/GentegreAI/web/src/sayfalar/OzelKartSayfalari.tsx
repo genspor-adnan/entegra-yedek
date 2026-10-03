@@ -52,4 +52,3 @@ export function AlerjiKartiSayfa() {
   const r = useHastaKaydiRotasi('/hasta-alerji');
   return r.gecerli ? <AlerjiKarti id={r.kayit} hastaId={r.hastaId} onKapat={r.kapat} /> : null;
 }
-

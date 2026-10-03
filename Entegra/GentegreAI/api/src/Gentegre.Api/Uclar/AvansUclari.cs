@@ -237,7 +237,7 @@ public static class AvansUclari
             var a = await baglanti.TekAsync("""
                 select a.taraf_id as "tarafId", a.tutar, a.durum, a.taksit_sayisi as "taksit",
                        a.ilk_donem as "ilkDonem", a.odeme_islem_id as "odemeId",
-                       a.sube_id as "subeId", coalesce(nullif(t.unvan, ''), '') as ad
+                       a.sube_id as "subeId", coalesce(nullif(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), '') as ad
                   from public.personel_avans a
                   join public.taraf t on t.id = a.taraf_id
                  where a.id = @p0

@@ -39,16 +39,16 @@ public sealed class IskontoTalepDeposu
 
     private const string SecimSql = """
         select t.id, t.belge_id, t.oran, t.onaylanan_oran, t.gerekce, t.durum,
-               coalesce(ist.unvan, '')  as isteyen,
+               coalesce(public.fn_taraf_ad(ist.unvan, ist.ad, ist.soyad)::varchar(120), '')  as isteyen,
                t.istek_ts,
-               coalesce(ony.unvan, '')  as onaylayan,
+               coalesce(public.fn_taraf_ad(ony.unvan, ony.ad, ony.soyad)::varchar(120), '')  as onaylayan,
                t.onay_ts, t.karar_notu,
                (select count(*) from public.iskonto_talep_satir ts
                  where ts.talep_id = t.id)                         as satir_sayisi,
                coalesce((select sum(s.tutar) from public.iskonto_talep_satir ts
                           join public.belge_satir s on s.id = ts.belge_satir_id
                          where ts.talep_id = t.id), 0)             as tutar,
-               coalesce(h.unvan, '')    as hasta,
+               coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')    as hasta,
                coalesce(b.belge_no, '') as belge_no,
                -- HASTA SERIDI (663): cinsiyet ikonu, yas, kurum, doktor.
                --   Yas dogum tarihinden ANLIK hesaplanir - talep aninda
@@ -56,8 +56,8 @@ public sealed class IskontoTalepDeposu
                coalesce(th.cinsiyet, 0) as cinsiyet,
                case when th.dogum_tarihi is null then 0
                     else extract(year from age(th.dogum_tarihi))::int end as yas,
-               coalesce(kr.unvan, '')   as kurum,
-               coalesce(dr.unvan, '')   as doktor
+               coalesce(public.fn_taraf_ad(kr.unvan, kr.ad, kr.soyad)::varchar(120), '')   as kurum,
+               coalesce(public.fn_taraf_ad(dr.unvan, dr.ad, dr.soyad)::varchar(120), '')   as doktor
           from public.iskonto_talep t
           join public.belge b        on b.id = t.belge_id
           left join public.taraf h   on h.id = b.taraf_id

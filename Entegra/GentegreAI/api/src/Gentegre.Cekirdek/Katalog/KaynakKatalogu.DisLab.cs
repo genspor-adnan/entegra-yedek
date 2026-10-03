@@ -106,7 +106,7 @@ public static partial class KaynakKatalogu
             new("id", "d.id", "sayi", "Id", Varsayilan: false),
             new("kod", "d.kod", "metin", "Kod", Hizalama: "orta", Genislik: 110),
             new("ad", "d.ad", "metin", "Dış Laboratuvar", Genislik: 260),
-            new("cari", "t.unvan", "metin", "Cari (tedarikçi)", Genislik: 240),
+            new("cari", "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)", "metin", "Cari (tedarikçi)", Genislik: 240),
             new("sonucKanaliAdi",
                 "case d.sonuc_kanali when 2 then 'HL7' when 3 then 'Portal' "
                 + "when 4 then 'Elden' else 'PDF / e-posta' end",

@@ -46,12 +46,12 @@ public static partial class LabUclari
                        i.durum, i.oncelik, i.klinik_bilgi as "klinikBilgi",
                        i.tani_icd as "taniIcd", i.sonuc_tarihi as "sonucTarihi",
                        i.hedef_bitis as "hedefBitis",
-                       coalesce(h.unvan, '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
                        coalesce(h.vkno, '') as "hastaTc",
                        hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
-                       coalesce(p.unvan, '') as "isteyenHekim",
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as "isteyenHekim",
                        coalesce(b.belge_no, '') as "protokolNo",
-                       coalesce(ok.unvan, '') as "odeyenKurum",
+                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum",
                        (select min(n.alim_zamani) from public.lab_numune n
                          where n.istem_id = i.id) as "numuneAlim",
                        (select min(n.kabul_zamani) from public.lab_numune n
@@ -83,7 +83,7 @@ public static partial class LabUclari
                        ls.karar_notu as "kararNotu",
                        ls.olcum_zamani as "olcumZamani", ls.onay_zamani as "onayZamani",
                        coalesce(t.yontem, '') as yontem, coalesce(c.ad, '') as "cihazAdi",
-                       coalesce(o.unvan, '') as "onaylayan", t.bolum,
+                       coalesce(public.fn_taraf_ad(o.unvan, o.ad, o.soyad)::varchar(120), '') as "onaylayan", t.bolum,
                        coalesce(n.barkod, '') as barkod,
                        -- NUMUNE KALİTESİ raporun zorunlu parçası (ISO 15189):
                        --   "K yüksek" ile "hemoliz nedeniyle yüksek görünüyor"
@@ -116,7 +116,7 @@ public static partial class LabUclari
                        k.on_rapor as "onRapor", k.on_rapor_zamani as "onRaporZamani",
                        k.uzman_yorum as "uzmanYorum", k.onay_zamani as "onayZamani",
                        k.kritik, k.ekk_bildirim as "ekkBildirim", k.durum,
-                       coalesce(o.unvan, '') as "onaylayan",
+                       coalesce(public.fn_taraf_ad(o.unvan, o.ad, o.soyad)::varchar(120), '') as "onaylayan",
                        public.fn_lab_kultur_ozet(k.id) as ozet,
                        coalesce((select string_agg(b.ad || coalesce(' (lot ' || nullif(kb.lot, '') || ')', ''),
                                                    ' · ' order by kb.sira)
@@ -184,7 +184,7 @@ public static partial class LabUclari
                        g.kontaminasyon, g.cinsiyet_dogrulama as "cinsiyetDogrulama",
                        g.uzman_yorum as "uzmanYorum", g.oneriler, g.sinirliliklar,
                        g.onay_zamani as "onayZamani", g.durum, g.rapor_surum as "raporSurum",
-                       coalesce(o.unvan, '') as "onaylayan",
+                       coalesce(public.fn_taraf_ad(o.unvan, o.ad, o.soyad)::varchar(120), '') as "onaylayan",
                        public.fn_lab_genetik_ozet(g.id) as ozet,
                        coalesce(p.ad, '') as panel, coalesce(p.yontem, 1) as yontem,
                        coalesce(p.referans_genom, '') as "referansGenom",

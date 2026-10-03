@@ -126,7 +126,7 @@ public static partial class LabUclari
                        gs.durum, gs.sonuc_zamani as "sonucZamani",
                        gs.ret_neden as "retNeden",
                        coalesce(n.barkod, '') as barkod, i.istem_no as "istemNo",
-                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan) as hasta,
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)) as hasta,
                        coalesce(ls.deger_metin, '') as deger,
                        coalesce(ls.bayrak, '') as bayrak
                   from public.lab_dis_gonderim_satir gs

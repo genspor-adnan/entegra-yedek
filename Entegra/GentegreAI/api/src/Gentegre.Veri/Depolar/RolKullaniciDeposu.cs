@@ -44,7 +44,7 @@ public sealed class RolKullaniciDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
-            select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
+            select k.id, k.kod, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), k.eposta,
                    coalesce((select dp.ad from public.departman dp
                               where dp.id = t.departman), ''),
                    coalesce((select g.ad from public.personel_gorev g
@@ -61,7 +61,7 @@ public sealed class RolKullaniciDeposu
              where k.rol_id = @p0
                 or exists (select 1 from public.kullanici_rol kr
                             where kr.kullanici_id = k.id and kr.rol_id = @p0)
-             order by k.aktif desc, ana desc, t.unvan
+             order by k.aktif desc, ana desc, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
             """, null, rolId);
         return await OkuAsync(komut, iptal);
     }
@@ -87,7 +87,7 @@ public sealed class RolKullaniciDeposu
         var q = (arama ?? "").Trim();
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
-            select t.id, coalesce(k.kod, ''), coalesce(t.unvan, ''), coalesce(k.eposta, ''),
+            select t.id, coalesce(k.kod, ''), coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), coalesce(k.eposta, ''),
                    coalesce((select dp.ad from public.departman dp
                               where dp.id = t.departman), ''),
                    coalesce((select g.ad from public.personel_gorev g
@@ -110,11 +110,11 @@ public sealed class RolKullaniciDeposu
                and coalesce(k.rol_id, 0) <> @p0
                and not exists (select 1 from public.kullanici_rol kr
                                 where kr.kullanici_id = k.id and kr.rol_id = @p0)
-               and (@p1 = '' or t.unvan ilike '%' || @p1 || '%'
+               and (@p1 = '' or public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) ilike '%' || @p1 || '%'
                              or k.kod ilike '%' || @p1 || '%'
                              or k.eposta ilike '%' || @p1 || '%'
                              or t.gorev ilike '%' || @p1 || '%')
-             order by t.unvan
+             order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
              limit 200
             """, null, rolId, q);
         return await OkuAsync(komut, iptal);

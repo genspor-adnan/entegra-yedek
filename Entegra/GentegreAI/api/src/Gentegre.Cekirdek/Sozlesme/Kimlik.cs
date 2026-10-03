@@ -107,6 +107,14 @@ public sealed class KullaniciOzeti
     /// </summary>
     public short PortalTuru { get; set; }
     /// <summary>
+    /// HEKIM KISITI (KaynakKatalogu.HekimKisitliSql): kullanici yalniz kendine
+    /// ait muayene / calisma listesi / randevu satirlarini gorur - suzme
+    /// SUNUCUDA. Arayuz bununla yalniz hekim seciciyi kendi adina kilitler
+    /// (kullanici: "uzman doktor sadece kendi adina acilmis randevulari gorur,
+    /// sadece kendi adi gelsin ve degisemesin").
+    /// </summary>
+    public bool HekimKisitli { get; set; }
+    /// <summary>
     /// PORTALDA KAPSAMI ACIK kaynak adlari (796 V2) - portal menusu bununla
     /// suzulur. Ic kullanicida BOS: kurum ici menu yetkiye gore cizilir.
     ///

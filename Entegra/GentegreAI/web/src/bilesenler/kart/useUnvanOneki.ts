@@ -20,7 +20,11 @@ export function useUnvanOneki(kaynak: string) {
 
   useEffect(() => {
     if (!ONEKLI_KARTLAR.has(kaynak) || !ham || secenekler.length === 0) return;
-    setOnek(secenekler.find(o => ham.startsWith(o + ' ')) ?? '');
+    // Unvan artik YALNIZ onek ("Dr.", 940); eski kayitta tam ad ("Dr. Ali
+    //   Kaya") olabilir - ikisi de taninir. En uzun onek once: "Uzm.Dr."
+    //   "Dr."'den once denenir.
+    const uzundan = [...secenekler].sort((a, b) => b.length - a.length);
+    setOnek(uzundan.find(o => ham === o || ham.startsWith(o + ' ')) ?? '');
   }, [kaynak, ham, secenekler]);
 
   useEffect(() => {

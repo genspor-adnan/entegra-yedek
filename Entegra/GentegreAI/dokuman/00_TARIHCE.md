@@ -18036,3 +18036,81 @@ Ayrıntı ve kanıt: `DENETIM_DUZELTME_SONUCU_2026-09-28.md` (denetim: `DENETIM_
   `IYZICO_SECRET_KEY` ya da `gizli/iyzico-anahtar.txt` (2 satır, git dışı); adresler
   `Odeme:Iyzico` (sandbox varsayılan). Dev hâlâ simülasyonda (anahtar bekleniyor).
   Kalan: iyzico webhook (async bildirim), abonelik (iyzico Subscription API) ile otomatik yenileme.
+
+
+## 03.10.2026 — Çalışma planı tek kaynak: şablon / istisna kartları ve listeleri, randevu kuralları, etiketler (938–946)
+
+**Etiketler ve ünvan (938–942).**
+* "Değerlendirme / Plan" → **"Değerlendirme / Sonuç"** (muayene kartı alanı, özet sekmesi, tamamlama kontrolü - 938);
+  başvuru kartında "Hekim / Personel" → **"Doktor / Personel"** (939); randevu takviminde "Hekim" görünüm düğmesi ve
+  seçici başlığı → **"Doktor"** (942); takvimin yan paneli **"Randevu Bekleyen İstemler"**, açılır / kapanır (941).
+  Dosyalar yalnız İngilizce sözlüğü ekler; eski anahtarlar durur (yeniden başlatılmamış API onları gönderebilir).
+* **Personelde `taraf.unvan` yalnız önek** ("Dr.", "Prof.Dr."; 940) - önceden "Dr. Alim Sarı" gibi tam addı. Görünen ad
+  tek yerden `fn_taraf_ad(unvan, ad, soyad)::varchar(120)`; uç ve katalog sorgularındaki `t.unvan` okumaları buna geçti,
+  yeni kolon açılmadı. Kurum / hasta kayıtlarında unvan kaydın kendi adı olarak kalır.
+
+**Hekim kısıtı ve oturum.** Hekim kısıtının tek tanımı `KaynakKatalogu.HekimKisitliSql`: çalışma planı olan hekim
+**ya da** ana rolü klinik hekim rolü (`hekim`, `pratisyen_doktor`, `acil_hekimi`) olan kullanıcı - planı henüz girilmemiş
+hekim kısıtsız kalıyordu. Randevu kaynağı kısıta eklendi (uzman doktor yalnız kendi randevularını görür; arayüz doktor
+seçicisini kendi adına kilitler, `HekimKisitli`). Rolü oturum açıkken "Rol Atanmamış"a çekilen kullanıcı bir sonraki
+istekte düşer (`OturumKapisi`), token süresini beklemez.
+
+**Plan tek kaynak (943, 944, 946).**
+* Randevu artık doktorun **çalışma planının dışına yazılamaz** (943, `tg_randevu_mesai_kontrol`): planı olan doktorda
+  randevunun başı ve sonu o günün bir bloğunda olmalı. Kontrol edilmeyenler: planı olmayan doktor, hekimsiz (cihaz)
+  randevu, iptal / gelmedi, saati-süresi-doktoru değişmeyen güncelleme, onaylı izin günü (kararı izin tetiğinin).
+  Ayar `randevu.mesai_disi`: 0 engelle (varsayılan) · 1 yalnız uyar.
+* **946 - 943'ün düzeltmesi:** `randevu.baslangic` timestamptz'dir (667), oturum UTC. 943 `baslangic::time` ile UTC
+  saatini plan bloklarının duvar saatiyle karşılaştırıyordu; İstanbul'da 09:30'a verilen randevu "06:30 mesai dışı"
+  diye reddediliyordu. Artık an, randevunun şubesinin saat dilimine (`sube.zaman_dilimi`, boşsa Europe/Istanbul)
+  çevrilip gün ve saat oradan alınır. **Açık konu:** aynı UTC karşılaştırması (`r.baslangic::date` / `::time`) başka
+  eski liste ve sayım sorgularında da var (ör. `v_hekim_calisma_istisna.etkilenen_randevu`, bugünkü sayaçlar) - gece
+  00:00-03:00 arasındaki randevular yanlış güne sayılabilir; ayrı iş.
+* **"Randevu Ayarları" ekranı kaldırıldı** (944; `RandevuAyarlar.tsx`, `RandevuBolumAyarlari.tsx` silindi,
+  `/randevu-ayarlar` → `/calisma-sablon`). Yerine Çalışma Şablonları listesinde **🏥 Bölüm** (bölümü randevuya toplu
+  aç / kapat; işaretli doktorlara "Standart hafta") ve **⚙ Varsayılanlar** (yeni şablonun gün / blok / slot düzeni +
+  mesai dışı ve izinli doktor kuralları: engelle / yalnız uyar) pencereleri (`bilesenler/calisma/CalismaSablonAraclari`).
+
+**Kartlar (945, mockup `Ekranlar/Randevu/calisma_sablonu_karti.html`, `izin_istisna_karti.html`).** İki kart da özel
+modal (`bilesenler/calisma`); yazma generic kart ucuyla (`calisma-sablon` / `calisma-istisna`), kaydetmeden önceki
+hesaplar `CalismaPlaniUclari.Kart.cs`.
+* **Çalışma Şablonu kartı:** günler 7 düğme, 1. / 2. blok (aradaki boşluk öğle arası), slot çipleri, canlı günlük zaman
+  çizgisi; Kanal & Kota ve Geçerlilik açılır / kapanır. Sağ panel kaydetmeden önce etkiyi söyler
+  (`POST /api/calisma-plani/sablon-etki`): haftalık slot / saat, 2 hafta doluluk, **kaydedince plan dışında kalacak
+  randevular** (bugün bir blokta olan, yeni şablon + doktorun diğer bloklarıyla dışarıda kalan), çakışan aktif şablon,
+  doktorun diğer şablonları. Kaydet / Kopyala / Pasife Al / Sil. Yeni şablon ⚙ Varsayılanlar düzeniyle açılır
+  (`GET /sablon-varsayilan`; önceden katalogda sabitti).
+* **İzin & İstisna kartı:** tür 5 büyük düğme (formu belirler: kapatan türde saat / slot pasif, ek mesaide kanal
+  zorunlu), "Plan bu haftayı nasıl görecek" şeridi, **etkilenen randevular** ve toplu işlem
+  (`POST /istisna-randevu`): başka doktora aktar, sonraki boş güne kaydır (30 gün, aynı bölümün blokları önce), hastaya
+  SMS (bildirim kuyruğu), iptal. Kurallar randevu tetiklerinde; uç satır satır dener (savepoint), yapılamayanı nedeniyle
+  döner; her değişiklik randevu loguna alan alan. Doktorun yakın istisnaları (İK izni salt okunur).
+  **Onay akışı:** yeni istisna **Bekliyor** (0) açılır, "✔ Onayla" 1'e çeker; yalnız onaylı istisna planı kapatır.
+* **945 DB:** aynı doktorun iki aktif şablonu aynı gün + örtüşen saat + örtüşen geçerlilikte **kaydedilemez**
+  (`tg_calisma_sablon_cakisma`; iki haftada bir + tek hafta arayla başlayanlar çakışmaz; şube / bölüm farkı çakışmayı
+  kaldırmaz). İstisnaya `onaylayan` / `onay_tarihi` (durum 1'e geçişte tetikle yazılır). Ek mesaide kanal zorunlu.
+* **Çalışma Planları sayfası:** satır başında seçim kutusu; seçiliyken "🏖 İzin / İstisna" kartı o doktorla açılır ve
+  doktor **değiştirilemez** (`?hekimId=&sabit=1`). "＋ Bu doktora istisna" da kilitli açar.
+
+**Listeler (mockup `Ekranlar/Randevu/calisma_sablonlari_listesi.html`, `izin_istisnalar_listesi.html`).** Generic
+liste bu iki ekranın sorusunu cevaplayamıyordu (satır başına doluluk, işlem bekleyen randevu, İK iznini aynı listede
+göstermek, özet şeridi). Özel sayfa (`sayfalar/calisma`), kart aynı rotada `:id?` ile üstte - süzgeç kaybolmaz. Hesaplar
+`CalismaPlaniUclari.Liste.cs`; randevu anları şubenin duvar saatinde karşılaştırılır (946 kuralı).
+* **Çalışma Şablonları:** durum çipleri sayılı (Aktif / Pasif / Süresi biten / Tümü), bölüm / şube, doktora göre grup
+  (grup başlığında haftalık saat). Satır: 7 gün kutusu (iki haftada bir taralı), 07-20 saat şeridi, B/P/Ç rozetleri,
+  2 hafta doluluk, "N gün kaldı", çakışma kırmızı. Özet: aktif şablon, haftalık kapasite, **şablonu olmayan doktor**
+  (çipten yeni şablon doktor + bölümle açılır), 30 günde bitecek. Toplu (`POST /sablon-toplu`): başka doktora kopyala
+  (945 çakışması satır bazında reddedilir), bitiş tarihi ver, pasife al, tek doktorsa kilitli izin / istisna.
+  "Doktor" şemada işaretli değil: **Dr. ünvanlı ya da geçmişte şablonu olmuş aktif personel** sayılır.
+* **İzin & İstisnalar:** varsayılan çip **Onay bekliyor**; tür (İK izni dahil) ve dönem çipleri, tarih aralığı, bölüm.
+  Satır: tür rozeti, aralık + gün sayısı + "N gün sonra / şu an devam ediyor", etkilenen randevunun **durumu**
+  (işlem bekleyen sayısı; ek mesaide açılan / dolu slot), giren / onaylayan. **İK izni** (personel_izin, onaylı) satırı
+  salt okunur, İzinler ekranına gider. Özet: onay bekleyen (+ en eski), işlem bekleyen randevu, bugün izinli doktorlar,
+  30 günlük tür dağılımı. Toplu onayla / iptal (`POST /istisna-toplu`, log alan bazlı). İkinci görünüm **zaman
+  çizelgesi** (doktor × 4 hafta, onay bekleyen taralı). Mockup'taki "N aktarıldı" bilgisi yok - toplu işlemler iz
+  tutmuyor; yalnız hâlâ bekleyen sayılır.
+
+**Doğrulama.** API + docker DB + Edge (Playwright): kartlar, onay akışı, kilitli doktor, listeler ve zaman çizelgesi;
+946 öncesi / sonrası 09:30 ve 19:00 randevusu; kaydırma / aktarma / iptal ve alan logları; kopyada çakışma reddi.
+`tsc -b` temiz, vitest 789/789 (tema sınıf çakışması testi `ck-` / `cl-` önekleriyle geçti). Test kayıtları silindi.
+Göçler 938-946 **yalnız docker'da**.

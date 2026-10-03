@@ -145,6 +145,10 @@ interface Props {
    * "arama editi sagina takvim butonu, basinca takvim listeye bassin").
    */
   ekGorunum?: { ad: string; ik: string; icerik: React.ReactNode };
+  /** Acilis gorunumu (Liste / Grup / Analiz / ek) - ekran son secimi saklarsa. */
+  gorunumBaslangic?: 'liste' | 'grup' | 'analiz' | 'ek';
+  /** Gorunum degisince haber verir (son secimi saklamak icin). */
+  onGorunumDegisti?(g: 'liste' | 'grup' | 'analiz' | 'ek'): void;
   /** Acilista secili gelecek cip (geri donuste onceki filtreyi korumak icin). */
   cipBaslangic?: number;
   /** Cip'e tiklanınca cagrilir - ekstre modundan listeye donmek gibi ekran
@@ -227,6 +231,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum,
+                          gorunumBaslangic, onGorunumDegisti,
                           onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
                           yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
@@ -291,7 +296,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   }, [tarihCombo, tarihOn, setTarihBas, setTarihBit]);
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
-  const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz' | 'ek'>('liste');
+  const [gorunum, setGorunumIc] = useState<'liste' | 'grup' | 'analiz' | 'ek'>(
+    gorunumBaslangic === 'ek' && !ekGorunum ? 'liste' : (gorunumBaslangic ?? 'liste'));
+  const setGorunum = (g: 'liste' | 'grup' | 'analiz' | 'ek') => { setGorunumIc(g); onGorunumDegisti?.(g) };
   // Kolon gorunurlugu/sirasi ve tercihin saklanmasi grid/kolonTercihi.ts'te.
   //   Kolon tercihi hatasi AYRI durumda: liste verisi kancasi kolonlara
   //   ihtiyac duyuyor, kolon kancasi da hata yazacak bir yer istiyor - ikisi

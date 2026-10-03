@@ -79,6 +79,8 @@ public static class KimlikUclari
                     // PORTAL TURU (806): arayuz kural yazmaz, yalniz portal
                     //   kullanicisina anlamsiz dugmeyi gostermez.
                     PortalTuru = baglam.PortalTuru,
+                    // HEKIM KISITI: hekim seciciyi kendi adina kilitlemek icin.
+                    HekimKisitli = await kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal),
                     Dil = kullanici.Dil,
                     // Zorunlu parola degisimi (674): /ben de tasir.
                     ParolaDegismeli = kullanici.ParolaDegismeli,

@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { useEscIleKapat } from '../../bilesenler/Modal';
 
 /**
  * FTR SEANS UYGULAMA KARTI (719) — mockup `Ekranlar/FTR/ftr_seans.html`.
@@ -27,7 +28,8 @@ export function FtrSeansKarti() {
   const durumS = konum.state as { geri?: string; ustGeri?: string } | null;
   const geri = durumS?.geri ?? sorgu.get('geri') ?? '/ftr-seans';
   const kapat = useCallback(() => git(geri, durumS?.ustGeri ? { state: { geri: durumS.ustGeri } } : undefined), [git, geri, durumS?.ustGeri]);
-  useEffect(() => { const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() }; window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f) }, [kapat]);
+  // Esc yalniz EN USTTEKI pencereyi kapatir (kartin icinde acik pencere varsa o).
+  useEscIleKapat(kapat);
 
   const yeni = param === 'yeni';
   const id = yeni ? 0 : Number(param ?? 0);

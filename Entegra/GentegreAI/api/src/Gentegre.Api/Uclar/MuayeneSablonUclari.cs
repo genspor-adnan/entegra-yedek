@@ -235,7 +235,7 @@ public static class MuayeneSablonUclari
                  group by p.ad order by 2 desc limit 20
                 """, null, [id], o => new { ad = o.GetString(0), adet = o.GetInt32(1) }, iptal);
             var son = await b.ListeAsync("""
-                select m.id, m.muayene_tarihi, coalesce(h.unvan, ''), coalesce(p.ad, '')
+                select m.id, m.muayene_tarihi, coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), coalesce(p.ad, '')
                   from public.muayene m
                   left join public.taraf h on h.id = m.taraf_id
                   left join public.v_personel_lookup p on p.id = m.personel_id

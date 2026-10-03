@@ -176,13 +176,13 @@ public static partial class RadyolojiUclari
             //   (taraf.departman departman tablosuna isaret eder, 251) -
             //   taraf_personel yalniz ozluk bilgisini tasir.
             var hekimler = await baglanti.ListeAsync("""
-                select t.id, t.unvan as ad, coalesce(d.ad, '') as "bolumAdi"
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(d.ad, '') as "bolumAdi"
                   from public.taraf t
                   left join public.departman d on d.id = t.departman
                  where coalesce(t.personel, 0) = 1
                    and public.fn_hekim_planli(t.id) = 1
                    and coalesce(t.durum, 1) = 1
-                 order by t.unvan
+                 order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KAYITLI DIS HEKIMLER (305): dis istemde artik serbest metin yerine
