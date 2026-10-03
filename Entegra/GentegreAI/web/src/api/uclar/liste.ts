@@ -99,6 +99,8 @@ export const listeUclari = {
   receteIlacEkle: (muayeneId: number, istek_: {
     barkod: string; doz?: string; periyot?: string; sureGun?: number;
     kutu?: number; aciklama?: string; uyariGerekce?: string;
+    /** Kutunun GS1 karekodu: verilirse barkod sunucuda GTIN'den çözülür. */
+    karekod?: string;
   }) => gonder<{ receteId: number; satirId: number; uyarilar: unknown[]; mesaj: string }>(
     `/api/recete/muayene/${muayeneId}`, istek_),
 

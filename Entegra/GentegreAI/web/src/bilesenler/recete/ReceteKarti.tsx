@@ -74,6 +74,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
   const [isaretli, setIsaretli] = useState<ListeSatiri[]>([]);
   const [secili, setSecili] = useState<ListeSatiri | null>(null);
   const [aramaAcik, setAramaAcik] = useState(false);
+  /** 📷 Karekod okutma penceresi (mockup muayene_karti_v2 reçete araç çubuğu). */
+  const [karekodAcik, setKarekodAcik] = useState(false);
+  const [karekod, setKarekod] = useState('');
   const [satirDuzen, setSatirDuzen] = useState<ListeSatiri | null>(null);
   const [tazele, setTazele] = useState(0);
 
@@ -144,6 +147,22 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
     yenile();
   });
 
+  /** e-İMZALA & MEDULA'YA GÖNDER (mockup): imza, ardından Medula. Medula
+      reddederse imza YİNE geçerlidir - mesaj ikisini ayrı söyler. */
+  const imzalaGonder = () => guvenli(async () => {
+    if (degisti) await api.kartGuncelle('recete', receteId, { surum, kart: { tur, aciklama } });
+    if (!await onay('Reçete imzalanıp Medula\'ya gönderilecek. İmzalanan reçete değiştirilemez. '
+                  + 'Onaylıyor musunuz?')) return;
+    const y = await api.receteImzala(receteId);
+    let medula = '';
+    try {
+      const g = await api.medulaReceteGonder(receteId);
+      medula = String((g as { mesaj?: string }).mesaj ?? 'Medula\'ya gönderildi.');
+    } catch (h) { medula = `Medula: ${hataMetni(h)}` }
+    mesaj(`${y.mesaj}\n${medula}`);
+    yenile();
+  });
+
   const medulayaGonder = () => guvenli(async () => {
     const y = await api.medulaReceteGonder(receteId);
     mesaj(String((y as { mesaj?: string }).mesaj ?? 'Medula\'ya gönderildi.'));
@@ -170,8 +189,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
     yenile();
   });
 
-  const ilacEkle = (barkod: string, ad: string) => guvenli(async () => {
-    const y = await api.receteIlacEkle(muayeneId, { barkod });
+  /** Uyarılı eklemede sunucunun uyarısı gösterilir (alerji / etkileşim). */
+  const ilacEkle = (barkod: string, ad: string, kare?: string) => guvenli(async () => {
+    const y = await api.receteIlacEkle(muayeneId, kare ? { barkod: '', karekod: kare } : { barkod });
     const u = (y.uyarilar ?? []) as { metin?: string }[];
     if (u.length) mesaj(`${ad} eklendi.\n\nUYARI:\n· ${u.map(x => x.metin ?? '').join('\n· ')}`);
     yenile();
@@ -219,15 +239,47 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
             </button>
           )}
           {taslak && (
-            <button type="button" className="d" onClick={() => void kopyala()}>
-              🕘 {c('Önceki reçeteyi kopyala')}
+            <button type="button" className="d onay" disabled={satirlar.length === 0}
+                    title={satirlar.length ? '' : c('Önce ilaç ekleyin')}
+                    onClick={() => void imzalaGonder()}>✍ {c("e-İmzala & Medula'ya Gönder")}</button>
+          )}
+          {taslak && (
+            <button type="button" className="d" title={c('Önceki reçeteyi kopyala')}
+                    onClick={() => void kopyala()}>
+              🕘 {gomulu ? c('Önceki reçete') : c('Önceki reçeteyi kopyala')}
             </button>
+          )}
+          {/* KAREKOD ve KULLANDIGI ILACLARDAN (mockup muayene_karti_v2 recete
+              arac cubugu): ilac eklemenin iki kisa yolu. */}
+          {taslak && (
+            <button type="button" className="d" onClick={() => { setKarekod(''); setKarekodAcik(true) }}>
+              📷 {c('Karekod')}
+            </button>
+          )}
+          {taslak && aktifIlac.length > 0 && (
+            <select className="recete-sablon" value="" aria-label={c('Kullandığı ilaçlardan ekle')}
+                    onChange={e => {
+                      const x = aktifIlac.find(a => metin(a.barkod) === e.target.value);
+                      if (x) void ilacEkle(metin(x.barkod), metin(x.ilacAd));
+                    }}>
+              <option value="">💊 {c('Kullandığı ilaçlardan…')}</option>
+              {aktifIlac.filter(a => metin(a.barkod)).map((a, i) => (
+                <option key={i} value={metin(a.barkod)}>{metin(a.ilacAd)}</option>
+              ))}
+            </select>
+          )}
+          {satirlar.length > 0 && (
+            <span className={`rozet ${uyarilar.length ? 'hata' : 'olumlu'}`}
+                  title={uyarilar.length ? c('Etkileşim / alerji uyarısı var') : c('Etkileşim / alerji: temiz')}>
+              {uyarilar.length ? `⚠ ${uyarilar.length} ${c('uyarı')}` : `✓ ${c('Uyarı yok')}`}
+            </span>
           )}
           {gomulu && ekAraclar}
           <span style={{ marginLeft: 'auto' }} />
           {gomulu && <span className={`rozet ${d.sinif}`}>{d.ad}{receteNo ? ` · ${receteNo}` : ''}</span>}
           {taslak && (
-            <button type="button" className="d teh" onClick={() => void sil()}>🗑 {c('Sil')}</button>
+            <button type="button" className="d teh" title={c('Taslak reçeteyi sil')}
+                    onClick={() => void sil()}>{gomulu ? '🗑' : `🗑 ${c('Sil')}`}</button>
           )}
           {!gomulu && (
             <button type="button" className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
@@ -264,11 +316,6 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
                       </span>
                     ))}
                   </div>
-                </div>
-                <div className="rk-fld rk-tam">
-                  <label htmlFor="rk-aciklama">{c('Açıklama (reçeteye basılır)')}</label>
-                  <input id="rk-aciklama" value={aciklama} maxLength={200} disabled={!taslak}
-                         onChange={e => setAciklama(e.target.value)} />
                 </div>
               </div>
             </div>
@@ -314,6 +361,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
                 onSecimDegisti={setSecili}
                 onSatirAc={r => { if (taslak) setSatirDuzen(r) }}
               />
+            </div>
+            {/* ACIKLAMA ILAC GRIDININ ALTINDA (kullanici): receteye basilan
+                not ilaclardan sonra yazilir. */}
+            <div className="rk-fld rk-tam rk-aciklama">
+              <label htmlFor="rk-aciklama">{c('Açıklama (reçeteye basılır)')}</label>
+              <input id="rk-aciklama" value={aciklama} maxLength={200} disabled={!taslak}
+                     onChange={e => setAciklama(e.target.value)} />
             </div>
             <p className="not">
               {taslak
@@ -396,6 +450,29 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar }:
             void ilacEkle(String(satir.barkod ?? ''), String(satir.ad ?? ''));
           }}
         />
+      )}
+      {karekodAcik && (
+        <Modal baslik={c('Karekod ile ilaç ekle')} dar enUst buyutmeYok onKapat={() => setKarekodAcik(false)}
+               alt={<>
+                 <button type="button" className="d bir" disabled={!karekod.trim()}
+                         onClick={() => { setKarekodAcik(false); void ilacEkle('', c('İlaç'), karekod.trim()) }}>
+                   ＋ {c('Ekle')}
+                 </button>
+                 <button type="button" className="d" onClick={() => setKarekodAcik(false)}>{c('Vazgeç')}</button>
+               </>}>
+          <div className="rk-satir">
+            <label className="rk-tam">{c('Kutunun karekodunu okutun')}
+              <input autoFocus value={karekod} onChange={e => setKarekod(e.target.value)}
+                     onKeyDown={e => {
+                       if (e.key === 'Enter' && karekod.trim()) {
+                         e.preventDefault(); setKarekodAcik(false); void ilacEkle('', c('İlaç'), karekod.trim());
+                       }
+                     }}
+                     placeholder="01086…21…17…10…" />
+            </label>
+            <p className="sonuk">{c('Okuyucu karekodu yazıp Enter gönderir; ilaç katalogdaki barkoduyla eklenir.')}</p>
+          </div>
+        </Modal>
       )}
       {satirDuzen && (
         <ReceteSatirPenceresi receteId={receteId} satir={satirDuzen}

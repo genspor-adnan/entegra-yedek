@@ -1,4 +1,5 @@
 ﻿using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Its;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -35,7 +36,7 @@ public static class ReceteUclari
     /// <summary>Reçeteye eklenecek ilaç. Ad ve etken madde katalogdan alınır.</summary>
     public sealed record IlacIstegi(string Barkod, string? Doz, string? Periyot,
                                     int? SureGun, int? Kutu, string? Aciklama,
-                                    string? UyariGerekce);
+                                    string? UyariGerekce, string? Karekod = null);
 
     public static void ReceteUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -63,7 +64,18 @@ public static class ReceteUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
 
-            var barkod = new string((istek.Barkod ?? "").Where(char.IsDigit).ToArray());
+            // KAREKOD (kullanici: recete sekmesinde "📷 Karekod"): kutunun GS1
+            //   karekodu okutulursa GTIN'den katalog barkoduna cevrilir - ITS
+            //   ekranindaki cozucunun aynisi; yetki yine muayene yetkisi.
+            var barkodHam = istek.Barkod ?? "";
+            if (!string.IsNullOrWhiteSpace(istek.Karekod))
+            {
+                var kod = KarekodCozumleme.Coz(istek.Karekod);
+                if (!kod.Gecerli)
+                    throw GentegreHatasi.Dogrulama(kod.Hata, [new("karekod", kod.Hata)]);
+                barkodHam = KarekodCozumleme.GtinBarkod(kod.Gtin);
+            }
+            var barkod = new string(barkodHam.Where(char.IsDigit).ToArray());
             if (barkod.Length is < 8 or > 20)
                 throw GentegreHatasi.Dogrulama("Ilac barkodu gecersiz.",
                     [new("barkod", "8-20 haneli barkod girin.")]);

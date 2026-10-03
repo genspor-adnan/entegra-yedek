@@ -6361,3 +6361,5 @@ textarea.fm-giris { resize: vertical }
 /* Bulgu gridi arac cubuguyla AYNI hizada (kullanici): gridin 10px kenar boslugu yok. */
 .bulgu-gridi .detay-kaydir { margin-left: 0; margin-right: 0 }
 .detay-tablo input.oneri-kutu { width: 100% }
+.rk-sol .rk-aciklama { margin: 10px 0 0 }
+.rk-gomulu .rk-arac select.recete-sablon, .kart-recete select.recete-sablon { flex: 0 0 auto; width: auto; max-width: 170px }
