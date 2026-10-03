@@ -22,7 +22,7 @@ import { c } from '../../dil/ceviri';
 type Durum = '0' | '1' | '2' | 'tumu';
 type Donem = 'hafta' | '30' | 'gecmis' | 'tumu';
 const TURLER: Record<number, [string, string, string]> = {
-  1: ['🏖', 'İzin', 't-izin'], 2: ['🎓', 'Kongre / eğitim', 't-kongre'], 3: ['🕘', 'Saat değişikliği', 't-saat'],
+  1: ['✈️', 'İzin', 't-izin'], 2: ['🎓', 'Kongre / eğitim', 't-kongre'], 3: ['🕘', 'Saat değişikliği', 't-saat'],
   4: ['➕', 'Ek mesai', 't-ek'], 5: ['⛔', 'Kapalı', 't-kapali'], 0: ['🌴', 'İK izni', 't-ik'],
 };
 const DURUM: Record<number, [string, string]> = { 0: ['Onay bekliyor', 'uyari'], 1: ['Onaylı', 'ok'], 2: ['İptal', 'gri'] };
@@ -163,7 +163,7 @@ export function CalismaIstisnaListesi() {
         </div>
         <div className="cl-arac cl-ikinci">
           <span className="sonuk">{c('Tür')}:</span>
-          {[['', 'Tümü'], ['1', '🏖 İzin'], ['2', '🎓 Kongre / eğitim'], ['3', '🕘 Saat değişikliği'], ['4', '➕ Ek mesai'], ['5', '⛔ Kapalı'], ['ik', '🌴 İK izni']].map(([k, a]) => (
+          {[['', 'Tümü'], ['1', '✈️ İzin'], ['2', '🎓 Kongre / eğitim'], ['3', '🕘 Saat değişikliği'], ['4', '➕ Ek mesai'], ['5', '⛔ Kapalı'], ['ik', '🌴 İK izni']].map(([k, a]) => (
             <button key={k} type="button" className={`ck-cip${tur === k ? ' on' : ''}`} onClick={() => setTur(k)}>{c(a)}</button>
           ))}
           <span className="cl-ayrac" />
@@ -229,7 +229,7 @@ export function CalismaIstisnaListesi() {
                       <td><span className={`cl-tur ${sinif}`}>{ic} {c(ad)}</span></td>
                       <td><div className="cl-dr">{s.hekim}<small>{s.departman}{s.bolumSecili ? '' : ik ? '' : ` · ${c('tüm bölümler')}`}</small></div></td>
                       {tarihHucre(s)}
-                      <td>{s.tur === 3 || s.tur === 4 ? <>{s.saatBas}–{s.saatBit}{s.tur === 4 && s.kanallar ? <span className="sonuk"> · {s.kanallar.split(',').map(k => ({ B: c('Banko'), P: c('Portal'), C: c('Çağrı') } as Record<string, string>)[k] ?? k).join(', ')}</span> : null}</> : c('gün boyu')}</td>
+                      <td>{s.saatBas && s.saatBit ? <>{s.saatBas}–{s.saatBit}{s.tur === 4 && s.kanallar ? <span className="sonuk"> · {s.kanallar.split(',').map(k => ({ B: c('Banko'), P: c('Portal'), C: c('Çağrı') } as Record<string, string>)[k] ?? k).join(', ')}</span> : null}</> : c('gün boyu')}</td>
                       <td className="cl-etk">{etkHucre(s)}</td>
                       <td><span className={`rozet ${dSinif}`}>{c(dAd)}</span></td>
                       <td>{ik ? <>{s.ikTur}{s.aciklama ? ` · ${s.aciklama}` : ''} <button type="button" className="cl-bag sonuk" onClick={() => git('/personel-izin')}>· {c('İzinler ekranından yönetilir')} ↗</button></> : s.aciklama}</td>
@@ -281,6 +281,7 @@ export function CalismaIstisnaListesi() {
         <CalismaIstisnaKarti key={id} id={id === 'yeni' ? 'yeni' : Number(id)}
           hekimId={Number(sorgu.get('hekimId')) || undefined}
           hekimSabit={sorgu.get('sabit') === '1' && !!Number(sorgu.get('hekimId'))}
+          ilkTur={Number(sorgu.get('tur')) || undefined} ilkTarih={sorgu.get('tarih') ?? undefined}
           onKapat={kartKapat} />
       )}
     </>

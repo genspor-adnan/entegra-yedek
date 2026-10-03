@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { bugunIso } from '../../bilesenler/bicim';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { randevuTercihiOku, randevuTercihiYaz } from './randevuTercihi';
 import type { Kosul, RandevuBolumDugumu } from '../../api/sozlesme';
@@ -32,7 +33,7 @@ export function useRandevuEkrani(
   const [agac, setAgac] = useState<RandevuBolumDugumu[]>([]);
   // KALDIGI YERDEN (kullanici): bolum ve doktor son secimle acilir.
   const { kullanici } = useOturum();
-  const [bolum, setBolumIc] = useState<number | ''>(() => randevuTercihiOku(kullanici?.id).bolum ?? '');
+  const [bolumSecim, setBolumIc] = useState<number | ''>(() => randevuTercihiOku(kullanici?.id).bolum ?? '');
   const [secilenHekim, setSecilenHekimIc] = useState<number | ''>(() => randevuTercihiOku(kullanici?.id).hekim ?? '');
   const setBolum = (b: number | '') => { setBolumIc(b); randevuTercihiYaz(kullanici?.id, { bolum: b }) };
   const setSecilenHekim = (h: number | '') => { setSecilenHekimIc(h); randevuTercihiYaz(kullanici?.id, { hekim: h }) };
@@ -42,6 +43,15 @@ export function useRandevuEkrani(
   const kendiHekim = kullanici?.hekimKisitli ? kullanici.id : null;
   const hekim: number | '' = kendiHekim ?? secilenHekim;
   const setHekim = (h: number | '') => { if (kendiHekim === null) setSecilenHekim(h) };
+  // KISITLI HEKIMIN BOLUMU (kullanici: "bolumler combosunda sadece giren
+  //   hekimin bolumu gorunsun ve disable olsun"): secenekler yalniz onun
+  //   bolum(ler)i; tek bolumse secici kilitli ve o bolum secili.
+  const kendiBolumleri = useMemo(() => kendiHekim === null ? null
+    : agac.filter(d => d.hekimler.some(h => h.hekimId === kendiHekim)), [agac, kendiHekim]);
+  const bolum: number | '' = kendiBolumleri === null ? bolumSecim
+    : kendiBolumleri.some(d => d.departmanId === bolumSecim) ? bolumSecim : (kendiBolumleri[0]?.departmanId ?? '');
+  const bolumSecenekleri = kendiBolumleri ?? agac;
+  const bolumSabit = kendiBolumleri !== null && kendiBolumleri.length <= 1;
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
   const [aralik, setAralik] = useState<{ baslangic: string; sureDk: number;
                                          hekimId?: number; cihazId?: number } | null>(null);
@@ -86,7 +96,9 @@ export function useRandevuEkrani(
   // Cihaz listesi randevu ekraninda bir kez cekilir; yetki/veri yoksa sessiz
   //   gecilir - poliklinik kurulumunda cihaz olmamasi hata degildir.
   useEffect(() => {
-    if (!randevuEkrani) return;
+    // Kisitli hekim (uzman doktor) cihaz gorunumunu kullanmaz (kullanici: "cihaz
+    //   filtre butonu gorunmesin") - liste bos kalir, buton ve yan panel cikmaz.
+    if (!randevuEkrani || kendiHekim !== null) return;
     let iptal = false;
     void (async () => {
       try {
@@ -104,7 +116,7 @@ export function useRandevuEkrani(
       } catch { /* radyoloji yok ya da yetki yok - cihaz gorunumu cikmaz */ }
     })();
     return () => { iptal = true };
-  }, [randevuEkrani]);
+  }, [randevuEkrani, kendiHekim]);
 
   const filtre = useMemo<Kosul | undefined>(() => {
     if (!randevuEkrani) return sabitFiltre;
@@ -160,6 +172,18 @@ export function useRandevuEkrani(
     return [kendisi ?? { id: kendiHekim, ad: kullanici?.ad ?? '', bolum: undefined as number | undefined }];
   }, [agac, bolum, kendiHekim, kullanici?.ad]);
 
+  /**
+   * GECMIS GUNE YENI RANDEVU YOK (kullanici: "gecmis gunlere yeni randevu
+   * karti acilamaz"): takvimde bos hucre, isaretli aralik + "Yeni" ve bekleyen
+   * isteme randevu ayni kapidan gecer. Takvim saatleri subenin duvar saatidir,
+   * gun yerel takvim gunuyle karsilastirilir. Mevcut randevuyu acmak serbest.
+   */
+  const gecmisGun = (baslangic: string) => {
+    if (baslangic.slice(0, 10) >= bugunIso()) return false;
+    mesaj('Geçmiş güne yeni randevu verilemez.');
+    return true;
+  };
+
   /** Hekimin bolumu (takvim sutunundan gelen hekim icin). */
   const hekimBolumu = (h?: number) =>
     h ? hekimSecenekleri.find(x => x.id === h)?.bolum : undefined;
@@ -173,6 +197,7 @@ export function useRandevuEkrani(
   const bekleyeneRandevuVer = async (
     istem: BekleyenIstem, baslangic: string, cihazId?: number,
   ) => {
+    if (gecmisGun(baslangic)) return;
     if (!cihazId) {
       mesaj('Randevu cihaza verilir - takvimde bir cihaz sütunu seçin.');
       return;
@@ -188,7 +213,7 @@ export function useRandevuEkrani(
     tazele();
   };
 
-  return { agac, bolum, setBolum, hekim, setHekim, hekimSabit: kendiHekim !== null, aralik, setAralik,
+  return { gecmisGun, agac, bolum, setBolum, bolumSecenekleri, bolumSabit, hekim, setHekim, hekimSabit: kendiHekim !== null, aralik, setAralik,
            cihazlar, bekleyenSecili, setBekleyenSecili,
            filtre, takvimAyarlari, hekimSecenekleri, hekimBolumu, bekleyeneRandevuVer };
 }

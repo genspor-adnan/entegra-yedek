@@ -116,6 +116,8 @@ export function ListeKarti({
   const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
   // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
   const [ozetModal, setOzetModal] = useState<number | null>(null);
+  /** Kartın kaydedilmemiş değişikliğini yazan fonksiyon (GenForm.kaydetBagla). */
+  const kartKaydetRef = useRef<(() => Promise<boolean>) | null>(null);
   /** Vucut semasi penceresi (Muayene sekmesi). */
   const [vucutAcik, setVucutAcik] = useState(false);
   /** e-Recete sekmesine "ilac aramayi ac" istegi (ozet kontrol listesi);
@@ -187,6 +189,7 @@ export function ListeKarti({
       <GenForm
         kaynak={tanim.kaynak}
         id={kartId}
+        kaydetBagla={f => { kartKaydetRef.current = f }}
         // MUAYENE > ISTEM & SONUCLAR (443): katalogdan gelen bag gridi
         //   "su istem acildi" der; hekimin ihtiyaci SONUCUN KENDISI.
         //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
@@ -581,7 +584,15 @@ export function ListeKarti({
                                 onMesaj={() => setEnabizMesaj({
                                   hastaId: satir.hastaId, hastaAdi: satir.hastaAdi,
                                   belgeId: Number(d.belgeId ?? 0) || null })} />
-                  {dugme('muayene.tamamla', '✓ Tamamla', 'd onay')}
+                  {/* TAMAMLA ÖNCE KAYDEDER (kullanıcı: "şikayet hikaye girdiğim halde eksik
+                      görünüyor"): tamamlama kuralı sunucuda KAYITLI veriye bakar -
+                      formda yazılıp kaydedilmemiş alan "eksik" sayılırdı. Kayıt
+                      başarısızsa (alan hatası, sürüm çakışması) Tamamla çalışmaz. */}
+                  <button key="muayene.tamamla" type="button" className="d onay"
+                          onClick={async () => {
+                            if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
+                            void aksiyon('muayene.tamamla', satir);
+                          }}>✓ Tamamla</button>
                 </>
               ) : (
                 // GOZ MUAYENESI (mockup goz_detayli_muayene.html araç çubuğu):
@@ -606,10 +617,11 @@ export function ListeKarti({
         resimYerTutucu={tanim.resimYerTutucu}
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
-        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && sorgu.get('baslangic')
+        //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
+        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum'))
           ? {
               ...tanim.yeniKayitVarsayilanlari,
-              baslangic: sorgu.get('baslangic')!,
+              ...(sorgu.get('baslangic') ? { baslangic: sorgu.get('baslangic')! } : {}),
               ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
               ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
               ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),

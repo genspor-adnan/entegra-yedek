@@ -7,7 +7,7 @@ import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
-import { GUN_AD, Grp, KANALLAR, SLOTLAR, bugunIso, dk, gun10, gunMetni, metin, sayi, tarihSaat } from './calismaOrtak';
+import { GUN_AD, Grp, KANALLAR, SaatSec, SLOTLAR, bugunIso, dk, gun10, gunMetni, metin, sayi, tarihSaat } from './calismaOrtak';
 
 /**
  * ÇALIŞMA ŞABLONU KARTI — mockup `Ekranlar/Randevu/calisma_sablonu_karti.html`.
@@ -156,24 +156,26 @@ export function CalismaSablonKarti({ id, ilkHekim, ilkDepartman, onKapat }: {
     return null;
   };
 
-  const kaydet = (ek?: Partial<Deger>) => guvenli(async () => {
+  /** kapat: Kaydet kartı kapatır (kullanıcı); Pasife Al / Aktifleştir açık bırakır. */
+  const kaydet = (ek?: Partial<Deger>, kapat = true) => guvenli(async () => {
     const v = { ...d, ...ek };
     const h = dogrula(v);
     if (h) { setHata(h); return }
     setHata(null); setKaydediyor(true);
     try {
+      let yeniId: number | null = null;
       if (kayitId === null) {
         const y = await api.kartEkle('calisma-sablon', { kart: govde(v) });
-        const yeniId = sayi(y.kart.id);
-        await oku(yeniId);
-        git(`/calisma-sablon/${yeniId}`, { replace: true });
+        yeniId = sayi(y.kart.id);
       } else {
         const once = ilk ? govde(ilk) : {};
         const fark = Object.fromEntries(Object.entries(govde(v)).filter(([k, x]) => once[k] !== x));
         if (Object.keys(fark).length > 0) await api.kartGuncelle('calisma-sablon', kayitId, { surum, kart: fark });
-        await oku(kayitId);
       }
-      mesaj(c('Şablon kaydedildi.'));
+      // Mesaj yok (kullanıcı): kart kapanır, liste tazelenir.
+      if (kapat) { onKapat(); return }
+      if (yeniId !== null) { await oku(yeniId); git(`/calisma-sablon/${yeniId}`, { replace: true }) }
+      else if (kayitId !== null) await oku(kayitId);
     } finally { setKaydediyor(false) }
   });
 
@@ -237,7 +239,7 @@ export function CalismaSablonKarti({ id, ilkHekim, ilkDepartman, onKapat }: {
           {yazar && <button type="button" className="d bir" disabled={kaydediyor || yukleniyor} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>}
           {yazar && kayitId !== null && <button type="button" className="d" onClick={kopyala}>⧉ {c('Kopyala')}</button>}
           {yazar && kayitId !== null && ilk !== null && (
-            <button type="button" className="d" disabled={kaydediyor} onClick={() => void kaydet({ aktif: d.aktif === 1 ? 0 : 1 })}>
+            <button type="button" className="d" disabled={kaydediyor} onClick={() => void kaydet({ aktif: d.aktif === 1 ? 0 : 1 }, false)}>
               {d.aktif === 1 ? `⏸ ${c('Pasife Al')}` : `▶ ${c('Aktifleştir')}`}</button>
           )}
           {yazar && kayitId !== null && <button type="button" className="d teh" onClick={() => void sil()}>🗑 {c('Sil')}</button>}
@@ -260,14 +262,14 @@ export function CalismaSablonKarti({ id, ilkHekim, ilkDepartman, onKapat }: {
 
               <div className="rk-fld ck-tam"><span className="ck-etiket">{c('Çalışma blokları')} <b className="ak-zor">*</b></span>
                 <div className="ck-blok"><span className="ck-etk">{c('1. blok')}{d.ikinci ? ` (${c('sabah')})` : ''}</span>
-                  <input value={d.bas1} disabled={!yazar} placeholder="09:00" onChange={e => yaz('bas1', e.target.value)} />
+                  <SaatSec deger={d.bas1} disabled={!yazar} onChange={v => yaz('bas1', v)} />
                   <span className="sonuk">–</span>
-                  <input value={d.bit1} disabled={!yazar} placeholder="12:30" onChange={e => yaz('bit1', e.target.value)} /></div>
+                  <SaatSec deger={d.bit1} disabled={!yazar} sonra={d.bas1} onChange={v => yaz('bit1', v)} /></div>
                 {d.ikinci ? (
                   <div className="ck-blok"><span className="ck-etk">{c('2. blok (öğleden sonra)')}</span>
-                    <input value={d.bas2} disabled={!yazar} placeholder="13:30" onChange={e => yaz('bas2', e.target.value)} />
+                    <SaatSec deger={d.bas2} disabled={!yazar} sonra={d.bit1} onChange={v => yaz('bas2', v)} />
                     <span className="sonuk">–</span>
-                    <input value={d.bit2} disabled={!yazar} placeholder="17:00" onChange={e => yaz('bit2', e.target.value)} />
+                    <SaatSec deger={d.bit2} disabled={!yazar} sonra={d.bas2} onChange={v => yaz('bit2', v)} />
                     {yazar && <button type="button" className="d ck-kucuk" title={c('2. bloğu kaldır')} onClick={() => yaz('ikinci', false)}>✕</button>}
                   </div>
                 ) : yazar && (

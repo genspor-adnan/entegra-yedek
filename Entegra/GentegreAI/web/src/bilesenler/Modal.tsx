@@ -108,6 +108,39 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
   };
 
   const govdeRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * İÇERİK ALANINA GÖRE ORTALA (kullanıcı): pencere bütün ekranın değil, sol
+   * menü ve üst şerit dışındaki içerik alanının (`main.ana`, portalda
+   * `main.pk-icerik`) GÖRÜNEN kısmının ortasına oturur. Pencere ekrandan
+   * taşacaksa merkez kenara 8 px kalacak şekilde sınırlanır. Pencere büyüyüp
+   * küçüldükçe (içerik yüklenince) ve ekran boyu değişince yeniden hesaplanır.
+   * İçerik alanı yoksa (giriş ekranı) tema.css'in %50'si geçerli kalır.
+   */
+  const [merkez, setMerkez] = useState<{ x: number; y: number } | null>(null);
+  useLayoutEffect(() => {
+    const hesapla = () => {
+      const pencere = govdeRef.current?.parentElement;
+      const ana = document.querySelector('main.ana, main.pk-icerik');
+      if (!pencere || !ana) { setMerkez(null); return }
+      const r = ana.getBoundingClientRect();
+      const sol = Math.max(r.left, 0), sag = Math.min(r.right, innerWidth);
+      const ust = Math.max(r.top, 0), alt = Math.min(r.bottom, innerHeight);
+      if (sag - sol < 100 || alt - ust < 100) { setMerkez(null); return }
+      const w = pencere.offsetWidth, h = pencere.offsetHeight;
+      const sinir = (v: number, boy: number, ekran: number) =>
+        boy + 16 >= ekran ? ekran / 2 : Math.min(Math.max(v, boy / 2 + 8), ekran - boy / 2 - 8);
+      const x = Math.round(sinir((sol + sag) / 2, w, innerWidth));
+      const y = Math.round(sinir((ust + alt) / 2, h, innerHeight));
+      setMerkez(o => (o && o.x === x && o.y === y ? o : { x, y }));
+    };
+    hesapla();
+    const pencere = govdeRef.current?.parentElement;
+    const gozlem = pencere && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(hesapla) : null;
+    if (pencere) gozlem?.observe(pencere);
+    window.addEventListener('resize', hesapla);
+    return () => { gozlem?.disconnect(); window.removeEventListener('resize', hesapla) };
+  }, []);
   const enYuksek = useRef(0);
 
   /**
@@ -241,8 +274,15 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
       <div className={`kawin${dar ? '' : ' genis'}${tamEkran ? ' tam' : ''}`
                       + `${ekSinif ? ' ' + ekSinif : ''}`}
            onMouseDown={e => e.stopPropagation()}
-           style={!tamEkran && (kaydirma.x || kaydirma.y)
-             ? { transform: `translate(${kaydirma.x}px, ${kaydirma.y}px)` } : undefined}>
+           // TASIMA OFSETI CSS DEGISKENIYLE (kullanici: "modal ekranlar ekrana gore
+           //   ortali olmali"): eskiden `transform` ofsetle EZILIYORDU - ortalayan
+           //   translate(-50%, -50%) kayboluyor, baslikta 1 px kaydirma bile
+           //   pencereyi yarim boyu kadar sag-alta atiyordu. Ortalama tema.css'te
+           //   kalir, ofset ona eklenir.
+           style={tamEkran ? undefined : {
+             ...(merkez ? { '--mx': `${merkez.x}px`, '--my': `${merkez.y}px` } : {}),
+             ...(kaydirma.x || kaydirma.y ? { '--kx': `${kaydirma.x}px`, '--ky': `${kaydirma.y}px` } : {}),
+           } as React.CSSProperties}>
         {/* Baslik cubugundan tutup FAREYLE TASINIR (kullanici): arkadaki listeyi
             gormek icin pencereyi kenara cekmek gerekiyordu. Cift tik ilk yerine
             dondurur; dugmeler/girdiler surukleme baslatmaz. */}

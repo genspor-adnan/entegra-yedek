@@ -105,6 +105,13 @@ interface Props {
   /** Hasta kartı: kimlik numarası kayıtlı bir hastaya aitse kaydetmek yerine O kart açılır.
       Verilmezse onKaydedildi(mevcutId) + onKapat ile aynı yola düşer. */
   onMevcutKayit?(id: number): void;
+  /**
+   * DIŞARIDAN KAYDET: kart, kaydedilmemiş değişikliği yazan bir fonksiyonu
+   * kaydeder (değişiklik yoksa hemen true). Kayıtlı veriye bakan sunucu
+   * aksiyonları (muayene "Tamamla") önce bunu çağırır. Başarısızsa false -
+   * hata kartta görünür, aksiyon çalışmaz.
+   */
+  kaydetBagla?(f: (() => Promise<boolean>) | null): void;
   /** Mockup'ta olup backend'i henuz olmayan sekmeler (or. "UTS Bilgileri") - "yakinda" gosterilir. */
   yerTutucuSekmeler?: string[];
   /** "Genel" sekmesinde alt-bolum kutularinin YANINA mockup'taki gibi bos "Resim" kutusu ekler. */
@@ -270,7 +277,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -306,6 +313,17 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
 
   const [deger, setDeger] = useState<Record<string, Deger>>({});
   const [ilkDeger, setIlkDeger] = useState<Record<string, Deger>>({});
+  /**
+   * KAYDEDİLMEMİŞ DEĞİŞİKLİK TAZELEMEDE KORUNUR (kullanıcı: "muayene kartında
+   * şikayet ve hikaye girdim, şablon uygula yapınca yok oldu"). Sunucu aksiyonu
+   * (şablon uygula, tümü normal...) kartı `tazeleAnahtari` ile yeniden okur;
+   * eskiden okunan değer formdaki yazılmamış alanların ÜSTÜNE yazılıyordu.
+   * Artık AYNI kayıt yeniden okunurken kullanıcının değiştirdiği alanlar
+   * korunur ve kirli kalır (Kaydet'le yazılır); başka kayda geçişte korunmaz.
+   */
+  const degerRef = useRef(deger); degerRef.current = deger;
+  const ilkDegerRef = useRef(ilkDeger); ilkDegerRef.current = ilkDeger;
+  const yuklenenRef = useRef<string | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
   const [yetki, setYetki] = useState<KartYetkisi>({ duzenle: false, sil: false, gizliAlanlar: [] });
   const [detaylar, setDetaylar] = useState<Record<string, DetayDurumu>>({});
@@ -732,7 +750,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
           m = { ...m, alanlar: eksikli };
           setMeta(m);
         }
-        setDeger(gelen);
+        const anahtar = `${kaynak}|${id}`;
+        const kirli = yuklenenRef.current === anahtar
+          ? Object.fromEntries(Object.entries(degerRef.current)
+              .filter(([a, v]) => a in gelen && v !== ilkDegerRef.current[a]))
+          : {};
+        yuklenenRef.current = anahtar;
+        setDeger({ ...gelen, ...kirli });
         setIlkDeger(gelen);
         // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen
         //   cins/tarih "zaten cekilmis" sayilir; kullanici birini degistirirse
@@ -1012,6 +1036,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     });
   }, [meta, deger, ilkDeger, detaylar]);
 
+  const kayitBasarili = useRef(false);
+  const disKaydetRef = useRef<() => Promise<boolean>>(async () => true);
+  disKaydetRef.current = async () => {
+    if (yeniMi || !kaydedilmemisDegisiklikVar) return true;
+    kayitBasarili.current = false;
+    await kaydet(true);
+    return kayitBasarili.current;
+  };
+  useEffect(() => {
+    kaydetBagla?.(() => disKaydetRef.current());
+    return () => kaydetBagla?.(null);
+  }, [kaydetBagla]);
+
   const kapatIstendi = useCallback(() => {
     if (kaydedilmemisDegisiklikVar) {
       setKapatmaUyarisi(true);
@@ -1176,6 +1213,7 @@ Yine de yeni kayıt eklensin mi?`);
       //   Kaydet'e baglidir: kart yazildiktan sonra kuyruk calisir.
       await ekKaydetleriCalistir();
 
+      kayitBasarili.current = true;
       onKaydedildi?.(Number(yanit.kart.id));
       if (acikKal && !yeniMi) { await yukle(); return; }
       onKapat?.();

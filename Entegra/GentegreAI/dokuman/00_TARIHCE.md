@@ -18114,3 +18114,90 @@ göstermek, özet şeridi). Özel sayfa (`sayfalar/calisma`), kart aynı rotada 
 946 öncesi / sonrası 09:30 ve 19:00 randevusu; kaydırma / aktarma / iptal ve alan logları; kopyada çakışma reddi.
 `tsc -b` temiz, vitest 789/789 (tema sınıf çakışması testi `ck-` / `cl-` önekleriyle geçti). Test kayıtları silindi.
 Göçler 938-946 **yalnız docker'da**.
+
+
+## 03.10.2026 (2) — Çalışma Planları sayfası (mockup'lı), randevu listesi uzman doktor / "Yeni" düzeltmeleri
+
+**Çalışma Planları** (mockup `Ekranlar/Randevu/calisma_planlari.html`, `sayfalar/CalismaPlani.tsx`). Üç görünüm:
+* **Doktor × gün:** hücre metin yerine mini zaman şeridi (08–19) + saat + **dolu / slot** (turuncu %80+, kırmızı dolu);
+  saat değişikliği sarı, ek mesai yeşil, izin / kongre / kapalı taralı, İK izni kesikli, **onay bekleyen istisna** turuncu
+  kesikli çerçeve (plan henüz uygulamaz - görünür olsun). Gün başlığında günün slotu, satır sonunda haftalık saat / doluluk,
+  bölüme göre grup, "Yalnız istisnalı", doktor arama. Özet şeridi: çalışan doktor, kapasite / dolu, izinli doktor,
+  **doktorsuz bölüm-gün**, işlem bekleyen randevu. Sağ panel seçili hücre: kaynak, saat / slot / kanal, doluluk,
+  **slot ızgarası**, o günün randevuları (`GET /api/calisma-plani/gun`), eylemler; doktorun haftalık istisnaları.
+  Çift tık şablon / istisna kartını açar; **boş hücreye çift tık = o güne ek mesai** (istisna kartı `tur` / `tarih`
+  ön dolgu, doktor kilitli).
+* **Bölüm doluluğu** ("Bölüm toplu"nun yerine): bölüm × gün doktor sayısı + doluluk; planlı gün ama doktor yoksa
+  kırmızı taralı; hücreye tık o bölümü doktor görünümünde süzer.
+* **Bugün çalışanlar:** "şimdi" çizgili gün şeridi, muayenede / saat dışı / mesai bitti / bugün yok, randevu / slot,
+  gelen, **sıradaki boş saat**, bugün olmayan doktorun aktarılmamış randevusu; randevusuz bölümler en altta.
+* Sunucu: `GET /api/calisma-plani` bloklara `dolu` (kapladığı slot) ve şablon adı ekler; `ozet=1` ile onay bekleyen
+  istisnalar + işlem bekleyen randevu. **Blok başına randevu sayısı ve `/bugun` artık şube saatinde** karşılaştırır
+  (946 kuralı; eskiden UTC ile 3 saat kayıktı).
+
+**Randevu listesi.**
+* **Uzman doktor (kısıtlı hekim):** takvimde **Cihaz** görünüm düğmesi ve bekleyen istem paneli çıkmaz (cihaz listesi
+  hiç çekilmez); **Bölüm** seçicisinde yalnız doktorun kendi bölüm(ler)i, tek bölümse kilitli; "Tüm Bölümler" ve
+  süzgeç temizleme yok.
+* **"＋ Yeni"** artık süzgeçteki bölüm / doktoru da karta taşır - takvimde saat işaretlenmemiş olsa bile; işaretli
+  aralık hekim sütunundan değilse doktor süzgeçten gelir; aralığın başlangıç ve süresi (bitiş) eskisi gibi.
+
+Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı arayüzde denenmedi (test hesabı yok).
+
+**Ek (aynı gün, 947).**
+* **Uzman Doktor rolünde randevu varsayılanı yalnız GÖR** (kullanıcı: "ekle/değiş/sil verme, kurum isterse değişebilsin;
+  tıklayıp kartın içeriğini görebilmeli"). Standart rol şablonunda `hekim` için `T("randevu")` (HekimTemel'in Y'sini ezer;
+  diğer doktor rolleri değişmez). `db/947`: mevcut kurulumda yalnız şablondan geldiği gibi duran (ekle=1, değiştir=1,
+  sil=0, hiç düzenlenmemiş) satır düzeltilir, önce `yedek_947_rol_yetki`'ye alınır; kurumun düzenlediği satıra dokunulmaz.
+  Doktor satıra / takvimdeki randevuya tıklayınca kart **salt okunur** açılır (kart okuma ucu GÖR ister); takvimde boş
+  saate tıklamak ekle yetkisi yoksa kart açmaz; salt okunur kartta Uygun Saatler tıklanmaz.
+* **Geçmiş güne yeni randevu kartı açılmaz:** takvimde boş hücre, işaretli aralık + "Yeni" ve bekleyen isteme randevu aynı
+  kapıdan (`useRandevuEkrani.gecmisGun`) - "Geçmiş güne yeni randevu verilemez." Mevcut randevuyu açmak serbest.
+* **Uygun Saatler aralık seçimi:** kartta işaretli slotların tamamı (başlangıç + süre) mavi; seçimin yanındaki slota
+  tık = uzat, uçtaki seçili slota tık = kısalt, başka saate tık = yeniden seç, Shift+tık = oraya kadar genişlet (arada
+  dolu varsa genişlemez). Süre alanı da birlikte değişir. Slot doluluğu artık slotun kendi adımıyla ölçülür.
+* **İzin & İstisna kartından Bölüm seçicisi kaldırıldı** (mockup da); istisna doktorun tüm bölümlerine uygulanır,
+  eski kayıttaki bölüm değeri korunur.
+* **Çalışma Planları araç çubuğu sadeleşti** (kullanıcı): "＋ Şablon"un sağındaki İzin / İstisna, Şablonlar, İstisnalar
+  ve Takvim düğmeleri kaldırıldı; görünüm çipleri (Doktor × gün / Bölüm doluluğu / Bugün çalışanlar) kaldı. İşaretli
+  doktorla izin / istisna seçim şeridinden açılır.
+
+**Ek 2 (aynı gün, 948).**
+* **Yarım gün / saatli izin** (kullanıcı: "dr burak için ayın 7'sine yarım gün izin girmek istedim, saatleri seçemedim";
+  "saat girilmezse tüm gün kapanır"). İzin / Kongre / Kapalı istisnasında saat İSTEĞE BAĞLI: boşsa gün boyu, girilirse
+  yalnız o saatler kapanır. `db/948`: `fn_hekim_calisma_bloklari` saatli kapanışı şablon bloğundan **kırpar** (09–18 +
+  13–17 izin → 09–13 ve 17–18); kapanış satırı saatsiz kalır, açıklaması "13:00–17:00 · ..." ile başlar (takvim ve uygun
+  saatler saatli satırı çalışma bloğu saydığı için). `ck_hci_saat`: kapatan türde saat ya ikisi birden ya hiç. Kapanış
+  satırının bölümü artık doktorun o günkü bloğundan gelir (eskiden 0 → planda ayrı "Bölümsüz" satır). Etkilenen randevu
+  hesabı tek yerde (`EtkiSql`): saatli kapanışta yalnız o saatlerle çakışanlar. Kart: saat alanları her türde açık
+  ("boşsa gün boyu"), şerit ve bilgi kutusu kısmi kapanışı gösterir. Çalışma Planları hücresi açık blokları çizer, altına
+  "✈ 13:00–17:00" notu; takvimde kapanan saatler "Mesai dışı" yerine "İzin 13:00–17:00".
+* **İK izni tetiği** (`tg_randevu_izin_kontrol`) günü UTC'de alıyordu - şube saat dilimine çevrildi (946 ile aynı kural).
+* **İzin ikonu uçak** (✈️; kullanıcı) - tür düğmeleri, listeler, plan, menü ve mockup'lar.
+* **Modal pencereler içerik alanına göre ortalanır** (kullanıcı): sol menü ve üst şerit dışındaki `main.ana`'nın görünen
+  kısmının ortası (`--mx/--my`), ekrandan taşmayacak şekilde sınırlı. Başlıktan sürükleme hatası düzeldi: ofset ortalayan
+  `translate(-50%,-50%)`'i eziyordu, 1 px kaydırma pencereyi yarım boyu kadar sağ-alta atıyordu (`--kx/--ky` ile eklenir).
+* **İzin & İstisna kartında saatler açılır liste** (kullanıcı: "saat yeri gelmiş ama seçemedim.. combo gelsin"):
+  `SaatSec` (06:00–23:45, 15 dk; bitiş yalnız başlangıçtan sonrası; kapatan türde "gün boyu" boş seçeneği). Şablon kartı
+  blokları ve ⚙ Varsayılanlar penceresi de aynı seçiciye geçti.
+* **Açıklama / neden seçimli ve TÜRE BAĞLI** (`db/949`): bağlı kod listesi `calisma.istisna_neden` (üst liste
+  `calisma.istisna_tur`) - İzin: yıllık / mazeret / rapor / ücretsiz / nöbet sonrası; Kongre: kongre / kurs / toplantı;
+  Saat değişikliği: ameliyat / toplantı / nöbet; Ek mesai: bekleyen randevu / kontrol / kampanya; Kapalı: resmi tatil /
+  bayram / bakım / tadilat; her türde "Diğer" serbest metin açar. Seçilen nedenin adı `aciklama`ya yazılır (eski serbest
+  metinler "Diğer" altında görünür). "…" düğmesi (ayar yetkisi) o türün nedenlerini düzenler (`KodListesiModali`, ustDeger).
+* **Kartlar kaydedince kapanır, "kaydedildi" mesajı yok** (kullanıcı): İzin & İstisna'da Kaydet / Onayla / İptal Et,
+  Çalışma Şablonu'nda Kaydet kartı kapatır, liste tazelenir. Şablonda Pasife Al / Aktifleştir kartı açık bırakır.
+* **Çalışma Planları'nda son kartı açılan doktor en üstte** (kullanıcı): hücreye çift tık, sağ paneldeki şablon /
+  istisna / "bu güne istisna" düğmeleri ve seçim şeridindeki izin / istisna kartı açan doktoru en yeni başta tutar
+  (localStorage, kullanıcı başına, 30 kayıt). Bölüme göre grupta o doktorun bölümü de başa gelir.
+* **Kart tazelenince kaydedilmemiş alanlar korunur** (kullanıcı: "muayene kartında şikayet ve hikaye girdim, şablon
+  uygula yapıp özete geçince yok oldu; sistem bilgileri duruyor"). Sunucu aksiyonu (şablon uygula, tümü normal…) açık
+  kartı `tazeleAnahtari` ile yeniden okuyordu ve okunan değer formdaki yazılmamış alanların üstüne yazılıyordu - bulgular
+  ayrı tabloda sunucuya yazıldığı için duruyordu. `GenForm`: AYNI kayıt yeniden okunurken kullanıcının değiştirdiği
+  alanlar korunur ve kirli kalır (Kaydet'le yazılır); başka kayda geçişte korunmaz. Bütün generic kartlar için geçerli.
+* **Muayene tamamlama kontrolü formdaki değerle** (kullanıcı: "şikayet hikaye girdiğim halde eksik görünüyor"): Özet
+  sekmesindeki liste şikayet / değerlendirme / çıkış şeklini formdan değerlendirir (kaydedilmemiş metin de "tamam").
+  **"✓ Tamamla" önce kaydeder**: `GenForm.kaydetBagla` - kart, kaydedilmemiş değişikliği yazan fonksiyonu ListeKarti'ye
+  verir; kayıt başarısızsa (alan hatası, sürüm çakışması) Tamamla çalışmaz. Kural yine sunucuda, kayıtlı veriye bakar.
+* **Muayene kartındaki rozet bandı kenardan kenara gri** (kullanıcı): `.muayene-durum.muayene-uyari` yan boşlukları ve
+  köşe yuvarlaklığı kalktı, alt çizgiyle ayrılır.

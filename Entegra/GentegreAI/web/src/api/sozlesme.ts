@@ -964,12 +964,17 @@ export interface CalismaBlok {
   gun: string; saatBas?: string | null; saatBit?: string | null; slotDk: number; kanallar: string;
   /** 1 şablon · 2 istisna (saat değişikliği / ek mesai) · 3 kapalı (izin / kongre / kapalı). */
   kaynak: number; istisnaTur?: number | null; sablonId?: number | null; istisnaId?: number | null; aciklama: string; randevu: number;
+  /** Randevuların kapladığı slot (şube saatinde) ve şablon adı. */
+  dolu?: number; sablon?: string;
 }
 export interface CalismaPlaniYaniti {
   bas: string; bit: string; subeId: number; bloklar: CalismaBlok[];
   hekimler: { id: number; ad: string; departmanId: number }[];
   bolumler: { id: number; ad: string; randevusuz: boolean }[];
   subeler: { id: number; ad: string }[];
+  /** ozet=1 ile: onay bekleyen istisnalar (plan henüz uygulamaz) ve işlem bekleyen randevu. */
+  bekleyenIstisnalar?: { id: number; hekimId: number; tur: number; bas: string; bit: string; aciklama: string; saatBas?: string | null; saatBit?: string | null; randevu: number }[];
+  islemBekleyen?: number;
 }
 
 export interface RandevuBolumDugumu {

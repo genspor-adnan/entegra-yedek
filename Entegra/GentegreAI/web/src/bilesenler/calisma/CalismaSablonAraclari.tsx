@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
 import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
+import { SaatSec } from './calismaOrtak';
 
 /**
  * CALISMA SABLONLARI LISTESI ARACLARI (mockup Ekranlar/Randevu/
@@ -206,13 +207,13 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
           </div>
           <div className="cs-alan"><span>{c('Bloklar (öğle arası boş bırakılırsa tek blok)')}</span>
             <div className="cs-blok">
-              <input value={v.bas} onChange={e => setV({ ...v, bas: e.target.value })} placeholder="09:00" />
+              <SaatSec deger={v.bas} onChange={x => setV({ ...v, bas: x })} />
               <span>–</span>
-              <input value={v.ogleBas} onChange={e => setV({ ...v, ogleBas: e.target.value })} placeholder={c('öğle')} />
+              <SaatSec deger={v.ogleBas} bos={c('öğle yok')} sonra={v.bas} onChange={x => setV({ ...v, ogleBas: x, ogleBit: x ? v.ogleBit : '' })} />
               <span className="cs-ara" />
-              <input value={v.ogleBit} onChange={e => setV({ ...v, ogleBit: e.target.value })} placeholder={c('öğle')} />
+              <SaatSec deger={v.ogleBit} bos={c('öğle yok')} sonra={v.ogleBas} disabled={!v.ogleBas} onChange={x => setV({ ...v, ogleBit: x })} />
               <span>–</span>
-              <input value={v.bit} onChange={e => setV({ ...v, bit: e.target.value })} placeholder="18:00" />
+              <SaatSec deger={v.bit} sonra={v.ogleBit || v.bas} onChange={x => setV({ ...v, bit: x })} />
             </div>
           </div>
           <div className="cs-alan"><span>{c('Slot')}</span>

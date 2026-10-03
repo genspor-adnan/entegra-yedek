@@ -162,7 +162,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
 | `fn_hakedis_kapat` | `388_prim_kademe_baglandi.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql |
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
-| `fn_hekim_calisma_bloklari` | `940_personel_unvan_yalniz_onek.sql` | 718_hekim_calisma_plani.sql, 748_izin_calisma_plani.sql |
+| `fn_hekim_calisma_bloklari` | `948_kismi_gun_izin.sql` | 718_hekim_calisma_plani.sql, 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql |
 | `fn_hekim_izinli` | `748_izin_calisma_plani.sql` | — |
 | `fn_hekim_planli` | `718_hekim_calisma_plani.sql` | — |
 | `fn_hesap_atama_adi` | `940_personel_unvan_yalniz_onek.sql` | 196_kasa_atama.sql, 197_kasa_atama_tek_alan.sql |
@@ -482,7 +482,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
-| `tg_randevu_izin_kontrol` | `940_personel_unvan_yalniz_onek.sql` | 748_izin_calisma_plani.sql |
+| `tg_randevu_izin_kontrol` | `948_kismi_gun_izin.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql |
 | `tg_randevu_mesai_kontrol` | `946_randevu_mesai_yerel_saat.sql` | 943_randevu_mesai_disi_kontrol.sql |
 | `tg_servis_toplam` | `773_teknik_servis.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |

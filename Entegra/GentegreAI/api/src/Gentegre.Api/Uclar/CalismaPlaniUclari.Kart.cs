@@ -64,6 +64,19 @@ public static partial class CalismaPlaniUclari
         return bos;
     }
 
+    /// <summary>
+    /// İstisnanın ETKİLEDİĞİ randevu (alias <paramref name="i"/> = istisna satırı, r = randevu):
+    /// saat değişikliğinde yeni saatin dışında kalan; saatli izin / kongre / kapalıda (948)
+    /// kapanan saatle çakışan; gün boyu kapanışta hepsi. Tarih ve doktor koşulu çağıranda.
+    /// </summary>
+    private static string EtkiSql(string i) =>
+        $"(case when {i}.tur = 3 then ({YerelSql}::time < {i}.saat_bas::time"
+        + $" or {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > {i}.saat_bit::time)"
+        + $" when {i}.tur in (1, 2, 5) and nullif({i}.saat_bas, '') is not null and nullif({i}.saat_bit, '') is not null"
+        + $" then {YerelSql}::time < {i}.saat_bit::time"
+        + $" and {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > {i}.saat_bas::time"
+        + " else true end)";
+
     private static bool Icinde(IEnumerable<Aralik> bloklar, int bas, int bit) =>
         bloklar.Any(b => bas >= b.Bas && bit <= b.Bit);
 
@@ -115,7 +128,10 @@ public static partial class CalismaPlaniUclari
                 bit = o.IsDBNull(2) ? -1 : Dakika(o.GetString(2)), kaynak = (int)o.GetInt16(3),
                 sablonId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4),
             }, iptal) : [];
-            var kapaliGun = plan.Where(p => p.kaynak is 3 or 4).Select(p => p.gun).ToHashSet();
+            // Kapalı gün = kapanış satırı olup HİÇ açık bloğu kalmayan gün; saatli
+            //   izinde (948) gün açık kalır, kapanan saat bloktan zaten kırpılmıştır.
+            var acikGun = plan.Where(p => p.kaynak is 1 or 2 && p.bas >= 0).Select(p => p.gun).ToHashSet();
+            var kapaliGun = plan.Where(p => p.kaynak is 3 or 4 && !acikGun.Contains(p.gun)).Select(p => p.gun).ToHashSet();
             List<Aralik> Mevcut(DateOnly g) => plan.Where(p => p.gun == g && p.kaynak is 1 or 2 && p.bas >= 0)
                                                    .Select(p => new Aralik(p.bas, p.bit)).ToList();
             List<Aralik> Digerleri(DateOnly g) => plan.Where(p => p.gun == g && p.kaynak is 1 or 2 && p.bas >= 0
@@ -254,9 +270,14 @@ public static partial class CalismaPlaniUclari
                  where r.hekim_id = @p0 and r.durum = 1
                    and {YerelSql}::date between @p1 and @p2
                    and (@p3::integer is null or r.bolum = @p3)
-                   and (@p4::smallint <> 3 or @p5::time is null
-                        or {YerelSql}::time < @p5::time
-                        or {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > @p6::time)
+                   and (case when @p4::smallint = 3 then (@p5::time is null
+                                  or {YerelSql}::time < @p5::time
+                                  or {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > @p6::time)
+                             -- SAATLİ İZİN / KONGRE / KAPALI (948): yalnız kapanan saatle çakışan
+                             when @p4::smallint in (1, 2, 5) and @p5::time is not null and @p6::time is not null
+                             then {YerelSql}::time < @p6::time
+                                  and {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > @p5::time
+                             else true end)
                  order by r.baslangic
                 """, null, [hekimId, bas, bit,
                             departmanId, (short)(tur ?? 1),

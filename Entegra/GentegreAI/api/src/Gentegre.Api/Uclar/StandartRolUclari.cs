@@ -354,7 +354,13 @@ public static class StandartRolUclari
         new("hekim", "Uzman Doktor",
             "Muayene, tanı, istem, reçete ve rapor; yatan hasta order'ı; kendi hakedişi.",
             ["muayenehane", "tip_merkezi", "hastane"],
-            K([.. HekimTemel, Y("yatan"), Y("yatan.izlem"), Y("yatan.order"),
+            // RANDEVU YALNIZ GÖR (947, kullanici: "uzman doktor rolune default
+            //   randevu ekle/degis/sil yetkilerini verme.. eger kurum isterse
+            //   degisebilsin"): kendi randevularini gorur (HekimKisiti), randevuyu
+            //   banko / cagri merkezi verir. Sonraki kural oncekini ezer (Eslestir),
+            //   HekimTemel'in Y("randevu")'su burada T'ye iner - diger doktor
+            //   rolleri (dis, goz, acil...) degismez. Kurum Yetkiler ekranindan acar.
+            K([.. HekimTemel, T("randevu"), Y("yatan"), Y("yatan.izlem"), Y("yatan.order"),
                A("yatan.order.imza"), T("ameliyathane"), T("ameliyathane.plan")])),
         new("pratisyen_doktor", "Pratisyen Doktor",
             "Poliklinik ve acil muayenesi, tanı, istem ve reçete; yatan hasta order'ı yazmaz.",

@@ -37,7 +37,7 @@ const saatMetni = (t: number) =>
   `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 
 export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, seciliSaat,
-                                      hariçId, onSec }: {
+                                      hariçId, saltOkunur, onSec }: {
   hekimId: number | null;
   /** Baslikta gosterilir (mockup: "Uygun Saatler — 02.09.2026 · Uzm. Dr. ..."). */
   hekimAdi?: string;
@@ -49,7 +49,14 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   seciliSaat: string;
   /** Düzenlenen randevu (kendi saatini "dolu" saymamak için). */
   hariçId?: number | null;
-  onSec(saat: string): void;
+  /** Salt okunur kart (ör. randevuyu yalnız GÖREN uzman doktor): seçim değişmez. */
+  saltOkunur?: boolean;
+  /**
+   * Seçim ARALIKTIR (kullanıcı: "takvimde işaretlediklerim gelmeli, artırıp
+   * azaltabilmeli ya da işaretleri kaldırıp başka saatlerden işaretleyebilmeliyim"):
+   * başlangıç + süre birlikte döner.
+   */
+  onSec(saat: string, sureDk: number): void;
 }) {
   const [dolu, setDolu] = useState<{ bas: number; bit: number }[]>([]);
   const [agac, setAgac] = useState<RandevuBolumDugumu[]>([]);
@@ -160,18 +167,57 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   }, [ayar, planli, calisma]);
 
   const secili = dk(seciliSaat);
+  /** Slotun kendi adımı (planlı doktorda bloğun slotu). */
+  const adimOf = (t: number) => {
+    if (planli) {
+      const b = calisma.find(x => t >= dk(String(x.saatBas)) && t < dk(String(x.saatBit)));
+      if (b) return Math.max(5, Number(b.slotDk) || ayar.slotDk);
+    }
+    return Math.max(5, ayar.slotDk);
+  };
+  const sure = Number(sureDk) || adimOf(secili);
+  const seciliBit = Number.isFinite(secili) ? secili + sure : NaN;
+  const seciliMi = (t: number) => Number.isFinite(secili) && t >= secili && t < seciliBit;
   const ogleBas = dk(ayar.ogleBaslangic);
   const ogleBit = dk(ayar.ogleBitis);
 
-  /** Slot, süresi boyunca dolu bir randevuyla ya da öğle arasıyla çakışıyor mu. */
+  /**
+   * Slot KENDİ adımı boyunca dolu bir randevuyla ya da öğle arasıyla çakışıyor mu.
+   * (Eskiden randevunun tüm süresine bakılıyordu; seçim artık slot slot
+   * genişlediği için her slot kendi başına değerlendirilir.)
+   */
   const kapali = (t: number) => {
-    const son = t + (Number(sureDk) || ayar.slotDk);
+    const son = t + adimOf(t);
     // Plan: randevu suresi blogun disina tasiyorsa kapali (ogle = bloklar arasi).
     if (planli) {
       if (!calisma.some(b => t >= dk(String(b.saatBas)) && son <= dk(String(b.saatBit)))) return true;
     } else if (Number.isFinite(ogleBas) && Number.isFinite(ogleBit)
         && t < ogleBit && son > ogleBas) return true;
     return dolu.some(d => t < d.bit && son > d.bas);
+  };
+
+  /** Aralıktaki her slot boş mu (genişletirken dolu slotun üzerinden geçilmez). */
+  const araBos = (bas: number, bit: number) => slotlar.filter(t => t >= bas && t < bit).every(t => !kapali(t) || seciliMi(t))
+    && slotlar.some(t => t === bas);
+
+  const tikla = (t: number, shift: boolean) => {
+    const a = adimOf(t);
+    if (!Number.isFinite(secili)) { onSec(saatMetni(t), a); return }
+    if (seciliMi(t)) {
+      // UÇTAN KISALT: tek slot kaldıysa seçim durur (randevunun saati zorunlu).
+      if (t === secili && t + a < seciliBit) onSec(saatMetni(t + a), seciliBit - (t + a));
+      else if (t + a >= seciliBit && t > secili) onSec(saatMetni(secili), t - secili);
+      return;
+    }
+    if (kapali(t)) return;
+    // SHIFT: seçimden tıklanan slota kadar (arada dolu yoksa).
+    if (shift) {
+      const bas = Math.min(secili, t), bit = Math.max(seciliBit, t + a);
+      if (araBos(bas, bit)) { onSec(saatMetni(bas), bit - bas); return }
+    }
+    if (t === seciliBit) { onSec(saatMetni(secili), sure + a); return }       // sona ekle
+    if (t + a === secili) { onSec(saatMetni(t), sure + a); return }            // başa ekle
+    onSec(saatMetni(t), a);                                                     // yeniden seç
   };
 
   if (!hekimId) {
@@ -197,12 +243,13 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
       <div className="saat-serit">
         {slotlar.map(t => {
           const dolulukVar = kapali(t);
-          const bu = t === secili;
+          const bu = seciliMi(t);
           return (
             <button key={t} type="button"
                     className={`saat${dolulukVar ? ' dolu' : ''}${bu ? ' secili' : ''}`}
-                    disabled={dolulukVar && !bu}
-                    onClick={() => onSec(saatMetni(t))}>
+                    disabled={saltOkunur || (dolulukVar && !bu)}
+                    title={bu ? c('Uçtaki slota tıkla: kısalt') : c('Seçimin yanına tıkla: uzat · başka saate tıkla: yeniden seç · Shift+tık: oraya kadar genişlet')}
+                    onClick={e => tikla(t, e.shiftKey)}>
               {saatMetni(t)}
             </button>
           );
@@ -216,8 +263,10 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
         )}
       </div>
       <div style={{ padding: '2px 12px 8px', fontSize: 11, opacity: .7 }}>
-        Dolu saatler üzeri çizili; seçili saat maviyle işaretli. Süre {sureDk || ayar.slotDk} dk
-        olduğu için taşan slotlar da kapalı görünür.
+        {Number.isFinite(secili)
+          ? <>{c('Seçili')}: <b>{saatMetni(secili)}–{saatMetni(seciliBit)}</b> ({sure} dk) · </>
+          : null}
+        {c('Dolu saatler üzeri çizili. Seçimin yanındaki slota tıkla: uzat · uçtaki seçili slota tıkla: kısalt · başka saate tıkla: yeniden seç · Shift+tık: oraya kadar genişlet.')}
       </div>
     </div>
   );

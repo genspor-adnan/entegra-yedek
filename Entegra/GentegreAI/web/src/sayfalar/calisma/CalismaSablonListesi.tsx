@@ -36,8 +36,9 @@ export function CalismaSablonListesi() {
   const [durum, setDurum] = useState<Durum>('aktif');
   const [departmanId, setDepartmanId] = useState<number | ''>('');
   const [subeId, setSubeId] = useState<number | ''>('');
-  const [ara, setAra] = useState('');
-  const [araGecikmeli, setAraGecikmeli] = useState('');
+  // ?ara= (Çalışma Planları "Şablonlarını aç"): liste o doktorla süzülü açılır.
+  const [ara, setAra] = useState(() => sorgu.get('ara') ?? '');
+  const [araGecikmeli, setAraGecikmeli] = useState(() => sorgu.get('ara') ?? '');
   const [grupla, setGrupla] = useState(true);
   const [yalnizBitecek, setYalnizBitecek] = useState(false);
   const [sablonsuzAcik, setSablonsuzAcik] = useState(false);
@@ -209,7 +210,7 @@ export function CalismaSablonListesi() {
               <button type="button" className="d ck-kucuk" disabled={seciliDoktorlar.length !== 1}
                       title={seciliDoktorlar.length !== 1 ? c('İstisna tek doktorludur - tek doktorun şablonlarını seçin') : undefined}
                       onClick={() => git(`/calisma-istisna/yeni?hekimId=${seciliDoktorlar[0]}&sabit=1&geri=%2Fcalisma-sablon`)}>
-                🏖 {c('Seçili doktora izin / istisna…')}</button>
+                ✈️ {c('Seçili doktora izin / istisna…')}</button>
             </>)}
             <button type="button" className="cl-bag cl-sag" onClick={() => setSecili(new Set())}>{c('Seçimi kaldır')} ✕</button>
           </div>

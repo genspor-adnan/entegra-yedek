@@ -44,3 +44,30 @@ export function Grp({ baslik, ek, ilkKapali, children, sinif }: {
     </div>
   );
 }
+
+/** 06:00 - 23:45, 15 dakikalık adımlar. */
+const SAAT_SECENEK = Array.from({ length: (24 - 6) * 4 }, (_, i) => {
+  const t = 6 * 60 + i * 15;
+  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+});
+
+/**
+ * SAAT SEÇİCİ (kullanıcı: "saat yeri gelmiş ama seçemedim.. combo gelsin"):
+ * metin kutusu yerine açılır liste. `bos` verilirse en üstte boş seçenek
+ * ("gün boyu" gibi) olur; `sonra` verilirse yalnız ondan SONRAKİ saatler
+ * (bitiş seçicisi başlangıçtan önceyi göstermez). Listede olmayan kayıtlı
+ * değer (ör. 08:10) kaybolmasın diye seçeneklere eklenir.
+ */
+export function SaatSec({ deger, onChange, disabled, bos, sonra, title }: {
+  deger: string; onChange(v: string): void; disabled?: boolean; bos?: string; sonra?: string; title?: string;
+}) {
+  const alt = sonra && !Number.isNaN(dk(sonra)) ? dk(sonra) : -1;
+  const liste = SAAT_SECENEK.filter(s => dk(s) > alt);
+  if (deger && !liste.includes(deger)) liste.unshift(deger);
+  return (
+    <select className="ck-saat" value={deger} disabled={disabled} title={title} onChange={e => onChange(e.target.value)}>
+      {bos !== undefined ? <option value="">{bos}</option> : !deger ? <option value="">--:--</option> : null}
+      {liste.map(s => <option key={s} value={s}>{s}</option>)}
+    </select>
+  );
+}

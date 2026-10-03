@@ -293,8 +293,7 @@ public static partial class CalismaPlaniUclari
                           where r.hekim_id = h.hekim_id and r.durum = 1
                             and {YerelSql}::date between greatest(h.bas_tarih, current_date) and h.bit_tarih
                             and (h.departman_id is null or r.bolum = h.departman_id)
-                            and (h.tur <> 3 or {YerelSql}::time < h.saat_bas::time
-                                 or {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > h.saat_bit::time)) end::int,
+                            and {EtkiSql("h")}) end::int,
                        case when h.tur = 4 then (
                          select count(*) from public.randevu r
                           where r.hekim_id = h.hekim_id and r.durum in (1, 2)
@@ -346,8 +345,7 @@ public static partial class CalismaPlaniUclari
                           where r.hekim_id = i.hekim_id and r.durum = 1
                             and {YerelSql}::date between greatest(i.bas_tarih, current_date) and i.bit_tarih
                             and (i.departman_id is null or r.bolum = i.departman_id)
-                            and (i.tur <> 3 or {YerelSql}::time < i.saat_bas::time
-                                 or {YerelSql}::time + make_interval(mins => greatest(r.sure_dk, 1)::int) > i.saat_bit::time)) else 0 end::int
+                            and {EtkiSql("i")}) else 0 end::int
                   from public.hekim_calisma_istisna i join public.taraf t on t.id = i.hekim_id
                  where i.bit_tarih >= current_date or i.durum = 0
                 """, null, [], o => new

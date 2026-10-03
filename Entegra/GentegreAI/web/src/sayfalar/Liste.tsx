@@ -146,7 +146,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const portalBaslik = usePortalBaslik(`/${tanim.rota ?? tanim.kaynak}`);
   const portalda = usePortaldaMi();
   // TELERADYOLOJI "Bana Ata" oturumun taraf kimligini yazar (799).
-  const { kullanici } = useOturum();
+  const { kullanici, yetki } = useOturum();
   const git = useNavigate();
   const { id } = useParams();
   const [sorgu] = useSearchParams();
@@ -840,17 +840,25 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // RANDEVU (251): takvimde fareyle isaretlenen aralik varsa saat ve sure
         //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
         //   basinca" formda o araligi gormek istiyor.
+        // SUZGEC DE TASINIR (kullanici: "yeni butona basarsam filtre combosunda
+        //   secili bolum / doktor ve isaretlenmis slotlarin baslama ve bitis
+        //   zamani karta gecmeli"): aralik yoksa da secili bolum / doktor gider;
+        //   aralik hekim sutunundan degilse doktor suzgecten gelir.
         // Cihaz sutunundan secildiyse bolum/hekim TASINMAZ - kaynak cihazdir (316).
-        const arBolum = randevuEkran.aralik?.cihazId
+        const ar = randevuEkran.aralik;
+        if (tanim.kaynak === 'randevu' && ar && randevuEkran.gecmisGun(ar.baslangic)) return;
+        const arHekim = ar?.cihazId ? undefined : (ar?.hekimId ?? (randevuEkran.hekim || undefined));
+        const arBolum = ar?.cihazId
           ? undefined
-          : randevuEkran.hekimBolumu(randevuEkran.aralik?.hekimId) ?? (randevuEkran.bolum || undefined);
-        const ek = tanim.kaynak === 'randevu' && randevuEkran.aralik
-          ? `?baslangic=${encodeURIComponent(randevuEkran.aralik.baslangic)}`
-            + `&sure=${randevuEkran.aralik.sureDk}`
-            + (randevuEkran.aralik.hekimId ? `&hekim=${randevuEkran.aralik.hekimId}` : '')
-            + (randevuEkran.aralik.cihazId ? `&cihaz=${randevuEkran.aralik.cihazId}` : '')
-            + (arBolum ? `&bolum=${arBolum}` : '')
-          : '';
+          : (ar?.hekimId ? randevuEkran.hekimBolumu(ar.hekimId) : undefined) ?? (randevuEkran.bolum || randevuEkran.hekimBolumu(arHekim) || undefined);
+        const parca = tanim.kaynak === 'randevu' ? [
+          ar ? `baslangic=${encodeURIComponent(ar.baslangic)}` : '',
+          ar ? `sure=${ar.sureDk}` : '',
+          arHekim ? `hekim=${arHekim}` : '',
+          ar?.cihazId ? `cihaz=${ar.cihazId}` : '',
+          arBolum ? `bolum=${arBolum}` : '',
+        ].filter(Boolean) : [];
+        const ek = parca.length ? `?${parca.join('&')}` : '';
         git(`${tanim.kartYolu}/yeni${ek}`);
       }
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
@@ -1050,11 +1058,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // Bolum/hekim suzgeci TARIH ARALIGININ SAGINDA (kullanici) - grid ve
         //   altindaki takvim ayni secimi kullanir.
         <>
-          <select value={randevuEkran.bolum} title="Bölüm"
+          <select value={randevuEkran.bolum} title="Bölüm" disabled={randevuEkran.bolumSabit}
                   onChange={e => { randevuEkran.setBolum(e.target.value ? Number(e.target.value) : '');
                                    randevuEkran.setHekim('') }}>
-            <option value="">{c('Tüm Bölümler')}</option>
-            {randevuEkran.agac.map(d => (
+            {/* Kisitli hekimde "Tum Bolumler" yok: yalniz kendi bolum(ler)i. */}
+            {!randevuEkran.hekimSabit && <option value="">{c('Tüm Bölümler')}</option>}
+            {randevuEkran.bolumSecenekleri.map(d => (
               <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
             ))}
           </select>
@@ -1065,7 +1074,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             {!randevuEkran.hekimSabit && <option value="">{c('Tüm Doktorlar')}</option>}
             {randevuEkran.hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select>
-          {(randevuEkran.bolum !== '' || (randevuEkran.hekim !== '' && !randevuEkran.hekimSabit)) && (
+          {!randevuEkran.hekimSabit && (randevuEkran.bolum !== '' || randevuEkran.hekim !== '') && (
             <button type="button" className="kapat" title={c('Bölüm/hekim filtresini kaldır')}
                     onClick={() => { randevuEkran.setBolum(''); randevuEkran.setHekim('') }}>×</button>
           )}
@@ -1273,6 +1282,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             onYeni={(bas, hek, cih) => {
               // Panelde istem SECILIYSE bos saate tiklamak yeni randevu formu
               //   degil, o isteme randevu demektir (dokunmatik/erisilebilir yol).
+              // Randevuyu yalniz GOREN rol (uzman doktor varsayilani, 947) bos
+              //   saate tiklayinca kart acmaz - kaydedemeyecegi formu gostermeyiz.
+              if (!yetki('randevu', 'ekle')) return;
+              if (randevuEkran.gecmisGun(bas)) return;
               if (randevuEkran.bekleyenSecili) { void randevuEkran.bekleyeneRandevuVer(randevuEkran.bekleyenSecili, bas, cih); return }
               // Cihaz sutunundan aciliyorsa bolum/hekim ARANMAZ - kaynak cihaz.
               const bol = cih ? undefined : (randevuEkran.hekimBolumu(hek) ?? (randevuEkran.bolum || undefined));

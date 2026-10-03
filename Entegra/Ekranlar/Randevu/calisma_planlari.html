@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çalışma Planları — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .btn.sec{border-color:var(--selbd);background:var(--sel);color:var(--navy);font-weight:bold}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .hafta{display:flex;gap:4px;align-items:center}
+  .hafta b{font-size:13px;color:var(--navy);margin:0 6px}
+  /* OZET */
+  .ozetler{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f7f9fc)}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.dikkat{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.dikkat .v,.kpi.dikkat .a{color:var(--warn)}
+  .kpi.kirmizi{border-color:#e4b7b2;background:#fdf1f0}
+  .kpi.kirmizi .v,.kpi.kirmizi .a{color:#8f3d36}
+  .kpi .bag{text-decoration:underline}
+  .lej{display:flex;gap:12px;padding:6px 12px;font-size:10.5px;color:var(--muted);flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line2)}
+  .lej i{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px;border:1px solid}
+  /* PLAN IZGARASI */
+  .govde{display:grid;grid-template-columns:1fr 300px}
+  .plan{display:grid;grid-template-columns:190px repeat(5,minmax(96px,1fr)) repeat(2,minmax(80px,.8fr)) 66px;border-right:1px solid var(--line2)}
+  .plan>div{border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);padding:5px 6px;min-height:56px}
+  .plan .hb{background:var(--head2);font-weight:bold;color:#3a5573;min-height:auto;padding:6px 8px;font-size:11px;display:flex;justify-content:space-between}
+  .plan .hb small{font-weight:normal;color:var(--muted)}
+  .plan .hb.bugun{background:#dbe8f8;color:var(--navy)}
+  .plan .hb.hs{background:#eef1f5}
+  .plan .bugunk{background:#f5f9fe}
+  .plan .hk{display:flex;gap:6px;align-items:flex-start;background:#f9fbfd}
+  .plan .hk b{display:block;color:var(--navy);font-size:11.5px}
+  .plan .hk small{display:block;color:var(--muted);font-size:10px}
+  .plan .grupbas{grid-column:1 / -1;min-height:auto;padding:4px 8px;background:#f3f6fa;font-weight:bold;color:var(--navy);font-size:11px}
+  .plan .grupbas span{font-weight:normal;color:var(--muted);margin-left:6px}
+  .plan .top{text-align:center;font-size:10.5px;color:var(--muted);display:flex;flex-direction:column;justify-content:center;gap:3px}
+  .plan .top b{color:var(--navy);font-size:12px}
+  .kutu{width:13px;height:13px;border:1px solid #8aa0b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent);flex:none;margin-top:1px}
+  /* HUCRE: mini zaman cizgisi + metin + doluluk */
+  .hc{border:1px solid #cfe0f5;background:#f3f8fe;border-radius:3px;padding:3px 4px;display:flex;flex-direction:column;gap:3px}
+  .hc .z{position:relative;height:6px;background:#e4ebf3;border-radius:2px}
+  .hc .z i{position:absolute;top:0;bottom:0;background:#7fb0e6;border-radius:2px}
+  .hc .z i.ek{background:#5fae7a}
+  .hc .t{font-size:10.5px;color:#1f4c85;white-space:nowrap;display:flex;justify-content:space-between;gap:4px}
+  .hc .t em{font-style:normal;font-weight:bold}
+  .hc .t em.yuk{color:#b4721b} .hc .t em.dolu{color:#b3261e}
+  .hc.ist{border-color:#f0d9a8;background:#fdf8ec}
+  .hc.ist .t{color:#8a6414}
+  .hc.ekm{border-color:#bfe3cb;background:#eef8f1}
+  .hc.kapali{border-color:#e4b7b2;background:repeating-linear-gradient(135deg,#f7e3e1 0 6px,#fbefee 6px 12px);color:#8f3d36;font-size:10.5px;font-weight:bold;justify-content:center;min-height:38px}
+  .hc.kapali small{font-weight:normal;display:block}
+  .hc.ik{border-style:dashed}
+  .hc.bekliyor{outline:2px dashed #e0a33a;outline-offset:-2px}
+  .hc.sel{box-shadow:0 0 0 2px #2f6db3}
+  .bos{color:#b0bccb;text-align:center;font-size:11px;padding-top:14px}
+  /* SAG PANEL */
+  .sag{background:#fbfcfe}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;margin:10px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:6px}
+  .grp h4 span{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .ic{padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .sat{display:grid;grid-template-columns:78px 1fr;gap:6px}
+  .sat .k{color:var(--muted)}
+  .dol{display:flex;align-items:center;gap:6px}
+  .dol .b{flex:1;height:7px;background:#eef1f5;border-radius:3px;overflow:hidden}
+  .dol .b i{display:block;height:100%;background:#e0a33a}
+  .slotlar{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+  .slotlar span{font-size:10px;text-align:center;border:1px solid var(--line2);border-radius:2px;padding:2px 0;color:#2f5c9e;background:#fff}
+  .slotlar span.d{background:#e3ecfa;border-color:#bcd2ef;color:#14315a;font-weight:bold}
+  .slotlar span.o{background:#f3f6fa;color:#b0bccb}
+  .rl{display:flex;flex-direction:column;gap:2px}
+  .rl div{display:flex;gap:6px}
+  .rl div b{width:38px;color:var(--navy)}
+  .eylem{display:flex;gap:4px;flex-wrap:wrap}
+  .kanal{display:inline-flex;gap:2px}
+  .kanal span{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:10px;color:#b0bccb}
+  .kanal span.on{border-color:#bcd2ef;background:#e3ecfa;color:#2f5c9e;font-weight:bold}
+  .bilgi{padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  .toplu{display:flex;gap:4px;align-items:center;padding:6px 10px;background:#eef5fd;border-bottom:1px solid #bcd2ef;color:#2f5c9e;font-size:11px}
+  /* BOLUM ISI HARITASI */
+  .isi{display:grid;grid-template-columns:200px repeat(7,1fr) 110px}
+  .isi>div{border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);padding:6px;font-size:11px;text-align:center}
+  .isi .hb{background:var(--head2);font-weight:bold;color:#3a5573}
+  .isi .ad{text-align:left;font-weight:bold;color:var(--navy)}
+  .isi .ad small{display:block;font-weight:normal;color:var(--muted);font-size:10px}
+  .isi .h0{background:repeating-linear-gradient(135deg,#f7e3e1 0 5px,#fbefee 5px 10px);color:#8f3d36;font-weight:bold}
+  .isi .h1{background:#eef4fc;color:#2f5c9e}
+  .isi .h2{background:#d4e5f9;color:#1f4c85;font-weight:bold}
+  .isi .h3{background:#a9caef;color:#14315a;font-weight:bold}
+  .isi .rs{background:#f3f6fa;color:var(--muted);font-style:italic}
+  .isi small{display:block;font-size:9.5px;font-weight:normal;opacity:.85}
+  /* BUGUN */
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal}
+  .grid td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .grid tr.grupbas td{background:#f7f9fc;font-weight:bold;color:var(--navy);padding:4px 8px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-mavi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .gun-serit{position:relative;height:8px;background:#eef1f5;border-radius:3px;min-width:180px}
+  .gun-serit i{position:absolute;top:0;bottom:0;background:#9cc1ea;border-radius:3px}
+  .gun-serit b{position:absolute;top:-3px;bottom:-3px;width:2px;background:#b3261e}
+  .aciklama{max-width:1240px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ===================================================== 1) DOKTOR x GUN -->
+<div class="win">
+  <div class="title">🗓 Çalışma Planları
+    <span class="sp">Randevu › Çalışma Planları · şablondan türer, istisna ezer — elle çizilmez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Şablon</div>
+    <div class="btn">✈️ İzin / İstisna — Dr. Aslı Demir</div>
+    <span class="ayrac"></span>
+    <div class="btn">📋 Şablonlar</div>
+    <div class="btn">✈️ İstisnalar <b style="color:var(--warn)">· 1 bekliyor</b></div>
+    <div class="btn">📅 Takvim</div>
+    <span class="ayrac"></span>
+    <span class="cipler"><span class="cip on">Doktor × gün</span><span class="cip">Bölüm doluluğu</span><span class="cip">Bugün çalışanlar</span></span>
+  </div>
+  <div class="toolbar" style="background:#fff">
+    <span class="hafta"><div class="btn kucuk">‹</div><div class="btn kucuk">Bu hafta</div><div class="btn kucuk">›</div>
+      <b>12 – 18 Ekim 2026</b><span style="color:var(--muted)">42. hafta</span></span>
+    <div class="inp combo sp" style="width:120px">Şube: Tümü</div>
+    <div class="inp combo" style="width:150px">Bölüm: Tümü</div>
+    <div class="inp combo" style="width:150px">Doktor: Tümü</div>
+    <span class="cipler"><span class="cip on">Bölüme göre grupla</span><span class="cip">Yalnız istisnalı</span></span>
+    <div class="inp" style="width:170px;color:var(--muted)">🔍 Doktor ara…</div>
+  </div>
+
+  <div class="ozetler">
+    <div class="kpi"><span class="k">Bu hafta çalışan</span><span class="v">46 doktor</span><span class="a">31 bölüm · 2 şube</span></div>
+    <div class="kpi"><span class="k">Kapasite / dolu</span><span class="v">4.980 / 1.912</span><span class="a">doluluk %38 · en dolu Kardiyoloji %91</span></div>
+    <div class="kpi dikkat"><span class="k">İzinli / kongrede</span><span class="v">4 doktor</span><span class="a">bu hafta 11 gün kapalı · <span class="bag">göster</span></span></div>
+    <div class="kpi kirmizi"><span class="k">Doktorsuz bölüm-gün</span><span class="v">3</span><span class="a">Göz Çar · KBB Cum · Üroloji Cmt · <span class="bag">göster</span></span></div>
+    <div class="kpi dikkat"><span class="k">İşlem bekleyen randevu</span><span class="v">7</span><span class="a">kapanan günlerde · <span class="bag">istisnaya git</span></span></div>
+  </div>
+
+  <div class="lej">
+    <span><i style="background:#f3f8fe;border-color:#cfe0f5"></i>şablon (tekrar eder)</span>
+    <span><i style="background:#fdf8ec;border-color:#f0d9a8"></i>saat değişikliği</span>
+    <span><i style="background:#eef8f1;border-color:#bfe3cb"></i>ek mesai</span>
+    <span><i style="background:repeating-linear-gradient(135deg,#f7e3e1 0 3px,#fbefee 3px 6px);border-color:#e4b7b2"></i>izin / kongre / kapalı</span>
+    <span><i style="background:#fff;border:2px dashed #e0a33a"></i>istisna onay bekliyor</span>
+    <span style="margin-left:auto">hücre: <b>saat</b> · <b>dolu / slot</b> (turuncu %80+, kırmızı dolu) · mini şerit 08–19</span>
+  </div>
+
+  <div class="toplu">☑ <b>1 doktor seçili</b> — Dr. Aslı Demir
+    <span class="btn kucuk">✈️ İzin / istisna…</span><span class="btn kucuk">📋 Şablonlarını aç</span><span class="btn kucuk">📅 Randevuları</span>
+    <span class="sp" style="color:var(--muted)">Seçimi kaldır ✕</span></div>
+
+  <div class="govde">
+    <div class="plan">
+      <div class="hb">Doktor <small>hafta</small></div>
+      <div class="hb">Pzt 12 <small>1.240</small></div>
+      <div class="hb bugun">Sal 13 · bugün <small>1.180</small></div>
+      <div class="hb">Çar 14 <small>1.090</small></div>
+      <div class="hb">Per 15 <small>1.220</small></div>
+      <div class="hb">Cum 16 <small>1.150</small></div>
+      <div class="hb hs">Cmt 17 <small>410</small></div>
+      <div class="hb hs">Paz 18 <small>—</small></div>
+      <div class="hb" style="justify-content:center">Hafta</div>
+
+      <div class="grupbas">Kardiyoloji <span>3 doktor · doluluk %91</span></div>
+
+      <div class="hk"><span class="kutu">✔</span><div><b>Dr. Aslı Demir</b><small>Kardiyoloji · Tümü</small></div></div>
+      <div><div class="hc kapali">🎓 Kongre<small>Barselona</small></div></div>
+      <div class="bugunk"><div class="hc kapali bekliyor">🎓 Kongre<small>onay bekliyor · 2 rnd</small></div></div>
+      <div><div class="hc kapali">🎓 Kongre</div></div>
+      <div><div class="hc kapali">🎓 Kongre</div></div>
+      <div><div class="hc kapali">🎓 Kongre</div></div>
+      <div><div class="hc sel"><div class="z"><i style="left:9%;width:36%"></i></div><div class="t">09–13 · efor<em class="yuk">7/8</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div class="top"><b>4 sa</b>%88</div>
+
+      <div class="hk"><span class="kutu"></span><div><b>Dr. Okan Aslan</b><small>Kardiyoloji · Merkez</small></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:32%"></i><i style="left:50%;width:32%"></i></div><div class="t">09–17<em class="dolu">14/14</em></div></div></div>
+      <div class="bugunk"><div class="hc"><div class="z"><i style="left:9%;width:32%"></i><i style="left:50%;width:32%"></i></div><div class="t">09–17<em class="dolu">14/14</em></div></div></div>
+      <div><div class="hc ist"><div class="z"><i style="left:45%;width:45%;background:#e0a33a"></i></div><div class="t">13–18 değişti<em>6/10</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:32%"></i><i style="left:50%;width:32%"></i></div><div class="t">09–17<em class="yuk">12/14</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:32%"></i><i style="left:50%;width:32%"></i></div><div class="t">09–17<em class="dolu">14/14</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div><div class="bos">—</div></div>
+      <div class="top"><b>33 sa</b>%94</div>
+
+      <div class="hk"><span class="kutu"></span><div><b>Dr. Cem Yalın</b><small>Kardiyoloji · Ankara</small></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em class="yuk">16/18</em></div></div></div>
+      <div class="bugunk"><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em class="dolu">18/18</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em class="yuk">15/18</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em class="dolu">18/18</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em class="yuk">17/18</em></div></div></div>
+      <div><div class="hc ekm"><div class="z"><i class="ek" style="left:9%;width:36%"></i></div><div class="t">+ 09–13 ek<em>5/8</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div class="top"><b>49 sa</b>%92</div>
+
+      <div class="grupbas">İç Hastalıkları <span>2 doktor · doluluk %47</span></div>
+
+      <div class="hk"><span class="kutu"></span><div><b>Dr. Barış Güneş</b><small>İç Hastalıkları · Tümü</small></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em>9/18</em></div></div></div>
+      <div class="bugunk"><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em>11/18</em></div></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em>7/18</em></div></div></div>
+      <div><div class="hc kapali ik">🌴 Yıllık izin<small>İK izni</small></div></div>
+      <div><div class="hc kapali ik">🌴 Yıllık izin<small>İK izni</small></div></div>
+      <div><div class="hc"><div class="z"><i style="left:9%;width:73%"></i></div><div class="t">09–18<em>4/18</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div class="top"><b>36 sa</b>%43</div>
+
+      <div class="hk"><span class="kutu"></span><div><b>Dr. Meltem Sezer</b><small>İç Hastalıkları · Merkez</small></div></div>
+      <div><div class="hc"><div class="z"><i style="left:0%;width:45%"></i></div><div class="t">08–13 · iki haftada bir<em>8/10</em></div></div></div>
+      <div class="bugunk"><div class="bos">—</div></div>
+      <div><div class="hc"><div class="z"><i style="left:0%;width:45%"></i></div><div class="t">08–13<em>5/10</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div><div class="hc"><div class="z"><i style="left:0%;width:45%"></i></div><div class="t">08–13<em>6/10</em></div></div></div>
+      <div><div class="bos">—</div></div>
+      <div><div class="bos">—</div></div>
+      <div class="top"><b>15 sa</b>%63</div>
+    </div>
+
+    <!-- SAG: secili hucre -->
+    <div class="sag">
+      <div class="grp">
+        <h4>Dr. Aslı Demir · Cmt 17.10 <span>şablon</span></h4>
+        <div class="ic">
+          <div class="sat"><span class="k">Kaynak</span><span>📋 Şablon "Efor testi" · her hafta</span></div>
+          <div class="sat"><span class="k">Saat / slot</span><span>09:00–13:00 · 30 dk</span></div>
+          <div class="sat"><span class="k">Kanal</span><span class="kanal"><span class="on">B</span><span>P</span><span>Ç</span></span></div>
+          <div class="sat"><span class="k">Doluluk</span><span class="dol"><span class="b"><i style="width:88%"></i></span>7 / 8</span></div>
+          <div class="slotlar">
+            <span class="d">09:00</span><span class="d">09:30</span><span class="d">10:00</span><span class="d">10:30</span>
+            <span class="d">11:00</span><span class="d">11:30</span><span class="d">12:00</span><span>12:30</span>
+          </div>
+          <div class="rl">
+            <div><b>09:00</b>Ayşe Yılmaz · Kontrol</div>
+            <div><b>09:30</b>Mehmet Koç · Muayene</div>
+            <div><b>10:00</b>Elif Arslan · Efor</div>
+            <div style="color:var(--muted)">… 4 randevu daha</div>
+          </div>
+          <div class="eylem">
+            <span class="btn kucuk">📋 Şablonu aç</span>
+            <span class="btn kucuk">✈️ Bu güne istisna</span>
+            <span class="btn kucuk">📅 Randevuları</span>
+          </div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Bu hafta istisnaları <span>Dr. Aslı Demir</span></h4>
+        <div class="ic">
+          <div>🎓 <b>Kongre</b> 12–16.10 <span class="chip c-bek">Onay bekliyor</span><br>
+            <span style="color:#8f3d36">2 randevu işlem bekliyor</span> · <u>kartı aç</u></div>
+        </div>
+      </div>
+      <div class="bilgi" style="margin:10px">ℹ Plan elle çizilmez: hücreye tıklayın → ayrıntı burada;
+        çift tık şablon / istisna kartını açar. Boş hücreye çift tık = o güne <b>ek mesai</b>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ 2) BOLUM DOLULUGU (isi) -->
+<div class="win">
+  <div class="title">🗓 Çalışma Planları — Bölüm doluluğu görünümü
+    <span class="sp">bölüm × gün: çalışan doktor sayısı ve doluluk · kırmızı = o gün doktor yok</span></div>
+  <div class="isi">
+    <div class="hb">Bölüm</div><div class="hb">Pzt 12</div><div class="hb">Sal 13</div><div class="hb">Çar 14</div><div class="hb">Per 15</div><div class="hb">Cum 16</div><div class="hb">Cmt 17</div><div class="hb">Paz 18</div><div class="hb">Hafta</div>
+
+    <div class="ad">Kardiyoloji<small>3 doktor</small></div>
+    <div class="h2">2 dr<small>%97</small></div><div class="h2">2 dr<small>%100</small></div><div class="h2">2 dr<small>%74</small></div>
+    <div class="h2">2 dr<small>%94</small></div><div class="h2">2 dr<small>%97</small></div><div class="h3">2 dr<small>%46 · ek mesai</small></div><div class="rs">—</div>
+    <div><b>%91</b></div>
+
+    <div class="ad">İç Hastalıkları<small>2 doktor</small></div>
+    <div class="h2">2 dr<small>%61</small></div><div class="h1">1 dr<small>%61</small></div><div class="h2">2 dr<small>%43</small></div>
+    <div class="h1">1 dr<small>izin</small></div><div class="h2">1 dr<small>%57</small></div><div class="h1">1 dr<small>%22</small></div><div class="rs">—</div>
+    <div><b>%47</b></div>
+
+    <div class="ad">Göz Hastalıkları<small>2 doktor</small></div>
+    <div class="h1">1 dr<small>%55</small></div><div class="h1">1 dr<small>%62</small></div><div class="h0">doktor yok<small>2 izinli</small></div>
+    <div class="h2">2 dr<small>%48</small></div><div class="h1">1 dr<small>%70</small></div><div class="rs">—</div><div class="rs">—</div>
+    <div><b>%57</b></div>
+
+    <div class="ad">Kulak Burun Boğaz<small>1 doktor</small></div>
+    <div class="h1">1 dr<small>%40</small></div><div class="h1">1 dr<small>%35</small></div><div class="h1">1 dr<small>%51</small></div>
+    <div class="h1">1 dr<small>%30</small></div><div class="h0">doktor yok<small>kongre</small></div><div class="rs">—</div><div class="rs">—</div>
+    <div><b>%39</b></div>
+
+    <div class="ad">Acil<small>randevusuz kabul</small></div>
+    <div class="rs">randevusuz</div><div class="rs">randevusuz</div><div class="rs">randevusuz</div><div class="rs">randevusuz</div><div class="rs">randevusuz</div><div class="rs">randevusuz</div><div class="rs">randevusuz</div>
+    <div>—</div>
+  </div>
+  <div class="lej" style="border:0">
+    <span><i style="background:#eef4fc;border-color:#cfe0f5"></i>1 doktor</span>
+    <span><i style="background:#d4e5f9;border-color:#a9caef"></i>2 doktor</span>
+    <span><i style="background:#a9caef;border-color:#7fb0e6"></i>3+ doktor</span>
+    <span><i style="background:repeating-linear-gradient(135deg,#f7e3e1 0 3px,#fbefee 3px 6px);border-color:#e4b7b2"></i>planlı gün ama doktor yok</span>
+    <span>hücreye tık = o gün o bölümün doktorları (doktor × gün görünümü süzülür)</span>
+  </div>
+</div>
+
+<!-- ============================================ 3) BUGUN CALISANLAR -->
+<div class="win">
+  <div class="title">🗓 Çalışma Planları — Bugün çalışanlar
+    <span class="sp">Sal 13.10.2026 · saat 10:42 · kayıt kabul bu listeyi görür</span></div>
+  <div class="toolbar" style="background:#fff">
+    <span class="cipler"><span class="cip on">Tümü 41</span><span class="cip">Şu an muayenede 29</span><span class="cip">Saat dışı 8</span><span class="cip">Bugün yok 4</span></span>
+    <div class="inp combo sp" style="width:150px">Bölüm: Tümü</div>
+  </div>
+  <table class="grid">
+    <tr><th>Doktor</th><th>Saatler (08–19, kırmızı çizgi = şimdi)</th><th>Durum</th><th>Randevu</th><th>Gelen</th><th>Sıradaki boş</th><th>Kanal</th></tr>
+    <tr class="grupbas"><td colspan="7">Kardiyoloji</td></tr>
+    <tr><td><b>Dr. Okan Aslan</b></td>
+      <td><div class="gun-serit"><i style="left:9%;width:32%"></i><i style="left:50%;width:32%"></i><b style="left:24%"></b></div></td>
+      <td><span class="chip c-ok">muayenede</span></td><td>14 / 14</td><td>5</td><td><span class="chip c-red">dolu</span></td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span>Ç</span></span></td></tr>
+    <tr><td><b>Dr. Cem Yalın</b> <span style="color:var(--muted)">· Ankara</span></td>
+      <td><div class="gun-serit"><i style="left:9%;width:73%"></i><b style="left:24%"></b></div></td>
+      <td><span class="chip c-ok">muayenede</span></td><td>18 / 18</td><td>4</td><td><span class="chip c-red">dolu</span></td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span class="on">Ç</span></span></td></tr>
+    <tr><td><b>Dr. Aslı Demir</b></td>
+      <td style="color:#8f3d36">🎓 Kongre · onay bekliyor</td>
+      <td><span class="chip c-bek">bugün yok</span></td><td>2 <span style="color:#8f3d36">· aktarılmalı</span></td><td>—</td><td>—</td><td>—</td></tr>
+    <tr class="grupbas"><td colspan="7">İç Hastalıkları</td></tr>
+    <tr><td><b>Dr. Barış Güneş</b></td>
+      <td><div class="gun-serit"><i style="left:9%;width:73%"></i><b style="left:24%"></b></div></td>
+      <td><span class="chip c-ok">muayenede</span></td><td>11 / 18</td><td>3</td><td><span class="chip c-mavi">11:30</span></td>
+      <td><span class="kanal"><span class="on">B</span><span class="on">P</span><span class="on">Ç</span></span></td></tr>
+    <tr><td><b>Dr. Meltem Sezer</b></td>
+      <td><div class="gun-serit"><i style="left:0%;width:45%;background:#cfd8e2"></i><b style="left:24%"></b></div></td>
+      <td><span class="chip c-gri">bu hafta değil</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr class="grupbas"><td colspan="7">Acil · Laboratuvar · Radyoloji</td></tr>
+    <tr><td colspan="2" style="color:var(--muted);font-style:italic">randevusuz kabul — plan gerektirmez, kayıt kabulde hep görünür</td>
+      <td><span class="chip c-mavi">randevusuz</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+  </table>
+</div>
+
+<div class="aciklama">
+  <b>NOT (mockup):</b> Çalışma Planları "bu hafta kim, nerede, ne kadar dolu ve nerede açık var" sorusunun ekranı;
+  plan elle çizilmez (şablon tekrar eder, istisna ezer). Bugünkü ekrana göre değişiklikler:
+  <b>(1)</b> hücre metin yerine <b>mini zaman şeridi</b> (08–19) + saat + <b>dolu / slot</b> (turuncu %80+, kırmızı dolu) —
+  bugün "09:00-18:00 · 30 dk B P C" metni hücreye sığmıyordu; slot ve kanal sağ panele taşındı;
+  <b>(2)</b> istisna türleri renkle ayrılır: saat değişikliği sarı, ek mesai yeşil, izin / kongre / kapalı taralı;
+  <b>İK izni</b> kesikli kenar; <b>onay bekleyen istisna</b> turuncu kesikli çerçeve (henüz planı kapatmıyor — görünsün);
+  <b>(3)</b> gün başlığında o günün toplam slotu, satır sonunda doktorun <b>haftalık saati ve doluluğu</b>; bugün sütunu vurgulu;
+  <b>(4)</b> varsayılan <b>bölüme göre grup</b> (grup başlığında bölüm doluluğu), "Yalnız istisnalı" çipi;
+  <b>(5)</b> üstte <b>özet şeridi</b>: çalışan doktor, kapasite / dolu, izinli doktor, <b>doktorsuz bölüm-gün</b>
+  (randevu verilemeyen gün) ve işlem bekleyen randevu — tıklanınca süzer / istisnaya gider;
+  <b>(6)</b> seçim kutusu (mevcut): seçili doktorla izin / istisna kilitli açılır; seçim şeridinde şablonlar ve randevular;
+  <b>(7)</b> sağ panel seçili hücrenin ayrıntısı: kaynak, saat / slot / kanal, doluluk, <b>slot ızgarası</b>, ilk randevular,
+  eylemler; doktorun o haftaki istisnaları; boş hücreye çift tık = ek mesai;
+  <b>(8)</b> "Bölüm toplu" yerine <b>Bölüm doluluğu</b> ısı haritası: bölüm × gün doktor sayısı + doluluk, doktor yoksa kırmızı taralı;
+  <b>(9)</b> <b>Bugün çalışanlar</b>: gün şeridi üstünde "şimdi" çizgisi, durum (muayenede / saat dışı / bugün yok),
+  randevu / gelen, <b>sıradaki boş saat</b>, bugün yok olanların aktarılmamış randevusu; randevusuz bölümler en altta.
+</div>
+</body>
+</html>

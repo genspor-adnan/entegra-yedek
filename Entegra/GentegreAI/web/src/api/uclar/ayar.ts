@@ -30,6 +30,16 @@ export interface CalismaIstisnaBaglam {
   kayit: { ekleyen: string; eklemeTarihi: string; onaylayan: string; onayTarihi: string | null } | null;
 }
 
+export interface CalismaBugunSatiri {
+  departmanId: number; departman: string; hekimId: number; hekim: string;
+  durum: 'muayenede' | 'saat-disi' | 'bitti' | 'yok'; neden?: string | null; ik: boolean;
+  bloklar: { bas: string; bit: string; istisna: boolean }[]; kanallar: string;
+  randevu: number; gelen: number; slot: number; siradakiBos?: string | null;
+}
+export interface CalismaBugun {
+  gun: string; subeId: number; simdi?: string | null; satirlar: CalismaBugunSatiri[]; randevusuz: { id: number; ad: string }[];
+}
+
 const sorguMetni = (g: Record<string, unknown>) => Object.entries(g)
   .filter(([, v]) => v !== undefined && v !== null && v !== '')
   .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&');
@@ -67,11 +77,13 @@ export const ayarUclari = {
   //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.
   randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
   /** Hekim çalışma planı (711): türetilmiş bloklar ve bugün çalışanlar. */
-  calismaPlani: (g: { bas?: string; bit?: string; hekimId?: number | null; departmanId?: number | null; sube?: number | null } = {}) =>
+  calismaPlani: (g: { bas?: string; bit?: string; hekimId?: number | null; departmanId?: number | null; sube?: number | null; ozet?: number } = {}) =>
     istek<CalismaPlaniYaniti>('/api/calisma-plani?' + Object.entries(g).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')),
   calismaBugun: (gun?: string, sube?: number | null) =>
-    istek<{ gun: string; subeId: number; satirlar: { departmanId: number; departman: string; hekimId: number; hekim: string; saatler: string; kaynak: number; kanallar: string; randevu: number; gelen: number; simdi: boolean }[]; randevusuz: { id: number; ad: string }[] }>(
-      `/api/calisma-plani/bugun?${gun ? `gun=${gun}&` : ''}${sube ? `sube=${sube}` : ''}`),
+    istek<CalismaBugun>(`/api/calisma-plani/bugun?${gun ? `gun=${gun}&` : ''}${sube ? `sube=${sube}` : ''}`),
+  /** Seçili hücre: doktorun o günkü randevuları (şube saatinde). */
+  calismaGun: (hekimId: number, gun: string) =>
+    istek<{ randevular: { id: number; saat: string; sureDk: number; durum: number; hasta: string; tip: string }[] }>(`/api/calisma-plani/gun?hekimId=${hekimId}&gun=${gun}`),
   // Çalışma şablonu / izin & istisna kartları (945): kaydetmeden önceki hesaplar.
   calismaSablonVarsayilan: () =>
     istek<{ gunler: string; bas1: string; bit1: string; bas2: string | null; bit2: string | null; slotDk: number }>('/api/calisma-plani/sablon-varsayilan'),

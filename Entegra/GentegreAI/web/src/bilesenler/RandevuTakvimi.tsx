@@ -341,6 +341,14 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                  && dk(String(b.saatBas)) < slot + adim && dk(String(b.saatBit)) > slot);
     if (acik) return undefined;
     const kapaliGun = gunun.find(b => !b.saatBas && (b.kaynak === 3 || b.kaynak === 4));
+    // SAATLİ KAPANIŞ (948): açıklama "13:00–17:00 · ..." ile başlar; o
+    //   saatlerdeki boşluk "Mesai dışı" değil, izin / kongre olarak yazılır.
+    const kismi = gunun.find(b => !b.saatBas && b.kaynak === 3 && /^\d\d:\d\d–\d\d:\d\d/.test(b.aciklama ?? ''));
+    if (kismi) {
+      const [kb, ke] = (kismi.aciklama ?? '').slice(0, 11).split('–').map(dk);
+      if (slot < ke && slot + adim > kb)
+        return metin(`${cev(({ 1: 'İzin', 2: 'Kongre', 5: 'Kapalı' } as Record<number, string>)[kismi.istisnaTur ?? 1] ?? 'Kapalı')} ${(kismi.aciklama ?? '').slice(0, 11)}`);
+    }
     if (kapaliGun && !gunun.some(b => b.saatBas))
       return metin(kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? cev('İzinli') : cev('Kapalı')));
     return metin(cev('Mesai dışı'));
@@ -431,7 +439,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         )}
         {/* CIHAZ gorunumu yalniz cihaz tanimliysa (316) - poliklinik
             kurulumunda bu buton hic cikmaz. */}
-        {cihazlar.length > 0 && (
+        {/* Kisitli hekimde (uzman doktor) yok - kullanici. */}
+        {cihazlar.length > 0 && !hekimSabit && (
           <button type="button" className={`cip${gorunum === 'cihaz' ? ' on' : ''}`}
                   onClick={() => setGorunum('cihaz')}>Cihaz</button>
         )}

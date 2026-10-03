@@ -175,7 +175,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'İzin & İstisnalar', ic: '🏖', yetkiKodu: 'randevu.plan', menuSira: 85,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'İzin & İstisnalar', ic: '✈️', yetkiKodu: 'randevu.plan', menuSira: 85,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta

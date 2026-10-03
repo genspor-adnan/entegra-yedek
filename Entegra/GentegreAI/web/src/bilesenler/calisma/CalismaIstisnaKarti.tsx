@@ -4,10 +4,11 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { CalismaIstisnaBaglam } from '../../api/uclar/ayar';
 import { Modal } from '../Modal';
+import { KodListesiModali } from '../KodListesiModali';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
-import { GUN_AD, Grp, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi, tarihSaat } from './calismaOrtak';
+import { GUN_AD, Grp, SaatSec, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi, tarihSaat } from './calismaOrtak';
 
 /**
  * İZİN & İSTİSNA KARTI — mockup `Ekranlar/Randevu/izin_istisna_karti.html`.
@@ -23,8 +24,8 @@ import { GUN_AD, Grp, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi, tarihSa
  */
 
 const TURLER: { kod: number; ad: string; ic: string; ne: string }[] = [
-  { kod: 1, ad: 'İzin', ic: '🏖', ne: 'o günler randevu yok' },
-  { kod: 2, ad: 'Kongre / eğitim', ic: '🎓', ne: 'o günler randevu yok' },
+  { kod: 1, ad: 'İzin', ic: '✈️', ne: 'gün boyu ya da saatli' },
+  { kod: 2, ad: 'Kongre / eğitim', ic: '🎓', ne: 'gün boyu ya da saatli' },
   { kod: 3, ad: 'Saat değişikliği', ic: '🕘', ne: 'o günler başka saat' },
   { kod: 4, ad: 'Ek mesai', ic: '➕', ne: 'ek çalışma bloğu' },
   { kod: 5, ad: 'Kapalı', ic: '⛔', ne: 'bölüm / gün kapalı' },
@@ -32,6 +33,12 @@ const TURLER: { kod: number; ad: string; ic: string; ne: string }[] = [
 const turAd = (k: number | null | undefined) => TURLER.find(t => t.kod === k)?.ad ?? '';
 const KAPATAN = (t: number) => t === 1 || t === 2 || t === 5;
 const SAATLI = (t: number) => t === 3 || t === 4;
+/**
+ * SAATLİ KAPANIŞ (948, kullanıcı: "yarım gün izin girmek istedim"): izin /
+ * kongre / kapalıda saat İSTEĞE BAĞLI - boşsa gün boyu, girilirse yalnız o
+ * saatler kapanır (plan bloğu kırpılır).
+ */
+const kismi = (v: { tur: number; saatBas: string; saatBit: string }) => KAPATAN(v.tur) && !!v.saatBas && !!v.saatBit;
 const KANAL: [string, string][] = [['B', 'Banko'], ['P', 'Portal'], ['C', 'Çağrı']];
 const DURUM: Record<number, [string, string]> = { 0: ['Onay bekliyor', 'uyari'], 1: ['Onaylı', 'ok'], 2: ['İptal', 'gri'] };
 
@@ -58,7 +65,7 @@ const govde = (v: Deger): Record<string, unknown> => ({
   hekimId: v.hekimId || null, tur: v.tur, departmanId: v.departmanId, subeId: v.subeId, durum: v.durum,
   basTarih: v.basTarih, bitTarih: v.bitTarih,
   // Gün boyu kapatan türde saat / slot / kanal tutulmaz (plan onları okumaz).
-  saatBas: SAATLI(v.tur) ? v.saatBas : null, saatBit: SAATLI(v.tur) ? v.saatBit : null,
+  saatBas: SAATLI(v.tur) || kismi(v) ? v.saatBas : null, saatBit: SAATLI(v.tur) || kismi(v) ? v.saatBit : null,
   slotDk: SAATLI(v.tur) ? v.slotDk : null,
   kanallar: v.tur === 4 ? KANAL.map(([k]) => k).filter(k => v.kanallar.includes(k)).join(',') : null,
   aciklama: v.aciklama.trim(),
@@ -71,12 +78,21 @@ const aralikMetni = (b: string, e: string) => b === e ? kisaTarih(b) : `${kisaTa
  * hekimSabit: Çalışma Planları'nda işaretli doktorla açıldı - doktor dolu gelir
  * ve değiştirilemez (yalnız yeni kayıtta; açılan kaydın doktoru zaten kayıttan).
  */
-export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat }: { id: number | 'yeni'; hekimId?: number; hekimSabit?: boolean; onKapat(): void }) {
+export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, ilkTur, ilkTarih, onKapat }: {
+  id: number | 'yeni'; hekimId?: number; hekimSabit?: boolean;
+  /** Yeni kayıtta ön değer (Çalışma Planları: boş hücreye çift tık = o güne ek mesai). */
+  ilkTur?: number; ilkTarih?: string;
+  onKapat(): void;
+}) {
   const git = useNavigate();
   const { yetki } = useOturum();
   const yazar = yetki('randevu.plan');
   const [kayitId, setKayitId] = useState<number | null>(id === 'yeni' ? null : id);
-  const [d, setD] = useState<Deger>(() => bos(ilkHekim));
+  const [d, setD] = useState<Deger>(() => ({
+    ...bos(ilkHekim),
+    ...(ilkTur && ilkTur >= 1 && ilkTur <= 5 ? { tur: ilkTur } : {}),
+    ...(ilkTarih ? { basTarih: ilkTarih, bitTarih: ilkTarih } : {}),
+  }));
   const [ilk, setIlk] = useState<Deger | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
   const [kodlar, setKodlar] = useState<Record<string, Record<string, string>>>({});
@@ -86,6 +102,14 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
   const [aktarHedef, setAktarHedef] = useState<number | ''>('');
   const [aktarAcik, setAktarAcik] = useState(false);
   const [tazele, setTazele] = useState(0);
+  // NEDEN LİSTESİ (949, kullanıcı: "açıklama / neden combo seçimli olsun",
+  //   "türe bağlı yap"): `calisma.istisna_neden`, üst değer = tür. Seçilen
+  //   nedenin ADI açıklamaya yazılır; "Diğer" serbest metin açar.
+  const [nedenler, setNedenler] = useState<string[]>([]);
+  const [nedenSurum, setNedenSurum] = useState(0);
+  const [digerAcik, setDigerAcik] = useState(false);
+  const [nedenDuzenle, setNedenDuzenle] = useState(false);
+  const { yetki: yetkiVar } = useOturum();
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kaydediyor, setKaydediyor] = useState(false);
@@ -120,8 +144,8 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
     const z = setTimeout(() => {
       api.calismaIstisnaBaglam({
         hekimId: d.hekimId, bas: d.basTarih, bit: d.bitTarih || d.basTarih, tur: d.tur,
-        saatBas: SAATLI(d.tur) && !Number.isNaN(dk(d.saatBas)) ? d.saatBas : undefined,
-        saatBit: SAATLI(d.tur) && !Number.isNaN(dk(d.saatBit)) ? d.saatBit : undefined,
+        saatBas: (SAATLI(d.tur) || kismi(d)) && !Number.isNaN(dk(d.saatBas)) ? d.saatBas : undefined,
+        saatBit: (SAATLI(d.tur) || kismi(d)) && !Number.isNaN(dk(d.saatBit)) ? d.saatBit : undefined,
         departmanId: d.departmanId, id: kayitId,
       }).then(y => {
         if (iptal) return;
@@ -132,6 +156,17 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
     }, 350);
     return () => { iptal = true; clearTimeout(z) };
   }, [baglamAnahtar]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    let iptal = false;
+    api.kodListe('calisma.istisna_neden', d.tur)
+      .then(y => { if (!iptal) setNedenler(y.degerler.filter(x => x.aktif !== 0).map(x => x.ad)) })
+      .catch(() => { if (!iptal) setNedenler([]) });
+    return () => { iptal = true };
+  }, [d.tur, nedenSurum]);
+  // Seçili neden: listede varsa o; değilse (eski serbest metin ya da "Diğer") Diğer.
+  const nedenSecim = d.aciklama && nedenler.includes(d.aciklama) && d.aciklama !== 'Diğer' ? d.aciklama
+    : (d.aciklama || digerAcik) ? 'Diğer' : '';
 
   // HAFTA ŞERİDİ: kayıtlı plan + bu formun etkisi (kendi satırları çıkarılır).
   const hafta = useMemo(() => {
@@ -148,7 +183,8 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
       let metinler = bloklar, kapat = !!kapali && !icinde, ek = false;
       if (kapali && !icinde) metinler = [kapali.kaynak === 4 ? (kapali.aciklama || 'İK izni') : turAd(kapali.istisnaTur)];
       if (icinde) {
-        if (KAPATAN(d.tur)) { metinler = [turAd(d.tur)]; kapat = true }
+        if (kismi(d)) { metinler = [...bloklar.length ? [`${bloklar.join(' · ')}`] : [], `${turAd(d.tur)} ${d.saatBas}–${d.saatBit}`]; ek = true }
+        else if (KAPATAN(d.tur)) { metinler = [turAd(d.tur)]; kapat = true }
         else if (d.tur === 3) { metinler = [`${d.saatBas || '--:--'}–${d.saatBit || '--:--'}`]; ek = true }
         else if (d.tur === 4) { metinler = [...bloklar, `+ ${d.saatBas || '--:--'}–${d.saatBit || '--:--'}`]; ek = true }
       }
@@ -160,6 +196,10 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
     if (!(v.hekimId > 0)) return c('Doktor seçilmeli.');
     if (!v.basTarih || !v.bitTarih) return c('Tarih aralığı girilmeli.');
     if (v.bitTarih < v.basTarih) return c('Bitiş tarihi başlangıçtan önce olamaz.');
+    if (KAPATAN(v.tur) && (!!v.saatBas !== !!v.saatBit))
+      return c('Saatli izin için iki saat de girilmeli; gün boyu için ikisini de boş bırakın.');
+    if (kismi(v) && (Number.isNaN(dk(v.saatBas)) || Number.isNaN(dk(v.saatBit)) || dk(v.saatBas) >= dk(v.saatBit)))
+      return c('Saatler SS:DD biçiminde ve başlangıç bitişten önce olmalı.');
     if (SAATLI(v.tur) && (Number.isNaN(dk(v.saatBas)) || Number.isNaN(dk(v.saatBit)) || dk(v.saatBas) >= dk(v.saatBit)))
       return c('Saat değişikliği / ek mesai için saatler SS:DD biçiminde ve başlangıç bitişten önce olmalı.');
     if (v.tur === 4 && v.kanallar.length === 0) return c('Ek mesai için en az bir kanal seçin.');
@@ -167,25 +207,20 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
     return null;
   };
 
-  const kaydet = (ek?: Partial<Deger>, sonraMesaj?: string) => guvenli(async () => {
+  const kaydet = (ek?: Partial<Deger>) => guvenli(async () => {
     const v = { ...d, ...ek };
     const h = dogrula(v);
     if (h) { setHata(h); return }
     setHata(null); setKaydediyor(true);
     try {
-      if (kayitId === null) {
-        const y = await api.kartEkle('calisma-istisna', { kart: govde(v) });
-        const yeniId = sayi(y.kart.id);
-        await oku(yeniId);
-        git(`/calisma-istisna/${yeniId}`, { replace: true });
-      } else {
+      if (kayitId === null) await api.kartEkle('calisma-istisna', { kart: govde(v) });
+      else {
         const once = ilk ? govde(ilk) : {};
         const fark = Object.fromEntries(Object.entries(govde(v)).filter(([k, x]) => once[k] !== x));
         if (Object.keys(fark).length > 0) await api.kartGuncelle('calisma-istisna', kayitId, { surum, kart: fark });
-        await oku(kayitId);
       }
-      setTazele(t => t + 1);
-      mesaj(sonraMesaj ?? c('İstisna kaydedildi.'));
+      // KAYDEDİNCE KAPANIR, MESAJ YOK (kullanıcı): Kaydet, Onayla ve İptal Et - liste tazelenir.
+      onKapat();
     } finally { setKaydediyor(false) }
   });
 
@@ -193,12 +228,12 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
     const bekleyen = (baglam?.randevular ?? []).filter(r => !sonuclar[r.id]?.basarili).length;
     if (KAPATAN(d.tur) && bekleyen > 0
         && !await onay(`${bekleyen} ${c('randevu için işlem seçilmedi; olduğu gibi kalır ve takvimde kapalı zeminde görünür. Onaylansın mı?')}`)) return;
-    await kaydet({ durum: 1 }, c('İstisna onaylandı - plan bu tarihler için değişti.'));
+    await kaydet({ durum: 1 });
   });
 
   const iptalEt = () => guvenli(async () => {
     if (!await onay(c('İstisna iptal edilecek; plan şablondaki haline döner. Devam edilsin mi?'), true)) return;
-    await kaydet({ durum: 2 }, c('İstisna iptal edildi.'));
+    await kaydet({ durum: 2 });
   });
 
   const sil = () => guvenli(async () => {
@@ -235,9 +270,9 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
   const kilitli = !yazar || d.durum === 2;
 
   return (
-    <Modal baslik={`🏖 ${c('İzin & İstisna')}${baslik ? ' — ' + baslik : kayitId === null ? ' — ' + c('Yeni') : ''}`}
+    <Modal baslik={`✈️ ${c('İzin & İstisna')}${baslik ? ' — ' + baslik : kayitId === null ? ' — ' + c('Yeni') : ''}`}
       ekSinif="kart-calisma" buyutmeYok onKapat={onKapat}
-      ustSerit={<div className="ck-kimlik ck-k4">
+      ustSerit={<div className="ck-kimlik ck-k3">
           <label className="rk-fld"><span className="ck-etiket">{c('Doktor')} <b className="ak-zor">*</b></span>
             <select className="ck-buyuk" value={d.hekimId || ''} disabled={kilitli || (!!hekimSabit && kayitId === null)} title={hekimSabit && kayitId === null ? c('Çalışma Planları listesinde seçilen doktor') : undefined} onChange={e => yaz('hekimId', Number(e.target.value) || 0)}>
               <option value="">{c('Seçin…')}</option>
@@ -250,11 +285,6 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
               <span className="sonuk">–</span>
               <input type="date" value={d.bitTarih} min={d.basTarih} disabled={kilitli} onChange={e => yaz('bitTarih', e.target.value)} />
             </div></div>
-          <label className="rk-fld"><span className="ck-etiket">{c('Bölüm')}</span>
-            <select value={d.departmanId ?? ''} disabled={kilitli} onChange={e => yaz('departmanId', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">{c('Tümü')}</option>
-              {secenekler('departmanId').map(([k, a]) => <option key={k} value={k}>{a}</option>)}
-            </select></label>
           <div className="rk-fld"><span className="ck-etiket">{c('Durum')}</span>
             <div className="ck-durum"><span className={`rozet ${durumSinif}`}>{c(durumAd)}</span></div></div>
         </div>}
@@ -278,11 +308,13 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
                     <b>{t.ic} {c(t.ad)}</b><span>{c(t.ne)}</span></button>
                 ))}
               </div>
-              <div className="rk-fld"><span className="ck-etiket">{c('Saat (yalnız saat değişikliği / ek mesai)')}{SAATLI(d.tur) && <> <b className="ak-zor">*</b></>}</span>
+              <div className="rk-fld"><span className="ck-etiket">{SAATLI(d.tur) ? c('Saat') : c('Saat (boşsa gün boyu)')}{SAATLI(d.tur) && <> <b className="ak-zor">*</b></>}</span>
                 <div className="ck-ikili">
-                  <input className="ck-saat" value={SAATLI(d.tur) ? d.saatBas : ''} placeholder="--:--" disabled={kilitli || !SAATLI(d.tur)} onChange={e => yaz('saatBas', e.target.value)} />
+                  <SaatSec deger={d.saatBas} disabled={kilitli} bos={SAATLI(d.tur) ? undefined : c('gün boyu')}
+                           onChange={v => setD(o => ({ ...o, saatBas: v, saatBit: !v ? '' : o.saatBit && dk(o.saatBit) <= dk(v) ? '' : o.saatBit }))} />
                   <span className="sonuk">–</span>
-                  <input className="ck-saat" value={SAATLI(d.tur) ? d.saatBit : ''} placeholder="--:--" disabled={kilitli || !SAATLI(d.tur)} onChange={e => yaz('saatBit', e.target.value)} />
+                  <SaatSec deger={d.saatBit} disabled={kilitli || (!SAATLI(d.tur) && !d.saatBas)} sonra={d.saatBas}
+                           bos={SAATLI(d.tur) ? undefined : c('gün boyu')} onChange={v => yaz('saatBit', v)} />
                 </div></div>
               <label className="rk-fld"><span className="ck-etiket">{c('Slot (boş = şablondaki)')}</span>
                 <select value={SAATLI(d.tur) ? (d.slotDk ?? '') : ''} disabled={kilitli || !SAATLI(d.tur)} onChange={e => yaz('slotDk', e.target.value ? Number(e.target.value) : null)}>
@@ -302,7 +334,26 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
                   ))}
                 </div></div>
               <label className="rk-fld ck-tam"><span className="ck-etiket">{c('Açıklama / neden')} <b className="ak-zor">*</b></span>
-                <input value={d.aciklama} maxLength={300} disabled={kilitli} onChange={e => yaz('aciklama', e.target.value)} /></label>
+                <span className="ck-ikili">
+                  <select value={nedenSecim} disabled={kilitli} style={{ flex: 1 }}
+                          onChange={e => {
+                            const v = e.target.value;
+                            if (v === 'Diğer') { setDigerAcik(true); if (nedenler.includes(d.aciklama)) yaz('aciklama', '') }
+                            else { setDigerAcik(false); yaz('aciklama', v) }
+                          }}>
+                    <option value="">{c('Seçin…')}</option>
+                    {nedenler.map(n => <option key={n} value={n}>{c(n)}</option>)}
+                    {!nedenler.includes('Diğer') && <option value="Diğer">{c('Diğer')}</option>}
+                  </select>
+                  {yetkiVar('ayar', 'degistir') && (
+                    <button type="button" className="d ck-kucuk" title={c('Neden listesini düzenle')}
+                            onClick={e => { e.preventDefault(); setNedenDuzenle(true) }}>…</button>
+                  )}
+                </span>
+                {nedenSecim === 'Diğer' && (
+                  <input value={d.aciklama} maxLength={300} disabled={kilitli} placeholder={c('Nedeni yazın…')}
+                         onChange={e => yaz('aciklama', e.target.value)} />
+                )}</label>
             </div>
           </Grp>
 
@@ -317,7 +368,9 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
                   </div>
                 ))}
               </div>
-              <div className="ck-bilgi ck-kutu ck-alt">{KAPATAN(d.tur)
+              <div className="ck-bilgi ck-kutu ck-alt">{kismi(d)
+                ? <>{c('Onaylanınca bu günlerde yalnız')} <b>{d.saatBas}–{d.saatBit}</b> {c('kapanır; kalan saatlerde randevu verilir.')}</>
+                : KAPATAN(d.tur)
                 ? <>{c('Onaylanınca taralı günler randevu takviminde')} <b>"{c(turAd(d.tur))}"</b> {c('diye kapanır; o günlere yeni randevu verilemez.')}</>
                 : d.tur === 3 ? c('Onaylanınca bu günlerde yalnız yeni saatlerde randevu verilir; şablon değişmez.')
                 : c('Onaylanınca bu günlere ek çalışma bloğu açılır; seçili kanallardan randevu alınabilir.')}</div>
@@ -411,6 +464,10 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, onKapat
               {baglam?.kayit && <span>{c('Giren')}: <b>{baglam.kayit.ekleyen || '—'} · {tarihSaat(baglam.kayit.eklemeTarihi)}</b></span>}
               {kayitId !== null && <span>{c('Onaylayan')}: <b>{baglam?.kayit?.onayTarihi ? `${baglam.kayit.onaylayan || '—'} · ${tarihSaat(baglam.kayit.onayTarihi)}` : '—'}</b></span>}
             </div>
+      {nedenDuzenle && (
+        <KodListesiModali kod="calisma.istisna_neden" baslik={`${c('Nedenler')} — ${c(turAd(d.tur))}`} ustDeger={d.tur}
+                          onKapat={() => { setNedenDuzenle(false); setNedenSurum(x => x + 1) }} />
+      )}
     </Modal>
   );
 }

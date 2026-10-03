@@ -104,8 +104,11 @@ export function KartGrupSarmalayici({
               sureDk={Number(deger.sureDk) || 0}
               seciliSaat={String(deger.baslangic ?? '').slice(11, 16)}
               hariçId={yeniMi ? null : Number(id)}
-              onSec={saat => alanDegistir(
-                'baslangic', `${String(deger.baslangic ?? '').slice(0, 10)}T${saat}`)}
+              saltOkunur={salt}
+              onSec={(saat, sure) => {
+                alanDegistir('baslangic', `${String(deger.baslangic ?? '').slice(0, 10)}T${saat}`);
+                alanDegistir('sureDk', String(sure));
+              }}
             />
             {/* Ozet serit EN ALTTA (mockup .ozet): hasta no, son randevu,
                 acik bakiye, olusturma. */}

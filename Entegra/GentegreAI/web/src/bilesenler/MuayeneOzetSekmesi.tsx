@@ -106,7 +106,16 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
     <><h6>{baslik}</h6><p>{ic}</p></>
   );
 
-  const eksikSay = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
+  // FORMDAKİ GÜNCEL DEĞER (kullanıcı: "şikayet hikaye girdiğim halde eksik
+  //   görünüyor"): sunucu kayıtlı veriye bakar; formda yazılmış ama henüz
+  //   kaydedilmemiş metin alanları için madde formdan değerlendirilir.
+  //   "Tamamla" önce kaydeder (ListeKarti), kural yine sunucuda.
+  const formAlani: Record<string, string> = { sikayet: 'sikayet', karar: 'karar', cikisSekli: 'cikisSekli' };
+  const kontrolGuncel = (kontrol ?? []).map(k => {
+    const a = formAlani[k.alan];
+    return a && a in d ? { ...k, tamam: m(d[a]).length > 0 } : k;
+  });
+  const eksikSay = kontrolGuncel.filter(k => k.zorunlu && !k.tamam).length;
 
   // KONTROL MADDESİNE TIK = EKSİĞİ GİDEREN YER (kullanıcı): ilgili sekme ve
   //   varsa yeni-kayıt penceresi. Tamamlanmış / salt okunur kartta tıklanmaz.
@@ -193,7 +202,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
               <span className="moz-sp not">{kontrol === null ? '…'
                 : eksikSay === 0 ? c('hazır') : `${eksikSay} ${c('eksik')}`}</span></h6>
             <ul className="moz-liste">
-              {(kontrol ?? []).map((k, i) => (
+              {kontrolGuncel.map((k, i) => (
                 // BILGI MADDESI (istem / reçete) eksikse uyarı değil soluk "–":
                 //   her muayenede olmaz, Tamamla'yı engellemez.
                 <li key={i} className={(k.tamam ? '' : k.zorunlu ? 'eksik' : 'soluk')
