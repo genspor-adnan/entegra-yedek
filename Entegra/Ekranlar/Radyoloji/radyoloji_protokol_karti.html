@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çekim Protokolü — Kart Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">⚙️ Çekim Protokolü — Abdomen BT (IV kontrastlı) · ABD-PV <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">⧉ Kopyala</span>
+    <span class="btn">📄 Hasta hazırlık kartı</span>
+    <span class="btn">📨 SMS önizle</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="kimlik" style="grid-template-columns:1.6fr 110px 90px 140px 110px 120px">
+    <div class="fld"><label class="req">Tetkik (hizmet)</label><div class="inp big">Abdomen BT (IV kontrastlı) <span style="margin-left:auto;color:var(--accent)">…</span></div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp"><span class="mod m-bt">BT</span></div></div>
+    <div class="fld"><label class="req">Süre</label><div class="inp">15 dk</div></div>
+    <div class="fld"><label>Kontrast</label><div class="inp"><span class="chip c-mor">IV + oral</span></div></div>
+    <div class="fld"><label>Seri kodu</label><div class="inp">ABD-PV</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip c-ok">Aktif</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="genel">Genel</div>
+    <div class="sek" data-p="seri">Seriler <span class="say">3</span></div>
+    <div class="sek" data-p="kontrast">Kontrast</div>
+    <div class="sek" data-p="hazirlik">Hasta hazırlığı</div>
+    <div class="sek" data-p="uyari">Uyarılar / kontrol <span class="say">4</span></div>
+    <div class="sek" data-p="malzeme">Malzeme / sarf <span class="say">4</span></div>
+    <div class="sek" data-p="cihaz">Cihazlar <span class="say">1</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="panel on" id="p-genel">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Protokol</h4><div class="ic izgara">
+          <div class="fld iki"><label>Bölge</label><div class="inp">Abdomen - Pelvis</div></div>
+          <div class="fld"><label>Hasta hazırlık süresi</label><div class="inp">30 dk önce gelsin</div></div>
+          <div class="fld"><label>Randevu slotu</label><div class="inp">15 dk (süre)</div></div>
+          <div class="fld iki"><label>Rapor şablonu (varsayılan)</label><div class="inp">BT-ABD-02 · Tüm abdomen BT (IV kontrastlı)</div></div>
+          <div class="fld iki"><label>Teknisyen yetkinliği</label><div class="inp">BT teknisyeni (kontrast enjeksiyonu yetkili)</div></div>
+          <div class="fld tam"><label>Endikasyon notu</label><div class="inp metin">Akut karın, kitle evrelemesi, takip. Böbrek taşı şüphesinde kontrastsız "Üriner sistem BT" protokolü seçilmeli.</div></div>
+        </div></div>
+        <div class="grp"><h4>Doz (radyasyon)</h4><div class="ic izgara">
+          <div class="fld"><label>Hedef CTDIvol</label><div class="inp">≤ 15 mGy</div></div>
+          <div class="fld"><label>Hedef DLP</label><div class="inp">≤ 700 mGy·cm</div></div>
+          <div class="fld"><label>Ulusal referans (DRL)</label><div class="inp">800 mGy·cm</div></div>
+          <div class="fld"><label>Çocuk</label><div class="inp">ağırlığa göre protokol</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Özet</h4><div class="ic">
+          <div class="satir"><span>Seri</span>3</div>
+          <div class="satir"><span>Kontrast</span>IV 1,5 ml/kg (≤ 100 ml) + oral 1 L</div>
+          <div class="satir"><span>Ön koşul</span>eGFR ≥ 30, alerji sorgusu</div>
+          <div class="satir"><span>Sarf</span>4 kalem · otomatik düşüm</div>
+          <div class="satir"><span>Son değişiklik</span>Dr. Kaan Arslan · 21.09.2026</div>
+        </div></div>
+        <div class="bilgi">Süre randevu takviminde slotu belirler; hazırlık metni randevu SMS'ine ve hasta hazırlık kartına girer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERİLER -->
+  <div class="panel" id="p-seri">
+    <div class="grp"><h4>Seri tarifi <span class="ek">teknisyen çekim sırasında bunu görür</span></h4>
+      <table class="liste">
+        <tr><th></th><th>#</th><th>Seri</th><th>Faz / gecikme</th><th>Kesit / aralık</th><th>kV / mAs</th><th>Rekonstrüksiyon</th><th>Not</th></tr>
+        <tr><td class="surukle">⋮⋮</td><td>1</td><td><b>Topogram</b></td><td>—</td><td>—</td><td>120 / 35</td><td>—</td><td>diyafram - simfiz</td></tr>
+        <tr class="sec"><td class="surukle">⋮⋮</td><td>2</td><td><b>Portal venöz faz</b></td><td>70 sn (bolus takip yok)</td><td>1,25 / 1,25 mm</td><td>120 / doz modülasyonu</td><td>yumuşak doku · 5 mm aksiyel + koronal</td><td>—</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>3</td><td><b>Geç faz</b></td><td>5 dk</td><td>5 / 5 mm</td><td>100 / düşük doz</td><td>yumuşak doku</td><td>yalnız böbrek / üreter</td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Seri</span> <span class="btn kucuk">⧉ Başka protokolden al</span></div>
+    </div>
+  </div>
+
+  <!-- KONTRAST -->
+  <div class="panel" id="p-kontrast">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Kontrast</h4><div class="ic izgara">
+        <div class="fld iki"><label>Tür</label><div class="inp"><span class="chip c-mor">IV</span>&nbsp;<span class="chip c-mor">Oral</span></div></div>
+        <div class="fld iki"><label>IV ajan</label><div class="inp">İyohekzol 350 mgI/ml</div></div>
+        <div class="fld"><label>Doz</label><div class="inp">1,5 ml/kg</div></div>
+        <div class="fld"><label>En çok</label><div class="inp">100 ml</div></div>
+        <div class="fld"><label>Hız</label><div class="inp">3 ml/sn</div></div>
+        <div class="fld"><label>Serum fizyolojik takip</label><div class="inp">40 ml</div></div>
+        <div class="fld iki"><label>Oral</label><div class="inp">1 L su + 30 ml oral kontrast, çekimden 60-30 dk önce</div></div>
+        <div class="fld iki"><label>Damar yolu</label><div class="inp">20G, antekübital</div></div>
+      </div></div>
+      <div>
+        <div class="kirmizi">⛔ Kontrast verilmez: eGFR &lt; 30 (hekim onayı olmadan), önceki ağır kontrast reaksiyonu.</div>
+        <div class="uyar" style="margin-top:10px">⚠ Hafif reaksiyon öyküsü: premedikasyon protokolü (hekim istemi) - kartta işaretlenir, teknisyen ekranında kırmızı görünür.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAZIRLIK -->
+  <div class="panel" id="p-hazirlik">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Hasta hazırlığı <span class="ek">randevu SMS'i + hazırlık kartı</span></h4><div class="ic izgara">
+          <div class="fld iki"><label>Hazırlık kodu</label><div class="inp">ACLIK-4 · 4 saat açlık</div></div>
+          <div class="fld iki"><label>Gönderim</label><div class="inp">☑ randevu SMS'ine ekle · ☑ 1 gün önce hatırlat</div></div>
+          <div class="fld tam"><label>Hastaya metin</label><div class="inp metin">Çekimden 4 saat önce yemeyin, su içebilirsiniz. Son 3 ay içindeki kreatinin sonucunuzu getirin. Metformin kullanıyorsanız hekiminize danışın. Randevudan 30 dakika önce gelin.</div></div>
+          <div class="fld tam"><label>Personele not</label><div class="inp metin">Oral kontrastı kayıtta verin; 60 dk bekleme odası. Diyabetik hastada açlık kan şekeri sorun.</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>SMS önizleme</h4><div class="ic" style="line-height:1.55">
+          <div style="background:#e9f5e9;border-radius:10px;padding:8px 10px">Sayın Elif Demo, 06.10 10:30 Abdomen BT randevunuz var. Çekimden 4 saat önce yemeyin, su içebilirsiniz. Kreatinin sonucunuzu getirin. Örnek Şehir Hastanesi</div>
+          <div style="color:var(--muted);font-size:10.5px;margin-top:4px">158 karakter · 1 SMS</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UYARILAR -->
+  <div class="panel" id="p-uyari">
+    <div class="grp"><h4>Çekim öncesi kontrol listesi <span class="ek">teknisyen işaretlemeden çekim başlamaz</span></h4>
+      <table class="liste">
+        <tr><th>Kontrol</th><th>Kural</th><th>Kaynak</th><th>Engel</th></tr>
+        <tr><td><b>eGFR</b></td><td>son 90 gün; &lt; 30 ise hekim onayı</td><td>lab sonucu (otomatik)</td><td><span class="chip c-red">engel</span></td></tr>
+        <tr><td><b>Kontrast alerjisi</b></td><td>öykü sorgusu; varsa premedikasyon</td><td>hasta alerji kaydı</td><td><span class="chip c-red">engel</span></td></tr>
+        <tr><td><b>Metformin</b></td><td>eGFR &lt; 45 ise 48 saat ara</td><td>ilaç listesi</td><td><span class="chip c-bek">uyarı</span></td></tr>
+        <tr><td><b>Gebelik</b></td><td>15-50 yaş kadın: sorgu / test</td><td>hasta beyanı</td><td><span class="chip c-red">engel</span></td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Kontrol</span> <span class="btn kucuk">📚 Hazırdan ekle (MR güvenlik, pacemaker, klostrofobi, emzirme)</span></div>
+    </div>
+    <div class="fld" style="margin-top:6px"><label>Özel uyarı (teknisyen ekranında üstte)</label><div class="inp metin">Böbrek nakilli hastada geç faz alınmaz; nefroloji ile görüşülür.</div></div>
+  </div>
+
+  <!-- MALZEME -->
+  <div class="panel" id="p-malzeme">
+    <div class="grp"><h4>Malzeme / sarf <span class="ek">çekim tamamlanınca depodan düşer</span></h4>
+      <table class="liste">
+        <tr><th></th><th>Stok kalemi</th><th class="r">Miktar</th><th>Düşüm</th><th>Kural</th><th class="r">Depo stoğu</th></tr>
+        <tr><td class="surukle">⋮⋮</td><td><b>İyohekzol 350 · 100 ml</b></td><td class="r">1 şişe</td><td>otomatik</td><td>kontrast verildiyse</td><td class="r">46</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td><b>Enjektör seti (power injector)</b></td><td class="r">1</td><td>otomatik</td><td>kontrast verildiyse</td><td class="r">120</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td><b>Oral kontrast 1 L</b></td><td class="r">1</td><td>sor</td><td>oral seçildiyse</td><td class="r"><span class="chip c-bek">8 - kritik</span></td></tr>
+        <tr><td class="surukle">⋮⋮</td><td><b>IV kanül 20G</b></td><td class="r">1</td><td>otomatik</td><td>her çekimde</td><td class="r">640</td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Kalem</span> <span style="color:var(--muted);margin-left:8px">"sor" = teknisyen çekim sonunda miktarı onaylar (ör. yarım şişe).</span></div>
+    </div>
+  </div>
+
+  <!-- CİHAZLAR -->
+  <div class="panel" id="p-cihaz">
+    <div class="grp"><h4>Bu protokolün çekilebildiği cihazlar <span class="ek">randevu yalnız bunlara verilir</span></h4>
+      <table class="liste">
+        <tr><th></th><th>Cihaz</th><th>Oda</th><th class="r">Süre (bu cihazda)</th><th>Cihaz protokol adı</th><th>Durum</th></tr>
+        <tr><td>☑</td><td><b>BT-1</b> · 128 kesit</td><td>Radyoloji 1. kat</td><td class="r">15 dk</td><td>ABD_PV_ROUTINE</td><td><span class="chip c-ok">Uygun</span></td></tr>
+        <tr><td>☐</td><td><b>BT-2</b> · 16 kesit</td><td>Acil</td><td class="r">20 dk</td><td>—</td><td><span class="chip c-gri">Tanımsız</span></td></tr>
+      </table>
+      <div class="ic bilgi" style="margin:10px">Cihaz protokol adı modalite iş listesine (MWL) gider; teknisyen cihazda doğru programı seçer.</div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Sekmeler tıklanınca açılır. Kimlik şeridi: tetkik (hizmet - protokol hizmete bağlı), modalite, süre, kontrast, seri kodu, durum.<br>
+<span class="n">1</span><b>Genel:</b> bölge, hazırlık süresi, randevu slotu, varsayılan rapor şablonu, teknisyen yetkinliği, endikasyon notu, doz hedefleri (CTDIvol / DLP / DRL).<br>
+<span class="n">2</span><b>Seriler</b> (<code>seri_tarifi</code>): seri adı, faz / gecikme, kesit, kV / mAs, rekonstrüksiyon.<br>
+<span class="n">3</span><b>Kontrast:</b> tür, ajan, doz (ml/kg, en çok), hız, takip; kontrendikasyon.<br>
+<span class="n">4</span><b>Hasta hazırlığı</b> (<code>hazirlik_kodu / hazirlik_metni</code>): hastaya metin (randevu SMS'i + hazırlık kartı), personele not, SMS önizleme.<br>
+<span class="n">5</span><b>Uyarılar / kontrol</b> (<code>uyari_kodu / ozel_uyari</code>): çekim öncesi kontrol listesi - kural, kaynak (lab / alerji / ilaç), engel ya da uyarı.<br>
+<span class="n">6</span><b>Malzeme / sarf</b> (<code>radyoloji_protokol_malzeme</code>): stok, miktar, düşüm tipi (otomatik / sor), kural, depo stoğu.<br>
+<span class="n">7</span><b>Cihazlar:</b> protokolün çekilebildiği cihazlar, cihaz başına süre, MWL protokol adı.
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>

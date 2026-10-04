@@ -241,6 +241,13 @@ public sealed class KimlikServisi
         var kullanici = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal)
                         ?? throw GentegreHatasi.Yetkisiz();
 
+        // DEMO KULLANICISI (964) parolasini degistiremez: girisler ekranda
+        //   herkese acik yazili; degisirse sonraki ziyaretci giremez.
+        if (kullanici.Kod.StartsWith("demo.", StringComparison.Ordinal)
+            && await _veri.TekDegerAsync<string?>(
+                   "select deger from public.referans where anahtar = 'kurulum.demo'", null, iptal) == "1")
+            throw GentegreHatasi.IsKurali("Demo kullanıcısının parolası değiştirilemez.");
+
         // Parola hic atanmamissa (goc) eski parola sorulmaz.
         if (kullanici.ParolaHash.Length > 0 &&
             !BCrypt.Net.BCrypt.Verify(istek.EskiParola ?? "", kullanici.ParolaHash))

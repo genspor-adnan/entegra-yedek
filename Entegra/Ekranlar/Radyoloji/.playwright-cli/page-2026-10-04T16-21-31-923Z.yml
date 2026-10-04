@@ -1,0 +1,117 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - text: ⚙️ Çekim Protokolü — Abdomen BT (IV kontrastlı) · ABD-PV
+      - generic [ref=e4]: Esc ile kapanır
+    - generic [ref=e5]:
+      - generic [ref=e6] [cursor=pointer]: 💾 Kaydet
+      - generic [ref=e7] [cursor=pointer]: ⧉ Kopyala
+      - generic [ref=e8] [cursor=pointer]: 📄 Hasta hazırlık kartı
+      - generic [ref=e9] [cursor=pointer]: 📨 SMS önizle
+      - generic [ref=e10] [cursor=pointer]: Kapat
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: Tetkik (hizmet) *
+        - generic [ref=e14]:
+          - text: Abdomen BT (IV kontrastlı)
+          - generic [ref=e15]: …
+      - generic [ref=e16]:
+        - generic [ref=e17]: Modalite *
+        - generic [ref=e18]: BT
+      - generic [ref=e20]:
+        - generic [ref=e21]: Süre *
+        - generic [ref=e22]: 15 dk
+      - generic [ref=e23]:
+        - generic [ref=e24]: Kontrast
+        - generic [ref=e25]: IV + oral
+      - generic [ref=e27]:
+        - generic [ref=e28]: Seri kodu
+        - generic [ref=e29]: ABD-PV
+      - generic [ref=e30]:
+        - generic [ref=e31]: Durum
+        - generic [ref=e32]: Aktif
+    - generic [ref=e34]:
+      - generic [ref=e35] [cursor=pointer]: Genel
+      - generic [ref=e36] [cursor=pointer]:
+        - text: Seriler
+        - generic [ref=e37]: "3"
+      - generic [ref=e38] [cursor=pointer]: Kontrast
+      - generic [ref=e39] [cursor=pointer]: Hasta hazırlığı
+      - generic [ref=e40] [cursor=pointer]:
+        - text: Uyarılar / kontrol
+        - generic [ref=e41]: "4"
+      - generic [ref=e42] [cursor=pointer]:
+        - text: Malzeme / sarf
+        - generic [ref=e43]: "4"
+      - generic [ref=e44] [cursor=pointer]:
+        - text: Cihazlar
+        - generic [ref=e45]: "1"
+    - generic [ref=e114]:
+      - heading "Seri tarifi teknisyen çekim sırasında bunu görür" [level=4] [ref=e115]:
+        - text: Seri tarifi
+        - generic [ref=e116]: teknisyen çekim sırasında bunu görür
+      - table [ref=e117]:
+        - rowgroup [ref=e118]:
+          - row [ref=e119]:
+            - columnheader [ref=e120]
+            - columnheader "#" [ref=e121]
+            - columnheader "Seri" [ref=e122]
+            - columnheader "Faz / gecikme" [ref=e123]
+            - columnheader "Kesit / aralık" [ref=e124]
+            - columnheader "kV / mAs" [ref=e125]
+            - columnheader "Rekonstrüksiyon" [ref=e126]
+            - columnheader "Not" [ref=e127]
+          - row [ref=e128]:
+            - cell "⋮⋮" [ref=e129]
+            - cell "1" [ref=e130]
+            - cell "Topogram" [ref=e131]
+            - cell "—" [ref=e132]
+            - cell "—" [ref=e133]
+            - cell "120 / 35" [ref=e134]
+            - cell "—" [ref=e135]
+            - cell "diyafram - simfiz" [ref=e136]
+          - row [ref=e137]:
+            - cell "⋮⋮" [ref=e138]
+            - cell "2" [ref=e139]
+            - cell "Portal venöz faz" [ref=e140]
+            - cell "70 sn (bolus takip yok)" [ref=e141]
+            - cell "1,25 / 1,25 mm" [ref=e142]
+            - cell "120 / doz modülasyonu" [ref=e143]
+            - cell "yumuşak doku · 5 mm aksiyel + koronal" [ref=e144]
+            - cell "—" [ref=e145]
+          - row [ref=e146]:
+            - cell "⋮⋮" [ref=e147]
+            - cell "3" [ref=e148]
+            - cell "Geç faz" [ref=e149]
+            - cell "5 dk" [ref=e150]
+            - cell "5 / 5 mm" [ref=e151]
+            - cell "100 / düşük doz" [ref=e152]
+            - cell "yumuşak doku" [ref=e153]
+            - cell "yalnız böbrek / üreter" [ref=e154]
+      - generic [ref=e155]:
+        - generic [ref=e156] [cursor=pointer]: ＋ Seri
+        - generic [ref=e157] [cursor=pointer]: ⧉ Başka protokolden al
+  - generic [ref=e101]:
+    - text: "NOT (mockup): Sekmeler tıklanınca açılır. Kimlik şeridi: tetkik (hizmet - protokol hizmete bağlı), modalite, süre, kontrast, seri kodu, durum."
+    - generic [ref=e102]: "1"
+    - text: "Genel: bölge, hazırlık süresi, randevu slotu, varsayılan rapor şablonu, teknisyen yetkinliği, endikasyon notu, doz hedefleri (CTDIvol / DLP / DRL)."
+    - generic [ref=e103]: "2"
+    - text: Seriler (
+    - code [ref=e104]: seri_tarifi
+    - text: "): seri adı, faz / gecikme, kesit, kV / mAs, rekonstrüksiyon."
+    - generic [ref=e105]: "3"
+    - text: "Kontrast: tür, ajan, doz (ml/kg, en çok), hız, takip; kontrendikasyon."
+    - generic [ref=e106]: "4"
+    - text: Hasta hazırlığı (
+    - code [ref=e107]: hazirlik_kodu / hazirlik_metni
+    - text: "): hastaya metin (randevu SMS'i + hazırlık kartı), personele not, SMS önizleme."
+    - generic [ref=e108]: "5"
+    - text: Uyarılar / kontrol (
+    - code [ref=e109]: uyari_kodu / ozel_uyari
+    - text: "): çekim öncesi kontrol listesi - kural, kaynak (lab / alerji / ilaç), engel ya da uyarı."
+    - generic [ref=e110]: "6"
+    - text: Malzeme / sarf (
+    - code [ref=e111]: radyoloji_protokol_malzeme
+    - text: "): stok, miktar, düşüm tipi (otomatik / sor), kural, depo stoğu."
+    - generic [ref=e112]: "7"
+    - text: "Cihazlar: protokolün çekilebildiği cihazlar, cihaz başına süre, MWL protokol adı."

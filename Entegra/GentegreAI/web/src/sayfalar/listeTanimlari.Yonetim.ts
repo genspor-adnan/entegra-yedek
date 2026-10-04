@@ -430,6 +430,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // EXCEL'DEN ICERI ALMA (548) - dort adimli sihirbaz, liste degil.
     //   Menude "Modül Ayarları"nin altinda degil, kendi basligi altinda:
     //   ayar degil VERI ISI - cari/stok/hizmet kartlarini yaziyor.
+    kaynak: 'demo-verisi', rota: 'demo-verisi', baslik: 'Demo Verisi',
+    yol: 'Yonetim › Veri Aktarımı › Demo Verisi', ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: 'Demo Verisi',
+    menuSira: 9, ic: '🧪', yetkiKodu: 'ayar',
+  },
+  {
+    // DEMO VERİSİ (964, mockup Ekranlar/Ayarlar/demo_tohum.html) yukarıda;
+    //   tanıtım kurulumunun verisi - yalnız DEMO kurulumda yazar.
     kaynak: 'iceri-alma', rota: 'iceri-alma', baslik: "Excel'den İçeri Alma",
     yol: 'Yonetim › Veri Aktarımı › İçeri Alma', ozelSayfa: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: "Excel'den İçeri Alma",

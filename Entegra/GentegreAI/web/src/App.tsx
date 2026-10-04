@@ -24,6 +24,7 @@ const KasaIslemKarti = tembel(() => import('./sayfalar/KasaIslemKarti'), 'KasaIs
 const StokAyarlar = tembel(() => import('./sayfalar/StokAyarlar'), 'StokAyarlar');
 const KasaAyarlar = tembel(() => import('./sayfalar/KasaAyarlar'), 'KasaAyarlar');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
+const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
 const CalismaSablonListesi = tembel(() => import('./sayfalar/calisma/CalismaSablonListesi'), 'CalismaSablonListesi');
 const CalismaIstisnaListesi = tembel(() => import('./sayfalar/calisma/CalismaIstisnaListesi'), 'CalismaIstisnaListesi');
@@ -218,6 +219,8 @@ function Yollar() {
         {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar') && <Route path="/iceri-alma" element={<IceriAlma />} />}
+        {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}
+        {yetki('ayar') && <Route path="/demo-verisi" element={<DemoVerisi />} />}
         {/* Eski "Randevu Ayarlari" adresi Calisma Sablonlari'na gider (ayarlar orada). */}
         <Route path="/randevu-ayarlar" element={<Navigate to="/calisma-sablon" replace />} />
         {/* Calisma plani (711): sablon + istisnadan turetilen haftalik plan. */}

@@ -233,8 +233,10 @@ public sealed partial class KartDeposu
     /// Özlük gibi kartla aynı kimliği taşıyan detayda satır-bazlı denetim yetmez:
     /// mevcut satırda boş kalan zorunlu alan "değişen" yoldan hiç gönderilmez,
     /// yeni kartta detay hiç gönderilmezse satır da açılmaz. Bu yüzden kayıttan
-    /// SONRA, aynı işlem içinde satır okunur: kart yeniyse ya da detay bu
-    /// kayıtta değiştiyse zorunlu alanlar dolu olmalı - değilse işlem geri alınır.
+    /// SONRA, aynı işlem içinde satır okunur: zorunlu alanlar dolu olmalı -
+    /// değilse işlem geri alınır. HER KAYITTA (kullanıcı ikinci kez: "doğ trh
+    /// girmeden kaydediyor"): yalnız detay değişince denetlemek, ad / bölüm
+    /// değiştirip kaydedeni geçiriyordu - eksik kart ilk düzenlemede tamamlanır.
     /// Koşullu sekmeler (KosulAlani) denetlenmez: sekme açık değilse alan istenmez.
     /// </summary>
     private async Task TekSatirZorunluDenetleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
@@ -245,20 +247,21 @@ public sealed partial class KartDeposu
             if (detay.UstKolon != detay.IdKolonu || detay.KosulAlani is not null) continue;
             var zorunlular = detay.Alanlar.Where(a => a.Zorunlu && a.Yazilabilir).ToList();
             if (zorunlular.Count == 0) continue;
-            if (!yeniKart && (farklar is null || !farklar.ContainsKey(detay.Ad))) continue;
 
             var secim = string.Join(", ", zorunlular.Select((a, i) => $"{a.Kolon} as k{i.ToString(CultureInfo.InvariantCulture)}"));
             await using var komut = baglanti.Komut(
                 $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0", islem, ustId);
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
             var satirVar = await okuyucu.ReadAsync(iptal);
-            for (var i = 0; i < zorunlular.Count; i++)
-            {
-                var bos = !satirVar || ZorunluBos(zorunlular[i], okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i));
-                if (bos)
-                    throw GentegreHatasi.Dogrulama($"{zorunlular[i].Etiket} zorunlu.",
-                        new AlanHatasi($"{detay.Ad}.{zorunlular[i].Ad}", $"{zorunlular[i].Etiket} boş bırakılamaz."));
-            }
+            // EKSİKLERİN HEPSİ TEK MESAJDA: biri doldurulunca sıradakini
+            //   söylemek kullanıcıyı aynı kartta defalarca "Kaydet"e bastırır.
+            var eksikler = zorunlular
+                .Where((a, i) => !satirVar || ZorunluBos(a, okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i)))
+                .ToList();
+            if (eksikler.Count > 0)
+                throw GentegreHatasi.Dogrulama(
+                    $"{string.Join(", ", eksikler.Select(e => e.Etiket))} zorunlu.",
+                    eksikler.Select(e => new AlanHatasi($"{detay.Ad}.{e.Ad}", $"{e.Etiket} boş bırakılamaz.")).ToArray());
         }
     }
 }

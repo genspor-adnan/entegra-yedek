@@ -91,12 +91,24 @@ public sealed class BildirimIscisi : BackgroundService
         var fabrika = kapsam.ServiceProvider.GetRequiredService<BildirimGondericiFabrikasi>();
 
         var kayitlar = await depo.SiradakileriAlAsync(_parti, iptal);
+        // DEMO KURULUM (964): dış gönderim YOK - satır "DEMO" sağlayıcı
+        //   referansıyla kapanır, kimseye SMS / e-posta gitmez. Uygulama içi
+        //   akış (zil, taleplerim) etkilenmez.
+        var demo = kayitlar.Count > 0 && await kapsam.ServiceProvider
+            .GetRequiredService<Gentegre.Api.Servisler.Demo.DemoVeriServisi>().DemoMuAsync(iptal);
         foreach (var kayit in kayitlar)
         {
             var kronometre = Stopwatch.StartNew();
             Cekirdek.Bildirim.GonderimSonucu sonuc;
             try
             {
+                if (demo)
+                {
+                    sonuc = new Cekirdek.Bildirim.GonderimSonucu(true, SaglayiciRef: "DEMO",
+                        HamYanit: "Demo kurulum - dış gönderim yapılmadı.");
+                    await depo.SonucYazAsync(kayit, sonuc, 0, CancellationToken.None);
+                    continue;
+                }
                 var gonderici = await fabrika.KurAsync(kayit, iptal);
                 sonuc = await gonderici.GonderAsync(kayit, iptal);
             }

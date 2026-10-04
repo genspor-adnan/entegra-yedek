@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo Verisi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8; --red:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:16px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .serit .k b{display:block;font-size:15px;color:var(--navy)}
+  .serit .k span{font-size:10.5px;color:var(--muted)}
+  .chip{display:inline-block;padding:1px 9px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dee8}
+  .govde{display:grid;grid-template-columns:1fr 380px}
+  .sol{border-right:1px solid var(--line2)}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);display:flex;gap:8px;align-items:center;
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0}
+  .grp h4 .ek{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .tam{grid-column:1 / -1}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;display:flex;align-items:center}
+  .combo{position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .profiller{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .pr{border:1px solid var(--line);border-radius:4px;padding:7px 6px;background:#fff;text-align:center;font-size:11px;line-height:1.3}
+  .pr b{display:block;font-size:12px}
+  .pr.on{background:var(--sel);border-color:var(--selbd);color:var(--navy)}
+  .pr span{color:var(--muted);font-size:10px}
+  .olcek{display:flex;gap:4px}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  table.t{width:100%;border-collapse:collapse;font-size:11.5px}
+  .t th{text-align:left;color:var(--muted);font-weight:normal;padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .t td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .t .r{text-align:right}
+  .t input[type=checkbox]{margin:0}
+  .sonuk{color:var(--muted)}
+  .uyar{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn);border-radius:4px;padding:7px 9px;font-size:11px;line-height:1.5;margin:0 12px 12px}
+  .kirmizi{background:#fdecea;border:1px solid #f1c3be;color:var(--red);border-radius:4px;padding:7px 9px;font-size:11px;line-height:1.5;margin:12px}
+  .sag .grp{margin:12px}
+  .adim{display:flex;gap:8px;align-items:flex-start;padding:5px 10px;font-size:11.5px}
+  .adim i{width:16px;height:16px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;color:#fff;margin-top:1px}
+  .adim.ok i{background:#2e7d46} .adim.su i{background:#e0a33a} .adim.bek i{background:#b9c4d0}
+  .adim small{display:block;color:var(--muted);font-size:10px}
+  .cubuk{height:6px;border-radius:3px;background:#e3e9f0;margin:4px 10px 10px;overflow:hidden}
+  .cubuk i{display:block;height:100%;width:62%;background:#2f6db3}
+  .satir{display:flex;justify-content:space-between;padding:3px 10px;font-size:11.5px}
+  .satir span{color:var(--muted)}
+  .n{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#e0a33a;color:#fff;font-size:10px;font-weight:bold;align-items:center;justify-content:center;margin-right:3px;vertical-align:middle}
+  code{background:#eef1f5;border-radius:3px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧪 Demo Verisi <span class="sp">Yönetim › Kurulum › Demo verisi · yalnız DEMO işaretli kurulumda açılır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">▶ Demo verisini üret</span>
+    <span class="btn">↻ Sıfırla ve yeniden üret</span>
+    <span class="btn">👁 Önizleme (sayılar)</span>
+    <span class="btn danger">🗑 Demo verisini temizle</span>
+    <span class="sp"></span>
+    <span class="btn">📋 Senaryo notları</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="serit">
+    <div class="k"><span>Kurulum</span><b>/genotipai/hastane</b></div>
+    <div class="k"><span>Mod</span><b><span class="chip c-bek">DEMO</span></b></div>
+    <div class="k"><span>Son üretim</span><b>04.10.2026 03:00</b></div>
+    <div class="k"><span>Tohum</span><b>#2611 · v3</b></div>
+    <div class="k"><span>Dış gönderim</span><b><span class="chip c-ok">Kapalı (SMS / e-posta / e-Nabız / Medula)</span></b></div>
+    <div class="k" style="margin-left:auto"><span>Gece yenileme</span><b><span class="chip c-ok">Her gün 03:00</span></b></div>
+  </div>
+
+  <div class="govde">
+    <div class="sol">
+      <!-- 2 -->
+      <div class="grp">
+        <h4>Kurum profili <span class="ek">ekranlar ve modüller profile göre</span></h4>
+        <div class="iz">
+          <div class="tam profiller">
+            <div class="pr on"><b>🏥 Hastane</b><span>poliklinik + yatan + acil + ameliyat</span></div>
+            <div class="pr"><b>🩺 Tıp merkezi</b><span>poliklinik + lab + görüntüleme</span></div>
+            <div class="pr"><b>🦷 Ağız-diş</b><span>diş hekimi + lab işleri</span></div>
+            <div class="pr"><b>🧫 Laboratuvar</b><span>numune + KK + rapor</span></div>
+          </div>
+          <div class="fld"><label>Kurum adı (antet)</label><div class="inp">Örnek Şehir Hastanesi</div></div>
+          <div class="fld"><label>Şehir / ilçe</label><div class="inp">İstanbul / Kadıköy</div></div>
+          <div class="fld"><label>Tohum (rastgelelik)</label><div class="inp">2611 <span class="sonuk" style="margin-left:6px">aynı tohum = aynı veri</span></div></div>
+          <div class="fld"><label>Tarih ekseni</label><div class="inp combo">Bugüne göre (−90 gün … +30 gün)</div></div>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="grp">
+        <h4>Ölçek ve modüller <span class="ek">kapalı modül hiç üretilmez</span></h4>
+        <div class="iz">
+          <div class="tam olcek"><span class="sonuk" style="margin-right:6px">Ölçek</span>
+            <span class="cip">Küçük</span><span class="cip on">Orta</span><span class="cip">Büyük</span><span class="cip">Özel…</span></div>
+        </div>
+        <table class="t">
+          <tr><th></th><th>Modül</th><th>Ne üretilir</th><th class="r">Adet</th></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Kurum yapısı</b></td><td>bölümler, poliklinik odaları, servis / yatak, çalışma planları</td><td class="r">18 bölüm · 60 yatak</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Personel</b></td><td>hekim, hemşire, kayıt kabul, lab, eczane, İK - SKRS branşlı, yöneticili</td><td class="r">85</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Hasta</b></td><td>kurgusal TC (algoritma geçerli, gerçek olmayan), yaş / cinsiyet dağılımı, SGK / özel sigorta</td><td class="r">300</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Randevu</b></td><td>geçmiş (geldi / gelmedi) + bugün + 2 hafta ileri, doluluk %70</td><td class="r">1.400</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Başvuru / muayene</b></td><td>ICD-10 tanı, şikâyet / bulgu şablonları, reçete</td><td class="r">900</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Laboratuvar</b></td><td>istem → numune → sonuç (referans dışı %8, panik 3), KK çalışmaları</td><td class="r">2.600 test</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Radyoloji</b></td><td>istem + rapor metni (görüntü yok, yer tutucu)</td><td class="r">180</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Yatan / acil / ameliyat</b></td><td>bugün dolu 42 yatak, 6 acil triyaj, 3 ameliyat planı</td><td class="r">95 yatış</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Eczane / stok</b></td><td>ilaç kataloğu, depo hareketleri, kritik stok 5 kalem</td><td class="r">400 kalem</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>Fatura / Medula</b></td><td>provizyon + fatura (simülasyon - Medula'ya gitmez)</td><td class="r">700</td></tr>
+          <tr><td><input type="checkbox" checked></td><td><b>İK / talepler</b></td><td>izin, avans, masraf, belge talepleri; onayda bekleyenler; duyurular</td><td class="r">120</td></tr>
+          <tr><td><input type="checkbox"></td><td>Sterilizasyon</td><td>set / döngü / indikatör</td><td class="r sonuk">—</td></tr>
+          <tr><td><input type="checkbox"></td><td>Çağrı merkezi</td><td>çağrı kayıtları, geri arama</td><td class="r sonuk">—</td></tr>
+        </table>
+        <div class="uyar" style="margin-top:10px">⚠ Bütün kişiler kurgusal: ad / soyad listeden birleştirilir, TC kimlik numarası algoritmaya uyar ama
+          gerçek kişiye ait değildir (99 ile başlayan aralık), telefonlar <code>0500 000 xx xx</code>, e-postalar <code>@ornek.test</code>.</div>
+      </div>
+
+      <!-- 4 -->
+      <div class="grp">
+        <h4>Demo kullanıcıları <span class="ek">giriş ekranında "Demo olarak dene" düğmeleri</span></h4>
+        <table class="t">
+          <tr><th>Rol</th><th>Kullanıcı</th><th>Parola</th><th>Açılış ekranı</th><th>Girişte</th></tr>
+          <tr><td>Başhekim</td><td><code>demo.bashekim</code></td><td><code>Demo!2026</code></td><td>Yönetim panosu</td><td><input type="checkbox" checked></td></tr>
+          <tr><td>Poliklinik hekimi</td><td><code>demo.hekim</code></td><td><code>Demo!2026</code></td><td>Muayene kuyruğu (bugün 14 hasta)</td><td><input type="checkbox" checked></td></tr>
+          <tr><td>Hemşire</td><td><code>demo.hemsire</code></td><td><code>Demo!2026</code></td><td>Servis / eMAR</td><td><input type="checkbox" checked></td></tr>
+          <tr><td>Kayıt kabul</td><td><code>demo.kayit</code></td><td><code>Demo!2026</code></td><td>Randevular · bugün</td><td><input type="checkbox" checked></td></tr>
+          <tr><td>Laboratuvar</td><td><code>demo.lab</code></td><td><code>Demo!2026</code></td><td>Numune kabul + sonuç onay</td><td><input type="checkbox" checked></td></tr>
+          <tr><td>Eczane</td><td><code>demo.eczane</code></td><td><code>Demo!2026</code></td><td>İlaç talepleri</td><td><input type="checkbox"></td></tr>
+          <tr><td>İK</td><td><code>demo.ik</code></td><td><code>Demo!2026</code></td><td>Personel listesi</td><td><input type="checkbox"></td></tr>
+        </table>
+        <div class="sonuk" style="padding:6px 12px 10px">Demo kullanıcıları ayar / yetki / kullanıcı yönetimini göremez; parola değiştiremez.</div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <!-- 5 -->
+      <div class="grp">
+        <h4>Üretim <span class="ek">çalışıyor · 2 dk 10 sn</span></h4>
+        <div class="cubuk"><i></i></div>
+        <div class="adim ok"><i>✓</i><div>Demo verisi temizlendi<small>yalnız <code>demo = 1</code> işaretli kayıtlar · 12.480 satır</small></div></div>
+        <div class="adim ok"><i>✓</i><div>Kurum yapısı · personel<small>18 bölüm · 85 personel · 7 demo kullanıcı</small></div></div>
+        <div class="adim ok"><i>✓</i><div>Hasta · randevu<small>300 hasta · 1.400 randevu</small></div></div>
+        <div class="adim su"><i>…</i><div>Muayene · laboratuvar<small>612 / 900 başvuru</small></div></div>
+        <div class="adim bek"><i>5</i><div>Radyoloji · yatan · eczane · fatura</div></div>
+        <div class="adim bek"><i>6</i><div>Tarihleri bugüne kaydır, sayaçları ve özetleri tazele</div></div>
+      </div>
+
+      <!-- 6 -->
+      <div class="grp">
+        <h4>Bugünün sahnesi <span class="ek">demo başında görünen</span></h4>
+        <div class="satir"><span>Bugünkü randevu</span><b>186</b></div>
+        <div class="satir"><span>Poliklinikte bekleyen</span><b>23</b></div>
+        <div class="satir"><span>Yatan hasta / doluluk</span><b>42 / %70</b></div>
+        <div class="satir"><span>Panik lab sonucu</span><b style="color:#b3261e">3</b></div>
+        <div class="satir"><span>Onay bekleyen talep</span><b>9</b></div>
+        <div class="satir"><span>Kritik stok</span><b>5</b></div>
+        <div class="satir" style="padding-bottom:10px"><span>Senaryo hastası</span><b>Elif Demo (34, K) · 10:30 Dahiliye</b></div>
+      </div>
+
+      <!-- 7 -->
+      <div class="grp">
+        <h4>Gece yenileme</h4>
+        <div class="satir"><span>Zamanlama</span><b>Her gün 03:00</b></div>
+        <div class="satir"><span>Ne yapar</span><b>temizle + aynı tohumla üret</b></div>
+        <div class="satir"><span>Son 7 gün</span><b>7 / 7 başarılı</b></div>
+        <div class="satir" style="padding-bottom:10px"><span>Ziyaretçi kayıtları</span><b>silinir (demo = 1)</b></div>
+      </div>
+
+      <div class="kirmizi">🔒 Bu ekran yalnız kurulum <b>DEMO</b> işaretliyse (<code>referans: kurulum.demo = 1</code>) açılır.
+        Gerçek kurulumda menüde görünmez, uç 403 döner - canlı veriye demo yazılamaz, canlı veri silinemez.</div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div style="padding:10px 14px;font-size:11px;line-height:1.7">
+<b>NOT (mockup):</b> Kullanıcı: "hastane olarak tanıtım için neler yapılabilir?" → "demo tohum için mockup yap".<br>
+<span class="n">1</span><b>Durum şeridi:</b> hangi kurulum, DEMO modu, son üretim, tohum sürümü; <b>dış gönderim kapalı</b>
+(demo kurulumunda bildirim işçisi SMS / e-posta göndermez, e-Nabız / Medula simülasyonda kalır); gece yenileme.<br>
+<span class="n">2</span><b>Kurum profili:</b> hastane / tıp merkezi / diş / lab - üretilecek modüller profile göre gelir. Kurum adı antet ve
+yazılarda görünür. <b>Tohum</b> sayısı aynı kalırsa aynı veri üretilir (senaryo hep aynı hastayla anlatılır).
+Tarihler <b>bugüne göre</b> kayar: tanıtım hangi gün yapılırsa yapılsın "bugünün randevuları" dolu.<br>
+<span class="n">3</span><b>Ölçek ve modüller:</b> küçük / orta / büyük hazır ayar, modül başına aç-kapa ve adet. Lab sonuçlarında referans dışı ve
+panik değer oranı ayarlı (uyarıları göstermek için). Bütün kişiler kurgusal (99'lu TC aralığı, <code>@ornek.test</code>, 0500 000).<br>
+<span class="n">4</span><b>Demo kullanıcıları:</b> rol başına hazır hesap + açılış ekranı; giriş ekranında "Demo olarak dene" düğmeleri.
+Ayar / yetki / kullanıcı yönetimi kapalı, parola değiştirilemez.<br>
+<span class="n">5</span><b>Üretim:</b> adım adım ilerleme (arka plan işi). Temizlik yalnız <code>demo = 1</code> işaretli kayıtlara dokunur.<br>
+<span class="n">6</span><b>Bugünün sahnesi:</b> demo başladığında ekranda ne olacağı - bekleyen hasta, panik sonuç, onay bekleyen talep,
+kritik stok ve senaryo hastası ("Elif Demo", 10:30 Dahiliye: randevu → muayene → lab → reçete → fatura).<br>
+<span class="n">7</span><b>Gece yenileme:</b> her gece temizle + aynı tohumla üret; ziyaretçinin bıraktığı kayıtlar da gider.<br>
+<b>Güvenlik:</b> ekran ve uç yalnız DEMO işaretli kurulumda çalışır - canlı kurulumda görünmez.
+</div></div>
+
+</body>
+</html>

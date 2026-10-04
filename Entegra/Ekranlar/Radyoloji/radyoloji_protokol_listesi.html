@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çekim Protokolleri — Liste Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Çekim Protokolleri</h1><span class="yol">Radyoloji › Tanımlar › Çekim Protokolleri</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni protokol</span>
+    <span class="btn">⧉ Kopyala</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">📄 Hasta hazırlık kartı</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Tetkik, seri kodu…</span>
+    <span class="cip on">Tümü <i>58</i></span>
+    <span class="cip"><span class="mod m-bt">BT</span> <i>21</i></span>
+    <span class="cip"><span class="mod m-mr">MR</span> <i>19</i></span>
+    <span class="cip"><span class="mod m-us">US</span> <i>9</i></span>
+    <span class="cip"><span class="mod m-dr">DR</span> <i>6</i></span>
+    <span class="cip"><span class="mod m-fl">FL</span> <i>3</i></span>
+    <span class="combo">Kontrast: Tümü</span>
+    <span class="combo">Cihaz: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">⚠ Hazırlık metni yok <i>4</i></span>
+    <span class="cip">⚠ Malzemesiz kontrastlı <i>2</i></span>
+  </div>
+
+  <div class="govde3">
+    <div class="agac">
+      <h6>Bölge</h6>
+      <div class="dal on">Tümü <i>58</i></div>
+      <div class="dal">Baş - Boyun <i>12</i></div>
+      <div class="dal">Toraks <i>8</i></div>
+      <div class="dal">Abdomen - Pelvis <i>15</i></div>
+      <div class="dal">Kas - İskelet <i>13</i></div>
+      <div class="dal">Vasküler <i>6</i></div>
+      <div class="dal">Meme <i>4</i></div>
+      <h6 style="margin-top:12px">Cihaz</h6>
+      <div class="dal">BT-1 (128 kesit) <i>21</i></div>
+      <div class="dal">MR-1 (1,5 T) <i>19</i></div>
+      <div class="dal">US oda 1-2 <i>9</i></div>
+    </div>
+
+    <div>
+      <table class="liste">
+        <tr><th>Tetkik (hizmet)</th><th>Modalite</th><th class="r">Süre</th><th>Kontrast</th><th>Seri kodu</th><th>Hazırlık</th><th>Uyarı</th><th class="o">Malzeme</th><th class="o">Cihaz</th></tr>
+        <tr class="sec"><td><b>Abdomen BT (IV kontrastlı)</b><small>portal venöz faz</small></td><td><span class="mod m-bt">BT</span></td><td class="r">15 dk</td><td><span class="chip c-mor">IV + oral</span></td><td>ABD-PV</td><td><span class="chip c-mavi">4 saat açlık</span></td><td><span class="chip c-bek">kreatinin</span></td><td class="o">4</td><td class="o">BT-1</td></tr>
+        <tr><td><b>Beyin BT</b></td><td><span class="mod m-bt">BT</span></td><td class="r">10 dk</td><td><span class="chip c-gri">Yok</span></td><td>BEY-STD</td><td>—</td><td>—</td><td class="o">0</td><td class="o">BT-1</td></tr>
+        <tr><td><b>Toraks BT anjiyo (PE)</b><small>pulmoner arter fazı, bolus takip</small></td><td><span class="mod m-bt">BT</span></td><td class="r">15 dk</td><td><span class="chip c-mor">IV</span></td><td>TOR-PE</td><td>—</td><td><span class="chip c-bek">kreatinin</span> <span class="chip c-red">alerji</span></td><td class="o">3</td><td class="o">BT-1</td></tr>
+        <tr><td><b>Lomber MR</b></td><td><span class="mod m-mr">MR</span></td><td class="r">25 dk</td><td><span class="chip c-gri">Yok</span></td><td>LOM-STD</td><td>—</td><td><span class="chip c-red">MR güvenlik</span></td><td class="o">0</td><td class="o">MR-1</td></tr>
+        <tr><td><b>Hipofiz MR (dinamik)</b></td><td><span class="mod m-mr">MR</span></td><td class="r">35 dk</td><td><span class="chip c-mor">IV (gadolinyum)</span></td><td>HIP-DIN</td><td>—</td><td><span class="chip c-red">MR güvenlik</span> <span class="chip c-bek">eGFR</span></td><td class="o">2</td><td class="o">MR-1</td></tr>
+        <tr><td><b>Prostat MR (multiparametrik)</b><small>PI-RADS</small></td><td><span class="mod m-mr">MR</span></td><td class="r">40 dk</td><td><span class="chip c-mor">IV</span></td><td>PRO-MP</td><td><span class="chip c-mavi">lavman</span></td><td><span class="chip c-red">MR güvenlik</span></td><td class="o">3</td><td class="o">MR-1</td></tr>
+        <tr><td><b>Tüm abdomen US</b></td><td><span class="mod m-us">US</span></td><td class="r">20 dk</td><td><span class="chip c-gri">Yok</span></td><td>—</td><td><span class="chip c-mavi">8 saat açlık · dolu mesane</span></td><td>—</td><td class="o">0</td><td class="o">US</td></tr>
+        <tr><td><b>Özofagus-mide-duodenum grafisi</b></td><td><span class="mod m-fl">FL</span></td><td class="r">30 dk</td><td><span class="chip c-mor">Oral (baryum)</span></td><td>OMD</td><td><span class="chip c-mavi">8 saat açlık</span></td><td>—</td><td class="o">2</td><td class="o">FL</td></tr>
+        <tr><td><b>PA akciğer grafisi</b></td><td><span class="mod m-dr">DR</span></td><td class="r">5 dk</td><td><span class="chip c-gri">Yok</span></td><td>—</td><td>—</td><td><span class="chip c-bek">gebelik</span></td><td class="o">0</td><td class="o">DR</td></tr>
+        <tr><td><b>Kolon BT (sanal kolonoskopi)</b><small>protokol taslak</small></td><td><span class="mod m-bt">BT</span></td><td class="r">20 dk</td><td><span class="chip c-mor">Oral + rektal CO₂</span></td><td>KOL-VC</td><td><span class="chip c-bek">metin yok</span></td><td>—</td><td class="o">0</td><td class="o">BT-1</td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 58 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 3 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <div class="oniz">
+      <div class="bl"><h5>Seçili protokol</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Abdomen BT (IV kontrastlı)</div>
+        <div class="satir"><span>Seri kodu</span>ABD-PV</div>
+        <div class="satir"><span>Süre (oda)</span>15 dk · randevu slotu</div>
+        <div class="satir"><span>Kontrast</span>IV 100 ml (1,5 ml/kg) + oral</div>
+        <div class="satir"><span>Cihaz</span>BT-1</div>
+      </div>
+      <div class="bl"><h5>Seriler</h5>
+        <div class="satir"><span>1</span>Topogram</div>
+        <div class="satir"><span>2</span>Portal venöz faz (70 sn)</div>
+        <div class="satir"><span>3</span>Geç faz (5 dk) - böbrek</div>
+      </div>
+      <div class="bl"><h5>Hasta hazırlığı <a>SMS metni ›</a></h5>
+        <div style="line-height:1.5">Çekimden 4 saat önce yemeyin, su içebilirsiniz. Son 3 ay içindeki kreatinin sonucunuzu getirin. Metformin kullanıyorsanız hekiminize danışın.</div>
+      </div>
+      <div class="bl"><h5>Kontrol listesi (çekim öncesi)</h5>
+        <div class="satir"><span>☐</span>eGFR ≥ 30 (son 90 gün)</div>
+        <div class="satir"><span>☐</span>Kontrast alerjisi sorgulandı</div>
+        <div class="satir"><span>☐</span>Metformin sorgulandı</div>
+        <div class="satir"><span>☐</span>Gebelik (15-50 yaş kadın)</div>
+      </div>
+      <div class="bl"><h5>Sarf (otomatik düşüm)</h5>
+        <div class="satir"><span>İyohekzol 350 · 100 ml</span>1 şişe</div>
+        <div class="satir"><span>Enjektör seti</span>1</div>
+        <div class="satir"><span>Oral kontrast 1 L</span>1</div>
+        <div class="satir"><span>IV kanül 20G</span>1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Tablo <code>radyoloji_protokol</code> (hizmet başına bir protokol) + <code>radyoloji_protokol_malzeme</code>.<br>
+<span class="n">1</span><b>Şerit:</b> modalite çipleri, kontrast ve cihaz süzgeci; ⚠ hazırlık metni girilmemiş / kontrastlı olup malzemesi tanımsız protokoller.<br>
+<span class="n">2</span><b>Sol:</b> bölge ve cihaz ağacı.<br>
+<span class="n">3</span><b>Liste:</b> tetkik (hizmet), modalite, süre (randevu slotunu belirler), kontrast türü, seri kodu, hazırlık özeti, uyarı rozetleri (kreatinin / eGFR, alerji, MR güvenlik, gebelik), malzeme sayısı, cihaz.<br>
+<span class="n">4</span><b>Sağ önizleme:</b> seriler, hasta hazırlığı (randevu SMS'i ve hazırlık kartı bundan), çekim öncesi kontrol listesi, otomatik düşülecek sarf.
+<b>Hasta hazırlık kartı</b>: seçili protokolün hastaya verilecek çıktısı.
+</div></div>
+
+</body>
+</html>

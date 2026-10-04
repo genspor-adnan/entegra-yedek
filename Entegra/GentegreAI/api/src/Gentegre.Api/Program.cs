@@ -77,6 +77,8 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizTetikleyici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGonderimi>();
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.EnabizPortalIstemcisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizMesajServisi>();
+// DEMO VERİSİ (964): yalnız kurulum.demo = 1 kurulumda yazar.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.Demo.DemoVeriServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizErisimServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGunSonuServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.ItsServisi>();
@@ -358,6 +360,7 @@ uygulama.BelgeTalebiUclariniEkle();
 // TALEPLERIM: kisinin kendi talepleri (izin/avans/masraf/belge/ariza/malzeme).
 uygulama.TaleplerimUclariniEkle();
 uygulama.PersonelListeUclariniEkle();
+uygulama.DemoUclariniEkle();
 // DUYURULAR (957): zil > Duyurular, yayinla, yonetim listesi.
 uygulama.DuyuruUclariniEkle();
 uygulama.TeknikServisUclariniEkle();

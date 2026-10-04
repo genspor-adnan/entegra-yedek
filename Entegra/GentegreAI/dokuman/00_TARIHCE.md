@@ -18438,3 +18438,29 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
   zorunlu alan boşsa işlem geri alınır (koşullu sekmeler hariç). Zorunlu **kod** alanında 0 = seçilmedi (cinsiyet
   varsayılanı 0; dev'de 102 personel 0) - boş sayılır. Etki: personel / diş hekimi / hasta özlüğü; boş zorunlu
   alanı olan mevcut kart, özlüğü değiştirilince doldurmadan kaydedilmez. dotnet test 218 geçti.
+* **İkinci tur (kullanıcı tekrar: "doğ trh girmeden kaydediyor"):** 1:1 detay zorunluları artık **her kayıtta**
+  denetlenir (yalnız özlük değişince değil) - ad / e-posta değiştirip kaydetmek de doğum tarihi ve cinsiyet ister;
+  eksiklerin hepsi tek mesajda ("Doğum Tarihi, Cinsiyet zorunlu."). Dev'de 102 personelin 97'sinde doğum tarihi,
+  99'unda cinsiyet boş - ilk düzenlemede tamamlanacak; hastada 2 / 1.
+
+## 04.10.2026 — Demo verisi, 1. aşama (964)
+
+* **Mockup** `Ekranlar/Ayarlar/demo_tohum.html` (kullanıcı: "hastane olarak tanıtım için neler yapılabilir?" →
+  "demo tohum için mockup yap"). Ekran `/demo-verisi` (Yönetim › Veri Aktarımı › Demo Verisi, yetki `ayar`).
+* **Güvenlik:** referans `kurulum.demo` (0) - yalnız 1 olan kurulumda üretim / temizlik / gece işi çalışır (uçlar 403),
+  bayrak EKRANDAN açılmaz (sunucuda SQL). Demo kurulumda **bildirim işçisi dış gönderim yapmaz** (satır "DEMO"
+  referansıyla kapanır). Demo kullanıcısı (`demo.*`) parolasını değiştiremez.
+* **Üretici** `Servisler/Demo/DemoVeriServisi`: profil, kurum adı (şube ünvanı), tohum (aynı tohum = aynı veri), ölçek
+  (küçük / orta / büyük), modüller. 1. aşamada: **personel** (başhekim, klinik dağılımlı hekim, hemşire, kayıt kabul, lab,
+  eczane, İK, idari - SKRS görev, yönetici bağı), **demo kullanıcıları** (7 rol, `Demo!2026`, giriş ekranında **"Demo
+  olarak dene"** düğmeleri), **hasta** (kurgusal TC 99…, yaş / cinsiyet dağılımı, senaryo hastası **Elif Demo**),
+  **randevu** (geçmiş geldi / gelmedi / iptal, bugün - hafta sonu da dolu -, ileri; senaryo hastası bugün 10:30),
+  **İK talepleri** (izin geçmiş / planlı / taslak, avans, belge talebi). Muayene, lab, radyoloji, yatan, eczane, fatura
+  ekranda "sonraki aşama".
+* **Temizlik** `demo_kayit` defterinden + demo kişilere bağlı bilinen tablolar (randevu, İK talepleri, kullanıcı, kadro
+  hareketi - özlük silinince tetik "çıkış" hareketi yazdığı için hareketler özlükten SONRA tekrar silinir); başka kayda
+  bağlı demo kişi atlanır, sayısı raporlanır. Personel cep telefonu benzersiz (sayaçla), sicil `DM####` çakışmasız.
+* **Gece yenileme** zamanlı iş `demo.yenile` (günlük 03:00, varsayılan pasif; ekrandan açılır). `demo_uretim` geçmişi.
+* Doğrulama (dev, geçici DEMO bayrağıyla): küçük ölçek 2 sn - 25 personel, 7 kullanıcı, 100 hasta, ~400 randevu (bugün
+  20), İK; `demo.hekim` girişi; temizlik sonrası demo kişi / kullanıcı / kayıt 0; bayrak kapatılınca üretim 403.
+  Dev'de bayrak tekrar 0. tsc temiz, vitest 789/789, dotnet test 218 geçti.

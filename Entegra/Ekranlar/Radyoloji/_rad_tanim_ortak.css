@@ -1,0 +1,92 @@
+/* Radyoloji tanım mockup'ları (şablon / protokol) - ortak stil. */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+  --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa;
+  --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --grpbg:#fbfcfd;
+  --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8; --red:#b3261e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+.win{max-width:1320px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+.title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+.toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer}
+.btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+.btn.kucuk{padding:2px 8px;font-size:11px}
+.sp{margin-left:auto}
+.ust{display:flex;align-items:center;gap:10px;padding:10px 14px 6px}
+.ust h1{margin:0;font-size:17px;color:var(--navy)}
+.ust .yol{color:var(--muted);font-size:11px}
+.serit{display:flex;gap:6px;align-items:center;padding:0 14px 8px;flex-wrap:wrap}
+.ara{border:1px solid var(--line);border-radius:14px;height:26px;width:240px;padding:0 12px;display:flex;align-items:center;color:#9aa7b5;background:#fff}
+.cip{border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:#fff;font-size:11px;cursor:pointer}
+.cip.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+.cip i{font-style:normal;opacity:.75;margin-left:3px}
+.combo{border:1px solid var(--line);border-radius:3px;height:25px;padding:0 22px 0 8px;display:inline-flex;align-items:center;background:#fff;position:relative;min-width:140px}
+.combo::after{content:"▾";position:absolute;right:7px;color:var(--muted);font-size:10px}
+table.liste{width:100%;border-collapse:collapse;font-size:11.5px}
+.liste th{background:var(--head);text-align:left;font-weight:bold;color:#46576a;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.liste td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.liste tr.sec td{background:var(--sel)}
+.liste tr.pasif td{color:#9aa7b5}
+.liste .r{text-align:right} .liste .o{text-align:center}
+.liste small{display:block;color:var(--muted);font-size:10.5px}
+.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+.c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+.c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+.c-mavi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+.c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+.c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dee8}
+.c-mor{background:#efe6f8;color:#6a3d9a;border:1px solid #d9c6ee}
+.mod{display:inline-block;min-width:34px;text-align:center;padding:1px 6px;border-radius:3px;font-weight:bold;font-size:10.5px;color:#fff}
+.m-bt{background:#2f6db3} .m-mr{background:#6a3d9a} .m-us{background:#16a085} .m-dr{background:#7f8c8d} .m-mg{background:#c0392b} .m-fl{background:#d35400} .m-dp{background:#27ae60}
+.altbar{display:flex;justify-content:space-between;padding:8px 12px;color:var(--muted);font-size:11px;border-top:1px solid var(--line2)}
+.govde3{display:grid;grid-template-columns:190px minmax(0,1fr) 320px;border-top:1px solid var(--line2);min-height:520px}
+.agac{border-right:1px solid var(--line2);padding:8px 0;background:#fbfcfd;font-size:11.5px}
+.agac h6{margin:0 12px 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.dal{display:flex;justify-content:space-between;padding:4px 12px;cursor:pointer}
+.dal.on{background:var(--sel);color:var(--navy);font-weight:bold}
+.dal.alt{padding-left:26px}
+.dal i{font-style:normal;color:var(--muted);font-size:10.5px}
+.oniz{border-left:1px solid var(--line2);background:#fbfcfd}
+.bl{padding:10px 14px;border-bottom:1px solid var(--line2)}
+.bl h5{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:flex}
+.bl h5 a{margin-left:auto;text-transform:none;color:var(--accent);letter-spacing:0}
+.satir{display:flex;justify-content:space-between;padding:2px 0;gap:8px}
+.satir span{color:var(--muted)}
+/* KART */
+.kimlik{display:grid;gap:10px;padding:10px 12px;background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+.fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fld label{font-size:10.5px;color:var(--muted)}
+.fld .req::after{content:" *";color:var(--req,#b23b3b)}
+.inp{border:1px solid var(--line);border-radius:2px;background:#fff;min-height:23px;padding:2px 6px;display:flex;align-items:center;font-size:12px;overflow:hidden}
+.inp.big{font-weight:bold;font-size:13px;color:var(--navy)}
+.inp.pasif{background:#f3f5f8;color:#9aa7b5}
+.inp.metin{align-items:flex-start;min-height:60px;line-height:1.5;white-space:normal}
+.sekmeler{display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid var(--line);background:#f7f9fb}
+.sek{padding:6px 14px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#eef2f6;cursor:pointer;font-size:11.5px;color:#46576a;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+.sek.on{background:#fff;color:var(--navy);font-weight:bold}
+.sek .say{font-size:10px;background:#dde5ee;border-radius:8px;padding:0 6px;font-weight:normal}
+.panel{display:none;padding:12px;min-height:420px}
+.panel.on{display:block}
+.izgara{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px}
+.izgara .tam{grid-column:1/-1} .izgara .iki{grid-column:span 2}
+.grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+.grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);display:flex;gap:8px;align-items:center;background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0}
+.grp h4 .ek{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+.grp .ic{padding:10px 12px}
+.iki-kolon{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}
+.uyar{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn);border-radius:4px;padding:7px 9px;font-size:11px;line-height:1.5}
+.bilgi{background:#eef4fc;border:1px solid #cfe0f5;color:#2f5c9e;border-radius:4px;padding:7px 9px;font-size:11px;line-height:1.5}
+.kirmizi{background:#fdecea;border:1px solid #f1c3be;color:var(--red);border-radius:4px;padding:7px 9px;font-size:11px;line-height:1.5}
+.surukle{color:#b9c4d0;cursor:grab;width:14px}
+.a4{background:#fff;border:1px solid #cfd8e3;box-shadow:0 4px 14px rgba(20,40,70,.15);padding:24px 30px;font-family:Georgia,serif;font-size:11.5px;line-height:1.65;max-width:520px;margin:0 auto}
+.a4 h3{text-align:center;font-size:13px;margin:6px 0 12px;letter-spacing:.4px}
+.a4 .bb{font-family:Arial;font-weight:bold;font-size:11px;color:#1d4270;margin-top:10px;text-transform:uppercase;letter-spacing:.3px}
+.a4 .yer{background:#fff6d6;border-bottom:1px dashed #d6a400;padding:0 2px}
+.kbd{display:inline-block;border:1px solid #b9c4d0;border-bottom-width:2px;border-radius:3px;padding:0 5px;font-family:Consolas,monospace;font-size:11px;background:#fff}
+.n{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#e0a33a;color:#fff;font-size:10px;font-weight:bold;align-items:center;justify-content:center;margin-right:3px;vertical-align:middle}
+.not{padding:10px 14px;font-size:11px;line-height:1.7}
+code{background:#eef1f5;border-radius:3px;padding:0 4px;font-size:11px}

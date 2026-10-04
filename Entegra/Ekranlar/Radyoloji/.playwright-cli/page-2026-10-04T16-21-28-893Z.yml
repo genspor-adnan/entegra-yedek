@@ -1,0 +1,130 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - text: ⚙️ Çekim Protokolü — Abdomen BT (IV kontrastlı) · ABD-PV
+      - generic [ref=e4]: Esc ile kapanır
+    - generic [ref=e5]:
+      - generic [ref=e6] [cursor=pointer]: 💾 Kaydet
+      - generic [ref=e7] [cursor=pointer]: ⧉ Kopyala
+      - generic [ref=e8] [cursor=pointer]: 📄 Hasta hazırlık kartı
+      - generic [ref=e9] [cursor=pointer]: 📨 SMS önizle
+      - generic [ref=e10] [cursor=pointer]: Kapat
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: Tetkik (hizmet) *
+        - generic [ref=e14]:
+          - text: Abdomen BT (IV kontrastlı)
+          - generic [ref=e15]: …
+      - generic [ref=e16]:
+        - generic [ref=e17]: Modalite *
+        - generic [ref=e18]: BT
+      - generic [ref=e20]:
+        - generic [ref=e21]: Süre *
+        - generic [ref=e22]: 15 dk
+      - generic [ref=e23]:
+        - generic [ref=e24]: Kontrast
+        - generic [ref=e25]: IV + oral
+      - generic [ref=e27]:
+        - generic [ref=e28]: Seri kodu
+        - generic [ref=e29]: ABD-PV
+      - generic [ref=e30]:
+        - generic [ref=e31]: Durum
+        - generic [ref=e32]: Aktif
+    - generic [ref=e34]:
+      - generic [ref=e35] [cursor=pointer]: Genel
+      - generic [ref=e36] [cursor=pointer]:
+        - text: Seriler
+        - generic [ref=e37]: "3"
+      - generic [ref=e38] [cursor=pointer]: Kontrast
+      - generic [ref=e39] [cursor=pointer]: Hasta hazırlığı
+      - generic [ref=e40] [cursor=pointer]:
+        - text: Uyarılar / kontrol
+        - generic [ref=e41]: "4"
+      - generic [ref=e42] [cursor=pointer]:
+        - text: Malzeme / sarf
+        - generic [ref=e43]: "4"
+      - generic [ref=e44] [cursor=pointer]:
+        - text: Cihazlar
+        - generic [ref=e45]: "1"
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - heading "Protokol" [level=4] [ref=e50]
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: Bölge
+              - generic [ref=e54]: Abdomen - Pelvis
+            - generic [ref=e55]:
+              - generic [ref=e56]: Hasta hazırlık süresi
+              - generic [ref=e57]: 30 dk önce gelsin
+            - generic [ref=e58]:
+              - generic [ref=e59]: Randevu slotu
+              - generic [ref=e60]: 15 dk (süre)
+            - generic [ref=e61]:
+              - generic [ref=e62]: Rapor şablonu (varsayılan)
+              - generic [ref=e63]: BT-ABD-02 · Tüm abdomen BT (IV kontrastlı)
+            - generic [ref=e64]:
+              - generic [ref=e65]: Teknisyen yetkinliği
+              - generic [ref=e66]: BT teknisyeni (kontrast enjeksiyonu yetkili)
+            - generic [ref=e67]:
+              - generic [ref=e68]: Endikasyon notu
+              - generic [ref=e69]: Akut karın, kitle evrelemesi, takip. Böbrek taşı şüphesinde kontrastsız "Üriner sistem BT" protokolü seçilmeli.
+        - generic [ref=e70]:
+          - heading "Doz (radyasyon)" [level=4] [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: Hedef CTDIvol
+              - generic [ref=e75]: ≤ 15 mGy
+            - generic [ref=e76]:
+              - generic [ref=e77]: Hedef DLP
+              - generic [ref=e78]: ≤ 700 mGy·cm
+            - generic [ref=e79]:
+              - generic [ref=e80]: Ulusal referans (DRL)
+              - generic [ref=e81]: 800 mGy·cm
+            - generic [ref=e82]:
+              - generic [ref=e83]: Çocuk
+              - generic [ref=e84]: ağırlığa göre protokol
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - heading "Özet" [level=4] [ref=e87]
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - generic [ref=e90]: Seri
+              - text: "3"
+            - generic [ref=e91]:
+              - generic [ref=e92]: Kontrast
+              - text: IV 1,5 ml/kg (≤ 100 ml) + oral 1 L
+            - generic [ref=e93]:
+              - generic [ref=e94]: Ön koşul
+              - text: eGFR ≥ 30, alerji sorgusu
+            - generic [ref=e95]:
+              - generic [ref=e96]: Sarf
+              - text: 4 kalem · otomatik düşüm
+            - generic [ref=e97]:
+              - generic [ref=e98]: Son değişiklik
+              - text: Dr. Kaan Arslan · 21.09.2026
+        - generic [ref=e99]: Süre randevu takviminde slotu belirler; hazırlık metni randevu SMS'ine ve hasta hazırlık kartına girer.
+  - generic [ref=e101]:
+    - text: "NOT (mockup): Sekmeler tıklanınca açılır. Kimlik şeridi: tetkik (hizmet - protokol hizmete bağlı), modalite, süre, kontrast, seri kodu, durum."
+    - generic [ref=e102]: "1"
+    - text: "Genel: bölge, hazırlık süresi, randevu slotu, varsayılan rapor şablonu, teknisyen yetkinliği, endikasyon notu, doz hedefleri (CTDIvol / DLP / DRL)."
+    - generic [ref=e103]: "2"
+    - text: Seriler (
+    - code [ref=e104]: seri_tarifi
+    - text: "): seri adı, faz / gecikme, kesit, kV / mAs, rekonstrüksiyon."
+    - generic [ref=e105]: "3"
+    - text: "Kontrast: tür, ajan, doz (ml/kg, en çok), hız, takip; kontrendikasyon."
+    - generic [ref=e106]: "4"
+    - text: Hasta hazırlığı (
+    - code [ref=e107]: hazirlik_kodu / hazirlik_metni
+    - text: "): hastaya metin (randevu SMS'i + hazırlık kartı), personele not, SMS önizleme."
+    - generic [ref=e108]: "5"
+    - text: Uyarılar / kontrol (
+    - code [ref=e109]: uyari_kodu / ozel_uyari
+    - text: "): çekim öncesi kontrol listesi - kural, kaynak (lab / alerji / ilaç), engel ya da uyarı."
+    - generic [ref=e110]: "6"
+    - text: Malzeme / sarf (
+    - code [ref=e111]: radyoloji_protokol_malzeme
+    - text: "): stok, miktar, düşüm tipi (otomatik / sor), kural, depo stoğu."
+    - generic [ref=e112]: "7"
+    - text: "Cihazlar: protokolün çekilebildiği cihazlar, cihaz başına süre, MWL protokol adı."

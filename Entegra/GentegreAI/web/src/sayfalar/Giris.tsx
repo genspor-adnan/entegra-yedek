@@ -18,6 +18,13 @@ export function Giris() {
   const [subeId, setSubeId] = useState<number | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [bekliyor, setBekliyor] = useState(false);
+  // DEMO OLARAK DENE (964): yalnız DEMO kurulumda sunucu liste döner.
+  const [demoGirisler, setDemoGirisler] = useState<{ kod: string; baslik: string; parola: string }[]>([]);
+  useEffect(() => { api.demoGirisler().then(y => setDemoGirisler(y.girisler)).catch(() => setDemoGirisler([])) }, []);
+  async function demoGir(k: { kod: string; parola: string }) {
+    setHata(null); setBekliyor(true);
+    try { await girisYap(k.kod, k.parola) } catch (h) { setHata(hataMetni(h)) } finally { setBekliyor(false) }
+  }
   // ILK GIRIS (kullanici): personel eklenince acilan hesabin parolasi bostur;
   //   kisi burada kendi parolasini tanimlar. IKI ADIM (denetim 28.09.2026 #5):
   //   1. kullanici + TCKN son 4 -> kayitli kanala kod, 2. kod + yeni parola.
@@ -325,6 +332,14 @@ export function Giris() {
              onClick={e => { e.preventDefault(); setUnuttumAdim(1); setHata(null); setBilgi(null) }}>
             Şifremi Unuttum
           </a>
+        )}
+        {subeler === null && demoGirisler.length > 0 && (
+          <div className="giris-demo">
+            <span>{c('Demo olarak dene')}</span>
+            <div>{demoGirisler.map(k => (
+              <button key={k.kod} type="button" className="d" disabled={bekliyor} onClick={() => void demoGir(k)}>{c(k.baslik)}</button>
+            ))}</div>
+          </div>
         )}
 
       </form>

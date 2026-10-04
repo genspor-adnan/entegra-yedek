@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapor Şablonları — Liste Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Rapor Şablonları</h1><span class="yol">Radyoloji › Tanımlar › Rapor Şablonları</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni şablon</span>
+    <span class="btn">⧉ Kopyala</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">⬇ Dışa aktar</span>
+    <span class="btn">⬆ İçeri al (.json)</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Şablon adı, kod, hizmet…</span>
+    <span class="cip on">Tümü <i>42</i></span>
+    <span class="cip"><span class="mod m-bt">BT</span> <i>14</i></span>
+    <span class="cip"><span class="mod m-mr">MR</span> <i>11</i></span>
+    <span class="cip"><span class="mod m-us">US</span> <i>8</i></span>
+    <span class="cip"><span class="mod m-dr">DR</span> <i>5</i></span>
+    <span class="cip"><span class="mod m-mg">MG</span> <i>2</i></span>
+    <span class="cip"><span class="mod m-dp">Doppler</span> <i>2</i></span>
+    <span class="combo">Durum: Aktif</span>
+    <span class="combo">Sahibi: Herkes</span>
+    <span class="sp"></span>
+    <span class="cip">⭐ Varsayılanlar</span>
+    <span class="cip">⚠ Hizmetsiz <i>3</i></span>
+  </div>
+
+  <div class="govde3">
+    <div class="agac">
+      <h6>Bölge</h6>
+      <div class="dal on">Tümü <i>42</i></div>
+      <div class="dal">Baş - Boyun <i>9</i></div>
+      <div class="dal alt">Beyin <i>5</i></div>
+      <div class="dal alt">Paranazal sinüs <i>2</i></div>
+      <div class="dal alt">Boyun / tiroid <i>2</i></div>
+      <div class="dal">Toraks <i>7</i></div>
+      <div class="dal">Abdomen - Pelvis <i>11</i></div>
+      <div class="dal">Kas - İskelet <i>8</i></div>
+      <div class="dal">Meme <i>3</i></div>
+      <div class="dal">Vasküler <i>4</i></div>
+      <h6 style="margin-top:12px">Sahibi</h6>
+      <div class="dal">Kurum şablonları <i>34</i></div>
+      <div class="dal">Benim şablonlarım <i>8</i></div>
+    </div>
+
+    <div>
+      <table class="liste">
+        <tr><th></th><th>Kod</th><th>Şablon</th><th>Modalite</th><th>Bağlı hizmet</th><th class="o">Bölüm</th><th class="o">Alan</th><th class="o">Makro</th><th class="o">Sürüm</th><th class="r">Kullanım <small>30 gün</small></th><th>Durum</th></tr>
+        <tr class="sec"><td>⭐</td><td>BT-BEY-01</td><td><b>Beyin BT (kontrastsız)</b><small>Dr. Kaan Arslan · güncelleme 28.09</small></td><td><span class="mod m-bt">BT</span></td><td>Beyin BT<small>+1 hizmet</small></td><td class="o">5</td><td class="o">4</td><td class="o">12</td><td class="o">v3</td><td class="r">214</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td>⭐</td><td>BT-TOR-01</td><td><b>Toraks BT</b><small>pulmoner nodül alanları (Fleischner)</small></td><td><span class="mod m-bt">BT</span></td><td>Toraks BT</td><td class="o">6</td><td class="o">7</td><td class="o">18</td><td class="o">v5</td><td class="r">188</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>BT-ABD-02</td><td><b>Tüm abdomen BT (IV kontrastlı)</b></td><td><span class="mod m-bt">BT</span></td><td>Abdomen BT kontrastlı</td><td class="o">6</td><td class="o">3</td><td class="o">21</td><td class="o">v2</td><td class="r">97</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td>⭐</td><td>MR-LOM-01</td><td><b>Lomber MR</b><small>seviye seviye disk alanları</small></td><td><span class="mod m-mr">MR</span></td><td>Lomber MR</td><td class="o">5</td><td class="o">10</td><td class="o">15</td><td class="o">v4</td><td class="r">143</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>MR-DIZ-01</td><td><b>Diz MR</b></td><td><span class="mod m-mr">MR</span></td><td>Diz MR (sağ / sol)</td><td class="o">5</td><td class="o">8</td><td class="o">9</td><td class="o">v1</td><td class="r">61</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td>⭐</td><td>MG-01</td><td><b>Mamografi (BI-RADS)</b><small>yapılandırılmış BI-RADS kategorisi</small></td><td><span class="mod m-mg">MG</span></td><td>Bilateral mamografi</td><td class="o">5</td><td class="o">6</td><td class="o">7</td><td class="o">v2</td><td class="r">52</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>US-TIR-01</td><td><b>Tiroid US (TI-RADS)</b></td><td><span class="mod m-us">US</span></td><td>Tiroid US</td><td class="o">4</td><td class="o">5</td><td class="o">6</td><td class="o">v1</td><td class="r">48</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>US-ABD-01</td><td><b>Tüm abdomen US</b></td><td><span class="mod m-us">US</span></td><td>Tüm abdomen US</td><td class="o">4</td><td class="o">2</td><td class="o">14</td><td class="o">v3</td><td class="r">176</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>DR-AC-01</td><td><b>PA akciğer grafisi</b></td><td><span class="mod m-dr">DR</span></td><td>PA akciğer</td><td class="o">3</td><td class="o">0</td><td class="o">8</td><td class="o">v2</td><td class="r">302</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>BT-KAR-01</td><td><b>Karaciğer dinamik BT (LI-RADS)</b><small>taslak - onay bekliyor</small></td><td><span class="mod m-bt">BT</span></td><td><span class="chip c-bek">hizmet yok</span></td><td class="o">6</td><td class="o">9</td><td class="o">4</td><td class="o">v1</td><td class="r">0</td><td><span class="chip c-bek">Taslak</span></td></tr>
+        <tr class="pasif"><td></td><td>BT-BEY-00</td><td><b>Beyin BT (eski)</b><small>yerine BT-BEY-01</small></td><td><span class="mod m-bt">BT</span></td><td>—</td><td class="o">3</td><td class="o">0</td><td class="o">5</td><td class="o">v1</td><td class="r">0</td><td><span class="chip c-gri">Pasif</span></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 42 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 3 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <div class="oniz">
+      <div class="bl"><h5>Seçili şablon</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">⭐ Beyin BT (kontrastsız)</div>
+        <div class="satir"><span>Kod / sürüm</span>BT-BEY-01 · v3</div>
+        <div class="satir"><span>Modalite / bölge</span>BT · Beyin</div>
+        <div class="satir"><span>Bağlı hizmet</span>Beyin BT, Beyin BT (çocuk)</div>
+        <div class="satir"><span>Sahibi</span>Kurum (tüm radyologlar)</div>
+      </div>
+      <div class="bl"><h5>Rapor iskeleti <a>Önizle ›</a></h5>
+        <div class="satir"><span>1</span>Teknik <span class="chip c-gri">yazdır</span></div>
+        <div class="satir"><span>2</span>Klinik bilgi <span class="chip c-mavi">istemden</span></div>
+        <div class="satir"><span>3</span>Bulgular <span class="chip c-red">zorunlu</span></div>
+        <div class="satir"><span>4</span>Sonuç / izlenim <span class="chip c-red">zorunlu</span></div>
+        <div class="satir"><span>5</span>Öneri</div>
+      </div>
+      <div class="bl"><h5>Sık makrolar</h5>
+        <div class="satir"><span><span class="kbd">.nl</span></span>Normal beyin BT</div>
+        <div class="satir"><span><span class="kbd">.isk</span></span>Akut iskemi bulgusu yok</div>
+        <div class="satir"><span><span class="kbd">.atr</span></span>Yaşla uyumlu atrofi</div>
+      </div>
+      <div class="bl"><h5>Kullanım · 30 gün</h5>
+        <div class="satir"><span>Rapor</span><b>214</b></div>
+        <div class="satir"><span>En çok kullanan</span>Dr. Kaan Arslan (96)</div>
+        <div class="satir"><span>Ortalama yazım</span>3 dk 40 sn</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "radyoloji de rapor şablonları ve çekim protokolleri için hem liste hem de kart mockup yap. sekmeler açılsın".
+Tablo <code>radyoloji_sablon</code> (+ <code>_bolum</code>, <code>_alan</code>, <code>_makro</code>).<br>
+<span class="n">1</span><b>Şerit:</b> modalite çipleri sayılı, durum ve sahibi süzgeci; ⭐ varsayılanlar (hizmet seçilince ilk gelen şablon), ⚠ hizmete bağlanmamış şablonlar.<br>
+<span class="n">2</span><b>Sol:</b> bölge ağacı + sahibi (kurum / kişisel şablon).<br>
+<span class="n">3</span><b>Liste:</b> kod, ad (altında sahibi / not), modalite rozeti, bağlı hizmet, bölüm / yapılandırılmış alan / makro sayısı, sürüm, son 30 gün kullanım, durum (taslak / aktif / pasif).<br>
+<span class="n">4</span><b>Sağ önizleme:</b> rapor iskeleti (bölüm sırası, zorunlu / istemden gelen), sık makrolar, kullanım.
+<b>Kopyala</b> başka modaliteye uyarlamak için; <b>Dışa aktar / İçeri al</b> kurumlar arası şablon taşıma.
+</div></div>
+
+</body>
+</html>

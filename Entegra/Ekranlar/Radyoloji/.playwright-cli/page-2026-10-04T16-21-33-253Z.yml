@@ -1,0 +1,321 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - heading "Rapor Şablonları" [level=1] [ref=f1e4]
+      - generic [ref=f1e5]: Radyoloji › Tanımlar › Rapor Şablonları
+      - generic [ref=f1e6] [cursor=pointer]: ＋ Yeni şablon
+      - generic [ref=f1e7] [cursor=pointer]: ⧉ Kopyala
+      - generic [ref=f1e8] [cursor=pointer]: ✎ Düzenle
+      - generic [ref=f1e9] [cursor=pointer]: ⬇ Dışa aktar
+      - generic [ref=f1e10] [cursor=pointer]: ⬆ İçeri al (.json)
+      - generic [ref=f1e11] [cursor=pointer]: 🖨 Yazdır ▾
+    - generic [ref=f1e12]:
+      - generic [ref=f1e13]: 🔍 Şablon adı, kod, hizmet…
+      - generic [ref=f1e14] [cursor=pointer]: Tümü 42
+      - generic [ref=f1e15] [cursor=pointer]:
+        - generic [ref=f1e16]: BT
+        - text: "14"
+      - generic [ref=f1e17] [cursor=pointer]:
+        - generic [ref=f1e18]: MR
+        - text: "11"
+      - generic [ref=f1e19] [cursor=pointer]:
+        - generic [ref=f1e20]: US
+        - text: "8"
+      - generic [ref=f1e21] [cursor=pointer]:
+        - generic [ref=f1e22]: DR
+        - text: "5"
+      - generic [ref=f1e23] [cursor=pointer]:
+        - generic [ref=f1e24]: MG
+        - text: "2"
+      - generic [ref=f1e25] [cursor=pointer]:
+        - generic [ref=f1e26]: Doppler
+        - text: "2"
+      - generic [ref=f1e27]: "Durum: Aktif ▾"
+      - generic [ref=f1e28]: "Sahibi: Herkes ▾"
+      - generic [ref=f1e29] [cursor=pointer]: ⭐ Varsayılanlar
+      - generic [ref=f1e30] [cursor=pointer]: ⚠ Hizmetsiz 3
+    - generic [ref=f1e31]:
+      - generic [ref=f1e32]:
+        - heading "Bölge" [level=6] [ref=f1e33]
+        - generic [ref=f1e34] [cursor=pointer]:
+          - text: Tümü
+          - generic [ref=f1e35]: "42"
+        - generic [ref=f1e36] [cursor=pointer]:
+          - text: Baş - Boyun
+          - generic [ref=f1e37]: "9"
+        - generic [ref=f1e38] [cursor=pointer]:
+          - text: Beyin
+          - generic [ref=f1e39]: "5"
+        - generic [ref=f1e40] [cursor=pointer]:
+          - text: Paranazal sinüs
+          - generic [ref=f1e41]: "2"
+        - generic [ref=f1e42] [cursor=pointer]:
+          - text: Boyun / tiroid
+          - generic [ref=f1e43]: "2"
+        - generic [ref=f1e44] [cursor=pointer]:
+          - text: Toraks
+          - generic [ref=f1e45]: "7"
+        - generic [ref=f1e46] [cursor=pointer]:
+          - text: Abdomen - Pelvis
+          - generic [ref=f1e47]: "11"
+        - generic [ref=f1e48] [cursor=pointer]:
+          - text: Kas - İskelet
+          - generic [ref=f1e49]: "8"
+        - generic [ref=f1e50] [cursor=pointer]:
+          - text: Meme
+          - generic [ref=f1e51]: "3"
+        - generic [ref=f1e52] [cursor=pointer]:
+          - text: Vasküler
+          - generic [ref=f1e53]: "4"
+        - heading "Sahibi" [level=6] [ref=f1e54]
+        - generic [ref=f1e55] [cursor=pointer]:
+          - text: Kurum şablonları
+          - generic [ref=f1e56]: "34"
+        - generic [ref=f1e57] [cursor=pointer]:
+          - text: Benim şablonlarım
+          - generic [ref=f1e58]: "8"
+      - generic [ref=f1e59]:
+        - table [ref=f1e60]:
+          - rowgroup [ref=f1e61]:
+            - row [ref=f1e62]:
+              - columnheader [ref=f1e63]
+              - columnheader "Kod" [ref=f1e64]
+              - columnheader "Şablon" [ref=f1e65]
+              - columnheader "Modalite" [ref=f1e66]
+              - columnheader "Bağlı hizmet" [ref=f1e67]
+              - columnheader "Bölüm" [ref=f1e68]
+              - columnheader "Alan" [ref=f1e69]
+              - columnheader "Makro" [ref=f1e70]
+              - columnheader "Sürüm" [ref=f1e71]
+              - columnheader "Kullanım 30 gün" [ref=f1e72]:
+                - text: Kullanım
+                - generic [ref=f1e73]: 30 gün
+              - columnheader "Durum" [ref=f1e74]
+            - row [ref=f1e75]:
+              - cell "⭐" [ref=f1e76]
+              - cell "BT-BEY-01" [ref=f1e77]
+              - cell "Beyin BT (kontrastsız) Dr. Kaan Arslan · güncelleme 28.09" [ref=f1e78]:
+                - text: Beyin BT (kontrastsız)
+                - generic [ref=f1e79]: Dr. Kaan Arslan · güncelleme 28.09
+              - cell "BT" [ref=f1e80]
+              - cell "Beyin BT +1 hizmet" [ref=f1e82]:
+                - text: Beyin BT
+                - generic [ref=f1e83]: +1 hizmet
+              - cell "5" [ref=f1e84]
+              - cell "4" [ref=f1e85]
+              - cell "12" [ref=f1e86]
+              - cell "v3" [ref=f1e87]
+              - cell "214" [ref=f1e88]
+              - cell "Aktif" [ref=f1e89]
+            - row [ref=f1e91]:
+              - cell "⭐" [ref=f1e92]
+              - cell "BT-TOR-01" [ref=f1e93]
+              - cell "Toraks BT pulmoner nodül alanları (Fleischner)" [ref=f1e94]:
+                - text: Toraks BT
+                - generic [ref=f1e95]: pulmoner nodül alanları (Fleischner)
+              - cell "BT" [ref=f1e96]
+              - cell "Toraks BT" [ref=f1e98]
+              - cell "6" [ref=f1e99]
+              - cell "7" [ref=f1e100]
+              - cell "18" [ref=f1e101]
+              - cell "v5" [ref=f1e102]
+              - cell "188" [ref=f1e103]
+              - cell "Aktif" [ref=f1e104]
+            - row [ref=f1e106]:
+              - cell [ref=f1e107]
+              - cell "BT-ABD-02" [ref=f1e108]
+              - cell "Tüm abdomen BT (IV kontrastlı)" [ref=f1e109]
+              - cell "BT" [ref=f1e110]
+              - cell "Abdomen BT kontrastlı" [ref=f1e112]
+              - cell "6" [ref=f1e113]
+              - cell "3" [ref=f1e114]
+              - cell "21" [ref=f1e115]
+              - cell "v2" [ref=f1e116]
+              - cell "97" [ref=f1e117]
+              - cell "Aktif" [ref=f1e118]
+            - row [ref=f1e120]:
+              - cell "⭐" [ref=f1e121]
+              - cell "MR-LOM-01" [ref=f1e122]
+              - cell "Lomber MR seviye seviye disk alanları" [ref=f1e123]:
+                - text: Lomber MR
+                - generic [ref=f1e124]: seviye seviye disk alanları
+              - cell "MR" [ref=f1e125]
+              - cell "Lomber MR" [ref=f1e127]
+              - cell "5" [ref=f1e128]
+              - cell "10" [ref=f1e129]
+              - cell "15" [ref=f1e130]
+              - cell "v4" [ref=f1e131]
+              - cell "143" [ref=f1e132]
+              - cell "Aktif" [ref=f1e133]
+            - row [ref=f1e135]:
+              - cell [ref=f1e136]
+              - cell "MR-DIZ-01" [ref=f1e137]
+              - cell "Diz MR" [ref=f1e138]
+              - cell "MR" [ref=f1e139]
+              - cell "Diz MR (sağ / sol)" [ref=f1e141]
+              - cell "5" [ref=f1e142]
+              - cell "8" [ref=f1e143]
+              - cell "9" [ref=f1e144]
+              - cell "v1" [ref=f1e145]
+              - cell "61" [ref=f1e146]
+              - cell "Aktif" [ref=f1e147]
+            - row [ref=f1e149]:
+              - cell "⭐" [ref=f1e150]
+              - cell "MG-01" [ref=f1e151]
+              - cell "Mamografi (BI-RADS) yapılandırılmış BI-RADS kategorisi" [ref=f1e152]:
+                - text: Mamografi (BI-RADS)
+                - generic [ref=f1e153]: yapılandırılmış BI-RADS kategorisi
+              - cell "MG" [ref=f1e154]
+              - cell "Bilateral mamografi" [ref=f1e156]
+              - cell "5" [ref=f1e157]
+              - cell "6" [ref=f1e158]
+              - cell "7" [ref=f1e159]
+              - cell "v2" [ref=f1e160]
+              - cell "52" [ref=f1e161]
+              - cell "Aktif" [ref=f1e162]
+            - row [ref=f1e164]:
+              - cell [ref=f1e165]
+              - cell "US-TIR-01" [ref=f1e166]
+              - cell "Tiroid US (TI-RADS)" [ref=f1e167]
+              - cell "US" [ref=f1e168]
+              - cell "Tiroid US" [ref=f1e170]
+              - cell "4" [ref=f1e171]
+              - cell "5" [ref=f1e172]
+              - cell "6" [ref=f1e173]
+              - cell "v1" [ref=f1e174]
+              - cell "48" [ref=f1e175]
+              - cell "Aktif" [ref=f1e176]
+            - row [ref=f1e178]:
+              - cell [ref=f1e179]
+              - cell "US-ABD-01" [ref=f1e180]
+              - cell "Tüm abdomen US" [ref=f1e181]
+              - cell "US" [ref=f1e182]
+              - cell "Tüm abdomen US" [ref=f1e184]
+              - cell "4" [ref=f1e185]
+              - cell "2" [ref=f1e186]
+              - cell "14" [ref=f1e187]
+              - cell "v3" [ref=f1e188]
+              - cell "176" [ref=f1e189]
+              - cell "Aktif" [ref=f1e190]
+            - row [ref=f1e192]:
+              - cell [ref=f1e193]
+              - cell "DR-AC-01" [ref=f1e194]
+              - cell "PA akciğer grafisi" [ref=f1e195]
+              - cell "DR" [ref=f1e196]
+              - cell "PA akciğer" [ref=f1e198]
+              - cell "3" [ref=f1e199]
+              - cell "0" [ref=f1e200]
+              - cell "8" [ref=f1e201]
+              - cell "v2" [ref=f1e202]
+              - cell "302" [ref=f1e203]
+              - cell "Aktif" [ref=f1e204]
+            - row [ref=f1e206]:
+              - cell [ref=f1e207]
+              - cell "BT-KAR-01" [ref=f1e208]
+              - cell "Karaciğer dinamik BT (LI-RADS) taslak - onay bekliyor" [ref=f1e209]:
+                - text: Karaciğer dinamik BT (LI-RADS)
+                - generic [ref=f1e210]: taslak - onay bekliyor
+              - cell "BT" [ref=f1e211]
+              - cell "hizmet yok" [ref=f1e213]
+              - cell "6" [ref=f1e215]
+              - cell "9" [ref=f1e216]
+              - cell "4" [ref=f1e217]
+              - cell "v1" [ref=f1e218]
+              - cell "0" [ref=f1e219]
+              - cell "Taslak" [ref=f1e220]
+            - row [ref=f1e222]:
+              - cell [ref=f1e223]
+              - cell "BT-BEY-00" [ref=f1e224]
+              - cell "Beyin BT (eski) yerine BT-BEY-01" [ref=f1e225]:
+                - text: Beyin BT (eski)
+                - generic [ref=f1e226]: yerine BT-BEY-01
+              - cell "BT" [ref=f1e227]
+              - cell "—" [ref=f1e229]
+              - cell "3" [ref=f1e230]
+              - cell "0" [ref=f1e231]
+              - cell "5" [ref=f1e232]
+              - cell "v1" [ref=f1e233]
+              - cell "0" [ref=f1e234]
+              - cell "Pasif" [ref=f1e235]
+        - generic [ref=f1e237]:
+          - generic [ref=f1e238]: "Kayıt: 42 · seçili 1"
+          - generic [ref=f1e239]: ‹ Önceki 1 / 3 Sonraki ›
+      - generic [ref=f1e240]:
+        - generic [ref=f1e241]:
+          - heading "Seçili şablon" [level=5] [ref=f1e242]
+          - generic [ref=f1e243]: ⭐ Beyin BT (kontrastsız)
+          - generic [ref=f1e244]:
+            - generic [ref=f1e245]: Kod / sürüm
+            - text: BT-BEY-01 · v3
+          - generic [ref=f1e246]:
+            - generic [ref=f1e247]: Modalite / bölge
+            - text: BT · Beyin
+          - generic [ref=f1e248]:
+            - generic [ref=f1e249]: Bağlı hizmet
+            - text: Beyin BT, Beyin BT (çocuk)
+          - generic [ref=f1e250]:
+            - generic [ref=f1e251]: Sahibi
+            - text: Kurum (tüm radyologlar)
+        - generic [ref=f1e252]:
+          - heading "Rapor iskeleti Önizle ›" [level=5] [ref=f1e253]:
+            - text: Rapor iskeleti
+            - generic [ref=f1e254]: Önizle ›
+          - generic [ref=f1e255]:
+            - generic [ref=f1e256]: "1"
+            - text: Teknik
+            - generic [ref=f1e257]: yazdır
+          - generic [ref=f1e258]:
+            - generic [ref=f1e259]: "2"
+            - text: Klinik bilgi
+            - generic [ref=f1e260]: istemden
+          - generic [ref=f1e261]:
+            - generic [ref=f1e262]: "3"
+            - text: Bulgular
+            - generic [ref=f1e263]: zorunlu
+          - generic [ref=f1e264]:
+            - generic [ref=f1e265]: "4"
+            - text: Sonuç / izlenim
+            - generic [ref=f1e266]: zorunlu
+          - generic [ref=f1e267]:
+            - generic [ref=f1e268]: "5"
+            - text: Öneri
+        - generic [ref=f1e269]:
+          - heading "Sık makrolar" [level=5] [ref=f1e270]
+          - generic [ref=f1e271]:
+            - generic [ref=f1e272]: .nl
+            - text: Normal beyin BT
+          - generic [ref=f1e274]:
+            - generic [ref=f1e275]: .isk
+            - text: Akut iskemi bulgusu yok
+          - generic [ref=f1e277]:
+            - generic [ref=f1e278]: .atr
+            - text: Yaşla uyumlu atrofi
+        - generic [ref=f1e280]:
+          - heading "Kullanım · 30 gün" [level=5] [ref=f1e281]
+          - generic [ref=f1e282]:
+            - generic [ref=f1e283]: Rapor
+            - generic [ref=f1e284]: "214"
+          - generic [ref=f1e285]:
+            - generic [ref=f1e286]: En çok kullanan
+            - text: Dr. Kaan Arslan (96)
+          - generic [ref=f1e287]:
+            - generic [ref=f1e288]: Ortalama yazım
+            - text: 3 dk 40 sn
+  - generic [ref=f1e290]:
+    - text: "NOT (mockup): Kullanıcı: \"radyoloji de rapor şablonları ve çekim protokolleri için hem liste hem de kart mockup yap. sekmeler açılsın\". Tablo"
+    - code [ref=f1e291]: radyoloji_sablon
+    - text: (+
+    - code [ref=f1e292]: _bolum
+    - text: ","
+    - code [ref=f1e293]: _alan
+    - text: ","
+    - code [ref=f1e294]: _makro
+    - text: ).
+    - generic [ref=f1e295]: "1"
+    - text: "Şerit: modalite çipleri sayılı, durum ve sahibi süzgeci; ⭐ varsayılanlar (hizmet seçilince ilk gelen şablon), ⚠ hizmete bağlanmamış şablonlar."
+    - generic [ref=f1e296]: "2"
+    - text: "Sol: bölge ağacı + sahibi (kurum / kişisel şablon)."
+    - generic [ref=f1e297]: "3"
+    - text: "Liste: kod, ad (altında sahibi / not), modalite rozeti, bağlı hizmet, bölüm / yapılandırılmış alan / makro sayısı, sürüm, son 30 gün kullanım, durum (taslak / aktif / pasif)."
+    - generic [ref=f1e298]: "4"
+    - text: "Sağ önizleme: rapor iskeleti (bölüm sırası, zorunlu / istemden gelen), sık makrolar, kullanım. Kopyala başka modaliteye uyarlamak için; Dışa aktar / İçeri al kurumlar arası şablon taşıma."

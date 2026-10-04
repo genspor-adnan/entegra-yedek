@@ -71,6 +71,23 @@ public static class ZamanliIsler
         //   devam ederken. İş emri doğunca planlanmazsa "gecikmiş" olur.
         // ARIZA ÇÖZÜM ONAYI (954): teknisyen "çözüldü" dedi, bildiren 3 gün
         //   yanıt vermedi - talep kapanır. Akışa "kendiliğinden kapandı" düşer.
+        // DEMO YENİLEME (964): yalnız DEMO kurulumda - temizle + aynı tohumla
+        //   üret; ziyaretçinin bıraktığı kayıtlar da gider. Canlı kurulumda iş
+        //   açılsa bile hiçbir şeye dokunmaz.
+        ["demo.yenile"] = async (servisler, iptal) =>
+        {
+            var demo = servisler.GetRequiredService<Gentegre.Api.Servisler.Demo.DemoVeriServisi>();
+            if (!await demo.DemoMuAsync(iptal)) return "Kurulum DEMO değil - atlandı.";
+            var ayar = await demo.AyarOkuAsync(iptal);
+            var id = await demo.UretimAcAsync("gece", null, ayar.Tohum, iptal);
+            await demo.CalistirAsync(id, true, iptal);
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            var sonuc = await veri.TekDegerAsync<string?>(
+                "select case durum when 1 then 'Demo verisi yenilendi: ' || ozet::text else 'Hata: ' || coalesce(hata, '') end from public.demo_uretim where id = @p0",
+                [id], iptal);
+            return sonuc ?? "";
+        },
+
         ["ariza.otomatik_kapat"] = async (servisler, iptal) =>
         {
             var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();

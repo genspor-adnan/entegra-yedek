@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapor Şablonu — Kart Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📝 Rapor Şablonu — BT-BEY-01 · Beyin BT (kontrastsız) <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">🆕 Yeni sürüm</span>
+    <span class="btn">⧉ Kopyala</span>
+    <span class="btn">👁 Önizle</span>
+    <span class="btn">⬇ Dışa aktar</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="kimlik" style="grid-template-columns:110px 1.6fr 110px 1.2fr 90px 110px">
+    <div class="fld"><label class="req">Kod</label><div class="inp">BT-BEY-01</div></div>
+    <div class="fld"><label class="req">Şablon adı</label><div class="inp big">Beyin BT (kontrastsız)</div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp"><span class="mod m-bt">BT</span>&nbsp;Bilgisayarlı tomografi</div></div>
+    <div class="fld"><label>Bölge</label><div class="inp">Baş - Boyun › Beyin</div></div>
+    <div class="fld"><label>Sürüm</label><div class="inp">v3</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip c-ok">Aktif</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="genel">Genel</div>
+    <div class="sek" data-p="bolum">Bölümler <span class="say">5</span></div>
+    <div class="sek" data-p="alan">Yapılandırılmış alanlar <span class="say">4</span></div>
+    <div class="sek" data-p="makro">Makrolar <span class="say">12</span></div>
+    <div class="sek" data-p="oniz">Önizleme</div>
+    <div class="sek" data-p="surum">Sürümler <span class="say">3</span></div>
+    <div class="sek" data-p="kul">Kullanım</div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="panel on" id="p-genel">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Kimlik</h4><div class="ic izgara">
+          <div class="fld iki"><label>Bağlı hizmetler (tetkik)</label><div class="inp">Beyin BT ✕ &nbsp; Beyin BT (çocuk) ✕ &nbsp; <span style="color:var(--accent)">＋ hizmet</span></div></div>
+          <div class="fld"><label>Varsayılan</label><div class="inp">☑ bu hizmetlerde ilk gelen</div></div>
+          <div class="fld"><label>Sahibi</label><div class="inp">Kurum (tüm radyologlar)</div></div>
+          <div class="fld"><label>Dil</label><div class="inp">Türkçe</div></div>
+          <div class="fld"><label>Şube</label><div class="inp">Tüm şubeler</div></div>
+          <div class="fld iki"><label>Rapor başlığı (yazdırmada)</label><div class="inp">BEYİN BİLGİSAYARLI TOMOGRAFİ</div></div>
+          <div class="fld tam"><label>Açıklama</label><div class="inp metin">Travma dışı başağrısı / nörolojik defisit ön değerlendirmesi. Akut iskemi şüphesinde MR difüzyon önerisi makrosu kullanılır.</div></div>
+        </div></div>
+        <div class="grp"><h4>Davranış</h4><div class="ic izgara">
+          <div class="fld iki"><label>Klinik bilgi</label><div class="inp">İstemdeki ön tanı + şikâyet otomatik dolsun</div></div>
+          <div class="fld iki"><label>Karşılaştırma</label><div class="inp">Hastanın son aynı bölge tetkiki "Karşılaştırma" satırına önerilsin</div></div>
+          <div class="fld iki"><label>Kritik bulgu</label><div class="inp">"Sonuç"ta kritik ifade geçerse kritik bulgu bildirimi sor</div></div>
+          <div class="fld iki"><label>e-İmza</label><div class="inp">Onayda e-imza zorunlu</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Özet</h4><div class="ic">
+          <div class="satir"><span>Bölüm</span>5 (2 zorunlu)</div>
+          <div class="satir"><span>Yapılandırılmış alan</span>4</div>
+          <div class="satir"><span>Makro</span>12</div>
+          <div class="satir"><span>Bakanlık rapor parçası</span>4 / 5 eşleşmiş</div>
+          <div class="satir"><span>Son değişiklik</span>Dr. Kaan Arslan · 28.09.2026</div>
+        </div></div>
+        <div class="uyar">⚠ "Öneri" bölümü Bakanlık rapor parçasıyla eşleşmemiş - e-Nabız'a gönderilen raporda ayrı başlık olarak gitmez.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BÖLÜMLER -->
+  <div class="panel" id="p-bolum">
+    <div class="grp"><h4>Rapor bölümleri <span class="ek">sürükleyerek sırala · varsayılan metin raporda hazır gelir</span></h4>
+      <table class="liste">
+        <tr><th></th><th>#</th><th>Başlık</th><th>Varsayılan metin</th><th class="o">Zorunlu</th><th class="o">Yazdır</th><th>Bakanlık parçası</th></tr>
+        <tr><td class="surukle">⋮⋮</td><td>1</td><td><b>Teknik</b></td><td>Kontrastsız aksiyel kesitler, 5 mm; koronal ve sagital reformatlar.</td><td class="o">—</td><td class="o">☑</td><td>Teknik</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>2</td><td><b>Klinik bilgi</b></td><td><i>{istem.on_tani}</i> · <i>{istem.sikayet}</i></td><td class="o">—</td><td class="o">☑</td><td>Klinik bilgi</td></tr>
+        <tr class="sec"><td class="surukle">⋮⋮</td><td>3</td><td><b>Bulgular</b></td><td>Beyin parankiminde akut kanama, kitle ya da yer kaplayan lezyon izlenmedi. Ventrikül sistemi orta hatta…</td><td class="o">☑</td><td class="o">☑</td><td>Bulgular</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>4</td><td><b>Sonuç / izlenim</b></td><td>Akut intrakraniyal patoloji saptanmadı.</td><td class="o">☑</td><td class="o">☑</td><td>Sonuç</td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>5</td><td><b>Öneri</b></td><td><span style="color:var(--muted)">(boş)</span></td><td class="o">—</td><td class="o">☑</td><td><span class="chip c-bek">eşleşmedi</span></td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Bölüm</span> <span class="btn kucuk">⇅ Bakanlık sırasına diz</span>
+        <span style="color:var(--muted);margin-left:8px">Yer tutucular: <code>{hasta.yas}</code> <code>{hasta.cinsiyet}</code> <code>{istem.on_tani}</code> <code>{onceki.tarih}</code> <code>{alan:orta_hat_kayma}</code></span></div>
+    </div>
+  </div>
+
+  <!-- ALANLAR -->
+  <div class="panel" id="p-alan">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Yapılandırılmış alanlar <span class="ek">raporda form olarak açılır, metne kendiliğinden yazılır</span></h4>
+        <table class="liste">
+          <tr><th></th><th>Kod</th><th>Alan</th><th>Tip</th><th>Seçenekler / birim</th><th class="o">Zorunlu</th><th class="o">Rapora bas</th></tr>
+          <tr><td class="surukle">⋮⋮</td><td>kanama</td><td><b>İntrakraniyal kanama</b></td><td>seçim</td><td>Yok · Epidural · Subdural · SAK · Parankimal</td><td class="o">☑</td><td class="o">☑</td></tr>
+          <tr><td class="surukle">⋮⋮</td><td>orta_hat_kayma</td><td><b>Orta hat kayması</b></td><td>sayı</td><td>mm · 0-30</td><td class="o">—</td><td class="o">☑</td></tr>
+          <tr><td class="surukle">⋮⋮</td><td>aspects</td><td><b>ASPECTS</b></td><td>skor</td><td>0-10 (akut iskemi)</td><td class="o">—</td><td class="o">☑</td></tr>
+          <tr><td class="surukle">⋮⋮</td><td>kritik</td><td><b>Kritik bulgu</b></td><td>evet / hayır</td><td>evet → kritik bulgu bildirimi</td><td class="o">☑</td><td class="o">—</td></tr>
+        </table>
+        <div class="ic"><span class="btn kucuk">＋ Alan</span> <span class="btn kucuk">📚 Hazır skorlardan ekle (BI-RADS · TI-RADS · LI-RADS · PI-RADS · Fleischner)</span></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Alan: Orta hat kayması</h4><div class="ic izgara" style="grid-template-columns:1fr 1fr">
+          <div class="fld"><label>Tip</label><div class="inp">Sayı</div></div>
+          <div class="fld"><label>Birim</label><div class="inp">mm</div></div>
+          <div class="fld"><label>Alt / üst sınır</label><div class="inp">0 - 30</div></div>
+          <div class="fld"><label>Bölüm</label><div class="inp">Bulgular</div></div>
+          <div class="fld tam"><label>Metne yazılış</label><div class="inp">"Orta hatta {değer} mm kayma izlendi."</div></div>
+          <div class="fld tam"><label>0 ise</label><div class="inp">"Orta hat yapıları normal konumda."</div></div>
+        </div></div>
+        <div class="bilgi">Yapılandırılmış alan, raporu istatistik ve kalite göstergesi için sayılabilir kılar (ör. BI-RADS 4-5 oranı).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAKROLAR -->
+  <div class="panel" id="p-makro">
+    <div class="grp"><h4>Makrolar <span class="ek">rapor yazarken kısayolu yazıp boşluk → metin eklenir</span></h4>
+      <table class="liste">
+        <tr><th>Kısayol</th><th>Ad</th><th>Metin</th><th>Hedef bölüm</th><th class="r">Kullanım</th></tr>
+        <tr><td><span class="kbd">.nl</span></td><td><b>Normal beyin BT</b></td><td>Beyin parankiminde akut kanama, kitle ya da yer kaplayan lezyon izlenmedi. Ventrikül sistemi…</td><td>Bulgular + Sonuç</td><td class="r">146</td></tr>
+        <tr><td><span class="kbd">.isk</span></td><td><b>Akut iskemi yok</b></td><td>BT'de belirgin akut iskemik değişiklik izlenmedi; erken iskemide MR difüzyon önerilir.</td><td>Sonuç</td><td class="r">41</td></tr>
+        <tr><td><span class="kbd">.atr</span></td><td><b>Yaşla uyumlu atrofi</b></td><td>Yaşla uyumlu serebral ve serebellar atrofik değişiklikler.</td><td>Bulgular</td><td class="r">38</td></tr>
+        <tr><td><span class="kbd">.lak</span></td><td><b>Kronik lakün</b></td><td>Bazal gangliyonlarda kronik laküner enfarkt alanları.</td><td>Bulgular</td><td class="r">22</td></tr>
+        <tr><td><span class="kbd">.mrd</span></td><td><b>MR difüzyon önerisi</b></td><td>Klinik şüphe sürüyorsa difüzyon ağırlıklı MR önerilir.</td><td>Öneri</td><td class="r">19</td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Makro</span> <span class="btn kucuk">⧉ Başka şablondan al</span>
+        <span style="color:var(--muted);margin-left:8px">Kişisel makrolar hekimin kendi profilinde; burada kurum makroları.</span></div>
+    </div>
+  </div>
+
+  <!-- ÖNİZLEME -->
+  <div class="panel" id="p-oniz">
+    <div class="iki-kolon">
+      <div class="a4">
+        <div style="font-family:Arial;display:flex;justify-content:space-between;border-bottom:2px solid #1d4270;padding-bottom:6px"><b style="color:#1d4270">Örnek Şehir Hastanesi · Radyoloji</b><span style="font-size:10px">Rapor no: R-2026-…</span></div>
+        <h3>BEYİN BİLGİSAYARLI TOMOGRAFİ</h3>
+        <div class="bb">Teknik</div>Kontrastsız aksiyel kesitler, 5 mm; koronal ve sagital reformatlar.
+        <div class="bb">Klinik bilgi</div><span class="yer">{istem.on_tani}</span> · <span class="yer">{istem.sikayet}</span>
+        <div class="bb">Bulgular</div>Beyin parankiminde akut kanama, kitle ya da yer kaplayan lezyon izlenmedi. Orta hat yapıları normal konumda.
+        <div class="bb">Sonuç</div>Akut intrakraniyal patoloji saptanmadı.
+        <div style="margin-top:22px;text-align:right;font-family:Arial;font-size:10.5px">Uzm. Dr. … <br>Radyoloji · e-imzalı</div>
+      </div>
+      <div>
+        <div class="grp"><h4>Önizleme hastası</h4><div class="ic">
+          <div class="fld"><label>Örnek veri</label><div class="inp">Elif Demo · 34 K · istem: başağrısı</div></div>
+        </div></div>
+        <div class="bilgi">Sarı = istem / hasta verisinden dolacak yer tutucu. Gerçek raporda değerle değişir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SÜRÜMLER -->
+  <div class="panel" id="p-surum">
+    <div class="grp"><h4>Sürüm geçmişi <span class="ek">yazılmış rapor kendi sürümüyle kalır</span></h4>
+      <table class="liste">
+        <tr><th>Sürüm</th><th>Tarih</th><th>Değiştiren</th><th>Değişiklik</th><th class="r">Rapor</th><th></th></tr>
+        <tr class="sec"><td><b>v3</b> <span class="chip c-ok">güncel</span></td><td>28.09.2026</td><td>Dr. Kaan Arslan</td><td>ASPECTS alanı eklendi; ".mrd" makrosu</td><td class="r">214</td><td><span class="btn kucuk">Farkı gör</span></td></tr>
+        <tr><td>v2</td><td>02.06.2026</td><td>Dr. Kaan Arslan</td><td>Bakanlık parçalarına eşlendi</td><td class="r">1.840</td><td><span class="btn kucuk">Farkı gör</span> <span class="btn kucuk">Geri yükle</span></td></tr>
+        <tr><td>v1</td><td>14.01.2026</td><td>Sistem Yöneticisi</td><td>İlk sürüm</td><td class="r">2.312</td><td><span class="btn kucuk">Farkı gör</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- KULLANIM -->
+  <div class="panel" id="p-kul">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Kullanım · son 30 gün</h4>
+        <table class="liste">
+          <tr><th>Hekim</th><th class="r">Rapor</th><th class="r">Ort. yazım</th><th class="r">Makro / rapor</th><th class="r">Metni değiştirme</th></tr>
+          <tr><td>Dr. Kaan Arslan</td><td class="r">96</td><td class="r">3 dk 10 sn</td><td class="r">2,4</td><td class="r">%18</td></tr>
+          <tr><td>Dr. Selin Aksoy</td><td class="r">71</td><td class="r">4 dk 05 sn</td><td class="r">1,6</td><td class="r">%34</td></tr>
+          <tr><td>Dr. Mert Özkan</td><td class="r">47</td><td class="r">3 dk 52 sn</td><td class="r">2,1</td><td class="r">%22</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="grp"><h4>Alan dağılımı</h4><div class="ic">
+          <div class="satir"><span>Kanama: Yok</span>%93</div>
+          <div class="satir"><span>Kanama: Subdural</span>%3</div>
+          <div class="satir"><span>Kritik bulgu: evet</span>%4 (9 rapor)</div>
+        </div></div>
+        <div class="bilgi">"Metni değiştirme" yüksekse varsayılan metin hekimlerin yazdığından uzak - şablon güncellenmeli.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Sekmeler tıklanınca açılır. Kimlik şeridi: kod, ad, modalite, bölge, sürüm, durum.<br>
+<span class="n">1</span><b>Genel:</b> bağlı hizmetler (varsayılan şablon), sahibi (kurum / kişisel), şube, rapor başlığı, davranış (klinik bilgi istemden, karşılaştırma önerisi, kritik bulgu sorusu, e-imza).<br>
+<span class="n">2</span><b>Bölümler</b> (<code>radyoloji_sablon_bolum</code>): sıra, başlık, varsayılan metin + yer tutucular, zorunlu, yazdır, Bakanlık rapor parçası eşleşmesi.<br>
+<span class="n">3</span><b>Yapılandırılmış alanlar</b> (<code>radyoloji_sablon_alan</code>): kod, tip (seçim / sayı / skor / evet-hayır), seçenekler, zorunlu, rapora bas; metne yazılış kalıbı; hazır skor kütüphanesi.<br>
+<span class="n">4</span><b>Makrolar</b> (<code>radyoloji_sablon_makro</code>): kısayol, metin, hedef bölüm, kullanım sayısı.<br>
+<span class="n">5</span><b>Önizleme:</b> A4 rapor, yer tutucular sarı. <span class="n">6</span><b>Sürümler:</b> yazılmış rapor kendi sürümüyle kalır, fark / geri yükle.
+<span class="n">7</span><b>Kullanım:</b> hekim bazında rapor, yazım süresi, makro, metni değiştirme oranı.
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>
