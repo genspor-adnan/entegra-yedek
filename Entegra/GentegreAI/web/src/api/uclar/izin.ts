@@ -104,6 +104,11 @@ export const izinUclari = {
   izinBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/izin-baglam?${p}`),
   izinHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/izin/${id}/hatirlat`, {}),
 
+  /** Avans kartı (960): personel / net maaş, azami taksit, açık avanslar, geçmiş, plan, hesaplar, akış. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  avansBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/avans-baglam?${p}`),
+  avansHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/avans/${id}/hatirlat`, {}),
+
   izinBakiye: (tarafId: number, yil?: number) =>
     istek<IzinBakiyesi>(`/api/ik/personel/${tarafId}/izin-bakiye`
       + (yil ? `?yil=${yil}` : '')),

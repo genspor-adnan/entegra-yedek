@@ -25,7 +25,7 @@ namespace Gentegre.Api.Uclar;
 /// çevirir. Ödendikten sonra iptal de edilemez: para çıkmıştır, geri almak
 /// ayrı bir işlemdir (tahsilat).
 /// </summary>
-public static class AvansUclari
+public static partial class AvansUclari
 {
     /// <summary>islem_log.tablo_id - personel_avans.</summary>
     // 1257/1258 (755): 907 = Hasta Bilgisi, 908 = Kasa İşlemi. 753 bu iki
@@ -68,6 +68,8 @@ public static class AvansUclari
     public static void AvansUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/ik").WithTags("Avans").RequireAuthorization();
+        // AVANS KARTI (960): bağlam (maaş, açık avans, plan, hesaplar, akış) + hatırlat.
+        AvansKartUclariniEkle(grup);
 
         // ------------------------------------------------------ talep aç ----
         grup.MapPost("/avans", async (

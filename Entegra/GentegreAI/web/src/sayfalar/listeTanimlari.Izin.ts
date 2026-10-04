@@ -57,7 +57,8 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     kaynak: 'personelAvans', rota: 'personel-avans',
     baslik: 'Personel Avansları',
     yol: 'İK & Prim › Avanslar',
-    kartYolu: '/personel-avans', kartBaslik: 'Personel Avansı',
+    // ÖZEL KART (960, mockup Ekranlar/IK/avans_karti.html): sayfalar/ik/AvansKarti.
+    kartYolu: '/personel-avans', kartBaslik: 'Personel Avansı', ozelKart: true,
     aksiyonEkrani: 'personel-avans-liste',
     tarihAlani: 'talepTarihi',
     cipler: [

@@ -107,6 +107,12 @@ interface Props {
    * hasta karti degil sade ADAY HASTA karti acilir. Verilmezse aranan kaynak.
    */
   yeniKaynak?: string;
+  /**
+   * KART DÜĞMELERİ YOK (kullanıcı: "izin talebi kartında personel aramada yeni
+   * ve düzenle butonları görünmesin"): yalnız seçim yapılan yerlerde Yeni /
+   * Düzenle personel kartını açıp asıl işi bölüyordu.
+   */
+  kartYok?: boolean;
   /** Aramaya EKLENEN sabit kosul (ör. randevuda yalniz aktif/aday hastalar). */
   ekFiltre?: Kosul;
   yerTutucu?: string;
@@ -160,7 +166,7 @@ interface Props {
  * arar (Tip/Bağlı Kurum/Görev-Rol gibi taraf-ortak kolonlarla) ve disaridan (ör. toolbar
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
-export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
+export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre,
                              yerTutucu, baslangicMetni, baslangicYeni,
                              cokluSecim = false, onSecCoklu, secimDenetimi,
                              onKapat, onSec }: Props) {
@@ -424,7 +430,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
             (578) - acilacak bir "basvuru hekimi karti" yok. Kayit kabul zaten
             hekim tanimlamaz; hekim Personel / Dis Doktor ekranindan acilir. */}
         <div className="lookup-cubuk">
-          {kaynaklar.length === 1 && !hekimDuzeni && (
+          {kaynaklar.length === 1 && !hekimDuzeni && !kartYok && (
             <>
               <button type="button" className="d"
                 onClick={() => setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>

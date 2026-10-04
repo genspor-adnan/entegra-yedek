@@ -477,7 +477,7 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
         </div>
       </div>
       {arama && (
-        <TarafArama acik kaynaklar={['personel']} yerTutucu={c('Personel ara…')}
+        <TarafArama acik kaynaklar={['personel']} kartYok yerTutucu={c('Personel ara…')}
           secimDenetimi={sec => arama === 'yerineId' && sec.id === d.tarafId ? c('Personel kendi vekili olamaz.') : null}
           onKapat={() => setArama(null)}
           onSec={sec => {

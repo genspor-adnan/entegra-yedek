@@ -18325,3 +18325,21 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
 * **Düzeltme:** Taleplerim izin penceresi `isGunu` göndermiyordu - gün takvim günü sayılıyordu (pencere "iş günü" diyordu).
 * Doğrulama: bağlam ucu (5 iş günü, dönüş, tatiller, ekip 4 kişi); tarayıcıda onaydaki izin, yeni izin (personel araması,
   kaydet - 3,5 iş günü, 28 Ekim arife ½, 29 Ekim tatil). tsc temiz, vitest 789/789. Deneme kaydı silindi.
+
+## 04.10.2026 — Personel avansı kartı (960)
+
+* **Mockup** `Ekranlar/IK/avans_karti.html`; Avanslar listesi özel kart açar (`/personel-avans/:id`, `sayfalar/ik/AvansKarti`).
+  Kimlik şeridi (jenerik personel araması - Yeni / Düzenle yok, avans no, talep tarihi, durum + bekleyen basamak); sol: tutar
+  (hızlı çipler, net maaş girilmişse "maaşın %50'si"), taksit düğmeleri (azami `ik.avans_azami_taksit`, üstü pasif), ilk kesinti
+  dönemi, aylık kesinti ve son dönem, gerekçe (kod listesi `ik.avans_gerekce` önerili, serbest yazılabilir), açıklama;
+  **kesinti planı** (taslakta sunucu formülüyle canlı - son taksit kalanı alır, ödenince gerçek satırlar, sıradaki vurgulu,
+  toplam / kesilen / kalan); **ödeme** (yalnız onaylıda: hesap listesi - eski aksiyon hesap numarasını elle soruyordu -,
+  havale / nakit, tarih; ödenince kasa işlemi bağlantısı). Sağ: **maaşa oranı** (net maaş, bu avans ve diğer açık avansların
+  aylık kesintisi; `ik.avans_maas_orani` = %25 üstü uyarı, engel değil), açık avans uyarısı, onay zinciri (hatırlat; sıradakine
+  Onayla / Reddet / Bilgi iste), son 12 ay geçmişi, belgeler (`dokuman` kaynağı `avans`), akış (oluşturma, onaylar, ödeme,
+  kesintiler, iptal). Araç çubuğu: Kaydet, Onaya gönder, Öde…, Kesinti işle, Avans formu (yazdır, kesinti planlı), İptal et.
+* **960** `taraf_personel.net_maas` (bordro yok - personel kartında "Aylık Net Maaş"), referans `ik.avans_maas_orani`, kod listesi
+  `ik.avans_gerekce`. Uçlar `GET /api/ik/avans-baglam`, `POST /api/ik/avans/{id}/hatirlat`.
+* İzin kartında personel / vekil aramasında **Yeni / Düzenle düğmeleri gizlendi** (`TarafArama kartYok`).
+* Doğrulama: bağlam ucu; tarayıcıda taslak avans ve yeni avans (personel araması, 2.500 ₺ × 5, kaydet). Ödeme ve kesinti
+  kartta denenmedi (kasa işlemi yazar). tsc temiz, vitest 789/789. Deneme kaydı silindi.

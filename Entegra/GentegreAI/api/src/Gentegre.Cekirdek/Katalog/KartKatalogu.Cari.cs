@@ -426,6 +426,8 @@ public static partial class KartKatalogu
                 new("istenCikisTarihi",   "isten_cikis_tarihi",  "tarih", Baslik: "İşten Çıkış Tarihi",
                     YalnizYeniKayitta: true, Ipucu: "Kadro Geçmişi'nden (İşten çıkış)"),
                 new("calismaSekli",       "calisma_sekli",       "kod",   SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
+                // NET MAAŞ (960): bordro yok - avans kartının "maaşa oranı" paneli için.
+                new("netMaas",            "net_maas",            "para",  Baslik: "Aylık Net Maaş", Ipucu: "Avans kartında maaşa oranı için"),
                 // Uyruk artik SKRS ULKE KODLARI'ndan secilir (614/615): alan
                 //   metin degil kod, degeri MERNIS kodudur ve e-Nabiz'a
                 //   ceviri olmadan gider. Serbest metinken "TC", "TR",

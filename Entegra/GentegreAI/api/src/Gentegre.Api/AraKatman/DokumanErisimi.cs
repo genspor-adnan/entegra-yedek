@@ -112,13 +112,14 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         }
 
         // İZİN BELGESİ (959): talep sahibi kendi izninde; İK `ik.izin` yetkisiyle.
-        if (kaynak == "izin")
+        if (kaynak is "izin" or "avans")
         {
-            var sahip = await veri.TekDegerAsync<int?>(
-                "select taraf_id from public.personel_izin where id = @p0", [(int)kaynakId], iptal);
+            var sahip = await veri.TekDegerAsync<int?>(kaynak == "izin"
+                ? "select taraf_id from public.personel_izin where id = @p0"
+                : "select taraf_id from public.personel_avans where id = @p0", [(int)kaynakId], iptal);
             if (sahip is null) throw GentegreHatasi.Bulunamadi(yok);
             if (sahip != baglam.KullaniciId
-                && !baglam.Yetkiler.Var("ik.izin", islem == Islem.Gor ? Islem.Gor : Islem.Degistir))
+                && !baglam.Yetkiler.Var(kaynak == "izin" ? "ik.izin" : "ik.avans", islem == Islem.Gor ? Islem.Gor : Islem.Degistir))
                 throw GentegreHatasi.Bulunamadi(yok);
             if (islem != Islem.Gor) baglam.YazmaIste();
             return;
