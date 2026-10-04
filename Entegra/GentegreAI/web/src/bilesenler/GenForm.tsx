@@ -192,6 +192,8 @@ interface Props {
    */
   ekSekmeler?: {
     anahtar: string; baslik: string;
+    /** Yeni (kaydedilmemiş) kayıtta da açılsın (965: şablon Önizleme / Sürümler / Kullanım). */
+    yenideDe?: boolean;
     /**
      * Sekmeyi cizer. BAGLAM (kartin o anki degerleri, metasi ve detay satir
      * adetleri) ekranin elinde YOK - kart GenForm'un icinde yasiyor. Mikro
@@ -939,7 +941,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
                          yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
                          gizliDetaylar,
                          ekSekmeler: ekSekmeler?.map(e => ({ anahtar: e.anahtar,
-                                                             baslik: e.baslik })),
+                                                             baslik: e.baslik, yenideDe: e.yenideDe })),
                          sekmeSirasi,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):

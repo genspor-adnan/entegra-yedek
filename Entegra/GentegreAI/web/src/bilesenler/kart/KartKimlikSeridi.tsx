@@ -307,6 +307,12 @@ export function KartKimlikSeridi({
                             //   varsayilan"). Otomatik akista kutular ekran
                             //   genisligine gore ziplayip bu ayrimi bozuyordu.
                             + (kaynak === 'fiyat-listesi' ? ' kaid-fiyat' : '')
+                            // ÇEKİM PROTOKOLÜ (kullanıcı): Tetkik geniş (3 birim, tema.css kaid-radprot).
+                            + (kaynak === 'radyoloji-protokol' ? ' kaid-radprot' : '')
+                            // RAPOR ŞABLONU (kullanıcı): kod %40 dar, şablon adı 2 kat.
+                            + (kaynak === 'radyoloji-sablon' ? ' kaid-radsablon' : '')
+                            // CİHAZ (967 mockup): ad geniş, kod dar.
+                            + (kaynak === 'radyoloji-cihaz' ? ' kaid-radcihaz' : '')
                             // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
                             //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
                             //   serit 4x2 duzenli bir izgara. Otomatik akista

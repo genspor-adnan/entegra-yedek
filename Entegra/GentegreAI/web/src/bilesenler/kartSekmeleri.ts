@@ -113,7 +113,7 @@ export function sekmeleriKur(secenek: {
    * cerceve yalnizca sekmeyi acar. Yeni kayitta acilmaz - hepsi kaydedilmis
    * bir muayeneye baglidir.
    */
-  ekSekmeler?: { anahtar: string; baslik: string }[];
+  ekSekmeler?: { anahtar: string; baslik: string; yenideDe?: boolean }[];
   /**
    * SEKME SIRASI (basliklara gore): listede adi gecen sekmeler bu sirayla
    * one alinir, kalanlar arkalarinda dogal sirasinda kalir. Muayene karti
@@ -273,9 +273,9 @@ export function sekmeleriKur(secenek: {
   }
   // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
   //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
-  if (!yeniMi)
-    (ekSekmeler ?? []).forEach(e =>
-      s.push({ tur: 'ozel', anahtar: e.anahtar, baslik: e.baslik }));
+  //   Yeni kayıtta yalnız `yenideDe` işaretli olanlar (kayda bağlı olmayanlar).
+  (ekSekmeler ?? []).filter(e => !yeniMi || e.yenideDe).forEach(e =>
+    s.push({ tur: 'ozel', anahtar: e.anahtar, baslik: e.baslik }));
 
   if (sekmeSirasi?.length) {
     const yer = (b: string) => {

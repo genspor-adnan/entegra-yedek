@@ -18464,3 +18464,68 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
 * Doğrulama (dev, geçici DEMO bayrağıyla): küçük ölçek 2 sn - 25 personel, 7 kullanıcı, 100 hasta, ~400 randevu (bugün
   20), İK; `demo.hekim` girişi; temizlik sonrası demo kişi / kullanıcı / kayıt 0; bayrak kapatılınca üretim 403.
   Dev'de bayrak tekrar 0. tsc temiz, vitest 789/789, dotnet test 218 geçti.
+
+## 04.10.2026 — Radyoloji rapor şablonu ve çekim protokolü ekranları (965)
+
+* **Mockup** `Ekranlar/Radyoloji/radyoloji_sablon_listesi_v2.html`, `radyoloji_sablon_karti_v2.html`,
+  `radyoloji_protokol_listesi.html`, `radyoloji_protokol_karti.html` (kullanıcı: "sekmeler açılsın" → "tümünü uygula").
+* **Şablon listesi:** modalite / ⭐ varsayılan / ⚠ hizmetsiz çipleri, solda **bölge** (rad.bolge, sayılı; Liste filtre
+  zincirine `useBolgeSuzgeci`), kolonlar ⭐ · kod · şablon (altında sahibi) · modalite · bağlı hizmet (+ek) · bölüm /
+  alan / makro sayısı · sürüm · **30 gün kullanım** (rapor kaydından) · durum; sağda rapor iskeleti, makrolar, kullanım.
+* **Şablon kartı** sekmeli: kimlik şeridi (kod, ad, modalite, bölge, sürüm, aktif) · Genel (ana tetkik + **ek bağlı
+  hizmetler** `radyoloji_sablon_hizmet`, varsayılan, sahibi, rapor başlığı, davranış bayrakları) · Bölümler (Bakanlık
+  parçası) · Yapılandırılmış alanlar (tip `rad.alan_tip`, birim, sınır, metne yazılış kalıbı) · Makrolar · **Önizleme**
+  (A4, yer tutucular sarı) · **Sürümler** (Yeni sürüm = içerik `radyoloji_sablon_surum`a dondurulur, sayaç artar; Geri
+  yükle) · **Kullanım** (hekim bazında rapor / onay / ortalama yazım, alan dağılımı). Rapor ekranı şablon seçimi ek bağlı
+  hizmetlere de bakar.
+* **Protokol listesi:** modalite / kontrastlı / ⚠ eksik (hazırlık metni yok, malzemesiz kontrastlı) çipleri, solda bölge,
+  kolonlar tetkik (altında seri) · modalite · süre · kontrast · seri · hazırlık · kontrol · malzeme · cihaz · eksik; sağda
+  seriler, hazırlık, kontrol listesi, sarf, cihaz.
+* **Protokol kartı** sekmeli: Genel (bölge, önce gelme, varsayılan şablon, yetkinlik, endikasyon, doz hedefleri
+  CTDIvol / DLP / DRL) · **Seriler** · Kontrast (ajan, doz, en çok, hız, takip, oral, damar yolu, kontrendikasyon) ·
+  Hasta hazırlığı (hazır talimat, SMS'e ekle, hatırlat, personel notu + **SMS önizleme**) · Uyarılar / kontrol (**çekim
+  öncesi kontrol listesi**: kural, kaynak, engel / uyarı) · Malzeme / sarf · **Cihazlar** (cihaz başına süre + MWL adı).
+* **965** yeni kolonlar + `radyoloji_sablon_hizmet`, `radyoloji_sablon_surum`, `radyoloji_protokol_seri / _kontrol /
+  _cihaz`, kod listeleri `rad.bolge`, `rad.kontrol_kaynak`, `rad.alan_tip`. **Düzeltmeler:** şablon bölüm / alan / makro
+  tablolarına `ekleyen / degistiren` (genel kart motoru yazıyordu - satır eklenemiyordu); şablon kartında "Sürüm" alanı
+  `sablonSurum` (adı `surum` olunca eşzamanlılık damgası xmin'i gösteriyordu - Form ve Onam kartlarında aynı çakışma var).
+  Uçlar `RadyolojiUclari.Tanim` (özet, sürümler, yeni sürüm, geri yükle, kullanım, protokol özeti).
+* Doğrulama: örnek şablon + protokol (kartla oluşturma, tetiklerin hazırlık / seri metni doldurması), sürüm 1 → 2,
+  silinen makronun geri yükleme ile dönmesi; tarayıcıda listeler, sekmeler, önizleme, SMS önizleme. Deneme kayıtları
+  silindi. tsc temiz, vitest 789/789, dotnet test 218 geçti.
+* **Yeni şablonda da 7 sekme** (kullanıcı: "rapor şablonu mockup'ta 7 sekme var"): kart motoru ek sekmeleri yeni
+  kayıtta gizliyordu; `ekSekmeler[].yenideDe` ile Önizleme (girilen içerikle) / Sürümler / Kullanım ("kaydedince dolar")
+  yeni kartta da görünür.
+* **966 örnek içerik** (kullanıcı: "bölgeler için örnek şablonlar ve çekim protokolleri ekle"): 13 rapor şablonu (her
+  bölgede en az bir: Beyin BT / MR, Tiroid US, Toraks BT, PA akciğer, Üst abdomen BT, Tüm abdomen US, Diz MR, Lomber /
+  Servikal MR, Mamografi + Meme US (BI-RADS), Alt ekstremite venöz Doppler) - bölümler (normal rapor metni, Bakanlık
+  parçası), yapılandırılmış alanlar (BI-RADS, TI-RADS, Lung-RADS, Fazekas, kanama...), makrolar, ek bağlı tetkikler;
+  15 çekim protokolü (seriler, kontrast ayrıntısı, doz hedefi, çekim öncesi kontrol listesi, varsayılan şablon).
+  İdempotent: şablon koduna / protokol tetkiğine göre yalnız eksik olan eklenir; tetkik kurumda yoksa şablon tetkiksiz,
+  protokol hiç eklenmez; malzeme / cihaz eklenmez (kuruma özel). Dev: 13 şablon, 15 protokol, hepsi tetkiğe bağlandı.
+* Çekim protokolü kartı: kimlik şeridinde **Tetkik (hizmet) geniş** (3 birim; `kaid-radprot`), "Aktif" onay kutusu
+  yerine **"Durum" etiketi + tıklanınca Aktif / Pasif değişen rozet** (`kartAlanCizim` DURUM_ROZETLI - protokol ve
+  şablon kartı).
+* Rapor şablonu kartı kimlik şeridi (kullanıcı): **kod %40 dar, şablon adı 2 kat, sürüm %70 dar** (`kaid-radsablon`).
+
+## 04.10.2026 — Radyoloji cihaz listesi ve kartı (967)
+
+* **Mockup** `Ekranlar/Radyoloji/radyoloji_cihaz_karti_v2.html`, `radyoloji_cihaz_listesi_v2.html` ("tümünü uygula").
+* **Liste:** gösterge şeridi (aktif · şu an çalışıyor · bakım / kapalı · arızada · QA / lisans gecikti · görüntüsü eksik
+  çekim; kutu = süzgeç), modalite çipleri, **solda konum (oda) + anlık durum**, sağda önizleme (model, oda / sorumlu, mesai,
+  şu an, bugün randevu / çekildi / sırada, **sıradaki boş slot**, saatlik yoğunluk, yaklaşan kapatma + etkilenen randevu,
+  QA / görüntü / doz uyarıları). Sol ve sağ panel katlanır (kullanıcı). Kolonlar: kod · cihaz (altında marka / model /
+  AE) · modalite · oda · **şu an** · bugün (çekim / randevu) · sırada · **haftalık doluluk** (randevu ÷ kapasite) · protokol ·
+  bağlantı (MWL / MPPS / görüntü eksik) · QA / lisans.
+* **Kart** sekmeli: kimlik şeridi (kod dar, ad geniş, modalite, oda, sorumlu, **durum rozeti** - kod tipli Aktif / Pasif de
+  rozet) · Genel (cihaz tanımı: marka, model, seri no, üretim, kurulum, garanti, servis sözleşmesi, ÜTS, demirbaş; DICOM:
+  AE Title, IP / port, MWL, MPPS, PACS hedefi + **Bağlantıyı test et** - TCP, C-ECHO değil) · Randevu ayarları (+ online
+  randevu, **kapasite**: çalışma günleri, günlük / haftalık slot) · **Protokoller** (protokol kartının "Cihazlar"ıyla aynı
+  tablo) · Kapatma / bakım · **Kalite kontrol** (test / lisans, periyot, son yapılış, sonuç) · **Doz** (30 gün, tetkik
+  başına ortalama CTDIvol / DLP, protokol hedefi, DRL üstü) · **Kullanım** (30 gün çekim, doluluk, ortalama süre, gelmedi /
+  iptal, günlük grafik, arıza kaybı) · **Belgeler** (doküman kaynağı `rad-cihaz`).
+* **967** cihaz kolonları, `radyoloji_cihaz_qa`, `rad.qa_sonuc`, `v_rad_protokol_lookup` (beyaz listede),
+  `v_radyoloji_cihaz_durum` (şu an / bugün / sırada / hafta randevu + kapasite / protokol / görüntü eksik / QA - liste ve
+  gösterge aynı tanım). Uçlar `RadyolojiUclari.Cihaz` (gösterge, özet, kullanım, doz, bağlantı testi).
+* Doğrulama: tarayıcıda liste + paneller + kart sekmeleri, kapasite 36 / 180; bağlantı testi IP yokken iş kuralı, açık
+  portta "yanıt verdi". tsc temiz, vitest 789/789, dotnet test 218 geçti.

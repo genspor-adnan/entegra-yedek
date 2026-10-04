@@ -634,6 +634,10 @@ public static partial class RadyolojiUclari
         PanoVeCihazEkle(grup);
         AkisVeKontrolEkle(grup);
         RaporEkle(grup);
+        // ŞABLON / PROTOKOL TANIM EKRANLARI (965): özet, sürüm, kullanım.
+        TanimEkle(grup);
+        // CİHAZ LİSTESİ / KARTI (967): gösterge, önizleme, kullanım, doz, bağlantı testi.
+        CihazEkle(grup);
         OnayVeBulguEkle(grup);
     }
 

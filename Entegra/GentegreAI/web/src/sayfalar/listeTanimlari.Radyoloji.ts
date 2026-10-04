@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * Radyoloji: çalışma listesi, şablonlar, protokoller, cihazlar.
@@ -53,11 +53,20 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     baslik: 'Rapor Şablonları', yol: 'Radyoloji › Rapor Şablonları',
     kartYolu: '/radyoloji-sablon', kartBaslik: 'Rapor Şablonu',
     aksiyonEkrani: 'cari-liste',
+    // 965 (mockup radyoloji_sablon_listesi_v2.html): modalite çipleri, ⭐ varsayılan, ⚠ hizmetsiz.
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'BT', filtre: { alan: 'modalite', op: 'esit', deger: 1 } },
+      { ad: 'MR', filtre: { alan: 'modalite', op: 'esit', deger: 2 } },
+      { ad: 'USG', filtre: { alan: 'modalite', op: 'esit', deger: 3 } },
+      { ad: 'Röntgen', filtre: { alan: 'modalite', op: 'esit', deger: 4 } },
+      { ad: 'Mamografi', filtre: { alan: 'modalite', op: 'esit', deger: 5 } },
+      { ad: '⭐ Varsayılan', filtre: { alan: 'varsayilan', op: 'esit', deger: 1 } },
+      { ad: '⚠ Hizmetsiz', filtre: { alan: 'hizmetsiz', op: 'esit', deger: 1 } },
       { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
+    kolonSirasi: ['yildiz', 'kod', 'ad', 'modaliteAdi', 'tetkik', 'bolumSayisi', 'alanSayisi', 'makroSayisi', 'surumAdi', 'kullanim30', 'durum'],
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
     menuSira: 90,
@@ -71,7 +80,20 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yol: 'Radyoloji › Çekim Protokolleri',
     kartYolu: '/radyoloji-protokol', kartBaslik: 'Çekim Protokolü',
     aksiyonEkrani: 'cari-liste',
-    gizliKolonlar: ['modalite', 'hizmetId', 'hazirlikMetni', 'ozelUyari'],
+    gizliKolonlar: ['modalite', 'hizmetId', 'hazirlikMetni', 'ozelUyari', 'seriTarifi', 'kontrast', 'bolge'],
+    // 965 (mockup radyoloji_protokol_listesi.html): modalite / kontrast çipleri, ⚠ eksik.
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'BT', filtre: { alan: 'modalite', op: 'esit', deger: 1 } },
+      { ad: 'MR', filtre: { alan: 'modalite', op: 'esit', deger: 2 } },
+      { ad: 'USG', filtre: { alan: 'modalite', op: 'esit', deger: 3 } },
+      { ad: 'Röntgen', filtre: { alan: 'modalite', op: 'esit', deger: 4 } },
+      { ad: 'Kontrastlı', filtre: { alan: 'kontrast', op: 'buyuk', deger: 0 } },
+      { ad: '⚠ Eksik', filtre: { alan: 'eksik', op: 'esitDegil', deger: '' } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    kolonSirasi: ['tetkikAdi', 'modaliteAdi', 'sureDk', 'kontrastAdi', 'seriAdi', 'hazirlik', 'kontrolSayisi', 'malzemeSayisi', 'cihazlar', 'eksik', 'durum'],
     menuGrup: 'Radyoloji', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Çekim Protokolleri', ic: '⚙️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
@@ -82,8 +104,21 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'radyoloji-cihaz', baslik: 'Cihazlar',
     yol: 'Radyoloji › Cihazlar',
     kartYolu: '/radyoloji-cihaz', kartBaslik: 'Radyoloji Cihazı',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    gizliKolonlar: ['modalite', 'subeId'],
+    aksiyonEkrani: 'cari-liste',
+    // 967 (mockup radyoloji_cihaz_listesi_v2.html): durum + modalite çipleri; gösterge,
+    //   konum / durum (sol) ve önizleme (sağ) panelleri Liste'de.
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'BT', filtre: { alan: 'modalite', op: 'esit', deger: 1 } },
+      { ad: 'MR', filtre: { alan: 'modalite', op: 'esit', deger: 2 } },
+      { ad: 'USG', filtre: { alan: 'modalite', op: 'esit', deger: 3 } },
+      { ad: 'Röntgen', filtre: { alan: 'modalite', op: 'esit', deger: 4 } },
+      { ad: 'Mamografi', filtre: { alan: 'modalite', op: 'esit', deger: 5 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    gizliKolonlar: ['modalite', 'subeId', 'cihazAlt', 'suAnKod', 'yuzTavan', 'qaGeciken', 'goruntuEksik'],
+    kolonSirasi: ['kod', 'ad', 'modaliteAdi', 'oda', 'suAn', 'bugun', 'sirada', 'doluluk', 'protokolSayisi', 'baglanti', 'qa', 'durum'],
     menuGrup: 'Radyoloji', menuSira: 92, menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🖥️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },

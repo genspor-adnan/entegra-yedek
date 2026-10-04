@@ -40,6 +40,7 @@ import { onayUclari } from './uclar/onay';
 import { izinUclari } from './uclar/izin';
 import { duyuruUclari } from './uclar/duyuru';
 import { demoUclari } from './uclar/demo';
+import { radyolojiTanimUclari } from './uclar/radyolojiTanim';
 import { servisUclari } from './uclar/servis';
 import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
@@ -73,6 +74,7 @@ export const api = {
   ...izinUclari,
   ...duyuruUclari,
   ...demoUclari,
+  ...radyolojiTanimUclari,
   ...servisUclari,
   ...arizaUclari,
   ...basvuruIstemUclari,

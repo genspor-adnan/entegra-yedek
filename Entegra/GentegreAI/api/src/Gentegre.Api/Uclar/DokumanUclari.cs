@@ -228,6 +228,8 @@ public static class DokumanUclari
         "personelAvans" => "avans",
         // BELGE TALEBİ EKİ (962): kaynak_id belge talebi.
         "personelBelgeTalep" => "belge-talep",
+        // CİHAZ BELGELERİ (967): kaynak_id radyoloji cihazı.
+        "radyoloji-cihaz" => "rad-cihaz",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -280,6 +282,7 @@ public static class DokumanUclari
         "personelIzin" => "ik.izin",
         "personelAvans" => "ik.avans",
         "personelBelgeTalep" => "ik.belge_talep",
+        "radyoloji-cihaz" => "radyoloji",
         "servisZiyaret" => "servis",
         _ => kartAdi
     };

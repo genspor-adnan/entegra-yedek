@@ -104,6 +104,8 @@ import { usePersonelSuzgeci } from './liste/usePersonelSuzgeci';
 import { BasvuruSeridi } from './liste/BasvuruSeridi';
 import { PrimSeridi } from './liste/PrimSeridi';
 import { PersonelSeridi } from './liste/PersonelSeridi';
+import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from './radyoloji/RadyolojiTanimPanelleri';
+import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
 import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
@@ -436,6 +438,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // PERSONEL LİSTESİ (963, mockup Ekranlar/IK/personel_listesi.html): gösterge
   //   şeridi + bölüm ağacı aynı veriden; önizleme sağda, Kart / Organizasyon ek görünüm.
   const personelEkrani = tanim.kaynak === 'personel' && !portalda;
+  // RADYOLOJİ TANIMLARI (965): solda bölge, sağda önizleme.
+  const radTanim = (tanim.kaynak === 'radyoloji-sablon' || tanim.kaynak === 'radyoloji-protokol') && !portalda;
+  const radBolge = useBolgeSuzgeci(radTanim);
+  // RADYOLOJİ CİHAZLARI (967): gösterge + konum / durum süzgeci, önizleme.
+  const radCihaz = tanim.kaynak === 'radyoloji-cihaz' && !portalda;
+  const cihazSuzgec = useCihazSuzgeci(radCihaz);
+  const cihazGostergesi = useCihazGostergesi(radCihaz, yenile);
   const personelGostergesi = usePersonelGostergesi(personelEkrani, personelSuzgec, yenile);
 
   // HAKEDIS SATIRLARI (prim rolu + kisi) SERIT SUZGECI kendi kancasinda.
@@ -999,7 +1008,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1133,6 +1142,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   sayilari gostermek, kaydin kendisini gostermekle ayni sinifta.
       ustPanel={portalda ? undefined
         : personelEkrani ? <PersonelGostergesi veri={personelGostergesi} s={personelSuzgec} />
+        : radCihaz ? <CihazGostergesi veri={cihazGostergesi} s={cihazSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
@@ -1203,10 +1213,15 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       solPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
         : personelEkrani ? <PersonelBolumAgaci veri={personelGostergesi} s={personelSuzgec} />
+        : radTanim ? <BolgePaneli kaynak={tanim.kaynak} s={radBolge} yenile={yenile} />
+        : radCihaz ? <CihazSolPanel veri={cihazGostergesi} s={cihazSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
       yanPanel={portalda ? undefined
         : personelEkrani ? <PersonelOnizleme satir={seciliSatir} yenile={yenile} />
+        : tanim.kaynak === 'radyoloji-sablon' ? <SablonOnizlemePaneli satir={seciliSatir} />
+        : tanim.kaynak === 'radyoloji-protokol' ? <ProtokolOnizlemePaneli satir={seciliSatir} />
+        : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)

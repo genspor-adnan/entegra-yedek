@@ -33,6 +33,23 @@ export interface KartOzellestirme {
 }
 
 export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
+  // ------------------------------------------- radyoloji tanımları (965) ----
+  // Mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html · radyoloji_protokol_karti.html:
+  //   kimlik şeridi + sekmeler (Önizleme / Sürümler / Kullanım ekranın ek sekmeleri).
+  'radyoloji-sablon': {
+    seritAlanlari: ['kod', 'ad', 'modalite', 'bolge', 'sablonSurum', 'durum'],
+    detayGrupta: { hizmetler: { grup: 'Genel' } },
+    sekmeSirasi: ['Genel', 'Bölümler', 'Yapılandırılmış alanlar', 'Makrolar', 'Önizleme', 'Sürümler', 'Kullanım'],
+  },
+  'radyoloji-cihaz': {
+    seritAlanlari: ['kod', 'ad', 'modalite', 'oda', 'sorumluId', 'durum'],
+    sekmeSirasi: ['Genel', 'Randevu ayarları', 'Protokoller', 'Kapatma / bakım', 'Kalite kontrol', 'Doz', 'Kullanım', 'Belgeler'],
+  },
+  'radyoloji-protokol': {
+    seritAlanlari: ['hizmetId', 'modalite', 'sureDk', 'kontrast', 'seriKodu', 'durum'],
+    detayGrupta: { kontroller: { grup: 'Uyarılar / kontrol' } },
+    sekmeSirasi: ['Genel', 'Seriler', 'Kontrast', 'Hasta hazırlığı', 'Uyarılar / kontrol', 'Malzeme / sarf', 'Cihazlar'],
+  },
   // ------------------------------------------------------------- kurum ----
   kurum: {
     // GENEL ÖNCE (484, kullanıcı: "genel ve adres sekmelerini yer değiştir").

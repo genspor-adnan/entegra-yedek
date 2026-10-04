@@ -45,6 +45,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["radyoloji-istem"] = new(["radyoloji", "radyoloji-istem"], ["radyoloji-istem"]),
         ["masraf-beyan"]    = new(["ik.masraf"], ["personel-masraf"]),
         ["servis-ziyaret"]  = new(["servis"], ["servis-ziyaret"]),
+        // CİHAZ BELGELERİ (967): lisans, servis sözleşmesi, test raporu, kılavuz.
+        ["rad-cihaz"]       = new(["radyoloji"], ["radyoloji-cihaz"]),
         ["klasor"]          = new(["dokuman"], []),
         ["sube"]            = new(["sube"], [], HerkeseGor: true),
         ["ebelge-xslt"]     = new(["ebelge_xslt"], [], HerkeseGor: true),

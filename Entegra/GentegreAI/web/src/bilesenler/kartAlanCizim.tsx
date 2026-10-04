@@ -77,6 +77,17 @@ export interface AlanCizimBaglami {
   alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
 }
 
+/**
+ * DURUM ROZETİ (kullanıcı: çekim protokolü kartında "aktif yerine durum ve rozet
+ * olarak aktif olsun"): bu kartlarda mantık tipli `durum` onay kutusu değil,
+ * tıklayınca Aktif / Pasif arasında geçen rozettir.
+ */
+const DURUM_ROZETLI = new Set(['radyoloji-protokol', 'radyoloji-sablon', 'radyoloji-cihaz']);
+const durumRozetiMi = (kaynak: string, a: KartAlanMeta) =>
+  (a.tip === 'mantik' || a.tip === 'kod') && a.ad === 'durum' && DURUM_ROZETLI.has(kaynak);
+/** Rozet açık mı: mantıkta true, kod tipinde '1' (Aktif). */
+const durumAcik = (a: KartAlanMeta, v: unknown) => a.tip === 'mantik' ? Boolean(v) : String(v ?? '') === '1';
+
 export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
@@ -94,7 +105,18 @@ export function alanCizici(b: AlanCizimBaglami) {
     };
 
     const renderGirdi = (a: KartAlanMeta) => (
-      a.tip === 'mantik' ? (
+      durumRozetiMi(kaynak, a) ? (
+        <span key={a.ad} className="durum-rozet-kutu">
+          <button type="button" className={`rozet ${durumAcik(a, deger[a.ad]) ? 'olumlu' : 'hata'}`}
+                  disabled={salt || !a.yazilabilir} title={c('Tıkla: Aktif / Pasif')}
+                  onClick={e => {
+                    e.preventDefault();
+                    setDeger(d => ({ ...d, [a.ad]: a.tip === 'mantik' ? !d[a.ad] : (durumAcik(a, d[a.ad]) ? '0' : '1') }));
+                  }}>
+            {durumAcik(a, deger[a.ad]) ? c('Aktif') : c('Pasif')}
+          </button>
+        </span>
+      ) : a.tip === 'mantik' ? (
         <input
           key={a.ad}
           type="checkbox"
@@ -385,7 +407,7 @@ export function alanCizici(b: AlanCizimBaglami) {
     //   bir kavram acardi; sinif, kart kokundeki `kart-<kaynak>` ile
     //   birlesince o ekranla sinirli kaliyor.
     const renderAlan = (a: KartAlanMeta) => (
-      <label key={a.ad} className={`alan tip-${a.tip} alan-${a.ad}`}>
+      <label key={a.ad} className={`alan tip-${durumRozetiMi(kaynak, a) ? 'kod' : a.tip} alan-${a.ad}`}>
         {/* Etiket kod_liste alanlarinda TIKLANABILIR (544): listeyi duzenler.
             Ayar ekranlarinda (AyarAlani, BelgeBaslik) ayni desen. */}
         {listeDuzenle && a.kodListesi && !salt && a.yazilabilir ? (
@@ -462,7 +484,7 @@ export function alanCizici(b: AlanCizimBaglami) {
               </div>
             );
           return (
-            <label key={a.ad} className={`alan tip-${a.tip} alan-${a.ad}`}>
+            <label key={a.ad} className={`alan tip-${durumRozetiMi(kaynak, a) ? 'kod' : a.tip} alan-${a.ad}`}>
               <span className="etiket">
                 {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
               </span>

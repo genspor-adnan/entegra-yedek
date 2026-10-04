@@ -513,7 +513,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (304 ad, 140 tanesi birden cok dosyada)
+## Gorunumler (306 ad, 140 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -754,8 +754,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_rad_hekim_lookup` | `940_personel_unvan_yalniz_onek.sql` | 283_radyoloji_cekirdek.sql, 313_rad_hekim_lookup_dis_hekim.sql, 718_hekim_calisma_plani.sql |
 | `v_rad_kontrast_yol_lookup` | `811_bakanlik_degerlendirme_ve_kontrast.sql` | — |
 | `v_rad_modalite_kod_lookup` | `810_bakanlik_hekim_ve_modalite.sql` | — |
+| `v_rad_protokol_lookup` | `967_radyoloji_cihaz_kart.sql` | — |
 | `v_rad_sablon_lookup` | `800_telerad_kurum_sozlesme_karti.sql` | — |
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
+| `v_radyoloji_cihaz_durum` | `967_radyoloji_cihaz_kart.sql` | — |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
 | `v_radyoloji_kritik_takip` | `940_personel_unvan_yalniz_onek.sql` | 318_radyoloji_takip_listeleri.sql |
 | `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |

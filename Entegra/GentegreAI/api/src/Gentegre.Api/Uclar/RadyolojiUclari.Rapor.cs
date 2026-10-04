@@ -98,11 +98,16 @@ public static partial class RadyolojiUclari
             //   genel şablonları (tetkike özel yoksa hekim yine bir şey bulsun).
             var sablonlar = await baglanti.ListeAsync("""
                 select s.id, s.kod, s.ad, s.surum, s.varsayilan,
-                       case when s.hizmet_id = @p0 then 1 else 0 end as "tetkigeOzel"
+                       case when s.hizmet_id = @p0
+                                 or exists (select 1 from public.radyoloji_sablon_hizmet x
+                                             where x.sablon_id = s.id and x.hizmet_id = @p0) then 1 else 0 end as "tetkigeOzel"
                   from public.radyoloji_sablon s
                  where s.durum = 1
+                   -- EK BAĞLI HİZMETLER (965): şablon birden çok tetkike bağlanabilir.
                    and (s.hizmet_id = @p0
-                        or (s.hizmet_id is null and s.modalite = @p1))
+                        or exists (select 1 from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id and x.hizmet_id = @p0)
+                        or (s.hizmet_id is null and s.modalite = @p1
+                            and not exists (select 1 from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id)))
                  order by "tetkigeOzel" desc, s.varsayilan desc, s.ad
                 """, null, [hizmetId, Convert.ToInt32(istem["modalite"] ?? 0)], OkuyucuGenisletmeleri.Sozluk, iptal);
 

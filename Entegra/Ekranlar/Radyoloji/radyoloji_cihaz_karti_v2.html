@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Cihazı — Kart Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+<style>
+  .gunler{display:flex;gap:4px}
+  .gun{border:1px solid var(--line);border-radius:4px;padding:4px 9px;background:#fff;font-size:11px}
+  .gun.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .kapasite{display:grid;grid-template-columns:60px repeat(7,1fr);gap:2px;font-size:10.5px}
+  .kapasite div{padding:3px 4px;text-align:center}
+  .kapasite .bas{color:var(--muted)}
+  .hucre{background:#e2f3e8;border-radius:2px}
+  .hucre.ogle{background:#eef1f5;color:#9aa7b5}
+  .hucre.acil{background:#fdf1dc}
+  .hucre.kapali{background:#f8e1df;color:#8f3d36}
+  .cubuklar{display:flex;align-items:flex-end;gap:3px;height:90px;padding:6px 0;border-bottom:1px solid var(--line2)}
+  .cubuklar i{flex:1;background:#7aa6d8;border-radius:2px 2px 0 0;display:block}
+  .cubuklar i.hs{background:#c9d6e5}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  .kpi div{border:1px solid var(--line2);border-radius:5px;padding:7px 10px;background:#fff}
+  .kpi b{display:block;font-size:17px;color:var(--navy)}
+  .kpi span{font-size:10.5px;color:var(--muted)}
+  .bag{display:flex;gap:8px;align-items:center}
+  .nokta{width:9px;height:9px;border-radius:50%;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖥️ Radyoloji Cihazı — BT-1 · Bilgisayarlı Tomografi (128 kesit) <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">🔌 Bağlantıyı test et</span>
+    <span class="btn">⛔ Kapat / bakıma al</span>
+    <span class="btn">📅 Takvimde göster</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="kimlik" style="grid-template-columns:110px 2.4fr 120px 1.1fr 1.3fr 100px">
+    <div class="fld"><label class="req">Kod</label><div class="inp">BT-1</div></div>
+    <div class="fld"><label class="req">Cihaz adı</label><div class="inp big">Bilgisayarlı Tomografi (128 kesit)</div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp"><span class="mod m-bt">BT</span>&nbsp;BT</div></div>
+    <div class="fld"><label>Oda / kat</label><div class="inp">Radyoloji · 1. kat · Oda 104</div></div>
+    <div class="fld"><label>Cihaz sorumlusu</label><div class="inp">Tkn. Murat Öz <span style="margin-left:auto;color:var(--accent)">…</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp" style="border:none;background:none;padding:0"><span class="chip c-ok" style="padding:3px 14px">Aktif</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="genel">Genel</div>
+    <div class="sek" data-p="randevu">Randevu ayarları</div>
+    <div class="sek" data-p="protokol">Protokoller <span class="say">21</span></div>
+    <div class="sek" data-p="kapatma">Kapatma / bakım <span class="say">2</span></div>
+    <div class="sek" data-p="kalite">Kalite kontrol <span class="say">1 ⚠</span></div>
+    <div class="sek" data-p="doz">Doz</div>
+    <div class="sek" data-p="kullanim">Kullanım</div>
+    <div class="sek" data-p="belge">Belgeler <span class="say">4</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="panel on" id="p-genel">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Cihaz tanımı</h4><div class="ic izgara">
+          <div class="fld"><label>Marka</label><div class="inp">Siemens</div></div>
+          <div class="fld"><label>Model</label><div class="inp">SOMATOM go.Top</div></div>
+          <div class="fld"><label>Seri no</label><div class="inp">SN 108422</div></div>
+          <div class="fld"><label>Üretim yılı</label><div class="inp">2022</div></div>
+          <div class="fld"><label>Kurulum tarihi</label><div class="inp">14.03.2023</div></div>
+          <div class="fld"><label>Garanti bitiş</label><div class="inp">14.03.2026 <span class="chip c-gri" style="margin-left:6px">bitti</span></div></div>
+          <div class="fld iki"><label>Servis firması / sözleşme</label><div class="inp">Siemens Healthineers · tam bakım · 31.12.2026'ya kadar</div></div>
+          <div class="fld iki"><label>ÜTS ürün numarası</label><div class="inp">04056869012345</div></div>
+          <div class="fld iki"><label>Demirbaş no</label><div class="inp">DM-2023-0412</div></div>
+          <div class="fld tam"><label>Açıklama</label><div class="inp metin">Acil dışı tüm BT tetkikleri; perfüzyon ve kardiyak protokoller bu cihazda. Hafta sonu acil BT için BT-2 kullanılır.</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>DICOM / bağlantı</h4><div class="ic izgara" style="grid-template-columns:1fr 1fr">
+          <div class="fld"><label>AE Title</label><div class="inp">CT_SOMATOM_1</div></div>
+          <div class="fld"><label>IP / port</label><div class="inp">10.10.4.21 : 104</div></div>
+          <div class="fld"><label>MWL (iş listesi)</label><div class="inp">☑ açık</div></div>
+          <div class="fld"><label>MPPS (çekim bildirimi)</label><div class="inp">☑ açık</div></div>
+          <div class="fld tam"><label>PACS hedefi</label><div class="inp">PACS_MAIN (10.10.4.5 : 11112)</div></div>
+        </div></div>
+        <div class="grp"><h4>Bağlantı durumu</h4><div class="ic">
+          <div class="bag"><span class="nokta" style="background:#2e7d46"></span>MWL sorgusu · son 2 dk önce</div>
+          <div class="bag"><span class="nokta" style="background:#2e7d46"></span>MPPS · bugün 34 çekim bildirildi</div>
+          <div class="bag"><span class="nokta" style="background:#e0a33a"></span>PACS'ta görüntüsü eksik çekim: 1</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANDEVU -->
+  <div class="panel" id="p-randevu">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Randevu ayarları <span class="ek">randevu takvimi bunlardan kurulur</span></h4><div class="ic izgara">
+        <div class="fld"><label>Randevu verilir</label><div class="inp">☑ evet</div></div>
+        <div class="fld"><label>Slot (dk)</label><div class="inp">15</div></div>
+        <div class="fld"><label>Varsayılan süre (dk)</label><div class="inp">15 · protokolü olmayan tetkik</div></div>
+        <div class="fld"><label>Aynı anda (hasta)</label><div class="inp">1</div></div>
+        <div class="fld"><label>Mesai</label><div class="inp">08:00 - 18:00</div></div>
+        <div class="fld"><label>Öğle arası</label><div class="inp">12:30 - 13:15</div></div>
+        <div class="fld"><label>Acil için ayrılan slot</label><div class="inp">saatte 1</div></div>
+        <div class="fld"><label>Online randevu</label><div class="inp">☐ kapalı</div></div>
+        <div class="fld tam"><label>Çalışma günleri</label>
+          <div class="gunler"><span class="gun on">Pzt</span><span class="gun on">Sal</span><span class="gun on">Çar</span><span class="gun on">Per</span><span class="gun on">Cum</span><span class="gun on">Cmt</span><span class="gun">Paz</span></div></div>
+      </div></div>
+      <div class="grp"><h4>Bu hafta kapasite <span class="ek">yeşil boş · sarı acil · kırmızı kapalı</span></h4><div class="ic">
+        <div class="kapasite">
+          <div class="bas"></div><div class="bas">Pzt</div><div class="bas">Sal</div><div class="bas">Çar</div><div class="bas">Per</div><div class="bas">Cum</div><div class="bas">Cmt</div><div class="bas">Paz</div>
+          <div class="bas">08-10</div><div class="hucre">8</div><div class="hucre">8</div><div class="hucre kapali">bakım</div><div class="hucre">8</div><div class="hucre">8</div><div class="hucre">8</div><div class="hucre ogle">—</div>
+          <div class="bas">10-12</div><div class="hucre acil">6+2</div><div class="hucre acil">6+2</div><div class="hucre kapali">bakım</div><div class="hucre acil">6+2</div><div class="hucre acil">6+2</div><div class="hucre">8</div><div class="hucre ogle">—</div>
+          <div class="bas">12:30</div><div class="hucre ogle">öğle</div><div class="hucre ogle">öğle</div><div class="hucre ogle">öğle</div><div class="hucre ogle">öğle</div><div class="hucre ogle">öğle</div><div class="hucre ogle">—</div><div class="hucre ogle">—</div>
+          <div class="bas">13-18</div><div class="hucre acil">16+4</div><div class="hucre acil">16+4</div><div class="hucre acil">16+4</div><div class="hucre acil">16+4</div><div class="hucre acil">16+4</div><div class="hucre ogle">—</div><div class="hucre ogle">—</div>
+        </div>
+        <div class="satir" style="margin-top:8px"><span>Haftalık randevu kapasitesi</span><b>186 slot (+30 acil)</b></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- PROTOKOLLER -->
+  <div class="panel" id="p-protokol">
+    <div class="grp"><h4>Bu cihazda çekilen protokoller <span class="ek">randevu yalnız bunlara verilir · cihaz protokol adı MWL'ye gider</span></h4>
+      <table class="liste">
+        <tr><th>Tetkik</th><th>Kontrast</th><th class="r">Süre (genel)</th><th class="r">Süre (bu cihaz)</th><th>Cihaz protokol adı (MWL)</th><th></th></tr>
+        <tr><td><b>BT, Beyin, Kontrastsız</b></td><td><span class="chip c-gri">Yok</span></td><td class="r">10 dk</td><td class="r">10 dk</td><td>HEAD_ROUTINE</td><td><span class="btn kucuk">✕</span></td></tr>
+        <tr><td><b>BT, Toraks, Kontrastlı</b></td><td><span class="chip c-mor">İV</span></td><td class="r">15 dk</td><td class="r">15 dk</td><td>THORAX_CE</td><td><span class="btn kucuk">✕</span></td></tr>
+        <tr><td><b>BT, Abdomen - Üst, Kontrastlı</b></td><td><span class="chip c-mor">İV + Oral</span></td><td class="r">15 dk</td><td class="r">20 dk</td><td>ABD_PV_ROUTINE</td><td><span class="btn kucuk">✕</span></td></tr>
+        <tr><td><b>BT, Beyin, Perfüzyon</b></td><td><span class="chip c-mor">İV</span></td><td class="r">20 dk</td><td class="r">20 dk</td><td>NEURO_PCT</td><td><span class="btn kucuk">✕</span></td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Protokol ekle</span> <span style="color:var(--muted);margin-left:8px">Protokol kartının "Cihazlar" sekmesiyle aynı bağ - iki yerden de düzenlenir.</span></div>
+    </div>
+  </div>
+
+  <!-- KAPATMA -->
+  <div class="panel" id="p-kapatma">
+    <div class="grp"><h4>Kapatmalar / bakım <span class="ek">bu aralıklarda randevu verilmez</span></h4>
+      <table class="liste">
+        <tr><th>Başlangıç</th><th>Bitiş</th><th>Tür</th><th>Açıklama</th><th class="r">Etkilenen randevu</th><th>Durum</th></tr>
+        <tr class="sec"><td>08.10.2026 08:00</td><td>08.10.2026 12:00</td><td><span class="chip c-mavi">Bakım</span></td><td>Periyodik bakım (servis firması)</td><td class="r">12 <small>taşınacak</small></td><td><span class="chip c-bek">Planlandı</span></td></tr>
+        <tr><td>22.09.2026 14:10</td><td>22.09.2026 16:40</td><td><span class="chip c-red">Arıza</span></td><td>Tüp soğutma hatası</td><td class="r">9 <small>taşındı</small></td><td><span class="chip c-ok">Kapandı</span></td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Kapatma</span> <span class="btn kucuk">📨 Etkilenen hastalara SMS</span> <span class="btn kucuk">↪ Randevuları BT-2'ye taşı</span></div>
+    </div>
+  </div>
+
+  <!-- KALİTE -->
+  <div class="panel" id="p-kalite">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Kalite kontrol ve lisans <span class="ek">tarihi geçen kırmızı</span></h4>
+        <table class="liste">
+          <tr><th>Test / belge</th><th>Periyot</th><th>Son</th><th>Sonraki</th><th>Sonuç</th></tr>
+          <tr><td><b>Su fantomu (CT sayısı, gürültü)</b></td><td>günlük</td><td>bugün 07:45</td><td>yarın</td><td><span class="chip c-ok">Uygun</span></td></tr>
+          <tr><td><b>Kalibrasyon (hava)</b></td><td>günlük</td><td>bugün 07:40</td><td>yarın</td><td><span class="chip c-ok">Uygun</span></td></tr>
+          <tr><td><b>Kabul / performans testi</b></td><td>yıllık</td><td>02.10.2025</td><td style="color:var(--red);font-weight:bold">02.10.2026</td><td><span class="chip c-red">Gecikti</span></td></tr>
+          <tr><td><b>Radyasyon kullanım lisansı (NDK)</b></td><td>5 yıllık</td><td>14.03.2023</td><td>14.03.2028</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+          <tr><td><b>Radyasyon alan ölçümü</b></td><td>yıllık</td><td>10.01.2026</td><td>10.01.2027</td><td><span class="chip c-ok">Uygun</span></td></tr>
+        </table>
+        <div class="ic"><span class="btn kucuk">＋ Test sonucu gir</span> <span class="btn kucuk">＋ Test tanımı</span></div>
+      </div>
+      <div>
+        <div class="kirmizi">⛔ Yıllık performans testi 2 gün gecikti. Randevu verilmeye devam ediyor; kalite sorumlusuna görev açıldı.</div>
+        <div class="bilgi" style="margin-top:10px">Günlük testi girilmeyen cihaz için sabah ilk çekimde teknisyene uyarı çıkar.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOZ -->
+  <div class="panel" id="p-doz">
+    <div class="grp"><h4>Doz izleme · son 30 gün <span class="ek">MPPS / RDSR'den; protokol hedefi ve ulusal referansla</span></h4>
+      <table class="liste">
+        <tr><th>Protokol</th><th class="r">Çekim</th><th class="r">Ort. CTDIvol</th><th class="r">Hedef</th><th class="r">Ort. DLP</th><th class="r">Hedef</th><th class="r">DRL</th><th>Durum</th></tr>
+        <tr><td><b>BT, Beyin, Kontrastsız</b></td><td class="r">412</td><td class="r">52,1</td><td class="r">60</td><td class="r">880</td><td class="r">1000</td><td class="r">1050</td><td><span class="chip c-ok">Hedefte</span></td></tr>
+        <tr><td><b>BT, Toraks, Kontrastlı</b></td><td class="r">188</td><td class="r">13,4</td><td class="r">15</td><td class="r">640</td><td class="r">600</td><td class="r">650</td><td><span class="chip c-bek">DLP hedef üstü</span></td></tr>
+        <tr><td><b>BT, Abdomen - Üst, Kontrastlı</b></td><td class="r">97</td><td class="r">14,2</td><td class="r">15</td><td class="r">690</td><td class="r">700</td><td class="r">800</td><td><span class="chip c-ok">Hedefte</span></td></tr>
+      </table>
+      <div class="ic"><span style="color:var(--muted)">DRL üstü tek çekimler: 3 · çocuk protokolünde ağırlığa göre ayrı değerlendirilir.</span></div>
+    </div>
+  </div>
+
+  <!-- KULLANIM -->
+  <div class="panel" id="p-kullanim">
+    <div class="kpi">
+      <div><b>1.142</b><span>Çekim · son 30 gün</span></div>
+      <div><b>%78</b><span>Slot doluluğu</span></div>
+      <div><b>13 dk</b><span>Ortalama oda süresi</span></div>
+      <div><b>%6</b><span>Gelmedi / iptal</span></div>
+    </div>
+    <div class="grp"><h4>Günlük çekim · son 30 gün <span class="ek">gri: hafta sonu</span></h4><div class="ic">
+      <div class="cubuklar">
+        <i style="height:70%"></i><i style="height:74%"></i><i style="height:66%"></i><i style="height:80%"></i><i style="height:72%"></i><i class="hs" style="height:35%"></i><i class="hs" style="height:10%"></i>
+        <i style="height:76%"></i><i style="height:69%"></i><i style="height:0%"></i><i style="height:82%"></i><i style="height:77%"></i><i class="hs" style="height:38%"></i><i class="hs" style="height:8%"></i>
+        <i style="height:71%"></i><i style="height:79%"></i><i style="height:73%"></i><i style="height:84%"></i><i style="height:75%"></i><i class="hs" style="height:40%"></i><i class="hs" style="height:12%"></i>
+        <i style="height:78%"></i><i style="height:65%"></i><i style="height:81%"></i><i style="height:76%"></i><i style="height:88%"></i><i class="hs" style="height:36%"></i><i class="hs" style="height:9%"></i>
+        <i style="height:74%"></i><i style="height:70%"></i>
+      </div>
+      <div class="satir"><span>Arıza nedeniyle kayıp</span>22.09 · 2,5 saat · 9 randevu</div>
+    </div></div>
+  </div>
+
+  <!-- BELGELER -->
+  <div class="panel" id="p-belge">
+    <div class="grp"><h4>Belgeler</h4>
+      <table class="liste">
+        <tr><th>Belge</th><th>Tür</th><th>Geçerlilik</th><th>Ekleyen</th></tr>
+        <tr><td>📄 <b>NDK radyasyon kullanım lisansı.pdf</b></td><td>Lisans</td><td>14.03.2028</td><td>Kalite birimi</td></tr>
+        <tr><td>📄 <b>Servis sözleşmesi 2026.pdf</b></td><td>Sözleşme</td><td>31.12.2026</td><td>Satınalma</td></tr>
+        <tr><td>📄 <b>Kabul testi raporu 2025.pdf</b></td><td>Test raporu</td><td>02.10.2026</td><td>Medikal fizik</td></tr>
+        <tr><td>📄 <b>Kullanım kılavuzu.pdf</b></td><td>Kılavuz</td><td>—</td><td>Tkn. Murat Öz</td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Belge ekle</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "cihaz kartı mockup yap". Rapor şablonu / çekim protokolü kartlarıyla aynı düzen; sekmeler tıklanınca açılır.
+Kimlik şeridi: kod, cihaz adı (geniş), modalite, oda / kat, sorumlu, durum rozeti. Tablo <code>radyoloji_cihaz</code>.<br>
+<span class="n">1</span><b>Genel:</b> marka / model / seri no / üretim / kurulum / garanti / servis sözleşmesi / ÜTS no / demirbaş no;
+DICOM (AE Title, IP / port, MWL, MPPS, PACS hedefi) ve canlı bağlantı durumu ("Bağlantıyı test et").<br>
+<span class="n">2</span><b>Randevu ayarları</b> (bugünkü alanlar): randevu verilir, slot, varsayılan süre, eşzaman, mesai, öğle, acil slot, çalışma günleri
++ <b>haftalık kapasite</b> ızgarası (boş / acil / kapalı).<br>
+<span class="n">3</span><b>Protokoller:</b> bu cihazda çekilen tetkikler, cihaz başına süre, MWL protokol adı (<code>radyoloji_protokol_cihaz</code> - protokol kartındaki "Cihazlar" ile aynı bağ).<br>
+<span class="n">4</span><b>Kapatma / bakım</b> (bugünkü detay): etkilenen randevu sayısı, hastalara SMS, başka cihaza taşıma.<br>
+<span class="n">5</span><b>Kalite kontrol:</b> periyodik testler (günlük fantom / kalibrasyon, yıllık performans, NDK lisansı, alan ölçümü) - son / sonraki / sonuç, geciken kırmızı.<br>
+<span class="n">6</span><b>Doz:</b> protokol başına ortalama CTDIvol / DLP, protokol hedefi ve ulusal referans (DRL) ile karşılaştırma.<br>
+<span class="n">7</span><b>Kullanım:</b> çekim, doluluk, ortalama oda süresi, gelmedi / iptal, günlük grafik, arıza kaybı.
+<span class="n">8</span><b>Belgeler:</b> lisans, sözleşme, test raporu, kılavuz (geçerlilik tarihli).
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>

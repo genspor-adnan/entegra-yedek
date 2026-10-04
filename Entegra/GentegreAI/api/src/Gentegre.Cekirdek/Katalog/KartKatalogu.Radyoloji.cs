@@ -133,9 +133,11 @@ public static partial class KartKatalogu
     /// surumunu saklar, bu yuzden sablonu duzenleyen surumu artirmali.
     /// </summary>
     /// <summary>
-    /// CİHAZ KARTI (283/315). Üç öbek: kimlik, DICOM/yerleşim, randevu ayarları.
+    /// CİHAZ KARTI (283/315 · sekmeli 967, mockup Ekranlar/Radyoloji/radyoloji_cihaz_karti_v2.html).
+    /// Kimlik şeridi: kod, ad, modalite, oda, sorumlu, durum rozeti. Sekmeler:
+    /// Genel (tanım + DICOM) · Randevu ayarları · Protokoller · Kapatma / bakım ·
+    /// Kalite kontrol; Doz / Kullanım / Belgeler ekranın ek sekmeleri.
     /// Randevu alan adları randevu_bolum_ayar ile AYNI - slot üretimi ortak.
-    /// Kapatma/bakım satırları detay gridinde: takvimde "kapalı" olarak çizilir.
     /// </summary>
     private static KartTanimi RadyolojiCihaz() => new(
         Ad: "radyoloji-cihaz",
@@ -148,52 +150,64 @@ public static partial class KartKatalogu
             ["durum"] = (short)1, ["randevu_verilir"] = (short)1,
             ["slot_dk"] = 15, ["varsayilan_sure"] = 15, ["eszaman"] = 1,
             ["baslangic_saat"] = "08:00", ["bitis_saat"] = "18:00",
-            ["calisma_gunleri"] = "1,2,3,4,5",
+            ["calisma_gunleri"] = "1,2,3,4,5", ["mwl"] = (short)1,
         },
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Kimlik"),
-            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 120,
-                Baslik: "Cihaz Adı", Grup: "Kimlik"),
-            new("modalite", "modalite", "kod", Zorunlu: true, KodListesi: "rad.modalite",
-                Baslik: "Modalite", Grup: "Kimlik"),
-            new("durum",    "durum",    "kod", SabitKodlar: DurumKodlari,
-                Baslik: "Durum", Grup: "Kimlik"),
+            // ---- KİMLİK ŞERİDİ ----
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Cihaz adı", Grup: "Kimlik"),
+            new("modalite", "modalite", "kod", Zorunlu: true, KodListesi: "rad.modalite", Baslik: "Modalite", Grup: "Kimlik"),
+            new("oda",      "oda",      "metin", EnFazlaUzunluk: 60, Baslik: "Oda / kat", Grup: "Kimlik"),
+            new("sorumluId", "sorumlu_id", "kod", KodTablosu: "public.v_personel_lookup", Baslik: "Cihaz sorumlusu", Grup: "Kimlik"),
+            new("durum",    "durum",    "kod", SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            // ---- GENEL ----
+            new("marka",   "marka",   "metin", EnFazlaUzunluk: 60, Baslik: "Marka", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("model",   "model",   "metin", EnFazlaUzunluk: 80, Baslik: "Model", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("seriNo",  "seri_no", "metin", EnFazlaUzunluk: 60, Baslik: "Seri no", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("uretimYili", "uretim_yili", "sayi", Baslik: "Üretim yılı", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("kurulumTarihi", "kurulum_tarihi", "tarih", Baslik: "Kurulum tarihi", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("garantiBitis", "garanti_bitis", "tarih", Baslik: "Garanti bitiş", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("servisFirma", "servis_firma", "metin", EnFazlaUzunluk: 150, Baslik: "Servis firması / sözleşme", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("servisBitis", "servis_bitis", "tarih", Baslik: "Servis sözleşmesi bitiş", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("utsNo",   "uts_no",   "metin", EnFazlaUzunluk: 30, Baslik: "ÜTS ürün numarası", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("demirbasNo", "demirbas_no", "metin", EnFazlaUzunluk: 30, Baslik: "Demirbaş no", Grup: "Genel", AltGrup: "Cihaz tanımı"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Cihaz tanımı"),
             // AE Title DICOM kimligi: MWL dogru cihaza ancak bununla iner.
-            new("aeTitle",  "ae_title", "metin", EnFazlaUzunluk: 32,
-                Baslik: "AE Title", Grup: "Yerleşim / DICOM"),
-            new("oda",      "oda",      "metin", EnFazlaUzunluk: 60,
-                Baslik: "Oda / Kat", Grup: "Yerleşim / DICOM"),
-            new("sorumluId", "sorumlu_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "Cihaz Sorumlusu", Grup: "Yerleşim / DICOM"),
-            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "Yerleşim / DICOM"),
+            new("aeTitle",  "ae_title", "metin", EnFazlaUzunluk: 32, Baslik: "AE Title", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            new("ip",       "ip",       "metin", EnFazlaUzunluk: 60, Baslik: "IP", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            new("port",     "port",     "sayi",  Baslik: "Port", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            new("mwl",      "mwl",      "mantik", Baslik: "MWL (iş listesi)", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            new("mpps",     "mpps",     "mantik", Baslik: "MPPS (çekim bildirimi)", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            new("pacsHedef", "pacs_hedef", "metin", EnFazlaUzunluk: 100, Baslik: "PACS hedefi", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            // ---- RANDEVU ----
             // RANDEVU: kapaliysa cihaz "walk-in" calisir, takvimde sutunu cikmaz.
-            new("randevuVerilir", "randevu_verilir", "mantik",
-                Baslik: "Randevu Verilir", Grup: "Randevu"),
-            new("baslangicSaat", "baslangic_saat", "metin", EnFazlaUzunluk: 5,
-                Baslik: "Mesai Başlangıç", Grup: "Randevu"),
-            new("bitisSaat",     "bitis_saat",     "metin", EnFazlaUzunluk: 5,
-                Baslik: "Mesai Bitiş", Grup: "Randevu"),
-            new("ogleBaslangic", "ogle_baslangic", "metin", EnFazlaUzunluk: 5,
-                Baslik: "Öğle Başlangıç", Grup: "Randevu"),
-            new("ogleBitis",     "ogle_bitis",     "metin", EnFazlaUzunluk: 5,
-                Baslik: "Öğle Bitiş", Grup: "Randevu"),
-            new("slotDk",        "slot_dk",        "sayi", Baslik: "Slot (dk)", Grup: "Randevu"),
+            new("randevuVerilir", "randevu_verilir", "mantik", Baslik: "Randevu verilir", Grup: "Randevu ayarları"),
+            new("onlineRandevu", "online_randevu", "mantik", Baslik: "Online randevu", Grup: "Randevu ayarları"),
+            new("baslangicSaat", "baslangic_saat", "metin", EnFazlaUzunluk: 5, Baslik: "Mesai başlangıç", Grup: "Randevu ayarları"),
+            new("bitisSaat",     "bitis_saat",     "metin", EnFazlaUzunluk: 5, Baslik: "Mesai bitiş", Grup: "Randevu ayarları"),
+            new("ogleBaslangic", "ogle_baslangic", "metin", EnFazlaUzunluk: 5, Baslik: "Öğle başlangıç", Grup: "Randevu ayarları"),
+            new("ogleBitis",     "ogle_bitis",     "metin", EnFazlaUzunluk: 5, Baslik: "Öğle bitiş", Grup: "Randevu ayarları"),
+            new("slotDk",        "slot_dk",        "sayi", Baslik: "Slot (dk)", Grup: "Randevu ayarları"),
             // Randevu SURESI oncelikle cekim protokolunden (314) gelir; bu alan
             //   protokolu olmayan tetkikler icin yedektir.
-            new("varsayilanSure", "varsayilan_sure", "sayi",
-                Baslik: "Varsayılan Süre (dk)", Grup: "Randevu"),
-            new("eszaman",   "eszaman",   "sayi", Baslik: "Aynı Anda (hasta)", Grup: "Randevu"),
-            new("acilSlot",  "acil_slot", "sayi", Baslik: "Acil için Ayrılan Slot", Grup: "Randevu"),
-            new("calismaGunleri", "calisma_gunleri", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Çalışma Günleri", Grup: "Randevu"),
+            new("varsayilanSure", "varsayilan_sure", "sayi", Baslik: "Varsayılan süre (dk)", Grup: "Randevu ayarları"),
+            new("eszaman",   "eszaman",   "sayi", Baslik: "Aynı anda (hasta)", Grup: "Randevu ayarları"),
+            new("acilSlot",  "acil_slot", "sayi", Baslik: "Acil için ayrılan slot", Grup: "Randevu ayarları"),
+            new("calismaGunleri", "calisma_gunleri", "metin", EnFazlaUzunluk: 20, Baslik: "Çalışma günleri (1=Pzt … 7=Paz)", Grup: "Randevu ayarları"),
             new("subeId",    "sube_id",   "kod", Gizli: true),
         },
         Detaylar: new DetayTanimi[]
         {
+            // BU CİHAZDA ÇEKİLEN PROTOKOLLER: protokol kartının "Cihazlar" sekmesiyle aynı tablo.
+            new("protokoller", "public.radyoloji_protokol_cihaz", "cihaz_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("protokolId", "protokol_id", "kod", Zorunlu: true, KodTablosu: "public.v_rad_protokol_lookup", Baslik: "Protokol (tetkik)"),
+                new("sureDk", "sure_dk", "sayi", Baslik: "Süre (bu cihazda, dk)"),
+                new("cihazProtokolAdi", "cihaz_protokol_adi", "metin", EnFazlaUzunluk: 80, Baslik: "Cihaz protokol adı (MWL)"),
+            }, SubeKolonu: null, Baslik: "Protokoller", LogTabloId: 1379),
             // BAKIM / ARIZA / TATIL: takvimde "kapalı" cizilir, randevu verilemez.
             new("kapatmalar", "public.radyoloji_cihaz_kapatma", "cihaz_id", new KartAlani[]
             {
@@ -202,13 +216,26 @@ public static partial class KartKatalogu
                 new("bitis",     "bitis",     "tarih", Zorunlu: true, Baslik: "Bitiş"),
                 new("nedenTur",  "neden_tur", "kod", KodListesi: "rad.kapatma", Baslik: "Neden"),
                 new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
-            }, SubeKolonu: null, Baslik: "Kapatma / Bakım", LogTabloId: 1282),
+            }, Sirala: "baslangic desc", SubeKolonu: null, Baslik: "Kapatma / bakım", LogTabloId: 1282),
+            // KALİTE KONTROL / LİSANS: periyot + son yapılış; sonraki = son + periyot.
+            new("qa", "public.radyoloji_cihaz_qa", "cihaz_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "#"),
+                new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Test / belge"),
+                new("periyotGun", "periyot_gun", "sayi", Baslik: "Periyot (gün)"),
+                new("sonTarih", "son_tarih", "tarih", Baslik: "Son yapılış"),
+                new("sonuc", "sonuc", "kod", KodListesi: "rad.qa_sonuc", Baslik: "Sonuç"),
+                new("notu", "notu", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Kalite kontrol", LogTabloId: 1380),
         });
 
     /// <summary>
-    /// ÇEKİM PROTOKOLÜ KARTI (314). Bir tetkikin TEK protokolü olur
-    /// (ux_radyoloji_protokol_hizmet) - kart tetkiği seçtirir, tekrar seçilirse
-    /// benzersizlik kısıtı iş kuralı mesajıyla uyarır.
+    /// ÇEKİM PROTOKOLÜ KARTI (314 · sekmeli 965, mockup Ekranlar/Radyoloji/radyoloji_protokol_karti.html).
+    /// Bir tetkikin TEK protokolü olur (ux_radyoloji_protokol_hizmet). Sekmeler:
+    /// Genel · Seriler · Kontrast · Hasta hazırlığı · Uyarılar / kontrol ·
+    /// Malzeme / sarf · Cihazlar. Kimlik şeridi: tetkik, modalite, süre,
+    /// kontrast, seri kodu, durum.
     /// </summary>
     private static KartTanimi RadyolojiProtokol() => new(
         Ad: "radyoloji-protokol",
@@ -218,55 +245,106 @@ public static partial class KartKatalogu
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
-            ["sure_dk"] = 15, ["kontrast"] = (short)0,
+            ["sure_dk"] = 15, ["kontrast"] = (short)0, ["durum"] = (short)1, ["sms_ekle"] = (short)1,
         },
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            // Tetkik binlerce hizmet arasindan JENERIK ARAMA ile secilir.
+            // ---- KİMLİK ŞERİDİ ----
             new("hizmetId", "hizmet_id", "kod", Zorunlu: true,
                 KodTablosu: "public.v_rad_tetkik_lookup", AramaKaynagi: "hizmet",
-                Baslik: "Tetkik", Grup: "Kimlik"),
+                Baslik: "Tetkik (hizmet)", Grup: "Kimlik"),
             // Bos birakilirsa hizmetin kendi modalitesi gecerlidir.
-            new("modalite", "modalite", "kod", KodListesi: "rad.modalite",
-                Baslik: "Modalite", Grup: "Kimlik"),
-            new("sureDk",   "sure_dk",  "sayi", Baslik: "Çekim Süresi (dk)", Grup: "Kimlik"),
-            new("kontrast", "kontrast", "kod", KodListesi: "rad.kontrast",
-                Baslik: "Varsayılan Kontrast", Grup: "Kimlik"),
-            new("seriTarifi", "seri_tarifi", "metin", EnFazlaUzunluk: 400,
-                Baslik: "Seri / Pozisyon Tarifi", Grup: "Çekim"),
-            // HASTAYA verilen metin: kabul ekraninda "Hazırlık talimatı ver"
-            //   isaretliyken bu metin gosterilir (311 modalite varsayilanini ezer).
-            new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 600,
-                Baslik: "Hazırlık Talimatı", Grup: "Çekim"),
-            // PERSONELE uyari: gebelik, metal, kreatinin gibi cekim oncesi kontrol.
-            new("ozelUyari", "ozel_uyari", "metin", EnFazlaUzunluk: 400,
-                Baslik: "Özel Uyarı", Grup: "Çekim"),
+            new("modalite", "modalite", "kod", KodListesi: "rad.modalite", Baslik: "Modalite", Grup: "Kimlik"),
+            new("sureDk",   "sure_dk",  "sayi", Zorunlu: true, Baslik: "Süre (dk)", Grup: "Kimlik"),
+            new("kontrast", "kontrast", "kod", KodListesi: "rad.kontrast", Baslik: "Kontrast", Grup: "Kimlik"),
+            // SERİ TİPİ kod listesinden (515): seri / pozisyon notu tetikle bundan dolar.
+            new("seriKodu", "seri_kodu", "kod", KodListesi: "rad.seri", Baslik: "Seri tipi", Grup: "Kimlik"),
+            // Ekranda Aktif / Pasif ROZETİ (kartAlanCizim DURUM_ROZETLI).
+            new("durum",    "durum",    "mantik", Baslik: "Durum", Grup: "Kimlik"),
+            // ---- GENEL ----
+            new("bolge", "bolge", "kod", KodListesi: "rad.bolge", Baslik: "Bölge", Grup: "Genel", AltGrup: "Protokol"),
+            new("hazirlikOnceDk", "hazirlik_once_dk", "sayi", Baslik: "Hasta önce gelsin (dk)", Grup: "Genel", AltGrup: "Protokol"),
+            new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_rad_sablon_lookup",
+                Baslik: "Varsayılan rapor şablonu", Grup: "Genel", AltGrup: "Protokol"),
+            new("yetkinlik", "yetkinlik", "metin", EnFazlaUzunluk: 150, Baslik: "Teknisyen yetkinliği", Grup: "Genel", AltGrup: "Protokol"),
+            new("endikasyon", "endikasyon", "metin", EnFazlaUzunluk: 600, Baslik: "Endikasyon notu", Grup: "Genel", AltGrup: "Protokol"),
+            new("seriTarifi", "seri_tarifi", "metin", EnFazlaUzunluk: 400, Baslik: "Seri / pozisyon notu", Grup: "Genel", AltGrup: "Protokol"),
+            new("ctdiHedef", "ctdi_hedef", "ondalik", Baslik: "Hedef CTDIvol (mGy)", Grup: "Genel", AltGrup: "Doz (radyasyon)"),
+            new("dlpHedef",  "dlp_hedef",  "ondalik", Baslik: "Hedef DLP (mGy·cm)", Grup: "Genel", AltGrup: "Doz (radyasyon)"),
+            new("drl",       "drl",        "ondalik", Baslik: "Ulusal referans (DRL)", Grup: "Genel", AltGrup: "Doz (radyasyon)"),
+            new("cocukNotu", "cocuk_notu", "metin", EnFazlaUzunluk: 200, Baslik: "Çocuk", Grup: "Genel", AltGrup: "Doz (radyasyon)"),
+            // ---- KONTRAST ----
+            new("kontrastAjan", "kontrast_ajan", "metin", EnFazlaUzunluk: 100, Baslik: "IV ajan", Grup: "Kontrast"),
+            new("kontrastDoz",  "kontrast_doz",  "metin", EnFazlaUzunluk: 60, Baslik: "Doz (ör. 1,5 ml/kg)", Grup: "Kontrast"),
+            new("kontrastEnCok", "kontrast_en_cok", "ondalik", Baslik: "En çok (ml)", Grup: "Kontrast"),
+            new("kontrastHiz",  "kontrast_hiz",  "metin", EnFazlaUzunluk: 40, Baslik: "Hız", Grup: "Kontrast"),
+            new("kontrastTakip", "kontrast_takip", "metin", EnFazlaUzunluk: 60, Baslik: "Serum fizyolojik takip", Grup: "Kontrast"),
+            new("damarYolu",    "damar_yolu",    "metin", EnFazlaUzunluk: 100, Baslik: "Damar yolu", Grup: "Kontrast"),
+            new("oralTarif",    "oral_tarif",    "metin", EnFazlaUzunluk: 300, Baslik: "Oral kontrast tarifi", Grup: "Kontrast"),
+            new("kontrendikasyon", "kontrendikasyon", "metin", EnFazlaUzunluk: 400, Baslik: "Kontrendikasyon", Grup: "Kontrast"),
+            // ---- HASTA HAZIRLIĞI ----
+            // HASTAYA verilen metin: randevu SMS'i ve hazırlık kartı bundan (311 modalite varsayılanını ezer).
+            new("hazirlikKodu",  "hazirlik_kodu",  "kod", KodListesi: "rad.hazirlik", Baslik: "Hazır talimat", Grup: "Hasta hazırlığı"),
+            new("smsEkle",       "sms_ekle",       "mantik", Baslik: "Randevu SMS'ine ekle", Grup: "Hasta hazırlığı"),
+            new("hatirlat",      "hatirlat",       "mantik", Baslik: "1 gün önce hatırlat", Grup: "Hasta hazırlığı"),
+            new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 600, Baslik: "Hastaya metin", Grup: "Hasta hazırlığı"),
+            new("personelNotu",  "personel_notu",  "metin", EnFazlaUzunluk: 600, Baslik: "Personele not", Grup: "Hasta hazırlığı"),
+            // ---- UYARILAR ----
+            new("uyariKodu", "uyari_kodu", "kod", KodListesi: "rad.uyari", Baslik: "Hazır uyarı", Grup: "Uyarılar / kontrol"),
+            new("ozelUyari", "ozel_uyari", "metin", EnFazlaUzunluk: 400, Baslik: "Özel uyarı (teknisyen ekranında üstte)", Grup: "Uyarılar / kontrol"),
         },
         Detaylar: new DetayTanimi[]
         {
+            new DetayTanimi("seriler", "public.radyoloji_protokol_seri", "protokol_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "#"),
+                new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 80, Baslik: "Seri"),
+                new("faz", "faz", "metin", EnFazlaUzunluk: 80, Baslik: "Faz / gecikme"),
+                new("kesit", "kesit", "metin", EnFazlaUzunluk: 40, Baslik: "Kesit / aralık"),
+                new("kvMas", "kv_mas", "metin", EnFazlaUzunluk: 40, Baslik: "kV / mAs"),
+                new("rekon", "rekon", "metin", EnFazlaUzunluk: 120, Baslik: "Rekonstrüksiyon"),
+                new("notu", "notu", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Seriler", LogTabloId: 1375),
+            new DetayTanimi("kontroller", "public.radyoloji_protokol_kontrol", "protokol_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "#"),
+                new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 80, Baslik: "Kontrol"),
+                new("kural", "kural", "metin", EnFazlaUzunluk: 200, Baslik: "Kural"),
+                new("kaynak", "kaynak", "kod", KodListesi: "rad.kontrol_kaynak", Baslik: "Kaynak"),
+                new("engel", "engel", "mantik", Baslik: "Engel (değilse uyarı)"),
+            }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Çekim öncesi kontrol", LogTabloId: 1376),
             // SARF LISTESI (320): tetkikin stok karsiligi. Cekim tamamlaninca
-            //   dusum penceresi bu satirlari ONERIR - miktar VARSAYILANDIR,
-            //   gercek kullanimi teknisyen onaylar.
+            //   dusum penceresi bu satirlari ONERIR - miktar VARSAYILANDIR.
             new DetayTanimi("malzeme", "public.radyoloji_protokol_malzeme", "protokol_id",
                 new KartAlani[]
                 {
-                    // ID SART: yoksa kayitli satir "yeni" sanilip cogalir.
                     new("id", "id", "sayi", Yazilabilir: false),
                     new("stokId", "stok_id", "kod", Zorunlu: true,
-                        KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok",
-                        Baslik: "Stok / Malzeme"),
+                        KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok", Baslik: "Stok / malzeme"),
                     new("miktar", "miktar", "sayi", Baslik: "Miktar"),
-                    new("dusumTipi", "dusum_tipi", "kod", KodListesi: "rad.dusum_tipi",
-                        Baslik: "Düşüm"),
+                    new("dusumTipi", "dusum_tipi", "kod", KodListesi: "rad.dusum_tipi", Baslik: "Düşüm"),
                     // Hesap YAPILMAZ: teknisyene gosterilen not ("1,5 mL/kg").
-                    new("kural", "kural", "metin", EnFazlaUzunluk: 200,
-                        Baslik: "Kural / Not"),
+                    new("kural", "kural", "metin", EnFazlaUzunluk: 200, Baslik: "Kural / not"),
                     new("sira", "sira", "sayi", Baslik: "Sıra"),
                 },
-                SubeKolonu: null, Baslik: "Malzeme / Sarf", LogTabloId: 1281),
+                SubeKolonu: null, Baslik: "Malzeme / sarf", LogTabloId: 1281),
+            new DetayTanimi("cihazlar", "public.radyoloji_protokol_cihaz", "protokol_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("cihazId", "cihaz_id", "kod", Zorunlu: true, KodTablosu: "public.v_radyoloji_cihaz_lookup", Baslik: "Cihaz"),
+                new("sureDk", "sure_dk", "sayi", Baslik: "Süre (bu cihazda, dk)"),
+                new("cihazProtokolAdi", "cihaz_protokol_adi", "metin", EnFazlaUzunluk: 80, Baslik: "Cihaz protokol adı (MWL)"),
+            }, SubeKolonu: null, Baslik: "Cihazlar", LogTabloId: 1377),
         });
 
+    /// <summary>
+    /// RAPOR ŞABLONU KARTI (283 · sekmeli 965, mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html).
+    /// Sekmeler: Genel (+ ek bağlı hizmetler) · Bölümler · Yapılandırılmış
+    /// alanlar · Makrolar; Önizleme / Sürümler / Kullanım ekranın ek sekmeleri.
+    /// </summary>
     private static KartTanimi RadyolojiSablon() => new(
         Ad: "radyoloji-sablon",
         YetkiKodu: "radyoloji",
@@ -280,66 +358,81 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            new("kod",       "kod",       "metin", EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Kimlik"),
-            new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 150,
-                Baslik: "Sablon Adi", Grup: "Kimlik"),
-            new("modalite",  "modalite",  "kod", KodListesi: "rad.modalite",
-                Baslik: "Modalite", Grup: "Kimlik"),
+            // ---- KİMLİK ŞERİDİ ----
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Şablon adı", Grup: "Kimlik"),
+            new("modalite", "modalite", "kod", Zorunlu: true, KodListesi: "rad.modalite", Baslik: "Modalite", Grup: "Kimlik"),
+            new("bolge",    "bolge",    "kod", KodListesi: "rad.bolge", Baslik: "Bölge", Grup: "Kimlik"),
+            // SÜRÜM elle yazılmaz: "Yeni sürüm" düğmesi içeriği saklayıp artırır.
+            // AD "surum" DEĞİL: kart yanıtındaki "surum" eşzamanlılık damgasıdır (xmin) ve onu ezerdi.
+            new("sablonSurum", "surum", "sayi", Yazilabilir: false, Baslik: "Sürüm", Grup: "Kimlik"),
+            new("durum",    "durum",    "mantik", Baslik: "Durum", Grup: "Kimlik"),
+            // ---- GENEL ----
             // Bos birakilirsa sablon o modalitenin GENEL sablonu olur; tetkike
-            //   bagliysa rapor ekraninda ilk sirada gelir.
-            new("hizmetId",  "hizmet_id", "kod", KodTablosu: "public.v_rad_tetkik_lookup",
-                Baslik: "Bagli Tetkik", Grup: "Kimlik"),
-            new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayilan", Grup: "Kimlik"),
-            new("durum",     "durum",     "mantik", Baslik: "Aktif", Grup: "Kimlik"),
-            new("bolum",     "bolum",     "metin", EnFazlaUzunluk: 60,
-                Baslik: "Bolum", Grup: "Genel"),
-            new("surum",     "surum",     "sayi",  Baslik: "Surum", Grup: "Genel"),
-            new("kullanim",  "kullanim",  "sayi",  Yazilabilir: false,
-                Baslik: "Kullanim", Grup: "Genel"),
-            new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
-                Baslik: "Aciklama", Grup: "Genel"),
-            new("subeId",    "sube_id",   "kod", Gizli: true),
+            //   bagliysa rapor ekraninda ilk sirada gelir. Ek tetkikler "Bağlı hizmetler" tablosunda.
+            new("hizmetId", "hizmet_id", "kod", KodTablosu: "public.v_rad_tetkik_lookup", AramaKaynagi: "hizmet",
+                Baslik: "Ana bağlı tetkik", Grup: "Genel", AltGrup: "Kimlik"),
+            new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayılan (bağlı tetkiklerde ilk gelen)", Grup: "Genel", AltGrup: "Kimlik"),
+            new("sahipId", "sahip_id", "kod", KodTablosu: "public.v_rad_hekim_lookup",
+                Baslik: "Sahibi (boş = kurum şablonu)", Grup: "Genel", AltGrup: "Kimlik"),
+            new("raporBasligi", "rapor_basligi", "metin", EnFazlaUzunluk: 150, Baslik: "Rapor başlığı (yazdırmada)", Grup: "Genel", AltGrup: "Kimlik"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Kimlik"),
+            new("kullanim", "kullanim", "sayi", Yazilabilir: false, Baslik: "Kullanım", Grup: "Genel", AltGrup: "Kimlik"),
+            new("istemBilgi", "istem_bilgi", "mantik", Baslik: "Klinik bilgi istemden dolsun", Grup: "Genel", AltGrup: "Davranış"),
+            new("karsilastirma", "karsilastirma", "mantik", Baslik: "Önceki aynı bölge tetkiki karşılaştırmaya önerilsin", Grup: "Genel", AltGrup: "Davranış"),
+            new("kritikSor", "kritik_sor", "mantik", Baslik: "Sonuçta kritik ifade geçerse kritik bulgu bildirimi sor", Grup: "Genel", AltGrup: "Davranış"),
+            new("eimzaZorunlu", "eimza_zorunlu", "mantik", Baslik: "Onayda e-imza zorunlu", Grup: "Genel", AltGrup: "Davranış"),
+            new("subeId",   "sube_id",  "kod", Gizli: true),
         },
         Detaylar: new DetayTanimi[]
         {
+            new("hizmetler", "public.radyoloji_sablon_hizmet", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("hizmetId", "hizmet_id", "kod", Zorunlu: true, KodTablosu: "public.v_rad_tetkik_lookup",
+                    AramaKaynagi: "hizmet", Baslik: "Ek bağlı tetkik"),
+            }, SubeKolonu: null, Baslik: "Bağlı hizmetler", LogTabloId: 1378),
+
             new("bolumler", "public.radyoloji_sablon_bolum", "sablon_id", new KartAlani[]
             {
                 new("id",   "id",   "sayi", Yazilabilir: false),
-                new("sira", "sira", "sayi", Baslik: "Sira"),
-                new("baslik", "baslik", "metin", Zorunlu: true, EnFazlaUzunluk: 60,
-                    Baslik: "Baslik"),
-                new("varsayilanMetin", "varsayilan_metin", "metin", Baslik: "Varsayilan Metin"),
+                new("sira", "sira", "sayi", Baslik: "#"),
+                new("baslik", "baslik", "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Başlık"),
+                // Yer tutucular: {istem.on_tani} {istem.sikayet} {hasta.yas} {hasta.cinsiyet}
+                new("varsayilanMetin", "varsayilan_metin", "metin", Baslik: "Varsayılan metin"),
                 new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
                 // Kapaliysa bolum ekranda gorunur ama hasta ciktisina basilmaz.
-                new("yazdir",  "yazdir",  "mantik", Baslik: "Yazdir"),
-            }, SubeKolonu: null, Baslik: "Bolumler", LogTabloId: 1278),
-
-            new("makrolar", "public.radyoloji_sablon_makro", "sablon_id", new KartAlani[]
-            {
-                new("id",      "id",      "sayi", Yazilabilir: false),
-                new("kisayol", "kisayol", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
-                    Baslik: "Kisayol"),
-                new("ad",      "ad",      "metin", EnFazlaUzunluk: 80, Baslik: "Ad"),
-                new("metin",   "metin",   "metin", Baslik: "Metin"),
-                new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60,
-                    Baslik: "Hedef Bolum"),
-            }, SubeKolonu: null, Baslik: "Makrolar", LogTabloId: 1279),
+                new("yazdir",  "yazdir",  "mantik", Baslik: "Yazdır"),
+                new("bakanlikParca", "bakanlik_parca", "kod", KodListesi: "rad.bakanlik_parca", Baslik: "Bakanlık rapor parçası"),
+            }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Bölümler", LogTabloId: 1278),
 
             new("skorlar", "public.radyoloji_sablon_alan", "sablon_id", new KartAlani[]
             {
                 new("id",       "id",       "sayi", Yazilabilir: false),
-                new("sira",     "sira",     "sayi", Baslik: "Sira"),
-                new("alanKod",  "alan_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 40,
-                    Baslik: "Alan Kodu"),
-                new("alanAd",   "alan_ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 80,
-                    Baslik: "Alan Adi"),
+                new("sira",     "sira",     "sayi", Baslik: "#"),
+                new("alanKod",  "alan_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 40, Baslik: "Kod"),
+                new("alanAd",   "alan_ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 80, Baslik: "Alan"),
+                new("tip",      "tip",      "kod", KodListesi: "rad.alan_tip", Baslik: "Tip"),
                 // Secenekler "|" ile ayrilir: serbest metin birakilirsa
                 //   "BIRADS 4" ile "Bi-Rads IV" iki ayri deger olur.
-                new("secenekler", "secenekler", "metin", EnFazlaUzunluk: 400,
-                    Baslik: "Secenekler (| ile)"),
+                new("secenekler", "secenekler", "metin", EnFazlaUzunluk: 400, Baslik: "Seçenekler (| ile)"),
+                new("birim",    "birim",    "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
+                new("altSinir", "alt_sinir", "ondalik", Baslik: "Alt"),
+                new("ustSinir", "ust_sinir", "ondalik", Baslik: "Üst"),
+                new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60, Baslik: "Bölüm"),
+                new("kalip",    "kalip",    "metin", EnFazlaUzunluk: 300, Baslik: "Metne yazılış ({değer})"),
+                new("sifirKalip", "sifir_kalip", "metin", EnFazlaUzunluk: 300, Baslik: "0 / yok ise"),
                 new("zorunlu",  "zorunlu",  "mantik", Baslik: "Zorunlu"),
-                new("raporaBas", "rapora_bas", "mantik", Baslik: "Rapora Bas"),
-            }, SubeKolonu: null, Baslik: "Skor Alanlari", LogTabloId: 1277),
+                new("raporaBas", "rapora_bas", "mantik", Baslik: "Rapora bas"),
+            }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Yapılandırılmış alanlar", LogTabloId: 1277),
+
+            new("makrolar", "public.radyoloji_sablon_makro", "sablon_id", new KartAlani[]
+            {
+                new("id",      "id",      "sayi", Yazilabilir: false),
+                new("kisayol", "kisayol", "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kısayol"),
+                new("ad",      "ad",      "metin", EnFazlaUzunluk: 80, Baslik: "Ad"),
+                new("metin",   "metin",   "metin", Baslik: "Metin"),
+                new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60, Baslik: "Hedef bölüm"),
+            }, SubeKolonu: null, Baslik: "Makrolar", LogTabloId: 1279),
         });
 }

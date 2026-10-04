@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Cihazları — Liste Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc);cursor:pointer}
+  .k b{display:block;font-size:18px;color:var(--navy)}
+  .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)}
+  .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .nokta{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+  .n-ok{background:#2e7d46} .n-uy{background:#e0a33a} .n-hata{background:#b3261e} .n-gri{background:#b9c4d0}
+  .doluluk{display:inline-flex;align-items:center;gap:6px}
+  .doluluk .yol{width:60px;height:5px;border-radius:3px;background:#e3e9f0;overflow:hidden;display:inline-block}
+  .doluluk .yol i{display:block;height:100%;background:#2f6db3}
+  .gunluk{display:flex;align-items:flex-end;gap:2px;height:56px}
+  .gunluk i{flex:1;background:#7aa6d8;border-radius:2px 2px 0 0;display:block}
+  .gunluk i.su{background:#e0a33a}
+  .liste td:first-child,.liste td:nth-child(5),.liste td:nth-child(6){white-space:nowrap}
+  .liste td:nth-child(2) small{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .liste td:nth-child(2) b{white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Cihazlar</h1><span class="yol">Radyoloji › Ayarlar › Cihazlar</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni cihaz</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">⛔ Kapat / bakıma al</span>
+    <span class="btn">🔌 Bağlantıları test et</span>
+    <span class="btn">📅 Takvim</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>9</b><span>Aktif cihaz</span></div>
+    <div class="k"><b>7</b><span>Şu an çalışıyor</span></div>
+    <div class="k uyari"><b>1</b><span>Bugün bakım / kapalı</span></div>
+    <div class="k kirmizi"><b>1</b><span>Arızada</span></div>
+    <div class="k kirmizi"><b>2</b><span>QA / lisans gecikti</span></div>
+    <div class="k uyari"><b>1</b><span>Bağlantı sorunu</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Kod, ad, AE Title, oda…</span>
+    <span class="cip on">Aktif <i>9</i></span>
+    <span class="cip"><span class="mod m-bt">BT</span> <i>2</i></span>
+    <span class="cip"><span class="mod m-mr">MR</span> <i>2</i></span>
+    <span class="cip"><span class="mod m-us">US</span> <i>2</i></span>
+    <span class="cip"><span class="mod m-dr">DR</span> <i>2</i></span>
+    <span class="cip"><span class="mod m-mg">MG</span> <i>1</i></span>
+    <span class="cip">Pasif <i>1</i></span>
+    <span class="cip">Tümü <i>10</i></span>
+    <span class="combo">Şube: Merkez</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Konum</h6>
+      <div class="dal on">Tümü <i>10</i></div>
+      <div class="dal">Radyoloji · 1. kat <i>6</i></div>
+      <div class="dal">Acil <i>2</i></div>
+      <div class="dal">Meme merkezi <i>1</i></div>
+      <div class="dal">Poliklinik binası <i>1</i></div>
+      <h6 style="margin-top:12px">Durum</h6>
+      <div class="dal"><span><span class="nokta n-ok"></span>Çalışıyor</span><i>7</i></div>
+      <div class="dal"><span><span class="nokta n-uy"></span>Bakımda</span><i>1</i></div>
+      <div class="dal"><span><span class="nokta n-hata"></span>Arızada</span><i>1</i></div>
+      <div class="dal"><span><span class="nokta n-gri"></span>Pasif</span><i>1</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Kod</th><th>Cihaz</th><th>Modalite</th><th>Oda</th><th>Şu an</th><th class="r">Bugün</th><th>Doluluk (hafta)</th><th class="o">Protokol</th><th>Bağlantı</th><th>QA / lisans</th></tr>
+        <tr class="sec"><td><b>BT-1</b></td><td><b>Bilgisayarlı Tomografi (128 kesit)</b><small>Siemens SOMATOM go.Top · AE CT_SOMATOM_1</small></td><td><span class="mod m-bt">BT</span></td><td>1. kat · 104</td><td><span class="chip c-ok">Çalışıyor</span><small>sırada 3 hasta</small></td><td class="r">34 / 42</td><td><span class="doluluk"><span class="yol"><i style="width:78%"></i></span>%78</span></td><td class="o">21</td><td><span class="nokta n-ok"></span>MWL · MPPS</td><td><span class="chip c-red">Perf. testi gecikti</span></td></tr>
+        <tr><td><b>BT-2</b></td><td><b>Acil BT (16 kesit)</b><small>GE Revolution ACT · AE CT_ACIL</small></td><td><span class="mod m-bt">BT</span></td><td>Acil</td><td><span class="chip c-ok">Çalışıyor</span></td><td class="r">18 / —</td><td><span class="doluluk"><span class="yol"><i style="width:54%"></i></span>acil</span></td><td class="o">9</td><td><span class="nokta n-ok"></span>MWL · MPPS</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>MR-1</b></td><td><b>MR 1,5 T</b><small>Philips Ingenia · AE MR_15T</small></td><td><span class="mod m-mr">MR</span></td><td>1. kat · 108</td><td><span class="chip c-bek">Bakımda</span><small>12:00'ye kadar</small></td><td class="r">6 / 16</td><td><span class="doluluk"><span class="yol"><i style="width:91%"></i></span>%91</span></td><td class="o">19</td><td><span class="nokta n-ok"></span>MWL · MPPS</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>MR-2</b></td><td><b>MR 3 T</b><small>Siemens MAGNETOM Vida · AE MR_3T</small></td><td><span class="mod m-mr">MR</span></td><td>1. kat · 110</td><td><span class="chip c-ok">Çalışıyor</span></td><td class="r">11 / 14</td><td><span class="doluluk"><span class="yol"><i style="width:84%"></i></span>%84</span></td><td class="o">14</td><td><span class="nokta n-uy"></span>PACS gecikmesi</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>US-1</b></td><td><b>Ultrason Oda 1</b><small>Samsung RS85</small></td><td><span class="mod m-us">US</span></td><td>1. kat · 112</td><td><span class="chip c-ok">Çalışıyor</span></td><td class="r">22 / 28</td><td><span class="doluluk"><span class="yol"><i style="width:72%"></i></span>%72</span></td><td class="o">12</td><td><span class="nokta n-ok"></span>MWL</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>US-2</b></td><td><b>Ultrason Oda 2 (Doppler)</b><small>GE LOGIQ E10</small></td><td><span class="mod m-us">US</span></td><td>1. kat · 114</td><td><span class="chip c-ok">Çalışıyor</span></td><td class="r">17 / 24</td><td><span class="doluluk"><span class="yol"><i style="width:66%"></i></span>%66</span></td><td class="o">8</td><td><span class="nokta n-ok"></span>MWL</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>DR-1</b></td><td><b>Dijital Röntgen</b><small>Fujifilm FDR Smart X</small></td><td><span class="mod m-dr">DR</span></td><td>Poliklinik binası</td><td><span class="chip c-ok">Çalışıyor</span><small>sırada 6 hasta</small></td><td class="r">58 / —</td><td><span class="doluluk"><span class="yol"><i style="width:40%"></i></span>randevusuz</span></td><td class="o">24</td><td><span class="nokta n-ok"></span>MWL · MPPS</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>DR-2</b></td><td><b>Acil Röntgen</b><small>Siemens Ysio</small></td><td><span class="mod m-dr">DR</span></td><td>Acil</td><td><span class="chip c-red">Arızada</span><small>dedektör · 2 sa</small></td><td class="r">9 / —</td><td><span class="doluluk"><span class="yol"><i style="width:0%"></i></span>—</span></td><td class="o">24</td><td><span class="nokta n-hata"></span>yanıt yok</td><td><span class="chip c-ok">Geçerli</span></td></tr>
+        <tr><td><b>MG-1</b></td><td><b>Dijital Mamografi (tomosentez)</b><small>Hologic 3Dimensions</small></td><td><span class="mod m-mg">MG</span></td><td>Meme merkezi</td><td><span class="chip c-ok">Çalışıyor</span></td><td class="r">12 / 16</td><td><span class="doluluk"><span class="yol"><i style="width:75%"></i></span>%75</span></td><td class="o">3</td><td><span class="nokta n-ok"></span>MWL · MPPS</td><td><span class="chip c-red">NDK lisansı 20 gün</span></td></tr>
+        <tr class="pasif"><td><b>DR-0</b></td><td><b>Analog Röntgen (eski)</b><small>yerine DR-1</small></td><td><span class="mod m-dr">DR</span></td><td>—</td><td><span class="chip c-gri">Pasif</span></td><td class="r">—</td><td>—</td><td class="o">0</td><td>—</td><td>—</td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 10 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 1 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Seçili cihaz</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">BT-1 · Bilgisayarlı Tomografi</div>
+        <div class="satir"><span>Model</span>Siemens SOMATOM go.Top</div>
+        <div class="satir"><span>Oda / sorumlu</span>1. kat · 104 · Tkn. Murat Öz</div>
+        <div class="satir"><span>Mesai / slot</span>08:00-18:00 · 15 dk</div>
+      </div>
+      <div class="bl"><h5>Bugün</h5>
+        <div class="satir"><span>Randevu</span><b>42</b></div>
+        <div class="satir"><span>Çekildi / sırada</span>34 / 3</div>
+        <div class="satir"><span>Sıradaki boş slot</span>15:45</div>
+        <div class="gunluk" style="margin-top:6px"><i style="height:40%"></i><i style="height:70%"></i><i style="height:90%"></i><i style="height:85%"></i><i style="height:30%"></i><i style="height:80%"></i><i class="su" style="height:60%"></i><i style="height:20%"></i><i style="height:10%"></i><i style="height:5%"></i></div>
+        <div class="satir" style="font-size:10px"><span>08</span><span>13</span><span>18</span></div>
+      </div>
+      <div class="bl"><h5>Yaklaşan <a>Kapatmalar ›</a></h5>
+        <div class="satir"><span>08.10 08:00-12:00</span><span class="chip c-mavi">Bakım</span></div>
+        <div class="satir"><span>Etkilenen randevu</span>12 · taşınacak</div>
+      </div>
+      <div class="bl"><h5>Kalite / lisans</h5>
+        <div class="kirmizi">⛔ Yıllık performans testi 2 gün gecikti.</div>
+        <div class="satir" style="margin-top:6px"><span>Günlük fantom</span><span class="chip c-ok">bugün uygun</span></div>
+        <div class="satir"><span>NDK lisansı</span>14.03.2028</div>
+      </div>
+      <div class="bl"><h5>Doz · 30 gün</h5>
+        <div class="satir"><span>Hedef üstü protokol</span>1 (Toraks kontrastlı · DLP)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "cihaz liste mockup yap". Rapor şablonu / çekim protokolü listeleriyle aynı düzen; satır çift tık → cihaz kartı (radyoloji_cihaz_karti_v2.html).<br>
+<span class="n">1</span><b>Gösterge şeridi</b> (tıkla = süz): aktif, şu an çalışan, bugün bakım / kapalı, arızada, QA / lisans gecikmiş, bağlantı sorunu.<br>
+<span class="n">2</span><b>Sol:</b> konum (oda / bina) ve anlık durum (çalışıyor / bakımda / arızada / pasif).<br>
+<span class="n">3</span><b>Liste:</b> kod, cihaz (altında marka / model / AE Title), modalite rozeti, oda, <b>şu an</b> (çalışıyor / bakımda / arızada + sırada bekleyen),
+bugün çekilen / randevu, haftalık slot doluluğu (randevusuz cihazda "randevusuz", acil cihazda "acil"), bağlı protokol sayısı,
+bağlantı (MWL / MPPS / PACS sağlığı), QA / lisans durumu (geciken ya da 30 günde dolan kırmızı).<br>
+<span class="n">4</span><b>Sağ önizleme:</b> model, oda, mesai; bugün randevu / çekildi / sırada / sıradaki boş slot + saatlik yoğunluk; yaklaşan kapatma ve etkilenen randevu;
+kalite / lisans uyarısı; doz hedefi aşan protokol. "Bağlantıları test et" tüm cihazlara MWL / PACS yoklaması yapar.
+</div></div>
+
+</body>
+</html>

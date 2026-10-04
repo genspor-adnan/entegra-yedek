@@ -36,6 +36,8 @@ import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
+import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
+import { CihazBaglantiTest, CihazDozSekmesi, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
 /** Muayene durum kodlari (kart metasindaki SabitKodlar ile ayni) - baslik
     rozeti icin. Kod->ad cevrimi tek satirlik, ek istek gerektirmesin. */
@@ -205,7 +207,16 @@ export function ListeKarti({
         alanIpucu={muayeneKarti
           ? (ad, yaz) => MAKRO_ALANLARI.has(ad) ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz} /> : null
           : undefined}
-        sekmeSarmalayici={tanim.kaynak === 'lab-tetkik'
+        sekmeSarmalayici={tanim.kaynak === 'radyoloji-cihaz'
+          // CİHAZ (967): Genel altında bağlantı testi, Randevu ayarları altında kapasite.
+          ? (baslik, icerik, deger) => baslik === 'Genel' && kartId !== 'yeni' && kartId !== null
+              ? <>{icerik}<CihazBaglantiTest id={Number(kartId)} /></>
+              : baslik === 'Randevu ayarları' ? <>{icerik}<CihazKapasite deger={deger as Record<string, unknown>} /></> : icerik
+          : tanim.kaynak === 'radyoloji-protokol'
+          // SMS ÖNİZLEME (965): hasta hazırlığı metni randevu SMS'inde nasıl görünür.
+          ? (baslik, icerik, deger) => baslik === 'Hasta hazırlığı'
+              ? <>{icerik}<SmsOnizleme deger={deger as Record<string, unknown>} /></> : icerik
+          : tanim.kaynak === 'lab-tetkik'
           ? (baslik, icerik, deger) => (
               baslik.includes('Çalışma Zamanları')
                 ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
@@ -418,7 +429,26 @@ export function ListeKarti({
         //   antibiyotik_karti.html): uc mockup'ta da ILK sekme okunur bir
         //   ozettir. Icerik kartin KENDI degerlerinden gelir - ikinci istek
         //   yok, kural yok.
-        ekSekmeler={labMikroOzetiVar(tanim.kaynak)
+        // RADYOLOJİ ŞABLONU (965): Önizleme · Sürümler · Kullanım (mockup sekmeleri).
+        // YENİ KARTTA DA 7 SEKME (kullanıcı: "rapor şablonu mockup'ta 7 sekme var"):
+        //   Önizleme girilen içerikle çalışır; Sürümler / Kullanım kayıttan sonra dolar.
+        // RADYOLOJİ CİHAZI (967): Doz · Kullanım · Belgeler (kayıtlı cihazda).
+        ekSekmeler={tanim.kaynak === 'radyoloji-cihaz' && kartId !== 'yeni' && kartId !== null
+          ? [
+              { anahtar: 'ozel:rc-doz', baslik: 'Doz', ciz: () => <CihazDozSekmesi id={Number(kartId)} /> },
+              { anahtar: 'ozel:rc-kul', baslik: 'Kullanım', ciz: () => <CihazKullanimSekmesi id={Number(kartId)} /> },
+              { anahtar: 'ozel:rc-belge', baslik: 'Belgeler',
+                ciz: () => <DokumanGalerisi kartAdi="radyoloji-cihaz" kaynakId={Number(kartId)} saltOkunur={false} /> },
+            ]
+          : tanim.kaynak === 'radyoloji-sablon' && kartId !== null
+          ? [
+              { anahtar: 'ozel:rt-oniz', baslik: 'Önizleme', yenideDe: true, ciz: baglam => <SablonOnizlemeSekmesi baglam={baglam} /> },
+              { anahtar: 'ozel:rt-surum', baslik: 'Sürümler', yenideDe: true,
+                ciz: () => kartId === 'yeni' ? <KayitSonraDolar /> : <SablonSurumSekmesi id={Number(kartId)} tazele={() => setKartTazele(t => t + 1)} /> },
+              { anahtar: 'ozel:rt-kul', baslik: 'Kullanım', yenideDe: true,
+                ciz: () => kartId === 'yeni' ? <KayitSonraDolar /> : <SablonKullanimSekmesi id={Number(kartId)} /> },
+            ]
+          : labMikroOzetiVar(tanim.kaynak)
             && kartId !== 'yeni' && kartId !== null
           ? [{ anahtar: 'ozel:tanim', baslik: 'Tanım',
                ciz: baglam => <LabMikroOzet kaynak={tanim.kaynak} baglam={baglam} /> }]

@@ -24,41 +24,62 @@ public static partial class KaynakKatalogu
         Ad: "radyoloji-cihaz",
         YetkiKodu: "radyoloji",
         Kaynak: "public.radyoloji_cihaz c " +
-                "left join public.taraf s on s.id = c.sorumlu_id",
+                "left join public.taraf s on s.id = c.sorumlu_id " +
+                "left join public.v_radyoloji_cihaz_durum d on d.cihaz_id = c.id",
         SubeKolonu: "c.sube_id",
         VarsayilanSirala: "c.modalite, c.ad",
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "c.id",    "sayi",  "Id", Varsayilan: false),
-            new("kod",      "c.kod",   "metin", "Kod", Genislik: 110),
-            new("ad",       "c.ad",    "metin", "Cihaz", Genislik: 260),
+            new("kod",      "c.kod",   "metin", "Kod", Genislik: 80),
+            // 967 (mockup radyoloji_cihaz_listesi_v2.html): ad + altında marka / model / AE Title.
+            new("ad",       "c.ad",    "metin", "Cihaz", Genislik: 260, Bicim: "alt:cihazAlt"),
+            new("cihazAlt",
+                "concat_ws(' · ', nullif(trim(c.marka || ' ' || c.model), ''), nullif('AE ' || c.ae_title, 'AE '))",
+                                       "metin", "Marka / model", Varsayilan: false),
             new("modaliteAdi",
                 "case c.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
                 "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
                 "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
                                        "metin", "Modalite", Hizalama: "orta",
-                                       Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
+                                       Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
             new("modalite", "c.modalite", "kod", "Modalite Kodu", Varsayilan: false),
-            new("aeTitle",  "c.ae_title", "metin", "AE Title", Genislik: 130),
-            new("oda",      "c.oda",   "metin", "Oda", Genislik: 150),
-            new("sorumlu",  "coalesce(public.fn_taraf_ad(s.unvan, s.ad, s.soyad)::varchar(120), '')", "metin", "Sorumlu", Genislik: 160),
-            // Mesai iki kolon yerine TEK okunur metin: listede "08:00-18:00"
-            //   bir bakışta anlaşılır, iki ayrı kolon yer harcardı.
+            new("oda",      "coalesce(c.oda, '')", "metin", "Oda", Genislik: 130),
+            // ŞU AN: kapatma aralığındaysa bakım / arıza / kapalı (v_radyoloji_cihaz_durum).
+            new("suAn",     "coalesce(d.su_an, '')", "metin", "Şu an", Bicim: "rozet", Genislik: 110),
+            new("suAnKod",  "coalesce(d.su_an_kod, 1)", "sayi", "Şu an kodu", Varsayilan: false),
+            new("bugun",
+                "case when coalesce(d.bugun_randevu, 0) > 0 then d.bugun_cekim || ' / ' || d.bugun_randevu " +
+                "     else coalesce(d.bugun_cekim, 0) || ' / —' end",
+                                       "metin", "Bugün (çekim / randevu)", Hizalama: "sag", Genislik: 120,
+                                       Filtrelenebilir: false, Siralanabilir: false),
+            new("sirada",   "coalesce(d.sirada, 0)", "sayi", "Sırada", Hizalama: "orta", Genislik: 70, Bicim: "sayac"),
+            new("doluluk",
+                "case when coalesce(d.hafta_kapasite, 0) > 0 then round(100.0 * d.hafta_randevu / d.hafta_kapasite) end",
+                                       "ondalik", "Doluluk % (hafta)", Genislik: 120, Bicim: "cubuk:yuzTavan"),
+            new("yuzTavan", "100", "sayi", "Tavan", Varsayilan: false),
+            new("protokolSayisi", "coalesce(d.protokol_sayisi, 0)", "sayi", "Protokol", Hizalama: "orta", Genislik: 80),
+            new("baglanti",
+                "concat_ws(' · ', case when c.mwl = 1 then 'MWL' end, case when c.mpps = 1 then 'MPPS' end, " +
+                "          case when coalesce(d.goruntu_eksik, 0) > 0 then 'görüntü eksik: ' || d.goruntu_eksik end)",
+                                       "metin", "Bağlantı", Genislik: 150, Filtrelenebilir: false),
+            new("qa",
+                "case when coalesce(d.qa_geciken, 0) > 0 then 'Gecikti: ' || d.qa_geciken_ad " +
+                "     when coalesce(d.qa_yaklasan, 0) > 0 then d.qa_yaklasan || ' test 30 gün içinde' else '' end",
+                                       "metin", "QA / lisans", Bicim: "uyari", Genislik: 180),
+            new("qaGeciken", "coalesce(d.qa_geciken, 0)", "sayi", "QA geciken", Varsayilan: false),
+            new("goruntuEksik", "coalesce(d.goruntu_eksik, 0)", "sayi", "Görüntü eksik", Varsayilan: false),
+            new("sorumlu",  "coalesce(public.fn_taraf_ad(s.unvan, s.ad, s.soyad)::varchar(120), '')", "metin", "Sorumlu",
+                Genislik: 160, Varsayilan: false),
+            new("aeTitle",  "c.ae_title", "metin", "AE Title", Varsayilan: false),
+            // Mesai iki kolon yerine TEK okunur metin.
             new("mesai",
                 "case when c.randevu_verilir = 1 and c.baslangic_saat <> '' " +
                 "     then c.baslangic_saat || '-' || c.bitis_saat else '' end",
                                        "metin", "Mesai", Hizalama: "orta", Genislik: 110,
-                                       Filtrelenebilir: false),
-            new("slotDk",   "c.slot_dk", "sayi", "Slot (dk)", Hizalama: "sag", Genislik: 90),
-            new("randevuVerilir", "c.randevu_verilir", "mantik", "Randevu", Hizalama: "orta",
-                Genislik: 90),
-            // BUGUNKU IS: cihazin doluluk hissini veren tek sayi.
-            new("bugun",
-                "(select count(*) from public.radyoloji_istem i " +
-                " where i.cihaz_id = c.id and i.durum > 0 " +
-                "   and coalesce(i.cekim_tarihi, i.ekleme_tarihi)::date = current_date)",
-                                       "sayi",  "Bugün", Hizalama: "sag", Genislik: 80,
-                                       Filtrelenebilir: false),
+                                       Filtrelenebilir: false, Varsayilan: false),
+            new("slotDk",   "c.slot_dk", "sayi", "Slot (dk)", Hizalama: "sag", Varsayilan: false),
+            new("randevuVerilir", "c.randevu_verilir", "mantik", "Randevu", Hizalama: "orta", Varsayilan: false),
             new("durum",    "c.durum", "kod",   "Durum", Hizalama: "orta"),
             new("subeId",   "c.sube_id", "sayi", "Şube", Varsayilan: false),
         });
@@ -82,31 +103,52 @@ public static partial class KaynakKatalogu
         {
             new("id",         "p.id",        "sayi",  "Id", Varsayilan: false),
             new("hizmetId",   "p.hizmet_id", "sayi",  "Tetkik Id", Varsayilan: false),
-            new("tetkikKodu", "coalesce(hz.kod, '')", "metin", "Kod", Genislik: 110),
-            new("tetkikAdi",  "coalesce(hz.ad, '')",  "metin", "Tetkik", Genislik: 280),
+            new("tetkikKodu", "coalesce(hz.kod, '')", "metin", "Kod", Varsayilan: false),
+            // 965 (mockup radyoloji_protokol_listesi.html): seri ayrı kolonda.
+            new("tetkikAdi",  "coalesce(hz.ad, '')",  "metin", "Tetkik (hizmet)", Genislik: 280),
+            // SERİ: tip kod listesinden (515), metni seri_tarifi.
+            new("seriAdi",    "coalesce(left(p.seri_tarifi, 40), '')", "metin", "Seri", Genislik: 160),
             new("modaliteAdi",
                 "case coalesce(p.modalite, hz.modalite) when 1 then 'BT' when 2 then 'MR' " +
                 "when 3 then 'USG' when 4 then 'Röntgen' when 5 then 'Mamografi' " +
                 "when 6 then 'DEXA' when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
                                              "metin", "Modalite", Hizalama: "orta",
                                              Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
-            new("modalite",   "coalesce(p.modalite, hz.modalite)", "kod", "Modalite Kodu",
-                Varsayilan: false),
-            new("sureDk",     "p.sure_dk",   "sayi",  "Süre (dk)", Hizalama: "sag", Genislik: 90),
-            new("kontrast",   "p.kontrast",  "kod",   "Kontrast", Hizalama: "orta", Genislik: 110),
-            // Metnin KENDISI listede yer kaplar; "var mı" sorusu yeter - eksik
-            //   protokol tek bakista gorunur.
+            new("modalite",   "coalesce(p.modalite, hz.modalite)", "kod", "Modalite Kodu", Varsayilan: false),
+            new("bolge",      "p.bolge",     "kod",   "Bölge Kodu", Varsayilan: false),
+            new("sureDk",     "p.sure_dk",   "sayi",  "Süre (dk)", Hizalama: "sag", Genislik: 80),
+            new("kontrastAdi",
+                "case p.kontrast when 1 then 'İV' when 2 then 'Oral' when 3 then 'İV + Oral' when 4 then 'Rektal' else 'Yok' end",
+                                             "metin", "Kontrast", Hizalama: "orta", Bicim: "rozet", Genislik: 100,
+                                             Filtrelenebilir: false),
+            new("kontrast",   "p.kontrast",  "kod",   "Kontrast Kodu", Varsayilan: false),
+            new("seriKodu",   "p.seri_kodu", "kod", "Seri Tipi Kodu", Varsayilan: false),
+            new("hazirlik",
+                "coalesce(left(p.hazirlik_metni, 40), '')",
+                                             "metin", "Hazırlık", Genislik: 160),
+            new("kontrolSayisi",
+                "(select count(*) from public.radyoloji_protokol_kontrol k where k.protokol_id = p.id)",
+                                             "sayi", "Kontrol", Hizalama: "orta", Genislik: 80, Bicim: "sayac"),
+            new("malzemeSayisi",
+                "(select count(*) from public.radyoloji_protokol_malzeme m where m.protokol_id = p.id)",
+                                             "sayi", "Malzeme", Hizalama: "orta", Genislik: 80),
+            new("cihazlar",
+                "coalesce((select string_agg(c.kod, ', ' order by c.kod) from public.radyoloji_protokol_cihaz pc " +
+                "          join public.radyoloji_cihaz c on c.id = pc.cihaz_id where pc.protokol_id = p.id), '')",
+                                             "metin", "Cihaz", Genislik: 120, Filtrelenebilir: false),
+            // UYARI ŞERİDİ: eksik hazırlık / malzemesiz kontrastlı protokol.
+            new("eksik",
+                "concat_ws(', ', case when coalesce(p.hazirlik_metni, '') = '' and p.kontrast > 0 then 'hazırlık metni yok' end, " +
+                "          case when p.kontrast > 0 and not exists (select 1 from public.radyoloji_protokol_malzeme m where m.protokol_id = p.id) " +
+                "               then 'malzemesiz kontrastlı' end)",
+                                             "metin", "Eksik", Bicim: "uyari", Genislik: 180),
             new("hazirlikVar",
                 "case when coalesce(p.hazirlik_metni, '') <> '' then 1 else 0 end",
-                                             "mantik", "Hazırlık", Hizalama: "orta", Genislik: 90),
-            new("uyariVar",
-                "case when coalesce(p.ozel_uyari, '') <> '' then 1 else 0 end",
-                                             "mantik", "Uyarı", Hizalama: "orta", Genislik: 80),
-            new("hazirlikMetni", "coalesce(p.hazirlik_metni, '')", "metin", "Hazırlık Talimatı",
-                Varsayilan: false),
+                                             "mantik", "Hazırlık var", Varsayilan: false),
+            new("hazirlikMetni", "coalesce(p.hazirlik_metni, '')", "metin", "Hazırlık Talimatı", Varsayilan: false),
             new("ozelUyari",  "coalesce(p.ozel_uyari, '')", "metin", "Özel Uyarı", Varsayilan: false),
-            new("seriTarifi", "coalesce(p.seri_tarifi, '')", "metin", "Seri / Pozisyon",
-                Genislik: 260),
+            new("seriTarifi", "coalesce(p.seri_tarifi, '')", "metin", "Seri / Pozisyon", Varsayilan: false),
+            new("durum",      "p.durum",     "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
         });
 
     private static KaynakTanimi RadyolojiIstem() => new(
@@ -229,33 +271,58 @@ public static partial class KaynakKatalogu
         Ad: "radyoloji-sablon",
         YetkiKodu: "radyoloji",
         Kaynak: "public.radyoloji_sablon s " +
-                "left join public.hizmet hz on hz.id = s.hizmet_id",
+                "left join public.hizmet hz on hz.id = s.hizmet_id " +
+                "left join public.taraf sh on sh.id = s.sahip_id",
         SubeKolonu: "s.sube_id",
         VarsayilanSirala: "s.modalite, s.ad",
         Kolonlar: new KolonTanimi[]
         {
             new("id",         "s.id",   "sayi",  "Id", Varsayilan: false),
-            new("kod",        "s.kod",  "metin", "Kod", Genislik: 120),
+            // 965 (mockup radyoloji_sablon_listesi_v2.html): ⭐ varsayılan en solda.
+            new("yildiz",     "case when s.varsayilan = 1 then '⭐' else '' end", "metin", "⭐",
+                Hizalama: "orta", Genislik: 36, Filtrelenebilir: false, Siralanabilir: false),
+            new("kod",        "s.kod",  "metin", "Kod", Genislik: 110),
+            new("ad",         "s.ad",   "metin", "Şablon", Genislik: 240, Bicim: "alt:sahibi"),
+            new("sahibi",
+                "case when s.sahip_id is null then 'Kurum şablonu' " +
+                "     else 'Kişisel · ' || public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120) end",
+                                        "metin", "Sahibi", Varsayilan: false),
+            new("sahipId",    "s.sahip_id", "sayi", "Sahip Id", Varsayilan: false),
             new("modaliteAdi",
-                "case s.modalite when 1 then \'BT\' when 2 then \'MR\' when 3 then \'USG\' " +
-                "when 4 then \'Röntgen\' when 5 then \'Mamografi\' when 6 then \'DEXA\' " +
-                "when 7 then \'Anjiyo\' when 8 then \'Skopi\' else \'\' end",
-                                        "metin", "Mod.", Hizalama: "orta", Bicim: "rozet",
-                                                 Genislik: 80, Filtrelenebilir: false),
+                "case s.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
+                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
+                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                        "metin", "Modalite", Hizalama: "orta", Bicim: "rozet",
+                                                 Genislik: 90, Filtrelenebilir: false),
             new("modalite",   "s.modalite", "kod", "Modalite Kodu", Varsayilan: false),
-            new("ad",         "s.ad",   "metin", "Sablon Adi", Genislik: 240),
+            new("bolge",      "s.bolge", "kod", "Bölge Kodu", Varsayilan: false),
             new("tetkik",
-                "coalesce(nullif(hz.kod, \'\') || \' · \', \'\') || coalesce(hz.ad, \'\')",
-                                        "metin", "Bagli Tetkik", Genislik: 240,
-                                                 Filtrelenebilir: false),
-            new("bolum",      "s.bolum", "metin", "Bolum", Genislik: 130),
+                "coalesce(hz.ad, '')", "metin", "Bağlı hizmet", Genislik: 200, Bicim: "alt:ekHizmet",
+                Filtrelenebilir: false),
+            new("ekHizmet",
+                "case when (select count(*) from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id) > 0 " +
+                "     then '+' || (select count(*) from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id) || ' hizmet' else '' end",
+                                        "metin", "Ek hizmet", Varsayilan: false),
+            new("hizmetsiz",
+                "case when s.hizmet_id is null and not exists (select 1 from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id) " +
+                "     then 1 else 0 end", "sayi", "Hizmetsiz", Varsayilan: false),
             new("bolumSayisi",
                 "(select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)",
-                                        "sayi",  "Bolum", Hizalama: "sag", Genislik: 80,
-                                                 Filtrelenebilir: false),
-            new("kullanim",   "s.kullanim", "sayi", "Kullanim", Hizalama: "sag", Genislik: 90),
-            new("varsayilan", "s.varsayilan", "mantik", "Varsayilan", Hizalama: "orta"),
-            new("durum",      "s.durum", "mantik", "Aktif", Hizalama: "orta"),
+                                        "sayi",  "Bölüm", Hizalama: "orta", Genislik: 70, Filtrelenebilir: false),
+            new("alanSayisi",
+                "(select count(*) from public.radyoloji_sablon_alan a where a.sablon_id = s.id)",
+                                        "sayi",  "Alan", Hizalama: "orta", Genislik: 70, Filtrelenebilir: false),
+            new("makroSayisi",
+                "(select count(*) from public.radyoloji_sablon_makro m where m.sablon_id = s.id)",
+                                        "sayi",  "Makro", Hizalama: "orta", Genislik: 70, Filtrelenebilir: false),
+            new("surumAdi",   "'v' || s.surum", "metin", "Sürüm", Hizalama: "orta", Genislik: 70, Siralanabilir: false),
+            // KULLANIM SON 30 GÜN: rapor kaydından sayılır (eski "kullanim" sayacı birikimli).
+            new("kullanim30",
+                "(select count(*) from public.radyoloji_rapor r where r.sablon_id = s.id and r.ekleme_tarihi > now() - interval '30 days')",
+                                        "sayi", "Kullanım (30 gün)", Hizalama: "sag", Genislik: 110),
+            new("kullanim",   "s.kullanim", "sayi", "Kullanım (toplam)", Hizalama: "sag", Varsayilan: false),
+            new("varsayilan", "s.varsayilan", "mantik", "Varsayılan", Varsayilan: false),
+            new("durum",      "s.durum", "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
         });
 
     /// <summary>
