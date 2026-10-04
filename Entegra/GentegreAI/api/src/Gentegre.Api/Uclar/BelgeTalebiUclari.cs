@@ -28,7 +28,7 @@ namespace Gentegre.Api.Uclar;
 /// değil - deneme süresindeki personele kredi yazısı vermemek gibi haklı
 /// gerekçeler var, İK hazırlık aşamasında gerekçesiyle reddedebilir.
 /// </summary>
-public static class BelgeTalebiUclari
+public static partial class BelgeTalebiUclari
 {
     /// <summary>islem_log.tablo_id — personel_belge_talep.</summary>
     private const int LogTalep = 1314;
@@ -45,6 +45,10 @@ public static class BelgeTalebiUclari
         public short? Adet { get; set; }
         public short? TeslimSekli { get; set; }
         public string? Aciklama { get; set; }
+        /// <summary>962: istenen tarih ve teslim adresleri.</summary>
+        public DateOnly? IstenenTarih { get; set; }
+        public string? TeslimEposta { get; set; }
+        public string? TeslimAdres { get; set; }
     }
 
     public sealed class GerekceIstegi { public string? Gerekce { get; set; } }
@@ -94,6 +98,8 @@ public static class BelgeTalebiUclari
     public static void BelgeTalebiUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/ik").WithTags("Belge Talebi").RequireAuthorization();
+        // BELGE TALEP KARTI (962): bağlam, e-posta ile teslim, kimliksiz doğrulama.
+        BelgeKartUclariniEkle(grup, yol);
 
         // ------------------------------------------------------- talep ----
         grup.MapPost("/belge-talep", async (
@@ -132,9 +138,9 @@ public static class BelgeTalebiUclari
             var id = await baglanti.TekDegerAsync<int>("""
                 insert into public.personel_belge_talep
                        (taraf_id, sube_id, tur, amac, muhatap, adet, teslim_sekli,
-                        durum, otomatik_onay, aciklama, ekleyen, talep_no)
+                        durum, otomatik_onay, aciklama, ekleyen, istenen_tarih, teslim_eposta, teslim_adres, talep_no)
                 values (@p0, @p1, coalesce(@p2, 1), @p3, @p4, coalesce(@p5, 1),
-                        coalesce(@p6, 1), @p7, @p8, @p9, @p10,
+                        coalesce(@p6, 1), @p7, @p8, @p9, @p10, @p11, @p12, @p13,
                         public.fn_numara_kimlik_uret(
                             908, @p1, 'personel_belge_talep', 'talep_no'))
                 returning id
@@ -142,7 +148,9 @@ public static class BelgeTalebiUclari
                 [istek.TarafId, baglam.SubeId ?? 0, istek.Tur, istek.Amac,
                  istek.Muhatap ?? "", istek.Adet, istek.TeslimSekli,
                  otoAcik ? Hazirlanacak : Onayda, otoAcik ? (short)1 : (short)0,
-                 istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+                 istek.Aciklama ?? "", baglam.KullaniciId,
+                 istek.IstenenTarih?.ToDateTime(TimeOnly.MinValue), istek.TeslimEposta?.Trim() ?? "",
+                 istek.TeslimAdres?.Trim() ?? ""], iptal);
 
             object? basamaklar = null;
             long? onayId = null;
@@ -195,7 +203,8 @@ public static class BelgeTalebiUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.belge_talep", Islem.Gor);
+            // 962: talep sahibi kendi yazısını görür (Taleplerim / kart önizleme).
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_belge_talep where id = @p0", id, "ik.belge_talep", Islem.Gor, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 

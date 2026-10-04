@@ -132,6 +132,11 @@ public static partial class KartKatalogu
             new("muhatap", "muhatap", "metin", Baslik: "Muhatap (boş = ilgili makama)",
                 Grup: "Talep", EnFazlaUzunluk: 200),
             new("adet", "adet", "sayi", Baslik: "Nüsha", Grup: "Talep"),
+            // 962: istenen tarih ve teslim adresleri.
+            new("istenenTarih", "istenen_tarih", "tarih", Baslik: "İstenen Tarih", Grup: "Talep"),
+            new("teslimEposta", "teslim_eposta", "metin", Baslik: "Teslim E-posta", Grup: "Talep", EnFazlaUzunluk: 150),
+            new("teslimAdres", "teslim_adres", "metin", Baslik: "Teslim Adresi", Grup: "Talep", EnFazlaUzunluk: 300),
+            new("dogrulamaKodu", "dogrulama_kodu", "metin", Yazilabilir: false, Baslik: "Doğrulama Kodu", Grup: "Talep"),
             new("teslimSekli", "teslim_sekli", "kod", Baslik: "Teslim Şekli",
                 Grup: "Talep", SabitKodlar: BelgeTeslimSekli),
             new("durum", "durum", "kod", Yazilabilir: false, Baslik: "Durum",

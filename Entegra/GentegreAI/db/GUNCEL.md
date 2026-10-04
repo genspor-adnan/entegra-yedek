@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (503 ad, 140 tanesi birden cok dosyada)
+## Fonksiyonlar (504 ad, 140 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -420,6 +420,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
+| `tg_belge_talep_dogrulama` | `962_belge_talep_karti.sql` | — |
 | `tg_calisma_istisna_onay` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 945_calisma_karti_kurallari.sql |
 | `tg_calisma_sablon_cakisma` | `945_calisma_karti_kurallari.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |

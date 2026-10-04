@@ -58,6 +58,7 @@ const Duyurular = tembel(() => import('./sayfalar/Duyurular'), 'Duyurular');
 const IzinTalepKarti = tembel(() => import('./sayfalar/ik/IzinTalepKarti'), 'IzinTalepKarti');
 const AvansKarti = tembel(() => import('./sayfalar/ik/AvansKarti'), 'AvansKarti');
 const MasrafKarti = tembel(() => import('./sayfalar/ik/MasrafKarti'), 'MasrafKarti');
+const BelgeTalepKarti = tembel(() => import('./sayfalar/ik/BelgeTalepKarti'), 'BelgeTalepKarti');
 const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
 const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
 const DisGunlukAkis = tembel(() => import('./sayfalar/dis/DisGunlukAkis'), 'DisGunlukAkis');
@@ -302,6 +303,11 @@ function Yollar() {
         {yetki('ik.masraf') && <Route path="/personel-masraf/:id" element={<>
           <Liste tanim={LISTELER.find(l => l.kaynak === 'personelMasraf')!} />
           <MasrafKarti />
+        </>} />}
+        {/* BELGE TALEP KARTI (962): liste arkada, ozel kart modal. */}
+        {yetki('ik.belge_talep') && <Route path="/personel-belge-talep/:id" element={<>
+          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelBelgeTalep')!} />
+          <BelgeTalepKarti />
         </>} />}
         {yetki('muayene') && (
           <Route path="/muayene-sablon" element={<MuayeneSablonlari />} />

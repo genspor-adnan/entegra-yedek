@@ -18363,3 +18363,21 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
   sürümsüz güncelleme reddedildiği için sessizce kaydedilmiyordu - artık açılış ucunda.
 * Doğrulama: tarayıcıda yeni beyan (personel araması, konu, 2 satır, kaydet - toplam 1.220); API'den satır düzenleme,
   mükerrer belge ve 125 gün önceki harcama uyarısı. tsc temiz, vitest 789/789. Deneme kayıtları silindi.
+
+## 04.10.2026 — Belge talep kartı (962)
+
+* **Mockup** `Ekranlar/IK/belge_talep_karti.html`; Belge Talepleri özel kart açar (`/personel-belge-talep/:id`,
+  `sayfalar/ik/BelgeTalepKarti`). Kimlik şeridi (jenerik personel araması, talep no, talep tarihi, durum + otomatik onay);
+  sol: tür kutucukları, amaç (`ik.belge_amac` önerili), muhatap, nüsha, teslim şekli (e-posta / kargo adresi - e-posta
+  varsayılanı kişinin kayıtlı adresi), **istenen tarih**, açıklama, maaş (yalnız maaş yazısı); **A4 yazı önizleme** (antet,
+  sayı / tarih, şablon metni - boş yer tutucu kırmızı, imza, **doğrulama barkodu**), şablon seçimi, "Metni düzenle"
+  (dondurur). Sağ: süreç adımları (talep → onay / otomatik → hazırlanıyor → hazır → teslim), hazırlık / teslim, istenen tarih
+  uyarısı, önceki talepler, belgeler (hazırlanan yazı + ekler, `dokuman` kaynağı `belge-talep`), akış. Araç çubuğu: Kaydet,
+  Hazırla (boş yer tutucu varken kapalı), Teslim et…, Yazdır / PDF (yazı sayfası), E-posta ile gönder, Reddet.
+* **962** `istenen_tarih`, `teslim_eposta`, `teslim_adres`, `dogrulama_kodu` (hazırlanınca tetikle üretilir, karışmayan 8
+  karakter), kod listesi `ik.belge_amac`. Uçlar `GET /api/ik/belge-baglam`, `POST /api/ik/belge-talep/{id}/eposta` (yazıyı
+  e-postayla gönderir + teslim), **kimliksiz `GET /api/belge-dogrula/{kod}`** (yalnız kurum, belge türü, sayı, tarih, maskeli
+  ad - TCKN / maaş asla). Yazı ucu talep sahibine de açık.
+* Doğrulama: tarayıcıda yeni talep (otomatik onay → Hazırlanacak), önizleme (4 boş yer tutucu → Hazırla kapalı); API'den metni
+  dondur → hazırla → kod YJWA-D3HF → doğrulama sayfası "Belge geçerli", yanlış kod "bulunamadı". E-posta gönderimi denenmedi
+  (dev bildirim işçisi canlı gönderir). tsc temiz, vitest 789/789. Deneme kaydı silindi.

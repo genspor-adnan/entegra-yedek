@@ -104,7 +104,8 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     kaynak: 'personelBelgeTalep', rota: 'personel-belge-talep',
     baslik: 'Belge Talepleri',
     yol: 'İK & Prim › Belge Talepleri',
-    kartYolu: '/personel-belge-talep', kartBaslik: 'Belge Talebi',
+    // ÖZEL KART (962, mockup Ekranlar/IK/belge_talep_karti.html): sayfalar/ik/BelgeTalepKarti.
+    kartYolu: '/personel-belge-talep', kartBaslik: 'Belge Talebi', ozelKart: true,
     aksiyonEkrani: 'personel-belge-talep-liste',
     tarihAlani: 'talepTarihi',
     cipler: [

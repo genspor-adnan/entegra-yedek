@@ -226,6 +226,8 @@ public static class DokumanUclari
         "personelIzin" => "izin",
         // AVANS BELGESİ (960): fatura, dekont... kaynak_id avans.
         "personelAvans" => "avans",
+        // BELGE TALEBİ EKİ (962): kaynak_id belge talebi.
+        "personelBelgeTalep" => "belge-talep",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -277,6 +279,7 @@ public static class DokumanUclari
         "personelMasraf" => "ik.masraf",
         "personelIzin" => "ik.izin",
         "personelAvans" => "ik.avans",
+        "personelBelgeTalep" => "ik.belge_talep",
         "servisZiyaret" => "servis",
         _ => kartAdi
     };

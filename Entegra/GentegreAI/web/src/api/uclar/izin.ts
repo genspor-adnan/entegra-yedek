@@ -118,6 +118,12 @@ export const izinUclari = {
   }) => istek<{ satirId: number }>(`/api/ik/masraf/satir/${satirId}`, { method: 'PUT', body: JSON.stringify(g) }),
   masrafHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/masraf/${id}/hatirlat`, {}),
 
+  /** Belge talep kartı (962): personel, şablonlar, önceki talepler, akış. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  belgeBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/belge-baglam?${p}`),
+  /** Hazırlanmış yazıyı e-postayla gönderir ve teslim edildi işaretler. */
+  belgeTalepEposta: (id: number) => gonder<{ durum: number; adres: string }>(`/api/ik/belge-talep/${id}/eposta`, {}),
+
   izinBakiye: (tarafId: number, yil?: number) =>
     istek<IzinBakiyesi>(`/api/ik/personel/${tarafId}/izin-bakiye`
       + (yil ? `?yil=${yil}` : '')),
@@ -226,6 +232,8 @@ export const izinUclari = {
   belgeTalepAc: (g: {
     tarafId: number; tur?: number; amac: string; muhatap?: string;
     adet?: number; teslimSekli?: number; aciklama?: string;
+    /** 962: istenen tarih ve teslim adresleri. */
+    istenenTarih?: string; teslimEposta?: string; teslimAdres?: string;
   }) => gonder<{
     id: number; durum: number; otomatikOnay: boolean; mesaj: string;
     basamaklar?: { sira: number; ad: string; rol: number }[];
