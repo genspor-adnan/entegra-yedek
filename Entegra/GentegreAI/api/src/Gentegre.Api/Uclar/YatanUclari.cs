@@ -111,6 +111,7 @@ public static partial class YatanUclari
         IzlemUclariniEkle(grup);
         IcmalUclariniEkle(grup);
         EpikrizUclariniEkle(grup);
+        OrderEkranUclariniEkle(grup);
 
         // ------------------------------------------------------- yatış özeti ----
         grup.MapGet("/{yatisId:int}/ozet", async (

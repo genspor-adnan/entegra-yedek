@@ -41,6 +41,10 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     detayGrupta: { hizmetler: { grup: 'Genel' } },
     sekmeSirasi: ['Genel', 'Bölümler', 'Yapılandırılmış alanlar', 'Makrolar', 'Önizleme', 'Sürümler', 'Kullanım'],
   },
+  'yatis-order': {
+    seritAlanlari: ['tur', 'ad', 'baslangic', 'bitis', 'hekimId', 'durum'],
+    sekmeSirasi: ['Order', 'Doz planı', 'Uygulamalar', 'Güvenlik kontrolleri', 'Geçmiş'],
+  },
   'radyoloji-cihaz': {
     seritAlanlari: ['kod', 'ad', 'modalite', 'oda', 'sorumluId', 'durum'],
     sekmeSirasi: ['Genel', 'Randevu ayarları', 'Protokoller', 'Kapatma / bakım', 'Kalite kontrol', 'Doz', 'Kullanım', 'Belgeler'],
@@ -223,9 +227,12 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     // Mockup sırası: ölçümler önde (görme → basınç → ön segment → fundus →
     //   motilite → ek testler), karar en sonda. "Genel" kartın kimlik
     //   alanları: mockupta başlıkta duruyor, bizde ilk sekme.
-    sekmeSirasi: ['Genel', 'Görme & Refraksiyon', 'Tonometri & Pakimetri',
+    // 970 (mockup goz_muayene_karti_v2): "Genel" sekmesi yok - alanlar kimlik
+    //   şeridinde; sonda Karşılaştırma ve Görüntüler & Belgeler.
+    seritAlanlari: ['hastaId', 'muayeneTuru', 'dilate', 'dilatasyonIlac', 'takipId', 'kontrolGun'],
+    sekmeSirasi: ['Görme & Refraksiyon', 'Tonometri & Pakimetri',
                   'Ön Segment', 'Fundus', 'Motilite · Pupil · Alan',
-                  'Gonyoskopi & Ek Testler', 'Tanı & Plan'],
+                  'Gonyoskopi & Ek Testler', 'Tanı & Plan', 'Karşılaştırma', 'Görüntüler'],
   },
 
   // ------------------------------------------------- muayene şablonu ----

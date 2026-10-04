@@ -4,6 +4,7 @@ import { hataMetni, type Kosul, type ListeSatiri } from '../../api/sozlesme';
 import type { CihazDoz, CihazGostergeYaniti, CihazKullanim, CihazOzet } from '../../api/uclar/radyolojiTanim';
 import { sayi, tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { Modal } from '../../bilesenler/Modal';
 
 /**
  * RADYOLOJİ CİHAZ LİSTESİ + KARTI PARÇALARI (967, mockup
@@ -235,5 +236,71 @@ export function CihazDozSekmesi({ id }: { id: number }) {
         </table>
       )}
     </div>
+  );
+}
+
+const HGUN = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+/**
+ * BU HAFTA KAPASİTE (Randevu ayarları sekmesinin sağı, mockup): gün x saat,
+ * hücrede BOŞ slot sayısı; yeşil boş · mavi dolu · kırmızı kapalı / arıza ·
+ * gri öğle / çalışmıyor. Sunucu kayıtlı ayardan hesaplar - kaydedilmemiş
+ * değişiklik ızgaraya Kaydet'ten sonra yansır.
+ */
+export function CihazHaftaKapasite({ id, yenile }: { id: number; yenile: number }) {
+  const [h, setH] = useState<import('../../api/uclar/radyolojiTanim').CihazHafta | null>(null);
+  useEffect(() => { api.radCihazHafta(id).then(setH).catch(() => setH(null)) }, [id, yenile]);
+  if (!h) return <div className="sonuk rt-kucuk">{c('yükleniyor')}…</div>;
+  if (!h.randevulu) return <div className="sonuk rt-kucuk">{c('Randevu verilmiyor ya da mesai girilmemiş.')}</div>;
+  return (
+    <div className="rc-hafta">
+      <h6 className="rt-baslik">{c('Bu hafta kapasite')} <span className="sonuk">({c('boş slot')} · {c('yeşil boş · mavi dolu · kırmızı kapalı')})</span></h6>
+      <table>
+        <thead><tr><th />{HGUN.map(g => <th key={g}>{c(g)}</th>)}</tr></thead>
+        <tbody>{h.satirlar.map(s => (
+          <tr key={s.saat}><th>{s.saat}</th>{s.gunler.map((g, i) => (
+            <td key={i} className={`rc-h-${g.tur === 'acik' ? (g.bos === 0 && g.kapasite > 0 ? 'dolu' : 'bos') : g.tur}`}
+                title={g.tur === 'acik' ? `${g.dolu} / ${g.kapasite}` : undefined}>
+              {g.tur === 'acik' ? g.bos : g.tur === 'ogle' ? c('öğle') : g.tur === 'ariza' ? c('arıza') : g.tur === 'kapali' ? c('kapalı') : '—'}
+            </td>
+          ))}</tr>
+        ))}</tbody>
+      </table>
+      <div className="rt-satir"><span>{c('Haftalık')}</span><b>{h.dolu ?? 0} / {h.toplam ?? 0} {c('slot dolu')}{h.toplam ? ` (%${Math.round(((h.dolu ?? 0) / h.toplam) * 100)})` : ''}</b></div>
+    </div>
+  );
+}
+
+/** "Kapat / bakıma al" penceresi. */
+export function CihazKapatModali({ id, onKapat, onTamam }: { id: number; onKapat(): void; onTamam(etkilenen: number): void }) {
+  const simdi = new Date(); simdi.setSeconds(0, 0);
+  const yerel = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const [neden, setNeden] = useState(1);
+  const [bas, setBas] = useState(yerel(simdi));
+  const [bit, setBit] = useState(yerel(new Date(simdi.getTime() + 4 * 3600000)));
+  const [aciklama, setAciklama] = useState('');
+  const [hata, setHata] = useState<string | null>(null);
+  const kaydet = async () => {
+    setHata(null);
+    try {
+      const y = await api.radCihazKapat(id, { nedenTur: neden, baslangic: new Date(bas).toISOString(), bitis: new Date(bit).toISOString(), aciklama });
+      onTamam(y.etkilenen);
+    } catch (e) { setHata(hataMetni(e)) }
+  };
+  return (
+    <Modal baslik={`⛔ ${c('Cihazı kapat / bakıma al')}`} buyutmeYok onKapat={onKapat}
+           alt={<><button type="button" className="d bir" onClick={() => void kaydet()}>{c('Kapat')}</button>
+                  <span className="ck-bosluk" /><button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button></>}>
+      <div className="rc-kapat">
+        <div className="ck-cipler">{([[1, 'Bakım'], [2, 'Arıza'], [3, 'Tatil'], [9, 'Diğer']] as [number, string][]).map(([k, a]) => (
+          <button key={k} type="button" className={`ck-cip${neden === k ? ' on' : ''}`} onClick={() => setNeden(k)}>{c(a)}</button>
+        ))}</div>
+        <label className="rk-fld"><span className="ck-etiket">{c('Başlangıç')}</span><input type="datetime-local" value={bas} onChange={e => setBas(e.target.value)} /></label>
+        <label className="rk-fld"><span className="ck-etiket">{c('Bitiş')}</span><input type="datetime-local" value={bit} onChange={e => setBit(e.target.value)} /></label>
+        <label className="rk-fld"><span className="ck-etiket">{c('Açıklama')}</span><input value={aciklama} maxLength={200} onChange={e => setAciklama(e.target.value)} /></label>
+        {hata && <div className="hata-kutusu">{hata}</div>}
+        <div className="sonuk rt-kucuk">{c('Bu aralıkta takvim kapalı çizilir, randevu verilmez. Aralıktaki randevular taşınmaz - sayısı bildirilir.')}</div>
+      </div>
+    </Modal>
   );
 }

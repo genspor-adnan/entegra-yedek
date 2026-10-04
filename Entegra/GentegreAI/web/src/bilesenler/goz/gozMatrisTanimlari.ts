@@ -98,6 +98,8 @@ export const GOZ_MATRISLERI: Record<string, GozMatrisTanimi> = {
     baslik: 'Biyomikroskopi (ön segment)',
     aciklama: 'kapaktan lense · her alan ayrı satır',
     varsayilan: HEKIM,
+    normal: { metin: 'normal', alanlar: ['degerMetin'], bayrak: 'normal' },
+    kopyalanir: true,
     satirlar: [
       { etiket: 'Kapak / kirpik', alan: 'degerMetin', ayirt: { alan: 'kapak' } },
       { etiket: 'Konjonktiva',    alan: 'degerMetin', ayirt: { alan: 'konjonktiva' } },
@@ -122,6 +124,8 @@ export const GOZ_MATRISLERI: Record<string, GozMatrisTanimi> = {
     baslik: 'Fundus',
     aciklama: 'disk · makula · damarlar · periferi · evreler kodlu',
     varsayilan: { ...HEKIM, yontem: 1 },
+    normal: { metin: 'normal', alanlar: ['diskMetin', 'makulaMetin', 'damarMetin', 'periferiMetin', 'vitreus'] },
+    kopyalanir: true,
     satirlar: [
       { etiket: 'Optik disk',        alan: 'diskMetin' },
       { etiket: 'C/D (yatay / dikey)', alan: 'cdYatay', yanAlan: 'cdDikey', birim: 'dikey',

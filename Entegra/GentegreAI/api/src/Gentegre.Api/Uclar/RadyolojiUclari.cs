@@ -638,6 +638,7 @@ public static partial class RadyolojiUclari
         TanimEkle(grup);
         // CİHAZ LİSTESİ / KARTI (967): gösterge, önizleme, kullanım, doz, bağlantı testi.
         CihazEkle(grup);
+        CihazAracEkle(grup);
         OnayVeBulguEkle(grup);
     }
 

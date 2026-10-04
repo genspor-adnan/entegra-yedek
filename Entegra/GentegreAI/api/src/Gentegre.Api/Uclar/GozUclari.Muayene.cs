@@ -30,7 +30,7 @@ public static partial class GozUclari
     {
         // -------------------------------------------------- muayeneyi tamamla ----
         grup.MapPost("/muayene/{id:int}/tamamla", async (
-            int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu,
+            int id, TamamlaIstegi? istek, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -51,7 +51,12 @@ public static partial class GozUclari
                      + (select count(*) from public.goz_refraksiyon x
                          where x.goz_muayene_id = gm.id)::int          as olcum,
                        (select count(*) from public.tani t
-                         where t.muayene_id = gm.muayene_id)::int      as tani
+                         where t.muayene_id = gm.muayene_id)::int      as tani,
+                       (select count(distinct x.goz) from public.goz_gorme x
+                         where x.goz_muayene_id = gm.id and x.goz in (1, 2)
+                           and (x.deger_ondalik is not null or coalesce(x.deger_metin, '') <> ''))::int as va_goz,
+                       (select count(distinct x.goz) from public.goz_tonometri x
+                         where x.goz_muayene_id = gm.id and x.goz in (1, 2) and x.gib is not null)::int as gib_goz
                   from public.goz_muayene gm
                   join public.muayene mu on mu.id = gm.muayene_id
                  where gm.id = @p0
@@ -62,6 +67,8 @@ public static partial class GozUclari
                 kapali = o.GetBoolean(2),
                 olcum = o.GetInt32(3),
                 tani = o.GetInt32(4),
+                vaGoz = o.GetInt32(5),
+                gibGoz = o.GetInt32(6),
             }, iptal) ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadı.");
 
             if (m.kapali)
@@ -75,6 +82,19 @@ public static partial class GozUclari
                     "Hiç ölçüm girilmemiş: görme, refraksiyon, basınç, ön segment ya da "
                     + "fundustan en az biri kaydedilmeli.");
 
+            // 970 TAMAMLAMA KURALI (mockup goz_muayene_karti_v2): tanı, iki gözün
+            //   görmesi ve GİB'i. Eksik varsa GEREKÇEYLE geçilir (çocuk, iş birliği
+            //   yok, tek göz...) - gerekçe kayıt günlüğüne düşer, sessiz geçmez.
+            var eksikler = new List<string>();
+            if (m.tani == 0) eksikler.Add("tanı");
+            if (m.vaGoz < 2) eksikler.Add("iki gözün görmesi");
+            if (m.gibGoz < 2) eksikler.Add("iki gözün GİB'i");
+            var gerekce = (istek?.Gerekce ?? "").Trim();
+            if (eksikler.Count > 0 && gerekce.Length < 3)
+                throw GentegreHatasi.IsKurali(
+                    "Eksik: " + string.Join(", ", eksikler) + ". Girin ya da gerekçe yazarak tamamlayın.",
+                    new { kod = "GOZ_EKSIK", eksikler });
+
             await baglanti.CalistirAsync("""
                 update public.muayene
                    set tamamlanma = now(), tamamlayan_id = @p1, durum = 3,
@@ -84,7 +104,9 @@ public static partial class GozUclari
 
             await log.YazAsync(LogIslemi.Degistir, LogTabloMuayene, m.muayeneId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { durum = "Göz muayenesi tamamlandı", olcum = m.olcum, tani = m.tani },
+                new { durum = "Göz muayenesi tamamlandı", olcum = m.olcum, tani = m.tani,
+                      eksik = eksikler.Count > 0 ? string.Join(", ", eksikler) : null,
+                      gerekce = eksikler.Count > 0 ? gerekce : null },
                 tarafId: m.hastaId, iptal: iptal);
 
             return Results.Ok(new
@@ -184,4 +206,7 @@ public static partial class GozUclari
             });
         });
     }
+
+    /// <summary>Tamamla isteği (970): eksik ölçüm / tanıda gerekçe.</summary>
+    public sealed record TamamlaIstegi(string? Gerekce);
 }

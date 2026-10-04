@@ -174,7 +174,9 @@ public static partial class KaynakKatalogu
               + "join public.yatis y on y.id = od.yatis_id "
               + "join public.taraf t on t.id = y.hasta_id "
               + "left join public.yatak yk on yk.id = y.yatak_id "
-              + "left join public.taraf h on h.id = od.hekim_id",
+              + "left join public.taraf h on h.id = od.hekim_id "
+              // 968: servis / oda / yaş / alerji / bugünkü dozlar / uyarı (liste + gösterge aynı tanım).
+              + "left join public.v_yatis_order_ozet v on v.order_id = od.id",
         SubeKolonu: "od.sube_id",
         VarsayilanSirala: "od.baslangic desc",
         Kolonlar: new KolonTanimi[]
@@ -182,7 +184,15 @@ public static partial class KaynakKatalogu
             new("id",       "od.id",      "sayi", "Id", Varsayilan: false),
             new("yatisId",  "od.yatis_id","sayi", "Yatış Id", Varsayilan: false),
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 100),
-            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200),
+            new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 200,
+                Bicim: "alt:hastaAlt"),
+            // 968 (mockup order_listesi_v2): hastanın altında yaş / cinsiyet / alerji.
+            new("hastaAlt",
+                "concat_ws(' · ', v.yas::text || case v.cinsiyet when 1 then ' E' when 2 then ' K' else '' end, "
+                + "nullif('alerji: ' || v.alerjiler, 'alerji: '))",
+                                          "metin", "Hasta Bilgisi", Varsayilan: false, Filtrelenebilir: false),
+            new("servis",   "coalesce(v.servis, '')", "metin", "Servis", Varsayilan: false),
+            new("oda",      "coalesce(v.oda, '')",    "metin", "Oda", Varsayilan: false),
             new("turAdi",
                 "case od.tur when 1 then 'İlaç' when 2 then 'Serum / sıvı' "
                 + "when 3 then 'Tetkik' when 4 then 'Görüntüleme' when 5 then 'Konsültasyon' "
@@ -190,7 +200,14 @@ public static partial class KaynakKatalogu
                                           "metin", "Tür", Hizalama: "orta", Bicim: "rozet",
                                           Genislik: 120, Filtrelenebilir: false),
             new("tur",      "od.tur",     "kod",  "Tür Kodu", Varsayilan: false),
-            new("ad",       "od.ad",      "metin", "Order", Genislik: 260),
+            new("ad",       "od.ad",      "metin", "Order", Genislik: 260, Bicim: "alt:orderAlt"),
+            new("orderAlt",
+                "concat_ws(' · ', nullif(trim(coalesce(rtrim(rtrim(od.doz::text, '0'), '.'), '') || ' ' || od.birim), ''), "
+                + "case od.yol when 1 then 'PO' when 2 then 'IV' when 3 then 'IM' when 4 then 'SC' when 5 then 'topikal' "
+                + "  when 6 then 'inhaler' when 7 then 'rektal' end, nullif(od.siklik, ''), "
+                + "case when od.infuzyon_dk > 0 then od.infuzyon_dk || ' dk infüzyon' end, "
+                + "case when od.stat = 1 then 'STAT' end, case when od.prn = 1 then trim('PRN ' || od.prn_kosul) end)",
+                                          "metin", "Order Ayrıntısı", Varsayilan: false, Filtrelenebilir: false),
             new("dozYol",
                 "trim(coalesce(to_char(od.doz, 'FM9999990D999'), '') || ' ' || od.birim "
                 + "|| case od.yol when 1 then ' · PO' when 2 then ' · IV' when 3 then ' · IM' "
@@ -202,7 +219,26 @@ public static partial class KaynakKatalogu
                                           Bicim: "dd.MM.yyyy HH:mm"),
             new("bitis",    "od.bitis",   "tarih", "Bitiş", Hizalama: "orta",
                                           Bicim: "dd.MM.yyyy HH:mm"),
-            new("hekim",    "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170),
+            // "02.10 → 09.10" altında "gün 3 / 7".
+            new("surec",
+                "to_char(od.baslangic, 'DD.MM') || ' → ' || coalesce(to_char(od.bitis, 'DD.MM'), '—')",
+                                          "metin", "Başlangıç → Bitiş", Genislik: 130, Filtrelenebilir: false, Bicim: "alt:gunMetni"),
+            new("gunMetni",
+                "'gün ' || v.gun_no || coalesce(' / ' || v.gun_toplam, '')", "metin", "Gün", Varsayilan: false, Filtrelenebilir: false),
+            // "08:00|2;20:00|1" - hücre çipleri (satirHucre "dozlar").
+            new("bugunDozlar", "coalesce(v.bugun_dozlar, '')", "metin", "Bugünkü Dozlar", Genislik: 170,
+                                          Filtrelenebilir: false, Bicim: "dozlar"),
+            new("bugunDoz",    "coalesce(v.bugun_doz, 0)",    "sayi", "Bugün Doz", Varsayilan: false),
+            new("gecikenDoz",  "coalesce(v.geciken_doz, 0)",  "sayi", "Geciken Doz", Varsayilan: false),
+            new("yuksekRisk",  "coalesce(v.yuksek_risk, 0)",  "mantik", "Yüksek Risk", Varsayilan: false),
+            new("bugunBitiyor","coalesce(v.bugun_bitiyor, 0)","mantik", "Bugün Bitiyor", Varsayilan: false),
+            new("stat",        "od.stat",                     "mantik", "STAT", Varsayilan: false),
+            new("prn",         "od.prn",                      "mantik", "PRN", Varsayilan: false),
+            new("uyari",
+                "concat_ws(' · ', nullif(v.uyari, ''), case when v.yuksek_risk = 1 then 'yüksek risk · çift kontrol' end)",
+                                          "metin", "Uyarı", Genislik: 190, Filtrelenebilir: false, Bicim: "uyari"),
+            new("hekim",    "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170,
+                Bicim: "alt:sozelDurum"),
             // SÖZEL ORDER uygulanır ama imzasız kalmaz: telefonla verilen
             //   talimat verilmemiş sayılmaz, imzasız da bırakılmaz.
             new("sozelDurum",

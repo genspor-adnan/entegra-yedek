@@ -160,7 +160,28 @@ public static partial class GozUclari
                 tani = o.GetInt32(5),
             }, iptal);
 
-            return Results.Ok(new { kimlik, onTetkik, durum });
+            // 970 HASTA ŞERİDİ (mockup goz_muayene_karti_v2): alerji, kullandığı göz
+            //   ilaçları, hedef GİB ve bir önceki göz muayenesinin GİB'i.
+            var ek = await baglanti.TekAsync("""
+                select coalesce((select string_agg(distinct coalesce(nullif(a.etken_madde, ''), a.etken), ', ')
+                                   from public.hasta_alerji a where a.hasta_id = gm.hasta_id and a.aktif = 1), '') as alerji,
+                       coalesce((select string_agg(nullif(z.aktif_tedavi, ''), ' · ') from public.goz_hasta_ozet z
+                                  where z.hasta_id = gm.hasta_id), '') as tedavi,
+                       v.hedef_od as "hedefOd", v.hedef_os as "hedefOs", v.takip_hastaliklar as takip,
+                       p.tarih as "oncekiTarih", p.gib_od as "oncekiGibOd", p.gib_os as "oncekiGibOs"
+                  from public.goz_muayene gm
+                  join public.muayene m on m.id = gm.muayene_id
+                  join public.v_goz_muayene_ozet v on v.goz_muayene_id = gm.id
+                  left join lateral (
+                        select m2.muayene_tarihi as tarih, v2.gib_od, v2.gib_os
+                          from public.goz_muayene g2 join public.muayene m2 on m2.id = g2.muayene_id
+                          join public.v_goz_muayene_ozet v2 on v2.goz_muayene_id = g2.id
+                         where g2.hasta_id = gm.hasta_id and m2.muayene_tarihi < m.muayene_tarihi
+                         order by m2.muayene_tarihi desc limit 1) p on true
+                 where gm.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new { kimlik, onTetkik, durum, ek });
         });
     }
 }

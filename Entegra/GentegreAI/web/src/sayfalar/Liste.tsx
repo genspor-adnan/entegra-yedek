@@ -106,6 +106,8 @@ import { PrimSeridi } from './liste/PrimSeridi';
 import { PersonelSeridi } from './liste/PersonelSeridi';
 import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from './radyoloji/RadyolojiTanimPanelleri';
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
+import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
+import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
 import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
@@ -443,6 +445,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const radBolge = useBolgeSuzgeci(radTanim);
   // RADYOLOJİ CİHAZLARI (967): gösterge + konum / durum süzgeci, önizleme.
   const radCihaz = tanim.kaynak === 'radyoloji-cihaz' && !portalda;
+  // ORDER LİSTESİ (968): gösterge + servis / oda / tür süzgeci, önizleme.
+  const orderEkrani = tanim.kaynak === 'yatis-order' && !portalda;
+  // GÖZ MUAYENELERİ (970): gösterge + tür / hekim süzgeci, önizleme.
+  const gozMuayeneEkrani = tanim.kaynak === 'goz-muayene' && !portalda;
+  const gozSuzgec = useGozMuayeneSuzgeci(gozMuayeneEkrani);
+  const gozGostergesi = useGozMuayeneGostergesi(gozMuayeneEkrani, yenile);
+  const orderSuzgec = useOrderSuzgeci(orderEkrani);
+  const orderGostergesi = useOrderGostergesi(orderEkrani, yenile);
   const cihazSuzgec = useCihazSuzgeci(radCihaz);
   const cihazGostergesi = useCihazGostergesi(radCihaz, yenile);
   const personelGostergesi = usePersonelGostergesi(personelEkrani, personelSuzgec, yenile);
@@ -783,6 +793,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         taburcuAc: id => setYatisTaburcu(id),
         dozAc: (yatisId, dozId, atla) =>
           setDozSatiri({ yatisId, dozId, atla: !!atla }),
+        kartAc: id => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${id}`) },
       })) return;
 
       if (await bildirimAksiyonu(kod, satir, secililer, {
@@ -1008,10 +1019,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
+      aracCubuguAltSatir={tanim.aracCubuguAltSatir}
       ebelgeMenusu={tanim.ebelgeMenusu}
       // KLASOR KOLONU YALNIZ "TUMU"DE (kullanici): belli bir klasor
       //   secildiginde her satirda ayni klasor adi yazmak, dar ekranda
@@ -1143,6 +1155,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       ustPanel={portalda ? undefined
         : personelEkrani ? <PersonelGostergesi veri={personelGostergesi} s={personelSuzgec} />
         : radCihaz ? <CihazGostergesi veri={cihazGostergesi} s={cihazSuzgec} />
+        : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
+        : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
@@ -1215,6 +1229,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : personelEkrani ? <PersonelBolumAgaci veri={personelGostergesi} s={personelSuzgec} />
         : radTanim ? <BolgePaneli kaynak={tanim.kaynak} s={radBolge} yenile={yenile} />
         : radCihaz ? <CihazSolPanel veri={cihazGostergesi} s={cihazSuzgec} />
+        : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
+        : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
       yanPanel={portalda ? undefined
@@ -1222,6 +1238,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : tanim.kaynak === 'radyoloji-sablon' ? <SablonOnizlemePaneli satir={seciliSatir} />
         : tanim.kaynak === 'radyoloji-protokol' ? <ProtokolOnizlemePaneli satir={seciliSatir} />
         : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />
+        : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
+        : gozMuayeneEkrani ? <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile} />
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)

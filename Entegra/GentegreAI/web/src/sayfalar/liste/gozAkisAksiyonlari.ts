@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import type { ListeSatiri } from '../../api/sozlesme';
+import { ApiHatasi, type ListeSatiri } from '../../api/sozlesme';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 
 /**
@@ -114,8 +114,19 @@ export async function gozAkisAksiyonu(
   // ---- MUAYENE KARTI ARAÇ ÇUBUĞU (mockup goz_detayli_muayene.html).
   if (kod === 'goz.muayene-tamamla') {
     if (!id) { mesaj('Önce bir muayene seçin.'); return true }
+    // EKSİKTE GEREKÇE (970): tanı / iki göz görme / GİB yoksa sunucu GOZ_EKSIK der;
+    //   hekim gerekçe yazarsa (çocuk, iş birliği yok, tek göz…) tamamlanır.
     await guvenli(async () => {
-      const y = await api.gozMuayeneTamamla(id);
+      let y;
+      try {
+        y = await api.gozMuayeneTamamla(id);
+      } catch (e) {
+        const engel = e instanceof ApiHatasi ? (e.hata.engel as { kod?: string } | undefined) : undefined;
+        if (engel?.kod !== 'GOZ_EKSIK') throw e;
+        const gerekce = await metinSor(`${(e as ApiHatasi).message}\n\nGerekçe:`, '', 'Gerekçe', true);
+        if (!gerekce?.trim()) return;
+        y = await api.gozMuayeneTamamla(id, gerekce.trim());
+      }
       mesaj('Muayene tamamlandı.' + (y.uyari ? ` ${y.uyari}` : ''));
       b.tazele();
     });

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Listesi — Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .liste td:first-child{white-space:nowrap}
+  .tur{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:bold;color:#fff}
+  .t-ilac{background:#2f6db3} .t-sivi{background:#16a085} .t-tetkik{background:#8e44ad} .t-bakim{background:#d35400} .t-diyet{background:#7f8c8d}
+  .dozlar{display:flex;gap:3px;flex-wrap:wrap}
+  .doz{font-size:10px;padding:1px 5px;border-radius:3px;border:1px solid}
+  .d-ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .d-bek{background:#fff;color:#46576a;border-color:#cdd6e0}
+  .d-gec{background:#f8e1df;color:#8f3d36;border-color:#e4b7b2}
+  .d-atl{background:#eef1f5;color:#9aa7b5;border-color:#d6dee8;text-decoration:line-through}
+  .uy{font-size:10.5px;color:#b3261e}
+  .hasta b{display:block}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Order Listesi</h1><span class="yol">Yatan Hasta › Order Listesi</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni order</span>
+    <span class="btn">✔ Onayla</span>
+    <span class="btn">⏸ Durdur</span>
+    <span class="btn">✎ Değiştir</span>
+    <span class="btn">⟳ Tekrarla</span>
+    <span class="btn">📋 Order setinden ekle</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>142</b><span>Aktif order</span></div>
+    <div class="k uyari"><b>5</b><span>Hekim onayı bekleyen (sözel)</span></div>
+    <div class="k"><b>318</b><span>Bugün verilecek doz</span></div>
+    <div class="k kirmizi"><b>7</b><span>Geciken doz (&gt; 30 dk)</span></div>
+    <div class="k"><b>12</b><span>Bugün biten / kesilecek</span></div>
+    <div class="k kirmizi"><b>9</b><span>Yüksek riskli ilaç</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, ilaç, protokol no…</span>
+    <span class="cip on">Aktif</span><span class="cip">Onay bekliyor</span><span class="cip">Durduruldu</span><span class="cip">Tamamlandı</span><span class="cip">Tümü</span>
+    <span class="combo">Tür: Tümü</span>
+    <span class="combo">Hekim: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">⏰ Sonraki 2 saat</span>
+    <span class="cip">STAT / acil</span>
+    <span class="cip">PRN (gerektiğinde)</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Servis / oda</h6>
+      <div class="dal on">Tümü <i>142</i></div>
+      <div class="dal">Dahiliye servisi <i>58</i></div>
+      <div class="dal alt">Oda 201 <i>9</i></div>
+      <div class="dal alt">Oda 202 <i>11</i></div>
+      <div class="dal">Genel cerrahi servisi <i>41</i></div>
+      <div class="dal">Yoğun bakım <i>43</i></div>
+      <h6 style="margin-top:12px">Tür</h6>
+      <div class="dal"><span><span class="tur t-ilac">İlaç</span></span><i>96</i></div>
+      <div class="dal"><span><span class="tur t-sivi">Sıvı</span></span><i>18</i></div>
+      <div class="dal"><span><span class="tur t-tetkik">Tetkik</span></span><i>12</i></div>
+      <div class="dal"><span><span class="tur t-bakim">Bakım</span></span><i>11</i></div>
+      <div class="dal"><span><span class="tur t-diyet">Diyet</span></span><i>5</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Yatak</th><th>Hasta</th><th>Order</th><th>Tür</th><th>Başlangıç → bitiş</th><th>Bugünkü dozlar</th><th>Hekim</th><th>Durum</th><th>Uyarı</th></tr>
+        <tr class="sec"><td><b>201-A</b></td><td class="hasta"><b>Elif Demo</b><small>34 K · 62 kg · Prot. 2026/1184</small></td>
+          <td><b>Seftriakson 1 g</b><small>IV · 12 saatte bir · 30 dk infüzyon</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>02.10 → 09.10<small>gün 3 / 7</small></td>
+          <td><div class="dozlar"><span class="doz d-ok">08:00 ✓</span><span class="doz d-bek">20:00</span></div></td>
+          <td>Dr. Ahmet Yılmaz</td><td><span class="chip c-ok">Aktif</span></td><td></td></tr>
+        <tr><td><b>201-A</b></td><td class="hasta"><b>Elif Demo</b><small>34 K</small></td>
+          <td><b>Parasetamol 1 g</b><small>IV · 6 saatte bir · PRN ateş &gt; 38,5</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>02.10 → —</td><td><div class="dozlar"><span class="doz d-ok">03:10 ✓</span><span class="chip c-gri">PRN</span></div></td>
+          <td>Dr. Ahmet Yılmaz</td><td><span class="chip c-ok">Aktif</span></td><td></td></tr>
+        <tr><td><b>202-B</b></td><td class="hasta"><b>Mehmet Kaya</b><small>71 E · 78 kg · eGFR 38</small></td>
+          <td><b>Enoksaparin 6000 IU</b><small>SC · günde 1 · 20:00</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>01.10 → 08.10</td><td><div class="dozlar"><span class="doz d-bek">20:00</span></div></td>
+          <td>Dr. Selin Aksoy</td><td><span class="chip c-ok">Aktif</span></td><td><span class="uy">⚠ eGFR 38 · doz ayarı</span><br><span class="chip c-red">yüksek risk</span></td></tr>
+        <tr><td><b>202-B</b></td><td class="hasta"><b>Mehmet Kaya</b><small>71 E</small></td>
+          <td><b>%0,9 NaCl 1000 ml</b><small>IV · 83 ml/sa · 12 saat</small></td><td><span class="tur t-sivi">Sıvı</span></td>
+          <td>bugün 08:00 → 20:00</td><td><div class="dozlar"><span class="doz d-ok">başladı 08:05</span></div></td>
+          <td>Dr. Selin Aksoy</td><td><span class="chip c-ok">Aktif</span></td><td></td></tr>
+        <tr><td><b>203-A</b></td><td class="hasta"><b>Ayşe Yıldız</b><small>58 K · alerji: penisilin</small></td>
+          <td><b>Metoprolol 50 mg</b><small>PO · günde 2 · 08:00 / 20:00</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>30.09 → —</td><td><div class="dozlar"><span class="doz d-gec">08:00 gecikti</span><span class="doz d-bek">20:00</span></div></td>
+          <td>Dr. Ali Yıldırım</td><td><span class="chip c-ok">Aktif</span></td><td><span class="uy">⏰ 08:00 dozu 2 sa 10 dk gecikti</span></td></tr>
+        <tr><td><b>203-A</b></td><td class="hasta"><b>Ayşe Yıldız</b><small>58 K</small></td>
+          <td><b>Hemogram + biyokimya</b><small>yarın 06:00 · açlık</small></td><td><span class="tur t-tetkik">Tetkik</span></td>
+          <td>yarın 06:00</td><td>—</td><td>Dr. Ali Yıldırım</td><td><span class="chip c-ok">Aktif</span></td><td></td></tr>
+        <tr><td><b>204-A</b></td><td class="hasta"><b>Hasan Demir</b><small>66 E</small></td>
+          <td><b>KCl 20 mEq</b><small>IV · %0,9 NaCl 500 ml içinde · 4 saatte</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>bugün 10:30</td><td><div class="dozlar"><span class="doz d-bek">10:30</span></div></td>
+          <td>Dr. Selin Aksoy <small>sözel · 10:20</small></td><td><span class="chip c-bek">Onay bekliyor</span></td><td><span class="chip c-red">yüksek risk · çift kontrol</span></td></tr>
+        <tr><td><b>204-A</b></td><td class="hasta"><b>Hasan Demir</b><small>66 E</small></td>
+          <td><b>Pozisyon değişimi</b><small>2 saatte bir · bası yarası riski</small></td><td><span class="tur t-bakim">Bakım</span></td>
+          <td>01.10 → —</td><td><div class="dozlar"><span class="doz d-ok">08 ✓</span><span class="doz d-ok">10 ✓</span><span class="doz d-bek">12</span><span class="doz d-bek">14</span></div></td>
+          <td>Hem. Derya Kurt</td><td><span class="chip c-ok">Aktif</span></td><td></td></tr>
+        <tr class="pasif"><td><b>205-B</b></td><td class="hasta"><b>Zeynep Koç</b><small>45 K</small></td>
+          <td><b>Tramadol 50 mg</b><small>IV · 8 saatte bir</small></td><td><span class="tur t-ilac">İlaç</span></td>
+          <td>29.09 → 03.10</td><td><div class="dozlar"><span class="doz d-atl">16:00</span></div></td>
+          <td>Dr. Ahmet Yılmaz</td><td><span class="chip c-gri">Durduruldu</span><small>bulantı</small></td><td></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 142 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 6 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Hasta</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Elif Demo · 201-A</div>
+        <div class="satir"><span>Yaş / kilo</span>34 K · 62 kg · 168 cm</div>
+        <div class="satir"><span>Alerji</span><b style="color:var(--ok)">bilinen yok</b></div>
+        <div class="satir"><span>Böbrek</span>kreatinin 0,8 · eGFR 98</div>
+        <div class="satir"><span>Tanı</span>J18.9 Pnömoni</div>
+      </div>
+      <div class="bl"><h5>Seçili order</h5>
+        <div style="font-weight:bold">Seftriakson 1 g IV</div>
+        <div class="satir"><span>Sıklık</span>12 saatte bir (08:00 / 20:00)</div>
+        <div class="satir"><span>Süre</span>7 gün · gün 3</div>
+        <div class="satir"><span>Hekim / onay</span>Dr. Ahmet Yılmaz · yazılı</div>
+      </div>
+      <div class="bl"><h5>Doz takvimi · bugün</h5>
+        <div class="dozlar"><span class="doz d-ok">08:00 ✓ Hem. Derya K. 08:04</span><span class="doz d-bek">20:00 bekliyor</span></div>
+        <div class="satir" style="margin-top:6px"><span>Toplam (bu order)</span>5 / 14 doz verildi</div>
+      </div>
+      <div class="bl"><h5>Güvenlik</h5>
+        <div class="satir"><span>Alerji</span><span class="chip c-ok">uygun</span></div>
+        <div class="satir"><span>Etkileşim</span><span class="chip c-ok">yok</span></div>
+        <div class="satir"><span>Doz aralığı</span><span class="chip c-ok">1-2 g / 12-24 sa</span></div>
+      </div>
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="btn kucuk">📇 Orderı aç</span><span class="btn kucuk">⏸ Durdur</span><span class="btn kucuk">✎ Doz değiştir</span><span class="btn kucuk">💉 Doz kuyruğu</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "Order Listesi ve kartı için mockup yap". Tablolar <code>yatis_order</code> (order) + <code>order_uygulama</code> (doz planı / uygulama).<br>
+<span class="n">1</span><b>Gösterge şeridi</b> (tıkla = süz): aktif order, sözel order'da hekim onayı bekleyen, bugün verilecek doz, 30 dk'dan fazla geciken doz, bugün biten, yüksek riskli ilaç.<br>
+<span class="n">2</span><b>Sol:</b> servis / oda ağacı ve tür (ilaç, sıvı, tetkik, hemşirelik bakımı, diyet). Şerit: durum çipleri, tür / hekim, sonraki 2 saat, STAT, PRN.<br>
+<span class="n">3</span><b>Liste:</b> yatak, hasta (altında yaş / kilo / protokol veya kritik bilgi: alerji, eGFR), order (altında yol · sıklık · hız), tür rozeti,
+başlangıç → bitiş (gün x / y), <b>bugünkü dozlar</b> (verildi ✓ / bekliyor / gecikti / atlandı), hekim (sözel order ise saati), durum, uyarı (böbrek ayarı, alerji, yüksek risk / çift kontrol, gecikme).<br>
+<span class="n">4</span><b>Sağ:</b> hasta özeti (alerji, böbrek, tanı), seçili order, bugünkü doz takvimi kimin verdiğiyle, güvenlik kontrolleri, hızlı işlem.
+Sol ve sağ paneller katlanır. Çift tık → order kartı (order_karti_v2.html).
+</div></div>
+
+</body>
+</html>

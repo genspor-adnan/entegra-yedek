@@ -60,6 +60,14 @@ export interface GozMatrisTanimi {
   satirlar: MatrisSatiri[];
   /** Satır oluşturulurken eklenecek sabit alanlar (kaynak, zaman…). */
   varsayilan?: Record<string, unknown>;
+  /**
+   * "TÜMÜ NORMAL" KISAYOLU (970 mockup): boş metin hücrelerine `metin` yazılır,
+   * `bayrak` alanı (ön segmentte `normal`) 1 olur. Dolu hücreye dokunulmaz -
+   * hekimin yazdığı bulgu "normal"le ezilmesin.
+   */
+  normal?: { metin: string; alanlar: string[]; bayrak?: string };
+  /** "Sağı sola kopyala" kısayolu (970 mockup): OD hücreleri OS'a (OS boşsa). */
+  kopyalanir?: boolean;
   not?: string;
 }
 
@@ -83,20 +91,52 @@ export function GozOlcumMatrisi({ tanim, durum, onDegis, salt }: {
   onDegis(yeni: DetayDurumu): void;
   salt: boolean;
 }) {
-  const yaz = (satir: MatrisSatiri, goz: number, alan: string, deger: string) => {
+  // TOPLU YAZ: kısayollar birden çok hücreyi tek durum güncellemesinde yazar.
+  const topluYaz = (yazimlar: { satir: MatrisSatiri; goz: number; alan: string; deger: unknown }[]) => {
     const guncel = durum.guncel.map(s => ({ ...s }));
-    const mevcut = kayitBul(guncel, goz, satir.ayirt);
-    if (mevcut) {
-      mevcut[alan] = deger;
-    } else {
-      // BOŞ HÜCREYE YAZINCA SATIR DOĞAR: hekimden önce "satır ekle" deyip
-      //   sonra göz ve tür seçmesini istemek, matrisin bütün kazancını
-      //   geri verirdi.
-      guncel.push({
-        goz, ...(satir.ayirt ?? {}), ...(tanim.varsayilan ?? {}), [alan]: deger,
-      });
+    for (const { satir, goz, alan, deger } of yazimlar) {
+      const mevcut = kayitBul(guncel, goz, satir.ayirt);
+      if (mevcut) {
+        mevcut[alan] = deger;
+      } else {
+        // BOŞ HÜCREYE YAZINCA SATIR DOĞAR: hekimden önce "satır ekle" deyip
+        //   sonra göz ve tür seçmesini istemek, matrisin bütün kazancını
+        //   geri verirdi.
+        guncel.push({
+          goz, ...(satir.ayirt ?? {}), ...(tanim.varsayilan ?? {}), [alan]: deger,
+        });
+      }
     }
     onDegis({ ...durum, guncel });
+  };
+  const yaz = (satir: MatrisSatiri, goz: number, alan: string, deger: string) =>
+    topluYaz([{ satir, goz, alan, deger }]);
+  const bos = (v: unknown) => v === null || v === undefined || String(v).trim() === '';
+
+  const tumuNormal = () => {
+    const n = tanim.normal!;
+    const l: { satir: MatrisSatiri; goz: number; alan: string; deger: unknown }[] = [];
+    for (const satir of tanim.satirlar) {
+      if (!n.alanlar.includes(satir.alan)) continue;
+      for (const g of GOZLER) {
+        const k = kayitBul(durum.guncel, g.kod, satir.ayirt);
+        if (bos(k?.[satir.alan])) l.push({ satir, goz: g.kod, alan: satir.alan, deger: n.metin });
+        if (n.bayrak && bos(k?.[satir.alan])) l.push({ satir, goz: g.kod, alan: n.bayrak, deger: 1 });
+      }
+    }
+    if (l.length) topluYaz(l);
+  };
+
+  const sagiSola = () => {
+    const l: { satir: MatrisSatiri; goz: number; alan: string; deger: unknown }[] = [];
+    for (const satir of tanim.satirlar) {
+      const od = kayitBul(durum.guncel, 1, satir.ayirt);
+      const os = kayitBul(durum.guncel, 2, satir.ayirt);
+      for (const alan of [satir.alan, satir.yanAlan].filter(Boolean) as string[]) {
+        if (!bos(od?.[alan]) && bos(os?.[alan])) l.push({ satir, goz: 2, alan, deger: od![alan] });
+      }
+    }
+    if (l.length) topluYaz(l);
   };
 
   return (
@@ -108,6 +148,14 @@ export function GozOlcumMatrisi({ tanim, durum, onDegis, salt }: {
         <div className="odos-baslik">
           <b>{tanim.baslik}</b>
           {tanim.aciklama && <span className="sonuk"> · {tanim.aciklama}</span>}
+          {!salt && (tanim.normal || tanim.kopyalanir) && (
+            <span className="odos-kisayol">
+              {tanim.normal && <button type="button" className="d kucuk" onClick={tumuNormal}
+                                       title="Boş hücrelere normal yazar; dolu bulguya dokunmaz">✓ Tümü normal</button>}
+              {tanim.kopyalanir && <button type="button" className="d kucuk" onClick={sagiSola}
+                                           title="Sağ gözün değerleri boş sol hücrelere">⇉ Sağı sola kopyala</button>}
+            </span>
+          )}
         </div>
       )}
       <div className="odos">

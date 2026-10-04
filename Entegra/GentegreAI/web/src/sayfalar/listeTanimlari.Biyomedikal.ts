@@ -72,7 +72,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
     baslik: 'İş Emirleri (Bakım & Arıza)',
     yol: 'Demirbaş › İş Emirleri',
     kartYolu: '/demirbas-is-emri', kartBaslik: 'İş Emri',
-    aksiyonEkrani: 'demirbas-is-emri-liste',
+    aksiyonEkrani: 'demirbas-is-emri-liste', aracCubuguAltSatir: true,
     tarihAlani: 'bildirimZamani',
     cipler: [
       { ad: 'Açık',          filtre: { alan: 'durum', op: 'esit', deger: 0 } },

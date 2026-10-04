@@ -18529,3 +18529,64 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
   gösterge aynı tanım). Uçlar `RadyolojiUclari.Cihaz` (gösterge, özet, kullanım, doz, bağlantı testi).
 * Doğrulama: tarayıcıda liste + paneller + kart sekmeleri, kapasite 36 / 180; bağlantı testi IP yokken iş kuralı, açık
   portta "yanıt verdi". tsc temiz, vitest 789/789, dotnet test 218 geçti.
+* **Kart araç çubuğu** (kullanıcı: "en üstte butonlar eksik"): 🔌 Bağlantıyı test et (Genel altındaki kopya kaldırıldı) ·
+  ⛔ **Kapat / bakıma al** (neden çipi, başlangıç / bitiş, açıklama → `POST /api/radyoloji/cihaz/{id}/kapat`, ISLEMLOG
+  1282, aralıktaki randevu sayısı bildirilir - taşınmaz) · 📅 Takvimde göster (randevu ekranı cihaz görünümü).
+* **Randevu ayarları** sağında **Bu hafta kapasite** ızgarası (`GET /cihaz/{id}/hafta`): saat x Pzt..Paz, hücrede boş slot;
+  yeşil boş · mavi dolu · kırmızı kapalı / arıza · gri öğle / çalışılmayan gün; altta haftalık dolu / toplam. Kayıtlı ayardan.
+* Detay kolonları mockup sayısına: Protokoller 5 (+ kontrast, genel süre - protokolden, salt okunur), Kapatma / bakım 6
+  (+ etkilenen randevu, durum Planlandı / Sürüyor / Kapandı).
+* Liste tanımına `aracCubuguAltSatir`: Yeni / Düzenle / Yazdır başlık satırında, akış düğmeleri (Ata,
+  Müdahaleye başla...) altında ayrı satırda sağa yaslı - İş Emirleri (Bakım & Arıza) ilk kullanan.
+
+## 04.10.2026 — Order listesi ve kartı (968-969)
+
+Mockup `Ekranlar/Yatan/order_listesi_v2.html` · `order_karti_v2.html` uygulandı.
+
+* **Liste**: gösterge (aktif · hekim onayı bekleyen sözel · bugün verilecek doz · geciken doz · bugün biten · yüksek
+  riskli ilaç; kutu = süzgeç), solda servis > oda ağacı + tür, sağda önizleme (hasta, seçili order, bugünkü doz takvimi,
+  güvenlik). Kolonlar: yatak, hasta (altında yaş / cinsiyet / alerji), order (altında doz · yol · sıklık · infüzyon ·
+  STAT / PRN), tür, başlangıç → bitiş (gün x / y), **bugünkü dozlar** (yeni hücre biçimi `dozlar`: verildi ✓ / bekliyor /
+  gecikti / atlandı), hekim (altında sözel durumu), durum, uyarı. Çipler: Aktif · Onay bekliyor · Durduruldu ·
+  Tamamlandı · STAT · PRN · Tümü. Yeni aksiyonlar **Doz Değiştir** (order durur, kopyası açılır) ve **Tekrarla**.
+* **Kart**: üstte hasta şeridi (yaş, yatış yeri / günü, alerji, tanı, alerji eşleşmesi uyarısı); kimlik şeridi tür ·
+  ilaç / hizmet · başlangıç · bitiş · hekim · durum. Sekmeler **Order** (doz ve uygulama: yatış, doz, birim, yol,
+  infüzyon, sıklık, saatler, STAT, PRN + koşul, seyreltme, hekim notu · order verilişi; sağda özet) · **Doz planı** (gün x
+  saat, gerçekleşen + planlı) · Uygulamalar · **Güvenlik kontrolleri** (alerji, mükerrer, yüksek risk, sözel onay; doz
+  aralığı "kontrol edilmedi" - ilaç doz verisi yok) · **Geçmiş** (kayıt günlüğü + uygulamalar). Araç çubuğu: Hekim onayı
+  (imzasız sözelde) · Durdur · Doz değiştir · Tekrarla.
+* **968** `yatis_order` stat / prn / prn_kosul / infuzyon_dk / seyreltme, `yuksek_riskli_ilac` (ISMP, anahtar kelime;
+  ekranı yok), `v_yatis_lookup` (beyaz listede), `v_yatis_order_ozet`. Uçlar `YatanUclari.Order` (gösterge, özet, plan,
+  geçmiş, kopyala). Alerji eşleşmesi etken maddenin ilk kelimesiyle; sınıf eşlemesi (penisilin → amoksisilin) yok.
+* **969 DOZ SAATİ HATASI**: 698 doz zamanını `(gün || saat)::timestamptz` ile UTC üretiyordu - "08:00" dozu 11:00 (TR)
+  planlanıyor, eMAR 11:00 gösteriyordu. Saat artık Europe/Istanbul duvar saati; aktif order'ların gelecekteki bekleyen
+  dozları yeniden üretildi. Geçmiş satırlar olduğu gibi (eski saatleriyle) kalır.
+* Dev DB: demo order'ların (9101-9106) tarihleri test için 18 gün ileri kaydırıldı.
+* Doğrulama: tarayıcıda liste + paneller + kart sekmeleri, Tekrarla yeni order kartını açtı (test kaydı silindi). tsc
+  temiz, vitest 789/789, dotnet test 218 geçti.
+
+## 04.10.2026 — Göz muayene listesi ve kartı (970)
+
+Mockup `Ekranlar/Goz/goz_muayene_listesi_v2.html` · `goz_muayene_karti_v2.html` uygulandı.
+
+* **Liste**: gösterge (bugün · dilatasyon bekliyor · GİB yüksek ve görme düşüşü son 30 gün · kontrolü gecikmiş · taslak;
+  kutu = süzgeç), solda muayene türü + hekim, sağda önizleme (hasta takip / alerji / damlalar / hedef GİB, bu muayenenin
+  sağ-sol görme · GİB · CCT · C/D, GİB eğilimi, tanı & plan). Kolonlar: tarih, hasta (altında yaş / cinsiyet / takip /
+  protokol), tür, **görme sağ / sol** ve **GİB sağ / sol** tek hücrede (yeni hücre biçimi `odos`; düşüş / hedef üstü
+  kırmızı), tanı, hekim, kontrol tarihi, durum (taslak / tamamlandı), uyarı. Çipler: Bugün · Taslak · Tamamlandı · Dilate ·
+  Glokom takibi · Retina takibi · Tümü.
+* **Kart**: "Genel" sekmesi kalktı - hasta, tür, dilatasyon + ilaç, hastalık takibi, kontrol kimlik şeridinde. Şeridin
+  altında **hasta şeridi** (takip, alerji, göz ilaçları, hedef GİB, önceki muayene GİB'i). Ön segment ve fundusta **Tümü
+  normal** (yalnız boş hücre) ve **Sağı sola kopyala** (yalnız boş sol hücre). Tonometri sağında **GİB eğilimi** (hedef üstü
+  ardışık ziyaret uyarısı), Tanı & Plan sağında tanılar + **muayeneden doğan işler** (gözlük reçetesi, görüntüleme, işlem,
+  kontrol randevusu). Yeni sekmeler **Karşılaştırma** (son muayeneler: görme, GİB, C/D, RNFL, MD, plan) ve **Görüntüler**
+  (hastanın göz görüntülemeleri + bu muayenenin çizimleri + muayene belgeleri).
+* **Tamamla kuralı**: tanı, iki gözün görmesi ve GİB'i yoksa sunucu `GOZ_EKSIK` döner; hekim gerekçe yazarak tamamlar,
+  gerekçe kayıt günlüğüne düşer. (Önceki kural: en az bir ölçüm yeterliydi, tanısızlık yalnız uyarıydı.)
+* **970** `v_goz_muayene_ozet` (görme / GİB sağ-sol, önceki görme, düşüş = logMAR farkı ≥ 0,2, hedef = ölçüm ya da
+  hastalık takibi yoksa 21, tanı, kontrol gecikmesi, dilatasyon bekliyor, glokom / retina takibi). Uçlar `GozUclari.Liste`
+  (gösterge, önizleme, karşılaştırma, işler, görüntüler); şerit ucuna `ek`.
+* Düzeltmeler: fundus "Damarlar" satırı katalogda alan bulamıyordu (`damar_metin` kolonu vardı) - eklendi; şeritte muayene
+  türü 4 / 5 (Acil / Tarama) ters yazılıyordu.
+* Doğrulama: tarayıcıda liste + önizleme, kartın sekmeleri, eksikte gerekçe penceresi ve gerekçeyle tamamlama (test geri
+  alındı). tsc temiz, vitest 789/789, dotnet test 218 geçti.

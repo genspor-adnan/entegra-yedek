@@ -259,7 +259,39 @@ export interface EpikrizYaniti {
   }[];
 }
 
+/** ORDER LİSTESİ + KARTI (968). */
+export interface OrderGostergeYaniti {
+  gosterge: { aktif: number; imzasiz: number; bugunDoz: number; geciken: number; biten: number; yuksekRisk: number };
+  odalar: { servis: string; oda: string; sayi: number }[];
+  turler: { tur: number; sayi: number }[];
+}
+export interface OrderGuvenlik { kontrol: string; durum: 'ok' | 'uyari' | 'hata' | 'gri'; sonuc: string; ayrinti: string }
+export interface OrderOzet {
+  order: {
+    id: number; ad: string; tur: number; durum: number; siklik: string; sozelOrder: number; imzali: boolean;
+    baslangic: string; bitis: string | null; stat: number; prn: number; hekim: string; hasta: string; yatak: string;
+    servis: string; oda: string; yas: number | null; cinsiyet: number; alerjiler: string; yatisGunu: number; tani: string;
+    gunNo: number; gunToplam: number | null; toplamDoz: number; verilenDoz: number; gecikenDoz: number;
+    sonraki: string | null; yuksekRisk: number; riskAnahtar: string; alerjiEslesen: string; mukerrer: number;
+  };
+  bugun: { saat: string; durum: number; uygulanan: string | null; uygulayan: string }[];
+  guvenlik: OrderGuvenlik[];
+}
+export interface OrderPlan {
+  gunler: string[]; bugun: string;
+  izgara: { saat: string; hucreler: { durum: number; uygulanan: string | null }[] }[];
+}
+export interface OrderGecmisSatiri { tarih: string; kullanici: string; islem: string; bilgi: string }
+
 export const yatanUclari = {
+  orderGosterge: () => istek<OrderGostergeYaniti>('/api/yatan/order-gosterge'),
+  orderOzet: (id: number) => istek<OrderOzet>(`/api/yatan/order/${id}/ozet`),
+  orderPlan: (id: number) => istek<OrderPlan>(`/api/yatan/order/${id}/plan`),
+  orderGecmis: (id: number) => istek<{ satirlar: OrderGecmisSatiri[] }>(`/api/yatan/order/${id}/gecmis`),
+  /** Tekrarla (durdur=false) / Doz değiştir (durdur=true): kopya order açar. */
+  orderKopyala: (id: number, durdur: boolean) =>
+    gonder<{ id: number }>(`/api/yatan/order/${id}/kopyala?durdur=${durdur}`, {}),
+
   /** Yatış kartının üst şeridi: kimlik + son vital + açık işler + risk. */
   yatisOzeti: (yatisId: number) => istek<YatisOzeti>(`/api/yatan/${yatisId}/ozet`),
 

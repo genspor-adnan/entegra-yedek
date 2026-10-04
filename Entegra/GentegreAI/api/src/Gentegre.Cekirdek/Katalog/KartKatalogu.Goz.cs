@@ -61,22 +61,24 @@ public static partial class KartKatalogu
             // Göz muayenesi genel muayenenin UZANTISIDIR (1:1): hasta, hekim,
             //   tarih ve tanı orada durur. Buradan değiştirilemez - iki yerde
             //   iki ayrı doğru olmasın.
-            new("muayeneId", "muayene_id", "sayi", Yazilabilir: false,
-                Baslik: "Muayene", Grup: "Genel"),
+            // 970 (mockup goz_muayene_karti_v2): "Genel" sekmesi yok - alanlar kimlik
+            //   şeridinde (tarih / hekim / durum üst hasta şeridinde, genel muayeneden).
+            new("muayeneId", "muayene_id", "sayi", Yazilabilir: false, Gizli: true,
+                Baslik: "Muayene", Grup: "Kimlik"),
             new("hastaId", "hasta_id", "kod", Zorunlu: true,
                 KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
-                Baslik: "Hasta", Grup: "Genel"),
+                Baslik: "Hasta", Grup: "Kimlik"),
             new("muayeneTuru", "muayene_turu", "kod", KodListesi: "goz.muayene_turu",
-                Baslik: "Muayene Türü", Grup: "Genel"),
+                Baslik: "Muayene Türü", Grup: "Kimlik"),
             // DİLATASYON bir alan değil bir DURUM: dilate göz muayenesinde
             //   fundus bakısı geçerli, refraksiyon ise güvenilmezdir. Ölçümü
             //   okuyan hekimin bunu bilmesi gerekir.
-            new("dilate", "dilate", "mantik", Baslik: "Dilate edildi", Grup: "Genel"),
+            new("dilate", "dilate", "mantik", Baslik: "Dilate edildi", Grup: "Kimlik"),
             new("dilatasyonIlac", "dilatasyon_ilac", "metin", EnFazlaUzunluk: 60,
-                Baslik: "Dilatasyon İlacı", Grup: "Genel"),
+                Baslik: "Dilatasyon İlacı", Grup: "Kimlik"),
             new("takipId", "takip_id", "kod", KodTablosu: "public.v_goz_takip_lookup",
-                Baslik: "Hastalık Takibi", Grup: "Genel"),
-            new("kontrolGun", "kontrol_gun", "sayi", Baslik: "Kontrol (gün)", Grup: "Genel"),
+                Baslik: "Hastalık Takibi", Grup: "Kimlik"),
+            new("kontrolGun", "kontrol_gun", "sayi", Baslik: "Kontrol (gün)", Grup: "Kimlik"),
 
             new("degerlendirme", "degerlendirme", "metin",
                 Baslik: "Değerlendirme", Grup: "Tanı & Plan", EnFazlaUzunluk: 2000),
@@ -185,6 +187,8 @@ public static partial class KartKatalogu
                 new("amdEvre", "amd_evre", "kod", KodListesi: "goz.amd_evre", Baslik: "AMD Evresi"),
                 new("diskMetin", "disk_metin", "metin", Baslik: "Disk", EnFazlaUzunluk: 600),
                 new("makulaMetin", "makula_metin", "metin", Baslik: "Maküla", EnFazlaUzunluk: 600),
+                // 970: matristeki "Damarlar" satırı yazacak alan bulamıyordu (kolon vardı).
+                new("damarMetin", "damar_metin", "metin", Baslik: "Damarlar", EnFazlaUzunluk: 600),
                 new("periferiMetin", "periferi_metin", "metin", Baslik: "Periferi", EnFazlaUzunluk: 600),
                 new("vitreus", "vitreus", "metin", EnFazlaUzunluk: 100, Baslik: "Vitreus"),
                 new("zaman", "zaman", "zaman", Baslik: "Zaman"),

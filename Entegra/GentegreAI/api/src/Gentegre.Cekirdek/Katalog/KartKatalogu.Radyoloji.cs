@@ -205,6 +205,14 @@ public static partial class KartKatalogu
             {
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("protokolId", "protokol_id", "kod", Zorunlu: true, KodTablosu: "public.v_rad_protokol_lookup", Baslik: "Protokol (tetkik)"),
+                // MOCKUP 5 KOLON (kullanıcı): kontrast ve genel süre protokolden, salt okunur.
+                new("kontrastAdi",
+                    "(select case p.kontrast when 1 then 'İV' when 2 then 'Oral' when 3 then 'İV + Oral' when 4 then 'Rektal' else 'Yok' end " +
+                    "   from public.radyoloji_protokol p where p.id = radyoloji_protokol_cihaz.protokol_id)",
+                    "metin", Yazilabilir: false, Baslik: "Kontrast"),
+                new("genelSure",
+                    "(select p.sure_dk from public.radyoloji_protokol p where p.id = radyoloji_protokol_cihaz.protokol_id)",
+                    "sayi", Yazilabilir: false, Baslik: "Süre (genel, dk)"),
                 new("sureDk", "sure_dk", "sayi", Baslik: "Süre (bu cihazda, dk)"),
                 new("cihazProtokolAdi", "cihaz_protokol_adi", "metin", EnFazlaUzunluk: 80, Baslik: "Cihaz protokol adı (MWL)"),
             }, SubeKolonu: null, Baslik: "Protokoller", LogTabloId: 1379),
@@ -216,6 +224,15 @@ public static partial class KartKatalogu
                 new("bitis",     "bitis",     "tarih", Zorunlu: true, Baslik: "Bitiş"),
                 new("nedenTur",  "neden_tur", "kod", KodListesi: "rad.kapatma", Baslik: "Neden"),
                 new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
+                // MOCKUP 6 KOLON (kullanıcı): etkilenen randevu + durum, salt okunur.
+                new("etkilenen",
+                    "(select count(*) from public.randevu r where r.cihaz_id = radyoloji_cihaz_kapatma.cihaz_id and r.durum <> 4 " +
+                    "   and r.baslangic >= radyoloji_cihaz_kapatma.baslangic and r.baslangic < radyoloji_cihaz_kapatma.bitis)",
+                    "sayi", Yazilabilir: false, Baslik: "Etkilenen randevu"),
+                new("durumAdi",
+                    "case when now() < radyoloji_cihaz_kapatma.baslangic then 'Planlandı' " +
+                    "     when now() < radyoloji_cihaz_kapatma.bitis then 'Sürüyor' else 'Kapandı' end",
+                    "metin", Yazilabilir: false, Baslik: "Durum"),
             }, Sirala: "baslangic desc", SubeKolonu: null, Baslik: "Kapatma / bakım", LogTabloId: 1282),
             // KALİTE KONTROL / LİSANS: periyot + son yapılış; sonraki = son + periyot.
             new("qa", "public.radyoloji_cihaz_qa", "cihaz_id", new KartAlani[]

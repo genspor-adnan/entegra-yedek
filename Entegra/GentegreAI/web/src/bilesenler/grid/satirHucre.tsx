@@ -11,6 +11,10 @@ import { sayi } from '../bicim';
  *   "cubuk:hakToplam" değer + değer/hakToplam doluluk çubuğu
  *   "sayac"           0 boş, >0 turuncu rozet
  *   "uyari"           dolu ise kırmızı "⚠ ..."
+ *   "odos:gibOs:gibYuksek"  sağ / sol iki değer (değer = OD); üçüncü alan bayrak
+ *                     biti (1 OD, 2 OS) kırmızı çizer (970 göz muayene listesi)
+ *   "dozlar"          "08:00|2;20:00|1" -> saat çipleri (968 order listesi):
+ *                     2 verildi ✓ · 1 bekliyor · 5 gecikti · 3/4 atlandı / reddetti
  */
 
 /** "Dr. Aslı Demir" -> "AD" (unvan öneki ve "(çağrı)" gibi parantezli ekler atlanır). */
@@ -66,6 +70,30 @@ export function satirHucre(satir: ListeSatiri, kolon: KolonMeta) {
   if (b === 'sayac') {
     const n = Number(v ?? 0);
     return n > 0 ? <span className="gh-sayac">{n}</span> : null;
+  }
+  if (b.startsWith('odos:')) {
+    const [, osAlan, bayrakAlan] = b.split(':');
+    const bayrak = Number(satir[bayrakAlan] ?? 0);
+    const yaz = (x: unknown) => (x === null || x === undefined || x === '' ? '—'
+      : Number(x).toLocaleString('tr-TR', { maximumFractionDigits: 2 }));
+    return (
+      <span className="gh-odos">
+        <i>S</i><span className={bayrak & 1 ? 'kirmizi' : undefined}>{yaz(v)}</span>
+        <i>L</i><span className={bayrak & 2 ? 'kirmizi' : undefined}>{yaz(satir[osAlan])}</span>
+      </span>
+    );
+  }
+  if (b === 'dozlar') {
+    const l = String(v ?? '').split(';').filter(Boolean);
+    if (l.length === 0) return <span className="gh-sonuk">—</span>;
+    return (
+      <span className="gh-dozlar">{l.map((x, i) => {
+        const [saat, d] = x.split('|');
+        const dn = Number(d);
+        const sinif = dn === 2 ? 'ok' : dn === 5 ? 'gec' : dn === 3 || dn === 4 ? 'atl' : 'bek';
+        return <span key={i} className={`gh-doz ${sinif}`}>{saat}{dn === 2 ? ' ✓' : dn === 5 ? ' gecikti' : ''}</span>;
+      })}</span>
+    );
   }
   if (b === 'uyari') {
     const m = String(v ?? '').trim();

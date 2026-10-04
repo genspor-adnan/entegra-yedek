@@ -43,13 +43,19 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     yol: 'Göz › Muayeneler',
     kartYolu: '/goz-muayene', kartBaslik: 'Göz Muayenesi',
     tarihAlani: 'tarih',
+    // 970 (mockup goz_muayene_listesi_v2.html): dönem / durum + takip çipleri;
+    //   gösterge, tür / hekim (sol) ve önizleme (sağ) panelleri Liste'de.
     cipler: [
-      { ad: 'Tam',      filtre: { alan: 'tur', op: 'esit', deger: 1 } },
-      { ad: 'Kontrol',  filtre: { alan: 'tur', op: 'esit', deger: 2 } },
-      { ad: 'Postop',   filtre: { alan: 'tur', op: 'esit', deger: 3 } },
-      { ad: 'Tarama',   filtre: { alan: 'tur', op: 'esit', deger: 5 } },
+      { ad: 'Bugün',          filtre: { alan: 'bugun',      op: 'esit', deger: 1 } },
+      { ad: 'Taslak',         filtre: { alan: 'tamamlandi', op: 'esit', deger: 0 } },
+      { ad: 'Tamamlandı',     filtre: { alan: 'tamamlandi', op: 'esit', deger: 1 } },
+      { ad: 'Dilate',         filtre: { alan: 'dilate',     op: 'esit', deger: 1 } },
+      { ad: 'Glokom takibi',  filtre: { alan: 'glokom',     op: 'esit', deger: 1 } },
+      { ad: 'Retina takibi',  filtre: { alan: 'retina',     op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
+    gizliKolonlar: ['dilate'],
+    kolonSirasi: ['tarih', 'hasta', 'turAdi', 'bcvaOd', 'gibOd', 'tani', 'hekim', 'kontrol', 'durumAdi', 'uyari'],
     urunModu: 2,
     menuGrup: 'Göz', menuAd: 'Muayeneler', ic: '👁️', yetkiKodu: 'goz.muayene', menuSira: 20,
   },

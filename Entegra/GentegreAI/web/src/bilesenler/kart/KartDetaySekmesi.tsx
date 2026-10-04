@@ -94,7 +94,8 @@ export function KartDetaySekmesi({
           //   sekme değiştirmeye zorlar. İkisi de KENDİ detay durumunu
           //   günceller - veri modeli değişmiyor, yalnız çizim yeri ortak.
           const ek = gozMatris.ekMatris ? GOZ_MATRISLERI[gozMatris.ekMatris] : undefined;
-          return (
+          // 970: ekran sekmeyi sarabilir (Tonometri sağında GİB eğilimi).
+          const matris = (
             <>
               <GozOlcumMatrisi
                 tanim={gozMatris}
@@ -112,6 +113,7 @@ export function KartDetaySekmesi({
               )}
             </>
           );
+          return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, matris, deger) : matris;
         }
 
         const grid = (

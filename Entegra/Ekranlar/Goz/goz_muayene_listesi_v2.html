@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Muayeneleri — Liste Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .od{display:grid;grid-template-columns:22px 1fr;gap:1px 4px;font-size:11px;white-space:nowrap}
+  .od i{font-style:normal;color:var(--muted);font-size:10px}
+  .yuksek{color:#b3261e;font-weight:bold}
+  .dusus{color:#b3261e}
+  .uy{font-size:10.5px;color:#b3261e}
+  .hasta{min-width:140px} .hasta b{display:block}
+  .liste td:nth-child(6){min-width:150px}
+  .tr-mini{display:flex;align-items:flex-end;gap:3px;height:36px;margin:4px 0}
+  .tr-mini i{flex:1;background:#9db8d9;border-radius:2px 2px 0 0}
+  .tr-mini i.y{background:#e0796f}
+  .od2{display:grid;grid-template-columns:90px 1fr 1fr;gap:3px 8px;font-size:11.5px}
+  .od2 .b{color:var(--muted);font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Göz Muayeneleri</h1><span class="yol">Göz › Muayeneler</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni muayene</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">✔ Tamamla</span>
+    <span class="btn">👓 Gözlük reçetesi</span>
+    <span class="btn">💉 İşlem planla</span>
+    <span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>38</b><span>Bugün muayene</span></div>
+    <div class="k uyari"><b>6</b><span>Dilatasyon bekliyor (damla verildi)</span></div>
+    <div class="k kirmizi"><b>4</b><span>GİB yüksek (&gt; hedef / &gt; 21)</span></div>
+    <div class="k kirmizi"><b>3</b><span>Görme düşüşü (≥ 2 sıra)</span></div>
+    <div class="k uyari"><b>11</b><span>Kontrolü gecikmiş</span></div>
+    <div class="k"><b>5</b><span>Tamamlanmamış (taslak)</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, protokol, tanı (H40…)…</span>
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Taslak</span><span class="cip">Tamamlandı</span><span class="cip">Tümü</span>
+    <span class="combo">Hekim: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">Dilate</span>
+    <span class="cip">Glokom takibi</span>
+    <span class="cip">Retina / anti-VEGF</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Muayene türü</h6>
+      <div class="dal on">Tümü <i>38</i></div>
+      <div class="dal">İlk muayene <i>9</i></div>
+      <div class="dal">Kontrol <i>14</i></div>
+      <div class="dal">Glokom takibi <i>6</i></div>
+      <div class="dal">Retina / anti-VEGF <i>4</i></div>
+      <div class="dal">Ön segment / kornea <i>2</i></div>
+      <div class="dal">Şaşılık / pediatrik <i>1</i></div>
+      <div class="dal">Ameliyat öncesi <i>1</i></div>
+      <div class="dal">Ameliyat sonrası <i>1</i></div>
+      <h6 style="margin-top:12px">Hekim</h6>
+      <div class="dal">Dr. Elif Arslan <i>17</i></div>
+      <div class="dal">Dr. Murat Kaya <i>13</i></div>
+      <div class="dal">Dr. Zeynep Er <i>8</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Saat</th><th>Hasta</th><th>Tür</th><th>Görme (düz.) <small>sağ / sol</small></th><th>GİB <small>sağ / sol</small></th><th>Tanı</th><th>Hekim</th><th>Kontrol</th><th>Durum</th><th>Uyarı</th></tr>
+        <tr class="sec"><td><b>09:10</b><small>dilate</small></td>
+          <td class="hasta"><b>Ayşe Yıldız</b><small>67 K · DM · Prot. 2026/4410</small></td>
+          <td><span class="chip c-gri">Glokom takibi</span></td>
+          <td><div class="od"><i>S</i>0,6 <small>(0,7)</small><i>L</i><span class="dusus">0,3 ↓</span></div></td>
+          <td><div class="od"><i>S</i>18<i>L</i><span class="yuksek">26</span></div></td>
+          <td>H40.1 Primer açık açılı glokom</td><td>Dr. Elif Arslan</td><td>1 ay</td>
+          <td><span class="chip c-ok">Tamamlandı</span></td>
+          <td><span class="uy">⚠ Sol GİB hedef üstü (hedef 18)</span><br><span class="uy">⚠ Sol görme 2 sıra düştü</span></td></tr>
+        <tr><td><b>09:25</b></td>
+          <td class="hasta"><b>Mehmet Kaya</b><small>72 E · Prot. 2026/4417</small></td>
+          <td><span class="chip c-gri">Retina / anti-VEGF</span></td>
+          <td><div class="od"><i>S</i>0,4<i>L</i>0,8</div></td>
+          <td><div class="od"><i>S</i>15<i>L</i>16</div></td>
+          <td>H35.3 Yaşa bağlı makula dejenerasyonu</td><td>Dr. Murat Kaya</td><td>4 hafta</td>
+          <td><span class="chip c-ok">Tamamlandı</span></td><td><span class="chip c-bek">enjeksiyon 3/3 planlandı</span></td></tr>
+        <tr><td><b>09:40</b><small>damla 09:32</small></td>
+          <td class="hasta"><b>Elif Demo</b><small>34 K · Prot. 2026/4421</small></td>
+          <td><span class="chip c-gri">İlk muayene</span></td>
+          <td><div class="od"><i>S</i>1,0<i>L</i>1,0</div></td>
+          <td><div class="od"><i>S</i>14<i>L</i>15</div></td>
+          <td>—</td><td>Dr. Zeynep Er</td><td>—</td>
+          <td><span class="chip c-bek">Taslak</span></td><td><span class="chip c-bek">⏱ dilatasyon 08 dk kaldı</span></td></tr>
+        <tr><td><b>10:05</b></td>
+          <td class="hasta"><b>Ali Demir</b><small>8 E · Prot. 2026/4430</small></td>
+          <td><span class="chip c-gri">Şaşılık / pediatrik</span></td>
+          <td><div class="od"><i>S</i>0,9<i>L</i><span class="dusus">0,5</span></div></td>
+          <td><div class="od"><i>S</i>—<i>L</i>—</div></td>
+          <td>H50.0 Konverjan şaşılık · H53.0 Ambliyopi</td><td>Dr. Zeynep Er</td><td>3 ay</td>
+          <td><span class="chip c-ok">Tamamlandı</span></td><td>👓 reçete yazıldı</td></tr>
+        <tr><td><b>10:20</b></td>
+          <td class="hasta"><b>Hasan Öztürk</b><small>61 E · Prot. 2026/4433</small></td>
+          <td><span class="chip c-gri">Ameliyat öncesi</span></td>
+          <td><div class="od"><i>S</i>0,2<i>L</i>0,7</div></td>
+          <td><div class="od"><i>S</i>17<i>L</i>16</div></td>
+          <td>H25.1 Senil nükleer katarakt (sağ)</td><td>Dr. Murat Kaya</td><td>ameliyat 12.10</td>
+          <td><span class="chip c-ok">Tamamlandı</span></td><td><span class="chip c-bek">biyometri bekliyor</span></td></tr>
+        <tr><td><b>10:45</b></td>
+          <td class="hasta"><b>Zeynep Koç</b><small>45 K · Prot. 2026/4440</small></td>
+          <td><span class="chip c-gri">Kontrol</span></td>
+          <td><div class="od"><i>S</i>1,0<i>L</i>1,0</div></td>
+          <td><div class="od"><i>S</i>13<i>L</i>13</div></td>
+          <td>H10.1 Akut atopik konjonktivit</td><td>Dr. Elif Arslan</td><td>gerekirse</td>
+          <td><span class="chip c-ok">Tamamlandı</span></td><td></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 38 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 2 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Hasta</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Ayşe Yıldız · 67 K</div>
+        <div class="satir"><span>Sistemik</span>Diyabet · hipertansiyon</div>
+        <div class="satir"><span>Alerji</span><b style="color:#b3261e">penisilin</b></div>
+        <div class="satir"><span>Damlalar</span>latanoprost (iki göz, akşam)</div>
+        <div class="satir"><span>Hedef GİB</span>sağ 18 · sol 18</div>
+      </div>
+      <div class="bl"><h5>Bu muayene</h5>
+        <div class="od2">
+          <span></span><span class="b">Sağ</span><span class="b">Sol</span>
+          <span class="b">Görme (düz.)</span><span>0,6</span><span class="dusus">0,3 ↓</span>
+          <span class="b">GİB</span><span>18</span><span class="yuksek">26</span>
+          <span class="b">CCT</span><span>548 µm</span><span>541 µm</span>
+          <span class="b">C/D</span><span>0,6</span><span>0,8</span>
+        </div>
+      </div>
+      <div class="bl"><h5>GİB eğilimi · sol (son 6)</h5>
+        <div class="tr-mini"><i style="height:45%"></i><i style="height:50%"></i><i style="height:48%"></i><i style="height:60%"></i><i class="y" style="height:78%"></i><i class="y" style="height:92%"></i></div>
+        <div class="satir"><span>03.2026 → bugün</span>17 → 26 mmHg</div>
+      </div>
+      <div class="bl"><h5>Tanı & plan</h5>
+        <div>H40.1 Primer açık açılı glokom</div>
+        <div class="satir"><span>Plan</span>sol SLT öner, tedaviye brimonidin ekle</div>
+        <div class="satir"><span>Kontrol</span>1 ay · görme alanı + OCT RNFL</div>
+      </div>
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="btn kucuk">📇 Muayeneyi aç</span><span class="btn kucuk">📊 Karşılaştır</span><span class="btn kucuk">💉 İşlem planla</span><span class="btn kucuk">🖼 OCT iste</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "göz muayene liste ve kartı için mockup yap". Tablolar <code>goz_muayene</code> + <code>goz_gorme</code> / <code>goz_refraksiyon</code> / <code>goz_tonometri</code> (sağ / sol satırları).<br>
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): bugün muayene, dilatasyon bekleyen (damla verildi, süre dolmadı), GİB yüksek (hasta hedefinin ya da 21'in üstü),
+görme düşüşü (önceki muayeneye göre ≥ 2 sıra / logMAR ≥ 0,2), kontrolü gecikmiş (kontrol günü geçti, yeni muayene yok), taslak.<br>
+<span class="n">2</span><b>Sol:</b> muayene türü ve hekim. Şerit: dönem / durum çipleri, Dilate, Glokom takibi, Retina.<br>
+<span class="n">3</span><b>Liste:</b> saat (altında dilate / damla saati), hasta (yaş, cinsiyet, sistemik), tür, <b>görme sağ / sol</b> (düzeltilmiş, ondalık;
+düşüş kırmızı ↓), <b>GİB sağ / sol</b> (hedef üstü kırmızı), tanı (ICD H), hekim, kontrol, durum, uyarı (GİB, görme düşüşü, dilatasyon süresi, bekleyen iş).<br>
+<span class="n">4</span><b>Sağ:</b> hasta (sistemik, alerji, kullandığı damlalar, hedef GİB), bu muayenenin sağ / sol özeti, GİB eğilimi, tanı & plan, hızlı işlem.
+Sol ve sağ paneller katlanır. Çift tık → muayene kartı (goz_muayene_karti_v2.html).
+</div></div>
+
+</body>
+</html>

@@ -200,6 +200,8 @@ interface Props {
       "Yeni/Duzenle dugmeleri Tumu/Aktif cipleri hizasinda olsun"). Az satirli
       ayar listelerinde iki ayri serit bosuna yer kapliyordu. */
   aracCubuguSeritte?: boolean;
+  /** Araç çubuğu başlık satırının ALTINDA, ayrı satırda sağa yaslı. */
+  aracCubuguAltSatir?: boolean;
   /**
    * DOVIZSIZ EKRANDA GIZLENECEK kolonlar (ekstreler): yuklenen satirlarin
    * hicbirinde doviz hareketi yoksa (kur her satirda 1) bu kolonlar cizilmez -
@@ -247,7 +249,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
-                          aracCubuguSeritte,
+                          aracCubuguSeritte, aracCubuguAltSatir,
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
@@ -565,6 +567,10 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     kolonlariSifirla: () => { kolonlariSifirla(); setKullaniciGrup(null) },
   });
 
+  // ALT SATIR (aracCubuguAltSatir): Yeni / Düzenle / Yazdır başlık satırında
+  //   kalır, akış düğmeleri (Ata, Müdahale...) altına iner, sağa yaslı.
+  const altSatirda = (kod: string) => !(kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod === 'genel.yazdir');
+
   return (
     <>
       {!gomulu && (
@@ -574,9 +580,15 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             <h1>{baslik ?? kaynak}</h1>
             {yol && <span className="yol">{yol}</span>}
             <div className="sag">
-              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />}
+              {aksiyonEkrani && <GenToolbar aksiyonlar={aracCubuguAltSatir ? aksiyonlar.filter(x => !altSatirda(x.kod)) : aksiyonlar}
+                                            calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />}
             </div>
           </div>
+          {aracCubuguAltSatir && aksiyonEkrani && (
+            <div className="basrow-arac">
+              <GenToolbar aksiyonlar={aksiyonlar.filter(x => altSatirda(x.kod))} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />
+            </div>
+          )}
         </div>
       )}
       {gomulu && aksiyonEkrani && !aracCubuguSeritte && (

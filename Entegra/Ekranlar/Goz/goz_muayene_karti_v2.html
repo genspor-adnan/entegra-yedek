@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Muayenesi — Kart Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .hasta-serit{display:flex;gap:18px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px;flex-wrap:wrap}
+  .hasta-serit b{color:var(--navy)}
+  .goz{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}
+  .goz th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2)}
+  .goz th.od-b{color:#2f6db3} .goz th.os-b{color:#8e44ad}
+  .goz td{padding:3px 6px;border-bottom:1px solid #eef2f6}
+  .goz td.et{color:var(--muted);width:150px}
+  .goz .inp{min-height:22px}
+  .goz .ayrac{border-left:2px solid #e3e9f0}
+  .normal{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ok)}
+  .kopya{font-size:10.5px;color:var(--accent);cursor:pointer}
+  .yuksek{color:#b3261e;font-weight:bold}
+  .trend{display:flex;align-items:flex-end;gap:6px;height:90px;padding:6px 0;border-bottom:1px solid var(--line2)}
+  .trend .c{flex:1;display:flex;gap:2px;align-items:flex-end;height:100%}
+  .trend .c i{flex:1;border-radius:2px 2px 0 0}
+  .trend .c i.s{background:#9db8d9} .trend .c i.l{background:#c7a6d8} .trend .c i.y{background:#e0796f}
+  .trend-et{display:flex;gap:6px;font-size:10px;color:var(--muted)} .trend-et span{flex:1;text-align:center}
+  .sema{border:1px dashed var(--line);border-radius:6px;height:150px;display:flex;align-items:center;justify-content:center;gap:30px;background:#fbfcfe}
+  .sema div{width:110px;height:110px;border-radius:50%;border:2px solid #c9d6e4;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;position:relative}
+  .sema div:after{content:"";position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid #e0a33a;left:28px;top:40px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cipx{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cipx.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👁 Göz Muayenesi — Ayşe Yıldız · 04.10.2026 09:10 <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">✔ Tamamla</span>
+    <span class="btn">⧉ Önceki muayeneden aktar</span>
+    <span class="btn">🎙 Dikte</span>
+    <span class="btn">✏ Göz şeması</span>
+    <span class="btn">👓 Gözlük reçetesi</span>
+    <span class="btn">💉 İşlem planla</span>
+    <span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="hasta-serit">
+    <span><b>Ayşe Yıldız</b> · 67 K · Prot. 2026/4410</span>
+    <span>Sistemik: <b>DM · HT</b></span>
+    <span>Alerji: <b style="color:#b3261e">penisilin</b></span>
+    <span>Damlalar: latanoprost OU akşam</span>
+    <span>Hedef GİB: sağ 18 · sol 18</span>
+    <span>Önceki muayene: 05.09.2026 · GİB 19 / 22</span>
+  </div>
+
+  <div class="kimlik" style="grid-template-columns:150px 1.4fr 1.4fr 120px 140px 110px">
+    <div class="fld"><label class="req">Tarih / saat</label><div class="inp">04.10.2026 09:10</div></div>
+    <div class="fld"><label class="req">Muayene türü</label><div class="inp combo">Glokom takibi</div></div>
+    <div class="fld"><label class="req">Hekim</label><div class="inp combo">Dr. Elif Arslan</div></div>
+    <div class="fld"><label>Dilatasyon</label><div class="inp" style="border:none;background:none;padding:0"><span class="chip c-ok" style="padding:3px 12px">Dilate · 09:32</span></div></div>
+    <div class="fld"><label>Kontrol</label><div class="inp combo">1 ay (04.11)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp" style="border:none;background:none;padding:0"><span class="chip c-bek" style="padding:3px 14px">Taslak</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="gorme">Görme &amp; Refraksiyon</div>
+    <div class="sek" data-p="gib">Tonometri &amp; Pakimetri</div>
+    <div class="sek" data-p="on">Ön Segment</div>
+    <div class="sek" data-p="fundus">Fundus</div>
+    <div class="sek" data-p="mot">Motilite · Pupil · Alan</div>
+    <div class="sek" data-p="ek">Gonyoskopi &amp; Ek Testler</div>
+    <div class="sek" data-p="tani">Tanı &amp; Plan <span class="say">2</span></div>
+    <div class="sek" data-p="kars">Karşılaştırma</div>
+    <div class="sek" data-p="belge">Görüntüler &amp; Belgeler <span class="say">3</span></div>
+  </div>
+
+  <!-- GÖRME & REFRAKSİYON -->
+  <div class="panel on" id="p-gorme">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Görme keskinliği <span class="ek">eşel: Snellen · ondalık ↔ logMAR otomatik</span></h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+          <tr><td class="et">Düzeltilmemiş (UCVA)</td><td><div class="inp">0,4 <span style="margin-left:auto;color:var(--muted)">logMAR 0,40</span></div></td><td class="ayrac"><div class="inp">0,2 <span style="margin-left:auto;color:var(--muted)">0,70</span></div></td></tr>
+          <tr><td class="et">Düzeltilmiş (BCVA)</td><td><div class="inp">0,6</div></td><td class="ayrac"><div class="inp yuksek">0,3 <span style="margin-left:auto;font-weight:normal">↓ önceki 0,5</span></div></td></tr>
+          <tr><td class="et">İğne deliği (PH)</td><td><div class="inp">0,7</div></td><td class="ayrac"><div class="inp">0,4</div></td></tr>
+          <tr><td class="et">Yakın (Jaeger)</td><td><div class="inp">J2</div></td><td class="ayrac"><div class="inp">J5</div></td></tr>
+        </table>
+      </div></div>
+      <div class="grp"><h4>Refraksiyon <span class="ek"><span class="kopya">⧉ oto-refraktometreden al</span></span></h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th>Sph</th><th>Cyl</th><th>Aks</th><th>Add</th><th>VA</th></tr>
+          <tr><td class="et" style="color:#2f6db3">OD · otorefraktometre</td><td>+1,25</td><td>-0,75</td><td>95</td><td></td><td></td></tr>
+          <tr><td class="et" style="color:#2f6db3">OD · subjektif</td><td><div class="inp">+1,00</div></td><td><div class="inp">-0,50</div></td><td><div class="inp">90</div></td><td><div class="inp">+2,50</div></td><td><div class="inp">0,6</div></td></tr>
+          <tr><td class="et" style="color:#8e44ad">OS · otorefraktometre</td><td>+1,50</td><td>-1,00</td><td>80</td><td></td><td></td></tr>
+          <tr><td class="et" style="color:#8e44ad">OS · subjektif</td><td><div class="inp">+1,25</div></td><td><div class="inp">-0,75</div></td><td><div class="inp">85</div></td><td><div class="inp">+2,50</div></td><td><div class="inp">0,3</div></td></tr>
+        </table>
+        <div class="izgara" style="margin-top:8px">
+          <div class="fld"><label>PD uzak / yakın</label><div class="inp">63 / 60 mm</div></div>
+          <div class="fld"><label>Keratometri OD (K1 / K2)</label><div class="inp">43,25 / 44,00 @ 90</div></div>
+          <div class="fld"><label>Keratometri OS (K1 / K2)</label><div class="inp">43,50 / 44,50 @ 85</div></div>
+          <div class="fld"><label>Siklopleji</label><div class="inp">☐ yapılmadı</div></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- TONOMETRİ -->
+  <div class="panel" id="p-gib">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Göz içi basıncı ve kornea kalınlığı</h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+          <tr><td class="et">GİB (mmHg)</td><td><div class="inp">18</div></td><td class="ayrac"><div class="inp yuksek">26 <span style="margin-left:auto;font-weight:normal">hedef 18</span></div></td></tr>
+          <tr><td class="et">Yöntem / saat</td><td colspan="2"><div class="inp combo">Goldmann aplanasyon · 09:20</div></td></tr>
+          <tr><td class="et">CCT (µm)</td><td><div class="inp">548</div></td><td class="ayrac"><div class="inp">541</div></td></tr>
+          <tr><td class="et">Düzeltilmiş GİB</td><td>18,0</td><td class="ayrac yuksek">26,6</td></tr>
+          <tr><td class="et">Hedef GİB</td><td><div class="inp">18</div></td><td class="ayrac"><div class="inp">18</div></td></tr>
+        </table>
+      </div></div>
+      <div class="grp"><h4>GİB eğilimi <span class="ek">mavi sağ · mor sol · kırmızı hedef üstü</span></h4><div class="ic">
+        <div class="trend">
+          <div class="c"><i class="s" style="height:55%"></i><i class="l" style="height:57%"></i></div>
+          <div class="c"><i class="s" style="height:52%"></i><i class="l" style="height:60%"></i></div>
+          <div class="c"><i class="s" style="height:50%"></i><i class="l" style="height:62%"></i></div>
+          <div class="c"><i class="s" style="height:54%"></i><i class="y" style="height:70%"></i></div>
+          <div class="c"><i class="s" style="height:56%"></i><i class="y" style="height:76%"></i></div>
+          <div class="c"><i class="s" style="height:55%"></i><i class="y" style="height:90%"></i></div>
+        </div>
+        <div class="trend-et"><span>03.26</span><span>05.26</span><span>06.26</span><span>07.26</span><span>09.26</span><span>bugün</span></div>
+        <div class="uyar" style="margin-top:8px">⚠ Sol GİB 3 ziyarettir hedef üstünde (22 → 26). Tedavi değişikliği / SLT değerlendirin.</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ÖN SEGMENT -->
+  <div class="panel" id="p-on">
+    <div class="grp"><h4>Ön segment (biyomikroskopi) <span class="ek"><span class="kopya">⧉ tümü normal</span> · <span class="kopya">⧉ sağı sola kopyala</span></span></h4><div class="ic">
+      <table class="goz">
+        <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+        <tr><td class="et">Kapak / adneks</td><td><span class="normal">☑ normal</span></td><td class="ayrac"><span class="normal">☑ normal</span></td></tr>
+        <tr><td class="et">Konjonktiva</td><td><span class="normal">☑ normal</span></td><td class="ayrac"><div class="inp">hafif hiperemi (damla ilişkili)</div></td></tr>
+        <tr><td class="et">Kornea</td><td><span class="normal">☑ saydam</span></td><td class="ayrac"><span class="normal">☑ saydam</span></td></tr>
+        <tr><td class="et">Ön kamara (Van Herick)</td><td><div class="inp">derin · grade 3</div></td><td class="ayrac"><div class="inp">derin · grade 3</div></td></tr>
+        <tr><td class="et">İris / pupil</td><td><span class="normal">☑ normal</span></td><td class="ayrac"><span class="normal">☑ normal</span></td></tr>
+        <tr><td class="et">Lens (LOCS III)</td><td><div class="inp">NO2 NC2 C1</div></td><td class="ayrac"><div class="inp">NO2 NC2</div></td></tr>
+      </table>
+    </div></div>
+  </div>
+
+  <!-- FUNDUS -->
+  <div class="panel" id="p-fundus">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Fundus <span class="ek">dilate · 90D / indirekt oftalmoskop</span></h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+          <tr><td class="et">Optik disk · C/D</td><td><div class="inp">0,6 · kenar düzenli</div></td><td class="ayrac"><div class="inp yuksek">0,8 · alt rim incelmesi</div></td></tr>
+          <tr><td class="et">Makula</td><td><span class="normal">☑ normal</span></td><td class="ayrac"><span class="normal">☑ normal</span></td></tr>
+          <tr><td class="et">Damarlar</td><td><div class="inp">hafif AV çaprazlaşma</div></td><td class="ayrac"><div class="inp">hafif AV çaprazlaşma</div></td></tr>
+          <tr><td class="et">Retina / periferi</td><td><span class="normal">☑ yatışık</span></td><td class="ayrac"><span class="normal">☑ yatışık</span></td></tr>
+          <tr><td class="et">Vitre</td><td><span class="normal">☑ berrak</span></td><td class="ayrac"><span class="normal">☑ berrak</span></td></tr>
+          <tr><td class="et">Diyabetik retinopati</td><td colspan="2"><div class="inp combo">Yok (her iki göz)</div></td></tr>
+        </table>
+      </div></div>
+      <div class="grp"><h4>Göz şeması <span class="ek">çizim, kayda resim olarak eklenir</span></h4><div class="ic">
+        <div class="sema"><div>OD</div><div>OS</div></div>
+        <div class="bilgi" style="margin-top:8px">✏ Göz şeması düğmesi çizim penceresini açar (goz_semasi.html).</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- MOTİLİTE -->
+  <div class="panel" id="p-mot">
+    <div class="grp"><h4>Motilite · pupil · görme alanı</h4><div class="ic">
+      <table class="goz">
+        <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+        <tr><td class="et">Göz hareketleri</td><td colspan="2"><span class="normal">☑ her yöne serbest</span></td></tr>
+        <tr><td class="et">Örtme testi (uzak / yakın)</td><td colspan="2"><div class="inp">ortoforik / ortoforik</div></td></tr>
+        <tr><td class="et">Pupil · RAPD</td><td><div class="inp">izokorik · RAPD yok</div></td><td class="ayrac"><div class="inp yuksek">RAPD +1</div></td></tr>
+        <tr><td class="et">Konfrontasyon alanı</td><td><span class="normal">☑ tam</span></td><td class="ayrac"><div class="inp">üst nazal kısıtlılık?</div></td></tr>
+        <tr><td class="et">Renk görme (Ishihara)</td><td><div class="inp">15/15</div></td><td class="ayrac"><div class="inp">13/15</div></td></tr>
+      </table>
+    </div></div>
+  </div>
+
+  <!-- EK TESTLER -->
+  <div class="panel" id="p-ek">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Gonyoskopi</h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th class="od-b">Sağ (OD)</th><th class="os-b ayrac">Sol (OS)</th></tr>
+          <tr><td class="et">Açı (Shaffer)</td><td><div class="inp">grade 3-4 · açık</div></td><td class="ayrac"><div class="inp">grade 3 · açık</div></td></tr>
+          <tr><td class="et">Pigmentasyon</td><td><div class="inp">hafif</div></td><td class="ayrac"><div class="inp">hafif</div></td></tr>
+        </table>
+      </div></div>
+      <div class="grp"><h4>Ek testler</h4><div class="ic">
+        <table class="goz">
+          <tr><th></th><th class="od-b">Sağ</th><th class="os-b ayrac">Sol</th></tr>
+          <tr><td class="et">Schirmer (mm / 5 dk)</td><td><div class="inp">12</div></td><td class="ayrac"><div class="inp">11</div></td></tr>
+          <tr><td class="et">Gözyaşı kırılma (BUT, sn)</td><td><div class="inp">9</div></td><td class="ayrac"><div class="inp">8</div></td></tr>
+          <tr><td class="et">OCT RNFL (µm)</td><td>92 <small>cihazdan</small></td><td class="ayrac yuksek">71 <small>cihazdan</small></td></tr>
+          <tr><td class="et">Görme alanı MD (dB)</td><td>-1,2</td><td class="ayrac yuksek">-6,8</td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:6px">OCT / görme alanı değerleri cihaz entegrasyonundan gelir (goz_goruntuleme_cihazlar.html); elle de girilebilir.</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- TANI & PLAN -->
+  <div class="panel" id="p-tani">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Tanılar <span class="ek">ICD-10 · göz tarafı zorunlu</span></h4>
+          <table class="liste">
+            <tr><th>ICD</th><th>Tanı</th><th>Göz</th><th>Tür</th></tr>
+            <tr><td><b>H40.1</b></td><td>Primer açık açılı glokom</td><td>OU</td><td><span class="chip c-ok">Kesin</span></td></tr>
+            <tr><td><b>H25.1</b></td><td>Senil nükleer katarakt</td><td>OU</td><td><span class="chip c-gri">Ön tanı</span></td></tr>
+          </table>
+        </div>
+        <div class="grp"><h4>Plan</h4><div class="ic izgara">
+          <div class="fld tam"><label>Değerlendirme</label><div class="inp metin">Sol gözde GİB hedef üstü, RNFL incelmesi ve alan kaybı ilerliyor.</div></div>
+          <div class="fld tam"><label>Plan</label><div class="inp metin">Tedaviye brimonidin %0,15 (sol, 2×1) eklendi. Sol SLT önerildi.</div></div>
+          <div class="fld iki"><label>Kontrol</label><div class="cipler"><span class="cipx">1 hafta</span><span class="cipx">2 hafta</span><span class="cipx on">1 ay</span><span class="cipx">3 ay</span><span class="cipx">6 ay</span><span class="cipx">1 yıl</span></div></div>
+          <div class="fld iki"><label>Kontrolde</label><div class="inp">görme alanı + OCT RNFL</div></div>
+          <div class="fld tam"><label>Hasta eğitimi</label><div class="inp">☑ damla kullanımı anlatıldı · ☑ uyum broşürü verildi</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Bu muayeneden doğan işler</h4><div class="ic">
+          <div class="satir"><span>💊 Reçete</span>brimonidin %0,15 · e-Reçete taslağı</div>
+          <div class="satir"><span>💉 İşlem</span>sol SLT · planlanmadı <span class="kopya">planla →</span></div>
+          <div class="satir"><span>🖼 Görüntüleme</span>OCT RNFL + görme alanı · kontrolde</div>
+          <div class="satir"><span>📅 Randevu</span>04.11.2026 · glokom polikliniği</div>
+        </div></div>
+        <div class="uyar">Tamamla: tanı, her iki gözün görmesi ve GİB'i (çocuk / iş birliği yoksa gerekçe) girilmeden muayene tamamlanmaz.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARŞILAŞTIRMA -->
+  <div class="panel" id="p-kars">
+    <div class="grp"><h4>Önceki muayenelerle karşılaştırma <span class="ek">son 5 muayene</span></h4>
+      <table class="liste">
+        <tr><th>Tarih</th><th>Tür</th><th>BCVA sağ / sol</th><th>GİB sağ / sol</th><th>C/D sağ / sol</th><th>RNFL sağ / sol</th><th>MD sol</th><th>Tedavi</th></tr>
+        <tr class="sec"><td><b>bugün</b></td><td>Glokom takibi</td><td>0,6 / <span class="yuksek">0,3</span></td><td>18 / <span class="yuksek">26</span></td><td>0,6 / 0,8</td><td>92 / <span class="yuksek">71</span></td><td class="yuksek">-6,8</td><td>latanoprost + brimonidin</td></tr>
+        <tr><td>05.09.2026</td><td>Glokom takibi</td><td>0,6 / 0,5</td><td>19 / 22</td><td>0,6 / 0,75</td><td>93 / 76</td><td>-5,1</td><td>latanoprost</td></tr>
+        <tr><td>12.07.2026</td><td>Kontrol</td><td>0,7 / 0,5</td><td>18 / 21</td><td>0,6 / 0,75</td><td>—</td><td>—</td><td>latanoprost</td></tr>
+        <tr><td>03.03.2026</td><td>İlk muayene</td><td>0,7 / 0,6</td><td>21 / 24</td><td>0,6 / 0,7</td><td>95 / 82</td><td>-3,9</td><td>— (başlandı)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- BELGELER -->
+  <div class="panel" id="p-belge">
+    <div class="grp"><h4>Görüntüler &amp; belgeler <span class="ek">cihazdan gelen + yüklenen</span></h4>
+      <table class="liste">
+        <tr><th>Tarih</th><th>Tür</th><th>Göz</th><th>Kaynak</th><th></th></tr>
+        <tr><td>04.10 09:05</td><td>OCT RNFL</td><td>OU</td><td>Cirrus 5000 (DICOM)</td><td><span class="btn kucuk">Aç</span></td></tr>
+        <tr><td>04.10 09:00</td><td>Görme alanı 24-2</td><td>OU</td><td>Humphrey (PDF)</td><td><span class="btn kucuk">Aç</span></td></tr>
+        <tr><td>04.10 09:45</td><td>Göz şeması</td><td>OS</td><td>Çizim</td><td><span class="btn kucuk">Aç</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Sekmeler tıklanınca açılır. Her bulgu <b>sağ (OD) / sol (OS) yan yana</b> girilir; "tümü normal" ve "sağı sola kopyala" kısayolları satır satır yazmayı önler.
+Tablolar <code>goz_muayene</code> (kimlik, tanı & plan) + <code>goz_gorme</code> / <code>goz_refraksiyon</code> / <code>goz_tonometri</code> (detay, göz tarafıyla).<br>
+<span class="n">1</span><b>Üst:</b> hasta şeridi (sistemik, alerji, kullandığı damlalar, hedef GİB, önceki muayene özeti); kimlik şeridi tarih, tür, hekim, dilatasyon rozeti (damla saati), kontrol, durum.
+Araç çubuğu: Tamamla, önceki muayeneden aktar, dikte, göz şeması, gözlük reçetesi, işlem planla, görüntüleme iste.<br>
+<span class="n">2</span><b>Görme & Refraksiyon:</b> UCVA / BCVA / PH / yakın (ondalık ↔ logMAR; önceki muayeneye göre düşüş kırmızı), otorefraktometre + subjektif, PD, keratometri.<br>
+<span class="n">3</span><b>Tonometri:</b> GİB, yöntem / saat, CCT, düzeltilmiş GİB, hedef GİB; GİB eğilimi grafiği ve hedef üstü uyarısı.<br>
+<span class="n">4</span><b>Ön segment · Fundus · Motilite · Ek testler:</b> OD / OS satırları, normal işaretleri; fundusta göz şeması; OCT / alan değerleri cihazdan.<br>
+<span class="n">5</span><b>Tanı & Plan:</b> ICD + göz tarafı, değerlendirme, plan, kontrol çipleri, hasta eğitimi; muayeneden doğan işler (reçete, işlem, görüntüleme, randevu). Tamamlama kuralı.<br>
+<span class="n">6</span><b>Karşılaştırma:</b> son muayenelerin görme / GİB / C/D / RNFL / MD / tedavi tablosu. <b>Görüntüler & Belgeler:</b> cihaz ve yüklenen dosyalar.
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>

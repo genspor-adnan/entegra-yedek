@@ -313,6 +313,10 @@ export function KartKimlikSeridi({
                             + (kaynak === 'radyoloji-sablon' ? ' kaid-radsablon' : '')
                             // CİHAZ (967 mockup): ad geniş, kod dar.
                             + (kaynak === 'radyoloji-cihaz' ? ' kaid-radcihaz' : '')
+                            // ORDER (968 mockup): ilaç / hizmet geniş.
+                            + (kaynak === 'yatis-order' ? ' kaid-order' : '')
+                            // GÖZ MUAYENESİ (970 mockup): hasta geniş.
+                            + (kaynak === 'goz-muayene' ? ' kaid-gozm' : '')
                             // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
                             //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
                             //   serit 4x2 duzenli bir izgara. Otomatik akista

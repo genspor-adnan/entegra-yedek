@@ -49,7 +49,15 @@ export interface CihazDoz {
               dlpHedef: number | null; drl: number | null; drlUstu: number }[];
 }
 
+export interface CihazHafta {
+  randevulu: boolean; pazartesi?: string; toplam?: number; dolu?: number;
+  satirlar: { saat: string; gunler: { tur: 'acik' | 'ogle' | 'kapali' | 'ariza' | 'yok'; kapasite: number; dolu: number; bos: number }[] }[];
+}
+
 export const radyolojiTanimUclari = {
+  radCihazHafta: (id: number) => istek<CihazHafta>(`/api/radyoloji/cihaz/${id}/hafta`),
+  radCihazKapat: (id: number, g: { nedenTur: number; baslangic: string; bitis: string; aciklama?: string }) =>
+    gonder<{ id: number; etkilenen: number }>(`/api/radyoloji/cihaz/${id}/kapat`, g),
   radCihazGosterge: () => istek<CihazGostergeYaniti>('/api/radyoloji/cihaz-gosterge'),
   radCihazOzet: (id: number) => istek<CihazOzet>(`/api/radyoloji/cihaz/${id}/ozet`),
   radCihazKullanim: (id: number) => istek<CihazKullanim>(`/api/radyoloji/cihaz/${id}/kullanim`),

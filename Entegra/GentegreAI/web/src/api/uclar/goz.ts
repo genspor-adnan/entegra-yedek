@@ -126,6 +126,11 @@ export interface GozMuayeneSeridiYaniti {
     dilate: boolean; dilatasyonIlac: string; muayeneTuru: number;
     tamamlandi: boolean; oda: string;
   };
+  /** 970 hasta şeridi: alerji, göz ilaçları, hedef GİB, önceki muayene. */
+  ek?: {
+    alerji: string; tedavi: string; hedefOd: number | null; hedefOs: number | null; takip: string;
+    oncekiTarih: string | null; oncekiGibOd: number | null; oncekiGibOs: number | null;
+  } | null;
   /** Kaynağı CİHAZ olan ölçümler: "Otoref ✔ 10:02". */
   onTetkik: { ad: string; zaman: string | null; sayi: number }[];
   durum: {
@@ -237,7 +242,40 @@ export interface GozCizimCiktisi {
   semaAdlari: { tur: number; ad: string }[];
 }
 
+/** GÖZ MUAYENE LİSTESİ + KARTI (970). */
+export interface GozMuayeneGostergeYaniti {
+  gosterge: { bugun: number; dilatasyon: number; gibYuksek: number; gormeDusus: number; kontrolGecikmis: number; taslak: number };
+  turler: { tur: number; sayi: number }[];
+  hekimler: { id: number | null; ad: string; sayi: number }[];
+}
+export interface GozGecmisSatiri {
+  id: number; tarih: string; tur: number; bu: boolean;
+  bcvaOd: number | null; bcvaOs: number | null; gibOd: number | null; gibOs: number | null;
+  hedefOd: number | null; hedefOs: number | null; cdOd: number | null; cdOs: number | null;
+  rnflOd: number | null; rnflOs: number | null; md: number | null; plan: string;
+}
+export interface GozMuayeneOnizleme {
+  muayene: {
+    id: number; hastaId: number; hasta: string; yas: number | null; cinsiyet: number; takip: string;
+    alerji: string; tedavi: string; bcvaOd: number | null; bcvaOs: number | null; gormeDusus: number;
+    gibOd: number | null; gibOs: number | null; hedefOd: number | null; hedefOs: number | null; gibYuksek: number;
+    cctOd: number | null; cctOs: number | null; cdOd: number | null; cdOs: number | null;
+    tani: string; plan: string; kontrolTarihi: string | null; tamamlandi: boolean;
+  };
+  gecmis: GozGecmisSatiri[];
+}
+export interface GozMuayeneIsleri {
+  tanilar: { kod: string; ad: string; taraf: number; kesinlik: number; tur: number }[];
+  isler: { tur: string; ad: string; zaman: string | null; ayrinti: string; id: number }[];
+}
+export interface GozGoruntuSatiri { zaman: string | null; tur: string; goz: string; kaynak: string; durum: string; buMuayene: boolean; nesne: string; id: number }
+
 export const gozUclari = {
+  gozMuayeneGosterge: () => istek<GozMuayeneGostergeYaniti>('/api/goz/muayene-gosterge'),
+  gozMuayeneOnizleme: (id: number) => istek<GozMuayeneOnizleme>(`/api/goz/muayene/${id}/onizleme`),
+  gozMuayeneKarsilastirma: (id: number) => istek<{ satirlar: GozGecmisSatiri[] }>(`/api/goz/muayene/${id}/karsilastirma`),
+  gozMuayeneIsleri: (id: number) => istek<GozMuayeneIsleri>(`/api/goz/muayene/${id}/isler`),
+  gozMuayeneGoruntuler: (id: number) => istek<{ satirlar: GozGoruntuSatiri[] }>(`/api/goz/muayene/${id}/goruntuler`),
   /** Öncekiyle karşılaştır: önceki çizim + yeni/kaybolan işaret farkı (705). */
   gozCizimKarsilastir: (gozMuayeneId: number) =>
     istek<GozCizimKarsilastirma>(`/api/goz/muayene/${gozMuayeneId}/cizim/karsilastir`),
@@ -286,9 +324,10 @@ export const gozUclari = {
       `/api/goz/muayene/${gozMuayeneId}/bulgu-metni`, govde),
 
   /** Muayeneyi tamamla — ölçümsüz muayene kapanmaz (kural sunucuda). */
-  gozMuayeneTamamla: (id: number) =>
+  /** Eksik (tanı / iki göz görme / GİB) varsa sunucu GOZ_EKSIK der; gerekçeyle geçilir (970). */
+  gozMuayeneTamamla: (id: number, gerekce?: string) =>
     gonder<{ id: number; tamamlandi: boolean; uyari: string }>(
-      `/api/goz/muayene/${id}/tamamla`, {}),
+      `/api/goz/muayene/${id}/tamamla`, gerekce ? { gerekce } : {}),
 
   /** Önceki muayeneden METİNSEL bulguları getir; ölçüm kopyalanmaz. */
   gozOncekiKopyala: (id: number) =>

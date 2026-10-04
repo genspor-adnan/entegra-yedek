@@ -163,6 +163,101 @@ public static partial class RadyolojiUclari
         });
     }
 
+    /// <summary>
+    /// KAPAT / BAKIMA AL (kart araç çubuğu): kapatma satırı açar; o aralıkta
+    /// takvim kapalı çizilir, randevu verilmez. Etkilenen (aralıktaki) randevu
+    /// sayısı döner - taşıma / SMS ayrı iştir.
+    /// </summary>
+    public sealed record KapatIstegi(short NedenTur, DateTimeOffset Baslangic, DateTimeOffset Bitis, string? Aciklama);
+
+    private static void CihazAracEkle(RouteGroupBuilder grup)
+    {
+        grup.MapPost("/cihaz/{id:int}/kapat", async (int id, KapatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            Gentegre.Veri.Depolar.LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            baglam.YazmaIste();
+            if (istek.Bitis <= istek.Baslangic)
+                throw GentegreHatasi.Dogrulama("Bitiş başlangıçtan sonra olmalı.", new AlanHatasi("bitis", "Bitiş başlangıçtan sonra olmalı."));
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var kid = await b.TekDegerAsync<int>("""
+                insert into public.radyoloji_cihaz_kapatma (cihaz_id, baslangic, bitis, neden_tur, aciklama, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5) returning id
+                """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime(), istek.NedenTur,
+                             (istek.Aciklama ?? "").Trim(), baglam.KullaniciId], iptal);
+            var etkilenen = await b.TekDegerAsync<long>("""
+                select count(*) from public.randevu where cihaz_id = @p0 and durum <> 4 and baslangic >= @p1 and baslangic < @p2
+                """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime()], iptal);
+            await log.YazAsync(b, islem, Gentegre.Veri.Depolar.LogIslemi.Ekle, 1282, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { neden = istek.NedenTur, baslangic = istek.Baslangic, bitis = istek.Bitis, istek.Aciklama, etkilenen },
+                ustTabloId: 944, ustKayitId: id, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { id = kid, etkilenen, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // BU HAFTA KAPASİTE (randevu ayarları sekmesi): gün x saat ızgarası -
+        //   kapasite (mesai, öğle, slot, eşzaman), dolu (randevu), kapalı (kapatma).
+        grup.MapGet("/cihaz/{id:int}/hafta", async (int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var c = await b.TekAsync("""
+                select randevu_verilir as rv, baslangic_saat as bas, bitis_saat as bit, ogle_baslangic as ob, ogle_bitis as oe,
+                       coalesce(slot_dk, 15) as slot, greatest(coalesce(eszaman, 1), 1) as es, coalesce(acil_slot, 0) as acil,
+                       coalesce(calisma_gunleri, '') as gunler,
+                       date_trunc('week', now() at time zone 'Europe/Istanbul')::date as pazartesi
+                  from public.radyoloji_cihaz where id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
+            var pzt = (DateTime)c["pazartesi"]!;
+            var randevular = await b.ListeAsync("""
+                select (baslangic at time zone 'Europe/Istanbul') as t from public.randevu
+                 where cihaz_id = @p0 and durum <> 4
+                   and (baslangic at time zone 'Europe/Istanbul') >= @p1 and (baslangic at time zone 'Europe/Istanbul') < @p1 + interval '7 days'
+                """, null, [id, pzt], o => o.GetDateTime(0), iptal);
+            var kapatmalar = await b.ListeAsync("""
+                select (baslangic at time zone 'Europe/Istanbul') as b, (bitis at time zone 'Europe/Istanbul') as e, neden_tur as n
+                  from public.radyoloji_cihaz_kapatma
+                 where cihaz_id = @p0 and (bitis at time zone 'Europe/Istanbul') > @p1 and (baslangic at time zone 'Europe/Istanbul') < @p1 + interval '7 days'
+                """, null, [id, pzt], o => (o.GetDateTime(0), o.GetDateTime(1), o.IsDBNull(2) ? (short)9 : o.GetInt16(2)), iptal);
+
+            static int? Dk(object? v) => v is string s && TimeOnly.TryParse(s, out var t) ? t.Hour * 60 + t.Minute : null;
+            int? bas = Dk(c["bas"]), bit = Dk(c["bit"]), ob = Dk(c["ob"]), oe = Dk(c["oe"]);
+            var slot = Math.Max(5, Convert.ToInt32(c["slot"])); var es = Convert.ToInt32(c["es"]);
+            var gunler = ((string)c["gunler"]!).Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => int.TryParse(x.Trim(), out var g) ? g : 0).ToHashSet();
+            if (bas is null || bit is null || Convert.ToInt32(c["rv"]) != 1)
+                return Results.Ok(new { randevulu = false, satirlar = Array.Empty<object>(), izlemeNo = baglam.IzlemeNo });
+
+            var saatler = Enumerable.Range(bas.Value / 60, (bit.Value + 59) / 60 - bas.Value / 60).ToList();
+            var satirlar = saatler.Select(sa => new
+            {
+                saat = $"{sa:00}:00",
+                gunler = Enumerable.Range(0, 7).Select(g =>
+                {
+                    var gun = pzt.AddDays(g);
+                    var calisir = gunler.Contains(g + 1);
+                    var hb = Math.Max(sa * 60, bas.Value); var he = Math.Min(sa * 60 + 60, bit.Value);
+                    // Öğle ile kesişen dakikalar düşülür; saat tamamen öğledeyse "öğle".
+                    var ogleDk = ob is int o1 && oe is int o2 ? Math.Max(0, Math.Min(he, o2) - Math.Max(hb, o1)) : 0;
+                    var kap = calisir && he > hb ? Math.Max(0, (he - hb - ogleDk) / slot) * es : 0;
+                    var bs = gun.AddMinutes(sa * 60); var bt = bs.AddHours(1);
+                    var kapali = kapatmalar.Where(k => k.Item1 < bt && k.Item2 > bs).Select(k => (short?)k.Item3).FirstOrDefault();
+                    var dolu = randevular.Count(t => t >= bs && t < bt);
+                    var tur = !calisir || he <= hb ? "yok" : kapali is not null ? (kapali == 2 ? "ariza" : "kapali")
+                            : kap == 0 && ogleDk > 0 ? "ogle" : "acik";
+                    return new { tur, kapasite = kap, dolu, bos = Math.Max(0, kap - dolu) };
+                }).ToArray(),
+            }).ToList();
+            var toplam = satirlar.Sum(s => s.gunler.Where(g => g.tur == "acik").Sum(g => g.kapasite));
+            var dolu = satirlar.Sum(s => s.gunler.Where(g => g.tur == "acik").Sum(g => g.dolu));
+            return Results.Ok(new { randevulu = true, pazartesi = pzt, satirlar, toplam, dolu, izlemeNo = baglam.IzlemeNo });
+        });
+    }
+
     /// <summary>Son 30 gün doz özeti CTE'si (@p0 = cihaz); `son` sorgu `doz`dan okur.</summary>
     private static string DozSql(string son) => $$"""
         with doz as (

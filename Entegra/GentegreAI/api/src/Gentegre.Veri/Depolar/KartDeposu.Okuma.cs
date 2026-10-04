@@ -354,6 +354,8 @@ public sealed partial class KartDeposu
             "public.v_rad_sablon_lookup",
             // CİHAZ KARTI PROTOKOLLER SEKMESİ (967).
             "public.v_rad_protokol_lookup",
+            // ORDER KARTI "Hasta (yatış)" (968).
+            "public.v_yatis_lookup",
             // BAKANLIK PROFILI (810/811): modalite-DICOM kodu eslemesi ve
             //   kontrast verilis yolu. Ikisi de KUCUK, SABIT liste - kod
             //   listesine sigmiyor cunku anahtarlari metin/ikinci kolon tasiyor.

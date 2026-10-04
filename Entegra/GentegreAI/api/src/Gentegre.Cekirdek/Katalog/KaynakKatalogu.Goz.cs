@@ -107,7 +107,9 @@ public static partial class KaynakKatalogu
         Kaynak: "public.goz_muayene gm "
               + "join public.muayene m on m.id = gm.muayene_id "
               + "join public.taraf t on t.id = gm.hasta_id "
-              + "left join public.taraf h on h.id = m.personel_id",
+              + "left join public.taraf h on h.id = m.personel_id "
+              // 970: görme / GİB sağ-sol + bayraklar, tanı, kontrol, takip (liste + gösterge aynı tanım).
+              + "left join public.v_goz_muayene_ozet v on v.goz_muayene_id = gm.id",
         SubeKolonu: "gm.sube_id",
         VarsayilanSirala: "m.muayene_tarihi desc",
         Kolonlar: new KolonTanimi[]
@@ -117,8 +119,15 @@ public static partial class KaynakKatalogu
             new("hastaId",   "gm.hasta_id",  "sayi", "Hasta Id", Varsayilan: false),
             new("tarih",     "m.muayene_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                              Bicim: "dd.MM.yyyy HH:mm"),
-            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 220),
-            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 180),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 200,
+                Bicim: "alt:hastaAlt"),
+            // 970 (mockup goz_muayene_listesi_v2): hastanın altında yaş / cinsiyet / takip / protokol.
+            new("hastaAlt",
+                "concat_ws(' · ', v.yas::text || case v.cinsiyet when 1 then ' E' when 2 then ' K' else '' end, "
+                + "nullif(v.takip_hastaliklar, ''), nullif(v.protokol, ''))",
+                                             "metin", "Hasta Bilgisi", Varsayilan: false, Filtrelenebilir: false),
+            new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 160),
+            new("hekimId",   "m.personel_id", "sayi", "Hekim Id", Varsayilan: false),
             new("turAdi",
                 "case gm.muayene_turu when 1 then 'Tam' when 2 then 'Kontrol' "
                 + "when 3 then 'Postop' when 4 then 'Acil' when 5 then 'Tarama' "
@@ -129,28 +138,38 @@ public static partial class KaynakKatalogu
             new("dilate",    "gm.dilate",    "mantik", "Dilate", Hizalama: "orta", Genislik: 80),
             // BCVA: en iyi düzeltilmiş görme (va_tur = 4). Sağ ve sol ayrı
             //   kolon, çünkü göz hekimi ikisini KARŞILAŞTIRARAK okur.
-            new("bcvaOd",
-                "(select v.deger_ondalik from public.goz_gorme v "
-                + " where v.goz_muayene_id = gm.id and v.goz = 1 and v.tur = 4 "
-                + " order by v.zaman desc limit 1)",
-                                             "sayi", "BCVA OD", Hizalama: "sag", Genislik: 90,
-                                             Bicim: "0.00", Filtrelenebilir: false),
-            new("bcvaOs",
-                "(select v.deger_ondalik from public.goz_gorme v "
-                + " where v.goz_muayene_id = gm.id and v.goz = 2 and v.tur = 4 "
-                + " order by v.zaman desc limit 1)",
-                                             "sayi", "BCVA OS", Hizalama: "sag", Genislik: 90,
-                                             Bicim: "0.00", Filtrelenebilir: false),
-            new("gibOd",
-                "(select o.gib from public.goz_tonometri o "
-                + " where o.goz_muayene_id = gm.id and o.goz = 1 order by o.zaman desc limit 1)",
-                                             "sayi", "GİB OD", Hizalama: "sag", Genislik: 85,
-                                             Bicim: "0.0", Filtrelenebilir: false),
-            new("gibOs",
-                "(select o.gib from public.goz_tonometri o "
-                + " where o.goz_muayene_id = gm.id and o.goz = 2 order by o.zaman desc limit 1)",
-                                             "sayi", "GİB OS", Hizalama: "sag", Genislik: 85,
-                                             Bicim: "0.0", Filtrelenebilir: false),
+            // GÖRME / GİB SAĞ-SOL TEK HÜCREDE (970, hücre biçimi "odos"): göz hekimi
+            //   ikisini karşılaştırarak okur; bayrak biti (1 OD, 2 OS) kırmızı çizer.
+            new("bcvaOd", "v.bcva_od", "sayi", "Görme (düz.)", Hizalama: "orta", Genislik: 100,
+                                             Bicim: "odos:bcvaOs:gormeDusus", Filtrelenebilir: false),
+            new("bcvaOs", "v.bcva_os", "sayi", "Görme OS", Varsayilan: false, Filtrelenebilir: false),
+            new("gormeDusus", "coalesce(v.gorme_dusus, 0)", "sayi", "Görme Düşüşü", Varsayilan: false),
+            new("gibOd", "v.gib_od", "sayi", "GİB", Hizalama: "orta", Genislik: 90,
+                                             Bicim: "odos:gibOs:gibYuksek", Filtrelenebilir: false),
+            new("gibOs", "v.gib_os", "sayi", "GİB OS", Varsayilan: false, Filtrelenebilir: false),
+            new("gibYuksek", "coalesce(v.gib_yuksek, 0)", "sayi", "GİB Yüksek", Varsayilan: false),
+            new("tani", "coalesce(v.tani, '')", "metin", "Tanı", Genislik: 200),
+            new("kontrol",
+                "case when v.kontrol_tarihi is null then '' else to_char(v.kontrol_tarihi, 'DD.MM.YYYY') end",
+                                             "metin", "Kontrol", Hizalama: "orta", Genislik: 100, Filtrelenebilir: false),
+            new("kontrolGecikmis", "coalesce(v.kontrol_gecikmis, 0)", "mantik", "Kontrol Gecikmiş", Varsayilan: false),
+            new("dilatasyonBekliyor", "coalesce(v.dilatasyon_bekliyor, 0)", "mantik", "Dilatasyon Bekliyor", Varsayilan: false),
+            new("tamamlandi", "case when m.tamamlanma is null then 0 else 1 end", "mantik", "Tamamlandı", Varsayilan: false),
+            new("durumAdi", "case when m.tamamlanma is null then 'Taslak' else 'Tamamlandı' end",
+                                             "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
+            new("glokom", "coalesce(v.glokom, 0)", "mantik", "Glokom Takibi", Varsayilan: false),
+            new("retina", "coalesce(v.retina, 0)", "mantik", "Retina Takibi", Varsayilan: false),
+            new("bugun", "case when (m.muayene_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+                                             "mantik", "Bugün", Varsayilan: false),
+            new("son30", "case when m.muayene_tarihi >= now() - interval '30 days' then 1 else 0 end",
+                                             "mantik", "Son 30 Gün", Varsayilan: false),
+            new("uyari",
+                "concat_ws(' · ', "
+                + "case v.gib_yuksek when 1 then 'Sağ GİB hedef üstü' when 2 then 'Sol GİB hedef üstü' when 3 then 'İki göz GİB hedef üstü' end, "
+                + "case v.gorme_dusus when 1 then 'Sağ görme düştü' when 2 then 'Sol görme düştü' when 3 then 'İki göz görme düştü' end, "
+                + "case when v.dilatasyon_bekliyor = 1 then 'dilatasyon bekliyor' end, "
+                + "case when v.kontrol_gecikmis = 1 then 'kontrol gecikti' end)",
+                                             "metin", "Uyarı", Genislik: 190, Filtrelenebilir: false, Bicim: "uyari"),
             // PANİK BAYRAĞI listede: GİB > 30 olan bir satırı karta girmeden
             //   görmek gerekir (akut glokom krizi saatlerle ölçülür).
             new("gibBayrak",

@@ -21,6 +21,8 @@ export interface YatanBaglam {
   taburcuAc(yatisId: number): void;
   /** Doz kuyruğu satırından uygulama penceresi (atlama modu dahil). */
   dozAc(yatisId: number, dozId: number, atlaModu?: boolean): void;
+  /** Yeni açılan kaydın kartı (968: Tekrarla / Doz değiştir). */
+  kartAc?(id: number): void;
 }
 
 export async function yatanAksiyonu(
@@ -106,6 +108,22 @@ export async function yatanAksiyonu(
       await api.orderDurdur(orderId);
       mesaj('Order durduruldu.');
       b.tazele();
+    });
+    return true;
+  }
+
+  // TEKRARLA / DOZ DEĞİŞTİR (968): kopya order açılır, kartı gelir. Doz
+  //   değiştirmede eski order durdurulur (iki sürüm aynı anda aktif olmasın).
+  if (kod === 'yatan.order-tekrarla' || kod === 'yatan.order-doz-degistir') {
+    const orderId = Number(satir?.id ?? 0);
+    if (!orderId) { mesaj('Önce bir order seçin.'); return true }
+    const degistir = kod === 'yatan.order-doz-degistir';
+    if (degistir && !await onay('Bu order durdurulup aynı bilgilerle yeni order açılsın mı? '
+                                + 'Yeni order kartında dozu değiştirip kaydedin.')) return true;
+    await guvenli(async () => {
+      const y = await api.orderKopyala(orderId, degistir);
+      b.tazele();
+      b.kartAc?.(y.id);
     });
     return true;
   }

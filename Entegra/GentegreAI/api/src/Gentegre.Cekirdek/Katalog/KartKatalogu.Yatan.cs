@@ -316,32 +316,42 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            new("yatisId", "yatis_id", "sayi", Zorunlu: true, Baslik: "Yatış", Grup: "Order"),
+            // 968 (mockup order_karti_v2): kimlik şeridi tür · ilaç / hizmet · başlangıç · bitiş ·
+            //   hekim · durum; tek "Order" sekmesi (doz ve uygulama / veriliş), dozlar "Uygulamalar".
             new("tur", "tur", "kod", Zorunlu: true, KodListesi: "yatan.order_tur",
-                Baslik: "Tür", Grup: "Order"),
+                Baslik: "Tür", Grup: "Kimlik"),
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
-                Baslik: "Order", Grup: "Order"),
-            new("doz", "doz", "ondalik", Baslik: "Doz", Grup: "Order"),
-            new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim", Grup: "Order"),
-            new("yol", "yol", "kod", KodListesi: "yatan.order_yol", Baslik: "Yol", Grup: "Order"),
-            new("siklik", "siklik", "metin", EnFazlaUzunluk: 40, Baslik: "Sıklık", Grup: "Order"),
+                Baslik: "İlaç / hizmet", Grup: "Kimlik"),
+            new("baslangic", "baslangic", "zaman", Baslik: "Başlangıç", Grup: "Kimlik"),
+            new("bitis", "bitis", "zaman", Baslik: "Bitiş", Grup: "Kimlik"),
+            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_hekim_lookup",
+                Baslik: "Order veren hekim", Grup: "Kimlik"),
+            new("durum", "durum", "kod", KodListesi: "yatan.order_durum",
+                Baslik: "Durum", Grup: "Kimlik"),
+
+            new("yatisId", "yatis_id", "kod", Zorunlu: true, KodTablosu: "public.v_yatis_lookup",
+                Baslik: "Hasta (yatış)", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("doz", "doz", "ondalik", Baslik: "Doz", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("yol", "yol", "kod", KodListesi: "yatan.order_yol", Baslik: "Yol", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("infuzyonDk", "infuzyon_dk", "sayi", Baslik: "İnfüzyon süresi (dk)", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("siklik", "siklik", "metin", EnFazlaUzunluk: 40, Baslik: "Sıklık", Grup: "Order", AltGrup: "Doz ve uygulama"),
             // Uygulama satırları BU SAATLERDEN üretilir.
             new("saatler", "saatler", "json", EnFazlaUzunluk: 600,
-                Baslik: "Saatler (JSON)", Grup: "Order"),
-
-            new("baslangic", "baslangic", "zaman", Baslik: "Başlangıç", Grup: "Süre & İmza"),
-            new("bitis", "bitis", "zaman", Baslik: "Bitiş", Grup: "Süre & İmza"),
-            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_hekim_lookup",
-                Baslik: "Hekim", Grup: "Süre & İmza"),
-            // SÖZEL ORDER uygulanır ama imzasız kalmaz.
-            new("sozelOrder", "sozel_order", "mantik", Baslik: "Sözel order", Grup: "Süre & İmza"),
-            new("onayHekimId", "onay_hekim_id", "kod", KodTablosu: "public.v_hekim_lookup",
-                Baslik: "İmzalayan", Grup: "Süre & İmza"),
-            new("onayTarihi", "onay_tarihi", "zaman", Baslik: "İmza Zamanı", Grup: "Süre & İmza"),
-            new("durum", "durum", "kod", KodListesi: "yatan.order_durum",
-                Baslik: "Durum", Grup: "Süre & İmza"),
+                Baslik: "Uygulama saatleri", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("stat", "stat", "mantik", Baslik: "STAT (hemen)", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("prn", "prn", "mantik", Baslik: "PRN (gerektiğinde)", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("prnKosul", "prn_kosul", "metin", EnFazlaUzunluk: 200, Baslik: "PRN koşulu", Grup: "Order", AltGrup: "Doz ve uygulama"),
+            new("seyreltme", "seyreltme", "metin", EnFazlaUzunluk: 200, Baslik: "Seyreltme / hazırlama", Grup: "Order", AltGrup: "Doz ve uygulama"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400,
-                Baslik: "Açıklama", Grup: "Süre & İmza"),
+                Baslik: "Hekim notu", Grup: "Order", AltGrup: "Doz ve uygulama"),
+
+            // SÖZEL ORDER uygulanır ama imzasız kalmaz; onayı araç çubuğundaki
+            //   "Hekim onayı" verir (ayrı yetki), alanlar salt okunur.
+            new("sozelOrder", "sozel_order", "mantik", Baslik: "Sözel / telefon order", Grup: "Order", AltGrup: "Order verilişi"),
+            new("onayHekimId", "onay_hekim_id", "kod", Yazilabilir: false, KodTablosu: "public.v_hekim_lookup",
+                Baslik: "Onaylayan", Grup: "Order", AltGrup: "Order verilişi"),
+            new("onayTarihi", "onay_tarihi", "zaman", Yazilabilir: false, Baslik: "Onay zamanı", Grup: "Order", AltGrup: "Order verilişi"),
         },
         Detaylar: new DetayTanimi[]
         {
@@ -361,7 +371,7 @@ public static partial class KartKatalogu
                 new("miktar", "miktar", "ondalik", Baslik: "Miktar"),
                 new("barkod", "barkod", "metin", EnFazlaUzunluk: 60, Baslik: "Karekod"),
                 new("elleDogrulandi", "elle_dogrulandi", "mantik", Baslik: "Elle doğrulandı"),
-            }, SubeKolonu: null, Sirala: "planlanan", LogTabloId: LogYatisOrder,
-               Baslik: "Dozlar"),
+            }, SubeKolonu: null, Sirala: "planlanan desc", LogTabloId: LogYatisOrder,
+               Baslik: "Uygulamalar"),
         });
 }

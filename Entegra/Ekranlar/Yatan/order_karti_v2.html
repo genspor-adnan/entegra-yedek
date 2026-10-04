@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order — Kart Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .turler{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .turb{border:1px solid var(--line);border-radius:4px;padding:7px 6px;background:#fff;text-align:center;font-size:11px}
+  .turb b{display:block;font-size:12px} .turb span{color:var(--muted);font-size:10px}
+  .turb.on{background:var(--sel);border-color:var(--selbd);color:var(--navy)}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cipx{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cipx.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .plan{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;font-size:10.5px}
+  .plan div{padding:4px;text-align:center;border-radius:3px}
+  .plan .b{color:var(--muted)}
+  .p-ok{background:#e2f3e8;color:#2e7d46} .p-bek{background:#fff;border:1px solid #cdd6e0} .p-gec{background:#f8e1df;color:#8f3d36} .p-yok{background:#f3f5f8}
+  .hasta-serit{display:flex;gap:18px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px}
+  .hasta-serit b{color:var(--navy)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">💊 Order — Seftriakson 1 g IV · Elif Demo (201-A) <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">✔ Hekim onayı</span>
+    <span class="btn">⏸ Durdur</span>
+    <span class="btn">✎ Doz değiştir (yeni order)</span>
+    <span class="btn">⟳ Tekrarla</span>
+    <span class="btn">🖨 Order formu</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="hasta-serit">
+    <span><b>Elif Demo</b> · 34 K · 62 kg · 168 cm</span>
+    <span>Yatış: Dahiliye · 201-A · gün 3</span>
+    <span>Alerji: <b style="color:var(--ok)">bilinen yok</b></span>
+    <span>eGFR 98 · kreatinin 0,8</span>
+    <span>Tanı: J18.9 Pnömoni</span>
+  </div>
+
+  <div class="kimlik" style="grid-template-columns:110px 2.4fr 130px 130px 1.2fr 110px">
+    <div class="fld"><label class="req">Tür</label><div class="inp"><span class="tur" style="background:#2f6db3;color:#fff;padding:0 6px;border-radius:3px;font-size:10px;font-weight:bold">İlaç</span></div></div>
+    <div class="fld"><label class="req">İlaç / hizmet</label><div class="inp big">Seftriakson 1 g flakon (IV/IM) <span style="margin-left:auto;color:var(--accent)">…</span></div></div>
+    <div class="fld"><label>Başlangıç</label><div class="inp">02.10 08:00</div></div>
+    <div class="fld"><label>Bitiş</label><div class="inp">09.10 08:00</div></div>
+    <div class="fld"><label class="req">Order veren hekim</label><div class="inp">Dr. Ahmet Yılmaz</div></div>
+    <div class="fld"><label>Durum</label><div class="inp" style="border:none;background:none;padding:0"><span class="chip c-ok" style="padding:3px 14px">Aktif</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="genel">Order</div>
+    <div class="sek" data-p="plan">Doz planı <span class="say">14</span></div>
+    <div class="sek" data-p="uyg">Uygulamalar <span class="say">5</span></div>
+    <div class="sek" data-p="guv">Güvenlik kontrolleri <span class="say">✓</span></div>
+    <div class="sek" data-p="gecmis">Geçmiş</div>
+  </div>
+
+  <!-- ORDER -->
+  <div class="panel on" id="p-genel">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Order türü</h4><div class="ic">
+          <div class="turler">
+            <div class="turb on"><b>💊 İlaç</b><span>doz · yol · sıklık</span></div>
+            <div class="turb"><b>💧 Sıvı / infüzyon</b><span>hacim · hız</span></div>
+            <div class="turb"><b>🧪 Tetkik</b><span>lab / radyoloji</span></div>
+            <div class="turb"><b>🩺 Bakım</b><span>pozisyon, pansuman…</span></div>
+            <div class="turb"><b>🍽 Diyet / aktivite</b><span>diyet, mobilizasyon</span></div>
+          </div>
+        </div></div>
+        <div class="grp"><h4>Doz ve uygulama</h4><div class="ic izgara">
+          <div class="fld"><label class="req">Doz</label><div class="inp">1</div></div>
+          <div class="fld"><label class="req">Birim</label><div class="inp combo">g</div></div>
+          <div class="fld"><label class="req">Yol</label><div class="inp combo">IV infüzyon</div></div>
+          <div class="fld"><label>İnfüzyon süresi</label><div class="inp">30 dk</div></div>
+          <div class="fld iki"><label class="req">Sıklık</label>
+            <div class="cipler"><span class="cipx">Tek doz</span><span class="cipx">Günde 1</span><span class="cipx on">12 saatte bir</span><span class="cipx">8 saatte bir</span><span class="cipx">6 saatte bir</span><span class="cipx">Özel</span></div></div>
+          <div class="fld iki"><label>Uygulama saatleri</label><div class="inp">08:00 · 20:00 <span style="margin-left:auto;color:var(--muted)">servis standart saatleri</span></div></div>
+          <div class="fld"><label>STAT (hemen)</label><div class="inp">☐</div></div>
+          <div class="fld"><label>PRN (gerektiğinde)</label><div class="inp">☐</div></div>
+          <div class="fld iki"><label>PRN koşulu</label><div class="inp pasif">ör. ateş &gt; 38,5 °C · en çok 4 doz/gün</div></div>
+          <div class="fld tam"><label>Seyreltme / hazırlama</label><div class="inp">100 ml %0,9 NaCl içinde</div></div>
+          <div class="fld tam"><label>Hekim notu</label><div class="inp metin">Kültür sonucuna göre gün 3'te değerlendirilecek.</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Order verilişi</h4><div class="ic">
+          <div class="satir"><span>Veriliş</span>yazılı (sistem)</div>
+          <div class="satir"><span>Sözel / telefon order</span>☐ — işaretlenirse hekim onayı 24 saat içinde zorunlu</div>
+          <div class="satir"><span>Onaylayan</span>—</div>
+        </div></div>
+        <div class="grp"><h4>Özet</h4><div class="ic">
+          <div class="satir"><span>Toplam doz</span>14 (7 gün × 2)</div>
+          <div class="satir"><span>Verilen / kalan</span>5 / 9</div>
+          <div class="satir"><span>Sonraki doz</span><b>bugün 20:00</b></div>
+          <div class="satir"><span>Eczane</span>stokta · 24 flakon</div>
+        </div></div>
+        <div class="bilgi">Kaydedilince doz planı üretilir; doz kuyruğu ve eMAR bu plandan beslenir. Doz değişikliği mevcut order'ı durdurup yeni order açar (iz kalsın diye).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="panel" id="p-plan">
+    <div class="grp"><h4>Doz planı <span class="ek">yeşil verildi · kırmızı gecikti · beyaz bekliyor</span></h4><div class="ic">
+      <div class="plan">
+        <div class="b"></div><div class="b">Per 02.10</div><div class="b">Cum 03.10</div><div class="b">Cmt 04.10</div><div class="b">Paz 05.10</div><div class="b">Pzt 06.10</div><div class="b">Sal 07.10</div><div class="b">Çar 08.10</div>
+        <div class="b">08:00</div><div class="p-ok">✓ 08:04</div><div class="p-ok">✓ 08:10</div><div class="p-ok">✓ 08:01</div><div class="p-bek">—</div><div class="p-bek">—</div><div class="p-bek">—</div><div class="p-bek">—</div>
+        <div class="b">20:00</div><div class="p-ok">✓ 20:15</div><div class="p-ok">✓ 20:02</div><div class="p-bek">bekliyor</div><div class="p-bek">—</div><div class="p-bek">—</div><div class="p-bek">—</div><div class="p-bek">—</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- UYGULAMALAR -->
+  <div class="panel" id="p-uyg">
+    <div class="grp"><h4>Uygulamalar <span class="ek">doz kuyruğundan; barkodla doğrulanır</span></h4>
+      <table class="liste">
+        <tr><th>Planlanan</th><th>Uygulanan</th><th>Uygulayan</th><th>Miktar</th><th>Doğrulama</th><th>Durum</th><th>Not</th></tr>
+        <tr><td>04.10 08:00</td><td>04.10 08:01</td><td>Hem. Derya Kurt</td><td>1 g</td><td><span class="chip c-ok">barkod</span></td><td><span class="chip c-ok">Verildi</span></td><td></td></tr>
+        <tr><td>03.10 20:00</td><td>03.10 20:02</td><td>Hem. Buse Kurt</td><td>1 g</td><td><span class="chip c-ok">barkod</span></td><td><span class="chip c-ok">Verildi</span></td><td></td></tr>
+        <tr><td>03.10 08:00</td><td>03.10 08:10</td><td>Hem. Derya Kurt</td><td>1 g</td><td><span class="chip c-bek">elle</span></td><td><span class="chip c-ok">Verildi</span></td><td>barkod okunmadı</td></tr>
+        <tr><td>02.10 20:00</td><td>02.10 20:15</td><td>Hem. Buse Kurt</td><td>1 g</td><td><span class="chip c-ok">barkod</span></td><td><span class="chip c-ok">Verildi</span></td><td>gecikme: hasta tetkikte</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- GÜVENLİK -->
+  <div class="panel" id="p-guv">
+    <div class="iki-kolon">
+      <div class="grp"><h4>Güvenlik kontrolleri <span class="ek">order kaydedilirken sunucuda yapılır</span></h4>
+        <table class="liste">
+          <tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr>
+          <tr><td><b>Alerji</b></td><td><span class="chip c-ok">Uygun</span></td><td>beta-laktam alerjisi kaydı yok</td></tr>
+          <tr><td><b>Etkileşim</b></td><td><span class="chip c-ok">Yok</span></td><td>aktif 3 order ile karşılaştırıldı</td></tr>
+          <tr><td><b>Doz aralığı</b></td><td><span class="chip c-ok">Uygun</span></td><td>yetişkin: 1-2 g / 12-24 saat</td></tr>
+          <tr><td><b>Böbrek ayarı</b></td><td><span class="chip c-ok">Gerekmez</span></td><td>eGFR 98</td></tr>
+          <tr><td><b>Mükerrer order</b></td><td><span class="chip c-ok">Yok</span></td><td>aynı etken madde aktif değil</td></tr>
+          <tr><td><b>Yüksek riskli ilaç</b></td><td><span class="chip c-gri">Değil</span></td><td>çift kontrol gerekmez</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="uyar">⚠ Uyarı çıkarsa order kaydı durmaz; hekim gerekçe yazarak geçer, gerekçe order geçmişine düşer. Mutlak kontrendikasyon (kayıtlı ağır alerji) kayıt engelidir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEÇMİŞ -->
+  <div class="panel" id="p-gecmis">
+    <div class="grp"><h4>Order geçmişi</h4><div class="ic">
+      <div class="satir"><span>02.10 07:40</span>Order verildi · Dr. Ahmet Yılmaz</div>
+      <div class="satir"><span>02.10 07:41</span>Doz planı üretildi · 14 doz</div>
+      <div class="satir"><span>02.10 08:04</span>İlk doz verildi · Hem. Derya Kurt</div>
+      <div class="satir"><span>03.10 08:10</span>Barkodsuz uygulama (elle doğrulandı) · Hem. Derya Kurt</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Sekmeler tıklanınca açılır. Üstte <b>hasta şeridi</b> (yaş / kilo / boy, yatış yeri ve günü, alerji, böbrek, tanı) - order yazarken hekim bunları görür.
+Kimlik şeridi: tür, ilaç / hizmet (geniş, arama), başlangıç, bitiş, order veren hekim, durum rozeti. Tablo <code>yatis_order</code>.<br>
+<span class="n">1</span><b>Order:</b> tür kutucukları (ilaç / sıvı / tetkik / bakım / diyet), doz + birim + yol + infüzyon süresi, sıklık çipleri, uygulama saatleri (servis standardı), STAT / PRN + koşul,
+seyreltme, hekim notu; verilişi (yazılı / sözel - sözelde 24 sa içinde hekim onayı), özet (toplam / verilen / sonraki doz / eczane stoğu).<br>
+<span class="n">2</span><b>Doz planı:</b> gün x saat ızgarası (<code>order_uygulama</code> planlanan) - verildi / gecikti / bekliyor.<br>
+<span class="n">3</span><b>Uygulamalar:</b> planlanan, uygulanan, uygulayan, miktar, barkod / elle doğrulama, durum, atlama / gecikme nedeni.<br>
+<span class="n">4</span><b>Güvenlik kontrolleri:</b> alerji, etkileşim, doz aralığı, böbrek ayarı, mükerrer order, yüksek riskli ilaç (çift kontrol).
+<span class="n">5</span><b>Geçmiş:</b> verildi, onaylandı, doz değişti (yeni order), durduruldu, uygulamalar.
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>

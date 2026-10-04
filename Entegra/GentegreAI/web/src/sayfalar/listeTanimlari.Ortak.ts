@@ -87,6 +87,9 @@ export interface ListeTanimi {
    */
   kartBaslik?: string;
   aksiyonEkrani?: string;
+  /** Yeni / Düzenle / Yazdır başlık satırında; diğer araç düğmeleri ALTINDA
+      ayrı satırda sağa yaslı. */
+  aracCubuguAltSatir?: boolean;
   /** e-Belge menusu KUTUSUNUN basligi ("E-Fatura" / "E-İrsaliye"). Verilmezse
       kutu cizilmez. Ekran adi ayirt etmiyor: 'belge-liste' satis fisi /
       tahakkuk / alis faturasi listelerinde de kullaniliyor. */

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (504 ad, 140 tanesi birden cok dosyada)
+## Fonksiyonlar (504 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -308,7 +308,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_numara_sablonu_bul` | `154_numara_sablonu_seed.sql` | 152_numara_sablonu.sql |
 | `fn_numara_sirada` | `152_numara_sablonu.sql` | — |
 | `fn_order_doz_gunluk` | `698_order_doz_uretimi.sql` | — |
-| `fn_order_uygulama_uret` | `698_order_doz_uretimi.sql` | — |
+| `fn_order_uygulama_uret` | `969_order_doz_yerel_saat.sql` | 698_order_doz_uretimi.sql |
 | `fn_panel_profil` | `940_personel_unvan_yalniz_onek.sql` | 508_panel_kurum_profili.sql, 512_panel_tip_merkezi_tam.sql, 513_panel_blok_sirasi.sql |
 | `fn_para_tr` | `769_para_bicimi_tr.sql` | — |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
@@ -513,7 +513,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (306 ad, 140 tanesi birden cok dosyada)
+## Gorunumler (309 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -625,6 +625,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_muayene_ozet` | `970_goz_muayene_liste_kart.sql` | — |
 | `v_goz_protokol_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_takip_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_tetkik_lookup` | `693_goz_lookup.sql` | — |
@@ -823,4 +824,6 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_urun_agaci_lookup` | `429_uretim_v1.sql` | — |
 | `v_yatak_lookup` | `696_yatan_lookup.sql` | — |
 | `v_yatak_panosu` | `940_personel_unvan_yalniz_onek.sql` | 695_yatan_hasta.sql |
+| `v_yatis_lookup` | `968_order_liste_kart.sql` | — |
+| `v_yatis_order_ozet` | `969_order_doz_yerel_saat.sql` | 968_order_liste_kart.sql |
 
