@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duyurular — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip b{color:var(--muted);margin-left:3px}
+  .cip.on b{color:var(--navy)}
+  .sekmeler{display:flex;gap:0;border-bottom:1px solid var(--line);padding:0 10px;background:#fff}
+  .sekme{padding:8px 14px;font-size:12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .sekme.on{color:var(--navy);font-weight:bold;border-bottom-color:#2f6db3}
+  .sekme .say{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:#e3ecfa;color:#2f5c9e;font-size:10.5px;text-align:center}
+  .sekme .say.k{background:#f8e1df;color:#8f3d36}
+  /* YENI TALEP KUTUCUKLARI */
+  .yeni{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding:12px}
+  .kutu{border:1px solid var(--line2);border-radius:6px;padding:10px 8px;background:#fff;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .kutu .i{font-size:22px;line-height:1}
+  .kutu b{font-size:12px;color:var(--navy)}
+  .kutu span{font-size:10px;color:var(--muted)}
+  .kutu:hover{border-color:var(--selbd);background:#f5f9fe}
+  /* OZET */
+  .ozetler{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 12px 12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.dikkat{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.dikkat .v,.kpi.dikkat .a{color:var(--warn)}
+  .bakiye{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;display:flex;margin-top:3px}
+  .bakiye i{display:block;height:100%}
+  .bolum-bas{padding:8px 12px 4px;font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  /* LISTE + PANEL */
+  .govde{display:grid;grid-template-columns:1fr 360px;border-top:1px solid var(--line2)}
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .grid td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .grid tr.secili td{background:#eef5fd}
+  .grid tr.bitti td{color:#7a8796}
+  .tur{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap;border:1px solid}
+  .t-izin{background:#f8e1df;color:#8f3d36;border-color:#e4b7b2}
+  .t-avans{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .t-masraf{background:#fdf1dc;color:#8a6414;border-color:#f0d9a8}
+  .t-belge{background:#e3ecfa;color:#2f5c9e;border-color:#bcd2ef}
+  .t-ariza{background:#efe6fa;color:#6b3fa0;border-color:#ddc9f2}
+  .t-stok{background:#e9ecf0;color:#4b5866;border-color:#cfd6de}
+  .konu b{color:var(--navy)}
+  .konu small{display:block;color:var(--muted);font-size:10.5px}
+  /* ONAY ZINCIRI */
+  .zincir{display:flex;align-items:center;gap:0;white-space:nowrap}
+  .adim{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+  .adim i{width:14px;height:14px;border-radius:50%;border:1.5px solid #b9c4d0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-style:normal;background:#fff}
+  .adim.ok i{background:#2e7d46;border-color:#2e7d46;color:#fff}
+  .adim.su i{background:#fff;border-color:#e0a33a;color:#e0a33a;box-shadow:0 0 0 3px #fdf1dc}
+  .adim.su{color:var(--warn);font-weight:bold}
+  .adim.red i{background:#b3261e;border-color:#b3261e;color:#fff}
+  .adim.red{color:#8f3d36;font-weight:bold}
+  .cizgi{width:14px;height:2px;background:#d6dde6;margin:0 2px}
+  .cizgi.ok{background:#2e7d46}
+  .kim{font-size:10.5px;color:var(--muted)}
+  .kim b{color:var(--ink);font-weight:normal}
+  .kim .gec{color:#8f3d36;font-weight:bold}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-mavi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .tutar{text-align:right;white-space:nowrap}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfe}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;margin:10px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:6px;align-items:center}
+  .grp h4 span{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .ic{padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .sat{display:grid;grid-template-columns:84px 1fr;gap:6px}
+  .sat .k{color:var(--muted)}
+  .zc{position:relative;padding-left:18px;display:flex;flex-direction:column;gap:9px}
+  .zc::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e3e9f0}
+  .zo{position:relative;font-size:11px}
+  .zo::before{content:"";position:absolute;left:-16px;top:3px;width:10px;height:10px;border-radius:50%;background:#2e7d46;border:2px solid #fff;box-shadow:0 0 0 1px #2e7d46}
+  .zo.su::before{background:#fff;box-shadow:0 0 0 2px #e0a33a}
+  .zo.yorum::before{background:#2f6db3;box-shadow:0 0 0 1px #2f6db3}
+  .zo small{display:block;color:var(--muted);font-size:10px}
+  .zo .bal{background:#f3f6fa;border:1px solid var(--line2);border-radius:6px;padding:5px 8px;margin-top:3px}
+  .ek{display:flex;gap:6px;flex-wrap:wrap}
+  .ek span{border:1px solid var(--line);border-radius:3px;padding:2px 6px;font-size:10.5px;background:#fff}
+  .eylem{display:flex;gap:4px;flex-wrap:wrap}
+  .bilgi{padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  .uyari{padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px}
+  /* YENI TALEP MODALI */
+  .modal-alan{padding:14px;background:rgba(20,40,70,.06);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .modal{background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(20,40,70,.18)}
+  .modal .mbas{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:6px 10px;font-weight:bold;font-size:12px;display:flex}
+  .modal .mbas span{margin-left:auto;font-weight:normal;opacity:.8;font-size:10.5px}
+  .modal .mgov{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .modal .malt{display:flex;gap:6px;justify-content:flex-end;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:#b23b3b}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ikili{display:flex;gap:6px;align-items:center}
+  .tablo-mini{border-collapse:collapse;width:100%;font-size:11px}
+  .tablo-mini th,.tablo-mini td{padding:4px 6px;border-bottom:1px solid var(--line2);text-align:left}
+  .tablo-mini th{color:var(--muted);font-weight:normal;background:var(--head)}
+  .aciklama{max-width:1240px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  /* ===== 0) ERISIM: UST SERIT IKONU + KULLANICI MENUSU ===== */
+  .erisim{position:relative;height:470px;background:#eef1f5;overflow:hidden}
+  .ustbar{height:52px;background:linear-gradient(#21497c,#183a66);display:flex;align-items:center;gap:14px;padding:0 14px;color:#fff}
+  .ustbar .logo{font-weight:bold;font-size:15px;display:flex;gap:6px;align-items:center}
+  .ustbar .ara{flex:0 0 280px;height:28px;border-radius:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11.5px;display:flex;align-items:center;padding:0 10px;color:rgba(255,255,255,.75)}
+  .ustbar .sube{margin:0 auto;font-weight:bold;font-size:13px}
+  .ustbar .ikonlar{display:flex;gap:14px;align-items:center}
+  .uik{position:relative;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .uik.on{background:rgba(255,255,255,.18);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .uik .rz{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e0503f;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .uik .nokta{position:absolute;top:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#3fb26b;border:2px solid #1d4270}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#2e5e98;border:2px solid rgba(255,255,255,.6);font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .avatar.on{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+  .pop{position:absolute;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 10px 30px rgba(20,40,70,.25);color:var(--ink)}
+  .pop::before{content:"";position:absolute;top:-7px;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+  .pop.talep{top:60px;right:290px;width:400px}
+  .pop.talep::before{right:-46px;display:none}
+  .pop.kullanici{top:60px;right:12px;width:250px}
+  .pop.kullanici::before{right:14px}
+  .pop .pb{padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--navy)}
+  .pop .pb span{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .hizli{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .hizli div{border:1px solid var(--line2);border-radius:5px;padding:6px 4px;text-align:center;font-size:10.5px;color:var(--navy);font-weight:bold;background:#fbfcfe}
+  .hizli div i{display:block;font-style:normal;font-size:17px;margin-bottom:2px}
+  .onayb{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fdf1f0;border-bottom:1px solid #f1d2ce;color:#8f3d36;font-size:11px}
+  .onayb b{font-size:13px}
+  .onayb span{margin-left:auto;text-decoration:underline}
+  .son{list-style:none;margin:0;padding:4px 0}
+  .son li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 12px;font-size:11px}
+  .son li:hover{background:#f5f9fe}
+  .son li small{display:block;color:var(--muted);font-size:10px}
+  .son li.yeni{background:#f2faf5}
+  .son li.yeni small{color:#2e7d46;font-weight:bold}
+  .pop .pa{padding:8px 12px;border-top:1px solid var(--line2);display:flex;justify-content:space-between;font-size:11px;color:var(--accent)}
+  .kmenu{list-style:none;margin:0;padding:4px 0}
+  .kmenu li{padding:6px 12px;font-size:11.5px;display:flex;gap:8px;align-items:center}
+  .kmenu li:hover{background:#f5f9fe}
+  .kmenu li span{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .kmenu li.vurgu{font-weight:bold;color:var(--navy)}
+  .kmenu li .rzk{margin-left:auto;background:#e0503f;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;font-weight:bold}
+  .kmenu .ayr{height:1px;background:var(--line2);margin:4px 0;padding:0}
+  .etiket-ok{position:absolute;font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px solid #bcd2ef;border-radius:4px;padding:4px 8px;max-width:210px;line-height:1.35}
+
+  /* ===== DUYURU ===== */
+  .sahne{position:relative;height:500px;background:#eef1f5;overflow:hidden}
+  .ustbar{height:52px;background:linear-gradient(#21497c,#183a66);display:flex;align-items:center;gap:14px;padding:0 14px;color:#fff}
+  .ustbar .logo{font-weight:bold;font-size:15px}
+  .ustbar .sube{margin:0 auto;font-weight:bold;font-size:13px}
+  .ustbar .ikonlar{display:flex;gap:14px;align-items:center}
+  .uik{position:relative;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .uik.on{background:rgba(255,255,255,.18);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .uik .rz{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e0503f;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .uik .mavi{position:absolute;bottom:-3px;right:-6px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:#2f6db3;color:#fff;font-size:9px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#2e5e98;border:2px solid rgba(255,255,255,.6);font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .pop{position:absolute;top:60px;right:70px;width:450px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 10px 30px rgba(20,40,70,.25)}
+  .pop .pb{padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--navy)}
+  .pop .pb span{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .psek{display:flex;border-bottom:1px solid var(--line2);font-size:11px}
+  .psek div{flex:1;text-align:center;padding:6px 12px;color:var(--muted);border-bottom:2px solid transparent}
+  .psek div.on{color:var(--navy);font-weight:bold;border-bottom-color:#2f6db3}
+  .psek b{background:#e0503f;color:#fff;border-radius:8px;padding:0 5px;font-size:9.5px;margin-left:3px}
+  .psek b.m{background:#2f6db3}
+  .dl{list-style:none;margin:0;padding:0}
+  .dl li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:start;padding:8px 12px;border-bottom:1px solid var(--line2);font-size:11px}
+  .dl li small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+  .dl li .oz{color:var(--ink);font-size:10.5px;margin-top:2px;line-height:1.35}
+  .dl li.yeni{background:#f5f9fe}
+  .dl li.yeni b::before{content:"●";color:#2f6db3;margin-right:4px;font-size:9px}
+  .dl li.kritik{background:#fdf1f0}
+  .dl li.sabit{border-left:3px solid #e0a33a}
+  .onem{display:inline-block;padding:0 6px;border-radius:9px;font-size:9.5px;font-weight:bold}
+  .o-k{background:#fdecea;color:#b3261e;border:1px solid #f1c6c2}
+  .o-o{background:#fdf6e6;color:#8a6414;border:1px solid #f0d9a8}
+  .o-b{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .pa{padding:8px 12px;display:flex;justify-content:space-between;font-size:11px;color:var(--accent)}
+  .etiket-ok{position:absolute;font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px solid #bcd2ef;border-radius:4px;padding:5px 8px;max-width:250px;line-height:1.4}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#5fb57c,#2e7d46);color:#fff;font-weight:bold}
+  .ikiyan{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px}
+  .modal.genis{max-width:none;margin:0}
+  .malt.ust{border-top:0;border-bottom:1px solid var(--line2);justify-content:flex-start}
+  .malt .sag{margin-left:auto}
+  .editor{border:1px solid var(--line);border-radius:2px;background:#fff}
+  .editor .arac{display:flex;gap:2px;padding:3px;border-bottom:1px solid var(--line2);background:var(--head)}
+  .editor .arac span{min-width:22px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;border-radius:2px;color:var(--ink)}
+  .editor .icerik{padding:8px;font-size:11.5px;line-height:1.5;min-height:110px}
+  .onemsec{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .onemsec div{border:1px solid var(--line2);border-radius:5px;padding:6px 8px;font-size:11px;background:#fbfcfe}
+  .onemsec div b{display:block;font-size:11.5px}
+  .onemsec div span{font-size:10px;color:var(--muted)}
+  .onemsec div.on{border-color:#e0a33a;background:#fdf6e6;box-shadow:0 0 0 2px #f6e3bd}
+  .hedef{display:flex;flex-wrap:wrap;gap:4px}
+  .hedef span{border:1px solid #bcd2ef;background:#e3ecfa;color:#2f5c9e;border-radius:10px;padding:1px 8px;font-size:10.5px}
+  .hedef span.ek{border-style:dashed;background:#fff;color:var(--muted)}
+  .kanal{display:flex;flex-direction:column;gap:3px;font-size:11px}
+  .onizle{border:1px dashed #bcd2ef;border-radius:6px;padding:8px;background:#f7fafe}
+  .bar{height:7px;background:#e3e9f0;border-radius:4px;overflow:hidden;width:120px;display:inline-block;vertical-align:middle}
+  .bar i{display:block;height:100%;background:#5fae7a}
+  .tam{position:relative;height:330px;background:rgba(20,40,70,.55);display:flex;align-items:center;justify-content:center}
+  .tam .kutu2{width:520px;background:#fff;border-radius:8px;box-shadow:0 20px 50px rgba(0,0,0,.35);overflow:hidden}
+  .tam .kb{background:linear-gradient(#c94a3d,#a5352a);color:#fff;padding:10px 14px;font-weight:bold;display:flex;gap:8px;align-items:center}
+  .tam .kb span{margin-left:auto;font-weight:normal;font-size:10.5px;opacity:.85}
+  .tam .ki{padding:12px 14px;font-size:11.5px;line-height:1.55;display:flex;flex-direction:column;gap:8px}
+  .tam .ka{display:flex;gap:6px;padding:10px 14px;background:var(--head);border-top:1px solid var(--line2);align-items:center}
+</style>
+</head>
+<body>
+
+<!-- ================================================== 1) ZIL: BANA GELENLER + DUYURULAR -->
+<div class="win">
+  <div class="title">🔔 Zil — Bana gelenler + Duyurular
+    <span class="sp">📨 = kendi taleplerim · 🔔 = bana gelen iş ve kuruma ait duyurular</span></div>
+  <div class="sahne">
+    <div class="ustbar">
+      <span class="logo">🧬 GenoTIP AI</span>
+      <span class="sube">🏥 Merkez ▾</span>
+      <span class="ikonlar">
+        <span class="uik">💬</span>
+        <span class="uik">📨</span>
+        <span class="uik on">🔔<span class="rz">5</span><span class="mavi">2</span></span>
+        <span class="avatar">AD</span>
+      </span>
+    </div>
+
+    <div class="pop">
+      <div class="pb">🔔 Bildirimler <span>5 işlem bekliyor · 2 okunmamış duyuru</span></div>
+      <div class="psek"><div>Bana gelenler <b>5</b></div><div class="on">Duyurular <b class="m">2</b></div></div>
+      <ul class="dl">
+        <li class="kritik sabit"><span>📌</span><span><b>Sistem bakımı: Pazar 02:00–04:00</b> <span class="onem o-k">Kritik</span>
+          <small>Bilgi İşlem · 04.10 09:10 · herkese</small>
+          <div class="oz">HBYS ve e-Nabız gönderimi kapalı olacak; acil kabul kâğıt formla devam eder…</div></span>
+          <span class="btn kucuk ok">✔ Okudum</span></li>
+        <li class="yeni"><span>📣</span><span><b>Yeni nöbet listesi yayınlandı (Ekim)</b> <span class="onem o-o">Önemli</span>
+          <small>Başhekimlik · bugün 08:30 · Kardiyoloji, Dahiliye · 📎 nobet_ekim.pdf</small>
+          <div class="oz">Değişiklik talepleri 10.10'a kadar Taleplerim › Diğer'den iletilir.</div></span>
+          <span class="btn kucuk">Aç</span></li>
+        <li><span>ℹ️</span><span><b>Kafeterya menüsü haftalık güncellendi</b> <span class="onem o-b">Bilgi</span>
+          <small>İdari İşler · dün · herkese</small></span>
+          <span style="color:var(--muted);font-size:10px">✓ okundu</span></li>
+        <li><span>ℹ️</span><span><b>Hasta hakları eğitimi 15.10 14:00 · Konferans salonu</b> <span class="onem o-b">Bilgi</span>
+          <small>Kalite · 01.10 · tüm klinik personel</small></span>
+          <span style="color:var(--muted);font-size:10px">✓ okundu</span></li>
+      </ul>
+      <div class="pa"><span>＋ Duyuru yayınla</span><span>Tüm duyurular →</span></div>
+    </div>
+
+    <div class="etiket-ok" style="top:70px;left:24px">① <b>🔔 tek kutu</b>: "Bana gelenler" (arıza, onay, iskonto - bugün olduğu gibi)
+      ve <b>Duyurular</b>. Kırmızı rozet = işlem bekleyen iş; <b>mavi küçük rozet</b> = okunmamış duyuru.</div>
+    <div class="etiket-ok" style="top:165px;left:24px">② Duyuru satırı: önem (<b>Kritik / Önemli / Bilgi</b>), kimden, ne zaman, kime, ek.
+      <b>Sabit</b> (📌) duyuru bitiş tarihine kadar en üstte. <b>Okuma onayı</b> istenenlerde "✔ Okudum" düğmesi -
+      kim okudu yayınlayan görür.</div>
+    <div class="etiket-ok" style="top:300px;left:24px">③ Yeni duyuru da işler gibi <b>anlık bildirim</b> olarak sol alta düşer;
+      kritik duyuru oturum açılışında <b>tam ekran</b> gelir (bölüm 4).</div>
+  </div>
+</div>
+
+<!-- ================================================== 2) DUYURU GIRISI / YAYINLAMA -->
+<div class="win">
+  <div class="title">📣 Duyuru yayınla — pencere
+    <span class="sp">zilden "＋ Duyuru yayınla" ya da Yönetim › Duyurular · yetki: duyuru (yayınla)</span></div>
+  <div class="ikiyan">
+    <div class="modal genis">
+      <div class="mbas">📣 Yeni duyuru <span>Başhekimlik adına · Dr. Kemal Ak</span></div>
+      <div class="malt ust"><span class="btn primary">📣 Yayınla</span><span class="btn">🕒 Zamanla…</span><span class="btn">💾 Taslak</span><span class="btn sag">Kapat</span></div>
+      <div class="mgov">
+        <div class="fld"><label class="req">Başlık</label><div class="inp">Yeni nöbet listesi yayınlandı (Ekim)</div></div>
+        <div class="fld"><label class="req">Metin</label>
+          <div class="editor"><div class="arac"><span><b>B</b></span><span><i>I</i></span><span><u>U</u></span><span>•≡</span><span>1≡</span><span>🔗</span><span>🖼</span><span>📎</span></div>
+            <div class="icerik">Ekim ayı nöbet listesi ektedir. <b>Değişiklik talepleri 10.10'a kadar</b> Taleplerim › Diğer'den iletilir;
+              karşılıklı değişimde iki hekimin de onayı gerekir.<br><br>Nöbet ücretleri bordroya kendiliğinden işlenir.</div></div></div>
+        <div class="fld"><label>Önem</label>
+          <div class="onemsec">
+            <div><b>ℹ️ Bilgi</b><span>zilde listelenir</span></div>
+            <div class="on"><b>📣 Önemli</b><span>+ anlık bildirim</span></div>
+            <div><b>🚨 Kritik</b><span>+ girişte tam ekran, SMS seçilebilir</span></div>
+          </div></div>
+        <div class="fld"><label class="req">Kime</label>
+          <div class="hedef"><span>🏥 Merkez şube</span><span>🩺 Kardiyoloji ✕</span><span>🩺 Dahiliye ✕</span><span>👤 Rol: Uzman Doktor ✕</span><span class="ek">＋ şube / bölüm / rol / kişi</span></div>
+          <span style="font-size:10px;color:var(--muted)">kesişim değil birleşim: seçilenlerden herhangi birine giren herkes · <b>48 kişi</b> görecek</span></div>
+        <div class="iki">
+          <div class="fld"><label>Yayın</label><div class="ikili"><div class="inp" style="flex:1">şimdi</div><span>–</span><div class="inp" style="flex:1">31.10.2026</div></div>
+            <span style="font-size:10px;color:var(--muted)">bitişte zilden kalkar, arşivde durur</span></div>
+          <div class="fld"><label>Seçenekler</label>
+            <div class="kanal"><span>☑ Okuma onayı iste ("✔ Okudum")</span><span>☑ 📌 Sabitle (bitişe kadar en üstte)</span><span>☐ Yorum / soru açık</span></div></div>
+        </div>
+        <div class="iki">
+          <div class="fld"><label>Ek</label><div class="ek"><span>📎 nobet_ekim.pdf</span><span>＋</span></div></div>
+          <div class="fld"><label>Ayrıca gönder</label>
+            <div class="kanal"><span>☐ E-posta</span><span>☐ SMS <span style="color:var(--muted)">(yalnız Kritik)</span></span></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="grp" style="margin:0"><h4>Önizleme — zilde böyle görünür</h4>
+        <div class="ic"><div class="onizle">
+          <ul class="dl" style="background:#fff;border:1px solid var(--line2);border-radius:4px">
+            <li class="yeni sabit"><span>📣</span><span><b>Yeni nöbet listesi yayınlandı (Ekim)</b> <span class="onem o-o">Önemli</span>
+              <small>Başhekimlik · şimdi · Kardiyoloji, Dahiliye · 📎 1</small>
+              <div class="oz">Ekim ayı nöbet listesi ektedir. Değişiklik talepleri 10.10'a kadar…</div></span>
+              <span class="btn kucuk ok">✔ Okudum</span></li>
+          </ul></div></div></div>
+      <div class="bilgi">ℹ <b>Kim yayınlar?</b> <code>duyuru</code> yetkisi olan. Yayınlayan yalnız <b>kendi kapsamına</b>
+        (kendi şubesi / bölümü) gönderebilir; "Herkes" ve Kritik + SMS yalnız yönetici yetkisiyle.</div>
+      <div class="uyari">⚠ Kritik + SMS 48 kişiye gider (≈ 48 SMS). Gönderim öncesi bir kez daha sorulur.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================== 3) DUYURULAR LISTESI (YONETIM) -->
+<div class="win">
+  <div class="title">📣 Duyurular — yönetim listesi
+    <span class="sp">Yönetim › Duyurular · yayınlananlar, zamanlananlar, taslaklar · kim okudu</span></div>
+  <div class="toolbar">
+    <span class="cipler"><span class="cip on">Yayında <b>3</b></span><span class="cip">Zamanlandı <b>1</b></span><span class="cip">Taslak <b>2</b></span><span class="cip">Bitti <b>14</b></span><span class="cip">Tümü</span></span>
+    <span class="btn primary sp">＋ Yeni duyuru</span>
+  </div>
+  <div class="ikiyan">
+    <div>
+      <table class="grid">
+        <tr><th>Önem</th><th>Başlık</th><th>Kime</th><th>Yayın</th><th>Okunma</th><th>Yayınlayan</th></tr>
+        <tr class="secili"><td><span class="onem o-k">Kritik</span> 📌</td><td class="konu"><b>Sistem bakımı: Pazar 02:00–04:00</b><small>okuma onayı · SMS gönderildi</small></td>
+          <td class="kim">herkes · 312 kişi</td><td class="kim">04.10 09:10 → 06.10</td>
+          <td><span class="bar"><i style="width:71%"></i></span> <b>221</b>/312</td><td class="kim">Bilgi İşlem</td></tr>
+        <tr><td><span class="onem o-o">Önemli</span> 📌</td><td class="konu"><b>Yeni nöbet listesi yayınlandı (Ekim)</b><small>📎 1 · okuma onayı</small></td>
+          <td class="kim">Kardiyoloji, Dahiliye · 48</td><td class="kim">bugün 08:30 → 31.10</td>
+          <td><span class="bar"><i style="width:35%"></i></span> <b>17</b>/48</td><td class="kim">Başhekimlik</td></tr>
+        <tr><td><span class="onem o-b">Bilgi</span></td><td class="konu"><b>Kafeterya menüsü haftalık güncellendi</b></td>
+          <td class="kim">herkes · 312</td><td class="kim">03.10 → 10.10</td>
+          <td><span class="bar"><i style="width:52%"></i></span> 162 gördü</td><td class="kim">İdari İşler</td></tr>
+        <tr><td><span class="onem o-b">Bilgi</span></td><td class="konu"><b>Hasta hakları eğitimi 15.10</b><small>🕒 zamanlandı</small></td>
+          <td class="kim">klinik personel · 140</td><td class="kim">07.10 08:00 → 15.10</td><td class="kim">—</td><td class="kim">Kalite</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="grp" style="margin:0 0 10px">
+        <h4>📌 Sistem bakımı <span class="onem o-k" style="margin-left:auto">Kritik</span></h4>
+        <div class="ic">
+          <div class="sat"><span class="k">Okudu</span><span><b>221</b> / 312 · %71</span></div>
+          <div class="sat"><span class="k">Okumadı</span><span>91 kişi · <a href="#">listeyi gör</a></span></div>
+          <div class="sat"><span class="k">En çok okumayan</span><span>Gece vardiyası · Acil (23)</span></div>
+          <div class="eylem"><span class="btn kucuk">🔔 Okumayanlara hatırlat</span><span class="btn kucuk">✎ Düzenle</span><span class="btn kucuk">⏹ Yayından kaldır</span></div>
+        </div>
+      </div>
+      <div class="bilgi">Düzenlenen yayındaki duyuru <b>"güncellendi"</b> etiketiyle yeniden okunmamış olur; okuma onayları sıfırlanmaz,
+        ama kim eski sürümü onayladı görünür.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================== 4) KRITIK DUYURU: GIRISTE TAM EKRAN -->
+<div class="win">
+  <div class="title">🚨 Kritik duyuru — oturum açılışında
+    <span class="sp">okuma onayı verilmeden kapanmaz; "Sonra" yok, bir kez onaylanır</span></div>
+  <div class="tam">
+    <div class="kutu2">
+      <div class="kb">🚨 Sistem bakımı: Pazar 02:00–04:00 <span>Bilgi İşlem · 04.10 09:10</span></div>
+      <div class="ki">
+        <div>Pazar gecesi 02:00–04:00 arasında <b>HBYS ve e-Nabız gönderimi kapalı</b> olacaktır.</div>
+        <div>• Acil kabul <b>kâğıt formla</b> devam eder; formlar acil bankosunda.<br>• Laboratuvar sonuçları cihazdan yazdırılır, 04:00'ten sonra sisteme aktarılır.<br>• Sorular: Bilgi İşlem dahili 4400.</div>
+        <div class="ek"><span>📎 bakim_proseduru.pdf</span></div>
+      </div>
+      <div class="ka"><span style="font-size:10.5px;color:var(--muted)">1 / 1 kritik duyuru</span><span class="btn ok" style="margin-left:auto">✔ Okudum, anladım</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div style="padding:10px 14px;font-size:11px;line-height:1.6">
+<b>NOT (mockup):</b> Kullanıcı: "üst ikonlarda taleplerim de 2 sekme var.. taleplerim burada kalsın, bana gelenleri duyuru (zil)'e aktar..
+bir de duyuru girişi / yayınlama için mockup yap". <b>📨 Taleplerim</b> yalnız kişinin kendi talepleri; <b>🔔 zil</b> iki sekme:
+<b>Bana gelenler</b> (bugünkü görünüm, uygulandı) ve <b>Duyurular</b> (bu mockup). Duyuru: önem (Bilgi / Önemli / Kritik), hedef kitle
+(şube / bölüm / rol / kişi birleşimi, kişi sayısı önizlenir), yayın aralığı, okuma onayı, sabitleme, ek, e-posta / SMS (Kritik).
+Yönetim listesinde okunma oranı ve okumayanlara hatırlatma; kritik duyuru oturum açılışında onaylanana kadar tam ekran.
+</div></div>
+
+</body>
+</html>

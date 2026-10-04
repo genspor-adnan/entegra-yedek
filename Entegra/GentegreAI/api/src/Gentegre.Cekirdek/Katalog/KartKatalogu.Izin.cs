@@ -62,6 +62,8 @@ public static partial class KartKatalogu
             //   olmayabilir ve ikisi ayrı sorudur.
             new("yerineId", "yerine_id", "sayi", Baslik: "Yerine Bakan", Grup: "Gerekçe",
                 KodTablosu: "public.v_personel_lookup"),
+            new("izinAdres", "izin_adres", "metin", Baslik: "İzin Adresi", Grup: "Gerekçe", EnFazlaUzunluk: 200),
+            new("izinTel", "izin_tel", "metin", Baslik: "İzinde Ulaşım", Grup: "Gerekçe", EnFazlaUzunluk: 40),
             new("belgeNo", "belge_no", "metin", Baslik: "Rapor / Belge No",
                 Grup: "Gerekçe", EnFazlaUzunluk: 60),
             new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Gerekçe",

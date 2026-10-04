@@ -6,6 +6,7 @@ import { c } from '../../dil/ceviri';
 import { TUR_IKON, talepleriYenile, type TalepBildirimi } from './useTaleplerimOzeti';
 import { useTaleplerim } from './TaleplerimPaneli';
 import { iskontoKararAc } from './GelenIsler';
+import { duyuruOkuAc } from '../duyuru/DuyuruOrtak';
 import { para } from '../bicim';
 
 /**
@@ -57,6 +58,20 @@ function Bildirim({ b, kapat }: { b: TalepBildirimi; kapat(): void }) {
         <div className="tl-tey">
           <button type="button" className="d bir" onClick={() => void yap(() => api.arizaDevral(a.id))}>✋ {c('Devral')}</button>
           <button type="button" className="d" onClick={() => { kapat(); git(`/taleplerim?sekme=gelen&sec=ariza-${a.id}`) }}>{c('Gör')}</button>
+          <button type="button" className="d tl-sag-btn" onClick={kapat}>{c('Sonra')}</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (b.duyuru) {
+    const d = b.duyuru;
+    return (
+      <div className={`tl-toast${b.acil ? ' tl-toast-acil' : ''}`}>
+        <div className="tl-tb">{d.onem === 3 ? '🚨' : '📣'} {d.guncelleme ? c('Duyuru güncellendi') : c('Yeni duyuru')}<span>{d.adina}</span></div>
+        <div><b>{d.baslik}</b>{d.ozet ? <><br />{d.ozet.slice(0, 120)}</> : null}</div>
+        <div className="tl-tey">
+          <button type="button" className="d bir" onClick={() => { kapat(); duyuruOkuAc(d.id) }}>{c('Aç')}</button>
           <button type="button" className="d tl-sag-btn" onClick={kapat}>{c('Sonra')}</button>
         </div>
       </div>

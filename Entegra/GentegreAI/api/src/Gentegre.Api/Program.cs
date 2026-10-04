@@ -357,6 +357,8 @@ uygulama.MasrafBeyaniUclariniEkle();
 uygulama.BelgeTalebiUclariniEkle();
 // TALEPLERIM: kisinin kendi talepleri (izin/avans/masraf/belge/ariza/malzeme).
 uygulama.TaleplerimUclariniEkle();
+// DUYURULAR (957): zil > Duyurular, yayinla, yonetim listesi.
+uygulama.DuyuruUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();

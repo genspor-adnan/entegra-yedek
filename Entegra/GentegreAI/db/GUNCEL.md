@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (497 ad, 140 tanesi birden cok dosyada)
+## Fonksiyonlar (503 ad, 140 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -58,6 +58,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_talep_yazi` | `940_personel_unvan_yalniz_onek.sql` | 768_belge_talep_yazisi.sql, 770_belge_talep_yazisi_para_bicimi.sql |
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
+| `fn_bolum_arkadaslari` | `959_izin_karti.sql` | — |
 | `fn_bolum_planli` | `718_hekim_calisma_plani.sql` | — |
 | `fn_bzbh_hastalik` | `882_bzbh_bildirim.sql` | — |
 | `fn_cagri_arayan_bul` | `940_personel_unvan_yalniz_onek.sql` | 839_cagri_merkezi.sql |
@@ -94,6 +95,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_dokuman_tipi` | `431_dokuman_kategori.sql` | — |
 | `fn_doviz_iso` | `083_doviz_kod_iso.sql` | — |
 | `fn_doviz_kur_getir` | `083_doviz_kod_iso.sql` | — |
+| `fn_duyuru_alicilari` | `957_duyuru.sql` | — |
+| `fn_duyuru_duz` | `958_duyuru_yardimci.sql` | — |
+| `fn_duyuru_gorur` | `957_duyuru.sql` | — |
+| `fn_duyuru_hedef_ozet` | `958_duyuru_yardimci.sql` | — |
 | `fn_ebelge_acik` | `179_ebelge_ana_salter.sql` | — |
 | `fn_ebelge_alici_bilgi` | `184_ebelge_alici_mail.sql` | — |
 | `fn_ebelge_birim_kodu` | `166_ebelge_json.sql` | — |
@@ -222,6 +227,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kritik_stok_talep` | `732_kritik_stok_talep.sql` | — |
 | `fn_kullanici_alan_yetkileri` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_ana_rol_temizle` | `665_cok_rollu_kullanici.sql` | — |
+| `fn_kullanici_bolumleri` | `957_duyuru.sql` | — |
 | `fn_kullanici_iskonto_tavani` | `792_sorumlu_kendi_tavani.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |

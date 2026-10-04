@@ -99,6 +99,11 @@ export const izinUclari = {
   /** Kişinin kendi talepleri (yetki istemez; yalnız kendi kayıtları). */
   taleplerim: () => istek<TaleplerimYaniti>('/api/ben/talepler'),
 
+  /** İzin talep kartı (959): gün / dönüş, takvim, bakiye, ekip, randevu, akış. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  izinBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/izin-baglam?${p}`),
+  izinHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/izin/${id}/hatirlat`, {}),
+
   izinBakiye: (tarafId: number, yil?: number) =>
     istek<IzinBakiyesi>(`/api/ik/personel/${tarafId}/izin-bakiye`
       + (yil ? `?yil=${yil}` : '')),
@@ -109,6 +114,8 @@ export const izinUclari = {
     isGunu?: boolean; aciklama?: string; belgeNo?: string; yerineId?: number;
     /** Saatli izin (950): "HH:MM", ikisi birden, tek gün. */
     saatBas?: string; saatBit?: string;
+    /** 959: izindeyken adres / ulaşım. */
+    izinAdres?: string; izinTel?: string;
   }) => gonder<{
     id: number; gun: number; durum: number;
     bakiye: IzinBakiyesi; uyarilar: string[];

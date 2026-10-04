@@ -18281,3 +18281,47 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
 * Doğrulama: API'den aç → gelen → benzer → devral → not → çöz → bildiren onayla akışı; tarayıcıda anlık bildirim, panel,
   "Bana gelenler", arıza penceresi ve demirbaş arama. tsc temiz, vitest 789/789, dotnet test 210 geçti (DB testleri atlandı).
   Acil SMS yolu canlı SMS gönderebileceği için denenmedi. Deneme kayıtları silindi.
+
+## 04.10.2026 — 🔔 Zil = Bana gelenler + Duyurular; duyuru yayınlama (957–958)
+
+* **Üst şerit ayrıldı** (kullanıcı: "taleplerim burada kalsın, bana gelenleri duyuru (zil)'e aktar"): 📨 yalnız kişinin kendi
+  talepleri; 🔔 zil iki sekme - **Bana gelenler** (arıza, onay, iskonto; aynı görünüm ve tek tık işlemler) ve **Duyurular**.
+  Kırmızı rozet işlem bekleyen, mavi küçük rozet okunmamış duyuru. Eski `ZilPaneli` kaldırıldı. Dil ikonu tema ikonunun soluna alındı.
+* **Mockup** `Ekranlar/Duyuru/duyuru.html`. **957** `duyuru` (önem 1 bilgi · 2 önemli · 3 kritik, yayın aralığı, okuma onayı,
+  sabit, e-posta / SMS - SMS yalnız kritik, sürüm), `duyuru_hedef` (şube / bölüm / rol / kişi BİRLEŞİMİ ya da herkes),
+  `duyuru_okuma` (gördü / okudu + hangi sürüm); `fn_duyuru_gorur`, `fn_duyuru_alicilari`, `fn_kullanici_bolumleri` (görevdeki
+  personel hareketi + aktif çalışma şablonu bölümü). Yetki `duyuru` (yayınla / yönet), `duyuru.genel` (herkese ve SMS) - yalnız
+  yöneticiye verildi; okumak yetki istemez. **958** özet / "kime" yardımcıları + saatlik `duyuru.gonderim` işi (zamanlanmış
+  duyurunun e-posta / SMS'i; `gonderim` damgası ikinciyi engeller).
+* **Uçlar** `/api/duyuru`: benim, tek duyuru, gördü, okudum, yönetim listesi (kişi / gördü / okudu sayıları), okuma durumu,
+  hedef ara / say, kaydet-yayınla (yayındaki düzenleme sürümü artırır - yeniden okunmamış; eski okuma onayı yetmez), kaldır,
+  sil (taslak), hatırlat (okumayanlarda yeniden okunmamış). **Metin HTML'i sunucuda beyaz listeyle temizlenir**
+  (`DuyuruUclari.HtmlTemizle`: biçim etiketleri + http(s) / mailto bağlantısı; betik, stil, olay öznitelikleri düşer) -
+  `DuyuruHtmlTestleri` 8 test. Duyuru ekleri `dokuman` kaynağı `duyuru` (gören okur, `duyuru` yetkisi yükler).
+* **Web:** zil › Duyurular listesi (önem, sabit 📌, güncellendi, ek sayısı, "✔ Okudum"); okuma penceresi; **kritik duyuru
+  oturumda tam ekran** ("Okudum, anladım" denmeden kapanmaz); Önemli / Kritik yeni duyuru anlık bildirim (masaüstü olayı
+  "Yeni duyuru"); **Yayınla penceresi** (biçimli metin, önem, kime + kişi sayısı, yayın aralığı / zamanla, okuma onayı, sabitle,
+  ek, e-posta / SMS, kimin adına, zil önizlemesi); **Yönetim › Duyurular** (Yayında / Zamanlandı / Taslak / Bitti, okunma
+  çubuğu, okumayanlar listesi, hatırlat / düzenle / kaldır).
+* Bu sürümde yok: duyuruya yorum / soru (mockup'ta kapalı seçenek); yayınlayanın kendi şube / bölüm kapsamıyla sınırlanması
+  (şimdilik yalnız "herkes" ve SMS ayrı yetkide).
+* Doğrulama: API'den hedef ara / say, yayınla (betik temizlendi), benim, okudum, güncelle (sürüm 2, yeniden okunmamış);
+  tarayıcıda kritik tam ekran, zil sekmeleri, yayınla penceresi, yönetim listesi. tsc temiz, vitest 789/789, dotnet test.
+  E-posta / SMS gönderimi denenmedi (dev bildirim işçisi canlı gönderir). Deneme duyuruları silindi.
+
+## 04.10.2026 — İzin talep kartı (959)
+
+* **Mockup** `Ekranlar/IK/izin_talep_karti.html`; İzin Talepleri listesi artık özel kart açar (`/personel-izin/:id`,
+  `sayfalar/ik/IzinTalepKarti`, liste arkada). Kimlik şeridi (personel - **jenerik personel araması**, izin no, talep tarihi,
+  durum + bekleyen basamak); sol: tür kutucukları, gün boyu / saatli, tarih, saat, iş günü / takvim günü, vekil (jenerik
+  arama), **izinde ulaşım / izin adresi** (959 yeni kolonlar), belge no (raporda zorunlu), açıklama; gün sayısı ve **işe
+  dönüş**, ay takvimi (izin, hafta sonu, resmî tatil / arife), **ekipte aynı günler** (bölüm arkadaşlarının izin / kongre /
+  kapalı günleri, kalan kişi; referans `ik.izin_bolum_en_az` = 2 - engel değil uyarı). Sağ: bakiye (kayıtlı talep iki kez
+  düşülmez), randevu etkisi, onay zinciri (Hatırlat; sıradaki basamağın sahibine Onayla / Reddet / Bilgi iste), belgeler
+  (`dokuman` kaynağı `izin`: sahibi ya da `ik.izin`), akış. Onaya gidince alanlar kilitli. Araç çubuğu: Kaydet, Onaya gönder,
+  İzin formu (yazdır), Kopyala, İptal et.
+* **Uçlar:** `GET /api/ik/izin-baglam` (gün / dönüş, tatiller, bakiye, ekip, randevu, akış - kayıt değiştirmez),
+  `POST /api/ik/izin/{id}/hatirlat`; izin açma ucu `izinAdres` / `izinTel` alır. `fn_bolum_arkadaslari`.
+* **Düzeltme:** Taleplerim izin penceresi `isGunu` göndermiyordu - gün takvim günü sayılıyordu (pencere "iş günü" diyordu).
+* Doğrulama: bağlam ucu (5 iş günü, dönüş, tatiller, ekip 4 kişi); tarayıcıda onaydaki izin, yeni izin (personel araması,
+  kaydet - 3,5 iş günü, 28 Ekim arife ½, 29 Ekim tatil). tsc temiz, vitest 789/789. Deneme kaydı silindi.

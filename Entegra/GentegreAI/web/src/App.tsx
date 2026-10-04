@@ -54,6 +54,8 @@ const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCi
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
 const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
 const ArizaEkipleri = tembel(() => import('./sayfalar/ariza/ArizaEkipleri'), 'ArizaEkipleri');
+const Duyurular = tembel(() => import('./sayfalar/Duyurular'), 'Duyurular');
+const IzinTalepKarti = tembel(() => import('./sayfalar/ik/IzinTalepKarti'), 'IzinTalepKarti');
 const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
 const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
 const DisGunlukAkis = tembel(() => import('./sayfalar/dis/DisGunlukAkis'), 'DisGunlukAkis');
@@ -283,6 +285,12 @@ function Yollar() {
         {/* TALEPLERIM: yetki kapisi yok - herkes yalniz kendi taleplerini gorur. */}
         <Route path="/taleplerim" element={<Taleplerim />} />
         {yetki('ariza') && <Route path="/ariza-ekipleri" element={<ArizaEkipleri />} />}
+        {yetki('duyuru') && <Route path="/duyurular" element={<Duyurular />} />}
+        {/* IZIN TALEP KARTI (959): liste arkada, ozel kart modal. */}
+        {yetki('ik.izin') && <Route path="/personel-izin/:id" element={<>
+          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelIzin')!} />
+          <IzinTalepKarti />
+        </>} />}
         {yetki('muayene') && (
           <Route path="/muayene-sablon" element={<MuayeneSablonlari />} />
         )}

@@ -80,6 +80,24 @@ public static class ZamanliIsler
             return n == 0 ? "Onay bekleyen eski arıza yok." : $"{n} çözülmüş arıza kendiliğinden kapandı.";
         },
 
+        // ZAMANLANMIŞ DUYURU (958): yayını başlamış, e-posta / SMS'i seçilmiş ve
+        //   henüz gönderilmemiş duyurular - gönderim damgası ikinciyi engeller.
+        ["duyuru.gonderim"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            var bildirim = servisler.GetRequiredService<Gentegre.Veri.Depolar.BildirimDeposu>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var idler = await baglanti.ListeAsync("""
+                select id from public.duyuru
+                 where durum = 1 and gonderim is null and (eposta = 1 or sms = 1)
+                   and coalesce(yayin_bas, ekleme_tarihi) <= now() and (yayin_bit is null or yayin_bit > now())
+                """, null, [], r => r.GetInt32(0), iptal);
+            var n = 0;
+            foreach (var id in idler)
+                n += await Uclar.DuyuruUclari.DisKanalGonderAsync(baglanti, bildirim, id, null, iptal);
+            return idler.Count == 0 ? "Gönderilecek duyuru yok." : $"{idler.Count} duyuru, {n} ileti kuyruğa alındı.";
+        },
+
         ["servis.periyodik"] = async (servisler, iptal) =>
         {
             var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();

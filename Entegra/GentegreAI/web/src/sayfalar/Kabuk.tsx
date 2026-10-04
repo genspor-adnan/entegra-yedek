@@ -10,12 +10,12 @@ import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ZilPaneli } from '../bilesenler/ZilPaneli';
-import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu } from '../bilesenler/taleplerim/TaleplerimPaneli';
+import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu, BanaGelenlerPaneli } from '../bilesenler/taleplerim/TaleplerimPaneli';
 import { useTaleplerimOzeti } from '../bilesenler/taleplerim/useTaleplerimOzeti';
 import { YeniTalepKatmani } from '../bilesenler/taleplerim/YeniTalepModali';
 import { TalepBildirimleri } from '../bilesenler/taleplerim/TalepBildirimleri';
 import { IskontoKararKatmani } from '../bilesenler/taleplerim/GelenIsler';
+import { DuyuruKatmani } from '../bilesenler/duyuru/DuyuruOrtak';
 import { Bayrak } from '../bilesenler/Bayrak';
 import { c, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -208,6 +208,25 @@ export function Kabuk() {
         <div className="ustsag">
           {kullanici?.subeYazma === false && <span className="rozet uyari">{c('salt okuma')}</span>}
 
+          {/* Dil secimi: temanin solunda bayrak (kullanici). Kullanici Ayarlari icindeki dil
+              kutusuyla AYNI degeri yazar (taraf_kullanici.dil) - burasi kisayol. */}
+          <span className="dil-sec" onMouseDown={e => e.stopPropagation()}>
+            <button type="button" className="ib" title={`${c('Dil')} — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
+                    onClick={() => setDilMenusu(a => !a)}>
+              <Bayrak dil={kullanici?.dil ?? 0} boy={18} />
+            </button>
+            {dilMenusu && (
+              <span className="dil-menu">
+                {DILLER.map(d => (
+                  <button key={d.deger} type="button"
+                          className={`dil-oge${(kullanici?.dil ?? 0) === d.deger ? ' on' : ''}`}
+                          onClick={() => { setDilMenusu(false); void dilSec(d.deger) }}>
+                    <span className="bayrak"><Bayrak dil={d.deger} /></span> {d.ad}
+                  </button>
+                ))}
+              </span>
+            )}
+          </span>
           {/* GECE / GUNDUZ: uc durumlu - Sistem, Gündüz, Gece. Secim tarayicida
               saklanir (ayni hesap iki cihazda farkli olabilir). */}
           <button className="ib" title={`${c('Tema')} — ${c(TEMA_ADI[tema])}`}
@@ -230,29 +249,10 @@ export function Kabuk() {
               zilden once - her ekranda tek tikla izin/avans/masraf/belge. */}
           <TaleplerimPaneli />
 
-          {/* ZIL (662): onay bekleyen isler - simdilik iskonto onaylari.
-              Dugme vardi ama hicbir sey yapmiyordu. */}
-          <ZilPaneli c={c} />
+          {/* ZIL = BANA GELENLER: bana gelen ariza, onayimi bekleyen, iskonto
+              onayi - tek tik islemle (taleplerim/TaleplerimPaneli). */}
+          <BanaGelenlerPaneli />
 
-          {/* Dil secimi: zilin saginda bayrak. Kullanici Ayarlari icindeki dil
-              kutusuyla AYNI degeri yazar (taraf_kullanici.dil) - burasi kisayol. */}
-          <span className="dil-sec" onMouseDown={e => e.stopPropagation()}>
-            <button type="button" className="ib" title={`${c('Dil')} — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
-                    onClick={() => setDilMenusu(a => !a)}>
-              <Bayrak dil={kullanici?.dil ?? 0} boy={18} />
-            </button>
-            {dilMenusu && (
-              <span className="dil-menu">
-                {DILLER.map(d => (
-                  <button key={d.deger} type="button"
-                          className={`dil-oge${(kullanici?.dil ?? 0) === d.deger ? ' on' : ''}`}
-                          onClick={() => { setDilMenusu(false); void dilSec(d.deger) }}>
-                    <span className="bayrak"><Bayrak dil={d.deger} /></span> {d.ad}
-                  </button>
-                ))}
-              </span>
-            )}
-          </span>
           <button className="ib" title={c('Yardım')}>?</button>
           {/* ÇIKIŞ AYIRT EDİLİR (kullanıcı): zil/yardım/dil ikonlarıyla aynı
               görünümdeydi ve başlığı Türkçesizdi ("Cikis"). Yanlışlıkla
@@ -316,6 +316,8 @@ export function Kabuk() {
       {/* ANLIK BILDIRIM (gelen_talepler mockup): yeni is acik ekranin sol altina. */}
       <TalepBildirimleri />
       <IskontoKararKatmani />
+      {/* DUYURU (957): okuma / yayinla penceresi + kritik duyuru tam ekran. */}
+      <DuyuruKatmani />
     </div>
     </TaleplerimBaglami.Provider>
   );

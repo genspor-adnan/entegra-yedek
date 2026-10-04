@@ -15,7 +15,8 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     kaynak: 'personelIzin', rota: 'personel-izin',
     baslik: 'İzin Talepleri',
     yol: 'İK & Prim › İzinler',
-    kartYolu: '/personel-izin', kartBaslik: 'İzin Talebi',
+    // ÖZEL KART (959, mockup Ekranlar/IK/izin_talep_karti.html): sayfalar/ik/IzinTalepKarti.
+    kartYolu: '/personel-izin', kartBaslik: 'İzin Talebi', ozelKart: true,
     aksiyonEkrani: 'personel-izin-liste',
     tarihAlani: 'baslangicTarihi',
     // İLK ÇİP AÇIK OLANLAR: listenin günlük iş kümesi taslak ve onaydaki

@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import type { IzinBakiyesi, OnayBekleyenSatiri, TaleplerimYaniti, TalepSatiri } from '../../api/uclar/izin';
 import type { ArizaGelen } from '../../api/uclar/ariza';
 import type { IskontoTalebi } from '../../api/sozlesme';
+import type { DuyuruSatiri } from '../../api/uclar/duyuru';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { para } from '../bicim';
 import { masaustuBildir } from '../bildirimTercihi';
@@ -40,13 +41,14 @@ export const baskaHareketi = (s: TalepSatiri) =>
  */
 export interface TalepBildirimi {
   anahtar: string;
-  tur: 'ariza' | 'onay' | 'sonuc' | 'iskonto';
+  tur: 'ariza' | 'onay' | 'sonuc' | 'iskonto' | 'duyuru';
   acil: boolean;
   zaman: number;
   ariza?: ArizaGelen;
   onay?: OnayBekleyenSatiri;
   satir?: TalepSatiri;
   iskonto?: IskontoTalebi;
+  duyuru?: DuyuruSatiri;
 }
 
 /** 20 sn: "anında"ya yakın, sunucuyu yormayacak kadar seyrek. */
@@ -75,25 +77,28 @@ export function useTaleplerimOzeti(kullaniciId: number | undefined) {
   const { aksiyonDegeri } = useOturum();
   const iskontoTavan = aksiyonDegeri('basvuru.iskonto');
   const [iskontolar, setIskontolar] = useState<IskontoTalebi[]>([]);
+  // DUYURULAR (957): zil > Duyurular sekmesi.
+  const [duyurular, setDuyurular] = useState<DuyuruSatiri[]>([]);
   const [ekip, setEkip] = useState(false);
   const [bildirimler, setBildirimler] = useState<TalepBildirimi[]>([]);
   /** Panel son açıldıktan sonra yeni iş geldi: rozet nabız atar. */
   const [nabiz, setNabiz] = useState(false);
-  const taban = useRef<{ ariza: Set<number>; onay: Set<string>; satir: Map<string, string>; iskonto: Set<number> } | null>(null);
+  const taban = useRef<{ ariza: Set<number>; onay: Set<string>; satir: Map<string, string>; iskonto: Set<number>; duyuru: Map<number, number> } | null>(null);
   const [bakiye, setBakiye] = useState<IzinBakiyesi | null>(null);
   const [sonBakis, setSonBakis] = useState(() => kullaniciId ? sonBakisOku(kullaniciId) : 0);
 
   const yukle = useCallback(async () => {
     if (!kullaniciId) return;
     try {
-      const [y, g, isk] = await Promise.all([
+      const [y, g, isk, dy] = await Promise.all([
         api.taleplerim(),
         api.arizaGelen().catch(() => ({ ekip: false, satirlar: [] as ArizaGelen[] })),
         iskontoTavan > 0 ? api.iskontoBekleyenler().catch(() => [] as IskontoTalebi[]) : Promise.resolve([] as IskontoTalebi[]),
+        api.duyuruBenim().then(x => x.satirlar).catch(() => [] as DuyuruSatiri[]),
       ]);
       // İskonto zinciri onay omurgasında da (1256) görünür - aynı iş iki kez çizilmesin.
       if (isk.length) y.onaylar = (y.onaylar ?? []).filter(o => o.kaynakTur !== 1256);
-      setVeri(y); setGelen(g.satirlar); setEkip(g.ekip); setIskontolar(isk);
+      setVeri(y); setGelen(g.satirlar); setEkip(g.ekip); setIskontolar(isk); setDuyurular(dy);
 
       // FARK → anlık bildirim (ilk okumada yalnız taban kurulur).
       const once = taban.current;
@@ -103,6 +108,10 @@ export function useTaleplerimOzeti(kullaniciId: number | undefined) {
         for (const a of g.satirlar)
           if (!once.ariza.has(a.id) && !a.benim)
             yeni.push({ anahtar: `a${a.id}`, tur: 'ariza', acil: a.oncelik === 4, zaman: simdi, ariza: a });
+        // YENİ / GÜNCELLENEN DUYURU: yalnız Önemli ve Kritik ekrana düşer; Bilgi zilde bekler.
+        for (const d of dy)
+          if (d.onem >= 2 && d.yeni && once.duyuru.get(d.id) !== d.surum)
+            yeni.push({ anahtar: `d${d.id}-${d.surum}`, tur: 'duyuru', acil: d.onem === 3, zaman: simdi, duyuru: d });
         for (const t of isk)
           if (!once.iskonto.has(t.id))
             yeni.push({ anahtar: `i${t.id}`, tur: 'iskonto', acil: false, zaman: simdi, iskonto: t });
@@ -121,15 +130,17 @@ export function useTaleplerimOzeti(kullaniciId: number | undefined) {
         onay: new Set((y.onaylar ?? []).map(o => `${o.kaynakTur}-${o.kaynakId}`)),
         satir: new Map(y.satirlar.map(st => [`${st.tur}-${st.id}`, st.sonHareket])),
         iskonto: new Set(isk.map(t => t.id)),
+        duyuru: new Map(dy.map(d => [d.id, d.surum])),
       };
       if (yeni.length) {
         setBildirimler(l => [...yeni, ...l.filter(b => !yeni.some(n => n.anahtar === b.anahtar))].slice(0, 5));
-        if (yeni.some(b => b.tur !== 'sonuc')) setNabiz(true);
+        if (yeni.some(b => b.tur !== 'sonuc' && b.tur !== 'duyuru')) setNabiz(true);
         if (yeni.some(b => b.acil)) acilSes();
         for (const b of yeni) {
           if (b.ariza) masaustuBildir('talep.gelen', `${b.acil ? '🚨 Acil arıza' : 'Yeni arıza'} — ${b.ariza.ekipAdi}`,
             `${b.ariza.talepNo} · ${b.ariza.aciklama} · ${b.ariza.konum}`);
           else if (b.onay) masaustuBildir('talep.gelen', 'Onayınızı bekliyor', `${b.onay.konu} · ${b.onay.talepEden}`);
+          else if (b.duyuru) masaustuBildir('duyuru', `📣 ${b.duyuru.baslik}`, `${b.duyuru.adina} · ${b.duyuru.ozet}`);
           else if (b.iskonto) masaustuBildir('iskonto', 'İskonto onayı bekliyor', `${b.iskonto.hasta} · %${b.iskonto.oran} · ${para.format(b.iskonto.tutar)}`);
           else if (b.satir) masaustuBildir('talep.sonuc', `${b.satir.baslik}: ${b.satir.durumAdi}`, b.satir.detay);
         }
@@ -172,8 +183,13 @@ export function useTaleplerimOzeti(kullaniciId: number | undefined) {
 
   /** İşlem bekleyen: atanmamış + bende arıza + onayımı bekleyen. */
   const islemBekleyen = gelen.length + (veri?.onaylar?.length ?? 0) + iskontolar.length;
+  /** Zilin mavi rozeti: okunmamış (ya da güncellenmiş) duyuru. */
+  const duyuruYeni = duyurular.filter(d => d.yeni).length;
+  /** Girişte tam ekran: okunmamış KRİTİK duyuru (okuma onayı verilene kadar). */
+  const kritikBekleyen = duyurular.filter(d => d.onem === 3 && (!d.okudu || d.eskiSurumOkundu));
 
   return { veri, bakiye, yeniler, acik, yukle, gorulduIsaretle, gelen, ekip, islemBekleyen, iskontolar, iskontoTavan,
+           duyurular, duyuruYeni, kritikBekleyen,
            bildirimler, bildirimKapat, nabiz, nabziSondur };
 }
 

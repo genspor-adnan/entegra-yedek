@@ -123,7 +123,7 @@ export function YeniTalepModali({ tur, onKapat }: { tur: Exclude<YeniTalepTuru, 
     try {
       if (tur === 'izin') {
         const y = await api.izinAc({
-          tarafId: ben, tur: izinTur, baslangic: bas, bitis: saatli ? bas : bit,
+          tarafId: ben, tur: izinTur, baslangic: bas, bitis: saatli ? bas : bit, isGunu: true,
           aciklama: aciklama.trim() || undefined,
           saatBas: saatli ? saatBas : undefined, saatBit: saatli ? saatBit : undefined,
         });

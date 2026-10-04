@@ -44,6 +44,15 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'panel', menuSira: 1,
   },
   {
+    // DUYURULAR (957, mockup Ekranlar/Duyuru/duyuru.html): yayınla, okunma,
+    //   hatırlat. Okumak menü istemez - herkes zilde görür.
+    kaynak: 'duyurular', rota: 'duyurular', ozelSayfa: true,
+    baslik: 'Duyurular',
+    yol: 'Yönetim › Duyurular',
+    menuGrup: 'Yönetim', menuAd: 'Duyurular', ic: '📣',
+    yetkiKodu: 'duyuru', menuSira: 2,
+  },
+  {
     // AKIŞ TANIMI (742): kurumun imza düzeni. Kurallar 738'de veriye
     //   taşınmıştı ama düzenleyecek ekran yoktu - eşiği değiştirmek göç
     //   dosyası yazmak demekti, yani kural yine koda gömülüydü.

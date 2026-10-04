@@ -25,7 +25,7 @@ namespace Gentegre.Api.Uclar;
 /// avans izin olur. Ama bu AYRI BİR KARARDIR - engellemek yerine zincire
 /// "bakiye aşımı" bayrağıyla İK basamağı ekleniyor.
 /// </summary>
-public static class IzinUclari
+public static partial class IzinUclari
 {
     /// <summary>islem_log.tablo_id - personel_izin.</summary>
     private const int LogIzin = 904;
@@ -47,6 +47,9 @@ public static class IzinUclari
         /// <summary>Saatli izin (950): "HH:MM", ikisi birden; tek gün. Gün tetikte hesaplanır.</summary>
         public string? SaatBas { get; set; }
         public string? SaatBit { get; set; }
+        /// <summary>959: izindeyken adres ve ulaşım.</summary>
+        public string? IzinAdres { get; set; }
+        public string? IzinTel { get; set; }
         public string? Aciklama { get; set; }
         public string? BelgeNo { get; set; }
         public int? YerineId { get; set; }
@@ -60,6 +63,8 @@ public static class IzinUclari
     public static void IzinUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/ik").WithTags("İzin").RequireAuthorization();
+        // İZİN TALEP KARTI (959): bağlam (takvim, bakiye, ekip, akış) + hatırlat.
+        IzinKartUclariniEkle(grup);
 
         // -------------------------------------------------------- bakiye ----
         grup.MapGet("/personel/{tarafId:int}/izin-bakiye", async (
@@ -137,9 +142,9 @@ public static class IzinUclari
                 insert into public.personel_izin
                        (taraf_id, tur, baslangic_tarihi, bitis_tarihi, gun, is_gunu,
                         aciklama, belge_no, yerine_id, durum, talep_tarihi,
-                        sube_id, ekleyen, saat_bas, saat_bit)
+                        sube_id, ekleyen, saat_bas, saat_bit, izin_adres, izin_tel)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, 0, current_date,
-                        @p9, @p10, nullif(@p11, ''), nullif(@p12, ''))
+                        @p9, @p10, nullif(@p11, ''), nullif(@p12, ''), @p13, @p14)
                 returning id
                 """, islem,
                 [istek.TarafId, istek.Tur,
@@ -148,7 +153,8 @@ public static class IzinUclari
                  gun, (short)(istek.IsGunu ? 1 : 0), istek.Aciklama ?? "",
                  istek.BelgeNo ?? "", istek.YerineId,
                  baglam.SubeId ?? p["subeId"], baglam.KullaniciId,
-                 istek.SaatBas ?? "", istek.SaatBit ?? ""], iptal);
+                 istek.SaatBas ?? "", istek.SaatBit ?? "",
+                 istek.IzinAdres?.Trim() ?? "", istek.IzinTel?.Trim() ?? ""], iptal);
 
             // GÜN TETİKTE (950): saatli izinde 0,5 olabilir - yanıt ve log
             //   yazılanı söylesin, ön hesabı değil.

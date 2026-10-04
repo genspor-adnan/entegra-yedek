@@ -111,6 +111,34 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
             return;
         }
 
+        // İZİN BELGESİ (959): talep sahibi kendi izninde; İK `ik.izin` yetkisiyle.
+        if (kaynak == "izin")
+        {
+            var sahip = await veri.TekDegerAsync<int?>(
+                "select taraf_id from public.personel_izin where id = @p0", [(int)kaynakId], iptal);
+            if (sahip is null) throw GentegreHatasi.Bulunamadi(yok);
+            if (sahip != baglam.KullaniciId
+                && !baglam.Yetkiler.Var("ik.izin", islem == Islem.Gor ? Islem.Gor : Islem.Degistir))
+                throw GentegreHatasi.Bulunamadi(yok);
+            if (islem != Islem.Gor) baglam.YazmaIste();
+            return;
+        }
+
+        // DUYURU EKİ (957): duyuruyu gören okur; yükleme / silme `duyuru` yetkisiyle.
+        if (kaynak == "duyuru")
+        {
+            var yonetir = baglam.Yetkiler.Var("duyuru", islem == Islem.Gor ? Islem.Gor : Islem.Degistir);
+            if (!yonetir)
+            {
+                if (islem != Islem.Gor) throw GentegreHatasi.Bulunamadi(yok);
+                var gorur = await veri.TekDegerAsync<bool>(
+                    "select public.fn_duyuru_gorur(@p0, @p1)", [(int)kaynakId, baglam.KullaniciId], iptal);
+                if (!gorur) throw GentegreHatasi.Bulunamadi(yok);
+            }
+            if (islem != Islem.Gor) baglam.YazmaIste();
+            return;
+        }
+
         if (kaynak == "lab-sonuc")
         {
             // Yetkisizlik de 404: 403 dönmek, kimliğin bir LAB dokümanı olduğunu söylerdi.

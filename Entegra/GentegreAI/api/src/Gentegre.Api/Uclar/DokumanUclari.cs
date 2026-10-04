@@ -211,7 +211,7 @@ public static class DokumanUclari
 
     /// <summary>Kart adi yerine dogrudan fiziksel kaynak adiyla gelen yollar (doküman listesi).</summary>
     private static readonly HashSet<string> FizikselAdlar =
-        new(StringComparer.Ordinal) { "taraf", "lab-sonuc", "masraf-beyan", "servis-ziyaret", "ariza" };
+        new(StringComparer.Ordinal) { "taraf", "lab-sonuc", "masraf-beyan", "servis-ziyaret", "ariza", "duyuru" };
 
     private static string FizikselKaynak(string kartAdi) => kartAdi switch
     {
@@ -220,6 +220,10 @@ public static class DokumanUclari
         // ARIZA FOTOĞRAFI (954): kaynak_id arıza talebi. Bildiren / takipçi
         //   kendi kaydında yetkisiz; ekip `ariza` yetkisiyle (DokumanErisimi).
         "ariza" => "ariza",
+        // DUYURU EKİ (957): kaynak_id duyuru. Gören okur, yayınlayan yükler.
+        "duyuru" => "duyuru",
+        // İZİN BELGESİ (959): rapor, kongre kabulü... kaynak_id izin talebi.
+        "personelIzin" => "izin",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -269,6 +273,7 @@ public static class DokumanUclari
         //   ayri bir "fis yetkisi" acmak, beyanla fisini iki ayri izne
         //   baglamak olurdu.
         "personelMasraf" => "ik.masraf",
+        "personelIzin" => "ik.izin",
         "servisZiyaret" => "servis",
         _ => kartAdi
     };

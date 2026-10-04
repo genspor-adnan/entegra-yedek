@@ -84,6 +84,11 @@ export function olaylar(iskontoTavani: number): OlayTanimi[] {
     aciklama: 'Ekibinize arıza düştüğünde ya da bir talep onayınıza geldiğinde.',
   });
   l.push({
+    kod: 'duyuru',
+    ad: 'Yeni duyuru',
+    aciklama: 'Size yönelik Önemli ya da Kritik bir duyuru yayınlandığında.',
+  });
+  l.push({
     kod: 'talep.sonuc',
     ad: 'Talebimde gelişme var',
     aciklama: 'Talebiniz devralındığında, çözüldüğünde, onaylandığında ya da reddedildiğinde.',
