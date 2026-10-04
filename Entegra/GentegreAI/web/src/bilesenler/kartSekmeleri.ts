@@ -174,6 +174,13 @@ export function sekmeleriKur(secenek: {
     // Personel'de Eğitim/Sertifika artık Genel sekmesinde Kimlik Bilgileri'nin altında
     //   gömülü grid; ayrı sekme açılmasın.
     if (personelGibiKart && d.ad === 'egitimler') return;
+    // PERSONEL "TALEPLER" (kullanıcı: "izinler sekmesi yerine Talepler sekmesi
+    //   ... tüm talepler sondan başa"): İzinler gridinin yerinde kişinin tüm
+    //   talepleri (izin, avans, masraf, belge, arıza, malzeme). Yeni kayıtta yok.
+    if (kaynak === 'personel' && d.ad === 'izinler') {
+      if (!yeniMi) s.push({ tur: 'ozel', anahtar: 'ozel:talepler', baslik: 'Talepler' });
+      return;
+    }
     // Hasta'da kimlik/hasta bilgisi Genel sekmesindeki özetin içinde kalır; izinler
     // hasta kartında kullanılmaz, ayrı sekme olarak gösterilmez.
     if (kaynak === 'hasta' && (d.ad === 'ozluk' || d.ad === 'izinler')) return;

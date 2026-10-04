@@ -123,8 +123,11 @@ export function useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi,
       })
       .catch((h: ApiHatasi) => { if (!iptal) setHata(h.message) });
     return () => { iptal = true };
+    // GİZLİ KOLON LİSTESİ DEĞİŞİNCE de kurulur (kullanıcı: "Görev ve sağındaki Rol
+    //   kolonlarını kaldır" - ekran tanımı değişmiş, açık sayfa eski kolonlarla
+    //   kalıyordu). Dizi her çizimde yeni olduğu için içeriğiyle karşılaştırılır.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kaynak]);
+  }, [kaynak, (gizliKolonlar ?? []).join(',')]);
 
   /** Katalogun BUGUNKU varsayilan kolonlari - tercihle birlikte saklanir. */
   const varsayilanAdlar = () => tumKolonlar.filter(k => k.varsayilan).map(k => k.ad);

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
 import { hataMetni, type DokumanSatiri } from '../../api/sozlesme';
 import type { IzinBakiyesi } from '../../api/uclar/izin';
@@ -70,7 +71,10 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
   const oz = useTaleplerim();
   const yeni = param === 'yeni';
   const [kayitId, setKayitId] = useState<number | null>(yeni ? null : Number(param));
-  const [d, setD] = useState<Deger>(() => ({ ...bos(), ...((konum.state as { kopya?: Partial<Deger> } | null)?.kopya ?? {}) }));
+  // PERSONEL LİSTESİNDEN (Yeni Talep ▾): seçili personel dolu gelir, Kapat listeye döner.
+  const pt = personelTalepDurumu(konum.state);
+  const [d, setD] = useState<Deger>(() => ({ ...bos(), ...(pt.personel ? { tarafId: pt.personel.id } : {}),
+    ...((konum.state as { kopya?: Partial<Deger> } | null)?.kopya ?? {}) }));
   const [ilk, setIlk] = useState<Deger | null>(null);
   const [ro, setRo] = useState<{ izinNo: string; durum: number; talepTarihi: string; redNeden: string; iptalNeden: string; gun: number }>(
     { izinNo: '', durum: 0, talepTarihi: '', redNeden: '', iptalNeden: '', gun: 0 });
@@ -84,9 +88,9 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
   const dosyaRef = useRef<HTMLInputElement>(null);
   /** JENERİK ARAMA (kullanıcı: "personel seçimi jenerik aramadan gelsin"): personel / vekil. */
   const [arama, setArama] = useState<'tarafId' | 'yerineId' | null>(null);
-  const [secilenAd, setSecilenAd] = useState<Record<string, string>>({});
+  const [secilenAd, setSecilenAd] = useState<Record<string, string>>(pt.personel ? { tarafId: pt.personel.ad } : {});
 
-  const kapat = useCallback(() => git('/personel-izin'), [git]);
+  const kapat = useCallback(() => git(pt.geri ?? '/personel-izin'), [git, pt.geri]);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.izin', kayitId ? 'degistir' : 'ekle');
@@ -154,7 +158,7 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
         izinAdres: d.izinAdres || undefined, izinTel: d.izinTel || undefined,
       });
       setKayitId(y.id);
-      git(`/personel-izin/${y.id}`, { replace: true });
+      git(`/personel-izin/${y.id}`, { replace: true, ...devamDurumu(pt) });
       return y.id;
     }
     const alan: Record<string, unknown> = {

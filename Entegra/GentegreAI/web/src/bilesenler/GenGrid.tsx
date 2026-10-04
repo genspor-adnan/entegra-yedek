@@ -145,6 +145,13 @@ interface Props {
    * "arama editi sagina takvim butonu, basinca takvim listeye bassin").
    */
   ekGorunum?: { ad: string; ik: string; icerik: React.ReactNode };
+  /**
+   * BIRDEN COK EK GORUNUM (963, personel: Kart + Organizasyon). Liste
+   * dugmesinin SAGINDA sirayla cizilir; verilirse `ekGorunum` yok sayilir.
+   */
+  ekGorunumler?: { ad: string; ik: string; icerik: React.ReactNode }[];
+  /** Grup / Analiz ("yakinda") cipleri cizilmesin - ek gorunumlu ekranda. */
+  grupAnalizGizli?: boolean;
   /** Acilis gorunumu (Liste / Grup / Analiz / ek) - ekran son secimi saklarsa. */
   gorunumBaslangic?: 'liste' | 'grup' | 'analiz' | 'ek';
   /** Gorunum degisince haber verir (son secimi saklamak icin). */
@@ -212,6 +219,19 @@ interface Props {
 }
 
 /**
+ * PANEL KATLAMA OKU (kullanıcı: "açılır kapanır butonların üzerindeki oklar
+ * belli olmuyor"): ‹ › karakterleri ince ve soluktu - kalın SVG ok.
+ */
+function KatlaOku({ yon }: { yon: 'sol' | 'sag' }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <path d={yon === 'sag' ? 'M5 2.5 L9.5 7 L5 11.5' : 'M9 2.5 L4.5 7 L9 11.5'} fill="none"
+            stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/**
  * Liste ekrani — ana mockup (gentegre_v4_web.html) duzeni:
  *   sayfa basligi + kirilma yolu + aksiyon dugmeleri
  *   cip filtreleri + hizli arama
@@ -230,7 +250,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
-                          cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum,
+                          cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
                           onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
                           yenile, odaklaSonEklenen,
@@ -258,7 +278,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const setKodSuzgecDeger = (v: string) => (onKodSuzgec ? onKodSuzgec(v) : setKodIcDeger(v));
   // Tarayicida saklanan tercihler (satir yuksekligi + yan panel) kendi
   //   kancasinda: grid/useGridTercihleri.
-  const { satirBoyu, satirBoyuSec, yanKapali, setYanKapali } =
+  const { satirBoyu, satirBoyuSec, yanKapali, setYanKapali, solKapali, setSolKapali } =
     useGridTercihleri(kaynak, !!solPanel);
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
   /**
@@ -297,7 +317,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
   const [gorunum, setGorunumIc] = useState<'liste' | 'grup' | 'analiz' | 'ek'>(
-    gorunumBaslangic === 'ek' && !ekGorunum ? 'liste' : (gorunumBaslangic ?? 'liste'));
+    gorunumBaslangic === 'ek' && !ekGorunum && !ekGorunumler?.length ? 'liste' : (gorunumBaslangic ?? 'liste'));
+  const ekler = ekGorunumler ?? (ekGorunum ? [ekGorunum] : []);
+  const [ekIndeks, setEkIndeks] = useState(0);
   const setGorunum = (g: 'liste' | 'grup' | 'analiz' | 'ek') => { setGorunumIc(g); onGorunumDegisti?.(g) };
   // Kolon gorunurlugu/sirasi ve tercihin saklanmasi grid/kolonTercihi.ts'te.
   //   Kolon tercihi hatasi AYRI durumda: liste verisi kancasi kolonlara
@@ -584,19 +606,25 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
         </div>
         )}
 
-        {ekGorunum && (
+        {ekGorunum && !ekGorunumler && (
           <button className={`cip ${gorunum === 'ek' ? 'on' : ''}`}
                   onClick={() => setGorunum(gorunum === 'ek' ? 'liste' : 'ek')}>
             {ekGorunum.ik} {ekGorunum.ad}
           </button>
         )}
-        {!gorunumSecimGizli && GORUNUMLER.map(g => (
+        {!gorunumSecimGizli && GORUNUMLER.filter(g => !grupAnalizGizli || g.v === 'liste').map(g => (
           <button
             key={g.v}
             className={`cip ${gorunum === g.v ? 'on' : ''}`}
             onClick={() => setGorunum(g.v)}
           >
             {g.ik} {cev(g.ad)}
+          </button>
+        ))}
+        {ekGorunumler?.map((e, i) => (
+          <button key={e.ad} className={`cip ${gorunum === 'ek' && ekIndeks === i ? 'on' : ''}`}
+                  onClick={() => { setEkIndeks(i); setGorunum('ek') }}>
+            {e.ik} {cev(e.ad)}
           </button>
         ))}
 
@@ -804,14 +832,21 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             .ucPanel); SOL PANEL varsa onun solunda bir kolon daha acilir.
             Ikisi de yoksa fazladan kap konmaz - eski duzen aynen kalir. */}
         <div className={gorunum === 'liste' && (yanPanel || solPanel)
-          ? `grid-yan-duzen${solPanel ? ' sollu' : ''}${yanKapali ? ' kapali' : ''}`
+          ? `grid-yan-duzen${solPanel ? ' sollu' : ''}${yanKapali ? ' kapali' : ''}${solPanel && solKapali ? ' solkapali' : ''}`
           : undefined}>
         {gorunum === 'liste' && solPanel && (
-          <aside className="grid-sol-panel">{solPanel}</aside>
+          <aside className={`grid-sol-panel${solKapali ? ' kapali' : ''}`}>
+            <button className="d sol-katla" type="button"
+                    title={solKapali ? 'Paneli aç' : 'Paneli kapat'}
+                    onClick={() => setSolKapali(k => !k)}>
+              <KatlaOku yon={solKapali ? 'sag' : 'sol'} />
+            </button>
+            {!solKapali && solPanel}
+          </aside>
         )}
         <div>
-        {gorunum === 'ek' && ekGorunum ? (
-          ekGorunum.icerik
+        {gorunum === 'ek' && ekler[ekIndeks] ? (
+          ekler[ekIndeks].icerik
         ) : gorunum !== 'liste' ? (
           <div className="kutu" style={{ padding: 48, textAlign: 'center', color: 'var(--soluk)' }}>
             {GORUNUMLER.find(g => g.v === gorunum)?.ik}{' '}
@@ -872,7 +907,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             <button className="d yan-katla" type="button"
                     title={yanKapali ? 'Paneli aç' : 'Paneli kapat'}
                     onClick={() => setYanKapali(k => !k)}>
-              {yanKapali ? '‹' : '›'}
+              <KatlaOku yon={yanKapali ? 'sol' : 'sag'} />
             </button>
             {!yanKapali && yanPanel}
           </aside>

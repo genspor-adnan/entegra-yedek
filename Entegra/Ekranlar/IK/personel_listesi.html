@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personel Listesi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1320px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .ust{display:flex;align-items:center;gap:10px;padding:10px 14px 6px}
+  .ust h1{margin:0;font-size:17px;color:var(--navy)}
+  .ust .yol{color:var(--muted);font-size:11px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .menu-sar{position:relative;display:inline-block}
+  .menu{position:absolute;right:0;top:28px;background:#fff;border:1px solid var(--line);border-radius:4px;
+    box-shadow:0 8px 20px rgba(20,40,70,.18);min-width:190px;z-index:5;padding:4px 0}
+  .menu div{padding:6px 12px;font-size:11.5px}
+  .menu div:hover,.menu .on{background:var(--sel)}
+  .menu small{display:block;color:var(--muted);font-size:10px}
+
+  /* GÖSTERGE ŞERİDİ: her kutu bir süzgeç - tıklanınca liste o kümeye iner */
+  .kpi{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:6px 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)}
+  .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)}
+  .k.uyari b{color:#b06d0a}
+  .k.kirmizi b{color:#b3261e}
+
+  .serit{display:flex;gap:6px;align-items:center;padding:0 14px 8px;flex-wrap:wrap}
+  .ara{border:1px solid var(--line);border-radius:14px;height:26px;width:260px;padding:0 12px;display:flex;align-items:center;color:#9aa7b5;background:#fff}
+  .gor{display:flex;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .gor span{padding:4px 12px;font-size:11px}
+  .gor .on{background:#2f6db3;color:#fff;font-weight:bold}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:#fff;font-size:11px}
+  .cip.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .combo{border:1px solid var(--line);border-radius:3px;height:25px;padding:0 22px 0 8px;display:flex;align-items:center;background:#fff;position:relative;min-width:150px}
+  .combo::after{content:"▾";position:absolute;right:7px;color:var(--muted);font-size:10px}
+
+  .govde{display:grid;grid-template-columns:190px minmax(0,1fr) 300px;border-top:1px solid var(--line2);min-height:560px}
+  /* BÖLÜM AĞACI */
+  .agac{border-right:1px solid var(--line2);padding:8px 0;background:#fbfcfd;font-size:11.5px}
+  .agac h6{margin:0 12px 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .dal{display:flex;justify-content:space-between;padding:4px 12px}
+  .dal.on{background:var(--sel);color:var(--navy);font-weight:bold}
+  .dal.alt{padding-left:26px}
+  .dal i{font-style:normal;color:var(--muted);font-size:10.5px}
+
+  /* GRID */
+  table.liste{width:100%;border-collapse:collapse;font-size:11.5px}
+  .liste th{background:var(--head);text-align:left;font-weight:bold;color:#46576a;padding:6px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .liste td{padding:5px 6px;border-bottom:1px solid var(--line2);vertical-align:middle;white-space:nowrap}
+  .liste tr.sec td{background:var(--sel)}
+  .liste tr.pasif td{color:#9aa7b5}
+  .liste .r{text-align:right}
+  .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:bold;font-size:11px;vertical-align:middle}
+  .ad b{display:block;color:var(--navy)}
+  .ad small,.ikinci{color:var(--muted);font-size:10.5px;display:block}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-izin{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dee8}
+  .rozet{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#e0a33a;color:#fff;font-size:10px;font-weight:bold;text-align:center}
+  .bar{width:60px;height:5px;border-radius:3px;background:#e3e9f0;display:inline-block;vertical-align:middle;margin-right:5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:#2e7d46}
+  .eksik{color:#b3261e;font-size:10.5px}
+  .altbar{display:flex;justify-content:space-between;padding:8px 12px;color:var(--muted);font-size:11px;border-top:1px solid var(--line2)}
+
+  /* ÖNİZLEME */
+  .oniz{border-left:1px solid var(--line2);background:#fbfcfd;min-width:0}
+  .orta{overflow-x:auto;min-width:0}
+  .kimlik{display:flex;gap:10px;align-items:center;padding:14px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .kimlik .av{width:52px;height:52px;font-size:17px}
+  .kimlik b{font-size:14px;color:var(--navy);display:block}
+  .kimlik small{color:var(--muted);display:block}
+  .bl{padding:10px 14px;border-bottom:1px solid var(--line2)}
+  .bl h5{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:flex}
+  .bl h5 a{margin-left:auto;text-transform:none;color:var(--accent);letter-spacing:0}
+  .satir{display:flex;justify-content:space-between;padding:2px 0}
+  .satir span{color:var(--muted)}
+  .bakiye{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+  .bakiye div{border:1px solid var(--line2);border-radius:4px;padding:5px;background:#fff}
+  .bakiye b{display:block;font-size:15px;color:var(--navy)}
+  .bakiye .yesil b{color:var(--ok)}
+  .talep{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+  .talep small{color:var(--muted);display:block;font-size:10px}
+  .uyar{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn);border-radius:4px;padding:6px 8px;font-size:11px;line-height:1.5}
+  .hizli{display:flex;gap:6px;flex-wrap:wrap}
+  .n{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#e0a33a;color:#fff;font-size:10px;font-weight:bold;align-items:center;justify-content:center;margin-right:3px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Personel</h1><span class="yol">İK &amp; Prim › Personel Listesi</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni</span>
+    <span class="menu-sar"><span class="btn">📨 Yeni Talep ▾</span>
+      <div class="menu">
+        <div class="on">🌴 İzin talebi<small>Dr. Aslı Demir · kalan 14 gün</small></div>
+        <div>💸 Avans talebi<small>açık avans yok</small></div>
+        <div>🧾 Masraf beyanı</div>
+        <div>📄 Belge talebi</div>
+      </div>
+    </span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+    <span class="btn">⬇ Excel</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>101</b><span>Aktif personel</span></div>
+    <div class="k"><b>4</b><span>Bugün izinde</span></div>
+    <div class="k"><b>1</b><span>Raporlu</span></div>
+    <div class="k uyari"><b>6</b><span>Onay bekleyen talep</span></div>
+    <div class="k"><b>3</b><span>Deneme süresinde</span></div>
+    <div class="k"><b>5</b><span>Bu ay doğum günü 🎂</span></div>
+    <div class="k kirmizi"><b>7</b><span>Eksik özlük bilgisi</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Ad, sicil, TC, telefon…</span>
+    <span class="gor"><span class="on">☰ Liste</span><span>▦ Kart</span><span>⛬ Organizasyon</span></span>
+    <span class="cip on">Aktif</span><span class="cip">Pasif</span><span class="cip">Tümü</span>
+    <span class="combo">Tüm Roller</span>
+    <span class="combo">Çalışma: Tümü</span>
+    <span class="sp"></span>
+    <span style="color:var(--muted);font-size:11px">Kolonlar ⚙</span>
+  </div>
+
+  <div class="govde">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Bölüm</h6>
+      <div class="dal on">Tümü <i>101</i></div>
+      <div class="dal">Acil <i>14</i></div>
+      <div class="dal">Başhekimlik <i>6</i></div>
+      <div class="dal">Dahiliye <i>11</i></div>
+      <div class="dal">Hasta Kabul / Danışma <i>9</i></div>
+      <div class="dal">Laboratuvar <i>12</i></div>
+      <div class="dal alt">Biyokimya <i>7</i></div>
+      <div class="dal alt">Mikrobiyoloji <i>5</i></div>
+      <div class="dal">Radyoloji <i>8</i></div>
+      <div class="dal">Sterilizasyon <i>4</i></div>
+      <div class="dal">Teknik Servis <i>5</i></div>
+      <div class="dal">Depo / Ambar <i>3</i></div>
+      <div class="dal">Muhasebe / Finans <i>6</i></div>
+      <div class="dal" style="color:#b3261e">Bölümsüz <i>2</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div class="orta">
+      <table class="liste">
+        <tr><th><input type="checkbox"></th><th></th><th>Sicil</th><th>Ad Soyad</th><th>Bölüm / Görev</th><th>Bugün</th>
+            <th>Kıdem</th><th>Kalan izin</th><th>Talep</th><th>Telefon</th></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#2f6db3">AY</span></td><td>7937</td>
+            <td class="ad"><b>Ali Yıldırım</b><small>Rol atanmamış</small></td><td>Depo / Ambar<span class="ikinci">Depo Sorumlusu</span></td>
+            <td><span class="chip c-ok">Çalışıyor</span></td><td>21 yıl</td><td><span class="bar"><i style="width:60%"></i></span>12</td><td></td><td>0532 *** 41 18</td></tr>
+        <tr class="sec"><td><input type="checkbox" checked></td><td><span class="av" style="background:#8e44ad">AD</span></td><td>7902</td>
+            <td class="ad"><b>Dr. Aslı Demir</b><small>Uzman Doktor</small></td><td>Dahiliye<span class="ikinci">Uzman Hekim</span></td>
+            <td><span class="chip c-ok">Çalışıyor</span> <span class="chip c-gri">Nöbet 08-08</span></td><td>9 yıl</td><td><span class="bar"><i style="width:54%"></i></span>14</td>
+            <td><span class="rozet">2</span></td><td>0533 *** 22 70</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#16a085">AB</span></td><td>7929</td>
+            <td class="ad"><b>Arda Bulut</b><small>Uzman Doktor</small></td><td>Mikrobiyoloji<span class="ikinci">Tıbbi Mikrobiyoloji</span></td>
+            <td><span class="chip c-izin">İzinde · dönüş 08.10</span></td><td>3 yıl</td><td><span class="bar"><i style="width:20%"></i></span>3</td><td><span class="rozet">1</span></td><td>0505 *** 10 44</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#c0392b">AK</span></td><td>7932</td>
+            <td class="ad"><b>Ayşe Kaya</b><small>Rol atanmamış</small></td><td>Başhekimlik<span class="ikinci">Başhekim</span></td>
+            <td><span class="chip c-ok">Çalışıyor</span></td><td>20 yıl</td><td><span class="bar"><i style="width:100%"></i></span>26</td><td></td><td>0532 *** 55 01</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#d35400">BK</span></td><td>7943</td>
+            <td class="ad"><b>Burak Kılıç</b><small>Muhasebe / Finans</small></td><td>Hasta Hakları<span class="ikinci">Hasta Hakları Sorumlusu</span></td>
+            <td><span class="chip c-red">Raporlu · 10.10'a kadar</span></td><td>12 yıl</td><td><span class="bar"><i style="width:35%"></i></span>8</td><td></td><td>0542 *** 90 12</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#27ae60">BK</span></td><td>7948</td>
+            <td class="ad"><b>Buse Kurt</b><small>Rol atanmamış</small></td><td>Güvenlik<span class="ikinci">Güvenlik Görevlisi</span></td>
+            <td><span class="chip c-bek">Deneme · 12 gün kaldı</span></td><td>6 ay</td><td><span class="eksik">hak yok</span></td><td></td><td>0555 *** 31 09</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#7f8c8d">CÇ</span></td><td>7945</td>
+            <td class="ad"><b>Cem Çetin</b><small>Rol atanmamış</small></td><td>Teknik Servis<span class="ikinci">Biyomedikal Sorumlusu</span></td>
+            <td><span class="chip c-ok">Çalışıyor</span></td><td>5 yıl</td><td><span class="bar"><i style="width:45%"></i></span>9</td><td></td><td><span class="eksik">⚠ IBAN, SGK sicil eksik</span></td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#2c3e50">CG</span></td><td>c005</td>
+            <td class="ad"><b>Ceyda Güven</b><small>Kayıt Kabul Sorumlusu</small></td><td>Hasta Kabul / Danışma<span class="ikinci">Hasta Kabul Sorumlusu</span></td>
+            <td><span class="chip c-ok">Çalışıyor</span> 🎂</td><td>4 yıl</td><td><span class="bar"><i style="width:70%"></i></span>14</td><td><span class="rozet">1</span></td><td>0530 *** 64 20</td></tr>
+        <tr><td><input type="checkbox"></td><td><span class="av" style="background:#2980b9">DK</span></td><td>7946</td>
+            <td class="ad"><b>Deniz Kara</b><small>Rol atanmamış</small></td><td>Sterilizasyon<span class="ikinci">Sterilizasyon Personeli</span></td>
+            <td><span class="chip c-izin">İzinde · yarım gün</span></td><td>13 yıl</td><td><span class="bar"><i style="width:50%"></i></span>10,5</td><td></td><td>0536 *** 18 33</td></tr>
+        <tr class="pasif"><td><input type="checkbox"></td><td><span class="av" style="background:#b8c2cc">EY</span></td><td>7811</td>
+            <td class="ad"><b>Emre Yalçın</b><small>Ayrıldı · 30.06.2026</small></td><td>Radyoloji<span class="ikinci">Tekniker</span></td>
+            <td><span class="chip c-gri">Pasif</span></td><td>—</td><td>—</td><td></td><td>—</td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 101 · seçili 1 · 11 ms</span><span>‹ Önceki &nbsp; 1 / 3 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="kimlik"><span class="av" style="background:#8e44ad">AD</span>
+        <div><b>Dr. Aslı Demir</b><small>Uzman Hekim · Dahiliye</small><small>Sicil 7902 · işe giriş 01.09.2017</small></div></div>
+
+      <div class="bl"><h5>Bugün</h5>
+        <div class="satir"><span>Durum</span><b style="color:var(--ok)">Çalışıyor</b></div>
+        <div class="satir"><span>Vardiya</span>08:00 – 08:00 nöbet</div>
+        <div class="satir"><span>Yönetici</span>Doç. Dr. Cem Yalın</div>
+        <div class="satir"><span>Telefon</span>0533 *** 22 70</div>
+        <div class="satir"><span>E-posta</span>asli.demir@…</div>
+      </div>
+
+      <div class="bl"><h5>İzin bakiyesi · 2026 <a>İzinler ›</a></h5>
+        <div class="bakiye"><div><b>26</b>Hak + devir</div><div><b>12</b>Kullanılan</div><div class="yesil"><b>14</b>Kalan</div></div>
+      </div>
+
+      <div class="bl"><h5>Son talepler <a>Tümü ›</a></h5>
+        <div class="talep"><div>Masraf beyanı<small>MB-2026-0084 · 1.840 ₺</small></div><span class="chip c-bek">Onayda</span></div>
+        <div class="talep"><div>Yıllık izin<small>20.10–24.10 · 5 gün</small></div><span class="chip c-bek">Onayda</span></div>
+        <div class="talep"><div>Çalışma belgesi<small>BT-000012</small></div><span class="chip c-ok">Teslim</span></div>
+      </div>
+
+      <div class="bl"><h5>Eksikler</h5>
+        <div class="uyar">⚠ Sağlık raporu 3 ay önce bitti · ISG eğitimi yenilenmeli (11.2026)</div>
+      </div>
+
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div class="hizli"><span class="btn kucuk">📇 Kartı aç</span><span class="btn kucuk">📨 Yeni talep ▾</span>
+          <span class="btn kucuk">💬 Mesaj</span><span class="btn kucuk">📅 Çalışma planı</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div style="padding:10px 14px;font-size:11px;line-height:1.7">
+<b>NOT (mockup):</b> Kullanıcı: "personel listesi için mockup yap". Bugünkü liste: araç çubuğu, arama, Liste / Grup / Analiz,
+Aktif / Pasif / Tümü, Bölüm ve Rol combo, kolonlar Sicil · Ad Soyad · Bölüm · Görev · Rol · İşe giriş · Kimlik No.<br>
+<span class="n">1</span><b>Gösterge şeridi:</b> her kutu bir süzgeç - tıklanınca liste o kümeye iner (bugün izinde, raporlu, onay bekleyen
+talebi olan, deneme süresinde, bu ay doğum günü olan, özlük bilgisi eksik: TC / SGK sicil / IBAN / işe giriş). Sayılar seçili bölüme göre.<br>
+<span class="n">2</span><b>Bölüm ağacı</b> solda (bugünkü Bölüm combosunun yerine), personel sayılarıyla; "Bölümsüz" kırmızı - atanmamış personel görünür olsun.<br>
+<span class="n">3</span><b>Liste:</b> avatar (fotoğraf varsa fotoğraf), ad altında rol, bölüm altında görev (iki kolon bire indi),
+<b>Bugün</b> (çalışıyor / izinde + dönüş günü / raporlu / nöbet / deneme süresi kalan gün - izin, rapor ve çalışma planından),
+kıdem, kalan izin (çubuklu), açık talep rozeti, maskeli telefon; eksik özlük bilgisi satırda kırmızı. Pasif personel soluk.
+Kimlik No kolonu varsayılanda gizli (Kolonlar ⚙ ile açılır). Görünüm: <b>Kart</b> (fotoğraflı ızgara), <b>Organizasyon</b> (yönetici ağacı).<br>
+<span class="n">4</span><b>Önizleme paneli:</b> seçili personel - bugünkü durum, vardiya, yönetici, iletişim, izin bakiyesi, son 3 talep
+(Tümü › personel kartındaki Talepler sekmesi), eksikler (sağlık raporu, İSG eğitimi, belge), hızlı işlem (kartı aç, yeni talep, mesaj, çalışma planı).
+Çift tık kartı açar (bugünkü gibi). <b>Yeni Talep ▾</b> menüsünde türün yanında kısa bilgi (kalan izin, açık avans).<br>
+Yetkisiz kullanıcı için maaş / TC gibi alanlar sunucudan hiç gelmez (bugünkü kural).
+</div></div>
+
+</body>
+</html>

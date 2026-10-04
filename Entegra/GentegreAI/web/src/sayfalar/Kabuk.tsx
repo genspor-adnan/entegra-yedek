@@ -10,6 +10,7 @@ import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { menuYolu, yolEslesir } from '../bilesenler/taleplerim/personelTalebi';
 import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu, BanaGelenlerPaneli } from '../bilesenler/taleplerim/TaleplerimPaneli';
 import { useTaleplerimOzeti } from '../bilesenler/taleplerim/useTaleplerimOzeti';
 import { YeniTalepKatmani } from '../bilesenler/taleplerim/YeniTalepModali';
@@ -64,12 +65,13 @@ export function Kabuk() {
    */
   useEffect(() => {
     const hepsi = satirlar.flatMap(sat => (sat.tur === 'duz' ? [sat.m] : sat.alt));
+    const yol = menuYolu(konum.pathname, konum.state);
     const eslesen = hepsi
-      .filter(m => konum.pathname === m.yol || konum.pathname.startsWith(m.yol + '/'))
+      .filter(m => yolEslesir(yol, m.yol))
       .sort((a, b) => b.yol.length - a.yol.length)[0];
     if (eslesen) tercih.sonKaydet(eslesen.yol);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [konum.pathname, satirlar]);
+  }, [konum.pathname, konum.state, satirlar]);
 
   // KULLANICI AYARLARI PENCERESI (sifre + dil) kendi kancasinda.
   // TALEPLERIM (mockup Ekranlar/Taleplerim): ust serit paneli, avatar menusu

@@ -1,5 +1,6 @@
 import { ReceteKartiSayfa, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
@@ -291,22 +292,22 @@ function Yollar() {
         {yetki('duyuru') && <Route path="/duyurular" element={<Duyurular />} />}
         {/* IZIN TALEP KARTI (959): liste arkada, ozel kart modal. */}
         {yetki('ik.izin') && <Route path="/personel-izin/:id" element={<>
-          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelIzin')!} />
+          <TalepArkaListe kaynak="personelIzin" />
           <IzinTalepKarti />
         </>} />}
         {/* AVANS KARTI (960): liste arkada, ozel kart modal. */}
         {yetki('ik.avans') && <Route path="/personel-avans/:id" element={<>
-          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelAvans')!} />
+          <TalepArkaListe kaynak="personelAvans" />
           <AvansKarti />
         </>} />}
         {/* MASRAF KARTI (961): liste arkada, ozel kart modal. */}
         {yetki('ik.masraf') && <Route path="/personel-masraf/:id" element={<>
-          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelMasraf')!} />
+          <TalepArkaListe kaynak="personelMasraf" />
           <MasrafKarti />
         </>} />}
         {/* BELGE TALEP KARTI (962): liste arkada, ozel kart modal. */}
         {yetki('ik.belge_talep') && <Route path="/personel-belge-talep/:id" element={<>
-          <Liste tanim={LISTELER.find(l => l.kaynak === 'personelBelgeTalep')!} />
+          <TalepArkaListe kaynak="personelBelgeTalep" />
           <BelgeTalepKarti />
         </>} />}
         {yetki('muayene') && (
@@ -463,6 +464,16 @@ function Yollar() {
       )}
     </Routes>
   );
+}
+
+/**
+ * TALEP KARTININ ARKASINDAKİ LİSTE: kart personel listesinden (Yeni Talep ▾)
+ * açıldıysa arkada personel listesi kalır, yoksa kartın kendi listesi.
+ */
+function TalepArkaListe({ kaynak }: { kaynak: string }) {
+  const arka = personelTalepDurumu(useLocation().state).arka;
+  const tanim = (arka && LISTELER.find(l => l.kaynak === arka)) || LISTELER.find(l => l.kaynak === kaynak)!;
+  return <Liste key={tanim.kaynak} tanim={tanim} />;
 }
 
 export default function App() {

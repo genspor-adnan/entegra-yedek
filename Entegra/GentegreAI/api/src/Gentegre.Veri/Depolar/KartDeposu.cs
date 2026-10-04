@@ -164,6 +164,7 @@ public sealed partial class KartDeposu
         if (detaylar is not null)
             eklenenDetaylar = await DetayUygulaAsync(
                 baglanti, islem, tanim, yeniId, detaylar, baglam, iptal, eklemeDetayLoguYaz: false);
+        await TekSatirZorunluDenetleAsync(baglanti, islem, tanim, yeniId, detaylar, yeniKart: true, iptal);
 
         // Ekleme logu buyumesin: bos ve katalog varsayilani olan alanlar yazilmaz.
         var kartLogu = EklemeLogDegerleri(degerler, tanim.YeniKayitVarsayilanlari, baglam.SubeId);
@@ -260,6 +261,7 @@ public sealed partial class KartDeposu
 
         if (detaylar is not null)
             await DetayUygulaAsync(baglanti, islem, tanim, id, detaylar, baglam, iptal);
+        await TekSatirZorunluDenetleAsync(baglanti, islem, tanim, id, detaylar, yeniKart: false, iptal);
 
         // Degisiklik logu alan bazli; hicbir alan degismediyse log satiri ACILMAZ.
         var sonrasi = await OkuAsync(baglanti, islem, tanim, id, okunabilirAlanlar, null, iptal);

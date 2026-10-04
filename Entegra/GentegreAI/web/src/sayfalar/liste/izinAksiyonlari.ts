@@ -2,6 +2,7 @@ import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { IzinBakiyesi } from '../../api/uclar/izin';
+import { PERSONEL_TALEP_TURLERI, type PersonelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 
 /**
  * İZİN AKSİYONLARI (743).
@@ -15,7 +16,7 @@ import type { IzinBakiyesi } from '../../api/uclar/izin';
  */
 export interface IzinBaglam {
   tazele(): void;
-  git?(yol: string): void;
+  git?(yol: string, state?: unknown): void;
 }
 
 /** Bakiyeyi tek satırda okunur yazar. */
@@ -35,6 +36,21 @@ export async function izinAksiyonu(
   satir: ListeSatiri | null | undefined,
   b: IzinBaglam,
 ): Promise<boolean> {
+  // ------------------------------------- personel listesi: Yeni Talep ▾ --
+  //   Seçili personel ve dönüş yolu karta router state ile gider.
+  const talepTuru = PERSONEL_TALEP_TURLERI.find(t => t.kod === kod);
+  if (talepTuru) {
+    if (!satir) { await mesaj('Önce bir personel seçin.'); return true; }
+    const durum: PersonelTalepDurumu = {
+      personel: { id: Number(satir.id), ad: String(satir.unvan ?? '') },
+      geri: window.location.pathname + window.location.search,
+      // ARKADA PERSONEL LİSTESİ KALSIN (kullanıcı: "arkadaki personel liste yerine
+      //   talep olan listeye geçiyor").
+      arka: 'personel',
+    };
+    b.git?.(`${talepTuru.yol}/yeni`, durum);
+    return true;
+  }
   // ------------------------------------------------ millî tatil üret --
   if (kod === 'resmi-tatil.yil-uret') {
     const ham = await metinSor(

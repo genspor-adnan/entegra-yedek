@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../dil/ceviri';
+import { PersonelTalepleri } from './taleplerim/PersonelTalepleri';
 import { api, oturum } from '../api/istemci';
 import { dokumanDosyaAdi, dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -1907,6 +1908,11 @@ Yine de yeni kayıt eklensin mi?`);
       {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
           basvuru gecmisi. Cift tik basvuruyu KARTIN USTUNDE acar - liste
           ekranina gitmek hasta kartindan kopmak demekti. */}
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:talepler' && (
+        <PersonelTalepleri tarafId={id as number}
+          // Personelde unvan yalnız önek (Dr.) - görünen ad önek + ad + soyad.
+          ad={[deger.unvan, deger.ad, deger.soyad].filter(Boolean).join(' ')} />
+      )}
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:basvurular' && (
         <OncekiBasvurular tarafId={id as number} baslik="Başvuru Geçmişi"
                           onAc={b => setAcilanBasvuru(b)}

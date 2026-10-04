@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
 import { TABAN } from '../../api/cekirdek';
 import { hataMetni, type DokumanSatiri } from '../../api/sozlesme';
@@ -76,9 +77,11 @@ export function BelgeTalepKarti() {
 
 function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
   const git = useNavigate();
+  // PERSONEL LİSTESİNDEN (Yeni Talep ▾): seçili personel dolu gelir, Kapat listeye döner.
+  const pt = personelTalepDurumu(useLocation().state);
   const { yetki } = useOturum();
   const [kayitId, setKayitId] = useState<number | null>(param === 'yeni' ? null : Number(param));
-  const [d, setD] = useState<Deger>({ tarafId: 0, tur: 1, amac: '', muhatap: '', adet: 1, teslimSekli: 1, teslimEposta: '',
+  const [d, setD] = useState<Deger>({ tarafId: pt.personel?.id ?? 0, tur: 1, amac: '', muhatap: '', adet: 1, teslimSekli: 1, teslimEposta: '',
                                       teslimAdres: '', istenenTarih: '', aciklama: '', maasTutar: '', maasTuru: 1 });
   const [ilk, setIlk] = useState<Deger | null>(null);
   const [ro, setRo] = useState({ talepNo: '', talepTarihi: '', durum: 0, otomatik: false, redNeden: '', hazirlayan: '',
@@ -95,10 +98,10 @@ function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
   const [hata, setHata] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const [arama, setArama] = useState(false);
-  const [secilenAd, setSecilenAd] = useState('');
+  const [secilenAd, setSecilenAd] = useState(pt.personel?.ad ?? '');
   const dosyaRef = useRef<HTMLInputElement>(null);
 
-  const kapat = useCallback(() => git('/personel-belge-talep'), [git]);
+  const kapat = useCallback(() => git(pt.geri ?? '/personel-belge-talep'), [git, pt.geri]);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const yazar = yetki('ik.belge_talep', kayitId ? 'degistir' : 'ekle');
   const kilitli = ro.durum >= 3;   // reddedildi / hazırlandı / teslim / iptal
@@ -162,7 +165,7 @@ function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
         await api.kartGuncelle(KAYNAK, y.id, { surum: (k.kart as Record<string, unknown>).surum as string, kart: { maasTutar: tutarOku(d.maasTutar), maasTuru: d.maasTuru } });
       }
       setKayitId(y.id);
-      git(`/personel-belge-talep/${y.id}`, { replace: true });
+      git(`/personel-belge-talep/${y.id}`, { replace: true, ...devamDurumu(pt) });
       if (y.mesaj) void mesaj(y.mesaj);
       return y.id;
     }

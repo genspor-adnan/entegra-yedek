@@ -1,4 +1,5 @@
 import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { PERSONEL_TALEP_TURLERI } from '../bilesenler/taleplerim/personelTalebi';
 
 /**
  * İK, doküman ve yönetim listeleri.
@@ -43,10 +44,18 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     // Ham bolum id API'den geliyor (basvuruda personel -> bolum doldurmak icin)
     //   ama gridde gorunmesin: orada departmanAdi var.
-    gizliKolonlar: ['departmanId', 'rolId'],
+    gizliKolonlar: ['departmanId', 'rolId', 'gorev', 'rolAdi'],
+    // MOCKUP KOLON SIRASI (963, Ekranlar/IK/personel_listesi.html): görev ve
+    //   rol ayrı kolon değil, bölüm ve ad hücrelerinin ikinci satırı.
+    // SİCİL DAR (kullanıcı: "Sicil No rename Sicil yap ve sütunu daralt").
+    kolonBasliklari: { kod: 'Sicil' },
+    kolonSirasi: ['kod', 'unvan', 'departmanAdi', 'bugun', 'kidem', 'kalanIzin', 'onaydaTalep', 'telefon', 'eksik', 'yoneticiAdi'],
     // Serit suzgecleri (kullanici: "aktif/pasif/durum saginda Bolum agac combo
     //   ve Rol combo"): ikisi de cip ve arama ile AND'lenir.
     bolumSuzgeci: true, rolSuzgeci: true,
+    // YENİ TALEP ▾: seçili personel için izin / avans / masraf / belge kartı
+    //   (Liste seçenekleri yetkiye göre süzer).
+    altSecenekler: { 'personel.talep': PERSONEL_TALEP_TURLERI.map(t => ({ kod: t.kod, ad: t.ad })) },
     // PERSONEL İZİNLERDEN ÖNCE (kullanıcı: "menüde personel ve izinler yer
     //   değiştir"): ikisi de sıra 10 iken diziye önce giren İzinler üste
     //   düşüyordu - kadro listesi İK menüsünün ilk maddesi olmalı.

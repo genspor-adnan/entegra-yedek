@@ -1,4 +1,5 @@
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
 namespace Gentegre.Api.Uclar;
@@ -24,20 +25,12 @@ public static class TaleplerimUclari
     private const int IzinTur = 904, AvansTur = 1257, MasrafTur = 1312,
                       BelgeTur = 1314, SatinalmaTur = 1241;
 
-    public static void TaleplerimUclariniEkle(this IEndpointRouteBuilder yol)
-    {
-        var grup = yol.MapGroup("/api/ben").WithTags("Taleplerim").RequireAuthorization();
-
-        grup.MapGet("/talepler", async (BaglamCozucu cozucu, VeriKaynagi veri,
-                                         HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            await using var b = await veri.AcAsync(iptal);
-            var ben = baglam.KullaniciId;
-
-            // SON 1 YIL + hâlâ açık olanlar: eski tamamlanmış talepler listeyi
-            //   şişirmesin; açık bir talep ne kadar eski olursa olsun görünür.
-            var satirlar = await b.ListeAsync($$"""
+    /// <summary>
+    /// KİŞİNİN TÜM TALEPLERİ (izin, avans, masraf, belge, arıza, malzeme) tek
+    /// listede; @p0 = taraf. Taleplerim paneli ve personel kartının "Talepler"
+    /// sekmesi aynı sorguyu kullanır - durum adları iki yerde ayrışmasın.
+    /// </summary>
+    internal static string TalepSorgusu(string suzgec, int sinir, string sirala = "t.son_hareket desc") => $$"""
                 with t as (
                   select 'izin' as tur, i.id, i.izin_no as no, i.durum,
                          case i.tur when 1 then 'Yıllık izin' when 2 then 'Mazeret izni'
@@ -142,11 +135,42 @@ public static class TaleplerimUclari
                         where t.grup = 'onayda' and v.kaynak_tur = t.kaynak_tur
                           and v.kaynak_id = t.id
                         order by v.sira limit 1) ob on true
-                 where t.grup in ('taslak', 'onayda', 'acik')
-                    or t.son_hareket > now() - interval '1 year'
-                 order by t.son_hareket desc
-                 limit 300
-                """, null, [ben], OkuyucuGenisletmeleri.Sozluk, iptal);
+                 where {{suzgec}}
+                 order by {{sirala}}
+                 limit {{sinir}}
+                """;
+
+    public static void TaleplerimUclariniEkle(this IEndpointRouteBuilder yol)
+    {
+        var grup = yol.MapGroup("/api/ben").WithTags("Taleplerim").RequireAuthorization();
+
+        // PERSONEL KARTI "TALEPLER" SEKMESİ (kullanıcı: "izinler sekmesi yerine
+        //   Talepler sekmesi olsa ve tüm talepler sondan başa doğru sıralı
+        //   listelense"): süzgeç yok, en yeni talep üstte.
+        yol.MapGet("/api/ik/personel/{tarafId:int}/talepler", async (int tarafId, BaglamCozucu cozucu,
+            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIsteKendi(tarafId, "personel", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var satirlar = await b.ListeAsync(TalepSorgusu("true", 1000, "t.ekleme_tarihi desc, t.id desc"),
+                null, [tarafId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { satirlar, izlemeNo = baglam.IzlemeNo });
+        }).WithTags("Taleplerim").RequireAuthorization();
+
+        grup.MapGet("/talepler", async (BaglamCozucu cozucu, VeriKaynagi veri,
+                                         HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            await using var b = await veri.AcAsync(iptal);
+            var ben = baglam.KullaniciId;
+
+            // SON 1 YIL + hâlâ açık olanlar: eski tamamlanmış talepler listeyi
+            //   şişirmesin; açık bir talep ne kadar eski olursa olsun görünür.
+            // SON 1 YIL + hâlâ açık olanlar (TalepSorgusu).
+            var satirlar = await b.ListeAsync(TalepSorgusu(
+                "t.grup in ('taslak', 'onayda', 'acik') or t.son_hareket > now() - interval '1 year'", 300),
+                null, [ben], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ONAYIMI BEKLEYEN: yalnız kişiye ya da vekâletle kişiye atanmış
             //   basamaklar. Rol basamakları (kim yetkiliyse) Onayımdakiler

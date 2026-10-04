@@ -9,7 +9,7 @@
 public static partial class KaynakKatalogu
 {
     /// <summary>Taraf listelerinde tekrar eden SQL parcalari.</summary>
-    private static class TarafKatalog
+    public static class TarafKatalog
     {
         /// <summary>
         /// TCKN listelerde MASKELI gorunur (kullanici): ilk 3 + son 2 acik,
@@ -33,6 +33,14 @@ public static partial class KaynakKatalogu
         /// rakamlara indirgenip birlestirilir; bosluk/parantez/+90 farki arama
         /// sonucunu degistirmesin.
         /// </summary>
+        /// <summary>Maskeli cep: "0532 *** 41 18" (963, personel listesi).</summary>
+        public const string TelefonMaske =
+            "case when length(regexp_replace(coalesce(t.cep_tel, ''), '[^0-9]', '', 'g')) >= 10 " +
+            "     then '0' || substr(right(regexp_replace(t.cep_tel, '[^0-9]', '', 'g'), 10), 1, 3) || ' *** ' " +
+            "          || substr(right(regexp_replace(t.cep_tel, '[^0-9]', '', 'g'), 10), 7, 2) || ' ' " +
+            "          || substr(right(regexp_replace(t.cep_tel, '[^0-9]', '', 'g'), 10), 9, 2) " +
+            "     else coalesce(t.cep_tel, '') end";
+
         public const string TelefonHam =
             "regexp_replace(coalesce(t.cep_tel, '') || ' ' || coalesce(t.telefon, ''), " +
             "               '[^0-9]', '', 'g')";
@@ -251,17 +259,23 @@ public static partial class KaynakKatalogu
             left join public.taraf_personel po on po.id = t.id
             left join public.taraf_kullanici tk on tk.id = t.id
             left join public.rol r on r.id = tk.rol_id
+            left join public.v_personel_durum pd on pd.taraf_id = t.id
             """,
         SabitKosul: "t.personel = 1",
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "t.id",            "sayi",  "Id",        Varsayilan: false),
-            new("kod",          "t.kod",           "metin", "Sicil No"),
-            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Ad Soyad"),
+            // Sicil kısa kod - dar kolon (uzun sicil kesilir, üstüne gelince tamamı).
+            new("kod",          "t.kod",           "metin", "Sicil No", Genislik: 78),
+            // PERSONEL LİSTESİ (963, mockup Ekranlar/IK/personel_listesi.html):
+            //   ad hücresinde avatar + ad + altında rol; bölüm hücresinde altında
+            //   görev ("kisi:" / "alt:" biçimi ikinci satırın alanını söyler).
+            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Ad Soyad",
+                Bicim: "kisi:rolAdi"),
             // Ad Soyad'in SAGINDA: departman / gorev / rol / ise giris (kullanici).
             new("departmanAdi", TarafKatalog.DepartmanAdi,
-                                                   "metin", "Bölüm"),
+                                                   "metin", "Bölüm / Görev", Bicim: "alt:gorev"),
             new("gorev",        TarafKatalog.PozisyonAdi, "metin", "Görev"),
             new("rolAdi",       "coalesce(r.ad, '')", "metin", "Rol"),
             // Ham rol id ISTEMCIYE GELIR: seritteki Rol suzgeci ad yerine id ile
@@ -269,12 +283,30 @@ public static partial class KaynakKatalogu
             //   Gridde gizli (listeTanimlari.gizliKolonlar), orada rolAdi var.
             new("rolId",        "coalesce(tk.rol_id, 0)", "sayi", "Rol Id",
                 Varsayilan: false),
+            // BUGÜN / KIDEM / KALAN İZİN / TALEP / EKSİK (963, v_personel_durum):
+            //   gösterge şeridi aynı görünümden sayar - süzgeç kolonları bunlar.
+            new("bugun",        "coalesce(pd.bugun, '')", "metin", "Bugün", Bicim: "rozet"),
+            new("bugunKod",     "coalesce(pd.bugun_kod, 1)", "sayi", "Bugün Kodu", Varsayilan: false),
+            new("kidem",        "coalesce(pd.kidem, '')", "metin", "Kıdem", Siralanabilir: false),
+            new("kalanIzin",    "pd.kalan_izin",   "ondalik", "Kalan İzin", Bicim: "cubuk:hakToplam"),
+            new("hakToplam",    "pd.hak_toplam",   "ondalik", "Yıllık Hak", Varsayilan: false),
+            new("onaydaTalep",  "coalesce(pd.onayda_talep, 0)", "sayi", "Talep", Hizalama: "orta", Bicim: "sayac"),
+            new("telefon",      TarafKatalog.TelefonMaske, "metin", "Telefon", Filtrelenebilir: false, Siralanabilir: false),
+            new("eksik",        "coalesce(pd.eksik, '')", "metin", "Eksik Bilgi", Bicim: "uyari"),
+            new("dogumBuAy",    "coalesce(pd.dogum_bu_ay, 0)", "sayi", "Doğum Günü (ay)", Varsayilan: false),
+            new("dogumBugun",   "coalesce(pd.dogum_bugun, 0)", "sayi", "Doğum Günü (bugün)", Varsayilan: false),
+            // ORGANİZASYON GÖRÜNÜMÜ (yönetici ağacı) için.
+            new("yoneticiId",   "po.yonetici_taraf_id", "sayi", "Yönetici Id", Varsayilan: false),
+            // YÖNETİCİ ADI (kullanıcı: "eksik bilgi kolonundan sonra Yönetici ekle").
+            new("yoneticiAdi",  "coalesce((select public.fn_taraf_ad(y.unvan, y.ad, y.soyad)::varchar(120) from public.taraf y where y.id = po.yonetici_taraf_id), '')",
+                                                   "metin", "Yönetici"),
             new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
-                Hizalama: "orta"),
+                Hizalama: "orta", Varsayilan: false),
+            // Kimlik No varsayılanda gizli (mockup) - Kolonlar ⚙ ile açılır.
             new("vkno",         TarafKatalog.TcknMaske, "metin", "Kimlik No",
-                Filtrelenebilir: false),
+                Filtrelenebilir: false, Varsayilan: false),
             new("vknoHam",      "t.vkno",          "metin", "Kimlik No (ham)", Varsayilan: false),
-            new("cepTel",       "t.cep_tel",       "metin", "Cep"),
+            new("cepTel",       "t.cep_tel",       "metin", "Cep", Varsayilan: false),
             // Randevu/basvuru hekim secimi (296): "randevu verilebilir" personel
             //   = doktor. Bolume gore suzme t.departman ile yapilir.
             // 711: bayrak yerine CALISMA PLANI - aktif sablonu olan personel "Randevu".

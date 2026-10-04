@@ -262,6 +262,12 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /^Dış kurum/i, sinif: 'uyari' },
   { desen: /^Online$/i, sinif: 'mavi' },
   { desen: /gün var$/i, sinif: 'gri' },
+  // PERSONEL "BUGÜN" (963): izin mavi, rapor kırmızı, deneme sarı, ayrılan gri.
+  { desen: /^İzinde/i, sinif: 'mavi' },
+  { desen: /^Raporlu/i, sinif: 'hata' },
+  { desen: /^Deneme ·/i, sinif: 'uyari' },
+  { desen: /^Çalışıyor$/i, sinif: 'olumlu' },
+  { desen: /^Ayrıldı/i, sinif: 'gri' },
   { desen: /sa sonra$/i, sinif: 'gri' },
 ];
 

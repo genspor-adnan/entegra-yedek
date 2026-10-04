@@ -101,7 +101,14 @@ public static class AksiyonKatalogu
                     Islem: Islem.Ekle, Sira: 50,
                     Ipucu: "Aktif personelden hesabı olmayanlara hesap açar"),
             ],
-            ["personel-liste"] = Crud("personel", "personel", "personel"),
+            ["personel-liste"] =
+                [.. Crud("personel", "personel", "personel"),
+                 // YENİ TALEP ▾ (kullanıcı: "personel listesinde yeni butonu sağına
+                 //   Yeni Talep butonu ekle.. seçili personel için"): alt seçenekler
+                 //   (izin / avans / masraf / belge) ekranda, her biri kendi yetkisiyle.
+                 new("personel.talep", "📨 Yeni Talep", "personel", Hedef: "araccubugu",
+                     KaynakKodu: "personel", Islem: Islem.Gor, KayitGerekir: true, Sira: 11,
+                     Ipucu: "Seçili personel için izin, avans, masraf ya da belge talebi")],
             // KADRO HAREKETI (840): pozisyon gecmisi defteri. Silme VAR ama
             //   dar: yanlis girilen hareket duzeltilebilmeli - defterin
             //   kendisi denetim izi degil, `islem_log` o isi yapiyor.

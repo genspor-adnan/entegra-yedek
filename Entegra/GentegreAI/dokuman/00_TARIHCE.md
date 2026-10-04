@@ -18381,3 +18381,60 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
 * Doğrulama: tarayıcıda yeni talep (otomatik onay → Hazırlanacak), önizleme (4 boş yer tutucu → Hazırla kapalı); API'den metni
   dondur → hazırla → kod YJWA-D3HF → doğrulama sayfası "Belge geçerli", yanlış kod "bulunamadı". E-posta gönderimi denenmedi
   (dev bildirim işçisi canlı gönderir). tsc temiz, vitest 789/789. Deneme kaydı silindi.
+
+## 04.10.2026 — Personel listesinde "Yeni Talep ▾"
+
+* Personel listesi araç çubuğunda "+ Yeni"nin sağında **📨 Yeni Talep ▾** (aksiyon `personel.talep`, kayıt gerekir):
+  açılır menü İzin talebi / Avans talebi / Masraf beyanı / Belge talebi - yalnız kullanıcının **ekleme yetkisi** olan
+  türler listelenir. Seçilen tür kendi kartını **seçili personel dolu** açar; Kapat personel listesine döner, kayıttan
+  sonra da dönüş yolu korunur (`bilesenler/taleplerim/personelTalebi.ts`, router state `{ personel, geri, arka }`).
+  Kartın **arkasında personel listesi kalır** (`App.tsx` `TalepArkaListe`: state.arka varsa o liste, yoksa kartın kendi listesi).
+* Doğrulama: tarayıcıda Ayşe Kaya seçili → menü 4 seçenek → Belge talebi kartı personel dolu → Kapat `/personel`.
+  tsc temiz, vitest 789/789.
+* **Menü seçimi:** talep kartı personel listesinden açıldıysa sol menüde Personel Listesi seçili (state.geri);
+  eşleşme tam yol ya da alt yol - `/personel-izin` artık `/personel`'i de yakmıyor (`menuYolu` / `yolEslesir`,
+  YanMenu + Kabuk son-ziyaret kaydı).
+* **Personel kartı "Talepler" sekmesi** (İzinler gridinin yerinde): kişinin tüm talepleri (izin, avans, masraf, belge,
+  arıza, malzeme) en yeni üstte; çift tık talep kartını açar (arkada personel listesi, Kapat personel kartına döner),
+  üstte tür başına "+ Yeni" (yetkiye göre). Uç `GET /api/ik/personel/{tarafId}/talepler`; sorgu Taleplerim ile ortak
+  (`TaleplerimUclari.TalepSorgusu`). Doğrulama: Dr. Ayşe Kaya kartı → 2 izin talebi → çift tık izin kartı → Kapat
+  `/personel/7882`. tsc temiz, vitest 789/789.
+
+## 04.10.2026 — Personel listesi (963)
+
+* **Mockup** `Ekranlar/IK/personel_listesi.html` uygulandı:
+  * **Gösterge şeridi** (gridin üstünde): aktif · bugün izinde · raporlu · onay bekleyen talep (+ kişi sayısı) · deneme
+    süresinde · bu ay doğum günü · eksik özlük bilgisi. Her kutu bir süzgeç (tekrar tıkla = kaldır), sayılar seçili
+    bölüm / rolle.
+  * **Bölüm ağacı** solda (bölüm combosunun yerine): personel sayılı, alt birimler açılır / kapanır (varsayılan kapalı,
+    seçili dalın üstleri açık), "Bölümsüz" kırmızı; ağaç uzarsa kendi kaydırır.
+  * **Kolonlar:** avatar + ad + altında rol · bölüm + altında görev · **Bugün** (çalışıyor / izinde + dönüş / raporlu /
+    deneme kalan gün / ayrıldı) · kıdem · kalan izin (çubuklu) · onaydaki talep rozeti · maskeli telefon · eksik bilgi.
+    Kimlik No ve işe giriş varsayılanda gizli.
+  * **Önizleme paneli** sağda (290 px): bugün, kıdem, rol, yönetici, iletişim, izin bakiyesi, son 3 talep, eksikler
+    (özlük + süresi geçen / 60 günde dolan eğitim-sertifika), hızlı işlem (kartı aç, yeni talep ▾, mesaj, çalışma planı).
+  * **Görünümler:** Liste / **Kart** (avatarlı ızgara) / **Organizasyon** (yönetici ağacı; yöneticisi girilmemişler
+    ayrı). Grup / Analiz ("yakında") bu ekranda gizli. "Yeni Talep ▾" izin seçeneğinde kalan izin yazar.
+* **963** `v_personel_durum` (bugün kodu / metni, kıdem, kalan izin, onaydaki talep, eksik özlük, doğum günü) - liste
+  kolonları ve gösterge sayıları aynı görünümü okur. Uçlar `GET /api/ik/personel-gosterge`,
+  `GET /api/ik/personel/{id}/onizleme`. Grid hücre biçimleri sunucudan: `kisi:` / `alt:` / `cubuk:` / `sayac` / `uyari`
+  (`bilesenler/grid/satirHucre.tsx`); GenGrid'e çoklu ek görünüm (`ekGorunumler`, `grupAnalizGizli`).
+* Yapılmadı: Nöbet / vardiya (çalışma planı bağı), IBAN (personelde alan yok), fotoğraf (avatar baş harf), "Çalışma"
+  süzgeç combosu. Kart / Organizasyon görünümünde ağaç ve şerit gizli (liste süzgeci uygulanır).
+* Doğrulama: tarayıcıda 101 aktif, "Onay bekleyen talep" → 2 satır, ağaç aç/kapa, önizleme (Ayşe Kaya), Kart ve
+  Organizasyon görünümleri. tsc temiz, vitest 789/789, dotnet test 218 geçti.
+* Sonradan: **Sicil** başlığı (Sicil No yerine) + dar kolon (78 px, uzun sicil kesilir); **Görev / Rol** ayrı kolonları
+  yok (açık sayfa eski kolonlarla kalıyordu - kolon tercihi gizli kolon listesi değişince de yeniden kurulur);
+  **sol panel de katlanır** (GenGrid geneli, `gentegre.solpanel.<kaynak>` ile hatırlanır; sağ panel zaten katlanıyordu);
+  ağaç okları SVG ve büyük.
+* Panel katlama düğmelerinde ok SVG ve koyu (‹ › karakterleri seçilmiyordu). Personel kartında **Cinsiyet zorunlu**
+  (özlük detayı, `Zorunlu: true`; SKRS listesinde "belirtilmedi" de seçilebilir). Dev'de 112 personelden 10'unda
+  cinsiyet boş - bu kartlar kaydedilirken cinsiyet istenir.
+* Personel listesine **Yönetici** kolonu (Eksik Bilgi'den sonra; yonetici_taraf_id adı).
+* **Zorunlu alan, 1:1 detayda gerçekten zorunlu** (kullanıcı: "doğ trh girmeden kaydediyor"): sunucu zorunluluğu
+  yalnız YENİ detay satırında arıyordu - özlük kartla aynı kimlikte, mevcut personelde hep "değişen" yoldan geçtiği ve
+  boş alan hiç gönderilmediği için doğum tarihi boş kayıt geçiyordu. Şimdi (KartDeposu): değişen satırda zorunlu alan
+  boşaltılamaz; 1:1 detay (UstKolon = id) kart YENİYSE ya da bu kayıtta değiştiyse kayıttan sonra aynı işlemde okunur,
+  zorunlu alan boşsa işlem geri alınır (koşullu sekmeler hariç). Zorunlu **kod** alanında 0 = seçilmedi (cinsiyet
+  varsayılanı 0; dev'de 102 personel 0) - boş sayılır. Etki: personel / diş hekimi / hasta özlüğü; boş zorunlu
+  alanı olan mevcut kart, özlüğü değiştirilince doldurmadan kaydedilmez. dotnet test 218 geçti.

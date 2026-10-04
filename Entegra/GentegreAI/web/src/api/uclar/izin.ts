@@ -83,6 +83,22 @@ export interface OnayBekleyenSatiri {
   baslama: string; gecikmeGun: number;
 }
 
+export interface PersonelGostergeYaniti {
+  gosterge: { aktif: number; izinde: number; raporlu: number; onaydaTalep: number; talepliKisi: number;
+              deneme: number; dogumBuAy: number; eksik: number };
+  bolumler: { id: number; ad: string; ust: number | null; sayi: number }[];
+  bolumsuz: number;
+}
+
+export interface PersonelOnizleme {
+  kisi: { id: number; ad: string; sicil: string; gorev: string; bolum: string; iseGiris: string | null;
+          bugun: string; bugunKod: number; kidem: string; kalanIzin: number | null; hakToplam: number | null;
+          kullanilan: number; onayda: number; eksik: string; yonetici: string; telefon: string; eposta: string;
+          rol: string; dogumBugun: number };
+  talepler: TalepSatiri[];
+  egitim: { ad: string; gecerlilik: string }[];
+}
+
 export interface TaleplerimYaniti {
   satirlar: TalepSatiri[];
   /** Kişiye (ya da vekâletle) atanmış bekleyen onay basamağı sayısı. */
@@ -98,6 +114,12 @@ export interface TaleplerimYaniti {
 export const izinUclari = {
   /** Kişinin kendi talepleri (yetki istemez; yalnız kendi kayıtları). */
   taleplerim: () => istek<TaleplerimYaniti>('/api/ben/talepler'),
+  /** Personel kartı "Talepler" sekmesi: kişinin tüm talepleri, en yeni üstte. */
+  /** Personel listesi (963): gösterge şeridi + bölüm ağacı sayıları. */
+  personelGosterge: (p: URLSearchParams) => istek<PersonelGostergeYaniti>(`/api/ik/personel-gosterge?${p}`),
+  /** Personel listesi önizleme paneli (963). */
+  personelOnizleme: (id: number) => istek<PersonelOnizleme>(`/api/ik/personel/${id}/onizleme`),
+  personelTalepleri: (tarafId: number) => istek<{ satirlar: TalepSatiri[] }>(`/api/ik/personel/${tarafId}/talepler`),
 
   /** İzin talep kartı (959): gün / dönüş, takvim, bakiye, ekip, randevu, akış. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -45,5 +45,15 @@ export function useGridTercihleri(kaynak: string, solPanelVar: boolean) {
     try { localStorage.setItem(yanAnahtar, yanKapali ? '1' : '0') } catch { /* yok say */ }
   }, [yanAnahtar, yanKapali]);
 
-  return { satirBoyu, satirBoyuSec, yanKapali, setYanKapali };
+  // SOL PANEL DE KAPANIR (kullanıcı: "soldaki bölüm ve sağdaki özet açılır
+  //   kapanır olsun"): ekran başına hatırlanır, varsayılan açık.
+  const solAnahtar = `gentegre.solpanel.${kaynak}`;
+  const [solKapali, setSolKapali] = useState(() => {
+    try { return localStorage.getItem(solAnahtar) === '1' } catch { return false }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(solAnahtar, solKapali ? '1' : '0') } catch { /* yok say */ }
+  }, [solAnahtar, solKapali]);
+
+  return { satirBoyu, satirBoyuSec, yanKapali, setYanKapali, solKapali, setSolKapali };
 }

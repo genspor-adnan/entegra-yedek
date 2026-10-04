@@ -416,7 +416,8 @@ public static partial class KartKatalogu
                 //   kisaltilmis kopya tutmuyoruz. Elle yazilan liste iki
                 //   secenekti (Erkek/Kadin); SKRS'de dort - "belirtilmedi"
                 //   ve "belirsiz" de gecerli kayit degerleri.
-                new("cinsiyet",           "cinsiyet",            "kod",   KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
+                // ZORUNLU (kullanıcı: "personel kartında cinsiyet zorunlu alan olmalı").
+                new("cinsiyet",           "cinsiyet",            "kod",   Zorunlu: true, KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
                 // GIRIS/CIKIS TARIHI KILITLI (840): ikisi de kadro
                 //   hareketinin yururlugudur (tur 1 giris, tur 9 cikis).
                 //   Kidem ve izin hakki bu tarihten hesaplandigi icin

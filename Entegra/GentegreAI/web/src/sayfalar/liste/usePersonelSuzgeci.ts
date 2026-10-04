@@ -4,6 +4,7 @@ import { guvenli } from '../../bilesenler/mesaj';
 import type { Kosul } from '../../api/sozlesme';
 import type { SuzgecRolu } from '../../bilesenler/RolSuzgeci';
 import { useOturum } from '../../kimlik/OturumBaglami';
+import { gostergeKosulu, type GostergeKodu } from './personelGosterge';
 
 /**
  * PERSONEL SERIT SUZGECLERI (kullanici: "aktif/pasif/durum saginda Bolum agac
@@ -17,6 +18,8 @@ export function usePersonelSuzgeci(
 ) {
   const [bolum, setBolum] = useState<{ id: number; agac: number[] } | null>(null);
   const [rol, setRol] = useState<number | ''>('');
+  // GÖSTERGE ŞERİDİ (963): seçili kutu (bugün izinde, raporlu...) - listeye AND'lenir.
+  const [gosterge, setGosterge] = useState<GostergeKodu | null>(null);
   const [roller, setRoller] = useState<SuzgecRolu[]>([]);
   const [rolBolumleri, setRolBolumleri] = useState<string[]>([]);
   // SISTEMDE KAYITLI PERSONELDE GEÇEN bölümler (kullanıcı): bölüm ağacı yalnız
@@ -53,24 +56,27 @@ export function usePersonelSuzgeci(
     });
   }, [bolumSuzgeci, rolSuzgeciVar, kaynak]);
   // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
-  useEffect(() => { setBolum(null); setRol('') }, [kaynak]);
+  useEffect(() => { setBolum(null); setRol(''); setGosterge(null) }, [kaynak]);
 
   /** Bolum/rol secimleri de sabit filtreye AND'lenir (cip ve arama ile birlikte). */
   const filtre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (!bolumSuzgeci && !rolSuzgeci) return temel;   // bkz. useBasvuruSuzgeci.filtre
     const kosullar: Kosul[] = [];
     if (temel) kosullar.push(temel);
-    // Bolum: secilen dal + TUM ALT BIRIMLERI.
-    if (bolum && bolum.agac.length > 0)
+    // Bolum: secilen dal + TUM ALT BIRIMLERI. -1 = "Bölümsüz" (963, ağaç).
+    if (bolum?.id === -1)
+      kosullar.push({ alan: 'departmanId', op: 'bos', deger: null });
+    else if (bolum && bolum.agac.length > 0)
       kosullar.push({ alan: 'departmanId', op: 'icinde', deger: bolum.agac });
+    if (gosterge) kosullar.push(gostergeKosulu(gosterge));
     if (rol !== '')
       kosullar.push({ alan: 'rolId', op: 'esit', deger: rol });
     return kosullar.length === 0 ? undefined
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
-  }, [bolumSuzgeci, rolSuzgeci, bolum, rol]);
+  }, [bolumSuzgeci, rolSuzgeci, bolum, rol, gosterge]);
 
-  return { bolum, setBolum, rol, setRol, roller, rolBolumleri, rolSuzgeciVar, bolumIzinli, filtre };
+  return { bolum, setBolum, rol, setRol, gosterge, setGosterge, roller, rolBolumleri, rolSuzgeciVar, bolumIzinli, filtre };
 }
 
 export type PersonelSuzgeci = ReturnType<typeof usePersonelSuzgeci>;

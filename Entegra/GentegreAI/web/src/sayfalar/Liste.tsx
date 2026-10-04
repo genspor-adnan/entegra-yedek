@@ -38,6 +38,7 @@ import { acilAksiyonu } from './liste/acilAksiyonlari';
 import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
 import { onayAksiyonu } from './liste/onayAksiyonlari';
 import { izinAksiyonu } from './liste/izinAksiyonlari';
+import { personelTalepSecenekleri } from '../bilesenler/taleplerim/personelTalebi';
 import { servisAksiyonu } from './liste/servisAksiyonlari';
 import { arizaAksiyonu } from './liste/arizaAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
@@ -103,6 +104,8 @@ import { usePersonelSuzgeci } from './liste/usePersonelSuzgeci';
 import { BasvuruSeridi } from './liste/BasvuruSeridi';
 import { PrimSeridi } from './liste/PrimSeridi';
 import { PersonelSeridi } from './liste/PersonelSeridi';
+import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
+  usePersonelGostergesi } from './liste/PersonelPanelleri';
 import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
 import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
@@ -430,6 +433,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const personelSuzgec = usePersonelSuzgeci(
     tanim.bolumSuzgeci, tanim.rolSuzgeci, tanim.kaynak);
   const rolSuzgeciVar = personelSuzgec.rolSuzgeciVar;
+  // PERSONEL LİSTESİ (963, mockup Ekranlar/IK/personel_listesi.html): gösterge
+  //   şeridi + bölüm ağacı aynı veriden; önizleme sağda, Kart / Organizasyon ek görünüm.
+  const personelEkrani = tanim.kaynak === 'personel' && !portalda;
+  const personelGostergesi = usePersonelGostergesi(personelEkrani, personelSuzgec, yenile);
 
   // HAKEDIS SATIRLARI (prim rolu + kisi) SERIT SUZGECI kendi kancasinda.
   const primSuzgec = usePrimSuzgeci(tanim.primSuzgeci, tanim.kaynak);
@@ -594,7 +601,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   onay kutusundan ya da zincirden verilir.
       if (await izinAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
-        git: yol => git(yol),
+        git: (yol, state) => git(yol, state ? { state } : undefined),
       })) return;
 
       // TEKNIK SERVIS (773): cagri -> is emri -> ziyaret. Iki kapi UCTA -
@@ -1005,7 +1012,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU,
-                       ...(tanim.altSecenekler ?? {}) }}
+                       ...(tanim.altSecenekler ?? {}),
+                       // YENİ TALEP ▾ (personel): yalnız eklemeye yetkili türler.
+                       ...(tanim.altSecenekler?.['personel.talep'] ? { 'personel.talep': personelTalepSecenekleri(yetki, seciliSatir) } : {}) }}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
@@ -1084,7 +1093,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       ) : tanim.primSuzgeci ? (
         <PrimSeridi s={primSuzgec} />
       ) : (tanim.bolumSuzgeci || rolSuzgeciVar) ? (
-        <PersonelSeridi s={personelSuzgec} bolumSuzgeci={tanim.bolumSuzgeci} />
+        // Personel listesinde bölüm SOLDAKİ AĞAÇTA (963) - combo çizilmez.
+        <PersonelSeridi s={personelSuzgec} bolumSuzgeci={tanim.bolumSuzgeci && !personelEkrani} />
       ) : tanim.ekstre && (
         <button
           disabled={!seciliSatir}
@@ -1122,6 +1132,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   portalinda laboratuvarin butun kuyrugu gorunuyordu. Kapsam disi
       //   sayilari gostermek, kaydin kendisini gostermekle ayni sinifta.
       ustPanel={portalda ? undefined
+        : personelEkrani ? <PersonelGostergesi veri={personelGostergesi} s={personelSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
@@ -1191,9 +1202,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       ) : undefined}
       solPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
+        : personelEkrani ? <PersonelBolumAgaci veri={personelGostergesi} s={personelSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
       yanPanel={portalda ? undefined
+        : personelEkrani ? <PersonelOnizleme satir={seciliSatir} yenile={yenile} />
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)
@@ -1240,6 +1253,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // RANDEVU: Liste / Takvim secimi de kaldigi yerden (randevuTercihi).
       gorunumBaslangic={tanim.kaynak === 'randevu' ? randevuTercihiOku(kullanici?.id).liste : undefined}
       onGorunumDegisti={tanim.kaynak === 'randevu' ? g => randevuTercihiYaz(kullanici?.id, { liste: g }) : undefined}
+      ekGorunumler={personelEkrani ? [
+        { ad: 'Kart', ik: '▦', icerik: <PersonelKartlari filtre={personelSuzgec.filtre(undefined)} yenile={yenile} /> },
+        { ad: 'Organizasyon', ik: '⛬', icerik: <PersonelOrganizasyon filtre={personelSuzgec.filtre(undefined)} yenile={yenile} /> },
+      ] : undefined}
+      grupAnalizGizli={personelEkrani}
       ekGorunum={tanim.kaynak === 'dis-lab-isemri' ? { ad: 'Kanban', ik: '🗂', icerik: <DisLabPano yenile={yenile} /> }
       : tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',

@@ -204,13 +204,61 @@ public sealed partial class KartDeposu
             sonuc[ad] = cevrilmis;
         }
 
-        if (yeni)
-            foreach (var zorunlu in detay.Alanlar.Where(a => a.Zorunlu))
-                if (!sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null ||
-                    (d is string m && m.Length == 0))
-                    throw GentegreHatasi.Dogrulama($"{detay.Ad}: {zorunlu.Etiket} zorunlu.",
-                        new AlanHatasi($"{detay.Ad}.{zorunlu.Ad}", $"{zorunlu.Etiket} boş bırakılamaz."));
+        // YENİ satırda zorunlu alan gelmeli; DEĞİŞEN satırda zorunlu alan
+        //   gönderildiyse boşaltılamaz (kullanıcı: "doğ trh girmeden kaydediyor").
+        foreach (var zorunlu in detay.Alanlar.Where(a => a.Zorunlu))
+        {
+            var var_ = sonuc.TryGetValue(zorunlu.Ad, out var d);
+            if ((yeni && !var_) || (var_ && ZorunluBos(zorunlu, d)))
+                throw GentegreHatasi.Dogrulama($"{detay.Ad}: {zorunlu.Etiket} zorunlu.",
+                    new AlanHatasi($"{detay.Ad}.{zorunlu.Ad}", $"{zorunlu.Etiket} boş bırakılamaz."));
+        }
 
         return sonuc;
+    }
+
+    /// <summary>
+    /// Zorunlu alan boş mu: null, boş metin ya da KOD alanında 0. Kod
+    /// kolonları "seçilmedi"yi 0 olarak tutuyor (taraf_personel.cinsiyet
+    /// varsayılanı 0; geçerli kodlar 1/2/3/9) - 0'ı dolu saymak zorunluluğu
+    /// boşa çıkarırdı.
+    /// </summary>
+    private static bool ZorunluBos(KartAlani alan, object? d) =>
+        d is null || (d is string m && m.Trim().Length == 0)
+        || (alan.Tip == "kod" && d is IConvertible && !(d is string)
+            && Convert.ToDecimal(d, CultureInfo.InvariantCulture) == 0m);
+
+    /// <summary>
+    /// 1:1 DETAYIN ZORUNLU ALANLARI (kullanıcı: "doğ trh girmeden kaydediyor").
+    /// Özlük gibi kartla aynı kimliği taşıyan detayda satır-bazlı denetim yetmez:
+    /// mevcut satırda boş kalan zorunlu alan "değişen" yoldan hiç gönderilmez,
+    /// yeni kartta detay hiç gönderilmezse satır da açılmaz. Bu yüzden kayıttan
+    /// SONRA, aynı işlem içinde satır okunur: kart yeniyse ya da detay bu
+    /// kayıtta değiştiyse zorunlu alanlar dolu olmalı - değilse işlem geri alınır.
+    /// Koşullu sekmeler (KosulAlani) denetlenmez: sekme açık değilse alan istenmez.
+    /// </summary>
+    private async Task TekSatirZorunluDenetleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        KartTanimi tanim, long ustId, Dictionary<string, DetayFarki>? farklar, bool yeniKart, CancellationToken iptal)
+    {
+        foreach (var detay in tanim.Detaylar ?? [])
+        {
+            if (detay.UstKolon != detay.IdKolonu || detay.KosulAlani is not null) continue;
+            var zorunlular = detay.Alanlar.Where(a => a.Zorunlu && a.Yazilabilir).ToList();
+            if (zorunlular.Count == 0) continue;
+            if (!yeniKart && (farklar is null || !farklar.ContainsKey(detay.Ad))) continue;
+
+            var secim = string.Join(", ", zorunlular.Select((a, i) => $"{a.Kolon} as k{i.ToString(CultureInfo.InvariantCulture)}"));
+            await using var komut = baglanti.Komut(
+                $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0", islem, ustId);
+            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+            var satirVar = await okuyucu.ReadAsync(iptal);
+            for (var i = 0; i < zorunlular.Count; i++)
+            {
+                var bos = !satirVar || ZorunluBos(zorunlular[i], okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i));
+                if (bos)
+                    throw GentegreHatasi.Dogrulama($"{zorunlular[i].Etiket} zorunlu.",
+                        new AlanHatasi($"{detay.Ad}.{zorunlular[i].Ad}", $"{zorunlular[i].Etiket} boş bırakılamaz."));
+            }
+        }
     }
 }

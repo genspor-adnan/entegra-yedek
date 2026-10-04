@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
 import { hataMetni, type DokumanSatiri } from '../../api/sozlesme';
 import { Modal } from '../../bilesenler/Modal';
@@ -51,10 +52,12 @@ export function AvansKarti() {
 
 function AvansKartiIc({ param }: { param: string | undefined }) {
   const git = useNavigate();
+  // PERSONEL LİSTESİNDEN (Yeni Talep ▾): seçili personel dolu gelir, Kapat listeye döner.
+  const pt = personelTalepDurumu(useLocation().state);
   const { yetki, aksiyonVar } = useOturum();
   const oz = useTaleplerim();
   const [kayitId, setKayitId] = useState<number | null>(param === 'yeni' ? null : Number(param));
-  const [d, setD] = useState<Deger>({ tarafId: 0, tutar: '', taksit: 1, ilkDonem: sonrakiAy(), gerekce: '', aciklama: '' });
+  const [d, setD] = useState<Deger>({ tarafId: pt.personel?.id ?? 0, tutar: '', taksit: 1, ilkDonem: sonrakiAy(), gerekce: '', aciklama: '' });
   const [ilk, setIlk] = useState<Deger | null>(null);
   const [ro, setRo] = useState({ avansNo: '', durum: 0, talepTarihi: '', redNeden: '', iptalNeden: '', odemeTarihi: '', odemeIslemId: 0 });
   const [surum, setSurum] = useState<string | undefined>();
@@ -67,11 +70,11 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
   const [hata, setHata] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const [arama, setArama] = useState(false);
-  const [secilenAd, setSecilenAd] = useState('');
+  const [secilenAd, setSecilenAd] = useState(pt.personel?.ad ?? '');
   const [odeme, setOdeme] = useState({ acik: false, hesapId: 0, nakit: false, tarih: bugunIso() });
   const dosyaRef = useRef<HTMLInputElement>(null);
 
-  const kapat = useCallback(() => git('/personel-avans'), [git]);
+  const kapat = useCallback(() => git(pt.geri ?? '/personel-avans'), [git, pt.geri]);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.avans', kayitId ? 'degistir' : 'ekle');
@@ -153,7 +156,7 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
       const y = await api.avansAc({ tarafId: d.tarafId, tutar, taksitSayisi: d.taksit, ilkDonem: d.ilkDonem, gerekce: d.gerekce,
                                     aciklama: d.aciklama.trim() || undefined });
       setKayitId(y.id);
-      git(`/personel-avans/${y.id}`, { replace: true });
+      git(`/personel-avans/${y.id}`, { replace: true, ...devamDurumu(pt) });
       return y.id;
     }
     const alan: Record<string, unknown> = { tutar, taksitSayisi: d.taksit, ilkDonem: d.ilkDonem, gerekce: d.gerekce, aciklama: d.aciklama };

@@ -10,6 +10,7 @@
  */
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c, cm } from '../../dil/ceviri';
 import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
          type MenuOgesi, type MenuSatiri } from './menuAgaci';
@@ -34,6 +35,10 @@ export interface YanMenuProps {
 export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd,
                           kullaniciKod, rolAdi, kurumProfilAdi }: YanMenuProps) {
   const konum = useLocation();
+  // SEÇİLİ MADDE: talep kartı personel listesinden açıldıysa personel listesi;
+  //   eşleşme tam yol ya da alt yol ("/personel-izin" Personel'i yakmasın).
+  const yol = menuYolu(konum.pathname, konum.state);
+  const secili = (m: string) => yolEslesir(yol, m);
   const { favoriler, favoriToggle } = tercih;
 
   /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
@@ -51,7 +56,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
   //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).
   const [acikGruplar, setAcikGruplar] = useState<Record<string, boolean>>({});
   const grupAcikMi = (ad: string, alt: MenuOgesi[]) =>
-    ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
+    ad in acikGruplar ? acikGruplar[ad] : alt.some(m => secili(m.yol));
 
   // BOLGE ACCORDION (V2): HBYS'de gruplar 7 bolge altinda; ayni anda TEK bolge
   //   acik, digerleri kapali - menu hicbir zaman bir ekrani asmaz. Kullanici
@@ -64,7 +69,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
     s.tur === 'grup' ? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
       : GRUP_SIRA_HBYS.includes(s.m.adHam ?? '') ? grupBolgesi(s.m.adHam) : undefined;
   const satirAktifMi = (s: MenuSatiri) => s.tur === 'grup'
-    ? s.alt.some(m => konum.pathname.startsWith(m.yol)) : konum.pathname.startsWith(s.m.yol);
+    ? s.alt.some(m => secili(m.yol)) : secili(s.m.yol);
   const tumBolgeler = bolgeliMenu
     ? BOLGE_HBYS.map(b => ({ b, satirlar: satirlar.filter(s => satirBolgesi(s)?.ad === b.ad) }))
       .filter(x => x.satirlar.length > 0)
@@ -89,7 +94,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
   /** Grupsuz duz oge (Ana Sayfa disinda or. Demirbas). */
   const duzCiz = (m: MenuOgesi) => (
     <NavLink key={m.yol} to={m.yol}
-             className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}>
+             className={() => `mi ${secili(m.yol) ? 'on' : ''}`}>
       <MenuIkon ic={m.ic} />
       <span>{m.ad}</span>
       {yildiz(m.yol)}
@@ -112,7 +117,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                   <NavLink
                     key={a.m.yol}
                     to={a.m.yol}
-                    className={() => `mi ${konum.pathname.startsWith(a.m.yol) ? 'on' : ''}`}
+                    className={() => `mi ${secili(a.m.yol) ? 'on' : ''}`}
                     style={{ paddingLeft: 34 }}
                   >
                     <MenuIkon ic={a.m.ic} />
@@ -139,7 +144,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                       <NavLink
                         key={m.yol}
                         to={m.yol}
-                        className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}
+                        className={() => `mi ${secili(m.yol) ? 'on' : ''}`}
                         style={{ paddingLeft: 52 }}
                       >
                         <MenuIkon ic={m.ic} />
@@ -160,7 +165,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                 yetkilerde en basa al"). */}
             {panelYetkisi && (
               <NavLink to="/panel"
-                       className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
+                       className={() => `mi ${yol === '/panel' ? 'on' : ''}`}>
                 <span className="ic">🏠</span>
                 <span>{cm('Ana Sayfa')}</span>
               </NavLink>
@@ -187,7 +192,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                   const yol = m.yol;
                   return (
                     <NavLink key={`fav-${yol}`} to={yol} style={{ paddingLeft: 34 }}
-                             className={() => `mi ${konum.pathname.startsWith(yol) ? 'on' : ''}`}>
+                             className={() => `mi ${secili(yol) ? 'on' : ''}`}>
                       <MenuIkon ic={m.ic} />
                       <span>{m.ad}</span>
                       {yildiz(yol)}
@@ -208,7 +213,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
               <NavLink
                 key={s.m.yol}
                 to={s.m.yol}
-                className={() => `mi ${konum.pathname.startsWith(s.m.yol) ? 'on' : ''}`}
+                className={() => `mi ${secili(s.m.yol) ? 'on' : ''}`}
               >
                 <MenuIkon ic={s.m.ic} />
                 <span>{s.m.ad}</span>

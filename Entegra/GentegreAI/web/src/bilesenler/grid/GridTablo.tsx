@@ -3,6 +3,7 @@ import { c } from '../../dil/ceviri';
 import { bicimle } from '../bicim';
 import { durumRozeti, ikonHucre, rozetHucre, yuzdeRozeti } from '../gridHucre';
 import { agacAdi } from './agacDizim';
+import { satirHucre } from './satirHucre';
 import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
 
 /**
@@ -168,6 +169,9 @@ export function GridTablo(p: GridTabloProps) {
                   {bicimle(agacAdi(satir[k.ad]), k, p.kaynak)}
                 </span>
               ) : (
+                // SATIRDAN BESLENEN BİÇİM (963): kişi / iki satır / çubuk /
+                //   sayaç / uyarı - undefined dönerse olağan zincir.
+                satirHucre(satir, k) !== undefined ? satirHucre(satir, k) :
                 ikonHucre(satir[k.ad], k) ?? yuzdeRozeti(satir[k.ad], k)
                   ?? rozetHucre(satir[k.ad], k)
                   ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k, p.kaynak)

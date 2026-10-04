@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
 import { hataMetni, type DokumanSatiri } from '../../api/sozlesme';
 import { Modal } from '../../bilesenler/Modal';
@@ -47,10 +48,12 @@ export function MasrafKarti() {
 
 function MasrafKartiIc({ param }: { param: string | undefined }) {
   const git = useNavigate();
+  // PERSONEL LİSTESİNDEN (Yeni Talep ▾): seçili personel dolu gelir, Kapat listeye döner.
+  const pt = personelTalepDurumu(useLocation().state);
   const { yetki } = useOturum();
   const oz = useTaleplerim();
   const [kayitId, setKayitId] = useState<number | null>(param === 'yeni' ? null : Number(param));
-  const [bas, setBas] = useState({ tarafId: 0, beyanTarihi: bugunIso(), konu: '', ilgiliIzinId: null as number | null, aciklama: '' });
+  const [bas, setBas] = useState({ tarafId: pt.personel?.id ?? 0, beyanTarihi: bugunIso(), konu: '', ilgiliIzinId: null as number | null, aciklama: '' });
   const [ilkBas, setIlkBas] = useState<typeof bas | null>(null);
   const [satirlar, setSatirlar] = useState<Satir[]>([]);
   const [ilkSatirlar, setIlkSatirlar] = useState<Satir[]>([]);
@@ -66,12 +69,12 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
   const [hata, setHata] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const [arama, setArama] = useState(false);
-  const [secilenAd, setSecilenAd] = useState('');
+  const [secilenAd, setSecilenAd] = useState(pt.personel?.ad ?? '');
   const fisRef = useRef<HTMLInputElement>(null);
   const yeniFisRef = useRef<HTMLInputElement>(null);
   const fisHedef = useRef<string | null>(null);
 
-  const kapat = useCallback(() => git('/personel-masraf'), [git]);
+  const kapat = useCallback(() => git(pt.geri ?? '/personel-masraf'), [git, pt.geri]);
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.masraf', kayitId ? 'degistir' : 'ekle');
   const yazB = <K extends keyof typeof bas>(k: K, v: (typeof bas)[K]) => setBas(o => ({ ...o, [k]: v }));
@@ -195,7 +198,7 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
       if (degisti) await satirYaz(bid, s);
       if (s.bekleyenFis) await fisBagla(bid, s.belgeNo, s.bekleyenFis);
     }
-    if (!kayitId) git(`/personel-masraf/${bid}`, { replace: true });
+    if (!kayitId) git(`/personel-masraf/${bid}`, { replace: true, ...devamDurumu(pt) });
     else await oku(bid);
     return bid;
   };

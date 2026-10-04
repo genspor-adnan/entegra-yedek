@@ -513,7 +513,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (303 ad, 140 tanesi birden cok dosyada)
+## Gorunumler (304 ad, 140 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -736,6 +736,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_vekalet` | `940_personel_unvan_yalniz_onek.sql` | 746_onay_bildirim_vekalet.sql |
 | `v_personel_avans` | `940_personel_unvan_yalniz_onek.sql` | 753_avans_modulu.sql, 755_avans_kaynak_tur_duzeltmesi.sql |
 | `v_personel_belge_talep` | `940_personel_unvan_yalniz_onek.sql` | 765_personel_belge_talebi.sql |
+| `v_personel_durum` | `963_personel_listesi.sql` | — |
 | `v_personel_grup_lookup` | `940_personel_unvan_yalniz_onek.sql` | 848_personel_bolum_gruplu_lookup.sql |
 | `v_personel_hareket` | `940_personel_unvan_yalniz_onek.sql` | 840_personel_hareket.sql, 843_kadro_ana_rol.sql |
 | `v_personel_izin` | `940_personel_unvan_yalniz_onek.sql` | 743_izin_modulu.sql |
