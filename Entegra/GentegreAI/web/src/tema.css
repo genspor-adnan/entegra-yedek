@@ -7053,3 +7053,38 @@ table.av-gecmis { width: calc(100% - 24px); margin: 6px 12px 10px; border-collap
 table.av-gecmis td { border-bottom: 1px solid var(--cizgi2); padding: 4px 6px }
 table.av-gecmis .r { text-align: right }
 .it-bakiye.av-maas > div b { font-size: 13px; white-space: nowrap }
+
+/* =====================================================================
+   MASRAF BEYANI KARTI (961, mockup Ekranlar/IK/masraf_karti.html). mk- oneki.
+   ===================================================================== */
+table.mk-satirlar { width: 100%; border-collapse: collapse; font-size: 11px }
+table.mk-satirlar th, table.mk-satirlar td { border-bottom: 1px solid var(--cizgi2); padding: 3px 4px; text-align: left; vertical-align: middle }
+table.mk-satirlar th { background: var(--yuz2); color: var(--soluk); font-weight: 400; white-space: nowrap }
+table.mk-satirlar th.r { text-align: right }
+table.mk-satirlar input, table.mk-satirlar select { width: 100%; height: 22px; font-size: 11px; min-width: 60px }
+table.mk-satirlar input[type=date] { min-width: 112px }
+table.mk-satirlar input.r { text-align: right; min-width: 70px }
+table.mk-satirlar tr.mk-secili td { background: #eef5fd }
+table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
+.mk-fis { width: 30px; height: 24px; border: 1px solid var(--cizgi); border-radius: 3px; display: inline-flex; align-items: center;
+  justify-content: center; font-size: 12px; background: var(--yuz); cursor: pointer }
+.mk-fis-var { background: repeating-linear-gradient(135deg, #dfe7f1 0 4px, #eef3f9 4px 8px); border-color: #9cc1ea }
+.mk-fis-yok { border-style: dashed; color: #b23b3b; border-color: #e4b7b2 }
+.mk-ekle { display: flex; gap: 6px; padding: 8px 12px }
+.mk-toplam { display: flex; gap: 16px; justify-content: flex-end; padding: 8px 12px; background: #eef5fd; border-top: 1px solid #bcd2ef;
+  font-size: 11.5px; color: #2f5c9e; border-radius: 0 0 4px 4px }
+.mk-toplam b { font-size: 14px }
+.mk-oniz { margin: 10px 12px; border: 1px solid var(--cizgi2); border-radius: 4px; min-height: 170px; max-height: 320px; display: flex;
+  align-items: center; justify-content: center; overflow: hidden; background: repeating-linear-gradient(135deg, #eef3f9 0 10px, #f7f9fc 10px 20px) }
+.mk-oniz > img { max-width: 100%; max-height: 318px; cursor: zoom-in }
+.mk-kontrol { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; font-size: 11px }
+.mk-k-ok::before { content: "✔ "; color: #2e7d46 }
+.mk-k-uy::before { content: "⚠ "; color: #8a6414 }
+.mk-k-er { color: #b23b3b }
+.mk-k-er::before { content: "✖ " }
+.mk-dagilim { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; font-size: 11px }
+.mk-dg { display: grid; grid-template-columns: 120px 1fr 72px; gap: 6px; align-items: center }
+.mk-dg > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.mk-dg .r { text-align: right }
+.mk-cb { height: 8px; background: var(--yuz2); border-radius: 4px; overflow: hidden }
+.mk-cb > i { display: block; height: 100%; background: #5fae7a }

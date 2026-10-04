@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masraf Beyanı Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#5fb57c,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1.4fr 1.3fr 110px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.kisa{width:64px;justify-content:center}
+  .inp.pasif{background:#f3f5f8;color:#9aa7b5}
+  .combo{position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .govde{display:grid;grid-template-columns:1fr 430px}
+  .sol{border-right:1px solid var(--line2)}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);display:flex;gap:8px;align-items:center;
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0}
+  .grp h4 .ek{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .grp .iz .tam{grid-column:1 / -1}
+  /* TUR SECIMI: buyuk dugmeler - neyin olacagini tur belirler */
+  .turler{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .tur{border:1px solid var(--line);border-radius:4px;padding:7px 6px;background:#fff;text-align:center;font-size:11px;line-height:1.3}
+  .tur b{display:block;font-size:12px;margin-bottom:2px}
+  .tur.on{background:var(--sel);border-color:var(--selbd);color:var(--navy)}
+  .tur .ne{color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .ikili{display:flex;gap:6px;align-items:center}
+  .tire{color:var(--muted)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-plan{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  /* TAKVIM SERIDI: istisnanin plani nasil degistirdigi */
+  .hafta{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:10px 12px}
+  .hg{border:1px solid var(--line2);border-radius:3px;padding:5px;text-align:center;font-size:10.5px;background:#fff}
+  .hg .t{font-weight:bold;color:var(--navy)}
+  .hg.kapali{background:repeating-linear-gradient(135deg,#f7e3e1 0 6px,#fbefee 6px 12px);border-color:#e4b7b2;color:#8f3d36}
+  .hg.bos{opacity:.45}
+  .uyari{margin:10px 12px 0;padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px}
+  .bilgi{margin:10px 12px 0;padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  table.dg{border-collapse:collapse;width:100%;font-size:11px}
+  table.dg th{background:var(--head2);text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);font-weight:normal;color:var(--muted)}
+  table.dg td{padding:4px 6px;border-bottom:1px solid var(--line2)}
+  .kutu{width:13px;height:13px;border:1px solid #8aa0b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+  .toplu{display:flex;gap:4px;padding:8px 10px;border-top:1px solid var(--line2);background:var(--head);flex-wrap:wrap}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  .aciklama{max-width:1080px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  /* ACILIR / KAPANIR BOLUMLER (kullanici: "sekmeler acilir olsun"): basliga tikla. */
+  .grp > h4{cursor:pointer;user-select:none}
+  .grp > h4::before{content:"▾";color:var(--muted);font-size:10px;width:10px}
+  .grp.kapali > h4::before{content:"▸"}
+  .grp.kapali > h4{border-bottom:none;border-radius:4px}
+  .grp.kapali > :not(h4){display:none}
+
+  /* ===== IZIN TALEP KARTI ===== */
+  .bakiye{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px}
+  .bk{border:1px solid var(--line2);border-radius:4px;padding:6px 8px;background:#fbfcfe;font-size:10.5px;color:var(--muted)}
+  .bk b{display:block;font-size:15px;color:var(--navy)}
+  .bk.son{border-color:#bfe0c8;background:#f2faf5}
+  .bk.son b{color:#2e7d46}
+  .bk.eksi{border-color:#e4b7b2;background:#fdf1f0}
+  .bk.eksi b{color:#8f3d36}
+  .cubuk{display:flex;height:9px;border-radius:5px;overflow:hidden;background:#e3e9f0;margin:0 12px 4px}
+  .cubuk i{display:block;height:100%}
+  .lej{display:flex;gap:10px;font-size:10px;color:var(--muted);padding:0 12px 10px}
+  .lej span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle;background:var(--c)}
+  .takvim{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:10px 12px}
+  .gun{border:1px solid var(--line2);border-radius:3px;min-height:38px;padding:3px 4px;font-size:10px;background:#fff}
+  .gun .n{font-weight:bold;color:var(--navy)}
+  .gun.izin{background:repeating-linear-gradient(135deg,#e3ecfa 0 5px,#f3f7fd 5px 10px);border-color:#bcd2ef}
+  .gun.tatil{background:#fdf6e6;border-color:#f0d9a8;color:#8a6414}
+  .gun.hs{background:#f3f6fa;color:#9aa7b5}
+  .gun.yarim{background:linear-gradient(90deg,#e3ecfa 55%,#fff 55%)}
+  .ekipt{width:100%;border-collapse:collapse;font-size:10.5px}
+  .ekipt th,.ekipt td{border:1px solid var(--line2);padding:3px 4px;text-align:center}
+  .ekipt th{background:var(--head);color:var(--muted);font-weight:normal}
+  .ekipt td.ad{text-align:left;white-space:nowrap}
+  .ekipt td.i{background:#e3ecfa;color:#2f5c9e;font-weight:bold}
+  .ekipt td.ben{background:#d6e6fb;color:#1f4f8f;font-weight:bold}
+  .ekipt td.cak{background:#fdecea;color:#b3261e;font-weight:bold}
+  .zincir2{display:flex;flex-direction:column;gap:6px;padding:10px 12px}
+  .bs{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;font-size:11px}
+  .bs i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;font-weight:bold;border:2px solid #b9c4d0;color:var(--muted);background:#fff}
+  .bs.ok i{background:#2e7d46;border-color:#2e7d46;color:#fff}
+  .bs.su i{border-color:#e0a33a;color:#e0a33a;box-shadow:0 0 0 3px #fdf1dc}
+  .bs small{display:block;color:var(--muted);font-size:10px}
+  .bs.ek{opacity:.85}
+  .bs.ek b::after{content:" · bakiye aşımı";color:#8f3d36;font-weight:normal;font-size:10px}
+  .akis{display:flex;flex-direction:column;gap:7px;padding:10px 12px;font-size:11px}
+  .akis div small{display:block;color:var(--muted);font-size:10px}
+  .tursec{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .tursec div{border:1px solid var(--line2);border-radius:5px;padding:6px 7px;background:#fbfcfe;font-size:11px}
+  .tursec div b{display:block;font-size:11.5px;color:var(--navy)}
+  .tursec div span{font-size:10px;color:var(--muted)}
+  .tursec div.on{border-color:#2f6db3;background:#e3ecfa;box-shadow:0 0 0 2px #cfe0f6}
+  .sure{display:flex;gap:4px}
+  .sure span{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#fff}
+  .sure span.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .ozetsat{display:flex;gap:14px;align-items:center;padding:8px 12px;background:#eef5fd;border-top:1px solid #bcd2ef;font-size:11.5px;color:#2f5c9e}
+  .ozetsat b{font-size:13px}
+  .etiket-not{font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px dashed #bcd2ef;border-radius:4px;padding:5px 8px;margin:0 12px 10px}
+
+  /* ===== AVANS KARTI ===== */
+  .tutarkut{display:flex;align-items:center;gap:8px}
+  .tutarkut .inp{font-size:15px;font-weight:bold;color:var(--navy);text-align:right;width:160px;height:28px}
+  .hizlit{display:flex;gap:4px}
+  .hizlit span{border:1px solid var(--line);border-radius:12px;padding:1px 8px;font-size:10.5px;background:#fff}
+  .taksitsec{display:flex;gap:3px}
+  .taksitsec span{width:26px;height:24px;border:1px solid var(--line);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;background:#fff}
+  .taksitsec span.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .taksitsec span.pasif{color:#c3ccd6;background:#f6f8fa}
+  .plan{width:100%;border-collapse:collapse;font-size:11px}
+  .plan th,.plan td{border-bottom:1px solid var(--line2);padding:5px 8px;text-align:left}
+  .plan th{background:var(--head);color:var(--muted);font-weight:normal}
+  .plan td.r,.plan th.r{text-align:right}
+  .plan tr.kesildi td{color:#2e7d46}
+  .plan tr.sira td{background:#fdf6e6}
+  .plan tr.toplam td{font-weight:bold;border-top:2px solid var(--line)}
+  .maas{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 12px}
+  .ms{border:1px solid var(--line2);border-radius:4px;padding:6px 8px;background:#fbfcfe;font-size:10.5px;color:var(--muted)}
+  .ms b{display:block;font-size:14px;color:var(--navy)}
+  .ms.dikkat{border-color:#f0d9a8;background:#fdf6e6}
+  .ms.dikkat b{color:#8a6414}
+  .oran{height:9px;border-radius:5px;background:#e3e9f0;overflow:hidden;margin:0 12px 4px;display:flex}
+  .oran i{display:block;height:100%}
+  .odeme{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px 12px}
+  .gecmis{width:100%;border-collapse:collapse;font-size:10.5px}
+  .gecmis td{border-bottom:1px solid var(--line2);padding:4px 8px}
+  .gecmis td.r{text-align:right}
+
+  /* ===== MASRAF KARTI ===== */
+  .satirlar{width:100%;border-collapse:collapse;font-size:11px}
+  .satirlar th,.satirlar td{border-bottom:1px solid var(--line2);padding:4px 5px;text-align:left;vertical-align:middle}
+  .satirlar th{background:var(--head);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .satirlar td.r,.satirlar th.r{text-align:right}
+  .satirlar .inp{height:22px;font-size:11px}
+  .satirlar tr.secili td{background:#eef5fd}
+  .satirlar tr.uyar td{background:#fdf6e6}
+  .fis{width:30px;height:24px;border:1px solid var(--line);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;background:#fff}
+  .fis.var{background:repeating-linear-gradient(135deg,#dfe7f1 0 4px,#eef3f9 4px 8px);border-color:#9cc1ea}
+  .fis.yok{border-style:dashed;color:#b23b3b;border-color:#e4b7b2}
+  .toplamsat{display:flex;gap:16px;justify-content:flex-end;padding:8px 12px;background:#eef5fd;border-top:1px solid #bcd2ef;font-size:11.5px;color:#2f5c9e}
+  .toplamsat b{font-size:14px}
+  .satirekle{display:flex;gap:6px;padding:8px 12px}
+  .dagilim{display:flex;flex-direction:column;gap:5px;padding:10px 12px;font-size:11px}
+  .dg-sat{display:grid;grid-template-columns:110px 1fr 70px;gap:6px;align-items:center}
+  .dg-sat .cb{height:8px;background:#e3e9f0;border-radius:4px;overflow:hidden}
+  .dg-sat .cb i{display:block;height:100%;background:#5fae7a}
+  .onizle{margin:10px 12px;border:1px solid var(--line2);border-radius:4px;height:190px;display:flex;align-items:center;justify-content:center;
+    background:repeating-linear-gradient(135deg,#eef3f9 0 10px,#f7f9fc 10px 20px);color:var(--muted);font-size:11px;flex-direction:column;gap:4px}
+  .onizle b{color:var(--navy);font-size:12px}
+  .kontrol{display:flex;flex-direction:column;gap:5px;padding:10px 12px;font-size:11px}
+  .kontrol div::before{margin-right:6px}
+  .kontrol .ok::before{content:"✔";color:#2e7d46}
+  .kontrol .uy::before{content:"⚠";color:#8a6414}
+  .kontrol .er::before{content:"✖";color:#b23b3b}
+</style>
+</head>
+<body>
+
+<div class="win">
+<div class="title">🧾 Masraf Beyanı — MB-2026-0092 · Dr. Aslı Demir
+<span class="sp">İK › Masraf Beyanları · kart · beyan → onay zinciri → muhasebe öder</span></div>
+
+<div class="toolbar">
+<div class="btn primary">💾 Kaydet</div>
+<div class="btn">📨 Onaya gönder</div>
+<div class="btn">🖨 Masraf formu</div>
+<div class="btn">⧉ Kopyala</div>
+<div class="btn danger">✖ İptal et</div>
+<div class="btn sp">Kapat</div>
+</div>
+
+<div class="idstrip" style="grid-template-columns:1.7fr 1fr .8fr 1fr">
+<div class="fld"><label class="req">Personel</label>
+<div class="ikili"><div class="inp big" style="flex:1">Dr. Aslı Demir <span style="color:var(--muted);font-weight:normal">· Kardiyoloji · Uzman Doktor</span></div><span class="btn kucuk">…</span></div></div>
+<div class="fld"><label>Beyan no</label><div class="inp pasif">MB-2026-0092</div></div>
+<div class="fld"><label>Beyan tarihi</label><div class="inp">02.10.2026</div></div>
+<div class="fld"><label>Durum</label><div class="inp"><span class="chip c-bek">Onayda · Mali işler</span></div></div>
+</div>
+
+<div class="govde">
+<div class="sol">
+<div class="grp">
+<h4>Beyan</h4>
+<div class="iz">
+<div class="fld"><label class="req">Konu / amaç</label><div class="inp combo">Kongre katılımı</div></div>
+<div class="fld"><label>İlgili</label><div class="inp">ESC 2026 Barselona · izin İZ-2026-0418 ↗</div></div>
+<div class="fld tam"><label>Açıklama</label><div class="inp">Avrupa Kardiyoloji Kongresi konaklama ve ulaşım giderleri</div></div>
+</div>
+</div>
+
+<div class="grp">
+<h4>Harcamalar <span class="ek">her satır bir belgedir · belgesiz satır yazılamaz</span></h4>
+<div style="padding:8px 12px 0;overflow-x:auto">
+<table class="satirlar">
+<tr><th>#</th><th>Tarih</th><th>Gider kalemi</th><th>Belge</th><th>Belge no</th><th class="r">Tutar</th><th class="r">KDV</th><th>Açıklama</th><th>Fiş</th><th></th></tr>
+<tr><td>1</td><td><div class="inp">12.10.2026</div></td><td><div class="inp combo">Konaklama</div></td><td><div class="inp combo">Fatura</div></td><td><div class="inp">HTL2026001842</div></td><td class="r"><div class="inp" style="text-align:right">840,00</div></td><td class="r"><div class="inp" style="text-align:right">76,36</div></td><td><div class="inp">3 gece otel</div></td><td><span class="fis var">📎</span></td><td>✕</td></tr>
+<tr class="secili"><td>2</td><td><div class="inp">12.10.2026</div></td><td><div class="inp combo">Ulaşım</div></td><td><div class="inp combo">Bilet</div></td><td><div class="inp">TK-1854-22</div></td><td class="r"><div class="inp" style="text-align:right">380,00</div></td><td class="r"><div class="inp" style="text-align:right">0,00</div></td><td><div class="inp">havalimanı transfer</div></td><td><span class="fis var">📎</span></td><td>✕</td></tr>
+<tr class="uyar"><td>3</td><td><div class="inp">13.10.2026</div></td><td><div class="inp combo">Yemek</div></td><td><div class="inp combo">Fiş</div></td><td><div class="inp">0045</div></td><td class="r"><div class="inp" style="text-align:right">120,00</div></td><td class="r"><div class="inp" style="text-align:right">10,91</div></td><td><div class="inp">akşam yemeği</div></td><td><span class="fis yok" title="Fiş görüntüsü yok">＋</span></td><td>✕</td></tr>
+</table>
+</div>
+<div class="satirekle"><span class="btn kucuk">＋ Satır</span><span class="btn kucuk">📷 Fiş fotoğrafından ekle</span><span class="btn kucuk">⧉ Satırı çoğalt</span></div>
+<div class="toplamsat"><span>3 belge</span><span>KDV: <b>87,27</b></span><span>KDV hariç: <b>1.252,73</b></span><span>Toplam: <b>1.340,00 ₺</b></span></div>
+</div>
+</div>
+
+<!-- SAG -->
+<div class="sag">
+<div class="grp">
+<h4>Fiş önizleme <span class="ek">satır 2 · TK-1854-22</span></h4>
+<div class="onizle"><b>📄 ucak_bileti.pdf</b>sayfa 1 / 1 · tıkla: büyüt<span class="btn kucuk">⬇ İndir</span></div>
+</div>
+
+<div class="grp">
+<h4>Kontrol <span class="ek">göndermeden önce</span></h4>
+<div class="kontrol">
+<div class="ok">Her satırda belge no var</div>
+<div class="uy">Satır 3'ün fiş görüntüsü yok</div>
+<div class="ok">Mükerrer belge yok (diğer beyanlarda aynı belge no aranır)</div>
+<div class="ok">Harcamalar son 60 günde</div>
+<div class="uy">Yemek günlük sınırı 400 ₺ - aşılmadı (120 ₺)</div>
+<div class="ok">Personelin âmiri tanımlı - onaya gidebilir</div>
+</div>
+</div>
+
+<div class="grp">
+<h4>Gider dağılımı</h4>
+<div class="dagilim">
+<div class="dg-sat"><span>Konaklama</span><span class="cb"><i style="width:63%"></i></span><span style="text-align:right">840,00</span></div>
+<div class="dg-sat"><span>Ulaşım</span><span class="cb"><i style="width:28%"></i></span><span style="text-align:right">380,00</span></div>
+<div class="dg-sat"><span>Yemek</span><span class="cb"><i style="width:9%"></i></span><span style="text-align:right">120,00</span></div>
+</div>
+</div>
+
+<div class="grp">
+<h4>Onay zinciri <span class="ek">Masraf Beyanı Onayı</span></h4>
+<div class="zincir2">
+<div class="bs ok"><i>✓</i><span><b>Birim âmiri</b><small>Doç. Dr. Cem Yalın · 03.10 10:05</small></span><span class="chip c-ok">Onayladı</span></div>
+<div class="bs su"><i>2</i><span><b>Mali işler</b><small>Sema Ak · bugün</small></span><span class="btn kucuk">🔔 Hatırlat</span></div>
+</div>
+<div style="padding:0 12px 10px;display:flex;gap:6px">
+<span class="btn kucuk ok">✔ Onayla</span><span class="btn kucuk">✕ Reddet</span><span class="btn kucuk">? Bilgi iste</span>
+<span style="font-size:10px;color:var(--muted);align-self:center">yalnız sıradaki basamağın sahibine</span></div>
+<div class="bilgi" style="margin:0 12px 12px">Ödeme bu modülde değil: onaylanan beyan <b>muhasebeye</b> düşer, maaşla ya da ayrı ödenir.
+Talep eden Taleplerim'de "Bana ödenecek" olarak görür.</div>
+</div>
+
+<div class="grp">
+<h4>Son beyanlar <span class="ek">son 12 ay</span></h4>
+<div style="padding:6px 12px 10px">
+<table class="gecmis">
+<tr><td>MB-2026-0061</td><td>Ağustos 2026</td><td class="r">640 ₺</td><td><span class="chip c-ok">Onaylandı</span></td></tr>
+<tr><td>MB-2026-0017</td><td>Mart 2026</td><td class="r">2.150 ₺</td><td><span class="chip c-ok">Onaylandı</span></td></tr>
+</table>
+</div>
+</div>
+
+<div class="grp">
+<h4>Akış <span class="ek">en yeni altta</span></h4>
+<div class="akis">
+<div>Beyan oluşturuldu<small>Dr. Aslı Demir · Taleplerim · 02.10 18:20</small></div>
+<div>3 satır, 2 fiş eklendi<small>02.10 18:31</small></div>
+<div>Onaya gönderildi<small>zincir: Birim âmiri → Mali işler · 02.10 18:33</small></div>
+<div>Birim âmiri onayladı<small>Doç. Dr. Cem Yalın · 03.10 10:05</small></div>
+<div style="color:#8a6414">Mali işler onayında<small>bugün</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="win"><div style="padding:10px 14px;font-size:11px;line-height:1.6">
+<b>NOT (mockup):</b> Kullanıcı: "Masraf beyanları listesinde masraf kartı için mockup yap". İzin ve avans kartı düzeni.
+<b>Kimlik şeridi:</b> personel (jenerik arama, Yeni / Düzenle yok), beyan no (onaya gönderince kesilir), beyan tarihi, durum + bekleyen basamak.
+<b>Sol:</b> beyan (konu / amaç seçimli, ilgili - örn. aynı tarihlerdeki izin talebine bağlantı, açıklama) ve <b>harcamalar tablosu</b>
+(satır içinde düzenlenir: tarih, gider kalemi, belge türü, belge no, tutar, KDV, açıklama, fiş görüntüsü; satır ekle / çoğalt;
+"fiş fotoğrafından ekle" görüntüyü yükler ve satırı açar); altında belge sayısı, KDV, KDV hariç ve toplam.
+<b>Sağ:</b> seçili satırın <b>fiş önizlemesi</b>, <b>gönderim öncesi kontrol</b> (belge no, fişsiz satır, mükerrer belge, 60 günden eski harcama,
+gider kalemi günlük sınırı, âmir tanımı - uyarılar engel değil, belgesiz satır ve âmirsiz gönderim engeldir), <b>gider dağılımı</b>,
+<b>onay zinciri</b> (hatırlat; sıradakine Onayla / Reddet / Bilgi iste; ödeme muhasebede), <b>son beyanlar</b>, akış.
+Araç çubuğu: Kaydet, Onaya gönder, Masraf formu (yazdır), Kopyala, İptal et. Onaya gidince satırlar kilitlenir, fiş eklenebilir.
+</div></div>
+
+</body>
+</html>

@@ -59,6 +59,10 @@ export async function izinAksiyonu(
   if (!kod.startsWith('personel-izin.') && !kod.startsWith('izin-bakiye.')
       && !kod.startsWith('personel-avans.') && !kod.startsWith('personel-masraf.')
       && !kod.startsWith('personel-belge-talep.')) return false;
+  // CRUD GENEL İŞLEYİCİDE (kullanıcı: "Personel Avansları listesinde yeni basınca
+  //   'Önce bir avans seçin' diyor"): Yeni / Düzenle / Sil kartı açar ya da siler
+  //   - burada yakalanınca seçili satır aranıp hata veriyordu.
+  if (kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('.sil')) return false;
 
   const id = Number(satir?.id ?? 0);
   const tarafId = Number(satir?.tarafId ?? 0);

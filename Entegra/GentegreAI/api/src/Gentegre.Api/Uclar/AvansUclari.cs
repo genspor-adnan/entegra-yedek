@@ -44,6 +44,8 @@ public static partial class AvansUclari
         /// <summary>İlk kesinti dönemi "yyyy-MM"; boşsa gelecek ay.</summary>
         public string? IlkDonem { get; set; }
         public string? Gerekce { get; set; }
+        /// <summary>960: kart açıklaması açılışta yazılır.</summary>
+        public string? Aciklama { get; set; }
     }
 
     public sealed class AvansOdemeIstegi
@@ -118,12 +120,12 @@ public static partial class AvansUclari
             var id = await baglanti.TekDegerAsync<int>("""
                 insert into public.personel_avans
                        (taraf_id, tutar, taksit_sayisi, ilk_donem, gerekce,
-                        durum, talep_tarihi, sube_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, 0, current_date, @p5, @p6)
+                        durum, talep_tarihi, sube_id, ekleyen, aciklama)
+                values (@p0, @p1, @p2, @p3, @p4, 0, current_date, @p5, @p6, @p7)
                 returning id
                 """, islem,
                 [istek.TarafId, istek.Tutar, taksit, donem, istek.Gerekce ?? "",
-                 baglam.SubeId ?? p["subeId"], baglam.KullaniciId], iptal);
+                 baglam.SubeId ?? p["subeId"], baglam.KullaniciId, istek.Aciklama?.Trim() ?? ""], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogAvans, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

@@ -109,6 +109,15 @@ export const izinUclari = {
   avansBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/avans-baglam?${p}`),
   avansHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/avans/${id}/hatirlat`, {}),
 
+  /** Masraf kartı (961): satırlar (fiş bağı), kalemler, kontrol, izinler, geçmiş, akış. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  masrafBaglam: (p: URLSearchParams) => istek<any>(`/api/ik/masraf-baglam?${p}`),
+  masrafSatirGuncelle: (satirId: number, g: {
+    masrafId?: number; harcamaTarihi?: string; belgeTuru?: number;
+    belgeNo: string; tutar: number; kdvTutar?: number; aciklama?: string;
+  }) => istek<{ satirId: number }>(`/api/ik/masraf/satir/${satirId}`, { method: 'PUT', body: JSON.stringify(g) }),
+  masrafHatirlat: (id: number) => gonder<{ bildirim: number }>(`/api/ik/masraf/${id}/hatirlat`, {}),
+
   izinBakiye: (tarafId: number, yil?: number) =>
     istek<IzinBakiyesi>(`/api/ik/personel/${tarafId}/izin-bakiye`
       + (yil ? `?yil=${yil}` : '')),
@@ -152,7 +161,7 @@ export const izinUclari = {
   // işlemidir - avansta yalnız bağ durur.
   avansAc: (g: {
     tarafId: number; tutar: number; taksitSayisi?: number;
-    ilkDonem?: string; gerekce?: string;
+    ilkDonem?: string; gerekce?: string; aciklama?: string;
   }) => gonder<{
     id: number; tutar: number; taksit: number; ilkDonem: string;
     durum: number; uyarilar: string[];
@@ -188,7 +197,7 @@ export const izinUclari = {
   // ======================================================= masraf beyani ==
   //  ODEME YOK (764): zincir onayla biter, muhasebe disarida oder.
 
-  masrafAc: (g: { tarafId: number; beyanTarihi?: string; aciklama?: string }) =>
+  masrafAc: (g: { tarafId: number; beyanTarihi?: string; aciklama?: string; konu?: string; ilgiliIzinId?: number | null }) =>
     gonder<{ id: number; durum: number }>('/api/ik/masraf', g),
 
   /** Belgesiz satir YAZILAMAZ - `belgeNo` zorunlu (db kisiti da korur). */

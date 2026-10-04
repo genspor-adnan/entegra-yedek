@@ -25,7 +25,7 @@ namespace Gentegre.Api.Uclar;
 /// olmayan bir ödeme izini varmış gibi göstermektense hiç göstermemek
 /// doğru.
 /// </summary>
-public static class MasrafBeyaniUclari
+public static partial class MasrafBeyaniUclari
 {
     /// <summary>islem_log.tablo_id — personel_masraf / satır.</summary>
     private const int LogBeyan = 1312;
@@ -39,6 +39,9 @@ public static class MasrafBeyaniUclari
         public int TarafId { get; set; }
         public DateOnly? BeyanTarihi { get; set; }
         public string? Aciklama { get; set; }
+        /// <summary>961: konu ve ilgili izin - kart açılışta yazar (sonra generic kart).</summary>
+        public string? Konu { get; set; }
+        public int? IlgiliIzinId { get; set; }
     }
 
     public sealed class SatirIstegi
@@ -57,6 +60,8 @@ public static class MasrafBeyaniUclari
     public static void MasrafBeyaniUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/ik").WithTags("Masraf Beyanı").RequireAuthorization();
+        // MASRAF KARTI (961): bağlam (satırlar, kontrol, kalemler, izinler, akış), satır düzenle, hatırlat.
+        MasrafKartUclariniEkle(grup);
 
         // ------------------------------------------------------- beyan ----
         grup.MapPost("/masraf", async (
@@ -75,13 +80,13 @@ public static class MasrafBeyaniUclari
 
             var id = await baglanti.TekDegerAsync<int>("""
                 insert into public.personel_masraf
-                       (taraf_id, sube_id, beyan_tarihi, aciklama, durum, ekleyen)
-                values (@p0, @p1, coalesce(@p2, current_date), @p3, 0, @p4)
+                       (taraf_id, sube_id, beyan_tarihi, aciklama, durum, ekleyen, konu, ilgili_izin_id)
+                values (@p0, @p1, coalesce(@p2, current_date), @p3, 0, @p4, @p5, @p6)
                 returning id
                 """, islem,
                 [istek.TarafId, baglam.SubeId ?? 0,
                  istek.BeyanTarihi?.ToDateTime(TimeOnly.MinValue),
-                 istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+                 istek.Aciklama ?? "", baglam.KullaniciId, istek.Konu?.Trim() ?? "", istek.IlgiliIzinId], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogBeyan, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

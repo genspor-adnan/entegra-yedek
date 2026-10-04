@@ -63,6 +63,9 @@ public static partial class KartKatalogu
                 Grup: "Beyan", KodTablosu: "public.v_personel_lookup"),
             new("beyanTarihi", "beyan_tarihi", "tarih", Baslik: "Beyan Tarihi",
                 Grup: "Beyan"),
+            // 961: konu (kod listesi ik.masraf_konu - metin olarak saklanır) ve ilgili izin.
+            new("konu", "konu", "metin", Baslik: "Konu / Amaç", Grup: "Beyan", EnFazlaUzunluk: 100),
+            new("ilgiliIzinId", "ilgili_izin_id", "sayi", Baslik: "İlgili İzin", Grup: "Beyan"),
             new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Beyan",
                 EnFazlaUzunluk: 300),
             // TOPLAM SATIRLARDAN TÜRETİLİR (db tetiği): elle yazılamaz, yoksa

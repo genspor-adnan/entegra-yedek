@@ -150,8 +150,8 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
     if (h) { setHata(h); return null }
     setHata(null);
     if (!kayitId) {
-      const y = await api.avansAc({ tarafId: d.tarafId, tutar, taksitSayisi: d.taksit, ilkDonem: d.ilkDonem, gerekce: d.gerekce });
-      if (d.aciklama.trim()) await api.kartGuncelle(KAYNAK, y.id, { kart: { aciklama: d.aciklama.trim() } }).catch(() => {});
+      const y = await api.avansAc({ tarafId: d.tarafId, tutar, taksitSayisi: d.taksit, ilkDonem: d.ilkDonem, gerekce: d.gerekce,
+                                    aciklama: d.aciklama.trim() || undefined });
       setKayitId(y.id);
       git(`/personel-avans/${y.id}`, { replace: true });
       return y.id;

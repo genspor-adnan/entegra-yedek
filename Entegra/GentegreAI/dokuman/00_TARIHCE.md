@@ -18343,3 +18343,23 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
 * İzin kartında personel / vekil aramasında **Yeni / Düzenle düğmeleri gizlendi** (`TarafArama kartYok`).
 * Doğrulama: bağlam ucu; tarayıcıda taslak avans ve yeni avans (personel araması, 2.500 ₺ × 5, kaydet). Ödeme ve kesinti
   kartta denenmedi (kasa işlemi yazar). tsc temiz, vitest 789/789. Deneme kaydı silindi.
+
+## 04.10.2026 — Masraf beyanı kartı (961)
+
+* **Mockup** `Ekranlar/IK/masraf_karti.html`; Masraf Beyanları listesi özel kart açar (`/personel-masraf/:id`,
+  `sayfalar/ik/MasrafKarti`). Kimlik şeridi (jenerik personel araması, beyan no, beyan tarihi, durum + bekleyen basamak);
+  sol: **konu / amaç** (kod listesi `ik.masraf_konu` önerili), **ilgili izin** (personelin son 3 ay / gelecek 1 ay izinleri),
+  açıklama; **harcamalar tablosu** satır içinde düzenlenir (tarih, gider kalemi - muhasebe masraf listesinde arama -, belge
+  türü, belge no, tutar, KDV, açıklama, fiş), satır ekle / çoğalt, **fiş fotoğrafından ekle** (görüntü yeni satıra bekler,
+  kayıtta belge no ile bağlanır), belge / KDV / KDV hariç / toplam. Sağ: **fiş önizleme** (seçili satır), **gönderim öncesi
+  kontrol** (belge no, tutar, fişsiz satır, **mükerrer belge**, **`ik.masraf_gecmis_gun` = 60 günden eski harcama**,
+  **gider kalemi günlük sınırı** `masraf.personel_gunluk_sinir`, âmir tanımı), gider dağılımı, onay zinciri (hatırlat;
+  sıradakine Onayla / Reddet / Bilgi iste; ödeme muhasebede), son beyanlar, akış. Onaya gidince satırlar kilitli, fiş eklenir.
+* **961** `personel_masraf.konu / ilgili_izin_id`, `masraf.personel_gunluk_sinir`, referans, kod listesi. Uçlar
+  `GET /api/ik/masraf-baglam`, `PUT /api/ik/masraf/satir/{id}` (belge no değişince bağlı fişin anahtarı da güncellenir),
+  `POST /api/ik/masraf/{id}/hatirlat`; beyan açma ucu konu / ilgili izin alır.
+* **Düzeltmeler:** liste aksiyonları (`izinAksiyonlari`) Yeni / Düzenle / Sil'i de yakalıyordu - Avans listesinde "Yeni"
+  "Önce bir avans seçin" diyordu (izin / masraf / belge talebinde de aynı). Avans kartında açıklama, açılıştan hemen sonraki
+  sürümsüz güncelleme reddedildiği için sessizce kaydedilmiyordu - artık açılış ucunda.
+* Doğrulama: tarayıcıda yeni beyan (personel araması, konu, 2 satır, kaydet - toplam 1.220); API'den satır düzenleme,
+  mükerrer belge ve 125 gün önceki harcama uyarısı. tsc temiz, vitest 789/789. Deneme kayıtları silindi.

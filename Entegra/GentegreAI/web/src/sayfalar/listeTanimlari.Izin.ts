@@ -82,7 +82,8 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     kaynak: 'personelMasraf', rota: 'personel-masraf',
     baslik: 'Masraf Beyanları',
     yol: 'İK & Prim › Masraf Beyanları',
-    kartYolu: '/personel-masraf', kartBaslik: 'Masraf Beyanı',
+    // ÖZEL KART (961, mockup Ekranlar/IK/masraf_karti.html): sayfalar/ik/MasrafKarti.
+    kartYolu: '/personel-masraf', kartBaslik: 'Masraf Beyanı', ozelKart: true,
     aksiyonEkrani: 'personel-masraf-liste',
     tarihAlani: 'beyanTarihi',
     cipler: [
