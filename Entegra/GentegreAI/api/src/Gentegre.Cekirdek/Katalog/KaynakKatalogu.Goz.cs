@@ -47,6 +47,13 @@ public static partial class KaynakKatalogu
             new("belgeId",   "a.belge_id",    "sayi", "Başvuru Id", Varsayilan: false),
             new("hastaId",   "a.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
             new("siraNo",    "a.sira_no",     "sayi", "Sıra", Hizalama: "orta", Genislik: 70),
+            // SÜREÇ v2 (goz_sureci_v2): ziyaretin göz muayene kaydı - açılmadı / #id açık / tamamlandı.
+            new("muayeneDurum",
+                "case when a.goz_muayene_id is null then 'açılmadı' "
+                + "when exists (select 1 from public.goz_muayene g join public.muayene m on m.id = g.muayene_id "
+                + "              where g.id = a.goz_muayene_id and m.tamamlanma is not null) then 'tamamlandı' "
+                + "else '#' || a.goz_muayene_id || ' açık' end",
+                                              "metin", "Muayene", Hizalama: "orta", Bicim: "rozet", Genislik: 120, Filtrelenebilir: false),
             new("hasta",     "a.hasta_adi",   "metin", "Hasta", Genislik: 220),
             new("istasyonAdi",
                 "case a.istasyon when 1 then 'Kabul' when 2 then 'Ön tetkik' "

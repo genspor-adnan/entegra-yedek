@@ -32,6 +32,7 @@ const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
 import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
 import { c } from '../../dil/ceviri';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { GozKartinaGit, GozOykuSekmesi, GozReceteSekmesi, GozTaniSekmesi, GozUcretSekmesi } from '../goz/GozSurecSekmeleri';
 import { GozGibEgilimi, GozGoruntulerSekmesi, GozKarsilastirmaSekmesi, GozTaniPlanPaneli } from '../goz/GozMuayenePanelleri';
 import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKutusu, OrderPlanSekmesi } from '../yatan/OrderPanelleri';
 import { randevuTercihiYaz } from './randevuTercihi';
@@ -67,6 +68,8 @@ export interface ListeKartiOzellikleri {
   muayeneBilgiAcik: boolean;
   setMuayeneBilgiAcik(acik: boolean): void;
   setIcdAramaAcik(acik: boolean): void;
+  /** ICD penceresi belirli bir muayeneye (göz kartı → genel muayene). */
+  icdAc?(muayeneId: number): void;
   kartTazele: number;
   setKartTazele(f: (t: number) => number): void;
   sorgu: URLSearchParams;
@@ -96,7 +99,7 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
 
 export function ListeKarti({
   tanim, kartId, kartOzel, sekmeVerisi, aksiyon,
-  muayeneBilgiAcik, setMuayeneBilgiAcik, setIcdAramaAcik,
+  muayeneBilgiAcik, setMuayeneBilgiAcik, setIcdAramaAcik, icdAc,
   kartTazele, setKartTazele, sorgu, git, setYenile, setOdaklaSonEklenen,
   onBasvuruAc,
 }: ListeKartiOzellikleri) {
@@ -463,6 +466,19 @@ export function ListeKarti({
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
         ekSekmeler={tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
           ? [
+              // SÜREÇ v2 (goz_sureci_v2): genel muayenenin sekmeleri göz kartında - aynı veri.
+              { anahtar: 'ozel:gz-oyku', baslik: 'Şikâyet & Öykü', ciz: () => <GozOykuSekmesi id={Number(kartId)} yenile={kartTazele} /> },
+              { anahtar: 'ozel:gz-tani', baslik: 'Tanılar',
+                ciz: (b) => <GozTaniSekmesi id={Number(kartId)} muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele}
+                                            icdAc={mid => (icdAc ? icdAc(mid) : setIcdAramaAcik(true))} /> },
+              { anahtar: 'ozel:gz-recete', baslik: 'e-Reçete',
+                ciz: (b) => <GozReceteSekmesi muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele}
+                                              tazele={() => setKartTazele(t => t + 1)} /> },
+              { anahtar: 'ozel:gz-istem', baslik: 'İstem & Sonuç',
+                ciz: (b) => <MuayeneIstemSonuc muayeneId={Number(b.deger.muayeneId ?? 0)}
+                                               onIstemAc={() => setIstem(Number(b.deger.muayeneId ?? 0))}
+                                               onDegisti={() => setKartTazele(t => t + 1)} /> },
+              { anahtar: 'ozel:gz-ucret', baslik: 'İşlem & Ücret', ciz: (b) => <GozUcretSekmesi muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele} /> },
               { anahtar: 'ozel:gz-kars', baslik: 'Karşılaştırma', ciz: () => <GozKarsilastirmaSekmesi id={Number(kartId)} yenile={kartTazele} /> },
               { anahtar: 'ozel:gz-gor', baslik: 'Görüntüler',
                 ciz: (b) => <GozGoruntulerSekmesi id={Number(kartId)} muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele} /> },
@@ -670,6 +686,8 @@ export function ListeKarti({
               return tanim.kaynak === 'muayene' ? (
                 <>
                   {dugme('muayene.al', '▶ Muayeneye Al')}
+                  {/* SÜREÇ v2: muayenenin göz kartı varsa ona geç. */}
+                  <GozKartinaGit muayeneId={Number(kartId)} git={git} />
                   {/* DIKTE (kullanici: "Muayeneye Al sagina"): sikayet / hikaye /
                       degerlendirme serbest metnine ses ile yazim; metin hekim
                       onaylayinca alanin SONUNA eklenir, kayit Kaydet ile. */}
@@ -714,6 +732,10 @@ export function ListeKarti({
                 //   hekim ölçümü bitirince buradan çıkış yapıyor.
                 <>
                   {dugme('goz.muayene-tamamla', '✔ Tamamla', 'd onay')}
+                  {/* RAPOR / SEVK genel kartta (süreç v2): aynı muayene, tek tık. */}
+                  {Number(d.muayeneId ?? 0) > 0 && (
+                    <button type="button" className="d" onClick={() => git(`/muayene/${Number(d.muayeneId)}?geri=${encodeURIComponent(`/goz-muayene/${kartId}`)}`)}>📋 {c('Genel muayene')}</button>
+                  )}
                   {dugme('goz.gozluk-recete', '👓 Gözlük Reçetesi')}
                   {dugme('goz.goruntuleme-iste', '📷 Görüntüleme İste')}
                   {dugme('goz.islem-planla', '💉 İşlem Planla')}
@@ -733,7 +755,7 @@ export function ListeKarti({
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
         //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
-        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum'))
+        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum') || sorgu.get('hastaId'))
           ? {
               ...tanim.yeniKayitVarsayilanlari,
               ...(sorgu.get('baslangic') ? { baslangic: sorgu.get('baslangic')! } : {}),
@@ -741,6 +763,8 @@ export function ListeKarti({
               ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
               ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
               ...(sorgu.get('cihaz') ? { cihazId: Number(sorgu.get('cihaz')) } : {}),
+              // KONTROL RANDEVUSU (göz süreci v2): muayene Tamamla'dan hasta ön dolu.
+              ...(sorgu.get('hastaId') ? { hastaId: Number(sorgu.get('hastaId')) } : {}),
             }
           // GOZ MUAYENESI KISAYOLLARI (691): recete / goruntuleme / islem
           //   karti muayeneden acildiysa hasta ve muayene bagi ON DOLGU

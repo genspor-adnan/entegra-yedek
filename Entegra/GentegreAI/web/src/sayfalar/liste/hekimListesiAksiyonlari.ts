@@ -65,7 +65,10 @@ export async function hekimListesiAksiyonu(
     b.tazele();
     // Muayene kartina GECILIR: "aldim" deyip ekranda kalmak hekimi bir
     //   tiklama daha zorlardi - amac zaten muayeneyi yazmak.
-    b.git(`/muayene/${y.muayeneId}`);
+    // GÖZ SÜRECİ v2: başvuru göz ünitesindeyse göz uzantısı açılır ve GÖZ KARTI gelir
+    //   (hekim iki kart arasında gezinmez). Uç yoksa / hata verirse genel kart.
+    const goz = await api.gozMuayeneUzantiAc(y.muayeneId).catch(() => null);
+    b.git(goz?.gozMuayeneId ? `/goz-muayene/${goz.gozMuayeneId}` : `/muayene/${y.muayeneId}`);
   });
   return true;
 }

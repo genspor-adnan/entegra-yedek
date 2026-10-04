@@ -377,6 +377,10 @@ public static class AksiyonKatalogu
                 new("goz.cagir",       "📢 Sıradakini Çağır", "goz",
                     KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 10, UrunModu: 2,
                     Bicim: "onay", Ipucu: "Seçili hasta yoksa en uzun bekleyeni çağırır"),
+                // SÜREÇ v2: başvuru panoya (Kabul) alınır - panoya ilk satırı açan tek yol.
+                new("goz.panoya-al", "＋ Başvuruyu Panoya Al", "goz",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 5, UrunModu: 2,
+                    Ipucu: "Bugünün başvurusunu göz ünitesine (Kabul) alır"),
                 new("goz.istasyona-al", "➡ İstasyona Al", "goz",
                     KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 20, UrunModu: 2, Bicim: "bir",
                     Ipucu: "Mevcut istasyon kapanır, yenisi açılır (geçmiş korunur)"),

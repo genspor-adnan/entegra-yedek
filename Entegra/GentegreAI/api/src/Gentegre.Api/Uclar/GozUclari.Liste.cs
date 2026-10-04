@@ -73,7 +73,8 @@ public static partial class GozUclari
                        (select max(t2.cct_um) filter (where t2.goz = 2) from public.goz_tonometri t2 where t2.goz_muayene_id = gm.id) as "cctOs",
                        (select max(f.cd_dikey) filter (where f.goz = 1) from public.goz_fundus f where f.goz_muayene_id = gm.id) as "cdOd",
                        (select max(f.cd_dikey) filter (where f.goz = 2) from public.goz_fundus f where f.goz_muayene_id = gm.id) as "cdOs",
-                       v.tani, coalesce(gm.plan, '') as plan, v.kontrol_tarihi as "kontrolTarihi", v.tamamlandi
+                       v.tani, coalesce(gm.plan, '') as plan, v.kontrol_tarihi as "kontrolTarihi", v.tamamlandi,
+                       v.hekim_id as "hekimId"
                   from public.goz_muayene gm
                   join public.taraf t on t.id = gm.hasta_id
                   join public.v_goz_muayene_ozet v on v.goz_muayene_id = gm.id
@@ -102,7 +103,7 @@ public static partial class GozUclari
             baglam.YetkiIste("goz.muayene", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var tanilar = await b.ListeAsync("""
-                select t.icd_kod as kod, coalesce(i.ad, '') as ad, coalesce(t.taraf, 0) as taraf,
+                select t.id, t.icd_kod as kod, coalesce(i.ad, '') as ad, coalesce(t.taraf, 0) as taraf,
                        coalesce(t.kesinlik, 0) as kesinlik, coalesce(t.tur, 0) as tur
                   from public.tani t
                   join public.goz_muayene gm on gm.muayene_id = t.muayene_id

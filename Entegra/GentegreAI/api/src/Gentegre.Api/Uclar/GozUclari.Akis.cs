@@ -182,6 +182,17 @@ public static partial class GozUclari
                      mevcut.siraNo, istek.Not, baglam.KullaniciId, id], iptal);
             }
 
+            // SÜREÇ v2 HALKA 1 (goz_sureci_v2): Ön tetkik / Hekim muayenesine geçen hastanın
+            //   genel muayene + göz uzantısı açılır (varsa olan); tekniker ölçümleri bu kayda yazılır.
+            int? gozMuayeneId = null;
+            var muayeneYeni = false;
+            if (istek.Istasyon is 2 or 3)
+            {
+                var acilan = await GozMuayeneAcAsync(baglanti, islem, log, mevcut.belgeId, baglam, iptal);
+                gozMuayeneId = acilan.GozMuayeneId;
+                muayeneYeni = acilan.Yeni;
+            }
+
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloGozAkis, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new
@@ -199,6 +210,8 @@ public static partial class GozUclari
                 istasyon = IstasyonAdi[istek.Istasyon],
                 tamamlandi = istek.Istasyon == 6,
                 uyari,
+                gozMuayeneId,
+                muayeneYeni,
             });
         });
 

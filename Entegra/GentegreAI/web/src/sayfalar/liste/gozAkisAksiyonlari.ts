@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
 import { ApiHatasi, type ListeSatiri } from '../../api/sozlesme';
+import { gozTamamlaSonrasi } from '../goz/GozSurecSekmeleri';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 
 /**
@@ -58,6 +59,24 @@ export async function gozAkisAksiyonu(
     return true;
   }
 
+  // SÜREÇ v2: başvuruyu panoya (Kabul) al - panoya ilk satırı açan tek yol.
+  if (kod === 'goz.panoya-al') {
+    await guvenli(async () => {
+      const y = await api.gozAkisBasvurular();
+      if (y.satirlar.length === 0) { mesaj('Panoya alınacak başvuru yok (son 24 saat).'); return }
+      const sec = await listeSor('Hangi başvuru göz ünitesine alınsın?', y.satirlar.map(s => ({
+        kod: String(s.id),
+        ad: `${s.hasta} · ${s.bolum || 'bölüm yok'}${s.hekim ? ` · ${s.hekim}` : ''} · `
+            + new Date(s.zaman).toTimeString().slice(0, 5),
+      })));
+      if (!sec) return;
+      await api.gozAkisEkle(Number(sec));
+      mesaj('Hasta panoya (Kabul) alındı.');
+      b.tazele();
+    });
+    return true;
+  }
+
   if (kod === 'goz.istasyona-al') {
     if (!id) { mesaj('Önce bir hasta kartı seçin.'); return true }
     const hedef = await listeSor('Hangi istasyona alınsın?', ISTASYONLAR);
@@ -68,7 +87,8 @@ export async function gozAkisAksiyonu(
       //   klinik bir karardır - engellenmiyor ama söyleniyor.
       mesaj(y.tamamlandi
         ? `${y.hasta} · ziyaret tamamlandı.`
-        : `${y.hasta} → ${y.istasyon}${y.uyari ? ` — ${y.uyari}` : ''}`);
+        : `${y.hasta} → ${y.istasyon}${y.uyari ? ` — ${y.uyari}` : ''}`
+          + (y.muayeneYeni ? ` · göz muayenesi #${y.gozMuayeneId} açıldı` : ''));
       b.tazele();
     });
     return true;
@@ -102,12 +122,16 @@ export async function gozAkisAksiyonu(
     // Muayene kaydı YOKSA açılmaz: pano muayene açmaz, açılmışı gösterir -
     //   boş muayene kaydı üretmek, hekimin hiç görmediği hastayı görülmüş
     //   gibi listelerdi.
+    // SÜREÇ v2: kayıt yoksa AÇILIR (genel muayene + göz uzantısı) - "açılmamış" denip
+    //   bırakılmaz; aynı başvuruda ikinci kayıt açılmaz.
     const muayeneId = Number(satir?.gozMuayeneId ?? 0);
-    if (!muayeneId) {
-      mesaj('Bu ziyarette henüz göz muayenesi açılmamış.');
-      return true;
-    }
-    b.git(`/goz-muayene/${muayeneId}`);
+    if (muayeneId) { b.git(`/goz-muayene/${muayeneId}`); return true }
+    if (!id) { mesaj('Önce bir hasta kartı seçin.'); return true }
+    await guvenli(async () => {
+      const y = await api.gozAkisMuayene(id);
+      b.tazele();
+      b.git(`/goz-muayene/${y.gozMuayeneId}`);
+    });
     return true;
   }
 
@@ -127,8 +151,10 @@ export async function gozAkisAksiyonu(
         if (!gerekce?.trim()) return;
         y = await api.gozMuayeneTamamla(id, gerekce.trim());
       }
-      mesaj('Muayene tamamlandı.' + (y.uyari ? ` ${y.uyari}` : ''));
+      if (y.uyari) mesaj(y.uyari);
       b.tazele();
+      // SÜREÇ v2: doğan işler + sonraki istasyon + kontrol randevusu.
+      await gozTamamlaSonrasi(id, b.git);
     });
     return true;
   }

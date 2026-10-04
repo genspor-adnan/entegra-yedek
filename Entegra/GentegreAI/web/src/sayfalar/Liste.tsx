@@ -235,6 +235,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [muayeneBilgiAcik, setMuayeneBilgiAcik] = useState(false);
   /** ICD arama penceresi açık mı (tanı sekmesi "＋ ICD-10 Ekle"). */
   const [icdAramaAcik, setIcdAramaAcik] = useState(false);
+  // GÖZ KARTI TANI SEKMESİ (süreç v2): ICD penceresi göz kartının GENEL muayenesine yazar.
+  const [icdMuayeneId, setIcdMuayeneId] = useState<number | null>(null);
   /** ICD penceresindeki TÜR (Kesin / Ön) ve TARAF seçimi - son seçim hesapta
       hatırlanır (kullanıcı). */
   const tani = useTaniEkleTercihi(icdAramaAcik, kullanici?.id);
@@ -1187,7 +1189,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                                mesaj(y.tamamlandi
                                  ? `${y.hasta} · ziyaret tamamlandı.`
                                  : `${y.hasta} → ${y.istasyon}`
-                                   + (y.uyari ? ` — ${y.uyari}` : ''));
+                                   + (y.uyari ? ` — ${y.uyari}` : '')
+                                   + (y.muayeneYeni ? ` · göz muayenesi #${y.gozMuayeneId} açıldı` : ''));
                                setGozAkisSecili(null);
                                setYenile(t => t + 1);
                              })} />
@@ -1583,7 +1586,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {/* ICD ARAMA (kullanici: "gelen ekranda tani arayabilmeliyim"): yazdikca
         arar, secilen kod SUNUCUDA tani satirina donusur (ana tani varsa ek). */}
-    {icdAramaAcik && kartId !== null && kartId !== 'yeni' && (
+    {icdAramaAcik && (icdMuayeneId !== null || (kartId !== null && kartId !== 'yeni')) && (
       <KaynakArama
         kaynak="icd" baslik="ICD-10 tanı ara"
         ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
@@ -1591,7 +1594,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         //   hastada aynı tanı her muayenede yeniden yazılırken kod kayabilir.
         oncekiBaslik="Önceki Tanılar"
         onceki={async () => {
-          const y = await api.muayeneTaniOnerileri(Number(kartId));
+          const y = await api.muayeneTaniOnerileri((icdMuayeneId ?? Number(kartId)));
           return y.onceki.map(t => ({ kod: t.kod, ad: t.ad }));
         }}
         // ŞABLON TANILARI (931): muayenenin bölüm / doktor şablonlarının sık tanıları.
@@ -1599,7 +1602,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // YZ ÖNERİSİ: bağlam SUNUCUDA toplanır ve anonimleştirilir (ad, soyad,
         //   kimlik no gitmez); ekran yalnız muayene numarasını yollar.
         yz={async () => {
-          const y = await api.muayeneYzTaniOnerisi(Number(kartId));
+          const y = await api.muayeneYzTaniOnerisi((icdMuayeneId ?? Number(kartId)));
           const notlar = [
             y.kirmiziBayrak && `⚠ ${y.kirmiziBayrak}`,
             y.eksikBilgi && `❓ ${y.eksikBilgi}`,
@@ -1608,7 +1611,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           ].filter((x): x is string => !!x);
           return { satirlar: y.oneriler, notlar, uyari: y.uyari };
         }}
-        sablon={async () => (await api.muayeneSablonTercihleri(Number(kartId))).tanilar}
+        sablon={async () => (await api.muayeneSablonTercihleri((icdMuayeneId ?? Number(kartId)))).tanilar}
         // ÇOK SEÇİM (kullanıcı): pencere her seçimde kapanmaz; eklenen tanı
         //   ✓ ile işaretlenir, tanı gridi arkada tazelenir. "Kapat" ile çıkılır.
         acikKalir
@@ -1626,10 +1629,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             </select>
           </label>
         </>}
-        onKapat={() => setIcdAramaAcik(false)}
+        onKapat={() => { setIcdAramaAcik(false); setIcdMuayeneId(null) }}
         onSec={async satir => {
           try {
-            await api.muayeneTaniEkle(Number(kartId), String(satir.kod),
+            await api.muayeneTaniEkle((icdMuayeneId ?? Number(kartId)), String(satir.kod),
                                       { kesinlik: tani.kesinlik, taraf: tani.taraf });
           } catch (h) {
             mesaj(hataMetni(h));
@@ -1651,6 +1654,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       aksiyon={aksiyon}
       muayeneBilgiAcik={muayeneBilgiAcik} setMuayeneBilgiAcik={setMuayeneBilgiAcik}
       setIcdAramaAcik={setIcdAramaAcik}
+      icdAc={mid => { setIcdMuayeneId(mid); setIcdAramaAcik(true) }}
       kartTazele={kartTazele} setKartTazele={setKartTazele}
       sorgu={sorgu} git={git} setYenile={setYenile}
       setOdaklaSonEklenen={setOdaklaSonEklenen}

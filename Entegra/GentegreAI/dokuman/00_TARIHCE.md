@@ -18590,3 +18590,28 @@ Mockup `Ekranlar/Goz/goz_muayene_listesi_v2.html` · `goz_muayene_karti_v2.html`
   türü 4 / 5 (Acil / Tarama) ters yazılıyordu.
 * Doğrulama: tarayıcıda liste + önizleme, kartın sekmeleri, eksikte gerekçe penceresi ve gerekçeyle tamamlama (test geri
   alındı). tsc temiz, vitest 789/789, dotnet test 218 geçti.
+
+## 05.10.2026 — Göz hasta süreci v2 (mockup goz_sureci_v2.html)
+
+Sorun: ünite panosu ve göz muayene kartı vardı ama aralarındaki halka yoktu - panoya ilk satırı açan yol, göz
+muayene kaydını açan adım ve hekimin tek kartta çalışması eksikti (demo verisi elle tohumlanmıştı).
+
+* **Halka 1 · kayıt açılışı**: pano araç çubuğunda **＋ Başvuruyu Panoya Al** (son 24 saatin başvuruları, göz bölümü
+  önde; Kabul istasyonu, günün sıra numarası). Hasta **Ön tetkik** ya da **Hekim muayenesi** istasyonuna geçince
+  (liste ya da kanban sürükle-bırak) genel muayene + göz uzantısı tek işlemde açılır (numara "Muayeneye Al" ile
+  aynı şablondan; tür önerisi: önceki göz muayenesi varsa Kontrol, yoksa Tam). **Muayeneyi Aç** kayıt yoksa açar.
+  Aynı başvuruda ikinci kayıt açılmaz. Panoda ve kanban kartında **Muayene** rozeti (açılmadı / #id açık /
+  tamamlandı).
+* **Halka 2 · tek kart**: Hekim Listesi'nden "Muayeneye Al" başvuru göz ünitesindeyse göz kartını açar. Göz kartına
+  genel muayenenin sekmeleri eklendi - **Şikâyet & Öykü** (sikayet / hikaye, genel muayene alanları), **Tanılar**
+  (ICD penceresi göz kartının genel muayenesine yazar, taraf sütunu), **e-Reçete**, **İstem & Sonuç**, **İşlem &
+  Ücret** (genel kartın bileşenleri, aynı muayeneId). Rapor / sevk için araç çubuğunda **Genel muayene**; genel
+  muayene kartında göz kartı varsa **👁 Göz kartı**.
+* **Halka 3 · Tamamla**: tamamlanınca doğan işler listelenir, hasta panoda istenmiş görüntüleme varsa
+  **Görüntüleme**, yoksa **Karar / işlem** istasyonuna alınır (onayla); kontrol günü girildiyse randevu kartı hasta /
+  hekim / tarih ön dolu açılır (`/randevu/yeni?hastaId&hastaAd&hekim&baslangic`).
+* Uçlar `GozUclari.Surec` (akis/basvurular, akis/ekle, akis/{id}/muayene, muayene-uzanti GET/POST, muayene/{id}/oyku,
+  muayene/{id}/sonraki-istasyon); istasyon ucu 2/3'e geçişte kaydı açar. Aksiyon `goz.panoya-al`. Şema değişikliği yok.
+* Doğrulama: tarayıcıda uçtan uca (başvuru panoya → ön tetkik → muayene #… açıldı → kart sekmeleri → ICD ile tanı
+  (bilateral) → gerekçeyle tamamla → Karar / işlem); test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test
+  218 geçti.

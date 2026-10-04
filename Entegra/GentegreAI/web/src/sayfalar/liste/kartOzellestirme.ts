@@ -230,9 +230,11 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     // 970 (mockup goz_muayene_karti_v2): "Genel" sekmesi yok - alanlar kimlik
     //   şeridinde; sonda Karşılaştırma ve Görüntüler & Belgeler.
     seritAlanlari: ['hastaId', 'muayeneTuru', 'dilate', 'dilatasyonIlac', 'takipId', 'kontrolGun'],
-    sekmeSirasi: ['Görme & Refraksiyon', 'Tonometri & Pakimetri',
+    // Süreç v2: genel muayene sekmeleri (öykü önde; tanı / reçete / istem / ücret ölçümlerden sonra).
+    sekmeSirasi: ['Şikâyet & Öykü', 'Görme & Refraksiyon', 'Tonometri & Pakimetri',
                   'Ön Segment', 'Fundus', 'Motilite · Pupil · Alan',
-                  'Gonyoskopi & Ek Testler', 'Tanı & Plan', 'Karşılaştırma', 'Görüntüler'],
+                  'Gonyoskopi & Ek Testler', 'Tanılar', 'e-Reçete', 'İstem & Sonuç', 'İşlem & Ücret',
+                  'Tanı & Plan', 'Karşılaştırma', 'Görüntüler'],
   },
 
   // ------------------------------------------------- muayene şablonu ----

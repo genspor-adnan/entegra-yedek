@@ -260,17 +260,33 @@ export interface GozMuayeneOnizleme {
     alerji: string; tedavi: string; bcvaOd: number | null; bcvaOs: number | null; gormeDusus: number;
     gibOd: number | null; gibOs: number | null; hedefOd: number | null; hedefOs: number | null; gibYuksek: number;
     cctOd: number | null; cctOs: number | null; cdOd: number | null; cdOs: number | null;
-    tani: string; plan: string; kontrolTarihi: string | null; tamamlandi: boolean;
+    tani: string; plan: string; kontrolTarihi: string | null; tamamlandi: boolean; hekimId: number | null;
   };
   gecmis: GozGecmisSatiri[];
 }
 export interface GozMuayeneIsleri {
-  tanilar: { kod: string; ad: string; taraf: number; kesinlik: number; tur: number }[];
+  tanilar: { id: number; kod: string; ad: string; taraf: number; kesinlik: number; tur: number }[];
   isler: { tur: string; ad: string; zaman: string | null; ayrinti: string; id: number }[];
 }
 export interface GozGoruntuSatiri { zaman: string | null; tur: string; goz: string; kaynak: string; durum: string; buMuayene: boolean; nesne: string; id: number }
 
+/** GÖZ SÜRECİ v2 (goz_sureci_v2.html). */
+export interface GozBasvuru { id: number; hasta: string; bolum: string; zaman: string; hekim: string }
+export interface GozOyku { muayeneId: number; sikayet: string; hikaye: string; ozgecmis: string; soygecmis: string; kapali: boolean }
+
 export const gozUclari = {
+  gozAkisBasvurular: () => istek<{ satirlar: GozBasvuru[] }>('/api/goz/akis/basvurular'),
+  gozAkisEkle: (belgeId: number) => gonder<{ id: number }>('/api/goz/akis/ekle', { belgeId }),
+  /** Panodan: kayıt yoksa genel muayene + göz uzantısı açılır. */
+  gozAkisMuayene: (istasyonId: number) =>
+    gonder<{ gozMuayeneId: number; muayeneId: number; yeni: boolean }>(`/api/goz/akis/${istasyonId}/muayene`, {}),
+  gozMuayeneUzantiBul: (muayeneId: number) => istek<{ gozMuayeneId: number | null }>(`/api/goz/muayene-uzanti/${muayeneId}`),
+  /** Başvuru göz ünitesindeyse uzantıyı açar, değilse yalnız bulur. */
+  gozMuayeneUzantiAc: (muayeneId: number) =>
+    gonder<{ gozMuayeneId: number | null; yeni?: boolean }>(`/api/goz/muayene-uzanti/${muayeneId}`, {}),
+  gozOyku: (id: number) => istek<GozOyku>(`/api/goz/muayene/${id}/oyku`),
+  gozOykuYaz: (id: number, g: { sikayet: string; hikaye: string }) => gonder<{ id: number }>(`/api/goz/muayene/${id}/oyku`, g),
+  gozSonrakiIstasyon: (id: number) => gonder<{ istasyon: number | null; ad?: string }>(`/api/goz/muayene/${id}/sonraki-istasyon`, {}),
   gozMuayeneGosterge: () => istek<GozMuayeneGostergeYaniti>('/api/goz/muayene-gosterge'),
   gozMuayeneOnizleme: (id: number) => istek<GozMuayeneOnizleme>(`/api/goz/muayene/${id}/onizleme`),
   gozMuayeneKarsilastirma: (id: number) => istek<{ satirlar: GozGecmisSatiri[] }>(`/api/goz/muayene/${id}/karsilastirma`),
@@ -357,7 +373,9 @@ export const gozUclari = {
   gozIstasyonaAl: (id: number, govde: {
     istasyon: number; oda?: string; personelId?: number | null; not?: string;
   }) => gonder<{ id: number | null; hasta: string; istasyon: string;
-                 tamamlandi: boolean; uyari: string }>(
+                 tamamlandi: boolean; uyari: string;
+                 /** Süreç v2: Ön tetkik / Hekim muayenesine geçişte açılan (ya da var olan) kayıt. */
+                 gozMuayeneId?: number | null; muayeneYeni?: boolean }>(
     `/api/goz/akis/${id}/istasyon`, govde),
 
   /** Dilatasyon başlat — 20 dakikalık sayaç; ikinci kez başlatılamaz. */

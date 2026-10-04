@@ -47,6 +47,8 @@ export interface AkisSatiri {
   /** Damlanın etkisine kalan dakika (sunucu hesaplar, 20 dk). */
   dilatasyonKalanDk: number | null;
   muayeneTuruAdi: string;
+  /** Süreç v2: "açılmadı" / "#id açık" / "tamamlandı". */
+  muayeneDurum?: string;
 }
 
 /** Dilatasyon süresi (dk) — çubuğun paydası; sunucudaki eşikle aynı. */
@@ -130,6 +132,12 @@ export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
                   {s.siraNo ? `sıra ${s.siraNo} · ` : ''}{s.beklemeDk} dk
                   {s.muayeneTuruAdi ? ` · ${s.muayeneTuruAdi}` : ''}
                 </span>
+                {s.muayeneDurum && (
+                  <span className={`rozet ${s.muayeneDurum === 'açılmadı' ? 'pas' : s.muayeneDurum === 'tamamlandı' ? 'ok' : 'mavi'}`}
+                        style={{ alignSelf: 'flex-start' }}>
+                    👁 {s.muayeneDurum}
+                  </span>
+                )}
 
                 {/* DİLATASYON SAYACI ÇUBUKLA (mockup): pano uzaktan okunuyor,
                     "13 dk kaldı" yazısını okumak için yaklaşmak gerekir.

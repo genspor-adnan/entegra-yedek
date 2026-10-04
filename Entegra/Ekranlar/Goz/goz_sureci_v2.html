@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Hasta Süreci — Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .akis{display:flex;align-items:stretch;gap:0;padding:14px;overflow-x:auto}
+  .ist{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:8px;background:#fff;padding:10px 10px 8px;position:relative}
+  .ist+.ist{margin-left:26px}
+  .ist+.ist:before{content:"➜";position:absolute;left:-21px;top:38%;color:var(--muted);font-size:16px}
+  .ist h5{margin:0 0 4px;font-size:12px;color:var(--navy)}
+  .ist .kim{font-size:10.5px;color:var(--muted);margin-bottom:6px}
+  .ist ul{margin:0;padding-left:15px;font-size:11px;line-height:1.5}
+  .ist .yeni{display:inline-block;margin-top:6px;font-size:10px;font-weight:bold;color:#fff;background:#d35400;border-radius:3px;padding:1px 6px}
+  .ist.vurgu{border-color:#e0a33a;box-shadow:0 0 0 2px #fbe3b8 inset}
+  .sayac{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;background:#e3ecfa;color:#2f5c9e;margin-top:4px}
+  .eksen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 14px 14px}
+  .kutu{border:1px solid var(--line2);border-radius:8px;background:#fbfcfe;padding:10px 12px;font-size:11.5px}
+  .kutu h6{margin:0 0 6px;font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .k{margin:3px 0;padding-left:18px;text-indent:-18px} .kutu .k > b:first-child{display:inline-block;width:18px;text-indent:0;color:#d35400}
+  .pano td .chip{white-space:nowrap}
+  .tost{display:flex;gap:8px;align-items:center;margin:8px 14px 0;padding:8px 12px;border-radius:6px;background:#e2f3e8;border:1px solid #bfe3cb;font-size:11.5px;color:#2e7d46}
+  .mini-sek{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line2);background:#f6f8fb;flex-wrap:wrap}
+  .mini-sek span{padding:6px 10px;font-size:11px;border:1px solid transparent;border-bottom:none;border-radius:5px 5px 0 0;color:var(--muted)}
+  .mini-sek span.on{background:#fff;border-color:var(--line2);color:var(--navy);font-weight:bold}
+  .mini-sek span.yeni{color:#d35400;font-weight:bold}
+  .mini-sek .ayr{color:var(--line);padding:6px 2px}
+  .cikis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px}
+  .cikis .c{border:1px solid var(--line2);border-radius:6px;padding:8px 10px;background:#fff;font-size:11.5px}
+  .cikis .c b{display:block;margin-bottom:3px}
+  .cikis .c small{color:var(--muted)}
+  .modal{max-width:520px;margin:12px auto;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.12);background:#fff;overflow:hidden}
+  .modal .t{background:var(--navy);color:#fff;padding:8px 12px;font-weight:bold;font-size:12.5px}
+  .modal .g{padding:12px 14px;font-size:12px}
+  .modal .a{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;border-top:1px solid var(--line2);background:#f6f8fb}
+  .ck{display:flex;gap:6px;align-items:center;margin:4px 0}
+</style>
+</head>
+<body>
+
+<!-- 1 AKIŞ -->
+<div class="win">
+  <div class="ust"><h1>Göz Hasta Süreci</h1><span class="yol">Göz › Süreç (v2)</span><span class="sp"></span>
+    <span class="chip c-bek">turuncu = bu mockup'la eklenen</span></div>
+  <div class="akis">
+    <div class="ist">
+      <h5>1 · Kabul</h5><div class="kim">sekreter · Hasta Kabul</div>
+      <ul><li>başvuru / randevudan geliş</li><li>bölüm: Göz</li><li>hasta panoya düşer</li></ul>
+    </div>
+    <div class="ist vurgu">
+      <h5>2 · Ön tetkik</h5><div class="kim">tekniker · pano + kart (ölçüm sekmeleri)</div>
+      <ul><li>otorefraktometre, NCT, pakimetri (cihazdan)</li><li>görme keskinliği</li><li>dilatasyon damlası → 20 dk</li></ul>
+      <span class="yeni">istasyona alınınca MUAYENE KAYDI AÇILIR</span>
+    </div>
+    <div class="ist vurgu">
+      <h5>3 · Hekim muayenesi</h5><div class="kim">göz hekimi · göz muayene kartı</div>
+      <ul><li>"Muayeneye Al" → göz kartı</li><li>ön segment, fundus, motilite</li><li>tanı · e-reçete · istem · rapor</li></ul>
+      <span class="yeni">tek kart: genel muayene sekmeleri içinde</span>
+    </div>
+    <div class="ist">
+      <h5>4 · Görüntüleme</h5><div class="kim">tekniker · cihaz entegrasyonu</div>
+      <ul><li>OCT, görme alanı, biyometri</li><li>sonuç karta / karşılaştırmaya düşer</li></ul>
+      <span class="sayac">yalnız istendiyse</span>
+    </div>
+    <div class="ist vurgu">
+      <h5>5 · Karar / işlem</h5><div class="kim">hekim · Tamamla</div>
+      <ul><li>gözlük reçetesi, işlem planı</li><li>kontrol randevusu</li><li>e-Nabız / ücret (genel muayeneden)</li></ul>
+      <span class="yeni">Tamamla → istasyon otomatik ilerler</span>
+    </div>
+    <div class="ist">
+      <h5>6 · Tamamlandı</h5><div class="kim">sekreter · pano</div>
+      <ul><li>ziyaret kapanır</li><li>bekleme süreleri raporu</li></ul>
+    </div>
+  </div>
+  <div class="eksen">
+    <div class="kutu"><h6>Halka 1 · Kayıt nerede açılır</h6>
+      <div class="k"><b>1</b>Hasta <b>Ön tetkik</b> istasyonuna alındığında <i>ya da</i> hekim "Muayeneye Al" dediğinde (hangisi önce olursa).</div>
+      <div class="k"><b>2</b>Tek işlemde: genel muayene (hasta, hekim, bölüm, başvuru) + göz uzantısı (tür: ilk / kontrol, önceki muayeneye göre önerilir).</div>
+      <div class="k"><b>3</b>İkinci kez açılmaz: aynı başvuruda varsa onu açar.</div>
+    </div>
+    <div class="kutu"><h6>Halka 2 · Hekim tek ekranda</h6>
+      <div class="k"><b>1</b>Günlük akış / muayene listesinde göz bölümü hastasına "Muayeneye Al" → <b>göz muayene kartı</b>.</div>
+      <div class="k"><b>2</b>Göz kartına genel muayenenin <b>Şikâyet & Öykü, Tanı, e-Reçete, İstem, Rapor, Sevk, İşlem & Ücret</b> sekmeleri eklenir - aynı veri, ikinci giriş yok.</div>
+      <div class="k"><b>3</b>Genel muayene kartı göz muayenesinde açılırsa "Göz kartına git" önerir.</div>
+    </div>
+    <div class="kutu"><h6>Halka 3 · Tamamla akışı yürütür</h6>
+      <div class="k"><b>1</b>Kural: tanı + iki göz görme + GİB, eksikte gerekçe (var).</div>
+      <div class="k"><b>2</b>Görüntüleme istendiyse hasta <b>Görüntüleme</b> istasyonuna, yoksa <b>Karar / işlem</b>e geçer.</div>
+      <div class="k"><b>3</b>Kontrol günü girildiyse kontrol randevusu önerilir (tarih + uygun saat).</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 PANO -->
+<div class="win">
+  <div class="ust"><h1>Göz Ünitesi Akışı</h1><span class="yol">Göz › Ünite Akışı</span><span class="sp"></span>
+    <span class="btn primary">📣 Sıradakini çağır</span><span class="btn">➡ İstasyona al</span><span class="btn">💧 Dilatasyon</span><span class="btn">🚪 Oda ata</span><span class="btn">👁 Muayeneyi aç</span></div>
+  <div class="tost">✔ Ayşe Yıldız <b>Ön tetkik</b>e alındı · <b>Göz muayenesi #990210 açıldı</b> (tür: Kontrol - son muayene 05.09.2026) · tekniker ölçümleri bu kayda yazılır <span class="btn kucuk" style="margin-left:auto">👁 Kartı aç</span></div>
+  <table class="liste pano" style="margin:10px 14px 14px;width:calc(100% - 28px)">
+    <tr><th>Sıra</th><th>Hasta</th><th>İstasyon</th><th>Bekleme</th><th>Dilatasyon</th><th>Muayene</th><th>Oda / personel</th><th>Ön tetkik</th></tr>
+    <tr class="sec"><td>12</td><td><b>Ayşe Yıldız</b><small>67 K · glokom takibi</small></td><td><span class="chip c-bek">Ön tetkik</span></td><td>3 dk</td><td>—</td><td><span class="chip c-ok">#990210 açık</span></td><td>Ön tetkik 1 · Tek. Ece</td><td>Otoref ✔ 09:12</td></tr>
+    <tr><td>10</td><td><b>Mehmet Kaya</b><small>72 E · AMD</small></td><td><span class="chip c-bek">Hekim muayenesi</span></td><td>14 dk</td><td><span class="chip c-ok">💧 hazır (22 dk)</span></td><td><span class="chip c-ok">#990208 açık</span></td><td>Oda 3 · Dr. Murat Kaya</td><td>Otoref ✔ · NCT ✔</td></tr>
+    <tr><td>11</td><td><b>Elif Demo</b><small>34 K · ilk muayene</small></td><td><span class="chip c-bek">Ön tetkik</span></td><td>6 dk</td><td><span class="chip c-bek">💧 08 dk kaldı</span></td><td><span class="chip c-ok">#990209 açık</span></td><td>Ön tetkik 2</td><td>NCT ✔</td></tr>
+    <tr><td>13</td><td><b>Ali Demir</b><small>8 E</small></td><td><span class="chip c-gri">Kabul</span></td><td>1 dk</td><td>—</td><td><span class="chip c-gri">açılmadı</span></td><td>—</td><td>—</td></tr>
+    <tr><td>9</td><td><b>Hasan Öztürk</b><small>61 E · preop</small></td><td><span class="chip c-bek">Görüntüleme</span></td><td>9 dk</td><td>—</td><td><span class="chip c-ok">#990207 tamamlandı</span></td><td>Biyometri · Tek. Can</td><td>—</td></tr>
+  </table>
+  <div class="not" style="margin:0 14px 14px"><span class="n">A</span><b>Muayene kolonu yeni:</b> ziyaretin göz muayene kaydı var mı, açık mı, tamamlandı mı. "Açılmadı" yalnız Kabul'deki hastada görünür;
+  Ön tetkik'e almak kaydı açar (bildirim şeridi). <b>Muayeneyi aç</b> artık "henüz açılmamış" demez - kayıt yoksa açar.</div>
+</div>
+
+<!-- 3 HEKİM KARTI -->
+<div class="win">
+  <div class="title">👁 Göz Muayenesi — Ayşe Yıldız · 04.10.2026 09:10 <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span><span class="btn">✔ Tamamla</span><span class="btn">⧉ Önceki muayeneden aktar</span><span class="btn">🎙 Dikte</span>
+    <span class="btn">✏ Göz şeması</span><span class="btn">👓 Gözlük reçetesi</span><span class="btn">💉 İşlem planla</span><span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">🔗 e-Nabız</span><span class="sp"></span><span class="btn">Kapat</span>
+  </div>
+  <div class="mini-sek">
+    <span class="yeni">Şikâyet &amp; Öykü</span><span class="ayr">|</span>
+    <span>Görme &amp; Refraksiyon</span><span>Tonometri &amp; Pakimetri</span><span>Ön Segment</span><span>Fundus</span><span>Motilite · Pupil · Alan</span><span>Gonyoskopi &amp; Ek Testler</span><span class="ayr">|</span>
+    <span class="yeni on">Tanı</span><span class="yeni">e-Reçete</span><span class="yeni">İstem &amp; Sonuç</span><span class="yeni">Rapor</span><span class="yeni">Sevk</span><span class="yeni">İşlem &amp; Ücret</span><span class="ayr">|</span>
+    <span>Tanı &amp; Plan</span><span>Karşılaştırma</span><span>Görüntüler</span>
+  </div>
+  <div class="iki-kolon" style="padding:10px 12px">
+    <div class="grp"><h4>Tanılar <span class="ek">genel muayenenin tanı listesi - göz tarafı zorunlu</span></h4>
+      <table class="liste">
+        <tr><th>ICD</th><th>Tanı</th><th>Göz</th><th>Tür</th><th>Kesinlik</th></tr>
+        <tr><td><b>H40.1</b></td><td>Primer açık açılı glokom</td><td><span class="chip c-gri">OU</span></td><td>Ana</td><td><span class="chip c-ok">Kesin</span></td></tr>
+        <tr><td><b>H25.1</b></td><td>Senil nükleer katarakt</td><td><span class="chip c-gri">OD</span></td><td>Ek</td><td><span class="chip c-bek">Ön tanı</span></td></tr>
+      </table>
+      <div style="padding:8px 10px"><span class="btn kucuk">＋ Tanı (ICD ara)</span> <span class="btn kucuk">⭐ Göz sık tanıları</span></div>
+    </div>
+    <div>
+      <div class="bilgi">Bu sekmeler <b>genel muayene kartının sekmeleri</b>dir - aynı veri, aynı kurallar (e-Reçete, akılcı istem, e-Nabız, ücret tahakkuku). Göz hekimi iki kart arasında gezinmez.</div>
+      <div class="uyar" style="margin-top:8px">Göz tanısında <b>göz tarafı</b> (OD / OS / OU) zorunlu: ICD H kodlarının çoğu taraf içermez, takip ve Medula bunu ister.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 TAMAMLA -->
+<div class="win">
+  <div class="ust"><h1>Tamamla sonrası</h1><span class="yol">Göz muayene kartı › ✔ Tamamla</span></div>
+  <div class="modal">
+    <div class="t">✔ Muayene tamamlandı — Ayşe Yıldız</div>
+    <div class="g">
+      <div style="margin-bottom:8px">Bu muayeneden doğan işler:</div>
+      <div class="ck">☑ <b>Görüntüleme:</b> OCT RNFL (OU) istendi → hasta <b>Görüntüleme</b> istasyonuna alınsın</div>
+      <div class="ck">☑ <b>e-Reçete:</b> brimonidin %0,15 - imza bekliyor</div>
+      <div class="ck">☐ <b>İşlem:</b> sol SLT önerildi - <span style="color:var(--accent)">şimdi planla →</span></div>
+      <div class="ck">☑ <b>Kontrol randevusu:</b> 1 ay → <b>04.11.2026 10:20</b> (Dr. Elif Arslan, ilk uygun) <span style="color:var(--accent)">değiştir</span></div>
+    </div>
+    <div class="a"><span class="btn">Yalnız tamamla</span><span class="btn primary">Uygula</span></div>
+  </div>
+  <div class="cikis">
+    <div class="c"><b>Görüntüleme istendiyse</b>istasyon → Görüntüleme<br><small>sonuç gelince hekime bildirim; karar istasyonunda kart tekrar açılır</small></div>
+    <div class="c"><b>İstenmediyse</b>istasyon → Karar / işlem<br><small>sekreter randevu ve ücreti kapatır</small></div>
+    <div class="c"><b>Kontrol randevusu</b>kontrol günü + hekim çalışma planı<br><small>ilk uygun slot önerilir, hasta kabul ederse yazılır</small></div>
+    <div class="c"><b>Ziyareti tamamla</b>açık istasyon kapanır<br><small>e-Nabız ve ücret genel muayeneden zaten gitmiştir</small></div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "göz süreci için mockup yap". Bugünkü durum: ünite akışı (pano) ve göz muayene kartı var, ama
+<b>göz muayene kaydını açan adım yok</b> (pano "henüz açılmamış" diyor, kart "Yeni" ile kaydedilemiyor - genel muayeneye bağlı olmak zorunda),
+"Muayeneye Al" göz hastasında genel kartı açıyor ve tanı / e-reçete / istem yalnız genel kartta. Bu mockup üç halkayı tanımlar (turuncu):<br>
+<span class="n">1</span><b>Kayıt açılışı:</b> Ön tetkik'e alma ya da "Muayeneye Al" - hangisi önce olursa - genel muayene + göz uzantısını tek işlemde açar
+(tür önerisi: önceki göz muayenesi varsa Kontrol, yoksa Tam). Aynı başvuruda ikinci kayıt açılmaz. Panoda <b>Muayene</b> kolonu.<br>
+<span class="n">2</span><b>Tek kart:</b> göz bölümü hastasında "Muayeneye Al" göz kartını açar; göz kartı genel muayenenin Şikâyet & Öykü, Tanı, e-Reçete,
+İstem & Sonuç, Rapor, Sevk, İşlem & Ücret sekmelerini taşır (aynı bileşenler, aynı veri). Göz tanısında taraf (OD / OS / OU) zorunlu.<br>
+<span class="n">3</span><b>Tamamla:</b> mevcut kural (tanı + iki göz görme + GİB, eksikte gerekçe) + çıkış penceresi: görüntüleme istendiyse hasta Görüntüleme
+istasyonuna, yoksa Karar / işlem'e; kontrol günü girildiyse ilk uygun kontrol randevusu önerilir; bekleyen işlem "şimdi planla".
+</div></div>
+
+</body>
+</html>
