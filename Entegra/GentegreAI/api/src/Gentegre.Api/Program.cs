@@ -355,6 +355,8 @@ uygulama.IzinUclariniEkle();
 uygulama.AvansUclariniEkle();
 uygulama.MasrafBeyaniUclariniEkle();
 uygulama.BelgeTalebiUclariniEkle();
+// TALEPLERIM: kisinin kendi talepleri (izin/avans/masraf/belge/ariza/malzeme).
+uygulama.TaleplerimUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();

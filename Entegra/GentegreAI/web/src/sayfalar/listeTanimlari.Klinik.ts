@@ -165,9 +165,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
   },
   {
     // OZEL LISTE (mockup izin_istisnalar_listesi.html).
-    kaynak: 'calisma-istisna', rota: 'calisma-istisna', ozelSayfa: true, aksiyonEkrani: 'calisma-istisna-liste', baslik: 'İzin & İstisnalar',
-    yol: 'Randevu › İzin & İstisnalar',
-    kartYolu: '/calisma-istisna', kartBaslik: 'İzin & İstisna', ozelKart: true,
+    kaynak: 'calisma-istisna', rota: 'calisma-istisna', ozelSayfa: true, aksiyonEkrani: 'calisma-istisna-liste', baslik: 'Çalışma İstisnaları',
+    yol: 'Randevu › Ayarlar › Çalışma İstisnaları',
+    kartYolu: '/calisma-istisna', kartBaslik: 'Çalışma İstisnası', ozelKart: true,
     tarihAlani: 'basTarih',
     cipler: [
       { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -175,7 +175,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'İzin & İstisnalar', ic: '✈️', yetkiKodu: 'randevu.plan', menuSira: 85,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma İstisnaları', ic: '🗓', yetkiKodu: 'randevu.plan', menuSira: 85,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta

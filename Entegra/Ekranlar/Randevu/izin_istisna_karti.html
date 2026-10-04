@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>İzin & İstisna Kartı — Mockup (GenoTIP AI)</title>
+<title>Çalışma İstisnası Kartı — Mockup (GenoTIP AI)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -49,7 +49,7 @@
   .grp .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
   .grp .iz .tam{grid-column:1 / -1}
   /* TUR SECIMI: buyuk dugmeler - neyin olacagini tur belirler */
-  .turler{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .turler{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
   .tur{border:1px solid var(--line);border-radius:4px;padding:7px 6px;background:#fff;text-align:center;font-size:11px;line-height:1.3}
   .tur b{display:block;font-size:12px;margin-bottom:2px}
   .tur.on{background:var(--sel);border-color:var(--selbd);color:var(--navy)}
@@ -92,8 +92,8 @@
 <body>
 
 <div class="win">
-  <div class="title">✈️ İzin & İstisna — Dr. Aslı Demir · 12–16.10.2026
-    <span class="sp">Randevu › İzin &amp; İstisnalar · şablonu değiştirmeden planı ezer</span></div>
+  <div class="title">🗓 Çalışma İstisnası — Dr. Aslı Demir · 12–16.10.2026
+    <span class="sp">Randevu › Ayarlar › Çalışma İstisnaları · şablonu değiştirmeden planı ezer · izin İK'dan girilir</span></div>
 
   <div class="toolbar">
     <div class="btn primary">💾 Kaydet</div>
@@ -120,23 +120,25 @@
         <div class="iz">
           <div class="fld tam">
             <div class="turler">
-              <div class="tur"><b>✈️ İzin</b><span class="ne">o günler randevu yok</span></div>
-              <div class="tur on"><b>🎓 Kongre / eğitim</b><span class="ne">o günler randevu yok</span></div>
+              <div class="tur on"><b>🎓 Kongre / eğitim</b><span class="ne">gün boyu ya da saatli</span></div>
               <div class="tur"><b>🕘 Saat değişikliği</b><span class="ne">o günler başka saat</span></div>
               <div class="tur"><b>➕ Ek mesai</b><span class="ne">ek çalışma bloğu</span></div>
-              <div class="tur"><b>⛔ Kapalı</b><span class="ne">bölüm / gün kapalı</span></div>
+              <div class="tur"><b>⛔ Kapalı</b><span class="ne">bölüm / gün · saatli olabilir</span></div>
             </div>
           </div>
 
-          <div class="fld"><label>Saat (yalnız saat değişikliği / ek mesai)</label>
-            <div class="ikili"><div class="inp kisa pasif">--:--</div><span class="tire">–</span><div class="inp kisa pasif">--:--</div></div></div>
+          <div class="fld"><label>Saat (boşsa gün boyu)</label>
+            <div class="ikili"><div class="inp kisa combo">gün boyu</div><span class="tire">–</span><div class="inp kisa combo">gün boyu</div></div></div>
           <div class="fld"><label>Slot (boş = şablondaki)</label>
             <div class="inp pasif">20 dk</div></div>
           <div class="fld"><label>Şube</label><div class="inp combo">Tümü</div></div>
           <div class="fld"><label>Kanallar (ek mesai için)</label>
             <div class="cipler"><span class="cip">Banko</span><span class="cip">Portal</span><span class="cip">Çağrı</span></div></div>
           <div class="fld tam"><label class="req">Açıklama / neden</label>
-            <div class="inp">Avrupa Kardiyoloji Kongresi — Barselona</div></div>
+            <div class="ikili"><div class="inp combo" style="flex:1">Kongre / sempozyum</div><span class="cip">…</span></div></div>
+          <div class="fld tam"><div class="bilgi" style="margin:0">✈️ <b>İzin burada girilmez</b> — yıllık, mazeret ya da
+            yarım gün izin <b>İK › İzinler</b>'den (ya da Taleplerim'den) girilir; onaylanınca plan kendiliğinden kapanır ve
+            aşağıdaki listede "İK izni" olarak görünür.</div></div>
         </div>
       </div>
 
@@ -203,9 +205,9 @@
 </div>
 
 <div class="aciklama">
-  <b>NOT (mockup):</b> İstisna şablonu değiştirmeden planı belirli tarihler için ezer.
-  <b>Tür</b> büyük düğmelerle seçilir ve formu belirler: İzin / Kongre / Kapalı gün boyu kapatır
-  (saat alanları pasif); Saat değişikliği o günlerin bloğunu yenisiyle değiştirir; Ek mesai yeni
+  <b>NOT (mockup):</b> İstisna şablonu değiştirmeden planı belirli tarihler için ezer. <b>İzin türü yoktur</b> (950): doktorun izni İK izni olarak girilir - bakiye, bordro ve onay oradadır; yarım gün izin de İK izninde saatle verilir.
+  <b>Tür</b> büyük düğmelerle seçilir ve formu belirler: Kongre / Kapalı saat boşsa gün boyu, saat girilirse
+  yalnız o saatleri kapatır; Saat değişikliği o günlerin bloğunu yenisiyle değiştirir; Ek mesai yeni
   blok ekler (saat ve kanal zorunlu). Alt bölüm planın o haftayı nasıl göreceğini, sağ panel
   <b>etkilenen randevuları</b> gösterir: onaylamadan önce toplu olarak başka doktora aktarma, sonraki
   boş güne kaydırma, SMS ile bildirme ya da iptal seçilir. Onay akışı: <b>Bekliyor → Onaylı</b>

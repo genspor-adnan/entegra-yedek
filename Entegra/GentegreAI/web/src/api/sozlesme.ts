@@ -365,7 +365,7 @@ export interface PaketIcerikSatiri {
 // 'json': jsonb kolonu (cihaz olcum eslemesi, time-out teyitleri). Istemci
 //   icin METINDIR - cok satirli yazilir; gecerlilik sunucuda dogrulanir ve
 //   yazarken ::jsonb cast'i orada eklenir.
-export type AlanTipi = 'metin' | 'sayi' | 'ondalik' | 'para' | 'tarih' | 'zaman' | 'json'
+export type AlanTipi = 'metin' | 'sayi' | 'ondalik' | 'para' | 'tarih' | 'zaman' | 'json' | 'saat'
                      | 'kod' | 'mantik';
 
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */

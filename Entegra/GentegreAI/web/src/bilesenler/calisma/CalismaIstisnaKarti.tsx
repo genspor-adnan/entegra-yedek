@@ -24,7 +24,9 @@ import { GUN_AD, Grp, SaatSec, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi
  */
 
 const TURLER: { kod: number; ad: string; ic: string; ne: string }[] = [
-  { kod: 1, ad: 'İzin', ic: '✈️', ne: 'gün boyu ya da saatli' },
+  // İZİN TÜRÜ YOK (950): izin İK › İzinler'den girilir. Eski İzin kayıtları
+  //   açılabilsin diye listede durur, yalnız o kayıtta görünür.
+  { kod: 1, ad: 'İzin (eski)', ic: '✈️', ne: "artık İK'dan girilir" },
   { kod: 2, ad: 'Kongre / eğitim', ic: '🎓', ne: 'gün boyu ya da saatli' },
   { kod: 3, ad: 'Saat değişikliği', ic: '🕘', ne: 'o günler başka saat' },
   { kod: 4, ad: 'Ek mesai', ic: '➕', ne: 'ek çalışma bloğu' },
@@ -49,7 +51,7 @@ interface Deger {
 }
 
 const bos = (hekimId?: number): Deger => ({
-  hekimId: hekimId ?? 0, tur: 1, departmanId: null, subeId: null, durum: 0,
+  hekimId: hekimId ?? 0, tur: 2, departmanId: null, subeId: null, durum: 0,
   basTarih: bugunIso(), bitTarih: bugunIso(), saatBas: '', saatBit: '', slotDk: null, kanallar: [], aciklama: '',
 });
 
@@ -270,7 +272,7 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, ilkTur,
   const kilitli = !yazar || d.durum === 2;
 
   return (
-    <Modal baslik={`✈️ ${c('İzin & İstisna')}${baslik ? ' — ' + baslik : kayitId === null ? ' — ' + c('Yeni') : ''}`}
+    <Modal baslik={`🗓 ${c('Çalışma İstisnası')}${baslik ? ' — ' + baslik : kayitId === null ? ' — ' + c('Yeni') : ''}`}
       ekSinif="kart-calisma" buyutmeYok onKapat={onKapat}
       ustSerit={<div className="ck-kimlik ck-k3">
           <label className="rk-fld"><span className="ck-etiket">{c('Doktor')} <b className="ak-zor">*</b></span>
@@ -302,8 +304,8 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, ilkTur,
         <div className="ck-sol">
           <Grp baslik={c('Ne oluyor?')}>
             <div className="ck-iz">
-              <div className="ck-turler ck-tam">
-                {TURLER.map(t => (
+              <div className="ck-turler ck-tam" style={{ gridTemplateColumns: `repeat(${d.tur === 1 ? 5 : 4}, 1fr)` }}>
+                {TURLER.filter(t => t.kod !== 1 || d.tur === 1).map(t => (
                   <button key={t.kod} type="button" disabled={kilitli} className={`ck-tur${d.tur === t.kod ? ' on' : ''}`} onClick={() => yaz('tur', t.kod)}>
                     <b>{t.ic} {c(t.ad)}</b><span>{c(t.ne)}</span></button>
                 ))}

@@ -47,6 +47,11 @@ public static partial class KartKatalogu
                 Grup: "İzin"),
             // İŞ GÜNÜ Mü TAKVİM GÜNÜ Mü: izin TÜRÜNE göre değişir (rapor
             //   takvim günüdür, mazeret çoğu kurumda iş günü).
+            // SAATLİ İZİN (950, kullanıcı: "İK iznine saat ekle"): ikisi birden ya da
+            //   hiç; saatliyse başlangıç = bitiş (tek gün). Gün tetikte: <= 4,5 saat
+            //   0,5 gün, üstü 1 gün. Planda yalnız o saatler kapanır.
+            new("saatBas", "saat_bas", "saat", Baslik: "Saat Başlangıç (boşsa gün boyu)", Grup: "İzin"),
+            new("saatBit", "saat_bit", "saat", Baslik: "Saat Bitiş", Grup: "İzin"),
             new("isGunu", "is_gunu", "mantik", Baslik: "İş günü say", Grup: "İzin"),
             new("gun", "gun", "ondalik", Yazilabilir: false, Baslik: "Gün", Grup: "İzin"),
             new("durum", "durum", "kod", Yazilabilir: false, Baslik: "Durum",

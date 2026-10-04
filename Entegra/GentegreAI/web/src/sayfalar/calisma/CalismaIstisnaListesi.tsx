@@ -144,11 +144,11 @@ export function CalismaIstisnaListesi() {
 
   return (
     <>
-      <div className="sayfabas"><div className="basrow"><h1>{c('İzin & İstisnalar')}</h1>
-        <span className="yol">{c('Randevu › Ayarlar › İzin & İstisnalar')} · {c('şablonu değiştirmeden planı ezen kayıtlar')}</span></div></div>
+      <div className="sayfabas"><div className="basrow"><h1>{c('Çalışma İstisnaları')}</h1>
+        <span className="yol">{c('Randevu › Ayarlar › Çalışma İstisnaları')} · {c('şablonu değiştirmeden planı ezen kayıtlar')}</span></div></div>
       <div className="cl-sayfa">
         <div className="cl-arac">
-          {yazar && <button type="button" className="d bir" onClick={() => git('/calisma-istisna/yeni')}>＋ {c('Yeni İzin / İstisna')}</button>}
+          {yazar && <button type="button" className="d bir" onClick={() => git('/calisma-istisna/yeni')}>＋ {c('Yeni İstisna')}</button>}
           <span className="cl-ayrac" />
           {([['0', 'Onay bekliyor', 'bekliyor'], ['1', 'Onaylı', 'onayli'], ['2', 'İptal', 'iptal'], ['tumu', 'Tümü', 'tumu']] as [Durum, string, keyof CalismaIstisnaListe['sayac']][]).map(([k, a, sk]) => (
             <button key={k} type="button" className={`ck-cip${durum === k ? ' on' : ''}${k === '0' && (sayac?.bekliyor ?? 0) > 0 ? ' bek' : ''}`}
@@ -163,7 +163,7 @@ export function CalismaIstisnaListesi() {
         </div>
         <div className="cl-arac cl-ikinci">
           <span className="sonuk">{c('Tür')}:</span>
-          {[['', 'Tümü'], ['1', '✈️ İzin'], ['2', '🎓 Kongre / eğitim'], ['3', '🕘 Saat değişikliği'], ['4', '➕ Ek mesai'], ['5', '⛔ Kapalı'], ['ik', '🌴 İK izni']].map(([k, a]) => (
+          {[['', 'Tümü'], ['2', '🎓 Kongre / eğitim'], ['3', '🕘 Saat değişikliği'], ['4', '➕ Ek mesai'], ['5', '⛔ Kapalı'], ['ik', '🌴 İK izni']].map(([k, a]) => (
             <button key={k} type="button" className={`ck-cip${tur === k ? ' on' : ''}`} onClick={() => setTur(k)}>{c(a)}</button>
           ))}
           <span className="cl-ayrac" />

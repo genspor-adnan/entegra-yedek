@@ -52,6 +52,8 @@ const GozSemaCikti = tembel(() => import('./sayfalar/GozSemaCikti'), 'GozSemaCik
 const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi');
 const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
+const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
+const ArizaEkipleri = tembel(() => import('./sayfalar/ariza/ArizaEkipleri'), 'ArizaEkipleri');
 const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
 const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
 const DisGunlukAkis = tembel(() => import('./sayfalar/dis/DisGunlukAkis'), 'DisGunlukAkis');
@@ -278,6 +280,9 @@ function Yollar() {
         {yetki('ariza.talep') && (
           <Route path="/ariza-bildir" element={<ArizaBildir />} />
         )}
+        {/* TALEPLERIM: yetki kapisi yok - herkes yalniz kendi taleplerini gorur. */}
+        <Route path="/taleplerim" element={<Taleplerim />} />
+        {yetki('ariza') && <Route path="/ariza-ekipleri" element={<ArizaEkipleri />} />}
         {yetki('muayene') && (
           <Route path="/muayene-sablon" element={<MuayeneSablonlari />} />
         )}

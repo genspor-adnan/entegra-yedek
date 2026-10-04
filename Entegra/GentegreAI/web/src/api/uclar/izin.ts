@@ -51,7 +51,54 @@ export interface IzinBakiyesi {
   not: string | null;
 }
 
+/**
+ * TALEPLERİM satırı: kişinin kendi talebi - altı modül tek biçimde.
+ * `grup` sunucuda hesaplanır (taslak · onayda · acik · tamam · red · iptal).
+ */
+export interface TalepSatiri {
+  tur: 'izin' | 'avans' | 'masraf' | 'belge' | 'ariza' | 'malzeme';
+  id: number;
+  no: string | null;
+  durum: number;
+  baslik: string;
+  detay: string;
+  tutar: number | null;
+  grup: 'taslak' | 'onayda' | 'acik' | 'tamam' | 'red' | 'iptal';
+  durumAdi: string;
+  redNeden: string | null;
+  eklemeTarihi: string;
+  sonHareket: string;
+  /** Son değiştiren kullanıcı (0 = sistem) - kendi hareketim bildirim olmaz. */
+  sonDegistiren: number;
+  kaynakTur: number;
+  /** Onayda ise sıradaki basamak. */
+  adimAd: string | null;
+  gecikmeGun: number | null;
+  adimBaslama: string | null;
+}
+
+export interface OnayBekleyenSatiri {
+  kaynakTur: number; kaynakId: number; kayitNo: string; konu: string; talepEden: string;
+  adimAd: string; akisKod: string; akisAd: string; olcu: number; olcuAdi: string;
+  baslama: string; gecikmeGun: number;
+}
+
+export interface TaleplerimYaniti {
+  satirlar: TalepSatiri[];
+  /** Kişiye (ya da vekâletle) atanmış bekleyen onay basamağı sayısı. */
+  onayBekleyen: number;
+  /** Kişiye / vekâletle atanmış bekleyen onay basamakları (panelde ✔ / ✕). */
+  onaylar: OnayBekleyenSatiri[];
+  odenecek: number;
+  /** false: personel kartı yok - izin/avans/masraf/belge açılamaz. */
+  personel: boolean;
+  tarafId: number;
+}
+
 export const izinUclari = {
+  /** Kişinin kendi talepleri (yetki istemez; yalnız kendi kayıtları). */
+  taleplerim: () => istek<TaleplerimYaniti>('/api/ben/talepler'),
+
   izinBakiye: (tarafId: number, yil?: number) =>
     istek<IzinBakiyesi>(`/api/ik/personel/${tarafId}/izin-bakiye`
       + (yil ? `?yil=${yil}` : '')),
@@ -60,6 +107,8 @@ export const izinUclari = {
   izinAc: (g: {
     tarafId: number; tur: number; baslangic: string; bitis: string;
     isGunu?: boolean; aciklama?: string; belgeNo?: string; yerineId?: number;
+    /** Saatli izin (950): "HH:MM", ikisi birden, tek gün. */
+    saatBas?: string; saatBit?: string;
   }) => gonder<{
     id: number; gun: number; durum: number;
     bakiye: IzinBakiyesi; uyarilar: string[];

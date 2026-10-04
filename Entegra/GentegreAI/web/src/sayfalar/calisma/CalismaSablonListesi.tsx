@@ -210,7 +210,7 @@ export function CalismaSablonListesi() {
               <button type="button" className="d ck-kucuk" disabled={seciliDoktorlar.length !== 1}
                       title={seciliDoktorlar.length !== 1 ? c('İstisna tek doktorludur - tek doktorun şablonlarını seçin') : undefined}
                       onClick={() => git(`/calisma-istisna/yeni?hekimId=${seciliDoktorlar[0]}&sabit=1&geri=%2Fcalisma-sablon`)}>
-                ✈️ {c('Seçili doktora izin / istisna…')}</button>
+                🗓 {c('Seçili doktora istisna…')}</button>
             </>)}
             <button type="button" className="cl-bag cl-sag" onClick={() => setSecili(new Set())}>{c('Seçimi kaldır')} ✕</button>
           </div>

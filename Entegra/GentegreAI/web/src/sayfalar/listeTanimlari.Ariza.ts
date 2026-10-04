@@ -39,4 +39,13 @@ export const ARIZA_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Teknik Servis', menuAd: 'Arıza Talepleri', ic: '🧰',
     yetkiKodu: 'ariza', modul: 'servis', menuSira: 8,
   },
+  {
+    // EKİP ÜYELERİ + NÖBETÇİ (955, mockup Ekranlar/Taleplerim/gelen_talepler.html):
+    //   iş kime düşer, acilde kim aranır.
+    kaynak: 'ariza-ekipleri', rota: 'ariza-ekipleri', ozelSayfa: true,
+    baslik: 'Arıza Ekipleri',
+    yol: 'Teknik Servis › Arıza Ekipleri',
+    menuGrup: 'Teknik Servis', menuAd: 'Arıza Ekipleri', ic: '👥',
+    yetkiKodu: 'ariza', modul: 'servis', menuSira: 9,
+  },
 ];

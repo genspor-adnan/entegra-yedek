@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gelen Talepler — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip b{color:var(--muted);margin-left:3px}
+  .cip.on b{color:var(--navy)}
+  .sekmeler{display:flex;gap:0;border-bottom:1px solid var(--line);padding:0 10px;background:#fff}
+  .sekme{padding:8px 14px;font-size:12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .sekme.on{color:var(--navy);font-weight:bold;border-bottom-color:#2f6db3}
+  .sekme .say{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:#e3ecfa;color:#2f5c9e;font-size:10.5px;text-align:center}
+  .sekme .say.k{background:#f8e1df;color:#8f3d36}
+  /* YENI TALEP KUTUCUKLARI */
+  .yeni{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding:12px}
+  .kutu{border:1px solid var(--line2);border-radius:6px;padding:10px 8px;background:#fff;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .kutu .i{font-size:22px;line-height:1}
+  .kutu b{font-size:12px;color:var(--navy)}
+  .kutu span{font-size:10px;color:var(--muted)}
+  .kutu:hover{border-color:var(--selbd);background:#f5f9fe}
+  /* OZET */
+  .ozetler{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 12px 12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.dikkat{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.dikkat .v,.kpi.dikkat .a{color:var(--warn)}
+  .bakiye{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;display:flex;margin-top:3px}
+  .bakiye i{display:block;height:100%}
+  .bolum-bas{padding:8px 12px 4px;font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  /* LISTE + PANEL */
+  .govde{display:grid;grid-template-columns:1fr 360px;border-top:1px solid var(--line2)}
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .grid td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .grid tr.secili td{background:#eef5fd}
+  .grid tr.bitti td{color:#7a8796}
+  .tur{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap;border:1px solid}
+  .t-izin{background:#f8e1df;color:#8f3d36;border-color:#e4b7b2}
+  .t-avans{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .t-masraf{background:#fdf1dc;color:#8a6414;border-color:#f0d9a8}
+  .t-belge{background:#e3ecfa;color:#2f5c9e;border-color:#bcd2ef}
+  .t-ariza{background:#efe6fa;color:#6b3fa0;border-color:#ddc9f2}
+  .t-stok{background:#e9ecf0;color:#4b5866;border-color:#cfd6de}
+  .konu b{color:var(--navy)}
+  .konu small{display:block;color:var(--muted);font-size:10.5px}
+  /* ONAY ZINCIRI */
+  .zincir{display:flex;align-items:center;gap:0;white-space:nowrap}
+  .adim{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+  .adim i{width:14px;height:14px;border-radius:50%;border:1.5px solid #b9c4d0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-style:normal;background:#fff}
+  .adim.ok i{background:#2e7d46;border-color:#2e7d46;color:#fff}
+  .adim.su i{background:#fff;border-color:#e0a33a;color:#e0a33a;box-shadow:0 0 0 3px #fdf1dc}
+  .adim.su{color:var(--warn);font-weight:bold}
+  .adim.red i{background:#b3261e;border-color:#b3261e;color:#fff}
+  .adim.red{color:#8f3d36;font-weight:bold}
+  .cizgi{width:14px;height:2px;background:#d6dde6;margin:0 2px}
+  .cizgi.ok{background:#2e7d46}
+  .kim{font-size:10.5px;color:var(--muted)}
+  .kim b{color:var(--ink);font-weight:normal}
+  .kim .gec{color:#8f3d36;font-weight:bold}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-mavi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .tutar{text-align:right;white-space:nowrap}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfe}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;margin:10px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:6px;align-items:center}
+  .grp h4 span{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .ic{padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .sat{display:grid;grid-template-columns:84px 1fr;gap:6px}
+  .sat .k{color:var(--muted)}
+  .zc{position:relative;padding-left:18px;display:flex;flex-direction:column;gap:9px}
+  .zc::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e3e9f0}
+  .zo{position:relative;font-size:11px}
+  .zo::before{content:"";position:absolute;left:-16px;top:3px;width:10px;height:10px;border-radius:50%;background:#2e7d46;border:2px solid #fff;box-shadow:0 0 0 1px #2e7d46}
+  .zo.su::before{background:#fff;box-shadow:0 0 0 2px #e0a33a}
+  .zo.yorum::before{background:#2f6db3;box-shadow:0 0 0 1px #2f6db3}
+  .zo small{display:block;color:var(--muted);font-size:10px}
+  .zo .bal{background:#f3f6fa;border:1px solid var(--line2);border-radius:6px;padding:5px 8px;margin-top:3px}
+  .ek{display:flex;gap:6px;flex-wrap:wrap}
+  .ek span{border:1px solid var(--line);border-radius:3px;padding:2px 6px;font-size:10.5px;background:#fff}
+  .eylem{display:flex;gap:4px;flex-wrap:wrap}
+  .bilgi{padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  .uyari{padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px}
+  /* YENI TALEP MODALI */
+  .modal-alan{padding:14px;background:rgba(20,40,70,.06);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .modal{background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(20,40,70,.18)}
+  .modal .mbas{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:6px 10px;font-weight:bold;font-size:12px;display:flex}
+  .modal .mbas span{margin-left:auto;font-weight:normal;opacity:.8;font-size:10.5px}
+  .modal .mgov{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .modal .malt{display:flex;gap:6px;justify-content:flex-end;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:#b23b3b}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ikili{display:flex;gap:6px;align-items:center}
+  .tablo-mini{border-collapse:collapse;width:100%;font-size:11px}
+  .tablo-mini th,.tablo-mini td{padding:4px 6px;border-bottom:1px solid var(--line2);text-align:left}
+  .tablo-mini th{color:var(--muted);font-weight:normal;background:var(--head)}
+  .aciklama{max-width:1240px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  /* ===== 0) ERISIM: UST SERIT IKONU + KULLANICI MENUSU ===== */
+  .erisim{position:relative;height:470px;background:#eef1f5;overflow:hidden}
+  .ustbar{height:52px;background:linear-gradient(#21497c,#183a66);display:flex;align-items:center;gap:14px;padding:0 14px;color:#fff}
+  .ustbar .logo{font-weight:bold;font-size:15px;display:flex;gap:6px;align-items:center}
+  .ustbar .ara{flex:0 0 280px;height:28px;border-radius:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11.5px;display:flex;align-items:center;padding:0 10px;color:rgba(255,255,255,.75)}
+  .ustbar .sube{margin:0 auto;font-weight:bold;font-size:13px}
+  .ustbar .ikonlar{display:flex;gap:14px;align-items:center}
+  .uik{position:relative;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .uik.on{background:rgba(255,255,255,.18);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .uik .rz{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e0503f;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .uik .nokta{position:absolute;top:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#3fb26b;border:2px solid #1d4270}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#2e5e98;border:2px solid rgba(255,255,255,.6);font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .avatar.on{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+  .pop{position:absolute;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 10px 30px rgba(20,40,70,.25);color:var(--ink)}
+  .pop::before{content:"";position:absolute;top:-7px;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+  .pop.talep{top:60px;right:290px;width:400px}
+  .pop.talep::before{right:-46px;display:none}
+  .pop.kullanici{top:60px;right:12px;width:250px}
+  .pop.kullanici::before{right:14px}
+  .pop .pb{padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--navy)}
+  .pop .pb span{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .hizli{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .hizli div{border:1px solid var(--line2);border-radius:5px;padding:6px 4px;text-align:center;font-size:10.5px;color:var(--navy);font-weight:bold;background:#fbfcfe}
+  .hizli div i{display:block;font-style:normal;font-size:17px;margin-bottom:2px}
+  .onayb{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fdf1f0;border-bottom:1px solid #f1d2ce;color:#8f3d36;font-size:11px}
+  .onayb b{font-size:13px}
+  .onayb span{margin-left:auto;text-decoration:underline}
+  .son{list-style:none;margin:0;padding:4px 0}
+  .son li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 12px;font-size:11px}
+  .son li:hover{background:#f5f9fe}
+  .son li small{display:block;color:var(--muted);font-size:10px}
+  .son li.yeni{background:#f2faf5}
+  .son li.yeni small{color:#2e7d46;font-weight:bold}
+  .pop .pa{padding:8px 12px;border-top:1px solid var(--line2);display:flex;justify-content:space-between;font-size:11px;color:var(--accent)}
+  .kmenu{list-style:none;margin:0;padding:4px 0}
+  .kmenu li{padding:6px 12px;font-size:11.5px;display:flex;gap:8px;align-items:center}
+  .kmenu li:hover{background:#f5f9fe}
+  .kmenu li span{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .kmenu li.vurgu{font-weight:bold;color:var(--navy)}
+  .kmenu li .rzk{margin-left:auto;background:#e0503f;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;font-weight:bold}
+  .kmenu .ayr{height:1px;background:var(--line2);margin:4px 0;padding:0}
+  .etiket-ok{position:absolute;font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px solid #bcd2ef;border-radius:4px;padding:4px 8px;max-width:210px;line-height:1.35}
+
+  /* ===== GELEN TALEPLER ===== */
+  .sahne{position:relative;height:520px;background:#eef1f5;overflow:hidden}
+  .ustbar{height:52px;background:linear-gradient(#21497c,#183a66);display:flex;align-items:center;gap:14px;padding:0 14px;color:#fff}
+  .ustbar .logo{font-weight:bold;font-size:15px}
+  .ustbar .sube{margin:0 auto;font-weight:bold;font-size:13px}
+  .ustbar .ikonlar{display:flex;gap:14px;align-items:center}
+  .uik{position:relative;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .uik.on{background:rgba(255,255,255,.18);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .uik .rz{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e0503f;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .uik .rz.nab{animation:nab 1.2s infinite}
+  @keyframes nab{50%{box-shadow:0 0 0 5px rgba(224,80,63,.35)}}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#2e5e98;border:2px solid rgba(255,255,255,.6);font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .pop{position:absolute;top:60px;right:120px;width:440px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 10px 30px rgba(20,40,70,.25)}
+  .pop .pb{padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--navy)}
+  .pop .pb span{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .psek{display:flex;border-bottom:1px solid var(--line2);font-size:11px}
+  .psek div{padding:6px 12px;color:var(--muted);border-bottom:2px solid transparent}
+  .psek div.on{color:var(--navy);font-weight:bold;border-bottom-color:#2f6db3}
+  .psek b{background:#e0503f;color:#fff;border-radius:8px;padding:0 5px;font-size:9.5px;margin-left:3px}
+  .gl{list-style:none;margin:0;padding:0}
+  .gl li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--line2);font-size:11px}
+  .gl li small{display:block;color:var(--muted);font-size:10px}
+  .gl li.acil{background:#fdf1f0}
+  .gl li.acil b{color:#8f3d36}
+  .gl .ey{display:flex;gap:4px}
+  .gl .grpb{display:block;padding:4px 12px;background:var(--head);font-size:10px;font-weight:bold;color:var(--muted);border-bottom:1px solid var(--line2);grid-template-columns:none}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#5fb57c,#2e7d46);color:#fff;font-weight:bold}
+  .btn.red{border-color:#b23b3b;color:#b23b3b;background:#fff}
+  .pa{padding:8px 12px;display:flex;justify-content:space-between;font-size:11px;color:var(--accent)}
+  .toast{position:absolute;width:340px;background:#fff;border:1px solid var(--line);border-left:4px solid #2f6db3;border-radius:6px;box-shadow:0 10px 26px rgba(20,40,70,.28);padding:9px 11px;font-size:11px;display:flex;flex-direction:column;gap:5px}
+  .toast.acil{border-left-color:#e0503f;background:#fff8f7}
+  .toast.yesil{border-left-color:#2e7d46;background:#f6fbf7}
+  .toast .tb{display:flex;align-items:center;gap:6px;font-weight:bold;color:var(--navy)}
+  .toast .tb span{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10px}
+  .toast .ey{display:flex;gap:4px}
+  .etiket-ok{position:absolute;font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px solid #bcd2ef;border-radius:4px;padding:5px 8px;max-width:250px;line-height:1.4}
+  .grupbas td{background:var(--head);font-weight:bold;color:var(--navy);font-size:11px}
+  .grupbas td span{font-weight:normal;color:var(--muted);margin-left:6px}
+  tr.acil td{background:#fdf1f0}
+  .ikiyan{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:12px}
+  .not-liste{margin:0;padding-left:16px;font-size:11px;line-height:1.6}
+  .kanal{display:grid;grid-template-columns:150px repeat(4,1fr);font-size:11px;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .kanal div{padding:5px 8px;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2)}
+  .kanal .h{background:var(--head);font-weight:bold;color:var(--navy)}
+  .kanal .e{color:#2e7d46;font-weight:bold;text-align:center}
+  .kanal .x{color:#b9c4d0;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- ================================================== 1) UST SERIT: EKIP UYESI -->
+<div class="win">
+  <div class="title">📥 Gelen talepler — üst şerit (ekip üyesi / onaycı)
+    <span class="sp">talep, gittiği kişiye ANINDA düşer · işlem panelden tek tıkla, ekran değiştirmeden</span></div>
+  <div class="sahne">
+    <div class="ustbar">
+      <span class="logo">🧬 GenoTIP AI</span>
+      <span class="sube">🏥 Merkez ▾</span>
+      <span class="ikonlar">
+        <span class="uik">💬</span>
+        <span class="uik on">📨<span class="rz nab">5</span></span>
+        <span class="uik">🔔</span>
+        <span class="avatar">MÉ</span>
+      </span>
+    </div>
+
+    <div class="pop">
+      <div class="pb">📨 Talepler <span>Tekn. Murat Er · Biyomedikal</span></div>
+      <div class="psek"><div class="on">Bana gelenler <b>5</b></div><div>Taleplerim</div></div>
+      <ul class="gl">
+        <li class="grpb">🚨 ACİL</li>
+        <li class="acil"><span>🩺</span><span><b>AT-000124 · Ventilatör alarm veriyor</b> · Yoğun Bakım 2
+          <small>Hem. Selin Aksu · ☎ dahili 2210 · 4 dk önce · atanmamış</small></span>
+          <span class="ey"><span class="btn kucuk primary">✋ Devral</span><span class="btn kucuk">☎</span></span></li>
+        <li class="grpb">ATANMAMIŞ · ekibime gelen</li>
+        <li><span>🩺</span><span><b>AT-000121 · EKG kâğıt sıkıştırıyor</b> · Poliklinik 3
+          <small>Dr. Aslı Demir · 1 sa önce · 2 kişi bildirdi</small></span>
+          <span class="ey"><span class="btn kucuk primary">✋ Devral</span></span></li>
+        <li class="grpb">BENDE</li>
+        <li><span>🩺</span><span><b>AT-000118 · İnfüzyon pompası şarj olmuyor</b> · Servis 4
+          <small>işlemde · dün 15:20'den beri</small></span>
+          <span class="ey"><span class="btn kucuk ok">✔ Çözüldü</span></span></li>
+        <li class="grpb">ONAYIMI BEKLEYEN</li>
+        <li><span>✈️</span><span><b>Yıllık izin · Tekn. Ali Can</b> 21–23.10 · 3 gün
+          <small>Birim âmiri basamağı · 1 gündür · bakiye 11 → 8</small></span>
+          <span class="ey"><span class="btn kucuk ok">✔</span><span class="btn kucuk red">✕</span></span></li>
+        <li><span>🧾</span><span><b>Masraf ₺ 640 · Tekn. Ali Can</b> · yol + yemek
+          <small>2 belge · bugün</small></span>
+          <span class="ey"><span class="btn kucuk ok">✔</span><span class="btn kucuk red">✕</span></span></li>
+      </ul>
+      <div class="pa"><span>🔊 ses açık · masaüstü bildirimi açık</span><span>Tümünü gör →</span></div>
+    </div>
+
+    <div class="toast acil" style="left:24px;bottom:24px">
+      <div class="tb">🚨 Acil arıza — Biyomedikal <span>şimdi</span></div>
+      <div><b>AT-000124</b> · Ventilatör alarm veriyor · Yoğun Bakım 2<br>Hem. Selin Aksu · ☎ dahili 2210</div>
+      <div class="ey"><span class="btn kucuk primary">✋ Devral</span><span class="btn kucuk">Gör</span><span class="btn kucuk" style="margin-left:auto">Sonra</span></div>
+    </div>
+
+    <div class="etiket-ok" style="top:70px;left:24px">① <b>Rozet = işlem bekleyen her şey</b>: bana gelen arıza (atanmamış + bende) + onayımı bekleyen talep.
+      Yeni iş gelince rozet <b>nabız atar</b>.</div>
+    <div class="etiket-ok" style="top:150px;left:24px">② Panel <b>"Bana gelenler"</b> ile açılır (ekip üyesi / onaycıda); gruplar: <b>Acil</b> en üstte,
+      <b>Atanmamış</b>, <b>Bende</b>, <b>Onayımı bekleyen</b>. Her satırda tek tık işlem:
+      <b>Devral</b>, <b>Çözüldü</b> (not sorar), <b>✔ Onayla / ✕ Reddet</b> (red gerekçe sorar).</div>
+    <div class="etiket-ok" style="top:290px;left:24px">③ <b>Anlık bildirim</b> (sol altta - sağ alt Yapay Zekâ düğmesinde): yeni iş açık ekranın üstüne düşer,
+      kişi bulunduğu ekrandan çıkmadan Devral / Gör der. Acil kırmızı + ses; kendiliğinden kapanmaz.</div>
+  </div>
+</div>
+
+<!-- ================================================== 2) TALEP EDENE GERI DONUS -->
+<div class="win">
+  <div class="title">📨 Talep edene geri dönüş — anlık bildirim
+    <span class="sp">ekip / onaycı işlem yapınca talep eden de aynı anda haberdar olur</span></div>
+  <div class="sahne" style="height:230px">
+    <div class="toast" style="left:24px;top:20px">
+      <div class="tb">🧰 Arızanız ele alındı <span>2 dk önce</span></div>
+      <div><b>AT-000121</b> EKG kâğıt sıkıştırıyor — <b>Tekn. Murat Er</b> devraldı.</div>
+      <div class="ey"><span class="btn kucuk">Gör</span></div>
+    </div>
+    <div class="toast yesil" style="left:390px;top:20px">
+      <div class="tb">✔ Arızanız çözüldü — onaylıyor musunuz? <span>şimdi</span></div>
+      <div><b>AT-000121</b> · "Rulo yuvası değişti, test çekimi yapıldı."</div>
+      <div class="ey"><span class="btn kucuk ok">✔ Evet, kapat</span><span class="btn kucuk red">↩ Düzelmedi</span></div>
+    </div>
+    <div class="toast yesil" style="left:756px;top:20px">
+      <div class="tb">✈️ İzniniz onaylandı <span>5 dk önce</span></div>
+      <div>Yıllık izin 21–23.10 · 3 gün · <b>Birim âmiri</b> onayladı, sırada İK.</div>
+      <div class="ey"><span class="btn kucuk">Gör</span></div>
+    </div>
+    <div class="etiket-ok" style="top:150px;left:24px;max-width:1100px">Talep eden için de aynı kanal: <b>devraldı / atandı / çözüldü / onaylandı / reddedildi / hazır</b>
+      olaylarında anlık bildirim + 📨'de yeşil nokta. "Çözüldü" bildirimi doğrudan <b>Evet, kapat / Düzelmedi</b> düğmeleriyle gelir — Taleplerim'i açmaya gerek yok.</div>
+  </div>
+</div>
+
+<!-- ================================================== 3) TALEPLERIM: BANA GELENLER -->
+<div class="win">
+  <div class="title">📨 Taleplerim — "Bana gelenler" sekmesi
+    <span class="sp">ekip üyesi / onaycı: işin tamamı tek listede · satıra tık → sağda ayrıntı + işlemler</span></div>
+  <div class="sekmeler">
+    <div class="sekme">Taleplerim <span class="say">4 açık</span></div>
+    <div class="sekme on">Bana gelenler <span class="say k">5</span></div>
+    <div class="sekme">Ekibimin işleri</div>
+  </div>
+  <div class="ikiyan">
+    <div>
+      <table class="grid">
+        <tr><th>Tür</th><th>No · Konu</th><th>Talep eden</th><th>Bekliyor</th><th>İşlem</th></tr>
+        <tr class="grupbas"><td colspan="5">🚨 Acil <span>1</span></td></tr>
+        <tr class="acil">
+          <td><span class="tur t-ariza">🧰 Arıza</span></td>
+          <td class="konu"><b>AT-000124</b> · Ventilatör alarm veriyor<small>Tıbbi cihaz · Yoğun Bakım 2 · DM-00088</small></td>
+          <td class="kim"><b>Hem. Selin Aksu</b><br>☎ dahili 2210</td>
+          <td class="kim"><span class="gec">4 dk</span></td>
+          <td><span class="btn kucuk primary">✋ Devral</span> <span class="btn kucuk">👤 Ata…</span></td>
+        </tr>
+        <tr class="grupbas"><td colspan="5">Atanmamış <span>ekibime gelen · 1</span></td></tr>
+        <tr class="secili">
+          <td><span class="tur t-ariza">🧰 Arıza</span></td>
+          <td class="konu"><b>AT-000121</b> · EKG kâğıt sıkıştırıyor<small>Poliklinik 3 · 2 kişi bildirdi · 📷 1</small></td>
+          <td class="kim"><b>Dr. Aslı Demir</b><br>☎ 4123</td>
+          <td class="kim">1 sa</td>
+          <td><span class="btn kucuk primary">✋ Devral</span> <span class="btn kucuk">👤 Ata…</span></td>
+        </tr>
+        <tr class="grupbas"><td colspan="5">Bende <span>1</span></td></tr>
+        <tr>
+          <td><span class="tur t-ariza">🧰 Arıza</span></td>
+          <td class="konu"><b>AT-000118</b> · İnfüzyon pompası şarj olmuyor<small>Servis 4 · işlemde</small></td>
+          <td class="kim"><b>Hem. Ece Tan</b></td>
+          <td class="kim">1 gün</td>
+          <td><span class="btn kucuk ok">✔ Çözüldü</span> <span class="btn kucuk">💬</span></td>
+        </tr>
+        <tr class="grupbas"><td colspan="5">Onayımı bekleyen <span>2</span></td></tr>
+        <tr>
+          <td><span class="tur t-izin">✈️ İzin</span></td>
+          <td class="konu"><b>İZ-2026-0431</b> · Yıllık izin 21–23.10<small>3 gün · bakiye 11 → 8 · vekil Tekn. Can Ay</small></td>
+          <td class="kim"><b>Tekn. Ali Can</b></td>
+          <td class="kim">1 gün</td>
+          <td><span class="btn kucuk ok">✔ Onayla</span> <span class="btn kucuk red">✕ Reddet</span></td>
+        </tr>
+        <tr>
+          <td><span class="tur t-masraf">🧾 Masraf</span></td>
+          <td class="konu"><b>MS-2026-0101</b> · yol + yemek<small>2 belge · 📎 fiş görüntüle</small></td>
+          <td class="kim"><b>Tekn. Ali Can</b></td>
+          <td class="kim">bugün</td>
+          <td><span class="btn kucuk ok">✔ Onayla</span> <span class="btn kucuk red">✕ Reddet</span></td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <div class="grp" style="margin:0 0 10px">
+        <h4>🧰 AT-000121 · EKG kâğıt sıkıştırıyor <span class="chip c-bek" style="margin-left:auto">Açık</span></h4>
+        <div class="ic">
+          <div class="sat"><span class="k">Bildiren</span><span><b>Dr. Aslı Demir</b> · ☎ 4123 <span class="btn kucuk">Ara</span></span></div>
+          <div class="sat"><span class="k">Takipçi</span><span>Hem. Elif Ak</span></div>
+          <div class="sat"><span class="k">Cihaz</span><span>DM-00412 EKG — Poliklinik 3 · <a href="#">geçmiş 3 arıza</a></span></div>
+          <div class="sat"><span class="k">Fotoğraf</span><span>📎 IMG_0412.jpg</span></div>
+          <div class="eylem"><span class="btn kucuk primary">✋ Devral</span><span class="btn kucuk">👤 Ata…</span><span class="btn kucuk">💬 Not</span><span class="btn kucuk">📷</span></div>
+        </div>
+      </div>
+      <div class="grp" style="margin:0">
+        <h4>Akış</h4>
+        <div class="ic"><div class="zc">
+          <div class="zo">Bildirildi<small>Dr. Aslı Demir · 09:05</small></div>
+          <div class="zo">Biyomedikal'e iletildi<small>sistem · 📨 4 ekip üyesine düştü</small></div>
+          <div class="zo yorum">Ben de bildiriyorum<div class="bal">Sabah da aynısı oldu.</div><small>Hem. Elif Ak · 09:40</small></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================== 4) KANALLAR -->
+<div class="win">
+  <div class="title">🔔 Haber kanalları — kim, neyi, nereden duyar</div>
+  <div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+    <div class="kanal">
+      <div class="h">Olay</div><div class="h">📨 rozet + panel</div><div class="h">Anlık bildirim (ekranda)</div><div class="h">Masaüstü / ses</div><div class="h">SMS / e-posta</div>
+      <div>Yeni arıza → ekibe</div><div class="e">✔</div><div class="e">✔</div><div class="e">✔</div><div class="x">—</div>
+      <div>ACİL arıza → ekibe</div><div class="e">✔</div><div class="e">✔ kırmızı, kapanmaz</div><div class="e">✔ ses</div><div class="e">✔ SMS</div>
+      <div>Onaya düşen talep → onaycıya</div><div class="e">✔</div><div class="e">✔</div><div class="e">✔</div><div class="e">✔ e-posta (var)</div>
+      <div>Devraldı / atandı → bildirene</div><div class="e">✔ yeşil nokta</div><div class="e">✔</div><div class="x">—</div><div class="x">—</div>
+      <div>Çözüldü → bildirene</div><div class="e">✔</div><div class="e">✔ Evet / Düzelmedi</div><div class="e">✔</div><div class="x">—</div>
+      <div>Onaylandı / reddedildi → talep edene</div><div class="e">✔</div><div class="e">✔</div><div class="x">—</div><div class="e">✔ e-posta (var)</div>
+      <div>Bende 1 günden uzun bekleyen</div><div class="e">✔ turuncu</div><div class="x">—</div><div class="x">—</div><div class="e">✔ sabah özeti</div>
+    </div>
+    <div class="bilgi"><b>Ekip kim?</b> Arıza kategorisi → ekip (Biyomedikal, Bilgi İşlem, Teknik…) zaten sistemde. Ekibe <b>üye</b> tanımı eklenir
+      (Ayarlar › Arıza ekipleri: ekip + kişi + nöbetçi). Üyesi tanımlı ekipte iş yalnız üyelere düşer; tanımsızsa arıza yetkisi olan herkese.
+      Acil SMS yalnız <b>nöbetçiye</b> (yoksa tüm üyelere).</div>
+  </div>
+</div>
+
+<div class="win"><div style="padding:10px 14px;font-size:11px;line-height:1.6">
+<b>NOT (mockup):</b> Kullanıcı: "talep yaptığımız birim / kişinin bundan hızlı ve pratik şekilde haberi olması ve gerekli aksiyonu alabilmesi lazım".
+Tek giriş noktası üst şeritteki <b>📨</b>: talep edende "Taleplerim", talebi alanda (ekip üyesi / onaycı) <b>"Bana gelenler"</b> ile açılır.
+İş <b>anlık bildirimle</b> ekrana düşer (sayfa yenilemeden, birkaç saniye içinde), işlem bildirimin ve panelin <b>üzerinden</b> yapılır.
+Aynı akış izin / avans / masraf / belge onaylarında da geçerli: onaycı panelden ✔ / ✕ der, talep eden anında görür.
+</div></div>
+
+</body>
+</html>

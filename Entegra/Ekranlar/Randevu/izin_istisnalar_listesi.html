@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>İzin & İstisnalar Listesi — Mockup (GenoTIP AI)</title>
+<title>Çalışma İstisnaları Listesi — Mockup (GenoTIP AI)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -112,11 +112,11 @@
 
 <!-- ============================================================ LISTE -->
 <div class="win">
-  <div class="title">✈️ İzin &amp; İstisnalar
-    <span class="sp">Randevu › Ayarlar › İzin &amp; İstisnalar · şablonu değiştirmeden planı ezen kayıtlar</span></div>
+  <div class="title">🗓 Çalışma İstisnaları
+    <span class="sp">Randevu › Ayarlar › Çalışma İstisnaları · şablonu değiştirmeden planı ezen kayıtlar · İK izinleri salt okunur</span></div>
 
   <div class="toolbar">
-    <div class="btn primary">＋ Yeni İzin / İstisna</div>
+    <div class="btn primary">＋ Yeni İstisna</div>
     <span class="ayrac"></span>
     <span class="cipler">
       <span class="cip bek on">Onay bekliyor <b>3</b></span>
@@ -131,7 +131,7 @@
   <div class="ikinci">
     <span class="k">Tür:</span>
     <span class="cipler">
-      <span class="cip on">Tümü</span><span class="cip">✈️ İzin</span><span class="cip">🎓 Kongre / eğitim</span>
+      <span class="cip on">Tümü</span><span class="cip">🎓 Kongre / eğitim</span>
       <span class="cip">🕘 Saat değişikliği</span><span class="cip">➕ Ek mesai</span><span class="cip">⛔ Kapalı</span>
       <span class="cip">🌴 İK izni</span>
     </span>
@@ -182,16 +182,16 @@
       <td>Sabah idari toplantı</td>
       <td class="kim">Giren: <b>Sekreter Ayşe</b> · 02.10<br>Onaylayan: —</td>
     </tr>
-    <tr>
-      <td><span class="kutu"></span></td>
-      <td><span class="tur t-izin">✈️ İzin</span></td>
-      <td><div class="dr">Dr. Emre Arslan<small>Deri ve Zührevi Hastalıklar</small></div></td>
-      <td class="tarih"><b>01–07.10.2026</b><small class="simdi">● şu an devam ediyor</small></td>
-      <td>gün boyu</td>
-      <td><div class="etk"><span class="tamam">✔ 4 randevu aktarıldı</span></div></td>
+    <tr class="ik">
+      <td><span class="kutu yok" title="İK izni burada düzenlenmez"></span></td>
+      <td><span class="tur t-ik">🌴 İK izni</span></td>
+      <td><div class="dr">Dr. Burak Kılıç<small>Endokrin ve Metabolizma</small></div></td>
+      <td class="tarih"><b>14.10.2026</b><small>yarım gün · Çarşamba</small></td>
+      <td>09:00–12:30</td>
+      <td><div class="etk"><span class="acik">2 randevu işlem bekliyor</span></div></td>
       <td><span class="chip c-ok">Onaylı</span></td>
-      <td>Mazeret — aile</td>
-      <td class="kim">Giren: <b>admin</b> · 28.09<br>Onaylayan: <b>Başhekim</b> · 29.09</td>
+      <td>Mazeret izni <span style="color:var(--muted)">· İzinler ekranından yönetilir ↗</span></td>
+      <td class="kim">İK · 0,5 gün · İZ-2026-0421</td>
     </tr>
     <tr class="ik">
       <td><span class="kutu yok" title="İK izni burada düzenlenmez"></span></td>
@@ -228,7 +228,7 @@
     </tr>
     <tr class="iptal">
       <td><span class="kutu"></span></td>
-      <td><span class="tur t-izin">✈️ İzin</span></td>
+      <td><span class="tur t-kongre">🎓 Kongre / eğitim</span></td>
       <td><div class="dr">Dr. Deniz Kara<small>Gastroenteroloji</small></div></td>
       <td class="tarih"><b>23.10.2026</b><small>1 gün</small></td>
       <td>gün boyu</td>
@@ -243,7 +243,7 @@
 
 <!-- ============================================== ZAMAN CIZELGESI GORUNUMU -->
 <div class="win">
-  <div class="title">✈️ İzin &amp; İstisnalar — ▬ Zaman çizelgesi görünümü
+  <div class="title">🗓 Çalışma İstisnaları — ▬ Zaman çizelgesi görünümü
     <span class="sp">aynı süzgeç · doktor × 4 hafta · çubuğa tıkla = kart</span></div>
   <div class="zc">
     <div class="zc-ust">
@@ -264,19 +264,19 @@
     <div class="zc-sat"><div class="ad">Dr. Ceren Çelik<small>KBB</small></div>
       <div class="cub t-ek" style="grid-column:14 / span 1">➕</div></div>
     <div class="zc-sat"><div class="ad">Dr. Emre Arslan<small>Deri</small></div>
-      <div class="cub t-izin" style="grid-column:2 / span 3">✈️ İzin</div></div>
+      <div class="cub t-ik" style="grid-column:2 / span 3">🌴 İK izni</div></div>
     <div class="zc-sat"><div class="ad">Göz Hastalıkları<small>bölüm</small></div>
       <div class="cub t-kapali" style="grid-column:26 / span 1">⛔</div></div>
   </div>
   <div class="lejant">
-    <span class="tur t-izin">✈️ İzin</span><span class="tur t-kongre">🎓 Kongre</span><span class="tur t-saat">🕘 Saat değişikliği</span>
+    <span class="tur t-kongre">🎓 Kongre</span><span class="tur t-saat">🕘 Saat değişikliği</span>
     <span class="tur t-ek">➕ Ek mesai</span><span class="tur t-kapali">⛔ Kapalı</span><span class="tur t-ik">🌴 İK izni</span>
     <span>taralı çubuk = onay bekliyor</span>
   </div>
 </div>
 
 <div class="aciklama">
-  <b>NOT (mockup):</b> Liste "kim, ne zaman, neden yok ve hastalara ne oldu" sorusunu cevaplar. Bugünkü
+  <b>NOT (mockup):</b> Liste "kim, ne zaman, neden yok ve hastalara ne oldu" sorusunu cevaplar. <b>İzin türü kaldırıldı</b> (950): izin İK'dan girilir ve buraya salt okunur "İK izni" satırı olarak düşer - saatli (yarım gün) İK izni saat sütununda görünür. Bugünkü
   generic listeye göre değişiklikler:
   <b>(1)</b> varsayılan çip <b>Onay bekliyor</b> (yalnız onaylı istisna planı kapatır — iş bekleyenler önde);
   çipler sayılı; tür ve dönem çipleri ikinci satırda;

@@ -11,6 +11,11 @@ import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ZilPaneli } from '../bilesenler/ZilPaneli';
+import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu } from '../bilesenler/taleplerim/TaleplerimPaneli';
+import { useTaleplerimOzeti } from '../bilesenler/taleplerim/useTaleplerimOzeti';
+import { YeniTalepKatmani } from '../bilesenler/taleplerim/YeniTalepModali';
+import { TalepBildirimleri } from '../bilesenler/taleplerim/TalepBildirimleri';
+import { IskontoKararKatmani } from '../bilesenler/taleplerim/GelenIsler';
 import { Bayrak } from '../bilesenler/Bayrak';
 import { c, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -67,6 +72,10 @@ export function Kabuk() {
   }, [konum.pathname, satirlar]);
 
   // KULLANICI AYARLARI PENCERESI (sifre + dil) kendi kancasinda.
+  // TALEPLERIM (mockup Ekranlar/Taleplerim): ust serit paneli, avatar menusu
+  //   ve Taleplerim sayfasi ayni ozeti okur - tek yerde, 60 sn'de bir.
+  const talepOzeti = useTaleplerimOzeti(kullanici?.id);
+
   const ayar = useKullaniciAyari({
     mevcutDil: kullanici?.dil ?? 0, dilDegistir, cikisYap,
   });
@@ -137,6 +146,7 @@ export function Kabuk() {
 
 
   return (
+    <TaleplerimBaglami.Provider value={talepOzeti}>
     <div className={`kabuk${menuKapali ? ' menu-kapali' : ''}`}>
       <header className="ust">
         {/* Menu ac/kapa: markanin SOLUNDA - kapaninca ana alan tam genislige acilir. */}
@@ -215,6 +225,11 @@ export function Kabuk() {
             <NavLink to="/yapay-zeka" className="ib" title={c('Yapay Zeka')}>✨</NavLink>
           )}
 
+          {/* TALEPLERIM (mockup ①): kirmizi rozet = onayimi bekleyen,
+              yesil nokta = kendi talebimde yeni hareket. Mesajin yaninda,
+              zilden once - her ekranda tek tikla izin/avans/masraf/belge. */}
+          <TaleplerimPaneli />
+
           {/* ZIL (662): onay bekleyen isler - simdilik iskonto onaylari.
               Dugme vardi ama hicbir sey yapmiyordu. */}
           <ZilPaneli c={c} />
@@ -259,14 +274,11 @@ export function Kabuk() {
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
           </button>
-          <button
-            type="button"
-            className="avt"
-            title={`Kullanıcı Ayarları — ${kullanici?.ad ?? ''}`}
-            onClick={() => ayar.setAcik(true)}
-          >
-            {profilResmi ? <img src={profilResmi} alt="" /> : basHarfler}
-          </button>
+          {/* AVATAR MENUSU (mockup ②): Taleplerim + izin bakiyesi + odenecek
+              en ustte; Kullanici Ayarlari artik menunun icinde. */}
+          <KullaniciMenusu ad={kullanici?.ad ?? ''} rolAdi={kullanici?.rolAdi}
+                           avatar={profilResmi ? <img src={profilResmi} alt="" /> : basHarfler}
+                           onAyarlar={() => ayar.setAcik(true)} onCikis={() => void cikisYap()} />
         </div>
       </header>
 
@@ -298,6 +310,13 @@ export function Kabuk() {
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
                    git={git} />
+
+      {/* YENI TALEP PENCERESI: panelden de sayfadan da yeniTalepAc() ile. */}
+      <YeniTalepKatmani />
+      {/* ANLIK BILDIRIM (gelen_talepler mockup): yeni is acik ekranin sol altina. */}
+      <TalepBildirimleri />
+      <IskontoKararKatmani />
     </div>
+    </TaleplerimBaglami.Provider>
   );
 }

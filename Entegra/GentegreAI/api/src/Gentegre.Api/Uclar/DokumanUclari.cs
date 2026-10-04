@@ -211,12 +211,15 @@ public static class DokumanUclari
 
     /// <summary>Kart adi yerine dogrudan fiziksel kaynak adiyla gelen yollar (doküman listesi).</summary>
     private static readonly HashSet<string> FizikselAdlar =
-        new(StringComparer.Ordinal) { "taraf", "lab-sonuc", "masraf-beyan", "servis-ziyaret" };
+        new(StringComparer.Ordinal) { "taraf", "lab-sonuc", "masraf-beyan", "servis-ziyaret", "ariza" };
 
     private static string FizikselKaynak(string kartAdi) => kartAdi switch
     {
         // Doküman listesi satirin kendi kaynagini gonderir.
         "taraf" or "lab-sonuc" or "masraf-beyan" or "servis-ziyaret" => kartAdi,
+        // ARIZA FOTOĞRAFI (954): kaynak_id arıza talebi. Bildiren / takipçi
+        //   kendi kaydında yetkisiz; ekip `ariza` yetkisiyle (DokumanErisimi).
+        "ariza" => "ariza",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.

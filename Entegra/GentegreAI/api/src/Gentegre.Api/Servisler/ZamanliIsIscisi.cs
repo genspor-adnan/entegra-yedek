@@ -69,6 +69,17 @@ public static class ZamanliIsler
         //   takvim notu değil TAAHHÜTTÜR. Hatırlatma olarak bırakmak,
         //   yapılmayan bakımın hiç iz bırakmaması demekti - fatura kesilmeye
         //   devam ederken. İş emri doğunca planlanmazsa "gecikmiş" olur.
+        // ARIZA ÇÖZÜM ONAYI (954): teknisyen "çözüldü" dedi, bildiren 3 gün
+        //   yanıt vermedi - talep kapanır. Akışa "kendiliğinden kapandı" düşer.
+        ["ariza.otomatik_kapat"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var n = await baglanti.TekDegerAsync<int>(
+                "select public.fn_ariza_otomatik_kapat(3)", null, [], iptal);
+            return n == 0 ? "Onay bekleyen eski arıza yok." : $"{n} çözülmüş arıza kendiliğinden kapandı.";
+        },
+
         ["servis.periyodik"] = async (servisler, iptal) =>
         {
             var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();

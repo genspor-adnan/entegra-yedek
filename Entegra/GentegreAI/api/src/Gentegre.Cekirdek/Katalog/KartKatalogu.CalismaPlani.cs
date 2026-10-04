@@ -55,7 +55,7 @@ public static partial class KartKatalogu
         Tablo: "public.hekim_calisma_istisna",
         LogTabloId: LogCalismaIstisna,
         SubeKolonu: null,
-        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["tur"] = (short)1, ["durum"] = (short)0, ["basTarih"] = "@simdi", ["bitTarih"] = "@simdi" },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["tur"] = (short)2, ["durum"] = (short)0, ["basTarih"] = "@simdi", ["bitTarih"] = "@simdi" },
         Alanlar: new KartAlani[]
         {
             new("id",           "id",            "sayi",  Yazilabilir: false),

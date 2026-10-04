@@ -77,6 +77,17 @@ export function olaylar(iskontoTavani: number): OlayTanimi[] {
       ad: 'İskonto onayı bekliyor',
       aciklama: 'Limitini aşan iskonto talebi onayınıza düştüğünde.',
     });
+  // TALEPLER (gelen_talepler mockup): herkese - talebi alan da talep eden de.
+  l.push({
+    kod: 'talep.gelen',
+    ad: 'Bana yeni iş geldi',
+    aciklama: 'Ekibinize arıza düştüğünde ya da bir talep onayınıza geldiğinde.',
+  });
+  l.push({
+    kod: 'talep.sonuc',
+    ad: 'Talebimde gelişme var',
+    aciklama: 'Talebiniz devralındığında, çözüldüğünde, onaylandığında ya da reddedildiğinde.',
+  });
   return l;
 }
 

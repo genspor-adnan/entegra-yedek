@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taleplerim — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+    --warn:#8a6414; --warnbg:#fdf6e6; --warnbd:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 8px;font-size:11px}
+  .sp{margin-left:auto}
+  .ayrac{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;background:#fff;font-size:11px}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip b{color:var(--muted);margin-left:3px}
+  .cip.on b{color:var(--navy)}
+  .sekmeler{display:flex;gap:0;border-bottom:1px solid var(--line);padding:0 10px;background:#fff}
+  .sekme{padding:8px 14px;font-size:12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .sekme.on{color:var(--navy);font-weight:bold;border-bottom-color:#2f6db3}
+  .sekme .say{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:#e3ecfa;color:#2f5c9e;font-size:10.5px;text-align:center}
+  .sekme .say.k{background:#f8e1df;color:#8f3d36}
+  /* YENI TALEP KUTUCUKLARI */
+  .yeni{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding:12px}
+  .kutu{border:1px solid var(--line2);border-radius:6px;padding:10px 8px;background:#fff;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .kutu .i{font-size:22px;line-height:1}
+  .kutu b{font-size:12px;color:var(--navy)}
+  .kutu span{font-size:10px;color:var(--muted)}
+  .kutu:hover{border-color:var(--selbd);background:#f5f9fe}
+  /* OZET */
+  .ozetler{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 12px 12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;padding:7px 10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .kpi.dikkat{border-color:var(--warnbd);background:var(--warnbg)}
+  .kpi.dikkat .v,.kpi.dikkat .a{color:var(--warn)}
+  .bakiye{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;display:flex;margin-top:3px}
+  .bakiye i{display:block;height:100%}
+  .bolum-bas{padding:8px 12px 4px;font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  /* LISTE + PANEL */
+  .govde{display:grid;grid-template-columns:1fr 360px;border-top:1px solid var(--line2)}
+  table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
+  .grid th{background:var(--head2);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;white-space:nowrap}
+  .grid td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .grid tr.secili td{background:#eef5fd}
+  .grid tr.bitti td{color:#7a8796}
+  .tur{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap;border:1px solid}
+  .t-izin{background:#f8e1df;color:#8f3d36;border-color:#e4b7b2}
+  .t-avans{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .t-masraf{background:#fdf1dc;color:#8a6414;border-color:#f0d9a8}
+  .t-belge{background:#e3ecfa;color:#2f5c9e;border-color:#bcd2ef}
+  .t-ariza{background:#efe6fa;color:#6b3fa0;border-color:#ddc9f2}
+  .t-stok{background:#e9ecf0;color:#4b5866;border-color:#cfd6de}
+  .konu b{color:var(--navy)}
+  .konu small{display:block;color:var(--muted);font-size:10.5px}
+  /* ONAY ZINCIRI */
+  .zincir{display:flex;align-items:center;gap:0;white-space:nowrap}
+  .adim{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+  .adim i{width:14px;height:14px;border-radius:50%;border:1.5px solid #b9c4d0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-style:normal;background:#fff}
+  .adim.ok i{background:#2e7d46;border-color:#2e7d46;color:#fff}
+  .adim.su i{background:#fff;border-color:#e0a33a;color:#e0a33a;box-shadow:0 0 0 3px #fdf1dc}
+  .adim.su{color:var(--warn);font-weight:bold}
+  .adim.red i{background:#b3261e;border-color:#b3261e;color:#fff}
+  .adim.red{color:#8f3d36;font-weight:bold}
+  .cizgi{width:14px;height:2px;background:#d6dde6;margin:0 2px}
+  .cizgi.ok{background:#2e7d46}
+  .kim{font-size:10.5px;color:var(--muted)}
+  .kim b{color:var(--ink);font-weight:normal}
+  .kim .gec{color:#8f3d36;font-weight:bold}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-gri{background:#eef1f5;color:#6b7a8b;border:1px solid #d6dde6}
+  .c-bek{background:#fdf1dc;color:#8a6414;border:1px solid #f0d9a8}
+  .c-red{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-mavi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .tutar{text-align:right;white-space:nowrap}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfe}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;margin:10px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:6px;align-items:center}
+  .grp h4 span{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .ic{padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .sat{display:grid;grid-template-columns:84px 1fr;gap:6px}
+  .sat .k{color:var(--muted)}
+  .zc{position:relative;padding-left:18px;display:flex;flex-direction:column;gap:9px}
+  .zc::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e3e9f0}
+  .zo{position:relative;font-size:11px}
+  .zo::before{content:"";position:absolute;left:-16px;top:3px;width:10px;height:10px;border-radius:50%;background:#2e7d46;border:2px solid #fff;box-shadow:0 0 0 1px #2e7d46}
+  .zo.su::before{background:#fff;box-shadow:0 0 0 2px #e0a33a}
+  .zo.yorum::before{background:#2f6db3;box-shadow:0 0 0 1px #2f6db3}
+  .zo small{display:block;color:var(--muted);font-size:10px}
+  .zo .bal{background:#f3f6fa;border:1px solid var(--line2);border-radius:6px;padding:5px 8px;margin-top:3px}
+  .ek{display:flex;gap:6px;flex-wrap:wrap}
+  .ek span{border:1px solid var(--line);border-radius:3px;padding:2px 6px;font-size:10.5px;background:#fff}
+  .eylem{display:flex;gap:4px;flex-wrap:wrap}
+  .bilgi{padding:7px 9px;border:1px solid #bcd2ef;background:#eef5fd;color:#2f5c9e;border-radius:4px;font-size:11px}
+  .uyari{padding:7px 9px;border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:4px;font-size:11px}
+  /* YENI TALEP MODALI */
+  .modal-alan{padding:14px;background:rgba(20,40,70,.06);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .modal{background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(20,40,70,.18)}
+  .modal .mbas{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:6px 10px;font-weight:bold;font-size:12px;display:flex}
+  .modal .mbas span{margin-left:auto;font-weight:normal;opacity:.8;font-size:10.5px}
+  .modal .mgov{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .modal .malt{display:flex;gap:6px;justify-content:flex-end;padding:8px 10px;background:var(--head);border-top:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:#b23b3b}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ikili{display:flex;gap:6px;align-items:center}
+  .tablo-mini{border-collapse:collapse;width:100%;font-size:11px}
+  .tablo-mini th,.tablo-mini td{padding:4px 6px;border-bottom:1px solid var(--line2);text-align:left}
+  .tablo-mini th{color:var(--muted);font-weight:normal;background:var(--head)}
+  .aciklama{max-width:1240px;margin:0 auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  /* ===== 0) ERISIM: UST SERIT IKONU + KULLANICI MENUSU ===== */
+  .erisim{position:relative;height:470px;background:#eef1f5;overflow:hidden}
+  .ustbar{height:52px;background:linear-gradient(#21497c,#183a66);display:flex;align-items:center;gap:14px;padding:0 14px;color:#fff}
+  .ustbar .logo{font-weight:bold;font-size:15px;display:flex;gap:6px;align-items:center}
+  .ustbar .ara{flex:0 0 280px;height:28px;border-radius:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11.5px;display:flex;align-items:center;padding:0 10px;color:rgba(255,255,255,.75)}
+  .ustbar .sube{margin:0 auto;font-weight:bold;font-size:13px}
+  .ustbar .ikonlar{display:flex;gap:14px;align-items:center}
+  .uik{position:relative;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .uik.on{background:rgba(255,255,255,.18);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+  .uik .rz{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e0503f;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #1d4270}
+  .uik .nokta{position:absolute;top:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#3fb26b;border:2px solid #1d4270}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#2e5e98;border:2px solid rgba(255,255,255,.6);font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .avatar.on{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+  .pop{position:absolute;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 10px 30px rgba(20,40,70,.25);color:var(--ink)}
+  .pop::before{content:"";position:absolute;top:-7px;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+  .pop.talep{top:60px;right:290px;width:400px}
+  .pop.talep::before{right:-46px;display:none}
+  .pop.kullanici{top:60px;right:12px;width:250px}
+  .pop.kullanici::before{right:14px}
+  .pop .pb{padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--navy)}
+  .pop .pb span{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .hizli{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .hizli div{border:1px solid var(--line2);border-radius:5px;padding:6px 4px;text-align:center;font-size:10.5px;color:var(--navy);font-weight:bold;background:#fbfcfe}
+  .hizli div i{display:block;font-style:normal;font-size:17px;margin-bottom:2px}
+  .onayb{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fdf1f0;border-bottom:1px solid #f1d2ce;color:#8f3d36;font-size:11px}
+  .onayb b{font-size:13px}
+  .onayb span{margin-left:auto;text-decoration:underline}
+  .son{list-style:none;margin:0;padding:4px 0}
+  .son li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 12px;font-size:11px}
+  .son li:hover{background:#f5f9fe}
+  .son li small{display:block;color:var(--muted);font-size:10px}
+  .son li.yeni{background:#f2faf5}
+  .son li.yeni small{color:#2e7d46;font-weight:bold}
+  .pop .pa{padding:8px 12px;border-top:1px solid var(--line2);display:flex;justify-content:space-between;font-size:11px;color:var(--accent)}
+  .kmenu{list-style:none;margin:0;padding:4px 0}
+  .kmenu li{padding:6px 12px;font-size:11.5px;display:flex;gap:8px;align-items:center}
+  .kmenu li:hover{background:#f5f9fe}
+  .kmenu li span{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .kmenu li.vurgu{font-weight:bold;color:var(--navy)}
+  .kmenu li .rzk{margin-left:auto;background:#e0503f;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;font-weight:bold}
+  .kmenu .ayr{height:1px;background:var(--line2);margin:4px 0;padding:0}
+  .etiket-ok{position:absolute;font-size:10.5px;color:#2f5c9e;background:#eef5fd;border:1px solid #bcd2ef;border-radius:4px;padding:4px 8px;max-width:210px;line-height:1.35}
+</style>
+</head>
+<body>
+
+<!-- ========================================= 0) ERISIM: UST SERIT + MENU -->
+<div class="win">
+  <div class="title">📨 Taleplerim — erişim <span class="sp">① üst şerit ikonu + açılır pencere · ② kullanıcı menüsü</span></div>
+  <div class="erisim">
+    <div class="ustbar">
+      <span class="logo">🧬 GenoTIP AI</span>
+      <span class="ara">🔍 Ara ya da komut yaz… <span style="margin-left:auto;font-size:10px;opacity:.8">Ctrl K</span></span>
+      <span class="sube">🏥 Merkez ▾</span>
+      <span class="ikonlar">
+        <span class="uik">🖥</span>
+        <span class="uik">💬</span>
+        <span class="uik on">📨<span class="rz">3</span><span class="nokta"></span></span>
+        <span class="uik">🔔<span class="rz">3</span></span>
+        <span class="uik">❓</span>
+        <span class="avatar on">AD</span>
+      </span>
+    </div>
+
+    <!-- ① TALEPLERIM ACILIR PENCERESI -->
+    <div class="pop talep">
+      <div class="pb">📨 Taleplerim <span>4 açık · 1 yeni hareket</span></div>
+      <div class="hizli">
+        <div><i>✈️</i>İzin</div><div><i>💸</i>Avans</div><div><i>🧾</i>Masraf</div><div><i>📄</i>Belge</div>
+      </div>
+      <div class="onayb">⏳ <b>3</b> talep onayınızı bekliyor <span>Onayla →</span></div>
+      <ul class="son">
+        <li class="yeni"><span>🧾</span><span><b>Masraf ₺ 1.340</b> · Kongre konaklama<small>✔ Mali işler onayladı · 10.10 maaşla ödenecek</small></span><span class="chip c-ok">Yeni</span></li>
+        <li><span>✈️</span><span><b>Yıllık izin</b> 12–16.10 · 5 gün<small>Başhekim onayında · 3 gündür</small></span><span class="chip c-bek">Onayda</span></li>
+        <li><span>💸</span><span><b>Avans ₺ 2.500</b> · 5 taksit<small>Mali işler onayında · 1 gündür</small></span><span class="chip c-bek">Onayda</span></li>
+        <li><span>🧰</span><span><b>Arıza</b> · EKG kâğıt sıkıştırıyor<small>Tekn. Murat Er · bugün 14:00</small></span><span class="chip c-mavi">Serviste</span></li>
+        <li><span>📄</span><span><b>Çalışma belgesi</b><small>hazır · indir ⬇</small></span><span class="chip c-ok">Hazır</span></li>
+      </ul>
+      <div class="pa"><span>✈️ İzin bakiyem: <b>13 gün</b></span><span>Tümünü gör →</span></div>
+    </div>
+
+    <!-- ② KULLANICI MENUSU -->
+    <div class="pop kullanici">
+      <div class="pb">Dr. Aslı Demir <span>Uzman Doktor · Kardiyoloji</span></div>
+      <ul class="kmenu">
+        <li class="vurgu">📨 Taleplerim <span class="rzk">3</span></li>
+        <li>✈️ İzin bakiyem <span>13 gün</span></li>
+        <li>💸 Avans / masraf <span>₺ 3.840 ödenecek</span></li>
+        <li class="ayr"></li>
+        <li>👤 Profilim</li>
+        <li>⚙ Kullanıcı ayarlarım</li>
+        <li>🔑 Parola değiştir</li>
+        <li class="ayr"></li>
+        <li>🏥 Şube değiştir <span>Merkez</span></li>
+        <li>🚪 Çıkış</li>
+      </ul>
+    </div>
+
+    <div class="etiket-ok" style="top:175px;left:40px">① <b>📨 ikonu</b> her ekranda. <b>Kırmızı rozet</b>: onayınızı bekleyen talep
+      sayısı (yalnız onaycıda). <b>Yeşil nokta</b>: kendi talebinizde yeni hareket (onaylandı, reddedildi, ödendi, hazır).</div>
+    <div class="etiket-ok" style="top:280px;left:40px">Tık → küçük pencere: <b>hızlı talep</b> düğmeleri, onay bekleyen şeridi,
+      <b>son 5 talep</b> ve durumu, izin bakiyesi; "Tümünü gör" Taleplerim ekranını açar. Hekim muayene ekranından çıkmadan izin ister.</div>
+    <div class="etiket-ok" style="top:380px;left:40px">② Avatar menüsünde en üstte <b>Taleplerim</b> + izin bakiyesi + ödenecek tutar.</div>
+  </div>
+</div>
+
+<!-- ======================================================= 1) TALEPLERIM -->
+<div class="win">
+  <div class="title">📨 Taleplerim — Dr. Aslı Demir · Kardiyoloji
+    <span class="sp">Üst menü › 👤 Taleplerim · herkes kendi taleplerini görür, açar ve takip eder</span></div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Taleplerim <span class="say">4 açık</span></div>
+    <div class="sekme">Onayımı bekleyenler <span class="say k">3</span></div>
+    <div class="sekme">Ekibimin talepleri</div>
+  </div>
+
+  <div class="bolum-bas">＋ Yeni talep</div>
+  <div class="yeni">
+    <div class="kutu"><span class="i">✈️</span><b>İzin</b><span>yıllık · mazeret · rapor</span></div>
+    <div class="kutu"><span class="i">💸</span><b>Avans</b><span>maaş avansı · taksitli</span></div>
+    <div class="kutu"><span class="i">🧾</span><b>Masraf</b><span>fiş / fatura yükle</span></div>
+    <div class="kutu"><span class="i">📄</span><b>Belge</b><span>çalışma belgesi · bordro</span></div>
+    <div class="kutu"><span class="i">🎓</span><b>Eğitim / kongre</b><span>katılım + masraf</span></div>
+    <div class="kutu"><span class="i">🧰</span><b>Arıza</b><span>cihaz · bina · BT</span></div>
+    <div class="kutu"><span class="i">📥</span><b>Malzeme</b><span>depodan talep</span></div>
+    <div class="kutu"><span class="i">💬</span><b>Diğer</b><span>İK'ya serbest talep</span></div>
+  </div>
+
+  <div class="ozetler">
+    <div class="kpi"><span class="k">Yıllık izin bakiyem</span><span class="v">13 gün</span>
+      <div class="bakiye"><i style="width:10%;background:#9cc1ea"></i><i style="width:25%;background:#e0a33a"></i></div>
+      <span class="a">20 hak · 2 kullanıldı · 5 onayda · kalan 13</span></div>
+    <div class="kpi dikkat"><span class="k">Açık taleplerim</span><span class="v">4</span><span class="a">1'i 3 gündür aynı onayda bekliyor</span></div>
+    <div class="kpi"><span class="k">Bana ödenecek</span><span class="v">₺ 3.840,00</span><span class="a">masraf ₺ 1.340 · avans ₺ 2.500 (10.10 maaşla)</span></div>
+    <div class="kpi"><span class="k">Avans kesintim</span><span class="v">₺ 500 / ay</span><span class="a">kalan 3 taksit · son 01.01.2027</span></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="cipler">
+      <span class="cip on">Açık <b>4</b></span><span class="cip">Tamamlanan <b>11</b></span>
+      <span class="cip">Reddedilen <b>1</b></span><span class="cip">Taslak <b>1</b></span><span class="cip">Tümü <b>17</b></span>
+    </span>
+    <span class="ayrac"></span>
+    <span class="cipler"><span class="cip on">Tüm türler</span><span class="cip">✈️ İzin</span><span class="cip">💸 Avans</span><span class="cip">🧾 Masraf</span><span class="cip">📄 Belge</span><span class="cip">🧰 Arıza</span></span>
+    <div class="inp combo sp" style="width:120px">Bu yıl</div>
+    <div class="inp" style="width:170px;color:var(--muted)">🔍 Talep no / konu ara…</div>
+  </div>
+
+  <div class="govde">
+    <table class="grid">
+      <tr><th>Tür</th><th>No · Konu</th><th class="tutar">Tutar / Süre</th><th>Onay durumu</th><th>Kimde</th><th>Son hareket</th></tr>
+      <tr class="secili">
+        <td><span class="tur t-izin">✈️ İzin</span></td>
+        <td class="konu"><b>İZ-2026-0418</b> · Yıllık izin<small>12–16.10.2026 · Avrupa Kardiyoloji Kongresi sonrası</small></td>
+        <td class="tutar">5 iş günü</td>
+        <td><span class="zincir">
+          <span class="adim ok"><i>✓</i>Bölüm</span><span class="cizgi ok"></span>
+          <span class="adim su"><i>…</i>Başhekim</span><span class="cizgi"></span>
+          <span class="adim"><i></i>İK</span></span></td>
+        <td class="kim"><b>Dr. Kemal Ak</b> (Başhekim)<br><span class="gec">3 gündür bekliyor</span></td>
+        <td class="kim">03.10 · Bölüm sorumlusu onayladı</td>
+      </tr>
+      <tr>
+        <td><span class="tur t-masraf">🧾 Masraf</span></td>
+        <td class="konu"><b>MS-2026-0092</b> · Kongre konaklama + yol<small>3 belge · 2 fatura, 1 fiş</small></td>
+        <td class="tutar">₺ 1.340,00</td>
+        <td><span class="zincir">
+          <span class="adim ok"><i>✓</i>Bölüm</span><span class="cizgi ok"></span>
+          <span class="adim ok"><i>✓</i>Mali</span><span class="cizgi ok"></span>
+          <span class="adim su"><i>₺</i>Ödeme</span></span></td>
+        <td class="kim"><b>Muhasebe</b><br>10.10 maaşla ödenecek</td>
+        <td class="kim">02.10 · Mali işler onayladı</td>
+      </tr>
+      <tr>
+        <td><span class="tur t-avans">💸 Avans</span></td>
+        <td class="konu"><b>AV-2026-0031</b> · Maaş avansı<small>5 taksit · aylık ₺ 500</small></td>
+        <td class="tutar">₺ 2.500,00</td>
+        <td><span class="zincir">
+          <span class="adim ok"><i>✓</i>Bölüm</span><span class="cizgi ok"></span>
+          <span class="adim su"><i>…</i>Mali</span><span class="cizgi"></span>
+          <span class="adim"><i></i>Ödeme</span></span></td>
+        <td class="kim"><b>Mali İşler Müdürü</b><br>1 gündür</td>
+        <td class="kim">03.10 · gönderildi</td>
+      </tr>
+      <tr>
+        <td><span class="tur t-ariza">🧰 Arıza</span></td>
+        <td class="konu"><b>AR-2026-0207</b> · Poliklinik 3 EKG cihazı kâğıt sıkıştırıyor<small>Biyomedikal · öncelik orta</small></td>
+        <td class="tutar">—</td>
+        <td><span class="zincir">
+          <span class="adim ok"><i>✓</i>Alındı</span><span class="cizgi ok"></span>
+          <span class="adim su"><i>🔧</i>Serviste</span><span class="cizgi"></span>
+          <span class="adim"><i></i>Kapandı</span></span></td>
+        <td class="kim"><b>Tekn. Murat Er</b><br>bugün 14:00 ziyaret</td>
+        <td class="kim">04.10 · teknisyen atandı</td>
+      </tr>
+      <tr class="bitti">
+        <td><span class="tur t-belge">📄 Belge</span></td>
+        <td class="konu"><b>BT-2026-0055</b> · Çalışma belgesi (banka için)<small>e-imzalı PDF</small></td>
+        <td class="tutar">—</td>
+        <td><span class="chip c-ok">Hazırlandı · indir ⬇</span></td>
+        <td class="kim">—</td>
+        <td class="kim">01.10 · İK hazırladı</td>
+      </tr>
+      <tr class="bitti">
+        <td><span class="tur t-izin">✈️ İzin</span></td>
+        <td class="konu"><b>İZ-2026-0377</b> · Mazeret izni<small>22.09.2026 · yarım gün 13:00–17:00</small></td>
+        <td class="tutar">0,5 gün</td>
+        <td><span class="adim red"><i>✕</i>Reddedildi</span></td>
+        <td class="kim">Başhekim: "o gün nöbet listesi dolu"</td>
+        <td class="kim">20.09 · ⧉ kopyalayıp yeniden gönder</td>
+      </tr>
+    </table>
+
+    <!-- SAG: secili talebin ayrintisi -->
+    <div class="sag">
+      <div class="grp">
+        <h4>✈️ İZ-2026-0418 · Yıllık izin <span class="chip c-bek">Onayda</span></h4>
+        <div class="ic">
+          <div class="sat"><span class="k">Tarih</span><span>12.10 Pzt – 16.10 Cum · <b>5 iş günü</b></span></div>
+          <div class="sat"><span class="k">Bakiye etkisi</span><span>18 → <b>13 gün</b> kalır</span></div>
+          <div class="sat"><span class="k">Vekil</span><span>Dr. Okan Aslan</span></div>
+          <div class="sat"><span class="k">Randevu</span><span style="color:#8f3d36">7 randevu var · onaylanınca çalışma planı kapanır, randevular İzin &amp; İstisna'dan aktarılır</span></div>
+          <div class="eylem">
+            <span class="btn kucuk">🔔 Hatırlat</span>
+            <span class="btn kucuk">💬 Yorum yaz</span>
+            <span class="btn kucuk">✎ Düzenle</span>
+            <span class="btn kucuk danger">↩ Geri çek</span>
+          </div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Akış <span>en yeni altta</span></h4>
+        <div class="ic">
+          <div class="zc">
+            <div class="zo">Talep oluşturuldu<small>Dr. Aslı Demir · 30.09 09:12</small></div>
+            <div class="zo">Bölüm sorumlusu onayladı<small>Doç. Dr. Cem Yalın · 01.10 11:40</small></div>
+            <div class="zo yorum">Yorum<div class="bal">Kongre tarihleri kesinleşti, vekil Dr. Okan.</div><small>Dr. Aslı Demir · 01.10 12:05</small></div>
+            <div class="zo su">Başhekim onayında<small>Dr. Kemal Ak · 3 gündür · hatırlatma 1 kez gönderildi</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Ekler <span>2</span></h4>
+        <div class="ic"><div class="ek"><span>📎 kongre_kabul.pdf</span><span>📎 ucak_bileti.pdf</span></div></div>
+      </div>
+      <div class="bilgi" style="margin:10px">ℹ Onaylanan izin bordroya ve <b>çalışma planına</b> kendiliğinden işlenir;
+        ayrıca çalışma istisnası girilmez; yarım gün izinde yalnız o saatler kapanır. Avans ve masraf ödemesi maaşla birlikte yapılır.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== 2) YENI TALEP MODALLARI -->
+<div class="win">
+  <div class="title">📨 Taleplerim — Yeni talep pencereleri <span class="sp">kutucuğa tık → türün kısa formu; gönderince akış başlar</span></div>
+  <div class="modal-alan">
+    <!-- IZIN -->
+    <div class="modal">
+      <div class="mbas">✈️ Yeni izin talebi <span>Dr. Aslı Demir</span></div>
+      <div class="mgov">
+        <div class="iki">
+          <div class="fld"><label class="req">İzin türü</label><div class="inp combo">Yıllık izin</div></div>
+          <div class="fld"><label>Süre</label><div class="cipler"><span class="cip on">Gün boyu</span><span class="cip">Saatli (yarım gün)</span></div><span style="font-size:10px;color:var(--muted)">saatli: tek gün + saat ▾ – saat ▾ · ≤ 4,5 saat 0,5 gün</span></div>
+        </div>
+        <div class="fld"><label class="req">Tarih aralığı</label>
+          <div class="ikili"><div class="inp" style="flex:1">12.10.2026</div><span>–</span><div class="inp" style="flex:1">16.10.2026</div></div></div>
+        <div class="uyari">📅 <b>5 iş günü</b> (hafta sonu ve resmi tatil sayılmaz) · bakiyen 18 → <b>13 gün</b>.
+          Bu aralıkta <b>7 randevun</b> var; onaylanınca planın kapanır, randevular aktarılır.</div>
+        <div class="iki">
+          <div class="fld"><label>Vekil</label><div class="inp combo">Dr. Okan Aslan</div></div>
+          <div class="fld"><label>İzinde ulaşım</label><div class="inp">0532 … 41 22</div></div>
+        </div>
+        <div class="fld"><label>Açıklama</label><div class="inp">Avrupa Kardiyoloji Kongresi sonrası</div></div>
+        <div class="fld"><label>Onay akışı</label>
+          <div class="zincir"><span class="adim"><i>1</i>Bölüm sorumlusu</span><span class="cizgi"></span><span class="adim"><i>2</i>Başhekim</span><span class="cizgi"></span><span class="adim"><i>3</i>İK</span></div></div>
+      </div>
+      <div class="malt"><span class="btn">💾 Taslak</span><span class="btn primary">📨 Gönder</span><span class="btn">Vazgeç</span></div>
+    </div>
+
+    <!-- MASRAF -->
+    <div class="modal">
+      <div class="mbas">🧾 Yeni masraf beyanı <span>Dr. Aslı Demir</span></div>
+      <div class="mgov">
+        <div class="iki">
+          <div class="fld"><label class="req">Masraf nedeni</label><div class="inp combo">Kongre / eğitim</div></div>
+          <div class="fld"><label>Bağlı talep</label><div class="inp combo">İZ-2026-0418 · Yıllık izin</div></div>
+        </div>
+        <div class="fld"><label class="req">Kalemler</label>
+          <table class="tablo-mini">
+            <tr><th>Tarih</th><th>Kalem</th><th>Belge</th><th style="text-align:right">Tutar</th></tr>
+            <tr><td>12.10</td><td>Konaklama (2 gece)</td><td>📎 fatura · e-Arşiv</td><td style="text-align:right">₺ 860,00</td></tr>
+            <tr><td>12.10</td><td>Havaalanı transfer</td><td>📎 fiş</td><td style="text-align:right">₺ 180,00</td></tr>
+            <tr><td>16.10</td><td>Yol</td><td>📎 fatura</td><td style="text-align:right">₺ 300,00</td></tr>
+            <tr><td colspan="3"><span class="btn kucuk">＋ Kalem</span> <span class="btn kucuk">📷 Fiş fotoğrafla (AI okur)</span></td>
+                <td style="text-align:right"><b>₺ 1.340,00</b></td></tr>
+          </table></div>
+        <div class="bilgi">ℹ Fotoğraftan tarih, tutar ve KDV okunur; hekim yalnız onaylar. Masraf merkezi
+          bölümden gelir (Kardiyoloji).</div>
+        <div class="fld"><label>Onay akışı</label>
+          <div class="zincir"><span class="adim"><i>1</i>Bölüm</span><span class="cizgi"></span><span class="adim"><i>2</i>Mali işler</span><span class="cizgi"></span><span class="adim"><i>₺</i>Ödeme (maaşla)</span></div></div>
+      </div>
+      <div class="malt"><span class="btn">💾 Taslak</span><span class="btn primary">📨 Gönder</span><span class="btn">Vazgeç</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================== 3) ONAYIMI BEKLEYENLER -->
+<div class="win">
+  <div class="title">📨 Taleplerim — Onayımı bekleyenler <span class="sp">yönetici / sorumlu: kendisine düşen adımlar · tek ekrandan onay</span></div>
+  <div class="toolbar">
+    <span class="cipler"><span class="cip on">Bekleyen <b>3</b></span><span class="cip">Onayladıklarım</span><span class="cip">Reddettiklerim</span></span>
+    <span class="sp"></span><span class="btn kucuk primary">✔ Seçilileri onayla</span><span class="btn kucuk">✕ Reddet…</span>
+  </div>
+  <table class="grid">
+    <tr><th style="width:26px">☐</th><th>Tür</th><th>Talep eden</th><th>Konu</th><th class="tutar">Tutar / Süre</th><th>Etki</th><th>Bekleme</th></tr>
+    <tr><td>☑</td><td><span class="tur t-izin">✈️ İzin</span></td><td><b>Dr. Aslı Demir</b><br><span class="kim">Kardiyoloji</span></td>
+      <td class="konu">Yıllık izin<small>12–16.10.2026</small></td><td class="tutar">5 iş günü</td>
+      <td class="kim">bölümde o hafta <b>1 kardiyolog</b> kalır · 7 randevu</td><td class="kim"><span class="gec">3 gün</span></td></tr>
+    <tr><td>☐</td><td><span class="tur t-avans">💸 Avans</span></td><td><b>Hmş. Elif Kaya</b><br><span class="kim">Yatan servis</span></td>
+      <td class="konu">Maaş avansı<small>3 taksit</small></td><td class="tutar">₺ 3.000,00</td>
+      <td class="kim">açık avansı yok · limit ₺ 5.000</td><td class="kim">1 gün</td></tr>
+    <tr><td>☐</td><td><span class="tur t-masraf">🧾 Masraf</span></td><td><b>Tekn. Murat Er</b><br><span class="kim">Biyomedikal</span></td>
+      <td class="konu">Yedek parça (acil alım)<small>1 fatura</small></td><td class="tutar">₺ 742,50</td>
+      <td class="kim">bütçe: Biyomedikal %62 kullanıldı</td><td class="kim">bugün</td></tr>
+  </table>
+</div>
+
+<div class="aciklama">
+  <b>NOT (mockup):</b> <b>ERİŞİM</b> (en üst bölüm): ① üst şeritte zil ve mesajın yanında <b>📨 ikonu</b> (kırmızı rozet = onayımı bekleyen, yeşil nokta = kendi talebimde yeni hareket); tıklayınca hızlı talep düğmeleri, onay şeridi, son 5 talep ve izin bakiyesi olan küçük pencere; ② <b>avatar menüsünde</b> en üstte Taleplerim, izin bakiyem, ödenecek tutar. Sol menüye konmaz - kişisel ekran, modül menüsünde kaybolur. <b>Taleplerim</b> herkesin (doktor, hemşire, teknisyen, idari) kendi taleplerini tek yerden
+  açtığı ve izlediği kişisel ekrandır; menüde kullanıcı simgesinin altında (👤 › Taleplerim) ve ana sayfada kart olarak durur.
+  Bugün izin, avans, masraf, belge ve arıza ayrı İK / teknik ekranlarda ve <b>yetkiyle</b> görülüyor; bu ekran aynı kayıtları
+  <b>yalnız sahibine</b> gösterir (kayıt kapsamı = talep eden), yeni kayıt da buradan açılır.
+  <b>(1)</b> üstte <b>yeni talep kutucukları</b> - her tür kısa bir pencere açar (izin, masraf örnekleri);
+  <b>(2)</b> özet: izin bakiyesi (kullanılan / onayda / kalan çubuğu), açık talep ve takılan, bana ödenecek tutar, avans kesintisi;
+  <b>(3)</b> liste: tür rozeti, no + konu, tutar / süre, <b>onay zinciri</b> (✓ geçti, ⏳ şu an, ✕ red) - onay akışı (754) adımları,
+  <b>kimde</b> ve ne zamandır, son hareket; çip: Açık / Tamamlanan / Reddedilen / Taslak;
+  <b>(4)</b> sağ panel seçili talebin ayrıntısı, <b>akış</b> (oluşturuldu → onaylar → yorumlar), ekler ve eylemler:
+  🔔 hatırlat (bekleyen kişiye bildirim, günde 1), 💬 yorum, ✎ düzenle (ilk onaydan önce), ↩ geri çek, reddedilende ⧉ kopyala-yeniden gönder;
+  <b>(5)</b> doktorun izni onaylanınca <b>çalışma planı kendiliğinden kapanır</b> (İK izni, 748) - formda etkilenen randevu sayısı önceden gösterilir;
+  <b>(6)</b> <b>Onayımı bekleyenler</b> sekmesi yalnız onay adımı olan kişide çıkar: etki sütunu (bölümde kalan doktor, bütçe, açık avans) ile
+  toplu onay / ret (ret nedeni zorunlu). Belge talebinin çıktısı hazır olunca satırdan indirilir.
+</div>
+</body>
+</html>

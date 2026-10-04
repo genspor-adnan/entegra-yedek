@@ -383,7 +383,7 @@ export function CalismaSablonKarti({ id, ilkHekim, ilkDepartman, onKapat }: {
           ) : (
             <div className="ck-bilgi ck-kutu">ℹ {c('Aynı gün ve saatte iki aktif şablon çakışırsa kayıt engellenir')}
               {etki ? ` (${c('çakışma yok')})` : ''}. {c('İzin, kongre ve saat değişikliği şablonu değiştirmeden')}
-              {' '}<button type="button" className="ck-bag" onClick={() => git(`/calisma-istisna/yeni${d.hekimId ? `?hekimId=${d.hekimId}` : ''}`)}>{c('İzin & İstisnalar')}</button>{c('\'dan girilir.')}</div>
+              {' '}<button type="button" className="ck-bag" onClick={() => git(`/calisma-istisna/yeni${d.hekimId ? `?hekimId=${d.hekimId}` : ''}`)}>{c('Çalışma İstisnaları')}</button>{c('\'dan girilir.')}</div>
           )}
 
           <Grp sinif="ck-grp-sag" baslik={c('Doktorun diğer şablonları')} ilkKapali ek={etki ? String(etki.digerleri.length) : undefined}>

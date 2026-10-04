@@ -102,7 +102,7 @@ public static class BelgeTalebiUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.belge_talep", Islem.Ekle);
+            baglam.YetkiIsteKendi(istek.TarafId, "ik.belge_talep", Islem.Ekle);
 
             if (istek.TarafId <= 0)
                 throw GentegreHatasi.Dogrulama("Personel zorunlu.",

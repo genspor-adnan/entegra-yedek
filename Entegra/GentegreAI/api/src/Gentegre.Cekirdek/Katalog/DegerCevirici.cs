@@ -154,6 +154,14 @@ public static class DegerCevirici
 
             "mantik" => (short)(s is "1" or "true" or "True" or "evet" ? 1 : 0),
 
+            // "saat" = gün içi DUVAR SAATİ, "HH:MM" metni (950: saatli izin). Boş -> null.
+            "saat" => string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : System.Text.RegularExpressions.Regex.IsMatch(s.Trim(), "^([01][0-9]|2[0-3]):[0-5][0-9]$")
+                         ? s.Trim()
+                         : throw GentegreHatasi.Dogrulama($"{alanBasligi}: saat SS:DD olmalı ({s}).",
+                               new AlanHatasi(alanAdi, "Saat SS:DD biçiminde olmalı.")),
+
             _ => s
         };
 

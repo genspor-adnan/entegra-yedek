@@ -44,6 +44,9 @@ public static class IzinUclari
         public DateOnly? Baslangic { get; set; }
         public DateOnly? Bitis { get; set; }
         public bool IsGunu { get; set; }
+        /// <summary>Saatli izin (950): "HH:MM", ikisi birden; tek gün. Gün tetikte hesaplanır.</summary>
+        public string? SaatBas { get; set; }
+        public string? SaatBit { get; set; }
         public string? Aciklama { get; set; }
         public string? BelgeNo { get; set; }
         public int? YerineId { get; set; }
@@ -64,7 +67,7 @@ public static class IzinUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.izin", Islem.Gor);
+            baglam.YetkiIsteKendi(tarafId, "ik.izin", Islem.Gor);
 
             await using var baglanti = await veri.AcAsync(iptal);
             return Results.Ok(await BakiyeAsync(baglanti, tarafId, yil, iptal)
@@ -77,7 +80,7 @@ public static class IzinUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.izin", Islem.Ekle);
+            baglam.YetkiIsteKendi(istek.TarafId, "ik.izin", Islem.Ekle);
 
             if (istek.TarafId <= 0)
                 throw GentegreHatasi.Dogrulama("Personel zorunlu.",
@@ -134,9 +137,9 @@ public static class IzinUclari
                 insert into public.personel_izin
                        (taraf_id, tur, baslangic_tarihi, bitis_tarihi, gun, is_gunu,
                         aciklama, belge_no, yerine_id, durum, talep_tarihi,
-                        sube_id, ekleyen)
+                        sube_id, ekleyen, saat_bas, saat_bit)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, 0, current_date,
-                        @p9, @p10)
+                        @p9, @p10, nullif(@p11, ''), nullif(@p12, ''))
                 returning id
                 """, islem,
                 [istek.TarafId, istek.Tur,
@@ -144,7 +147,13 @@ public static class IzinUclari
                  istek.Bitis.Value.ToDateTime(TimeOnly.MinValue),
                  gun, (short)(istek.IsGunu ? 1 : 0), istek.Aciklama ?? "",
                  istek.BelgeNo ?? "", istek.YerineId,
-                 baglam.SubeId ?? p["subeId"], baglam.KullaniciId], iptal);
+                 baglam.SubeId ?? p["subeId"], baglam.KullaniciId,
+                 istek.SaatBas ?? "", istek.SaatBit ?? ""], iptal);
+
+            // GÜN TETİKTE (950): saatli izinde 0,5 olabilir - yanıt ve log
+            //   yazılanı söylesin, ön hesabı değil.
+            gun = await baglanti.TekDegerAsync<decimal>(
+                "select gun from public.personel_izin where id = @p0", islem, [id], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogIzin, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -227,7 +236,7 @@ public static class IzinUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.izin", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_izin where id = @p0", id, "ik.izin", Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -309,7 +318,7 @@ public static class IzinUclari
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.izin", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_izin where id = @p0", id, "ik.izin", Islem.Degistir, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Gerekce))
                 throw GentegreHatasi.Dogrulama("İptal gerekçesi zorunlu.",

@@ -18201,3 +18201,83 @@ Doğrulama: API + Edge; `tsc -b` temiz, vitest 789/789. Uzman doktor kısıtı a
   verir; kayıt başarısızsa (alan hatası, sürüm çakışması) Tamamla çalışmaz. Kural yine sunucuda, kayıtlı veriye bakar.
 * **Muayene kartındaki rozet bandı kenardan kenara gri** (kullanıcı): `.muayene-durum.muayene-uyari` yan boşlukları ve
   köşe yuvarlaklığı kalktı, alt çizgiyle ayrılır.
+
+## 04.10.2026 — İzin tek yerden: İK iznine saat, çalışma istisnasından "İzin" türü kalktı (950–953), Taleplerim mockup'ı
+
+* **Neden** (kullanıcı: "izin ve izin & istisna menüsü var, fark nedir" → "izin türünü kaldır, sadece istisna olsun, İK
+  iznine saat ekle"): doktorun izni iki yere girilebiliyordu - İK › İzinler (bakiye, bordro, onay) ve istisnanın "İzin"
+  türü (yalnız plan; bakiyeden düşmüyor, İK'ya da girilirse çift kayıt).
+* **950** `personel_izin.saat_bas / saat_bit` (ikisi birden ya da hiç, saatli izin tek günlük); `gun` numeric(5,1)
+  (bağlı iki görünüm saklanıp geri kuruldu). **Gün tetikte** (`tg_personel_izin_gun`): kart yolundan açılan izinde gün HİÇ
+  hesaplanmıyordu (gun = 0, bakiyeden düşmüyordu) - artık her yazımda `fn_izin_gun`; saatli izinde ≤ 4,5 saat 0,5 gün,
+  üstü 1 gün. Veri onarımı: gün 0 kalmış 1 izin yeniden hesaplandı (`yedek_950_personel_izin`). Randevu tetikleri saate
+  bakar (`fn_hekim_izin_cakisan`): sabah izinli doktora öğleden sonra randevu verilir; izinli saate "09:00 - 12:30 arası
+  izinli" hatası. Mesai dışı kontrolü yalnız izinle çakışan randevuyu izin tetiğine bırakır. İstisna "İzin" türü: kod
+  değeri pasif, yeni kayıt / türü İzin'e çevirme reddedilir (eski kayıtlar ve plana etkileri durur).
+* **951** planın saatli İK iznini kırpması (950'ye eklenmesi gereken bölüm birleştirme hatasıyla dışarıda kalmıştı;
+  uygulanmış göç değiştirilmedi). **952** İK izni plana ŞUBEDEN BAĞIMSIZ işlenir: istisnanın şube koşulu İK iznine de
+  uygulanıyordu - "tüm şubeler" görünümünde (p_sube = 0) şubeli izin şubesiz şablonu KAPATMIYORDU (gün boyu izin de).
+  **953** saatli izin kuralları anlaşılır mesajla (tek gün, iki saat birlikte, bitiş başlangıçtan sonra).
+* **Yeni alan tipi `saat`** (katalog + `DegerCevirici`: "HH:MM" doğrulama, boş → null; kartta 06:00–23:45 açılır liste).
+  İzin kartında "Saat Başlangıç (boşsa gün boyu)" / "Saat Bitiş".
+* **Arayüz:** menü / sayfa / kart adı **"Çalışma İstisnaları"** (🗓); istisna kartında 4 tür (eski İzin kaydı açılırsa
+  "İzin (eski)" görünür); yeni istisna varsayılanı Kongre; tür süzgecinden İzin kalktı (İK izni salt okunur kalır).
+* **Mockup'lar** buna göre: istisna kartı (4 tür, saat "boşsa gün boyu", neden seçimli, "izin burada girilmez" notu),
+  istisna listesi (yarım gün İK izni satırı), Çalışma Planları / Şablonlar ("İstisna…"), Taleplerim (saatli izin).
+  Yeni mockup **`Ekranlar/Taleplerim/taleplerim.html`**: kişinin kendi izin / avans / masraf / belge / arıza / malzeme
+  talepleri - yeni talep kutucukları, özet (izin bakiyesi, açık, ödenecek), onay zinciri, akış, onayımı bekleyenler.
+* Doğrulama: işlem içinde saatli / gün boyu izin, randevu red ve izin istisnası red (geri alındı); kart ucundan saatli
+  izin (0,5 gün), iki günlük saatli izin ve hatalı saat reddi; vitest 789/789. Deneme kayıtları silindi.
+
+## 04.10.2026 — Taleplerim: kişinin kendi talepleri (ekran + üst şerit paneli + avatar menüsü)
+
+* **Mockup** `Ekranlar/Taleplerim/taleplerim.html` uygulandı. Erişim: üst şeritte **📨** (kırmızı rozet = kişiye /
+  vekâletle atanmış bekleyen onay basamağı; yeşil nokta = kendi talebinde başkasının yaptığı yeni hareket) ve
+  **avatar menüsü** (Taleplerim, izin bakiyem, ödenecek tutar, Kullanıcı ayarlarım, Çıkış - avatar artık doğrudan
+  ayarları açmıyor). Sol menüye konmadı: kişisel ekran.
+* **`GET /api/ben/talepler`** (`TaleplerimUclari`): oturumdaki kişinin izin / avans / masraf / belge / arıza / malzeme
+  (satınalma) talepleri tek listede; durum grubu sunucuda (taslak · onayda · acik · tamam · red · iptal), onaydaysa
+  sıradaki basamak + gecikme (`v_onay_bekleyen`); özet: onayımı bekleyen, ödenecek, personel mi. Yetki istemez - başka
+  kişinin kaydı bu uçtan okunamaz.
+* **Kendi adına talep** (`AraKatman/KendiTalebi`): izin aç / gönder / iptal + bakiye, avans aç / gönder / iptal, masraf
+  aç / satır ekle-sil / gönder / iptal, belge talebi aç - kayıt kişinin kendisine aitse İK yetkisi aranmaz; başkası
+  adına yine İK yetkisi. Onay kararı bu yoldan geçmez.
+* İzin açma ucu saatli izni (`saatBas` / `saatBit`) alır; yanıt ve log tetiğin hesapladığı günü döner (0,5).
+* **Web:** `/taleplerim` (yeni talep kutucukları, bakiye / açık / ödenecek / onayımı bekleyen özetleri, durum ve tür
+  süzgeci, satır ayrıntısı + onay akışı, taslağı gönder / vazgeç, talebi geri çek); yeni talep pencereleri (izin -
+  gün boyu ya da saatli, avans - taksit, masraf - belge satırları, belge talebi); arıza ve malzeme kendi ekranlarına
+  gider. Veri kabukta bir kez okunur (60 sn), panel / menü / sayfa aynı bağlamı kullanır.
+* Bu sürümde yok (mockup'ta var): Eğitim / kongre ve Diğer kutucukları, "Ekibimin talepleri" sekmesi, ek dosya,
+  yorum, hatırlat, belgeyi indir.
+* Doğrulama: tsc temiz, vitest 789/789; tarayıcıda panel, sayfa, ayrıntı, avatar menüsü ve yeni izin penceresi;
+  kendi adına saatli izin (0,5 gün) API'den açıldı, deneme kayıtları silindi.
+
+## 04.10.2026 — Arıza Bildir Taleplerim'de + talebi alana anında haber ve tek tık işlem (954–956)
+
+* **Mockup'lar** `Ekranlar/Taleplerim/ariza_bildir.html`, `gelen_talepler.html` (kullanıcı: "talep yaptığımız birim / kişinin
+  bundan hızlı ve pratik şekilde haberi olması ve gerekli aksiyonu alabilmesi lazım").
+* **Arıza bildir penceresi** (Taleplerim kutucuğu ve 📨 panelinden): kategori kutucukları + "iletilecek ekip" (kural sunucuda,
+  `/api/ariza/secenekler` ekip eşlemesini de döner), demirbaş ara / okut (`/demirbas-ara`, konum cihazdan dolar), aynı cihaz /
+  konumda açık arıza varsa önce o (`/benzer`) - **"Ben de bildiriyorum"** ikinci kayıt açmaz, takipçi ekler (`/ben-de`),
+  fotoğraf / video (`dokuman` kaynağı `ariza`; bildiren / takipçi kendi kaydında yetkisiz, ekip `ariza` yetkisiyle),
+  ulaşılacak telefon, **Acil**'de ekibin nöbetçisine SMS (yoksa üyelere; şablon `ariza.acil`, e-posta yedeği).
+* **954** `ariza_talep.telefon / cozum_tarihi`; **akış** `ariza_talep_hareket` (durum / sorumlu değişimi tetikle, not ve "ben de"
+  uçtan); `ariza_talep_takipci`; `fn_ariza_talep_ac` telefonlu; **çözüldü → bildirenin onayı**: "Evet, kapat" (`/onayla`) ya da
+  "Düzelmedi" (`/yeniden-ac`, sorumluluysa İşlemde'ye döner); 3 gün yanıt yoksa zamanlı iş `ariza.otomatik_kapat` kapatır.
+  Bildiren iş bitmeden vazgeçebilir (`/vazgec`). Taleplerim'de "Çözüldü · onayınızı bekliyor" açık sayılır.
+* **955 ekip üyeliği + nöbetçi** (`ariza_ekip_uye`, `fn_ariza_ekip_alicilari`): üyesi olan ekipte iş yalnız üyelere düşer,
+  üyesiz ekipte arıza yetkisi olan herkese. Ekip üyesi `ariza` yetkisi olmadan kendi ekibinin işini devralır / çözer.
+  Ayar ekranı **Teknik Servis › Arıza Ekipleri** (üye ekle, nöbetçi işaretle; cep telefonu yoksa uyarı).
+  **956** "Devral" akışa tek satır yazar.
+* **Talebi alana haber + işlem:** 📨 rozeti artık **işlem bekleyen** sayısı (bana gelen arıza + onayımı bekleyen), yeni iş gelince
+  nabız atar. Panel iki sekme: **Bana gelenler** (🚨 Acil · Atanmamış · Bende · Onayımı bekleyen; satırda Devral / Çözüldü /
+  ✔ Onayla / ✕ Reddet / ☎) ve Taleplerim (çözülen arızada ✔ Kapat / ↩). Taleplerim sayfasında **"Bana gelenler" sekmesi**
+  (Ata… ekip listesinden; arıza için takip paneli, onay için zincir + karar). Onay kararı genel `/api/onay/kayit/../karar`
+  ucundan - modül durumu orada yazılır.
+* **Anlık bildirim** (20 sn yoklama, içerik alanının sol altı): bana yeni arıza / onay ve kendi talebimdeki gelişme
+  (kendi yaptığım değişiklik hariç - satırlara `sonDegistiren`); acil kırmızı, sesli, kendiliğinden kapanmaz; masaüstü bildirimi
+  Kullanıcı ayarları › Bildirimler'de iki yeni olayla ("Bana yeni iş geldi", "Talebimde gelişme var").
+* Bu sürümde yok: "bende 1 günden uzun bekleyen" sabah e-posta özeti; anlık bildirim sunucu itmesi değil yoklama.
+* Doğrulama: API'den aç → gelen → benzer → devral → not → çöz → bildiren onayla akışı; tarayıcıda anlık bildirim, panel,
+  "Bana gelenler", arıza penceresi ve demirbaş arama. tsc temiz, vitest 789/789, dotnet test 210 geçti (DB testleri atlandı).
+  Acil SMS yolu canlı SMS gönderebileceği için denenmedi. Deneme kayıtları silindi.

@@ -75,7 +75,7 @@ public static class AvansUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.avans", Islem.Ekle);
+            baglam.YetkiIsteKendi(istek.TarafId, "ik.avans", Islem.Ekle);
 
             if (istek.TarafId <= 0)
                 throw GentegreHatasi.Dogrulama("Personel zorunlu.",
@@ -147,7 +147,7 @@ public static class AvansUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.avans", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_avans where id = @p0", id, "ik.avans", Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -387,7 +387,7 @@ public static class AvansUclari
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.avans", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_avans where id = @p0", id, "ik.avans", Islem.Degistir, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Gerekce))
                 throw GentegreHatasi.Dogrulama("İptal gerekçesi zorunlu.",

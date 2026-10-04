@@ -6,6 +6,13 @@ import { grupluSecenekler } from './grupluSecenek';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 
 /** Kart alanlarinda tutulan deger tipleri. */
+
+/** "saat" tipli alanların seçenekleri: 06:00 - 23:45, 15 dakikalık adımlar (950). */
+const SAAT_LISTESI = Array.from({ length: (24 - 6) * 4 }, (_, i) => {
+  const t = 6 * 60 + i * 15;
+  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+});
+
 export type Deger = string | number | boolean | null;
 
 // "epostaWeb"/"aliasEposta" DAHIL DEGIL - role gore URL/GIB-URN-alias de tutabiliyor
@@ -280,7 +287,20 @@ export function alanCizici(b: AlanCizimBaglami) {
                   <option key={k} value={k}>{c(v, 'kod')}</option>)}
           </select>
         );
-      })() : telefonAlaniMi(a.ad) ? (
+      })() : a.tip === 'saat' ? (
+        // SAAT (950): 06:00-23:45, 15 dk; boş = "gün boyu" / seçilmedi.
+        <select key={a.ad} data-alan={a.ad} value={String(deger[a.ad] ?? '')}
+                disabled={salt || !a.yazilabilir}
+                onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}>
+          <option value="">{a.zorunlu ? '— seçiniz' : '— gün boyu'}</option>
+          {(() => {
+            const l = SAAT_LISTESI.slice();
+            const v = String(deger[a.ad] ?? '');
+            if (v && !l.includes(v)) l.unshift(v);
+            return l.map(s => <option key={s} value={s}>{s}</option>);
+          })()}
+        </select>
+      ) : telefonAlaniMi(a.ad) ? (
         <TelefonGirdi
           key={a.ad}
           value={String(deger[a.ad] ?? '')}

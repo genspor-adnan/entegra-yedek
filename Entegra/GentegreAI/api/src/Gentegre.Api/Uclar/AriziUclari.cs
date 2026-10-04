@@ -2,6 +2,7 @@ using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -12,10 +13,10 @@ namespace Gentegre.Api.Uclar;
 ///   * <b>Ekip</b> (yetki <c>ariza</c>) devralır → çözer → kapatır.
 /// Liste ve kart KaynakKatalogu üzerinden; buradaki uçlar AKIŞ aksiyonlarıdır.
 /// </summary>
-public static class AriziUclari
+public static partial class AriziUclari
 {
     public sealed record TalepIstegi(short Kategori, string Aciklama, string? Konum,
-                                     short? Oncelik, int? DemirbasId);
+                                     short? Oncelik, int? DemirbasId, string? Telefon = null);
     public sealed record AtaIstegi(int SorumluId);
     public sealed record CozIstegi(string Notu);
 
@@ -36,14 +37,24 @@ public static class AriziUclari
                      order by d.deger
                     """, null, [liste],
                 r => (object)new { deger = r.GetInt32(0), ad = r.GetString(1) }, iptal);
+            // EKİP EŞLEMESİ (954): pencere "iletilecek ekip"i kategori seçilir
+            //   seçilmez gösterir - kural sunucuda, istemci yalnız okur.
+            var ekipler = await b.ListeAsync("""
+                    select e.kategori, e.ekip, coalesce(d.ad, '') as ad
+                      from public.ariza_kategori_ekip e
+                      left join public.kod_liste l on l.kod = 'ariza.ekip'
+                      left join public.kod_deger d on d.liste_id = l.id and d.deger = e.ekip and d.dil = 0
+                    """, null, [],
+                r => (object)new { kategori = (int)r.GetInt16(0), ekip = (int)r.GetInt16(1), ad = r.GetString(2) }, iptal);
             return Results.Ok(new { kategoriler = await Liste("ariza.kategori"),
-                                    oncelikler = await Liste("ariza.oncelik") });
+                                    oncelikler = await Liste("ariza.oncelik"), ekipler });
         });
 
         // SELF-SERVİS AÇIŞ: herkes (ariza.talep). Kategori -> ekip yönlendirmesi
         //   fn_ariza_talep_ac içinde; talep_eden = oturum kişisi.
         grup.MapPost("/talep", async (TalepIstegi istek, VeriKaynagi veri,
-            BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+            BaglamCozucu cozucu, BildirimDeposu bildirim, ILoggerFactory gunluk,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ariza.talep", Islem.Ekle);
@@ -52,14 +63,20 @@ public static class AriziUclari
 
             await using var b = await veri.AcAsync(iptal);
             var id = await b.TekDegerAsync<int>("""
-                select public.fn_ariza_talep_ac(@p0::smallint, @p1, @p2, @p3::smallint, @p4, @p5, @p6)
+                select public.fn_ariza_talep_ac(@p0::smallint, @p1, @p2, @p3::smallint, @p4, @p5, @p6, @p7)
                 """, null,
                 [istek.Kategori, istek.Aciklama.Trim(), istek.Konum?.Trim() ?? "",
-                 istek.Oncelik ?? (short)2, istek.DemirbasId, baglam.KullaniciId, baglam.SubeId ?? 0], iptal);
+                 istek.Oncelik ?? (short)2, istek.DemirbasId, baglam.KullaniciId, baglam.SubeId ?? 0,
+                 istek.Telefon?.Trim() ?? ""], iptal);
             var no = await b.TekDegerAsync<string>(
                 "select talep_no from public.ariza_talep where id = @p0", null, [id], iptal);
+
+            // ACİL (954): ekibe anında SMS / e-posta. Bildirim yazılamazsa
+            //   kayıt düşmez - günlüğe yazılır.
+            var bildirilen = istek.Oncelik == 4
+                ? await AcilBildirAsync(b, bildirim, gunluk.CreateLogger("Ariza"), id, baglam, iptal) : 0;
             return Results.Ok(new { id, talepNo = no, mesaj = $"Arıza kaydı açıldı: {no}",
-                                    izlemeNo = baglam.IzlemeNo });
+                                    bildirilen, izlemeNo = baglam.IzlemeNo });
         });
 
         // EKİP DEVRALIR: sorumlu = ben, durum İşlemde (yetki ariza).
@@ -67,8 +84,8 @@ public static class AriziUclari
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ariza", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            await EkipIsteAsync(b, id, baglam, iptal);
             var n = await b.CalistirAsync("""
                 update public.ariza_talep
                    set sorumlu_id = @p1, durum = 3, degistiren = @p1, degistirme_tarihi = now()
@@ -83,9 +100,9 @@ public static class AriziUclari
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ariza", Islem.Degistir);
             if (istek.SorumluId <= 0) throw GentegreHatasi.IsKurali("Sorumlu personel seçilmeli.");
             await using var b = await veri.AcAsync(iptal);
+            await EkipIsteAsync(b, id, baglam, iptal);
             var n = await b.CalistirAsync("""
                 update public.ariza_talep
                    set sorumlu_id = @p1, durum = case when durum < 2 then 2 else durum end,
@@ -101,9 +118,9 @@ public static class AriziUclari
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ariza", Islem.Degistir);
             if (string.IsNullOrWhiteSpace(istek.Notu)) throw GentegreHatasi.IsKurali("Çözüm notu zorunlu.");
             await using var b = await veri.AcAsync(iptal);
+            await EkipIsteAsync(b, id, baglam, iptal);
             var n = await b.CalistirAsync("""
                 update public.ariza_talep
                    set durum = 4, cozum_notu = @p1, degistiren = @p2, degistirme_tarihi = now()
@@ -113,13 +130,15 @@ public static class AriziUclari
             return Results.Ok(new { id, mesaj = "Talep çözüldü.", izlemeNo = baglam.IzlemeNo });
         });
 
+        ArizaTakipUclariniEkle(grup);
+
         // KAPAT: durum Kapandı (yetki ariza).
         grup.MapPost("/{id:int}/kapat", async (int id, VeriKaynagi veri,
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ariza", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            await EkipIsteAsync(b, id, baglam, iptal);
             var n = await b.CalistirAsync("""
                 update public.ariza_talep
                    set durum = 5, kapanis_tarihi = now(), degistiren = @p1, degistirme_tarihi = now()

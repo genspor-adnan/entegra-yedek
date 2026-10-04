@@ -95,6 +95,22 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
             return;
         }
 
+        // ARIZA FOTOĞRAFI (954): bildiren ya da takipçi kendi kaydında;
+        //   ekip `ariza` yetkisiyle. Başkası = bulunamadı.
+        if (kaynak == "ariza")
+        {
+            var kendi = await veri.TekDegerAsync<bool>("""
+                select exists (select 1 from public.ariza_talep t where t.id = @p0
+                                 and (t.talep_eden = @p1 or exists (
+                                      select 1 from public.ariza_talep_takipci k
+                                       where k.talep_id = t.id and k.taraf_id = @p1)))
+                """, [(int)kaynakId, baglam.KullaniciId], iptal);
+            if (!kendi && !baglam.Yetkiler.Var("ariza", islem == Islem.Gor ? Islem.Gor : Islem.Degistir))
+                throw GentegreHatasi.Bulunamadi(yok);
+            if (islem != Islem.Gor) baglam.YazmaIste();
+            return;
+        }
+
         if (kaynak == "lab-sonuc")
         {
             // Yetkisizlik de 404: 403 dönmek, kimliğin bir LAB dokümanı olduğunu söylerdi.

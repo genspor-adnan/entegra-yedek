@@ -64,7 +64,7 @@ public static class MasrafBeyaniUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.masraf", Islem.Ekle);
+            baglam.YetkiIsteKendi(istek.TarafId, "ik.masraf", Islem.Ekle);
 
             if (istek.TarafId <= 0)
                 throw GentegreHatasi.Dogrulama("Personel zorunlu.",
@@ -100,7 +100,7 @@ public static class MasrafBeyaniUclari
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.masraf", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_masraf where id = @p0", id, "ik.masraf", Islem.Degistir, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.BelgeNo))
                 throw GentegreHatasi.Dogrulama("Belge numarası zorunlu.",
@@ -147,7 +147,7 @@ public static class MasrafBeyaniUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.masraf", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select b.taraf_id from public.personel_masraf_satir s join public.personel_masraf b on b.id = s.beyan_id where s.id = @p0", satirId, "ik.masraf", Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -172,7 +172,7 @@ public static class MasrafBeyaniUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.masraf", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_masraf where id = @p0", id, "ik.masraf", Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -244,7 +244,7 @@ public static class MasrafBeyaniUclari
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ik.masraf", Islem.Degistir);
+            await KendiTalebi.IsteAsync(veri, baglam, "select taraf_id from public.personel_masraf where id = @p0", id, "ik.masraf", Islem.Degistir, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Gerekce))
                 throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.",

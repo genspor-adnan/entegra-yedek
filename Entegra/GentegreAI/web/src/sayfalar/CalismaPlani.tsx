@@ -21,7 +21,7 @@ import { c } from '../dil/ceviri';
  *     doktor yoksa kırmızı taralı.
  *   * Bugün çalışanlar: "şimdi" çizgili gün şeridi, muayenede / saat dışı /
  *     bugün yok, sıradaki boş saat, gelmeyecek doktorun aktarılmamış randevusu.
- * Satır başındaki kutu: işaretli doktorla İzin / İstisna kartı doktor kilitli açılır.
+ * Satır başındaki kutu: işaretli doktorla Çalışma İstisnası kartı doktor kilitli açılır.
  */
 const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const ISTISNA: Record<number, [string, string]> = {
@@ -79,7 +79,7 @@ export function CalismaPlani() {
   const [bugunCip, setBugunCip] = useState<'' | 'muayenede' | 'disi' | 'yok'>('');
   const [secili, setSecili] = useState<{ anahtar: string; gun: string } | null>(null);
   const [gunRandevu, setGunRandevu] = useState<{ id: number; saat: string; sureDk: number; durum: number; hasta: string; tip: string }[] | null>(null);
-  // SATIR SEÇİMİ (kullanıcı): işaretli doktorla "İzin / İstisna" kartı doktoru
+  // SATIR SEÇİMİ (kullanıcı): işaretli doktorla "İstisna" kartı doktoru
   //   dolu ve KİLİTLİ açar. İstisna tek doktorludur - tek satır işaretlenir.
   const [isaretli, setIsaretli] = useState<{ hekimId: number; ad: string } | null>(null);
 
@@ -267,7 +267,7 @@ export function CalismaPlani() {
         <div className="cl-arac">
           {yazar && <button type="button" className="d bir" onClick={() => git('/calisma-sablon/yeni?geri=%2Fcalisma-plani')}>＋ {c('Şablon')}</button>}
           {/* Izin / istisna, sablonlar, istisnalar, takvim dugmeleri kaldirildi (kullanici);
-              isaretli doktorla izin / istisna secim seridinde. */}
+              isaretli doktorla istisna secim seridinde. */}
           <span className="cl-ayrac" />
           {([['doktor', 'Doktor × gün'], ['bolum', 'Bölüm doluluğu'], ['bugun', 'Bugün çalışanlar']] as [Gorunum, string][]).map(([k, a]) => (
             <button key={k} type="button" className={`ck-cip${gorunum === k ? ' on' : ''}`} onClick={() => setGorunum(k)}>{c(a)}</button>
@@ -325,7 +325,7 @@ export function CalismaPlani() {
           </div>
           {isaretli && (
             <div className="cl-toplu">☑ <b>{c('1 doktor seçili')}</b> — {isaretli.ad}
-              {yazar && <button type="button" className="d ck-kucuk" onClick={() => kartaGit(isaretli.hekimId, istisnaYolu(isaretli.hekimId))}>✈️ {c('İzin / istisna…')}</button>}
+              {yazar && <button type="button" className="d ck-kucuk" onClick={() => kartaGit(isaretli.hekimId, istisnaYolu(isaretli.hekimId))}>🗓 {c('İstisna…')}</button>}
               <button type="button" className="d ck-kucuk" onClick={() => git(`/calisma-sablon?ara=${encodeURIComponent(isaretli.ad.replace(/^(Prof\.|Doç\.|Op\.|Uzm\.)?\s*Dr\.\s*/i, ''))}`)}>📋 {c('Şablonlarını aç')}</button>
               <button type="button" className="d ck-kucuk" onClick={() => git(`/randevu?hekimId=${isaretli.hekimId}`)}>📅 {c('Randevuları')}</button>
               <button type="button" className="cl-bag cl-sag" onClick={() => setIsaretli(null)}>{c('Seçimi kaldır')} ✕</button>
@@ -349,7 +349,7 @@ export function CalismaPlani() {
                 return (
                   <Fragment key={r.anahtar}>
                     {grupBas && <div className="pl-grup">{r.departman}<span>{new Set(grup.map(x => x.hekimId)).size} {c('doktor')} · {c('doluluk')} %{go!.yuzde}</span></div>}
-                    <label className="pl-hk" title={c('İşaretle: İzin / İstisna bu doktor için açılır')}>
+                    <label className="pl-hk" title={c('İşaretle: istisna bu doktor için açılır')}>
                       <input type="checkbox" checked={isaretli?.hekimId === r.hekimId} onChange={e => isaretleSec(r, e.target.checked)} />
                       <span><b>{r.hekim}</b><small>{r.departman} · {r.sube || c('Tümü')}</small></span></label>
                     {gunler.map((d, i) => <div key={i} className={iso(d) === bugunIso ? 'bugunk' : ''}>{Hucre(r, iso(d))}</div>)}
