@@ -7,13 +7,13 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { FTR_KABIN_TUR } from './ftrKodlari';
 
 /**
  * FTR ÜNİTE PANOSU (719) — mockup `Ekranlar/FTR/ftr_unite_panosu.html`.
  * Kabin kartları (sürüyor / bekliyor / boş), bekleyen sırası, fizyoterapist
  * yükü, günün programı. Kart tıkla → seans ekranı; 30 sn'de bir tazelenir.
  */
-const TUR: Record<number, string> = { 1: 'Kabin', 2: 'Egzersiz salonu', 3: 'Hidroterapi', 4: 'Manuel terapi', 5: 'Robotik', 6: 'Grup' };
 type Gorunum = 'kabin' | 'sira' | 'fzt' | 'program';
 
 export function FtrPano() {
@@ -70,7 +70,7 @@ export function FtrPano() {
               const sinif = !kb.aktif ? 'bakim' : sr.length ? 'dolu' : bk.length ? 'bekle' : 'bos';
               return (
                 <div key={kb.id} className={`ft-kb ${sinif}`}>
-                  <div className="ft-kbh">{kb.ad}<span className="sonuk" style={{ fontWeight: 400 }}> · {TUR[kb.tur]}</span>{sr[0]?.baslangic && <span className="ft-sayac">⏱ {dk(sr[0].baslangic)} dk</span>}</div>
+                  <div className="ft-kbh">{kb.ad}<span className="sonuk" style={{ fontWeight: 400 }}> · {FTR_KABIN_TUR[kb.tur]}</span>{sr[0]?.baslangic && <span className="ft-sayac">⏱ {dk(sr[0].baslangic)} dk</span>}</div>
                   {sr.map(s => <div key={s.id} className="ft-kart" onClick={() => ac(s)}>
                     <b>{s.hasta}</b> <span className="sonuk">· {s.bolge}</span><div className="sonuk">{s.programNo} · {s.sira}/{s.seansSayisi}</div>
                     <div>{s.yapilanlar ? `${s.yapilanlar} ✔` : ''}{s.sonrakiUygulama ? <span> · <b>{s.sonrakiUygulama}</b> ⏵</span> : ''}</div>

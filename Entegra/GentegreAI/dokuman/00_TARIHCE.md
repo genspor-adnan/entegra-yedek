@@ -18907,3 +18907,35 @@ Kullanıcı: *"diş kısmını da refaktor yap"*. Modülün uç dosyaları zaten
   `dis-plan` durumları ("Tamamlandı", "Sürüyor") sunucudan doğru; tarayıcıda diş günlük
   akışında kısa lab rozeti ("teslim") ve lab kanbanında iş türleri (Kron · Diğer)
   görüldü.
+
+## 05.10.2026 — FTR refaktörü (davranış değişmedi)
+
+Kullanıcı: *"ftr kısmını da refaktor yap"*. Modül küçük (en büyük dosya 408 satır),
+bölünecek bir şey yoktu; iş **tekrarın kaldırılması** oldu.
+
+* **Aynı kural iki ekranda ayrı yazılmıştı:** "bu egzersiz bu seansta var mı" -
+  seans kartında satırı soluklaştırmak için (`s.sira < e.asamaBas || (e.asamaBit != null
+  && s.sira > e.asamaBit)`) ve "· bu seans" etiketi için ikinci kez, ters mantıkla.
+  Aşama aralığı metni ("3–5" / "3–…") de iki kartta ayrı kuruluyordu. → yeni
+  `sayfalar/ftr/ftrKodlari.ts`: `egzersizSeanstaVar(e, sira)` ve
+  `ftrAsamaAraligi(e, seansSayisi)`. Aynı kuralın iki ifadesi, birinin sessizce
+  sapması demekti: aralık değişirse biri soluk gösterirken öteki "bu seans" der.
+* **Kod sözlükleri tek yere:** egzersiz yeri iki kartta ayrıydı; kabin türü, tedavi
+  yanıtı ve seans rozet rengi birer yerdeydi ama hepsi veritabanı kod listelerinin
+  (`ftr.egzersiz_yer`, `ftr.kabin_tur`, `ftr.yanit`, `ftr.seans_durum`) elle kopyası.
+  Metinler o listelerle karşılaştırıldı - **birebir aynı**, yani henüz ayrışma yok;
+  kopya tek noktaya indi. Seans durumunun ADI bilinçli olarak alınmadı: o sunucudan
+  (`durumAdi`) geliyor, burada yalnız rengi var.
+* **Sunucuda sihirli durum sayıları adlandırıldı** (`FtrUclari.cs`): `durum >= 4` dört
+  uçta, `durum is 3 or 5` iki uçta geçiyordu ve eşiğin ne demek olduğu ancak kod
+  listesine bakılarak anlaşılıyordu → `ProgramKapali(durum)` · `SeansKapali(durum)` ·
+  `SeansPlanliDurum`. Kod listesi değerleri veritabanından doğrulanıp yoruma yazıldı
+  (program: 1 taslak · 2 sürüyor · 3 ara değerlendirme · 4 tamamlandı · 5 sonlandırıldı).
+  Hata mesajları uç başına ayrı kaldı - "kapanmış programa seans açılmaz" ile "program
+  zaten kapalı" farklı şey söylüyor.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `ftr-program` listesi ("Sürüyor · Lomber · 5 seans") ve `/api/ftr/program/1` yanıtı
+  okundu. Tarayıcıda program kartına **geçici iki egzersiz** eklenip ortak yardımcı
+  sınandı: yer "Klinik" / "Klinik + ev", aşama "1–5" (bitişsiz egzersiz kür sonuna
+  kadar) ve "3–5"; **test kayıtları silindi**. Seans kartındaki egzersiz bölümü dev
+  veride görünür olmadı (kür/uygulama koşuluna bağlı) - aynı iki fonksiyonu çağırıyor.

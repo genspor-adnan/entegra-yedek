@@ -9,6 +9,7 @@ import { TarafSecici } from '../../bilesenler/TarafArama';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { FTR_EGZERSIZ_YER, FTR_SEANS_ROZET, FTR_YANIT, ftrAsamaAraligi } from './ftrKodlari';
 
 /**
  * FTR TEDAVİ PROGRAMI (KÜR) KARTI (719) — mockup `Ekranlar/FTR/ftr_program_karti.html`.
@@ -17,9 +18,6 @@ import { useEscIleKapat } from '../../bilesenler/Modal';
  * arkada Tedavi Programları listesi, kapat geldiği yere döner.
  */
 const DURUM: Record<number, [string, string]> = { 1: ['Taslak', 'gri'], 2: ['Sürüyor', 'mavi'], 3: ['Ara değerlendirme', 'uyari'], 4: ['Tamamlandı', 'ok'], 5: ['Sonlandırıldı', 'hata'] };
-const SEANS: Record<number, string> = { 1: 'gri', 2: 'mavi', 3: 'ok', 4: 'hata', 5: 'gri', 6: 'uyari' };
-const YER: Record<number, string> = { 1: 'Klinik', 2: 'Ev', 3: 'Klinik + ev' };
-const YANIT: Record<number, string> = { 1: 'İyi yanıt', 2: 'Kısmi yanıt', 3: 'Yanıtsız' };
 type Sekme = 'uyg' | 'seans' | 'egz' | 'takip' | 'gunluk';
 
 export function FtrProgramKarti() {
@@ -134,7 +132,7 @@ export function FtrProgramKarti() {
         <div><label>Durum</label><div className="ds-inp"><span className={`rozet ${dr[1]}`}>{dr[0]}</span> {p.yapilan_seans} yapıldı · {p.devamsiz} devamsız</div></div>
         <div><label>{c('Sonraki seans')}</label><div className="ds-inp">{p.sonraki_seans ? tarihYaz(p.sonraki_seans) : <span className="sonuk">planlanmadı</span>}</div></div>
         <div><label>{c('Yıllık hak (bölge)')}</label><div className="ds-inp">{p.rapor_seans_hakki ? `${p.rapor_seans_hakki} · ` : ''}<span className={`rozet ${p.kalan_hak < p.seans_sayisi - p.yapilan_seans ? 'uyari' : 'ok'}`}>kalan {p.kalan_hak}</span>{p.kalan_hak < p.seans_sayisi - p.yapilan_seans ? <span className="sonuk"> · {p.seans_sayisi - p.yapilan_seans - p.kalan_hak} seans hak dışı</span> : null}</div></div>
-        <div><label>Yanıt</label><div className="ds-inp">{p.yanit ? YANIT[p.yanit] : <span className="sonuk">kür sonunda</span>}</div></div>
+        <div><label>Yanıt</label><div className="ds-inp">{p.yanit ? FTR_YANIT[p.yanit] : <span className="sonuk">kür sonunda</span>}</div></div>
       </div>
       <div className="ds-ozet6" style={{ gridTemplateColumns: 'repeat(6,1fr)' }}>
         <div><span>Seans</span><b>{p.yapilan_seans} / {p.seans_sayisi}</b><div className="ds-bar" style={{ margin: '3px 0 0' }}><i style={{ width: `${p.seans_sayisi ? Math.min(100, p.yapilan_seans / p.seans_sayisi * 100) : 0}%`, background: 'var(--ok)' }} /></div></div>
@@ -190,7 +188,7 @@ export function FtrProgramKarti() {
               {k.seanslar.map(s => <tr key={s.id} className={s.durum === 4 || s.durum === 5 ? 'soluk' : ''}>
                 <td className="orta">{s.sira}</td><td>{tarihYaz(s.tarih)}</td><td className="orta">{s.saat}</td><td>{[s.fizyoterapist, s.kabin].filter(Boolean).join(' · ') || '—'}</td>
                 <td className="orta">{s.uygulamaSayisi ? `${s.yapilanUygulama}/${s.uygulamaSayisi}` : '—'}</td><td className="orta">{s.vasOnce ?? '—'} → {s.vasSonra ?? '—'}</td><td className="orta">{s.durum === 3 || s.durum === 6 ? `${s.sureDk} dk` : '—'}</td>
-                <td><span className={`rozet ${SEANS[s.durum] ?? 'gri'}`}>{s.durumAdi}{s.sira === p.ara_degerlendirme_seans ? ' · ara değ.' : ''}</span></td>
+                <td><span className={`rozet ${FTR_SEANS_ROZET[s.durum] ?? 'gri'}`}>{s.durumAdi}{s.sira === p.ara_degerlendirme_seans ? ' · ara değ.' : ''}</span></td>
                 <td className="ds-satir-arac"><button className="d" onClick={() => git(`/ftr-seans/${s.id}`, { state: { geri: geriBurasi, ustGeri: geri } })}>{s.durum === 2 ? '🏃 Devam' : 'Aç'}</button></td></tr>)}
               {k.seanslar.length === 0 && <tr><td colSpan={9} className="sonuk">Seans yok. "🗓 Seansları Planla" sıklığa göre takvimi üretir; "🏃 Bugünkü Seans" ilk seansı açar.</td></tr>}
             </tbody>
@@ -204,7 +202,7 @@ export function FtrProgramKarti() {
           <div className="ds-dg"><table>
             <thead><tr><th className="orta">#</th><th>{c('Egzersiz')}</th><th>{c('Set × tekrar')}</th><th>Yer</th><th className="orta">Aşama</th><th>Not</th></tr></thead>
             <tbody>
-              {k.egzersizler.map(e => <tr key={e.id}><td className="orta sonuk">{e.sira}</td><td>{e.ad}</td><td>{e.setTekrar}</td><td>{YER[e.yer]}</td><td className="orta">{e.asamaBas}–{e.asamaBit ?? p.seans_sayisi}</td><td>{e.notMetin}</td></tr>)}
+              {k.egzersizler.map(e => <tr key={e.id}><td className="orta sonuk">{e.sira}</td><td>{e.ad}</td><td>{e.setTekrar}</td><td>{FTR_EGZERSIZ_YER[e.yer]}</td><td className="orta">{ftrAsamaAraligi(e, p.seans_sayisi)}</td><td>{e.notMetin}</td></tr>)}
               {k.egzersizler.length === 0 && <tr><td colSpan={6} className="sonuk">Egzersiz yok - program kartını düzenleyip "Egzersiz Programı" detayına ekleyin.</td></tr>}
             </tbody>
           </table></div>

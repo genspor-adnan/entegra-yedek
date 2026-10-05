@@ -8,6 +8,7 @@ import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { FTR_EGZERSIZ_YER, egzersizSeanstaVar, ftrAsamaAraligi } from './ftrKodlari';
 
 /**
  * FTR SEANS UYGULAMA KARTI (719) — mockup `Ekranlar/FTR/ftr_seans.html`.
@@ -16,7 +17,6 @@ import { useEscIleKapat } from '../../bilesenler/Modal';
  * sonu geçişi. Modal, kapat geldiği yere döner (program kartı / pano / liste).
  */
 const VAS = Array.from({ length: 11 }, (_, i) => i);
-const YER: Record<number, string> = { 1: 'Klinik', 2: 'Ev', 3: 'Klinik + ev' };
 type Sekme = 'uyg' | 'egz' | 'not';
 
 export function FtrSeansKarti() {
@@ -139,7 +139,7 @@ export function FtrSeansKarti() {
       {sekme === 'egz' && (
         <div className="ds-grp ds-grp-ic">
           <div className="ds-dg"><table><thead><tr><th>{c('Egzersiz')}</th><th>{c('Set × tekrar')}</th><th>Yer</th><th className="orta">Aşama</th></tr></thead>
-            <tbody>{k.egzersizler.map(e => <tr key={e.id} className={s.sira < e.asamaBas || (e.asamaBit != null && s.sira > e.asamaBit) ? 'soluk' : ''}><td>{e.ad}</td><td>{e.setTekrar}</td><td>{YER[e.yer]}</td><td className="orta">{e.asamaBas}–{e.asamaBit ?? '…'}{s.sira >= e.asamaBas && (e.asamaBit == null || s.sira <= e.asamaBit) ? ' · bu seans' : ''}</td></tr>)}
+            <tbody>{k.egzersizler.map(e => <tr key={e.id} className={egzersizSeanstaVar(e, s.sira) ? '' : 'soluk'}><td>{e.ad}</td><td>{e.setTekrar}</td><td>{FTR_EGZERSIZ_YER[e.yer]}</td><td className="orta">{ftrAsamaAraligi(e)}{egzersizSeanstaVar(e, s.sira) ? ' · bu seans' : ''}</td></tr>)}
               {k.egzersizler.length === 0 && <tr><td colSpan={4} className="sonuk">{c('Egzersiz tanımlı değil.')}</td></tr>}</tbody></table></div>
         </div>
       )}

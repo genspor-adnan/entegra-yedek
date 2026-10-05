@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -16,6 +16,30 @@ public static class FtrUclari
 {
     private const int LogProgram = 1182;
     private const int LogSeans   = 1185;
+
+    // ---------------------------------------------------- durum eşikleri ----
+    // Kodda "durum >= 4" ve "durum is 3 or 5" olarak dört ve iki kez
+    //   tekrarlanıyordu: eşiğin ne demek olduğu ancak kod listesine
+    //   (ftr.program_durum / ftr.seans_durum) bakılarak anlaşılıyordu.
+    //
+    // Program (ftr.program_durum): 1 taslak · 2 sürüyor · 3 ara değerlendirme ·
+    //   4 tamamlandı · 5 sonlandırıldı. Dört ve üstü KAPALIDIR - kapanmış
+    //   programa seans açılmaz, uygulama eklenmez (klinik kayıt kapandıktan
+    //   sonra büyüyemez).
+    private const short ProgramKapaliDurum = 4;
+    // Seans (ftr.seans_durum): 1 planlı · 2 sürüyor · 3 yapıldı · 4 gelmedi ·
+    //   5 iptal · 6 yarım. Yapıldı ve iptal KAPALIDIR; "gelmedi" ve "yarım"
+    //   hâlâ düzeltilebilir.
+    private const short SeansPlanliDurum = 1;
+
+    /// <summary>Program kapandı mı (tamamlandı / iptal)?</summary>
+    private static bool ProgramKapali(short durum) => durum >= ProgramKapaliDurum;
+
+    /// <summary>
+    /// Seans kapandı mı? Yapıldı (3) ve iptal (5) kapalıdır - "gelmedi" (4) ve
+    /// "yarım" (6) kapalı DEĞİL: ikisi de sonradan düzeltilen durumlar.
+    /// </summary>
+    private static bool SeansKapali(short durum) => durum is 3 or 5;
 
     public sealed record SeansAcIstegi(int? KabinId, int? FizyoterapistId);
     public sealed record SeansGuncelleIstegi(int? VasOnce, int? VasSonra, string? EvUyum, string? UygulamaNotu, string? Komplikasyon,
@@ -97,7 +121,7 @@ public static class FtrUclari
             baglam.YetkiIste("ftr.program", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             var p = await ProgramOkuAsync(b, id, iptal);
-            if (p.durum >= 4) throw GentegreHatasi.IsKurali("Kapanmış programa uygulama eklenmez.");
+            if (ProgramKapali(p.durum)) throw GentegreHatasi.IsKurali("Kapanmış programa uygulama eklenmez.");
             if (g.HizmetId is null && string.IsNullOrWhiteSpace(g.Ad)) throw GentegreHatasi.Dogrulama("Uygulama seçin ya da ad yazın.");
             var yeniId = await b.TekDegerAsync<int>("""
                 insert into public.ftr_program_uygulama (program_id, sira, hizmet_id, ad, bolge_metin, sure_dk, parametre, cihaz_ad, seans_bas, seans_bit, sube_id, ekleyen)
@@ -125,7 +149,7 @@ public static class FtrUclari
             baglam.YetkiIste("ftr.program", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             var p = await ProgramOkuAsync(b, id, iptal);
-            if (p.durum >= 4) throw GentegreHatasi.IsKurali("Kapanmış program planlanmaz.");
+            if (ProgramKapali(p.durum)) throw GentegreHatasi.IsKurali("Kapanmış program planlanmaz.");
             await using var islem = await b.BeginTransactionAsync(iptal);
             if (g.MevcutlariSil == true)
                 await b.CalistirAsync("delete from public.ftr_seans where program_id = @p0 and durum = 1", islem, [id], iptal);
@@ -165,7 +189,7 @@ public static class FtrUclari
             baglam.AksiyonIste("ftr.program.sonlandir");
             await using var b = await veri.AcAsync(iptal);
             var p = await ProgramOkuAsync(b, id, iptal);
-            if (p.durum >= 4) throw GentegreHatasi.IsKurali("Program zaten kapalı.");
+            if (ProgramKapali(p.durum)) throw GentegreHatasi.IsKurali("Program zaten kapalı.");
             await using var islem = await b.BeginTransactionAsync(iptal);
             var iptalSeans = await b.CalistirAsync("update public.ftr_seans set durum = 5 where program_id = @p0 and durum in (1, 2)", islem, [id], iptal);
             var tamam = p.yapilan >= p.seansSayisi;
@@ -186,7 +210,7 @@ public static class FtrUclari
             baglam.YetkiIste("ftr.seans", Islem.Ekle);
             await using var b = await veri.AcAsync(iptal);
             var p = await ProgramOkuAsync(b, id, iptal);
-            if (p.durum >= 4) throw GentegreHatasi.IsKurali("Kapanmış programa seans açılmaz.");
+            if (ProgramKapali(p.durum)) throw GentegreHatasi.IsKurali("Kapanmış programa seans açılmaz.");
             var bugun = DateOnly.FromDateTime(Gentegre.Cekirdek.Saat.Bugun);
             var acik = await b.TekDegerAsync<int?>("select id from public.ftr_seans where program_id = @p0 and durum = 2 limit 1", null, [id], iptal);
             if (acik is int a) return Results.Ok(new { id = a, mevcut = true });
@@ -257,7 +281,7 @@ public static class FtrUclari
             baglam.YetkiIste("ftr.seans", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             var durum = await b.TekDegerAsync<short?>("select durum from public.ftr_seans where id = @p0", null, [id], iptal) ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
-            if (durum is 3 or 5) throw GentegreHatasi.IsKurali("Kapanmış seans değiştirilmez.");
+            if (SeansKapali(durum)) throw GentegreHatasi.IsKurali("Kapanmış seans değiştirilmez.");
             await b.CalistirAsync("""
                 update public.ftr_seans
                    set vas_once = coalesce(@p1, vas_once), vas_sonra = coalesce(@p2, vas_sonra), ev_uyum = coalesce(@p3, ev_uyum),
@@ -296,7 +320,7 @@ public static class FtrUclari
             await using var b = await veri.AcAsync(iptal);
             var s = await b.TekAsync("select program_id, durum, sira from public.ftr_seans where id = @p0", null, [id],
                 o => new { programId = o.GetInt32(0), durum = o.GetInt16(1), sira = (int)o.GetInt16(2) }, iptal) ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
-            if (s.durum is 3 or 5) throw GentegreHatasi.IsKurali("Seans zaten kapalı.");
+            if (SeansKapali(s.durum)) throw GentegreHatasi.IsKurali("Seans zaten kapalı.");
             var p = await ProgramOkuAsync(b, s.programId, iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("update public.ftr_seans set durum = 3, bitis = now(), baslangic = coalesce(baslangic, now() - interval '30 minute'), degistiren = @p1, degistirme_tarihi = now() where id = @p0",
@@ -320,7 +344,7 @@ public static class FtrUclari
             await using var b = await veri.AcAsync(iptal);
             var s = await b.TekAsync("select program_id, durum from public.ftr_seans where id = @p0", null, [id], o => new { programId = o.GetInt32(0), durum = o.GetInt16(1) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
-            if (s.durum != 1) throw GentegreHatasi.IsKurali("Yalnız planlı seans 'gelmedi' olur.");
+            if (s.durum != SeansPlanliDurum) throw GentegreHatasi.IsKurali("Yalnız planlı seans 'gelmedi' olur.");
             await using var islem = await b.BeginTransactionAsync(iptal);
             // Gelmeyen seans YAKILMAZ: sırası korunur, aynı sıra numarasıyla yeni planlı seans en sona eklenir (program uzar).
             await b.CalistirAsync("update public.ftr_seans set durum = 4, degistiren = @p1, degistirme_tarihi = now() where id = @p0", islem, [id, baglam.KullaniciId], iptal);
