@@ -6,6 +6,7 @@ import type { CalismaBugun } from '../api/uclar/ayar';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { tarihYaz } from '../bilesenler/bicim';
 import { c } from '../dil/ceviri';
+import { GUN_AD } from '../bilesenler/calisma/calismaOrtak';
 
 /**
  * ÇALIŞMA PLANLARI (711) — mockup `Ekranlar/Randevu/calisma_planlari.html`.
@@ -23,7 +24,6 @@ import { c } from '../dil/ceviri';
  *     bugün yok, sıradaki boş saat, gelmeyecek doktorun aktarılmamış randevusu.
  * Satır başındaki kutu: işaretli doktorla Çalışma İstisnası kartı doktor kilitli açılır.
  */
-const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const ISTISNA: Record<number, [string, string]> = {
   1: ['✈️', 'İzin'], 2: ['🎓', 'Kongre / eğitim'], 3: ['🕘', 'Saat değişikliği'], 4: ['➕', 'Ek mesai'], 5: ['⛔', 'Kapalı'],
 };

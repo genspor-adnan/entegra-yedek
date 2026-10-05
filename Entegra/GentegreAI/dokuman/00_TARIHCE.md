@@ -19038,3 +19038,32 @@ Kullanıcı: *"kayıt kabul kısmını da refaktor yap"*.
   sabitleri o dosyadan import ediyor, taşımadan sonra da geçti). Tarayıcıda başvuru
   listesi ve "Özel (Ücretli)" ödeyenli başvuru açıldı: provizyon sekmesi hiç çizilmedi
   (kuralın beklenen davranışı).
+
+## 05.10.2026 — Randevu / çalışma planı refaktörü (davranış değişmedi, bir etiket hatası düzeldi)
+
+Kullanıcı: *"randevu kısmını da refaktor yap"*. Sunucu tarafı küçük
+(`RandevuUclari.cs` 53 satır - randevu kuralları çalışma planı fonksiyonlarında ve kart
+motorunda); iş istemci tarafındaki tekrarlardı.
+
+* **Gün adları dizisi DÖRT yerde** yazılmıştı - ve ortak dosya (`calismaOrtak.GUN_AD`)
+  zaten vardı: randevu takvimi, çalışma planı ve şablon araçları kendi kopyalarını
+  tutuyordu. Üçü ortak dosyaya bağlandı.
+* **İstisna türü ÜÇ yerde ayrı yazılmıştı ve üçü farklıydı:** istisna kartı (kod · ad ·
+  ikon · açıklama; 1 "İzin (eski)"), istisna listesi (ikon · ad · CSS sınıfı; 1 "İzin")
+  ve randevu takvimi - takvimde **yalnız üç tür tanınıyordu**
+  (`{1:'İzin',2:'Kongre',5:'Kapalı'}`), saat değişikliği (3) ve ek mesai (4) için
+  "Kapalı" yazılıyordu. Oysa kısmi kapanış satırı tam olarak o iki türden de doğuyor:
+  **hekimin saatini değiştirdiği gün takvimde "Kapalı" görünüyordu.**
+  → yeni `bilesenler/calisma/calismaKodlari.ts`: kod · tam ad · takvim için kısa ad ·
+  ikon · liste sınıfı · davranış (`kapatir`, `saatli`) ve "seçilemez eski tür" bayrağı.
+  Metinler kod listesiyle (`calisma.istisna_tur`) aynı.
+* **Davranış kuralları da tek yere:** "hangi tür günü kapatır" (`KAPATAN`) ve "hangisi
+  saat ister" (`SAATLI`) istisna kartında iki tek satırlık fonksiyondu; artık tür
+  tanımının kendi alanları (`istisnaKapatir` / `istisnaSaatli`). Kartın tür seçim
+  listesi de artık `t.kod !== 1` yerine `!t.eski` bayrağına bakıyor.
+* Doğrulama: tsc temiz, vitest 789/789, dotnet test 218 geçti. Tarayıcıda çalışma
+  istisnaları ekranı açıldı: tür etiketleri ortak sözlükten ("Kongre / eğitim · Saat
+  değişikliği · Ek mesai · Kapalı · İK izni"). Randevu takviminde dev veride hücre
+  etiketi üretecek kısmi kapanış kaydı bulunmadığı için takvim metni ekranda
+  görülemedi - `GUN_AD` değişikliği aynı diziye bağlanmak, istisna etiketi ise
+  yalnız eksik kodları tanıyan sözlüğün yerine geçmek.

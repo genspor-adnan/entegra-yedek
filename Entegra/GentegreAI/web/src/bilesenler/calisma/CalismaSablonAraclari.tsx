@@ -4,7 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
 import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
-import { SaatSec } from './calismaOrtak';
+import { GUN_AD, SaatSec } from './calismaOrtak';
 
 /**
  * CALISMA SABLONLARI LISTESI ARACLARI (mockup Ekranlar/Randevu/
@@ -16,7 +16,6 @@ import { SaatSec } from './calismaOrtak';
  *     randevu kurallari (mesai disi, izinli doktor: engelle / yalniz uyar).
  * Kural ve yazma sunucuda; burasi yalniz secimi toplar.
  */
-const GUNLER = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const SLOTLAR = [10, 15, 20, 30, 45, 60];
 
 export function CalismaSablonAraclari({ onDegisti }: { onDegisti(): void }) {
@@ -198,7 +197,7 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
           <h6>{c('Yeni şablonun varsayılanı')}</h6>
           <div className="cs-alan"><span>{c('Günler')}</span>
             <div className="cs-gunler">
-              {GUNLER.map((g, i) => (
+              {GUN_AD.map((g, i) => (
                 <button key={g} type="button" className={`cs-gun${v.gunler.includes(i + 1) ? ' on' : ''}`}
                         onClick={() => setV({ ...v, gunler: v.gunler.includes(i + 1)
                           ? v.gunler.filter(x => x !== i + 1) : [...v.gunler, i + 1] })}>{c(g)}</button>

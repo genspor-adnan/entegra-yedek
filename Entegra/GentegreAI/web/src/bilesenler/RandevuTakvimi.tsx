@@ -2,6 +2,8 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { api } from '../api/istemci';
 import { type CalismaBlok, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { c as cev } from '../dil/ceviri';
+import { GUN_AD } from './calisma/calismaOrtak';
+import { istisnaKisaAdi } from './calisma/calismaKodlari';
 
 /**
  * RANDEVU TAKVİMİ (243) - günlük ve haftalık görünüm (kullanıcı isteği).
@@ -25,7 +27,6 @@ const VARSAYILAN: Ayarlar = {
   calismaGunleri: [1, 2, 3, 4, 5, 6],
 };
 
-const GUN_ADI = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
 /** Takvimin bir sutunu: gunluk/haftalik gorunumde bir GUN, hekim gorunumunde
     bir HEKIM (o gunun icinde). */
@@ -267,7 +268,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       const t = new Date(g);
       return {
         anahtar: g,
-        baslik: `${GUN_ADI[(t.getDay() + 6) % 7]} ${g.slice(8, 10)}.${g.slice(5, 7)}`,
+        baslik: `${GUN_AD[(t.getDay() + 6) % 7]} ${g.slice(8, 10)}.${g.slice(5, 7)}`,
         gun: g,
         hekim: undefined,
       };
@@ -347,7 +348,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     if (kismi) {
       const [kb, ke] = (kismi.aciklama ?? '').slice(0, 11).split('–').map(dk);
       if (slot < ke && slot + adim > kb)
-        return metin(`${cev(({ 1: 'İzin', 2: 'Kongre', 5: 'Kapalı' } as Record<number, string>)[kismi.istisnaTur ?? 1] ?? 'Kapalı')} ${(kismi.aciklama ?? '').slice(0, 11)}`);
+        return metin(`${cev(istisnaKisaAdi(kismi.istisnaTur ?? 1))} ${(kismi.aciklama ?? '').slice(0, 11)}`);
     }
     if (kapaliGun && !gunun.some(b => b.saatBas))
       return metin(kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? cev('İzinli') : cev('Kapalı')));

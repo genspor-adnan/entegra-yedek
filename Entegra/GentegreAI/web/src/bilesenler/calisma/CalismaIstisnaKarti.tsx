@@ -9,6 +9,7 @@ import { guvenli, mesaj, onay } from '../mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
 import { GUN_AD, Grp, SaatSec, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi, tarihSaat } from './calismaOrtak';
+import { ISTISNA_TURLERI, istisnaAdi, istisnaKapatir, istisnaSaatli } from './calismaKodlari';
 
 /**
  * İZİN & İSTİSNA KARTI — mockup `Ekranlar/Randevu/izin_istisna_karti.html`.
@@ -23,18 +24,12 @@ import { GUN_AD, Grp, SaatSec, SLOTLAR, bugunIso, dk, gun10, isoGun, metin, sayi
  * İK'dan onaylanan izin burada girilmez, salt okunur listelenir.
  */
 
-const TURLER: { kod: number; ad: string; ic: string; ne: string }[] = [
-  // İZİN TÜRÜ YOK (950): izin İK › İzinler'den girilir. Eski İzin kayıtları
-  //   açılabilsin diye listede durur, yalnız o kayıtta görünür.
-  { kod: 1, ad: 'İzin (eski)', ic: '✈️', ne: "artık İK'dan girilir" },
-  { kod: 2, ad: 'Kongre / eğitim', ic: '🎓', ne: 'gün boyu ya da saatli' },
-  { kod: 3, ad: 'Saat değişikliği', ic: '🕘', ne: 'o günler başka saat' },
-  { kod: 4, ad: 'Ek mesai', ic: '➕', ne: 'ek çalışma bloğu' },
-  { kod: 5, ad: 'Kapalı', ic: '⛔', ne: 'bölüm / gün kapalı' },
-];
-const turAd = (k: number | null | undefined) => TURLER.find(t => t.kod === k)?.ad ?? '';
-const KAPATAN = (t: number) => t === 1 || t === 2 || t === 5;
-const SAATLI = (t: number) => t === 3 || t === 4;
+// İZİN TÜRÜ SEÇİLEMEZ (950): izin İK › İzinler'den girilir; eski İzin kaydı
+//   açılabilsin diye listede durur (`eski` bayrağı).
+const TURLER = ISTISNA_TURLERI;
+const turAd = istisnaAdi;
+const KAPATAN = istisnaKapatir;
+const SAATLI = istisnaSaatli;
 /**
  * SAATLİ KAPANIŞ (948, kullanıcı: "yarım gün izin girmek istedim"): izin /
  * kongre / kapalıda saat İSTEĞE BAĞLI - boşsa gün boyu, girilirse yalnız o
@@ -305,7 +300,7 @@ export function CalismaIstisnaKarti({ id, hekimId: ilkHekim, hekimSabit, ilkTur,
           <Grp baslik={c('Ne oluyor?')}>
             <div className="ck-iz">
               <div className="ck-turler ck-tam" style={{ gridTemplateColumns: `repeat(${d.tur === 1 ? 5 : 4}, 1fr)` }}>
-                {TURLER.filter(t => t.kod !== 1 || d.tur === 1).map(t => (
+                {TURLER.filter(t => !t.eski || d.tur === t.kod).map(t => (
                   <button key={t.kod} type="button" disabled={kilitli} className={`ck-tur${d.tur === t.kod ? ' on' : ''}`} onClick={() => yaz('tur', t.kod)}>
                     <b>{t.ic} {c(t.ad)}</b><span>{c(t.ne)}</span></button>
                 ))}

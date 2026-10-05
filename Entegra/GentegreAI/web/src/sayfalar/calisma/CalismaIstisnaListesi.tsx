@@ -8,6 +8,7 @@ import { CalismaIstisnaKarti } from '../../bilesenler/calisma/CalismaIstisnaKart
 import { GUN_AD, isoGun, tarihSaat } from '../../bilesenler/calisma/calismaOrtak';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { c } from '../../dil/ceviri';
+import { IK_IZNI, ISTISNA_TURLERI } from '../../bilesenler/calisma/calismaKodlari';
 
 /**
  * İZİN & İSTİSNALAR LİSTESİ — mockup `Ekranlar/Randevu/izin_istisnalar_listesi.html`.
@@ -21,9 +22,11 @@ import { c } from '../../dil/ceviri';
  */
 type Durum = '0' | '1' | '2' | 'tumu';
 type Donem = 'hafta' | '30' | 'gecmis' | 'tumu';
+// İkon / ad / CSS sınıfı ORTAK sözlükten (calismaKodlari); İK izni istisna
+//   türü değil, listede ayrı satır olarak görünüyor.
 const TURLER: Record<number, [string, string, string]> = {
-  1: ['✈️', 'İzin', 't-izin'], 2: ['🎓', 'Kongre / eğitim', 't-kongre'], 3: ['🕘', 'Saat değişikliği', 't-saat'],
-  4: ['➕', 'Ek mesai', 't-ek'], 5: ['⛔', 'Kapalı', 't-kapali'], 0: ['🌴', 'İK izni', 't-ik'],
+  ...Object.fromEntries(ISTISNA_TURLERI.map(t => [t.kod, [t.ic, t.ad, t.sinif]])),
+  [IK_IZNI.kod]: [IK_IZNI.ic, IK_IZNI.ad, IK_IZNI.sinif],
 };
 const DURUM: Record<number, [string, string]> = { 0: ['Onay bekliyor', 'uyari'], 1: ['Onaylı', 'ok'], 2: ['İptal', 'gri'] };
 const gunEkle = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x };
