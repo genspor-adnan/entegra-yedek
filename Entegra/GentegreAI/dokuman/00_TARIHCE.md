@@ -19188,3 +19188,37 @@ maddeler eksik"*. Mockup `Ekranlar/Taleplerim/taleplerim.html` ② dokuz maddeli
   Şube değiştir Merkez · Çıkış`. Profilim → Hesabım sekmesi, Parola değiştir →
   Güvenlik sekmesi, Şube değiştir → üst şerit şube listesi (Merkez · Ankara
   Şube (salt okuma)) açıldı, avatar menüsü kapandı. tsc temiz, vitest 789 geçti.
+
+## 05.10.2026 — Göz görüntüleme listesi: mockup'ta kalan üç madde
+
+Kullanıcı: *"göz için görüntü listesini mockup gibi yaptın mı"*. Karşılaştırma
+(`Ekranlar/Goz/goz_goruntuleme_listesi_v2.html`): göstergeler, dönem / durum
+çipleri, tetkik · cihaz · değerlendiren ağacı, kolon dizilimi ve önizleme
+(görüntü OD/OS · ölçümler · eğilim · YZ ön okuma) zaten yerindeydi. Eksik üç
+madde tamamlandı:
+
+* **Sol panelde işaret şeridi:** Dilate · Glokom takibi · Retina / anti-VEGF.
+  Üçü birbirinden bağımsız açılıp kapanıyor (gösterge çipleri gibi tek seçim
+  değil) - "dilate + glokom takibi" gerçek bir soru. Takip bayrakları hastanın
+  **açık takip kaydından** okunuyor (`goz_hastalik_takip`, hastalık 1 glokom ·
+  2 DR · 3 AMD), tetkik türünden çıkarılmıyor: OCT maküla hem retina hem üveit
+  izleminde çekiliyor, tetkike bakan bir kural yanlış hastayı listelerdi.
+* **Kalite kolonunun alt metni** ("güven düşük", sinyal < 6): mockup'ta görme
+  alanı satırında kalite yerine bu yazıyor. Düşük güvenilirlikli çekimin
+  ölçümü eğilime girerse "kötüleşme" sanılır.
+* **Önizlemede "Hızlı işlem" bloğu:** Aç · Değerlendir (yalnız çekilmiş
+  kayıtta) · Muayene (yalnız muayenesi olan kayıtta). Düğmeler araç
+  çubuğunun AYNI yolunu (`gozAkisAksiyonu`) çağırıyor - ikinci bir kod yolu,
+  ödeme / durum kontrollerinin birinde eksik kalması demekti.
+
+**Mockup'ta olup yapılmayan:** `🖥 PACS'ta aç`. DICOM / PACS bağlantısı
+kurulmadı; her zaman hata veren bir düğme koymak yalan söylemek olurdu.
+Görüntü kutusu görüntünün nereden geleceğini yazıyor (Study UID / "cihazdan ·
+PACS'tan (DICOM)"), bağlantı kurulunca düğme buraya eklenecek.
+
+Doğrulama: üç süzgeç uçta tek tek denendi (dilate için bir satır işaretlenip
+geri alındı, glokom 1 · retina 2 kayıt döndü), kalite alt metni geçici
+`kalite = 4` ile "güven düşük" yazdı ve değer 9'a geri alındı; tarayıcıda çip
+şeridi süzdü, Değerlendir düğmesi çekilmiş kayıtta çıkıp karta götürdü
+(`/goz-goruntuleme/990108`), istenmiş kayıtta görünmedi. dotnet test 218,
+vitest 789 geçti.

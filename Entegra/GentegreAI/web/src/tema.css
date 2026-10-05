@@ -7541,6 +7541,11 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .gg-olcum th:first-child { text-align: left }
 .gg-y5 { background: #fff3cd; font-weight: 600 }
 .gg-y1 { background: #fde2df; color: #b3261e; font-weight: 700 }
+/* İŞARET ŞERİDİ (mockup goz_goruntuleme_listesi_v2 ②): sol panelin üstünde
+   dilate / glokom takibi / retina çipleri - ağaç dallarından ayrı dursun. */
+.gg-isaret { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 10px 8px; border-bottom: 1px solid var(--cizgi2); margin-bottom: 6px }
+.gg-cip { flex-direction: row; align-items: center; padding: 3px 8px; border-radius: 11px; font-size: 10.5px; white-space: nowrap }
+
 .gg-yz { border: 1px dashed #b9a6e0; background: #f7f3fd; border-radius: 6px; padding: 6px 8px; font-size: 11.5px; margin-top: 8px }
 .gg-trend { display: flex; align-items: flex-end; gap: 6px; height: 48px; border-bottom: 1px solid var(--cizgi2); margin: 4px 0 }
 .gg-trend > div { flex: 1; display: flex; align-items: flex-end; gap: 2px; justify-content: center }

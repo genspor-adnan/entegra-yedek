@@ -1281,7 +1281,15 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : gozMuayeneEkrani ? <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile} />
         : gozlukEkrani ? <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile} />
-        : gorEkrani ? <GoruntulemeOnizlemePaneli satir={seciliSatir} yenile={yenile} onAc={id => git(`/goz-goruntuleme/${id}`)} />
+        : gorEkrani ? (
+          // HIZLI İŞLEM düğmeleri araç çubuğunun AYNI yolunu kullanır
+          //   (gozAkisAksiyonu): ikinci bir kod yolu, ödeme / durum
+          //   kontrollerinin birinde eksik kalması demekti.
+          <GoruntulemeOnizlemePaneli satir={seciliSatir} yenile={yenile}
+                                     onAc={id => git(`/goz-goruntuleme/${id}`)}
+                                     onDegerlendir={() => void aksiyon('goz.gor-degerlendir', seciliSatir)}
+                                     onMuayene={() => void aksiyon('goz.gor-muayene', seciliSatir)} />
+        )
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)

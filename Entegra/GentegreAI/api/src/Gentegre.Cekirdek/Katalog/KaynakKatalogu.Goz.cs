@@ -382,6 +382,21 @@ public static partial class KaynakKatalogu
             new("kaliteDusuk", "case when g.kalite is not null and g.kalite < 6 then 1 else 0 end", "mantik", "Kalite Düşük", Varsayilan: false),
             new("esikDisi", "case when coalesce(v.bayrak, 0) >= 1 then 1 else 0 end", "mantik", "Eşik Dışı", Varsayilan: false),
             new("yzDikkat", "coalesce(v.yz_dikkat, 0)", "mantik", "YZ Dikkat", Varsayilan: false),
+            // MOCKUP ② ŞERİDİ: dilate · glokom takibi · retina / anti-VEGF.
+            //   Takip bayrakları HASTANIN AÇIK TAKİP KAYDINDAN okunur, tetkik
+            //   türünden çıkarılmaz: OCT maküla hem retina hem üveit izleminde
+            //   çekiliyor, tetkike bakan bir kural yanlış hastayı listeler.
+            //   (hastalık 1 glokom · 2 diyabetik retinopati · 3 AMD -
+            //   anti-VEGF alan iki grup bunlar.)
+            new("dilate", "coalesce(g.dilate, 0)", "mantik", "Dilate", Varsayilan: false),
+            new("glokomTakip",
+                "case when exists (select 1 from public.goz_hastalik_takip k "
+                + "where k.hasta_id = g.hasta_id and k.hastalik = 1 and k.durum = 1) then 1 else 0 end",
+                "mantik", "Glokom Takibi", Varsayilan: false),
+            new("retinaTakip",
+                "case when exists (select 1 from public.goz_hastalik_takip k "
+                + "where k.hasta_id = g.hasta_id and k.hastalik in (2, 3) and k.durum = 1) then 1 else 0 end",
+                "mantik", "Retina / anti-VEGF", Varsayilan: false),
             new("cihazId", "g.cihaz_id", "sayi", "Cihaz Id", Varsayilan: false),
             new("muayeneId", "g.muayene_id", "sayi", "Muayene Id", Varsayilan: false),
             new("degerlendirenId", "g.degerlendiren_id", "sayi", "Değerlendiren Id", Varsayilan: false),
@@ -389,7 +404,12 @@ public static partial class KaynakKatalogu
             new("degerlendiren", "coalesce(public.fn_taraf_ad(d.unvan, d.ad, d.soyad)::varchar(120), '')", "metin", "Değerlendiren", Genislik: 170),
             // KALİTE listede: düşük sinyalli OCT'nin ölçümü trende girerse
             //   "incelme" sanılan şey aslında kötü çekimdir.
-            new("kalite",    "g.kalite",      "sayi", "Kalite", Hizalama: "orta", Genislik: 80),
+            // KALİTE altında "güven düşük" (mockup): görme alanında yanlış pozitif oranı
+            //   yüksek çekimin ölçümü trende girerse "kötüleşme" sanılır.
+            new("kalite",    "g.kalite",      "sayi", "Kalite", Hizalama: "orta", Genislik: 80,
+                                              Bicim: "alt:kaliteAlt"),
+            new("kaliteAlt", "case when g.kalite is not null and g.kalite < 6 then 'güven düşük' else '' end",
+                                              "metin", "Kalite Notu", Varsayilan: false, Filtrelenebilir: false),
             // AI ÖN OKUMA bir TASLAKTIR: kolon "var/yok" der, sonuç demez.
             new("aiOnOkuma", "case when g.ai_on_okuma is null then 0 else 1 end",
                                               "mantik", "AI ön okuma", Hizalama: "orta",
