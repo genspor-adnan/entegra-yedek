@@ -6,6 +6,8 @@ import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
 import { c } from '../dil/ceviri';
+import { GEN_KALITIM, GEN_YONTEM, MIKRO_ID_YONTEM, genSinifMetni } from '../bilesenler/labKodlari';
+import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 
 /**
  * LABORATUVAR SONUÇ RAPORU (mockuplar: Ekranlar/Lab/lab_sonuc_formu_*.html).
@@ -26,32 +28,12 @@ import { c } from '../dil/ceviri';
 
 type Satir = Record<string, unknown>;
 
-const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
 /** Bayrak → rapor gösterimi. Boş bayrak "değerlendirilmedi" demektir. */
 const BAYRAK: Record<string, string> = {
   LL: '↓↓ Panik düşük', HH: '↑↑ Panik yüksek', L: '↓ Düşük', H: '↑ Yüksek', N: 'Normal',
 };
 
-const KALITIM: Record<number, string> = {
-  1: 'OD', 2: 'OR', 3: 'X’e bağlı', 4: 'Mitokondriyal',
-};
-
-const SINIF: Record<number, string> = {
-  1: 'Benign (1)', 2: 'Olası benign (2)', 3: 'VUS (3)',
-  4: 'Olası patojenik (4)', 5: 'Patojenik (5)',
-};
-
-const ID_YONTEM: Record<number, string> = {
-  1: 'MALDI-TOF MS', 2: 'Otomatize sistem (VITEK)', 3: 'Manuel testler',
-  4: 'Moleküler',
-};
-
-const GEN_YONTEM: Record<number, string> = {
-  1: 'NGS panel (hedef zenginleştirme)', 2: 'Tüm ekzom dizileme (WES)',
-  3: 'Tüm genom dizileme (WGS)', 4: 'PCR / RT-PCR', 5: 'Sanger dizileme',
-  6: 'Karyotip', 7: 'MLPA', 8: 'Mikroarray',
-};
 
 /** "0 bakılmadı · 1 negatif · 2 pozitif" - üçü ayrı bilgi. */
 const direncMetni = (izolat: Satir): string => {
@@ -170,7 +152,7 @@ export function LabRaporCikti() {
           <div>
             <span className="et">{c('Doğum T. / Yaş')}</span>
             <span className="dg">
-              {[gunNokta(i.dogumTarihi), yasMetni(i.dogumTarihi), CINSIYET[Number(i.cinsiyet ?? 0)]]
+              {[gunNokta(i.dogumTarihi), yasMetni(i.dogumTarihi), cinsiyetAdi(i.cinsiyet)]
                 .filter(Boolean).join(' · ') || '—'}
             </span>
           </div>
@@ -359,7 +341,7 @@ export function LabRaporCikti() {
                       )}
                     </div>
                     <div className="not">
-                      İdentifikasyon: {ID_YONTEM[Number(u.idYontem ?? 1)] ?? '—'}
+                      İdentifikasyon: {MIKRO_ID_YONTEM[Number(u.idYontem ?? 1)] ?? '—'}
                       {u.idGuven ? ` · güven %${sayiMetni(u.idGuven, 1)}` : ''}
                       {direnc ? ` · ${direnc}` : ''}
                       {String(u.direncNotu ?? '').trim() !== '' ? ` · ${u.direncNotu}` : ''}
@@ -482,14 +464,14 @@ export function LabRaporCikti() {
                           </td>
                           <td>{String(x.hgvsP ?? '') || '—'}</td>
                           <td>{ZIGOSITE[Number(x.zigosite ?? 1)]}</td>
-                          <td>{KALITIM[Number(x.kalitim ?? 0)] ?? '—'}</td>
+                          <td>{GEN_KALITIM[Number(x.kalitim ?? 0)] ?? '—'}</td>
                           <td className="sag">
                             {x.gnomadAf !== null && x.gnomadAf !== undefined
                               ? Number(x.gnomadAf).toExponential(1) : '—'}
                           </td>
                           <td>{String(x.clinvar ?? '') || '—'}</td>
                           <td>{(x.acmgKriterler as string[] | null)?.join(' · ') || '—'}</td>
-                          <td><b>{SINIF[Number(x.sinif ?? 3)]}</b></td>
+                          <td><b>{genSinifMetni(x.sinif, true)}</b></td>
                         </tr>
                       ))}
                     </tbody>

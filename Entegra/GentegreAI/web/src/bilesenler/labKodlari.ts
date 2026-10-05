@@ -125,3 +125,80 @@ export function sayi(v: unknown, basamak = 2): string {
     ? s.toLocaleString('tr-TR', { maximumFractionDigits: basamak })
     : String(v);
 }
+
+/* =========================================================================
+   GENETİK (lab_genetik_*) ve MİKROBİYOLOJİ (lab_kultur_*) SÖZLÜKLERİ.
+
+   Üçü de hem ekranda hem RAPOR ÇIKTISINDA okunuyordu ve kopyalar ayrışmıştı:
+   kalıtım sözlüğü ekranda beş değer (somatik dahil), çıktıda dördü tanıyordu -
+   somatik varyantın kalıtımı raporda BOŞ basılıyordu. Tanımlayıcı yöntem de
+   ekranda kısa ("MALDI-TOF"), çıktıda uzun ("MALDI-TOF MS") yazılmıştı ve
+   çıktıda 9 "Diğer" hiç yoktu.
+
+   Çözüm: kod → {kisa, ad}. Ekran dar olduğu yerde `kisa`, rapor `ad` kullanır;
+   kod listesine değer eklenince iki görünüm birlikte güncellenir.
+   ========================================================================= */
+
+export interface KodAdi { kisa: string; ad: string }
+
+const kisaAd = (k: Record<number, KodAdi>) => {
+  const sonuc: Record<number, string> = {};
+  for (const [kod, v] of Object.entries(k)) sonuc[Number(kod)] = v.kisa;
+  return sonuc;
+};
+const uzunAd = (k: Record<number, KodAdi>) => {
+  const sonuc: Record<number, string> = {};
+  for (const [kod, v] of Object.entries(k)) sonuc[Number(kod)] = v.ad;
+  return sonuc;
+};
+
+/** `lab_genetik_vaka.kalitim`. */
+export const GEN_KALITIM: Record<number, string> = {
+  1: 'OD', 2: 'OR', 3: 'X’e bağlı', 4: 'Mitokondriyal', 5: 'Somatik',
+};
+
+/** `lab_genetik_varyant.sinif` (ACMG 1-5). */
+export const GEN_SINIF: Record<number, string> = {
+  1: 'Benign', 2: 'Olası benign', 3: 'VUS', 4: 'Olası patojenik', 5: 'Patojenik',
+};
+
+/** Raporda sınıf NUMARASIYLA yazılır: "VUS (3)" - ACMG sınıfı sayı olarak okunur. */
+export const genSinifMetni = (kod: unknown, numarali = false): string => {
+  const n = Number(kod ?? 0);
+  const ad = GEN_SINIF[n];
+  if (!ad) return '';
+  return numarali ? `${ad} (${n})` : ad;
+};
+
+/** Varyant sınıfının rozet sınıfı: patojenik kırmızı, VUS sarı, benign yeşil. */
+export function genSinifSinifi(kod: unknown): string {
+  const n = Number(kod ?? 0);
+  if (n === 5 || n === 4) return 'rozet hata';
+  if (n === 3) return 'rozet uyari';
+  return 'rozet olumlu';
+}
+
+/** `lab_genetik_vaka.yontem`. */
+export const GEN_YONTEM: Record<number, string> = {
+  1: 'NGS panel (hedef zenginleştirme)', 2: 'Tüm ekzom dizileme (WES)',
+  3: 'Tüm genom dizileme (WGS)', 4: 'PCR / RT-PCR', 5: 'Sanger dizileme',
+  6: 'Karyotip', 7: 'MLPA', 8: 'Mikroarray',
+};
+
+/** `lab_kultur_izolat.id_yontem` — ekranda kısa, raporda uzun ad. */
+const MIKRO_ID: Record<number, KodAdi> = {
+  1: { kisa: 'MALDI-TOF', ad: 'MALDI-TOF MS' },
+  2: { kisa: 'VITEK', ad: 'Otomatize sistem (VITEK)' },
+  3: { kisa: 'Manuel', ad: 'Manuel testler' },
+  4: { kisa: 'Moleküler', ad: 'Moleküler' },
+  9: { kisa: 'Diğer', ad: 'Diğer' },
+};
+export const MIKRO_ID_YONTEM_KISA = kisaAd(MIKRO_ID);
+export const MIKRO_ID_YONTEM = uzunAd(MIKRO_ID);
+
+/** Enfeksiyon kontrolüne bildirilen direnç işaretleri (436). */
+export const MIKRO_DIRENC: { alan: string; ad: string }[] = [
+  { alan: 'mrsa', ad: 'MRSA' }, { alan: 'vre', ad: 'VRE' },
+  { alan: 'esbl', ad: 'ESBL' }, { alan: 'karbapenemaz', ad: 'Karbapenemaz' },
+  { alan: 'ampc', ad: 'AmpC' },
+];

@@ -1,22 +1,13 @@
 import { tarihSaat } from '../../bicim';
 import {
-  sayi, sirSinifi, } from '../../labKodlari';
+  MIKRO_DIRENC, MIKRO_ID_YONTEM_KISA, sayi, sirSinifi,
+} from '../../labKodlari';
 import { dizi, metin, kodEki } from './ortak';
 import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
 
-const ID_YONTEM: Record<number, string> = {
-  1: 'MALDI-TOF', 2: 'VITEK', 3: 'Manuel', 4: 'Moleküler', 9: 'Diğer',
-};
-
-/** Enfeksiyon kontrolüne bildirilen direnç işaretleri (436). */
-const DIRENC: { alan: string; ad: string }[] = [
-  { alan: 'mrsa', ad: 'MRSA' }, { alan: 'vre', ad: 'VRE' },
-  { alan: 'esbl', ad: 'ESBL' }, { alan: 'karbapenemaz', ad: 'Karbapenemaz' },
-  { alan: 'ampc', ad: 'AmpC' },
-];
 
 export function KulturDetayi({ veri }: { veri: Kayit }) {
   const k = (veri.kultur ?? {}) as Kayit;
@@ -147,7 +138,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                     {/* DİRENÇ İŞARETLERİ enfeksiyon kontrolünün konusudur:
                         MRSA/VRE/ESBL/karbapenemaz gizlenirse bildirim
                         yapılmaz. */}
-                    {DIRENC.filter(d => Number(i[d.alan] ?? 0) === 1).map(d => (
+                    {MIKRO_DIRENC.filter(d => Number(i[d.alan] ?? 0) === 1).map(d => (
                       <span className="rozet hata" key={d.alan}
                             style={{ marginLeft: 4 }}>{d.ad}</span>
                     ))}
@@ -158,7 +149,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                     {i.anlamli === false && <span className="not"> · anlamsız</span>}
                   </td>
                   <td className="orta not">
-                    {ID_YONTEM[Number(i.idYontem ?? 0)] ?? '—'}
+                    {MIKRO_ID_YONTEM_KISA[Number(i.idYontem ?? 0)] ?? '—'}
                     {i.idGuven ? ` ${sayi(i.idGuven, 1)}` : ''}
                   </td>
                 </tr>

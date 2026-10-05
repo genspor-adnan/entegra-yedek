@@ -1,29 +1,18 @@
 import { tarihSaat } from '../../bicim';
 import {
-  ZIGOSITE, sayi, } from '../../labKodlari';
+  GEN_KALITIM, GEN_SINIF, ZIGOSITE, genSinifSinifi, sayi,
+} from '../../labKodlari';
 import { dizi, metin } from './ortak';
 import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
 
-const KALITIM: Record<number, string> = {
-  1: 'OD', 2: 'OR', 3: 'X’e bağlı', 4: 'Mitokondriyal', 5: 'Somatik',
-};
 
 export function GenetikDetayi({ veri }: { veri: Kayit }) {
   const v = (veri.vaka ?? {}) as Kayit;
   const varyantlar = dizi(veri.varyantlar);
 
-  const sinif = (k: unknown) => {
-    const n = Number(k ?? 0);
-    if (n === 5 || n === 4) return 'rozet hata';        // patojenik / olası
-    if (n === 3) return 'rozet uyari';                  // VUS
-    return 'rozet olumlu';                              // benign / olası benign
-  };
-  const SINIF: Record<number, string> = {
-    1: 'Benign', 2: 'Olası benign', 3: 'VUS', 4: 'Olası patojenik', 5: 'Patojenik',
-  };
 
   return (
     <>
@@ -57,7 +46,7 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
                   </td>
                   <td>{metin(x.hgvsP) || '—'}</td>
                   <td className="orta">{ZIGOSITE[Number(x.zigosite ?? 0)] ?? '—'}</td>
-                  <td className="orta">{KALITIM[Number(x.kalitim ?? 0)] ?? '—'}</td>
+                  <td className="orta">{GEN_KALITIM[Number(x.kalitim ?? 0)] ?? '—'}</td>
                   {/* VAF ORAN olarak saklanır (0,49 = %49): başına yüzde
                       işareti koymak değeri yüz kat küçük gösteriyordu. */}
                   <td className="sag">
@@ -73,8 +62,8 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
                       ? (x.acmg as string[]).join(' · ') : '—'}
                   </td>
                   <td className="orta">
-                    <span className={sinif(x.sinif)}>
-                      {SINIF[Number(x.sinif ?? 0)] ?? '—'}
+                    <span className={genSinifSinifi(x.sinif)}>
+                      {GEN_SINIF[Number(x.sinif ?? 0)] ?? '—'}
                     </span>
                     {x.sinifElle ? <span className="not" title={c('Uzman değiştirdi')}> ✎</span>
                                  : null}

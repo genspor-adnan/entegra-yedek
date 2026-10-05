@@ -18813,3 +18813,39 @@ Kullanıcı: *"genel muayene kısmını da refaktor yap"*.
   `/api/muayene/ozet` ve `/tani-secenekleri` 200, muayene listesi durum metinleri yerinde,
   tarayıcıda muayene kartı (durum rozeti "Açık") ve rapor penceresi tür listeleri
   ("İstirahat · Sağlık durumu · İlaç kullanım (SUT) · İş göremezlik") kontrol edildi.
+
+## 05.10.2026 — Laboratuvar refaktörü (davranış değişmedi, üç sessiz ayrışma düzeldi)
+
+Kullanıcı: *"lab kısmını da refaktor yap"*.
+
+* **`LabUclari.cs` bölündü** (1246 satır / 23 uç tek metottaydı; modülün zaten
+  `.Mikrobiyoloji`, `.Genetik`, `.Rapor`… parçaları vardı): `.Katalog` (301 - hizmet
+  eşlemesi, tetkik ağacı / özeti, çalışma takvimi) · `.Numune` (160 - barkod, kabul/ret,
+  istem numune durumu, saklama, ret nedenleri) · `.Sonuc` (102 - sonuç, iki aşamalı onay,
+  düzeltme, panik). İstem uçları kayıt tipleriyle ana dosyada (761) kaldı. 23 uç
+  gövdesi taşıma öncesi metinle karşılaştırıldı: fark yok.
+* **`LabServisi.cs` bölündü** (1348 satır): `.Numune` (242) · `.Sonuc` (465) ·
+  `.Cihaz` (202); sınıf başlığı, istem açma ve bütün bölümlerin kullandığı yardımcılar
+  (`IstemDurumTazeleAsync`, `AralikMetni`, `IsaretKodu`, `RetMesajiYazAsync`) ana
+  dosyada (508). 19 üyenin imzası ve gövdesi karşılaştırıldı.
+* **Üç sözlük hem ekranda hem RAPOR ÇIKTISINDA ayrı yazılmıştı ve ayrışmıştı** -
+  `labKodlari.ts`'ye taşındı:
+  * **Kalıtım**: ekran beş değer (somatik dahil), çıktı dördü → somatik varyantın
+    kalıtımı raporda **boş** basılıyordu.
+  * **ACMG sınıfı**: ekran "VUS", çıktı "VUS (3)" → tek sözlük + `genSinifMetni(kod,
+    numarali)`; rozet rengi de aynı yerden (`genSinifSinifi`).
+  * **Tanımlayıcı yöntem**: ekran kısa ("MALDI-TOF"), çıktı uzun ("MALDI-TOF MS") ve
+    çıktıda 9 "Diğer" hiç yoktu → `{kisa, ad}` çifti, iki görünüm tek kodtan.
+  * Direnç işaretleri (MRSA / VRE / ESBL / Karbapenemaz / AmpC) ve genetik yöntem
+    listesi de ortak dosyaya alındı.
+* **Cinsiyet sözlüğü beş dosyada** ayrıydı (lab etiketi, lab raporu, radyoloji raporu,
+  göz şeması çıktısı, göz muayene şeridi) ve iki biçimdeydi → `bilesenler/kisiKodlari.ts`
+  (`cinsiyetAdi(kod, kisa)`): etikette tek harf, resmî çıktıda tam ad - iki biçim
+  bilinçli, iki sözlük değil.
+* `LabMikroOzet.tsx` `bilesenler/` kökündeydi; kardeşlerinin yanına (`bilesenler/lab/`)
+  taşındı.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `/lab/tetkik/agac`, `/lab/ret-nedenleri`, `/lab/calisma-takvimi` 200, lab istem listesi
+  durum/bölüm metinleri yerinde, tarayıcıda lab rapor çıktısı (cinsiyet "Erkek",
+  "İdentifikasyon: MALDI-TOF MS") kontrol edildi. Dev veritabanında genetik vaka kaydı
+  olmadığı için ACMG sınıf metni ekranda görülemedi - kod yolu aynı sözlükten.

@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import type { GozMuayeneSeridiYaniti } from '../../api/uclar/goz';
 import { tarihSaat } from '../bicim';
 import { c } from '../../dil/ceviri';
+import { cinsiyetAdi } from '../kisiKodlari';
 
 /**
  * GÖZ MUAYENE KARTI ÜST ŞERİDİ — mockup
@@ -24,7 +25,6 @@ import { c } from '../../dil/ceviri';
  * göremediği için eksik sayardı.
  */
 
-const CINSIYET: Record<number, string> = { 1: 'E', 2: 'K' };
 // goz.muayene_turu kod listesiyle aynı (970: 4 / 5 ters yazılmıştı).
 const MUAYENE_TURU: Record<number, string> = {
   1: 'Tam muayene', 2: 'Kontrol', 3: 'Postop', 4: 'Acil', 5: 'Tarama (DR)',
@@ -56,7 +56,7 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
       <div>
         <div className="ad">{k.hasta}</div>
         <div className="sonuk">
-          {[`${k.yas ?? '—'}${k.cinsiyet ? ` ${CINSIYET[k.cinsiyet] ?? ''}` : ''}`,
+          {[`${k.yas ?? '—'}${k.cinsiyet ? ` ${cinsiyetAdi(k.cinsiyet, true)}` : ''}`,
             k.protokol ? `Prot. ${k.protokol}` : '', tarihSaat(k.tarih), k.hekim].filter(Boolean).join(' · ')}
         </div>
       </div>

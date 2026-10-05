@@ -1,4 +1,4 @@
-import type { EkSekmeBaglami } from './GenForm';
+import type { EkSekmeBaglami } from '../GenForm';
 
 /**
  * MIKROBIYOLOJI KATALOG KARTLARININ "Tanım" SEKMESI.

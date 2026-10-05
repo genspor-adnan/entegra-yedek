@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { AntetLogo } from '../bilesenler/AntetLogo';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
+import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 
 /**
  * RADYOLOJI RAPOR CIKTISI (mockup: Ekranlar/radyoloji_rapor_onizleme.html).
@@ -21,7 +22,6 @@ import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 type Satir = Record<string, unknown>;
 
 /** Dogum tarihinden yas - kartlardaki hesapla ayni kural. */
-const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
 /** Modaliteye gore rapor basligi (mockup "Manyetik Rezonans İnceleme Raporu"). */
 const RAPOR_ADI: Record<number, string> = {
@@ -115,7 +115,7 @@ export function RadyolojiRaporCikti() {
           <div>
             <span className="et">Doğum T. / Yaş</span>
             <span className="dg">
-              {[gunNokta(r.dogumTarihi), yasMetni(r.dogumTarihi), CINSIYET[Number(r.cinsiyet ?? 0)]]
+              {[gunNokta(r.dogumTarihi), yasMetni(r.dogumTarihi), cinsiyetAdi(r.cinsiyet)]
                 .filter(Boolean).join(' · ') || '—'}
             </span>
           </div>

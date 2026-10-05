@@ -6,6 +6,7 @@ import { hataMetni } from '../api/sozlesme';
 import { code128Desen } from '../bilesenler/barkod128';
 import { NUMUNE, TUP } from '../bilesenler/labKodlari';
 import { c as cev } from '../dil/ceviri';
+import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 
 /**
  * TÜP BARKOD ETİKETİ (444, mockup: Ekranlar/Lab/lab_istem_numune_kabul.html).
@@ -27,7 +28,6 @@ import { c as cev } from '../dil/ceviri';
 
 type Satir = Record<string, unknown>;
 
-const CINSIYET: Record<number, string> = { 1: 'E', 2: 'K' };
 
 /** "AYŞE YILMAZ" → "Yılmaz A." — etikete sığan ama ayırt eden biçim. */
 const kisaAd = (tam: string): string => {
@@ -148,7 +148,7 @@ export function LabEtiket() {
                 <div className="et-hasta">
                   {kisaAd(String(e.hasta ?? ''))}
                   {' · '}
-                  {[yasMetni(e.dogumTarihi), CINSIYET[Number(e.cinsiyet ?? 0)] ?? '']
+                  {[yasMetni(e.dogumTarihi), cinsiyetAdi(e.cinsiyet, true)]
                     .filter(Boolean).join('')}
                   {gunNokta(e.dogumTarihi) ? ` · ${gunNokta(e.dogumTarihi)}` : ''}
                 </div>

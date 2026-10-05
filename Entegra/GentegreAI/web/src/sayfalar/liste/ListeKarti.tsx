@@ -1,6 +1,6 @@
 import { GenForm } from '../../bilesenler/GenForm';
 import { Modal } from '../../bilesenler/Modal';
-import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/LabMikroOzet';
+import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaglamSeridi, MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';

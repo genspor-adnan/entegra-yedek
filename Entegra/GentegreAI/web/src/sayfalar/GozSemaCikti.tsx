@@ -7,6 +7,7 @@ import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { SemaZemini } from '../bilesenler/goz/gozSemaZemini';
 import type { GozCizimCiktisi } from '../api/uclar/goz';
 import { c } from '../dil/ceviri';
+import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 
 /**
  * GÖZ ŞEMASI ÇIKTISI (705) — mockup `Ekranlar/Goz/goz_semasi.html`
@@ -20,7 +21,6 @@ import { c } from '../dil/ceviri';
  * ayrı bir PDF üreticisi YOK — aynı çıktının iki üretim yolu, birinin
  * ötekinden sessizce sapması demektir (radyoloji/lab çıktılarıyla aynı karar).
  */
-const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
 export function GozSemaCikti() {
   const { id } = useParams();
@@ -83,7 +83,7 @@ export function GozSemaCikti() {
               <td>
                 {m.dogumTarihi ? gunNokta(String(m.dogumTarihi)) : '—'}
                 {m.dogumTarihi ? ` · ${yasMetni(String(m.dogumTarihi))}` : ''}
-                {m.cinsiyet ? ` · ${CINSIYET[Number(m.cinsiyet)] ?? ''}` : ''}
+                {m.cinsiyet ? ` · ${cinsiyetAdi(m.cinsiyet)}` : ''}
               </td>
             </tr>
             <tr>
