@@ -11,6 +11,7 @@ import { TarafSecici } from '../../bilesenler/TarafArama';
 import { para, tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { DIS_HAKEDIS_KURAL } from '../../bilesenler/dis/disKodlari';
 
 /**
  * SEANS KARTI — mockup `Ekranlar/Dis Klinigi/dis_seans_kaydi.html` (Uygulama
@@ -24,7 +25,6 @@ import { useEscIleKapat } from '../../bilesenler/Modal';
  *
  * Modal: arkada Seanslar listesi; Esc / Kapat geldiği yere döner.
  */
-const KURAL: Record<number, string> = { 1: 'Tamamlanınca', 2: 'Seans başına oran', 3: 'Adet' };
 const SATIR: Record<number, [string, string]> = { 0: ['Plan dışı', 'uyari'], 1: ['Planlı', 'gri'], 2: ['Sürüyor', 'mavi'], 3: ['Yapıldı', 'ok'], 4: ['İptal', 'hata'], 5: ['Ertelendi', 'uyari'] };
 type Sekme = 'islem' | 'anestezi' | 'sarf' | 'ucret';
 
@@ -208,7 +208,7 @@ export function DisSeansKarti() {
                         {i.labGerekir && <span className="rozet gri" style={{ marginLeft: 4 }}>lab</span>}</td>
                       <td className="orta">{i.planSatirId ? `${i.seansNo}/${i.seansSayisi}` : '—'}</td>
                       <td className="orta"><input type="checkbox" checked={i.tamamlandi} disabled={!yazar || i.satirDurum === 3} onChange={e => void islemGuncelle(i.id, { tamamlandi: e.target.checked })} onClick={e => e.stopPropagation()} /></td>
-                      <td>{i.planSatirId ? KURAL[i.ucretKurali] : 'Adet'}</td>
+                      <td>{i.planSatirId ? DIS_HAKEDIS_KURAL[i.ucretKurali] : 'Adet'}</td>
                       <td className="sag">{i.ucret ? para.format(i.ucret) : i.planSatirId ? para.format(i.ucretKurali === 2 ? i.net / Math.max(1, i.seansSayisi) : i.net) : '—'}</td>
                       <td className="orta"><span className={`rozet ${i.satirDurum === 3 || i.ucret ? 'ok' : i.tamamlandi ? 'ok' : SATIR[i.satirDurum]?.[1] ?? 'gri'}`}>{i.ucret ? 'Ücretlendi' : i.satirDurum === 3 ? 'Yapıldı' : i.tamamlandi ? 'Tamamlanacak' : i.planSatirId ? (i.seansNo > 1 ? 'Sürüyor' : 'Başladı') : 'Plansız'}</span></td>
                       <td className="ds-satir-arac">{yazar && !i.ucret && <button className="d" onClick={e => { e.stopPropagation(); void islemSil(i.id) }}>✖</button>}</td>

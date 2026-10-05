@@ -16,6 +16,7 @@ import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { StokAramaPenceresi } from '../../bilesenler/StokAramaPenceresi';
 import { c as cev } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { DIS_LAB_ASAMA, DIS_LAB_IS_TURU } from '../../bilesenler/dis/disKodlari';
 
 /**
  * DİŞ HASTA KARTI — mockup `Ekranlar/Dis Klinigi/dis_hasta_karti_v5.html`.
@@ -39,14 +40,6 @@ const PLAN_DURUM: Record<number, [string, string]> = {
 };
 const SATIR_DURUM: Record<number, [string, string]> = {
   1: ['Planlı', 'gri'], 2: ['Sürüyor', 'mavi'], 3: ['Yapıldı', 'ok'], 4: ['İptal', 'hata'], 5: ['Ertelendi', 'uyari'],
-};
-const LAB_ASAMA: Record<number, string> = {
-  1: 'Ölçü bekliyor', 2: 'Gönderildi', 3: 'Tasarım onayı', 4: 'Üretim', 5: 'Geldi', 6: 'Prova',
-  7: 'Geri gönderildi', 8: 'Teslim edildi', 9: 'İptal',
-};
-const LAB_IS: Record<number, string> = {
-  1: 'Kron', 2: 'Köprü', 3: 'İmplant üstü', 4: 'Total protez', 5: 'Parsiyel protez',
-  6: 'Ortodonti apareyi', 7: 'Gece plağı', 8: 'Diğer',
 };
 /** Hızlı bulgu paleti (mockup): seçili yüzeye uygular. */
 const HIZLI_BULGU: { kod: number; ad: string; ik: string; tumDis?: boolean }[] = [
@@ -667,11 +660,11 @@ export function DisHastaKarti() {
               <tbody>
                 {kart.labIsleri.map(l => (
                   <tr key={l.id} onDoubleClick={() => git(`/dis-lab-isemri/${l.id}`)}>
-                    <td>{l.isemriNo}</td><td>{l.lab}</td><td className="orta">{l.disNolar}</td><td>{LAB_IS[l.isTuru]}</td>
+                    <td>{l.isemriNo}</td><td>{l.lab}</td><td className="orta">{l.disNolar}</td><td>{DIS_LAB_IS_TURU[l.isTuru]}</td>
                     <td>{l.malzeme}{l.renk ? ' · ' + l.renk : ''}</td>
                     <td className="orta">{l.gonderim ? gunNokta(l.gonderim) : '—'}</td>
                     <td className="orta">{l.beklenen ? gunNokta(l.beklenen) : '—'}</td>
-                    <td className="orta"><span className={`rozet ${l.asama === 8 ? 'ok' : l.asama >= 5 ? 'uyari' : 'mavi'}`}>{LAB_ASAMA[l.asama]}</span></td>
+                    <td className="orta"><span className={`rozet ${l.asama === 8 ? 'ok' : l.asama >= 5 ? 'uyari' : 'mavi'}`}>{DIS_LAB_ASAMA[l.asama]}</span></td>
                     <td className="sag">{para.format(l.labFiyat)}</td>
                   </tr>
                 ))}

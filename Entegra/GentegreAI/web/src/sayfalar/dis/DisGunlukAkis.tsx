@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor } from '../../bilesenler/mesaj';
 import { bugunIso, gunNokta, para } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { DIS_LAB_ASAMA_KISA, DIS_PLAN_DURUM_KISA } from '../../bilesenler/dis/disKodlari';
 
 /**
  * DİŞ KLİNİĞİ GÜNLÜK AKIŞ — mockup `Ekranlar/Dis Klinigi/dis_gunluk_akis.html`.
@@ -23,8 +24,6 @@ import { c } from '../../dil/ceviri';
 
 const SAAT_BAS = 8, SAAT_SON = 19;
 const RD: Record<number, [string, string]> = { 1: ['Planlı', 'gri'], 2: ['Ünitte', 'mavi'], 3: ['Gelmedi', 'hata'], 4: ['İptal', 'gri'] };
-const PD: Record<number, string> = { 1: 'Taslak', 2: 'Proforma bekliyor', 3: 'Plan onaylı', 4: 'Plan onaylı', 5: 'Tamamlandı' };
-const LAB: Record<number, string> = { 1: 'ölçü', 2: 'labda', 3: 'labda', 4: 'labda', 5: 'lab ✔ geldi', 6: 'prova', 7: 'labda', 8: 'teslim' };
 
 function saatMetni(iso: string) {
   const d = new Date(iso);
@@ -122,7 +121,7 @@ export function DisGunlukAkis() {
         <b>{s.hasta}{s.yas != null ? ` · ${s.yas}` : ''}</b>
         {s.planliIslem}{s.disNo ? ` · ${s.disNo}` : ''}{s.seansSayisi ? ` · ${(s.yapilanSeans ?? 0) + 1}. seans` : ''}
         {s.planNo && <span className="ds-plan-kod"><code>{s.planNo.replace('TP-', 'TP-').slice(0, 12)} / {s.planSira}</code></span>}
-        {s.labAsama && <span className="rozet uyari" style={{ marginLeft: 4 }}>{LAB[s.labAsama]}</span>}
+        {s.labAsama && <span className="rozet uyari" style={{ marginLeft: 4 }}>{DIS_LAB_ASAMA_KISA[s.labAsama]}</span>}
         {k && <><div className={`ds-sure${k.asti ? ' gec' : ''}`}><i style={{ width: `${k.oran}%` }} /></div>
           <span className={`sonuk${k.asti ? ' ds-kir' : ''}`}>{k.gecen} / {k.plan} dk{k.asti ? ` · ${k.gecen - k.plan} dk aştı` : ` · kalan ${k.plan - k.gecen}`}</span></>}
       </div>
@@ -203,7 +202,7 @@ export function DisGunlukAkis() {
                 <td className="orta">{s.planNo ? <code>{s.planNo} / {s.planSira}</code> : <span className="rozet gri">plan yok</span>}</td>
                 <td>{s.alerji && s.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>)}
                     {s.labAsama != null && s.labAsama >= 5 && s.labAsama < 8 && <span className="rozet ok">{c('Lab işi geldi')}</span>}</td>
-                <td className="orta">{s.planDurum ? <span className="rozet mavi">{PD[s.planDurum]} · {s.planYapilan}/{s.planToplamSatir}</span> : '—'}</td>
+                <td className="orta">{s.planDurum ? <span className="rozet mavi">{DIS_PLAN_DURUM_KISA[s.planDurum]} · {s.planYapilan}/{s.planToplamSatir}</span> : '—'}</td>
                 <td className={`sag${s.bakiye > 0 ? ' ds-kir' : ''}`}>{para.format(s.bakiye)}</td>
                 <td className="orta">
                   <span className={`rozet ${s.seansDurum === 1 ? 'mavi' : s.seansDurum === 2 ? 'ok' : RD[s.randevuDurum]?.[1] ?? 'gri'}`}>

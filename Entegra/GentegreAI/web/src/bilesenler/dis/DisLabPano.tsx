@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay } from '../mesaj';
 import { para, tarihSaat, tarihYaz } from '../bicim';
 import { c as cev } from '../../dil/ceviri';
+import { DIS_LAB_IS_TURU, DIS_OLCU_TIPI } from './disKodlari';
 
 /**
  * LAB İŞ EMİRLERİ KANBAN (711) — mockup `Ekranlar/Dis Klinigi/dis_lab_kanban.html`.
@@ -16,8 +17,6 @@ import { c as cev } from '../../dil/ceviri';
  * beklenen geçti kırmızı, 2 gün kaldı sarı. Sağda seçili kart + tek tık geçişler.
  */
 const ASAMA: Record<number, [string, string]> = { 1: ['Ölçü bekliyor', 'gri'], 2: ['Gönderildi', 'mavi'], 3: ['Tasarım onayı', 'mor'], 4: ['Üretim', 'mavi'], 5: ['Geldi', 'uyari'], 6: ['Prova', 'uyari'], 7: ['Geri gönderildi', 'hata'], 8: ['Teslim edildi', 'ok'], 9: ['İptal', 'gri'] };
-const TUR: Record<number, string> = { 1: 'Kron', 2: 'Köprü', 3: 'İmplant üstü', 4: 'Total protez', 5: 'Parsiyel protez', 6: 'Ortodonti apareyi', 7: 'Gece plağı', 8: 'Diğer' };
-const OLCU: Record<number, string> = { 1: 'Geleneksel', 2: 'Dijital tarama' };
 const KOLONLAR: { k: string; ad: string; alt: string; asamalar: number[]; sinif: string; hedef: number }[] = [
   { k: 'olcu',    ad: '1 · Ölçü bekliyor',     alt: 'klinikte',            asamalar: [1],       sinif: 'olcu',    hedef: 1 },
   { k: 'labda',   ad: '2 · Gönderildi / Labda', alt: 'üretim',             asamalar: [2, 3, 4], sinif: 'labda',   hedef: 2 },
@@ -133,7 +132,7 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
           {k.gecikti ? <span className="rozet hata">gecikti</span> : k.asama === 3 ? <span className="rozet mor">onay?</span> : (k.asama === 2 || k.asama === 4) && kalan != null && kalan <= 2 ? <span className="rozet uyari">{kalan <= 0 ? 'bugün' : kalan === 1 ? 'yarın' : `${kalan} gün`}</span> : k.asama >= 5 ? <span className={`rozet ${asamaRenk}`}>{asamaAd}</span> : k.planNo ? <span className="rozet gri">{k.planNo}</span> : null}
         </div>
         <div className="ds-kb-hasta">{k.hasta} <span className="sonuk">· diş {k.disNolar || '—'}</span></div>
-        <div className="ds-kb-is">{[TUR[k.isTuru], k.malzeme, k.renk].filter(Boolean).join(' · ')}{k.islem && !kisa ? <span className="sonuk"> · {k.islem}</span> : ''}</div>
+        <div className="ds-kb-is">{[DIS_LAB_IS_TURU[k.isTuru], k.malzeme, k.renk].filter(Boolean).join(' · ')}{k.islem && !kisa ? <span className="sonuk"> · {k.islem}</span> : ''}</div>
         {!kisa && <div className="ds-kb-alt"><span className="ds-kb-tag lab">{k.lab}</span><span>{k.hekim || '—'}</span>
           {k.kaliteKontrol === 1 && <span className="ds-kb-tag kk">KK ✔</span>}
           {k.geriSayisi > 0 && <span className="ds-kb-tag">{k.geriSayisi + 1}. tur</span>}
@@ -195,8 +194,8 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
                 <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: '1fr 1fr' }}>
                   <div><label>Hasta</label><div className="ds-inp">{sec.hasta}</div></div>
                   <div><label>{cev('Plan satırı')}</label><div className="ds-inp">{sec.planNo ? `${sec.planNo} · #${sec.planSira} · ${sec.islem}` : <span className="sonuk">plan dışı</span>}</div></div>
-                  <div><label>{cev('Diş / iş')}</label><div className="ds-inp">{sec.disNolar || '—'} · {TUR[sec.isTuru] ?? ''}</div></div>
-                  <div><label>{cev('Renk · ölçü')}</label><div className="ds-inp">{[sec.renk, OLCU[sec.olcuTipi]].filter(Boolean).join(' · ') || '—'}</div></div>
+                  <div><label>{cev('Diş / iş')}</label><div className="ds-inp">{sec.disNolar || '—'} · {DIS_LAB_IS_TURU[sec.isTuru] ?? ''}</div></div>
+                  <div><label>{cev('Renk · ölçü')}</label><div className="ds-inp">{[sec.renk, DIS_OLCU_TIPI[sec.olcuTipi]].filter(Boolean).join(' · ') || '—'}</div></div>
                   <div><label>Hekim</label><div className="ds-inp">{sec.hekim || '—'}</div></div>
                   <div><label>{cev('Gönderim → beklenen')}</label><div className="ds-inp">{sec.gonderim ? tarihYaz(sec.gonderim) : '—'} → {sec.beklenen ? tarihYaz(sec.beklenen) : '—'} (SLA {sec.slaGun} gün)</div></div>
                   <div><label>{cev('Lab / hasta fiyatı')}</label><div className="ds-inp">{para.format(sec.labFiyat)} / {para.format(sec.hastaFiyat)}</div></div>
@@ -254,8 +253,8 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
                 <tbody>
                   {kuryeGidecek.map(k => <tr key={k.id} className={seciliKurye.has(k.id) ? 'sel' : ''}>
                     <td className="orta"><input type="checkbox" checked={seciliKurye.has(k.id)} onChange={e => setSeciliKurye(s => { const n = new Set(s); if (e.target.checked) n.add(k.id); else n.delete(k.id); return n })} /></td>
-                    <td>{k.isemriNo}</td><td>{k.hasta}</td><td className="orta">{k.disNolar || '—'}</td><td>{[TUR[k.isTuru], k.malzeme, k.renk].filter(Boolean).join(' · ')}</td><td>{k.lab}</td>
-                    <td>{OLCU[k.olcuTipi] ?? '—'}</td><td>{tarihYaz(new Date(Date.now() + k.slaGun * 86400000).toISOString())} ({k.slaGun} gün)</td></tr>)}
+                    <td>{k.isemriNo}</td><td>{k.hasta}</td><td className="orta">{k.disNolar || '—'}</td><td>{[DIS_LAB_IS_TURU[k.isTuru], k.malzeme, k.renk].filter(Boolean).join(' · ')}</td><td>{k.lab}</td>
+                    <td>{DIS_OLCU_TIPI[k.olcuTipi] ?? '—'}</td><td>{tarihYaz(new Date(Date.now() + k.slaGun * 86400000).toISOString())} ({k.slaGun} gün)</td></tr>)}
                   {kuryeGidecek.length === 0 && <tr><td colSpan={8} className="sonuk">{cev('Ölçü bekleyen iş emri yok.')}</td></tr>}
                 </tbody>
               </table></div>

@@ -9,6 +9,7 @@ import { TarafSecici } from '../../bilesenler/TarafArama';
 import { para, tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { DIS_HAKEDIS_KURAL, DIS_LAB_IS_TURU } from '../../bilesenler/dis/disKodlari';
 
 /**
  * TEDAVİ PLANI KARTI (710) — mockup `Ekranlar/Dis Klinigi/dis_tedavi_plani_karti.html`.
@@ -25,9 +26,7 @@ import { useEscIleKapat } from '../../bilesenler/Modal';
  */
 const DURUM: Record<number, [string, string]> = { 1: ['Taslak', 'gri'], 2: ['Sunuldu', 'mavi'], 3: ['Onaylı', 'ok'], 4: ['Sürüyor', 'mavi'], 5: ['Tamamlandı', 'ok'], 6: ['İptal', 'hata'], 7: ['Süresi doldu', 'uyari'] };
 const SATIR: Record<number, [string, string]> = { 1: ['Planlı', 'gri'], 2: ['Sürüyor', 'mavi'], 3: ['Yapıldı', 'ok'], 4: ['İptal', 'hata'], 5: ['Ertelendi', 'uyari'] };
-const KURAL: Record<number, string> = { 1: 'Tamamlanınca', 2: 'Seans başına oran', 3: 'Adet' };
 const LAB_ASAMA: Record<number, [string, string]> = { 1: ['Ölçü bekliyor', 'gri'], 2: ['Gönderildi', 'mavi'], 3: ['Tasarım onayı', 'mor'], 4: ['Üretim', 'mavi'], 5: ['Geldi', 'uyari'], 6: ['Prova', 'uyari'], 7: ['Geri gönderildi', 'hata'], 8: ['Teslim edildi', 'ok'], 9: ['İptal', 'gri'] };
-const LAB_TUR: Record<number, string> = { 1: 'Kron', 2: 'Köprü', 3: 'İmplant üstü', 4: 'Total protez', 5: 'Parsiyel protez', 6: 'Ortodonti apareyi', 7: 'Gece plağı', 8: 'Diğer' };
 const SEANS_DURUM: Record<number, [string, string]> = { 1: ['Açık', 'mavi'], 2: ['Bitti', 'ok'], 3: ['İptal', 'hata'] };
 const LOG_TIP: Record<number, string> = { 0: 'sildi', 1: 'ekledi', 2: 'değiştirdi' };
 const LOG_TABLO: Record<number, string> = { 1130: 'plan', 1131: 'plan satırı', 1138: 'ödeme planı' };
@@ -360,7 +359,7 @@ export function DisPlanKarti() {
                       <td className="sag">{para.format(s.listeFiyat)}</td>
                       <td className="sag">{s.iskonto ? `−${para.format(s.iskonto)}` : '—'}</td>
                       <td className="sag">{para.format(s.net)}</td>
-                      <td>{KURAL[s.ucretKurali] ?? ''}{s.labGerekir && s.ucretKurali === 1 ? ' (teslim)' : ''}</td>
+                      <td>{DIS_HAKEDIS_KURAL[s.ucretKurali] ?? ''}{s.labGerekir && s.ucretKurali === 1 ? ' (teslim)' : ''}</td>
                       <td className="orta">{lab ? <span className={`rozet ${LAB_ASAMA[lab.asama]?.[1] ?? 'gri'}`}>{lab.isemriNo} · {LAB_ASAMA[lab.asama]?.[0]}</span> : s.labGerekir ? <span className="rozet uyari">lab gerekir</span> : '—'}</td>
                       <td className="orta">{s.durum !== 4 && p.hastaOnayZamani ? <span className="rozet ok">✔</span> : '—'}</td>
                       <td className="orta">{rnd ? tarihSaat(rnd.baslangic) : s.randevu ? tarihSaat(s.randevu) : '—'}</td>
@@ -525,7 +524,7 @@ export function DisPlanKarti() {
             <tbody>
               {v.labIsleri.map(l => { const s = v.satirlar.find(z => z.id === l.planSatirId); const gec = l.beklenen && l.asama < 5 && new Date(l.beklenen).getTime() < Date.now(); return <tr key={l.id}>
                 <td><b>{l.isemriNo}</b></td><td className="orta">#{l.planSira}{s ? ` · ${s.islem}` : ''}</td><td>{l.lab || '—'}</td><td className="orta">{l.disNolar || s?.disNo || '—'}</td>
-                <td>{[LAB_TUR[l.isTuru], l.malzeme, l.renk].filter(Boolean).join(' · ')}</td><td>{l.gonderim ? tarihYaz(l.gonderim) : '—'}</td>
+                <td>{[DIS_LAB_IS_TURU[l.isTuru], l.malzeme, l.renk].filter(Boolean).join(' · ')}</td><td>{l.gonderim ? tarihYaz(l.gonderim) : '—'}</td>
                 <td>{l.beklenen ? <span className={gec ? 'ds-kir' : ''}>{tarihYaz(l.beklenen)}{gec ? ' · gecikti' : ''}</span> : '—'}</td>
                 <td><span className={`rozet ${LAB_ASAMA[l.asama]?.[1] ?? 'gri'}`}>{LAB_ASAMA[l.asama]?.[0] ?? l.asama}{l.asama >= 5 && l.kaliteKontrol === 1 ? ' · KK ✔' : ''}</span></td>
                 <td>{l.randevu ? tarihSaat(l.randevu) : l.teslim ? `teslim ${tarihYaz(l.teslim)}` : '—'}</td><td className="sag">{para.format(l.labFiyat)}</td>

@@ -18879,3 +18879,31 @@ oldu.
   `/cihaz-kapatma?bas&bit`, `/randevu-bekleyen` 200; başvuru istemi sorgusu DB'de
   çalıştırılıp "Radyoloji · BT / MR / Röntgen" doğrulandı, nöbet listesinin boş-kod
   metni (`Tümü`) SQL'de sınandı. Tarayıcıda radyoloji panosu modalite rozetleri yerinde.
+
+## 05.10.2026 — Diş kliniği refaktörü (davranış değişmedi, bir eksik düzeldi)
+
+Kullanıcı: *"diş kısmını da refaktor yap"*. Modülün uç dosyaları zaten parçalıydı
+(en büyüğü 434 satır), bu yüzden iş **sözlük tekilleştirmesi** oldu.
+
+* **Protez iş türü ÜÇ dosyada** ayrı yazılmıştı (lab panosu, plan kartı, hasta kartı),
+  **hakediş kuralı ikisinde** (plan + seans kartı) → yeni `bilesenler/dis/disKodlari.ts`.
+* **Lab aşaması iki sözlükte iki amaçla** duruyordu: kartta tam ad ("Geri gönderildi"),
+  günlük akışta kısa rozet ("labda") - ve **akış sözlüğü 9 (İptal) kodunu hiç
+  tanımıyordu**, iptal edilmiş lab işi akışta boş rozet olarak görünüyordu. Tek sözlük,
+  iki görünüm (`DIS_LAB_ASAMA` / `_KISA`).
+* **Plan durumu** da aynı desene alındı: akışta 3 (onaylı) ve 4 (sürüyor) bilinçli olarak
+  aynı rozeti taşıyor ("Plan onaylı" - akıştaki soru "plan hazır mı"), kartta ayrı
+  görünür; iki görünüm artık tek kodtan türüyor ve 6-7 (iptal / süresi doldu) akışta da
+  tanınıyor.
+* Metinler sunucudaki katalog sabitleriyle (`DisPlanDurumAdi`, `DisLabAsamaAdi`) aynı
+  tutuldu. Sunucuda kolon tanımının içinde kalan son inline `case` de sabite alındı
+  (`DisLabIsTuruAdi`) - öteki iki diş sözlüğü zaten sabitti.
+* Bakılıp **yapılmayan**: `DisHastaKarti.tsx` (688) ve `DisPlanKarti.tsx` (591)
+  bölünmedi. İkisi de tek ekranın sekmelerini taşıyor ve projedeki kardeş kart dosyaları
+  (`MuayeneSablonKarti` 623, `IstemDetayi` 607) aynı boyutta; bölmek bu modülü
+  ötekilerden farklı bir desene sokardı.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `dis-lab-isemri` listesi iş türü / aşama ("Kron · Gönderildi", "Diğer · Geldi"),
+  `dis-plan` durumları ("Tamamlandı", "Sürüyor") sunucudan doğru; tarayıcıda diş günlük
+  akışında kısa lab rozeti ("teslim") ve lab kanbanında iş türleri (Kron · Diğer)
+  görüldü.

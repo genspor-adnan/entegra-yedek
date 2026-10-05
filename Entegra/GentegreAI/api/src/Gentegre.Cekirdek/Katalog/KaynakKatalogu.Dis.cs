@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// DİŞ KLİNİĞİ MODÜLÜ LİSTELERİ (706) — tasarım notu
@@ -17,6 +17,16 @@ public static partial class KaynakKatalogu
         "case p.durum when 1 then 'Taslak' when 2 then 'Sunuldu' when 3 then 'Onaylı' "
         + "when 4 then 'Sürüyor' when 5 then 'Tamamlandı' when 6 then 'İptal' "
         + "when 7 then 'Süresi doldu' else '' end";
+
+    /// <summary>
+    /// Protez iş türü. Sabite alındı: öteki iki diş sözlüğü (plan durumu, lab
+    /// aşaması) zaten sabitti, bu biri kolon tanımının içinde kalmıştı -
+    /// ekrandaki karşılığı `bilesenler/dis/disKodlari.ts`.
+    /// </summary>
+    private const string DisLabIsTuruAdi =
+        "case i.is_turu when 1 then 'Kron' when 2 then 'Köprü' when 3 then 'İmplant üstü' "
+        + "when 4 then 'Total protez' when 5 then 'Parsiyel protez' when 6 then 'Ortodonti apareyi' "
+        + "when 7 then 'Gece plağı' else 'Diğer' end";
 
     private const string DisLabAsamaAdi =
         "case i.asama when 1 then 'Ölçü bekliyor' when 2 then 'Gönderildi' when 3 then 'Tasarım onayı' "
@@ -125,9 +135,7 @@ public static partial class KaynakKatalogu
             new("hasta",     "i.hasta_adi",    "metin", "Hasta", Genislik: 180),
             new("hastaId",   "i.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
             new("disNolar",  "i.dis_nolar",    "metin", "Diş", Hizalama: "orta", Genislik: 90),
-            new("isTuruAdi", "case i.is_turu when 1 then 'Kron' when 2 then 'Köprü' when 3 then 'İmplant üstü' "
-                           + "when 4 then 'Total protez' when 5 then 'Parsiyel protez' when 6 then 'Ortodonti apareyi' "
-                           + "when 7 then 'Gece plağı' else 'Diğer' end",
+            new("isTuruAdi", DisLabIsTuruAdi,
                 "metin", "İş", Genislik: 120, Filtrelenebilir: false),
             new("isTuru",    "i.is_turu",      "kod",   "İş Türü Kodu", Varsayilan: false),
             new("malzeme",   "i.malzeme || case when i.renk <> '' then ' · ' || i.renk else '' end",
