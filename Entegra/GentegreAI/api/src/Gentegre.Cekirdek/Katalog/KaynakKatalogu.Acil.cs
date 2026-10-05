@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ACİL SERVİS (716) — üç liste:
@@ -41,10 +41,11 @@ public static partial class KaynakKatalogu
                 Genislik: 95, Kodlar: AcEvetHayirKodlari),
             new("triyaj",     "b.triyaj",      "kod",   "Triyaj", Hizalama: "orta",
                 Genislik: 90, Kodlar: AcTriyajKodlari),
+            // Etiketler AcilKodlari'ndan: sözlük ile case ifadesini ayrı
+            //   güncellemek, yeni kodun gridde boş görünmesiydi.
             new("triyajAdi",
-                "case b.triyaj when 1 then 'Kırmızı' when 2 then 'Turuncu'" +
-                " when 3 then 'Sarı' when 4 then 'Yeşil' when 5 then 'Mavi'" +
-                " else 'Triyaj bekliyor' end",
+                AcilKodlari.KodAdiIfadesi("b.triyaj", AcilKodlari.TriyajRenk,
+                                          "'Triyaj bekliyor'"),
                 "metin", "Triyaj Adı", Hizalama: "orta", Genislik: 120, Bicim: "rozet",
                 Siralanabilir: false, Filtrelenebilir: false),
             new("sikayet",    "b.sikayet",     "metin", "Şikâyet", Genislik: 330),
@@ -82,11 +83,9 @@ public static partial class KaynakKatalogu
                 Siralanabilir: false, Filtrelenebilir: false),
             new("adliVaka",   "b.adli_vaka",   "kod",   "Adli", Hizalama: "orta",
                 Genislik: 80, Kodlar: AcEvetHayirKodlari),
+            // Gridde KISA ad (sütun 120 px); çıkış penceresi tam adı gösteriyor.
             new("cikisAdi",
-                "case b.cikis_sekli when 0 then '' when 1 then 'Taburcu'" +
-                " when 2 then 'Servise yatış' when 3 then 'Yoğun bakım' when 4 then 'Sevk'" +
-                " when 5 then 'Ölüm' when 6 then 'Kendi isteğiyle' when 7 then 'Ameliyathane'" +
-                " else '' end",
+                AcilKodlari.KodAdiIfadesi("b.cikis_sekli", AcilKodlari.CikisSekliKisa),
                 "metin", "Çıkış", Hizalama: "orta", Genislik: 120,
                 Siralanabilir: false, Filtrelenebilir: false),
             new("cikisSekli", "b.cikis_sekli", "kod",   "Çıkış Kodu", Hizalama: "orta",
@@ -188,31 +187,14 @@ public static partial class KaynakKatalogu
             new("subeId", "y.sube_id", "sayi", "Şube", Varsayilan: false),
         });
 
-    private static readonly Dictionary<string, string> AcTriyajKodlari = new()
-    {
-        ["1"] = "1 Kırmızı (resüsitasyon)", ["2"] = "2 Turuncu (acil)",
-        ["3"] = "3 Sarı (acele)", ["4"] = "4 Yeşil (az acil)", ["5"] = "5 Mavi (acil değil)",
-        ["0"] = "Triyaj bekliyor",
-    };
-
-    private static readonly Dictionary<string, string> AcGelisKodlari = new()
-    {
-        ["1"] = "Kendi imkânı", ["2"] = "112 ambulans", ["3"] = "Özel ambulans",
-        ["4"] = "Polis/Jandarma", ["5"] = "Sevk", ["9"] = "Diğer",
-    };
-
-    private static readonly Dictionary<string, string> AcCikisKodlari = new()
-    {
-        ["1"] = "Taburcu", ["2"] = "Servise yatış", ["3"] = "Yoğun bakım", ["4"] = "Sevk",
-        ["5"] = "Ölüm", ["6"] = "Kendi isteğiyle", ["7"] = "Ameliyathane",
-    };
-
-    private static readonly Dictionary<string, string> AcCagriTurKodlari = new()
-    {
-        ["1"] = "Konsültasyon", ["2"] = "Mavi Kod", ["3"] = "Beyaz Kod",
-        ["4"] = "Pembe Kod", ["5"] = "Kateter Lab", ["6"] = "Ameliyathane",
-        ["7"] = "Yoğun Bakım",
-    };
+    // TRİYAJ / GELİŞ / ÇIKIŞ / ÇAĞRI sözlükleri ORTAK (AcilKodlari): aynı
+    //   kodlar kart kataloğunda ve ekranın çıkış penceresinde de yazılıydı ve
+    //   metinler ayrışmıştı ("Sevk" ↔ "Sevk (başka kuruma)", "Sevk" ↔ "Başka
+    //   kurumdan sevk").
+    private static readonly Dictionary<string, string> AcTriyajKodlari = AcilKodlari.Triyaj;
+    private static readonly Dictionary<string, string> AcGelisKodlari = AcilKodlari.GelisSekli;
+    private static readonly Dictionary<string, string> AcCikisKodlari = AcilKodlari.CikisSekli;
+    private static readonly Dictionary<string, string> AcCagriTurKodlari = AcilKodlari.CagriTuru;
 
     private static readonly Dictionary<string, string> AcCagriDurumKodlari = new()
     {

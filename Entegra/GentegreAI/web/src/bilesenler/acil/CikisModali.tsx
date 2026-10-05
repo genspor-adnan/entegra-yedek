@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
 import { c as cev } from '../../dil/ceviri';
+import { ACIL_CIKIS_SEKLI } from './acilKodlari';
 
 /**
  * ACİL ÇIKIŞ KARARI (716).
@@ -19,15 +20,7 @@ import { c as cev } from '../../dil/ceviri';
  * ICD KODU ARANARAK SEÇİLİR, elle yazılmaz: serbest metin tanı, göstergeyi
  * hesaplayan kod eşleşmesini sessizce ıskalar.
  */
-const CIKIS_SEKLI: { kod: number; ad: string }[] = [
-  { kod: 1, ad: 'Taburcu' },
-  { kod: 2, ad: 'Servise yatış' },
-  { kod: 3, ad: 'Yoğun bakım' },
-  { kod: 4, ad: 'Sevk (başka kuruma)' },
-  { kod: 5, ad: 'Ölüm' },
-  { kod: 6, ad: 'Kendi isteğiyle ayrıldı' },
-  { kod: 7, ad: 'Ameliyathane' },
-];
+const CIKIS_SEKLI = ACIL_CIKIS_SEKLI;
 
 interface Bolum { id: number; ad: string }
 interface Tani { kod: string; ad: string }

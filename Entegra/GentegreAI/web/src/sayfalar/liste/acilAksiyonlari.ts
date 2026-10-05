@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
+import { ACIL_CAGRI_TURU, ACIL_TRIYAJ, secenekler } from '../../bilesenler/acil/acilKodlari';
 
 /**
  * ACİL SERVİS LİSTE AKSİYONLARI (716 uçları).
@@ -21,23 +22,10 @@ export interface AcilBaglam {
   cikisAc(v: { basvuruId: number; protokolNo?: string; hastaAdi?: string }): void;
 }
 
-const TRIYAJ: { kod: string; ad: string }[] = [
-  { kod: '1', ad: '1 · Kırmızı (resüsitasyon)' },
-  { kod: '2', ad: '2 · Turuncu (acil)' },
-  { kod: '3', ad: '3 · Sarı (acele)' },
-  { kod: '4', ad: '4 · Yeşil (az acil)' },
-  { kod: '5', ad: '5 · Mavi (acil değil)' },
-];
-
-const CAGRI_TURU: { kod: string; ad: string }[] = [
-  { kod: '1', ad: 'Konsültasyon' },
-  { kod: '2', ad: 'Mavi Kod' },
-  { kod: '3', ad: 'Beyaz Kod' },
-  { kod: '4', ad: 'Pembe Kod' },
-  { kod: '5', ad: 'Kateter Lab' },
-  { kod: '6', ad: 'Ameliyathane' },
-  { kod: '7', ad: 'Yoğun Bakım' },
-];
+// Triyaj ve çağrı türü ORTAK sözlükten (bilesenler/acil/acilKodlari): aynı
+//   kodlar liste / kart kataloğunda ve çıkış penceresinde de yazılıydı.
+const TRIYAJ = secenekler(ACIL_TRIYAJ);
+const CAGRI_TURU = secenekler(ACIL_CAGRI_TURU);
 
 export async function acilAksiyonu(
   kod: string,

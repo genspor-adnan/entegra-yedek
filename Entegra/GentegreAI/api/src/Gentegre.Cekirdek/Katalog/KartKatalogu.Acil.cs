@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ACİL SERVİS KARTLARI (716).
@@ -141,25 +141,20 @@ public static partial class KartKatalogu
         ["4"] = "4 · Yeşil (az acil)", ["5"] = "5 · Mavi (acil değil)",
     };
 
-    private static readonly Dictionary<string, string> AcKartGelisKodlari = new()
-    {
-        ["1"] = "Kendi imkânı", ["2"] = "112 ambulans", ["3"] = "Özel ambulans",
-        ["4"] = "Polis/Jandarma", ["5"] = "Başka kurumdan sevk", ["9"] = "Diğer",
-    };
+    // GELİŞ KODLARI ORTAK (AcilKodlari): liste kataloğu "Sevk", kart "Başka
+    //   kurumdan sevk" diyordu - aynı başvuru iki ekranda iki cevap veriyordu.
+    //   Kanonik metin uzun olan (kart) seçildi: gridde de sütun yetiyor.
+    private static readonly Dictionary<string, string> AcKartGelisKodlari = AcilKodlari.GelisSekli;
 
-    private static readonly Dictionary<string, string> AcKartCikisKodlari = new()
-    {
-        ["0"] = "(açık)", ["1"] = "Taburcu", ["2"] = "Servise yatış",
-        ["3"] = "Yoğun bakım", ["4"] = "Sevk", ["5"] = "Ölüm",
-        ["6"] = "Kendi isteğiyle", ["7"] = "Ameliyathane",
-    };
+    // ÇIKIŞ KODLARI ORTAK (AcilKodlari) + kartın "(açık)" satırı: o, kodun
+    //   kendi anlamı değil - "çıkış yapılmamış" durumunu kartta göstermenin
+    //   yolu, bu yüzden sözlüğe değil buraya eklenir.
+    private static readonly Dictionary<string, string> AcKartCikisKodlari =
+        new(AcilKodlari.CikisSekli) { ["0"] = "(açık)" };
 
-    private static readonly Dictionary<string, string> AcKartCagriTurKodlari = new()
-    {
-        ["1"] = "Konsültasyon", ["2"] = "Mavi Kod", ["3"] = "Beyaz Kod",
-        ["4"] = "Pembe Kod", ["5"] = "Kateter Lab", ["6"] = "Ameliyathane",
-        ["7"] = "Yoğun Bakım",
-    };
+    // ÇAĞRI TÜRÜ ORTAK (AcilKodlari): liste kataloğunda, kartta ve ekranın
+    //   çağrı penceresinde üç kopyaydı.
+    private static readonly Dictionary<string, string> AcKartCagriTurKodlari = AcilKodlari.CagriTuru;
 
     private static readonly Dictionary<string, string> AcKartCagriDurumKodlari = new()
     {

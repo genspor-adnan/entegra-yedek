@@ -19067,3 +19067,37 @@ motorunda); iş istemci tarafındaki tekrarlardı.
   etiketi üretecek kısmi kapanış kaydı bulunmadığı için takvim metni ekranda
   görülemedi - `GUN_AD` değişikliği aynı diziye bağlanmak, istisna etiketi ise
   yalnız eksik kodları tanıyan sözlüğün yerine geçmek.
+
+## 05.10.2026 — Acil servis refaktörü (davranış değişmedi, iki ayrışma düzeldi)
+
+Kullanıcı: *"acil kısmını da refaktor yap"*. Acil, sözlük ayrışmasının en yoğun olduğu
+modüldü: aynı kodlar hem liste kataloğunda (hem SQL `case` hem kolon sözlüğü olarak),
+hem kart kataloğunda, hem de ekranın pencerelerinde yazılıydı.
+
+* Yeni **`Gentegre.Cekirdek/Katalog/AcilKodlari.cs`** - triyaj (ve renk adı), geliş
+  şekli, çıkış şekli (tam + grid için kısa), çağrı türü. **SQL etiketi de buradan
+  üretiliyor** (`KodAdiIfadesi(kolon, sozluk, bos)`): sözlüğü güncelleyip `case`
+  ifadesini güncellemeyi unutmak, gridde yeni kodun boş görünmesiydi.
+* **Düzelen iki ayrışma:** geliş şekli listede "Sevk", kartta "Başka kurumdan sevk"
+  diyordu - aynı başvuru iki ekranda iki cevap veriyordu (kanonik metin uzun olan
+  seçildi). Çıkış şekli listede/kartta "Sevk" ve "Kendi isteğiyle", çıkış penceresinde
+  "Sevk (başka kuruma)" ve "Kendi isteğiyle ayrıldı" idi; pencere TAM adı gösteriyor
+  (hekim neyi seçtiğini okumalı), grid sütunu dar olduğu için KISA ad ayrı sözlükte -
+  fark artık bilinçli ve tek yerde.
+* Kart kataloğunun `"(açık)"` satırı sözlüğe alınmadı: o, kodun kendi anlamı değil -
+  "çıkış yapılmamış" durumunu kartta göstermenin yolu, bu yüzden kart kataloğu ortak
+  sözlüğü alıp başına onu ekliyor.
+* İstemci tarafı: yeni **`bilesenler/acil/acilKodlari.ts`** (triyaj, triyaj rengi, çıkış
+  şekli, çağrı türü) - triyaj ve çağrı türü listeleri `acilAksiyonlari`'nda, çıkış şekli
+  `CikisModali`'nde ayrı yazılıydı. Acil kodları için veritabanında kod listesi yok
+  (`kod_liste`'de `acil.*` satırı yok), bu yüzden sunucu ve istemci birer sözlük tutuyor
+  - ama her tarafta bir tane, ve ikisi aynı metinler.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789.
+  `acilBasvuru` listesi üretilen `case` ile doğru etiket döndü ("Triyaj bekliyor",
+  "Turuncu"; çıkışı olmayan kayıtta boş), `acilCagri` "Konsültasyon", `acilYatak`
+  "Boş". Kısa çıkış adı eşlemesi SQL'de ayrıca sınandı (4 → "Sevk", 6 → "Kendi
+  isteğiyle"). Tarayıcıda triyaj ekranı ve "Triyaj Ver / Değiştir" penceresi: seçenekler
+  ortak sözlükten ("1 · Kırmızı (resüsitasyon)" … "5 · Mavi (acil değil)").
+  Dev veride çıkışı yapılmış acil başvurusu yok; çıkış kodunu elle yazmayı DB kuralı
+  (çıkış tanısı zorunlu) reddetti - o yüzden grid "Çıkış" kolonu dolu hâliyle
+  görülemedi, kural doğru çalışıyor.
