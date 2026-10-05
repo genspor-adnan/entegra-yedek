@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// MEDULA KARTLARI (707) — rapor (etken madde satırlı), kesinti, dönem, fatura.
@@ -13,8 +13,9 @@ public static partial class KartKatalogu
     private const int LogMedulaRapor   = 1153;
     private const int LogMedulaKesinti = 1154;
 
-    private static readonly Dictionary<string, string> MedulaRaporDurumKodlari =
-        new() { ["1"] = "Taslak", ["2"] = "İmzalı", ["3"] = "Medula kabul", ["4"] = "İptal", ["5"] = "Hata" };
+    // RAPOR DURUMU ORTAK (MedulaKodlari): liste kataloğunun SQL etiketi de
+    //   aynı sözlükten üretiliyor.
+    private static readonly Dictionary<string, string> MedulaRaporDurumKodlari = MedulaKodlari.RaporDurum;
 
     private static KartTanimi MedulaRaporKarti() => new(
         Ad: "medula-rapor",

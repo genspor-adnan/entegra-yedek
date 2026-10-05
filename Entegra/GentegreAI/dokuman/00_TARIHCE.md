@@ -19101,3 +19101,33 @@ hem kart kataloğunda, hem de ekranın pencerelerinde yazılıydı.
   Dev veride çıkışı yapılmış acil başvurusu yok; çıkış kodunu elle yazmayı DB kuralı
   (çıkış tanısı zorunlu) reddetti - o yüzden grid "Çıkış" kolonu dolu hâliyle
   görülemedi, kural doğru çalışıyor.
+
+## 05.10.2026 — Medula refaktörü (davranış değişmedi, bir boş kolon düzeldi)
+
+Kullanıcı: *"medula kısmını da refaktor yap"*. Dosyalar makul boyutta (en büyüğü 466
+satır), iş yine etiketlerin tekilleştirilmesi oldu.
+
+* Yeni **`Cekirdek/Katalog/KodIfadesi.cs`**: kod sözlüğünden SQL `case` üretir. Acil
+  refaktöründe bu yardımcı `AcilKodlari` içinde yazılmıştı; Medula da aynı şeyi
+  istediği için ortak yere çıktı (acil kataloğu da artık onu çağırıyor).
+* Yeni **`Cekirdek/Katalog/MedulaKodlari.cs`**: işlem durumu, fatura türü, fatura
+  durumu, dönem durumu, e-Rapor durumu, kuyruk durumu. Liste kataloğundaki altı SQL
+  `case` ifadesi ve kart kataloğundaki rapor durumu sözlüğü artık buradan.
+* **Düzelen kusur:** işlem (hizmet kaydı) durumunda **0 kodu sunucuda hiç yoktu**;
+  gönderilmemiş hizmet kaydı gridde **boş** görünüyordu - istemci ona "Gönderilmedi"
+  diyor. Sözlükte var, grid de artık yazıyor.
+* **Bilinçli kalan metin farkları yoruma yazıldı:** grid sütunu dar olduğu için sunucu
+  "Ücretli", ekran rozeti "Ücretli (yerel)"; takip durumunun etiketi tek kolona bakmıyor
+  (onaylı takip, çıkış zamanı varsa "Kapatıldı", yoksa "Açık takip") - o koşullu ifade
+  liste kataloğunda kaldı.
+* İstemci tarafında Medula sözlükleri **zaten tek yerde** (`api/uclar/medula.ts`) ve
+  ekranlar oradan import ediyor; dokunulmadı. Liste çipleri ("Bekleyen", "Medula
+  Kabul") kod adının birebir kopyası değil - onlar filtre etiketi, oldukları gibi
+  bırakıldı.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti (web tarafı değişmediği için
+  vitest aynı: 789/789). Üretilen etiketler listelerden okundu: `medula-islem` "Kabul",
+  `medula-fatura` "Dönem kapandı / İncelendi" + tür "Ayaktan", `medula-donem`
+  "İncelemede", `medula-kuyruk` "Kabul", `medula-rapor` "Medula kabul" + "İlaç".
+  0 kodunun yeni etiketi SQL'de sınandı (0 → "Gönderilmedi", 9 → boş). Tarayıcıda
+  Medula hizmet kayıtları listesi ve fatura & dönem ekranı açıldı ("Açık",
+  "Kaydedildi").

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ACİL SERVİS KOD SÖZLÜKLERİ — tek kaynak (liste kataloğu, kart kataloğu ve
@@ -17,6 +17,9 @@ namespace Gentegre.Cekirdek.Katalog;
 /// <para><b>Kart kataloğunun "(açık)" satırı burada değil:</b> o, kodun kendi
 /// anlamı değil - kartta "çıkış yapılmamış" durumunu göstermenin yolu. Kart
 /// kataloğu sözlüğü alıp başına onu ekliyor.</para>
+///
+/// <para>SQL etiketini <see cref="KodIfadesi.KodAdi"/> üretir (Medula kataloğu
+/// da aynı yardımcıyı kullanıyor).</para>
 ///
 /// <para>Acil kodları için veritabanında kod listesi YOK (<c>kod_liste</c>'de
 /// <c>acil.*</c> satırı yok): bu dosya kanonik kaynaktır. İstemci tarafındaki
@@ -73,17 +76,4 @@ public static class AcilKodlari
         ["7"] = "Yoğun Bakım",
     };
 
-    /// <summary>
-    /// Kod sözlüğünü SQL <c>case</c> ifadesine çevirir: etiketler tek yerden
-    /// gelsin. Sözlükte olmayan kod <paramref name="bosDeger"/> olur.
-    /// </summary>
-    /// <param name="kolon">Kod kolonu, tablo takma adıyla (<c>b.cikis_sekli</c>).</param>
-    public static string KodAdiIfadesi(string kolon, Dictionary<string, string> kodlar,
-                                       string bosDeger = "''")
-    {
-        var sb = new System.Text.StringBuilder($"case {kolon}");
-        foreach (var (kod, ad) in kodlar.OrderBy(x => x.Key, StringComparer.Ordinal))
-            sb.Append($" when {kod} then '{ad.Replace("'", "''")}'");
-        return sb.Append($" else {bosDeger} end").ToString();
-    }
 }

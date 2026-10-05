@@ -44,7 +44,7 @@ public static partial class KaynakKatalogu
             // Etiketler AcilKodlari'ndan: sözlük ile case ifadesini ayrı
             //   güncellemek, yeni kodun gridde boş görünmesiydi.
             new("triyajAdi",
-                AcilKodlari.KodAdiIfadesi("b.triyaj", AcilKodlari.TriyajRenk,
+                KodIfadesi.KodAdi("b.triyaj", AcilKodlari.TriyajRenk,
                                           "'Triyaj bekliyor'"),
                 "metin", "Triyaj Adı", Hizalama: "orta", Genislik: 120, Bicim: "rozet",
                 Siralanabilir: false, Filtrelenebilir: false),
@@ -85,7 +85,7 @@ public static partial class KaynakKatalogu
                 Genislik: 80, Kodlar: AcEvetHayirKodlari),
             // Gridde KISA ad (sütun 120 px); çıkış penceresi tam adı gösteriyor.
             new("cikisAdi",
-                AcilKodlari.KodAdiIfadesi("b.cikis_sekli", AcilKodlari.CikisSekliKisa),
+                KodIfadesi.KodAdi("b.cikis_sekli", AcilKodlari.CikisSekliKisa),
                 "metin", "Çıkış", Hizalama: "orta", Genislik: 120,
                 Siralanabilir: false, Filtrelenebilir: false),
             new("cikisSekli", "b.cikis_sekli", "kod",   "Çıkış Kodu", Hizalama: "orta",

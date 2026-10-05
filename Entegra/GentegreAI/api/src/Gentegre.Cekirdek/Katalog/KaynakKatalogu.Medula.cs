@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// MEDULA LİSTELERİ (707) — takipler, hizmet kayıtları, faturalar, dönemler,
@@ -63,7 +63,9 @@ public static partial class KaynakKatalogu
             new("tutar",     "i.tutar",      "para",  "Tutar", Hizalama: "sag"),
             new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 150),
             new("tetkik",    "i.tetkik",     "mantik", "Tetkik", Hizalama: "orta", Genislik: 60),
-            new("durumAdi",  "case i.durum when 1 then 'Bekliyor' when 2 then 'Kabul' when 3 then 'Hata' when 4 then 'İptal' when 5 then 'Ücretli' else '' end",
+            // 0 (gönderilmedi) sözlükte var: eskiden `case`'te yoktu ve
+            //   gönderilmemiş hizmet kaydı gridde boş görünüyordu.
+            new("durumAdi",  KodIfadesi.KodAdi("i.durum", MedulaKodlari.IslemDurum),
                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 90, Filtrelenebilir: false),
             new("durum",     "i.durum",      "kod",   "Durum Kodu", Varsayilan: false),
             new("sonuc",     "case when i.sonuc_kod = '' then '' else i.sonuc_kod || ' · ' || i.sonuc_mesaj end", "metin", "Sonuç", Genislik: 260, Filtrelenebilir: false),
@@ -85,7 +87,7 @@ public static partial class KaynakKatalogu
             new("hastaId",     "f.hasta_id",        "sayi",  "Hasta Id", Varsayilan: false),
             new("belgeId",     "f.belge_id",        "sayi",  "Başvuru Id", Varsayilan: false),
             new("hekim",       "f.hekim_adi",       "metin", "Hekim", Genislik: 140),
-            new("turAdi",      "case f.fatura_turu when 1 then 'Ayaktan' when 2 then 'Yatan' when 3 then 'Günübirlik' when 4 then 'Acil' else '' end",
+            new("turAdi",      KodIfadesi.KodAdi("f.fatura_turu", MedulaKodlari.FaturaTuru),
                 "metin", "Tür", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
             new("donem",       "case when f.donem_yil is null then '' else f.donem_yil || '/' || lpad(f.donem_ay::text, 2, '0') end",
                 "metin", "Dönem", Hizalama: "orta", Genislik: 80, Filtrelenebilir: false),
@@ -94,8 +96,7 @@ public static partial class KaynakKatalogu
             new("katilim",     "f.hasta_katilim",   "para",  "Katılım", Hizalama: "sag"),
             new("fark",        "f.fark",            "para",  "Fark", Hizalama: "sag"),
             new("kesinti",     "f.kesinti",         "para",  "Kesinti", Hizalama: "sag"),
-            new("durumAdi",    "case f.durum when 1 then 'Taslak' when 2 then 'Kaydedildi' when 3 then 'Dönemde' when 4 then 'Dönem kapandı' "
-                             + "when 5 then 'İncelendi' when 6 then 'Ödendi' when 7 then 'İptal' else '' end",
+            new("durumAdi",    KodIfadesi.KodAdi("f.durum", MedulaKodlari.FaturaDurum),
                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 120, Filtrelenebilir: false),
             new("durum",       "f.durum",           "kod",   "Durum Kodu", Varsayilan: false),
             new("sonuc",       "case when f.sonuc_kod = '' then '' else f.sonuc_kod || ' · ' || f.sonuc_mesaj end", "metin", "Sonuç", Genislik: 220, Filtrelenebilir: false),
@@ -122,7 +123,7 @@ public static partial class KaynakKatalogu
             new("sonlandirma", "d.sonlandirma",  "tarih", "Sonlandırma", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("icmalNo",     "d.icmal_no",     "metin", "İcmal", Genislik: 120),
             new("odemeTarihi", "d.odeme_tarihi", "tarih", "Ödeme", Hizalama: "orta"),
-            new("durumAdi",    "case d.durum when 1 then 'Açık' when 2 then 'Sonlandırıldı' when 3 then 'İncelemede' when 4 then 'Kapandı' else '' end",
+            new("durumAdi",    KodIfadesi.KodAdi("d.durum", MedulaKodlari.DonemDurum),
                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
             new("durum",       "d.durum",        "kod",   "Durum Kodu", Varsayilan: false),
         });
@@ -171,7 +172,7 @@ public static partial class KaynakKatalogu
             new("baslangic", "r.baslangic",  "tarih", "Başlangıç", Hizalama: "orta"),
             new("bitis",     "r.bitis",      "tarih", "Bitiş", Hizalama: "orta"),
             new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 140),
-            new("durumAdi",  "case r.durum when 1 then 'Taslak' when 2 then 'İmzalı' when 3 then 'Medula kabul' when 4 then 'İptal' when 5 then 'Hata' else '' end",
+            new("durumAdi",  KodIfadesi.KodAdi("r.durum", MedulaKodlari.RaporDurum),
                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
             new("durum",     "r.durum",      "kod",   "Durum Kodu", Varsayilan: false),
             new("sonuc",     "r.medula_sonuc", "metin", "Medula Sonucu", Genislik: 200, Filtrelenebilir: false),
@@ -192,7 +193,7 @@ public static partial class KaynakKatalogu
             new("kaynak",    "q.kaynak_tablo || ' ' || coalesce(q.kaynak_id::text, '')", "metin", "Kaynak", Genislik: 150, Filtrelenebilir: false),
             new("hasta",     "q.hasta_adi",    "metin", "Hasta", Genislik: 170),
             new("belgeId",   "q.belge_id",     "sayi",  "Başvuru Id", Varsayilan: false),
-            new("durumAdi",  "case q.durum when 1 then 'Bekliyor' when 2 then 'Gönderildi' when 3 then 'Kabul' when 4 then 'Hata' when 5 then 'Elle müdahale' when 6 then 'İptal' else '' end",
+            new("durumAdi",  KodIfadesi.KodAdi("q.durum", MedulaKodlari.KuyrukDurum),
                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
             new("durum",     "q.durum",        "kod",   "Durum Kodu", Varsayilan: false),
             new("sonucKod",  "q.sonuc_kod",    "metin", "Kod", Hizalama: "orta", Genislik: 70),
