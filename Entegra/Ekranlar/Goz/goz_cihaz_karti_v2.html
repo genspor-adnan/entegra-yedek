@@ -49,7 +49,7 @@
     <span class="btn">🔌 Bağlantıyı sına</span>
     <span class="btn">📋 MWL gönder (deneme)</span>
     <span class="btn">🔗 Eşlenmeyenleri işle</span>
-    <span class="btn">🛠 Kalibrasyon ekle</span>
+    <span class="btn">🛠 Kalibrasyon kaydı (demirbaşta)</span>
     <span class="sp"></span>
     <span class="btn">⏸ Pasifleştir</span>
   </div>
@@ -220,26 +220,57 @@
 
       <!-- 2f -->
       <div class="panel" data-s="bakim">
-        <div class="yok">⚠ <b>Şemada karşılığı yok:</b> <code>goz_cihaz</code> tablosunda kalibrasyon / bakım alanı bulunmuyor.
-          İki seçenek var: (a) cihaz <b>demirbaşa bağlıysa</b> bakım kayıtları demirbaş modülünden okunur (tercih edilen - ikinci bir bakım
-          kaydı tutmak iki ayrı doğru üretir), (b) bağlı değilse <code>goz_cihaz</code>'a periyot + son kalibrasyon alanları eklenir.
-          <b>Karar verilmeden uygulanmaz.</b></div>
-        <div class="grp" style="margin-top:10px"><h5>Taslak düzen (a seçeneği · demirbaştan okunur)</h5>
+        <div class="bilgi">Kalibrasyon ve bakım <b>bu kartta tutulmaz</b>: cihaz biyomedikal modülündeki demirbaş kaydına bağlıdır
+          (<code>goz_cihaz.demirbas_id</code>) ve bütün bilgi oradan <b>salt okuma</b> gelir. Aynı cihaz için ikinci bir bakım geçmişi tutmak
+          iki ayrı "son kalibrasyon tarihi" üretirdi; akredite kalibrasyonun referans cihazı, belirsizliği ve sertifikası da yalnız orada
+          saklanıyor.</div>
+
+        <div class="grp" style="margin-top:10px"><h5>Demirbaş kaydı <span class="sonuk" style="text-transform:none">· salt okuma</span></h5>
           <div class="izgara">
-            <label class="fld"><span>Kalibrasyon periyodu</span><div class="inp pasif">6 ay <small>(demirbaş)</small></div></label>
+            <label class="fld"><span>Demirbaş no</span><div class="inp pasif">DMR-2024/0188 ↗</div></label>
+            <label class="fld"><span>Risk sınıfı</span><div class="inp pasif">Yüksek</div></label>
+            <label class="fld"><span>Durum</span><div class="inp pasif">Kullanımda</div></label>
+            <label class="fld"><span>Garanti bitiş</span><div class="inp pasif">14.03.2027</div></label>
+            <label class="fld"><span>Kalibrasyon periyodu</span><div class="inp pasif">6 ay</div></label>
             <label class="fld"><span>Son kalibrasyon</span><div class="inp pasif">12.08.2026</div></label>
-            <label class="fld"><span>Sonraki</span><div class="inp pasif">12.02.2027</div></label>
-            <label class="fld"><span>Durum</span><div class="inp pasif"><span class="chip c-ok">güncel</span></div></label>
+            <label class="fld"><span>Kalibrasyon geçerlilik</span><div class="inp pasif">12.02.2027 <span class="chip c-ok">güncel</span></div></label>
+            <label class="fld"><span>Bakım periyodu / sonraki</span><div class="inp pasif">12 ay · 14.05.2027</div></label>
           </div>
+          <div class="bilgi" style="margin-top:6px">Alanlar <code>demirbas</code> tablosundan: <code>kalibrasyon_periyot_ay</code> ·
+            <code>son_kalibrasyon</code> · <code>kalibrasyon_gecerlilik</code> · <code>bakim_periyot_ay</code> · <code>son_bakim</code> ·
+            <code>sonraki_bakim</code> · <code>garanti_bitis</code>. Düzenleme demirbaş kartında yapılır.</div>
         </div>
-        <table class="tbl">
-          <tr><th>Tarih</th><th>Tür</th><th>Yapan</th><th>Sonuç</th><th>Belge</th></tr>
-          <tr><td>12.08.2026</td><td>Kalibrasyon</td><td>Heidelberg servis</td><td><span class="chip c-ok">Uygun</span></td><td>📄 sertifika</td></tr>
-          <tr><td>14.05.2026</td><td>Periyodik bakım</td><td>Heidelberg servis</td><td><span class="chip c-ok">Uygun</span></td><td>📄 form</td></tr>
-          <tr><td>03.01.2026</td><td>Arıza · optik yol</td><td>Heidelberg servis</td><td><span class="chip c-bek">Parça değişti</span></td><td>📄 rapor</td></tr>
-        </table>
-        <div class="bilgi" style="margin-top:6px">Kalibrasyonu geçmiş cihazın <b>ölçümü yine alınır</b> ama görüntüleme listesinde uyarı çıkar:
-          kalibrasyonsuz cihaz ölçümünü trende sokmak yanlış "progresyon" üretir.</div>
+
+        <div class="grp"><h5>Kalibrasyon kayıtları <span class="sonuk" style="text-transform:none">· demirbas_kalibrasyon</span></h5>
+          <table class="tbl">
+            <tr><th>Tarih</th><th>Kayıt no</th><th>Tür</th><th>Sonuç</th><th>Geçerlilik</th><th>Yapan / firma</th><th>Referans cihaz</th><th>Belirsizlik</th><th></th></tr>
+            <tr class="sec"><td>12.08.2026</td><td class="kod">KAL-2026/0441</td><td><span class="chip c-gri">Kalibrasyon</span></td>
+              <td><span class="chip c-ok">Uygun</span></td><td>12.02.2027</td><td>Heidelberg servis</td>
+              <td class="kod">OPT-REF 12 · SRT-88190</td><td>±0,8 µm</td><td><span class="btn kucuk">📄</span></td></tr>
+            <tr><td>12.08.2026</td><td class="kod">EG-2026/0388</td><td><span class="chip c-gri">Elektriksel güvenlik</span></td>
+              <td><span class="chip c-ok">Uygun</span></td><td>12.08.2027</td><td>Biyomedikal birimi</td>
+              <td class="kod">Fluke ESA615</td><td class="sonuk">—</td><td><span class="btn kucuk">📄</span></td></tr>
+            <tr><td>10.02.2026</td><td class="kod">KAL-2026/0067</td><td><span class="chip c-gri">Kalibrasyon</span></td>
+              <td><span class="chip c-bek">Şartlı uygun</span></td><td>10.08.2026</td><td>Heidelberg servis</td>
+              <td class="kod">OPT-REF 12 · SRT-88190</td><td>±1,4 µm</td><td><span class="btn kucuk">📄</span></td></tr>
+          </table>
+          <div style="margin-top:6px"><span class="btn kucuk">↗ Kalibrasyon listesini aç</span> <span class="btn kucuk">＋ Kalibrasyon kaydı (demirbaşta)</span></div>
+        </div>
+
+        <div class="grp"><h5>Bakım / arıza iş emirleri <span class="sonuk" style="text-transform:none">· demirbas_is_emri</span></h5>
+          <table class="tbl">
+            <tr><th>Tarih</th><th>Tür</th><th>Öncelik</th><th>Konu</th><th>Yapan</th><th>Durum</th><th></th></tr>
+            <tr><td>14.05.2026</td><td><span class="chip c-gri">Periyodik bakım</span></td><td>Normal</td><td>Yıllık bakım · optik temizlik</td><td>Heidelberg servis</td><td><span class="chip c-ok">Kapandı</span></td><td><span class="btn kucuk">📄</span></td></tr>
+            <tr><td>03.01.2026</td><td><span class="chip c-red">Arıza</span></td><td>Yüksek</td><td>Optik yolda görüntü bozulması · parça değişimi</td><td>Heidelberg servis</td><td><span class="chip c-ok">Kapandı</span></td><td><span class="btn kucuk">📄</span></td></tr>
+          </table>
+          <div style="margin-top:6px"><span class="btn kucuk">↗ İş emri listesini aç</span> <span class="btn kucuk">＋ Arıza bildir (demirbaşta)</span></div>
+        </div>
+
+        <div class="bilgi">Kalibrasyonu <b>geçmiş</b> ya da sonucu <b>uygun değil</b> olan cihazın ölçümü yine alınır, ama görüntüleme
+          listesinde ve ölçüm satırında uyarı çıkar: kalibrasyonsuz cihaz ölçümünü trende sokmak yanlış "progresyon" üretir.
+          <b>Demirbaşa bağlı olmayan cihazda</b> bu sekme boş gelir ve listedeki kalibrasyon kolonu "—" gösterir; takip isteniyorsa
+          cihaz demirbaşa bağlanmalıdır.</div>
+      </div>
       </div>
     </div>
 
@@ -307,8 +338,13 @@ ve "eşleşmezse" davranışı: varsayılan <b>beklet</b>, çünkü ölçümü y
 eşik kaynağı, <b>zorunlu</b> işareti; "örnek mesajla sına" hiçbir şey yazmadan sonucu gösterir. Zorunlu alan eksikse mesaj kuyrukta kalır -
 yarım ölçüm sessizce eksik trend üretir.
 (e) <b>Mesaj günlüğü</b> - son mesajlar, ham gövde, eşle / yeniden işle; ham mesaj silinmez.
-(f) <b>Kalibrasyon / bakım</b> - <b>şemada karşılığı yok</b>: ya demirbaş modülünden okunur (tercih) ya da <code>goz_cihaz</code>'a alan eklenir;
-karar verilmeden uygulanmaz. Kalibrasyonu geçmiş cihazın ölçümü alınır ama listede uyarı çıkar.<br>
+(f) <b>Kalibrasyon / bakım</b> - <b>kullanıcı kararı (05.10.2026): demirbaştan okunur.</b> Bu kart hiçbir bakım verisi tutmaz;
+<code>goz_cihaz.demirbas_id</code> ile biyomedikal modülüne bağlanır ve sekme <b>salt okuma</b> gösterir: <code>demirbas</code>
+(periyot · son kalibrasyon · <code>kalibrasyon_gecerlilik</code> · son / sonraki bakım · garanti), <code>demirbas_kalibrasyon</code>
+(tür · sonuç · geçerlilik · referans cihaz · sertifika · belirsizlik · ortam koşulları) ve <code>demirbas_is_emri</code>
+(periyodik bakım / arıza). Ekleme ve düzenleme demirbaş kartında yapılır - ikinci bir bakım geçmişi iki ayrı "son kalibrasyon tarihi"
+üretirdi. Kalibrasyonu geçmiş ya da "uygun değil" olan cihazın ölçümü alınır ama listede ve ölçüm satırında uyarı çıkar;
+<b>demirbaşa bağlı olmayan cihazda</b> sekme boş gelir ve kalibrasyon kolonu "—" olur.<br>
 
 <span class="n">3</span><b>Sağ sütun:</b> MWL bilgisi (bu cihazda eşleşme hatası beklenmez), durum (dinleyici · son mesaj · bugün çekim ·
 kuyruk · hata), son 24 saat sayıları ve çekim→ekran gecikmesi, cihazın tetkik dağılımı, hızlı işlem, kayıt bilgisi.

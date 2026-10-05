@@ -265,10 +265,12 @@
         <div class="bilgi" style="margin-top:6px">Eşlenen alanlar <code>goz_goruntuleme_olcum</code> satırlarına ayrıştırılır - trend ve eşik kontrolü bunlardan hesaplanır.</div>
       </div>
 
-      <div class="bl"><h5>Kalibrasyon</h5>
+      <div class="bl"><h5>Kalibrasyon <span class="sonuk">· demirbaştan</span></h5>
+        <div class="satir"><span>Demirbaş</span>DMR-2024/0188 ↗</div>
         <div class="satir"><span>Son</span>12.08.2026</div>
         <div class="satir"><span>Periyot</span>6 ay</div>
-        <div class="satir"><span>Sonraki</span>12.02.2027</div>
+        <div class="satir"><span>Geçerlilik</span>12.02.2027 <span class="chip c-ok">güncel</span></div>
+        <div class="bilgi" style="margin-top:6px">Salt okuma: kayıt demirbaş kartında tutulur.</div>
       </div>
 
       <div class="bl"><h5>Hızlı işlem</h5>
@@ -298,7 +300,8 @@ hatalı mesaj (çözümlenemedi), kalibrasyon günü geçmiş.<br>
 bağlantı seçicisi, sağda bağımsız işaretler (MWL destekli · Eşlenmeyen var · Kalibrasyon gecikmiş).<br>
 
 <span class="n">3</span><b>Liste:</b> cihaz (altında yer), tür, model / seri, bağlantı (+ adres), MWL desteği, son mesaj zamanı (gecikme kırmızı),
-bugün çekim, eşlenmeyen sayısı, kalibrasyon tarihi, durum (renkli nokta). <b>Alt sekmeler:</b>
+bugün çekim, eşlenmeyen sayısı, <b>kalibrasyon geçerlilik tarihi</b> (demirbaştan - <code>demirbas.kalibrasyon_gecerlilik</code>,
+cihaz <code>goz_cihaz.demirbas_id</code> ile bağlı; bağlı değilse "—"), durum (renkli nokta). <b>Alt sekmeler:</b>
 (a) <b>Gelen mesaj kuyruğu</b> - ham mesaj silinmez, eşleşme düzeltilip <b>yeniden işlenir</b>; ham gövde panelde görünür.
 (b) <b>Çalışma listesi (MWL)</b> - istemler hangi cihaza gitti; MWL desteklemeyen cihazda tekniker hastayı cihazda seçer ve eşleşme
 protokol numarasıyla kurulur (protokol alanı boş gelen mesaj bu yüzden kuyrukta bekler).
@@ -307,7 +310,8 @@ ameliyat planına yazılır; <b>hangi formülle hesaplandığı kayıtta kalır<
 
 <span class="n">4</span><b>Sağ:</b> cihaz tanımı, bağlantı ayarları + "bağlantıyı sına", son 24 saat sayıları ve ortalama gecikme
 (çekim → ekran), <b>ölçüm alan eşlemesi</b> (cihaz alanı → <code>goz_goruntuleme_olcum</code> kolonu; trend ve eşik kontrolü bundan hesaplanır),
-kalibrasyon periyodu, hızlı işlem. Sol ve sağ paneller katlanır.
+kalibrasyon durumu (<b>demirbaştan salt okuma</b>; ekleme / düzenleme demirbaş kartında), hızlı işlem. Sol ve sağ paneller katlanır.
+Kalibrasyon gecikmiş cihazın ölçümü alınır ama uyarı çıkar - detay kart mockup'ında (<code>goz_cihaz_karti_v2.html</code>).
 </div></div>
 
 <script>
