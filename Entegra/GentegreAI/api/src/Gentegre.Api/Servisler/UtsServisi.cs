@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Uts;
 using Gentegre.Veri;
@@ -115,8 +115,8 @@ public sealed class UtsServisi
             Adt: string.IsNullOrEmpty(seriNo) && adet > 0 ? adet : null);
 
         var sonuc = await GonderAsync(TurAlma, istek, subeId, baglam,
-            stokId, null, null, null, adet, null,
-            kurumNo, "", urunNo, lotNo, seriNo, null, null, iptal);
+            new Iz(StokId: stokId, Adet: adet, KurumNo: kurumNo,
+                   UrunNo: urunNo, LotNo: lotNo, SeriNo: seriNo), iptal);
 
         if (sonuc.Basarili && envanterId is > 0)
             await _depo.EnvanterAlindiAsync(envanterId.Value, adet, baglam, iptal);
@@ -129,19 +129,19 @@ public sealed class UtsServisi
         int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var s = UtsDogrulama.SeriNo(seriNo);
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
         var k = UtsDogrulama.KurumNo(kurumNo);
         var b = UtsDogrulama.BelgeNo(belgeNo);
-        var adt = UtsDogrulama.AdetKurali(s, l, adet);
 
-        var istek = new UtsVermeIstek(Uno: u, Kun: k, Bno: b, Lno: l, Sno: s, Adt: adt,
+        var istek = new UtsVermeIstek(Uno: kimlik.Uno, Kun: k, Bno: b,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             Git: git is null ? null : UtsDogrulama.Tarih(git, "git", "Gerçek işlem tarihi"));
 
         var sonuc = await GonderAsync(TurVerme, istek, subeId, baglam,
-            stokId, seriLotId, belgeId, belgeSatirId, adt ?? 1, git,
-            k, b, u, l ?? "", s ?? "", null, null, iptal);
+            new Iz(StokId: stokId, SeriLotId: seriLotId, BelgeId: belgeId,
+                   BelgeSatirId: belgeSatirId, Adet: kimlik.IzAdet, Git: git,
+                   KurumNo: k, BelgeNo: b, UrunNo: kimlik.Uno,
+                   LotNo: kimlik.LotMetin, SeriNo: kimlik.SeriMetin), iptal);
         return sonuc.Yanit;
     }
 
@@ -168,20 +168,20 @@ public sealed class UtsServisi
         int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var s = UtsDogrulama.SeriNo(seriNo);
-        var adt = UtsDogrulama.AdetKurali(s, l, adet);
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
         var tarih = UtsDogrulama.Tarih(git, "git", "Kullanım tarihi");
 
         var tckn = (hastaTckn ?? "").Trim();
-        var istek = new UtsKullanimIstek(Uno: u, Git: tarih, Lno: l, Sno: s, Adt: adt,
+        var istek = new UtsKullanimIstek(Uno: kimlik.Uno, Git: tarih,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             Tkn: tckn.Length > 0 ? tckn : null,
             HastaAdi: Bosalt(hastaAdi), HastaSoyadi: Bosalt(hastaSoyadi));
 
         return await GonderAsync(TurKullanim, istek, subeId, baglam,
-            stokId, seriLotId, belgeId, belgeSatirId, adt ?? 1, git,
-            "", "", u, l ?? "", s ?? "", null, null, iptal);
+            new Iz(StokId: stokId, SeriLotId: seriLotId, BelgeId: belgeId,
+                   BelgeSatirId: belgeSatirId, Adet: kimlik.IzAdet, Git: git,
+                   UrunNo: kimlik.Uno, LotNo: kimlik.LotMetin,
+                   SeriNo: kimlik.SeriMetin), iptal);
 
         static string? Bosalt(string? d) =>
             string.IsNullOrWhiteSpace(d) ? null : d.Trim();
@@ -192,17 +192,15 @@ public sealed class UtsServisi
         decimal adet, DateTime? urt, DateTime? skt,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var sn = UtsDogrulama.SeriNo(seriNo);
-        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
-        var istek = new UtsUretimIstek(Uno: u,
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
+        var istek = new UtsUretimIstek(Uno: kimlik.Uno,
             Urt: UtsDogrulama.Tarih(urt, "urt", "Üretim tarihi"),
-            Lno: l, Sno: sn, Adt: adt,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             Skt: skt is null ? null : UtsDogrulama.Tarih(skt, "skt", "Son kullanma"));
         var sonuc = await GonderAsync(TurUretim, istek, subeId, baglam,
-            null, null, null, null, adt ?? 1, urt, "", "", u, l ?? "", sn ?? "",
-            urt, skt, iptal);
+            new Iz(Adet: kimlik.IzAdet, Git: urt, UrunNo: kimlik.Uno,
+                   LotNo: kimlik.LotMetin, SeriNo: kimlik.SeriMetin,
+                   Urt: urt, Skt: skt), iptal);
         return sonuc.Yanit;
     }
 
@@ -211,24 +209,22 @@ public sealed class UtsServisi
         decimal adet, DateTime? urt, DateTime? skt, int? ithalUlke, int? menseiUlke,
         string? gumrukBeyanname, int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var sn = UtsDogrulama.SeriNo(seriNo);
-        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
         if (ithalUlke is null or <= 0 || menseiUlke is null or <= 0)
             throw GentegreHatasi.Dogrulama(
                 "İthal edildiği ülke (IEU) ve menşei ülke (MEU) kodları zorunludur (Türkiye 792).",
                 new AlanHatasi("ithalUlke", "ÜTS sayısal ülke kodu."));
         var gbn = (gumrukBeyanname ?? "").Trim();
-        var istek = new UtsIthalatIstek(Uno: u,
+        var istek = new UtsIthalatIstek(Uno: kimlik.Uno,
             Urt: UtsDogrulama.Tarih(urt, "urt", "Üretim tarihi"),
             IthalUlke: ithalUlke, MenseiUlke: menseiUlke,
-            Lno: l, Sno: sn, Adt: adt,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             Skt: skt is null ? null : UtsDogrulama.Tarih(skt, "skt", "Son kullanma"),
             GumrukBeyanname: gbn.Length > 0 ? gbn : null);
         var sonuc = await GonderAsync(TurIthalat, istek, subeId, baglam,
-            null, null, null, null, adt ?? 1, urt, "", gbn, u, l ?? "", sn ?? "",
-            urt, skt, iptal);
+            new Iz(Adet: kimlik.IzAdet, Git: urt, BelgeNo: gbn, UrunNo: kimlik.Uno,
+                   LotNo: kimlik.LotMetin, SeriNo: kimlik.SeriMetin,
+                   Urt: urt, Skt: skt), iptal);
         return sonuc.Yanit;
     }
 
@@ -237,23 +233,23 @@ public sealed class UtsServisi
         decimal adet, string? tur, string? digerAciklama,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var sn = UtsDogrulama.SeriNo(seriNo);
-        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
+        // KOD LİSTEDEN DOĞRULANIR (yoksa ÜTS reddediyordu - bir ağ turu ve
+        //   anlaşılmaz hata metni); mesajdaki liste de tek kaynaktan.
         var t = (tur ?? "").Trim();
-        if (t.Length == 0)
+        if (t.Length == 0 || !UtsKodlari.HekTurleri.Contains(t))
             throw GentegreHatasi.Dogrulama("Kayıp/HEK türü zorunludur.",
-                new AlanHatasi("tur", "HEK, DOGAL_AFET, YANGIN, CALINMA, STOK_DUZELTME, DIGER."));
+                new AlanHatasi("tur", UtsKodlari.Liste(UtsKodlari.HekTurleri)));
         var dta = (digerAciklama ?? "").Trim();
-        if (t == "DIGER" && dta.Length == 0)
+        if (t == UtsKodlari.Diger && dta.Length == 0)
             throw GentegreHatasi.Dogrulama("Türü 'Diğer' ise açıklama zorunludur.",
                 new AlanHatasi("digerAciklama", "Gerekçeyi yazın."));
-        var istek = new UtsHekIstek(Uno: u, Tur: t, Lno: l, Sno: sn, Adt: adt,
+        var istek = new UtsHekIstek(Uno: kimlik.Uno, Tur: t,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             DigerAciklama: dta.Length > 0 ? dta : null);
         var sonuc = await GonderAsync(TurHek, istek, subeId, baglam,
-            null, null, null, null, adt ?? 1, null, "", "", u, l ?? "", sn ?? "",
-            null, null, iptal);
+            new Iz(Adet: kimlik.IzAdet, UrunNo: kimlik.Uno,
+                   LotNo: kimlik.LotMetin, SeriNo: kimlik.SeriMetin), iptal);
         return sonuc.Yanit;
     }
 
@@ -262,42 +258,55 @@ public sealed class UtsServisi
         decimal adet, string? gerekce, string? digerAciklama, string? belgeNo,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
-        var u = UtsDogrulama.Uno(uno);
-        var l = UtsDogrulama.LotNo(lotNo);
-        var sn = UtsDogrulama.SeriNo(seriNo);
-        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var kimlik = UtsDogrulama.TekilKimlik(uno, lotNo, seriNo, adet);
         var g = (gerekce ?? "").Trim();
-        if (g.Length == 0)
+        if (g.Length == 0 || !UtsKodlari.ImhaGerekceleri.Contains(g))
             throw GentegreHatasi.Dogrulama("İmha gerekçesi zorunludur.",
-                new AlanHatasi("gerekce", "GRK listesinden bir değer seçin."));
+                new AlanHatasi("gerekce", UtsKodlari.Liste(UtsKodlari.ImhaGerekceleri)));
         var b = UtsDogrulama.BelgeNo(belgeNo);
         var dga = (digerAciklama ?? "").Trim();
-        if (g == "DIGER" && dga.Length == 0)
+        if (g == UtsKodlari.Diger && dga.Length == 0)
             throw GentegreHatasi.Dogrulama("Gerekçe 'Diğer' ise açıklama zorunludur.",
                 new AlanHatasi("digerAciklama", "Gerekçeyi yazın."));
-        var istek = new UtsImhaIstek(Uno: u, Gerekce: g, BelgeNo: b,
-            Lno: l, Sno: sn, Adt: adt,
+        var istek = new UtsImhaIstek(Uno: kimlik.Uno, Gerekce: g, BelgeNo: b,
+            Lno: kimlik.Lno, Sno: kimlik.Sno, Adt: kimlik.Adt,
             DigerAciklama: dga.Length > 0 ? dga : null);
         var sonuc = await GonderAsync(TurImha, istek, subeId, baglam,
-            null, null, null, null, adt ?? 1, null, "", b, u, l ?? "", sn ?? "",
-            null, null, iptal);
+            new Iz(Adet: kimlik.IzAdet, BelgeNo: b, UrunNo: kimlik.Uno,
+                   LotNo: kimlik.LotMetin, SeriNo: kimlik.SeriMetin), iptal);
         return sonuc.Yanit;
     }
 
+    /// <summary>
+    /// Bildirimin İZ ALANLARI: ÜTS'ye gitmeyen ama <c>uts_bildirim</c> satırına
+    /// yazılan bağlar (hangi stok, hangi belge satırı, hangi lot) ve kayıt
+    /// alanları.
+    ///
+    /// <para><b>Neden kayıt:</b> gönderim yardımcısı on üç pozisyonel parametre
+    /// alıyordu ve çağrılar <c>null, null, null, null, adt ?? 1, urt, "", "",
+    /// u, l ?? "", sn ?? "", urt, skt</c> gibi okunamaz diziler hâline
+    /// gelmişti. Yanlış sıraya yazılan bir alan (ör. kurum no ile belge no'nun
+    /// yer değiştirmesi) derleyiciye takılmaz, bildirim ÜTS'ye yanlış izle
+    /// giderdi.</para>
+    /// </summary>
+    private sealed record Iz(
+        int? StokId = null, int? SeriLotId = null, int? BelgeId = null, int? BelgeSatirId = null,
+        decimal Adet = 1, DateTime? Git = null,
+        string KurumNo = "", string BelgeNo = "", string UrunNo = "",
+        string LotNo = "", string SeriNo = "",
+        DateTime? Urt = null, DateTime? Skt = null);
+
     /// <summary>Ortak gönderim: kaydet(durum 0) → POST → sonucu yaz.</summary>
     private async Task<(bool Basarili, string Mesaj, object Yanit)> GonderAsync<T>(
-        short tur, T istek, int? subeId, YazmaBaglami baglam,
-        int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
-        decimal adet, DateTime? git,
-        string kurumNo, string belgeNo, string urunNo, string lotNo, string seriNo,
-        DateTime? urt, DateTime? skt, CancellationToken iptal)
+        short tur, T istek, int? subeId, YazmaBaglami baglam, Iz iz, CancellationToken iptal)
     {
         var hesap = await HesapAsync(subeId, iptal);
         var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
 
         var bildirimId = await _depo.BildirimEkleAsync(
-            tur, baglam, hesap.TestMi, stokId, seriLotId, belgeId, belgeSatirId,
-            adet, git, kurumNo, belgeNo, urunNo, lotNo, seriNo, urt, skt, govde, iptal);
+            tur, baglam, hesap.TestMi, iz.StokId, iz.SeriLotId, iz.BelgeId, iz.BelgeSatirId,
+            iz.Adet, iz.Git, iz.KurumNo, iz.BelgeNo, iz.UrunNo, iz.LotNo, iz.SeriNo,
+            iz.Urt, iz.Skt, govde, iptal);
 
         var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
             Istemci(), hesap, Turler[tur].EkleYolu, govde,
@@ -699,8 +708,10 @@ public sealed class UtsServisi
                 Git: b.BelgeTarihi.ToString("yyyy-MM-dd",
                     System.Globalization.CultureInfo.InvariantCulture));
             var sonuc = await GonderAsync(TurVerme, istek, b.SubeId, baglam,
-                i.StokId, i.SeriLotId, belgeId, i.BelgeSatirId, adt ?? 1, b.BelgeTarihi,
-                b.TarafUtsNo, b.BelgeNo, i.UrunNo, i.LotNo, i.SeriNo, null, null, iptal);
+                new Iz(StokId: i.StokId, SeriLotId: i.SeriLotId, BelgeId: belgeId,
+                       BelgeSatirId: i.BelgeSatirId, Adet: adt ?? 1, Git: b.BelgeTarihi,
+                       KurumNo: b.TarafUtsNo, BelgeNo: b.BelgeNo, UrunNo: i.UrunNo,
+                       LotNo: i.LotNo, SeriNo: i.SeriNo), iptal);
             return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Verme",
                 sonuc.Basarili, sonuc.Mesaj);
         }
@@ -720,8 +731,10 @@ public sealed class UtsServisi
             var istek = new UtsAlmaIstek(Vbi: es.Value.Bid,
                 Adt: i.SeriNo.Length == 0 && adet > 0 ? adet : null);
             var sonuc = await GonderAsync(TurAlma, istek, b.SubeId, baglam,
-                i.StokId, i.SeriLotId, belgeId, i.BelgeSatirId, adet, b.BelgeTarihi,
-                "", b.BelgeNo, i.UrunNo, i.LotNo, i.SeriNo, null, null, iptal);
+                new Iz(StokId: i.StokId, SeriLotId: i.SeriLotId, BelgeId: belgeId,
+                       BelgeSatirId: i.BelgeSatirId, Adet: adet, Git: b.BelgeTarihi,
+                       BelgeNo: b.BelgeNo, UrunNo: i.UrunNo,
+                       LotNo: i.LotNo, SeriNo: i.SeriNo), iptal);
             if (sonuc.Basarili)
                 await _depo.EnvanterAlindiAsync(es.Value.Id, adet, baglam, iptal);
             return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Alma",

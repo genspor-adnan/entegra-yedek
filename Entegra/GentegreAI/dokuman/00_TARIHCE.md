@@ -19131,3 +19131,36 @@ satır), iş yine etiketlerin tekilleştirilmesi oldu.
   0 kodunun yeni etiketi SQL'de sınandı (0 → "Gönderilmedi", 9 → boş). Tarayıcıda
   Medula hizmet kayıtları listesi ve fatura & dönem ekranı açıldı ("Açık",
   "Kaydedildi").
+
+## 05.10.2026 — ÜTS refaktörü (bir kapı eklendi, gerisi davranışsız)
+
+Kullanıcı: *"uts kısmını da refaktor yap"*. `UtsServisi.cs` 861 satırdı; iki tekrar
+deseni vardı.
+
+* **Tekil kimlik doğrulaması yedi metotta aynı dört satırdı** (UNO · LNO · SNO · ADT
+  kuralı) ve değişken adları tutarsızdı (`s` / `sn`). Dördü birlikte anlam taşıyor -
+  adet kuralı seri/lot doluluğuna bakıyor, yani sıra zorunlu. →
+  `UtsDogrulama.TekilKimlik(...)` + `UtsTekilKimlik` kaydı (`Adt` null olabilir: tekil
+  takipte ÜTS'ye adet GÖNDERİLMEZ, gönderilirse bildirim reddedilir).
+* **Gönderim yardımcısı 18 parametre alıyordu** ve dokuz çağrı
+  `null, null, null, null, adt ?? 1, urt, "", "", u, l ?? "", sn ?? "", urt, skt`
+  gibi okunamaz dizilere dönüşmüştü; yanlış sıraya yazılan bir alan (kurum no ile
+  belge no'nun yer değişmesi gibi) derleyiciye takılmaz, bildirim ÜTS'ye yanlış izle
+  giderdi. → `Iz` kaydı (varsayılanlı, isimli alanlar). Dokuz çağrının her alanı
+  taşımadan önceki pozisyonla tek tek karşılaştırıldı.
+* **Eklenen kapı (davranış değişikliği):** HEK/zayiat türü ve imha gerekçesi
+  doğrulanmıyordu - yalnız "boş mu" ve "DIGER ise açıklama var mı" bakılıyordu. Yazım
+  hatalı kod ÜTS'ye gidiyor ve oradan dönüyordu. Geçerli liste ayrıca hata mesajının
+  içinde elle yazılıydı. → yeni `Cekirdek/Uts/UtsKodlari.cs`; kod listede yoksa
+  **400 DOGRULAMA** ve mesajdaki geçerli değerler listeden üretiliyor.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti. Uçlar denendi: geçersiz HEK
+  türü ve geçersiz imha gerekçesi 400 DOGRULAMA + liste mesajı döndü; geçerli kodla
+  gönderim yolu uçtan uca çalıştı (iz kaydı yazıldı, POST yapıldı, sonuç kaydedildi,
+  `uts_bildirim` satırı tur 6 / adet 1 / durum 2).
+* **DİKKAT - dış sisteme istek gitti:** dev veritabanındaki ÜTS hesabı CANLI adrese
+  işaretli (`fn_uts_hesap`: `url = https://utsuygulama.saglik.gov.tr`, `test_mi = false`).
+  Doğrulama için gönderilen HEK bildirimi gerçek ÜTS'ye ulaştı ve "Tekil Ürün
+  bulunamadı (UTS-H002)" ile REDDEDİLDİ - Bakanlık tarafında kayıt oluşmadı. Dev
+  veritabanına yazılan deneme satırı silindi (`uts_bildirim` yeniden 0 satır). Dev
+  hesabının test adresine (`test_mi = true`) çevrilmesi gerekir; o yapılmadan ÜTS
+  uçları canlı veriyle denenmemeli.

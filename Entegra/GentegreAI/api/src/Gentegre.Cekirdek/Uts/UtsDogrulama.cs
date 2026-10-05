@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Gentegre.Cekirdek.Sozlesme;
 
 namespace Gentegre.Cekirdek.Uts;
@@ -75,6 +75,23 @@ public static class UtsDogrulama
             throw GentegreHatasi.Dogrulama("Lot takipli üründe adet (ADT) 1'den küçük olamaz.",
                 new AlanHatasi("adet", "En az 1."));
         return adet;
+    }
+
+    /// <summary>
+    /// ÜRÜN KİMLİĞİ + ADET tek adımda doğrulanır: her bildirim metodu
+    /// (alma, verme, kullanım, üretim, ithalat, HEK, imha) aynı dört satırı
+    /// yazıyordu - UNO, LNO, SNO ve ADT kuralı. Dördü birlikte anlam taşıyor:
+    /// adet kuralı seri / lot doluluğuna bakıyor, yani sırayla çağrılmaları
+    /// zorunlu. Ayrı ayrı yazıldığında bir metotta sıra kaçarsa (ADT kuralına
+    /// doğrulanmamış seri verilirse) hata ÜTS'den dönerdi.
+    /// </summary>
+    public static UtsTekilKimlik TekilKimlik(string? uno, string? lotNo, string? seriNo,
+                                             decimal adet)
+    {
+        var u = Uno(uno);
+        var l = LotNo(lotNo);
+        var s = SeriNo(seriNo);
+        return new UtsTekilKimlik(u, l, s, AdetKurali(s, l, adet));
     }
 
     /// <summary>
