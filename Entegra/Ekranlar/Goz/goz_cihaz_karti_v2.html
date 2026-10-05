@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Cihazı — Kart Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  /* KİMLİK ŞERİDİ: cihazın "kim olduğu" her sekmede görünür kalmalı -
+     ayarlar sekmesinde hangi cihazı düzenlediğini unutmak kolaydır. */
+  .kml{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr 1fr .9fr;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe;font-size:11.5px}
+  .kml .et{display:block;font-size:10px;color:var(--muted)}
+  .kml b{color:var(--navy)}
+  .nokta{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .n-ok{background:#2e7d46} .n-uy{background:#e0a33a} .n-kr{background:#b3261e} .n-ps{background:#9aa7b4}
+  .ic2{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;padding:10px 14px}
+  .panel{display:none} .panel.on{display:block}
+  .grp{margin-bottom:12px}
+  .grp h5{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line2);padding-bottom:4px}
+  .izgara{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
+  .izgara.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fld{display:flex;flex-direction:column;gap:2px;font-size:11.5px}
+  .fld span{font-size:10px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;padding:4px 7px;min-height:24px;font-size:11.5px}
+  .inp.pasif{background:#f3f6fa;color:var(--muted)}
+  .inp.kod{font-family:Consolas,monospace;font-size:11px}
+  .tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+  .tbl th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573}
+  .tbl td{border-bottom:1px solid #eef2f6;padding:4px 7px}
+  .tbl td.kod{font-family:Consolas,monospace;font-size:11px;color:#44546a}
+  .tbl tr.sec td{background:var(--sel)}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .uyar-k{border:1px solid #f2ddbf;background:#fdf6e3;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#7a5a12;margin-bottom:10px}
+  .ham{font-family:Consolas,monospace;font-size:10.5px;background:#f7f9fc;border:1px solid var(--line2);border-radius:4px;padding:6px 8px;white-space:pre-wrap;color:#44546a}
+  .krm{color:#b3261e;font-weight:bold}
+  .yok{border:1px dashed #e0c9a0;background:#fffaf0;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#7a5a12}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔌 Göz Cihazı <span class="rz">OCT-1</span><span class="rz">Spectralis</span><span class="rz">DICOM</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">🔌 Bağlantıyı sına</span>
+    <span class="btn">📋 MWL gönder (deneme)</span>
+    <span class="btn">🔗 Eşlenmeyenleri işle</span>
+    <span class="btn">🛠 Kalibrasyon ekle</span>
+    <span class="sp"></span>
+    <span class="btn">⏸ Pasifleştir</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kml">
+    <div><span class="et">Cihaz</span><b style="font-size:13px">OCT-1 · Spectralis</b></div>
+    <div><span class="et">Tür</span><b>OCT</b></div>
+    <div><span class="et">Seri no</span><b>S-4412</b></div>
+    <div><span class="et">Yer</span><b>OCT / GA odası</b></div>
+    <div><span class="et">Son mesaj</span><b>10:45</b> <span class="sonuk">· 2 dk önce</span></div>
+    <div><span class="et">Durum</span><b><span class="nokta n-ok"></span>Çalışıyor</b></div>
+  </div>
+
+  <div class="sekmeler">
+    <span class="sek on" data-s="tanim">Tanım</span>
+    <span class="sek" data-s="baglanti">Bağlantı</span>
+    <span class="sek" data-s="tetkik">Tetkikler <span class="say">4</span></span>
+    <span class="sek" data-s="esleme">Ölçüm eşlemesi <span class="say">9</span></span>
+    <span class="sek" data-s="mesaj">Mesaj günlüğü <span class="say">11</span></span>
+    <span class="sek" data-s="bakim">Kalibrasyon / bakım</span>
+  </div>
+
+  <div class="ic2">
+    <div>
+      <!-- 2a -->
+      <div class="panel on" data-s="tanim">
+        <div class="grp"><h5>Kimlik</h5>
+          <div class="izgara">
+            <label class="fld"><span>Kod *</span><div class="inp kod">OCT1</div></label>
+            <label class="fld"><span>Ad *</span><div class="inp">OCT-1</div></label>
+            <label class="fld"><span>Tür *</span><div class="inp">OCT ▾</div></label>
+            <label class="fld"><span>Aktif</span><div class="inp">☑ Aktif</div></label>
+            <label class="fld"><span>Üretici</span><div class="inp">Heidelberg Engineering</div></label>
+            <label class="fld"><span>Model</span><div class="inp">Spectralis OCT2</div></label>
+            <label class="fld"><span>Seri no</span><div class="inp">S-4412</div></label>
+            <label class="fld"><span>Yazılım sürümü</span><div class="inp">6.16.8</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Yer ve sorumluluk</h5>
+          <div class="izgara">
+            <label class="fld"><span>Şube</span><div class="inp pasif">Merkez</div></label>
+            <label class="fld"><span>Oda / birim</span><div class="inp">OCT / GA odası ▾</div></label>
+            <label class="fld"><span>Sorumlu</span><div class="inp">Tekn. Z. Ak ▾</div></label>
+            <label class="fld"><span>Demirbaş kaydı</span><div class="inp">DMR-2024/0188 · Spectralis ↗</div></label>
+          </div>
+          <div class="bilgi" style="margin-top:6px">Demirbaş bağı (<code>goz_cihaz.demirbas_id</code>) zorunlu değil; <b>bağlıysa</b> garanti,
+            servis ve bakım kayıtları demirbaş kartından okunur - burada ikinci kez tutulmaz.</div>
+        </div>
+        <div class="grp"><h5>Tetkik varsayılanları</h5>
+          <div class="izgara">
+            <label class="fld"><span>Varsayılan göz</span><div class="inp">İstemden gelir ▾</div></label>
+            <label class="fld"><span>Dilatasyon ister</span><div class="inp">☐ Hayır</div></label>
+            <label class="fld"><span>Çekim süresi (dk)</span><div class="inp">8</div></label>
+            <label class="fld"><span>Eşzamanlı çekim</span><div class="inp">1</div></label>
+          </div>
+          <div class="bilgi" style="margin-top:6px">Çekim süresi ve eşzamanlı çekim sayısı <b>sıra tahmini</b> içindir (görüntüleme listesinde
+            "sırada 3." yazarken kullanılır); kısıt değildir.</div>
+        </div>
+      </div>
+
+      <!-- 2b -->
+      <div class="panel" data-s="baglanti">
+        <div class="grp"><h5>Protokol</h5>
+          <div class="izgara">
+            <label class="fld"><span>Biçim *</span><div class="inp">DICOM (MWL + sonuç) ▾</div></label>
+            <label class="fld"><span>MWL desteği</span><div class="inp">☑ Var</div></label>
+            <label class="fld"><span>Dinleyici durumu</span><div class="inp"><span class="nokta n-ok"></span>Dinliyor</div></label>
+            <label class="fld"><span>Son mesaj</span><div class="inp pasif">05.10.2026 10:45</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>DICOM ayarları</h5>
+          <div class="izgara">
+            <label class="fld"><span>Cihaz IP</span><div class="inp kod">192.168.1.40</div></label>
+            <label class="fld"><span>Port</span><div class="inp kod">104</div></label>
+            <label class="fld"><span>Cihaz AE başlığı</span><div class="inp kod">SPECTRALIS1</div></label>
+            <label class="fld"><span>Bizim AE başlığı</span><div class="inp kod">GENOTIP</div></label>
+            <label class="fld"><span>Zaman aşımı (sn)</span><div class="inp">30</div></label>
+            <label class="fld"><span>Yeniden deneme</span><div class="inp">3</div></label>
+            <label class="fld"><span>Sonuç türü</span><div class="inp">OPT · OP · SC ▾</div></label>
+            <label class="fld"><span>Görüntü saklama</span><div class="inp">DOSYA (hash) ▾</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Klasör ayarları <span class="sonuk" style="text-transform:none">· biçim "XML / CSV / PDF klasörü" seçilince açılır</span></h5>
+          <div class="izgara k2">
+            <label class="fld"><span>İzlenen klasör</span><div class="inp kod pasif">\\gen-oct\iol\out</div></label>
+            <label class="fld"><span>Dosya deseni</span><div class="inp kod pasif">*.xml</div></label>
+            <label class="fld"><span>İşlenen dosya</span><div class="inp pasif">arşiv klasörüne taşı ▾</div></label>
+            <label class="fld"><span>Kod sayfası</span><div class="inp pasif">UTF-8 ▾</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Hasta eşleştirme</h5>
+          <div class="izgara">
+            <label class="fld"><span>Anahtar *</span><div class="inp">Protokol no ▾</div></label>
+            <label class="fld"><span>Yedek anahtar</span><div class="inp">Hasta no (H) ▾</div></label>
+            <label class="fld"><span>Eşleşmezse</span><div class="inp">kuyrukta beklet ▾</div></label>
+            <label class="fld"><span>Gün penceresi</span><div class="inp">1 gün</div></label>
+          </div>
+          <div class="bilgi" style="margin-top:6px"><b>Eşleşmezse "beklet"</b> varsayılandır: ölçümü yanlış hastaya yazmak, hiç yazmamaktan
+            kötüdür. Kuyruktaki mesaj elle eşlenip yeniden işlenir.</div>
+        </div>
+        <div class="grp"><h5>Son sınama</h5>
+          <div class="kart" style="margin:0">
+            <div class="sat"><span>Zaman</span>05.10.2026 09:12</div>
+            <div class="sat"><span>Sonuç</span><span class="chip c-ok">C-ECHO başarılı · 42 ms</span></div>
+            <div class="sat"><span>MWL sorgusu</span><span class="chip c-ok">5 kayıt döndü</span></div>
+            <div class="sat"><span>Yapan</span>admin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2c -->
+      <div class="panel" data-s="tetkik">
+        <table class="tbl">
+          <tr><th>Tetkik (sistem)</th><th>Kod</th><th>Cihazda karşılığı</th><th>MWL'de gönderilen</th><th>Varsayılan göz</th><th></th></tr>
+          <tr class="sec"><td>OCT RNFL / GCC</td><td class="kod">2</td><td class="kod">RNFL_GCC</td><td class="kod">OPT · "RNFL"</td><td>OU</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td>OCT maküla</td><td class="kod">1</td><td class="kod">MACULA_CUBE</td><td class="kod">OPT · "MACULA"</td><td>OU</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td>OCT ön segment</td><td class="kod">3</td><td class="kod">ANT_SEG</td><td class="kod">OPT · "ANTERIOR"</td><td>istemden</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td>FAF</td><td class="kod">5</td><td class="kod">AF</td><td class="kod">OP · "FAF"</td><td>istemden</td><td><span class="btn kucuk">✕</span></td></tr>
+        </table>
+        <div style="margin-top:6px"><span class="btn kucuk">＋ Tetkik ekle</span></div>
+        <div class="bilgi" style="margin-top:8px">Bu liste iki işi yapar: <b>istem bu cihaza yönlendirilebilir mi</b> (görüntüleme listesinde
+          cihaz seçimi) ve <b>MWL'ye ne yazılacak</b>. Eşlemesi olmayan tetkik bu cihaza gönderilemez - "cihaz seçin" kutusunda hiç görünmez.</div>
+      </div>
+
+      <!-- 2d -->
+      <div class="panel" data-s="esleme">
+        <table class="tbl">
+          <tr><th>Cihaz alanı</th><th>Ölçüm kodu</th><th>Birim</th><th>Göz alanı</th><th>Dönüştürme</th><th>Eşik / normatif</th><th>Zorunlu</th><th></th></tr>
+          <tr class="sec"><td class="kod">RNFL_Average</td><td class="kod">rnfl_avg</td><td>µm</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>cihaz normatif %</td><td>☑</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">RNFL_Inferior</td><td class="kod">rnfl_inf</td><td>µm</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>cihaz normatif %</td><td>☑</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">RNFL_Superior</td><td class="kod">rnfl_sup</td><td>µm</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>cihaz normatif %</td><td>☐</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">GCC_Average</td><td class="kod">gcc_avg</td><td>µm</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>cihaz normatif %</td><td>☐</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">CentralThickness</td><td class="kod">cmt</td><td>µm</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>yerel eşik 300</td><td>☐</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">CupDiscRatio</td><td class="kod">cd_oran</td><td class="sonuk">—</td><td class="kod">Laterality</td><td class="sonuk">—</td><td>yerel eşik 0,7</td><td>☐</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">SignalStrength</td><td class="kod">kalite</td><td>/40</td><td class="sonuk">—</td><td><span class="chip c-bek">×0,25 → /10</span></td><td>&lt; 6 düşük</td><td>☑</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">ScanDate</td><td class="kod">cekim_zamani</td><td class="sonuk">—</td><td class="sonuk">—</td><td><span class="chip c-bek">tarih · yerel saat</span></td><td class="sonuk">—</td><td>☑</td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td class="kod">StudyInstanceUID</td><td class="kod">study_uid</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td>☑</td><td><span class="btn kucuk">✕</span></td></tr>
+        </table>
+        <div style="margin-top:6px"><span class="btn kucuk">＋ Alan ekle</span> <span class="btn kucuk">🧪 Örnek mesajla sına</span></div>
+        <div class="bilgi" style="margin-top:8px">Eşleme <code>goz_cihaz.olcum_esleme</code> (jsonb) içinde durur. Eşlenen her alan
+          <code>goz_goruntuleme_olcum</code>'a <b>bir satır</b> olarak yazılır (göz ayrımı <i>Göz alanı</i> kolonundan) - trend, eşik bayrağı ve
+          liste "ana ölçüm" kolonu bu satırlardan hesaplanır. <b>Zorunlu</b> işaretli bir alan mesajda yoksa mesaj hatalı sayılır ve kuyrukta kalır:
+          yarım ölçüm kaydı sessizce eksik trend üretir.</div>
+        <div class="ham" style="margin-top:8px">🧪 Örnek mesaj sonucu (yazılmaz, yalnız gösterir)
+  rnfl_avg   OD 78   OS 86     ✔
+  rnfl_inf   OD 61   OS 104    ✔  (OD eşik dışı · normatif %1)
+  kalite     OD 28/40 → 7/10   ✔  (dönüştürme uygulandı)
+  cmt        —                 ⚠  alanı mesajda yok (zorunlu değil, atlandı)</div>
+      </div>
+
+      <!-- 2e -->
+      <div class="panel" data-s="mesaj">
+        <table class="tbl">
+          <tr><th>Zaman</th><th>Eşleşme</th><th>Tetkik</th><th>Kaynak</th><th>Durum</th><th>Hata</th><th></th></tr>
+          <tr><td>10:45</td><td>Mehmet Kaya · 2026/20390</td><td>OCT RNFL + GCC</td><td class="kod">DICOM OPT</td><td><span class="chip c-ok">İşlendi</span></td><td class="sonuk">—</td><td><span class="btn kucuk">👁 Ham</span></td></tr>
+          <tr><td>10:12</td><td>Ali Vural · 2026/20408</td><td>OCT maküla + FAF</td><td class="kod">DICOM OPT</td><td><span class="chip c-ok">İşlendi</span></td><td class="sonuk">—</td><td><span class="btn kucuk">👁 Ham</span></td></tr>
+          <tr class="sec"><td>09:58</td><td class="sonuk">— <small>(protokol alanı boş)</small></td><td class="sonuk">OCT RNFL?</td><td class="kod">DICOM OPT</td><td><span class="chip c-bek">Kuyrukta</span></td><td class="sonuk">eşleşme kurulamadı</td><td><span class="btn kucuk">🔗 Eşle</span></td></tr>
+          <tr><td>09:40</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="kod">DICOM</td><td><span class="chip c-red">Hata</span></td><td class="krm">zorunlu alan yok: study_uid</td><td><span class="btn kucuk">🔁 Yeniden işle</span></td></tr>
+        </table>
+        <div class="ham" style="margin-top:8px">(0008,0050) AccessionNumber   : (boş)
+(0010,0020) PatientID         :
+(0020,000D) StudyInstanceUID  : 1.2.826.0.1.3680043.8.498.17...
+(0008,0060) Modality          : OPT   ·   (0020,0060) Laterality: R</div>
+        <div class="bilgi" style="margin-top:6px">Ham mesaj <b>silinmez</b> (<code>goz_cihaz_mesaj.ham</code>): eşleşme elle kurulunca aynı kayıttan
+          yeniden işlenir, ölçümler o anda türetilir. Bu yüzden "cihazdan gelmişti ama kayıp" durumu oluşmaz.</div>
+      </div>
+
+      <!-- 2f -->
+      <div class="panel" data-s="bakim">
+        <div class="yok">⚠ <b>Şemada karşılığı yok:</b> <code>goz_cihaz</code> tablosunda kalibrasyon / bakım alanı bulunmuyor.
+          İki seçenek var: (a) cihaz <b>demirbaşa bağlıysa</b> bakım kayıtları demirbaş modülünden okunur (tercih edilen - ikinci bir bakım
+          kaydı tutmak iki ayrı doğru üretir), (b) bağlı değilse <code>goz_cihaz</code>'a periyot + son kalibrasyon alanları eklenir.
+          <b>Karar verilmeden uygulanmaz.</b></div>
+        <div class="grp" style="margin-top:10px"><h5>Taslak düzen (a seçeneği · demirbaştan okunur)</h5>
+          <div class="izgara">
+            <label class="fld"><span>Kalibrasyon periyodu</span><div class="inp pasif">6 ay <small>(demirbaş)</small></div></label>
+            <label class="fld"><span>Son kalibrasyon</span><div class="inp pasif">12.08.2026</div></label>
+            <label class="fld"><span>Sonraki</span><div class="inp pasif">12.02.2027</div></label>
+            <label class="fld"><span>Durum</span><div class="inp pasif"><span class="chip c-ok">güncel</span></div></label>
+          </div>
+        </div>
+        <table class="tbl">
+          <tr><th>Tarih</th><th>Tür</th><th>Yapan</th><th>Sonuç</th><th>Belge</th></tr>
+          <tr><td>12.08.2026</td><td>Kalibrasyon</td><td>Heidelberg servis</td><td><span class="chip c-ok">Uygun</span></td><td>📄 sertifika</td></tr>
+          <tr><td>14.05.2026</td><td>Periyodik bakım</td><td>Heidelberg servis</td><td><span class="chip c-ok">Uygun</span></td><td>📄 form</td></tr>
+          <tr><td>03.01.2026</td><td>Arıza · optik yol</td><td>Heidelberg servis</td><td><span class="chip c-bek">Parça değişti</span></td><td>📄 rapor</td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:6px">Kalibrasyonu geçmiş cihazın <b>ölçümü yine alınır</b> ama görüntüleme listesinde uyarı çıkar:
+          kalibrasyonsuz cihaz ölçümünü trende sokmak yanlış "progresyon" üretir.</div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <div class="uyar-k">ℹ Bu cihaz <b>MWL destekliyor</b>: istem oluşturulduğunda çalışma listesine düşer, tekniker cihazda hasta seçmez -
+        eşleşme hatası bu cihazda beklenmez.</div>
+
+      <div class="kart"><h6>Durum</h6>
+        <div class="sat"><span>Dinleyici</span><span class="chip c-ok">Dinliyor</span></div>
+        <div class="sat"><span>Son mesaj</span>10:45 <small>(2 dk)</small></div>
+        <div class="sat"><span>Bugün çekim</span><b>9</b></div>
+        <div class="sat"><span>Kuyrukta</span><b>1</b> <span class="chip c-bek">eşleşmedi</span></div>
+        <div class="sat"><span>Hata</span><b>1</b> <span class="chip c-red">zorunlu alan</span></div>
+      </div>
+
+      <div class="kart"><h6>Son 24 saat</h6>
+        <div class="sat"><span>Gelen mesaj</span>11</div>
+        <div class="sat"><span>İşlenen</span>9</div>
+        <div class="sat"><span>Ortalama gecikme</span>38 sn <small>(çekim → ekran)</small></div>
+        <div class="sat"><span>En uzun</span>2 dk 11 sn</div>
+      </div>
+
+      <div class="kart"><h6>Bu cihazın tetkikleri</h6>
+        <div class="sat"><span>OCT RNFL / GCC</span><b>6</b></div>
+        <div class="sat"><span>OCT maküla</span><b>2</b></div>
+        <div class="sat"><span>FAF</span><b>1</b></div>
+        <div class="sat"><span>OCT ön segment</span><b>—</b></div>
+      </div>
+
+      <div class="kart"><h6>Hızlı işlem</h6>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">🔌 Bağlantıyı sına</span>
+          <span class="btn kucuk">🧪 Örnek mesajla sına</span>
+          <span class="btn kucuk">🔗 Kuyruğu aç</span>
+          <span class="btn kucuk">📋 MWL gönder</span>
+          <span class="btn kucuk">↗ Demirbaş kartı</span>
+        </div>
+      </div>
+
+      <div class="kart"><h6>Kayıt bilgisi</h6>
+        <div class="sat"><span>Ekleyen</span>admin · 14.03.2024</div>
+        <div class="sat"><span>Değiştiren</span>admin · 05.10.2026 09:12</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> <code>goz_goruntuleme_cihazlar_v2.html</code> listesinin <b>kartı</b>. Tablolar: <code>goz_cihaz</code>
+(kod · ad · tur · uretici · model · seri_no · demirbas_id · protokol · baglanti · mwl · <b>olcum_esleme jsonb</b> · dinleyici_durum ·
+son_mesaj · aktif) ve <code>goz_cihaz_mesaj</code> (zaman · hasta_eslesme · ham · dosya_yolu · islem_durum · hata). Kart
+<b>tanım kartıdır</b>: ölçüm üretmez, ölçümün nasıl okunacağını tanımlar.<br>
+
+<span class="n">1</span><b>Kimlik şeridi</b> her sekmede sabit (cihaz, tür, seri, yer, son mesaj, durum): ayarlar sekmesindeyken hangi cihazı
+düzenlediğini unutmak kolaydır.<br>
+
+<span class="n">2</span><b>Sekmeler:</b>
+(a) <b>Tanım</b> - kimlik, yer / sorumlu, demirbaş bağı (bağlıysa garanti ve servis demirbaş kartından okunur, burada ikinci kez tutulmaz),
+tetkik varsayılanları (çekim süresi ve eşzamanlı çekim <b>sıra tahmini</b> içindir, kısıt değil).
+(b) <b>Bağlantı</b> - biçim (DICOM / klasör / elle), DICOM ayarları, klasör ayarları (biçim seçimine göre açılır), <b>hasta eşleştirme anahtarı</b>
+ve "eşleşmezse" davranışı: varsayılan <b>beklet</b>, çünkü ölçümü yanlış hastaya yazmak hiç yazmamaktan kötüdür. Altta son sınama sonucu.
+(c) <b>Tetkikler</b> - cihazın yapabildiği tetkikler ve MWL'ye yazılan kod; <b>eşlemesi olmayan tetkik bu cihaza gönderilemez</b>.
+(d) <b>Ölçüm eşlemesi</b> - cihaz alanı → ölçüm kodu, birim, <b>göz alanı</b> (OD/OS ayrımı), dönüştürme (örn. sinyal 40'lık ölçekten 10'luğa),
+eşik kaynağı, <b>zorunlu</b> işareti; "örnek mesajla sına" hiçbir şey yazmadan sonucu gösterir. Zorunlu alan eksikse mesaj kuyrukta kalır -
+yarım ölçüm sessizce eksik trend üretir.
+(e) <b>Mesaj günlüğü</b> - son mesajlar, ham gövde, eşle / yeniden işle; ham mesaj silinmez.
+(f) <b>Kalibrasyon / bakım</b> - <b>şemada karşılığı yok</b>: ya demirbaş modülünden okunur (tercih) ya da <code>goz_cihaz</code>'a alan eklenir;
+karar verilmeden uygulanmaz. Kalibrasyonu geçmiş cihazın ölçümü alınır ama listede uyarı çıkar.<br>
+
+<span class="n">3</span><b>Sağ sütun:</b> MWL bilgisi (bu cihazda eşleşme hatası beklenmez), durum (dinleyici · son mesaj · bugün çekim ·
+kuyruk · hata), son 24 saat sayıları ve çekim→ekran gecikmesi, cihazın tetkik dağılımı, hızlı işlem, kayıt bilgisi.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>
