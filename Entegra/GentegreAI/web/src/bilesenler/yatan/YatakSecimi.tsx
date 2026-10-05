@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { YatakSecenegi } from '../../api/uclar/yatan';
 import { c } from '../../dil/ceviri';
+import { YATAN_IZOLASYON } from './yatanKodlari';
 
 /**
  * YATAK SEÇİMİ — mockup `Ekranlar/Yatan/yatis_kabul.html` ve
@@ -27,10 +28,6 @@ const ODA_TUR: Record<number, string> = {
 const CINSIYET_KURALI: Record<number, string> = {
   0: 'cinsiyet serbest', 1: 'kadın odası', 2: 'erkek odası',
   3: 'ilk yatan kuralı kilitler',
-};
-const IZOLASYON: Record<number, string> = {
-  1: 'temaslı izolasyon', 2: 'damlacık izolasyon',
-  3: 'solunum izolasyonu', 4: 'koruyucu izolasyon',
 };
 
 export function YatakSecimi({ hastaId, departmanId, seciliId, haricYatakId, onSec }: {
@@ -88,7 +85,7 @@ export function YatakSecimi({ hastaId, departmanId, seciliId, haricYatakId, onSe
                   ? oda
                   : (<>
                       {y.izolasyon > 0
-                        ? IZOLASYON[y.izolasyon]
+                        ? YATAN_IZOLASYON[y.izolasyon]
                         : (y.klinik || '—')}
                       {y.ucretHizmet && <> · {y.ucretHizmet}</>}
                       {secili && <> · <b>seçildi</b></>}

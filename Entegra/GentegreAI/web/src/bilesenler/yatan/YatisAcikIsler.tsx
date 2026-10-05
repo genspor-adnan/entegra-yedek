@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import type { YatisOzeti } from '../../api/uclar/yatan';
 import { tarihYaz } from '../bicim';
 import { c } from '../../dil/ceviri';
+import { YATAN_RISK_DUZEY_KUCUK, YATAN_RISK_OLCEK } from './yatanKodlari';
 
 /**
  * AÇIK İŞLER + RİSK DEĞERLENDİRMELERİ — yatış kartının Genel sekmesi
@@ -19,11 +20,6 @@ import { c } from '../../dil/ceviri';
  * günündeki puan olurdu.
  */
 
-const OLCEK: Record<number, string> = {
-  1: 'Düşme riski (İtaki)', 2: 'Bası yarası (Braden)',
-  3: 'Beslenme (NRS-2002)', 4: 'Bilinç (GKS)',
-};
-const DUZEY: Record<number, string> = { 1: 'düşük', 2: 'orta', 3: 'yüksek' };
 
 /** Değerlendirme kaç saat sonra "eski" sayılır. */
 const TAZELIK_SAAT = 24;
@@ -89,13 +85,13 @@ export function YatisAcikIsler({ yatisId }: { yatisId: number }) {
             const eski = saat > TAZELIK_SAAT;
             return (
               <div className="sat" key={r.olcek}>
-                <span>{OLCEK[r.olcek] ?? '—'}</span>
+                <span>{YATAN_RISK_OLCEK[r.olcek] ?? '—'}</span>
                 <b>
                   {r.puan ?? '—'}
                   {r.duzey != null && (
                     <span className={`rozet ${r.duzey === 3 ? 'hata'
                                               : r.duzey === 2 ? 'sari' : 'ok'}`}>
-                      {DUZEY[r.duzey]}
+                      {YATAN_RISK_DUZEY_KUCUK[r.duzey]}
                     </span>
                   )}
                   {/* SÜRESİ GEÇEN DEĞERLENDİRME SARARIR: puan tazeliğiyle

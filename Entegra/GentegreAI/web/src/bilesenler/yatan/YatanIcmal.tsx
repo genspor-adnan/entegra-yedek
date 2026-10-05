@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import type { IcmalYaniti } from '../../api/uclar/yatan';
 import { paraYaz, tarihYaz } from '../bicim';
 import { c, ilacAdi } from '../../dil/ceviri';
+import { ORDER_TURLERI } from '../../sayfalar/yatan/OrderPanelleri';
 
 /**
  * YATAN HASTA HİZMET İCMALİ — mockup
@@ -22,9 +23,6 @@ import { c, ilacAdi } from '../../dil/ceviri';
 
 interface YatisSecenegi { id: number; hasta: string; yatak: string; dosyaNo: string }
 
-const ORDER_TUR: Record<number, string> = {
-  3: 'Tetkik', 4: 'Görüntüleme', 5: 'Konsültasyon',
-};
 
 export function YatanIcmal({ yenile }: { yenile?: number }) {
   const [yatislar, setYatislar] = useState<YatisSecenegi[]>([]);
@@ -156,7 +154,7 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
                   <td className="sag">1</td>
                   <td className="sag">{k.birim ? paraYaz(k.birim) : '—'}</td>
                   <td className="sag">{k.birim ? paraYaz(k.birim) : '—'}</td>
-                  <td className="sonuk">{ORDER_TUR[k.tur] ?? 'order'}</td>
+                  <td className="sonuk">{ORDER_TURLERI[k.tur]?.[0] ?? 'order'}</td>
                   <td>{k.durum === 1
                     ? <span className="rozet sari">{c('Sonuç bekliyor')}</span>
                     : <span className="rozet ok">{c('Tamamlandı')}</span>}</td>

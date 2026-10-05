@@ -18977,3 +18977,33 @@ iş yine tekrarın kaldırılması oldu.
 * Bakılıp **kapsam dışı bırakılan**: çalışan LİSTESİNDEKİ kanaat rozeti renksiz (gri)
   geliyor - o renk liste metadatasından (sunucu) üretiliyor, kart ekranının sözlüğüyle
   ilgisi yok; istenirse ayrı iş olarak liste kataloğuna renk kuralı eklenebilir.
+
+## 05.10.2026 — Yatan hasta refaktörü (davranış değişmedi, bir ayrışma düzeldi)
+
+Kullanıcı: *"yatan kısmını da refaktor yap"*.
+
+* **`YatanUclari.cs` bölündü** (1068 satır / 12 uç; modülün zaten `.Emar`, `.Izlem`,
+  `.Icmal`, `.Epikriz`, `.Order` parçaları vardı): `.Kabul` (283 - yatak seçenekleri,
+  kabul, "yatakta", yatak temizlendi) · `.Cikis` (252 - taburcu planı, çıkış kontrolü,
+  taburcu, iptal). Ana dosyada (540) sınıf başlığı, yatış özeti, nakil, order durdurma
+  ve tahakkuk kaldı. 12 uç gövdesi taşıma öncesi metinle karşılaştırıldı: fark yok.
+* **Risk ölçekleri iki ekranda İKİ ADLA yazılmıştı** - hemşire izleminde "İtaki düşme
+  riski", yatış şeridindeki açık işler listesinde "Düşme riski (İtaki)"; aynı ölçek,
+  iki isim. Hemşire "Braden bası yarası süresi geçti" diye arayıp şeritte "Bası yarası
+  (Braden)" görüyordu. Metinler artık kod listesinden (`yatan.risk_olcek`) tek biçimde:
+  yeni `bilesenler/yatan/yatanKodlari.ts`.
+* **Risk düzeyi** iki dosyada büyük / küçük harfle yazılmıştı; cümle içinde geçtiği yer
+  küçük harf istiyor, iki biçim KALDI ama tek kodtan türüyor
+  (`YATAN_RISK_DUZEY` / `_KUCUK`).
+* **İzolasyon sözlüğü** iki dosyada birebir kopyaydı (yatak seçimi, yatış şeridi) → tek
+  yer. **Order türü** iki yerde tanımlıydı: tam liste renkleriyle
+  (`OrderPanelleri.ORDER_TURLERI`), icmalde yalnız üç türlük alt küme - alt küme
+  kaldırıldı, icmal tam listeden okuyor (kod listesinde sekiz tür var; icmalde dördüncü
+  tür geldiğinde "order" yazıyordu).
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `/api/yatan/{id}/ozet`, `/cikis-kontrol` ve `/yatak-secenekleri?hastaId=` 200
+  (yatak engel metinleri "Dolu", "Temizlik bekliyor · Nakil sonrası", izolasyon kodu
+  geliyor). Tarayıcıda yatan listesi ve yatış kartı açıldı: risk satırları kanonik
+  adlarla ("İtaki düşme riski · Braden bası yarası · NRS-2002 beslenme") ve küçük harfli
+  düzeyle göründü. Hemşire izlem ekranında dev veride risk satırı çizilmedi (o ekran
+  nöbet seçimine bağlı) - aynı sözlüğü okuyor.

@@ -5,6 +5,7 @@ import { guvenli, mesaj, metinSor } from '../mesaj';
 import { tarihSaat } from '../bicim';
 import { VitalEgrisi } from './VitalEgrisi';
 import { c } from '../../dil/ceviri';
+import { YATAN_RISK_DUZEY, YATAN_RISK_OLCEK } from './yatanKodlari';
 
 /**
  * HEMŞİRE İZLEM — mockup `Ekranlar/Yatan/hemsire_izlem.html`.
@@ -33,11 +34,6 @@ const SEKMELER = [
 const SIVI_TUR: Record<number, string> = {
   1: 'Oral', 2: 'IV', 3: 'Kan ürünü', 4: 'İdrar', 5: 'Drenaj', 6: 'Kusma', 7: 'Gaita',
 };
-const OLCEK: Record<number, string> = {
-  1: 'İtaki düşme riski', 2: 'Braden bası yarası',
-  3: 'NRS-2002 beslenme', 4: 'Glasgow koma skalası',
-};
-const DUZEY: Record<number, string> = { 1: 'Düşük', 2: 'Orta', 3: 'Yüksek' };
 
 /** Değerlendirme kaç saat sonra "süresi geçti" sayılır (yatış kartıyla aynı). */
 const TAZELIK_SAAT = 24;
@@ -306,12 +302,12 @@ export function HemsireIzlem({ yenile, onDegisti }: {
                         <span className="rozet sari"> süresi geçti</span>
                       )}
                     </td>
-                    <td>{r.olcekAd || OLCEK[r.olcek] || '—'}</td>
+                    <td>{r.olcekAd || YATAN_RISK_OLCEK[r.olcek] || '—'}</td>
                     <td>{r.puan ?? '—'}</td>
                     <td>{r.duzey != null && (
                       <span className={`rozet ${r.duzey === 3 ? 'hata'
                                                 : r.duzey === 2 ? 'sari' : 'ok'}`}>
-                        {DUZEY[r.duzey]}
+                        {YATAN_RISK_DUZEY[r.duzey]}
                       </span>)}
                     </td>
                     <td>{r.onlem || <span className="rozet hata">önlem yazılmamış</span>}</td>

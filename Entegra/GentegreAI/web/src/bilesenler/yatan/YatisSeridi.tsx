@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import type { YatisOzeti } from '../../api/uclar/yatan';
 import { tarihSaat, tarihYaz } from '../bicim';
 import { c } from '../../dil/ceviri';
+import { YATAN_IZOLASYON } from './yatanKodlari';
 
 /**
  * YATIŞ KARTI ÜST ŞERİDİ — mockup `Ekranlar/Yatan/yatis_karti.html`
@@ -19,10 +20,6 @@ import { c } from '../../dil/ceviri';
  * günde kaçırmak demektir.
  */
 
-const IZOLASYON: Record<number, string> = {
-  1: 'temaslı izolasyon', 2: 'damlacık izolasyon',
-  3: 'solunum izolasyonu', 4: 'koruyucu izolasyon',
-};
 const DURUM: Record<number, string> = {
   0: 'İptal', 1: 'Yatış kabul', 2: 'Yatakta',
   3: 'Taburcu planlandı', 4: 'Taburcu', 5: 'Kurum dışına sevk',
@@ -74,7 +71,7 @@ export function YatisSeridi({ yatisId }: { yatisId: number }) {
           <span className={`rozet ${o.durum === 3 ? 'sari' : o.durum >= 4 ? 'pas' : 'ok'}`}>
             {DURUM[o.durum] ?? ''}
           </span>
-          {o.izolasyon > 0 && <span className="rozet hata">🦠 {IZOLASYON[o.izolasyon]}</span>}
+          {o.izolasyon > 0 && <span className="rozet hata">🦠 {YATAN_IZOLASYON[o.izolasyon]}</span>}
           {o.refakatci && <span className="rozet mavi">👥 refakatçi</span>}
           {o.tahminiCikis && (
             <span className="rozet">📅 tahmini çıkış {tarihYaz(o.tahminiCikis)}</span>
