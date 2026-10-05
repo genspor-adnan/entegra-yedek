@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
+import { altKurumSorulur } from './kayitKabulKodlari';
 
 /** Kurumun basvuruya baglanabilen sozlesmeleri (469). */
 export interface KurumSozlesmesi {
@@ -38,7 +39,7 @@ export function useKurumSecenekleri(odeyenKurumId: number | null, kurumTuru?: nu
   //   Kod listesi tur * 100 + kod uzayinda: SGK'ninkiler 3 ile baslar.
   useEffect(() => {
     let iptal = false;
-    if (kurumTuru !== 3) { setAltKurumlar([]); return }
+    if (!altKurumSorulur(kurumTuru)) { setAltKurumlar([]); return }
     void (async () => {
       try {
         const y = await api.kodListe("kurum.alt_kurum");

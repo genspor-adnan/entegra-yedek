@@ -19007,3 +19007,34 @@ Kullanıcı: *"yatan kısmını da refaktor yap"*.
   adlarla ("İtaki düşme riski · Braden bası yarası · NRS-2002 beslenme") ve küçük harfli
   düzeyle göründü. Hemşire izlem ekranında dev veride risk satırı çizilmedi (o ekran
   nöbet seçimine bağlı) - aynı sözlüğü okuyor.
+
+## 05.10.2026 — Kayıt kabul refaktörü (davranış değişmedi)
+
+Kullanıcı: *"kayıt kabul kısmını da refaktor yap"*.
+
+* **Ödeyen kurumun TÜRÜ satır içi sayıyla karşılaştırılıyordu** - `kurumTuru !== 2`,
+  `kurumTuru === 2 || kurumTuru === 3`, `k?.tur === 2`, `?.tur === 3`,
+  `kurumTuru !== 3`, `(k.tur ?? 0) === 2` - beş dosyada. Bu karşılaştırmalar küçük
+  şeyler değil: MEDULA alanlarının çizilip çizilmeyeceğine, poliçe türünün (alt kurum)
+  sorulup sorulmayacağına ve aşama şeridinin hangi provizyon alanını okuyacağına karar
+  veriyorlar.
+  → yeni `sayfalar/belgeKarti/kayitKabulKodlari.ts`: `KURUM_OZEL/OSS/SGK`,
+  `ALT_OSS/TSS/KARMA` ve kararı adlandıran üç yardımcı - `sgkKapsamiVar()`
+  (MEDULA alanları; SGK ve TSS'de asıl ödeyici SGK, yalnız ÖSS'de çizilmez),
+  `ozelSigortaKapsamiVar()` (ÖSS alanları; tamamlayıcı poliçede SGK ile birlikte açık),
+  `altKurumSorulur()` (poliçe türü yalnız SGK sözleşmesinde).
+* Sabitler `basvuruAsamalari.ts` içinde tanımlıydı ve yalnız orada kullanılıyordu; aşama
+  hesabı tek müşterisi değil. Sabitler ortak dosyaya taşındı, aşama dosyası onları
+  **yeniden dışa veriyor** - mevcut import yolları (ve testler) kırılmadı.
+* Bakılıp **yapılmayan**: `BasvuruSekmesi.tsx` (551) ve `ProvizyonSekmesi.tsx` (381)
+  bölünmedi. İkisi tek formun alan ızgarası; alanları alt bileşene çıkarmak `degistir`
+  ve `kilitli` proplarını her gruba taşımak demek - okunurluk kazanmıyor. ÖSS ve SGK
+  provizyon blokları benzer görünüyor ama alan kümeleri farklı (SGK'da provizyon tipi /
+  takip no, ÖSS'de poliçe / hasar no); tek bileşende birleştirmek koşullu alanlarla
+  daha karışık olurdu. Provizyon DURUMU zaten kod listesinden (`provizyon.durum`)
+  geliyor, elle sözlük yok.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789
+  (`basvuruAsamalari.test.ts` kurum türü ve alt kurum dallarını zaten test ediyor -
+  sabitleri o dosyadan import ediyor, taşımadan sonra da geçti). Tarayıcıda başvuru
+  listesi ve "Özel (Ücretli)" ödeyenli başvuru açıldı: provizyon sekmesi hiç çizilmedi
+  (kuralın beklenen davranışı).

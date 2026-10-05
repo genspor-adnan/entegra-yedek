@@ -17,22 +17,14 @@
  * provizyon istenemiyor.
  */
 
-/**
- * Kurum tipi - `taraf_kurum.tur` (467'de yine üçe indi).
- *
- * TSS ve KARMA ARTIK KURUM TÜRÜ DEĞİL: aynı sigorta şirketiyle ÖSS, TSS ve
- * Karma poliçe ayrı şartlarla çalışılır, bu yüzden poliçe türü SÖZLEŞMENİN
- * alt kurumudur (`belge_basvuru.alt_kurum`, 468/469). Türü dörde çıkarmak
- * aynı şirketi üç kez cari açmayı gerektiriyordu.
- */
-export const KURUM_OZEL = 1;
-export const KURUM_OSS = 2;
-export const KURUM_SGK = 3;
+// KURUM TÜRÜ SABİTLERİ ORTAK DOSYADA (kayitKabulKodlari): aşama hesabı tek
+//   müşterisi değil - başvuru ve provizyon ekranları da aynı kararı veriyor.
+//   Buradan yeniden dışa veriliyor, eski import yolu çalışmaya devam ediyor.
+import {
+  ALT_KARMA, ALT_OSS, ALT_TSS, KURUM_OSS, KURUM_OZEL, KURUM_SGK,
+} from './kayitKabulKodlari';
 
-/** `kurum.alt_kurum` (468): tur * 100 + kod. */
-export const ALT_OSS = 201;
-export const ALT_TSS = 202;
-export const ALT_KARMA = 203;
+export { ALT_KARMA, ALT_OSS, ALT_TSS, KURUM_OSS, KURUM_OZEL, KURUM_SGK };
 
 /**
  * PROVIZYON DURUMU (kod listesi `provizyon.durum`):

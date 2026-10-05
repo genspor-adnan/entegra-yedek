@@ -6,6 +6,7 @@ import { KodSecim, MetinAlani, ZamanAlani, MUSTEHAKLIK } from './alanlar';
 import type { BasvuruBilgi } from '../BasvuruSekmesi';
 import type { KurumSozlesmesi } from '../../../sayfalar/belgeKarti/useKurumSecenekleri';
 import { c } from '../../../dil/ceviri';
+import { KURUM_OSS, ozelSigortaKapsamiVar, sgkKapsamiVar } from '../../../sayfalar/belgeKarti/kayitKabulKodlari';
 
 export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                                   kurumTuru, belgeId, tarafId, hekimId,
@@ -101,9 +102,9 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
    *              tamamlayici police ozel sigorta grubunda; ikisi de acik.
    *   ÖSS (2)  : yalniz ozel sigorta grubu; MEDULA alanlari hic cizilmez.
    */
-  const sgkVar = kurumTuru !== 2;
+  const sgkVar = sgkKapsamiVar(kurumTuru);
   const [tamamlayici, setTamamlayici] = useState(false);
-  const ossVar = kurumTuru === 2 || kurumTuru === 3 || tamamlayici
+  const ossVar = ozelSigortaKapsamiVar(kurumTuru) || tamamlayici
                  || (bilgi.ossKurumId ?? null) !== null
                  || !!bilgi.ossProvizyonNo || !!bilgi.ossPoliceNo;
 
@@ -332,7 +333,7 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                     onChange={e => degistir({
                       ossKurumId: e.target.value ? Number(e.target.value) : null })}>
               <option value="">— Yok —</option>
-              {(kurumlar ?? []).filter(k => (k.tur ?? 0) === 2)
+              {(kurumlar ?? []).filter(k => (k.tur ?? 0) === KURUM_OSS)
                 .map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
             </select>
           </label>

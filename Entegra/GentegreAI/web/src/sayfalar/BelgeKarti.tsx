@@ -42,6 +42,7 @@ import { useBasvuruVarsayilanlari } from './belgeKarti/useBasvuruVarsayilanlari'
 import { useSatirSecimi } from './belgeKarti/useSatirSecimi';
 import { useKalemAkisi } from './belgeKarti/useKalemAkisi';
 import { useKayitKapisi } from './belgeKarti/useKayitKapisi';
+import { KURUM_OSS, KURUM_SGK } from './belgeKarti/kayitKabulKodlari';
 import {
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla, belgeOnizlemesi,
   kartBasligi,
@@ -771,7 +772,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   memur ayni sirketi ikinci kez secmesin (farkliysa elle degistirilebilir).
   useEffect(() => {
     const k = kurumlar.find(x => x.id === odeyenKurumId);
-    if (k?.tur === 2 && !basvuruBilgi.ossKurumId)
+    if (k?.tur === KURUM_OSS && !basvuruBilgi.ossKurumId)
       setBasvuruBilgi(o => ({ ...o, ossKurumId: k.id }));
   }, [odeyenKurumId, kurumlar, basvuruBilgi.ossKurumId]);
 
@@ -1328,7 +1329,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             tahsilToplam={tahsilToplami(tahsilat.tahsilatlar)}
             // Provizyon durumu ODEYENIN kendi alanindan: SGK'da sgkDurum,
             //   ozel sigortada ossDurum (299 - ikisi ayri tutulur).
-            provizyonDurum={kurumlar.find(k => k.id === odeyenKurumId)?.tur === 3
+            provizyonDurum={kurumlar.find(k => k.id === odeyenKurumId)?.tur === KURUM_SGK
               ? Number(basvuruBilgi.sgkDurum ?? 0)
               : Number(basvuruBilgi.ossDurum ?? 0)}
             kapanmaDurum={Number(sonuc?.belge.kapanmaDurum ?? 0)}
