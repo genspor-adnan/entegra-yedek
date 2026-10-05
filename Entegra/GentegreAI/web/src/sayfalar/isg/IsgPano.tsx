@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { IsgFirmaKarti, IsgFirmaSatiri, IsgPano as Pano } from '../../api/uclar/isg';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
+import { ISG_MARUZIYET, ISG_TEHLIKE_ROZET, isgPeriyotMetni } from './isgKodlari';
 
 /**
  * FİRMA PANOSU `/isg-pano` (İSG 741) — mockup Ekranlar/ISG/isg_firma_panosu.html.
@@ -12,7 +13,6 @@ import { c } from '../../dil/ceviri';
  * vade, kaza), seçili firma için sekmeler: Firma kartı (bölümler & maruziyet),
  * Sağlık gözetimi özeti (işverene giden yalnız sayılar), Süre (İSG-KATİP).
  */
-const TEH: Record<number, string> = { 1: 'isg-teh-az', 2: 'isg-teh-t', 3: 'isg-teh-ct' };
 export function IsgPano() {
   const git = useNavigate();
   const [sorgu, setSorgu] = useSearchParams();
@@ -68,7 +68,7 @@ export function IsgPano() {
           <tbody>
             {firmalar.map(x => (
               <tr key={x.id} className={x.id === seciliId ? 'sec' : ''} onClick={() => setSeciliId(x.id)} onDoubleClick={() => git(`/isg-firma/${x.id}?geri=%2Fisg-pano`)}>
-                <td><b>{x.firma_adi}</b></td><td>{x.nace}</td><td><span className={`isg-teh ${TEH[x.tehlike]}`}>{x.tehlike_adi}</span></td>
+                <td><b>{x.firma_adi}</b></td><td>{x.nace}</td><td><span className={`isg-teh ${ISG_TEHLIKE_ROZET[x.tehlike]}`}>{x.tehlike_adi}</span></td>
                 <td className="fm-sag">{x.aktif_calisan}</td><td>{x.hekim_adi}</td><td className="fm-sag">{x.plan_dk.toLocaleString('tr-TR')}</td>
                 <td className="fm-sag">{(x.muayene_dk_ay + x.ziyaret_dk_ay).toLocaleString('tr-TR')}</td>
                 <td><div className={`isg-bar${oran(x) >= 80 ? '' : oran(x) >= 50 ? ' s' : ' k'}`}><i style={{ width: `${oran(x)}%` }} /></div></td>
@@ -94,7 +94,7 @@ export function IsgPano() {
           {sekme === 'kart' && (
             <>
               <div className="isg-frm">
-                <Al lb="SGK sicil" v={f.sgk_sicil} /><Al lb="NACE" v={`${f.nace} ${f.nace_ad}`} /><Al lb="Tehlike sınıfı" v={<span className={`isg-teh ${TEH[f.tehlike]}`}>{f.tehlike_adi}</span>} />
+                <Al lb="SGK sicil" v={f.sgk_sicil} /><Al lb="NACE" v={`${f.nace} ${f.nace_ad}`} /><Al lb="Tehlike sınıfı" v={<span className={`isg-teh ${ISG_TEHLIKE_ROZET[f.tehlike]}`}>{f.tehlike_adi}</span>} />
                 <Al lb="Çalışan" v={`${f.aktif_calisan} aktif · beyan ${f.calisan_sayisi}`} /><Al lb="İşyeri hekimi" v={f.hekim_adi} /><Al lb="İSG uzmanı" v={f.isg_uzman_adi} /><Al lb="DSP" v={f.dsp_adi} />
                 <Al lb="Aylık dakika" v={`${f.plan_dk.toLocaleString('tr-TR')} dk${f.aylik_dk ? ' (sözleşme)' : ' (çalışan × katsayı)'}`} /><Al lb="Sözleşme" v={`${f.sozlesme_bas ? new Date(f.sozlesme_bas).toLocaleDateString('tr-TR') : '—'} – ${f.sozlesme_bit ? new Date(f.sozlesme_bit).toLocaleDateString('tr-TR') : '—'}`} />
                 <Al lb="Ziyaret sıklığı" v={f.ziyaret_sikligi} /><Al lb="Gece çalışanı" v={String(f.gece_calisan)} /><Al lb="İSG kurulu" v={f.isg_kurulu ? 'Var' : 'Yok'} /><Al lb="Yetkili" v={`${f.yetkili} ${f.yetkili_tel}`} /><Al lb="Adres" v={f.adres} />
@@ -102,7 +102,7 @@ export function IsgPano() {
               <table className="fm-tablo">
                 <thead><tr><th>Bölüm</th><th className="fm-sag">Çalışan</th><th>{c('Maruziyet')}</th><th>{c('Tetkik paketi')}</th><th>Periyot</th><th className="fm-sag">{c('Vadesi geçen')}</th></tr></thead>
                 <tbody>
-                  {k.bolumler.map(b => <tr key={b.id}><td>{b.ad}</td><td className="fm-sag">{b.aktif || b.calisanSayisi}</td><td>{(b.maruziyet ?? []).map(m => <span key={m} className="isg-mrz">{MARUZIYET[m] ?? m}</span>)}</td><td>{b.tetkikPaketi}</td><td>{b.periyotAy ? `${b.periyotAy} ay` : `sınıf (${f.tehlike === 1 ? 60 : f.tehlike === 2 ? 36 : 12} ay)`}</td><td className={`fm-sag${b.vadeGecen ? ' isg-kir' : ''}`}>{b.vadeGecen}</td></tr>)}
+                  {k.bolumler.map(b => <tr key={b.id}><td>{b.ad}</td><td className="fm-sag">{b.aktif || b.calisanSayisi}</td><td>{(b.maruziyet ?? []).map(m => <span key={m} className="isg-mrz">{ISG_MARUZIYET[m] ?? m}</span>)}</td><td>{b.tetkikPaketi}</td><td>{isgPeriyotMetni(b.periyotAy, f.tehlike)}</td><td className={`fm-sag${b.vadeGecen ? ' isg-kir' : ''}`}>{b.vadeGecen}</td></tr>)}
                   {!k.bolumler.length && <tr><td colSpan={6} className="sonuk">Bölüm yok — firma kartında "Bölümler ve maruziyetler" detayından ekleyin.</td></tr>}
                 </tbody>
               </table>
@@ -142,9 +142,6 @@ export function IsgPano() {
   );
 }
 
-export const MARUZIYET: Record<number, string> = {
-  1: 'Gürültü', 2: 'Toz', 3: 'Kimyasal', 4: 'Ekranlı araç', 5: 'Yüksekte', 6: 'Gece', 7: 'Biyolojik', 8: 'Ergonomik', 9: 'Sıcak/soğuk', 10: 'Titreşim', 11: 'Radyasyon', 12: 'Gıda (portör)', 13: 'Metal dumanı', 14: 'Ağır metal',
-};
 function Al({ lb, v }: { lb: string; v: React.ReactNode }) {
   return <div className="isg-al"><div className="fm-etiket">{lb}</div><div className="isg-v">{v || '—'}</div></div>;
 }

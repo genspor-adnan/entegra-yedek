@@ -18939,3 +18939,41 @@ bölünecek bir şey yoktu; iş **tekrarın kaldırılması** oldu.
   sınandı: yer "Klinik" / "Klinik + ev", aşama "1–5" (bitişsiz egzersiz kür sonuna
   kadar) ve "3–5"; **test kayıtları silindi**. Seans kartındaki egzersiz bölümü dev
   veride görünür olmadı (kür/uygulama koşuluna bağlı) - aynı iki fonksiyonu çağırıyor.
+
+## 05.10.2026 — İSG refaktörü (davranış değişmedi)
+
+Kullanıcı: *"isg kısmını da refaktor yap"*. Modül küçük (en büyük dosya 275 satır);
+iş yine tekrarın kaldırılması oldu.
+
+* **Kart, görünümü için PANO EKRANINA bağlıydı:** maruziyet sözlüğü
+  `IsgPano.tsx` içinde tanımlanıp dışa veriliyor, çalışan kartı onu oradan import
+  ediyordu. Sözlükler yeni `sayfalar/isg/isgKodlari.ts`'ye alındı (maruziyet, muayene
+  türü, kanaat şiddeti, tehlike rozeti, sınıf periyodu).
+* **Kanaat rengi iki yerde iki ifadeyle** yazılmıştı: tabloda sözlükten
+  (`uyari`/`hata`), KPI kutusunda satır içi üçlü koşuldan (`sari`/`kir`). İki CSS ailesi
+  gerçekten ayrı (`.rozet.uyari` ile `.fm-kpi .d.sari`), ama **hangi kanaatin hangi
+  şiddette olduğu** tek karar: artık bir kez veriliyor, iki eşleme ondan türüyor.
+* **Muayene türü satır içi DİZİYDİ** (`['', 'işe giriş', …][tur]`): kod listesine
+  altıncı tür eklenirse dizi sessizce `undefined` döndürürdü. Sözlüğe alındı; kısa
+  ekran adının kod listesindeki tam karşılığı (`Erken kontrol` ↔ "erken") yanında
+  duruyor. Maruziyet için de aynı: ekran çipleri kısa, kod listesi metni `ad` alanında.
+* **Tehlike sınıfı periyodu istemcide sihirli üçlüydü** (`tehlike === 1 ? 60 : … : 12`).
+  Asıl hesap veritabanında (`fn_isg_periyot_ay`: çalışanın / bölümün kendi periyodu,
+  gece 24 ay, portör 6 ay); istemcideki eşik yalnız "bölümün periyodu yok, sınıftan
+  geliyor" satırını yazmak için. `ISG_SINIF_PERIYOT_AY` + `isgPeriyotMetni()` olarak
+  adlandırıldı ve DB karşılığı yoruma yazıldı.
+* **Sunucuda kanaat METİNDEN kod türetiyordu** (`kanaatMetin.StartsWith("Çalışam") ? 3
+  : …`): form motoru cevabı serbest metin saklıyor, kod tutmuyor. Davranış korunarak
+  `KanaatKodu(metin)` yardımcısına alındı ve kırılganlığı yoruma yazıldı - şablon metni
+  değişirse kanaat 0 kalır, bu yüzden eşleşme tek yerde durmalı ve şablon metinleri
+  `isg.kanaat` kod listesiyle aynı yazılmalı. `durum != 1` / `durum != 4` sihirli
+  sayıları `CalisanAktif` / `FormIstekTamam` oldu.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `/api/isg/pano` ve `/api/isg/calisan/1` okundu (kanaat 2 "Şu koşulla çalışır",
+  maruziyet [5,6], periyot 12 ay). Tarayıcıda İSG panosu (tehlike rozeti
+  `isg-teh-ct`, maruziyet çipleri "Gürültü · Toz · Sıcak/soğuk", periyot "sınıf (12
+  ay)") ve çalışan kartı (KPI "Kanaat · Şu koşulla çalışır" sarı sınıfla, muayene türü
+  "periyodik") kontrol edildi.
+* Bakılıp **kapsam dışı bırakılan**: çalışan LİSTESİNDEKİ kanaat rozeti renksiz (gri)
+  geliyor - o renk liste metadatasından (sunucu) üretiliyor, kart ekranının sözlüğüyle
+  ilgisi yok; istenirse ayrı iş olarak liste kataloğuna renk kuralı eklenebilir.

@@ -5,9 +5,9 @@ import { hataMetni } from '../../api/sozlesme';
 import type { IsgCalisanKarti as Kart } from '../../api/uclar/isg';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay, secimSor } from '../../bilesenler/mesaj';
-import { MARUZIYET } from './IsgPano';
 import { c as cev } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
+import { ISG_MARUZIYET, ISG_MUAYENE_TUR_KISA, isgKanaatKpiSinifi, isgKanaatRozeti } from './isgKodlari';
 
 /**
  * ÇALIŞAN KARTI `/isg-calisan/:id` (İSG 741) — mockup Ekranlar/ISG/isg_calisan_karti.html.
@@ -16,7 +16,6 @@ import { useEscIleKapat } from '../../bilesenler/Modal';
  * Ek-2 muayene aç (SMS ya da iç ekran), formu gönder, olay bildir, aşı,
  * genel hasta kartı. Modal; kapat geldiği yere. Düzenleme gizli generic kart.
  */
-const KANAAT: Record<number, string> = { 1: 'ok', 2: 'uyari', 3: 'hata' };
 type Sekme = 'kimlik' | 'maruziyet' | 'muayene' | 'asi' | 'tibbi' | 'olay';
 
 export function IsgCalisanKarti() {
@@ -73,8 +72,8 @@ export function IsgCalisanKarti() {
         <button className="d" onClick={() => git(`/hasta/${c.hasta_id}?geri=${encodeURIComponent(buradan)}`)}>🪪 Genel hasta kartı</button>
       </div>
       <div className="fm-kpis">
-        <div className="fm-kpi"><div className="b">{cev('Son muayene')}</div><div className="d">{tarih(c.son_muayene)} <small>{c.son_muayene_tur ? ['', 'işe giriş', 'periyodik', 'işe dönüş', 'erken', 'iş değişikliği'][c.son_muayene_tur] : ''}</small></div></div>
-        <div className="fm-kpi"><div className="b">Kanaat</div><div className={`d${c.son_kanaat === 2 ? ' sari' : c.son_kanaat === 3 ? ' kir' : c.son_kanaat === 1 ? ' ok' : ''}`}>{c.son_kanaat_adi ?? '—'}</div></div>
+        <div className="fm-kpi"><div className="b">{cev('Son muayene')}</div><div className="d">{tarih(c.son_muayene)} <small>{c.son_muayene_tur ? ISG_MUAYENE_TUR_KISA[c.son_muayene_tur] ?? '' : ''}</small></div></div>
+        <div className="fm-kpi"><div className="b">Kanaat</div><div className={`d${isgKanaatKpiSinifi(c.son_kanaat)}`}>{c.son_kanaat_adi ?? '—'}</div></div>
         <div className="fm-kpi"><div className="b">{cev('Sonraki periyodik')}</div><div className={`d${c.kalan_gun < 0 ? ' kir' : c.kalan_gun <= 30 ? ' sari' : ''}`}>{tarih(c.vade)} <small>{c.kalan_gun < 0 ? `${-c.kalan_gun} gün geçti` : `${c.kalan_gun} gün`}</small></div></div>
         <div className="fm-kpi"><div className="b">Periyot</div><div className="d">{c.periyot_hesap} ay <small>{c.periyot_ay ? 'hekim kısaltması' : c.calisma >= 3 ? 'gece' : 'tehlike sınıfı'}</small></div></div>
         <div className="fm-kpi"><div className="b">{cev('Aşı')}</div><div className={`d${k.asilar.some(a => a.vadesi_gecti) ? ' sari' : ''}`}>{k.asilar.length ? k.asilar.slice(0, 2).map(a => `${a.asi_adi.split(' ')[0]} ${a.doz}`).join(' · ') : '—'}</div></div>
@@ -99,7 +98,7 @@ export function IsgCalisanKarti() {
       {sekme === 'maruziyet' && (
         <>
           <div style={{ padding: '4px 0 8px' }}><b style={{ fontSize: 12 }}>{cev('Maruziyetler')}</b> <span className="sonuk">(bölüm varsayılanı + kişiye özel)</span><br />
-            {maruz.length ? maruz.map(m => <span key={m} className={`isg-mrz${(c.maruziyet ?? []).includes(m) ? ' on' : ''}`}>{MARUZIYET[m] ?? m}</span>) : <span className="sonuk">Tanımsız — firma kartında bölüme ya da çalışan kartına yazın.</span>}
+            {maruz.length ? maruz.map(m => <span key={m} className={`isg-mrz${(c.maruziyet ?? []).includes(m) ? ' on' : ''}`}>{ISG_MARUZIYET[m] ?? m}</span>) : <span className="sonuk">Tanımsız — firma kartında bölüme ya da çalışan kartına yazın.</span>}
           </div>
           <div className="isg-frm"><Al lb="Tetkik paketi (bölüm)" v={c.tetkik_paketi} genis /><Al lb="Periyot" v={`${c.periyot_hesap} ay${c.periyot_ay ? ' (hekim kısaltması)' : ''}`} /><Al lb="Tetkik öneri" v={tetkikOneri(maruz)} genis /></div>
           <div className="sonuk" style={{ fontSize: 11 }}>Paket = maruziyet kodlarının birleşimi; "Ek-2 muayene aç" formunun Tetkikler bölümünde sonuçlar işaretlenir. Lab / radyoloji istemi genel hasta kartından.</div>
@@ -113,7 +112,7 @@ export function IsgCalisanKarti() {
               <tr key={m.id}>
                 <td>{tarih(m.tarih)}</td><td>{m.tur_adi}</td><td>{m.hekim_adi}</td>
                 <td>{m.form_istek_id ? <span className={`rozet ${m.form_durum === 4 ? 'ok' : m.form_durum === 3 ? 'uyari' : 'mor'}`}>{m.form_durum_adi ?? '—'}</span> : <span className="sonuk">elle</span>}</td>
-                <td>{m.kanaat ? <span className={`rozet ${KANAAT[m.kanaat]}`}>{m.kanaat_adi}</span> : '—'}</td>
+                <td>{m.kanaat ? <span className={`rozet ${isgKanaatRozeti(m.kanaat)}`}>{m.kanaat_adi}</span> : '—'}</td>
                 <td className="fm-not">{m.kosul}</td><td>{tarih(m.sonraki_tarih)}</td>
                 <td><span className={`rozet ${m.durum === 2 ? 'ok' : m.durum === 3 ? 'hata' : 'mor'}`}>{m.durum_adi}</span></td>
                 <td className="fm-sag">

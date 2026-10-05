@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
@@ -22,6 +22,27 @@ public static class IsgUclari
     // 1299 (757): 1204 eczane imhasinin (EczaneUclari).
     private const int LogMuayene = 1299;
     private const int LogOlay    = 1303;
+
+    /// <summary>Çalışan hâlâ işte (ayrılmış değil) - <c>isg_calisan.durum</c>.</summary>
+    private const short CalisanAktif = 1;
+    /// <summary>Form isteği tamamlandı (<c>form_istek.durum</c>); öncesinde kanaat okunamaz.</summary>
+    private const short FormIstekTamam = 4;
+
+    /// <summary>
+    /// Ek-2 formundaki kanaat SEÇENEĞİNİN METNİNDEN kod üretir
+    /// (<c>isg.kanaat</c>: 1 çalışır · 2 şu koşulla çalışır · 3 çalışamaz).
+    ///
+    /// <para><b>Kırılgan ve bilerek böyle:</b> form motoru cevabı serbest
+    /// metin olarak saklıyor, kod tutmuyor. Şablondaki seçenek metni
+    /// değiştirilirse eşleşme kaybolur ve kanaat 0 (belirsiz) kalır - bu
+    /// yüzden metin eşleşmesi tek yerde durur ve şablon metinleri
+    /// <c>isg.kanaat</c> kod listesiyle aynı yazılmalıdır.</para>
+    /// </summary>
+    private static short KanaatKodu(string metin)
+        => metin.StartsWith("Çalışam") ? (short)3
+         : metin.StartsWith("Şu") ? (short)2
+         : metin.StartsWith("Çalış") ? (short)1
+         : (short)0;
 
     public sealed record MuayeneAcIstegi(int? Tur, int? Kanal, int? HekimId, string? Telefon);
     public sealed record TopluIstegi(int[] CalisanIds, int? Tur, int? Kanal);
@@ -228,7 +249,7 @@ public static class IsgUclari
         var c = await b.TekAsync("select c.hasta_id, c.firma_id, f.hekim_id, c.durum from public.isg_calisan c join public.isg_firma f on f.id = c.firma_id where c.id = @p0", null, [calisanId],
             o => new { hastaId = o.GetInt32(0), firmaId = o.GetInt32(1), hekimId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), durum = o.GetInt16(3) }, iptal)
             ?? throw GentegreHatasi.Bulunamadi("Çalışan bulunamadı.");
-        if (c.durum != 1) throw GentegreHatasi.IsKurali("Ayrılmış çalışana muayene açılmaz.");
+        if (c.durum != CalisanAktif) throw GentegreHatasi.IsKurali("Ayrılmış çalışana muayene açılmaz.");
         var acik = await b.TekAsync("select id, form_istek_id from public.isg_muayene where calisan_id = @p0 and durum = 1 order by id desc limit 1", null, [calisanId],
             o => new { id = o.GetInt32(0), formId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1) }, iptal);
         if (acik is not null) return new { id = acik.id, formIstekId = acik.formId, mevcut = true };
@@ -254,10 +275,10 @@ public static class IsgUclari
     {
         var d = await b.TekAsync("select i.durum, i.cevap::text, m.id from public.form_istek i join public.isg_muayene m on m.form_istek_id = i.id where i.id = @p0", null, [formIstekId],
             o => new { durum = o.GetInt16(0), cevap = o.GetString(1), muayeneId = o.GetInt32(2) }, iptal);
-        if (d is null || d.durum != 4) return null;
+        if (d is null || d.durum != FormIstekTamam) return null;
         var c = JsonNode.Parse(d.cevap) as JsonObject ?? new JsonObject();
         var kanaatMetin = c["kanaat"]?.ToString() ?? "";
-        short kanaat = kanaatMetin.StartsWith("Çalışam") ? (short)3 : kanaatMetin.StartsWith("Şu") ? (short)2 : kanaatMetin.StartsWith("Çalış") ? (short)1 : (short)0;
+        var kanaat = KanaatKodu(kanaatMetin);
         DateOnly? sonraki = DateOnly.TryParse(c["sonraki"]?.ToString(), out var sd) ? sd : null;
         var sevk = c["sevk"] is JsonValue sv && (sv.ToString() is "true" or "Evet");
         var tetkik = string.Join(" · ", new[] { ("Odyometri", c["odyometri"]), ("SFT", c["sft"]), ("PA", c["pa"]), ("EKG", c["ekg"]), ("Lab", c["lab"]), ("Portör", c["portor"]) }
