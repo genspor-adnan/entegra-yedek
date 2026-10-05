@@ -2,6 +2,7 @@ import { api } from '../../api/istemci';
 import { ApiHatasi, type ListeSatiri } from '../../api/sozlesme';
 import { gozTamamlaSonrasi } from '../goz/GozSurecSekmeleri';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
+import { GOZ_ISTASYON } from '../../bilesenler/goz/gozPanoSabitleri';
 
 /**
  * GÖZ ÜNİTE AKIŞI AKSİYONLARI — mockup
@@ -18,15 +19,18 @@ import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj
  * ayrışması demek.
  */
 
-/** 1 kabul · 2 ön tetkik · 3 muayene · 4 görüntüleme · 5 karar · 6 tamamlandı. */
-const ISTASYONLAR = [
-  { kod: '2', ad: 'Ön tetkik' },
-  { kod: '3', ad: 'Hekim muayenesi' },
-  { kod: '4', ad: 'Görüntüleme' },
-  { kod: '5', ad: 'Karar / işlem' },
-  { kod: '1', ad: 'Kabul / bekleme' },
-  { kod: '6', ad: 'Tamamlandı (ziyaret kapanır)' },
-];
+/**
+ * "İstasyona al" listesi: sözlük ortak (gozPanoSabitleri), SIRA burada -
+ * hasta en çok ön tetkik ve muayene arasında taşınıyor, kuyruğun başına
+ * onlar yazılıyor. 6 (tamamlandı) ziyareti kapatır, en sonda durur.
+ */
+const ISTASYONLAR = [2, 3, 4, 5, 1, 6].map(k => ({
+  kod: String(k),
+  ad: k === 6 ? 'Tamamlandı (ziyaret kapanır)'
+    : k === 1 ? 'Kabul / bekleme'
+      : k === 3 ? 'Hekim muayenesi'
+        : GOZ_ISTASYON[k],
+}));
 
 const DAMLALAR = ['Tropikamid', 'Siklopentolat', 'Fenilefrin', 'Tropikamid + Fenilefrin'];
 
@@ -37,6 +41,12 @@ export interface GozAkisBaglam {
   semaAc?(gozMuayeneId: number): void;
   /** Dikte (705): sesle metin bulgu penceresi. */
   dikteAc?(gozMuayeneId: number): void;
+  /**
+   * 976: istem sepetini Göz sekmesinde açar. Pano istemi AÇAR ama YAZMAZ -
+   * kayıt muayeneye gidiyor, ücretlendirme başvuruda; panoya form koymak
+   * ayakta doldurulan yarım kayıtlar üretirdi.
+   */
+  istemAc?(gozMuayeneId: number): void;
 }
 
 export async function gozAkisAksiyonu(
@@ -106,15 +116,68 @@ export async function gozAkisAksiyonu(
     return true;
   }
 
+  // ---- ODA / CİHAZ ATAMA: 976'dan beri TANIMLI kaynaktan seçiliyor.
+  //   Serbest metin "OCT-1 / OCT1" ikiliğini üretiyor, doluluk tablosu ikiye
+  //   bölünüyor ve darboğaz görünmez oluyordu. Tanım yapılmamış kurulumda
+  //   (liste boş) eski davranış sürüyor: elle metin.
   if (kod === 'goz.oda-ata') {
     if (!id) { mesaj('Önce bir hasta kartı seçin.'); return true }
-    const oda = await metinSor('Oda / cihaz', String(satir?.oda ?? ''));
-    if (!oda?.trim()) return true;
     await guvenli(async () => {
-      await api.gozOdaAta(id, oda.trim());
-      mesaj(`Oda atandı: ${oda.trim()}`);
+      const istasyon = Number(satir?.istasyon ?? 0);
+      const y = await api.liste('goz-kaynak', { sayfa: 1, boyut: 200,
+        filtre: { alan: 'aktif', op: 'esit', deger: 1 } });
+      // İSTASYONA UYAN KAYNAK ÖNDE: ön tetkik masasını muayene listesinde
+      //   göstermek yanlış atamayı kolaylaştırıyor. "Tümü" (0) her yerde.
+      const uygun = y.satirlar.filter(k => {
+        const i = Number(k.istasyon ?? 0);
+        return i === 0 || !istasyon || i === istasyon;
+      });
+      if (uygun.length === 0) {
+        const oda = await metinSor('Oda / cihaz (tanım yok - elle)', String(satir?.oda ?? ''));
+        if (!oda?.trim()) return;
+        await api.gozOdaAta(id, oda.trim());
+        mesaj(`Oda atandı: ${oda.trim()}`);
+        b.tazele();
+        return;
+      }
+      const sec = await listeSor('Hangi oda / cihaz?', uygun.map(k => ({
+        kod: String(k.id),
+        ad: `${String(k.ad ?? '')} · ${String(k.turAdi ?? '')}`
+            + (Number(k.sayi ?? 0) > 0 ? ` · sırada ${String(k.sayi)}` : ' · boş')
+            + (String(k.sahip ?? '') ? ` · ${String(k.sahip)}` : ''),
+      })));
+      if (!sec) return;
+      const secili = uygun.find(k => String(k.id) === sec);
+      const r = await api.gozOdaAta(id, '', null, Number(sec));
+      mesaj(`Oda atandı: ${r.oda || String(secili?.ad ?? '')}`);
       b.tazele();
     });
+    return true;
+  }
+
+  // ---- GÖRÜNTÜLEME İSTEMİ (976): mockup araç çubuğundaki "📷 Görüntüleme
+  //   İstemi". Muayene kaydı YOKSA açılmaz - istem muayeneye yazılıyor,
+  //   başvurusuz / muayenesiz istem 974'te bilerek kapatıldı.
+  if (kod === 'goz.goruntuleme-istem') {
+    const muayeneId = Number(satir?.gozMuayeneId ?? 0);
+    if (!muayeneId) {
+      mesaj('Önce hastayı Ön tetkik / Hekim muayenesine alın: istem muayene kaydına yazılır.');
+      return true;
+    }
+    if (!b.istemAc) { mesaj('İstem sepeti bu ekranda açılamıyor.'); return true }
+    b.istemAc(muayeneId);
+    return true;
+  }
+
+  // ---- BEKLEME EKRANI: salon televizyonunda açık kalacak, YENİ SEKMEDE
+  //   açılıyor - panoyu kullanan kişi kendi ekranını kaybetmemeli.
+  if (kod === 'goz.bekleme-ekrani') {
+    window.open('/goz-bekleme-ekrani', '_blank', 'noopener');
+    return true;
+  }
+
+  if (kod === 'goz.gun-ozeti') {
+    b.git('/goz-unite-gun-ozeti');
     return true;
   }
 

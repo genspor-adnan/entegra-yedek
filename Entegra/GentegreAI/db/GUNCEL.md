@@ -515,7 +515,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (311 ad, 141 tanesi birden cok dosyada)
+## Gorunumler (313 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -626,14 +626,16 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_gebelik_sonucsuz` | `940_personel_unvan_yalniz_onek.sql` | 902_gebelik_sonucu.sql |
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
+| `v_goz_bekleme_ekrani` | `976_goz_unite_pano_v2.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_goruntuleme_ozet` | `974_goz_goruntuleme_istem.sql` | — |
 | `v_goz_gozluk_ozet` | `973_gozluk_liste_ozet.sql` | — |
+| `v_goz_kaynak_doluluk` | `976_goz_unite_pano_v2.sql` | — |
 | `v_goz_muayene_ozet` | `970_goz_muayene_liste_kart.sql` | — |
 | `v_goz_protokol_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_takip_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_tetkik_lookup` | `693_goz_lookup.sql` | — |
-| `v_goz_unite_akis` | `940_personel_unvan_yalniz_onek.sql` | 691_goz_modulu.sql |
+| `v_goz_unite_akis` | `976_goz_unite_pano_v2.sql` | 691_goz_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_hakedis_ozet` | `940_personel_unvan_yalniz_onek.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql |
 | `v_hakedis_satir` | `940_personel_unvan_yalniz_onek.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql, 363_hakedis_rol_isaret_kontrolu.sql |
 | `v_hasta_avans` | `940_personel_unvan_yalniz_onek.sql` | 779_hasta_avansi.sql, 780_avans_iadesi.sql, 781_belge_tahsilat_avans_kullanimi.sql |

@@ -51,6 +51,8 @@ const RadyolojiIstemKarti = tembel(() => import('./sayfalar/RadyolojiIstemKarti'
 const RadyolojiRaporCikti = tembel(() => import('./sayfalar/RadyolojiRaporCikti'), 'RadyolojiRaporCikti');
 const LabRaporCikti = tembel(() => import('./sayfalar/LabRaporCikti'), 'LabRaporCikti');
 const GozSemaCikti = tembel(() => import('./sayfalar/GozSemaCikti'), 'GozSemaCikti');
+const GozBeklemeEkrani = tembel(() => import('./sayfalar/goz/GozBeklemeEkrani'), 'GozBeklemeEkrani');
+const GozUniteGunOzeti = tembel(() => import('./sayfalar/goz/GozUniteGunOzeti'), 'GozUniteGunOzeti');
 const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi');
 const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
@@ -275,6 +277,16 @@ function Yollar() {
             palet ve arac degil, antet + kimlik + sema + isaret dokumu gider. */}
         {yetki('goz.muayene') && (
           <Route path="/goz/sema-cikti/:id" element={<GozSemaCikti />} />
+        )}
+        {/* BEKLEME SALONU EKRANI (976): panodan AYRI sayfa - salonda duvarda
+            duruyor, ad maskeli, dugme yok. Panoyu gorme yetkisiyle acilir. */}
+        {yetki('goz') && (
+          <Route path="/goz-bekleme-ekrani" element={<GozBeklemeEkrani />} />
+        )}
+        {/* GUN OZETI CIKTISI (976): panonun degil GUNUN kagit hali - sayaclar,
+            darbogaz, kaynak dolulugu ve hekim yuku antetle basilir. */}
+        {yetki('goz') && (
+          <Route path="/goz-unite-gun-ozeti" element={<GozUniteGunOzeti />} />
         )}
         {/* Belge talebi YAZISI (768): liste ekraninda cizilemez - kagida
             antet + metin + imza gider, arac cubugu gitmez. */}

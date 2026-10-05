@@ -18696,3 +18696,68 @@ Mockup `Ekranlar/Goz/goz_gozluk_recetesi_v2.html` · `goz_gozluk_recete_listesi_
   yanıtındaki `goruntuIstem`. İstem ekranında "Laboratuvar" → "Lab", üç sekme eşit genişlik, ikon üstte. Göz muayene /
   gözlük reçetesi / görüntüleme kartı başlığında H → "No", P → "Prt"; sürüm rozeti kaldırıldı (genel muayene dahil),
   yerinde hekim adı rozeti.
+
+## 05.10.2026 — Göz ünite panosu v2: mockup'ın kalan parçaları (976)
+
+Kullanıcı: *"göz ünite panosunda eksik ne kaldı"* → *"hepsini yap"*. Mockup
+`Ekranlar/Goz/goz_unite_panosu.html` ile ekran karşılaştırıldı; sekiz eksik madde
+kapatıldı.
+
+* **Otomatik tazeleme (mockup "30 sn'de bir yenilenir").** Pano artık 30 saniyede bir
+  kendini tazeliyor ve başlık şeridinde **son yenileme saati + geri sayım + Duraklat**
+  duruyor. Tasarım notunun sebebi: "verinin ne kadar taze olduğunu bilmeden sıraya
+  güvenilmez". Görünmeyen sekmede istek atılmıyor (`document.hidden`); kart taşırken
+  duraklatılabiliyor - tazeleme listeyi yeniden kurup sürüklemeyi düşürüyordu.
+* **Şerit çipleri DURUM oldu:** Bekleyen (çağrılmadı) · Çağrıldı · Dilatasyonda ·
+  Geciken (≥ 30 dk) · Acil · Tümü. İstasyon çipleri kanbanın sütunlarıyla aynı şeyi
+  söylüyordu, **sol panele** taşındı: istasyon / hekim (yanında **vardiya**, çalışma
+  planından) / oda-cihaz, her biri sayılı. Çip ve panel **kanbanı da süzüyor** - grid
+  süzülüp kanban dolu kalınca kullanıcı için süzgeç çalışmıyor demekti.
+* **Oda / cihaz TANIMI geldi** (`goz_kaynak`, ekran *Göz › Oda / Cihaz Tanımı*).
+  Atama serbest metindi: "OCT-1" ile "OCT1" iki kaynak sayılıyor, doluluk ikiye
+  bölünüyor ve darboğaz görünmez oluyordu. Artık atama tanımdan seçiliyor
+  (`kaynak_id`; oda metnini sunucu tanımdan yazar), tanım yoksa eski elle giriş
+  sürüyor. Doluluk görünümü **boş kaynağı da** döndürüyor - mockup'ın cümlesi ("HFA
+  sırası dört kişiyken muayene odası boş duruyor") ancak atıl kaynak görünürse kurulur.
+  Geçmiş oda metinleri göçte tanıma çevrildi.
+* **Kanban kartı mockup ayrıntıları:** yaş · cinsiyet, **acil / çocuk** rozeti, "şu an
+  işlemde" vurgusu (çağrılmış + kaynağı atanmış), **ön tetkik tamamlanması** ("Otoref ✔ ·
+  Tonometri —"), **ölçüm özeti** ("GİB 26/24 · otoref −2,25 / −2,00"), "çağrıldı" rozeti
+  (çağrıldı-gelmedi ile kimse-çağırmadı ayrı görünmeli).
+* **Hekim yükünde GECİKME kolonu** (mockup "+12 dk"): randevu saatiyle istasyona giriş
+  arası. Randevusuz hastada **ölçülemez** ve "—" yazar; sıfır yazmak "zamanında" demek
+  olurdu. Oda tablosunda tür / sahip ve "boş" satırı.
+* **Bekleme salonu ekranı** (`/goz-bekleme-ekrani`, araç çubuğundan yeni sekme):
+  çağrılanlar büyük puntoyla üstte, altta istasyon kuyrukları, dilatasyon sayacı.
+  **Ad maskeli ve maskeleme sunucuda** (`v_goz_bekleme_ekrani`) - salonda ekranı herkes
+  okuyor, tam ad istemciye hiç gitmiyor. Ekranda düğme yok: çağırma / taşıma panoda
+  kalıyor.
+* **Gün özeti çıktısı** (`/goz-unite-gun-ozeti`): antet + sayaçlar + darboğaz + istasyon
+  dağılımı + kaynak doluluğu + hekim yükü. Panonun değil **günün** kâğıt hâli; veri
+  panonun kendi ucundan (ikinci bir "gün özeti" sorgusu aynı günün iki ortalamasını
+  üretirdi). Yazdırma tarayıcınındır, ayrı PDF üreticisi yok.
+* **Görüntüleme istemi panodan:** "📷 Görüntüleme İstemi" istem sepetini **Göz**
+  sekmesinde açıyor. Pano istemi açar ama yazmaz - kayıt muayeneye, ücret başvuruya
+  gidiyor (974 akışı). Muayenesi açılmamış hastada uç yerine ekran anlaşılır cümle verir.
+* **976** `goz_kaynak` (+ `goz.kaynak_tur` listesi, `goz.kaynak` yetkisi),
+  `goz_ziyaret_istasyon.kaynak_id`, `v_goz_kaynak_doluluk`, `v_goz_bekleme_ekrani`;
+  `v_goz_unite_akis` yeniden kuruldu (çağrı / işlemde / gecikti / acil / çocuk / yaş /
+  ön tetkik / GİB-otoref / randevu gecikmesi; muayene bağı **lateral** - çok muayeneli
+  başvuru hastayı panoda iki kez gösteriyordu). Uçlar: `/goz/bekleme-ekrani`,
+  `/goz/unite-ozet` (kaynak doluluğu + gecikme + panel süzgeçleri + antet).
+* **İki hata yolda çıktı:** (1) araç çubuğu düğmeleri **gridin kendiliğinden seçtiği**
+  satıra uygulanıyordu - kullanıcı karta tıklayıp "Oda Ata" deyince işlem başka hastaya
+  gidiyordu; kanban seçimi artık öne alındı. (2) `goz.kaynak` yetkisi `tur = 1`
+  (aksiyon) yazılmıştı, liste **rotası açılmıyor** ve ekran ana sayfaya düşüyordu -
+  kaynak yetkisi `tur = 0` olmalı.
+* Refaktör: istasyon sözlüğü ve eşikler (bekleme hedefi / kritik, sıra uyarısı,
+  dilatasyon 20 dk, tazeleme 30 sn) beş dosyada tekrarlanıyordu →
+  `bilesenler/goz/gozPanoSabitleri.ts`. Şerit, kanban ve alt tablolar artık **tek**
+  `/unite-ozet` isteğini paylaşıyor (üç istek aynı ekranda üç farklı "4 kişi" üretiyordu).
+* Doğrulama: tarayıcıda pano (şerit sayacı, çipler + sol panel kanbanı süzüyor, kart
+  rozetleri, oda atama tanımdan, gün özeti, bekleme ekranı yeni sekmede), API ile
+  `/unite-ozet` ve `/bekleme-ekrani`, ölçüm eklenip "Otoref ✔ · Tonometri ✔ · GİB 26/24"
+  görüldü ve **test kayıtları silindi**. tsc temiz, vitest 789/789, dotnet test 218
+  geçti. **Not:** `gentegre_ai_test` veritabanı 940/963 nesnelerini içermiyor (ör.
+  `fn_taraf_ad`, `v_personel_durum` yok), bu yüzden DB testleri atlanıyor - 976'dan
+  önce de böyleydi, ayrı iş.

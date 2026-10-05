@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
@@ -36,6 +36,7 @@ public static partial class GozUclari
         // Ünite panosu sayaçları ayrı dosyada: bu dosya HASTANIN göz özetini
         //   tutuyor, o ise ÜNİTENİN o günkü hâlini.
         UniteOzetiEkle(grup);
+        PanoUclariniEkle(grup);
         AkisUclariniEkle(grup);
         SeritUcunuEkle(grup);
         ListeUclariniEkle(grup);

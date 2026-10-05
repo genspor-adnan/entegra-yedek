@@ -334,6 +334,8 @@ public static partial class KartKatalogu
         Ekle(GozGozlukReceteKarti());
         Ekle(GozTakipKarti());
         Ekle(GozCihazKarti());
+        // 976: göz ünitesi oda / cihaz tanımı (panonun kaynak doluluğu).
+        Ekle(GozKaynakKarti());
         Ekle(DikteTerimKarti());
         Ekle(GozKontaktLensKarti());
         Ekle(GozIslemProtokolKarti());

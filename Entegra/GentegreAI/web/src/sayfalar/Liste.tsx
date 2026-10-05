@@ -70,6 +70,7 @@ import { GozUniteOzeti } from '../bilesenler/goz/GozUniteOzeti';
 import { GozUniteTablolari } from '../bilesenler/goz/GozUniteTablolari';
 import { GozSemasi } from '../bilesenler/goz/GozSemasi';
 import { GozDikte } from '../bilesenler/goz/GozDikte';
+import { IstemSepetiModal } from '../bilesenler/IstemSepetiModal';
 import { YatakPanosu } from '../bilesenler/YatakPanosu';
 import { YatisKabulModali } from '../bilesenler/yatan/YatisKabulModali';
 import { EmarCizelgesi } from '../bilesenler/yatan/EmarCizelgesi';
@@ -109,6 +110,7 @@ import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi
 import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
 import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from './goz/GozlukPanelleri';
 import { GoruntulemeGostergesi, GoruntulemeOnizlemePaneli, GoruntulemeSolPanel, useGoruntulemeGostergesi, useGoruntulemeSuzgeci } from './goz/GozGoruntulemePanelleri';
+import { GozPanoSolPanel, GozPanoTazeleSeridi, useGozPanoOzeti, useGozPanoSuzgeci } from './goz/GozPanoPanelleri';
 import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
@@ -212,6 +214,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Göz şeması ve dikte (705): ikisi de açık muayeneye bulgu yazar.
   const [gozSema, setGozSema] = useState<number | null>(null);
   const [gozDikte, setGozDikte] = useState<number | null>(null);
+  /** 976: panodan açılan istem sepeti (Göz sekmesi) - pano istemi açar, yazmaz. */
+  const [gozPanoIstem, setGozPanoIstem] = useState<number | null>(null);
   const [yatisTaburcu, setYatisTaburcu] = useState<number | null>(null);
   /**
    * GÖZ ÜNİTE AKIŞINDA SEÇİLİ KART (691). Kanban gridin DIŞINDA bir seçim
@@ -458,6 +462,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
   const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
   // 974 GÖZ GÖRÜNTÜLEME: gösterge (ödeme / sıra / değerlendirme), tetkik-cihaz (sol), önizleme (sağ).
+  // GÖZ ÜNİTE PANOSU (976): 30 sn otomatik tazeleme + istasyon / hekim / kaynak
+  //   süzgeci; şerit, kanban ve alt tablolar TEK isteği paylaşıyor.
+  const panoEkrani = tanim.kaynak === 'goz-akis' && !portalda;
+  const panoSuzgec = useGozPanoSuzgeci(panoEkrani);
+  const panoDurum = useGozPanoOzeti(panoEkrani, yenile, () => setYenile(t => t + 1));
   const gorEkrani = tanim.kaynak === 'goz-goruntuleme' && !portalda;
   const gorSuzgec = useGoruntulemeSuzgeci(gorEkrani);
   const gorGostergesi = useGoruntulemeGostergesi(gorEkrani, yenile);
@@ -739,7 +748,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   dilatasyon, oda, ziyareti kapat. Pano YAZMAZ, TASIR.
       // KANBAN SEÇİMİ GRİD SEÇİMİNİN YERİNE GEÇER: kullanıcı karta tıklayıp
       //   düğmeye basıyor; gridden ikinci kez seçtirmek gereksiz bir adım.
-      if (await gozAkisAksiyonu(kod, satir ?? gozAkisSecili, {
+      // KANBAN SEÇİMİ GRİD SEÇİMİNİN YERİNE GEÇER - ve ÖNCE gelir (976):
+      //   grid ilk satırı kendiliğinden seçiyor, `satir ?? gozAkisSecili`
+      //   sırası yüzünden kullanıcı karta tıklayıp düğmeye bastığında işlem
+      //   BAŞKA hastaya uygulanıyordu (oda ataması, istem, çağrı). Kart
+      //   seçilmemişse grid satırı yine kullanılır.
+      if (await gozAkisAksiyonu(kod, gozAkisSecili ?? satir, {
         // Kart araç çubuğundan çağrıldığında (tamamla, önceki muayeneden
         //   kopyala) kayıt SUNUCUDA değişiyor: liste kadar AÇIK KART da
         //   tazelenmeli, yoksa getirilen bulgular ekranda görünmez.
@@ -747,6 +761,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         git: yol => git(yol),
         semaAc: id => setGozSema(id),
         dikteAc: id => setGozDikte(id),
+        istemAc: id => setGozPanoIstem(id),
       })) return;
 
       // MEDULA (707): kabul/hizmet sayfalari, cikis, fatura, recete imzala/gonder, kuyruk.
@@ -1031,7 +1046,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gorSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1189,9 +1204,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // ÖNCE SAYAÇ ŞERİDİ, SONRA KANBAN (mockup goz_unite_panosu.html):
         //   şerit "ünite tıkalı mı", kanban "kim nerede" sorusunu cevaplıyor -
         //   önce durum, sonra ayrıntı.
-        ? <><GozUniteOzeti yenile={yenile} />
+        ? <><GozPanoTazeleSeridi d={panoDurum} onYenile={() => setYenile(t => t + 1)} />
+             <GozUniteOzeti veri={panoDurum.veri} />
              <GozUniteKanban yenile={yenile}
                              seciliId={Number(gozAkisSecili?.id ?? 0) || null}
+                             // ÇİPLER VE SOL PANEL KANBANI DA SÜZER (976):
+                             //   gridi süzüp kanbanı dolu bırakmak, kullanıcı
+                             //   için süzgeç çalışmıyor demekti. Çip koşulu
+                             //   gridin iç durumundan (cipIndeks) okunuyor -
+                             //   ikinci bir çip durumu iki ekranı ayrıştırırdı.
+                             filtre={panoSuzgec.filtre(cipler?.[cipIndeks]?.filtre)}
                              onSec={sat => setGozAkisSecili(sat as unknown as ListeSatiri)}
                              // SÜRÜKLE-BIRAK: kart sütuna bırakılınca hasta o
                              //   istasyona alınır. Kararı sunucu veriyor -
@@ -1206,7 +1228,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                                setGozAkisSecili(null);
                                setYenile(t => t + 1);
                              })} />
-             <GozUniteTablolari yenile={yenile} /></>
+             <GozUniteTablolari veri={panoDurum.veri} /></>
         : tanim.kaynak === 'lab-sonuc'
         ? <LabOzetSeridi yenile={yenile} onCip={setCipIndeks} />
         // MUAYENE LISTESI OZET SERIDI (461, mockup muayene_listesi.html):
@@ -1247,6 +1269,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukSolPanel veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : panoEkrani ? <GozPanoSolPanel veri={panoDurum.veri} s={panoSuzgec} />
         : gorEkrani ? <GoruntulemeSolPanel veri={gorGostergesi} s={gorSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
@@ -1551,6 +1574,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         onKapat={() => setGozDikte(null)}
         onTamam={() => { setYenile(t => t + 1); setKartTazele(t => t + 1) }}
       />
+    )}
+    {/* 976: panodan istem sepeti. Göz sekmesinde açılıyor - panoda istenen şey
+        görüntüleme; sepet kaydı muayeneye, ücreti başvuruya yazıyor. */}
+    {gozPanoIstem !== null && (
+      <IstemSepetiModal muayeneId={gozPanoIstem} baslangicSekme="goz"
+                        onKapat={() => setGozPanoIstem(null)}
+                        onBitti={() => setYenile(t => t + 1)} />
     )}
     {yatisNakil !== null && (
       <NakilModali

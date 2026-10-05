@@ -416,8 +416,29 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu2,sagtus,palet",
                     KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 60, UrunModu: 2,
                     Ipucu: "Açık istasyon kapanır, hasta panodan düşer"),
+                // 976 (mockup araç çubuğu): istem panodan AÇILIR ama panoda
+                //   YAZILMAZ - sepet muayene kaydına yazıyor, kural orada.
+                new("goz.goruntuleme-istem", "📷 Görüntüleme İstemi", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz.goruntuleme", Islem: Islem.Ekle, Sira: 70, UrunModu: 2,
+                    Ipucu: "İstem sepetini Göz sekmesinde açar (başvuruya ücretlendirilir)"),
+                // BEKLEME EKRANI ayrı pencere: salon TV'sinde açık kalacak, ad
+                //   maskeli. Yetki panoyu görmekle aynı.
+                new("goz.bekleme-ekrani", "🖥 Bekleme Ekranı", "goz",
+                    Hedef: "araccubugu2,palet",
+                    KaynakKodu: "goz", Islem: Islem.Gor, Sira: 80, UrunModu: 2,
+                    Ipucu: "Bekleme salonu ekranını yeni sekmede açar"),
+                new("goz.gun-ozeti", "🖨 Gün Özeti", "goz",
+                    Hedef: "araccubugu2,palet",
+                    KaynakKodu: "goz", Islem: Islem.Gor, Sira: 90, UrunModu: 2,
+                    Ipucu: "Sayaçlar, darboğaz, kaynak ve hekim yükü - yazdırılabilir özet"),
                 Yazdir(),
             },
+            // 976: oda / cihaz tanımı - ayar ekranı (crud).
+            ["goz-kaynak-liste"] =
+            [
+                .. Crud("goz-kaynak", "goz", "goz.kaynak", ekleAdi: "＋ Yeni Oda / Cihaz"),
+            ],
             ["goz-hasta-ozet-liste"] = new AksiyonTanimi[] { Yazdir() },
 
             // ===================================================== DIS (706) ==

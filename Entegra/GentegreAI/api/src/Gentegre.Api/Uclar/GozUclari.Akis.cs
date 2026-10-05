@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -33,9 +33,14 @@ public static partial class GozUclari
         ["", "Kabul", "Ön tetkik", "Hekim muayenesi", "Görüntüleme", "Karar / işlem", "Tamamlandı"];
 
     public sealed record IstasyonIstegi(short Istasyon, string? Oda, int? PersonelId,
-                                        string? Not);
+                                        string? Not, int? KaynakId = null);
     public sealed record DilatasyonIstegi(string? Ilac);
-    public sealed record OdaIstegi(string? Oda, int? PersonelId);
+    /// <summary>
+    /// 976: atama artık TANIMLI kaynağa (<c>goz_kaynak</c>) yapılıyor.
+    /// <c>Oda</c> metni geriye dönük uyumluluk için duruyor - tanım yapılmamış
+    /// kurulumda ekran serbest metinle çalışmaya devam ediyor.
+    /// </summary>
+    public sealed record OdaIstegi(string? Oda, int? PersonelId, int? KaynakId = null);
 
     private static void AkisUclariniEkle(RouteGroupBuilder grup)
     {
@@ -116,7 +121,8 @@ public static partial class GozUclari
             var mevcut = await baglanti.TekAsync("""
                 select i.belge_id, i.hasta_id, i.sube_id, i.istasyon, i.cikis,
                        i.dilatasyon_zamani, i.sira_no, i.oda, i.personel_id,
-                       public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan
+                       public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan,
+                       i.kaynak_id
                   from public.goz_ziyaret_istasyon i
                   join public.taraf t on t.id = i.hasta_id
                  where i.id = @p0
@@ -133,6 +139,7 @@ public static partial class GozUclari
                 oda = o.GetString(7),
                 personelId = o.IsDBNull(8) ? (int?)null : o.GetInt32(8),
                 hasta = o.GetString(9),
+                kaynakId = o.IsDBNull(10) ? (int?)null : o.GetInt32(10),
             }, iptal) ?? throw GentegreHatasi.Bulunamadi("Akış kaydı bulunamadı.");
 
             if (mevcut.kapali)
@@ -167,19 +174,25 @@ public static partial class GozUclari
                 yeniId = await baglanti.TekDegerAsync<int>("""
                     insert into public.goz_ziyaret_istasyon
                         (sube_id, belge_id, hasta_id, istasyon, giris, oda, personel_id,
-                         sira_no, not_metin, dilatasyon_zamani, dilatasyon_ilac, ekleyen)
+                         sira_no, not_metin, dilatasyon_zamani, dilatasyon_ilac, ekleyen,
+                         kaynak_id)
                     select @p0, @p1, @p2, @p3, now(), coalesce(@p4, ''), @p5,
                            @p6, coalesce(@p7, ''),
                            -- DİLATASYON ZAMANI TAŞINIR: damla hastaya
                            --   damlatıldı, istasyon değişti diye sıfırlanmaz;
                            --   sayaç yeni sütunda da doğru saymalı.
-                           i.dilatasyon_zamani, i.dilatasyon_ilac, @p8
+                           i.dilatasyon_zamani, i.dilatasyon_ilac, @p8,
+                           -- KAYNAK TAŞINIR (976): istasyon değişip oda metni
+                           --   taşınırken kaynak bağı kopsaydı doluluk tablosu
+                           --   hastayı tanımsız odada sayardı.
+                           @p10
                       from public.goz_ziyaret_istasyon i where i.id = @p9
                     returning id
                     """, islem,
                     [mevcut.subeId, mevcut.belgeId, mevcut.hastaId, istek.Istasyon,
                      istek.Oda ?? mevcut.oda, istek.PersonelId ?? mevcut.personelId,
-                     mevcut.siraNo, istek.Not, baglam.KullaniciId, id], iptal);
+                     mevcut.siraNo, istek.Not, baglam.KullaniciId, id,
+                     istek.KaynakId ?? mevcut.kaynakId], iptal);
             }
 
             // SÜREÇ v2 HALKA 1 (goz_sureci_v2): Ön tetkik / Hekim muayenesine geçen hastanın
@@ -255,18 +268,34 @@ public static partial class GozUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("goz", Islem.Degistir);
 
-            var etkilenen = await veri.CalistirAsync("""
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // TANIMLI KAYNAK SEÇİLDİYSE oda metni TANIMDAN yazılır: ekranın
+            //   gönderdiği metne güvenseydik "OCT-1" ile "OCT1" yeniden iki
+            //   kaynak olurdu - 976'nın çözdüğü sorun aynen geri gelirdi.
+            string? kaynakAdi = null;
+            if (istek.KaynakId is int kid)
+            {
+                kaynakAdi = await baglanti.TekDegerAsync<string>("""
+                    select k.ad from public.goz_kaynak k where k.id = @p0 and k.aktif = 1
+                    """, null, [kid], iptal)
+                    ?? throw GentegreHatasi.IsKurali("Oda / cihaz tanımı bulunamadı ya da kapalı.");
+            }
+
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.goz_ziyaret_istasyon
-                   set oda = coalesce(@p1, oda), personel_id = coalesce(@p2, personel_id),
+                   set oda = coalesce(@p1, oda),
+                       kaynak_id = coalesce(@p4, kaynak_id),
+                       personel_id = coalesce(@p2, personel_id),
                        degistiren = @p3, degistirme_tarihi = now()
                  where id = @p0 and cikis is null
-                """, new object?[] { id, istek.Oda?.Trim(), istek.PersonelId,
-                                     baglam.KullaniciId }, iptal);
+                """, null, [id, kaynakAdi ?? istek.Oda?.Trim(), istek.PersonelId,
+                            baglam.KullaniciId, istek.KaynakId], iptal);
 
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali("Kayıt bulunamadı ya da kapanmış.");
 
-            return Results.Ok(new { id, oda = istek.Oda ?? "" });
+            return Results.Ok(new { id, oda = kaynakAdi ?? istek.Oda ?? "" });
         });
     }
 }

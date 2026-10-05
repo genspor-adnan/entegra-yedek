@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from '../../api/istemci';
 import type { GozUniteOzeti as Ozet } from '../../api/uclar/goz';
+import { GOZ_ISTASYON, GOZ_PANO_ESIK } from './gozPanoSabitleri';
 
 /**
  * GÖZ ÜNİTE PANOSU SAYAÇLARI — mockup
@@ -21,26 +20,16 @@ import type { GozUniteOzeti as Ozet } from '../../api/uclar/goz';
  * 31 dk" ikinci cihazı ya da randevu aralığını gündeme getirir.
  */
 
-const ISTASYON: Record<number, string> = {
-  1: 'Kabul', 2: 'Ön tetkik', 3: 'Muayene',
-  4: 'Görüntüleme', 5: 'Karar / işlem', 6: 'Tamamlandı',
-};
+const ISTASYON = GOZ_ISTASYON;
+const { beklemeHedefDk: BEKLEME_HEDEF, beklemeKritikDk: BEKLEME_KRITIK } = GOZ_PANO_ESIK;
 
-/** Bekleme hedefi (dk): üstü sarı. Kurum ayarı olana kadar tek yerde. */
-const BEKLEME_HEDEF = 15;
-/** Bu süreyi geçen bekleme kırmızı: hasta "unutuldum" demeden önceki eşik. */
-const BEKLEME_KRITIK = 30;
-
-export function GozUniteOzeti({ yenile }: { yenile?: number }) {
-  const [veri, setVeri] = useState<Ozet | null>(null);
-
-  const yukle = useCallback(async () => {
-    // Şerit zorunlu değil: hatası kanbanı ve listeyi düşürmemeli.
-    try { setVeri(await api.gozUniteOzeti()) } catch { /* sessiz */ }
-  }, []);
-
-  useEffect(() => { void yukle() }, [yukle, yenile]);
-
+/**
+ * 976: VERİ PROPTAN gelir. Şerit, alt tablolar ve sol panel aynı yanıtı
+ * paylaşıyor (`useGozPanoOzeti`); her bileşen kendi isteğini atarken aynı
+ * ekranda üç ayrı an fotoğrafı görünüyordu - kutudaki "4 kişi" ile tablodaki
+ * "5 kişi" arasındaki fark kullanıcıya hep veri hatası gibi okunur.
+ */
+export function GozUniteOzeti({ veri }: { veri: Ozet | null }) {
   if (!veri) return null;
   const g = veri.gunOzet;
   const a = veri.acik;

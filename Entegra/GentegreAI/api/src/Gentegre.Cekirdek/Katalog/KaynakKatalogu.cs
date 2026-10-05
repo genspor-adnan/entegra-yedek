@@ -281,6 +281,8 @@ public static partial class KaynakKatalogu
         Ekle(GozIslemProtokol());
         Ekle(GozCihazMesaj());
         Ekle(GozHastaOzet());
+        // 976: panonun "oda ve cihaz doluluğu" tablosunun tanım ekranı.
+        Ekle(GozKaynak());
 
         // DIS KLINIGI (706): hasta listesi (karta giris), planlar, seanslar,
         //   lab is emirleri, odeme planlari, ayarlar (unit / lab).

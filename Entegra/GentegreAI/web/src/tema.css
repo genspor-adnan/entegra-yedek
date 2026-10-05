@@ -7550,3 +7550,117 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .gg-trend > div.bu { outline: 1px dashed #9aa; outline-offset: 1px }
 .gg-mavi { color: #2f6db3 }
 .gg-mor { color: #8e44ad }
+
+/* ===========================================================================
+   GOZ UNITE PANOSU v2 (976) — mockup Ekranlar/Goz/goz_unite_panosu.html.
+   Mockup'ta olup ekranda eksik kalan parcalar: tazeleme seridi, kart
+   ayrintilari (acil/cocuk/su an islemde), bekleme salonu ekrani ve gun
+   ozeti ciktisi. Sinif adlari ON EKLI (gp- / gk- / gbe-): pano kutularina
+   kisa genel ad vermek, temanin global adlarini sahiplenmek olurdu (446).
+   ========================================================================= */
+
+/* TAZELEME SERIDI: mockup basliginda "30 sn'de bir yenilenir" yaziyor.
+   Tasarim notu sebebini soyluyor - panoya bakan kisi verinin ne kadar taze
+   oldugunu bilmeden siraya guvenemez. */
+.gp-tazele {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 6px 8px; margin: 6px 0 0;
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz2);
+  font-size: 11.5px;
+}
+.gp-tazele > b { color: var(--yazi2) }
+.gp-tazele .gp-bosluk { margin-left: auto }
+/* Canli nokta: veri akiyor mu sorusu bir bakista cevaplanir. */
+.gp-nokta {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--ok);
+  box-shadow: 0 0 0 3px var(--okzem);
+}
+.gp-vardiya { font-style: normal; color: var(--soluk); font-size: 10.5px }
+
+/* KART AYRINTILARI: su an islemde olan kart vurgulu (mockup `.simdi`),
+   acil kirmizi kenarli. Bekleyenle ayni gorunen kart, sirayi oldugundan
+   uzun gosteriyor. */
+.kanban .is.simdi { border-color: var(--mavi, #2f6db3); background: #f2f7fd }
+.kanban .is.acil  { border-left: 3px solid var(--hata) }
+.kanban .is .gk-yas { font-weight: 400; color: var(--soluk); font-size: 10.5px }
+.kanban .is .gk-rozetler { display: flex; gap: 4px; margin: 2px 0 1px }
+.kanban .is .gk-rozetler .rozet { font-size: 10px; padding: 1px 7px }
+
+/* ===========================================================================
+   BEKLEME SALONU EKRANI (976) — /goz-bekleme-ekrani.
+   Panonun degil SALONUN ekrani: punto uzaktan okunacak kadar buyuk, dugme
+   yok, ad maskeli (maskeleme sunucuda).
+   ========================================================================= */
+.gbe { display: flex; flex-direction: column; gap: 10px; padding: 10px; min-height: 100% }
+.gbe-ust {
+  display: flex; align-items: baseline; gap: 12px;
+  border-bottom: 2px solid var(--vurgu); padding-bottom: 6px;
+}
+.gbe-ust > b { font-size: 22px; color: var(--yazi2) }
+.gbe-ust > span { margin-left: auto; font-size: 22px; font-variant-numeric: tabular-nums }
+/* CAGRILANLAR en ustte ve en buyuk: salondaki hastanin ekrana bakma sebebi. */
+.gbe-cagri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+.gbe-kart {
+  border: 2px solid var(--ok); border-radius: var(--r); background: var(--okzem);
+  padding: 12px 14px;
+}
+.gbe-kart > b { display: block; font-size: 28px; line-height: 1.2; color: var(--yazi2) }
+.gbe-kart > span { display: block; font-size: 18px; color: var(--ok); font-weight: 700 }
+.gbe-kart > i { display: block; font-style: normal; font-size: 13px; color: var(--soluk) }
+.gbe-kuyruk { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; flex: 1 }
+.gbe-kol { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz) }
+.gbe-kol > h4 {
+  display: flex; gap: 6px; margin: 0; padding: 6px 9px; font-size: 13px;
+  background: var(--kartzem); border-bottom: 1px solid var(--cizgi2);
+}
+.gbe-kol > h4 > span { margin-left: auto; color: var(--soluk); font-weight: 400 }
+.gbe-satir {
+  display: flex; align-items: center; gap: 6px; padding: 5px 9px; font-size: 15px;
+  border-bottom: 1px solid var(--cizgi3, var(--cizgi2));
+}
+.gbe-satir > i { margin-left: auto; font-style: normal; font-size: 12px; color: var(--soluk) }
+.gbe-satir > em { font-style: normal; font-size: 11px; color: var(--mor) }
+.gbe-satir > em.gbe-hazir { color: var(--ok); font-weight: 700 }
+/* Cagrilan satir kuyrukta da isaretli: "cagrildi ama gelmedi" ile "kimse
+   cagirmadi" ayri gorunmeli (702). */
+.gbe-satir.cagrildi { background: var(--okzem) }
+.gbe-bos { padding: 18px; text-align: center; color: var(--soluk); font-size: 16px }
+.gbe-alt {
+  display: flex; gap: 10px; font-size: 12px; color: var(--soluk);
+  border-top: 1px solid var(--cizgi2); padding-top: 6px;
+}
+.gbe-alt > span { margin-left: auto }
+@media (max-width: 1100px) {
+  .gbe-cagri  { grid-template-columns: repeat(2, 1fr) }
+  .gbe-kuyruk { grid-template-columns: repeat(2, 1fr) }
+}
+
+/* ===========================================================================
+   GUN OZETI CIKTISI (976) — /goz-unite-gun-ozeti.
+   `.cikti-sayfa` / `.cikti-arac` ORTAK kagit; buradaki kurallar sema
+   ciktisiyla ayni yerlesimi pano ozeti icin tekrarliyor.
+   ========================================================================= */
+.gp-cikti .cikti-antet {
+  display: flex; gap: 14px; align-items: flex-start;
+  border-bottom: 2px solid #1c4374; padding-bottom: 8px; margin-bottom: 10px;
+}
+.gp-cikti .cikti-antet b { font-size: 14px; color: #1c4374 }
+.gp-cikti .cikti-antet .sag { margin-left: auto; text-align: right }
+.gp-cikti .cikti-kimlik {
+  width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 12px;
+}
+.gp-cikti .cikti-kimlik th {
+  text-align: left; color: #6b7a8d; font-weight: 400; padding: 3px 8px 3px 0;
+  width: 110px; border-bottom: 1px solid #eef2f6;
+}
+.gp-cikti .cikti-kimlik td {
+  padding: 3px 14px 3px 0; font-weight: 700; border-bottom: 1px solid #eef2f6;
+}
+.gp-cikti .cikti-blok { margin-top: 14px; break-inside: avoid }
+.gp-cikti .cikti-blok h4 {
+  margin: 0 0 6px; font-size: 11.5px; color: #1c4374; text-transform: uppercase;
+  letter-spacing: .3px; border-bottom: 1px solid #e4eaf1; padding-bottom: 2px;
+}
+.gp-cikti .cikti-blok table th { text-align: left }
+.gp-cikti .cikti-blok table th.sag, .gp-cikti .cikti-blok table td.sag { text-align: right }
+.gp-cikti .cikti-bos { padding: 14px 0 0; color: #6b7a8d; line-height: 1.6 }

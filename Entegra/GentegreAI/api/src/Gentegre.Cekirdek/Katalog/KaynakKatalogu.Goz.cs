@@ -96,6 +96,113 @@ public static partial class KaynakKatalogu
                                               "metin", "Muayene", Hizalama: "orta", Genislik: 110,
                                               Filtrelenebilir: false),
             new("gozMuayeneId", "a.goz_muayene_id", "sayi", "Göz Muayene Id", Varsayilan: false),
+            // 976 (mockup goz_unite_panosu.html): panonun ŞERİT ÇİPLERİ ve KANBAN
+            //   KARTI bu kolonlardan çiziliyor. Hepsi görünümde hesaplanıyor çünkü
+            //   grid ile kanban aynı satırı okuyor - "çağrıldı mı" iki yerde
+            //   hesaplanırsa iki ekran iki farklı cevap verir.
+            new("cagrildi",     "a.cagrildi",     "mantik", "Çağrıldı",     Varsayilan: false),
+            new("cagriZamani",  "a.cagri_zamani", "zaman",  "Çağrı",        Hizalama: "orta",
+                                                  Bicim: "HH:mm", Varsayilan: false),
+            // İŞLEMDE: çağrılmış + kaynağı atanmış satır "şu an masada" (mockup
+            //   bu kartı vurguluyor) - bekleyenle aynı görünen kart, sırayı
+            //   olduğundan uzun gösterir.
+            new("islemde",      "a.islemde",      "mantik", "İşlemde",      Varsayilan: false),
+            new("gecikti",      "a.gecikti",      "mantik", "Geciken",      Varsayilan: false),
+            new("dilatasyonda", "a.dilatasyonda", "mantik", "Dilatasyonda", Varsayilan: false),
+            new("acil",         "a.acil",         "mantik", "Acil",         Varsayilan: false),
+            new("cocuk",        "a.cocuk",        "mantik", "Çocuk",        Varsayilan: false),
+            new("yas",          "a.yas",          "sayi",   "Yaş", Hizalama: "orta", Genislik: 60,
+                                                  Varsayilan: false),
+            new("cinsiyet",     "coalesce(a.cinsiyet, 0)", "kod", "Cinsiyet", Varsayilan: false),
+            new("kaynakId",     "a.kaynak_id",    "sayi",   "Kaynak Id",    Varsayilan: false),
+            new("hekimId",      "a.hekim_id",     "sayi",   "Hekim Id",     Varsayilan: false),
+            // ÖN TETKİK TAMAMLANMASI: hastayı hekime almadan önce bakılan tek
+            //   şey bu (mockup: "Otoref ✔ · Tonometri —").
+            new("onTetkik",
+                "case when a.goz_muayene_id is null then '' else "
+                + "'Otoref ' || case when a.otoref_var = 1 then '✔' else '—' end "
+                + "|| ' · Tonometri ' || case when a.tono_var = 1 then '✔' else '—' end end",
+                                              "metin", "Ön tetkik", Hizalama: "orta", Genislik: 160,
+                                              Filtrelenebilir: false),
+            new("otorefVar",    "a.otoref_var",   "mantik", "Otoref alındı", Varsayilan: false),
+            new("tonoVar",      "a.tono_var",     "mantik", "Tonometri alındı", Varsayilan: false),
+            // ÖLÇÜM ÖZETİ: bir göz hastasını hatırlatan iki sayı GİB ve otoref.
+            //   Ondalık ayıracı yerel ayara bırakılmıyor (to_char + replace).
+            new("olcumOzet",
+                "concat_ws(' · ', "
+                + "case when a.gib_od is not null or a.gib_os is not null "
+                + "     then 'GİB ' || coalesce(round(a.gib_od)::text, '—') || '/' "
+                + "          || coalesce(round(a.gib_os)::text, '—') end, "
+                + "case when a.ref_od_sph is not null or a.ref_os_sph is not null "
+                + "     then 'otoref ' || coalesce(replace(to_char(a.ref_od_sph, 'FM990.00'), '.', ','), '—') "
+                + "          || ' / ' || coalesce(replace(to_char(a.ref_os_sph, 'FM990.00'), '.', ','), '—') end)",
+                                              "metin", "Ölçüm", Genislik: 200, Filtrelenebilir: false),
+            // RANDEVU GECİKMESİ: hekim yükü tablosundaki "+12 dk" buradan çıkıyor;
+            //   randevusuz hastada BOŞ kalır - gecikme ölçülemez, sıfır değildir.
+            new("randevuSaat",  "a.randevu_saat", "zaman", "Randevu", Hizalama: "orta",
+                                                  Bicim: "HH:mm", Varsayilan: false),
+            new("randevuGecikmeDk", "a.randevu_gecikme_dk", "sayi", "Randevu gecikmesi (dk)",
+                                                  Hizalama: "sag", Genislik: 120, Varsayilan: false),
+        });
+
+    // ------------------------------------------------------- oda / cihaz tanımı ----
+    /// <summary>
+    /// GÖZ ÜNİTESİ ODA / CİHAZ TANIMI (976) — panonun "Oda ve cihaz doluluğu"
+    /// tablosunun kaynağı.
+    ///
+    /// <para><b>Serbest metin oda bir kaynak sayılmaz:</b> 976'ya kadar atama
+    /// <c>goz_ziyaret_istasyon.oda</c> metniydi ve "OCT-1" ile "OCT1" iki ayrı
+    /// satır üretiyordu; doluluk ikiye bölününce darboğaz görünmez oluyordu.</para>
+    ///
+    /// <para><b>Liste BOŞ kaynağı da gösterir</b> (<c>v_goz_kaynak_doluluk</c>):
+    /// panonun söylediği şey "HFA sırası dört kişiyken muayene odası boş
+    /// duruyor" - yalnız dolu kaynakları saymak bu cümleyi kurmayı imkânsız
+    /// kılardı.</para>
+    /// </summary>
+    private static KaynakTanimi GozKaynak() => new(
+        Ad: "goz-kaynak",
+        YetkiKodu: "goz.kaynak",
+        Kaynak: "public.goz_kaynak k "
+              + "left join public.goz_cihaz c on c.id = k.cihaz_id "
+              + "left join public.taraf p on p.id = k.personel_id "
+              + "left join public.v_goz_kaynak_doluluk d on d.kaynak_id = k.id",
+        SubeKolonu: "k.sube_id",
+        VarsayilanSirala: "k.sira, k.ad",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",   "k.id",  "sayi",  "Id", Varsayilan: false),
+            new("kod",  "k.kod", "metin", "Kod", Genislik: 90),
+            new("ad",   "k.ad",  "metin", "Oda / cihaz", Genislik: 200),
+            new("turAdi",
+                "case k.tur when 1 then 'Muayene odası' when 2 then 'Cihaz' "
+                + "when 3 then 'İşlem odası' when 4 then 'Ön tetkik' else '' end",
+                                 "metin", "Tür", Hizalama: "orta", Bicim: "rozet", Genislik: 130,
+                                 Filtrelenebilir: false),
+            new("tur",  "k.tur", "kod",   "Tür Kodu", Varsayilan: false),
+            new("istasyonAdi",
+                "case k.istasyon when 1 then 'Kabul' when 2 then 'Ön tetkik' "
+                + "when 3 then 'Muayene' when 4 then 'Görüntüleme' "
+                + "when 5 then 'Karar / İşlem' else 'Tümü' end",
+                                 "metin", "İstasyon", Hizalama: "orta", Genislik: 120,
+                                 Filtrelenebilir: false),
+            new("istasyon", "k.istasyon", "kod", "İstasyon Kodu", Varsayilan: false),
+            new("cihaz",  "coalesce(c.ad, '')", "metin", "Bağlı cihaz", Genislik: 160),
+            new("cihazId", "k.cihaz_id", "sayi", "Cihaz Id", Varsayilan: false),
+            new("sahip",
+                "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')",
+                                 "metin", "Sabit sahibi", Genislik: 170),
+            // ŞU AN: doluluk görünümünden - tanım ekranı aynı zamanda panonun
+            //   küçük hâli olsun, kurulumda "doğru yeri mi tanımladım" sorusu
+            //   başka ekran açmadan cevaplanabilsin.
+            new("sayi",   "coalesce(d.sayi, 0)", "sayi", "Sırada", Hizalama: "orta",
+                                 Bicim: "sayac", Genislik: 80),
+            new("suAn",   "coalesce(d.hasta, '')", "metin", "Şu an", Genislik: 180,
+                                 Filtrelenebilir: false),
+            new("sureDk", "coalesce(d.sure_dk, 0)", "sayi", "Süre (dk)", Hizalama: "sag",
+                                 Genislik: 90, Varsayilan: false),
+            new("sira",   "k.sira", "sayi", "Sıra", Hizalama: "orta", Genislik: 70, Varsayilan: false),
+            new("aktif",  "k.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
+            new("notMetin", "k.not_metin", "metin", "Not", Genislik: 200, Varsayilan: false),
         });
 
     // ------------------------------------------------------- göz muayeneleri ----

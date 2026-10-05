@@ -102,16 +102,55 @@ export interface GozUniteOzeti {
   istasyonlar: { istasyon: number; sayi: number; enUzunDk: number }[];
   /** En uzun bekleyen istasyon: "ünite yoğun" değil, nerede tıkalı. */
   darbogaz: { istasyon: number; sayi: number; enUzunDk: number } | null;
-  /** Oda / cihaz doluluğu: pano HASTAYI değil KAYNAĞI sayar. */
+  /**
+   * Oda / cihaz doluluğu: pano HASTAYI değil KAYNAĞI sayar.
+   * 976: kaynak artık tanımlı (`goz_kaynak`) ve BOŞ kaynak da satır üretir -
+   * "HFA sırası dört kişiyken muayene odası boş duruyor" cümlesi ancak öyle
+   * kurulabiliyor.
+   */
   odalar: {
-    oda: string; sayi: number; hasta: string; istasyon: number;
-    sureDk: number; enUzunDk: number;
+    kaynakId: number | null; kod: string; oda: string;
+    tur: number; turAdi: string; sahip: string;
+    sayi: number; hasta: string; istasyon: number;
+    sureDk: number; enUzunDk: number; bos: boolean; tanimli: boolean;
   }[];
   /** Hekim (ve tekniker) yükü — ön tetkik ünitenin girişi. */
   hekimler: {
-    personel: string; tamamlanan: number; bekleyen: number;
+    personelId: number; personel: string; tamamlanan: number; bekleyen: number;
     ortDk: number; enUzunDk: number;
+    /** Randevuya göre gecikme; randevusuz hastada ÖLÇÜLEMEZ (null). */
+    gecikmeDk: number | null; randevulu: number;
   }[];
+  /** Sol panel: kimde kaç açık satır var (liste süzgecinden geçmeden). */
+  panelHekimler: { id: number; ad: string; sayi: number }[];
+  /** Sol panel: hangi kaynakta kaç kişi. */
+  panelKaynaklar: { kaynakId: number | null; ad: string; sayi: number }[];
+  /** Vardiya aralığı çalışma planından (718) - panoya elle yazılmıyor. */
+  vardiyalar: { id: number; vardiya: string }[];
+  /** Gün özeti çıktısının kurum başlığı (v_sube_antet, 772). */
+  antet: {
+    unvan: string; adres: string; ilce: string; il: string;
+    telefon: string; subeAd: string; logoDokumanId: number | null;
+  } | null;
+}
+
+/**
+ * BEKLEME SALONU EKRANI (976) — ad MASKELİ gelir, maskeleme sunucuda.
+ * Ekran yalnız okur: çağırma / taşıma panoda kalıyor.
+ */
+export interface GozBeklemeEkrani {
+  zaman: string;
+  cagrilanlar: {
+    id: number; ad: string; kaynak: string; istasyon: number;
+    hekim: string; cagriDk: number; dilatasyon: number;
+  }[];
+  bekleyenler: {
+    id: number; ad: string; istasyon: number; kaynak: string;
+    beklemeDk: number; siraNo: number; hekim: string;
+    dilatasyon: number; cagrildi: boolean;
+  }[];
+  dilatasyonda: number;
+  dilatasyonHazir: number;
 }
 
 /**
@@ -448,8 +487,16 @@ export const gozUclari = {
   gozDilatasyon: (id: number, ilac?: string) =>
     gonder<{ id: number; hazirDk: number }>(`/api/goz/akis/${id}/dilatasyon`, { ilac }),
 
-  gozOdaAta: (id: number, oda: string, personelId?: number | null) =>
-    gonder<{ id: number; oda: string }>(`/api/goz/akis/${id}/oda`, { oda, personelId }),
+  /**
+   * Oda / cihaz atama. 976: `kaynakId` verilirse oda metnini SUNUCU tanımdan
+   * yazar - ekranın gönderdiği serbest metin "OCT-1 / OCT1" ikiliğini geri
+   * getirirdi.
+   */
+  gozOdaAta: (id: number, oda: string, personelId?: number | null, kaynakId?: number | null) =>
+    gonder<{ id: number; oda: string }>(`/api/goz/akis/${id}/oda`, { oda, personelId, kaynakId }),
+
+  /** Bekleme salonu ekranı: çağrılanlar + kuyruk (ad maskeli). */
+  gozBeklemeEkrani: () => istek<GozBeklemeEkrani>('/api/goz/bekleme-ekrani'),
 
   /** Ünite panosu sayaçları — bugün, ünitede, bekleme, dilatasyon, darboğaz. */
   gozUniteOzeti: (gun?: string) =>

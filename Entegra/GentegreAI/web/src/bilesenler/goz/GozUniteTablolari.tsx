@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from '../../api/istemci';
 import type { GozUniteOzeti } from '../../api/uclar/goz';
 import { c } from '../../dil/ceviri';
+import { GOZ_ISTASYON, GOZ_PANO_ESIK } from './gozPanoSabitleri';
 
 /**
  * ODA / CİHAZ DOLULUĞU ve HEKİM YÜKÜ — mockup
@@ -20,25 +19,12 @@ import { c } from '../../dil/ceviri';
  * bir uç, aynı ekranda iki farklı "4 kişi" üretmenin en kısa yoluydu.
  */
 
-const ISTASYON: Record<number, string> = {
-  1: 'Kabul', 2: 'Ön tetkik', 3: 'Muayene',
-  4: 'Görüntüleme', 5: 'Karar / işlem', 6: 'Tamamlandı',
-};
+const ISTASYON = GOZ_ISTASYON;
+const {
+  siraUyari: SIRA_UYARI, beklemeKritikDk: BEKLEME_KRITIK, gecikmeUyariDk: GECIKME_UYARI,
+} = GOZ_PANO_ESIK;
 
-/** Sıra bu sayıyı geçince kaynak "tıkalı" sayılır (mockup: HFA 4 kişi). */
-const SIRA_UYARI = 3;
-/** Bu dakikayı geçen bekleme kırmızı. */
-const BEKLEME_KRITIK = 30;
-
-export function GozUniteTablolari({ yenile }: { yenile?: number }) {
-  const [veri, setVeri] = useState<GozUniteOzeti | null>(null);
-
-  const yukle = useCallback(async () => {
-    try { setVeri(await api.gozUniteOzeti()) } catch { /* sessiz */ }
-  }, []);
-
-  useEffect(() => { void yukle() }, [yukle, yenile]);
-
+export function GozUniteTablolari({ veri }: { veri: GozUniteOzeti | null }) {
   if (!veri) return null;
   // İkisi de boşsa şerit hiç çizilmez: boş iki tablo, ekranda yer kaplayan
   //   ama hiçbir şey söylemeyen bir kutu olurdu.
@@ -55,14 +41,30 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
           </thead>
           <tbody>
             {veri.odalar.length === 0 && (
-              <tr><td colSpan={5} className="sonuk">{c('Oda/cihaz ataması yapılmamış.')}</td></tr>
+              <tr><td colSpan={5} className="sonuk">
+                {c('Oda / cihaz tanımlanmamış - Göz › Oda / Cihaz Tanımı.')}
+              </td></tr>
             )}
             {veri.odalar.map(o => (
-              <tr key={o.oda}>
-                <td><b>{o.oda}</b></td>
-                <td>{o.hasta || '—'}</td>
-                <td className="sonuk">{ISTASYON[o.istasyon] ?? '—'}</td>
-                <td className="sag">{o.sureDk} dk</td>
+              <tr key={`${o.kaynakId ?? 'x'}-${o.oda}`} className={o.bos ? 'sonuk' : undefined}>
+                <td>
+                  <b>{o.oda}</b>
+                  {/* TÜR VE SAHİP ADIN ALTINDA: "Oda 1 · Dr. Aksoy" mockup'ta
+                      tek satır - kaynağın kime ait olduğu, sıranın kimde
+                      tıkandığını okumanın yarısı. */}
+                  {(o.turAdi || o.sahip) && (
+                    <span className="sonuk"> {[o.turAdi, o.sahip].filter(Boolean).join(' · ')}</span>
+                  )}
+                  {/* TANIMSIZ KAYNAK İŞARETLENİR: doluluk yazım hatasıyla
+                      ikiye bölünmesin diye tanıma davet eder (976). */}
+                  {!o.tanimli && <span className="rozet gri"> {c('tanımsız')}</span>}
+                </td>
+                {/* BOŞ KAYNAK DA SATIR: mockup'ın söylediği cümle "HFA sırası
+                    dört kişiyken muayene odası boş duruyor" - atıl kaynak
+                    görünmezse pano bu cümleyi kuramaz. */}
+                <td>{o.bos ? <span className="sonuk">{c('boş')}</span> : (o.hasta || '—')}</td>
+                <td className="sonuk">{o.bos ? '—' : (ISTASYON[o.istasyon] ?? '—')}</td>
+                <td className="sag">{o.bos ? '—' : `${o.sureDk} dk`}</td>
                 <td className="sag">
                   {/* SIRA UZUNSA ROZET: sayının kendisi "4" ile "1" arasındaki
                       farkı yeterince anlatmıyor. */}
@@ -70,7 +72,7 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
                     ? <span className="rozet hata">{o.sayi}</span>
                     : o.enUzunDk >= BEKLEME_KRITIK
                       ? <span className="rozet sari">{o.sayi}</span>
-                      : o.sayi}
+                      : o.sayi || '—'}
                 </td>
               </tr>
             ))}
@@ -88,16 +90,17 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
         <table className="izlem-tablo">
           <thead>
             <tr><th>Kişi</th><th className="sag">Tamam</th><th className="sag">Bekleyen</th>
-                <th className="sag">{c('Ort. süre')}</th><th className="sag">{c('En uzun')}</th></tr>
+                <th className="sag">{c('Ort. süre')}</th><th className="sag">{c('En uzun')}</th>
+                <th className="sag">{c('Gecikme')}</th></tr>
           </thead>
           <tbody>
             {veri.hekimler.length === 0 && (
-              <tr><td colSpan={5} className="sonuk">
+              <tr><td colSpan={6} className="sonuk">
                 Bugün istasyonlara personel atanmamış.
               </td></tr>
             )}
             {veri.hekimler.map(h => (
-              <tr key={h.personel}>
+              <tr key={h.personelId}>
                 <td>{h.personel}</td>
                 <td className="sag">{h.tamamlanan}</td>
                 <td className="sag">
@@ -110,6 +113,18 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
                   {h.enUzunDk >= BEKLEME_KRITIK
                     ? <span className="rozet hata">{h.enUzunDk} dk</span>
                     : h.enUzunDk ? `${h.enUzunDk} dk` : '—'}
+                </td>
+                {/* GECİKME RANDEVUYA GÖRE (976): randevusuz hastada ÖLÇÜLEMEZ
+                    ve "—" yazar - sıfır yazmak "zamanında" demek olurdu ve
+                    randevusuz çalışan bir ünite kendini hep zamanında sanırdı. */}
+                <td className="sag" title={h.randevulu
+                      ? `${h.randevulu} ${c('randevulu hastadan')}`
+                      : c('randevulu hasta yok - gecikme ölçülemez')}>
+                  {h.gecikmeDk === null ? <span className="sonuk">—</span>
+                    : h.gecikmeDk >= GECIKME_UYARI
+                      ? <span className="rozet sari">+{h.gecikmeDk} dk</span>
+                      : h.gecikmeDk > 0 ? `+${h.gecikmeDk} dk`
+                        : <span className="rozet ok">{c('zamanında')}</span>}
                 </td>
               </tr>
             ))}

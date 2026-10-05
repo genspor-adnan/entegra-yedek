@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import type { Kosul } from '../api/sozlesme';
+import { GOZ_KANBAN_SUTUNLARI, GOZ_PANO_ESIK } from './goz/gozPanoSabitleri';
 
 /**
  * GÖZ ÜNİTESİ KANBANI — mockup `Ekranlar/Goz/goz_unite_panosu.html`.
@@ -22,14 +24,7 @@ import { api } from '../api/istemci';
  * dönen cümleyi gösterir.
  */
 
-/** Mockuptaki altı istasyon; 6 (tamamlandı) kanbanda sütun değil, hedeftir. */
-const ISTASYONLAR = [
-  { kod: 1, ad: '1 · Kabul / bekleme' },
-  { kod: 2, ad: '2 · Ön tetkik' },
-  { kod: 3, ad: '3 · Hekim muayenesi' },
-  { kod: 4, ad: '4 · Görüntüleme' },
-  { kod: 5, ad: '5 · Karar / işlem' },
-] as const;
+const ISTASYONLAR = GOZ_KANBAN_SUTUNLARI;
 
 export interface AkisSatiri {
   id: number;
@@ -49,15 +44,36 @@ export interface AkisSatiri {
   muayeneTuruAdi: string;
   /** Süreç v2: "açılmadı" / "#id açık" / "tamamlandı". */
   muayeneDurum?: string;
+  // ---- 976 (mockup kart ayrıntıları) ----
+  /** Çağrıldı ve kaynağı atandı: hasta ŞU AN masada (kart vurgulu). */
+  islemde?: number;
+  cagrildi?: number;
+  /** Acil muayene türü - sıraya göre değil, aciliyete göre çağrılır. */
+  acil?: number;
+  /** 16 yaş altı: refakatçi ve ayrı yaklaşım gerektiriyor. */
+  cocuk?: number;
+  yas?: number | null;
+  cinsiyet?: number | null;
+  /** "Otoref ✔ · Tonometri —": hekime almadan önce bakılan tek şey. */
+  onTetkik?: string;
+  /** "GİB 26/24 · otoref −2,25 / −2,00". */
+  olcumOzet?: string;
+  /** Tanımlı oda / cihaz (976) - serbest metin yerine. */
+  kaynakId?: number | null;
 }
 
-/** Dilatasyon süresi (dk) — çubuğun paydası; sunucudaki eşikle aynı. */
-const DILATASYON_DK = 20;
+const { dilatasyonDk: DILATASYON_DK, beklemeKritikDk: BEKLEME_KRITIK } = GOZ_PANO_ESIK;
 
-export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
+export function GozUniteKanban({ yenile, seciliId, filtre, onSec, onTasi }: {
   /** Liste tazelendiğinde kanban da tazelensin. */
   yenile?: number;
   seciliId?: number | null;
+  /**
+   * 976: ŞERİT ÇİPLERİ VE SOL PANEL KANBANI DA SÜZER. Kanban kendi isteğini
+   * süzgeçsiz atarken "Geciken" çipi gridi süzüyor, kanban dolu kalıyordu -
+   * kullanıcı için pano süzgeci çalışmıyor demekti.
+   */
+  filtre?: Kosul;
   /**
    * Seçilen kartın TAMAMI döner, yalnız id değil: araç çubuğu düğmeleri
    * (oda ata, muayeneyi aç) satırın odasına ve muayene kimliğine bakıyor.
@@ -74,10 +90,10 @@ export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
   const yukle = useCallback(async () => {
     // Kanban zorunlu değil: hatası liste akışını kesmemeli.
     try {
-      const y = await api.liste('goz-akis', { sayfa: 1, boyut: 200 });
+      const y = await api.liste('goz-akis', { sayfa: 1, boyut: 200, filtre });
       setSatirlar(y.satirlar as unknown as AkisSatiri[]);
     } catch { /* sessiz */ }
-  }, []);
+  }, [filtre]);
 
   useEffect(() => { void yukle() }, [yukle, yenile]);
 
@@ -111,7 +127,12 @@ export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
             {kolon.map(s => (
               <div key={s.id}
                    className={`is${s.id === seciliId ? ' secili' : ''}`
-                              + (surukle?.id === s.id ? ' suruklenen' : '')}
+                              + (surukle?.id === s.id ? ' suruklenen' : '')
+                              // ŞU AN İŞLEMDE olan kart vurgulu (mockup `.simdi`):
+                              //   bekleyenle aynı görünen kart, sırayı
+                              //   olduğundan uzun gösteriyor.
+                              + (s.islemde ? ' simdi' : '')
+                              + (s.acil ? ' acil' : '')}
                    draggable={!!onTasi}
                    onDragStart={e => {
                      setSurukle(s);
@@ -122,12 +143,32 @@ export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
                    }}
                    onDragEnd={() => { setSurukle(null); setHedef(null) }}
                    onClick={() => onSec?.(s)}>
-                <b>{s.hasta}</b>
+                <b>{s.hasta}
+                  {/* YAŞ VE CİNSİYET ADIN YANINDA (mockup "39 K"): çocuk
+                      hastaya yaklaşım farklı, karta bakan bunu adla birlikte
+                      okumalı. */}
+                  {s.yas ? <span className="gk-yas"> {s.yas}{s.cinsiyet === 1 ? ' E' : s.cinsiyet === 2 ? ' K' : ''}</span> : null}
+                </b>
+                {/* ACİL VE ÇOCUK ROZETİ: sıraya göre değil, önceliğe göre
+                    çağrılan iki durum. */}
+                {/* SAYI İLE && KULLANILMAZ: `0 && ...` JSX'te "0" basıyor -
+                    kartta adın altında sebepsiz bir sıfır çıkıyordu. */}
+                {(s.acil || s.cocuk) ? (
+                  <span className="gk-rozetler">
+                    {s.acil ? <span className="rozet hata">acil</span> : null}
+                    {s.cocuk ? <span className="rozet mor">çocuk</span> : null}
+                  </span>
+                ) : null}
                 {/* İkinci satır "kim ilgileniyor / nerede": hekim ve oda,
                     hastayı çağıracak kişinin ilk baktığı iki bilgi. */}
                 <span className="sonuk">
                   {[s.hekim, s.oda].filter(Boolean).join(' · ') || '—'}
                 </span>
+                {/* ÖN TETKİK ve ÖLÇÜM: mockup kartta "Otoref ✔ · Tonometri —"
+                    ve "GİB 26/24" yazıyor - hastayı hekime almadan önce
+                    bakılan iki satır. Ölçüm yoksa satır çizilmez. */}
+                {s.istasyon === 2 && s.onTetkik && <span className="sonuk">{s.onTetkik}</span>}
+                {s.olcumOzet && <span className="sonuk">{s.olcumOzet}</span>}
                 <span className="sonuk">
                   {s.siraNo ? `sıra ${s.siraNo} · ` : ''}{s.beklemeDk} dk
                   {s.muayeneTuruAdi ? ` · ${s.muayeneTuruAdi}` : ''}
@@ -162,7 +203,12 @@ export function GozUniteKanban({ yenile, seciliId, onSec, onTasi }: {
                 {/* Bekleme eşiği: yarım saati geçen hasta kolonun içinde de
                     ayrışsın - kolon sayacı "yığılma var" der, bu satır
                     "kimde" der. */}
-                {s.beklemeDk >= 30 && <span className="rozet sari">⏱ uzun bekleme</span>}
+                {s.beklemeDk >= BEKLEME_KRITIK && <span className="rozet sari">⏱ uzun bekleme</span>}
+                {/* ÇAĞRILDI AMA GELMEDİ ile KİMSE ÇAĞIRMADI ayrı görünür (702):
+                    ikisi aynı görünürse sıra kimsede kalmıyor. */}
+                {!s.islemde && s.cagrildi
+                  ? <span className="rozet mavi">📢 çağrıldı</span>
+                  : null}
               </div>
             ))}
           </div>

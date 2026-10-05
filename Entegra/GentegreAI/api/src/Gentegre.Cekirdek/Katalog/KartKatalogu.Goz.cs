@@ -44,6 +44,53 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> GozKaynakKodlari =
         new() { ["1"] = "Hekim", ["2"] = "Tekniker", ["3"] = "Cihaz", ["4"] = "Hasta beyanı" };
 
+    /// <summary>Kaynak hangi istasyona ait: 0 = hepsi.</summary>
+    private static readonly Dictionary<string, string> GozKaynakIstasyonKodlari =
+        new()
+        {
+            ["0"] = "Tümü", ["1"] = "Kabul", ["2"] = "Ön tetkik",
+            ["3"] = "Muayene", ["4"] = "Görüntüleme", ["5"] = "Karar / işlem",
+        };
+
+    // ============================================ göz ünitesi oda / cihazı ====
+    /// <summary>
+    /// ODA / CİHAZ TANIMI (976) — panonun kaynak doluluğu bu tanımdan çıkıyor.
+    ///
+    /// <para><b>Cihazın kendi tanımı <c>goz_cihaz</c>'da kalır</b> (ölçüm
+    /// eşlemesi, protokol, dinleyici): burada yalnız "ünitede bir kaynak
+    /// olarak sayılsın" bağı kurulur. İkinci bir cihaz tanımı açmak, aynı
+    /// cihazın ölçüm eşlemesini iki yere bölerdi.</para>
+    /// </summary>
+    private static KartTanimi GozKaynakKarti() => new(
+        Ad: "goz-kaynak",
+        YetkiKodu: "goz.kaynak",
+        Tablo: "public.goz_kaynak",
+        LogTabloId: 1381,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = (short)1, ["istasyon"] = (short)0, ["aktif"] = (short)1, ["sira"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Oda / cihaz adı", Grup: "Kimlik"),
+            new("tur", "tur", "kod", Zorunlu: true, KodListesi: "goz.kaynak_tur", Baslik: "Tür", Grup: "Kimlik"),
+            // İSTASYON: ön tetkik masası muayene odasıyla aynı listede
+            //   görünmesin - atama kutusu kısaldıkça yanlış atama azalıyor.
+            new("istasyon", "istasyon", "kod", SabitKodlar: GozKaynakIstasyonKodlari,
+                Baslik: "İstasyon", Grup: "Kimlik"),
+            new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_goz_cihaz_lookup",
+                Baslik: "Bağlı cihaz (ölçüm / protokol tanımı)", Grup: "Kimlik"),
+            new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "Sabit sahibi (hekim / tekniker)", Grup: "Kimlik"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Kimlik"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("notMetin", "not_metin", "metin", EnFazlaUzunluk: 200, Baslik: "Not", Grup: "Kimlik"),
+            new("subeId", "sube_id", "kod", Gizli: true),
+        });
+
     // ====================================================== göz muayenesi ====
     private static KartTanimi GozMuayeneKarti() => new(
         Ad: "goz-muayene",

@@ -25,16 +25,39 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     kaynak: 'goz-akis', rota: 'goz-akis', aksiyonEkrani: 'goz-akis-liste', baslik: 'Göz Ünitesi Akışı',
     yol: 'Göz › Ünite Akışı',
     tarihAlani: 'istasyonGiris',
-    // Çipler ünitenin istasyonları: hangi masada kimin işi var.
+    // 976 (mockup goz_unite_panosu.html şeridi): ÇİPLER DURUM, istasyon SOL
+    //   PANELDE. İstasyon çipi kanbanın sütunlarıyla aynı şeyi söylüyordu;
+    //   panonun şeridinde asıl aranan "kim bekliyor, kim gecikti, acil var mı".
     cipler: [
-      { ad: 'Ön Tetkik',    filtre: { alan: 'istasyon', op: 'esit', deger: 2 } },
-      { ad: 'Muayene',      filtre: { alan: 'istasyon', op: 'esit', deger: 3 } },
-      { ad: 'Görüntüleme',  filtre: { alan: 'istasyon', op: 'esit', deger: 4 } },
-      { ad: 'Karar / İşlem',filtre: { alan: 'istasyon', op: 'esit', deger: 5 } },
+      { ad: 'Bekleyen',     filtre: { alan: 'cagrildi',     op: 'esit', deger: 0 } },
+      { ad: 'Çağrıldı',     filtre: { alan: 'cagrildi',     op: 'esit', deger: 1 } },
+      { ad: 'Dilatasyonda', filtre: { alan: 'dilatasyonda', op: 'esit', deger: 1 } },
+      { ad: 'Geciken',      filtre: { alan: 'gecikti',      op: 'esit', deger: 1 } },
+      { ad: 'Acil',         filtre: { alan: 'acil',         op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
+    gizliKolonlar: ['cagrildi', 'dilatasyonda', 'gecikti', 'acil', 'cocuk'],
     urunModu: 2,
     menuGrup: 'Göz', menuAd: 'Ünite Akışı', ic: '🚦', yetkiKodu: 'goz', menuSira: 10,
+  },
+  {
+    // ODA / CİHAZ TANIMI (976): panonun "Oda ve cihaz doluluğu" tablosunun
+    //   kaynağı. Ayar ekranı ama liste aynı zamanda panonun küçük hâli -
+    //   kurulumda "doğru yeri mi tanımladım" sorusu burada cevaplanıyor.
+    kaynak: 'goz-kaynak', rota: 'goz-kaynak', aksiyonEkrani: 'goz-kaynak-liste',
+    baslik: 'Göz Ünitesi Oda / Cihazları',
+    yol: 'Göz › Oda / Cihaz Tanımı',
+    kartYolu: '/goz-kaynak', kartBaslik: 'Oda / Cihaz',
+    cipler: [
+      { ad: 'Aktif',          filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Muayene odası',  filtre: { alan: 'tur',   op: 'esit', deger: 1 } },
+      { ad: 'Cihaz',          filtre: { alan: 'tur',   op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    kolonSirasi: ['kod', 'ad', 'turAdi', 'istasyonAdi', 'cihaz', 'sahip', 'sayi', 'suAn', 'aktif'],
+    urunModu: 2,
+    menuGrup: 'Göz', menuAd: 'Oda / Cihaz Tanımı', ic: '🚪', yetkiKodu: 'goz.kaynak',
+    menuSira: 90,
   },
   {
     // GÖZ MUAYENELERİ - yapılmış ziyaretler. Listede OD/OS BCVA ve GİB durur:
