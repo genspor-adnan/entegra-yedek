@@ -281,9 +281,7 @@ public static class AksiyonKatalogu
                 new("goz.gozluk-recete", "👓 Gözlük Reçetesi", "goz",
                     KaynakKodu: "goz.recete", Islem: Islem.Ekle,
                     KayitGerekir: true, Sira: 40, UrunModu: 2),
-                new("goz.goruntuleme-iste", "📷 Görüntüleme İste", "goz",
-                    KaynakKodu: "goz.goruntuleme", Islem: Islem.Ekle,
-                    KayitGerekir: true, Sira: 45, UrunModu: 2),
+                // 974: "Görüntüleme İste" YOK - istem İstem & Sepet'ten (başvuru → ödeme).
                 new("goz.islem-planla", "💉 İşlem Planla", "goz",
                     KaynakKodu: "goz.islem", Islem: Islem.Ekle,
                     KayitGerekir: true, Sira: 50, UrunModu: 2,
@@ -307,9 +305,19 @@ public static class AksiyonKatalogu
                     KayitGerekir: true, Sira: 65, UrunModu: 2,
                     Ipucu: "Sesle metin bulgu; ölçüm alanları kapalı"),
             ],
-            ["goz-goruntuleme-liste"] = Crud("goz-goruntuleme", "goz", "goz.goruntuleme",
-                                             ekleAdi: "＋ Yeni Görüntüleme",
-                                             silIpucu: "Ölçüm satırı olan çekim silinmez"),
+            ["goz-goruntuleme-liste"] =
+            [
+                // 974: "Yeni" YOK - kayıt hekimin istem sepetinden doğar (başvuru → ödeme).
+                .. Crud("goz-goruntuleme", "goz", "goz.goruntuleme", silIpucu: "Ölçüm satırı olan çekim silinmez").Where(a => a.Kod != "goz-goruntuleme.yeni"),
+                new("goz.gor-degerlendir", "✍ Değerlendir", "goz", KaynakKodu: "goz.goruntuleme", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 22, UrunModu: 2),
+                new("goz.gor-cekildi", "📷 Çekildi", "goz", KaynakKodu: "goz.goruntuleme", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2, Ipucu: "Ödemesi yapılmamış istem çekilemez"),
+                new("goz.gor-yeniden", "↻ Yeniden Çekim İste", "goz", KaynakKodu: "goz.goruntuleme", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 42, UrunModu: 2),
+                new("goz.gor-muayene", "👁 Muayeneye Git", "goz", KaynakKodu: "goz.muayene", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 46, UrunModu: 2),
+            ],
             ["goz-islem-liste"] = Crud("goz-islem", "goz", "goz.islem",
                                        ekleAdi: "＋ Yeni İşlem",
                                        silIpucu: "Uygulanmış işlem silinmez; iptal edin"),

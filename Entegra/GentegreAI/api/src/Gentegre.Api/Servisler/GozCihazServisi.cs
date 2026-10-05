@@ -114,9 +114,35 @@ public sealed class GozCihazServisi
                     continue;
                 }
 
+                // GÖRÜNTÜLEME CİHAZI İSTEMSİZ / ÖDEMESİZ YAZMAZ (974, kullanıcı: "başvuruya
+                //   kaydedilmeden görüntü çekilemez"): ölçüm hekimin istediği, bankoda
+                //   ödenmiş (serbest) görüntüleme kaydına yazılır. İstem yoksa ya da ödeme
+                //   bekliyorsa mesaj kuyrukta bekler (2); ödeme alınınca düğme / gece işi işler.
+                int? istemId = null;
+                if (m.tur is not (1 or 2 or 3))
+                {
+                    var istem = await baglanti.TekAsync("""
+                        select g.id, g.serbest from public.goz_goruntuleme g
+                         where g.hasta_id = @p0 and g.muayene_id = @p1 and g.tetkik = @p2
+                           and g.durum in (1, 2) and (g.cihaz_mesaj_id is null or g.cihaz_mesaj_id = @p3)
+                         order by g.serbest desc, (g.cihaz_mesaj_id = @p3) desc nulls last, g.id
+                         limit 1
+                        """, null, [hastaId.Value, muayene.MuayeneId, (short)TetkikKodu(m.tur), m.id],
+                        o => new { Id = o.GetInt32(0), Serbest = o.GetInt16(1) }, iptal);
+                    if (istem is null || istem.Serbest == 0)
+                    {
+                        await DurumYazAsync(baglanti, m.id, 2, istem is null
+                            ? "Bu tetkik için hekim istemi yok; istem yapılıp ödeme alınınca işlenir."
+                            : "İstem ödeme bekliyor (bankoda ücretlendirilip başvuru kaydedilmeli).", iptal);
+                        sahipsiz++;
+                        continue;
+                    }
+                    istemId = istem.Id;
+                }
+
                 var yazilan = await YazAsync(baglanti, m.id, m.cihazId, m.tur,
                                              muayene.GozMuayeneId, muayene.MuayeneId,
-                                             hastaId.Value, m.zaman, degerler, iptal);
+                                             hastaId.Value, m.zaman, degerler, iptal, istemId);
 
                 await DurumYazAsync(baglanti, m.id, 1,
                     $"{yazilan} ölçüm yazıldı ({m.cihazAd}).", iptal);
@@ -315,7 +341,8 @@ public sealed class GozCihazServisi
     private static async Task<int> YazAsync(Npgsql.NpgsqlConnection baglanti, long mesajId,
                                             int cihazId, int cihazTur, int gozMuayeneId,
                                             int muayeneId, int hastaId, DateTime zaman,
-                                            List<Deger> degerler, CancellationToken iptal)
+                                            List<Deger> degerler, CancellationToken iptal,
+                                            int? istemId = null)
     {
         // GÖZ BAZINDA TEK SATIR: bir mesaj iki gözün değerlerini taşıyor,
         //   ölçüm tablosu ise göz bazlı. Aynı gözün sph/cyl/aks değerleri tek
@@ -372,7 +399,16 @@ public sealed class GozCihazServisi
                 // GÖRÜNTÜLEME CİHAZLARI (OCT, görme alanı, fundus, topografi,
                 //   biyometri, endotel, USG) -> görüntüleme + ölçüm satırları.
                 default:
-                    var goruntulemeId = await baglanti.TekDegerAsync<int>("""
+                    // 974: ölçüm hekimin ödenmiş istemine yazılır (çekildi = 2).
+                    var goruntulemeId = istemId is int ist
+                        ? await baglanti.TekDegerAsync<int>("""
+                            update public.goz_goruntuleme
+                               set cihaz_id = @p1, cekim_zamani = @p2, durum = greatest(durum, 2::smallint),
+                                   cihaz_mesaj_id = @p3, degistirme_tarihi = now()
+                             where id = @p0
+                            returning id
+                            """, null, [ist, cihazId, zaman, mesajId], iptal)
+                        : await baglanti.TekDegerAsync<int>("""
                         insert into public.goz_goruntuleme
                             (muayene_id, hasta_id, goz, tetkik, cihaz_id, istem_zamani,
                              cekim_zamani, durum, cihaz_mesaj_id, ekleyen)
@@ -410,13 +446,14 @@ public sealed class GozCihazServisi
     /// <summary>Cihaz türü → tetkik kodu (goz.goruntuleme_tur). Bilinmeyen tür 0 kalır.</summary>
     private static int TetkikKodu(int cihazTur) => cihazTur switch
     {
-        4 => 1,   // OCT
-        5 => 3,   // Görme alanı
-        6 => 4,   // Fundus foto
-        7 => 5,   // Topografi
-        8 => 6,   // Biyometri
-        9 => 7,   // Endotel
-        10 => 8,  // USG
+        // goz.tetkik kod listesi (691): istemle eşleşebilmesi için aynı kodlar (974).
+        4 => 1,   // OCT (maküla)
+        5 => 8,   // Görme alanı
+        6 => 7,   // Fundus foto
+        7 => 9,   // Topografi
+        8 => 11,  // Biyometri
+        9 => 12,  // Endotel
+        10 => 14, // USG (B-scan)
         _ => 0,
     };
 

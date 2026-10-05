@@ -56,7 +56,7 @@ const sayiyaCevir = (v: unknown): number | null => {
 };
 
 /** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
-type Kalem = { tur: 'lab' | 'radyoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
+type Kalem = { tur: 'lab' | 'radyoloji' | 'goz'; id: number; ham: Satir; bagli: boolean; panik: boolean };
 
 export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   muayeneId: number;
@@ -68,11 +68,11 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   const git = useNavigate();
   const [veri, setVeri] = useState<{
     belgeId: number | null; istemler: Satir[]; sonuclar: Satir[];
-    kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[];
+    kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[]; goz?: Satir[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   // Seçili istem: sağ panel bunu gösterir, kırmızı 🗑 bunu siler.
-  const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji'; id: number } | null>(null);
+  const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji' | 'goz'; id: number } | null>(null);
 
   const yukle = useCallback(async () => {
     try { setVeri(await api.muayeneSonuclari(muayeneId) as never) }
@@ -94,7 +94,11 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
       tur: 'radyoloji' as const, id: Number(r.id), ham: r,
       bagli: Number(r.bagId ?? 0) > 0, panik: false,
     }));
-    return [...lab, ...rad];
+    // GÖZ GÖRÜNTÜLEME (974): aynı listede; eşik dışı ölçüm "panik" gibi öne alınmaz, rozetle görünür.
+    const goz = (veri.goz ?? []).map(g => ({
+      tur: 'goz' as const, id: Number(g.id), ham: g, bagli: Number(g.bagId ?? 0) > 0, panik: false,
+    }));
+    return [...lab, ...rad, ...goz];
   }, [veri]);
 
   // VARSAYILAN SEÇİM: panikli istem varsa o (hekimin ilk görmesi gereken),
@@ -111,7 +115,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
     if (!await onay('Seçili istem silinecek. Onaylıyor musunuz?', true)) return;
     const y = secili.tur === 'lab'
       ? await api.labIstemSil(secili.id)
-      : await api.radyolojiIstemSil(secili.id);
+      : secili.tur === 'goz'
+        ? await api.gozGoruntulemeIptal(secili.id)
+        : await api.radyolojiIstemSil(secili.id);
     mesaj(y.mesaj);
     setSecili(null);
     await yukle();
@@ -188,6 +194,22 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
         </tr>
       );
     }
+    if (k.tur === 'goz') {
+      const g = k.ham;
+      const gd = Number(g.durum ?? 1);
+      return (
+        <tr key={anahtar} {...ortak}>
+          <td>{c('Göz')}</td>
+          <td className="isn-ad">{GOZ_TETKIK[Number(g.tetkik)] ?? c('Göz tetkiki')} <span className="not">· {GOZ_TARAF[Number(g.goz)] ?? 'OU'}</span></td>
+          <td className="hiza-orta">{Number(g.oncelik ?? 1) >= 2 ? <span className="rozet hata">{c('Acil')}</span> : '—'}</td>
+          <td className="hiza-orta">{g.istemZamani ? tarihSaat(g.istemZamani) : '—'}</td>
+          <td className="hiza-orta">
+            <span className={`rozet ${gd === 3 ? 'olumlu' : gd === 0 ? 'gri' : 'uyari'}`}>{c(gozDurumAdi(g))}</span>
+            {Number(g.bayrak ?? 0) >= 1 && <> <span className="rozet hata">{c('Eşik dışı')}</span></>}
+          </td>
+        </tr>
+      );
+    }
     const r = k.ham;
     const durum = Number(r.durum ?? 0);
     return (
@@ -249,7 +271,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
             ? <LabSonucPaneli istem={secKalem.ham} veri={veri}
                 onRapor={() => git(`/lab/rapor/${secKalem.id}`)}
                 onGordu={gordu} />
-            : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
+            : secKalem.tur === 'goz'
+              ? <GozGoruntuPaneli g={secKalem.ham} onGordu={gordu} onAc={() => git(`/goz-goruntuleme/${secKalem.id}`)} />
+              : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
         </div>
       </div>
     </div>
@@ -415,6 +439,61 @@ function RadyolojiPaneli({ r, onGordu }: { r: Satir; onGordu: (bagId: number) =>
       </h6>
       <div className="ic">
         {sonuc || <span className="not">{r.onayTarihi ? c('Raporda sonuç bölümü yok.') : c('Rapor henüz onaylanmadı.')}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------- GÖZ (974) --
+const GOZ_TETKIK: Record<number, string> = {
+  1: 'OCT maküla', 2: 'OCT RNFL / GCC', 3: 'OCT ön segment', 4: 'OCT-A', 5: 'FAF', 6: 'FA / ICGA', 7: 'Fundus foto',
+  8: 'Görme alanı', 9: 'Topografi', 10: 'Pakimetri', 11: 'Biyometri', 12: 'Endotel', 13: 'UBM', 14: 'B-scan USG', 15: 'ERG / VEP',
+};
+const GOZ_TARAF: Record<number, string> = { 1: 'OD', 2: 'OS', 3: 'OU' };
+const GOZ_SONUC: Record<number, string> = { 1: 'Normal', 2: 'Sınırda', 3: 'Anormal', 4: 'Değerlendirilemez' };
+const OLCUM_AD: Record<string, string> = { cmt: 'CMT', rnfl_ort: 'RNFL ort.', md: 'MD', k1: 'K1', cct: 'CCT', al: 'AL' };
+
+/** Ödeme / çekim / değerlendirme adımı tek metin. */
+function gozDurumAdi(g: Satir): string {
+  const d = Number(g.durum ?? 1);
+  if (d === 0) return 'İptal';
+  if (d === 3) return 'Değerlendirildi';
+  if (d === 2) return 'Değerlendirme bekliyor';
+  return Number(g.serbest ?? 1) === 0 ? 'Ödeme bekliyor' : 'Çekim sırasında';
+}
+
+function GozGoruntuPaneli({ g, onGordu, onAc }: { g: Satir; onGordu: (bagId: number) => void; onAc: () => void }) {
+  const bagId = Number(g.bagId ?? 0);
+  const d = Number(g.durum ?? 1);
+  const ana = String(g.anaOlcum ?? '');
+  return (
+    <div className="kagrup">
+      <h6>
+        <b>{GOZ_TETKIK[Number(g.tetkik)] ?? c('Göz tetkiki')} · {GOZ_TARAF[Number(g.goz)] ?? 'OU'}</b>
+        <span className={`rozet ${d === 3 ? 'olumlu' : d === 0 ? 'gri' : 'uyari'}`}>{c(gozDurumAdi(g))}</span>
+        <span className="not">{g.cekimZamani ? `${c('çekim')} ${tarihSaat(g.cekimZamani)}` : ''}
+          {g.kalite != null ? ` · ${c('sinyal')} ${String(g.kalite)}/10` : ''}</span>
+        <span style={{ marginLeft: 'auto' }} />
+        {d >= 2 && <button className="d" onClick={onAc}>{c('🖼 Görüntüyü aç')}</button>}
+        {bagId > 0 && d === 3 && (g.hekimGordu
+          ? <span className="rozet olumlu">{c('Görüldü')} · {tarihSaat(g.hekimGordu)}</span>
+          : <button className="d bir" onClick={() => onGordu(bagId)}>{c('👁 Gördüm')}</button>)}
+      </h6>
+      <div className="ic">
+        {d === 1 && Number(g.serbest ?? 1) === 0 && <div className="not">{c('Bankoda ücretlendirilip başvuru kaydedilince çekime düşer.')}</div>}
+        {d === 1 && Number(g.serbest ?? 1) === 1 && <div className="not">{c('Teknisyen çekim listesinde.')}</div>}
+        {ana && (g.anaOd != null || g.anaOs != null) && (
+          <div>{OLCUM_AD[ana] ?? ana}: <b>OD {sayiMetni(g.anaOd) || '—'}</b> · <b>OS {sayiMetni(g.anaOs) || '—'}</b>
+            {Number(g.bayrak ?? 0) >= 1 && <> <span className="rozet hata">{c('Eşik dışı')}</span></>}</div>
+        )}
+        {d === 3 && (
+          <>
+            <div style={{ marginTop: 4 }}><b>{c('Sonuç')}:</b> {c(GOZ_SONUC[Number(g.sonuc)] ?? '—')}</div>
+            {String(g.degerlendirme ?? '') && <div style={{ whiteSpace: 'pre-wrap' }}>{String(g.degerlendirme)}</div>}
+            {String(g.oneri ?? '') && <div><b>{c('Öneri')}:</b> {String(g.oneri)}</div>}
+          </>
+        )}
+        {d === 2 && <div className="not">{c('Çekildi; hekim değerlendirmesi bekleniyor.')}</div>}
       </div>
     </div>
   );

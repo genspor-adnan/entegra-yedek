@@ -278,8 +278,26 @@ public static partial class LabUclari
                  order by ri.id desc
                 """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // GÖZ GÖRÜNTÜLEME (974): aynı sekmede - durum, ana ölçüm, değerlendirme.
+            var goz = await veri.ListeAsync("""
+                select g.id, g.tetkik, g.goz, g.durum, g.serbest, g.oncelik, g.istem_zamani as "istemZamani",
+                       g.cekim_zamani as "cekimZamani", g.degerlendirme_zamani as "degerlendirmeZamani",
+                       g.sonuc, coalesce(g.degerlendirme, '') as degerlendirme, coalesce(g.oneri, '') as oneri,
+                       v.ana_olcum as "anaOlcum", v.ana_od as "anaOd", v.ana_os as "anaOs", v.bayrak, g.kalite,
+                       (select mi.id from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'goz_goruntuleme' and mi.hedef_id = g.id limit 1) as "bagId",
+                       (select mi.hekim_gordu from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'goz_goruntuleme' and mi.hedef_id = g.id limit 1) as "hekimGordu"
+                  from public.goz_goruntuleme g
+                  left join public.v_goz_goruntuleme_ozet v on v.goruntuleme_id = g.id
+                 where (g.belge_id = @p1 and @p1 is not null)
+                    or exists (select 1 from public.muayene_istem mi
+                                where mi.muayene_id = @p0 and mi.hedef_tablo = 'goz_goruntuleme' and mi.hedef_id = g.id)
+                 order by g.id desc
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
             return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId, baglar,
-                                    istemler, sonuclar, kulturler, vakalar, radyoloji,
+                                    istemler, sonuclar, kulturler, vakalar, radyoloji, goz,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Görüntüleme — Liste v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.krm b{color:#b3261e} .k.uy b{color:#b06d0a}
+  .liste td{white-space:nowrap} .liste td small{white-space:nowrap}
+  .hasta b{display:block}
+  .tt{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:bold;color:#fff}
+  .t-oct{background:#2f6db3} .t-ga{background:#8e44ad} .t-bio{background:#16a085} .t-ff{background:#d35400} .t-top{background:#2c3e50}
+  .kal{display:inline-flex;gap:1px;vertical-align:middle} .kal i{width:5px;height:10px;background:#d6dee8;border-radius:1px}
+  .kal i.on{background:#2e7d46} .kal.dus i.on{background:#e0a33a}
+  .od2{display:grid;grid-template-columns:14px auto;gap:0 4px;font-size:11px} .od2 i{font-style:normal;color:var(--muted);font-size:10px}
+  .krm{color:#b3261e;font-weight:bold} .uy{font-size:10.5px;color:#b3261e} .uy2{font-size:10.5px;color:#b06d0a}
+  .resim{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .resim div{height:92px;border-radius:4px;background:radial-gradient(circle at 50% 55%,#f6c28b 0 18%,#d9774a 19% 45%,#5a2a1a 46% 100%);display:flex;align-items:flex-end;justify-content:center;color:#fff;font-size:10px;padding-bottom:3px}
+  .resim div.oct{background:repeating-linear-gradient(0deg,#1d1d1d 0 3px,#2a2a2a 3px 6px),#222;position:relative}
+  .resim div.oct:after{content:"";position:absolute;left:8%;right:8%;top:40%;height:22%;border-top:3px solid #e8e8e8;border-bottom:2px solid #aaa;border-radius:50% 50% 40% 40%}
+  .tr{display:flex;align-items:flex-end;gap:5px;height:44px;border-bottom:1px solid var(--line2);margin:4px 0}
+  .tr i{flex:1;background:#9db8d9;border-radius:2px 2px 0 0} .tr i.d{background:#e0796f}
+  .yz{border:1px dashed #b9a6e0;background:#f7f3fd;border-radius:6px;padding:6px 8px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Göz Görüntüleme &amp; Testler</h1><span class="yol">Göz › Görüntüleme</span>
+    <span class="sp"></span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">✍ Değerlendir</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:6px;padding:0 14px 8px">
+    <span class="btn">📷 Çekildi</span>
+    <span class="btn">↻ Yeniden çekim iste</span>
+    <span class="btn">🖥 PACS'ta aç</span>
+    <span class="btn">👁 Muayeneye git</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>23</b><span>Bugün istenen</span></div>
+    <div class="k uy"><b>7</b><span>Çekim bekleyen (sırada)</span></div>
+    <div class="k uy"><b>5</b><span>Değerlendirme bekleyen</span></div>
+    <div class="k krm"><b>2</b><span>Kalitesi düşük (sinyal &lt; 6/10)</span></div>
+    <div class="k krm"><b>4</b><span>Eşik dışı ölçüm (sınır / anormal)</span></div>
+    <div class="k"><b>3</b><span>YZ ön okuma: dikkat</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, H / P no…</span>
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">İstendi</span><span class="cip">Çekildi</span><span class="cip">Değerlendirildi</span><span class="cip">Tümü</span>
+    <span class="combo">Değerlendiren: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">Dilate</span><span class="cip">Glokom takibi</span><span class="cip">Retina / anti-VEGF</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Tetkik</h6>
+      <div class="dal on">Tümü <i>23</i></div>
+      <div class="dal"><span><span class="tt t-oct">OCT</span> maküla</span><i>6</i></div>
+      <div class="dal"><span><span class="tt t-oct">OCT</span> RNFL / GCC</span><i>7</i></div>
+      <div class="dal"><span><span class="tt t-ga">GA</span> görme alanı</span><i>4</i></div>
+      <div class="dal"><span><span class="tt t-bio">BİO</span> biyometri</span><i>3</i></div>
+      <div class="dal"><span><span class="tt t-ff">FF</span> fundus foto</span><i>2</i></div>
+      <div class="dal"><span><span class="tt t-top">TOP</span> topografi</span><i>1</i></div>
+      <h6 style="margin-top:12px">Cihaz</h6>
+      <div class="dal">Cirrus 5000 (OCT) <i>13</i></div>
+      <div class="dal">Humphrey HFA3 <i>4</i></div>
+      <div class="dal">IOLMaster 700 <i>3</i></div>
+      <div class="dal">Topcon TRC <i>2</i></div>
+      <div class="dal">Pentacam <i>1</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>İstem</th><th>Hasta</th><th>Tetkik</th><th>Göz</th><th>Durum</th><th>Kalite</th><th>Ana ölçüm <small>sağ / sol</small></th><th>Değerlendiren</th><th>Bekleme</th><th>Uyarı</th></tr>
+        <tr class="sec"><td><b>09:40</b><small>Dr. Elif Arslan</small></td>
+          <td class="hasta"><b>Ayşe Yıldız</b><small>67 K · H d1111 · P GZ-990103</small></td>
+          <td><span class="tt t-oct">OCT</span> RNFL</td><td>OU</td><td><span class="chip c-bek">Çekildi</span><small>10:05 · Cirrus</small></td>
+          <td><span class="kal"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> 8</td>
+          <td><div class="od2"><i>S</i>RNFL 92 µm<i>L</i><span class="krm">RNFL 71 µm</span></div></td>
+          <td>—</td><td>25 dk</td><td><span class="uy">sol inferior incelme (%1)</span></td></tr>
+        <tr><td><b>09:42</b><small>Dr. Elif Arslan</small></td>
+          <td class="hasta"><b>Ayşe Yıldız</b><small>67 K · H d1111 · P GZ-990103</small></td>
+          <td><span class="tt t-ga">GA</span> 24-2</td><td>OU</td><td><span class="chip c-bek">Çekildi</span><small>10:20 · HFA3</small></td>
+          <td><span class="kal dus"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span> <span class="uy2">güven düşük</span></td>
+          <td><div class="od2"><i>S</i>MD −1,2 dB<i>L</i><span class="krm">MD −6,8 dB</span></div></td>
+          <td>—</td><td>18 dk</td><td><span class="uy2">yanlış pozitif %18 - tekrar?</span></td></tr>
+        <tr><td><b>09:55</b><small>Dr. Murat Kaya</small></td>
+          <td class="hasta"><b>Mehmet Kaya</b><small>72 E · H d0451 · P GZ-990120</small></td>
+          <td><span class="tt t-oct">OCT</span> maküla</td><td>OD</td><td><span class="chip c-ok">Değerlendirildi</span><small>Dr. M. Kaya</small></td>
+          <td><span class="kal"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> 9</td>
+          <td><div class="od2"><i>S</i><span class="krm">CMT 412 µm</span><i>L</i>—</div></td>
+          <td>Dr. Murat Kaya</td><td>—</td><td><span class="uy">sıvı ↑ (önceki 298) · anti-VEGF</span></td></tr>
+        <tr><td><b>10:12</b><small>Dr. Murat Kaya</small></td>
+          <td class="hasta"><b>Hasan Öztürk</b><small>61 E · H d0988 · P GZ-990115</small></td>
+          <td><span class="tt t-bio">BİO</span> biyometri</td><td>OD</td><td><span class="chip c-gri">İstendi</span><small>sırada 3.</small></td>
+          <td>—</td><td>—</td><td>—</td><td>12 dk</td><td><span class="uy2">preop · IOL hesabı</span></td></tr>
+        <tr><td><b>10:30</b><small>Dr. Zeynep Er</small></td>
+          <td class="hasta"><b>Elif Demo</b><small>34 K · H d1310 · P GZ-990121</small></td>
+          <td><span class="tt t-ff">FF</span> fundus foto</td><td>OU</td><td><span class="chip c-gri">İstendi</span><small>dilate · 08 dk</small></td>
+          <td>—</td><td>—</td><td>—</td><td>5 dk</td><td></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 23 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 2 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Görüntü</h5>
+        <div class="resim"><div class="oct">OD</div><div class="oct">OS</div></div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Cirrus 5000 · 10:05 · sinyal 8/10 · DICOM 2 seri</div>
+      </div>
+      <div class="bl"><h5>Ölçümler</h5>
+        <div class="satir"><span>RNFL ort.</span>92 / <span class="krm">71 µm</span></div>
+        <div class="satir"><span>GCC</span>84 / <span class="krm">68 µm</span></div>
+        <div class="satir"><span>C/D (OCT)</span>0,58 / 0,79</div>
+      </div>
+      <div class="bl"><h5>RNFL eğilimi · sol</h5>
+        <div class="tr"><i style="height:90%"></i><i style="height:84%"></i><i style="height:80%"></i><i class="d" style="height:70%"></i></div>
+        <div class="satir"><span>03.2026 → bugün</span>82 → 71 µm (−11)</div>
+      </div>
+      <div class="bl"><h5>YZ ön okuma</h5>
+        <div class="yz">🤖 Sol inferotemporal RNFL defekti; önceki tetkike göre anlamlı incelme (≥ 5 µm). Glokom progresyonu ile uyumlu. <i style="color:var(--muted)">- öneridir, hekim değerlendirir</i></div>
+      </div>
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="btn kucuk">📇 Aç</span><span class="btn kucuk">✍ Değerlendir</span><span class="btn kucuk">🖥 PACS</span><span class="btn kucuk">👁 Muayene</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "göz görüntüleme kartı ve liste mockup yap". Tablolar <code>goz_goruntuleme</code> + <code>goz_goruntuleme_olcum</code> (göz, ölçüm, değer, birim, normal %, bayrak).
+Kayıt göz muayenesinden "Görüntüleme İste" ile açılır (listede "Yeni" yok); kart goz_goruntuleme_karti_v2.html.<br>
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): bugün istenen, çekim bekleyen, değerlendirme bekleyen, kalitesi düşük (sinyal / güvenilirlik), eşik dışı ölçüm (normatif %5 / %1 altı),
+YZ ön okumada dikkat. Düzenle / Değerlendir / Yazdır üstte; Çekildi, Yeniden çekim, PACS'ta aç, Muayeneye git altta.<br>
+<span class="n">2</span><b>Sol:</b> tetkik türü ve cihaz. Şerit: dönem / durum çipleri, değerlendiren, dilate, glokom / retina takibi.<br>
+<span class="n">3</span><b>Liste:</b> istem saati (altında isteyen hekim), hasta (yaş · H · P), tetkik rozeti, göz, durum (altında çekim saati / cihaz / sıra), <b>kalite çubuğu</b>,
+<b>ana ölçüm sağ / sol</b> (tetkike göre RNFL, CMT, MD, AL…; eşik dışı kırmızı), değerlendiren, bekleme, uyarı (incelme, sıvı artışı, güvenilirlik, preop).<br>
+<span class="n">4</span><b>Sağ:</b> küçük görüntü (OD / OS), ölçümler, önceki tetkiklere göre eğilim, YZ ön okuma (öneri), hızlı işlem. Sol ve sağ paneller katlanır.
+</div></div>
+</body>
+</html>

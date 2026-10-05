@@ -19,10 +19,14 @@ import { hataMetni, type ListeSatiri, type Kosul } from '../api/sozlesme';
  * ŞABLON PANELLERİ (931, kullanıcı: "panelleri istem ekranına bağla"):
  * muayenenin bölüm/doktor şablonlarında tanımlı paneller Laboratuvar'ın en
  * üstünde "⭐ Şablon Panelleri" kategorisidir; varsa ekran o kategoriyle açılır.
+ *
+ * GÖZ (974, kullanıcı: "istem sepete de ekle"): üçüncü sekme göz görüntüleme tetkikleri
+ * (OCT, görme alanı, biyometri…). Kalem göz tarafı taşır (OU → OD → OS, çipe tıkla);
+ * istem lab / radyolojiyle aynı yoldan başvuruya bekleyen düşer, banko ödeyince çekilir.
  */
-type Sekme = 'lab' | 'radyoloji';
-type KalemTur = 'tetkik' | 'panel' | 'radyoloji';
-type Kalem = { grup: Sekme; tur: KalemTur; id: number; kod: string; ad: string };
+type Sekme = 'lab' | 'radyoloji' | 'goz';
+type KalemTur = 'tetkik' | 'panel' | 'radyoloji' | 'goz';
+type Kalem = { grup: Sekme; tur: KalemTur; id: number; kod: string; ad: string; goz?: number };
 const anahtar = (k: { tur: KalemTur; id: number }) => `${k.tur[0]}${k.id}`;
 
 /** Şablon panelleri kategorisi (yalnız muayenenin şablonunda panel varsa çıkar). */
@@ -41,6 +45,20 @@ const LAB_BOLUMLER = [
   { kod: '7', ad: 'İdrar', ikon: '💧' },
   { kod: '9', ad: 'Diğer', ikon: '🔬' },
 ];
+/** goz.tetkik kod listesi (691) ve sepet kategorileri. */
+const GOZ_TETKIK: Record<number, string> = {
+  1: 'OCT maküla', 2: 'OCT RNFL / GCC', 3: 'OCT ön segment', 4: 'OCT-A', 5: 'FAF', 6: 'FA / ICGA', 7: 'Fundus foto',
+  8: 'Görme alanı', 9: 'Kornea topografisi', 10: 'Pakimetri', 11: 'Biyometri', 12: 'Endotel', 13: 'UBM', 14: 'B-scan USG', 15: 'ERG / VEP',
+};
+const GOZ_KATEGORI: { kod: string; ad: string; ikon: string; tetkikler: number[] }[] = [
+  { kod: '', ad: 'Tümü', ikon: '👁', tetkikler: [] },
+  { kod: 'oct', ad: 'OCT', ikon: '🌀', tetkikler: [1, 2, 3, 4] },
+  { kod: 'fun', ad: 'Fundus / anjiyo', ikon: '🔴', tetkikler: [5, 6, 7] },
+  { kod: 'fon', ad: 'Görme alanı / ERG', ikon: '🎯', tetkikler: [8, 15] },
+  { kod: 'on', ad: 'Ön segment', ikon: '🔵', tetkikler: [9, 10, 12, 13] },
+  { kod: 'bio', ad: 'Biyometri / USG', ikon: '📏', tetkikler: [11, 14] },
+];
+const GOZ_TARAF: Record<number, string> = { 1: 'OD', 2: 'OS', 3: 'OU' };
 const MODALITELER = [
   { kod: '', ad: 'Tümü', ikon: '📷' },
   { kod: '1', ad: 'BT', ikon: '🖥' },
@@ -78,6 +96,10 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   const [yz, setYz] = useState<{ satirlar: { satir: ListeSatiri; tur: KalemTur }[]; notlar: string[]; uyari: string } | null>(null);
   const [yzHata, setYzHata] = useState<string | null>(null);
   const yzIstendi = useRef(false);
+  /** Göz sekmesi: ücret hizmeti eşlenmiş tetkikler (974). */
+  const [gozTetkikler, setGozTetkikler] = useState<{ tetkik: number; kod: string; hizmetAd: string }[] | null>(null);
+  /** Göz istemlerinin klinik sorusu (teknisyen + değerlendiren hekim görür). */
+  const [gozSoru, setGozSoru] = useState('');
 
   useEffect(() => {
     let iptal = false;
@@ -110,6 +132,19 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         ? { op: 'or', kosullar: ['kod', 'ad', 'kisaAd'].map(alan => ({
             alan, op: 'icerir' as const, deger: metin })) }
         : undefined;
+
+      if (sekme === 'goz') {
+        let liste = gozTetkikler;
+        if (!liste) { liste = (await api.gozTetkikHizmet()).satirlar; setGozTetkikler(liste) }
+        const kat = GOZ_KATEGORI.find(k => k.kod === kategori);
+        const k = metin.toLocaleLowerCase('tr');
+        setSatirlar(liste
+          .filter(t => !kat || kat.tetkikler.length === 0 || kat.tetkikler.includes(t.tetkik))
+          .map(t => ({ id: t.tetkik, kod: t.kod, ad: GOZ_TETKIK[t.tetkik] ?? t.hizmetAd, hizmetAd: t.hizmetAd }) as ListeSatiri)
+          .filter(t => !k || `${String(t.kod)} ${String(t.ad)} ${String(t.hizmetAd)}`.toLocaleLowerCase('tr').includes(k))
+          .map(t => ({ satir: t, tur: 'goz' as const })));
+        return;
+      }
 
       if (sekme === 'radyoloji') {
         // Modalitesi olan hizmetler = radyoloji tetkikleri.
@@ -184,7 +219,14 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   // GRUP TÜRDEN: YZ kategorisi lab ve görüntülemeyi birlikte listeler; sekmeden
   //   alınsaydı lab sekmesinde önerilen görüntüleme lab istemine karışırdı.
   const kalemYap = (r: ListeSatiri, tur: KalemTur): Kalem => ({
-    grup: tur === 'radyoloji' ? 'radyoloji' : 'lab', tur, id: Number(r.id), kod: String(r.kod ?? ''), ad: String(r.ad ?? ''),
+    grup: tur === 'radyoloji' ? 'radyoloji' : tur === 'goz' ? 'goz' : 'lab', tur, id: Number(r.id), kod: String(r.kod ?? ''), ad: String(r.ad ?? ''),
+    ...(tur === 'goz' ? { goz: 3 } : {}),
+  });
+  /** Göz kaleminin tarafı: OU → OD → OS. */
+  const tarafDegis = (a: string) => setSepet(s => {
+    const n = new Map(s); const k = n.get(a);
+    if (k) n.set(a, { ...k, goz: k.goz === 3 ? 1 : k.goz === 1 ? 2 : 3 });
+    return n;
   });
   const ekleCikar = (r: ListeSatiri, tur: KalemTur) => {
     const k = kalemYap(r, tur);
@@ -199,6 +241,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     const labTetkik = kalemler.filter(k => k.tur === 'tetkik').map(k => k.id);
     const labPanel = kalemler.filter(k => k.tur === 'panel').map(k => k.id);
     const radyoloji = kalemler.filter(k => k.tur === 'radyoloji');
+    const goz = kalemler.filter(k => k.tur === 'goz');
 
     setMesgul(true);
     await guvenli(async () => {
@@ -231,6 +274,14 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         catch { hatalar.push(k.ad || k.kod); }
       }
 
+      // GÖZ GÖRÜNTÜLEME (974): her tetkik ayrı istem, göz tarafı ve klinik soruyla.
+      for (const k of goz) {
+        try {
+          await api.muayeneIstemAc(muayeneId, { tur: 6, gozTetkik: k.id, goz: k.goz ?? 3, aciliyet, aciklama: gozSoru.trim() || undefined });
+          acildi++;
+        } catch (h) { hatalar.push(`${k.ad} (${hataMetni(h)})`); }
+      }
+
       mesaj(hatalar.length === 0
         ? `${acildi} istem açıldı.`
         : `${acildi} istem açıldı; başarısız: ${hatalar.join(', ')}.`);
@@ -244,7 +295,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     ? (sablonPanel.length > 0
         ? [{ kod: SABLON, ad: `Şablon Panelleri (${sablonPanel.length})`, ikon: '⭐' }, ...LAB_BOLUMLER]
         : LAB_BOLUMLER)
-    : MODALITELER)];
+    : sekme === 'goz' ? GOZ_KATEGORI : MODALITELER)];
   // YZ kategorisinde liste YZ yanıtından (arama metniyle süzülür).
   const gorunenSatirlar = kategori === YZ
     ? (yz?.satirlar ?? []).filter(({ satir: r }) => !arama.trim()
@@ -252,18 +303,21 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     : satirlar;
   const sepetListe = useMemo(() => [...sepet.entries()], [sepet]);
   const labSay = useMemo(() => [...sepet.values()].filter(k => k.grup === 'lab').length, [sepet]);
-  const radSay = sepet.size - labSay;
+  const gozSay = useMemo(() => [...sepet.values()].filter(k => k.grup === 'goz').length, [sepet]);
+  const radSay = sepet.size - labSay - gozSay;
 
+  /** Sekme düğmesi ikonu metnin ÜSTÜNDE (kullanıcı). */
+  const ikonUst = (ikon: string) => <span style={{ display: 'block', fontSize: 16, lineHeight: '20px' }}>{ikon}</span>;
   const sekmeDug = (s: Sekme): React.CSSProperties => ({
-    flex: 1, border: 0, padding: '8px 6px', cursor: 'pointer', fontSize: 13,
+    flex: '1 1 0', minWidth: 0, border: 0, padding: '8px 4px', cursor: 'pointer', fontSize: 13,
     fontWeight: sekme === s ? 700 : 500,
     background: sekme === s ? '#2b6cb0' : '#eef2f7',
     color: sekme === s ? '#fff' : '#33506e',
-    borderRadius: s === 'lab' ? '6px 0 0 0' : '0 6px 0 0',
+    borderRadius: s === 'lab' ? '6px 0 0 0' : s === 'goz' ? '0 6px 0 0' : 0,
   });
 
   return (
-    <Modal baslik="🧾 Tetkik İstemi (Lab + Radyoloji)" onKapat={onKapat}
+    <Modal baslik="🧾 Tetkik İstemi (Lab + Radyoloji + Göz)" onKapat={onKapat}
       alt={<>
         <label style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
           <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
@@ -277,9 +331,11 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         <div style={{ width: 176, flex: '0 0 176px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex' }}>
             <button type="button" style={sekmeDug('lab')}
-              onClick={() => sekmeSec('lab')}>🧪 Laboratuvar{labSay > 0 ? ` (${labSay})` : ''}</button>
+              onClick={() => sekmeSec('lab')}>{ikonUst('🧪')}Lab{labSay > 0 ? ` (${labSay})` : ''}</button>
             <button type="button" style={sekmeDug('radyoloji')}
-              onClick={() => sekmeSec('radyoloji')}>📷 Radyoloji{radSay > 0 ? ` (${radSay})` : ''}</button>
+              onClick={() => sekmeSec('radyoloji')}>{ikonUst('📷')}Radyoloji{radSay > 0 ? ` (${radSay})` : ''}</button>
+            <button type="button" style={sekmeDug('goz')}
+              onClick={() => sekmeSec('goz')}>{ikonUst('👁')}Göz{gozSay > 0 ? ` (${gozSay})` : ''}</button>
           </div>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, overflowY: 'auto', maxHeight: 400,
             border: '1px solid #e5eaf0', borderTop: 0, borderRadius: '0 0 6px 6px', flex: 1 }}>
@@ -300,7 +356,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         {/* SAĞ: arama + liste + sepet */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <input ref={kutu} value={arama} onChange={e => setArama(e.target.value)}
-            placeholder={sekme === 'lab' ? 'Tetkik / panel ara (Hemogram, TİT, kod…)' : 'Tetkik ara (kod / ad)…'}
+            placeholder={sekme === 'lab' ? 'Tetkik / panel ara (Hemogram, TİT, kod…)' : sekme === 'goz' ? 'Göz tetkiki ara (OCT, görme alanı, biyometri…)' : 'Tetkik ara (kod / ad)…'}
             style={{ padding: '8px 10px', fontSize: 14, border: '1px solid #cbd5e0',
               borderRadius: 6, marginBottom: 8 }} />
           <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #eef', borderRadius: 6, maxHeight: 340 }}>
@@ -326,10 +382,11 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
                       <td style={{ width: 26, padding: '5px 4px', textAlign: 'center' }}>
                         <input type="checkbox" checked={secili} readOnly tabIndex={-1} /></td>
                       <td style={{ width: 28, padding: '5px 2px', textAlign: 'center' }}>
-                        {tur === 'panel' ? '📦' : tur === 'radyoloji' ? '📷' : ''}</td>
+                        {tur === 'panel' ? '📦' : tur === 'radyoloji' ? '📷' : tur === 'goz' ? '👁' : ''}</td>
                       <td style={{ width: 84, padding: '5px 6px', color: '#667', fontFamily: 'monospace' }}>
                         {String(r.kod ?? '')}</td>
                       <td style={{ padding: '5px 6px' }}>{String(r.ad ?? '')}
+                        {tur === 'goz' && r.hizmetAd ? <div style={{ fontSize: 11, color: '#889' }}>{String(r.hizmetAd)}</div> : null}
                         {r.gerekce ? <div className="yz-gerekce">{String(r.gerekce)}</div> : null}</td>
                       <td style={{ width: 52, padding: '5px 8px', textAlign: 'right', color: '#9aa' }}
                         title="Bugüne kadar istenme sayısı">
@@ -344,17 +401,22 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
           {/* ALT: ortak sepet (lab + radyoloji) */}
           <div style={{ marginTop: 8, borderTop: '2px solid #e5eaf0', paddingTop: 6 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#1a365d', marginBottom: 4 }}>
-              Seçilen İstemler ({sepet.size}) · Lab {labSay} · Radyoloji {radSay}</div>
+              Seçilen İstemler ({sepet.size}) · Lab {labSay} · Radyoloji {radSay} · Göz {gozSay}</div>
             {sepet.size === 0
               ? <div style={{ fontSize: 12, color: '#9aa', padding: '2px 0' }}>
                   Sekme + kategori seç, tetkiğe tıkla — burada birikir (lab ve radyoloji birlikte).</div>
               : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 88, overflowY: 'auto' }}>
                   {sepetListe.map(([a, k]) => (
                     <span key={a} style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
-                      background: k.grup === 'radyoloji' ? '#f3eefb' : '#eef4fb',
-                      border: `1px solid ${k.grup === 'radyoloji' ? '#d9cdef' : '#cdddef'}`,
+                      background: k.grup === 'radyoloji' ? '#f3eefb' : k.grup === 'goz' ? '#eaf6f2' : '#eef4fb',
+                      border: `1px solid ${k.grup === 'radyoloji' ? '#d9cdef' : k.grup === 'goz' ? '#bfe3d6' : '#cdddef'}`,
                       borderRadius: 14, padding: '3px 6px 3px 10px', fontSize: 12 }}>
-                      {k.tur === 'panel' ? '📦 ' : k.tur === 'radyoloji' ? '📷 ' : ''}{k.ad || k.kod}
+                      {k.tur === 'panel' ? '📦 ' : k.tur === 'radyoloji' ? '📷 ' : k.tur === 'goz' ? '👁 ' : ''}{k.ad || k.kod}
+                      {k.tur === 'goz' && (
+                        <button type="button" title="Göz: OU → OD → OS" onClick={() => tarafDegis(a)}
+                          style={{ border: '1px solid #9cc9b8', background: '#fff', borderRadius: 8, cursor: 'pointer',
+                            fontSize: 11, fontWeight: 700, padding: '0 6px', color: '#1f6f55' }}>{GOZ_TARAF[k.goz ?? 3]}</button>
+                      )}
                       <button type="button" onClick={() =>
                         setSepet(s => { const n = new Map(s); n.delete(a); return n })}
                         style={{ border: 0, background: 'none', cursor: 'pointer', color: '#c33',
@@ -362,6 +424,11 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
                     </span>
                   ))}
                 </div>}
+            {gozSay > 0 && (
+              <input value={gozSoru} onChange={e => setGozSoru(e.target.value)} maxLength={300}
+                placeholder="Göz tetkiki klinik soru (ör. glokom progresyonu? sol alan kaybı)"
+                style={{ marginTop: 6, width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid #cbd5e0', borderRadius: 6 }} />
+            )}
           </div>
         </div>
       </div>

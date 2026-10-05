@@ -276,6 +276,8 @@ export interface GozOyku { muayeneId: number; sikayet: string; hikaye: string; o
 
 /** GÖZ KARTI v4. */
 export interface GozKontrol {
+  /** Bu muayenede istenmiş göz görüntüleme sayısı (974). */
+  goruntuIstem?: number;
   bolumler: { baslik: string; durum: string; ipucu: string }[];
   kontrol: { kod: string; ad: string; durum: 'ok' | 'yok' | 'uyari'; zorunlu: boolean; mesaj: string; bolum: string }[];
 }
@@ -303,6 +305,19 @@ export interface GozlukGostergeYaniti {
 }
 export type GozlukOnizleme = Record<string, unknown>;
 
+// 974 GÖZ GÖRÜNTÜLEME v2
+export interface GozGoruntulemeGostergeYaniti {
+  gosterge: { bugun: number; sirada: number; odemeBekliyor: number; degerlendirmeBekleyen: number; kaliteDusuk: number; esikDisi: number; yzDikkat: number };
+  tetkikler: { tetkik: number; sayi: number }[]; cihazlar: { id: number; ad: string; sayi: number }[];
+  degerlendirenler: { id: number; ad: string; sayi: number }[];
+}
+export interface GozGoruntulemeOlcum { goz: number; olcum: string; deger: number | null; birim: string; normalPct: number | null; bayrak: number; onceki: number | null }
+export interface GozGoruntulemeOnizleme {
+  kayit: Record<string, unknown>;
+  olcumler: GozGoruntulemeOlcum[];
+  egilim: { zaman: string; id: number; bu: boolean; od: number | null; os: number | null }[];
+}
+
 export const gozUclari = {
   gozlukKaynak: (q: { receteId?: number; hastaId?: number; muayeneId?: number }) => {
     const p = new URLSearchParams();
@@ -315,6 +330,13 @@ export const gozUclari = {
   gozlukDurum: (id: number, durum: 3 | 4) => gonder<{ id: number; durum: number }>(`/api/goz/gozluk/${id}/durum/${durum}`, {}),
   gozlukGosterge: () => istek<GozlukGostergeYaniti>('/api/goz/gozluk-gosterge'),
   gozlukOnizleme: (id: number) => istek<{ recete: GozlukOnizleme }>(`/api/goz/gozluk/${id}/onizleme`),
+  gozTetkikHizmet: () => istek<{ satirlar: { tetkik: number; hizmetId: number; kod: string; hizmetAd: string }[] }>('/api/goz/tetkik-hizmet'),
+  gozGoruntulemeGosterge: () => istek<GozGoruntulemeGostergeYaniti>('/api/goz/goruntuleme-gosterge'),
+  gozGoruntulemeOnizleme: (id: number) => istek<GozGoruntulemeOnizleme>(`/api/goz/goruntuleme/${id}/onizleme`),
+  gozGoruntulemeCekildi: (id: number) => gonder<{ id: number; durum: number }>(`/api/goz/goruntuleme/${id}/cekildi`, {}),
+  gozGoruntulemeDegerlendir: (id: number) => gonder<{ id: number; durum: number }>(`/api/goz/goruntuleme/${id}/degerlendir`, {}),
+  gozGoruntulemeIptal: (id: number) => gonder<{ id: number; mesaj: string }>(`/api/goz/goruntuleme/${id}/iptal`, {}),
+  gozGoruntulemeYeniden: (id: number) => gonder<{ id: number; eskiId: number }>(`/api/goz/goruntuleme/${id}/yeniden`, {}),
   gozKontrol: (id: number) => istek<GozKontrol>(`/api/goz/muayene/${id}/kontrol`),
   gozOzetMetin: (id: number) => istek<{ bolumler: { baslik: string; metin: string }[] }>(`/api/goz/muayene/${id}/ozet-metin`),
   gozHastaOyku: (hastaId: number) => istek<GozHastaOyku>(`/api/goz/hasta/${hastaId}/oyku`),

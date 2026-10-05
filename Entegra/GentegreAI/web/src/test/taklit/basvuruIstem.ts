@@ -18,6 +18,6 @@ type Uclar = typeof basvuruIstemUclari;
 
 export const basvuruIstemTaklidi = {
   basvuruBekleyenIstem: () => Promise.resolve(bosBekleyenIstem()),
-  basvuruIstemSerbest: () => Promise.resolve({ lab: 0, radyoloji: 0, toplam: 0, mesaj: '' }),
+  basvuruIstemSerbest: () => Promise.resolve({ lab: 0, radyoloji: 0, goz: 0, toplam: 0, mesaj: '' }),
   basvuruIstemUcretlendir: () => Promise.resolve({ eklenen: 0, mesaj: '' }),
 } satisfies { [K in keyof Uclar]: (...a: Parameters<Uclar[K]>) => ReturnType<Uclar[K]> };

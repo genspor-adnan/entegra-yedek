@@ -67,12 +67,19 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     yol: 'Göz › Görüntüleme & Testler',
     kartYolu: '/goz-goruntuleme', kartBaslik: 'Göz Görüntüleme',
     tarihAlani: 'istemZamani',
+    // 974 (mockup goz_goruntuleme_listesi_v2.html): kayıt istem sepetinden doğar (başvuru →
+    //   ödeme); gösterge, tetkik / cihaz (sol) ve önizleme (sağ) panelleri Liste'de.
     cipler: [
+      { ad: 'Bugün',            filtre: { alan: 'bugun',   op: 'esit', deger: 1 } },
+      { ad: 'Bu hafta',         filtre: { alan: 'buHafta', op: 'esit', deger: 1 } },
       { ad: 'İstendi',          filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Çekildi',          filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Değerlendirildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
+    aracCubuguAltSatir: true,
+    gizliKolonlar: ['cihaz', 'istemZamani', 'cekimZamani'],
+    kolonSirasi: ['istemSaat', 'hasta', 'tetkikAdi', 'goz', 'durumAdi', 'kalite', 'anaOd', 'degerlendiren', 'beklemeDk', 'uyari'],
     urunModu: 2,
     menuGrup: 'Göz', menuAd: 'Görüntüleme & Testler', ic: '🔬', yetkiKodu: 'goz.goruntuleme',
     menuSira: 30,

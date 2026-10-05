@@ -288,7 +288,9 @@ export const labUclari = {
             sonuclar: Record<string, unknown>[];
             kulturler: Record<string, unknown>[];
             vakalar: Record<string, unknown>[];
-            radyoloji: Record<string, unknown>[] }>(
+            radyoloji: Record<string, unknown>[];
+            /** Göz görüntüleme (974). */
+            goz?: Record<string, unknown>[] }>(
       `/api/lab/muayene/${muayeneId}/sonuclar`),
 
   /** Hekim sonucu gordu (418): sonucun gelmesi ile gorulmesi AYRI olaylar. */

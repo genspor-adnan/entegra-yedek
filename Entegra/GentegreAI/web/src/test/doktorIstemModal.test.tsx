@@ -60,6 +60,6 @@ describe('doktor istemi penceresi', () => {
     expect(metin()).toMatch(/Seçilenlerin toplamı \(2\)\s*390,00/);
 
     await act(async () => { screen.getByText(/Seçilenleri Ücrete Ekle/).click() });
-    expect(ucretlendir).toHaveBeenCalledWith(5, { lab: [1], radyoloji: [7] });
+    expect(ucretlendir).toHaveBeenCalledWith(5, { lab: [1], radyoloji: [7], goz: [] });
   });
 });

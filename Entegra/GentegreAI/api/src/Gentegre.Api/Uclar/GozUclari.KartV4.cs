@@ -108,8 +108,14 @@ public static partial class GozUclari
             baglam.YetkiIste("goz.muayene", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var (bol, kontrol) = await GozKontrolAsync(b, null, id, iptal);
+            // 974: bu muayenede istenmiş (iptal olmayan) görüntüleme - araç çubuğu "Görüntü İste" / "Görüntü Sonuçları".
+            var goruntuIstem = await b.TekDegerAsync<int>("""
+                select count(*)::int from public.goz_goruntuleme g join public.goz_muayene gm on gm.muayene_id = g.muayene_id
+                 where gm.id = @p0 and g.durum <> 0
+                """, null, [id], iptal);
             return Results.Ok(new
             {
+                goruntuIstem,
                 bolumler = bol.Select(x => new { baslik = x.Key, durum = x.Value.Durum, ipucu = x.Value.Ipucu }),
                 kontrol = kontrol.Select(x => new { kod = x.Kod, ad = x.Ad, durum = x.Durum, zorunlu = x.Zorunlu, mesaj = x.Mesaj, bolum = x.Bolum }),
                 izlemeNo = baglam.IzlemeNo,

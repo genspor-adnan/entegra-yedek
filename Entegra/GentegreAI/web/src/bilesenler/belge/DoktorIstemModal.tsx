@@ -20,6 +20,7 @@ import type { BekleyenIstem, BekleyenIstemYaniti } from '../../api/uclar/basvuru
 const GRUPLAR: { tur: BekleyenIstem['tur']; ad: string; ic: string }[] = [
   { tur: 'lab', ad: 'Laboratuvar', ic: '🧪' },
   { tur: 'radyoloji', ad: 'Görüntüleme', ic: '📷' },
+  { tur: 'goz', ad: 'Göz görüntüleme', ic: '👁' },
 ];
 
 const sag: React.CSSProperties = { textAlign: 'right', padding: '5px 8px', whiteSpace: 'nowrap' };
@@ -31,7 +32,7 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
   onKapat(): void;
   onTamam(): void;
 }) {
-  const hepsi: BekleyenIstem[] = [...veri.lab, ...veri.radyoloji];
+  const hepsi: BekleyenIstem[] = [...veri.lab, ...veri.radyoloji, ...(veri.goz ?? [])];
   const anahtar = (x: BekleyenIstem) => `${x.tur}-${x.id}`;
   const [secili, setSecili] = useState<Set<string>>(() => new Set(hepsi.map(anahtar)));
   const [mesgul, setMesgul] = useState(false);
@@ -53,10 +54,11 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
   const ucretle = async () => {
     const lab = veri.lab.filter(x => secili.has(anahtar(x))).map(x => x.id);
     const rad = veri.radyoloji.filter(x => secili.has(anahtar(x))).map(x => x.id);
-    if (lab.length + rad.length === 0) { mesaj('En az bir tetkik seçin.'); return }
+    const goz = (veri.goz ?? []).filter(x => secili.has(anahtar(x))).map(x => x.id);
+    if (lab.length + rad.length + goz.length === 0) { mesaj('En az bir tetkik seçin.'); return }
     setMesgul(true);
     await guvenli(async () => {
-      const y = await api.basvuruIstemUcretlendir(belgeId, { lab, radyoloji: rad });
+      const y = await api.basvuruIstemUcretlendir(belgeId, { lab, radyoloji: rad, goz });
       mesaj(y.mesaj);
       onTamam();
     });

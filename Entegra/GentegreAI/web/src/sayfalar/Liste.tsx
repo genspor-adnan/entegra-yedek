@@ -108,6 +108,7 @@ import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzg
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
 import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
 import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from './goz/GozlukPanelleri';
+import { GoruntulemeGostergesi, GoruntulemeOnizlemePaneli, GoruntulemeSolPanel, useGoruntulemeGostergesi, useGoruntulemeSuzgeci } from './goz/GozGoruntulemePanelleri';
 import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
@@ -456,6 +457,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const gozlukEkrani = tanim.kaynak === 'goz-gozluk-recete' && !portalda;
   const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
   const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
+  // 974 GÖZ GÖRÜNTÜLEME: gösterge (ödeme / sıra / değerlendirme), tetkik-cihaz (sol), önizleme (sağ).
+  const gorEkrani = tanim.kaynak === 'goz-goruntuleme' && !portalda;
+  const gorSuzgec = useGoruntulemeSuzgeci(gorEkrani);
+  const gorGostergesi = useGoruntulemeGostergesi(gorEkrani, yenile);
   const gozSuzgec = useGozMuayeneSuzgeci(gozMuayeneEkrani);
   const gozGostergesi = useGozMuayeneGostergesi(gozMuayeneEkrani, yenile);
   const orderSuzgec = useOrderSuzgeci(orderEkrani);
@@ -1026,7 +1031,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gorSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1165,6 +1170,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : gorEkrani ? <GoruntulemeGostergesi veri={gorGostergesi} s={gorSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
@@ -1241,6 +1247,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukSolPanel veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : gorEkrani ? <GoruntulemeSolPanel veri={gorGostergesi} s={gorSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
       yanPanel={portalda ? undefined
@@ -1251,6 +1258,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : gozMuayeneEkrani ? <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile} />
         : gozlukEkrani ? <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile} />
+        : gorEkrani ? <GoruntulemeOnizlemePaneli satir={seciliSatir} yenile={yenile} onAc={id => git(`/goz-goruntuleme/${id}`)} />
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)

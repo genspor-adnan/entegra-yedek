@@ -1254,6 +1254,34 @@ public static class MuayeneUclari
             //   barkodlar orada uretilir. Muayeneden istenen tetkigin numune
             //   plani olmadan acilmasi, kan alma biriminde "hangi tup" sorusunu
             //   cevapsiz birakirdi.
+            // GÖZ GÖRÜNTÜLEME (974): lab / radyolojiyle AYNI akış - başvuruya bekleyen
+            //   istem (serbest=0), banko ücret + başvuru kaydı serbest bırakır, teknisyen
+            //   ancak ondan sonra çeker. Ücret hizmeti goz_tetkik_hizmet'ten.
+            if (istek.Tur == 6)
+            {
+                if (m.BelgeId is not > 0)
+                    throw GentegreHatasi.IsKurali("Göz görüntüleme istemi için muayenenin başvurusu olmalı.");
+                if (istek.GozTetkik is not (>= 1 and <= 15))
+                    throw GentegreHatasi.Dogrulama("Göz tetkiki seçilmeli.", [new("gozTetkik", "Tetkik seçin.")]);
+                var gozHizmet = await baglanti.TekDegerAsync<int?>(
+                    "select hizmet_id from public.goz_tetkik_hizmet where tetkik = @p0", islem, [istek.GozTetkik.Value], iptal)
+                    ?? throw GentegreHatasi.IsKurali("Bu tetkik için ücret hizmeti tanımlı değil (göz tetkik - hizmet eşlemesi).");
+                hedefId = await baglanti.TekDegerAsync<int>("""
+                    insert into public.goz_goruntuleme
+                        (sube_id, muayene_id, hasta_id, goz, tetkik, hizmet_id, belge_id, serbest, oncelik,
+                         istek_hekim_id, klinik_soru, istem_zamani, durum, ekleyen)
+                    values (@p0, @p1, @p2, @p3, @p4, @p5, @p6,
+                            public.fn_istem_serbest((select basvuru_turu from public.belge_basvuru where id = @p6)::smallint,
+                                                    @p7::smallint, 1::smallint),
+                            @p7, @p8, @p9, now(), 1, @p10)
+                    returning id
+                    """, islem,
+                    [m.SubeId, id, m.HastaId, (short)(istek.Goz is (>= 1 and <= 3) ? istek.Goz.Value : 3),
+                     (short)istek.GozTetkik.Value, gozHizmet, m.BelgeId, (short)(istek.Aciliyet ?? 1), m.HekimId,
+                     (istek.Aciklama ?? "").Trim(), baglam.KullaniciId], iptal);
+                hedefTablo = "goz_goruntuleme";
+            }
+
             if (istek.Tur == 1)
             {
                 if (m.BelgeId is not > 0)
@@ -1678,7 +1706,9 @@ public static class MuayeneUclari
     public sealed record IstemIstegi(int Tur, int? HizmetId, int? Aciliyet, string? Aciklama,
                                      int[]? TetkikIdler, int[]? PanelIdler,
                                      /// <summary>Akılcı istem kararları (873).</summary>
-                                     Servisler.LabServisi.AkilciKarar[]? Akilci = null);
+                                     Servisler.LabServisi.AkilciKarar[]? Akilci = null,
+                                     /// <summary>Göz görüntüleme (Tur 6, 974): goz.tetkik kodu ve göz (1 OD · 2 OS · 3 OU).</summary>
+                                     short? GozTetkik = null, short? Goz = null);
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);

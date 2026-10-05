@@ -17,7 +17,7 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class BasvuruIstemUclari
 {
-    public sealed record SerbestIstegi(int[]? LabIstemIdler, int[]? RadyolojiIstemIdler);
+    public sealed record SerbestIstegi(int[]? LabIstemIdler, int[]? RadyolojiIstemIdler, int[]? GozIstemIdler = null);
 
     public static void BasvuruIstemUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -91,6 +91,23 @@ public static class BasvuruIstemUclari
                 o => (Id: o.GetInt32(0), Oncelik: o.GetInt16(1), Tetkik: o.GetString(2),
                       Kategori: o.GetString(3), Hizmetler: (int[])o[4]), iptal);
 
+            // GÖZ GÖRÜNTÜLEME (974): lab / radyolojiyle aynı - bekleyen istem, hizmeti eşlemeden.
+            var gozHam = await b.ListeAsync("""
+                select g.id, g.oncelik,
+                       (case g.tetkik when 1 then 'OCT maküla' when 2 then 'OCT RNFL / GCC' when 3 then 'OCT ön segment'
+                             when 4 then 'OCT-A' when 5 then 'FAF' when 6 then 'FA / ICGA' when 7 then 'Fundus foto'
+                             when 8 then 'Görme alanı' when 9 then 'Topografi' when 10 then 'Pakimetri' when 11 then 'Biyometri'
+                             when 12 then 'Endotel' when 13 then 'UBM' when 14 then 'B-scan' when 15 then 'ERG / VEP' else 'Göz tetkiki' end
+                        || ' · ' || case g.goz when 1 then 'OD' when 2 then 'OS' else 'OU' end) as tetkik,
+                       'Göz görüntüleme' as kategori,
+                       case when g.hizmet_id is null then '{}'::int[] else array[g.hizmet_id] end
+                  from public.goz_goruntuleme g
+                 where g.belge_id = @p0 and g.serbest = 0 and g.durum <> 0
+                 order by g.id
+                """, null, [belgeId],
+                o => (Id: o.GetInt32(0), Oncelik: o.GetInt16(1), Tetkik: o.GetString(2),
+                      Kategori: o.GetString(3), Hizmetler: (int[])o[4]), iptal);
+
             var sz = await SozlesmeAsync(b, belgeId, iptal);
             // ÜCRETTE = ücret satırının hizmeti YA DA paket içeriği: check-up
             //   satırı girildiyse içindeki hemogram/glukoz istemi de ücrettedir.
@@ -126,9 +143,11 @@ public static class BasvuruIstemUclari
             foreach (var x in labHam) lab.Add(await SatirAsync("lab", x, sz.LabIskonto));
             var rad = new List<object>();
             foreach (var x in radHam) rad.Add(await SatirAsync("radyoloji", x, sz.RadIskonto));
+            var goz = new List<object>();
+            foreach (var x in gozHam) goz.Add(await SatirAsync("goz", x, sz.RadIskonto));
 
-            return Results.Ok(new { lab, radyoloji = rad,
-                                    toplam = lab.Count + rad.Count,
+            return Results.Ok(new { lab, radyoloji = rad, goz,
+                                    toplam = lab.Count + rad.Count + goz.Count,
                                     kurum = sz.Kurum, sozlesme = sz.Sozlesme,
                                     izlemeNo = baglam.IzlemeNo });
         });
@@ -145,8 +164,10 @@ public static class BasvuruIstemUclari
 
             var labIds = istek?.LabIstemIdler;
             var radIds = istek?.RadyolojiIstemIdler;
+            var gozIds = istek?.GozIstemIdler;
             var hepsi = (labIds is null || labIds.Length == 0)
-                      && (radIds is null || radIds.Length == 0);
+                      && (radIds is null || radIds.Length == 0)
+                      && (gozIds is null || gozIds.Length == 0);
 
             var labN = await b.CalistirAsync("""
                 update public.lab_istem set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
@@ -160,10 +181,16 @@ public static class BasvuruIstemUclari
                    and (@p2::bool or id = any(@p3))
                 """, null, [belgeId, baglam.KullaniciId, hepsi, radIds ?? []], iptal);
 
-            return Results.Ok(new { lab = labN, radyoloji = radN, toplam = labN + radN,
-                                    mesaj = labN + radN == 0
+            var gozN = await b.CalistirAsync("""
+                update public.goz_goruntuleme set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
+                 where belge_id = @p0 and serbest = 0
+                   and (@p2::bool or id = any(@p3))
+                """, null, [belgeId, baglam.KullaniciId, hepsi, gozIds ?? []], iptal);
+
+            return Results.Ok(new { lab = labN, radyoloji = radN, goz = gozN, toplam = labN + radN + gozN,
+                                    mesaj = labN + radN + gozN == 0
                                         ? "Serbest bırakılacak bekleyen istem yok."
-                                        : $"{labN + radN} istem serbest bırakıldı, çalışma listelerine düştü.",
+                                        : $"{labN + radN + gozN} istem serbest bırakıldı, çalışma listelerine düştü.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 
@@ -183,7 +210,8 @@ public static class BasvuruIstemUclari
             // Seçili istem id'leri (grid'den); boşsa TÜM bekleyenler ücretlenir.
             var labIds = istek?.LabIstemIdler ?? [];
             var radIds = istek?.RadyolojiIstemIdler ?? [];
-            var hepsi = labIds.Length == 0 && radIds.Length == 0;
+            var gozIds = istek?.GozIstemIdler ?? [];
+            var hepsi = labIds.Length == 0 && radIds.Length == 0 && gozIds.Length == 0;
 
             // Faturalanacak hizmetler: radyoloji istemin hizmeti; lab istemin
             //   tetkiklerinin hizmeti - PANELDEN doğan satırda PANELİN hizmeti
@@ -196,6 +224,10 @@ public static class BasvuruIstemUclari
                     select i.hizmet_id as hid from public.radyoloji_istem i
                      where i.belge_id = @p0 and i.serbest = 0 and i.durum <> 0 and i.hizmet_id is not null
                        and (@p1::bool or i.id = any(@p3))
+                    union
+                    select g.hizmet_id from public.goz_goruntuleme g
+                     where g.belge_id = @p0 and g.serbest = 0 and g.durum <> 0 and g.hizmet_id is not null
+                       and (@p1::bool or g.id = any(@p4))
                     union
                     select coalesce(lp.hizmet_id, t.hizmet_id) from public.lab_istem i
                       join public.lab_istem_satir s on s.istem_id = i.id
@@ -210,7 +242,7 @@ public static class BasvuruIstemUclari
                                     cross join lateral public.fn_hizmet_paket_kapsam(bs.hizmet_id) a
                                     where bs.belge_id = @p0 and bs.hizmet_id is not null
                                       and a.hizmet_id = hz.id)
-                """, null, [belgeId, hepsi, labIds, radIds], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
+                """, null, [belgeId, hepsi, labIds, radIds, gozIds], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
 
             if (hizmetler.Count == 0)
                 return Results.Ok(new { eklenen = 0, mesaj = "Ücretlendirilecek bekleyen doktor istemi yok.",

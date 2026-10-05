@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Görüntüleme — Kart v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  .ust-serit{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px}
+  .ust-serit .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .ust-serit .bil{display:flex;gap:16px;flex-wrap:wrap} .ust-serit .bil b{color:var(--navy)}
+  .kml{display:grid;grid-template-columns:1.3fr .7fr 1.3fr 1fr 1fr 1.1fr;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .sekmeler .sek .say{margin-left:4px}
+  .ic2{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;padding:10px 14px}
+  .gor{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .gor .k{background:#111;border-radius:6px;height:240px;position:relative;overflow:hidden;color:#ddd;font-size:11px}
+  .gor .k .b{position:absolute;top:6px;left:8px;font-weight:bold}
+  .gor .k .s{position:absolute;bottom:6px;left:8px;right:8px;display:flex;justify-content:space-between;color:#aaa;font-size:10px}
+  .gor .k .oct{position:absolute;left:6%;right:6%;top:38%;height:26%;border-top:4px solid #f0f0f0;border-bottom:3px solid #9a9a9a;border-radius:50% 50% 40% 40%}
+  .gor .k .ince{position:absolute;left:58%;width:18%;top:36%;height:6px;background:#e0796f;opacity:.85;border-radius:3px}
+  .arac{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
+  .arac .btn{font-size:10.5px;padding:2px 8px}
+  .seri{display:flex;gap:6px;margin-top:6px}
+  .seri div{width:62px;height:44px;background:#222;border-radius:3px;border:2px solid transparent;color:#bbb;font-size:9px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px}
+  .seri div.on{border-color:var(--accent)}
+  .olc{width:100%;border-collapse:collapse;font-size:11.5px}
+  .olc th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2)}
+  .olc td{padding:4px 6px;border-bottom:1px solid #eef2f6}
+  .olc th.od,.olc td.od{color:#2f6db3} .olc th.os{color:#8e44ad}
+  .nb{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .n-y{background:#7fc28f} .n-s{background:#f2cf5b} .n-k{background:#e0796f}
+  .krm{color:#b3261e;font-weight:bold}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .kal{display:inline-flex;gap:1px} .kal i{width:6px;height:11px;background:#d6dee8;border-radius:1px} .kal i.on{background:#2e7d46}
+  .trend{display:flex;align-items:flex-end;gap:10px;height:140px;padding:6px 4px;border-bottom:1px solid var(--line2)}
+  .trend .c{flex:1;display:flex;gap:3px;align-items:flex-end;height:100%}
+  .trend .c i{flex:1;border-radius:2px 2px 0 0} .trend .c i.s{background:#9db8d9} .trend .c i.l{background:#c7a6d8} .trend .c i.d{background:#e0796f}
+  .trend-et{display:flex;gap:10px;font-size:10px;color:var(--muted);padding:0 4px} .trend-et span{flex:1;text-align:center}
+  .yz{border:1px dashed #b9a6e0;background:#f7f3fd;border-radius:6px;padding:8px 10px;font-size:11.5px}
+  .sonuc{display:flex;gap:6px} .sonuc .cip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11.5px;background:#fff}
+  .sonuc .cip.on{background:#f8e1df;border-color:#e4b7b2;color:#8f3d36;font-weight:bold}
+  .metin{width:100%;min-height:90px;border:1px solid var(--line);border-radius:4px;padding:6px 8px;font-size:12px;background:#fff}
+  .panel{display:none} .panel.on{display:block}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖼 Göz Görüntüleme <span class="rz">H d1111</span><span class="rz">P GZ-990103</span><span class="rz">OCT RNFL · OU</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">✍ Değerlendir ve imzala</span>
+    <span class="btn">↻ Yeniden çekim iste</span>
+    <span class="btn">🖥 PACS'ta aç</span>
+    <span class="btn">🖨 Rapor yazdır</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <!-- 1 hasta bandı -->
+  <div class="ust-serit">
+    <div><div class="ad">Ayşe Yıldız</div><div style="color:var(--muted)">67 K · göz muayenesi 04.10.2026 09:10 · istem Dr. Elif Arslan</div></div>
+    <div class="bil">
+      <span>Takip: <b>Glokom (OU)</b></span>
+      <span>Son aynı tetkik: <b>05.09.2026</b> (RNFL OS 76 µm)</span>
+      <span>Dilate: <b>evet · 09:32</b></span>
+      <span>Klinik soru: <b>progresyon? sol alan kaybı</b></span>
+    </div>
+    <div><span class="chip c-bek">Çekildi · değerlendirme bekliyor</span></div>
+  </div>
+  <!-- 2 kimlik bandı -->
+  <div class="kml">
+    <div class="fld"><label class="req">Tetkik</label><div class="inp combo">OCT — RNFL / GCC</div></div>
+    <div class="fld"><label class="req">Göz</label><div class="inp combo">OU</div></div>
+    <div class="fld"><label>Cihaz</label><div class="inp combo">Cirrus 5000 · OCT odası</div></div>
+    <div class="fld"><label>Çekim</label><div class="inp">04.10.2026 10:05</div></div>
+    <div class="fld"><label>Teknisyen</label><div class="inp combo">Tek. Ece Kara</div></div>
+    <div class="fld"><label>Kalite (sinyal)</label><div class="inp"><span class="kal"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>&nbsp; 8 / 10</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="gor">Görüntü &amp; ölçümler</div>
+    <div class="sek" data-p="kars">Karşılaştırma <span class="say">4</span></div>
+    <div class="sek" data-p="deg">Değerlendirme</div>
+    <div class="sek" data-p="belge">Belgeler <span class="say">2</span></div>
+  </div>
+
+  <!-- GÖRÜNTÜ & ÖLÇÜMLER -->
+  <div class="panel on" id="p-gor">
+    <div class="ic2">
+      <div>
+        <div class="gor">
+          <div class="k"><span class="b" style="color:#9cc0e8">OD · Sağ</span><div class="oct"></div><div class="s"><span>RNFL 92 µm</span><span>sinyal 8</span></div></div>
+          <div class="k"><span class="b" style="color:#c7a6d8">OS · Sol</span><div class="oct"></div><div class="ince"></div><div class="s"><span>RNFL 71 µm · inferior defekt</span><span>sinyal 8</span></div></div>
+        </div>
+        <div class="arac"><span class="btn">🔍 Büyüt</span><span class="btn">◐ Kontrast</span><span class="btn">📏 Ölç</span><span class="btn">⇄ Önceki ile yan yana</span><span class="btn">🖥 DICOM görüntüleyicide aç</span></div>
+        <div class="seri"><div class="on">RNFL OD</div><div>RNFL OS</div><div>GCC OD</div><div>GCC OS</div><div>ONH</div></div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Study UID 1.2.840…4410 · 2 seri · 5 görüntü · cihazdan otomatik (DICOM / HL7)</div>
+      </div>
+      <div>
+        <div class="kart"><h6>Ölçümler <span style="text-transform:none">normatif: <span class="nb n-y"></span>normal <span class="nb n-s"></span>%5 <span class="nb n-k"></span>%1</span></h6>
+          <table class="olc">
+            <tr><th>Ölçüm</th><th class="od">OD</th><th class="os">OS</th><th>Önceki OS</th></tr>
+            <tr><td>RNFL ort.</td><td><span class="nb n-y"></span>92 µm</td><td><span class="nb n-k"></span><span class="krm">71</span></td><td>76</td></tr>
+            <tr><td>RNFL superior</td><td><span class="nb n-y"></span>114</td><td><span class="nb n-y"></span>102</td><td>104</td></tr>
+            <tr><td>RNFL inferior</td><td><span class="nb n-y"></span>118</td><td><span class="nb n-k"></span><span class="krm">74</span></td><td>86</td></tr>
+            <tr><td>GCC ort.</td><td><span class="nb n-y"></span>84</td><td><span class="nb n-s"></span>68</td><td>71</td></tr>
+            <tr><td>C/D (OCT)</td><td>0,58</td><td><span class="krm">0,79</span></td><td>0,75</td></tr>
+            <tr><td>Rim alanı</td><td>1,32 mm²</td><td>0,82 mm²</td><td>0,90</td></tr>
+          </table>
+        </div>
+        <div class="yz">🤖 <b>YZ ön okuma</b>: Sol inferotemporal RNFL defekti, önceki tetkike göre anlamlı incelme (inferior −12 µm). Glokom progresyonu ile uyumlu.
+          <div style="margin-top:4px"><span class="btn kucuk">✓ Değerlendirmeye aktar</span> <span style="color:var(--muted);font-size:10.5px">öneridir, hekim karar verir</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARŞILAŞTIRMA -->
+  <div class="panel" id="p-kars">
+    <div class="ic2">
+      <div>
+        <div class="kart"><h6>RNFL ortalama eğilimi <span style="text-transform:none">mavi sağ · mor sol · kırmızı anlamlı incelme</span></h6>
+          <div class="trend">
+            <div class="c"><i class="s" style="height:95%"></i><i class="l" style="height:82%"></i></div>
+            <div class="c"><i class="s" style="height:94%"></i><i class="l" style="height:80%"></i></div>
+            <div class="c"><i class="s" style="height:93%"></i><i class="l" style="height:76%"></i></div>
+            <div class="c"><i class="s" style="height:92%"></i><i class="d" style="height:71%"></i></div>
+          </div>
+          <div class="trend-et"><span>07.2025</span><span>03.2026</span><span>09.2026</span><span>bugün</span></div>
+        </div>
+        <div class="kart"><h6>Önceki tetkikler</h6>
+          <table class="olc">
+            <tr><th>Tarih</th><th>Tetkik</th><th>Sinyal</th><th>RNFL OD</th><th>RNFL OS</th><th>Değerlendirme</th></tr>
+            <tr><td><b>bugün</b></td><td>OCT RNFL</td><td>8</td><td>92</td><td class="krm">71</td><td>—</td></tr>
+            <tr><td>05.09.2026</td><td>OCT RNFL</td><td>9</td><td>93</td><td>76</td><td>sol sınırda incelme</td></tr>
+            <tr><td>03.03.2026</td><td>OCT RNFL</td><td>7</td><td>95</td><td>82</td><td>başlangıç</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="kart"><h6>Progresyon analizi</h6>
+          <div class="sat"><span>Sol RNFL değişim hızı</span><b class="krm">−5,8 µm / yıl</b></div>
+          <div class="sat"><span>Yaşa bağlı beklenen</span><span>−0,5 µm / yıl</span></div>
+          <div class="sat"><span>Olay analizi (GPA)</span><b class="krm">olası progresyon</b></div>
+          <div class="sat"><span>Sağ göz</span><span>stabil</span></div>
+        </div>
+        <div class="kart"><h6>Aynı ziyaretin diğer testleri</h6>
+          <div class="sat"><span>Görme alanı 24-2</span><span class="krm">MD −6,8 dB</span></div>
+          <div class="sat"><span>GİB (muayene)</span><span>18 / 26</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEĞERLENDİRME -->
+  <div class="panel" id="p-deg">
+    <div class="ic2">
+      <div>
+        <div class="kart"><h6>Sonuç</h6>
+          <div class="sonuc"><span class="cip">Normal</span><span class="cip">Sınırda</span><span class="cip on">Anormal</span><span class="cip">Değerlendirilemez (kalite)</span></div></div>
+        <div class="kart"><h6>Bulgu / yorum <span style="text-transform:none">⧉ şablon · 🎙 dikte</span></h6>
+          <div class="metin">Sol gözde inferotemporal RNFL defekti; 05.09.2026'ya göre inferior kadranda 12 µm incelme. Sağ göz normal sınırlarda. Bulgular sol gözde glokom progresyonu ile uyumludur.</div></div>
+        <div class="kart"><h6>Öneri</h6>
+          <div class="metin" style="min-height:44px">Tedavi değişikliği / SLT değerlendirmesi; 3 ay sonra OCT + görme alanı.</div></div>
+      </div>
+      <div>
+        <div class="kart"><h6>İmza</h6>
+          <div class="sat"><span>Değerlendiren</span><span>Dr. Elif Arslan</span></div>
+          <div class="sat"><span>Durum</span><span>imza bekliyor</span></div>
+          <div style="margin-top:6px"><span class="btn primary">✍ Değerlendir ve imzala</span></div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:6px">İmzalanınca sonuç muayene kartının "Görüntüler" ve "Karşılaştırma" bölümlerine, e-Nabız'a ve hasta göz özetine düşer.</div>
+        </div>
+        <div class="uyar">Kalite 6/10 altındaysa "Değerlendirilemez" önerilir; "Yeniden çekim iste" teknisyen kuyruğuna düşer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BELGELER -->
+  <div class="panel" id="p-belge">
+    <div style="padding:10px 14px">
+      <table class="liste">
+        <tr><th>Tarih</th><th>Belge</th><th>Kaynak</th><th></th></tr>
+        <tr><td>04.10 10:06</td><td>RNFL / ONH analiz raporu (PDF)</td><td>Cirrus 5000</td><td><span class="btn kucuk">Aç</span></td></tr>
+        <tr><td>04.10 10:06</td><td>GCC analiz raporu (PDF)</td><td>Cirrus 5000</td><td><span class="btn kucuk">Aç</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Sekmeler tıklanınca açılır. Göz muayene kartından "Görüntüleme İste" ile hasta ve muayene dolu açılır; Kaydet / Kapat muayene kartına döner (gözlük reçetesiyle aynı).
+Başlıkta H / P ve tetkik rozetleri; üstte hasta bandı (takip, son aynı tetkik, dilate, klinik soru), kimlik bandında tetkik, göz, cihaz, çekim, teknisyen, kalite.<br>
+<span class="n">1</span><b>Görüntü &amp; ölçümler:</b> OD / OS görüntü (cihazdan DICOM), araçlar (büyüt, kontrast, ölç, önceki ile yan yana, DICOM görüntüleyici), seri şeridi;
+ölçüm tablosu (normatif renk: normal / %5 / %1, önceki değer) - <code>goz_goruntuleme_olcum</code>; YZ ön okuma (öneri, değerlendirmeye aktar).<br>
+<span class="n">2</span><b>Karşılaştırma:</b> eğilim grafiği, önceki tetkikler, progresyon analizi (değişim hızı, yaşa bağlı beklenen, olay analizi), aynı ziyaretin diğer testleri.<br>
+<span class="n">3</span><b>Değerlendirme:</b> sonuç (normal / sınırda / anormal / değerlendirilemez), bulgu (şablon, dikte), öneri; <b>Değerlendir ve imzala</b> - sonuç muayene kartına, e-Nabız'a,
+hasta göz özetine düşer. Kalite düşükse "değerlendirilemez" önerisi ve yeniden çekim.<br>
+<span class="n">4</span><b>Belgeler:</b> cihazın PDF raporları.
+</div></div>
+<script>
+document.querySelectorAll('.sek').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+}));
+</script>
+</body>
+</html>

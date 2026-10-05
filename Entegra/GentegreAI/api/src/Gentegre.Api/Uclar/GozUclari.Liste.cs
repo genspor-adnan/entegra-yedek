@@ -120,9 +120,12 @@ public static partial class GozUclari
                             when 5 then 'FAF' when 6 then 'FA / ICGA' when 7 then 'Fundus foto' when 8 then 'Görme alanı'
                             when 9 then 'Topografi' when 10 then 'Pakimetri' when 11 then 'Biyometri' when 12 then 'Endotel'
                             when 13 then 'UBM' when 14 then 'B-scan USG' when 15 then 'ERG / VEP' else 'Görüntüleme' end,
-                       g.istem_zamani, case g.goz when 1 then 'OD' when 2 then 'OS' else 'OU' end, g.id
+                       g.istem_zamani,
+                       (case g.goz when 1 then 'OD' when 2 then 'OS' else 'OU' end) || ' · '
+                         || case when g.durum = 2 then 'değerlendirme bekliyor' when g.serbest = 0 then 'ödeme bekliyor' else 'çekim sırasında' end,
+                       g.id
                   from public.goz_goruntuleme g join public.goz_muayene gm on gm.id = @p0
-                 where g.muayene_id = gm.muayene_id
+                 where g.muayene_id = gm.muayene_id and g.durum in (1, 2)   -- 974: değerlendirilen / iptal bekleyen değil
                 union all
                 select 'islem', coalesce(h.ad, case i.tur when 1 then 'Enjeksiyon' when 2 then 'Lazer' when 3 then 'Ameliyat' else 'Göz işlemi' end),
                        coalesce(i.planlanan_tarih, i.ekleme_tarihi),

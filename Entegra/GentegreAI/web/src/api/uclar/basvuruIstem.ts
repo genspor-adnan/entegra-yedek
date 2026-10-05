@@ -7,7 +7,7 @@ import { gonder, istek } from '../cekirdek';
  * kabule hazır, tahsilat sonraya kalabilir.
  */
 export interface BekleyenIstem {
-  tur: 'lab' | 'radyoloji'; id: number; oncelik: number; tetkik: string; kategori: string;
+  tur: 'lab' | 'radyoloji' | 'goz'; id: number; oncelik: number; tetkik: string; kategori: string;
   /** Başvurunun kurum fiyat listesinden birim fiyat toplamı (ücretlendirmeyle AYNI kural). */
   fiyat: number;
   /** Sözleşme iskontosu (%): lab / görüntüleme ayrı. */
@@ -22,6 +22,8 @@ export interface BekleyenIstem {
 export interface BekleyenIstemYaniti {
   lab: BekleyenIstem[];
   radyoloji: BekleyenIstem[];
+  /** Göz görüntüleme istemleri (974). */
+  goz?: BekleyenIstem[];
   toplam: number;
   /** Ödeyen kurum ve sözleşme adı (fiyatın dayanağı). */
   kurum?: string;
@@ -34,15 +36,15 @@ export const basvuruIstemUclari = {
     istek<BekleyenIstemYaniti>(`/api/basvuru/${belgeId}/bekleyen-istem`),
 
   /** Bekleyen istemleri serbest bırak (id verilmezse tümü). */
-  basvuruIstemSerbest: (belgeId: number, ids?: { lab?: number[]; radyoloji?: number[] }) =>
-    gonder<{ lab: number; radyoloji: number; toplam: number; mesaj: string }>(
+  basvuruIstemSerbest: (belgeId: number, ids?: { lab?: number[]; radyoloji?: number[]; goz?: number[] }) =>
+    gonder<{ lab: number; radyoloji: number; goz: number; toplam: number; mesaj: string }>(
       `/api/basvuru/${belgeId}/istem-serbest`,
-      { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null }),
+      { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null, gozIstemIdler: ids?.goz ?? null }),
 
   /** Doktor istemlerini ücretlendir: bekleyen istemlerin hizmetlerini ücret
    *  satırı olarak başvuruya ekler (fiyat + iskonto + karşılama); istemler
    *  serbest kalır (worklist'e düşer). */
-  basvuruIstemUcretlendir: (belgeId: number, ids?: { lab?: number[]; radyoloji?: number[] }) =>
+  basvuruIstemUcretlendir: (belgeId: number, ids?: { lab?: number[]; radyoloji?: number[]; goz?: number[] }) =>
     gonder<{ eklenen: number; mesaj: string }>(`/api/basvuru/${belgeId}/istem-ucretlendir`,
-      { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null }),
+      { labIstemIdler: ids?.lab ?? null, radyolojiIstemIdler: ids?.radyoloji ?? null, gozIstemIdler: ids?.goz ?? null }),
 };

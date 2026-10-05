@@ -205,16 +205,28 @@ public static partial class KaynakKatalogu
         Kaynak: "public.goz_goruntuleme g "
               + "join public.taraf t on t.id = g.hasta_id "
               + "left join public.goz_cihaz c on c.id = g.cihaz_id "
-              + "left join public.taraf d on d.id = g.degerlendiren_id",
+              + "left join public.taraf d on d.id = g.degerlendiren_id "
+              // 974: H / P, ana ölçüm, bekleme, uyarı (liste + gösterge aynı tanım).
+              + "left join public.taraf ih on ih.id = g.istek_hekim_id "
+              + "left join public.v_goz_goruntuleme_ozet v on v.goruntuleme_id = g.id",
         SubeKolonu: "g.sube_id",
         VarsayilanSirala: "g.istem_zamani desc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "g.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "g.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
-            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
+            // 974 (mockup goz_goruntuleme_listesi_v2): istem saati altında isteyen hekim.
+            new("istemSaat", "to_char(g.istem_zamani at time zone 'Europe/Istanbul', 'DD.MM HH24:MI')",
+                                              "metin", "İstem", Genislik: 110, Filtrelenebilir: false, Bicim: "alt:istekHekim"),
+            new("istekHekim", "coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), '')", "metin", "İsteyen", Varsayilan: false),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 200,
+                Bicim: "alt:hastaAlt"),
+            new("hastaAlt",
+                "concat_ws(' · ', v.yas::text || case v.cinsiyet when 1 then ' E' when 2 then ' K' else '' end, "
+                + "nullif('H ' || v.hasta_no, 'H '), nullif('P ' || v.protokol, 'P '))",
+                                              "metin", "Hasta Bilgisi", Varsayilan: false, Filtrelenebilir: false),
             new("goz",       GozTarafIfade,   "metin", "Göz", Hizalama: "orta",
-                                              Bicim: "rozet", Genislik: 70, Filtrelenebilir: false),
+                                              Bicim: "rozet", Genislik: 60, Filtrelenebilir: false),
             new("gozKod",    "g.goz",         "kod",  "Göz Kodu", Varsayilan: false),
             new("tetkikAdi",
                 "case g.tetkik when 1 then 'OCT maküla' when 2 then 'OCT RNFL/GCC' "
@@ -233,8 +245,32 @@ public static partial class KaynakKatalogu
             new("durumAdi",
                 "case g.durum when 0 then 'İptal' when 1 then 'İstendi' "
                 + "when 2 then 'Çekildi' when 3 then 'Değerlendirildi' else '' end",
-                                              "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                              "metin", "Durum", Hizalama: "orta", Bicim: "alt:durumAlt",
                                               Genislik: 130, Filtrelenebilir: false),
+            new("durumAlt",
+                "case when g.durum = 1 and g.serbest = 0 then 'ödeme bekliyor' "
+                + "when g.cekim_zamani is not null then concat_ws(' · ', to_char(g.cekim_zamani at time zone 'Europe/Istanbul', 'HH24:MI'), nullif(c.ad, '')) "
+                + "else '' end", "metin", "Durum Ayrıntısı", Varsayilan: false, Filtrelenebilir: false),
+            new("anaOd", "v.ana_od", "sayi", "Ana ölçüm", Hizalama: "orta", Genislik: 110,
+                Bicim: "odos:anaOs:anaBayrak", Filtrelenebilir: false),
+            new("anaOs", "v.ana_os", "sayi", "Ana Ölçüm OS", Varsayilan: false, Filtrelenebilir: false),
+            // Bit: 1 OD · 2 OS - yalnız eşik dışı ölçümü olan göz kırmızı.
+            new("anaBayrak",
+                "(case when exists (select 1 from public.goz_goruntuleme_olcum o where o.goruntuleme_id = g.id and o.goz = 1 and o.bayrak >= 1) then 1 else 0 end"
+                + " + case when exists (select 1 from public.goz_goruntuleme_olcum o where o.goruntuleme_id = g.id and o.goz = 2 and o.bayrak >= 1) then 2 else 0 end)",
+                "sayi", "Bayrak", Varsayilan: false),
+            new("beklemeDk", "v.bekleme_dk", "sayi", "Bekleme (dk)", Hizalama: "orta", Genislik: 90),
+            new("uyari", "coalesce(v.uyari, '')", "metin", "Uyarı", Genislik: 180, Filtrelenebilir: false, Bicim: "uyari"),
+            new("serbest", "g.serbest", "mantik", "Ödendi", Varsayilan: false),
+            new("bugun", "case when (g.istem_zamani at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+                                              "mantik", "Bugün", Varsayilan: false),
+            new("buHafta", "case when g.istem_zamani >= date_trunc('week', now()) then 1 else 0 end", "mantik", "Bu Hafta", Varsayilan: false),
+            new("kaliteDusuk", "case when g.kalite is not null and g.kalite < 6 then 1 else 0 end", "mantik", "Kalite Düşük", Varsayilan: false),
+            new("esikDisi", "case when coalesce(v.bayrak, 0) >= 1 then 1 else 0 end", "mantik", "Eşik Dışı", Varsayilan: false),
+            new("yzDikkat", "coalesce(v.yz_dikkat, 0)", "mantik", "YZ Dikkat", Varsayilan: false),
+            new("cihazId", "g.cihaz_id", "sayi", "Cihaz Id", Varsayilan: false),
+            new("muayeneId", "g.muayene_id", "sayi", "Muayene Id", Varsayilan: false),
+            new("degerlendirenId", "g.degerlendiren_id", "sayi", "Değerlendiren Id", Varsayilan: false),
             new("durum",     "g.durum",       "kod",  "Durum Kodu", Varsayilan: false),
             new("degerlendiren", "coalesce(public.fn_taraf_ad(d.unvan, d.ad, d.soyad)::varchar(120), '')", "metin", "Değerlendiren", Genislik: 170),
             // KALİTE listede: düşük sinyalli OCT'nin ölçümü trende girerse

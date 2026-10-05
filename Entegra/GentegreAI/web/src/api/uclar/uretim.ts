@@ -189,7 +189,9 @@ export const uretimUclari = {
                                                tetkikIdler?: number[];
                                                panelIdler?: number[];
                                                /** Akılcı istem kararları (873). */
-                                               akilci?: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[] }) =>
+                                               akilci?: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[];
+                                               /** Göz görüntüleme (tur 6, 974): goz.tetkik kodu + göz (1 OD · 2 OS · 3 OU). */
+                                               gozTetkik?: number; goz?: number }) =>
     gonder<{ istemId: number; hedefTablo: string; hedefId: number | null; mesaj: string }>(
       `/api/muayene/${muayeneId}/istem`, istek),
 

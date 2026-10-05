@@ -184,12 +184,10 @@ export async function gozAkisAksiyonu(
 
   // YENİ KAYIT AÇAN KISAYOLLAR: kart hastayı ve muayeneyi ÖN DOLGU olarak
   //   taşır (sorgu parametresi). Hekim aynı bilgiyi ikinci kez seçmesin diye.
-  if (kod === 'goz.gozluk-recete' || kod === 'goz.goruntuleme-iste'
-      || kod === 'goz.islem-planla') {
+  if (kod === 'goz.gozluk-recete' || kod === 'goz.islem-planla') {
     const hastaId = Number(satir?.hastaId ?? 0);
     if (!id || !hastaId) { mesaj('Önce bir muayene seçin.'); return true }
-    const yol = kod === 'goz.gozluk-recete' ? '/goz-gozluk-recete'
-      : kod === 'goz.goruntuleme-iste' ? '/goz-goruntuleme' : '/goz-islem';
+    const yol = kod === 'goz.gozluk-recete' ? '/goz-gozluk-recete' : '/goz-islem';
     // MUAYENE ID (goz_muayene.id DEGIL): uc tablonun da muayene_id'si
     //   public.muayene'ye bakar. Yoksa bag kurulmaz, kart yine acilir.
     const muayeneId = Number(satir?.muayeneId ?? 0);
@@ -220,6 +218,26 @@ export async function gozAkisAksiyonu(
     if (satir?.muayeneId) p.set('muayeneId', String(satir.muayeneId));
     if (satir?.hasta) p.set('hastaAd', String(satir.hasta));
     b.git(`/goz-gozluk-recete/yeni?${p.toString()}`);
+    return true;
+  }
+
+  // ---- GÖZ GÖRÜNTÜLEME (974): ödenmiş istem çekilir → hekim değerlendirir; yeniden çekim ücretsiz yeni kayıt.
+  if (kod === 'goz.gor-cekildi' || kod === 'goz.gor-degerlendir' || kod === 'goz.gor-yeniden' || kod === 'goz.gor-muayene') {
+    if (!id) { mesaj('Önce bir görüntüleme seçin.'); return true }
+    if (kod === 'goz.gor-degerlendir') { b.git(`/goz-goruntuleme/${id}`); return true }
+    if (kod === 'goz.gor-yeniden' && !await onay('Yeniden çekim istensin mi? Bu çekim iptal edilir, yeni kayıt ücretsiz sıraya düşer.')) return true;
+    await guvenli(async () => {
+      if (kod === 'goz.gor-muayene') {
+        const y = await api.gozGoruntulemeOnizleme(id);
+        const gm = Number(y.kayit.gozMuayeneId ?? 0);
+        if (!gm) { mesaj('Bu görüntülemenin göz muayenesi yok.'); return }
+        b.git(`/goz-muayene/${gm}`);
+        return;
+      }
+      if (kod === 'goz.gor-cekildi') { await api.gozGoruntulemeCekildi(id); mesaj('Çekildi; değerlendirme bekliyor.') }
+      else { await api.gozGoruntulemeYeniden(id); mesaj('Yeniden çekim istendi.') }
+      b.tazele();
+    });
     return true;
   }
 

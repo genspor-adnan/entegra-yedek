@@ -252,47 +252,34 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            // MUAYENE BAGI ARKA PLANDA (Gizli): kayit bir muayeneden
-            //   dogduysa hangi muayene oldugu KAYDEDILIR - ekranda ham
-            //   id gostermenin degeri yok, ama bagin kaybolmasinin
-            //   bedeli var: "bu goruntulemeyi kim, hangi muayenede
-            //   istedi" sorusu sonra cevapsiz kalir. Muayene kartindaki
-            //   kisayol bu alani URL ile doldurur.
-            new("muayeneId", "muayene_id", "sayi", Gizli: true),
-            new("hastaId", "hasta_id", "kod", Zorunlu: true,
-                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
-                Baslik: "Hasta", Grup: "İstem"),
-            new("goz", "goz", "kod", Zorunlu: true, SabitKodlar: GozTarafKodlari,
-                Baslik: "Göz", Grup: "İstem"),
-            new("tetkik", "tetkik", "kod", Zorunlu: true, KodListesi: "goz.tetkik",
-                Baslik: "Tetkik", Grup: "İstem"),
-            // Ücretin kaynağı hizmet satırıdır; tetkik kodu klinik, hizmet
-            //   mali taraf. İkisi ayrı alan - biri değişince öteki yanlış
-            //   olmasın diye tek alana sıkıştırılmadı.
-            new("hizmetId", "hizmet_id", "kod", KodTablosu: "public.v_goz_tetkik_lookup",
-                Baslik: "Hizmet (ücret)", Grup: "İstem"),
-            new("durum", "durum", "kod", KodListesi: "goz.goruntuleme_durum",
-                Baslik: "Durum", Grup: "İstem"),
-            new("istemZamani", "istem_zamani", "zaman", Baslik: "İstem Zamanı", Grup: "İstem"),
+            // 974 (mockup goz_goruntuleme_karti_v2): kayıt İSTEMDEN doğar (sepet → başvuru →
+            //   ödeme); hasta, tetkik, göz, hizmet, istem kartta değişmez.
+            new("muayeneId", "muayene_id", "sayi", Gizli: true, Yazilabilir: false),
+            new("belgeId", "belge_id", "sayi", Gizli: true, Yazilabilir: false),
+            new("hastaId", "hasta_id", "kod", Gizli: true, Yazilabilir: false, KodTablosu: "public.v_hasta_lookup", Baslik: "Hasta", Grup: "Kimlik"),
+            new("hizmetId", "hizmet_id", "kod", Gizli: true, Yazilabilir: false, KodTablosu: "public.v_goz_tetkik_lookup", Baslik: "Hizmet", Grup: "Kimlik"),
+            new("durum", "durum", "kod", Gizli: true, Yazilabilir: false, KodListesi: "goz.goruntuleme_durum", Baslik: "Durum", Grup: "Kimlik"),
+            new("serbest", "serbest", "mantik", Gizli: true, Yazilabilir: false, Baslik: "Ödendi", Grup: "Kimlik"),
+            new("istemZamani", "istem_zamani", "zaman", Gizli: true, Yazilabilir: false, Baslik: "İstem", Grup: "Kimlik"),
+            new("klinikSoru", "klinik_soru", "metin", Gizli: true, Yazilabilir: false, Baslik: "Klinik soru", Grup: "Kimlik"),
+            new("tetkik", "tetkik", "kod", Yazilabilir: false, KodListesi: "goz.tetkik", Baslik: "Tetkik", Grup: "Kimlik"),
+            new("goz", "goz", "kod", Yazilabilir: false, SabitKodlar: GozTarafKodlari, Baslik: "Göz", Grup: "Kimlik"),
+            new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_goz_cihaz_lookup", Baslik: "Cihaz", Grup: "Kimlik"),
+            new("cekimZamani", "cekim_zamani", "zaman", Yazilabilir: false, Baslik: "Çekim", Grup: "Kimlik"),
+            new("teknisyenId", "teknisyen_id", "kod", KodTablosu: "public.v_personel_lookup", Baslik: "Teknisyen", Grup: "Kimlik"),
+            new("kalite", "kalite", "sayi", Baslik: "Kalite (sinyal 0-10)", Grup: "Kimlik"),
+            new("dilate", "dilate", "mantik", Gizli: true, Baslik: "Dilate", Grup: "Kimlik"),
+            new("studyUid", "study_uid", "metin", Gizli: true, EnFazlaUzunluk: 64, Baslik: "DICOM Study UID", Grup: "Kimlik"),
 
-            new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_goz_cihaz_lookup",
-                Baslik: "Cihaz", Grup: "Çekim"),
-            new("cekimZamani", "cekim_zamani", "zaman", Baslik: "Çekim Zamanı", Grup: "Çekim"),
-            new("teknisyenId", "teknisyen_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "Teknisyen", Grup: "Çekim"),
-            new("dilate", "dilate", "mantik", Baslik: "Dilate", Grup: "Çekim"),
-            // KALİTE klinik bir filtredir: düşük sinyalli OCT'nin ölçümü
-            //   trende girerse "incelme" sanılan şey aslında kötü çekimdir.
-            new("kalite", "kalite", "sayi", Baslik: "Kalite / Sinyal", Grup: "Çekim"),
-            new("studyUid", "study_uid", "metin", EnFazlaUzunluk: 64,
-                Baslik: "DICOM Study UID", Grup: "Çekim"),
-
-            new("degerlendirme", "degerlendirme", "metin",
-                Baslik: "Değerlendirme", Grup: "Değerlendirme", EnFazlaUzunluk: 2500),
-            new("degerlendirenId", "degerlendiren_id", "kod",
-                KodTablosu: "public.v_hekim_lookup",
+            // DEĞERLENDİRME (ekranın "Değerlendirme" sekmesi; imza uçtan - durum 3).
+            new("sonuc", "sonuc", "kod", SabitKodlar: new Dictionary<string, string>
+                { ["1"] = "Normal", ["2"] = "Sınırda", ["3"] = "Anormal", ["4"] = "Değerlendirilemez" },
+                Baslik: "Sonuç", Grup: "Değerlendirme"),
+            new("degerlendirme", "degerlendirme", "metin", Baslik: "Bulgu / yorum", Grup: "Değerlendirme", EnFazlaUzunluk: 2500),
+            new("oneri", "oneri", "metin", Baslik: "Öneri", Grup: "Değerlendirme", EnFazlaUzunluk: 1000),
+            new("degerlendirenId", "degerlendiren_id", "kod", Yazilabilir: false, KodTablosu: "public.v_personel_lookup",
                 Baslik: "Değerlendiren", Grup: "Değerlendirme"),
-            new("degerlendirmeZamani", "degerlendirme_zamani", "zaman",
+            new("degerlendirmeZamani", "degerlendirme_zamani", "zaman", Yazilabilir: false,
                 Baslik: "Değerlendirme Zamanı", Grup: "Değerlendirme"),
         },
         Detaylar: new DetayTanimi[]
@@ -312,7 +299,7 @@ public static partial class KartKatalogu
                 new("normalPct", "normal_pct", "ondalik", Baslik: "Normatif %"),
                 new("bayrak", "bayrak", "sayi", Baslik: "Bayrak"),
             }, SubeKolonu: null, Sirala: "goz, olcum", LogTabloId: LogGozGoruntuleme,
-               Baslik: "Ölçümler"),
+               Baslik: "Ölçüm girişi"),
 
             // BİYOMETRİ tek satır: bir gözün bir çekiminde tek biyometri olur.
             new("biyometri", "public.goz_biyometri", "goruntuleme_id", new KartAlani[]

@@ -41,6 +41,10 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     detayGrupta: { hizmetler: { grup: 'Genel' } },
     sekmeSirasi: ['Genel', 'Bölümler', 'Yapılandırılmış alanlar', 'Makrolar', 'Önizleme', 'Sürümler', 'Kullanım'],
   },
+  // 974 (mockup goz_goruntuleme_karti_v2): görüntü & ölçümler önce, değerlendirme sonda.
+  'goz-goruntuleme': {
+    sekmeSirasi: ['Görüntü & ölçümler', 'Karşılaştırma', 'Ölçüm girişi', 'Biyometri / IOL', 'Değerlendirme'],
+  },
   'yatis-order': {
     seritAlanlari: ['tur', 'ad', 'baslangic', 'bitis', 'hekimId', 'durum'],
     sekmeSirasi: ['Order', 'Doz planı', 'Uygulamalar', 'Güvenlik kontrolleri', 'Geçmiş'],

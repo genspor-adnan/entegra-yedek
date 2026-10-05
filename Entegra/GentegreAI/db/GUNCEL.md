@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (504 ad, 141 tanesi birden cok dosyada)
+## Fonksiyonlar (506 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -27,7 +27,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_basvuru_hekim_dis_mi` | `578_basvuru_hekim_kaynagi.sql` | — |
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
-| `fn_basvuru_istem_serbest_uygula` | `925_basvuru_istem_serbest_panel.sql` | 919_istem_bazli_serbest.sql |
+| `fn_basvuru_istem_serbest_uygula` | `974_goz_goruntuleme_istem.sql` | 919_istem_bazli_serbest.sql, 925_basvuru_istem_serbest_panel.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
 | `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
@@ -432,6 +432,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_fiyat_satir_tarife` | `539_turetilmis_liste_sokuldu.sql` | 518_fiyat_listesi_tarife_tipi.sql, 533_ttb_fiyat_turetilmis.sql |
 | `tg_ftr_program_no` | `719_ftr_modulu.sql` | — |
 | `tg_ftr_seans_sil_koru` | `720_ftr_seans_sil_koruma.sql` | — |
+| `tg_goz_goruntuleme_kilit` | `975_goz_goruntuleme_kilit.sql` | — |
+| `tg_goz_goruntuleme_olcum_kilit` | `975_goz_goruntuleme_kilit.sql` | — |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
@@ -513,7 +515,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (310 ad, 141 tanesi birden cok dosyada)
+## Gorunumler (311 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -625,6 +627,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_goruntuleme_ozet` | `974_goz_goruntuleme_istem.sql` | — |
 | `v_goz_gozluk_ozet` | `973_gozluk_liste_ozet.sql` | — |
 | `v_goz_muayene_ozet` | `970_goz_muayene_liste_kart.sql` | — |
 | `v_goz_protokol_lookup` | `693_goz_lookup.sql` | — |

@@ -18666,3 +18666,28 @@ Mockup `Ekranlar/Goz/goz_gozluk_recetesi_v2.html` · `goz_gozluk_recete_listesi_
   üstte, "Genel muayene" düğmesi kaldırıldı.
 * Doğrulama: tarayıcıda göz kartı → reçete (hasta dolu) → değer al → Kaydet → göz kartına dönüş; imza (kilit, no,
   e-imza); liste + gösterge + önizleme. Test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test 218 geçti.
+
+## 05.10.2026 — Göz görüntüleme istemi ve liste / kart v2 (974-975)
+
+* Kullanıcı: "aynı lab ve görüntüleme istemleri gibi.. akış doktordan başvuruya.. başvuruda ödeme yapılınca
+  görüntüye.. başvuruya kaydedilmeden görüntü çekilemez" · "üstte görüntü iste butona gerek yok.. ama orada görüntü
+  sonucunu görmek için buton olmalı" · "istem sepete de ekle".
+* Akış: hekim **istem sepetinin "Göz" sekmesinden** ister (tur 6; göz tarafı OU/OD/OS, klinik soru) → kayıt
+  başvuruya bekleyen (`serbest = fn_istem_serbest(...)`, acil / yatan hemen serbest) → banko "Doktor İstemi"nde göz
+  satırları, ücretlendir → başvuru kaydında `fn_basvuru_istem_serbest_uygula` serbest bırakır → teknisyen "Çekildi" →
+  hekim "Değerlendir ve imzala" (bağlı `muayene_istem` tamamlanır). Başvurusuz istem yok; "Görüntüleme İste" kısayolu
+  ve listedeki "Yeni" kaldırıldı. Göz kartında yerine **🖼 Görüntü sonuçları** düğmesi (sayılı).
+* **974** `goz_goruntuleme` + belge_id / serbest / oncelik / istek_hekim_id / klinik_soru / sonuc / oneri;
+  `goz_tetkik_hizmet` (SUT kodlarıyla 11 tetkik eşlendi; eşlemesiz tetkik sepette çıkmaz); serbest bırakma
+  fonksiyonuna göz dalı; `v_goz_goruntuleme_ozet`. **975** tetik kilitleri: ödenmemiş kayda çekim / ölçüm yazılamaz,
+  değerlendirilmiş kayıt ve ölçümleri değişmez.
+* Cihaz servisi: görüntüleme mesajı yalnız aynı hasta + muayene + tetkikin **ödenmiş istemine** yazılır; istem yoksa /
+  ödeme bekliyorsa mesaj kuyrukta bekler (2). Cihaz türü → tetkik kodu `goz.tetkik` listesine uyduruldu (eskisi kaymıştı).
+* Uçlar `GozUclari.Goruntuleme` (tetkik-hizmet, gösterge, önizleme, çekildi, değerlendir, yeniden çekim, iptal);
+  hekimin İstem & Sonuç'unda göz satırları + sonuç paneli; liste: 7 gösterge, tetkik / cihaz / değerlendiren sol panel,
+  önizleme, H / P, ana ölçüm sağ / sol (göz bazlı bayrak), bekleme, uyarı; kart: hasta bandı, Görüntü & ölçümler,
+  Karşılaştırma, Değerlendirme. Göz kartı "Bekleyen istemler" yalnız açık istemleri gösterir.
+* Doğrulama: API ile istem → banko bekleyen → ödeme yokken çekim / ölçüm reddi → ücret satırı + serbest → çekildi →
+  sonuçsuz değerlendirme reddi → değerlendirildi → kilit → İstem & Sonuç'ta göründü; tarayıcıda liste, kart, göz kartı
+  sepeti. Test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test 218 geçti. Banko ucu eski test başvurusunda
+  7 gün kilidine takıldığından ücret satırı SQL ile eklendi.
