@@ -6,6 +6,9 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER, modulAcikMi } from '../sayfalar/listeTanimlari';
 import { modUyar } from '../api/sozlesme';
 import { TEMA_ADI, TEMA_IKON, temaUygula, type Tema } from './tema';
+
+/** Pencerenin sekmeleri - avatar menüsü hangi sekmede açılacağını söylüyor. */
+export type AyarSekmesi = 'hesap' | 'gorunum' | 'guvenlik' | 'bildirim';
 import { tarihSaat } from './bicim';
 import { cihazAdi } from './cihazAdi';
 import { DILLER } from './diller';
@@ -40,7 +43,7 @@ import { profilResmiSil, profilResmiYukle, useProfilResmi } from './profilResmi'
  *    şifreden farklı" kuralı sunucuda yok - düğmesini koymak yalan olurdu.
  *    2 adımlı doğrulama yalnız DURUM olarak (başlıkta) okunur.
  */
-export function KullaniciAyarlari({ ayar, tema, setTema, c }: {
+export function KullaniciAyarlari({ ayar, tema, setTema, c, ilkSekme }: {
   ayar: {
     acik: boolean; kapat(): void; tamam(): Promise<void>;
     seciliDil: number; setSeciliDil(d: number): void;
@@ -52,9 +55,17 @@ export function KullaniciAyarlari({ ayar, tema, setTema, c }: {
   tema: Tema;
   setTema(t: Tema): void;
   c(m: string): string;
+  /**
+   * Pencere hangi sekmede açılsın (avatar menüsü): "Profilim" hesap,
+   * "Parola değiştir" güvenlik sekmesini açıyor. Verilmezse hesap.
+   */
+  ilkSekme?: AyarSekmesi;
 }) {
   const { aksiyonDegeri, kullanici } = useOturum();
-  const [sekme, setSekme] = useState<'hesap' | 'gorunum' | 'guvenlik' | 'bildirim'>('hesap');
+  const [sekme, setSekme] = useState<AyarSekmesi>(ilkSekme ?? 'hesap');
+  // PENCERE HER AÇILIŞTA İSTENEN SEKMEDE: aynı pencere kapatılıp "Parola
+  //   değiştir" ile yeniden açıldığında önceki sekmede kalıyordu.
+  useEffect(() => { if (ayar.acik) setSekme(ilkSekme ?? 'hesap') }, [ayar.acik, ilkSekme]);
   const [h, setH] = useState<HesapBilgisi | null>(null);
   const [hataH, setHataH] = useState('');
 

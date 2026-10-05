@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { DILLER } from '../bilesenler/diller';
-import { KullaniciAyarlari } from '../bilesenler/KullaniciAyarlari';
+import { KullaniciAyarlari, type AyarSekmesi } from '../bilesenler/KullaniciAyarlari';
 import { useProfilResmi } from '../bilesenler/profilResmi';
 import { useSubeLogo } from '../bilesenler/subeLogo';
 import { menuSatirlariKur } from './kabuk/menuAgaci';
@@ -108,6 +108,9 @@ export function Kabuk() {
   //   çok şubeli kullanıcıda tıklayınca şube listesi açılır (değiştirme kalır).
   const subeLogo = useSubeLogo(aktifSube?.logoDokumanId);
   const [subeMenusu, setSubeMenusu] = useState(false);
+  /** Avatar menüsü ayarları hangi sekmede açıyor (Profilim / Parola değiştir). */
+  const [ayarSekmesi, setAyarSekmesi] = useState<AyarSekmesi>('hesap');
+  const ayarlariAc = (sekme: AyarSekmesi) => { setAyarSekmesi(sekme); ayar.setAcik(true) };
   const cokSube = (kullanici?.subeler.length ?? 0) > 1;
   useEffect(() => {
     if (!subeMenusu) return;
@@ -280,7 +283,15 @@ export function Kabuk() {
               en ustte; Kullanici Ayarlari artik menunun icinde. */}
           <KullaniciMenusu ad={kullanici?.ad ?? ''} rolAdi={kullanici?.rolAdi}
                            avatar={profilResmi ? <img src={profilResmi} alt="" /> : basHarfler}
-                           onAyarlar={() => ayar.setAcik(true)} onCikis={() => void cikisYap()} />
+                           aktifSubeAd={aktifSube?.ad} cokSube={cokSube}
+                           onProfil={() => ayarlariAc('hesap')}
+                           onAyarlar={() => ayarlariAc('hesap')}
+                           onParola={() => ayarlariAc('guvenlik')}
+                           // ŞUBE SEÇİM LİSTESİ ÜST ŞERİTTE: şube markası (logo + ad)
+                           //   orada duruyor, ikinci bir liste iki ayrı "aktif şube"
+                           //   göstergesi olurdu.
+                           onSubeDegistir={() => setSubeMenusu(true)}
+                           onCikis={() => void cikisYap()} />
         </div>
       </header>
 
@@ -299,7 +310,7 @@ export function Kabuk() {
           (bilesenler/KullaniciAyarlari.tsx). Kabuk'ta gomulu dururken
           Hesabim/Gorunum/Guvenlik/Bildirim sekmeleri kabugu 200 satir daha
           buyutecekti; pencerenin kendi verisi de var (hesap, oturumlar). */}
-      <KullaniciAyarlari ayar={ayar} tema={tema} setTema={setTema} c={c} />
+      <KullaniciAyarlari ayar={ayar} tema={tema} setTema={setTema} c={c} ilkSekme={ayarSekmesi} />
 
       {/* AI REHBER (447): sag altta, her ekranda. Yol gosterir; kayit
           degistirmez. Yetkisi olmayana hic cizilmez. */}

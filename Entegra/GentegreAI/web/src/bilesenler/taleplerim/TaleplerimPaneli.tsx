@@ -211,8 +211,27 @@ export function BanaGelenlerPaneli() {
  * AVATAR MENÜSÜ (mockup ②): avatar eskiden doğrudan Kullanıcı Ayarları'nı
  * açıyordu; artık önce kişisel kısayollar, ayarlar menünün içinde.
  */
-export function KullaniciMenusu({ ad, rolAdi, avatar, onAyarlar, onCikis }: {
-  ad: string; rolAdi?: string; avatar: React.ReactNode; onAyarlar(): void; onCikis(): void;
+/**
+ * AVATAR MENÜSÜ (mockup `Ekranlar/Taleplerim/taleplerim.html` ②).
+ *
+ * Mockup'ta menü dokuz maddeli: Taleplerim · izin bakiyem · avans/masraf ·
+ * <b>Profilim</b> · kullanıcı ayarlarım · <b>Parola değiştir</b> ·
+ * <b>Şube değiştir</b> · Çıkış. Üç ortadaki madde eksikti; kullanıcı ayarları
+ * penceresi dört sekmeli olduğu için "Profilim" ve "Parola değiştir" o
+ * pencerenin İLGİLİ SEKMESİNİ açar - ikinci bir profil ekranı yapmak aynı
+ * bilgiyi iki yerde tutmak olurdu.
+ *
+ * <b>Şube değiştir yalnız çok şubeli kurulumda görünür</b> ve üst şeritteki
+ * şube menüsünü açar: seçim listesi orada, çünkü şube markası (logo + ad)
+ * zaten orada duruyor - ikinci bir liste iki ayrı "aktif şube" göstergesi
+ * demekti.
+ */
+export function KullaniciMenusu({ ad, rolAdi, avatar, aktifSubeAd, cokSube,
+                                  onProfil, onAyarlar, onParola, onSubeDegistir, onCikis }: {
+  ad: string; rolAdi?: string; avatar: React.ReactNode;
+  aktifSubeAd?: string; cokSube?: boolean;
+  onProfil(): void; onAyarlar(): void; onParola(): void;
+  onSubeDegistir(): void; onCikis(): void;
 }) {
   const oz = useTaleplerim();
   const git = useNavigate();
@@ -241,8 +260,15 @@ export function KullaniciMenusu({ ad, rolAdi, avatar, onAyarlar, onCikis }: {
               💸 {c('Avans / masraf')}<span className="tl-km-sag">{odenecek > 0 ? `${para.format(odenecek)} ${c('ödenecek')}` : '—'}</span></button>
           )}
           <i className="ayr" />
+          <button type="button" onClick={sec(onProfil)}>👤 {c('Profilim')}</button>
           <button type="button" onClick={sec(onAyarlar)}>⚙ {c('Kullanıcı ayarlarım')}</button>
+          <button type="button" onClick={sec(onParola)}>🔑 {c('Parola değiştir')}</button>
           <i className="ayr" />
+          {cokSube && (
+            <button type="button" onClick={sec(onSubeDegistir)}>
+              🏥 {c('Şube değiştir')}
+              {aktifSubeAd && <span className="tl-km-sag">{c(aktifSubeAd, 'kod')}</span>}</button>
+          )}
           <button type="button" className="cikis" onClick={sec(onCikis)}>🚪 {c('Çıkış')}</button>
         </div>
       )}

@@ -19164,3 +19164,27 @@ deseni vardı.
   veritabanına yazılan deneme satırı silindi (`uts_bildirim` yeniden 0 satır). Dev
   hesabının test adresine (`test_mi = true`) çevrilmesi gerekir; o yapılmadan ÜTS
   uçları canlı veriyle denenmemeli.
+
+## 05.10.2026 — Avatar menüsü mockup'taki tam listeye tamamlandı
+
+Kullanıcı: *"sağ üst avatar basılan kullanıcı menüsünü mockup gibi yap.. bazı
+maddeler eksik"*. Mockup `Ekranlar/Taleplerim/taleplerim.html` ② dokuz maddeli;
+üçü yoktu: **Profilim**, **Parola değiştir**, **Şube değiştir**.
+
+* Profilim ve Parola değiştir, kullanıcı ayarları penceresini **ilgili
+  sekmesinde** açıyor (Hesabım / Güvenlik). İkinci bir profil ekranı aynı
+  bilgiyi iki yerde tutmak olurdu; parola değişimi de zaten Güvenlik
+  sekmesinde duruyor. `KullaniciAyarlari` yeni `ilkSekme` prop'u aldı ve
+  pencere **her açılışta** istenen sekmeye dönüyor (eskiden kapatıp yeniden
+  açınca önceki sekmede kalırdı - menüden "Parola değiştir" seçilince yanlış
+  sekme görünecekti).
+* Şube değiştir maddesi üst şeritteki şube menüsünü açıyor: seçim listesi
+  orada, çünkü şube markası (logo + ad) orada duruyor - menü içine ikinci bir
+  liste koymak iki ayrı "aktif şube" göstergesi demekti. Madde **yalnız çok
+  şubeli kurulumda** görünür ve sağında aktif şubenin adı yazar (mockup'ta
+  "Merkez").
+* Doğrulama (tarayıcı): menü artık `Taleplerim 5 · İzin bakiyem 14 gün ·
+  Avans / masraf — · Profilim · Kullanıcı ayarlarım · Parola değiştir ·
+  Şube değiştir Merkez · Çıkış`. Profilim → Hesabım sekmesi, Parola değiştir →
+  Güvenlik sekmesi, Şube değiştir → üst şerit şube listesi (Merkez · Ankara
+  Şube (salt okuma)) açıldı, avatar menüsü kapandı. tsc temiz, vitest 789 geçti.
