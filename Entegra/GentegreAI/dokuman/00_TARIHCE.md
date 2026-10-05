@@ -18761,3 +18761,23 @@ kapatıldı.
   geçti. **Not:** `gentegre_ai_test` veritabanı 940/963 nesnelerini içermiyor (ör.
   `fn_taraf_ad`, `v_personel_durum` yok), bu yüzden DB testleri atlanıyor - 976'dan
   önce de böyleydi, ayrı iş.
+
+### Aynı gün — pano refaktörü (davranış değişmedi)
+
+* `GozUclari.Ozet.cs` tek lambdada dokuz sorgu ve 306 satırdı; her sorgu **kendi
+  metoduna** çıktı (anonim tip yerine `Pano*` kayıtları - JSON adları camelCase
+  olduğu için sözleşme değişmedi). Hangi sorgunun hangi kutuyu beslediği artık
+  metot adından okunuyor.
+* **Dilatasyon eşiği (20 dk) sunucuda tek sabit:** `GozUclari.DilatasyonDk`
+  (uyarı, kalan süre, "hazır" sayımı) + `KaynakKatalogu.Goz.GozDilatasyonDk`
+  (liste kolonu; çekirdek projesi API'ye bağımlı değil). Görünümlerdeki karşılığı
+  yorumda işaretli - eşik değişirse ikisi birlikte değişmeli.
+* `GozUniteKanban.tsx` `bilesenler/` kökündeydi; panonun öteki parçalarıyla
+  birlikte `bilesenler/goz/` altına taşındı.
+* Bakılıp **yapılmayan**: `gozAkisAksiyonlari.ts` 340 satır (kardeş aksiyon
+  dosyaları 395-871), bölünmedi; `Liste.tsx`'teki pano kancaları öteki ekranların
+  (`gorSuzgec`/`gorGostergesi`) deseniyle aynı bırakıldı - tek ekran için ayrı
+  desen açmak okumayı zorlaştırırdı.
+* Doğrulama: dotnet build temiz, tsc temiz, vitest 789/789, dotnet test 218 geçti;
+  `/unite-ozet` yanıtı alan alan karşılaştırıldı ve tarayıcıda pano (şerit, kanban,
+  tablolar, sol panel) yeniden açıldı.

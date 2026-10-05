@@ -29,6 +29,17 @@ public static partial class GozUclari
     /// <summary>Akış hareketi kendi kaydıdır: log satırı ziyaret istasyonuna düşer.</summary>
     private const int LogTabloGozAkis = 953;
 
+    /// <summary>
+    /// DİLATASYON SÜRESİ (dk) — damla bu sürede etki eder. Dört yerde ayrı
+    /// yazılmıştı (uyarı, kalan süre, pano sayacı, hazır sayımı); eşiği
+    /// değiştiren birinin dördünü birden bulması gerekiyordu.
+    ///
+    /// <para>Veritabanı tarafındaki karşılıkları <c>v_goz_unite_akis</c> ve
+    /// <c>v_goz_bekleme_ekrani</c> içindedir (976): eşik değişirse görünümler
+    /// de güncellenmeli, yoksa pano "hazır" derken sunucu "bekliyor" der.</para>
+    /// </summary>
+    internal const int DilatasyonDk = 20;
+
     public static void GozUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/goz").WithTags("Göz").RequireAuthorization();

@@ -65,7 +65,7 @@ import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
 import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
 import { GozHastaPaneli } from '../bilesenler/GozHastaPaneli';
-import { GozUniteKanban } from '../bilesenler/GozUniteKanban';
+import { GozUniteKanban } from '../bilesenler/goz/GozUniteKanban';
 import { GozUniteOzeti } from '../bilesenler/goz/GozUniteOzeti';
 import { GozUniteTablolari } from '../bilesenler/goz/GozUniteTablolari';
 import { GozSemasi } from '../bilesenler/goz/GozSemasi';

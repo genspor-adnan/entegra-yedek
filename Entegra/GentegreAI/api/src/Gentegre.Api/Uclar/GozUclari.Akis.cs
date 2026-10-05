@@ -153,9 +153,9 @@ public static partial class GozUclari
             //   ama söyler.
             string uyari = "";
             if (istek.Istasyon == 3 && mevcut.dilatasyon is DateTime d
-                && d.AddMinutes(20) > DateTime.UtcNow)
+                && d.AddMinutes(DilatasyonDk) > DateTime.UtcNow)
             {
-                var kalan = (int)Math.Ceiling((d.AddMinutes(20) - DateTime.UtcNow).TotalMinutes);
+                var kalan = (int)Math.Ceiling((d.AddMinutes(DilatasyonDk) - DateTime.UtcNow).TotalMinutes);
                 uyari = $"Dilatasyon hazır değil: {kalan} dk kaldı.";
             }
 
@@ -257,7 +257,7 @@ public static partial class GozUclari
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { dilatasyon = istek.Ilac ?? "başlatıldı" }, iptal: iptal);
 
-            return Results.Ok(new { id, hazirDk = 20 });
+            return Results.Ok(new { id, hazirDk = DilatasyonDk });
         });
 
         // ------------------------------------------------------ oda / personel ----

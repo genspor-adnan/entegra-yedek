@@ -17,6 +17,13 @@
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>
+    /// Dilatasyon süresi (dk) — kalan süre kolonu bunu sayıyor. Uç tarafındaki
+    /// karşılığı <c>GozUclari.DilatasyonDk</c>; çekirdek projesi API'ye bağımlı
+    /// olmadığı için değer burada tekrar yazılıyor, ikisi birlikte değişir.
+    /// </summary>
+    private const int GozDilatasyonDk = 20;
+
     /// <summary>OD/OS/OU — her ölçüm ve işlem satırında aynı sözlük.</summary>
     private const string GozTarafIfade =
         "case g.goz when 1 then 'OD' when 2 then 'OS' when 3 then 'OU' else '' end";
@@ -85,7 +92,7 @@ public static partial class KaynakKatalogu
             //   olmadan çağrılırdı.
             new("dilatasyonKalanDk",
                 "case when a.dilatasyon_zamani is null then null "
-                + "else greatest(0, 20 - (extract(epoch from (now() - a.dilatasyon_zamani)) "
+                + $"else greatest(0, {GozDilatasyonDk} - (extract(epoch from (now() - a.dilatasyon_zamani)) "
                 + "                       / 60)::int) end",
                                  "sayi", "Dilatasyon kalan (dk)", Hizalama: "sag",
                                  Genislik: 120, Filtrelenebilir: false, Varsayilan: false),

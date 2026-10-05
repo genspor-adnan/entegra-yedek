@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from '../api/istemci';
-import type { Kosul } from '../api/sozlesme';
-import { GOZ_KANBAN_SUTUNLARI, GOZ_PANO_ESIK } from './goz/gozPanoSabitleri';
+import { api } from '../../api/istemci';
+import type { Kosul } from '../../api/sozlesme';
+import { GOZ_KANBAN_SUTUNLARI, GOZ_PANO_ESIK } from './gozPanoSabitleri';
 
 /**
  * GÖZ ÜNİTESİ KANBANI — mockup `Ekranlar/Goz/goz_unite_panosu.html`.
