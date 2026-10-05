@@ -18691,3 +18691,8 @@ Mockup `Ekranlar/Goz/goz_gozluk_recetesi_v2.html` · `goz_gozluk_recete_listesi_
   sonuçsuz değerlendirme reddi → değerlendirildi → kilit → İstem & Sonuç'ta göründü; tarayıcıda liste, kart, göz kartı
   sepeti. Test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test 218 geçti. Banko ucu eski test başvurusunda
   7 gün kilidine takıldığından ücret satırı SQL ile eklendi.
+* Ek düzeltmeler (aynı gün, kullanıcı): göz kartında görüntü istenmemişse "📷 Görüntü İste" (istem sepetini Göz
+  sekmesinde açar), istenmişse "🖼 Görüntü Sonuçları (n)" (görüntü penceresi) - sayı `/goz/muayene/{id}/kontrol`
+  yanıtındaki `goruntuIstem`. İstem ekranında "Laboratuvar" → "Lab", üç sekme eşit genişlik, ikon üstte. Göz muayene /
+  gözlük reçetesi / görüntüleme kartı başlığında H → "No", P → "Prt"; sürüm rozeti kaldırıldı (genel muayene dahil),
+  yerinde hekim adı rozeti.
