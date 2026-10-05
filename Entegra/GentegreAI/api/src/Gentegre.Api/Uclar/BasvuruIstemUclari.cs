@@ -3,6 +3,7 @@ using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
+using Gentegre.Cekirdek.Katalog;
 
 namespace Gentegre.Api.Uclar;
 
@@ -76,12 +77,9 @@ public static class BasvuruIstemUclari
                 o => (Id: o.GetInt32(0), Oncelik: o.GetInt16(1), Tetkik: o.GetString(2),
                       Kategori: o.GetString(3), Hizmetler: (int[])o[4]), iptal);
 
-            var radHam = await b.ListeAsync("""
+            var radHam = await b.ListeAsync($$"""
                 select i.id, i.oncelik, coalesce(hz.ad, '') as tetkik,
-                       'Radyoloji · ' || case i.modalite when 1 then 'BT' when 2 then 'MR'
-                            when 3 then 'USG' when 4 then 'Röntgen' when 5 then 'Mamografi'
-                            when 6 then 'DEXA' when 7 then 'Anjiyo' when 8 then 'Skopi'
-                            else 'Görüntüleme' end as kategori,
+                       'Radyoloji · ' || {{RadyolojiIfadeleri.ModaliteAdi("i.modalite", "'Görüntüleme'")}} as kategori,
                        case when i.hizmet_id is null then '{}'::int[] else array[i.hizmet_id] end
                   from public.radyoloji_istem i
                   left join public.hizmet hz on hz.id = i.hizmet_id

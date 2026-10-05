@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -631,7 +631,7 @@ public static partial class RadyolojiUclari
         });
 
         SarfVeKontrastEkle(grup);
-        PanoVeCihazEkle(grup);
+        PanoEkle(grup);
         AkisVeKontrolEkle(grup);
         RaporEkle(grup);
         // ŞABLON / PROTOKOL TANIM EKRANLARI (965): özet, sürüm, kullanım.

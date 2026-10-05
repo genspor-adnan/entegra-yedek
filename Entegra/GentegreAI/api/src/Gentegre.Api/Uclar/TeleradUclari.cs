@@ -1,6 +1,7 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Cekirdek.Katalog;
 
 namespace Gentegre.Api.Uclar;
 
@@ -155,11 +156,9 @@ public static partial class TeleradUclari
             // --------------------------------------------- modalite dağılımı ----
             // Modalite ADI çalışma listesindeki ifadeyle AYNI (KaynakKatalogu):
             //   iki ekran aynı tetkike iki ad yazmasın.
-            var modalite = await baglanti.ListeAsync("""
+            var modalite = await baglanti.ListeAsync($"""
                 select i.modalite,
-                       case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG'
-                            when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA'
-                            when 7 then 'Anjiyo' when 8 then 'Skopi' else '—' end as "modaliteAdi",
+                       {RadyolojiIfadeleri.ModaliteAdi("i.modalite", "'—'")} as "modaliteAdi",
                        count(*)                                             as "adet",
                        coalesce(avg(extract(epoch from
                          (i.onay_zamani - i.gelis_zamani)) / 60)

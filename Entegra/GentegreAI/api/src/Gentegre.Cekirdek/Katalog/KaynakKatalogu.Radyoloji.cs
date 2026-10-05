@@ -38,9 +38,7 @@ public static partial class KaynakKatalogu
                 "concat_ws(' · ', nullif(trim(c.marka || ' ' || c.model), ''), nullif('AE ' || c.ae_title, 'AE '))",
                                        "metin", "Marka / model", Varsayilan: false),
             new("modaliteAdi",
-                "case c.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("c.modalite"),
                                        "metin", "Modalite", Hizalama: "orta",
                                        Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
             new("modalite", "c.modalite", "kod", "Modalite Kodu", Varsayilan: false),
@@ -109,9 +107,7 @@ public static partial class KaynakKatalogu
             // SERİ: tip kod listesinden (515), metni seri_tarifi.
             new("seriAdi",    "coalesce(left(p.seri_tarifi, 40), '')", "metin", "Seri", Genislik: 160),
             new("modaliteAdi",
-                "case coalesce(p.modalite, hz.modalite) when 1 then 'BT' when 2 then 'MR' " +
-                "when 3 then 'USG' when 4 then 'Röntgen' when 5 then 'Mamografi' " +
-                "when 6 then 'DEXA' when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("coalesce(p.modalite, hz.modalite)"),
                                              "metin", "Modalite", Hizalama: "orta",
                                              Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
             new("modalite",   "coalesce(p.modalite, hz.modalite)", "kod", "Modalite Kodu", Varsayilan: false),
@@ -195,9 +191,7 @@ public static partial class KaynakKatalogu
                                                                                 Bicim: "dd.MM.yyyy HH:mm",
                                                                                 Genislik: 130),
             new("modaliteAdi",
-                "case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("i.modalite"),
                                                       "metin", "Mod.",          Hizalama: "orta",
                                                                                 Bicim: "rozet", Genislik: 80,
                                                                                 Filtrelenebilir: false),
@@ -289,9 +283,7 @@ public static partial class KaynakKatalogu
                                         "metin", "Sahibi", Varsayilan: false),
             new("sahipId",    "s.sahip_id", "sayi", "Sahip Id", Varsayilan: false),
             new("modaliteAdi",
-                "case s.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("s.modalite"),
                                         "metin", "Modalite", Hizalama: "orta", Bicim: "rozet",
                                                  Genislik: 90, Filtrelenebilir: false),
             new("modalite",   "s.modalite", "kod", "Modalite Kodu", Varsayilan: false),
@@ -345,9 +337,7 @@ public static partial class KaynakKatalogu
             new("id",           "k.istem_id",     "sayi",  "Id", Varsayilan: false),
             new("istemId",      "k.istem_id",     "sayi",  "İstem", Varsayilan: false),
             new("modaliteAdi",
-                "case k.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("k.modalite"),
                                                   "metin", "Mod.", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 80,
                                                   Filtrelenebilir: false),
@@ -407,9 +397,7 @@ public static partial class KaynakKatalogu
             new("istemId",      "ks.istem_id",    "sayi",  "İstem", Varsayilan: false),
             new("gonderimZamani","ks.gonderim_zamani", "tarih", "İstek", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("modaliteAdi",
-                "case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("i.modalite"),
                                                   "metin", "Mod.", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 80,
                                                   Filtrelenebilir: false),
@@ -464,9 +452,7 @@ public static partial class KaynakKatalogu
             new("istemId",      "t.istem_id",     "sayi",  "İstem", Varsayilan: false),
             new("onayTarihi",   "t.onay_tarihi",  "tarih", "Rapor Onayı", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("modaliteAdi",
-                "case t.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
-                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
-                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("t.modalite"),
                                                   "metin", "Mod.", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 80,
                                                   Filtrelenebilir: false),

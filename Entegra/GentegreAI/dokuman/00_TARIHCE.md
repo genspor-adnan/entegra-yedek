@@ -18849,3 +18849,33 @@ Kullanıcı: *"lab kısmını da refaktor yap"*.
   durum/bölüm metinleri yerinde, tarayıcıda lab rapor çıktısı (cinsiyet "Erkek",
   "İdentifikasyon: MALDI-TOF MS") kontrol edildi. Dev veritabanında genetik vaka kaydı
   olmadığı için ACMG sınıf metni ekranda görülemedi - kod yolu aynı sözlükten.
+
+## 05.10.2026 — Radyoloji refaktörü (davranış değişmedi)
+
+Kullanıcı: *"radyoloji kısmını da refaktor yap"*. Modülün uç dosyaları zaten
+parçalıydı (en büyüğü 646 satır), bu yüzden refaktör **bölme değil tekilleştirme**
+oldu.
+
+* **Modalite `case` ifadesi on üç yerde kopyalanmıştı** - altı liste kataloğunda
+  (radyoloji, teleradyoloji, telerad nöbet), üç uç sorgusunda; aralarında yalnız kolon
+  adı ve eşleşmeyen kodun metni değişiyordu (`''` / `'Tümü'` / `'Görüntüleme'` / `'—'`).
+  Dokuzuncu bir modalite (PET, sintigrafi) eklendiğinde on üç yerden on ikisi eski
+  kalır ve aynı tetkik bir ekranda adıyla, ötekinde boş görünürdü.
+  → `Gentegre.Cekirdek/Katalog/RadyolojiIfadeleri.ModaliteAdi(kolon, bosDeger)`.
+  Ham `case` kopyası artık **sıfır**. Raw-SQL sorgularında `$$"""` + `{{…}}` kullanıldı:
+  başvuru istemi sorgusunda `'{}'::int[]` literali var, tek `{}` kaçırılmadan kalsın.
+* **"PanoVeCihaz" dosyası ikiye ayrıldı.** Cihaz uçları iki dosyaya bölünmüştü: cihaz
+  göstergeleri `.Cihaz.cs`'te, cihaz kapatmaları `.PanoVeCihaz.cs`'te - kapatma ucunu
+  arayan kişi cihaz dosyasında bulamıyordu. Kapatma uçları `.Cihaz.cs`'e taşındı, kalan
+  dosya `.Pano.cs` oldu (pano + randevu bekleyen + randevu ver). Beş uç gövdesi taşıma
+  öncesi metinle karşılaştırıldı: fark yok.
+* Bakılıp **yapılmayan**: `RadyolojiRapor.tsx` (549 satır) bölünmedi - tek ekranın
+  rapor yazma akışı ve projedeki kardeş kart dosyaları da bu boyutta; `DURUM_RENK` adı
+  iki dosyada geçiyor ama ikisi de yerel sabit ve farklı tabloya ait (lab KK vs radyoloji
+  istemi), tema sınıfı değil.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789.
+  Modalite adı **her kaynaktan** okundu: radyoloji istem / cihaz / protokol listeleri ve
+  telerad istek listesi (MR · Röntgen · BT · USG), `/radyoloji/pano`, `/cihaz-gosterge`,
+  `/cihaz-kapatma?bas&bit`, `/randevu-bekleyen` 200; başvuru istemi sorgusu DB'de
+  çalıştırılıp "Radyoloji · BT / MR / Röntgen" doğrulandı, nöbet listesinin boş-kod
+  metni (`Tümü`) SQL'de sınandı. Tarayıcıda radyoloji panosu modalite rozetleri yerinde.

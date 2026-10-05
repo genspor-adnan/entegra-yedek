@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// TELERADYOLOJİ NÖBET ÇİZELGESİ ve ATAMA KURALLARI (801) — liste kaynakları.
@@ -89,9 +89,7 @@ public static partial class KaynakKatalogu
             new("kurumAdi", "coalesce(public.fn_taraf_ad(kt.unvan, kt.ad, kt.soyad)::varchar(120), 'Tüm kurumlar')", "metin", "Kurum",
                                               Genislik: 190),
             new("modaliteAdi",
-                "case k.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' "
-                + "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' "
-                + "when 7 then 'Anjiyo' when 8 then 'Skopi' else 'Tümü' end",
+                RadyolojiIfadeleri.ModaliteAdi("k.modalite", "'Tümü'"),
                 "metin", "Modalite", Hizalama: "orta", Genislik: 100, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("oncelikAdi",

@@ -1,10 +1,11 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
 using System.Text.Json;
+using Gentegre.Cekirdek.Katalog;
 
 namespace Gentegre.Api.Uclar;
 
@@ -103,12 +104,10 @@ public static partial class RadyolojiUclari
             baglam.YetkiIste("radyoloji", Islem.Gor);
             await using var baglanti = await veri.AcAsync(iptal);
 
-            var kart = await baglanti.TekAsync("""
+            var kart = await baglanti.TekAsync($"""
                 select i.id, i.accession_no as "accessionNo", i.durum, i.oncelik,
                        i.modalite,
-                       case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG'
-                            when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA'
-                            when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end as "modaliteAdi",
+                       {RadyolojiIfadeleri.ModaliteAdi("i.modalite")} as "modaliteAdi",
                        coalesce(dd.ad,'') as "durumAdi",
                        coalesce(od.ad,'') as "oncelikAdi",
                        i.hasta_id as "hastaId",

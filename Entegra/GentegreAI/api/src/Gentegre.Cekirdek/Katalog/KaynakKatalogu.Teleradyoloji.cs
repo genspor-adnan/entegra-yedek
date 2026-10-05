@@ -84,9 +84,7 @@ public static partial class KaynakKatalogu
             //   yazmasin. Ham kod da gizli kolon olarak durur: suzme kodla
             //   yapilir, ad degisince filtre kaymaz.
             new("modaliteAdi",
-                "case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' "
-                + "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' "
-                + "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("i.modalite"),
                 "metin", "Modalite", Hizalama: "orta", Bicim: "rozet", Genislik: 100,
                 Filtrelenebilir: false),
             new("modalite",    "i.modalite",    "kod",   "Modalite Kodu", Varsayilan: false),
@@ -224,9 +222,7 @@ public static partial class KaynakKatalogu
             new("kurumAdi",  "e.kurum_adi", "metin", "Kurum", Genislik: 200),
             new("erisimNo",  "e.dis_erisim_no", "metin", "Erişim No", Genislik: 140),
             new("modaliteAdi",
-                "case e.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' "
-                + "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' "
-                + "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                RadyolojiIfadeleri.ModaliteAdi("e.modalite"),
                 "metin", "Modalite", Hizalama: "orta", Genislik: 100,
                 Filtrelenebilir: false),
             new("durumAdi",
