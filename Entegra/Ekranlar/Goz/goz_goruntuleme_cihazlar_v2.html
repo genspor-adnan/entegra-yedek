@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Cihazları ve Entegrasyon — Liste Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .uy{font-size:10.5px;color:#b3261e}
+  .nokta{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .n-ok{background:#2e7d46} .n-uy{background:#e0a33a} .n-kr{background:#b3261e} .n-ps{background:#9aa7b4}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .panel{display:none} .panel.on{display:block}
+  /* IOL HESABI: biyometri ölçümü ile formül çıktısı YAN YANA durmalı -
+     hekim "hangi göze hangi mercek" kararını bu iki kolondan veriyor. */
+  .iol{width:100%;border-collapse:collapse;font-size:11.5px}
+  .iol th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2)}
+  .iol td{padding:4px 6px;border-bottom:1px solid #eef2f6}
+  .iol td:first-child{color:var(--muted);width:160px}
+  .iol th.od{color:#2f6db3} .iol th.os{color:#8e44ad}
+  .sec-iol{background:#f1f9f3}
+  .mesaj{font-family:Consolas,monospace;font-size:10.5px;background:#f7f9fc;border:1px solid var(--line2);border-radius:4px;padding:6px 8px;white-space:pre-wrap;color:#44546a}
+  .kal{display:inline-flex;gap:1px} .kal i{width:6px;height:11px;background:#d6dee8;border-radius:1px} .kal i.on{background:#2e7d46}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Göz Cihazları</h1><span class="yol">Göz › Cihazlar ve entegrasyon</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni cihaz</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">🔌 Bağlantıyı sına</span>
+    <span class="btn">📋 Çalışma listesi (MWL)</span>
+    <span class="btn">🔗 Sonucu eşle</span>
+    <span class="btn">🧮 IOL hesabı</span>
+    <span class="btn">🛠 Kalibrasyon kaydı</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>9</b><span>Tanımlı cihaz (7 aktif)</span></div>
+    <div class="k"><b>24</b><span>Bugün çekim</span></div>
+    <div class="k uyari"><b>5</b><span>Sonuç bekleyen (cihazda)</span></div>
+    <div class="k kirmizi"><b>3</b><span>Eşlenmeyen mesaj</span></div>
+    <div class="k kirmizi"><b>1</b><span>Hatalı mesaj (çözümlenemedi)</span></div>
+    <div class="k uyari"><b>2</b><span>Kalibrasyon günü geçmiş</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Cihaz, model, seri no…</span>
+    <span class="cip on">Aktif</span><span class="cip">Pasif</span><span class="cip">Tümü</span>
+    <span class="combo">Bağlantı: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">MWL destekli</span>
+    <span class="cip">Eşlenmeyen var</span>
+    <span class="cip">Kalibrasyon gecikmiş</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Cihaz türü</h6>
+      <div class="dal on">Tümü <i>9</i></div>
+      <div class="dal">OCT <i>2</i></div>
+      <div class="dal">Görme alanı <i>1</i></div>
+      <div class="dal">Biyometri <i>1</i></div>
+      <div class="dal">Topografi / pakimetri <i>2</i></div>
+      <div class="dal">Fundus kamera <i>1</i></div>
+      <div class="dal">Otoref / keratometre <i>1</i></div>
+      <div class="dal">Tonometre <i>1</i></div>
+      <h6 style="margin-top:12px">Bağlantı</h6>
+      <div class="dal">DICOM (MWL + sonuç) <i>3</i></div>
+      <div class="dal">XML / CSV klasörü <i>3</i></div>
+      <div class="dal">PDF klasörü <i>1</i></div>
+      <div class="dal">Elle giriş <i>2</i></div>
+      <h6 style="margin-top:12px">Durum</h6>
+      <div class="dal">Çalışıyor <i>6</i></div>
+      <div class="dal">Uyarı <i>1</i></div>
+      <div class="dal">Bağlantı yok <i>1</i></div>
+      <div class="dal">Pasif <i>1</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Cihaz</th><th>Tür</th><th>Model / seri</th><th>Bağlantı</th><th>MWL</th><th>Son mesaj</th>
+          <th>Bugün çekim</th><th>Eşlenmeyen</th><th>Kalibrasyon</th><th>Durum</th></tr>
+
+        <tr class="sec"><td><b>OCT-1</b><small>OCT / GA odası</small></td>
+          <td>OCT</td><td>Spectralis · S-4412</td>
+          <td><span class="chip c-mavi">DICOM</span><small>192.168.1.40:104</small></td>
+          <td><span class="chip c-ok">✔</span></td>
+          <td>10:45 <small>2 dk önce</small></td>
+          <td><b>9</b></td><td class="sonuk">—</td>
+          <td>12.08.2026</td>
+          <td><span class="nokta n-ok"></span>Çalışıyor</td></tr>
+
+        <tr><td><b>HFA3</b><small>GA odası</small></td>
+          <td>Görme alanı</td><td>Humphrey HFA3 · H-7781</td>
+          <td><span class="chip c-mavi">DICOM + PDF</span></td>
+          <td><span class="chip c-ok">✔</span></td>
+          <td>10:52</td>
+          <td><b>4</b></td><td class="sonuk">—</td>
+          <td>03.09.2026</td>
+          <td><span class="nokta n-ok"></span>Çalışıyor</td></tr>
+
+        <tr><td><b>IOLMaster 700</b><small>ön tetkik</small></td>
+          <td>Biyometri</td><td>Zeiss · Z-2290</td>
+          <td><span class="chip c-gri">XML klasörü</span><small>\\gen-oct\iol\out</small></td>
+          <td><span class="chip c-bek">—</span></td>
+          <td>10:30</td>
+          <td><b>3</b></td><td><span class="chip c-red">2</span></td>
+          <td>22.07.2026</td>
+          <td><span class="nokta n-uy"></span>Uyarı · eşleşme</td></tr>
+
+        <tr><td><b>Pentacam</b><small>refraktif</small></td>
+          <td>Topografi</td><td>Oculus · O-1180</td>
+          <td><span class="chip c-gri">CSV klasörü</span></td>
+          <td><span class="chip c-bek">—</span></td>
+          <td>09:58</td>
+          <td><b>2</b></td><td><span class="chip c-red">1</span></td>
+          <td><span class="uy">18.02.2026 · gecikti</span></td>
+          <td><span class="nokta n-uy"></span>Uyarı · kalibrasyon</td></tr>
+
+        <tr><td><b>Kowa nonmyd</b><small>DR tarama</small></td>
+          <td>Fundus kamera</td><td>Kowa · K-5521</td>
+          <td><span class="chip c-gri">JPG klasörü</span></td>
+          <td><span class="chip c-bek">—</span></td>
+          <td>11:05</td>
+          <td><b>5</b></td><td class="sonuk">—</td>
+          <td>30.06.2026</td>
+          <td><span class="nokta n-ok"></span>Çalışıyor</td></tr>
+
+        <tr><td><b>Topcon KR-1</b><small>ön tetkik</small></td>
+          <td>Otoref / K</td><td>Topcon · T-3310</td>
+          <td><span class="chip c-gri">XML klasörü</span></td>
+          <td><span class="chip c-bek">—</span></td>
+          <td>09:32</td>
+          <td><b>1</b></td><td class="sonuk">—</td>
+          <td>11.08.2026</td>
+          <td><span class="nokta n-ok"></span>Çalışıyor</td></tr>
+
+        <tr><td><b>Icare ic200</b><small>ön tetkik</small></td>
+          <td>Tonometre</td><td>Icare · I-9043</td>
+          <td><span class="chip c-bek">Elle giriş</span></td>
+          <td><span class="chip c-bek">—</span></td>
+          <td class="sonuk">—</td>
+          <td class="sonuk">—</td><td class="sonuk">—</td>
+          <td><span class="uy">05.01.2026 · gecikti</span></td>
+          <td><span class="nokta n-uy"></span>Uyarı · kalibrasyon</td></tr>
+
+        <tr><td><b>OCT-2</b><small>yedek</small></td>
+          <td>OCT</td><td>Topcon Triton · T-8890</td>
+          <td><span class="chip c-mavi">DICOM</span></td>
+          <td><span class="chip c-ok">✔</span></td>
+          <td><span class="uy">02.10.2026 · 3 gün</span></td>
+          <td class="sonuk">—</td><td class="sonuk">—</td>
+          <td>14.05.2026</td>
+          <td><span class="nokta n-kr"></span>Bağlantı yok</td></tr>
+
+        <tr><td class="sonuk"><b>Tomey EM-4000</b><small>pasif</small></td>
+          <td>Endotel</td><td>Tomey · E-2201</td>
+          <td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td>
+          <td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td>
+          <td><span class="nokta n-ps"></span><span class="sonuk">Pasif</span></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 9 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 1 &nbsp; Sonraki ›</span></div>
+
+      <!-- 3b: alt sekmeler -->
+      <div class="sekmeler" style="margin-top:10px">
+        <span class="sek on" data-s="kuyruk">Gelen mesaj kuyruğu <span class="say">4</span></span>
+        <span class="sek" data-s="mwl">Çalışma listesi (MWL) <span class="say">5</span></span>
+        <span class="sek" data-s="iol">IOL hesabı</span>
+      </div>
+
+      <div class="panel on" data-s="kuyruk">
+        <table class="liste">
+          <tr><th>Zaman</th><th>Cihaz</th><th>Biçim</th><th>Hasta / protokol</th><th>Tetkik</th><th>Eşleşme</th><th>Durum</th><th></th></tr>
+          <tr><td>10:45</td><td>OCT-1</td><td>DICOM OPT</td><td>Mehmet Kaya · 2026/20390</td><td>OCT RNFL + GCC</td><td><span class="chip c-ok">protokol</span></td><td><span class="chip c-ok">İşlendi</span></td><td></td></tr>
+          <tr class="sec"><td>10:30</td><td>IOLMaster</td><td>XML</td><td class="sonuk">HASANOZ63 <small>(cihazda elle yazılmış)</small></td><td>Biyometri</td><td><span class="chip c-red">eşleşmedi</span></td><td><span class="chip c-bek">Bekliyor</span></td><td><span class="btn kucuk">🔗 Eşle</span></td></tr>
+          <tr><td>10:12</td><td>Pentacam</td><td>CSV</td><td class="sonuk">— <small>(protokol alanı boş)</small></td><td>Topografi</td><td><span class="chip c-red">eşleşmedi</span></td><td><span class="chip c-bek">Bekliyor</span></td><td><span class="btn kucuk">🔗 Eşle</span></td></tr>
+          <tr><td>09:40</td><td>IOLMaster</td><td>XML</td><td class="sonuk">bozuk kayıt</td><td class="sonuk">—</td><td><span class="chip c-red">çözümlenemedi</span></td><td><span class="chip c-red">Hata</span></td><td><span class="btn kucuk">🔁 Yeniden işle</span></td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:6px">Ham mesaj <b>silinmez</b>, yeniden işlenir: eşleşme düzeltilince ölçümler aynı kayıttan türetilir.</div>
+        <div class="mesaj" style="margin-top:6px">&lt;Measurement patient="HASANOZ63" date="2026-10-05T10:30"&gt;
+  &lt;AL eye="OS"&gt;23.84&lt;/AL&gt; &lt;K1&gt;43.10&lt;/K1&gt; &lt;K2&gt;44.00&lt;/K2&gt; &lt;ACD&gt;3.21&lt;/ACD&gt;
+&lt;/Measurement&gt;</div>
+      </div>
+
+      <div class="panel" data-s="mwl">
+        <table class="liste">
+          <tr><th>Saat</th><th>Hasta / protokol</th><th>Tetkik</th><th>Göz</th><th>İsteyen</th><th>Gönderilen cihaz</th><th>Durum</th></tr>
+          <tr><td>10:45</td><td>Mehmet Kaya · 2026/20390</td><td>OCT RNFL + GCC</td><td>OU</td><td>Dr. Aksoy</td><td>OCT-1</td><td><span class="chip c-ok">Çekildi</span></td></tr>
+          <tr><td>10:52</td><td>Mehmet Kaya · 2026/20390</td><td>Görme alanı 24-2</td><td>OU</td><td>Dr. Aksoy</td><td>HFA3</td><td><span class="chip c-ok">Çekildi</span></td></tr>
+          <tr class="sec"><td>11:20</td><td>Can Öz · 2026/20455</td><td>Topografi + pakimetri</td><td>OU</td><td>Dr. Yalçın</td><td><span class="chip c-bek">— (MWL yok)</span></td><td><span class="chip c-bek">Sırada</span></td></tr>
+          <tr><td>11:35</td><td>Hasan Öz · 2026/20421</td><td>Biyometri (IOL)</td><td>OS</td><td>Dr. Aksoy</td><td><span class="chip c-bek">— (MWL yok)</span></td><td><span class="chip c-bek">Sırada</span></td></tr>
+          <tr><td>11:50</td><td>Fatma Demir · 2026/20415</td><td>Fundus foto</td><td>OU</td><td>Dr. Çelik</td><td>Kowa</td><td><span class="chip c-bek">Gönderildi</span></td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:6px">MWL desteklemeyen cihazda tekniker hastayı cihazda seçer; eşleşme <b>protokol numarası</b> ile kurulur -
+          bu yüzden protokol alanı boş gelen mesaj kuyrukta bekler.</div>
+      </div>
+
+      <div class="panel" data-s="iol">
+        <table class="iol">
+          <tr><th>Biyometri · Hasan Öz · 63 E</th><th class="od">OD · Sağ</th><th class="os">OS · Sol</th></tr>
+          <tr><td>Aksiyel uzunluk (AL)</td><td class="sonuk">23,52 <small>(ameliyatlı)</small></td><td><b>23,84</b></td></tr>
+          <tr><td>Keratometri K1 / K2</td><td class="sonuk">43,0 / 43,8</td><td><b>43,10 / 44,00</b></td></tr>
+          <tr><td>Ön kamara derinliği (ACD)</td><td class="sonuk">3,18</td><td>3,21</td></tr>
+          <tr><td>Lens kalınlığı</td><td class="sonuk">4,42</td><td>4,51</td></tr>
+          <tr><td>Beyaz-beyaz (WTW)</td><td class="sonuk">11,8</td><td>11,9</td></tr>
+          <tr><td>Ölçüm kalitesi</td><td class="sonuk">—</td><td><span class="kal"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> 4/5</td></tr>
+        </table>
+        <table class="iol" style="margin-top:10px">
+          <tr><th>Formül / hedef</th><th>IOL gücü</th><th>Beklenen refraksiyon</th><th>Mercek</th></tr>
+          <tr class="sec-iol"><td><b>Barrett Universal II</b> <small>(hedef −0,25)</small></td><td><b>21,5 D</b></td><td>−0,18</td><td>SN60WF</td></tr>
+          <tr><td>SRK/T</td><td>21,5 D</td><td>−0,31</td><td>SN60WF</td></tr>
+          <tr><td>Haigis</td><td>22,0 D</td><td>−0,52</td><td>SN60WF</td></tr>
+          <tr><td>Hoffer Q</td><td>21,5 D</td><td>−0,22</td><td>SN60WF</td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:6px">Hesap <b>seçilen formül + hedef refraksiyona</b> göre yapılır ve ameliyat planına yazılır
+          (<code>goz_ameliyat.iol_*</code>); hangi formülün kullanıldığı kayıtta durur - sonradan "neden bu mercek" sorusunun cevabı budur.</div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Cihaz</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">OCT-1 · Spectralis</div>
+        <div class="satir"><span>Tür</span>OCT (RNFL · GCC · makula · ön segment)</div>
+        <div class="satir"><span>Seri no</span>S-4412</div>
+        <div class="satir"><span>Yer</span>OCT / GA odası</div>
+        <div class="satir"><span>Durum</span><span class="chip c-ok">Çalışıyor</span></div>
+      </div>
+
+      <div class="bl"><h5>Bağlantı</h5>
+        <div class="satir"><span>Biçim</span>DICOM (MWL + OPT sonuç)</div>
+        <div class="satir"><span>Adres</span>192.168.1.40 : 104</div>
+        <div class="satir"><span>AE başlığı</span>SPECTRALIS1 → GENOTIP</div>
+        <div class="satir"><span>Son sınama</span>05.10.2026 09:12 <span class="chip c-ok">başarılı</span></div>
+        <div style="margin-top:6px"><span class="btn kucuk">🔌 Bağlantıyı sına</span></div>
+      </div>
+
+      <div class="bl"><h5>Son 24 saat</h5>
+        <div class="satir"><span>Gelen mesaj</span>11</div>
+        <div class="satir"><span>Eşlenen</span>11</div>
+        <div class="satir"><span>Eşlenmeyen</span>—</div>
+        <div class="satir"><span>Hata</span>—</div>
+        <div class="satir"><span>Ortalama gecikme</span>38 sn <small>(çekim → ekran)</small></div>
+      </div>
+
+      <div class="bl"><h5>Ölçüm eşlemesi</h5>
+        <div class="satir"><span>RNFL ort.</span><code>rnfl_avg</code></div>
+        <div class="satir"><span>GCC</span><code>gcc_avg</code></div>
+        <div class="satir"><span>CMT</span><code>cmt</code></div>
+        <div class="satir"><span>Sinyal / kalite</span><code>signal_strength</code></div>
+        <div class="bilgi" style="margin-top:6px">Eşlenen alanlar <code>goz_goruntuleme_olcum</code> satırlarına ayrıştırılır - trend ve eşik kontrolü bunlardan hesaplanır.</div>
+      </div>
+
+      <div class="bl"><h5>Kalibrasyon</h5>
+        <div class="satir"><span>Son</span>12.08.2026</div>
+        <div class="satir"><span>Periyot</span>6 ay</div>
+        <div class="satir"><span>Sonraki</span>12.02.2027</div>
+      </div>
+
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">📇 Cihazı aç</span>
+          <span class="btn kucuk">📋 MWL gönder</span>
+          <span class="btn kucuk">🔗 Mesajları eşle</span>
+          <span class="btn kucuk">🛠 Kalibrasyon ekle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> v1 (<code>goz_goruntuleme_cihazlar.html</code>) hem günün çekimlerini hem cihazları hem sonuç panellerini tek sayfada
+gösteriyordu. <b>v2 ikiye ayırır:</b> günün çekimleri ve sonuç değerlendirmesi <b>görüntüleme listesinde</b>
+(<code>goz_goruntuleme_listesi_v2.html</code> - yapıldı), bu ekran <b>cihaz ve entegrasyonun kendisidir</b>: tanım, bağlantı, gelen mesaj kuyruğu,
+çalışma listesi ve IOL hesabı. Tablolar: <code>goz_cihaz</code> + <code>goz_cihaz_mesaj</code> + <code>goz_biyometri</code>
+(+ ameliyat planı için <code>goz_ameliyat</code>).<br>
+
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): tanımlı / aktif cihaz, bugün çekim, <b>sonuç bekleyen</b> (istem gitti, cihazdan dönmedi),
+<b>eşlenmeyen mesaj</b> (ölçüm geldi ama hangi hastaya ait olduğu kurulamadı - kırmızı, çünkü ölçüm ekranda görünmez),
+hatalı mesaj (çözümlenemedi), kalibrasyon günü geçmiş.<br>
+
+<span class="n">2</span><b>Sol:</b> cihaz türü, bağlantı biçimi (DICOM / XML-CSV / PDF klasörü / elle giriş) ve durum. Şerit: aktif-pasif çipleri,
+bağlantı seçicisi, sağda bağımsız işaretler (MWL destekli · Eşlenmeyen var · Kalibrasyon gecikmiş).<br>
+
+<span class="n">3</span><b>Liste:</b> cihaz (altında yer), tür, model / seri, bağlantı (+ adres), MWL desteği, son mesaj zamanı (gecikme kırmızı),
+bugün çekim, eşlenmeyen sayısı, kalibrasyon tarihi, durum (renkli nokta). <b>Alt sekmeler:</b>
+(a) <b>Gelen mesaj kuyruğu</b> - ham mesaj silinmez, eşleşme düzeltilip <b>yeniden işlenir</b>; ham gövde panelde görünür.
+(b) <b>Çalışma listesi (MWL)</b> - istemler hangi cihaza gitti; MWL desteklemeyen cihazda tekniker hastayı cihazda seçer ve eşleşme
+protokol numarasıyla kurulur (protokol alanı boş gelen mesaj bu yüzden kuyrukta bekler).
+(c) <b>IOL hesabı</b> - biyometri ölçümleri OD / OS yan yana, altında formül karşılaştırması (Barrett / SRK-T / Haigis / Hoffer Q), seçilen satır
+ameliyat planına yazılır; <b>hangi formülle hesaplandığı kayıtta kalır</b>.<br>
+
+<span class="n">4</span><b>Sağ:</b> cihaz tanımı, bağlantı ayarları + "bağlantıyı sına", son 24 saat sayıları ve ortalama gecikme
+(çekim → ekran), <b>ölçüm alan eşlemesi</b> (cihaz alanı → <code>goz_goruntuleme_olcum</code> kolonu; trend ve eşik kontrolü bundan hesaplanır),
+kalibrasyon periyodu, hızlı işlem. Sol ve sağ paneller katlanır.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>

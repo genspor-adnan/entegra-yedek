@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Hasta Kartı — Kart Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  /* ÜST ŞERİT: göz hekiminin karta girer girmez görmesi gereken üç şey -
+     kim, neyi var (sistemik + alerji), hangi göz tanısı aktif. */
+  .ust-serit{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px}
+  .ust-serit .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .ust-serit .bil{display:flex;gap:16px;flex-wrap:wrap} .ust-serit .bil b{color:var(--navy)}
+  .krm{color:#b3261e;font-weight:bold}
+  .tani{display:flex;gap:6px;flex-wrap:wrap;padding:7px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe;font-size:11.5px;align-items:center}
+  .ic2{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;padding:10px 14px}
+  .ozet{width:100%;border-collapse:collapse;font-size:11.5px}
+  .ozet th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2)}
+  .ozet td{padding:4px 6px;border-bottom:1px solid #eef2f6}
+  .ozet td:first-child{color:var(--muted);width:150px}
+  .ozet th.od{color:#2f6db3} .ozet th.os{color:#8e44ad}
+  .yuksek{color:#b3261e;font-weight:bold} .dusus{color:#b3261e}
+  .ok-y{color:#b06d0a}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .trend{display:flex;align-items:flex-end;gap:10px;height:120px;padding:6px 4px;border-bottom:1px solid var(--line2)}
+  .trend .c{flex:1;display:flex;gap:3px;align-items:flex-end;height:100%}
+  .trend .c i{flex:1;border-radius:2px 2px 0 0} .trend .c i.s{background:#9db8d9} .trend .c i.l{background:#c7a6d8} .trend .c i.d{background:#e0796f}
+  .trend-et{display:flex;gap:10px;font-size:10px;color:var(--muted);padding:0 4px} .trend-et span{flex:1;text-align:center}
+  .panel{display:none} .panel.on{display:block}
+  .yz{border:1px dashed #b9a6e0;background:#f7f3fd;border-radius:6px;padding:8px 10px;font-size:11.5px;margin-top:8px}
+  .uyar-k{border:1px solid #f3c4bf;background:#fbe9e7;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#8f2a22;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👤 Göz Hasta Kartı <span class="rz">H d1111</span><span class="rz">58 E</span><span class="rz">6 ziyaret</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">👁 Yeni muayene</span>
+    <span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">👓 Gözlük reçetesi</span>
+    <span class="btn">💉 İşlem planla</span>
+    <span class="btn">📈 Trend</span>
+    <span class="btn">🖨 Göz özeti yazdır</span>
+    <span class="sp"></span>
+    <span class="btn">↗ Genel hasta kartı</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="ust-serit">
+    <div><div class="ad">Mehmet Kaya</div><div class="sonuk">12345678901 · 58 E · SGK</div></div>
+    <div class="bil">
+      <span>Sistemik <b>DM tip 2 · HT</b></span>
+      <span>Alerji <b class="krm">yok</b></span>
+      <span>İlaç <b>metformin · ramipril</b></span>
+      <span>Göz damlası <b>latanoprost 1×1 (akşam, iki göz)</b></span>
+      <span>Son ziyaret <b>03.09.2026</b></span>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="tani">
+    <span class="sonuk">Aktif göz tanıları</span>
+    <span class="chip c-red">H40.1 POAG şüphesi · OU</span>
+    <span class="chip c-gri">H52.1 Miyopi · OU</span>
+    <span class="chip c-bek">H25.1 Nükleer katarakt · OD (erken)</span>
+    <span class="sp"></span>
+    <span class="sonuk">Aile / risk: baba glokom · DM 8 yıl · sigara bırakmış</span>
+  </div>
+
+  <div class="sekmeler">
+    <span class="sek on" data-s="ozet">Göz özeti (OD/OS)</span>
+    <span class="sek" data-s="ziyaret">Ziyaretler <span class="say">6</span></span>
+    <span class="sek" data-s="gozluk">Gözlük / lens <span class="say">3</span></span>
+    <span class="sek" data-s="goruntu">Görüntüleme <span class="say">5</span></span>
+    <span class="sek" data-s="takip">Takip <span class="say">1</span></span>
+    <span class="sek" data-s="islem">İşlemler</span>
+    <span class="sek" data-s="trend">Trend</span>
+  </div>
+
+  <div class="ic2">
+    <div>
+      <!-- 3a -->
+      <div class="panel on" data-s="ozet">
+        <table class="ozet">
+          <tr><th>Parametre</th><th class="od">OD · Sağ</th><th class="os">OS · Sol</th><th>Kaynak</th></tr>
+          <tr><td>Son BCVA</td><td>0,8 <small>(pinhole 1,0)</small></td><td>1,0</td><td class="sonuk">03.09.2026 muayene</td></tr>
+          <tr><td>Son refraksiyon</td><td>−2,25 / −0,50 × 90 · add +2,00</td><td>−2,00 / −0,75 × 85 · add +2,00</td><td class="sonuk">otoref + manifest</td></tr>
+          <tr><td>GİB (son / en yüksek)</td><td><span class="yuksek">26</span> mmHg · maks 28 <small>(12.03.25)</small></td><td><span class="yuksek">24</span> mmHg · maks 25</td><td class="sonuk">tonometri</td></tr>
+          <tr><td>Pakimetri (CCT)</td><td>532 µm</td><td>528 µm</td><td class="sonuk">12.03.2025</td></tr>
+          <tr><td>C/D oranı</td><td>0,6 <small>(vertikal 0,65)</small></td><td>0,5</td><td class="sonuk">fundus</td></tr>
+          <tr><td>RNFL ort. (OCT)</td><td><span class="dusus">78 µm · inferior incelme</span></td><td>86 µm <small>normal sınırda</small></td><td class="sonuk">03.09.2026 OCT</td></tr>
+          <tr><td>Görme alanı (24-2)</td><td><span class="dusus">MD −3,2 dB · PSD 3,1 · üst arkuat</span></td><td>MD −1,1 dB · PSD 1,8 · normal</td><td class="sonuk">03.09.2026 GA</td></tr>
+          <tr><td>Gonyoskopi</td><td>Açık (Shaffer 3-4) · pigment +</td><td>Açık (3-4)</td><td class="sonuk">12.03.2025</td></tr>
+          <tr><td>Lens</td><td>Nükleer skleroz NO2 NC2 <small>(LOCS III)</small></td><td>Şeffaf / NO1</td><td class="sonuk">ön segment</td></tr>
+          <tr><td>Makula (OCT)</td><td>Normal · CMT 262 µm</td><td>Normal · CMT 258 µm</td><td class="sonuk">12.03.2025</td></tr>
+          <tr><td>Retina periferi</td><td>DR yok</td><td>DR yok</td><td class="sonuk">fundus</td></tr>
+          <tr><td>Aktif tedavi</td><td>Latanoprost 1×1 <small>(12.03.25'ten beri)</small></td><td>Latanoprost 1×1</td><td class="sonuk">takip planı</td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:8px">Her satır <b>son onaylı</b> muayene / görüntülemeden türetilir (<code>goz_hasta_ozet</code>); taslak kayıt özete girmez.
+          Boş hücre "ölçülmedi" demektir - "normal" demek değildir.</div>
+      </div>
+
+      <!-- 3b -->
+      <div class="panel" data-s="ziyaret">
+        <table class="liste">
+          <tr><th>Tarih</th><th>Hekim</th><th>Neden</th><th>BCVA <small>sağ / sol</small></th><th>GİB <small>sağ / sol</small></th><th>Tanı</th><th>Karar</th><th></th></tr>
+          <tr class="sec"><td>03.09.2026</td><td>Dr. Aksoy</td><td>Glokom takip · 6 ay</td><td>0,8 / 1,0</td><td><span class="yuksek">26 / 24</span></td><td>H40.1 · H25.1</td><td>GA + OCT · ilaç değişimi değerlendirilecek</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+          <tr><td>12.03.2026</td><td>Dr. Aksoy</td><td>Glokom takip</td><td>0,8 / 1,0</td><td>19 / 18</td><td>H40.1</td><td>Latanoprost devam · 6 ay</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+          <tr><td>10.09.2025</td><td>Dr. Aksoy</td><td>Glokom takip</td><td>0,9 / 1,0</td><td>20 / 19</td><td>H40.1</td><td>GA stabil</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+          <tr><td>12.03.2025</td><td>Dr. Aksoy</td><td>İlk başvuru · bulanık görme</td><td>0,9 / 1,0</td><td><span class="yuksek">28 / 25</span></td><td>H40.1 · H52.1</td><td>Latanoprost başlandı · gözlük · GA + OCT bazal</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+          <tr><td>12.03.2025</td><td class="sonuk">Tekn. Z. Ak</td><td>Ön tetkik</td><td>—</td><td>28 / 25</td><td>—</td><td class="sonuk">otoref · pakimetri</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+          <tr><td>14.02.2024</td><td>Dr. Yalçın</td><td>Gözlük kontrolü</td><td>1,0 / 1,0</td><td>18 / 18</td><td>H52.1</td><td>Gözlük yenilendi</td><td><span class="btn kucuk">📂 Aç</span></td></tr>
+        </table>
+      </div>
+
+      <!-- 3c -->
+      <div class="panel" data-s="gozluk">
+        <table class="liste">
+          <tr><th>Tarih</th><th>Tür</th><th>OD <small>sph / cyl × aks</small></th><th>OS <small>sph / cyl × aks</small></th><th>Add</th><th>PD</th><th>Cam / lens</th><th>Hekim</th><th>Durum</th></tr>
+          <tr class="sec"><td>12.03.2025</td><td><span class="chip c-gri">Progresif</span></td><td>−2,25 / −0,50 × 90</td><td>−2,00 / −0,75 × 85</td><td>+2,00</td><td>64 <small>(32/32)</small></td><td>Organik 1.6 · AR · mavi filtre</td><td>Dr. Aksoy</td><td><span class="chip c-ok">Aktif · teslim edildi</span></td></tr>
+          <tr><td>14.02.2024</td><td><span class="chip c-gri">Uzak</span></td><td>−2,00 / −0,50 × 90</td><td>−1,75 / −0,75 × 85</td><td>—</td><td>64</td><td>Organik 1.5</td><td>Dr. Yalçın</td><td><span class="chip c-bek">Eski</span></td></tr>
+          <tr><td>2019</td><td><span class="chip c-bek">Dış reçete</span></td><td>−1,75 / −0,50 × 90</td><td>−1,50 / −0,50 × 90</td><td>—</td><td>—</td><td class="sonuk">hasta beyanı</td><td class="sonuk">—</td><td><span class="chip c-bek">Eski</span></td></tr>
+        </table>
+        <div class="bilgi" style="margin-top:8px">Dış reçete <b>hasta beyanıdır</b>, ayrı rozetle durur: trend hesabına ve SGK hak kontrolüne girmez.</div>
+      </div>
+
+      <!-- 3d -->
+      <div class="panel" data-s="goruntu">
+        <table class="liste">
+          <tr><th>Tarih</th><th>Tetkik</th><th>Göz</th><th>Cihaz</th><th>Ana ölçümler</th><th>Kalite</th><th>Görüntü</th><th>Değerlendirme</th></tr>
+          <tr class="sec"><td>03.09.2026</td><td>OCT RNFL + GCC</td><td>OU</td><td>Spectralis</td><td>RNFL OD <span class="dusus">78 (inf 61 ↓)</span> · OS 86 · GCC OD 74</td><td>28/40</td><td><span class="chip c-bek">DICOM bekliyor</span></td><td><span class="chip c-ok">Değerlendirildi</span></td></tr>
+          <tr><td>03.09.2026</td><td>Görme alanı 24-2 SITA</td><td>OU</td><td>HFA3</td><td>OD MD −3,2 PSD 3,1 <small>GHT dışı</small> · OS MD −1,1</td><td>güvenilir</td><td><span class="chip c-bek">PDF bekliyor</span></td><td><span class="chip c-ok">Değerlendirildi</span></td></tr>
+          <tr><td>12.03.2026</td><td>OCT RNFL</td><td>OU</td><td>Spectralis</td><td>OD 82 · OS 88</td><td>31/40</td><td>🖼 ✔</td><td><span class="chip c-ok">Değerlendirildi</span></td></tr>
+          <tr><td>12.03.2025</td><td>Görme alanı 24-2 (bazal)</td><td>OU</td><td>HFA3</td><td>OD MD −1,8 · OS −0,6</td><td>güvenilir</td><td>📄 ✔</td><td><span class="chip c-ok">Değerlendirildi</span></td></tr>
+          <tr><td>12.03.2025</td><td>Fundus foto + OCT makula</td><td>OU</td><td>Kowa / Spectralis</td><td>CMT 262 / 258 · DR yok</td><td>—</td><td>🖼 ✔</td><td><span class="chip c-ok">Değerlendirildi</span></td></tr>
+        </table>
+      </div>
+
+      <!-- 3e -->
+      <div class="panel" data-s="takip">
+        <div class="kart"><h6>Glokom takip planı <span class="sonuk">goz_hastalik_takip · POAG şüphesi</span></h6>
+          <div class="sat"><span>Hedef GİB</span><b>≤ 18 mmHg</b> <span class="sonuk">(bazal 28 → %30 düşüş)</span></div>
+          <div class="sat"><span>Durum</span><b class="krm">Hedef dışı · progresyon şüphesi</b></div>
+          <div class="sat"><span>Tedavi</span>Latanoprost 1×1 · 18 ay · uyum: iyi (beyan)</div>
+          <div class="sat"><span>Periyot</span>GİB 3 ay · GA 6 ay · OCT 6 ay · gonyoskopi yıllık</div>
+          <div class="sat"><span>Sonraki kontrol</span><b>03.12.2026</b> <span class="chip c-bek">GİB</span></div>
+        </div>
+        <div class="kart"><h6>Protokolün istediği ama yapılmayanlar</h6>
+          <div class="sat"><span>Gonyoskopi</span><span class="ok-y">18 ay önce · yıllık olmalı</span></div>
+          <div class="sat"><span>Pakimetri</span><span class="sonuk">12.03.2025 · bazal yeterli</span></div>
+        </div>
+        <div class="yz">🤖 <b>Progresyon analizi:</b> RNFL eğimi OD <b>−4,1 µm/yıl</b> (OS −1,2), GA olay analizi üst arkuat defektte derinleşme.
+          Yapısal-fonksiyonel korelasyon (+). <span class="sonuk">Öneridir, hekim karar verir.</span></div>
+      </div>
+
+      <!-- 3f -->
+      <div class="panel" data-s="islem">
+        <table class="liste">
+          <tr><th>Tarih</th><th>Tür</th><th>Göz</th><th>İşlem</th><th>Hekim</th><th>Sonuç / not</th><th>Durum</th></tr>
+          <tr><td colspan="7" class="sonuk" style="text-align:center;padding:14px">Uygulanmış işlem kaydı yok.</td></tr>
+        </table>
+        <div class="kart" style="margin-top:10px"><h6>Planlanan</h6>
+          <div class="sat"><span>SLT (lazer trabeküloplasti) OD</span><span class="chip c-bek">03.09.2026 kararı bekliyor</span></div>
+        </div>
+      </div>
+
+      <!-- 3g -->
+      <div class="panel" data-s="trend">
+        <div class="kart"><h6>GİB (mmHg) · RNFL (µm) · MD (dB) <span class="sonuk">son 4 ölçüm</span></h6>
+          <div class="trend">
+            <div class="c"><i class="s" style="height:93%"></i><i class="l" style="height:83%"></i><i class="d" style="height:88%"></i></div>
+            <div class="c"><i class="s" style="height:66%"></i><i class="l" style="height:63%"></i><i class="d" style="height:86%"></i></div>
+            <div class="c"><i class="s" style="height:63%"></i><i class="l" style="height:60%"></i><i class="d" style="height:82%"></i></div>
+            <div class="c"><i class="s" style="height:86%"></i><i class="l" style="height:80%"></i><i class="d" style="height:78%"></i></div>
+          </div>
+          <div class="trend-et"><span>12.03.2025</span><span>10.09.2025</span><span>12.03.2026</span><span>03.09.2026</span></div>
+          <div class="sonuk" style="margin-top:4px">■ GİB OD &nbsp; ■ GİB OS &nbsp; ■ RNFL OD</div>
+        </div>
+        <table class="ozet">
+          <tr><th>Tarih</th><th class="od">GİB OD</th><th class="os">GİB OS</th><th class="od">RNFL OD</th><th class="od">MD OD</th><th class="od">C/D OD</th></tr>
+          <tr><td>12.03.2025</td><td><span class="yuksek">28</span></td><td><span class="yuksek">25</span></td><td>88</td><td>−1,8</td><td>0,5</td></tr>
+          <tr><td>10.09.2025</td><td>20</td><td>19</td><td>86</td><td>−2,0</td><td>0,5</td></tr>
+          <tr><td>12.03.2026</td><td>19</td><td>18</td><td>82</td><td class="sonuk">—</td><td>0,55</td></tr>
+          <tr><td>03.09.2026</td><td><span class="yuksek">26</span></td><td><span class="yuksek">24</span></td><td><span class="dusus">78</span></td><td><span class="dusus">−3,2</span></td><td>0,6</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div>
+      <div class="uyar-k">⚠ <b>Hedef GİB aşıldı</b> (26/24 · hedef ≤ 18) ve RNFL incelmesi sürüyor - tedavi değişimi / SLT değerlendirilmeli.</div>
+      <div class="kart"><h6>Son ziyaret <span class="sonuk">03.09.2026</span></h6>
+        <div class="sat"><span>Hekim</span>Dr. Aksoy</div>
+        <div class="sat"><span>Neden</span>Glokom takip · 6 ay</div>
+        <div class="sat"><span>Karar</span>GA + OCT · ilaç değişimi</div>
+        <div class="sat"><span>Kontrol</span>03.12.2026</div>
+      </div>
+      <div class="kart"><h6>Sayılar</h6>
+        <div class="sat"><span>Ziyaret</span><b>6</b></div>
+        <div class="sat"><span>Gözlük reçetesi</span><b>3</b> <span class="sonuk">(1 dış)</span></div>
+        <div class="sat"><span>Görüntüleme</span><b>5</b></div>
+        <div class="sat"><span>Takip protokolü</span><b>1</b> <span class="chip c-red">hedef dışı</span></div>
+        <div class="sat"><span>İşlem</span><b>—</b></div>
+      </div>
+      <div class="kart"><h6>Hızlı işlem</h6>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">👁 Yeni muayene</span>
+          <span class="btn kucuk">📊 Karşılaştır</span>
+          <span class="btn kucuk">💉 SLT planla</span>
+          <span class="btn kucuk">🖼 OCT iste</span>
+          <span class="btn kucuk">🖨 Özet yazdır</span>
+        </div>
+      </div>
+      <div class="kart"><h6>Genel tıbbi özet</h6>
+        <div class="sonuk">Alerji · kronik hastalık · ilaç listesi ortak <code>hasta_*</code> tablolarından gelir; bu kart yalnız <b>göz katmanıdır</b>.</div>
+        <div style="margin-top:6px"><span class="btn kucuk">↗ Genel hasta kartını aç</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> v1 (<code>goz_hasta_karti.html</code>) bölümleri sayıyordu; v2 <b>uygulanabilir kart düzenini</b> tanımlar.
+Kaynak: <code>taraf</code> + <code>goz_hasta_ozet</code> (materyalize özet) + <code>goz_muayene</code> / <code>goz_gozluk_recetesi</code> /
+<code>goz_goruntuleme</code> / <code>goz_hastalik_takip</code> / <code>goz_islem</code>. <b>Bu kart hiçbir değeri kendi tutmaz</b> - hepsi
+ilgili kayıttan türetilir, düzenleme ilgili kartta yapılır (listedeki 📂 Aç).<br>
+
+<span class="n">1</span><b>Üst şerit</b> her sekmede sabit: kimlik, sistemik hastalık, <b>alerji</b> (kırmızı), kullandığı ilaçlar ve <b>göz damlaları</b>
+(glokomda uyum sorusunun cevabı burada), son ziyaret tarihi.<br>
+
+<span class="n">2</span><b>Aktif göz tanıları</b> ayrı şeritte, ICD-H kodlarıyla ve göz bilgisiyle (OD/OS/OU); yanında aile / risk öyküsü.<br>
+
+<span class="n">3</span><b>Sekmeler:</b> (a) <b>Göz özeti OD/OS</b> - tek tablo, her satırın kaynağı ve tarihi yazar; boş hücre "ölçülmedi" demektir,
+"normal" değil. (b) <b>Ziyaretler</b> - BCVA / GİB / tanı / karar, satırdan muayene kartı açılır. (c) <b>Gözlük / lens</b> - dış reçete
+ayrı rozetle (hasta beyanı; trende ve SGK hak kontrolüne girmez). (d) <b>Görüntüleme</b> - ana ölçümler, kalite ve değerlendirme durumu.
+(e) <b>Takip</b> - hedef GİB, durum, periyotlar, <b>protokolün istediği ama yapılmayanlar</b> ve YZ progresyon analizi (öneri; hekim karar verir).
+(f) <b>İşlemler</b> - uygulanan + planlanan. (g) <b>Trend</b> - GİB / RNFL / MD çubukları + sayı tablosu.<br>
+
+<span class="n">4</span><b>Sağ sütun:</b> en üstte <b>tek bir kırmızı uyarı kutusu</b> (hedef GİB aşıldı + progresyon gibi karar gerektiren durum),
+son ziyaret özeti, sayılar (ziyaret / reçete / görüntüleme / takip / işlem), hızlı işlem ve genel hasta kartına geçiş.
+Kart <b>salt okuma</b> açılır: buradan veri değiştirilmez, ilgili kayda gidilir.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>

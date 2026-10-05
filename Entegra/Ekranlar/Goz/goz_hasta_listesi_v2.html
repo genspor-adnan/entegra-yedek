@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Hasta Listesi (Ünite Akışı) — Liste Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .od{display:grid;grid-template-columns:22px 1fr;gap:1px 4px;font-size:11px;white-space:nowrap}
+  .od i{font-style:normal;color:var(--muted);font-size:10px}
+  .yuksek{color:#b3261e;font-weight:bold}
+  .hasta{min-width:150px} .hasta b{display:block}
+  .uy{font-size:10.5px;color:#b3261e}
+  .bek{font-weight:bold} .bek.g{color:#b06d0a} .bek.kir{color:#b3261e}
+  /* İSTASYON ZAMAN ÇİZGİSİ (sağ panel): hasta bir ziyarette birden çok
+     istasyondan geçiyor - "nerede ne kadar durdu" tek bakışta okunmalı. */
+  .ist{display:grid;gap:2px}
+  .ist div{display:flex;gap:6px;align-items:center;padding:3px 0 3px 10px;border-left:2px solid #d6dee8;margin-left:5px;position:relative;font-size:11.5px}
+  .ist div:before{content:"";position:absolute;left:-6px;width:10px;height:10px;border-radius:50%;background:#d6dee8}
+  .ist div.ok{border-color:#2e7d46} .ist div.ok:before{background:#2e7d46}
+  .ist div.su{border-color:#e0a33a} .ist div.su:before{background:#e0a33a}
+  .ist small{margin-left:auto;color:var(--muted)}
+  .sayac{display:inline-block;padding:1px 8px;border-radius:10px;background:#fdf6e3;border:1px solid #f2ddbf;color:#8a6218;font-size:10.5px;font-weight:bold}
+  .od2{display:grid;grid-template-columns:96px 1fr 1fr;gap:3px 8px;font-size:11.5px}
+  .od2 .b{color:var(--muted);font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Göz Hasta Listesi</h1><span class="yol">Göz › Hasta Listesi (ünite akışı)</span>
+    <span class="sp"></span>
+    <span class="btn primary">📢 Sıradakini çağır</span>
+    <span class="btn">👁 Detaylı muayene</span>
+    <span class="btn">👤 Göz hasta kartı</span>
+    <span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">👓 Gözlük reçetesi</span>
+    <span class="btn">🪑 Oda ata</span>
+    <span class="btn">📊 Ünite panosu</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>34</b><span>Bugün hasta</span></div>
+    <div class="k"><b>6</b><span>Ön tetkik bekleyen</span></div>
+    <div class="k"><b>9</b><span>Muayene bekleyen</span></div>
+    <div class="k uyari"><b>5</b><span>Dilatasyon süresi doldu (çağrılmadı)</span></div>
+    <div class="k kirmizi"><b>3</b><span>30 dk+ bekleyen</span></div>
+    <div class="k"><b>3</b><span>Karar / işlem bekleyen</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, protokol, H / P no…</span>
+    <span class="cip on">Bugün</span><span class="cip">Açık ziyaretler</span><span class="cip">Tamamlanan</span><span class="cip">Tümü</span>
+    <span class="combo">Hekim: Tümü</span>
+    <span class="combo">Oda: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">Dilate</span>
+    <span class="cip">Acil</span>
+    <span class="cip">Postop kontrol</span>
+    <span class="cip">Çocuk (&lt; 18)</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>İstasyon</h6>
+      <div class="dal on">Tümü <i>34</i></div>
+      <div class="dal">1 · Kabul / bekleme <i>5</i></div>
+      <div class="dal">2 · Ön tetkik (tekniker) <i>6</i></div>
+      <div class="dal">3 · Hekim muayenesi <i>9</i></div>
+      <div class="dal">4 · Görüntüleme / test <i>4</i></div>
+      <div class="dal">5 · Karar / işlem <i>3</i></div>
+      <div class="dal">6 · Tamamlandı <i>12</i></div>
+      <h6 style="margin-top:12px">Hekim</h6>
+      <div class="dal">Dr. Elif Aksoy <i>13</i></div>
+      <div class="dal">Dr. Murat Yalçın <i>11</i></div>
+      <div class="dal">Dr. Zeynep Çelik (retina) <i>8</i></div>
+      <div class="dal alt">Tekn. Z. Ak <i>6</i></div>
+      <h6 style="margin-top:12px">Oda / birim</h6>
+      <div class="dal">Oda 1 <i>9</i></div>
+      <div class="dal">Oda 2 <i>7</i></div>
+      <div class="dal">Ön tetkik <i>6</i></div>
+      <div class="dal">OCT / GA odası <i>4</i></div>
+      <div class="dal">Enjeksiyon odası <i>2</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Sıra</th><th>Hasta</th><th>Geliş nedeni</th><th>Otoref <small>sağ / sol</small></th><th>GİB <small>sağ / sol</small></th>
+          <th>Dilate</th><th>Görüntüleme</th><th>Hekim</th><th>İstasyon</th><th>Bekleme</th><th>Uyarı</th></tr>
+        <tr class="sec"><td><b>14</b><small>Prot. 2026/20390</small></td>
+          <td class="hasta"><b>Mehmet Kaya</b><small>58 E · H d1111</small></td>
+          <td>Glokom şüphesi · aile öyküsü</td>
+          <td><div class="od"><i>S</i>−2,25 / −0,50<i>L</i>−2,00 / −0,75</div></td>
+          <td><div class="od"><i>S</i><span class="yuksek">26</span><i>L</i><span class="yuksek">24</span></div></td>
+          <td>—</td>
+          <td><span class="chip c-bek">GA + OCT sırada</span></td>
+          <td>Dr. Elif Aksoy</td>
+          <td><span class="chip c-mavi">Görüntüleme</span></td>
+          <td><span class="bek g">18 dk</span></td>
+          <td><span class="uy">⚠ İki göz GİB &gt; 21</span><br><small>DM · HT</small></td></tr>
+
+        <tr><td><b>15</b><small>Prot. 2026/20408</small></td>
+          <td class="hasta"><b>Ali Vural</b><small>71 E · H d0451</small></td>
+          <td>Yaş tip AMD takip · OD</td>
+          <td><div class="od"><i>S</i>+1,00<i>L</i>+1,25</div></td>
+          <td><div class="od"><i>S</i>14<i>L</i>15</div></td>
+          <td><span class="chip c-ok">✔ 09:55</span></td>
+          <td><span class="chip c-ok">OCT ✔ FAF ✔</span></td>
+          <td>Dr. Zeynep Çelik</td>
+          <td><span class="chip c-mor">Karar</span></td>
+          <td>—</td>
+          <td><span class="chip c-bek">anti-VEGF 4. doz</span><br><small>antikoagülan</small></td></tr>
+
+        <tr><td><b>16</b><small>Prot. 2026/20421</small></td>
+          <td class="hasta"><b>Hasan Öz</b><small>63 E · H d0988</small></td>
+          <td>OD katarakt postop 1. hafta · OS plan</td>
+          <td><div class="od"><i>S</i>+0,50<i>L</i>−1,75</div></td>
+          <td><div class="od"><i>S</i>16<i>L</i>17</div></td>
+          <td>—</td>
+          <td><span class="chip c-bek">Biyometri OS</span></td>
+          <td>Dr. Elif Aksoy</td>
+          <td><span class="chip c-mavi">Görüntüleme</span></td>
+          <td><span class="bek">9 dk</span></td>
+          <td><small>postop sorunsuz</small></td></tr>
+
+        <tr><td><b>17</b><small>Prot. 2026/20415</small></td>
+          <td class="hasta"><b>Fatma Demir</b><small>63 K · H d1310</small></td>
+          <td>DM · yıllık DR taraması</td>
+          <td><div class="od"><i>S</i>−0,75<i>L</i>−0,50</div></td>
+          <td><div class="od"><i>S</i>—<i>L</i>—</div></td>
+          <td><span class="sayac">⏱ 08 dk</span></td>
+          <td><span class="chip c-bek">Fundus foto plan</span></td>
+          <td>Dr. Zeynep Çelik</td>
+          <td><span class="chip c-gri">Ön tetkik</span></td>
+          <td><span class="bek">6 dk</span></td>
+          <td><small>DM 12 yıl · HbA1c 8,1</small></td></tr>
+
+        <tr><td><b>18</b><small>Prot. 2026/20430</small></td>
+          <td class="hasta"><b>Kerem Us</b><small>45 E · H d1422</small></td>
+          <td>Refraktif cerrahi ön değerlendirme</td>
+          <td><div class="od"><i>S</i>−4,25 / −1,00<i>L</i>−4,00 / −0,75</div></td>
+          <td><div class="od"><i>S</i>15<i>L</i>14</div></td>
+          <td>—</td>
+          <td><span class="chip c-bek">Topografi + pakimetri</span></td>
+          <td>Dr. Murat Yalçın</td>
+          <td><span class="chip c-gri">Ön tetkik</span></td>
+          <td><span class="bek kir">31 dk</span></td>
+          <td><span class="uy">⚠ 30 dk+ bekliyor</span></td></tr>
+
+        <tr><td><b>19</b><small>Prot. 2026/20440</small></td>
+          <td class="hasta"><b>Selin Ar</b><small>27 K · H d1501</small></td>
+          <td>Kırmızı göz · konjonktivit?</td>
+          <td><div class="od"><i>S</i>1,0<i>L</i>1,0</div></td>
+          <td><div class="od"><i>S</i>13<i>L</i>13</div></td>
+          <td>—</td><td>—</td>
+          <td>Dr. Elif Aksoy</td>
+          <td><span class="chip c-ok">Muayenede · Oda 1</span></td>
+          <td><span class="bek">8 dk</span></td>
+          <td><span class="chip c-red">⚡ Acil</span></td></tr>
+
+        <tr><td><b>20</b><small>Prot. 2026/20447</small></td>
+          <td class="hasta"><b>Ayşe Yılmaz</b><small>39 K · H d1620</small></td>
+          <td>Rutin muayene · randevulu</td>
+          <td><div class="od"><i>S</i>—<i>L</i>—</div></td>
+          <td><div class="od"><i>S</i>—<i>L</i>—</div></td>
+          <td>—</td><td>—</td>
+          <td>Dr. Elif Aksoy</td>
+          <td><span class="chip c-gri">Kabul</span></td>
+          <td><span class="bek">2 dk</span></td>
+          <td><small>09:40 randevu ✔ · SGK</small></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 34 · seçili 1 · ort. toplam süre 68 dk</span><span>‹ Önceki &nbsp; 1 / 2 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Hasta</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Mehmet Kaya · 58 E</div>
+        <div class="satir"><span>Protokol</span>2026/20390 · H d1111</div>
+        <div class="satir"><span>Sistemik</span>DM tip 2 · hipertansiyon</div>
+        <div class="satir"><span>Alerji</span>bilinen yok</div>
+        <div class="satir"><span>Takip</span>Glokom (POAG şüphesi) · hedef GİB ≤ 18</div>
+      </div>
+
+      <div class="bl"><h5>Bu ziyaretin akışı</h5>
+        <div class="ist">
+          <div class="ok">Kabul <small>09:28 · 4 dk</small></div>
+          <div class="ok">Ön tetkik · Tekn. Z. Ak <small>09:32 · 12 dk</small></div>
+          <div class="ok">Hekim muayenesi · Oda 1 <small>09:44 · 16 dk</small></div>
+          <div class="su">Görüntüleme <small>10:02 · 18 dk bekliyor</small></div>
+          <div>Karar / işlem <small>—</small></div>
+        </div>
+      </div>
+
+      <div class="bl"><h5>Ön tetkik (cihazdan)</h5>
+        <div class="od2">
+          <span></span><span class="b">Sağ</span><span class="b">Sol</span>
+          <span class="b">Otoref</span><span>−2,25 / −0,50 × 90</span><span>−2,00 / −0,75 × 85</span>
+          <span class="b">GİB</span><span class="yuksek">26</span><span class="yuksek">24</span>
+          <span class="b">Pakimetri</span><span>532 µm</span><span>528 µm</span>
+          <span class="b">Dilatasyon</span><span>—</span><span>—</span>
+        </div>
+        <div class="satir" style="margin-top:4px"><span>Kaynak</span>Topcon KR-1 · Icare ic200 (otomatik)</div>
+      </div>
+
+      <div class="bl"><h5>Bekleyen iş</h5>
+        <div class="satir"><span>Görüntüleme</span>Görme alanı 24-2 · OCT RNFL (sırada 2.)</div>
+        <div class="satir"><span>İsteyen</span>Dr. Elif Aksoy · 09:58</div>
+        <div class="satir"><span>Ödeme</span><span class="chip c-ok">tahsil edildi</span></div>
+      </div>
+
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">📢 Çağır</span>
+          <span class="btn kucuk">👁 Muayeneyi aç</span>
+          <span class="btn kucuk">👤 Hasta kartı</span>
+          <span class="btn kucuk">💧 Dilatasyon başlat</span>
+          <span class="btn kucuk">🪑 Oda ata</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> v1 (<code>goz_hasta_listesi.html</code>) istasyon gruplu bir akış tablosuydu; <b>v2 bunu ünite panosunun GRID görünümü</b> olarak
+tanımlar. Pano (<code>goz_unite_panosu.html</code>) kanban + özet tablolarıyla "ünite nasıl gidiyor"u, bu liste "tek hastanın ölçümleri ve bekleyen işi"ni
+gösterir - aynı kaynak: <code>belge_basvuru</code> + <code>goz_ziyaret_istasyon</code> + <code>goz_muayene</code> (+ ön tetkik için
+<code>goz_refraksiyon</code> / <code>goz_tonometri</code> / <code>goz_ek_test</code>). Kanban ile aynı satır kümesi, farklı okuma; çift tık → göz muayene kartı.<br>
+
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): bugün hasta, ön tetkik bekleyen, muayene bekleyen, <b>dilatasyon süresi dolmuş ama çağrılmamış</b>
+(damla saati + ilaç süresi geçti - bu hasta artık bekletilmemeli), 30 dk+ bekleyen, karar / işlem bekleyen.<br>
+
+<span class="n">2</span><b>Sol:</b> istasyon (kabul → ön tetkik → muayene → görüntüleme → karar → tamamlandı), hekim (tekniker alt satırda) ve oda / birim.
+Şerit: dönem çipleri + hekim / oda seçicisi, sağda <b>bağımsız işaretler</b> (Dilate · Acil · Postop kontrol · Çocuk) - tek seçimli çiplerle karışmaz,
+"muayene bekleyen + dilate" gerçek bir sorudur.<br>
+
+<span class="n">3</span><b>Liste:</b> sıra (altında protokol), hasta (yaş · cinsiyet · H no), geliş nedeni, <b>otoref sağ / sol</b>,
+<b>GİB sağ / sol</b> (21 üstü ya da hedef üstü kırmızı), dilate (✔ saat ya da kalan süre sayacı), görüntüleme durumu, hekim, istasyon rozeti,
+bekleme (20 dk sarı · 30 dk kırmızı), uyarı (GİB, 30 dk+, acil, sistemik). Ölçüm kolonları <b>cihazdan gelen</b> değerlerdir - elle girilmez.<br>
+
+<span class="n">4</span><b>Sağ:</b> hasta (protokol, sistemik, alerji, takip + hedef GİB), <b>bu ziyaretin istasyon zaman çizgisi</b> (her istasyonda
+ne kadar durdu), ön tetkik değerleri ve hangi cihazdan geldiği, bekleyen iş (istem + ödeme durumu), hızlı işlem. Sol ve sağ paneller katlanır.
+</div></div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>
