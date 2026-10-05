@@ -18615,3 +18615,54 @@ muayene kaydını açan adım ve hekimin tek kartta çalışması eksikti (demo 
 * Doğrulama: tarayıcıda uçtan uca (başvuru panoya → ön tetkik → muayene #… açıldı → kart sekmeleri → ICD ile tanı
   (bilateral) → gerekçeyle tamamla → Karar / işlem); test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test
   218 geçti.
+
+## 05.10.2026 — Göz muayene kartı v4 (971)
+
+Mockup `Ekranlar/Goz/goz_muayene_karti_v4.html` uygulandı (14 yatay sekme dar ekranda kayıyor, karşılaştırma için
+sekme değiştirmek gerekiyordu).
+
+* **Dikey kip** (GenForm `sekmeGruplari` / `sekmeDurumu` / `yanPanel` / `altSerit`, Modal `yanPanel` / `altSerit`):
+  solda aşamalı gezinti (Özet · 1 Öykü · 2 Ölçüm · 3 Karar · 4 Kayıt; aşama ilerlemesi, bölüm durumu ● dolu / ○ boş /
+  kırmızı uyarı, kısa ipucu), **açılır / kapanır** (kapalıyken durum noktaları; kart türü başına hatırlanır), sağda hep
+  görünen OD / OS özeti (BCVA, GİB, hedef, CCT, C/D, GİB eğilimi, tanılar, uyarılar), altta tamamlama koşulları
+  (eksiğe tık = bölüm) + Tamamla. Diğer kartlar etkilenmez.
+* **Özet** (açılış sekmesi): 5 kutu (görme, GİB, ana tanı, reçete, plan / kontrol; tık = bölüm), bölümlerden derlenen
+  muayene metni (yazılmaz), tamamlama kontrolü, bekleyen görüntüleme istemleri, son göz muayeneleri.
+* **Şikâyet & göz öyküsü**: şikâyet ve hikâye tek satır (⤢ genişler); hızlı şikâyet çipleri (göz / süre / seyir ile
+  satıra eklenir; ışık çakması, uçuşan cisim, perde, ani kayıp acil uyarısı); hastanın **göz öyküsü** (ameliyat, lazer,
+  travma, düzeltme, ambliyopi, damlalar + uyum, aile) - `goz_hasta_oyku` (971, hasta başına jsonb, sonraki
+  muayenelerde gelir); **sistemik & göze etkili ilaçlar** kronik tanı ve son 12 ay reçetesinden türetilir (tamsulosin
+  IFIS, hidroksiklorokin retinal toksisite, steroid GİB, antikoagülan, topiramat...).
+* **Tek kontrol tanımı** (`GozKontrolAsync`): gezinti durumları, Özet listesi, alt şerit ve **Tamamla** aynı listeyi
+  okur. Zorunlu: şikâyet, görme iki göz, GİB iki göz, tanı + göz tarafı, değerlendirme / plan (eksikte gerekçe);
+  uyarı: imzasız e-reçete, verilmemiş kontrol randevusu. Hiç ölçüm yoksa yine tamamlanmaz.
+* Hasta şeridi tek sarı satıra indi (bağlam kutuları Özet'e, tamamlanma çubuğu gezinti / alt şeride taşındı); araç
+  çubuğunda **Muayene özeti** (rapor penceresi). Hasta değişmez, göz muayene listesinde "Yeni" yok.
+* Uçlar `GozUclari.KartV4`: muayene/{id}/kontrol, muayene/{id}/ozet-metin, hasta/{id}/oyku GET/POST (log tablo 957).
+* Doğrulama: tsc temiz, vitest 789/789, dotnet test 218 geçti. Tarayıcı denemesi API kapalı olduğu için yapılmadı.
+
+## 05.10.2026 — Gözlük reçetesi kartı ve listesi v2 (972-973)
+
+Mockup `Ekranlar/Goz/goz_gozluk_recetesi_v2.html` · `goz_gozluk_recete_listesi_v2.html` uygulandı.
+
+* **Muayeneden açılış** (kullanıcı): göz muayene kartındaki "Gözlük Reçetesi" kartı hasta, muayene ve hasta adı dolu açar
+  (`?hastaId&muayeneId&hastaAd&geri`); **Kaydet ve Kapat göz muayene kartına döner**. Listede "Yeni" yok - reçete
+  muayeneden (ya da "Yeni reçeteye kopyala" ile) açılır. Hasta kartta değişmez.
+* **Kart**: başlıkta H / P rozetleri; üstte hasta bandı (son reçete, SGK gözlük hakkı - 2 yıl kuralı, dilate uyarısı,
+  durum), kimlik şeridinde geçerlilik / optik / SGK'lı. Tek "Reçete" sekmesi: tür ve kullanım çipleri; **değerleri al**
+  (bu muayenenin subjektif / sikloplejik refraksiyonu, mevcut gözlük, önceki reçete - kaynak saklanır), − / + silindir
+  **transpozisyon**, OD / OS sph · cyl · aks · add · prizma · taban · PD · seg, VA, yakın değer otomatik; cam malzeme,
+  kaplama, progresif tasarım, optiğe not; **kontroller** (dilate refraksiyon, düşük VA, anizometropi ≥ 1,5 D, add / yaş,
+  SGK 2 yıl); önceki reçeteler + kopyala; sağda canlı **A5 önizleme** (yazdır). Yeni reçetede hekim muayeneden,
+  geçerlilik 6 ay, SGK hakkı kuraldan gelir.
+* **Akış**: İmzala (değerler kilitlenir, reçete no + özet hash + QR kodu) → Optike gönder (3) → Teslim edildi (4).
+* **Liste**: gösterge (bugün, imza bekleyen, optikte, geçerliliği bitecek, SGK 2 yıl dolmadan, SGK hakkı yeni doğan),
+  solda tür / durum / optik, sağda önizleme (önceki reçeteye göre fark, teslim takibi). Kolonlar: tarih (altında reçete
+  no), hasta (yaş · H · P), tür, OD, OS, add, PD, hekim, optik, durum, uyarı. Düzenle / İmzala / Yazdır üstte, akış
+  düğmeleri altta.
+* **972** `kaplamalar` smallint[] → varchar (kart motoru dizi yazamıyordu, değerler korundu), `deger_kaynak`,
+  `goz.gozluk_kullanim` ve `goz.kaplama` listeleri. **973** `v_goz_gozluk_ozet`. Uçlar `GozUclari.Gozluk` (kaynak,
+  imzala, durum, gösterge, önizleme). Göz muayene kartı: Özet ikonu, sağ panel katlanır, başlıkta H / P, hasta bandı
+  üstte, "Genel muayene" düğmesi kaldırıldı.
+* Doğrulama: tarayıcıda göz kartı → reçete (hasta dolu) → değer al → Kaydet → göz kartına dönüş; imza (kilit, no,
+  e-imza); liste + gösterge + önizleme. Test kayıtları silindi. tsc temiz, vitest 789/789, dotnet test 218 geçti.

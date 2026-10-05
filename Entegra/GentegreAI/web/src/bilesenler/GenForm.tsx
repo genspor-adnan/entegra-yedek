@@ -33,7 +33,6 @@ import { GenGrid } from './GenGrid';
 import { HekimGonderimOzeti } from './radyoloji/HekimGonderimOzeti';
 import { IstemAkisi } from './radyoloji/IstemAkisi';
 import { YatisSeridi } from './yatan/YatisSeridi';
-import { GozMuayeneSeridi } from './goz/GozMuayeneSeridi';
 import { KontrolListesi } from './radyoloji/KontrolListesi';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
@@ -204,6 +203,20 @@ interface Props {
   }[];
   /** Sekme sirasi (basliklara gore) - mockup sirasi. */
   sekmeSirasi?: string[];
+  /**
+   * DİKEY AŞAMALI GEZİNTİ (göz kartı v4): sekmeler üstte yatay değil SOLDA, aşama
+   * başlıkları altında gruplu. Başlığı `null` olan grup başlıksız (Özet gibi tek öğe).
+   * Gruba girmeyen sekme en sona düşer. Yeni kayıtta kullanılmaz.
+   */
+  /** Başlıkta `#id` YERİNE rozetler (göz kartı: H hasta no · P protokol no). */
+  baslikRozet?: React.ReactNode;
+  sekmeGruplari?: { baslik: string | null; sekmeler: string[] }[];
+  /** Gezintide sekmenin durum noktası (ok / bos / uy) ve kısa ipucu. */
+  sekmeDurumu?(baslik: string): { durum: string; ipucu?: string; ikon?: string } | undefined;
+  /** Gövdenin sağında hep görünen panel (yalnız kayıtlı kartta). */
+  yanPanel?: React.ReactNode;
+  /** Gövdenin altında sabit şerit; sekmeyeGit eksik koşuldan bölüme götürür. */
+  altSerit?(sekmeyeGit: (baslik: string) => void): React.ReactNode;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -280,7 +293,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -950,6 +963,28 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
      gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, ekSekmeler,
      sekmeSirasi, detaylar]);
+  // TAM EŞLEŞME ÖNCE, sonra baş eşleşmesi: "Tanı" "Tanılar"ı değil "Tanı"yı açmalı.
+  const sekmeyeGitBaslik = (b: string) => {
+    const s = sekmeler.find(x => x.baslik === b) ?? sekmeler.find(x => x.baslik.startsWith(b));
+    if (s) setAktifSekme(s.anahtar);
+  };
+  const dikeyGezinti = !!sekmeGruplari && !yeniMi && sekmeler.length > 1;
+  // SOL GEZİNTİ KATLANIR (kullanıcı): dar ekranda gövdeye yer açılır; kart türü başına hatırlanır.
+  const [navKapali, setNavKapali] = useState(() => {
+    try { return localStorage.getItem(`kartNavKapali.${kaynak}`) === '1' } catch { return false }
+  });
+  const navDegis = () => setNavKapali(k => {
+    try { localStorage.setItem(`kartNavKapali.${kaynak}`, k ? '0' : '1') } catch { /* sart degil */ }
+    return !k;
+  });
+  // SAĞ PANEL DE KATLANIR (kullanıcı): kapalıyken ince şerit + aç düğmesi.
+  const [yanKapali, setYanKapali] = useState(() => {
+    try { return localStorage.getItem(`kartYanKapali.${kaynak}`) === '1' } catch { return false }
+  });
+  const yanDegis = () => setYanKapali(k => {
+    try { localStorage.setItem(`kartYanKapali.${kaynak}`, k ? '0' : '1') } catch { /* sart degil */ }
+    return !k;
+  });
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   /**
@@ -1296,15 +1331,26 @@ Yine de yeni kayıt eklensin mi?`);
 
   return (
     <Modal
-      baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
+      baslik={`${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
       buyutmeYok={buyutmeYok}
         // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
         //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
         //   sinifi tek basina her kartin "durum" alanini etkilerdi.
-        ekSinif={`kart-${kaynak}${kaynak === 'randevu' ? ' kart-orta' : ''}`}
+        ekSinif={`kart-${kaynak}${kaynak === 'randevu' ? ' kart-orta' : ''}`
+                 + (dikeyGezinti ? ' kart-dikey' : '')}
+        yanPanel={dikeyGezinti ? (yanPanel ? (
+          yanKapali
+            ? <div className="kayan-dar"><button type="button" className="kanav-katla" title={c('Paneli aç')} onClick={yanDegis}>◀</button></div>
+            : <div className="kayan-ic"><button type="button" className="kanav-katla" title={c('Paneli kapat')} onClick={yanDegis}>▶</button>{yanPanel}</div>
+        ) : null) : undefined}
+        // Dikey kipte gövde yüksekliği CSS'ten (pencere sabit 88vh): Modal'ın ölçümü gövdenin
+        //   üst öğesini pencere sayar, dikey sarmalayıcıda tavanı yanlış hesaplardı.
+        olcumYok={dikeyGezinti || undefined}
+        altSerit={dikeyGezinti && altSerit ? altSerit(sekmeyeGitBaslik) : undefined}
       ustBilgi={
         <>
+          {baslikRozet}
           {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
               cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
               "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
@@ -1412,12 +1458,56 @@ Yine de yeni kayıt eklensin mi?`);
             tamamlanma cubugu SEKMELERIN USTUNDE - hekim olcume baslamadan
             once bu dordunu okuyor; sekmeye gomulurse her muayenede iki kez
             gezinilir. Yeni kayitta yok: henuz muayene numarasi bile olusmadi. */}
-        {kaynak === 'goz-muayene' && !yeniMi && (
-          <GozMuayeneSeridi gozMuayeneId={id as number} />
-        )}
+        {/* v4: göz kartında hasta şeridi kimlik şeridinin ÜSTÜNDE (kullanıcı) - ListeKarti
+            seritSarmalayici ile çizer. */}
         </>
       )}
-      sekmeBar={sekmeler.length > 1 && (
+      sekmeBar={dikeyGezinti ? (
+        <nav className={`kanav${navKapali ? ' kapali' : ''}`}>
+          <button type="button" className="kanav-katla" title={navKapali ? c('Gezintiyi aç') : c('Gezintiyi kapat')}
+                  onClick={navDegis}>{navKapali ? '▶' : '◀'}</button>
+          {navKapali ? (
+            // KAPALI: yalnız durum noktaları - hangi bölüm boş / uyarılı hâlâ görünür.
+            sekmeler.map(s => {
+              const d = sekmeDurumu?.(s.baslik);
+              return (
+                <div key={s.anahtar} className={`kanav-nokta${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
+                     title={c(s.baslik)} onClick={() => setAktifSekme(s.anahtar)}>
+                  <span className={`kanav-d${d?.durum ? ` d-${d.durum}` : ''}${d?.ikon ? ' ikon' : ''}`}>{d?.ikon ?? (d?.durum === 'ok' || d?.durum === 'uy' ? '●' : d?.durum === 'bos' ? '○' : '·')}</span>
+                </div>
+              );
+            })
+          ) : (() => {
+            const kullanilan = new Set<string>();
+            const satir = (s: SekmeTanimi) => {
+              kullanilan.add(s.anahtar);
+              const d = sekmeDurumu?.(s.baslik);
+              return (
+                <div key={s.anahtar} className={`kanav-o${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
+                     onClick={() => setAktifSekme(s.anahtar)}>
+                  <span className={`kanav-d${d?.durum ? ` d-${d.durum}` : ''}${d?.ikon ? ' ikon' : ''}`}>{d?.ikon ?? (d?.durum === 'ok' || d?.durum === 'uy' ? '●' : d?.durum === 'bos' ? '○' : '·')}</span>
+                  <span>{c(s.baslik)}</span>
+                  {d?.ipucu && <small>{d.ipucu}</small>}
+                </div>
+              );
+            };
+            const bloklar = sekmeGruplari!.map((g, i) => {
+              const ic = g.sekmeler.map(b => sekmeler.find(s => s.baslik === b)).filter((s): s is SekmeTanimi => !!s);
+              if (ic.length === 0) return null;
+              const tamam = ic.filter(s => sekmeDurumu?.(s.baslik)?.durum === 'ok').length;
+              const sayilan = ic.filter(s => ['ok', 'bos', 'uy'].includes(sekmeDurumu?.(s.baslik)?.durum ?? '')).length;
+              return (
+                <div key={i} className={g.baslik ? 'kanav-g' : 'kanav-g bas'}>
+                  {g.baslik && <h6>{c(g.baslik)}{sayilan > 0 && <i className={tamam === sayilan ? 'tamam' : ''}>{tamam} / {sayilan}</i>}</h6>}
+                  {ic.map(satir)}
+                </div>
+              );
+            });
+            const kalan = sekmeler.filter(s => !kullanilan.has(s.anahtar));
+            return <>{bloklar}{kalan.length > 0 && <div className="kanav-g">{kalan.map(satir)}</div>}</>;
+          })()}
+        </nav>
+      ) : sekmeler.length > 1 && (
         <div className="katab">
           {sekmeler.map(s => (
             <div
@@ -1890,10 +1980,7 @@ Yine de yeni kayıt eklensin mi?`);
              deger, meta,
              detaySayisi: ad => detaylar[ad]?.guncel.length ?? 0,
              detaySatirlari: ad => (detaylar[ad]?.guncel ?? []) as Record<string, Deger>[],
-             sekmeyeGit: b => {
-               const s = sekmeler.find(x => x.baslik.startsWith(b));
-               if (s) setAktifSekme(s.anahtar);
-             },
+             sekmeyeGit: sekmeyeGitBaslik,
              alanYaz: (ad, v, kaydetSonra) => {
                if (salt) return;
                alanDegistir(ad, v);

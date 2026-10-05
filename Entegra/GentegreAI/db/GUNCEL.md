@@ -513,7 +513,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (309 ad, 141 tanesi birden cok dosyada)
+## Gorunumler (310 ad, 141 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -625,6 +625,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_gozluk_ozet` | `973_gozluk_liste_ozet.sql` | — |
 | `v_goz_muayene_ozet` | `970_goz_muayene_liste_kart.sql` | — |
 | `v_goz_protokol_lookup` | `693_goz_lookup.sql` | — |
 | `v_goz_takip_lookup` | `693_goz_lookup.sql` | — |

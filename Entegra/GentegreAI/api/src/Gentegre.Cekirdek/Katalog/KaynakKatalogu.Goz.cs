@@ -349,17 +349,41 @@ public static partial class KaynakKatalogu
         Kaynak: "public.goz_gozluk_recetesi r "
               + "join public.taraf t on t.id = r.hasta_id "
               + "left join public.taraf h on h.id = r.hekim_id "
-              + "left join public.taraf o on o.id = r.optik_taraf_id",
+              + "left join public.taraf o on o.id = r.optik_taraf_id "
+              // 973: H / P no, SGK 2 yıl, anizometropi, dilate, uyarı (liste + gösterge aynı tanım).
+              + "left join public.v_goz_gozluk_ozet v on v.recete_id = r.id",
         SubeKolonu: "r.sube_id",
         VarsayilanSirala: "r.ekleme_tarihi desc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "r.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "r.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
-            new("receteNo",  "r.recete_no",   "metin", "Reçete No", Genislik: 140),
-            new("tarih",     "r.ekleme_tarihi", "tarih", "Tarih", Hizalama: "orta",
-                                              Bicim: "dd.MM.yyyy"),
-            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 220),
+            new("receteNo",  "coalesce(r.recete_no, '')", "metin", "Reçete No", Varsayilan: false),
+            // 973 (mockup goz_gozluk_recete_listesi_v2): tarih altında reçete no, hasta altında yaş / H / P.
+            new("tarihMetin", "to_char(r.ekleme_tarihi at time zone 'Europe/Istanbul', 'DD.MM.YYYY HH24:MI')",
+                                              "metin", "Tarih", Genislik: 130, Filtrelenebilir: false, Bicim: "alt:receteNo"),
+            new("tarih",     "r.ekleme_tarihi", "tarih", "Tarih (gün)", Varsayilan: false, Bicim: "dd.MM.yyyy"),
+            new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 200,
+                Bicim: "alt:hastaAlt"),
+            new("hastaAlt",
+                "concat_ws(' · ', v.yas::text || case v.cinsiyet when 1 then ' E' when 2 then ' K' else '' end, "
+                + "nullif('H ' || v.hasta_no, 'H '), nullif('P ' || v.protokol, 'P '))",
+                                              "metin", "Hasta Bilgisi", Varsayilan: false, Filtrelenebilir: false),
+            new("addMetin", "coalesce(to_char(coalesce(r.od_add, r.os_add), 'FMS990D00'), '—')", "metin", "Add",
+                                              Hizalama: "orta", Genislik: 70, Filtrelenebilir: false),
+            new("pdMetin", "replace(concat_ws(' / ', case when r.od_pd is not null or r.os_pd is not null "
+                + "then to_char(coalesce(r.od_pd, 0) + coalesce(r.os_pd, 0), 'FM990.0') end, to_char(r.pd_yakin, 'FM990.0')), '.', ',')", "metin", "PD",
+                                              Hizalama: "orta", Genislik: 80, Filtrelenebilir: false),
+            new("uyari", "coalesce(v.uyari, '')", "metin", "Uyarı", Genislik: 170, Filtrelenebilir: false, Bicim: "uyari"),
+            new("bugun", "case when (r.ekleme_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+                                              "mantik", "Bugün", Varsayilan: false),
+            new("buHafta", "case when r.ekleme_tarihi >= date_trunc('week', now()) then 1 else 0 end", "mantik", "Bu Hafta", Varsayilan: false),
+            new("bitecek", "coalesce(v.bitecek, 0)", "mantik", "Geçerlilik Bitiyor", Varsayilan: false),
+            new("sgkErken", "coalesce(v.sgk_erken, 0)", "mantik", "SGK Erken", Varsayilan: false),
+            new("sgkHakDogdu", "coalesce(v.sgk_hak_dogdu, 0)", "mantik", "SGK Hakkı Doğdu", Varsayilan: false),
+            new("cocuk", "case when v.yas < 18 then 1 else 0 end", "mantik", "Çocuk", Varsayilan: false),
+            new("optikId", "r.optik_taraf_id", "sayi", "Optik Id", Varsayilan: false),
+            new("muayeneId", "r.muayene_id", "sayi", "Muayene Id", Varsayilan: false),
             new("hekim",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 170),
             new("turAdi",
                 "case r.tur when 1 then 'Uzak' when 2 then 'Yakın' when 3 then 'Bifokal' "
@@ -374,21 +398,17 @@ public static partial class KaynakKatalogu
                 "trim(coalesce(to_char(r.od_sph, 'FMS990D00'), '') "
                 + "|| case when r.od_cyl is null then '' "
                 + "        else ' / ' || to_char(r.od_cyl, 'FMS990D00') "
-                + "             || ' x ' || coalesce(r.od_aks::text, '') end "
-                + "|| case when r.od_add is null then '' "
-                + "        else '  add ' || to_char(r.od_add, 'FMS990D00') end)",
+                + "             || ' × ' || coalesce(r.od_aks::text, '') end)",
                                               "metin", "OD", Genislik: 190, Filtrelenebilir: false),
             new("os",
                 "trim(coalesce(to_char(r.os_sph, 'FMS990D00'), '') "
                 + "|| case when r.os_cyl is null then '' "
                 + "        else ' / ' || to_char(r.os_cyl, 'FMS990D00') "
-                + "             || ' x ' || coalesce(r.os_aks::text, '') end "
-                + "|| case when r.os_add is null then '' "
-                + "        else '  add ' || to_char(r.os_add, 'FMS990D00') end)",
+                + "             || ' × ' || coalesce(r.os_aks::text, '') end)",
                                               "metin", "OS", Genislik: 190, Filtrelenebilir: false),
             new("durumAdi",
                 "case r.durum when 0 then 'İptal' when 1 then 'Taslak' when 2 then 'İmzalandı' "
-                + "when 3 then 'Optiğe verildi' when 4 then 'Teslim edildi' else '' end",
+                + "when 3 then 'Optikte' when 4 then 'Teslim edildi' else '' end",
                                               "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
                                               Genislik: 130, Filtrelenebilir: false),
             new("durum",     "r.durum",       "kod",  "Durum Kodu", Varsayilan: false),

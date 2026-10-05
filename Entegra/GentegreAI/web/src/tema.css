@@ -7413,8 +7413,121 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .odos-kisayol { margin-left: auto; display: inline-flex; gap: 6px }
 .goz-hasta-serit { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; padding: 6px 12px; background: #fff8e6;
                    border-bottom: 1px solid #f0d9a8; font-size: 11.5px }
-.alan-izgara.kaid-gozm { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, .8fr); gap: 8px 12px }
+.alan-izgara.kaid-gozm { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, .8fr); gap: 8px 12px }
 @media (max-width: 900px) { .alan-izgara.kaid-gozm { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
 /* GÖZ SÜRECİ v2: Şikâyet & Öykü sekmesi */
 .gz-alan { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: 11.5px; color: var(--soluk) }
 .gz-alan textarea { width: 100%; font: inherit; color: var(--yazi); padding: 6px 8px; border: 1px solid var(--cizgi); border-radius: 4px; resize: vertical }
+/* GÖZ MUAYENE KARTI v4 (mockup Ekranlar/Goz/goz_muayene_karti_v4.html): dikey kip */
+.kawin.genis.kart-dikey { width: min(1380px, 98vw); height: 88vh }
+.kawin.genis.kart-dikey.tam { height: auto }
+.kadikey { display: flex; flex: 1; min-height: 0; border-top: 1px solid var(--cizgi2) }
+.kadikey > .kagov { flex: 1; min-width: 0 }
+.kanav { width: 215px; flex: none; overflow: auto; background: #f6f8fb; border-right: 1px solid var(--cizgi2); padding: 6px 0 10px }
+.kanav-g h6 { margin: 10px 12px 4px; font-size: 10px; letter-spacing: .4px; color: var(--soluk); text-transform: uppercase; display: flex; justify-content: space-between }
+.kanav-g h6 i { font-style: normal; color: #b06d0a } .kanav-g h6 i.tamam { color: #2e7d46 }
+.kanav-o { display: flex; align-items: center; gap: 6px; padding: 5px 12px 5px 14px; font-size: 12px; cursor: pointer; border-left: 3px solid transparent; color: var(--yazi) }
+.kanav-o:hover { background: #eef3f9 }
+.kanav-o.on { background: #fff; border-left-color: var(--vurgu, #2f6db3); color: var(--lacivert, #1f3a5f); font-weight: 700 }
+.kanav-o small { margin-left: auto; color: var(--soluk); font-size: 10px; font-weight: 400 }
+.kanav-d { width: 12px; text-align: center; font-size: 10px; color: #b9c4d0 }
+.kanav-d.d-ok { color: #2e7d46 } .kanav-d.d-uy { color: #b3261e }
+.kanav-d.ikon { font-size: 13px; color: var(--vurgu, #2f6db3); width: 14px }
+.kanav-g.bas { padding: 4px 8px 2px }
+.kayan { flex: none; overflow: auto; background: #fbfcfe; border-left: 1px solid var(--cizgi2); font-size: 11.5px }
+.kayan-ic { width: 255px; padding: 10px 12px; position: relative }
+.kayan-dar { width: 30px; position: relative; min-height: 40px }
+.kaalt { border-top: 1px solid var(--cizgi2); background: #f6f8fb }
+.gz4-sag h5 { margin: 10px 0 5px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px }
+.gz4-sag h5:first-child { margin-top: 0 }
+.gz-od2 .b.od { color: #2f6db3; font-weight: 700 } .gz-od2 .b.os { color: #8e44ad; font-weight: 700 }
+.gz4-cip { display: inline-block; margin: 2px 4px 2px 0; padding: 1px 7px; border-radius: 10px; background: #eef3f9; border: 1px solid #d6e2ef; font-size: 10.5px }
+.gz4-kural { display: flex; align-items: center; gap: 14px; padding: 7px 12px; font-size: 11.5px; flex-wrap: wrap }
+.gz4-kural .ok { color: #2e7d46 }
+.gz4-kural .yok { color: #b3261e; cursor: pointer; text-decoration: underline dotted }
+.gz4-ust { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 7px 12px; background: #fff8e6;
+           border-bottom: 1px solid #f0d9a8; font-size: 11.5px }
+.gz4-ust .ad { font-size: 14px; font-weight: 700; color: var(--lacivert, #1f3a5f) }
+.gz4-ust .bil { display: flex; gap: 16px; flex-wrap: wrap }
+.gz4-ust .roz { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end }
+.gz4-kutu5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px }
+.gz4-kt { border: 1px solid var(--cizgi2); border-radius: 6px; padding: 7px 10px; background: linear-gradient(#fff, #f6f9fc); cursor: pointer; min-width: 0 }
+.gz4-kt span { display: block; font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px }
+.gz4-kt b { display: block; font-size: 13px; color: var(--lacivert, #1f3a5f); margin-top: 2px }
+.gz4-kt small { color: var(--soluk); font-size: 10.5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.gz4-kt.uy { border-color: #e4b7b2; background: #fdf4f3 } .gz4-kt.uy b { color: #b3261e }
+.gz4-oz2 { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 12px; align-items: start }
+.gz4-metin { border: 1px solid var(--cizgi2); border-radius: 6px; padding: 10px 12px; background: #fff; font-size: 12px; line-height: 1.55 }
+.gz4-metin h6 { margin: 8px 0 2px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase }
+.gz4-metin > div:first-child h6 { margin-top: 0 }
+.gz4-metin p { margin: 0 }
+.gz4-kl { border: 1px solid var(--cizgi2); border-radius: 6px; background: #fff; padding: 8px 10px; font-size: 11.5px; margin-bottom: 10px }
+.gz4-kl h6 { margin: 0 0 6px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; display: flex; justify-content: space-between }
+.gz4-kl h6 i { font-style: normal; color: #b06d0a }
+.gz4-kl .s { display: flex; gap: 6px; align-items: flex-start; padding: 3px 0; border-bottom: 1px dashed #eef2f6 }
+.gz4-kl .s:last-of-type { border-bottom: none }
+.gz4-kl .s .i { width: 16px; text-align: center }
+.gz4-kl .s.ok .i { color: #2e7d46 } .gz4-kl .s.yok .i { color: #b3261e } .gz4-kl .s.opt .i { color: #b06d0a }
+.gz4-kl .s a { margin-left: auto; color: var(--vurgu, #2f6db3); font-size: 10.5px; white-space: nowrap; cursor: pointer }
+.gz4-kl .s small { display: block; color: var(--soluk); font-size: 10.5px }
+.gz4-mini { width: 100%; font-size: 11px; border-collapse: collapse }
+.gz4-mini td, .gz4-mini th { padding: 3px 4px; border-bottom: 1px solid #eef2f6; text-align: left }
+.gz4-mini th { color: var(--soluk); font-weight: 600; font-size: 10.5px }
+.gz4-mini input, .gz4-mini select { width: 100%; font-size: 11px; padding: 2px 4px }
+.gz4-tek { display: grid; grid-template-columns: 70px 1fr auto; gap: 6px 8px; align-items: center }
+.gz4-tek label { font-size: 11px; color: var(--soluk) }
+.gz4-tek input, .gz4-tek textarea { width: 100%; font: inherit; font-size: 12px; padding: 5px 8px; border: 1px solid var(--cizgi); border-radius: 4px }
+.gz4-kart { border: 1px solid var(--cizgi2); border-radius: 6px; background: #fff; padding: 8px 10px; margin-top: 10px }
+.gz4-kart h6 { margin: 0 0 6px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; display: flex; justify-content: space-between; gap: 8px }
+.gz4-kart h6 a { color: var(--vurgu, #2f6db3); text-transform: none; cursor: pointer; font-weight: 400 }
+.gz4-gr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px }
+.gz4-sat { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11.5px; padding: 2px 0 }
+.gz4-sat .et { min-width: 88px; color: var(--soluk); font-size: 11px }
+.gz4-cipler { display: inline-flex; gap: 4px; flex-wrap: wrap }
+.gz4-c { border: 1px solid var(--cizgi); border-radius: 12px; padding: 2px 9px; background: #fff; font-size: 11px; cursor: pointer; white-space: nowrap }
+.gz4-c.on { background: #eaf2fb; border-color: #9cc0e8; color: var(--lacivert, #1f3a5f); font-weight: 700 }
+.gz4-c.uy { border-color: #e4b7b2; color: #8f3d36 }
+.gz4-risk { display: inline-block; font-size: 10px; padding: 0 6px; border-radius: 3px; background: #f8e1df; color: #8f3d36 }
+.kanav { position: relative }
+.kanav-katla { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0; border: 1px solid var(--cizgi2);
+               border-radius: 4px; background: #fff; color: var(--lacivert, #1f3a5f); font-size: 11px; cursor: pointer; z-index: 1 }
+.kanav-katla:hover { background: #eaf2fb }
+.kanav.kapali { width: 30px; padding-top: 30px }
+.kanav-nokta { display: flex; justify-content: center; padding: 5px 0; cursor: pointer; border-left: 3px solid transparent }
+.kanav-nokta:hover { background: #eef3f9 }
+.kanav-nokta.on { background: #fff; border-left-color: var(--vurgu, #2f6db3) }
+/* GÖZLÜK REÇETESİ v2 (972-973, mockup Ekranlar/Goz/goz_gozluk_recetesi_v2.html · _listesi_v2.html) */
+.gl-tur { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 10px; font-weight: 700; color: #fff }
+.gl-mini { width: 100%; border-collapse: collapse; margin: 5px 0 }
+.gl-mini td, .gl-mini th { border: 1px solid #cfd8e3; padding: 2px 3px; text-align: center; font-size: 10.5px }
+.gl-mini th { background: #f3f6fa; font-weight: 600 }
+.gl-kagit-mini { background: #fff; border: 1px solid #d6dee8; padding: 8px 10px; font-size: 10.5px; line-height: 1.45 }
+.gl-fark { color: #b06d0a }
+.gl-adim { display: flex; flex-direction: column; font-size: 11px; margin-top: 4px }
+.gl-adim > div { display: flex; gap: 6px; align-items: center; padding: 3px 0 3px 10px; margin-left: 5px; border-left: 2px solid #d6dee8; position: relative }
+.gl-adim > div::before { content: ""; position: absolute; left: -6px; width: 10px; height: 10px; border-radius: 50%; background: #d6dee8 }
+.gl-adim > div.ok { border-color: #2e7d46 } .gl-adim > div.ok::before { background: #2e7d46 }
+.gl-adim > div.su::before { background: #e0a33a }
+.gl-adim small { margin-left: auto; color: var(--soluk) }
+.gl-govde { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start }
+@media (max-width: 1100px) { .gl-govde { grid-template-columns: minmax(0, 1fr) } }
+.gl-sag { background: #f3f5f8; border: 1px solid var(--cizgi2); border-radius: 6px; padding: 10px }
+.gl-bas { display: flex; align-items: center; gap: 6px; margin: 10px 0 6px; font-size: 12.5px; color: var(--lacivert, #1f3a5f) }
+.gl-kaynak { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11px; color: var(--soluk); margin-bottom: 8px }
+.gl-rx { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px }
+.gl-rx th { font-size: 10.5px; color: var(--soluk); font-weight: 600; text-align: center; padding: 5px 3px; border-bottom: 1px solid var(--cizgi2) }
+.gl-rx td { padding: 3px; border-bottom: 1px solid #eef2f6; text-align: center }
+.gl-rx td.g { text-align: left; font-weight: 700; white-space: nowrap }
+.gl-rx td.g.od { color: #2f6db3 } .gl-rx td.g.os { color: #8e44ad }
+.gl-rx input { width: 100%; min-width: 52px; text-align: center; font-size: 13px; font-weight: 700; padding: 4px 2px; border: 1px solid var(--cizgi); border-radius: 4px }
+.gl-rx tr.gl-yakin td { background: #fafbfd; color: var(--soluk); font-size: 10.5px; font-weight: 400 }
+.gl-rx tr.gl-yakin input { font-size: 11px; font-weight: 400; margin-left: 4px; width: 56px; min-width: 0 }
+.gl-not { flex: 1; min-width: 160px; font-size: 11.5px; padding: 3px 6px; border: 1px solid var(--cizgi); border-radius: 4px }
+.gl-k { font-size: 11.5px; padding: 2px 0 }
+.gl-k.ok { color: #2e7d46 } .gl-k.uy { color: #b06d0a } .gl-k.kr { color: #b3261e }
+.gl-kagit { background: #fff; border: 1px solid #d6dee8; box-shadow: 0 2px 8px rgba(0, 0, 0, .08); padding: 12px 14px; font-size: 10.5px; line-height: 1.45; margin-top: 6px }
+.gl-kagit .kb { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--lacivert, #1f3a5f); padding-bottom: 6px; margin-bottom: 8px }
+.gl-kagit .kb b { font-size: 12px; color: var(--lacivert, #1f3a5f) }
+.gl-kagit .imza { margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end }
+.gl-kagit .qr { width: 54px; height: 54px; background: repeating-linear-gradient(45deg, #1f2d3d 0 3px, #fff 3px 6px); border: 3px solid #1f2d3d }
+.gl-kagit .cz { border-top: 1px solid #9aa7b5; width: 130px; text-align: center; padding-top: 2px; color: var(--soluk) }

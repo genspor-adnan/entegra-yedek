@@ -107,6 +107,7 @@ import { PersonelSeridi } from './liste/PersonelSeridi';
 import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from './radyoloji/RadyolojiTanimPanelleri';
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
 import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
+import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from './goz/GozlukPanelleri';
 import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
@@ -451,6 +452,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const orderEkrani = tanim.kaynak === 'yatis-order' && !portalda;
   // GÖZ MUAYENELERİ (970): gösterge + tür / hekim süzgeci, önizleme.
   const gozMuayeneEkrani = tanim.kaynak === 'goz-muayene' && !portalda;
+  // GÖZLÜK REÇETELERİ (973): gösterge + tür / durum / optik süzgeci, önizleme.
+  const gozlukEkrani = tanim.kaynak === 'goz-gozluk-recete' && !portalda;
+  const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
+  const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
   const gozSuzgec = useGozMuayeneSuzgeci(gozMuayeneEkrani);
   const gozGostergesi = useGozMuayeneGostergesi(gozMuayeneEkrani, yenile);
   const orderSuzgec = useOrderSuzgeci(orderEkrani);
@@ -1021,7 +1026,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1159,6 +1164,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : radCihaz ? <CihazGostergesi veri={cihazGostergesi} s={cihazSuzgec} />
         : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
+        : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
@@ -1234,6 +1240,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : radCihaz ? <CihazSolPanel veri={cihazGostergesi} s={cihazSuzgec} />
         : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
+        : gozlukEkrani ? <GozlukSolPanel veri={gozlukGostergesi} s={gozlukSuzgec} />
         : undefined}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
       yanPanel={portalda ? undefined
@@ -1243,6 +1250,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : gozMuayeneEkrani ? <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile} />
+        : gozlukEkrani ? <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)

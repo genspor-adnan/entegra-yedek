@@ -41,12 +41,16 @@ export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
  * kullanip GenForm tarafindan da cizildigi icin, ayni dosyada kalsa
  * dairesel import olurdu.
  */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif, enUst,
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit, alt, dar, ekSinif, enUst,
                        buyutmeYok, olcumYok, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
   sekmeBar?: React.ReactNode;
+  /** Gövdenin SAĞINDA hep görünen panel (göz kartı v4 OD/OS özeti). */
+  yanPanel?: React.ReactNode;
+  /** Gövdenin ALTINDA sabit şerit (göz kartı v4 tamamlama koşulları). */
+  altSerit?: React.ReactNode;
   alt: React.ReactNode;
   /** Az alanli kartlar icin yarim genislik (1080 -> 560): bos beyaz alan kalmasin. */
   dar?: boolean;
@@ -304,8 +308,20 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>
         {ustSerit}
-        {sekmeBar}
-        <div className="kagov" ref={govdeRef}>{children}</div>
+        {yanPanel !== undefined ? (
+          // DİKEY KİP (göz kartı v4): solda sekme gezintisi, ortada gövde, sağda panel.
+          <div className="kadikey">
+            {sekmeBar}
+            <div className="kagov" ref={govdeRef}>{children}</div>
+            {yanPanel && <aside className="kayan">{yanPanel}</aside>}
+          </div>
+        ) : (
+          <>
+            {sekmeBar}
+            <div className="kagov" ref={govdeRef}>{children}</div>
+          </>
+        )}
+        {altSerit && <div className="kaalt">{altSerit}</div>}
       </div>
     </div>,
     document.body,

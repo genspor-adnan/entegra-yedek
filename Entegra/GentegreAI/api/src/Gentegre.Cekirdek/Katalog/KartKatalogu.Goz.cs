@@ -65,7 +65,9 @@ public static partial class KartKatalogu
             //   şeridinde (tarih / hekim / durum üst hasta şeridinde, genel muayeneden).
             new("muayeneId", "muayene_id", "sayi", Yazilabilir: false, Gizli: true,
                 Baslik: "Muayene", Grup: "Kimlik"),
-            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+            // HASTA DEĞİŞMEZ (kullanıcı 05.10.2026): başvurudan gelir, yalnız hasta
+            //   şeridinde okunur - kimlik şeridinde alan olarak çizilmez.
+            new("hastaId", "hasta_id", "kod", Zorunlu: true, Yazilabilir: false, Gizli: true,
                 KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
                 Baslik: "Hasta", Grup: "Kimlik"),
             new("muayeneTuru", "muayene_turu", "kod", KodListesi: "goz.muayene_turu",
@@ -496,62 +498,45 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
-            // MUAYENE BAGI ARKA PLANDA (Gizli): kayit bir muayeneden
-            //   dogduysa hangi muayene oldugu KAYDEDILIR - ekranda ham
-            //   id gostermenin degeri yok, ama bagin kaybolmasinin
-            //   bedeli var: "bu goruntulemeyi kim, hangi muayenede
-            //   istedi" sorusu sonra cevapsiz kalir. Muayene kartindaki
-            //   kisayol bu alani URL ile doldurur.
+            // 972 (mockup goz_gozluk_recetesi_v2): hasta / muayene / hekim göz muayenesinden gelir
+            //   (URL), kartta değişmez; değerler ekranın "Reçete" sekmesinde (alanYaz).
             new("muayeneId", "muayene_id", "sayi", Gizli: true),
-            new("receteNo", "recete_no", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
-                Baslik: "Reçete No", Grup: "Genel"),
-            new("hastaId", "hasta_id", "kod", Zorunlu: true,
-                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
-                Baslik: "Hasta", Grup: "Genel"),
-            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_hekim_lookup",
-                Baslik: "Hekim", Grup: "Genel"),
-            new("tur", "tur", "kod", KodListesi: "goz.gozluk_tur", Baslik: "Tür", Grup: "Genel"),
-            new("durum", "durum", "kod", KodListesi: "goz.recete_durum",
-                Baslik: "Durum", Grup: "Genel"),
-            // GEÇERLİLİK: refraksiyon değişir; süresiz reçete yıllar sonra
-            //   yanlış camla gelen hasta demektir.
-            new("gecerlilikBitis", "gecerlilik_bitis", "tarih",
-                Baslik: "Geçerlilik Bitişi", Grup: "Genel"),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true, Gizli: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta", Baslik: "Hasta", Grup: "Kimlik"),
+            new("hekimId", "hekim_id", "kod", Gizli: true, KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Kimlik"),
+            new("receteNo", "recete_no", "metin", Yazilabilir: false, Gizli: true, EnFazlaUzunluk: 20, Baslik: "Reçete No", Grup: "Kimlik"),
+            new("durum", "durum", "kod", Yazilabilir: false, Gizli: true, KodListesi: "goz.recete_durum", Baslik: "Durum", Grup: "Kimlik"),
+            new("imzaZamani", "imza_zamani", "zaman", Yazilabilir: false, Gizli: true, Baslik: "İmza", Grup: "Kimlik"),
+            // GEÇERLİLİK: refraksiyon değişir; süresiz reçete yıllar sonra yanlış camla gelen hasta demektir.
+            new("gecerlilikBitis", "gecerlilik_bitis", "tarih", Baslik: "Geçerlilik", Grup: "Kimlik"),
+            new("optikTarafId", "optik_taraf_id", "kod", KodTablosu: "public.v_cari_lookup", Baslik: "Optik", Grup: "Kimlik"),
+            new("sgkHak", "sgk_hak", "mantik", Baslik: "SGK'lı reçete", Grup: "Kimlik"),
 
-            // OD VE OS TEK GRUPTA, ALT ALTA (mockup goz_gozluk_recetesi.html
-            //   `.odos`): reçete optikte iki gözün DEĞERLERİ KARŞILAŞTIRILARAK
-            //   okunur. Ayrı iki sekmeye koyulduğunda "sağ -2,00 sol -1,75" gibi
-            //   tek bakışta görülmesi gereken fark, sekme değiştirerek
-            //   aranıyordu. Alan sırası OD dörtlüsü + OS dörtlüsü: dört sütunlu
-            //   ızgarada iki göz kendiliğinden hizalı iki satır olur.
-            new("odSph", "od_sph", "ondalik", Baslik: "OD Sph", Grup: "Reçete (OD / OS)"),
-            new("odCyl", "od_cyl", "ondalik", Baslik: "OD Cyl", Grup: "Reçete (OD / OS)"),
-            new("odAks", "od_aks", "sayi", Baslik: "OD Aks", Grup: "Reçete (OD / OS)"),
-            new("odAdd", "od_add", "ondalik", Baslik: "OD Add", Grup: "Reçete (OD / OS)"),
-            new("osSph", "os_sph", "ondalik", Baslik: "OS Sph", Grup: "Reçete (OD / OS)"),
-            new("osCyl", "os_cyl", "ondalik", Baslik: "OS Cyl", Grup: "Reçete (OD / OS)"),
-            new("osAks", "os_aks", "sayi", Baslik: "OS Aks", Grup: "Reçete (OD / OS)"),
-            new("osAdd", "os_add", "ondalik", Baslik: "OS Add", Grup: "Reçete (OD / OS)"),
-            // Prizma ve PD günlük reçetede çoğu zaman boş: dört sütunun
-            //   ritmini bozmasınlar diye ikinci sıraya alındı.
-            new("odPrizma", "od_prizma", "ondalik", Baslik: "OD Prizma", Grup: "Reçete (OD / OS)"),
-            new("odPd", "od_pd", "ondalik", Baslik: "OD PD", Grup: "Reçete (OD / OS)"),
-            new("osPrizma", "os_prizma", "ondalik", Baslik: "OS Prizma", Grup: "Reçete (OD / OS)"),
-            new("osPd", "os_pd", "ondalik", Baslik: "OS PD", Grup: "Reçete (OD / OS)"),
-
-            new("pdYakin", "pd_yakin", "ondalik", Baslik: "Yakın PD", Grup: "Cam & Optik"),
-            new("camMalzeme", "cam_malzeme", "kod", KodListesi: "goz.cam_malzeme",
-                Baslik: "Cam Malzemesi", Grup: "Cam & Optik"),
-            new("tasarim", "tasarim", "metin", EnFazlaUzunluk: 60,
-                Baslik: "Tasarım", Grup: "Cam & Optik"),
-            new("notOptik", "not_optik", "metin", EnFazlaUzunluk: 600,
-                Baslik: "Optiğe Not", Grup: "Cam & Optik"),
-            // SGK cam/çerçeve hakkı: hastaya "hakkınız var mı" sorusunu
-            //   optikte sordurmamak için reçetede durur.
-            new("sgkHak", "sgk_hak", "mantik", Baslik: "SGK hakkı var", Grup: "Cam & Optik"),
-            new("optikTarafId", "optik_taraf_id", "kod", KodTablosu: "public.v_cari_lookup",
-                Baslik: "Anlaşmalı Optik", Grup: "Cam & Optik"),
-            new("optikTeslim", "optik_teslim", "tarih", Baslik: "Teslim", Grup: "Cam & Optik"),
+            new("tur", "tur", "kod", KodListesi: "goz.gozluk_tur", Baslik: "Tür", Grup: "Değerler"),
+            new("kullanim", "kullanim", "kod", KodListesi: "goz.gozluk_kullanim", Baslik: "Kullanım", Grup: "Değerler"),
+            new("odSph", "od_sph", "ondalik", Baslik: "OD Sph", Grup: "Değerler"),
+            new("odCyl", "od_cyl", "ondalik", Baslik: "OD Cyl", Grup: "Değerler"),
+            new("odAks", "od_aks", "sayi", Baslik: "OD Aks", Grup: "Değerler"),
+            new("odAdd", "od_add", "ondalik", Baslik: "OD Add", Grup: "Değerler"),
+            new("odPrizma", "od_prizma", "ondalik", Baslik: "OD Prizma", Grup: "Değerler"),
+            new("odTaban", "od_taban", "sayi", Baslik: "OD Taban", Grup: "Değerler"),
+            new("odPd", "od_pd", "ondalik", Baslik: "OD PD", Grup: "Değerler"),
+            new("odSeg", "od_seg", "ondalik", Baslik: "OD Seg", Grup: "Değerler"),
+            new("osSph", "os_sph", "ondalik", Baslik: "OS Sph", Grup: "Değerler"),
+            new("osCyl", "os_cyl", "ondalik", Baslik: "OS Cyl", Grup: "Değerler"),
+            new("osAks", "os_aks", "sayi", Baslik: "OS Aks", Grup: "Değerler"),
+            new("osAdd", "os_add", "ondalik", Baslik: "OS Add", Grup: "Değerler"),
+            new("osPrizma", "os_prizma", "ondalik", Baslik: "OS Prizma", Grup: "Değerler"),
+            new("osTaban", "os_taban", "sayi", Baslik: "OS Taban", Grup: "Değerler"),
+            new("osPd", "os_pd", "ondalik", Baslik: "OS PD", Grup: "Değerler"),
+            new("osSeg", "os_seg", "ondalik", Baslik: "OS Seg", Grup: "Değerler"),
+            new("pdYakin", "pd_yakin", "ondalik", Baslik: "Yakın PD", Grup: "Değerler"),
+            new("camMalzeme", "cam_malzeme", "kod", KodListesi: "goz.cam_malzeme", Baslik: "Cam Malzemesi", Grup: "Değerler"),
+            new("kaplamalar", "kaplamalar", "metin", EnFazlaUzunluk: 120, Baslik: "Kaplamalar", Grup: "Değerler"),
+            new("tasarim", "tasarim", "metin", EnFazlaUzunluk: 60, Baslik: "Tasarım", Grup: "Değerler"),
+            new("notOptik", "not_optik", "metin", EnFazlaUzunluk: 600, Baslik: "Optiğe Not", Grup: "Değerler"),
+            new("degerKaynak", "deger_kaynak", "metin", EnFazlaUzunluk: 40, Baslik: "Değer Kaynağı", Grup: "Değerler"),
+            new("optikTeslim", "optik_teslim", "tarih", Yazilabilir: false, Baslik: "Teslim", Grup: "Değerler"),
         });
 
     // ===================================================== hastalık takibi ====

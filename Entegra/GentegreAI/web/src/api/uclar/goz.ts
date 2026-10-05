@@ -274,7 +274,51 @@ export interface GozGoruntuSatiri { zaman: string | null; tur: string; goz: stri
 export interface GozBasvuru { id: number; hasta: string; bolum: string; zaman: string; hekim: string }
 export interface GozOyku { muayeneId: number; sikayet: string; hikaye: string; ozgecmis: string; soygecmis: string; kapali: boolean }
 
+/** GÖZ KARTI v4. */
+export interface GozKontrol {
+  bolumler: { baslik: string; durum: string; ipucu: string }[];
+  kontrol: { kod: string; ad: string; durum: 'ok' | 'yok' | 'uyari'; zorunlu: boolean; mesaj: string; bolum: string }[];
+}
+export interface GozHastaOyku {
+  veri: Record<string, unknown>; zaman: string | null; kim: string;
+  kronik: { kod: string; ad: string; baslangic: string | null }[];
+  ilaclar: string[]; riskler: { ilac: string; risk: string }[];
+}
+
+/** GÖZLÜK REÇETESİ v2 (972-973). */
+export interface GozlukRefraksiyon { tur: number; goz: number; sph: number | null; cyl: number | null; aks: number | null;
+  add: number | null; va: number | null; pdUzak: number | null; pdYakin: number | null }
+export interface GozlukOnceki { id: number; tarih: string; tur: number; durum: number; receteNo: string; sgk: number;
+  odSph: number | null; odCyl: number | null; odAks: number | null; osSph: number | null; osCyl: number | null; osAks: number | null;
+  add: number | null; odPd: number | null; osPd: number | null; pdYakin: number | null; camMalzeme: number | null; kaplamalar: string; tasarim: string }
+export interface GozlukKaynak {
+  hasta: { ad: string; hastaNo: string; yas: number | null; cinsiyet: number } | null;
+  muayene: { id: number; protokol: string; tarih: string; hekimId: number | null; hekim: string; dilate: number; gozMuayeneId: number | null } | null;
+  refraksiyon: GozlukRefraksiyon[]; oncekiler: GozlukOnceki[];
+  sonSgk: string | null; sgkHakVar: boolean; sgkHakTarihi: string | null;
+}
+export interface GozlukGostergeYaniti {
+  gosterge: { bugun: number; taslak: number; optikte: number; bitecek: number; sgkErken: number; sgkHakDogdu: number };
+  turler: { tur: number; sayi: number }[]; durumlar: { durum: number; sayi: number }[]; optikler: { id: number | null; ad: string; sayi: number }[];
+}
+export type GozlukOnizleme = Record<string, unknown>;
+
 export const gozUclari = {
+  gozlukKaynak: (q: { receteId?: number; hastaId?: number; muayeneId?: number }) => {
+    const p = new URLSearchParams();
+    if (q.receteId) p.set('receteId', String(q.receteId));
+    if (q.hastaId) p.set('hastaId', String(q.hastaId));
+    if (q.muayeneId) p.set('muayeneId', String(q.muayeneId));
+    return istek<GozlukKaynak>(`/api/goz/gozluk/kaynak?${p.toString()}`);
+  },
+  gozlukImzala: (id: number) => gonder<{ id: number; durum: number; receteNo: string }>(`/api/goz/gozluk/${id}/imzala`, {}),
+  gozlukDurum: (id: number, durum: 3 | 4) => gonder<{ id: number; durum: number }>(`/api/goz/gozluk/${id}/durum/${durum}`, {}),
+  gozlukGosterge: () => istek<GozlukGostergeYaniti>('/api/goz/gozluk-gosterge'),
+  gozlukOnizleme: (id: number) => istek<{ recete: GozlukOnizleme }>(`/api/goz/gozluk/${id}/onizleme`),
+  gozKontrol: (id: number) => istek<GozKontrol>(`/api/goz/muayene/${id}/kontrol`),
+  gozOzetMetin: (id: number) => istek<{ bolumler: { baslik: string; metin: string }[] }>(`/api/goz/muayene/${id}/ozet-metin`),
+  gozHastaOyku: (hastaId: number) => istek<GozHastaOyku>(`/api/goz/hasta/${hastaId}/oyku`),
+  gozHastaOykuYaz: (hastaId: number, veri: Record<string, unknown>) => gonder<{ hastaId: number }>(`/api/goz/hasta/${hastaId}/oyku`, veri),
   gozAkisBasvurular: () => istek<{ satirlar: GozBasvuru[] }>('/api/goz/akis/basvurular'),
   gozAkisEkle: (belgeId: number) => gonder<{ id: number }>('/api/goz/akis/ekle', { belgeId }),
   /** Panodan: kayıt yoksa genel muayene + göz uzantısı açılır. */

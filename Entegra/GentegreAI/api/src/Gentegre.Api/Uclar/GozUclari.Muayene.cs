@@ -85,10 +85,11 @@ public static partial class GozUclari
             // 970 TAMAMLAMA KURALI (mockup goz_muayene_karti_v2): tanı, iki gözün
             //   görmesi ve GİB'i. Eksik varsa GEREKÇEYLE geçilir (çocuk, iş birliği
             //   yok, tek göz...) - gerekçe kayıt günlüğüne düşer, sessiz geçmez.
-            var eksikler = new List<string>();
-            if (m.tani == 0) eksikler.Add("tanı");
-            if (m.vaGoz < 2) eksikler.Add("iki gözün görmesi");
-            if (m.gibGoz < 2) eksikler.Add("iki gözün GİB'i");
+            // v4: kural çubuğu / Özet'in kontrol listesiyle AYNI tanım (GozKontrolAsync) -
+            //   ekranda "tamam" görünen koşul burada eksik sayılmasın.
+            var (_, kontrol) = await GozKontrolAsync(baglanti, null, id, iptal);
+            var eksikler = kontrol.Where(k => k.Zorunlu && k.Durum != "ok")
+                .Select(k => k.Ad + (k.Mesaj != "" ? $" ({k.Mesaj})" : "")).ToList();
             var gerekce = (istek?.Gerekce ?? "").Trim();
             if (eksikler.Count > 0 && gerekce.Length < 3)
                 throw GentegreHatasi.IsKurali(

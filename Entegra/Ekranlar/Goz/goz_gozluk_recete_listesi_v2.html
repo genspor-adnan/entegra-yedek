@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gözlük Reçeteleri — Liste v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.krm b{color:#b3261e} .k.uy b{color:#b06d0a}
+  .rx{font-size:11.5px;white-space:nowrap}
+  .rx i{font-style:normal;color:var(--muted);font-size:10px;margin-right:3px}
+  .hasta{min-width:150px} .hasta b{display:block;white-space:nowrap}
+  .liste td small{white-space:nowrap} .liste td{white-space:nowrap} .liste td:last-child{white-space:normal;min-width:120px}
+  .tur{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:bold;color:#fff}
+  .t-uz{background:#2f6db3} .t-ya{background:#16a085} .t-bi{background:#8e44ad} .t-pr{background:#d35400}
+  .uy{font-size:10.5px;color:#b3261e} .uy2{font-size:10.5px;color:#b06d0a}
+  .kagit{background:#fff;border:1px solid #d6dee8;padding:10px 12px;font-size:10.5px;line-height:1.45}
+  .kagit table{width:100%;border-collapse:collapse;margin:5px 0}
+  .kagit td,.kagit th{border:1px solid #cfd8e3;padding:2px;text-align:center;font-size:10px}
+  .kagit th{background:#f3f6fa}
+  .adim{display:flex;flex-direction:column;gap:0;font-size:11px;margin-top:4px}
+  .adim div{display:flex;gap:6px;align-items:center;padding:3px 0;border-left:2px solid #d6dee8;padding-left:8px;margin-left:5px;position:relative}
+  .adim div:before{content:"";position:absolute;left:-6px;width:10px;height:10px;border-radius:50%;background:#d6dee8}
+  .adim div.ok{border-color:#2e7d46} .adim div.ok:before{background:#2e7d46}
+  .adim div.su:before{background:#e0a33a}
+  .adim small{margin-left:auto;color:var(--muted)}
+  .fark{font-size:11px} .fark b{color:#b06d0a}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Gözlük Reçeteleri</h1><span class="yol">Göz › Gözlük Reçeteleri</span>
+    <span class="sp"></span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">✍ İmzala</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:6px;padding:0 14px 8px">
+    <span class="btn">📱 SMS / e-posta</span>
+    <span class="btn">🏪 Optike gönder</span>
+    <span class="btn">✔ Teslim edildi</span>
+    <span class="btn">⧉ Yeni reçeteye kopyala</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>14</b><span>Bugün yazılan</span></div>
+    <div class="k uy"><b>3</b><span>İmza bekleyen (taslak)</span></div>
+    <div class="k"><b>9</b><span>Optikte, teslim edilmedi</span></div>
+    <div class="k uy"><b>6</b><span>Geçerliliği 30 günde bitecek</span></div>
+    <div class="k krm"><b>2</b><span>SGK 2 yıl dolmadan yazılan</span></div>
+    <div class="k"><b>41</b><span>SGK hakkı yeni doğan (hatırlatma)</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, H / P no, reçete no…</span>
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Taslak</span><span class="cip">İmzalı</span><span class="cip">Optikte</span><span class="cip">Teslim edildi</span><span class="cip">Tümü</span>
+    <span class="combo">Hekim: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">SGK'lı</span><span class="cip">Çocuk (&lt; 18)</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Tür</h6>
+      <div class="dal on">Tümü <i>14</i></div>
+      <div class="dal"><span><span class="tur t-uz">Uzak</span></span><i>6</i></div>
+      <div class="dal"><span><span class="tur t-ya">Yakın</span></span><i>3</i></div>
+      <div class="dal"><span><span class="tur t-bi">Bifokal</span></span><i>1</i></div>
+      <div class="dal"><span><span class="tur t-pr">Progresif</span></span><i>4</i></div>
+      <h6 style="margin-top:12px">Durum</h6>
+      <div class="dal">Taslak <i>3</i></div>
+      <div class="dal">İmzalı <i>2</i></div>
+      <div class="dal">Optike gönderildi <i>9</i></div>
+      <div class="dal">Teslim edildi <i>—</i></div>
+      <div class="dal">Süresi doldu <i>—</i></div>
+      <h6 style="margin-top:12px">Optik</h6>
+      <div class="dal">Görüş Optik <i>5</i></div>
+      <div class="dal">Merkez Optik <i>3</i></div>
+      <div class="dal">— hasta seçmedi <i>6</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Tarih</th><th>Hasta</th><th>Tür</th><th>OD <small>sph / cyl × aks</small></th><th>OS <small>sph / cyl × aks</small></th><th>Add</th><th>PD</th><th>Hekim</th><th>Optik</th><th>Durum</th><th>Uyarı</th></tr>
+        <tr class="sec"><td><b>09:40</b><small>GR-2026-00412</small></td>
+          <td class="hasta"><b>Ayşe Yıldız</b><small>67 K · H d1111 · P GZ-990103</small></td>
+          <td><span class="tur t-pr">Progresif</span></td>
+          <td class="rx">+1,00 / −0,50 × 90</td><td class="rx">+1,25 / −0,75 × 85</td><td>+2,50</td><td>63 / 60</td>
+          <td>Dr. Elif Arslan</td><td>—</td><td><span class="chip c-bek">Taslak</span></td><td><span class="uy2">dilate refraksiyon</span></td></tr>
+        <tr><td><b>09:55</b><small>GR-2026-00413</small></td>
+          <td class="hasta"><b>Ali Demir</b><small>8 E · H d1204 · P GZ-990112</small></td>
+          <td><span class="tur t-uz">Uzak</span></td>
+          <td class="rx">+2,50 / −1,00 × 180</td><td class="rx">+4,00 / −1,25 × 175</td><td>—</td><td>54</td>
+          <td>Dr. Zeynep Er</td><td>Görüş Optik</td><td><span class="chip c-ok">Optikte</span></td><td><span class="uy">anizometropi 1,50 D · ambliyopi</span></td></tr>
+        <tr><td><b>10:12</b><small>GR-2026-00414</small></td>
+          <td class="hasta"><b>Hasan Öztürk</b><small>61 E · H d0988 · P GZ-990115</small></td>
+          <td><span class="tur t-ya">Yakın</span></td>
+          <td class="rx">+2,25</td><td class="rx">+2,25 / −0,25 × 90</td><td>—</td><td>60</td>
+          <td>Dr. Murat Kaya</td><td>—</td><td><span class="chip c-ok">İmzalı</span></td><td><span class="uy">SGK: son reçete 1 yıl 2 ay önce</span></td></tr>
+        <tr><td><b>10:40</b><small>GR-2026-00415</small></td>
+          <td class="hasta"><b>Zeynep Koç</b><small>45 K · H d1310 · P GZ-990118</small></td>
+          <td><span class="tur t-bi">Bifokal</span></td>
+          <td class="rx">−1,75</td><td class="rx">−2,00 / −0,50 × 10</td><td>+1,25</td><td>62 / 59</td>
+          <td>Dr. Elif Arslan</td><td>Merkez Optik</td><td><span class="chip c-ok">Optikte</span></td><td></td></tr>
+        <tr><td><b>11:05</b><small>GR-2026-00416</small></td>
+          <td class="hasta"><b>Mehmet Kaya</b><small>72 E · H d0451 · P GZ-990120</small></td>
+          <td><span class="tur t-pr">Progresif</span></td>
+          <td class="rx">+0,75 / −0,75 × 95</td><td class="rx">+1,00 / −0,50 × 80</td><td>+2,75</td><td>64 / 61</td>
+          <td>Dr. Murat Kaya</td><td>Görüş Optik</td><td><span class="chip c-gri">Teslim edildi</span></td><td></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 14 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 1 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Reçete</h5>
+        <div class="kagit">
+          <div style="display:flex;justify-content:space-between"><b>GR-2026-00412</b><span>04.10.2026</span></div>
+          <div>Ayşe Yıldız · 67 K · Progresif · sürekli</div>
+          <table>
+            <tr><th></th><th>Sph</th><th>Cyl</th><th>Aks</th><th>Add</th><th>PD</th></tr>
+            <tr><th>OD</th><td>+1,00</td><td>−0,50</td><td>90</td><td>+2,50</td><td>31,5</td></tr>
+            <tr><th>OS</th><td>+1,25</td><td>−0,75</td><td>85</td><td>+2,50</td><td>31,5</td></tr>
+          </table>
+          <div>Organik 1.5 · antirefle, sertlik · kısa koridor</div>
+          <div>Geçerlilik 04.04.2027 · SGK'lı</div>
+        </div>
+      </div>
+      <div class="bl"><h5>Önceki reçeteye göre</h5>
+        <div class="fark">12.03.2024 → bugün: OD sph <b>+0,25</b> · OS sph <b>+0,25</b> · add <b>+0,25</b></div>
+      </div>
+      <div class="bl"><h5>Teslim takibi</h5>
+        <div class="adim">
+          <div class="ok">Yazıldı<small>09:40 · Dr. Elif Arslan</small></div>
+          <div class="su">İmza bekliyor<small>—</small></div>
+          <div>Optike gönderildi<small>—</small></div>
+          <div>Optik okuttu (QR)<small>—</small></div>
+          <div>Teslim edildi<small>—</small></div>
+        </div>
+      </div>
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="btn kucuk">📇 Reçeteyi aç</span><span class="btn kucuk">✍ İmzala</span><span class="btn kucuk">👁 Göz muayenesi</span><span class="btn kucuk">📱 SMS</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup):</b> Kullanıcı: "gözlük listesi için mockup yap". Tablo <code>goz_gozluk_recetesi</code>; kart goz_gozluk_recetesi_v2.html. Yeni reçete listeden açılmaz -
+göz muayene kartındaki "Gözlük Reçetesi" düğmesiyle (hasta ve muayene bağıyla) açılır; listede "Yeni" yok, "Yeni reçeteye kopyala" var.<br>
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): bugün yazılan, imza bekleyen, optikte teslim edilmeyen, geçerliliği 30 günde bitecek, SGK 2 yıl dolmadan yazılan
+(ücretli olabilir), SGK hakkı yeni doğan hastalar (hatırlatma / SMS listesi). Araç düğmeleri iki satır: Düzenle / İmzala / Yazdır üstte, akış düğmeleri altta sağa yaslı.<br>
+<span class="n">2</span><b>Sol:</b> tür, durum (taslak → imzalı → optike gönderildi → teslim edildi / süresi doldu), optik. Şerit: dönem / durum çipleri, hekim, SGK'lı, çocuk.<br>
+<span class="n">3</span><b>Liste:</b> saat (altında reçete no), hasta (yaş / cinsiyet / H / P), tür rozeti, <b>OD ve OS reçete değeri</b>, add, PD (uzak / yakın), hekim, optik,
+durum, uyarı (dilate refraksiyon, anizometropi, SGK 2 yıl, süresi dolmak üzere).<br>
+<span class="n">4</span><b>Sağ:</b> reçete mini önizlemesi, önceki reçeteye göre fark, teslim takibi (yazıldı → imza → optike → QR okutuldu → teslim), hızlı işlem.
+Sol ve sağ paneller katlanır.
+</div></div>
+</body>
+</html>

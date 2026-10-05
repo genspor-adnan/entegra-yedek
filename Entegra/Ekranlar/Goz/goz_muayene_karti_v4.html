@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Muayenesi — Kart v4 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .ust-serit{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px}
+  .ust-serit .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .ust-serit .bil{display:flex;gap:16px;flex-wrap:wrap}
+  .ust-serit .bil span b{color:var(--navy)}
+  .ust-serit .roz{display:flex;gap:6px;align-items:center}
+  .kml{display:grid;grid-template-columns:150px 1.3fr 1.3fr 1fr 140px;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .govde{display:grid;grid-template-columns:210px minmax(0,1fr) 250px;min-height:600px}
+  .nav{border-right:1px solid var(--line2);background:#f6f8fb;padding:8px 0}
+  .nav h6{margin:10px 12px 4px;font-size:10px;letter-spacing:.4px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .nav h6 i{font-style:normal;color:#2e7d46}
+  .nav .o{display:flex;align-items:center;gap:6px;padding:5px 12px 5px 16px;font-size:12px;cursor:pointer;border-left:3px solid transparent}
+  .nav .o:hover{background:#eef3f9}
+  .nav .o.on{background:#fff;border-left-color:var(--accent);color:var(--navy);font-weight:bold}
+  .nav .o .d{width:14px;text-align:center;font-size:11px}
+  .nav .o .d.ok{color:#2e7d46} .nav .o .d.bos{color:#b9c4d0} .nav .o .d.uy{color:#b3261e}
+  .nav .o small{margin-left:auto;color:var(--muted);font-size:10px}
+  .nav .ozet{margin:0 8px 6px;padding:7px 10px;border-radius:6px;background:#fff;border:1px solid var(--line2)}
+  .nav .ozet.on{border-color:var(--selbd);background:var(--sel)}
+  .orta{padding:10px 14px;overflow:auto}
+  .orta h3{margin:2px 0 8px;font-size:13px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .orta h3 .sp{flex:1}
+  .panel{display:none} .panel.on{display:block}
+  .od{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}
+  .od th{font-size:10.5px;color:var(--muted);text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2);font-weight:600}
+  .od th.r{color:#2f6db3} .od th.l{color:#8e44ad}
+  .od td{padding:3px 6px;border-bottom:1px solid #eef2f6}
+  .od td.et{color:var(--muted);width:170px}
+  .od td.ay{border-left:2px solid #e3e9f0}
+  .onc{font-size:10px;color:#9aa7b5;margin-left:6px;white-space:nowrap}
+  .onc.dus{color:#b3261e}
+  .kis{display:flex;gap:6px}
+  .kis .btn{font-size:10.5px;padding:2px 8px}
+  .krm{color:#b3261e;font-weight:bold}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfe;padding:10px 12px;font-size:11.5px}
+  .sag h5{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .sag .bl{margin-bottom:12px}
+  .ozg{display:grid;grid-template-columns:62px 1fr 1fr;gap:3px 6px}
+  .ozg .b{color:var(--muted);font-size:10.5px}
+  .ozg .h{font-size:10.5px;font-weight:bold} .ozg .h.r{color:#2f6db3} .ozg .h.l{color:#8e44ad}
+  .tr{display:flex;align-items:flex-end;gap:4px;height:42px;border-bottom:1px solid var(--line2);margin:4px 0}
+  .tr .c{flex:1;display:flex;gap:1px;align-items:flex-end;height:100%}
+  .tr .c i{flex:1;border-radius:2px 2px 0 0;background:#9db8d9} .tr .c i.l{background:#c7a6d8} .tr .c i.y{background:#e0796f}
+  .tani-ch{display:inline-block;margin:2px 4px 2px 0;padding:1px 7px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px}
+  .kural{display:flex;align-items:center;gap:14px;padding:8px 12px;border-top:1px solid var(--line2);background:#f6f8fb;font-size:11.5px}
+  .kural .k.ok{color:#2e7d46} .kural .k.yok{color:#b3261e;cursor:pointer;text-decoration:underline dotted}
+  .kural .sp{flex:1}
+  /* ÖZET */
+  .kutu5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+  .kt{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc);cursor:pointer}
+  .kt span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kt b{display:block;font-size:13px;color:var(--navy);margin-top:2px}
+  .kt small{color:var(--muted);font-size:10.5px}
+  .kt.uy{border-color:#e4b7b2;background:#fdf4f3} .kt.uy b{color:#b3261e}
+  .oz2{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px}
+  .oz-metin{border:1px solid var(--line2);border-radius:6px;padding:10px 12px;background:#fff;font-size:12px;line-height:1.55}
+  .oz-metin h6{margin:8px 0 2px;font-size:10.5px;color:var(--muted);text-transform:uppercase}
+  .oz-metin h6:first-child{margin-top:0}
+  .oz-metin p{margin:0}
+  .kl{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;font-size:11.5px;margin-bottom:10px}
+  .kl h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .kl .s{display:flex;gap:6px;align-items:flex-start;padding:3px 0;border-bottom:1px dashed #eef2f6}
+  .kl .s:last-child{border-bottom:none}
+  .kl .s .i{width:16px;text-align:center}
+  .kl .s.ok .i{color:#2e7d46} .kl .s.yok .i{color:#b3261e} .kl .s.opt .i{color:#b06d0a}
+  .kl .s a{margin-left:auto;color:var(--accent);font-size:10.5px;white-space:nowrap;cursor:pointer}
+  .kl .s small{display:block;color:var(--muted);font-size:10.5px}
+  /* ÖYKÜ */
+  .tek{display:grid;grid-template-columns:90px 1fr auto;gap:6px 8px;align-items:center;margin-bottom:6px}
+  .tek label{font-size:11px;color:var(--muted)}
+  .tek .inp{min-height:26px}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cipx{border:1px solid var(--line);border-radius:12px;padding:2px 9px;background:#fff;font-size:11px;cursor:pointer;white-space:nowrap}
+  .cipx.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cipx.uy{border-color:#e4b7b2;color:#8f3d36}
+  .gr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .kart h6 a{color:var(--accent);text-transform:none;cursor:pointer}
+  .sat{display:flex;gap:6px;align-items:center;font-size:11.5px;padding:2px 0}
+  .sat .et{min-width:92px;color:var(--muted);font-size:11px}
+  .risk{display:inline-block;font-size:10px;padding:0 6px;border-radius:3px;background:#f8e1df;color:#8f3d36;margin-left:4px}
+  .mini{width:100%;font-size:11px;border-collapse:collapse}
+  .mini td,.mini th{padding:3px 4px;border-bottom:1px solid #eef2f6;text-align:left}
+  .mini th{color:var(--muted);font-weight:600;font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👁 Göz Muayenesi #990210 — Ayşe Yıldız <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">⧉ Önceki muayeneden aktar</span>
+    <span class="btn">🎙 Dikte</span>
+    <span class="btn">✏ Göz şeması</span>
+    <span style="width:1px;background:var(--line);margin:0 4px"></span>
+    <span class="btn">👓 Gözlük reçetesi</span>
+    <span class="btn">🖼 Görüntüleme iste</span>
+    <span class="btn">💉 İşlem planla</span>
+    <span style="width:1px;background:var(--line);margin:0 4px"></span>
+    <span class="btn">📖 Muayene özeti (rapor)</span>
+    <span class="btn">📋 Genel muayene</span>
+    <span class="btn">🔗 e-Nabız</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="ust-serit">
+    <div><div class="ad">Ayşe Yıldız</div><div style="color:var(--muted)">67 K · Prot. M-000412 · 04.10.2026 09:10 · Dr. Elif Arslan</div></div>
+    <div class="bil">
+      <span>Takip: <b>Glokom (OU)</b></span>
+      <span>Alerji: <b class="krm">penisilin</b></span>
+      <span>Damlalar: <b>latanoprost OU akşam</b></span>
+      <span>Sistemik: <b>DM · HT</b></span>
+      <span>Önceki: <b>05.09.2026 · GİB 19 / 22</b></span>
+    </div>
+    <div class="roz"><span class="chip c-gri">Kontrol</span><span class="chip c-ok">💧 dilate · 09:32</span><span class="chip c-bek">Taslak</span></div>
+  </div>
+  <div class="kml">
+    <div class="fld"><label>Muayene türü</label><div class="inp combo">Kontrol</div></div>
+    <div class="fld"><label>Hastalık takibi</label><div class="inp combo">Glokom · OU · POAG orta</div></div>
+    <div class="fld"><label>Dilatasyon ilacı</label><div class="inp combo">Tropikamid %1 · 09:32</div></div>
+    <div class="fld"><label>Kontrol</label><div class="inp combo">1 ay → 04.11.2026</div></div>
+    <div class="fld"><label>Ön tetkik</label><div class="inp" style="border:none;background:none;padding:0"><span class="chip c-ok">Otoref ✓ 09:12</span> <span class="chip c-ok">NCT ✓</span></div></div>
+  </div>
+
+  <div class="govde">
+    <!-- SOL -->
+    <div class="nav">
+      <div class="o ozet on" data-p="ozet"><span class="d">▤</span><b>Özet</b><small>4 / 6 ✓</small></div>
+      <h6>1 · Öykü <i>✓</i></h6>
+      <div class="o" data-p="oyku"><span class="d ok">●</span>Şikâyet &amp; göz öyküsü</div>
+      <h6>2 · Ölçüm <i>4 / 6</i></h6>
+      <div class="o" data-p="gorme"><span class="d ok">●</span>Görme &amp; refraksiyon<small>OD·OS</small></div>
+      <div class="o" data-p="gib"><span class="d uy">●</span>Tonometri &amp; pakimetri<small>hedef ↑</small></div>
+      <div class="o" data-p="bos"><span class="d ok">●</span>Ön segment</div>
+      <div class="o" data-p="bos"><span class="d ok">●</span>Fundus</div>
+      <div class="o" data-p="bos"><span class="d bos">○</span>Motilite · pupil · alan</div>
+      <div class="o" data-p="bos"><span class="d bos">○</span>Gonyoskopi &amp; ek testler</div>
+      <h6>3 · Karar <i style="color:#b06d0a">1 / 3</i></h6>
+      <div class="o" data-p="tani"><span class="d ok">●</span>Tanılar<small>2</small></div>
+      <div class="o" data-p="bos"><span class="d bos">○</span>Değerlendirme &amp; plan</div>
+      <div class="o" data-p="bos"><span class="d ok">●</span>e-Reçete<small>taslak</small></div>
+      <div class="o" data-p="bos"><span class="d ok">●</span>İstem &amp; sonuç<small>1</small></div>
+      <div class="o" data-p="bos"><span class="d bos">○</span>İşlem &amp; ücret</div>
+      <h6>4 · Kayıt</h6>
+      <div class="o" data-p="bos"><span class="d">⟲</span>Karşılaştırma<small>4</small></div>
+      <div class="o" data-p="bos"><span class="d">🖼</span>Görüntüler<small>3</small></div>
+    </div>
+
+    <!-- ORTA -->
+    <div class="orta">
+
+      <!-- ÖZET (kart bununla açılır) -->
+      <div class="panel on" id="p-ozet">
+        <h3>Özet <span class="sp"></span><span class="chip c-gri">yazılmaz · kutuya tıkla = ilgili bölüm</span></h3>
+        <div class="kutu5">
+          <div class="kt" data-git="gorme"><span>Görme (düz.)</span><b>0,6 / <span class="krm">0,3 ↓</span></b><small>sağ / sol · önceki 0,6 / 0,5</small></div>
+          <div class="kt uy" data-git="gib"><span>GİB</span><b>18 / 26</b><small>hedef 18 / 18 · Goldmann</small></div>
+          <div class="kt" data-git="tani"><span>Ana tanı</span><b>H40.1 · OU</b><small>+1 ek tanı</small></div>
+          <div class="kt"><span>Reçete</span><b>1 ilaç · taslak</b><small>brimonidin %0,15</small></div>
+          <div class="kt"><span>Plan / kontrol</span><b>—</b><small>kontrol 1 ay · 04.11</small></div>
+        </div>
+        <div class="oz2">
+          <div class="oz-metin">
+            <h6>Şikâyet</h6><p>Sol gözde bulanık görme · 2 ay · akşamları artıyor.</p>
+            <h6>Göz öyküsü</h6><p>3 yıldır POAG, latanoprost OU (uyum: düzensiz). Göz ameliyatı yok. DM 12 yıl (HbA1c 7,4), HT. Aile: annede glokom.</p>
+            <h6>Bulgular</h6>
+            <p><b>Görme</b> BCVA OD 0,6 · OS 0,3 (önceki 0,5). <b>Refraksiyon</b> OD +1,00 -0,50×90 · OS +1,25 -0,75×85, add +2,50.
+            <b>GİB</b> OD 18 · OS 26 mmHg (Goldmann, CCT 548 / 541). <b>Ön segment</b> OS hafif hiperemi, ÖK derin, lens NO2 NC2.
+            <b>Fundus</b> C/D OD 0,6 · OS 0,8, OS alt rim incelmesi; makula normal, DR yok.</p>
+            <h6>Tanı</h6><p>H40.1 Primer açık açılı glokom (bilateral, kesin) · H25.1 Senil nükleer katarakt (sağ, ön tanı)</p>
+            <h6>Görüntüleme</h6><p>OCT RNFL OU istendi.</p>
+            <h6>Reçete</h6><p>Brimonidin %0,15 OS 2×1 (taslak).</p>
+          </div>
+          <div>
+            <div class="kl">
+              <h6>Tamamlama kontrolü <span style="color:#b06d0a">4 / 6</span></h6>
+              <div class="s ok"><span class="i">✓</span><div>Şikâyet</div></div>
+              <div class="s ok"><span class="i">✓</span><div>Görme · iki göz</div></div>
+              <div class="s ok"><span class="i">✓</span><div>GİB · iki göz</div></div>
+              <div class="s ok"><span class="i">✓</span><div>Ana tanı · göz tarafı<small>H40.1 · bilateral</small></div></div>
+              <div class="s yok"><span class="i">○</span><div>Değerlendirme &amp; plan<small>zorunlu</small></div><a>yaz →</a></div>
+              <div class="s opt"><span class="i">!</span><div>e-Reçete imzalanmadı<small>tamamlamayı engellemez</small></div><a>imzala →</a></div>
+              <div class="s opt"><span class="i">!</span><div>Kontrol randevusu verilmedi<small>Tamamla'da önerilir</small></div><a>ver →</a></div>
+              <div style="margin-top:8px"><span class="btn primary" style="width:100%;justify-content:center;display:flex">✔ Tamamla</span></div>
+            </div>
+            <div class="kl">
+              <h6>Bekleyen istemler</h6>
+              <div class="s opt"><span class="i">⏳</span><div>OCT RNFL (OU)<small>istendi 09:40 · görüntüleme istasyonu</small></div></div>
+            </div>
+            <div class="kl">
+              <h6>Son göz muayeneleri</h6>
+              <table class="mini">
+                <tr><th>Tarih</th><th>BCVA</th><th>GİB</th><th>Tanı</th></tr>
+                <tr><td>05.09.26</td><td>0,6 / 0,5</td><td>19 / 22</td><td>H40.1</td></tr>
+                <tr><td>12.07.26</td><td>0,7 / 0,5</td><td>18 / 21</td><td>H40.1</td></tr>
+                <tr><td>03.03.26</td><td>0,7 / 0,6</td><td>21 / 24</td><td>H40.1</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÖYKÜ -->
+      <div class="panel" id="p-oyku">
+        <h3>Şikâyet &amp; göz öyküsü <span class="sp"></span>
+          <span class="kis"><span class="btn">⧉ Önceki öyküyü aktar</span><span class="btn">🎙 Dikte</span></span></h3>
+        <div class="tek">
+          <label>Şikâyet</label><div class="inp">Sol gözde bulanık görme · 2 ay · akşamları artıyor</div><span class="btn kucuk">⤢</span>
+          <label>Hikâye</label><div class="inp">3 yıldır glokom, latanoprost; son 2 ayda damlayı düzensiz kullanmış</div><span class="btn kucuk">⤢</span>
+        </div>
+        <div class="kart">
+          <h6>Hızlı şikâyet <a>çipe tıkla = şikâyet satırına eklenir</a></h6>
+          <div class="cipler">
+            <span class="cipx on">Bulanık görme</span><span class="cipx">Azalmış yakın görme</span><span class="cipx">Kızarıklık</span><span class="cipx">Ağrı</span>
+            <span class="cipx">Kaşıntı</span><span class="cipx">Sulanma</span><span class="cipx">Batma / yabancı cisim</span><span class="cipx">Işık hassasiyeti</span>
+            <span class="cipx uy">Işık çakması</span><span class="cipx uy">Uçuşan cisimler</span><span class="cipx uy">Perde inmesi</span><span class="cipx uy">Ani görme kaybı</span>
+            <span class="cipx">Çift görme</span><span class="cipx">Kontrol / reçete</span>
+          </div>
+          <div class="sat" style="margin-top:6px"><span class="et">Göz</span>
+            <span class="cipx">Sağ</span><span class="cipx on">Sol</span><span class="cipx">İki göz</span>
+            <span class="et" style="margin-left:12px">Süre</span><span class="cipx">gün</span><span class="cipx">hafta</span><span class="cipx on">2 ay</span><span class="cipx">yıl</span>
+            <span class="et" style="margin-left:12px">Seyir</span><span class="cipx">ani</span><span class="cipx on">yavaş</span><span class="cipx">aralıklı</span></div>
+          <div class="bilgi" style="margin-top:6px">Kırmızı çipler (ışık çakması, uçuşan cisim, perde, ani kayıp) <b>acil uyarısı</b> verir: retina dekolmanı / vasküler olay ayırıcı tanısı - dilate fundus önerilir.</div>
+        </div>
+        <div class="gr2">
+          <div class="kart">
+            <h6>Göz öyküsü <a>önceki muayeneden geldi</a></h6>
+            <div class="sat"><span class="et">Ameliyat</span><span class="cipx on">yok</span><span class="cipx">katarakt</span><span class="cipx">refraktif</span><span class="cipx">vitrektomi</span><span class="cipx">glokom cerrahisi</span></div>
+            <div class="sat"><span class="et">Lazer</span><span class="cipx on">yok</span><span class="cipx">SLT</span><span class="cipx">YAG</span><span class="cipx">PRP</span></div>
+            <div class="sat"><span class="et">Travma</span><span class="cipx on">yok</span><span class="cipx">var</span></div>
+            <div class="sat"><span class="et">Düzeltme</span><span class="cipx on">gözlük</span><span class="cipx">kontakt lens</span><span class="cipx">yok</span></div>
+            <div class="sat"><span class="et">Ambliyopi / şaşılık</span><span class="cipx on">yok</span><span class="cipx">var</span></div>
+          </div>
+          <div class="kart">
+            <h6>Göz damlaları <a>＋ ekle</a></h6>
+            <table class="mini">
+              <tr><th>İlaç</th><th>Göz</th><th>Doz</th><th>Uyum</th></tr>
+              <tr><td>Latanoprost %0,005</td><td>OU</td><td>akşam 1×1</td><td><span class="cipx uy">düzensiz</span></td></tr>
+            </table>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Reçete geçmişinden ve hastalık takibinden gelir; uyum hekim girer.</div>
+          </div>
+          <div class="kart">
+            <h6>Sistemik hastalık &amp; göze etkili ilaçlar</h6>
+            <div class="sat"><span class="et">Diyabet</span><b>12 yıl</b> · HbA1c 7,4 <span style="color:var(--muted)">(lab 14.09)</span></div>
+            <div class="sat"><span class="et">Hipertansiyon</span>var</div>
+            <div class="sat"><span class="et">İlaçlar</span>metformin · ramipril · <b>tamsulosin</b><span class="risk">IFIS riski</span></div>
+            <div class="sat"><span class="et">Diğer riskler</span><span class="cipx">antikoagülan</span><span class="cipx">steroid</span><span class="cipx">hidroksiklorokin</span><span class="cipx">amiodaron</span></div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Kronik tanı ve aktif ilaçlar hastanın genel kaydından; göze etkili olanlar işaretlenir (katarakt öncesi tamsulosin, retinal toksisite).</div>
+          </div>
+          <div class="kart">
+            <h6>Aile öyküsü</h6>
+            <div class="sat"><span class="et">Glokom</span><span class="cipx on">anne</span><span class="cipx">baba</span><span class="cipx">kardeş</span></div>
+            <div class="sat"><span class="et">AMD</span><span class="cipx on">yok</span></div>
+            <div class="sat"><span class="et">Keratokonus</span><span class="cipx on">yok</span></div>
+            <div class="sat"><span class="et">Kalıtsal retina</span><span class="cipx on">yok</span></div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Glokom aile öyküsü takip riskine yazılır (risk skoru).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GÖRME (v3 ile aynı, kısaltılmış) -->
+      <div class="panel" id="p-gorme">
+        <h3>Görme &amp; refraksiyon <span class="sp"></span><span class="kis"><span class="btn">⇉ Sağı sola kopyala</span></span></h3>
+        <table class="od">
+          <tr><th>Görme keskinliği</th><th class="r">OD · Sağ</th><th class="l">OS · Sol</th></tr>
+          <tr><td class="et">Düzeltmesiz (UCVA)</td><td><div class="inp">0,4 <span class="onc">önceki 0,4</span></div></td><td class="ay"><div class="inp">0,2 <span class="onc">önceki 0,3</span></div></td></tr>
+          <tr><td class="et">En iyi düzeltilmiş (BCVA)</td><td><div class="inp">0,6 <span class="onc">önceki 0,6</span></div></td><td class="ay"><div class="inp krm">0,3 <span class="onc dus">↓ önceki 0,5</span></div></td></tr>
+        </table>
+      </div>
+      <div class="panel" id="p-gib">
+        <h3>Tonometri &amp; pakimetri</h3>
+        <table class="od">
+          <tr><th></th><th class="r">OD · Sağ</th><th class="l">OS · Sol</th></tr>
+          <tr><td class="et">GİB (Goldmann)</td><td><div class="inp">18 <span class="onc">hedef 18</span></div></td><td class="ay"><div class="inp krm">26 <span class="onc dus">hedef 18 · önceki 22</span></div></td></tr>
+          <tr><td class="et">CCT</td><td><div class="inp">548 µm</div></td><td class="ay"><div class="inp">541 µm</div></td></tr>
+        </table>
+      </div>
+      <div class="panel" id="p-tani">
+        <h3>Tanılar <span class="sp"></span><span class="btn">＋ Tanı (ICD ara)</span></h3>
+        <table class="liste">
+          <tr><th>ICD</th><th>Tanı</th><th>Göz</th><th>Tür</th><th>Kesinlik</th></tr>
+          <tr><td><b>H40.1</b></td><td>Primer açık açılı glokom</td><td><span class="chip c-gri">Bilateral</span></td><td>Ana</td><td><span class="chip c-ok">Kesin</span></td></tr>
+          <tr><td><b>H25.1</b></td><td>Senil nükleer katarakt</td><td><span class="chip c-gri">Sağ</span></td><td>Ek</td><td><span class="chip c-bek">Ön tanı</span></td></tr>
+        </table>
+      </div>
+      <div class="panel" id="p-bos">
+        <h3>Bölüm</h3>
+        <div class="bilgi">İçerik v3 / bugünkü kartla aynı - v4'te değişen: <b>Özet</b> açılış sayfası ve <b>Şikâyet &amp; göz öyküsü</b>.</div>
+      </div>
+    </div>
+
+    <!-- SAĞ -->
+    <div class="sag">
+      <div class="bl"><h5>Bu muayene · özet</h5>
+        <div class="ozg">
+          <span></span><span class="h r">Sağ</span><span class="h l">Sol</span>
+          <span class="b">BCVA</span><span>0,6</span><span class="krm">0,3 ↓</span>
+          <span class="b">GİB</span><span>18</span><span class="krm">26</span>
+          <span class="b">Hedef</span><span>18</span><span>18</span>
+          <span class="b">CCT</span><span>548</span><span>541</span>
+          <span class="b">C/D</span><span>0,6</span><span class="krm">0,8</span>
+        </div>
+      </div>
+      <div class="bl"><h5>GİB eğilimi</h5>
+        <div class="tr">
+          <div class="c"><i style="height:62%"></i><i class="l y" style="height:72%"></i></div>
+          <div class="c"><i style="height:55%"></i><i class="l" style="height:62%"></i></div>
+          <div class="c"><i style="height:58%"></i><i class="y" style="height:80%"></i></div>
+          <div class="c"><i style="height:55%"></i><i class="y" style="height:95%"></i></div>
+        </div>
+      </div>
+      <div class="bl"><h5>Tanılar</h5><span class="tani-ch">H40.1 · OU</span><span class="tani-ch">H25.1 · OD</span></div>
+      <div class="bl"><h5>Uyarılar</h5>
+        <div class="krm" style="font-weight:normal">⚠ Sol GİB hedef üstü (3 ziyaret)</div>
+        <div class="krm" style="font-weight:normal">⚠ Sol görme 2 sıra düştü</div>
+        <div class="krm" style="font-weight:normal">⚠ Tamsulosin - katarakt cerrahisinde IFIS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kural">
+    <b>Tamamlamak için:</b>
+    <span class="k ok">✓ Şikâyet</span><span class="k ok">✓ Görme OD/OS</span><span class="k ok">✓ GİB OD/OS</span><span class="k ok">✓ Tanı</span>
+    <span class="k yok">○ Değerlendirme &amp; plan</span>
+    <span class="sp"></span>
+    <span class="btn primary">✔ Tamamla</span>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v4):</b> Kullanıcı: "muayenede yaptığımız özet sayfası, tamamlama listesi vardı; şikâyet ve hikâyeyi 1 satır yapalım, orayı başka nasıl doldururuz - ver4".
+v3 yerleşimi (sol aşama gezintisi, ortada bölüm, sağda OD/OS özet, altta kural çubuğu) korunur; iki şey eklenir:<br>
+<span class="n">1</span><b>Özet</b> - kart bununla açılır (genel muayenenin Özet sekmesinin göz karşılığı). Üstte beş kutu (görme, GİB, ana tanı, reçete, plan / kontrol;
+tıkla = ilgili bölüm), solda derlenmiş muayene metni (şikâyet, göz öyküsü, bulgular OD / OS, tanı, görüntüleme, reçete - <b>yazılmaz</b>, bölümlerden derlenir),
+sağda <b>tamamlama kontrolü</b> (sunucunun kuralıyla aynı liste: zorunlu ○ / tamam ✓ / uyarı !; eksiğin yanında "yaz → / imzala → / ver →"), bekleyen istemler ve son göz muayeneleri.<br>
+<span class="n">2</span><b>Şikâyet &amp; göz öyküsü</b> - şikâyet ve hikâye <b>tek satır</b> (⤢ ile genişler). Boşalan alan yapılandırılmış öyküyle dolar:
+<b>hızlı şikâyet çipleri</b> (tıkla = satıra eklenir; göz / süre / seyir seçimi; ışık çakması, uçuşan cisim, perde, ani kayıp <b>acil uyarısı</b> verir),
+<b>göz öyküsü</b> (ameliyat, lazer, travma, düzeltme, ambliyopi - önceki muayeneden gelir), <b>göz damlaları</b> (reçete geçmişi + takip; uyum hekimden),
+<b>sistemik hastalık &amp; göze etkili ilaçlar</b> (kronik tanı / aktif ilaçlardan; tamsulosin → IFIS, hidroksiklorokin → retinal toksisite işaretlenir),
+<b>aile öyküsü</b> (glokom, AMD, keratokonus, kalıtsal retina). "Önceki öyküyü aktar" ve Dikte bölüm başlığında.<br>
+<span class="n">3</span><b>Hasta değişmez</b> (kullanıcı): hasta başvurudan gelir, kart Hekim Listesi / pano "Muayeneye Al" ile açılır - kimlik satırında hasta
+alanı yoktur, hasta yalnız sarı şeritte okunur. Göz muayene listesinde "Yeni" yoktur (başvurusuz muayene açılmaz).<br>
+Sol gezintide Özet ve diğer bölümler tıklanabilir (Özet, Öykü, Görme, Tonometri, Tanılar örnekli).
+</div></div>
+
+<script>
+const ac = p => {
+  document.querySelectorAll('.nav .o').forEach(x => x.classList.toggle('on', x.dataset.p === p));
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
+};
+document.querySelectorAll('.nav .o').forEach(o => o.addEventListener('click', () => ac(o.dataset.p)));
+document.querySelectorAll('.kt[data-git]').forEach(k => k.addEventListener('click', () => ac(k.dataset.git)));
+</script>
+</body>
+</html>

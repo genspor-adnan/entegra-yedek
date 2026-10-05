@@ -47,100 +47,35 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
   if (!veri) return null;
 
   const k = veri.kimlik;
-  const d = veri.durum;
-  const adim = (ad: string, sayi: number) => (
-    <span key={ad} className={sayi > 0 ? 'tamam' : ''}>
-      {sayi > 0 ? '✔' : '○'} {ad}
-    </span>
-  );
-
+  // v4 (mockup goz_muayene_karti_v4): TEK sarı şerit - kim, takip, alerji, damlalar, sistemik,
+  //   önceki muayene ve rozetler. Bağlam kutuları Özet'e, tamamlanma çubuğu sol gezinti /
+  //   alt şeride taşındı.
+  const e = veri.ek;
   return (
-    <>
-      <div className="goz-kimlik">
+    <div className="gz4-ust">
+      <div>
         <div className="ad">{k.hasta}</div>
-        <div className="kv"><span>{c('Yaş / cinsiyet')}</span>
-          <b>{k.yas ?? '—'}{k.cinsiyet ? ` / ${CINSIYET[k.cinsiyet] ?? ''}` : ''}</b></div>
-        <div className="kv"><span>Protokol</span>
-          <b>{k.protokol || k.hastaNo || '—'}</b></div>
-        <div className="kv"><span>Tarih</span>
-          <b>{tarihSaat(k.tarih)}</b></div>
-        <div className="kv"><span>{c('Hekim / bölüm')}</span>
-          <b>{[k.hekim, k.bolum].filter(Boolean).join(' · ') || '—'}</b></div>
-        {k.oda && <div className="kv"><span>Oda</span><b>{k.oda}</b></div>}
-        <div className="sag">
-          <span className="rozet mavi">{MUAYENE_TURU[k.muayeneTuru] ?? 'Muayene'}</span>
-          {/* DİLATASYON ROZETİ: dilate hasta fundusa hazırdır ama iki saat
-              boyunca araç kullanamaz — hekim ve sekreter bunu bilmeli. */}
-          {k.dilate
-            ? <span className="rozet mor">💧 dilate{k.dilatasyonIlac ? ` · ${k.dilatasyonIlac}` : ''}</span>
-            : <span className="rozet pas">dilate değil</span>}
-          {k.tamamlandi && <span className="rozet ok">tamamlandı</span>}
+        <div className="sonuk">
+          {[`${k.yas ?? '—'}${k.cinsiyet ? ` ${CINSIYET[k.cinsiyet] ?? ''}` : ''}`,
+            k.protokol ? `Prot. ${k.protokol}` : '', tarihSaat(k.tarih), k.hekim].filter(Boolean).join(' · ')}
         </div>
       </div>
-
-      {/* HASTA ŞERİDİ (970 mockup goz_muayene_karti_v2): ölçüme başlamadan
-          bilinmesi gerekenler - alerji, kullandığı göz ilaçları, hedef GİB,
-          bir önceki muayenenin GİB'i. */}
-      {veri.ek && (
-        <div className="goz-hasta-serit">
-          {veri.ek.takip && <span>{c('Takip')}: <b>{veri.ek.takip}</b></span>}
-          <span>{c('Alerji')}: {veri.ek.alerji
-            ? <b className="gz-kirmizi">{veri.ek.alerji}</b> : <b className="gz-yesil">{c('bilinen yok')}</b>}</span>
-          <span>{c('Göz ilaçları')}: <b>{veri.ek.tedavi || '—'}</b></span>
-          {(veri.ek.hedefOd !== null || veri.ek.hedefOs !== null) && (
-            <span>{c('Hedef GİB')}: <b>{c('sağ')} {sayiYaz(veri.ek.hedefOd)} · {c('sol')} {sayiYaz(veri.ek.hedefOs)}</b></span>
-          )}
-          <span>{c('Önceki muayene')}: <b>{veri.ek.oncekiTarih
-            ? `${tarihSaat(veri.ek.oncekiTarih).slice(0, 10)} · GİB ${sayiYaz(veri.ek.oncekiGibOd)} / ${sayiYaz(veri.ek.oncekiGibOs)}`
-            : c('yok (ilk muayene)')}</b></span>
-        </div>
-      )}
-
-      {/* BAĞLAM KUTULARI (mockup `.hdr k4`): dördü de OKUNUR, yazılmaz -
-          şikâyet ve öykü genel muayene kaydının alanları; burada hekimin
-          hatırlaması için duruyor. */}
-      <div className="goz-baglam">
-        <div className="alan">
-          <span>Şikâyet</span>
-          <b>{k.sikayet || <i className="bos-deger">girilmemiş</i>}</b>
-        </div>
-        <div className="alan">
-          <span>{c('Sistemik / ilaç')}</span>
-          <b>{[k.ozgecmis, k.sistem].filter(Boolean).join(' · ')
-              || <i className="bos-deger">—</i>}</b>
-        </div>
-        <div className="alan">
-          <span>{c('Ön tetkik (tekniker · cihaz)')}</span>
-          <b>
-            {veri.onTetkik.length === 0
-              ? <i className="bos-deger">cihazdan ölçüm gelmedi</i>
-              : veri.onTetkik.map(t => (
-                  <span key={t.ad} className="rozet ok">
-                    {t.ad} ✔ {t.zaman ? new Date(t.zaman).toTimeString().slice(0, 5) : ''}
-                  </span>
-                ))}
-          </b>
-        </div>
-        <div className="alan">
-          <span>{c('Aile / risk')}</span>
-          <b>{k.soygecmis || <i className="bos-deger">—</i>}</b>
-        </div>
+      <div className="bil">
+        {e?.takip && <span>{c('Takip')}: <b>{e.takip}</b></span>}
+        <span>{c('Alerji')}: {e?.alerji ? <b className="gz-kirmizi">{e.alerji}</b> : <b className="gz-yesil">{c('bilinen yok')}</b>}</span>
+        <span>{c('Damlalar')}: <b>{e?.tedavi || '—'}</b></span>
+        {(k.ozgecmis || k.sistem) && <span>{c('Sistemik')}: <b>{[k.ozgecmis, k.sistem].filter(Boolean).join(' · ').slice(0, 60)}</b></span>}
+        <span>{c('Önceki')}: <b>{e?.oncekiTarih
+          ? `${tarihSaat(e.oncekiTarih).slice(0, 10)} · GİB ${sayiYaz(e.oncekiGibOd)} / ${sayiYaz(e.oncekiGibOs)}` : c('ilk muayene')}</b></span>
       </div>
-
-      {/* TAMAMLANMA ÇUBUĞU (mockup `.statusbar`): muayeneyi kapatmadan önce
-          "neyi ölçmedim" sorusunun cevabı. */}
-      <div className="goz-durum">
-        {adim('VA', d.va)}
-        {adim('Ref', d.ref_)}
-        {adim('GİB', d.gib)}
-        {adim('Ön seg', d.onSegment)}
-        {adim('Fundus', d.fundus)}
-        {adim('Tanı', d.tani)}
-        <span className="sonuk">
-          Ölçümler göz bazlı kaydedilir (OD/OS ayrı satır); kaynak cihaz,
-          tekniker ya da hekimdir.
-        </span>
+      <div className="roz">
+        <span className="rozet mavi">{MUAYENE_TURU[k.muayeneTuru] ?? 'Muayene'}</span>
+        {k.dilate
+          ? <span className="rozet mor">💧 {c('dilate')}{k.dilatasyonIlac ? ` · ${k.dilatasyonIlac}` : ''}</span>
+          : <span className="rozet pas">{c('dilate değil')}</span>}
+        {veri.onTetkik.map(t => <span key={t.ad} className="rozet ok">{t.ad} ✓</span>)}
+        <span className={`rozet ${k.tamamlandi ? 'ok' : 'uyari'}`}>{k.tamamlandi ? c('tamamlandı') : c('taslak')}</span>
       </div>
-    </>
+    </div>
   );
 }

@@ -268,10 +268,12 @@ public static class AksiyonKatalogu
             //   Calismayacak dugme koymak, olmayan bir yetenegi vaat etmektir.
             ["goz-muayene-liste"] =
             [
+                // "YENİ" YOK (kullanıcı 05.10.2026): hasta başvurudan gelir, kart
+                //   Hekim Listesi / pano "Muayeneye Al" ile açılır - başvurusuz
+                //   göz muayenesi açılmaz (göz süreci v2).
                 .. Crud("goz-muayene", "goz", "goz.muayene",
-                        ekleAdi: "＋ Yeni Muayene",
                         silIpucu: "Ölçümü olan muayene silinmez; "
-                                + "yanlış açılan boş kayıt için"),
+                                + "yanlış açılan boş kayıt için").Where(a => a.Kod != "goz-muayene.yeni"),
                 new("goz.muayene-tamamla", "✔ Muayeneyi Tamamla", "goz",
                     KaynakKodu: "goz.muayene", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 15, UrunModu: 2, Bicim: "onay",
@@ -311,9 +313,21 @@ public static class AksiyonKatalogu
             ["goz-islem-liste"] = Crud("goz-islem", "goz", "goz.islem",
                                        ekleAdi: "＋ Yeni İşlem",
                                        silIpucu: "Uygulanmış işlem silinmez; iptal edin"),
-            ["goz-gozluk-recete-liste"] = Crud("goz-gozluk-recete", "goz", "goz.recete",
-                                               ekleAdi: "＋ Yeni Reçete",
-                                               silIpucu: "Hastaya verilmiş reçete silinmez"),
+            // GÖZLÜK REÇETELERİ (972): "Yeni" YOK - reçete göz muayene kartından (hasta ve muayene
+            //   bağıyla) açılır. Akış düğmeleri ikinci satırda (aracCubuguAltSatir).
+            ["goz-gozluk-recete-liste"] =
+            [
+                .. Crud("goz-gozluk-recete", "goz", "goz.recete",
+                        silIpucu: "Hastaya verilmiş reçete silinmez").Where(a => a.Kod != "goz-gozluk-recete.yeni"),
+                new("goz.gozluk-imzala", "✍ İmzala", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 22, UrunModu: 2, Ipucu: "Değerler kilitlenir"),
+                new("goz.gozluk-optik", "🏪 Optike Gönder", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("goz.gozluk-teslim", "✔ Teslim Edildi", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 42, UrunModu: 2),
+                new("goz.gozluk-kopyala", "⧉ Yeni Reçeteye Kopyala", "goz", KaynakKodu: "goz.recete", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 44, UrunModu: 2, Ipucu: "Aynı hastanın muayenesinden açın"),
+            ],
             ["goz-kontakt-lens-liste"] = Crud("goz-kontakt-lens", "goz", "goz.recete",
                                               ekleAdi: "＋ Yeni Lens Kaydı"),
             ["goz-takip-liste"] = Crud("goz-takip", "goz", "goz.takip",

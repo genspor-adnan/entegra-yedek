@@ -193,8 +193,33 @@ export async function gozAkisAksiyonu(
     // MUAYENE ID (goz_muayene.id DEGIL): uc tablonun da muayene_id'si
     //   public.muayene'ye bakar. Yoksa bag kurulmaz, kart yine acilir.
     const muayeneId = Number(satir?.muayeneId ?? 0);
-    b.git(`${yol}/yeni?hastaId=${hastaId}`
-          + (muayeneId ? `&muayeneId=${muayeneId}` : ''));
+    // HASTA ADI + GERİ (kullanıcı): reçete kartında hasta dolu gelir; Kaydet / Kapat göz
+    //   muayene kartına döner.
+    const p = new URLSearchParams({ hastaId: String(hastaId) });
+    if (muayeneId) p.set('muayeneId', String(muayeneId));
+    if (satir?.hastaAdi) p.set('hastaAd', String(satir.hastaAdi));
+    p.set('geri', `/goz-muayene/${id}`);
+    b.git(`${yol}/yeni?${p.toString()}`);
+    return true;
+  }
+
+  // ---- GÖZLÜK REÇETELERİ (972): imza → optiğe ver → teslim; kopya yeni reçete açar.
+  if (kod === 'goz.gozluk-imzala' || kod === 'goz.gozluk-optik' || kod === 'goz.gozluk-teslim') {
+    if (!id) { mesaj('Önce bir reçete seçin.'); return true }
+    if (kod === 'goz.gozluk-imzala' && !await onay('Reçete imzalansın mı? İmzadan sonra değerler değiştirilemez.')) return true;
+    await guvenli(async () => {
+      if (kod === 'goz.gozluk-imzala') { const y = await api.gozlukImzala(id); mesaj(`Reçete imzalandı (${y.receteNo}).`) }
+      else { await api.gozlukDurum(id, kod === 'goz.gozluk-optik' ? 3 : 4); mesaj(kod === 'goz.gozluk-optik' ? 'Reçete optiğe verildi.' : 'Teslim edildi.') }
+      b.tazele();
+    });
+    return true;
+  }
+  if (kod === 'goz.gozluk-kopyala') {
+    if (!id) { mesaj('Önce bir reçete seçin.'); return true }
+    const p = new URLSearchParams({ hastaId: String(satir?.hastaId ?? ''), kopya: String(id) });
+    if (satir?.muayeneId) p.set('muayeneId', String(satir.muayeneId));
+    if (satir?.hasta) p.set('hastaAd', String(satir.hasta));
+    b.git(`/goz-gozluk-recete/yeni?${p.toString()}`);
     return true;
   }
 

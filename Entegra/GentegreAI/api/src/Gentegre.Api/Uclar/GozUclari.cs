@@ -40,6 +40,8 @@ public static partial class GozUclari
         SeritUcunuEkle(grup);
         ListeUclariniEkle(grup);
         SurecUclariniEkle(grup);
+        KartV4UclariniEkle(grup);
+        GozlukUclariniEkle(grup);
         MuayeneUclariniEkle(grup);
         // Cizim ve dikte (705): ikisi de MUAYENE BULGUSU yazmanin baska
         //   bir yolu - bulgu metni yazan tek uc ikisinde de ortak.

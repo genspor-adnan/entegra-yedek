@@ -32,7 +32,10 @@ const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
 import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
 import { c } from '../../dil/ceviri';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
-import { GozKartinaGit, GozOykuSekmesi, GozReceteSekmesi, GozTaniSekmesi, GozUcretSekmesi } from '../goz/GozSurecSekmeleri';
+import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
+import { GozlukHastaBandi, GozlukReceteFormu, gozlukYazdir, useGozlukKaynak } from '../goz/GozlukPanelleri';
+import { GOZ_SEKME_GRUPLARI, GozKuralSeridi, GozOykuV4Sekmesi, GozOzetSekmesi, GozSagOzet, useGozKontrol } from '../goz/GozKartV4';
+import { GozKartinaGit, GozReceteSekmesi, GozTaniSekmesi, GozUcretSekmesi } from '../goz/GozSurecSekmeleri';
 import { GozGibEgilimi, GozGoruntulerSekmesi, GozKarsilastirmaSekmesi, GozTaniPlanPaneli } from '../goz/GozMuayenePanelleri';
 import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKutusu, OrderPlanSekmesi } from '../yatan/OrderPanelleri';
 import { randevuTercihiYaz } from './randevuTercihi';
@@ -137,6 +140,25 @@ export function ListeKarti({
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
   const [kayitSayaci, setKayitSayaci] = useState(0);
+  // GÖZ KARTI v4: sol gezinti durumları + kontrol listesi (kayıt / tazeleme ile yenilenir).
+  const gozKontrol = useGozKontrol(tanim.kaynak === 'goz-muayene' && typeof kartId === 'number' ? kartId : 0,
+                                   kartTazele * 1000 + kayitSayaci);
+  // GÖZ KARTI BAŞLIĞI (kullanıcı): kayıt numarası yerine hasta no + protokol no.
+  const [gozBaslik, setGozBaslik] = useState<{ h: string; p: string; ad: string } | null>(null);
+  useEffect(() => {
+    setGozBaslik(null);
+    if (tanim.kaynak !== 'goz-muayene' || typeof kartId !== 'number') return;
+    api.gozMuayeneSeridi(kartId).then(y => setGozBaslik({ h: y.kimlik.hastaNo, p: y.kimlik.protokol, ad: y.kimlik.hasta })).catch(() => {});
+  }, [tanim.kaynak, kartId]);
+  // GÖZLÜK REÇETESİ v2: kaynak (hasta bandı, başlık rozetleri, "değerleri al", önceki reçeteler).
+  const gozlukKaynak = useGozlukKaynak(tanim.kaynak === 'goz-gozluk-recete',
+    typeof kartId === 'number' ? { receteId: kartId }
+      : { hastaId: Number(sorgu.get('hastaId') ?? 0) || undefined, muayeneId: Number(sorgu.get('muayeneId') ?? 0) || undefined },
+    kartTazele * 1000 + kayitSayaci);
+  const gozTamamla = async () => {
+    if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
+    await aksiyon('goz.muayene-tamamla', { id: Number(kartId) } as ListeSatiri);
+  };
   const { aksiyonVar } = useOturum();
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
@@ -206,6 +228,31 @@ export function ListeKarti({
         kaynak={tanim.kaynak}
         id={kartId}
         kaydetBagla={f => { kartKaydetRef.current = f }}
+        // GÖZ KARTI v4 (mockup goz_muayene_karti_v4): solda aşamalı gezinti, sağda OD/OS
+        //   özeti, altta tamamlama koşulları - yalnız kayıtlı kartta.
+        sekmeGruplari={tanim.kaynak === 'goz-muayene' ? GOZ_SEKME_GRUPLARI : undefined}
+        // Başlık rozetleri (kullanıcı): H hasta no · P protokol no.
+        baslikRozet={tanim.kaynak === 'goz-gozluk-recete' && gozlukKaynak ? (
+          <>
+            {gozlukKaynak.hasta?.hastaNo && <span className="rozet gri" title={c('Hasta no')}>H {gozlukKaynak.hasta.hastaNo}</span>}
+            {gozlukKaynak.muayene?.protokol && <span className="rozet gri" title={c('Protokol no')}>P {gozlukKaynak.muayene.protokol}</span>}
+          </>
+        ) : tanim.kaynak === 'goz-muayene' && gozBaslik ? (
+          <>
+            {gozBaslik.h && <span className="rozet gri" title={c('Hasta no')}>H {gozBaslik.h}</span>}
+            {gozBaslik.p && <span className="rozet gri" title={c('Protokol no')}>P {gozBaslik.p}</span>}
+          </>
+        ) : undefined}
+        sekmeDurumu={tanim.kaynak === 'goz-muayene' ? (bas => {
+          // ÖZET bir bölüm değil, derleme: durum noktası yerine ikon (kullanıcı).
+          if (bas === 'Özet') return { durum: '', ikon: '▤' };
+          const d = gozKontrol?.bolumler.find(x => x.baslik === bas);
+          return d ? { durum: d.durum, ipucu: d.ipucu } : undefined;
+        }) : undefined}
+        yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
+          ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} /> : undefined}
+        altSerit={tanim.kaynak === 'goz-muayene'
+          ? (git => <GozKuralSeridi kontrol={gozKontrol} sekmeyeGit={git} onTamamla={() => void gozTamamla()} />) : undefined}
         // MUAYENE > ISTEM & SONUCLAR (443): katalogdan gelen bag gridi
         //   "su istem acildi" der; hekimin ihtiyaci SONUCUN KENDISI.
         //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
@@ -462,12 +509,21 @@ export function ListeKarti({
         // YENİ KARTTA DA 7 SEKME (kullanıcı: "rapor şablonu mockup'ta 7 sekme var"):
         //   Önizleme girilen içerikle çalışır; Sürümler / Kullanım kayıttan sonra dolar.
         // RADYOLOJİ CİHAZI (967): Doz · Kullanım · Belgeler (kayıtlı cihazda).
+        // GÖZLÜK REÇETESİ (972): tek "Reçete" sekmesi (yeni kayıtta da) - değerler kart alanlarına yazılır.
         // ORDER (968): Doz planı · Güvenlik kontrolleri · Geçmiş (kayıtlı order'da).
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
-        ekSekmeler={tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
+        ekSekmeler={tanim.kaynak === 'goz-gozluk-recete'
+          ? [{ anahtar: 'ozel:gl-recete', baslik: 'Reçete', yenideDe: true,
+               ciz: (b) => <GozlukReceteFormu b={b} k={gozlukKaynak} kopyaId={Number(sorgu.get('kopya') ?? 0) || null} /> }]
+          : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
           ? [
               // SÜREÇ v2 (goz_sureci_v2): genel muayenenin sekmeleri göz kartında - aynı veri.
-              { anahtar: 'ozel:gz-oyku', baslik: 'Şikâyet & Öykü', ciz: () => <GozOykuSekmesi id={Number(kartId)} yenile={kartTazele} /> },
+              // v4: kart ÖZET ile açılır (genel muayenenin Özet sekmesinin göz karşılığı).
+              { anahtar: 'ozel:gz-ozet', baslik: 'Özet',
+                ciz: (b) => <GozOzetSekmesi id={Number(kartId)} kontrol={gozKontrol} yenile={kartTazele * 1000 + kayitSayaci}
+                                            sekmeyeGit={b.sekmeyeGit} onTamamla={() => void gozTamamla()} /> },
+              { anahtar: 'ozel:gz-oyku', baslik: 'Şikâyet & Öykü',
+                ciz: (b) => <GozOykuV4Sekmesi id={Number(kartId)} hastaId={Number(b.deger.hastaId ?? 0)} yenile={kartTazele} /> },
               { anahtar: 'ozel:gz-tani', baslik: 'Tanılar',
                 ciz: (b) => <GozTaniSekmesi id={Number(kartId)} muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele}
                                             icdAc={mid => (icdAc ? icdAc(mid) : setIcdAramaAcik(true))} /> },
@@ -564,7 +620,13 @@ export function ListeKarti({
         // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
         //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
         //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
-        seritSarmalayici={tanim.kaynak === 'yatis-order' && kartId !== 'yeni' && kartId !== null
+        seritSarmalayici={tanim.kaynak === 'goz-gozluk-recete'
+          // Hasta bandı kimlik şeridinin ÜSTÜNDE (göz kartıyla aynı düzen).
+          ? (serit, d) => <><GozlukHastaBandi k={gozlukKaynak} durum={Number(d.durum ?? 1)} />{serit}</>
+          : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
+          // GÖZ KARTI v4 (kullanıcı): hasta bandı ÜSTTE, muayene türü / dilatasyon bandı altında.
+          ? (serit) => <><GozMuayeneSeridi gozMuayeneId={Number(kartId)} yenile={kartTazele} />{serit}</>
+          : tanim.kaynak === 'yatis-order' && kartId !== 'yeni' && kartId !== null
           // ORDER (968 mockup): kimlik şeridinin üstünde hasta şeridi (alerji, tanı...).
           ? (serit) => <><OrderHastaSeridi id={Number(kartId)} yenile={kartTazele} />{serit}</>
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
@@ -589,7 +651,25 @@ export function ListeKarti({
         // CİHAZ KARTI ARAÇ ÇUBUĞU (kullanıcı: "en üstte butonlar eksik", mockup):
         //   bağlantı testi · kapat / bakıma al · takvimde göster.
         // ORDER KARTI ARAÇ ÇUBUĞU (968 mockup): hekim onayı · durdur · doz değiştir · tekrarla.
-        ekAraclar={kartId !== 'yeni' && kartId !== null && tanim.kaynak === 'yatis-order'
+        // GÖZLÜK REÇETESİ ARAÇ ÇUBUĞU (mockup): imzala · yazdır (A5) · optiğe ver · teslim.
+        ekAraclar={tanim.kaynak === 'goz-gozluk-recete' && typeof kartId === 'number'
+          ? (d) => {
+              const durum = Number(d.durum ?? 1);
+              const islem = (f: () => Promise<unknown>) => void guvenli(async () => { await f(); setKartTazele(t => t + 1); setYenile(t => t + 1) });
+              return (
+                <>
+                  {durum === 1 && <button type="button" className="d" onClick={() => islem(async () => {
+                    if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
+                    if (!await onay(c('Reçete imzalansın mı? İmzadan sonra değerler değiştirilemez.'))) return;
+                    await api.gozlukImzala(kartId);
+                  })}>✍ {c('İmzala')}</button>}
+                  <button type="button" className="d" onClick={() => gozlukYazdir()}>🖨 {c('Yazdır (A5)')}</button>
+                  {durum === 2 && <button type="button" className="d" onClick={() => islem(() => api.gozlukDurum(kartId, 3))}>🏪 {c('Optike gönder')}</button>}
+                  {(durum === 2 || durum === 3) && <button type="button" className="d" onClick={() => islem(() => api.gozlukDurum(kartId, 4))}>✔ {c('Teslim edildi')}</button>}
+                </>
+              );
+            }
+          : kartId !== 'yeni' && kartId !== null && tanim.kaynak === 'yatis-order'
           ? (d) => {
               const id = Number(kartId);
               const dd = d as Record<string, unknown>;
@@ -675,7 +755,7 @@ export function ListeKarti({
               const satir = {
                 id: Number(kartId),
                 hastaId: Number(d.hastaId ?? d.tarafId ?? 0),
-                hastaAdi: String(d.tarafAdi ?? d.hastaAdi ?? ''),
+                hastaAdi: String(d.tarafAdi ?? d.hastaAdi ?? gozBaslik?.ad ?? ''),
                 // Kisayolla acilacak kayitlar bu muayeneye baglanir.
                 muayeneId: Number(d.muayeneId ?? 0),
               };
@@ -731,11 +811,10 @@ export function ListeKarti({
                 // GOZ MUAYENESI (mockup goz_detayli_muayene.html araç çubuğu):
                 //   hekim ölçümü bitirince buradan çıkış yapıyor.
                 <>
-                  {dugme('goz.muayene-tamamla', '✔ Tamamla', 'd onay')}
-                  {/* RAPOR / SEVK genel kartta (süreç v2): aynı muayene, tek tık. */}
-                  {Number(d.muayeneId ?? 0) > 0 && (
-                    <button type="button" className="d" onClick={() => git(`/muayene/${Number(d.muayeneId)}?geri=${encodeURIComponent(`/goz-muayene/${kartId}`)}`)}>📋 {c('Genel muayene')}</button>
-                  )}
+                  {/* v4: Tamamla alt şeritte ve Özet'te (koşullarla birlikte). */}
+                  <button type="button" className="d"
+                          onClick={() => setOzetModal(Number(d.muayeneId ?? 0) || null)}>📖 {c('Muayene özeti')}</button>
+                  {/* "Genel muayene" düğmesi kaldırıldı (kullanıcı 05.10.2026). */}
                   {dugme('goz.gozluk-recete', '👓 Gözlük Reçetesi')}
                   {dugme('goz.goruntuleme-iste', '📷 Görüntüleme İste')}
                   {dugme('goz.islem-planla', '💉 İşlem Planla')}
@@ -821,6 +900,8 @@ export function ListeKarti({
           //   geldigi ekrana doner; kart yoluna ara gecis gereksiz gecmis birakirdi.
           // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.
           // ISG (741): yeni calisan kaydedince ozel karta (muayene ac / form gonder).
+          // GÖZLÜK REÇETESİ (kullanıcı): muayeneden açıldıysa Kaydet göz muayene kartına döner.
+          if (tanim.kaynak === 'goz-gozluk-recete' && sorgu.get('geri')) { git(sorgu.get('geri')!, { replace: true }); return }
           if (kartId === 'yeni' && tanim.kaynak === 'isg-calisan') { git(`/isg-calisan/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/isg-calisan')}`, { replace: true }); return }
           if (kartId === 'yeni' && tanim.kaynak === 'ftr-program') { git(`/ftr-program/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/ftr-program')}`, { replace: true }); return }
           if (kartId === 'yeni' && !sorgu.get('geri')) {

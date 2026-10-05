@@ -569,7 +569,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
 
   // ALT SATIR (aracCubuguAltSatir): Yeni / Düzenle / Yazdır başlık satırında
   //   kalır, akış düğmeleri (Ata, Müdahale...) altına iner, sağa yaslı.
-  const altSatirda = (kod: string) => !(kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod === 'genel.yazdir');
+  const altSatirda = (kod: string) => !(kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('-imzala')
+                                         || kod === 'genel.yazdir');
 
   return (
     <>

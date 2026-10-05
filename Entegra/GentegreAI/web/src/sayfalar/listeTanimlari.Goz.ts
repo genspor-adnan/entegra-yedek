@@ -102,12 +102,24 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     yol: 'Göz › Gözlük Reçeteleri',
     kartYolu: '/goz-gozluk-recete', kartBaslik: 'Gözlük Reçetesi',
     tarihAlani: 'tarih',
+    // 973 (mockup goz_gozluk_recete_listesi_v2.html): dönem / durum + SGK / çocuk çipleri;
+    //   gösterge, tür / durum / optik (sol) ve önizleme (sağ) panelleri Liste'de.
     cipler: [
-      { ad: 'Taslak',         filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'İmzalandı',      filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Optiğe verildi', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Bugün',          filtre: { alan: 'bugun',   op: 'esit', deger: 1 } },
+      { ad: 'Bu hafta',       filtre: { alan: 'buHafta', op: 'esit', deger: 1 } },
+      { ad: 'Taslak',         filtre: { alan: 'durum',   op: 'esit', deger: 1 } },
+      { ad: 'İmzalı',         filtre: { alan: 'durum',   op: 'esit', deger: 2 } },
+      { ad: 'Optikte',        filtre: { alan: 'durum',   op: 'esit', deger: 3 } },
+      { ad: 'Teslim edildi',  filtre: { alan: 'durum',   op: 'esit', deger: 4 } },
+      { ad: 'SGK’lı',         filtre: { alan: 'sgkHak',  op: 'esit', deger: 1 } },
+      { ad: 'Çocuk (< 18)',   filtre: { alan: 'cocuk',   op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
+    aracCubuguAltSatir: true,
+    gizliKolonlar: ['receteNo', 'gecerlilikBitis'],
+    kolonSirasi: ['tarihMetin', 'hasta', 'turAdi', 'od', 'os', 'addMetin', 'pdMetin', 'hekim', 'optik', 'durumAdi', 'uyari'],
+    // Değerler kartın kendi "Reçete" sekmesinde (GozlukReceteFormu) - katalog grubu gizli.
+    gizliKartSekmeleri: ['Değerler'],
     urunModu: 2,
     menuGrup: 'Göz', menuAd: 'Gözlük Reçeteleri', ic: '👓', yetkiKodu: 'goz.recete', menuSira: 50,
   },
