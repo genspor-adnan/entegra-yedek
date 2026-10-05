@@ -19222,3 +19222,46 @@ geri alındı, glokom 1 · retina 2 kayıt döndü), kalite alt metni geçici
 şeridi süzdü, Değerlendir düğmesi çekilmiş kayıtta çıkıp karta götürdü
 (`/goz-goruntuleme/990108`), istenmiş kayıtta görünmedi. dotnet test 218,
 vitest 789 geçti.
+
+## 05.10.2026 — Göz muayene listesi mockup'a tamamlandı + panel katlama etiketi
+
+Kullanıcı: *"göz muayene listesini de mockup gibi yap"* ve *"sağ ve sol
+panelleri açılır/kapanır olsun"*. Mockup `Ekranlar/Goz/goz_muayene_listesi_v2.html`.
+
+Zaten yerinde olanlar: altı gösterge kutusu, tür · hekim ağacı, görme / GİB
+sağ-sol tek hücrede (düşüş ve hedef üstü kırmızı), tanı · kontrol · uyarı
+kolonları, hasta altında yaş · cinsiyet · takip · protokol, sağ panelde hasta
+(alerji, damlalar, hedef GİB) · bu muayene · GİB eğilimi · tanı & plan.
+
+Eklenenler:
+
+* **Saat kolonu + alt metni** ("09:10" / altında "dilate 09:35"). Gün ve saat
+  birlikte yazılıyor: liste bir günle sınırlı değil (hafta / tümü çipleri de
+  var), yalnız saat hangi güne ait olduğunu belirsiz bırakırdı. Damla saati
+  `goz_ziyaret_istasyon.dilatasyon_zamani`'ndan, **yalnız dilate muayenede** -
+  ilk yazımda koşul kolonun tamamını kapsamıyordu ve dilate olmayan bir
+  muayenenin altına hastanın o günkü başka ziyaretindeki damla saati düşüyordu
+  (uçta görüldü, düzeltildi).
+* **"Bu hafta" çipi** (mockup'ta vardı, eksikti) ve **dilate / glokom / retina
+  çipleri dönem şeridinden çıkarıldı**: o şerit TEK SEÇİM olduğu için
+  "Bugün + glokom takibi" kurulamıyordu. Üçü artık sol panelin üstündeki
+  **işaret şeridinde**, bağımsız açılıp kapanıyor - görüntüleme listesiyle
+  ORTAK bileşen (`bilesenler/goz/GozIsaretSeridi.tsx`; dün görüntülemeye
+  yazılan yerel kopya buraya taşındı).
+* **Araç çubuğuna "🖼 Görüntüleme İste"** (mockup'ta vardı): panonun aynı
+  aksiyonu, satırda `gozMuayeneId` arıyor - muayene listesine o adla bir kolon
+  eklendi, aksiyon mantığı değişmedi.
+* **Sağ panelde "Hızlı işlem"**: Aç · Tamamla (yalnız taslakta) · Gözlük
+  reçetesi · Görüntüleme iste. Düğmeler araç çubuğunun AYNI yolunu çağırıyor.
+* **Panel katlama (iki ekranda da)**: mekanizma vardı (ekran başına
+  `localStorage`, sol varsayılan açık, sağ 1600px altında kapalı başlar) ama
+  kapalı şeritte yalnız bir ok duruyordu - kullanıcı panelin kapalı olduğunu
+  değil **hiç olmadığını** düşünüyordu. Kapalı şeride dikey etiket eklendi
+  ("Süzgeç" / "Özet") ve ipucu metni netleşti ("Özet panelini aç").
+
+Doğrulama: uçta saat / saatAlt / buHafta / gozMuayeneId denendi (damla saati
+düzeltmesi öncesi-sonrası karşılaştırıldı); tarayıcıda kolon başlıkları
+mockup'la aynı sırada, çipler `Bugün · Bu hafta · Taslak · Tamamlandı · Tümü`,
+işaret şeridi süzdü ve "Glokom takibi + Bugün" kombinasyonu çalıştı, hızlı
+işlem dört düğmeyi gösterdi, sol panel kapatılıp açıldı ("Süzgeç" etiketi).
+dotnet test 218, vitest 789 geçti.

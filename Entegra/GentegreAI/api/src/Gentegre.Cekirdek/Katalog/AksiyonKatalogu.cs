@@ -286,6 +286,12 @@ public static class AksiyonKatalogu
                     KaynakKodu: "goz.islem", Islem: Islem.Ekle,
                     KayitGerekir: true, Sira: 50, UrunModu: 2,
                     Ipucu: "Enjeksiyon · lazer · ameliyat"),
+                // MOCKUP ARAÇ ÇUBUĞU: "🖼 Görüntüleme İste" - hekim muayeneyi
+                //   kapatmadan OCT / görme alanı ister (istem muayeneye yazılır).
+                new("goz.goruntuleme-istem", "🖼 Görüntüleme İste", "goz",
+                    KaynakKodu: "goz.goruntuleme", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 44, UrunModu: 2,
+                    Ipucu: "Seçili muayeneye OCT / görme alanı / biyometri istemi"),
                 new("goz.onceki-kopyala", "📋 Önceki Muayeneden Kopyala", "goz",
                     Hedef: "araccubugu2,sagtus,palet",
                     KaynakKodu: "goz.muayene", Islem: Islem.Degistir,

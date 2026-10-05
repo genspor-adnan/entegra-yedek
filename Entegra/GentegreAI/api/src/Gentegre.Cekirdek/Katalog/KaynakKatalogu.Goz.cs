@@ -1,4 +1,4 @@
-﻿namespace Gentegre.Cekirdek.Katalog;
+namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// GÖZ (OFTALMOLOJİ) MODÜLÜ LİSTELERİ (691) — tasarım notu
@@ -240,6 +240,27 @@ public static partial class KaynakKatalogu
             new("hastaId",   "gm.hasta_id",  "sayi", "Hasta Id", Varsayilan: false),
             new("tarih",     "m.muayene_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                              Bicim: "dd.MM.yyyy HH:mm"),
+            // SAAT + ALT METİN (mockup: "09:10" / altında "dilate 09:35").
+            //   Gün ve saat birlikte: liste bir günle sınırlı değil (dönem
+            //   çipleri hafta / tümü de seçiyor), yalnız saat yazmak hangi
+            //   güne ait olduğunu belirsiz bırakırdı.
+            new("saat", "to_char(m.muayene_tarihi at time zone 'Europe/Istanbul', 'DD.MM HH24:MI')",
+                                             "metin", "Saat", Hizalama: "orta", Genislik: 100,
+                                             Filtrelenebilir: false, Bicim: "alt:saatAlt"),
+            // DAMLA SAATİ istasyon kaydından (goz_ziyaret_istasyon.dilatasyon_zamani):
+            //   dilate bayrağı "damla verildi" demiyor, saati verilmiş olanda var.
+            //   Süre dolmadıysa "damla HH:MM", dolduysa yalnız "dilate".
+            new("saatAlt",
+                // Damla saati YALNIZ dilate muayenede: hastanın o gün başka bir
+                //   ziyarette damlası olabilir, dilate OLMAYAN muayenenin altına
+                //   saat yazmak o muayenede damla yapıldığı anlamına gelirdi.
+                "case when gm.dilate = 1 then concat_ws(' ', 'dilate', "
+                + "(select to_char(zi.dilatasyon_zamani at time zone 'Europe/Istanbul', 'HH24:MI') "
+                + "   from public.goz_ziyaret_istasyon zi "
+                + "  where zi.hasta_id = gm.hasta_id and zi.dilatasyon_zamani is not null "
+                + "    and zi.dilatasyon_zamani::date = m.muayene_tarihi::date "
+                + "  order by zi.dilatasyon_zamani desc limit 1)) else '' end",
+                                             "metin", "Saat Notu", Varsayilan: false, Filtrelenebilir: false),
             new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 200,
                 Bicim: "alt:hastaAlt"),
             // 970 (mockup goz_muayene_listesi_v2): hastanın altında yaş / cinsiyet / takip / protokol.
@@ -284,6 +305,11 @@ public static partial class KaynakKatalogu
                                              "mantik", "Bugün", Varsayilan: false),
             new("son30", "case when m.muayene_tarihi >= now() - interval '30 days' then 1 else 0 end",
                                              "mantik", "Son 30 Gün", Varsayilan: false),
+            new("buHafta", "case when m.muayene_tarihi >= date_trunc('week', now()) then 1 else 0 end",
+                                             "mantik", "Bu Hafta", Varsayilan: false),
+            // GÖRÜNTÜLEME İSTEMİ aksiyonu satırda `gozMuayeneId` arıyor (pano
+            //   ile AYNI kod yolu): burada göz muayenesinin kendisi o kayıttır.
+            new("gozMuayeneId", "gm.id", "sayi", "Göz Muayene Id", Varsayilan: false),
             new("uyari",
                 "concat_ws(' · ', "
                 + "case v.gib_yuksek when 1 then 'Sağ GİB hedef üstü' when 2 then 'Sol GİB hedef üstü' when 3 then 'İki göz GİB hedef üstü' end, "

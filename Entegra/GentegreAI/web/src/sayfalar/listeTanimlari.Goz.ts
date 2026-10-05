@@ -68,17 +68,19 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     tarihAlani: 'tarih',
     // 970 (mockup goz_muayene_listesi_v2.html): dönem / durum + takip çipleri;
     //   gösterge, tür / hekim (sol) ve önizleme (sağ) panelleri Liste'de.
+    // DÖNEM / DURUM çipleri (tek seçim). Dilate · glokom · retina ARTIK
+    //   BURADA DEĞİL: onlar birbirinden bağımsız açılır, sol panelin
+    //   üstündeki işaret şeridinde (GozIsaretSeridi) - tek seçimli şeritte
+    //   "Bugün + dilate" kurulamıyordu.
     cipler: [
-      { ad: 'Bugün',          filtre: { alan: 'bugun',      op: 'esit', deger: 1 } },
-      { ad: 'Taslak',         filtre: { alan: 'tamamlandi', op: 'esit', deger: 0 } },
-      { ad: 'Tamamlandı',     filtre: { alan: 'tamamlandi', op: 'esit', deger: 1 } },
-      { ad: 'Dilate',         filtre: { alan: 'dilate',     op: 'esit', deger: 1 } },
-      { ad: 'Glokom takibi',  filtre: { alan: 'glokom',     op: 'esit', deger: 1 } },
-      { ad: 'Retina takibi',  filtre: { alan: 'retina',     op: 'esit', deger: 1 } },
+      { ad: 'Bugün',      filtre: { alan: 'bugun',      op: 'esit', deger: 1 } },
+      { ad: 'Bu hafta',   filtre: { alan: 'buHafta',    op: 'esit', deger: 1 } },
+      { ad: 'Taslak',     filtre: { alan: 'tamamlandi', op: 'esit', deger: 0 } },
+      { ad: 'Tamamlandı', filtre: { alan: 'tamamlandi', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    gizliKolonlar: ['dilate'],
-    kolonSirasi: ['tarih', 'hasta', 'turAdi', 'bcvaOd', 'gibOd', 'tani', 'hekim', 'kontrol', 'durumAdi', 'uyari'],
+    gizliKolonlar: ['dilate', 'tarih'],
+    kolonSirasi: ['saat', 'hasta', 'turAdi', 'bcvaOd', 'gibOd', 'tani', 'hekim', 'kontrol', 'durumAdi', 'uyari'],
     urunModu: 2,
     menuGrup: 'Göz', menuAd: 'Muayeneler', ic: '👁️', yetkiKodu: 'goz.muayene', menuSira: 20,
   },

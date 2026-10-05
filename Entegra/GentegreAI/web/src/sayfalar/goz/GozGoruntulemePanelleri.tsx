@@ -5,6 +5,7 @@ import type { GozGoruntulemeGostergeYaniti, GozGoruntulemeOnizleme } from '../..
 import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { GozIsaretSeridi, useGozIsaretleri } from '../../bilesenler/goz/GozIsaretSeridi';
 import { GOZ_SONUC, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
 
 /**
@@ -36,26 +37,14 @@ export function goruntulemeDurumu(durum: number, serbest: number): { ad: string;
 // ------------------------------------------------------------------ LİSTE --
 export type GoruntulemeGostergeKodu = 'bugun' | 'sirada' | 'odemeBekliyor' | 'degerlendirmeBekleyen' | 'kaliteDusuk' | 'esikDisi' | 'yzDikkat';
 
-/** Mockup ② şeridindeki işaretler - etiket ve kolon adı tek yerde. */
-export const GORUNTULEME_ISARETLERI = {
-  dilate: 'Dilate', glokomTakip: 'Glokom takibi', retinaTakip: 'Retina / anti-VEGF',
-} as const;
-export type GoruntulemeIsaretKodu = keyof typeof GORUNTULEME_ISARETLERI;
-
 export function useGoruntulemeSuzgeci(aktif: boolean) {
   const [gosterge, setGosterge] = useState<GoruntulemeGostergeKodu | null>(null);
   const [tetkik, setTetkik] = useState<number | null>(null);
   const [cihaz, setCihaz] = useState<number | null>(null);
   const [degerlendiren, setDegerlendiren] = useState<number | null>(null);
-  /**
-   * MOCKUP ② ŞERİDİ: dilate · glokom takibi · retina / anti-VEGF. Üçü
-   * BİRBİRİNDEN BAĞIMSIZ açılır / kapanır (gösterge çipleri gibi tek seçim
-   * değil): "dilate + glokom takibi" gerçek bir soru - damlalı hasta
-   * bekletilemez, glokom izlemi de aynı gün görme alanı ister.
-   */
-  const [isaretler, setIsaretler] = useState<Record<GoruntulemeIsaretKodu, boolean>>(
-    { dilate: false, glokomTakip: false, retinaTakip: false });
-  const isaretCevir = (k: GoruntulemeIsaretKodu) => setIsaretler(o => ({ ...o, [k]: !o[k] }));
+  // İŞARET ŞERİDİ muayene listesiyle ORTAK (bilesenler/goz/GozIsaretSeridi):
+  //   iki ekranda aynı üç soru soruluyor.
+  const isaret = useGozIsaretleri();
   const filtre = (temel: Kosul | undefined): Kosul | undefined => {
     if (!aktif) return temel;
     const l: Kosul[] = temel ? [temel] : [];
@@ -67,14 +56,14 @@ export function useGoruntulemeSuzgeci(aktif: boolean) {
     if (gosterge === 'kaliteDusuk') esit('kaliteDusuk', 1);
     if (gosterge === 'esikDisi') esit('esikDisi', 1);
     if (gosterge === 'yzDikkat') esit('yzDikkat', 1);
-    (Object.keys(isaretler) as GoruntulemeIsaretKodu[]).forEach(k => { if (isaretler[k]) esit(k, 1) });
+    isaret.isaretKosullari(esit);
     if (tetkik !== null) esit('tetkik', tetkik);
     if (cihaz !== null) esit('cihazId', cihaz);
     if (degerlendiren !== null) esit('degerlendirenId', degerlendiren);
     return l.length === 0 ? undefined : l.length === 1 ? l[0] : { op: 'and', kosullar: l };
   };
   return { gosterge, setGosterge, tetkik, setTetkik, cihaz, setCihaz, degerlendiren, setDegerlendiren,
-           isaretler, isaretCevir, filtre };
+           isaret, filtre };
 }
 export type GoruntulemeSuzgeci = ReturnType<typeof useGoruntulemeSuzgeci>;
 
@@ -112,12 +101,7 @@ export function GoruntulemeSolPanel({ veri, s }: { veri: GozGoruntulemeGostergeY
   return (
     <div className="rt-agac">
       {/* İşaret şeridi EN ÜSTTE: tetkik / cihaz ağacından bağımsız süzgeç. */}
-      <div className="gg-isaret">
-        {(Object.keys(GORUNTULEME_ISARETLERI) as GoruntulemeIsaretKodu[]).map(k => (
-          <button key={k} type="button" className={`pl-k gg-cip${s.isaretler[k] ? ' on' : ''}`}
-                  onClick={() => s.isaretCevir(k)}>{c(GORUNTULEME_ISARETLERI[k])}</button>
-        ))}
-      </div>
+      <GozIsaretSeridi s={s.isaret} />
       <h6>{c('Tetkik')}</h6>
       <button type="button" className={`rt-dal${s.tetkik === null ? ' on' : ''}`} onClick={() => s.setTetkik(null)}><span>{c('Tümü')}</span><i>{toplam}</i></button>
       {(veri?.tetkikler ?? []).map(t => (

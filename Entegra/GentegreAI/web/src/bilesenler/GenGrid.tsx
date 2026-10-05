@@ -849,10 +849,15 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           : undefined}>
         {gorunum === 'liste' && solPanel && (
           <aside className={`grid-sol-panel${solKapali ? ' kapali' : ''}`}>
+            {/* KAPALIYKEN NE OLDUĞU YAZAR: ince şeritte yalnız bir ok
+                duruyordu, kullanıcı panelin kapalı olduğunu değil hiç
+                olmadığını düşünüyordu. Etiket yalnız kapalıyken çizilir -
+                açıkken panelin kendi başlıkları zaten var. */}
             <button className="d sol-katla" type="button"
-                    title={solKapali ? 'Paneli aç' : 'Paneli kapat'}
+                    title={solKapali ? 'Süzgeç panelini aç' : 'Paneli kapat'}
                     onClick={() => setSolKapali(k => !k)}>
               <KatlaOku yon={solKapali ? 'sag' : 'sol'} />
+              {solKapali && <span className="katla-et">Süzgeç</span>}
             </button>
             {!solKapali && solPanel}
           </aside>
@@ -918,9 +923,10 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
         {gorunum === 'liste' && yanPanel && (
           <aside className={`grid-yan-panel${yanKapali ? ' kapali' : ''}`}>
             <button className="d yan-katla" type="button"
-                    title={yanKapali ? 'Paneli aç' : 'Paneli kapat'}
+                    title={yanKapali ? 'Özet panelini aç' : 'Paneli kapat'}
                     onClick={() => setYanKapali(k => !k)}>
               <KatlaOku yon={yanKapali ? 'sol' : 'sag'} />
+              {yanKapali && <span className="katla-et">Özet</span>}
             </button>
             {!yanKapali && yanPanel}
           </aside>

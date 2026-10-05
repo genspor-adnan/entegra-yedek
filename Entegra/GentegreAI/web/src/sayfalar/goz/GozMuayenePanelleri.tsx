@@ -5,6 +5,7 @@ import type { GozGecmisSatiri, GozMuayeneGostergeYaniti, GozMuayeneIsleri, GozMu
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
 import { c } from '../../dil/ceviri';
+import { GozIsaretSeridi, useGozIsaretleri } from '../../bilesenler/goz/GozIsaretSeridi';
 
 /**
  * GÖZ MUAYENE LİSTESİ + KARTI PARÇALARI (970, mockup
@@ -27,6 +28,10 @@ export function useGozMuayeneSuzgeci(aktif: boolean) {
   const [gosterge, setGosterge] = useState<GozGostergeKodu | null>(null);
   const [tur, setTur] = useState<number | null>(null);
   const [hekim, setHekim] = useState<number | null>(null);
+  // İŞARET ŞERİDİ (mockup ②) görüntüleme listesiyle ORTAK: dilate · glokom ·
+  //   retina, üçü bağımsız. Eskiden dönem / durum çiplerinin arasındaydılar,
+  //   o şerit TEK SEÇİM olduğu için "Bugün + dilate" kurulamıyordu.
+  const isaret = useGozIsaretleri();
   const filtre = (temel: Kosul | undefined): Kosul | undefined => {
     if (!aktif) return temel;
     const l: Kosul[] = temel ? [temel] : [];
@@ -36,11 +41,12 @@ export function useGozMuayeneSuzgeci(aktif: boolean) {
     if (gosterge === 'gormeDusus') l.push({ alan: 'gormeDusus', op: 'buyuk', deger: 0 }, { alan: 'son30', op: 'esit', deger: 1 });
     if (gosterge === 'kontrolGecikmis') l.push({ alan: 'kontrolGecikmis', op: 'esit', deger: 1 });
     if (gosterge === 'taslak') l.push({ alan: 'tamamlandi', op: 'esit', deger: 0 });
+    isaret.isaretKosullari((alan, deger) => l.push({ alan, op: 'esit', deger }));
     if (tur !== null) l.push({ alan: 'tur', op: 'esit', deger: tur });
     if (hekim !== null) l.push({ alan: 'hekimId', op: 'esit', deger: hekim });
     return l.length === 0 ? undefined : l.length === 1 ? l[0] : { op: 'and', kosullar: l };
   };
-  return { gosterge, setGosterge, tur, setTur, hekim, setHekim, filtre };
+  return { gosterge, setGosterge, tur, setTur, hekim, setHekim, isaret, filtre };
 }
 export type GozMuayeneSuzgeci = ReturnType<typeof useGozMuayeneSuzgeci>;
 
@@ -77,6 +83,7 @@ export function GozMuayeneSolPanel({ veri, s }: { veri: GozMuayeneGostergeYaniti
   const toplam = turler.reduce((a, b) => a + b.sayi, 0);
   return (
     <div className="rt-agac">
+      <GozIsaretSeridi s={s.isaret} />
       <h6>{c('Muayene türü')}</h6>
       <button type="button" className={`rt-dal${s.tur === null ? ' on' : ''}`} onClick={() => s.setTur(null)}><span>{c('Tümü')}</span><i>{toplam}</i></button>
       {turler.map(t => (
@@ -119,7 +126,18 @@ function GibCubuklari({ satirlar, yukseklik = 80 }: { satirlar: GozGecmisSatiri[
   );
 }
 
-export function GozMuayeneOnizleme({ satir, yenile }: { satir: ListeSatiri | null; yenile: number }) {
+export function GozMuayeneOnizleme({ satir, yenile, onAc, onTamamla, onGozluk, onIstem }: {
+  satir: ListeSatiri | null; yenile: number;
+  /**
+   * HIZLI İŞLEM (mockup ④): panelden de çağrılabilen araç çubuğu aksiyonları.
+   * Hepsi araç çubuğunun AYNI yolunu kullanır - ikinci bir kod yolu, tamamlama
+   * kontrollerinin (zorunlu alan, ödeme) birinde eksik kalması demekti.
+   */
+  onAc?: (id: number) => void;
+  onTamamla?: () => void;
+  onGozluk?: () => void;
+  onIstem?: () => void;
+}) {
   const id = satir ? Number(satir.id) : 0;
   const [o, setO] = useState<GozMuayeneOnizleme | null>(null);
   useEffect(() => { setO(null); if (id > 0) api.gozMuayeneOnizleme(id).then(setO).catch(() => setO(null)) }, [id, yenile]);
@@ -156,6 +174,16 @@ export function GozMuayeneOnizleme({ satir, yenile }: { satir: ListeSatiri | nul
         <Satir s={c('Kontrol')} d={m.kontrolTarihi ? tarihYaz(m.kontrolTarihi) : '—'} />
         <Satir s={c('Durum')} d={<span className={`rozet ${m.tamamlandi ? 'olumlu' : 'uyari'}`}>{m.tamamlandi ? c('Tamamlandı') : c('Taslak')}</span>} />
       </div>
+      {(onAc || onTamamla || onGozluk || onIstem) && (
+        <div className="rt-bl"><h5>{c('Hızlı işlem')}</h5>
+          {onAc && <button type="button" className="d" onClick={() => onAc(id)}>📇 {c('Aç')}</button>}
+          {/* TAMAMLA yalnız taslakta: tamamlanmış muayene yeniden kapatılmaz. */}
+          {onTamamla && !m.tamamlandi && (
+            <button type="button" className="d" onClick={onTamamla}>✔ {c('Tamamla')}</button>)}
+          {onGozluk && <button type="button" className="d" onClick={onGozluk}>👓 {c('Gözlük reçetesi')}</button>}
+          {onIstem && <button type="button" className="d" onClick={onIstem}>🖼 {c('Görüntüleme iste')}</button>}
+        </div>
+      )}
     </div>
   );
 }

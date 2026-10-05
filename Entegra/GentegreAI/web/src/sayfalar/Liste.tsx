@@ -1279,7 +1279,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : tanim.kaynak === 'radyoloji-protokol' ? <ProtokolOnizlemePaneli satir={seciliSatir} />
         : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
-        : gozMuayeneEkrani ? <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile} />
+        : gozMuayeneEkrani ? (
+          <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile}
+                              onAc={id => git(`/goz-muayene/${id}`)}
+                              onTamamla={() => void aksiyon('goz.muayene-tamamla', seciliSatir)}
+                              onGozluk={() => void aksiyon('goz.gozluk-recete', seciliSatir)}
+                              onIstem={() => void aksiyon('goz.goruntuleme-istem', seciliSatir)} />
+        )
         : gozlukEkrani ? <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile} />
         : gorEkrani ? (
           // HIZLI İŞLEM düğmeleri araç çubuğunun AYNI yolunu kullanır
