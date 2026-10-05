@@ -284,6 +284,18 @@ export async function gozAkisAksiyonu(
     return true;
   }
 
+  // ---- GÖZLÜK REÇETESİ BİLDİRİMİ (973): hastaya reçetenin HAZIR olduğu
+  //   bildirilir; değerleri gitmez (SMS'te dioptri yanlış okunur, bkz. db 977).
+  if (kod === 'goz.gozluk-bildir') {
+    if (!id) { mesaj('Önce bir reçete seçin.'); return true }
+    await guvenli(async () => {
+      const y = await api.gozlukBildir(id);
+      mesaj(`${y.kanal === 'sms' ? 'SMS' : 'E-posta'} kuyruğa alındı: ${y.alici}`);
+      b.tazele();
+    });
+    return true;
+  }
+
   // ---- GÖZ GÖRÜNTÜLEME (974): ödenmiş istem çekilir → hekim değerlendirir; yeniden çekim ücretsiz yeni kayıt.
   if (kod === 'goz.gor-cekildi' || kod === 'goz.gor-degerlendir' || kod === 'goz.gor-yeniden' || kod === 'goz.gor-muayene') {
     if (!id) { mesaj('Önce bir görüntüleme seçin.'); return true }

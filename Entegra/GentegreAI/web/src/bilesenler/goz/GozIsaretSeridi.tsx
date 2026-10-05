@@ -16,29 +16,37 @@ import { c } from '../../dil/ceviri';
  * de kolonlar aynı adı taşıyor (`dilate`, `glokom`, `retina`), tek fark
  * görüntülemede takibin hastadan okunması.
  */
-export const GOZ_ISARETLERI = {
+/** Muayene ve görüntüleme listesinin işaretleri (aynı üç soru). */
+export const GOZ_TAKIP_ISARETLERI = {
   dilate: 'Dilate', glokom: 'Glokom takibi', retina: 'Retina / anti-VEGF',
-} as const;
-export type GozIsaretKodu = keyof typeof GOZ_ISARETLERI;
+};
 
-/** Şeridin durumu - süzgeç kancaları bunu kendi filtre zincirine ekler. */
-export function useGozIsaretleri() {
-  const [isaretler, setIsaretler] = useState<Record<GozIsaretKodu, boolean>>(
-    { dilate: false, glokom: false, retina: false });
-  const isaretCevir = (k: GozIsaretKodu) => setIsaretler(o => ({ ...o, [k]: !o[k] }));
+/** Gözlük reçetesi listesinin işaretleri (mockup ② şeridi). */
+export const GOZLUK_ISARETLERI = {
+  sgkHak: 'SGK’lı', cocuk: 'Çocuk (< 18)',
+};
+
+/**
+ * Şeridin durumu. İşaret tanımı PARAMETRE: kodlar süzülecek KOLON ADLARI,
+ * etiketler ekran metni. Üç listede işaretler farklı (göz muayenesinde takip,
+ * gözlükte SGK / çocuk) ama davranış aynı - bağımsız aç/kapa.
+ */
+export function useGozIsaretleri(tanim: Record<string, string> = GOZ_TAKIP_ISARETLERI) {
+  const [isaretler, setIsaretler] = useState<Record<string, boolean>>({});
+  const isaretCevir = (k: string) => setIsaretler(o => ({ ...o, [k]: !o[k] }));
   /** Açık işaretleri koşul listesine ekler (kolon adı = işaret kodu). */
   const isaretKosullari = (ekle: (alan: string, deger: number) => void) =>
-    (Object.keys(isaretler) as GozIsaretKodu[]).forEach(k => { if (isaretler[k]) ekle(k, 1) });
-  return { isaretler, isaretCevir, isaretKosullari };
+    Object.keys(tanim).forEach(k => { if (isaretler[k]) ekle(k, 1) });
+  return { tanim, isaretler, isaretCevir, isaretKosullari };
 }
 export type GozIsaretDurumu = ReturnType<typeof useGozIsaretleri>;
 
 export function GozIsaretSeridi({ s }: { s: GozIsaretDurumu }) {
   return (
     <div className="gg-isaret">
-      {(Object.keys(GOZ_ISARETLERI) as GozIsaretKodu[]).map(k => (
+      {Object.entries(s.tanim).map(([k, etiket]) => (
         <button key={k} type="button" className={`pl-k gg-cip${s.isaretler[k] ? ' on' : ''}`}
-                onClick={() => s.isaretCevir(k)}>{c(GOZ_ISARETLERI[k])}</button>
+                onClick={() => s.isaretCevir(k)}>{c(etiket)}</button>
       ))}
     </div>
   );

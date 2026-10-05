@@ -335,6 +335,12 @@ public static class AksiyonKatalogu
                         silIpucu: "Hastaya verilmiş reçete silinmez").Where(a => a.Kod != "goz-gozluk-recete.yeni"),
                 new("goz.gozluk-imzala", "✍ İmzala", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 22, UrunModu: 2, Ipucu: "Değerler kilitlenir"),
+                // MOCKUP ARAÇ ÇUBUĞU: "📱 SMS / e-posta" - hastaya reçetenin
+                //   hazır olduğunu bildirir (değerleri DEĞİL, bkz. 977).
+                new("goz.gozluk-bildir", "📱 SMS / e-posta", "goz",
+                    KaynakKodu: "goz.recete", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 38, UrunModu: 2,
+                    Ipucu: "İmzalı reçetenin hazır olduğunu hastaya bildirir"),
                 new("goz.gozluk-optik", "🏪 Optike Gönder", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 40, UrunModu: 2),
                 new("goz.gozluk-teslim", "✔ Teslim Edildi", "goz", KaynakKodu: "goz.recete", Islem: Islem.Degistir,

@@ -1286,7 +1286,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                               onGozluk={() => void aksiyon('goz.gozluk-recete', seciliSatir)}
                               onIstem={() => void aksiyon('goz.goruntuleme-istem', seciliSatir)} />
         )
-        : gozlukEkrani ? <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile} />
+        : gozlukEkrani ? (
+          <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile}
+                                onAc={id => git(`/goz-gozluk-recete/${id}`)}
+                                onImzala={() => void aksiyon('goz.gozluk-imzala', seciliSatir)}
+                                onBildir={() => void aksiyon('goz.gozluk-bildir', seciliSatir)}
+                                onOptik={() => void aksiyon('goz.gozluk-optik', seciliSatir)}
+                                onTeslim={() => void aksiyon('goz.gozluk-teslim', seciliSatir)} />
+        )
         : gorEkrani ? (
           // HIZLI İŞLEM düğmeleri araç çubuğunun AYNI yolunu kullanır
           //   (gozAkisAksiyonu): ikinci bir kod yolu, ödeme / durum

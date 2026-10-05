@@ -134,7 +134,9 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     yol: 'Göz › Gözlük Reçeteleri',
     kartYolu: '/goz-gozluk-recete', kartBaslik: 'Gözlük Reçetesi',
     tarihAlani: 'tarih',
-    // 973 (mockup goz_gozluk_recete_listesi_v2.html): dönem / durum + SGK / çocuk çipleri;
+    // 973 (mockup goz_gozluk_recete_listesi_v2.html): dönem / durum çipleri
+    //   (SGK'lı · Çocuk ARTIK sol panelin üstündeki bağımsız işaret şeridinde -
+    //   tek seçimli çip şeridinde "Taslak + SGK'lı" kurulamıyordu);
     //   gösterge, tür / durum / optik (sol) ve önizleme (sağ) panelleri Liste'de.
     cipler: [
       { ad: 'Bugün',          filtre: { alan: 'bugun',   op: 'esit', deger: 1 } },
@@ -143,8 +145,6 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'İmzalı',         filtre: { alan: 'durum',   op: 'esit', deger: 2 } },
       { ad: 'Optikte',        filtre: { alan: 'durum',   op: 'esit', deger: 3 } },
       { ad: 'Teslim edildi',  filtre: { alan: 'durum',   op: 'esit', deger: 4 } },
-      { ad: 'SGK’lı',         filtre: { alan: 'sgkHak',  op: 'esit', deger: 1 } },
-      { ad: 'Çocuk (< 18)',   filtre: { alan: 'cocuk',   op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     aracCubuguAltSatir: true,

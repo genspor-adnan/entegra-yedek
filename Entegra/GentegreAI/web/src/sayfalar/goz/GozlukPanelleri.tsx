@@ -5,6 +5,7 @@ import type { GozlukGostergeYaniti, GozlukKaynak, GozlukOnceki, GozlukOnizleme }
 import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { GozIsaretSeridi, GOZLUK_ISARETLERI, useGozIsaretleri } from '../../bilesenler/goz/GozIsaretSeridi';
 
 /**
  * GÖZLÜK REÇETESİ v2 (972-973, mockup Ekranlar/Goz/goz_gozluk_recetesi_v2.html ·
@@ -40,10 +41,15 @@ export const dpt = (v: unknown) => {
 export type GozlukGostergeKodu = 'bugun' | 'taslak' | 'optikte' | 'bitecek' | 'sgkErken' | 'sgkHakDogdu';
 
 export function useGozlukSuzgeci(aktif: boolean) {
+  // İŞARET ŞERİDİ (mockup ②): SGK'lı · Çocuk. Dönem / durum çiplerinin
+  //   arasındaydılar, o şerit TEK SEÇİM olduğu için "Taslak + SGK'lı"
+  //   (imza bekleyen SGK reçeteleri) kurulamıyordu.
+  const isaret = useGozIsaretleri(GOZLUK_ISARETLERI);
   const [gosterge, setGosterge] = useState<GozlukGostergeKodu | null>(null);
   const [tur, setTur] = useState<number | null>(null);
   const [durum, setDurum] = useState<number | null>(null);
   const [optik, setOptik] = useState<number | null | 'yok'>(null);
+  const [hekim, setHekim] = useState<number | null>(null);
   const filtre = (temel: Kosul | undefined): Kosul | undefined => {
     if (!aktif) return temel;
     const l: Kosul[] = temel ? [temel] : [];
@@ -53,13 +59,16 @@ export function useGozlukSuzgeci(aktif: boolean) {
     if (gosterge === 'bitecek') l.push({ alan: 'bitecek', op: 'esit', deger: 1 });
     if (gosterge === 'sgkErken') l.push({ alan: 'sgkErken', op: 'esit', deger: 1 });
     if (gosterge === 'sgkHakDogdu') l.push({ alan: 'sgkHakDogdu', op: 'esit', deger: 1 });
+    isaret.isaretKosullari((alan, deger) => l.push({ alan, op: 'esit', deger }));
+    if (hekim !== null) l.push({ alan: 'hekimId', op: 'esit', deger: hekim });
     if (tur !== null) l.push({ alan: 'tur', op: 'esit', deger: tur });
     if (durum !== null) l.push({ alan: 'durum', op: 'esit', deger: durum });
     if (optik === 'yok') l.push({ alan: 'optikId', op: 'bos' });
     else if (optik !== null) l.push({ alan: 'optikId', op: 'esit', deger: optik });
     return l.length === 0 ? undefined : l.length === 1 ? l[0] : { op: 'and', kosullar: l };
   };
-  return { gosterge, setGosterge, tur, setTur, durum, setDurum, optik, setOptik, filtre };
+  return { gosterge, setGosterge, tur, setTur, durum, setDurum, optik, setOptik,
+           hekim, setHekim, isaret, filtre };
 }
 export type GozlukSuzgeci = ReturnType<typeof useGozlukSuzgeci>;
 
@@ -95,6 +104,7 @@ export function GozlukSolPanel({ veri, s }: { veri: GozlukGostergeYaniti | null;
   const toplam = (veri?.turler ?? []).reduce((a, b) => a + b.sayi, 0);
   return (
     <div className="rt-agac">
+      <GozIsaretSeridi s={s.isaret} />
       <h6>{c('Tür')}</h6>
       <button type="button" className={`rt-dal${s.tur === null ? ' on' : ''}`} onClick={() => s.setTur(null)}><span>{c('Tümü')}</span><i>{toplam}</i></button>
       {(veri?.turler ?? []).map(t => (
@@ -105,6 +115,12 @@ export function GozlukSolPanel({ veri, s }: { veri: GozlukGostergeYaniti | null;
       {(veri?.durumlar ?? []).map(d => (
         <button key={d.durum} type="button" className={`rt-dal${s.durum === d.durum ? ' on' : ''}`} onClick={() => s.setDurum(s.durum === d.durum ? null : d.durum)}>
           <span>{c(DURUM[d.durum] ?? String(d.durum))}</span><i>{d.sayi}</i></button>
+      ))}
+      {(veri?.hekimler ?? []).length > 0 && <h6 style={{ marginTop: 12 }}>{c('Hekim')}</h6>}
+      {(veri?.hekimler ?? []).map(h => (
+        <button key={h.id} type="button" className={`rt-dal${s.hekim === h.id ? ' on' : ''}`}
+                onClick={() => s.setHekim(s.hekim === h.id ? null : h.id)}>
+          <span>{h.ad}</span><i>{h.sayi}</i></button>
       ))}
       <h6 style={{ marginTop: 12 }}>{c('Optik')}</h6>
       {(veri?.optikler ?? []).map(o => {
@@ -132,7 +148,19 @@ function MiniRecete({ r }: { r: Record<string, unknown> }) {
   );
 }
 
-export function GozlukOnizlemePaneli({ satir, yenile }: { satir: ListeSatiri | null; yenile: number }) {
+export function GozlukOnizlemePaneli({ satir, yenile, onAc, onImzala, onBildir, onOptik, onTeslim }: {
+  satir: ListeSatiri | null; yenile: number;
+  /**
+   * HIZLI İŞLEM (mockup ④): araç çubuğunun AYNI yolunu çağıran düğmeler.
+   * Hangisi görünecek REÇETENİN DURUMUNA bağlı - imzasız reçete optiğe
+   * gönderilemez, teslim edilmiş reçete yeniden imzalanmaz.
+   */
+  onAc?: (id: number) => void;
+  onImzala?: () => void;
+  onBildir?: () => void;
+  onOptik?: () => void;
+  onTeslim?: () => void;
+}) {
   const id = satir ? Number(satir.id) : 0;
   const [r, setR] = useState<GozlukOnizleme | null>(null);
   useEffect(() => { setR(null); if (id > 0) api.gozlukOnizleme(id).then(y => setR(y.recete)).catch(() => setR(null)) }, [id, yenile]);
@@ -169,6 +197,15 @@ export function GozlukOnizlemePaneli({ satir, yenile }: { satir: ListeSatiri | n
         </div>
         {r.optik ? <div className="rt-kucuk" style={{ marginTop: 4 }}>{c('Optik')}: {String(r.optik)}</div> : null}
       </div>
+      {(onAc || onImzala || onBildir || onOptik || onTeslim) && (
+        <div className="rt-bl"><h5>{c('Hızlı işlem')}</h5>
+          {onAc && <button type="button" className="d" onClick={() => onAc(id)}>📇 {c('Aç')}</button>}
+          {onImzala && durum === 1 && <button type="button" className="d" onClick={onImzala}>✍ {c('İmzala')}</button>}
+          {onBildir && durum >= 2 && <button type="button" className="d" onClick={onBildir}>📱 {c('SMS / e-posta')}</button>}
+          {onOptik && durum === 2 && <button type="button" className="d" onClick={onOptik}>🏪 {c('Optike gönder')}</button>}
+          {onTeslim && durum === 3 && <button type="button" className="d" onClick={onTeslim}>✔ {c('Teslim edildi')}</button>}
+        </div>
+      )}
     </div>
   );
 }

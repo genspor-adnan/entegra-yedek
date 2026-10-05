@@ -341,6 +341,8 @@ export interface GozlukKaynak {
 export interface GozlukGostergeYaniti {
   gosterge: { bugun: number; taslak: number; optikte: number; bitecek: number; sgkErken: number; sgkHakDogdu: number };
   turler: { tur: number; sayi: number }[]; durumlar: { durum: number; sayi: number }[]; optikler: { id: number | null; ad: string; sayi: number }[];
+  /** Reçeteyi yazan hekimler (mockup ② şeridi "Hekim: Tümü"). */
+  hekimler: { id: number; ad: string; sayi: number }[];
 }
 export type GozlukOnizleme = Record<string, unknown>;
 
@@ -369,6 +371,10 @@ export const gozUclari = {
   gozlukDurum: (id: number, durum: 3 | 4) => gonder<{ id: number; durum: number }>(`/api/goz/gozluk/${id}/durum/${durum}`, {}),
   gozlukGosterge: () => istek<GozlukGostergeYaniti>('/api/goz/gozluk-gosterge'),
   gozlukOnizleme: (id: number) => istek<{ recete: GozlukOnizleme }>(`/api/goz/gozluk/${id}/onizleme`),
+  /** Reçetenin hazır olduğunu hastaya bildirir (SMS / e-posta kuyruğu). */
+  gozlukBildir: (id: number) =>
+    istek<{ kanal: string; alici: string; kuyrukId: number | null }>(
+      `/api/goz/gozluk/${id}/bildir`, { method: 'POST' }),
   gozTetkikHizmet: () => istek<{ satirlar: { tetkik: number; hizmetId: number; kod: string; hizmetAd: string }[] }>('/api/goz/tetkik-hizmet'),
   gozGoruntulemeGosterge: () => istek<GozGoruntulemeGostergeYaniti>('/api/goz/goruntuleme-gosterge'),
   gozGoruntulemeOnizleme: (id: number) => istek<GozGoruntulemeOnizleme>(`/api/goz/goruntuleme/${id}/onizleme`),

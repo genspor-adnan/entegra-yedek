@@ -19265,3 +19265,49 @@ mockup'la aynı sırada, çipler `Bugün · Bu hafta · Taslak · Tamamlandı ·
 işaret şeridi süzdü ve "Glokom takibi + Bugün" kombinasyonu çalıştı, hızlı
 işlem dört düğmeyi gösterdi, sol panel kapatılıp açıldı ("Süzgeç" etiketi).
 dotnet test 218, vitest 789 geçti.
+
+## 05.10.2026 — Gözlük reçete listesi mockup'a tamamlandı (977)
+
+Kullanıcı: *"gözlük reçete listesini de mockup gibi yap"*. Mockup
+`Ekranlar/Goz/goz_gozluk_recete_listesi_v2.html`. Yerinde olanlar: altı
+gösterge, dönem / durum çipleri, tür · durum · optik ağacı, tarih altında
+reçete no, OD / OS / add / PD kolonları, sağ panelde mini reçete · önceki
+reçeteye göre fark · teslim takibi adımları.
+
+Eklenenler:
+
+* **Hastaya bildirim** (mockup araç çubuğu "📱 SMS / e-posta"): yeni uç
+  `POST /api/goz/gozluk/{id}/bildir` + iki şablon (`db/977`). Kurallar:
+  **taslak gönderilmez** (imzasız reçetenin numarası yok, değerleri
+  değişebilir); kanal telefon varsa SMS, yoksa e-posta; ikisi de yoksa açık
+  hata - sessizce kuyruğa atmak "gönderildi" yanılgısı olurdu. **Mesajda
+  dioptri YOK**: SMS'te işaret / virgül / aks yanlış okunur ve hasta mesajı
+  optikte geçerli belge sanır; reçete no + geçerlilik yazılıyor, optikte
+  sorulan bu.
+* **Hekim seçici** (mockup ② şeridi "Hekim: Tümü"): gösterge ucu artık
+  reçeteyi yazan hekimleri de sayıyor, sol panelde grup olarak.
+* **SGK'lı · Çocuk (< 18) işaret şeridi**: dönem / durum çiplerinin arasından
+  çıkarıldı - o şerit tek seçim olduğu için "Taslak + SGK'lı" (imza bekleyen
+  SGK reçeteleri) kurulamıyordu. Şerit bileşeni artık **parametrik**: işaret
+  tanımı prop (`GOZ_TAKIP_ISARETLERI` muayene / görüntüleme,
+  `GOZLUK_ISARETLERI` gözlük).
+* **Sağ panelde "Hızlı işlem"**: Aç · İmzala (taslakta) · SMS / e-posta
+  (imzalıdan sonra) · Optike gönder (imzalıda) · Teslim edildi (optikte).
+
+**Mockup'ta olup yapılmayan:** teslim takibindeki "QR okutuldu" adımı -
+optikte okutma kaydı tutan bir tablo yok; adım eklenirse her zaman boş
+görünürdü.
+
+Doğrulama: uç iki kapısıyla denendi (taslak reddi; imzalıda kuyruk satırı
+yazıldı, şablon doğru doldu). **Gönderim olmaması için API `ArkaPlan:Kapali=true`
+ile çalıştırıldı ve kuyruk satırı sonra silindi** - dev veritabanındaki SMS /
+e-posta hesapları aktif ve kimlik bilgileri dolu, işçi açıkken mesaj gerçekten
+giderdi. Tarayıcıda: işaret şeridi (SGK'lı süzdü, Çocuk boş döndü - hastalar 37
+ve 60 yaşında), sol panelde HEKİM grubu, araç çubuğu mockup'la aynı yedi düğme,
+hızlı işlem durumla değişti (optikte: Aç · SMS · Teslim; imzalı: Aç · SMS ·
+Optike gönder). dotnet test 218, vitest 789 geçti.
+
+> **Dev veritabanında bekleyen bir bildirim var** (`bildirim` id 1332, SMS,
+> randevu hatırlatması, 5336304110) - benim testimden değil, önceki bir
+> çalışmadan kalmış. Arka plan işçisi açıkken gerçek SMS olarak gider;
+> silinmesi kullanıcının kararı.

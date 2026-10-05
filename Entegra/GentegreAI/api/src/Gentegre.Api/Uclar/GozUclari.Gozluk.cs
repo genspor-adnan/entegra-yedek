@@ -1,6 +1,7 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Bildirim;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -131,6 +132,84 @@ public static partial class GozUclari
             return Results.Ok(new { id, durum = yeni, izlemeNo = baglam.IzlemeNo });
         });
 
+        // HASTAYA BİLDİRİM (mockup araç çubuğu "📱 SMS / e-posta").
+        //
+        //   REÇETE DEĞERLERİ GÖNDERİLMEZ (şablon 977): dioptri SMS'te yanlış
+        //   okunur (işaret, virgül, aks) ve hasta mesajı optikte geçerli belge
+        //   sanır. Mesaj reçetenin yazıldığını, numarasını ve geçerliliğini
+        //   söyler.
+        //
+        //   TASLAK GÖNDERİLMEZ: imzasız reçetenin numarası yok ve değerleri
+        //   değişebilir - hastaya "hazır" demek yanlış olurdu.
+        grup.MapPost("/gozluk/{id:int}/bildir", async (int id, string? kanal, BaglamCozucu cozucu,
+            VeriKaynagi veri, BildirimDeposu bildirim, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("goz.recete", Islem.Degistir);
+            baglam.YazmaIste();
+            await using var b = await veri.AcAsync(iptal);
+            var r = await b.TekAsync("""
+                select r.durum, r.hasta_id,
+                       coalesce(nullif(r.recete_no, ''), 'GR-' || r.id)                        as "receteNo",
+                       to_char(r.ekleme_tarihi at time zone 'Europe/Istanbul', 'DD.MM.YYYY')   as tarih,
+                       case when r.gecerlilik_bitis is null then '-'
+                            else to_char(r.gecerlilik_bitis, 'DD.MM.YYYY') end                 as gecerlilik,
+                       public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)                as hasta,
+                       coalesce(t.telefon, '')                                             as telefon,
+                       coalesce(t.eposta, '')                                                  as eposta,
+                       coalesce(sb.ad, '')                                                     as kurum
+                  from public.goz_gozluk_recetesi r
+                  join public.taraf t on t.id = r.hasta_id
+                  left join public.sube sb on sb.id = r.sube_id
+                 where r.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Reçete bulunamadı.");
+
+            if (Convert.ToInt32(r["durum"] ?? 0) < 2)
+                throw GentegreHatasi.IsKurali("Taslak reçete gönderilmez - önce imzalayın.");
+
+            // KANAL: istenmezse telefonu olana SMS, yoksa e-posta. İkisi de
+            //   yoksa hata - sessizce kuyruğa atmak "gönderildi" yanılgısıdır.
+            var telefon = (string)(r["telefon"] ?? "");
+            var eposta = (string)(r["eposta"] ?? "");
+            var sms = (kanal ?? "").Equals("eposta", StringComparison.OrdinalIgnoreCase)
+                ? false
+                : telefon.Length > 0;
+            if (sms && telefon.Length == 0)
+                throw GentegreHatasi.IsKurali("Hastanın cep telefonu kayıtlı değil.");
+            if (!sms && eposta.Length == 0)
+                throw GentegreHatasi.IsKurali(
+                    telefon.Length == 0 && eposta.Length == 0
+                        ? "Hastanın telefonu ve e-postası kayıtlı değil - hasta kartından girin."
+                        : "Hastanın e-postası kayıtlı değil.");
+
+            var degiskenler = new Dictionary<string, string>
+            {
+                ["kurum"] = (string)(r["kurum"] ?? ""),
+                ["tarih"] = (string)(r["tarih"] ?? ""),
+                ["recete_no"] = (string)(r["receteNo"] ?? ""),
+                ["gecerlilik"] = (string)(r["gecerlilik"] ?? ""),
+                ["hasta"] = (string)(r["hasta"] ?? ""),
+            };
+            var kuyrukId = await bildirim.KuyrugaEkleAsync(new BildirimIstegi(
+                    SablonKodu: sms ? "gozluk.recete" : "gozluk.recete.eposta",
+                    Kanal: null,
+                    Alici: sms ? telefon : eposta,
+                    Degiskenler: degiskenler,
+                    TarafId: Convert.ToInt32(r["hasta_id"] ?? 0),
+                    KaynakId: id),
+                baglam.KullaniciId, baglam.SubeId, iptal);
+
+            await log.YazAsync(LogIslemi.Degistir, LogTabloGozluk, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { islem = sms ? "SMS kuyruğa alındı" : "E-posta kuyruğa alındı", alici = sms ? telefon : eposta },
+                iptal: iptal);
+            return Results.Ok(new
+            {
+                id, kuyrukId, kanal = sms ? "sms" : "eposta", alici = sms ? telefon : eposta,
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         grup.MapGet("/gozluk-gosterge", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -155,7 +234,13 @@ public static partial class GozUclari
                   from public.goz_gozluk_recetesi r left join public.taraf o on o.id = r.optik_taraf_id
                  where (@p0::int is null or r.sube_id = @p0) group by 1, 2 order by 3 desc
                 """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
-            return Results.Ok(new { gosterge, turler, durumlar, optikler, izlemeNo = baglam.IzlemeNo });
+            // HEKİM (mockup ② şeridi "Hekim: Tümü"): reçeteyi yazan hekim.
+            var hekimler = await b.ListeAsync("""
+                select r.hekim_id as id, public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120) as ad, count(*) as sayi
+                  from public.goz_gozluk_recetesi r join public.taraf h on h.id = r.hekim_id
+                 where (@p0::int is null or r.sube_id = @p0) group by 1, 2 order by 3 desc
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { gosterge, turler, durumlar, optikler, hekimler, izlemeNo = baglam.IzlemeNo });
         });
 
         // ÖNİZLEME (liste sağ paneli): reçete + önceki reçeteye göre fark + teslim adımları.
