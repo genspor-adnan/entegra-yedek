@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Gentegre.Testler;
 
@@ -28,6 +28,24 @@ public sealed class MuayeneTamamlamaTestleri
         return File.ReadAllText(yol);
     }
 
+    /// <summary>
+    /// Muayene uçlarının TAMAMI: dosya 2026-10'da konu başına parçalara
+    /// bölündü (MuayeneUclari.Tamamla.cs, .Rapor.cs…). Test bir dosyayı değil
+    /// KURALI arıyor; tek dosyaya bakmak, kural komşu parçaya taşındığında
+    /// kuralı değil taşımayı kırmızı yapardı.
+    /// </summary>
+    private static string TumUclar()
+    {
+        var dizin = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dizin is not null && !Directory.Exists(Path.Combine(dizin.FullName, "src")))
+            dizin = dizin.Parent;
+        Assert.NotNull(dizin);
+        var klasor = Path.Combine(dizin!.FullName, "src", "Gentegre.Api", "Uclar");
+        var dosyalar = Directory.GetFiles(klasor, "MuayeneUclari*.cs");
+        Assert.NotEmpty(dosyalar);
+        return string.Join(Environment.NewLine, dosyalar.Select(File.ReadAllText));
+    }
+
     /// <summary>Tamamlama kuralı yardımcısının gövdesi (imzadan bir sonraki metoda).</summary>
     private static string KuralBolumu(string kaynak)
     {
@@ -42,7 +60,7 @@ public sealed class MuayeneTamamlamaTestleri
     [Fact]
     public void Tamamlama_eNabiz_zorunlulariyla_engellenir()
     {
-        var kaynak = Kaynak("Gentegre.Api", "Uclar", "MuayeneUclari.cs");
+        var kaynak = TumUclar();
         // KURAL TEK YERDE (931): TamamlamaKontrolleriAsync - Tamamla ve özet
         //   sekmesinin kontrol listesi aynı listeyi okur. Maddeler ZORUNLU
         //   (son eleman true) olmalı; zorunlu olmayan madde Tamamla'yı durdurmaz.
@@ -69,7 +87,7 @@ public sealed class MuayeneTamamlamaTestleri
     [Fact]
     public void Takip_numarasi_ENGEL_DEGIL_uyaridir()
     {
-        var kaynak = Kaynak("Gentegre.Api", "Uclar", "MuayeneUclari.cs");
+        var kaynak = TumUclar();
 
         // SYS takip numarası da 103/106'nın zorunlu alanı - AMA hekimin
         //   elinde değil: numara, hasta kaydının (101) USS'ye gönderilmesiyle

@@ -18781,3 +18781,35 @@ kapatıldı.
 * Doğrulama: dotnet build temiz, tsc temiz, vitest 789/789, dotnet test 218 geçti;
   `/unite-ozet` yanıtı alan alan karşılaştırıldı ve tarayıcıda pano (şerit, kanban,
   tablolar, sol panel) yeniden açıldı.
+
+## 05.10.2026 — Genel muayene refaktörü (davranış değişmedi)
+
+Kullanıcı: *"genel muayene kısmını da refaktor yap"*.
+
+* **`MuayeneUclari.cs` bölündü:** 1748 satır / 29 uç tek metottaydı; konu başına parçalı
+  dosyalara ayrıldı - `.Tamamla` (166) · `.Sekme` (443: şablon, sekme verisi, önceki
+  muayeneden kopyalama, tümü normal, vücut şeması, bulgu metni, özet derleme) · `.Rapor`
+  (147) · `.Tani` (195) · `.Yz` (176) · `.Istem` (216); ana dosyada (532) sınıf başlığı,
+  akış / sıra uçları (özet, muayeneye al, çağır, başvurudan al) ve ortak yardımcılar
+  kaldı. Uç gövdeleri **birebir** taşındı: 29 rota listesi ve her gövde, taşımadan önceki
+  metinle karşılaştırılarak doğrulandı.
+* **Kod sözlükleri tek kaynağa** - ve ikisi gerçekten ayrışmıştı:
+  * `MUAYENE_DURUM` iki ekranda ayrı yazılmıştı; muayene sekmeleri "Sonuç bekliyor"
+    diyor ve **4 (ek not eklendi) durumunu hiç tanımıyordu** - o muayenenin rozeti boş
+    görünüyordu. Yeni `bilesenler/muayeneKodlari.ts` metinleri sunucudaki kart kodlarıyla
+    (`KartKatalogu.Saglik`) birebir tutuyor.
+  * `GOZ_TETKIK` üç kopyaydı ve 9 numaralı tetkiğe ikisi "Topografi", biri "Kornea
+    topografisi" diyordu - hekim sepetten istediğini sonuç ekranında başka adla
+    görüyordu. Yeni `bilesenler/goz/gozKodlari.ts` (tetkik / taraf / sonuç) sunucudaki
+    `goz.tetkik` listesine yakınsar; iki ekranda ad "Kornea topografisi" oldu.
+  * Lab `BOLUM` ve `ISTEM_DURUM` zaten `labKodlari.ts`'de vardı; muayenenin İstem &
+    Sonuç ve Özet pencereleri kendi kopyalarını tutuyordu - artık ortak dosyadan.
+  * Rapor türleri: özet penceresi sözlük, rapor penceresi liste tutuyordu →
+    `RAPOR_TUR` + ondan türetilen `RAPOR_TUR_SECENEK` / `RAPOR_ALT_TUR`.
+* `MuayeneTamamlamaTestleri` kaynak METNİNE bakıyordu ve tek dosya adı okuyordu; artık
+  `MuayeneUclari*.cs` dosyalarının tamamını okuyor - test bir dosyayı değil **kuralı**
+  arıyor, kural komşu parçaya taşındığında kırmızı olmamalı.
+* Doğrulama: dotnet build temiz, dotnet test 218 geçti, tsc temiz, vitest 789/789;
+  `/api/muayene/ozet` ve `/tani-secenekleri` 200, muayene listesi durum metinleri yerinde,
+  tarayıcıda muayene kartı (durum rozeti "Açık") ve rapor penceresi tür listeleri
+  ("İstirahat · Sağlık durumu · İlaç kullanım (SUT) · İş göremezlik") kontrol edildi.

@@ -4,6 +4,7 @@ import { Modal } from './Modal';
 import { guvenli, mesaj } from './mesaj';
 import { akilciEngelKodu, akilciUyariAkisi, type AkilciKarar } from '../sayfalar/liste/akilciIstem';
 import { hataMetni, type ListeSatiri, type Kosul } from '../api/sozlesme';
+import { GOZ_TETKIK } from './goz/gozKodlari';
 
 /**
  * BİRLEŞİK İSTEM EKRANI (kullanici: "lab ve radyoloji istemi birleştir, tek
@@ -45,11 +46,7 @@ const LAB_BOLUMLER = [
   { kod: '7', ad: 'İdrar', ikon: '💧' },
   { kod: '9', ad: 'Diğer', ikon: '🔬' },
 ];
-/** goz.tetkik kod listesi (691) ve sepet kategorileri. */
-const GOZ_TETKIK: Record<number, string> = {
-  1: 'OCT maküla', 2: 'OCT RNFL / GCC', 3: 'OCT ön segment', 4: 'OCT-A', 5: 'FAF', 6: 'FA / ICGA', 7: 'Fundus foto',
-  8: 'Görme alanı', 9: 'Kornea topografisi', 10: 'Pakimetri', 11: 'Biyometri', 12: 'Endotel', 13: 'UBM', 14: 'B-scan USG', 15: 'ERG / VEP',
-};
+/** Sepet kategorileri; tetkik adları ortak sözlükte (goz/gozKodlari). */
 const GOZ_KATEGORI: { kod: string; ad: string; ikon: string; tetkikler: number[] }[] = [
   { kod: '', ad: 'Tümü', ikon: '👁', tetkikler: [] },
   { kod: 'oct', ad: 'OCT', ikon: '🌀', tetkikler: [1, 2, 3, 4] },

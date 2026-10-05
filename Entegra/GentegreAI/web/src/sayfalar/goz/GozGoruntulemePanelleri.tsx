@@ -5,6 +5,7 @@ import type { GozGoruntulemeGostergeYaniti, GozGoruntulemeOnizleme } from '../..
 import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { GOZ_SONUC, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
 
 /**
  * GÖZ GÖRÜNTÜLEME v2 (974, mockup Ekranlar/Goz/goz_goruntuleme_listesi_v2.html ·
@@ -16,12 +17,6 @@ import { c } from '../../dil/ceviri';
  *   Kart : GoruntulemeHastaBandi · GoruntuOlcumSekmesi · GoruntulemeKarsilastirmaSekmesi
  */
 
-export const GOZ_TETKIK: Record<number, string> = {
-  1: 'OCT maküla', 2: 'OCT RNFL / GCC', 3: 'OCT ön segment', 4: 'OCT-A', 5: 'FAF', 6: 'FA / ICGA', 7: 'Fundus foto',
-  8: 'Görme alanı', 9: 'Topografi', 10: 'Pakimetri', 11: 'Biyometri', 12: 'Endotel', 13: 'UBM', 14: 'B-scan USG', 15: 'ERG / VEP',
-};
-const TARAF: Record<number, string> = { 1: 'OD', 2: 'OS', 3: 'OU' };
-const SONUC: Record<number, string> = { 1: 'Normal', 2: 'Sınırda', 3: 'Anormal', 4: 'Değerlendirilemez' };
 const OLCUM: Record<string, string> = {
   cmt: 'CMT (µm)', rnfl_ort: 'RNFL ort. (µm)', rnfl_sup: 'RNFL superior', rnfl_inf: 'RNFL inferior', gcc: 'GCC ort.',
   cd: 'C/D (OCT)', md: 'MD (dB)', psd: 'PSD (dB)', vfi: 'VFI (%)', al: 'AL (mm)', k1: 'K1', k2: 'K2', acd: 'ACD', cct: 'CCT (µm)',
@@ -221,7 +216,7 @@ export function GoruntulemeOnizlemePaneli({ satir, yenile, onAc }: { satir: List
       {yzMetni(k.yzOnOkuma) && <div className="rt-bl"><YzOnOkuma metin={yzMetni(k.yzOnOkuma)} /></div>}
       {Number(k.durum) === 3 && (
         <div className="rt-bl"><h5>{c('Değerlendirme')}</h5>
-          <div><b>{c(SONUC[Number(k.sonuc)] ?? '—')}</b> · {String(k.degerlendiren ?? '')}</div>
+          <div><b>{c(GOZ_SONUC[Number(k.sonuc)] ?? '—')}</b> · {String(k.degerlendiren ?? '')}</div>
           {String(k.degerlendirme ?? '') && <div className="rt-kucuk">{String(k.degerlendirme)}</div>}
         </div>
       )}
@@ -300,4 +295,3 @@ export function GoruntulemeKarsilastirmaSekmesi({ r }: { r: GozGoruntulemeOnizle
   );
 }
 
-export { TARAF as GOZ_TARAF };

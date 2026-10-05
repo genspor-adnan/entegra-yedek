@@ -5,6 +5,8 @@ import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat } from './bicim';
 import { c } from '../dil/ceviri';
+import { BOLUM, ISTEM_DURUM } from './labKodlari';
+import { GOZ_SONUC, GOZ_TARAF, GOZ_TETKIK } from './goz/gozKodlari';
 
 /**
  * MUAYENE › İSTEM & SONUÇLAR (443; düzen: mockup muayene_karti_v2.html).
@@ -29,17 +31,6 @@ import { c } from '../dil/ceviri';
 
 type Satir = Record<string, unknown>;
 
-const BOLUM: Record<number, string> = {
-  1: 'Biyokimya', 2: 'Hematoloji', 3: 'Hormon', 4: 'Mikrobiyoloji',
-  5: 'Seroloji', 6: 'Koagülasyon', 7: 'İdrar', 9: 'Diğer',
-};
-
-const ISTEM_DURUM: Record<number, string> = {
-  // 4 = HER satir sonuclandi (onay bekliyor); bir kismi sonuclanmissa
-  //   istem hala "Calisiliyor". Sunucu da ayni esikle yaziyor.
-  1: 'İstendi', 2: 'Numune alındı', 3: 'Çalışılıyor', 4: 'Sonuçlandı',
-  5: 'Onaylandı', 9: 'İptal',
-};
 
 const sayiMetni = (v: unknown, b = 2): string => {
   if (v === null || v === undefined || v === '') return '';
@@ -445,12 +436,6 @@ function RadyolojiPaneli({ r, onGordu }: { r: Satir; onGordu: (bagId: number) =>
 }
 
 // ------------------------------------------------------------- GÖZ (974) --
-const GOZ_TETKIK: Record<number, string> = {
-  1: 'OCT maküla', 2: 'OCT RNFL / GCC', 3: 'OCT ön segment', 4: 'OCT-A', 5: 'FAF', 6: 'FA / ICGA', 7: 'Fundus foto',
-  8: 'Görme alanı', 9: 'Topografi', 10: 'Pakimetri', 11: 'Biyometri', 12: 'Endotel', 13: 'UBM', 14: 'B-scan USG', 15: 'ERG / VEP',
-};
-const GOZ_TARAF: Record<number, string> = { 1: 'OD', 2: 'OS', 3: 'OU' };
-const GOZ_SONUC: Record<number, string> = { 1: 'Normal', 2: 'Sınırda', 3: 'Anormal', 4: 'Değerlendirilemez' };
 const OLCUM_AD: Record<string, string> = { cmt: 'CMT', rnfl_ort: 'RNFL ort.', md: 'MD', k1: 'K1', cct: 'CCT', al: 'AL' };
 
 /** Ödeme / çekim / değerlendirme adımı tek metin. */

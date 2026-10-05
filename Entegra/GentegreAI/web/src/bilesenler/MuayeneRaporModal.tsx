@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { Modal } from './Modal';
 import { guvenli, mesaj } from './mesaj';
+import { RAPOR_ALT_TUR, RAPOR_TUR_SECENEK } from './muayeneKodlari';
 
 /**
  * MUAYENE RAPOR EKLE (kullanici: "eklerken direkt modal açılsın ön bilgilerle,
@@ -9,14 +10,10 @@ import { guvenli, mesaj } from './mesaj';
  * ön dolu gelir; hekim gün/açıklama/ICD'yi doldurup kaydeder. Kayıt TASLAK
  * rapor açar (grid'de belirir, e-İmzala ile onaylanır).
  */
-const TURLER = [
-  { k: 1, ad: 'İstirahat' }, { k: 2, ad: 'Sağlık durumu' },
-  { k: 3, ad: 'İlaç kullanım (SUT)' }, { k: 4, ad: 'İş göremezlik' },
-];
-const ALT_TURLER = [
-  { k: 0, ad: '—' }, { k: 1, ad: 'İş göremezlik' }, { k: 2, ad: 'Refakat' },
-  { k: 3, ad: 'Doğum öncesi' }, { k: 4, ad: 'Doğum sonrası' }, { k: 5, ad: 'Diğer' },
-];
+// Tür ve alt tür ORTAK sözlükten (muayeneKodlari): özet penceresi aynı
+//   kodları sözlük olarak okuyor, iki liste tutmak ikisinin ayrışmasıydı.
+const TURLER = RAPOR_TUR_SECENEK;
+const ALT_TURLER = RAPOR_ALT_TUR;
 
 const bugun = () => new Date().toISOString().slice(0, 10);
 

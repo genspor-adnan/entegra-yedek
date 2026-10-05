@@ -3,6 +3,8 @@ import { api } from '../api/istemci';
 import { Modal } from './Modal';
 import { guvenli, mesaj } from './mesaj';
 import { hataMetni } from '../api/sozlesme';
+import { ISTEM_DURUM } from './labKodlari';
+import { RAPOR_TUR } from './muayeneKodlari';
 
 /**
  * MUAYENE ÖZETİ (mockup Ekranlar/Muayene/muayene_ozeti.html). Solda derlenen
@@ -13,10 +15,6 @@ import { hataMetni } from '../api/sozlesme';
 type Satir = Record<string, unknown>;
 const m = (v: unknown) => String(v ?? '').trim();
 
-const ISTEM_DURUM: Record<number, string> = {
-  1: 'İstendi', 2: 'Numune alındı', 3: 'Çalışılıyor', 4: 'Sonuçlandı', 5: 'Onaylandı', 9: 'İptal',
-};
-const RAPOR_TUR: Record<number, string> = { 1: 'İstirahat', 2: 'Sağlık durumu', 3: 'İlaç kullanım', 4: 'İş göremezlik' };
 
 export function MuayeneOzetiModal({ muayeneId, onKapat }: { muayeneId: number; onKapat(): void }) {
   const [ozet, setOzet] = useState('');

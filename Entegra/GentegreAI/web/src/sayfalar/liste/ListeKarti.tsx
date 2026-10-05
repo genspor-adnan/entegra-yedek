@@ -34,7 +34,9 @@ import { c } from '../../dil/ceviri';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
 import { GozlukHastaBandi, GozlukReceteFormu, gozlukYazdir, useGozlukKaynak } from '../goz/GozlukPanelleri';
-import { GOZ_TARAF, GOZ_TETKIK, GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
+import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
+import { GOZ_TARAF, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
+import { MUAYENE_DURUM } from '../../bilesenler/muayeneKodlari';
 import { GOZ_SEKME_GRUPLARI, GozKuralSeridi, GozOykuV4Sekmesi, GozOzetSekmesi, GozSagOzet, useGozKontrol } from '../goz/GozKartV4';
 import { GozKartinaGit, GozReceteSekmesi, GozTaniSekmesi, GozUcretSekmesi } from '../goz/GozSurecSekmeleri';
 import { GozGibEgilimi, GozGoruntulerSekmesi, GozKarsilastirmaSekmesi, GozTaniPlanPaneli } from '../goz/GozMuayenePanelleri';
@@ -47,12 +49,6 @@ import type { KartOzellestirme } from './kartOzellestirme';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKapatModali, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
-/** Muayene durum kodlari (kart metasindaki SabitKodlar ile ayni) - baslik
-    rozeti icin. Kod->ad cevrimi tek satirlik, ek istek gerektirmesin. */
-const MUAYENE_DURUM: Record<string, string> = {
-  '1': 'Açık', '2': 'Sonuç Bekliyor', '3': 'Tamamlandı',
-  '4': 'Ek Not Eklendi', '0': 'İptal',
-};
 
 
 /** "Muayene" sekmesi (eski adları Fizik Muayene → Şablon Muayene - kullanıcı yeniden
@@ -471,7 +467,7 @@ export function ListeKarti({
         baslikEk={tanim.kaynak === 'muayene'
           ? (d) => {
               const kod = String(d.durum ?? '');
-              const ad = MUAYENE_DURUM[kod] ?? '';
+              const ad = MUAYENE_DURUM[Number(kod)] ?? '';
               const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri'
                           : kod === '2' ? 'uyari' : 'mavi';
               return (

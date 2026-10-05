@@ -8,6 +8,7 @@ import type { SablonTercihleri } from '../api/uclar/liste';
 import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat, para } from './bicim';
 import { c } from '../dil/ceviri';
+import { MUAYENE_DURUM } from './muayeneKodlari';
 
 /**
  * MUAYENE KARTININ EK SEKMELERİ (mockup `muayene_karti.html`):
@@ -41,9 +42,6 @@ const metin = (v: unknown) => String(v ?? '').trim();
 const sayi = (v: unknown) => Number(v ?? 0);
 
 // Reçete türü / durum / kullanım adları artık SUNUCUDA (recete-satir listesi).
-const MUAYENE_DURUM: Record<number, string> = {
-  0: 'İptal', 1: 'Açık', 2: 'Sonuç bekliyor', 3: 'Tamamlandı',
-};
 
 /** Sekme verisini bir kez çeker; dört sekme aynı sonucu kullanır. */
 export function useMuayeneSekmeVerisi(muayeneId: number, tazele: number) {
