@@ -75,9 +75,40 @@ export function BaglantiAyarSekmesi({ b, onSina }: { b: EkSekmeBaglami; onSina?:
 
   return (
     <div className="gc-sekme">
-      <div className="bilgi">{c('Bu sekmedeki alanlar protokole göre değişir ve tek bir ayar '
-        + 'nesnesinde saklanır; seçili protokol')}: <b>{c(GOZ_CIHAZ_PROTOKOL[protokol] ?? '—')}</b>.
-        {' '}{c('Protokolü ve MWL desteğini "Tanım" sekmesinden değiştirin.')}</div>
+      {/* PROTOKOL BURADA (mockup "Bağlantı" sekmesi): katalog grubu gizli,
+          çünkü mockup'ta tek bağlantı sekmesi var ve protokol seçimi alttaki
+          alan kümesini belirliyor - ikisi ayrı sekmede olsaydı kullanıcı
+          protokolü değiştirip ayarların değiştiğini görmeyecekti. */}
+      <h5 className="gc-bas">{c('Protokol')}</h5>
+      <div className="gc-izgara">
+        <label className="gc-alan"><span>{c('Biçim')}</span>
+          <select className="gc-inp" value={String(b.deger.protokol ?? '')}
+                  disabled={b.saltOkunur}
+                  onChange={e => b.alanYaz('protokol', Number(e.target.value))}>
+            {Object.entries(GOZ_CIHAZ_PROTOKOL).map(([v, ad]) => (
+              <option key={v} value={v}>{c(ad)}</option>
+            ))}
+          </select>
+        </label>
+        <label className="gc-alan"><span>{c('Adres (AE / COM / klasör)')}</span>
+          <input className="gc-inp" value={String(b.deger.baglanti ?? '')} disabled={b.saltOkunur}
+                 placeholder="AE:OCT1@10.20.4.51:104"
+                 onChange={e => b.alanYaz('baglanti', e.target.value)} />
+        </label>
+        <label className="gc-alan"><span>{c('DICOM çalışma listesi (MWL)')}</span>
+          <select className="gc-inp" value={Number(b.deger.mwl) === 1 ? '1' : '0'}
+                  disabled={b.saltOkunur}
+                  onChange={e => b.alanYaz('mwl', Number(e.target.value))}>
+            <option value="0">{c('yok')}</option>
+            <option value="1">{c('var')}</option>
+          </select>
+        </label>
+        <label className="gc-alan"><span>{c('Son mesaj')}</span>
+          <div className="gc-inp gc-salt">{b.deger.sonMesaj ? tarihSaat(b.deger.sonMesaj) : '—'}</div>
+        </label>
+      </div>
+      <div className="bilgi">{c('Aşağıdaki alanlar seçili protokole göre değişir ve tek bir '
+        + 'ayar nesnesinde saklanır.')}</div>
 
       {dicom && (
         <>

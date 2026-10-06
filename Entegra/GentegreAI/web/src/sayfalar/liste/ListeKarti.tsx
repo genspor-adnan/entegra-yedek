@@ -288,12 +288,6 @@ export function ListeKarti({
         }) : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
-          // GÖZ CİHAZI (978 mockup ③): durum · son 24 saat · tetkik dağılımı ·
-          //   hızlı işlem. Sayılar listedeki önizlemenin AYNI ucundan gelir.
-          : tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number'
-          ? <CihazYanPaneli r={cihazOnizleme}
-                            onSina={() => void cihazSina(kartId)}
-                            onDemirbas={id => git(`/demirbas/${id}`)} />
           : undefined}
         altSerit={tanim.kaynak === 'goz-muayene'
           ? (git => <GozKuralSeridi kontrol={gozKontrol} sekmeyeGit={git} onTamamla={() => void gozTamamla()} />) : undefined}
@@ -323,6 +317,18 @@ export function ListeKarti({
           // ORDER (968): Order sekmesinin sağında özet (toplam / verilen / sonraki doz).
           ? (baslik, icerik) => baslik === 'Order' && kartId !== 'yeni' && kartId !== null
               ? <div className="od-iki"><div>{icerik}</div><OrderOzetKutusu id={Number(kartId)} yenile={kartTazele} /></div>
+              : icerik
+          : tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number'
+          // GÖZ CİHAZI (978 mockup ③): sağ sütun - durum · son 24 saat ·
+          //   tetkik dağılımı · hızlı işlem. GenForm'un `yanPanel`i yalnız
+          //   DİKEY gezinti kipinde çiziliyor (sekmeGruplari şart), mockup ise
+          //   yatay sekme şeridi istiyor; bu yüzden panel "Tanım" sekmesinin
+          //   sağına konuyor. Sayılar listedeki önizlemenin AYNI ucundan gelir.
+          ? (baslik, icerik) => baslik === 'Tanım'
+              ? <div className="gc-iki"><div>{icerik}</div>
+                  <CihazYanPaneli r={cihazOnizleme}
+                                  onSina={() => void cihazSina(kartId)}
+                                  onDemirbas={id => git(`/demirbas/${id}`)} /></div>
               : icerik
           : tanim.kaynak === 'radyoloji-cihaz'
           // CİHAZ (967): Randevu ayarları altında kapasite, sağında bu hafta ızgarası.
@@ -563,7 +569,11 @@ export function ListeKarti({
           //   hatasında cihazın bütün ölçümlerini susturmak demekti) ·
           //   Mesaj günlüğü ve Kalibrasyon (kayıtlı cihazda, salt okuma).
           ? [
-              { anahtar: 'ozel:gc-baglanti', baslik: 'Bağlantı ayarları', yenideDe: true,
+              // MOCKUP'TA TEK "Bağlantı" sekmesi var: katalog grubu gizlendi
+              //   (gizliKartSekmeleri) ve protokol · adres · MWL alanları bu
+              //   sekmede düzenleniyor - iki "Bağlantı" başlığı olsaydı
+              //   kullanıcı hangisine bakacağını bilemezdi.
+              { anahtar: 'ozel:gc-baglanti', baslik: 'Bağlantı', yenideDe: true,
                 ciz: (b) => <BaglantiAyarSekmesi b={b}
                                                  onSina={typeof kartId === 'number'
                                                    ? () => void cihazSina(kartId) : undefined} /> },

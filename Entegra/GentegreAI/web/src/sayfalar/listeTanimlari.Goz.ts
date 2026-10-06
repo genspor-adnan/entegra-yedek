@@ -254,6 +254,11 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['uretici', 'olcumEslemeVar', 'baglanti'],
     kolonSirasi: ['ad', 'turAdi', 'model', 'seriNo', 'oda', 'protokolAdi', 'mwl',
                   'sonMesaj', 'bugunCekim', 'eslenmeyen', 'kalibrasyonGecerlilik', 'durumAdi'],
+    // KATALOG "Bağlantı" GRUBU GİZLİ: alanları (protokol · adres · MWL · son
+    //   mesaj) ve jsonb ayarları kartın özel "Bağlantı" sekmesinde düzenlenir -
+    //   mockup'ta tek bağlantı sekmesi var. Ham JSON kutusu kullanıcıya
+    //   gösterilmiyor: bir virgül hatası cihazın bütün ölçümlerini susturur.
+    gizliKartSekmeleri: ['Bağlantı'],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🛠️',
     yetkiKodu: 'goz.cihaz', menuSira: 90,

@@ -19416,3 +19416,26 @@ tsc temiz, vitest 789 geçti.
 > belleği kritik seviyeye düştüğü için arka plan görevi olarak durdurulmuştu;
 > izin olmadan yeniden başlatılmadı. Kart düzeni (üst şerit, altı sekme, yan
 > panel) ekranda görülerek değil, derleme ve uç testleriyle doğrulandı.
+
+### Aynı gün, tarayıcı doğrulaması sonrası düzeltmeler (cihaz kartı)
+
+Dev sunucu yeniden açılınca kart ekranda görüldü ve **mockup'tan iki sapma**
+düzeltildi:
+
+* **İki ayrı "Bağlantı" sekmesi oluşmuştu** (katalog grubu + yeni özel sekme).
+  Mockup'ta tek bağlantı sekmesi var; katalog grubu `gizliKartSekmeleri` ile
+  kapatıldı ve protokol · adres · MWL · son mesaj alanları özel sekmenin
+  "Protokol" bölümüne taşındı - protokol seçimi alttaki alan kümesini
+  belirlediği için ikisinin ayrı sekmelerde olması, kullanıcının protokolü
+  değiştirip ayarların değiştiğini görmemesi demekti. Ham JSON kutuları da
+  böylece kullanıcıya hiç gösterilmiyor.
+* **Sağ sütun çizilmiyordu:** GenForm'un `yanPanel`i yalnız DİKEY gezinti
+  kipinde (sekme listesi solda) çiziliyor, mockup ise yatay sekme şeridi
+  istiyor. Panel "Tanım" sekmesinin sağına alındı (`.gc-iki`).
+
+Tarayıcı doğrulaması: sekme şeridi **Tanım · Bağlantı · Tetkikler · Ölçüm
+eşlemesi · Mesaj günlüğü · Kalibrasyon** (mockup ile birebir), kimlik alanları
+üst şeritte (`kaid`), protokolü "Dosya"ya çevirince DICOM bölümü yerine KLASÖR
+bölümü geldi, "örnek mesajla sına" ekranda `OD rnfl_ort 78 · OD cmt 262 ·
+OS rnfl_ort 86` çözdü (hiçbir şey yazmadan), sağ sütunda Durum · Son 24 saat ·
+Hızlı işlem kutuları ve MWL bilgisi göründü.
