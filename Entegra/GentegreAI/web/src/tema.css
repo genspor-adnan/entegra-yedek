@@ -7671,3 +7671,32 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .gp-cikti .cikti-blok table th { text-align: left }
 .gp-cikti .cikti-blok table th.sag, .gp-cikti .cikti-blok table td.sag { text-align: right }
 .gp-cikti .cikti-bos { padding: 14px 0 0; color: #6b7a8d; line-height: 1.6 }
+
+/* ===================================================================
+   GÖZ CİHAZ KARTI SEKMELERİ (978, mockup goz_cihaz_karti_v2)
+   Eşleme sekmeleri jsonb kolonlarını TABLO olarak düzenler: kullanıcıya JSON
+   metni yazdırmak, bir virgül hatasında cihazın bütün ölçümlerini susturmak
+   demekti.
+   =================================================================== */
+.gc-sekme { padding: 10px 12px; font-size: 12px }
+.gc-sekme .bilgi { margin-bottom: 8px }
+.gc-tbl { width: 100%; margin-bottom: 8px }
+.gc-tbl th { font-size: 10.5px; color: var(--soluk); text-transform: uppercase; text-align: left }
+.gc-tbl td { padding: 3px 5px; vertical-align: middle }
+.gc-inp { border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 6px; font-size: 11.5px;
+  background: var(--yuz); color: var(--yazi); min-width: 120px; width: 100% }
+.gc-ekle { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px }
+.gc-ham { font-family: Consolas, "Courier New", monospace; font-size: 10.5px; white-space: pre-wrap;
+  background: var(--yuz2); border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; margin: 0;
+  max-height: 220px; overflow: auto }
+/* Kalibrasyon özeti: demirbaştan gelen alanlar - SALT OKUMA. */
+.gc-ozet { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px 12px; margin-bottom: 10px }
+.gc-ozet div { display: flex; flex-direction: column; gap: 1px }
+.gc-ozet span { font-size: 10px; color: var(--soluk) }
+/* Sekme içi uyarı kutusu (kalibrasyon gecikmiş / demirbaş bağı yok). */
+.gc-sekme .uyar { border: 1px solid #f2ddbf; background: #fdf6e3; color: #7a5a12;
+  border-radius: 6px; padding: 7px 9px; font-size: 11.5px; margin-bottom: 10px }
+:root:not([data-theme="light"]) .gc-sekme .uyar,
+:root[data-theme="dark"] .gc-sekme .uyar { background: #3a2f12; border-color: #6b5420; color: #f0d9a8 }
+.gc-bas { margin: 12px 0 6px; font-size: 11px; color: var(--soluk); text-transform: uppercase;
+  border-bottom: 1px solid var(--cizgi2); padding-bottom: 4px }

@@ -31,3 +31,27 @@ export const GOZ_TARAF: Record<number, string> = { 1: 'OD', 2: 'OS', 3: 'OU' };
 export const GOZ_SONUC: Record<number, string> = {
   1: 'Normal', 2: 'Sınırda', 3: 'Anormal', 4: 'Değerlendirilemez',
 };
+
+/**
+ * CİHAZ KODLARI (978) - DB kod listeleriyle BİREBİR: `goz.cihaz_tur` ve
+ * `goz.cihaz_protokol`. Liste kataloğu adları SQL `case` ile üretiyor, bu
+ * sözlük sol panel / önizleme gibi KOD taşıyan uçlar için - ikisi aynı metni
+ * yazmak zorunda.
+ */
+export const GOZ_CIHAZ_TUR: Record<number, string> = {
+  1: 'Otorefraktometre / keratometre', 2: 'Tonometre (NCT)', 3: 'Pakimetre',
+  4: 'OCT', 5: 'Görme alanı', 6: 'Fundus kamera', 7: 'Topografi',
+  8: 'Biyometri', 9: 'Endotel', 10: 'USG',
+};
+
+export const GOZ_CIHAZ_PROTOKOL: Record<number, string> = {
+  1: 'DICOM', 2: 'Seri metin (RS-232)', 3: 'Dosya (XML/CSV/PDF)', 4: 'API',
+};
+
+/**
+ * CİHAZ DURUMU sol ağaçta: üç ayrı alandan türetilir (aktif · dinleyici_durum ·
+ * uyarı). Kodlar sunucudaki `cihaz-gosterge` sorgusuyla aynı sırayı taşır.
+ */
+export const GOZ_CIHAZ_DURUM: Record<number, string> = {
+  0: 'Dinliyor', 1: 'Çalışıyor (dinleyici yok)', 2: 'Bağlantı yok', 3: 'Pasif',
+};

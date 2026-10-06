@@ -35,6 +35,8 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
 import { GozlukHastaBandi, GozlukReceteFormu, gozlukYazdir, useGozlukKaynak } from '../goz/GozlukPanelleri';
 import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
+import { KalibrasyonSekmesi, MesajGunluguSekmesi, OlcumEslemeSekmesi, TetkikEslemeSekmesi } from '../goz/GozCihazSekmeleri';
+import { useGozCihazOnizleme } from '../goz/GozCihazPanelleri';
 import { GOZ_TARAF, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
 import { MUAYENE_DURUM } from '../../bilesenler/muayeneKodlari';
 import { GOZ_SEKME_GRUPLARI, GozKuralSeridi, GozOykuV4Sekmesi, GozOzetSekmesi, GozSagOzet, useGozKontrol } from '../goz/GozKartV4';
@@ -155,6 +157,17 @@ export function ListeKarti({
   // GÖZ GÖRÜNTÜLEME v2 (974): hasta bandı, rozetler, görüntü / ölçüm / karşılaştırma sekmeleri tek uçtan.
   const gorOnizleme = useGoruntulemeOnizleme(tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number' ? kartId : null,
     kartTazele * 1000 + kayitSayaci);
+  // GÖZ CİHAZI (978): mesaj günlüğü ve kalibrasyon sekmeleri tek uçtan beslenir
+  //   (listedeki önizlemenin AYNI ucu - iki ayrı sorgu iki ayrı sayı üretirdi).
+  const cihazOnizleme = useGozCihazOnizleme(
+    tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number' ? kartId : null,
+    kartTazele * 1000 + kayitSayaci);
+  /** Mesajı yeniden işler ve sekmeyi tazeler (ham kayıt değişmez, 703). */
+  const cihazMesajIsle = async (mesajId: number) => {
+    await aksiyon('goz.mesaj-isle', { id: mesajId } as ListeSatiri);
+    setKartTazele(t => t + 1);
+  };
+
   // GÖRÜNTÜ SONUÇLARI penceresi (göz kartı araç çubuğu): muayene id'si (goz görüntüleme / belge için).
   const [gozGoruntuModal, setGozGoruntuModal] = useState<number | null>(null);
   const gozTamamla = async () => {
@@ -531,7 +544,28 @@ export function ListeKarti({
         // GÖZLÜK REÇETESİ (972): tek "Reçete" sekmesi (yeni kayıtta da) - değerler kart alanlarına yazılır.
         // ORDER (968): Doz planı · Güvenlik kontrolleri · Geçmiş (kayıtlı order'da).
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
-        ekSekmeler={tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
+        ekSekmeler={tanim.kaynak === 'goz-cihaz'
+          // GÖZ CİHAZI (978 mockup): Tetkikler · Ölçüm eşlemesi (jsonb kolonları
+          //   TABLO olarak düzenlenir - kullanıcıya JSON yazdırmak, bir virgül
+          //   hatasında cihazın bütün ölçümlerini susturmak demekti) ·
+          //   Mesaj günlüğü ve Kalibrasyon (kayıtlı cihazda, salt okuma).
+          ? [
+              { anahtar: 'ozel:gc-tetkik', baslik: 'Tetkikler', yenideDe: true,
+                ciz: (b) => <TetkikEslemeSekmesi b={b} /> },
+              { anahtar: 'ozel:gc-esleme', baslik: 'Ölçüm eşlemesi', yenideDe: true,
+                ciz: (b) => <OlcumEslemeSekmesi b={b} /> },
+              ...(typeof kartId === 'number'
+                ? [
+                    { anahtar: 'ozel:gc-mesaj', baslik: 'Mesaj günlüğü',
+                      ciz: () => <MesajGunluguSekmesi r={cihazOnizleme}
+                                                      onIsle={id => void cihazMesajIsle(id)} /> },
+                    { anahtar: 'ozel:gc-kalib', baslik: 'Kalibrasyon',
+                      ciz: () => <KalibrasyonSekmesi r={cihazOnizleme}
+                                                     onDemirbas={id => git(`/demirbas/${id}`)} /> },
+                  ]
+                : []),
+            ]
+          : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
           // GÖZ GÖRÜNTÜLEME (974 mockup): Görüntü & ölçümler · Karşılaştırma; Değerlendirme katalog grubu.
           ? [{ anahtar: 'ozel:gg-goruntu', baslik: 'Görüntü & ölçümler', ciz: (b) => <GoruntuOlcumSekmesi r={gorOnizleme} b={b} /> },
              { anahtar: 'ozel:gg-kars', baslik: 'Karşılaştırma', ciz: () => <GoruntulemeKarsilastirmaSekmesi r={gorOnizleme} /> }]

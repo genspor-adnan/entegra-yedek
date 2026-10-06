@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// GÖZ (OFTALMOLOJİ) MODÜLÜ LİSTELERİ (691) — tasarım notu
@@ -718,7 +718,11 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi GozCihaz() => new(
         Ad: "goz-cihaz",
         YetkiKodu: "goz.cihaz",
-        Kaynak: "public.goz_cihaz c",
+        // 978: sayılar ve kalibrasyon durumu v_goz_cihaz_ozet'ten - gösterge
+        //   ile liste AYNI tanımı okuyor (ayrı sorgu = ayrı sayı).
+        Kaynak: "public.goz_cihaz c "
+              + "join public.v_goz_cihaz_ozet v on v.cihaz_id = c.id "
+              + "left join public.taraf s on s.id = c.sorumlu_id",
         SubeKolonu: "c.sube_id",
         VarsayilanSirala: "c.tur, c.ad",
         Kolonlar: new KolonTanimi[]
@@ -751,5 +755,51 @@ public static partial class KaynakKatalogu
                 "case when c.olcum_esleme = '{}'::jsonb then 0 else 1 end",
                                               "mantik", "Eşleme", Hizalama: "orta", Genislik: 80),
             new("aktif",     "c.aktif",       "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
+
+            // ---------------------------------------------------- 978 v2 ----
+            new("seriNo",    "coalesce(c.seri_no, '')", "metin", "Seri No", Genislik: 120),
+            new("oda",       "coalesce(c.oda, '')",     "metin", "Yer / oda", Genislik: 140),
+            new("sorumlu",
+                "coalesce(public.fn_taraf_ad(s.unvan, s.ad, s.soyad)::varchar(120), '')",
+                                              "metin", "Sorumlu", Genislik: 160, Varsayilan: false),
+            new("bugunCekim", "v.bugun_cekim", "sayi", "Bugün çekim", Hizalama: "orta", Genislik: 100),
+            new("bekleyen",   "v.bekleyen",    "sayi", "Sonuç bekleyen", Hizalama: "orta", Genislik: 110),
+            // EŞLENMEYEN kırmızı okunmalı: ölçüm geldi ama hangi hastaya ait
+            //   olduğu kurulamadı - o ölçüm hiçbir ekranda görünmüyor.
+            new("eslenmeyen", "v.eslenmeyen",  "sayi", "Eşlenmeyen", Hizalama: "orta", Genislik: 100),
+            new("hatali",     "v.hatali",      "sayi", "Hatalı mesaj", Hizalama: "orta", Genislik: 100,
+                                              Varsayilan: false),
+            new("tetkikSay",  "v.tetkik_say",  "sayi", "Tetkik eşlemesi", Hizalama: "orta",
+                                              Genislik: 110, Varsayilan: false),
+            // KALİBRASYON DEMİRBAŞTAN (kullanıcı kararı 05.10.2026): cihaz
+            //   demirbaşa bağlı değilse boş gelir - "kalibrasyonu yok" değil
+            //   "takip edilmiyor" demektir.
+            new("kalibrasyonGecerlilik", "v.kalibrasyon_gecerlilik", "tarih",
+                                              "Kalibrasyon geçerlilik", Hizalama: "orta",
+                                              Genislik: 130, Bicim: "dd.MM.yyyy"),
+            new("kalibrasyonGecikmis", "v.kalibrasyon_gecikmis", "mantik",
+                                              "Kalibrasyon Gecikmiş", Varsayilan: false),
+            new("demirbasKod", "coalesce(v.demirbas_kod, '')", "metin", "Demirbaş No",
+                                              Genislik: 110, Varsayilan: false),
+            // "Demirbaş kartı" aksiyonu satırdaki id'ye gidiyor; bağ yoksa
+            //   aksiyon "takip edilmiyor" diyerek durur.
+            new("demirbasId", "c.demirbas_id", "sayi", "Demirbaş Id", Varsayilan: false),
+            new("sonSinama", "c.son_sinama", "tarih", "Son sınama", Hizalama: "orta",
+                                              Genislik: 120, Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("sonSinamaSonuc", "coalesce(c.son_sinama_sonuc, '')", "metin", "Sınama sonucu",
+                                              Genislik: 220, Varsayilan: false, Filtrelenebilir: false),
+            // DURUM tek kolonda: pasif · dinliyor · bağlantı yok · uyarı.
+            //   Üç ayrı mantık kolonunu gridde okumak, bir rozeti okumaktan zor.
+            new("durumAdi",
+                "case when c.aktif = 0 then 'Pasif' "
+                + "when c.dinleyici_durum = 2 then 'Bağlantı yok' "
+                + "when c.dinleyici_durum = 1 then 'Dinliyor' "
+                + "when v.kalibrasyon_gecikmis = 1 or v.eslenmeyen > 0 then 'Uyarı' "
+                + "else 'Çalışıyor' end",
+                                              "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                              Genislik: 120, Filtrelenebilir: false),
+            new("dinleyiciDurum", "c.dinleyici_durum", "kod", "Dinleyici Kodu", Varsayilan: false),
+            new("eslenmeyenVar", "case when v.eslenmeyen > 0 then 1 else 0 end", "mantik",
+                                              "Eşlenmeyen Var", Varsayilan: false),
         });
 }

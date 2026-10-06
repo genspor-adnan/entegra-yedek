@@ -61,6 +61,8 @@ public static partial class GozUclari
         CizimUclariniEkle(grup);
         CizimCiktiUclariniEkle(grup);
         DikteUclariniEkle(grup);
+        // Cihaz tanımı / gösterge / önizleme / bağlantı sınaması (978).
+        grup.CihazUclariniEkle();
 
         // ----------------------------------------------- cihaz mesajı işle ----
         // Sürücü düzeltildiğinde mesaj YENİDEN İŞLENİR, yeniden yazılmaz: ham

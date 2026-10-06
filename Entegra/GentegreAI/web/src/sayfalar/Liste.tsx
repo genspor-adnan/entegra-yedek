@@ -107,6 +107,8 @@ import { PrimSeridi } from './liste/PrimSeridi';
 import { PersonelSeridi } from './liste/PersonelSeridi';
 import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from './radyoloji/RadyolojiTanimPanelleri';
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
+import { GozCihazGostergesi, GozCihazOnizlemePaneli, GozCihazSolPanel,
+         useGozCihazGostergesi, useGozCihazSuzgeci } from './goz/GozCihazPanelleri';
 import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
 import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from './goz/GozlukPanelleri';
 import { GoruntulemeGostergesi, GoruntulemeOnizlemePaneli, GoruntulemeSolPanel, useGoruntulemeGostergesi, useGoruntulemeSuzgeci } from './goz/GozGoruntulemePanelleri';
@@ -461,6 +463,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const gozlukEkrani = tanim.kaynak === 'goz-gozluk-recete' && !portalda;
   const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
   const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
+  // GÖZ CİHAZLARI (978): radyolojinin cihaz ekranıyla aynı adları taşıyor,
+  //   bu yüzden göz önekli ayrı bileşen kümesi.
+  const gozCihazEkrani = tanim.kaynak === 'goz-cihaz' && !portalda;
+  const gozCihazSuzgec = useGozCihazSuzgeci(gozCihazEkrani);
+  const gozCihazGostergesi = useGozCihazGostergesi(gozCihazEkrani, yenile);
   // 974 GÖZ GÖRÜNTÜLEME: gösterge (ödeme / sıra / değerlendirme), tetkik-cihaz (sol), önizleme (sağ).
   // GÖZ ÜNİTE PANOSU (976): 30 sn otomatik tazeleme + istasyon / hekim / kaynak
   //   süzgeci; şerit, kanban ve alt tablolar TEK isteği paylaşıyor.
@@ -1046,7 +1053,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1185,6 +1192,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : gozCihazEkrani ? <GozCihazGostergesi veri={gozCihazGostergesi} s={gozCihazSuzgec} />
         : gorEkrani ? <GoruntulemeGostergesi veri={gorGostergesi} s={gorSuzgec} />
         : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
@@ -1269,6 +1277,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukSolPanel veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : gozCihazEkrani ? <GozCihazSolPanel veri={gozCihazGostergesi} s={gozCihazSuzgec} />
         : panoEkrani ? <GozPanoSolPanel veri={panoDurum.veri} s={panoSuzgec} />
         : gorEkrani ? <GoruntulemeSolPanel veri={gorGostergesi} s={gorSuzgec} />
         : undefined}
@@ -1293,6 +1302,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                                 onBildir={() => void aksiyon('goz.gozluk-bildir', seciliSatir)}
                                 onOptik={() => void aksiyon('goz.gozluk-optik', seciliSatir)}
                                 onTeslim={() => void aksiyon('goz.gozluk-teslim', seciliSatir)} />
+        )
+        : gozCihazEkrani ? (
+          <GozCihazOnizlemePaneli satir={seciliSatir} yenile={yenile}
+                                  onSina={() => void aksiyon('goz.cihaz-sina', seciliSatir)}
+                                  onMesajlar={() => void aksiyon('goz.cihaz-mesajlar', seciliSatir)}
+                                  onDemirbas={() => void aksiyon('goz.cihaz-demirbas', seciliSatir)} />
         )
         : gorEkrani ? (
           // HIZLI İŞLEM düğmeleri araç çubuğunun AYNI yolunu kullanır

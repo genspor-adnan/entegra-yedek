@@ -709,5 +709,36 @@ public static partial class KartKatalogu
             //   bir RNFL değeri, sessizce yanlış trend üretir.
             new("olcumEsleme", "olcum_esleme", "json",
                 Baslik: "Ölçüm Eşlemesi (JSON)", Grup: "Bağlantı", EnFazlaUzunluk: 4000),
+
+            // ------------------------------------------------- 978 v2 ----
+            // YER VE SORUMLULUK (mockup "Tanım" sekmesi): cihazın hangi odada
+            //   durduğu sıra ve çağrı ekranlarında kullanılıyor, kimin sorumlu
+            //   olduğu arıza bildiriminde.
+            new("oda", "oda", "metin", EnFazlaUzunluk: 60, Baslik: "Yer / Oda", Grup: "Yer"),
+            new("sorumluId", "sorumlu_id", "sayi", Baslik: "Sorumlu (personel)", Grup: "Yer"),
+            new("yazilimSurum", "yazilim_surum", "metin", EnFazlaUzunluk: 40,
+                Baslik: "Yazılım Sürümü", Grup: "Yer"),
+            // ÇEKİM SÜRESİ sıra tahmini içindir, KISIT DEĞİL: cihaz doluyken
+            //   hekim yine istem yazabilir - süre yalnız "sırada 3." yazarken
+            //   kullanılır.
+            new("cekimDk", "cekim_dk", "sayi", Baslik: "Çekim Süresi (dk)", Grup: "Yer"),
+            new("dilatasyonIster", "dilatasyon_ister", "mantik",
+                Baslik: "Dilatasyon İster", Grup: "Yer"),
+
+            // AYARLAR tek jsonb: protokole göre anlamı değişiyor (DICOM ip/port,
+            //   dosya klasör/desen, ortak hasta eşleştirme). Her protokol için
+            //   ayrı kolon açmak, dosya cihazında boş duran altı DICOM alanı
+            //   demekti. Anahtarları KOD doğrular (CihazAyarlari).
+            new("ayarlar", "ayarlar", "json",
+                Baslik: "Bağlantı / Eşleştirme Ayarları (JSON)", Grup: "Bağlantı",
+                EnFazlaUzunluk: 4000),
+            // TETKİK EŞLEMESİ olmayan cihaza istem YÖNLENDİRİLEMEZ: istem
+            //   ekranındaki cihaz kutusunda hiç görünmez.
+            new("tetkikEsleme", "tetkik_esleme", "json",
+                Baslik: "Tetkik Eşlemesi (JSON)", Grup: "Bağlantı", EnFazlaUzunluk: 4000),
+            new("sonSinama", "son_sinama", "zaman", Yazilabilir: false,
+                Baslik: "Son Sınama", Grup: "Bağlantı"),
+            new("sonSinamaSonuc", "son_sinama_sonuc", "metin", Yazilabilir: false,
+                EnFazlaUzunluk: 200, Baslik: "Sınama Sonucu", Grup: "Bağlantı"),
         });
 }

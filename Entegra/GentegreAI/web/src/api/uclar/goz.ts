@@ -346,6 +346,29 @@ export interface GozlukGostergeYaniti {
 }
 export type GozlukOnizleme = Record<string, unknown>;
 
+// 978 GÖZ CİHAZLARI v2
+export interface GozCihazGostergeYaniti {
+  gosterge: {
+    tanimli: number; aktif: number; bugunCekim: number; bekleyen: number;
+    eslenmeyen: number; hatali: number; kalibrasyonGecikmis: number;
+  };
+  turler: { tur: number; sayi: number }[];
+  protokoller: { protokol: number; sayi: number }[];
+  durumlar: { durum: number; sayi: number }[];
+}
+export interface GozCihazOnizleme {
+  cihaz: Record<string, unknown>;
+  mesajlar: { id: number; zaman: string; hastaEslesme: string; durum: number; hata: string; dosyaYolu: string; ham: string }[];
+  tetkikler: { tetkik: number; sayi: number }[];
+  /** Demirbaştan SALT OKUMA (kullanıcı kararı 05.10.2026); bağ yoksa boş. */
+  kalibrasyonlar: { id: number; tarih: string; kayitNo: string; tur: number; sonuc: number;
+                    gecerlilik: string | null; referansCihaz: string; referansSertifika: string;
+                    belirsizlik: number | null; belirsizlikBirim: string; yapan: string; firma: string }[];
+  isEmirleri: { id: number; isEmriNo: string; tur: number; oncelik: number; durum: number;
+                bildirimZamani: string; tamamlanma: string | null; planlanan: string | null;
+                arizaMetni: string; yapilanIs: string; hastaEtkilendi: number }[];
+}
+
 // 974 GÖZ GÖRÜNTÜLEME v2
 export interface GozGoruntulemeGostergeYaniti {
   gosterge: { bugun: number; sirada: number; odemeBekliyor: number; degerlendirmeBekleyen: number; kaliteDusuk: number; esikDisi: number; yzDikkat: number };
@@ -370,6 +393,11 @@ export const gozUclari = {
   gozlukImzala: (id: number) => gonder<{ id: number; durum: number; receteNo: string }>(`/api/goz/gozluk/${id}/imzala`, {}),
   gozlukDurum: (id: number, durum: 3 | 4) => gonder<{ id: number; durum: number }>(`/api/goz/gozluk/${id}/durum/${durum}`, {}),
   gozlukGosterge: () => istek<GozlukGostergeYaniti>('/api/goz/gozluk-gosterge'),
+  // 978 cihazlar: gösterge · önizleme · bağlantı sınaması
+  gozCihazGosterge: () => istek<GozCihazGostergeYaniti>('/api/goz/cihaz-gosterge'),
+  gozCihazOnizleme: (id: number) => istek<GozCihazOnizleme>(`/api/goz/cihaz/${id}/onizleme`),
+  gozCihazSina: (id: number) =>
+    istek<{ basarili: boolean; sonuc: string }>(`/api/goz/cihaz/${id}/sina`, { method: 'POST' }),
   gozlukOnizleme: (id: number) => istek<{ recete: GozlukOnizleme }>(`/api/goz/gozluk/${id}/onizleme`),
   /** Reçetenin hazır olduğunu hastaya bildirir (SMS / e-posta kuyruğu). */
   gozlukBildir: (id: number) =>

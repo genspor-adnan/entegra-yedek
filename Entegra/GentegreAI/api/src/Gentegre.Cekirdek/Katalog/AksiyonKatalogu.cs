@@ -363,9 +363,27 @@ public static class AksiyonKatalogu
                                          ekleAdi: "＋ Yeni Terim",
                                          silIpucu: "Kurum sözlüğünden silmek "
                                                  + "herkesin diktesini etkiler"),
-            ["goz-cihaz-liste"] = Crud("goz-cihaz", "goz", "goz.cihaz",
-                                       ekleAdi: "＋ Yeni Cihaz",
-                                       silIpucu: "Mesajı olan cihaz silinmez; pasife alın"),
+            // CIHAZLAR (978, mockup goz_goruntuleme_cihazlar_v2): tanim +
+            //   baglanti sinamasi + mesaj kuyrugu. Kalibrasyon eylemi YOK -
+            //   kayit demirbas kartinda tutulur, buradan oraya gidilir.
+            ["goz-cihaz-liste"] =
+            [
+                .. Crud("goz-cihaz", "goz", "goz.cihaz",
+                        ekleAdi: "＋ Yeni Cihaz",
+                        silIpucu: "Mesajı olan cihaz silinmez; pasife alın"),
+                new("goz.cihaz-sina", "🔌 Bağlantıyı Sına", "goz",
+                    KaynakKodu: "goz.cihaz", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2,
+                    Ipucu: "Adrese TCP bağlantısı dener (DICOM doğrulaması değil); sonucu kaydeder"),
+                new("goz.cihaz-mesajlar", "📨 Mesaj Kuyruğu", "goz",
+                    KaynakKodu: "goz.cihaz", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 32, UrunModu: 2,
+                    Ipucu: "Bu cihazın eşlenmeyen ve hatalı mesajları"),
+                new("goz.cihaz-demirbas", "↗ Demirbaş Kartı", "goz",
+                    KaynakKodu: "goz.cihaz", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 34, UrunModu: 2,
+                    Ipucu: "Kalibrasyon ve bakım kaydı demirbaş kartında tutulur"),
+            ],
 
             // CIHAZ MESAJLARI: cihazin gonderdigi HAM KAYIT. Elle eklenmez
             //   (kaynagi cihaz), duzeltilmez ve silinmez - olcumun nereden

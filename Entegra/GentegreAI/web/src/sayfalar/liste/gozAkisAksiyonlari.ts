@@ -284,6 +284,35 @@ export async function gozAkisAksiyonu(
     return true;
   }
 
+  // ---- CİHAZLAR (978): bağlantı sınaması · mesaj kuyruğu · demirbaş kartı.
+  if (kod === 'goz.cihaz-sina') {
+    if (!id) { mesaj('Önce bir cihaz seçin.'); return true }
+    await guvenli(async () => {
+      const y = await api.gozCihazSina(id);
+      // SONUÇ METNİ sunucudan geliyor ve sınırını kendisi yazıyor
+      //   ("DICOM doğrulaması yapılmadı") - istemci onu yorumlamıyor.
+      mesaj(`${y.basarili ? '✔' : '✕'} ${y.sonuc}`);
+      b.tazele();
+    });
+    return true;
+  }
+  if (kod === 'goz.cihaz-mesajlar') {
+    if (!id) { mesaj('Önce bir cihaz seçin.'); return true }
+    // Mesaj listesi kendi ekranı: cihaz süzgeciyle açılır.
+    b.git(`/goz-cihaz-mesaj?cihazId=${id}`);
+    return true;
+  }
+  if (kod === 'goz.cihaz-demirbas') {
+    const demirbasId = Number(satir?.demirbasId ?? 0);
+    if (!demirbasId) {
+      mesaj('Cihaz demirbaşa bağlı değil - kalibrasyon ve bakım takip edilmiyor. '
+            + 'Cihaz kartından demirbaş kaydını bağlayın.');
+      return true;
+    }
+    b.git(`/demirbas/${demirbasId}`);
+    return true;
+  }
+
   // ---- GÖZLÜK REÇETESİ BİLDİRİMİ (973): hastaya reçetenin HAZIR olduğu
   //   bildirilir; değerleri gitmez (SMS'te dioptri yanlış okunur, bkz. db 977).
   if (kod === 'goz.gozluk-bildir') {

@@ -241,10 +241,19 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     kaynak: 'goz-cihaz', rota: 'goz-cihaz', aksiyonEkrani: 'goz-cihaz-liste', baslik: 'Göz Cihazları',
     yol: 'Göz › Ayarlar › Cihazlar',
     kartYolu: '/goz-cihaz', kartBaslik: 'Göz Cihazı',
+    // 978 (mockup goz_goruntuleme_cihazlar_v2.html): gösterge, tür / bağlantı /
+    //   durum (sol) ve cihaz önizlemesi (sağ) panelleri Liste'de. MWL ·
+    //   eşlenmeyen · kalibrasyon işaretleri ÇİP DEĞİL - bağımsız şeritte,
+    //   "aktif + eşlenmeyen var" kurulabilsin.
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'aktif', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
+    aracCubuguAltSatir: true,
+    gizliKolonlar: ['uretici', 'olcumEslemeVar', 'baglanti'],
+    kolonSirasi: ['ad', 'turAdi', 'model', 'seriNo', 'oda', 'protokolAdi', 'mwl',
+                  'sonMesaj', 'bugunCekim', 'eslenmeyen', 'kalibrasyonGecerlilik', 'durumAdi'],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🛠️',
     yetkiKodu: 'goz.cihaz', menuSira: 90,

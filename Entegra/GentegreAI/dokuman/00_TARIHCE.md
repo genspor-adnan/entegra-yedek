@@ -19311,3 +19311,64 @@ Optike gönder). dotnet test 218, vitest 789 geçti.
 > randevu hatırlatması, 5336304110) - benim testimden değil, önceki bir
 > çalışmadan kalmış. Arka plan işçisi açıkken gerçek SMS olarak gider;
 > silinmesi kullanıcının kararı.
+
+## 06.10.2026 — Göz cihaz listesi ve kartı mockup'a göre yapıldı (978)
+
+Kullanıcı: *"göz cihaz listesi ve kartını mockup a göre yap"* (mockup
+`Ekranlar/Goz/goz_goruntuleme_cihazlar_v2.html` + `goz_cihaz_karti_v2.html`).
+Önceki hâl: liste yalnız kimlik kolonları + iki çip, kart üç grup, panel yok.
+
+**db/978** — `goz_cihaz`'a çalışma kuralları eklendi: `oda` · `sorumlu_id` ·
+`yazilim_surum` · `cekim_dk` · `dilatasyon_ister` · `ayarlar` (jsonb) ·
+`tetkik_esleme` (jsonb) · `son_sinama` + `son_sinama_sonuc`. Protokole göre
+anlamı değişen bağlantı alanları (DICOM ip/port/AE, dosya klasör/desen, ortak
+hasta eşleştirme) tek `ayarlar` jsonb'sinde: her protokol için ayrı kolon
+açmak, dosya cihazında boş duran altı DICOM kolonu demekti. Yeni görünüm
+`v_goz_cihaz_ozet` sayıları (bugün çekim · sonuç bekleyen · eşlenmeyen ·
+hatalı · 24 saat · **çekim→ekran gecikmesi**) ve **demirbaştan** kalibrasyon
+alanlarını veriyor - liste kolonları ve gösterge aynı tanımı okuyor.
+
+**API** `GozUclari.Cihaz.cs`: `/cihaz-gosterge` (gösterge + tür/protokol/durum
+ağacı), `/cihaz/{id}/onizleme` (cihaz + son mesajlar + bu ay tetkikler +
+demirbaştan kalibrasyon kayıtları ve iş emirleri), `/cihaz/{id}/sina`.
+
+* **Sınamanın sınırı yazılı:** DICOM yığını yok, bu yüzden uç C-ECHO
+  göndermiyor - adrese **TCP bağlantısı** deniyor ve sonucu *"Port açık · 42 ms
+  (DICOM doğrulaması yapılmadı)"* diye kaydediyor. Dosya protokolünde adres bir
+  klasördür, orada erişim denetimi yapılıyor. Sonuç saklanıyor: ekran her
+  açılışta "bilinmiyor" derse kullanıcı aynı sınamayı tekrar çalıştırır.
+* Adres iki yerden okunuyor (yeni `ayarlar.ip/port` ve eski tek satır
+  `baglanti` metni `AE:OCT1@10.20.4.51:104`) - eski kayıtlar taşınmadan çalışsın.
+
+**Liste**: 6 gösterge, bağımsız işaret şeridi (MWL destekli · Eşlenmeyen var ·
+Kalibrasyon gecikmiş), sol ağaç (tür · bağlantı · durum), mockup kolon dizilimi
+ve tek "Durum" rozeti (pasif / bağlantı yok / dinliyor / uyarı), sağ panelde
+cihaz · bağlantı · son 24 saat · ölçüm eşlemesi · son mesajlar · kalibrasyon
+(demirbaştan) + hızlı işlem. Yeni aksiyonlar: Bağlantıyı Sına · Mesaj Kuyruğu ·
+Demirbaş Kartı (bağ yoksa "takip edilmiyor" diyerek durur).
+
+**Kart**: üç gruba (Genel · Bağlantı · Yer) ek **dört sekme** —
+*Tetkikler* ve *Ölçüm eşlemesi* jsonb kolonlarını **tablo olarak** düzenler
+(kullanıcıya JSON metni yazdırmak, bir virgül hatasında cihazın bütün
+ölçümlerini susturmak demekti; değer yine aynı kolona kart kaydıyla yazılır),
+*Mesaj günlüğü* (ham gövde + yeniden işle) ve *Kalibrasyon* (**salt okuma**,
+demirbaştan; bağ yoksa ne yapılacağını yazan uyarı).
+
+Doğrulama: uçlar denendi (gösterge · liste · önizleme); sınama iki dalda da
+gerçek sonuç verdi (*"Klasör görünmüyor: C:\dosya\ga"*, *"Zaman aşımı (5 sn) ·
+10.20.4.51:104"*) ve DB'ye yazıldı. Tarayıcıda: gösterge + işaret şeridi + sol
+ağaç + kolonlar mockup'la aynı, önizlemenin altı bloğu doldu, kartın dört
+sekmesi açıldı; **eşleme düzenlemesi uçtan uca test edildi** - tetkik satırı
+eklenip `{"goz":"istem","mwl":"OPT/RNFL","tetkik":2,"cihaz_kod":"RNFL_GCC"}`
+olarak, ölçüm eşlemesine `SignalStrength → kalite` olarak yazıldı.
+**Bir hata bulundu ve düzeltildi:** jsonb sunucudan metin geliyor, panel
+`Object.entries` ile metni karakter karakter dolaşıp eşleme tablosunu
+"0 → {", "1 → \"" diye çiziyordu.
+Test için yapılan tüm DB değişiklikleri geri alındı (cihaz 9003'ün demirbaş
+bağı, eşlemeler, sınama izleri; demirbaş 1'in kalibrasyon alanları ve
+KAL-TEST-001 kaydı). dotnet test 218, vitest 789 geçti.
+
+**Yapılmayan (mockup'ta var):** IOL hesabı sekmesi (biyometri ölçümünden
+Barrett / SRK-T / Haigis / Hoffer Q karşılaştırması) - formül kütüphanesi ayrı
+bir iş, `goz_biyometri` verisi hazır ama hesap motoru yok. MWL çalışma listesi
+sekmesi de bekliyor: DICOM yığını kurulana kadar gösterecek veri üretilmiyor.
