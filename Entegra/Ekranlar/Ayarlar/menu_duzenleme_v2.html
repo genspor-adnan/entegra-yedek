@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menü Düzenleme — Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  /* ŞUBE ŞERİDİ: hangi şubenin düzenini düzenlediğini unutmak, yanlış şubenin
+     menüsünü bozmak demektir - her zaman en üstte ve renkli. */
+  .sube-serit{display:flex;gap:14px;align-items:center;padding:8px 12px;background:#fff8e6;border-bottom:1px solid #f0d9a8;font-size:11.5px;flex-wrap:wrap}
+  .sube-serit b{color:var(--navy)}
+  .sube-serit .sec{border:1px solid var(--line);border-radius:3px;background:#fff;padding:3px 8px;min-width:190px}
+  .miras{display:inline-block;padding:1px 8px;border-radius:9px;font-size:10.5px;border:1px solid #cfe0f5;background:#eef4fc;color:#2f6db3}
+  .miras.ozel{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46}
+  .uc{display:grid;grid-template-columns:330px minmax(0,1fr) 300px;gap:12px;padding:10px 14px;align-items:start}
+  /* AĞAÇ: sürükle-bırak ile sıra ve derinlik. */
+  .agac{border:1px solid var(--line2);border-radius:6px;background:#fff;max-height:560px;overflow:auto}
+  .agac .bas{display:flex;gap:6px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);background:var(--head);font-size:11px;color:var(--muted)}
+  .dugum{display:flex;gap:6px;align-items:center;padding:4px 8px;font-size:11.5px;border-bottom:1px solid #f2f5f8;cursor:default;white-space:nowrap}
+  .dugum:hover{background:#f5f9fe}
+  .dugum.sec{background:var(--sel)}
+  .dugum .tut{color:#9aa7b4;cursor:grab;font-size:12px}
+  .dugum .ok{width:12px;text-align:center;color:var(--muted);font-size:10px}
+  .dugum .ad{flex:1;overflow:hidden;text-overflow:ellipsis}
+  .dugum .sag{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .dugum.d1{padding-left:8px;font-weight:bold}
+  .dugum.d2{padding-left:26px}
+  .dugum.d3{padding-left:46px;color:#44546a}
+  .dugum.d4{padding-left:66px;color:#5a6b7d}
+  .dugum.gizli .ad{color:#9aa7b4;text-decoration:line-through}
+  .bolge-renk{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .ikon{width:16px;text-align:center}
+  /* SÜRÜKLEME göstergesi: bırakıldığında nereye gireceği çizgiyle belli olur. */
+  .birak{height:0;border-top:2px dashed #2f6db3;margin:0 8px}
+  .suruklenen{opacity:.55;background:#eef4fc}
+  .rozet-k{display:inline-block;padding:0 6px;border-radius:8px;font-size:9.5px;border:1px solid var(--line);background:#f4f6f9;color:#5a6b7d}
+  /* ORTA: seçili düğümün özellikleri. */
+  .ozellik{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:10px 12px}
+  .grp{margin-bottom:12px}
+  .grp h5{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line2);padding-bottom:4px}
+  .izgara{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+  .izgara.k1{grid-template-columns:1fr}
+  .fld{display:flex;flex-direction:column;gap:2px;font-size:11.5px}
+  .fld span{font-size:10px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;padding:4px 7px;min-height:24px;font-size:11.5px}
+  .inp.pasif{background:#f3f6fa;color:var(--muted)}
+  .bilgi-k{border:1px solid #f2ddbf;background:#fdf6e3;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#7a5a12;margin-bottom:10px}
+  .uyar-k{border:1px solid #f3c4bf;background:#fbe9e7;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#8f2a22;margin-bottom:10px}
+  /* SAĞ: canlı önizleme - gerçek sol menü. */
+  .onizle{background:#20344d;border-radius:6px;padding:8px 0;color:#dce6f2;font-size:11.5px;max-height:560px;overflow:auto}
+  .onizle .bolge{display:flex;gap:7px;align-items:center;padding:6px 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:#9fb6d0}
+  .onizle .oge{display:flex;gap:7px;align-items:center;padding:5px 10px 5px 22px}
+  .onizle .oge.alt{padding-left:38px;color:#b9cadb}
+  .onizle .oge.on{background:#2d4a6b;color:#fff;font-weight:bold}
+  .onizle .oge .yildiz{margin-left:auto;color:#f0c454}
+  .sayac{font-size:10.5px;color:var(--muted)}
+  .arac2{display:flex;gap:6px;flex-wrap:wrap;padding:6px 14px 0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Menü Düzenleme</h1><span class="yol">Yönetim › Ayarlar › Menü Düzeni</span>
+    <span class="sp"></span>
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">👁 Önizle</span>
+    <span class="btn">⤾ Varsayılana dön</span>
+    <span class="btn">⧉ Başka şubeye kopyala</span>
+    <span class="btn">📤 Dışa aktar</span>
+    <span class="btn">📥 İçe aktar</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="sube-serit">
+    <span>Düzenlenen</span>
+    <span class="sec">🏥 Merkez ▾</span>
+    <span class="miras ozel">şubeye özel düzen</span>
+    <span>Kaynak</span><b>Varsayılan düzen + 7 değişiklik</b>
+    <span class="sp"></span>
+    <span>Ürün modu</span><b>GenoTIP AI (HBYS)</b>
+    <span>Rol</span><span class="sec" style="min-width:150px">Tüm roller ▾</span>
+  </div>
+  <div class="arac2">
+    <span class="cip on">Tümü</span><span class="cip">Yalnız değiştirilenler</span><span class="cip">Gizlenenler</span>
+    <span class="cip">Boş gruplar</span>
+    <span class="sp"></span>
+    <span class="sayac">8 bölge · 24 grup · 96 ekran · 7 değişiklik</span>
+  </div>
+
+  <div class="uc">
+    <!-- 2 -->
+    <div class="agac">
+      <div class="bas">⠿ sürükle · ▸ aç/kapa · gözle gizle <span class="sp"></span><span class="rozet-k">4 seviye</span></div>
+
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▾</span>
+        <span class="bolge-renk" style="background:#2f6db3"></span>
+        <span class="ad">Hasta Akışı</span>
+        <span class="sag"><span class="rozet-k">bölge</span><span>👁</span></span></div>
+
+      <div class="dugum d2"><span class="tut">⠿</span><span class="ok">▸</span><span class="ikon">🎧</span>
+        <span class="ad">Çağrı Merkezi</span><span class="sag"><span class="rozet-k">grup · 4</span><span>👁</span></span></div>
+
+      <div class="dugum d2"><span class="tut">⠿</span><span class="ok">▾</span><span class="ikon">📅</span>
+        <span class="ad">Randevu</span><span class="sag"><span class="rozet-k">grup · 3</span><span>👁</span></span></div>
+      <div class="dugum d3"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">📅</span>
+        <span class="ad">Randevular</span><span class="sag"><span class="rozet-k">ekran</span><span>⭐</span><span>👁</span></span></div>
+      <div class="dugum d3"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">🗓</span>
+        <span class="ad">Randevu Takvimi</span><span class="sag"><span class="rozet-k">ekran</span><span>👁</span></span></div>
+      <div class="dugum d3 gizli"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">⚙</span>
+        <span class="ad">Randevu Ayarları</span><span class="sag"><span class="rozet-k">ekran</span><span>🚫</span></span></div>
+
+      <div class="dugum d2 sec"><span class="tut">⠿</span><span class="ok">▾</span><span class="ikon">🚑</span>
+        <span class="ad">Kayıt Kabul</span><span class="sag"><span class="rozet-k">grup · 9</span><span>👁</span></span></div>
+      <div class="dugum d3"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">🤕</span>
+        <span class="ad">Hasta Listesi</span><span class="sag"><span class="rozet-k">ekran</span><span>⭐</span><span>👁</span></span></div>
+      <div class="dugum d3"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">♿</span>
+        <span class="ad">Başvurular</span><span class="sag"><span class="rozet-k">ekran</span><span>⭐</span><span>👁</span></span></div>
+      <div class="birak"></div>
+      <div class="dugum d3 suruklenen"><span class="tut">⠿</span><span class="ok">▾</span><span class="ikon">💳</span>
+        <span class="ad">Tahsilat &amp; Ödeme</span><span class="sag"><span class="rozet-k">alt başlık · 3</span><span>👁</span></span></div>
+      <div class="dugum d4"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">💰</span>
+        <span class="ad">Hasta Avansları</span><span class="sag"><span class="rozet-k">ekran</span><span>👁</span></span></div>
+      <div class="dugum d4"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">🧾</span>
+        <span class="ad">Provizyonlar</span><span class="sag"><span class="rozet-k">ekran</span><span>👁</span></span></div>
+      <div class="dugum d4"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">✅</span>
+        <span class="ad">İskonto Onayı</span><span class="sag"><span class="rozet-k">ekran</span><span>👁</span></span></div>
+      <div class="dugum d3"><span class="tut">⠿</span><span class="ok"></span><span class="ikon">📊</span>
+        <span class="ad">Dökümler</span><span class="sag"><span class="rozet-k">ekran</span><span>👁</span></span></div>
+
+      <div class="dugum d2"><span class="tut">⠿</span><span class="ok">▸</span><span class="ikon">🚨</span>
+        <span class="ad">Acil</span><span class="sag"><span class="rozet-k">grup · 5</span><span>👁</span></span></div>
+
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#3f9a5e"></span>
+        <span class="ad">Klinikler</span><span class="sag"><span class="rozet-k">bölge · 5 grup</span><span>👁</span></span></div>
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#6a3fb5"></span>
+        <span class="ad">Tanı &amp; Tetkik</span><span class="sag"><span class="rozet-k">bölge · 2 grup</span><span>👁</span></span></div>
+      <div class="dugum d1 gizli"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#c0392b"></span>
+        <span class="ad">Yatan &amp; Cerrahi</span><span class="sag"><span class="rozet-k">bölge</span><span>🚫</span></span></div>
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#d9a12b"></span>
+        <span class="ad">Ödeyen &amp; Fatura</span><span class="sag"><span class="rozet-k">bölge · 3 grup</span><span>👁</span></span></div>
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#1c8b8b"></span>
+        <span class="ad">Finans</span><span class="sag"><span class="rozet-k">bölge · 3 grup</span><span>👁</span></span></div>
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#8a6218"></span>
+        <span class="ad">Tedarik</span><span class="sag"><span class="rozet-k">bölge · 4 grup</span><span>👁</span></span></div>
+      <div class="dugum d1"><span class="tut">⠿</span><span class="ok">▸</span>
+        <span class="bolge-renk" style="background:#4d5d6e"></span>
+        <span class="ad">Yönetim</span><span class="sag"><span class="rozet-k">bölge · 6 grup</span><span>👁</span></span></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <div class="ozellik">
+        <div class="grp"><h5>Seçili düğüm · grup</h5>
+          <div class="izgara">
+            <label class="fld"><span>Sistem adı (değişmez)</span><div class="inp pasif">Kayıt Kabul</div></label>
+            <label class="fld"><span>Görünen ad</span><div class="inp">Hasta Kabul</div></label>
+            <label class="fld"><span>İkon</span><div class="inp">🚑 ▾</div></label>
+            <label class="fld"><span>Kısayol (Ctrl+K etiketi)</span><div class="inp">kabul, başvuru, protokol</div></label>
+          </div>
+          <div class="bilgi-k"><b>Sistem adı değişmez:</b> rota, yetki ve kod eşlemesi ona bağlıdır.
+            Değiştirilen yalnız <b>görünen addır</b>; dil dosyasına çeviri olarak yazılır, İngilizce arayüzde
+            karşılığı ayrı girilir.</div>
+        </div>
+
+        <div class="grp"><h5>Yerleşim</h5>
+          <div class="izgara">
+            <label class="fld"><span>Üst başlık (bölge)</span><div class="inp">Hasta Akışı ▾</div></label>
+            <label class="fld"><span>Üst düğüm</span><div class="inp">— (bölgenin doğrudan altında) ▾</div></label>
+            <label class="fld"><span>Sıra</span><div class="inp">3</div></label>
+            <label class="fld"><span>Derinlik</span><div class="inp pasif">2 (bölge › grup)</div></label>
+          </div>
+          <div class="bilgi-k">Derinlik sürükleyerek değişir: bir düğümü başka düğümün <b>üstüne</b> bırakmak
+            onu alt düğüm yapar. <b>En çok 4 seviye</b> (bölge › grup › alt başlık › ekran); daha derini
+            menüde okunmuyor, sürükleme o noktada bırakmayı reddeder.</div>
+        </div>
+
+        <div class="grp"><h5>Görünürlük</h5>
+          <div class="izgara">
+            <label class="fld"><span>Durum</span><div class="inp">Görünür ▾</div></label>
+            <label class="fld"><span>Açılışta</span><div class="inp">Kapalı (accordion) ▾</div></label>
+            <label class="fld"><span>Rol kısıtı</span><div class="inp">— (yetkiye bırak) ▾</div></label>
+            <label class="fld"><span>Kurum tipi</span><div class="inp pasif">hastane · tıp merkezi</div></label>
+          </div>
+          <div class="uyar-k"><b>Gizlemek yetki değildir.</b> Menüden kaldırılan ekran adresi bilen kullanıcıya
+            hâlâ açılır; erişimi kapatmak için <b>Yetkiler</b> ekranı kullanılır. Yetkisi olmayan ekran burada
+            düzenlense bile o kullanıcıda zaten görünmez.</div>
+        </div>
+
+        <div class="grp"><h5>Bu düğümün altındakiler <span class="sayac">· 9 ekran</span></h5>
+          <table class="liste">
+            <tr><th>Sıra</th><th>Ekran</th><th>Görünen ad</th><th>Rota</th><th>Durum</th></tr>
+            <tr><td>1</td><td>Hasta Listesi</td><td>Hasta Listesi</td><td class="sonuk">/hasta</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>2</td><td>Başvurular</td><td><b>Hasta Kabul Başvuruları</b></td><td class="sonuk">/basvuru</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>3</td><td class="sonuk">— alt başlık —</td><td><b>Tahsilat &amp; Ödeme</b></td><td class="sonuk">—</td><td><span class="chip c-mavi">Başlık</span></td></tr>
+            <tr><td>4</td><td>Hasta Avansları</td><td>Hasta Avansları</td><td class="sonuk">/hasta-avans</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>5</td><td>Provizyonlar</td><td>Provizyonlar</td><td class="sonuk">/provizyon</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>6</td><td>İskonto Onayı</td><td>İskonto Onayı</td><td class="sonuk">/iskonto-onay</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>7</td><td>Medula Kabul</td><td>Medula Kabul</td><td class="sonuk">/medula-kabul</td><td><span class="chip c-bek">Gizli</span></td></tr>
+            <tr><td>8</td><td>Dökümler</td><td>Dökümler</td><td class="sonuk">/dokumler</td><td><span class="chip c-ok">Görünür</span></td></tr>
+            <tr><td>9</td><td>Ayarlar</td><td>Kayıt Kabul Ayarları</td><td class="sonuk">/kayit-kabul-ayar</td><td><span class="chip c-ok">Görünür</span></td></tr>
+          </table>
+          <div style="margin-top:6px"><span class="btn kucuk">＋ Alt başlık ekle</span>
+            <span class="btn kucuk">＋ Ekran ekle</span>
+            <span class="btn kucuk">🔗 Dış bağlantı ekle</span></div>
+          <div class="bilgi-k" style="margin-top:8px"><b>Ekran listesi sabittir:</b> buraya yalnız sistemde
+            <u>var olan</u> ekranlar ve <b>alt başlık</b> (ekran açmayan ara düğüm) eklenir. "Dış bağlantı"
+            kurum içi bir adrese (eski sisteme, PACS'a, intranete) açılır ve ayrı bir ikonla işaretlenir.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div>
+      <div class="bilgi-k">Önizleme <b>seçili şubenin</b> ve seçili rolün gördüğü menüdür; yetkisi olmayan
+        ekranlar burada da çizilmez.</div>
+      <div class="onizle">
+        <div class="bolge"><span class="bolge-renk" style="background:#2f6db3"></span> Hasta Akışı ▾</div>
+        <div class="oge">🎧 Çağrı Merkezi ▸</div>
+        <div class="oge">📅 Randevu ▸</div>
+        <div class="oge on">🚑 Hasta Kabul ▾</div>
+        <div class="oge alt">🤕 Hasta Listesi <span class="yildiz">★</span></div>
+        <div class="oge alt">♿ Hasta Kabul Başvuruları <span class="yildiz">★</span></div>
+        <div class="oge alt" style="opacity:.75;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px">Tahsilat &amp; Ödeme</div>
+        <div class="oge alt" style="padding-left:52px">💰 Hasta Avansları</div>
+        <div class="oge alt" style="padding-left:52px">🧾 Provizyonlar</div>
+        <div class="oge alt" style="padding-left:52px">✅ İskonto Onayı</div>
+        <div class="oge alt">📊 Dökümler</div>
+        <div class="oge alt">⚙ Kayıt Kabul Ayarları</div>
+        <div class="oge">🚨 Acil ▸</div>
+        <div class="bolge"><span class="bolge-renk" style="background:#3f9a5e"></span> Klinikler ▸</div>
+        <div class="bolge"><span class="bolge-renk" style="background:#6a3fb5"></span> Tanı &amp; Tetkik ▸</div>
+        <div class="bolge" style="opacity:.45"><span class="bolge-renk" style="background:#c0392b"></span> Yatan &amp; Cerrahi <small>(gizli)</small></div>
+        <div class="bolge"><span class="bolge-renk" style="background:#d9a12b"></span> Ödeyen &amp; Fatura ▸</div>
+        <div class="bolge"><span class="bolge-renk" style="background:#1c8b8b"></span> Finans ▸</div>
+        <div class="bolge"><span class="bolge-renk" style="background:#8a6218"></span> Tedarik ▸</div>
+        <div class="bolge"><span class="bolge-renk" style="background:#4d5d6e"></span> Yönetim ▸</div>
+      </div>
+
+      <div class="ozellik" style="margin-top:10px">
+        <div class="grp" style="margin:0"><h5>Bu şubedeki değişiklikler <span class="sayac">· 7</span></h5>
+          <div class="sat" style="font-size:11.5px">
+            <div>✎ <b>Kayıt Kabul</b> → "Hasta Kabul"</div>
+            <div>✎ <b>Başvurular</b> → "Hasta Kabul Başvuruları"</div>
+            <div>⇅ <b>Göz</b> grubu Klinikler içinde 2. sıraya</div>
+            <div>＋ Alt başlık: <b>Tahsilat &amp; Ödeme</b> (3 ekran)</div>
+            <div>🚫 <b>Yatan &amp; Cerrahi</b> bölgesi gizlendi</div>
+            <div>🚫 <b>Randevu Ayarları</b> gizlendi</div>
+            <div>🚫 <b>Medula Kabul</b> gizlendi</div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <span class="btn kucuk">⤾ Seçili değişikliği geri al</span>
+            <span class="btn kucuk">⤾ Tümünü varsayılana döndür</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> Kullanıcı: <i>"ana menü düzenleme — yerlerini kaydırabileyim, ismini değiştirebileyim,
+üst başlığı belirleyebileyim, derinliği yapabileyim, her şube için farklı yapabilirim"</i>.
+Bugün menü <b>koddan</b> geliyor: <code>listeTanimlari*.ts</code> (menuGrup · menuAltGrup · menuAd · menuSira) ve
+<code>kabuk/menuBolgeleri.ts</code> (8 bölge). Bu ekran onu <b>veriye</b> taşır; kod tarafı <b>varsayılan düzen</b>
+olarak kalır, ekran yalnız <b>farkı</b> saklar.<br>
+
+<span class="n">1</span><b>Şube şeridi:</b> hangi şubenin düzeni düzenleniyor + <b>miras rozeti</b>
+("varsayılan düzen" / "şubeye özel"). Şubenin kendi düzeni yoksa varsayılan görünür ve ilk değişiklikte kopya
+oluşur. Rol seçicisi yalnız <b>önizleme</b> içindir - düzen role göre saklanmaz, görünürlük yetkiden gelir.<br>
+
+<span class="n">2</span><b>Ağaç (sürükle-bırak):</b> dört seviye - <b>bölge › grup › alt başlık › ekran</b>.
+Sürüklerken bırakma çizgisi nereye gireceğini gösterir; bir düğümün ÜSTÜNE bırakmak onu alt düğüm yapar
+(derinlik böyle değişir), 4. seviyeden derini reddedilir. Gizlenen düğüm üstü çizili ve 🚫 ile durur.
+Bölge satırında renk karesi vardır: menüdeki renkle aynı.<br>
+
+<span class="n">3</span><b>Özellikler:</b> <u>sistem adı değişmez</u> (rota/yetki ona bağlı), değiştirilen
+<b>görünen addır</b> ve dil kaydına yazılır. Yerleşim kutusunda üst başlık (bölge), üst düğüm, sıra ve
+<b>salt okuma derinlik</b>. Görünürlükte durum, açılışta açık/kapalı (accordion) ve kurum tipi.
+<b>Gizlemek yetki değildir</b> - adresi bilen kullanıcı ekrana yine girer; erişim Yetkiler ekranından kapatılır.
+Altta o düğümün çocukları tablo olarak; "alt başlık" ekran açmayan ara düğümdür, "dış bağlantı" kurum içi
+bir adrese gider.<br>
+
+<span class="n">4</span><b>Önizleme:</b> seçili şube + seçili rol için <b>gerçek sol menü</b>. Altında
+<b>"bu şubedeki değişiklikler"</b> listesi: her satır tek tek geri alınabilir - şubeye özel düzen zamanla
+büyür, hangi farkın neden konduğunu görmeden yönetilemez.<br>
+
+<b>Veri tarafı (öneri, henüz yok):</b> tek tablo <code>menu_duzen</code> (sube_id · dugum_tur
+[bölge/grup/altbaslik/ekran] · sistem_kod · ust_kod · sira · gorunen_ad · ikon · gizli · acilista_acik).
+Kayıt yalnız <b>farkı</b> tutar; satırı olmayan düğüm koddaki varsayılanla çizilir. Böylece yeni bir modül
+eklendiğinde şube düzenleri bozulmaz, yeni ekran varsayılan yerinde görünür.
+</div></div>
+</body>
+</html>
