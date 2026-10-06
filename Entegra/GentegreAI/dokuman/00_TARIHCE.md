@@ -19510,3 +19510,31 @@ dotnet test 218, vitest 789, tsc temiz.
 Doğrulama: menü düzeninden "Kayıt Kabul" → "Hasta Kabul" yapıldı, rol kartının
 Yetki Matrisi sekmesinde `🤕 Hasta Kabul(10)` göründü; düzen sonra silindi
 (dev veritabanı temiz). vitest 789, tsc temiz.
+
+### Aynı gün — Kurum Profili sekmeleri yeniden düzenlendi
+
+Kullanıcı: *"Modüller sekmesini rename 'Menü Düzeni', kurum tipi ve modülleri
+gridini kaldır, bu sekmeye yeni yapılan menü düzeni ekranını taşı"* ve
+*"Roller sekmesinden sonraya Data Kullanımı sekmesi ekle, Modüller sekmesindeki
+Hizmet / Stok Kategorileri'ni buraya taşı"*.
+
+Yeni sıra: **1 Profil · 2 Menü Düzeni · 3 Roller · 4 Data Kullanımı ·
+5 Kayıt & Ücretlendirme · 6 Klinik Ayarlar · 7 Entegrasyonlar · 8 Kaynaklar ·
+9 Özet & Kurulum**.
+
+* **2 · Menü Düzeni:** kurum tipi × modül matrisi kaldırıldı (modül paketi
+  tipten gelir ve Profil sekmesinde tip seçilirken zaten görünür); yerine
+  menü düzeni ekranı **gömüldü**. Bileşen aynı (`/menu-duzeni` rotası da onu
+  açar) - iki kopya bakım edilmiyor. Gömülü çizimde ekranın kendi başlığı
+  gizleniyor (`gomulu` prop'u), kart zaten "Kurum Profili › Menü Düzeni" diyor.
+* **4 · Data Kullanımı:** Hizmet / Stok kategorileri buraya taşındı - "kurum
+  hangi veriyi kullanıyor" sorusu modül sekmesinin değil kendi başlığının işi.
+* Menüdeki ayrı "Menü Düzeni" girdisi **gizlendi** (`menuGizli`): aynı ekranı
+  iki yerden açmak hangisinin güncel olduğu sorusunu doğurur. Rota duruyor -
+  derin bağlantı ve yardım kaydı onu kullanıyor.
+* Ölü kod temizlendi: matris rozet sabiti (`MATRIS_ISARET`) ve modül kutusu
+  CSS'i.
+
+Doğrulama: dokuz sekme sırayla çizildi; "2 · Menü Düzeni" sekmesinde şube
+seçici + Kaydet + "Gizlemek yetki değildir" uyarısı, "4 · Data Kullanımı"
+sekmesinde Hizmet / Stok Kategorileri göründü. vitest 789, tsc temiz.

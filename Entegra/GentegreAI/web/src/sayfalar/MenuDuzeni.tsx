@@ -31,7 +31,12 @@ type Dugum = {
   yol?: string;
 };
 
-export function MenuDuzeni() {
+/**
+ * `gomulu`: Kurum Profili'nin "Menü Düzeni" sekmesinde çizilirken ekranın
+ * kendi başlığı ve yol çizgisi gizlenir - kart zaten "Kurum Profili › Menü
+ * Düzeni" diyor, ikinci başlık ekranı ikiye bölüyordu.
+ */
+export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const { kullanici, yetki } = useOturum();
   const duzenleyebilir = yetki('menu.duzen', 'degistir');
   const [subeId, setSubeId] = useState<number>(kullanici?.subeId ?? 0);
@@ -176,8 +181,10 @@ export function MenuDuzeni() {
   return (
     <div className="mn-ekran">
       <div className="mn-ust">
-        <h2>{c('Menü Düzeni')}</h2>
-        <span className="sonuk">{c('Yönetim › Ayarlar › Menü Düzeni')}</span>
+        {!gomulu && <>
+          <h2>{c('Menü Düzeni')}</h2>
+          <span className="sonuk">{c('Yönetim › Ayarlar › Menü Düzeni')}</span>
+        </>}
         <span className="mn-bosluk" />
         <select className="mn-inp" value={subeId} onChange={e => setSubeId(Number(e.target.value))}>
           {(kullanici?.subeler ?? []).map(s => <option key={s.id} value={s.id}>{c(s.ad, 'kod')}</option>)}

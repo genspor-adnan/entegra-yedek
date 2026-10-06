@@ -389,6 +389,11 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'menu-duzen', rota: 'menu-duzeni', baslik: 'Menü Düzeni',
     yol: 'Yönetim › Ayarlar › Menü Düzeni',
     ozelSayfa: true,
+    // MENÜDE AYRI GİRDİ YOK (kullanıcı 06.10.2026: ekran Kurum Profili'nin
+    //   "Menü Düzeni" sekmesine taşındı): aynı ekranı iki yerden açmak,
+    //   hangisinin güncel olduğu sorusunu doğurur. Rota duruyor - derin
+    //   bağlantı ve yardım kaydı onu kullanıyor.
+    menuGizli: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Menü Düzeni', menuSira: 45,
     ic: '🧭', yetkiKodu: 'menu.duzen',
   },

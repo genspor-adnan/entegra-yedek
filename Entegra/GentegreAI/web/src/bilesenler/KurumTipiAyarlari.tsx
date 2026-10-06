@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './kurumTipiAyarlari.css';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { MenuDuzeni } from '../sayfalar/MenuDuzeni';
 import { hataMetni, type KurumProfil, type KurumProfilYaniti, type ProfilRolu }
   from '../api/sozlesme';
 import { mesaj, onay } from './mesaj';
@@ -31,13 +32,6 @@ const GEREKLILIK: Record<number, string> = {
   2: 'zorunlu', 1: 'önerilen', 0: 'opsiyonel',
 };
 
-/** Modul varsayilan rozeti: 1 acik · 2 opsiyonel · 0 bu tipte anlamsiz. */
-const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
-  1: { sinif: 'm-on',  im: '●' },
-  2: { sinif: 'm-ops', im: '◐' },
-  0: { sinif: 'm-off', im: '○' },
-};
-
 /**
  * KURUM PROFILI & SISTEM AYARLARI - Yönetim › Kurum Profili (489'da Firma
  * Bilgileri'nin sekmesinden kendi ekranina tasindi).
@@ -54,9 +48,15 @@ const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
 // ROLLER KENDI SEKMESINDE (789, kullanici: "modüllerin sağına Roller diye
 //   sekme aç ve rolleri oraya taşı"): profil sekmesi tip kartlari + modul
 //   ozeti + iki rol tablosuyla uzayip gidiyordu; rol isi ayri bir adimdir.
-const SEKMELER = ['1 · Profil', '2 · Modüller', '3 · Roller', '4 · Kayıt & Ücretlendirme',
-                  '5 · Klinik Ayarlar', '6 · Entegrasyonlar', '7 · Kaynaklar (birim/ünit/cihaz)',
-                  '8 · Özet & Kurulum'];
+// MODÜLLER -> MENÜ DÜZENİ (kullanıcı 06.10.2026): modül aç/kapa ve kurum tipi
+//   matrisi kaldırıldı; modül paketi TİPTEN gelir, kurumun ayarladığı şey
+//   menünün YERLEŞİMİ. Ekran (979) sekmeye gömülü.
+// DATA KULLANIMI (kullanıcı): hizmet / stok kategorileri modül sekmesinde
+//   duruyordu; orası artık menü. "Kurum hangi veriyi kullanıyor" sorusu
+//   Roller'in arkasında kendi sekmesinde.
+const SEKMELER = ['1 · Profil', '2 · Menü Düzeni', '3 · Roller', '4 · Data Kullanımı',
+                  '5 · Kayıt & Ücretlendirme', '6 · Klinik Ayarlar', '7 · Entegrasyonlar',
+                  '8 · Kaynaklar (birim/ünit/cihaz)', '9 · Özet & Kurulum'];
 
 export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
@@ -594,58 +594,26 @@ export function KurumTipiAyarlari() {
       </div>
 
       <div className="pnl" hidden={aktif !== 1}>
-        {/* Kutucuklu seçim kaldırıldı (06.10.2026): modül paketi TİPTEN gelir,
-            menüde ne görüneceği Menü Düzeni ekranından (979) ayarlanır. */}
-        <div className="ic sonuk">● açık · ◐ opsiyonel · ○ bu tipte anlamsız (gizli).
-          Matris <b>kurum tipinin paketidir</b>: kurum tipi seçilince bu satır geçerli olur.
-          Kapalı modülün menüsü, yetkileri ve kart sekmeleri çizilmez; <b>verisi silinmez</b>.
-          Menüde hangi ekranın görüneceğini şube başına değiştirmek için
-          <b> Yönetim › Ayarlar › Menü Düzeni</b> ekranını kullanın - orada gizlemek
-          erişimi kapatmaz, modül kapatmak ise kapatır.</div>
+        {/* MENÜ DÜZENİ (979) BURAYA GÖMÜLÜ (kullanıcı 06.10.2026: "modüller
+            sekmesini rename 'Menü Düzeni', kurum tipi ve modülleri gridini
+            kaldır, menü düzeni ekranını taşı").
 
-        {/* TIP x MODUL VARSAYILANLARI (kurum_tipi_modul) - secili tip vurgulu. */}
-        <div className="dg matris">
-          <table>
-            <thead>
-              <tr>
-                <th>{c('Kurum tipi')}</th>
-                {(veri?.moduller ?? []).map(m => (
-                  <th key={m.kod} className="orta" style={{ fontSize: '10px' }}>{m.ad}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(veri?.tipler ?? []).map(t => (
-                <tr key={t.kod} className={profil?.kurumTipi === t.kod ? 'sel' : ''}
-                    style={{ cursor: 'pointer' }} onClick={() => tipSec(t.kod)}>
-                  <td><b>{t.ad}</b></td>
-                  {(veri?.moduller ?? []).map(m => {
-                    const v = veri?.matris.find(x => x.kurumTipi === t.kod && x.modul === m.kod)
-                                ?.varsayilan ?? 0;
-                    const i = MATRIS_ISARET[v] ?? MATRIS_ISARET[0];
-                    return (
-                      <td key={m.kod} className="orta">
-                        <span className={i.sinif}>{i.im}</span>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            Kurum tipi × modül matrisi KALDIRILDI: modül paketi tipten gelir ve
+            Profil sekmesinde tip seçilirken zaten görünüyor; kurumun burada
+            ayarladığı şey artık menünün YERLEŞİMİDİR.
+
+            Bileşen AYNI (`/menu-duzeni` rotası da onu açar) - iki kopya bakım
+            edilmiyor. */}
+        <MenuDuzeni gomulu />
+      </div>
+
+      {/* 4 · DATA KULLANIMI: kurumun hangi veriyi kullandığı. Kategoriler
+          Modüller sekmesinden taşındı (kullanıcı 06.10.2026). */}
+      <div className="pnl" hidden={aktif !== 3}>
+        <div className="ic sonuk">
+          Kurumun hangi işleri yaptığı ve hangi veriyi kullandığı. Kapatılan
+          kategorinin <b>altındaki hizmet ve stoklar da pasif</b> olur.
         </div>
-
-        {/* MODÜL AÇMA / KAPAMA KUTULARI KALDIRILDI (kullanıcı 06.10.2026:
-            "bu bölüme gerek kalmadı"). Modül paketi artık KURUM TİPİNDEN gelir
-            (üstteki matris) ve menüde ne görüneceği şube başına Menü Düzeni
-            ekranından ayarlanır (979).
-
-            VERİ DURUYOR: daha önce elle açılıp kapatılmış modüller
-            `kurum_profil.moduller` içinde kayıtlı kalır ve menü süzmesinde
-            uygulanmaya devam eder - satırları silmek, kurulumda bilinçli
-            kapatılmış bir modülü sessizce geri açmak olurdu. Yeni kurulumda
-            override hiç oluşmaz; tipin varsayılanı geçerlidir. */}
-
         {/* HIZMET / STOK KATEGORILERI (527, kullanici: "profile gore kimler
             neyi kullanacak - gorüntuleme merkezi sadece radyoloji kullanir,
             laboratuvar sadece tahlil islemleri gibi").
@@ -754,7 +722,7 @@ export function KurumTipiAyarlari() {
             )}
         </div>
       </div>
-      <div className="pnl" hidden={aktif !== 3}>
+      <div className="pnl" hidden={aktif !== 4}>
           <div className="hdr k4">
             <div className="fld"><label>{c('Başvuru modeli')}</label><div className="inp combo">{c('Tek başvuru = tek muayene')}<span className="sonuk">· tıp merkezi: başvuru altında çoklu hizmet · hastane: yatış</span></div></div>
             <div className="fld"><label>{c('Ödeyen kurumlar')}</label><div className="inp">☑ Özel (kendi) · ☑ SGK · ☑ Özel sigorta (ÖSS) · ☐ Kurum sözleşmeleri · ☐ Yabancı/sağlık turizmi</div></div>
@@ -771,7 +739,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 4}>
+      <div className="pnl" hidden={aktif !== 5}>
           <div className="ikiPanel">
             <div className="hdr" style={{gridTemplateColumns: '1fr 1fr'}}>
               <div className="fld"><label>{c('Muayene şablonu')}</label><div className="inp combo">{c('Dahiliye genel')}<span className="sonuk">· dal: göz OD/OS, FTR skala, diş odontogram</span></div></div>
@@ -798,7 +766,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 5}>
+      <div className="pnl" hidden={aktif !== 6}>
           {/* ENTEGRASYONLAR CANLI (491, kullanici): mockup'ta 12 sabit satir
               vardi ve "bağlı / test / gizli" rozetleri gercek hesaplara
               bakmiyordu. Gereklilik urun modu + acik modullerden, durum
@@ -852,7 +820,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 6}>
+      <div className="pnl" hidden={aktif !== 7}>
           <div className="ikiPanel">
             <div className="grp" style={{margin: '10px'}}><div className="gb">{c('Birimler / kaynaklar')}<span className="sp">tipe göre: oda · ünit · cihaz · servis/yatak</span></div>
               <div className="dg"><table><thead><tr><th>Kaynak</th><th>Tür</th><th>{c('Bağlı')}</th><th className="orta">Randevu</th><th className="orta">Aktif</th></tr></thead>
@@ -874,7 +842,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 7}>
+      <div className="pnl" hidden={aktif !== 8}>
           {/* OZET VE KURULUM ADIMLARI CANLI (490, kullanici: "profil yanlış
               geliyor" + "kurulum adımları tablosunu da canlıya bağla"):
               mockup'tan gelen sabit sekiz satir hangi adimin gercekten tamam
