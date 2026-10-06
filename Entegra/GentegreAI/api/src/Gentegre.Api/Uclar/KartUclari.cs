@@ -81,6 +81,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var (okunabilir, gizli) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
@@ -126,6 +129,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Ekle);
 
             var uyarilar = new List<string>();
@@ -204,6 +210,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Degistir);
 
             if (string.IsNullOrWhiteSpace(istek.Surum))
@@ -267,6 +276,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
 
@@ -293,6 +305,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
@@ -325,6 +340,9 @@ public static class KartUclari
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var urunModu = await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal);

@@ -128,6 +128,9 @@ public static class MenuDuzenUclari
                      s.DisBaglanti ?? "", baglam.KullaniciId], iptal);
 
             await islem.CommitAsync(iptal);
+            // ÖNBELLEK HEMEN DÜŞER: yöneticinin kaydettiği gizleme bir dakika
+            //   beklemeden geçerli olsun (kapı bu kümeden okuyor).
+            MenuDuzenDeposu.Temizle(hedef);
 
             // MENÜ DÜZENİ DENETLENİR: bir ekranın menüden kaldırıldığı sonradan
             //   "neden göremiyorum" sorusunun cevabıdır.
@@ -151,6 +154,7 @@ public static class MenuDuzenUclari
             await using var b = await veri.AcAsync(iptal);
             var silinen = await b.CalistirAsync(
                 "delete from public.menu_duzen where sube_id = @p0", null, [hedef], iptal);
+            MenuDuzenDeposu.Temizle(hedef);
 
             await log.YazAsync(LogIslemi.Sil, LogTabloMenuDuzen, hedef,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

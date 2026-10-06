@@ -51,6 +51,8 @@ kurucu.Services.AddSingleton(new VeriKaynagi(baglantiDizesi));
 kurucu.Services.AddScoped<KullaniciDeposu>();
 // Kimlik no bicimi (679) - kurum profilinden, sube basina 60 sn onbellekli.
 kurucu.Services.AddScoped<KimlikKuraliDeposu>();
+// MENÜ DÜZENİ (979): gizlenen ekranın kapısı - bağlam her istekte okur (önbellekli).
+kurucu.Services.AddScoped<MenuDuzenDeposu>();
 kurucu.Services.AddScoped<OturumDeposu>();
 // Singleton: YetkiCozucu (singleton) tuketiyor, kendisi stateless (VeriKaynagi'yi sarar,
 //   her cagride kendi baglantisini acar) - paylasilan mutable durumu yok.

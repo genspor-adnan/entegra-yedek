@@ -20,6 +20,9 @@ public static class ListeUclari
         {
             var tanim = KaynakBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             // URUN MODU BURADA DA COZULUR: kolon metasi (asagidaki /kolonlar)
@@ -138,6 +141,9 @@ public static class ListeUclari
         {
             var tanim = KaynakBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
+            //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
+            baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var kolonlar = GorunurKolonlar(tanim, baglam,

@@ -69,17 +69,16 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
   //   menüden kurulur - kapalı modülün ekranları hiç çizilmez, kurumun
   //   yeniden adlandırdığı grup/ekran kendi adıyla görünür.
   //
-  //   MENÜDE GİZLENEN EKRAN YİNE LİSTELENİR ("menüde gizli" rozetiyle):
-  //   gizlemek erişimi kapatmaz (979), yetkiyi yöneten kişi o ekranın
-  //   yetkisini görebilmeli - yoksa kimsenin kapatamadığı bir erişim kalırdı.
+  //   MENÜDE GİZLENEN EKRAN AĞAÇTA DA ÇİZİLMEZ (kullanıcı 06.10.2026):
+  //   kurum menüden kaldırdığı ekranı yetki ekranında da görmek istemiyor.
+  //   Yetki satırı veritabanında DURUYOR (erişim kapanmaz, kayıt silinmez);
+  //   geri görmek için ekranı menü düzeninden yeniden göstermek gerekir.
   const duzenH = duzenHaritasi(duzen);
   const harita = new Map<string, {
     grup: string; altGrup?: string; ic: string; ekranlar: string[];
     /** Ekran adları GRUBUYLA: aynı kod farklı gruplarda farklı ad taşır
         (`belge` = Kayıt Kabul'de "Başvurular", Satış'ta "Satış Faturaları"). */
     gruplu: { grup: string; ad: string }[];
-    /** Menüde gizlenmiş mi (979) - erişim kapalı DEĞİL, yalnız menüde yok. */
-    gizli?: boolean;
   }>();
   /** Menü grubunun ikonu - grubun ilk ekranından. */
   const grupIkonu = new Map<string, string>();
@@ -94,8 +93,13 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
     //   "Kayıt Kabul" yazması, aynı şeyi iki adla aratırdı.
     const grupAd = (l.menuGrup && duzenH.get(l.menuGrup)?.gorunenAd) || l.menuGrup;
     const ekranAd = duzenH.get(l.kaynak ?? '')?.gorunenAd || l.menuAd;
+    // MENÜDE GİZLİ EKRAN AĞAÇTA DA YOK (kullanıcı 06.10.2026: "profilde
+    //   menüde gizli olan aramada çıkmaz ve yetki matrisinde görünmez").
+    //   Kurum menüden kaldırdığı ekranı yetki ekranında da görmek istemiyor;
+    //   yetki satırı veritabanında DURUYOR, yalnız bu ağaçta çizilmiyor.
     const gizliMi = (l.menuGrup && duzenH.get(l.menuGrup)?.gizli === 1)
                     || duzenH.get(l.kaynak ?? '')?.gizli === 1;
+    if (gizliMi) continue;
     if (grupAd && !grupSirasi.includes(grupAd)) grupSirasi.push(grupAd);
     if (grupAd && l.ic && !grupIkonu.has(grupAd)) grupIkonu.set(grupAd, l.ic);
     if (!grupAd) continue;
@@ -107,12 +111,9 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
     if (v) {
       v.ekranlar.push(ekranAd);
       v.gruplu.push({ grup: grupAd, ad: ekranAd });
-      if (!gizliMi) v.gizli = false;
     } else harita.set(l.yetkiKodu, {
       grup: grupAd, altGrup: l.menuAltGrup, ic: l.ic, ekranlar: [ekranAd],
       gruplu: [{ grup: grupAd, ad: ekranAd }],
-      // Yetkinin BÜTÜN ekranları gizliyse rozet çıkar; biri görünüyorsa çıkmaz.
-      gizli: !!gizliMi,
     });
   }
   return { harita, grupSirasi, grupIkonu };
@@ -151,6 +152,9 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   const modulDugumu = new Map<string, Dugum>();
   for (const s of yeni.filter(x => !x.kod.includes('.'))) {
     const yer = harita.get(s.kod);
+    // Menüde karşılığı olan ama tamamı gizlenmiş yetki: harita'ya hiç girmedi
+    //   (yukarıda `continue`). Menüde hiç ekranı OLMAYAN yetkiler (panel, ayar
+    //   gibi) eskisi gibi kendi grubunda durur - onların menü satırı zaten yok.
     // SUNUCUNUN GRUBU + KURUMUN ADI: grup kararı sunucudan gelir (684), ama
     //   kurum o grubu yeniden adlandırdıysa (979) ağaçta kurumun adı yazar -
     //   menüde "Hasta Kabul" görünürken burada "Kayıt Kabul" aramak zorunda
@@ -171,11 +175,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
       anahtar: `y:${s.yetkiId}`,
       ad: buGrupta.length === 1 ? buGrupta[0].ad
         : yer?.ekranlar.length === 1 ? yer.ekranlar[0] : s.ad,
-      ipucu: [
-        yer && yer.ekranlar.length > 1 ? `Ekranlar: ${yer.ekranlar.join(', ')}` : '',
-        // Menüde gizli olduğu YAZILIR: yetki duruyor, yalnız menüde yok.
-        yer?.gizli ? 'Menüde gizli (erişim açık)' : '',
-      ].filter(Boolean).join(' · ') || undefined,
+      ipucu: yer && yer.ekranlar.length > 1 ? `Ekranlar: ${yer.ekranlar.join(', ')}` : undefined,
       ic: yer?.ic, satir: s, cocuklar: [],
     };
     ust.cocuklar.push(d);

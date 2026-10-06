@@ -82,6 +82,25 @@ public sealed class IstekBaglami
     /// <summary>TCKN / Turkiye telefon bicimi kontrolu bu subede uygulanir mi?</summary>
     public bool YerelTurkiye => string.Equals(UlkeKod, "TR", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Bu şubede MENÜDEN GİZLENMİŞ sistem kodları (979). Gizleme artık bir
+    /// kapıdır (kullanıcı 06.10.2026: "gizlenen menü hiçbir yerde
+    /// kullanılamaz") - yetki tablosu yerinde durur, gizlilik kalkınca ekran
+    /// eski yetkileriyle geri gelir.
+    /// </summary>
+    public IReadOnlySet<string> GizliEkranlar { get; init; }
+        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Kaynak menüde gizliyse isteği reddeder. Yetki kontrolünden ÖNCE
+    /// çağrılır: yetkisi olan kullanıcı da gizlenmiş ekranı açamaz.
+    /// </summary>
+    public void MenuAcikIste(string kaynakAdi)
+    {
+        if (GizliEkranlar.Contains(kaynakAdi))
+            throw GentegreHatasi.Yasak("Bu ekran menü düzeninde gizlenmiş.");
+    }
+
     public void YetkiIste(string kaynakKodu, Islem islem)
     {
         if (!Yetkiler.Var(kaynakKodu, islem))
@@ -158,13 +177,15 @@ public sealed class BaglamCozucu
     private readonly YetkiCozucu _yetkiCozucu;
     private readonly KullaniciDeposu _kullanicilar;
     private readonly KimlikKuraliDeposu _kimlik;
+    private readonly MenuDuzenDeposu _menu;
 
     public BaglamCozucu(YetkiCozucu yetkiCozucu, KullaniciDeposu kullanicilar,
-                        KimlikKuraliDeposu kimlik)
+                        KimlikKuraliDeposu kimlik, MenuDuzenDeposu menu)
     {
         _yetkiCozucu = yetkiCozucu;
         _kullanicilar = kullanicilar;
         _kimlik = kimlik;
+        _menu = menu;
     }
 
     public async Task<IstekBaglami> CozAsync(HttpContext ctx, CancellationToken iptal = default)
@@ -199,6 +220,8 @@ public sealed class BaglamCozucu
         // Kimlik bicimi (679) ONBELLEKLI okunur: her istekte sorgu atmak
         //   ayarin kendisinden pahali olurdu.
         var kimlikKurali = await _kimlik.KuralAsync(subeId ?? 0, iptal);
+        // MENÜDE GİZLİ EKRANLAR (979): önbellekli okunur - düzen seyrek değişir.
+        var gizliEkranlar = await _menu.GizliKodlarAsync(subeId ?? 0, iptal);
 
         return new IstekBaglami
         {
@@ -216,7 +239,8 @@ public sealed class BaglamCozucu
             // IP her uc dosyasinda ayri bir `Ip(HttpContext)` yardimcisiyla
             //   cikariliyordu (10 kopya); baglam zaten ctx'i goruyor.
             Ip = IpCoz(ctx),
-            KimlikKurali = kimlikKurali
+            KimlikKurali = kimlikKurali,
+            GizliEkranlar = gizliEkranlar,
         };
     }
 

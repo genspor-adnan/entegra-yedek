@@ -19564,3 +19564,43 @@ altta label olsun"*.
 Doğrulama: ağaç kapalı açıldı (8 bölge), bölge açılınca grupları geldi,
 "Kayıt Kabul" gizlenince altındaki beş ekran da 🚫 oldu; dokuz sekme ikon +
 etiketle çizildi. vitest 789, tsc temiz.
+
+### Aynı gün — gizlenen ekran artık bir KAPI (kullanıcı kararı)
+
+Kullanıcı: *"profilde menüde gizli olan aramada çıkmaz ve yetki matrisinde
+görünmez"*, ardından *"gizlenen menü hiçbir yerde kullanılamaz"*.
+
+Menü gizlemesi 979'da yalnız **yerleşim**di (ekran menüden kalkar, adresi bilen
+yetkili yine açardı; uyarı metni de bunu söylüyordu). Kullanıcı kararıyla artık
+**erişim kapısı**:
+
+* **Sunucu kapısı:** liste (`/api/liste/{kaynak}`) ve kart (`/api/kart/...`)
+  uçlarında, yetki kontrolünden ÖNCE `baglam.MenuAcikIste(kaynak)` - gizlenmiş
+  kaynak **403 "Bu ekran menü düzeninde gizlenmiş."** döner. Yetkisi olan
+  kullanıcı da açamaz.
+* **Yetki tablosuna DOKUNULMAZ:** gizlilik kaldırılınca ekran eski
+  yetkileriyle geri gelir, kimseye yeniden yetki vermek gerekmez. Erişimi
+  kalıcı kapatmak hâlâ Yetkiler ekranının işi.
+* **Yetki matrisi:** gizlenmiş ekranın yetkisi ağaçta **hiç çizilmiyor**
+  (önceki "menüde gizli" rozeti kaldırıldı).
+* **Arama (Ctrl+K):** palet zaten süzülmüş menüden besleniyor - ek değişiklik
+  gerekmedi.
+* **Önbellek:** gizli kümesi şube başına 60 sn (`MenuDuzenDeposu`,
+  `KimlikKuraliDeposu` deseni); düzeni yazan/sıfırlayan uç önbelleği hemen
+  düşürüyor, kaydedilen gizleme bir dakika beklemeden geçerli oluyor. Tablo
+  henüz göç edilmemiş kurulumda (42P01) gizleme yok sayılıyor - menüyü hiç
+  çizmemektense düzenlenmemiş çizmek doğru.
+
+Doğrulama: `goz-cihaz` ekranı gizlendi → liste **403**, kart **403**; gizleme
+silinince liste yine **200**. Yetki matrisinde gizlenen "Dökümler" kayboldu.
+dotnet test 218, vitest 789, tsc temiz. Dev veritabanı temiz bırakıldı
+(`menu_duzen` 0 satır).
+
+### Aynı gün — lab kurulumu HBYS düzenine alındı (sunucu verisi)
+
+Kullanıcı: *"lab profilinde hbys gibi bütün menü görünsün"*, *"menü düzeni hbys
+gibi olsun"*. **Sunucudaki `gentegre_ai_lab` veritabanında** üç şube profili
+güncellendi: `moduller` = 31 modülün hepsi açık (önceki: kurum geneli ve Ankara
+`isg·form·cagri·steril`, Merkez `dis·ftr·goz·cagri·steril·teleradyoloji`) ve
+`menu_bolgeli = 1` (bölgeli HBYS menüsü). Artık menü tam geliyor; kısıtlama
+Menü Düzeni ekranından şube başına yapılıyor.

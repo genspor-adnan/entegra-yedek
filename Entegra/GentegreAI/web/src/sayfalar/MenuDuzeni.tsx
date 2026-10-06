@@ -227,8 +227,12 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       </div>
 
       {mesaj && <div className="mn-mesaj">{mesaj}</div>}
-      <div className="mn-uyari">{c('Gizlemek yetki değildir: menüden kaldırılan ekran, yetkisi olan '
-        + 'kullanıcıya adresten yine açılır. Erişimi kapatmak için Yetkiler ekranını kullanın.')}</div>
+      {/* KURAL (kullanıcı 06.10.2026): gizlenen ekran menüde, aramada ve yetki
+          matrisinde görünmez - ama ERİŞİM KAPANMAZ: adresi bilen yetkili
+          kullanıcı ekranı yine açar. Erişimi kapatmak Yetkiler'in işi. */}
+      <div className="mn-uyari">{c('Gizlenen ekran menüde, Ctrl+K aramasında ve yetki '
+        + 'matrisinde görünmez. Erişimi KAPATMAZ: adresi bilen yetkili kullanıcı ekranı yine '
+        + 'açabilir - erişim için Yetkiler ekranını kullanın.')}</div>
 
       <div className="mn-govde">
         {/* AĞAÇ */}
