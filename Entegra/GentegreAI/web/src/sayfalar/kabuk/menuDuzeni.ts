@@ -21,6 +21,38 @@ export type { MenuDuzenSatiri } from '../../api/sozlesme';
 /** Ekranın sistem kodu: liste kaynağı varsa o, yoksa rota (özel sayfalar). */
 export const ogeKodu = (m: MenuOgesi) => m.kaynak ?? m.yol;
 
+/**
+ * MENÜDE BİRDEN ÇOK YERDE GEÇEN KAYNAKLAR.
+ *
+ * "Dökümler" her grubun altında durur ve hepsi tek `/dokumler` ekranına gider;
+ * `basvuru`, `triyaj` gibi ekranların da iki grupta kısayolu var. Hepsi aynı
+ * `ogeKodu`'nu taşıdığı için menü düzeni onları TEK düğüm sanıyordu: düzenleme
+ * ekranının ağacı ve önizlemesi aynı React anahtarını birden çok kez
+ * kullanıyor, grup başlıkları düşüyor ve satırlar çiftleniyordu; bir grubun
+ * "Dökümler"ini gizlemek hepsini birden gizlerdi.
+ *
+ * Çözüm: çakışan kaynak <b>grup bağlamıyla</b> kodlanır (`Randevu/dokumler`).
+ * Çakışmayan ekran eski kodunu KORUR - kayıtlı düzenler bozulmasın.
+ */
+export function cakisanKaynaklar(satirlar: MenuSatiri[]): Set<string> {
+  const sayac = new Map<string, number>();
+  for (const sat of satirlar) {
+    const ogeler = sat.tur === 'grup' ? sat.alt : [sat.m];
+    for (const m of ogeler) {
+      const k = ogeKodu(m);
+      sayac.set(k, (sayac.get(k) ?? 0) + 1);
+    }
+  }
+  return new Set([...sayac].filter(([, n]) => n > 1).map(([k]) => k));
+}
+
+/** Düğüm kodu: çakışan kaynak grup bağlamını alır, diğerleri sade kalır. */
+export const ogeKoduBaglamli = (m: MenuOgesi, grupKod: string | undefined,
+                                cakisan: Set<string>) => {
+  const k = ogeKodu(m);
+  return cakisan.has(k) && grupKod ? `${grupKod}/${k}` : k;
+};
+
 /** Grubun sistem kodu: ÇEVRİLMEMİŞ ad - dil değişince eşleşme bozulmasın. */
 export const grupKodu = (sat: Extract<MenuSatiri, { tur: 'grup' }>) =>
   sat.alt.find(m => m.grupHam)?.grupHam ?? sat.ad;
@@ -42,10 +74,13 @@ export function menuDuzeniUygula(
   if (!duzen || duzen.length === 0) return satirlar;
   const h = duzenHaritasi(duzen);
   if (h.size === 0) return satirlar;
+  // Çakışan kaynaklar grup bağlamıyla kodlanır - düzenleme ekranının ağacıyla
+  //   AYNI kod üretilmeli, yoksa kaydedilen değişiklik menüye yansımaz.
+  const cakisan = cakisanKaynaklar(satirlar);
 
   // 1) ÖĞELER: gizle · yeniden adlandır · ikon · sıra · grup değiştir.
-  const ogeDuzenle = (m: MenuOgesi): MenuOgesi | null => {
-    const d = h.get(ogeKodu(m));
+  const ogeDuzenle = (m: MenuOgesi, grupKod?: string): MenuOgesi | null => {
+    const d = h.get(ogeKoduBaglamli(m, grupKod, cakisan));
     if (!d) return m;
     if (d.gizli === 1) return null;
     return {
@@ -83,9 +118,9 @@ export function menuDuzeniUygula(
 
     const alt: MenuOgesi[] = [];
     for (const m of sat.alt) {
-      const yeni = ogeDuzenle(m);
+      const yeni = ogeDuzenle(m, kod);
       if (!yeni) continue;
-      const d = h.get(ogeKodu(m));
+      const d = h.get(ogeKoduBaglamli(m, kod, cakisan));
       // Başka gruba taşınmış ekran burada çizilmez, hedefinde çizilir.
       if (d?.ustKod && d.ustKod !== kod) {
         const liste = tasinan.get(d.ustKod) ?? [];
@@ -103,6 +138,10 @@ export function menuDuzeniUygula(
     sonuc.push({
       tur: 'grup',
       ad: yeniAd,
+      // GRUP BAŞKA BÖLGEYE TAŞINDI: bölge haritası (menuBolgeleri) koddadır ve
+      //   statiktir; kurumun taşıması burada satıra yazılır, menüyü çizen
+      //   YanMenu önce bu alana bakar.
+      bolge: dg?.ustKod && dg.ustKod.length > 0 ? dg.ustKod : undefined,
       ikon: dg?.ikon && dg.ikon.length > 0 ? dg.ikon
             : (yeniAd !== sat.ad ? (GRUP_IKON[sat.ad] ?? GRUP_IKON_CEV[sat.ad]) : undefined),
       alt,

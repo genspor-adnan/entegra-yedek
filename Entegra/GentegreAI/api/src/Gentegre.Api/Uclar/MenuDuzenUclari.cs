@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -107,6 +107,15 @@ public static class MenuDuzenUclari
                 //   kodda karşılığı yok, adsız kalırsa menüde boş satır olur.
                 if (s.DugumTur == 3 && string.IsNullOrWhiteSpace(s.GorunenAd))
                     throw GentegreHatasi.Dogrulama("Alt başlığın adı zorunludur.");
+                // İKON GÖRSELİ (980): emoji ya da küçük `data:` URL'i. Kolon metin
+                //   olduğu için sınır BURADA: menü her çizimde okunuyor, büyük
+                //   görsel bütün menüyü yavaşlatırdı.
+                if (s.Ikon is { Length: > 65536 })
+                    throw GentegreHatasi.Dogrulama("İkon görseli en çok 64 KB olabilir.");
+                if (s.Ikon is { Length: > 16 } g
+                    && !g.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+                    throw GentegreHatasi.Dogrulama(
+                        "İkon ya kısa bir simge metni ya da data:image/... görseli olmalı.");
             }
 
             await using var b = await veri.AcAsync(iptal);

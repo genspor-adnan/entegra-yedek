@@ -19619,3 +19619,37 @@ yetkisi olmayan kullanıcı adresi bilse de giremez.
 
 Doğrulama: menüde Yönetim grubunda "Kurum Profili" yok; `/kurum-profili`
 adresi dokuz sekmeyle açıldı.
+
+### 07.10.2026 — Menü düzeni: çakışan kod hatası, üst başlık · sıra · ikon
+
+**Hata (kullanıcı: *"ben grup gizliyorum ama grup içinden bazı ekranlar
+(dökümler gibi) önizlemede görünüyor"*).** Kök neden gizleme değil, **ekran
+kodu çakışmasıydı**: `Dökümler` her grubun altında aynı `dokumler` kaynağıyla
+duruyor (`basvuru`, `triyaj` de iki grupta). Menü düzeni bunları tek düğüm
+sayıyordu - aynı React anahtarı tekrarlandığı için gizleme olmadan bile grup
+başlıkları düşüyor, satırlar çiftleniyordu; bir grubun Dökümler'ini gizlemek
+hepsini gizlerdi.
+
+* Çakışan kaynak artık **grup bağlamıyla** kodlanır (`Randevu/dokumler`),
+  çakışmayan ekran eski kodunu korur - kayıtlı düzenler bozulmaz
+  (`cakisanKaynaklar` / `ogeKoduBaglamli`, `menuDuzeniUygula` aynı kodu üretir).
+* Aynı grupta iki kez geçen ekran için sayı eki (`#2`); önizleme ağacında
+  döngü koruması - kurum bir düğümü kendi altına taşırsa ekran çökmemeli.
+
+**Üst başlık ve sıra artık değiştirilebilir** (kullanıcı: *"menü düzeninde üst
+başlık ve sıra değişebilmeli"*): ekran başka **gruba**, grup başka **bölgeye**
+taşınır (seçenekler ağacın kendisinden), sıra elle girilir. Grup→bölge taşıması
+menüye de bağlandı (`MenuSatiri.bolge`; YanMenu önce ona bakar, sonra koddaki
+`menuBolgeleri` haritasına). Önizleme artık farkı **uygular** - taşıma ve sıra
+kaydetmeden görünür.
+
+**İkon yüklenebilir** (kullanıcı: *"ikon da yükleyebilirim"*): seçilen görsel
+tarayıcıda 64×64 PNG'ye küçültülüp `data:` URL olarak saklanır; `menu_duzen.ikon`
+metne çevrildi (**980**), sunucu 64 KB ve `data:image/` biçimini doğruluyor.
+Menü, önizleme ve özellik paneli görseli `img.ic-gorsel` ile çiziyor.
+
+Doğrulama (dev): Kayıt Kabul gizlendi → alt ekranları (Başvurular, Medula
+Kabul) düştü; Medula Kabul Randevu grubuna taşındı, sıra 5 verildi, PNG ikon
+yüklendi → kaydedilen satır `Kayıt Kabul/medula-kabul · ust=Randevu · sira=5 ·
+data:image/png` ve menüde görsel ikonla çizildi. vitest 789, tsc temiz, dev
+veritabanı temiz bırakıldı.

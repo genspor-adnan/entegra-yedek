@@ -178,6 +178,15 @@ input, select { font: inherit; color: inherit }
 .mi.on { background: var(--mor2); color: var(--mor); font-weight: 700 }
 .mi .ic { font-size: 14px; width: 18px; text-align: center }
 .ic-hilal { display: inline-flex; align-items: center; justify-content: center }
+/* Yüklenen menü ikonu (980): emoji ile aynı kutuyu kaplasın - satır
+   yüksekliği ikondan ikona değişirse menü zıplar. */
+.ic-gorsel { width: 16px; height: 16px; object-fit: contain; vertical-align: -3px }
+/* Menü düzeni ikon alanı: metin kutusu/önizleme + yükle/sıfırla düğmeleri. */
+.mn-ikon-satir { display: flex; align-items: center; gap: 6px }
+/* Sınıf adıyla değil eleman seçiciyle: `.mn-inp` tek anlamlı kalsın. */
+.mn-ikon-satir input { flex: 1 }
+.mn-ikon-onizle { width: 28px; height: 28px; object-fit: contain;
+  border: 1px solid var(--cizgi); border-radius: 6px; padding: 2px; background: var(--kart) }
 /* Eczane (781): cizilmis Hygieia kasesi - emoji gibi hizalansin. */
 .ic-eczane { display: inline-flex; align-items: center; justify-content: center }
 .mi .rz { margin-left: auto; font-size: 10px; color: var(--soluk) }

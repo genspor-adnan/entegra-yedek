@@ -66,7 +66,11 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
   // Satirin bolgesi: grup satiri grup adiyla, grupsuz DUZ oge (Demirbas) kendi
   //   adiyla bulunur; bolge listesinde olmayan duz oge bolgelerin ustunde kalir.
   const satirBolgesi = (s: MenuSatiri): MenuBolgesi | undefined =>
-    s.tur === 'grup' ? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
+    s.tur === 'grup'
+      // Kurumun tasidigi bolge once (979): menu duzeninde grup baska bolgeye
+      //   alinmissa koddaki harita degil, o gecerli.
+      ? (s.bolge ? BOLGE_HBYS.find(b => b.ad === s.bolge) : undefined)
+        ?? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
       : GRUP_SIRA_HBYS.includes(s.m.adHam ?? '') ? grupBolgesi(s.m.adHam) : undefined;
   const satirAktifMi = (s: MenuSatiri) => s.tur === 'grup'
     ? s.alt.some(m => secili(m.yol)) : secili(s.m.yol);

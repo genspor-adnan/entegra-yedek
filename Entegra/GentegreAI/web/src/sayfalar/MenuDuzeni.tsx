@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -6,7 +6,8 @@ import { c } from '../dil/ceviri';
 import { LISTELER } from './Liste';
 import { menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
 import { BOLGE_HBYS } from './kabuk/menuBolgeleri';
-import { grupKodu, ogeKodu, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
+import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar,
+         type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 
 /**
  * MENÜ DÜZENİ (979, mockup `Ekranlar/Ayarlar/menu_duzenleme_v2.html`).
@@ -26,6 +27,8 @@ type Dugum = {
   ad: string;
   ikon?: string;
   ustKod?: string;
+  /** Koddaki doğal sıra (menuSira) - düzen sırası boşsa bu geçerli. */
+  sira?: number;
   derinlik: number;
   /** Ekran düğümünde rota - "nereye gider" sütunu. */
   yol?: string;
@@ -49,6 +52,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * açılır olsun", "gruplar kapalı olsun default"): tam menü ~330 düğüm -
    * hepsi açıkken aranan satır ekrana sığmıyordu.
    */
+  const dosyaGirdi = useRef<HTMLInputElement>(null);
   const [acik, setAcik] = useState<Record<string, boolean>>({});
   const acikMi = (kod: string) => acik[kod] === true;
   const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
@@ -67,15 +71,32 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   /** Ağacı düz listeye açar: bölge › grup › ekran (mockup soldaki ağaç). */
   const dugumler: Dugum[] = useMemo(() => {
     const d: Dugum[] = [];
+    // ÇAKIŞAN KAYNAK GRUP BAĞLAMI ALIR: "Dökümler" her grubun altında aynı
+    //   `dokumler` kaynağıyla duruyor; tek kod sayıldığında ağaç ve önizleme
+    //   aynı React anahtarını tekrarlıyor, grup başlıkları düşüyor ve satırlar
+    //   çiftleniyordu - bir grubun Dökümler'ini gizlemek hepsini gizlerdi.
+    const cakisan = cakisanKaynaklar(satirlar);
+    // AYNI GRUPTA AYNI EKRAN İKİ KEZ geçebiliyor (menü tanımındaki tekrar):
+    //   grup bağlamı bile kodu benzersiz yapmaz, ağaç o düğümü kendi altına
+    //   alıp özyinelemeye girerdi. Tekrara sayı eklenir - kod yine
+    //   KARARLIDIR (menü tanımının sırası değişmedikçe aynı kalır).
+    const sayac = new Map<string, number>();
+    const benzersiz = (kod: string) => {
+      const n = (sayac.get(kod) ?? 0) + 1;
+      sayac.set(kod, n);
+      return n === 1 ? kod : `${kod}#${n}`;
+    };
     const gruplar = satirlar.filter(s => s.tur === 'grup') as Extract<MenuSatiri, { tur: 'grup' }>[];
     const duzOgeler = satirlar.filter(s => s.tur === 'duz') as Extract<MenuSatiri, { tur: 'duz' }>[];
 
     const grupEkle = (sat: Extract<MenuSatiri, { tur: 'grup' }>, ustKod?: string) => {
       const kod = grupKodu(sat);
       d.push({ tur: 'grup', kod, sistemAd: kod, ad: sat.ad, ustKod, derinlik: ustKod ? 2 : 1 });
+      sayac.set(kod, 1);
       for (const m of sat.alt)
         d.push({
-          tur: 'ekran', kod: ogeKodu(m), sistemAd: m.adHam ?? m.ad, ad: m.ad,
+          tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(m, kod, cakisan)),
+          sistemAd: m.adHam ?? m.ad, ad: m.ad, sira: m.sira,
           ikon: m.ic, ustKod: kod, derinlik: ustKod ? 3 : 2, yol: m.yol,
         });
     };
@@ -98,7 +119,8 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     }
     for (const s of duzOgeler)
       d.push({
-        tur: 'ekran', kod: ogeKodu(s.m), sistemAd: s.m.adHam ?? s.m.ad, ad: s.m.ad,
+        tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(s.m, undefined, cakisan)),
+        sistemAd: s.m.adHam ?? s.m.ad, ad: s.m.ad,
         ikon: s.m.ic, derinlik: 1, yol: s.m.yol,
       });
     return d;
@@ -123,13 +145,18 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * açınca altındakiler kendiliğinden döner; alt satırlara tek tek "gizli"
    * yazılsaydı grup açıldığında hepsi gizli kalırdı.
    */
+  /** Düğümün ETKİN üstü: kurum taşıdıysa yeni başlık, yoksa koddaki. */
+  const etkinUst = (dugum: Dugum): string | undefined =>
+    fark(dugum.kod)?.ustKod ?? dugum.ustKod ?? undefined;
+
   const ustGizli = (dugum: Dugum): boolean => {
-    let kod = dugum.ustKod;
+    let kod = etkinUst(dugum);
     const gorulen = new Set<string>();
     while (kod && !gorulen.has(kod)) {
       gorulen.add(kod);
       if (fark(kod)?.gizli === 1) return true;
-      kod = dugumler.find(x => x.kod === kod)?.ustKod;
+      const ust = dugumler.find(x => x.kod === kod);
+      kod = ust ? etkinUst(ust) : undefined;
     }
     return false;
   };
@@ -148,12 +175,92 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         sira: null, gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
         ...mevcut, ...parca,
       };
-      const bos = yeni.gizli === 0 && yeni.acilistaAcik === 0
+      // ÜST BAŞLIK DEĞİŞİKLİĞİ DE BİR FARKTIR: kayıt yalnız varsayılanla aynıysa
+      //   düşer. Taşınan ekran (ustKod başka grup) bu kontrolde boş sayılırsa
+      //   kaydetmeden siliniyordu.
+      const tasindi = (yeni.ustKod ?? null) !== (dugum.ustKod ?? null);
+      const bos = yeni.gizli === 0 && yeni.acilistaAcik === 0 && !tasindi
         && !yeni.gorunenAd && !yeni.ikon && (yeni.sira === null || yeni.sira === undefined);
       const kalan = onceki.filter(x => x.sistemKod !== dugum.kod);
       return bos ? kalan : [...kalan, yeni];
     });
   };
+
+  /**
+   * Düğümün taşınabileceği üst başlıklar: ekran GRUPLARA, grup (bölgeli
+   * düzende) BÖLGELERE taşınır. Bölge düğümünün üstü yoktur - liste boş döner
+   * ve alan salt okunur kalır.
+   */
+  const ustSecenekleri = (dugum: Dugum): string[] => {
+    if (dugum.tur === 'ekran')
+      return dugumler.filter(x => x.tur === 'grup').map(x => x.kod);
+    if (dugum.tur === 'grup' && bolgeli)
+      return dugumler.filter(x => x.tur === 'bolge').map(x => x.kod);
+    return [];
+  };
+
+  /** Seçili düğümün ikonu yüklenmiş görsel mi (emoji ise metin kutusu çizilir). */
+  const ikonGorsel = seciliDugum && (fark(seciliDugum.kod)?.ikon ?? '').startsWith('data:image/')
+    ? fark(seciliDugum.kod)!.ikon! : '';
+
+  /**
+   * İKON YÜKLEME (980): seçilen görsel tarayıcıda 64x64 PNG'ye küçültülür.
+   * Ham dosyayı göndermek 2 MB'lık bir fotoğrafı menüye koymak demekti;
+   * küçültme sunucu sınırının (64 KB) altında kalmayı da garantiler.
+   */
+  const ikonYukle = (dosya: File | undefined) => {
+    if (!dosya || !seciliDugum) return;
+    const oku = new FileReader();
+    oku.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const tuval = document.createElement('canvas');
+        tuval.width = 64; tuval.height = 64;
+        const ctx = tuval.getContext('2d');
+        if (!ctx) return;
+        // ORAN KORUNUR: kare olmayan logo ezilmesin - ortalanır.
+        const olcek = Math.min(64 / im.width, 64 / im.height);
+        const g = im.width * olcek, y = im.height * olcek;
+        ctx.drawImage(im, (64 - g) / 2, (64 - y) / 2, g, y);
+        const veri = tuval.toDataURL('image/png');
+        if (veri.length > 65536) { setMesaj(c('Görsel çok büyük.')); return }
+        farkYaz(seciliDugum, { ikon: veri });
+      };
+      im.src = String(oku.result);
+    };
+    oku.readAsDataURL(dosya);
+    if (dosyaGirdi.current) dosyaGirdi.current.value = '';
+  };
+
+  /**
+   * ÖNİZLEME AĞACI: düzen farkı UYGULANMIŞ hali - taşıma ve sıra burada
+   * görünmeli, yoksa kurum değişikliği kaydetmeden sonucunu göremezdi.
+   * Sıra anahtarı: kurumun verdiği sıra > koddaki menuSira > ağaçtaki yer.
+   */
+  const onizleme = useMemo(() => {
+    const dogal = new Map(dugumler.map((d, i) => [d.kod, i]));
+    const siraNo = (d: Dugum) =>
+      fark(d.kod)?.sira ?? d.sira ?? ((dogal.get(d.kod) ?? 0) + 1) * 1000;
+    const cocuklar = (ust: string | undefined) => dugumler
+      .filter(d => etkinUst(d) === ust && !gizliMi(d))
+      .sort((a, b) => siraNo(a) - siraNo(b) || (dogal.get(a.kod)! - dogal.get(b.kod)!));
+    const cikti: { d: Dugum; derinlik: number }[] = [];
+    // ÇİZİLEN HER DÜĞÜM BİR KEZ: kurum bir düğümü kendi alt ağacına taşırsa
+    //   (ya da iki düğüm aynı kodu taşırsa) özyineleme kendini yer. Önizleme
+    //   bunu sessizce keser - düzenleme ekranı çökmemeli.
+    const gezildi = new Set<string>();
+    const gez = (ust: string | undefined, derinlik: number) => {
+      if (derinlik > 6) return;
+      for (const c of cocuklar(ust)) {
+        if (gezildi.has(c.kod)) continue;
+        gezildi.add(c.kod);
+        cikti.push({ d: c, derinlik });
+        gez(c.kod, derinlik + 1);
+      }
+    };
+    gez(undefined, 1);
+    return cikti;
+  }, [dugumler, duzen]);
 
   const kaydet = async () => {
     if (!subeId) { setMesaj(c('Şube seçili değil.')); return }
@@ -312,15 +419,55 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                          value={fark(seciliDugum.kod)?.gorunenAd ?? ''}
                          placeholder={seciliDugum.ad}
                          onChange={e => farkYaz(seciliDugum, { gorunenAd: e.target.value })} /></label>
+                {/* İKON: emoji metni YA DA yüklenen görsel (980, kullanıcı
+                    "ikon da yükleyebilirim"). Görsel seçilince 64x64 PNG'ye
+                    küçültülüp `data:` URL olarak saklanır - ayrı dosya deposu
+                    menüyü her çizimde bir sorgu daha pahalı yapardı. */}
                 <label className="mn-kutu"><span>{c('İkon')}</span>
-                  <input className="mn-inp" disabled={!duzenleyebilir}
-                         value={fark(seciliDugum.kod)?.ikon ?? ''}
-                         placeholder={seciliDugum.ikon ?? '—'}
-                         onChange={e => farkYaz(seciliDugum, { ikon: e.target.value })} /></label>
+                  <div className="mn-ikon-satir">
+                    {ikonGorsel ? (
+                      <img src={ikonGorsel} alt="" className="mn-ikon-onizle" />
+                    ) : (
+                      <input className="mn-inp" disabled={!duzenleyebilir}
+                             value={fark(seciliDugum.kod)?.ikon ?? ''}
+                             placeholder={seciliDugum.ikon ?? '—'}
+                             onChange={e => farkYaz(seciliDugum, { ikon: e.target.value })} />
+                    )}
+                    <input ref={dosyaGirdi} type="file" accept="image/*" hidden
+                           onChange={e => ikonYukle(e.target.files?.[0])} />
+                    <button type="button" className="d mini" disabled={!duzenleyebilir}
+                            onClick={() => dosyaGirdi.current?.click()}
+                            title={c('Görsel yükle (en çok 64 KB, 64x64 ölçülür)')}>⬆</button>
+                    {(fark(seciliDugum.kod)?.ikon ?? '') !== '' && (
+                      <button type="button" className="d mini" disabled={!duzenleyebilir}
+                              onClick={() => farkYaz(seciliDugum, { ikon: '' })}
+                              title={c('İkonu varsayılana döndür')}>↺</button>
+                    )}
+                  </div></label>
+                {/* ÜST BAŞLIK DEĞİŞTİRİLEBİLİR (kullanıcı 06.10.2026): ekran başka
+                    grubun, grup da başka bölgenin altına taşınabilir. Seçenekler
+                    ağacın kendisinden gelir - elle kod yazdırmak, var olmayan bir
+                    başlığa taşıyıp ekranı menüden düşürmek demekti. */}
                 <label className="mn-kutu"><span>{c('Üst başlık')}</span>
-                  <div className="mn-inp pasif">{seciliDugum.ustKod ? c(seciliDugum.ustKod) : '—'}</div></label>
+                  {ustSecenekleri(seciliDugum).length === 0 ? (
+                    <div className="mn-inp pasif">{seciliDugum.ustKod ? c(seciliDugum.ustKod) : '—'}</div>
+                  ) : (
+                    <select className="mn-inp" disabled={!duzenleyebilir}
+                            value={fark(seciliDugum.kod)?.ustKod ?? seciliDugum.ustKod ?? ''}
+                            onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value || null })}>
+                      {ustSecenekleri(seciliDugum).map(u => (
+                        <option key={u} value={u}>{c(u)}</option>
+                      ))}
+                    </select>
+                  )}</label>
                 <label className="mn-kutu"><span>{c('Sıra')}</span>
-                  <div className="mn-inp pasif">{fark(seciliDugum.kod)?.sira ?? c('varsayılan')}</div></label>
+                  {/* SIRA ELLE DE GİRİLİR: sürüklemek bitişik taşımak için iyi,
+                      "en sona al" için on kez sürüklemek gerekiyordu. Boş = varsayılan. */}
+                  <input className="mn-inp" type="number" disabled={!duzenleyebilir}
+                         value={fark(seciliDugum.kod)?.sira ?? ''}
+                         placeholder={c('varsayılan')}
+                         onChange={e => farkYaz(seciliDugum,
+                           { sira: e.target.value === '' ? null : Number(e.target.value) })} /></label>
                 <label className="mn-kutu"><span>{c('Derinlik')}</span>
                   <div className="mn-inp pasif">{seciliDugum.derinlik}</div></label>
                 <label className="mn-kutu"><span>{c('Durum')}</span>
@@ -346,11 +493,14 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         {/* ÖNİZLEME */}
         <div className="mn-onizle">
           <div className="mn-onizle-bas">{c('Önizleme')}</div>
-          {dugumler.filter(d => !gizliMi(d)).map(d => {
+          {onizleme.map(({ d, derinlik }) => {
             const ad = fark(d.kod)?.gorunenAd || d.ad;
+            const ik = fark(d.kod)?.ikon || d.ikon;
             return (
-              <div key={`o-${d.kod}`} className={`mn-oge d${d.derinlik}`}>
-                {d.ikon && <span>{fark(d.kod)?.ikon || d.ikon}</span>} {ad}
+              <div key={`o-${d.kod}`} className={`mn-oge d${derinlik}`}>
+                {ik && (ik.startsWith('data:image/')
+                  ? <img src={ik} alt="" className="ic-gorsel" />
+                  : <span>{ik}</span>)} {ad}
               </div>
             );
           })}

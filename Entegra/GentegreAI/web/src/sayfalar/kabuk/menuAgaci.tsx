@@ -74,7 +74,10 @@ export type MenuSatiri =
    * tablodan bulunuyor (GRUP_IKON), kurum grubu yeniden adlandırınca eşleşme
    * düşüp varsayılan klasör çiziliyordu.
    */
-  | { tur: 'grup'; ad: string; ikon?: string; alt: MenuOgesi[] };
+  | { tur: 'grup'; ad: string; ikon?: string; alt: MenuOgesi[];
+      /** Menü düzeniyle BAŞKA BÖLGEYE taşındıysa o bölgenin adı (979).
+          Boşsa bölge koddaki haritadan (menuBolgeleri) bulunur. */
+      bolge?: string };
 
 /** Sira korunarak grupla: her benzersiz grup adi ILK gorundugu yerde acilir. */
 /**
@@ -83,6 +86,11 @@ export type MenuSatiri =
  * yok, ☪ renksiz/mor ciziliyor; SVG ile boyanir.
  */
 export function MenuIkon({ ic }: { ic: string }) {
+  // YÜKLENEN İKON (980, kullanıcı: "ikon da yükleyebilirim"): menü düzeninde
+  //   kuruma özel simge `data:image/...` olarak saklanır. Emoji yolundan önce
+  //   bakılır - uzun metin emoji gibi çizilirse menüde ham URL görünürdü.
+  if (ic.startsWith('data:image/'))
+    return <span className="ic" aria-hidden="true"><img src={ic} alt="" className="ic-gorsel" /></span>;
   // '@ameliyathane' (kullanici: "ameliyathane resmi olsun"): emoji seti
   //   ameliyat masasi tasimiyor - lamba + masa cizimi.
   if (ic === '@ameliyathane')
