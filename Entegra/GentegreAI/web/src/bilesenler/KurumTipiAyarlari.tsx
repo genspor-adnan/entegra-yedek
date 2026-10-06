@@ -54,9 +54,20 @@ const GEREKLILIK: Record<number, string> = {
 // DATA KULLANIMI (kullanıcı): hizmet / stok kategorileri modül sekmesinde
 //   duruyordu; orası artık menü. "Kurum hangi veriyi kullanıyor" sorusu
 //   Roller'in arkasında kendi sekmesinde.
-const SEKMELER = ['1 · Profil', '2 · Menü Düzeni', '3 · Roller', '4 · Data Kullanımı',
-                  '5 · Kayıt & Ücretlendirme', '6 · Klinik Ayarlar', '7 · Entegrasyonlar',
-                  '8 · Kaynaklar (birim/ünit/cihaz)', '9 · Özet & Kurulum'];
+// SEKME: ÜSTTE İKON, ALTTA ETİKET (kullanıcı 06.10.2026) - sıra numarası
+//   kaldırıldı: sekme eklenip çıkarıldığında numaralar kayıyordu ve kullanıcı
+//   ekranı adıyla arıyor, "4" ile değil.
+const SEKMELER: { ad: string; ic: string }[] = [
+  { ad: 'Profil',               ic: '🏥' },
+  { ad: 'Menü Düzeni',          ic: '🧭' },
+  { ad: 'Roller',               ic: '👥' },
+  { ad: 'Data Kullanımı',       ic: '🗂' },
+  { ad: 'Kayıt & Ücretlendirme', ic: '🧾' },
+  { ad: 'Klinik Ayarlar',       ic: '🩺' },
+  { ad: 'Entegrasyonlar',       ic: '🔌' },
+  { ad: 'Kaynaklar',            ic: '🪑' },
+  { ad: 'Özet & Kurulum',       ic: '✅' },
+];
 
 export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
@@ -440,11 +451,12 @@ export function KurumTipiAyarlari() {
         </div>
       )}
 
-      <div className="sekmeler">
-        {SEKMELER.map((b, i) => (
-          <div key={b} className={`sekme${i === aktif ? ' on' : ''}`}
-               onClick={() => setAktif(i)}>
-            {b}
+      <div className="sekmeler kt-sekmeler">
+        {SEKMELER.map((t, i) => (
+          <div key={t.ad} className={`sekme${i === aktif ? ' on' : ''}`}
+               title={t.ad} onClick={() => setAktif(i)}>
+            <span className="kt-sekme-ic">{t.ic}</span>
+            <span className="kt-sekme-ad">{c(t.ad)}</span>
           </div>
         ))}
       </div>

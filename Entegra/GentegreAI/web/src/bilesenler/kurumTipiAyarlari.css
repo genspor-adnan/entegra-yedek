@@ -225,3 +225,12 @@
 @media (max-width: 800px) {
   .kt-agac .kt-rol .amac { display: none }
 }
+
+/* SEKME: ÜSTTE İKON, ALTTA ETİKET (kullanıcı 06.10.2026). Sıra numarası yok -
+   sekme eklenip çıkarıldığında numaralar kayıyordu. */
+.kt-kok .kt-sekmeler .sekme {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 12px; line-height: 1.15; text-align: center; min-width: 86px;
+}
+.kt-kok .kt-sekme-ic { font-size: 17px }
+.kt-kok .kt-sekme-ad { font-size: 11px; white-space: nowrap }

@@ -44,6 +44,14 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const [subeyeOzel, setSubeyeOzel] = useState(0);
   const [secili, setSecili] = useState<string | null>(null);
   const [surukle, setSurukle] = useState<string | null>(null);
+  /**
+   * AĞAÇ KATLANIR, VARSAYILAN KAPALI (kullanıcı 06.10.2026: "grup kapanır
+   * açılır olsun", "gruplar kapalı olsun default"): tam menü ~330 düğüm -
+   * hepsi açıkken aranan satır ekrana sığmıyordu.
+   */
+  const [acik, setAcik] = useState<Record<string, boolean>>({});
+  const acikMi = (kod: string) => acik[kod] === true;
+  const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
   const [mesaj, setMesaj] = useState('');
   const [yukleniyor, setYukleniyor] = useState(true);
 
@@ -107,6 +115,26 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   }, [subeId]);
 
   const fark = (kod: string) => duzen.find(x => x.sistemKod === kod);
+  /**
+   * BASAMAKLI GİZLEME (kullanıcı 06.10.2026): "grup görünmez yapılırsa
+   * altındakiler de görünmez olur, görünür yapılırsa altındakiler görünür".
+   *
+   * Alt düğümün KENDİ kaydı yazılmaz - üstünü takip eder. Böylece grubu geri
+   * açınca altındakiler kendiliğinden döner; alt satırlara tek tek "gizli"
+   * yazılsaydı grup açıldığında hepsi gizli kalırdı.
+   */
+  const ustGizli = (dugum: Dugum): boolean => {
+    let kod = dugum.ustKod;
+    const gorulen = new Set<string>();
+    while (kod && !gorulen.has(kod)) {
+      gorulen.add(kod);
+      if (fark(kod)?.gizli === 1) return true;
+      kod = dugumler.find(x => x.kod === kod)?.ustKod;
+    }
+    return false;
+  };
+  /** Ekranda gizli görünür mü: kendi işareti ya da üstünden miras. */
+  const gizliMi = (dugum: Dugum) => fark(dugum.kod)?.gizli === 1 || ustGizli(dugum);
   const seciliDugum = dugumler.find(x => x.kod === secili) ?? null;
 
   /** Farkı günceller: değer varsayılana döndüyse satır SİLİNİR (fark kalmasın). */
@@ -206,11 +234,30 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         {/* AĞAÇ */}
         <div className="mn-agac">
           <div className="mn-agac-bas">{c('Sürükleyerek sırala · göz ile gizle')}
-            <span className="sonuk"> · {dugumler.length} {c('düğüm')}</span></div>
+            <span className="sonuk"> · {dugumler.length} {c('düğüm')}</span>
+            <span className="mn-bosluk" />
+            <button type="button" className="d mini" onClick={() => setAcik(
+              Object.fromEntries(dugumler.filter(x => dugumler.some(y => y.ustKod === x.kod))
+                                         .map(x => [x.kod, true])))}>⤢ {c('Tümünü aç')}</button>
+            <button type="button" className="d mini" onClick={() => setAcik({})}>⤡ {c('Kapat')}</button>
+          </div>
           {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
-          {dugumler.map(d => {
+          {dugumler.filter(d => {
+            // ÜST ZİNCİRİ KAPALIYSA ÇİZİLMEZ: bölge kapalıysa grupları da,
+            //   grup kapalıysa ekranları da gizlenir.
+            let k = d.ustKod;
+            const gorulen = new Set<string>();
+            while (k && !gorulen.has(k)) {
+              gorulen.add(k);
+              if (!acikMi(k)) return false;
+              k = dugumler.find(x => x.kod === k)?.ustKod;
+            }
+            return true;
+          }).map(d => {
             const f = fark(d.kod);
-            const gizli = f?.gizli === 1;
+            const kendiGizli = f?.gizli === 1;
+            const mirasGizli = !kendiGizli && ustGizli(d);
+            const gizli = kendiGizli || mirasGizli;
             return (
               <div key={d.kod}
                    className={`mn-dugum d${d.derinlik}${secili === d.kod ? ' sec' : ''}`
@@ -221,13 +268,23 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                    onDrop={() => birak(d)}
                    onClick={() => setSecili(d.kod)}>
                 <span className="tut">⠿</span>
+                {dugumler.some(x => x.ustKod === d.kod) ? (
+                  <button type="button" className="d mini mn-ok"
+                          title={acikMi(d.kod) ? c('Kapat') : c('Aç')}
+                          onClick={e => { e.stopPropagation(); ac(d.kod) }}>
+                    {acikMi(d.kod) ? '▾' : '▸'}</button>
+                ) : <span className="mn-ok-bos" />}
                 {d.ikon && <span className="ikon">{d.ikon}</span>}
                 <span className="ad">{f?.gorunenAd || d.ad}</span>
                 <span className="sag">
                   <span className="rozet gri">{c(d.tur === 'bolge' ? 'bölge' : d.tur === 'grup' ? 'grup' : 'ekran')}</span>
-                  <button type="button" className="d mini" disabled={!duzenleyebilir}
-                          title={gizli ? c('Göster') : c('Gizle')}
-                          onClick={e => { e.stopPropagation(); farkYaz(d, { gizli: gizli ? 0 : 1 }) }}>
+                  {/* ÜSTÜ GİZLİYSE düğme kapalı: alt düğümü tek tek göstermek,
+                      grubu kapalıyken menüde yalnız o satırı çizmek demekti. */}
+                  <button type="button" className="d mini"
+                          disabled={!duzenleyebilir || mirasGizli}
+                          title={mirasGizli ? c('Üst başlık gizli - önce onu açın')
+                                 : kendiGizli ? c('Göster') : c('Gizle')}
+                          onClick={e => { e.stopPropagation(); farkYaz(d, { gizli: kendiGizli ? 0 : 1 }) }}>
                     {gizli ? '🚫' : '👁'}</button>
                 </span>
               </div>
@@ -263,7 +320,8 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                 <label className="mn-kutu"><span>{c('Derinlik')}</span>
                   <div className="mn-inp pasif">{seciliDugum.derinlik}</div></label>
                 <label className="mn-kutu"><span>{c('Durum')}</span>
-                  <select className="mn-inp" disabled={!duzenleyebilir}
+                  <select className="mn-inp"
+                          disabled={!duzenleyebilir || (fark(seciliDugum.kod)?.gizli !== 1 && ustGizli(seciliDugum))}
                           value={fark(seciliDugum.kod)?.gizli === 1 ? '1' : '0'}
                           onChange={e => farkYaz(seciliDugum, { gizli: Number(e.target.value) })}>
                     <option value="0">{c('Görünür')}</option>
@@ -284,8 +342,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         {/* ÖNİZLEME */}
         <div className="mn-onizle">
           <div className="mn-onizle-bas">{c('Önizleme')}</div>
-          {dugumler.filter(d => d.tur !== 'ekran' || !fark(d.kod)?.gizli).map(d => {
-            if (fark(d.kod)?.gizli === 1 && d.tur !== 'ekran') return null;
+          {dugumler.filter(d => !gizliMi(d)).map(d => {
             const ad = fark(d.kod)?.gorunenAd || d.ad;
             return (
               <div key={`o-${d.kod}`} className={`mn-oge d${d.derinlik}`}>

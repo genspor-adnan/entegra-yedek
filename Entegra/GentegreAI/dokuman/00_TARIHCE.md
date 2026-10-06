@@ -19538,3 +19538,29 @@ Yeni sıra: **1 Profil · 2 Menü Düzeni · 3 Roller · 4 Data Kullanımı ·
 Doğrulama: dokuz sekme sırayla çizildi; "2 · Menü Düzeni" sekmesinde şube
 seçici + Kaydet + "Gizlemek yetki değildir" uyarısı, "4 · Data Kullanımı"
 sekmesinde Hizmet / Stok Kategorileri göründü. vitest 789, tsc temiz.
+
+### Aynı gün — menü düzeni ağacı katlanır + basamaklı gizleme, profil sekmeleri ikonlu
+
+Kullanıcı: *"gruplar kapalı olsun default"*, *"grup kapanır açılır olsun"*,
+*"grup görünmez yapılırsa altındakiler de görünmez olur, görünür yapılırsa da
+altındakiler görünür olur"*, *"profilde sekmelerde rakamlar yerine üstte ikon
+altta label olsun"*.
+
+* **Ağaç katlanır, varsayılan kapalı:** tam menü ~330 düğüm; hepsi açıkken
+  aranan satır ekrana sığmıyordu. Bölge/grup satırında ▸/▾ düğmesi, başlıkta
+  "Tümünü aç / Kapat".
+* **Basamaklı gizleme:** üst düğüm gizliyse altındakiler de gizli görünür ve
+  menüde çizilmez. Alt satıra **kendi kaydı yazılmaz** - üstünü takip eder;
+  tek tek "gizli" yazılsaydı grup geri açıldığında hepsi gizli kalırdı.
+  Üstü gizli olan düğümün göz düğmesi kapalı ("Üst başlık gizli - önce onu
+  açın"): alt düğümü tek tek göstermek, grubu kapalıyken menüde yalnız o
+  satırı çizmek demekti.
+* **Kurum Profili sekmeleri:** sıra numarası kaldırıldı, üstte ikon altta
+  etiket (🏥 Profil · 🧭 Menü Düzeni · 👥 Roller · 🗂 Data Kullanımı ·
+  🧾 Kayıt & Ücretlendirme · 🩺 Klinik Ayarlar · 🔌 Entegrasyonlar ·
+  🪑 Kaynaklar · ✅ Özet & Kurulum). Numara, sekme eklenip çıkarıldığında
+  kayıyordu ve kullanıcı ekranı adıyla arıyor.
+
+Doğrulama: ağaç kapalı açıldı (8 bölge), bölge açılınca grupları geldi,
+"Kayıt Kabul" gizlenince altındaki beş ekran da 🚫 oldu; dokuz sekme ikon +
+etiketle çizildi. vitest 789, tsc temiz.

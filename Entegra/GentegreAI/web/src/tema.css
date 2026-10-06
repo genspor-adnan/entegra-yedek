@@ -7769,6 +7769,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mn-dugum.d3 { padding-left: 40px }
 .mn-dugum.d4 { padding-left: 58px }
 .mn-dugum .mini { padding: 0 5px; font-size: 11px }
+/* Aç/kapa oku: çocuğu olmayan düğümde yerini boş bırakır (hizalama). */
+.mn-ok { min-width: 16px; padding: 0 2px !important }
+.mn-ok-bos { display: inline-block; width: 16px }
+.mn-agac-bas { display: flex; align-items: center; gap: 6px }
 
 .mn-ozellik { border: 1px solid var(--cizgi2); border-radius: 6px; background: var(--yuz); padding: 10px 12px }
 .mn-ozellik h5 { margin: 0 0 8px; font-size: 11px; color: var(--soluk); text-transform: uppercase;
