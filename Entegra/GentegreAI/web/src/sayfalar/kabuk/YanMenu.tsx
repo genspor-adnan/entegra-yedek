@@ -109,7 +109,7 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                   style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
                   onClick={() => setAcikGruplar(g => ({ ...g, [s.ad]: !grupAcikMi(s.ad, s.alt) }))}
                 >
-                  <MenuIkon ic={GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁'} />
+                  <MenuIkon ic={s.ikon ?? GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁'} />
                   <span>{s.ad}</span>
                   <span className="rz">{grupAcikMi(s.ad, s.alt) ? '▾' : '▸'}</span>
                 </button>

@@ -19439,3 +19439,49 @@ eşlemesi · Mesaj günlüğü · Kalibrasyon** (mockup ile birebir), kimlik ala
 bölümü geldi, "örnek mesajla sına" ekranda `OD rnfl_ort 78 · OD cmt 262 ·
 OS rnfl_ort 86` çözdü (hiçbir şey yazmadan), sağ sütunda Durum · Son 24 saat ·
 Hızlı işlem kutuları ve MWL bilgisi göründü.
+
+## 06.10.2026 — Menü düzeni ekranı (979)
+
+Kullanıcı: *"menüyü yap mockup'a göre"* (`Ekranlar/Ayarlar/menu_duzenleme_v2.html`;
+istekler: yerleri kaydırma · ad değiştirme · üst başlık · derinlik · şube başına).
+
+**Tasarım kararı — fark saklanır, ağaç değil.** Menü ağacı KODDA kalıyor
+(`listeTanimlari*.ts` + `kabuk/menuBolgeleri.ts`); yeni tablo `menu_duzen`
+yalnız kurumun yaptığı **değişikliği** tutuyor. Tam ağaç saklansaydı yeni bir
+ekran eklendiğinde hiçbir şubede görünmezdi - düzen donardı. Satırı olmayan
+düğüm varsayılan yerinde çıkıyor.
+
+* **db/979** — `menu_duzen` (sube_id · dugum_tur · sistem_kod · ust_kod · sira ·
+  gorunen_ad · ikon · gizli · acilista_acik · dis_baglanti), `menu.duzen`
+  yetkisi (yönetici rolüne verildi) ve yardım kaydı. `sistem_kod` **değişmez
+  kimliktir**: ekranda liste kaynağı, grup/bölgede çevrilmemiş ad - görünen ad
+  değişince rota ve yetki eşlemesi bozulmasın.
+* **API** `MenuDuzenUclari`: GET (okuma **yetki istemez** - kullanıcı kendi
+  menüsünü çizebilmeli; başka şubeyi okumak `menu.duzen` ister), PUT (şubenin
+  satırlarını tek işlemde değiştirir), DELETE (varsayılana dön). Şube satırı
+  kurum genelini ezer (`distinct on ... order by sube_id nulls last`).
+* **İstemci** `kabuk/menuDuzeni.ts`: farkı koddan kurulan ağacın üstüne uygular
+  (gizle · yeniden adlandır · ikon · sıra · başka gruba taşı). **Boş kalan grup
+  çizilmez** - bütün ekranları gizlenmiş bir başlık, tıklanınca hiçbir şey
+  açmayan satır olurdu.
+* **Ekran** `/menu-duzeni`: üç sütun - sürükle-bırak ağacı (bölge › grup ›
+  ekran), seçili düğümün özellikleri, canlı menü önizlemesi. Şube seçici +
+  "varsayılan düzen / şubeye özel" rozeti. **Gizlemek yetki değildir** uyarısı
+  ekranda sabit: menüden kaldırılan ekran, yetkisi olana adresten yine açılır.
+* Değer varsayılana döndüğünde satır **kayıttan düşer** - fark dosyası
+  gereksiz satırla şişmesin.
+
+**Yol boyunca düzeltilen üç şey:** (1) tip `api/uclar/kimlik.ts`'ten menü
+koduna bağlanınca `api → sayfalar → Liste → api` **döngüsel import**u oluştu,
+tip `api/sozlesme.ts`'e taşındı (donguselImport testi yakaladı); (2) `md-`
+öneki dikte modülünde kullanımdaydı (`.muayene-dikte .md-kutu`), menü düzeni
+`mn-` önekine geçti (temaSinifCakismasi testi yakaladı); (3) grup ikonu ADA
+göre bulunuyordu (`GRUP_IKON[s.ad]`), grubu yeniden adlandırınca menüde
+varsayılan klasör çiziliyordu - `MenuSatiri`ye `ikon` alanı eklendi, ad
+değişikliği ikonu düşürmüyor.
+
+Doğrulama: uçta kaydet/oku/sıfırla denendi; ekranda "Kayıt Kabul" → **"Hasta
+Kabul"** adlandırıldı ve sıra verildi, **sol menüde ikonuyla birlikte bölgenin
+başında** göründü; "Dökümler" gizlendi ve menüden düştü; "Varsayılana dön"
+farkı sildi (`menu_duzen` 0 satır - dev veritabanı temiz bırakıldı).
+dotnet test 218, vitest 789, tsc temiz.

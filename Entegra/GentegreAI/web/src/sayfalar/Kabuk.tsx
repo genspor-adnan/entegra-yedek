@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { api } from '../api/istemci';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { DILLER } from '../bilesenler/diller';
 import { KullaniciAyarlari, type AyarSekmesi } from '../bilesenler/KullaniciAyarlari';
 import { useProfilResmi } from '../bilesenler/profilResmi';
 import { useSubeLogo } from '../bilesenler/subeLogo';
 import { menuSatirlariKur } from './kabuk/menuAgaci';
+import { menuDuzeniUygula, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { YanMenu } from './kabuk/YanMenu';
 import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
@@ -31,7 +33,25 @@ export function Kabuk() {
 
   // MENU AGACI (kabuk/menuAgaci): yetki + urun modu + kurum modulu suzgeci,
   //   grup/alt-grup, urune gore grup sirasi - hepsi saf fonksiyonda.
-  const satirlar = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
+  const kodSatirlari = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
+  /**
+   * MENÜ DÜZENİ FARKI (979): kurumun bu şube için yaptığı değişiklikler
+   * (sıra · görünen ad · ikon · gizleme) koddan kurulan ağacın ÜSTÜNE
+   * uygulanır. Fark yoksa ağaç olduğu gibi çizilir - yeni eklenen bir ekran
+   * hiçbir şubede kaybolmaz.
+   */
+  const [menuDuzen, setMenuDuzen] = useState<MenuDuzenSatiri[]>([]);
+  useEffect(() => {
+    if (!kullanici?.id) return;
+    let iptal = false;
+    // Düzen okuması YETKİ İSTEMEZ: kullanıcı kendi menüsünü çizebilmeli.
+    //   Hata durumunda sessizce varsayılan ağaç kalır - menü hiç çizilmemesindense
+    //   düzenlenmemiş çizilsin.
+    api.menuDuzen().then(y => { if (!iptal) setMenuDuzen(y.satirlar) }).catch(() => {});
+    return () => { iptal = true };
+  }, [kullanici?.id, kullanici?.subeId]);
+  const satirlar = useMemo(() => menuDuzeniUygula(kodSatirlari, menuDuzen),
+                           [kodSatirlari, menuDuzen]);
 
   // BOLGE (V2) BASLIKLARI PROFILDEN (905, kullanici: "menü tipini profillere
   //   kaydet"): "Hasta Akisi"/"Klinikler" gibi bolge basliklari cok bransli

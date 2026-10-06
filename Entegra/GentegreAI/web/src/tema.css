@@ -5913,9 +5913,9 @@ textarea.fm-giris { resize: vertical }
 .muayene-dikte .md-seviye { display: inline-block; width: 90px; height: 6px; border-radius: 3px; background: var(--cizgi2); overflow: hidden }
 .muayene-dikte .md-seviye i { display: block; height: 100%; background: var(--yesil, #2e7d32); transition: width .08s linear }
 .muayene-dikte .md-tani { font-size: 11px }
-.muayene-dikte .md-alan { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px }
-.muayene-dikte .md-alan.aktif { border-color: var(--mor); box-shadow: 0 0 0 2px color-mix(in srgb, var(--mor) 25%, transparent) }
-.muayene-dikte .md-alan-bas { display: flex; align-items: center; gap: 8px; font-size: 12px }
+.muayene-dikte .md-kutu { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px }
+.muayene-dikte .md-kutu.aktif { border-color: var(--mor); box-shadow: 0 0 0 2px color-mix(in srgb, var(--mor) 25%, transparent) }
+.muayene-dikte .md-kutu-bas { display: flex; align-items: center; gap: 8px; font-size: 12px }
 
 /* Baglam seridi kutu basligindaki DUZENLE isareti yalniz kalem ikonu (kullanici). */
 .kart-baglam .kb-bas .kb-kalem { color: var(--mor); font-size: 11px; margin-left: 4px }
@@ -7729,3 +7729,62 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 :root[data-theme="dark"] .gc-sekme .uyar { background: #3a2f12; border-color: #6b5420; color: #f0d9a8 }
 .gc-bas { margin: 12px 0 6px; font-size: 11px; color: var(--soluk); text-transform: uppercase;
   border-bottom: 1px solid var(--cizgi2); padding-bottom: 4px }
+
+/* ===================================================================
+   MENÜ DÜZENİ (979, mockup Ekranlar/Ayarlar/menu_duzenleme_v2.html)
+   Üç sütun: ağaç (sürükle-bırak) · seçili düğümün özellikleri · önizleme.
+   =================================================================== */
+.mn-ekran { padding: 10px 14px; font-size: 12px }
+.mn-ust { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px }
+.mn-ust h2 { margin: 0; font-size: 15px; color: var(--baslik, #14315a) }
+.mn-bosluk { margin-left: auto }
+.mn-inp { border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  color: var(--yazi); padding: 4px 7px; font-size: 11.5px; min-height: 26px; min-width: 150px }
+.mn-inp.pasif { background: var(--yuz2); color: var(--soluk) }
+.mn-mesaj { border: 1px solid var(--cizgi2); background: var(--yuz2); border-radius: 6px;
+  padding: 6px 9px; margin-bottom: 8px; font-size: 11.5px }
+/* GİZLEMEK YETKİ DEĞİLDİR uyarısı ekranda sabit durur. */
+.mn-uyari { border: 1px solid #f2ddbf; background: #fdf6e3; color: #7a5a12;
+  border-radius: 6px; padding: 7px 9px; margin-bottom: 10px; font-size: 11.5px }
+:root:not([data-theme="light"]) .mn-uyari,
+:root[data-theme="dark"] .mn-uyari { background: #3a2f12; border-color: #6b5420; color: #f0d9a8 }
+.mn-govde { display: grid; grid-template-columns: 340px minmax(0, 1fr) 280px; gap: 12px; align-items: start }
+@media (max-width: 1200px) { .mn-govde { grid-template-columns: minmax(0, 1fr) } }
+
+.mn-agac { border: 1px solid var(--cizgi2); border-radius: 6px; background: var(--yuz);
+  max-height: 70vh; overflow: auto }
+.mn-agac-bas { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz2);
+  font-size: 10.5px; color: var(--soluk) }
+.mn-dugum { display: flex; gap: 6px; align-items: center; padding: 4px 8px; font-size: 11.5px;
+  border-bottom: 1px solid var(--cizgi2); cursor: pointer; white-space: nowrap }
+.mn-dugum:hover { background: var(--yuz2) }
+.mn-dugum.sec { background: var(--sec, #eef4fc) }
+.mn-dugum.surukle { opacity: .5 }
+.mn-dugum.gizli .ad { color: var(--soluk); text-decoration: line-through }
+.mn-dugum .tut { color: var(--soluk); cursor: grab }
+.mn-dugum .ad { flex: 1; overflow: hidden; text-overflow: ellipsis }
+.mn-dugum .sag { margin-left: auto; display: flex; gap: 4px; align-items: center }
+.mn-dugum.d1 { font-weight: 600 }
+.mn-dugum.d2 { padding-left: 22px }
+.mn-dugum.d3 { padding-left: 40px }
+.mn-dugum.d4 { padding-left: 58px }
+.mn-dugum .mini { padding: 0 5px; font-size: 11px }
+
+.mn-ozellik { border: 1px solid var(--cizgi2); border-radius: 6px; background: var(--yuz); padding: 10px 12px }
+.mn-ozellik h5 { margin: 0 0 8px; font-size: 11px; color: var(--soluk); text-transform: uppercase;
+  border-bottom: 1px solid var(--cizgi2); padding-bottom: 4px }
+.mn-izgara { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px 10px }
+.mn-kutu { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px }
+.mn-kutu span { font-size: 10px; color: var(--soluk) }
+.mn-bilgi { margin-top: 10px; border: 1px solid var(--cizgi2); background: var(--yuz2);
+  border-radius: 6px; padding: 7px 9px; font-size: 11px; color: var(--soluk) }
+
+/* Önizleme: gerçek sol menünün koyu zemini. */
+.mn-onizle { background: #20344d; border-radius: 6px; padding: 8px 0; color: #dce6f2;
+  font-size: 11.5px; max-height: 70vh; overflow: auto }
+.mn-onizle-bas { padding: 0 10px 6px; font-size: 10px; color: #9fb6d0; text-transform: uppercase }
+.mn-oge { padding: 4px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mn-oge.d1 { font-weight: 600; color: #9fb6d0; text-transform: uppercase; font-size: 10.5px; padding-top: 8px }
+.mn-oge.d2 { padding-left: 20px }
+.mn-oge.d3 { padding-left: 36px; color: #b9cadb }
+.mn-oge.d4 { padding-left: 52px; color: #b9cadb }

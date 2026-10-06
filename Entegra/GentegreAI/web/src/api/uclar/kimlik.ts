@@ -1,5 +1,5 @@
 import {
-  type BenYaniti, type GirisYaniti, } from '../sozlesme';
+  type BenYaniti, type GirisYaniti, type MenuDuzenSatiri, } from '../sozlesme';
 import { istek, gonder, oturum } from '../cekirdek';
 
 /** Kimlik ve oturum. */
@@ -15,6 +15,20 @@ export const kimlikUclari = {
   },
 
   ben: () => istek<BenYaniti>('/api/kimlik/ben'),
+
+  // ---------------------------------------------------- menü düzeni (979) ----
+  /** Şubenin menü FARKI (yoksa boş): varsayılan ağaç koddan kurulur. */
+  menuDuzen: (subeId?: number) =>
+    istek<{ subeId: number; satirlar: MenuDuzenSatiri[]; subeyeOzel: number }>(
+      `/api/menu-duzen${subeId ? `?subeId=${subeId}` : ''}`),
+  menuDuzenKaydet: (subeId: number, satirlar: MenuDuzenSatiri[]) =>
+    istek<{ subeId: number; satir: number }>('/api/menu-duzen', {
+      method: 'PUT', body: JSON.stringify({ subeId, satirlar }),
+    }),
+  /** Şubenin bütün farkını siler - menü koddaki varsayılana döner. */
+  menuDuzenSifirla: (subeId: number) =>
+    istek<{ subeId: number; silinen: number }>(`/api/menu-duzen?subeId=${subeId}`,
+      { method: 'DELETE' }),
 
   subeSec: (subeId: number) =>
     istek<GirisYaniti>('/api/kimlik/sube', {

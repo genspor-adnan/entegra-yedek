@@ -391,6 +391,8 @@ uygulama.CihazUclariniEkle();
 uygulama.LabUclariniEkle();
 // GOZ (691): hasta ozeti ve olcum trendi - liste/kart disi iki sorgu.
 uygulama.GozUclariniEkle();
+// Menü düzeni (979): sol menünün şube başına yerleşim farkı.
+uygulama.MenuDuzenUclariniEkle();
 // YATAN HASTA (695): yatis kartinin ust seridi - kimlik, son vital, acik isler.
 uygulama.YatanUclariniEkle();
 // DIS KLINIGI (706): odontogram, tedavi plani satiri yapildi, gunluk akis,

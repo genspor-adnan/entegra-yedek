@@ -1168,3 +1168,23 @@ export interface DokumKatalogu {
 export interface DokumAntet {
   kurum: Record<string, unknown> | null; kullanici: number;
 }
+
+/**
+ * MENÜ DÜZENİ FARKI (979). Menü ağacı KODDADIR; sunucu yalnız kurumun yaptığı
+ * değişikliği saklar. Tip burada durur: uç dosyası menü kodundan tip çekerse
+ * `api → sayfalar → Liste → api` döngüsü oluşuyor (donguselImport testi).
+ */
+export interface MenuDuzenSatiri {
+  /** 1 bölge · 2 grup · 3 alt başlık · 4 ekran. */
+  dugumTur: number;
+  /** Değişmez kimlik: ekranda liste kaynağı, grup/bölgede çevrilmemiş ad. */
+  sistemKod: string;
+  ustKod?: string | null;
+  sira?: number | null;
+  gorunenAd?: string;
+  ikon?: string;
+  gizli: number;
+  acilistaAcik: number;
+  disBaglanti?: string;
+  subeyeOzel?: number;
+}

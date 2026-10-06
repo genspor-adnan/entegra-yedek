@@ -383,6 +383,16 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Yönetim', menuSira: 20, menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
   },
   {
+    // MENU DUZENI (979): sol menunun sube basina yerlesimi - sira, gorunen ad,
+    //   gizleme. Liste degil (ozelSayfa); kendi yetkisi var cunku yanlis elde
+    //   butun kullanicilarin menusunu bozar.
+    kaynak: 'menu-duzen', rota: 'menu-duzeni', baslik: 'Menü Düzeni',
+    yol: 'Yönetim › Ayarlar › Menü Düzeni',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Menü Düzeni', menuSira: 45,
+    ic: '🧭', yetkiKodu: 'menu.duzen',
+  },
+  {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,

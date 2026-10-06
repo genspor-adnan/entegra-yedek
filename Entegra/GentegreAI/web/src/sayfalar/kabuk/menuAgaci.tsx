@@ -69,7 +69,12 @@ export const GRUP_SIRA_ERP = [
 
 export type MenuSatiri =
   | { tur: 'duz'; m: MenuOgesi }
-  | { tur: 'grup'; ad: string; alt: MenuOgesi[] };
+  /**
+   * `ikon` yalnız MENÜ DÜZENİ (979) doldurur: grup ikonu normalde ADA göre
+   * tablodan bulunuyor (GRUP_IKON), kurum grubu yeniden adlandırınca eşleşme
+   * düşüp varsayılan klasör çiziliyordu.
+   */
+  | { tur: 'grup'; ad: string; ikon?: string; alt: MenuOgesi[] };
 
 /** Sira korunarak grupla: her benzersiz grup adi ILK gorundugu yerde acilir. */
 /**
