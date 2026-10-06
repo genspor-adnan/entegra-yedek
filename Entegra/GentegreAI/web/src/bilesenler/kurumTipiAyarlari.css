@@ -140,17 +140,6 @@
 .kt-kok .ikili-sayi { display: flex; gap: 6px }
 .kt-kok .ikili-sayi > * { flex: 1; min-width: 0 }
 .kt-kok .tip { cursor: pointer }
-.kt-kok .modul-kutulari {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 6px 12px; padding: 10px;
-}
-.kt-kok .modul-kutu {
-  display: flex; align-items: center; gap: 6px; padding: 4px 8px;
-  border: 1px solid var(--line2); border-radius: 3px; background: #fff; cursor: pointer;
-}
-.kt-kok .modul-kutu.acik { border-color: var(--accent); background: var(--sel) }
-.kt-kok .modul-kutu > span:nth-of-type(1) { flex: 1; min-width: 0 }
-
 /* AKTIF SUBE UYARISI (364): menu aktif subenin profilinden cizilir - kurum
    genelini duzenleyen kullanici bunu gorsun. */
 .kt-kok .uyari {

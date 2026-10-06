@@ -19485,3 +19485,28 @@ Kabul"** adlandırıldı ve sıra verildi, **sol menüde ikonuyla birlikte bölg
 başında** göründü; "Dökümler" gizlendi ve menüden düştü; "Varsayılana dön"
 farkı sildi (`menu_duzen` 0 satır - dev veritabanı temiz bırakıldı).
 dotnet test 218, vitest 789, tsc temiz.
+
+### Aynı gün — kurum profilinde modül kutuları kaldırıldı, yetki matrisi menüye bağlandı
+
+* **Kurum Profili › Modüller:** "Bu kurumda açık modüller" kutucukları
+  kaldırıldı (kullanıcı: *"bu bölüme gerek kalmadı"*). Modül paketi artık
+  **kurum tipinden** gelir (matris duruyor, bilgi olarak); menüde ne görüneceği
+  şube başına Menü Düzeni ekranından ayarlanır. **Veri silinmedi:** daha önce
+  elle kapatılmış modüller `kurum_profil.moduller` içinde kalır ve süzmede
+  uygulanmaya devam eder - satırları silmek, kurulumda bilinçli kapatılmış bir
+  modülü sessizce geri açmak olurdu.
+* **Yetki matrisi artık AKTİF MENÜYE bağlı** (kullanıcı: *"yetki matrisi aktif
+  menüye bağlı olmalıdır"*): (a) **kapalı modülün yetkileri ağaçta hiç
+  çizilmiyor** (eskiden duruyordu), (b) kurumun menüde yeniden adlandırdığı
+  grup/ekran yetki ağacında da **o adla** görünüyor - menüde "Hasta Kabul"
+  yazarken yetkiyi "Kayıt Kabul" diye aramak gerekmiyor.
+* **Menüde gizlenen ekranın yetkisi listede KALIR** ("Menüde gizli (erişim
+  açık)" ipucuyla): gizlemek erişimi kapatmaz, yetkiyi yöneten kişi o satırı
+  görebilmeli - yoksa kimsenin kapatamadığı bir erişim kalırdı.
+* Döngüsel import tekrar çıktı (`RolYetkiMatrisi → menuDuzeni → menuAgaci →
+  Liste → api`); harita yardımcısı menü kodundan bağımsız
+  `kabuk/menuDuzenHarita.ts`'e alındı.
+
+Doğrulama: menü düzeninden "Kayıt Kabul" → "Hasta Kabul" yapıldı, rol kartının
+Yetki Matrisi sekmesinde `🤕 Hasta Kabul(10)` göründü; düzen sonra silindi
+(dev veritabanı temiz). vitest 789, tsc temiz.

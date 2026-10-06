@@ -1,5 +1,6 @@
 import { GRUP_IKON, GRUP_IKON_CEV, type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import type { MenuDuzenSatiri } from '../../api/sozlesme';
+import { duzenHaritasi } from './menuDuzenHarita';
 
 /**
  * MENÜ DÜZENİ FARKI (979, mockup `Ekranlar/Ayarlar/menu_duzenleme_v2.html`).
@@ -24,12 +25,7 @@ export const ogeKodu = (m: MenuOgesi) => m.kaynak ?? m.yol;
 export const grupKodu = (sat: Extract<MenuSatiri, { tur: 'grup' }>) =>
   sat.alt.find(m => m.grupHam)?.grupHam ?? sat.ad;
 
-/** Hızlı erişim için kod → satır eşlemesi. */
-export function duzenHaritasi(satirlar: MenuDuzenSatiri[] | null | undefined) {
-  const h = new Map<string, MenuDuzenSatiri>();
-  for (const s of satirlar ?? []) h.set(s.sistemKod, s);
-  return h;
-}
+export { duzenHaritasi } from './menuDuzenHarita';
 
 /**
  * Farkı menü satırlarına uygular: gizleme, görünen ad, ikon, sıra ve

@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import type { YetkiSatiri } from '../api/sozlesme';
 import { hataMetni } from '../api/sozlesme';
-import { LISTELER } from '../sayfalar/listeTanimlari';
+import { LISTELER, modulAcikMi } from '../sayfalar/listeTanimlari';
+import type { MenuDuzenSatiri } from '../api/sozlesme';
+import { duzenHaritasi } from '../sayfalar/kabuk/menuDuzenHarita';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
 import { c as cev } from '../dil/ceviri';
@@ -61,12 +63,23 @@ interface Dugum {
  * ÜRÜN MODU (232) burada da geçerli: ERP'de "Kayıt Kabul" gibi HBYS'e özgü
  * ekranlar menüde yok, yetki ağacında da başlık açmazlar.
  */
-function menuHaritasi(urunModu: number) {
+function menuHaritasi(urunModu: number, moduller: string[] | undefined,
+                     duzen: MenuDuzenSatiri[]) {
+  // AKTIF MENÜYE BAĞLI (kullanıcı 06.10.2026): ağaç, kurumun o anda GÖRDÜĞÜ
+  //   menüden kurulur - kapalı modülün ekranları hiç çizilmez, kurumun
+  //   yeniden adlandırdığı grup/ekran kendi adıyla görünür.
+  //
+  //   MENÜDE GİZLENEN EKRAN YİNE LİSTELENİR ("menüde gizli" rozetiyle):
+  //   gizlemek erişimi kapatmaz (979), yetkiyi yöneten kişi o ekranın
+  //   yetkisini görebilmeli - yoksa kimsenin kapatamadığı bir erişim kalırdı.
+  const duzenH = duzenHaritasi(duzen);
   const harita = new Map<string, {
     grup: string; altGrup?: string; ic: string; ekranlar: string[];
     /** Ekran adları GRUBUYLA: aynı kod farklı gruplarda farklı ad taşır
         (`belge` = Kayıt Kabul'de "Başvurular", Satış'ta "Satış Faturaları"). */
     gruplu: { grup: string; ad: string }[];
+    /** Menüde gizlenmiş mi (979) - erişim kapalı DEĞİL, yalnız menüde yok. */
+    gizli?: boolean;
   }>();
   /** Menü grubunun ikonu - grubun ilk ekranından. */
   const grupIkonu = new Map<string, string>();
@@ -74,26 +87,43 @@ function menuHaritasi(urunModu: number) {
   for (const l of LISTELER) {
     if (l.urunModu && l.urunModu !== urunModu) continue;
     if (l.menuGizli) continue;
-    if (l.menuGrup && !grupSirasi.includes(l.menuGrup)) grupSirasi.push(l.menuGrup);
-    if (l.menuGrup && l.ic && !grupIkonu.has(l.menuGrup)) grupIkonu.set(l.menuGrup, l.ic);
-    if (!l.menuGrup) continue;
+    // KAPALI MODÜL: ekranı, rotası ve yetkisi hiç çizilmiyor - yetki ağacında
+    //   da yeri yok (eskiden kapalı modülün yetkileri listede duruyordu).
+    if (!modulAcikMi(l, moduller)) continue;
+    // KURUMUN VERDİĞİ AD (979): menüde "Hasta Kabul" yazarken yetki ağacında
+    //   "Kayıt Kabul" yazması, aynı şeyi iki adla aratırdı.
+    const grupAd = (l.menuGrup && duzenH.get(l.menuGrup)?.gorunenAd) || l.menuGrup;
+    const ekranAd = duzenH.get(l.kaynak ?? '')?.gorunenAd || l.menuAd;
+    const gizliMi = (l.menuGrup && duzenH.get(l.menuGrup)?.gizli === 1)
+                    || duzenH.get(l.kaynak ?? '')?.gizli === 1;
+    if (grupAd && !grupSirasi.includes(grupAd)) grupSirasi.push(grupAd);
+    if (grupAd && l.ic && !grupIkonu.has(grupAd)) grupIkonu.set(grupAd, l.ic);
+    if (!grupAd) continue;
     // Ayni yetki kodu birden cok ekranda olabilir (belge -> teklif/siparis/
     //   fatura...): ILK ekranin yeri esas alinir, ekran ADLARININ hepsi
     //   toplanir - tek ekransa yaprak o adla cizilir (kullanici: "modul
     //   adlari menudeki adlarla ayni olsun").
     const v = harita.get(l.yetkiKodu);
-    if (v) { v.ekranlar.push(l.menuAd); v.gruplu.push({ grup: l.menuGrup, ad: l.menuAd }) }
-    else harita.set(l.yetkiKodu, {
-      grup: l.menuGrup, altGrup: l.menuAltGrup, ic: l.ic, ekranlar: [l.menuAd],
-      gruplu: [{ grup: l.menuGrup, ad: l.menuAd }],
+    if (v) {
+      v.ekranlar.push(ekranAd);
+      v.gruplu.push({ grup: grupAd, ad: ekranAd });
+      if (!gizliMi) v.gizli = false;
+    } else harita.set(l.yetkiKodu, {
+      grup: grupAd, altGrup: l.menuAltGrup, ic: l.ic, ekranlar: [ekranAd],
+      gruplu: [{ grup: grupAd, ad: ekranAd }],
+      // Yetkinin BÜTÜN ekranları gizliyse rozet çıkar; biri görünüyorsa çıkmaz.
+      gizli: !!gizliMi,
     });
   }
   return { harita, grupSirasi, grupIkonu };
 }
 
 /** Düz yetki listesinden menü düzeninde ağaç kurar. */
-function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
-  const { harita, grupSirasi, grupIkonu } = menuHaritasi(urunModu);
+function agacKur(satirlar: YetkiSatiri[], urunModu: number,
+                moduller: string[] | undefined, duzen: MenuDuzenSatiri[]): Dugum[] {
+  const { harita, grupSirasi, grupIkonu } = menuHaritasi(urunModu, moduller, duzen);
+  // `d` adı bu fonksiyonda düğüm değişkeni - harita ayrı adla durur.
+  const duzenH = duzenHaritasi(duzen);
   const kokler: Dugum[] = [];
   const kokBul = (ad: string, ic?: string) => {
     let d = kokler.find(k => k.ad === ad);
@@ -121,7 +151,12 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
   const modulDugumu = new Map<string, Dugum>();
   for (const s of yeni.filter(x => !x.kod.includes('.'))) {
     const yer = harita.get(s.kod);
-    const grupAdi = EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? s.grup ?? yer?.grup ?? 'Diğer';
+    // SUNUCUNUN GRUBU + KURUMUN ADI: grup kararı sunucudan gelir (684), ama
+    //   kurum o grubu yeniden adlandırdıysa (979) ağaçta kurumun adı yazar -
+    //   menüde "Hasta Kabul" görünürken burada "Kayıt Kabul" aramak zorunda
+    //   kalmasın. Eşleme ÇEVRİLMEMİŞ ad üzerinden: düzen kaydı onu taşıyor.
+    const hamGrup = EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? s.grup ?? yer?.grup ?? 'Diğer';
+    const grupAdi = duzenH.get(hamGrup)?.gorunenAd || hamGrup;
     const kok = kokBul(grupAdi,
                        grupIkonu.get(grupAdi) ?? yer?.ic
                        ?? (EK_GRUP[s.kod] ? '🏠' : undefined));
@@ -136,7 +171,11 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
       anahtar: `y:${s.yetkiId}`,
       ad: buGrupta.length === 1 ? buGrupta[0].ad
         : yer?.ekranlar.length === 1 ? yer.ekranlar[0] : s.ad,
-      ipucu: yer && yer.ekranlar.length > 1 ? `Ekranlar: ${yer.ekranlar.join(', ')}` : undefined,
+      ipucu: [
+        yer && yer.ekranlar.length > 1 ? `Ekranlar: ${yer.ekranlar.join(', ')}` : '',
+        // Menüde gizli olduğu YAZILIR: yetki duruyor, yalnız menüde yok.
+        yer?.gizli ? 'Menüde gizli (erişim açık)' : '',
+      ].filter(Boolean).join(' · ') || undefined,
       ic: yer?.ic, satir: s, cocuklar: [],
     };
     ust.cocuklar.push(d);
@@ -204,8 +243,19 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
   }, [rolId]);
 
   // Agac aktif urun moduna gore kurulur (232).
-  const agac = useMemo(() => (satirlar ? agacKur(satirlar, kullanici?.urunModu ?? 1) : []),
-                       [satirlar, kullanici?.urunModu]);
+  // MENÜ DÜZENİ FARKI (979): ağaç kurumun gördüğü menüyle aynı adları ve
+  //   aynı kapsamı taşısın. Okunamazsa boş dizi - ağaç koddaki adlarla çizilir.
+  const [menuDuzen, setMenuDuzen] = useState<MenuDuzenSatiri[]>([]);
+  useEffect(() => {
+    let iptal = false;
+    api.menuDuzen().then(y => { if (!iptal) setMenuDuzen(y.satirlar) }).catch(() => {});
+    return () => { iptal = true };
+  }, []);
+  const agac = useMemo(
+    () => (satirlar
+      ? agacKur(satirlar, kullanici?.urunModu ?? 1, kullanici?.moduller, menuDuzen)
+      : []),
+    [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen]);
 
   // Ilk yuklemede TUM dallar kapali (kullanici) - 900 satirlik agac acik
   //   gelirse ekran okunmuyordu.

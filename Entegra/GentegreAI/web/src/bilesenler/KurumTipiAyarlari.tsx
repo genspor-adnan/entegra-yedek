@@ -111,13 +111,6 @@ export function KurumTipiAyarlari() {
     return o !== undefined ? o === 1 : tipVarsayilani(modul) === 1;
   };
 
-  const modulCevir = (modul: string) => {
-    if (!profil) return;
-    const yeni = { ...(profil.moduller ?? {}) };
-    yeni[modul] = modulAcik(modul) ? 0 : 1;
-    degistir({ moduller: yeni });
-  };
-
   /**
    * Kurum tipi degisince modul OVERRIDE'lari silinir: yeni tipin varsayilan
    * paketi gecerli olsun - eski tipten kalan "lab kapali" gibi bir isaret
@@ -601,7 +594,14 @@ export function KurumTipiAyarlari() {
       </div>
 
       <div className="pnl" hidden={aktif !== 1}>
-        <div className="ic sonuk">● açık · ◐ opsiyonel (aç/kapat) · ○ bu tipte anlamsız (gizli). Matris tipin VARSAYILANIDIR; alttaki kutucuklar bu kurulumun kendi seçimini yazar. Modül kapanınca menü, yetkiler ve kart sekmeleri gizlenir; veri kalır.</div>
+        {/* Kutucuklu seçim kaldırıldı (06.10.2026): modül paketi TİPTEN gelir,
+            menüde ne görüneceği Menü Düzeni ekranından (979) ayarlanır. */}
+        <div className="ic sonuk">● açık · ◐ opsiyonel · ○ bu tipte anlamsız (gizli).
+          Matris <b>kurum tipinin paketidir</b>: kurum tipi seçilince bu satır geçerli olur.
+          Kapalı modülün menüsü, yetkileri ve kart sekmeleri çizilmez; <b>verisi silinmez</b>.
+          Menüde hangi ekranın görüneceğini şube başına değiştirmek için
+          <b> Yönetim › Ayarlar › Menü Düzeni</b> ekranını kullanın - orada gizlemek
+          erişimi kapatmaz, modül kapatmak ise kapatır.</div>
 
         {/* TIP x MODUL VARSAYILANLARI (kurum_tipi_modul) - secili tip vurgulu. */}
         <div className="dg matris">
@@ -635,34 +635,16 @@ export function KurumTipiAyarlari() {
           </table>
         </div>
 
-        {/* BU KURULUMUN SECIMI - override'lar kurum_profil.moduller'e yazilir. */}
-        <div className="grp" style={{ margin: '10px' }}>
-          <div className="gb">Bu kurumda açık modüller — {tipAdi(profil?.kurumTipi)}</div>
-          <div className="modul-kutulari">
-            {(veri?.moduller ?? []).map(m => {
-              const vars = tipVarsayilani(m.kod);
-              const acik = modulAcik(m.kod);
-              const ozel = profil?.moduller?.[m.kod] !== undefined
-                           && (profil?.moduller?.[m.kod] === 1) !== (vars === 1);
-              return (
-                <label key={m.kod} className={`modul-kutu${acik ? ' acik' : ''}`}
-                       title={vars === 1 ? 'Bu tipin varsayılan paketinde açık'
-                              : vars === 2 ? 'Opsiyonel - açıp kapatabilirsiniz'
-                              : 'Bu tipte anlamsız; yine de açabilirsiniz'}>
-                  <input type="checkbox" checked={acik} onChange={() => modulCevir(m.kod)} />
-                  <span>{m.ad}</span>
-                  <span className={MATRIS_ISARET[vars].sinif}>{MATRIS_ISARET[vars].im}</span>
-                  {ozel && <span className="rz mavi">özel</span>}
-                </label>
-              );
-            })}
-          </div>
-          <div className="ic sonuk">
-            Rozet tipin varsayılanını gösterir; kutucuk bu kurulumun seçimidir.
-            Varsayılandan ayrılan modüller <b>özel</b> işaretiyle durur.
-            <b>{c('Kaydet &amp; Uygula')}</b> ile yazılır.
-          </div>
-        </div>
+        {/* MODÜL AÇMA / KAPAMA KUTULARI KALDIRILDI (kullanıcı 06.10.2026:
+            "bu bölüme gerek kalmadı"). Modül paketi artık KURUM TİPİNDEN gelir
+            (üstteki matris) ve menüde ne görüneceği şube başına Menü Düzeni
+            ekranından ayarlanır (979).
+
+            VERİ DURUYOR: daha önce elle açılıp kapatılmış modüller
+            `kurum_profil.moduller` içinde kayıtlı kalır ve menü süzmesinde
+            uygulanmaya devam eder - satırları silmek, kurulumda bilinçli
+            kapatılmış bir modülü sessizce geri açmak olurdu. Yeni kurulumda
+            override hiç oluşmaz; tipin varsayılanı geçerlidir. */}
 
         {/* HIZMET / STOK KATEGORILERI (527, kullanici: "profile gore kimler
             neyi kullanacak - gorüntuleme merkezi sadece radyoloji kullanir,
