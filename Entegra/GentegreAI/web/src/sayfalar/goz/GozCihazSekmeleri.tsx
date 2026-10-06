@@ -3,7 +3,8 @@ import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
 import type { GozCihazOnizleme } from '../../api/uclar/goz';
 import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
-import { GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
+import { GOZ_TETKIK, GOZ_CIHAZ_PROTOKOL } from '../../bilesenler/goz/gozKodlari';
+import { api } from '../../api/istemci';
 
 /**
  * CİHAZ KARTININ EK SEKMELERİ (978, mockup `goz_cihaz_karti_v2.html`).
@@ -30,6 +31,122 @@ function jsonCoz<T>(ham: unknown, varsayilan: T): T {
 }
 
 type TetkikSatiri = { tetkik: number; cihaz_kod?: string; mwl?: string; goz?: string };
+
+/** `ayarlar` jsonb'sinin tek alanını okuyup yazan küçük kutu. */
+function AyarAlani({ ayarlar, yaz, ad, baslik, ipucu, genislik, secenekler }: {
+  ayarlar: Record<string, unknown>;
+  yaz(ad: string, deger: string): void;
+  ad: string; baslik: string; ipucu?: string; genislik?: number;
+  secenekler?: [string, string][];
+}) {
+  const deger = ayarlar[ad] === null || ayarlar[ad] === undefined ? '' : String(ayarlar[ad]);
+  return (
+    <label className="gc-alan" style={genislik ? { width: genislik } : undefined}>
+      <span>{c(baslik)}</span>
+      {secenekler
+        ? (
+          <select className="gc-inp" value={deger} onChange={e => yaz(ad, e.target.value)}>
+            {secenekler.map(([v, et]) => <option key={v} value={v}>{c(et)}</option>)}
+          </select>
+        )
+        : <input className="gc-inp" value={deger} placeholder={ipucu} onChange={e => yaz(ad, e.target.value)} />}
+    </label>
+  );
+}
+
+/**
+ * BAĞLANTI AYARLARI (mockup "Bağlantı" sekmesi) — `ayarlar` jsonb'sini FORM
+ * olarak düzenler ve <b>protokole göre</b> alan kümesini değiştirir: dosya
+ * cihazında DICOM kutuları çizilmez, kullanıcı boş altı alana bakmaz.
+ *
+ * Protokol ve MWL kart alanları olduğu için burada DEĞİL "Tanım" sekmesindedir;
+ * bu sekme yalnız o protokolün ayrıntısını ve hasta eşleştirmesini tutar.
+ */
+export function BaglantiAyarSekmesi({ b, onSina }: { b: EkSekmeBaglami; onSina?: () => void }) {
+  const ayarlar = jsonCoz<Record<string, unknown>>(b.deger.ayarlar, {});
+  const yaz = (ad: string, deger: string) => {
+    const yeni = { ...ayarlar };
+    if (deger === '') delete yeni[ad]; else yeni[ad] = deger;
+    b.alanYaz('ayarlar', JSON.stringify(yeni));
+  };
+  const protokol = Number(b.deger.protokol ?? 0);
+  const dicom = protokol === 1;
+  const dosya = protokol === 3;
+
+  return (
+    <div className="gc-sekme">
+      <div className="bilgi">{c('Bu sekmedeki alanlar protokole göre değişir ve tek bir ayar '
+        + 'nesnesinde saklanır; seçili protokol')}: <b>{c(GOZ_CIHAZ_PROTOKOL[protokol] ?? '—')}</b>.
+        {' '}{c('Protokolü ve MWL desteğini "Tanım" sekmesinden değiştirin.')}</div>
+
+      {dicom && (
+        <>
+          <h5 className="gc-bas">{c('DICOM')}</h5>
+          <div className="gc-izgara">
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="ip" baslik="Cihaz IP" ipucu="192.168.1.40" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="port" baslik="Port" ipucu="104" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="ae" baslik="Cihaz AE başlığı" ipucu="SPECTRALIS1" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="bizim_ae" baslik="Bizim AE başlığı" ipucu="GENOTIP" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="timeout_sn" baslik="Zaman aşımı (sn)" ipucu="30" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="deneme" baslik="Yeniden deneme" ipucu="3" />
+          </div>
+        </>
+      )}
+
+      {dosya && (
+        <>
+          <h5 className="gc-bas">{c('Klasör')}</h5>
+          <div className="gc-izgara">
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="klasor" baslik="İzlenen klasör" ipucu="\\sunucu\oct\out" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="desen" baslik="Dosya deseni" ipucu="*.xml" />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="islenen" baslik="İşlenen dosya"
+                       secenekler={[['', '— seçilmedi —'], ['arsiv', 'arşiv klasörüne taşı'],
+                                    ['sil', 'sil'], ['birak', 'yerinde bırak']]} />
+            <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="kod_sayfa" baslik="Kod sayfası"
+                       secenekler={[['', '— seçilmedi —'], ['UTF-8', 'UTF-8'],
+                                    ['windows-1254', 'windows-1254'], ['ISO-8859-9', 'ISO-8859-9']]} />
+          </div>
+        </>
+      )}
+
+      {!dicom && !dosya && (
+        <div className="bilgi">{c('Seçili protokolde ek bağlantı ayarı yok; adres "Tanım" '
+          + 'sekmesindeki Bağlantı alanına yazılır (seri port, API adresi).')}</div>
+      )}
+
+      <h5 className="gc-bas">{c('Hasta eşleştirme')}</h5>
+      <div className="gc-izgara">
+        <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="anahtar" baslik="Anahtar"
+                   secenekler={[['', 'protokol no (varsayılan)'], ['protokol', 'protokol no'],
+                                ['hasta_no', 'hasta no (H)'], ['tc', 'TC kimlik no'],
+                                ['barkod', 'barkod']]} />
+        <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="yedek_anahtar" baslik="Yedek anahtar"
+                   secenekler={[['', '— yok —'], ['protokol', 'protokol no'],
+                                ['hasta_no', 'hasta no (H)'], ['tc', 'TC kimlik no']]} />
+        <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="eslesmezse" baslik="Eşleşmezse"
+                   secenekler={[['', 'kuyrukta beklet (varsayılan)'], ['beklet', 'kuyrukta beklet'],
+                                ['hata', 'hata olarak işaretle']]} />
+        <AyarAlani ayarlar={ayarlar} yaz={yaz} ad="gun_penceresi" baslik="Gün penceresi" ipucu="1" />
+      </div>
+      {/* VARSAYILAN "BEKLET": ölçümü yanlış hastaya yazmak, hiç yazmamaktan
+          kötüdür - kuyrukta bekleyen mesaj elle eşlenip yeniden işlenir. */}
+      <div className="bilgi">{c('Eşleşme kurulamazsa varsayılan davranış kuyrukta bekletmektir: '
+        + 'ölçümü yanlış hastaya yazmak, hiç yazmamaktan kötüdür. Bekleyen mesaj '
+        + '"Mesaj günlüğü" sekmesinden elle eşlenip yeniden işlenir.')}</div>
+
+      <h5 className="gc-bas">{c('Son sınama')}</h5>
+      <div className="gc-ozet">
+        <div><span>{c('Zaman')}</span><b>{b.deger.sonSinama ? tarihSaat(b.deger.sonSinama) : c('hiç sınanmadı')}</b></div>
+        <div><span>{c('Sonuç')}</span><b>{String(b.deger.sonSinamaSonuc ?? '—')}</b></div>
+      </div>
+      {onSina && (
+        <div><button type="button" className="d" onClick={onSina}>🔌 {c('Bağlantıyı sına')}</button>
+          <div className="rt-kucuk sonuk">{c('Adrese TCP bağlantısı dener; DICOM doğrulaması yapılmaz.')}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function TetkikEslemeSekmesi({ b }: { b: EkSekmeBaglami }) {
   const satirlar = jsonCoz<TetkikSatiri[]>(b.deger.tetkikEsleme, []);
@@ -83,34 +200,92 @@ export function TetkikEslemeSekmesi({ b }: { b: EkSekmeBaglami }) {
   );
 }
 
-export function OlcumEslemeSekmesi({ b }: { b: EkSekmeBaglami }) {
-  const esleme = jsonCoz<Record<string, string>>(b.deger.olcumEsleme, {});
-  const satirlar = Object.entries(esleme);
-  const yaz = (yeni: Record<string, string>) => b.alanYaz('olcumEsleme', JSON.stringify(yeni));
+/**
+ * Eşleme satırının v2 biçimi. ESKİ BİÇİM (düz metin = yalnız ölçüm kodu)
+ * okunmaya devam ediyor: elle JSON yazılmış kurulumlar ve göç verisi onu
+ * kullanıyor, sessizce susmaları olmaz. Kaydetmede satır obje olarak yazılır.
+ */
+type EslemeSatiri = {
+  kod: string; birim?: string; goz?: string; donustur?: string;
+  esik?: string; zorunlu?: boolean;
+};
+
+const satirCoz = (ham: unknown): EslemeSatiri => {
+  if (typeof ham === 'string') return { kod: ham };
+  const o = (ham ?? {}) as Partial<EslemeSatiri>;
+  return { ...o, kod: o.kod ?? '' };
+};
+
+export function OlcumEslemeSekmesi({ b, cihazId }: { b: EkSekmeBaglami; cihazId: number | null }) {
+  const esleme = jsonCoz<Record<string, unknown>>(b.deger.olcumEsleme, {});
+  const satirlar = Object.entries(esleme).map(([alan, ham]) => [alan, satirCoz(ham)] as const);
+  const yaz = (yeni: Record<string, unknown>) => b.alanYaz('olcumEsleme', JSON.stringify(yeni));
+  const satirYaz = (alan: string, parca: Partial<EslemeSatiri>) =>
+    yaz({ ...esleme, [alan]: { ...satirCoz(esleme[alan]), ...parca } });
+
   const [alan, setAlan] = useState('');
   const [kod, setKod] = useState('');
+  // ÖRNEK MESAJ sekmede durur: eşlemeyi kurarken cihazdan gerçek çekim
+  //   beklemek, her denemede bir hasta kaydını kirletmek demekti.
+  const [ornek, setOrnek] = useState('');
+  const [sonuc, setSonuc] = useState<{ gozAd: string; olcum: string; deger: number }[] | null>(null);
+  const [sinaHata, setSinaHata] = useState('');
+
+  const sina = async () => {
+    setSinaHata(''); setSonuc(null);
+    if (!cihazId) { setSinaHata(c('Sınama kayıtlı cihazda çalışır - önce kaydedin.')); return }
+    try {
+      const y = await api.gozCihazEslemeSina(cihazId, ornek, JSON.stringify(esleme));
+      setSonuc(y.satirlar);
+    } catch (h) {
+      setSinaHata(h instanceof Error ? h.message : String(h));
+    }
+  };
 
   return (
     <div className="gc-sekme">
       <div className="bilgi">{c('Cihazın gönderdiği alan adı, hangi ölçüm olarak kaydedilecek. '
-        + 'Eşlenen her alan ölçüm tablosuna bir satır olarak yazılır; trend, eşik bayrağı ve '
-        + 'listedeki "ana ölçüm" kolonu bu satırlardan hesaplanır. Eşlenmemiş alan ham kalır.')}</div>
+        + 'Eşlenen her alan ölçüm tablosuna bir satır olarak yazılır (göz ayrımı "Göz alanı" '
+        + 'kolonundan); trend, eşik bayrağı ve listedeki "ana ölçüm" kolonu bu satırlardan '
+        + 'hesaplanır. Eşlenmemiş alan ham kalır.')}</div>
 
       <table className="gl-mini gc-tbl">
         <tbody>
-          <tr><th>{c('Cihaz alanı')}</th><th>{c('Ölçüm kodu')}</th><th /></tr>
-          {satirlar.map(([a, k]) => (
+          <tr><th>{c('Cihaz alanı')}</th><th>{c('Ölçüm kodu')}</th><th>{c('Birim')}</th>
+            <th>{c('Göz alanı')}</th><th>{c('Dönüştürme')}</th><th>{c('Eşik / normatif')}</th>
+            <th>{c('Zorunlu')}</th><th /></tr>
+          {satirlar.map(([a, r]) => (
             <tr key={a}>
-              <td>{a}</td>
-              <td><input className="gc-inp" value={k}
-                         onChange={e => yaz({ ...esleme, [a]: e.target.value })} /></td>
+              <td><b>{a}</b></td>
+              <td><input className="gc-inp" value={r.kod}
+                         onChange={e => satirYaz(a, { kod: e.target.value })} /></td>
+              <td><input className="gc-inp gc-dar" value={r.birim ?? ''} placeholder="µm"
+                         onChange={e => satirYaz(a, { birim: e.target.value })} /></td>
+              <td>
+                <select className="gc-inp" value={r.goz ?? ''}
+                        onChange={e => satirYaz(a, { goz: e.target.value })}>
+                  <option value="">{c('mesajdan')}</option>
+                  <option value="Laterality">Laterality</option>
+                  <option value="Eye">Eye</option>
+                  <option value="OD">{c('hep OD')}</option>
+                  <option value="OS">{c('hep OS')}</option>
+                </select>
+              </td>
+              <td><input className="gc-inp gc-dar" value={r.donustur ?? ''} placeholder="x0.25"
+                         onChange={e => satirYaz(a, { donustur: e.target.value })} /></td>
+              <td><input className="gc-inp gc-dar" value={r.esik ?? ''} placeholder="<6"
+                         onChange={e => satirYaz(a, { esik: e.target.value })} /></td>
+              {/* ZORUNLU alan mesajda yoksa mesaj hatalı sayılır: yarım ölçüm
+                  kaydı sessizce eksik trend üretir. */}
+              <td className="orta"><input type="checkbox" checked={r.zorunlu === true}
+                                          onChange={e => satirYaz(a, { zorunlu: e.target.checked })} /></td>
               <td><button type="button" className="d" onClick={() => {
                 const kopya = { ...esleme }; delete kopya[a]; yaz(kopya);
               }}>✕</button></td>
             </tr>
           ))}
           {satirlar.length === 0 && (
-            <tr><td colSpan={3} className="sonuk">{c('Ölçüm eşlemesi yok - gelen değerler ham kalır, '
+            <tr><td colSpan={8} className="sonuk">{c('Ölçüm eşlemesi yok - gelen değerler ham kalır, '
               + 'trend ve eşik kontrolü çalışmaz.')}</td></tr>
           )}
         </tbody>
@@ -122,9 +297,37 @@ export function OlcumEslemeSekmesi({ b }: { b: EkSekmeBaglami }) {
         <input className="gc-inp" placeholder={c('Ölçüm kodu (rnfl_ort)')} value={kod}
                onChange={e => setKod(e.target.value)} />
         <button type="button" className="d" disabled={!alan.trim() || !kod.trim()}
-                onClick={() => { yaz({ ...esleme, [alan.trim()]: kod.trim() }); setAlan(''); setKod('') }}>
+                onClick={() => { yaz({ ...esleme, [alan.trim()]: { kod: kod.trim() } }); setAlan(''); setKod('') }}>
           ＋ {c('Ekle')}</button>
       </div>
+
+      <h5 className="gc-bas">{c('Örnek mesajla sına')}</h5>
+      <div className="bilgi">{c('Cihazdan gelmiş gibi bir metin yapıştırın: hangi ölçümlerin '
+        + 'çıkacağını gösterir, HİÇBİR ŞEY KAYDETMEZ. Tabloda değiştirdiğiniz (henüz '
+        + 'kaydedilmemiş) eşleme kullanılır.')}</div>
+      <textarea className="gc-ornek" value={ornek} rows={4}
+                placeholder={'<Eye>OD</Eye><RNFL_Avg>78</RNFL_Avg>\nOD IOP 26 CCT 532'}
+                onChange={e => setOrnek(e.target.value)} />
+      <div className="gc-ekle">
+        <button type="button" className="d" disabled={!ornek.trim()} onClick={() => void sina()}>
+          🧪 {c('Sına')}</button>
+        {sonuc && <span className="sonuk">{sonuc.length} {c('ölçüm çözüldü')}</span>}
+      </div>
+      {sinaHata && <div className="uyar">{sinaHata}</div>}
+      {sonuc && sonuc.length === 0 && (
+        <div className="uyar">{c('Hiçbir ölçüm çözülemedi: alan adları eşlemedeki adlarla '
+          + 'birebir aynı mı (büyük/küçük harf önemsiz) ve değerler sayı mı?')}</div>
+      )}
+      {sonuc && sonuc.length > 0 && (
+        <table className="gl-mini gc-tbl">
+          <tbody>
+            <tr><th>{c('Göz')}</th><th>{c('Ölçüm')}</th><th>{c('Değer')}</th></tr>
+            {sonuc.map((x, i) => (
+              <tr key={`${x.olcum}-${i}`}><td>{x.gozAd}</td><td>{x.olcum}</td><td>{x.deger}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
@@ -282,6 +485,74 @@ export function KalibrasyonSekmesi({ r, onDemirbas }: { r: GozCihazOnizleme | nu
           )}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+/**
+ * KART YAN PANELİ (mockup ③ sağ sütun): MWL bilgisi, durum, son 24 saat,
+ * tetkik dağılımı, hızlı işlem, kayıt bilgisi.
+ *
+ * Sayılar listedeki önizlemenin AYNI ucundan gelir - kartta ikinci bir sorgu
+ * açmak, aynı cihaz için iki farklı "bugün çekim" sayısı demekti.
+ */
+export function CihazYanPaneli({ r, onSina, onDemirbas }: {
+  r: GozCihazOnizleme | null;
+  onSina?: () => void;
+  onDemirbas?: (id: number) => void;
+}) {
+  if (!r) return null;
+  const k = r.cihaz;
+  const mwl = Number(k.mwl) === 1;
+  const demirbasId = Number(k.demirbasId ?? 0);
+  const sayi = (v: unknown) => (v === null || v === undefined ? '—' : String(v));
+  return (
+    <div className="gc-yan">
+      {/* MWL DESTEĞİ eşleşme hatasının beklenip beklenmeyeceğini söylüyor:
+          çalışma listesi varsa tekniker cihazda hasta seçmiyor. */}
+      <div className={`gc-bilgi-kutu${mwl ? ' olumlu' : ''}`}>
+        {mwl
+          ? c('Bu cihaz MWL destekliyor: istem çalışma listesine düşer, tekniker cihazda hasta '
+              + 'seçmez - eşleşme hatası beklenmez.')
+          : c('Bu cihaz MWL desteklemiyor: tekniker hastayı cihazda seçer, eşleşme protokol '
+              + 'numarasıyla kurulur. Protokol alanı boş gelen mesaj kuyrukta bekler.')}
+      </div>
+
+      <div className="gc-kutu"><h6>{c('Durum')}</h6>
+        <div className="gc-sat"><span>{c('Dinleyici')}</span>
+          <b>{Number(k.dinleyiciDurum) === 1 ? c('Dinliyor')
+            : Number(k.dinleyiciDurum) === 2 ? c('Bağlantı yok') : c('—')}</b></div>
+        <div className="gc-sat"><span>{c('Son mesaj')}</span>
+          <b>{k.sonMesaj ? tarihSaat(k.sonMesaj) : '—'}</b></div>
+        <div className="gc-sat"><span>{c('Bugün çekim')}</span><b>{sayi(k.bugunCekim)}</b></div>
+        <div className="gc-sat"><span>{c('Kuyrukta')}</span><b>{sayi(k.eslenmeyen)}</b></div>
+        <div className="gc-sat"><span>{c('Hatalı')}</span><b>{sayi(k.hatali)}</b></div>
+      </div>
+
+      <div className="gc-kutu"><h6>{c('Son 24 saat')}</h6>
+        <div className="gc-sat"><span>{c('Gelen mesaj')}</span><b>{sayi(k.mesaj24s)}</b></div>
+        <div className="gc-sat"><span>{c('İşlenen')}</span><b>{sayi(k.islenen24s)}</b></div>
+        <div className="gc-sat"><span>{c('Ortalama gecikme')}</span>
+          <b>{k.gecikmeSn != null ? `${Number(k.gecikmeSn)} ${c('sn')}` : '—'}</b></div>
+      </div>
+
+      {r.tetkikler.length > 0 && (
+        <div className="gc-kutu"><h6>{c('Bu ay tetkikler')}</h6>
+          {r.tetkikler.map(t => (
+            <div key={t.tetkik} className="gc-sat">
+              <span>{c(GOZ_TETKIK[t.tetkik] ?? String(t.tetkik))}</span><b>{t.sayi}</b></div>
+          ))}
+        </div>
+      )}
+
+      <div className="gc-kutu"><h6>{c('Hızlı işlem')}</h6>
+        <div className="gc-dugmeler">
+          {onSina && <button type="button" className="d" onClick={onSina}>🔌 {c('Bağlantıyı sına')}</button>}
+          {demirbasId > 0 && onDemirbas && (
+            <button type="button" className="d" onClick={() => onDemirbas(demirbasId)}>↗ {c('Demirbaş kartı')}</button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

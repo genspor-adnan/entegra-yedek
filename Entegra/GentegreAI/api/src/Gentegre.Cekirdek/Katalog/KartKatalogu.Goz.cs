@@ -681,22 +681,26 @@ public static partial class KartKatalogu
             //   şeridine çıkar ve SEKME OLARAK ÇİZİLMEZ (kartSekmeleri.ts
             //   KIMLIK_GRUP) - o zaman kartta tek sekme kalır ve sekme şeridi
             //   hiç görünmez. Kullanıcı kartında da aynı tuzağa düşülmüştü.
+            // KİMLİK GRUBU kartın ÜST ŞERİDİNE çıkar (sekme olarak çizilmez):
+            //   mockup goz_cihaz_karti_v2 her sekmede cihaz · tür · seri · yer ·
+            //   durum okunabilsin istiyor - ayarlar sekmesindeyken hangi cihazı
+            //   düzenlediğini unutmak kolaydır.
             new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Genel"),
+                Baslik: "Kod", Grup: "Kimlik"),
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120,
-                Baslik: "Cihaz Adı", Grup: "Genel"),
+                Baslik: "Cihaz Adı", Grup: "Kimlik"),
             new("tur", "tur", "kod", Zorunlu: true, KodListesi: "goz.cihaz_tur",
-                Baslik: "Tür", Grup: "Genel"),
-            new("uretici", "uretici", "metin", EnFazlaUzunluk: 80, Baslik: "Üretici", Grup: "Genel"),
-            new("model", "model", "metin", EnFazlaUzunluk: 80, Baslik: "Model", Grup: "Genel"),
-            new("seriNo", "seri_no", "metin", EnFazlaUzunluk: 60, Baslik: "Seri No", Grup: "Genel"),
+                Baslik: "Tür", Grup: "Kimlik"),
+            new("seriNo", "seri_no", "metin", EnFazlaUzunluk: 60, Baslik: "Seri No", Grup: "Kimlik"),
+            new("uretici", "uretici", "metin", EnFazlaUzunluk: 80, Baslik: "Üretici", Grup: "Tanım"),
+            new("model", "model", "metin", EnFazlaUzunluk: 80, Baslik: "Model", Grup: "Tanım"),
             // Demirbaş bağı: cihaz hem klinik kaynak hem sabit kıymet. Bakım,
             //   amortisman ve garanti orada; ölçüm burada.
             // Demirbaş bağı SAYI olarak durur: demirbaş için lookup görünümü
             //   yok ve göz modülü için bir tane açmak, aynı listeyi ikinci kez
             //   tanımlamak olurdu - bağ kurulduğunda ortak lookup eklenecek.
-            new("demirbasId", "demirbas_id", "sayi", Baslik: "Demirbaş", Grup: "Genel"),
-            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Genel"),
+            new("demirbasId", "demirbas_id", "sayi", Baslik: "Demirbaş", Grup: "Tanım"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
 
             new("protokol", "protokol", "kod", KodListesi: "goz.cihaz_protokol",
                 Baslik: "Protokol", Grup: "Bağlantı"),
@@ -714,16 +718,16 @@ public static partial class KartKatalogu
             // YER VE SORUMLULUK (mockup "Tanım" sekmesi): cihazın hangi odada
             //   durduğu sıra ve çağrı ekranlarında kullanılıyor, kimin sorumlu
             //   olduğu arıza bildiriminde.
-            new("oda", "oda", "metin", EnFazlaUzunluk: 60, Baslik: "Yer / Oda", Grup: "Yer"),
-            new("sorumluId", "sorumlu_id", "sayi", Baslik: "Sorumlu (personel)", Grup: "Yer"),
+            new("oda", "oda", "metin", EnFazlaUzunluk: 60, Baslik: "Yer / Oda", Grup: "Kimlik"),
+            new("sorumluId", "sorumlu_id", "sayi", Baslik: "Sorumlu (personel)", Grup: "Tanım"),
             new("yazilimSurum", "yazilim_surum", "metin", EnFazlaUzunluk: 40,
-                Baslik: "Yazılım Sürümü", Grup: "Yer"),
+                Baslik: "Yazılım Sürümü", Grup: "Tanım"),
             // ÇEKİM SÜRESİ sıra tahmini içindir, KISIT DEĞİL: cihaz doluyken
             //   hekim yine istem yazabilir - süre yalnız "sırada 3." yazarken
             //   kullanılır.
-            new("cekimDk", "cekim_dk", "sayi", Baslik: "Çekim Süresi (dk)", Grup: "Yer"),
+            new("cekimDk", "cekim_dk", "sayi", Baslik: "Çekim Süresi (dk)", Grup: "Tanım"),
             new("dilatasyonIster", "dilatasyon_ister", "mantik",
-                Baslik: "Dilatasyon İster", Grup: "Yer"),
+                Baslik: "Dilatasyon İster", Grup: "Tanım"),
 
             // AYARLAR tek jsonb: protokole göre anlamı değişiyor (DICOM ip/port,
             //   dosya klasör/desen, ortak hasta eşleştirme). Her protokol için

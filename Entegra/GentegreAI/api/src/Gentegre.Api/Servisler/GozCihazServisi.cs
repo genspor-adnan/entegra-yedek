@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Gentegre.Veri;
@@ -166,14 +166,51 @@ public sealed class GozCihazServisi
 
     // ---------------------------------------------------------- ayrıştırma ----
     /// <summary>Cihazın kendi anahtarı → bizim ölçüm adımız (büyük/küçük harf duyarsız).</summary>
+    /// <summary>
+    /// EŞLEME HARİTASI iki biçimde olabilir ve ikisi de okunur:
+    ///
+    /// <list type="bullet">
+    ///   <item>eski/kısa: <c>{"RNFL_Avg": "rnfl_ort"}</c></item>
+    ///   <item>v2 (978 kart): <c>{"RNFL_Avg": {"kod": "rnfl_ort", "birim": "µm",
+    ///         "donustur": "x0.25", "zorunlu": true}}</c></item>
+    /// </list>
+    ///
+    /// <para>Kısa biçim BIRAKILMADI: eşlemeyi tabloyla düzenlemeyen (elle JSON
+    /// yazan) kurulumlar ve göç verisi onu kullanıyor - yalnız obje biçimi
+    /// okunsaydı o cihazların ölçümleri sessizce susardı.</para>
+    /// </summary>
     private static Dictionary<string, string> HaritaOku(string json)
     {
         var harita = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (string.IsNullOrWhiteSpace(json)) return harita;
         using var belge = JsonDocument.Parse(json);
         foreach (var alan in belge.RootElement.EnumerateObject())
-            harita[alan.Name] = alan.Value.GetString() ?? "";
+        {
+            harita[alan.Name] = alan.Value.ValueKind switch
+            {
+                JsonValueKind.String => alan.Value.GetString() ?? "",
+                JsonValueKind.Object => alan.Value.TryGetProperty("kod", out var k)
+                                            ? k.GetString() ?? "" : "",
+                _ => "",
+            };
+            // Kodu boş kalan alan haritada DURMAZ: boş ölçüm adıyla satır
+            //   yazmak, hangi ölçüm olduğu bilinmeyen bir değer üretirdi.
+            if (harita[alan.Name].Length == 0) harita.Remove(alan.Name);
+        }
         return harita;
+    }
+
+    /// <summary>
+    /// EŞLEME DENEMESİ (kart "örnek mesajla sına"): ham mesajı verilen haritayla
+    /// ayrıştırır ve <b>hiçbir şey yazmaz</b>. Eşleme kurarken cihazdan gerçek
+    /// mesaj beklemek, her denemede bir hasta kaydını kirletmek demekti.
+    /// </summary>
+    public static IReadOnlyList<(short Goz, string Olcum, decimal Deger)> EslemeSina(
+        string ham, int protokol, string eslemeJson)
+    {
+        var harita = HaritaOku(eslemeJson);
+        return Ayristir(ham ?? "", protokol, harita)
+               .Select(d => (d.Goz, d.Olcum, d.Sayi)).ToList();
     }
 
     /// <summary>

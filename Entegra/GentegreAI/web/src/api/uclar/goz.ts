@@ -396,6 +396,10 @@ export const gozUclari = {
   // 978 cihazlar: gösterge · önizleme · bağlantı sınaması
   gozCihazGosterge: () => istek<GozCihazGostergeYaniti>('/api/goz/cihaz-gosterge'),
   gozCihazOnizleme: (id: number) => istek<GozCihazOnizleme>(`/api/goz/cihaz/${id}/onizleme`),
+  /** Örnek mesajla eşleme denemesi - HİÇBİR ŞEY YAZMAZ (kart "Ölçüm eşlemesi"). */
+  gozCihazEslemeSina: (id: number, ham: string, esleme?: string) =>
+    gonder<{ satirlar: { goz: number; gozAd: string; olcum: string; deger: number }[]; bulunan: number }>(
+      `/api/goz/cihaz/${id}/esleme-sina`, { ham, esleme }),
   gozCihazSina: (id: number) =>
     istek<{ basarili: boolean; sonuc: string }>(`/api/goz/cihaz/${id}/sina`, { method: 'POST' }),
   gozlukOnizleme: (id: number) => istek<{ recete: GozlukOnizleme }>(`/api/goz/gozluk/${id}/onizleme`),

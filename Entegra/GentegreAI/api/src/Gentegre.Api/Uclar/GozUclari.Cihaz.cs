@@ -21,6 +21,10 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class GozCihazUclari
 {
+    /// <param name="Ham">Cihazdan gelmiş gibi denenecek örnek mesaj.</param>
+    /// <param name="Esleme">Kartta düzenlenen (henüz kaydedilmemiş) harita; boşsa kayıtlı olan.</param>
+    public sealed record EslemeSinaIstegi(string? Ham, string? Esleme);
+
     public static void CihazUclariniEkle(this RouteGroupBuilder grup)
     {
         // ------------------------------------------------------- gösterge ----
@@ -163,6 +167,66 @@ public static class GozCihazUclari
             return Results.Ok(new
             {
                 cihaz, mesajlar, tetkikler, kalibrasyonlar, isEmirleri,
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
+        // ------------------------------------------- eşlemeyi örnekle sına ----
+        /* Kart "Ölçüm eşlemesi" sekmesindeki "örnek mesajla sına": ham metni
+           cihazın AYRIŞTIRICISINDAN geçirir ve ne çıkacağını gösterir.
+           HİÇBİR ŞEY YAZMAZ - eşleme kurarken cihazdan gerçek mesaj beklemek,
+           her denemede bir hasta kaydını kirletmek demekti.
+
+           Eşleme gövdeden alınabilir: kullanıcı kartta DEĞİŞTİRDİĞİ ama henüz
+           kaydetmediği haritayı denemek istiyor; gövde boşsa kayıtlı harita. */
+        grup.MapPost("/cihaz/{id:int}/esleme-sina", async (
+            int id, EslemeSinaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("goz.cihaz", Islem.Gor);
+            if (string.IsNullOrWhiteSpace(istek.Ham))
+                throw GentegreHatasi.Dogrulama("Sınanacak örnek mesaj boş.");
+
+            await using var b = await veri.AcAsync(iptal);
+            var c = await b.TekAsync("""
+                select c.protokol, coalesce(c.olcum_esleme, '{}'::jsonb)::text as esleme
+                  from public.goz_cihaz c
+                 where c.id = @p0 and (@p1::int is null or c.sube_id = @p1)
+                """, null, [id, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
+
+            var esleme = string.IsNullOrWhiteSpace(istek.Esleme)
+                ? (string)(c["esleme"] ?? "{}")
+                : istek.Esleme!;
+            var protokol = Convert.ToInt32(c["protokol"] ?? 0);
+
+            List<object> satirlar;
+            try
+            {
+                satirlar = Servisler.GozCihazServisi.EslemeSina(istek.Ham!, protokol, esleme)
+                    .Select(d => (object)new
+                    {
+                        goz = d.Goz,
+                        gozAd = d.Goz == 1 ? "OD" : d.Goz == 2 ? "OS" : "OU",
+                        olcum = d.Olcum,
+                        deger = d.Deger,
+                    })
+                    .ToList();
+            }
+            catch (System.Text.Json.JsonException h)
+            {
+                // BOZUK JSON kullanıcının yazdığı haritadan geliyor: 500 değil
+                //   doğrulama hatası - düzeltecek olan kullanıcı.
+                throw GentegreHatasi.Dogrulama($"Eşleme JSON'u okunamadı: {h.Message}");
+            }
+
+            return Results.Ok(new
+            {
+                satirlar,
+                // SIFIR SATIR da bir cevaptır: "eşleme tutmadı" demek, hata değil.
+                bulunan = satirlar.Count,
+                protokol,
                 izlemeNo = baglam.IzlemeNo,
             });
         });

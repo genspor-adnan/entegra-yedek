@@ -35,7 +35,8 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
 import { GozlukHastaBandi, GozlukReceteFormu, gozlukYazdir, useGozlukKaynak } from '../goz/GozlukPanelleri';
 import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
-import { KalibrasyonSekmesi, MesajGunluguSekmesi, OlcumEslemeSekmesi, TetkikEslemeSekmesi } from '../goz/GozCihazSekmeleri';
+import { BaglantiAyarSekmesi, CihazYanPaneli, KalibrasyonSekmesi, MesajGunluguSekmesi,
+         OlcumEslemeSekmesi, TetkikEslemeSekmesi } from '../goz/GozCihazSekmeleri';
 import { useGozCihazOnizleme } from '../goz/GozCihazPanelleri';
 import { GOZ_TARAF, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
 import { MUAYENE_DURUM } from '../../bilesenler/muayeneKodlari';
@@ -167,6 +168,11 @@ export function ListeKarti({
     await aksiyon('goz.mesaj-isle', { id: mesajId } as ListeSatiri);
     setKartTazele(t => t + 1);
   };
+  /** Bağlantı sınaması: sonuç cihaza yazılır, sekme tazelenir. */
+  const cihazSina = async (id: number) => {
+    await aksiyon('goz.cihaz-sina', { id } as ListeSatiri);
+    setKartTazele(t => t + 1);
+  };
 
   // GÖRÜNTÜ SONUÇLARI penceresi (göz kartı araç çubuğu): muayene id'si (goz görüntüleme / belge için).
   const [gozGoruntuModal, setGozGoruntuModal] = useState<number | null>(null);
@@ -281,7 +287,14 @@ export function ListeKarti({
           return d ? { durum: d.durum, ipucu: d.ipucu } : undefined;
         }) : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
-          ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} /> : undefined}
+          ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
+          // GÖZ CİHAZI (978 mockup ③): durum · son 24 saat · tetkik dağılımı ·
+          //   hızlı işlem. Sayılar listedeki önizlemenin AYNI ucundan gelir.
+          : tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number'
+          ? <CihazYanPaneli r={cihazOnizleme}
+                            onSina={() => void cihazSina(kartId)}
+                            onDemirbas={id => git(`/demirbas/${id}`)} />
+          : undefined}
         altSerit={tanim.kaynak === 'goz-muayene'
           ? (git => <GozKuralSeridi kontrol={gozKontrol} sekmeyeGit={git} onTamamla={() => void gozTamamla()} />) : undefined}
         // MUAYENE > ISTEM & SONUCLAR (443): katalogdan gelen bag gridi
@@ -550,10 +563,15 @@ export function ListeKarti({
           //   hatasında cihazın bütün ölçümlerini susturmak demekti) ·
           //   Mesaj günlüğü ve Kalibrasyon (kayıtlı cihazda, salt okuma).
           ? [
+              { anahtar: 'ozel:gc-baglanti', baslik: 'Bağlantı ayarları', yenideDe: true,
+                ciz: (b) => <BaglantiAyarSekmesi b={b}
+                                                 onSina={typeof kartId === 'number'
+                                                   ? () => void cihazSina(kartId) : undefined} /> },
               { anahtar: 'ozel:gc-tetkik', baslik: 'Tetkikler', yenideDe: true,
                 ciz: (b) => <TetkikEslemeSekmesi b={b} /> },
               { anahtar: 'ozel:gc-esleme', baslik: 'Ölçüm eşlemesi', yenideDe: true,
-                ciz: (b) => <OlcumEslemeSekmesi b={b} /> },
+                ciz: (b) => <OlcumEslemeSekmesi b={b}
+                                                cihazId={typeof kartId === 'number' ? kartId : null} /> },
               ...(typeof kartId === 'number'
                 ? [
                     { anahtar: 'ozel:gc-mesaj', baslik: 'Mesaj günlüğü',

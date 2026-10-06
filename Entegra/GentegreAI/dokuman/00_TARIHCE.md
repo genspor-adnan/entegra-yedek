@@ -19372,3 +19372,47 @@ KAL-TEST-001 kaydı). dotnet test 218, vitest 789 geçti.
 Barrett / SRK-T / Haigis / Hoffer Q karşılaştırması) - formül kütüphanesi ayrı
 bir iş, `goz_biyometri` verisi hazır ama hesap motoru yok. MWL çalışma listesi
 sekmesi de bekliyor: DICOM yığını kurulana kadar gösterecek veri üretilmiyor.
+
+## 06.10.2026 — Cihaz kartı mockup düzenine getirildi
+
+Kullanıcı: *"Cihaz kartı mockup gibi yap"* (`Ekranlar/Goz/goz_cihaz_karti_v2.html`).
+Dünkü iş listeyi ve kartın dört sekmesini getirmişti; kart düzeni hâlâ jenerik
+katalog gruplarıydı (Genel · Bağlantı · Yer) ve bağlantı ayarları tek JSON
+alanıydı. Bu adımda mockup'ın altı sekmeli düzeni tamamlandı:
+
+* **Kimlik şeridi:** kod · ad · tür · seri · yer · aktif artık `Kimlik` grubunda,
+  yani kartın **üst şeridinde** sabit (sekme olarak çizilmez). Mockup'ın istediği
+  şey bu: ayarlar sekmesindeyken hangi cihazı düzenlediğini unutmak kolaydır.
+  "Genel" ve "Yer" grupları tek **Tanım** sekmesinde birleşti.
+* **Bağlantı ayarları sekmesi** (yeni): `ayarlar` jsonb'sini **form** olarak
+  düzenler ve **protokole göre** alan kümesini değiştirir - DICOM cihazında
+  ip/port/AE/timeout, dosya cihazında klasör/desen/kod sayfası; ikisi de olmayan
+  protokolde yalnız açıklama. Altta **hasta eşleştirme** (anahtar · yedek ·
+  eşleşmezse · gün penceresi) ve son sınama sonucu + "Bağlantıyı sına".
+* **Ölçüm eşlemesi sekmesi** mockup kolonlarına genişletildi: cihaz alanı ·
+  ölçüm kodu · birim · **göz alanı** · dönüştürme · eşik/normatif · **zorunlu**.
+  Satır artık jsonb'de nesne olarak duruyor; **eski düz-metin biçim okunmaya
+  devam ediyor** (`{"RNFL_Avg": "rnfl_ort"}`) - elle JSON yazılmış kurulumlar ve
+  göç verisi onu kullanıyor, yalnız yeni biçim okunsaydı o cihazların ölçümleri
+  sessizce susardı (`GozCihazServisi.HaritaOku` iki biçimi de çözüyor).
+* **"Örnek mesajla sına"** (yeni uç `POST /cihaz/{id}/esleme-sina`): cihazdan
+  gelmiş gibi bir metin yapıştırılır, cihazın **kendi ayrıştırıcısından** geçer
+  ve ne çıkacağı gösterilir - **hiçbir şey yazmaz**. Eşleme kurarken cihazdan
+  gerçek çekim beklemek, her denemede bir hasta kaydını kirletmek demekti.
+  Tabloda değiştirilen (henüz kaydedilmemiş) harita da denenebiliyor; bozuk JSON
+  500 değil **400 DOGRULAMA** döner, çünkü düzeltecek olan kullanıcıdır.
+* **Kart yan paneli** (mockup sağ sütun): MWL bilgisi (çalışma listesi varsa
+  eşleşme hatası beklenmez), durum, son 24 saat + çekim→ekran gecikmesi, bu ayın
+  tetkik dağılımı, hızlı işlem. Sayılar listedeki önizlemenin **aynı ucundan**
+  gelir - kartta ikinci bir sorgu, aynı cihaz için iki farklı "bugün çekim"
+  sayısı demekti.
+
+Doğrulama: uç üç dalda denendi - eski kısa harita + XML örnek 3 ölçüm çözdü
+(göz ayrımı doğru: OD 78 · OD 262 · OS 86), **v2 obje biçimli harita** kodu
+okudu (kalite 28), bozuk JSON 400 döndü. dotnet build + dotnet test 218,
+tsc temiz, vitest 789 geçti.
+
+> **Tarayıcı doğrulaması yapılmadı:** web geliştirme sunucusu (5173) sistem
+> belleği kritik seviyeye düştüğü için arka plan görevi olarak durdurulmuştu;
+> izin olmadan yeniden başlatılmadı. Kart düzeni (üst şerit, altı sekme, yan
+> panel) ekranda görülerek değil, derleme ve uç testleriyle doğrulandı.

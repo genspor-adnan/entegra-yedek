@@ -7693,6 +7693,29 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .gc-ozet { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px 12px; margin-bottom: 10px }
 .gc-ozet div { display: flex; flex-direction: column; gap: 1px }
 .gc-ozet span { font-size: 10px; color: var(--soluk) }
+/* Bağlantı ayarları sekmesi: protokole göre değişen alan ızgarası. */
+.gc-izgara { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px 10px; margin-bottom: 10px }
+.gc-alan { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px }
+.gc-alan span { font-size: 10px; color: var(--soluk) }
+.gc-inp.gc-dar { min-width: 70px }
+.gc-tbl td.orta { text-align: center }
+/* Örnek mesaj kutusu - cihazdan gelmiş gibi metin yapıştırılır. */
+.gc-ornek { width: 100%; font-family: Consolas, "Courier New", monospace; font-size: 11px;
+  border: 1px solid var(--cizgi); border-radius: 4px; padding: 6px 8px; background: var(--yuz);
+  color: var(--yazi); margin-bottom: 6px; resize: vertical }
+/* Kart yan paneli (mockup sağ sütun). */
+.gc-yan { padding: 8px; font-size: 11.5px; display: flex; flex-direction: column; gap: 10px }
+.gc-bilgi-kutu { border: 1px solid var(--cizgi2); background: var(--yuz2); border-radius: 6px;
+  padding: 7px 9px; font-size: 11px; color: var(--soluk) }
+.gc-bilgi-kutu.olumlu { border-color: #bfe3cb; background: #f1f9f3; color: #2e6b45 }
+:root:not([data-theme="light"]) .gc-bilgi-kutu.olumlu,
+:root[data-theme="dark"] .gc-bilgi-kutu.olumlu { background: #16301f; border-color: #2f5c3c; color: #bfe3cb }
+.gc-kutu { border: 1px solid var(--cizgi2); border-radius: 6px; background: var(--yuz); padding: 7px 9px }
+.gc-kutu h6 { margin: 0 0 5px; font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px }
+.gc-sat { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0 }
+.gc-sat span { color: var(--soluk) }
+.gc-dugmeler { display: flex; flex-wrap: wrap; gap: 6px }
+
 /* Sekme içi uyarı kutusu (kalibrasyon gecikmiş / demirbaş bağı yok). */
 .gc-sekme .uyar { border: 1px solid #f2ddbf; background: #fdf6e3; color: #7a5a12;
   border-radius: 6px; padding: 7px 9px; font-size: 11.5px; margin-bottom: 10px }
