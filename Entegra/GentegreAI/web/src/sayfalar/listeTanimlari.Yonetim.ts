@@ -380,6 +380,16 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ekrani goren kitle degismesin.
     kaynak: 'kurum-profili', baslik: 'Kurum Profili', yol: 'Yonetim › Kurum Profili',
     ozelSayfa: true,
+    // MENÜDE YOK (kullanıcı 06.10.2026: "kurum profilini ana menüden çıkar, ben
+    //   adresle ve şifreyle girsem, müşteri burayı görmesin"): kurulum ekranı -
+    //   kurum tipi, menü düzeni, roller ve data kullanımı buradan belirleniyor;
+    //   müşterinin günlük işinde yeri yok, yanlış dokunuş bütün kurulumu bozar.
+    //
+    //   `menuGizli` KOD KARARIDIR, menü düzeninden gizleme DEĞİLDİR: rota ve
+    //   uçlar çalışmaya devam eder (979 kapısı yalnız menu_duzen kayıtlarına
+    //   bakar), yetkisi olan kişi /kurum-profili adresinden açar. Gerçek sınır
+    //   yine YETKİ: `sube` yetkisi olmayan kullanıcı adresi bilse de giremez.
+    menuGizli: true,
     menuGrup: 'Yönetim', menuSira: 20, menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
   },
   {

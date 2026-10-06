@@ -19604,3 +19604,18 @@ güncellendi: `moduller` = 31 modülün hepsi açık (önceki: kurum geneli ve A
 `isg·form·cagri·steril`, Merkez `dis·ftr·goz·cagri·steril·teleradyoloji`) ve
 `menu_bolgeli = 1` (bölgeli HBYS menüsü). Artık menü tam geliyor; kısıtlama
 Menü Düzeni ekranından şube başına yapılıyor.
+
+### Aynı gün — Kurum Profili ana menüden çıkarıldı
+
+Kullanıcı: *"kurum profilini ana menüden çıkar, ben adresle ve şifreyle girsem,
+müşteri burayı görmesin"*. Ekran `menuGizli` oldu: Yönetim grubunda artık
+görünmüyor, `/kurum-profili` adresinden açılıyor.
+
+**İki gizleme birbirine karıştırılmamalı:** `menuGizli` bir KOD kararıdır -
+rota ve uçlar çalışır, 979 kapısı yalnız `menu_duzen` kayıtlarına bakar. Yani
+adresi bilen **yetkili** kişi ekranı açar; menü düzeninden gizlenen ekran ise
+hiçbir yerde açılmaz. Kurum Profili'nde gerçek sınır yine YETKİ (`sube`):
+yetkisi olmayan kullanıcı adresi bilse de giremez.
+
+Doğrulama: menüde Yönetim grubunda "Kurum Profili" yok; `/kurum-profili`
+adresi dokuz sekmeyle açıldı.
