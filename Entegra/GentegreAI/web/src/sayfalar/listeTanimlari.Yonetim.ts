@@ -395,7 +395,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   bağlantı ve yardım kaydı onu kullanıyor.
     menuGizli: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Menü Düzeni', menuSira: 45,
-    ic: '🧭', yetkiKodu: 'menu.duzen',
+    ic: '🌳', yetkiKodu: 'menu.duzen',
   },
   {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).

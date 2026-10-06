@@ -59,9 +59,9 @@ const GEREKLILIK: Record<number, string> = {
 //   ekranı adıyla arıyor, "4" ile değil.
 const SEKMELER: { ad: string; ic: string }[] = [
   { ad: 'Profil',               ic: '🏥' },
-  { ad: 'Menü Düzeni',          ic: '🧭' },
+  { ad: 'Menü Düzeni',          ic: '🌳' },
   { ad: 'Roller',               ic: '👥' },
-  { ad: 'Data Kullanımı',       ic: '🗂' },
+  { ad: 'Data Kullanımı',       ic: '🗄' },
   { ad: 'Kayıt & Ücretlendirme', ic: '🧾' },
   { ad: 'Klinik Ayarlar',       ic: '🩺' },
   { ad: 'Entegrasyonlar',       ic: '🔌' },
