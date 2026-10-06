@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz İşlemi — Kart Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  .rz.od{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3} .rz.os{background:#f1ecfa;border-color:#ddd0f2;color:#6a3fb5}
+  /* KİMLİK ŞERİDİ: yanlış göze yapılan işlem geri alınamaz - hasta ve GÖZ
+     her sekmede görünür kalmalı. */
+  .kml{display:grid;grid-template-columns:1.5fr .7fr 1fr 1fr 1fr .9fr;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe;font-size:11.5px}
+  .kml .et{display:block;font-size:10px;color:var(--muted)}
+  .kml b{color:var(--navy)}
+  .krm{color:#b3261e;font-weight:bold}
+  .ic2{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;padding:10px 14px}
+  .grp{margin-bottom:12px}
+  .grp h5{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line2);padding-bottom:4px}
+  .izgara{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
+  .izgara.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fld{display:flex;flex-direction:column;gap:2px;font-size:11.5px}
+  .fld span{font-size:10px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;padding:4px 7px;min-height:24px;font-size:11.5px}
+  .inp.pasif{background:#f3f6fa;color:var(--muted)}
+  .panel{display:none} .panel.on{display:block}
+  /* TIME-OUT: beş madde işaretlenmeden "Uygulandı" kaydı açılmaz. */
+  .timeout{border:1px solid #bfe3cb;background:#f1f9f3;border-radius:6px;padding:8px 10px;font-size:11.5px}
+  .timeout div{display:flex;gap:7px;padding:3px 0;align-items:center}
+  .timeout .yok{color:#b3261e;font-weight:bold}
+  .timeout .kutu{width:13px;height:13px;border:1px solid #7aa98c;border-radius:3px;display:inline-block;text-align:center;line-height:11px;font-size:10px;background:#fff}
+  .timeout .kutu.on{background:#2e7d46;border-color:#2e7d46;color:#fff}
+  .seri{display:flex;gap:3px;align-items:center}
+  .seri i{width:16px;height:16px;border-radius:3px;background:#d6dee8;font-style:normal;font-size:9.5px;color:#fff;display:flex;align-items:center;justify-content:center}
+  .seri i.ok{background:#2e7d46} .seri i.bu{background:#2f6db3} .seri i.gec{background:#b3261e} .seri i.pl{background:#cbd5e0;color:#5a6b7d}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .uyar-k{border:1px solid #f3c4bf;background:#fbe9e7;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#8f2a22;margin-bottom:10px}
+  .bilgi-k{border:1px solid #f2ddbf;background:#fdf6e3;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#7a5a12;margin-bottom:10px}
+  .tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+  .tbl th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573}
+  .tbl td{border-bottom:1px solid #eef2f6;padding:4px 7px}
+  .tbl td.kod{font-family:Consolas,monospace;font-size:11px;color:#44546a}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">💉 Göz İşlemi <span class="rz">H d0451</span><span class="rz od">OD</span><span class="rz">Anti-VEGF · doz 4</span><span class="rz">Bugün 11:30</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn ok">✔ Uygulandı</span>
+    <span class="btn">📋 Onam yazdır</span>
+    <span class="btn">📦 Malzeme / lot (ÜTS)</span>
+    <span class="btn">🗓 Sonraki doz</span>
+    <span class="btn">🖼 OCT iste</span>
+    <span class="sp"></span>
+    <span class="btn danger">✕ İptal</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kml">
+    <div><span class="et">Hasta</span><b style="font-size:13px">Ali Vural · 71 E</b></div>
+    <div><span class="et">Göz</span><b class="rz od" style="margin:0">OD · Sağ</b></div>
+    <div><span class="et">İşlem</span><b>İntravitreal anti-VEGF</b></div>
+    <div><span class="et">Endikasyon</span><b>H35.32 Yaş tip AMD</b></div>
+    <div><span class="et">Hekim / yer</span><b>Dr. Çelik · Enjeksiyon odası</b></div>
+    <div><span class="et">Durum</span><b>Planlı · bugün 11:30</b></div>
+  </div>
+
+  <div class="sekmeler">
+    <span class="sek on" data-s="islem">İşlem</span>
+    <span class="sek" data-s="tur">Enjeksiyon</span>
+    <span class="sek" data-s="timeout">Göz doğrulama</span>
+    <span class="sek" data-s="malzeme">Malzeme / ÜTS <span class="say">2</span></span>
+    <span class="sek" data-s="sonuc">Sonuç & komplikasyon</span>
+    <span class="sek" data-s="postop">Postop / sonraki</span>
+  </div>
+
+  <div class="ic2">
+    <div>
+      <!-- 2a -->
+      <div class="panel on" data-s="islem">
+        <div class="grp"><h5>İşlem</h5>
+          <div class="izgara">
+            <label class="fld"><span>Hasta *</span><div class="inp pasif">Ali Vural · H d0451</div></label>
+            <label class="fld"><span>Göz *</span><div class="inp">OD · Sağ ▾</div></label>
+            <label class="fld"><span>Tür *</span><div class="inp">İntravitreal enjeksiyon ▾</div></label>
+            <label class="fld"><span>İşlem kodu (SUT)</span><div class="inp">617.040</div></label>
+            <label class="fld"><span>Endikasyon (ICD-H) *</span><div class="inp">H35.32 ▾</div></label>
+            <label class="fld"><span>Muayene bağı</span><div class="inp pasif">03.09.2026 · Dr. Çelik ↗</div></label>
+            <label class="fld"><span>Durum</span><div class="inp">Planlı ▾</div></label>
+            <label class="fld"><span>Ücret / hizmet</span><div class="inp">Anti-VEGF uygulaması ▾</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Planlama</h5>
+          <div class="izgara">
+            <label class="fld"><span>Planlanan</span><div class="inp">05.10.2026 11:30</div></label>
+            <label class="fld"><span>Uygulama zamanı</span><div class="inp pasif">— (uygulanınca yazılır)</div></label>
+            <label class="fld"><span>Hekim *</span><div class="inp">Dr. Zeynep Çelik ▾</div></label>
+            <label class="fld"><span>Yardımcı</span><div class="inp">Hemş. S. Ay ▾</div></label>
+            <label class="fld"><span>Yer / salon</span><div class="inp">Enjeksiyon odası ▾</div></label>
+            <label class="fld"><span>Anestezi</span><div class="inp">Topikal ▾</div></label>
+            <label class="fld"><span>Anestezi konsültasyonu</span><div class="inp">☐ gerekmiyor</div></label>
+            <label class="fld"><span>Onam</span><div class="inp">✔ bugün imzalı ↗</div></label>
+          </div>
+          <div class="bilgi-k">Uygulama zamanı ELLE girilmez: "Uygulandı" düğmesi time-out doğrulamasından sonra yazar.
+            Planlanan tarihi geçmiş ve uygulanmamış işlem listede <b>gecikmiş</b> görünür.</div>
+        </div>
+      </div>
+
+      <!-- 2b -->
+      <div class="panel" data-s="tur">
+        <div class="bilgi-k">Bu sekme <b>işlem türüne göre</b> değişir: enjeksiyonda ilaç ve doz serisi, lazerde parametreler,
+          ameliyatta IOL ve teknik. Üçünü tek sekmede göstermek, bir enjeksiyon kaydında boş duran on lazer alanı demekti
+          (tablolar da ayrı: <code>goz_enjeksiyon</code> · <code>goz_lazer</code> · <code>goz_ameliyat</code>).</div>
+        <div class="grp"><h5>İlaç ve doz</h5>
+          <div class="izgara">
+            <label class="fld"><span>İlaç *</span><div class="inp">Aflibersept ▾</div></label>
+            <label class="fld"><span>Doz (mg) *</span><div class="inp">2,00</div></label>
+            <label class="fld"><span>Doz no</span><div class="inp">4</div></label>
+            <label class="fld"><span>Protokol</span><div class="inp">Treat &amp; extend ▾</div></label>
+            <label class="fld"><span>Aralık (hafta)</span><div class="inp">8</div></label>
+            <label class="fld"><span>Giriş yeri</span><div class="inp">İnferotemporal ▾</div></label>
+            <label class="fld"><span>İğne</span><div class="inp">30G ▾</div></label>
+            <label class="fld"><span>Önceki OCT CMT</span><div class="inp">348 µm</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Doz serisi</h5>
+          <div class="seri" style="margin-bottom:6px"><i class="ok">1</i><i class="ok">2</i><i class="ok">3</i><i class="bu">4</i><i class="pl">5</i></div>
+          <table class="tbl">
+            <tr><th>Doz</th><th>Tarih</th><th>İlaç / doz</th><th>CMT (öncesi)</th><th>Lot</th><th>Durum</th></tr>
+            <tr><td>1</td><td>12.03.2026</td><td>Aflibersept 2 mg</td><td>512 µm</td><td class="kod">A0881</td><td><span class="chip c-ok">Uygulandı</span></td></tr>
+            <tr><td>2</td><td>09.05.2026</td><td>Aflibersept 2 mg</td><td>428 µm</td><td class="kod">A0990</td><td><span class="chip c-ok">Uygulandı</span></td></tr>
+            <tr><td>3</td><td>18.08.2026</td><td>Aflibersept 2 mg</td><td>348 µm</td><td class="kod">A1102</td><td><span class="chip c-ok">Uygulandı</span></td></tr>
+            <tr class="sec"><td>4</td><td>05.10.2026</td><td>Aflibersept 2 mg</td><td><b style="color:#b3261e">412 µm ↑</b></td><td class="kod">A1234</td><td><span class="chip c-mavi">Bugün</span></td></tr>
+            <tr><td>5</td><td class="sonuk">12.11.2026 (plan)</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td><span class="chip c-bek">Planlandı</span></td></tr>
+          </table>
+          <div class="bilgi-k">Doz serisi kartın kendi alanı değil: aynı hastanın aynı gözündeki <b>önceki işlem kayıtlarından</b>
+            türetilir - "kaçıncı doz" iki yerde tutulursa biri yanlış olur.</div>
+        </div>
+      </div>
+
+      <!-- 2c -->
+      <div class="panel" data-s="timeout">
+        <div class="uyar-k">⚠ Yanlış göze yapılan enjeksiyon <b>geri alınamaz</b>. Aşağıdaki beş madde işaretlenmeden
+          "Uygulandı" kaydı açılmaz; işaretleyen kullanıcı ve zaman kaydedilir.</div>
+        <div class="timeout">
+          <div><span class="kutu on">✓</span> Hasta kimliği doğrulandı <small class="sonuk">· sözlü + barkod</small><small style="margin-left:auto" class="sonuk">Hemş. S. Ay · 11:28</small></div>
+          <div><span class="kutu on">✓</span> <b>Göz: OD işaretli</b><small style="margin-left:auto" class="sonuk">Dr. Çelik · 11:29</small></div>
+          <div><span class="kutu on">✓</span> İlaç ve doz okundu <small class="sonuk">· aflibersept 2 mg</small><small style="margin-left:auto" class="sonuk">Hemş. S. Ay · 11:29</small></div>
+          <div><span class="kutu on">✓</span> Onam imzalı <small class="sonuk">· bugün</small><small style="margin-left:auto" class="sonuk">Dr. Çelik · 11:29</small></div>
+          <div><span class="kutu">&nbsp;</span> <span class="yok">Lot / SKT okutuldu</span> <small class="sonuk">· A1234 · SKT 03.2027</small><small style="margin-left:auto" class="sonuk">bekliyor</small></div>
+        </div>
+        <div class="grp" style="margin-top:10px"><h5>Hazırlık</h5>
+          <div class="izgara k2">
+            <label class="fld"><span>Antisepsi</span><div class="inp">Povidon iyot %5 ▾</div></label>
+            <label class="fld"><span>Örtü / blefarosta</span><div class="inp">Steril örtü + blefarosta</div></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2d -->
+      <div class="panel" data-s="malzeme">
+        <table class="tbl">
+          <tr><th>Malzeme</th><th>Seri / lot</th><th>SKT</th><th>Adet</th><th>ÜTS</th><th></th></tr>
+          <tr class="sec"><td>Aflibersept 2 mg flakon</td><td class="kod">A1234</td><td>03.2027</td><td>1</td><td><span class="chip c-ok">verme ✔</span></td><td><span class="btn kucuk">✕</span></td></tr>
+          <tr><td>İntravitreal enjeksiyon seti</td><td class="kod">SET-7781</td><td>11.2028</td><td>1</td><td><span class="chip c-bek">gerekmiyor</span></td><td><span class="btn kucuk">✕</span></td></tr>
+        </table>
+        <div style="margin-top:6px"><span class="btn kucuk">＋ Malzeme ekle</span> <span class="btn kucuk">📷 Karekod okut</span></div>
+        <div class="bilgi-k">İlaç ve implant <b>karekoddan</b> eklenir: lot ve SKT elle yazılırsa ÜTS bildirimi reddedilir.
+          ÜTS'ye "verme" bildirimi uygulama kaydıyla birlikte gider (<code>uts_bildirim</code> bağı satırda durur).</div>
+      </div>
+
+      <!-- 2e -->
+      <div class="panel" data-s="sonuc">
+        <div class="grp"><h5>Uygulama</h5>
+          <div class="izgara">
+            <label class="fld"><span>Uygulama zamanı</span><div class="inp">05.10.2026 11:34</div></label>
+            <label class="fld"><span>Süre (dk)</span><div class="inp">6</div></label>
+            <label class="fld"><span>İşlem sonrası GİB</span><div class="inp">18 mmHg</div></label>
+            <label class="fld"><span>Işık hissi</span><div class="inp">✔ var ▾</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Komplikasyon</h5>
+          <div class="izgara k2">
+            <label class="fld"><span>Komplikasyon</span><div class="inp">Yok ▾</div></label>
+            <label class="fld"><span>Açıklama</span><div class="inp pasif">—</div></label>
+          </div>
+          <div class="bilgi-k">"Yok" da bir cevaptır ve <b>zorunludur</b>: boş bırakılan komplikasyon alanı,
+            sorulmadığı mı yoksa olmadığı mı belli olmayan bir kayıt üretir.</div>
+        </div>
+        <div class="grp"><h5>Bulgular / not</h5>
+          <div class="inp" style="min-height:70px">Enjeksiyon sorunsuz. SPA yok, retina perfüzyonu normal. Hastaya kırmızı göz / ağrı / görme azlığı durumunda acile başvurması söylendi.</div>
+        </div>
+      </div>
+
+      <!-- 2f -->
+      <div class="panel" data-s="postop">
+        <div class="grp"><h5>Sonraki doz / kontrol</h5>
+          <div class="izgara">
+            <label class="fld"><span>Sonraki planlanan</span><div class="inp">12.11.2026</div></label>
+            <label class="fld"><span>Aralık kararı</span><div class="inp">Uzat (8 → 10 hafta) ▾</div></label>
+            <label class="fld"><span>Kontrol + OCT</span><div class="inp">8 hafta ▾</div></label>
+            <label class="fld"><span>Postop protokol</span><div class="inp">Anti-VEGF postop ▾</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Postop takip maddeleri <span class="sonuk" style="text-transform:none">· protokolden</span></h5>
+          <table class="tbl">
+            <tr><th>Zaman</th><th>Madde</th><th>Durum</th><th>Not</th></tr>
+            <tr><td>+1 saat</td><td>GİB ölçümü</td><td><span class="chip c-ok">18 mmHg</span></td><td class="sonuk">—</td></tr>
+            <tr><td>+1 gün</td><td>Telefonla arama (ağrı / görme)</td><td><span class="chip c-bek">bekliyor</span></td><td class="sonuk">—</td></tr>
+            <tr><td>+1 hafta</td><td>Muayene</td><td><span class="chip c-bek">randevu yok</span></td><td class="krm">randevu oluşturulmalı</td></tr>
+            <tr><td>+8 hafta</td><td>OCT + karar</td><td><span class="chip c-bek">plan</span></td><td class="sonuk">doz 5 kararı</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <div class="uyar-k">⚠ <b>Antikoagülan</b> (varfarin) kullanıyor · INR 2,4 (02.10) - enjeksiyon için engel değil,
+        subkonjonktival kanama riski hastaya anlatılmalı.</div>
+
+      <div class="kart"><h6>Hasta</h6>
+        <div class="sat"><span>Takip</span>Yaş tip AMD · OD</div>
+        <div class="sat"><span>Sistemik</span>HT · antikoagülan</div>
+        <div class="sat"><span>Alerji</span>bilinen yok</div>
+        <div class="sat"><span>Son BCVA</span>OD 0,4 · OS 0,8</div>
+        <div class="sat"><span>Son GİB</span>14 / 15</div>
+      </div>
+
+      <div class="kart"><h6>Bu işlem</h6>
+        <div class="sat"><span>Doz</span><b>4 / seri</b></div>
+        <div class="sat"><span>Önceki doz</span>18.08.2026</div>
+        <div class="sat"><span>CMT eğilimi</span><b style="color:#b3261e">348 → 412 ↑</b></div>
+        <div class="sat"><span>Onam</span><span class="chip c-ok">imzalı</span></div>
+        <div class="sat"><span>Time-out</span><span class="chip c-bek">4 / 5</span></div>
+        <div class="sat"><span>ÜTS</span><span class="chip c-ok">hazır</span></div>
+      </div>
+
+      <div class="kart"><h6>Uygulanamaz ise</h6>
+        <div class="sonuk">Time-out tamamlanmadan "Uygulandı" düğmesi kapalıdır. Eksik maddeler:</div>
+        <div class="sat"><span>Lot okutma</span><span class="chip c-red">eksik</span></div>
+      </div>
+
+      <div class="kart"><h6>Hızlı işlem</h6>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">📷 Lot okut</span>
+          <span class="btn kucuk">📋 Onam</span>
+          <span class="btn kucuk">🖼 OCT</span>
+          <span class="btn kucuk">👤 Hasta kartı</span>
+        </div>
+      </div>
+
+      <div class="kart"><h6>Kayıt bilgisi</h6>
+        <div class="sat"><span>Ekleyen</span>Dr. Çelik · 03.09.2026</div>
+        <div class="sat"><span>Değiştiren</span>Hemş. S. Ay · bugün 11:29</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> <code>goz_islem_planlama_v2.html</code> listesinin <b>kartı</b>. Tablolar: <code>goz_islem</code>
+(hasta · göz · tur · islem_kod · endikasyon_icd · planlanan_tarih · uygulama_zamani · hekim · salon · anestezi · onam_id ·
+<b>time_out</b> · bulgular · komplikasyon · postop_protokol_id · durum) + türe göre <code>goz_enjeksiyon</code> /
+<code>goz_lazer</code> / <code>goz_ameliyat</code> (+ <code>goz_ameliyat_kontrol</code>) ve <code>goz_islem_malzeme</code>
+(stok · seri_lot · <code>uts_bildirim_id</code>).<br>
+
+<span class="n">1</span><b>Kimlik şeridi</b> her sekmede sabit ve <b>göz rozeti renkli</b> (OD mavi · OS mor): yanlış göze
+yapılan işlem geri alınamaz, bu bilgi hiçbir sekmede gözden kaybolmamalı.<br>
+
+<span class="n">2</span><b>Sekmeler:</b> (a) <b>İşlem</b> - kimlik, endikasyon, SUT kodu, muayene bağı + planlama (hekim,
+yardımcı, yer, anestezi, onam). Uygulama zamanı <b>elle girilmez</b>, "Uygulandı" yazar. (b) <b>Türe göre sekme</b> -
+enjeksiyonda ilaç/doz ve <b>doz serisi</b> (serinin kendisi kartta tutulmaz, aynı gözün önceki kayıtlarından türetilir -
+"kaçıncı doz" iki yerde tutulursa biri yanlış olur), lazerde parametreler, ameliyatta IOL ve teknik.
+(c) <b>Göz doğrulama (time-out)</b> - beş madde, işaretleyen ve zaman kaydıyla; tamamlanmadan "Uygulandı" <b>kapalı</b>.
+(d) <b>Malzeme / ÜTS</b> - ilaç ve implant karekoddan eklenir (elle lot yazımı ÜTS'de reddedilir), satırda ÜTS bildirim bağı.
+(e) <b>Sonuç & komplikasyon</b> - uygulama zamanı, süre, işlem sonrası GİB, ışık hissi; <b>komplikasyon alanı zorunlu</b>
+("Yok" da cevaptır - boş alan, sorulmadı mı olmadı mı belirsiz bırakır). (f) <b>Postop / sonraki</b> - sonraki doz, aralık
+kararı ve protokolden gelen takip maddeleri.<br>
+
+<span class="n">3</span><b>Sağ sütun:</b> en üstte karar gerektiren <b>tek uyarı</b> (antikoagülan / INR gibi), hasta özeti,
+bu işlemin durumu (doz, CMT eğilimi, onam, time-out, ÜTS), <b>"uygulanamaz ise"</b> kutusu (eksik maddeleri sayar),
+hızlı işlem ve kayıt bilgisi.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>

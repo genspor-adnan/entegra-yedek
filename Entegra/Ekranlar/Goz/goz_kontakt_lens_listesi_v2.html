@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontakt Lens — Liste Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:0 14px 10px}
+  .k{border:1px solid var(--line2);border-radius:6px;padding:7px 10px;background:linear-gradient(#fff,#f6f9fc)}
+  .k b{display:block;font-size:18px;color:var(--navy)} .k span{font-size:10.5px;color:var(--muted)}
+  .k.on{border-color:var(--selbd);background:var(--sel)} .k.kirmizi b{color:#b3261e} .k.uyari b{color:#b06d0a}
+  .hasta{min-width:150px} .hasta b{display:block}
+  .deg{font-family:Consolas,monospace;font-size:11px;white-space:nowrap}
+  .od{display:grid;grid-template-columns:22px 1fr;gap:1px 4px;font-size:11px;white-space:nowrap}
+  .od i{font-style:normal;color:var(--muted);font-size:10px}
+  .uy{font-size:10.5px;color:#b3261e}
+  /* OTURUŞ: lens reçetesinin asıl sonucu - "hangi lens oturdu" sorusunun
+     cevabı; deneme satırlarında rozet, reçetede yeşil. */
+  .otu{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .otu.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .otu.sik{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .otu.gev{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .otu.red{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .od2{display:grid;grid-template-columns:86px 1fr 1fr;gap:3px 8px;font-size:11.5px}
+  .od2 .b{color:var(--muted);font-size:10.5px}
+  .lens-k{border:1px solid var(--line2);border-radius:6px;padding:7px 9px;background:#fbfcfe;font-size:11.5px;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <h1>Kontakt Lens</h1><span class="yol">Göz › Kontakt Lens</span>
+    <span class="sp"></span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn ok">✔ Reçeteye çevir</span>
+    <span class="btn">⧉ Yeni denemeye kopyala</span>
+    <span class="btn">📱 SMS / e-posta</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+    <span class="btn">🗓 Kontrol randevusu</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kpi">
+    <div class="k on"><b>7</b><span>Bugün deneme / reçete</span></div>
+    <div class="k uyari"><b>4</b><span>Deneme sürüyor (karar yok)</span></div>
+    <div class="k kirmizi"><b>2</b><span>Oturmadı / intolerans</span></div>
+    <div class="k uyari"><b>5</b><span>Kontrolü gecikmiş (ilk 1 hafta)</span></div>
+    <div class="k"><b>9</b><span>Yıllık kontrolü geçmiş</span></div>
+    <div class="k kirmizi"><b>1</b><span>Komplikasyon bildirimi</span></div>
+  </div>
+
+  <div class="serit">
+    <span class="ara">🔍 Hasta, H / P no, marka-model…</span>
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Deneme</span><span class="cip">Reçete</span><span class="cip">Tümü</span>
+    <span class="combo">Hekim: Tümü</span>
+    <span class="sp"></span>
+    <span class="cip">Keratokonus</span>
+    <span class="cip">Ortokeratoloji</span>
+    <span class="cip">Terapötik</span>
+    <span class="cip">Çocuk (&lt; 18)</span>
+  </div>
+
+  <div class="govde3">
+    <!-- 2 -->
+    <div class="agac">
+      <h6>Lens türü</h6>
+      <div class="dal on">Tümü <i>34</i></div>
+      <div class="dal">Yumuşak · küresel <i>12</i></div>
+      <div class="dal">Yumuşak · torik <i>7</i></div>
+      <div class="dal">Multifokal <i>3</i></div>
+      <div class="dal">Sert gaz geçirgen (RGP) <i>5</i></div>
+      <div class="dal">Skleral <i>4</i></div>
+      <div class="dal">Hibrit <i>1</i></div>
+      <div class="dal">Ortokeratoloji <i>2</i></div>
+      <h6 style="margin-top:12px">Durum</h6>
+      <div class="dal">Deneme <i>9</i></div>
+      <div class="dal">Reçete <i>18</i></div>
+      <div class="dal">Oturmadı <i>4</i></div>
+      <div class="dal">Bırakıldı <i>3</i></div>
+      <h6 style="margin-top:12px">Endikasyon</h6>
+      <div class="dal">Miyopi / astigmat <i>19</i></div>
+      <div class="dal">Keratokonus <i>8</i></div>
+      <div class="dal">Afaki / post-op <i>3</i></div>
+      <div class="dal">Terapötik (bandaj) <i>2</i></div>
+      <div class="dal">Kozmetik / protez <i>2</i></div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <table class="liste">
+        <tr><th>Tarih</th><th>Hasta</th><th>Tür</th><th>Göz</th><th>Marka / model</th>
+          <th>Değerler <small>sph / cyl × aks · add</small></th><th>BC / DIA</th><th>Oturuş</th>
+          <th>Görme (lensle)</th><th>Kullanım</th><th>Hekim</th><th>Durum</th><th>Uyarı</th></tr>
+
+        <tr class="sec"><td><b>05.10 10:20</b><small>3. deneme</small></td>
+          <td class="hasta"><b>Kerem Us</b><small>45 E · H d1422</small></td>
+          <td><span class="chip c-gri">Skleral</span></td>
+          <td><span class="chip c-mavi">OD</span></td>
+          <td>Zenlens 16.5</td>
+          <td class="deg">−4,25 / −1,00 × 95</td>
+          <td class="deg">8,00 / 16,5</td>
+          <td><span class="otu ok">Oturdu</span></td>
+          <td>0,9</td>
+          <td>10 sa/gün</td>
+          <td>Dr. Yalçın</td>
+          <td><span class="chip c-bek">Deneme</span></td>
+          <td><span class="chip c-bek">keratokonus · reçeteye çevrilecek</span></td></tr>
+
+        <tr><td><b>05.10 09:40</b></td>
+          <td class="hasta"><b>Ayşe Yıldız</b><small>67 K · H d1111</small></td>
+          <td><span class="chip c-gri">Multifokal</span></td>
+          <td><span class="chip c-mor">OU</span></td>
+          <td>Air Optix plus Multifocal</td>
+          <td class="deg">+1,25 · add +2,00</td>
+          <td class="deg">8,60 / 14,2</td>
+          <td><span class="otu sik">Sıkı</span></td>
+          <td>0,7</td>
+          <td class="sonuk">—</td>
+          <td>Dr. Arslan</td>
+          <td><span class="chip c-bek">Deneme</span></td>
+          <td><span class="uy">⚠ BC bir basamak artırılmalı</span></td></tr>
+
+        <tr><td><b>04.10 14:10</b></td>
+          <td class="hasta"><b>Can Öz</b><small>31 E · H d1455</small></td>
+          <td><span class="chip c-gri">Yumuşak · torik</span></td>
+          <td><span class="chip c-mor">OU</span></td>
+          <td>Biofinity Toric</td>
+          <td class="deg">−3,00 / −1,25 × 180</td>
+          <td class="deg">8,70 / 14,5</td>
+          <td><span class="otu ok">Oturdu</span></td>
+          <td>1,0</td>
+          <td>12 sa/gün</td>
+          <td>Dr. Yalçın</td>
+          <td><span class="chip c-ok">Reçete</span></td>
+          <td class="sonuk">aylık · 1 yıl kontrol</td></tr>
+
+        <tr><td><b>02.10 11:05</b></td>
+          <td class="hasta"><b>Elif Demo</b><small>34 K · H d1310</small></td>
+          <td><span class="chip c-gri">Yumuşak · küresel</span></td>
+          <td><span class="chip c-mavi">OD</span></td>
+          <td>Dailies Total1</td>
+          <td class="deg">−2,00</td>
+          <td class="deg">8,50 / 14,1</td>
+          <td><span class="otu red">Oturmadı</span></td>
+          <td>0,6</td>
+          <td class="sonuk">—</td>
+          <td>Dr. Arslan</td>
+          <td><span class="chip c-red">Oturmadı</span></td>
+          <td><span class="uy">⚠ kuruluk · intolerans</span></td></tr>
+
+        <tr><td><b>28.09 16:30</b></td>
+          <td class="hasta"><b>Mehmet Kaya</b><small>58 E · H d1111</small></td>
+          <td><span class="chip c-gri">RGP</span></td>
+          <td><span class="chip c-mor">OS</span></td>
+          <td>Rose K2</td>
+          <td class="deg">−5,50</td>
+          <td class="deg">7,20 / 9,6</td>
+          <td><span class="otu gev">Gevşek</span></td>
+          <td>0,8</td>
+          <td>8 sa/gün</td>
+          <td>Dr. Yalçın</td>
+          <td><span class="chip c-bek">Deneme</span></td>
+          <td><span class="uy">⚠ ilk hafta kontrolü 7 gün gecikti</span></td></tr>
+
+        <tr><td><b>14.08 10:00</b></td>
+          <td class="hasta"><b>Sema Ak</b><small>59 K · H d1702</small></td>
+          <td><span class="chip c-gri">Terapötik</span></td>
+          <td><span class="chip c-mavi">OD</span></td>
+          <td>Bandaj lens (silikon hidrojel)</td>
+          <td class="deg">plano</td>
+          <td class="deg">8,60 / 14,0</td>
+          <td><span class="otu ok">Oturdu</span></td>
+          <td>0,5</td>
+          <td>sürekli · 7 gün</td>
+          <td>Dr. Çelik</td>
+          <td><span class="chip c-ok">Reçete</span></td>
+          <td><span class="chip c-red">komplikasyon: keratit şüphesi</span></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 34 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 2 &nbsp; Sonraki ›</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="oniz">
+      <div class="bl"><h5>Hasta</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Kerem Us · 45 E</div>
+        <div class="satir"><span>Tanı</span>H18.6 Keratokonus · OD belirgin</div>
+        <div class="satir"><span>Gözlükle görme</span>OD 0,4 · OS 0,8</div>
+        <div class="satir"><span>Kornea</span>K maks 54,2 D · pakimetri 452 µm</div>
+        <div class="satir"><span>Alerji / kuruluk</span>mevsimsel alerji · OSDI 18</div>
+      </div>
+
+      <div class="bl"><h5>Bu deneme</h5>
+        <div class="lens-k">
+          <div><b>Zenlens 16.5</b> · skleral · OD</div>
+          <div class="od2" style="margin-top:4px">
+            <span></span><span class="b">Değer</span><span class="b">Not</span>
+            <span class="b">Sph / cyl</span><span>−4,25 / −1,00 × 95</span><span class="sonuk">overrefraksiyon −0,25</span>
+            <span class="b">BC / DIA</span><span>8,00 / 16,5</span><span class="sonuk">sag 350 µm</span>
+            <span class="b">Oturuş</span><span><span class="otu ok">Oturdu</span></span><span class="sonuk">floresan: merkezi temas yok</span>
+            <span class="b">Görme (lensle)</span><span>0,9</span><span class="sonuk">gözlükle 0,4</span>
+            <span class="b">Kullanım</span><span>10 sa/gün</span><span class="sonuk">günlük temizlik</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bl"><h5>Deneme geçmişi · OD</h5>
+        <div class="satir"><span>1. 20.09 · Rose K2 7,10</span><span class="otu sik">Sıkı</span></div>
+        <div class="satir"><span>2. 28.09 · Zenlens 16,0</span><span class="otu gev">Gevşek</span></div>
+        <div class="satir"><span>3. 05.10 · Zenlens 16,5</span><span class="otu ok">Oturdu</span></div>
+        <div class="rt-kucuk sonuk" style="margin-top:4px">Aynı hastanın aynı gözündeki önceki satırlar - hangi parametrenin
+          işe yaradığı buradan okunur.</div>
+      </div>
+
+      <div class="bl"><h5>Takip planı</h5>
+        <div class="satir"><span>İlk kontrol</span>1 hafta · 12.10.2026</div>
+        <div class="satir"><span>Sonra</span>1 ay · 3 ay · 6 ayda bir</div>
+        <div class="satir"><span>Lens ömrü</span>12 ay (skleral)</div>
+      </div>
+
+      <div class="bl"><h5>Hızlı işlem</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">📇 Aç</span>
+          <span class="btn kucuk">✔ Reçeteye çevir</span>
+          <span class="btn kucuk">⧉ Yeni deneme</span>
+          <span class="btn kucuk">🗓 Kontrol randevusu</span>
+          <span class="btn kucuk">🖨 Yazdır</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> Kontakt lens listesi. Tablo <code>goz_kontakt_lens</code> (hasta · muayene · göz · lens_tur ·
+marka_model · sph · cyl · aks · add_yakin · <b>bc</b> · <b>dia</b> · <b>oturus</b> · va · <b>deneme</b> · kullanim_saat ·
+bakim_notu · durum). Kart <code>goz_kontakt_lens_karti_v2.html</code>.<br>
+
+<b>Gözlük reçetesinden AYRI liste olmasının sebebi:</b> kontakt lens bir <b>oturuş denemesidir</b> - aynı hastaya üç farklı
+eğrilik denenir, satırların çoğu "denendi ve olmadı" kaydıdır. Aynı listede dursalardı "hangisi verildi" sorusu iki ayrı
+anlama gelirdi. Yeni kayıt listeden açılmaz: göz muayene kartından (hasta ve muayene bağıyla) ya da bir denemeden
+<b>kopyalanarak</b> açılır.<br>
+
+<span class="n">1</span><b>Gösterge</b> (tıkla = süz): bugün deneme/reçete, <b>deneme sürüyor</b> (karar verilmemiş satır -
+hasta lensle dolaşıyor ama reçete yok), <b>oturmadı / intolerans</b>, <b>ilk hafta kontrolü gecikmiş</b> (lens komplikasyonu
+ilk günlerde çıkar), yıllık kontrolü geçmiş, komplikasyon bildirimi.<br>
+
+<span class="n">2</span><b>Sol:</b> lens türü (yumuşak küresel / torik / multifokal / RGP / skleral / hibrit / ortokeratoloji),
+durum ve endikasyon. Şerit: dönem + durum çipleri, hekim seçicisi, sağda <b>bağımsız işaretler</b>
+(Keratokonus · Ortokeratoloji · Terapötik · Çocuk) - "deneme + keratokonus" gerçek bir sorudur.<br>
+
+<span class="n">3</span><b>Liste:</b> tarih (altında kaçıncı deneme), hasta, tür, <b>göz rozeti</b>, marka/model,
+değerler (sph / cyl × aks · add), <b>BC / DIA</b> (lens seçiminin asıl parametreleri), <b>oturuş</b> rozeti
+(oturdu / sıkı / gevşek / oturmadı), lensle görme, kullanım saati, hekim, durum, uyarı. Gözlük listesinden farkı bu iki
+kolondur: reçete değeri değil <b>lensin korneaya oturuşu</b> karar veriyor.<br>
+
+<span class="n">4</span><b>Sağ:</b> hasta (tanı, gözlükle görme, kornea verileri - K maks / pakimetri, kuruluk),
+bu denemenin ayrıntısı (overrefraksiyon, sag, floresan değerlendirmesi), <b>aynı gözün deneme geçmişi</b>
+(hangi parametre işe yaradı), takip planı ve hızlı işlem. Sol ve sağ paneller katlanır.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>

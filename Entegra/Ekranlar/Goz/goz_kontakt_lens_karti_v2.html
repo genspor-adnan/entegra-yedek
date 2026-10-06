@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontakt Lens — Kart Mockup v2 (GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef3f9;border:1px solid #d6e2ef;font-size:10.5px;margin-left:6px;color:var(--navy)}
+  .rz.od{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3} .rz.os{background:#f1ecfa;border-color:#ddd0f2;color:#6a3fb5}
+  .kml{display:grid;grid-template-columns:1.5fr .6fr 1fr 1fr 1fr .9fr;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fbfcfe;font-size:11.5px}
+  .kml .et{display:block;font-size:10px;color:var(--muted)}
+  .kml b{color:var(--navy)}
+  .ic2{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;padding:10px 14px}
+  .grp{margin-bottom:12px}
+  .grp h5{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line2);padding-bottom:4px}
+  .izgara{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
+  .izgara.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .izgara.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fld{display:flex;flex-direction:column;gap:2px;font-size:11.5px}
+  .fld span{font-size:10px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;padding:4px 7px;min-height:24px;font-size:11.5px}
+  .inp.pasif{background:#f3f6fa;color:var(--muted)}
+  .inp.deg{font-family:Consolas,monospace}
+  .panel{display:none} .panel.on{display:block}
+  /* OD / OS YAN YANA: lens değerleri iki gözde ayrı ama birlikte okunur -
+     hekim "sağda ne verdim, solda ne" diye karşılaştırıyor. */
+  .odos{display:grid;grid-template-columns:120px 1fr 1fr;gap:4px 10px;font-size:11.5px;align-items:center}
+  .odos .bas{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .odos .et{color:var(--muted)}
+  .odos .od{color:#2f6db3;font-weight:bold} .odos .os{color:#8e44ad;font-weight:bold}
+  .otu{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e}
+  .otu.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .otu.sik{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .otu.gev{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .otu.red{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .kart{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:8px 10px;margin-bottom:10px;font-size:11.5px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+  .sat{display:flex;justify-content:space-between;padding:2px 0}
+  .sat span:first-child{color:var(--muted)}
+  .tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+  .tbl th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573}
+  .tbl td{border-bottom:1px solid #eef2f6;padding:4px 7px}
+  .tbl td.kod{font-family:Consolas,monospace;font-size:11px}
+  .bilgi-k{border:1px solid #f2ddbf;background:#fdf6e3;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#7a5a12;margin-bottom:10px}
+  .uyar-k{border:1px solid #f3c4bf;background:#fbe9e7;border-radius:6px;padding:7px 9px;font-size:11.5px;color:#8f2a22;margin-bottom:10px}
+  /* FLORESAN DEĞERLENDİRMESİ: oturuş kararının gerekçesi. */
+  .flo{display:flex;gap:8px;align-items:center;margin:6px 0}
+  .flo .g{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 50%, #7fd0a8 0 32%, #4ba882 33% 62%, #2b7a5c 63% 100%);position:relative;border:1px solid #cfe0f5}
+  .flo .g i{position:absolute;border-radius:50%}
+  .flo .g .mrk{left:34%;top:34%;width:32%;height:32%;background:rgba(255,255,255,.35)}
+  .flo .not{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👁 Kontakt Lens <span class="rz">H d1422</span><span class="rz od">OD</span><span class="rz">Skleral</span><span class="rz">3. deneme</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn ok">✔ Reçeteye çevir</span>
+    <span class="btn">⧉ Yeni denemeye kopyala</span>
+    <span class="btn">📱 SMS / e-posta</span>
+    <span class="btn">🖨 Yazdır</span>
+    <span class="btn">🗓 Kontrol randevusu</span>
+    <span class="sp"></span>
+    <span class="btn danger">✕ Bırakıldı</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="kml">
+    <div><span class="et">Hasta</span><b style="font-size:13px">Kerem Us · 45 E</b></div>
+    <div><span class="et">Göz</span><b class="rz od" style="margin:0">OD</b></div>
+    <div><span class="et">Lens</span><b>Zenlens 16.5 · skleral</b></div>
+    <div><span class="et">Oturuş</span><b><span class="otu ok">Oturdu</span></b></div>
+    <div><span class="et">Hekim / muayene</span><b>Dr. Yalçın · 05.10.2026 ↗</b></div>
+    <div><span class="et">Durum</span><b>Deneme (3.)</b></div>
+  </div>
+
+  <div class="sekmeler">
+    <span class="sek on" data-s="lens">Lens</span>
+    <span class="sek" data-s="oturus">Oturuş & görme</span>
+    <span class="sek" data-s="kornea">Kornea verileri</span>
+    <span class="sek" data-s="gecmis">Deneme geçmişi <span class="say">3</span></span>
+    <span class="sek" data-s="bakim">Kullanım & bakım</span>
+    <span class="sek" data-s="takip">Takip & komplikasyon</span>
+  </div>
+
+  <div class="ic2">
+    <div>
+      <!-- 2a -->
+      <div class="panel on" data-s="lens">
+        <div class="grp"><h5>Kayıt</h5>
+          <div class="izgara">
+            <label class="fld"><span>Hasta *</span><div class="inp pasif">Kerem Us · H d1422</div></label>
+            <label class="fld"><span>Muayene bağı</span><div class="inp pasif">05.10.2026 · Dr. Yalçın ↗</div></label>
+            <label class="fld"><span>Kayıt türü *</span><div class="inp">Deneme ▾</div></label>
+            <label class="fld"><span>Durum</span><div class="inp">Deneme sürüyor ▾</div></label>
+          </div>
+          <div class="bilgi-k">Kayıt türü <b>Deneme</b> iken reçete yazdırılmaz; "Reçeteye çevir" oturuş
+            <b>Oturdu</b> ve lensle görme girilmişse açılır - oturmayan lensin reçetesi hastayı optiğe boşa gönderir.</div>
+        </div>
+
+        <div class="grp"><h5>Lens</h5>
+          <div class="izgara">
+            <label class="fld"><span>Göz *</span><div class="inp">OD · Sağ ▾</div></label>
+            <label class="fld"><span>Lens türü *</span><div class="inp">Skleral ▾</div></label>
+            <label class="fld"><span>Marka / model *</span><div class="inp">Zenlens 16.5</div></label>
+            <label class="fld"><span>Malzeme / Dk</span><div class="inp">Optimum Infinite · 180</div></label>
+          </div>
+          <!-- DEĞERLER OD/OS AYRI SATIR: kayıt göz başınadır (goz_kontakt_lens.goz),
+               iki göz için iki satır açılır - tek satırda tutulsa "OU" kaydında
+               hangi değerin hangi göze ait olduğu kaybolurdu. -->
+          <div class="odos" style="margin-top:8px">
+            <span class="bas">Parametre</span><span class="bas od">OD · bu kayıt</span><span class="bas os">OS · eş kayıt ↗</span>
+            <span class="et">Sph</span><div class="inp deg">−4,25</div><div class="inp deg pasif">−3,75</div>
+            <span class="et">Cyl × aks</span><div class="inp deg">−1,00 × 95</div><div class="inp deg pasif">−0,75 × 85</div>
+            <span class="et">Add (yakın)</span><div class="inp deg">—</div><div class="inp deg pasif">—</div>
+            <span class="et">BC (mm)</span><div class="inp deg">8,00</div><div class="inp deg pasif">8,10</div>
+            <span class="et">DIA (mm)</span><div class="inp deg">16,5</div><div class="inp deg pasif">16,5</div>
+          </div>
+          <div class="bilgi-k">Sağ kolon <b>salt okumadır</b>: diğer gözün kaydı ayrı satırdır, buradan yalnız
+            karşılaştırma için gösterilir ("sağda ne verdim, solda ne"). Düzenlemek için o kayda geçilir.</div>
+        </div>
+      </div>
+
+      <!-- 2b -->
+      <div class="panel" data-s="oturus">
+        <div class="grp"><h5>Oturuş değerlendirmesi</h5>
+          <div class="izgara">
+            <label class="fld"><span>Oturuş *</span><div class="inp">Oturdu ▾</div></label>
+            <label class="fld"><span>Sag / kasa boşluğu</span><div class="inp">350 µm</div></label>
+            <label class="fld"><span>Limbal temas</span><div class="inp">Yok ▾</div></label>
+            <label class="fld"><span>Hareket (mm)</span><div class="inp">0,2</div></label>
+            <label class="fld"><span>Santralizasyon</span><div class="inp">İyi ▾</div></label>
+            <label class="fld"><span>Floresan deseni</span><div class="inp">Merkezi temas yok ▾</div></label>
+            <label class="fld"><span>Overrefraksiyon</span><div class="inp deg">−0,25</div></label>
+            <label class="fld"><span>Konfor (0-10)</span><div class="inp">8</div></label>
+          </div>
+          <div class="flo">
+            <div class="g"><i class="mrk"></i></div>
+            <div class="not">Floresan görünümü şema olarak çizilir (merkez · orta · periferi).
+              <b>Oturuş kararının gerekçesi</b> burada kalır: üç ay sonra "neden bu lens" sorusunun cevabı
+              "Oturdu" rozeti değil, bu satırlardır.</div>
+          </div>
+        </div>
+        <div class="grp"><h5>Görme</h5>
+          <div class="izgara k3">
+            <label class="fld"><span>Lensle görme *</span><div class="inp">0,9</div></label>
+            <label class="fld"><span>Gözlükle görme</span><div class="inp pasif">0,4 <small>(muayeneden)</small></div></label>
+            <label class="fld"><span>Kazanç</span><div class="inp pasif">+5 sıra</div></label>
+          </div>
+          <div class="bilgi-k">Gözlükle görme muayeneden okunur, elle girilmez: aynı değeri iki yere yazmak,
+            birinin eski kalması demektir. <b>Kazanç</b> keratokonusta lens kararının tek sayısal gerekçesidir.</div>
+        </div>
+      </div>
+
+      <!-- 2c -->
+      <div class="panel" data-s="kornea">
+        <div class="bilgi-k">Bu sekme <b>salt okumadır</b>: değerler topografi / pakimetri / biyometri ölçümlerinden
+          (<code>goz_goruntuleme_olcum</code>) gelir. Lens kaydı kendi kopyasını tutmaz - cihaz ölçümü güncellenince
+          burada da güncel görünür.</div>
+        <table class="tbl">
+          <tr><th>Parametre</th><th>OD · Sağ</th><th>OS · Sol</th><th>Kaynak</th></tr>
+          <tr><td>K1 / K2</td><td>48,2 / 54,2 D</td><td>44,1 / 45,0 D</td><td class="sonuk">Pentacam · 28.09.2026</td></tr>
+          <tr><td>K maks</td><td><b style="color:#b3261e">54,2 D</b></td><td>45,2 D</td><td class="sonuk">Pentacam</td></tr>
+          <tr><td>Astigmat (kornea)</td><td>6,0 D · 95°</td><td>0,9 D · 85°</td><td class="sonuk">Pentacam</td></tr>
+          <tr><td>Pakimetri (en ince)</td><td>452 µm</td><td>528 µm</td><td class="sonuk">Pentacam</td></tr>
+          <tr><td>Ekzantrisite (e)</td><td>0,82</td><td>0,48</td><td class="sonuk">Pentacam</td></tr>
+          <tr><td>HVID (beyaz-beyaz)</td><td>11,8 mm</td><td>11,9 mm</td><td class="sonuk">IOLMaster</td></tr>
+          <tr><td>Gözyaşı (OSDI / TBUT)</td><td>18 / 7 sn</td><td>18 / 8 sn</td><td class="sonuk">muayene · 05.10.2026</td></tr>
+        </table>
+        <div class="bilgi-k">Skleral lensin DIA'sı HVID'den, BC'si K değerlerinden türetiliyor: bu sekme
+          <b>lens seçiminin girdisidir</b>, sonucu değil.</div>
+      </div>
+
+      <!-- 2d -->
+      <div class="panel" data-s="gecmis">
+        <table class="tbl">
+          <tr><th>#</th><th>Tarih</th><th>Lens</th><th>BC / DIA</th><th>Değer</th><th>Oturuş</th><th>Görme</th><th>Karar</th><th></th></tr>
+          <tr><td>1</td><td>20.09.2026</td><td>Rose K2 (RGP)</td><td class="kod">7,10 / 9,6</td><td class="kod">−5,00</td>
+            <td><span class="otu sik">Sıkı</span></td><td>0,7</td><td class="sonuk">merkezi temas · değiştir</td><td><span class="btn kucuk">📂</span></td></tr>
+          <tr><td>2</td><td>28.09.2026</td><td>Zenlens 16,0</td><td class="kod">8,20 / 16,0</td><td class="kod">−4,50</td>
+            <td><span class="otu gev">Gevşek</span></td><td>0,8</td><td class="sonuk">sag fazla · BC düşür</td><td><span class="btn kucuk">📂</span></td></tr>
+          <tr class="sec"><td>3</td><td>05.10.2026</td><td>Zenlens 16,5</td><td class="kod">8,00 / 16,5</td><td class="kod">−4,25 / −1,00 × 95</td>
+            <td><span class="otu ok">Oturdu</span></td><td>0,9</td><td><b>reçeteye çevrilecek</b></td><td><span class="btn kucuk">📂</span></td></tr>
+        </table>
+        <div class="bilgi-k">Geçmiş <b>aynı hastanın aynı gözündeki</b> kayıtlardan gelir (kartta tutulmaz).
+          Yeni deneme "kopyala" ile açılır: parametreler taşınır, oturuş ve görme <b>boş gelir</b> -
+          kopyalanan bir "Oturdu" değerlendirmesi hiç yapılmamış bir muayeneyi kayda geçirirdi.</div>
+      </div>
+
+      <!-- 2e -->
+      <div class="panel" data-s="bakim">
+        <div class="grp"><h5>Kullanım</h5>
+          <div class="izgara">
+            <label class="fld"><span>Günlük kullanım (saat)</span><div class="inp">10</div></label>
+            <label class="fld"><span>Değişim sıklığı</span><div class="inp">Yıllık ▾</div></label>
+            <label class="fld"><span>Gece kullanımı</span><div class="inp">Hayır ▾</div></label>
+            <label class="fld"><span>Lens ömrü</span><div class="inp pasif">12 ay · 05.10.2027</div></label>
+          </div>
+        </div>
+        <div class="grp"><h5>Bakım</h5>
+          <div class="izgara k2">
+            <label class="fld"><span>Solüsyon</span><div class="inp">Peroksit sistemi ▾</div></label>
+            <label class="fld"><span>Dolum sıvısı (skleral)</span><div class="inp">Serum fizyolojik (tek doz)</div></label>
+          </div>
+          <div class="inp" style="min-height:64px;margin-top:8px">Günlük: peroksit ile temizlik, 6 saat bekletme.
+            Takma öncesi tek doz SF ile doldur. Musluk suyu KULLANMA (Acanthamoeba riski). Lens kabı 3 ayda bir değişir.</div>
+        </div>
+        <div class="grp"><h5>Hastaya verilen</h5>
+          <table class="tbl">
+            <tr><th>Belge / malzeme</th><th>Tarih</th><th>Durum</th></tr>
+            <tr><td>Kullanım ve bakım talimatı (yazılı)</td><td>05.10.2026</td><td><span class="chip c-ok">verildi</span></td></tr>
+            <tr><td>Takma / çıkarma eğitimi</td><td>05.10.2026</td><td><span class="chip c-ok">yapıldı · 20 dk</span></td></tr>
+            <tr><td>Lens + kap + solüsyon</td><td>05.10.2026</td><td><span class="chip c-bek">reçete sonrası</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2f -->
+      <div class="panel" data-s="takip">
+        <div class="grp"><h5>Takip planı</h5>
+          <div class="izgara">
+            <label class="fld"><span>İlk kontrol *</span><div class="inp">1 hafta · 12.10.2026</div></label>
+            <label class="fld"><span>Sonraki</span><div class="inp">1 ay ▾</div></label>
+            <label class="fld"><span>Periyot</span><div class="inp">6 ayda bir ▾</div></label>
+            <label class="fld"><span>Randevu</span><div class="inp">☐ oluşturulmadı</div></label>
+          </div>
+          <div class="bilgi-k"><b>İlk hafta kontrolü zorunlu alan:</b> lens komplikasyonları (hipoksi, dev papiller
+            konjonktivit, infiltrat) ilk günlerde çıkar. Kontrolü gecikmiş kayıtlar listede gösterge olarak sayılır.</div>
+        </div>
+        <div class="grp"><h5>Komplikasyon</h5>
+          <div class="izgara k3">
+            <label class="fld"><span>Komplikasyon</span><div class="inp">Yok ▾</div></label>
+            <label class="fld"><span>Bildirim tarihi</span><div class="inp pasif">—</div></label>
+            <label class="fld"><span>Lens kullanımı</span><div class="inp">Sürüyor ▾</div></label>
+          </div>
+          <div class="inp" style="min-height:56px;margin-top:8px">—</div>
+        </div>
+        <div class="grp"><h5>Kontrol kayıtları</h5>
+          <table class="tbl">
+            <tr><th>Tarih</th><th>Konfor</th><th>Görme</th><th>Bulgu</th><th>Karar</th></tr>
+            <tr><td colSpan="5" class="sonuk" style="text-align:center;padding:12px">Henüz kontrol yapılmadı - ilk kontrol 12.10.2026.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div>
+      <div class="uyar-k">⚠ <b>Keratokonus · OD K maks 54,2 D</b> - pakimetri 452 µm. Skleral lens korneaya temas
+        etmemeli; "Sıkı" oturuşta hipoksi ve ödem riski.</div>
+
+      <div class="kart"><h6>Hasta</h6>
+        <div class="sat"><span>Tanı</span>H18.6 Keratokonus · OD</div>
+        <div class="sat"><span>Gözlükle</span>OD 0,4 · OS 0,8</div>
+        <div class="sat"><span>Lensle</span><b>OD 0,9</b></div>
+        <div class="sat"><span>Kuruluk</span>OSDI 18 · TBUT 7 sn</div>
+        <div class="sat"><span>Alerji</span>mevsimsel</div>
+      </div>
+
+      <div class="kart"><h6>Bu kayıt</h6>
+        <div class="sat"><span>Deneme</span><b>3. (OD)</b></div>
+        <div class="sat"><span>Oturuş</span><span class="otu ok">Oturdu</span></div>
+        <div class="sat"><span>Overrefraksiyon</span>−0,25</div>
+        <div class="sat"><span>Konfor</span>8 / 10</div>
+        <div class="sat"><span>Reçeteye hazır</span><span class="chip c-ok">evet</span></div>
+      </div>
+
+      <div class="kart"><h6>Diğer göz · OS</h6>
+        <div class="sat"><span>Lens</span>Zenlens 16,5</div>
+        <div class="sat"><span>Oturuş</span><span class="otu ok">Oturdu</span></div>
+        <div class="sat"><span>Durum</span><span class="chip c-ok">Reçete · 28.09</span></div>
+        <div style="margin-top:6px"><span class="btn kucuk">↗ OS kaydını aç</span></div>
+      </div>
+
+      <div class="kart"><h6>Hızlı işlem</h6>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn kucuk">✔ Reçeteye çevir</span>
+          <span class="btn kucuk">⧉ Yeni deneme</span>
+          <span class="btn kucuk">🗓 Kontrol randevusu</span>
+          <span class="btn kucuk">🖨 Talimat yazdır</span>
+          <span class="btn kucuk">👤 Hasta kartı</span>
+        </div>
+      </div>
+
+      <div class="kart"><h6>Kayıt bilgisi</h6>
+        <div class="sat"><span>Ekleyen</span>Dr. Yalçın · 05.10.2026</div>
+        <div class="sat"><span>Değiştiren</span>Dr. Yalçın · bugün 10:34</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v2):</b> <code>goz_kontakt_lens_listesi_v2.html</code> listesinin <b>kartı</b>. Tablo
+<code>goz_kontakt_lens</code> (göz · lens_tur · marka_model · sph · cyl · aks · add_yakin · bc · dia · <b>oturus</b> · va ·
+<b>deneme</b> · kullanim_saat · bakim_notu · durum). Kornea verileri ve gözlükle görme <b>okunur</b> - kart kendi kopyasını
+tutmaz.<br>
+
+<span class="n">1</span><b>Kimlik şeridi</b> her sekmede sabit: hasta · <b>göz rozeti</b> · lens · <b>oturuş</b> · hekim ·
+kaçıncı deneme. Oturuş şeritte, çünkü kartın bütün kararı o alana bağlı.<br>
+
+<span class="n">2</span><b>Sekmeler:</b> (a) <b>Lens</b> - kayıt türü (deneme / reçete), lens tanımı ve değerler
+<b>OD / OS yan yana</b>; sağ kolon salt okuma (diğer gözün kaydı ayrı satır, buradan yalnız karşılaştırılır).
+(b) <b>Oturuş & görme</b> - oturuş kararı ve <b>gerekçesi</b> (sag, limbal temas, hareket, santralizasyon, floresan
+şeması, overrefraksiyon, konfor) + lensle görme ve gözlükle görmeye göre <b>kazanç</b>; gözlük değeri muayeneden okunur.
+(c) <b>Kornea verileri</b> - salt okuma (K1/K2, K maks, pakimetri, e, HVID, gözyaşı): skleral lensin DIA'sı HVID'den,
+BC'si K'dan türetildiği için bu sekme lens seçiminin <b>girdisidir</b>. (d) <b>Deneme geçmişi</b> - aynı gözün önceki
+kayıtları; "kopyala" parametreleri taşır, <b>oturuş ve görmeyi boş bırakır</b> (kopyalanan bir değerlendirme, yapılmamış
+muayeneyi kayda geçirirdi). (e) <b>Kullanım & bakım</b> - kullanım saati, değişim sıklığı, solüsyon, skleral dolum sıvısı,
+hastaya verilen talimat ve eğitim kaydı. (f) <b>Takip & komplikasyon</b> - <b>ilk hafta kontrolü zorunlu</b> (lens
+komplikasyonları ilk günlerde çıkar), komplikasyon alanı ve kontrol kayıtları.<br>
+
+<span class="n">3</span><b>Sağ sütun:</b> karar gerektiren tek uyarı (keratokonus / ince kornea), hasta özeti
+(gözlükle - lensle görme karşılaştırması), bu kaydın durumu ve <b>"reçeteye hazır"</b> göstergesi, <b>diğer gözün kaydı</b>
+(ayrı satır olduğu için bağlantıyla), hızlı işlem, kayıt bilgisi.<br>
+
+<b>"Reçeteye çevir" kuralı:</b> oturuş <b>Oturdu</b> değilse ve lensle görme girilmemişse düğme açılmaz - oturmayan lensin
+reçetesi hastayı optiğe boşa gönderir.
+</div></div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sek'));
+  var scope=bar.parentElement;
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var pnl=[].slice.call(scope.querySelectorAll('.panel'));
+      pnl.forEach(function(p,j){p.classList.toggle('on', (p.dataset.s||String(j))===(t.dataset.s||String(i)))});
+    });
+  });
+});
+</script>
+</body>
+</html>
