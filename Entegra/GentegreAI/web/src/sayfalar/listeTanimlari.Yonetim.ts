@@ -59,7 +59,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // PERSONEL İZİNLERDEN ÖNCE (kullanıcı: "menüde personel ve izinler yer
     //   değiştir"): ikisi de sıra 10 iken diziye önce giren İzinler üste
     //   düşüyordu - kadro listesi İK menüsünün ilk maddesi olmalı.
-    menuGrup: 'İK & Prim', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 5,
+    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 5,
   },
   // PRIM (kullanici): ana menude kendi basina grup degil, IK'nin ALTINDA
   //   ve Personel Listesi'nden SONRA. menuSira 20/30/40 personelin 10'unun
@@ -72,7 +72,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
-    menuGrup: 'İK & Prim', menuAd: 'Prim Planları', ic: '🎯',
+    menuGrup: 'İK', menuAd: 'Prim Planları', ic: '🎯',
     yetkiKodu: 'prim', menuSira: 40, urunModu: 2,
   },
   {
@@ -120,7 +120,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Hakedişler', ic: '💰',
+    menuGrup: 'İK', menuAd: 'Hakedişler', ic: '💰',
     yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
   },
   {

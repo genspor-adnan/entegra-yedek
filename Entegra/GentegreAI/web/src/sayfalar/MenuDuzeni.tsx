@@ -250,12 +250,20 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       const tur = turNo(dugum.tur);
       const kod = dbKod(dugum.kod);
       const mevcut = onceki.find(x => x.sistemKod === kod && x.dugumTur === tur);
+      const birlesik = { ...mevcut, ...parca };
       const yeni: MenuDuzenSatiri = {
         dugumTur: tur,
         sistemKod: kod,
-        ustKod: dugum.ustKod != null ? dbKod(dugum.ustKod) : null,
         sira: null, gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
-        ...mevcut, ...parca,
+        ...birlesik,
+        // ÜST KOD DAİMA VERİTABANI BİÇİMİNDE (07.10.2026 hatası): çağıranlar
+        //   (üst başlık seçimi, sürükleme) İÇ KOD veriyor (`b|Yönetim`) ve
+        //   `...parca` onu ham geçirdiği için önek veritabanına yazılıyordu.
+        //   Ağaçta `b|Yönetim` diye üst olmadığından o grup menüden
+        //   kayboluyordu. Normalleştirme tek yerde, burada.
+        ustKod: birlesik.ustKod !== undefined
+          ? (birlesik.ustKod != null ? dbKod(birlesik.ustKod) : null)
+          : (dugum.ustKod != null ? dbKod(dugum.ustKod) : null),
       };
       // ÜST BAŞLIK DEĞİŞİKLİĞİ DE BİR FARKTIR: kayıt yalnız varsayılanla aynıysa
       //   düşer. Taşınan ekran (ustKod başka grup) bu kontrolde boş sayılırsa

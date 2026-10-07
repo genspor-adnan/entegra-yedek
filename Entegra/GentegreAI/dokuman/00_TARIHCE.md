@@ -20028,3 +20028,35 @@ Doğrulama: muayene kartı #13'te sekme açıldı, 4 akış adımı, iki aktarı
 kısayolu ve "Bu hastanın kayıtlarına henüz erişilmedi" durumu göründü. Hasta
 alanının muayenede `tarafId` olduğu düzeltildi (`hastaId` yalnız bazı
 kartlarda var). vitest 789, tsc temiz.
+
+### 07.10.2026 — iç kod öneki veritabanına kaçıyordu + "İK & Prim" → "İK"
+
+**Hata (kullanıcı: *"genprofil'de muayene için aktif menüde yönetim ve İK
+kayboldu"*).** Tür bazlı eşleşme için eklenen **iç kod öneki** (`b|` bölge,
+`g|` grup, `e|` ekran) veritabanına yazılmıştı: muayene kurulumunda
+`sistem_kod='İK & Prim'` satırının `ust_kod`'u **`b|Yönetim`** olmuş. Ağaçta
+öyle bir üst olmadığı için grup çiziminden düşüyordu.
+
+Kök neden `farkYaz`: üst kodu yalnız **varsayılan** değerde normalleştiriyordu,
+`...parca` ile gelen (üst başlık seçimi, sürükleme) ham geçiyordu. Çağıranların
+hepsi iç kod verdiği için önek DB'ye sızdı. Normalleştirme artık tek yerde,
+`farkYaz`'ın içinde ve `parca`'dan geleni de kapsıyor.
+
+**Sunucuda onarım** (`gentegre_ai_muayene`, `gentegre_ai_lab`): `ust_kod` ve
+`sistem_kod` alanlarından `^[bge]\|` öneki sıyrıldı, "Yönetim" bölgesi
+görünür yapıldı (kullanıcının kaybolan menüsü).
+
+**"İK & Prim" → "İK"** (kullanıcı: *"İK & Prim rename İK her yerde"*): kodda 8
+dosya (menü grubu, bölge haritası, liste tanımları, grup ikonu). Adı **veri
+olarak** taşıyan yerler için göç **982**: `dokum_tanimi.menu_grup`,
+`ai_rehber_ekran` (yol · menü grubu · arama anahtarı) ve `menu_duzen`
+(kurumun kendi düzenlemesi eski adla eşleşmez, grup ayarlarını kaybederdi).
+Göç 689/690/871 **düzenlenmedi** - onlar tarih; değişiklik yeni dosyada.
+
+Uygulandı: dev + sunucudaki **dokuz** veritabanı. `dis · osgb · goz · ftr ·
+tipmerkezi`'de `menu_duzen` tablosu henüz yok (891 göçte kalmışlar), onlarda
+yalnız döküm ve yardım dizini güncellendi.
+
+`menuDuzeni.test.ts`'teki "kaldırılan gruplar geri gelmedi" listesinden `İK`
+çıkarıldı: eskiden kaldırılmış bir ad olması, bugün bilinçle seçilmesini
+engellemiyor.

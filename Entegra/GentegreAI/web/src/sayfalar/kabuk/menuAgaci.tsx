@@ -69,7 +69,7 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK & Prim', 'Doküman', 'Sabit Varlıklar',
+  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Sabit Varlıklar',
 ];
 
 export type MenuSatiri =
@@ -230,7 +230,7 @@ export const GRUP_IKON: Record<string, string> = {
   // Muhasebe ana menusu (kullanici): Stok'tan sonra gelir - hesap plani, fisler,
   //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
   'Muhasebe': '⚖️',
-  'İK & Prim': '👥',
+  'İK': '👥',
   // Gemi dumeni (kullanici, ucuncu deneme): Unicode'da GERCEK bir gemi
   //   dumeni emojisi YOK. Denenenler: ☸️ (dharma cakri - dini sembol),
   //   🛞 (tekerlek - lastik gibi cizilir). ⎈ (U+2388) anlamca dogru ama

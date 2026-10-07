@@ -29,7 +29,7 @@ export const KADRO_LISTELERI: ListeGirdisi[] = [
       { ad: 'Şube nakli',    filtre: { alan: 'tur', op: 'esit', deger: 5 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Kadro Hareketleri', ic: '🪜',
+    menuGrup: 'İK', menuAd: 'Kadro Hareketleri', ic: '🪜',
     yetkiKodu: 'ik.kadro', modul: 'ik', menuSira: 12,
   },
 ];

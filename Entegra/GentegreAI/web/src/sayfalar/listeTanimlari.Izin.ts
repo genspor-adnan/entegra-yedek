@@ -14,7 +14,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'personelIzin', rota: 'personel-izin',
     baslik: 'İzin Talepleri',
-    yol: 'İK & Prim › İzinler',
+    yol: 'İK › İzinler',
     // ÖZEL KART (959, mockup Ekranlar/IK/izin_talep_karti.html): sayfalar/ik/IzinTalepKarti.
     kartYolu: '/personel-izin', kartBaslik: 'İzin Talebi', ozelKart: true,
     aksiyonEkrani: 'personel-izin-liste',
@@ -32,13 +32,13 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Onay gecikti', filtre: { alan: 'onayGecikmeGun', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'İzinler', ic: '🌴',
+    menuGrup: 'İK', menuAd: 'İzinler', ic: '🌴',
     yetkiKodu: 'ik.izin', modul: 'ik', menuSira: 10,
   },
   {
     kaynak: 'izinBakiye', rota: 'izin-bakiye',
     baslik: 'İzin Bakiyeleri',
-    yol: 'İK & Prim › İzin Bakiyesi',
+    yol: 'İK › İzin Bakiyesi',
     aksiyonEkrani: 'izin-bakiye-liste',
     cipler: [
       { ad: 'Kullanılabilir', filtre: { alan: 'kalan', op: 'buyuk', deger: 0 } },
@@ -47,7 +47,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'İşe giriş girilmemiş', filtre: { alan: 'hakYok', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'İzin Bakiyesi', ic: '📊',
+    menuGrup: 'İK', menuAd: 'İzin Bakiyesi', ic: '📊',
     yetkiKodu: 'ik.izin', modul: 'ik', menuSira: 11,
   },
   {
@@ -56,7 +56,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     //   olmadan ödenmiş avans izlenemez.
     kaynak: 'personelAvans', rota: 'personel-avans',
     baslik: 'Personel Avansları',
-    yol: 'İK & Prim › Avanslar',
+    yol: 'İK › Avanslar',
     // ÖZEL KART (960, mockup Ekranlar/IK/avans_karti.html): sayfalar/ik/AvansKarti.
     kartYolu: '/personel-avans', kartBaslik: 'Personel Avansı', ozelKart: true,
     aksiyonEkrani: 'personel-avans-liste',
@@ -71,7 +71,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kesinti gecikti', filtre: { alan: 'gecikenTaksit', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Avanslar', ic: '💸',
+    menuGrup: 'İK', menuAd: 'Avanslar', ic: '💸',
     yetkiKodu: 'ik.avans', modul: 'ik', menuSira: 14,
   },
   {
@@ -81,7 +81,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     //   şeylerdir. ÖDEME BU LİSTEDE YOK: zincir onayla biter.
     kaynak: 'personelMasraf', rota: 'personel-masraf',
     baslik: 'Masraf Beyanları',
-    yol: 'İK & Prim › Masraf Beyanları',
+    yol: 'İK › Masraf Beyanları',
     // ÖZEL KART (961, mockup Ekranlar/IK/masraf_karti.html): sayfalar/ik/MasrafKarti.
     kartYolu: '/personel-masraf', kartBaslik: 'Masraf Beyanı', ozelKart: true,
     aksiyonEkrani: 'personel-masraf-liste',
@@ -94,7 +94,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Reddedildi', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Masraf Beyanları', ic: '🧾',
+    menuGrup: 'İK', menuAd: 'Masraf Beyanları', ic: '🧾',
     yetkiKodu: 'ik.masraf', modul: 'ik', menuSira: 15,
   },
   {
@@ -103,7 +103,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     //   sebebi odur. Bekleme günü teslime kadar işler.
     kaynak: 'personelBelgeTalep', rota: 'personel-belge-talep',
     baslik: 'Belge Talepleri',
-    yol: 'İK & Prim › Belge Talepleri',
+    yol: 'İK › Belge Talepleri',
     // ÖZEL KART (962, mockup Ekranlar/IK/belge_talep_karti.html): sayfalar/ik/BelgeTalepKarti.
     kartYolu: '/personel-belge-talep', kartBaslik: 'Belge Talebi', ozelKart: true,
     aksiyonEkrani: 'personel-belge-talep-liste',
@@ -116,15 +116,15 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Reddedildi',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Belge Talepleri', ic: '📄',
+    menuGrup: 'İK', menuAd: 'Belge Talepleri', ic: '📄',
     yetkiKodu: 'ik.belge_talep', modul: 'ik', menuSira: 16,
   },
   {
-    // RESMÎ TATİL (749): iş günü hesabının dayandığı takvim. İK & Prim
+    // RESMÎ TATİL (749): iş günü hesabının dayandığı takvim. İK
     //   altında, çünkü izin gününü de vardiyayı da bu liste belirler.
     kaynak: 'resmiTatil', rota: 'resmi-tatil',
     baslik: 'Resmî Tatiller',
-    yol: 'İK & Prim › Resmî Tatiller',
+    yol: 'İK › Resmî Tatiller',
     kartYolu: '/resmi-tatil', kartBaslik: 'Resmî Tatil',
     aksiyonEkrani: 'resmi-tatil-liste',
     tarihAlani: 'tarih',
@@ -143,7 +143,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Hafta sonuna denk', filtre: { alan: 'haftaSonu', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK & Prim', menuAd: 'Resmî Tatiller', ic: '📅',
+    menuGrup: 'İK', menuAd: 'Resmî Tatiller', ic: '📅',
     yetkiKodu: 'ik.tatil', modul: 'ik', menuSira: 13,
   },
   {
@@ -151,10 +151,10 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     //   değiştirmek başka bir iştir - ek gün vermek kurumun kararıdır.
     kaynak: 'personelIzinHak', rota: 'personel-izin-hak',
     baslik: 'İzin Hakedişleri',
-    yol: 'İK & Prim › İzin Hakedişi',
+    yol: 'İK › İzin Hakedişi',
     kartYolu: '/personel-izin-hak', kartBaslik: 'İzin Hakedişi',
     aksiyonEkrani: 'personel-izin-hak-liste',
-    menuGrup: 'İK & Prim', menuAd: 'İzin Hakedişi', ic: '🧮',
+    menuGrup: 'İK', menuAd: 'İzin Hakedişi', ic: '🧮',
     yetkiKodu: 'ik.izin_hak', modul: 'ik', menuSira: 12, menuGizli: true,
   },
 ];

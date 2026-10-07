@@ -42,8 +42,23 @@ p = io.open(parca, encoding="utf-8").read()
 #   degistirmek icin tekrar calistirmak yeter - eski bloklar duplike olmaz.
 #   Bu location bloklarinda ic-ice { } yok, [^}]* yeterli.
 n = len(re.findall(r"location[^\n{]*genotipai", s))
-s = re.sub(r"\n[ \t]*location[^\n{]*genotipai[^\n{]*\{[^{}]*\}\n", "\n", s)
-s = re.sub(r"\n[ \t]*location = /genotipai \{[^}]*\}\n", "\n", s)
+# DESEN `\n` ILE BASLAMAZ (07.10.2026'da bulunan hata): eski hali satir
+#   sonundaki `\n`'i tuketip bir SONRAKI blogun basindaki `\n`'i yok ediyordu;
+#   ardisik bloklarin yarisi silinmeden kaliyor, guncel parca eklenince nginx
+#   "duplicate location" diyor ve betik yedegi geri yukluyordu. Gorunen sonuc:
+#   calistirdiginiz halde yeni profil (goruntuleme, muayene) siteye hic girmez.
+s = re.sub(r"[ \t]*location[^\n{]*genotipai[^\n{]*\{[^{}]*\}[ \t]*\n", "", s)
+s = re.sub(r"[ \t]*location = /genotipai \{[^{}]*\}[ \t]*\n", "", s)
+
+kalan = re.findall(r"location[^\n{]*genotipai", s)
+if kalan:
+    # Temizlik yarim kalirsa parcayi eklemek duplicate uretir: siteye hic
+    #   dokunmadan dur - nginx -t hatasindan sonra geri almak degil, hic
+    #   bozmamak dogru.
+    sys.stderr.write("HATA: su genotipai bloklari temizlenemedi, site DEGISTIRILMEDI:\n")
+    for k in kalan[:10]:
+        sys.stderr.write("   " + k.strip() + "\n")
+    sys.exit(2)
 
 i = s.rstrip().rfind("}")               # server{} son kapanisi
 s = s[:i] + "\n" + p + "\n" + s[i:]

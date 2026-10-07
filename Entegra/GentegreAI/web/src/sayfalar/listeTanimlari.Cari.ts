@@ -273,6 +273,6 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   degil; kullanici "Departman listesi ekranini 2'ye bol" dedi.
     kaynak: 'departman', baslik: 'Bölüm / Görev', yol: 'Yönetim › Bölüm / Görev',
     ozelSayfa: true,
-    menuGrup: 'İK & Prim', menuSira: 20, menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
+    menuGrup: 'İK', menuSira: 20, menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
   },
 ];

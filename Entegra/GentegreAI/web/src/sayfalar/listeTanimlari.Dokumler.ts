@@ -82,7 +82,7 @@ export const DOKUM_LISTELERI = [
   dokumOgesi('Üretim'),
   dokumOgesi('Finans'),
   dokumOgesi('Muhasebe'),
-  dokumOgesi('İK & Prim'),
+  dokumOgesi('İK'),
   // Dokuman kendi ana grubu (kullanici): dokum orada da var - "hangi klasorde
   //   kac dosya, suresi dolan, onayda bekleyen" bir dokum sorusudur.
   dokumOgesi('Doküman'),

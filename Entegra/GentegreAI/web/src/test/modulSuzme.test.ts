@@ -38,7 +38,7 @@ describe('modül süzmesi', () => {
     //   Kurumlar & Sigorta - ucu de kapatilamaz cekirdek ekranlar.
     // Medula (707): modül kapısı yok - SGK'lı hasta kabul eden her HBYS
     //   kurumunda görünür, hesap tanımsızsa kuyruk ekranı bunu söyler.
-    const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK & Prim',
+    const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK',
                             'Kurumlar & Sigorta', 'Demirbaş', 'Medula']);
     const gruplar = new Set(LISTELER.map(l => l.menuGrup).filter(Boolean) as string[]);
 

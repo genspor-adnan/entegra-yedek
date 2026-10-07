@@ -29,7 +29,10 @@ describe('menü düzeni', () => {
     //   Mesajlar/AI üst çubukta.
     // DOKÜMAN LİSTEDE DEĞİL: Yönetim'in alt grubu yapılınca ana menüden
     //   kaybolmuştu, kullanıcı geri istedi (kendi grubu, Demirbaş'tan önce).
-    for (const eski of ['Kasa', 'Banka', 'CRM', 'Cari', 'İK', 'İletişim & AI'])
+    // "İK" DE LİSTEDE DEĞİL (kullanıcı 07.10.2026: "İK & Prim rename İK her
+    //   yerde"): grup adı yeniden "İK" oldu - eskiden kaldırılmış bir ad
+    //   olması, bugün bilinçle seçilmiş olmasını engellemiyor.
+    for (const eski of ['Kasa', 'Banka', 'CRM', 'Cari', 'İletişim & AI'])
       expect(GRUPLAR, `"${eski}" grubu menüden kalkmıştı`).not.toContain(eski);
   });
 
