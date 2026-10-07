@@ -134,18 +134,19 @@
   </div>
 
   <div class="sekmeler">
-    <div class="sekme on">Hekim Özeti</div>
-    <div class="sekme">Tanılar <span class="say">11</span></div>
-    <div class="sekme">İlaç / Reçete <span class="say kir">9</span></div>
-    <div class="sekme">Tahliller <span class="say sari">24</span></div>
-    <div class="sekme">Görüntüleme <span class="say">4</span></div>
-    <div class="sekme">Yatış / Ameliyat <span class="say">2</span></div>
-    <div class="sekme">Aşı · Alerji</div>
-    <div class="sekme">Raporlar <span class="say">3</span></div>
-    <div class="sekme">Zaman Çizelgesi</div>
+    <div class="sekme on" data-s="ozet">Hekim Özeti</div>
+    <div class="sekme" data-s="tani">Tanılar <span class="say">11</span></div>
+    <div class="sekme" data-s="ilac">İlaç / Reçete <span class="say kir">9</span></div>
+    <div class="sekme" data-s="tahlil">Tahliller <span class="say sari">24</span></div>
+    <div class="sekme" data-s="goruntu">Görüntüleme <span class="say">4</span></div>
+    <div class="sekme" data-s="yatis">Yatış / Ameliyat <span class="say">2</span></div>
+    <div class="sekme" data-s="asi">Aşı · Alerji</div>
+    <div class="sekme" data-s="rapor">Raporlar <span class="say">3</span></div>
+    <div class="sekme" data-s="zaman">Zaman Çizelgesi</div>
   </div>
 
   <!-- HEKİM ÖZETİ: muayenenin ilk 30 saniyesinde okunacak kadar kısa. -->
+  <div class="pnl" data-s="ozet">
   <div class="ucPanel">
     <div class="grp">
       <div class="gb">Kronik tanılar <span class="sp mini">dış kurum + bizden</span></div>
@@ -225,6 +226,261 @@
         </tbody></table></div>
       <div class="ic mini">Görüntü e-Nabız'da varsa bağlantıyla açılır, kuruma <b>kopyalanmaz</b>;
         rapor metni muayene notuna eklenebilir (kaynak ve tarih damgasıyla).</div>
+    </div>
+  </div>
+  </div>
+
+
+  <!-- TANILAR: hangi kurum, kronik mi, aktarıldı mı. -->
+  <div class="pnl" data-s="tani" hidden>
+    <div class="toolbar" style="border-top:none">
+      <span class="chip on">Tümü</span><span class="chip">Kronik</span><span class="chip">Son 1 yıl</span>
+      <span class="chip">Yalnız dış kurum</span>
+      <div class="btn kucuk sp">➕ Seçilenleri Muayeneye Aktar</div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta"><span class="kutucuk"><i></i></span></th><th>Tarih</th><th>ICD-10</th>
+        <th>Tanı</th><th>Kurum</th><th>Klinik</th><th class="orta">Kronik</th><th class="orta">Tür</th>
+        <th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="orta"><span class="kutucuk"><i class="on"></i></span></td><td>22.03.2026</td>
+          <td>E11.9</td><td class="sar">Tip 2 diabetes mellitus</td><td>X Devlet Hast.</td><td>Endokrinoloji</td>
+          <td class="orta"><span class="rz mor">kronik</span></td><td class="orta">ana</td>
+          <td class="orta"><span class="rz">aktarılmadı</span></td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>22.03.2026</td>
+          <td>E03.9</td><td class="sar">Hipotiroidi</td><td>X Devlet Hast.</td><td>Endokrinoloji</td>
+          <td class="orta"><span class="rz mor">kronik</span></td><td class="orta">ek</td>
+          <td class="orta"><span class="rz ok">aktarıldı</span></td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>11.11.2025</td>
+          <td>I10</td><td class="sar">Esansiyel (primer) hipertansiyon</td><td>Z Özel Hast.</td><td>Kardiyoloji</td>
+          <td class="orta"><span class="rz mor">kronik</span></td><td class="orta">ana</td>
+          <td class="orta"><span class="rz">aktarılmadı</span></td></tr>
+        <tr><td class="orta"><span class="kutucuk"><i></i></span></td><td>14.05.2026</td>
+          <td>J06.9</td><td class="sar">Üst solunum yolu enfeksiyonu</td><td>Bizim kurum</td><td>Dahiliye</td>
+          <td class="orta">—</td><td class="orta">ana</td>
+          <td class="orta"><span class="rz mavi">bizden</span></td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>08.01.2026</td>
+          <td>J02.9</td><td class="sar">Akut farenjit</td><td>Y ASM</td><td>Aile Hekimliği</td>
+          <td class="orta">—</td><td class="orta">ana</td>
+          <td class="orta"><span class="rz">aktarılmadı</span></td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>03.06.2025</td>
+          <td>Z00.0</td><td class="sar">Genel tıbbi muayene</td><td>Y ASM</td><td>Aile Hekimliği</td>
+          <td class="orta">—</td><td class="orta">ana</td><td class="orta"><span class="rz pas">ilgisiz</span></td></tr>
+      </tbody></table></div>
+    <div class="ic mini">Aktarılan tanı kendi muayenenizin tanı listesine <b>kaynak damgasıyla</b>
+      girer (22.03.2026 · X Devlet Hast.). Kronik işareti e-Nabız'dan gelir; aktarılınca hastanın
+      tıbbi özetine de düşer.</div>
+  </div>
+
+  <!-- İLAÇ / REÇETE: aktif-bitmiş ayrımı ve alerji çelişkisi. -->
+  <div class="pnl" data-s="ilac" hidden>
+    <div class="toolbar" style="border-top:none">
+      <span class="chip on">Tümü</span><span class="chip">Aktif (sürekli)</span><span class="chip">Son 6 ay</span>
+      <span class="chip">Çelişkili</span>
+      <div class="btn kucuk sp">➕ Seçilenleri Reçeteye Al</div>
+      <div class="btn kucuk">🧪 Etkileşim Kontrolü</div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta"><span class="kutucuk"><i></i></span></th><th>Tarih</th><th>Reçete No</th>
+        <th>Kurum</th><th>İlaç</th><th>Doz / Periyot</th><th>Süre</th><th class="orta">Durum</th>
+        <th class="orta">Uyarı</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="orta"><span class="kutucuk"><i class="on"></i></span></td><td>22.03.2026</td>
+          <td>2026-03-…</td><td>X Devlet Hast.</td><td>Metformin 1000 mg</td><td>2×1</td><td>sürekli</td>
+          <td class="orta"><span class="rz ok">aktif</span></td><td class="orta">—</td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>11.11.2025</td>
+          <td>2025-11-…</td><td>Z Özel Hast.</td><td>Ramipril 5 mg</td><td>1×1</td><td>sürekli</td>
+          <td class="orta"><span class="rz ok">aktif</span></td><td class="orta">—</td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>22.03.2026</td>
+          <td>2026-03-…</td><td>X Devlet Hast.</td><td>Levotiroksin 50 mcg</td><td>1×1</td><td>sürekli</td>
+          <td class="orta"><span class="rz ok">aktif</span></td><td class="orta">—</td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>08.01.2026</td>
+          <td>2026-01-…</td><td>Y ASM</td><td><span class="rz kir">Amoksisilin 1 g</span></td><td>2×1</td>
+          <td>7 gün</td><td class="orta"><span class="rz pas">karşılandı</span></td>
+          <td class="orta"><span class="rz kir">alerji</span></td></tr>
+        <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td><td>08.01.2026</td>
+          <td>2026-01-…</td><td>Y ASM</td><td>İbuprofen 400 mg</td><td>2×1</td><td>5 gün</td>
+          <td class="orta"><span class="rz pas">karşılandı</span></td>
+          <td class="orta"><span class="rz sari">HT ile dikkat</span></td></tr>
+        <tr><td class="orta"><span class="kutucuk"><i></i></span></td><td>14.05.2026</td>
+          <td>2026-05-…</td><td>Bizim kurum</td><td>Parasetamol 500 mg</td><td>3×1</td><td>5 gün</td>
+          <td class="orta"><span class="rz pas">karşılandı</span></td><td class="orta">—</td></tr>
+      </tbody></table></div>
+    <div class="ic"><span class="rz kir">Çelişki</span> 08.01.2026 Amoksisilin, kayıtlı
+      <b>penisilin alerjisiyle</b> çelişiyor - hastaya sorulmalı ve alerji kaydı güncellenmeli.
+      <span class="mini">Reçeteye alınan ilaç kendi reçetenizde yeni satır olur; dış reçete
+      değiştirilmez.</span></div>
+  </div>
+
+  <!-- TAHLİLLER: tamamı + gidişat; özet yalnız anormali gösteriyordu. -->
+  <div class="pnl" data-s="tahlil" hidden>
+    <div class="toolbar" style="border-top:none">
+      <span class="chip on">Tümü</span><span class="chip">Yalnız anormal</span><span class="chip">Biyokimya</span>
+      <span class="chip">Hormon</span><span class="chip">Hematoloji</span><span class="chip">Mikrobiyoloji</span>
+      <div class="btn kucuk sp">📈 Trend (HbA1c · TSH)</div>
+      <div class="btn kucuk">📎 Muayene Notuna Ekle</div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th>Tarih</th><th>Kurum</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Birim</th>
+        <th>Referans</th><th class="orta">Bayrak</th><th class="orta">Önceki</th></tr></thead>
+      <tbody>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>HbA1c</td><td class="sag">7,9</td>
+          <td>%</td><td>&lt; 7,0</td><td class="orta"><span class="rz sari">H</span></td>
+          <td class="orta">8,4 ↓</td></tr>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>Açlık glukoz</td><td class="sag">142</td>
+          <td>mg/dL</td><td>70–100</td><td class="orta"><span class="rz sari">H</span></td>
+          <td class="orta">156 ↓</td></tr>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>LDL kolesterol</td><td class="sag">168</td>
+          <td>mg/dL</td><td>&lt; 130</td><td class="orta"><span class="rz sari">H</span></td>
+          <td class="orta">151 ↑</td></tr>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>TSH</td><td class="sag">3,1</td>
+          <td>mIU/L</td><td>0,4–4,0</td><td class="orta">—</td><td class="orta">6,8 ↓</td></tr>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>Kreatinin</td><td class="sag">0,8</td>
+          <td>mg/dL</td><td>0,5–1,1</td><td class="orta">—</td><td class="orta">0,8 =</td></tr>
+        <tr class="dis"><td>08.01.2026</td><td>Y ASM</td><td>CRP</td><td class="sag">14</td>
+          <td>mg/L</td><td>&lt; 5</td><td class="orta"><span class="rz sari">H</span></td>
+          <td class="orta">—</td></tr>
+        <tr class="dis"><td>08.01.2026</td><td>Y ASM</td><td>WBC</td><td class="sag">10,9</td>
+          <td>10³/µL</td><td>4–10</td><td class="orta"><span class="rz sari">H</span></td>
+          <td class="orta">—</td></tr>
+        <tr class="dis"><td>19.02.2025</td><td>X Devlet Hast.</td><td>TSH</td><td class="sag">6,8</td>
+          <td>mIU/L</td><td>0,4–4,0</td><td class="orta"><span class="rz kir">H</span></td>
+          <td class="orta">—</td></tr>
+        <tr class="dis"><td>19.02.2025</td><td>X Devlet Hast.</td><td>fT4</td><td class="sag">0,7</td>
+          <td>ng/dL</td><td>0,8–1,8</td><td class="orta"><span class="rz kir">L</span></td>
+          <td class="orta">—</td></tr>
+      </tbody></table></div>
+    <div class="ic mini">"Önceki" kolonu AYNI tetkikin bir önceki sonucudur - hangi kurumda
+      yapıldığına bakmaz: hekim gidişatı görmeli. Referans aralığı sonucu ÜRETEN laboratuvarın
+      aralığıdır, kendi laboratuvarınızınki değil.</div>
+  </div>
+
+  <!-- GÖRÜNTÜLEME: görüntü bağlantıyla açılır, kuruma kopyalanmaz. -->
+  <div class="pnl" data-s="goruntu" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tarih</th><th>Kurum</th><th>Tetkik</th><th>Bölge</th><th class="sar">Rapor sonucu</th>
+        <th class="orta">Görüntü</th><th class="orta">Rapor</th></tr></thead>
+      <tbody>
+        <tr class="dis"><td>22.03.2026</td><td>X Devlet Hast.</td><td>Tiroid USG</td><td>Boyun</td>
+          <td class="sar">Sağ lobda 8 mm izoekoik nodül, TIRADS 2</td>
+          <td class="orta"><span class="btn kucuk">🖼 Aç</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>11.11.2025</td><td>Z Özel Hast.</td><td>Ekokardiyografi</td><td>Kalp</td>
+          <td class="sar">EF %55, hafif sol ventrikül hipertrofisi</td>
+          <td class="orta"><span class="rz pas">yok</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>03.06.2025</td><td>Y ASM</td><td>Akciğer grafisi (PA)</td><td>Toraks</td>
+          <td class="sar">Normal</td>
+          <td class="orta"><span class="btn kucuk">🖼 Aç</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>19.02.2025</td><td>X Devlet Hast.</td><td>Tiroid USG</td><td>Boyun</td>
+          <td class="sar">Sağ lobda 7 mm nodül</td>
+          <td class="orta"><span class="btn kucuk">🖼 Aç</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+      </tbody></table></div>
+    <div class="ic mini">Görüntü e-Nabız'ın görüntüleyicisinde açılır; <b>kuruma indirilmez ve
+      saklanmaz</b>. Rapor metni "Muayene Notuna Ekle" ile kaynak ve tarih damgasıyla eklenir.
+      Aynı tetkikin eski kaydı (19.02.2025 ile 22.03.2026) karşılaştırma için bırakılır.</div>
+  </div>
+
+  <!-- YATIŞ / AMELİYAT -->
+  <div class="pnl" data-s="yatis" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tarih</th><th>Kurum</th><th>Klinik</th><th>Tür</th><th class="sar">Tanı / işlem</th>
+        <th>Süre</th><th class="orta">Çıkış</th><th class="orta">Epikriz</th></tr></thead>
+      <tbody>
+        <tr class="dis"><td>09.07.2024</td><td>X Devlet Hast.</td><td>Genel Cerrahi</td><td>Yatış + ameliyat</td>
+          <td class="sar">K80.2 Kolelitiyaz · Laparoskopik kolesistektomi (P621350)</td>
+          <td>3 gün</td><td class="orta">şifa</td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>14.02.2023</td><td>Z Özel Hast.</td><td>Kadın Doğum</td><td>Yatış</td>
+          <td class="sar">O80 Normal doğum</td><td>2 gün</td><td class="orta">şifa</td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+      </tbody></table></div>
+    <div class="ic mini">Ameliyat işlem kodu SUT/SKRS koduyla gelir. Epikriz metni e-Nabız'da
+      varsa okunur; <b>ameliyat notu</b> paylaşıma açık değilse yalnız başlık görünür.</div>
+  </div>
+
+  <!-- AŞI · ALERJİ: ikisi de muayene kararını doğrudan etkiler. -->
+  <div class="pnl" data-s="asi" hidden>
+    <div class="ikiPanel">
+      <div class="grp">
+        <div class="gb">Alerjiler <span class="sp mini">e-Nabız + hasta beyanı</span></div>
+        <div class="dg"><table>
+          <thead><tr><th>Etken</th><th>Tür</th><th>Şiddet</th><th>Kayıt</th><th class="orta">Kaynak</th></tr></thead>
+          <tbody>
+            <tr><td><b>Penisilin</b></td><td>İlaç</td><td><span class="rz kir">ciddi</span></td>
+              <td>2019 · X Devlet Hast.</td><td class="orta">dış</td></tr>
+            <tr><td>Polen</td><td>Çevresel</td><td><span class="rz sari">hafif</span></td>
+              <td>2022 · hasta beyanı</td><td class="orta"><span class="rz mavi">bizden</span></td></tr>
+          </tbody></table></div>
+        <div class="ic mini">Ciddi ilaç alerjisi reçete yazarken <b>engelleyici uyarı</b> üretir;
+          bu panelde yalnız görüntülenir, kayıt Alerji kartından yönetilir.</div>
+      </div>
+      <div class="grp">
+        <div class="gb">Aşılar</div>
+        <div class="dg"><table>
+          <thead><tr><th>Tarih</th><th>Aşı</th><th>Doz</th><th>Kurum</th></tr></thead>
+          <tbody>
+            <tr class="dis"><td>03.06.2025</td><td>Grip (influenza)</td><td>1</td><td>Y ASM</td></tr>
+            <tr class="dis"><td>12.10.2021</td><td>COVID-19 (hatırlatma)</td><td>3</td><td>Y ASM</td></tr>
+            <tr class="dis"><td>08.04.2019</td><td>Tetanoz (Td)</td><td>1</td><td>X Devlet Hast.</td></tr>
+          </tbody></table></div>
+        <div class="ic mini">Çocukluk aşı takvimi e-Nabız'da ayrı pakette gelir; erişkin
+          hastada son 10 yıl gösterilir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAPORLAR -->
+  <div class="pnl" data-s="rapor" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tarih</th><th>Rapor türü</th><th>Kurum</th><th class="sar">Konu</th><th>Geçerlilik</th>
+        <th class="orta">Durum</th><th class="orta">Belge</th></tr></thead>
+      <tbody>
+        <tr class="dis"><td>22.03.2026</td><td>İlaç kullanım raporu</td><td>X Devlet Hast.</td>
+          <td class="sar">Levotiroksin · Metformin (kronik)</td><td>22.03.2028</td>
+          <td class="orta"><span class="rz ok">geçerli</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>11.11.2025</td><td>İstirahat raporu</td><td>Z Özel Hast.</td>
+          <td class="sar">3 gün istirahat</td><td>14.11.2025</td>
+          <td class="orta"><span class="rz pas">süresi doldu</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        <tr class="dis"><td>09.07.2024</td><td>Ameliyat / yatış raporu</td><td>X Devlet Hast.</td>
+          <td class="sar">Kolesistektomi sonrası</td><td>—</td>
+          <td class="orta"><span class="rz pas">arşiv</span></td>
+          <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+      </tbody></table></div>
+    <div class="ic mini">Geçerli <b>ilaç kullanım raporu</b> reçete yazarken SUT kontrolünde
+      kullanılır: raporu olan ilaç için katılım payı ve rapor şartı farklıdır.</div>
+  </div>
+
+  <!-- ZAMAN ÇİZELGESİ (sekme): tüm kurumlar tek akışta. -->
+  <div class="pnl" data-s="zaman" hidden>
+    <div class="toolbar" style="border-top:none">
+      <span class="chip on">Tümü</span><span class="chip">Muayene</span><span class="chip">Reçete</span>
+      <span class="chip">Tahlil</span><span class="chip">Görüntüleme</span><span class="chip">Yatış</span>
+      <span class="chip">Aşı</span>
+      <div class="btn kucuk sp">⬇ Özet PDF</div>
+    </div>
+    <div class="zc">
+      <div class="yil">2026</div>
+      <div class="sat biz"><span class="tar">14.05.2026</span><span>Bizim kurum · Dahiliye</span>
+        <span>Muayene · J06.9 · Parasetamol 500 mg reçete</span><span class="rz mavi">bizden</span></div>
+      <div class="sat"><span class="tar">22.03.2026</span><span>X Devlet Hast. · Endokrinoloji</span>
+        <span>Muayene · E11.9/E03.9 · HbA1c 7,9 ↑ · Tiroid USG · Levotiroksin</span><span class="rz">dış</span></div>
+      <div class="sat"><span class="tar">08.01.2026</span><span>Y ASM · Aile Hekimliği</span>
+        <span>Muayene · J02.9 · CRP 14 ↑ · <b class="rz kir">Amoksisilin</b> (alerji çelişkisi)</span><span class="rz">dış</span></div>
+      <div class="yil">2025</div>
+      <div class="sat"><span class="tar">11.11.2025</span><span>Z Özel Hast. · Kardiyoloji</span>
+        <span>Muayene · I10 · EKO (EF %55)</span><span class="rz">dış</span></div>
+      <div class="sat"><span class="tar">03.06.2025</span><span>Y ASM · Aile Hekimliği</span>
+        <span>Periyodik muayene · Akciğer grafisi · Grip aşısı</span><span class="rz">dış</span></div>
+      <div class="sat"><span class="tar">19.02.2025</span><span>X Devlet Hast. · Endokrinoloji</span>
+        <span>Muayene · E03.9 · TSH 6,8 ↑ / fT4 0,7 ↓ · doz artışı</span><span class="rz">dış</span></div>
+      <div class="yil">2024</div>
+      <div class="sat"><span class="tar">09.07.2024</span><span>X Devlet Hast. · Genel Cerrahi</span>
+        <span>Yatış 3 gün · Laparoskopik kolesistektomi (K80.2)</span><span class="rz">dış</span></div>
     </div>
   </div>
 
@@ -338,6 +594,27 @@
   servisinin (USS) döndürdüğü paketlere göre adlandırıldı; gerçekleştirme kararı
   verilmeden API/DB'ye dokunulmayacak.
 </div>
+
+
+<script>
+// Sekmeler: data-s eslesmesi (muayene_karti_v2 ile ayni desen). Yalniz ILK
+//   pencerenin panelleri anahtarlanir - ikinci pencere "izin yok" hali,
+//   ucuncusu zaman cizelgesinin tek basina gorunumu.
+(function(){
+  var win = document.querySelector('.win');
+  var tabs = [].slice.call(win.querySelectorAll('.sekmeler .sekme'));
+  var pnls = [].slice.call(win.querySelectorAll(':scope > .pnl'));
+  function goster(k){
+    tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.s === k); });
+    pnls.forEach(function(p){ p.hidden = (p.dataset.s !== k); });
+  }
+  tabs.forEach(function(t){
+    t.style.cursor = 'pointer';
+    t.addEventListener('click', function(){ goster(t.dataset.s); });
+  });
+  goster('ozet');
+})();
+</script>
 
 </body>
 </html>
