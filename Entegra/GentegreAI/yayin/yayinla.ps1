@@ -32,7 +32,7 @@ param(
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
     [ValidateSet('hepsi','hbys','erp','profiller',
-                 'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme')]
+                 'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
     [switch]$TemelAl,
@@ -74,6 +74,13 @@ $PROFILLER = @(
     @{ Ad='goz';        Etiket='Profil: Goz (dal)';    Tip='dal_goz' }
     @{ Ad='ftr';        Etiket='Profil: FTR (dal)';    Tip='dal_ftr' }
     @{ Ad='goruntuleme'; Etiket='Profil: Goruntuleme Mrk'; Tip='goruntuleme' }
+    # MUAYENE (kullanici 07.10.2026: "46.36.201.170/genotipai/muayene yayinla"):
+    #   muayene akisi odakli kurulum; DB'si HASTANE profilinden kopyalandi, o
+    #   yuzden kurum tipi de hastane - muayene/istem/recete zinciri tam acik
+    #   olsun. Listenin SONUNA eklenir: port sirayla atandigi icin ortaya
+    #   eklemek butun profillerin portunu kaydirir ve nginx bloklariyla
+    #   ayrismasina yol acar (muayene = 5198).
+    @{ Ad='muayene';    Etiket='Profil: Muayene';       Tip='hastane' }
 )
 $port = 5190
 foreach ($p in $PROFILLER) {

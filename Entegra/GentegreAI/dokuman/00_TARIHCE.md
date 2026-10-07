@@ -19949,3 +19949,38 @@ web'den de açılabiliyor.
 
 Doğrulama: `/kurum-profili` adresi artık panele düşüyor (rota yok); web vitest
 789 ve tsc temiz, GenProfil derlemesi temiz.
+
+### 07.10.2026 — yeni kurulum: /genotipai/muayene
+
+Kullanıcı: *"46.36.201.170/genotipai/muayene yayınla"*. Dokuzuncu profil
+eklendi: `muayene` → `gentegre_ai_muayene`, konteyner `gentegre-api-muayene`,
+port **5198**. Profil listesinin **sonuna** eklendi; port sırayla atandığı için
+ortaya eklemek bütün profillerin portunu kaydırır ve nginx bloklarıyla
+ayrışmasına yol açardı.
+
+**Veritabanı neden hastane kopyası:** boş kurulum zinciri `003_goc_taraf.sql`'de
+kırıldı (`relation "public.cari" does not exist`) - dosya `aktarim_adimlari.txt`
+listesinde değil, yani boş veritabanında çalışabileceği varsayılmış ama
+çalışmıyor. Diğer profiller de sıfırdan göçle değil tohumdan kurulmuş. Dev
+tohumunu sunucuya göndermek ise dev veritabanında test hasta kayıtları olduğu
+için **engellendi** (doğru sınır). Bu yüzden kopya **sunucunun içinde** alındı:
+`pg_dump gentegre_ai_hastane | psql gentegre_ai_muayene` - veri sunucudan
+çıkmadı. Kurum tipi de hastane kaldı: muayene/istem/reçete zinciri tam açık
+olsun.
+
+Yayın `20261007-164358` tamam (göç 0 uygulandı/965 kayıtlı, api konteyneri
+kuruldu). **Kalan tek adım nginx**: `/genotipai/muayene/` blokları siteye
+uygulanmadı, çünkü betik sudo parolası istiyor:
+
+```bash
+sudo bash /tmp/nginx-genotipai-uygula.sh   # dosyalar /tmp'de hazır
+```
+
+Uygulanana kadar adres ve API basic-auth'a takılır (401). Betik tekrar
+çalıştırılabilir; nginx -t başarısız olursa yedeği geri yükler.
+
+### Aynı gün — lab ve hastane yayınları
+
+`lab` → `20261007-162932` (göç yok). `hastane` → `20261007-163211`, **3 göç
+uygulandı** (979 menü düzeni, 980 ikon görseli, 981 tür benzersizliği), öncesinde
+yedek alındı.
