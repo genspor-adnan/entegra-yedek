@@ -7821,3 +7821,33 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mn-oge.d2 { padding-left: 20px }
 .mn-oge.d3 { padding-left: 36px; color: #b9cadb }
 .mn-oge.d4 { padding-left: 52px; color: #b9cadb }
+
+/* ---------------------------------------------------------------------------
+   MUAYENEDE e-NABIZ SEKMESİ (mockup muayene_enabiz_paneli_v3)
+   Sekmede tablo yok: veri Bakanlık sayfasında kalıyor - burada erişim akışı,
+   aktarım kısayolları ve KVKK izi var.
+--------------------------------------------------------------------------- */
+.mn-enabiz { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px }
+.mn-enabiz .me-ust { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.mn-enabiz .me-akis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px }
+@media (max-width: 900px) { .mn-enabiz .me-akis { grid-template-columns: 1fr 1fr } }
+.mn-enabiz .me-ad { border: 1px solid var(--cizgi2); border-radius: 6px;
+  background: var(--yuz); padding: 8px 10px }
+.mn-enabiz .me-ad .no { display: inline-block; width: 18px; height: 18px; border-radius: 9px;
+  background: var(--vurgu); color: #fff; text-align: center; line-height: 18px;
+  font-size: 10.5px; font-weight: 700 }
+.mn-enabiz .me-ad b { display: block; margin: 4px 0 2px; font-size: 12px }
+.mn-enabiz .me-ad span:not(.no) { display: block; font-size: 11px; color: var(--metin2); line-height: 1.6 }
+.mn-enabiz .me-bilgi { font-size: 11.5px; line-height: 1.7; color: var(--metin2);
+  background: var(--yuz2); border: 1px solid var(--cizgi2); border-radius: 6px; padding: 9px 11px }
+.mn-enabiz .me-bas { font-size: 11.5px; font-weight: 700; color: var(--metin) }
+.mn-enabiz .me-aktar { border: 1px solid var(--cizgi2); border-radius: 6px;
+  background: var(--yuz); padding: 9px 11px; display: flex; flex-direction: column; gap: 7px }
+.mn-enabiz .me-dugmeler { display: flex; gap: 6px; flex-wrap: wrap }
+.mn-enabiz .me-ipucu { font-size: 11px; line-height: 1.6 }
+.mn-enabiz .me-tablo { border: 1px solid var(--cizgi2); border-radius: 6px; overflow: auto }
+.mn-enabiz .me-tablo table { border-collapse: collapse; width: 100% }
+.mn-enabiz .me-tablo th { background: var(--yuz2); border-bottom: 1px solid var(--cizgi2);
+  text-align: left; padding: 6px 8px; font-size: 11px; color: var(--metin2); white-space: nowrap }
+.mn-enabiz .me-tablo td { border-bottom: 1px solid var(--cizgi2); padding: 5px 8px;
+  font-size: 11.5px; white-space: nowrap }

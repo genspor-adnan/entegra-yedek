@@ -19984,3 +19984,47 @@ Uygulanana kadar adres ve API basic-auth'a takılır (401). Betik tekrar
 `lab` → `20261007-162932` (göç yok). `hastane` → `20261007-163211`, **3 göç
 uygulandı** (979 menü düzeni, 980 ikon görseli, 981 tür benzersizliği), öncesinde
 yedek alındı.
+
+### 07.10.2026 — Muayene kartında e-Nabız sekmesi (V3 mockup'ın uygulanması)
+
+Kullanıcı: *"muayene yapan doktorun e-Nabız'dan hasta verilerini görebilmesi
+için mockup yap"* → *"gelen e-Nabız web sayfasından bize veri alabilir misin"*
+→ *"yeni vers ile revize et"* → *"v3 yap"*.
+
+**Önce doğru soru cevaplandı:** Bakanlık HBYS'ye hasta geçmişi **döndürmüyor**.
+`EnabizErisimServisi` akışı: `DoktorEHRErisimi` çağrılır, dönen geçici
+`AccessKey` paylaşım adresinin sonuna eklenir, **sayfa açılır**; hekim orada
+e-Devlet ile girer (hasta kayıtlarını gizlemişse SMS onayı). Sayfayı kazımak
+teknik olarak da mümkün değil (farklı alan adı - tarayıcı engeller) ve hekimin
+e-Devlet oturumunu taşımak kimlik taklidi olurdu. Bu yüzden V2 mockup'ı
+(dolu tablolar) terk edilip **V3** yazıldı: her sekme kaynağını söyler.
+
+Uygulanan parça (kullanıcı seçimi): **muayene kartına `e-Nabız` sekmesi**
+(`MuayeneEnabizSekmesi.tsx`). Sekmede **tablo yok** - veri Bakanlık
+sayfasında kalıyor:
+
+* **Erişim düğmeleri** ortak bileşenden (`EnabizButonu`, KTS H8: görünüm,
+  konum ve ipucu denetim maddesi - yeniden çizilmedi).
+* **4 adımlı akış**: erişim isteği → geçici anahtar → e-Nabız sayfası →
+  e-Devlet + SMS. Hekim ne olacağını önce okur.
+* **"Gördüğünü muayeneye aktar"**: tanı ve ilaç kısayolları kartın KENDİ
+  ekleme yollarını çağırır (ICD arama, reçete ilaç arama) - ikinci bir kayıt
+  yolu açılmadı, tanı/ilaç kuralları tek yerde kaldı. Not: dış tahlil kendi
+  laboratuvar sonucu gibi kaydedilmez.
+* **Erişim kayıtları** (`GET /api/enabiz/erisim?hastaId=`): başarısız denemeler
+  dahil, anahtarın yalnız ilk 8 karakteri.
+
+Mockup'tan bilinçli sapma: **gömülü pencere yok**. Devlet sayfaları
+`X-Frame-Options` ile çerçevelenmeye izin vermediği için iframe boş bir kutu
+olurdu; adres yeni sekmede açılıyor (düğme pop-up kuralına uygun: sekme
+istekten önce açılır).
+
+**Yapılmayan, çünkü servis yok:** "SGK · Reçete / Rapor" sekmesi. Medula
+entegrasyonumuz yalnız KAYIT yönünde (`eReceteKayit`, `raporKayit`); başka
+kurumun e-reçetesini/e-raporunu **sorgulayan** işlem yok - SGK servis
+dokümanı ve yetkisi gerekiyor. Mockup'ta duruyor, uygulanması o yetkiye bağlı.
+
+Doğrulama: muayene kartı #13'te sekme açıldı, 4 akış adımı, iki aktarım
+kısayolu ve "Bu hastanın kayıtlarına henüz erişilmedi" durumu göründü. Hasta
+alanının muayenede `tarafId` olduğu düzeltildi (`hastaId` yalnız bazı
+kartlarda var). vitest 789, tsc temiz.

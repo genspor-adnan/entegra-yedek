@@ -17,6 +17,7 @@ import { AsiUygulaModali } from '../../bilesenler/AsiUygulaModali';
 import { CocukIzlemModali } from '../../bilesenler/CocukIzlemModali';
 import { GebeIzlemModali } from '../../bilesenler/GebeIzlemModali';
 import { EnabizButonu } from '../../bilesenler/EnabizButonu';
+import { MuayeneEnabizSekmesi } from '../../bilesenler/MuayeneEnabizSekmesi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
 import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
@@ -678,6 +679,22 @@ export function ListeKarti({
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },
+              // e-NABIZ SEKMESI (mockup muayene_enabiz_paneli_v3): dis kurum
+              //   kayitlarina ERISIM + hekimin gordugunu aktarmasi + KVKK izi.
+              //   Veri bu ekrana GELMEZ; sayfa Bakanlikta acilir - bu yuzden
+              //   sekmede tablo degil akis ve kisayollar var.
+              { anahtar: 'ozel:enabiz', baslik: 'e-Nabız',
+                ciz: baglam => (
+                  <MuayeneEnabizSekmesi
+                    // MUAYENEDE HASTA ALANI `tarafId` (hasta bir taraftır);
+                    //   `hastaId` yalnız bazı kartlarda var.
+                    hastaId={Number(baglam.deger.tarafId ?? baglam.deger.hastaId ?? 0)}
+                    muayeneId={Number(kartId)}
+                    eylemler={{
+                      taniEkle: () => setIcdAramaAcik(true),
+                      ilacEkle: () => setReceteIlacAra(true),
+                    }} />
+                ) },
               { anahtar: 'ozel:gecmis', baslik: 'Geçmiş',
                 ciz: () => (
                   <MuayeneGecmisSekmesi veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
