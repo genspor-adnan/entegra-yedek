@@ -25,6 +25,11 @@ export interface MenuOgesi {
   sira?: number;
   /** Ekranin LISTE KAYNAGI - portal menusu kapsam suzgecinde kullanir (796 V2). */
   kaynak?: string;
+  /** Ekranin YETKI KODU: yetki matrisi agacini AYNI menuden kurar (979). */
+  yetkiKodu?: string;
+  /** Ekranin MODUL kodu (kurum profilinde acilip kapanan paket) - menu
+      duzeni ekrani hangi module ait oldugunu yazar. */
+  modul?: string;
   /** Ozel sayfa mi (pano/ayar): liste kaynagi yoktur. */
   ozelSayfa?: boolean;
 }
@@ -322,6 +327,8 @@ export function menuSatirlariKur(
       altGrup: l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
       sira: l.menuSira,
       kaynak: l.kaynak,
+      yetkiKodu: l.yetkiKodu,
+      modul: l.modul,
       ozelSayfa: l.ozelSayfa,
     }));
 

@@ -19748,3 +19748,47 @@ dönsün.
 Doğrulama (dev): "Klinikler" bölgesi gizlenip kaydedildi → sol menüde KLİNİKLER
 ve grupları kayboldu, HASTA AKIŞI yerinde kaldı. vitest 789, tsc temiz, dev
 veritabanı temiz.
+
+### 07.10.2026 (altıncı tur) — pasif menü paneli, çapraz taşıma, matris bölgeli
+
+**Pasif menü** (kullanıcı: *"önizleme yerine soldaki menü benzerini yapsan ve
+başlığı pasif menü olsa… kullanmayacaklarımı sağdaki pasif menüye taşısam…
+ihtiyaç olduğunda sağdan sola taşıyıp yerine yerleştirsem kaydırarak"*): sağ
+panel artık önizleme değil **Pasif menü**. Aktif ağaçtan panele bırakmak
+gizler, panelden sol ağaçtaki bir satırın üstüne bırakmak hem aktife alır hem o
+sıraya yerleştirir (↩ düğmesi de var). Gizlenen satır aktif ağaçta artık
+çizilmiyor - iki kutu "aktif / pasif" olarak ayrıldı. Üstü pasifte olan satır
+kendi başına geri alınamaz (önce üst başlık aktife gelmeli).
+
+**Çapraz taşıma** (kullanıcı: *"grup ya da bölge taşıdığımda alt alanları ile
+birlikte taşınmalıdır"*): sürükleme artık yalnız kardeş sırası değil - ekran
+başka gruba, grup başka bölgeye bırakılabiliyor. Alt öğeler kendiliğinden
+geliyor: ekranın üstü grup kodu, grubun üstü bölge adıdır ve taşınan düğümün
+kodu değişmiyor; bu yüzden yalnız taşınan düğüme satır yazılıyor (alt satırlara
+yazmak, üst geri taşındığında onları yerinde bırakırdı).
+
+**Yetki matrisi gerçek menüden kuruluyor** (kullanıcı: *"bu aktif menünün aynı
+şekilde yetki matrisinde de görünmesi gerekir"*): ağaç artık
+`menuDuzeniUygula(menuSatirlariKur(...))` çıktısından kurulur - gizli
+bölge/grup/ekran yok, kurumun adları ve sırası geçerli, taşınan ekran yeni
+grubunda. **Bölgeli kurulumda matris de bölge › grup › yetki** olarak çiziliyor.
+Yetki süzmesi yok (`() => true`): rolü düzenleyen kişi kendisinde olmayan
+yetkiyi de verebilmeli.
+
+**Paylaşılan ekranın modülü görünür** (kullanıcı: *"dökümler ve ayarlar birçok
+menü altında var… eğer önemliyse hangi modüle ait olduğunu gösteren bir alan
+ekle"*): özellik paneline **Modül** ve **Veri süzgeci** (`grup = Randevu`)
+alanları eklendi. Ayrıca süzgeç artık taşıma ile birlikte gidiyor: "Dökümler"
+başka grubun altına alınınca `?grup=` yeni grubun adına çevrilir - yoksa
+"Laboratuvar › Dökümler" tıklandığında Randevu'nun dökümleri açılırdı.
+
+`donguselImport` testi **tip-only** importları saymıyor artık (`import type`
+derlemede silinir, çalışma zamanı döngüsü üretemez); matris menü modülünü tip
+olarak alınca olmayan bir döngü raporlanıyordu.
+
+Doğrulama (dev): Klinikler bölgesi pasife sürüklendi (59 satır), geri alındı;
+ekran pasiften Kayıt Kabul grubuna bırakıldı; Randevu grubu Klinikler bölgesine
+sürüklendi ve **beş ekranı birlikte taşındı**, kaydedince sol menüde de
+Klinikler altında çizildi; matris kökleri Hasta Akışı(26) · Klinikler(40) ·
+Tanı & Tetkik(32)… olarak bölgeli geldi; "Dökümler" seçilince Modül ve
+"grup = Randevu" alanları göründü. vitest 789, tsc temiz, dev veritabanı temiz.

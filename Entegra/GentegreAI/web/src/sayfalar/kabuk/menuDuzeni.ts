@@ -100,6 +100,21 @@ export function menuDuzeniUygula(
     };
   };
 
+  /**
+   * GRUP SÜZGEÇLİ ROTA TAŞINIRKEN SÜZGEÇ DE TAŞINIR.
+   *
+   * "Dökümler" her grubun altında aynı ekrana (`/dokumler`) gider, hangi
+   * grubun dökümü olduğunu `?grup=` söyler. Ekran başka grubun altına
+   * taşındığında süzgeç olduğu gibi kalsaydı, "Laboratuvar › Dökümler"
+   * tıklandığında Randevu'nun dökümleri açılırdı - başlık bir şey, içerik
+   * başka şey. Taşıma süzgeci de yeni grubun ham adına çevirir.
+   */
+  const yolTasi = (m: MenuOgesi, yeniGrupKod: string): MenuOgesi =>
+    m.yol.includes('?grup=')
+      ? { ...m, yol: m.yol.replace(/\?grup=[^&]*/, `?grup=${encodeURIComponent(yeniGrupKod)}`),
+          grupHam: yeniGrupKod }
+      : m;
+
   // 2) TAŞINANLAR: ekranın üst kodu değiştiyse hedef grubun altına geçer.
   //    Önce bütün öğeleri topla, sonra hedefe göre dağıt - tek geçişte
   //    taşımak, henüz görülmemiş gruba taşımayı kaçırırdı.
@@ -119,7 +134,7 @@ export function menuDuzeniUygula(
       if (duzBolge !== '' && h.get(duzBolge)?.gizli === 1) continue;
       if (d?.ustKod) {
         const liste = tasinan.get(d.ustKod) ?? [];
-        liste.push(m);
+        liste.push(yolTasi(m, d.ustKod));
         tasinan.set(d.ustKod, liste);
         continue;
       }
@@ -151,7 +166,7 @@ export function menuDuzeniUygula(
       // Başka gruba taşınmış ekran burada çizilmez, hedefinde çizilir.
       if (d?.ustKod && d.ustKod !== kod) {
         const liste = tasinan.get(d.ustKod) ?? [];
-        liste.push(yeni);
+        liste.push(yolTasi(yeni, d.ustKod));
         tasinan.set(d.ustKod, liste);
         continue;
       }

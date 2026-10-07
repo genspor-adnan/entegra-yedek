@@ -29,6 +29,10 @@ type Dugum = {
   ustKod?: string;
   /** Koddaki doğal sıra (menuSira) - düzen sırası boşsa bu geçerli. */
   sira?: number;
+  /** Ekranın modül kodu (kurum profilinde açılıp kapanan paket). */
+  modul?: string;
+  /** Rotadaki grup süzgeci - "Dökümler" gibi PAYLAŞILAN ekranlarda dolu. */
+  suzgec?: string;
   derinlik: number;
   /** Ekran düğümünde rota - "nereye gider" sütunu. */
   yol?: string;
@@ -39,6 +43,18 @@ type Dugum = {
  * kendi başlığı ve yol çizgisi gizlenir - kart zaten "Kurum Profili › Menü
  * Düzeni" diyor, ikinci başlık ekranı ikiye bölüyordu.
  */
+/**
+ * Rotadaki grup süzgeci: `/dokumler?grup=Randevu` → "Randevu".
+ *
+ * "Dökümler" ve benzeri PAYLAŞILAN ekranlar her grubun altında aynı rotaya
+ * gider; hangi grubun verisini açtığını yalnız bu süzgeç söyler. Düzen ekranı
+ * bunu yazar - kullanıcı başlığı taşırken neyi taşıdığını görsün.
+ */
+function suzgecCoz(yol: string): string | undefined {
+  const e = /[?&]grup=([^&]+)/.exec(yol);
+  return e ? decodeURIComponent(e[1]) : undefined;
+}
+
 export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const { kullanici, yetki } = useOturum();
   const duzenleyebilir = yetki('menu.duzen', 'degistir');
@@ -98,6 +114,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         d.push({
           tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(m, kod, cakisan)),
           sistemAd: m.adHam ?? m.ad, ad: m.ad, sira: m.sira,
+          modul: m.modul, suzgec: suzgecCoz(m.yol),
           ikon: m.ic, ustKod: kod, derinlik: ustKod ? 3 : 2, yol: m.yol,
         });
     };
@@ -122,6 +139,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       d.push({
         tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(s.m, undefined, cakisan)),
         sistemAd: s.m.adHam ?? s.m.ad, ad: s.m.ad,
+        modul: s.m.modul, suzgec: suzgecCoz(s.m.yol),
         ikon: s.m.ic, derinlik: 1, yol: s.m.yol,
       });
     return d;
@@ -281,12 +299,20 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     return cikti;
   }, [dugumler, duzen]);
 
-  /** Önizleme: yerleşimin gizliler çıkarılmış hali. */
-  const onizleme = useMemo(
-    () => yerlesim.filter(({ d }) => !gizliMi(d)), [yerlesim, duzen]);
+  /**
+   * PASİF MENÜ (kullanıcı 07.10.2026): "kullanmayacaklarımı sağdaki pasif
+   * menüye taşısam, sadece kullanacağım aktifler sol menüde kalsa; ihtiyaç
+   * olduğunda sağdan sola taşıyıp yerine yerleştirsem".
+   *
+   * Sağ panel artık önizleme değil, **gizlenenlerin listesi**: aktif menüden
+   * çıkarılan düğümler oraya düşer, sürükleyerek geri alınır. Gizleme modeli
+   * aynı (`gizli = 1`) - değişen yalnız nasıl gösterildiği.
+   */
+  const pasifSatirlari = useMemo(
+    () => yerlesim.filter(({ d }) => gizliMi(d)), [yerlesim, duzen]);
 
-  /** Sol ağaç: yerleşim + katlanma (üst zinciri kapalıysa çizilmez). */
-  const agacSatirlari = yerlesim.filter(({ d }) => {
+  /** Sol ağaç: AKTİF menü - gizlenenler burada çizilmez, pasif panelde durur. */
+  const agacSatirlari = yerlesim.filter(({ d }) => !gizliMi(d)).filter(({ d }) => {
     let k = etkinUst(d);
     const gorulen = new Set<string>();
     while (k && !gorulen.has(k)) {
@@ -434,23 +460,70 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     } catch (h) { setMesaj(hataMetni(h)) }
   };
 
-  /** Sürükle-bırak: aynı üstteki kardeşler arasında SIRA değiştirir. */
+  /** Aktiften PASİFE: panelin üstüne bırakılan düğüm gizlenir. */
+  const pasifeBirak = () => {
+    if (!surukle) return;
+    const kaynak = dugumler.find(x => x.kod === surukle);
+    setSurukle(null);
+    if (!kaynak || !duzenleyebilir) return;
+    if (gizliMi(kaynak)) return;              // zaten pasifte
+    farkYaz(kaynak, { gizli: 1 });
+    setMesaj(`${c('Pasife alındı')}: ${fark(kaynak.kod)?.gorunenAd || kaynak.ad}`);
+  };
+
+  /**
+   * Sürükle-bırak: aynı üstteki kardeşler arasında SIRA değiştirir.
+   * PASİFTEN GELEN düğüm ayrıca aktife alınır ve hedefin üst başlığına
+   * taşınır - kullanıcı "yerine yerleştirsem kaydırarak" dediği için bırakılan
+   * nokta hem görünürlüğü hem sırayı belirler.
+   */
   const birak = (hedef: Dugum) => {
     if (!surukle || surukle === hedef.kod) { setSurukle(null); return }
     const kaynak = dugumler.find(x => x.kod === surukle);
-    setSurukle(null);
-    if (!kaynak || kaynak.tur !== hedef.tur || etkinUst(kaynak) !== etkinUst(hedef)) {
-      // FARKLI SEVİYE / FARKLI ÜST: mockup'ta derinlik değiştirme var, ama
-      //   ekran burada yalnız KARDEŞ SIRASI değiştiriyor - grubu başka bölgeye
-      //   taşımak bölge tanımını (kod) değiştirmek demek, o ayrı iş.
-      setMesaj(c('Yalnız aynı başlık altındaki düğümler kendi aralarında sıralanır.'));
+    if (kaynak && gizliMi(kaynak) && kaynak.tur === hedef.tur) {
+      setSurukle(null);
+      // Önce aktife al ve hedefin üstüne taşı; sıra bir sonraki adımda
+      //   kardeşler yeniden numaralanırken verilir.
+      farkYaz(kaynak, { gizli: 0, ustKod: etkinUst(hedef) ?? '' });
+      setMesaj(`${c('Aktife alındı')}: ${fark(kaynak.kod)?.gorunenAd || kaynak.ad}`);
       return;
     }
+    setSurukle(null);
+    if (!kaynak) return;
+
+    // BAŞKA BAŞLIĞA SÜRÜKLEME (kullanıcı 07.10.2026: "grup ya da bölge
+    //   taşıdığımda alt alanları ile birlikte taşınmalıdır"): eskiden yalnız
+    //   kardeş sırası değişiyordu, başka bölgeye bırakmak uyarı veriyordu.
+    //
+    //   ALT ÖĞELER KENDİLİĞİNDEN GELİR: ekranın üstü GRUP kodudur, grubun üstü
+    //   bölge adıdır - taşınan düğümün kodu değişmediği için zinciri koparan
+    //   bir şey yok. Bu yüzden yalnız taşınan düğüme satır yazılır; alt
+    //   satırlara yazmak, üstü geri taşındığında onları yerinde bırakırdı.
+    const hedefUst = etkinUst(hedef);
+    const yeniUst = kaynak.tur === hedef.tur ? hedefUst          // kardeş olarak araya gir
+      : kaynak.tur === 'ekran' && hedef.tur === 'grup' ? hedef.kod   // grubun altına
+      : kaynak.tur === 'grup' && hedef.tur === 'bolge' ? hedef.kod   // bölgenin altına
+      : undefined;
+    if (yeniUst === undefined && kaynak.tur !== hedef.tur) {
+      setMesaj(c('Bu düğüm oraya taşınamaz: ekran bir gruba, grup bir bölgeye taşınır.'));
+      return;
+    }
+    if (kaynak.tur !== hedef.tur) {
+      farkYaz(kaynak, { ustKod: yeniUst ?? '' });
+      setMesaj(`${fark(kaynak.kod)?.gorunenAd || kaynak.ad} → ${
+        fark(hedef.kod)?.gorunenAd || hedef.ad}`);
+      return;
+    }
+    // Aynı tür ama BAŞKA üst: önce taşı, sonra hedefin kardeşleri arasında
+    //   sırala - bırakılan nokta sırayı da belirlesin.
+    const tasiniyor = etkinUst(kaynak) !== hedefUst;
+    if (tasiniyor) farkYaz(kaynak, { ustKod: hedefUst ?? '' });
     // KARDEŞ SIRASI YERLEŞİMDEN: koddaki dizi sırası değil, ekranda GÖRÜLEN
     //   sıra - yoksa bir kez sürükledikten sonraki her sürükleme eski sıraya
     //   göre hesaplanıp düğümü geri atardı.
     const kardes = yerlesim.map(({ d }) => d)
-      .filter(x => x.tur === kaynak.tur && etkinUst(x) === etkinUst(kaynak));
+      .filter(x => x.tur === kaynak.tur
+                   && (x.kod === kaynak.kod || etkinUst(x) === hedefUst));
     const sira = kardes.map(x => x.kod).filter(k => k !== kaynak.kod);
     const i = sira.indexOf(hedef.kod);
     sira.splice(i < 0 ? sira.length : i, 0, kaynak.kod);
@@ -461,9 +534,13 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         const mevcut = sonuc.find(x => x.sistemKod === kod);
         const yeni: MenuDuzenSatiri = {
           dugumTur: d.tur === 'bolge' ? 1 : d.tur === 'grup' ? 2 : 4,
-          sistemKod: kod, ustKod: etkinUst(d) ?? null,
+          sistemKod: kod,
           gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
-          ...mevcut, sira: (indeks + 1) * 10,
+          ...mevcut,
+          // Taşınan düğümün üstü HEDEFİN üstüdür (mevcut kayıt eski üstü
+          //   taşıyor olabilir: `...mevcut` onu geri yazardı).
+          ustKod: kod === kaynak.kod ? (hedefUst ?? '') : (mevcut?.ustKod ?? etkinUst(d) ?? null),
+          sira: (indeks + 1) * 10,
         };
         sonuc = [...sonuc.filter(x => x.sistemKod !== kod), yeni];
       });
@@ -641,6 +718,20 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                     <option value="0">{c('Görünür')}</option>
                     <option value="1">{c('Gizli')}</option>
                   </select></label>
+                {/* HANGİ MODÜLE AİT (kullanıcı 07.10.2026: "eğer önemliyse hangi
+                    modüle ait olduğunu gösteren bir alan ekle"): paylaşılan
+                    ekranlarda - Dökümler, Ayarlar - başlığın hangi veriyi
+                    açtığı yalnız bu iki alandan anlaşılır. */}
+                {seciliDugum.tur === 'ekran' && (
+                  <label className="mn-kutu"><span>{c('Modül')}</span>
+                    <div className="mn-inp pasif">{seciliDugum.modul
+                      ? c(seciliDugum.modul, 'kod') : c('modülsüz (her kurulumda)')}</div></label>
+                )}
+                {seciliDugum.suzgec && (
+                  <label className="mn-kutu"><span>{c('Veri süzgeci')}</span>
+                    <div className="mn-inp pasif" title={c('Bu başlık taşındığında süzgeç de '
+                      + 'yeni grubuna çevrilir')}>{c('grup')} = {c(seciliDugum.suzgec)}</div></label>
+                )}
                 {seciliDugum.yol && (
                   <label className="mn-kutu"><span>{c('Rota')}</span>
                     <div className="mn-inp pasif">{seciliDugum.yol}</div></label>
@@ -653,17 +744,45 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
           )}
         </div>
 
-        {/* ÖNİZLEME */}
-        <div className="mn-onizle">
-          <div className="mn-onizle-bas">{c('Önizleme')}</div>
-          {onizleme.map(({ d, derinlik }) => {
+        {/* PASİF MENÜ: aktif menüden çıkarılanlar. Panelin ÜSTÜNE bırakmak
+            gizler, oradan sol ağaçtaki bir satırın üstüne bırakmak geri alır
+            ve o sıraya yerleştirir. Sol menünün görünümünde çizilir -
+            kullanıcı aynı menüyü iki kutuda görsün. */}
+        <div className={`mn-onizle${surukle ? ' mn-hedef' : ''}`}
+             onDragOver={e => { if (surukle) e.preventDefault() }}
+             onDrop={() => pasifeBirak()}>
+          <div className="mn-onizle-bas">{c('Pasif menü')}
+            <span className="sonuk"> · {pasifSatirlari.length}</span>
+          </div>
+          {pasifSatirlari.length === 0 && (
+            <div className="mn-pasif-bos">
+              {c('Kullanmadığınız başlıkları buraya sürükleyin.')}
+            </div>
+          )}
+          {pasifSatirlari.map(({ d, derinlik }) => {
             const ad = fark(d.kod)?.gorunenAd || d.ad;
             const ik = fark(d.kod)?.ikon || d.ikon;
+            // Üstü gizli olan satır KENDİ başına geri alınamaz: önce üst
+            //   başlığı aktife taşınmalı, yoksa menüde yeri olmayan bir ekran
+            //   "aktif" sayılırdı.
+            const mirasla = fark(d.kod)?.gizli !== 1;
             return (
-              <div key={`o-${d.kod}`} className={`mn-oge d${derinlik}`}>
+              <div key={`p-${d.kod}`}
+                   className={`mn-oge d${derinlik}${mirasla ? ' mn-miras' : ''}`}
+                   draggable={duzenleyebilir && !mirasla}
+                   onDragStart={() => setSurukle(d.kod)}
+                   title={mirasla ? c('Üst başlığı pasifte - önce onu aktife taşıyın')
+                                  : c('Aktif menüdeki yerine sürükleyin')}>
+                {!mirasla && <span className="tut">⠿</span>}
                 {ik && (ik.startsWith('data:image/')
                   ? <img src={ik} alt="" className="ic-gorsel" />
                   : <span>{ik}</span>)} {ad}
+                {!mirasla && (
+                  <button type="button" className="d mini mn-geri"
+                          disabled={!duzenleyebilir}
+                          title={c('Aktif menüye al')}
+                          onClick={() => farkYaz(d, { gizli: 0 })}>↩</button>
+                )}
               </div>
             );
           })}

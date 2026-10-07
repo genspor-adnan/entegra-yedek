@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import type { YetkiSatiri } from '../api/sozlesme';
 import { hataMetni } from '../api/sozlesme';
-import { LISTELER, modulAcikMi } from '../sayfalar/listeTanimlari';
+import { LISTELER } from '../sayfalar/listeTanimlari';
 import type { MenuDuzenSatiri } from '../api/sozlesme';
 import { duzenHaritasi } from '../sayfalar/kabuk/menuDuzenHarita';
+import { menuSatirlariKur } from '../sayfalar/kabuk/menuAgaci';
+import { menuDuzeniUygula } from '../sayfalar/kabuk/menuDuzeni';
+import { grupBolgesi } from '../sayfalar/kabuk/menuBolgeleri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
 import { c as cev } from '../dil/ceviri';
@@ -64,7 +67,7 @@ interface Dugum {
  * ekranlar menüde yok, yetki ağacında da başlık açmazlar.
  */
 function menuHaritasi(urunModu: number, moduller: string[] | undefined,
-                     duzen: MenuDuzenSatiri[]) {
+                     duzen: MenuDuzenSatiri[], bolgeli: boolean) {
   // AKTIF MENÜYE BAĞLI (kullanıcı 06.10.2026): ağaç, kurumun o anda GÖRDÜĞÜ
   //   menüden kurulur - kapalı modülün ekranları hiç çizilmez, kurumun
   //   yeniden adlandırdığı grup/ekran kendi adıyla görünür.
@@ -73,9 +76,22 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
   //   kurum menüden kaldırdığı ekranı yetki ekranında da görmek istemiyor.
   //   Yetki satırı veritabanında DURUYOR (erişim kapanmaz, kayıt silinmez);
   //   geri görmek için ekranı menü düzeninden yeniden göstermek gerekir.
-  const duzenH = duzenHaritasi(duzen);
+  // TEK KAYNAK: AĞAÇ, MENÜYÜ ÇİZEN KODUN ÇIKTISINDAN KURULUR
+  //   (kullanıcı 07.10.2026: "bu aktif menünün aynı şekilde yetki matrisinde
+  //   de görünmesi gerekir"). Daha önce burada LISTELER yeniden süzülüyordu;
+  //   gizleme ve ad kuralları iki yerde ayrı yazıldığı için biri (BÖLGE
+  //   gizlemesi) matriste eksik kalmıştı. Artık kurumun gördüğü menü ne ise
+  //   matris de onu gösterir: gizli bölge/grup/ekran yok, kurumun verdiği
+  //   adlar, kurumun sırası, taşınan ekran yeni grubunda.
+  //
+  //   YETKİ SÜZMESİ YOK (`() => true`): rolü düzenleyen kişi, KENDİSİNDE
+  //   olmayan yetkiyi de vermek zorunda - menüde görmediği ekranın yetkisi de
+  //   ağaçta durmalı. Kapalı modül ve ürün modu süzmesi yerinde kalır.
+  const satirlar = menuDuzeniUygula(
+    menuSatirlariKur(LISTELER, () => true, urunModu, moduller), duzen);
+
   const harita = new Map<string, {
-    grup: string; altGrup?: string; ic: string; ekranlar: string[];
+    grup: string; bolge?: string; altGrup?: string; ic: string; ekranlar: string[];
     /** Ekran adları GRUBUYLA: aynı kod farklı gruplarda farklı ad taşır
         (`belge` = Kayıt Kabul'de "Başvurular", Satış'ta "Satış Faturaları"). */
     gruplu: { grup: string; ad: string }[];
@@ -83,46 +99,51 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
   /** Menü grubunun ikonu - grubun ilk ekranından. */
   const grupIkonu = new Map<string, string>();
   const grupSirasi: string[] = [];
-  for (const l of LISTELER) {
-    if (l.urunModu && l.urunModu !== urunModu) continue;
-    if (l.menuGizli) continue;
-    // KAPALI MODÜL: ekranı, rotası ve yetkisi hiç çizilmiyor - yetki ağacında
-    //   da yeri yok (eskiden kapalı modülün yetkileri listede duruyordu).
-    if (!modulAcikMi(l, moduller)) continue;
-    // KURUMUN VERDİĞİ AD (979): menüde "Hasta Kabul" yazarken yetki ağacında
-    //   "Kayıt Kabul" yazması, aynı şeyi iki adla aratırdı.
-    const grupAd = (l.menuGrup && duzenH.get(l.menuGrup)?.gorunenAd) || l.menuGrup;
-    const ekranAd = duzenH.get(l.kaynak ?? '')?.gorunenAd || l.menuAd;
-    // MENÜDE GİZLİ EKRAN AĞAÇTA DA YOK (kullanıcı 06.10.2026: "profilde
-    //   menüde gizli olan aramada çıkmaz ve yetki matrisinde görünmez").
-    //   Kurum menüden kaldırdığı ekranı yetki ekranında da görmek istemiyor;
-    //   yetki satırı veritabanında DURUYOR, yalnız bu ağaçta çizilmiyor.
-    const gizliMi = (l.menuGrup && duzenH.get(l.menuGrup)?.gizli === 1)
-                    || duzenH.get(l.kaynak ?? '')?.gizli === 1;
-    if (gizliMi) continue;
-    if (grupAd && !grupSirasi.includes(grupAd)) grupSirasi.push(grupAd);
-    if (grupAd && l.ic && !grupIkonu.has(grupAd)) grupIkonu.set(grupAd, l.ic);
-    if (!grupAd) continue;
-    // Ayni yetki kodu birden cok ekranda olabilir (belge -> teklif/siparis/
-    //   fatura...): ILK ekranin yeri esas alinir, ekran ADLARININ hepsi
-    //   toplanir - tek ekransa yaprak o adla cizilir (kullanici: "modul
-    //   adlari menudeki adlarla ayni olsun").
-    const v = harita.get(l.yetkiKodu);
-    if (v) {
-      v.ekranlar.push(ekranAd);
-      v.gruplu.push({ grup: grupAd, ad: ekranAd });
-    } else harita.set(l.yetkiKodu, {
-      grup: grupAd, altGrup: l.menuAltGrup, ic: l.ic, ekranlar: [ekranAd],
-      gruplu: [{ grup: grupAd, ad: ekranAd }],
-    });
+  /** Grup adı → bölge adı (HBYS). Matris ağacı da bölgeleri başlık yapar. */
+  const grupBolge = new Map<string, string>();
+  const bolgeSirasi: string[] = [];
+
+  for (const sat of satirlar) {
+    if (sat.tur !== 'grup') continue;
+    const grupAd = sat.ad;
+    if (!grupSirasi.includes(grupAd)) grupSirasi.push(grupAd);
+    // BÖLGE: kurum taşıdıysa o, boş dize ise bölgesiz (en üst), yoksa koddaki
+    //   harita - menüyü çizen YanMenu ile aynı kural.
+    if (bolgeli) {
+      const bolgeAd = sat.bolge === '' ? ''
+        : (sat.bolge && sat.bolge.length > 0 ? sat.bolge
+           : grupBolgesi(sat.alt.find(m => m.grupHam)?.grupHam).ad);
+      if (bolgeAd !== '') {
+        grupBolge.set(grupAd, bolgeAd);
+        if (!bolgeSirasi.includes(bolgeAd)) bolgeSirasi.push(bolgeAd);
+      }
+    }
+    for (const m of sat.alt) {
+      if (!m.yetkiKodu) continue;
+      if (m.ic && !grupIkonu.has(grupAd)) grupIkonu.set(grupAd, m.ic);
+      // Ayni yetki kodu birden cok ekranda olabilir (belge -> teklif/siparis/
+      //   fatura...): ILK ekranin yeri esas alinir, ekran ADLARININ hepsi
+      //   toplanir - tek ekransa yaprak o adla cizilir (kullanici: "modul
+      //   adlari menudeki adlarla ayni olsun").
+      const v = harita.get(m.yetkiKodu);
+      if (v) {
+        v.ekranlar.push(m.ad);
+        v.gruplu.push({ grup: grupAd, ad: m.ad });
+      } else harita.set(m.yetkiKodu, {
+        grup: grupAd, bolge: grupBolge.get(grupAd), altGrup: m.altGrup,
+        ic: m.ic, ekranlar: [m.ad], gruplu: [{ grup: grupAd, ad: m.ad }],
+      });
+    }
   }
-  return { harita, grupSirasi, grupIkonu };
+  return { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi };
 }
 
 /** Düz yetki listesinden menü düzeninde ağaç kurar. */
 function agacKur(satirlar: YetkiSatiri[], urunModu: number,
-                moduller: string[] | undefined, duzen: MenuDuzenSatiri[]): Dugum[] {
-  const { harita, grupSirasi, grupIkonu } = menuHaritasi(urunModu, moduller, duzen);
+                moduller: string[] | undefined, duzen: MenuDuzenSatiri[],
+                bolgeli: boolean): Dugum[] {
+  const { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi } =
+    menuHaritasi(urunModu, moduller, duzen, bolgeli);
   // `d` adı bu fonksiyonda düğüm değişkeni - harita ayrı adla durur.
   const duzenH = duzenHaritasi(duzen);
   const kokler: Dugum[] = [];
@@ -131,9 +152,12 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     if (!d) { d = { anahtar: `g:${ad}`, ad, ic, cocuklar: [] }; kokler.push(d) }
     return d;
   };
-  const altBul = (ust: Dugum, ad: string) => {
+  const altBul = (ust: Dugum, ad: string, ic?: string) => {
     let d = ust.cocuklar.find(k => k.ad === ad && !k.satir);
-    if (!d) { d = { anahtar: `${ust.anahtar}/${ad}`, ad, cocuklar: [] }; ust.cocuklar.push(d) }
+    if (!d) {
+      d = { anahtar: `${ust.anahtar}/${ad}`, ad, ic, cocuklar: [] };
+      ust.cocuklar.push(d);
+    }
     return d;
   };
 
@@ -161,9 +185,17 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     //   kalmasın. Eşleme ÇEVRİLMEMİŞ ad üzerinden: düzen kaydı onu taşıyor.
     const hamGrup = EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? s.grup ?? yer?.grup ?? 'Diğer';
     const grupAdi = duzenH.get(hamGrup)?.gorunenAd || hamGrup;
-    const kok = kokBul(grupAdi,
-                       grupIkonu.get(grupAdi) ?? yer?.ic
-                       ?? (EK_GRUP[s.kod] ? '🏠' : undefined));
+    // BÖLGE BAŞLIĞI (HBYS): menü bölgeli çiziliyorsa matris de bölge › grup ›
+    //   yetki olarak çizilir - "aynı şekilde görünmesi" istenen yapı bu.
+    //   Bölgesi olmayan grup (kurum "en üst"e almış ya da ERP) kök kalır.
+    const bolgeAdi = bolgeli ? grupBolge.get(grupAdi) : undefined;
+    const grupIk = grupIkonu.get(grupAdi) ?? yer?.ic
+                   ?? (EK_GRUP[s.kod] ? '🏠' : undefined);
+    // Grup kökü YALNIZ bölgesizse açılır: ikisini de çağırmak, bölgenin
+    //   altına giren grubun bir kopyasını kök listesinde boş bırakıyordu.
+    const kok = bolgeAdi
+      ? altBul(kokBul(bolgeAdi), grupAdi, grupIk)
+      : kokBul(grupAdi, grupIk);
     const ust = yer?.altGrup ? altBul(kok, yer.altGrup) : kok;
     // AD, SATIRIN DURDUGU GRUPTAKI EKRANDAN (kullanici: "Kayıt Kabul altına
     //   sırayla Hasta Listesi, Başvurular ve İskonto Onayı gelmeli"): `belge`
@@ -196,6 +228,10 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   kokler.sort((a, b) => sira(a) - sira(b));
   function sira(d: Dugum) {
     if (d.ad === ANA_SAYFA) return -1;      // en basta (kullanici)
+    // Bölge ve grup aynı dizide sıralanır: bölgeli menüde kök düğümler
+    //   bölgelerdir, bölgesiz gruplar menüde olduğu gibi onların arasında.
+    const b = bolgeSirasi.indexOf(d.ad);
+    if (b >= 0) return 100 + b;
     const i = grupSirasi.indexOf(d.ad);
     return i >= 0 ? i : 1000 + kokler.indexOf(d);
   }
@@ -253,9 +289,11 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
   }, []);
   const agac = useMemo(
     () => (satirlar
-      ? agacKur(satirlar, kullanici?.urunModu ?? 1, kullanici?.moduller, menuDuzen)
+      ? agacKur(satirlar, kullanici?.urunModu ?? 1, kullanici?.moduller, menuDuzen,
+                kullanici?.urunModu === 2 && kullanici?.menuBolgeli === 1)
       : []),
-    [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen]);
+    [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen,
+     kullanici?.menuBolgeli]);
 
   // Ilk yuklemede TUM dallar kapali (kullanici) - 900 satirlik agac acik
   //   gelirse ekran okunmuyordu.

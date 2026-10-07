@@ -37,9 +37,16 @@ function dosyalar(dizin: string): string[] {
 /** `import ... from './x'` ve `export ... from './x'` - yalnız GÖRELİ olanlar. */
 function goreliImportlar(icerik: string): string[] {
   const bulunan: string[] = [];
-  const kalip = /(?:^|\n)\s*(?:import|export)[\s\S]*?from\s+['"](\.[^'"]+)['"]/g;
+  // TIP-ONLY IMPORT SAYILMAZ (`import type { X } from './y'`): derlemede
+  //   tamamen silinir, calisma zamani grafiginde yoktur ve bu testin aradigi
+  //   degerlendirme-sirasi hatasini uretemez. Sayildiginda, yalniz tip alan
+  //   bir dosya yuzunden olmayan bir dongu raporlaniyordu.
+  const kalip = /(?:^|\n)\s*(?:import|export)(\s+type\s)?[\s\S]*?from\s+['"](\.[^'"]+)['"]/g;
   let e: RegExpExecArray | null;
-  while ((e = kalip.exec(icerik)) !== null) bulunan.push(e[1]);
+  while ((e = kalip.exec(icerik)) !== null) {
+    if (e[1]) continue;                       // import type ... from
+    bulunan.push(e[2]);
+  }
   return bulunan;
 }
 
