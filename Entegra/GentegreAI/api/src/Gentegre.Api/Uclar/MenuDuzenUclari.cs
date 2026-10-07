@@ -129,10 +129,15 @@ public static class MenuDuzenUclari
                     insert into public.menu_duzen
                            (sube_id, dugum_tur, sistem_kod, ust_kod, sira, gorunen_ad,
                             ikon, gizli, acilista_acik, dis_baglanti, ekleyen)
-                    values (@p0, @p1, @p2, nullif(@p3, ''), @p4, nullif(@p5, ''),
+                    -- ÜST KOD'DA BOŞ DİZE ANLAMLIDIR (kullanıcı 07.10.2026:
+                    --   "derinlik 2 olan bir grubu en üste derinlik 1'e alamadım"):
+                    --   '' = kurum düğümü EN ÜSTE aldı, null = kurum üste hiç
+                    --   dokunmadı. nullif ikisini birleştirdiği için kök isteği
+                    --   kayboluyordu. Diğer alanlarda nullif yerinde kalıyor.
+                    values (@p0, @p1, @p2, @p3, @p4, nullif(@p5, ''),
                             nullif(@p6, ''), @p7, @p8, nullif(@p9, ''), @p10)
                     """, islem,
-                    [hedef, s.DugumTur, s.SistemKod.Trim(), s.UstKod ?? "", s.Sira,
+                    [hedef, s.DugumTur, s.SistemKod.Trim(), s.UstKod, s.Sira,
                      s.GorunenAd ?? "", s.Ikon ?? "", s.Gizli, s.AcilistaAcik,
                      s.DisBaglanti ?? "", baglam.KullaniciId], iptal);
 

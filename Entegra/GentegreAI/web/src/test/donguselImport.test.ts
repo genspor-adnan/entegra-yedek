@@ -54,6 +54,9 @@ function coz(kaynak: string, hedef: string): string | null {
 }
 
 describe('modül grafiği', () => {
+  // ZAMAN AŞIMI YÜKSEK: test bütün kaynak ağacını okuyup grafiği kuruyor;
+  //   dosya sayısı arttıkça 5 sn'lik varsayılan, paralel koşuda yetmiyor ve
+  //   döngü yokken "FAIL" veriyordu.
   it('döngüsel import içermez (bilinen küme dışında)', () => {
     const graf = new Map<string, string[]>();
     for (const dosya of dosyalar(KOK)) {
@@ -139,5 +142,5 @@ describe('modül grafiği', () => {
     });
     // Zincir ADIYLA raporlanır: "üç döngü var" hangisini düzelteceğini söylemez.
     expect(yeniler, `Yeni döngüsel import:\n  ${yeniler.join('\n  ')}`).toEqual([]);
-  });
+  }, 30_000);
 });

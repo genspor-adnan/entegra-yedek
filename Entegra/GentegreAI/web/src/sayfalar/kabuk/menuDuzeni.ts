@@ -149,7 +149,9 @@ export function menuDuzeniUygula(
       // GRUP BAŞKA BÖLGEYE TAŞINDI: bölge haritası (menuBolgeleri) koddadır ve
       //   statiktir; kurumun taşıması burada satıra yazılır, menüyü çizen
       //   YanMenu önce bu alana bakar.
-      bolge: dg?.ustKod && dg.ustKod.length > 0 ? dg.ustKod : undefined,
+      //   BOŞ DİZE = EN ÜST (bölgesiz, kök seviye); undefined = kurum
+      //   dokunmadı, koddaki harita geçerli.
+      bolge: dg?.ustKod === null || dg?.ustKod === undefined ? undefined : dg.ustKod,
       ikon: dg?.ikon && dg.ikon.length > 0 ? dg.ikon
             : (yeniAd !== sat.ad ? (GRUP_IKON[sat.ad] ?? GRUP_IKON_CEV[sat.ad]) : undefined),
       alt,

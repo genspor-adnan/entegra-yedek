@@ -19685,3 +19685,25 @@ türetilen kapılar (`hasta`, `hasta-avans`, `iskonto-onay`,
 **403** döndü - başka grupta görünür kalan ekranlar için kapı yazılmadı;
 gizleme kaldırılınca liste yine **200**. vitest 789, tsc temiz, dev
 veritabanı temiz.
+
+### 07.10.2026 (üçüncü tur) — grup "en üst"e (kök seviye) alınabiliyor
+
+Kullanıcı: *"derinlik 2 olan bir grubu en üste derinlik 1'e alamadım"*. Üst
+başlık listesinde grup için yalnız bölgeler vardı; bölge **dışına** çıkarmanın
+yolu yoktu. Üç yerde eksik vardı:
+
+* **Seçenek:** grup için `— en üst —` eklendi (boş dize). `e.target.value ||
+  null` yazıldığı için seçim null'a düşüyor, kayıt "boş" sayılıp siliniyor ve
+  grup bölgesine geri dönüyordu - boş dize artık aynen saklanıyor.
+* **Sunucu:** `insert ... nullif(@p3,'')` boş dize ile null'u birleştiriyordu.
+  Artık `ust_kod` ham yazılıyor: **'' = en üste alındı**, **null = kurum üste
+  dokunmadı**. Diğer alanlarda `nullif` yerinde.
+* **Menü:** bölgeli düzende bölgelerin üstünde yalnız *düz öğeler* çiziliyordu;
+  süzgeç artık bölgesi olmayan **grupları** da kapsıyor, `satirBolgesi` boş
+  dizeyi "bölgesiz" okuyor (koddaki `menuBolgeleri` haritasına düşmüyor).
+
+Doğrulama: Çağrı Merkezi grubu "en üst"e alındı → düzenleme ağacında **d1**,
+kaydedince sol menüde HASTA AKIŞI bölgesinin **üstünde** kök seviyede çizildi;
+`menu_duzen.ust_kod` boş dize olarak saklandı. Ayrıca `donguselImport` testinin
+zaman aşımı 30 sn'ye çıkarıldı - döngü yokken paralel koşuda 5 sn dolup FAIL
+veriyordu. vitest 789, tsc temiz, dev veritabanı temiz.

@@ -145,9 +145,15 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * açınca altındakiler kendiliğinden döner; alt satırlara tek tek "gizli"
    * yazılsaydı grup açıldığında hepsi gizli kalırdı.
    */
-  /** Düğümün ETKİN üstü: kurum taşıdıysa yeni başlık, yoksa koddaki. */
-  const etkinUst = (dugum: Dugum): string | undefined =>
-    fark(dugum.kod)?.ustKod ?? dugum.ustKod ?? undefined;
+  /**
+   * Düğümün ETKİN üstü: kurum taşıdıysa yeni başlık, yoksa koddaki.
+   * BOŞ DİZE = EN ÜST (kök seviye): kurum grubu bölge dışına çıkarmış.
+   */
+  const etkinUst = (dugum: Dugum): string | undefined => {
+    const u = fark(dugum.kod)?.ustKod;
+    if (u === '') return undefined;
+    return u ?? dugum.ustKod ?? undefined;
+  };
 
   const ustGizli = (dugum: Dugum): boolean => {
     let kod = etkinUst(dugum);
@@ -178,6 +184,8 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       // ÜST BAŞLIK DEĞİŞİKLİĞİ DE BİR FARKTIR: kayıt yalnız varsayılanla aynıysa
       //   düşer. Taşınan ekran (ustKod başka grup) bu kontrolde boş sayılırsa
       //   kaydetmeden siliniyordu.
+      // '' (en üst) de bir taşımadır: null'a eşitlenirse kayıt boş sayılıp
+      //   silinir ve grup bölgesine geri düşerdi.
       const tasindi = (yeni.ustKod ?? null) !== (dugum.ustKod ?? null);
       const bos = yeni.gizli === 0 && yeni.acilistaAcik === 0 && !tasindi
         && !yeni.gorunenAd && !yeni.ikon && (yeni.sira === null || yeni.sira === undefined);
@@ -194,8 +202,11 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const ustSecenekleri = (dugum: Dugum): string[] => {
     if (dugum.tur === 'ekran')
       return dugumler.filter(x => x.tur === 'grup').map(x => x.kod);
+    // GRUP BÖLGE DIŞINA DA ÇIKAR: boş dize "en üst" demek - grup bölgelerin
+    //   üstünde, derinlik 1'de çizilir (kullanıcı: "derinlik 2 olan bir grubu
+    //   en üste derinlik 1'e alamadım").
     if (dugum.tur === 'grup' && bolgeli)
-      return dugumler.filter(x => x.tur === 'bolge').map(x => x.kod);
+      return ['', ...dugumler.filter(x => x.tur === 'bolge').map(x => x.kod)];
     return [];
   };
 
@@ -514,16 +525,20 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                 {/* ÜST BAŞLIK DEĞİŞTİRİLEBİLİR (kullanıcı 06.10.2026): ekran başka
                     grubun, grup da başka bölgenin altına taşınabilir. Seçenekler
                     ağacın kendisinden gelir - elle kod yazdırmak, var olmayan bir
-                    başlığa taşıyıp ekranı menüden düşürmek demekti. */}
+                    başlığa taşıyıp ekranı menüden düşürmek demekti.
+                    "en üst" seçimi BOŞ DİZE gönderir ve aynen saklanır: `|| null`
+                    yazıldığında kayıt boş sayılıp siliniyor, grup bölgesine geri
+                    dönüyordu. */}
                 <label className="mn-kutu"><span>{c('Üst başlık')}</span>
                   {ustSecenekleri(seciliDugum).length === 0 ? (
                     <div className="mn-inp pasif">{seciliDugum.ustKod ? c(seciliDugum.ustKod) : '—'}</div>
                   ) : (
                     <select className="mn-inp" disabled={!duzenleyebilir}
                             value={fark(seciliDugum.kod)?.ustKod ?? seciliDugum.ustKod ?? ''}
-                            onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value || null })}>
+                            onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value })}>
                       {ustSecenekleri(seciliDugum).map(u => (
-                        <option key={u} value={u}>{c(u)}</option>
+                        <option key={u || '-kok-'} value={u}>
+                          {u === '' ? `— ${c('en üst')} —` : c(u)}</option>
                       ))}
                     </select>
                   )}</label>

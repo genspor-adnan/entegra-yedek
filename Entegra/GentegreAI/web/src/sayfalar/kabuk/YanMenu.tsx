@@ -68,9 +68,12 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
   const satirBolgesi = (s: MenuSatiri): MenuBolgesi | undefined =>
     s.tur === 'grup'
       // Kurumun tasidigi bolge once (979): menu duzeninde grup baska bolgeye
-      //   alinmissa koddaki harita degil, o gecerli.
-      ? (s.bolge ? BOLGE_HBYS.find(b => b.ad === s.bolge) : undefined)
-        ?? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
+      //   alinmissa koddaki harita degil, o gecerli. BOS DIZE = EN UST: grup
+      //   hicbir bolgeye girmez, bolgelerin ustunde kok seviyede cizilir
+      //   (kullanici: "derinlik 2 olan grubu en uste derinlik 1'e alamadim").
+      ? s.bolge === '' ? undefined
+        : (s.bolge ? BOLGE_HBYS.find(b => b.ad === s.bolge) : undefined)
+          ?? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
       : GRUP_SIRA_HBYS.includes(s.m.adHam ?? '') ? grupBolgesi(s.m.adHam) : undefined;
   const satirAktifMi = (s: MenuSatiri) => s.tur === 'grup'
     ? s.alt.some(m => secili(m.yol)) : secili(s.m.yol);
@@ -213,7 +216,9 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
 
             {/* "Calisma alani" bolum basligi kaldirildi (kullanici). */}
             {/* BOLGESIZ (ERP) ya da bolgeye girmeyen duz ogeler. */}
-            {satirlar.filter(s => !bolgeliMenu || (s.tur === 'duz' && !satirBolgesi(s))).map(s => s.tur === 'duz' ? (
+            {/* BOLGESIZ SATIRLAR USTTE: duz ogeler ve kurumun EN USTE aldigi
+                gruplar (menu duzeni ust baslik = "en ust"). */}
+            {satirlar.filter(s => !bolgeliMenu || !satirBolgesi(s)).map(s => s.tur === 'duz' ? (
               <NavLink
                 key={s.m.yol}
                 to={s.m.yol}
