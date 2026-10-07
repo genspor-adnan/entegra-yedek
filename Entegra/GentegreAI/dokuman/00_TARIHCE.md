@@ -19792,3 +19792,23 @@ sürüklendi ve **beş ekranı birlikte taşındı**, kaydedince sol menüde de
 Klinikler altında çizildi; matris kökleri Hasta Akışı(26) · Klinikler(40) ·
 Tanı & Tetkik(32)… olarak bölgeli geldi; "Dökümler" seçilince Modül ve
 "grup = Randevu" alanları göründü. vitest 789, tsc temiz, dev veritabanı temiz.
+
+### 07.10.2026 (yedinci tur) — sağa ok, katlanır pasif menü, yer gösterge başlıkları
+
+* **Aktif menüde göz yerine sağa ok** (kullanıcı): aktif ağaçta yalnız görünen
+  düğümler var, düğmenin tek işi onları pasif menüye göndermek - iki yönlü göz
+  ikonu bu panelde yönü belirsiz bırakıyordu. Pasifte geri alma düğmesi de
+  simetri için `←`.
+* **Pasif menüde bölge ve gruplar katlanır** (varsayılan kapalı): pasife alınan
+  bir bölge altındaki onlarca satırı birden açmak listeyi okunmaz yapıyordu.
+* **Üst başlık pasifte de çizilir** (kullanıcı: *"bir ekranı aktiften pasife
+  aldığımda o ekranın üst menüsü yoksa pasifte üst menü oluşturup altına
+  girsin"*): tek ekranı pasife almak onu köksüz bırakıyordu - listede
+  "Dökümler" yazıyor, hangi grubun dökümü olduğu görünmüyordu. Üst zincir **yer
+  göstergesi** olarak eklenir: o başlık aktif menüde durur, pasifte yalnız
+  ekranın nereden geldiğini söyler (sürüklenmez, geri alınmaz, yalnız katlanır).
+
+Doğrulama (dev): Randevu › Dökümler sağa okla pasife alındı → pasif panelde
+`HASTA AKIŞI › RANDEVU › Dökümler` hiyerarşisi çıktı, başlıklar katlanır ve
+soluk, yalnız ekran satırı sürüklenebilir. vitest 789, tsc temiz, dev
+veritabanı temiz.

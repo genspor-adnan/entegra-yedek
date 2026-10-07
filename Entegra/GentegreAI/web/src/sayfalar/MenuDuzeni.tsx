@@ -71,6 +71,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const dosyaGirdi = useRef<HTMLInputElement>(null);
   const aktarimGirdi = useRef<HTMLInputElement>(null);
   const [acik, setAcik] = useState<Record<string, boolean>>({});
+  const [pasifAcik, setPasifAcik] = useState<Record<string, boolean>>({});
   const acikMi = (kod: string) => acik[kod] === true;
   const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
   const [mesaj, setMesaj] = useState('');
@@ -308,8 +309,64 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * çıkarılan düğümler oraya düşer, sürükleyerek geri alınır. Gizleme modeli
    * aynı (`gizli = 1`) - değişen yalnız nasıl gösterildiği.
    */
-  const pasifSatirlari = useMemo(
-    () => yerlesim.filter(({ d }) => gizliMi(d)), [yerlesim, duzen]);
+  const pasifSatirlari = useMemo(() => {
+    const derinlikH = new Map(yerlesim.map(({ d, derinlik }) => [d.kod, derinlik]));
+    const cikti: { d: Dugum; derinlik: number; baslik?: boolean }[] = [];
+    const eklendi = new Set<string>();
+    /**
+     * ÜST BAŞLIK PASİFTE DE ÇİZİLİR (kullanıcı 07.10.2026: "bir ekranı
+     * aktiften pasife aldığımda o ekranın üst menüsü yoksa pasifte üst menü
+     * oluşturup altına girsin").
+     *
+     * Tek bir ekranı pasife almak onu köksüz bırakıyordu: listede "Dökümler"
+     * yazıyor, hangi grubun dökümü olduğu görünmüyordu. Üst zincir YER
+     * GÖSTERGESİ olarak eklenir (`baslik`) - o başlık aktif menüde duruyor,
+     * burada yalnız ekranın nereden geldiğini söyler: sürüklenmez, geri
+     * alınmaz, yalnız katlanır.
+     */
+    const ustEkle = (d: Dugum) => {
+      const u = etkinUst(d);
+      if (!u) return;
+      const ust = dugumler.find(x => x.kod === u);
+      if (!ust) return;
+      ustEkle(ust);
+      if (eklendi.has(ust.kod)) return;
+      eklendi.add(ust.kod);
+      cikti.push({ d: ust, derinlik: derinlikH.get(ust.kod) ?? 1, baslik: !gizliMi(ust) });
+    };
+    for (const { d, derinlik } of yerlesim) {
+      if (!gizliMi(d)) continue;
+      ustEkle(d);
+      if (eklendi.has(d.kod)) continue;
+      eklendi.add(d.kod);
+      cikti.push({ d, derinlik });
+    }
+    return cikti;
+  }, [yerlesim, duzen]);
+
+  /**
+   * Pasif menüde açık başlıklar. Varsayılan KAPALI: pasife alınan bir bölge
+   * altındaki onlarca satırı birden açmak listeyi okunmaz yapıyordu.
+   */
+  const pasifAcikMi = (kod: string) => pasifAcik[kod] === true;
+  const pasifAc = (kod: string) =>
+    setPasifAcik(o => ({ ...o, [kod]: !pasifAcikMi(kod) }));
+
+  /** Pasif panelde çizilecek satırlar: üst zinciri kapalıysa gösterilmez. */
+  const pasifGorunur = pasifSatirlari.filter(({ d }) => {
+    let k = etkinUst(d);
+    const gorulen = new Set<string>();
+    while (k && !gorulen.has(k)) {
+      gorulen.add(k);
+      // Üst, pasif listesinde yer gösterge satırı olarak da olabilir; listede
+      //   hiç yoksa zincir orada biter.
+      if (!pasifSatirlari.some(x => x.d.kod === k)) break;
+      if (!pasifAcikMi(k)) return false;
+      const ust = dugumler.find(x => x.kod === k);
+      k = ust ? etkinUst(ust) : undefined;
+    }
+    return true;
+  });
 
   /** Sol ağaç: AKTİF menü - gizlenenler burada çizilmez, pasif panelde durur. */
   const agacSatirlari = yerlesim.filter(({ d }) => !gizliMi(d)).filter(({ d }) => {
@@ -601,14 +658,13 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
           </div>
           {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
           {agacSatirlari.map(({ d, derinlik }) => {
+            // Bu listede yalnız AKTİF düğümler var (gizliler pasif panelde),
+            //   bu yüzden ayrı bir "gizli" durumu çizilmiyor.
             const f = fark(d.kod);
-            const kendiGizli = f?.gizli === 1;
-            const mirasGizli = !kendiGizli && ustGizli(d);
-            const gizli = kendiGizli || mirasGizli;
             return (
               <div key={d.kod}
                    className={`mn-dugum d${derinlik}${secili === d.kod ? ' sec' : ''}`
-                              + `${gizli ? ' gizli' : ''}${surukle === d.kod ? ' surukle' : ''}`}
+                              + `${surukle === d.kod ? ' surukle' : ''}`}
                    draggable={duzenleyebilir}
                    onDragStart={() => setSurukle(d.kod)}
                    onDragOver={e => e.preventDefault()}
@@ -625,14 +681,16 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                 <span className="ad">{f?.gorunenAd || d.ad}</span>
                 <span className="sag">
                   <span className="rozet gri">{c(d.tur === 'bolge' ? 'bölge' : d.tur === 'grup' ? 'grup' : 'ekran')}</span>
-                  {/* ÜSTÜ GİZLİYSE düğme kapalı: alt düğümü tek tek göstermek,
-                      grubu kapalıyken menüde yalnız o satırı çizmek demekti. */}
-                  <button type="button" className="d mini"
-                          disabled={!duzenleyebilir || mirasGizli}
-                          title={mirasGizli ? c('Üst başlık gizli - önce onu açın')
-                                 : kendiGizli ? c('Göster') : c('Gizle')}
-                          onClick={e => { e.stopPropagation(); farkYaz(d, { gizli: kendiGizli ? 0 : 1 }) }}>
-                    {gizli ? '🚫' : '👁'}</button>
+                  {/* SAĞA OK = PASİFE AL (kullanıcı 07.10.2026: "aktif menüde göz
+                      yerine sağa ok tuşu ikon yap"): aktif ağaçta yalnız görünen
+                      düğümler var, düğmenin tek işi onları sağdaki pasif menüye
+                      göndermek - göz ikonu iki yönlüydü ve bu panelde yönün
+                      hangisi olduğu belirsizdi. */}
+                  <button type="button" className="d mini mn-pasife"
+                          disabled={!duzenleyebilir}
+                          title={c('Pasif menüye al')}
+                          onClick={e => { e.stopPropagation(); farkYaz(d, { gizli: 1 }) }}>
+                    →</button>
                 </span>
               </div>
             );
@@ -759,29 +817,43 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
               {c('Kullanmadığınız başlıkları buraya sürükleyin.')}
             </div>
           )}
-          {pasifSatirlari.map(({ d, derinlik }) => {
+          {pasifGorunur.map(({ d, derinlik, baslik }) => {
             const ad = fark(d.kod)?.gorunenAd || d.ad;
             const ik = fark(d.kod)?.ikon || d.ikon;
             // Üstü gizli olan satır KENDİ başına geri alınamaz: önce üst
             //   başlığı aktife taşınmalı, yoksa menüde yeri olmayan bir ekran
             //   "aktif" sayılırdı.
-            const mirasla = fark(d.kod)?.gizli !== 1;
+            // `baslik` = düğümün kendisi AKTİF, burada yalnız yer göstergesi.
+            const mirasla = !baslik && fark(d.kod)?.gizli !== 1;
+            const cocukVar = pasifSatirlari.some(x => etkinUst(x.d) === d.kod);
+            const tasinabilir = duzenleyebilir && !mirasla && !baslik;
             return (
               <div key={`p-${d.kod}`}
-                   className={`mn-oge d${derinlik}${mirasla ? ' mn-miras' : ''}`}
-                   draggable={duzenleyebilir && !mirasla}
+                   className={`mn-oge d${derinlik}${mirasla ? ' mn-miras' : ''}`
+                              + `${baslik ? ' mn-yer' : ''}`}
+                   draggable={tasinabilir}
                    onDragStart={() => setSurukle(d.kod)}
-                   title={mirasla ? c('Üst başlığı pasifte - önce onu aktife taşıyın')
-                                  : c('Aktif menüdeki yerine sürükleyin')}>
-                {!mirasla && <span className="tut">⠿</span>}
+                   title={baslik ? c('Bu başlık aktif menüde - burada yalnız yerini gösterir')
+                          : mirasla ? c('Üst başlığı pasifte - önce onu aktife taşıyın')
+                                    : c('Aktif menüdeki yerine sürükleyin')}>
+                {/* BÖLGE VE GRUPLAR AÇILIR-KAPANIR (kullanıcı 07.10.2026):
+                    pasife alınan bir bölge altındaki her şeyi getiriyor
+                    (onlarca satır); kapalı başlık listeyi okunur tutuyor. */}
+                {cocukVar ? (
+                  <button type="button" className="d mini mn-ok"
+                          title={pasifAcikMi(d.kod) ? c('Kapat') : c('Aç')}
+                          onClick={e => { e.stopPropagation(); pasifAc(d.kod) }}>
+                    {pasifAcikMi(d.kod) ? '▾' : '▸'}</button>
+                ) : <span className="mn-ok-bos" />}
+                {tasinabilir && <span className="tut">⠿</span>}
                 {ik && (ik.startsWith('data:image/')
                   ? <img src={ik} alt="" className="ic-gorsel" />
                   : <span>{ik}</span>)} {ad}
-                {!mirasla && (
+                {!mirasla && !baslik && (
                   <button type="button" className="d mini mn-geri"
                           disabled={!duzenleyebilir}
                           title={c('Aktif menüye al')}
-                          onClick={() => farkYaz(d, { gizli: 0 })}>↩</button>
+                          onClick={() => farkYaz(d, { gizli: 0 })}>←</button>
                 )}
               </div>
             );

@@ -7805,6 +7805,12 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mn-oge { display: flex; align-items: center; gap: 4px }
 .mn-oge[draggable="true"] { cursor: grab }
 .mn-oge.mn-miras { opacity: .55 }
+/* Pasif menüdeki YER GÖSTERGESİ başlık: düğümün kendisi aktif menüde, burada
+   yalnız ekranın nereden geldiğini söylüyor - başlık gibi, satır gibi değil. */
+.mn-oge.mn-yer { opacity: .75; font-size: 10px; text-transform: uppercase;
+  letter-spacing: .3px; color: #9fb6d0 }
+/* Sağa ok (pasife al) düğmesi aktif ağaçta sağda durur. */
+.mn-pasife { color: var(--metin2) }
 .mn-oge .tut { opacity: .5 }
 .mn-geri { margin-left: auto; background: transparent; border-color: #44608a; color: #dce6f2 }
 .mn-oge { padding: 4px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
