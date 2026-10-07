@@ -1,6 +1,6 @@
 import { GRUP_IKON, GRUP_IKON_CEV, type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import type { MenuDuzenSatiri } from '../../api/sozlesme';
-import { duzenHaritasi } from './menuDuzenHarita';
+import { duzenHaritasi, DUGUM } from './menuDuzenHarita';
 import { grupBolgesi } from './menuBolgeleri';
 
 /**
@@ -66,7 +66,7 @@ export const ogeKoduBaglamli = (m: MenuOgesi, grupKod: string | undefined,
 export const grupKodu = (sat: Extract<MenuSatiri, { tur: 'grup' }>) =>
   sat.alt.find(m => m.grupHam)?.grupHam ?? sat.ad;
 
-export { duzenHaritasi } from './menuDuzenHarita';
+export { duzenHaritasi, DUGUM } from './menuDuzenHarita';
 
 /**
  * Farkı menü satırlarına uygular: gizleme, görünen ad, ikon, sıra ve
@@ -82,14 +82,14 @@ export function menuDuzeniUygula(
 ): MenuSatiri[] {
   if (!duzen || duzen.length === 0) return satirlar;
   const h = duzenHaritasi(duzen);
-  if (h.size === 0) return satirlar;
+  if (h.boyut === 0) return satirlar;
   // Çakışan kaynaklar grup bağlamıyla kodlanır - düzenleme ekranının ağacıyla
   //   AYNI kod üretilmeli, yoksa kaydedilen değişiklik menüye yansımaz.
   const cakisan = cakisanKaynaklar(satirlar);
 
   // 1) ÖĞELER: gizle · yeniden adlandır · ikon · sıra · grup değiştir.
   const ogeDuzenle = (m: MenuOgesi, grupKod?: string): MenuOgesi | null => {
-    const d = h.get(ogeKoduBaglamli(m, grupKod, cakisan));
+    const d = h.bul(ogeKoduBaglamli(m, grupKod, cakisan));
     if (!d) return m;
     if (d.gizli === 1) return null;
     return {
@@ -125,13 +125,13 @@ export function menuDuzeniUygula(
     if (sat.tur === 'duz') {
       const m = ogeDuzenle(sat.m);
       if (!m) continue;
-      const d = h.get(ogeKodu(sat.m));
+      const d = h.bul(ogeKodu(sat.m));
       // GRUPSUZ ÖĞE DE BİR BÖLGEDE DURUR (YanMenu: `grupBolgesi(adHam)`):
       //   bölgesi gizlenmişse çizilmez, yoksa bütün grupları düşmüş bir bölge
       //   tek bir öğe yüzünden menüde kalırdı.
       const duzBolge = d?.ustKod === '' ? ''
         : (d?.ustKod && d.ustKod.length > 0 ? d.ustKod : grupBolgesi(sat.m.adHam).ad);
-      if (duzBolge !== '' && h.get(duzBolge)?.gizli === 1) continue;
+      if (duzBolge !== '' && h.bul(duzBolge, DUGUM.bolge)?.gizli === 1) continue;
       if (d?.ustKod) {
         const liste = tasinan.get(d.ustKod) ?? [];
         liste.push(yolTasi(m, d.ustKod));
@@ -143,7 +143,7 @@ export function menuDuzeniUygula(
     }
 
     const kod = grupKodu(sat);
-    const dg = h.get(kod);
+    const dg = h.bul(kod, DUGUM.grup);
     // BÖLGE GİZLENDİYSE ALTINDAKİ GRUPLAR DA ÇİZİLMEZ (kullanıcı 07.10.2026:
     //   "kaydet&uygula dedim soldaki menüye uygulandı ama ana menüye
     //   uygulanmadı"). Düzenleme ekranı basamaklı gizlemeyi kendi ağacında
@@ -155,14 +155,14 @@ export function menuDuzeniUygula(
     //   dönsün diye) kontrol burada, çizim anında yapılır.
     const bolgeAd = dg?.ustKod === '' ? ''                 // '' = en üst, bölgesiz
       : (dg?.ustKod && dg.ustKod.length > 0 ? dg.ustKod : grupBolgesi(kod).ad);
-    const bolgeGizli = bolgeAd !== '' && h.get(bolgeAd)?.gizli === 1;
+    const bolgeGizli = bolgeAd !== '' && h.bul(bolgeAd, DUGUM.bolge)?.gizli === 1;
     if (dg?.gizli === 1 || bolgeGizli) continue;
 
     const alt: MenuOgesi[] = [];
     for (const m of sat.alt) {
       const yeni = ogeDuzenle(m, kod);
       if (!yeni) continue;
-      const d = h.get(ogeKoduBaglamli(m, kod, cakisan));
+      const d = h.bul(ogeKoduBaglamli(m, kod, cakisan));
       // Başka gruba taşınmış ekran burada çizilmez, hedefinde çizilir.
       if (d?.ustKod && d.ustKod !== kod) {
         const liste = tasinan.get(d.ustKod) ?? [];
@@ -205,7 +205,7 @@ export function menuDuzeniUygula(
   // 4) GRUP SIRASI: fark sıra verdiyse ona göre; vermediyse kodun sırası
   //    korunur (sıra verilmemiş grup, verilmişlerin arkasında kendi yerinde).
   const grupSira = (sat: MenuSatiri, i: number) =>
-    sat.tur === 'grup' ? (h.get(grupKodu(sat))?.sira ?? 1000 + i) : 1000 + i;
+    sat.tur === 'grup' ? (h.bul(grupKodu(sat), DUGUM.grup)?.sira ?? 1000 + i) : 1000 + i;
   const sirali = sonuc
     .map((sat, i) => ({ sat, i }))
     .sort((a, b) => grupSira(a.sat, a.i) - grupSira(b.sat, b.i) || a.i - b.i)

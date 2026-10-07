@@ -4,7 +4,7 @@ import type { YetkiSatiri } from '../api/sozlesme';
 import { hataMetni } from '../api/sozlesme';
 import { LISTELER } from '../sayfalar/listeTanimlari';
 import type { MenuDuzenSatiri } from '../api/sozlesme';
-import { duzenHaritasi } from '../sayfalar/kabuk/menuDuzenHarita';
+import { duzenHaritasi, DUGUM } from '../sayfalar/kabuk/menuDuzenHarita';
 import { menuSatirlariKur } from '../sayfalar/kabuk/menuAgaci';
 import { menuDuzeniUygula } from '../sayfalar/kabuk/menuDuzeni';
 import { grupBolgesi } from '../sayfalar/kabuk/menuBolgeleri';
@@ -184,7 +184,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     //   menüde "Hasta Kabul" görünürken burada "Kayıt Kabul" aramak zorunda
     //   kalmasın. Eşleme ÇEVRİLMEMİŞ ad üzerinden: düzen kaydı onu taşıyor.
     const hamGrup = EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? s.grup ?? yer?.grup ?? 'Diğer';
-    const grupAdi = duzenH.get(hamGrup)?.gorunenAd || hamGrup;
+    const grupAdi = duzenH.bul(hamGrup, DUGUM.grup)?.gorunenAd || hamGrup;
     // BÖLGE BAŞLIĞI (HBYS): menü bölgeli çiziliyorsa matris de bölge › grup ›
     //   yetki olarak çizilir - "aynı şekilde görünmesi" istenen yapı bu.
     //   Bölgesi olmayan grup (kurum "en üst"e almış ya da ERP) kök kalır.

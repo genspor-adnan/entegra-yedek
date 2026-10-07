@@ -6,6 +6,7 @@ import { c } from '../dil/ceviri';
 import { LISTELER } from './Liste';
 import { menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
 import { BOLGE_HBYS } from './kabuk/menuBolgeleri';
+import { DUGUM } from './kabuk/menuDuzenHarita';
 import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
          type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 
@@ -50,6 +51,24 @@ type Dugum = {
  * gider; hangi grubun verisini açtığını yalnız bu süzgeç söyler. Düzen ekranı
  * bunu yazar - kullanıcı başlığı taşırken neyi taşıdığını görsün.
  */
+/**
+ * İÇ DÜĞÜM KODU = TÜR + VERİTABANI KODU.
+ *
+ * "Yönetim" hem bir BÖLGE hem bir GRUP adı (kullanıcı 07.10.2026: *"aktif
+ * bölgede yönetim bölge altında yönetim grup yok ama ana menüde var"*). Ağaç
+ * düğümleri yalnız adla anahtarlandığında ikisi tek düğüme düşüyor, grup
+ * düzenleme ekranından kayboluyordu. İç anahtar türü de taşır; veritabanına
+ * yazılırken tür ayrı alanda (`dugumTur`) gittiği için ön ek atılır.
+ */
+const TUR_ONEK = { bolge: 'b', grup: 'g', ekran: 'e' } as const;
+const icKod = (tur: keyof typeof TUR_ONEK, dbKod: string) => `${TUR_ONEK[tur]}|${dbKod}`;
+/** İç koddan veritabanı kodu (`g|Yönetim` → `Yönetim`). */
+const dbKod = (ic: string) => (ic.length > 1 && ic[1] === '|' ? ic.slice(2) : ic);
+const turNo = (tur: 'bolge' | 'grup' | 'ekran') =>
+  tur === 'bolge' ? DUGUM.bolge : tur === 'grup' ? DUGUM.grup : DUGUM.ekran;
+/** Üst düğümün türü sabittir: ekranın üstü grup, grubun üstü bölge. */
+const ustTuru = (tur: 'bolge' | 'grup' | 'ekran') => (tur === 'ekran' ? 'grup' : 'bolge');
+
 function suzgecCoz(yol: string): string | undefined {
   const e = /[?&]grup=([^&]+)/.exec(yol);
   return e ? decodeURIComponent(e[1]) : undefined;
@@ -109,38 +128,43 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     const gruplar = satirlar.filter(s => s.tur === 'grup') as Extract<MenuSatiri, { tur: 'grup' }>[];
     const duzOgeler = satirlar.filter(s => s.tur === 'duz') as Extract<MenuSatiri, { tur: 'duz' }>[];
 
-    const grupEkle = (sat: Extract<MenuSatiri, { tur: 'grup' }>, ustKod?: string) => {
+    const grupEkle = (sat: Extract<MenuSatiri, { tur: 'grup' }>, ustIc?: string) => {
       const kod = grupKodu(sat);
-      d.push({ tur: 'grup', kod, sistemAd: kod, ad: sat.ad, ustKod, derinlik: ustKod ? 2 : 1 });
+      const ic = icKod('grup', kod);
+      d.push({ tur: 'grup', kod: ic, sistemAd: kod, ad: sat.ad,
+               ustKod: ustIc, derinlik: ustIc ? 2 : 1 });
       sayac.set(kod, 1);
       for (const m of sat.alt)
         d.push({
-          tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(m, kod, cakisan)),
+          tur: 'ekran', kod: icKod('ekran', benzersiz(ogeKoduBaglamli(m, kod, cakisan))),
           sistemAd: m.adHam ?? m.ad, ad: m.ad, sira: m.sira,
           modul: m.modul, suzgec: suzgecCoz(m.yol),
-          ikon: m.ic, ustKod: kod, derinlik: ustKod ? 3 : 2, yol: m.yol,
+          ikon: m.ic, ustKod: ic, derinlik: ustIc ? 3 : 2, yol: m.yol,
         });
     };
 
     if (bolgeli) {
       for (const b of BOLGE_HBYS) {
-        d.push({ tur: 'bolge', kod: b.ad, sistemAd: b.ad, ad: c(b.ad), derinlik: 1 });
+        d.push({ tur: 'bolge', kod: icKod('bolge', b.ad), sistemAd: b.ad,
+                 ad: c(b.ad), derinlik: 1 });
         for (const g of b.gruplar) {
           const sat = gruplar.find(x => grupKodu(x) === g);
-          if (sat) grupEkle(sat, b.ad);
+          if (sat) grupEkle(sat, icKod('bolge', b.ad));
         }
       }
       // Bölgeye yazılmamış grup: Yönetim bölgesinin altına düşer (menuBolgeleri
       //   kuralı) - burada da aynı yere konur ki ekran menüyle aynı şeyi göstersin.
       const yazilanlar = new Set(BOLGE_HBYS.flatMap(b => b.gruplar));
       for (const sat of gruplar)
-        if (!yazilanlar.has(grupKodu(sat))) grupEkle(sat, BOLGE_HBYS[BOLGE_HBYS.length - 1].ad);
+        if (!yazilanlar.has(grupKodu(sat)))
+          grupEkle(sat, icKod('bolge', BOLGE_HBYS[BOLGE_HBYS.length - 1].ad));
     } else {
       for (const sat of gruplar) grupEkle(sat);
     }
     for (const s of duzOgeler)
       d.push({
-        tur: 'ekran', kod: benzersiz(ogeKoduBaglamli(s.m, undefined, cakisan)),
+        tur: 'ekran',
+        kod: icKod('ekran', benzersiz(ogeKoduBaglamli(s.m, undefined, cakisan))),
         sistemAd: s.m.adHam ?? s.m.ad, ad: s.m.ad,
         modul: s.m.modul, suzgec: suzgecCoz(s.m.yol),
         ikon: s.m.ic, derinlik: 1, yol: s.m.yol,
@@ -159,7 +183,16 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     return () => { iptal = true };
   }, [subeId]);
 
-  const fark = (kod: string) => duzen.find(x => x.sistemKod === kod);
+  /**
+   * Düğümün düzen kaydı. Arama TÜR + VERİTABANI KODU ile: "Yönetim" hem bölge
+   * hem grup adı, yalnız kodla aranınca birinin kaydı diğerininmiş gibi
+   * okunuyordu.
+   */
+  const fark = (icKodu: string) => {
+    const tur = icKodu[0] === 'b' ? DUGUM.bolge : icKodu[0] === 'g' ? DUGUM.grup : DUGUM.ekran;
+    const kod = dbKod(icKodu);
+    return duzen.find(x => x.sistemKod === kod && x.dugumTur === tur);
+  };
 
   /**
    * KAYDEDİLMEMİŞ DEĞİŞİKLİK VAR MI?
@@ -189,8 +222,11 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    */
   const etkinUst = (dugum: Dugum): string | undefined => {
     const u = fark(dugum.kod)?.ustKod;
-    if (u === '') return undefined;
-    return u ?? dugum.ustKod ?? undefined;
+    if (u === '') return undefined;                    // kurum en üste almış
+    // Kayıttaki üst VERİTABANI kodudur; iç koda çevrilir. Üst türü sabit:
+    //   ekranın üstü grup, grubun üstü bölge.
+    if (u != null) return icKod(ustTuru(dugum.tur), u);
+    return dugum.ustKod ?? undefined;
   };
 
   const ustGizli = (dugum: Dugum): boolean => {
@@ -211,11 +247,13 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   /** Farkı günceller: değer varsayılana döndüyse satır SİLİNİR (fark kalmasın). */
   const farkYaz = (dugum: Dugum, parca: Partial<MenuDuzenSatiri>) => {
     setDuzen(onceki => {
-      const mevcut = onceki.find(x => x.sistemKod === dugum.kod);
+      const tur = turNo(dugum.tur);
+      const kod = dbKod(dugum.kod);
+      const mevcut = onceki.find(x => x.sistemKod === kod && x.dugumTur === tur);
       const yeni: MenuDuzenSatiri = {
-        dugumTur: dugum.tur === 'bolge' ? 1 : dugum.tur === 'grup' ? 2 : 4,
-        sistemKod: dugum.kod,
-        ustKod: dugum.ustKod ?? null,
+        dugumTur: tur,
+        sistemKod: kod,
+        ustKod: dugum.ustKod != null ? dbKod(dugum.ustKod) : null,
         sira: null, gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
         ...mevcut, ...parca,
       };
@@ -224,10 +262,11 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       //   kaydetmeden siliniyordu.
       // '' (en üst) de bir taşımadır: null'a eşitlenirse kayıt boş sayılıp
       //   silinir ve grup bölgesine geri düşerdi.
-      const tasindi = (yeni.ustKod ?? null) !== (dugum.ustKod ?? null);
+      const tasindi = (yeni.ustKod ?? null)
+                      !== (dugum.ustKod != null ? dbKod(dugum.ustKod) : null);
       const bos = yeni.gizli === 0 && yeni.acilistaAcik === 0 && !tasindi
         && !yeni.gorunenAd && !yeni.ikon && (yeni.sira === null || yeni.sira === undefined);
-      const kalan = onceki.filter(x => x.sistemKod !== dugum.kod);
+      const kalan = onceki.filter(x => !(x.sistemKod === kod && x.dugumTur === tur));
       return bos ? kalan : [...kalan, yeni];
     });
   };
@@ -417,12 +456,13 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * atılır, yoksa grup geri açıldığında eski kapı kaydı ekranı kapalı tutardı.
    */
   const kaydedilecek = (): MenuDuzenSatiri[] => {
-    const sade = (kod: string) => kod.split('/').pop()!.replace(/#\d+$/, '');
+    const sade = (ic: string) => dbKod(ic).split('/').pop()!.replace(/#\d+$/, '');
     // Kurumun kendi satırları: ağaçta karşılığı olanlar + kurumun ürettiği
-    //   düğümler (alt başlık / dış bağlantı, dugumTur 3).
-    const kendi = duzen.filter(x => x.dugumTur === 3
-                                    || dugumler.some(d => d.kod === x.sistemKod));
-    const kapiliKodlar = new Set(kendi.map(x => x.sistemKod));
+    //   düğümler (alt başlık / dış bağlantı, dugumTur 3). Eşleşme TÜR + KOD.
+    const kendi = duzen.filter(x => x.dugumTur === DUGUM.altBaslik
+      || dugumler.some(d => dbKod(d.kod) === x.sistemKod && turNo(d.tur) === x.dugumTur));
+    const kapiliKodlar = new Set(
+      kendi.filter(x => x.dugumTur === DUGUM.ekran).map(x => x.sistemKod));
 
     const toplam = new Map<string, { hepsi: number; gizliSay: number }>();
     for (const d of dugumler) {
@@ -438,7 +478,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
       if (o.gizliSay < o.hepsi) continue;        // bir yerde görünüyor
       if (kapiliKodlar.has(k)) continue;         // kurum zaten kendisi yazmış
       turetilmis.push({
-        dugumTur: 4, sistemKod: k, ustKod: null, sira: null,
+        dugumTur: DUGUM.ekran, sistemKod: k, ustKod: null, sira: null,
         gorunenAd: '', ikon: '', gizli: 1, acilistaAcik: 0,
       });
     }
@@ -607,20 +647,23 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     sira.splice(i < 0 ? sira.length : i, 0, kaynak.kod);
     setDuzen(onceki => {
       let sonuc = [...onceki];
-      sira.forEach((kod, indeks) => {
-        const d = dugumler.find(x => x.kod === kod)!;
-        const mevcut = sonuc.find(x => x.sistemKod === kod);
+      sira.forEach((ic, indeks) => {
+        const d = dugumler.find(x => x.kod === ic)!;
+        const tur = turNo(d.tur);
+        const kod = dbKod(ic);
+        const mevcut = sonuc.find(x => x.sistemKod === kod && x.dugumTur === tur);
+        const ustIc = ic === kaynak.kod ? hedefUst : (etkinUst(d) ?? undefined);
         const yeni: MenuDuzenSatiri = {
-          dugumTur: d.tur === 'bolge' ? 1 : d.tur === 'grup' ? 2 : 4,
+          dugumTur: tur,
           sistemKod: kod,
           gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
           ...mevcut,
           // Taşınan düğümün üstü HEDEFİN üstüdür (mevcut kayıt eski üstü
           //   taşıyor olabilir: `...mevcut` onu geri yazardı).
-          ustKod: kod === kaynak.kod ? (hedefUst ?? '') : (mevcut?.ustKod ?? etkinUst(d) ?? null),
+          ustKod: ustIc != null ? dbKod(ustIc) : (ic === kaynak.kod ? '' : mevcut?.ustKod ?? null),
           sira: (indeks + 1) * 10,
         };
-        sonuc = [...sonuc.filter(x => x.sistemKod !== kod), yeni];
+        sonuc = [...sonuc.filter(x => !(x.sistemKod === kod && x.dugumTur === tur)), yeni];
       });
       return sonuc;
     });

@@ -19878,3 +19878,25 @@ kaydetme ve varsayılana dönme rozeti temizliyor.
 Doğrulama: açılışta rozet yok → bir düğüm pasife alındı → "kaydedilmedi" +
 düğme vurgusu → Kaydet & Uygula → rozet kalktı ("193 değişiklik"). Lab'dan
 kopyalanan satırlar dev veritabanından silindi.
+
+### 07.10.2026 — "Yönetim" bölge/grup ad çakışması (düzen kaydı tür bazlı eşleşiyor)
+
+Kullanıcı: *"aktif bölgede yönetim bölge altında yönetim grup yok ama ana
+menüde var"*. **"Yönetim" hem bir bölge hem bir grup adı** (`menuBolgeleri`:
+`{ ad: 'Yönetim', gruplar: ['İK & Prim', 'Doküman', 'Yönetim'] }`). Düzen kaydı
+yalnız `sistemKod` ile eşleştiği için ikisi tek satıra düşüyordu: düzenleme
+ağacında bölge ile grup aynı düğüm sayılıp grup kayboluyor, bölgenin kaydı
+grubun kaydıymış gibi okunuyordu.
+
+* `duzenHaritasi` artık **tür + kod** ile kuruluyor (`DUGUM.bolge/grup/ekran`);
+  `menuDuzeniUygula` ve yetki matrisi aramaları türünü söylüyor. `dugum_tur`
+  veritabanında zaten ayrı alan - eşleşme de ikisini birlikte kullanır, eski
+  kayıtlar olduğu gibi çalışır.
+* Düzenleme ekranının ağaç düğümleri **iç kod** taşıyor (`b|Yönetim`,
+  `g|Yönetim`, `e|dokumler`); veritabanına yazarken ön ek atılır, tür ayrı
+  alanda gider. `fark`, `farkYaz`, `etkinUst`, sürükleme sırası ve kapı
+  türetimi bu eşleşmeyi kullanıyor.
+
+Doğrulama: lab'ın 193 satırlık düzeni yerel veritabanına yüklendi → düzenleme
+ağacında `Yönetim (bölge) › İK & Prim · Doküman · Yönetim (grup)` göründü, ana
+menüyle birebir aynı. vitest 789, tsc temiz, dev veritabanı temiz.
