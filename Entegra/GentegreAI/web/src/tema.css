@@ -7811,6 +7811,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   letter-spacing: .3px; color: #9fb6d0 }
 /* Sağa ok (pasife al) düğmesi aktif ağaçta sağda durur. */
 .mn-pasife { color: var(--metin2) }
+/* Kaydedilmemiş değişiklik: düğme dikkat çeksin - ekrandaki düzen henüz
+   menüye uygulanmadı. */
+.mn-bekleyen { box-shadow: 0 0 0 2px color-mix(in srgb, var(--turuncu, #e2a03f) 55%, transparent) }
 .mn-oge .tut { opacity: .5 }
 .mn-geri { margin-left: auto; background: transparent; border-color: #44608a; color: #dce6f2 }
 .mn-oge { padding: 4px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }

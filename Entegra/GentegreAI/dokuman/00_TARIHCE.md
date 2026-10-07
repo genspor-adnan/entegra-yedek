@@ -19852,3 +19852,29 @@ giriş `admin` → üst şeritte "Sistem Yoneticisi", sekmeler 🏥 Profil · �
 Düzeni · 👥 Roller · 🗄 Data Kullanımı … ; Menü Düzeni sekmesi lab'ın gerçek
 düzenini gösterdi (242 pasif satır, Merkez / Ankara Şube). `npm run build`
 temiz; web tarafı tsc temiz, vitest 789.
+
+### 07.10.2026 — "aktif menü ile ana menü aynı değil" teşhisi + kaydedilmedi rozeti
+
+Kullanıcı lab kurulumunda düzenleme ekranındaki aktif menü ile ana menünün
+farklı olduğunu bildirdi. **Lab'ın kendi düzeni (193 satır, şube 1) yerel
+veritabanına birebir kopyalanıp karşılaştırıldı** - iki görünüm aynı çıktı:
+
+| | |
+|---|---|
+| Aktif ağaç | Kayıt Kabul · Laboratuvar · Yönetim (bölge) |
+| Ana menü | Kayıt Kabul · Laboratuvar · YÖNETİM › İK & Prim · Doküman · Yönetim |
+
+Sunucu tarafı da dışlandı: lab'daki paket son kodu taşıyor
+(`gentegre:menu-duzen` olayı derlenmiş dosyada var), düzen admin'in **kendi**
+şubesinde (şube 1) ve diğer şubede hiç satır yok. Yani kalan iki neden
+**kaydedilmemiş değişiklik** ve **tarayıcı önbelleği**.
+
+Birincisi artık ekranda görünür: başlıkta **"kaydedilmedi"** rozeti ve Kaydet
+düğmesinde bekleyen vurgusu. Ekranda yapılan her şey yerel durumda birikiyor,
+menü ancak *Kaydet & Uygula* ile değişiyor; rozet olmadan bu fark "ekranlar
+tutmuyor" gibi görünüyordu. Karşılaştırma sunucudan okunan hal ile yapılıyor,
+kaydetme ve varsayılana dönme rozeti temizliyor.
+
+Doğrulama: açılışta rozet yok → bir düğüm pasife alındı → "kaydedilmedi" +
+düğme vurgusu → Kaydet & Uygula → rozet kalktı ("193 değişiklik"). Lab'dan
+kopyalanan satırlar dev veritabanından silindi.

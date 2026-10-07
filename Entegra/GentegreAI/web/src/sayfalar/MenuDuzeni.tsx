@@ -72,6 +72,8 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const aktarimGirdi = useRef<HTMLInputElement>(null);
   const [acik, setAcik] = useState<Record<string, boolean>>({});
   const [pasifAcik, setPasifAcik] = useState<Record<string, boolean>>({});
+  /** Sunucudaki hal: kaydedilmemiş değişiklik var mı, buradan anlaşılır. */
+  const [sunucudaki, setSunucudaki] = useState<MenuDuzenSatiri[]>([]);
   const acikMi = (kod: string) => acik[kod] === true;
   const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
   const [mesaj, setMesaj] = useState('');
@@ -150,13 +152,29 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     let iptal = false;
     setYukleniyor(true);
     api.menuDuzen(subeId || undefined)
-      .then(y => { if (!iptal) { setDuzen(y.satirlar); setSubeyeOzel(y.subeyeOzel) } })
+      .then(y => { if (!iptal) { setDuzen(y.satirlar); setSunucudaki(y.satirlar);
+                                 setSubeyeOzel(y.subeyeOzel) } })
       .catch(h => { if (!iptal) setMesaj(hataMetni(h)) })
       .finally(() => { if (!iptal) setYukleniyor(false) });
     return () => { iptal = true };
   }, [subeId]);
 
   const fark = (kod: string) => duzen.find(x => x.sistemKod === kod);
+
+  /**
+   * KAYDEDİLMEMİŞ DEĞİŞİKLİK VAR MI?
+   *
+   * Ekranda yapılan her şey önce yerel durumda birikiyor; menü ancak *Kaydet &
+   * Uygula* ile değişiyor. Bu rozet olmadığında "düzenleme ekranı ile ana menü
+   * aynı değil" denen durum aslında kaydedilmemiş değişiklik oluyordu.
+   */
+  const kirli = useMemo(() => {
+    const anahtar = (r: MenuDuzenSatiri) => [r.sistemKod, r.ustKod ?? '', r.sira ?? '',
+      r.gorunenAd ?? '', r.ikon ?? '', r.gizli, r.acilistaAcik].join('');
+    const a = duzen.map(anahtar).sort();
+    const b = sunucudaki.map(anahtar).sort();
+    return a.length !== b.length || a.some((x, i) => x !== b[i]);
+  }, [duzen, sunucudaki]);
   /**
    * BASAMAKLI GİZLEME (kullanıcı 06.10.2026): "grup görünmez yapılırsa
    * altındakiler de görünmez olur, görünür yapılırsa altındakiler görünür".
@@ -430,7 +448,10 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   const kaydet = async () => {
     if (!subeId) { setMesaj(c('Şube seçili değil.')); return }
     try {
-      const y = await api.menuDuzenKaydet(subeId, kaydedilecek());
+      const gonderilen = kaydedilecek();
+      const y = await api.menuDuzenKaydet(subeId, gonderilen);
+      setDuzen(gonderilen);
+      setSunucudaki(gonderilen);
       setSubeyeOzel(y.satir);
       // ANA MENÜ ANINDA GEÇERLİ: kabuk bu olayı dinliyor ve düzeni yeniden
       //   okuyor - kurum değişikliğini görmek için sayfayı yenilemesin.
@@ -512,7 +533,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     if (!subeId) return;
     try {
       await api.menuDuzenSifirla(subeId);
-      setDuzen([]); setSubeyeOzel(0);
+      setDuzen([]); setSunucudaki([]); setSubeyeOzel(0);
       setMesaj(c('Varsayılan düzene dönüldü.'));
     } catch (h) { setMesaj(hataMetni(h)) }
   };
@@ -619,7 +640,11 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         <span className={`rozet ${subeyeOzel > 0 ? 'olumlu' : 'gri'}`}>
           {subeyeOzel > 0 ? `${c('şubeye özel')} · ${subeyeOzel}` : c('varsayılan düzen')}
         </span>
-        <button type="button" className="d birincil" disabled={!duzenleyebilir}
+        {/* KAYDEDİLMEDİ ROZETİ: ekrandaki düzen henüz menüye uygulanmadı. */}
+        {kirli && <span className="rozet uyari" title={c('Menüye uygulanması için kaydedin')}>
+          {c('kaydedilmedi')}</span>}
+        <button type="button" className={`d birincil${kirli ? ' mn-bekleyen' : ''}`}
+                disabled={!duzenleyebilir}
                 onClick={() => void kaydet()}>💾 {c('Kaydet & Uygula')}</button>
         <button type="button" className="d" disabled={!duzenleyebilir || subeyeOzel === 0}
                 onClick={() => void sifirla()}>⤾ {c('Varsayılana dön')}</button>
