@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayenede e-Nabız Hasta Verileri — Mockup (GenoTIP AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.kucuk{padding:2px 7px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg td.sar{white-space:normal}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.dis td{background:#fcfdff}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .sekmeler{display:flex;gap:3px;padding:7px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 13px;font-size:11.5px;
+    background:#e7edf4;color:#4d5d6e;display:flex;gap:6px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .say{font-size:10px;font-weight:normal;background:#fff;border:1px solid var(--line);border-radius:8px;padding:0 6px;color:var(--muted)}
+  .sekme .say.kir{color:#b3261e;border-color:#f3c4bf;background:#fbe9e7}
+  .sekme .say.sari{color:#8a6218;border-color:#f2ddbf;background:#fdf6e3}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px;flex-wrap:wrap}
+  .fld .inp.ro{background:#f6f8fa;color:#4d5d6e}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#eaf0f7);border-bottom:1px solid var(--line2);
+    padding:5px 9px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;gap:8px;align-items:center}
+  .grp .ic{padding:8px 10px;font-size:11.5px;line-height:1.7}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+  .ucPanel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1480px;margin:10px auto 22px;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0;padding-left:18px}
+  .not li{margin-bottom:5px}
+  /* Kritik uyarı bandı: hekimin gözden kaçırmaması gereken tek satır. */
+  .uyaribant{display:flex;gap:10px;align-items:center;padding:7px 12px;background:#fbe9e7;
+    border-bottom:1px solid #f3c4bf;color:#8c2b22;font-size:11.5px;font-weight:bold;flex-wrap:wrap}
+  .uyaribant .rz{font-weight:normal}
+  /* Rıza kapalı durumu: veri yerine ne yapılacağı yazar. */
+  .kapali{padding:26px 16px;text-align:center;color:var(--muted);font-size:12px;line-height:1.9;background:#fafcfe}
+  .kapali .bas{font-size:13px;font-weight:bold;color:var(--ink);display:block;margin-bottom:4px}
+  .kapali .kutu{max-width:620px;margin:0 auto;border:1px dashed var(--line);border-radius:6px;padding:16px;background:#fff}
+  /* Zaman çizelgesi: dış kurum olayları tek bakışta. */
+  .zc{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+  .zc .yil{font-size:10.5px;color:var(--muted);margin-top:4px}
+  .zc .sat{display:grid;grid-template-columns:78px 150px 1fr auto;gap:8px;align-items:center;
+    border:1px solid var(--line2);border-radius:4px;padding:5px 8px;background:#fff;font-size:11.5px}
+  .zc .sat.biz{background:#f4f9ff;border-color:#cfe0f5}
+  .zc .sat .tar{color:var(--muted);font-size:11px}
+  .mini{font-size:10.5px;color:var(--muted)}
+  .kutucuk{display:inline-flex;align-items:center;gap:4px}
+  .kutucuk i{width:11px;height:11px;border:1px solid var(--line);border-radius:2px;background:#fff;display:inline-block}
+  .kutucuk i.on{background:#2f6db3;border-color:#2f6db3}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ 1 · ANA EKRAN
+     Muayene kartının İÇİNDEN açılan e-Nabız paneli. Hekim muayenedeyken
+     hastanın DIŞ KURUM verisini görür ve gerekeni muayenesine aktarır.      -->
+<div class="win">
+  <div class="title">🩺 Muayene · Ayşe Yılmaz (34) — e-Nabız Hasta Verileri
+    <span class="sp">Dr. Ahmet Yılmaz · Dahiliye · Başvuru B-2026-004271 · bu görüntüleme loglanır</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">🔄 e-Nabız'dan Yenile</div>
+    <div class="btn">📅 Son 1 yıl ▾</div>
+    <div class="sepv"></div>
+    <div class="btn">➕ Seçilenleri Muayeneye Aktar</div>
+    <div class="btn">📎 Muayene Notuna Ekle</div>
+    <div class="btn">🖨 Özet Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">🔎 Hasta Onam Kaydı</div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+
+  <!-- KRİTİK UYARI BANDI: alerji ve ilaç çelişkisi en üstte, panel hangi
+       sekmede olursa olsun görünür. -->
+  <div class="uyaribant">⚠ Penisilin alerjisi (2019, X Devlet Hast.)
+    <span class="rz kir">Çelişki</span> Dış kurumda 08.01.2026 Amoksisilin yazılmış
+    <span class="rz sari">Kritik tahlil</span> 19.02.2025 TSH 6,8 ↑
+    <span class="btn kucuk sp">Uyarıları gizle</span></div>
+
+  <div class="hdr">
+    <div class="fld"><label>Paylaşım izni (hasta onamı)</label>
+      <div class="inp"><span class="rz ok">Var</span>
+        <span class="sonuk">07.10.2026 · e-Devlet onayı · 24 saat geçerli</span></div></div>
+    <div class="fld"><label>Sorgu gerekçesi</label>
+      <div class="inp ro">Muayene · B-2026-004271 <span class="sonuk">(başvurudan otomatik)</span></div></div>
+    <div class="fld"><label>Son senkron</label>
+      <div class="inp ro">07.10.2026 09:12 <span class="rz mavi">canlı</span> <span class="sonuk">· 1,4 s</span></div></div>
+    <div class="fld"><label>Kapsam</label>
+      <div class="inp ro">8 kurum · 142 kayıt <span class="sonuk">· 5 yıl</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Hekim Özeti</div>
+    <div class="sekme">Tanılar <span class="say">11</span></div>
+    <div class="sekme">İlaç / Reçete <span class="say kir">9</span></div>
+    <div class="sekme">Tahliller <span class="say sari">24</span></div>
+    <div class="sekme">Görüntüleme <span class="say">4</span></div>
+    <div class="sekme">Yatış / Ameliyat <span class="say">2</span></div>
+    <div class="sekme">Aşı · Alerji</div>
+    <div class="sekme">Raporlar <span class="say">3</span></div>
+    <div class="sekme">Zaman Çizelgesi</div>
+  </div>
+
+  <!-- HEKİM ÖZETİ: muayenenin ilk 30 saniyesinde okunacak kadar kısa. -->
+  <div class="ucPanel">
+    <div class="grp">
+      <div class="gb">Kronik tanılar <span class="sp mini">dış kurum + bizden</span></div>
+      <div class="ic">
+        <div><span class="rz mor">E11.9</span> Tip 2 diyabet · 2019 · X Devlet Hast.
+          <span class="btn kucuk sp">➕ Muayeneye</span></div>
+        <div><span class="rz mor">I10</span> Esansiyel hipertansiyon · 2021 · Y ASM
+          <span class="btn kucuk">➕ Muayeneye</span></div>
+        <div><span class="rz mor">E03.9</span> Hipotiroidi · 2021 · X Devlet Hast.
+          <span class="btn kucuk">➕ Muayeneye</span></div>
+        <div class="mini" style="margin-top:4px">Kronik işareti e-Nabız'dan gelir; aktarılan tanı
+          hastanın tıbbi özetine de düşer.</div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Aktif ilaçlar <span class="sp mini">son 6 ay · 4 kurum</span></div>
+      <div class="ic">
+        <div>Metformin 1000 mg · 2×1 · sürekli <span class="rz ok">aktif</span>
+          <span class="btn kucuk sp">➕ Reçeteye</span></div>
+        <div>Ramipril 5 mg · 1×1 · sürekli <span class="rz ok">aktif</span>
+          <span class="btn kucuk">➕ Reçeteye</span></div>
+        <div>Levotiroksin 50 mcg · 1×1 · sürekli <span class="rz ok">aktif</span>
+          <span class="btn kucuk">➕ Reçeteye</span></div>
+        <div><span class="rz kir">Amoksisilin 1 g</span> · 08.01.2026 · karşılandı
+          <span class="mini">alerji ile çelişiyor</span></div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Son tahlil bayrakları <span class="sp mini">yalnız anormal</span></div>
+      <div class="ic">
+        <div>22.03.2026 · HbA1c <b>7,9 %</b> <span class="rz sari">H</span> <span class="mini">(&lt; 7,0)</span></div>
+        <div>22.03.2026 · LDL <b>168 mg/dL</b> <span class="rz sari">H</span></div>
+        <div>19.02.2025 · TSH <b>6,8 mIU/L</b> <span class="rz kir">H</span></div>
+        <div>08.01.2026 · CRP <b>14 mg/L</b> <span class="rz sari">H</span></div>
+        <div class="mini" style="margin-top:4px">Normal sonuçlar "Tahliller" sekmesinde;
+          özet yalnız referans dışını gösterir.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ikiPanel" style="padding-top:0">
+    <div class="grp">
+      <div class="gb">Dış kurum muayeneleri <span class="sp mini">son 12 ay</span></div>
+      <div class="dg"><table>
+        <thead><tr><th class="orta"><span class="kutucuk"><i></i></span></th><th>Tarih</th><th>Kurum</th>
+          <th>Klinik</th><th>Tanı</th><th class="orta">Kaynak</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td class="orta"><span class="kutucuk"><i class="on"></i></span></td>
+            <td>22.03.2026</td><td>X Devlet Hast.</td><td>Endokrinoloji</td><td>E11.9 · E03.9</td>
+            <td class="orta">dış</td></tr>
+          <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td>
+            <td>08.01.2026</td><td>Y ASM</td><td>Aile Hekimliği</td><td>J02.9</td><td class="orta">dış</td></tr>
+          <tr><td class="orta"><span class="kutucuk"><i></i></span></td>
+            <td>14.05.2026</td><td>Bizim kurum</td><td>Dahiliye</td><td>J06.9</td>
+            <td class="orta"><span class="rz mavi">bizden</span></td></tr>
+          <tr class="dis"><td class="orta"><span class="kutucuk"><i></i></span></td>
+            <td>11.11.2025</td><td>Z Özel Hast.</td><td>Kardiyoloji</td><td>I10</td><td class="orta">dış</td></tr>
+        </tbody></table></div>
+      <div class="ic mini">Dış kurum hekim adı e-Nabız'da maskeli döner. Satır seçip
+        <b>Seçilenleri Muayeneye Aktar</b> ile tanı/ilaç kendi muayenenize kopyalanır.</div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Son görüntüleme ve raporlar</div>
+      <div class="dg"><table>
+        <thead><tr><th>Tarih</th><th>Kurum</th><th>Tetkik</th><th class="orta">Görüntü</th><th class="orta">Rapor</th></tr></thead>
+        <tbody>
+          <tr><td>22.03.2026</td><td>X Devlet Hast.</td><td>Tiroid USG</td>
+            <td class="orta"><span class="btn kucuk">🖼 Aç</span></td>
+            <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+          <tr><td>11.11.2025</td><td>Z Özel Hast.</td><td>EKO</td>
+            <td class="orta"><span class="rz pas">yok</span></td>
+            <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+          <tr><td>03.06.2025</td><td>Y ASM</td><td>Akciğer grafisi</td>
+            <td class="orta"><span class="btn kucuk">🖼 Aç</span></td>
+            <td class="orta"><span class="btn kucuk">📄 Oku</span></td></tr>
+        </tbody></table></div>
+      <div class="ic mini">Görüntü e-Nabız'da varsa bağlantıyla açılır, kuruma <b>kopyalanmaz</b>;
+        rapor metni muayene notuna eklenebilir (kaynak ve tarih damgasıyla).</div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Hasta: Ayşe Yılmaz · TCKN 123******78 · 34 y · K</span>
+    <span>Onam: 07.10.2026 09:10 · 24 saat</span>
+    <span class="sp">Sorgu kaydı: İşlem Günlüğü › e-Nabız okuma · Dr. Ahmet Yılmaz</span>
+  </div>
+</div>
+
+<!-- ======================================================= 2 · RIZA YOK HALİ
+     Aynı panel, hasta izni olmadığında. Veri YERİNE ne yapılacağı yazar.    -->
+<div class="win">
+  <div class="title">🩺 Muayene · Mehmet Demir (57) — e-Nabız Hasta Verileri
+    <span class="sp">paylaşım izni yok</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📨 Hastadan İzin İste (SMS)</div>
+    <div class="btn">🔎 Onam Kaydını Gör</div>
+    <div class="btn pas">🔄 e-Nabız'dan Yenile</div>
+    <div class="btn pas">➕ Seçilenleri Muayeneye Aktar</div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr">
+    <div class="fld"><label>Paylaşım izni (hasta onamı)</label>
+      <div class="inp"><span class="rz kir">Yok</span> <span class="sonuk">e-Nabız'da kapalı</span></div></div>
+    <div class="fld"><label>Sorgu gerekçesi</label>
+      <div class="inp ro">Muayene · B-2026-004318</div></div>
+    <div class="fld"><label>Son deneme</label>
+      <div class="inp ro">07.10.2026 09:20 <span class="rz kir">reddedildi (izin yok)</span></div></div>
+    <div class="fld"><label>Kapsam</label><div class="inp ro">—</div></div>
+  </div>
+  <div class="kapali">
+    <div class="kutucuk" style="display:block">
+      <span class="bas">Hastanın e-Nabız paylaşım izni yok</span>
+      Dış kurum verileri gösterilmez. Hasta e-Devlet / e-Nabız üzerinden hekiminize
+      <b>süreli görüntüleme izni</b> verebilir; "İzin İste" düğmesi hastanın kayıtlı
+      telefonuna bağlantı gönderir.<br>
+      <span class="mini">Acil durumda mevzuatın izin verdiği <b>acil erişim</b> ayrı bir
+        gerekçeyle açılır ve ayrıca denetlenir - bu panelden değil, Acil modülünden.</span>
+      <div style="margin-top:14px;display:flex;gap:6px;justify-content:center">
+        <span class="btn primary">📨 Hastadan İzin İste (SMS)</span>
+        <span class="btn">📋 Hastanın beyanıyla kaydet</span>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>İzin isteği gönderildiğinde hasta onayı anında düşer; panel kendini yeniler.</span></div>
+</div>
+
+<!-- ================================================== 3 · ZAMAN ÇİZELGESİ SEKMESİ -->
+<div class="win">
+  <div class="title">📆 e-Nabız Zaman Çizelgesi — Ayşe Yılmaz
+    <span class="sp">tüm kurumlar · tek akış</span></div>
+  <div class="toolbar">
+    <span class="chip on">Tümü</span><span class="chip">Muayene</span><span class="chip">Reçete</span>
+    <span class="chip">Tahlil</span><span class="chip">Görüntüleme</span><span class="chip">Yatış</span>
+    <span class="chip">Aşı</span>
+    <div class="sepv"></div>
+    <div class="btn kucuk">📅 5 yıl ▾</div>
+    <div class="btn kucuk sp">⬇ Özet PDF</div>
+  </div>
+  <div class="zc">
+    <div class="yil">2026</div>
+    <div class="sat biz"><span class="tar">14.05.2026</span><span>Bizim kurum · Dahiliye</span>
+      <span>Muayene · J06.9 · Parasetamol 500 mg reçete</span><span class="rz mavi">bizden</span></div>
+    <div class="sat"><span class="tar">22.03.2026</span><span>X Devlet Hast. · Endokrinoloji</span>
+      <span>Muayene · E11.9/E03.9 · HbA1c 7,9 ↑ · Tiroid USG · Levotiroksin</span><span class="rz">dış</span></div>
+    <div class="sat"><span class="tar">08.01.2026</span><span>Y ASM · Aile Hekimliği</span>
+      <span>Muayene · J02.9 · CRP 14 ↑ · <b class="rz kir">Amoksisilin</b> (alerji çelişkisi)</span><span class="rz">dış</span></div>
+    <div class="yil">2025</div>
+    <div class="sat"><span class="tar">11.11.2025</span><span>Z Özel Hast. · Kardiyoloji</span>
+      <span>Muayene · I10 · EKO (EF %55)</span><span class="rz">dış</span></div>
+    <div class="sat"><span class="tar">03.06.2025</span><span>Y ASM · Aile Hekimliği</span>
+      <span>Periyodik muayene · Akciğer grafisi · Grip aşısı</span><span class="rz">dış</span></div>
+    <div class="sat"><span class="tar">19.02.2025</span><span>X Devlet Hast. · Endokrinoloji</span>
+      <span>Muayene · E03.9 · TSH 6,8 ↑ / fT4 0,7 ↓ · doz artışı</span><span class="rz">dış</span></div>
+  </div>
+  <div class="statusbar"><span>Bizim kurumun kayıtları mavi; gerisi e-Nabız'dan okunur.</span>
+    <span class="sp">142 kayıt · 8 kurum</span></div>
+</div>
+
+<div class="not">
+  <b>Muayenede e-Nabız (okuma) — tasarım notları</b>
+  <ul>
+    <li><b>Hasta izni veriden önce gelir.</b> Panelin ilk alanı paylaşım izni ve
+      süresidir; izin yoksa veri yerine <b>ne yapılacağı</b> yazar (izin isteği SMS,
+      hastanın beyanıyla kayıt). İzin olmadan tek satır dış veri çizilmez - "boş liste"
+      göstermek, veri yok sanılmasına yol açardı.</li>
+    <li><b>Gerekçe başvurudan gelir, elle yazılmaz.</b> Sorgu hangi muayene için
+      yapıldıysa o başvuru numarasıyla loglanır (<code>İşlem Günlüğü › e-Nabız okuma</code>):
+      kim, hangi hasta, hangi gerekçe, ne zaman. Hekim bunu göremediği bir yerde değil,
+      panelin başlığında ve durum çubuğunda görür.</li>
+    <li><b>Kritik olan en üstte, bir bant.</b> Alerji, ilaç çelişkisi ve kritik tahlil
+      hangi sekmede olursa olsun görünür. Muayenenin ilk saniyelerinde okunacak şey
+      budur; sekmelerin arkasına saklanmaz.</li>
+    <li><b>Özet yalnız anormali gösterir.</b> 24 tahlilin hepsini özete koymak, hekimin
+      aradığını bulamaması demekti: özette referans dışı olanlar, tamamı kendi
+      sekmesinde.</li>
+    <li><b>Veri kopyalanmaz, AKTARILIR.</b> Dış kurum verisi kurumun kayıtlarına
+      kendiliğinden yazılmaz; hekim seçtiğini "Muayeneye Aktar" ile alır ve aktarılan
+      satır <b>kaynak + tarih damgası</b> taşır (kimin tanısı olduğu kaybolmasın).
+      Görüntüler bağlantıyla açılır, indirilip saklanmaz.</li>
+    <li><b>Dış kurumun hekim adı maskelidir</b> (e-Nabız böyle döndürür); klinik SKRS
+      koduyla gelir, adı yerel listeden çözülür.</li>
+    <li><b>Acil erişim bu panelde yok.</b> Mevzuatın izin verdiği acil durum erişimi
+      ayrı gerekçe ve ayrı denetim ister; Acil modülünden açılır - muayene panelinde
+      bir düğme olarak durması, istisnayı rutine çevirirdi.</li>
+    <li>Zaman çizelgesinde <b>bizim kurumun kayıtları mavi</b>: hekim neyin kendi
+      kurumundan, neyin dışarıdan geldiğini ayırt etmeden karar vermemeli.</li>
+  </ul>
+  <b>Mockup</b> · tasarım aşaması: kod yazılmadı. Veri alanları e-Nabız okuma
+  servisinin (USS) döndürdüğü paketlere göre adlandırıldı; gerçekleştirme kararı
+  verilmeden API/DB'ye dokunulmayacak.
+</div>
+
+</body>
+</html>
