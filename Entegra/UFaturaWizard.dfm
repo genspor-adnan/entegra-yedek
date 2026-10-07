@@ -144,8 +144,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
-        ExplicitTop = 282
-        ExplicitHeight = 328
         object PanelAlt: TPanel
           Left = 1
           Top = 159
@@ -161,7 +159,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
-          ExplicitTop = 162
           DesignSize = (
             1102
             165)
@@ -826,7 +823,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
-          ExplicitHeight = 137
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -1701,7 +1697,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.CustomButtons.Buttons = <>
         Properties.Images = Tablo.PNGImageList2
         OnChange = PageUstChange
-        ExplicitTop = 102
         ClientRectBottom = 176
         ClientRectLeft = 4
         ClientRectRight = 1100

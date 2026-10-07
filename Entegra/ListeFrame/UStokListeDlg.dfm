@@ -45,6 +45,7 @@ object StokListeDlg: TStokListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -2028,6 +2029,7 @@ object StokListeDlg: TStokListeDlg
     object UretimIslemleriMenu: TMenuItem
       Caption = #220'retim '#304#351'lemleri'
       ImageIndex = 15
+      Visible = False
       object YeniReceteOlusturMenu: TMenuItem
         Caption = 'Yeni Re'#231'ete Olu'#351'tur'
         ImageIndex = 0

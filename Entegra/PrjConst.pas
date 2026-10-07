@@ -2942,6 +2942,7 @@ const
     Ops_TevkifatOranlari = -2331;
     Ops_TevkifatNedeni   = -2332; //Tevkifatlı fatura (TIPI=22) tevkifat nedenleri GENINI bölümü
     Ops_KDVIstisnaNedeni = -2333; //KDV İstisna fatura (TIPI=24) istisna nedenleri GENINI bölümü
+    Ops_IhracKayitliMuafiyetNedeni = -2334; //İhraç kayıtlı fatura (TIPI=9) muafiyet nedenleri
 
     //Ops_Kasiyer_Cafe_Sip_Sablon = -238701; -238702; -238703; -238704; -238705
     //Ops_Kasiyer_Cafe_Hesap_Sablon = -238801;-238802;-238803;-238804;-238805;

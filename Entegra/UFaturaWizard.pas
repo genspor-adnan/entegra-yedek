@@ -721,6 +721,7 @@ type
     FRaporMenuHazir: Boolean;
     FTevkifatListeHazir: Boolean;
     FIstisnaListeHazir: Boolean;
+    FIstisnaListeBolum: Integer;
     // Satirda tevkifat girilince baslik TIPI'sini 22 yapan otomatik ayar (bkz TevkifatTipiOtoAyarla)
     FTipiTevkifatOto: Boolean;      // TIPI=22'yi BIZ mi atadik (geri alma yalniz bu durumda)
     FTipiTevkifatOnceki: Integer;   // biz atamadan onceki TIPI degeri
@@ -1736,13 +1737,20 @@ begin
 end;
 
 procedure TFaturaWizardDlg.IstisnaListesiHazirla;
+var
+  LBolum: Integer;
 begin
-  if FIstisnaListeHazir then
+  if TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 9) then
+    LBolum := Ops_IhracKayitliMuafiyetNedeni
+  else
+    LBolum := Ops_KDVIstisnaNedeni;
+  if FIstisnaListeHazir and (FIstisnaListeBolum = LBolum) then
     Exit;
   comboIstisna.Properties.Items := Tablo.imgComboboxInit(
-    'select DEGER, ANAHTAR from GENINI where BOLUM=' + IntToStr(Ops_KDVIstisnaNedeni) +
+    'select DEGER, ANAHTAR from GENINI where BOLUM=' + IntToStr(LBolum) +
     ' and DIL=-1 order by SIRA').Items;
   FIstisnaListeHazir := True;
+  FIstisnaListeBolum := LBolum;
 end;
 
 procedure TFaturaWizardDlg.BelgeEkle1Click(Sender: TObject);
@@ -2048,10 +2056,12 @@ begin
       Exit;
    end;
 
-   // KDV İstisna fatura (TIPI=24) ise istisna nedeni (PLANID) seçilmeden kapatılamaz.
-   if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 24)
-      and (TabFatbaslik.FieldByName('PLANID').IsNull or (TabFatbaslik.FieldByName('PLANID').AsInteger = 0)) then begin
-      Application.MessageBox(PChar('KDV İstisna faturası için istisna nedeni seçmelisiniz.'),
+    // KDV istisna ve ihrac kayitli faturalarda (TIPI=24/9) istisna nedeni
+    // PLANID'de tutulur ve e-belgede TaxExemptionReason olarak kullanilir.
+    if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active and
+       (TabFatbaslik.FieldByName('TIPI').AsInteger in [9, 24])
+       and (TabFatbaslik.FieldByName('PLANID').IsNull or (TabFatbaslik.FieldByName('PLANID').AsInteger = 0)) then begin
+       Application.MessageBox(PChar('İhraç kayıtlı / KDV istisna faturası için istisna nedeni seçmelisiniz.'),
         PChar(Uyari), MB_OK or MB_ICONWARNING);
       CanClose := False;
       Exit;
@@ -2516,6 +2526,7 @@ begin
   FTipiTevkifatOto    := False;   // otomatik TIPI=22 atamasi bu belge icin henuz yok
   FTipiTevkifatOnceki := 0;
   FIstisnaListeHazir := False;
+  FIstisnaListeBolum := 0;
 
   if EIrsaliyeKullanimda=False then
      MenuKagitIrsaliyeyeCevir.Destroy; //e-irsaliye kullanımda ise göndermeyecekleri zaman kağıda çevirmeleri gerekir
@@ -5055,8 +5066,11 @@ begin
   if LotAlanlari then
     SQLStr[9] := SQLStr[9] + 'LOTNO=SL.LOTNO, Kalan=SI.KALAN, SERINO=SL.SERINO, ';
   SQLStr[9] := SQLStr[9] + 'Birimfiyat=F.BIRIMFIYAT,Tutar=F.TUTAR, FBID=FB.ID, FID=F.ID, ';
-  SQLStr[10] := ' DepoID=CASE WHEN FB.TUR=14 THEN FB.CIKISDEPO ELSE FB.GIRISDEPO END, '+
-                'Depo = (select DEPOADI from DEPOLAR where ID=CASE WHEN FB.TUR=14 THEN FB.CIKISDEPO ELSE FB.GIRISDEPO END)';
+  // Satis irsaliyesi/faturasi stoktan CIKIS yapar; alis belgeleri GIRIS yapar.
+  // Iade alis faturasi seciminde kaynak TUR=15/16 oldugunda da cikis deposu
+  // gelmelidir (onceki kontrol yalniz TUR=14'u kapsadigi icin alan bos kalirdi).
+  SQLStr[10] := ' DepoID=CASE WHEN FB.TUR IN (14,15,16) THEN FB.CIKISDEPO ELSE FB.GIRISDEPO END, '+
+                'Depo = (select DEPOADI from DEPOLAR where ID=CASE WHEN FB.TUR IN (14,15,16) THEN FB.CIKISDEPO ELSE FB.GIRISDEPO END)';
   if (TabFatbaslik.FieldByName('TUR').AsInteger = 109) and LotluUrunler then
     SQLStr[11] := '	,Kalan=SI.KALAN, LOTNO=SL.LOTNO, SERINO=SL.SERINO '
   else if TabFatbaslik.FieldByName('TUR').AsInteger = 10 then
@@ -5121,11 +5135,11 @@ begin
   if Tablo.ListedenBilgiGetir(HizmetUrunSec,SQLStr,st,[nil,nil,nil,nil,nil,nil,nil,Tablo.repStokAnaBirim,nil,nil,nil,nil,nil,nil,nil],'FaturaWizardHizmetUrunSec') then begin
      IadeOlanUrununSatisTarihi := StrToDateTimeDef(st[5], Tablo.GENINI.BugunTrh-1000);
      if LotAlanlari then begin
-       FatBasID := StrToIntDef(st[13],0);
-       FatSatirID := StrToIntDef(st[14],0);
+       FatBasID := StrToIntDef(st[10],0);
+       FatSatirID := StrToIntDef(st[11],0);
      end else begin
-       FatBasID := StrToIntDef(st[13],0);
-       FatSatirID := StrToIntDef(st[14],0);
+       FatBasID := StrToIntDef(st[10],0);
+       FatSatirID := StrToIntDef(st[11],0);
      end;
      Adet  := StrToIntDef(st[6],1);
      if LotAlanlari then
@@ -5221,11 +5235,12 @@ end;
 
 procedure TFaturaWizardDlg.FaturaTipiDuzenle;
 var
-  Tevkifatli, Istisnali, TamIskontolu, KdvMuafiyetli: Boolean;
+  Tevkifatli, Istisnali, IhracKayitli, TamIskontolu, KdvMuafiyetli: Boolean;
 begin
-  // TIPI=22 / TIPI=24 / %100 iskonto / %0 KDV: "Not 2" (ACIKLAMA2) yerine neden combosu.
+  // TIPI=22 / TIPI=24 / TIPI=9 / %100 iskonto / %0 KDV: "Not 2" yerine neden combosu.
   Tevkifatli := TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 22);
   Istisnali  := TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 24);
+  IhracKayitli := TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 9);
   TamIskontolu := TabFatbaslik.Active and TamIskontoSatiriVar;
   KdvMuafiyetli := TabFatbaslik.Active and KDVMuafiyetSatiriVar;
   // comboTevkifat ile comboIstisna ayni yerde (Left=87/Top=138) ve ayni alana
@@ -5235,16 +5250,20 @@ begin
     TamIskontolu  := False;
     KdvMuafiyetli := False;
   end;
-  cxLabel4.Visible      := not (Tevkifatli or Istisnali or TamIskontolu or KdvMuafiyetli);
-  cxDBTextEdit2.Visible := not (Tevkifatli or Istisnali or TamIskontolu or KdvMuafiyetli);
+  cxLabel4.Visible      := not (Tevkifatli or Istisnali or IhracKayitli or TamIskontolu or KdvMuafiyetli);
+  cxDBTextEdit2.Visible := not (Tevkifatli or Istisnali or IhracKayitli or TamIskontolu or KdvMuafiyetli);
   LabelTevkifat.Visible := Tevkifatli;
   comboTevkifat.Visible := Tevkifatli;
-  LabelIstisna.Visible  := Istisnali or TamIskontolu or KdvMuafiyetli;
-  comboIstisna.Visible  := Istisnali or TamIskontolu or KdvMuafiyetli;
+  LabelIstisna.Visible  := Istisnali or IhracKayitli or TamIskontolu or KdvMuafiyetli;
+  comboIstisna.Visible  := Istisnali or IhracKayitli or TamIskontolu or KdvMuafiyetli;
   if Tevkifatli then
     TevkifatListesiHazirla;
-  if Istisnali or TamIskontolu or KdvMuafiyetli then
+  if Istisnali or IhracKayitli or TamIskontolu or KdvMuafiyetli then
     IstisnaListesiHazirla;
+  if IhracKayitli then
+    LabelIstisna.Caption := 'İhraç Kayıt' + sLineBreak + 'Muafiyet'
+  else
+    LabelIstisna.Caption := 'İstisna Nedeni';
 
   if ((ComboFatTipi.EditValue=4)or(ComboFatTipi.EditValue=7)or(ComboFatTipi.EditValue=8)) then
      LabelEkVergi.Caption := 'Stopaj'

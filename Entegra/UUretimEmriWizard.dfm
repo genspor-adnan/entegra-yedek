@@ -74,8 +74,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       Caption = 'JvWizardInteriorPage1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelUst: TPanel
         Left = 0
         Top = 70
@@ -97,7 +95,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           Left = 3
           Top = 3
           Width = 1190
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -162,9 +159,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           end
         end
         object PageControlUst: TcxPageControl
-          Properties.Images = Tablo.PNGImageList2
           Left = 0
-          Top = 32
+          Top = 35
           Width = 1196
           Height = 230
           Align = alTop
@@ -174,8 +170,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           TabOrder = 1
           Properties.ActivePage = cxTabSheet1
           Properties.CustomButtons.Buttons = <>
+          Properties.Images = Tablo.PNGImageList2
           OnChange = PageControlUstChange
-          ExplicitTop = 35
           ClientRectBottom = 226
           ClientRectLeft = 4
           ClientRectRight = 1192
@@ -184,10 +180,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
             AllowCloseButton = False
             Caption = 'Genel'
             ImageIndex = 11
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelGenelUst: TPanel
               Left = 0
               Top = 0
@@ -627,14 +619,11 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                 Caption = #220'r'#252'n Kodu'
                 Transparent = True
               end
-              object cxDBDateEdit1: TcxDBDateEdit
+              object DateTERMINTARIHI: TcxDBDateEdit
                 Left = 1098
                 Top = 2
                 DataBinding.DataField = 'TERMINTARIHI'
                 DataBinding.DataSource = DtsUretimEmri
-                Properties.Kind = ckDateTime
-                Properties.ReadOnly = True
-                Style.Color = clMedGray
                 TabOrder = 35
                 Width = 88
               end
@@ -643,31 +632,18 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 19
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
           object EkAlanlarEkr2: TcxTabSheet
             Caption = 'Ek Alanlar2'
             ImageIndex = 19
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
           object EkAlanlarEkr3: TcxTabSheet
             Caption = 'EkAlanlarEkr3'
             ImageIndex = 19
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end
       object cxPageControl1: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 246
         Width = 1196
@@ -676,18 +652,15 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         TabOrder = 1
         Properties.ActivePage = SheetUretimAgaci
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         OnPageChanging = cxPageControl1PageChanging
         ClientRectBottom = 378
         ClientRectLeft = 4
         ClientRectRight = 1192
-        ClientRectTop = 24
+        ClientRectTop = 25
         object SheetUretimAgaci: TcxTabSheet
           Caption = #220'retim A'#287'ac'#305
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar5: TToolBar
             Left = 0
             Top = 0
@@ -784,7 +757,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
             Left = 0
             Top = 24
             Width = 1188
-            Height = 330
+            Height = 329
             Align = alClient
             Bands = <
               item
@@ -1008,10 +981,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetOperasyonlar: TcxTabSheet
           Caption = 'Operasyon'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Panel2: TPanel
             Left = 0
             Top = 0
@@ -1293,34 +1262,30 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
             Left = 0
             Top = 209
             Width = 1188
-            Height = 145
+            Height = 144
             Align = alClient
             TabOrder = 1
             object cxPageControl2: TcxPageControl
               Left = 1
               Top = 1
               Width = 1186
-              Height = 143
+              Height = 142
               Align = alClient
               TabOrder = 0
               Properties.ActivePage = SheetIsZaman
               Properties.CustomButtons.Buttons = <>
-              ClientRectBottom = 139
+              ClientRectBottom = 138
               ClientRectLeft = 4
               ClientRectRight = 1182
               ClientRectTop = 24
               object SheetIsZaman: TcxTabSheet
                 Caption = #304#351' Zaman Personel'
                 ImageIndex = 35
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridIsZaman: TcxGrid
                   Left = 0
                   Top = 23
                   Width = 1178
-                  Height = 92
+                  Height = 91
                   Align = alClient
                   TabOrder = 0
                   object GridIsZamanView: TcxGridDBTableView
@@ -1610,15 +1575,11 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetPlanlama: TcxTabSheet
                 Caption = 'Malzeme Planlama'
                 ImageIndex = 12
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridPlanlama: TcxGrid
                   Left = 0
                   Top = 25
                   Width = 1178
-                  Height = 90
+                  Height = 89
                   Align = alClient
                   PopupMenu = PopupOperasyonPlanlama
                   TabOrder = 0
@@ -1841,15 +1802,11 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetOpIslemler: TcxTabSheet
                 Caption = 'T'#252'ketilenler'
                 ImageIndex = 19
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridUrtOpDetay: TcxGrid
                   Left = 0
                   Top = 0
                   Width = 1178
-                  Height = 115
+                  Height = 114
                   Align = alClient
                   TabOrder = 0
                   object GridUrtOpDetayDBTableView1: TcxGridDBTableView
@@ -1933,10 +1890,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetOpMaliyet: TcxTabSheet
                 Caption = 'Ekstra Maliyet'
                 ImageIndex = 19
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object ToolBar2: TToolBar
                   Left = 0
                   Top = 0
@@ -2006,7 +1959,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                   Left = 0
                   Top = 24
                   Width = 1178
-                  Height = 91
+                  Height = 90
                   Align = alClient
                   TabOrder = 1
                   object GridUrtOpMaliyetDBTableView1: TcxGridDBTableView
@@ -2094,10 +2047,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object cxTabSheet2: TcxTabSheet
                 Caption = 'D'#305#351' Kaynak Kullan'#305'm'#305' (Fason)'
                 ImageIndex = 19
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object ToolBar6: TToolBar
                   Left = 0
                   Top = 0
@@ -2167,7 +2116,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                   Left = 0
                   Top = 24
                   Width = 1178
-                  Height = 91
+                  Height = 90
                   Align = alClient
                   TabOrder = 1
                   object GridFasonView: TcxGridDBTableView
@@ -2291,13 +2240,9 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetYorumMedya: TcxTabSheet
                 Caption = 'Yorum/Medya'
                 ImageIndex = 38
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object Panel4: TPanel
                   Left = 0
-                  Top = 54
+                  Top = 53
                   Width = 1178
                   Height = 41
                   Align = alBottom
@@ -2337,7 +2282,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                 end
                 object labelFileName: TcxLabel
                   Left = 0
-                  Top = 95
+                  Top = 94
                   ParentCustomHint = False
                   Align = alBottom
                   ParentColor = False
@@ -2355,14 +2300,13 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                   Properties.Alignment.Horz = taRightJustify
                   Transparent = True
                   Visible = False
-                  ExplicitTop = 94
                   AnchorX = 1178
                 end
                 object GridYorum: TcxGrid
                   Left = 0
                   Top = 0
                   Width = 1178
-                  Height = 54
+                  Height = 53
                   Align = alClient
                   TabOrder = 2
                   LookAndFeel.ScrollbarMode = sbmClassic
@@ -2445,15 +2389,11 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetMaliyet: TcxTabSheet
           Caption = 'Maliyet'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object cxGrid1: TcxGrid
             Left = 0
             Top = 0
             Width = 1188
-            Height = 354
+            Height = 353
             Align = alClient
             TabOrder = 0
             LookAndFeel.ScrollbarMode = sbmClassic
@@ -2552,15 +2492,11 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetGereksinim: TcxTabSheet
           Caption = 'Gereksinim'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridGereksinim: TcxGrid
             Left = 0
             Top = 0
             Width = 1188
-            Height = 354
+            Height = 353
             Align = alClient
             TabOrder = 0
             LookAndFeel.ScrollbarMode = sbmClassic
@@ -2794,7 +2730,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         Control = PanelGenelUst
         Color = clNavy
         ParentColor = False
-        ExplicitWidth = 8
       end
     end
   end
@@ -3296,8 +3231,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
   object DtsUrToplamMaliyet: TDataSource
     DataSet = TabUrToplamMaliyet
     OnStateChange = DtsOperasyonEkMaliyetStateChange
-    Left = 667
-    Top = 21
+    Left = 747
+    Top = 13
   end
   object frxUrToplamMaliyet: TfrxDBDataset
     UserName = 'UrToplamMaliyet'
@@ -3689,8 +3624,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
   end
   object Query19: TFDQuery
     Connection = Tablo.FDCnn
-    Left = 210
-    Top = 179
+    Left = 218
+    Top = 147
   end
   object TabOperasyonFason: TFDQuery
     BeforePost = TabOperasyonFasonBeforePost

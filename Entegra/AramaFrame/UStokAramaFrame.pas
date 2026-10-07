@@ -5,7 +5,7 @@
 interface
 
 uses
-  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
   dxSkinsCore, cxGraphics, cxCheckBox, cxMaskEdit, cxDropDownEdit,Utablo,
   cxControls, cxContainer, cxEdit, cxTextEdit, dxSkinLondonLiquidSky,DateUtils,PrjConst,

@@ -218,10 +218,8 @@ uses LocOnFly, UTablo, prjconst, FetaKurulusSiniflari, FetaClassExtensions, UAna
 
 const
    // Ek alanlarin (Calisma / Ek Alan1 / Ek Alan2 sekmeleri) fiziksel tablosu.
-   //   ALANLAR.TABLO bu ada isaret ediyor ve veri de burada (TABLOLAR 526).
-   //   ADI YAZIM HATALI (OPERASON) AMA DOGRU TABLO BUDUR - duzeltilmis yazimli
-   //   URETIMOPERASYONPERSONEL_USER (TABLOLAR 511) bos ve ek alan kolonlari yok.
-   CUserTablo = 'URETIMOPERASONPERSONEL_USER';
+   //   Bu tablo hem ek alanlarin okunmasinda hem de Kaydet'te kullanilir.
+   CUserTablo = 'URETIMOPERASYONPERSONEL_USER';
 
 var
    OncekiPersonel:Integer;

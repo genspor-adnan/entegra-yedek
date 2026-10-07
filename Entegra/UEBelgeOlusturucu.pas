@@ -108,6 +108,7 @@ type
     Ilce: string;
     Il: string;
     ParaBirimi: string;
+    DovizKur: Currency;
     AliciAlias: string;
     GondericiAlias: string;
     UUID: string;
@@ -422,8 +423,20 @@ end;
 function ParaBirimiNormallestir(const ADeger: string): string;
 begin
   Result := UpperCase(Trim(ADeger));
-  if (Result = '') or (Result = 'TL') or (Result = 'YTL') then
+  if Result = #8364 then
+    Result := 'EUR'
+  else if Result = '$' then
+    Result := 'USD'
+  else if Result = #163 then
+    Result := 'GBP'
+  else if (Result = #8378) or (Result = '') or (Result = 'TL') or
+    (Result = 'YTL') then
     Result := 'TRY';
+end;
+
+function ParaBirimiTRYmi(const AParaBirimi: string): Boolean;
+begin
+  Result := SameText(ParaBirimiNormallestir(AParaBirimi), 'TRY');
 end;
 
 function BizimTarafGetir(const AVergiNo, AUnvan: string): TEBelgeTaraf; forward;
@@ -611,6 +624,11 @@ begin
     Result := 'SGK'
   else
     Result := 'SATIS';
+end;
+
+function IhracKayitliMi(const ABaslik: TEBelgeBaslik): Boolean;
+begin
+  Result := ABaslik.Tipi = 9;
 end;
 
 function SenaryoProfilKodu(const ABaslik: TEBelgeBaslik): string;
@@ -814,7 +832,11 @@ begin
     LQuery.SQL.Text :=
       'select '+DbUst(1)+'ANAHTAR, DEGER from GENINI where BOLUM=:BOLUM and DIL=-1 ' +
       'and DEGER=:DEGER order by SIRA, ANAHTAR '+DbSinir(1);
-    LQuery.ParamByName('BOLUM').AsInteger := Ops_KDVIstisnaNedeni;
+    if (AIstisnaNedeniID = 701) or (AIstisnaNedeniID = 702) or
+       (AIstisnaNedeniID = 703) or (AIstisnaNedeniID = 704) then
+      LQuery.ParamByName('BOLUM').AsInteger := Ops_IhracKayitliMuafiyetNedeni
+    else
+      LQuery.ParamByName('BOLUM').AsInteger := Ops_KDVIstisnaNedeni;
     LQuery.ParamByName('DEGER').AsInteger := AIstisnaNedeniID;
     LQuery.Open;
     if LQuery.Eof then
@@ -880,7 +902,8 @@ end;
 function KDVIstisnaNotu(const ABaslik: TEBelgeBaslik): string;
 begin
   Result := '';
-  if not ((ABaslik.Tur = EBelgeTuruEFatura) and (ABaslik.Tipi = 24)) then
+  if not ((ABaslik.Tur = EBelgeTuruEFatura) and
+    (ABaslik.Tipi in [9, 24])) then
     Exit;
   if ABaslik.PlanID <= 0 then
     Exit;
@@ -1607,7 +1630,7 @@ var
   LSatirID: Integer;
   LKimlikQuery: TFDQuery;
   LIhracatJson: string;
-  LSatirNavlun, LSatirSigorta: Currency;
+  LSatirNavlun, LSatirSigorta, LDovizToplam, LDovizOrani: Currency;
 begin
   ABaslik := Default(TEBelgeBaslik);
   SetLength(ASatirlar, 0);
@@ -1629,7 +1652,7 @@ begin
     ABaslik.TevkifatNedeni);
   // KDV istisna kodu: Tipi=24 (KDV istisna faturasi) veya Senaryo=3 (ihracat)
   // -> izibiz KDV%=0'da taxExemptionCode zorunlu kilar.
-  if (ABaslik.Tipi = 24) or (ABaslik.Senaryo = 3) then
+  if (ABaslik.Tipi in [9, 24]) or (ABaslik.Senaryo = 3) then
     KDVIstisnaBilgisiGetir(ABaslik.PlanID, ABaslik.KDVIstisnaKodu,
       ABaslik.KDVIstisnaNedeni);
   ABaslik.RehberID := AlanInt(Tablo.Query1, 'REHBERID');
@@ -1653,12 +1676,28 @@ begin
   ABaslik.Il := AlanStr(Tablo.Query1, 'IL');
   ABaslik.ParaBirimi := ParaBirimiNormallestir(
     AlanStr(Tablo.Query1, 'FATURADOVIZI'));
+  ABaslik.DovizKur := AlanCurrency(Tablo.Query1, 'DOVIZKUR');
   ABaslik.AliciAlias := AlanStr(Tablo.Query1, 'ALICIALIAS');
   ABaslik.GondericiAlias := AlanStr(Tablo.Query1, 'GONDERICIALIAS');
   ABaslik.UUID := AlanStr(Tablo.Query1, 'EBUUID');
   ABaslik.Matrah := AlanCurrency(Tablo.Query1, 'FATURA_MATRAHI');
   ABaslik.KDV := AlanCurrency(Tablo.Query1, 'KDV_TUTARI');
   ABaslik.Toplam := AlanCurrency(Tablo.Query1, 'FATURA_TUTARI');
+  // Dovizli faturada FATBASLIK'taki matrah/KDV/Tutar TL'dir. UBL ve izibiz
+  // tutarlari ise DocumentCurrencyCode cinsinden olmali; DOVIZ_TUTARI toplam
+  // doviz tutaridir. Baslik dip toplamlarini da satirlarla ayni para birimine
+  // cevir ki TaxTotal, LegalMonetaryTotal ve tutar yazisi tutarli kalsin.
+  if not ParaBirimiTRYmi(ABaslik.ParaBirimi) then begin
+    LDovizToplam := AlanCurrency(Tablo.Query1, 'DOVIZ_TUTARI');
+    if (LDovizToplam = 0) and (ABaslik.DovizKur > 0) then
+      LDovizToplam := ABaslik.Toplam / ABaslik.DovizKur;
+    if (LDovizToplam <> 0) and (ABaslik.Toplam <> 0) then begin
+      LDovizOrani := LDovizToplam / ABaslik.Toplam;
+      ABaslik.Matrah := ABaslik.Matrah * LDovizOrani;
+      ABaslik.KDV := ABaslik.KDV * LDovizOrani;
+      ABaslik.Toplam := LDovizToplam;
+    end;
+  end;
 
   // Ihracat faturasi (Senaryo=3): FATURA_USER.IHRACAT JSON alanindan teslim
   // sarti, tasima, kap, FOB, kap adedi oku (JSON delivery/shipment icin).
@@ -1719,8 +1758,17 @@ begin
       if LMiktar = 0 then
         LMiktar := 1;
       LSatir.Miktar := LMiktar;
-      LSatir.BirimFiyat := AlanCurrency(Tablo.Query1, 'BIRIMFIYAT');
-      LSatir.Tutar := AlanCurrency(Tablo.Query1, 'TUTAR');
+      // MSSQL'deki e-belge SP'si dovizli faturada DOVIZ_BIRIMFIYAT ve
+      // DOVIZ_TUTARI alanlarini EBelge* adlariyla dondurur. Eski/PG sorgu
+      // sonucunda bu alanlar yoksa mevcut TL alanlarini kullanmaya devam et.
+      if Assigned(Tablo.Query1.FindField('EBELGEBIRIMFIYAT')) then
+        LSatir.BirimFiyat := AlanCurrency(Tablo.Query1, 'EBELGEBIRIMFIYAT')
+      else
+        LSatir.BirimFiyat := AlanCurrency(Tablo.Query1, 'BIRIMFIYAT');
+      if Assigned(Tablo.Query1.FindField('EBELGETUTAR')) then
+        LSatir.Tutar := AlanCurrency(Tablo.Query1, 'EBELGETUTAR')
+      else
+        LSatir.Tutar := AlanCurrency(Tablo.Query1, 'TUTAR');
       LSatir.KDVOrani := AlanFloat(Tablo.Query1, 'KDV');
       LSatir.IskontoOrani := AlanFloat(Tablo.Query1, 'ISKONTO');
       LSatir.Iskonto2Orani := AlanFloat(Tablo.Query1, 'ISKONTO2');
@@ -2837,6 +2885,22 @@ begin
           LXML.Append(KamuPaymentMeansXML(LOdemeHesabi));
         end;
       end;
+      // Izibiz'in olusturdugu UBL sirasi: taraflar/odeme bilgileri sonrasi,
+      // TaxTotal oncesi. Kurla birlikte tum tutarlar DocumentCurrencyCode
+      // cinsindendir.
+      if not ParaBirimiTRYmi(ABaslik.ParaBirimi) then begin
+        if ABaslik.DovizKur <= 0 then
+          raise Exception.Create('Dovizli e-Fatura icin FATBASLIK.DOVIZKUR sifirdan buyuk olmalidir.');
+        LXML.AppendLine('<cac:PricingExchangeRate>');
+        LXML.AppendLine('<cbc:SourceCurrencyCode>' +
+          XMLEscape(ABaslik.ParaBirimi) + '</cbc:SourceCurrencyCode>');
+        LXML.AppendLine('<cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>');
+        LXML.AppendLine('<cbc:CalculationRate>' +
+          Ondalik(ABaslik.DovizKur, '0.######') + '</cbc:CalculationRate>');
+        LXML.AppendLine('<cbc:Date>' + FormatDateTime('yyyy-mm-dd', ABaslik.Tarih) +
+          '</cbc:Date>');
+        LXML.AppendLine('</cac:PricingExchangeRate>');
+      end;
       if ABaslik.NavlunGirildi or ABaslik.SigortaGirildi or
         (ABaslik.NavlunTutar > 0) or (ABaslik.SigortaTutar > 0) then begin
         LXML.AppendLine('<cac:Delivery>');
@@ -2900,7 +2964,7 @@ begin
         //   icinde, TaxScheme'den ONCE). Istisna/ihracat -> plan kodu; bedelsiz (%100 iskonto, net
         //   matrah 0 -> KDV 0) -> muafiyet kodu 351. Tetik: KDV tutari 0 (oran degil - bedelsizde oran 18).
         var LIstisnaXml: string := '';
-        if LGrupVergi < 0.001 then begin
+        if (LGrupVergi < 0.001) or IhracKayitliMi(ABaslik) then begin
           var LMufKod, LMufNeden: string;
           KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
           LIstisnaXml :=
@@ -2973,6 +3037,8 @@ begin
           ABaslik.ParaBirimi + '">' + Ondalik(LToplamIskonto, '0.00##') +
           '</cbc:AllowanceTotalAmount>');
       var LPayable: Currency := LToplamMatrah + LToplamVergi - LToplamTevkifat;
+      if IhracKayitliMi(ABaslik) then
+        LPayable := LToplamMatrah;
       if Abs(LPayable - ABaslik.Toplam) < 0.02 then
         LPayable := ABaslik.Toplam;
       LXML.AppendLine('<cbc:PayableAmount currencyID="' +
@@ -3076,7 +3142,7 @@ begin
         LSatirIskonto := SatirIskontoTutar(ASatirlar[I]);
         LSatirBrut := SatirBrutTutar(ASatirlar[I]);
         LSatirIstisnaXml := '';
-        if LSatirVergi < 0.001 then begin
+        if (LSatirVergi < 0.001) or IhracKayitliMi(ABaslik) then begin
           var LMufKod, LMufNeden: string;
           KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
           LSatirIstisnaXml :=
@@ -5479,7 +5545,7 @@ function _IzibizJSONOlustur(const ABaslik: TEBelgeBaslik;
 var
   LRoot, LContent, LSupplier, LSupplierAdr, LCustomer, LTax, LTaxSub, LTaxScheme,
     LMonetary, LLine, LLineTax, LLineTaxSub, LLineTaxScheme,
-    LWithholdingTax, LWithholdingSub: TJSONObject;
+    LWithholdingTax, LWithholdingSub, LPricingExchangeRate: TJSONObject;
   LNotes, LLines, LTaxSubArr, LLineTaxSubArr, LAddRefs,
     LWithholdingSubArr: TJSONArray;
   LAddRefSend: TJSONObject;
@@ -5588,6 +5654,16 @@ begin
     if LTrimmed <> '' then
       LNotes.Add(LTrimmed);
     LContent.AddPair('currencyCode', IfThen(Trim(ABaslik.ParaBirimi) = '', 'TRY', ABaslik.ParaBirimi));
+    if (not LIsIrsaliye) and not ParaBirimiTRYmi(ABaslik.ParaBirimi) then begin
+      if ABaslik.DovizKur <= 0 then
+        raise Exception.Create('Dovizli e-Fatura icin FATBASLIK.DOVIZKUR sifirdan buyuk olmalidir.');
+      LPricingExchangeRate := TJSONObject.Create;
+      LPricingExchangeRate.AddPair('sourceCurrencyCode', ABaslik.ParaBirimi);
+      LPricingExchangeRate.AddPair('targetCurrencyCode', 'TRY');
+      LPricingExchangeRate.AddPair('calculationRate', TJSONNumber.Create(ABaslik.DovizKur));
+      LPricingExchangeRate.AddPair('date', FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
+      LContent.AddPair('pricingExchangeRate', LPricingExchangeRate);
+    end;
     if ABaslik.NavlunGirildi or ABaslik.SigortaGirildi or
       (ABaslik.NavlunTutar > 0) or (ABaslik.SigortaTutar > 0) then begin
       var LHeaderShipment: TJSONObject := TJSONObject.Create;
@@ -5962,7 +6038,7 @@ begin
         LTaxSub.AddPair('taxableAmount', TJSONNumber.Create(LGrupMatrah));
         LTaxSub.AddPair('percent', TJSONNumber.Create(ASatirlar[i].KDVOrani));
         LTaxSub.AddPair('taxAmount', TJSONNumber.Create(LGrupVergi));
-        if LGrupVergi < 0.001 then begin
+        if (LGrupVergi < 0.001) or IhracKayitliMi(ABaslik) then begin
           var LMufKod, LMufNeden: string;
           KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
           LTaxSub.AddPair('taxExemptionCode', LMufKod);
@@ -6018,6 +6094,8 @@ begin
       //   brut - allowanceTotal = taxExclusive. (LToplamMatrah net; satir LineExtensionAmount net kalir.)
       var LTopIsk: Currency := SatirlarIskontoToplami(ASatirlar);
       var LPayable: Currency := LToplamMatrah + LToplamKDV - LToplamTevkifat;
+      if IhracKayitliMi(ABaslik) then
+        LPayable := LToplamMatrah;
       if Abs(LPayable - ABaslik.Toplam) < 0.02 then
         LPayable := ABaslik.Toplam;
       LMonetary := TJSONObject.Create;
@@ -6174,7 +6252,7 @@ begin
       LLineTaxSub.AddPair('taxAmount', TJSONNumber.Create(LSatirVergi));
       LLineTaxSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
       LLineTaxSub.AddPair('percent', TJSONNumber.Create(LSatir.KDVOrani));
-      if LSatirVergi < 0.001 then begin
+      if (LSatirVergi < 0.001) or IhracKayitliMi(ABaslik) then begin
         var LMufKod, LMufNeden: string;
         KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
         LLineTaxSub.AddPair('taxExemptionCode', LMufKod);

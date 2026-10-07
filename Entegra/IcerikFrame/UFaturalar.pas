@@ -1,9 +1,9 @@
-﻿unit  UFaturalar;
+﻿unit UFaturalar;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,    Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage,
   cxEdit, DB, cxDBData, cxImageComboBox, FireDAC.Comp.Client, StdCtrls, DBCtrls, Buttons,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,

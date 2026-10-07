@@ -447,7 +447,7 @@ type
     TabUretimOperasyonLOKASYONADI: TWideStringField;
     TabUretimOperasyonISMERKEZIADI: TWideStringField;
     TabUretimOperasyonPERSONELAD: TWideStringField;
-    cxDBDateEdit1: TcxDBDateEdit;
+    DateTERMINTARIHI: TcxDBDateEdit;
     procedure DtsUretimEmriStateChange(Sender: TObject);
     procedure DtsUretimEmriDetayStateChange(Sender: TObject);
     procedure TabUretimEmriNewRecord(DataSet: TDataSet);
@@ -1503,7 +1503,8 @@ begin
 end;
 
 procedure TUretimEmriWizardDlg.FormCreate(Sender: TObject);
-var Ad:string;
+var
+  Ad, Alan: string;
   procedure SekmeIslem(Ops:Integer;Tab1:TcxTabSheet);
   begin
       Ad := Tablo.GENINI.ReadString(Ops, '');
@@ -1539,6 +1540,17 @@ begin
     TabUretimOperasyonPersonel.FindField('LOKASYONADI').ProviderFlags := [];
   if TabUretimOperasyonPersonel.FindField('KAYNAKADI') <> nil then
     TabUretimOperasyonPersonel.FindField('KAYNAKADI').ProviderFlags := [];
+
+  // Operasyon gridinin sorgusu URETIMOPERASYON'a ek olarak hesaplanmis ve
+  // bagli tablolardan gelen goruntuleme alanlarini da donuyor. FireDAC'in bu
+  // alanlari update etmeye calismamasi icin hedef tablo/anahtar acik verilir.
+  TabUretimOperasyon.UpdateOptions.UpdateTableName := 'URETIMOPERASYON';
+  TabUretimOperasyon.UpdateOptions.KeyFields := 'ID';
+  TabUretimOperasyon.UpdateOptions.UpdateChangedFields := True;
+  for Alan in ['GBASTAR', 'GBITTAR', 'GERCEKLESEN', 'STOKKODU', 'STOKADI',
+    'URUNNO', 'RESIM', 'DOKUMAN', 'LOKASYONADI', 'ISMERKEZIADI', 'PERSONELAD'] do
+    if TabUretimOperasyon.FindField(Alan) <> nil then
+      TabUretimOperasyon.FindField(Alan).ProviderFlags := [];
 end;
 
 procedure TUretimEmriWizardDlg.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1769,6 +1781,7 @@ begin
         ULog.SnapTablo(4, 'URETIMOPERASYONMALIYET',  'URETIMOPERASYONID in ' + LOp),
         ULog.SnapTablo(4, 'URETIMOPERASYONFASON',    'URETIMOPERASYONID in ' + LOp),
         ULog.SnapTablo(4, 'URETIMOPERASYONPERSONEL', 'OPERASYONID in ' + LOp),
+        ULog.SnapTablo(4, 'URETIMOPERASYONPERSONEL_USER', 'ID in ' + LPers),
         ULog.SnapTablo(4, 'GOREVYORUM',              'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp),
         ULog.SnapTablo(5, 'DOKUMAN',                 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp + ')'),
         ULog.SnapTablo(6, 'IMAJ',                    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp + '))'),
@@ -1962,7 +1975,7 @@ begin
    LokID:=Tablo.LokasyonAra_IDGetir(Lokasyon_UretimIsMerkezi);
    if LokID>0 then begin
       TabUretimOperasyon.Edit;
-      TabUretimOperasyon.FieldByName('LOKASYON').Value:=LokID;
+      TabUretimOperasyon.FieldByName('ISMERKEZI').Value:=LokID;
       TabUretimOperasyon.Post;
       TabloYenile(TabUretimOperasyon,[TabUretimEmri.FieldByName('ID').AsInteger]);
    end;
@@ -2816,9 +2829,40 @@ begin
 end;
 
 procedure TUretimEmriWizardDlg.IsZamanSilClick(Sender: TObject);
+var
+  LID: Integer;
 begin
-  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
-     TabUretimOperasyonPersonel.Delete;
+  if TabUretimOperasyonPersonel.IsEmpty then
+    Exit;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
+    LID := TabUretimOperasyonPersonel.FieldByName('ID').AsInteger;
+    ULog.OturumYakala(FOturumID);
+    Tablo.FDCnn.StartTransaction;
+    try
+      // Olcum ve ek-alan tablolari URETIMOPERASYONPERSONEL'e baglidir.
+      // Eski yazim hatali _USER tablosunda CASCADE yoktur; cocuklar once silinmelidir.
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'delete from URETIMOLCUMDETAY where URETIMOLCUMID in ' +
+        '(select ID from URETIMOLCUM where OPERASYONPERSONELID=&ID)', ['&ID'], [LID]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'delete from URETIMOLCUM where OPERASYONPERSONELID=&ID', ['&ID'], [LID]);
+      // Eski kurulumlarda yazim hatali _USER tablosu da FK ile ana kayda baglidir.
+      // Bazi musterilerde fiziksel tablo yoktur; bu nedenle yalniz varsa silinir.
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'if object_id(N''dbo.URETIMOPERASONPERSONEL_USER'', N''U'') is not null ' +
+        'delete from dbo.URETIMOPERASONPERSONEL_USER where ID=&ID', ['&ID'], [LID]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'delete from URETIMOPERASYONPERSONEL_USER where ID=&ID', ['&ID'], [LID]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'delete from URETIMOPERASYONPERSONEL where ID=&ID', ['&ID'], [LID]);
+      Tablo.FDCnn.Commit;
+    except
+      if Tablo.FDCnn.InTransaction then
+        Tablo.FDCnn.Rollback;
+      raise;
+    end;
+    CheckTamamlananlarClick(Self);
+  end;
 end;
 
 procedure TUretimEmriWizardDlg.IsZamanYeniClick(Sender: TObject);
@@ -2913,12 +2957,6 @@ begin
 end;
 
 end.
-
-
-
-
-
-
 
 
 

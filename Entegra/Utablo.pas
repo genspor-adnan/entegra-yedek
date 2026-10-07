@@ -3346,7 +3346,8 @@ begin
   // Arayuz isi Pascal'da kalir:
   //   - stok yetersizligi: sunucu donusumu REDDEDER ve yetersiz stoklari
   //     Uyarilar[] ile bildirir. StokDurumKontrolKurali "sor" ise kullaniciya
-  //     sorulur ve ayni istek stokOnayi=true ile TEKRAR gonderilir.
+  //     sorulur; "izin ver" ise sessizce ayni istek stokOnayi=true ile tekrar
+  //     gonderilir.
   //   - izlemeli urun: sunucu seri/lot secimi ister; secim gelmezse donusum
   //     yapilmaz ve uyari gosterilir.
   //
@@ -3365,8 +3366,23 @@ begin
       Exit;
     end;
 
-    // Basarisiz: stok yetersizligi ve kullanici onayi verilebiliyorsa tekrar dene
-    if (Pos('"kod":"STOK_YETERSIZ"', LSonuc) > 0) and (StokDurumKontrolKurali = 1) then
+    // Stok opsiyonu "Yetersizse de cikabilsin" ise sunucuya acik izin ver.
+    // Ilk istek bilerek stokOnayi=false gider; aksi halde gercek yetersizlik
+    // bilgisi alinmaz. Bu yol eski StokCikisYeterliMi'nin kural=2 davranisiyla
+    // ayni sonucu verir.
+    if (Pos('"kod":"STOK_YETERSIZ"', LSonuc) > 0) and (StokDurumKontrolKurali = 2) then
+    begin
+      LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False, LSonuc);
+      if LId > 0 then
+      begin
+        EBelgeTaslakNoDuzelt(LId);
+        Result := LId;
+        Exit;
+      end;
+    end
+
+    // Stok opsiyonu "Yetersizse onay alsin" ise kullanicidan onay alarak tekrar dene.
+    else if (Pos('"kod":"STOK_YETERSIZ"', LSonuc) > 0) and (StokDurumKontrolKurali = 1) then
     begin
       if UyariGoster(Uyari, DonusumUyariMetni(LSonuc) + #13#10 +
                      TCikmakIstediginizKadarUrunYokYinedeCik, 2) = mrYes then

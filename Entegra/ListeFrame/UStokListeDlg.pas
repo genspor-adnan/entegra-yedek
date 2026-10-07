@@ -1183,7 +1183,7 @@ begin
     AramaYap;
   end;
 
-  UretimIslemleriMenu.Visible := Tablo.YetkiVarmi(3321,YetkiTur_Gorme); //üretim görev framedeki reçete butonunu görme yetkisi..
+  UretimIslemleriMenu.Visible := False;//Tablo.YetkiVarmi(3321,YetkiTur_Gorme); //üretim görev framedeki reçete butonunu görme yetkisi..
 
   YaziciYaz.PopupMenu := TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).pmDokumAyarlar;
   PopupMenuYaz.Images := TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).ImageList1;
