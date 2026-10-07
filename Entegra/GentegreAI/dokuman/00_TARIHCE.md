@@ -20089,3 +20089,32 @@ ağaç boş düzenle çalışırken grup görünüyor, bu düzenle kaybolyordu; 
 eklenerek daraltıldı. Düzeltme sonrası aynı veriyle aktif menü: **Kayıt Kabul ·
 Muayene · İK · Yönetim**. vitest 789, dotnet test 218, tsc temiz, dev
 veritabanı temiz.
+
+### 07.10.2026 — yetki matrisinde yalnız AKTİF menü başlıkları
+
+Kullanıcı (görüntüleme kurulumu): *"yetki matrisinde menüde olmayan (pasif)
+satırlar var, sadece aktif olanlar olmalı"*. Matris ağacı menüden kurulsa da iki
+delik kalmıştı:
+
+* **Yetki satırının grubu SUNUCUDAN gelir** (684) ve sunucu menü düzenini
+  bilmez: kurumun pasife aldığı grup, matriste kök olarak açılıyordu
+  (Teleradyoloji, FTR, Çağrı Merkezi, Ameliyathane, Sterilizasyon, Acil,
+  Eczane). `kokBul` artık **aktif menüde olmayan başlığı açmıyor** (`null`
+  döner, çağıran o satırı atlar). Aktif başlık = görünen gruplar + bölgeler +
+  Ana Sayfa.
+* **Gizlenen ekranın yetkisi** menü haritasına girmediği için "menüde hiç
+  ekranı olmayan yetki" sanılıp sunucu grubuna ekleniyordu. Artık ayrım var:
+  menüde karşılığı OLAN (`menuluKodlar`) ama aktif menüde olmayan yetki
+  çizilmez; menüde hiç ekranı olmayan yetki (panel, döküm, aksiyon) çizilmeye
+  devam eder - onlar başka yerden verilemez.
+* Aksiyon yetkisi, üst modülü ağaçta yoksa ve o modül menülüyse çizilmez
+  (gizlenen ekranın aksiyonları "Diğer" altında görünüyordu).
+
+**Sonuç olarak:** pasife alınan ekranın yetkisi matriste görünmez, dolayısıyla
+o ekrana yetki verilemez/alınamaz. Ekran aktife döndüğünde satır da döner -
+yetki kaydı silinmediği için eski haliyle.
+
+Doğrulama: görüntüleme kurulumunun 171 satırlık düzeni yerel veritabanına
+kopyalandı; matris kökleri 15'ten 7'ye düştü (Ana Sayfa · Randevu · Kayıt
+Kabul · Radyoloji · Laboratuvar · Ödeyen & Fatura · Yönetim) - kurulumun aktif
+menüsüyle birebir. vitest 789, tsc temiz, dev veritabanı temiz.

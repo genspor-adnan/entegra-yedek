@@ -135,19 +135,40 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
       });
     }
   }
-  return { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi };
+  // MENÜDE KARŞILIĞI OLAN YETKİLER (gizlenmiş olanlar dahil): ağaç, "menüde
+  //   hiç ekranı olmayan" yetki ile "ekranı gizlenmiş" yetkiyi ayırmak için
+  //   bunu kullanır - ilki çizilmeli (panel, döküm, aksiyon; başka yerden
+  //   verilemez), ikincisi çizilmemeli (kullanıcı 07.10.2026: "yetki
+  //   matrisinde menüde olmayan (pasif) satırlar var, sadece aktif olanlar
+  //   olmalı").
+  const menuluKodlar = new Set<string>();
+  for (const l of LISTELER) if (l.yetkiKodu) menuluKodlar.add(l.yetkiKodu);
+
+  return { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi, menuluKodlar };
 }
 
 /** Düz yetki listesinden menü düzeninde ağaç kurar. */
 function agacKur(satirlar: YetkiSatiri[], urunModu: number,
                 moduller: string[] | undefined, duzen: MenuDuzenSatiri[],
                 bolgeli: boolean): Dugum[] {
-  const { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi } =
+  const { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi, menuluKodlar } =
     menuHaritasi(urunModu, moduller, duzen, bolgeli);
   // `d` adı bu fonksiyonda düğüm değişkeni - harita ayrı adla durur.
   const duzenH = duzenHaritasi(duzen);
   const kokler: Dugum[] = [];
-  const kokBul = (ad: string, ic?: string) => {
+  /**
+   * AKTİF MENÜDE OLAN BAŞLIKLAR (kullanıcı 07.10.2026: "yetki matrisinde
+   * menüde olmayan (pasif) satırlar var, sadece aktif olanlar olmalı").
+   *
+   * Yetki satırının grubu SUNUCUDAN gelir (684) ve sunucu menü düzenini
+   * bilmez: kurumun pasife aldığı bir grup, yetki ağacında kök olarak
+   * açılıyordu. Kök ancak aktif menüde varsa (grup, bölge ya da Ana Sayfa)
+   * oluşur; yoksa o yetki satırı çizilmez.
+   */
+  const aktifBasliklar = new Set<string>([...grupSirasi, ...bolgeSirasi, ANA_SAYFA]);
+
+  const kokBul = (ad: string, ic?: string): Dugum | null => {
+    if (!aktifBasliklar.has(ad)) return null;
     let d = kokler.find(k => k.ad === ad);
     if (!d) { d = { anahtar: `g:${ad}`, ad, ic, cocuklar: [] }; kokler.push(d) }
     return d;
@@ -176,6 +197,11 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   const modulDugumu = new Map<string, Dugum>();
   for (const s of yeni.filter(x => !x.kod.includes('.'))) {
     const yer = harita.get(s.kod);
+    // GİZLENMİŞ EKRANIN YETKİSİ ÇİZİLMEZ: menüde karşılığı VAR ama aktif
+    //   menüde yok demek - kurum o ekranı pasife almış. Menüde hiç ekranı
+    //   olmayan yetki (panel, döküm, aksiyon) bu kuraldan muaf: onlar başka
+    //   yerden verilemediği için ağaçta kalmalı.
+    if (!yer && menuluKodlar.has(s.kod)) continue;
     // Menüde karşılığı olan ama tamamı gizlenmiş yetki: harita'ya hiç girmedi
     //   (yukarıda `continue`). Menüde hiç ekranı OLMAYAN yetkiler (panel, ayar
     //   gibi) eskisi gibi kendi grubunda durur - onların menü satırı zaten yok.
@@ -193,9 +219,9 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
                    ?? (EK_GRUP[s.kod] ? '🏠' : undefined);
     // Grup kökü YALNIZ bölgesizse açılır: ikisini de çağırmak, bölgenin
     //   altına giren grubun bir kopyasını kök listesinde boş bırakıyordu.
-    const kok = bolgeAdi
-      ? altBul(kokBul(bolgeAdi), grupAdi, grupIk)
-      : kokBul(grupAdi, grupIk);
+    const bolgeKoku = bolgeAdi ? kokBul(bolgeAdi) : null;
+    const kok = bolgeKoku ? altBul(bolgeKoku, grupAdi, grupIk) : kokBul(grupAdi, grupIk);
+    if (!kok) continue;                 // başlık aktif menüde yok
     const ust = yer?.altGrup ? altBul(kok, yer.altGrup) : kok;
     // AD, SATIRIN DURDUGU GRUPTAKI EKRANDAN (kullanici: "Kayıt Kabul altına
     //   sırayla Hasta Listesi, Başvurular ve İskonto Onayı gelmeli"): `belge`
@@ -221,7 +247,11 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     const d: Dugum = { anahtar: `y:${s.yetkiId}`, ad: s.ad, satir: s, cocuklar: [] };
     const ustDugum = modulDugumu.get(ustKod);
     if (ustDugum) ustDugum.cocuklar.push(d);
-    else kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer').cocuklar.push(d);
+    // Üst modül ağaçta yoksa ve o modül MENÜLÜ bir yetkiyse, ekranı pasife
+    //   alınmış demektir: aksiyonu da çizmeyiz (yoksa gizlenen ekranın
+    //   aksiyonları "Diğer" altında görünür).
+    else if (!menuluKodlar.has(ustKod))
+      kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer')?.cocuklar.push(d);
   }
 
   // Kokler menu sirasiyla; menude olmayan basliklar sonda.
