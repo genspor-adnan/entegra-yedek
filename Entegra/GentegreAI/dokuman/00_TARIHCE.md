@@ -19812,3 +19812,43 @@ Doğrulama (dev): Randevu › Dökümler sağa okla pasife alındı → pasif pa
 `HASTA AKIŞI › RANDEVU › Dökümler` hiyerarşisi çıktı, başlıklar katlanır ve
 soluk, yalnız ekran satırı sürüklenebilir. vitest 789, tsc temiz, dev
 veritabanı temiz.
+
+### 07.10.2026 — GenProfil: kurum profili bakım aracı (yeni proje)
+
+Kullanıcı: *"GenProfil diye yeni proje oluştur, bunun içine kurum-profili'ni al,
+girişte user/pass/adres bilgilerini al ve bağlandığın sunucunun profilini
+düzenle kaydet ve çık"*, ardından *"artık laba yayınlamaya gerek kalmayacak, ben
+genprofil ile lab'ı ayarlayacağım"*.
+
+`GentegreAI/genprofil/` — küçük bir React/Vite aracı. Adres + kullanıcı/parola
+ile **herhangi bir kurulumun** sunucusuna bağlanır ve o kurulumun kurum
+profilini (Profil · Menü Düzeni · Roller · Data Kullanımı …) açar.
+
+Kararlar:
+
+* **Ekran kopyalanmadı, paylaşıldı.** Kurum profili ekranı, API istemcisi,
+  oturum yönetimi ve tema `../web/src` içinden `@web` takma adıyla gelir;
+  buradaki kod yalnız kabuk (adres girişi, giriş formu, üst şerit). İki ayrı
+  profil ekranı iki ayrı davranış demekti.
+* **Vekil (proxy), CORS ayarı değil.** Tarayıcı hep aracın kendi kaynağına
+  istek atar; hedef adres `/vekil/<base64url(adres)>/api/...` yolunun içinde
+  taşınır, Node tarafı hedefe iletir. Böylece bağlanılan sunucuda CORS listesine
+  aracın adresini eklemek **gerekmez** (lab yalnız `46.36.201.170` ve
+  `localhost`'u kabul ediyor). Adresin başlıkta değil **yolda** taşınması
+  bilinçli: istemci yalnız API tabanını değiştirir, istek gönderen ortak kod
+  (`api/cekirdek.ts`) hiç değişmez. Aynı ara katman hem Vite dev sunucusunda
+  hem üretim sunucusunda (`sunucu.mjs`) çalışır.
+* `api/cekirdek.ts`'deki `TABAN` artık `let` + `tabanAyarla()`: derleme zamanı
+  sabit yerine çalışma zamanında belirlenebiliyor (ESM canlı bağlama sayesinde
+  içe alan modüller yeni değeri görür). Web ürününde davranış değişmedi.
+* **Adres önce alınır:** oturum sağlayıcısı mount olunca `/ben` çağırıyor; taban
+  belirlenmeden açmak isteği yanlış sunucuya gönderirdi.
+* **Kaydetme ekranın kendisinde:** üstteki "Kaydet ve çık" yalnız oturumu
+  kapatır; profil ekranı kendi Kaydet düğmelerini taşır - araç doğrulama, yetki
+  ve şube kurallarını tekrar yazmaz.
+
+Doğrulama: `npm run dev` (5174) → adres `http://46.36.201.170/genotipai/lab` →
+giriş `admin` → üst şeritte "Sistem Yoneticisi", sekmeler 🏥 Profil · 🌳 Menü
+Düzeni · 👥 Roller · 🗄 Data Kullanımı … ; Menü Düzeni sekmesi lab'ın gerçek
+düzenini gösterdi (242 pasif satır, Merkez / Ankara Şube). `npm run build`
+temiz; web tarafı tsc temiz, vitest 789.

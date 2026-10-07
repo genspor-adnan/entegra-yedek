@@ -10,7 +10,19 @@ import { hataIziKaydet } from './hataIzi';
  * Uc sarmalayicilari konu bazli dosyalara (api/uclar) ayrildi; bu dosya
  * yalniz TASIMA katmanidir - hangi ucun ne dondurdugu orada yazar.
  */
-export const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
+/**
+ * API taban adresi. Normalde derleme zamanında (`VITE_API`) sabittir, ama
+ * **GenProfil** aracı adresi kullanıcıdan alır: teknisyen hangi kurumun
+ * sunucusuna bağlanacağını girişte yazar. Bu yüzden `let` ve
+ * {@link tabanAyarla} - ESM canlı bağlama sayesinde içe alan modüller yeni
+ * değeri görür.
+ */
+export let TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
+
+/** Sonundaki `/` ve `/api` eki atılır: kullanıcı ikisini de yazabilir. */
+export function tabanAyarla(adres: string) {
+  TABAN = adres.trim().replace(/\/+$/, '').replace(/\/api$/i, '');
+}
 
 const ANAHTAR = {
   access: 'gentegre.access',
