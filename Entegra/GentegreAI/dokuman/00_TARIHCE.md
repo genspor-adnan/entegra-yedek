@@ -19934,3 +19934,18 @@ sunucu ve diğer okuyucular (`fn_urun_modu`, GenForm kart kuralları) aynen
 
 Doğrulama: `/genel-ayarlar` ekranında "Ürün modu" yok, Genel grubu Döviz ile
 başlıyor. vitest 789, tsc temiz.
+
+### 07.10.2026 — Kurum profili ekranı web ürününden kaldırıldı
+
+Kullanıcı: *"projedeki kurum-profili'ni kaldır"*, *"genprofil yeterli"*.
+Kurulum ekranı artık ayrı araçta (`GentegreAI/genprofil`): teknisyen sunucu
+adresi ve parolayla bağlanıp düzenliyor. Web ürününden kalkanlar: liste tanımı
+(`kurum-profili`), `/kurum-profili` rotası ve `sayfalar/KurumProfili.tsx`.
+
+**Bileşen duruyor:** `bilesenler/KurumTipiAyarlari.tsx` GenProfil tarafından
+`@web` takma adıyla paylaşılıyor - iki kopya iki ayrı davranış demekti. Menü
+düzeni ekranı (`/menu-duzeni`) da yerinde: kendi yetkisi (`menu.duzen`) ile
+web'den de açılabiliyor.
+
+Doğrulama: `/kurum-profili` adresi artık panele düşüyor (rota yok); web vitest
+789 ve tsc temiz, GenProfil derlemesi temiz.

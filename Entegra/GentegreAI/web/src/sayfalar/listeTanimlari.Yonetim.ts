@@ -372,26 +372,12 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     ozelSayfa: true,
     menuGrup: 'Yönetim', menuSira: 30, menuAd: 'Firma / Şubeler', ic: '🏢', yetkiKodu: 'sube',
   },
-  {
-    // KURUM PROFILI (489) - Firma Bilgileri'nin sekmesiydi, kullanici menude
-    //   AYRI SATIR istedi: kurulumun kendisini (urun modu, kurum tipi, acik
-    //   moduller, kayit/ucretlendirme) belirledigi icin sube kimliginin ic
-    //   sekmesi olarak durmasi onu gizliyordu. Yetki kodu 'sube' KALDI -
-    //   ekrani goren kitle degismesin.
-    kaynak: 'kurum-profili', baslik: 'Kurum Profili', yol: 'Yonetim › Kurum Profili',
-    ozelSayfa: true,
-    // MENÜDE YOK (kullanıcı 06.10.2026: "kurum profilini ana menüden çıkar, ben
-    //   adresle ve şifreyle girsem, müşteri burayı görmesin"): kurulum ekranı -
-    //   kurum tipi, menü düzeni, roller ve data kullanımı buradan belirleniyor;
-    //   müşterinin günlük işinde yeri yok, yanlış dokunuş bütün kurulumu bozar.
-    //
-    //   `menuGizli` KOD KARARIDIR, menü düzeninden gizleme DEĞİLDİR: rota ve
-    //   uçlar çalışmaya devam eder (979 kapısı yalnız menu_duzen kayıtlarına
-    //   bakar), yetkisi olan kişi /kurum-profili adresinden açar. Gerçek sınır
-    //   yine YETKİ: `sube` yetkisi olmayan kullanıcı adresi bilse de giremez.
-    menuGizli: true,
-    menuGrup: 'Yönetim', menuSira: 20, menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
-  },
+  // KURUM PROFİLİ EKRANI BU ÜRÜNDE YOK (kullanıcı 07.10.2026: "projedeki
+  //   kurum-profili'ni kaldır", "genprofil yeterli"): kurulum ekranı artık
+  //   ayrı bir araçta (GentegreAI/genprofil) - teknisyen sunucu adresi ve
+  //   parolayla bağlanıp düzenler. Ekranın BİLEŞENİ (bilesenler/
+  //   KurumTipiAyarlari) duruyor: GenProfil onu buradan paylaşıyor, iki kopya
+  //   iki ayrı davranış demekti.
   {
     // MENU DUZENI (979): sol menunun sube basina yerlesimi - sira, gorunen ad,
     //   gizleme. Liste degil (ozelSayfa); kendi yetkisi var cunku yanlis elde

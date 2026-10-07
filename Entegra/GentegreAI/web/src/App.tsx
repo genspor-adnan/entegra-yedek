@@ -33,7 +33,6 @@ const KayitKabulAyarlar = tembel(() => import('./sayfalar/KayitKabulAyarlar'), '
 const KatalogAyarlar = tembel(() => import('./sayfalar/KatalogAyarlar'), 'KatalogAyarlar');
 const DepartmanGorev = tembel(() => import('./sayfalar/DepartmanGorev'), 'DepartmanGorev');
 const FirmaBilgileri = tembel(() => import('./sayfalar/FirmaBilgileri'), 'FirmaBilgileri');
-const KurumProfili = tembel(() => import('./sayfalar/KurumProfili'), 'KurumProfili');
 // MENÜ DÜZENİ (979): yalnız yöneticinin açtığı ekran - tembel yüklenir.
 const MenuDuzeni = tembel(() => import('./sayfalar/MenuDuzeni'), 'MenuDuzeni');
 const GenelAyarlar = tembel(() => import('./sayfalar/GenelAyarlar'), 'GenelAyarlar');
@@ -240,7 +239,6 @@ function Yollar() {
         {yetki('personel') && <Route path="/departman" element={<DepartmanGorev />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
         {/* Kurum profili (489): Firma Bilgileri'nin sekmesiydi, kendi ekrani. */}
-        {yetki('sube') && <Route path="/kurum-profili" element={<KurumProfili />} />}
         {/* MENÜ DÜZENİ (979): menünün şube başına yerleşimi. */}
         {yetki('menu.duzen') && <Route path="/menu-duzeni" element={<MenuDuzeni />} />}
         {yetki('belge') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
