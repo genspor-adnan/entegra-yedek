@@ -161,20 +161,17 @@ export function GenelAyarlar() {
           <>
             <div className="kagrup">
               <h6>Genel</h6>
-              {/* Urun modu | Yerel para | Doviz YAN YANA, ARALIKLI (kullanici);
-                  combolar Belge Girisi editiyle ayni olcude (160px - tema
-                  .ayar-formu select kurali). Para/doviz combolari genel.doviz
-                  kod listesinden; ETIKETE tiklaninca jenerik modalda yonetilir. */}
+              {/* Doviz combosu Belge Girisi editiyle ayni olcude (160px - tema
+                  .ayar-formu select kurali); kod listesi genel.doviz, ETIKETE
+                  tiklaninca jenerik modalda yonetilir. */}
               <div className="alan-izgara ayar-formu ayar-yanyana">
-                {/* Urun modu (215): menu/marka/mesaj basliklari buna gore.
-                    Degisiklik acik oturumlara SONRAKI giris/yenilemede iner. */}
-                {alan('genel.urun_modu', 'Ürün modu', {
-                  tip: 'secenek',
-                  secenekler: [
-                    { deger: '1', ad: 'Gentegre AI (ERP)' },
-                    { deger: '2', ad: 'GenoTIP AI (HBYS)' },
-                  ],
-                })}
+                {/* ÜRÜN MODU BURADAN KALDIRILDI (kullanıcı 07.10.2026): ürünün
+                    ERP mi HBYS mi olduğu KURULUM kararıdır - kurum tipiyle
+                    birlikte Kurum Profili'nde (ve GenProfil aracında) set
+                    edilir. Günlük ayar ekranında durması, menüyü ve markayı tek
+                    tıkla değiştirebilen bir düğmeyi herkesin önüne koymaktı.
+                    Ayarın kendisi (`genel.urun_modu`) yerinde; yalnız bu ekranda
+                    çizilmiyor. */}
                 {alan('genel.varsayilan_doviz', 'Döviz', { listeKod: 'genel.doviz' })}
                 {/* YEREL PARA BIRIMI ve SAAT FARKI BURADAN KALDIRILDI (666/667).
                     Ikisi de artik SUBENIN ayari: Yönetim > Firma Bilgileri >

@@ -19919,3 +19919,18 @@ API'sine kaydedildi (`satir: 2`).
 193 satırlık düzenini sildi; düzen yedeğinden **aynen geri yüklendi**
 (193 satır, 7 gizli bölge, Kayıt Kabul + Laboratuvar kök seviyede) ve
 doğrulandı.
+
+### 07.10.2026 — "Ürün modu" Genel Ayarlar'dan kaldırıldı
+
+Kullanıcı: *"yönetim ana menüsünde Genel altında Genel Ayarlar'da 'ürün modu'nu
+kaldır"*. Ürünün ERP mi HBYS mi olduğu **kurulum kararı**: kurum tipiyle
+birlikte Kurum Profili'nde (ve GenProfil aracında) set ediliyor. Günlük ayar
+ekranında durması, menüyü ve markayı tek tıkla değiştirebilen bir düğmeyi
+herkesin önüne koymaktı.
+
+Ayarın kendisi (`genel.urun_modu`) yerinde - yalnız bu ekranda çizilmiyor;
+sunucu ve diğer okuyucular (`fn_urun_modu`, GenForm kart kuralları) aynen
+çalışıyor.
+
+Doğrulama: `/genel-ayarlar` ekranında "Ürün modu" yok, Genel grubu Döviz ile
+başlıyor. vitest 789, tsc temiz.
