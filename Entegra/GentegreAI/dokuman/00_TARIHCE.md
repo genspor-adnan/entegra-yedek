@@ -19729,3 +19729,22 @@ Doğrulama: grup adı değiştirilip dışa aktarıldı (`menu-duzeni-Merkez-<ta
 1 satır), ad geri alındı, dosya yüklenince ad geri geldi; olmayan ekran içeren
 dosya *"1 satır bu kurulumda yok, atlandı"*, yabancı dosya *"Bu dosya bir menü
 düzeni yedeği değil."* verdi. vitest 789, tsc temiz, dev veritabanı temiz.
+
+### 07.10.2026 (beşinci tur) — bölge gizlemesi ana menüye de uygulanıyor
+
+Kullanıcı (lab kurulumunda): *"kaydet&uygula dedim soldaki menüye uygulandı ama
+ana menüye uygulanmadı"*. Lab'da **7 bölge** gizlenmişti (`dugum_tur` 1);
+düzenleme ekranı basamaklı gizlemeyi kendi ağacında hesapladığı için orada
+doğru görünüyordu, ama menüyü kuran `menuDuzeniUygula` yalnız **grup ve ekran**
+satırlarına bakıyor, **bölge satırını hiç görmüyordu** - bölgesi gizlenen grup
+menüde olduğu gibi kalıyordu.
+
+Artık çizim anında grubun (ve grupsuz düz öğenin) **etkin bölgesi** çözülüp
+gizliliğine bakılıyor: fark `ustKod` varsa o, boş dize ise "bölgesiz / en üst",
+yoksa koddaki `grupBolgesi` haritası. Kontrol çizim anında yapılıyor çünkü alt
+satırlara kayıt yazılmıyor - bölge geri açılınca altındakiler kendiliğinden
+dönsün.
+
+Doğrulama (dev): "Klinikler" bölgesi gizlenip kaydedildi → sol menüde KLİNİKLER
+ve grupları kayboldu, HASTA AKIŞI yerinde kaldı. vitest 789, tsc temiz, dev
+veritabanı temiz.

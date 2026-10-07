@@ -1,6 +1,7 @@
 import { GRUP_IKON, GRUP_IKON_CEV, type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import type { MenuDuzenSatiri } from '../../api/sozlesme';
 import { duzenHaritasi } from './menuDuzenHarita';
+import { grupBolgesi } from './menuBolgeleri';
 
 /**
  * MENÜ DÜZENİ FARKI (979, mockup `Ekranlar/Ayarlar/menu_duzenleme_v2.html`).
@@ -110,6 +111,12 @@ export function menuDuzeniUygula(
       const m = ogeDuzenle(sat.m);
       if (!m) continue;
       const d = h.get(ogeKodu(sat.m));
+      // GRUPSUZ ÖĞE DE BİR BÖLGEDE DURUR (YanMenu: `grupBolgesi(adHam)`):
+      //   bölgesi gizlenmişse çizilmez, yoksa bütün grupları düşmüş bir bölge
+      //   tek bir öğe yüzünden menüde kalırdı.
+      const duzBolge = d?.ustKod === '' ? ''
+        : (d?.ustKod && d.ustKod.length > 0 ? d.ustKod : grupBolgesi(sat.m.adHam).ad);
+      if (duzBolge !== '' && h.get(duzBolge)?.gizli === 1) continue;
       if (d?.ustKod) {
         const liste = tasinan.get(d.ustKod) ?? [];
         liste.push(m);
@@ -122,7 +129,19 @@ export function menuDuzeniUygula(
 
     const kod = grupKodu(sat);
     const dg = h.get(kod);
-    if (dg?.gizli === 1) continue;
+    // BÖLGE GİZLENDİYSE ALTINDAKİ GRUPLAR DA ÇİZİLMEZ (kullanıcı 07.10.2026:
+    //   "kaydet&uygula dedim soldaki menüye uygulandı ama ana menüye
+    //   uygulanmadı"). Düzenleme ekranı basamaklı gizlemeyi kendi ağacında
+    //   hesaplıyordu; menüyü kuran bu fonksiyon ise yalnız grup ve ekran
+    //   satırlarına bakıyor, bölge satırını (dugumTur 1) hiç görmüyordu -
+    //   bölgesi gizlenen grup menüde olduğu gibi kalıyordu.
+    //
+    //   Alt satırlara kayıt YAZILMADIĞI için (bölge geri açılınca hepsi
+    //   dönsün diye) kontrol burada, çizim anında yapılır.
+    const bolgeAd = dg?.ustKod === '' ? ''                 // '' = en üst, bölgesiz
+      : (dg?.ustKod && dg.ustKod.length > 0 ? dg.ustKod : grupBolgesi(kod).ad);
+    const bolgeGizli = bolgeAd !== '' && h.get(bolgeAd)?.gizli === 1;
+    if (dg?.gizli === 1 || bolgeGizli) continue;
 
     const alt: MenuOgesi[] = [];
     for (const m of sat.alt) {
