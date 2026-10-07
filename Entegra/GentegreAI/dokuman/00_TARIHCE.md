@@ -19707,3 +19707,25 @@ kaydedince sol menüde HASTA AKIŞI bölgesinin **üstünde** kök seviyede çiz
 `menu_duzen.ust_kod` boş dize olarak saklandı. Ayrıca `donguselImport` testinin
 zaman aşımı 30 sn'ye çıkarıldı - döngü yokken paralel koşuda 5 sn dolup FAIL
 veriyordu. vitest 789, tsc temiz, dev veritabanı temiz.
+
+### 07.10.2026 (dördüncü tur) — menü düzeni dışa/içe aktarım (JSON)
+
+Kullanıcı: *"bu menüyü export/import yapalım"*, *"json olabilir"*. Bir şubede
+kurulan düzen **JSON dosyası** olarak alınıp başka şubeye ya da başka kuruluma
+yükleniyor. Taşınan şey yalnız **fark**: menü ağacı koddan geldiği için dosya
+kuruluma özel ekran listesi taşımaz.
+
+* Dosya: `{ tur: 'gentegre-menu-duzeni', surum, tarih, subeId, subeAd,
+  urunModu, satirlar }`. Şube/ürün bilgisi **bilgi amaçlı** - aynı düzen başka
+  şubeye de yüklenebilmeli, yükleme bunu zorlamıyor.
+* İçe aktarım yalnız **ekrana** yükler; geçerli olması için *Kaydet & Uygula*
+  gerekir - yanlış dosya menüyü sessizce değiştirmesin.
+* Bu kurulumda **karşılığı olmayan** ekran satırı atlanır ve sayısı mesajda
+  yazılır (başka kurulumun ekranını saklamak menüyü sessizce bozardı); kurumun
+  kendi ürettiği düğümler (alt başlık / dış bağlantı, `dugumTur` 3) muaf.
+  Yabancı dosya ve daha yeni sürüm açık hatayla reddedilir.
+
+Doğrulama: grup adı değiştirilip dışa aktarıldı (`menu-duzeni-Merkez-<tarih>.json`,
+1 satır), ad geri alındı, dosya yüklenince ad geri geldi; olmayan ekran içeren
+dosya *"1 satır bu kurulumda yok, atlandı"*, yabancı dosya *"Bu dosya bir menü
+düzeni yedeği değil."* verdi. vitest 789, tsc temiz, dev veritabanı temiz.

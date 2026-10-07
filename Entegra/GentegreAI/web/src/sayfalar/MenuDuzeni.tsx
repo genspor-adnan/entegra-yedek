@@ -53,6 +53,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
    * hepsi açıkken aranan satır ekrana sığmıyordu.
    */
   const dosyaGirdi = useRef<HTMLInputElement>(null);
+  const aktarimGirdi = useRef<HTMLInputElement>(null);
   const [acik, setAcik] = useState<Record<string, boolean>>({});
   const acikMi = (kod: string) => acik[kod] === true;
   const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
@@ -355,6 +356,75 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     } catch (h) { setMesaj(hataMetni(h)) }
   };
 
+  // ---------------------------------------------------------------- AKTARIM
+  /**
+   * DIŞA / İÇE AKTARIM (kullanıcı 07.10.2026: "bu menüyü export/import
+   * yapalım"): bir şubede kurulan düzen dosyaya yazılır, başka şubeye ya da
+   * başka kuruluma yüklenir. Taşınan şey yalnız FARK - menü ağacının kendisi
+   * koddan geldiği için dosya kuruluma özel ekran listesi taşımaz.
+   */
+  const AKTARIM_SURUM = 1;
+
+  const disaAktar = () => {
+    const paket = {
+      tur: 'gentegre-menu-duzeni',
+      surum: AKTARIM_SURUM,
+      tarih: new Date().toISOString(),
+      // Bilgi amaçlı: hangi şubeden alındı, hangi üründe kuruldu. Yüklerken
+      //   ZORLAYICI değil - aynı düzen başka şubeye de yüklenebilmeli.
+      subeId, subeAd: (kullanici?.subeler ?? []).find(x => x.id === subeId)?.ad ?? '',
+      urunModu: kullanici?.urunModu ?? 0,
+      satirlar: duzen,
+    };
+    const dosya = new Blob([JSON.stringify(paket, null, 2)],
+                           { type: 'application/json' });
+    const url = URL.createObjectURL(dosya);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `menu-duzeni-${paket.subeAd || subeId}-${new Date()
+      .toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setMesaj(c('Dışa aktarıldı') + ` · ${duzen.length} ${c('satır')}`);
+  };
+
+  const iceAktar = (dosya: File | undefined) => {
+    if (!dosya) return;
+    const oku = new FileReader();
+    oku.onload = () => {
+      try {
+        const paket = JSON.parse(String(oku.result));
+        if (paket?.tur !== 'gentegre-menu-duzeni' || !Array.isArray(paket.satirlar))
+          throw new Error(c('Bu dosya bir menü düzeni yedeği değil.'));
+        if (Number(paket.surum) > AKTARIM_SURUM)
+          throw new Error(c('Dosya daha yeni bir sürümden; önce uygulamayı güncelleyin.'));
+        // BU KURULUMDA OLMAYAN EKRAN ATLANIR: başka kurulumda tanımlı bir
+        //   ekranın satırını saklamak, menüyü sessizce bozmak olurdu. Kurumun
+        //   kendi ürettiği düğümler (alt başlık / dış bağlantı) kodda
+        //   karşılığı olmadığı için muaf.
+        const gecerli: MenuDuzenSatiri[] = [];
+        let atlanan = 0;
+        for (const r of paket.satirlar as MenuDuzenSatiri[]) {
+          if (!r || typeof r.sistemKod !== 'string' || r.dugumTur < 1 || r.dugumTur > 4) {
+            atlanan += 1; continue;
+          }
+          if (r.dugumTur !== 3 && !dugumler.some(d => d.kod === r.sistemKod)) {
+            atlanan += 1; continue;
+          }
+          gecerli.push({ ...r, gizli: r.gizli === 1 ? 1 : 0 });
+        }
+        setDuzen(gecerli);
+        setMesaj(`${c('İçe aktarıldı')} · ${gecerli.length} ${c('satır')}`
+          + (atlanan > 0 ? ` · ${atlanan} ${c('satır bu kurulumda yok, atlandı')}` : '')
+          + ` · ${c('geçerli olması için Kaydet & Uygula')}`);
+      } catch (h) {
+        setMesaj(h instanceof Error ? h.message : c('Dosya okunamadı.'));
+      }
+    };
+    oku.readAsText(dosya);
+    if (aktarimGirdi.current) aktarimGirdi.current.value = '';
+  };
+
   const sifirla = async () => {
     if (!subeId) return;
     try {
@@ -419,6 +489,17 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                 onClick={() => void kaydet()}>💾 {c('Kaydet & Uygula')}</button>
         <button type="button" className="d" disabled={!duzenleyebilir || subeyeOzel === 0}
                 onClick={() => void sifirla()}>⤾ {c('Varsayılana dön')}</button>
+        {/* AKTARIM: düzen JSON dosyası olarak alınır, başka şubeye / kuruluma
+            yüklenir. İçe aktarım yalnız EKRANA yüklenir - geçerli olması için
+            Kaydet & Uygula gerekir, yanlış dosya menüyü sessizce değiştirmesin. */}
+        <button type="button" className="d" onClick={disaAktar}
+                title={c('Düzeni JSON dosyası olarak indir')}>⬇ {c('Dışa aktar')}</button>
+        <input ref={aktarimGirdi} type="file" accept="application/json,.json" hidden
+               onChange={e => iceAktar(e.target.files?.[0])} />
+        <button type="button" className="d" disabled={!duzenleyebilir}
+                onClick={() => aktarimGirdi.current?.click()}
+                title={c('JSON dosyasından yükle (Kaydet & Uygula ile geçerli olur)')}>
+          ⬆ {c('İçe aktar')}</button>
       </div>
 
       {mesaj && <div className="mn-mesaj">{mesaj}</div>}
