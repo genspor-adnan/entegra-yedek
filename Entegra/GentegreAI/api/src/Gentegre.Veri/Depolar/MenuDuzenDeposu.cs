@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -40,11 +40,18 @@ public sealed class MenuDuzenDeposu
         {
             await using var baglanti = await _veri.AcAsync(iptal);
             // ŞUBE SATIRI KURUM GENELİNİ EZER: aynı kodda iki satır varsa
-            //   (biri sube_id null) şubeninki geçerli - gizli/görünür kararı da ondan.
+            //   (biri sube_id null) şubeninki geçerli - gizli/görünür kararı ondan.
+            //
+            // KAPI YALNIZ EKRAN SATIRLARINA BAKAR (dugum_tur 4): "Yönetim"
+            //   BÖLGESİNİ gizlemek, adı "Yönetim" olan bir EKRANI kapatmak
+            //   anlamına gelmez - aynı ad iki düğüm türünde birden olabiliyor.
+            //   Grup/bölge gizlemesinin ekranlara yansıması kaydetme sırasında
+            //   türetiliyor (MenuDuzeni.kaydedilecek).
             await using var komut = baglanti.Komut("""
                 select distinct on (d.sistem_kod) d.sistem_kod, d.gizli
                   from public.menu_duzen d
-                 where d.sube_id is null or d.sube_id = @p0
+                 where (d.sube_id is null or d.sube_id = @p0)
+                   and d.dugum_tur = 4
                  order by d.sistem_kod, d.sube_id nulls last
                 """, null, subeId);
             await using var o = await komut.ExecuteReaderAsync(iptal);

@@ -50,11 +50,18 @@ public static class MenuDuzenUclari
                 baglam.YetkiIste("menu.duzen", Islem.Gor);
 
             await using var b = await veri.AcAsync(iptal);
-            // ŞUBE SATIRI KURUM GENELİNİ EZER: aynı sistem_kod için iki satır
-            //   varsa (biri sube_id null) şubeninki kazanır - `distinct on`
+            // ŞUBE SATIRI KURUM GENELİNİ EZER: aynı düğüm için iki satır varsa
+            //   (biri sube_id null) şubeninki kazanır - `distinct on`
             //   sıralaması bunu yapıyor.
+            //
+            // DÜĞÜM = TÜR + KOD (07.10.2026'da bulunan hata): `distinct on
+            //   (sistem_kod)` iken "Yönetim" bölgesi ile "Yönetim" grubundan
+            //   yalnız BİRİ istemciye geliyordu. Kaydı düşen düğüm
+            //   düzenlenmemiş sayılıp doğal yerine dönüyor; bölge gizliyse
+            //   grup da onunla pasife düşüyor ve kurum "Yönetim grubu yok"
+            //   diyordu.
             var satirlar = await b.ListeAsync("""
-                select distinct on (d.sistem_kod)
+                select distinct on (d.dugum_tur, d.sistem_kod)
                        d.dugum_tur as "dugumTur", d.sistem_kod as "sistemKod",
                        d.ust_kod as "ustKod", d.sira,
                        coalesce(d.gorunen_ad, '') as "gorunenAd",
@@ -64,7 +71,7 @@ public static class MenuDuzenUclari
                        case when d.sube_id is null then 0 else 1 end as "subeyeOzel"
                   from public.menu_duzen d
                  where d.sube_id is null or d.sube_id = @p0
-                 order by d.sistem_kod, d.sube_id nulls last
+                 order by d.dugum_tur, d.sistem_kod, d.sube_id nulls last
                 """, null, [hedef], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // TekAsync basvuru turu istiyor (T : class): sayiyi sozluk olarak oku.

@@ -20060,3 +20060,32 @@ yalnız döküm ve yardım dizini güncellendi.
 `menuDuzeni.test.ts`'teki "kaldırılan gruplar geri gelmedi" listesinden `İK`
 çıkarıldı: eskiden kaldırılmış bir ad olması, bugün bilinçle seçilmesini
 engellemiyor.
+
+### 07.10.2026 — "Yönetim grubu yok": okuma ucu kodu türsüz ayırıyordu
+
+Kullanıcı: *"yine muayenede İK üst başlık en üst görünüyor oysa Yönetim bölgesi
+altında"* → *"yönetim grup yine yok"*. İki ayrı hata çıktı, ikisi de aynı kökten:
+**aynı ad iki düğüm türünde** ("Yönetim" hem bölge hem grup).
+
+1. **Üst başlık yanlış görünüyordu.** Seçenekler iç kod (`b|Yönetim`), `value`
+   ise veritabanı kodu (`Yönetim`) olarak veriliyordu; eşleşmeyince tarayıcı
+   ilk seçeneği ("— en üst —") gösteriyor, bölge altındaki grup kök gibi
+   duruyordu. `value` artık `etkinUst()` ile iç kod; seçenek **etiketi** ise
+   `dbKod()` ile sade ad (kullanıcı `b|` önekini görmemeli).
+
+2. **Grup menüden kayboluyordu.** Okuma ucu `distinct on (sistem_kod)` yapıyor,
+   yani "Yönetim" bölgesi ile "Yönetim" grubundan **yalnız biri** istemciye
+   geliyordu. Kaydı düşen düğüm "düzenlenmemiş" sayılıp doğal yerine dönüyor;
+   bölge gizli olduğu için grup da onunla **pasife** düşüyordu. Artık
+   `distinct on (dugum_tur, sistem_kod)`.
+
+   Aynı hata erişim kapısında da vardı: `MenuDuzenDeposu` kod bazlı okuyordu ve
+   "Yönetim" bölgesini gizlemek, adı "Yönetim" olan bir **ekranı** kapatabilirdi.
+   Kapı artık yalnız `dugum_tur = 4` satırlarına bakıyor - grup/bölge
+   gizlemesinin ekranlara yansıması kaydetmede türetiliyor.
+
+Teşhis: muayene kurulumunun 264 satırlık düzeni yerel veritabanına kopyalandı,
+ağaç boş düzenle çalışırken grup görünüyor, bu düzenle kaybolyordu; tek satır
+eklenerek daraltıldı. Düzeltme sonrası aynı veriyle aktif menü: **Kayıt Kabul ·
+Muayene · İK · Yönetim**. vitest 789, dotnet test 218, tsc temiz, dev
+veritabanı temiz.

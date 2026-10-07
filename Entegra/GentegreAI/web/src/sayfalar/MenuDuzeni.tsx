@@ -826,11 +826,18 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                     <div className="mn-inp pasif">{seciliDugum.ustKod ? c(seciliDugum.ustKod) : '—'}</div>
                   ) : (
                     <select className="mn-inp" disabled={!duzenleyebilir}
-                            value={fark(seciliDugum.kod)?.ustKod ?? seciliDugum.ustKod ?? ''}
+                            // DEĞER DE İÇ KOD (07.10.2026 hatası): seçenekler iç
+                            //   kod (`b|Yönetim`), değer ise veritabanı kodu
+                            //   (`Yönetim`) olarak veriliyordu; eşleşmeyince
+                            //   tarayıcı ilk seçeneği ("en üst") gösteriyor ve
+                            //   grup bölge altındayken kök gibi görünüyordu.
+                            value={etkinUst(seciliDugum) ?? ''}
                             onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value })}>
                       {ustSecenekleri(seciliDugum).map(u => (
                         <option key={u || '-kok-'} value={u}>
-                          {u === '' ? `— ${c('en üst')} —` : c(u)}</option>
+                          {/* ETİKET VERİTABANI KODU: değer iç kod (`b|Yönetim`)
+                              ama kullanıcı "b|" önekini görmemeli. */}
+                          {u === '' ? `— ${c('en üst')} —` : c(dbKod(u))}</option>
                       ))}
                     </select>
                   )}</label>
