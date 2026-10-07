@@ -19900,3 +19900,22 @@ grubun kaydıymış gibi okunuyordu.
 Doğrulama: lab'ın 193 satırlık düzeni yerel veritabanına yüklendi → düzenleme
 ağacında `Yönetim (bölge) › İK & Prim · Doküman · Yönetim (grup)` göründü, ana
 menüyle birebir aynı. vitest 789, tsc temiz, dev veritabanı temiz.
+
+### 07.10.2026 — göç 981: menü düzeni benzersizliği türü de kapsıyor
+
+Kullanıcı: *"Ayni kayit zaten var (menu_duzen_benzersiz) deyip kaydetmiyor"*.
+Tür bazlı eşleşmeden sonra aynı kodda iki satır (bölge "Yönetim" + grup
+"Yönetim") gerekiyor; 979'daki kısıt ise `(sube_id, sistem_kod)` olduğu için
+ikinciyi reddediyordu. `dugum_tur` zaten satırda; benzersizlik de onu kapsar
+(`981_menu_duzen_tur_benzersiz.sql`). Eski satırlar etkilenmez: eski kısıtı
+sağlayan her küme yenisini de sağlar.
+
+**Uygulandı:** dev (`gentegre_ai`) ve **sunucudaki lab** (`gentegre_ai_lab`,
+`goc_gecmisi`'ne de yazıldı). Doğrulama: `UNIQUE (sube_id, dugum_tur,
+sistem_kod)` iki veritabanında da aktif; aynı kodda bölge+grup satırı lab
+API'sine kaydedildi (`satir: 2`).
+
+**Not:** o doğrulama isteği `PUT /menu-duzen` olduğu için lab'ın mevcut
+193 satırlık düzenini sildi; düzen yedeğinden **aynen geri yüklendi**
+(193 satır, 7 gizli bölge, Kayıt Kabul + Laboratuvar kök seviyede) ve
+doğrulandı.
