@@ -20118,3 +20118,46 @@ Doğrulama: görüntüleme kurulumunun 171 satırlık düzeni yerel veritabanın
 kopyalandı; matris kökleri 15'ten 7'ye düştü (Ana Sayfa · Randevu · Kayıt
 Kabul · Radyoloji · Laboratuvar · Ödeyen & Fatura · Yönetim) - kurulumun aktif
 menüsüyle birebir. vitest 789, tsc temiz, dev veritabanı temiz.
+
+### 07.10.2026 — kurulum menüleri açıldı · muayene tek şubeye indi (sunucu verisi)
+
+Kullanıcı: *"sunucuda muayene goruntu dis osgb goz ftr menülerini hastane gibi
+yap"* → *"muayeneyi tek şube yap"*.
+
+**Altı kurulumda menü tam açıldı** (`gentegre_ai_muayene`, `_goruntuleme`,
+`_dis`, `_osgb`, `_goz`, `_ftr`): her birinde `kurum_profil` üç satır -
+`moduller` = 31 modülün hepsi, `menu_bolgeli = 1`. Hiçbirinde `menu_duzen`
+kaydı yoktu, yani gizleme de yok. Hastane'nin kendi ayarı 28 modülde kaldı
+(ona dokunulmadı), yani altısı hastaneden üç modül daha geniş.
+
+`moduller` alanının **ek/opsiyonel** modülleri işaretlediği not edilmeli:
+çekirdek HBYS ekranları modül etiketi taşımadığı için liste kısıtlı görünse de
+menüde duruyor. Kesin sayı `fn_kurum_modul_acik`'ten okunur (API `/kimlik/ben`
+döner).
+
+**Muayene tek şube** (`gentegre_ai_muayene`): Ankara Şube (id 3) **pasife**
+alındı, `kullanici_sube` yetkileri (2 satır) ve `kurum_profil` satırı silindi,
+kalan iki satırın `kurum_tipi` değeri `muayenehane` yapıldı. Şube
+**silinmedi**: 38 tablo şubeye FK veriyor ve şube 3'te yapılandırma kayıtları
+var (276 klinik gösterge dönemi, 76 rol-şube bağı, 20 e-Nabız paketi, 18 gün
+sonu, mali dönem, depo, çağrı santrali) - hasta/belge gibi iş verisi yoktu ama
+11 tabloyu temizlemek yerine pasifleştirmek geri alınabilir ve yeterli: pasif
+şube giriş ekranında seçenek olarak çıkmıyor. Doğrulama: API `subeler:
+[(1, 'Merkez')]`.
+
+**Görüntüleme veritabanı yeniden kuruldu.** İlk yayın denemesi göçte patladı:
+DB 19.09.2026'da kalmış, 329 bekleyen göç vardı ve zincir kırıktı
+(`272_kampanya_fiyat.sql`: `tk.kampanya_id` yok). İçinde yalnız tohum verisi
+olduğu için (2918 taraf, 59 belge) `gentegre_ai_hastane` kopyası alındı
+(**sunucunun içinde**: `pg_dump | psql`, veri dışarı çıkmadı), `kurum_tipi`
+`goruntuleme` yazıldı. Göç öncesi yedek duruyor:
+`gentegre-ai-goruntuleme/yedek/gentegre_ai_goruntuleme-20261007-183617.dump`.
+
+**nginx uygula betiği onarıldı.** `goruntuleme` ve `muayene` blokları siteye
+hiç girmiyordu: betiğin eski blokları silen regex'i satır sonundaki `\n`'i
+tüketip bir sonraki bloğun başındaki `\n`'i yok ediyor, **ardışık blokların
+yarısı** silinmeden kalıyor ve güncel parça eklenince nginx `duplicate
+location` diyordu - betik de kendi yedeğini geri yüklediği için "çalıştırdım
+ama değişmedi" görünüyordu. Desen artık `\n` ile başlamıyor; temizlik yarım
+kalırsa betik siteye **hiç dokunmadan** duruyor (çıkış kodu 2, kalan blokları
+yazar). Sonuç: dokuz kurulumun hepsi yayında.
