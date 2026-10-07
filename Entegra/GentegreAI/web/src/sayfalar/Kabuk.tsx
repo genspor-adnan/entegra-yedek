@@ -6,7 +6,7 @@ import { KullaniciAyarlari, type AyarSekmesi } from '../bilesenler/KullaniciAyar
 import { useProfilResmi } from '../bilesenler/profilResmi';
 import { useSubeLogo } from '../bilesenler/subeLogo';
 import { menuSatirlariKur } from './kabuk/menuAgaci';
-import { menuDuzeniUygula, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
+import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { YanMenu } from './kabuk/YanMenu';
 import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
@@ -47,8 +47,14 @@ export function Kabuk() {
     // Düzen okuması YETKİ İSTEMEZ: kullanıcı kendi menüsünü çizebilmeli.
     //   Hata durumunda sessizce varsayılan ağaç kalır - menü hiç çizilmemesindense
     //   düzenlenmemiş çizilsin.
-    api.menuDuzen().then(y => { if (!iptal) setMenuDuzen(y.satirlar) }).catch(() => {});
-    return () => { iptal = true };
+    const oku = () => api.menuDuzen()
+      .then(y => { if (!iptal) setMenuDuzen(y.satirlar) }).catch(() => {});
+    oku();
+    // KAYDET & UYGULA ANINDA GEÇERLİ (kullanıcı 07.10.2026): menü düzeni
+    //   ekranı kaydedince bu olayı yayar, sol menü yeniden okur. Yoksa kurum
+    //   değişikliği görmek için sayfayı yenilemek zorundaydı.
+    window.addEventListener(MENU_DUZEN_OLAYI, oku);
+    return () => { iptal = true; window.removeEventListener(MENU_DUZEN_OLAYI, oku) };
   }, [kullanici?.id, kullanici?.subeId]);
   const satirlar = useMemo(() => menuDuzeniUygula(kodSatirlari, menuDuzen),
                            [kodSatirlari, menuDuzen]);

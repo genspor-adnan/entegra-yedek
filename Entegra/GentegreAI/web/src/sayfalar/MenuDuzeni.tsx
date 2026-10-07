@@ -6,7 +6,7 @@ import { c } from '../dil/ceviri';
 import { LISTELER } from './Liste';
 import { menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
 import { BOLGE_HBYS } from './kabuk/menuBolgeleri';
-import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar,
+import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
          type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 
 /**
@@ -233,16 +233,23 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
   };
 
   /**
-   * ÖNİZLEME AĞACI: düzen farkı UYGULANMIŞ hali - taşıma ve sıra burada
-   * görünmeli, yoksa kurum değişikliği kaydetmeden sonucunu göremezdi.
+   * YERLEŞİM: düzen farkı UYGULANMIŞ ağaç - taşıma ve sıra burada görünür.
+   *
+   * <b>Hem sol ağaç hem önizleme bunu kullanır</b> (kullanıcı 07.10.2026:
+   * "sürükle bırak yapıyorum değişmiyor"): ağaç koddaki sırayı çiziyordu, yani
+   * sürükleme kaydı yazılıyor ama ekranda hiçbir şey kıpırdamıyordu. Tek
+   * yerleşim, iki görünümün aynı şeyi göstermesini garanti eder.
+   *
    * Sıra anahtarı: kurumun verdiği sıra > koddaki menuSira > ağaçtaki yer.
    */
-  const onizleme = useMemo(() => {
+  const yerlesim = useMemo(() => {
     const dogal = new Map(dugumler.map((d, i) => [d.kod, i]));
     const siraNo = (d: Dugum) =>
       fark(d.kod)?.sira ?? d.sira ?? ((dogal.get(d.kod) ?? 0) + 1) * 1000;
+    // Gizliler DE yerleşimde durur: sol ağaç onları 🚫 ile çizmeli, süzme
+    //   yalnız önizlemede yapılır.
     const cocuklar = (ust: string | undefined) => dugumler
-      .filter(d => etkinUst(d) === ust && !gizliMi(d))
+      .filter(d => etkinUst(d) === ust)
       .sort((a, b) => siraNo(a) - siraNo(b) || (dogal.get(a.kod)! - dogal.get(b.kod)!));
     const cikti: { d: Dugum; derinlik: number }[] = [];
     // ÇİZİLEN HER DÜĞÜM BİR KEZ: kurum bir düğümü kendi alt ağacına taşırsa
@@ -262,11 +269,77 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     return cikti;
   }, [dugumler, duzen]);
 
+  /** Önizleme: yerleşimin gizliler çıkarılmış hali. */
+  const onizleme = useMemo(
+    () => yerlesim.filter(({ d }) => !gizliMi(d)), [yerlesim, duzen]);
+
+  /** Sol ağaç: yerleşim + katlanma (üst zinciri kapalıysa çizilmez). */
+  const agacSatirlari = yerlesim.filter(({ d }) => {
+    let k = etkinUst(d);
+    const gorulen = new Set<string>();
+    while (k && !gorulen.has(k)) {
+      gorulen.add(k);
+      if (!acikMi(k)) return false;
+      const ust = dugumler.find(x => x.kod === k);
+      k = ust ? etkinUst(ust) : undefined;
+    }
+    return true;
+  });
+
+  /**
+   * KAYDEDİLECEK SATIRLAR = kurumun düzenlemeleri + TÜRETİLMİŞ ERİŞİM KAPILARI.
+   *
+   * Gizlemek erişimi kapatır (kullanıcı 07.10.2026: "Erişimi KAPATIR: adresi
+   * bilen yetkili kullanıcı ekranı açamaz"). Kapı sunucuda, ekranın liste/kart
+   * KAYNAK adıyla çalışıyor; ağaçta ise kod grup bağlamlı olabiliyor
+   * (`Randevu/dokumler`) ve bir grubu gizlemek alt satırlara kayıt YAZMIYOR
+   * (grup geri açılınca hepsi dönsün diye). Bu ikisini şurada birleştiriyoruz:
+   * kaydederken, menüde <b>görünür tek girişi kalmayan</b> her ekran kaynağı
+   * için sade kodlu bir gizli satır üretilir - sunucu kapısı onu görür.
+   *
+   * Bir ekranın iki grupta kısayolu varsa ve biri açıksa kapı YAZILMAZ: ekran
+   * menüde duruyor, erişimi kapatmak yanlış olurdu.
+   *
+   * Türetilmiş satırlar her kaydetmede baştan hesaplanır; önce bir öncekiler
+   * atılır, yoksa grup geri açıldığında eski kapı kaydı ekranı kapalı tutardı.
+   */
+  const kaydedilecek = (): MenuDuzenSatiri[] => {
+    const sade = (kod: string) => kod.split('/').pop()!.replace(/#\d+$/, '');
+    // Kurumun kendi satırları: ağaçta karşılığı olanlar + kurumun ürettiği
+    //   düğümler (alt başlık / dış bağlantı, dugumTur 3).
+    const kendi = duzen.filter(x => x.dugumTur === 3
+                                    || dugumler.some(d => d.kod === x.sistemKod));
+    const kapiliKodlar = new Set(kendi.map(x => x.sistemKod));
+
+    const toplam = new Map<string, { hepsi: number; gizliSay: number }>();
+    for (const d of dugumler) {
+      if (d.tur !== 'ekran') continue;
+      const k = sade(d.kod);
+      const o = toplam.get(k) ?? { hepsi: 0, gizliSay: 0 };
+      o.hepsi += 1;
+      if (gizliMi(d)) o.gizliSay += 1;
+      toplam.set(k, o);
+    }
+    const turetilmis: MenuDuzenSatiri[] = [];
+    for (const [k, o] of toplam) {
+      if (o.gizliSay < o.hepsi) continue;        // bir yerde görünüyor
+      if (kapiliKodlar.has(k)) continue;         // kurum zaten kendisi yazmış
+      turetilmis.push({
+        dugumTur: 4, sistemKod: k, ustKod: null, sira: null,
+        gorunenAd: '', ikon: '', gizli: 1, acilistaAcik: 0,
+      });
+    }
+    return [...kendi, ...turetilmis];
+  };
+
   const kaydet = async () => {
     if (!subeId) { setMesaj(c('Şube seçili değil.')); return }
     try {
-      const y = await api.menuDuzenKaydet(subeId, duzen);
+      const y = await api.menuDuzenKaydet(subeId, kaydedilecek());
       setSubeyeOzel(y.satir);
+      // ANA MENÜ ANINDA GEÇERLİ: kabuk bu olayı dinliyor ve düzeni yeniden
+      //   okuyor - kurum değişikliğini görmek için sayfayı yenilemesin.
+      window.dispatchEvent(new Event(MENU_DUZEN_OLAYI));
       setMesaj(c('Kaydedildi') + ` · ${y.satir} ${c('değişiklik')}`);
     } catch (h) { setMesaj(hataMetni(h)) }
   };
@@ -285,14 +358,18 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     if (!surukle || surukle === hedef.kod) { setSurukle(null); return }
     const kaynak = dugumler.find(x => x.kod === surukle);
     setSurukle(null);
-    if (!kaynak || kaynak.tur !== hedef.tur || kaynak.ustKod !== hedef.ustKod) {
+    if (!kaynak || kaynak.tur !== hedef.tur || etkinUst(kaynak) !== etkinUst(hedef)) {
       // FARKLI SEVİYE / FARKLI ÜST: mockup'ta derinlik değiştirme var, ama
       //   ekran burada yalnız KARDEŞ SIRASI değiştiriyor - grubu başka bölgeye
       //   taşımak bölge tanımını (kod) değiştirmek demek, o ayrı iş.
       setMesaj(c('Yalnız aynı başlık altındaki düğümler kendi aralarında sıralanır.'));
       return;
     }
-    const kardes = dugumler.filter(x => x.tur === kaynak.tur && x.ustKod === kaynak.ustKod);
+    // KARDEŞ SIRASI YERLEŞİMDEN: koddaki dizi sırası değil, ekranda GÖRÜLEN
+    //   sıra - yoksa bir kez sürükledikten sonraki her sürükleme eski sıraya
+    //   göre hesaplanıp düğümü geri atardı.
+    const kardes = yerlesim.map(({ d }) => d)
+      .filter(x => x.tur === kaynak.tur && etkinUst(x) === etkinUst(kaynak));
     const sira = kardes.map(x => x.kod).filter(k => k !== kaynak.kod);
     const i = sira.indexOf(hedef.kod);
     sira.splice(i < 0 ? sira.length : i, 0, kaynak.kod);
@@ -303,7 +380,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         const mevcut = sonuc.find(x => x.sistemKod === kod);
         const yeni: MenuDuzenSatiri = {
           dugumTur: d.tur === 'bolge' ? 1 : d.tur === 'grup' ? 2 : 4,
-          sistemKod: kod, ustKod: d.ustKod ?? null,
+          sistemKod: kod, ustKod: etkinUst(d) ?? null,
           gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
           ...mevcut, sira: (indeks + 1) * 10,
         };
@@ -328,18 +405,19 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
           {subeyeOzel > 0 ? `${c('şubeye özel')} · ${subeyeOzel}` : c('varsayılan düzen')}
         </span>
         <button type="button" className="d birincil" disabled={!duzenleyebilir}
-                onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
+                onClick={() => void kaydet()}>💾 {c('Kaydet & Uygula')}</button>
         <button type="button" className="d" disabled={!duzenleyebilir || subeyeOzel === 0}
                 onClick={() => void sifirla()}>⤾ {c('Varsayılana dön')}</button>
       </div>
 
       {mesaj && <div className="mn-mesaj">{mesaj}</div>}
-      {/* KURAL (kullanıcı 06.10.2026): gizlenen ekran menüde, aramada ve yetki
-          matrisinde görünmez - ama ERİŞİM KAPANMAZ: adresi bilen yetkili
-          kullanıcı ekranı yine açar. Erişimi kapatmak Yetkiler'in işi. */}
+      {/* KURAL (kullanıcı 07.10.2026): gizlemek ERİŞİMİ DE KAPATIR - adresi
+          bilen yetkili kullanıcı da açamaz (sunucu kapısı: liste ve kart uçları
+          403 döner). Yetki kaydı silinmez: gizlilik kalkınca ekran eski
+          yetkileriyle geri gelir. */}
       <div className="mn-uyari">{c('Gizlenen ekran menüde, Ctrl+K aramasında ve yetki '
-        + 'matrisinde görünmez. Erişimi KAPATMAZ: adresi bilen yetkili kullanıcı ekranı yine '
-        + 'açabilir - erişim için Yetkiler ekranını kullanın.')}</div>
+        + 'matrisinde görünmez. Erişimi KAPATIR: adresi bilen yetkili kullanıcı da ekranı '
+        + 'açamaz. Yetki kaydı silinmez - ekranı yeniden gösterince eski yetkileriyle döner.')}</div>
 
       <div className="mn-govde">
         {/* AĞAÇ */}
@@ -348,30 +426,19 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
             <span className="sonuk"> · {dugumler.length} {c('düğüm')}</span>
             <span className="mn-bosluk" />
             <button type="button" className="d mini" onClick={() => setAcik(
-              Object.fromEntries(dugumler.filter(x => dugumler.some(y => y.ustKod === x.kod))
+              Object.fromEntries(dugumler.filter(x => dugumler.some(y => etkinUst(y) === x.kod))
                                          .map(x => [x.kod, true])))}>⤢ {c('Tümünü aç')}</button>
             <button type="button" className="d mini" onClick={() => setAcik({})}>⤡ {c('Kapat')}</button>
           </div>
           {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
-          {dugumler.filter(d => {
-            // ÜST ZİNCİRİ KAPALIYSA ÇİZİLMEZ: bölge kapalıysa grupları da,
-            //   grup kapalıysa ekranları da gizlenir.
-            let k = d.ustKod;
-            const gorulen = new Set<string>();
-            while (k && !gorulen.has(k)) {
-              gorulen.add(k);
-              if (!acikMi(k)) return false;
-              k = dugumler.find(x => x.kod === k)?.ustKod;
-            }
-            return true;
-          }).map(d => {
+          {agacSatirlari.map(({ d, derinlik }) => {
             const f = fark(d.kod);
             const kendiGizli = f?.gizli === 1;
             const mirasGizli = !kendiGizli && ustGizli(d);
             const gizli = kendiGizli || mirasGizli;
             return (
               <div key={d.kod}
-                   className={`mn-dugum d${d.derinlik}${secili === d.kod ? ' sec' : ''}`
+                   className={`mn-dugum d${derinlik}${secili === d.kod ? ' sec' : ''}`
                               + `${gizli ? ' gizli' : ''}${surukle === d.kod ? ' surukle' : ''}`}
                    draggable={duzenleyebilir}
                    onDragStart={() => setSurukle(d.kod)}
@@ -379,7 +446,7 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
                    onDrop={() => birak(d)}
                    onClick={() => setSecili(d.kod)}>
                 <span className="tut">⠿</span>
-                {dugumler.some(x => x.ustKod === d.kod) ? (
+                {dugumler.some(x => etkinUst(x) === d.kod) ? (
                   <button type="button" className="d mini mn-ok"
                           title={acikMi(d.kod) ? c('Kapat') : c('Aç')}
                           onClick={e => { e.stopPropagation(); ac(d.kod) }}>

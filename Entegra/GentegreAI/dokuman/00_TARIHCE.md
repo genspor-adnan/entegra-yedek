@@ -19653,3 +19653,35 @@ Kabul) düştü; Medula Kabul Randevu grubuna taşındı, sıra 5 verildi, PNG i
 yüklendi → kaydedilen satır `Kayıt Kabul/medula-kabul · ust=Randevu · sira=5 ·
 data:image/png` ve menüde görsel ikonla çizildi. vitest 789, tsc temiz, dev
 veritabanı temiz bırakıldı.
+
+### 07.10.2026 (ikinci tur) — sürükle-bırak, canlı uygulama, gizleme artık erişim kapısı
+
+**Sürükle-bırak çalışmıyordu** (kullanıcı: *"sürükle bırak yapıyorum
+değişmiyor"*). Kayıt yazılıyordu ama **sol ağaç koddaki sırayı çiziyordu**:
+ekranda hiçbir şey kıpırdamıyordu. Artık ağaç ve önizleme **tek yerleşimden**
+(`yerlesim`) çiziliyor - düzen farkı (taşıma + sıra) ikisine de uygulanıyor,
+kardeş sırası da görünen sıradan hesaplanıyor (yoksa ikinci sürükleme düğümü
+geri atıyordu).
+
+**Kaydet & Uygula anında geçerli** (kullanıcı: *"sol menü de değişsin"*,
+*"kaydet&uygula basınca ana menüde geçerli olsun"*): kaydetme `MENU_DUZEN_OLAYI`
+yayıyor, kabuk düzeni yeniden okuyor. Sayfa yenilemek gerekmiyor; düğme adı da
+"Kaydet & Uygula" oldu.
+
+**Gizlemek artık erişimi KAPATIR** (kullanıcı metni: *"Erişimi KAPATIR: adresi
+bilen yetkili kullanıcı ekranı açamaz"*). Sunucu kapısı ekranın liste/kart
+KAYNAK adıyla çalışıyor, ağaç kodu ise grup bağlamlı olabiliyor
+(`Randevu/dokumler`) ve grup gizlemesi alt satırlara kayıt yazmıyor. İkisi
+kaydetmede birleştirildi: menüde **görünür tek girişi kalmayan** her ekran
+kaynağı için sade kodlu gizli satır türetiliyor. İki grupta kısayolu olan ve
+biri açık kalan ekran için kapı yazılmıyor. Türetilmiş satırlar her kaydetmede
+baştan hesaplanıyor - grup geri açılınca kapı da kalkıyor.
+
+Doğrulama (dev): Çalışma İstisnaları sürüklenerek Randevu grubunun başına
+alındı (ağaçta görüldü); ekran adı değiştirilip kaydedildi, sol menü sayfa
+yenilemeden "Randevu Listesi" gösterdi; "Kayıt Kabul" gizlenip kaydedilince
+türetilen kapılar (`hasta`, `hasta-avans`, `iskonto-onay`,
+`kayit-kabul-ayarlar`, `sigorta-provizyon`) yazıldı ve `/api/liste/hasta`
+**403** döndü - başka grupta görünür kalan ekranlar için kapı yazılmadı;
+gizleme kaldırılınca liste yine **200**. vitest 789, tsc temiz, dev
+veritabanı temiz.

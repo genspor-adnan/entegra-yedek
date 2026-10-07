@@ -18,6 +18,14 @@ import { duzenHaritasi } from './menuDuzenHarita';
  */
 export type { MenuDuzenSatiri } from '../../api/sozlesme';
 
+/**
+ * Menü düzeni kaydedildiğinde yayılan pencere olayı: sol menü bunu dinleyip
+ * düzeni yeniden okur, böylece "Kaydet & Uygula" sayfa yenilemeden geçerli
+ * olur. Olay, iki bileşeni birbirine bağımlı yapmamak için seçildi (kabuk
+ * düzenleme ekranını, ekran kabuğu import etmiyor).
+ */
+export const MENU_DUZEN_OLAYI = 'gentegre:menu-duzen-degisti';
+
 /** Ekranın sistem kodu: liste kaynağı varsa o, yoksa rota (özel sayfalar). */
 export const ogeKodu = (m: MenuOgesi) => m.kaynak ?? m.yol;
 
