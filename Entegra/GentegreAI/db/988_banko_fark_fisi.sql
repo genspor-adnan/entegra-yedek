@@ -1,0 +1,78 @@
+-- =====================================================================
+-- 988 - BANKO GUN SONU: fark fisi ayarlari + ozetin fisi disalamasi
+--
+-- Kullanici 08.10.2026 (banko_gun_sonu_kasa_teslimi.html): "✔ Fark Fisini
+--   Olustur". 987'de `fark_islem_id` kolonu acilmisti ama fis
+--   URETILMIYORDU: fark yalniz kayitti, kasa bakiyesi sayimla
+--   esitlenmiyordu - ertesi gun ayni fark devrediyordu.
+--
+-- FARK AYRI FISLE MUHASEBELESIR: kasa bakiyesi sayima cekilir, fark gecmisi
+--   bozulmaz. Noksan = kasadan cikis (tur 4), fazla = kasaya giris (tur 3).
+--
+-- KARSI HESAP AYARDAN: hangi gider/gelir hesabina yazilacagi kuruma ozel.
+--   Bos birakilirsa fis URETILMEZ ve kullaniciya bildirilir - gun sonunu
+--   bloke etmek yerine (banko kapanmali) eksik ayari soylemek dogru.
+-- =====================================================================
+
+insert into public.referans (anahtar, deger, aciklama)
+select v.anahtar, v.deger, v.aciklama
+  from (values
+    ('banko.fark_hesap_id', '',
+     'Kasa sayım farkının yazılacağı karşı hesap (boşsa fark fişi üretilmez)'),
+    ('banko.fark_tur_fazla', '3',
+     'Sayımda FAZLA çıkınca kullanılacak kasa işlem türü (varsayılan 3 Giriş Fişi)'),
+    ('banko.fark_tur_noksan', '4',
+     'Sayımda NOKSAN çıkınca kullanılacak kasa işlem türü (varsayılan 4 Çıkış Fişi)')
+  ) as v(anahtar, deger, aciklama)
+ where not exists (select 1 from public.referans r where r.anahtar = v.anahtar);
+
+-- FARK FISI SAYACLARA GIRMEZ: gun ici tahsilat sayaclari "banko ne tahsil
+--   etti" sorusunu yanitliyor; duzeltme fisi oraya karisirsa ertesi gun
+--   rakamlar tutmaz. Fis oturuma BAGLI kalir (kasa ekstresinden "bu para
+--   neydi" sorusu icin), yalniz ozetten dislanir.
+-- Kolon EKLENDIGI icin replace yetmez (PG kolon sirasini/adini degistirmiyor);
+--   gorunum once dusuruluyor. Bagimli nesne yok: katalog ve uclar sorguyu
+--   calisma aninda kuruyor.
+drop view if exists public.v_banko_oturum_ozet;
+create view public.v_banko_oturum_ozet as
+select o.id,
+       o.banko_id, b.kod as banko_kod, b.ad as banko_ad, b.hesap_id,
+       b.acilis_onay, b.gun_sonu_onay, b.kupur_dokumu, b.devir_tutar as banko_devir_hedef,
+       o.sube_id, o.kullanici_id, o.vardiya, o.durum,
+       o.acilis_talep_ts, o.acilis_ts, o.kapanis_talep_ts, o.kapanis_ts,
+       o.devir_tutar, o.acilis_sayim, o.acilis_fark, o.acilis_not,
+       o.acilis_onay_id, o.acilis_onay_ts, o.red_neden,
+       o.kapanis_sayim, o.kapanis_beklenen, o.kapanis_fark, o.fark_neden,
+       o.fark_aciklama, o.fark_islem_id, o.kasada_birakilan, o.teslim_edilen,
+       o.teslim_alan_id, o.kapanis_onay_id, o.kapanis_onay_ts, o.tutanak_no,
+       coalesce(h.nakit, 0)::numeric(18,2)   as nakit_tahsilat,
+       coalesce(h.nakit_iade, 0)::numeric(18,2) as nakit_iade,
+       coalesce(h.pos, 0)::numeric(18,2)     as pos_tutar,
+       coalesce(h.banka, 0)::numeric(18,2)   as banka_tutar,
+       coalesce(h.cek, 0)::numeric(18,2)     as cek_tutar,
+       coalesce(h.adet, 0)                   as islem_adet,
+       (o.devir_tutar + o.acilis_fark + coalesce(h.nakit, 0) - coalesce(h.nakit_iade, 0))
+         ::numeric(18,2)                     as beklenen_nakit
+  from public.banko_oturum o
+  join public.banko b on b.id = o.banko_id
+  left join (
+        select k.oturum_id,
+               sum(case when t.ana_hesap_turu = 'K' and t.yon > 0 then k.yerel_tutar else 0 end) as nakit,
+               sum(case when t.ana_hesap_turu = 'K' and t.yon < 0 then k.yerel_tutar else 0 end) as nakit_iade,
+               sum(case when t.ana_hesap_turu = 'P' then k.yerel_tutar else 0 end)               as pos,
+               sum(case when t.ana_hesap_turu = 'B' then k.yerel_tutar else 0 end)               as banka,
+               -- CEK KASADA PARA DEGIL: fiziken banko kasasinda durur ama
+               --   sayima girmez, portfoye alinir (cek teslim listesi).
+               sum(case when t.grup = 'ceksenet' then k.yerel_tutar else 0 end)                  as cek,
+               count(*)                                                                          as adet
+          from public.kasa_islem k
+          join public.kasa_islem_turu t on t.kod = k.tur
+         where k.oturum_id is not null and k.durum <> 9
+           -- Fark fisi (kaynak_tur 1385 = banko oturumu) sayilmaz.
+           and k.kaynak_tur is distinct from 1385
+         group by k.oturum_id) h on h.oturum_id = o.id;
+
+do $$
+begin
+  raise notice '988: fark fisi ayarlari eklendi, ozet gorunumu guncellendi (cek kovasi + fis dislama)';
+end $$;

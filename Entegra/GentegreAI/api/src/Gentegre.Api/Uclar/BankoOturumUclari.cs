@@ -231,6 +231,7 @@ public static class BankoOturumUclari
             baglam.YetkiIste("banko_onay", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             var o = await DurumAsync(b, id, baglam.SubeId ?? 0, iptal);
+            var fisNotu = "";
 
             if (o.KullaniciId == baglam.KullaniciId)
                 throw GentegreHatasi.IsKurali("Kendi oturumunuzu onaylayamazsınız.");
@@ -259,6 +260,14 @@ public static class BankoOturumUclari
                            degistiren = @p1, degistirme_tarihi = now()
                      where id = @p0
                     """, islem, [id, baglam.KullaniciId, tutanak], iptal);
+                // FARK FISI KAPANISTA YAZILIR, teslime gonderirken degil:
+                //   sorumlu reddederse gorevli yeniden sayar ve fark degisir -
+                //   her denemede fis yazmak kasayi birkac kez duzeltirdi.
+                var ozet = await OturumAsync(b, "where o.id = @p0", [id], iptal);
+                if (ozet is not null)
+                    fisNotu = await FarkFisiAsync(b, islem, id, ozet.BankoId, ozet.HesapId,
+                                                  ozet.KapanisFark, ozet.FarkNeden,
+                                                  ozet.FarkAciklama, baglam, iptal);
             }
             else throw GentegreHatasi.IsKurali("Bu oturum onay beklemiyor.");
 
@@ -267,7 +276,11 @@ public static class BankoOturumUclari
                 new { onay = o.Durum == OnayBekler ? "acilis" : "kapanis", not = istek?.Not ?? "" },
                 iptal: iptal);
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { oturum = await OturumAsync(b, "where o.id = @p0", [id], iptal) });
+            return Results.Ok(new
+            {
+                oturum = await OturumAsync(b, "where o.id = @p0", [id], iptal),
+                mesaj = (o.Durum == OnayBekler ? "Oturum açıldı." : "Oturum kapandı.") + fisNotu,
+            });
         });
 
         grup.MapPost("/{id:long}/reddet", async (long id, OnayIstegi istek, VeriKaynagi veri,
@@ -372,12 +385,16 @@ public static class BankoOturumUclari
             await KupurYazAsync(b, islem, id, 2, istek.Kupurler, baglam.KullaniciId, iptal);
 
             string? tutanak = null;
+            string fisNotu = "";
             if (!onayIster)
             {
                 tutanak = await TutanakNoAsync(b, islem, iptal);
                 await b.CalistirAsync(
                     "update public.banko_oturum set tutanak_no = @p1 where id = @p0",
                     islem, [id, tutanak], iptal);
+                fisNotu = await FarkFisiAsync(b, islem, id, ozet.BankoId, ozet.HesapId,
+                                              fark, istek.FarkNeden ?? 0, istek.FarkAciklama,
+                                              baglam, iptal);
             }
 
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogTablo, (int)id, baglam.KullaniciId,
@@ -389,9 +406,9 @@ public static class BankoOturumUclari
             {
                 oturum = await OturumAsync(b, "where o.id = @p0", [id], iptal),
                 tutanakNo = tutanak,
-                mesaj = onayIster
+                mesaj = (onayIster
                     ? "Sayım kaydedildi, teslime gönderildi; onay gelene kadar bankoda tahsilat girilemez."
-                    : "Oturum kapandı.",
+                    : "Oturum kapandı.") + fisNotu,
             });
         });
 
@@ -466,6 +483,73 @@ public static class BankoOturumUclari
         }
     }
 
+    /// <summary>
+    /// FARK FİŞİ (988, mockup banko_gun_sonu_kasa_teslimi.html "Fark Fişini
+    /// Oluştur"): sayım farkı ayrı bir kasa işlemiyle muhasebeleşir - kasa
+    /// bakiyesi sayıma çekilir, fark geçmişi bozulmaz ve ertesi gün aynı fark
+    /// devretmez.
+    ///
+    /// NOKSAN = kasadan çıkış, FAZLA = kasaya giriş. Karşı hesap kurum ayarından
+    /// (`banko.fark_hesap_id`); tanımlı değilse fiş ÜRETİLMEZ ve kullanıcıya
+    /// söylenir - gün sonunu bloke etmek yerine (banko kapanmalı) eksik ayarı
+    /// bildirmek doğru.
+    ///
+    /// Fiş oturuma bağlanır (<c>oturum_id</c>, <c>kaynak_tur</c> = 1385) ama
+    /// oturum sayaçlarına GİRMEZ: gün içi sayaçlar "banko ne tahsil etti"
+    /// sorusunu yanıtlıyor, düzeltme fişi oraya karışırsa rakamlar tutmaz.
+    /// </summary>
+    private static async Task<string> FarkFisiAsync(NpgsqlConnection b, NpgsqlTransaction islem,
+        long oturumId, int bankoId, int? kasaHesapId, decimal fark, short neden, string? aciklama,
+        IstekBaglami baglam, CancellationToken iptal)
+    {
+        if (fark == 0) return "";
+        if (kasaHesapId is not > 0)
+            return " Fark fişi üretilmedi: bankonun kasa hesabı tanımlı değil.";
+
+        var karsi = await AyarAsync(b, islem, "banko.fark_hesap_id", iptal);
+        if (!int.TryParse(karsi, out var karsiHesap) || karsiHesap <= 0)
+            return " Fark fişi üretilmedi: \"Kasa sayım farkı hesabı\" (banko.fark_hesap_id) tanımlı değil.";
+
+        var turAnahtar = fark > 0 ? "banko.fark_tur_fazla" : "banko.fark_tur_noksan";
+        var tur = short.TryParse(await AyarAsync(b, islem, turAnahtar, iptal), out var t)
+                  ? t : (short)(fark > 0 ? 3 : 4);
+
+        var not = $"Kasa sayım farkı - banko oturumu #{oturumId}"
+                  + (FarkNedenleri.TryGetValue(neden, out var ad) ? $" ({ad})" : "")
+                  + (string.IsNullOrWhiteSpace(aciklama) ? "" : $": {aciklama}");
+
+        var fisId = await b.TekDegerAsync<long>("""
+            insert into public.kasa_islem
+                   (tur, islem_tarihi, durum, hesap_id, karsi_hesap_id, doviz_cinsi,
+                    tutar, doviz_kuru, yerel_tutar, kaynak_tur, kaynak_id, oturum_id,
+                    aciklama, sube_id, ekleyen)
+            values (@p0, now(), 1, @p1, @p2, 'TL', @p3, 1, @p3, 1385, @p4, @p4,
+                    @p5, @p6, @p7)
+            returning id
+            """, islem,
+            [tur, kasaHesapId, karsiHesap, Math.Abs(fark), oturumId,
+             Kirp(not, 300), baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+
+        await b.CalistirAsync(
+            "update public.banko_oturum set fark_islem_id = @p1 where id = @p0",
+            islem, [oturumId, (int)fisId], iptal);
+
+        return $" Fark fişi oluşturuldu (#{fisId}, {Math.Abs(fark):N2} ₺ "
+               + (fark > 0 ? "fazla" : "noksan") + ").";
+    }
+
+    private static async Task<string> AyarAsync(NpgsqlConnection b, NpgsqlTransaction islem,
+                                                string anahtar, CancellationToken iptal)
+        => await b.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0",
+                                         islem, [anahtar], iptal) ?? "";
+
+    /// <summary>Fark nedeni kodları - `banko_oturum.fark_neden`.</summary>
+    private static readonly Dictionary<short, string> FarkNedenleri = new()
+    {
+        [1] = "Para üstü hatası", [2] = "Eksik tahsilat", [3] = "Fazla tahsilat",
+        [4] = "Kayıt dışı ödeme", [5] = "Sayım hatası", [99] = "Diğer",
+    };
+
     /// <summary>Tutanak no: TT-yyyy-nnnnnn, yıl içinde sıralı.</summary>
     private static async Task<string> TutanakNoAsync(NpgsqlConnection b, NpgsqlTransaction islem,
                                                      CancellationToken iptal)
@@ -490,7 +574,7 @@ public static class BankoOturumUclari
                       o.fark_neden, o.fark_aciklama, o.kasada_birakilan, o.teslim_edilen,
                       o.teslim_alan_id, o.kapanis_talep_ts, o.kapanis_ts, o.kapanis_onay_id,
                       o.tutanak_no, o.acilis_onay, o.gun_sonu_onay, o.kupur_dokumu,
-                      o.banko_devir_hedef,
+                      o.banko_devir_hedef, o.hesap_id, o.fark_islem_id, o.cek_tutar,
                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as gorevli
                  from public.v_banko_oturum_ozet o
                  left join public.taraf t on t.id = o.kullanici_id
@@ -510,7 +594,9 @@ public static class BankoOturumUclari
                    o.IsDBNull(31) ? null : o.GetDateTime(31),
                    o.IsDBNull(32) ? null : o.GetInt32(32), o.GetString(33),
                    o.GetInt16(34) == 1, o.GetInt16(35) == 1, o.GetInt16(36) == 1,
-                   o.GetDecimal(37), o.GetString(38)), iptal);
+                   o.GetDecimal(37), o.IsDBNull(38) ? null : o.GetInt32(38),
+                   o.IsDBNull(39) ? null : o.GetInt32(39), o.GetDecimal(40),
+                   o.GetString(41)), iptal);
 
     public sealed record OturumOzeti(
         long Id, int BankoId, string BankoKod, string BankoAd, int KullaniciId, string Vardiya,
@@ -521,7 +607,8 @@ public static class BankoOturumUclari
         decimal KapanisFark, short FarkNeden, string FarkAciklama, decimal KasadaBirakilan,
         decimal TeslimEdilen, int? TeslimAlanId, DateTime? KapanisTalepTs, DateTime? KapanisTs,
         int? KapanisOnayId, string TutanakNo, bool AcilisOnay, bool GunSonuOnay, bool KupurDokumu,
-        decimal BankoDevirHedef, string Gorevli);
+        decimal BankoDevirHedef, int? HesapId, int? FarkIslemId, decimal CekTutar,
+        string Gorevli);
 
     public sealed record KupurSatiri(decimal? Birim, int? Adet);
     public sealed record AcIstegi(int? BankoId, string? Vardiya, decimal? AcilisSayim, string? Not,
