@@ -337,6 +337,30 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
   },
+  // --- BANKOLAR (985, Ekranlar/Kayit Kabul/banko_tanimi_v2.html): kasa /
+  //     karsilama NOKTASI - kasasi, POS'u ve donanimi olan fiziksel yer.
+  //     Kart generic: tanim + POS + donanim sekmeleri KartKatalogu.Banko'dan
+  //     geliyor, ozel sayfa gerektiren bir sey yok.
+  //
+  //     BANKO TANIMINDA KULLANICI YOK (kullanici 08.10.2026): kim calisacagi
+  //     oturum acilisinda belirlenir - bu yuzden listede "yetkili" sutunu da
+  //     yok, acik oturum sutunu oturum altyapisiyla gelecek.
+  {
+    kaynak: 'banko', rota: 'banko', aksiyonEkrani: 'banko-liste',
+    baslik: 'Bankolar', yol: 'Kasa › Bankolar',
+    kartYolu: '/banko', kartBaslik: 'Banko',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'aktif', op: 'esit', deger: 0 } },
+      // ARIZALI POS'U OLAN BANKO: tahsilat ekraninda o cihaz listelenmez,
+      //   yani banko eksik kapasiteyle calisiyordur - teknige dusen is.
+      { ad: "Arızalı POS'u olan", filtre: { alan: 'posArizali', op: 'buyuk', deger: 0 } },
+      { ad: 'Danışma (kasasız)', filtre: { alan: 'tur', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Finans', menuSira: 25, menuAd: 'Bankolar', ic: '🏧',
+    yetkiKodu: 'banko',
+  },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {

@@ -2474,6 +2474,13 @@ public static class AksiyonKatalogu
                  Yazdir()],
             ["eczane-miad-liste"] = [Yazdir()],
 
+            // BANKO (985). SILME VAR: banko taniminin gecmise bagi yok -
+            //   oturum ve tahsilat baglandiginda silme engeli eklenecek;
+            //   simdilik kullanilmayan banko PASIFE alinir (listedeki
+            //   varsayilan suzgec aktifleri gosterir).
+            ["banko-liste"] = [.. Crud("banko", "banko", "banko",
+                silIpucu: "Kullanımdan çıkarmak için Aktif alanını kapatmak yeterli")],
+
             // BIYOMEDIKAL (723). Cihaz envanterinin karti DEMIRBAS kartidir -
             //   ekran kodu ayri, Crud ayni karta bagli.
             ["demirbas-cihaz-liste"] =

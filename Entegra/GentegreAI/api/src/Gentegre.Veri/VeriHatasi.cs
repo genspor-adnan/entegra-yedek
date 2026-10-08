@@ -64,6 +64,10 @@ public static class VeriHatasi
     private static readonly Dictionary<string, string> BenzersizMesajlari = new(StringComparer.Ordinal)
     {
         ["ux_depo_ad"] = "Bu depo adı zaten kullanılıyor.",
+        // BANKO (985): ham index adi kullaniciya bir sey soylemiyordu.
+        ["banko_kod_benzersiz"] = "Bu şubede aynı kodlu banko var; kod şube içinde benzersiz olmalı.",
+        ["banko_pos_terminal_benzersiz"] = "Bu terminal numarası başka bir bankoda tanımlı; bir POS cihazı tek bankoda olur.",
+        ["banko_pos_varsayilan_tek"] = "Bankoda tek varsayılan POS olur; önce diğerinin \"Varsayılan\" işaretini kaldırın.",
         ["ux_depo_varsayilan"] = "Yalnizca bir depo varsayilan olabilir.",
         ["ux_stok_paket_satir"] = "Bu ürün pakete zaten eklenmiş - satırdaki adedi değiştirin.",
         ["ux_hizmet_paket_satir"] = "Bu tetkik panele zaten eklenmiş - satırdaki adedi değiştirin.",

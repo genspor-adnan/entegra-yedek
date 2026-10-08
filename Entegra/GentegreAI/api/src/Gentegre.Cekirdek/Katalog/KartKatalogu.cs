@@ -433,6 +433,8 @@ public static partial class KartKatalogu
         Ekle(Demirbas());
         // CIHAZ ARA KATMANI (432).
         Ekle(CihazKarti());
+        // BANKO (985): kasa/karsilama noktasi + POS ve donanim detaylari.
+        Ekle(Banko());
 
         // SIGORTA v1 (430): kurum hesabi ve kod eslemesi (provizyonun karti YOK).
         Ekle(SigortaHesapKarti());

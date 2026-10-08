@@ -20277,3 +20277,88 @@ Doğrulama (GenProfil → yerel API): Menü Düzeni sekmesinde yalnız "⬇ Dı�
 üstteki tek `Kaydet & Uygula` basıldığında `menu_duzen`'e 50 satır yazıldı.
 Roller sekmesinde portal rolleri de göründü (5 satır). vitest 789, tsc temiz,
 dev veritabanı temiz.
+
+### 08.10.2026 — "Banko" dili: roller, Danışma rolü, banko tanımı (984, 985)
+
+Kullanıcı: *"rollerde Kayıt Kabul rename Banko Görevlisi"*, *"Roller'e Danışma
+ekle"*, *"vezne yerine Banko kullan.. Banko listesi ve Banko kartı için
+sekmeler açılan mockup yap"*, *"banko tanımı yaparken oraya bağlı POS listesi
+de girilebilmeli"*, *"banko tanımında kullanıcı olmaz"*, *"ama sabah banko
+açılışı yaparken uygun banko seçilip kullanıcı adıyla başlanmalı"*,
+*"opsiyonel olarak banko sorumlusu onay verince banko açılabilir"*,
+*"tahsilat yaparken kurumdaki tüm POS listesi değil sadece o bankoya bağlı POS
+listesi"*, *"Banko ve Kullanıcı (Banko görevlisi) birlikte kayıt yapılmalı..
+yani 3 nolu bankoda Ali Deniz banko görevlisi giriş yaptı"*.
+
+**Rol adları (984).** `kayit_kabul` → **Banko Görevlisi**,
+`kayit_kabul_sorumlu` → **Banko Sorumlusu**, `vezne` → **Banko Kasiyeri**.
+**Kodlar değişmedi**: yetki eşlemeleri, kurum tipi geçerlilik haritası (829),
+kadro ağacı ve personel geçmişi koda bağlı - yalnız görünen ad değişti.
+Güncelleme koşullu (`where ad = '<eski standart ad>'`), müşterinin kendi
+yazdığı ad korunur.
+
+`vezne` ayrı kaldı, `kayit_kabul`'e katılmadı: Banko Görevlisi kayıt **da**
+açar, Banko Kasiyeri **yalnız** kasadır (hasta/belge salt okuma). İkisini
+birleştirmek, sadece tahsilat yapan personele hasta kaydı açma yetkisi
+vermek olurdu.
+
+**Yeni rol: Danışma.** Karşılama bankosu - hasta ve randevu **salt okuma**,
+para ve klinik yetkisi yok. Kayıt açmak bankonun işi; danışmada açılan yarım
+kayıt bankoda ikinci kez açılırdı. Kadroda Banko Sorumlusu'na bağlı.
+`rolCalismaAlani` düzenine `danış|danis` eklendi - yoksa yeni rol "Tümü"
+alanına düşüyordu.
+
+**Banko tanımı (985).** Üç tablo: `banko`, `banko_pos`, `banko_cihaz`; kart
+`KartKatalogu.Banko`, liste `KaynakKatalogu.Banko`, ekran Finans › Bankolar.
+Kart generic (özel sayfa yok): Tanım / Ayarlar / POS Cihazları / Yazıcı &
+Donanım.
+
+Kararlar ve nedenleri:
+
+* **Banko tanımında KULLANICI YOKTUR.** Banko fiziksel bir noktadır: kasası,
+  POS'u ve donanımı vardır, personeli yoktur. Sabah açılışta uygun banko
+  seçilir ve oturum **giriş yapan kullanıcının adıyla** başlar (banko +
+  görevli çifti). Tanıma personel listesi koymak her vardiya ve her izinde
+  tanımı düzenlemek demekti; kimin tahsilat yapabileceği **rolden** gelir.
+* **Kasasız banko olabilir** (tür 2 "Danışma"): kasa hesabı, POS ve oturum
+  beklenmez. Bu yüzden `hesap_id` üzerinde CHECK yok - türü seçip hesabı
+  henüz seçmemiş kullanıcıya veritabanı hatası döndürmek yerine alan serbest.
+* **POS bankoya bağlıdır** ve tahsilat ekranı yalnız o bankonun **çalışan**
+  POS'larını listeler. Yan bankonun terminaline çekilen kart o bankonun gün
+  sonunu tutturmaz; görevlinin önünde olmayan cihazı listelemek de yalnız
+  hata üretir.
+* **POS tahsilatı kasaya nakit girmez:** `banko_pos.hesap_id` kendi banka
+  hesabını (mevcut POS hesapları) gösterir, mutabakat ekstreyle yapılır. Gün
+  sonu sayımı yalnız nakit üzerinden - bu ayrım olmadan her gün fark çıkar.
+* **Varsayılan POS radyo davranışlı** (`tg_banko_pos_varsayilan`): yeni
+  varsayılan işaretlenince diğeri kendiliğinden bırakılır. Partial unique
+  index (`banko_pos_varsayilan_tek`) güvenlik ağı olarak kalıyor, ama
+  kullanıcıyı "önce öbürünün işaretini kaldır" adımına zorlamak gereksizdi.
+  Üç benzersizlik kısıtı için okunur mesaj eklendi (`VeriHatasi`) - ham index
+  adı kullanıcıya bir şey söylemiyordu.
+* **Onaylar opsiyonel ve iki uç ayrı:** `acilis_onay` (varsayılan kapalı) ve
+  `gun_sonu_onay` (varsayılan açık). Küçük kurumda her sabah onay beklemek
+  bankoyu durdurur, büyük kurumda devir farkının imzası gerekir - kararı kurum
+  verir.
+* **Sınırlar uyarır, engellemez** (nakit üst sınırı, tek işlem sınırı):
+  hastayı kasada bekletmek yerine sorumluya haber verilip ara teslim yapılır.
+  0 = sınır yok.
+* **Kurallar bankoya özel:** acil bankosunda kısmi tahsilat açık olabilir,
+  poliklinikte kapalı.
+* **Donanım demirbaş kartına bağlı** (`demirbas_id`): bakım, arıza ve garanti
+  orada izlenir; banko kartı yalnız hangi cihazın burada olduğunu söyler. İki
+  yerde cihaz geçmişi tutmak ikisini de güvenilmez yapardı.
+* Yetki `banko`, grup **Kasa**. `yonetici` rolünde joker satır olmadığı için
+  yeni yetki ona da açıkça verildi - yoksa ekran yöneticiye bile 403 döner.
+* Banko kodu **şube içinde** benzersiz; terminal numarası **kurum genelinde**
+  (bir POS cihazı tek yerde durur).
+
+**Yapılmayan (sonraki iş):** oturum/vardiya altyapısı - açılış, kasa devri,
+gün içi hareketler, gün sonu teslimi ve sorumlu onay kuyruğu. Mockup'larda
+tasarlandı (`banko_oturum_akisi_v2.html`), kartta yer tutucu sekme bile
+açılmadı: boş sekme doldurulacak bir şey varmış izlenimi verir.
+
+Mockup: `Ekranlar/Kayıt Kabul/banko_tanimi_v2.html` (liste + 6 sekmeli kart).
+Doğrulama: liste ve kart canlı denendi (2 POS + 1 cihazlı banko yazıldı,
+varsayılan devri çalıştı, arızalı POS "çalışan POS" sayısına girmedi), vitest
+789, dotnet test 218, test satırları silindi.

@@ -523,6 +523,8 @@ public static partial class KaynakKatalogu
         Ekle(SatinalmaButce());
         Ekle(StokFisi(3));
         Ekle(StokFisi(4));
+        // BANKO (985)
+        Ekle(Banko());
     }
 
     /// <summary>
