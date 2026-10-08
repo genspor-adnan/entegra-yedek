@@ -74,6 +74,16 @@ export type OnaySatiri = {
  * Onay kuyruğu yanıtı. `kendiOnay`: kullanıcı KENDİ oturumunu onaylayabilir mi
  * - yönetici (ayar yetkisi) ya da `banko.kendi_onay` açıkken true.
  */
+/**
+ * Tahsilat ekranının POS seçeneği (997): açık oturumun bankosundaki çalışan
+ * terminal. `hesapAdi` terminalin tahsilat hesabı - seçim iki soruyu birden
+ * yanıtlıyor.
+ */
+export type PosSecenek = {
+  id: number; hesapAdi: string; hesapId: number; terminalNo: string;
+  varsayilan: boolean; oturumId: number; bankoId: number; bankoAd: string;
+};
+
 export type OnayKuyrugu = { satirlar: OnaySatiri[]; kendiOnay: boolean };
 
 export type OturumYaniti = { oturum: OturumOzeti | null; mesaj?: string; tutanakNo?: string | null };
@@ -147,6 +157,7 @@ export const bankoOturumUclari = {
   bankoOturumPosEslestir: (id: number, satirlar: {
     bankoPosId: number; cihazToplam?: number; ulasilamadiMi?: boolean; aciklama?: string;
   }[]) => gonder<{ pos: PosEslesme[] }>(`/api/banko-oturum/${id}/pos-eslestir`, { satirlar }),
+  bankoOturumPosSecenekleri: () => istek<PosSecenek[]>('/api/banko-oturum/pos-secenekleri'),
   bankoOturumSil: (id: number) =>
     istek<void>(`/api/banko-oturum/${id}`, { method: 'DELETE' }),
   bankoOturumYenidenAc: (id: number, not: string) =>

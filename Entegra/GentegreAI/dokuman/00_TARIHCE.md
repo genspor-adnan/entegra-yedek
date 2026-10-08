@@ -20750,3 +20750,41 @@ butonu ekle"*.
 Doğrulama: gece vardiyası "Gece / nöbet · 18:00-08:00 (+1 gün)" olarak tam
 yazıldı; kapanmış oturum silme denemesi 422 verdi, boş oturum 204 ile silindi.
 vitest 789, dotnet test 218.
+
+### 08.10.2026 — Tahsilat vardiyaya bağlandı: oturum damgası, zorunluluk ayarı, POS seçimi (997)
+
+Kullanıcı sordu: *"banko oturumu açmadan başvurudan tahsilat yapılabilir mi?"*
+Yapılabiliyordu - 987/990'da `kasa_islem.oturum_id` ve `banko_pos_id`
+kolonları açılmıştı ama **dolduran taraf yoktu**. Vardiya akışı kendi içinde
+çalışıyor, para akışıyla bağlı değildi; gün içi sayaçlar hep boş kalıyordu.
+Ardından: *"başla, ayar olarak kur"*, *"pos seçimini de ekle"*, *"banko
+görevlisi ve sorumlusu için oturum açmak zorunlu olmalı"*.
+
+* **Oturum damgası tek yerde** (`KasaDeposu.Yazma`): kasa işlemi hangi
+  ekrandan gelirse gelsin (başvuru tahsilatı, kasa kartı, avans) buradan
+  yazılıyor. İki ekranda ayrı damga kodu, birinin unutulması demekti.
+  İstemci `oturumId` gönderdiyse dokunulmuyor (düzeltme/aktarım).
+* **Oturum zorunluluğu ayar** (`banko.oturum_zorunlu`, varsayılan 1): banko
+  görevlisi ve sorumlusu tahsilat için açık oturum açmak zorunda - vardiyası
+  olmadan aldığı para hiçbir gün sonunda görünmez. **Yönetici hariç**, ölçüt
+  `ayar` yetkisi: ayarı değiştirebilen kişi bu anahtarı kendisi kapatabilir ve
+  düzeltme/istisna kayıtlarını bankosu olmadan girmesi gerekiyor. Aynı ölçüt
+  kendi oturumunu onaylama istisnasında da kullanılıyor (993) - iki yerde iki
+  farklı "yönetici" tanımı olmasın. Muhasebeci (banko yetkisi olmayan)
+  etkilenmiyor; ödeme ve virman da şart dışı (tür 21–27 tahsilat), para
+  kasadan çıkıyor ya da hesaplar arası geziyor.
+* **POS seçimi** (`PosSecModali` + `/banko-oturum/pos-secenekleri`): POS
+  tahsilatında açık oturumun bankosundaki **çalışan** terminaller listeleniyor
+  - kurumdaki bütün POS'lar değil, arızalı olan da yok. Seçim iki soruyu
+  birden yanıtlıyor: terminalin tahsilat hesabı işlemin hesabı oluyor,
+  `bankoPosId` de gün sonu eşleşmesine yazılıyor. Önce "POS hesabı" sorup
+  sonra terminali sormak aynı bilgiyi iki kez istemekti.
+* **Oturum/POS yoksa eski akış**: `PosSecModali` boş liste ya da hata
+  durumunda hesap seçimine düşüyor - muhasebeden girilen bankosuz POS
+  tahsilatı için ve uç erişilemediğinde kasayı durdurmamak için.
+
+Doğrulama: oturum açıkken yazılan tahsilat `oturum_id = 16` damgası aldı, gün
+içi sayaç 320 ₺ / 1 işlem gösterdi ve tür dökümüne "Nakit Tahsilat" olarak
+düştü. Zorunluluk ölçütü rol yetkileriyle doğrulandı (Görevli ve Sorumlu:
+`banko_oturum.ekle=1`, `ayar.degistir=0` → şart var; yönetici → yok). vitest
+791, dotnet test 218.

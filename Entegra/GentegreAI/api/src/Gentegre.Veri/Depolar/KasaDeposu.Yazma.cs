@@ -25,6 +25,11 @@ public sealed partial class KasaDeposu
         ["karsiDovizCinsi"] = "karsi_doviz_cinsi", ["karsiTutar"] = "karsi_tutar",
         ["karsiKur"] = "karsi_kur", ["masrafTutar"] = "masraf_tutar",
         ["masrafId"] = "masraf_id", ["hizmetId"] = "hizmet_id", ["projeId"] = "proje_id",
+        // POS TERMINALI (990/997): POS tahsilati hangi cihazdan gecti. Gun
+        //   sonu eslesmesi cihazin raporuyla bunu karsilastiriyor; hesap
+        //   uzerinden tahmin yetmiyordu (ayni hesaba bagli iki POS'un
+        //   toplami ikisinde de gorunuyordu).
+        ["bankoPosId"] = "banko_pos_id",
         ["merkezId"] = "merkez_id", ["cekSenetId"] = "cek_senet_id",
         ["krediTaksitId"] = "kredi_taksit_id", ["kuponTuruId"] = "kupon_turu_id",
         ["belgeId"] = "belge_id", ["planIslemId"] = "plan_islem_id",
@@ -37,6 +42,26 @@ public sealed partial class KasaDeposu
         //   degismez - iade AYRI satirdir, kasa iki hareketi de gorur.
         ["avansKaynakId"] = "avans_kaynak_id"
     };
+
+    /// <summary>
+    /// TAHSİLAT MI: işlem türü tahsilat grubunda mı (nakit, POS, havale, çek,
+    /// senet, kupon). Ödeme ve virman oturum şartına girmez - para kasadan
+    /// çıkıyor ya da hesaplar arasında geziyor, bankonun vardiyasıyla ilgisi
+    /// yok. Tür kodları: 21-27 tahsilat (yön +1).
+    /// </summary>
+    private static bool TahsilatMi(IDictionary<string, object?> islem)
+        => islem.TryGetValue("tur", out var t) && t is not null
+           && int.TryParse(t.ToString(), out var kod) && kod is >= 21 and <= 27;
+
+    private static async Task<T?> TekDegerAsync<T>(NpgsqlConnection baglanti,
+        NpgsqlTransaction? tx, string sql, object?[] par, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand(sql, baglanti, tx);
+        for (var i = 0; i < par.Length; i++)
+            komut.Parameters.AddWithValue("p" + i, par[i] ?? DBNull.Value);
+        var d = await komut.ExecuteScalarAsync(iptal);
+        return d is null or DBNull ? default : (T)Convert.ChangeType(d, typeof(T).GenericTypeArguments.FirstOrDefault() ?? typeof(T));
+    }
 
     private async Task<int> BaslikEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
         IDictionary<string, object?> islem, YazmaBaglami baglam, CancellationToken iptal)
@@ -52,6 +77,39 @@ public sealed partial class KasaDeposu
         }
         kolonlar.Add("ekleyen");
         parametreler.Add(baglam.KullaniciId);
+
+        // BANKO OTURUMU DAMGASI (997): tahsilat hangi vardiyada alındı?
+        //   Gün içi sayaçlar, ödeme türü dökümü, POS eşleşmesi ve gün sonu
+        //   farkı bu damgayla çalışıyor - damgasız tahsilat oturumun hiç
+        //   göremediği para olur.
+        //
+        //   TEK YERDE: hangi ekrandan gelirse gelsin (başvuru tahsilatı, kasa
+        //   kartı, avans) kasa işlemi buradan yazılıyor. İki ekranda ayrı
+        //   damga kodu, birinin unutulması demekti.
+        //
+        //   İstemci `oturumId` gönderdiyse dokunulmaz (düzeltme/aktarım);
+        //   yoksa kullanıcının açık oturumu yazılır.
+        if (!kolonlar.Contains("oturum_id"))
+        {
+            var oturumId = await TekDegerAsync<long?>(baglanti, tx,
+                "select public.fn_banko_acik_oturum(@p0)", [baglam.KullaniciId], iptal);
+            if (oturumId is { } oid)
+            {
+                kolonlar.Add("oturum_id");
+                parametreler.Add(oid);
+            }
+            else if (TahsilatMi(islem) && await TekDegerAsync<bool?>(baglanti, tx,
+                         "select public.fn_banko_oturum_gerekli(@p0)",
+                         [baglam.KullaniciId], iptal) == true)
+            {
+                // OTURUM ZORUNLU (ayar `banko.oturum_zorunlu`): banko
+                //   görevlisi vardiyasını açmadan tahsilat alamaz - aldığı
+                //   para hiçbir gün sonunda görünmezdi.
+                throw GentegreHatasi.IsKurali(
+                    "Tahsilat için açık banko oturumu gerekiyor. Kayıt Kabul > Bankolar'dan "
+                    + "\"Oturum Aç\" ile vardiyanızı başlatın.");
+            }
+        }
 
         var yer = Enumerable.Range(0, parametreler.Count).Select(i => "@p" + i);
         var sql = $"insert into public.kasa_islem ({string.Join(", ", kolonlar)}) " +

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { api } from '../../api/istemci';
 import type { BelgeYaniti } from '../../api/sozlesme';
@@ -11,6 +12,7 @@ import { TerminModali } from './TerminModali';
 import { KalemRolModali } from '../prim/KalemRolModali';
 import { IadeSatirPenceresi } from './IadeSatirPenceresi';
 import { BelgeTahsilatModallari } from './BelgeTahsilatModallari';
+import { PosSecModali } from '../banko/PosSecModali';
 import { HesapSecModali } from './HesapSecModali';
 import { IskontoTalepModali } from './IskontoTalepModali';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
@@ -185,6 +187,13 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     terminAcik, setTerminAcik, rolModali, setRolModali,
     istemModali, setIstemModali, onKaydedildi, git,
   } = p;
+
+  // POS SEÇİMİ ATLANDI: açık oturum ya da çalışan POS yoksa eski "POS hesabı"
+  //   seçimine düşülür (muhasebeden girilen bankosuz POS tahsilatı). Bayrak
+  //   seçim kapanınca sıfırlanıyor; yoksa bir sonraki tahsilatta POS listesi
+  //   hiç denenmezdi.
+  const [posAtlandi, setPosAtlandi] = useState(false);
+  useEffect(() => { if (!hesapSecim) setPosAtlandi(false) }, [hesapSecim]);
 
   return (
     <>
@@ -386,7 +395,41 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
 
       {/* HIZLI TAHSILAT hesap secimi (banka / POS): secilince kart acilmadan
           satir eklenir, tutar acik borcun tamami gelir. */}
-      {hesapSecim && (
+      {/* POS TAHSILATI: once ACIK OTURUMUN terminalleri (997). Oturum ya da
+          calisan POS yoksa eski POS HESABI secimine dusulur - muhasebeden
+          girilen bankosuz POS tahsilati icin. */}
+      {hesapSecim === 'P' && !posAtlandi && (
+        <PosSecModali
+          onOturumYok={() => setPosAtlandi(true)}
+          onKapat={() => { setHesapSecim(null); setHesapSecimIade?.(false);
+                           setHesapSecimPara?.(null) }}
+          onSec={p => void (async () => {
+            const t = alisMi ? 35 : 25;
+            const iadeMi = !!hesapSecimIade;
+            const secilen = hesapSecimPara ?? null;
+            setHesapSecim(null);
+            setHesapSecimIade?.(false);
+            setHesapSecimPara?.(null);
+            if (iadeMi) {
+              if (secilen) await iadeYaz?.(t, p.hesapId, p.terminalNo, secilen);
+              return;
+            }
+            const tutar = secilen ? secilen.tutar : await tahsilatTutariSor('POS');
+            if (!(tutar > 0)) return;
+            const ek = {
+              ...(secilen ? { dovizCinsi: secilen.doviz, dovizKuru: secilen.kur } : {}),
+              bankoPosId: p.id,
+            };
+            // Hesap, TERMINALIN kendi tahsilat hesabi: ayrica sormak ayni
+            //   bilgiyi iki kez istemekti.
+            if (hizliTahsilat) await hizliTahsilat(t, p.hesapId, tutar, p.terminalNo, ek);
+            else { await tahsilat.hizliTahsilat(t, p.hesapId, tutar, p.terminalNo, ek);
+                   await posSonrasi?.(t) }
+          })()}
+        />
+      )}
+
+      {hesapSecim && (hesapSecim === 'B' || posAtlandi) && (
         <HesapSecModali
           tur={hesapSecim}
           baslik={hesapSecim === 'B' ? 'Banka Hesabı Seç' : 'POS Hesabı Seç'}

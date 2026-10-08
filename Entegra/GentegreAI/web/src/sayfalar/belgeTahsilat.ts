@@ -30,6 +30,12 @@ export interface HizliTahsilatEki {
   aciklama?: string;
   /** Iade / para ustu: tutar EKSI beklenir ve dagitim yazilmaz. */
   eksiMi?: boolean;
+  /**
+   * POS TERMİNALİ (997): tahsilat hangi cihazdan geçti. Gün sonu eşleşmesi
+   * cihazın raporuyla bunu karşılaştırıyor; hesap üzerinden tahmin yetmiyordu
+   * (aynı hesaba bağlı iki POS'un toplamı ikisinde de görünüyordu).
+   */
+  bankoPosId?: number;
 }
 
 export interface TahsilatAcilisi {
@@ -131,6 +137,10 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
           //   nasil girildigini anlatiyordu, NE OLDUGUNU degil - ekstrede ve
           //   kasa listesinde okunan sey belgenin cinsi.
           aciklama: ek.aciklama ?? `${belgeAdi} Tahsilatı`,
+          // POS terminali (997); yoksa alan gönderilmez - sunucu oturumun
+          //   damgasını kendisi basıyor, terminal bilgisi yalnız POS
+          //   tahsilatında anlamlı.
+          ...(ek.bankoPosId ? { bankoPosId: ek.bankoPosId } : {}),
         },
         secenekler: { taslak: false, plan: false, kurKontrolu: true, belgeId: kayitliId },
       });

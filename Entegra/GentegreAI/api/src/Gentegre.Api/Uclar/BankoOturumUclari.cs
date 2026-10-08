@@ -96,6 +96,43 @@ public static class BankoOturumUclari
             return Results.Ok(new { bankolar = liste, vardiyalar });
         });
 
+        // --------------------------------------------- tahsilat POS secenekleri
+        // TAHSILAT EKRANI ICIN: aktif oturumun bankosundaki CALISAN POS'lar.
+        //   Kurumdaki butun terminaller degil (kullanici 08.10.2026:
+        //   "tahsilat yaparken kurumdaki tum pos listesi degil sadece o
+        //   bankoya bagli POS listesi gelmis olur") ve arizali olan da yok -
+        //   gorevli calismayan cihazi denemesin.
+        //
+        //   ACIK OTURUM YOKSA BOS DONER: POS secimi vardiyaya bagli; oturum
+        //   olmadan hangi bankonun cihazi oldugu bilinemez.
+        grup.MapGet("/pos-secenekleri", async (VeriKaynagi veri, BaglamCozucu cozucu,
+                                               HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var liste = await b.ListeAsync("""
+                select p.id, coalesce(h.ad, '') as hesap_adi, p.terminal_no,
+                       p.varsayilan, o.id as oturum_id, o.banko_id, bk.ad as banko_ad,
+                       coalesce(p.hesap_id, 0) as hesap_id
+                  from public.banko_oturum o
+                  join public.banko bk on bk.id = o.banko_id
+                  join public.banko_pos p on p.banko_id = o.banko_id and p.durum = 1
+                  left join public.hesap h on h.id = p.hesap_id
+                 where o.kullanici_id = @p0 and o.durum = 2
+                 order by p.varsayilan desc, p.terminal_no
+                """, null, [baglam.KullaniciId], r => new
+            {
+                id = r.GetInt32(0), hesapAdi = r.GetString(1), terminalNo = r.GetString(2),
+                varsayilan = r.GetInt16(3) == 1, oturumId = r.GetInt64(4),
+                bankoId = r.GetInt32(5), bankoAd = r.GetString(6),
+                // Terminalin TAHSILAT HESABI: islemin hesabi bu olur, ayrica
+                //   sormak ayni bilgiyi iki kez istemekti.
+                hesapId = r.GetInt32(7),
+            }, iptal);
+            return Results.Ok(liste);
+        });
+
         // ------------------------------------------------------ aktif oturum
         // Kullanıcının canlı oturumu (varsa): gün içi şeridin kaynağı.
         grup.MapGet("/aktif", async (VeriKaynagi veri, BaglamCozucu cozucu,

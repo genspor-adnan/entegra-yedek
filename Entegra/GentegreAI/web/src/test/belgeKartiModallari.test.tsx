@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import {
   BelgeKartiModallari, type BelgeKartiModalProps,
 } from '../bilesenler/belge/BelgeKartiModallari';
@@ -44,6 +44,10 @@ vi.mock('../bilesenler/belge/TerminModali', () => ({ TerminModali: taklit('termi
 vi.mock('../bilesenler/prim/KalemRolModali', () => ({ KalemRolModali: taklit('rol') }));
 vi.mock('../bilesenler/belge/IadeSatirPenceresi', () => ({ IadeSatirPenceresi: taklit('iade') }));
 vi.mock('../bilesenler/belge/HesapSecModali', () => ({ HesapSecModali: taklit('hesap') }));
+// POS SECIMI (997): acik oturumun terminalleri. Gercegi uc cagiriyor; burada
+//   yalniz "hangi pencere acildi" ve "oturum yoksa hesap secimine duser"
+//   onemli.
+vi.mock('../bilesenler/banko/PosSecModali', () => ({ PosSecModali: taklit('pos') }));
 vi.mock('../bilesenler/belge/BelgeTahsilatModallari',
         () => ({ BelgeTahsilatModallari: taklit('tahsilat') }));
 // HASTA KARTI (781): kart artik dogrudan GenForm ile aciliyor.
@@ -241,10 +245,28 @@ describe('kalem penceresi', () => {
 });
 
 describe('hizli tahsilat hesap secimi', () => {
-  it('banka ve POS ayni pencereyi FARKLI baslikla acar', () => {
+  it('banka hesap penceresini acar', () => {
     ciz({ hesapSecim: 'B' });
     expect(cizilen.hesap.baslik).toBe('Banka Hesabı Seç');
+  });
+
+  // POS TAHSILATINDA ONCE TERMINAL SECIMI (997): acik oturumun bankosundaki
+  //   calisan POS'lar listelenir. Oturum/POS yoksa ya da liste alinamazsa
+  //   eski "POS Hesabi Sec" akisina dusulur - test ortaminda uc mock'lu
+  //   olmadigi icin bu dalin kendisi dogrulaniyor.
+  // POS TAHSILATINDA ONCE TERMINAL SECIMI (997): acik oturumun bankosundaki
+  //   calisan POS'lar. Oturum/POS yoksa ya da liste alinamazsa eski "POS
+  //   Hesabi Sec" akisina dusulur - para akisi kilitlenmesin.
+  it('POS tahsilatinda once terminal penceresi acilir', () => {
     ciz({ hesapSecim: 'P' });
+    expect(cizilen.pos).toBeTruthy();
+    expect(cizilen.hesap).toBeUndefined();
+  });
+
+  it('oturum/POS yoksa POS hesabi secimine duser', async () => {
+    const a = ciz({ hesapSecim: 'P' });
+    await act(async () => { (cizilen.pos.onOturumYok as () => void)() });
+    expect(a.getByTestId('hesap')).toBeTruthy();
     expect(cizilen.hesap.baslik).toBe('POS Hesabı Seç');
   });
 
