@@ -22,7 +22,8 @@ export type OturumOzeti = {
   nakitTahsilat: number; nakitIade: number; posTutar: number; bankaTutar: number;
   islemAdet: number; beklenenNakit: number;
   kapanisSayim: number; kapanisBeklenen: number; kapanisFark: number;
-  farkNeden: number; farkAciklama: string;
+  farkNeden: number; farkAciklama: string; farkIslemId: number | null;
+  cekTutar: number;
   kasadaBirakilan: number; teslimEdilen: number; teslimAlanId: number | null;
   kapanisTalepTs: string | null; kapanisTs: string | null; kapanisOnayId: number | null;
   tutanakNo: string;
@@ -31,6 +32,19 @@ export type OturumOzeti = {
 };
 
 export type KupurSatiri = { birim: number; adet: number };
+
+/**
+ * Ödeme türü dökümü (989) — mockup tablosu: Tür / Adet / Tahsilat / İade /
+ * Net / Kasada durur? / Teslim-eşleşme.
+ *
+ * `kasaDurumu`: 1 kasada sayılır (nakit) · 2 kasaya girmez (POS, havale) ·
+ * 3 fiziken var ama sayıma girmez (çek/senet, portföye alınır) · 4 nakit
+ * akışı yok (kupon/indirim).
+ */
+export type TurOzeti = {
+  tur: number; turAdi: string; turGrup: string; hesapTuru: string;
+  kasaDurumu: number; adet: number; tahsilat: number; iade: number; net: number;
+};
 
 export type OnaySatiri = {
   id: number; tur: 'acilis' | 'kapanis'; bankoKod: string; bankoAd: string;
@@ -43,7 +57,24 @@ export type OnaySatiri = {
 };
 
 export type OturumYaniti = { oturum: OturumOzeti | null; mesaj?: string; tutanakNo?: string | null };
-export type OturumDetay = { oturum: OturumOzeti; kupurler: { asama: number; birim: number; adet: number }[] };
+/**
+ * POS gün sonu eşleşmesi (990). `eslesmeDurum`: 1 eşleşti · 2 fark var ·
+ * 3 cihaza ulaşılamadı. `cihazToplam` null ise henüz girilmemiş.
+ */
+export type PosEslesme = {
+  bankoPosId: number; bankaAdi: string; terminalNo: string; posDurum: number;
+  sistemToplam: number; cihazToplam: number | null; fark: number | null;
+  eslesmeDurum: number | null; eslesmeNot: string;
+};
+
+export type OturumDetay = {
+  oturum: OturumOzeti;
+  kupurler: { asama: number; birim: number; adet: number }[];
+  turler: TurOzeti[];
+  pos: PosEslesme[];
+  /** Terminale bağlanmamış POS tahsilatı (tahsilat ekranı POS'u yazmıyorsa). */
+  posAtanmamis: { toplam: number; adet: number } | null;
+};
 
 export type AcIstegi = {
   bankoId: number; vardiya?: string; acilisSayim?: number; not?: string;
@@ -81,6 +112,9 @@ export const bankoOturumUclari = {
     gonder<OturumYaniti>(`/api/banko-oturum/${id}/reddet`, { not }),
   bankoOturumGunSonu: (id: number, g: GunSonuIstegi) =>
     gonder<OturumYaniti>(`/api/banko-oturum/${id}/gun-sonu`, g),
+  bankoOturumPosEslestir: (id: number, satirlar: {
+    bankoPosId: number; cihazToplam?: number; ulasilamadiMi?: boolean; aciklama?: string;
+  }[]) => gonder<{ pos: PosEslesme[] }>(`/api/banko-oturum/${id}/pos-eslestir`, { satirlar }),
   bankoOturumYenidenAc: (id: number, not: string) =>
     gonder<OturumYaniti>(`/api/banko-oturum/${id}/yeniden-ac`, { not }),
 };

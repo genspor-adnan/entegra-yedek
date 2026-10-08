@@ -18,6 +18,7 @@ import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { OturumAcModali } from '../bilesenler/banko/OturumAcModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
   from '../bilesenler/radyoloji/RandevuBekleyenPanel';
@@ -303,6 +304,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     useState<{ id: number; unvan: string } | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
+  // BANKO OTURUMU listeden MODAL olarak açılır (kullanıcı: "bankolar a oturum
+  //   aç butonu ekle ve bu modal i açsın"): görevli bankosunu listede
+  //   bulduysa vardiyayı oradan başlatır.
+  const [oturumAcBanko, setOturumAcBanko] = useState<number | null>(null);
 
   // AI REHBER BAGLAMI (449): acik kart hangisi? Belge/basvuru karti MODAL
   //   aciliyor, rota degismiyor - panel kaydin id'sini baska turlu bilemez.
@@ -679,6 +684,19 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         git: yol => git(yol),
         belgeAc: belgeId => setAcikBelgeId(belgeId),
       })) return;
+
+      // BANKO (985/987): oturum akisi ayri bir ekran; liste yalniz secili
+      //   bankoyla oraya goturur. Kurallar (uygun banko, canli oturum,
+      //   devir) sunucuda - liste onlari tekrar yazmaz.
+      if (kod === 'banko.oturum-ac' || kod === 'banko.oturumlar') {
+        const bankoId = Number(satir?.id ?? 0);
+        if (!bankoId) { mesaj('Önce bir banko seçin.'); return }
+        // Açılış MODAL, gün içi/gün sonu TAM SAYFA: altı adımı modala
+        //   sıkıştırmak hepsini daraltırdı.
+        if (kod === 'banko.oturum-ac') setOturumAcBanko(bankoId);
+        else git(`/banko-oturumlar?banko=${bankoId}`);
+        return;
+      }
 
       if (await itsAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
@@ -1501,6 +1519,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {acikBelgeId !== null && (
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
+    )}
+    {oturumAcBanko !== null && (
+      <OturumAcModali bankoId={oturumAcBanko} onKapat={acildi => {
+        setOturumAcBanko(null);
+        // Oturum açıldıysa liste tazelenir: "açık oturum" sütunu değişti.
+        if (acildi) setYenile(t => t + 1);
+      }} />
     )}
 
     {/* HASTA KARTINDAN YENİ BAŞVURU (782, kullanıcı): hasta kartı KAPANIR,

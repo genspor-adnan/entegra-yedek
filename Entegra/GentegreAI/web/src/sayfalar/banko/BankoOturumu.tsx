@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
   FARK_NEDENLERI, KUPURLER,
-  type KupurSatiri, type OturumOzeti, type UygunBanko,
+  type KupurSatiri, type OturumOzeti, type PosEslesme, type TurOzeti,
+  type UygunBanko,
 } from '../../api/uclar/bankoOturum';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -50,6 +52,10 @@ const saat = (t: string | null) =>
 
 export function BankoOturumu() {
   const { yetki } = useOturum();
+  // Listeden "🔓 Oturum Aç" ile gelince banko seçili gelsin: görevli
+  //   bankosunu listede bulduysa burada yeniden aramasın.
+  const [arama] = useSearchParams();
+  const istenenBanko = Number(arama.get('banko') ?? 0);
   const [oturum, setOturum] = useState<OturumOzeti | null>(null);
   const [bankolar, setBankolar] = useState<UygunBanko[]>([]);
   const [hata, setHata] = useState<string | null>(null);
@@ -64,6 +70,10 @@ export function BankoOturumu() {
 
   // gün sonu formu
   const [gunSonu, setGunSonu] = useState(false);
+  const [turler, setTurler] = useState<TurOzeti[]>([]);
+  const [poslar, setPoslar] = useState<PosEslesme[]>([]);
+  const [posGiris, setPosGiris] = useState<Record<number, string>>({});
+  const [posAtanmamis, setPosAtanmamis] = useState<{ toplam: number; adet: number } | null>(null);
   const [kapanisKupur, setKapanisKupur] = useState<Record<number, string>>({});
   const [kapanisTutar, setKapanisTutar] = useState('');
   const [farkNeden, setFarkNeden] = useState(0);
@@ -77,13 +87,44 @@ export function BankoOturumu() {
       if (!y.oturum) {
         const b = await api.bankoOturumUygun();
         setBankolar(b);
-        setBankoId(p => (p && b.some(x => x.id === p) ? p : b[0]?.id ?? 0));
+        setBankoId(p => {
+          // Sıra: URL'den istenen > zaten seçili > listenin ilki.
+          if (istenenBanko && b.some(x => x.id === istenenBanko)) return istenenBanko;
+          return p && b.some(x => x.id === p) ? p : b[0]?.id ?? 0;
+        });
       }
       setHata(null);
     } catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
-  }, []);
+  }, [istenenBanko]);
 
   useEffect(() => { void yukle() }, [yukle]);
+
+  // ODEME TURU DOKUMU oturum acikken anlamli: gun ici her tahsilat satirini
+  //   tura gore toplar. Oturum yoksa cagrilmaz - bos tablo cizmek icin
+  //   istek atmak gereksiz.
+  useEffect(() => {
+    if (!oturum) { setTurler([]); return }
+    let iptal = false;
+    (async () => {
+      try {
+        const d = await api.bankoOturumGetir(oturum.id);
+        if (iptal) return;
+        setTurler(d.turler ?? []);
+        setPoslar(d.pos ?? []);
+        setPosAtanmamis(d.posAtanmamis ?? null);
+        // Girilmis cihaz toplamlari forma yazilir: gun sonu yarim kalip
+        //   tekrar acildiginda bastan girilmesin.
+        setPosGiris(o => {
+          const y = { ...o };
+          for (const p of d.pos ?? [])
+            if (p.cihazToplam != null && y[p.bankoPosId] === undefined)
+              y[p.bankoPosId] = String(p.cihazToplam);
+          return y;
+        });
+      } catch { /* dokum gosterilemezse akis durmaz */ }
+    })();
+    return () => { iptal = true };
+  }, [oturum?.id, oturum?.durum, gunSonu]);
   // ONAY BEKLERKEN KENDİLİĞİNDEN TAZELENİR: görevli ekranı yenilemek için
   //   beklemesin - onay gelince gün içi şeride kendisi geçer.
   useEffect(() => {
@@ -127,6 +168,23 @@ export function BankoOturumu() {
     setOturum(y.oturum); setGunSonu(false); if (y.mesaj) mesaj(y.mesaj);
   });
 
+  const posKaydet = () => guvenli(async () => {
+    if (!oturum) return;
+    const satirlar = poslar
+      .filter(p => (posGiris[p.bankoPosId] ?? '') !== '')
+      .map(p => ({
+        bankoPosId: p.bankoPosId,
+        cihazToplam: parseFloat((posGiris[p.bankoPosId] ?? '0').replace(',', '.')) || 0,
+      }));
+    if (satirlar.length === 0) { mesaj('Cihaz toplamı girilmedi.'); return }
+    const y = await api.bankoOturumPosEslestir(oturum.id, satirlar);
+    setPoslar(o => o.map(p => {
+      const g = y.pos.find(x => x.bankoPosId === p.bankoPosId);
+      return g ? { ...p, ...g } : p;
+    }));
+    mesaj('POS gün sonu kaydedildi.');
+  });
+
   const yenidenAc = () => guvenli(async () => {
     if (!oturum) return;
     if (!(await onay('Kapanmış oturum yeniden açılacak. Gerekçe loga yazılır.'))) return;
@@ -163,7 +221,19 @@ export function BankoOturumu() {
 
       {/* ---------------------------------------------------- 1 · AÇILIŞ --- */}
       {!oturum && (
-        bankolar.length === 0 ? (
+        istenenBanko > 0 && !bankolar.some(x => x.id === istenenBanko) ? (
+          <div className="bo-bos">
+            Seçtiğiniz bankoda oturum açılamıyor. Olası sebepler: bankoda zaten
+            <b> canlı bir oturum var</b>, banko <b>pasif</b>, <b>danışma</b> türünde
+            (kasası yok) ya da başka şubeye ait. Aşağıdan uygun bir banko
+            seçebilirsiniz.
+            {bankolar.length > 0 && (
+              <div className="bo-not" style={{ padding: '8px 0 0' }}>
+                Uygun bankolar: {bankolar.map(b => `${b.kod} ${b.ad}`).join(' · ')}
+              </div>
+            )}
+          </div>
+        ) : bankolar.length === 0 ? (
           <div className="bo-bos">
             Bu şubede oturum açılabilecek banko yok. Bankolar pasif olabilir, hepsinde
             açık oturum olabilir ya da yalnız danışma bankosu tanımlıdır (danışmada
@@ -296,6 +366,10 @@ export function BankoOturumu() {
       {oturum?.durum === 2 && gunSonu && (
         <div className="bo-kutu">
           <div className="bo-kb">Gün sonu — kasa sayımı</div>
+          <TurTablosu turler={turler} />
+          <PosPaneli poslar={poslar} giris={posGiris} setGiris={setPosGiris}
+                     kaydet={posKaydet} atanmamis={posAtanmamis} />
+
           <div className="bo-iki">
             <div>
               <div className="bo-kb2">Sistem — kasada olması gereken</div>
@@ -442,6 +516,141 @@ export function BankoOturumu() {
   );
 }
 
+/**
+ * POS GÜN SONU EŞLEŞMESİ (990) — mockup: "POS gün sonu 120,00 ₺ fark".
+ *
+ * POS tahsilatı kasaya nakit girmez; mutabakatı CİHAZIN gün sonu raporuyla
+ * yapılır. Görevli her terminal için cihazdan okuduğu toplamı girer, sistem
+ * kendi toplamını karşısına koyar.
+ *
+ * FARK GÜN SONUNU ENGELLEMEZ: POS farkı banka ekstresiyle kapanır (komisyon,
+ * taksit, gün kayması) - nakit sayım farkıyla aynı şey değil. Kayıt altına
+ * alınır ve kapanış onayında sorumlunun önüne düşer.
+ */
+function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis }: {
+  poslar: PosEslesme[];
+  giris: Record<number, string>;
+  setGiris: (f: (o: Record<number, string>) => Record<number, string>) => void;
+  kaydet: () => void;
+  atanmamis: { toplam: number; adet: number } | null;
+}) {
+  if (poslar.length === 0) return null;
+  return (
+    <>
+      <div className="bo-kb2 bo-ic">POS gün sonu eşleşmesi</div>
+      <table className="bo-tablo bo-pos">
+        <thead>
+          <tr><th>Terminal</th><th>Sistem</th><th>Cihaz gün sonu</th><th>Fark</th><th>Durum</th></tr>
+        </thead>
+        <tbody>
+          {poslar.map(p => {
+            const girilen = giris[p.bankoPosId] ?? '';
+            const cihaz = parseFloat(girilen.replace(',', '.'));
+            const fark = Number.isFinite(cihaz) ? cihaz - p.sistemToplam : null;
+            return (
+              <tr key={p.bankoPosId}>
+                <td>{p.bankaAdi} · {p.terminalNo}
+                  {p.posDurum !== 1 && <span className="bo-rz sari">cihaz arızalı</span>}</td>
+                <td>{para(p.sistemToplam)}</td>
+                <td><input value={girilen} inputMode="decimal" placeholder="0,00"
+                           onChange={e => setGiris(o => ({ ...o, [p.bankoPosId]: e.target.value }))} /></td>
+                <td className={fark ? 'bo-kir' : ''}>{fark == null ? '—' : para(fark)}</td>
+                <td>
+                  {p.eslesmeDurum === 1 ? <span className="bo-rz ok">eşleşti</span>
+                   : p.eslesmeDurum === 2 ? <span className="bo-rz kir">fark</span>
+                   : p.eslesmeDurum === 3 ? <span className="bo-rz sari">ulaşılamadı</span>
+                   : <span className="bo-rz">girilmedi</span>}
+                </td>
+              </tr>
+            );
+          })}
+          {atanmamis && atanmamis.adet > 0 && (
+            <tr className="bo-atan">
+              <td>Terminale bağlanmamış POS tahsilatı ({atanmamis.adet} işlem)</td>
+              <td>{para(atanmamis.toplam)}</td>
+              <td colSpan={3} className="bo-es">
+                Para kayıtta; hangi terminalden geçtiği yazılmamış - cihaz
+                toplamıyla karşılaştırırken bu tutarı da sayın.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      <div className="bo-dugmeler">
+        <button onClick={kaydet}>💳 POS Gün Sonunu Kaydet</button>
+        <span className="bo-not">
+          POS farkı gün sonunu engellemez; banka ekstresiyle kapanır (komisyon,
+          taksit, gün kayması). Nakit sayım farkıyla aynı şey değildir.
+        </span>
+      </div>
+    </>
+  );
+}
+
+/**
+ * ÖDEME TÜRÜ DÖKÜMÜ (989) — mockup tablosu: Tür / Adet / Tahsilat / İade /
+ * Net / Kasada durur? / Teslim-eşleşme.
+ *
+ * "Kasada durur mu" türün kendi özelliğinden gelir: nakit sayılır, POS ve
+ * havale kasaya para olarak girmez, çek fiziken kasada ama SAYIMA GİRMEZ
+ * (portföye alınır), kupon/indirimde nakit akışı yok. Gün sonunda kasiyer ile
+ * sorumlu bu tabloya bakarak mutabık kalır.
+ */
+function TurTablosu({ turler }: { turler: TurOzeti[] }) {
+  if (turler.length === 0)
+    return (
+      <div className="bo-not">
+        Bu oturumda henüz tahsilat yok - ödeme türü dökümü boş.
+      </div>
+    );
+  const t = (n: number) => turler.reduce((a, x) => a + (n === 1 ? x.tahsilat : n === 2 ? x.iade : x.net), 0);
+  const adet = turler.reduce((a, x) => a + x.adet, 0);
+  return (
+    <>
+      <div className="bo-kb2 bo-ic">Ödeme türü dökümü</div>
+      <table className="bo-tablo bo-tur">
+        <thead>
+          <tr>
+            <th>Tür</th><th>Adet</th><th>Tahsilat</th><th>İade</th><th>Net</th>
+            <th>Kasada durur?</th><th>Teslim / eşleşme</th>
+          </tr>
+        </thead>
+        <tbody>
+          {turler.map(x => (
+            <tr key={x.tur}>
+              <td>{x.turAdi}</td>
+              <td>{x.adet}</td>
+              <td>{para(x.tahsilat)}</td>
+              <td>{x.iade ? '−' + para(x.iade) : '—'}</td>
+              <td>{para(x.net)}</td>
+              <td className={'bo-kd' + (x.kasaDurumu === 1 ? ' var' : '')}>{KASA_DURUM[x.kasaDurumu] ?? ''}</td>
+              <td className="bo-es">{ESLESME[x.kasaDurumu] ?? ''}</td>
+            </tr>
+          ))}
+          <tr className="top">
+            <td>TOPLAM</td><td>{adet}</td><td>{para(t(1))}</td>
+            <td>{t(2) ? '−' + para(t(2)) : '—'}</td><td>{para(t(3))}</td>
+            <td /><td />
+          </tr>
+        </tbody>
+      </table>
+    </>
+  );
+}
+
+const KASA_DURUM: Record<number, string> = {
+  1: 'Evet · sayılır',
+  2: 'Hayır',
+  3: 'Fiziken evet · sayıma girmez',
+  4: 'Hayır',
+};
+const ESLESME: Record<number, string> = {
+  1: 'Sayım bekliyor',
+  2: 'Banka ekstresinde bekliyor',
+  3: 'Portföye alındı · çek teslim listesi',
+  4: 'nakit akışı yok',
+};
+
 /** Kupür dökümü: adet girilir, tutar ve toplam kendiliğinden hesaplanır. */
 function KupurTablosu({ deger, degistir, toplam }: {
   deger: Record<number, string>;
@@ -533,6 +742,21 @@ const bostil = `
 .bo-tablo td:last-child, .bo-tablo th:last-child { text-align:right; font-family:Consolas, monospace; }
 .bo-tablo tr.top td { font-weight:bold; background:#f7f9fc; }
 .bo-tablo tr.sonuk td { color: var(--ikincil-metin, #6b7a8b); }
+.bo-pos { margin: 0 11px 0; width: calc(100% - 22px); }
+.bo-pos td:nth-child(2), .bo-pos td:nth-child(4) { text-align:right; font-family:Consolas,monospace; }
+.bo-pos tr.bo-atan td { background:#fdf6e3; color:#7a5612; }
+.bo-pos input { width:110px; border:1px solid var(--cizgi, #cdd6e0); border-radius:3px;
+  padding:3px 6px; text-align:right; font-family:Consolas,monospace;
+  background:var(--giris-arka, #fff); color: var(--metin, #1f2d3a); }
+.bo-rz.kir { background:#fbe9e7; color:#b3261e; border-color:#f3c4bf; }
+.bo-tur { margin: 0 11px 10px; width: calc(100% - 22px); }
+.bo-tur td:nth-child(2) { text-align:center; font-family:Consolas,monospace; }
+.bo-tur td:nth-child(3), .bo-tur td:nth-child(4), .bo-tur td:nth-child(5) {
+  text-align:right; font-family:Consolas,monospace; }
+.bo-tur td:last-child, .bo-tur th:last-child { text-align:left; font-family:inherit; }
+.bo-kd { font-size:11px; color: var(--ikincil-metin, #6b7a8b); }
+.bo-kd.var { color:#2e7d46; font-weight:bold; }
+.bo-es { font-size:11px; color: var(--ikincil-metin, #6b7a8b); }
 .bo-kupur input { width:70px; border:1px solid var(--cizgi, #cdd6e0); border-radius:3px;
   padding:3px 6px; text-align:right; font-family:Consolas, monospace;
   background:var(--giris-arka, #fff); color: var(--metin, #1f2d3a); }

@@ -769,7 +769,18 @@ public static partial class AksiyonKatalogu
         //   simdilik kullanilmayan banko PASIFE alinir (listedeki
         //   varsayilan suzgec aktifleri gosterir).
         s["banko-liste"] = [.. Crud("banko", "banko", "banko",
-            silIpucu: "Kullanımdan çıkarmak için Aktif alanını kapatmak yeterli")];
+            silIpucu: "Kullanımdan çıkarmak için Aktif alanını kapatmak yeterli"),
+            // OTURUM LISTEDEN DE ACILIR (kullanici 08.10.2026: "bankolar a
+            //   oturum ac butonu ekle"): gorevli sabah bankosunu listede
+            //   buluyor; oradan akis ekranini acmak, menuden ikinci ekrana
+            //   gidip bankoyu yeniden secmekten kisa.
+            new("banko.oturum-ac", "🔓 Oturum Aç", "banko",
+                Hedef: "araccubugu,sagtus,palet", KaynakKodu: "banko_oturum",
+                Islem: Islem.Ekle, KayitGerekir: true, Sira: 15,
+                Ipucu: "Seçili bankoda vardiya açar - devir sayımıyla"),
+            new("banko.oturumlar", "📋 Oturumları", "banko",
+                Hedef: "sagtus,palet", KaynakKodu: "banko_oturum",
+                Islem: Islem.Gor, KayitGerekir: true, Sira: 16)];
 
         // OTURUM GECMISI SALT OKUMA (987): oturum karttan acilmaz/kapanmaz,
         //   akis ekraninin (banko-oturum) isi. Kapanan oturum duzeltilmez;

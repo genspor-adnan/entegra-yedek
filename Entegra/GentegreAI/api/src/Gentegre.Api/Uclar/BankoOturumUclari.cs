@@ -103,7 +103,56 @@ public static class BankoOturumUclari
                  where oturum_id = @p0 order by asama, birim desc
                 """, null, [id],
                 r => new { asama = r.GetInt16(0), birim = r.GetDecimal(1), adet = r.GetInt32(2) }, iptal);
-            return Results.Ok(new { oturum = o, kupurler = kupur });
+            // ODEME TURU DOKUMU (989): gun sonunda kasiyer ile sorumlu bu
+            //   tabloya bakarak mutabik kalir - tek "nakit/POS" toplami
+            //   "hangi turden ne kadar girdi" sorusunu yanitlamiyor.
+            var turler = await b.ListeAsync("""
+                select tur, tur_adi, tur_grup, hesap_turu, kasa_durumu,
+                       adet, tahsilat, iade, net
+                  from public.v_banko_oturum_tur_ozeti
+                 where oturum_id = @p0
+                 order by kasa_durumu, tur
+                """, null, [id], r => new
+            {
+                tur = r.GetInt16(0), turAdi = r.GetString(1), turGrup = r.GetString(2),
+                hesapTuru = r.GetString(3), kasaDurumu = r.GetInt32(4),
+                adet = r.GetInt64(5), tahsilat = r.GetDecimal(6),
+                iade = r.GetDecimal(7), net = r.GetDecimal(8),
+            }, iptal);
+            // POS GUN SONU ESLESMESI (990): her cihazin kendi toplami ayri
+            //   anlam tasiyor - "hangi terminalde fark var" sorusu tek POS
+            //   toplamiyla yanitlanamaz.
+            var posListe = await b.ListeAsync("""
+                select banko_pos_id, banka_adi, terminal_no, pos_durum,
+                       sistem_toplam, cihaz_toplam, fark, eslesme_durum, eslesme_not
+                  from public.v_banko_oturum_pos
+                 where oturum_id = @p0
+                 order by terminal_no
+                """, null, [id], r => new
+            {
+                bankoPosId = r.GetInt32(0), bankaAdi = r.GetString(1),
+                terminalNo = r.GetString(2), posDurum = r.GetInt16(3),
+                sistemToplam = r.GetDecimal(4),
+                cihazToplam = r.IsDBNull(5) ? (decimal?)null : r.GetDecimal(5),
+                fark = r.IsDBNull(6) ? (decimal?)null : r.GetDecimal(6),
+                eslesmeDurum = r.IsDBNull(7) ? (short?)null : r.GetInt16(7),
+                eslesmeNot = r.IsDBNull(8) ? "" : r.GetString(8),
+            }, iptal);
+            // TERMINALE BAGLANMAMIS POS TAHSILATI: sessizce 0 gostermek,
+            //   gorevliyi "cihazda para var sistemde yok" yanilgisina
+            //   surukler - para kayitta, yalniz hangi terminalden gectigi
+            //   yazilmamistir (tahsilat ekrani POS'u yazmaya baslayana kadar
+            //   tum POS tahsilati burada toplanir).
+            var atanmamis = await b.TekAsync("""
+                select toplam, adet from public.v_banko_oturum_pos_atanmamis
+                 where oturum_id = @p0
+                """, null, [id],
+                r => new { toplam = r.GetDecimal(0), adet = r.GetInt64(1) }, iptal);
+            return Results.Ok(new
+            {
+                oturum = o, kupurler = kupur, turler, pos = posListe,
+                posAtanmamis = atanmamis,
+            });
         });
 
         // ------------------------------------------------------------- açılış
@@ -412,6 +461,64 @@ public static class BankoOturumUclari
             });
         });
 
+        // --------------------------------------------- POS gun sonu eslesmesi
+        // Gorevli her cihazin gun sonu raporundaki toplami girer; sistem
+        //   kendi toplamini dondurur ve farki yazar. FARK GUN SONUNU
+        //   ENGELLEMEZ: POS farki banka ekstresiyle kapanir (komisyon,
+        //   taksit, gun kaymasi) - nakit sayim farkiyla ayni sey degil.
+        grup.MapPost("/{id:long}/pos-eslestir", async (long id, PosEslesmeIstegi istek,
+            VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("banko_oturum", Islem.Degistir);
+            await using var b = await veri.AcAsync(iptal);
+            var o = await DurumAsync(b, id, baglam.SubeId ?? 0, iptal);
+            if (o.Durum != Acik && o.Durum != TeslimBekler)
+                throw GentegreHatasi.IsKurali("Yalnız açık ya da teslimde olan oturumda POS eşleştirilir.");
+
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            foreach (var satir in istek.Satirlar ?? [])
+            {
+                if (satir.BankoPosId is not > 0) continue;
+                // SISTEM TOPLAMI YAZILDIGI AN DONDURULUR: sonraki duzeltme
+                //   fisleri gecmis mutabakati oynatmasin.
+                var sistem = await b.TekDegerAsync<decimal?>("""
+                    select sistem_toplam from public.v_banko_oturum_pos
+                     where oturum_id = @p0 and banko_pos_id = @p1
+                    """, islem, [id, satir.BankoPosId], iptal) ?? 0m;
+                var cihaz = Math.Round(satir.CihazToplam ?? 0m, 2);
+                var fark = Math.Round(cihaz - sistem, 2);
+                var durum = (short)(satir.UlasilamadiMi == true ? 3 : fark == 0 ? 1 : 2);
+                await b.CalistirAsync("""
+                    insert into public.banko_oturum_pos
+                           (oturum_id, banko_pos_id, cihaz_toplam, sistem_toplam, fark,
+                            durum, aciklama, ekleyen)
+                    values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+                    on conflict (oturum_id, banko_pos_id) do update
+                       set cihaz_toplam = @p2, sistem_toplam = @p3, fark = @p4,
+                           durum = @p5, aciklama = @p6
+                    """, islem,
+                    [id, satir.BankoPosId, cihaz, sistem, fark, durum,
+                     Kirp(satir.Aciklama, 300), baglam.KullaniciId], iptal);
+            }
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogTablo, (int)id, baglam.KullaniciId,
+                baglam.SubeId, baglam.Ip, new { posEslesme = (istek.Satirlar ?? []).Count }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+
+            var liste = await b.ListeAsync("""
+                select banko_pos_id, sistem_toplam, cihaz_toplam, fark, eslesme_durum
+                  from public.v_banko_oturum_pos where oturum_id = @p0 order by terminal_no
+                """, null, [id], r => new
+            {
+                bankoPosId = r.GetInt32(0), sistemToplam = r.GetDecimal(1),
+                cihazToplam = r.IsDBNull(2) ? (decimal?)null : r.GetDecimal(2),
+                fark = r.IsDBNull(3) ? (decimal?)null : r.GetDecimal(3),
+                eslesmeDurum = r.IsDBNull(4) ? (short?)null : r.GetInt16(4),
+            }, iptal);
+            return Results.Ok(new { pos = liste });
+        });
+
         // ------------------------------------------------------- yeniden aç
         // AYRI YETKİ: kapanan oturum normalde düzeltilmez, hatalı tahsilat
         //   iade/düzeltme fişiyle çözülür. Yine de yanlış kapatılan oturum
@@ -611,6 +718,9 @@ public static class BankoOturumUclari
         string Gorevli);
 
     public sealed record KupurSatiri(decimal? Birim, int? Adet);
+    public sealed record PosEslesmeSatiri(int? BankoPosId, decimal? CihazToplam,
+                                          bool? UlasilamadiMi, string? Aciklama);
+    public sealed record PosEslesmeIstegi(List<PosEslesmeSatiri>? Satirlar);
     public sealed record AcIstegi(int? BankoId, string? Vardiya, decimal? AcilisSayim, string? Not,
                                   List<KupurSatiri>? Kupurler);
     public sealed record OnayIstegi(string? Not);
