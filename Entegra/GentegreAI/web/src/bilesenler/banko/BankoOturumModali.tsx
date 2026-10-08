@@ -18,8 +18,11 @@ import { BankoOturumu } from '../../sayfalar/banko/BankoOturumu';
  * Geniş ve kendi kaydırmasıyla: gün sonu panelinde dört tablo var, dar bir
  * modal hepsini daraltırdı.
  */
-export function BankoOturumModali({ bankoId, onKapat }: {
-  bankoId: number;
+export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
+  /** Bankolar listesinden seçilen banko; 0 ise modal uygun bankoları seçtirir. */
+  bankoId?: number;
+  /** Oturum geçmişinden "Düzenle" ile gelen oturum. */
+  oturumId?: number;
   onKapat(): void;
 }) {
   // ESC ile kapanır: modal bir pencere gibi davranmalı.
@@ -34,11 +37,11 @@ export function BankoOturumModali({ bankoId, onKapat }: {
       <div className="bom" onClick={e => e.stopPropagation()}>
         <style>{stil}</style>
         <div className="bom-bas">
-          🏦 Banko Oturumu
+          {oturumId ? `🏦 Banko Oturumu #${oturumId}` : '🏦 Banko Oturumu'}
           <button type="button" className="bom-kapat" onClick={onKapat} title="Kapat (Esc)">✖</button>
         </div>
         <div className="bom-govde">
-          <BankoOturumu gomulu acilisBanko={bankoId} onKapat={onKapat} />
+          <BankoOturumu gomulu acilisBanko={bankoId} oturumId={oturumId} onKapat={onKapat} />
         </div>
       </div>
     </div>

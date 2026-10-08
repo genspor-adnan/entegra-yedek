@@ -51,11 +51,17 @@ const para = (n: number) =>
 const saat = (t: string | null) =>
   t ? new Date(t).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
-export function BankoOturumu({ gomulu, acilisBanko, onKapat }: {
+export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   /** Modal içinde çizilir: kendi sayfa kabuğunu ve başlığını kurmaz. */
   gomulu?: boolean;
   /** Bankolar listesinden seçilen banko (modal kullanımı). */
   acilisBanko?: number;
+  /**
+   * BELİRLİ BİR OTURUM (oturum geçmişinden "Düzenle"): verilmezse kullanıcının
+   * kendi canlı oturumu açılır. Kapanmış oturum da açılabilir - akış salt
+   * okuma durur, tutanak oradan basılır.
+   */
+  oturumId?: number;
   onKapat?: () => void;
 } = {}) {
   const { yetki } = useOturum();
@@ -91,7 +97,10 @@ export function BankoOturumu({ gomulu, acilisBanko, onKapat }: {
 
   const yukle = useCallback(async () => {
     try {
-      const y = await api.bankoOturumAktif();
+      // Belirli oturum istendiyse onu getir; yoksa kullanıcının canlı oturumu.
+      const y = oturumId
+        ? { oturum: (await api.bankoOturumGetir(oturumId)).oturum }
+        : await api.bankoOturumAktif();
       setOturum(y.oturum);
       if (!y.oturum) {
         const b = await api.bankoOturumUygun();
@@ -104,7 +113,7 @@ export function BankoOturumu({ gomulu, acilisBanko, onKapat }: {
       }
       setHata(null);
     } catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
-  }, [istenenBanko]);
+  }, [istenenBanko, oturumId]);
 
   useEffect(() => { void yukle() }, [yukle]);
 
@@ -234,6 +243,14 @@ export function BankoOturumu({ gomulu, acilisBanko, onKapat }: {
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
+
+      {gomulu && acilisBanko === 0 && !oturumId && oturum && (
+        <div className="bo-uyari">
+          ⚠ <b>Yeni oturum açılamaz:</b> açık bir oturumunuz var (aşağıda). Bir
+          görevli aynı anda tek oturum yürütür - bunu gün sonuyla kapatınca
+          yenisini açabilirsiniz.
+        </div>
+      )}
 
       {/* ---------------------------------------------------- 1 · AÇILIŞ --- */}
       {!oturum && (

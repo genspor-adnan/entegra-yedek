@@ -20602,3 +20602,30 @@ Doğrulama: POS gridi API'den okundu (10 alan, banka yok), hesap listesi 13 POS
 hesabı gösterdi; silme engeli kendi test bankosuyla denendi - oturumsuzken 204,
 kapanmış oturum eklenince 422 ("Bu bankoda oturum kaydı var"). vitest 789,
 dotnet test 218.
+
+### 08.10.2026 — Banko Oturumları listesine "Yeni Oturum Aç" ve "Düzenle"
+
+Kullanıcı: *"Banko Oturumları na '+ Yeni Oturum Aç' ve Düzenle butonu ekle,
+yeni oturum basılınca modalde kapalı olan bankolar listesi gelsin, seçilen ile
+açılsın"*.
+
+* **"＋ Yeni Oturum Aç" kayıt seçimi istemez**: modal uygun - yani **oturumu
+  kapalı** - bankoları listeler ve seçilenle açar. Görevli önce bir geçmiş
+  satırı seçmek zorunda kalmasın; zaten yeni oturumun geçmişte karşılığı yok.
+  Liste `uygun-bankolar` ucundan geliyor: aktif, kasalı, canlı oturumu olmayan
+  ve bu şubeye ait bankolar.
+* **"✎ Düzenle" seçili oturumu açar** (`BankoOturumu` yeni `oturumId` prop'u).
+  Kapanmış oturumda da çalışıyor ama akış salt okuma duruyor - kapanan oturum
+  düzeltilmez, tutanak oradan basılır. Başka görevlinin oturumu da
+  görüntülenebiliyor; gün sonu yalnız kendi oturumunda ya da onay yetkisiyle
+  yapılabiliyor (sunucu kuralı 987).
+* İkisi de **aynı modal**: akış tek yerde, ikinci bir kopya yok.
+* **"Yeni" basıldığında açık oturum varsa** modal onu gösteriyor ve üstte neden
+  yeni açılamadığını yazıyor ("Bir görevli aynı anda tek oturum yürütür").
+  Sessizce mevcut oturumu açmak, görevliyi "yeni istedim, eski geldi" diye
+  şaşırtırdı.
+
+Doğrulama: açık oturumu olmayan kullanıcıyla modal açılış formunda geldi ve
+seçenek olarak yalnız B-02 çıktı (B-01'de canlı oturum var, listede yok);
+"Düzenle" oturum #5'i doğru adımda (4 · Gün içi işlem) açtı; açık oturumu olan
+kullanıcıda uyarı göründü. vitest 789, dotnet test 218.

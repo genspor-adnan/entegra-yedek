@@ -786,7 +786,24 @@ public static partial class AksiyonKatalogu
         //   akis ekraninin (banko-oturum) isi. Kapanan oturum duzeltilmez;
         //   hatali tahsilat iade/duzeltme fisiyle cozulur - bu yuzden
         //   listede yeni/duzenle/sil yok, yalniz yazdirma var.
+        // OTURUM GECMISI: liste okunur ama oturum BURADAN da acilip
+        //   surdurulebilir (kullanici 08.10.2026: "Banko Oturumlari na +
+        //   Yeni Oturum Ac ve Duzenle butonu ekle").
+        //
+        //   "Yeni" KAYIT SECIMI ISTEMEZ: modal uygun (oturumu kapali)
+        //   bankolari listeler ve secilenle acar - gorevli once bir gecmis
+        //   satiri secmek zorunda kalmasin.
+        //
+        //   "Duzenle" kapanmis oturumda da calisir ama akis salt okuma
+        //   durur: kapanan oturum duzeltilmez, tutanak oradan basilir.
         s["banko-oturum-liste"] = [
+            new("banko-oturum.yeni", "＋ Yeni Oturum Aç", "banko_oturum",
+                Kisayol: "Ctrl+N", Hedef: "araccubugu,palet",
+                KaynakKodu: "banko_oturum", Islem: Islem.Ekle, Sira: 5,
+                Ipucu: "Oturumu kapalı bankolar arasından seçerek vardiya açar"),
+            new("banko-oturum.duzenle", "✎ Düzenle", "banko_oturum",
+                Kisayol: "Enter", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "banko_oturum", Islem: Islem.Gor, KayitGerekir: true, Sira: 8),
             // TUTANAK LISTEDEN DE: kapanmis bir oturumun belgesi sonradan
             //   istenebilir (denetim, mutabakat) - akis ekranina donmek
             //   yerine gecmisten dogrudan acilir.

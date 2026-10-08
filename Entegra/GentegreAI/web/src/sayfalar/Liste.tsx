@@ -308,6 +308,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   seçilerek Oturum Aç butonuyla girilsin"): açılış, gün içi ve gün sonu
   //   AYNI modalda - görevliyi iki ayrı yere göndermemek için.
   const [oturumAcBanko, setOturumAcBanko] = useState<number | null>(null);
+  // Oturum gecmisinden "Duzenle": belirli oturumu ayni modalda acar.
+  const [acikOturumId, setAcikOturumId] = useState<number | null>(null);
 
   // AI REHBER BAGLAMI (449): acik kart hangisi? Belge/basvuru karti MODAL
   //   aciliyor, rota degismiyor - panel kaydin id'sini baska turlu bilemez.
@@ -693,6 +695,15 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         if (!bankoId) { mesaj('Önce bir banko seçin.'); return }
         if (kod === 'banko.oturum-ac') setOturumAcBanko(bankoId);
         else git(`/banko-oturumlar?banko=${bankoId}`);
+        return;
+      }
+      // OTURUM GECMISINDEN: yeni oturum (banko secimi modalda) ya da secili
+      //   oturumu ac. Ikisi de ayni modal - akis tek yerde.
+      if (kod === 'banko-oturum.yeni') { setOturumAcBanko(0); return }
+      if (kod === 'banko-oturum.duzenle') {
+        const oturum = Number(satir?.id ?? 0);
+        if (!oturum) { mesaj('Önce bir oturum seçin.'); return }
+        setAcikOturumId(oturum);
         return;
       }
       if (kod === 'banko-oturum.tutanak') {
@@ -1523,6 +1534,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {acikBelgeId !== null && (
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
+    )}
+    {acikOturumId !== null && (
+      <BankoOturumModali oturumId={acikOturumId} onKapat={() => {
+        setAcikOturumId(null);
+        setYenile(t => t + 1);
+      }} />
     )}
     {oturumAcBanko !== null && (
       <BankoOturumModali bankoId={oturumAcBanko} onKapat={() => {
