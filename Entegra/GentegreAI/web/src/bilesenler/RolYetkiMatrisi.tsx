@@ -325,11 +325,24 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
     [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen,
      kullanici?.menuBolgeli]);
 
+  /**
+   * AĞACIN YAPI İMZASI: düğüm anahtarlarının birleşimi. Yetki kutusu
+   * değişince `satirlar` yenilenir ve `agac` memo'su YENİ NESNE döner - ama
+   * yapı aynıdır. Kapalılık durumunu `agac` nesnesine bağlamak, her "Gör"
+   * tıklamasında ağacı çöktürüyordu (kullanıcı 09.10.2026: "yetki matrisinde
+   * gör sütununu değiştirince satır kapanıyor, üst kısım açılıyor").
+   *
+   * İmza yalnız ürün modu / modüller / menü düzeni değişince değişir; o
+   * zaman ağaç gerçekten başka bir ağaçtır ve yeniden kapanması doğrudur.
+   */
+  const agacImzasi = useMemo(
+    () => agac.flatMap(k => tumAnahtarlar(k)).join('|'), [agac]);
+
   // Ilk yuklemede TUM dallar kapali (kullanici) - 900 satirlik agac acik
   //   gelirse ekran okunmuyordu.
   useEffect(() => {
-    if (agac.length > 0) setKapali(new Set(agac.flatMap(k => tumAnahtarlar(k))));
-  }, [agac]);
+    if (agacImzasi) setKapali(new Set(agacImzasi.split('|')));
+  }, [agacImzasi]);
 
   /** Arama: eşleşen yaprakların id kümesi (atalar açık çizilir). */
   const suzgec = useMemo(() => {
@@ -435,12 +448,27 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
       const hedef = d.satir && !cocukVar ? [d.satir] : altSatirlar;
       // Aksiyon yetkisinde yalniz izin (gor) anlamli.
       const uygun = hedef.filter(x => x.tur !== 1 || s === 'gor');
-      if (uygun.length === 0) return <span style={{ opacity: .3 }}>–</span>;
+      // TIRE 1 - SÜTUN GEÇERSİZ: aksiyon yetkisinde (tür 1) yalnız "Gör"
+      //   anlamlı; Ekle/Değiştir/Sil orada hiç yok. Boş kutu çizmek "kapalı"
+      //   sanılırdı, tire "burada böyle bir şey yok" diyor.
+      if (uygun.length === 0)
+        return <span style={{ opacity: .3 }}
+                     title="Bu sütun bu yetki için geçerli değil (aksiyon yetkisinde yalnız Gör)">–</span>;
       const acikSayi = uygun.filter(x => x[s]).length;
       const hepsi = acikSayi === uygun.length;
+      // TIRE 2 - KISMİ SEÇİM: grup satırında bazı alt yetkiler açık, bazıları
+      //   kapalı. Tarayıcı `indeterminate` kutuyu tire ile çiziyor; başlık
+      //   kaç tanesinin açık olduğunu söylüyor - tire tek başına "açık mı
+      //   kapalı mı" sorusunu yanıtlamıyordu.
+      const kismi = acikSayi > 0 && !hepsi;
       return (
         <input type="checkbox" checked={hepsi} disabled={saltOkunur}
-               ref={el => { if (el) el.indeterminate = acikSayi > 0 && !hepsi }}
+               ref={el => { if (el) el.indeterminate = kismi }}
+               title={d.satir
+                 ? undefined
+                 : kismi ? `Kısmi: ${acikSayi} / ${uygun.length} alt yetki açık`
+                 : hepsi ? `Tümü açık (${uygun.length})`
+                 : `Tümü kapalı (${uygun.length})`}
                onChange={e => degistir(new Set(uygun.map(x => x.yetkiId)), s,
                                        e.target.checked)} />
       );
@@ -451,11 +479,13 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
         <td style={{ paddingLeft: 6 + derinlik * 18 }}>
           {cocukVar ? (
             <button type="button" onClick={() => ac(d.anahtar)}
+                    title={acik ? 'Daralt' : 'Genişlet'}
                     style={{ border: 0, background: 'transparent', cursor: 'pointer',
-                             padding: '0 4px 0 0', fontSize: 11 }}>
+                             padding: '0 5px 0 0', fontSize: 16, lineHeight: 1,
+                             color: 'var(--yazi2, #4d5d6e)' }}>
               {acik ? '▾' : '▸'}
             </button>
-          ) : <span style={{ display: 'inline-block', width: 15 }} />}
+          ) : <span style={{ display: 'inline-block', width: 21 }} />}
           {d.ic ? `${d.ic} ` : ''}
           <span style={{ fontWeight: d.satir ? 400 : 600 }} title={d.ipucu}>{d.ad}</span>
           {aksiyon && <span className="rozet gri" style={{ marginLeft: 6 }}>aksiyon</span>}

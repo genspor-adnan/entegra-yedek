@@ -20811,3 +20811,42 @@ düşürürdü.
 Doğrulama: beş alanın her biri ayrı ayrı 200 döndü; "Hekim" aramasında rol ve
 bölümden 20 kayıt bulundu, kimlik no (42714345954) ve telefon (5009989483)
 aramaları doğru personeli getirdi. vitest 791, dotnet test 218.
+
+### 09.10.2026 — Yetki matrisi: ağaç çökmesi düzeltildi, ok büyütüldü, tire açıklandı; rol kartı sadeleşti
+
+Kullanıcı: *"yetki matrisinde gör sütununu değiştirince satır kapanıyor, üst
+kısım açılıyor"*, *"satır başlarındaki ok ikonu daha büyük yap"*, *"görme
+sütununda check var bir de − var, − ne demek?"*, *"rol kartında kullanıcının
+tel ve eposta sütunlarını kaldır"*.
+
+**Ağaç çökmesi (hata).** "İlk yüklemede tüm dallar kapalı" efekti `agac`
+**nesnesine** bağlıydı. Yetki kutusu değişince `satirlar` yenileniyor, memo
+yeni nesne döndürüyor ve efekt yeniden çalışıp elle açılmış dalı
+çöktürüyordu - kullanıcı her tıklamada ağacın tepesine dönüyordu. Düzeltme:
+efekt artık ağacın **yapı imzasına** bağlı (düğüm anahtarlarının birleşimi);
+imza yalnız ürün modu / modüller / menü düzeni değişince değişiyor, o zaman
+ağaç gerçekten başka bir ağaç olduğu için yeniden kapanması doğru.
+
+Regresyon testi eklendi (`rolYetkiMatrisiAgac.test.tsx`): gerçek bileşen
+çiziliyor, yalnız API ve oturum taklit ediliyor - hata ağaç kurulumu ile efekt
+arasındaki bağda olduğu için oraya dokunan bir taklit testi değersiz kılardı.
+
+**Tire'nin iki anlamı vardı, ikisi de açıklamasızdı:**
+* *Sütun geçersiz* - aksiyon yetkisinde (tür 1) yalnız "Gör" anlamlı;
+  Ekle/Değiştir/Sil orada hiç yok. Boş kutu çizmek "kapalı" sanılırdı.
+* *Kısmi seçim* - grup satırında bazı alt yetkiler açık (tarayıcı
+  `indeterminate` kutuyu tire ile çiziyor).
+
+İkisine de başlık (tooltip) eklendi; kısmi durumda kaç tanesinin açık olduğu
+yazıyor ("Kısmi: 3 / 8 alt yetki açık"). Tire tek başına "açık mı kapalı mı"
+sorusunu yanıtlamıyordu.
+
+**Ok ikonu** 11 px → 16 px, tıklama hedefi genişledi, başlık olarak
+"Genişlet / Daralt" eklendi.
+
+**Rol kartında telefon ve e-posta kolonları kalktı**: rol kartının sorusu "bu
+rolde kim var" - iletişim bilgisi kişinin kendi kartında ve satıra çift tıkla
+oraya gidiliyor. İki kolon gridi genişletip Durum / Son Giriş'i kenara
+itiyordu.
+
+vitest 793 (87 dosya).

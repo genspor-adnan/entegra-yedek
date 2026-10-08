@@ -105,16 +105,15 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <thead>
           <tr>
             <th style={{ width: 34 }}></th>
-            <th>Kullanıcı</th><th>{c('Rolü')}</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
-            <th>E-posta</th><th>Şube</th>
+            <th>Kullanıcı</th><th>{c('Rolü')}</th><th>Bölüm</th><th>Görev</th><th>Şube</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
           </tr>
         </thead>
         <tbody>
-          {!uyeler && <tr><td colSpan={10}>Yükleniyor…</td></tr>}
+          {!uyeler && <tr><td colSpan={8}>Yükleniyor…</td></tr>}
           {uyeler?.length === 0 && (
-            <tr><td colSpan={10} className="bos">{c('Bu rolde kullanıcı yok.')}</td></tr>
+            <tr><td colSpan={8} className="bos">{c('Bu rolde kullanıcı yok.')}</td></tr>
           )}
           {uyeler?.map(k => (
             /* Tek tik SATIRI ISARETLER, cift tik kullanici kartini acar. */
@@ -136,8 +135,6 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                     : <span className="rozet ok">ana rol</span>}</td>
               <td>{k.departman}</td>
               <td>{k.gorev}</td>
-              <td>{k.telefon}</td>
-              <td>{k.eposta}</td>
               <td>{k.sube}</td>
               <td style={{ textAlign: 'center' }}>
                 <span className={`rozet ${k.aktif ? 'ok' : 'gri'}`}>
