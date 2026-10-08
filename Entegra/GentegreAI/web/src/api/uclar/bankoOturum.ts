@@ -56,6 +56,12 @@ export type OnaySatiri = {
   kendisi: boolean;
 };
 
+/**
+ * Onay kuyruğu yanıtı. `kendiOnay`: kullanıcı KENDİ oturumunu onaylayabilir mi
+ * - yönetici (ayar yetkisi) ya da `banko.kendi_onay` açıkken true.
+ */
+export type OnayKuyrugu = { satirlar: OnaySatiri[]; kendiOnay: boolean };
+
 export type OturumYaniti = { oturum: OturumOzeti | null; mesaj?: string; tutanakNo?: string | null };
 /**
  * POS gün sonu eşleşmesi (990). `eslesmeDurum`: 1 eşleşti · 2 fark var ·
@@ -117,7 +123,7 @@ export const bankoOturumUclari = {
   bankoOturumAktif: () => istek<OturumYaniti>('/api/banko-oturum/aktif'),
   bankoOturumGetir: (id: number) => istek<OturumDetay>(`/api/banko-oturum/${id}`),
   bankoOturumAc: (g: AcIstegi) => gonder<OturumYaniti>('/api/banko-oturum/ac', g),
-  bankoOturumKuyruk: () => istek<OnaySatiri[]>('/api/banko-oturum/onay-kuyrugu'),
+  bankoOturumKuyruk: () => istek<OnayKuyrugu>('/api/banko-oturum/onay-kuyrugu'),
   bankoOturumOnayla: (id: number, not?: string) =>
     gonder<OturumYaniti>(`/api/banko-oturum/${id}/onayla`, { not: not ?? '' }),
   bankoOturumReddet: (id: number, not: string) =>

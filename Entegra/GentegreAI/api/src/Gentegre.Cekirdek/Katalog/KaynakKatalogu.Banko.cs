@@ -78,6 +78,22 @@ public static partial class KaynakKatalogu
                   left join public.taraf t on t.id = o.kullanici_id
                   left join public.taraf ta on ta.id = o.teslim_alan_id",
         SubeKolonu: "o.sube_id",
+        // BANKO GOREVLISI YALNIZ KENDI OTURUMLARINI GORUR (kullanici
+        //   08.10.2026). Baskasinin vardiyasi, devri ve sayim farki onun isi
+        //   degil; gun sonu rakamlari gorevliye ait bir performans kaydina
+        //   donusmemeli.
+        //
+        //   SORUMLU/YONETICI HEPSINI GORUR: olcut `banko_onay` ekran
+        //   yetkisi - onay kuyrugunu goren kisi zaten butun oturumlari
+        //   gormek zorunda (fark egilimi, tekrarlayan noksan).
+        //
+        //   KOSUL SQL'DE YETKIYE BAKIYOR (`fn_kullanici_yetkileri`): liste
+        //   kataloğu yetkiye gore iki ayri kaynak tanimlamiyor - tek tanim,
+        //   kosul kullanicinin hakkini kendisi cozuyor. `{kullanici}` yer
+        //   tutucusu SorguUretici tarafindan PARAMETREYLE baglaniyor.
+        SabitKosul: "(o.kullanici_id = {kullanici}"
+                  + " or exists (select 1 from public.fn_kullanici_yetkileri({kullanici}) y"
+                  + "             where y.yetki_kod = 'banko_onay' and y.gor = 1))",
         VarsayilanSirala: "o.id desc",
         Kolonlar: new KolonTanimi[]
         {

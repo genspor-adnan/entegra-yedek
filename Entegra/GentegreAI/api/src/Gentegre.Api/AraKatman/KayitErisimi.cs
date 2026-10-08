@@ -44,7 +44,12 @@ public sealed class KayitErisimi
         var uretici = baglam.PortalTuru > 0
             ? new SorguUretici(erisim, baglam.PortalTuru, baglam.PortalKimlik)
                   { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri }
-            : new SorguUretici(erisim) { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri };
+            : new SorguUretici(erisim)
+            {
+                HekimId = hekimId, TetkikRolleri = baglam.RolIdleri,
+                // `{kullanici}` yer tutuculu SabitKosul icin (993).
+                KullaniciId = baglam.KullaniciId,
+            };
 
         var istek = new ListeIstegi
         {

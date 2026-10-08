@@ -39,6 +39,15 @@ public sealed partial class SorguUretici
     public int? HekimId { get; init; }
 
     /// <summary>
+    /// İSTEĞİ YAPAN KULLANICI: `SabitKosul` içindeki `{kullanici}` yer tutucusu
+    /// buna bağlanır (parametreyle, SQL'e gömülmeden). "Yalnız kendi kayıtları"
+    /// kuralını katalogda yazmayı sağlıyor - banko oturum geçmişi böyle
+    /// süzülüyor (993: görevli kendi oturumlarını görür, onay yetkisi olan
+    /// hepsini).
+    /// </summary>
+    public int? KullaniciId { get; init; }
+
+    /// <summary>
     /// TEST SEVİYESİNDE YETKİ KISITI (889/923): kullanıcının GÜNCEL etkili
     /// rol kümesi (ana + ek). Kaynağın tetkik kolonu varsa
     /// (KaynakKatalogu.TetkikKisitKolonu) satırlar
@@ -212,7 +221,15 @@ public sealed partial class SorguUretici
         var parcalar = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(_kaynak.SabitKosul))
-            parcalar.Add("(" + _kaynak.SabitKosul + ")");
+        {
+            // `{kullanici}` PARAMETREYLE baglanir. Kullanici bilinmiyorsa
+            //   (dokum/ozet gibi baglamsiz cagri) 0 baglanir: kosul "kendi
+            //   kayitlari" diyorsa sonuc bos doner - acik kalmasindan iyidir.
+            var kosul = _kaynak.SabitKosul!;
+            if (kosul.Contains("{kullanici}"))
+                kosul = kosul.Replace("{kullanici}", Ekle(KullaniciId ?? 0));
+            parcalar.Add("(" + kosul + ")");
+        }
 
         // Sube filtresi SUNUCUDA eklenir - istekte gelmez (API §8).
         //   Ozel kosul (SubeKosulu) varsa duz esitligin yerine gecer: "{sube}"

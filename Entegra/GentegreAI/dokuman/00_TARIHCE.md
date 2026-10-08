@@ -20629,3 +20629,52 @@ Doğrulama: açık oturumu olmayan kullanıcıyla modal açılış formunda geld
 seçenek olarak yalnız B-02 çıktı (B-01'de canlı oturum var, listede yok);
 "Düzenle" oturum #5'i doğru adımda (4 · Gün içi işlem) açtı; açık oturumu olan
 kullanıcıda uyarı göründü. vitest 789, dotnet test 218.
+
+### 08.10.2026 — Onay kuyruğu: yönetici kendi oturumunu onaylar; görevli yalnız kendi oturumlarını görür (993)
+
+Kullanıcı: *"Banko Onay Kuyruğu nu onaylayamıyorum"* → *"yöneticiyim
+onaylayabilirim"*, *"Banko Görevlisi sadece kendi oturumlarını listeler/görür"*,
+*"1 kullanıcı aynı anda tek oturum açabilir"*, *"yönetici, banko görevlisi,
+banko sorumlusu yeni oturum açabilir"*.
+
+**Kendi oturumunu onaylama.** 987'deki "sorumlu kendi oturumunu onaylayamaz"
+kuralı tek kişi çalışırken gün sonunu kapatılamaz hale getiriyordu. İki
+istisna tanımlandı:
+
+* **Yönetici** - ölçüt rol ADI değil `ayar` yetkisi: kurum ayarlarını
+  değiştirebilen kişi aşağıdaki anahtarı kendisi açabilir, ona ayrıca ayar
+  şartı koymak anlamsız bir tur attırmak olurdu. Rol adları kuruma göre
+  değişiyor, yetki sabit.
+* **`banko.kendi_onay = 1`** (varsayılan kapalı): tek hekimli muayenehane,
+  tek kişilik laboratuvar - görevli ile sorumlu aynı kişi.
+
+Her iki durumda onay logu `kendiOturumu` damgası taşıyor: denetimde "kim kendi
+kasasını onayladı" sorusu yanıtlanabilmeli. Kuyruk ekranı da hakkı sunucudan
+okuyor (`kendiOnay`) ve düğmeyi ona göre açıyor; alt not hangi durumda
+olduğunu yazıyor.
+
+**Görevli yalnız kendi oturumlarını görür.** Başkasının vardiyası, devri ve
+sayım farkı onun işi değil; gün sonu rakamları görevliye ait bir performans
+kaydına dönüşmemeli. Ölçüt `banko_onay` yetkisi: onay kuyruğunu gören kişi
+(sorumlu, yönetici) bütün oturumları görmek zorunda - fark eğilimi ve
+tekrarlayan noksan oradan okunuyor.
+
+Kural **katalogda** yazılı (`KaynakKatalogu.BankoOturum.SabitKosul`) ve
+yetkiyi SQL'de soruyor (`fn_kullanici_yetkileri`): yetkiye göre iki ayrı kaynak
+tanımlamak yerine tek tanım, koşul kullanıcının hakkını kendisi çözüyor.
+Bunun için `SabitKosul` içindeki `{kullanici}` yer tutucusu artık parametreyle
+bağlanıyor (`SorguUretici.KullaniciId`; `ListeDeposu` ve `KayitErisimi`
+geçiriyor) - daha önce yalnız `PortalKosullari`'nda bağlanıyordu, `SabitKosul`
+ham gidiyordu. Detay ucu da kontrol ediyor: liste süzgeci yetmez, id'yi bilen
+kullanıcı doğrudan uca gidebilirdi.
+
+**Zaten yerinde olan iki kural** doğrulandı: bir kullanıcı aynı anda tek oturum
+(`banko_oturum_canli_kullanici` partial unique index, 987) ve yeni oturum açma
+yetkisi - Yönetici, Banko Sorumlusu, Banko Görevlisi **ve Banko Kasiyeri**
+(`banko_oturum` ekle hakkı). Kasiyer listede sayılmamıştı ama tahsilat yapan
+rol olduğu için hakkı korundu; kaldırılması isteniyorsa `vezne` rolünden
+`banko_oturum` ekle hakkı alınır.
+
+Doğrulama: yönetici kendi oturumunu onayladı (oturum #5 kapandı, tutanak
+TT-2026-000001); görüntüleme kısıtı SQL'den sayıldı (yetkili 1 satır, yetkisiz
+0) ve liste ucundan doğrulandı. vitest 789, dotnet test 218.

@@ -26,11 +26,18 @@ const saat = (t: string | null) =>
 
 export function BankoOnayKuyrugu() {
   const [satirlar, setSatirlar] = useState<OnaySatiri[]>([]);
+  // Kendi oturumunu onaylama hakkı: yönetici ya da `banko.kendi_onay` ayarı.
+  const [kendiOnay, setKendiOnay] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
 
   const yukle = useCallback(async () => {
-    try { setSatirlar(await api.bankoOturumKuyruk()); setHata(null) }
+    try {
+      const y = await api.bankoOturumKuyruk();
+      setSatirlar(y.satirlar ?? []);
+      setKendiOnay(!!y.kendiOnay);
+      setHata(null);
+    }
     catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
   }, []);
 
@@ -89,8 +96,10 @@ export function BankoOnayKuyrugu() {
                 </td>
                 <td className="sar">{s.not || '—'}</td>
                 <td className="orta">
-                  <button className="bok-ok" disabled={s.kendisi} onClick={() => onayla(s)}>✔ Onayla</button>
-                  <button className="bok-red" disabled={s.kendisi} onClick={() => reddet(s)}>✖ Reddet</button>
+                  <button className="bok-ok" disabled={s.kendisi && !kendiOnay}
+                          onClick={() => onayla(s)}>✔ Onayla</button>
+                  <button className="bok-red" disabled={s.kendisi && !kendiOnay}
+                          onClick={() => reddet(s)}>✖ Reddet</button>
                 </td>
               </tr>
             ))}
@@ -102,8 +111,14 @@ export function BankoOnayKuyrugu() {
         <b>Farklı açılış/kapanış ayrı onay ister:</b> devir ya da sayım tutmuyorsa
         onaylayan kişi farkı da onaylamış olur - fark fişi onun adına düşer. Onay kaydı
         kim, ne zaman, hangi tutarı onayladı olarak durur.
-        {' '}<b>Kendi oturumunuzu onaylayamazsınız.</b> Teslim reddi oturumu kapatmaz,
-        açık durumuna döndürür - görevli yeniden sayar.
+        {' '}{kendiOnay
+          ? <><b>Kendi oturumunuzu onaylayabilirsiniz</b> (yönetici ya da tek kişilik
+              kurum ayarı); onay logu "kendi oturumu" damgası taşır.</>
+          : <><b>Kendi oturumunuzu onaylayamazsınız</b> - teslimi başka bir yetkili alır.
+              Tek kişi çalışılıyorsa Ayarlar'dan <code>banko.kendi_onay</code>{' '}
+              açılabilir.</>}
+        {' '}Teslim reddi oturumu kapatmaz, açık durumuna döndürür - görevli yeniden
+        sayar.
       </div>
     </div>
   );

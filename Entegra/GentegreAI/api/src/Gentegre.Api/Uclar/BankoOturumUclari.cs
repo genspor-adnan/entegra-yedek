@@ -98,6 +98,12 @@ public static class BankoOturumUclari
             await using var b = await veri.AcAsync(iptal);
             var o = await OturumAsync(b, "where o.id = @p0 and o.sube_id = @p1", [id, baglam.SubeId ?? 0], iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Oturum bulunamadı.");
+            // BASKASININ OTURUMU: liste suzgeci yetmez, id'yi bilen kullanici
+            //   dogrudan bu ucu cagirabilirdi. Onay yetkisi olan (sorumlu,
+            //   yonetici) hepsini gorur; banko gorevlisi yalniz kendisini.
+            if (o.KullaniciId != baglam.KullaniciId
+                && !baglam.Yetkiler.Var("banko_onay", Islem.Gor))
+                throw GentegreHatasi.IsKurali("Bu oturum başka bir görevliye ait.");
             var kupur = await b.ListeAsync("""
                 select asama, birim, adet from public.banko_oturum_kupur
                  where oturum_id = @p0 order by asama, birim desc
@@ -288,7 +294,12 @@ public static class BankoOturumUclari
                 //   reddeder ama kullanıcıya tıklanabilir bir yol göstermeyelim.
                 kendisi = o.GetInt32(5) == baglam.KullaniciId,
             }, iptal);
-            return Results.Ok(liste);
+            // KENDI OTURUMUNU ONAYLAMA AYARI (993): tek kisilik kurumda
+            //   gorevli ile sorumlu ayni kisi; kurali mutlak tutmak gun sonunu
+            //   hic kapatilamaz hale getiriyordu. Istemci dugmeyi buna gore
+            //   aciyor, sunucu da ayni ayara bakiyor.
+            var kendiOnay = await KendiOnaylayabilirMi(baglam, b, iptal);
+            return Results.Ok(new { satirlar = liste, kendiOnay });
         });
 
         // ----------------------------------------------------- açılış onayı
@@ -301,8 +312,11 @@ public static class BankoOturumUclari
             var o = await DurumAsync(b, id, baglam.SubeId ?? 0, iptal);
             var fisNotu = "";
 
-            if (o.KullaniciId == baglam.KullaniciId)
-                throw GentegreHatasi.IsKurali("Kendi oturumunuzu onaylayamazsınız.");
+            if (o.KullaniciId == baglam.KullaniciId
+                && !await KendiOnaylayabilirMi(baglam, b, iptal))
+                throw GentegreHatasi.IsKurali(
+                    "Kendi oturumunuzu onaylayamazsınız; teslimi başka bir yetkili alır. "
+                    + "Tek kişi çalışılıyorsa Ayarlar'dan \"banko.kendi_onay\" açılabilir.");
 
             await using var islem = await b.BeginTransactionAsync(iptal);
             if (o.Durum == OnayBekler)
@@ -341,7 +355,14 @@ public static class BankoOturumUclari
 
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogTablo, (int)id, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip,
-                new { onay = o.Durum == OnayBekler ? "acilis" : "kapanis", not = istek?.Not ?? "" },
+                new
+                {
+                    onay = o.Durum == OnayBekler ? "acilis" : "kapanis",
+                    not = istek?.Not ?? "",
+                    // KENDI OTURUMU IZ BIRAKIR: ayar acik olsa da denetimde
+                    //   "kim kendi kasasini onayladi" sorusu yanitlanmali.
+                    kendiOturumu = o.KullaniciId == baglam.KullaniciId ? 1 : 0,
+                },
                 iptal: iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new
@@ -360,7 +381,8 @@ public static class BankoOturumUclari
                 throw GentegreHatasi.Dogrulama("Red nedeni yazılmalı.");
             await using var b = await veri.AcAsync(iptal);
             var o = await DurumAsync(b, id, baglam.SubeId ?? 0, iptal);
-            if (o.KullaniciId == baglam.KullaniciId)
+            if (o.KullaniciId == baglam.KullaniciId
+                && !await KendiOnaylayabilirMi(baglam, b, iptal))
                 throw GentegreHatasi.IsKurali("Kendi oturumunuzu reddedemezsiniz.");
 
             await using var islem = await b.BeginTransactionAsync(iptal);
@@ -663,6 +685,28 @@ public static class BankoOturumUclari
         return $" Fark fişi oluşturuldu (#{fisId}, {Math.Abs(fark):N2} ₺ "
                + (fark > 0 ? "fazla" : "noksan") + ").";
     }
+
+    /// <summary>
+    /// Görevli KENDİ oturumunu onaylayabilir mi? Normalde hayır - karşılıklı
+    /// imza denetimin kendisidir (987).
+    ///
+    /// İki istisna:
+    /// 1. <b>Yönetici</b> (kullanıcı 08.10.2026: "yöneticiyim onaylayabilirim").
+    ///    Ölçüt rol ADI değil <c>ayar</c> yetkisi: kurum ayarlarını
+    ///    değiştirebilen kişi aşağıdaki anahtarı kendisi açabilir, ona ayrıca
+    ///    ayar şartı koymak anlamsız bir tur attırmak olurdu. Rol adları da
+    ///    kuruma göre değişiyor; yetki sabit.
+    /// 2. <c>banko.kendi_onay = 1</c> (993): tek hekimli muayenehane, tek
+    ///    kişilik laboratuvar - görevli ile sorumlu aynı kişi. Varsayılan
+    ///    kapalı; açan kurum bilerek açıyor.
+    ///
+    /// Her iki durumda onay logu <c>kendiOturumu</c> damgası taşıyor:
+    /// denetimde "kim kendi kasasını onayladı" sorusu yanıtlanabilmeli.
+    /// </summary>
+    private static async Task<bool> KendiOnaylayabilirMi(IstekBaglami baglam,
+        NpgsqlConnection b, CancellationToken iptal)
+        => baglam.Yetkiler.Var("ayar", Islem.Degistir)
+           || await AyarAsync(b, null!, "banko.kendi_onay", iptal) == "1";
 
     private static async Task<string> AyarAsync(NpgsqlConnection b, NpgsqlTransaction islem,
                                                 string anahtar, CancellationToken iptal)

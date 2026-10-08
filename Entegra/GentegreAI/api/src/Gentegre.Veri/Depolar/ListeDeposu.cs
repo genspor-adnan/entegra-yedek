@@ -27,7 +27,14 @@ public sealed class ListeDeposu
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
                   { HekimId = hekimId, TetkikRolleri = tetkikRolleri }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
-            : new SorguUretici(kaynak) { HekimId = hekimId, TetkikRolleri = tetkikRolleri };
+            : new SorguUretici(kaynak)
+            {
+                HekimId = hekimId, TetkikRolleri = tetkikRolleri,
+                // `{kullanici}` yer tutuculu SabitKosul icin (993): "yalniz
+                //   kendi kayitlari" kurali katalogda yazili, deger burada
+                //   baglaniyor.
+                KullaniciId = kullaniciId,
+            };
 
         var satirUretici = Uretici();
         var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam, kullaniciId);
