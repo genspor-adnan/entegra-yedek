@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Bildirim;
+﻿using Gentegre.Cekirdek.Bildirim;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 
@@ -78,8 +78,13 @@ public sealed class RandevuHatirlatmasi
         if (r is null) return;
         if (KapaliDurumlar.Contains(r.Durum)) return;      // iptal/gelmedi: yalnız iptal
 
-        var acik = await AyarAsync("randevu.hatirlatma_acik", "1", iptal);
-        if (acik == "0") return;
+        // VARSAYILAN KAPALI (kullanici 08.10.2026: "randevu hatirlatmayi
+        //   durdur her yerde"). Ayar satiri yoksa da gonderilmez: SMS
+        //   UCRETLI ve hastaya giden bir mesaj - "ayari unutulmus kurulum"
+        //   yuzunden kendiliginden gitmesi kabul edilemez. Acmak isteyen
+        //   kurum Ayarlar'dan `randevu.hatirlatma_acik = 1` yapar.
+        var acik = await AyarAsync("randevu.hatirlatma_acik", "0", iptal);
+        if (acik != "1") return;
 
         var saat = int.TryParse(await AyarAsync("randevu.hatirlatma_saat", "24", iptal), out var sa)
                    ? Math.Clamp(sa, 1, 168) : 24;
