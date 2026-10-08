@@ -62,7 +62,7 @@ export type OturumYaniti = { oturum: OturumOzeti | null; mesaj?: string; tutanak
  * 3 cihaza ulaşılamadı. `cihazToplam` null ise henüz girilmemiş.
  */
 export type PosEslesme = {
-  bankoPosId: number; bankaAdi: string; terminalNo: string; posDurum: number;
+  bankoPosId: number; hesapAdi: string; terminalNo: string; posDurum: number;
   sistemToplam: number; cihazToplam: number | null; fark: number | null;
   eslesmeDurum: number | null; eslesmeNot: string;
 };

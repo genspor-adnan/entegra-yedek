@@ -624,7 +624,7 @@ function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis }: {
             const fark = Number.isFinite(cihaz) ? cihaz - p.sistemToplam : null;
             return (
               <tr key={p.bankoPosId}>
-                <td>{p.bankaAdi} · {p.terminalNo}
+                <td>{p.hesapAdi} · {p.terminalNo}
                   {p.posDurum !== 1 && <span className="bo-rz sari">cihaz arızalı</span>}</td>
                 <td>{para(p.sistemToplam)}</td>
                 <td><input value={girilen} inputMode="decimal" placeholder="0,00"

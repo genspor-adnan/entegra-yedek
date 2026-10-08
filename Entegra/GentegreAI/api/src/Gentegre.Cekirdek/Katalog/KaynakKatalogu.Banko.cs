@@ -46,10 +46,12 @@ public static partial class KaynakKatalogu
                 "(select count(*) from public.banko_cihaz c where c.banko_id = b.id)",
                 "sayi", "Cihaz", Hizalama: "orta", Genislik: 70,
                 Varsayilan: false, Filtrelenebilir: false),
+            // VARSAYILAN POS HESAP ADIYLA (992): banka alani kalkti, POS
+            //   kendi tahsilat hesabiyla taniniyor.
             new("varsayilanPos",
-                @"coalesce((select coalesce(bk.ad, '') || ' · ' || p.terminal_no
+                @"coalesce((select coalesce(ph.ad, '') || ' · ' || p.terminal_no
                               from public.banko_pos p
-                              left join public.banka bk on bk.id = p.banka_id
+                              left join public.hesap ph on ph.id = p.hesap_id
                              where p.banko_id = b.id and p.varsayilan = 1 limit 1), '')",
                 "metin", "Varsayılan POS", Genislik: 170, Varsayilan: false,
                 Filtrelenebilir: false),

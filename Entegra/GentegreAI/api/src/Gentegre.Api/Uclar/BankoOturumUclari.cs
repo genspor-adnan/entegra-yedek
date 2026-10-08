@@ -123,14 +123,14 @@ public static class BankoOturumUclari
             //   anlam tasiyor - "hangi terminalde fark var" sorusu tek POS
             //   toplamiyla yanitlanamaz.
             var posListe = await b.ListeAsync("""
-                select banko_pos_id, banka_adi, terminal_no, pos_durum,
+                select banko_pos_id, hesap_adi, terminal_no, pos_durum,
                        sistem_toplam, cihaz_toplam, fark, eslesme_durum, eslesme_not
                   from public.v_banko_oturum_pos
                  where oturum_id = @p0
                  order by terminal_no
                 """, null, [id], r => new
             {
-                bankoPosId = r.GetInt32(0), bankaAdi = r.GetString(1),
+                bankoPosId = r.GetInt32(0), hesapAdi = r.GetString(1),
                 terminalNo = r.GetString(2), posDurum = r.GetInt16(3),
                 sistemToplam = r.GetDecimal(4),
                 cihazToplam = r.IsDBNull(5) ? (decimal?)null : r.GetDecimal(5),

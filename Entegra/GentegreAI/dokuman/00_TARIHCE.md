@@ -20566,3 +20566,39 @@ adımda (4 · Gün içi işlem) gösterdi, gün sonu panelinde dört tablo çizi
 alt düğmeye kaydırarak erişildi, Esc ile kapandı. Menü sırası tarayıcıdan
 okundu: Hasta Listesi · Başvurular · Bankolar · Banko Onayları · Banko
 Oturumları · Medula Kabul · İskonto Onayı. vitest 789.
+
+### 08.10.2026 — POS'ta banka yerine tahsilat hesabı; oturumu olan banko silinemez (992)
+
+Kullanıcı: *"banko kartında pos sekmesinde banka sütunu kaldır onun yerine
+tahsilat hesabı nı getir, bu hesap listesinde sadece pos listesi olsun"*,
+*"gridden kaldırılacak kolonlar: Üye İşyeri No, seri no, Taksit (en az),
+Taksit (en çok), komisyon, valör"*, *"açık ya da geçmiş oturum kaydı varsa
+banko silinemez"*.
+
+* **Banka alanı kalktı, yerine Tahsilat Hesabı** (zorunlu) ve liste yalnız POS
+  hesaplarıyla sınırlı (`v_pos_hesap_lookup`, `hesap.tur = 'P'`). POS tahsilatı
+  kasaya nakit girmez; kendi POS hesabına yazılır ve gün sonu mutabakatı o
+  hesabın ekstresiyle yapılır - bankayı ayrıca sormak aynı bilgiyi iki kez
+  istemekti. Üstelik iki alan tutarsız kalabiliyordu: "Ziraat" seçip hesabı
+  Garanti POS'u göstermek mümkündü. `banka_id` kolonu DB'de duruyor (eski
+  kayıtlar), kartta görünmüyor ve hiçbir yerde okunmuyor.
+* **Altı kolon gridden kalktı**: Üye İşyeri No, Seri No, Taksit (en az/en çok),
+  Komisyon %, Valör. Komisyon ve valör **`hesap` tablosunda zaten tanımlı**
+  (`komisyon_orani`, `valor_gun`) - POS satırında ikinci kez tutmak iki değerin
+  ayrışması demekti. Kolonlar DB'de duruyor, veri kaybı yok. POS gridi artık:
+  Varsayılan · Tahsilat Hesabı · Terminal No · Bağlantı · Adres/IP · Port ·
+  Yabancı kart · Durum · Not.
+* Banko listesindeki "Varsayılan POS" sütunu ve gün sonu eşleşme paneli de
+  hesap adını gösteriyor (`v_banko_oturum_pos.hesap_adi`).
+* **Oturum kaydı olan banko silinemez** (`SilmeEngelleri`): oturum paranın
+  sorumluluk zinciridir - devir, tahsilat, sayım farkı ve teslim tutanağı ona
+  bağlı; bankoyu silmek o zinciri sahipsiz bırakırdı. **Kapanmış oturum da
+  engeller**: "artık kullanılmıyor" bir silme gerekçesi değil, denetim kaydı
+  oradan okunuyor. POS'undan tahsilat geçmişse de engellenir. Kullanımdan
+  çıkarmanın yolu `Aktif` alanını kapatmak - pasif banko yeni oturum açamaz,
+  geçmişi durur.
+
+Doğrulama: POS gridi API'den okundu (10 alan, banka yok), hesap listesi 13 POS
+hesabı gösterdi; silme engeli kendi test bankosuyla denendi - oturumsuzken 204,
+kapanmış oturum eklenince 422 ("Bu bankoda oturum kaydı var"). vitest 789,
+dotnet test 218.

@@ -183,7 +183,7 @@ export function BankoTutanak() {
               <tbody>
                 {d.pos.filter(p => p.cihazToplam != null).map(p => (
                   <tr key={p.bankoPosId}>
-                    <td>{p.bankaAdi} · {p.terminalNo}</td>
+                    <td>{p.hesapAdi} · {p.terminalNo}</td>
                     <td>{para(p.sistemToplam)}</td>
                     <td>{para(p.cihazToplam ?? 0)}</td>
                     <td className={p.fark ? 'tt-kir' : ''}>{para(p.fark ?? 0)}</td>

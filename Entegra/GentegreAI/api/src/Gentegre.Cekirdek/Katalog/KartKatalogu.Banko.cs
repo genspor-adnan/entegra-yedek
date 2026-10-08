@@ -128,6 +128,27 @@ public static partial class KartKatalogu
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400,
                 Baslik: "Açıklama", Grup: "Ayarlar"),
         },
+        // SILME ENGELLERI (kullanici 08.10.2026: "acik ya da gecmis oturum
+        //   kaydi varsa banko silinemez"): oturum paranin sorumluluk
+        //   zinciridir - devir, tahsilat, sayim farki ve teslim tutanagi ona
+        //   bagli. Bankoyu silmek o zinciri sahipsiz birakirdi; kullanimdan
+        //   cikarmanin yolu `Aktif` alanini kapatmak (pasif banko yeni oturum
+        //   acamaz, gecmisi durur).
+        //
+        //   KAPANMIS OTURUM DA ENGELLER: "artik kullanilmiyor" bir silme
+        //   gerekcesi degil, denetim kaydi oradan okunuyor.
+        //
+        //   POS ve cihaz satirlari engel DEGIL: onlar bankonun kendi
+        //   detaylari, kartla birlikte gider.
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.banko_oturum", "banko_id",
+                "Bu bankoda oturum kaydı var (açık ya da kapanmış); banko silinemez. "
+                + "Kullanımdan çıkarmak için \"Aktif\" alanını kapatın."),
+            new("public.kasa_islem", "banko_pos_id",
+                "Bu bankonun POS'undan tahsilat geçmiş; banko silinemez. "
+                + "Kullanımdan çıkarmak için \"Aktif\" alanını kapatın."),
+        },
         Detaylar: new DetayTanimi[]
         {
             // ----------------------------------------------- POS cihazları ----
@@ -138,27 +159,33 @@ public static partial class KartKatalogu
                 //   işaretlenirse tahsilat ekranı hangisini seçili getireceğini
                 //   bilemezdi - veritabanı reddeder.
                 new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayılan"),
-                new("bankaId", "banka_id", "kod", KodTablosu: "public.v_banka_lookup",
-                    Zorunlu: true, Baslik: "Banka"),
+                // TAHSILAT HESABI, BANKA ALANININ YERINE (992, kullanici:
+                //   "banka sutunu kaldir onun yerine tahsilat hesabi ni
+                //   getir, bu hesap listesinde sadece pos listesi olsun").
+                //   POS tahsilati kasaya nakit girmez; kendi POS hesabina
+                //   yazilir ve gun sonu mutabakati o hesabin ekstresiyle
+                //   yapilir. Bankayi ayrica sormak ayni bilgiyi iki kez
+                //   istemekti - ustelik iki alan tutarsiz kalabiliyordu
+                //   ("Ziraat" secip hesabi Garanti POS'u gostermek mumkundu).
+                //   `banka_id` kolonu DB'de duruyor (eski kayitlar), kartta
+                //   gorunmuyor ve hicbir yerde okunmuyor.
+                new("hesapId", "hesap_id", "kod", KodTablosu: "public.v_pos_hesap_lookup",
+                    Zorunlu: true, Baslik: "Tahsilat Hesabı",
+                    Ipucu: "Yalnız POS hesapları listelenir; gün sonu mutabakatı bu hesabın ekstresiyle yapılır"),
                 new("terminalNo", "terminal_no", "metin", Zorunlu: true,
                     EnFazlaUzunluk: 30, Baslik: "Terminal No"),
-                new("uyeIsyeriNo", "uye_isyeri_no", "metin", EnFazlaUzunluk: 30,
-                    Baslik: "Üye İşyeri No"),
-                new("seriNo", "seri_no", "metin", EnFazlaUzunluk: 40, Baslik: "Seri No"),
                 new("baglantiTur", "baglanti_tur", "kod", SabitKodlar: PosBaglantiKodlari,
                     Baslik: "Bağlantı"),
                 new("adres", "adres", "metin", EnFazlaUzunluk: 60, Baslik: "Adres / IP"),
                 new("port", "port", "sayi", Baslik: "Port"),
-                new("taksitMin", "taksit_min", "sayi", Baslik: "Taksit (en az)"),
-                new("taksitMax", "taksit_max", "sayi", Baslik: "Taksit (en çok)"),
                 new("yabanciKart", "yabanci_kart", "mantik", Baslik: "Yabancı kart"),
-                // POS TAHSİLATI KASAYA NAKİT GİRMEZ: kendi banka hesabına
-                //   yazılır, mutabakatı ekstreyle yapılır. Gün sonu sayımı
-                //   yalnız nakit üzerinden - bu ayrım olmadan her gün fark çıkar.
-                new("hesapId", "hesap_id", "kod", KodTablosu: "public.v_hesap_lookup",
-                    Baslik: "Tahsilat Hesabı"),
-                new("komisyonOran", "komisyon_oran", "ondalik", Baslik: "Komisyon %"),
-                new("valorGun", "valor_gun", "sayi", Baslik: "Valör (gün)"),
+                // GRIDDEN KALDIRILAN ALANLAR (kullanici 08.10.2026): Uye
+                //   Isyeri No, Seri No, Taksit (en az/en cok), Komisyon,
+                //   Valor. Kolonlar DB'de duruyor; komisyon ve valor zaten
+                //   HESAP tablosunda tanimli (hesap.komisyon_orani,
+                //   hesap.valor_gun) - POS satirinda ikinci kez tutmak iki
+                //   degerin ayrismasi demekti. Cihaz kunyesi (uye isyeri,
+                //   seri no) gunluk iste kullanilmiyor.
                 new("durum", "durum", "kod", SabitKodlar: PosDurumKodlari, Baslik: "Durum",
                     Ipucu: "Çalışmayan POS tahsilat ekranında listelenmez"),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Not"),
