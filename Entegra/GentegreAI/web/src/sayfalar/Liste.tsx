@@ -18,7 +18,7 @@ import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
-import { OturumAcModali } from '../bilesenler/banko/OturumAcModali';
+import { BankoOturumModali } from '../bilesenler/banko/BankoOturumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
   from '../bilesenler/radyoloji/RandevuBekleyenPanel';
@@ -304,9 +304,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     useState<{ id: number; unvan: string } | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
-  // BANKO OTURUMU listeden MODAL olarak açılır (kullanıcı: "bankolar a oturum
-  //   aç butonu ekle ve bu modal i açsın"): görevli bankosunu listede
-  //   bulduysa vardiyayı oradan başlatır.
+  // BANKO OTURUMU listeden MODAL olarak açılır (kullanıcı: "bankolar dan
+  //   seçilerek Oturum Aç butonuyla girilsin"): açılış, gün içi ve gün sonu
+  //   AYNI modalda - görevliyi iki ayrı yere göndermemek için.
   const [oturumAcBanko, setOturumAcBanko] = useState<number | null>(null);
 
   // AI REHBER BAGLAMI (449): acik kart hangisi? Belge/basvuru karti MODAL
@@ -691,8 +691,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (kod === 'banko.oturum-ac' || kod === 'banko.oturumlar') {
         const bankoId = Number(satir?.id ?? 0);
         if (!bankoId) { mesaj('Önce bir banko seçin.'); return }
-        // Açılış MODAL, gün içi/gün sonu TAM SAYFA: altı adımı modala
-        //   sıkıştırmak hepsini daraltırdı.
         if (kod === 'banko.oturum-ac') setOturumAcBanko(bankoId);
         else git(`/banko-oturumlar?banko=${bankoId}`);
         return;
@@ -1527,10 +1525,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
     )}
     {oturumAcBanko !== null && (
-      <OturumAcModali bankoId={oturumAcBanko} onKapat={acildi => {
+      <BankoOturumModali bankoId={oturumAcBanko} onKapat={() => {
         setOturumAcBanko(null);
-        // Oturum açıldıysa liste tazelenir: "açık oturum" sütunu değişti.
-        if (acildi) setYenile(t => t + 1);
+        // Modal kapanınca liste tazelenir: oturum açılmış ya da kapanmış
+        //   olabilir, "açık oturum" sütunu değişti.
+        setYenile(t => t + 1);
       }} />
     )}
 

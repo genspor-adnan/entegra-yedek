@@ -339,6 +339,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   },
   // --- BANKOLAR (985, Ekranlar/Kayit Kabul/banko_tanimi_v2.html): kasa /
   //     karsilama NOKTASI - kasasi, POS'u ve donanimi olan fiziksel yer.
+  //
+  //     MENU GRUBU "KAYIT KABUL" (kullanici 08.10.2026: "bankolar menusunu
+  //     Kayit Kabul de Basvurular dan sonraya al"): banko kayit kabulun
+  //     fiziksel noktasi; gorevli gun boyu Hasta Listesi ve Basvurular ile
+  //     birlikte kullaniyor - Finans grubunda aramak gereksiz gezinmeydi.
+  //     Siralar Basvurular'in (20) ardinda: 22 tanim, 23 oturum (gizli),
+  //     24 onay kuyrugu, 25 oturum gecmisi (Medula Kabul ile ayni sira;
+//     ad sirasina gore diziliyor, banko ailesi bitisik kaliyor).
   //     Kart generic: tanim + POS + donanim sekmeleri KartKatalogu.Banko'dan
   //     geliyor, ozel sayfa gerektiren bir sey yok.
   //
@@ -358,21 +366,27 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Danışma (kasasız)', filtre: { alan: 'tur', op: 'esit', deger: 2 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Finans', menuSira: 25, menuAd: 'Bankolar', ic: '🏧',
+    menuGrup: 'Kayıt Kabul', menuSira: 22, menuAd: 'Bankolar', ic: '🏧',
     yetkiKodu: 'banko',
   },
   // --- BANKO OTURUMU (987, vardiya): akis ekrani ve sorumlu onay kuyrugu.
   //     ozelSayfa - kolonlu liste degil, durum makinesi olan bir akis.
+  // BANKO OTURUMU MENUDE YOK (kullanici 08.10.2026: "bankolar dan secilerek
+  //   Oturum Ac butonuyla girilsin"): akis Bankolar listesinden modal olarak
+  //   acilir. Rota duruyor (/banko-oturum) - adres cubugundan acmak ve
+  //   tutanak donusu oradan calisiyor, ama menude ikinci bir giris yok:
+  //   gorevli bankosunu secmeden oturum acamaz.
   {
     kaynak: 'banko-oturum', rota: 'banko-oturum', ozelSayfa: true,
     baslik: 'Banko Oturumu', yol: 'Kasa › Banko Oturumu',
-    menuGrup: 'Finans', menuSira: 26, menuAd: 'Banko Oturumu', ic: '🔓',
+    menuGizli: true,
+    menuGrup: 'Kayıt Kabul', menuSira: 23, menuAd: 'Banko Oturumu', ic: '🔓',
     yetkiKodu: 'banko_oturum',
   },
   {
     kaynak: 'banko-onay', rota: 'banko-onay', ozelSayfa: true,
     baslik: 'Banko Onay Kuyruğu', yol: 'Kasa › Banko Onayları',
-    menuGrup: 'Finans', menuSira: 27, menuAd: 'Banko Onayları', ic: '✅',
+    menuGrup: 'Kayıt Kabul', menuSira: 24, menuAd: 'Banko Onayları', ic: '✅',
     yetkiKodu: 'banko_onay',
   },
   // --- BANKO OTURUM GECMISI (987): vardiya kayitlari. Fark egilimi buradan
@@ -390,7 +404,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Farklı kapanan', filtre: { alan: 'kapanisFark', op: 'esitDegil', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Finans', menuSira: 28, menuAd: 'Banko Oturumları', ic: '📋',
+    menuGrup: 'Kayıt Kabul', menuSira: 24, menuAd: 'Banko Oturumları', ic: '📋',
     yetkiKodu: 'banko_oturum',
   },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak

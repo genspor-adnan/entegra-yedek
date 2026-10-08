@@ -51,13 +51,19 @@ const para = (n: number) =>
 const saat = (t: string | null) =>
   t ? new Date(t).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
-export function BankoOturumu() {
+export function BankoOturumu({ gomulu, acilisBanko, onKapat }: {
+  /** Modal içinde çizilir: kendi sayfa kabuğunu ve başlığını kurmaz. */
+  gomulu?: boolean;
+  /** Bankolar listesinden seçilen banko (modal kullanımı). */
+  acilisBanko?: number;
+  onKapat?: () => void;
+} = {}) {
   const { yetki } = useOturum();
   const git = useNavigate();
-  // Listeden "🔓 Oturum Aç" ile gelince banko seçili gelsin: görevli
-  //   bankosunu listede bulduysa burada yeniden aramasın.
+  // Banko ya prop'tan (modal) ya adresten gelir: görevli bankosunu listede
+  //   bulduysa burada yeniden aramasın.
   const [arama] = useSearchParams();
-  const istenenBanko = Number(arama.get('banko') ?? 0);
+  const istenenBanko = acilisBanko || Number(arama.get('banko') ?? 0);
   const [oturum, setOturum] = useState<OturumOzeti | null>(null);
   const [bankolar, setBankolar] = useState<UygunBanko[]>([]);
   const [hata, setHata] = useState<string | null>(null);
@@ -157,6 +163,8 @@ export function BankoOturumu() {
       bankoId, vardiya, acilisSayim, not: acilisNot,
       kupurler: secili?.kupurDokumu ? kupurListe(acilisKupur) : undefined,
     });
+    // Açılıştan sonra AYNI ekranda kalınır: onay bekliyorsa bekleme kutusu,
+    //   açıldıysa gün içi şerit burada - görevli kaldığı yerden sürdürür.
     setOturum(y.oturum); if (y.mesaj) mesaj(y.mesaj);
   });
 
@@ -196,21 +204,25 @@ export function BankoOturumu() {
     setOturum(y.oturum);
   });
 
-  if (yukleniyor) return <div className="fm-sayfa sonuk">Yükleniyor…</div>;
+  if (yukleniyor)
+    return <div className={(gomulu ? 'bo-gomulu' : 'fm-sayfa') + ' sonuk'}>Yükleniyor…</div>;
 
   const adim = etkinAdim(oturum, gunSonu);
   return (
-    <div className="fm-sayfa bo-sayfa">
+    <div className={gomulu ? 'bo-gomulu' : 'fm-sayfa bo-sayfa'}>
       <style>{bostil}</style>
-      <div className="bo-baslik">
-        <h2>🏦 Banko Oturumu</h2>
-        {oturum && (
-          <span className="bo-ust">
-            {oturum.bankoKod} · {oturum.bankoAd} · {oturum.gorevli}
-            {oturum.vardiya ? ` · ${oturum.vardiya}` : ''}
-          </span>
-        )}
-      </div>
+      {/* Modal kabuğu başlığı kendi çiziyor; burada ikinci başlık olmaz. */}
+      {!gomulu && (
+        <div className="bo-baslik">
+          <h2>🏦 Banko Oturumu</h2>
+          {oturum && (
+            <span className="bo-ust">
+              {oturum.bankoKod} · {oturum.bankoAd} · {oturum.gorevli}
+              {oturum.vardiya ? ` · ${oturum.vardiya}` : ''}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="bo-akis">
         {ADIMLAR.map((a, i) => (
@@ -510,7 +522,9 @@ export function BankoOturumu() {
             </div>
           </div>
           <div className="bo-dugmeler">
-            <button onClick={() => git(`/banko-tutanak/${oturum.id}`)}>🖨 Teslim Tutanağı</button>
+            <button onClick={() => { onKapat?.(); git(`/banko-tutanak/${oturum.id}`) }}>
+              🖨 Teslim Tutanağı
+            </button>
             {oturum.durum === 4 && yetki('banko_oturum.yeniden_ac') && (
               <>
                 <button onClick={yenidenAc}>🔓 Yeniden Aç</button>
@@ -746,6 +760,8 @@ const bostil = `
    toplam tasma olusmadigi icin scroll da cikmiyordu - alt kisim erisilemez
    kaliyordu. Bu akis ekrani uzun formlardan olusuyor; blok akisa dondurup
    kaydirmayi sayfanin kendisine veriyoruz. */
+.bo-gomulu { display:block }
+.bo-gomulu .bo-akis { margin-bottom:10px }
 .bo-sayfa { display: block; height: 100%; overflow-y: auto; padding: 14px 16px 24px; }
 .bo-baslik { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
 .bo-baslik h2 { margin:0; font-size:17px; }

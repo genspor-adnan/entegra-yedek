@@ -20532,3 +20532,37 @@ Doğrulama: her adım API ve tarayıcıdan denendi (fark fişi #5266 yazıldı, 
 dökümü 5 işlemle doğru kovalara düştü, POS farkı hesaplandı, çek sayıma
 girmedi, tutanak kapanmış oturumla basıldı). vitest 789, dotnet test 218.
 Test verileri silindi; kullanıcının açık oturumu ve bankoları korundu.
+
+### 08.10.2026 — Banko oturumu modala alındı, menü Kayıt Kabul'e taşındı
+
+Kullanıcı: *"banko oturumunu şu mockup gibi modal yap ve bankolar dan
+seçilerek 'Oturum Aç' butonuyla girilsin"*, ardından *"bankolar menüsünü Kayıt
+Kabul de Başvurular dan sonraya al"*.
+
+* **Akışın tamamı modalda** (`BankoOturumModali`): açılış talebi, onay
+  bekleme, gün içi şerit, gün sonu sayımı (kupür, ödeme türü dökümü, POS
+  eşleşmesi, çek listesi) ve teslim. Önceki sürümde yalnız açılış modaldı,
+  gerisi tam sayfaya yönlendiriyordu - görevliyi iki ayrı yere göndermek
+  yerine tek yerde tutmak istendi.
+* **Aynı bileşen kullanılıyor** (`BankoOturumu` `gomulu` modunda): modala
+  ikinci bir kopya yazmak iki ayrı davranış demekti. Artık kaldırılan
+  `OturumAcModali` yalnız açılışı taşıyordu; işlevi akış ekranının kendi
+  açılış bölümünde zaten vardı.
+* Modal geniş (1080 px) ve **kaydırma gövdede**: başlık sabit kalıyor, uzun
+  gün sonu paneli altta kırpılmıyor. Esc ile kapanıyor.
+* **Tam sayfa rota duruyor** (`/banko-oturum`) ama menüde girişi yok
+  (`menuGizli`): adres çubuğundan açmak ve tutanak dönüşü oradan çalışıyor,
+  menüde ikinci bir giriş yok - görevli bankosunu seçmeden oturum açamaz.
+* **Menü grubu Finans → Kayıt Kabul**, Başvurular'ın (sıra 20) ardında:
+  Bankolar 22, oturum 23 (gizli), onay kuyruğu ve oturum geçmişi 24. Banko
+  kayıt kabulün fiziksel noktası; görevli gün boyu Hasta Listesi ve Başvurular
+  ile birlikte kullanıyor, Finans grubunda aramak gereksiz gezinmeydi. Oturum
+  geçmişi 24'te bırakıldı (25 değil): aynı sıradaki girdiler tanım sırasına
+  göre diziliyor, böylece banko ailesi bitişik kalıyor ve Medula Kabul (25)
+  sonrasına düşüyor.
+
+Doğrulama: Bankolar listesinden "🔓 Oturum Aç" → modal açık oturumu doğru
+adımda (4 · Gün içi işlem) gösterdi, gün sonu panelinde dört tablo çizildi, en
+alt düğmeye kaydırarak erişildi, Esc ile kapandı. Menü sırası tarayıcıdan
+okundu: Hasta Listesi · Başvurular · Bankolar · Banko Onayları · Banko
+Oturumları · Medula Kabul · İskonto Onayı. vitest 789.
