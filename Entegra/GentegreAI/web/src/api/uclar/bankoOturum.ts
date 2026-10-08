@@ -15,7 +15,11 @@ export type UygunBanko = {
  * Vardiya seçeneği (994): kod sabit, saatler kurum ayarından
  * (`banko.vardiya<kod>`). Mesai her kurumda aynı değil.
  */
-export type VardiyaSecenek = { kod: number; ad: string; bas: string; bit: string };
+export type VardiyaSecenek = {
+  kod: number; ad: string; bas: string; bit: string;
+  /** Hazır metin: "18:00-08:00". Biçim istemcide yeniden kurulmasın. */
+  aralik: string;
+};
 
 /** `uygun-bankolar` yanıtı: bankolar + vardiya seçenekleri. */
 export type UygunYanit = { bankolar: UygunBanko[]; vardiyalar: VardiyaSecenek[] };
@@ -105,7 +109,7 @@ export type OturumDetay = {
 };
 
 export type AcIstegi = {
-  bankoId: number; vardiyaKod?: number; vardiyaBas?: string; vardiyaBit?: string;
+  bankoId: number; vardiyaKod?: number; vardiyaAralik?: string;
   acilisSayim?: number; not?: string; kupurler?: KupurSatiri[];
 };
 
@@ -143,6 +147,8 @@ export const bankoOturumUclari = {
   bankoOturumPosEslestir: (id: number, satirlar: {
     bankoPosId: number; cihazToplam?: number; ulasilamadiMi?: boolean; aciklama?: string;
   }[]) => gonder<{ pos: PosEslesme[] }>(`/api/banko-oturum/${id}/pos-eslestir`, { satirlar }),
+  bankoOturumSil: (id: number) =>
+    istek<void>(`/api/banko-oturum/${id}`, { method: 'DELETE' }),
   bankoOturumYenidenAc: (id: number, not: string) =>
     gonder<OturumYaniti>(`/api/banko-oturum/${id}/yeniden-ac`, { not }),
 };

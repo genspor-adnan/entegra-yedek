@@ -20713,3 +20713,40 @@ kaybolmasın.
 Doğrulama: modal "Tüm gün" seçilince saatleri 08:00–22:00 getirdi, oturum
 açıldı ve veritabanına "Tüm gün · 08:00-22:00" / kod 9 / 08:00 / 22:00 olarak
 yazıldı; kupür tablosu ekranlarda yok. vitest 789, dotnet test 218.
+
+### 08.10.2026 — Vardiya saat alanı, gece vardiyası, çift tık, oturum silme (995, 996)
+
+Kullanıcı sırayla: *"vardiya combosunda saat olmasın, başlangıç ve bitiş tek
+edit içinde olsun"* → *"yine önceki gibi formatlı 2 edit olsun ama geniş
+olmasın"*, *"gece vardiyası genelde 18:00-08:00 olur, akşam başlar ve ertesi
+gün biter"*, *"Kasada bulunan (devir sayımı), fark ve not aynı satırda olsun"*,
+*"Banko Oturumları çift tıklayınca düzenle açılsın"*, *"Banko Oturumları na Sil
+butonu ekle"*.
+
+* **Vardiya combosunda saat yok** (yalnız ad); saat **iki dar `type="time"`
+  alanı** yan yana (92 px). Biçimi tarayıcı tutuyor, sunucuya "18:00-08:00"
+  olarak birleşip gidiyor - ayrıştırma ve doğrulama sunucuda, biçimi iki yerde
+  kontrol etmek birinin gevşemesi demekti.
+* **Gece vardiyası 18:00–08:00** ve ertesi güne taşıyor. Bitiş saati
+  başlangıçtan küçükse bu hata değil, gece vardiyasıdır; metne **"(+1 gün)"**
+  damgası düşüyor - tutanakta "18:00-08:00" tek başına hangi güne ait olduğunu
+  söylemiyordu. Metin 35 karaktere çıktığı için `banko_oturum.vardiya`
+  varchar(30) → **varchar(60)** (995); 30'da "… (+1" diye kırpılıyordu.
+  Görünüm kolona bağlı olduğu için göç view'i düşürüp yeniden kuruyor.
+* Sayım / fark / not **aynı satırda**: sayımı girip farkı görmek ve gerekçeyi
+  yazmak tek harekettir, araya satır sonu koymak gözü yukarı-aşağı
+  gezdiriyordu.
+* **Çift tık = Düzenle**: oturum geçmişinde satıra çift tıklamak modalı açıyor
+  (aksiyonla aynı davranış, akış tek yerde).
+* **Sil (996)** yalnız **boş oturum** için: kapanmış oturum silinmiyor (teslim
+  tutanağı ve gün sonu kaydı ona bağlı - yanlış kapatıldıysa "Yeniden Aç"),
+  işlem görmüş oturum silinmiyor (tahsilatlar oturuma bağlı), fark fişi olan
+  silinmiyor. Başkasının oturumunu silmek için onay yetkisi gerekiyor. Silme
+  logu DELETE'ten **önce** tam gövdeyle yazılıyor (ULog deseni): silinen satır
+  sonradan yalnız logdan okunabilir. Hak Banko Sorumlusu, Görevli ve
+  Kasiyer'e verildi (yöneticide zaten vardı); görevli yalnız kendi boş
+  oturumunu silebiliyor.
+
+Doğrulama: gece vardiyası "Gece / nöbet · 18:00-08:00 (+1 gün)" olarak tam
+yazıldı; kapanmış oturum silme denemesi 422 verdi, boş oturum 204 ile silindi.
+vitest 789, dotnet test 218.

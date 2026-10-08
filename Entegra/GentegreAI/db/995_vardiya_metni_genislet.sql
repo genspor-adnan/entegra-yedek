@@ -1,27 +1,20 @@
 -- =====================================================================
--- 994 - BANKO OTURUMU: vardiya SECENEKLI + formatli saatler
+-- 995 - banko_oturum.vardiya 30 -> 60 karakter
 --
--- Kullanici 08.10.2026: "Banko Oturumu kartinda vardiya secenekli olsun,
---   tum gun opsiyonu da olabilir, saatler formatli olsun".
+-- Vardiya metni sunucuda uretiliyor: "Gece / nöbet · 18:00-08:00 (+1 gün)"
+--   = 35 karakter. 987'de kolon varchar(30) acilmisti (serbest metin
+--   dusunulmustu); uretilen metin kirpiliyordu ("... (+1").
 --
--- NEDEN KOD + SAAT: vardiya serbest metindi ("Sabah", "sabah vardiyasi",
---   "08-16" hepsi ayni seyi anlatiyordu) ve bu haliyle ne suzulebiliyor ne
---   de iki oturum karsilastirilabiliyordu. Kod sabit, saatler 'HH:MM'
---   (semanin diger saat kolonlariyla ayni bicim).
---
--- GORUNEN METIN (`vardiya`) DURUYOR ve sunucuda uretiliyor: "Sabah ·
---   08:00-16:00". Tutanak ve listeler onu basiyor - iki yerde bicim
---   kurmamak icin tek kaynak.
+-- Ertesi gune tasan vardiya damgasi (+1 gun) metnin PARCASI: tutanakta
+--   "18:00-08:00" tek basina hangi gune ait oldugunu soylemiyor.
 -- =====================================================================
 
-alter table public.banko_oturum
-    -- 1 Sabah · 2 Ogleden sonra · 3 Aksam · 4 Gece/Nobet · 9 Tum gun
-    add column if not exists vardiya_kod smallint not null default 0,
-    add column if not exists vardiya_bas varchar(5) not null default '',
-    add column if not exists vardiya_bit varchar(5) not null default '';
-
--- Ozet gorunumu yeni kolonlari tasir (kolon EKLENDIGI icin yeniden kurulur).
+-- GORUNUM KOLONA BAGLI (v_banko_oturum_ozet): PG kolon tipini gorunum
+--   varken degistirmiyor. Gorunum dusurulup ayni tanimla yeniden kuruluyor.
 drop view if exists public.v_banko_oturum_ozet;
+
+alter table public.banko_oturum alter column vardiya type varchar(60);
+
 create view public.v_banko_oturum_ozet as
 select o.id,
        o.banko_id, b.kod as banko_kod, b.ad as banko_ad, b.hesap_id,
@@ -58,20 +51,7 @@ select o.id,
            and k.kaynak_tur is distinct from 1385
          group by k.oturum_id) h on h.oturum_id = o.id;
 
--- VARDIYA SAATLERI KURUM AYARI: varsayilanlar burada, kurum kendi
---   mesaisine gore degistirebilir. Bicim "bas-bit" ('HH:MM-HH:MM').
-insert into public.referans (anahtar, deger, aciklama)
-select v.anahtar, v.deger, v.aciklama
-  from (values
-    ('banko.vardiya1', '08:00-16:00', 'Sabah vardiyası saatleri'),
-    ('banko.vardiya2', '12:00-20:00', 'Öğleden sonra vardiyası saatleri'),
-    ('banko.vardiya3', '16:00-24:00', 'Akşam vardiyası saatleri'),
-    ('banko.vardiya4', '18:00-08:00', 'Gece / nöbet vardiyası saatleri (ertesi güne taşar)'),
-    ('banko.vardiya9', '08:00-22:00', 'Tüm gün seçeneğinin saatleri')
-  ) as v(anahtar, deger, aciklama)
- where not exists (select 1 from public.referans r where r.anahtar = v.anahtar);
-
 do $$
 begin
-  raise notice '994: vardiya_kod/bas/bit kolonlari + vardiya saati ayarlari hazir';
+  raise notice '995: banko_oturum.vardiya varchar(60)';
 end $$;

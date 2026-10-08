@@ -88,6 +88,9 @@ public static class BankoOturumUclari
                     kod, ad,
                     bas = par.ElementAtOrDefault(0) ?? "",
                     bit = par.ElementAtOrDefault(1) ?? "",
+                    // Ekran tek alanda gösteriyor; hazır metni de veriyoruz
+                    //   ki biçim istemcide yeniden kurulmasın.
+                    aralik = par.Length >= 2 ? $"{par[0]}-{par[1]}" : "",
                 });
             }
             return Results.Ok(new { bankolar = liste, vardiyalar });
@@ -233,7 +236,7 @@ public static class BankoOturumUclari
                 throw GentegreHatasi.Dogrulama("Geçersiz vardiya seçimi.");
             var vAyar = vKod == 0 ? null
                       : await AyarAsync(b, null!, $"banko.vardiya{vKod}", iptal);
-            var (vMetin, vBas, vBit) = VardiyaCoz(vKod, istek.VardiyaBas, istek.VardiyaBit, vAyar);
+            var (vMetin, vBas, vBit) = VardiyaCoz(vKod, istek.VardiyaAralik, vAyar);
 
             // DEVİR SUNUCUDAN: istemciden gelen değer yok sayılır.
             var devir = banko.Devir;
@@ -255,7 +258,7 @@ public static class BankoOturumUclari
                             case when @p4 = 2 then now() end, @p9, @p2)
                     returning id
                     """, islem,
-                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, Kirp(vMetin, 30),
+                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, Kirp(vMetin, 60),
                      durum, devir, sayim, fark, Kirp(istek.Not, 400), banko.Birakilacak,
                      vKod, vBas, vBit], iptal);
             }
@@ -588,6 +591,59 @@ public static class BankoOturumUclari
             return Results.Ok(new { pos = liste });
         });
 
+        // ------------------------------------------------------------- sil
+        /// Yanlis acilan oturumu siler. KAPANMIS OTURUM SILINMEZ ve islem
+        ///   gormus oturum silinmez: oturum paranin sorumluluk zinciri -
+        ///   tutanak, fark fisi ve tahsilat satirlari ona bagli. Silinebilen
+        ///   tek sey "bos" oturum: henuz hicbir tahsilat yazilmamis, acilis
+        ///   ya da red asamasinda kalmis kayit.
+        grup.MapDelete("/{id:long}", async (long id, VeriKaynagi veri, LogDeposu log,
+            BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("banko_oturum", Islem.Sil);
+            await using var b = await veri.AcAsync(iptal);
+            var o = await OturumAsync(b, "where o.id = @p0 and o.sube_id = @p1",
+                                      [id, baglam.SubeId ?? 0], iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Oturum bulunamadı.");
+
+            if (o.Durum == Kapandi)
+                throw GentegreHatasi.IsKurali(
+                    "Kapanmış oturum silinmez: teslim tutanağı ve gün sonu kaydı buna bağlı. "
+                    + "Yanlış kapatıldıysa \"Yeniden Aç\" kullanılır.");
+            if (o.IslemAdet > 0)
+                throw GentegreHatasi.IsKurali(
+                    $"Bu oturumda {o.IslemAdet} işlem var; silinemez. Tahsilatlar oturuma "
+                    + "bağlı - düzeltme iade/düzeltme fişiyle yapılır.");
+            if (o.FarkIslemId is > 0)
+                throw GentegreHatasi.IsKurali("Oturumun fark fişi var; silinemez.");
+            // BASKASININ OTURUMU: silmek gorevlinin kaydini yok etmek olurdu.
+            //   Onay yetkisi olan (sorumlu, yonetici) silebilir.
+            if (o.KullaniciId != baglam.KullaniciId
+                && !baglam.Yetkiler.Var("banko_onay", Islem.Degistir))
+                throw GentegreHatasi.IsKurali("Bu oturum başka bir görevliye ait.");
+
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            // SILME LOGU DELETE'TEN ONCE, tam govdeyle (ULog deseni): silinen
+            //   satir sonradan yalniz logdan okunabilir.
+            await log.YazAsync(b, islem, LogIslemi.Sil, LogTablo, (int)id, baglam.KullaniciId,
+                baglam.SubeId, baglam.Ip,
+                new
+                {
+                    banko = o.BankoKod, gorevli = o.Gorevli, vardiya = o.Vardiya,
+                    durum = o.Durum, devir = o.DevirTutar, acilisSayim = o.AcilisSayim,
+                    acilisFark = o.AcilisFark, not = o.AcilisNot,
+                }, iptal: iptal);
+            await b.CalistirAsync("delete from public.banko_oturum_pos where oturum_id = @p0",
+                                  islem, [id], iptal);
+            await b.CalistirAsync("delete from public.banko_oturum_kupur where oturum_id = @p0",
+                                  islem, [id], iptal);
+            await b.CalistirAsync("delete from public.banko_oturum where id = @p0",
+                                  islem, [id], iptal);
+            await islem.CommitAsync(iptal);
+            return Results.NoContent();
+        });
+
         // ------------------------------------------------------- yeniden aç
         // AYRI YETKİ: kapanan oturum normalde düzeltilmez, hatalı tahsilat
         //   iade/düzeltme fişiyle çözülür. Yine de yanlış kapatılan oturum
@@ -646,7 +702,7 @@ public static class BankoOturumUclari
     private static readonly Dictionary<short, string> VardiyaVarsayilan = new()
     {
         [1] = "08:00-16:00", [2] = "12:00-20:00", [3] = "16:00-24:00",
-        [4] = "00:00-08:00", [9] = "08:00-22:00",
+        [4] = "18:00-08:00", [9] = "08:00-22:00",
     };
 
     /// <summary>"HH:MM" doğrulaması: boş geçilebilir, bozuk geçilemez.</summary>
@@ -663,17 +719,32 @@ public static class BankoOturumUclari
     /// listeler bunu basıyor; biçimi iki yerde kurmamak için tek kaynak.
     /// </summary>
     private static (string Ad, string Bas, string Bit) VardiyaCoz(
-        short kod, string? bas, string? bit, string? ayar)
+        short kod, string? aralikMetni, string? ayar)
     {
         if (kod == 0) return ("", "", "");
         var ad = VardiyaAdlari.TryGetValue(kod, out var a) ? a : "";
-        var aralik = (string.IsNullOrWhiteSpace(ayar)
-                      ? VardiyaVarsayilan.GetValueOrDefault(kod, "")
-                      : ayar!).Split('-');
-        // İstemci saat verdiyse o geçerli; vermediyse kurum ayarı/varsayılan.
-        var b1 = Saat(string.IsNullOrWhiteSpace(bas) ? aralik.ElementAtOrDefault(0) : bas);
-        var b2 = Saat(string.IsNullOrWhiteSpace(bit) ? aralik.ElementAtOrDefault(1) : bit);
-        var metin = ad + (b1.Length > 0 && b2.Length > 0 ? $" · {b1}-{b2}" : "");
+        // SAAT ARALIĞI TEK ALAN (kullanıcı 08.10.2026: "başlangıç ve bitiş tek
+        //   edit içinde olsun"): "08:00-22:00". İstemci vermezse kurum ayarı,
+        //   o da yoksa varsayılan. Ayrıştırma ve doğrulama SUNUCUDA - biçimi
+        //   iki yerde kontrol etmek, birinin gevşemesi demekti.
+        var kaynak = !string.IsNullOrWhiteSpace(aralikMetni) ? aralikMetni!
+                   : !string.IsNullOrWhiteSpace(ayar) ? ayar!
+                   : VardiyaVarsayilan.GetValueOrDefault(kod, "");
+        var par = kaynak.Replace("–", "-").Split('-', StringSplitOptions.TrimEntries);
+        var b1 = Saat(par.ElementAtOrDefault(0));
+        var b2 = Saat(par.ElementAtOrDefault(1));
+        if (b1.Length > 0 && b2.Length == 0)
+            throw GentegreHatasi.Dogrulama("Saat aralığı \"SS:DD-SS:DD\" biçiminde olmalı.");
+        // ERTESİ GÜNE TAŞAN VARDİYA (kullanıcı 08.10.2026: "gece vardiyası
+        //   genelde 18:00-08:00 olur, akşam başlar ve ertesi gün biter"):
+        //   bitiş saati başlangıçtan küçükse hata değil, gece vardiyasıdır.
+        //   Metne "+1 gün" damgası düşüyor - tutanakta "18:00-08:00" tek
+        //   başına hangi güne ait olduğunu söylemiyordu.
+        var tasar = b1.Length > 0 && b2.Length > 0
+                    && string.CompareOrdinal(b2, b1) <= 0;
+        var metin = ad + (b1.Length > 0 && b2.Length > 0
+                          ? $" · {b1}-{b2}" + (tasar ? " (+1 gün)" : "")
+                          : "");
         return (metin, b1, b2);
     }
 
@@ -815,6 +886,7 @@ public static class BankoOturumUclari
         object?[] par, CancellationToken iptal)
         => await b.TekAsync($"""
                select o.id, o.banko_id, o.banko_kod, o.banko_ad, o.kullanici_id, o.vardiya,
+                      o.vardiya_kod, o.vardiya_bas, o.vardiya_bit,
                       o.durum, o.devir_tutar, o.acilis_sayim, o.acilis_fark, o.acilis_not,
                       o.acilis_talep_ts,
                       o.acilis_ts, o.acilis_onay_id, o.acilis_onay_ts, o.red_neden,
@@ -830,25 +902,27 @@ public static class BankoOturumUclari
                  {kosul}
                """, null, par, o => new OturumOzeti(
                    o.GetInt64(0), o.GetInt32(1), o.GetString(2), o.GetString(3), o.GetInt32(4),
-                   o.GetString(5), o.GetInt16(6), o.GetDecimal(7), o.GetDecimal(8), o.GetDecimal(9),
-                   o.GetString(10), o.GetDateTime(11),
-                   o.IsDBNull(12) ? null : o.GetDateTime(12),
-                   o.IsDBNull(13) ? null : o.GetInt32(13),
-                   o.IsDBNull(14) ? null : o.GetDateTime(14), o.GetString(15),
-                   o.GetDecimal(16), o.GetDecimal(17), o.GetDecimal(18), o.GetDecimal(19),
-                   o.GetInt64(20), o.GetDecimal(21), o.GetDecimal(22), o.GetDecimal(23),
-                   o.GetDecimal(24), o.GetInt16(25), o.GetString(26), o.GetDecimal(27),
-                   o.GetDecimal(28), o.IsDBNull(29) ? null : o.GetInt32(29),
-                   o.IsDBNull(30) ? null : o.GetDateTime(30),
-                   o.IsDBNull(31) ? null : o.GetDateTime(31),
-                   o.IsDBNull(32) ? null : o.GetInt32(32), o.GetString(33),
-                   o.GetInt16(34) == 1, o.GetInt16(35) == 1, o.GetInt16(36) == 1,
-                   o.GetDecimal(37), o.IsDBNull(38) ? null : o.GetInt32(38),
-                   o.IsDBNull(39) ? null : o.GetInt32(39), o.GetDecimal(40),
-                   o.GetString(41)), iptal);
+                   o.GetString(5), o.GetInt16(6), o.GetString(7), o.GetString(8),
+                   o.GetInt16(9), o.GetDecimal(10), o.GetDecimal(11), o.GetDecimal(12),
+                   o.GetString(13), o.GetDateTime(14),
+                   o.IsDBNull(15) ? null : o.GetDateTime(15),
+                   o.IsDBNull(16) ? null : o.GetInt32(16),
+                   o.IsDBNull(17) ? null : o.GetDateTime(17), o.GetString(18),
+                   o.GetDecimal(19), o.GetDecimal(20), o.GetDecimal(21), o.GetDecimal(22),
+                   o.GetInt64(23), o.GetDecimal(24), o.GetDecimal(25), o.GetDecimal(26),
+                   o.GetDecimal(27), o.GetInt16(28), o.GetString(29), o.GetDecimal(30),
+                   o.GetDecimal(31), o.IsDBNull(32) ? null : o.GetInt32(32),
+                   o.IsDBNull(33) ? null : o.GetDateTime(33),
+                   o.IsDBNull(34) ? null : o.GetDateTime(34),
+                   o.IsDBNull(35) ? null : o.GetInt32(35), o.GetString(36),
+                   o.GetInt16(37) == 1, o.GetInt16(38) == 1, o.GetInt16(39) == 1,
+                   o.GetDecimal(40), o.IsDBNull(41) ? null : o.GetInt32(41),
+                   o.IsDBNull(42) ? null : o.GetInt32(42), o.GetDecimal(43),
+                   o.GetString(44)), iptal);
 
     public sealed record OturumOzeti(
         long Id, int BankoId, string BankoKod, string BankoAd, int KullaniciId, string Vardiya,
+        short VardiyaKod, string VardiyaBas, string VardiyaBit,
         short Durum, decimal DevirTutar, decimal AcilisSayim, decimal AcilisFark, string AcilisNot,
         DateTime AcilisTalepTs, DateTime? AcilisTs, int? AcilisOnayId, DateTime? AcilisOnayTs, string RedNeden,
         decimal NakitTahsilat, decimal NakitIade, decimal PosTutar, decimal BankaTutar,
@@ -863,8 +937,8 @@ public static class BankoOturumUclari
     public sealed record PosEslesmeSatiri(int? BankoPosId, decimal? CihazToplam,
                                           bool? UlasilamadiMi, string? Aciklama);
     public sealed record PosEslesmeIstegi(List<PosEslesmeSatiri>? Satirlar);
-    public sealed record AcIstegi(int? BankoId, short? VardiyaKod, string? VardiyaBas,
-                                  string? VardiyaBit, decimal? AcilisSayim, string? Not,
+    public sealed record AcIstegi(int? BankoId, short? VardiyaKod, string? VardiyaAralik,
+                                  decimal? AcilisSayim, string? Not,
                                   List<KupurSatiri>? Kupurler);
     public sealed record OnayIstegi(string? Not);
     public sealed record GunSonuIstegi(decimal? KapanisSayim, short? FarkNeden, string? FarkAciklama,

@@ -81,6 +81,11 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   //   kullanıcı yine elle düzeltebilir.
   const [vardiyalar, setVardiyalar] = useState<VardiyaSecenek[]>([]);
   const [vardiyaKod, setVardiyaKod] = useState(0);
+  // SAAT ARALIĞI İKİ FORMATLI ALAN, YAN YANA ve DAR (kullanıcı 08.10.2026:
+  //   "yine önceki gibi formatlı 2 edit olsun ama geniş olmasın"). Biçimi
+  //   tarayıcı tutuyor (type=time); sunucuya "18:00-08:00" olarak birleşip
+  //   gidiyor, ayrıştırma ve doğrulama orada - biçimi iki yerde kontrol
+  //   etmek birinin gevşemesi demekti.
   const [vBas, setVBas] = useState('');
   const [vBit, setVBit] = useState('');
   const [acilisTutar, setAcilisTutar] = useState('');
@@ -169,7 +174,8 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
 
   const ac = () => guvenli(async () => {
     const y = await api.bankoOturumAc({
-      bankoId, vardiyaKod, vardiyaBas: vBas, vardiyaBit: vBit,
+      bankoId, vardiyaKod,
+      vardiyaAralik: vBas && vBit ? `${vBas}-${vBit}` : '',
       acilisSayim, not: acilisNot,
     });
     // Açılıştan sonra AYNI ekranda kalınır: onay bekliyorsa bekleme kutusu,
@@ -288,24 +294,21 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
                 <select value={vardiyaKod} onChange={e => {
                   const k = Number(e.target.value);
                   setVardiyaKod(k);
-                  // Seçime göre ÖNERİ saatler: kurum ayarından geliyor,
+                  // Seçime göre ÖNERİ aralık: kurum ayarından geliyor,
                   //   kullanıcı yine elle düzeltebilir.
                   const v = vardiyalar.find(x => x.kod === k);
                   setVBas(v?.bas ?? ''); setVBit(v?.bit ?? '');
                 }}>
                   <option value={0}>— seçin —</option>
-                  {vardiyalar.map(v => (
-                    <option key={v.kod} value={v.kod}>
-                      {v.ad}{v.bas && v.bit ? ` (${v.bas}–${v.bit})` : ''}
-                    </option>
-                  ))}
+                  {vardiyalar.map(v => <option key={v.kod} value={v.kod}>{v.ad}</option>)}
                 </select>
               </label>
-              <label>Başlangıç
-                <input type="time" value={vBas} onChange={e => setVBas(e.target.value)} />
-              </label>
-              <label>Bitiş
-                <input type="time" value={vBit} onChange={e => setVBit(e.target.value)} />
+              <label>Saat aralığı
+                <span className="bo-saat">
+                  <input type="time" value={vBas} onChange={e => setVBas(e.target.value)} />
+                  <b>–</b>
+                  <input type="time" value={vBit} onChange={e => setVBit(e.target.value)} />
+                </span>
               </label>
               <label>Kasa hesabı
                 <input readOnly value={secili?.hesap || '—'} />
@@ -325,19 +328,21 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
                 parayı banknot banknot saymak günlük işi yavaşlatıyordu; tek
                 devir tutarı giriliyor, fark yine sistem devrine göre
                 hesaplanıyor. */}
-            <div className="bo-izgara">
+            {/* ÜÇÜ AYNI SATIRDA (kullanıcı 08.10.2026): sayım, fark ve not
+                birlikte okunuyor - sayımı girip farkı görmek ve gerekçeyi
+                yazmak tek harekettir, araya satır sonu koymak gözü
+                yukarı-aşağı gezdiriyordu. */}
+            <div className="bo-izgara bo-sayim">
               <label>Kasada bulunan (devir sayımı)
                 <input value={acilisTutar} onChange={e => setAcilisTutar(e.target.value)}
                        className="bo-buyuk" placeholder="0,00" inputMode="decimal" />
               </label>
-            </div>
-
-            <div className="bo-izgara">
               <label>Fark
                 <input readOnly className={'bo-buyuk' + (acilisFark !== 0 ? ' bo-kir' : '')}
                        value={para(acilisFark) + ' ₺'} />
               </label>
-              <label className="bo-genis">Not{acilisFark !== 0 ? ' (fark var - açıklayın)' : ''}
+              <label className="bo-not-alan">
+                Not{acilisFark !== 0 ? ' (fark var - açıklayın)' : ''}
                 <input value={acilisNot} onChange={e => setAcilisNot(e.target.value)} />
               </label>
             </div>
@@ -802,6 +807,12 @@ const bostil = `
   border-radius:4px; padding:5px 7px; font-size:12.5px; background:var(--giris-arka, #fff);
   color: var(--metin, #1f2d3a); }
 .bo-izgara input[readonly], .bo-tek input[readonly] { background:#f6f8fa; }
+.bo-sayim { grid-template-columns: 180px 150px 1fr; }
+.bo-not-alan input { width:100% }
+@media (max-width: 720px) { .bo-sayim { grid-template-columns: 1fr } }
+.bo-saat { display:flex; align-items:center; gap:6px }
+.bo-saat input { width:92px; flex:none }
+.bo-saat b { color: var(--ikincil-metin, #6b7a8b) }
 .bo-buyuk { font-family: Consolas, monospace; font-weight:bold; text-align:right; }
 .bo-kir { color:#b3261e; }
 .bo-not { color: var(--ikincil-metin, #6b7a8b); font-size:11px; line-height:1.6; padding:0 11px 9px; }

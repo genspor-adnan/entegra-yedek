@@ -804,6 +804,13 @@ public static partial class AksiyonKatalogu
             new("banko-oturum.duzenle", "✎ Düzenle", "banko_oturum",
                 Kisayol: "Enter", Hedef: "araccubugu,sagtus,palet",
                 KaynakKodu: "banko_oturum", Islem: Islem.Gor, KayitGerekir: true, Sira: 8),
+            // SIL yalniz BOS oturum icin (kullanici 08.10.2026): kapanmis
+            //   oturum ve islem gormus oturum silinmez - tutanak, fark fisi
+            //   ve tahsilat satirlari ona bagli. Sunucu reddi soruya doner.
+            new("banko-oturum.sil", "🗑 Sil", "banko_oturum",
+                Hedef: "sagtus,palet", KaynakKodu: "banko_oturum",
+                Islem: Islem.Sil, KayitGerekir: true, Sira: 9,
+                Ipucu: "Yalnız hiç işlem görmemiş, kapanmamış oturum silinebilir"),
             // TUTANAK LISTEDEN DE: kapanmis bir oturumun belgesi sonradan
             //   istenebilir (denetim, mutabakat) - akis ekranina donmek
             //   yerine gecmisten dogrudan acilir.

@@ -706,6 +706,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         setAcikOturumId(oturum);
         return;
       }
+      if (kod === 'banko-oturum.sil') {
+        const oturum = Number(satir?.id ?? 0);
+        if (!oturum) { mesaj('Önce bir oturum seçin.'); return }
+        // Kurallar SUNUCUDA (kapanmis oturum, islem gormus oturum silinmez);
+        //   ekran yalniz onay soruyor ve reddi mesaja ceviriyor.
+        if (!(await onay(`#${oturum} oturumu silinecek. Yalnız hiç işlem görmemiş,`
+                         + ' kapanmamış oturum silinebilir.', true))) return;
+        await guvenli(async () => {
+          await api.bankoOturumSil(oturum);
+          mesaj('Oturum silindi.');
+          setYenile(t => t + 1);
+        });
+        return;
+      }
       if (kod === 'banko-oturum.tutanak') {
         const oturumId = Number(satir?.id ?? 0);
         if (!oturumId) { mesaj('Önce bir oturum seçin.'); return }
@@ -1119,6 +1133,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           setAcikBelgeId(Number(satir.id));
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
+        // BANKO OTURUMU cift tikta MODAL (kullanici 08.10.2026: "Banko
+        //   Oturumlari cift tiklayinca duzenle acilsin") - "Duzenle"
+        //   aksiyonuyla ayni davranis, akis tek yerde.
+        else if (tanim.kaynak === 'bankoOturum') setAcikOturumId(Number(satir.id));
         // Gelen belgenin KARTI YOK: cift tik gonderenin goruntusunu acar.
         else if (tanim.kaynak === 'gelen-belge')
           void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));
