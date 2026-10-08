@@ -74,7 +74,19 @@ function suzgecCoz(yol: string): string | undefined {
   return e ? decodeURIComponent(e[1]) : undefined;
 }
 
-export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
+export function MenuDuzeni({ gomulu, kaydetBagla }: {
+  gomulu?: boolean;
+  /**
+   * GÖMÜLÜ MODDA KAYDETMEYİ EBEVEYN YAPAR (kullanıcı 08.10.2026: "tek kaydet
+   * uygulama yeterli"). Ekran kendi Kaydet düğmesini çizmez; kaydetme
+   * fonksiyonunu buradan verir, Kurum Profili'nin ana Kaydet'i çağırır.
+   *
+   * Fonksiyon bir ref üzerinden veriliyor: `kaydet` her render'da yeniden
+   * kuruluyor ve doğrudan geçirmek ebeveyni her render'da güncellemeye
+   * zorlardı.
+   */
+  kaydetBagla?: (fn: (() => Promise<void>) | null) => void;
+} = {}) {
   const { kullanici, yetki } = useOturum();
   const duzenleyebilir = yetki('menu.duzen', 'degistir');
   const [subeId, setSubeId] = useState<number>(kullanici?.subeId ?? 0);
@@ -577,6 +589,15 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
     if (aktarimGirdi.current) aktarimGirdi.current.value = '';
   };
 
+  // Kaydetme fonksiyonu ebeveyne BİR KEZ verilir, içeriği ref'ten okunur.
+  const kaydetRef = useRef(kaydet);
+  kaydetRef.current = kaydet;
+  useEffect(() => {
+    if (!kaydetBagla) return;
+    kaydetBagla(() => kaydetRef.current());
+    return () => kaydetBagla(null);
+  }, [kaydetBagla]);
+
   const sifirla = async () => {
     if (!subeId) return;
     try {
@@ -694,11 +715,19 @@ export function MenuDuzeni({ gomulu }: { gomulu?: boolean } = {}) {
         {/* KAYDEDİLMEDİ ROZETİ: ekrandaki düzen henüz menüye uygulanmadı. */}
         {kirli && <span className="rozet uyari" title={c('Menüye uygulanması için kaydedin')}>
           {c('kaydedilmedi')}</span>}
-        <button type="button" className={`d birincil${kirli ? ' mn-bekleyen' : ''}`}
-                disabled={!duzenleyebilir}
-                onClick={() => void kaydet()}>💾 {c('Kaydet & Uygula')}</button>
-        <button type="button" className="d" disabled={!duzenleyebilir || subeyeOzel === 0}
-                onClick={() => void sifirla()}>⤾ {c('Varsayılana dön')}</button>
+        {/* GÖMÜLÜ MODDA KENDİ KAYDET'İ YOK: Kurum Profili'nin ana "Kaydet &
+            Uygula" düğmesi menü düzenini de kaydeder. İki kaydet düğmesi,
+            hangisinin neyi kaydettiği sorusunu doğuruyordu. "Varsayılana dön"
+            de orada gereksiz: düzeni sıfırlamak ayrı ekrandan yapılır. */}
+        {!gomulu && (
+          <>
+            <button type="button" className={`d birincil${kirli ? ' mn-bekleyen' : ''}`}
+                    disabled={!duzenleyebilir}
+                    onClick={() => void kaydet()}>💾 {c('Kaydet & Uygula')}</button>
+            <button type="button" className="d" disabled={!duzenleyebilir || subeyeOzel === 0}
+                    onClick={() => void sifirla()}>⤾ {c('Varsayılana dön')}</button>
+          </>
+        )}
         {/* AKTARIM: düzen JSON dosyası olarak alınır, başka şubeye / kuruluma
             yüklenir. İçe aktarım yalnız EKRANA yüklenir - geçerli olması için
             Kaydet & Uygula gerekir, yanlış dosya menüyü sessizce değiştirmesin. */}

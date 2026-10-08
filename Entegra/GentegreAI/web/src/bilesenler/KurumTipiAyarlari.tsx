@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './kurumTipiAyarlari.css';
 import { api } from '../api/istemci';
@@ -380,6 +380,15 @@ export function KurumTipiAyarlari() {
     }
   };
 
+  /**
+   * MENÜ DÜZENİNİ DE ANA KAYDET KAYDEDER (kullanıcı 08.10.2026: "tek kaydet
+   * uygulama yeterli"). Gömülü ekran kaydetme fonksiyonunu buraya veriyor;
+   * sekme hiç açılmadıysa `null` kalır ve kaydetme onu atlar.
+   */
+  const menuKaydet = useRef<(() => Promise<void>) | null>(null);
+  const menuKaydetBagla = useCallback(
+    (fn: (() => Promise<void>) | null) => { menuKaydet.current = fn }, []);
+
   const kaydet = async () => {
     if (!profil) return;
     setKaydediyor(true);
@@ -416,8 +425,19 @@ export function KurumTipiAyarlari() {
       //   giriste gorurdu.
       const aktifSube = kullanici?.subeId ?? 0;
       if (subeId === aktifSube) await tazele();
+      // MENÜ DÜZENİ DE AYNI KAYDET'TE: sekme açıldıysa onun değişiklikleri de
+      //   yazılır. PROFİLDEN SONRA çağrılıyor - profil kaydı modül kümesini
+      //   değiştirebilir ve menü ona göre çizilir. Menü kaydı hata verirse
+      //   profil kaydı geri alınmaz; mesaj ayrı verilir, çünkü ikisi ayrı
+      //   kayıttır ve biri olduysa onu saklamak doğru.
+      let menuNotu = '';
+      if (menuKaydet.current) {
+        try { await menuKaydet.current() }
+        catch (h) { menuNotu = ' ' + c('Menü düzeni kaydedilemedi: ') + hataMetni(h) }
+      }
       mesaj('Kurum profili kaydedildi.'
-            + (subeId !== aktifSube ? ' (Menü aktif şubenin profiline göre çizilir.)' : ''));
+            + (subeId !== aktifSube ? ' (Menü aktif şubenin profiline göre çizilir.)' : '')
+            + menuNotu);
     } catch (h) { setHata(hataMetni(h)) }
     finally { setKaydediyor(false) }
   };
@@ -643,7 +663,7 @@ export function KurumTipiAyarlari() {
 
             Bileşen AYNI (`/menu-duzeni` rotası da onu açar) - iki kopya bakım
             edilmiyor. */}
-        <MenuDuzeni gomulu />
+        <MenuDuzeni gomulu kaydetBagla={menuKaydetBagla} />
       </div>
 
       {/* 4 · DATA KULLANIMI: kurumun hangi veriyi kullandığı. Kategoriler
@@ -928,11 +948,12 @@ export function KurumTipiAyarlari() {
                 </td></tr>
               )}
             </tbody></table></div>
+          {/* İKİNCİ KAYDET KALDIRILDI (kullanıcı 08.10.2026: "tek kaydet
+              uygulama yeterli"): üstteki araç çubuğundaki "Kaydet & Uygula"
+              her sekmede görünüyor ve menü düzenini de kaydediyor. Aynı işi
+              yapan ikinci düğme, hangisinin neyi kaydettiği sorusunu
+              doğuruyordu. */}
           <div style={{padding: '8px 12px', display: 'flex', gap: '6px'}}>
-            <div className={`btn primary${kaydediyor ? ' sonuk' : ''}`}
-                 onClick={() => { if (!kaydediyor) void kaydet() }}>
-              💾 Profili Kaydet &amp; Menüyü Uygula
-            </div>
             {/* Adimlar baska ekranda tamamlaniyor - donunce listeyi tazele. */}
             <div className="btn" onClick={() => void yukle()}>🔄 Adımları yenile</div>
           </div>

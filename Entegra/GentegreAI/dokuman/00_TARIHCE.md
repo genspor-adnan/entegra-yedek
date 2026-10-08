@@ -20250,3 +20250,30 @@ kişi, dis_istem_kurumu 2, dis_kurum_yonetici 1, hasta_portali 2,
 firma_yetkilisi 0); `firma_yetkilisi` kapatıldı/açıldı, kadro rolü (`hemsire`)
 denemesi 422 verdi; rol silme denemesi 422, liste araç çubuğunda Sil düğmesi
 yok. dotnet test 218, vitest 789, tsc temiz.
+
+### 08.10.2026 — tek "Kaydet & Uygula": menü düzeni de ana kaydete bağlandı
+
+Kullanıcı: *"menü düzeni sekmesindeki kaydet uygula butonuna gerek yok, bunun
+işlevini üstteki ana kaydet uygula yapsın, tek kaydet uygulama yeterli, ayrıca
+ordaki varsayılana dön butonuna da gerek yok"*.
+
+* `MenuDuzeni` **gömülü** modda kendi `Kaydet & Uygula` ve `Varsayılana dön`
+  düğmelerini çizmiyor; kaydetme fonksiyonunu `kaydetBagla` prop'uyla ebeveyne
+  veriyor (bir **ref** üzerinden: `kaydet` her render'da yeniden kuruluyor,
+  doğrudan geçirmek ebeveyni her render'da güncellemeye zorlardı).
+* Kurum Profili'nin araç çubuğundaki tek `Kaydet & Uygula` artık menü düzenini
+  de kaydediyor. Sıra **profil → menü**: profil kaydı açık modül kümesini
+  değiştirebiliyor ve menü ona göre çiziliyor. Menü kaydı hata verirse profil
+  kaydı geri alınmıyor, mesaj ayrı veriliyor - ikisi ayrı kayıt, biri olduysa
+  onu saklamak doğru.
+* "Özet & Kurulum" sekmesindeki ikinci kaydet düğmesi (*"Profili Kaydet &
+  Menüyü Uygula"*) kaldırıldı: üstteki düğme her sekmede görünüyor ve aynı işi
+  yapıyor; iki düğme "hangisi neyi kaydediyor" sorusunu doğuruyordu.
+* Sekmede **"kaydedilmedi" rozeti kaldı** - kaydetmenin gerektiği bilgisi
+  düğmeden değil rozetten okunuyor.
+
+Doğrulama (GenProfil → yerel API): Menü Düzeni sekmesinde yalnız "⬇ Dışa aktar
+· ⬆ İçe aktar" duruyor; bir bölge pasife alınınca "kaydedilmedi" rozeti çıktı,
+üstteki tek `Kaydet & Uygula` basıldığında `menu_duzen`'e 50 satır yazıldı.
+Roller sekmesinde portal rolleri de göründü (5 satır). vitest 789, tsc temiz,
+dev veritabanı temiz.
