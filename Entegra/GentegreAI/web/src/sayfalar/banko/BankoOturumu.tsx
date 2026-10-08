@@ -470,7 +470,13 @@ function KupurTablosu({ deger, degistir, toplam }: {
 }
 
 const bostil = `
-.bo-sayfa { padding: 14px 16px 24px; }
+/* KIRPILMA (kullanici: "alt taraf kirpilmis goremiyorum"): .fm-sayfa
+   display:flex / column. Flex cocuklarin varsayilan flex-shrink:1 degeri
+   kutulari pencereye SIGDIRMAYA calisiyor, kutu kendi icerigini kirpiyor ve
+   toplam tasma olusmadigi icin scroll da cikmiyordu - alt kisim erisilemez
+   kaliyordu. Bu akis ekrani uzun formlardan olusuyor; blok akisa dondurup
+   kaydirmayi sayfanin kendisine veriyoruz. */
+.bo-sayfa { display: block; height: 100%; overflow-y: auto; padding: 14px 16px 24px; }
 .bo-baslik { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
 .bo-baslik h2 { margin:0; font-size:17px; }
 .bo-ust { color: var(--ikincil-metin, #6b7a8b); font-size:12px; }
@@ -489,7 +495,7 @@ const bostil = `
 .bo-rz.ok { background:#e2f3e8; color:#2e7d46; border-color:#bfe3cb; }
 .bo-rz.sari { background:#fdf6e3; color:#8a6218; border-color:#f2ddbf; }
 .bo-kutu { border:1px solid var(--cizgi, #cdd6e0); border-radius:6px; background:var(--kart, #fff);
-  margin-bottom:12px; overflow:hidden; }
+  margin-bottom:12px; }
 .bo-kb { background:var(--baslik-arka, #f3f6fa); border-bottom:1px solid var(--cizgi, #cdd6e0);
   padding:7px 11px; font-weight:bold; font-size:12.5px; display:flex; gap:10px; align-items:center; }
 .bo-kb2 { font-weight:bold; font-size:12px; margin:8px 0 4px; color:#2c4a6b; }
