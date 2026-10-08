@@ -20678,3 +20678,38 @@ rol olduğu için hakkı korundu; kaldırılması isteniyorsa `vezne` rolünden
 Doğrulama: yönetici kendi oturumunu onayladı (oturum #5 kapandı, tutanak
 TT-2026-000001); görüntüleme kısıtı SQL'den sayıldı (yetkili 1 satır, yetkisiz
 0) ve liste ucundan doğrulandı. vitest 789, dotnet test 218.
+
+### 08.10.2026 — Vardiya seçenekli + formatlı saat; kupür yerine tek devir (994)
+
+Kullanıcı: *"Banko Oturumu kartında vardiya seçenekli olsun, tüm gün opsiyonu
+da olabilir, saatler formatlı olsun"*, *"oturum açma/kapatma da kupür kaldır,
+yerine devir olsun"*, *"tüm gün 08-22 olsun"*.
+
+**Vardiya seçenekli.** Serbest metinken "Sabah", "sabah vardiyası", "08-16"
+hepsi aynı şeyi anlatıyordu; süzülemiyor ve iki oturum karşılaştırılamıyordu.
+Artık kod + saat: `vardiya_kod` (1 Sabah · 2 Öğleden sonra · 3 Akşam · 4 Gece
+/ nöbet · 9 Tüm gün) ve `vardiya_bas`/`vardiya_bit` varchar 'HH:MM' (şemanın
+diğer saat kolonlarıyla aynı biçim). Ekranda `<input type="time">` - biçimi
+tarayıcı tutuyor, sunucu `^([01]\d|2[0-4]):[0-5]\d$` ile doğruluyor.
+
+**Saatler kurum ayarından** (`banko.vardiya<kod>` = "HH:MM-HH:MM"): mesai her
+kurumda aynı değil; kod sabit kalırken saat değişebilsin. Seçim yapılınca
+öneri saatler forma yazılıyor, kullanıcı elle düzeltebiliyor. Tüm gün
+**08:00–22:00** (kullanıcı isteği; ilk değer 08:00–18:00 idi).
+
+**Görünen metin sunucuda üretiliyor**: "Tüm gün · 08:00-22:00". Tutanak ve
+listeler onu basıyor - biçimi iki yerde kurmamak için tek kaynak. Seçenek
+listesi de sunucudan geliyor (`uygun-bankolar` yanıtında), istemci kendi
+listesini tutmuyor: kurum ayarı değişince ekran kendiliğinden uyuyor.
+
+**Kupür dökümü kaldırıldı**, yerine tek devir tutarı. Kasadaki parayı banknot
+banknot saymak günlük işi yavaşlatıyordu; açılışta "Kasada bulunan (devir
+sayımı)", gün sonunda "Sayılan nakit (kasadaki devir)" tek alan. Fark yine
+sistem devrine göre hesaplanıyor. Banko kartındaki "kupür dökümüyle" ayarı ve
+tutanaktaki kupür bölümü de kalktı. `kupur_dokumu` kolonu ve
+`banko_oturum_kupur` tablosu DB'de duruyor - eski oturumların dökümü
+kaybolmasın.
+
+Doğrulama: modal "Tüm gün" seçilince saatleri 08:00–22:00 getirdi, oturum
+açıldı ve veritabanına "Tüm gün · 08:00-22:00" / kod 9 / 08:00 / 22:00 olarak
+yazıldı; kupür tablosu ekranlarda yok. vitest 789, dotnet test 218.

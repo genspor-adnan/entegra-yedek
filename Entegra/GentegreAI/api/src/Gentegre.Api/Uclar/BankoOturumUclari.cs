@@ -72,7 +72,25 @@ public static class BankoOturumUclari
                 gunSonuOnay = o.GetInt16(8) == 1, kupurDokumu = o.GetInt16(9) == 1,
                 birakilacak = o.GetDecimal(10),
             }, iptal);
-            return Results.Ok(liste);
+            // VARDİYA SEÇENEKLERİ saatleriyle birlikte: istemci kendi listesini
+            //   tutmuyor, kurum ayarı değişince ekran kendiliğinden uyuyor.
+            var vardiyalar = new List<object>();
+            foreach (var (kod, ad) in VardiyaAdlari)
+            {
+                var ayar = await b.TekDegerAsync<string>(
+                    "select deger from public.referans where anahtar = @p0",
+                    null, [$"banko.vardiya{kod}"], iptal);
+                var par = (string.IsNullOrWhiteSpace(ayar)
+                           ? VardiyaVarsayilan.GetValueOrDefault(kod, "")
+                           : ayar!).Split('-');
+                vardiyalar.Add(new
+                {
+                    kod, ad,
+                    bas = par.ElementAtOrDefault(0) ?? "",
+                    bit = par.ElementAtOrDefault(1) ?? "",
+                });
+            }
+            return Results.Ok(new { bankolar = liste, vardiyalar });
         });
 
         // ------------------------------------------------------ aktif oturum
@@ -209,6 +227,14 @@ public static class BankoOturumUclari
             if (banko.SubeId != (baglam.SubeId ?? 0))
                 throw GentegreHatasi.IsKurali("Banko başka şubeye ait.");
 
+            // VARDİYA: kod + saat sunucuda metne çevrilir (994).
+            var vKod = istek.VardiyaKod ?? 0;
+            if (vKod != 0 && !VardiyaAdlari.ContainsKey(vKod))
+                throw GentegreHatasi.Dogrulama("Geçersiz vardiya seçimi.");
+            var vAyar = vKod == 0 ? null
+                      : await AyarAsync(b, null!, $"banko.vardiya{vKod}", iptal);
+            var (vMetin, vBas, vBit) = VardiyaCoz(vKod, istek.VardiyaBas, istek.VardiyaBit, vAyar);
+
             // DEVİR SUNUCUDAN: istemciden gelen değer yok sayılır.
             var devir = banko.Devir;
             var sayim = Math.Round(istek.AcilisSayim ?? 0m, 2);
@@ -221,15 +247,17 @@ public static class BankoOturumUclari
             {
                 id = await b.TekDegerAsync<long>("""
                     insert into public.banko_oturum
-                        (banko_id, sube_id, kullanici_id, vardiya, durum, devir_tutar,
+                        (banko_id, sube_id, kullanici_id, vardiya, vardiya_kod,
+                         vardiya_bas, vardiya_bit, durum, devir_tutar,
                          acilis_sayim, acilis_fark, acilis_not, acilis_ts,
                          kasada_birakilan, ekleyen)
-                    values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8,
+                    values (@p0, @p1, @p2, @p3, @p10, @p11, @p12, @p4, @p5, @p6, @p7, @p8,
                             case when @p4 = 2 then now() end, @p9, @p2)
                     returning id
                     """, islem,
-                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, Kirp(istek.Vardiya, 30),
-                     durum, devir, sayim, fark, Kirp(istek.Not, 400), banko.Birakilacak], iptal);
+                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, Kirp(vMetin, 30),
+                     durum, devir, sayim, fark, Kirp(istek.Not, 400), banko.Birakilacak,
+                     vKod, vBas, vBit], iptal);
             }
             catch (PostgresException h) when (h.SqlState == "23505")
             {
@@ -598,6 +626,57 @@ public static class BankoOturumUclari
         });
     }
 
+    // -------------------------------------------------------------- vardiya
+    /// <summary>
+    /// VARDİYA SEÇENEKLERİ (994, kullanıcı: "vardiya seçenekli olsun, tüm gün
+    /// opsiyonu da olabilir"). Serbest metinken "Sabah", "sabah vardiyası",
+    /// "08-16" hepsi aynı şeyi anlatıyordu; süzülemiyor ve iki oturum
+    /// karşılaştırılamıyordu.
+    ///
+    /// Saatler kurum ayarından gelir (`banko.vardiya<kod>` = "HH:MM-HH:MM"):
+    /// mesai her kurumda aynı değil, kod sabit kalırken saat kuruma göre
+    /// değişebilsin.
+    /// </summary>
+    internal static readonly Dictionary<short, string> VardiyaAdlari = new()
+    {
+        [1] = "Sabah", [2] = "Öğleden sonra", [3] = "Akşam",
+        [4] = "Gece / nöbet", [9] = "Tüm gün",
+    };
+
+    private static readonly Dictionary<short, string> VardiyaVarsayilan = new()
+    {
+        [1] = "08:00-16:00", [2] = "12:00-20:00", [3] = "16:00-24:00",
+        [4] = "00:00-08:00", [9] = "08:00-22:00",
+    };
+
+    /// <summary>"HH:MM" doğrulaması: boş geçilebilir, bozuk geçilemez.</summary>
+    private static string Saat(string? m)
+    {
+        var t = (m ?? "").Trim();
+        if (t.Length == 0) return "";
+        return System.Text.RegularExpressions.Regex.IsMatch(t, @"^([01]\d|2[0-4]):[0-5]\d$")
+            ? t : throw GentegreHatasi.Dogrulama($"Saat biçimi SS:DD olmalı: \"{t}\"");
+    }
+
+    /// <summary>
+    /// Vardiya metnini SUNUCUDA üretir: "Sabah · 08:00-16:00". Tutanak ve
+    /// listeler bunu basıyor; biçimi iki yerde kurmamak için tek kaynak.
+    /// </summary>
+    private static (string Ad, string Bas, string Bit) VardiyaCoz(
+        short kod, string? bas, string? bit, string? ayar)
+    {
+        if (kod == 0) return ("", "", "");
+        var ad = VardiyaAdlari.TryGetValue(kod, out var a) ? a : "";
+        var aralik = (string.IsNullOrWhiteSpace(ayar)
+                      ? VardiyaVarsayilan.GetValueOrDefault(kod, "")
+                      : ayar!).Split('-');
+        // İstemci saat verdiyse o geçerli; vermediyse kurum ayarı/varsayılan.
+        var b1 = Saat(string.IsNullOrWhiteSpace(bas) ? aralik.ElementAtOrDefault(0) : bas);
+        var b2 = Saat(string.IsNullOrWhiteSpace(bit) ? aralik.ElementAtOrDefault(1) : bit);
+        var metin = ad + (b1.Length > 0 && b2.Length > 0 ? $" · {b1}-{b2}" : "");
+        return (metin, b1, b2);
+    }
+
     // ------------------------------------------------------------- yardımcı
     /// <summary>islem_log.tablo_id — banko oturumu.</summary>
     private const int LogTablo = 1385;
@@ -784,7 +863,8 @@ public static class BankoOturumUclari
     public sealed record PosEslesmeSatiri(int? BankoPosId, decimal? CihazToplam,
                                           bool? UlasilamadiMi, string? Aciklama);
     public sealed record PosEslesmeIstegi(List<PosEslesmeSatiri>? Satirlar);
-    public sealed record AcIstegi(int? BankoId, string? Vardiya, decimal? AcilisSayim, string? Not,
+    public sealed record AcIstegi(int? BankoId, short? VardiyaKod, string? VardiyaBas,
+                                  string? VardiyaBit, decimal? AcilisSayim, string? Not,
                                   List<KupurSatiri>? Kupurler);
     public sealed record OnayIstegi(string? Not);
     public sealed record GunSonuIstegi(decimal? KapanisSayim, short? FarkNeden, string? FarkAciklama,

@@ -18,8 +18,9 @@ import { FARK_NEDENLERI } from '../../api/uclar/bankoOturum';
  * ayrıca YAZIYLA yazılır - rakamda tek hane değişikliği belgeyi sahteleştirir,
  * yazı onu yakalar.
  *
- * Döküm kalemleri: kupür sayımı, ödeme türü dağılımı, POS eşleşmesi ve çek
- * teslim listesi. Hepsi oturumun kendi verisinden gelir; tutanak ikinci bir
+ * Döküm kalemleri: ödeme türü dağılımı, POS eşleşmesi ve çek teslim listesi.
+ * Kupür dökümü kaldırıldı (kullanıcı 08.10.2026: "kupür kaldır, yerine devir
+ * olsun") - sayım tek devir tutarı olarak giriliyor. Hepsi oturumun kendi verisinden gelir; tutanak ikinci bir
  * hesap yapmaz - yapsaydı ekranla tutanak arasında fark çıkabilirdi.
  */
 export function BankoTutanak() {
@@ -37,7 +38,6 @@ export function BankoTutanak() {
   if (!d) return <div className="tt-sayfa sonuk">Yükleniyor…</div>;
 
   const o = d.oturum;
-  const kupur = d.kupurler.filter(k => k.asama === 2);
   const nakitKovasi = d.turler.filter(t => t.kasaDurumu === 1);
   const digerKova = d.turler.filter(t => t.kasaDurumu !== 1);
   const cekToplam = d.cekler.reduce((a, c) => a + c.tutar, 0);
@@ -131,29 +131,6 @@ export function BankoTutanak() {
                 : 'Fark fişi üretilmedi; kasa bakiyesi sayımdan farklı kalır.'}
             </div>
           </div>
-        )}
-
-        {kupur.length > 0 && (
-          <>
-            <div className="tt-bolum">Kupür dökümü</div>
-            <table className="tt-tablo tt-kupur">
-              <thead><tr><th>Kupür</th><th>Adet</th><th>Tutar</th></tr></thead>
-              <tbody>
-                {kupur.map(k => (
-                  <tr key={k.birim}>
-                    <td>{k.birim === 1 ? 'Bozuk' : `${k.birim} ₺`}</td>
-                    <td>{k.adet}</td>
-                    <td>{para(k.birim * k.adet)}</td>
-                  </tr>
-                ))}
-                <tr className="tt-a">
-                  <td>Sayılan toplam</td>
-                  <td>{kupur.reduce((a, k) => a + k.adet, 0)}</td>
-                  <td>{para(kupur.reduce((a, k) => a + k.birim * k.adet, 0))}</td>
-                </tr>
-              </tbody>
-            </table>
-          </>
         )}
 
         {d.turler.length > 0 && (

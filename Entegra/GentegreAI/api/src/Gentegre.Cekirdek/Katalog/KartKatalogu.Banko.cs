@@ -121,9 +121,11 @@ public static partial class KartKatalogu
             new("iadeOnay", "iade_onay", "mantik",
                 Baslik: "İade için sorumlu onayı", Grup: "Ayarlar",
                 AltGrup: "Onay ve Kurallar"),
-            new("kupurDokumu", "kupur_dokumu", "mantik",
-                Baslik: "Gün sonu sayımı kupür dökümüyle", Grup: "Ayarlar",
-                AltGrup: "Onay ve Kurallar"),
+            // KUPUR DOKUMU AYARI KALDIRILDI (kullanici 08.10.2026: "oturum
+            //   acma/kapatmada kupur kaldir, yerine devir olsun"): sayim tek
+            //   devir tutari olarak giriliyor, banknot dokumu istenmiyor.
+            //   `kupur_dokumu` kolonu ve banko_oturum_kupur tablosu DB'de
+            //   duruyor - eski oturumlarin dokumu kaybolmasin.
 
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400,
                 Baslik: "Açıklama", Grup: "Ayarlar"),

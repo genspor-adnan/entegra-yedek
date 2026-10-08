@@ -11,9 +11,19 @@ export type UygunBanko = {
   birakilacak: number;
 };
 
+/**
+ * Vardiya seçeneği (994): kod sabit, saatler kurum ayarından
+ * (`banko.vardiya<kod>`). Mesai her kurumda aynı değil.
+ */
+export type VardiyaSecenek = { kod: number; ad: string; bas: string; bit: string };
+
+/** `uygun-bankolar` yanıtı: bankolar + vardiya seçenekleri. */
+export type UygunYanit = { bankolar: UygunBanko[]; vardiyalar: VardiyaSecenek[] };
+
 export type OturumOzeti = {
   id: number; bankoId: number; bankoKod: string; bankoAd: string;
   kullaniciId: number; vardiya: string;
+  vardiyaKod: number; vardiyaBas: string; vardiyaBit: string;
   /** 1 açılış onayı bekliyor · 2 açık · 3 teslime gönderildi · 4 kapandı · 5 reddedildi */
   durum: number;
   devirTutar: number; acilisSayim: number; acilisFark: number; acilisNot: string;
@@ -95,8 +105,8 @@ export type OturumDetay = {
 };
 
 export type AcIstegi = {
-  bankoId: number; vardiya?: string; acilisSayim?: number; not?: string;
-  kupurler?: KupurSatiri[];
+  bankoId: number; vardiyaKod?: number; vardiyaBas?: string; vardiyaBit?: string;
+  acilisSayim?: number; not?: string; kupurler?: KupurSatiri[];
 };
 
 export type GunSonuIstegi = {
@@ -119,7 +129,7 @@ export const KUPURLER: number[] = [200, 100, 50, 20, 10, 5, 1];
 
 
 export const bankoOturumUclari = {
-  bankoOturumUygun: () => istek<UygunBanko[]>('/api/banko-oturum/uygun-bankolar'),
+  bankoOturumUygun: () => istek<UygunYanit>('/api/banko-oturum/uygun-bankolar'),
   bankoOturumAktif: () => istek<OturumYaniti>('/api/banko-oturum/aktif'),
   bankoOturumGetir: (id: number) => istek<OturumDetay>(`/api/banko-oturum/${id}`),
   bankoOturumAc: (g: AcIstegi) => gonder<OturumYaniti>('/api/banko-oturum/ac', g),

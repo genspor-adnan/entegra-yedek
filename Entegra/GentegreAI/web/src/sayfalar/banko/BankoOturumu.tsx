@@ -3,10 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
-  FARK_NEDENLERI, KUPURLER,
-  type KupurSatiri, type OturumCek, type OturumOzeti, type PosEslesme,
-  type TurOzeti,
-  type UygunBanko,
+  FARK_NEDENLERI,
+  type OturumCek, type OturumOzeti, type PosEslesme, type TurOzeti,
+  type UygunBanko, type VardiyaSecenek,
 } from '../../api/uclar/bankoOturum';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -77,8 +76,13 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
 
   // açılış formu
   const [bankoId, setBankoId] = useState(0);
-  const [vardiya, setVardiya] = useState('');
-  const [acilisKupur, setAcilisKupur] = useState<Record<number, string>>({});
+  // VARDİYA SEÇENEKLİ (994): serbest metin yerine kod + saat. Saatler kurum
+  //   ayarından geliyor; seçim değişince öneri saatler forma yazılır,
+  //   kullanıcı yine elle düzeltebilir.
+  const [vardiyalar, setVardiyalar] = useState<VardiyaSecenek[]>([]);
+  const [vardiyaKod, setVardiyaKod] = useState(0);
+  const [vBas, setVBas] = useState('');
+  const [vBit, setVBit] = useState('');
   const [acilisTutar, setAcilisTutar] = useState('');
   const [acilisNot, setAcilisNot] = useState('');
 
@@ -89,7 +93,6 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   const [posGiris, setPosGiris] = useState<Record<number, string>>({});
   const [posAtanmamis, setPosAtanmamis] = useState<{ toplam: number; adet: number } | null>(null);
   const [cekler, setCekler] = useState<OturumCek[]>([]);
-  const [kapanisKupur, setKapanisKupur] = useState<Record<number, string>>({});
   const [kapanisTutar, setKapanisTutar] = useState('');
   const [farkNeden, setFarkNeden] = useState(0);
   const [farkAciklama, setFarkAciklama] = useState('');
@@ -103,8 +106,10 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         : await api.bankoOturumAktif();
       setOturum(y.oturum);
       if (!y.oturum) {
-        const b = await api.bankoOturumUygun();
+        const y2 = await api.bankoOturumUygun();
+        const b = y2.bankolar ?? [];
         setBankolar(b);
+        setVardiyalar(y2.vardiyalar ?? []);
         setBankoId(p => {
           // Sıra: URL'den istenen > zaten seçili > listenin ilki.
           if (istenenBanko && b.some(x => x.id === istenenBanko)) return istenenBanko;
@@ -154,23 +159,18 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
 
   const secili = useMemo(() => bankolar.find(b => b.id === bankoId) ?? null, [bankolar, bankoId]);
 
-  const kupurToplam = (k: Record<number, string>) =>
-    KUPURLER.reduce((t, b) => t + b * (parseInt(k[b] ?? '', 10) || 0), 0);
-  const kupurListe = (k: Record<number, string>): KupurSatiri[] =>
-    KUPURLER.map(b => ({ birim: b, adet: parseInt(k[b] ?? '', 10) || 0 })).filter(x => x.adet > 0);
-
-  const acilisSayim = secili?.kupurDokumu ? kupurToplam(acilisKupur) : (parseFloat(acilisTutar.replace(',', '.')) || 0);
+  const acilisSayim = parseFloat(acilisTutar.replace(',', '.')) || 0;
   const acilisFark = secili ? acilisSayim - secili.devir : 0;
 
-  const kapanisSayim = oturum?.kupurDokumu ? kupurToplam(kapanisKupur) : (parseFloat(kapanisTutar.replace(',', '.')) || 0);
+  const kapanisSayim = parseFloat(kapanisTutar.replace(',', '.')) || 0;
   const beklenen = oturum?.beklenenNakit ?? 0;
   const kapanisFark = kapanisSayim - beklenen;
   const birakilanSayi = parseFloat((birakilan || '').replace(',', '.')) || 0;
 
   const ac = () => guvenli(async () => {
     const y = await api.bankoOturumAc({
-      bankoId, vardiya, acilisSayim, not: acilisNot,
-      kupurler: secili?.kupurDokumu ? kupurListe(acilisKupur) : undefined,
+      bankoId, vardiyaKod, vardiyaBas: vBas, vardiyaBit: vBit,
+      acilisSayim, not: acilisNot,
     });
     // Açılıştan sonra AYNI ekranda kalınır: onay bekliyorsa bekleme kutusu,
     //   açıldıysa gün içi şerit burada - görevli kaldığı yerden sürdürür.
@@ -184,7 +184,6 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
       farkNeden: kapanisFark !== 0 ? farkNeden : undefined,
       farkAciklama: kapanisFark !== 0 ? farkAciklama : undefined,
       kasadaBirakilan: birakilanSayi,
-      kupurler: oturum.kupurDokumu ? kupurListe(kapanisKupur) : undefined,
     });
     setOturum(y.oturum); setGunSonu(false); if (y.mesaj) mesaj(y.mesaj);
   });
@@ -286,8 +285,27 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
                 </select>
               </label>
               <label>Vardiya
-                <input value={vardiya} onChange={e => setVardiya(e.target.value)}
-                       placeholder="Sabah · 08:00–16:00" />
+                <select value={vardiyaKod} onChange={e => {
+                  const k = Number(e.target.value);
+                  setVardiyaKod(k);
+                  // Seçime göre ÖNERİ saatler: kurum ayarından geliyor,
+                  //   kullanıcı yine elle düzeltebilir.
+                  const v = vardiyalar.find(x => x.kod === k);
+                  setVBas(v?.bas ?? ''); setVBit(v?.bit ?? '');
+                }}>
+                  <option value={0}>— seçin —</option>
+                  {vardiyalar.map(v => (
+                    <option key={v.kod} value={v.kod}>
+                      {v.ad}{v.bas && v.bit ? ` (${v.bas}–${v.bit})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>Başlangıç
+                <input type="time" value={vBas} onChange={e => setVBas(e.target.value)} />
+              </label>
+              <label>Bitiş
+                <input type="time" value={vBit} onChange={e => setVBit(e.target.value)} />
               </label>
               <label>Kasa hesabı
                 <input readOnly value={secili?.hesap || '—'} />
@@ -302,16 +320,17 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
               yazılır - sonraki görevli başkasının farkını devralmasın.
             </div>
 
-            {secili?.kupurDokumu ? (
-              <KupurTablosu deger={acilisKupur} degistir={setAcilisKupur} toplam={acilisSayim} />
-            ) : (
-              <div className="bo-izgara">
-                <label>Kasada bulunan (sayım)
-                  <input value={acilisTutar} onChange={e => setAcilisTutar(e.target.value)}
-                         className="bo-buyuk" placeholder="0,00" />
-                </label>
-              </div>
-            )}
+            {/* KUPÜR DÖKÜMÜ KALDIRILDI (kullanıcı 08.10.2026: "oturum
+                açma/kapatma da kupür kaldır, yerine devir olsun"): kasadaki
+                parayı banknot banknot saymak günlük işi yavaşlatıyordu; tek
+                devir tutarı giriliyor, fark yine sistem devrine göre
+                hesaplanıyor. */}
+            <div className="bo-izgara">
+              <label>Kasada bulunan (devir sayımı)
+                <input value={acilisTutar} onChange={e => setAcilisTutar(e.target.value)}
+                       className="bo-buyuk" placeholder="0,00" inputMode="decimal" />
+              </label>
+            </div>
 
             <div className="bo-izgara">
               <label>Fark
@@ -422,12 +441,10 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
               </table>
             </div>
             <div>
-              <div className="bo-kb2">Sayım{oturum.kupurDokumu ? ' — kupür dökümü' : ''}</div>
-              {oturum.kupurDokumu
-                ? <KupurTablosu deger={kapanisKupur} degistir={setKapanisKupur} toplam={kapanisSayim} />
-                : <label className="bo-tek">Sayılan nakit
-                    <input value={kapanisTutar} onChange={e => setKapanisTutar(e.target.value)}
-                           className="bo-buyuk" placeholder="0,00" /></label>}
+              <div className="bo-kb2">Sayım</div>
+              <label className="bo-tek">Sayılan nakit (kasadaki devir)
+                <input value={kapanisTutar} onChange={e => setKapanisTutar(e.target.value)}
+                       className="bo-buyuk" placeholder="0,00" inputMode="decimal" /></label>
               <div className="bo-izgara">
                 <label>Sayılan<input readOnly className="bo-buyuk" value={para(kapanisSayim)} /></label>
                 <label>Olması gereken<input readOnly className="bo-buyuk" value={para(beklenen)} /></label>
@@ -742,33 +759,6 @@ const ESLESME: Record<number, string> = {
   3: 'Portföye alındı · çek teslim listesi',
   4: 'nakit akışı yok',
 };
-
-/** Kupür dökümü: adet girilir, tutar ve toplam kendiliğinden hesaplanır. */
-function KupurTablosu({ deger, degistir, toplam }: {
-  deger: Record<number, string>;
-  degistir: (f: (o: Record<number, string>) => Record<number, string>) => void;
-  toplam: number;
-}) {
-  return (
-    <table className="bo-tablo bo-kupur">
-      <thead><tr><th>Kupür</th><th>Adet</th><th>Tutar</th></tr></thead>
-      <tbody>
-        {KUPURLER.map(b => {
-          const adet = parseInt(deger[b] ?? '', 10) || 0;
-          return (
-            <tr key={b}>
-              <td>{b === 1 ? 'Bozuk (₺)' : `${b} ₺`}</td>
-              <td><input value={deger[b] ?? ''} inputMode="numeric"
-                         onChange={e => degistir(o => ({ ...o, [b]: e.target.value }))} /></td>
-              <td>{para(b * adet)}</td>
-            </tr>
-          );
-        })}
-        <tr className="top"><td>Toplam</td><td /><td>{para(toplam)}</td></tr>
-      </tbody>
-    </table>
-  );
-}
 
 const bostil = `
 /* KIRPILMA (kullanici: "alt taraf kirpilmis goremiyorum"): .fm-sayfa
