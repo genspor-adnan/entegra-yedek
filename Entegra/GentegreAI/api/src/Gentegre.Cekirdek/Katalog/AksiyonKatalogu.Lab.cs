@@ -786,7 +786,14 @@ public static partial class AksiyonKatalogu
         //   akis ekraninin (banko-oturum) isi. Kapanan oturum duzeltilmez;
         //   hatali tahsilat iade/duzeltme fisiyle cozulur - bu yuzden
         //   listede yeni/duzenle/sil yok, yalniz yazdirma var.
-        s["banko-oturum-liste"] = [Yazdir()];
+        s["banko-oturum-liste"] = [
+            // TUTANAK LISTEDEN DE: kapanmis bir oturumun belgesi sonradan
+            //   istenebilir (denetim, mutabakat) - akis ekranina donmek
+            //   yerine gecmisten dogrudan acilir.
+            new("banko-oturum.tutanak", "🧾 Teslim Tutanağı", "banko_oturum",
+                Hedef: "araccubugu,sagtus,palet", KaynakKodu: "banko_oturum",
+                Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+            Yazdir()];
 
         // BIYOMEDIKAL (723). Cihaz envanterinin karti DEMIRBAS kartidir -
         //   ekran kodu ayri, Crud ayni karta bagli.

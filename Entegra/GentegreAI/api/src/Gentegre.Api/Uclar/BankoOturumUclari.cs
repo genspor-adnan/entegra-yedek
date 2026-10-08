@@ -148,10 +148,29 @@ public static class BankoOturumUclari
                  where oturum_id = @p0
                 """, null, [id],
                 r => new { toplam = r.GetDecimal(0), adet = r.GetInt64(1) }, iptal);
+            // CEK TESLIM LISTESI (991): cek kasada para degil, fiziken
+            //   cekmecede durur ve gun sonunda elden teslim edilir -
+            //   tutanakta seri no ve vadeyle dokumu olmali, "3 cek teslim
+            //   edildi" tek basina kontrol edilemez.
+            var cekler = await b.ListeAsync("""
+                select cek_id, tur, seri_no, banka_adi, kesideci, vade, kalan_gun,
+                       yerel_tutar, durum, taraf_unvan
+                  from public.v_banko_oturum_cek
+                 where oturum_id = @p0
+                 order by vade nulls last, cek_id
+                """, null, [id], r => new
+            {
+                cekId = r.GetInt32(0), tur = r.GetInt16(1), seriNo = r.GetString(2),
+                bankaAdi = r.GetString(3), kesideci = r.GetString(4),
+                vade = r.IsDBNull(5) ? (DateTime?)null : r.GetDateTime(5),
+                kalanGun = r.IsDBNull(6) ? (int?)null : r.GetInt32(6),
+                tutar = r.GetDecimal(7), durum = r.GetInt16(8),
+                tarafUnvan = r.GetString(9),
+            }, iptal);
             return Results.Ok(new
             {
                 oturum = o, kupurler = kupur, turler, pos = posListe,
-                posAtanmamis = atanmamis,
+                posAtanmamis = atanmamis, cekler,
             });
         });
 

@@ -20467,3 +20467,68 @@ Doğrulama: yerel API'ye (`http://localhost:5180`) tek formla bağlanıldı,
 "Kaydet ve Çık" profili kaydedip çıktı (kaydedildi mesajı ürünün kendi
 kutusunda), giriş ekranı adresi hatırladı. vitest 789, tsc temiz, GenProfil
 derlendi.
+
+### 08.10.2026 — Gün sonu tamamlandı: fark fişi, tür dökümü, POS eşleşmesi, çek listesi, teslim tutanağı (988-991)
+
+Kullanıcı `banko_gun_sonu_kasa_teslimi.html` ve `kasa_teslim_tutanagi.html`
+mockup'larını gösterip *"hepsini sırayla yap"* dedi. 987 vardiya akışının
+iskeletini kurmuştu; bu mockup'ların gün sonu ayrıntıları eksikti.
+
+**1. Fark fişi (988).** 987'de `fark_islem_id` kolonu vardı ama fiş
+üretilmiyordu: fark yalnız kayıttı, kasa bakiyesi sayımla eşitlenmiyor ve
+ertesi gün aynı fark devrediyordu. Kapanışta `kasa_islem` yazılıyor - noksan
+çıkış, fazla giriş fişi; kasa hesabı bankodan, karşı hesap kurum ayarından
+(`banko.fark_hesap_id`). **Ayar boşsa fiş üretilmez ve söylenir**: gün sonunu
+bloke etmek yerine eksik ayarı bildirmek doğru, banko kapanmalı. Fiş oturuma
+bağlı (`oturum_id`, `kaynak_tur` 1385) ama **sayaçlara girmez** - gün içi
+sayaçlar "banko ne tahsil etti" sorusunu yanıtlıyor, düzeltme fişi oraya
+karışırsa rakamlar tutmaz.
+
+**2. Ödeme türü dökümü (989, `v_banko_oturum_tur_ozeti`).** Tür / adet /
+tahsilat / iade / net / kasada durur mu / teslim-eşleşme. "Kasada durur mu"
+türün `ana_hesap_turu`ndan türer: nakit sayılır, POS ve havale kasaya para
+olarak girmez, çek fiziken kasada ama **sayıma girmez**, kupon/indirimde nakit
+akışı yok. Tek "nakit/POS" toplamı "hangi türden ne kadar girdi" sorusunu
+yanıtlamıyordu; gün sonunda kasiyer ile sorumlu bu tabloya bakarak mutabık
+kalır.
+
+**3. POS gün sonu eşleşmesi (990, `banko_oturum_pos`).** Her terminal için
+cihazın gün sonu toplamı girilir, sistem kendi toplamını koyar, fark yazılır.
+**Fark gün sonunu engellemez**: POS farkı banka ekstresiyle kapanır (komisyon,
+taksit, gün kayması) - nakit sayım farkıyla aynı şey değil. Ayrı tablo, çünkü
+fark **cihaz bazında** anlam taşıyor: "hangi terminalde 120 TL fark var"
+sorusu tek toplamla yanıtlanamaz.
+
+Burada bir kusur çıktı: tahsilatın hangi terminalden geçtiği **hesap üzerinden
+tahmin ediliyordu** ve aynı tahsilat hesabına bağlı iki POS'un toplamı ikisinde
+de görünüyordu. `kasa_islem.banko_pos_id` eklendi. Tahsilat ekranı POS'u
+yazmaya başlayana kadar o tutar panelde **"terminale bağlanmamış POS
+tahsilatı"** satırında ayrı duruyor - sessizce 0 göstermek görevliyi "cihazda
+para var sistemde yok" yanılgısına sürüklerdi.
+
+**4. Çek teslim listesi (991, `v_banko_oturum_cek`).** Çek kasada para
+değildir: fiziken çekmecede durur, nakit sayımına girmez ve gün sonunda elden
+teslim edilir. Tutanakta seri no ve vadeyle dökümü var - "3 çek teslim edildi"
+tek başına kontrol edilemez. **Yeni tablo açılmadı**: çek zaten `cek_senet`
+kaydı ve tahsilat fişine `giris_kasa_islem_id` ile bağlı; ikinci bir çek
+listesi tutmak ikisinin ayrışması demekti.
+
+**5. Teslim tutanağı (`/banko-tutanak/:id`).** Yazdırılabilir belge: A (olması
+gereken) / B (sayım farkı) / teslim edilen üçlüsü, kupür dökümü, tür dağılımı,
+POS eşleşmesi, çek listesi, iki imza satırı. Tutar **yazıyla da** yazılıyor -
+rakamda tek hane değişikliği belgeyi sahteleştirir, yazı onu yakalar (test:
+30.080,00 → "otuzbinseksen Türk Lirası"). Tutanak ikinci bir hesap yapmaz,
+oturumun kendi verisini basar; yapsaydı ekranla belge arasında fark çıkabilirdi.
+`@media print` ile araç çubuğu ve uygulama kabuğu kâğıda çıkmıyor.
+
+**Ek (aynı gün, kullanıcı isteği).** Bankolar listesine **🔓 Oturum Aç** +
+`OturumAcModali`: görevli bankosunu listede bulduysa vardiyayı oradan başlatır.
+Açılış modal, gün içi ve gün sonu tam sayfa - altı adımı modala sıkıştırmak
+hepsini daraltırdı. Sunucunun reddi ("Açık bir oturumunuz var") modal **içinde**
+gösteriliyor; iş kuralı reddi teknik hata değil, kullanıcı neyi düzelteceğini
+orada okumalı.
+
+Doğrulama: her adım API ve tarayıcıdan denendi (fark fişi #5266 yazıldı, tür
+dökümü 5 işlemle doğru kovalara düştü, POS farkı hesaplandı, çek sayıma
+girmedi, tutanak kapanmış oturumla basıldı). vitest 789, dotnet test 218.
+Test verileri silindi; kullanıcının açık oturumu ve bankoları korundu.

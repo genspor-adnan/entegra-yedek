@@ -697,6 +697,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         else git(`/banko-oturumlar?banko=${bankoId}`);
         return;
       }
+      if (kod === 'banko-oturum.tutanak') {
+        const oturumId = Number(satir?.id ?? 0);
+        if (!oturumId) { mesaj('Önce bir oturum seçin.'); return }
+        git(`/banko-tutanak/${oturumId}`);
+        return;
+      }
 
       if (await itsAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),

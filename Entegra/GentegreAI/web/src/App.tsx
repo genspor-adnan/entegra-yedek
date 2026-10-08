@@ -90,6 +90,7 @@ const CagriGiden = tembel(() => import('./sayfalar/cagri/CagriGiden'), 'CagriGid
 const CagriSupervizor = tembel(() => import('./sayfalar/cagri/CagriSupervizor'), 'CagriSupervizor');
 const BankoOturumu = tembel(() => import('./sayfalar/banko/BankoOturumu'), 'BankoOturumu');
 const BankoOnayKuyrugu = tembel(() => import('./sayfalar/banko/BankoOnayKuyrugu'), 'BankoOnayKuyrugu');
+const BankoTutanak = tembel(() => import('./sayfalar/banko/BankoTutanak'), 'BankoTutanak');
 const CagriSantral = tembel(() => import('./sayfalar/cagri/CagriSantral'), 'CagriSantral');
 const SterilPano = tembel(() => import('./sayfalar/steril/SterilPano'), 'SterilPano');
 const SterilDonguKarti = tembel(() => import('./sayfalar/steril/SterilDonguKarti'), 'SterilDonguKarti');
@@ -440,6 +441,9 @@ function Yollar() {
             ozelSayfa, duz liste degil. */}
         {yetki('banko_oturum') && <Route path="/banko-oturum" element={<BankoOturumu />} />}
         {yetki('banko_onay') && <Route path="/banko-onay" element={<BankoOnayKuyrugu />} />}
+        {/* TESLIM TUTANAGI: yazdirilmak icin ayri rota - imza fiziksel bir
+            belgeye atilir, ekran kaydi onun yerine gecmez. */}
+        {yetki('banko_oturum') && <Route path="/banko-tutanak/:id" element={<BankoTutanak />} />}
         {yetki('cagri.ayar') && <Route path="/cagri-santral" element={<CagriSantral />} />}
         {yetki('cagri.kayit') && (
           <Route path="/cagri/:id" element={<>

@@ -67,6 +67,17 @@ export type PosEslesme = {
   eslesmeDurum: number | null; eslesmeNot: string;
 };
 
+/**
+ * Çek teslim listesi (991). Çek kasada para değil: fiziken çekmecede durur,
+ * nakit sayımına girmez ve gün sonunda elden teslim edilir.
+ * `durum` 10 = portföyde.
+ */
+export type OturumCek = {
+  cekId: number; tur: number; seriNo: string; bankaAdi: string; kesideci: string;
+  vade: string | null; kalanGun: number | null; tutar: number; durum: number;
+  tarafUnvan: string;
+};
+
 export type OturumDetay = {
   oturum: OturumOzeti;
   kupurler: { asama: number; birim: number; adet: number }[];
@@ -74,6 +85,7 @@ export type OturumDetay = {
   pos: PosEslesme[];
   /** Terminale bağlanmamış POS tahsilatı (tahsilat ekranı POS'u yazmıyorsa). */
   posAtanmamis: { toplam: number; adet: number } | null;
+  cekler: OturumCek[];
 };
 
 export type AcIstegi = {

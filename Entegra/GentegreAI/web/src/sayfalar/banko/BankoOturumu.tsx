@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
   FARK_NEDENLERI, KUPURLER,
-  type KupurSatiri, type OturumOzeti, type PosEslesme, type TurOzeti,
+  type KupurSatiri, type OturumCek, type OturumOzeti, type PosEslesme,
+  type TurOzeti,
   type UygunBanko,
 } from '../../api/uclar/bankoOturum';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
@@ -52,6 +53,7 @@ const saat = (t: string | null) =>
 
 export function BankoOturumu() {
   const { yetki } = useOturum();
+  const git = useNavigate();
   // Listeden "🔓 Oturum Aç" ile gelince banko seçili gelsin: görevli
   //   bankosunu listede bulduysa burada yeniden aramasın.
   const [arama] = useSearchParams();
@@ -74,6 +76,7 @@ export function BankoOturumu() {
   const [poslar, setPoslar] = useState<PosEslesme[]>([]);
   const [posGiris, setPosGiris] = useState<Record<number, string>>({});
   const [posAtanmamis, setPosAtanmamis] = useState<{ toplam: number; adet: number } | null>(null);
+  const [cekler, setCekler] = useState<OturumCek[]>([]);
   const [kapanisKupur, setKapanisKupur] = useState<Record<number, string>>({});
   const [kapanisTutar, setKapanisTutar] = useState('');
   const [farkNeden, setFarkNeden] = useState(0);
@@ -112,6 +115,7 @@ export function BankoOturumu() {
         setTurler(d.turler ?? []);
         setPoslar(d.pos ?? []);
         setPosAtanmamis(d.posAtanmamis ?? null);
+        setCekler(d.cekler ?? []);
         // Girilmis cihaz toplamlari forma yazilir: gun sonu yarim kalip
         //   tekrar acildiginda bastan girilmesin.
         setPosGiris(o => {
@@ -369,6 +373,7 @@ export function BankoOturumu() {
           <TurTablosu turler={turler} />
           <PosPaneli poslar={poslar} giris={posGiris} setGiris={setPosGiris}
                      kaydet={posKaydet} atanmamis={posAtanmamis} />
+          <CekPaneli cekler={cekler} />
 
           <div className="bo-iki">
             <div>
@@ -504,15 +509,71 @@ export function BankoOturumu() {
               </div>
             </div>
           </div>
-          {oturum.durum === 4 && yetki('banko_oturum.yeniden_ac') && (
-            <div className="bo-dugmeler">
-              <button onClick={yenidenAc}>🔓 Yeniden Aç</button>
-              <span className="bo-not">Ayrı yetki ister; gerekçe loga yazılır.</span>
-            </div>
-          )}
+          <div className="bo-dugmeler">
+            <button onClick={() => git(`/banko-tutanak/${oturum.id}`)}>🖨 Teslim Tutanağı</button>
+            {oturum.durum === 4 && yetki('banko_oturum.yeniden_ac') && (
+              <>
+                <button onClick={yenidenAc}>🔓 Yeniden Aç</button>
+                <span className="bo-not">Ayrı yetki ister; gerekçe loga yazılır.</span>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * ÇEK TESLİM LİSTESİ (991) — mockup: "Portföye alındı · çek teslim listesi".
+ *
+ * Çek kasada para değildir: fiziken çekmecede durur, nakit sayımına GİRMEZ ve
+ * gün sonunda elden teslim edilir. Tutanakta seri no ve vadeyle dökümü olmalı -
+ * "3 çek teslim edildi" tek başına kontrol edilemez.
+ *
+ * Liste `cek_senet` kayıtlarından türetilir (tahsilat fişine `giris_kasa_islem_id`
+ * ile bağlı); ikinci bir çek listesi tutmak ikisinin ayrışması demekti.
+ */
+function CekPaneli({ cekler }: { cekler: OturumCek[] }) {
+  if (cekler.length === 0) return null;
+  const toplam = cekler.reduce((a, c) => a + c.tutar, 0);
+  return (
+    <>
+      <div className="bo-kb2 bo-ic">Çek / senet teslim listesi</div>
+      <table className="bo-tablo bo-cek">
+        <thead>
+          <tr><th>Tür</th><th>Seri no</th><th>Banka</th><th>Keşideci</th>
+            <th>Vade</th><th>Tutar</th></tr>
+        </thead>
+        <tbody>
+          {cekler.map(c => (
+            <tr key={c.cekId}>
+              <td>{c.tur === 2 ? 'Senet' : 'Çek'}</td>
+              <td>{c.seriNo || '—'}</td>
+              <td>{c.bankaAdi || '—'}</td>
+              <td>{c.kesideci || c.tarafUnvan || '—'}</td>
+              <td>
+                {c.vade ? new Date(c.vade).toLocaleDateString('tr-TR') : '—'}
+                {c.kalanGun != null && (
+                  <span className={'bo-rz' + (c.kalanGun < 0 ? ' kir' : '')}>
+                    {c.kalanGun < 0 ? `${-c.kalanGun} gün geçti` : `${c.kalanGun} gün`}
+                  </span>
+                )}
+              </td>
+              <td>{para(c.tutar)}</td>
+            </tr>
+          ))}
+          <tr className="top">
+            <td colSpan={5}>TOPLAM · {cekler.length} kıymetli evrak</td>
+            <td>{para(toplam)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="bo-not">
+        Bu evrak <b>nakit sayımına girmez</b>; fiziken teslim edilir ve portföyde
+        izlenir. Vadesi geçmiş çek varsa tahsile verilmesi gecikmiş demektir.
+      </div>
+    </>
   );
 }
 
@@ -742,6 +803,8 @@ const bostil = `
 .bo-tablo td:last-child, .bo-tablo th:last-child { text-align:right; font-family:Consolas, monospace; }
 .bo-tablo tr.top td { font-weight:bold; background:#f7f9fc; }
 .bo-tablo tr.sonuk td { color: var(--ikincil-metin, #6b7a8b); }
+.bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }
+.bo-cek td:last-child, .bo-cek th:last-child { text-align:right; font-family:Consolas,monospace; }
 .bo-pos { margin: 0 11px 0; width: calc(100% - 22px); }
 .bo-pos td:nth-child(2), .bo-pos td:nth-child(4) { text-align:right; font-family:Consolas,monospace; }
 .bo-pos tr.bo-atan td { background:#fdf6e3; color:#7a5612; }
