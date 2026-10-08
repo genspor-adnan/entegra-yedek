@@ -88,6 +88,8 @@ const CagriOperator = tembel(() => import('./sayfalar/cagri/CagriOperator'), 'Ca
 const CagriKarti = tembel(() => import('./sayfalar/cagri/CagriKarti'), 'CagriKarti');
 const CagriGiden = tembel(() => import('./sayfalar/cagri/CagriGiden'), 'CagriGiden');
 const CagriSupervizor = tembel(() => import('./sayfalar/cagri/CagriSupervizor'), 'CagriSupervizor');
+const BankoOturumu = tembel(() => import('./sayfalar/banko/BankoOturumu'), 'BankoOturumu');
+const BankoOnayKuyrugu = tembel(() => import('./sayfalar/banko/BankoOnayKuyrugu'), 'BankoOnayKuyrugu');
 const CagriSantral = tembel(() => import('./sayfalar/cagri/CagriSantral'), 'CagriSantral');
 const SterilPano = tembel(() => import('./sayfalar/steril/SterilPano'), 'SterilPano');
 const SterilDonguKarti = tembel(() => import('./sayfalar/steril/SterilDonguKarti'), 'SterilDonguKarti');
@@ -433,6 +435,11 @@ function Yollar() {
         {yetki('cagri.pano') && <Route path="/cagri-pano" element={<CagriOperator />} />}
         {yetki('cagri.giden') && <Route path="/cagri-giden" element={<CagriGiden />} />}
         {yetki('cagri.supervizor') && <Route path="/cagri-supervizor" element={<CagriSupervizor />} />}
+
+        {/* BANKO OTURUMU (987): akis ekrani ve sorumlu onay kuyrugu - ikisi de
+            ozelSayfa, duz liste degil. */}
+        {yetki('banko_oturum') && <Route path="/banko-oturum" element={<BankoOturumu />} />}
+        {yetki('banko_onay') && <Route path="/banko-onay" element={<BankoOnayKuyrugu />} />}
         {yetki('cagri.ayar') && <Route path="/cagri-santral" element={<CagriSantral />} />}
         {yetki('cagri.kayit') && (
           <Route path="/cagri/:id" element={<>

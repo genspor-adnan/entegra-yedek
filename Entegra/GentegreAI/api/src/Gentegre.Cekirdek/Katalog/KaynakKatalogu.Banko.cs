@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// BANKO LİSTESİ (985, Ekranlar/Kayıt Kabul/banko_tanimi_v2.html).
@@ -62,5 +62,54 @@ public static partial class KaynakKatalogu
             new("gunSonuOnay", "b.gun_sonu_onay", "mantik", "Gün Sonu Onayı",
                 Hizalama: "orta", Genislik: 110, Varsayilan: false),
             new("aktif", "b.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
+        });
+
+    /// <summary>
+    /// BANKO OTURUMLARI (987) — vardiya geçmişi. Fark eğilimi buradan okunur:
+    /// aynı görevlide tekrarlayan noksan, eğitim ya da denetim konusudur.
+    /// Oturum kaydı silinmez; akış ekranı (banko-oturum) yazar, bu liste okur.
+    /// </summary>
+    private static KaynakTanimi BankoOturum() => new(
+        Ad: "bankoOturum",
+        YetkiKodu: "banko_oturum",
+        Kaynak: @"public.v_banko_oturum_ozet o
+                  left join public.taraf t on t.id = o.kullanici_id
+                  left join public.taraf ta on ta.id = o.teslim_alan_id",
+        SubeKolonu: "o.sube_id",
+        VarsayilanSirala: "o.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id", "o.id", "sayi", "Oturum", Genislik: 90),
+            new("bankoKod", "o.banko_kod", "metin", "Banko", Genislik: 100),
+            new("bankoAd", "o.banko_ad", "metin", "Banko Adı", Genislik: 180),
+            new("gorevli", "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')",
+                "metin", "Görevli", Genislik: 170, Filtrelenebilir: false),
+            new("vardiya", "o.vardiya", "metin", "Vardiya", Genislik: 110),
+            new("durumAdi",
+                "case o.durum when 1 then 'Açılış onayı bekliyor' when 2 then 'Açık'" +
+                " when 3 then 'Teslime gönderildi' when 4 then 'Kapandı'" +
+                " when 5 then 'Reddedildi' else '' end",
+                "metin", "Durum", Genislik: 150, Bicim: "rozet", Filtrelenebilir: false),
+            new("durum", "o.durum", "kod", "Durum Kodu", Varsayilan: false,
+                Kodlar: KartKatalogu.OturumDurumKodlari),
+            new("acilisTs", "o.acilis_ts", "zaman", "Açılış", Genislik: 140),
+            new("kapanisTs", "o.kapanis_ts", "zaman", "Kapanış", Genislik: 140),
+            new("devirTutar", "o.devir_tutar", "para", "Devir", Genislik: 110),
+            new("acilisFark", "o.acilis_fark", "para", "Açılış Farkı", Genislik: 110),
+            new("nakitTahsilat", "o.nakit_tahsilat", "para", "Nakit", Genislik: 110),
+            new("posTutar", "o.pos_tutar", "para", "POS", Genislik: 110),
+            new("islemAdet", "o.islem_adet", "sayi", "İşlem", Hizalama: "orta", Genislik: 80),
+            new("kapanisSayim", "o.kapanis_sayim", "para", "Sayım", Genislik: 110),
+            // FARK İŞARETLİ: eksi = noksan. Tek kolonda iki soru yanıtlanıyor.
+            new("kapanisFark", "o.kapanis_fark", "para", "Fark", Genislik: 110),
+            new("kasadaBirakilan", "o.kasada_birakilan", "para", "Bırakılan", Genislik: 110,
+                Varsayilan: false),
+            new("teslimEdilen", "o.teslim_edilen", "para", "Teslim", Genislik: 110,
+                Varsayilan: false),
+            new("teslimAlan", "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')",
+                "metin", "Teslim Alan", Genislik: 170, Varsayilan: false, Filtrelenebilir: false),
+            new("tutanakNo", "o.tutanak_no", "metin", "Tutanak", Genislik: 130, Varsayilan: false),
+            new("farkAciklama", "o.fark_aciklama", "metin", "Fark Notu", Genislik: 240,
+                Varsayilan: false),
         });
 }

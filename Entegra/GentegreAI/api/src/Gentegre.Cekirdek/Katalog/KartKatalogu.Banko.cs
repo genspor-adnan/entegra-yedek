@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// BANKO kartı (985, Ekranlar/Kayıt Kabul/banko_tanimi_v2.html).
@@ -184,7 +184,38 @@ public static partial class KartKatalogu
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Not"),
             }, Sirala: "tur, id", Baslik: "Yazıcı & Donanım",
                SubeKolonu: null, LogTabloId: 1384),
+
+            // ----------------------------------------------- oturumlar ----
+            // SALT OKUMA: oturum karttan açılmaz/kapanmaz - akış ekranının
+            //   (banko-oturum) işi. Burada yalnız geçmiş görünür: fark
+            //   eğilimi bu listeden okunur, aynı görevlide tekrarlayan
+            //   noksan eğitim ya da denetim konusudur.
+            new("oturumlar", "public.banko_oturum", "banko_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false, Baslik: "Oturum"),
+                new("durum", "durum", "kod", Yazilabilir: false,
+                    SabitKodlar: OturumDurumKodlari, Baslik: "Durum"),
+                new("acilisTs", "acilis_ts", "zaman", Yazilabilir: false, Baslik: "Açılış"),
+                new("kapanisTs", "kapanis_ts", "zaman", Yazilabilir: false, Baslik: "Kapanış"),
+                new("vardiya", "vardiya", "metin", Yazilabilir: false, Baslik: "Vardiya"),
+                new("devirTutar", "devir_tutar", "para", Yazilabilir: false, Baslik: "Devir"),
+                new("acilisFark", "acilis_fark", "para", Yazilabilir: false, Baslik: "Açılış Farkı"),
+                new("kapanisSayim", "kapanis_sayim", "para", Yazilabilir: false, Baslik: "Sayım"),
+                new("kapanisFark", "kapanis_fark", "para", Yazilabilir: false, Baslik: "Fark"),
+                new("kasadaBirakilan", "kasada_birakilan", "para", Yazilabilir: false,
+                    Baslik: "Bırakılan"),
+                new("teslimEdilen", "teslim_edilen", "para", Yazilabilir: false, Baslik: "Teslim"),
+                new("tutanakNo", "tutanak_no", "metin", Yazilabilir: false, Baslik: "Tutanak"),
+                new("farkAciklama", "fark_aciklama", "metin", Yazilabilir: false, Baslik: "Fark Notu"),
+            }, Sirala: "id desc", Baslik: "Oturumlar", SubeKolonu: null,
+               SaltOkunur: true, LogTabloId: 1385),
         });
+
+    internal static readonly Dictionary<string, string> OturumDurumKodlari = new()
+    {
+        ["1"] = "Açılış onayı bekliyor", ["2"] = "Açık",
+        ["3"] = "Teslime gönderildi", ["4"] = "Kapandı", ["5"] = "Reddedildi",
+    };
 
     internal static readonly Dictionary<string, string> BankoTuruKodlari = new()
     {

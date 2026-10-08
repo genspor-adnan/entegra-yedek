@@ -361,6 +361,38 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 25, menuAd: 'Bankolar', ic: '🏧',
     yetkiKodu: 'banko',
   },
+  // --- BANKO OTURUMU (987, vardiya): akis ekrani ve sorumlu onay kuyrugu.
+  //     ozelSayfa - kolonlu liste degil, durum makinesi olan bir akis.
+  {
+    kaynak: 'banko-oturum', rota: 'banko-oturum', ozelSayfa: true,
+    baslik: 'Banko Oturumu', yol: 'Kasa › Banko Oturumu',
+    menuGrup: 'Finans', menuSira: 26, menuAd: 'Banko Oturumu', ic: '🔓',
+    yetkiKodu: 'banko_oturum',
+  },
+  {
+    kaynak: 'banko-onay', rota: 'banko-onay', ozelSayfa: true,
+    baslik: 'Banko Onay Kuyruğu', yol: 'Kasa › Banko Onayları',
+    menuGrup: 'Finans', menuSira: 27, menuAd: 'Banko Onayları', ic: '✅',
+    yetkiKodu: 'banko_onay',
+  },
+  // --- BANKO OTURUM GECMISI (987): vardiya kayitlari. Fark egilimi buradan
+  //     okunur - ayni gorevlide tekrarlayan noksan egitim/denetim konusudur.
+  {
+    kaynak: 'bankoOturum', rota: 'banko-oturumlar', aksiyonEkrani: 'banko-oturum-liste',
+    baslik: 'Banko Oturumları', yol: 'Kasa › Banko Oturumları',
+    tarihAlani: 'acilisTs',
+    toplam: ['nakitTahsilat', 'posTutar', 'kapanisFark'],
+    cipler: [
+      { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onay bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Teslimde', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      // FARKLI KAPANIS: sifirdan farkli fark - denetimin ilk baktigi yer.
+      { ad: 'Farklı kapanan', filtre: { alan: 'kapanisFark', op: 'esitDegil', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Finans', menuSira: 28, menuAd: 'Banko Oturumları', ic: '📋',
+    yetkiKodu: 'banko_oturum',
+  },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {

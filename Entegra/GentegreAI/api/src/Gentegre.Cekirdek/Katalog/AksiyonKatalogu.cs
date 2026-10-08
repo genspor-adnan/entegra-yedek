@@ -2481,6 +2481,12 @@ public static class AksiyonKatalogu
             ["banko-liste"] = [.. Crud("banko", "banko", "banko",
                 silIpucu: "Kullanımdan çıkarmak için Aktif alanını kapatmak yeterli")],
 
+            // OTURUM GECMISI SALT OKUMA (987): oturum karttan acilmaz/kapanmaz,
+            //   akis ekraninin (banko-oturum) isi. Kapanan oturum duzeltilmez;
+            //   hatali tahsilat iade/duzeltme fisiyle cozulur - bu yuzden
+            //   listede yeni/duzenle/sil yok, yalniz yazdirma var.
+            ["banko-oturum-liste"] = [Yazdir()],
+
             // BIYOMEDIKAL (723). Cihaz envanterinin karti DEMIRBAS kartidir -
             //   ekran kodu ayri, Crud ayni karta bagli.
             ["demirbas-cihaz-liste"] =

@@ -20362,3 +20362,73 @@ Mockup: `Ekranlar/Kayıt Kabul/banko_tanimi_v2.html` (liste + 6 sekmeli kart).
 Doğrulama: liste ve kart canlı denendi (2 POS + 1 cihazlı banko yazıldı,
 varsayılan devri çalıştı, arızalı POS "çalışan POS" sayısına girmedi), vitest
 789, dotnet test 218, test satırları silindi.
+
+### 08.10.2026 — Banko vardiyası: oturum akışı (987)
+
+Kullanıcı: *"banko vardiya yı da mockup gibi yap"* — tasarım
+`Ekranlar/Kayıt Kabul/banko_oturum_akisi_v2.html`, altı adım: açılış talebi →
+(ops.) sorumlu onayı → devir sayımı → gün içi işlem → gün sonu sayımı →
+teslim ve kapanış.
+
+**Şema.** `banko_oturum` (durum 1 açılış onayı bekliyor · 2 açık · 3 teslime
+gönderildi · 4 kapandı · 5 reddedildi), `banko_oturum_kupur` (açılış/kapanış
+kupür dökümü), `kasa_islem.oturum_id`, `fn_banko_devir`,
+`v_banko_oturum_ozet`.
+
+Kararlar ve nedenleri:
+
+* **Oturum = banko + görevli.** Banko tanımında kullanıcı yok; açılışta uygun
+  banko seçilir ve oturum giriş yapan kullanıcının adıyla başlar. Yalnız
+  kullanıcıyı tutmak "hangi kasadan", yalnız bankoyu tutmak "kim saydı"
+  sorusunu cevapsız bırakırdı.
+* **Devir elle yazılmaz** (`fn_banko_devir`): önceki oturumun
+  `kasada_birakilan` değeri. İstemciden gelen devir **yok sayılır** - elle
+  yazılabilse kasadaki para ile kayıt arasındaki bağ kopardı. Doğrulandı:
+  400 ₺ bırakılan oturum kapandıktan sonra yeni açılışta devir 400 geldi.
+* **Fark açılışta yazılır**, kapanışta değil: sonraki görevli başkasının
+  farkını devralmasın.
+* **Bir bankoda ve bir görevlide tek canlı oturum** (iki partial unique
+  index): aynı kasada iki görevli olursa gün sonu sayımının kime ait olduğu
+  belirsiz kalır; aynı kişi iki bankodaysa tahsilatın hangi kasaya yazılacağı
+  belirsiz olur. İki kısıtın da kullanıcıya ayrı mesajı var.
+* **Sayaçlar hareketlerden türetilir** (`v_banko_oturum_ozet`), oturum
+  satırında tutulmaz - iki yerde tutulsa biri diğerini yalanlardı. Nakit/POS
+  ayrımı işlem türünün `ana_hesap_turu`ndan gelir (K nakit · P POS · B
+  havale); POS ve havale kasada para olarak durmaz, sayıma girmez.
+* **Kapanışta "olması gereken" dondurulur** (`kapanis_beklenen`): sonradan bir
+  düzeltme fişi hareketleri değiştirirse kapanmış oturumun farkı kendiliğinden
+  oynardı.
+* **Fark fişsiz kapanış yok:** fark ≠ 0 ise neden ve açıklama zorunlu (sunucu
+  422 veriyor, ekranda düğme de kapalı). Fark ayrı fişle muhasebeleşir; kasa
+  bakiyesi sayımla eşitlenir, fark geçmişi bozulmaz.
+* **Bırakılan tutar sayımı aşamaz** - olmayan parayı yarına devretmek ertesi
+  gün hazır fark üretirdi. Önerilen tutar banko hedefi ile sayımın küçüğü:
+  hedef 1.000 ama kasada 400 varsa öneri 400, yoksa her gün elle kısılırdı.
+* **Onaylar opsiyonel ve iki uç ayrı** (`banko.acilis_onay` /
+  `gun_sonu_onay`): kapalıysa adım atlanır, görevli devri sayıp doğrudan açar
+  ya da kapatır.
+* **Sorumlu kendi oturumunu onaylamaz** - karşılıklı imza değil denetim olması
+  için. Kuyrukta `kendisi` satırının düğmeleri kapalı gelir, sunucu da
+  reddeder.
+* **Teslim reddi oturumu kapatmaz**, açık durumuna döndürür: görevli yeniden
+  sayar. Reddi "kapandı" saymak sayımı düzeltilemez hale getirirdi.
+* **Kapanan oturum düzeltilmez** (liste salt okuma, aksiyon yok); yanlış
+  kapatılan için `banko_oturum.yeniden_ac` **ayrı yetkisi** var ve gerekçe
+  loga yazılır.
+* **Tutanak no** `TT-yyyy-nnnnnn`, yıl içinde sıralı; kapanış onayında üretilir.
+
+**Ekranlar.** `/banko-oturum` (altı adım tek sayfada - ayrı ekranlara bölmek
+görevliyi "şimdi hangi ekranda olmalıyım" sorusuyla bırakırdı; akış şeridi
+adımı söylüyor), `/banko-onay` (açılış ve kapanış bekleyenler **tek** kuyrukta,
+tür sütunuyla ayrılır), `Kasa › Banko Oturumları` (geçmiş; fark eğilimi burada
+okunur) ve banko kartında salt okuma **Oturumlar** sekmesi.
+
+**Yetki türü tuzağı:** ekran yetkileri **tür 0** olmak zorunda. Onay kuyruğunu
+`banko_oturum.onayla` (tür 1, aksiyon) ile bağladığımda rota sessizce
+açılmıyordu - istemci `yetki('kod')` çağrısını tür 0 listesinden çözüyor.
+Ekran yetkisi `banko_onay` olarak ayrıldı; `yeniden_ac` aksiyon olarak kaldı.
+
+Doğrulama: tam akış hem API hem tarayıcıdan uçtan uca çalıştırıldı (açılış →
+onay → gün sonu → teslim → kapanış → ertesi gün devri), kendi oturumunu
+onaylama, çift oturum, fark açıklaması ve bırakılan tutar kuralları ayrı ayrı
+denendi. vitest 789, dotnet test 218, test satırları silindi.
