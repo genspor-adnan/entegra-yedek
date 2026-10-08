@@ -287,15 +287,20 @@ public static partial class KartKatalogu
 
     private static KartTanimi Rol() => new(
         Ad: "rol",
+        SilmeYok: true,
         YetkiKodu: "rol",                     // zaten seed'liydi (yetki.id=15, sira 62)
         Tablo: "public.rol",
         LogTabloId: 903,                      // yeni tablo - eski karsiligi yok (bkz. taraf_adres: 901)
         SubeKolonu: null,                     // ana tanim verisi - subeler arasi ortak
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
-        // SILME ENGELI (kullanici: "rollere silme ikonu ekle, icinde kullanici varsa
-        //   engelle"): ana rolu bu olan kullanici, ek rol atamasi ya da alt rol
-        //   varsa 422 + adet. Yetki/sube satirlari FK cascade ile gider; sistem
-        //   rolunu tetik (664) korur.
+        // ROL SILINMEZ (kullanici 08.10.2026: "rollerde silme yok aktif/pasif
+        //   var"): rol kadro hareketi gecmisinde ve personel atamasinda geciyor;
+        //   silmek o gecmisi bozar. Kullanimdan kaldirmak icin `aktif = 0` -
+        //   pasif rol yetki de vermez (goc 983).
+        //
+        //   Asagidaki SilmeEngelleri DURUYOR ama artik ikinci savunma hatti:
+        //   silme ucu `SilmeYok` yuzunden zaten 422 veriyor. Engelleri silmek,
+        //   bayrak ileride kaldirilirsa koruması olmayan bir silme birakirdi.
         SilmeEngelleri: new SilmeEngeli[]
         {
             new("public.taraf_kullanici", "rol_id", "Bu rol kullanıcılara atanmış; önce kullanıcıların rolünü değiştirin."),

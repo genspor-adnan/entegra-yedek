@@ -38,6 +38,14 @@ export const belgeUclari = {
    * kurumun kendi isareti. Isaretleme ekrani kapatilacaklari da gormeli, o
    * yuzden burada sablon suzgeci UYGULANMAZ.
    */
+  /**
+   * PORTAL ROLÜNÜ AÇ/KAPAT. Kurum tipi geçerlilik haritasına yazmaz: harita
+   * kurum içi kadroyu anlatıyor ve portal rolünü bilinçle atlıyor (829).
+   */
+  portalRolAktif: (g: { kod: string; aktif: boolean }) =>
+    gonder<{ kod: string; aktif: boolean; degisti: boolean; kisi: number }>(
+      '/api/kurum-profil/standart-roller/portal-aktif', g),
+
   profilRolleri: (kurumTipi?: string) =>
     istek<{ kurumTipi: string; yazili: boolean; bolumler: string[]; roller: ProfilRolu[] }>(
       `/api/kurum-profil/standart-roller/profil-rolleri${

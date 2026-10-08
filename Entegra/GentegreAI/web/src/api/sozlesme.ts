@@ -1001,6 +1001,12 @@ export interface KurumKatalogSatiri { kod: string; ad: string; sira: number }
 export interface ProfilRolu {
   id: number; kod: string; ad: string; amac: string;
   aktif: boolean; sistem: boolean; kisi: number;
+  /**
+   * PORTAL ROLÜ (dış kurum · dış hekim · firma · hasta). Kadro değil
+   * dışarıya açılan kapı: kutusu kurum tipi geçerliliğine değil DOĞRUDAN
+   * `rol.aktif`e yazar (829 + kullanıcı 08.10.2026).
+   */
+  portal?: boolean;
   sablon: boolean; modul?: string | null; modulKapali: boolean;
   varsayilan: boolean; gecerli: boolean; yazili: boolean; kilitli: boolean;
   /**

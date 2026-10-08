@@ -253,11 +253,19 @@ public static class StandartRolUclari
         ["atanmamis"]            = new("Sistem", null, 20),
     };
 
+    /// <summary>
+    /// PORTAL BÖLÜMÜ - dış kurum, dış hekim, firma ve hasta hesaplarının
+    /// rolleri. Kadro değil <b>dışarıya açılan kapı</b> olduğu için listenin
+    /// en altında durur ve kutusu kurum tipi geçerliliğine değil doğrudan
+    /// `rol.aktif`e bağlıdır (829 + kullanıcı 08.10.2026).
+    /// </summary>
+    public const string PortalBolumu = "Portal (kurum dışı)";
+
     /// <summary>Bölümlerin ekrandaki sırası; listede olmayan bölüm sona düşer.</summary>
     public static readonly string[] KadroBolumleri =
     [
         "Yönetim", "Tıbbi hizmetler", "Hemşirelik", "Yardımcı sağlık ve teknik",
-        "Hasta hizmetleri", "Mali işler", "İdari ve destek", "Portal (kurum dışı)",
+        "Hasta hizmetleri", "Mali işler", "İdari ve destek", PortalBolumu,
         "Sistem",
     ];
 
@@ -1038,6 +1046,66 @@ public static class StandartRolUclari
             return Results.Ok(new { kurumTipi = tip, kuruldu, guncellendi, atlandi });
         });
 
+        // ------------------------------------------------ portal rolü aç/kapat --
+        // POST /api/kurum-profil/standart-roller/portal-aktif  { kod, aktif }
+        //
+        // Kullanıcı 08.10.2026: *"roller sekmesine en alta dış kurum / hasta vb
+        //   kalan rolleri de ekle, buradan aktif/pasif yönetimi yapalım"*.
+        //
+        // KURUM TİPİ HARİTASINA YAZILMAZ. Harita kurum İÇİ kadroyu anlatıyor ve
+        //   `fn_kurum_tipi_rol_uygula` portal rolünü bilinçle atlıyor (829):
+        //   hastane profili kaydedildiğinde dış kurumun kapısı kapanmasın. Bu uç
+        //   doğrudan `rol.aktif` yazar - kurum portalı bilerek açar ya da kapatır.
+        grup.MapPost("/portal-aktif", async (PortalAktifIstegi istek, VeriKaynagi veri,
+                                             LogDeposu log, BaglamCozucu cozucu,
+                                             HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            // Rolün kendi yetkisi: rol ekranını değiştirebilen kişi portalı da
+            //   açıp kapatabilir - ayrı bir yetki icat etmek, kimsenin fark
+            //   etmediği üçüncü bir kapı olurdu.
+            baglam.YetkiIste("rol", Islem.Degistir);
+
+            var kod = (istek.Kod ?? "").Trim();
+            if (kod.Length == 0) throw GentegreHatasi.Dogrulama("Rol kodu boş.");
+
+            await using var b = await veri.AcAsync(iptal);
+            var rol = await b.TekAsync("""
+                select r.id, coalesce(r.portal_turu, 0) as portal_turu, r.aktif, r.ad,
+                       (select count(*) from public.taraf_kullanici k
+                         where k.rol_id = r.id and k.aktif = 1) as kisi
+                  from public.rol r where r.kod = @p0
+                """, null, [kod],
+                o => new { id = o.GetInt32(0), portal = o.GetInt16(1) > 0,
+                           aktif = o.GetInt16(2) == 1, ad = o.GetString(3),
+                           kisi = o.GetInt64(4) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rol bulunamadı.");
+
+            // BU UÇ YALNIZ PORTAL ROLÜ İÇİN: kadro rolleri geçerlilik
+            //   haritasından yönetiliyor, iki yoldan yönetmek ikisinin de
+            //   güvenilmez olması demekti.
+            if (!rol.portal)
+                throw GentegreHatasi.IsKurali(
+                    "Bu uç yalnız portal rolleri için: kadro rolleri profil geçerlilik "
+                    + "listesinden yönetilir.");
+
+            var yeni = (short)(istek.Aktif ? 1 : 0);
+            if (rol.aktif == istek.Aktif)
+                return Results.Ok(new { kod, aktif = istek.Aktif, degisti = false, rol.kisi });
+
+            await b.CalistirAsync("""
+                update public.rol set aktif = @p1, degistiren = @p2,
+                       degistirme_tarihi = now() where id = @p0
+                """, null, [rol.id, yeni, baglam.KullaniciId], iptal);
+
+            await log.YazAsync(LogIslemi.Degistir, LogTabloRol, rol.id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { portalRol = kod, rol.ad, aktif = istek.Aktif, etkilenenKullanici = rol.kisi },
+                iptal: iptal);
+
+            return Results.Ok(new { kod, aktif = istek.Aktif, degisti = true, rol.kisi });
+        });
+
         // ------------------------------------------- profile göre geçerli rol --
         // GET /api/kurum-profil/standart-roller/profil-rolleri?kurumTipi=osgb
         //
@@ -1070,17 +1138,28 @@ public static class StandartRolUclari
             //   tipiyle ilgisi yok. Canli denemede "Hastane" profilinde
             //   isaretlenmedigi icin `dis_istem_kurumu` pasife alinmis ve dis
             //   kurumun kullanicilari giris yapamaz olmustu.
+            // PORTAL ROLLERİ DE LİSTEDE, AMA AYRI BÖLÜMDE (kullanıcı 08.10.2026:
+            //   "roller sekmesine en alta dış kurum / hasta vb kalan rolleri de
+            //   ekle, buradan aktif/pasif yönetimi yapalım").
+            //
+            //   829'da bu liste portal rollerini HİÇ göstermiyordu, çünkü kurum
+            //   tipi haritası onları kapatıyor ve dış kurum kullanıcıları giriş
+            //   yapamaz hale geliyordu. Çözüm "göstermemek" değil, haritadan
+            //   ayırmak: portal satırının kutusu geçerlilik haritasına değil
+            //   DOĞRUDAN `rol.aktif`e yazar (aşağıdaki /portal-aktif ucu) ve
+            //   `fn_kurum_tipi_rol_uygula` onlara hâlâ dokunmaz.
             var roller = await b.ListeAsync("""
                 select r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem,
                        (select count(*) from public.taraf_kullanici k
-                         where k.rol_id = r.id and k.aktif = 1) as kisi
+                         where k.rol_id = r.id and k.aktif = 1) as kisi,
+                       coalesce(r.portal_turu, 0) as portal_turu
                   from public.rol r
-                 where coalesce(r.portal_turu, 0) = 0
-                 order by r.sistem desc, r.ad
+                 order by coalesce(r.portal_turu, 0), r.sistem desc, r.ad
                 """, null, [],
                 o => new { id = o.GetInt32(0), kod = o.GetString(1), ad = o.GetString(2),
                            amac = o.GetString(3), aktif = o.GetInt16(4) == 1,
-                           sistem = o.GetInt16(5) == 1, kisi = o.GetInt64(6) }, iptal);
+                           sistem = o.GetInt16(5) == 1, kisi = o.GetInt64(6),
+                           portalTuru = o.GetInt16(7) }, iptal);
 
             var liste = roller.Select(r =>
             {
@@ -1094,20 +1173,34 @@ public static class StandartRolUclari
                         && (modul is null || acikModuller.Contains(modul)));
                 var kayit = harita.FirstOrDefault(h => h.kod == r.kod);
                 var kadro = SablonKadro.GetValueOrDefault(r.kod);
+                var portal = r.portalTuru > 0;
                 return new
                 {
                     r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem, r.kisi,
+                    // PORTAL SATIRI: kutusu "bu profilde geçerli" değil
+                    //   "aktif" anlamına gelir; ekran bunu ayrı bölümde ve
+                    //   ayrı etiketle çizer.
+                    portal,
                     // KADRO YERI (ağaç görünümü): haritada olmayan rol - kurumun
                     //   kendi açtığı - "Diğer" bölümüne düşer, gizlenmez.
-                    bolum = kadro?.Bolum ?? "", ust = kadro?.Ust, sira = kadro?.Sira ?? 9000,
+                    // PORTAL ROLLERİ EN ALTTA kendi bölümünde (sıra 9500):
+                    //   kadro ağacının içine karışmasınlar.
+                    bolum = portal ? PortalBolumu : kadro?.Bolum ?? "",
+                    ust = portal ? null : kadro?.Ust,
+                    sira = portal ? 9500 : kadro?.Sira ?? 9000,
                     sablon = s is not null, modul,
                     modulKapali = modul is not null && !acikModuller.Contains(modul),
-                    varsayilan,
-                    gecerli = kayit?.gecerli ?? varsayilan,
-                    // İŞARETLENMİŞ Mİ: kurum bu tip için kaydını yazdı mı.
-                    yazili = kayit is not null,
+                    varsayilan = portal ? r.aktif : varsayilan,
+                    // Portal satırında kutu doğrudan AKTİFLİĞİ gösterir: kurum
+                    //   tipi haritası portal rolüne hiç yazılmıyor, oradan
+                    //   okumak kutuyu gerçekle ilgisiz bir değere bağlardı.
+                    gecerli = portal ? r.aktif : kayit?.gecerli ?? varsayilan,
                     // KİLİTLİ: pasife alınamaz (786 tetiği) - kutu kapatılamaz.
                     kilitli = r.kod is "yonetici" or "atanmamis",
+                    // KİŞİSİ OLAN PORTAL ROLÜ KAPATILIRSA o kullanıcılar giriş
+                    //   yapamaz: ekran uyarsın diye sayıyı zaten gönderiyoruz
+                    //   (`kisi`), ayrıca kilitlemiyoruz - kurum bilerek kapatabilir.
+                    yazili = portal ? true : kayit is not null,
                 };
             }).ToList();
 
@@ -1153,6 +1246,9 @@ public static class StandartRolUclari
     /// </param>
     public sealed record KurIstegi(string? KurumTipi, List<string>? Kodlar, bool? Guncelle,
                                    bool? TumModuller = null);
+
+    /// <summary>Portal rolünü aç/kapat (kod + aktif).</summary>
+    public sealed record PortalAktifIstegi(string? Kod, bool Aktif);
     private const int LogTabloRol = 903;   // rol karti ile ayni (KartKatalogu.Cari.Hasta)
 
     private sealed record YetkiSatir(int id, string kod, short tur);

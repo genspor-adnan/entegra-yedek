@@ -199,6 +199,17 @@ public sealed record KartTanimi(
     int LogTabloId,                // ISLEMLOG.TABLOID (eski GENINI -11110 listesi)
     IReadOnlyList<DetayTanimi>? Detaylar = null,
     IReadOnlyList<SilmeEngeli>? SilmeEngelleri = null,
+    /// <summary>
+    /// KART HİÇ SİLİNMEZ (kullanıcı 08.10.2026: "rollerde silme yok
+    /// aktif/pasif var"). Kaydın varlığı geçmişe bağlıysa - rol, kadro
+    /// hareketinde ve personel atamasında geçiyor - silmek geçmişi bozar;
+    /// doğru yol `aktif` alanını kapatmaktır.
+    ///
+    /// `SilmeEngelleri`'nden farkı: o koşullu (içinde kullanıcı varsa engelle),
+    /// bu koşulsuzdur. Silme ucu 422 verir, kart meta'sı `sil: false` döner ve
+    /// ekran düğmeyi hiç çizmez - kullanıcı var olmayan bir yolu denemesin.
+    /// </summary>
+    bool SilmeYok = false,
     string IdKolonu = "id",
     string? SabitKosul = null,
     string? SubeKolonu = null,

@@ -20208,3 +20208,45 @@ doğrulandı.
 
 Yedek: `~/yedek-rol/rol_<kurulum>.dump` (rol · rol_yetki · rol_sube ·
 kullanici_rol, altı kurulum).
+
+### 08.10.2026 — rol silme kalktı · portal rolleri Roller sekmesinde
+
+**Rol silinmez** (kullanıcı: *"rollerde silme yok aktif/pasif var"*). Daha önce
+kullanıcının isteğiyle eklenen silme ikonu (*"rollere silme ikonu ekle, içinde
+kullanıcı varsa engelle"*) kaldırıldı: rol kadro hareketi geçmişinde ve personel
+atamasında geçiyor, silmek o geçmişi bozar. Kullanımdan çıkarmak `aktif = 0` -
+pasif rol yetki de vermiyor (göç 983).
+
+* `KartTanimi.SilmeYok` bayrağı eklendi (koşulsuz; `SilmeEngelleri` koşulluydu).
+  Rol kartında `true`: silme ucu **422** veriyor ("Bu kayıt silinmez;
+  kullanımdan kaldırmak için 'Aktif' alanını kapatın"), kart meta'sı `sil: false`
+  döndüğü için ekran düğmeyi hiç çizmiyor.
+* `AksiyonKatalogu.Crud(... sil: false)`: rol listesinde silme aksiyonu artık
+  **üretilmiyor**. Düğmeyi göstermemek 422 vermekten önce gelir - kullanıcı var
+  olmayan bir yolu denemesin.
+* Mevcut `SilmeEngelleri` duruyor: bayrak ileride kaldırılırsa koruması olmayan
+  bir silme bırakmasın.
+
+**Portal rolleri Roller sekmesine eklendi** (kullanıcı: *"roller sekmesine en
+alta dış kurum / hasta vb kalan rolleri de ekle, buradan aktif/pasif yönetimi
+yapalım"*). 829'da bu liste portal rollerini **hiç göstermiyordu**, çünkü kurum
+tipi haritası onları kapatıyor ve dış kurum kullanıcıları giriş yapamaz hale
+geliyordu. Çözüm göstermemek değil, **haritadan ayırmak**:
+
+* `profil-rolleri` ucu portal rollerini de döndürüyor: `portal: true`, bölüm
+  **"Portal (kurum dışı)"**, sıra 9500 (en altta). Kutu `gecerli` yerine
+  doğrudan `aktif` değerini gösteriyor - harita portal rolüne hiç yazılmadığı
+  için oradan okumak kutuyu gerçekle ilgisiz bir değere bağlardı.
+* Yeni uç **`POST .../standart-roller/portal-aktif`** `{kod, aktif}`: doğrudan
+  `rol.aktif` yazıyor, `kurum_tipi_rol`'e dokunmuyor. Kadro rolü gönderilirse
+  422 - bir rolü iki yoldan yönetmek ikisini de güvenilmez yapardı. Yetki
+  `rol/değiştir`; her değişiklik ISLEMLOG'a etkilenen kullanıcı sayısıyla yazılıyor.
+* Ekranda portal kutusu **Kaydet'i beklemiyor** (harita yazmadığı için Kaydet'e
+  bırakmak kutuyu süse çevirirdi); hata olursa kutu geri alınıyor. Kişisi olan
+  rol kapatılırsa "{n} kullanıcı artık giriş yapamaz" uyarısı çıkıyor.
+
+Doğrulama: dev kurulumunda 79 rolün 5'i portal bölümünde geldi (dis_doktor 24
+kişi, dis_istem_kurumu 2, dis_kurum_yonetici 1, hasta_portali 2,
+firma_yetkilisi 0); `firma_yetkilisi` kapatıldı/açıldı, kadro rolü (`hemsire`)
+denemesi 422 verdi; rol silme denemesi 422, liste araç çubuğunda Sil düğmesi
+yok. dotnet test 218, vitest 789, tsc temiz.

@@ -198,13 +198,35 @@ export function KurumTipiAyarlari() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tip]);
 
-  const rolCevir = (kod: string, kilitli = false) => {
+  const rolCevir = (kod: string, kilitli = false, portal = false) => {
     if (kilitli) return;                      // yonetici/atanmamis kapanamaz
+    const acik = !rolGecerli.has(kod);
     setRolGecerli(o => {
       const n = new Set(o);
       if (n.has(kod)) n.delete(kod); else n.add(kod);
       return n;
     });
+    // PORTAL SATIRI KAYDET'İ BEKLEMEZ: kutusu geçerlilik haritasına değil
+    //   doğrudan `rol.aktif`e yazar (829: harita portal rolünü kapatmıyor,
+    //   dolayısıyla Kaydet'e bırakmak kutuyu hiçbir şey yapmayan bir süse
+    //   çevirirdi). Hata olursa kutu geri alınır.
+    if (!portal) return;
+    void (async () => {
+      try {
+        const y = await api.portalRolAktif({ kod, aktif: acik });
+        setProfilRol(o => o.map(r => (r.kod === kod ? { ...r, aktif: y.aktif } : r)));
+        if (!acik && y.kisi > 0)
+          mesaj(c('Bu rolde {n} kullanıcı var; artık giriş yapamazlar.')
+                 .replace('{n}', String(y.kisi)));
+      } catch (h) {
+        setRolGecerli(o => {
+          const n = new Set(o);
+          if (acik) n.delete(kod); else n.add(kod);
+          return n;
+        });
+        mesaj(hataMetni(h));
+      }
+    })();
   };
 
   /**
@@ -223,7 +245,7 @@ export function KurumTipiAyarlari() {
       id: 0, kod: r.kod, ad: r.ad, amac: r.amac,
       aktif: false, sistem: false, kisi: 0,
       sablon: true, modul: null as string | null, modulKapali: false,
-      varsayilan: r.tipUygun, gecerli: false, yazili: false, kilitli: false,
+      varsayilan: r.tipUygun, gecerli: false, yazili: false, kilitli: false, portal: false,
       bolum: r.bolum, ust: r.ust, sira: r.sira,
       kurulu: false, tipUygun: r.tipUygun,
     })),
@@ -288,15 +310,20 @@ export function KurumTipiAyarlari() {
       <label className={`kt-rol${rolGecerli.has(d.kod) ? ' on' : ''}`
                         + `${d.kurulu ? '' : ' yeni'}${d.tipUygun ? '' : ' disi'}`}>
         <input type="checkbox" checked={rolGecerli.has(d.kod)} disabled={d.kilitli}
-               onChange={() => rolCevir(d.kod, d.kilitli)}
-               title={d.kilitli ? 'Bu rol pasife alınamaz' : ''} />
+               onChange={() => rolCevir(d.kod, d.kilitli, d.portal)}
+               title={d.kilitli ? c('Bu rol pasife alınamaz')
+                      : d.portal ? c('Portal rolü: kutu doğrudan aktif/pasif yazar, Kaydet beklemez')
+                      : c('Bu kurum profilinde geçerli mi')} />
         <span className="ad">{d.ad}</span>
         <span className="kod">{d.kod}</span>
         {d.amac && <span className="amac" title={d.amac}>{d.amac}</span>}
         {d.kisi > 0 && <span className="rz kisi">{d.kisi} kişi</span>}
         {d.kilitli && <span className="rz">kilitli</span>}
         {!d.kurulu && <span className="rz yeni">kurulacak</span>}
-        {!d.tipUygun && <span className="rz" title={c('Bu kurum tipinde önerilmez')}>başka tip</span>}
+        {!d.tipUygun && !d.portal
+          && <span className="rz" title={c('Bu kurum tipinde önerilmez')}>başka tip</span>}
+        {d.portal && <span className="rz mor" title={c('Dışarıya açılan kapı: kurum tipiyle '
+          + 'kapanmaz, bu kutudan açılıp kapanır')}>portal</span>}
         {d.kurulu && (d.aktif
           ? <span className="rz ok">aktif</span>
           : <span className="rz pas">pasif</span>)}

@@ -113,7 +113,9 @@ public static class KartUclari
                 Yetki = new KartYetkisi
                 {
                     Duzenle = baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Degistir),
-                    Sil = baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Sil),
+                    // SİLİNMEYEN KART: yetki olsa da `sil` kapalı döner -
+                    //   ekran var olmayan bir yolu düğme olarak göstermesin.
+                    Sil = !tanim.SilmeYok && baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Sil),
                     GizliAlanlar = gizli
                 },
                 IzlemeNo = baglam.IzlemeNo
@@ -279,6 +281,11 @@ public static class KartUclari
             // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
             //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
             baglam.MenuAcikIste(kaynak);
+            // SİLİNMEYEN KART (08.10.2026): yetki kontrolünden ÖNCE - mesaj
+            //   "yetkiniz yok" değil, "bu kayıt silinmez" olmalı.
+            if (tanim.SilmeYok)
+                throw GentegreHatasi.IsKurali(
+                    "Bu kayıt silinmez; kullanımdan kaldırmak için 'Aktif' alanını kapatın.");
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
 

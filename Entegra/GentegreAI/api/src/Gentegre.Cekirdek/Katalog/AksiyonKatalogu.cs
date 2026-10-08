@@ -68,7 +68,10 @@ public static class AksiyonKatalogu
             ["kisi-liste"] = Crud("kisi", "kisi", "cari"),
             // Sil ARAC CUBUGUNDA (kullanici: "rollere silme ikonu ekle"); kullanicili rol
             //   sunucuda engellenir (KartKatalogu Rol SilmeEngelleri).
-            ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false, silHedef: null),
+            // ROL SILINMEZ: kullanimdan cikarmak icin kartta `Aktif` kapatilir
+            //   (pasif rol yetki de vermez - goc 983). Silme aksiyonu hic
+            //   uretilmiyor; sunucu tarafi KartTanimi.SilmeYok ile kapali.
+            ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false, sil: false),
 
             // KULLANICILAR (Yonetim > Guvenlik) - mockup kullanicilar.html.
             //   CRUD YOK: hesap burada "yeni kayit" gibi acilmaz (personelden
@@ -3177,26 +3180,35 @@ public static class AksiyonKatalogu
     /// <param name="silHedef">Silmenin gorunecegi yuzeyler; null = hepsi.</param>
     /// <param name="yazdir">Yazdir/CSV dugmesi eklensin mi.</param>
     /// <param name="silSira">Silme sirasi - araya aksiyon giren ekranlarda kayar.</param>
+    /// <param name="sil">
+    /// Silme aksiyonu uretilsin mi. <b>false</b>: kayit hic silinmez
+    /// (kullanici 08.10.2026: "rollerde silme yok aktif/pasif var") - varligi
+    /// gecmise bagli kayitlar kullanimdan `aktif` alani kapatilarak cikarilir.
+    /// Dugmeyi gostermemek, 422 vermekten once gelir: kullanici var olmayan bir
+    /// yolu denemesin. Sunucu tarafi ayrica `KartTanimi.SilmeYok` ile kapali.
+    /// </param>
     private static AksiyonTanimi[] Crud(string onEk, string grup, string kaynakKodu,
         string ekleAdi = "＋ Yeni", string? silHedef = "sagtus,palet",
         bool yazdir = true, int silSira = 30, string silAdi = "🗑 Sil",
-        string? silIpucu = null)
+        string? silIpucu = null, bool sil = true)
     {
-        AksiyonTanimi[] dortlu =
+        AksiyonTanimi[] ucluVeSil =
         [
             new($"{onEk}.yeni", ekleAdi, grup, Kisayol: "Ctrl+N",
                 KaynakKodu: kaynakKodu, Islem: Islem.Ekle, Sira: 10),
             new($"{onEk}.duzenle", "✎ Düzenle", grup, Kisayol: "Enter",
                 KaynakKodu: kaynakKodu, Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-            silHedef is null
-                ? new($"{onEk}.sil", silAdi, grup, Kisayol: "Del",
-                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira,
-                      Ipucu: silIpucu)
-                : new($"{onEk}.sil", silAdi, grup, Hedef: silHedef, Kisayol: "Del",
-                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira,
-                      Ipucu: silIpucu),
+            .. (sil
+                ? new AksiyonTanimi[] { silHedef is null
+                    ? new($"{onEk}.sil", silAdi, grup, Kisayol: "Del",
+                          KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true,
+                          Sira: silSira, Ipucu: silIpucu)
+                    : new($"{onEk}.sil", silAdi, grup, Hedef: silHedef, Kisayol: "Del",
+                          KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true,
+                          Sira: silSira, Ipucu: silIpucu) }
+                : []),
         ];
-        return yazdir ? [.. dortlu, Yazdir()] : dortlu;
+        return yazdir ? [.. ucluVeSil, Yazdir()] : ucluVeSil;
     }
 
     /// <summary>Yazdir / CSV kaydet - salt gorunum ekranlarinda tek basina da kullanilir.</summary>
