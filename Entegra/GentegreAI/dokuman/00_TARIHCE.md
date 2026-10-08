@@ -20161,3 +20161,50 @@ location` diyordu - betik de kendi yedeğini geri yüklediği için "çalıştı
 ama değişmedi" görünüyordu. Desen artık `\n` ile başlamıyor; temizlik yarım
 kalırsa betik siteye **hiç dokunmadan** duruyor (çıkış kodu 2, kalan blokları
 yazar). Sonuç: dokuz kurulumun hepsi yayında.
+
+### 08.10.2026 — kuruluma uygun rol seti (muayene · görüntüleme · lab · diş · göz · FTR)
+
+Kullanıcı: *"muayene goruntuleme, lab, dis, goz, ftr sunucularına bağlan, rol
+listesini sil, o profillere uygun rol ve yetkiler ekle"*.
+
+**Roller zaten tanımlıydı:** her kurulumda 79 sistem rolü ve dolu yetkileri var
+(hekim, laborant, radyolog, diş hekimi, optometrist, fizyoterapist…). Yani iş
+yeni rol yazmak değil, **kuruluma uymayanları kaldırmak**tı.
+
+**Silmek yerine pasife alındı.** `taraf_kullanici.rol_id` ve
+`personel_hareket.rol_id` yabancı anahtarları NO ACTION: silmek 113-120
+personel kaydını ve **kadro hareketi geçmişini** kırardı. Listeyi temizlemenin
+bedeli geçmişi bozmak olamaz.
+
+**Göç 983 — pasif rol yetki vermez.** Pasifleştirme tek başına yetmiyordu:
+`fn_kullanici_rolleri` kullanıcının aktifliğini kontrol ediyor ama **rolün**
+aktifliğini kontrol etmiyordu, yani pasife alınan rol yetki vermeye devam
+ediyordu. Artık her iki dalda (ana rol + ek roller) `rol.aktif = 1` şartı var.
+Bu bir ürün hatasıydı; dev ve **dokuz** kuruluma uygulandı.
+
+**Portal rolleri her kurulumda aktif kalır** (`rol.portal_turu > 0`): hasta ve
+dış kurum hesapları bu rollerle çalışıyor ve `tg_kullanici_portal_taraf`
+tetikleyicisi portal hesabının portal rolünde olmasını şart koşuyor -
+pasife almak o hesapları kurtarılamaz hale getirirdi (ilk deneme bu tetikleyiciye
+takılıp geri alındı).
+
+Her kurulumda **ortak çekirdek**: Yönetici · Rol Atanmamış · Kayıt Kabul ·
+Banko Şefi · Vezne · Muhasebe · Medikal Muhasebe · Medula Sorumlusu · Tıbbi
+Sekreter · Sekreter · Bilgi İşlem · Kalite + portal rolleri.
+
+| Kurulum | Ek klinik roller | Aktif / pasif |
+|---|---|---|
+| muayene | Uzman Doktor · Pratisyen · Doktor Sekreteri · Hemşire · Sağlık Personeli | 22 / 57 |
+| goruntuleme | Radyolog · Radyoloji Teknisyeni · Teleradyoloji Doktoru · Doktor Sekreteri · Biyomedikal | 22 / 57 |
+| lab | Lab Uzmanı · Lab Teknisyeni · Numune Kabul | 20 / 59 |
+| dis | Diş Hekimi · Diş Asistanı · Protez Lab Sorumlusu · Radyoloji Teknisyeni · Sterilizasyon · Hemşire | 23 / 56 |
+| goz | Göz Doktoru · Göz Teknisyeni · Optometrist · Hemşire | 21 / 58 |
+| ftr | FTR Uzmanı · Fizyoterapist · Hemşire | 20 / 59 |
+
+Pasif role bağlı personel atamaları *Rol Atanmamış*'a çevrildi (31-77 kayıt),
+ek rol bağları silindi; **kadro hareketi geçmişine dokunulmadı**. `admin` her
+kurulumda `yonetici` rolünde kaldı (317-326 yetki) ve altı kurulumda da girişi
+doğrulandı.
+
+Yedek: `~/yedek-rol/rol_<kurulum>.dump` (rol · rol_yetki · rol_sube ·
+kullanici_rol, altı kurulum).
