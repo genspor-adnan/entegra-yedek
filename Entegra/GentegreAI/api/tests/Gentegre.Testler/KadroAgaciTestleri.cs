@@ -53,8 +53,19 @@ public sealed class KadroAgaciTestleri(VeritabaniOlgusu olgu)
         var blok = Regex.Match(Kaynak(),
             @"KadroBolumleri =\s*\[(?<g>.*?)\];", RegexOptions.Singleline);
         Assert.True(blok.Success, "KadroBolumleri kaynakta bulunamadı.");
-        return [.. Regex.Matches(blok.Groups["g"].Value, @"""(?<b>[^""]+)""")
-            .Select(m => m.Groups["b"].Value)];
+        var adlar = Regex.Matches(blok.Groups["g"].Value, @"""(?<b>[^""]+)""")
+            .Select(m => m.Groups["b"].Value).ToList();
+        // SABİT REFERANSINI DA ÇÖZ: listede `PortalBolumu` gibi bir const adı
+        //   geçiyorsa orada string literal yoktur; değeri kaynaktaki
+        //   tanımından okunur - yoksa test var olan bölümü "eksik" sanar.
+        foreach (var sabit in Regex.Matches(blok.Groups["g"].Value, @"\b[A-Z][A-Za-z0-9_]*\b")
+                                   .Select(m => m.Value).Distinct())
+        {
+            var tanim = Regex.Match(Kaynak(),
+                @"const\s+string\s+" + Regex.Escape(sabit) + @"\s*=\s*""(?<v>[^""]+)""");
+            if (tanim.Success) adlar.Add(tanim.Groups["v"].Value);
+        }
+        return adlar;
     }
 
     [VtFact(DisplayName = "Kadro haritasındaki her rol gerçekten var")]

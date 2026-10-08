@@ -111,16 +111,17 @@
     <span class="sp">Ayşe Banko · Merkez · Banko 2 · 08.10.2026 08:02</span></div>
   <div class="akis">
     <div class="ad simdi"><span class="no">1</span>Oturum talebi</div>
-    <div class="ad"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad"><span class="no">2</span>Sorumlu onayı <span class="rz mavi">ops.</span></div>
     <div class="ad"><span class="no">3</span>Devir sayımı</div>
     <div class="ad"><span class="no">4</span>Gün içi işlem</div>
     <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
     <div class="ad"><span class="no">6</span>Teslim &amp; kapanış</div>
   </div>
   <div class="hdr">
-    <div class="fld"><label>Banko / kasa</label>
-      <div class="inp">Banko 2 — Poliklinik Girişi <span class="rz mavi">KASA-02</span></div></div>
-    <div class="fld"><label>Görevli</label><div class="inp ro">Ayşe Banko (vezne)</div></div>
+    <div class="fld"><label>Banko * <span class="sonuk">(uygun olanlar)</span></label>
+      <div class="inp">BNK-02 — Poliklinik Girişi ▾ <span class="rz mavi">KASA-02</span></div></div>
+    <div class="fld"><label>Görevli</label>
+      <div class="inp ro">Ayşe Banko <span class="sonuk">(giriş yapan kullanıcı)</span></div></div>
     <div class="fld"><label>Vardiya</label><div class="inp">Sabah · 08:00–16:00</div></div>
     <div class="fld"><label>Önceki oturum</label>
       <div class="inp ro">#4417 · 07.10.2026 · <span class="rz ok">kapandı</span></div></div>
@@ -132,22 +133,28 @@
         <div class="fld"><label>Sistem devri</label>
           <div class="inp ro buyuk">4.250,00 ₺</div></div>
         <div class="fld"><label>Devreden görevli</label>
-          <div class="inp ro">Mehmet Vezne · #4417 kapanışı</div></div>
+          <div class="inp ro">Mehmet Kaya · #4417 kapanışı</div></div>
         <div class="fld"><label>Kasada bulunan (sayım)</label>
           <div class="inp buyuk">4.250,00 ₺</div></div>
       </div>
       <div class="sonuk" style="margin-top:6px">Sistem devri <b>önceki oturumun kapanış
         bakiyesidir</b> ve elle değiştirilemez; sayım farklıysa fark kapanışta değil
         <b>açılışta</b> yazılır - sonraki görevli başkasının farkını devralmasın.</div>
+      <div class="sonuk" style="margin-top:4px"><b>Banko tanımında kullanıcı yoktur:</b>
+        sabah açılışta <b>uygun banko seçilir</b> ve oturum <b>giriş yapan kullanıcının
+        adıyla</b> başlar. Listede yalnız bu şubedeki aktif ve oturumu kapalı bankolar
+        çıkar - başkasının açık oturumuna girilmez.</div>
     </div>
   </div>
   <div class="toolbar">
     <div class="btn primary">📨 Onaya Gönder</div>
+    <div class="btn ok">🔓 Doğrudan Aç</div>
     <div class="btn">🧾 Devir Tutanağını Gör</div>
     <div class="btn sp">✖ Vazgeç</div>
   </div>
-  <div class="statusbar"><span>Talep sorumluya bildirim olarak düşer; onaysız oturumda
-    tahsilat girilemez.</span></div>
+  <div class="statusbar"><span><b>Sorumlu onayı opsiyonel</b> (banko ayarı): açıksa talep
+    sorumluya bildirim düşer ve onaysız oturumda tahsilat girilemez - "Doğrudan Aç"
+    kapalıdır. Ayar kapalıysa görevli devri sayıp doğrudan açar, onay adımı atlanır.</span></div>
 </div>
 
 <!-- =================================================== 2 · SORUMLU ONAY EKRANI
@@ -157,7 +164,7 @@
     <span class="sp">Hatice Sorumlu · Banko Şefi · 3 bekleyen</span></div>
   <div class="akis">
     <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
-    <div class="ad simdi"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad simdi"><span class="no">2</span>Sorumlu onayı <span class="rz mavi">ops.</span></div>
     <div class="ad"><span class="no">3</span>Devir sayımı</div>
     <div class="ad"><span class="no">4</span>Gün içi işlem</div>
     <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
@@ -176,14 +183,14 @@
           <span class="btn kucuk danger">✖ Reddet</span></td></tr>
       <tr><td class="orta"><span class="kutucuk"><i></i></span></td>
         <td>08:05</td><td><span class="rz mavi">açılış</span></td><td>Banko 3</td>
-        <td>Deniz Vezne</td><td class="para">1.900,00 / 1.850,00</td>
+        <td>Deniz Yildiz</td><td class="para">1.900,00 / 1.850,00</td>
         <td class="para"><span class="rz kir">−50,00</span></td>
         <td class="sar">Sayımda 50 ₺ noksan; görevli yeniden saydı.</td>
         <td class="orta"><span class="btn kucuk ok">✔ Onayla</span>
           <span class="btn kucuk danger">✖ Reddet</span></td></tr>
       <tr><td class="orta"><span class="kutucuk"><i></i></span></td>
         <td>07.10 18:40</td><td><span class="rz mor">kapanış</span></td><td>Banko 1</td>
-        <td>Mehmet Vezne</td><td class="para">12.480,00 / 12.480,00</td>
+        <td>Mehmet Kaya</td><td class="para">12.480,00 / 12.480,00</td>
         <td class="para">0,00</td><td class="sar">Gün sonu teslim · POS mutabık</td>
         <td class="orta"><span class="btn kucuk ok">✔ Onayla</span>
           <span class="btn kucuk">🧾 Tutanak</span></td></tr>
@@ -204,7 +211,7 @@
     <span class="sp">Ayşe Banko · Oturum #4432 açık · 08.10.2026</span></div>
   <div class="akis">
     <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
-    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı <span class="rz mavi">ops.</span></div>
     <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
     <div class="ad simdi"><span class="no">4</span>Gün içi işlem</div>
     <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
@@ -281,7 +288,7 @@
     <span class="sp">Oturum #4432 · Ayşe Banko · 08.10.2026 17:55</span></div>
   <div class="akis">
     <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
-    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı <span class="rz mavi">ops.</span></div>
     <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
     <div class="ad bitti"><span class="no">4</span>Gün içi işlem</div>
     <div class="ad simdi"><span class="no">5</span>Gün sonu sayım</div>
@@ -361,7 +368,7 @@
     <span class="sp">kapanış onayı bekliyor</span></div>
   <div class="akis">
     <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
-    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı <span class="rz mavi">ops.</span></div>
     <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
     <div class="ad bitti"><span class="no">4</span>Gün içi işlem</div>
     <div class="ad bitti"><span class="no">5</span>Gün sonu sayım</div>
@@ -454,10 +461,21 @@
     <li><b>Devir elle yazılmaz.</b> Açılıştaki sistem devri, önceki oturumun kapanış
       bakiyesidir. Sayım farklıysa fark <b>açılışta</b> kaydedilir: sonraki görevli
       başkasının farkını devralmasın.</li>
-    <li><b>Sorumlu onayı iki uçta.</b> Açılış onayı olmadan tahsilat girilemez, kapanış
-      onayı olmadan oturum kapanmaz. Onay kaydı kim/ne zaman/hangi tutar olarak durur
-      (<code>onay_id</code>, <code>onay_ts</code>); sorumlu <b>kendi bankosunu</b>
-      onaylayamaz.</li>
+    <li><b>Sorumlu onayı OPSİYONEL, iki uç ayrı ayarlanır</b> (kullanıcı 08.10.2026:
+      *"opsiyonel olarak banko sorumlusu onay verince banko açılabilir"*). Banko
+      ayarlarında <b>açılış onayı</b> ve <b>gün sonu onayı</b> için iki ayrı kutu var:
+      küçük kurumda her sabah onay beklemek bankoyu durdurur, büyük kurumda devir
+      farkının bir imzası olması gerekir - kararı kurum verir. Yaygın tercih açılışı
+      serbest bırakıp teslimi imzaya bağlamak. Açılış onayı AÇIKSA onay gelmeden
+      tahsilat girilemez, kapanış onayı açıksa oturum kapanmaz. Onay kaydı
+      kim/ne zaman/hangi tutar olarak durur (<code>onay_id</code>, <code>onay_ts</code>);
+      sorumlu <b>kendi bankosunu</b> onaylayamaz.</li>
+    <li><b>Banko tanımında kullanıcı yoktur</b> (kullanıcı 08.10.2026). Açılışta uygun
+      banko seçilir, oturum giriş yapan kullanıcının adıyla başlar ve kayıt ikisini
+      birlikte tutar ("3 nolu bankoda Ali Deniz giriş yaptı"). Tanıma personel listesi
+      koymak her vardiya ve her izinde tanımı düzenlemek demekti; kimin tahsilat
+      yapabileceği <b>rolden</b> gelir. Banko tanımı:
+      <code>banko_tanimi_v2.html</code>.</li>
     <li><b>Kasadaki para gün boyu görünür.</b> Üst şeritte devir, nakit tahsilat, iade ve
       "olması gereken" yan yana durur. Gün sonunda ilk kez bakılan bir sayı, farkı
       kaçırmanın en kolay yoludur.</li>

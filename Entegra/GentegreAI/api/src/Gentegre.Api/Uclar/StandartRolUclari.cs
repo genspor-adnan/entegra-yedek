@@ -214,6 +214,9 @@ public static class StandartRolUclari
         ["osgb_sekreter"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 60),
         ["cagri_supervizor"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 62),
         ["cagri_operator"]       = new("Hasta hizmetleri", "cagri_supervizor", 64),
+        // DANISMA bankonun yaninda: ikisi de banko sefine bagli, hasta
+        //   hizmetleri bolumunde.
+        ["danisma"]              = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 65),
         ["tibbi_sekreter"]       = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 70),
         ["doktor_sekreteri"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 80),
         ["hasta_haklari"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 90),
@@ -330,8 +333,24 @@ public static class StandartRolUclari
 
     private static readonly Sablon[] Sablonlar =
     [
-        new("kayit_kabul", "Kayıt Kabul / Banko", "Hasta kaydı, randevu, başvuru, provizyon, fiş ve tahsilat.", Klinik, K(KayitKabulTemel)),
-        new("kayit_kabul_sorumlu", "Kayıt Kabul Sorumlusu (Banko Şefi)",
+        // AD "Banko Görevlisi" (kullanici 08.10.2026: "rollerde Kayıt Kabul
+        //   rename Banko Görevlisi") - KOD `kayit_kabul` DEGISMEZ: yetki
+        //   eslemeleri, kurum tipi haritasi ve kadro agaci koda bagli.
+        new("kayit_kabul", "Banko Görevlisi", "Hasta kaydı, randevu, başvuru, provizyon, fiş ve tahsilat.", Klinik, K(KayitKabulTemel)),
+        // DANISMA (kullanici 08.10.2026: "Roller'e Danışma ekle"): karsilama
+        //   bankosu - hastayi YONLENDIRIR, islem yapmaz.
+        //
+        //   PARA VE KLINIK YETKISI YOK: tahsilat, provizyon, muayene ve istem
+        //   yok; danisma gorevlisi hastanin nerede, hangi hekimde, kacta oldugu
+        //   sorusunu cevaplar. Hasta ve randevu SALT OKUMA (`T`): kayit acmak
+        //   bankonun isi, danismada acilan yarim kayit bankoda ikinci kez
+        //   acilirdi.
+        new("danisma", "Danışma",
+            "Karşılama ve yönlendirme: hasta/randevu sorgulama, hekim ve bölüm bilgisi; işlem ve tahsilat yok.",
+            Klinik,
+            K(T("hasta"), T("randevu"), T("belge"), T("taraf"), T("personel"),
+              T("kurum"), T("hizmet"), T("bildirim"))),
+        new("kayit_kabul_sorumlu", "Banko Sorumlusu",
             "Bankonun tüm işleri + iskonto talebinin birim imzası, vardiya/kasa kapatma.", Klinik,
             K(KayitKabulSorumluTemel)),
         // AD "Doktor" (790, kullanici: "Hekim rename Doktor") - KOD `hekim`
@@ -493,7 +512,10 @@ public static class StandartRolUclari
         new("ust_yonetim", "Üst Yönetim (Mesul Müdür / Genel Müdür)",
             "Salt okuma dökümler + iskonto zincirinin son imzası.", Hepsi,
             K(UstYonetimTemel)),
-        new("vezne", "Vezne", "Tahsilat, makbuz, fatura kapatma.", ["tip_merkezi", "hastane"],
+        // AD "Banko Kasiyeri" (kullanici 08.10.2026: "vezne yerine Banko
+        //   kullan") - KOD `vezne` degismez. `kayit_kabul` (Banko Gorevlisi)
+        //   kayit DA acar, bu rol YALNIZ kasadir: ayri kalmasi gerekiyor.
+        new("vezne", "Banko Kasiyeri", "Tahsilat, makbuz, fatura kapatma; hasta kaydı açmaz.", ["tip_merkezi", "hastane"],
             K(Y("kasa_islem"), Y("mali_hareket"), T("hesap"), Y("kasa_kapatma"), A("kasa.kapat"), A("kasa.makbuz-yazdir"), A("kasa.kesinlestir"), T("belge"), T("hasta"), T("cari"))),
         new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Hepsi,
             K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false), new("portal.%", false))),

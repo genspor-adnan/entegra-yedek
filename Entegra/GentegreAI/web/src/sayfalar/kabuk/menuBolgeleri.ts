@@ -101,7 +101,7 @@ export function calismaAlaniBul(kod: string | undefined): CalismaAlani {
 export function rolCalismaAlani(rolAdi: string | undefined): string {
   const r = (rolAdi ?? '').toLocaleLowerCase('tr');
   if (!r) return 'tumu';
-  if (/banko|kayıt kabul|kayit kabul|vezne|yatış|yatis|sekreter/.test(r)) return 'banko';
+  if (/banko|kayıt kabul|kayit kabul|vezne|danış|danis|yatış|yatis|sekreter/.test(r)) return 'banko';
   // ECZANE/DEPO ROLÜ muhasebeden ÖNCE bakılır: "Eczane / Depo" içindeki
   //   sözcükler başka dala düşmesin.
   if (/eczac|eczane|depo|biyomedikal|satınalma|satinalma/.test(r)) return 'tedarik';

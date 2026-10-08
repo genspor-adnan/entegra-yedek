@@ -131,7 +131,7 @@ describe('menü düzeni', () => {
     expect(CALISMA_ALANLARI[0].bolgeler, 'ilk alan Tümü olmalı (boş liste)').toEqual([]);
     // StandartRolUclari.cs adları: rol varsayılanı boşa düşmesin.
     const beklenen: [string, string][] = [
-      ['Kayıt Kabul / Banko', 'banko'], ['Vezne', 'banko'], ['Yatış / Taburcu Ofisi', 'banko'],
+      ['Banko Görevlisi', 'banko'], ['Banko Kasiyeri', 'banko'], ['Danışma', 'banko'], ['Yatış / Taburcu Ofisi', 'banko'],
       ['Hekim', 'hekim'], ['Diş Hekimi', 'hekim'], ['Göz Hekimi', 'hekim'], ['FTR Uzmanı', 'hekim'],
       ['Hemşire', 'hemsire'], ['Fizyoterapist', 'hemsire'], ['Diş Asistanı', 'hemsire'],
       ['Lab Teknisyeni', 'tani'], ['Radyolog', 'tani'], ['Numune Kabul', 'tani'],
