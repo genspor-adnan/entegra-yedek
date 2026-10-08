@@ -20788,3 +20788,26 @@ içi sayaç 320 ₺ / 1 işlem gösterdi ve tür dökümüne "Nakit Tahsilat" ol
 düştü. Zorunluluk ölçütü rol yetkileriyle doğrulandı (Görevli ve Sorumlu:
 `banko_oturum.ekle=1`, `ayar.degistir=0` → şart var; yönetici → yok). vitest
 791, dotnet test 218.
+
+### 08.10.2026 — Personel araması: rol, bölüm, görev, kimlik no, telefon
+
+Kullanıcı: *"personel aramada ad soyad, rol, bölüm, görev, kimlik no ve tel den
+bulunabilmeli"*.
+
+`TarafArama`'nın `KAYNAK_EK_ARAMA` haritasına `personel` girdisi eklendi:
+`rolAdi`, `departmanAdi`, `gorev`, `vknoHam`. Ad soyad (`unvan`) ve sicil
+(`kod`) ortak filtrede zaten vardı; telefon rakam girilince `telefonHam` ile
+aranıyordu.
+
+**Kimlik no HAM alandan** aranıyor (`vknoHam`), maskeli `vkno`'dan değil:
+maskeli alanda arayan kullanıcı "427 143" yazdığında bulamazdı.
+
+Sunucu tarafında değişiklik gerekmedi - alanların hepsi `personel` kaynağında
+zaten tanımlıydı ve süzülebilirdi; eksik olan istemcinin bu alanları serbest
+metin filtresine koymasıydı. Ek alanlar **kaynak başına** kuruluyor: ortak
+filtreye konsa başka kaynakta olmayan alan o listeyi 400 DOGRULAMA ile
+düşürürdü.
+
+Doğrulama: beş alanın her biri ayrı ayrı 200 döndü; "Hekim" aramasında rol ve
+bölümden 20 kayıt bulundu, kimlik no (42714345954) ve telefon (5009989483)
+aramaları doğru personeli getirdi. vitest 791, dotnet test 218.

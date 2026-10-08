@@ -40,6 +40,13 @@ interface TarafSatiri {
  */
 const KAYNAK_EK_ARAMA: Record<string, string[]> = {
   'basvuru-hekim': ['bolumAdi'],
+  // PERSONEL ARAMASI (kullanici 08.10.2026: "personel aramada ad soyad, rol,
+  //   bolum, gorev, kimlik no ve tel den bulunabilmeli"). Ad soyad (`unvan`)
+  //   ve sicil (`kod`) ortak filtrede; telefon rakam girilince `telefonHam`
+  //   ile zaten araniyor. Buraya rol / bolum / gorev ve HAM kimlik no
+  //   ekleniyor - maskeli `vkno` ile aramak "123 45" yazan kullaniciyi
+  //   bulamazdi.
+  personel: ['rolAdi', 'departmanAdi', 'gorev', 'vknoHam'],
 };
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
