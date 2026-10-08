@@ -20432,3 +20432,38 @@ Doğrulama: tam akış hem API hem tarayıcıdan uçtan uca çalıştırıldı (
 onay → gün sonu → teslim → kapanış → ertesi gün devri), kendi oturumunu
 onaylama, çift oturum, fark açıklaması ve bırakılan tutar kuralları ayrı ayrı
 denendi. vitest 789, dotnet test 218, test satırları silindi.
+
+### 08.10.2026 — GenProfil refaktörü: tek bağlantı ekranı, gerçek "Kaydet ve Çık"
+
+Kullanıcı: *"genprofil i refaktor et"*.
+
+* **Tek bağlantı ekranı.** Adres, kullanıcı ve parola artık aynı formda
+  (ilk istek de böyleydi: *"girişte user/pass/adres bilgilerini al"*). Önce
+  adres sorup kullanıcıyı ikinci ekranda istemek teknisyene aynı işi iki
+  adımda yaptırıyordu; yanlış adres de ancak ikinci ekranda hata veriyordu.
+  Giriş tutmazsa form bilgilerle geri gelir ve nedeni yazar. Parola saklanmaz,
+  yalnız adres hatırlanır - çıkışta artık silinmiyor, aynı sunucuya tekrar
+  bağlanmak çoğu zaman olan iş.
+* **"Kaydet ve Çık" gerçekten kaydediyor.** `KurumTipiAyarlari` ana kaydetme
+  işlevini `kaydetBagla` prop'uyla dışa veriyor (menü düzeninin kancasıyla
+  aynı desen: ref üzerinden, yoksa ebeveyn her render'da güncellenirdi); şerit
+  onu çağırıp sonra çıkıyor. **Kayıt hata verirse çıkılmıyor** - ekran hatayı
+  gösterir, teknisyen düzeltir; sessizce çıkmak değişikliği kaybettirirdi.
+  İkinci düğme "Kaydetmeden Çık" adıyla ne yaptığını söylüyor. Önceki sürümde
+  düğme "Kaydet ve çık" diyor ama yalnız oturumu kapatıyordu: adı kaydettiğini
+  söylerken kaydetmemesi, teknisyene işini yapmış izlenimi veriyordu.
+* **Mesaj katmanı paylaşıldı** (`MesajKatmani`). Dinleyici kurulmadığı için
+  `mesaj()` tarayıcı `alert`ine düşüyordu; `paraSor()` ise sessizce `null`
+  dönüyor, yani profil ekranının bir sorusu hiç sorulmamış sayılabilirdi.
+* **Bileşen ayrımı.** `Profil.tsx` üst şerit + giriş formu + durum ekranları +
+  içeriği birlikte taşıyordu; üst şerit `Ust.tsx`'e çıktı, giriş formu
+  bağlantı ekranına taşındı, `Profil` yalnız oturum/kaydet akışını ve içeriği
+  çiziyor.
+* Sunucu değişince `key={adres}` ile oturum ve paylaşılan ekran sıfırdan
+  kurulur - eski kurumun kullanıcısı, profili ve menüsü yeni bağlantıya
+  taşınmasın.
+
+Doğrulama: yerel API'ye (`http://localhost:5180`) tek formla bağlanıldı,
+"Kaydet ve Çık" profili kaydedip çıktı (kaydedildi mesajı ürünün kendi
+kutusunda), giriş ekranı adresi hatırladı. vitest 789, tsc temiz, GenProfil
+derlendi.

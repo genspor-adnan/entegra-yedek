@@ -18,3 +18,6 @@
 .gp-hata { margin: 8px 0; padding: 8px 10px; border-radius: 6px;
   background: color-mix(in srgb, var(--kirmizi) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--kirmizi) 40%, transparent); font-size: 12px }
+
+/* Adres alanının altındaki açıklama: alanla kutu arasına girmesin. */
+.gp-ipucu { font-size: 11px; margin: -4px 0 12px }

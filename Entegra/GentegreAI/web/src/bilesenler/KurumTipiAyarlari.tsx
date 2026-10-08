@@ -69,7 +69,15 @@ const SEKMELER: { ad: string; ic: string }[] = [
   { ad: 'Özet & Kurulum',       ic: '✅' },
 ];
 
-export function KurumTipiAyarlari() {
+/**
+ * `kaydetBagla`: ana "Kaydet & Uygula" islevini DISA verir. GenProfil
+ * (kurum profili bakim araci) ustteki kendi "Kaydet ve Cik" dugmesiyle ayni
+ * kaydi tetikliyor - araca ikinci bir kaydetme yolu yazmak, iki ayri davranis
+ * demekti. Web icinde kullanilmaz: orada tek dugme ekranin kendisinde.
+ */
+export function KurumTipiAyarlari({ kaydetBagla }: {
+  kaydetBagla?: (fn: (() => Promise<void>) | null) => void;
+} = {}) {
   const [aktif, setAktif] = useState(0);
   const { kullanici, tazele } = useOturum();
   const git = useNavigate();
@@ -385,6 +393,16 @@ export function KurumTipiAyarlari() {
    * uygulama yeterli"). Gömülü ekran kaydetme fonksiyonunu buraya veriyor;
    * sekme hiç açılmadıysa `null` kalır ve kaydetme onu atlar.
    */
+  // Ana kaydeti ebeveyne veren kanca: `kaydet` her render'da yeniden
+  //   kuruldugu icin dogrudan gecirmek ebeveyni her render'da guncellemeye
+  //   zorlardi - ref uzerinden sabit bir sarmalayici veriyoruz.
+  const anaKaydetRef = useRef<() => Promise<void>>(async () => {});
+  useEffect(() => {
+    if (!kaydetBagla) return;
+    kaydetBagla(() => anaKaydetRef.current());
+    return () => kaydetBagla(null);
+  }, [kaydetBagla]);
+
   const menuKaydet = useRef<(() => Promise<void>) | null>(null);
   const menuKaydetBagla = useCallback(
     (fn: (() => Promise<void>) | null) => { menuKaydet.current = fn }, []);
@@ -441,6 +459,7 @@ export function KurumTipiAyarlari() {
     } catch (h) { setHata(hataMetni(h)) }
     finally { setKaydediyor(false) }
   };
+  anaKaydetRef.current = kaydet;
 
   const tipAdi = (kod?: string) => veri?.tipler.find(t => t.kod === kod)?.ad ?? '';
 
