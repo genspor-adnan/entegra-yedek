@@ -2,3 +2,7 @@
 # AI model anahtari sunucuda durur, depoda DEGIL (450).
 gizli/
 api/src/Gentegre.Api/gizli/
+
+# dotnet test ciktilari (trx, kapsam raporlari): uretim artigi.
+api/TestResults/
+api/**/TestResults/

@@ -1,9 +1,0 @@
-- generic [ref=e4]:
-  - heading "GenoTIP AI" [level=1] [ref=e14]
-  - paragraph [ref=e7]: Calisacaginiz subeyi secin
-  - generic [ref=e15]:
-    - text: Sube
-    - combobox "Sube" [ref=e16]:
-      - option "Merkez (varsayilan)" [selected]
-      - option "Ankara Sube — salt okuma"
-  - button "Devam" [ref=e17] [cursor=pointer]

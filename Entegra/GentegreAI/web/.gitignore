@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright-cli oturum ciktilari (anlik sayfa dokumleri) ve tarayici profili:
+#   tanilama artigi, depoya girmemeli - 686 dosya / 6.9 MB birikmisti.
+.playwright-cli/
+.playwright/
+test-results/
+playwright-report/
