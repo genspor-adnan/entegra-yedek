@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banko Oturumu — Açılıştan Teslime Akış — Mockup (GenoTIP AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1420px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.kucuk{padding:2px 7px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg td.sar{white-space:normal}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.top td{background:#f7f9fc;font-weight:bold}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .para{font-family:Consolas,monospace;text-align:right;white-space:nowrap}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k3{grid-template-columns:repeat(3,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px;flex-wrap:wrap}
+  .fld .inp.ro{background:#f6f8fa;color:#4d5d6e}
+  .fld .inp.buyuk{font-family:Consolas,monospace;font-size:14px;font-weight:bold;justify-content:flex-end}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden;margin:10px}
+  .grp .gb{background:linear-gradient(#f4f7fb,#eaf0f7);border-bottom:1px solid var(--line2);
+    padding:5px 9px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;gap:8px;align-items:center}
+  .grp .ic{padding:8px 10px;font-size:11.5px;line-height:1.7}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+  .ucPanel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1420px;margin:10px auto 24px;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0;padding-left:18px}
+  .not li{margin-bottom:5px}
+  /* AKIŞ ŞERİDİ: hangi adımdayız - her pencerenin başında aynı şerit. */
+  .akis{display:flex;gap:0;padding:8px 12px;background:#f7fafc;border-bottom:1px solid var(--line2);
+    flex-wrap:wrap;align-items:center}
+  .akis .ad{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;font-size:11px;
+    color:var(--muted);border:1px solid var(--line2);border-right:none;background:#fff}
+  .akis .ad:first-child{border-radius:12px 0 0 12px}
+  .akis .ad:last-child{border-radius:0 12px 12px 0;border-right:1px solid var(--line2)}
+  .akis .ad .no{width:16px;height:16px;border-radius:8px;background:#dde5ee;color:#4d5d6e;
+    text-align:center;line-height:16px;font-size:10px;font-weight:bold}
+  .akis .ad.bitti{color:#2e7d46;background:#f3faf5}
+  .akis .ad.bitti .no{background:#3f9a5e;color:#fff}
+  .akis .ad.simdi{color:var(--navy);background:#eef4fc;font-weight:bold;border-color:#cfe0f5}
+  .akis .ad.simdi .no{background:#2f6db3;color:#fff}
+  /* Oturum şeridi: banko görevlisinin gün boyu gördüğü sayaçlar. */
+  .oturum{display:flex;gap:10px;align-items:center;padding:7px 12px;background:#20344d;color:#dce6f2;
+    font-size:11.5px;flex-wrap:wrap}
+  .oturum .kutu{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    border-radius:4px;padding:3px 10px;display:flex;gap:7px;align-items:center}
+  .oturum .kutu b{font-family:Consolas,monospace;font-size:13px}
+  .oturum .kutu span{color:#9fb6d0;font-size:10.5px}
+  /* Sayım tablosu: kupür sayımı */
+  .sayim{display:grid;grid-template-columns:repeat(4,auto);gap:4px 10px;padding:8px 10px;align-items:center;font-size:11.5px}
+  .sayim .kup{font-family:Consolas,monospace;text-align:right}
+  .sayim input{width:52px}
+  .kutucuk{display:inline-flex;align-items:center;gap:4px}
+  .kutucuk i{width:11px;height:11px;border:1px solid var(--line);border-radius:2px;background:#fff;display:inline-block}
+  .kutucuk i.on{background:#2f6db3;border-color:#2f6db3}
+  .uyaribant{display:flex;gap:10px;align-items:center;padding:7px 12px;background:#fdf6e3;
+    border-bottom:1px solid #f2ddbf;color:#7a5612;font-size:11.5px;flex-wrap:wrap}
+  .uyaribant.kir{background:#fbe9e7;border-color:#f3c4bf;color:#8c2b22}
+  .bekle{padding:26px 16px;text-align:center;color:var(--muted);font-size:12px;line-height:1.9}
+  .bekle .bas{font-size:14px;font-weight:bold;color:var(--ink);display:block;margin-bottom:6px}
+  .bekle .kutu{max-width:560px;margin:0 auto;border:1px dashed var(--line);border-radius:6px;padding:18px;background:#fafcfe}
+</style>
+</head>
+<body>
+
+<!-- ======================================================= 1 · OTURUM TALEBİ
+     Banko görevlisi vardiyaya başlar: oturum açma talebi SORUMLUYA gider.   -->
+<div class="win">
+  <div class="title">🏦 Banko Oturumu — Açılış Talebi
+    <span class="sp">Ayşe Banko · Merkez · Banko 2 · 08.10.2026 08:02</span></div>
+  <div class="akis">
+    <div class="ad simdi"><span class="no">1</span>Oturum talebi</div>
+    <div class="ad"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad"><span class="no">3</span>Devir sayımı</div>
+    <div class="ad"><span class="no">4</span>Gün içi işlem</div>
+    <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
+    <div class="ad"><span class="no">6</span>Teslim &amp; kapanış</div>
+  </div>
+  <div class="hdr">
+    <div class="fld"><label>Banko / kasa</label>
+      <div class="inp">Banko 2 — Poliklinik Girişi <span class="rz mavi">KASA-02</span></div></div>
+    <div class="fld"><label>Görevli</label><div class="inp ro">Ayşe Banko (vezne)</div></div>
+    <div class="fld"><label>Vardiya</label><div class="inp">Sabah · 08:00–16:00</div></div>
+    <div class="fld"><label>Önceki oturum</label>
+      <div class="inp ro">#4417 · 07.10.2026 · <span class="rz ok">kapandı</span></div></div>
+  </div>
+  <div class="grp">
+    <div class="gb">Devir (önceki oturumdan kalan nakit)</div>
+    <div class="ic">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div class="fld"><label>Sistem devri</label>
+          <div class="inp ro buyuk">4.250,00 ₺</div></div>
+        <div class="fld"><label>Devreden görevli</label>
+          <div class="inp ro">Mehmet Vezne · #4417 kapanışı</div></div>
+        <div class="fld"><label>Kasada bulunan (sayım)</label>
+          <div class="inp buyuk">4.250,00 ₺</div></div>
+      </div>
+      <div class="sonuk" style="margin-top:6px">Sistem devri <b>önceki oturumun kapanış
+        bakiyesidir</b> ve elle değiştirilemez; sayım farklıysa fark kapanışta değil
+        <b>açılışta</b> yazılır - sonraki görevli başkasının farkını devralmasın.</div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="btn primary">📨 Onaya Gönder</div>
+    <div class="btn">🧾 Devir Tutanağını Gör</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+  <div class="statusbar"><span>Talep sorumluya bildirim olarak düşer; onaysız oturumda
+    tahsilat girilemez.</span></div>
+</div>
+
+<!-- =================================================== 2 · SORUMLU ONAY EKRANI
+     Banko sorumlusunun kuyruğu: açılış ve kapanış onayları aynı yerde.      -->
+<div class="win">
+  <div class="title">✅ Banko Sorumlusu — Onay Kuyruğu
+    <span class="sp">Hatice Sorumlu · Banko Şefi · 3 bekleyen</span></div>
+  <div class="akis">
+    <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
+    <div class="ad simdi"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad"><span class="no">3</span>Devir sayımı</div>
+    <div class="ad"><span class="no">4</span>Gün içi işlem</div>
+    <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
+    <div class="ad"><span class="no">6</span>Teslim &amp; kapanış</div>
+  </div>
+  <div class="dg"><table>
+    <thead><tr><th class="orta"><span class="kutucuk"><i></i></span></th><th>Saat</th><th>Tür</th>
+      <th>Banko</th><th>Görevli</th><th class="sag">Devir / Sayım</th><th class="sag">Fark</th>
+      <th class="sar">Not</th><th class="orta">İşlem</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td class="orta"><span class="kutucuk"><i class="on"></i></span></td>
+        <td>08:02</td><td><span class="rz mavi">açılış</span></td><td>Banko 2</td>
+        <td>Ayşe Banko</td><td class="para">4.250,00 / 4.250,00</td>
+        <td class="para">0,00</td><td class="sar">—</td>
+        <td class="orta"><span class="btn kucuk ok">✔ Onayla</span>
+          <span class="btn kucuk danger">✖ Reddet</span></td></tr>
+      <tr><td class="orta"><span class="kutucuk"><i></i></span></td>
+        <td>08:05</td><td><span class="rz mavi">açılış</span></td><td>Banko 3</td>
+        <td>Deniz Vezne</td><td class="para">1.900,00 / 1.850,00</td>
+        <td class="para"><span class="rz kir">−50,00</span></td>
+        <td class="sar">Sayımda 50 ₺ noksan; görevli yeniden saydı.</td>
+        <td class="orta"><span class="btn kucuk ok">✔ Onayla</span>
+          <span class="btn kucuk danger">✖ Reddet</span></td></tr>
+      <tr><td class="orta"><span class="kutucuk"><i></i></span></td>
+        <td>07.10 18:40</td><td><span class="rz mor">kapanış</span></td><td>Banko 1</td>
+        <td>Mehmet Vezne</td><td class="para">12.480,00 / 12.480,00</td>
+        <td class="para">0,00</td><td class="sar">Gün sonu teslim · POS mutabık</td>
+        <td class="orta"><span class="btn kucuk ok">✔ Onayla</span>
+          <span class="btn kucuk">🧾 Tutanak</span></td></tr>
+    </tbody></table></div>
+  <div class="uyaribant">⚠ <b>Farklı açılış ayrı onay ister:</b> devir ile sayım tutmuyorsa
+    onaylayan kişi farkı da onaylamış olur - fark fişi onun adına düşer.</div>
+  <div class="statusbar">
+    <span>Onay kaydı: kim, ne zaman, hangi tutarı onayladı (<code>onay_id</code> ·
+      <code>onay_ts</code>)</span>
+    <span class="sp">Sorumlu kendi bankosunun oturumunu onaylayamaz</span>
+  </div>
+</div>
+
+<!-- ================================================= 3 · GÜN İÇİ BANKO EKRANI
+     Oturum açık: hasta + başvuru kaydı ve tahsilat. Üstte oturum sayaçları.  -->
+<div class="win">
+  <div class="title">🤕 Kayıt Kabul — Banko 2
+    <span class="sp">Ayşe Banko · Oturum #4432 açık · 08.10.2026</span></div>
+  <div class="akis">
+    <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
+    <div class="ad simdi"><span class="no">4</span>Gün içi işlem</div>
+    <div class="ad"><span class="no">5</span>Gün sonu sayım</div>
+    <div class="ad"><span class="no">6</span>Teslim &amp; kapanış</div>
+  </div>
+
+  <!-- OTURUM ŞERİDİ: kasadaki para her an görünür - gün sonunda sürpriz olmasın. -->
+  <div class="oturum">
+    <span>🔓 Oturum <b>#4432</b></span>
+    <div class="kutu"><span>devir</span><b>4.250,00</b></div>
+    <div class="kutu"><span>nakit tahsilat</span><b>+3.120,00</b></div>
+    <div class="kutu"><span>nakit iade</span><b>−180,00</b></div>
+    <div class="kutu"><span>kasada olması gereken</span><b>7.190,00</b></div>
+    <div class="kutu"><span>POS</span><b>5.640,00</b></div>
+    <div class="kutu"><span>işlem</span><b>38</b></div>
+    <span class="sp"><span class="btn kucuk">💰 Tahsilat Al</span>
+      <span class="btn kucuk">↩ İade</span>
+      <span class="btn kucuk">🔒 Gün Sonu</span></span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Başvuru</div>
+    <div class="btn">👤 Hasta Kaydı</div>
+    <div class="btn">🔍 Hasta Ara (TCKN / ad)</div>
+    <div class="sepv"></div>
+    <div class="btn">🛡️ Provizyon Al</div>
+    <div class="btn">💰 Tahsilat</div>
+    <div class="btn">🧾 Fiş / Fatura</div>
+    <div class="btn sp">📊 Oturum Dökümü</div>
+  </div>
+
+  <div class="dg"><table>
+    <thead><tr><th>Saat</th><th>Başvuru</th><th>Hasta</th><th>Klinik / hekim</th>
+      <th>Ödeyen</th><th class="sag">Tutar</th><th class="sag">Tahsil</th>
+      <th class="orta">Ödeme</th><th class="orta">Durum</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td>11:42</td><td>B-2026-004512</td><td>Ayşe Yılmaz</td>
+        <td>Dahiliye · Dr. A. Yılmaz</td><td>SGK</td><td class="para">0,00</td>
+        <td class="para">0,00</td><td class="orta"><span class="rz pas">—</span></td>
+        <td class="orta"><span class="rz ok">provizyon</span></td></tr>
+      <tr><td>11:35</td><td>B-2026-004511</td><td>Mehmet Demir</td>
+        <td>Göz · Dr. S. Aydın</td><td>Özel</td><td class="para">450,00</td>
+        <td class="para">450,00</td><td class="orta"><span class="rz mavi">POS</span></td>
+        <td class="orta"><span class="rz ok">tahsil</span></td></tr>
+      <tr><td>11:20</td><td>B-2026-004510</td><td>Zeynep Kaya</td>
+        <td>Lab · —</td><td>Özel</td><td class="para">320,00</td>
+        <td class="para">320,00</td><td class="orta"><span class="rz sari">nakit</span></td>
+        <td class="orta"><span class="rz ok">tahsil</span></td></tr>
+      <tr><td>11:05</td><td>B-2026-004509</td><td>Ali Vural</td>
+        <td>Radyoloji · —</td><td>SGK + katılım</td><td class="para">42,00</td>
+        <td class="para">42,00</td><td class="orta"><span class="rz sari">nakit</span></td>
+        <td class="orta"><span class="rz ok">tahsil</span></td></tr>
+      <tr><td>10:48</td><td>B-2026-004508</td><td>Fatma Şen</td>
+        <td>Dahiliye · Dr. A. Yılmaz</td><td>Özel</td><td class="para">450,00</td>
+        <td class="para">270,00</td><td class="orta"><span class="rz sari">nakit</span></td>
+        <td class="orta"><span class="rz sari">kısmi</span></td></tr>
+      <tr><td>10:30</td><td>B-2026-004507</td><td>Hasan Ak</td>
+        <td>Göz · Dr. S. Aydın</td><td>Özel</td><td class="para">180,00</td>
+        <td class="para">−180,00</td><td class="orta"><span class="rz kir">iade</span></td>
+        <td class="orta"><span class="rz pas">iptal</span></td></tr>
+      <tr class="top"><td colspan="5">Oturum toplamı (38 işlem)</td>
+        <td class="para">—</td><td class="para">8.760,00</td>
+        <td class="orta" colspan="2">nakit 3.120,00 · POS 5.640,00 · iade −180,00</td></tr>
+    </tbody></table></div>
+  <div class="statusbar">
+    <span>Kapalı oturuma yazma reddedilir: tahsilat satırı <b>oturum numarasını taşır</b></span>
+    <span class="sp">Son işlem 11:42 · Banko 2</span>
+  </div>
+</div>
+
+<!-- ==================================================== 4 · GÜN SONU SAYIMI -->
+<div class="win">
+  <div class="title">🔒 Gün Sonu — Kasa Sayımı ve Teslim
+    <span class="sp">Oturum #4432 · Ayşe Banko · 08.10.2026 17:55</span></div>
+  <div class="akis">
+    <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
+    <div class="ad bitti"><span class="no">4</span>Gün içi işlem</div>
+    <div class="ad simdi"><span class="no">5</span>Gün sonu sayım</div>
+    <div class="ad"><span class="no">6</span>Teslim &amp; kapanış</div>
+  </div>
+
+  <div class="ikiPanel">
+    <div class="grp" style="margin:0">
+      <div class="gb">Sistem — kasada olması gereken</div>
+      <div class="dg"><table>
+        <tbody>
+          <tr><td>Devir (açılış)</td><td class="para">4.250,00</td></tr>
+          <tr><td>Nakit tahsilat (28 işlem)</td><td class="para">+3.120,00</td></tr>
+          <tr><td>Nakit iade (1 işlem)</td><td class="para">−180,00</td></tr>
+          <tr><td>Kasadan çıkan (banka yatırma)</td><td class="para">0,00</td></tr>
+          <tr class="top"><td>Olması gereken nakit</td><td class="para">7.190,00</td></tr>
+          <tr><td class="sonuk">POS (bilgi — kasada değil)</td><td class="para sonuk">5.640,00</td></tr>
+          <tr><td class="sonuk">Havale / EFT</td><td class="para sonuk">0,00</td></tr>
+        </tbody></table></div>
+      <div class="ic sonuk">POS ve havale kasada <b>para olarak durmaz</b>: sayım yalnız
+        nakit üzerindendir, mutabakatı banka ekstresi yapar.</div>
+    </div>
+
+    <div class="grp" style="margin:0">
+      <div class="gb">Sayım — kupür dökümü</div>
+      <div class="sayim">
+        <span class="sonuk">Kupür</span><span class="sonuk">Adet</span>
+        <span class="sonuk kup">Tutar</span><span></span>
+        <span class="kup">200 ₺</span><span><input value="20"></span><span class="kup">4.000,00</span><span></span>
+        <span class="kup">100 ₺</span><span><input value="22"></span><span class="kup">2.200,00</span><span></span>
+        <span class="kup">50 ₺</span><span><input value="14"></span><span class="kup">700,00</span><span></span>
+        <span class="kup">20 ₺</span><span><input value="9"></span><span class="kup">180,00</span><span></span>
+        <span class="kup">10 ₺</span><span><input value="5"></span><span class="kup">50,00</span><span></span>
+        <span class="kup">Bozuk</span><span><input value="—"></span><span class="kup">10,00</span><span></span>
+      </div>
+      <div class="hdr k3" style="border-top:1px solid var(--line2)">
+        <div class="fld"><label>Sayılan nakit</label><div class="inp ro buyuk">7.140,00 ₺</div></div>
+        <div class="fld"><label>Olması gereken</label><div class="inp ro buyuk">7.190,00 ₺</div></div>
+        <div class="fld"><label>Fark</label>
+          <div class="inp buyuk" style="color:#b3261e">−50,00 ₺</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uyaribant kir">⚠ <b>Fark var: 50,00 ₺ noksan.</b> Teslim için açıklama ve
+    <b>fark fişi</b> zorunlu - fark fişsiz kapanış reddedilir.</div>
+
+  <div class="grp">
+    <div class="gb">Fark açıklaması</div>
+    <div class="ic">
+      <div style="display:grid;grid-template-columns:200px 1fr;gap:10px">
+        <div class="fld"><label>Fark nedeni</label>
+          <div class="inp">Para üstü hatası ▾</div></div>
+        <div class="fld"><label>Açıklama (zorunlu)</label>
+          <div class="inp">11:05 tahsilatında 50 ₺ fazla para üstü verilmiş olabilir;
+            hasta ulaşılamadı.</div></div>
+      </div>
+      <div class="sonuk" style="margin-top:6px">Fark <b>ayrı fişle muhasebeleşir</b>
+        (<code>fark_islem_id</code>): kasa bakiyesi sayımla eşitlenir, fark geçmişi
+        bozulmaz - yarının devri 7.140,00 ₺ olur.</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">📨 Teslime Gönder (onaya)</div>
+    <div class="btn">🖨 Sayım Föyü</div>
+    <div class="btn">↻ Yeniden Say</div>
+    <div class="btn sp pas">🔒 Kapat <span class="sonuk">(onay bekler)</span></div>
+  </div>
+  <div class="statusbar"><span>Sayım kaydedilmeden kapanış yapılamaz · fark ≠ 0 ise sorumlu
+    onayı şart</span></div>
+</div>
+
+<!-- ============================================== 5 · TESLİM VE KAPANIŞ -->
+<div class="win">
+  <div class="title">🧾 Teslim Tutanağı — Oturum #4432
+    <span class="sp">kapanış onayı bekliyor</span></div>
+  <div class="akis">
+    <div class="ad bitti"><span class="no">1</span>Oturum talebi</div>
+    <div class="ad bitti"><span class="no">2</span>Sorumlu onayı</div>
+    <div class="ad bitti"><span class="no">3</span>Devir sayımı</div>
+    <div class="ad bitti"><span class="no">4</span>Gün içi işlem</div>
+    <div class="ad bitti"><span class="no">5</span>Gün sonu sayım</div>
+    <div class="ad simdi"><span class="no">6</span>Teslim &amp; kapanış</div>
+  </div>
+  <div class="hdr">
+    <div class="fld"><label>Teslim eden</label><div class="inp ro">Ayşe Banko · 17:55</div></div>
+    <div class="fld"><label>Teslim alan</label>
+      <div class="inp">Hatice Sorumlu (Banko Şefi) ▾</div></div>
+    <div class="fld"><label>Teslim edilen nakit</label>
+      <div class="inp ro buyuk">7.140,00 ₺</div></div>
+    <div class="fld"><label>Fark</label>
+      <div class="inp ro buyuk" style="color:#b3261e">−50,00 ₺</div></div>
+  </div>
+  <div class="ucPanel">
+    <div class="grp" style="margin:0">
+      <div class="gb">Oturum özeti</div>
+      <div class="ic">
+        <div>Açılış · 08:12 <span class="rz ok">onaylı</span> (Hatice Sorumlu)</div>
+        <div>Devir <b>4.250,00</b> · işlem <b>38</b></div>
+        <div>Nakit <b>3.120,00</b> · iade <b>−180,00</b></div>
+        <div>POS <b>5.640,00</b> · havale <b>0,00</b></div>
+        <div>Sayım <b>7.140,00</b> · fark <b>−50,00</b></div>
+      </div>
+    </div>
+    <div class="grp" style="margin:0">
+      <div class="gb">Yarının devri</div>
+      <div class="ic">
+        <div class="fld"><label>Kasada bırakılan</label>
+          <div class="inp ro buyuk">1.000,00 ₺</div></div>
+        <div class="fld" style="margin-top:6px"><label>Bankaya / üst kasaya</label>
+          <div class="inp ro buyuk">6.140,00 ₺</div></div>
+        <div class="sonuk" style="margin-top:6px">Bırakılan tutar <b>sonraki oturumun
+          devri</b> olur; kalanı için kasa çıkış fişi üretilir.</div>
+      </div>
+    </div>
+    <div class="grp" style="margin:0">
+      <div class="gb">İmza / onay</div>
+      <div class="ic">
+        <div><span class="rz ok">✔</span> Teslim eden · Ayşe Banko · 17:55</div>
+        <div><span class="rz sari">⏳</span> Teslim alan · Hatice Sorumlu · bekliyor</div>
+        <div><span class="rz sari">⏳</span> Fark onayı · bekliyor</div>
+        <div class="sonuk" style="margin-top:6px">Onay gelince oturum <b>kapanır</b> ve
+          bankoda tahsilat girilemez; yeni gün yeni oturumla başlar.</div>
+      </div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="btn">🖨 Tutanağı Yazdır</div>
+    <div class="btn">📎 Oturum Dökümünü Ekle</div>
+    <div class="sepv"></div>
+    <div class="btn pas">🔓 Yeniden Aç <span class="sonuk">(ayrı yetki)</span></div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="statusbar">
+    <span>Kapanan oturum düzeltilmez: hatalı tahsilat <b>iade/düzeltme fişiyle</b> çözülür</span>
+    <span class="sp">Tutanak no: TT-2026-000318</span>
+  </div>
+</div>
+
+<!-- ============================================ 6 · ONAY BEKLERKEN BANKO -->
+<div class="win">
+  <div class="title">⏳ Banko 2 — Oturum kapanış onayı bekliyor</div>
+  <div class="bekle">
+    <div class="kutu">
+      <span class="bas">Oturum #4432 teslime gönderildi</span>
+      Sorumlu onaylayana kadar bu bankoda <b>tahsilat ve başvuru kaydı yapılamaz</b>.<br>
+      Hasta kaydı ve randevu görüntüleme açık kalır - para hareketi olmayan işler
+      beklemesin.<br>
+      <span class="sonuk">Acil durumda sorumlu <b>zorla kapatma</b> yetkisiyle oturumu
+        kapatabilir; bu da tutanağa ayrı satır olarak yazılır.</span>
+      <div style="margin-top:14px;display:flex;gap:6px;justify-content:center">
+        <span class="btn">🔄 Durumu yenile</span>
+        <span class="btn">📞 Sorumluya haber ver</span>
+        <span class="btn">👤 Hasta Kaydı (para hareketsiz)</span>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Onay geldiğinde ekran kendini yeniler ve yeni oturum talebi
+    düğmesi açılır.</span></div>
+</div>
+
+<div class="not">
+  <b>Banko oturumu — tasarım notları</b>
+  <ul>
+    <li><b>Oturum, paranın sorumluluk zinciridir.</b> Açılış devri, gün içi hareketler ve
+      kapanış sayımı tek kayıtta (<code>kasa_oturum</code>) durur; her tahsilat satırı
+      <b>oturum numarasını taşır</b>. Kapalı oturuma yazma reddedilir - yoksa "dün kimin
+      kasasına girdi" sorusu cevapsız kalır.</li>
+    <li><b>Devir elle yazılmaz.</b> Açılıştaki sistem devri, önceki oturumun kapanış
+      bakiyesidir. Sayım farklıysa fark <b>açılışta</b> kaydedilir: sonraki görevli
+      başkasının farkını devralmasın.</li>
+    <li><b>Sorumlu onayı iki uçta.</b> Açılış onayı olmadan tahsilat girilemez, kapanış
+      onayı olmadan oturum kapanmaz. Onay kaydı kim/ne zaman/hangi tutar olarak durur
+      (<code>onay_id</code>, <code>onay_ts</code>); sorumlu <b>kendi bankosunu</b>
+      onaylayamaz.</li>
+    <li><b>Kasadaki para gün boyu görünür.</b> Üst şeritte devir, nakit tahsilat, iade ve
+      "olması gereken" yan yana durur. Gün sonunda ilk kez bakılan bir sayı, farkı
+      kaçırmanın en kolay yoludur.</li>
+    <li><b>POS kasada değildir.</b> Sayım yalnız nakit üzerinden yapılır; POS ve havale
+      bilgi olarak gösterilir, mutabakatını banka ekstresi yapar.</li>
+    <li><b>Fark fişsiz kapanış yok.</b> Fark ≠ 0 ise neden ve açıklama zorunlu, fark
+      <b>ayrı fişle</b> muhasebeleşir (<code>fark_islem_id</code>): kasa bakiyesi sayımla
+      eşitlenir ama fark geçmişi bozulmaz.</li>
+    <li><b>Kapanan oturum düzeltilmez.</b> Hatalı tahsilat iade/düzeltme fişiyle çözülür;
+      "yeniden aç" ayrı bir yetkidir ve tutanağa satır olarak yazılır.</li>
+    <li><b>Onay beklerken banko tamamen durmaz:</b> para hareketi olmayan işler (hasta
+      kaydı, randevu görüntüleme) açık kalır - kuyruk onay yüzünden şişmesin.</li>
+    <li><b>Kasada bırakılan tutar yarının devridir</b>; kalanı için kasa çıkış fişi
+      üretilir, böylece banka yatırma ile kasa bakiyesi ayrışmaz.</li>
+  </ul>
+  <b>Mockup</b> · tasarım aşaması: kod yazılmadı. Veri modeli ve alan adları
+  <code>Ekranlar/Kayıt Kabul/banko_kasa_sureci.html</code> ile aynı
+  (<code>kasa_oturum</code>, <code>devir_tutar</code>, <code>fark_islem_id</code>,
+  <code>onay_id</code>); bu dosya o modelin <b>ekran akışıdır</b>. Tahsilat ve gün sonu
+  ayrıntısı için <code>banko_tahsilat_al.html</code> ve
+  <code>banko_gun_sonu_kasa_teslimi.html</code>.
+</div>
+
+</body>
+</html>
