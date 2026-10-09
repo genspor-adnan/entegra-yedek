@@ -20850,3 +20850,54 @@ oraya gidiliyor. İki kolon gridi genişletip Durum / Son Giriş'i kenara
 itiyordu.
 
 vitest 793 (87 dosya).
+
+### 09.10.2026 — Geniş yetki kodları ekran bazında bölündü; rol kodu artık değişmez (998)
+
+Kullanıcı: *"hasan aydın banko görevlisi olarak login oldum ama yetki dışında
+menü geldi"*, *"yetki matrisinde neler varsa onlar menüde görünmeli"*,
+*"kayit_kabul / banko görevlisine kayıtkabul ve randevu yetkisi verdim
+sadece"*, *"o zaman kod değişemez yap"*.
+
+**Teşhis: sorun rolde değil, yetki kodunun genişliğindeydi.** Menü gerçek
+kurucuyla hesaplanınca Banko Görevlisi'nde Satış, Alış, Stok & Hizmet, Finans
+ve Kurumlar & Sigorta grupları çıkıyordu. Tek `belge` yetkisi **21 ekran**
+açıyor: Kayıt Kabul'ün ihtiyacı olan "Başvurular" ile birlikte Satış
+Faturaları, Alış Siparişleri, Stok Transfer de geliyor. Yetkiyi rolden
+kaldırmak işi bozardı - başvuru açılamaz hale gelirdi. `hesap` tüm Finans
+tanımlarını, `kasa_islem` Finans listelerini, `sigorta` kurum tanım
+ekranlarını aynı şekilde beraberinde getiriyordu. Bu yalnız bankoyu değil
+herkesi ilgilendiriyordu: `belge` yetkisi **38 rolde** var - hekim, hemşire,
+eczacı ve danışma da Satış Faturaları menüsünü görüyordu.
+
+**Çözüm:** geniş kod çekirdek işini korur, ekran kümeleri kendi kodunu alır -
+`belge.satis` / `belge.alis` / `belge.stok`, `hesap.tanim`, `kasa.finans`,
+`sigorta.tanim`. Yeni kodlar o ekranları gerçekten kullanan ERP/mali rollere
+açık listeyle verildi (haklar eski haklarla birebir aynı); "eski yetkisi olan
+herkese ver" demek hekimin menüsünü olduğu gibi bırakmak olurdu. 34 menü
+tanımının yetki kodu güncellendi. Banko Görevlisi ile Danışma rollerinden
+`cari`, `aday`, `gorev`, `kurum`, `mali_hareket` ve 871'de topluca verilmiş
+`acil.*` / `cagri.*` yetkileri kaldırıldı (triyaj, acil yatak tanımı,
+santral-IVR ayarı, süpervizör panosu banko işi değil). Sonuç menü: **Kayıt
+Kabul + Randevu**.
+
+Regresyon testi `menuYetkiKapsami.test.tsx`: menüyü gerçek kurucuyla kurup
+Banko Görevlisi'nin yasak grupları görmediğini, Başvurular/Bankolar'ı
+gördüğünü ve ERP kodları verilince Satış/Alış/Finans'ın geri geldiğini
+doğruluyor - bir ekrana yeniden `belge` yazılırsa test düşer.
+
+**Kalan (ayrı tur):** menüden düşen ekran, adresi bilen kullanıcı için hâlâ
+açık - `belge` tek kaynak olduğundan sunucu yetkisi tür bazında bölünmedi.
+Belge listesine tür bazlı satır süzmesi gerekiyor.
+
+**Rol kartı:** `kod` artık `YalnizYeniKayitta` - kayıt açılırken belirlenir,
+sonra değişmez (program rol kodlarına bakıyor: banko, iskonto onayı, sistem
+rolleri; `rol_yetki` ve kurulum betikleri de kodla geliyor). Ekranda alan
+kilitli çizilir, sunucu da reddeder. Kilit hata mesajı artık alandan gelir -
+sabit metin ("Kadro Geçmişi'nden değişir") rol kodu için yanlış yol
+gösteriyordu. Ayrıca kart güncellemesinde **slug yeniden üretilmiyor**: ad
+değişince `kod` da addan türetiliyordu ve sistem rolünü koruyan tetik 422
+veriyordu - yani sistem rolünün adı hiç değiştirilemiyordu. Kaydetme hatası
+artık görünür alana kaydırılıyor (uzun kartta kutu ekran dışında kalıyordu).
+
+Rol kartındaki kullanıcı gridinden telefon ve e-posta kolonları kalktı.
+vitest 796 (88 dosya).

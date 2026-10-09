@@ -618,8 +618,13 @@ public static class KartUclari
             if (alan.YalnizYeniKayitta && !yeni)
                 throw GentegreHatasi.Dogrulama(
                     $"{ad} alani karttan degistirilemez.",
-                    new AlanHatasi(ad, "Bu bilgi Kadro Geçmişi'nden, yürürlük "
-                                     + "tarihiyle değiştirilir."));
+                    // MESAJ ALANDAN: kilit iki ayri sebeple konabiliyor -
+                    //   kadro alanlari kendi defterinden degisir, rol kodu
+                    //   HIC degismez (program koda bakiyor). Tek sabit mesaj
+                    //   ikinci durumda kullaniciya yanlis yol gosteriyordu.
+                    new AlanHatasi(ad, alan.Ipucu
+                                     ?? "Bu bilgi Kadro Geçmişi'nden, yürürlük "
+                                      + "tarihiyle değiştirilir."));
 
             if (!baglam.Yetkiler.AlanYazilir(tanim.Ad, alan.Ad))
                 throw GentegreHatasi.Yasak($"{ad} alanini degistirme yetkiniz yok.");

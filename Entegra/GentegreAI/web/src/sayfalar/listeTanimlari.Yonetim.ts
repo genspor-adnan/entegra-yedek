@@ -423,14 +423,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
     ozelSayfa: true,
     menuGrup: 'Finans', menuAltGrup: 'Ayarlar', menuAd: 'Kasa', menuSira: 90,
-    ic: '💵', yetkiKodu: 'kasa_islem',
+    ic: '💵', yetkiKodu: 'kasa.finans',
   },
   {
     // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
     kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
     ozelSayfa: true,
     menuGrup: 'Satış', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 90,
-    ic: '🧾', yetkiKodu: 'belge',
+    ic: '🧾', yetkiKodu: 'belge.satis',
   },
   // İK AYARLARI EKRANI KALDIRILDI (kullanici: "İK Ayarlarinda bolum ve gorevi
   //   kaldir"). Ekranin TEK icerigi `taraf.departman` ve `taraf.gorev` kod
@@ -459,6 +459,6 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
     menuGrup: 'Alış', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri', menuSira: 90,
-    ic: '📥', yetkiKodu: 'belge',
+    ic: '📥', yetkiKodu: 'belge.alis',
   },
 ];

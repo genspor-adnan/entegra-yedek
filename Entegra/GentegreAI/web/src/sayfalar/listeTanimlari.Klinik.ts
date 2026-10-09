@@ -365,7 +365,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta',
-    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 30,
+    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta.tanim', menuSira: 30,
   },
   {
     // KOD ESLEME (430): kanonik deger <-> saglayici degeri. Yeni sirket
@@ -376,7 +376,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'sigorta-kod-esleme-liste',
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar',
-    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 90,
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta.tanim', menuSira: 90,
   },
   {
     // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
@@ -392,7 +392,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta',
-    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 40,
+    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta.tanim', menuSira: 40,
   },
   {
     // CIHAZLAR (432) - laboratuvar/goz/goruntuleme cihazlarinin baglanti

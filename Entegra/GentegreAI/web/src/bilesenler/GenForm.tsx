@@ -1263,6 +1263,10 @@ Yine de yeni kayıt eklensin mi?`);
       } else {
         setAlanHatalari(c.alanlar);
         setHata(c.mesaj);
+        // Kutuyu gorunur alana getir: uzun kartta ekran disinda kalinca
+        //   kaydetme sessizce basarisiz olmus gibi gorunuyordu.
+        setTimeout(() => document.querySelector('.hata-kutusu')
+          ?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 0);
         // Hatali alan baska sekmedeyse oraya atla - kullanici bos ekranda
         //   "nerede hata var" diye aramasin.
         const hedefSekme = c.ilkAlan ? sekmeBul(c.ilkAlan) : null;

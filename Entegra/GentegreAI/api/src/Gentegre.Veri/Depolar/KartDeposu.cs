@@ -404,7 +404,20 @@ public sealed partial class KartDeposu
     {
         foreach (var alan in tanim.Alanlar.Where(a => a.SlugKaynak is not null))
         {
+            var istekteVar = degerler.ContainsKey(alan.Ad);
             var verildi = degerler.TryGetValue(alan.Ad, out var d) ? d as string : null;
+            // GUNCELLEMEDE KOD ISTEKTE YOKSA DOKUNULMAZ (09.10.2026, kullanici:
+            //   "rol kaydedemedim"). Eski davranis, ad degisince kodu AD'DAN
+            //   yeniden uretiyordu: "Banko Görevlisi" -> "banko-gorevlisi-test"
+            //   ve sistem rolunun kodunu koruyan tetik 422 veriyordu. Yani
+            //   sistem rolunun ADI hic degistirilemiyordu - tetigin kendi
+            //   mesaji "Adi serbestce degistirilebilir" derken.
+            //
+            //   Teknik kod REFERANSTIR: program rol kodlarina bakiyor, URL'ler
+            //   ve dis sistemler slug'a bakabiliyor. "Ad degisti, kodu da
+            //   degistir" karari ancak kullanici kodu ACIKCA gonderdiginde
+            //   (bos gondererek "yeniden uret" dedigi durum dahil) alinabilir.
+            if (mevcutId is not null && !istekteVar) continue;
             var kaynak = verildi;
             if (string.IsNullOrWhiteSpace(kaynak))
             {

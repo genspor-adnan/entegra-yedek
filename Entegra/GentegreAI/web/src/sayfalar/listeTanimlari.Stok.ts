@@ -143,7 +143,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Karşılanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge.stok',
     menuSira: 30,
   },
   {
@@ -155,7 +155,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge.stok',
     menuSira: 40,
   },
   {
@@ -170,7 +170,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fire',          filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
       { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge.stok',
     menuSira: 50,
   },
   {
@@ -183,7 +183,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'İmha',         filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
       { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge.stok',
     menuSira: 60,
   },
   {

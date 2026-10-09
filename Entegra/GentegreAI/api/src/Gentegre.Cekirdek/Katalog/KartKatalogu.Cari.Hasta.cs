@@ -312,8 +312,16 @@ public static partial class KartKatalogu
             new("id",        "id",         "sayi",  Yazilabilir: false),
             // Kod teknik alan: bos birakilirsa ADDAN uretilir, girilirse slug'a
             //   cevrilir (ck_rol_kod dar alfabe istiyor - "Satış Müdürü" patliyordu).
+            //
+            // KOD SONRADAN DEGISMEZ (09.10.2026, kullanici: "o zaman kod
+            //   degisemez yap"): program rol kodlarina bakiyor (banko, iskonto
+            //   onayi, sistem rolleri), rol_yetki ve kurulum betikleri de kodla
+            //   geliyor - degisen kod o baglari sessizce koparir. Sistem
+            //   rollerinde veritabani tetigi zaten reddediyordu; kural artik
+            //   TUM rollerde ve ekranda alan kilitli cizilir.
             new("kod",       "kod",        "metin", EnFazlaUzunluk: 40,  Baslik: "Kod", Grup: "Kimlik",
-                SlugKaynak: "ad"),
+                SlugKaynak: "ad", YalnizYeniKayitta: true,
+                Ipucu: "Kod kayıt açılırken belirlenir, sonra değişmez - program bu koda bakıyor. Adı serbestçe değiştirilebilir."),
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Ad",  Grup: "Kimlik"),
             new("ustRolId",  "ust_rol_id", "kod",   KodTablosu: "public.rol", Baslik: "Üst Rol", Grup: "Kimlik"),
             new("aktif",     "aktif",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Aktif", Grup: "Kimlik"),
