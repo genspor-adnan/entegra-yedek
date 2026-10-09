@@ -817,12 +817,14 @@ function OzetKutulari({ oturum, islemler, acikBorclar, basvuruSayisi }: {
   const acik = hastadan.reduce((t, b) => t + b.kalan, 0);
   const sayildi = oturum.durum === 3 || oturum.durum === 4;
   const fark = sayildi ? oturum.kapanisFark : null;
-  // YARI YÜKSEKLİK (kullanıcı 09.10.2026: "kutuları çok kalın" -> "%50
-  //   azalt"): başlık ve değer tek satırda; açıklama üzerine gelince ipucu.
+  // İNCE KUTU (kullanıcı 09.10.2026: "kutuları çok kalın", tek satır denendi
+  //   -> "kutuları bir önceki haline getir"): başlık / değer / açıklama üç
+  //   satır, küçük boşlukla.
   const kutu = (bas: string, deg: string, alt: string, sinif = '') => (
-    <div className={'bo-okutu ' + sinif} title={alt}>
+    <div className={'bo-okutu ' + sinif}>
       <div className="bas">{bas}</div>
       <div className="deg">{deg}</div>
+      <div className="alt">{alt}</div>
     </div>
   );
   return (
@@ -1140,10 +1142,8 @@ const bostil = `
   background: var(--cizgi-ince, #e3e9f0); border-top:1px solid var(--cizgi-ince, #e3e9f0);
   border-bottom:1px solid var(--cizgi, #cdd6e0); }
 @media (max-width: 900px) { .bo-ozet { grid-template-columns:repeat(3, 1fr); } }
-/* İNCE (kullanıcı 09.10.2026: "ortadaki başvuru, tahsilat... kutuları çok kalın",
-   "%50 azalt"): tek satır - başlık solda, değer sağda. */
-.bo-okutu { background: var(--yuz, #fff); padding:3px 10px; display:flex; align-items:baseline;
-  justify-content:space-between; gap:8px; white-space:nowrap; }
+/* İNCE (kullanıcı 09.10.2026: "ortadaki başvuru, tahsilat... kutuları çok kalın"). */
+.bo-okutu { background: var(--yuz, #fff); padding:4px 10px; }
 .bo-okutu .bas { font-size:10px; color: var(--soluk, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
 .bo-okutu .deg { font-size:14px; font-weight:bold; color: var(--baslik, #14315a); margin-top:0; line-height:1.3; }
 .bo-okutu .alt { font-size:10px; color: var(--soluk, #6b7a8b); margin-top:0; }
