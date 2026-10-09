@@ -404,23 +404,27 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         //   defa kasada olması gereken var üsttekini sil.. başta oturum #17
         //   var onu da kaldır.. diğerlerini de kutulara böl"): oturum numarası
         //   başlıkta zaten yazıyor, "kasada olması gereken" özet kutusunda.
-        <div className="bo-serit-kutu">
-          <div className="bo-ozet">
-            <div className="bo-okutu"><div className="bas">Devir</div>
-              <div className="deg">{para(oturum.devirTutar)} ₺</div></div>
-            {oturum.acilisFark !== 0 && (
-              <div className="bo-okutu teh"><div className="bas">Açılış Farkı</div>
-                <div className="deg">{para(oturum.acilisFark)} ₺</div></div>
-            )}
-            <div className="bo-okutu"><div className="bas">Nakit Tahsilat</div>
-              <div className="deg">+{para(oturum.nakitTahsilat)} ₺</div></div>
-            <div className="bo-okutu"><div className="bas">Nakit İade</div>
-              <div className="deg">−{para(oturum.nakitIade)} ₺</div></div>
-            <div className="bo-okutu"><div className="bas">POS</div>
-              <div className="deg">{para(oturum.posTutar)} ₺</div></div>
-            <div className="bo-okutu"><div className="bas">İşlem</div>
-              <div className="deg">{oturum.islemAdet}</div></div>
-          </div>
+        // MOCKUP ŞERİDİ (banko_gun_sonu_kasa_teslimi.html `.serit .sel`,
+        //   kullanıcı 09.10.2026: "üst ve alt kutuları aynı mockup gibi yap"):
+        //   tek satır "etiket: değer" hapları, sağda durum ve son işlem.
+        <div className="bo-mserit">
+          {oturum.vardiya && <div className="sel">🕗 Vardiya: <b>{oturum.vardiya}</b></div>}
+          <div className="sel">💼 Devir: <b>{para(oturum.devirTutar)} ₺</b></div>
+          {oturum.acilisFark !== 0 && (
+            <div className="sel">⚠ Açılış farkı: <b className="bo-kir">{para(oturum.acilisFark)} ₺</b></div>
+          )}
+          <div className="sel">💵 Nakit tahsilat: <b>+{para(oturum.nakitTahsilat)} ₺</b></div>
+          <div className="sel">↩ Nakit iade: <b>−{para(oturum.nakitIade)} ₺</b></div>
+          <div className="sel">💳 POS: <b>{para(oturum.posTutar)} ₺</b></div>
+          <div className="sel">🧾 İşlem: <b>{oturum.islemAdet}</b></div>
+          <span className={'bo-rz ' + (oturum.durum === 2 ? 'sari' : oturum.durum === 3 ? 'mavi' : 'ok')}>
+            {oturum.durum === 2 ? 'Vardiya açık · teslim edilmedi'
+              : oturum.durum === 3 ? 'Teslime gönderildi' : 'Kapandı'}
+          </span>
+          <span className="sp" />
+          {islemler.length > 0 && (
+            <span className="sonuk">Son işlem {saatKisa(islemler[0].tarih)}</span>
+          )}
           {oturum.durum === 2 && (
             <button className="bo-ana bo-sag" onClick={() => {
               setGunSonu(true);
@@ -1116,26 +1120,28 @@ const bostil = `
 .bo-islem td.para, .bo-islem th.sag { text-align:right; font-family:Consolas, monospace; }
 .bo-islem td.orta, .bo-islem th.orta { text-align:center; font-family:inherit; }
 .bo-islem tr.sonuk td:not(.orta) { text-decoration:line-through; }
-.bo-ozet { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:1px;
-  background: var(--cizgi-ince, #e3e9f0); border:1px solid var(--cizgi-ince, #e3e9f0);
-  border-radius:4px; overflow:hidden; margin-top:8px; }
-.bo-okutu { background: var(--yuzey, #fff); padding:9px 12px; }
-.bo-okutu .bas { font-size:10.5px; color: var(--ikincil-metin, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
-.bo-okutu .deg { font-size:18px; font-weight:bold; color: var(--baslik, #1d3557); margin-top:2px; }
-.bo-okutu .alt { font-size:10.5px; color: var(--ikincil-metin, #6b7a8b); margin-top:2px; }
+/* MOCKUP .ozet / .kutu (banko_gun_sonu_kasa_teslimi.html): eşit altı sütun,
+   1px çizgiyle ayrılmış beyaz kutular; dar ekranda üçlü. */
+.bo-ozet { display:grid; grid-template-columns:repeat(6, 1fr); gap:1px;
+  background: var(--cizgi-ince, #e3e9f0); border-top:1px solid var(--cizgi-ince, #e3e9f0);
+  border-bottom:1px solid var(--cizgi, #cdd6e0); }
+@media (max-width: 900px) { .bo-ozet { grid-template-columns:repeat(3, 1fr); } }
+.bo-okutu { background: var(--yuz, #fff); padding:9px 12px; }
+.bo-okutu .bas { font-size:10.5px; color: var(--soluk, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
+.bo-okutu .deg { font-size:18px; font-weight:bold; color: var(--baslik, #14315a); margin-top:2px; }
+.bo-okutu .alt { font-size:10.5px; color: var(--soluk, #6b7a8b); margin-top:2px; }
 .bo-okutu.iyi .deg { color:#2e7d46; }
-.bo-okutu.uy .deg { color:#b7791f; }
+.bo-okutu.uy .deg { color:#8a6218; }
 .bo-okutu.teh .deg { color:#b3261e; }
+/* MOCKUP .serit / .sel */
+.bo-mserit { display:flex; gap:10px; align-items:center; padding:7px 10px; background:#f7fafc;
+  border-bottom:1px solid var(--cizgi-ince, #e3e9f0); flex-wrap:wrap; margin-top:8px; }
+.bo-mserit .sel { border:1px solid var(--cizgi, #cdd6e0); border-radius:3px; background: var(--yuz, #fff);
+  min-height:26px; display:flex; align-items:center; padding:0 8px; gap:6px; font-size:12px; white-space:nowrap; }
+.bo-mserit .sel b { font-weight:bold; }
+.bo-mserit .sp { flex:1; }
 .bo-sekmeli { margin-top:8px; }
 .bo-sekmeli .katab { margin-bottom:6px; }
-.bo-serit-kutu { display:flex; gap:10px; align-items:center; margin-top:8px; }
-.bo-serit-kutu .bo-ozet { flex:1; margin-top:0; }
-/* ÜST KUTULAR YARIM YÜKSEKLİK (kullanıcı 09.10.2026: "üstteki kutular %50
-   yükseklikte olsun altındaki açıklama labellere gerek yok"): başlık ve
-   değer tek satırda. */
-.bo-serit-kutu .bo-okutu { padding:4px 10px; display:flex; align-items:baseline;
-  justify-content:space-between; gap:8px; white-space:nowrap; }
-.bo-serit-kutu .bo-okutu .deg { font-size:14px; margin-top:0; }
 .bo-durum-cubugu { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font-size:11px; color: var(--ikincil-metin, #6b7a8b); padding:5px 2px; }
 .bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }
