@@ -210,6 +210,8 @@ public static partial class EkranKodlari
         // Laboratuvar (1004 aşama 2): yalnız kural / denetim tanımları.
         "lab.akilci_karar", "lab.kk.kural", "lab.tetkik.akilci_kural",
         "lab.tetkik.refleks_kural", "lab.tetkik.indeks",
+        // Klinik modüller (1004 aşama 2): yalnız Göz İşlem Protokolleri tanımı.
+        "goz.islem.protokol",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
@@ -234,6 +236,15 @@ public static partial class EkranKodlari
     //   lot seçimi), Dış Laboratuvarlar (gönderimde lab seçimi), Genetik
     //   Panelleri / Varyant / Run (vaka akışı), Dış Kalite / Cihaz Olayları
     //   (KK akışı), Arşiv Kayıtları ve Cihaz Mesajları (Göz / Lab ekranları).
+    //
+    // BİLİNÇLİ KÖPRÜ - KLİNİK MODÜLLER: Sterilizasyon program / bakım / set
+    //   listeleri (Steril Ayarlar sayfası ve pano birlikte kullanır), Diş
+    //   Laboratuvarları (diş akışının beş ekranı), Çalışma Şablon / İstisna
+    //   (Çalışma Planı ve izin talebi), e-Nabız Kod Eşleme (e-Nabız panosu),
+    //   Çağrı kuyruk / agent (Santral sayfası), Medula kuyruğu (kuyruk
+    //   bileşeni), Göz cihaz mesajı / kontakt lens / hasta özeti, Yatak
+    //   Panosu / Hizmet İcmali / İlaç Uygulama, FTR Seanslar, Masa Çizelgesi,
+    //   Acil Çağrılar, Medula fatura / dönem / kesinti ve e-Rapor (iş akışı).
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
     public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);

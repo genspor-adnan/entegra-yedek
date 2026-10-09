@@ -69,7 +69,7 @@ public static partial class KartKatalogu
     // --------------------------------------------------- işlem protokolleri ----
     private static KartTanimi GozIslemProtokolKarti() => new(
         Ad: "goz-islem-protokol",
-        YetkiKodu: "goz.islem",
+        YetkiKodu: "goz.islem.protokol",   // 1004 aşama 2
         Tablo: "public.goz_islem_protokol",
         LogTabloId: LogGozProtokol,
         SubeKolonu: null,                 // protokol kurum genelidir, şubeye bağlı değil

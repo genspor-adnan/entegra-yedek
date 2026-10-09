@@ -272,4 +272,17 @@ public sealed class EkranKoduBolmeTestleri
         Assert.True(Set("lab.mikro.antibiyotik").Var("lab.mikro", Islem.Gor));
         Assert.True(Set("lab.kk.lot").Var("lab.kk", Islem.Gor));
     }
+
+    // -------------------------------------- 1004 aşama 2: klinik modüller ---
+
+    [Fact]
+    public void Goz_islem_protokolu_ayrildi_klinik_akis_koprude()
+    {
+        Assert.Equal("goz.islem.protokol", KaynakKatalogu.Bul("goz-islem-protokol")!.YetkiKodu);
+        Assert.False(Set("goz.islem.protokol").Var("goz.islem", Islem.Gor));
+        // Köprü: sterilizasyon setleri, çalışma şablonu, yatak panosu.
+        Assert.True(Set("steril.birim.set_tanim").Var("steril.birim", Islem.Gor));
+        Assert.True(Set("randevu.plan.sablon").Var("randevu.plan", Islem.Gor));
+        Assert.True(Set("yatan.yatak_pano").Var("yatan", Islem.Gor));
+    }
 }

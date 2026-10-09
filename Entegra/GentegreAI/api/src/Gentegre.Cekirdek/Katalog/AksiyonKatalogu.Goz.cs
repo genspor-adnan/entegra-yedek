@@ -118,7 +118,7 @@ public static partial class AksiyonKatalogu
                                    silIpucu: "Takip kapatılır, silinmez");
 
         // AYARLAR: protokol ve cihaz TANIMDIR - kurulum isi, tam CRUD.
-        s["goz-islem-protokol-liste"] = Crud("goz-islem-protokol", "goz", "goz.islem",
+        s["goz-islem-protokol-liste"] = Crud("goz-islem-protokol", "goz", "goz.islem.protokol",
                                             ekleAdi: "＋ Yeni Protokol");
         // DİKTE SÖZLÜĞÜ (705): terim/komut/sık cümle VERİDİR - yeni bir
         //   kısaltma için sürüm çıkmak gerekmesin diye ekrandan yönetilir.

@@ -81,7 +81,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi GozIslemProtokol() => new(
         Ad: "goz-islem-protokol",
-        YetkiKodu: "goz.islem",
+        YetkiKodu: "goz.islem.protokol",   // 1004 aşama 2: İşlem Protokolleri tanımı (kartta seçim kod tablosundan)
         Kaynak: "public.goz_islem_protokol p",
         VarsayilanSirala: "p.ad",
         Kolonlar: new KolonTanimi[]
