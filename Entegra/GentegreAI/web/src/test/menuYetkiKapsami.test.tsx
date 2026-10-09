@@ -21,11 +21,11 @@ import { LISTELER } from '../sayfalar/listeTanimlari';
  * düşer - menü sızıntısı sessizce geri gelmesin.
  */
 
-/** Banko Görevlisi (kayit_kabul) rolünün gör yetkileri - 998 sonrası. */
+/** Banko Görevlisi rolünün gör yetkileri - 998 + 1002 sonrası (`banko` yok). */
 const BANKO_YETKILERI = new Set([
   'sigorta', 'sigorta.iptal', 'sigorta.provizyon',
   'ai', 'ai.rehber', 'mesaj',
-  'banko', 'banko_oturum', 'hesap', 'kasa_islem', 'kasa.makbuz-yazdir',
+  'banko_oturum', 'hesap', 'kasa_islem', 'kasa.makbuz-yazdir',
   'basvuru.iskonto', 'belge', 'hasta', 'iskonto_onay',
   'randevu', 'randevu.plan',
   'belge_satir', 'taraf',
@@ -36,13 +36,11 @@ const YASAK_GRUPLAR = ['Satış', 'Alış', 'Stok & Hizmet', 'Cari & CRM',
                        'Kurumlar & Sigorta'];
 
 /**
- * FİNANS İSTİSNASI (kullanıcı 09.10.2026: "sadece Bankolar menüsünü de eski
- * yeri olan Finans altına al.. oturum ve onay burada kalsın"). Banko TANIMI
- * kasa/POS kurulumudur, Finans'ta durur; banko görevlisi onu `banko`
- * yetkisiyle görür. Grubun geri kalanı (kasa işlem listeleri, hesap
- * tanımları) `kasa.finans` / `hesap.tanim` ister - bankoda yok.
+ * FİNANS BANKODA YOK (1002, kullanıcı 09.10.2026: "hasan rolü ile girdim
+ * finans görünüyor.. görünmemeli"). Bankolar tanım ekranı Finans'ta durur
+ * ama `banko` yetkisi ister - görevlide yok; oturumu `banko_oturum` ile
+ * Kayıt Kabul > Banko Oturumları'ndan açar.
  */
-const FINANS_BANKODA = ['Bankolar'];
 
 function gruplar(izin: Set<string>, urunModu: number) {
   return menuSatirlariKur(LISTELER, k => izin.has(k), urunModu, undefined)
@@ -56,13 +54,8 @@ describe('menü yetki kapsamı', () => {
     for (const yasak of YASAK_GRUPLAR) expect(g).not.toContain(yasak);
   });
 
-  it('Finans grubu bankoda YALNIZ Banko tanımını gösterir', () => {
-    const satirlar = menuSatirlariKur(LISTELER, k => BANKO_YETKILERI.has(k), 2, undefined);
-    const finans = satirlar.find(s => s.tur === 'grup' && s.ad === 'Finans');
-    // Grup ya hiç çıkmaz ya da yalnız izinli ekranı taşır; "Kasa İşlemleri"
-    //   ya da "POS" sızarsa yetki bölmesi geri gelmiş olur.
-    if (finans && finans.tur === 'grup')
-      expect(finans.alt.map(m => m.ad).sort()).toEqual(FINANS_BANKODA);
+  it('Banko Görevlisi Finans grubunu GÖRMEZ', () => {
+    expect(gruplar(BANKO_YETKILERI, 2)).not.toContain('Finans');
   });
 
   it('Banko Görevlisi kendi işini YAPABİLİR (Kayıt Kabul + Randevu durur)', () => {
