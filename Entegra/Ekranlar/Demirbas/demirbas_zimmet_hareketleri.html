@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demirbaş Zimmet ve Hareketler — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#3a6a72,#294a50);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#9fd0d6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#3a6a72;background:linear-gradient(#4f8f99,#3a6a72);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}.flex1{margin-left:auto}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after,.grid2 .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center;gap:5px}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;border:1px solid var(--line);background:#f4f7fa;color:#4a6078;cursor:default}
+  .chip.on{background:#2f6db3;color:#fff;border-color:#2f6db3}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:12px}.pane.active{display:block}
+  .row{display:flex;gap:12px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg tr.uyari td{background:#fff6e6}
+  .dg tfoot td{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:var(--navy)}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .sub{font-size:10.5px;color:var(--muted)}.mono{font-family:Consolas,"Segoe UI",monospace;font-size:11px}
+  .gridtb{display:flex;gap:4px;padding:6px 0 0;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold;white-space:nowrap;border:1px solid}
+  .h1{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}   /* Veriş */
+  .h9{background:#eef7ee;color:#3f8a4e;border-color:#cfe8cf}   /* İade */
+  .h2{background:#f1ecfa;color:#6a4bb0;border-color:#ddd2f1}   /* Yer değişikliği */
+  .h3{background:#eef1f4;color:#55687c;border-color:#d8dfe6}   /* Yedek havuza */
+  .h4{background:#e4f5f6;color:#2a7c86;border-color:#c5e6e9}   /* Havuzdan atama */
+  .h5{background:#fdf1e2;color:#b5731a;border-color:#f2ddbf}   /* Atölyeye */
+  .h6{background:#fdeee6;color:#b4532a;border-color:#f3d3c2}   /* Dış servise */
+  .h7{background:#fbe9e9;color:#a3312f;border-color:#f0caca}   /* Hurdaya */
+  .h8{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}   /* Sayımda bulundu */
+  .hd{background:#e9f0f7;color:#2c5a8a;border-color:#c9d9ea}   /* Devir (veriş, eski kişi dolu) */
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:8px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .v.warn{color:#b5731a}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .kpi.alarm{border-color:#f2ddbf;background:linear-gradient(#fffaf2,#fdf1e2)}
+  .bar{height:10px;border-radius:5px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2);min-width:90px}.bar>span{display:block;height:100%}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle;flex:none}
+  /* filtre paneli */
+  .filt{width:230px;flex:none}
+  .filt .grp .body{display:flex;flex-direction:column;gap:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  /* personel listesi */
+  .plist{width:270px;flex:none}
+  .pi{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--line2);background:#fff;cursor:default}
+  .pi:hover{background:#f2f7fd}.pi.sel{background:var(--sel);box-shadow:inset 3px 0 0 #2f6db3}
+  .pi .ad{font-weight:bold;color:var(--navy)}.pi .n{margin-left:auto;font-weight:bold;color:#34506e;background:#e3ebf4;border-radius:9px;padding:0 7px;font-size:10.5px}
+  .pi.ayr{background:#fff6e6}.pi.ayr .n{background:#f6dcae;color:#8a5a0d}
+  .alarmbox{border:1px solid #f2ddbf;background:#fdf6ea;color:#8a5a0d;border-radius:4px;padding:7px 10px;font-size:11px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .pkart{display:flex;gap:12px;align-items:center;padding:8px 10px;border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);margin-bottom:10px}
+  .pkart .av{width:38px;height:38px;font-size:13px}
+  /* modal */
+  .ovl{background:rgba(20,40,70,.28);padding:22px;border-radius:4px}
+  .modal{max-width:640px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 12px 34px rgba(20,40,70,.3);overflow:hidden}
+  .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;width:max-content}
+  .seg span{padding:4px 12px;font-size:11px;background:#f4f7fa;border-right:1px solid var(--line)}.seg span:last-child{border-right:0}
+  .seg span.on{background:#2f6db3;color:#fff;font-weight:bold}
+  .scan{border:1px dashed #7fa7d3;background:#f3f8fe;color:#2f6db3}
+  .cb{display:flex;gap:6px;align-items:center;font-size:11.5px}.cb i{width:13px;height:13px;border:1px solid #7f93a8;border-radius:2px;background:#2f6db3;display:inline-block;position:relative}
+  .cb i::after{content:"✓";color:#fff;font-size:10px;position:absolute;left:2px;top:-2px;font-style:normal}
+  .mfoot{display:flex;gap:6px;justify-content:flex-end;padding:8px 10px;background:var(--head);border-top:1px solid var(--line)}
+  /* tutanak A4 */
+  .a4wrap{background:#d9dfe6;padding:18px;display:flex;justify-content:center}
+  .a4{width:620px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);padding:30px 36px;font-family:"Times New Roman",serif;font-size:12.5px;color:#111}
+  .a4 h2{text-align:center;margin:0 0 4px;font-size:17px;letter-spacing:1px}
+  .a4 .ust{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}
+  .a4 table{border-collapse:collapse;width:100%;margin:10px 0}
+  .a4 th,.a4 td{border:1px solid #444;padding:4px 6px;font-size:11.5px}.a4 th{background:#eee}
+  .a4 .imza{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:26px}
+  .a4 .imza div{border-top:1px solid #111;padding-top:5px;text-align:center;font-size:11.5px;min-height:70px}
+  .lbl{font-size:11px;color:var(--muted);font-weight:bold;letter-spacing:.5px;margin:4px auto 6px;max-width:1180px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title"><span class="dot"></span> Demirbaş Zimmet ve Hareketler <span class="sp">Merkez şube · 01.10.2026 – 10.10.2026 · DEMIRBAS_HAREKET</span></div>
+  <div class="toolbar">
+    <div class="btn primary">👤 Zimmetle (Veriş)</div>
+    <div class="btn">↩ İade Al</div>
+    <div class="btn">⇄ Devret</div>
+    <div class="btn">📍 Yer Değiştir</div>
+    <div class="sepv"></div>
+    <div class="btn">👥 Toplu Zimmet</div>
+    <div class="btn">🖨️ Tutanak Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">📊 Excel</div>
+    <div class="btn flex1">✖ Kapat</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">Toplam demirbaş</div><div class="v">456</div><div class="s">Hurda hariç · serviste/atölyede 14</div></div>
+    <div class="kpi"><div class="k">Zimmetli</div><div class="v">289</div><div class="s">%63,4 · 118 personel</div></div>
+    <div class="kpi"><div class="k">Depoda / boşta</div><div class="v pos">153</div><div class="s">Depo 63 · Yedek havuz 41 · Ortak alan 49</div></div>
+    <div class="kpi"><div class="k">Bu ay hareket</div><div class="v">37</div><div class="s">Veriş 14 · İade 9 · Yer 8 · Diğer 6</div></div>
+    <div class="kpi alarm"><div class="k">İade bekleyen</div><div class="v warn">7</div><div class="s">Ayrılan 2 personel üzerinde</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="hareket">Hareketler <span class="b">37</span></div>
+    <div class="tab" data-t="personel">Personel Zimmetleri <span class="b">118</span></div>
+    <div class="tab" data-t="lokasyon">Lokasyon Dağılımı <span class="b">9</span></div>
+  </div>
+
+  <!-- ================= HAREKETLER ================= -->
+  <div class="pane active" data-p="hareket">
+    <div class="row">
+      <div class="filt">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Süzme</h4>
+          <div class="body">
+            <div class="fld"><label>Demirbaş ara</label><div class="inp">🔍 <span class="sub">No, ad, seri no, barkod…</span></div></div>
+            <div class="fld"><label>Tarih aralığı</label><div class="row" style="gap:6px"><div class="inp" style="flex:1">01.10.2026</div><div class="inp" style="flex:1">10.10.2026</div></div></div>
+            <div class="chips"><span class="chip">Bugün</span><span class="chip">Bu hafta</span><span class="chip on">Bu ay</span><span class="chip">Yıl</span></div>
+            <div class="fld"><label>Hareket tipi</label>
+              <div class="chips">
+                <span class="chip on">Tümü</span><span class="badge h1">Veriş</span><span class="badge h9">İade</span><span class="badge h2">Yer değişikliği</span>
+                <span class="badge h3">Yedek havuza</span><span class="badge h4">Havuzdan atama</span><span class="badge h5">Atölyeye</span>
+                <span class="badge h6">Dış servise</span><span class="badge h7">Hurdaya</span><span class="badge h8">Sayımda bulundu</span>
+              </div></div>
+            <div class="fld"><label>Personel (eski veya yeni)</label><div class="inp combo">Tümü</div></div>
+            <div class="fld"><label>Lokasyon</label><div class="inp combo">Tümü</div></div>
+            <div class="fld"><label>Departman</label><div class="inp combo">Tümü</div></div>
+            <div class="cb" style="color:var(--muted)"><i style="background:#fff"></i>&nbsp;Yalnız tutanaklı hareketler</div>
+            <div class="gridtb"><span class="minibtn">↻ Uygula</span><span class="minibtn">Temizle</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="dg"><table>
+          <thead><tr><th style="width:92px">Tarih / Saat</th><th style="width:108px">Tip</th><th style="width:78px">Demirbaş No</th><th>Demirbaş Adı</th><th>Kimden</th><th>Kime</th><th style="width:96px">Tutanak No</th><th style="width:78px">İşlem Yapan</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>10.10.2026<div class="sub">14:22</div></td><td><span class="badge hd">Veriş · Devir</span></td><td class="mono">DMB.0342</td><td>Dizüstü Bilgisayar — Dell Latitude 5540</td><td>Elif Şahin<div class="sub">Ofis — 3. Kat</div></td><td>Murat Yıldız<div class="sub">Ofis — 2. Kat</div></td><td class="mono">TUT.2026-0131</td><td>admin</td><td>Proje ekibine geçiş</td></tr>
+            <tr><td>10.10.2026<div class="sub">11:05</div></td><td><span class="badge h9">İade</span></td><td class="mono">DMB.0418</td><td>Cep Telefonu — Samsung A55</td><td>Kemal Arslan<div class="sub">Saha</div></td><td>—<div class="sub">Depo — Bilgi İşlem</div></td><td class="mono">TUT.2026-0130</td><td>İK · Selin</td><td>İşten ayrılış iadesi</td></tr>
+            <tr><td>09.10.2026<div class="sub">16:40</div></td><td><span class="badge h2">Yer değişikliği</span></td><td class="mono">DMB.0207</td><td>Toplantı Masası 12 Kişilik</td><td><div class="sub">Ofis — 1. Kat</div></td><td><div class="sub">Toplantı Salonu B</div></td><td class="sub">—</td><td>Ali Demir</td><td>Ofis düzenlemesi</td></tr>
+            <tr><td>09.10.2026<div class="sub">10:12</div></td><td><span class="badge h1">Veriş</span></td><td class="mono">DMB.0455</td><td>Monitör 27" — LG 27UL500</td><td>—<div class="sub">Depo — Bilgi İşlem</div></td><td>Ayşe Çelik<div class="sub">Muhasebe</div></td><td class="mono">TUT.2026-0129</td><td>admin</td><td>Yeni personel kurulumu</td></tr>
+            <tr><td>08.10.2026<div class="sub">15:31</div></td><td><span class="badge h6">Dış servise</span></td><td class="mono">DMB.0188</td><td>Lazer Yazıcı — HP M428</td><td><div class="sub">Muhasebe</div></td><td><div class="sub">Yetkili Servis (Teknosa)</div></td><td class="sub">—</td><td>Ali Demir</td><td>İş emri İE.2026-0412 · kâğıt sıkışması</td></tr>
+            <tr><td>08.10.2026<div class="sub">09:02</div></td><td><span class="badge h4">Havuzdan atama</span></td><td class="mono">DMB.0391</td><td>Dizüstü Bilgisayar — Lenovo E14</td><td><div class="sub">Yedek Havuz</div></td><td>Burak Öztürk<div class="sub">Satış</div></td><td class="sub">—</td><td>admin</td><td>Arızalı cihaz yerine geçici</td></tr>
+            <tr><td>07.10.2026<div class="sub">17:18</div></td><td><span class="badge h5">Atölyeye</span></td><td class="mono">DMB.0276</td><td>Matkap — Bosch GSB 18V</td><td>Hakan Koç<div class="sub">Saha</div></td><td><div class="sub">Bakım Atölyesi</div></td><td class="sub">—</td><td>Hakan Koç</td><td>İş emri İE.2026-0408 · batarya</td></tr>
+            <tr><td>06.10.2026<div class="sub">13:45</div></td><td><span class="badge h3">Yedek havuza</span></td><td class="mono">DMB.0302</td><td>Tablet — iPad 10. Nesil</td><td><div class="sub">Satış</div></td><td><div class="sub">Yedek Havuz</div></td><td class="sub">—</td><td>admin</td><td>Kullanılmıyor</td></tr>
+            <tr><td>03.10.2026<div class="sub">11:20</div></td><td><span class="badge h8">Sayımda bulundu</span></td><td class="mono">DMB.0099</td><td>Projeksiyon — Epson EB-X49</td><td><div class="sub">— (kayıp)</div></td><td><div class="sub">Toplantı Salonu A</div></td><td class="sub">—</td><td>Sayım ekibi</td><td>2026/3. çeyrek sayımı</td></tr>
+            <tr><td>02.10.2026<div class="sub">10:00</div></td><td><span class="badge h7">Hurdaya</span></td><td class="mono">DMB.0041</td><td>Masaüstü PC — HP ProDesk 400 G3</td><td><div class="sub">Depo — Bilgi İşlem</div></td><td><div class="sub">Hurda Alanı</div></td><td class="sub">—</td><td>Mali İşler</td><td>Ekonomik ömrü doldu · onay K-2026/14</td></tr>
+            <tr><td>01.10.2026<div class="sub">09:30</div></td><td><span class="badge h1">Veriş</span></td><td class="mono">DMB.0460</td><td>Araç Takip Cihazı — Arvento</td><td>—<div class="sub">Depo — İdari</div></td><td>Kemal Arslan<div class="sub">Saha</div></td><td class="mono">TUT.2026-0124</td><td>İdari İşler</td><td>34 ABC 123 araç</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">🗂️ Demirbaş Kartını Aç</span><span class="minibtn">🖨️ Tutanağı Yazdır</span><span class="minibtn">📄 Hareket Dökümü</span><span style="margin-left:auto" class="sub">11 / 37 kayıt · Tarih ↓</span></div>
+        <div class="hint">Hareket satırları <b>elle girilmez</b>: karttaki zimmet veya lokasyon değiştiğinde tetik <b>DEMIRBAS_HAREKET</b> satırını yazar. "Devir" ayrı bir tip değildir — eski zimmeti dolu bir <b>Veriş</b> (hareket=1) kaydıdır. Tutanak no yalnızca Veriş / İade hareketlerinde üretilir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PERSONEL ZİMMETLERİ ================= -->
+  <div class="pane" data-p="personel">
+    <div class="row">
+      <div class="plist">
+        <div class="grp" style="margin-bottom:0;overflow:hidden">
+          <h4>Personel <span class="tag">TARAF · personel</span></h4>
+          <div style="padding:8px"><div class="inp">🔍 <span class="sub">Personel ara…</span></div>
+            <div class="chips" style="margin-top:6px"><span class="chip on">Zimmetli</span><span class="chip">İade bekleyen <b>2</b></span><span class="chip">Tümü</span></div></div>
+          <div class="pi ayr sel"><span class="av" style="background:#b5731a">KA</span><div><div class="ad">Kemal Arslan</div><div class="sub">Saha · ⚠ 30.09.2026 ayrıldı</div></div><span class="n">4</span></div>
+          <div class="pi"><span class="av" style="background:#2f6db3">EŞ</span><div><div class="ad">Elif Şahin</div><div class="sub">Yazılım</div></div><span class="n">3</span></div>
+          <div class="pi"><span class="av" style="background:#6a4bb0">MY</span><div><div class="ad">Murat Yıldız</div><div class="sub">Yazılım</div></div><span class="n">5</span></div>
+          <div class="pi"><span class="av" style="background:#2a7c86">AÇ</span><div><div class="ad">Ayşe Çelik</div><div class="sub">Muhasebe</div></div><span class="n">2</span></div>
+          <div class="pi"><span class="av" style="background:#3f8a4e">BÖ</span><div><div class="ad">Burak Öztürk</div><div class="sub">Satış</div></div><span class="n">3</span></div>
+          <div class="pi"><span class="av" style="background:#a3312f">HK</span><div><div class="ad">Hakan Koç</div><div class="sub">Saha</div></div><span class="n">6</span></div>
+          <div class="pi ayr"><span class="av" style="background:#b5731a">ZT</span><div><div class="ad">Zeynep Tekin</div><div class="sub">Satış · ⚠ 05.10.2026 ayrıldı</div></div><span class="n">3</span></div>
+          <div class="pi"><span class="av" style="background:#55687c">SA</span><div><div class="ad">Serkan Aydın</div><div class="sub">İdari İşler</div></div><span class="n">1</span></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="alarmbox">⚠ <b>Kemal Arslan</b> 30.09.2026 tarihinde işten ayrıldı — üzerinde <b>4 demirbaş</b> (₺ 61.850) iade bekliyor. İlişik kesme belgesi bu iadeler tamamlanınca verilir.</div>
+        <div class="pkart"><span class="av" style="background:#b5731a">KA</span>
+          <div><div style="font-weight:bold;color:var(--navy);font-size:13px">Kemal Arslan</div><div class="sub">Saha Teknisyeni · Saha Operasyon · Sicil 1047</div></div>
+          <div style="margin-left:auto;text-align:right"><div class="sub">Zimmet toplamı</div><div style="font-weight:bold;color:var(--navy);font-size:14px">₺ 61.850,00</div></div></div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:26px"></th><th style="width:80px">No</th><th>Ad</th><th>Kategori</th><th>Lokasyon</th><th style="width:90px">Zimmet Tarihi</th><th style="width:100px">Tutanak</th><th class="amt" style="width:96px">Değer</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="c">☑</td><td class="mono">DMB.0460</td><td>Araç Takip Cihazı — Arvento</td><td>Araç Ekipmanı</td><td>Saha</td><td>01.10.2026</td><td class="mono">TUT.2026-0124</td><td class="amt">4.250,00</td></tr>
+            <tr><td class="c">☑</td><td class="mono">DMB.0377</td><td>Dizüstü Bilgisayar — HP ProBook 450</td><td>Bilgi İşlem</td><td>Saha</td><td>12.02.2026</td><td class="mono">TUT.2026-0019</td><td class="amt">38.900,00</td></tr>
+            <tr><td class="c">☑</td><td class="mono">DMB.0309</td><td>Ölçü Seti — Fluke 117</td><td>Ölçüm Cihazı</td><td>Saha</td><td>08.11.2025</td><td class="mono">TUT.2025-0377</td><td class="amt">12.400,00</td></tr>
+            <tr><td class="c">☑</td><td class="mono">DMB.0288</td><td>Baret + İSG Seti</td><td>İSG Ekipmanı</td><td>Saha</td><td>03.06.2025</td><td class="mono">TUT.2025-0201</td><td class="amt">6.300,00</td></tr>
+            <tr class="uyari"><td class="c">—</td><td class="mono">DMB.0418</td><td>Cep Telefonu — Samsung A55 <span class="badge h9">İade alındı 10.10</span></td><td>Bilgi İşlem</td><td>Depo — Bilgi İşlem</td><td>14.03.2025</td><td class="mono">TUT.2026-0130</td><td class="amt sub">(15.600,00)</td></tr>
+          </tbody>
+          <tfoot><tr><td></td><td colspan="6">4 demirbaş zimmetli · 1 iade bu ay</td><td class="amt">61.850,00</td></tr></tfoot>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">↩ Seçilenleri İade Al</span><span class="minibtn">⇄ Seçilenleri Devret…</span><span class="minibtn">🖨️ Zimmet Formu Yazdır</span><span class="minibtn">📄 Zimmet Geçmişi</span></div>
+        <div class="hint">Toplu iade tek tutanak üretir (TUT.yyyy-nnnn, birden çok satır). Değer = alış tutarı; net defter değeri için demirbaş kartının Amortisman sekmesine bakın.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOKASYON DAĞILIMI ================= -->
+  <div class="pane" data-p="lokasyon">
+    <div class="dg"><table>
+      <thead><tr><th>Lokasyon</th><th class="amt" style="width:80px">Adet</th><th class="amt" style="width:80px">Zimmetli</th><th class="amt" style="width:80px">Boşta</th><th class="amt" style="width:120px">Toplam Değer</th><th style="width:200px">Pay</th><th style="width:120px">Son Hareket</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td>Ofis — 3. Kat</td><td class="amt">96</td><td class="amt">91</td><td class="amt">5</td><td class="amt">2.184.500</td><td><div class="bar"><span style="width:20%;background:#2f6db3"></span></div></td><td>10.10.2026</td></tr>
+        <tr><td>Ofis — 2. Kat</td><td class="amt">84</td><td class="amt">80</td><td class="amt">4</td><td class="amt">1.902.300</td><td><div class="bar"><span style="width:17%;background:#2f6db3"></span></div></td><td>10.10.2026</td></tr>
+        <tr><td>Saha</td><td class="amt">78</td><td class="amt">78</td><td class="amt">0</td><td class="amt">1.411.750</td><td><div class="bar"><span style="width:16%;background:#2f6db3"></span></div></td><td>07.10.2026</td></tr>
+        <tr><td>Muhasebe</td><td class="amt">42</td><td class="amt">40</td><td class="amt">2</td><td class="amt">812.900</td><td><div class="bar"><span style="width:9%;background:#2f6db3"></span></div></td><td>09.10.2026</td></tr>
+        <tr><td>Toplantı Salonu A / B</td><td class="amt">38</td><td class="amt">0</td><td class="amt">38</td><td class="amt">624.100</td><td><div class="bar"><span style="width:8%;background:#6a4bb0"></span></div></td><td>09.10.2026</td></tr>
+        <tr><td>Depo — Bilgi İşlem</td><td class="amt">63</td><td class="amt">0</td><td class="amt">63</td><td class="amt">1.096.400</td><td><div class="bar"><span style="width:13%;background:#3f8a4e"></span></div></td><td>10.10.2026</td></tr>
+        <tr><td>Yedek Havuz</td><td class="amt">41</td><td class="amt">0</td><td class="amt">41</td><td class="amt">958.200</td><td><div class="bar"><span style="width:8%;background:#55687c"></span></div></td><td>08.10.2026</td></tr>
+        <tr><td>Bakım Atölyesi</td><td class="amt">9</td><td class="amt">0</td><td class="amt">9</td><td class="amt">118.600</td><td><div class="bar"><span style="width:2%;background:#b5731a"></span></div></td><td>07.10.2026</td></tr>
+        <tr><td>Dış Servis</td><td class="amt">5</td><td class="amt">0</td><td class="amt">5</td><td class="amt">74.900</td><td><div class="bar"><span style="width:1%;background:#b4532a"></span></div></td><td>08.10.2026</td></tr>
+      </tbody>
+      <tfoot><tr><td>Toplam</td><td class="amt">456</td><td class="amt">289</td><td class="amt">167</td><td class="amt">9.183.650</td><td></td><td></td></tr></tfoot>
+    </table></div>
+    <div class="gridtb"><span class="minibtn">🔍 Lokasyondaki Demirbaşlar</span><span class="minibtn">📍 Toplu Yer Değiştir</span><span class="minibtn">📦 Bu Lokasyonu Say</span><span class="minibtn">📊 Excel</span></div>
+    <div class="hint">Lokasyonlar <b>demirbas.lokasyon</b> kod listesinden gelir. Hurdaya ayrılanlar (30 adet) toplam dışıdır. Satıra çift tıklama, Hareketler sekmesini o lokasyona süzülmüş açar.</div>
+  </div>
+
+  <div class="maprow"><b>Tablolar:</b>
+    <span>Hareket → <b>DEMIRBAS_HAREKET</b> (tetikle yazılır)</span>·
+    <span>Zimmet → <b>DEMIRBAS.ZIMMET_TARAF_ID</b></span>·
+    <span>Lokasyon → <b>DEMIRBAS.LOKASYON</b> (kod listesi)</span>·
+    <span>Departman → <b>DEMIRBAS.DEPARTMAN_ID</b></span>·
+    <span>Tutanak no → <b>TUT.yyyy-nnnn</b> (yalnız Veriş / İade)</span>·
+    <span>Servis / atölye → <b>IS_EMRI_ID</b></span>
+  </div>
+  <div class="statusbar"><span>Seçili: <b style="color:#2f6db3">DMB.0342 — Murat Yıldız</b></span><span>Süzme: Bu ay · tüm tipler</span><span style="margin-left:auto">Son hareket: 10.10.2026 14:22 · admin</span></div>
+</div>
+
+<!-- ================= ZİMMETLE / DEVRET PENCERESİ ================= -->
+<div class="lbl">Zimmetle / Devret penceresi (araç çubuğundan açılır)</div>
+<div class="ovl" style="max-width:1180px;margin:0 auto 18px">
+  <div class="modal">
+    <div class="title"><span class="dot"></span> Zimmet İşlemi <span class="sp">Kayıt kartı günceller · hareket tetikle yazılır</span></div>
+    <div style="padding:12px">
+      <div class="seg" style="margin-bottom:12px"><span class="on">Zimmetle (Veriş)</span><span>Devret</span><span>İade Al</span><span>Yer Değiştir</span></div>
+      <div class="grp">
+        <h4>Demirbaşlar <span class="tag">2 seçili</span></h4>
+        <div class="body">
+          <div class="inp scan">▥ Barkod okutun veya demirbaş no / ad yazın…</div>
+          <div class="dg" style="margin-top:8px"><table>
+            <thead><tr><th style="width:80px">No</th><th>Ad</th><th>Şu anki durum</th><th style="width:26px"></th></tr></thead>
+            <tbody>
+              <tr><td class="mono">DMB.0455</td><td>Monitör 27" — LG 27UL500</td><td><span class="sub">Boşta · Depo — Bilgi İşlem</span></td><td class="c">✖</td></tr>
+              <tr><td class="mono">DMB.0466</td><td>Klavye + Mouse Seti — Logitech MK295</td><td><span class="sub">Boşta · Depo — Bilgi İşlem</span></td><td class="c">✖</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="grp" style="margin-bottom:0">
+        <h4>Teslim</h4>
+        <div class="body grid2" style="grid-template-columns:130px 1fr 90px 1fr">
+          <label class="req">Teslim alan personel</label><div class="inp combo"><span class="av" style="background:#2a7c86;width:18px;height:18px;font-size:8px">AÇ</span> Ayşe Çelik — Muhasebe</div>
+          <label>Teslim eden</label><div class="inp combo">Ali Demir — Bilgi İşlem</div>
+          <label class="req">Lokasyon</label><div class="inp combo">Muhasebe</div>
+          <label>Departman</label><div class="inp combo">Mali İşler</div>
+          <label class="req">Tarih</label><div class="inp">09.10.2026 10:12</div>
+          <label>Tutanak No</label><div class="inp mono" style="color:var(--navy);font-weight:bold">TUT.2026-0129 <span class="sub" style="font-weight:normal">(kayıtta kesinleşir)</span></div>
+          <label>Açıklama</label><div class="inp full" style="grid-column:2 / -1">Yeni personel kurulumu</div>
+          <div></div><div class="cb full" style="grid-column:2 / -1"><i></i>&nbsp;Tutanak oluştur ve yazdır</div>
+        </div>
+      </div>
+      <div class="hint">Devret seçilirse "Teslim eden" alanı mevcut zimmet sahibi olarak kilitlenir ve tek tutanak hem iadeyi hem verişi kapsar. Zimmetli bir demirbaş Zimmetle ile okutulursa uyarı verilir ve Devret'e geçilmesi önerilir.</div>
+    </div>
+    <div class="mfoot"><div class="btn">Vazgeç</div><div class="btn primary">✔ Kaydet ve Tutanak Yazdır</div></div>
+  </div>
+</div>
+
+<!-- ================= ZİMMET TUTANAĞI ÖNİZLEME ================= -->
+<div class="lbl">Zimmet Tutanağı — baskı önizleme</div>
+<div class="win">
+  <div class="toolbar"><div class="btn primary">🖨️ Yazdır</div><div class="btn">📄 PDF Kaydet</div><div class="btn">📎 Demirbaşa Belge Olarak Ekle</div><div class="btn flex1">✖ Kapat</div></div>
+  <div class="a4wrap"><div class="a4">
+    <div class="ust"><div><b>ÖRNEK TEKNOLOJİ A.Ş.</b><br>Merkez Şube</div><div style="text-align:right">Tutanak No: <b>TUT.2026-0129</b><br>Tarih: 09.10.2026 10:12</div></div>
+    <h2>DEMİRBAŞ ZİMMET TUTANAĞI</h2>
+    <p style="text-align:center;margin:0 0 10px">(Teslim / Veriş)</p>
+    <p>Aşağıda bilgileri yazılı demirbaşlar, çalışır ve eksiksiz olarak teslim edilmiştir. Teslim alan personel, demirbaşları özenle kullanmayı, görev değişikliği veya işten ayrılış halinde eksiksiz iade etmeyi kabul eder.</p>
+    <table>
+      <tr><th style="width:110px">Teslim Eden</th><td>Ali Demir — Bilgi İşlem</td><th style="width:110px">Teslim Alan</th><td>Ayşe Çelik — Muhasebe</td></tr>
+      <tr><th>Lokasyon</th><td>Muhasebe</td><th>Departman</th><td>Mali İşler</td></tr>
+    </table>
+    <table>
+      <thead><tr><th style="width:28px">#</th><th style="width:82px">Demirbaş No</th><th>Adı</th><th style="width:120px">Seri No</th><th style="width:70px">Durumu</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>DMB.0455</td><td>Monitör 27" — LG 27UL500</td><td>LG27-2026-5521</td><td>Sağlam</td></tr>
+        <tr><td>2</td><td>DMB.0466</td><td>Klavye + Mouse Seti — Logitech MK295</td><td>LGT-MK295-0871</td><td>Sağlam</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:6px 0 0">Açıklama: Yeni personel kurulumu</p>
+    <div class="imza"><div><b>TESLİM EDEN</b><br>Ali Demir<br><span style="font-size:10px">Ad Soyad / İmza</span></div><div><b>TESLİM ALAN</b><br>Ayşe Çelik<br><span style="font-size:10px">Ad Soyad / İmza</span></div></div>
+    <p style="font-size:10px;color:#555;margin-top:18px;text-align:center">Bu tutanak iki nüsha düzenlenmiştir. · Gentegre · DEMIRBAS_HAREKET #2214</p>
+  </div></div>
+</div>
+
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+</body>
+</html>
