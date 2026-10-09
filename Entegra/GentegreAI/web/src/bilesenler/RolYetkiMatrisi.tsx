@@ -280,6 +280,13 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   // 2) Aksiyon yetkileri (belge.kesinlestir, uts.bildir...) ait olduklari
   //    modulun ALTINA girer; modul yoksa kendi grubunda durur.
   for (const s of yeni.filter(x => x.kod.includes('.') && !ayriEkran(x))) {
+    // AKTİF MENÜDE OLMAYAN EKRAN ÇİZİLMEZ (kullanıcı 09.10.2026: "yetki
+    //   matrisinde başvuruların altında erp menüleri var"). HBYS'de Satış /
+    //   Alış ekranları menüde yok; kodları (`belge.satis.fatura`) haritada
+    //   bulunamayınca aksiyon sanılıp önekleri `belge` olan Başvurular'ın
+    //   altına giriyordu. Menüde ekranı olan kod ekran kodudur: aktif menüde
+    //   yoksa matriste de yok - üstteki "gizlenmiş ekran" kuralıyla aynı.
+    if (s.tur === 0 && menuluKodlar.has(s.kod)) continue;
     const ustKod = ustKodu(s.kod);
     // Alt EKRAN da menüdeki adıyla yazılır (matris = menü): `klinik_kalite.olgu`
     //   menüde "Klinik Kalite Göstergeleri", yetki adı başka bir şey.
