@@ -52,7 +52,8 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
                   title={tam ? 'Pencere boyutuna dön' : 'Ekranı kapla'} aria-pressed={tam}>
             {tam ? '⤡' : '⤢'}
           </button>
-          <button type="button" className="bom-kapat" onClick={onKapat} title="Kapat (Esc)">✖</button>
+          {/* BAŞLIKTA ✖ YOK (kullanıcı 09.10.2026: "sağ üst köşeden kapatma x i
+              kaldır"): kapatma oturum ekranındaki "Kapat" düğmesinde; Esc de kapatır. */}
         </div>
         <div className="bom-govde">
           <BankoOturumu gomulu acilisBanko={bankoId} oturumId={oturumId} onKapat={onKapat} />
@@ -71,9 +72,8 @@ const stil = `
 .bom-bas { background:linear-gradient(#2b5c95,#1c4374); color:#fff; padding:9px 12px;
   font-weight:bold; font-size:13.5px; display:flex; align-items:center; flex:none }
 .bom-buyut { margin-left:auto; background:none; border:1px solid rgba(255,255,255,.45); color:#fff;
-  cursor:pointer; font-size:13px; line-height:18px; border-radius:3px; padding:0 6px; margin-right:8px }
+  cursor:pointer; font-size:13px; line-height:18px; border-radius:3px; padding:0 6px }
 .bom-buyut:hover { background:rgba(255,255,255,.15) }
-.bom-kapat { background:none; border:none; color:#fff; cursor:pointer; font-size:14px }
 /* Tam ekran: kenar boşluğu küçülür, pencere ekranı kaplar. */
 .bom-ort.tam { padding:8px }
 .bom.tam { width:100%; max-height:calc(100vh - 16px); height:calc(100vh - 16px) }
