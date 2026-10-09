@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ONAY KARTLARI (741/742) — akış tanımı ve vekâlet.
@@ -67,7 +67,7 @@ public static partial class KartKatalogu
         // YETKİ KULLANICI YÖNETİMİYLE AYNI: akış, kurumun imza düzenidir.
         //   "Onayı olan herkes akışı düzenlesin" deseydik, imzalayan kişi
         //   kendi basamağını kaldırabilirdi.
-        YetkiKodu: "kullanici",
+        YetkiKodu: "kullanici.onay_akis",   // 1004 aşama 2: kendi kodu
         Tablo: "public.onay_akis",
         LogTabloId: 1295,
         // KURUM GENELİ (bkz. liste kaynağı): şube damgası konsaydı tanım
@@ -138,7 +138,7 @@ public static partial class KartKatalogu
         // YETKİ: vekâlet imza yetkisinin devridir - kullanıcı yönetimiyle
         //   aynı ağırlıkta. "Onayı olan herkes kendi vekâletini tanımlasın"
         //   deseydik, imza zinciri kişinin kendi kararına kalırdı.
-        YetkiKodu: "kullanici",
+        YetkiKodu: "kullanici.onay_vekalet",   // 1004 aşama 2: kendi kodu
         Tablo: "public.onay_vekalet",
         LogTabloId: 1294,
         SubeKolonu: null,

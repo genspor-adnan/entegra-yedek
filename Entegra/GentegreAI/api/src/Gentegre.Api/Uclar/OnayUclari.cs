@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -140,7 +140,7 @@ public static class OnayUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("kullanici", Islem.Gor);
+            baglam.YetkiIste("kullanici.onay_akis", Islem.Gor);   // 1004 aşama 2: yalnız Onay Akışları ekranı
 
             await using var baglanti = await veri.AcAsync(iptal);
 

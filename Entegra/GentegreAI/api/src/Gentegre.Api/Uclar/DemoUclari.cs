@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler.Demo;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -22,7 +22,7 @@ public static class DemoUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Gor);
+            baglam.YetkiIste("ayar.demo_verisi", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var demoMu = await demo.DemoMuAsync(iptal);
             var son = await b.TekAsync("""
@@ -77,7 +77,7 @@ public static class DemoUclari
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Degistir);
+            baglam.YetkiIste("ayar.demo_verisi", Islem.Degistir);
             await demo.DemoIsteAsync(iptal);
             await demo.AyarYazAsync(ayar with { Tohum = Math.Clamp(ayar.Tohum, 1, 999999) }, iptal);
             return Results.Ok(new { izlemeNo = baglam.IzlemeNo });
@@ -88,7 +88,7 @@ public static class DemoUclari
             IServiceScopeFactory kapsamlar, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Degistir);
+            baglam.YetkiIste("ayar.demo_verisi", Islem.Degistir);
             await demo.DemoIsteAsync(iptal);
             var ayar = await demo.AyarOkuAsync(iptal);
             var id = await demo.UretimAcAsync("elle", baglam.KullaniciId, ayar.Tohum, iptal);
@@ -105,7 +105,7 @@ public static class DemoUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Degistir);
+            baglam.YetkiIste("ayar.demo_verisi", Islem.Degistir);
             await demo.DemoIsteAsync(iptal);
             await veri.CalistirAsync("update public.zamanli_is set aktif = @p0 where kod = 'demo.yenile'",
                 [(short)(istek.Aktif ? 1 : 0)], iptal);

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ÜRETİM KARTLARI (429) — ürün ağacı, üretim emri, iş merkezi.
@@ -420,7 +420,7 @@ public static partial class KartKatalogu
     /// <summary>İŞ MERKEZİ KARTI — kapasite ve saat ücreti.</summary>
     private static KartTanimi IsMerkeziKarti() => new(
         Ad: "is-merkezi",
-        YetkiKodu: "uretim",
+        YetkiKodu: "uretim.is_merkezi",   // 1004 aşama 2: kendi kodu
         Tablo: "public.is_merkezi",
         LogTabloId: 997,
         SubeKolonu: "sube_id",

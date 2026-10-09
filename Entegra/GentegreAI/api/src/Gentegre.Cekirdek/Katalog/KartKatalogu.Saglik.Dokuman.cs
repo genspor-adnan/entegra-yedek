@@ -20,7 +20,7 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi DokumanKategoriKarti() => new(
         Ad: "dokuman-kategori",
-        YetkiKodu: "dokuman",
+        YetkiKodu: "dokuman.kategori",   // 1004 aşama 2: kendi kodu
         Tablo: "public.dokuman_kategori",
         LogTabloId: 1002,
         SubeKolonu: null,                     // ana veri - subeler arasi ORTAK

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ONAY AKIŞI LİSTESİ (742).
@@ -11,7 +11,7 @@ public static partial class KaynakKatalogu
 {
     private static KaynakTanimi OnayAkisKaynagi() => new(
         Ad: "onayAkis",
-        YetkiKodu: "kullanici",
+        YetkiKodu: "kullanici.onay_akis",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.v_onay_akis v",
         // ŞUBE SÜZMESİ YOK: akış KURUM GENELİ bir tanımdır - imza düzeni
         //   şubeye göre değişmez. Süzseydik şubesiz (kurum geneli) tanımlar

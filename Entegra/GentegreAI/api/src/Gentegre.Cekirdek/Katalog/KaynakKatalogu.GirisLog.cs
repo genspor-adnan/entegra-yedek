@@ -18,7 +18,7 @@ public static partial class KaynakKatalogu
         Ad: "giris-log",
         // İşlem günlüğüyle AYNI yetki: ikisi de denetim kaydı, ayrı bir yetki
         //   kodu "logu görebilen ama girişleri göremeyen" yapay bir rol üretirdi.
-        YetkiKodu: "islem_log",
+        YetkiKodu: "islem_log.giris",   // 1004 aşama 2: kendi kodu
         Kaynak: """
             public.giris_denemesi g
             left join public.taraf k on k.id = g.kullanici_id

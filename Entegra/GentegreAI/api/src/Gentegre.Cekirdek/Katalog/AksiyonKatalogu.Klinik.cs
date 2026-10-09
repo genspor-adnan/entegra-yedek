@@ -614,7 +614,7 @@ public static partial class AksiyonKatalogu
         //   SilmeEngelleri'nde (sunucu), dugme yine gosterilir ki
         //   kullanici sebebini ogrensin.
         s["dokuman-kategori-liste"] = Crud("dokuman-kategori", "dokuman-kategori",
-                                          "dokuman", "＋ Yeni", silHedef: null,
+                                          "dokuman.kategori", "＋ Yeni", silHedef: null,
                                           yazdir: false);
         s["dokuman-klasor-liste"]   = Crud("dokuman-klasor", "dokuman-klasor",
                                           "dokuman", "＋ Yeni", silHedef: null,
@@ -680,7 +680,7 @@ public static partial class AksiyonKatalogu
         ];
 
         s["sigorta-kod-esleme-liste"] = Crud("sigorta-kod-esleme", "sigorta-kod-esleme",
-                                            "sigorta", "＋ Yeni", silHedef: null,
+                                            "sigorta.tanim.kod_esleme", "＋ Yeni", silHedef: null,
                                             yazdir: false);
 
         s["sigorta-istek-log-liste"] = [Yazdir()];
@@ -745,7 +745,7 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 85),
         ];
 
-        s["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim",
+        s["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim.is_merkezi",
                                     "＋ Yeni", silHedef: null, yazdir: false);
     }
 }

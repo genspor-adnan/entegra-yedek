@@ -285,4 +285,31 @@ public sealed class EkranKoduBolmeTestleri
         Assert.True(Set("randevu.plan.sablon").Var("randevu.plan", Islem.Gor));
         Assert.True(Set("yatan.yatak_pano").Var("yatan", Islem.Gor));
     }
+
+    // ------------------------------------------ 1004 aşama 2: Yönetim / ERP ---
+
+    [Fact]
+    public void Yonetim_erp_tanim_ekranlari_ayrildi()
+    {
+        var ayri = new Dictionary<string, string>
+        {
+            ["giris-log"] = "islem_log.giris", ["onayAkis"] = "kullanici.onay_akis",
+            ["onayVekalet"] = "kullanici.onay_vekalet", ["izinBakiye"] = "ik.izin.bakiye",
+            ["dokuman-kategori"] = "dokuman.kategori", ["sigorta-kod-esleme"] = "sigorta.tanim.kod_esleme",
+            ["sigorta-istek-log"] = "sigorta.tanim.istek_log", ["is-merkezi"] = "uretim.is_merkezi",
+        };
+        foreach (var (kaynak, kod) in ayri)
+        {
+            Assert.Equal(kod, KaynakKatalogu.Bul(kaynak)!.YetkiKodu);
+            Assert.True(EkranKodlari.KendiKapisinda(kod), kod);
+        }
+        Assert.True(EkranKodlari.KendiKapisinda("ayar.demo_verisi"));
+        Assert.Equal("stok.ayar", EkranKodlari.AyarAnahtariKodu["stok.negatif_davranis"]);
+        // Kullanıcı yönetimi onay akışını artık açmaz, onay akışı da kullanıcıları.
+        Assert.False(Set("kullanici").Var("kullanici.onay_akis", Islem.Gor));
+        Assert.False(Set("kullanici.onay_akis").Var("kullanici", Islem.Gor));
+        // Köprü: Kişi listesi, Bölüm/Görev, Kategoriler seçim listesi.
+        Assert.True(Set("cari.kisi").Var("cari", Islem.Gor));
+        Assert.True(Set("stok.kategori").Var("stok", Islem.Gor));
+    }
 }

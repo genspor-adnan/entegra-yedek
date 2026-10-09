@@ -251,19 +251,19 @@ public static partial class AksiyonKatalogu
         //   bayraklarla hangi basamaklarin cikacagini gosterir. Eşiği
         //   degistiren kisi sonucunu gercek bir talep acmadan gormeli.
         s["onay-akis-liste"] =
-            [.. Crud("onay-akis", "onay", "kullanici"),
+            [.. Crud("onay-akis", "onay", "kullanici.onay_akis"),
              new("onay-akis.dene", "🧪 Akışı Dene", "onay",
-                 KaynakKodu: "kullanici", Islem: Islem.Gor,
+                 KaynakKodu: "kullanici.onay_akis", Islem: Islem.Gor,
                  KayitGerekir: true, Sira: 15,
                  Ipucu: "Kayıt üretmez - hangi basamakların çıkacağını gösterir"),
              new("onay-akis.yuruyenler", "📋 Yürüyen Onaylar", "onay",
-                 Hedef: "sagtus,palet", KaynakKodu: "kullanici", Islem: Islem.Gor,
+                 Hedef: "sagtus,palet", KaynakKodu: "kullanici.onay_akis", Islem: Islem.Gor,
                  KayitGerekir: true, Sira: 16)];
 
         // VEKALET EKRANI (741): imza yetkisinin gecici devri. CRUD
         //   yeter - vekaletin akisi yok, tanimlanir ya da kaldirilir.
         s["onay-vekalet-liste"] =
-            [.. Crud("onay-vekalet", "onay", "kullanici")];
+            [.. Crud("onay-vekalet", "onay", "kullanici.onay_vekalet")];
 
         s["onay-kutusu-liste"] =
             [new("onay-kutusu.onayla", "✓ Onayla", "onay",

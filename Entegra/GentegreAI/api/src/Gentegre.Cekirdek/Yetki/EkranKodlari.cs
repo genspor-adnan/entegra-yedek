@@ -212,6 +212,10 @@ public static partial class EkranKodlari
         "lab.tetkik.refleks_kural", "lab.tetkik.indeks",
         // Klinik modüller (1004 aşama 2): yalnız Göz İşlem Protokolleri tanımı.
         "goz.islem.protokol",
+        // Yönetim / ERP (1004 aşama 2): tanım, günlük ve araç ekranları.
+        "ayar.demo_verisi", "islem_log.giris", "kullanici.onay_akis", "kullanici.onay_vekalet",
+        "ik.izin.bakiye", "dokuman.kategori", "sigorta.tanim.kod_esleme",
+        "sigorta.tanim.istek_log", "uretim.is_merkezi", "stok.ayar",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
@@ -245,6 +249,14 @@ public static partial class EkranKodlari
     //   bileşeni), Göz cihaz mesajı / kontakt lens / hasta özeti, Yatak
     //   Panosu / Hizmet İcmali / İlaç Uygulama, FTR Seanslar, Masa Çizelgesi,
     //   Acil Çağrılar, Medula fatura / dönem / kesinti ve e-Rapor (iş akışı).
+    //
+    // BİLİNÇLİ KÖPRÜ - YÖNETİM / ERP: Kişi, Bölüm / Görev, Kategoriler,
+    //   Kampanyalar (her yerde seçim listesi), Doküman Klasörleri (Dokümanlar
+    //   paneli), Prim Planları (personel kartı), Onam Kayıtları (hasta onamı
+    //   klinik akışta yazılır), Ürün Ağaçları (üretim emri buradan açılır),
+    //   Arıza Ekipleri (talep atama), teknik servis / İTS / ÜTS / kurum icmali
+    //   listeleri (iş akışı) ve Excel İçeri Alma (hedef kaynağın kendi
+    //   yetkisiyle yazar).
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
     public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);
@@ -257,6 +269,7 @@ public static partial class EkranKodlari
         new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["kasa.duzenleme_gun"] = "kasa.finans.ayar",
+        ["stok.negatif_davranis"]       = "stok.ayar",
         ["belge.satis.vade_gun"]        = "belge.satis.ayar",
         ["belge.satis.varsayilan_seri"] = "belge.satis.ayar",
         ["belge.alis.vade_gun"]         = "belge.alis.ayar",

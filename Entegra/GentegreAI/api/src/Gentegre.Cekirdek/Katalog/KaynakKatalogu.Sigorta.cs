@@ -127,7 +127,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi SigortaKodEsleme() => new(
         Ad: "sigorta-kod-esleme",
-        YetkiKodu: "sigorta.tanim",
+        YetkiKodu: "sigorta.tanim.kod_esleme",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.sigorta_kod_esleme e "
               + "  join public.sigorta_saglayici s on s.id = e.saglayici_id",
         VarsayilanSirala: "s.ad asc, e.alan asc, e.sira asc, e.yerel_kod asc",
@@ -151,7 +151,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi SigortaIstekLog() => new(
         Ad: "sigorta-istek-log",
-        YetkiKodu: "sigorta.tanim",
+        YetkiKodu: "sigorta.tanim.istek_log",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.sigorta_istek_log l "
               + "  left join public.sigorta_saglayici s on s.id = l.saglayici_id",
         SubeKolonu: "l.sube_id",

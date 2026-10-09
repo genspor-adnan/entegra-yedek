@@ -68,9 +68,12 @@ public class SigortaTestleri
         //   istek günlüğü ise TANIM ekranlarıdır (`sigorta.tanim`); banko
         //   görevlisinin menüsünde "Kurumlar & Sigorta" grubunu açıyorlardı.
         Assert.Equal("sigorta", KaynakKatalogu.Bul("sigorta-provizyon")?.YetkiKodu);
+        // 1004: kod eşlemesi ve istek günlüğü ekran başına kendi kodunu aldı
+        //   (`sigorta.tanim.kod_esleme`, `sigorta.tanim.istek_log`); hepsi
+        //   tanım ailesinde, çekirdek provizyon kodunda değil.
         foreach (var ad in new[] { "sigorta-hesap", "sigorta-kod-esleme",
                                    "sigorta-istek-log" })
-            Assert.Equal("sigorta.tanim", KaynakKatalogu.Bul(ad)?.YetkiKodu);
+            Assert.StartsWith("sigorta.tanim", KaynakKatalogu.Bul(ad)?.YetkiKodu);
     }
 
     [Fact]

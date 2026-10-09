@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 
 namespace Gentegre.Testler;
 
@@ -98,8 +98,11 @@ public class UretimTestleri
         {
             var aksiyonlar = AksiyonKatalogu.Ekran(ekran);
             Assert.NotNull(aksiyonlar);
+            // 1004: İş Merkezleri kendi kodunu aldı (`uretim.is_merkezi`) -
+            //   aile yine üretim, stok değil.
             Assert.All(aksiyonlar!.Where(a => a.KaynakKodu is not null),
-                a => Assert.Equal("uretim", a.KaynakKodu));
+                a => Assert.True(a.KaynakKodu == "uretim" || a.KaynakKodu!.StartsWith("uretim.", StringComparison.Ordinal),
+                                 a.KaynakKodu));
         }
     }
 

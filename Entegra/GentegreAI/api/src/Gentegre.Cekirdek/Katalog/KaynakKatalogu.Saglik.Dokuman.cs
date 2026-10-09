@@ -134,7 +134,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi DokumanKategori() => new(
         Ad: "dokuman-kategori",
-        YetkiKodu: "dokuman",
+        YetkiKodu: "dokuman.kategori",   // 1004 aşama 2: kendi kodu
         // AKIŞ ADI OMURGADAN (758): `dokuman_akis` artık yazılmıyor,
         //   kategorinin akis_id'si `onay_akis`i gösteriyor.
         Kaynak: "public.dokuman_kategori t "

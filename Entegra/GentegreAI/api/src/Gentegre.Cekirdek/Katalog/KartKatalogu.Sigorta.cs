@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// SİGORTA KARTLARI (430) — kurum hesabı ve kod eşleme.
@@ -63,7 +63,7 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi SigortaKodEslemeKarti() => new(
         Ad: "sigorta-kod-esleme",
-        YetkiKodu: "sigorta",
+        YetkiKodu: "sigorta.tanim.kod_esleme",   // 1004 aşama 2: kendi kodu (eskiden çekirdek `sigorta`)
         Tablo: "public.sigorta_kod_esleme",
         LogTabloId: 1001,
         Alanlar: new KartAlani[]

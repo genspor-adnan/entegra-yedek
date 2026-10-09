@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ÜRETİM LİSTELERİ (429) — ürün ağacı, üretim emri, iş merkezi.
@@ -170,7 +170,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi IsMerkezi() => new(
         Ad: "is-merkezi",
-        YetkiKodu: "uretim",
+        YetkiKodu: "uretim.is_merkezi",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.is_merkezi m left join public.taraf f on f.id = m.fason_taraf_id",
         SubeKolonu: "m.sube_id",
         VarsayilanSirala: "m.kod asc",

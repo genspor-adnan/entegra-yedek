@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ONAY VEKÂLETİ LİSTESİ (741).
@@ -11,7 +11,7 @@ public static partial class KaynakKatalogu
 {
     private static KaynakTanimi OnayVekaletKaynagi() => new(
         Ad: "onayVekalet",
-        YetkiKodu: "kullanici",
+        YetkiKodu: "kullanici.onay_vekalet",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.v_onay_vekalet v",
         // ŞUBE SÜZMESİ YOK: vekâlet KİŞİNİNDİR, şubenin değil. Devreden
         //   başka şubede çalışıyor olabilir; süzmek vekâleti görünmez kılardı.

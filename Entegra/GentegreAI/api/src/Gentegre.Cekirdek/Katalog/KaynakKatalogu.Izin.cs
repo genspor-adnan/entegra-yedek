@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// İZİN LİSTELERİ (743) — talepler ve bakiye.
@@ -86,7 +86,7 @@ public static partial class KaynakKatalogu
     // --------------------------------------------------------- bakiye ----
     private static KaynakTanimi IzinBakiyeKaynagi() => new(
         Ad: "izinBakiye",
-        YetkiKodu: "ik.izin",
+        YetkiKodu: "ik.izin.bakiye",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.v_personel_izin_bakiye v",
         SubeKolonu: "v.sube_id",
         VarsayilanSirala: "v.personel_ad",
