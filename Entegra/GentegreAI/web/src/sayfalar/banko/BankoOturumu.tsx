@@ -257,6 +257,19 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
             {i === 1 && <span className="bo-rz mavi">ops.</span>}
           </div>
         ))}
+        {/* GÜN SONU SAĞ ÜSTTE (kullanıcı 09.10.2026: "gün sonu butonunu sağ üst
+          köşeye oturum rozetleri sırasına al"): akışın sonraki adımı, adım
+          rozetlerinin hizasında. */}
+        {oturum?.durum === 2 && (
+          <button className="bo-ana bo-akis-sag" onClick={() => {
+            setGunSonu(true);
+            // Önerilen bırakma tutarı banko tanımından gelir; görevli değiştirebilir.
+            // ÖNERİ SAYIMI AŞMAZ: hedef 1.000 ama kasada 400 varsa öneri 400.
+            //   Aşan öneri her gün elle düzeltilmek zorunda kalırdı.
+            setBirakilan(String(Math.min(oturum.bankoDevirHedef || 0,
+                                         oturum.beklenenNakit || 0)));
+          }}>🔒 Gün Sonu</button>
+        )}
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -424,16 +437,6 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
           <span className="sp" />
           {islemler.length > 0 && (
             <span className="sonuk">Son işlem {saatKisa(islemler[0].tarih)}</span>
-          )}
-          {oturum.durum === 2 && (
-            <button className="bo-ana bo-sag" onClick={() => {
-              setGunSonu(true);
-              // Önerilen bırakma tutarı banko tanımından gelir; görevli değiştirebilir.
-              // ÖNERİ SAYIMI AŞMAZ: hedef 1.000 ama kasada 400 varsa öneri 400.
-              //   Aşan öneri her gün elle düzeltilmek zorunda kalırdı.
-              setBirakilan(String(Math.min(oturum.bankoDevirHedef || 0,
-                                           oturum.beklenenNakit || 0)));
-            }}>🔒 Gün Sonu</button>
           )}
         </div>
       )}
@@ -1055,7 +1058,8 @@ const bostil = `
 .bo-baslik { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
 .bo-baslik h2 { margin:0; font-size:17px; }
 .bo-ust { color: var(--ikincil-metin, #6b7a8b); font-size:12px; }
-.bo-akis { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.bo-akis { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
+.bo-akis-sag { margin-left:auto; }
 .bo-ad { display:flex; align-items:center; gap:6px; border:1px solid var(--cizgi, #cdd6e0);
   border-radius:14px; padding:3px 11px; font-size:11.5px; background:var(--kart, #fff);
   color: var(--ikincil-metin, #6b7a8b); }
