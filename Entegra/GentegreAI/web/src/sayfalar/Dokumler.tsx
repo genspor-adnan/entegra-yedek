@@ -13,6 +13,7 @@ import { BaskiOnizleme } from './dokum/BaskiOnizleme';
 import { ozetMi } from './dokum/SonucTablosu';
 import { bosTanim, kuralAraligi, parametreAlanlari } from './dokum/ortak';
 import { c } from '../dil/ceviri';
+import { dokumKodu } from './listeTanimlari.Dokumler';
 
 /**
  * DÖKÜMLER & İSTATİSTİK (686) — mockup Ekranlar/Ayarlar/dokum_tasarimcisi.html
@@ -33,8 +34,11 @@ type Sekme = 'liste' | 'tasarla' | 'istatistik' | 'onizle' | 'baski';
 
 export function Dokumler() {
   const { kullanici, yetki } = useOturum();
-  const yazabilir = yetki('dokum', 'ekle');
-  const yonetici = yetki('dokum', 'degistir');
+  // GRUBUN KENDİ KODU (1003): Finans › Dökümler `dokum.finans` ile açılır,
+  //   tasarımcı (grupsuz, Yönetim) `dokum.yonetim` ile.
+  const dokumYetki = dokumKodu(new URLSearchParams(window.location.search).get('grup'));
+  const yazabilir = yetki(dokumYetki, 'ekle');
+  const yonetici = yetki(dokumYetki, 'degistir');
 
   const [sekme, setSekme] = useState<Sekme>('liste');
   const [katalog, setKatalog] = useState<DokumKatalogu | null>(null);

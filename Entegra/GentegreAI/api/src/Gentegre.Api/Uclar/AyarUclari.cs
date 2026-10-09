@@ -43,7 +43,13 @@ public static class AyarUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Degistir);
+            // KAYIT KABUL AYARLARI KENDİ KODUYLA (1003): `kayit_kabul.ayar`
+            //   yalnız o sayfanın anahtarlarını yazar; genel `ayar` kapısını
+            //   ona açmak bütün kurum ayarlarını açmak olurdu.
+            if (!(EkranKodlari.KayitKabulAyarAnahtarlari.Contains(anahtar)
+                  && baglam.Yetkiler.Var("kayit_kabul.ayar", Islem.Degistir)))
+                baglam.YetkiIste("ayar", Islem.Degistir);
+            else baglam.YazmaIste();
             var liste = await depo.YazAsync(anahtar, istek?.Deger ?? "",
                 baglam.Yazma, iptal);
             return Results.Ok(new { ayarlar = liste, izlemeNo = baglam.IzlemeNo });

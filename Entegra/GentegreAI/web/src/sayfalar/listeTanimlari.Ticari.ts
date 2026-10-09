@@ -134,7 +134,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: '',
     menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Faturalar',
-    ic: '🧾', yetkiKodu: 'belge.satis',
+    ic: '🧾', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
   },
   {
     // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.
@@ -248,7 +248,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: '📥 Gelen Kutusu', rota: 'gelen-belge', kosul: 'ebelge' },
     ],
     menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturaları', ic: '🧾',
-    yetkiKodu: 'belge.alis',
+    yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod
   },
   {
     kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişleri',

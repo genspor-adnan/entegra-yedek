@@ -256,7 +256,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ("Dokumler" acilir menusu) 11_MENU_DUZENI_PLANI ile gelecek.
     kaynak: 'dokumler', rota: 'dokumler', ozelSayfa: true,
     baslik: 'Dökümler', yol: 'Yönetim › Dökümler',
-    menuGrup: 'Yönetim', menuSira: 10, menuAd: 'Dökümler', ic: '📊', yetkiKodu: 'dokum',
+    menuGrup: 'Yönetim', menuSira: 10, menuAd: 'Dökümler', ic: '📊', yetkiKodu: 'dokum.yonetim',   // 1003
   },
   {
     // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
@@ -408,7 +408,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Yonetim › Modül Ayarları › Kayit Kabul', ozelSayfa: true,
     menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Kayıt Kabul', menuSira: 90,
     // Kullanici: Kayit Kabul logosu kirmizi hilal ('@hilal' -> Kabuk MenuIkon SVG).
-    ic: '@hilal', yetkiKodu: 'ayar', urunModu: 2,
+    ic: '@hilal', yetkiKodu: 'kayit_kabul.ayar', urunModu: 2,   // 1003
   },
   {
     // Sekmeli AYAR ekrani - liste degil (ozelSayfa): Genel + Depolar. Menude

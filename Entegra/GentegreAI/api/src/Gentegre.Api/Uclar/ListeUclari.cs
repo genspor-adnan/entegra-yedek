@@ -57,7 +57,10 @@ public static class ListeUclari
                 //   menu kodlari bolundu ama kaynak yetkisi tek kod oldugu
                 //   icin menuden dusen ekran adresi bilen kullaniciya acik
                 //   kaliyordu. Yetkisi olmayan TUR hic donmez.
-                BelgeKumeleri(tanim, baglam));
+                BelgeKumeleri(tanim, baglam),
+                // EKRAN SATIR KISITI (1003): `cari` kaynağına yalnız
+                //   `cari.tedarikci` ile gelen kullanıcı müşteri satırı görmez.
+                EkranKodlari.Kisit(tanim.Ad, k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul);
 
             return Results.Ok(yanit);
         });
@@ -205,7 +208,7 @@ public static class ListeUclari
         if (KaynakKatalogu.BelgeKisitKolonu(tanim.Ad) is null) return null;
         var kumeler = new List<string>(KaynakKatalogu.BelgeYetkiKodlari.Count);
         foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
-            if (baglam.Yetkiler.Var(kod, Islem.Gor)
+            if (baglam.Yetkiler.VarTam(kod, Islem.Gor)
                 && KaynakKatalogu.BelgeKumesi(kod) is { } kume)
                 kumeler.Add(kume);
         return kumeler;

@@ -1153,7 +1153,7 @@ public static class BelgeUclari
 
         foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
         {
-            if (!baglam.Yetkiler.Var(kod, Islem.Gor)) continue;
+            if (!baglam.Yetkiler.VarTam(kod, Islem.Gor)) continue;
             var kume = KaynakKatalogu.BelgeKumesi(kod);
             if (kume is null) continue;
             if (kume == KaynakKatalogu.BelgeKumeBasvuru)

@@ -143,6 +143,6 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'Miad & Tüketim', ic: '⏳',
-    yetkiKodu: 'stok', menuSira: 70,
+    yetkiKodu: 'eczane.miad', menuSira: 70,   // 1003
   },
 ];

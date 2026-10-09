@@ -110,10 +110,10 @@ public static partial class AksiyonKatalogu
                 AksiyonYetkisi: "kullanici.portal", KayitGerekir: true, Sira: 80,
                 Ipucu: "Dışarıdan giriş icin PAROLASIZ hesap acar - kisi ilk giriste kendi parolasini koyar"),
         ];
-        // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
+        // Dis doktor (305): kendi yetkisiyle (1003, eskiden `personel`), kendi kart adiyla.
         s["dis-hekim-liste"] =
         [
-            .. Crud("dis-hekim", "dis-hekim", "personel"),
+            .. Crud("dis-hekim", "dis-hekim", "dis_doktor"),
             // TOPLU ROL (819/822): gocle gelen dis hekimlerin HESABI VAR
             //   ama rolu "Rol Atanmamis" - giris yapsalar hicbir ekran
             //   goremezler. Yetkili bir IC rolu tasiyan hesap atlanir.

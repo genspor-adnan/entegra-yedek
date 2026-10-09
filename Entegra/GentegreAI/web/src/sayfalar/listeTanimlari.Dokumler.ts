@@ -13,9 +13,34 @@ import type { ListeTanimi } from './listeTanimlari.Ortak';
  * Yönetim › Dökümler ise TASARIMCIDIR (süzgeçsiz, hepsi): plan kural 4 -
  * grup içi 📊 çalıştırma, Yönetim'deki tasarım.
  *
- * YETKİ: `dokum` kodu. Döküm yetkisi olmayanda satır hiç çizilmez; dökümün
+ * YETKİ: GRUBUN KENDİ KODU `dokum.<grup>` (1003, kullanıcı: "menü koduyla
+ * yetki matrisi kodları aynı olmalı"). Eskiden tek `dokum` kodu 28 grubun
+ * Dökümler'ini birlikte açıyordu - matristeki bir kutu menüde 28 yeri
+ * değiştiriyordu. Döküm yetkisi olmayanda satır hiç çizilmez; dökümün
  * KAYNAK yetkisi ayrıca sunucuda uygulanır (döküm görmek veri görmek değildir).
+ * Kod listesi sunucuda Gentegre.Cekirdek/Yetki/EkranKodlari ile aynı.
  */
+const DOKUM_KOD_EKI: Record<string, string> = {
+  'Yönetim': 'yonetim', 'Randevu': 'randevu', 'Kayıt Kabul': 'kayit_kabul',
+  'Muayene': 'muayene', 'Laboratuvar': 'laboratuvar', 'Radyoloji': 'radyoloji',
+  'Göz': 'goz', 'Yatan Hasta': 'yatan_hasta', 'Diş': 'dis', 'FTR': 'ftr',
+  'İşyeri Hekimliği': 'isyeri_hekimligi', 'Çağrı Merkezi': 'cagri_merkezi',
+  'Medula': 'medula', 'Ameliyathane': 'ameliyathane', 'Acil': 'acil',
+  'Kurumlar & Sigorta': 'kurumlar_sigorta', 'Cari & CRM': 'cari_crm',
+  'Satış': 'satis', 'Alış': 'alis', 'Stok & Hizmet': 'stok_hizmet',
+  'Eczane': 'eczane', 'Satınalma': 'satinalma', 'Üretim': 'uretim',
+  'Finans': 'finans', 'Muhasebe': 'muhasebe', 'İK': 'ik', 'Doküman': 'dokuman',
+  'Teknik Servis': 'teknik_servis',
+};
+
+/** Grubun Dökümler yetki kodu; grupsuz (tasarımcı) = Yönetim'inki. */
+export function dokumKodu(grup?: string | null): string {
+  return `dokum.${DOKUM_KOD_EKI[grup || 'Yönetim'] ?? 'yonetim'}`;
+}
+
+/** Bütün Dökümler kodları - rota kapısı bunlardan biri yeterli. */
+export const DOKUM_KODLARI = Object.values(DOKUM_KOD_EKI).map(e => `dokum.${e}`);
+
 function dokumOgesi(grup: string, sira = 80): ListeTanimi & {
   menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string;
 } {
@@ -30,7 +55,7 @@ function dokumOgesi(grup: string, sira = 80): ListeTanimi & {
     menuSira: sira,
     menuAd: 'Dökümler',
     ic: '📊',
-    yetkiKodu: 'dokum',
+    yetkiKodu: dokumKodu(grup),
   } as ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string };
 }
 

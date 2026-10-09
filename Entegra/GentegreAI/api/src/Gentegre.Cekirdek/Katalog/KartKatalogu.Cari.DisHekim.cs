@@ -23,7 +23,7 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi DisHekim() => new(
         Ad: "dis-hekim",
-        YetkiKodu: "personel",
+        YetkiKodu: "dis_doktor",   // 1003
         Tablo: "public.taraf",
         LogTabloId: 73,
         // taraf.sube_id NOT NULL: kayit oturumun subesiyle yazilsin diye sube

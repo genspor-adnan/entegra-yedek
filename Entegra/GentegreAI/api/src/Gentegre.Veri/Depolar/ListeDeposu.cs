@@ -17,7 +17,7 @@ public sealed class ListeDeposu
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
         string izlemeNo, int? kullaniciId, CancellationToken iptal = default,
         short portalTuru = 0, int? hekimId = null, IReadOnlyList<int>? tetkikRolleri = null,
-        IReadOnlyCollection<string>? belgeKumeleri = null)
+        IReadOnlyCollection<string>? belgeKumeleri = null, string? ekranKosulu = null)
     {
         var kronometre = Stopwatch.StartNew();
 
@@ -27,7 +27,7 @@ public sealed class ListeDeposu
         SorguUretici Uretici() => portalTuru > 0
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
                   { HekimId = hekimId, TetkikRolleri = tetkikRolleri,
-                    BelgeKumeleri = belgeKumeleri }
+                    BelgeKumeleri = belgeKumeleri, EkranKosulu = ekranKosulu }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
             : new SorguUretici(kaynak)
             {
@@ -36,6 +36,8 @@ public sealed class ListeDeposu
                 //   kosulu tasimali - biri unutulursa sayfa "12 kayit" der,
                 //   grid 3 satir cizer.
                 BelgeKumeleri = belgeKumeleri,
+                // EKRAN SATIR KISITI (1003): Tedarikçiler yalnız tedarikçileri.
+                EkranKosulu = ekranKosulu,
                 // `{kullanici}` yer tutuculu SabitKosul icin (993): "yalniz
                 //   kendi kayitlari" kurali katalogda yazili, deger burada
                 //   baglaniyor.

@@ -333,7 +333,7 @@ public static partial class KaynakKatalogu
     // ---------------------------------------------------- miad takibi ----
     private static KaynakTanimi EczaneMiad() => new(
         Ad: "eczaneMiad",
-        YetkiKodu: "stok",
+        YetkiKodu: "eczane.miad",  // 1003: Eczane › Miad & Tüketim kendi kodu
         Kaynak: @"public.v_eczane_miad v
                   left join public.depo dp on dp.id = v.depo_id",
         VarsayilanSirala: "v.kalan_gun",

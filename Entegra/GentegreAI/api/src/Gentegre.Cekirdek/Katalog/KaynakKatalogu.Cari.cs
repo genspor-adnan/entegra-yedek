@@ -375,7 +375,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi DisHekim() => new(
         Ad: "dis-hekim",
-        YetkiKodu: "personel",
+        YetkiKodu: "dis_doktor",   // 1003: Kurumlar & Sigorta › Dış Doktorlar kendi kodu
         Kaynak: """
             public.taraf t
             join public.taraf_personel po on po.id = t.id

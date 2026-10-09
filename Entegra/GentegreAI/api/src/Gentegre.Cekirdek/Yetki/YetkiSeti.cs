@@ -44,7 +44,25 @@ public sealed class YetkiSeti
             a => a.Kaynak + "." + a.Alan, a => a.Izin, StringComparer.Ordinal);
     }
 
+    /// <summary>
+    /// Kaynak kapısı. Kodun kendisi YA DA o kaynağı kullanan bölünmüş ekran
+    /// kodu (1003, <see cref="EkranKodlari"/>) yeter: Tedarikçiler ekranı
+    /// `cari.tedarikci` ile açılır ama verisini `cari` kaynağından okur.
+    /// </summary>
     public bool Var(string kaynakKodu, Islem islem)
+    {
+        if (VarTam(kaynakKodu, islem)) return true;
+        foreach (var alt in EkranKodlari.VeriKapisiAltlari(kaynakKodu))
+            if (VarTam(alt, islem)) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Yalnız kodun KENDİSİ (türetme yok). Belge kümesi gibi "hangi kod
+    /// verildi" sorusunda kullanılır: `belge.kurum_fatura` belge kaynağını
+    /// açar ama başvuru kümesini (çekirdek `belge`) açmamalı.
+    /// </summary>
+    public bool VarTam(string kaynakKodu, Islem islem)
     {
         if (!_yetkiler.TryGetValue(kaynakKodu, out var y)) return false;
         return islem switch

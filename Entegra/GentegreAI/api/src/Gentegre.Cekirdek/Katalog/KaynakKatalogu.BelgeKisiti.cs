@@ -38,6 +38,9 @@ public static partial class KaynakKatalogu
     public const string BelgeKumeSatis   = "satis";
     public const string BelgeKumeAlis    = "alis";
     public const string BelgeKumeStok    = "stok";
+    // 1003: farklı menü grubundaki fatura ekranları kendi kodunu aldı.
+    public const string BelgeKumeKurumFatura = "kurum_fatura";
+    public const string BelgeKumeAlisFatura  = "alis_fatura";
 
     /// <summary>
     /// Başvuru bağlamı belge TİPİ: başvuru ve ondan türeyen hasta belgeleri
@@ -61,6 +64,10 @@ public static partial class KaynakKatalogu
         [BelgeKumeAlis]  = new[] { 9, 10, 11, 12, 13, 109 },
         // Stok: giriş 3, çıkış 4, transfer 20, talep 105.
         [BelgeKumeStok]  = new[] { 3, 4, 20, 105 },
+        // Kurumlar & Sigorta › Faturalar (satış faturası 15) ve
+        //   Stok & Hizmet › Alış Faturaları (11): ekranların sabit süzgeci.
+        [BelgeKumeKurumFatura] = new[] { 15 },
+        [BelgeKumeAlisFatura]  = new[] { 11 },
     };
 
     /// <summary>
@@ -92,10 +99,17 @@ public static partial class KaynakKatalogu
         "belge.satis" => BelgeKumeSatis,
         "belge.alis"  => BelgeKumeAlis,
         "belge.stok"  => BelgeKumeStok,
+        "belge.kurum_fatura" => BelgeKumeKurumFatura,
+        "belge.alis_fatura"  => BelgeKumeAlisFatura,
         _             => null,
     };
 
-    /// <summary>Kısıtın bakacağı tüm yetki kodları - bağlam bunları sorgular.</summary>
+    /// <summary>
+    /// Kısıtın bakacağı tüm yetki kodları - bağlam bunları TAM eşleşmeyle
+    /// sorgular (YetkiSeti.VarTam): ekran kodu belge kaynağını açar ama
+    /// başka kümeyi açmaz.
+    /// </summary>
     public static IReadOnlyList<string> BelgeYetkiKodlari { get; } =
-        new[] { "belge", "belge.satis", "belge.alis", "belge.stok" };
+        new[] { "belge", "belge.satis", "belge.alis", "belge.stok",
+                "belge.kurum_fatura", "belge.alis_fatura" };
 }

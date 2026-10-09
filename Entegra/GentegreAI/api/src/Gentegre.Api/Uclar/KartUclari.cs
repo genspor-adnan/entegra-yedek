@@ -21,10 +21,13 @@ public static class KartUclari
         //   yanlissa belge yanlis turde gider ve GIB reddeder.
         yol.MapPost("/api/kart/cari/{id:int}/ebelge-mukellef", async (
             int id, BaglamCozucu cozucu, EBelgeSorgu sorgu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
+            // EKRAN SATIR KISITI (1003): Tedarikçiler'den gelen kullanıcı
+            //   yalnız tedarikçi kaydını sorgulatabilir.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, id, Islem.Degistir, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var oku = new Npgsql.NpgsqlCommand(
@@ -77,7 +80,7 @@ public static class KartUclari
         // ------------------------------------------------------------- oku ----
         grup.MapGet("/{kaynak}/{id:long}", async (
             string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -85,6 +88,8 @@ public static class KartUclari
             //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
             baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            // EKRAN SATIR KISITI (1003): kısıt dışı kayıt "bulunamadı".
+            await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, null, id, Islem.Gor, iptal);
 
             var (okunabilir, gizli) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
 
@@ -127,7 +132,7 @@ public static class KartUclari
             string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama, VeriKaynagi veri,
             KullaniciDeposu kullanicilar, Servisler.RandevuHatirlatmasi hatirlatma,
             Servisler.PanikDegerBildirimi panik, Servisler.DisKurumBasvurusu disKurum,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -138,6 +143,8 @@ public static class KartUclari
 
             var uyarilar = new List<string>();
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
+            // EKRAN SATIR KISITI (1003): yeni kayıt kısıtın dışında açılamaz.
+            await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, degerler, null, Islem.Ekle, iptal);
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
             // HASTA (kullanıcı kuralı): aynı kimlik numaralı hasta varsa yeni kayıt açılmaz.
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
@@ -208,7 +215,7 @@ public static class KartUclari
             string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, VeriKaynagi veri,
             Servisler.RandevuHatirlatmasi hatirlatma, Servisler.PanikDegerBildirimi panik,
             Servisler.DisKurumBasvurusu disKurum,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -224,6 +231,9 @@ public static class KartUclari
             var uyarilar = new List<string>();
             var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
+            // EKRAN SATIR KISITI (1003): kısıt dışı kayıt değişmez, kayıt
+            //   kısıtın dışına da çıkarılamaz (tedarikçi işareti kapatılamaz).
+            await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, degerler, id, Islem.Degistir, iptal);
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, id, iptal);
 
@@ -274,7 +284,7 @@ public static class KartUclari
         // ------------------------------------------------------------- sil ----
         grup.MapDelete("/{kaynak}/{id:long}", async (
             string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -287,6 +297,7 @@ public static class KartUclari
                 throw GentegreHatasi.IsKurali(
                     "Bu kayıt silinmez; kullanımdan kaldırmak için 'Aktif' alanını kapatın.");
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
+            await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, null, id, Islem.Sil, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
 
             // Silme logu kartin TAM halini saklar - alan yetkisiyle kirpilmis

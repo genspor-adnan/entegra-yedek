@@ -71,6 +71,14 @@ public sealed partial class SorguUretici
     /// </summary>
     public IReadOnlyCollection<string>? BelgeKumeleri { get; init; }
 
+    /// <summary>
+    /// EKRAN SATIR KISITI (1003, EkranKodlari.SatirKisiti): ekran kodu eski
+    /// kodun kaynağını açtığında yalnız o ekranın satırları döner (Tedarikçiler
+    /// `cari` kaynağında yalnız tedarikçiler). Katalogdan gelen sabit metin -
+    /// istek girdisi taşımaz. Satır, sayım ve toplam aynı koşulu alır.
+    /// </summary>
+    public string? EkranKosulu { get; init; }
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -265,6 +273,9 @@ public sealed partial class SorguUretici
         if (KaynakKatalogu.TetkikKisitKolonu(_kaynak.Ad) is { } tk)
             parcalar.Add($"public.fn_lab_tetkik_izin_roller({tk}, "
                        + $"{Ekle((TetkikRolleri ?? Array.Empty<int>()).ToArray())}, 'gor')");
+
+        if (EkranKosulu is { Length: > 0 } ek)
+            parcalar.Add("(" + ek + ")");
 
         // BELGE TURU KISITI (998): `belge` kaynagi cok turludur (basvuru,
         //   satis, alis, stok fisi). 998'de menu kodlari bolundu ama kaynak

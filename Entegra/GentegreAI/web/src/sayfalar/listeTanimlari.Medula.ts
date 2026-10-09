@@ -23,7 +23,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     //   BAĞLANTIDIR (menuYol; App.tsx rota açmaz) - Dökümler deseni.
     kaynak: 'medula-kabul', rota: 'medula-kabul', ozelSayfa: true, baslik: 'Medula Hasta Kabul / Provizyon',
     yol: 'Kayıt Kabul › Medula Kabul', urunModu: 2, menuYol: '/medula-kabul',
-    menuGrup: 'Kayıt Kabul', menuAd: 'Medula Kabul', ic: '🪪', yetkiKodu: 'medula.provizyon', menuSira: 25,
+    menuGrup: 'Kayıt Kabul', menuAd: 'Medula Kabul', ic: '🪪', yetkiKodu: 'medula.kabul', menuSira: 25,   // 1003
   },
   {
     kaynak: 'medula-takip', rota: 'medula-takip', aksiyonEkrani: 'medula-takip-liste', baslik: 'Medula Takipleri',

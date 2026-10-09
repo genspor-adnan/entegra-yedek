@@ -1,5 +1,6 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
+using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
 namespace Gentegre.Api.AraKatman;
@@ -41,12 +42,18 @@ public sealed class KayitErisimi
                                               [baglam.KullaniciId], iptal) == 1)
             hekimId = baglam.KullaniciId;
 
+        // EKRAN SATIR KISITI (1003): liste ucundaki kuralin aynisi - yalniz
+        //   `cari.tedarikci` ile gelen kullanici musteri kaydini kimligiyle
+        //   acamaz.
+        var ekranKosulu = EkranKodlari.Kisit(tanim.Ad,
+            k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul;
+
         var uretici = baglam.PortalTuru > 0
             ? new SorguUretici(erisim, baglam.PortalTuru, baglam.PortalKimlik)
-                  { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri }
+                  { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu }
             : new SorguUretici(erisim)
             {
-                HekimId = hekimId, TetkikRolleri = baglam.RolIdleri,
+                HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu,
                 // `{kullanici}` yer tutuculu SabitKosul icin (993).
                 KullaniciId = baglam.KullaniciId,
             };

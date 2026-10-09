@@ -15,19 +15,23 @@ public static class KisiUclari
         var grup = yol.MapGroup("/api/kart/cari/{tarafId:long}/kisiler").WithTags("Kart").RequireAuthorization();
 
         grup.MapGet("/", async (
-            long tarafId, BaglamCozucu cozucu, KisiDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            long tarafId, BaglamCozucu cozucu, KisiDeposu depo, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Gor);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Gor, iptal);
             return Results.Ok(await depo.ListeleAsync(tarafId, iptal));
         });
 
         grup.MapPost("/", async (
             long tarafId, KisiIstegi istek, BaglamCozucu cozucu, KisiDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Degistir, iptal);
             var liste = await depo.EkleAsync(tarafId, istek.Unvan, istek.Telefon, istek.Eposta,
                 istek.Gorev, istek.Departman,
                 baglam.Yazma, iptal);
@@ -36,10 +40,12 @@ public static class KisiUclari
 
         grup.MapPut("/{kisiId:long}", async (
             long tarafId, long kisiId, KisiIstegi istek, BaglamCozucu cozucu, KisiDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Degistir, iptal);
             var liste = await depo.GuncelleAsync(tarafId, kisiId, istek.Unvan, istek.Telefon,
                 istek.Eposta, istek.Aktif, istek.Gorev, istek.Departman,
                 baglam.Yazma, iptal);
@@ -49,10 +55,12 @@ public static class KisiUclari
         // Var olan bir kisiyi bu cariye bagla (cari kartinda "Kişi Ekle" -> TarafArama).
         grup.MapPost("/{kisiId:long}/bagla", async (
             long tarafId, long kisiId, BaglamCozucu cozucu, KisiDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Degistir, iptal);
             var liste = await depo.BaglaAsync(tarafId, kisiId,
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
@@ -61,10 +69,12 @@ public static class KisiUclari
         // Kisiyi bu cariden KOPAR (bag_id=null) - DB'den SILMEZ. Grid'deki "Sil" ikonu bunu cagirir.
         grup.MapPost("/{kisiId:long}/kopar", async (
             long tarafId, long kisiId, BaglamCozucu cozucu, KisiDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Degistir, iptal);
             var liste = await depo.KoparAsync(tarafId, kisiId,
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
@@ -72,10 +82,12 @@ public static class KisiUclari
 
         grup.MapDelete("/{kisiId:long}", async (
             long tarafId, long kisiId, BaglamCozucu cozucu, KisiDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Sil);
+            // EKRAN SATIR KISITI (1003): üst cari tedarikçi değilse kişileri yok sayılır.
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Sil, iptal);
             await depo.SilAsync(tarafId, kisiId, baglam.Yazma, iptal);
             return Results.NoContent();
         });

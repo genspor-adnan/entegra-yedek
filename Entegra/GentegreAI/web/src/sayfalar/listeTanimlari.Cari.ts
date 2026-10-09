@@ -61,7 +61,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçiler',
-    ic: '🚚', yetkiKodu: 'cari',
+    ic: '🚚', yetkiKodu: 'cari.tedarikci',   // 1003: menü yeri kendi kodu
   },
   {
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
@@ -121,7 +121,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Hekim Bilgisi ARTIK GENEL SEKMESINDE (kullanici): ayri sekme olarak da
     //   gorunmesi ayni kutuyu iki yere koymak olurdu.
     gizliKartSekmeleri: ['Hekim Bilgisi'],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'dis_doktor',
     menuSira: 50,
     urunModu: 2,
   },

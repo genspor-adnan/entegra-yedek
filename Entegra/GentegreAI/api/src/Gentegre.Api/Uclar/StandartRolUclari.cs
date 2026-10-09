@@ -1295,7 +1295,11 @@ public static class StandartRolUclari
         foreach (var k in s.Kurallar)
         {
             var desen = "^" + System.Text.RegularExpressions.Regex.Escape(k.Desen).Replace("%", ".*") + "$";
-            foreach (var y in yetkiler.Where(y => System.Text.RegularExpressions.Regex.IsMatch(y.kod, desen)))
+            // BÖLÜNMÜŞ EKRAN KODU (1003) eski kodun kuralını izler: şablon
+            //   `belge.satis` diyorsa Kurumlar & Sigorta › Faturalar da gelir -
+            //   bölme kutuları ayırdı, şablonun verdiği işi değiştirmedi.
+            foreach (var y in yetkiler.Where(y => System.Text.RegularExpressions.Regex.IsMatch(y.kod, desen)
+                                               || EkranKodlari.KopyaKaynagi(y.kod) == k.Desen))
             {
                 // "%" gibi geniş desen aksiyonları (tur 1) kapsamaz: aksiyon açıkça istenir.
                 if (k.Desen.Contains('%') && y.tur == 1 && !k.Desen.Contains('.')) continue;

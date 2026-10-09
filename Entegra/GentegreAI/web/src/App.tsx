@@ -2,6 +2,7 @@ import { ReceteKartiSayfa, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKart
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
+import { DOKUM_KODLARI } from './sayfalar/listeTanimlari.Dokumler';
 import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
@@ -217,7 +218,7 @@ function Yollar() {
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
-        {yetki('ayar') && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
+        {(yetki('ayar') || yetki('kayit_kabul.ayar')) && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
         {yetki('katalog') && <Route path="/katalog-ayarlar" element={<KatalogAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
@@ -267,7 +268,8 @@ function Yollar() {
         {yetki('iskonto_onay') && <Route path="/iskonto-onay" element={<IskontoOnaylari />} />}
         {/* DOKUMLER & ISTATISTIK (686): kosullu, kaydedilen, tekrar calistirilan
             dokum tasarimcisi + baski onizleme. SQL istemcide yok. */}
-        {yetki('dokum') && <Route path="/dokumler" element={<Dokumler />} />}
+        {/* 1003: grup başına kod - herhangi bir grubun Dökümler'i yeter, ekran grubu süzer. */}
+        {DOKUM_KODLARI.some(k => yetki(k)) && <Route path="/dokumler" element={<Dokumler />} />}
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}
@@ -463,8 +465,9 @@ function Yollar() {
         )}
         {yetki('form.sablon') && <Route path="/form-editor/:id" element={<FormSablonEditor />} />}
         {/* MEDULA (707): hasta kabul, hizmet kaydi, fatura & donem, kuyruk & ayarlar ozel sayfalar. */}
-        {yetki('medula.provizyon') && <Route path="/medula-kabul" element={<MedulaHastaKabul />} />}
-        {yetki('medula.provizyon') && <Route path="/medula-kabul/:belgeId" element={<MedulaHastaKabul />} />}
+        {/* 1003: Kayıt Kabul › Medula Kabul kendi kodu (medula.kabul), ekran aynı. */}
+        {(yetki('medula.provizyon') || yetki('medula.kabul')) && <Route path="/medula-kabul" element={<MedulaHastaKabul />} />}
+        {(yetki('medula.provizyon') || yetki('medula.kabul')) && <Route path="/medula-kabul/:belgeId" element={<MedulaHastaKabul />} />}
         {yetki('medula.hizmet') && <Route path="/medula-hizmet/:belgeId" element={<MedulaHizmetKayit />} />}
         {yetki('medula.fatura') && <Route path="/medula-fatura-donem" element={<MedulaFaturaDonem />} />}
         {yetki('medula') && <Route path="/medula-kuyruk-ayar" element={<MedulaKuyruk />} />}
