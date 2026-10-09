@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { PosSecenek } from '../../api/uclar/bankoOturum';
@@ -28,12 +28,21 @@ export function PosSecModali({ onSec, onKapat, onOturumYok }: {
 }) {
   const [liste, setListe] = useState<PosSecenek[] | null>(null);
   const [hata, setHata] = useState('');
+  // Tek POS otomatik seçimi bir kez: etki yeniden çalışırsa ikinci tahsilat açılmasın.
+  const otomatikSecildi = useRef(false);
 
   useEffect(() => {
     (async () => {
       try {
         const l = await api.bankoOturumPosSecenekleri();
         if (l.length === 0) { onOturumYok(); return }
+        // TEK POS DOĞRUDAN SEÇİLİR (kullanıcı 09.10.2026: "tek pos varsa
+        //   direkt seçilmiş olsun pos tahsilatında"): bankoda tek çalışan
+        //   terminal varken sormak boş bir tık. Pencere hiç çizilmez.
+        if (l.length === 1) {
+          if (!otomatikSecildi.current) { otomatikSecildi.current = true; onSec(l[0]) }
+          return;
+        }
         setListe(l);
       } catch (h) {
         // LISTE ALINAMADIYSA ESKI AKIS: POS hesabı seçimi devam eder.

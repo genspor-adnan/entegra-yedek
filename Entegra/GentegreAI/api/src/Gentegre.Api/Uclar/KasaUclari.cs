@@ -739,7 +739,11 @@ public static class KasaUclari
         // AVANS DAMGASI (779): hasta avansi olarak alinan tahsilat. Yazma
         //   beyaz listesine eklemek yetmiyor - baslik dogrulayicisi katalogda
         //   olmayan adi REDDEDIYOR (tasarim): iki liste de bilmeli.
-        "avans" or "avansKaynakId" => "sayi",
+        "avans" or "avansKaynakId" or
+        // POS TERMINALI (997): tahsilat ekrani bankonun POS'unu yazar; yazma
+        //   haritasinda vardi, burada yoktu - POS tahsilati "Bilinmeyen kasa
+        //   islemi alani: bankoPosId" ile reddediliyordu (kullanici 09.10.2026).
+        "bankoPosId" => "sayi",
 
         "tutar" or "dovizKuru" or "karsiTutar" or "karsiKur" or "masrafTutar" => "para",
 
