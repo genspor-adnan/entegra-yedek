@@ -569,7 +569,15 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi Departman() => new(
         Ad: "departman",
-        YetkiKodu: "personel",
+        // BOLUM LISTESI KENDI YETKISINDE (999, kullanici: "basvuru menusune
+        //   tiklayinca: Bu islem icin yetkiniz yok"). Kod `personel`di: bolum
+        //   ADLARINI okumak icin personel OZLUK yetkisi gerekiyordu ve kayit
+        //   kabul rolunde o yetki bilincli olarak yok (684). Basvuru/randevu
+        //   suzgeci, calisma plani ve acil cikis modali bu listeyi cagiriyor.
+        //
+        //   MENU kapisi `personel` KALIR: IK'daki "Bölüm / Görev" TANIM
+        //   ekrani IK'nin isi, kayit kabul menusunde gorunmemeli.
+        YetkiKodu: "departman",
         Kaynak: "public.departman d",
         // Alt birim UST BIRIMININ ALTINDA listelensin (257): once ust birimin
         //   adi (kok departmanlarda kendi adi), sonra kendi adi.

@@ -207,7 +207,7 @@ public static class StandartRolUclari
         ["steril_sorumlu"]       = new("Yardımcı sağlık ve teknik", null, 135),
         // ------------------------------------------------ hasta hizmetleri ----
         ["kayit_kabul_sorumlu"]  = new("Hasta hizmetleri", null, 10),
-        ["kayit_kabul"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 20),
+        ["banko_gorevlisi"]      = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 20),
         ["vezne"]                = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 30),
         ["yatis_ofisi"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 40),
         ["tedavi_danismani"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 50),
@@ -333,10 +333,13 @@ public static class StandartRolUclari
 
     private static readonly Sablon[] Sablonlar =
     [
-        // AD "Banko Görevlisi" (kullanici 08.10.2026: "rollerde Kayıt Kabul
-        //   rename Banko Görevlisi") - KOD `kayit_kabul` DEGISMEZ: yetki
-        //   eslemeleri, kurum tipi haritasi ve kadro agaci koda bagli.
-        new("kayit_kabul", "Banko Görevlisi", "Hasta kaydı, randevu, başvuru, provizyon, fiş ve tahsilat.", Klinik, K(KayitKabulTemel)),
+        // AD 08.10.2026'da (kullanici: "rollerde Kayıt Kabul rename Banko
+        //   Görevlisi"), KOD 09.10.2026'da degisti (kullanici: "kayit_kabul
+        //   rol kodu rename Banko_Gorevlisi"; kucuk harf zorunlu - ck_rol_kod
+        //   `^[a-z0-9._-]+$` istiyor). Rename DB tarafinda goc 1000, burada
+        //   haritalar; kod program referansi oldugu icin ikisi birlikte
+        //   degismek zorunda.
+        new("banko_gorevlisi", "Banko Görevlisi", "Hasta kaydı, randevu, başvuru, provizyon, fiş ve tahsilat.", Klinik, K(KayitKabulTemel)),
         // DANISMA (kullanici 08.10.2026: "Roller'e Danışma ekle"): karsilama
         //   bankosu - hastayi YONLENDIRIR, islem yapmaz.
         //

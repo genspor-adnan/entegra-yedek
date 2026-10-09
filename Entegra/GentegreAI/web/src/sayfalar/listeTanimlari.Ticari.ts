@@ -200,7 +200,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     // Yalniz HBYS (kullanici): konsinye takibi tibbi malzeme/implant akisinda
     //   kullaniliyor, ERP kurulumunda menude yer kaplamasin.
-    urunModu: 2, menuAd: 'Satış Konsinyeler', menuGizli: true, ic: '📦', yetkiKodu: 'belge',
+    urunModu: 2, menuAd: 'Satış Konsinyeler', menuGizli: true, ic: '📦', yetkiKodu: 'belge.satis',
   },
   // ------------------------------------------------------------- ALIS ----
   //  Satis tarafinin birebir karsiligi: ayni 'belge' kaynagi, ayni kart, yalniz

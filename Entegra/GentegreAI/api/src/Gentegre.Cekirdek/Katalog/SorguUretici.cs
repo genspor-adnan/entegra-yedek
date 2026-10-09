@@ -275,10 +275,12 @@ public sealed partial class SorguUretici
             && KaynakKatalogu.BelgeKisitKolonu(_kaynak.Ad) is { } bk)
         {
             var dallar = new List<string>();
-            // Cekirdek `belge` yetkisi TURU degil basvuruyu acar: tur 19 hem
-            //   HBYS basvurusu hem ERP satis siparisidir, ayiran `tipi` (30).
+            // Cekirdek `belge` yetkisi TURE degil TIPE bakar: basvuru (19) ve
+            //   ondan kesilen hasta fisi (16) / tahakkuku (17) ayni `tipi`yi
+            //   (30) tasiyor. Yalniz tur 19 denseydi kayit kabul memuru kendi
+            //   hastasinin fisini goremezdi.
             if (kumeler.Contains(KaynakKatalogu.BelgeKumeBasvuru))
-                dallar.Add($"({bk.Tur} = {Ekle(19)} and {bk.Tipi} = {Ekle(30)})");
+                dallar.Add($"{bk.Tipi} = {Ekle(KaynakKatalogu.BelgeTipiBasvuru)}");
             var turler = kumeler
                 .Where(k => k != KaynakKatalogu.BelgeKumeBasvuru)
                 .SelectMany(KaynakKatalogu.BelgeKumesininTurleri)

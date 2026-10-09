@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 
 namespace Gentegre.Testler;
@@ -36,8 +36,9 @@ public sealed class BelgeTuruYetkisiTestleri
     {
         var sql = Satirlar(Uretici(KaynakKatalogu.BelgeKumeBasvuru));
 
-        // Başvuru dalı: tür ve tip birlikte bağlanır (ikisi de parametre).
-        Assert.Contains("b.tur =", sql);
+        // Başvuru dalı TİPE bakar: başvuru (19) ve ondan kesilen hasta fişi
+        //   (16) / tahakkuku (17) aynı tipi taşır - yalnız tür 19 denseydi
+        //   kayıt kabul kendi hastasının fişini göremezdi.
         Assert.Contains("b.tipi =", sql);
         // Satış/alış kümesinin tür listesi (any(...)) hiç girmemeli.
         Assert.DoesNotContain("b.tur = any(", sql);
@@ -51,6 +52,7 @@ public sealed class BelgeTuruYetkisiTestleri
         Assert.Contains("b.tur = any(", sql);
         // Başvuru dalı YOK: `belge` çekirdek yetkisi verilmedi.
         Assert.DoesNotContain("b.tipi =", sql);
+        Assert.Equal(30, KaynakKatalogu.BelgeTipiBasvuru);
     }
 
     [Fact]

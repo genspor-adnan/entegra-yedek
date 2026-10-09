@@ -1140,8 +1140,8 @@ public static class BelgeUclari
     /// olduğunu söyler - belge numarası deneyerek kurumun ciro hacmi
     /// çıkarılabilirdi.
     ///
-    /// Tür 19 iki anlamlıdır (HBYS başvurusu `tipi` 30, ERP satış siparişi 1),
-    /// bu yüzden çekirdek `belge` yetkisi türe değil TÜR+TİP çiftine bakar.
+    /// Çekirdek `belge` yetkisi türe değil `tipi`ye bakar: başvuru ve ondan
+    /// kesilen hasta fişi/tahakkuku aynı tipi (30) taşır.
     /// </summary>
     private static void BelgeTuruIste(IstekBaglami baglam,
                                       IDictionary<string, object?> belge)
@@ -1158,7 +1158,9 @@ public static class BelgeUclari
             if (kume is null) continue;
             if (kume == KaynakKatalogu.BelgeKumeBasvuru)
             {
-                if (tur == 19 && tipi == 30) return;
+                // Basvuru baglami TIPLE belirlenir - basvurudan kesilen hasta
+                //   fisi/tahakkuku da ayni tipi tasir (bkz. BelgeKisiti).
+                if (tipi == KaynakKatalogu.BelgeTipiBasvuru) return;
             }
             else if (KaynakKatalogu.BelgeKumesininTurleri(kume).Contains(tur)) return;
         }

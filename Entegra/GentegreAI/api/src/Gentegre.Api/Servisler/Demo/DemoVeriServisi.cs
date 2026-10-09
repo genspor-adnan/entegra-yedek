@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -52,7 +52,7 @@ public sealed class DemoVeriServisi(VeriKaynagi veri, ILogger<DemoVeriServisi> g
         ("bashekim", "demo.bashekim", "Başhekim", "Yönetim panosu"),
         ("hekim", "demo.hekim", "Poliklinik hekimi", "Muayene kuyruğu"),
         ("hemsire", "demo.hemsire", "Hemşire", "Servis"),
-        ("kayit_kabul", "demo.kayit", "Kayıt kabul", "Randevular · bugün"),
+        ("banko_gorevlisi", "demo.kayit", "Kayıt kabul", "Randevular · bugün"),
         ("lab_uzmani", "demo.lab", "Laboratuvar", "Numune kabul + sonuç onay"),
         ("eczaci", "demo.eczane", "Eczane", "İlaç talepleri"),
         ("erp_ik", "demo.ik", "İK", "Personel listesi"),
@@ -370,7 +370,7 @@ public sealed class DemoVeriServisi(VeriKaynagi veri, ILogger<DemoVeriServisi> g
             ("bashekim", ["Başhekim"], BolumAra(c, "Başhekimlik"), 1, "Dr."),
             ("hekim", ["Uzman Hekim"], null, Math.Max(4, n * 26 / 100), "Dr."),
             ("hemsire", ["Hemşire"], null, Math.Max(3, n * 32 / 100), ""),
-            ("kayit_kabul", ["Hasta Kabul Görevlisi"], BolumAra(c, "Hasta Kabul / Danışma"), Math.Max(2, n * 9 / 100), ""),
+            ("banko_gorevlisi", ["Hasta Kabul Görevlisi"], BolumAra(c, "Hasta Kabul / Danışma"), Math.Max(2, n * 9 / 100), ""),
             ("lab_uzmani", ["Laborant"], BolumAra(c, "Tıbbi Biyokimya"), Math.Max(2, n * 9 / 100), ""),
             ("eczaci", ["Eczacı"], BolumAra(c, "Depo / Ambar"), Math.Max(1, n * 5 / 100), ""),
             ("erp_ik", ["İnsan Kaynakları Uzmanı", "İK Uzmanı"], BolumAra(c, "İnsan Kaynakları"), Math.Max(1, n * 4 / 100), ""),

@@ -20949,3 +20949,47 @@ onayı günlük işler, Kayıt Kabul'de kaldı. Sol menü grup okları 10 px →
 (kullanıcı: *"ana menü de sağdaki okları da daha büyük yap"*).
 
 dotnet test 226 geçti (362 atlandı - DB testleri), vitest 797 (88 dosya).
+
+### 09.10.2026 — Bölüm listesi kendi yetkisine ayrıldı (999); rol kodu banko_gorevlisi (1000)
+
+Kullanıcı: *"hasan olarak girdim.. başvuru menüsüne tıklayınca: Bu islem icin
+yetkiniz yok"*, ardından *"kayit_kabul rol kodu rename Banko_Gorevlisi"*.
+
+**Hata başvuru listesinden değil, listenin üst şeridindeki BÖLÜM
+SÜZGECİNDEN** geliyordu: API logu `/api/liste/departman` için YASAK satırı
+basıyordu. `departman` kaynağının yetki kodu `personel`di - bölüm ADLARINI
+okumak için personel ÖZLÜK yetkisi gerekiyordu, kayıt kabul rolünde ise o
+yetki 684'te bilinçli olarak kaldırılmıştı. 998'in yan etkisi değil, eskiden
+beri duran bir boşluk; menü temizlenip başvuru ekranına girilince göründü.
+
+Çözüm, aynı "geniş kod" düzeltmesinin küçüğü: bölüm listesi kendi kodunu aldı
+(`departman`) ve iki kapı ayrıldı - **menü** kapısı `personel` kaldı (İK'daki
+"Bölüm / Görev" TANIM ekranı İK'nın işi, kayıt kabul menüsünde görünmemeli),
+**veri** kapısı `departman` oldu. Yeni kod menüde hiçbir ekran açmıyor (saf
+veri yetkisi, `belge_satir` / `taraf` gibi), bu yüzden verilmesi kimsenin
+menüsünü kirletmiyor; `personel` ya da `hasta` görme yetkisi olan 65 role
+görme hakkıyla dağıtıldı.
+
+**Belge türü kısıtı düzeltildi:** çekirdek `belge` yetkisi yalnız tür 19'u
+açıyordu, ama başvurudan kesilen hasta fişi (16) ve tahakkuku (17) de
+`tipi = 30` taşıyor - kayıt kabul memuru kendi hastasının fişini göremezdi.
+Kural artık türe değil **tipe** bakıyor: `tipi = 30` başvuru bağlamıdır
+(dev DB'de tipi 30'un türleri 16, 17, 19), ERP ticari belgeleri (tipi 1 / 2)
+kendi kümelerinin kodunu ister. Ölçüm: banko görevlisi 65 kayıt (16/17/19)
+ve hasta fişi kartını görüyor, alış belgesi 0 ve ERP belgesinin kartı
+"bulunamadı". Satış Konsinyeler ekranının yetkisi de `belge.satis`a geçti
+(tür 119 satış kümesindeydi, kodu `belge` kalmıştı).
+
+**Rol kodu `kayit_kabul` → `banko_gorevlisi`** (1000). Adı 984'te değişmişti,
+kodu kalmıştı. Kod program referansı (StandartRolUclari hiyerarşisi, 18 göç
+betiği, demo verisi), bu yüzden rename ekrandan değil göçten yapıldı - rol
+kartında `kod` alanı 998'den beri kilitli. İstenen "Banko_Gorevlisi" yazımı
+veritabanına giremiyor: `ck_rol_kod` kısıtı `^[a-z0-9._-]+$` istiyor, diğer
+kodlar da bu yazımda. `fn_rol_sistem_koru` tetiği sistem rolünün kodunu
+koruduğu için göç onu aynı işlemde kapatıp geri açıyor. Sıfırdan kurulumda
+sıra güvenli: 020 seed'i eski kodu ekler, aradaki göçler onu kullanır, 1000
+en sonda rename eder - bundan sonraki göçler `banko_gorevlisi` kullanmalı.
+`kayit_kabul_sorumlu` (Banko Şefi) dokunulmadı.
+
+dotnet test 226 geçti, vitest 797 (88 dosya). Tarayıcıda Banko Görevlisi ile
+başvuru ekranı hatasız açılıyor, 403 kalmadı.

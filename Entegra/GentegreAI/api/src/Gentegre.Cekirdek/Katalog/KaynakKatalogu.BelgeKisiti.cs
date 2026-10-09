@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// BELGE TÜRÜ YETKİ KISITI (998 — kullanıcı 09.10.2026: "yetki matrisinde
@@ -16,10 +16,17 @@ namespace Gentegre.Cekirdek.Katalog;
 /// toplamlar da aynı koşulu taşır (SorguUretici üç sorguyu aynı kurucudan
 /// üretiyor), yoksa sayfa "12 kayıt" der, grid 3 satır çizerdi.
 ///
-/// TÜR 19 İKİ ANLAMLIDIR: HBYS başvurusu ile ERP satış siparişi aynı türdür,
-/// ayıran <c>tipi</c>'dir (başvuru 30, sipariş 1 — bkz. listeTanimlari.Klinik
-/// "BASVURU ile SATIS SIPARISI ayni turdur"). Bu yüzden çekirdek <c>belge</c>
-/// yetkisi türü değil, <c>(tur = 19 and tipi = 30)</c> çiftini açar.
+/// ÇEKİRDEK YETKİ TÜRE DEĞİL <c>tipi</c>'YE BAKAR. Tür 19 iki anlamlıdır
+/// (HBYS başvurusu ile ERP satış siparişi aynı tür, ayıran <c>tipi</c>: 30 /
+/// 1 — bkz. listeTanimlari.Klinik "BASVURU ile SATIS SIPARISI ayni turdur").
+/// Ama iş akışı türde bitmiyor: başvurudan kesilen hasta fişi (16) ve
+/// tahakkuku (17) de <c>tipi = 30</c> taşır. Çekirdeği yalnız tür 19'a
+/// bağlamak kayıt kabul memurunun kendi hastasının fişini kapatırdı - dev
+/// veritabanında tipi 30'un türleri 16, 17 ve 19.
+///
+/// Kural: <c>tipi = 30</c> başvuru bağlamıdır ve çekirdek <c>belge</c>
+/// yetkisi onu açar; ERP ticari belgeleri (tipi 1 normal, 2 iade) kendi
+/// kümelerinin kodunu ister.
 ///
 /// Kısıt kaynak kaydının alanı değil ayrı harita - tetkik ve hekim
 /// kısıtlarındaki gerekçenin aynısı: kaynak kaydı sık dokunulan ortak dosya.
@@ -31,6 +38,12 @@ public static partial class KaynakKatalogu
     public const string BelgeKumeSatis   = "satis";
     public const string BelgeKumeAlis    = "alis";
     public const string BelgeKumeStok    = "stok";
+
+    /// <summary>
+    /// Başvuru bağlamı belge TİPİ: başvuru ve ondan türeyen hasta belgeleri
+    /// (fiş, tahakkuk) bu tipi taşır. ERP ticari belgesi 1 (normal) / 2 (iade).
+    /// </summary>
+    public const int BelgeTipiBasvuru = 30;
 
     /// <summary>
     /// Küme -> o kümeye ait belge türleri. Türler Delphi'den gelen sabit
