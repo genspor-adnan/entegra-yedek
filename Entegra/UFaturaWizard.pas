@@ -5195,10 +5195,11 @@ begin
       // VALIDASYON: iade edilen belgenin GIB e-belge no'su 3 seri(harf) + 13 rakam = 16 hane.
       //   Gelen fatura/irsaliyede faturano harf de icerebilir (seri kismi); bu yuzden toplam
       //   uzunluk degil RAKAM sayisi kontrol edilir. Rakam 13 degilse schematron reddi -> uyar.
-      //   Yalniz iade FATURASI icin: e-Irsaliye'de iade tipi/BillingReference yok, alis iade
-      //   irsaliyesinde (TUR=10) kaynak satis irsaliyesi no'su GIB'e referans olarak gitmez.
+      //   Yalniz GIDEN iade belgesi icin: gelen (alis) belgede (TUR=10/11/12/109) iade
+      //   referansi GIB'e bizden gitmez - irsaliyede iade tipi/BillingReference yok, alis
+      //   faturasini karsi taraf duzenler; kaynak no'su GIB formatinda olmak zorunda degil.
       if ((EFaturaKullanimda > 0) or EIrsaliyeKullanimda) and
-         (TabFatbaslik.FieldByName('TUR').AsInteger <> 10) then begin
+         not (TabFatbaslik.FieldByName('TUR').AsInteger in [10, 11, 12, 109]) then begin
         var LBelgeNo := Trim(st[4]);
         var LRakamSay := 0;
         for var K := Low(string) to High(LBelgeNo) do
