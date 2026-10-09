@@ -317,14 +317,17 @@ export function menuSatirlariKur(
     && (!l.urunModu || modUyar(l.urunModu, urunModu))
     // MODUL suzmesi (359): kurum profilinde kapali modulun menusu cizilmez.
     && modulAcikMi(l, moduller));
+  const erpGrubu = (l: (typeof listeler)[number]) =>
+    urunModu !== 2 ? (l as { erpMenuGrup?: string }).erpMenuGrup : undefined;
+  const grupAdi = (l: (typeof listeler)[number]) => erpGrubu(l) ?? l.menuGrup;
   const ogeler: MenuOgesi[] =
     yetkiliListeler.map(l => ({
       yol: l.menuYol ?? `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
       rz: l.ozelSayfa ? 'ayar' : 'liste',
-      grup: l.menuGrup ? cm(l.menuGrup) : undefined,
-      grupHam: l.menuGrup,
+      grup: grupAdi(l) ? cm(grupAdi(l)!) : undefined,
+      grupHam: grupAdi(l),
       adHam: l.menuAd,
-      altGrup: l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
+      altGrup: l.menuAltGrup && !erpGrubu(l) ? cm(l.menuAltGrup) : undefined,
       sira: l.menuSira,
       kaynak: l.kaynak,
       yetkiKodu: l.yetkiKodu,
@@ -334,7 +337,13 @@ export function menuSatirlariKur(
 
   // Iki seviye: grup (Cari, Kasa, Yönetim…) ve grubun icinde alt grup
   //   (Yönetim › Ayarlar). Ayni yardimci iki seviyede de kullanilir.
-  const satirlar = grupla(ogeler, m => m.grup);
+  // YALNIZ "DÖKÜMLER" KALAN GRUP ÇİZİLMEZ (kullanıcı 10.10.2026: "erp modunda
+  //   yatan hasta, ameliyathane, eczane, sigorta ve kurumlar olmaz"): Dökümler
+  //   her gruba eklenen bir bağlantı ve ürün moduna bakmıyor; ERP'de HBYS
+  //   grubunun bütün ekranları süzülünce grup tek başına Dökümler'le
+  //   kalıyordu. Dökümler bir grubun eşlikçisidir, grubu ayakta tutmaz.
+  const satirlar = grupla(ogeler, m => m.grup)
+    .filter(s => s.tur !== 'grup' || s.alt.some(m => m.kaynak !== 'dokumler'));
   // YONETIM HER ZAMAN EN SONDA (kullanici): grup sirasi tanim dizisindeki ILK
   //   ogeden gelir, Yonetim'in ilk ogesi (Kampanyalar) dizinin ortasinda oldugu
   //   icin menunun ortasina dusuyordu. Ayarlar/roller gibi seyrek kullanilan

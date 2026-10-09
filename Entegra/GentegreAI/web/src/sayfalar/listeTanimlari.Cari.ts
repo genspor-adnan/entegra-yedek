@@ -264,7 +264,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   Yonetim altinda ararken bulunmuyordu.
     // Kampanya fiyat listesi UZERINE isleyen bir kural: hemen arkasinda durur.
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Kampanyalar',
-    ic: '🏷️', yetkiKodu: 'fiyat_listesi.kampanya', menuSira: 92,
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi.kampanya', menuSira: 92, erpMenuGrup: 'Satış',
   },
   {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
