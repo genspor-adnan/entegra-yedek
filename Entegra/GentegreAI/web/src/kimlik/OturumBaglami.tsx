@@ -3,6 +3,7 @@ import { api, oturum } from '../api/istemci';
 import { OTURUM_TAZELE_OLAYI } from '../api/cekirdek';
 import { ApiHatasi, type BenYaniti, type KaynakYetkisi, type KullaniciOzeti } from '../api/sozlesme';
 import { subeAyariniKur } from '../bilesenler/subeAyari';
+import { sonKullaniciYaz } from './sonKullanici';
 
 /** /ben bu surede donmezse gecici hata sayilir (sonsuz "Yukleniyor" yok). */
 const BEN_ZAMAN_ASIMI_MS = 15000;
@@ -126,6 +127,10 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
     async girisYap(kod, parola, subeId) {
       const yanit = await api.giris(kod, parola, subeId);
       oturum.yaz(yanit);
+      // SON KULLANICI (kullanici 09.10.2026: "login de son girdigim user name
+      //   default gelsin"): yalniz BASARILI giristen sonra - yanlis yazilan
+      //   kod bir sonraki acilisa tasinmasin. Parola saklanmaz.
+      sonKullaniciYaz(kod);
       setBen(await api.ben());
     },
 

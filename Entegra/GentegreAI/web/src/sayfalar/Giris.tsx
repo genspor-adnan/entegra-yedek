@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
+import { sonKullaniciOku } from '../kimlik/sonKullanici';
 
 /**
  * Giris ekrani. Cok subeli kullanicida sube secimi giris akisinin parcasidir:
@@ -12,7 +13,8 @@ import { c } from '../dil/ceviri';
  */
 export function Giris() {
   const { girisYap } = useOturum();
-  const [kod, setKod] = useState('admin');
+  // Son başarılı girişin kodu öntanımlı; hiç giriş yoksa eski varsayılan.
+  const [kod, setKod] = useState(() => sonKullaniciOku() ?? 'admin');
   const [parola, setParola] = useState('');
   const [subeler, setSubeler] = useState<SubeOzeti[] | null>(null);
   const [subeId, setSubeId] = useState<number | null>(null);
@@ -298,13 +300,14 @@ export function Giris() {
                   ve parola alanlarinda tarayicinin kayitli kimlik onerisi
                   cikmasin. Paroladaki "new-password", Chrome/Edge'in
                   `off`u yok saymasi yuzunden (bkz. otomatikTamamlama.ts). */}
-              <input value={kod} onChange={e => setKod(e.target.value)} autoFocus
+              <input value={kod} onChange={e => setKod(e.target.value)} autoFocus={!kod}
                      autoComplete="off" />
             </label>
             <label>
               Parola
+              {/* Kod hazır geliyorsa imleç doğrudan parolada. */}
               <input type="password" value={parola} autoComplete="new-password"
-                     onChange={e => setParola(e.target.value)} />
+                     autoFocus={!!kod} onChange={e => setParola(e.target.value)} />
             </label>
           </>
         ) : (
