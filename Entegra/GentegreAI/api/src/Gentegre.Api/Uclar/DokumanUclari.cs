@@ -230,6 +230,9 @@ public static class DokumanUclari
         "personelBelgeTalep" => "belge-talep",
         // CİHAZ BELGELERİ (967): kaynak_id radyoloji cihazı.
         "radyoloji-cihaz" => "rad-cihaz",
+        // DEMİRBAŞ BELGELERİ (10.10.2026): fatura, garanti, servis raporu,
+        //   zimmet tutanağı... kaynak_id demirbaş kimliğidir.
+        "demirbas" => "demirbas",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.

@@ -44,6 +44,12 @@ const OZLUK_TURLERI = [
 //   hangi gorselin basilacagi buna gore secilir (fn_sube_gorsel).
 const FIRMA_GORSELLERI = ['Logo', 'Kaşe', 'İmza', 'Antet'];
 
+// Demirbaş belgeleri (10.10.2026): eski yapılandırılmış belge türleri öneri oldu.
+const DEMIRBAS_BELGELERI = [
+  'Fatura / Satın Alma', 'Garanti Belgesi', 'Zimmet Tutanağı', 'Servis Raporu',
+  'Kalibrasyon Kaydı', 'Kullanım Kılavuzu', 'Ruhsat / CE Belgesi', 'Fotoğraf',
+];
+
 function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; resimUrlleri: Record<number, string> }) {
   return (
     <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: 10, background: 'var(--yuz2)', margin: '0 10px 10px', borderRadius: 4 }}>
@@ -305,10 +311,12 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                 autoFocus
                 placeholder={kartAdi === 'personelMasraf'
                   ? 'Hangi harcamanın fişi (belge no)'
+                  : kartAdi === 'demirbas' ? 'Fatura, garanti belgesi, tutanak...'
                   : 'İş sözleşmesi, sağlık raporu...'}
               />
               <datalist id="dokuman-belge-turu-secenekleri">
                 {(kartAdi === 'sube' ? FIRMA_GORSELLERI
+                  : kartAdi === 'demirbas' ? DEMIRBAS_BELGELERI
                   : kartAdi === 'personelMasraf' ? masrafBelgeNolari
                   : OZLUK_TURLERI)
                   .map(s => <option key={s} value={s} />)}

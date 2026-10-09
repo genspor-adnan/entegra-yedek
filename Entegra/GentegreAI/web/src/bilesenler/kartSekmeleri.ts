@@ -271,6 +271,12 @@ export function sekmeleriKur(secenek: {
   if (kaynak === 'personelMasraf' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Fiş / Fatura' });
   }
+  // DEMİRBAŞ BELGELERİ (kullanıcı 10.10.2026: "demirbaş belge sekmesini
+  //   standart belge/doküman ekleme deseni yap"): fatura, garanti belgesi,
+  //   zimmet tutanağı - standart galeri. Yeni kayıtta id yok, önce kaydedilir.
+  if (kaynak === 'demirbas' && !yeniMi) {
+    s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Belgeler' });
+  }
   // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
   //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
   //   Yeni kayıtta yalnız `yenideDe` işaretli olanlar (kayda bağlı olmayanlar).

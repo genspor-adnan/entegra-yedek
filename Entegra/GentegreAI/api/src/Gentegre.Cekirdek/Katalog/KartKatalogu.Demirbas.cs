@@ -195,22 +195,12 @@ public static partial class KartKatalogu
                YeniSatirVarsayilanlari: new Dictionary<string, object?>
                    { ["tur"] = (short)1, ["durum"] = (short)0 }),
 
-            // BELGE SEKMESİ ERP'DE DE AÇIK: fatura/garanti belgesi hastaneye
-            //   özgü değil. Türler ikisini birden kapsıyor.
-            new("belgeler", "public.demirbas_belge", "demirbas_id", new KartAlani[]
-            {
-                new("id", "id", "sayi", Yazilabilir: false),
-                new("tur", "tur", "kod", Zorunlu: true, Baslik: "Belge Türü",
-                    SabitKodlar: DbBelgeTuruKodlari),
-                new("ad", "ad", "metin", Baslik: "Ad", EnFazlaUzunluk: 200),
-                new("tarih", "tarih", "tarih", Baslik: "Tarih"),
-                // GEÇERLİLİK: sertifika ve ruhsat süreli. Süresi dolmuş belge
-                //   "var" sayılırsa denetimde cihaz belgesiz çıkar.
-                new("gecerlilik", "gecerlilik", "tarih", Baslik: "Geçerlilik"),
-                new("dokumanId", "dokuman_id", "sayi", Baslik: "Doküman"),
-                new("aciklama", "aciklama", "metin", Baslik: "Not", EnFazlaUzunluk: 300),
-            }, Sirala: "tarih desc nulls last, id", Baslik: "Belgeler",
-               SubeKolonu: null, LogTabloId: 1220),
+            // BELGELER (kullanıcı 10.10.2026: "demirbaş belge sekmesini standart
+            //   belge/doküman ekleme deseni yap"): yapılandırılmış demirbas_belge
+            //   detayı KALKTI, sekme standart doküman galerisi (DokumanGalerisi,
+            //   dokuman.kaynak = 'demirbas'). Dosya yükleme / önizleme / paylaşma
+            //   her kartta aynı bileşenden gelir. Tablo durur (hiçbir kurulumda
+            //   satırı yoktu).
         });
 
 
@@ -232,12 +222,4 @@ public static partial class KartKatalogu
         ["6"] = "Dış servise", ["7"] = "Hurdaya", ["8"] = "Sayımda bulundu",
     };
 
-    private static readonly Dictionary<string, string> DbBelgeTuruKodlari = new()
-    {
-        ["1"] = "Kalibrasyon kaydı", ["2"] = "Referans sertifikası",
-        ["3"] = "EST raporu", ["4"] = "Kullanım kılavuzu",
-        ["5"] = "Servis el kitabı", ["6"] = "Fatura / satın alma",
-        ["7"] = "Servis raporu", ["8"] = "Eğitim kaydı",
-        ["9"] = "ÜTS / CE belgesi", ["99"] = "Diğer",
-    };
 }
