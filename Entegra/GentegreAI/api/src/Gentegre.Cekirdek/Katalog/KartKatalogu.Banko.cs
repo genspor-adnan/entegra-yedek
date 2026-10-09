@@ -214,30 +214,11 @@ public static partial class KartKatalogu
             }, Sirala: "tur, id", Baslik: "Yazıcı & Donanım",
                SubeKolonu: null, LogTabloId: 1384),
 
-            // ----------------------------------------------- oturumlar ----
-            // SALT OKUMA: oturum karttan açılmaz/kapanmaz - akış ekranının
-            //   (banko-oturum) işi. Burada yalnız geçmiş görünür: fark
-            //   eğilimi bu listeden okunur, aynı görevlide tekrarlayan
-            //   noksan eğitim ya da denetim konusudur.
-            new("oturumlar", "public.banko_oturum", "banko_id", new KartAlani[]
-            {
-                new("id", "id", "sayi", Yazilabilir: false, Baslik: "Oturum"),
-                new("durum", "durum", "kod", Yazilabilir: false,
-                    SabitKodlar: OturumDurumKodlari, Baslik: "Durum"),
-                new("acilisTs", "acilis_ts", "zaman", Yazilabilir: false, Baslik: "Açılış"),
-                new("kapanisTs", "kapanis_ts", "zaman", Yazilabilir: false, Baslik: "Kapanış"),
-                new("vardiya", "vardiya", "metin", Yazilabilir: false, Baslik: "Vardiya"),
-                new("devirTutar", "devir_tutar", "para", Yazilabilir: false, Baslik: "Devir"),
-                new("acilisFark", "acilis_fark", "para", Yazilabilir: false, Baslik: "Açılış Farkı"),
-                new("kapanisSayim", "kapanis_sayim", "para", Yazilabilir: false, Baslik: "Sayım"),
-                new("kapanisFark", "kapanis_fark", "para", Yazilabilir: false, Baslik: "Fark"),
-                new("kasadaBirakilan", "kasada_birakilan", "para", Yazilabilir: false,
-                    Baslik: "Bırakılan"),
-                new("teslimEdilen", "teslim_edilen", "para", Yazilabilir: false, Baslik: "Teslim"),
-                new("tutanakNo", "tutanak_no", "metin", Yazilabilir: false, Baslik: "Tutanak"),
-                new("farkAciklama", "fark_aciklama", "metin", Yazilabilir: false, Baslik: "Fark Notu"),
-            }, Sirala: "id desc", Baslik: "Oturumlar", SubeKolonu: null,
-               SaltOkunur: true, LogTabloId: 1385),
+            // OTURUMLAR SEKMESİ KATALOG DETAYI DEĞİL (kullanıcı 09.10.2026:
+            //   "banko kartında 2 tane oturum olmuş.. soldaki gengrid olmayanı
+            //   kaldır"): kartta Banko Oturumları listesinin bu bankoya
+            //   süzülmüş GenGrid'i duruyor (listeTanimlari yerTutucuSekmeler +
+            //   GenForm) - çip, sıralama, toplam ve görevli adı onda var.
         });
 
     internal static readonly Dictionary<string, string> OturumDurumKodlari = new()
