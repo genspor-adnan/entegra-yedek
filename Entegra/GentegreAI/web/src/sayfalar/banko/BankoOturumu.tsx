@@ -470,8 +470,8 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
               kullanıcı 09.10.2026: "oturumdaki sekmelerin şeklini değiş". */}
           <div className="katab">
             {OTURUM_SEKMELERI.map(([k, ad]) => {
-              // SAYI ETİKETİN SAĞINDA "N adet" (kullanıcı 09.10.2026: "sekmelerdeki
-              //   sayılar label sağında adet olarak görünsün").
+              // SAYI ETİKETİN SAĞINDA ROZET (kullanıcı 09.10.2026: "sekmelerdeki
+              //   sayılar label sağında..." -> "başlıkta adet yazma ve rakamı rozet yap").
               const rozet = k === 'islem' ? islemler.filter(x => !x.iptal).length
                 : k === 'tur' ? turler.length
                 : k === 'acik' ? acikBorclar.length
@@ -485,7 +485,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
                   {rozet !== null && rozet !== 0 && (
                     rozet === 'fark'
                       ? <span className="bo-rz kir">fark</span>
-                      : <span className="bo-sadet">{rozet} adet</span>
+                      : <span className="bo-rz mavi bo-sadet">{rozet}</span>
                   )}
                 </div>
               );
@@ -1282,7 +1282,7 @@ const bostil = `
   padding:3px 6px; text-align:right; font-family:Consolas,monospace;
   background:var(--giris-arka, #fff); color: var(--metin, #1f2d3a); }
 .bo-rz.kir { background:#fbe9e7; color:#b3261e; border-color:#f3c4bf; }
-.bo-sadet { margin-left:6px; font-weight:normal; font-size:11px; color: var(--soluk, #6b7a8b); }
+.bo-rz.bo-sadet { margin-left:6px; font-weight:bold; min-width:18px; text-align:center; }
 .bo-rz.pas { background:#eceff2; color:#6b7a8b; border-color:#dde3e9; }
 .bo-rz.mor { background:#f1ecfa; color:#6a3fb5; border-color:#ddd0f2; }
 .bo-tur th.orta, .bo-tur td.orta { text-align:center; font-family:inherit; }
