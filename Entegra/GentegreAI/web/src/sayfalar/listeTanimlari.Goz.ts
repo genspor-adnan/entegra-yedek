@@ -185,7 +185,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     kaynak: 'goz-hasta-ozet', rota: 'goz-hasta-ozet', aksiyonEkrani: 'goz-hasta-ozet-liste', baslik: 'Göz Hasta Özeti',
     yol: 'Göz › Hasta Özeti',
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Hasta Özeti', ic: '🧿', yetkiKodu: 'goz', menuSira: 15,
+    menuGrup: 'Göz', menuAd: 'Hasta Özeti', ic: '🧿', yetkiKodu: 'goz.hasta_ozet', menuSira: 15,
   },
   {
     // KONTAKT LENS gözlükten AYRI liste: kontakt lens reçetesi bir OTURUŞ
@@ -202,7 +202,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Kontakt Lens', ic: '🔵', yetkiKodu: 'goz.recete', menuSira: 55,
+    menuGrup: 'Göz', menuAd: 'Kontakt Lens', ic: '🔵', yetkiKodu: 'goz.recete.kontakt_lens', menuSira: 55,
   },
   {
     // İŞLEM PROTOKOLLERİ AYARDIR: postop kontrol planı bir ŞABLON - işleme
@@ -216,7 +216,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'İşlem Protokolleri', ic: '📋',
-    yetkiKodu: 'goz.islem', menuSira: 91,
+    yetkiKodu: 'goz.islem.protokol', menuSira: 91,
   },
   {
     // CİHAZ MESAJLARI bir İŞ KUYRUĞUDUR, hata günlüğü değil: hasta eşleşmesi
@@ -233,7 +233,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Mesajları', ic: '📡',
-    yetkiKodu: 'goz.cihaz', menuSira: 92,
+    yetkiKodu: 'goz.cihaz.mesaj', menuSira: 92,
   },
   {
     // CİHAZLAR AYARLARIN ALTINDA: günlük iş değil kurulum işi. Lab cihaz

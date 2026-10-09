@@ -101,7 +101,12 @@ public static partial class KaynakKatalogu
         "belge.stok"  => BelgeKumeStok,
         "belge.kurum_fatura" => BelgeKumeKurumFatura,
         "belge.alis_fatura"  => BelgeKumeAlisFatura,
-        _             => null,
+        // 1004 AŞAMA 1: ekran başına bölünen satış/alış/stok kodları kendi
+        //   kümesinin TAMAMINI açar (Satış Faturaları -> satış kümesi). Türe
+        //   göre daraltma aşama 2'de.
+        _ => Yetki.EkranKodlari.KopyaKaynagi(yetkiKodu) is { } ust
+             && ust is "belge.satis" or "belge.alis" or "belge.stok"
+             ? BelgeKumesi(ust) : null,
     };
 
     /// <summary>
@@ -111,5 +116,9 @@ public static partial class KaynakKatalogu
     /// </summary>
     public static IReadOnlyList<string> BelgeYetkiKodlari { get; } =
         new[] { "belge", "belge.satis", "belge.alis", "belge.stok",
-                "belge.kurum_fatura", "belge.alis_fatura" };
+                "belge.kurum_fatura", "belge.alis_fatura" }
+        .Concat(Yetki.EkranKodlari.AyniGrupEkranlari
+                    .Where(x => x.Eski is "belge.satis" or "belge.alis" or "belge.stok")
+                    .Select(x => x.Yeni))
+        .ToArray();
 }

@@ -73,7 +73,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
     menuGrup: 'İK', menuAd: 'Prim Planları', ic: '🎯',
-    yetkiKodu: 'prim', menuSira: 40, urunModu: 2,
+    yetkiKodu: 'prim.plan', menuSira: 40, urunModu: 2,
   },
   {
     // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
@@ -184,7 +184,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Kategoriler/Klasorler AYARDIR: yol zaten "Doküman › Ayarlar › ..." -
     //   gunluk listelerle ayni duzeyde durmasinlar.
     menuGrup: 'Doküman', menuSira: 30, menuAltGrup: 'Ayarlar',
-    menuAd: 'Kategoriler', ic: '🏷️', yetkiKodu: 'dokuman',
+    menuAd: 'Kategoriler', ic: '🏷️', yetkiKodu: 'dokuman.kategori',
   },
   {
     // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
@@ -198,7 +198,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Doküman', menuSira: 31, menuAltGrup: 'Ayarlar',
-    menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman',
+    menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman.klasor',
   },
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
@@ -239,7 +239,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Başarısız', filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
     ],
     gizliKolonlar: ['kullaniciId'],
-    menuGrup: 'Yönetim', menuSira: 101, menuAltGrup: 'Güvenlik', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
+    menuGrup: 'Yönetim', menuSira: 101, menuAltGrup: 'Güvenlik', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log.giris',
   },
   {
     // YZ KONTOR & KULLANIM (934, mockup Ekranlar/Ayarlar/yz_kontor_kullanim.html):
@@ -273,7 +273,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'onam', baslik: 'Onamlar', yol: 'Yonetim › Onamlar',
     aksiyonEkrani: 'cikti-liste', tarihAlani: 'tarih',
     menuGrup: 'Yönetim', menuSira: 114, menuAltGrup: 'Platform',
-    menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam',
+    menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam.kayit',
   },
   {
     // BILDIRIM SABLONLARI (399): kod SABIT (kodla cagrilir), metin serbest.
@@ -315,7 +315,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // ICD-10 ve ilac katalogunun DURUM/YUKLEME ekrani: ikisi de Muayene
     //   Ayarlari altinda oldugu icin kurulum ekrani da orada (kullanici).
     menuSira: 94, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Klinik Kataloglar', ic: '📚', yetkiKodu: 'katalog', urunModu: 2,
+    menuAd: 'Klinik Kataloglar', ic: '📚', yetkiKodu: 'katalog.klinik', urunModu: 2,
   },
   {
     // ICD-10 (400): senkron doldurur, ekran SALT GORUNUM - elle tani kodu
@@ -336,7 +336,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   yazan hekimin gunluk baktigi liste - ayar degil, calisma ekrani.
     menuSira: 93, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     // Ikon Receteler ile ayni 💊 idi (kullanici); 📖 de Tibbi Ozet'te kullaniliyor.
-    menuAd: 'İlaç Kataloğu', ic: '📕', yetkiKodu: 'katalog', urunModu: 2,
+    menuAd: 'İlaç Kataloğu', ic: '📕', yetkiKodu: 'katalog.ilac', urunModu: 2,
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
@@ -416,21 +416,21 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',
     ozelSayfa: true,
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları', menuSira: 201,
-    ic: '📦', yetkiKodu: 'stok',
+    ic: '📦', yetkiKodu: 'stok.ayar',
   },
   {
     // Kasa modulu ayarlari (149) - simdilik tek sekme: duzeltme gun siniri.
     kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
     ozelSayfa: true,
     menuGrup: 'Finans', menuAltGrup: 'Ayarlar', menuAd: 'Kasa', menuSira: 90,
-    ic: '💵', yetkiKodu: 'kasa.finans',
+    ic: '💵', yetkiKodu: 'kasa.finans.ayar',
   },
   {
     // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
     kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
     ozelSayfa: true,
     menuGrup: 'Satış', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 90,
-    ic: '🧾', yetkiKodu: 'belge.satis',
+    ic: '🧾', yetkiKodu: 'belge.satis.ayar',
   },
   // İK AYARLARI EKRANI KALDIRILDI (kullanici: "İK Ayarlarinda bolum ve gorevi
   //   kaldir"). Ekranin TEK icerigi `taraf.departman` ve `taraf.gorev` kod
@@ -444,7 +444,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'demo-verisi', rota: 'demo-verisi', baslik: 'Demo Verisi',
     yol: 'Yonetim › Veri Aktarımı › Demo Verisi', ozelSayfa: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: 'Demo Verisi',
-    menuSira: 9, ic: '🧪', yetkiKodu: 'ayar',
+    menuSira: 9, ic: '🧪', yetkiKodu: 'ayar.demo_verisi',
   },
   {
     // DEMO VERİSİ (964, mockup Ekranlar/Ayarlar/demo_tohum.html) yukarıda;
@@ -452,13 +452,13 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'iceri-alma', rota: 'iceri-alma', baslik: "Excel'den İçeri Alma",
     yol: 'Yonetim › Veri Aktarımı › İçeri Alma', ozelSayfa: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: "Excel'den İçeri Alma",
-    menuSira: 1, ic: '⬆', yetkiKodu: 'ayar',
+    menuSira: 1, ic: '⬆', yetkiKodu: 'ayar.iceri_alma',
   },
   {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
     menuGrup: 'Alış', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri', menuSira: 90,
-    ic: '📥', yetkiKodu: 'belge.alis',
+    ic: '📥', yetkiKodu: 'belge.alis.ayar',
   },
 ];

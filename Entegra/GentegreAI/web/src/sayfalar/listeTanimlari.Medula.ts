@@ -71,7 +71,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Hata',         filtre: { alan: 'durum', op: 'esit', deger: 5 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'e-Rapor', ic: '📄', yetkiKodu: 'medula.recete', menuSira: 45,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'e-Rapor', ic: '📄', yetkiKodu: 'medula.recete.rapor', menuSira: 45,
   },
   {
     kaynak: 'medula-fatura-donem', rota: 'medula-fatura-donem', ozelSayfa: true, baslik: 'Medula Fatura & Dönem',
@@ -89,13 +89,13 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['yerelTutar', 'medulaTutar', 'katilim', 'kesinti'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Faturalar', ic: '🧾', yetkiKodu: 'medula.fatura', menuSira: 60,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Faturalar', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
   },
   {
     kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemleri',
     yol: 'Medula › Dönemler', kartYolu: '/medula-donem', kartBaslik: 'Dönem',
     toplam: ['toplam', 'kesinti', 'net', 'odenen', 'kalan'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönemler', ic: '📅', yetkiKodu: 'medula.fatura', menuSira: 65,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönemler', ic: '📅', yetkiKodu: 'medula.fatura.donem', menuSira: 65,
   },
   {
     kaynak: 'medula-kesinti', rota: 'medula-kesinti', aksiyonEkrani: 'medula-kesinti-liste', baslik: 'Medula Kesintileri',
@@ -107,12 +107,12 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['tutar', 'iade'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Kesinti / İtiraz', ic: '⚖️', yetkiKodu: 'medula.fatura', menuSira: 70,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Kesinti / İtiraz', ic: '⚖️', yetkiKodu: 'medula.fatura.kesinti', menuSira: 70,
   },
   {
     kaynak: 'medula-kuyruk-ayar', rota: 'medula-kuyruk-ayar', ozelSayfa: true, baslik: 'Medula Gönderim Kuyruğu & Ayarlar',
     yol: 'Medula › Gönderim Kuyruğu', urunModu: 2,
-    menuGrup: 'Medula', menuAd: 'Gönderim Kuyruğu & Ayarlar', ic: '📡', yetkiKodu: 'medula', menuSira: 80,
+    menuGrup: 'Medula', menuAd: 'Gönderim Kuyruğu & Ayarlar', ic: '📡', yetkiKodu: 'medula.kuyruk_ayar', menuSira: 80,
   },
   {
     kaynak: 'medula-kuyruk', rota: 'medula-kuyruk', aksiyonEkrani: 'medula-kuyruk-liste', baslik: 'Medula Çağrı Günlüğü',
@@ -123,6 +123,6 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kabul',     filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, menuGrup: 'Medula', menuAltGrup: 'Ayarlar', menuAd: 'Çağrı Günlüğü', ic: '🗂️', yetkiKodu: 'medula', menuSira: 90,
+    urunModu: 2, menuGrup: 'Medula', menuAltGrup: 'Ayarlar', menuAd: 'Çağrı Günlüğü', ic: '🗂️', yetkiKodu: 'medula.cagri_gunlugu', menuSira: 90,
   },
 ];

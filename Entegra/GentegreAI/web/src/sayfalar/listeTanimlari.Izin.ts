@@ -48,7 +48,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'İzin Bakiyesi', ic: '📊',
-    yetkiKodu: 'ik.izin', modul: 'ik', menuSira: 11,
+    yetkiKodu: 'ik.izin.bakiye', modul: 'ik', menuSira: 11,
   },
   {
     // AVANS (753): talep → onay → ödeme → mahsup. Listenin asıl sorusu

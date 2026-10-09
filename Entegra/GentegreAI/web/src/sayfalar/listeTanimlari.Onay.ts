@@ -70,7 +70,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Yönetim', menuAd: 'Onay Akışları', ic: '🧭',
-    yetkiKodu: 'kullanici', menuSira: 3,
+    yetkiKodu: 'kullanici.onay_akis', menuSira: 3,
   },
   {
     // VEKÂLET (741): imza yetkisinin geçici devri. Vekâlet olmadan onay
@@ -91,6 +91,6 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Yönetim', menuAd: 'Onay Vekâleti', ic: '🤝',
-    yetkiKodu: 'kullanici', menuSira: 2,
+    yetkiKodu: 'kullanici.onay_vekalet', menuSira: 2,
   },
 ];

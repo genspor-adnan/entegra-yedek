@@ -46,6 +46,6 @@ export const ARIZA_LISTELERI: ListeGirdisi[] = [
     baslik: 'Arıza Ekipleri',
     yol: 'Teknik Servis › Arıza Ekipleri',
     menuGrup: 'Teknik Servis', menuAd: 'Arıza Ekipleri', ic: '👥',
-    yetkiKodu: 'ariza', modul: 'servis', menuSira: 9,
+    yetkiKodu: 'ariza.ekip', modul: 'servis', menuSira: 9,
   },
 ];

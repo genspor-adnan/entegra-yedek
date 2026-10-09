@@ -52,7 +52,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'telerad-pano', rota: 'telerad-pano', ozelSayfa: true,
     baslik: 'Teleradyoloji Panosu', yol: 'Teleradyoloji › Pano',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Panosu',
-    ic: '📊', menuSira: 38, yetkiKodu: 'teleradyoloji',
+    ic: '📊', menuSira: 38, yetkiKodu: 'teleradyoloji.pano',
     modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -76,7 +76,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'telerad-fatura', rota: 'telerad-fatura', ozelSayfa: true,
     baslik: 'Teleradyoloji Dönem Faturası', yol: 'Teleradyoloji › Dönem Faturası',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Dönem Faturası',
-    ic: '🧾', menuSira: 50, yetkiKodu: 'teleradyoloji.kurum',
+    ic: '🧾', menuSira: 50, yetkiKodu: 'teleradyoloji.kurum.fatura',
     modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -126,7 +126,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yol: 'Teleradyoloji › Teslim Kuyruğu',
     aksiyonEkrani: 'telerad-teslim-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Teslim Kuyruğu',
-    ic: '📤', menuSira: 50, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+    ic: '📤', menuSira: 50, yetkiKodu: 'teleradyoloji.teslim', modul: 'teleradyoloji', urunModu: 2,
   },
   {
     // GELEN RAPORLAR (817): dışarıdan ORU ile gelen raporlar. Eşleşmeyen satır
@@ -136,7 +136,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yol: 'Teleradyoloji › Gelen Raporlar',
     aksiyonEkrani: 'telerad-gelen-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Gelen Raporlar',
-    ic: '📥', menuSira: 51, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+    ic: '📥', menuSira: 51, yetkiKodu: 'teleradyoloji.gelen', modul: 'teleradyoloji', urunModu: 2,
   },
   {
     // BAKANLIK EKSİKLERİ (813): Bakanlığa bildirilecek ama bir alanı eksik
@@ -149,6 +149,6 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // KART YOK: düzeltme yeri isteğin kendi kartı, ayrı bir kart açmak aynı
     //   veriyi iki ekrandan yazılabilir kılardı.
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Bakanlık Eksikleri',
-    ic: '🏛', menuSira: 49, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+    ic: '🏛', menuSira: 49, yetkiKodu: 'teleradyoloji.bakanlik_eksik', modul: 'teleradyoloji', urunModu: 2,
   },
 ];

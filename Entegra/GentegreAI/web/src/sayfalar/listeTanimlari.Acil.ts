@@ -74,7 +74,7 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Acil', menuAd: 'Çağrılar', ic: '📞',
-    yetkiKodu: 'acil.pano', menuSira: 30,
+    yetkiKodu: 'acil.pano.cagri', menuSira: 30,
   },
   {
     kaynak: 'acilYatak', rota: 'acil-yatak',

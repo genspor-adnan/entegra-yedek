@@ -120,7 +120,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Bildirimler', ic: '📡',
-    yetkiKodu: 'uts', menuSira: 111,
+    yetkiKodu: 'uts.bildirim', menuSira: 111,
   },
   {
     // ÜTS urun sorgu (223): UNO/LNO/SNO ile ÜTS'den canli tekil urun sorgusu.
@@ -129,7 +129,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     yol: 'Stok › ÜTS Ürün Sorgu',
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Ürün Sorgu', ic: '🔍',
-    yetkiKodu: 'uts', menuSira: 112,
+    yetkiKodu: 'uts.sorgu', menuSira: 112,
   },
   {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
@@ -155,7 +155,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge.stok',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge.stok.transfer',
     menuSira: 40,
   },
   {
@@ -170,7 +170,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fire',          filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
       { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge.stok',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge.stok.giris',
     menuSira: 50,
   },
   {
@@ -183,7 +183,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'İmha',         filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
       { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge.stok',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge.stok.cikis',
     menuSira: 60,
   },
   {
@@ -204,7 +204,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAd: 'Ürün Ağaçları', menuSira: 20,
-    ic: '🌳', yetkiKodu: 'uretim',
+    ic: '🌳', yetkiKodu: 'uretim.urun_agaci',
   },
   {
     // URETIM EMIRLERI (429).
@@ -241,6 +241,6 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezleri', menuSira: 90,
-    ic: '⚙️', yetkiKodu: 'uretim',
+    ic: '⚙️', yetkiKodu: 'uretim.is_merkezi',
   },
 ];

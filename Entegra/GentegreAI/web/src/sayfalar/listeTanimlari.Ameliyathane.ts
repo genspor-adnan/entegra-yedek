@@ -50,7 +50,7 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
     yol: 'Ameliyathane › Masa Çizelgesi',
     urunModu: 2,
     menuGrup: 'Ameliyathane', menuAd: 'Masa Çizelgesi', ic: '🗓',
-    yetkiKodu: 'ameliyathane.plan', menuSira: 5,
+    yetkiKodu: 'ameliyathane.plan.cizelge', menuSira: 5,
   },
   {
     kaynak: 'ameliyatTalep', rota: 'ameliyat-talep',

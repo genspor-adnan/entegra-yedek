@@ -53,7 +53,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Teknik Servis', menuAd: 'İş Emirleri', ic: '🔧',
-    yetkiKodu: 'servis', modul: 'servis', menuSira: 20,
+    yetkiKodu: 'servis.is_emri', modul: 'servis', menuSira: 20,
   },
   {
     // ÇİZELGE ÖZEL SAYFA: generic liste satır çizer, blok çizmez. Menüde
@@ -62,7 +62,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
     baslik: 'Teknisyen Çizelgesi',
     yol: 'Teknik Servis › Çizelge',
     menuGrup: 'Teknik Servis', menuAd: 'Çizelge', ic: '📅',
-    yetkiKodu: 'servis', modul: 'servis', menuSira: 25,
+    yetkiKodu: 'servis.cizelge', modul: 'servis', menuSira: 25,
   },
   {
     kaynak: 'servis-ziyaret', rota: 'servis-ziyaret',
@@ -80,7 +80,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Teknik Servis', menuAd: 'Ziyaretler', ic: '🚐',
-    yetkiKodu: 'servis', modul: 'servis', menuSira: 30,
+    yetkiKodu: 'servis.ziyaret', modul: 'servis', menuSira: 30,
   },
   {
     kaynak: 'servis-emanet', rota: 'servis-emanet',
@@ -94,7 +94,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Teknik Servis', menuAd: 'Emanet Cihazlar', ic: '🔄',
-    yetkiKodu: 'servis', modul: 'servis', menuSira: 40,
+    yetkiKodu: 'servis.emanet', modul: 'servis', menuSira: 40,
   },
   {
     kaynak: 'taraf-cihaz', rota: 'taraf-cihaz',

@@ -161,7 +161,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan', menuSira: 80,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan.sablon', menuSira: 80,
   },
   {
     // OZEL LISTE (mockup izin_istisnalar_listesi.html).
@@ -175,7 +175,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma İstisnaları', ic: '🗓', yetkiKodu: 'randevu.plan', menuSira: 85,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma İstisnaları', ic: '🗓', yetkiKodu: 'randevu.plan.istisna', menuSira: 85,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
@@ -376,7 +376,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'sigorta-kod-esleme-liste',
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar',
-    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta.tanim', menuSira: 90,
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta.tanim.kod_esleme', menuSira: 90,
   },
   {
     // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
@@ -392,7 +392,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta',
-    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta.tanim', menuSira: 40,
+    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta.tanim.istek_log', menuSira: 40,
   },
   {
     // CIHAZLAR (432) - laboratuvar/goz/goruntuleme cihazlarinin baglanti
@@ -430,7 +430,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 104,
+    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz.mesaj', menuSira: 104,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
@@ -451,7 +451,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   (ITS ilac, UTS tibbi cihaz) ama ayni is - karekod bildirimi; yan yana
     //   dururlar. Sira 68: UTS alt grubu 70'ten basliyor.
     menuSira: 100, menuGrup: 'Stok & Hizmet', menuAltGrup: 'İTS',
-    menuAd: 'Bildirimler', ic: '💊', yetkiKodu: 'stok',
+    menuAd: 'Bildirimler', ic: '💊', yetkiKodu: 'stok.its',
   },
   {
     // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:
@@ -469,7 +469,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
+    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene.recete',
   },
   {
     // HAKEDISLERIM (mockup Ekranlar/Muayene/hekim_hakedislerim.html):
@@ -494,7 +494,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     baslik: 'Prim Satırları', yol: 'Muayene › Prim Satırları',
     urunModu: 2, modul: 'muayene',
     menuSira: 38, menuGrup: 'Muayene', menuAd: 'Prim Satırları', ic: '📄',
-    yetkiKodu: 'prim.kendi',
+    yetkiKodu: 'prim.kendi.satir',
   },
   {
     // TIBBI OZET (420) - hasta basina tek satir: alerji / kronik / ilac.
@@ -575,7 +575,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene',
+    menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene.sablon',
   },
   {
     // BZBH BILDIRIM PANOSU (882, KTS H5): ozel sayfa - bekleyen vaka
@@ -616,7 +616,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 91, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene',
+    menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene.makro',
   },
   {
     // HEKIM CALISMA LISTESI (410, Faz 1) - hekimin gun icindeki isi.
@@ -665,6 +665,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene.liste',
   },
 ];

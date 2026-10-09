@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Yetki;
+﻿namespace Gentegre.Cekirdek.Yetki;
 
 /// <summary>
 /// MENÜ YERİNE GÖRE BÖLÜNEN EKRAN KODLARI (1003 — kullanıcı 09.10.2026:
@@ -25,7 +25,7 @@ namespace Gentegre.Cekirdek.Yetki;
 ///
 /// Web tarafında aynı kodlar listeTanimlari'nda ve Dökümler öğelerinde durur.
 /// </summary>
-public static class EkranKodlari
+public static partial class EkranKodlari
 {
     /// <summary>Grubun Dökümler ekranı kodu: <c>dokum.&lt;grup&gt;</c>.</summary>
     public static readonly IReadOnlyList<string> DokumKodlari =
@@ -67,12 +67,29 @@ public static class EkranKodlari
     /// <summary>Ekran kodunun haklarını kopyaladığı eski kod; bölünmemiş kodda null.</summary>
     public static string? KopyaKaynagi(string kod)
         => Kopya.TryGetValue(kod, out var k) ? k
+         : AyniGrupKopya.Value.TryGetValue(kod, out var a) ? a
          : kod.StartsWith("dokum.", StringComparison.Ordinal) ? "dokum"
          : null;
 
+    // AYNI GRUP TABLOSU (1004) başka dosyada: kısmi sınıfların statik alan
+    //   sırası dosyalar arasında belirsiz, sözlükler ilk kullanımda kurulur.
+    private static readonly Lazy<Dictionary<string, string>> AyniGrupKopya = new(() =>
+        AyniGrupEkranlari.ToDictionary(x => x.Yeni, x => x.Eski, StringComparer.Ordinal));
+
+    private static readonly Lazy<Dictionary<string, string[]>> TumVeriKapisi = new(() =>
+    {
+        var d = VeriKapisi.ToDictionary(x => x.Key, x => x.Value.ToList(), StringComparer.Ordinal);
+        foreach (var (yeni, eski) in AyniGrupEkranlari)
+        {
+            if (!d.TryGetValue(eski, out var l)) d[eski] = l = [];
+            l.Add(yeni);
+        }
+        return d.ToDictionary(x => x.Key, x => x.Value.ToArray(), StringComparer.Ordinal);
+    });
+
     /// <summary>Bu veri kodunun kapısını da açan ekran kodları (yoksa boş).</summary>
     public static IReadOnlyList<string> VeriKapisiAltlari(string veriKodu)
-        => VeriKapisi.TryGetValue(veriKodu, out var a) ? a : [];
+        => TumVeriKapisi.Value.TryGetValue(veriKodu, out var a) ? a : [];
 
     /// <summary>
     /// SATIR KISITI (kullanıcı 09.10.2026: "tedarikçi satır süzgecini de

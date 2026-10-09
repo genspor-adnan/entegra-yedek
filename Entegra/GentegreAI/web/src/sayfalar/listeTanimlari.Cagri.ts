@@ -93,18 +93,18 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     yol: 'Çağrı Merkezi › Ayarlar › Kuyruklar',
     kartYolu: '/cagri-kuyruk', kartBaslik: 'Kuyruk',
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Kuyruklar & SLA', ic: '👥', yetkiKodu: 'cagri.ayar', menuSira: 91,
+    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Kuyruklar & SLA', ic: '👥', yetkiKodu: 'cagri.ayar.kuyruk', menuSira: 91,
   },
   {
     kaynak: 'cagri-agent', rota: 'cagri-agent', aksiyonEkrani: 'cagri-agent-liste', baslik: 'Agentlar',
     yol: 'Çağrı Merkezi › Ayarlar › Agentlar',
     kartYolu: '/cagri-agent', kartBaslik: 'Agent',
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Agentlar (dahili)', ic: '🎧', yetkiKodu: 'cagri.ayar', menuSira: 92,
+    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Agentlar (dahili)', ic: '🎧', yetkiKodu: 'cagri.ayar.agent', menuSira: 92,
   },
   {
     kaynak: 'cagri-santral', ozelSayfa: true, baslik: 'Santral · IVR · Kanallar', yol: 'Çağrı Merkezi › Ayarlar › Santral',
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Santral · IVR · Kanallar', ic: '⚙️', yetkiKodu: 'cagri.ayar', menuSira: 93,
+    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Santral · IVR · Kanallar', ic: '⚙️', yetkiKodu: 'cagri.ayar.santral', menuSira: 93,
   },
 ];

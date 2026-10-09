@@ -105,4 +105,32 @@ public sealed class EkranKoduBolmeTestleri
         Assert.Contains("(t.tedarikci = 1)", satir);
         Assert.Contains("(t.tedarikci = 1)", sayim);
     }
+
+    // ------------------------------------------ 1004 aynı grup (aşama 1) ---
+    //   Kullanıcı 09.10.2026: "B grubunu da böl", "1 ile başla, sonra 2".
+
+    [Fact]
+    public void Ayni_grup_ekran_kodu_eski_kapiyi_acar_ve_kopya_kaynagi_eski_kod()
+    {
+        Assert.Equal(117, EkranKodlari.AyniGrupEkranlari.Length);
+        Assert.Equal(117, EkranKodlari.AyniGrupEkranlari.Select(x => x.Yeni).Distinct().Count());
+        foreach (var (yeni, eski) in EkranKodlari.AyniGrupEkranlari)
+        {
+            Assert.Equal(eski, EkranKodlari.KopyaKaynagi(yeni));
+            Assert.True(Set(yeni).Var(eski, Islem.Gor), yeni);
+        }
+        // Ana ekran eski kodu korur; alt ekran kodu ana ekranın kapısını açar.
+        Assert.True(Set("muayene.recete").Var("muayene", Islem.Gor));
+        Assert.False(Set("muayene").Var("muayene.recete", Islem.Gor));
+    }
+
+    [Fact]
+    public void Bolunmus_satis_ekrani_satis_kumesini_acar_basvuruyu_acmaz()
+    {
+        var s = Set("belge.satis.fatura");
+        var kumeler = KaynakKatalogu.BelgeYetkiKodlari
+            .Where(k => s.VarTam(k, Islem.Gor))
+            .Select(KaynakKatalogu.BelgeKumesi).ToList();
+        Assert.Equal([KaynakKatalogu.BelgeKumeSatis], kumeler);
+    }
 }

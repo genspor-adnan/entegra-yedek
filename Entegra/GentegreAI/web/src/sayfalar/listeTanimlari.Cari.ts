@@ -23,7 +23,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Yalniz HBYS: donem icmali odeyen kurum (SGK/OSS) akisinin parcasi,
     //   ERP kurulumunda karsiligi yok (kullanici).
     urunModu: 2,
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum.icmal',
     menuSira: 20,
   },
   {
@@ -92,7 +92,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // yapilmadi, ozel bir "sadelestirme" gerekmedi).
     kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
     aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'Cari & CRM', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
+    menuGrup: 'Cari & CRM', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari.kisi',
     menuSira: 30,
   },
   {
@@ -205,7 +205,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Menude STOK & HIZMET grubunda, Hizmet Listesi'nin (20) hemen ardinda
     //   (kullanici): kategori bu iki listenin siniflandirmasi - Yonetim
     //   altinda ararken kimse bulamiyordu.
-    menuGrup: 'Stok & Hizmet', menuAltGrup: 'Ayarlar', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'Ayarlar', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok.kategori',
     menuSira: 200,
   },
   {
@@ -264,7 +264,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   Yonetim altinda ararken bulunmuyordu.
     // Kampanya fiyat listesi UZERINE isleyen bir kural: hemen arkasinda durur.
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Kampanyalar',
-    ic: '🏷️', yetkiKodu: 'fiyat_listesi', menuSira: 92,
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi.kampanya', menuSira: 92,
   },
   {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
@@ -273,6 +273,6 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   degil; kullanici "Departman listesi ekranini 2'ye bol" dedi.
     kaynak: 'departman', baslik: 'Bölüm / Görev', yol: 'Yönetim › Bölüm / Görev',
     ozelSayfa: true,
-    menuGrup: 'İK', menuSira: 20, menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
+    menuGrup: 'İK', menuSira: 20, menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel.bolum',
   },
 ];

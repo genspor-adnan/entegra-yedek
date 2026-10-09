@@ -110,6 +110,6 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
     yol: 'Diş › Ayarlar › Laboratuvarlar',
     kartYolu: '/dis-lab', kartBaslik: 'Laboratuvar',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Laboratuvarlar', ic: '🏭', yetkiKodu: 'dis.unit', menuSira: 91,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Laboratuvarlar', ic: '🏭', yetkiKodu: 'dis.unit.lab', menuSira: 91,
   },
 ];

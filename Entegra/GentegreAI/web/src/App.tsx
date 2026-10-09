@@ -219,40 +219,40 @@ function Yollar() {
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {(yetki('ayar') || yetki('kayit_kabul.ayar')) && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
-        {yetki('katalog') && <Route path="/katalog-ayarlar" element={<KatalogAyarlar />} />}
-        {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
+        {yetki('katalog.klinik') && <Route path="/katalog-ayarlar" element={<KatalogAyarlar />} />}
+        {yetki('stok.ayar') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
-        {yetki('stok') && <Route path="/kategori" element={<Kategoriler />} />}
-        {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
+        {yetki('stok.kategori') && <Route path="/kategori" element={<Kategoriler />} />}
+        {yetki('kasa.finans.ayar') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
-        {yetki('ayar') && <Route path="/iceri-alma" element={<IceriAlma />} />}
+        {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}
-        {yetki('ayar') && <Route path="/demo-verisi" element={<DemoVerisi />} />}
+        {yetki('ayar.demo_verisi') && <Route path="/demo-verisi" element={<DemoVerisi />} />}
         {/* Eski "Randevu Ayarlari" adresi Calisma Sablonlari'na gider (ayarlar orada). */}
         <Route path="/randevu-ayarlar" element={<Navigate to="/calisma-sablon" replace />} />
         {/* Calisma plani (711): sablon + istisnadan turetilen haftalik plan. */}
         {yetki('randevu.plan') && <Route path="/calisma-plani" element={<CalismaPlani />} />}
         {/* Calisma sablonlari / izin & istisnalar: ozel liste; kart AYNI
             rotada (:id?) ustte acilir - liste suzgeci kart acilip kapaninca kaybolmaz. */}
-        {yetki('randevu.plan') && <Route path="/calisma-sablon/:id?" element={<CalismaSablonListesi />} />}
-        {yetki('randevu.plan') && <Route path="/calisma-istisna/:id?" element={<CalismaIstisnaListesi />} />}
+        {yetki('randevu.plan.sablon') && <Route path="/calisma-sablon/:id?" element={<CalismaSablonListesi />} />}
+        {yetki('randevu.plan.istisna') && <Route path="/calisma-istisna/:id?" element={<CalismaIstisnaListesi />} />}
         {/* Ameliyathane masa cizelgesi (719): generic liste satir cizer, blok
             cizmez - "hangi masa ne zaman bos" sorusu kendi sayfasini ister. */}
-        {yetki('ameliyathane.plan') && <Route path="/ameliyat-cizelge" element={<AmeliyatCizelge />} />}
+        {yetki('ameliyathane.plan.cizelge') && <Route path="/ameliyat-cizelge" element={<AmeliyatCizelge />} />}
         {/* Departman + gorev (255): tek ekranda iki grid. */}
-        {yetki('personel') && <Route path="/departman" element={<DepartmanGorev />} />}
+        {yetki('personel.bolum') && <Route path="/departman" element={<DepartmanGorev />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
         {/* Kurum profili (489): Firma Bilgileri'nin sekmesiydi, kendi ekrani. */}
         {/* MENÜ DÜZENİ (979): menünün şube başına yerleşimi. */}
         {yetki('menu.duzen') && <Route path="/menu-duzeni" element={<MenuDuzeni />} />}
-        {yetki('belge') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
-        {yetki('belge') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
+        {yetki('belge.satis.ayar') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
+        {yetki('belge.alis.ayar') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
-        {yetki('uts') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
+        {yetki('uts.sorgu') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
         {/* Radyoloji panosu (320): liste degil - sayac/doluluk/uyari ekrani. */}
         {yetki('radyoloji') && <Route path="/radyoloji-pano" element={<RadyolojiPanosu />} />}
-        {yetki('teleradyoloji') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
-        {yetki('teleradyoloji.kurum') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
+        {yetki('teleradyoloji.pano') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
+        {yetki('teleradyoloji.kurum.fatura') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
         {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}
         {/* HAKEDISLERIM: hekimin KENDI prim dokumu - liste degil, ozet +
             gruplu dokum. Yetki `prim.kendi`; butun kisileri goren ekran
@@ -260,7 +260,7 @@ function Yollar() {
         {yetki('prim.kendi') && <Route path="/hakedisim" element={<Hakedisim />} />}
         {/* PRIM SATIRLARI: ayni self-scoped hakedisim endpoint/sayfasi, menude
             Hakedislerim'in ustunde ayri giris (kullanici). */}
-        {yetki('prim.kendi') && <Route path="/prim-satirlari" element={<Hakedisim />} />}
+        {yetki('prim.kendi.satir') && <Route path="/prim-satirlari" element={<Hakedisim />} />}
 
         {/* ISKONTO ONAY EKRANI (666): zilin buyugu - kuyruk, karar, limit,
             analiz. 'belge' gor yetkisi yeter; KARAR yetkisi ayri (aksiyon
@@ -302,7 +302,7 @@ function Yollar() {
         )}
         {/* Teknisyen cizelgesi (775): generic liste satir cizer, BLOK cizmez -
             "kimde bos kapasite var" sorusu zaman ekseninde gorulur. */}
-        {yetki('servis') && (
+        {yetki('servis.cizelge') && (
           <Route path="/servis-cizelge" element={<ServisCizelge />} />
         )}
         {yetki('ariza.talep') && (
@@ -310,7 +310,7 @@ function Yollar() {
         )}
         {/* TALEPLERIM: yetki kapisi yok - herkes yalniz kendi taleplerini gorur. */}
         <Route path="/taleplerim" element={<Taleplerim />} />
-        {yetki('ariza') && <Route path="/ariza-ekipleri" element={<ArizaEkipleri />} />}
+        {yetki('ariza.ekip') && <Route path="/ariza-ekipleri" element={<ArizaEkipleri />} />}
         {yetki('duyuru') && <Route path="/duyurular" element={<Duyurular />} />}
         {/* IZIN TALEP KARTI (959): liste arkada, ozel kart modal. */}
         {yetki('ik.izin') && <Route path="/personel-izin/:id" element={<>
@@ -332,7 +332,7 @@ function Yollar() {
           <TalepArkaListe kaynak="personelBelgeTalep" />
           <BelgeTalepKarti />
         </>} />}
-        {yetki('muayene') && (
+        {yetki('muayene.sablon') && (
           <Route path="/muayene-sablon" element={<MuayeneSablonlari />} />
         )}
         {/* DIS (706): hasta karti (odontogram + plan) ve gunluk akis ozel
@@ -446,7 +446,7 @@ function Yollar() {
         {/* TESLIM TUTANAGI: yazdirilmak icin ayri rota - imza fiziksel bir
             belgeye atilir, ekran kaydi onun yerine gecmez. */}
         {yetki('banko_oturum') && <Route path="/banko-tutanak/:id" element={<BankoTutanak />} />}
-        {yetki('cagri.ayar') && <Route path="/cagri-santral" element={<CagriSantral />} />}
+        {yetki('cagri.ayar.santral') && <Route path="/cagri-santral" element={<CagriSantral />} />}
         {yetki('cagri.kayit') && (
           <Route path="/cagri/:id" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'cagri' && l.rota === 'cagri')!} />
@@ -455,8 +455,8 @@ function Yollar() {
         )}
         {/* STERİLİZASYON (868): pano / izlenebilirlik / ayar tam sayfa; döngü kartı liste üstünde modal. */}
         {yetki('steril.pano') && <Route path="/steril-pano" element={<SterilPano />} />}
-        {yetki('steril.izleme') && <Route path="/steril-izleme" element={<SterilIzlenebilirlik />} />}
-        {yetki('steril.ayar') && <Route path="/steril-ayar" element={<SterilAyarlar />} />}
+        {yetki('steril.izleme.defter') && <Route path="/steril-izleme" element={<SterilIzlenebilirlik />} />}
+        {yetki('steril.ayar.kural') && <Route path="/steril-ayar" element={<SterilAyarlar />} />}
         {yetki('steril.dongu') && (
           <Route path="/steril-dongu/:id" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'steril-dongu' && l.rota === 'steril-dongu')!} />
@@ -470,7 +470,7 @@ function Yollar() {
         {(yetki('medula.provizyon') || yetki('medula.kabul')) && <Route path="/medula-kabul/:belgeId" element={<MedulaHastaKabul />} />}
         {yetki('medula.hizmet') && <Route path="/medula-hizmet/:belgeId" element={<MedulaHizmetKayit />} />}
         {yetki('medula.fatura') && <Route path="/medula-fatura-donem" element={<MedulaFaturaDonem />} />}
-        {yetki('medula') && <Route path="/medula-kuyruk-ayar" element={<MedulaKuyruk />} />}
+        {yetki('medula.kuyruk_ayar') && <Route path="/medula-kuyruk-ayar" element={<MedulaKuyruk />} />}
         {/* Levey-Jennings (442): tetkik/lot/seviye sorgu parametresiyle. */}
         {yetki('lab.kk') && <Route path="/lab/kk/grafik" element={<LabKkGrafik />} />}
         {/* Tup barkod etiketi (444): ?istem= tum tupler, ?numune= tek tup. */}

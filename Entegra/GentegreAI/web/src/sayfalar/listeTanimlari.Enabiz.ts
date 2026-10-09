@@ -30,7 +30,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     // Bayrak emojisi Windows'ta "TR" harfleri olarak cizilir (dil secicide de
     //   ayni sorun yasanmisti) - gonderim kuyruguna anlamli ikon.
     menuGrup: 'e-Nabız', menuAd: 'Gönderim Kuyruğu', ic: '📤',
-    yetkiKodu: 'entegrasyon', menuSira: 20,
+    yetkiKodu: 'entegrasyon.kuyruk', menuSira: 20,
   },
   {
     // VERI KALITESI PANOSU (454) - mockup enabiz_veri_kalitesi.html.
@@ -66,7 +66,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'enabiz',
     menuGrup: 'e-Nabız', menuAltGrup: 'Ayarlar', menuAd: 'Kod Eşleme', ic: '🔗',
-    yetkiKodu: 'entegrasyon', menuSira: 90,
+    yetkiKodu: 'entegrasyon.kod_esleme', menuSira: 90,
   },
 
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).

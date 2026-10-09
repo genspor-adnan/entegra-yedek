@@ -202,9 +202,14 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
    * (`belge.satis`, `belge.alis`, `belge.stok`, `hesap.tanim`...). Nokta
    * görülünce aksiyon sanılıp üst modülün altına konuyorlardı: Kayıt Kabul >
    * Başvurular (`belge`) satırına tik atmak Satış/Alış/Stok ekranlarını da
-   * açıyordu. Menüde üst kodundan FARKLI grupta duran noktalı ekran kodu
-   * modül gibi kendi grubuna yerleşir; aynı gruptaki alt ekranlar
-   * (`lab.tetkik` Laboratuvar altında) eskisi gibi üstünün altında kalır.
+   * açıyordu.
+   *
+   * MENÜ SATIRI = MATRİS SATIRI (1004, kullanıcı: "B grubunu da böl"): her
+   * menü ekranı kendi kodunu aldıktan sonra AYNI gruptaki ekran da üstünün
+   * altına girmez - Muayene > Çalışma Listesi'ne tik atmak Reçeteler'i,
+   * Muayeneler'i açmamalı. Menüde kendi ekranı olan noktalı kod (tür 0)
+   * modül gibi kendi menü yerinde durur; yalnız AKSİYONLAR üst ekranın
+   * altına girer.
    */
   const ustKodu = (kod: string) => {
     const onek = kod.slice(0, kod.indexOf('.'));
@@ -212,8 +217,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   };
   const ayriEkran = (s: { kod: string; tur: number }) => {
     if (!s.kod.includes('.') || s.tur !== 0) return false;
-    const yer = harita.get(s.kod);
-    return !!yer && harita.get(ustKodu(s.kod))?.grup !== yer.grup;
+    return harita.has(s.kod);
   };
   for (const s of yeni.filter(x => !x.kod.includes('.') || ayriEkran(x))) {
     const yer = harita.get(s.kod);

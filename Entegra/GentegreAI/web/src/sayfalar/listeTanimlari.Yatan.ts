@@ -50,7 +50,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAd: 'Yatak Panosu', ic: '🗺️',
-    yetkiKodu: 'yatan', menuSira: 20,
+    yetkiKodu: 'yatan.yatak_pano', menuSira: 20,
   },
   {
     // ORDER'LAR - servis genelinde açık talimatlar. Listenin iki işi:
@@ -95,7 +95,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAd: 'İlaç Uygulama', ic: '💊',
-    yetkiKodu: 'yatan.order', menuSira: 40,
+    yetkiKodu: 'yatan.order.uygulama', menuSira: 40,
   },
   {
     // HEMŞİRE İZLEMİ - servis genelinde ÖLÇÜM satırları. Listenin işi eşiği
@@ -133,7 +133,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     toplam: ['tutar'],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAd: 'Hizmet İcmali', ic: '🧾',
-    yetkiKodu: 'yatan', menuSira: 50,
+    yetkiKodu: 'yatan.icmal', menuSira: 50,
   },
   {
     // ODALAR AYARLARIN ALTINDA: kurulum işi. Kural odanın (cinsiyet,
