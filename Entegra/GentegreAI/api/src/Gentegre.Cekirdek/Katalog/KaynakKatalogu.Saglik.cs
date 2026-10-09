@@ -394,7 +394,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi MetinMakro() => new(
         Ad: "metin-makro",
-        YetkiKodu: "muayene",
+        YetkiKodu: "muayene.makro",   // 1004 aşama 2: Metin Makroları yönetimi kendi kodu (açılım muayene ucunda)
         Kaynak: "public.metin_makro m "
               + "  left join public.v_personel_lookup p on p.id = m.hekim_id "
               + "  left join public.v_departman_lookup d on d.id = m.bolum_id",

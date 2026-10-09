@@ -222,4 +222,19 @@ public sealed class EkranKoduBolmeTestleri
         // Kopya kaynağı kalır: göç ve şablon hâlâ eski kodun hakkını izler.
         Assert.Equal("kasa.finans", EkranKodlari.KopyaKaynagi("kasa.finans.vade"));
     }
+
+    // --------------------------------------------- 1004 aşama 2: Muayene ---
+
+    [Fact]
+    public void Makro_yonetimi_ayrildi_klinik_kaynaklar_koprude()
+    {
+        Assert.Equal("muayene.makro", KaynakKatalogu.Bul("metin-makro")!.YetkiKodu);
+        Assert.False(Set("muayene").Var("muayene.makro", Islem.Gor));
+        Assert.False(Set("muayene.makro").Var("muayene", Islem.Gor));
+        // Bilinçli köprü: reçete/muayene/şablon klinik akışta da kullanılır,
+        //   ekran kodu çekirdek klinik kapıyı açmaya devam eder.
+        Assert.Equal("muayene", KaynakKatalogu.Bul("recete")!.YetkiKodu);
+        Assert.True(Set("muayene.recete").Var("muayene", Islem.Gor));
+        Assert.True(Set("muayene.liste").Var("muayene", Islem.Gor));
+    }
 }

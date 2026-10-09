@@ -203,7 +203,20 @@ public static partial class EkranKodlari
         "belge.alis.irsaliye", "belge.alis.fis", "belge.alis.tahakkuk", "belge.alis.konsinye",
         "belge.alis.ayar",
         "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis",
+        // Muayene (1004 aşama 2): yalnız Metin Makroları yönetimi ayrıldı.
+        "muayene.makro",
     };
+
+    // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
+    //   Reçeteler (`recete`), Muayeneler (`muayene`), Muayene Şablonları,
+    //   ICD / İlaç katalogları ve Prim Satırları kaynakları menü ekranının
+    //   DIŞINDA hekimin klinik akışında da kullanılır: reçete kartı muayenede
+    //   reçete yazarken, muayene kartı Diş / İSG / başvurudan, şablon muayene
+    //   içinde, ICD / ilaç her tanı ve ilaç seçiminde açılır. Bu kaynakları
+    //   ekran koduna bağlamak "Reçeteler menüsü kapalı hekim reçete yazamaz"
+    //   demek olurdu. Menü ve matris ekran başına AYRIK; veri çekirdek klinik
+    //   koddan (`muayene`, `katalog`, `prim.kendi`) açılmaya devam eder ve bu
+    //   ekranların köprüsü kasıtlı olarak kalır.
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
     public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);

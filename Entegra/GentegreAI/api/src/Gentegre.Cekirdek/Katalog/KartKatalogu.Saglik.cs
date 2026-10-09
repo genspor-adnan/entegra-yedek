@@ -767,7 +767,7 @@ public static partial class KartKatalogu
     /// <summary>METİN MAKROSU KARTI (411) — kısayoldan hazır metin.</summary>
     private static KartTanimi MetinMakroKarti() => new(
         Ad: "metin-makro",
-        YetkiKodu: "muayene",
+        YetkiKodu: "muayene.makro",   // 1004 aşama 2
         Tablo: "public.metin_makro",
         LogTabloId: 968,
         SubeKolonu: "sube_id",
