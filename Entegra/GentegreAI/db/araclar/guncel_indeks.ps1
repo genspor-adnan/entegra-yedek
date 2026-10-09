@@ -30,7 +30,10 @@ $Cikti = Join-Path $Dizin "GUNCEL.md"
 $Kalip = [regex]'(?m)^\s*create\s+(?:or\s+replace\s+)?(function|view)\s+(?:public\.)?([a-z_][a-z0-9_]*)'
 
 $bulgular = @{}     # "tur|ad" -> dosya listesi
-foreach ($d in (Get-ChildItem $Dizin -Filter "*.sql" | Sort-Object Name)) {
+# SAYISAL SIRA: ad sirasi 1000_'i 197_'den once koyup yururlukteki dosyayi
+#   yanlis gosteriyordu (09.10.2026).
+function GocNo([string]$ad) { if ($ad -match '^(\d+)_') { [int]$Matches[1] } else { [int]::MaxValue } }
+foreach ($d in (Get-ChildItem $Dizin -Filter "*.sql" | Sort-Object { GocNo $_.Name }, Name)) {
     $metin = [System.IO.File]::ReadAllText($d.FullName).ToLowerInvariant()
     foreach ($m in $Kalip.Matches($metin)) {
         $tur = $m.Groups[1].Value.ToLower()
@@ -60,7 +63,7 @@ foreach ($tur in @("function", "view")) {
     $satirlar.Add("|---|---|---|")
     foreach ($k in $liste) {
         $ad = $k.Split("|")[1]
-        $dosyalar = @($bulgular[$k] | Sort-Object)
+        $dosyalar = @($bulgular[$k] | Sort-Object { GocNo $_ }, { $_ })
         $son = $dosyalar[-1]
         $onceki = if ($dosyalar.Count -gt 1) { ($dosyalar[0..($dosyalar.Count - 2)] -join ", ") } else { "—" }
         $satirlar.Add("| ``$ad`` | ``$son`` | $onceki |")

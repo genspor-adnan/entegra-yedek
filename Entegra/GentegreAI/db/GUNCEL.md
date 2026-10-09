@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (506 ad, 141 tanesi birden cok dosyada)
+## Fonksiyonlar (510 ad, 142 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -22,6 +22,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ariza_otomatik_kapat` | `954_ariza_talep_takip.sql` | — |
 | `fn_ariza_talep_ac` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql |
 | `fn_avans_iade_toplam` | `780_avans_iadesi.sql` | — |
+| `fn_banko_acik_oturum` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
+| `fn_banko_devir` | `987_banko_oturum.sql` | — |
+| `fn_banko_oturum_gerekli` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
 | `fn_baslik_harf` | `653_baslik_harfi_kisaltma_ek.sql` | 630_baslik_harf.sql, 651_hizmet_adi_baslik_harfi.sql, 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_baslik_kelime` | `630_baslik_harf.sql` | — |
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
@@ -229,11 +232,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_ana_rol_temizle` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_bolumleri` | `957_duyuru.sql` | — |
 | `fn_kullanici_iskonto_tavani` | `792_sorumlu_kendi_tavani.sql` | — |
-| `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
+| `fn_kullanici_kasa` | `1005_banko_oturum_kasasi.sql` | 196_kasa_atama.sql, 197_kasa_atama_tek_alan.sql |
 | `fn_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |
 | `fn_kullanici_portal_turu` | `794_portal_kapsami.sql` | — |
 | `fn_kullanici_rol_dogrula` | `665_cok_rollu_kullanici.sql` | — |
-| `fn_kullanici_rolleri` | `665_cok_rollu_kullanici.sql` | — |
+| `fn_kullanici_rolleri` | `983_pasif_rol_yetki_vermez.sql` | 665_cok_rollu_kullanici.sql |
 | `fn_kullanici_subeleri` | `666_sube_yerel_ayarlar.sql` | 665_cok_rollu_kullanici.sql |
 | `fn_kullanici_yetki_surumu` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_yetkileri` | `665_cok_rollu_kullanici.sql` | 020_sema_kimlik.sql, 068_taraf_rol_id_kolonlari.sql, 661_basvuru_fiyat_iskonto_yetkisi.sql |
@@ -409,6 +412,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
 | `tg_ariza_talep_cozum` | `954_ariza_talep_takip.sql` | — |
 | `tg_ariza_talep_hareket` | `956_ariza_hareket_devral.sql` | 954_ariza_talep_takip.sql |
+| `tg_banko_pos_varsayilan` | `985_banko_tanimi.sql` | — |
 | `tg_basvuru_yapan_hekim` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_basvuru_yapan_satir` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
@@ -515,7 +519,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (313 ad, 141 tanesi birden cok dosyada)
+## Gorunumler (321 ad, 143 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -535,6 +539,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_asi_uygulama` | `940_personel_unvan_yalniz_onek.sql` | 898_asi_modulu.sql |
 | `v_banka_lookup` | `109_banka.sql` | — |
 | `v_banka_sube_lookup` | `110_banka_sube_bagli_ve_kur.sql` | 109_banka.sql |
+| `v_banko_lookup` | `985_banko_tanimi.sql` | — |
+| `v_banko_oturum_cek` | `991_banko_cek_teslim.sql` | — |
+| `v_banko_oturum_ozet` | `995_vardiya_metni_genislet.sql` | 987_banko_oturum.sql, 988_banko_fark_fisi.sql, 994_banko_vardiya.sql |
+| `v_banko_oturum_pos` | `992_banko_pos_tahsilat_hesabi.sql` | 990_banko_pos_gun_sonu.sql |
+| `v_banko_oturum_pos_atanmamis` | `990_banko_pos_gun_sonu.sql` | — |
+| `v_banko_oturum_tur_ozeti` | `989_banko_odeme_turu_ozeti.sql` | — |
 | `v_basvuru_hekim` | `940_personel_unvan_yalniz_onek.sql` | 578_basvuru_hekim_kaynagi.sql, 583_basvuru_hekim_arama.sql, 718_hekim_calisma_plani.sql |
 | `v_belge_acik_satir` | `471_dagilim_kapanma_tahsil.sql` | 082_belge_donusum.sql, 290_acik_satir_pay.sql, 293_acik_satir_kalem_adi.sql, 352_donusum_tutar_bazli.sql |
 | `v_belge_donusum` | `086_belge_donusum_kurallar.sql` | — |
@@ -628,6 +638,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_goz_bekleme_ekrani` | `976_goz_unite_pano_v2.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_cihaz_ozet` | `978_goz_cihaz_v2.sql` | — |
 | `v_goz_goruntuleme_ozet` | `974_goz_goruntuleme_istem.sql` | — |
 | `v_goz_gozluk_ozet` | `973_gozluk_liste_ozet.sql` | — |
 | `v_goz_kaynak_doluluk` | `976_goz_unite_pano_v2.sql` | — |
@@ -752,6 +763,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_personel_masraf` | `940_personel_unvan_yalniz_onek.sql` | 764_masraf_beyani.sql |
 | `v_plan_vade` | `940_personel_unvan_yalniz_onek.sql` | 077_v_ekstre.sql |
 | `v_portal_davet` | `940_personel_unvan_yalniz_onek.sql` | 822_portal_daveti.sql |
+| `v_pos_hesap_lookup` | `992_banko_pos_tahsilat_hesabi.sql` | — |
 | `v_prim_rol_aday` | `940_personel_unvan_yalniz_onek.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql, 576_personel_departman_tek_kaynak.sql, 808_dis_hekim_raporlayan.sql |
 | `v_prim_rol_lookup` | `391_prim_rol_lookup_onarim.sql` | 362_gonderen_calisma_sekli.sql |
 | `v_prim_taraf_lookup` | `940_personel_unvan_yalniz_onek.sql` | 375_prim_plani_taraf.sql, 377_prim_taraf_lookup_genis.sql, 378_prim_taraf_lookup_aktif.sql |

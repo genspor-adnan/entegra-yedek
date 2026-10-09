@@ -128,8 +128,10 @@ $Kimlik  = @("020_sema_kimlik.sql", "021_goc_kimlik.sql", "022_sema_sube_ebelge.
              "025_fn_belge_no.sql", "026_doviz_tutar_kurali.sql")
 # 027 ve sonrasi: dosya sirasi.
 $Kalan   = @(Get-ChildItem $Dizin -Filter "*.sql" |
-             Where-Object { $_.Name -match '^(\d{3})_' -and [int]$Matches[1] -ge 27 } |
-             Sort-Object Name | ForEach-Object { $_.Name })
+             Where-Object { $_.Name -match '^(\d{3,})_' -and [int]$Matches[1] -ge 27 } |
+             # SAYISAL SIRA (09.10.2026): ad sirasi 1000_'i 101_'den once
+             #   koyuyordu; eski kalip '^(\d{3})_' 1000+ dosyalari hic almiyordu.
+             Sort-Object { [int]($_.Name -split '_')[0] }, Name | ForEach-Object { $_.Name })
 
 if ($TemelAl) {
   # DIKKAT: SQL CALISTIRMAZ, butun dosyalari "uygulandi" isaretler. Yalniz

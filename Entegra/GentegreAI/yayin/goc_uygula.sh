@@ -112,7 +112,11 @@ do \$\$ begin perform pg_advisory_unlock($KILIT); end \$\$;
 SQL
 [ -f "$PAKET/kurulum/000_bos_kurulum.sql" ] && normal "$PAKET/kurulum/000_bos_kurulum.sql" > "$GECICI/_tohum.sql"
 
-DOSYALAR=$(ls "$PAKET"/db/[0-9][0-9][0-9]_*.sql 2>/dev/null | sort || true)
+# SAYISAL SIRA, EN AZ UC HANE (09.10.2026): 1000 ve sonrasi da goc.
+#   Eski kalip `[0-9][0-9][0-9]_` 1000_*.sql dosyalarini HIC almiyordu,
+#   duz `sort` da 1000_'i 101_'den once siraliyordu. `sort -V` sayiyi
+#   sayi olarak karsilastirir.
+DOSYALAR=$(ls "$PAKET"/db/[0-9][0-9][0-9]*_*.sql 2>/dev/null | sort -V || true)
 for D in $DOSYALAR; do normal "$D" > "$GECICI/$(basename "$D")"; done
 docker exec "$PG" mkdir -p "$KAPDIZIN"
 # Windows'ta (Git Bash, yerel test) docker.exe MSYS yolunu anlamaz; sunucuda

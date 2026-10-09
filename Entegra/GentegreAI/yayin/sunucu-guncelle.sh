@@ -68,7 +68,8 @@ if [ -d "$GECICI/db" ]; then
     BEKLEYEN=0
     # Ilk kurulumda defter henuz yok: hata "bekleyen = hepsi" demektir.
     UYGULANMIS=" $( (psqlq -tA -c "select dosya from public.goc_gecmisi" 2>/dev/null || true) | tr '\n' ' ') "
-    for D in "$GECICI"/db/[0-9][0-9][0-9]_*.sql; do
+    # En az uc hane (1000+ goc dahil) - goc_uygula.sh ile ayni kalip.
+    for D in "$GECICI"/db/[0-9][0-9][0-9]*_*.sql; do
         [ -e "$D" ] || continue
         case "$UYGULANMIS" in *" $(basename "$D") "*) ;; *) BEKLEYEN=$((BEKLEYEN+1)) ;; esac
     done

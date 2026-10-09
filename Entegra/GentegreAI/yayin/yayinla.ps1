@@ -154,7 +154,8 @@ foreach ($k in $secilen) {
     $dbHedef = Join-Path $gecici 'db'
     New-Item -ItemType Directory -Path $dbHedef -Force | Out-Null
     Get-ChildItem (Join-Path $kok 'db') -Filter '*.sql' |
-        Where-Object { $_.Name -match '^\d{3}_' } |
+        # En az uc hane: 1000 ve sonrasi da goc (eski '^\d{3}_' onlari atliyordu).
+        Where-Object { $_.Name -match '^\d{3,}_' } |
         Copy-Item -Destination $dbHedef
     # KURULUM DOSYALARI (tek kaynak, db/kurulum): bos kurulum tohumu, MSSQL
     #   aktarim adimlari listesi, dis veri on kosullari. Sunucudaki goc
