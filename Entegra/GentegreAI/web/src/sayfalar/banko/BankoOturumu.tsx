@@ -1069,7 +1069,8 @@ const bostil = `
 .bo-ust { color: var(--ikincil-metin, #6b7a8b); font-size:12px; }
 .bo-akis { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
 .bo-akis-sag { margin-left:auto; }
-.bo-ikincil { border:1px solid var(--cizgi, #cdd6e0); border-radius:4px; padding:6px 12px; font-size:12px;
+/* Küçük (kullanıcı 09.10.2026: "kapat butonu da küçült"). */
+.bo-ikincil { border:1px solid var(--cizgi, #cdd6e0); border-radius:3px; padding:2px 8px; font-size:11px;
   background: var(--yuz, #fff); color: var(--yazi2, #1f2d3a); cursor:pointer; }
 .bo-ikincil:hover { border-color: var(--mor, #2f6db3); }
 .bo-ad { display:flex; align-items:center; gap:6px; border:1px solid var(--cizgi, #cdd6e0);

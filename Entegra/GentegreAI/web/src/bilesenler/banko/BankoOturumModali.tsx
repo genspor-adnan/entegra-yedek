@@ -48,9 +48,11 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
         <style>{stil}</style>
         <div className="bom-bas">
           {oturumId ? `🏦 Banko Oturumu #${oturumId}` : '🏦 Banko Oturumu'}
-          <button type="button" className="bom-buyut" onClick={tamCevir}
-                  title={tam ? 'Pencere boyutuna dön' : 'Ekranı kapla'} aria-pressed={tam}>
-            {tam ? '⤡' : '⤢'}
+          {/* Diğer pencerelerle AYNI kare ikon ve sınıf (Modal.tsx kabas-dugme)
+              - kullanıcı 09.10.2026: "max ikonu da kare yap diğer ekranlar gibi". */}
+          <button type="button" className="kabas-dugme bom-buyut" onClick={tamCevir}
+                  title={tam ? 'Pencereye döndür' : 'Tam ekran'} aria-pressed={tam}>
+            {tam ? '🗗' : '🗖'}
           </button>
           {/* BAŞLIKTA ✖ YOK (kullanıcı 09.10.2026: "sağ üst köşeden kapatma x i
               kaldır"): kapatma oturum ekranındaki "Kapat" düğmesinde; Esc de kapatır. */}
@@ -71,9 +73,7 @@ const stil = `
   box-shadow:0 18px 48px rgba(16,28,42,.28); overflow:hidden }
 .bom-bas { background:linear-gradient(#2b5c95,#1c4374); color:#fff; padding:9px 12px;
   font-weight:bold; font-size:13.5px; display:flex; align-items:center; flex:none }
-.bom-buyut { margin-left:auto; background:none; border:1px solid rgba(255,255,255,.45); color:#fff;
-  cursor:pointer; font-size:13px; line-height:18px; border-radius:3px; padding:0 6px }
-.bom-buyut:hover { background:rgba(255,255,255,.15) }
+.bom-buyut { margin-left:auto }
 /* Tam ekran: kenar boşluğu küçülür, pencere ekranı kaplar. */
 .bom-ort.tam { padding:8px }
 .bom.tam { width:100%; max-height:calc(100vh - 16px); height:calc(100vh - 16px) }
