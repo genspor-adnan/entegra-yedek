@@ -20993,3 +20993,27 @@ en sonda rename eder - bundan sonraki göçler `banko_gorevlisi` kullanmalı.
 
 dotnet test 226 geçti, vitest 797 (88 dosya). Tarayıcıda Banko Görevlisi ile
 başvuru ekranı hatasız açılıyor, 403 kalmadı.
+
+### 09.10.2026 — Rol kodu: kayit_kabul_sorumlu -> banko_sorumlusu (1001)
+
+Kullanıcı: *"kayit_kabul_sorumlu kodu da banko_sorumlusu olsun"*. Adı 984'ten
+beri "Banko Sorumlusu"ydu, kodu eski kalmıştı.
+
+Kod, `StandartRolUclari` kadro ağacında **Hasta hizmetleri bölgesinin
+kökü**dür: banko görevlisi, vezne, yatış ofisi, danışma, tıbbi sekreter,
+doktor sekreteri, hasta hakları, tedavi danışmanı, OSGB sekreteri ve çağrı
+süpervizörü üst rol olarak onu gösteriyor - 13 referans birlikte değişti.
+Üst rol bağı `ust_rol_id` (ID) ile tutulduğu için alt rollerin bağı
+kendiliğinden korunuyor.
+
+1000'deki gerekçelerin aynısı: rename ekrandan değil göçten (rol kartında
+`kod` kilitli), küçük harf zorunlu (`ck_rol_kod`), `fn_rol_sistem_koru`
+tetiği aynı işlemde kapatılıp açılıyor.
+
+**Göç dev veritabanına UYGULANMADI:** Docker engine yanıt vermeyi bıraktı
+(konteyner ayaktaydı, API bağlanıyordu ama `docker` komutları sessiz
+dönüyordu; Docker Desktop yeniden başlatılınca da engine gelmedi). Kaynak
+kod ve betik hazır, `db/1001_banko_sorumlusu_rol_kodu.sql` uygulanmayı
+bekliyor. **Uygulanana kadar dev ortamında API ile DB tutarsızdır**: kodda
+`banko_sorumlusu`, veritabanında hâlâ `kayit_kabul_sorumlu` - standart rol
+ekranı o rolü "eksik" gösterir.

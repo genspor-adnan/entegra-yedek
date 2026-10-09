@@ -70,7 +70,7 @@ public static class StandartRolUclari
         //   bu, HER BANKO CALISANINI birim onaycisi yapiyordu - talebi acan
         //   kendi talebini onaylayamasa da (783) yanindaki mesai arkadasi
         //   onaylayabiliyordu. Denetim degil karsilikli imza olurdu.
-        //   Basamak ayri bir role tasindi: `kayit_kabul_sorumlu`.
+        //   Basamak ayri bir role tasindi: `banko_sorumlusu`.
     ];
 
     /// <summary>
@@ -206,20 +206,20 @@ public static class StandartRolUclari
         ["sosyal_hizmet"]        = new("Yardımcı sağlık ve teknik", null, 130),
         ["steril_sorumlu"]       = new("Yardımcı sağlık ve teknik", null, 135),
         // ------------------------------------------------ hasta hizmetleri ----
-        ["kayit_kabul_sorumlu"]  = new("Hasta hizmetleri", null, 10),
-        ["banko_gorevlisi"]      = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 20),
-        ["vezne"]                = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 30),
-        ["yatis_ofisi"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 40),
-        ["tedavi_danismani"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 50),
-        ["osgb_sekreter"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 60),
-        ["cagri_supervizor"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 62),
+        ["banko_sorumlusu"]      = new("Hasta hizmetleri", null, 10),
+        ["banko_gorevlisi"]      = new("Hasta hizmetleri", "banko_sorumlusu", 20),
+        ["vezne"]                = new("Hasta hizmetleri", "banko_sorumlusu", 30),
+        ["yatis_ofisi"]          = new("Hasta hizmetleri", "banko_sorumlusu", 40),
+        ["tedavi_danismani"]     = new("Hasta hizmetleri", "banko_sorumlusu", 50),
+        ["osgb_sekreter"]        = new("Hasta hizmetleri", "banko_sorumlusu", 60),
+        ["cagri_supervizor"]     = new("Hasta hizmetleri", "banko_sorumlusu", 62),
         ["cagri_operator"]       = new("Hasta hizmetleri", "cagri_supervizor", 64),
         // DANISMA bankonun yaninda: ikisi de banko sefine bagli, hasta
         //   hizmetleri bolumunde.
-        ["danisma"]              = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 65),
-        ["tibbi_sekreter"]       = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 70),
-        ["doktor_sekreteri"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 80),
-        ["hasta_haklari"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 90),
+        ["danisma"]              = new("Hasta hizmetleri", "banko_sorumlusu", 65),
+        ["tibbi_sekreter"]       = new("Hasta hizmetleri", "banko_sorumlusu", 70),
+        ["doktor_sekreteri"]     = new("Hasta hizmetleri", "banko_sorumlusu", 80),
+        ["hasta_haklari"]        = new("Hasta hizmetleri", "banko_sorumlusu", 90),
         ["cagri_sorumlu"]        = new("Hasta hizmetleri", null, 100),
         ["cagri_ajani"]          = new("Hasta hizmetleri", "cagri_sorumlu", 110),
         ["sekreter"]             = new("Hasta hizmetleri", null, 120),
@@ -353,7 +353,7 @@ public static class StandartRolUclari
             Klinik,
             K(T("hasta"), T("randevu"), T("belge"), T("taraf"), T("personel"),
               T("kurum"), T("hizmet"), T("bildirim"))),
-        new("kayit_kabul_sorumlu", "Banko Sorumlusu",
+        new("banko_sorumlusu", "Banko Sorumlusu",
             "Bankonun tüm işleri + iskonto talebinin birim imzası, vardiya/kasa kapatma.", Klinik,
             K(KayitKabulSorumluTemel)),
         // AD "Doktor" (790, kullanici: "Hekim rename Doktor") - KOD `hekim`
