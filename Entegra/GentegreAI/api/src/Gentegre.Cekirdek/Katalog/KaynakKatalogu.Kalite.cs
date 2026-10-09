@@ -150,7 +150,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi LabKkKural() => new(
         Ad: "lab-kk-kural",
-        YetkiKodu: "lab.kk",
+        YetkiKodu: "lab.kk.kural",   // 1004 aşama 2: kendi kodu (Westgard)
         Kaynak: "public.lab_kk_kural k left join public.lab_tetkik t on t.id = k.tetkik_id",
         SubeKolonu: null,
         VarsayilanSirala: "k.tetkik_id nulls first, k.sira",
@@ -218,7 +218,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi LabIndeksEsik() => new(
         Ad: "lab-indeks-esik",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.indeks",   // 1004 aşama 2: kendi kodu (serum indeksi)
         Kaynak: "public.lab_indeks_esik e "
               + "  left join public.lab_tetkik t on t.id = e.tetkik_id",
         SubeKolonu: null,

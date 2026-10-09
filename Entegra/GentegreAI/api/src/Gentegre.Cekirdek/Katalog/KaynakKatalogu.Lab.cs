@@ -439,7 +439,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi LabAkilciKural() => new(
         Ad: "lab-akilci-kural",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.akilci_kural",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.lab_akilci_kural k left join public.hizmet h on h.id = k.hizmet_id",
         SubeKolonu: null,
         VarsayilanSirala: "k.sut_kodu asc",
@@ -949,7 +949,7 @@ public static partial class KaynakKatalogu
     /// <summary>REFLEKS TEST KURALLARI (873 §6): kurum laboratuvarı tanımlar.</summary>
     private static KaynakTanimi LabRefleksKural() => new(
         Ad: "lab-refleks-kural",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.refleks_kural",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.lab_refleks_kural k join public.lab_tetkik t on t.id = k.tetkik_id join public.lab_tetkik h on h.id = k.hedef_tetkik_id",
         SubeKolonu: null,
         VarsayilanSirala: "t.kod asc, k.id asc",
@@ -967,7 +967,7 @@ public static partial class KaynakKatalogu
     /// <summary>AKILCI İSTEM KARARLARI (873): hekim gerekçeleri / vazgeçmeler / refleks-reflektif izi (Bakanlık analizi).</summary>
     private static KaynakTanimi LabAkilciGerekce() => new(
         Ad: "lab-akilci-gerekce",
-        YetkiKodu: "lab",
+        YetkiKodu: "lab.akilci_karar",   // 1004 aşama 2: kendi kodu (Akılcı İstem Kararları)
         Kaynak: "public.lab_akilci_gerekce g "
               + "left join public.hizmet h on h.id = g.hizmet_id "
               + "left join public.taraf p on p.id = g.hekim_id "

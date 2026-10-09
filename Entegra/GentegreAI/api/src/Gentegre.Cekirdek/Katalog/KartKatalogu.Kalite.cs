@@ -102,7 +102,7 @@ public static partial class KartKatalogu
 
     private static KartTanimi LabKkKuralKarti() => new(
         Ad: "lab-kk-kural",
-        YetkiKodu: "lab.kk",
+        YetkiKodu: "lab.kk.kural",   // 1004 aşama 2: kendi kodu
         Tablo: "public.lab_kk_kural",
         LogTabloId: 1024,
         SubeKolonu: null,
@@ -208,7 +208,7 @@ public static partial class KartKatalogu
     /// <summary>SERUM İNDEKSİ EŞİĞİ (444) — test bazlı HIL sınırları.</summary>
     private static KartTanimi LabIndeksEsikKarti() => new(
         Ad: "lab-indeks-esik",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.indeks",   // 1004 aşama 2: kendi kodu
         Tablo: "public.lab_indeks_esik",
         LogTabloId: 1027,
         SubeKolonu: null,

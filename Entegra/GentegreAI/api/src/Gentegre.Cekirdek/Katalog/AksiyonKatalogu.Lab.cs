@@ -220,12 +220,12 @@ public static partial class AksiyonKatalogu
         ];
 
         s["lab-kk-lot-liste"] = Crud("lab-kk-lot", "lab-kk-lot", "lab.kk");
-        s["lab-kk-kural-liste"] = Crud("lab-kk-kural", "lab-kk-kural", "lab.kk");
+        s["lab-kk-kural-liste"] = Crud("lab-kk-kural", "lab-kk-kural", "lab.kk.kural");
         s["lab-dkk-liste"] = Crud("lab-dkk", "lab-dkk", "lab.kk");
         s["lab-cihaz-olay-liste"] =
             Crud("lab-cihaz-olay", "lab-cihaz-olay", "lab.kk");
         s["lab-indeks-esik-liste"] =
-            Crud("lab-indeks-esik", "lab-indeks-esik", "lab.tetkik");
+            Crud("lab-indeks-esik", "lab-indeks-esik", "lab.tetkik.indeks");
 
         // DIS LABORATUVAR (445). Gonderim bir surec: her adim ayri dugme.
         //   "Sonuc Gir" burada cunku dis lab sonucu PDF/portal ile gelir
@@ -268,8 +268,8 @@ public static partial class AksiyonKatalogu
 
         s["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik");
         // AKILCI TEST İSTEMİ (873): kural kataloğu, refleks kuralları; karar günlüğü salt okunur.
-        s["lab-akilci-kural-liste"] = Crud("lab-akilci-kural", "lab-akilci-kural", "lab.tetkik");
-        s["lab-refleks-kural-liste"] = Crud("lab-refleks-kural", "lab-refleks-kural", "lab.tetkik");
+        s["lab-akilci-kural-liste"] = Crud("lab-akilci-kural", "lab-akilci-kural", "lab.tetkik.akilci_kural");
+        s["lab-refleks-kural-liste"] = Crud("lab-refleks-kural", "lab-refleks-kural", "lab.tetkik.refleks_kural");
         s["lab-akilci-gerekce-liste"] =
         [
             new("genel.yazdir", "🖨️ Yazdır", "lab", Hedef: "araccubugu2,palet", Sira: 90, UrunModu: 2),

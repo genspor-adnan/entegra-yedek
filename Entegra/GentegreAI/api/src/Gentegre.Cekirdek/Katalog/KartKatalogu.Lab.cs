@@ -457,7 +457,7 @@ public static partial class KartKatalogu
     /// <summary>AKILCI TEST İSTEM KURALI kartı (873). SUT kodu ve hizmet bağı kurulumdan gelir; kurum süre/branş/basamak/aktif düzeltir.</summary>
     private static KartTanimi LabAkilciKuralKarti() => new(
         Ad: "lab-akilci-kural",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.akilci_kural",   // 1004 aşama 2: kendi kodu
         Tablo: "public.lab_akilci_kural",
         LogTabloId: 1351,
         SubeKolonu: null,
@@ -675,7 +675,7 @@ public static partial class KartKatalogu
     /// <summary>REFLEKS TEST KURALI kartı (873 §6).</summary>
     private static KartTanimi LabRefleksKuralKarti() => new(
         Ad: "lab-refleks-kural",
-        YetkiKodu: "lab.tetkik",
+        YetkiKodu: "lab.tetkik.refleks_kural",   // 1004 aşama 2: kendi kodu
         Tablo: "public.lab_refleks_kural",
         LogTabloId: 1352,
         SubeKolonu: "sube_id",

@@ -207,6 +207,9 @@ public static partial class EkranKodlari
         "muayene.makro",
         // Radyoloji (1004 aşama 2): yalnız Çekim Protokolleri tanımı ayrıldı.
         "radyoloji.protokol",
+        // Laboratuvar (1004 aşama 2): yalnız kural / denetim tanımları.
+        "lab.akilci_karar", "lab.kk.kural", "lab.tetkik.akilci_kural",
+        "lab.tetkik.refleks_kural", "lab.tetkik.indeks",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
@@ -225,6 +228,12 @@ public static partial class EkranKodlari
     //   Konsültasyonlar / Sonuç Teslim ve teleradyoloji listeleri (iş akışı
     //   ekranları; işlemleri çekirdek `radyoloji` / `teleradyoloji` uçlarıyla
     //   yapılır - ayırmak "ekranı görür, işlem yapamaz" demek olurdu).
+    //
+    // BİLİNÇLİ KÖPRÜ - LABORATUVAR: Paneller (istem sepeti), Antibiyotik /
+    //   Besiyeri (mikrobiyoloji sonuç girişi), Kontrol Lotları (KK ölçümünde
+    //   lot seçimi), Dış Laboratuvarlar (gönderimde lab seçimi), Genetik
+    //   Panelleri / Varyant / Run (vaka akışı), Dış Kalite / Cihaz Olayları
+    //   (KK akışı), Arşiv Kayıtları ve Cihaz Mesajları (Göz / Lab ekranları).
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
     public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);

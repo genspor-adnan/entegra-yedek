@@ -250,4 +250,26 @@ public sealed class EkranKoduBolmeTestleri
         Assert.True(Set("radyoloji.sablon").Var("radyoloji", Islem.Gor));
         Assert.True(Set("radyoloji.kritik").Var("radyoloji", Islem.Gor));
     }
+
+    // ----------------------------------------- 1004 aşama 2: Laboratuvar ---
+
+    [Fact]
+    public void Lab_kural_tanimlari_ayrildi_akis_kaynaklari_koprude()
+    {
+        var ayri = new Dictionary<string, string>
+        {
+            ["lab-akilci-gerekce"] = "lab.akilci_karar", ["lab-kk-kural"] = "lab.kk.kural",
+            ["lab-akilci-kural"] = "lab.tetkik.akilci_kural", ["lab-refleks-kural"] = "lab.tetkik.refleks_kural",
+            ["lab-indeks-esik"] = "lab.tetkik.indeks",
+        };
+        foreach (var (kaynak, kod) in ayri)
+        {
+            Assert.Equal(kod, KaynakKatalogu.Bul(kaynak)!.YetkiKodu);
+            Assert.True(EkranKodlari.KendiKapisinda(kod), kod);
+        }
+        // Köprü: istem sepeti paneli, mikro sonuç antibiyotiği, KK lotu.
+        Assert.True(Set("lab.tetkik.panel").Var("lab.tetkik", Islem.Gor));
+        Assert.True(Set("lab.mikro.antibiyotik").Var("lab.mikro", Islem.Gor));
+        Assert.True(Set("lab.kk.lot").Var("lab.kk", Islem.Gor));
+    }
 }
