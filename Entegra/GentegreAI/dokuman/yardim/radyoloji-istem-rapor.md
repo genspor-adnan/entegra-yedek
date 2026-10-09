@@ -12,12 +12,13 @@ urun_modu: 2
 yetki: radyoloji-istem
 erisim: kullanici
 ozet: Radyoloji › Çalışma Listesi ekranında istem açma, cihaz randevusu, çekildi işaretleme, sarf düşme, rapor yazma / onaylama, kritik bulgu ve sonuç teslimi.
-guncelleme: 2026-09-19
+guncelleme: 2026-10-10
 dogrulama: kod-incelemesi
 ---
 
 ## Amaç
-Radyoloji Çalışma Listesi modülün giriş ekranıdır: istem burada açılır, cihaza randevu verilir, çekim işaretlenir, rapor yazılır ve onaylanır, sonuç teslim edilir. Ayrı bir istem ekranı yoktur; kart bu listeden açılır (`/radyoloji/[kayıt no]`).
+Radyoloji Çalışma Listesi modülün giriş ekranıdır: cihaza randevu verilir, çekim işaretlenir, rapor yazılır ve onaylanır, sonuç teslim edilir. İstem bu listeden **açılmaz**; yalnız başvurudan (banko kabulü, randevuda ✔ Geldi), muayeneden (hekim istemi) ya da dış kurum / dış doktor portalından gelir. Kart bu listeden açılır (`/radyoloji/[kayıt no]`).
+Rol bazlı ayrıntılı belgeler: `radyoloji-hasta-kabul` (banko), `radyoloji-calisma-listesi` (teknisyen), `radyoloji-rapor-yazma-onay` (radyolog), `radyoloji-sonuc-teslim`, genel akış `goruntuleme-gunluk-akis`.
 
 ## Ekrana giriş yolları
 - Sol menü: **Radyoloji › Çalışma Listesi**; aynı grupta **Pano**, **Kritik Bulgular**, **Konsültasyonlar**, **Sonuç Teslim**, Ayarlar altında **Rapor Şablonları**, **Çekim Protokolleri**, **Cihazlar**.
@@ -41,7 +42,7 @@ Kolonlar: Accession · Hasta · Tetkik · İsteyen Kurum · Ödeyen Kurum · Rad
 Çipler: **Bekleyen Çekim · Raporlanacak · Raporlanıyor · Onay Bekleyen · Onaylandı · Tümü**; tarih süzgeci saat alanına göre.
 
 ## İşlemler (düğmeler)
-- `radyoloji.yeni` **＋ Yeni İstem** (Ctrl+N), `radyoloji.duzenle` **✎ Düzenle** (Enter).
+- `radyoloji.duzenle` **✎ Aç / Düzenle** (Enter). Listede "Yeni İstem" düğmesi yoktur (başvurusuz, ücretsiz istem açılmasın diye).
 - `radyoloji.randevu` **📅 Randevu Ver**: cihaza randevu (randevu modülüne yazılır).
 - `radyoloji.cekildi` **✔ Çekildi İşaretle**: çekim zamanı; sarf penceresi kendiliğinden açılır.
 - `radyoloji.sarf` **🧪 Sarf Düş**: kontrast / malzeme stoktan düşer.
@@ -51,10 +52,10 @@ Kolonlar: Accession · Hasta · Tetkik · İsteyen Kurum · Ödeyen Kurum · Rad
 - Kritik Bulgular listesinde bildirim / kapatma; Konsültasyonlar listesinde cevap.
 
 ## Adım adım
-1. **Radyoloji › Çalışma Listesi › ＋ Yeni İstem**: hasta, tetkik, klinik bilgi ve isteyen hekimi girin; **Kaydet**.
-2. **📅 Randevu Ver** ile cihaz ve saat seçin (walk-in cihazda gerekmez).
+1. İstem kabulde açılır: **Randevu › Randevular**'da cihaz randevusunu seçip **✔ Geldi** → Radyoloji İstemi penceresinde tetkik, klinik bilgi ve isteyen hekimi girin; **✔ İstemi Aç** ya da **💵 Tahsilat Al ve Kabul Et**. Hekimin muayeneden istediği tetkik başvuru kartında **🩺 Doktor İstemi** ile ücretlendirilip kaydedilince listeye düşer.
+2. Randevusu yoksa listede **📅 Randevu Ver** ile cihaz ve saat seçin (walk-in cihazda gerekmez).
 3. Hasta geldiğinde Kontrol Listesi'ni doldurun; çekimden sonra **✔ Çekildi İşaretle**, açılan pencerede sarfı onaylayın.
-4. Radyolog **✎ Rapor Yaz** → şablon yüklenir, makrolarla metni yazın, **💾 Taslak Kaydet**; sonra raporu onaya gönderin / onaylayın (rapor ekranındaki durum düğmeleri).
+4. Radyolog **✎ Rapor Yaz** → şablon yüklenir, makrolarla metni yazın, **💾 Taslak Kaydet**; uzman onayı gerekiyorsa **➜ Uzmana Gönder**, onay yetkisi varsa **✍ Onayla ve İmzala**.
 5. Kritik bulgu varsa rapor ekranında "Bu tetkikte kritik bulgu var" işaretleyip bildirilen kişiyi yazın; takibi **Kritik Bulgular** ekranından kapatın.
 6. Onaylı raporu **📦 Sonuç Teslim Et** ile teslim edin; teslim alan kişi zorunludur.
 
@@ -104,4 +105,4 @@ Kolonlar: Accession · Hasta · Tetkik · İsteyen Kurum · Ödeyen Kurum · Rad
 - dokuman/00_TARIHCE.md (283-336 radyoloji)
 
 ## Doğrulama durumu
-Kod incelemesiyle yazıldı. Rapor ekranındaki onay / onaya gönder düğmelerinin tam adları doğrulanacak.
+Kod incelemesiyle yazıldı. 10.10.2026: listeden kaldırılmış "＋ Yeni İstem" düğmesi çıkarıldı, istemin kabulden / muayeneden doğduğu yazıldı; rapor ekranı düğme adları (➜ Uzmana Gönder, ✍ Onayla ve İmzala, ＋ Ek Rapor, 🖨 Çıktı) koddan doğrulandı.

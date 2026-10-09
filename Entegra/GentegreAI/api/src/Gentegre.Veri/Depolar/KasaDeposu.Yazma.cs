@@ -106,8 +106,11 @@ public sealed partial class KasaDeposu
                 //   görevlisi vardiyasını açmadan tahsilat alamaz - aldığı
                 //   para hiçbir gün sonunda görünmezdi.
                 throw GentegreHatasi.IsKurali(
-                    "Tahsilat için açık banko oturumu gerekiyor. Kayıt Kabul > Bankolar'dan "
-                    + "\"Oturum Aç\" ile vardiyanızı başlatın.");
+                    // YOL GÖREVLİNİN GÖRDÜĞÜ EKRAN (10.10.2026): 1002'den beri banko
+                    //   görevlisi Bankolar tanımını görmüyor; oturumu Banko
+                    //   Oturumları listesinden açıyor.
+                    "Tahsilat için açık banko oturumu gerekiyor. Kayıt Kabul › Banko Oturumları'ndan "
+                    + "\"＋ Yeni Oturum Aç\" ile vardiyanızı başlatın.");
             }
         }
 
