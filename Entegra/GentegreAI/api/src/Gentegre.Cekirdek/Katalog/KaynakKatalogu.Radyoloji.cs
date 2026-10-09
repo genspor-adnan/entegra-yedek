@@ -92,7 +92,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi RadyolojiProtokol() => new(
         Ad: "radyoloji-protokol",
-        YetkiKodu: "radyoloji",
+        YetkiKodu: "radyoloji.protokol",   // 1004 aşama 2: Çekim Protokolleri tanımı kendi kodu (klinik uçlar tabloyu kendi SQL ile okur)
         Kaynak: "public.radyoloji_protokol p " +
                 "join public.hizmet hz on hz.id = p.hizmet_id",
         SubeKolonu: null,

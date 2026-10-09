@@ -205,6 +205,8 @@ public static partial class EkranKodlari
         "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis",
         // Muayene (1004 aşama 2): yalnız Metin Makroları yönetimi ayrıldı.
         "muayene.makro",
+        // Radyoloji (1004 aşama 2): yalnız Çekim Protokolleri tanımı ayrıldı.
+        "radyoloji.protokol",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
@@ -217,6 +219,12 @@ public static partial class EkranKodlari
     //   demek olurdu. Menü ve matris ekran başına AYRIK; veri çekirdek klinik
     //   koddan (`muayene`, `katalog`, `prim.kendi`) açılmaya devam eder ve bu
     //   ekranların köprüsü kasıtlı olarak kalır.
+    //
+    // BİLİNÇLİ KÖPRÜ - RADYOLOJİ: Rapor Şablonları (rapor yazarken şablon
+    //   kartı yüklenir), Cihazlar (randevuda cihaz seçimi), Kritik Bulgular /
+    //   Konsültasyonlar / Sonuç Teslim ve teleradyoloji listeleri (iş akışı
+    //   ekranları; işlemleri çekirdek `radyoloji` / `teleradyoloji` uçlarıyla
+    //   yapılır - ayırmak "ekranı görür, işlem yapamaz" demek olurdu).
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
     public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);

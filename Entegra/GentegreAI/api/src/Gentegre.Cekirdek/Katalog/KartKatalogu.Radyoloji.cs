@@ -256,7 +256,7 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi RadyolojiProtokol() => new(
         Ad: "radyoloji-protokol",
-        YetkiKodu: "radyoloji",
+        YetkiKodu: "radyoloji.protokol",   // 1004 aşama 2
         Tablo: "public.radyoloji_protokol",
         LogTabloId: 1280,
         SubeKolonu: null,

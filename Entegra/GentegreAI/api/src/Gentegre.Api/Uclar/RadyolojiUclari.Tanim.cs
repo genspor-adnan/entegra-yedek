@@ -180,7 +180,8 @@ public static partial class RadyolojiUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Gor);
+            // 1004 aşama 2: yalnız Çekim Protokolleri ekranının önizleme paneli.
+            baglam.YetkiIste("radyoloji.protokol", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var p = await b.TekAsync("""
                 select coalesce(hz.ad, '') as tetkik, coalesce(p.seri_tarifi, '') as "seriKodu", p.sure_dk as "sureDk",

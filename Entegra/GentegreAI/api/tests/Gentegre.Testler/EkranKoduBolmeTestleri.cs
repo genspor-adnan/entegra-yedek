@@ -237,4 +237,17 @@ public sealed class EkranKoduBolmeTestleri
         Assert.True(Set("muayene.recete").Var("muayene", Islem.Gor));
         Assert.True(Set("muayene.liste").Var("muayene", Islem.Gor));
     }
+
+    // ------------------------------------------- 1004 aşama 2: Radyoloji ---
+
+    [Fact]
+    public void Cekim_protokolu_ayrildi_akis_ekranlari_koprude()
+    {
+        Assert.Equal("radyoloji.protokol", KaynakKatalogu.Bul("radyoloji-protokol")!.YetkiKodu);
+        Assert.False(Set("radyoloji.protokol").Var("radyoloji", Islem.Gor));
+        Assert.False(Set("radyoloji").Var("radyoloji.protokol", Islem.Gor));
+        // Bilinçli köprü: rapor şablonu ve kritik bulgu iş akışı çekirdekte.
+        Assert.True(Set("radyoloji.sablon").Var("radyoloji", Islem.Gor));
+        Assert.True(Set("radyoloji.kritik").Var("radyoloji", Islem.Gor));
+    }
 }
