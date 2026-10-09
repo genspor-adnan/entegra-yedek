@@ -223,7 +223,7 @@ public static partial class KaynakKatalogu
     //   kolonlari burada hep bos kalirdi.
     private static KaynakTanimi StokTransfer() => new(
         Ad: "stok-transfer",
-        YetkiKodu: "belge",
+        YetkiKodu: "belge.stok",
         Kaynak: """
             public.belge b
             left join public.depo cd on cd.id = b.cikis_depo_id
@@ -258,7 +258,7 @@ public static partial class KaynakKatalogu
     //   asil hareketi stok transferi (20) yapar.
     private static KaynakTanimi StokTalep() => new(
         Ad: "stok-talep",
-        YetkiKodu: "belge",
+        YetkiKodu: "belge.stok",
         Kaynak: """
             public.belge b
             left join public.depo cd on cd.id = b.cikis_depo_id
@@ -303,7 +303,9 @@ public static partial class KaynakKatalogu
 
         return new KaynakTanimi(
             Ad: giris ? "giris-fis" : "cikis-fis",
-            YetkiKodu: "belge",
+            // STOK FISI KENDI YETKISINDE (998): `belge` kodu basvurudan
+            //   stok fisine kadar her seyi aciyordu.
+            YetkiKodu: "belge.stok",
             Kaynak: """
                 public.belge b
                 left join public.depo d on d.id = coalesce(b.giris_depo_id, b.cikis_depo_id)

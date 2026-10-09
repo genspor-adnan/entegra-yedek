@@ -20901,3 +20901,51 @@ artık görünür alana kaydırılıyor (uzun kartta kutu ekran dışında kalı
 
 Rol kartındaki kullanıcı gridinden telefon ve e-posta kolonları kalktı.
 vitest 796 (88 dosya).
+
+### 09.10.2026 — Belge türü yetki kısıtı: menüden düşen ekran adresten de açılmıyor
+
+Kullanıcı: *"o süzmeyi de yap"*. 998 menü kodlarını bölmüştü ama kaynak
+yetkisi tek kod (`belge`) olduğundan menüden düşen ekran, adresi bilen
+kullanıcı için açık kalıyordu.
+
+**İki kapı kuruldu.**
+
+*Liste:* `KaynakKatalogu.BelgeKisiti` kümeleri belge türlerine bağlıyor (satış
+14-19/119, alış 9-13/109, stok 3/4/20/105); `SorguUretici.BelgeKumeleri`
+verilince yetkisiz tür WHERE'e hiç girmiyor. Satır, sayım ve toplam **aynı**
+koşulu taşıyor - biri unutulsa sayfa "12 kayıt" der, grid 3 satır çizerdi.
+Küme hesaplanıp boş çıkarsa koşul `false`: "kısıt hesaplandı ama boş"
+durumunda listeyi açık bırakmak sızdırma olurdu. Küme *verilmezse* (null)
+koşul hiç eklenmez - bağlamsız çağrılar (döküm, özet) davranışını korur.
+
+*Kart:* `/api/belge/{id}` de aynı kararı veriyor ve **"bulunamadı"** dönüyor,
+"yetkisiz" değil - yetkisiz cevabı kaydın var olduğunu söyler, belge numarası
+deneyerek kurumun ciro hacmi çıkarılabilirdi.
+
+**Tür 19 iki anlamlı:** HBYS başvurusu ile ERP satış siparişi aynı türdür,
+ayıran `tipi` (30 / 1). Bu yüzden çekirdek `belge` yetkisi türü değil
+`(tur = 19 and tipi = 30)` çiftini açıyor.
+
+Tek türlü kaynakların yetkisi de yeni kodlara geçti (12 kaynak: irsaliye,
+açık satır, gelen kutusu, stok fişleri, hesap ekstresi, banka tanımları,
+vade/planlar, sigorta tanım ekranları). **`hesap` ve `kasa-islem` kaynakları
+çekirdek kaldı**: tahsilat akışı (`HesapSecModali`, `useParaAkislari`) POS ve
+hesap seçimi için onları çağırıyor - daraltmak banko görevlisinin tahsilatını
+bozardı. Menü ekranları zaten `hesap.tanim` / `kasa.finans` ile gizli.
+
+Ölçüm (dev DB): banko görevlisi filtresiz belge listesinde **54 kayıt
+görüyor, hepsi başvuru**; tür 15 ve 11 sorguları 0 dönüyor; satış belgesinin
+kartı "bulunamadı". Yönetici 69 kayıt ve tüm türleri görüyor.
+
+8 birim testi (`BelgeTuruYetkisiTestleri`) üretilen SQL'i okuyor - veritabanı
+istemiyor, çünkü iddia "sorguya hangi koşul girdi". `SigortaTestleri` tanım
+ekranlarının yeni kodunu kayda geçirecek şekilde güncellendi (provizyon
+çekirdek `sigorta`da kalır, tanım ekranları `sigorta.tanim`).
+
+**Bankolar menüsü Finans'a taşındı** (kullanıcı: *"sadece Bankolar menüsünü de
+eski yeri olan Finans altına al.. oturum ve onay burada kalsın"*) - banko
+tanımı kasa/POS kurulumudur, POS'un yanında durur; oturum açma ve sorumlu
+onayı günlük işler, Kayıt Kabul'de kaldı. Sol menü grup okları 10 px → 15 px
+(kullanıcı: *"ana menü de sağdaki okları da daha büyük yap"*).
+
+dotnet test 226 geçti (362 atlandı - DB testleri), vitest 797 (88 dosya).

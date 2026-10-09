@@ -16,7 +16,8 @@ public sealed class ListeDeposu
     public async Task<ListeYaniti> SorgulaAsync(KaynakTanimi kaynak, ListeIstegi istek,
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
         string izlemeNo, int? kullaniciId, CancellationToken iptal = default,
-        short portalTuru = 0, int? hekimId = null, IReadOnlyList<int>? tetkikRolleri = null)
+        short portalTuru = 0, int? hekimId = null, IReadOnlyList<int>? tetkikRolleri = null,
+        IReadOnlyCollection<string>? belgeKumeleri = null)
     {
         var kronometre = Stopwatch.StartNew();
 
@@ -25,11 +26,16 @@ public sealed class ListeDeposu
         //   baskasinin kaydini cizer.
         SorguUretici Uretici() => portalTuru > 0
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
-                  { HekimId = hekimId, TetkikRolleri = tetkikRolleri }
+                  { HekimId = hekimId, TetkikRolleri = tetkikRolleri,
+                    BelgeKumeleri = belgeKumeleri }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
             : new SorguUretici(kaynak)
             {
                 HekimId = hekimId, TetkikRolleri = tetkikRolleri,
+                // BELGE TURU KISITI (998): satir, sayim ve toplam AYNI
+                //   kosulu tasimali - biri unutulursa sayfa "12 kayit" der,
+                //   grid 3 satir cizer.
+                BelgeKumeleri = belgeKumeleri,
                 // `{kullanici}` yer tutuculu SabitKosul icin (993): "yalniz
                 //   kendi kayitlari" kurali katalogda yazili, deger burada
                 //   baglaniyor.

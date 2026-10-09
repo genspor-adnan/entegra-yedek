@@ -472,7 +472,7 @@ public static partial class KaynakKatalogu
     //   belge listesine eklemek onu 20 kolonluk bir seye cevirirdi.
     private static KaynakTanimi Irsaliye() => new(
         Ad: "irsaliye",
-        YetkiKodu: "belge",
+        YetkiKodu: "belge.satis",
         Kaynak: """
             public.belge b
             left join public.depo  cd on cd.id = b.cikis_depo_id
@@ -640,7 +640,7 @@ public static partial class KaynakKatalogu
     //   uctan (GET /api/belge/{id}/acik-satirlar) okur; bu liste genel gorunum.
     private static KaynakTanimi BelgeAcikSatir() => new(
         Ad: "belge-acik-satir",
-        YetkiKodu: "belge",
+        YetkiKodu: "belge.satis",
         Kaynak: "public.v_belge_acik_satir a",
         SubeKolonu: "a.sube_id",
         KapsamKolonu: "a.taraf_id",
@@ -672,7 +672,7 @@ public static partial class KaynakKatalogu
     //   verildi mi. Giden belgelerle karistirmamak icin AYRI kaynak.
     private static KaynakTanimi GelenBelge() => new(
         Ad: "gelen-belge",
-        YetkiKodu: "belge",
+        YetkiKodu: "belge.alis",
         Kaynak: """
             public.e_belge e
             left join public.taraf t on t.id = e.taraf_id

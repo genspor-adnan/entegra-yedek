@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// SİGORTA LİSTELERİ (430) — provizyonlar, kurum hesapları, kod eşleme.
@@ -88,7 +88,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi SigortaHesap() => new(
         Ad: "sigorta-hesap",
-        YetkiKodu: "sigorta",
+        YetkiKodu: "sigorta.tanim",
         Kaynak: "public.sigorta_hesap h "
               + "  join public.sigorta_saglayici s on s.id = h.saglayici_id "
               + "  join public.entegrasyon_hesap e on e.id = h.hesap_id "
@@ -127,7 +127,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi SigortaKodEsleme() => new(
         Ad: "sigorta-kod-esleme",
-        YetkiKodu: "sigorta",
+        YetkiKodu: "sigorta.tanim",
         Kaynak: "public.sigorta_kod_esleme e "
               + "  join public.sigorta_saglayici s on s.id = e.saglayici_id",
         VarsayilanSirala: "s.ad asc, e.alan asc, e.sira asc, e.yerel_kod asc",
@@ -151,7 +151,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi SigortaIstekLog() => new(
         Ad: "sigorta-istek-log",
-        YetkiKodu: "sigorta",
+        YetkiKodu: "sigorta.tanim",
         Kaynak: "public.sigorta_istek_log l "
               + "  left join public.sigorta_saglayici s on s.id = l.saglayici_id",
         SubeKolonu: "l.sube_id",

@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sigorta;
 
 namespace Gentegre.Testler;
@@ -61,7 +61,16 @@ public class SigortaTestleri
         //   bilgisini açardı (özel nitelikli veri).
         foreach (var ad in new[] { "sigorta-provizyon", "sigorta-hesap",
                                    "sigorta-kod-esleme", "sigorta-istek-log" })
-            Assert.Equal("sigorta", KaynakKatalogu.Bul(ad)?.YetkiKodu);
+            Assert.StartsWith("sigorta", KaynakKatalogu.Bul(ad)?.YetkiKodu);
+
+        // 998'DE AYRILDI: provizyon ÇEKİRDEK `sigorta` yetkisinde kaldı -
+        //   kayıt kabul memuru provizyon alır. Kurum hesabı, kod eşlemesi ve
+        //   istek günlüğü ise TANIM ekranlarıdır (`sigorta.tanim`); banko
+        //   görevlisinin menüsünde "Kurumlar & Sigorta" grubunu açıyorlardı.
+        Assert.Equal("sigorta", KaynakKatalogu.Bul("sigorta-provizyon")?.YetkiKodu);
+        foreach (var ad in new[] { "sigorta-hesap", "sigorta-kod-esleme",
+                                   "sigorta-istek-log" })
+            Assert.Equal("sigorta.tanim", KaynakKatalogu.Bul(ad)?.YetkiKodu);
     }
 
     [Fact]

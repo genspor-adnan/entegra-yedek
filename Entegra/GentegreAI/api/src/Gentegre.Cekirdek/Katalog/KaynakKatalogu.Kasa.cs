@@ -108,7 +108,7 @@ public static partial class KaynakKatalogu
     // --------------------------------------------------------------- banka ----
     private static KaynakTanimi BankaListesi() => new(
         Ad: "banka",
-        YetkiKodu: "hesap",
+        YetkiKodu: "hesap.tanim",
         Kaynak: "public.banka b",
         SubeKolonu: null,
         VarsayilanSirala: "b.sira, b.ad",
@@ -284,7 +284,7 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi HesapEkstre() => new(
         Ad: "hesap-ekstre",
-        YetkiKodu: "hesap",
+        YetkiKodu: "hesap.tanim",
         Kaynak: "public.v_hesap_ekstre e",
         SubeKolonu: "e.sube_id",
         GrupKolonu: EkstreGrupKolonu,
@@ -608,7 +608,7 @@ public static partial class KaynakKatalogu
     //   vade gecmis - listenin varsayilan sirasi en gecikmisi ustte.
     private static KaynakTanimi PlanVade() => new(
         Ad: "plan-vade",
-        YetkiKodu: "kasa_islem",
+        YetkiKodu: "kasa.finans",
         Kaynak: "public.v_plan_vade v",
         SubeKolonu: "v.sube_id",
         KapsamKolonu: "v.taraf_id",

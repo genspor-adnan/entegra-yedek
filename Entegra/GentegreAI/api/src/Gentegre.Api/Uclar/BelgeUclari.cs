@@ -226,6 +226,11 @@ public static class BelgeUclari
                 Convert.ToInt32(belgeSube) != baglam.SubeId.Value)
                 throw GentegreHatasi.Bulunamadi();
 
+            // BELGE TURU YETKISI (998): liste turu suzuyor, KART da suzmeli -
+            //   yoksa menuden dusen ekranin kaydi id ile aciliyordu. Kayit
+            //   kabul memuru basvuruyu gorur, satis faturasini gormez.
+            BelgeTuruIste(baglam, kayit.Belge);
+
             return Results.Ok(new BelgeYaniti
             {
                 Belge = kayit.Belge,
@@ -1124,4 +1129,39 @@ public static class BelgeUclari
         _ => null
     };
 
+
+    /// <summary>
+    /// BELGE TÜRÜ YETKİSİ (998): belgenin türü kullanıcının görebildiği
+    /// kümede değilse kayıt YOK sayılır.
+    ///
+    /// Liste tarafında süzgeç SQL'e giriyor (SorguUretici + KaynakKatalogu
+    /// .BelgeKisiti); tek kayıt okunurken aynı kararı burada veriyoruz.
+    /// "Bulunamadı" dönüyoruz, "yetkisiz" değil: yetkisiz cevabı kaydın VAR
+    /// olduğunu söyler - belge numarası deneyerek kurumun ciro hacmi
+    /// çıkarılabilirdi.
+    ///
+    /// Tür 19 iki anlamlıdır (HBYS başvurusu `tipi` 30, ERP satış siparişi 1),
+    /// bu yüzden çekirdek `belge` yetkisi türe değil TÜR+TİP çiftine bakar.
+    /// </summary>
+    private static void BelgeTuruIste(IstekBaglami baglam,
+                                      IDictionary<string, object?> belge)
+    {
+        if (!belge.TryGetValue("tur", out var turHam) || turHam is null) return;
+        var tur = Convert.ToInt32(turHam);
+        var tipi = belge.TryGetValue("tipi", out var tipHam) && tipHam is not null
+                 ? Convert.ToInt32(tipHam) : 0;
+
+        foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
+        {
+            if (!baglam.Yetkiler.Var(kod, Islem.Gor)) continue;
+            var kume = KaynakKatalogu.BelgeKumesi(kod);
+            if (kume is null) continue;
+            if (kume == KaynakKatalogu.BelgeKumeBasvuru)
+            {
+                if (tur == 19 && tipi == 30) return;
+            }
+            else if (KaynakKatalogu.BelgeKumesininTurleri(kume).Contains(tur)) return;
+        }
+        throw GentegreHatasi.Bulunamadi();
+    }
 }

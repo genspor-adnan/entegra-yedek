@@ -52,7 +52,12 @@ public static class ListeUclari
                 // TEST SEVIYESINDE YETKI KISITI (889/923): kisitli tetkikin
                 //   sonucu yalniz izinli rollere doner; GUNCEL rol kumesi
                 //   (ana + ek) sorulur, token'daki rol degil.
-                baglam.RolIdleri);
+                baglam.RolIdleri,
+                // BELGE TURU KISITI (998): `belge` kaynagi cok turludur -
+                //   menu kodlari bolundu ama kaynak yetkisi tek kod oldugu
+                //   icin menuden dusen ekran adresi bilen kullaniciya acik
+                //   kaliyordu. Yetkisi olmayan TUR hic donmez.
+                BelgeKumeleri(tanim, baglam));
 
             return Results.Ok(yanit);
         });
@@ -187,4 +192,22 @@ public static class ListeUclari
                 .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu)
                             && baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
                 .ToList();
+
+    /// <summary>
+    /// BELGE TÜRÜ YETKİ KISITI (998): kullanıcının görebildiği belge
+    /// kümeleri. Tür kısıtı olmayan kaynakta <c>null</c> döner ve sorguya
+    /// hiçbir koşul eklenmez - kısıt yalnız çok türlü <c>belge</c> kaynağını
+    /// ilgilendiriyor, 200'den fazla liste boşuna bir koşul taşımasın.
+    /// </summary>
+    private static IReadOnlyCollection<string>? BelgeKumeleri(KaynakTanimi tanim,
+        IstekBaglami baglam)
+    {
+        if (KaynakKatalogu.BelgeKisitKolonu(tanim.Ad) is null) return null;
+        var kumeler = new List<string>(KaynakKatalogu.BelgeYetkiKodlari.Count);
+        foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
+            if (baglam.Yetkiler.Var(kod, Islem.Gor)
+                && KaynakKatalogu.BelgeKumesi(kod) is { } kume)
+                kumeler.Add(kume);
+        return kumeler;
+    }
 }

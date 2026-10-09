@@ -366,7 +366,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Danışma (kasasız)', filtre: { alan: 'tur', op: 'esit', deger: 2 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kayıt Kabul', menuSira: 22, menuAd: 'Bankolar', ic: '🏧',
+    menuGrup: 'Finans', menuSira: 45, menuAd: 'Bankolar', ic: '🏧',
     yetkiKodu: 'banko',
   },
   // --- BANKO OTURUMU (987, vardiya): akis ekrani ve sorumlu onay kuyrugu.

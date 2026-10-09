@@ -58,6 +58,19 @@ public sealed partial class SorguUretici
     /// </summary>
     public IReadOnlyList<int>? TetkikRolleri { get; init; }
 
+    /// <summary>
+    /// BELGE TÜRÜ YETKİ KISITI (998): kullanıcının görebildiği belge
+    /// kümeleri (<c>basvuru</c> / <c>satis</c> / <c>alis</c> / <c>stok</c> -
+    /// bkz. KaynakKatalogu.BelgeKumesi). Çok türlü <c>belge</c> kaynağında
+    /// yetkisi olmayan TÜR hiç dönmez.
+    ///
+    /// Küme VERİLMEZSE (null) kısıt uygulanmaz: bağlamsız çağrılar (döküm,
+    /// özet, iç raporlar) bugünkü davranışını korur. Boş küme ise "hiçbir
+    /// belge kümesi yok" demektir ve liste boş döner - yetki kontrolü
+    /// yapılmış ama hiçbir küme çıkmamışsa kapı KAPALI olmalı.
+    /// </summary>
+    public IReadOnlyCollection<string>? BelgeKumeleri { get; init; }
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -252,6 +265,30 @@ public sealed partial class SorguUretici
         if (KaynakKatalogu.TetkikKisitKolonu(_kaynak.Ad) is { } tk)
             parcalar.Add($"public.fn_lab_tetkik_izin_roller({tk}, "
                        + $"{Ekle((TetkikRolleri ?? Array.Empty<int>()).ToArray())}, 'gor')");
+
+        // BELGE TURU KISITI (998): `belge` kaynagi cok turludur (basvuru,
+        //   satis, alis, stok fisi). 998'de menu kodlari bolundu ama kaynak
+        //   yetkisi tek kod oldugu icin menuden dusen ekran adresi bilen
+        //   kullaniciya acik kaliyordu. Yetkisi olmayan TUR burada hic
+        //   donmez - sayim ve toplamlar da ayni kosulu tasir.
+        if (BelgeKumeleri is { } kumeler
+            && KaynakKatalogu.BelgeKisitKolonu(_kaynak.Ad) is { } bk)
+        {
+            var dallar = new List<string>();
+            // Cekirdek `belge` yetkisi TURU degil basvuruyu acar: tur 19 hem
+            //   HBYS basvurusu hem ERP satis siparisidir, ayiran `tipi` (30).
+            if (kumeler.Contains(KaynakKatalogu.BelgeKumeBasvuru))
+                dallar.Add($"({bk.Tur} = {Ekle(19)} and {bk.Tipi} = {Ekle(30)})");
+            var turler = kumeler
+                .Where(k => k != KaynakKatalogu.BelgeKumeBasvuru)
+                .SelectMany(KaynakKatalogu.BelgeKumesininTurleri)
+                .Distinct().ToArray();
+            if (turler.Length > 0)
+                dallar.Add($"{bk.Tur} = any({Ekle(turler)})");
+            // Hicbir kume yoksa kapi KAPALI - "kisit hesaplandi ama bos"
+            //   durumunda listeyi acik birakmak sizdirma olurdu.
+            parcalar.Add(dallar.Count > 0 ? "(" + string.Join(" or ", dallar) + ")" : "false");
+        }
 
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
         if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)
