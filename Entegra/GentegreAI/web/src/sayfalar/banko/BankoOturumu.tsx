@@ -104,6 +104,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   const [cekler, setCekler] = useState<OturumCek[]>([]);
   const [islemler, setIslemler] = useState<OturumIslem[]>([]);
   const [acikBorclar, setAcikBorclar] = useState<OturumAcikBorc[]>([]);
+  const [basvuruSayisi, setBasvuruSayisi] = useState(0);
   // Mockup banko_gun_sonu_kasa_teslimi.html sekmeleri (ilk sekme açık gelir).
   const [sekme, setSekme] = useState<OturumSekme>('tur');
   const [kapanisTutar, setKapanisTutar] = useState('');
@@ -151,6 +152,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         setCekler(d.cekler ?? []);
         setIslemler(d.islemler ?? []);
         setAcikBorclar(d.acikBorclar ?? []);
+        setBasvuruSayisi(d.basvuruSayisi ?? 0);
         // Girilmis cihaz toplamlari forma yazilir: gun sonu yarim kalip
         //   tekrar acildiginda bastan girilmesin.
         setPosGiris(o => {
@@ -426,26 +428,40 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
           gibi şeridin altında. Kapanmış oturumda da çizilir - oturum kartını
           listeden açan sorumlu aynı dökümü görür. Gün sonu formu açıkken
           gizli: orada tür dökümü ve sayım konuşuluyor. */}
+      {/* ÖZET KUTULARI (kullanıcı 09.10.2026: "mockupta butonlarla sekmeler
+          arasındaki bilgi kutularını da oturum kartına ekle"): vardiyanın iki
+          sorusu - "bu vardiyada ne yaptım", "kasada ne var". Hepsi oturum
+          detayından; ekran yeniden hesap yapmaz, yalnız sayar ve toplar. */}
+      {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && !gunSonu && (
+        <OzetKutulari oturum={oturum} islemler={islemler} acikBorclar={acikBorclar}
+                      basvuruSayisi={basvuruSayisi} />
+      )}
+
       {/* SEKMELER (kullanıcı 09.10.2026: "banko oturum kartına şu mockup taki
           sekmeleri ekle" - banko_gun_sonu_kasa_teslimi.html): Ödeme Türleri ·
           Vardiya İşlemleri · POS Gün Sonu · Açık Borçlar · Teslim Geçmişi.
           Gün sonu formu açıkken gizli: orada sayım ve teslim konuşuluyor. */}
       {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && !gunSonu && (
         <div className="bo-sekmeli">
-          <div className="bo-sekmeler">
+          {/* Kart içi sekmelerin ORTAK görünümü (tema.css .katab / .kat) -
+              kullanıcı 09.10.2026: "oturumdaki sekmelerin şeklini değiş". */}
+          <div className="katab">
             {OTURUM_SEKMELERI.map(([k, ad]) => {
               const rozet = k === 'islem' ? islemler.filter(x => !x.iptal).length
                 : k === 'acik' ? acikBorclar.length
                 : k === 'pos' && poslar.some(p => p.fark != null && Math.abs(p.fark) > 0.005) ? 'fark'
                 : null;
               return (
-                <button key={k} type="button" className={'bo-sekme' + (sekme === k ? ' on' : '')}
-                        onClick={() => setSekme(k)}>
+                <div key={k} role="tab" aria-selected={sekme === k}
+                     className={'kat' + (sekme === k ? ' on' : '')}
+                     onClick={() => setSekme(k)}>
                   {ad}
                   {rozet !== null && rozet !== 0 && (
-                    <span className={'bo-rz ' + (rozet === 'fark' ? 'kir' : k === 'acik' ? 'sari' : '')}>{rozet}</span>
+                    rozet === 'fark'
+                      ? <span className="bo-rz kir">fark</span>
+                      : <span className="b">{rozet}</span>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
@@ -760,6 +776,48 @@ function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis }: {
   );
 }
 
+/**
+ * ÖZET KUTULARI — mockup banko_gun_sonu_kasa_teslimi.html `.ozet`:
+ * Başvuru · Tahsilat · Tahsil Edilen · Açık Borç · Kasada Olması Gereken ·
+ * Sayım Farkı. Rakamlar sunucunun oturum detayından gelir.
+ */
+function OzetKutulari({ oturum, islemler, acikBorclar, basvuruSayisi }: {
+  oturum: OturumOzeti; islemler: OturumIslem[]; acikBorclar: OturumAcikBorc[];
+  basvuruSayisi: number;
+}) {
+  const gecerli = islemler.filter(x => !x.iptal);
+  const tahsilAdet = gecerli.filter(x => !x.iade).length;
+  const iadeAdet = gecerli.filter(x => x.iade).length;
+  const iptalAdet = islemler.length - gecerli.length;
+  const net = gecerli.reduce((t, x) => t + (x.iade ? -x.tahsil : x.tahsil), 0);
+  const hastadan = acikBorclar.filter(b => !b.kurumPayli);
+  const acik = hastadan.reduce((t, b) => t + b.kalan, 0);
+  const sayildi = oturum.durum === 3 || oturum.durum === 4;
+  const fark = sayildi ? oturum.kapanisFark : null;
+  const kutu = (bas: string, deg: string, alt: string, sinif = '') => (
+    <div className={'bo-okutu ' + sinif}>
+      <div className="bas">{bas}</div>
+      <div className="deg">{deg}</div>
+      <div className="alt">{alt}</div>
+    </div>
+  );
+  return (
+    <div className="bo-ozet">
+      {kutu('Başvuru', String(basvuruSayisi), 'bu vardiyada işlem gören')}
+      {kutu('Tahsilat', String(tahsilAdet), `${iadeAdet} iade · ${iptalAdet} iptal`)}
+      {kutu('Tahsil Edilen', `${para(net)} ₺`, 'iade sonrası net · tüm türler', 'iyi')}
+      {kutu('Açık Borç', `${para(acik)} ₺`, `${hastadan.length} başvuru · tahsil edilmedi`,
+            hastadan.length > 0 ? 'uy' : '')}
+      {kutu('Kasada Olması Gereken', `${para(oturum.beklenenNakit)} ₺`,
+            'yalnız NAKİT: devir + nakit − iade')}
+      {fark == null
+        ? kutu('Sayım Farkı', '—', 'gün sonunda sayılır')
+        : kutu('Sayım Farkı', `${para(fark)} ₺`, `sayılan ${para(oturum.kapanisSayim)} ₺`,
+               Math.abs(fark) > 0.005 ? 'teh' : 'iyi')}
+    </div>
+  );
+}
+
 type OturumSekme = 'tur' | 'islem' | 'pos' | 'acik' | 'gecmis';
 const OTURUM_SEKMELERI: [OturumSekme, string][] = [
   ['tur', 'Ödeme Türleri'], ['islem', 'Vardiya İşlemleri'], ['pos', 'POS Gün Sonu'],
@@ -1048,13 +1106,18 @@ const bostil = `
 .bo-islem td.para, .bo-islem th.sag { text-align:right; font-family:Consolas, monospace; }
 .bo-islem td.orta, .bo-islem th.orta { text-align:center; font-family:inherit; }
 .bo-islem tr.sonuk td:not(.orta) { text-decoration:line-through; }
+.bo-ozet { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:1px;
+  background: var(--cizgi-ince, #e3e9f0); border:1px solid var(--cizgi-ince, #e3e9f0);
+  border-radius:4px; overflow:hidden; margin-top:8px; }
+.bo-okutu { background: var(--yuzey, #fff); padding:9px 12px; }
+.bo-okutu .bas { font-size:10.5px; color: var(--ikincil-metin, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
+.bo-okutu .deg { font-size:18px; font-weight:bold; color: var(--baslik, #1d3557); margin-top:2px; }
+.bo-okutu .alt { font-size:10.5px; color: var(--ikincil-metin, #6b7a8b); margin-top:2px; }
+.bo-okutu.iyi .deg { color:#2e7d46; }
+.bo-okutu.uy .deg { color:#b7791f; }
+.bo-okutu.teh .deg { color:#b3261e; }
 .bo-sekmeli { margin-top:8px; }
-.bo-sekmeler { display:flex; gap:2px; flex-wrap:wrap; border-bottom:1px solid var(--cizgi-ince, #e3e9f0); margin-bottom:6px; }
-.bo-sekme { background:none; border:1px solid transparent; border-bottom:none; padding:6px 12px;
-  font-size:12px; cursor:pointer; color: var(--ikincil-metin, #6b7a8b); border-radius:4px 4px 0 0;
-  display:inline-flex; gap:6px; align-items:center; }
-.bo-sekme.on { color: var(--metin, #1f2d3d); font-weight:bold; border-color: var(--cizgi-ince, #e3e9f0);
-  background: var(--yuzey, #fff); margin-bottom:-1px; }
+.bo-sekmeli .katab { margin-bottom:6px; }
 .bo-durum-cubugu { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font-size:11px; color: var(--ikincil-metin, #6b7a8b); padding:5px 2px; }
 .bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }

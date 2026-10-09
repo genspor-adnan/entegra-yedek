@@ -143,6 +143,8 @@ export type OturumDetay = {
   cekler: OturumCek[];
   islemler: OturumIslem[];
   acikBorclar: OturumAcikBorc[];
+  /** Bu vardiyada işlem gören başvuru sayısı (açık borçla aynı kapsam). */
+  basvuruSayisi: number;
 };
 
 export type AcIstegi = {

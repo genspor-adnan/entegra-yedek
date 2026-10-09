@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -330,10 +330,26 @@ public static class BankoOturumUclari
                 odeyen = r.GetString(6), tutar = r.GetDecimal(7), tahsil = r.GetDecimal(8),
                 kalan = r.GetDecimal(7) - r.GetDecimal(8), kurumPayli = r.GetBoolean(9),
             }, iptal);
+            // BAŞVURU SAYISI (mockup gün sonu özet kutusu "Başvuru"): açık
+            //   borçla AYNI kapsam - oturumda tahsilatı olan ya da görevlinin
+            //   oturum süresince açtığı başvurular.
+            var basvuruSayisi = await b.TekDegerAsync<long>("""
+                with oturum as (
+                    select o.kullanici_id, coalesce(o.acilis_ts, o.acilis_talep_ts) as bas, o.kapanis_ts as son
+                      from public.banko_oturum o where o.id = @p0)
+                select count(*) from (
+                    select k.belge_id as id from public.kasa_islem k
+                      join public.belge be on be.id = k.belge_id and be.tipi = 30
+                     where k.oturum_id = @p0
+                    union
+                    select be.id from public.belge be, oturum o
+                     where be.tipi = 30 and be.ekleyen = o.kullanici_id
+                       and be.ekleme_tarihi >= o.bas and (o.son is null or be.ekleme_tarihi <= o.son)) a
+                """, null, [id], iptal);
             return Results.Ok(new
             {
                 oturum = o, kupurler = kupur, turler, pos = posListe,
-                posAtanmamis = atanmamis, cekler, islemler, acikBorclar,
+                posAtanmamis = atanmamis, cekler, islemler, acikBorclar, basvuruSayisi,
             });
         });
 
