@@ -400,17 +400,27 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
 
       {/* ------------------------------------------------- 3 · GÜN İÇİ ----- */}
       {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && (
-        <div className="bo-serit">
-          <span>🔓 Oturum <b>#{oturum.id}</b></span>
-          <div className="bo-k"><span>devir</span><b>{para(oturum.devirTutar)}</b></div>
-          {oturum.acilisFark !== 0 && (
-            <div className="bo-k"><span>açılış farkı</span><b>{para(oturum.acilisFark)}</b></div>
-          )}
-          <div className="bo-k"><span>nakit tahsilat</span><b>+{para(oturum.nakitTahsilat)}</b></div>
-          <div className="bo-k"><span>nakit iade</span><b>−{para(oturum.nakitIade)}</b></div>
-          <div className="bo-k vurgu"><span>kasada olması gereken</span><b>{para(oturum.beklenenNakit)}</b></div>
-          <div className="bo-k"><span>POS</span><b>{para(oturum.posTutar)}</b></div>
-          <div className="bo-k"><span>işlem</span><b>{oturum.islemAdet}</b></div>
+        // ŞERİT KUTULARA BÖLÜNDÜ (kullanıcı 09.10.2026: "oturum kartında 2
+        //   defa kasada olması gereken var üsttekini sil.. başta oturum #17
+        //   var onu da kaldır.. diğerlerini de kutulara böl"): oturum numarası
+        //   başlıkta zaten yazıyor, "kasada olması gereken" özet kutusunda.
+        <div className="bo-serit-kutu">
+          <div className="bo-ozet">
+            <div className="bo-okutu"><div className="bas">Devir</div>
+              <div className="deg">{para(oturum.devirTutar)} ₺</div></div>
+            {oturum.acilisFark !== 0 && (
+              <div className="bo-okutu teh"><div className="bas">Açılış Farkı</div>
+                <div className="deg">{para(oturum.acilisFark)} ₺</div></div>
+            )}
+            <div className="bo-okutu"><div className="bas">Nakit Tahsilat</div>
+              <div className="deg">+{para(oturum.nakitTahsilat)} ₺</div></div>
+            <div className="bo-okutu"><div className="bas">Nakit İade</div>
+              <div className="deg">−{para(oturum.nakitIade)} ₺</div></div>
+            <div className="bo-okutu"><div className="bas">POS</div>
+              <div className="deg">{para(oturum.posTutar)} ₺</div></div>
+            <div className="bo-okutu"><div className="bas">İşlem</div>
+              <div className="deg">{oturum.islemAdet}</div></div>
+          </div>
           {oturum.durum === 2 && (
             <button className="bo-ana bo-sag" onClick={() => {
               setGunSonu(true);
@@ -432,7 +442,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
           arasındaki bilgi kutularını da oturum kartına ekle"): vardiyanın iki
           sorusu - "bu vardiyada ne yaptım", "kasada ne var". Hepsi oturum
           detayından; ekran yeniden hesap yapmaz, yalnız sayar ve toplar. */}
-      {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && !gunSonu && (
+      {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && (
         <OzetKutulari oturum={oturum} islemler={islemler} acikBorclar={acikBorclar}
                       basvuruSayisi={basvuruSayisi} />
       )}
@@ -1118,6 +1128,14 @@ const bostil = `
 .bo-okutu.teh .deg { color:#b3261e; }
 .bo-sekmeli { margin-top:8px; }
 .bo-sekmeli .katab { margin-bottom:6px; }
+.bo-serit-kutu { display:flex; gap:10px; align-items:center; margin-top:8px; }
+.bo-serit-kutu .bo-ozet { flex:1; margin-top:0; }
+/* ÜST KUTULAR YARIM YÜKSEKLİK (kullanıcı 09.10.2026: "üstteki kutular %50
+   yükseklikte olsun altındaki açıklama labellere gerek yok"): başlık ve
+   değer tek satırda. */
+.bo-serit-kutu .bo-okutu { padding:4px 10px; display:flex; align-items:baseline;
+  justify-content:space-between; gap:8px; white-space:nowrap; }
+.bo-serit-kutu .bo-okutu .deg { font-size:14px; margin-top:0; }
 .bo-durum-cubugu { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font-size:11px; color: var(--ikincil-metin, #6b7a8b); padding:5px 2px; }
 .bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }
