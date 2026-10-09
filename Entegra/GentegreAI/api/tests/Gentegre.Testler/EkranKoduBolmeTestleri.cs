@@ -67,7 +67,7 @@ public sealed class EkranKoduBolmeTestleri
         foreach (var k in new[] { "belge.kurum_fatura", "belge.alis_fatura", "eczane.miad",
                                   "kayit_kabul.ayar", "cari.tedarikci", "dis_doktor", "medula.kabul" })
             Assert.NotNull(EkranKodlari.KopyaKaynagi(k));
-        Assert.Equal(28, EkranKodlari.DokumKodlari.Count);
+        Assert.Equal(29, EkranKodlari.DokumKodlari.Count);   // 1007 Sabit Varlıklar
         Assert.All(EkranKodlari.DokumKodlari, k => Assert.Equal("dokum", EkranKodlari.KopyaKaynagi(k)));
         Assert.Null(EkranKodlari.KopyaKaynagi("belge.satis"));
     }
@@ -112,8 +112,8 @@ public sealed class EkranKoduBolmeTestleri
     [Fact]
     public void Ayni_grup_ekran_kodu_eski_kapiyi_acar_ve_kopya_kaynagi_eski_kod()
     {
-        Assert.Equal(117, EkranKodlari.AyniGrupEkranlari.Length);
-        Assert.Equal(117, EkranKodlari.AyniGrupEkranlari.Select(x => x.Yeni).Distinct().Count());
+        Assert.Equal(118, EkranKodlari.AyniGrupEkranlari.Length);   // 1007 demirbas.zimmet
+        Assert.Equal(118, EkranKodlari.AyniGrupEkranlari.Select(x => x.Yeni).Distinct().Count());
         foreach (var (yeni, eski) in EkranKodlari.AyniGrupEkranlari)
         {
             Assert.Equal(eski, EkranKodlari.KopyaKaynagi(yeni));

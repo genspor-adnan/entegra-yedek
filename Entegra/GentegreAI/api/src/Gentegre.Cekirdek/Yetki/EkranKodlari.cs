@@ -37,6 +37,7 @@ public static partial class EkranKodlari
         "dokum.cari_crm", "dokum.satis", "dokum.alis", "dokum.stok_hizmet",
         "dokum.eczane", "dokum.satinalma", "dokum.uretim", "dokum.finans",
         "dokum.muhasebe", "dokum.ik", "dokum.dokuman", "dokum.teknik_servis",
+        "dokum.sabit_varliklar",   // 1007
     ];
 
     /// <summary>Yeni ekran kodu → haklarını kopyaladığı eski kod.</summary>
@@ -49,6 +50,7 @@ public static partial class EkranKodlari
         ["cari.tedarikci"]     = "cari",              // Stok & Hizmet › Tedarikçiler
         ["dis_doktor"]         = "personel",          // Kurumlar & Sigorta › Dış Doktorlar
         ["medula.kabul"]       = "medula.provizyon",  // Kayıt Kabul › Medula Kabul
+        ["demirbas.ayar"]      = "ayar",              // Sabit Varlıklar › Ayarlar › Demirbaş (1007)
     };
 
     /// <summary>
@@ -240,6 +242,9 @@ public static partial class EkranKodlari
         "ayar.demo_verisi", "islem_log.giris", "kullanici.onay_akis", "kullanici.onay_vekalet",
         "ik.izin.bakiye", "dokuman.kategori", "sigorta.tanim.kod_esleme",
         "sigorta.tanim.istek_log", "uretim.is_merkezi", "stok.ayar",
+        // Sabit Varlıklar (1007): Zimmet / Hareketler kendi uçlarında
+        //   (DemirbasZimmetUclari), demirbaş kartının kapısını açmaz.
+        "demirbas.zimmet", "demirbas.ayar",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
@@ -294,6 +299,11 @@ public static partial class EkranKodlari
     {
         ["kasa.duzenleme_gun"] = "kasa.finans.ayar",
         ["stok.negatif_davranis"]       = "stok.ayar",
+        ["demirbas.iade_lokasyon"]      = "demirbas.ayar",
+        ["demirbas.tutanak_metni"]      = "demirbas.ayar",
+        ["demirbas.amortisman_yontem"]  = "demirbas.ayar",
+        ["demirbas.amortisman_omur"]    = "demirbas.ayar",
+        ["demirbas.parca_depo"]         = "demirbas.ayar",
         ["belge.satis.vade_gun"]        = "belge.satis.ayar",
         ["belge.satis.varsayilan_seri"] = "belge.satis.ayar",
         ["belge.alis.vade_gun"]         = "belge.alis.ayar",

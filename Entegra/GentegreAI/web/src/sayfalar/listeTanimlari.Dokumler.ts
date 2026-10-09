@@ -30,7 +30,7 @@ const DOKUM_KOD_EKI: Record<string, string> = {
   'Satış': 'satis', 'Alış': 'alis', 'Stok & Hizmet': 'stok_hizmet',
   'Eczane': 'eczane', 'Satınalma': 'satinalma', 'Üretim': 'uretim',
   'Finans': 'finans', 'Muhasebe': 'muhasebe', 'İK': 'ik', 'Doküman': 'dokuman',
-  'Teknik Servis': 'teknik_servis',
+  'Teknik Servis': 'teknik_servis', 'Sabit Varlıklar': 'sabit_varliklar',
 };
 
 /** Grubun Dökümler yetki kodu; grupsuz (tasarımcı) = Yönetim'inki. */
@@ -112,4 +112,6 @@ export const DOKUM_LISTELERI = [
   //   kac dosya, suresi dolan, onayda bekleyen" bir dokum sorusudur.
   dokumOgesi('Doküman'),
   dokumOgesi('Teknik Servis'),
+  // 1007 (kullanıcı 10.10.2026: "sabit varlıklar altına bir de dökümler ekle").
+  dokumOgesi('Sabit Varlıklar'),
 ];

@@ -472,6 +472,7 @@ public static partial class KaynakKatalogu
         Ekle(FiyatListesiSatir());
         // Demirbas (216)
         Ekle(Demirbas());
+        Ekle(DemirbasHareket());   // 1007 Zimmet / Hareketler
         Ekle(Irsaliye());
         // Gelen e-Belge kutusu (187)
         Ekle(GelenBelge());

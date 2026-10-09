@@ -132,6 +132,22 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Sabit Varlıklar', menuSira: 10, menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
+    // ZİMMET / HAREKETLER (1007, mockup Ekranlar/Demirbas/demirbas_zimmet_hareketleri.html):
+    //   veriş / iade / devir / yer değişikliği + tutanak. Kendi ekran kodu.
+    kaynak: 'demirbas-zimmet', rota: 'demirbas-zimmet', ozelSayfa: true,
+    baslik: 'Zimmet / Hareketler', yol: 'Sabit Varlıklar › Zimmet / Hareketler',
+    menuGrup: 'Sabit Varlıklar', menuSira: 15, menuAd: 'Zimmet / Hareketler', ic: '👤',
+    yetkiKodu: 'demirbas.zimmet',
+  },
+  {
+    // DEMİRBAŞ AYARLARI (1007): iade lokasyonu, tutanak metni, amortisman
+    //   varsayılanları, kategori / lokasyon listeleri.
+    kaynak: 'demirbas-ayarlar', rota: 'demirbas-ayarlar', ozelSayfa: true,
+    baslik: 'Demirbaş Ayarları', yol: 'Sabit Varlıklar › Ayarlar › Demirbaş',
+    menuGrup: 'Sabit Varlıklar', menuAltGrup: 'Ayarlar', menuSira: 90, menuAd: 'Demirbaş',
+    ic: '⚙️', yetkiKodu: 'demirbas.ayar',
+  },
+  {
     // DOKUMAN ANA MENU GRUBU (kullanici: "dokuman menusu kaybolmus, demirbastan
     //   onceye gelsin"). Yonetim'in ALT GRUBU yapilinca ana menuden dusmustu -
     //   dokuman gunluk is, ayar degil. Grup sirasi Kabuk.tsx GRUP_SIRA'dan.

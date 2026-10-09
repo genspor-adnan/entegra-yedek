@@ -60,6 +60,10 @@ public sealed class AyarDeposu
         // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
         //   depodan dusmek iki birimin sayimini da bozar.
         "eczane.depo", "demirbas.parca_depo",
+        // DEMİRBAŞ AYARLARI (1007): iade lokasyonu, tutanak metni, yeni
+        //   kaydın amortisman varsayılanları (tetik fn_demirbas_amortisman_varsayilan).
+        "demirbas.iade_lokasyon", "demirbas.tutanak_metni",
+        "demirbas.amortisman_yontem", "demirbas.amortisman_omur",
         // Varsayilan doviz (219) - genel.doviz kod listesinden secilir.
         "genel.varsayilan_doviz",
         // ÜTS taban adresleri (223) - bos birakilirsa fn_uts_hesap resmi
@@ -173,6 +177,8 @@ public sealed class AyarDeposu
         ["belge.geri_gun_siniri"] = 7,
         // Tahsilat/odeme kac gun sonra kilitlensin (149): 0 kapali, -1 sinirsiz.
         ["kasa.duzenleme_gun"] = 7,
+        ["demirbas.amortisman_yontem"] = 1,
+        ["demirbas.amortisman_omur"] = 0,
         ["liste.sayfa_boyu"] = 50,
         ["stok.negatif_davranis"] = 1,
         // POS tahsilatinda varsayilan AKSIYON YOK: kurulumu yapilmamis bir
@@ -204,6 +210,8 @@ public sealed class AyarDeposu
         //   10'un altinda sayfalama ekrani surekli istek atmaya cevirir.
         ["liste.sayfa_boyu"] = (10, 500),
         ["stok.negatif_davranis"] = (0, 2),          // serbest / uyar / engelle
+        ["demirbas.amortisman_yontem"] = (1, 2),     // normal / azalan bakiyeler
+        ["demirbas.amortisman_omur"] = (0, 50),      // 0 = bos birak
         ["basvuru.pos_aksiyon"] = (0, 2),            // yok / otomatik fis / sor
         // 0 = kural kapali (her iskonto dogrudan), 100 = hicbir iskonto onay
         //   istemez anlamina gelir; ikisi de mesru ama arasi normal kullanim.

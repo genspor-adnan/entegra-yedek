@@ -25,6 +25,7 @@ public static partial class EkranKodlari
         ("acil.pano.cagri", "acil.pano"),                       // Acil › Çağrılar
         ("ameliyathane.plan.cizelge", "ameliyathane.plan"),     // Ameliyathane › Masa Çizelgesi
         ("ariza.ekip", "ariza"),                                // Teknik Servis › Arıza Ekipleri
+        ("demirbas.zimmet", "demirbas"),                        // Sabit Varlıklar › Zimmet / Hareketler (1007)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

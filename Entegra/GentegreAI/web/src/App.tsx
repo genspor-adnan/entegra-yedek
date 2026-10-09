@@ -24,6 +24,8 @@ const BelgeKarti = tembel(() => import('./sayfalar/BelgeKarti'), 'BelgeKarti');
 const KasaIslemKarti = tembel(() => import('./sayfalar/KasaIslemKarti'), 'KasaIslemKarti');
 const StokAyarlar = tembel(() => import('./sayfalar/StokAyarlar'), 'StokAyarlar');
 const KasaAyarlar = tembel(() => import('./sayfalar/KasaAyarlar'), 'KasaAyarlar');
+const DemirbasZimmet = tembel(() => import('./sayfalar/demirbas/DemirbasZimmet'), 'DemirbasZimmet');
+const DemirbasAyarlar = tembel(() => import('./sayfalar/demirbas/DemirbasAyarlar'), 'DemirbasAyarlar');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -224,6 +226,9 @@ function Yollar() {
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
         {yetki('stok.kategori') && <Route path="/kategori" element={<Kategoriler />} />}
         {yetki('kasa.finans.ayar') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
+        {/* Sabit Varlıklar (1007) */}
+        {yetki('demirbas.zimmet') && <Route path="/demirbas-zimmet" element={<DemirbasZimmet />} />}
+        {yetki('demirbas.ayar') && <Route path="/demirbas-ayarlar" element={<DemirbasAyarlar />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}
