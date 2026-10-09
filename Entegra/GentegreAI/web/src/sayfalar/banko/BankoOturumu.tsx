@@ -270,6 +270,12 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
                                          oturum.beklenenNakit || 0)));
           }}>🔒 Gün Sonu</button>
         )}
+        {/* KAPAT (kullanıcı 09.10.2026: "gün sonu sağına kapat ekle"): modal
+            içindeyken; sayfa olarak açıldıysa kapatacak pencere yok. */}
+        {gomulu && onKapat && (
+          <button type="button" className={'bo-ikincil' + (oturum?.durum === 2 ? '' : ' bo-akis-sag')}
+                  onClick={onKapat}>✖ Kapat</button>
+        )}
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -811,11 +817,12 @@ function OzetKutulari({ oturum, islemler, acikBorclar, basvuruSayisi }: {
   const acik = hastadan.reduce((t, b) => t + b.kalan, 0);
   const sayildi = oturum.durum === 3 || oturum.durum === 4;
   const fark = sayildi ? oturum.kapanisFark : null;
+  // YARI YÜKSEKLİK (kullanıcı 09.10.2026: "kutuları çok kalın" -> "%50
+  //   azalt"): başlık ve değer tek satırda; açıklama üzerine gelince ipucu.
   const kutu = (bas: string, deg: string, alt: string, sinif = '') => (
-    <div className={'bo-okutu ' + sinif}>
+    <div className={'bo-okutu ' + sinif} title={alt}>
       <div className="bas">{bas}</div>
       <div className="deg">{deg}</div>
-      <div className="alt">{alt}</div>
     </div>
   );
   return (
@@ -1060,6 +1067,9 @@ const bostil = `
 .bo-ust { color: var(--ikincil-metin, #6b7a8b); font-size:12px; }
 .bo-akis { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
 .bo-akis-sag { margin-left:auto; }
+.bo-ikincil { border:1px solid var(--cizgi, #cdd6e0); border-radius:4px; padding:6px 12px; font-size:12px;
+  background: var(--yuz, #fff); color: var(--yazi2, #1f2d3a); cursor:pointer; }
+.bo-ikincil:hover { border-color: var(--mor, #2f6db3); }
 .bo-ad { display:flex; align-items:center; gap:6px; border:1px solid var(--cizgi, #cdd6e0);
   border-radius:14px; padding:3px 11px; font-size:11.5px; background:var(--kart, #fff);
   color: var(--ikincil-metin, #6b7a8b); }
@@ -1130,10 +1140,13 @@ const bostil = `
   background: var(--cizgi-ince, #e3e9f0); border-top:1px solid var(--cizgi-ince, #e3e9f0);
   border-bottom:1px solid var(--cizgi, #cdd6e0); }
 @media (max-width: 900px) { .bo-ozet { grid-template-columns:repeat(3, 1fr); } }
-.bo-okutu { background: var(--yuz, #fff); padding:9px 12px; }
-.bo-okutu .bas { font-size:10.5px; color: var(--soluk, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
-.bo-okutu .deg { font-size:18px; font-weight:bold; color: var(--baslik, #14315a); margin-top:2px; }
-.bo-okutu .alt { font-size:10.5px; color: var(--soluk, #6b7a8b); margin-top:2px; }
+/* İNCE (kullanıcı 09.10.2026: "ortadaki başvuru, tahsilat... kutuları çok kalın",
+   "%50 azalt"): tek satır - başlık solda, değer sağda. */
+.bo-okutu { background: var(--yuz, #fff); padding:3px 10px; display:flex; align-items:baseline;
+  justify-content:space-between; gap:8px; white-space:nowrap; }
+.bo-okutu .bas { font-size:10px; color: var(--soluk, #6b7a8b); text-transform:uppercase; letter-spacing:.3px; }
+.bo-okutu .deg { font-size:14px; font-weight:bold; color: var(--baslik, #14315a); margin-top:0; line-height:1.3; }
+.bo-okutu .alt { font-size:10px; color: var(--soluk, #6b7a8b); margin-top:0; }
 .bo-okutu.iyi .deg { color:#2e7d46; }
 .bo-okutu.uy .deg { color:#8a6218; }
 .bo-okutu.teh .deg { color:#b3261e; }

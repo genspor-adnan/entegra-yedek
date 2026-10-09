@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BankoOturumu } from '../../sayfalar/banko/BankoOturumu';
 
 /**
@@ -26,6 +26,16 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
   onKapat(): void;
 }) {
   // ESC ile kapanır: modal bir pencere gibi davranmalı.
+  // TAM EKRAN (kullanıcı 09.10.2026: "ekranı max yapma ikonu ekle"): seçim
+  //   tarayıcıda hatırlanır - görevli vardiya boyunca aynı düzeni kullanır.
+  const [tam, setTam] = useState<boolean>(() => {
+    try { return localStorage.getItem('gentegre.bankoOturumTam') === '1' } catch { return false }
+  });
+  const tamCevir = () => setTam(t => {
+    const y = !t;
+    try { localStorage.setItem('gentegre.bankoOturumTam', y ? '1' : '0') } catch { /* yoksay */ }
+    return y;
+  });
   useEffect(() => {
     const t = (e: KeyboardEvent) => { if (e.key === 'Escape') onKapat() };
     window.addEventListener('keydown', t);
@@ -33,11 +43,15 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
   }, [onKapat]);
 
   return (
-    <div className="bom-ort" onClick={onKapat}>
-      <div className="bom" onClick={e => e.stopPropagation()}>
+    <div className={'bom-ort' + (tam ? ' tam' : '')} onClick={onKapat}>
+      <div className={'bom' + (tam ? ' tam' : '')} onClick={e => e.stopPropagation()}>
         <style>{stil}</style>
         <div className="bom-bas">
           {oturumId ? `🏦 Banko Oturumu #${oturumId}` : '🏦 Banko Oturumu'}
+          <button type="button" className="bom-buyut" onClick={tamCevir}
+                  title={tam ? 'Pencere boyutuna dön' : 'Ekranı kapla'} aria-pressed={tam}>
+            {tam ? '⤡' : '⤢'}
+          </button>
           <button type="button" className="bom-kapat" onClick={onKapat} title="Kapat (Esc)">✖</button>
         </div>
         <div className="bom-govde">
@@ -56,7 +70,13 @@ const stil = `
   box-shadow:0 18px 48px rgba(16,28,42,.28); overflow:hidden }
 .bom-bas { background:linear-gradient(#2b5c95,#1c4374); color:#fff; padding:9px 12px;
   font-weight:bold; font-size:13.5px; display:flex; align-items:center; flex:none }
-.bom-kapat { margin-left:auto; background:none; border:none; color:#fff; cursor:pointer; font-size:14px }
+.bom-buyut { margin-left:auto; background:none; border:1px solid rgba(255,255,255,.45); color:#fff;
+  cursor:pointer; font-size:13px; line-height:18px; border-radius:3px; padding:0 6px; margin-right:8px }
+.bom-buyut:hover { background:rgba(255,255,255,.15) }
+.bom-kapat { background:none; border:none; color:#fff; cursor:pointer; font-size:14px }
+/* Tam ekran: kenar boşluğu küçülür, pencere ekranı kaplar. */
+.bom-ort.tam { padding:8px }
+.bom.tam { width:100%; max-height:calc(100vh - 16px); height:calc(100vh - 16px) }
 /* Kaydırma GÖVDEDE: başlık sabit kalsın, uzun gün sonu paneli altta kırpılmasın. */
 .bom-govde { overflow-y:auto; padding:12px 14px 16px; flex:1 1 auto; min-height:0 }
 `;
