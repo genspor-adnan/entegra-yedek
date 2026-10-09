@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERP Menü Düzeni — Mockup (Gentegre AI · ERP modu)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .rolbar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fff;flex-wrap:wrap;align-items:center}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap;cursor:pointer}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .sp{margin-left:auto} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 7px;font-size:10px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .duz{display:grid;grid-template-columns:58px 280px 1fr;min-height:640px}
+  /* sol menü */
+  .sol{background:#f4f6f9;border-right:1px solid var(--line2);padding:0 0 6px;font-size:12px;display:flex;flex-direction:column}
+  .ara{margin:8px 10px 4px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .ara kbd{margin-left:auto;font-size:9.5px;border:1px solid var(--line);border-radius:3px;padding:0 4px;background:#f4f6f9}
+  .serit{display:flex;gap:4px;padding:4px 10px 6px;flex-wrap:wrap}
+  .serit span{font-size:10.5px;border:1px solid var(--line2);background:#fff;border-radius:10px;padding:1px 8px;color:#2b3a4a}
+  .serit b{font-size:10px;color:var(--muted);width:100%;font-weight:normal}
+  .mi{display:flex;align-items:center;gap:8px;padding:5px 12px;color:#2b3a4a;cursor:default;line-height:1.3}
+  .mi .ik{width:18px;text-align:center}
+  .mi .rz{margin-left:auto}
+  .mi.on{background:#dbe7f7;color:#1c4374;font-weight:bold}
+  .mi.yeni{color:#2e7d46}
+  .zon{display:flex;align-items:center;gap:8px;padding:9px 12px 4px;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#6b7a8b;font-weight:bold;border-top:1px solid var(--line2);margin-top:4px;cursor:pointer;user-select:none}
+  .zon i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .zon .ok{margin-left:auto;font-size:10px}
+  .mod{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 14px;font-weight:bold;color:#1c4374;cursor:pointer;user-select:none}
+  .mod .ok{margin-left:auto;color:var(--muted);font-size:10px}
+  .alt .mi{padding-left:38px;font-weight:normal}
+  .alt .ara2{padding:5px 12px 1px 38px;font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:#93a1b0}
+  .alt .mi.dokum{color:#4d5d6e;font-style:italic}
+  .kapali+.alt,.zkapali{display:none}
+  .kullanici{margin-top:auto;border-top:1px solid var(--line);background:#fff;padding:8px 12px;display:flex;gap:8px;align-items:center}
+  .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px}
+  .kullanici small{display:block;color:var(--muted);font-size:10.5px}
+  /* daraltılmış */
+  .dar{background:#e9eef4;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:3px}
+  .dar .d{width:40px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+  .dar .d.on{background:#dbe7f7}
+  .dar .d::before{content:"";position:absolute;left:-6px;top:6px;width:3px;height:18px;border-radius:2px;background:var(--c,transparent)}
+  .dar hr{width:30px;border:none;border-top:1px solid var(--line);margin:4px 0}
+  .dar .et{font-size:9px;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg);margin:6px 0}
+  .z1{background:#2f6db3}.z2{background:#8a6d3b}.z3{background:#1c8b8b}.z4{background:#c0392b}.z5{background:#3f9a5e}.z6{background:#6a3fb5}.z7{background:#6b7a8b}
+  /* sağ panel */
+  .sag{padding:0;overflow:auto}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b}
+  .ic{padding:8px 10px;line-height:1.6}
+  .ic ul{margin:0;padding-left:18px}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573}
+  .dg td{border-bottom:1px solid var(--line2);padding:5px 8px;font-size:11.5px;vertical-align:top}
+  .dg td i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .soru li{margin-bottom:4px}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  @media (max-width:900px){.duz{grid-template-columns:58px 1fr}.sag{grid-column:1/-1;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🧭 ERP Menü Düzeni — Öneri <span class="sp">7 bölge · 13 modül · ERP modu (ürün modu 1) · Gentegre AI</span></div>
+  <div class="rolbar">
+    <span class="sonuk">Görünüm:</span>
+    <span class="chip on" id="cTum">Tümü açık</span>
+    <span class="chip" id="cAkor">Tek bölge (accordion)</span>
+    <span class="sp"></span><span class="sonuk">Kullanıcı: yönetici (tüm yetkiler) · HBYS grupları ERP'de çizilmez</span>
+  </div>
+  <div class="duz">
+
+<!-- DARALTILMIŞ (ikon şeridi) -->
+<div class="dar" title="Daraltılmış menü (ikon şeridi)">
+  <div class="d">☰</div><div class="d on">🏠</div><div class="d">⭐</div><hr>
+  <div class="d" style="--c:#2f6db3">🤝</div><div class="d" style="--c:#2f6db3">🧾</div><div class="d" style="--c:#2f6db3">📥</div><div class="d" style="--c:#2f6db3">🛒</div>
+  <div class="d" style="--c:#8a6d3b">📦</div><div class="d" style="--c:#8a6d3b">🏭</div>
+  <div class="d" style="--c:#1c8b8b">💵</div><div class="d" style="--c:#1c8b8b">⚖️</div>
+  <div class="d" style="--c:#c0392b">🖥️</div><div class="d" style="--c:#c0392b">🔧</div>
+  <div class="d" style="--c:#3f9a5e">👥</div><div class="d" style="--c:#6a3fb5">📁</div><div class="d" style="--c:#6b7a8b">⚙️</div>
+  <span class="et">daraltılmış · fareyle üstüne gelince modül listesi açılır</span>
+</div>
+
+<!-- ÖNERİLEN ERP MENÜSÜ -->
+<div class="sol" id="menu">
+  <div class="ara">🔍 Menüde ara… <kbd>Ctrl+K</kbd></div>
+  <div class="mi on"><span class="ik">🏠</span>Ana Sayfa</div>
+  <div class="serit"><b>⭐ Favoriler</b><span>Satış Faturaları</span><span>Stok Listesi</span><span>Kasa İşlemleri</span></div>
+  <div class="serit"><b>🕓 En son</b><span>Cari Ekstre</span><span>Satış Siparişleri</span><span>Demirbaş</span></div>
+
+  <div class="zon"><i class="z1"></i>1 · Ticaret<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">🤝</span>Cari &amp; CRM<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">🏢</span>Müşteri Listesi</div><div class="mi"><span class="ik">👤</span>Kişi Listesi</div><div class="mi"><span class="ik">🎯</span>Aday Müşteriler</div><div class="mi"><span class="ik">💡</span>Satış Fırsatları</div><div class="mi"><span class="ik">📌</span>Projeler</div><div class="mi"><span class="ik">✅</span>Görevler</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+    <div class="mod"><span class="ik">🧾</span>Satış<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📝</span>Satış Teklifleri</div><div class="mi"><span class="ik">📋</span>Satış Siparişleri</div><div class="mi"><span class="ik">🚚</span>Satış İrsaliyeleri</div><div class="mi"><span class="ik">🧾</span>Satış Faturaları</div><div class="mi"><span class="ik">🧷</span>Satış Fişleri</div><div class="mi"><span class="ik">📆</span>Tahakkuklar</div><div class="mi"><span class="ik">📂</span>Açık Satırlar</div>
+      <div class="mi"><span class="ik">🏷️</span>Fiyat Listeleri<span class="rz mavi">taşındı</span></div><div class="mi"><span class="ik">🎁</span>Kampanyalar<span class="rz mavi">taşındı</span></div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">⚙️</span>Satış Belgeleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+    <div class="mod"><span class="ik">📥</span>Alış<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📋</span>Alış Siparişleri</div><div class="mi"><span class="ik">🚚</span>Alış İrsaliyeleri</div><div class="mi"><span class="ik">🧾</span>Alış Faturaları<span class="rz sari">Stok'tan?</span></div><div class="mi"><span class="ik">🧷</span>Alış Fişleri</div><div class="mi"><span class="ik">📆</span>Tahakkuklar</div><div class="mi"><span class="ik">🔁</span>Alış Konsinyeler</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">⚙️</span>Alış Belgeleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+    <div class="mod"><span class="ik">🛒</span>Satınalma<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">🙋</span>Talepler</div><div class="mi"><span class="ik">📝</span>Teklifler</div><div class="mi"><span class="ik">📋</span>Siparişler</div><div class="mi"><span class="ik">📦</span>Mal Kabul</div><div class="mi"><span class="ik">🔎</span>Fatura Kontrolü</div><div class="mi"><span class="ik">🏭</span>Tedarikçiler</div><div class="mi"><span class="ik">💰</span>Bütçe</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z2"></i>2 · Stok &amp; Üretim<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">📦</span>Stok &amp; Hizmet<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📦</span>Stok Listesi</div><div class="mi"><span class="ik">🛎️</span>Hizmet Listesi</div><div class="mi"><span class="ik">🙋</span>Stoktan Talep</div><div class="mi"><span class="ik">🔀</span>Stok Transfer</div><div class="mi"><span class="ik">⬇️</span>Giriş Fişi</div><div class="mi"><span class="ik">⬆️</span>Çıkış Fişi</div><div class="mi"><span class="ik">🏭</span>Tedarikçiler<span class="rz sari">çift</span></div>
+      <div class="ara2">ÜTS</div><div class="mi"><span class="ik">📨</span>Gelen / Askıdakiler</div><div class="mi"><span class="ik">🔔</span>Bildirimler</div><div class="mi"><span class="ik">🔍</span>Ürün Sorgu</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">🗂️</span>Kategoriler</div><div class="mi"><span class="ik">⚙️</span>Stok Ayarları</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+    <div class="mod"><span class="ik">🏭</span>Üretim<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">🛠</span>Üretim Emirleri</div><div class="mi"><span class="ik">🌳</span>Ürün Ağaçları</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">🏗️</span>İş Merkezleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z3"></i>3 · Finans &amp; Muhasebe<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">💵</span>Finans<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">💵</span>Kasa İşlemleri</div><div class="mi"><span class="ik">🗓</span>Vade / Planlar</div><div class="mi"><span class="ik">📄</span>Çek Listesi</div><div class="mi"><span class="ik">📃</span>Senet Listesi</div><div class="mi"><span class="ik">🧮</span>Masraf Listesi</div><div class="mi"><span class="ik">📑</span>Cari Ekstre</div><div class="mi"><span class="ik">📒</span>Hesap Ekstresi</div>
+      <div class="ara2">Hesaplar</div><div class="mi"><span class="ik">🗄️</span>Kasa Hesapları</div><div class="mi"><span class="ik">🏦</span>Banka Hesapları</div><div class="mi"><span class="ik">💳</span>Kredi Kartı</div><div class="mi"><span class="ik">📟</span>POS</div><div class="mi"><span class="ik">🏛️</span>Krediler</div><div class="mi"><span class="ik">🪟</span>Bankolar</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">⚙️</span>Kasa</div><div class="mi"><span class="ik">🏦</span>Banka Tanımları</div><div class="mi"><span class="ik">🔣</span>İşlem Türleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+    <div class="mod"><span class="ik">⚖️</span>Muhasebe<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📘</span>Muhasebe Fişleri</div><div class="mi"><span class="ik">📨</span>e-Belge</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">🌲</span>Hesap Planı</div><div class="mi"><span class="ik">🎯</span>Masraf Merkezleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z4"></i>4 · Varlık &amp; Servis<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">🖥️</span>Sabit Varlıklar<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">🖥️</span>Demirbaş</div><div class="mi yeni"><span class="ik">🔁</span>Zimmet / Hareketler<span class="rz ok">yeni</span></div><div class="mi dokum yeni"><span class="ik">🖨</span>Dökümler<span class="rz ok">yeni</span></div></div>
+    <div class="mod"><span class="ik">🔧</span>Teknik Servis<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">🚩</span>Arıza Bildir</div><div class="mi"><span class="ik">🧰</span>Arıza Talepleri</div><div class="mi"><span class="ik">📞</span>Çağrılar</div><div class="mi"><span class="ik">🛠</span>İş Emirleri</div><div class="mi"><span class="ik">📅</span>Çizelge</div><div class="mi"><span class="ik">🚗</span>Ziyaretler</div><div class="mi"><span class="ik">📦</span>Emanet Cihazlar</div><div class="mi"><span class="ik">🖨️</span>Cihaz Parkı</div><div class="mi"><span class="ik">📜</span>Sözleşmeler</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">👷</span>Arıza Ekipleri</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z5"></i>5 · İnsan Kaynakları<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">👥</span>İK<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">👥</span>Personel Listesi</div><div class="mi"><span class="ik">🏖️</span>İzinler</div><div class="mi"><span class="ik">⚖️</span>İzin Bakiyesi</div><div class="mi"><span class="ik">🔄</span>Kadro Hareketleri</div><div class="mi"><span class="ik">💸</span>Avanslar</div><div class="mi"><span class="ik">🧾</span>Masraf Beyanları</div><div class="mi"><span class="ik">📄</span>Belge Talepleri</div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">🏷️</span>Bölüm / Görev</div><div class="mi"><span class="ik">📅</span>Resmî Tatiller</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z6"></i>6 · Ofis<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">📁</span>Doküman<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📁</span>Dokümanlar</div><div class="mi"><span class="ik">✔️</span>Onay Kuyruğu<span class="rz kir">4</span></div>
+      <div class="ara2">Tanımlar</div><div class="mi"><span class="ik">🗂️</span>Kategoriler</div><div class="mi"><span class="ik">📂</span>Klasörler</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="zon"><i class="z7"></i>7 · Yönetim<span class="ok">▾</span></div>
+  <div class="zb">
+    <div class="mod"><span class="ik">⚙️</span>Yönetim<span class="ok">▾</span></div><div class="alt">
+      <div class="mi"><span class="ik">📥</span>Onayımdakiler<span class="rz kir">2</span></div><div class="mi"><span class="ik">📣</span>Duyurular</div><div class="mi"><span class="ik">📊</span>Excel'den İçeri Alma</div>
+      <div class="ara2">Kullanıcı &amp; yetki</div><div class="mi"><span class="ik">👤</span>Kullanıcılar</div><div class="mi"><span class="ik">🛡️</span>Roller</div><div class="mi"><span class="ik">🔀</span>Onay Akışları</div><div class="mi"><span class="ik">🤝</span>Onay Vekâleti</div>
+      <div class="ara2">Kurum</div><div class="mi"><span class="ik">🏢</span>Firma / Şubeler</div><div class="mi"><span class="ik">⚙️</span>Genel</div><div class="mi"><span class="ik">🤖</span>YZ Kontör &amp; Kullanım</div><div class="mi"><span class="ik">🧪</span>Demo Verisi</div>
+      <div class="ara2">Bildirim &amp; iş</div><div class="mi"><span class="ik">✉️</span>Bildirim Şablonları</div><div class="mi"><span class="ik">📬</span>Bildirim Kuyruğu</div><div class="mi"><span class="ik">⏰</span>Zamanlanmış İşler</div>
+      <div class="ara2">KVKK</div><div class="mi"><span class="ik">📜</span>Onam Metinleri</div><div class="mi"><span class="ik">🖊️</span>Onam Kayıtları</div>
+      <div class="ara2">Kayıtlar</div><div class="mi"><span class="ik">🔑</span>Giriş Kayıtları</div><div class="mi"><span class="ik">📓</span>İşlem Günlüğü</div><div class="mi dokum"><span class="ik">🖨</span>Dökümler</div></div>
+  </div>
+
+  <div class="kullanici"><div class="avatar">AD</div><div>admin<small>🏢 Merkez Şube ▾ · 2026</small></div><span class="sp sonuk" title="Çıkış">⏻</span></div>
+</div>
+
+<!-- AÇIKLAMA PANELİ -->
+<div class="sag">
+  <div class="grp"><div class="gb">1 · Bölge → modül eşlemesi</div>
+    <div class="dg"><table>
+      <thead><tr><th>Bölge</th><th>Modüller (menuGrup)</th><th>Mantık</th></tr></thead>
+      <tbody>
+        <tr><td><i class="z1"></i>Ticaret</td><td>Cari &amp; CRM · Satış · Alış · Satınalma</td><td>müşteriden sipariş/fatura, tedarikçiden alım</td></tr>
+        <tr><td><i class="z2"></i>Stok &amp; Üretim</td><td>Stok &amp; Hizmet · Üretim</td><td>malın kendisi: depo, hareket, reçete</td></tr>
+        <tr><td><i class="z3"></i>Finans &amp; Muhasebe</td><td>Finans · Muhasebe</td><td>tahsilat/ödeme, hesap, fiş, e-Belge</td></tr>
+        <tr><td><i class="z4"></i>Varlık &amp; Servis</td><td>Sabit Varlıklar · Teknik Servis</td><td>ikisi de cihaz izler (HBYS'deki 773 kararı)</td></tr>
+        <tr><td><i class="z5"></i>İnsan Kaynakları</td><td>İK</td><td>tek modül; Prim/PDKS gelirse buraya</td></tr>
+        <tr><td><i class="z6"></i>Ofis</td><td>Doküman</td><td>günlük iş, ayar değil; ileride Mesajlaşma/Takvim</td></tr>
+        <tr><td><i class="z7"></i>Yönetim</td><td>Yönetim</td><td>her zaman en sonda</td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic sonuk">Modül içi sıra: günlük iş listeleri → (alt başlık: Hesaplar / ÜTS) → <b>Tanımlar</b> → <b>Dökümler</b> en sonda. Rota ve yetki kodları değişmez; yalnız Kabuk'a <code>BOLGE_ERP</code> eklenir (bugün ERP bölgesiz, tek seviye).</div>
+  </div>
+
+  <div class="grp"><div class="gb">2 · Bugüne göre değişen</div><div class="ic"><ul>
+    <li><b>Kaldırılan gruplar (ERP'de çizilmez):</b> Kurumlar &amp; Sigorta, Randevu, Muayene, Laboratuvar, Radyoloji, Göz, Yatan Hasta, Diş, FTR, İşyeri Hekimliği, Çağrı Merkezi, Medula, Ameliyathane, Acil, Eczane.</li>
+    <li><b>Fiyat Listeleri</b> ve <b>Kampanyalar</b> Satış'a taşındı (bugün Satış'ın sonunda, Dökümler'in arkasındaydı).</li>
+    <li><b>Kayıt Kabul</b> (Banko Onayları / Banko Oturumları) önerilen menüde yok → açık soru 1.</li>
+    <li>Tanım ekranları (Satış/Alış Belgeleri, Kategoriler, Stok Ayarları, İş Merkezleri, Kasa, Banka Tanımları, İşlem Türleri, Hesap Planı, Masraf Merkezleri, Bölüm / Görev, Arıza Ekipleri, Resmî Tatiller…) <b>Tanımlar</b> alt başlığına; Dökümler her modülde son satır.</li>
+    <li>Finans: hesap tanımları (Kasa/Banka/Kredi Kartı/POS/Krediler/Bankolar) <b>Hesaplar</b> alt başlığında toplandı.</li>
+    <li>Stok &amp; Hizmet: ÜTS ekranları (Gelen / Askıdakiler, Bildirimler, Ürün Sorgu) <b>ÜTS</b> alt başlığına.</li>
+    <li>Yönetim: 19 düz satır 6 alt başlığa bölündü (Kullanıcı &amp; yetki, Kurum, Bildirim &amp; iş, KVKK, Kayıtlar).</li>
+    <li>Sabit Varlıklar: <b>Zimmet / Hareketler</b> ekranı ve modül Dökümleri <span class="rz ok">yeni</span> (demirbaş zimmet mockup'ı).</li>
+    <li>Bölge başlığı ve modül tıklanınca açılır/kapanır; "Tek bölge" görünümünde diğer bölgeler kapanır (HBYS ile aynı).</li>
+  </ul></div></div>
+
+  <div class="grp"><div class="gb">3 · Açık sorular</div><div class="ic"><ol class="soru">
+    <li><b>Kayıt Kabul / Banko ERP'de var mı?</b> Banko Onayları ve Banko Oturumları hastane vezne akışı. Perakende/POS kasası için ERP'de de anlamlıysa Finans'a "Kasa Oturumları" adıyla mı girmeli, yoksa ERP'de tamamen mi kapanmalı?</li>
+    <li><b>Teknik Servis nerede?</b> Önerilen: Sabit Varlıklar ile aynı bölgede (ikisi de cihaz). Alternatif: müşteri cihazına servis veren firma için Ticaret bölgesine (Satış'ın yanına).</li>
+    <li><b>Alış Faturaları</b> bugün Stok &amp; Hizmet grubunda (<code>belge.alis_fatura</code>); Alış grubunda fatura yok. Alış'a taşınsın mı? (Öneride Alış'ta gösterildi.)</li>
+    <li><b>Tedarikçiler</b> iki yerde: Stok (<code>cari.tedarikci</code>) ve Satınalma (<code>satinalma.tedarikci</code>). Biri kaldırılsın mı, yoksa Cari &amp; CRM'e tek "Tedarikçi Listesi" mi?</li>
+    <li><b>ÜTS</b> yalnız tıbbi cihaz satan firmaya lazım: kurum profilinde modül kapalıysa alt başlık hiç çizilmesin mi?</li>
+    <li><b>Bankolar</b> Finans hesaplarında duruyor; Kayıt Kabul ERP'den çıkarsa bu ekran da ERP'de gerekli mi?</li>
+  </ol></div></div>
+</div>
+  </div>
+  <div class="statusbar"><span>ERP öneri · 7 bölge · 13 modül · ~140 ekran · Dökümler her modülün sonunda</span><span class="sp">Bugün: Kabuk ERP tek seviye (14 grup, Kayıt Kabul + Kurumlar dahil)</span></div>
+</div>
+<div class="not"><b>ERP menü düzeni (öneri).</b> HBYS V2 ile aynı görsel dil: renk kodlu bölge → açılır modül → ekran. Sol şerit daraltılmış (ikon) varyantı gösterir. Yalnız tasarım; web/API/DB'ye dokunulmadı. HBYS karşılığı: <code>Ekranlar/Ayarlar/hastane_menu_v2.html</code>.</div>
+
+<script>
+// Bölge ve modül başlıkları açılır-kapanır; "Tek bölge" modunda bir bölge açılınca diğerleri kapanır.
+var akor=false, zonlar=[].slice.call(document.querySelectorAll('#menu .zon'));
+function isaret(el,acik){var o=el.querySelector('.ok'); if(o) o.textContent=acik?'▾':'▸';}
+zonlar.forEach(function(z){
+  z.addEventListener('click',function(){
+    var b=z.nextElementSibling, acik=b.classList.contains('zkapali');
+    if(akor&&acik) zonlar.forEach(function(x){x.nextElementSibling.classList.add('zkapali');isaret(x,false);});
+    b.classList.toggle('zkapali',!acik); isaret(z,acik);
+  });
+});
+document.querySelectorAll('#menu .mod').forEach(function(m){
+  m.addEventListener('click',function(){var k=m.classList.toggle('kapali'); isaret(m,!k);});
+});
+document.getElementById('cTum').onclick=function(){akor=false;this.classList.add('on');document.getElementById('cAkor').classList.remove('on');
+  zonlar.forEach(function(z){z.nextElementSibling.classList.remove('zkapali');isaret(z,true);});};
+document.getElementById('cAkor').onclick=function(){akor=true;this.classList.add('on');document.getElementById('cTum').classList.remove('on');
+  zonlar.forEach(function(z,i){z.nextElementSibling.classList.toggle('zkapali',i!==0);isaret(z,i===0);});};
+</script>
+</body>
+</html>
