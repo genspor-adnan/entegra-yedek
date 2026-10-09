@@ -503,6 +503,8 @@ return (
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
           <th>{c('Kasa / Banka')}</th>
+          {/* BANKO (kullanıcı 09.10.2026): tahsilatın alındığı banko oturumu. */}
+          <th style={{ width: 140 }}>{c('Banko')}</th>
           {/* DOVIZ SUTUNU yalniz dovizli tahsilat varsa (kullanici: "döviz
               tahsilat olursa tutar soluna alınan döviz de gelsin"): "Tutar"
               kolonu YEREL KARSILIKTIR, hastanin verdigi 100 USD orada hic
@@ -533,6 +535,7 @@ return (
             <td>{kb.belgeNo}</td>
             <td>{kb.turAdi}</td>
             <td>{kb.cari || <span className="sonuk">—</span>}</td>
+            <td className="sonuk">—</td>
             {dovizliTahsilatVar && <td className="hiza-sag sonuk">—</td>}
             <td className="hiza-sag">{para.format(kb.tutar)}</td>
           </tr>
@@ -561,6 +564,7 @@ return (
             <td>{String(k.islemNo ?? '')}</td>
             <td>{String(k.turAdi ?? '')}</td>
             <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
+            <td>{String(k.banko ?? '') || <span className="sonuk">—</span>}</td>
             {/* TUTAR ARTIK GRIDDE DUZENLENMIYOR (kullanici): tutar tahsilat
                 aracina basildigi anda MODALDE soruluyor (acik borc onyuklu,
                 Enter kaydediyor). Iki ayri duzenleme yolu -hucre ici ve
@@ -584,7 +588,7 @@ return (
           );
         })}
         {tahsilatlar.length === 0 && (kurumBelgeleri ?? []).length === 0 && (
-          <tr><td colSpan={dovizliTahsilatVar ? 7 : 6} className="bos">
+          <tr><td colSpan={dovizliTahsilatVar ? 8 : 7} className="bos">
             {kayitliId > 0
               ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
               : 'Önce belgeyi kaydedin.'}
@@ -593,7 +597,7 @@ return (
       </tbody>
       <tfoot>
         <tr className="genel">
-          <td colSpan={dovizliTahsilatVar ? 6 : 5} className="hiza-sag">
+          <td colSpan={dovizliTahsilatVar ? 7 : 6} className="hiza-sag">
             {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
           </td>
           <td className="hiza-sag">

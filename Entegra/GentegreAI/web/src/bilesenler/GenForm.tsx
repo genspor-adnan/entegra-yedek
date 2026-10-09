@@ -2074,7 +2074,38 @@ Yine de yeni kayıt eklensin mi?`);
         )
       )}
 
+      {/* BANKO "Oturumlar" (mockup banko_tanimi_v2.html): bankonun vardiya
+          geçmişi. Oturum = banko + görevli; fark eğilimi buradan okunur.
+          Kart detayı değil, Banko Oturumları listesinin bu bankoya süzülmüş
+          hali - salt okunur. */}
+      {aktif?.tur === 'yerTutucu' && kaynak === 'banko' && aktif.baslik === 'Oturumlar' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            Banko kaydedildikten sonra açılan oturumlar burada listelenir.
+          </div>
+        ) : (
+          <GenGrid
+            kaynak="bankoOturum"
+            gomulu
+            seritGizli
+            boyut={25}
+            sabitFiltre={{ alan: 'bankoId', op: 'esit', deger: id as number }}
+            kolonSirasi={['id', 'acilisTs', 'gorevli', 'devirTutar', 'nakitTahsilat',
+                          'posTutar', 'kapanisSayim', 'kapanisFark', 'teslimAlan', 'durumAdi']}
+            cipler={[
+              { ad: 'Tümü' },
+              { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+              { ad: 'Farklı kapananlar', filtre: { op: 'and', kosullar: [
+                { alan: 'durum', op: 'esit', deger: 4 },
+                { alan: 'kapanisFark', op: 'esitDegil', deger: 0 },
+              ] } },
+            ]}
+          />
+        )
+      )}
+
       {aktif?.tur === 'yerTutucu'
+       && !(kaynak === 'banko' && aktif.baslik === 'Oturumlar')
        && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi')
        && !(kaynak === 'radyoloji-istem' && aktif.baslik === 'Kontrol Listesi') && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>

@@ -364,10 +364,15 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   yani banko eksik kapasiteyle calisiyordur - teknige dusen is.
       { ad: "Arızalı POS'u olan", filtre: { alan: 'posArizali', op: 'buyuk', deger: 0 } },
       { ad: 'Danışma (kasasız)', filtre: { alan: 'tur', op: 'esit', deger: 2 } },
+      // CANLI OTURUM (kullanıcı 09.10.2026): şu an çalışan bankolar.
+      { ad: 'Oturum açık', filtre: { alan: 'oturumDurum', op: 'esit', deger: 2 } },
       { ad: 'Tümü' },
     ],
     menuGrup: 'Finans', menuSira: 45, menuAd: 'Bankolar', ic: '🏧',
     yetkiKodu: 'banko',
+    // OTURUMLAR SEKMESİ (mockup banko_tanimi_v2.html, kullanıcı 09.10.2026):
+    //   bankonun vardiya geçmişi - içi GenForm'da salt okunur GenGrid.
+    yerTutucuSekmeler: ['Oturumlar'],
   },
   // --- BANKO OTURUMU (987, vardiya): akis ekrani ve sorumlu onay kuyrugu.
   //     ozelSayfa - kolonlu liste degil, durum makinesi olan bir akis.

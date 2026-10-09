@@ -15,9 +15,18 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Banko() => new(
         Ad: "banko",
         YetkiKodu: "banko",
+        // CANLI OTURUM (kullanıcı 09.10.2026: "bankolara sütun olarak durum ve
+        //   kullanıcı ekle"): bankoda aynı anda tek canlı oturum olur (durum
+        //   1-3, 987 tekil indeksi) - listede kimin çalıştığı ve oturumun
+        //   hangi adımda olduğu kart açmadan görünsün.
         Kaynak: @"public.banko b
                   left join public.hesap h on h.id = b.hesap_id
-                  left join public.sube s on s.id = b.sube_id",
+                  left join public.sube s on s.id = b.sube_id
+                  left join lateral (select o.durum, o.kullanici_id
+                                       from public.banko_oturum o
+                                      where o.banko_id = b.id and o.durum in (1, 2, 3)
+                                      order by o.id desc limit 1) bo on true
+                  left join public.taraf bt on bt.id = bo.kullanici_id",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.kod",
         Kolonlar: new KolonTanimi[]
@@ -34,6 +43,16 @@ public static partial class KaynakKatalogu
             new("tur", "b.tur", "kod", "Tür Kodu", Varsayilan: false,
                 Kodlar: KartKatalogu.BankoTuruKodlari),
             new("hesapAd", "coalesce(h.ad, '')", "metin", "Kasa Hesabı", Genislik: 170),
+            // Durum adları Banko Oturumları listesiyle aynı; canlı oturum yoksa "Kapalı".
+            new("oturumDurumAdi",
+                "case bo.durum when 1 then 'Açılış onayı bekliyor' when 2 then 'Açık'" +
+                " when 3 then 'Teslime gönderildi' else 'Kapalı' end",
+                "metin", "Durum", Genislik: 150, Bicim: "rozet", Filtrelenebilir: false),
+            new("oturumDurum", "coalesce(bo.durum, 0)", "sayi", "Oturum Durum Kodu",
+                Varsayilan: false),
+            new("kullanici",
+                "coalesce(public.fn_taraf_ad(bt.unvan, bt.ad, bt.soyad)::varchar(120), '')",
+                "metin", "Kullanıcı", Genislik: 170),
             // ÇALIŞAN POS SAYISI: arızalı cihaz sayılmaz (yukarıdaki not).
             new("posSayi",
                 "(select count(*) from public.banko_pos p where p.banko_id = b.id and p.durum = 1)",
@@ -98,6 +117,9 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id", "o.id", "sayi", "Oturum", Genislik: 90),
+            // Banko kartının Oturumlar sekmesi bu kolonla süzer (kullanıcı
+            //   09.10.2026: "banko kartına mockup gibi Oturumlar sekmesi ekle").
+            new("bankoId", "o.banko_id", "sayi", "Banko Id", Varsayilan: false),
             new("bankoKod", "o.banko_kod", "metin", "Banko", Genislik: 100),
             new("bankoAd", "o.banko_ad", "metin", "Banko Adı", Genislik: 180),
             new("gorevli", "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')",

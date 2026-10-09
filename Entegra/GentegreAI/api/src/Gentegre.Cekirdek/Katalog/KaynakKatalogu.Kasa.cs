@@ -471,6 +471,17 @@ public static partial class KaynakKatalogu
             new("tur",           "t.tur",           "sayi",  "Tür Kodu", Varsayilan: false),
             new("turAdi",        "t.tur_adi",       "metin", "İşlem", Genislik: 180),
             new("hesapAdi",      "t.hesap_adi",     "metin", "Kasa / Banka", Genislik: 180),
+            // BANKO (kullanıcı 09.10.2026: "başvuruda tahsilat sütunu olarak
+            //   Banko bilgisini ekle"): tahsilat hangi bankonun oturumunda
+            //   alındı - oturum damgasından (997). Damgasız (muhasebeden
+            //   girilen) ya da avans kullanım satırında boş.
+            new("banko",
+                @"coalesce((select b.kod || ' · ' || b.ad
+                              from public.kasa_islem k
+                              join public.banko_oturum o on o.id = k.oturum_id
+                              join public.banko b on b.id = o.banko_id
+                             where k.id = t.kasa_islem_id), '')",
+                "metin", "Banko", Genislik: 140, Filtrelenebilir: false),
             new("tutar",         "t.tutar",         "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
             new("yerelTutar",    "t.yerel_tutar",   "para",  "TL Tutar", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
             new("dovizCinsi",    "t.doviz_cinsi",   "metin", "Döviz", Hizalama: "orta", Varsayilan: false),

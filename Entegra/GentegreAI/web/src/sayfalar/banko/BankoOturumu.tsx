@@ -4,11 +4,12 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
   FARK_NEDENLERI,
-  type OturumCek, type OturumIslem, type OturumOzeti, type PosEslesme, type TurOzeti,
+  type OturumAcikBorc, type OturumCek, type OturumIslem, type OturumOzeti, type PosEslesme, type TurOzeti,
   type UygunBanko, type VardiyaSecenek,
 } from '../../api/uclar/bankoOturum';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
+import { GenGrid } from '../../bilesenler/GenGrid';
 
 /**
  * BANKO OTURUMU `/banko-oturum` (987) — mockup
@@ -102,6 +103,9 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   const [posAtanmamis, setPosAtanmamis] = useState<{ toplam: number; adet: number } | null>(null);
   const [cekler, setCekler] = useState<OturumCek[]>([]);
   const [islemler, setIslemler] = useState<OturumIslem[]>([]);
+  const [acikBorclar, setAcikBorclar] = useState<OturumAcikBorc[]>([]);
+  // Mockup banko_gun_sonu_kasa_teslimi.html sekmeleri (ilk sekme açık gelir).
+  const [sekme, setSekme] = useState<OturumSekme>('tur');
   const [kapanisTutar, setKapanisTutar] = useState('');
   const [farkNeden, setFarkNeden] = useState(0);
   const [farkAciklama, setFarkAciklama] = useState('');
@@ -146,6 +150,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         setPosAtanmamis(d.posAtanmamis ?? null);
         setCekler(d.cekler ?? []);
         setIslemler(d.islemler ?? []);
+        setAcikBorclar(d.acikBorclar ?? []);
         // Girilmis cihaz toplamlari forma yazilir: gun sonu yarim kalip
         //   tekrar acildiginda bastan girilmesin.
         setPosGiris(o => {
@@ -421,8 +426,49 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
           gibi şeridin altında. Kapanmış oturumda da çizilir - oturum kartını
           listeden açan sorumlu aynı dökümü görür. Gün sonu formu açıkken
           gizli: orada tür dökümü ve sayım konuşuluyor. */}
+      {/* SEKMELER (kullanıcı 09.10.2026: "banko oturum kartına şu mockup taki
+          sekmeleri ekle" - banko_gun_sonu_kasa_teslimi.html): Ödeme Türleri ·
+          Vardiya İşlemleri · POS Gün Sonu · Açık Borçlar · Teslim Geçmişi.
+          Gün sonu formu açıkken gizli: orada sayım ve teslim konuşuluyor. */}
       {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && !gunSonu && (
-        <IslemTablosu islemler={islemler} oturum={oturum} />
+        <div className="bo-sekmeli">
+          <div className="bo-sekmeler">
+            {OTURUM_SEKMELERI.map(([k, ad]) => {
+              const rozet = k === 'islem' ? islemler.filter(x => !x.iptal).length
+                : k === 'acik' ? acikBorclar.length
+                : k === 'pos' && poslar.some(p => p.fark != null && Math.abs(p.fark) > 0.005) ? 'fark'
+                : null;
+              return (
+                <button key={k} type="button" className={'bo-sekme' + (sekme === k ? ' on' : '')}
+                        onClick={() => setSekme(k)}>
+                  {ad}
+                  {rozet !== null && rozet !== 0 && (
+                    <span className={'bo-rz ' + (rozet === 'fark' ? 'kir' : k === 'acik' ? 'sari' : '')}>{rozet}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {sekme === 'tur' && (<><TurTablosu turler={turler} /><CekPaneli cekler={cekler} /></>)}
+          {sekme === 'islem' && <IslemTablosu islemler={islemler} oturum={oturum} />}
+          {sekme === 'pos' && (
+            <PosPaneli poslar={poslar} giris={posGiris} setGiris={setPosGiris}
+                       kaydet={posKaydet} atanmamis={posAtanmamis} />
+          )}
+          {sekme === 'acik' && <AcikBorcTablosu borclar={acikBorclar} />}
+          {sekme === 'gecmis' && (
+            // Bu bankonun vardiyaları - banko kartının Oturumlar sekmesiyle aynı liste.
+            <GenGrid
+              kaynak="bankoOturum"
+              gomulu
+              seritGizli
+              boyut={10}
+              sabitFiltre={{ alan: 'bankoId', op: 'esit', deger: oturum.bankoId }}
+              kolonSirasi={['id', 'acilisTs', 'gorevli', 'devirTutar', 'nakitTahsilat',
+                            'posTutar', 'kapanisSayim', 'kapanisFark', 'teslimAlan', 'durumAdi']}
+            />
+          )}
+        </div>
       )}
 
       {oturum?.durum === 2 && !gunSonu && (
@@ -714,6 +760,65 @@ function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis }: {
   );
 }
 
+type OturumSekme = 'tur' | 'islem' | 'pos' | 'acik' | 'gecmis';
+const OTURUM_SEKMELERI: [OturumSekme, string][] = [
+  ['tur', 'Ödeme Türleri'], ['islem', 'Vardiya İşlemleri'], ['pos', 'POS Gün Sonu'],
+  ['acik', 'Açık Borçlar'], ['gecmis', 'Teslim Geçmişi'],
+];
+
+/**
+ * AÇIK BORÇLAR — mockup gün sonu: "belge genel toplam − tahsilat · kurum
+ * tahakkuku hariç". Kalan sunucudan gelir (genel toplam - net tahsilat).
+ * Kurum payı olan başvurular ayrı bölümde: oradaki kalan kurum payını da
+ * içerir, vezneden tahsil edilmez.
+ */
+function AcikBorcTablosu({ borclar }: { borclar: OturumAcikBorc[] }) {
+  if (borclar.length === 0)
+    return <div className="bo-bos">Bu vardiyada açık borçlu başvuru yok.</div>;
+  const hasta = borclar.filter(b => !b.kurumPayli);
+  const kurum = borclar.filter(b => b.kurumPayli);
+  const tablo = (liste: OturumAcikBorc[], baslik: string, not?: string) => (
+    <>
+      <div className="bo-kb2 bo-ic">{baslik}</div>
+      {not && <div className="bo-not bo-ic">{not}</div>}
+      <div className="bo-tkap">
+        <table className="bo-tablo bo-islem">
+          <thead>
+            <tr>
+              <th>Başvuru</th><th>Hasta</th><th>Klinik / hekim</th><th>Ödeyen</th>
+              <th className="sag">Tutar</th><th className="sag">Tahsil</th><th className="sag">Kalan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {liste.map(b => (
+              <tr key={b.belgeId}>
+                <td>{b.basvuruNo}</td>
+                <td>{b.hasta || '—'}</td>
+                <td>{b.bolum || b.hekim ? `${b.bolum || '—'} · ${b.hekim || '—'}` : '—'}</td>
+                <td>{b.odeyen || '—'}</td>
+                <td className="para">{para(b.tutar)}</td>
+                <td className="para">{para(b.tahsil)}</td>
+                <td className="para"><span className="bo-rz sari">{para(b.kalan)}</span></td>
+              </tr>
+            ))}
+            <tr className="top">
+              <td colSpan={6}>Toplam ({liste.length} başvuru)</td>
+              <td className="para">{para(liste.reduce((t, b) => t + b.kalan, 0))}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+  return (
+    <>
+      {hasta.length > 0 && tablo(hasta, 'Hastadan alınacak')}
+      {kurum.length > 0 && tablo(kurum, 'Kurum tahakkuku',
+        'SGK / özel sigorta payı olan başvurular: kalan kurum payını da içerir, vezneden tahsil edilmez.')}
+    </>
+  );
+}
+
 /**
  * GÜN İÇİ İŞLEMLER — mockup banko_oturum_akisi_v2.html adım 4: Saat /
  * Başvuru / Hasta / Klinik · hekim / Ödeyen / Tutar / Tahsil / Ödeme / Durum.
@@ -943,6 +1048,13 @@ const bostil = `
 .bo-islem td.para, .bo-islem th.sag { text-align:right; font-family:Consolas, monospace; }
 .bo-islem td.orta, .bo-islem th.orta { text-align:center; font-family:inherit; }
 .bo-islem tr.sonuk td:not(.orta) { text-decoration:line-through; }
+.bo-sekmeli { margin-top:8px; }
+.bo-sekmeler { display:flex; gap:2px; flex-wrap:wrap; border-bottom:1px solid var(--cizgi-ince, #e3e9f0); margin-bottom:6px; }
+.bo-sekme { background:none; border:1px solid transparent; border-bottom:none; padding:6px 12px;
+  font-size:12px; cursor:pointer; color: var(--ikincil-metin, #6b7a8b); border-radius:4px 4px 0 0;
+  display:inline-flex; gap:6px; align-items:center; }
+.bo-sekme.on { color: var(--metin, #1f2d3d); font-weight:bold; border-color: var(--cizgi-ince, #e3e9f0);
+  background: var(--yuzey, #fff); margin-bottom:-1px; }
 .bo-durum-cubugu { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font-size:11px; color: var(--ikincil-metin, #6b7a8b); padding:5px 2px; }
 .bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }

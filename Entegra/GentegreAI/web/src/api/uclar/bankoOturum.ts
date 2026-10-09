@@ -122,6 +122,17 @@ export type OturumIslem = {
   terminalNo: string; belgeTahsil: number;
 };
 
+/**
+ * Açık borç (mockup gün sonu, Açık Borçlar sekmesi): bu vardiyada işlem gören
+ * başvurunun genel toplamı - net tahsilatı. `kurumPayli` başvuruda kalan kurum
+ * payını da içerir (vezneden istenecek tutar değildir).
+ */
+export type OturumAcikBorc = {
+  belgeId: number; basvuruNo: string; tarih: string | null; hasta: string;
+  bolum: string; hekim: string; odeyen: string;
+  tutar: number; tahsil: number; kalan: number; kurumPayli: boolean;
+};
+
 export type OturumDetay = {
   oturum: OturumOzeti;
   kupurler: { asama: number; birim: number; adet: number }[];
@@ -131,6 +142,7 @@ export type OturumDetay = {
   posAtanmamis: { toplam: number; adet: number } | null;
   cekler: OturumCek[];
   islemler: OturumIslem[];
+  acikBorclar: OturumAcikBorc[];
 };
 
 export type AcIstegi = {

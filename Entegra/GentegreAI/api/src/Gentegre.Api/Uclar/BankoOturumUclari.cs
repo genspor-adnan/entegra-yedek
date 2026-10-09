@@ -278,10 +278,62 @@ public static class BankoOturumUclari
                 bolum = r.GetString(13), hekim = r.GetString(14), odeyen = r.GetString(15),
                 terminalNo = r.GetString(16), belgeTahsil = r.GetDecimal(17),
             }, iptal);
+            // AÇIK BORÇLAR (mockup banko_gun_sonu_kasa_teslimi.html, kullanıcı
+            //   09.10.2026: "banko oturum kartına şu mockup taki sekmeleri ekle"):
+            //   bu vardiyada işlem gören başvurular - oturumda tahsilatı olan ya
+            //   da görevlinin oturum süresince açtığı - ve kalanı.
+            //   KALAN = sunucunun genel toplamı (fn_belge_diptoplam) - net
+            //   tahsilat (iade düşülür, iptal sayılmaz). Dağıtım kovalarından
+            //   hesaplanmaz: kovalar KDV hariç, tahsilat KDV dahil - ikisini
+            //   çıkarmak yanlış borç gösterirdi. Kurum payı olan başvuru
+            //   `kurumPayli` işaretiyle ayrı bölümde: oradaki kalan kurum
+            //   payını da içerir, vezneden istenecek tutar değildir.
+            var acikBorclar = await b.ListeAsync("""
+                with oturum as (
+                    select o.kullanici_id, coalesce(o.acilis_ts, o.acilis_talep_ts) as bas, o.kapanis_ts as son
+                      from public.banko_oturum o where o.id = @p0),
+                adaylar as (
+                    select k.belge_id as id from public.kasa_islem k
+                     where k.oturum_id = @p0 and k.belge_id is not null
+                    union
+                    select be.id from public.belge be, oturum o
+                     where be.tipi = 30 and be.ekleyen = o.kullanici_id
+                       and be.ekleme_tarihi >= o.bas and (o.son is null or be.ekleme_tarihi <= o.son))
+                select be.id, be.belge_no, be.belge_tarihi,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), be.taraf_unvan, ''),
+                       coalesce(d.ad, ''),
+                       coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), ''),
+                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), ''),
+                       be.genel_toplam, t.net,
+                       exists (select 1 from public.belge_satir s
+                                 join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
+                                where s.belge_id = be.id and (dg.sgk <> 0 or dg.oss <> 0))
+                  from adaylar a
+                  join public.belge be on be.id = a.id and be.tipi = 30
+                  left join public.belge_basvuru bb on bb.id = be.id
+                  left join public.taraf h  on h.id = coalesce(bb.hasta_id, be.taraf_id)
+                  left join public.departman d on d.id = bb.bolum_id
+                  left join public.taraf hk on hk.id = bb.personel_id
+                  left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+                  cross join lateral (
+                      select coalesce(sum(case when kt.yon > 0 then k.yerel_tutar else -k.yerel_tutar end), 0) as net
+                        from public.kasa_islem k
+                        join public.kasa_islem_turu kt on kt.kod = k.tur
+                       where k.belge_id = be.id and k.durum <> 9) t
+                 where be.genel_toplam - t.net > 0.005
+                 order by be.belge_tarihi desc, be.id desc
+                """, null, [id], r => new
+            {
+                belgeId = r.GetInt32(0), basvuruNo = r.GetString(1),
+                tarih = r.IsDBNull(2) ? (DateTime?)null : r.GetDateTime(2),
+                hasta = r.GetString(3), bolum = r.GetString(4), hekim = r.GetString(5),
+                odeyen = r.GetString(6), tutar = r.GetDecimal(7), tahsil = r.GetDecimal(8),
+                kalan = r.GetDecimal(7) - r.GetDecimal(8), kurumPayli = r.GetBoolean(9),
+            }, iptal);
             return Results.Ok(new
             {
                 oturum = o, kupurler = kupur, turler, pos = posListe,
-                posAtanmamis = atanmamis, cekler, islemler,
+                posAtanmamis = atanmamis, cekler, islemler, acikBorclar,
             });
         });
 
