@@ -176,6 +176,14 @@ public sealed class KullaniciOzeti
     /// gelmek zorunda; ekran limiti buna gore daraltir. 0 = kural kapali.
     /// </summary>
     public decimal IskontoOnayEsigi { get; set; }
+
+    /// <summary>
+    /// KURULUM ORTAMI (1008, kullanıcı 10.10.2026: "Canlı / Demo / Eğitim
+    /// Ortamı"): "canli" | "demo" | "egitim". Demo ve eğitimde ekran üst
+    /// şeritte belirgin etiket çizer - personel pratik yaparken gerçek
+    /// kurulumda olduğunu sanmasın, canlıda da eğitim verisi girilmesin.
+    /// </summary>
+    public string Ortam { get; set; } = "canli";
 }
 
 /// <summary>

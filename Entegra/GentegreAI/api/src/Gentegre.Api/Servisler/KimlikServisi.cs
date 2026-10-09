@@ -157,7 +157,8 @@ public sealed class KimlikServisi
                 await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal),
                 await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal),
-                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal))
+                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal),
+                await OrtamAsync(iptal))
         };
     }
 
@@ -381,7 +382,8 @@ public sealed class KimlikServisi
                 await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal),
                 await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal),
-                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal))
+                await _kullanicilar.HekimKisitliAsync(kullanici.TarafId, iptal),
+                await OrtamAsync(iptal))
         };
     }
 
@@ -413,6 +415,15 @@ public sealed class KimlikServisi
     /// hesaba katar; kural sunucuda TETIKLE korunuyor, buradaki deger yalnizca
     /// kullaniciyi bosa ugrastirmamak icin.
     /// </summary>
+    /// <summary>Kurulum ortamı (1008): bilinmeyen değer canlı sayılır.</summary>
+    private async Task<string> OrtamAsync(CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var m = (await AyarDeposu.MetinAsync(baglanti, null, "genel.ortam", "canli", iptal))
+                .Trim().ToLowerInvariant();
+        return m is "demo" or "egitim" ? m : "canli";
+    }
+
     private async Task<decimal> IskontoEsigiAsync(CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -444,8 +455,10 @@ public sealed class KimlikServisi
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
         IReadOnlyList<string> moduller, int hekimRolu,
         (string Kod, string Ad, short MenuBolgeli) kurumTipi = default,
-        decimal iskontoEsigi = 0m, short portalTuru = 0, bool hekimKisitli = false) => new()
+        decimal iskontoEsigi = 0m, short portalTuru = 0, bool hekimKisitli = false,
+        string ortam = "canli") => new()
     {
+        Ortam = ortam,
         HekimKisitli = hekimKisitli,
         // PORTAL TURU (806): giris yanitinda da tasinir - sayfa yenilenmeden
         //   once ekran portal kullanicisina anlamsiz dugmeyi gostermesin.

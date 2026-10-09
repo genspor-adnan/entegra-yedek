@@ -77,6 +77,11 @@ input, select { font: inherit; color: inherit }
    kutusudur (yari saydam beyaz zemin, acik mavi yazi) ve listelerde/lookup'ta
    yeniden kullanildiginda beyaz zeminde okunmaz yazi veriyordu - sekiz
    bilesen bunu inline `style` ile eziyordu. Liste aramasi artik `.ara-kutu`. */
+/* ORTAM ETİKETİ (1008): demo turuncu, eğitim mor - üst şeritte göz ardı edilemez. */
+.ust-ortam { flex:none; margin-left:10px; padding:3px 10px; border-radius:12px; font-size:11px;
+  font-weight:700; letter-spacing:.6px; color:#fff; border:1px solid rgba(255,255,255,.5); }
+.ust-ortam.demo { background:#e07b1a; }
+.ust-ortam.egitim { background:#7b4bc4; }
 .ust-ara {
   /* Kullanici: "ara/komut yaz'i biraz sola al ve %30 kucult" - ortalama yerine
      markaya yakin, 400 -> 280px, 30 -> 26px. */

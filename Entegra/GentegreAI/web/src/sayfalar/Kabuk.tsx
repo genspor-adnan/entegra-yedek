@@ -205,6 +205,12 @@ export function Kabuk() {
           <kbd>Ctrl K</kbd>
         </button>
 
+        {/* ORTAM ETİKETİ (1008, kullanıcı 10.10.2026: "Canlı / Demo / Eğitim
+            Ortamı"): demo / eğitim kurulumunda belirgin - personel pratik
+            yaparken gerçek kurulumda olduğunu sanmasın. Canlıda çizilmez. */}
+        {kullanici?.ortam === 'demo' && <span className="ust-ortam demo">DEMO ORTAMI</span>}
+        {kullanici?.ortam === 'egitim' && <span className="ust-ortam egitim">EĞİTİM ORTAMI</span>}
+
         {/* Sube markasi ARA KUTUSU ile TEMA dugmesi arasinda ortada (kullanici). */}
         {aktifSube && (
           <span className="sube-marka-kap" onMouseDown={e => e.stopPropagation()}>

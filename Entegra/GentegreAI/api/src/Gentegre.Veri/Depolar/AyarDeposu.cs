@@ -66,6 +66,8 @@ public sealed class AyarDeposu
         "demirbas.amortisman_yontem", "demirbas.amortisman_omur",
         // Varsayilan doviz (219) - genel.doviz kod listesinden secilir.
         "genel.varsayilan_doviz",
+        // KURULUM ORTAMI (1008): canli / demo / egitim - ust seritte etiket.
+        "genel.ortam",
         // ÜTS taban adresleri (223) - bos birakilirsa fn_uts_hesap resmi
         //   sabitlere duser.
         "uts.uretim_url",

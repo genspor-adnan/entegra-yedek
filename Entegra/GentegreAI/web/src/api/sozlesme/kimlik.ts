@@ -76,6 +76,8 @@ export interface KullaniciOzeti {
    * reddedilecek bir orani yazmaktan kurtarir.
    */
   iskontoOnayEsigi?: number;
+  /** Kurulum ortamı (1008): demo / eğitimde üst şeritte etiket çizilir. */
+  ortam?: 'canli' | 'demo' | 'egitim';
 }
 
 /** Urun modlari (215). Ad sol ust marka, mesaj basligi ve menu suzmede kullanilir. */
