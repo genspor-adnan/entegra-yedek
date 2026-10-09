@@ -292,12 +292,18 @@ public sealed partial class SorguUretici
             //   hastasinin fisini goremezdi.
             if (kumeler.Contains(KaynakKatalogu.BelgeKumeBasvuru))
                 dallar.Add($"{bk.Tipi} = {Ekle(KaynakKatalogu.BelgeTipiBasvuru)}");
-            var turler = kumeler
-                .Where(k => k != KaynakKatalogu.BelgeKumeBasvuru)
-                .SelectMany(KaynakKatalogu.BelgeKumesininTurleri)
-                .Distinct().ToArray();
+            // KUME = EKRAN KODU (1004 aşama 2): her ekran kendi türünü açar.
+            //   Siparis (19) basvuruyla ayni turdur; ekranin kendi suzgeci
+            //   gibi tipi 30 disarida kalir.
+            var erp = kumeler.Where(k => k != KaynakKatalogu.BelgeKumeBasvuru).ToList();
+            var turler = erp.Where(k => !KaynakKatalogu.BelgeKumesiBasvuruHaric(k))
+                .SelectMany(KaynakKatalogu.BelgeKumesininTurleri).Distinct().ToArray();
             if (turler.Length > 0)
                 dallar.Add($"{bk.Tur} = any({Ekle(turler)})");
+            var haricTurler = erp.Where(KaynakKatalogu.BelgeKumesiBasvuruHaric)
+                .SelectMany(KaynakKatalogu.BelgeKumesininTurleri).Distinct().ToArray();
+            if (haricTurler.Length > 0)
+                dallar.Add($"({bk.Tur} = any({Ekle(haricTurler)}) and {bk.Tipi} <> {Ekle(KaynakKatalogu.BelgeTipiBasvuru)})");
             // Hicbir kume yoksa kapi KAPALI - "kisit hesaplandi ama bos"
             //   durumunda listeyi acik birakmak sizdirma olurdu.
             parcalar.Add(dallar.Count > 0 ? "(" + string.Join(" or ", dallar) + ")" : "false");

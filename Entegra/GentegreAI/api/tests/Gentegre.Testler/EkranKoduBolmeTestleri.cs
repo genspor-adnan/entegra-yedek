@@ -126,13 +126,59 @@ public sealed class EkranKoduBolmeTestleri
     }
 
     [Fact]
-    public void Bolunmus_satis_ekrani_satis_kumesini_acar_basvuruyu_acmaz()
+    public void Satis_faturasi_ekrani_yalniz_faturayi_acar_basvuruyu_acmaz()
     {
         var s = Set("belge.satis.fatura");
+        Assert.True(s.Var("belge", Islem.Gor));                 // kaynak kapısı
         var kumeler = KaynakKatalogu.BelgeYetkiKodlari
             .Where(k => s.VarTam(k, Islem.Gor))
             .Select(KaynakKatalogu.BelgeKumesi).ToList();
-        Assert.Equal([KaynakKatalogu.BelgeKumeSatis], kumeler);
+        Assert.Equal(["belge.satis.fatura"], kumeler);
+        Assert.True(KaynakKatalogu.BelgeKumesiIzinVerir("belge.satis.fatura", 15, 1));
+        Assert.False(KaynakKatalogu.BelgeKumesiIzinVerir("belge.satis.fatura", 18, 1));   // teklif
+        Assert.False(KaynakKatalogu.BelgeKumesiIzinVerir("belge.satis.fatura", 19, 30));  // başvuru
+    }
+
+    // ------------------------------------------ 1004 aşama 2: Satış / Alış ---
+
+    [Fact]
+    public void Her_belge_ekrani_kendi_turunu_acar()
+    {
+        var beklenen = new Dictionary<string, int[]>
+        {
+            ["belge.satis"] = [18, 119], ["belge.satis.siparis"] = [19], ["belge.satis.irsaliye"] = [14],
+            ["belge.satis.fatura"] = [15], ["belge.satis.fis"] = [16], ["belge.satis.tahakkuk"] = [17],
+            ["belge.alis"] = [9], ["belge.alis.irsaliye"] = [10], ["belge.alis_fatura"] = [11],
+            ["belge.alis.fis"] = [12], ["belge.alis.tahakkuk"] = [13], ["belge.alis.konsinye"] = [109],
+            ["belge.stok"] = [105], ["belge.stok.transfer"] = [20], ["belge.stok.giris"] = [3], ["belge.stok.cikis"] = [4],
+        };
+        foreach (var (kod, turler) in beklenen)
+            Assert.Equal(turler, KaynakKatalogu.BelgeKumesininTurleri(KaynakKatalogu.BelgeKumesi(kod)!));
+    }
+
+    [Fact]
+    public void Siparis_basvuruyu_gormez_sorguda_da()
+    {
+        // Sipariş (19) başvuruyla aynı tür; ekranın süzgeci gibi tipi 30 dışarıda.
+        Assert.True(KaynakKatalogu.BelgeKumesiIzinVerir("belge.satis.siparis", 19, 1));
+        Assert.False(KaynakKatalogu.BelgeKumesiIzinVerir("belge.satis.siparis", 19, 30));
+        var belge = KaynakKatalogu.Bul("belge")!;
+        var sql = new SorguUretici(belge) { BelgeKumeleri = ["belge.satis.siparis"] }
+            .Satirlar(new Cekirdek.Sozlesme.ListeIstegi(), belge.Kolonlar.Take(3).ToList(), null, null, 1).Sql;
+        Assert.Contains("and b.tipi <>", sql);
+    }
+
+    [Fact]
+    public void Tek_turlu_belge_kaynaklari_kendi_kodunda()
+    {
+        Assert.Equal("belge.satis.irsaliye", KaynakKatalogu.Bul("irsaliye")!.YetkiKodu);
+        Assert.Equal("belge.satis.acik_satir", KaynakKatalogu.Bul("belge-acik-satir")!.YetkiKodu);
+        Assert.Equal("belge.alis_fatura", KaynakKatalogu.Bul("gelen-belge")!.YetkiKodu);
+        Assert.Equal("belge.stok.transfer", KaynakKatalogu.Bul("stok-transfer")!.YetkiKodu);
+        Assert.Equal("belge.stok.giris", KaynakKatalogu.Bul("giris-fis")!.YetkiKodu);
+        Assert.Equal("belge.stok.cikis", KaynakKatalogu.Bul("cikis-fis")!.YetkiKodu);
+        Assert.False(Set("belge.satis.irsaliye").Var("belge.satis", Islem.Gor));
+        Assert.Equal("belge.satis.ayar", EkranKodlari.AyarAnahtariKodu["belge.satis.vade_gun"]);
     }
 
     // ----------------------------------------------- 1004 aşama 2: Finans ---

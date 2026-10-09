@@ -58,7 +58,15 @@ public static partial class EkranKodlari
     /// </summary>
     private static readonly Dictionary<string, string[]> VeriKapisi = new(StringComparer.Ordinal)
     {
-        ["belge"]            = ["belge.kurum_fatura", "belge.alis_fatura"],
+        // Belge ekranları `belge` kaynağını açar; hangi TÜRÜ göreceğini
+        //   ekran kodunun kendi kümesi belirler (BelgeKisiti, 1004 aşama 2).
+        ["belge"]            = ["belge.kurum_fatura", "belge.alis_fatura",
+                                "belge.satis", "belge.satis.siparis", "belge.satis.irsaliye",
+                                "belge.satis.fatura", "belge.satis.fis", "belge.satis.tahakkuk",
+                                "belge.satis.acik_satir",
+                                "belge.alis", "belge.alis.irsaliye", "belge.alis.fis",
+                                "belge.alis.tahakkuk", "belge.alis.konsinye",
+                                "belge.stok", "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis"],
         ["cari"]             = ["cari.tedarikci"],
         ["medula.provizyon"] = ["medula.kabul"],
         ["dokum"]            = [.. DokumKodlari],
@@ -188,6 +196,13 @@ public static partial class EkranKodlari
         "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
         "kasa.finans.vade",          // plan-vade kaynağı
         "kasa.finans.ayar",          // yalnız kasa ayar anahtarları (AyarUclari)
+        // Satış / Alış / Stok (1004 aşama 2): belge ekranı kendi türüyle,
+        //   tek türlü kaynaklar (irsaliye, açık satır, stok fişleri) kendi kodu.
+        "belge.satis.siparis", "belge.satis.irsaliye", "belge.satis.fatura", "belge.satis.fis",
+        "belge.satis.tahakkuk", "belge.satis.acik_satir", "belge.satis.ayar",
+        "belge.alis.irsaliye", "belge.alis.fis", "belge.alis.tahakkuk", "belge.alis.konsinye",
+        "belge.alis.ayar",
+        "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis",
     };
 
     /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
@@ -201,6 +216,10 @@ public static partial class EkranKodlari
         new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["kasa.duzenleme_gun"] = "kasa.finans.ayar",
+        ["belge.satis.vade_gun"]        = "belge.satis.ayar",
+        ["belge.satis.varsayilan_seri"] = "belge.satis.ayar",
+        ["belge.alis.vade_gun"]         = "belge.alis.ayar",
+        ["belge.alis.varsayilan_seri"]  = "belge.alis.ayar",
     };
 
     /// <summary>

@@ -116,9 +116,14 @@ public sealed class BelgeTuruYetkisiTestleri
     [Fact]
     public void Satis_ve_alis_turleri_cakismaz()
     {
-        var satis = KaynakKatalogu.BelgeKumesininTurleri(KaynakKatalogu.BelgeKumeSatis);
-        var alis  = KaynakKatalogu.BelgeKumesininTurleri(KaynakKatalogu.BelgeKumeAlis);
-        var stok  = KaynakKatalogu.BelgeKumesininTurleri(KaynakKatalogu.BelgeKumeStok);
+        // 1004 aşama 2: küme = ekran kodu; aile, kod önekinden toplanır.
+        int[] Aile(params string[] onekler) => KaynakKatalogu.BelgeYetkiKodlari
+            .Where(k => onekler.Any(o => k.StartsWith(o, StringComparison.Ordinal)))
+            .SelectMany(k => KaynakKatalogu.BelgeKumesininTurleri(KaynakKatalogu.BelgeKumesi(k)!))
+            .Distinct().ToArray();
+        var satis = Aile("belge.satis", "belge.kurum_fatura");
+        var alis  = Aile("belge.alis");
+        var stok  = Aile("belge.stok");
 
         // Bir tür iki kümeye girerse yetkiyi daraltmak anlamını yitirir.
         Assert.Empty(satis.Intersect(alis));

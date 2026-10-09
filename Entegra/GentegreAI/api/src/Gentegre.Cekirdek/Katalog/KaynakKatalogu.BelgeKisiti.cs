@@ -33,14 +33,18 @@
 /// </summary>
 public static partial class KaynakKatalogu
 {
-    /// <summary>Belge kümesi izni: yetki kodundan türetilen mantıksal ad.</summary>
+    /// <summary>
+    /// Belge kümesi izni. Çekirdek <c>belge</c> başvuru bağlamını (tipi 30)
+    /// açar; ERP belgelerinde KÜME = EKRAN KODU (1004 aşama 2, kullanıcı:
+    /// "Satış/Alış'a geç"): Satış Faturaları yalnız faturayı, Satış
+    /// Teklifleri yalnız teklifi açar.
+    /// </summary>
     public const string BelgeKumeBasvuru = "basvuru";
-    public const string BelgeKumeSatis   = "satis";
-    public const string BelgeKumeAlis    = "alis";
-    public const string BelgeKumeStok    = "stok";
-    // 1003: farklı menü grubundaki fatura ekranları kendi kodunu aldı.
-    public const string BelgeKumeKurumFatura = "kurum_fatura";
-    public const string BelgeKumeAlisFatura  = "alis_fatura";
+    public const string BelgeKumeSatis   = "belge.satis";
+    public const string BelgeKumeAlis    = "belge.alis";
+    public const string BelgeKumeStok    = "belge.stok";
+    public const string BelgeKumeKurumFatura = "belge.kurum_fatura";
+    public const string BelgeKumeAlisFatura  = "belge.alis_fatura";
 
     /// <summary>
     /// Başvuru bağlamı belge TİPİ: başvuru ve ondan türeyen hasta belgeleri
@@ -49,25 +53,35 @@ public static partial class KaynakKatalogu
     public const int BelgeTipiBasvuru = 30;
 
     /// <summary>
-    /// Küme -> o kümeye ait belge türleri. Türler Delphi'den gelen sabit
-    /// kodlardır (listeTanimlari'ndaki `sabitFiltre`/`yeniBelgeTuru` ile
-    /// birebir): 9-13/109 alış, 14-19/119 satış, 3/4/20/105 stok fişleri.
+    /// Ekran kodu -> açtığı belge türleri ve başvuru tipinin hariç olup
+    /// olmadığı. Türler Delphi'den gelen sabit kodlardır, ekranın
+    /// `sabitFiltre`/`yeniBelgeTuru`'su ile birebir. Sipariş (19) başvuruyla
+    /// aynı türdür; ekranın kendi süzgeci gibi tipi 30 DIŞARIDA.
     /// </summary>
-    private static readonly Dictionary<string, int[]> BelgeKumeTurleri =
+    private static readonly Dictionary<string, (int[] Turler, bool BasvuruHaric)> BelgeKumeTurleri =
         new(StringComparer.Ordinal)
     {
-        // Satış: teklif 18, sipariş 19, irsaliye 14, fatura 15, fiş 16,
-        //   tahakkuk 17, konsinye 119.
-        [BelgeKumeSatis] = new[] { 14, 15, 16, 17, 18, 19, 119 },
-        // Alış: sipariş 9, irsaliye 10, fatura 11, fiş 12, tahakkuk 13,
-        //   konsinye 109.
-        [BelgeKumeAlis]  = new[] { 9, 10, 11, 12, 13, 109 },
-        // Stok: giriş 3, çıkış 4, transfer 20, talep 105.
-        [BelgeKumeStok]  = new[] { 3, 4, 20, 105 },
-        // Kurumlar & Sigorta › Faturalar (satış faturası 15) ve
-        //   Stok & Hizmet › Alış Faturaları (11): ekranların sabit süzgeci.
-        [BelgeKumeKurumFatura] = new[] { 15 },
-        [BelgeKumeAlisFatura]  = new[] { 11 },
+        // Satış
+        ["belge.satis"]            = ([18, 119], false),   // Teklifler (+ gizli Konsinyeler)
+        ["belge.satis.siparis"]    = ([19], true),         // Siparişler
+        ["belge.satis.irsaliye"]   = ([14], false),        // İrsaliyeler (kart)
+        ["belge.satis.fatura"]     = ([15], false),        // Faturalar
+        ["belge.kurum_fatura"]     = ([15], false),        // Kurumlar & Sigorta › Faturalar
+        ["belge.satis.fis"]        = ([16], false),        // Fişler
+        ["belge.satis.tahakkuk"]   = ([17], false),        // Tahakkuklar
+        ["belge.satis.acik_satir"] = ([19], true),         // Açık Satırlar (siparişin kartı)
+        // Alış
+        ["belge.alis"]             = ([9], false),         // Siparişler
+        ["belge.alis.irsaliye"]    = ([10], false),
+        ["belge.alis_fatura"]      = ([11], false),        // Stok & Hizmet › Alış Faturaları
+        ["belge.alis.fis"]         = ([12], false),
+        ["belge.alis.tahakkuk"]    = ([13], false),
+        ["belge.alis.konsinye"]    = ([109], false),
+        // Stok fişleri (liste kendi kaynağında; kart belge ucundan açılır)
+        ["belge.stok"]             = ([105], false),       // Stoktan Talep
+        ["belge.stok.transfer"]    = ([20], false),
+        ["belge.stok.giris"]       = ([3], false),
+        ["belge.stok.cikis"]       = ([4], false),
     };
 
     /// <summary>
@@ -87,27 +101,26 @@ public static partial class KaynakKatalogu
 
     /// <summary>Kümenin belge türleri; bilinmeyen küme için boş dizi.</summary>
     public static int[] BelgeKumesininTurleri(string kume)
-        => BelgeKumeTurleri.TryGetValue(kume, out var t) ? t : Array.Empty<int>();
+        => BelgeKumeTurleri.TryGetValue(kume, out var t) ? t.Turler : Array.Empty<int>();
+
+    /// <summary>Küme başvuru tipini (30) dışarıda bırakıyor mu.</summary>
+    public static bool BelgeKumesiBasvuruHaric(string kume)
+        => BelgeKumeTurleri.TryGetValue(kume, out var t) && t.BasvuruHaric;
+
+    /// <summary>Yetki kodundan belge kümesi (çekirdek `belge` = başvuru, ERP kodu = kendisi).</summary>
+    public static string? BelgeKumesi(string yetkiKodu)
+        => yetkiKodu == "belge" ? BelgeKumeBasvuru
+         : BelgeKumeTurleri.ContainsKey(yetkiKodu) ? yetkiKodu
+         : null;
 
     /// <summary>
-    /// Yetki kodundan belge kümesi. Çekirdek <c>belge</c> yalnız başvuruyu
-    /// açar; ERP kümelerinin her biri kendi kodunu ister.
+    /// Kümenin bu belgeye izin verip vermediği (tek kayıt / yazma kapısı).
     /// </summary>
-    public static string? BelgeKumesi(string yetkiKodu) => yetkiKodu switch
-    {
-        "belge"       => BelgeKumeBasvuru,
-        "belge.satis" => BelgeKumeSatis,
-        "belge.alis"  => BelgeKumeAlis,
-        "belge.stok"  => BelgeKumeStok,
-        "belge.kurum_fatura" => BelgeKumeKurumFatura,
-        "belge.alis_fatura"  => BelgeKumeAlisFatura,
-        // 1004 AŞAMA 1: ekran başına bölünen satış/alış/stok kodları kendi
-        //   kümesinin TAMAMINI açar (Satış Faturaları -> satış kümesi). Türe
-        //   göre daraltma aşama 2'de.
-        _ => Yetki.EkranKodlari.KopyaKaynagi(yetkiKodu) is { } ust
-             && ust is "belge.satis" or "belge.alis" or "belge.stok"
-             ? BelgeKumesi(ust) : null,
-    };
+    public static bool BelgeKumesiIzinVerir(string kume, int tur, int tipi)
+        => kume == BelgeKumeBasvuru
+           ? tipi == BelgeTipiBasvuru
+           : BelgeKumesininTurleri(kume).Contains(tur)
+             && !(BelgeKumesiBasvuruHaric(kume) && tipi == BelgeTipiBasvuru);
 
     /// <summary>
     /// Kısıtın bakacağı tüm yetki kodları - bağlam bunları TAM eşleşmeyle
@@ -115,10 +128,5 @@ public static partial class KaynakKatalogu
     /// başka kümeyi açmaz.
     /// </summary>
     public static IReadOnlyList<string> BelgeYetkiKodlari { get; } =
-        new[] { "belge", "belge.satis", "belge.alis", "belge.stok",
-                "belge.kurum_fatura", "belge.alis_fatura" }
-        .Concat(Yetki.EkranKodlari.AyniGrupEkranlari
-                    .Where(x => x.Eski is "belge.satis" or "belge.alis" or "belge.stok")
-                    .Select(x => x.Yeni))
-        .ToArray();
+        new[] { "belge" }.Concat(BelgeKumeTurleri.Keys).ToArray();
 }

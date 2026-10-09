@@ -25,6 +25,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Ekle);
 
             var belge = BaslikDegerleri(istek.Belge);
+            await BelgeYazmaIsteAsync(baglam, veri, null, belge, Islem.Ekle, iptal);
             BelgeTarihiSaatle(belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
@@ -263,6 +264,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Degistir);
 
             var belge = BaslikDegerleri(istek.Belge);
+            await BelgeYazmaIsteAsync(baglam, veri, id, belge, Islem.Degistir, iptal);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
 
@@ -500,11 +502,12 @@ public static class BelgeUclari
         //   IPTAL kullanilir; on-kosullar veritabaninda (fn_belge_silinebilir),
         //   arayuz ve uc AYNI cevabi alsin diye.
         grup.MapDelete("/{id:int}", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Sil);
+            await BelgeYazmaIsteAsync(baglam, veri, id, null, Islem.Sil, iptal);
 
             var mesaj = await depo.SilAsync(id,
                 baglam.Yazma, iptal);
@@ -1151,19 +1154,49 @@ public static class BelgeUclari
         var tipi = belge.TryGetValue("tipi", out var tipHam) && tipHam is not null
                  ? Convert.ToInt32(tipHam) : 0;
 
-        foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
-        {
-            if (!baglam.Yetkiler.VarTam(kod, Islem.Gor)) continue;
-            var kume = KaynakKatalogu.BelgeKumesi(kod);
-            if (kume is null) continue;
-            if (kume == KaynakKatalogu.BelgeKumeBasvuru)
-            {
-                // Basvuru baglami TIPLE belirlenir - basvurudan kesilen hasta
-                //   fisi/tahakkuku da ayni tipi tasir (bkz. BelgeKisiti).
-                if (tipi == KaynakKatalogu.BelgeTipiBasvuru) return;
-            }
-            else if (KaynakKatalogu.BelgeKumesininTurleri(kume).Contains(tur)) return;
-        }
-        throw GentegreHatasi.Bulunamadi();
+        if (!TurIzinli(baglam, tur, tipi, Islem.Gor)) throw GentegreHatasi.Bulunamadi();
     }
+
+    /// <summary>
+    /// Kullanıcının bu tür/tipteki belgede bu işlemi yapabilecek bir ekran
+    /// kodu var mı. Başvuru bağlamı TİPLE belirlenir - başvurudan kesilen
+    /// hasta fişi/tahakkuku da aynı tipi taşır (bkz. BelgeKisiti).
+    /// </summary>
+    private static bool TurIzinli(IstekBaglami baglam, int tur, int tipi, Islem islem)
+    {
+        foreach (var kod in KaynakKatalogu.BelgeYetkiKodlari)
+            if (baglam.Yetkiler.VarTam(kod, islem)
+                && KaynakKatalogu.BelgeKumesi(kod) is { } kume
+                && KaynakKatalogu.BelgeKumesiIzinVerir(kume, tur, tipi))
+                return true;
+        return false;
+    }
+
+    /// <summary>
+    /// YAZMA KAPISI (1004 aşama 2, kullanıcı: "Satış/Alış'a geç"): ekran
+    /// kodu belgeyi yalnız OKUMADA değil yazmada da kendi türüyle sınırlar -
+    /// Satış Teklifleri yetkisiyle fatura kesilmez / silinmez. Kayıtlı belge
+    /// kısıt dışındaysa "bulunamadı" (okumayla aynı cevap).
+    /// </summary>
+    private static async Task BelgeYazmaIsteAsync(IstekBaglami baglam, VeriKaynagi veri,
+        int? id, IDictionary<string, object?>? yeni, Islem islem, CancellationToken iptal)
+    {
+        if (id is not null)
+        {
+            var mevcut = await veri.TekAsync("select tur, tipi from public.belge where id = @p0",
+                [id.Value], r => new[] { (int)r.GetInt16(0), (int)r.GetInt16(1) }, iptal);
+            if (mevcut is null || !TurIzinli(baglam, mevcut[0], mevcut[1], islem))
+                throw GentegreHatasi.Bulunamadi();
+        }
+        if (yeni is not null && Sayi(yeni, "tur") is int tur
+            && !TurIzinli(baglam, tur, Sayi(yeni, "tipi") ?? 0, islem))
+            throw GentegreHatasi.Yasak("Bu belge türünde işlem yetkiniz yok.");
+    }
+
+    private static int? Sayi(IDictionary<string, object?> d, string alan)
+        => d.TryGetValue(alan, out var v) && v is not null
+           ? v is JsonElement j
+             ? (j.ValueKind == JsonValueKind.Number ? j.GetInt32() : null)
+             : Convert.ToInt32(v, System.Globalization.CultureInfo.InvariantCulture)
+           : null;
 }

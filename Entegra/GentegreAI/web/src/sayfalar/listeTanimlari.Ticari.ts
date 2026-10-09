@@ -154,7 +154,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // MENUDE YOK (kullanici): Alis Faturalari > "Gelen Kutusu" sekmesinden
     //   girilir; menude ikinci bir giris ayni ekrani iki yerde gosterirdi.
     menuGizli: true,
-    menuGrup: 'Alış', menuSira: 10, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis',
+    menuGrup: 'Alış', menuSira: 10, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',   // 1004: Alış Faturaları çipi
   },
   {
     // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
