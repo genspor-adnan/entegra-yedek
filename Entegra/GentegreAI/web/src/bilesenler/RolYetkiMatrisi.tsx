@@ -195,7 +195,27 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   //   kuralini uygulayinca (menude ilk gordugu yer) sunucuyla ayrisiyor ve
   //   yetki IK'da beklenirken Cari altinda cikiyordu. Tek karar yeri: sunucu.
   const modulDugumu = new Map<string, Dugum>();
-  for (const s of yeni.filter(x => !x.kod.includes('.'))) {
+  /**
+   * BAŞKA GRUPTAKİ ALT EKRAN KENDİ GRUBUNDA DURUR (kullanıcı 09.10.2026:
+   * "uzman doktor barış ile girdim.. seçtiğim yetki matrisi dışında menüler
+   * var"). 998 bölmesi geniş kodları noktalı EKRAN kodlarına ayırdı
+   * (`belge.satis`, `belge.alis`, `belge.stok`, `hesap.tanim`...). Nokta
+   * görülünce aksiyon sanılıp üst modülün altına konuyorlardı: Kayıt Kabul >
+   * Başvurular (`belge`) satırına tik atmak Satış/Alış/Stok ekranlarını da
+   * açıyordu. Menüde üst kodundan FARKLI grupta duran noktalı ekran kodu
+   * modül gibi kendi grubuna yerleşir; aynı gruptaki alt ekranlar
+   * (`lab.tetkik` Laboratuvar altında) eskisi gibi üstünün altında kalır.
+   */
+  const ustKodu = (kod: string) => {
+    const onek = kod.slice(0, kod.indexOf('.'));
+    return UST_KOD[onek] ?? onek;
+  };
+  const ayriEkran = (s: { kod: string; tur: number }) => {
+    if (!s.kod.includes('.') || s.tur !== 0) return false;
+    const yer = harita.get(s.kod);
+    return !!yer && harita.get(ustKodu(s.kod))?.grup !== yer.grup;
+  };
+  for (const s of yeni.filter(x => !x.kod.includes('.') || ayriEkran(x))) {
     const yer = harita.get(s.kod);
     // GİZLENMİŞ EKRANIN YETKİSİ ÇİZİLMEZ: menüde karşılığı VAR ama aktif
     //   menüde yok demek - kurum o ekranı pasife almış. Menüde hiç ekranı
@@ -209,7 +229,21 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     //   kurum o grubu yeniden adlandırdıysa (979) ağaçta kurumun adı yazar -
     //   menüde "Hasta Kabul" görünürken burada "Kayıt Kabul" aramak zorunda
     //   kalmasın. Eşleme ÇEVRİLMEMİŞ ad üzerinden: düzen kaydı onu taşıyor.
-    const hamGrup = EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? s.grup ?? yer?.grup ?? 'Diğer';
+    // MATRİS = MENÜ (kullanıcı 09.10.2026: "genprofil ile seçtiğim menüler
+    //   yetki matrisinde görünecek.. yetki matrisinde gor dediğim menüler de
+    //   kullanıcı menüsünde görünecek"). Menüde ekranı olan yetki MENÜDEKİ
+    //   grubunda çizilir. Sunucu grubu yalnız menüdeki gruplardan biriyse
+    //   kullanılır (684: `personel` iki grupta, seçim sunucunun). Aksi halde
+    //   yetki tablosunun eski grubu (`Sistem`, `CRM`, `Kalite`) aktif menüde
+    //   başlık bulamıyor ve satır HİÇ çizilmiyordu: uzman doktorda Radyoloji,
+    //   Görevler, Onayımdakiler, Klinik Kalite menüde çıkıyor ama matriste
+    //   kutusu yoktu - kaldırmanın yolu kalmıyordu. Aynı sebeple 998'in
+    //   `belge.satis`'i ("Kayıt Kabul" yazılı) menüdeki Satış yerine gider.
+    const sunucuGrubu = GRUP_ADI[s.grup] ?? s.grup;
+    const menuGruplari = yer?.gruplu.map(g => g.grup) ?? [];
+    const hamGrup = menuGruplari.length === 0
+      ? EK_GRUP[s.kod] ?? sunucuGrubu ?? 'Diğer'
+      : menuGruplari.includes(sunucuGrubu) ? sunucuGrubu : yer!.grup;
     const grupAdi = duzenH.bul(hamGrup, DUGUM.grup)?.gorunenAd || hamGrup;
     // BÖLGE BAŞLIĞI (HBYS): menü bölgeli çiziliyorsa matris de bölge › grup ›
     //   yetki olarak çizilir - "aynı şekilde görünmesi" istenen yapı bu.
@@ -241,10 +275,17 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   }
   // 2) Aksiyon yetkileri (belge.kesinlestir, uts.bildir...) ait olduklari
   //    modulun ALTINA girer; modul yoksa kendi grubunda durur.
-  for (const s of yeni.filter(x => x.kod.includes('.'))) {
-    const onek = s.kod.slice(0, s.kod.indexOf('.'));
-    const ustKod = UST_KOD[onek] ?? onek;
-    const d: Dugum = { anahtar: `y:${s.yetkiId}`, ad: s.ad, satir: s, cocuklar: [] };
+  for (const s of yeni.filter(x => x.kod.includes('.') && !ayriEkran(x))) {
+    const ustKod = ustKodu(s.kod);
+    // Alt EKRAN da menüdeki adıyla yazılır (matris = menü): `klinik_kalite.olgu`
+    //   menüde "Klinik Kalite Göstergeleri", yetki adı başka bir şey.
+    const ekran = harita.get(s.kod);
+    const d: Dugum = {
+      anahtar: `y:${s.yetkiId}`,
+      ad: s.tur === 0 && ekran?.ekranlar.length === 1 ? ekran.ekranlar[0] : s.ad,
+      ic: s.tur === 0 ? ekran?.ic : undefined,
+      satir: s, cocuklar: [],
+    };
     const ustDugum = modulDugumu.get(ustKod);
     if (ustDugum) ustDugum.cocuklar.push(d);
     // Üst modül ağaçta yoksa ve o modül MENÜLÜ bir yetkiyse, ekranı pasife
