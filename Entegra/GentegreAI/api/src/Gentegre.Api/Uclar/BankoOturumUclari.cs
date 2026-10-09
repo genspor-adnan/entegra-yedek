@@ -231,10 +231,57 @@ public static class BankoOturumUclari
                 tutar = r.GetDecimal(7), durum = r.GetInt16(8),
                 tarafUnvan = r.GetString(9),
             }, iptal);
+            // KIMDEN NE ALINDI (kullanici 09.10.2026: "oturum kartinin icini
+            //   mockup a gore duzenle.. kimden ne alindi vb bilgiler olsun",
+            //   Ekranlar/Kayıt Kabul/banko_oturum_akisi_v2.html adim 4): 997'den
+            //   beri her tahsilat oturum damgasi tasiyor; tur ozeti "ne kadar"
+            //   diyordu, bu liste "kimden, hangi basvuru icin".
+            //   Tutar = basvurunun genel toplami, Tahsil = bu satirin parasi;
+            //   KISMI = basvuruya yapilan tum tahsilatin toplami (iadeler
+            //   dusulmus) genel toplamin altinda. Fark fisi (kaynak 1385) tur
+            //   ozetinde oldugu gibi disarida - tahsilat degil, sayim duzeltmesi.
+            var islemler = await b.ListeAsync("""
+                select k.id, k.islem_tarihi, k.durum, t.yon, t.ad,
+                       coalesce(t.ana_hesap_turu, ''), t.grup,
+                       k.yerel_tutar, k.makbuz_no, k.belge_id,
+                       coalesce(be.belge_no, ''), coalesce(be.genel_toplam, 0),
+                       coalesce(nullif(k.taraf_unvan, ''),
+                                (select public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)
+                                   from public.taraf h where h.id = k.taraf_id), ''),
+                       coalesce(d.ad, ''),
+                       coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), ''),
+                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), ''),
+                       coalesce(p.terminal_no, ''),
+                       coalesce((select sum(case when t2.yon > 0 then k2.yerel_tutar
+                                                 else -k2.yerel_tutar end)
+                                   from public.kasa_islem k2
+                                   join public.kasa_islem_turu t2 on t2.kod = k2.tur
+                                  where k2.belge_id = k.belge_id and k2.durum <> 9), 0)
+                  from public.kasa_islem k
+                  join public.kasa_islem_turu t on t.kod = k.tur
+                  left join public.belge be          on be.id = k.belge_id
+                  left join public.belge_basvuru bb  on bb.id = k.belge_id
+                  left join public.departman d       on d.id = bb.bolum_id
+                  left join public.taraf hk          on hk.id = bb.personel_id
+                  left join public.taraf ok          on ok.id = bb.odeyen_kurum_id
+                  left join public.banko_pos p       on p.id = k.banko_pos_id
+                 where k.oturum_id = @p0
+                   and k.kaynak_tur is distinct from 1385
+                 order by k.islem_tarihi desc, k.id desc
+                """, null, [id], r => new
+            {
+                id = r.GetInt32(0), tarih = r.GetDateTime(1), iptal = r.GetInt16(2) == 9,
+                iade = r.GetInt16(3) < 0, turAdi = r.GetString(4), hesapTuru = r.GetString(5),
+                turGrup = r.GetString(6), tahsil = r.GetDecimal(7), makbuzNo = r.GetString(8),
+                belgeId = r.IsDBNull(9) ? (int?)null : r.GetInt32(9),
+                basvuruNo = r.GetString(10), tutar = r.GetDecimal(11), hasta = r.GetString(12),
+                bolum = r.GetString(13), hekim = r.GetString(14), odeyen = r.GetString(15),
+                terminalNo = r.GetString(16), belgeTahsil = r.GetDecimal(17),
+            }, iptal);
             return Results.Ok(new
             {
                 oturum = o, kupurler = kupur, turler, pos = posListe,
-                posAtanmamis = atanmamis, cekler,
+                posAtanmamis = atanmamis, cekler, islemler,
             });
         });
 

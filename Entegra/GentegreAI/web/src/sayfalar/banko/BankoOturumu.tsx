@@ -4,7 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
   FARK_NEDENLERI,
-  type OturumCek, type OturumOzeti, type PosEslesme, type TurOzeti,
+  type OturumCek, type OturumIslem, type OturumOzeti, type PosEslesme, type TurOzeti,
   type UygunBanko, type VardiyaSecenek,
 } from '../../api/uclar/bankoOturum';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
@@ -49,6 +49,9 @@ const para = (n: number) =>
   n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const saat = (t: string | null) =>
   t ? new Date(t).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+/** Gün içi tabloda yalnız saat - oturum zaten tek güne ait. */
+const saatKisa = (t: string) =>
+  new Date(t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
 export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   /** Modal içinde çizilir: kendi sayfa kabuğunu ve başlığını kurmaz. */
@@ -98,6 +101,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
   const [posGiris, setPosGiris] = useState<Record<number, string>>({});
   const [posAtanmamis, setPosAtanmamis] = useState<{ toplam: number; adet: number } | null>(null);
   const [cekler, setCekler] = useState<OturumCek[]>([]);
+  const [islemler, setIslemler] = useState<OturumIslem[]>([]);
   const [kapanisTutar, setKapanisTutar] = useState('');
   const [farkNeden, setFarkNeden] = useState(0);
   const [farkAciklama, setFarkAciklama] = useState('');
@@ -141,6 +145,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         setPoslar(d.pos ?? []);
         setPosAtanmamis(d.posAtanmamis ?? null);
         setCekler(d.cekler ?? []);
+        setIslemler(d.islemler ?? []);
         // Girilmis cihaz toplamlari forma yazilir: gun sonu yarim kalip
         //   tekrar acildiginda bastan girilmesin.
         setPosGiris(o => {
@@ -410,6 +415,14 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
             }}>🔒 Gün Sonu</button>
           )}
         </div>
+      )}
+
+      {/* KİMDEN NE ALINDI (kullanıcı 09.10.2026): gün içi tablosu mockup'taki
+          gibi şeridin altında. Kapanmış oturumda da çizilir - oturum kartını
+          listeden açan sorumlu aynı dökümü görür. Gün sonu formu açıkken
+          gizli: orada tür dökümü ve sayım konuşuluyor. */}
+      {oturum && (oturum.durum === 2 || oturum.durum === 3 || oturum.durum === 4) && !gunSonu && (
+        <IslemTablosu islemler={islemler} oturum={oturum} />
       )}
 
       {oturum?.durum === 2 && !gunSonu && (
@@ -702,6 +715,93 @@ function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis }: {
 }
 
 /**
+ * GÜN İÇİ İŞLEMLER — mockup banko_oturum_akisi_v2.html adım 4: Saat /
+ * Başvuru / Hasta / Klinik · hekim / Ödeyen / Tutar / Tahsil / Ödeme / Durum.
+ *
+ * Satır = oturuma damgalı bir kasa işlemi (997). Tutar başvurunun toplamı,
+ * Tahsil bu satırın parası; başvuruya yapılan tahsilatın neti toplamın
+ * altındaysa durum KISMİ. İptal edilen satır sönük çizilir ve toplama girmez.
+ */
+function IslemTablosu({ islemler, oturum }: { islemler: OturumIslem[]; oturum: OturumOzeti }) {
+  if (islemler.length === 0)
+    return (
+      <div className="bo-bos">
+        Bu oturumda henüz tahsilat yok. Başvurudan alınan her ödeme oturum
+        numarasıyla buraya düşer.
+      </div>
+    );
+  const gecerli = islemler.filter(x => !x.iptal);
+  const net = gecerli.reduce((a, x) => a + (x.iade ? -x.tahsil : x.tahsil), 0);
+  const son = islemler[0];
+  return (
+    <>
+      <div className="bo-tkap">
+        <table className="bo-tablo bo-islem">
+          <thead>
+            <tr>
+              <th>Saat</th><th>Başvuru</th><th>Hasta</th><th>Klinik / hekim</th>
+              <th>Ödeyen</th><th className="sag">Tutar</th><th className="sag">Tahsil</th>
+              <th className="orta">Ödeme</th><th className="orta">Durum</th>
+            </tr>
+          </thead>
+          <tbody>
+            {islemler.map(x => {
+              const odeme = odemeRozeti(x);
+              const durum = durumRozeti(x);
+              return (
+                <tr key={x.id} className={x.iptal ? 'sonuk' : ''}
+                    title={x.makbuzNo ? `Makbuz ${x.makbuzNo} · ${x.turAdi}` : x.turAdi}>
+                  <td>{saatKisa(x.tarih)}</td>
+                  <td>{x.basvuruNo || '—'}</td>
+                  <td>{x.hasta || '—'}</td>
+                  <td>{x.bolum || x.hekim ? `${x.bolum || '—'} · ${x.hekim || '—'}` : '—'}</td>
+                  <td>{x.odeyen || '—'}</td>
+                  <td className="para">{x.belgeId ? para(x.tutar) : '—'}</td>
+                  <td className="para">{x.iade ? '−' : ''}{para(x.tahsil)}</td>
+                  <td className="orta"><span className={'bo-rz ' + odeme.renk}>{odeme.ad}</span></td>
+                  <td className="orta"><span className={'bo-rz ' + durum.renk}>{durum.ad}</span></td>
+                </tr>
+              );
+            })}
+            <tr className="top">
+              <td colSpan={5}>Oturum toplamı ({gecerli.length} işlem)</td>
+              <td className="para">—</td>
+              <td className="para">{para(net)}</td>
+              <td className="orta" colSpan={2}>
+                nakit {para(oturum.nakitTahsilat)} · POS {para(oturum.posTutar)}
+                {oturum.nakitIade ? ` · iade −${para(oturum.nakitIade)}` : ''}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="bo-durum-cubugu">
+        <span>Kapalı oturuma yazma reddedilir: tahsilat satırı <b>oturum numarasını taşır</b></span>
+        <span>Son işlem {saatKisa(son.tarih)} · {oturum.bankoAd || oturum.bankoKod}</span>
+      </div>
+    </>
+  );
+}
+
+/** Ödeme rozeti: kasa türünün ana hesabından (K nakit, P POS, B havale). */
+function odemeRozeti(x: OturumIslem): { ad: string; renk: string } {
+  if (x.iade) return { ad: 'iade', renk: 'kir' };
+  if (x.hesapTuru === 'K') return { ad: 'nakit', renk: 'sari' };
+  if (x.hesapTuru === 'P') return { ad: 'POS', renk: 'mavi' };
+  if (x.hesapTuru === 'B') return { ad: 'havale', renk: 'mavi' };
+  if (x.turGrup === 'ceksenet') return { ad: 'çek/senet', renk: 'mavi' };
+  return { ad: x.turAdi.toLocaleLowerCase('tr-TR'), renk: '' };
+}
+
+function durumRozeti(x: OturumIslem): { ad: string; renk: string } {
+  if (x.iptal) return { ad: 'iptal', renk: '' };
+  if (x.iade) return { ad: 'iade', renk: 'kir' };
+  // Kuruş yuvarlaması kısmi saymasın.
+  if (x.belgeId && x.belgeTahsil < x.tutar - 0.005) return { ad: 'kısmi', renk: 'sari' };
+  return { ad: 'tahsil', renk: 'ok' };
+}
+
+/**
  * ÖDEME TÜRÜ DÖKÜMÜ (989) — mockup tablosu: Tür / Adet / Tahsilat / İade /
  * Net / Kasada durur? / Teslim-eşleşme.
  *
@@ -837,6 +937,14 @@ const bostil = `
 .bo-tablo td:last-child, .bo-tablo th:last-child { text-align:right; font-family:Consolas, monospace; }
 .bo-tablo tr.top td { font-weight:bold; background:#f7f9fc; }
 .bo-tablo tr.sonuk td { color: var(--ikincil-metin, #6b7a8b); }
+.bo-tkap { overflow-x:auto; margin:8px 0 0; border:1px solid var(--cizgi-ince, #e3e9f0); border-radius:4px; }
+.bo-islem th { text-align:left; background:#f7f9fc; white-space:nowrap; }
+.bo-islem td { white-space:nowrap; }
+.bo-islem td.para, .bo-islem th.sag { text-align:right; font-family:Consolas, monospace; }
+.bo-islem td.orta, .bo-islem th.orta { text-align:center; font-family:inherit; }
+.bo-islem tr.sonuk td:not(.orta) { text-decoration:line-through; }
+.bo-durum-cubugu { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  font-size:11px; color: var(--ikincil-metin, #6b7a8b); padding:5px 2px; }
 .bo-cek { margin: 0 11px 0; width: calc(100% - 22px); }
 .bo-cek td:last-child, .bo-cek th:last-child { text-align:right; font-family:Consolas,monospace; }
 .bo-pos { margin: 0 11px 0; width: calc(100% - 22px); }
@@ -864,6 +972,7 @@ const bostil = `
   color: var(--ikincil-metin, #6b7a8b); font-size:12.5px; line-height:1.7; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="acik"]) .bo-tablo tr.top td { background: rgba(255,255,255,.04); }
+  :root:not([data-tema="acik"]) .bo-islem th { background: rgba(255,255,255,.04); }
   :root:not([data-tema="acik"]) .bo-izgara input[readonly] { background: rgba(255,255,255,.04); }
   :root:not([data-tema="acik"]) .bo-serit { background: rgba(79,140,210,.12); border-color:#2f5882; }
   :root:not([data-tema="acik"]) .bo-kb { background: rgba(255,255,255,.04); }

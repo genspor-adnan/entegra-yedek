@@ -108,6 +108,20 @@ export type OturumCek = {
   tarafUnvan: string;
 };
 
+/**
+ * Oturuma damgalı tahsilat satırı - "kimden ne alındı" (mockup adım 4).
+ * `tutar` başvurunun genel toplamı, `tahsil` bu satırın parası;
+ * `belgeTahsil` başvuruya yapılan tüm tahsilatın neti (kısmi ödeme tespiti).
+ */
+export type OturumIslem = {
+  id: number; tarih: string; iptal: boolean; iade: boolean;
+  turAdi: string; hesapTuru: string; turGrup: string;
+  tahsil: number; makbuzNo: string; belgeId: number | null;
+  basvuruNo: string; tutar: number; hasta: string;
+  bolum: string; hekim: string; odeyen: string;
+  terminalNo: string; belgeTahsil: number;
+};
+
 export type OturumDetay = {
   oturum: OturumOzeti;
   kupurler: { asama: number; birim: number; adet: number }[];
@@ -116,6 +130,7 @@ export type OturumDetay = {
   /** Terminale bağlanmamış POS tahsilatı (tahsilat ekranı POS'u yazmıyorsa). */
   posAtanmamis: { toplam: number; adet: number } | null;
   cekler: OturumCek[];
+  islemler: OturumIslem[];
 };
 
 export type AcIstegi = {
