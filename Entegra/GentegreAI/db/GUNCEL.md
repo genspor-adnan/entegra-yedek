@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (510 ad, 142 tanesi birden cok dosyada)
+## Fonksiyonlar (511 ad, 142 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -76,6 +76,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_dagilim_pay_grubu` | `470_belge_satir_dagilim.sql` | — |
 | `fn_dagilim_rota` | `915_dagilim_rota_kurum_oder.sql` | 470_belge_satir_dagilim.sql, 493_kurum_turu_kurumu_oder.sql, 597_tss_sgk_kullanilmasin.sql |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
+| `fn_demirbas_hareket_yaz` | `1006_demirbas_sekmeleri.sql` | — |
 | `fn_demirbas_is_emri_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_demirbas_kalib_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_demirbas_kalibrasyon_isle` | `723_demirbas_kalibrasyon.sql` | — |
@@ -519,7 +520,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (321 ad, 143 tanesi birden cok dosyada)
+## Gorunumler (323 ad, 143 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -571,8 +572,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |
+| `v_demirbas_amortisman` | `1006_demirbas_sekmeleri.sql` | — |
 | `v_demirbas_durum` | `728_demirbas_kalibrasyon_tabi.sql` | 723_demirbas_kalibrasyon.sql |
 | `v_demirbas_is_emri_onay` | `752_onarim_onayi.sql` | — |
+| `v_demirbas_zimmet` | `1006_demirbas_sekmeleri.sql` | — |
 | `v_departman_agac_lookup` | `577_dis_hekim_bolum_brans.sql` | — |
 | `v_departman_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_depo_lookup` | `093_depo_kurallar.sql` | 088_belge_irsaliye_alanlari.sql |

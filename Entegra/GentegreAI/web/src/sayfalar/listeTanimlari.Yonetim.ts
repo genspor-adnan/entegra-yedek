@@ -128,7 +128,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ALTINDA TEK BASINA (kullanici; grupsuz duz oge). Iki modda ORTAK.
     kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',
     kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
-    yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
+    // Sekmeler 1006'dan beri gerçek (kart detayları) - yer tutucu kalmadı.
     menuGrup: 'Sabit Varlıklar', menuSira: 10, menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
