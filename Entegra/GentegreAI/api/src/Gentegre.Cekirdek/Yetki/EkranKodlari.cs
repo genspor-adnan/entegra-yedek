@@ -62,6 +62,12 @@ public static partial class EkranKodlari
         ["cari"]             = ["cari.tedarikci"],
         ["medula.provizyon"] = ["medula.kabul"],
         ["dokum"]            = [.. DokumKodlari],
+        // 1004 aşama 2 Finans: hesap ekranı kodu `hesap` kaynağını ve liste
+        //   içi ekstreyi açar; hangi satırı göreceğini SatirKisitlari belirler.
+        ["hesap"]              = ["hesap.tanim", "hesap.tanim.banka", "hesap.tanim.kredi",
+                                  "hesap.tanim.pos", "hesap.tanim.kredi_karti"],
+        ["hesap.tanim.ekstre"] = ["hesap.tanim", "hesap.tanim.banka", "hesap.tanim.kredi",
+                                  "hesap.tanim.pos", "hesap.tanim.kredi_karti"],
     };
 
     /// <summary>Ekran kodunun haklarını kopyaladığı eski kod; bölünmemiş kodda null.</summary>
@@ -81,6 +87,7 @@ public static partial class EkranKodlari
         var d = VeriKapisi.ToDictionary(x => x.Key, x => x.Value.ToList(), StringComparer.Ordinal);
         foreach (var (yeni, eski) in AyniGrupEkranlari)
         {
+            if (KendiKapisi.Contains(yeni)) continue;
             if (!d.TryGetValue(eski, out var l)) d[eski] = l = [];
             l.Add(yeni);
         }
@@ -92,38 +99,109 @@ public static partial class EkranKodlari
         => TumVeriKapisi.Value.TryGetValue(veriKodu, out var a) ? a : [];
 
     /// <summary>
-    /// SATIR KISITI (kullanıcı 09.10.2026: "tedarikçi satır süzgecini de
-    /// ekle"). Ekran kodu eski kodun kaynağını açtığında (VeriKapisi) yalnız
-    /// O EKRANIN satırlarını görmeli: `cari.tedarikci` ile gelen kullanıcı
-    /// müşteri listesini adres çubuğundan açamamalı. Kısıt, kullanıcıda eski
-    /// kodun KENDİSİ yoksa uygulanır - `cari` yetkisi olan her şeyi görür.
+    /// SATIR KURALI (kullanıcı 09.10.2026: "tedarikçi satır süzgecini de
+    /// ekle"; 1004 aşama 2 Finans). Ekran kodu ortak bir kaynağı açtığında
+    /// yalnız O EKRANIN satırlarını görür: `cari.tedarikci` müşteri listesini,
+    /// `hesap.tanim.banka` kasa hesaplarını adres çubuğundan açamaz.
     /// </summary>
-    /// <param name="Kosul">Kaynak/kart tablosu `t` takma adıyla; sabit metin, kullanıcı girdisi yok.</param>
-    /// <param name="BayrakAlani">Kartta açık kalması gereken alan (yeni kayıt / güncelleme).</param>
+    /// <param name="Kod">Kuralın bağlı olduğu ekran kodu.</param>
+    /// <param name="Kosul">Kaynağın kendi takma adıyla sabit SQL; kullanıcı girdisi yok.</param>
+    /// <param name="Alan">Kartta bu ekranın kaydını belirleyen alan (yazmada korunur).</param>
+    /// <param name="Deger">Alanın bu ekrana ait değeri (true = açık bayrak).</param>
     /// <param name="UstAlani">Kartta, kısıtı sağlayan üst kayda işaret eden alan.</param>
-    /// <param name="UstKaynak">UstAlani'nin işaret ettiği kaynak (kısıtı o kaynağın kuralı sağlar).</param>
-    public sealed record SatirKisiti(string VeriKodu, string EkranKodu, string Kosul,
-                                     string? BayrakAlani = null, string? UstAlani = null,
-                                     string? UstKaynak = null);
+    /// <param name="UstKaynak">UstAlani'nin işaret ettiği kaynak (onun kuralı denetler).</param>
+    public sealed record SatirKurali(string Kod, string Kosul, string? Alan = null, object? Deger = null,
+                                     string? UstAlani = null, string? UstKaynak = null);
 
-    /// <summary>Kaynak/kart adı → satır kısıtı. İkisi de `public.taraf t` üzerinde.</summary>
+    /// <param name="Serbest">Bu kodlardan biri olan kullanıcıya kısıt uygulanmaz (veri çekirdeği).</param>
+    public sealed record SatirKisiti(string[] Serbest, SatirKurali[] Kurallar);
+
+    /// <summary>Kullanıcıya uygulanacak kısıt: geçerli kurallar ve birleşik koşul.</summary>
+    public sealed record UygulananKisit(IReadOnlyList<SatirKurali> Kurallar)
+    {
+        /// <summary>Kurallardan biri yeter (veya); hiç kural yoksa kapı kapalı.</summary>
+        public string Kosul => Kurallar.Count == 0 ? "false"
+            : string.Join(" or ", Kurallar.Select(k => "(" + k.Kosul + ")"));
+    }
+
+    private static string HesapTuru(string tur) => $"h.tur = '{tur}'";
+    private static string EkstreHesapTuru(string tur)
+        => $"exists (select 1 from public.hesap eh where eh.id = e.hesap_id and eh.tur = '{tur}')";
+
+    /// <summary>Kaynak/kart adı → satır kısıtı.</summary>
     private static readonly Dictionary<string, SatirKisiti> SatirKisitlari = new(StringComparer.Ordinal)
     {
-        // Tedarikçiler ekranı: yalnız tedarikçi bayraklı cariler.
-        ["cari"] = new("cari", "cari.tedarikci", "t.tedarikci = 1", BayrakAlani: "tedarikci"),
+        // Tedarikçiler ekranı: yalnız tedarikçi bayraklı cariler (`taraf t`).
+        ["cari"] = new(["cari"], [new("cari.tedarikci", "t.tedarikci = 1", "tedarikci", true)]),
         // Tedarikçi kartının kişileri: yalnız tedarikçiye bağlı kişiler.
-        ["kisi"] = new("cari", "cari.tedarikci",
+        ["kisi"] = new(["cari"], [new("cari.tedarikci",
             "exists (select 1 from public.taraf u where u.id = t.bag_id and u.tedarikci = 1)",
-            UstAlani: "bagId", UstKaynak: "cari"),
+            UstAlani: "bagId", UstKaynak: "cari")]),
+
+        // FİNANS (1004 aşama 2). Hesap ekranları tek `hesap` kaynağına türle
+        //   bakar. `hesap` çekirdeği SERBEST: banko POS/hesap seçimi ve
+        //   muhasebe tümünü görür (998 kararı). Yalnız ekran kodu olan kendi
+        //   türünü görür ve karta yalnız o türü yazar.
+        ["hesap"] = new(["hesap"],
+        [
+            new("hesap.tanim",             HesapTuru("K"), "tur", "K"),   // Kasa Hesapları
+            new("hesap.tanim.banka",       HesapTuru("B"), "tur", "B"),   // Banka Hesapları
+            new("hesap.tanim.kredi",       HesapTuru("R"), "tur", "R"),   // Krediler
+            new("hesap.tanim.pos",         HesapTuru("P"), "tur", "P"),   // POS
+            new("hesap.tanim.kredi_karti", HesapTuru("V"), "tur", "V"),   // Kredi Kartı
+        ]),
+        // Ekstre: kendi ekranı (Hesap Ekstresi) tümünü, hesap ekranlarının
+        //   liste içi ekstresi yalnız kendi türündeki hesapları açar.
+        ["hesap-ekstre"] = new(["hesap.tanim.ekstre"],
+        [
+            new("hesap.tanim",             EkstreHesapTuru("K")),
+            new("hesap.tanim.banka",       EkstreHesapTuru("B")),
+            new("hesap.tanim.kredi",       EkstreHesapTuru("R")),
+            new("hesap.tanim.pos",         EkstreHesapTuru("P")),
+            new("hesap.tanim.kredi_karti", EkstreHesapTuru("V")),
+        ]),
+        // Çek / Senet tek kaynak, türle ayrılır; ikisi de ekran kodu, serbest yok.
+        ["cek-senet"] = new([],
+        [
+            new("cek_senet",       "c.tur = 1", "tur", (short)1),   // Çek Listesi
+            new("cek_senet.senet", "c.tur = 2", "tur", (short)2),   // Senet Listesi
+        ]),
     };
 
     /// <summary>
-    /// Kaynağa/karta uygulanacak satır kısıtı; kullanıcı eski kodun kendisine
-    /// sahipse ya da ekran kodu yoksa null (kısıt yok).
+    /// Kaynağa/karta uygulanacak kısıt; kısıtsız kaynakta ya da kullanıcı
+    /// serbest bir koda sahipse null.
     /// </summary>
-    public static SatirKisiti? Kisit(string ad, Func<string, bool> tamVar)
-        => SatirKisitlari.TryGetValue(ad, out var k) && !tamVar(k.VeriKodu) && tamVar(k.EkranKodu)
-           ? k : null;
+    public static UygulananKisit? Kisit(string ad, Func<string, bool> tamVar)
+    {
+        if (!SatirKisitlari.TryGetValue(ad, out var k) || k.Serbest.Any(tamVar)) return null;
+        return new UygulananKisit(k.Kurallar.Where(x => tamVar(x.Kod)).ToList());
+    }
+
+    /// <summary>
+    /// AŞAMA 2'YE GEÇEN EKRANLAR: kendi kaynağına doğrudan bağlandı, eski
+    /// kodun kapısını artık AÇMAZ (aşama 1 köprüsü kalkar; kopya kaynağı kalır).
+    /// </summary>
+    private static readonly HashSet<string> KendiKapisi = new(StringComparer.Ordinal)
+    {
+        "hesap.tanim.banka_tanim",   // banka kaynağı + kartı
+        "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
+        "kasa.finans.vade",          // plan-vade kaynağı
+        "kasa.finans.ayar",          // yalnız kasa ayar anahtarları (AyarUclari)
+    };
+
+    /// <summary>Ekran aşama 2'de kendi kaynağına bağlandı mı (eski kapıyı açmaz).</summary>
+    public static bool KendiKapisinda(string kod) => KendiKapisi.Contains(kod);
+
+    /// <summary>
+    /// Ekran kodunun kendi ayar anahtarları: kod bunları genel `ayar`
+    /// yetkisi olmadan yazar (AyarUclari).
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> AyarAnahtariKodu =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["kasa.duzenleme_gun"] = "kasa.finans.ayar",
+    };
 
     /// <summary>
     /// Kayıt Kabul Ayarları sayfasının yazdığı anahtarlar. `kayit_kabul.ayar`

@@ -81,7 +81,7 @@ public sealed class EkranKoduBolmeTestleri
         var s = Set("cari.tedarikci");
         var k = EkranKodlari.Kisit("cari", kod => s.VarTam(kod, Islem.Gor));
         Assert.NotNull(k);
-        Assert.Equal("t.tedarikci = 1", k!.Kosul);
+        Assert.Equal("(t.tedarikci = 1)", k!.Kosul);
         // Kişi listesi de yalnız tedarikçiye bağlı kişiler.
         Assert.Contains("u.tedarikci = 1", EkranKodlari.Kisit("kisi", kod => s.VarTam(kod, Islem.Gor))!.Kosul);
     }
@@ -117,7 +117,8 @@ public sealed class EkranKoduBolmeTestleri
         foreach (var (yeni, eski) in EkranKodlari.AyniGrupEkranlari)
         {
             Assert.Equal(eski, EkranKodlari.KopyaKaynagi(yeni));
-            Assert.True(Set(yeni).Var(eski, Islem.Gor), yeni);
+            // Aşama 2'ye geçen ekran kendi kaynağına bağlı; eski kapıyı açmaz.
+            Assert.Equal(!EkranKodlari.KendiKapisinda(yeni), Set(yeni).Var(eski, Islem.Gor));
         }
         // Ana ekran eski kodu korur; alt ekran kodu ana ekranın kapısını açar.
         Assert.True(Set("muayene.recete").Var("muayene", Islem.Gor));
@@ -132,5 +133,47 @@ public sealed class EkranKoduBolmeTestleri
             .Where(k => s.VarTam(k, Islem.Gor))
             .Select(KaynakKatalogu.BelgeKumesi).ToList();
         Assert.Equal([KaynakKatalogu.BelgeKumeSatis], kumeler);
+    }
+
+    // ----------------------------------------------- 1004 aşama 2: Finans ---
+
+    private static string? Kosul(string kaynak, YetkiSeti s)
+        => EkranKodlari.Kisit(kaynak, k => s.VarTam(k, Islem.Gor))?.Kosul;
+
+    [Fact]
+    public void Hesap_ekrani_yalniz_kendi_turunu_gorur_cekirdek_hepsini()
+    {
+        var banka = Set("hesap.tanim.banka");
+        Assert.True(banka.Var("hesap", Islem.Gor));          // kaynak kapısı açılır
+        Assert.Equal("(h.tur = 'B')", Kosul("hesap", banka));
+        Assert.Equal("(h.tur = 'K') or (h.tur = 'B')", Kosul("hesap", Set("hesap.tanim", "hesap.tanim.banka")));
+        Assert.Null(Kosul("hesap", Set("hesap", "hesap.tanim.banka")));   // banko / muhasebe
+        // Liste içi ekstre de kendi türüyle; Hesap Ekstresi ekranı tümünü.
+        Assert.True(banka.Var("hesap.tanim.ekstre", Islem.Gor));
+        Assert.Contains("eh.tur = 'B'", Kosul("hesap-ekstre", banka));
+        Assert.Null(Kosul("hesap-ekstre", Set("hesap.tanim.ekstre")));
+    }
+
+    [Fact]
+    public void Cek_ve_senet_ayri_ekran()
+    {
+        Assert.Equal("(c.tur = 1)", Kosul("cek-senet", Set("cek_senet")));
+        Assert.Equal("(c.tur = 2)", Kosul("cek-senet", Set("cek_senet.senet")));
+        Assert.Equal("(c.tur = 1) or (c.tur = 2)", Kosul("cek-senet", Set("cek_senet", "cek_senet.senet")));
+        Assert.True(Set("cek_senet.senet").Var("cek_senet", Islem.Gor));
+    }
+
+    [Fact]
+    public void Kendi_kaynagina_gecen_finans_ekrani_eski_kapiyi_acmaz()
+    {
+        Assert.Equal("hesap.tanim.banka_tanim", KaynakKatalogu.Bul("banka")!.YetkiKodu);
+        Assert.Equal("hesap.tanim.ekstre", KaynakKatalogu.Bul("hesap-ekstre")!.YetkiKodu);
+        Assert.Equal("kasa.finans.vade", KaynakKatalogu.Bul("plan-vade")!.YetkiKodu);
+        Assert.False(Set("kasa.finans.vade").Var("kasa.finans", Islem.Gor));
+        Assert.False(Set("hesap.tanim.banka_tanim").Var("hesap.tanim", Islem.Gor));
+        Assert.False(Set("hesap.tanim.ekstre").Var("hesap.tanim", Islem.Gor));
+        Assert.Equal("kasa.finans.ayar", EkranKodlari.AyarAnahtariKodu["kasa.duzenleme_gun"]);
+        // Kopya kaynağı kalır: göç ve şablon hâlâ eski kodun hakkını izler.
+        Assert.Equal("kasa.finans", EkranKodlari.KopyaKaynagi("kasa.finans.vade"));
     }
 }

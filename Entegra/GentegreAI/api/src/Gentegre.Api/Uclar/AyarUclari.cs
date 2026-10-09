@@ -46,8 +46,10 @@ public static class AyarUclari
             // KAYIT KABUL AYARLARI KENDİ KODUYLA (1003): `kayit_kabul.ayar`
             //   yalnız o sayfanın anahtarlarını yazar; genel `ayar` kapısını
             //   ona açmak bütün kurum ayarlarını açmak olurdu.
-            if (!(EkranKodlari.KayitKabulAyarAnahtarlari.Contains(anahtar)
-                  && baglam.Yetkiler.Var("kayit_kabul.ayar", Islem.Degistir)))
+            //   Kasa Ayarları da aynı desen (1004 aşama 2): `kasa.finans.ayar`.
+            var ekranKodu = EkranKodlari.KayitKabulAyarAnahtarlari.Contains(anahtar) ? "kayit_kabul.ayar"
+                          : EkranKodlari.AyarAnahtariKodu.GetValueOrDefault(anahtar);
+            if (!(ekranKodu is not null && baglam.Yetkiler.Var(ekranKodu, Islem.Degistir)))
                 baglam.YetkiIste("ayar", Islem.Degistir);
             else baglam.YazmaIste();
             var liste = await depo.YazAsync(anahtar, istek?.Deger ?? "",

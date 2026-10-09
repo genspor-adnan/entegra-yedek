@@ -148,7 +148,7 @@ public static partial class AksiyonKatalogu
         };
 
         // Banka tanimlari (db/109).
-        s["banka-liste"] = Crud("banka", "banka", "hesap", silHedef: null);
+        s["banka-liste"] = Crud("banka", "banka", "hesap.tanim.banka_tanim", silHedef: null);
 
         // Gorev / hatirlatma / takvim (db/108): stok-liste ile ayni desen.
         //   "Tamamla" ayri bir aksiyon DEGIL - durum kartta degisir; listede

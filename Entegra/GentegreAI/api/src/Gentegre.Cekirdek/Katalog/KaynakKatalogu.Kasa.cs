@@ -108,7 +108,7 @@ public static partial class KaynakKatalogu
     // --------------------------------------------------------------- banka ----
     private static KaynakTanimi BankaListesi() => new(
         Ad: "banka",
-        YetkiKodu: "hesap.tanim",
+        YetkiKodu: "hesap.tanim.banka_tanim",   // 1004 aşama 2: Banka Tanımları kendi kodu
         Kaynak: "public.banka b",
         SubeKolonu: null,
         VarsayilanSirala: "b.sira, b.ad",
@@ -284,7 +284,7 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi HesapEkstre() => new(
         Ad: "hesap-ekstre",
-        YetkiKodu: "hesap.tanim",
+        YetkiKodu: "hesap.tanim.ekstre",   // 1004 aşama 2: hesap ekranları kendi türünü açar (EkranKodlari)
         Kaynak: "public.v_hesap_ekstre e",
         SubeKolonu: "e.sube_id",
         GrupKolonu: EkstreGrupKolonu,
@@ -608,7 +608,7 @@ public static partial class KaynakKatalogu
     //   vade gecmis - listenin varsayilan sirasi en gecikmisi ustte.
     private static KaynakTanimi PlanVade() => new(
         Ad: "plan-vade",
-        YetkiKodu: "kasa.finans",
+        YetkiKodu: "kasa.finans.vade",   // 1004 aşama 2: Vade / Planlar kendi kodu
         Kaynak: "public.v_plan_vade v",
         SubeKolonu: "v.sube_id",
         KapsamKolonu: "v.taraf_id",

@@ -73,7 +73,7 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi Banka() => new(
         Ad: "banka",
-        YetkiKodu: "hesap",                   // banka tanimi kasa/banka ekibinin isi
+        YetkiKodu: "hesap.tanim.banka_tanim", // 1004 aşama 2: Finans › Ayarlar › Banka Tanımları
         Tablo: "public.banka",
         LogTabloId: 919,
         SubeKolonu: null,                     // ana veri - subeler arasi ortak
