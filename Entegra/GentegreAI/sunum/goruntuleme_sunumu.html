@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI Görüntüleme</title>
+<style>
+  :root {
+    --zem: #eef1f5; --yuz: #ffffff; --yuz2: #f3f6fa;
+    --cizgi: #cdd6e0; --cizgi2: #e3e9f0;
+    --yazi: #1f2d3a; --yazi2: #14315a; --soluk: #6b7a8b;
+    --mor: #2f6db3; --mor2: #d7e7fb; --koyu: #14315a;
+    --ok: #2e7d46; --okzem: #e2f3e8; --okkenar: #bfe3cb;
+    --uyari: #a9791a; --uyarizem: #fdf6e3; --uyarikenar: #eeddb4;
+    --hata: #b23b3b; --hatazem: #fdeceb; --hatakenar: #f6d3d1;
+    --grupzem: #eaf1f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0f2340; color: var(--yazi);
+    font-family: "Segoe UI", "Trebuchet MS", Tahoma, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #sahne { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .slayt {
+    position: absolute; width: 1280px; height: 720px; background: var(--zem);
+    display: none; overflow: hidden; transform-origin: center center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .slayt.aktif { display: block; }
+
+  /* ---------- ortak yerleşim ---------- */
+  .ust { height: 96px; padding: 26px 56px 0; display: flex; align-items: flex-end; gap: 18px;
+         background: linear-gradient(180deg, #ffffff 0%, #f0f5fa 100%); border-bottom: 3px solid var(--mor); }
+  .ust .ikon { font-size: 40px; line-height: 1; padding-bottom: 14px; }
+  .ust h2 { font-size: 34px; color: var(--yazi2); font-weight: 700; padding-bottom: 16px; letter-spacing: -.2px; }
+  .ust .etiket { margin-left: auto; padding-bottom: 20px; font-size: 14px; color: var(--soluk); }
+  .govde { padding: 30px 56px 0; height: 584px; }
+  .alt { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 0 56px;
+         display: flex; align-items: center; justify-content: space-between;
+         font-size: 13px; color: var(--soluk); border-top: 1px solid var(--cizgi2); background: #f7f9fc; }
+  .alt b { color: var(--mor); font-weight: 600; }
+
+  h3 { font-size: 21px; color: var(--yazi2); margin-bottom: 10px; }
+  ul.mad { list-style: none; }
+  ul.mad li { position: relative; padding-left: 26px; font-size: 19px; line-height: 1.42; margin-bottom: 9px; }
+  ul.mad li::before { content: ""; position: absolute; left: 4px; top: 10px; width: 10px; height: 10px;
+                      border-radius: 2px; background: var(--mor); }
+  ul.mad.kucuk li { font-size: 17px; margin-bottom: 7px; }
+  ul.mad.kucuk li::before { top: 9px; width: 8px; height: 8px; }
+  .k { color: var(--yazi2); font-weight: 650; }
+  .soluk { color: var(--soluk); }
+
+  .izgara { display: grid; gap: 22px; }
+  .i2 { grid-template-columns: 1fr 1fr; }
+  .i3 { grid-template-columns: 1fr 1fr 1fr; }
+  .i4 { grid-template-columns: repeat(4, 1fr); }
+  .kutu { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 8px; padding: 20px 22px;
+          box-shadow: 0 2px 8px rgba(20,40,70,.06); }
+  .kutu.vurgu { border-top: 4px solid var(--mor); }
+  .kutu .baslik { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; color: var(--yazi2); margin-bottom: 10px; }
+  .kutu .baslik .e { font-size: 26px; }
+  .kutu p { font-size: 16px; line-height: 1.45; color: var(--yazi); }
+
+  .rozet { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px;
+           letter-spacing: .3px; vertical-align: middle; }
+  .r-var { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar); }
+  .r-yol { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar); }
+  .r-ops { background: var(--mor2); color: var(--mor); border: 1px solid #b6d0f0; }
+
+  .not { margin-top: 18px; padding: 12px 16px; border-left: 4px solid var(--uyari); background: var(--uyarizem);
+         font-size: 15.5px; line-height: 1.45; border-radius: 0 6px 6px 0; }
+  .not.mavi { border-left-color: var(--mor); background: var(--grupzem); }
+
+  /* ---------- kapak ---------- */
+  .kapak { background: linear-gradient(135deg, #0f2a4d 0%, #1d4f8a 55%, #2f6db3 100%); color: #fff; }
+  .kapak .ic { position: absolute; left: 90px; top: 150px; right: 90px; }
+  .kapak .urun { font-size: 22px; letter-spacing: 3px; text-transform: uppercase; opacity: .85; }
+  .kapak h1 { font-size: 66px; line-height: 1.08; margin: 18px 0 22px; font-weight: 750; }
+  .kapak .alt-baslik { font-size: 26px; opacity: .92; max-width: 860px; line-height: 1.4; }
+  .kapak .serit { position: absolute; left: 90px; bottom: 70px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .kapak .serit span { border: 1px solid rgba(255,255,255,.45); padding: 8px 16px; border-radius: 20px; font-size: 16px; }
+  .kapak .buyuk-ikon { position: absolute; right: 100px; top: 150px; opacity: .22; }
+  .kapak .firma { position: absolute; right: 90px; top: 60px; font-size: 16px; opacity: .8; text-align: right; }
+
+  /* ---------- akış ---------- */
+  .akis { display: flex; align-items: stretch; gap: 0; margin-top: 10px; }
+  .adim { flex: 1; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 10px; padding: 18px 14px 16px;
+          text-align: center; position: relative; }
+  .adim .no { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px;
+              border-radius: 50%; background: var(--mor); color: #fff; font-weight: 700; font-size: 15px; line-height: 28px; }
+  .adim .e { font-size: 38px; margin: 6px 0 6px; }
+  .adim .ad { font-size: 18px; font-weight: 700; color: var(--yazi2); margin-bottom: 8px; }
+  .adim .ac { font-size: 14px; line-height: 1.4; color: var(--soluk); }
+  .ok { width: 30px; display: flex; align-items: center; justify-content: center; color: var(--mor); font-size: 26px; font-weight: 700; }
+  .durumlar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 30px; font-size: 16px; }
+  .durumlar .d { padding: 7px 14px; border-radius: 6px; background: var(--grupzem); border: 1px solid #c6d9ef; color: var(--yazi2); font-weight: 600; }
+  .durumlar .d.son { background: var(--okzem); border-color: var(--okkenar); color: var(--ok); }
+  .durumlar .y { color: var(--mor); font-weight: 700; }
+
+  /* ---------- mini ekran (mockup taklidi) ---------- */
+  .ekran { background: #fff; border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; font-size: 13px;
+           box-shadow: 0 6px 22px rgba(20,40,70,.14); }
+  .ekran .eb { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi); padding: 8px 12px;
+               font-weight: 700; color: var(--yazi2); font-size: 14px; }
+  .ekran .cipler { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap; }
+  .ekran .cip { padding: 3px 9px; border-radius: 10px; background: var(--yuz2); border: 1px solid var(--cizgi2); font-size: 12px; }
+  .ekran .cip.on { background: var(--mor); color: #fff; border-color: var(--mor); }
+  .ekran table { width: 100%; border-collapse: collapse; }
+  .ekran th { background: #f0f5fa; text-align: left; padding: 6px 8px; font-size: 12px; color: var(--grupyazi, #23405c); border-bottom: 1px solid var(--cizgi); }
+  .ekran td { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); font-size: 12.5px; }
+  .ekran tr.acil td { background: var(--hatazem); }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+  .t-acil { background: var(--hata); color: #fff; }
+  .t-n { background: var(--yuz2); color: var(--soluk); border: 1px solid var(--cizgi2); }
+  .t-ok { background: var(--okzem); color: var(--ok); }
+  .t-uy { background: var(--uyarizem); color: var(--uyari); }
+
+  /* ---------- modül matrisi ---------- */
+  .modul { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px;
+           padding: 11px 14px; font-size: 16.5px; font-weight: 600; color: var(--yazi2); }
+  .modul .e { font-size: 22px; }
+  .modul .rozet { margin-left: auto; }
+
+  /* ---------- sayaç ---------- */
+  .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; padding: 14px 16px; }
+  .sayac .s { font-size: 13px; color: var(--soluk); }
+  .sayac .v { font-size: 30px; font-weight: 750; color: var(--yazi2); }
+  .sayac.uy .v { color: var(--uyari); }
+  .sayac.okk .v { color: var(--ok); }
+
+  /* ---------- yol haritası ---------- */
+  .yol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  .yol .m { display: flex; gap: 14px; background: #fff; border: 1px solid var(--cizgi); border-left: 5px solid var(--uyari);
+            border-radius: 6px; padding: 13px 16px; }
+  .yol .m .e { font-size: 26px; }
+  .yol .m b { display: block; font-size: 17.5px; color: var(--yazi2); margin-bottom: 4px; }
+  .yol .m span { font-size: 14.5px; color: var(--soluk); line-height: 1.4; }
+
+  /* ---------- gezinti ---------- */
+  #gezinti { position: fixed; right: 18px; bottom: 14px; opacity: .3; transition: opacity .2s; display: flex; gap: 8px; align-items: center;
+             color: #cfe0f5; font-size: 14px; z-index: 5; user-select: none; }
+  #gezinti:hover { opacity: 1; }
+  #gezinti button { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.3);
+                    border-radius: 6px; padding: 6px 12px; font-size: 15px; cursor: pointer; }
+  #gezinti button:hover { background: rgba(255,255,255,.22); }
+  #ilerleme { position: fixed; left: 0; top: 0; height: 4px; background: #5aa0ea; z-index: 5; transition: width .2s; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { background: #fff; overflow: visible; height: auto; }
+    #sahne { position: static; display: block; }
+    .slayt { display: block !important; position: relative; transform: none !important; box-shadow: none;
+             page-break-after: always; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .slayt:last-child { page-break-after: auto; break-after: auto; }
+    #gezinti, #ilerleme { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="ilerleme"></div>
+<div id="sahne">
+
+<!-- 1 KAPAK -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5"><circle cx="60" cy="52" r="40"/><circle cx="60" cy="52" r="20"/><path d="M10 104h100M28 104l10-24h44l10 24" stroke-linejoin="round"/></svg></div>
+  <div class="ic">
+    <div class="urun">Gentegre AI · HBYS</div>
+    <h1>Görüntüleme Merkezi<br>Çözümü</h1>
+    <div class="alt-baslik">Randevudan onaylı rapora, cihazdan hakedişe kadar görüntüleme merkezinin tüm iş akışı tek bir web platformunda.</div>
+  </div>
+  <div class="serit">
+    <span>Randevu &amp; Cihaz</span><span>Kayıt Kabul</span><span>Radyoloji İstem</span>
+    <span>Raporlama</span><span>Teleradyoloji</span><span>e-Nabız</span><span>Portal</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+</section>
+
+<!-- 2 SORUNLAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">⚠️</div><h2>Görüntüleme merkezinin günlük sorunları</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu"><div class="baslik"><span class="e">📅</span>Cihaz takvimi kopuk</div>
+        <p>Randevu ayrı yerde, cihaz bakımı ayrı yerde. Aynı cihaza aynı saate iki hasta yazılır; gelmeyen hasta cihaz listesini doldurur.</p></div>
+      <div class="kutu"><div class="baslik"><span class="e">🧾</span>Kabulde hesap karmaşası</div>
+        <p>SGK, özel sigorta, kurum sözleşmesi ve kampanya fiyatı; hasta payı ile kurum payını elle ayırmak hata üretir.</p></div>
+      <div class="kutu"><div class="baslik"><span class="e">⌨️</span>Teknisyen hastayı elle yazar</div>
+        <p>Accession numarası olmayan ya da yanlış tetkike açılmış istem PACS'ta eşleşmez; "hangi çekim kayboldu" sorusu cevapsız kalır.</p></div>
+      <div class="kutu"><div class="baslik"><span class="e">⏱️</span>Rapor gecikir, iz kalmaz</div>
+        <p>Acil bekleme süresi görünmez. Kritik bulguda "hekime söyledim" iddiası kayıt yoksa savunulamaz.</p></div>
+      <div class="kutu"><div class="baslik"><span class="e">💉</span>Kontrast kayıt dışı</div>
+        <p>Kontrast, enjektör, kanül, film ve CD stoktan düşmez; tetkik maliyeti ve kârlılığı hesaplanamaz.</p></div>
+      <div class="kutu"><div class="baslik"><span class="e">🤝</span>Gönderen hekim primi Excel'de</div>
+        <p>Kim gönderdi, kim çekti, kim raporladı bilgisi istemde zaten var; prim ve hakediş yine de ayrıca hesaplanır.</p></div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 3 ÇÖZÜM ÖZETİ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🧩</div><h2>Çözüm: kurum tipi "Görüntüleme Merkezi"</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.05fr 1.35fr; gap: 34px;">
+      <div>
+        <ul class="mad">
+          <li>Kurulumda <span class="k">kurum tipi</span> seçilir; o tipin <span class="k">hazır modül paketi</span> kendiliğinden açılır, ilgisiz ekranlar menüde görünmez.</li>
+          <li>Tip <span class="k">şube bazında</span> da seçilebilir: merkez tıp merkezi, yan bina görüntüleme merkezi.</li>
+          <li><span class="k">"Görüntüleme + Lab"</span> tipi radyoloji ile laboratuvarı ortak kabulle birlikte sunar.</li>
+          <li>Kabulde soru azalır: başvuru türü sorulmaz, hekim alanı <span class="k">"Gönderen"</span> (dış doktor) olur.</li>
+          <li>Açılış panosu görüntülemeye özel: bekleyen istem, çekildi, rapor bekleyen, bugün onaylanan, modalite kuyruğu.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="izgara i2" style="gap: 10px;">
+          <div class="modul"><span class="e">📅</span>Randevu<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🏥</span>Kayıt Kabul<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🦴</span>Radyoloji<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🌐</span>Teleradyoloji<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🔗</span>e-Nabız<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🏛️</span>Medula (SGK)<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🤝</span>Prim / Hakediş<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">📦</span>Stok<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">💰</span>Kasa &amp; Muhasebe<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">📎</span>Doküman &amp; Mesaj<span class="rozet r-var">AÇIK</span></div>
+          <div class="modul"><span class="e">🩺</span>Muayene<span class="rozet r-ops">OPSİYONEL</span></div>
+          <div class="modul"><span class="e">🧪</span>Laboratuvar<span class="rozet r-ops">+LAB TİPİ</span></div>
+        </div>
+        <div class="soluk" style="font-size: 13px; margin-top: 10px;">Varsayılan modül matrisi (kurum_tipi_modul). Her modül kurulumda ayrıca açılıp kapatılabilir.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 4 HASTA AKIŞI -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔁</div><h2>Hasta akışı: tek kayıt, uçtan uca</h2></div>
+  <div class="govde">
+    <div class="akis" style="margin-top: 22px;">
+      <div class="adim"><div class="no">1</div><div class="e">📅</div><div class="ad">Randevu</div>
+        <div class="ac">Cihaz sütununa slot; süre çekim protokolünden</div></div>
+      <div class="ok">›</div>
+      <div class="adim"><div class="no">2</div><div class="e">🏥</div><div class="ad">Kayıt Kabul</div>
+        <div class="ac">"✓ Geldi": başvuru + istem + tahsilat tek işlemde</div></div>
+      <div class="ok">›</div>
+      <div class="adim"><div class="no">3</div><div class="e">🏷️</div><div class="ad">İstem</div>
+        <div class="ac">Accession no otomatik, modalite tetkikten</div></div>
+      <div class="ok">›</div>
+      <div class="adim"><div class="no">4</div><div class="e">🦴</div><div class="ad">Çekim</div>
+        <div class="ac">Kontrol listesi, doz, kontrast, sarf onayı</div></div>
+      <div class="ok">›</div>
+      <div class="adim"><div class="no">5</div><div class="e">✍️</div><div class="ad">Rapor</div>
+        <div class="ac">Şablon + makro, taslak → uzman onayı</div></div>
+      <div class="ok">›</div>
+      <div class="adim"><div class="no">6</div><div class="e">📦</div><div class="ad">Teslim</div>
+        <div class="ac">Rapor / film / CD / dijital, portal, e-Nabız</div></div>
+    </div>
+
+    <div class="durumlar">
+      <span class="soluk" style="margin-right: 6px;">İstem durumları:</span>
+      <span class="d">Bekleyen Çekim</span><span class="y">→</span>
+      <span class="d">Raporlanacak</span><span class="y">→</span>
+      <span class="d">Raporlanıyor</span><span class="y">→</span>
+      <span class="d">Onay Bekleyen</span><span class="y">→</span>
+      <span class="d son">Onaylandı</span>
+    </div>
+
+    <div class="izgara i3" style="margin-top: 26px; gap: 16px;">
+      <div class="not mavi" style="margin: 0;"><b>İstem hasta gelince doğar.</b> Randevu yalnız plandır; cihazın çalışma listesi gelmeyen hastalarla dolmaz.</div>
+      <div class="not mavi" style="margin: 0;"><b>Ticari ve klinik kayıt ayrı.</b> Ücret satırı belgede, çekim/doz/study istemde; biri iptal edilse öteki izini korur.</div>
+      <div class="not mavi" style="margin: 0;"><b>Kurallar veritabanında.</b> Kart, muayene ve toplu kabul aynı kontrolden geçer; hiçbir yol kuralı atlayamaz.</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 5 RANDEVU & CİHAZ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📅</div><h2>Randevu ve cihaz planlama</h2></div>
+  <div class="govde">
+    <div class="izgara i2" style="gap: 34px;">
+      <div>
+        <ul class="mad kucuk">
+          <li>Ortak randevu motorunda <span class="k">Cihaz</span> görünümü: mesai, öğle arası, slot adımı, aynı slotta hasta sayısı, <span class="k">acil slot kotası</span>, çalışma günleri.</li>
+          <li><span class="k">Çakışma kuralı</span> ve <span class="k">tetkik–cihaz modalite uyumu</span> sunucuda; yanlış cihaza randevu verilemez.</li>
+          <li>Randevu süresi tetkikin <span class="k">çekim protokolünden</span> gelir.</li>
+          <li><span class="k">Bekleyen istemler paneli</span>: randevusuz istem boş saate sürükle-bırak (dokunmatik destekli).</li>
+          <li>Randevusuz (walk-in) cihazda istem doğrudan çalışma listesine düşer.</li>
+          <li>Cihaz <span class="k">kapatma takvimi</span> (bakım / arıza / tatil) takvimde taralı blok olarak görünür.</li>
+          <li>Randevu hatırlatma bildirimi kayıt anında kuyruğa konur (SMS / e-posta kanalı).</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ekran">
+          <div class="eb">🦴 Cihaz Kartı · BT-1 (Bilgisayarlı Tomografi)</div>
+          <div class="cipler"><span class="cip on">Genel</span><span class="cip">Randevu Ayarları</span><span class="cip">Kapatma / Bakım</span><span class="cip">Kalite Kontrol / Lisans</span></div>
+          <table>
+            <tr><th>Alan</th><th>Değer</th></tr>
+            <tr><td>Marka / Model / Seri No</td><td>Cihaz kimliği, garanti, servis sözleşmesi</td></tr>
+            <tr><td>ÜTS No · Demirbaş No</td><td>Ürün takip ve demirbaş bağı</td></tr>
+            <tr><td>DICOM</td><td>AE Title · IP / Port · MWL · MPPS · PACS hedefi</td></tr>
+            <tr><td>Durum (şu an)</td><td><span class="tag t-ok">Çalışıyor</span> / <span class="tag t-uy">Bakım</span> / <span class="tag t-acil">Arıza</span></td></tr>
+            <tr><td>Bugün</td><td>Çekilen · randevu · sırada · hafta doluluğu</td></tr>
+            <tr><td>QA</td><td>Periyot + son yapılış; 30 günde dolan uyarısı</td></tr>
+          </table>
+        </div>
+        <div class="soluk" style="font-size: 13px; margin-top: 8px;">Ekran: Radyoloji › Ayarlar › Cihazlar (mockup radyoloji_cihaz_karti_v2 temel alınarak)</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 6 KAYIT KABUL -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏥</div><h2>Kayıt kabul, banko, tahsilat ve kurumlar</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">⚡</span>Tek ekranda kabul</div>
+        <ul class="mad kucuk">
+          <li>Hasta arama: TC / hasta no / ad soyad / protokol</li>
+          <li>Başvuru + tetkik başına istem + tahsilat <span class="k">sunucuda tek işlem</span></li>
+          <li>"📷 İstem Kâğıdını Tara": kâğıt üretilen <span class="k">her isteme</span> eklenir</li>
+          <li>Hazırlık talimatı protokolden; gebelik / metal / kreatinin uyarısı tetkik seçilince</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🧮</span>Doğru fiyat, doğru pay</div>
+        <ul class="mad kucuk">
+          <li>Fiyat zinciri: <span class="k">kampanya → kurum sözleşmesi → cari listesi → varsayılan</span></li>
+          <li>Hasta payı / kurum payı ayrımı, poliçe hastanın aktif poliçesinden</li>
+          <li>Kurum tamamını karşılıyorsa tahsilat açılmaz</li>
+          <li>Tahsilat <span class="k">belge satırına dağıtılır</span>; avans mahsubu</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🏛️</span>SGK ve kurumlar</div>
+        <ul class="mad kucuk">
+          <li>SGK başvuru no / takip no ve özel sigorta provizyon alanları ayrı</li>
+          <li>Medula modülü: provizyon, hizmet kaydı, fatura ve dönem, gönderim kuyruğu</li>
+          <li>Kurum tahakkuku (kurum payı faturası) başvuru kartından</li>
+          <li>SUT kodu hizmet kartında: icmal mutabakatının anahtarı</li>
+        </ul></div>
+    </div>
+    <div class="not">Medula ekranları ve gönderim kuyruğu hazır; bu sürümde SGK kuralları yerel veriyle taklit eden <b>simülasyon kapısı</b> çalışıyor. Canlı SGK bağlantısı yol haritasındadır.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 7 İSTEM & WORKLIST -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🗂️</div><h2>Çalışma listesi, istem ve cihaz bağlantısı</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.25fr 1fr; gap: 30px;">
+      <div>
+        <div class="ekran">
+          <div class="eb">🦴 Radyoloji — Çalışma Listesi</div>
+          <div class="cipler"><span class="cip">Bekleyen Çekim</span><span class="cip on">Raporlanacak</span><span class="cip">Raporlanıyor</span><span class="cip">Onay Bekleyen</span><span class="cip">Onaylandı</span><span class="cip">Tümü</span></div>
+          <table>
+            <tr><th>Mod.</th><th>Accession</th><th>Hasta</th><th>Tetkik</th><th>Ödeyen</th><th>Öncelik</th></tr>
+            <tr class="acil"><td>BT</td><td>ACC-…-0041</td><td>M. Ç. · 67/E</td><td>Beyin BT</td><td>SGK</td><td><span class="tag t-acil">ACİL</span></td></tr>
+            <tr><td>MR</td><td>ACC-…-0043</td><td>A. Y. · 41/K</td><td>Lomber MR</td><td>Özel sig.</td><td><span class="tag t-n">Normal</span></td></tr>
+            <tr><td>USG</td><td>ACC-…-0044</td><td>Z. K. · 29/K</td><td>Tiroid USG</td><td>Kendi öder</td><td><span class="tag t-n">Normal</span></td></tr>
+            <tr><td>MG</td><td>ACC-…-0047</td><td>M. D. · 48/K</td><td>Mamografi</td><td>Özel sig.</td><td><span class="tag t-n">Normal</span></td></tr>
+          </table>
+        </div>
+        <ul class="mad kucuk" style="margin-top: 16px;">
+          <li>Accession no <span class="k">veritabanında</span> üretilir; üç giriş yolunda (hekim istemi, dış kabul, kart) unutulamaz.</li>
+          <li>İstem yalnız <span class="k">modalitesi tanımlı tetkike</span> açılır; lab tetkiki radyoloji kuyruğuna düşemez.</li>
+          <li><span class="k">Çekim öncesi kontrol listesi</span> modaliteye göre (MR metal/pil, BT gebelik, kontrast alerji/kreatinin); zorunlu soru yanıtsızsa "Çekildi" yapılamaz.</li>
+          <li>Çekim kaydı: cihaz, tekniker, zaman, kontrast (yol · etken madde · konsantrasyon · ml), <span class="k">DLP, CTDIvol</span>.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Cihaz / PACS entegrasyonu</h3>
+        <ul class="mad kucuk">
+          <li>Cihaz kartında AE Title, IP/port, MWL, MPPS, PACS hedefi; <span class="k">bağlantı testi</span> (TCP) <span class="rozet r-var">VAR</span></li>
+          <li>İstemde PACS alanları: Study UID, seri ve görüntü sayısı; PACS olay izi tablosu <span class="rozet r-var">VAR</span></li>
+          <li>Kabulde "Cihaz listesine (MWL) gönder" seçimi kayda geçer <span class="rozet r-var">VAR</span></li>
+          <li>HL7 v2: MLLP dinleyici + çözümleyici, ORU üreticisi ve MLLP istemcisi <span class="rozet r-var">VAR</span></li>
+          <li>Gerçek DICOM MWL gönderimi, MPPS ve "PACS'ta aç" görüntüleyici bağlantısı <span class="rozet r-yol">YOL HARİTASI</span></li>
+        </ul>
+        <div class="not mavi" style="font-size: 14.5px;"><b>Mimari karar:</b> kendi PACS'ımızı kurmuyoruz; merkezin mevcut PACS'ına bağlanılır. Görüntü kurumda kalır, sistem <b>study UID / accession</b> ile referans tutar.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 8 RAPORLAMA -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">✍️</div><h2>Raporlama: hızlı, yapılandırılmış, denetlenebilir</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">📄</span>Şablon ve makro</div>
+        <ul class="mad kucuk">
+          <li>Hazır şablonlarla açılış (Beyin BT, Toraks BT, MR, USG …)</li>
+          <li>Bölüm iskeleti: Klinik Bilgi → Teknik → Karşılaştırma → Bulgular → Sonuç</li>
+          <li><span class="k">Makrolar</span>, yapılandırılmış alanlar (birim, sınır, metne yazılış kalıbı)</li>
+          <li>Tetkike bağlı şablon kendiliğinden yüklenir; kurum / kişisel şablon, <span class="k">sürüm geçmişi</span></li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">✅</span>Onay ve güvence</div>
+        <ul class="mad kucuk">
+          <li>İki aşama: <span class="k">yazan</span> (asistan) ve <span class="k">onaylayan</span> (uzman)</li>
+          <li>Zorunlu bölüm boşken rapor onaylanamaz</li>
+          <li>Resmî <span class="k">rapor numarası onayda</span> atanır, numara boşluğu oluşmaz</li>
+          <li>Onaylı rapor değişmez; düzeltme <span class="k">ek rapor (addendum)</span> ile</li>
+          <li>Rapor ekranında <span class="k">önceki tetkikler</span> yan yana</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🚨</span>Kritik bulgu ve konsültasyon</div>
+        <ul class="mad kucuk">
+          <li>Kritik bulgu üç adım: işaretle → <span class="k">kime, hangi yolla, ne zaman</span> bildirildi → teyit</li>
+          <li>"İşaretlendi ama bildirilmedi" boşluğu ayrı listede görünür</li>
+          <li>İkinci okuma / konsültasyon istek ve cevabı</li>
+          <li>Bakanlık profili (ayarla açılır): dört parçalı rapor, Bulgular &lt; 50 karakter onaylanmaz</li>
+        </ul></div>
+    </div>
+    <div class="izgara i2" style="margin-top: 18px; gap: 16px;">
+      <div class="not mavi" style="margin: 0;">Antetli, logolu rapor çıktısı tarayıcıdan yazdırılır / PDF olarak kaydedilir. Rapor ekranları İngilizce arayüzle de kullanılabilir.</div>
+      <div class="not" style="margin: 0;"><b>Yol haritası:</b> nitelikli elektronik imza (NES, PAdES + zaman damgası) ve kuyruktan <b>toplu imza</b>. Süreç tasarımı hazır; bugün onay damgası "kim onayladı" bilgisini tutar.</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 9 TELERADYOLOJİ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🌐</div><h2>Teleradyoloji: dışarıya rapor hizmeti</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.2fr 1fr; gap: 32px;">
+      <div>
+        <ul class="mad kucuk">
+          <li>Dış kurumun tetkiki çalışma listesine <span class="k">SLA'lı istek</span> olarak düşer; radyolog mevcut raporlama ekranıyla okur.</li>
+          <li><span class="k">SLA, görüntünün geldiği an başlar</span>; kalan dakika sunucuda hesaplanır, aşım onayda kayda geçer.</li>
+          <li>Kurum ve <span class="k">sözleşme</span> kartları (dönem, ücret modeli, tarife, SLA süreleri).</li>
+          <li><span class="k">Nöbet çizelgesi ve otomatik atama</span>; atama geçmişi kendiliğinden tutulur.</li>
+          <li>Tetkik ücreti <span class="k">dönem faturasına</span>, radyolog payı <span class="k">hakedişe</span> gider.</li>
+          <li><span class="k">Kurum portalı</span>: dış kurum isteğini kendisi açar ve sonucunu izler.</li>
+          <li>Ters yön de aynı yapıyla: kendi tetkikimizi dışarıya okutmak.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="kutu" style="margin-bottom: 14px;"><div class="baslik"><span class="e">📨</span>HL7 rapor teslimi</div>
+          <ul class="mad kucuk">
+            <li>ORU^R01 üreticisi, tek üretici iki profil: <span class="k">Bakanlık 2.3.1</span> ve kurum HBYS'si 2.5</li>
+            <li>MLLP teslim kuyruğu; ACK'ya göre artan aralıkla tekrar, her deneme ham mesajla izlenir</li>
+            <li>Gelen ORU: dışarıda yazılan rapor da içeri alınır</li>
+            <li>"Bakanlık Eksikleri" listesi: reddedilecek mesaj hiç gönderilmez</li>
+          </ul></div>
+        <div class="not" style="margin: 0;"><b>Yol haritası:</b> teleradyolojide DICOM görüntü alımı (DICOMweb / C-FIND, erişim no eşleştirme). Pilot kurumla netleşecek.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 10 SONUÇ TESLİMİ / PORTAL / E-NABIZ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📦</div><h2>Sonuç teslimi, portallar ve e-Nabız</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">📦</span>Sonuç teslim</div>
+        <ul class="mad kucuk">
+          <li>Kalem kutuları: <span class="k">rapor · film · CD · dijital</span></li>
+          <li>Teslim alan kişi zorunlu; Teslim Bekleyen / Teslim Edilen listesi</li>
+          <li>Kabulde "Sonuç CD'si hazırlanacak" işareti</li>
+          <li>Onaylı rapor, isteyen hekimin muayene kartında "İstem &amp; Sonuçlar"da</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">📱</span>Üç portal, telefona uygun</div>
+        <ul class="mad kucuk">
+          <li><span class="k">Dış doktor</span>: yalnız kendi hastalarının istem ve sonuçları; portaldan istem açabilir</li>
+          <li><span class="k">Dış kurum</span>: kendi istekleri, ad maskeli</li>
+          <li><span class="k">Hasta</span>: kendi sonuçları ve borcu, sade dil</li>
+          <li>Hasta daveti ve bildirim: SMS + e-posta kanalları</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🔗</span>e-Nabız</div>
+        <ul class="mad kucuk">
+          <li><span class="k">409 Radyoloji Sonuç Kayıt</span> paketi rapor <span class="k">onayında</span> üretilir (LOINC, onay zamanı, sonuç bölümleri)</li>
+          <li>Onaylanmamış rapor e-Nabız'a gitmez</li>
+          <li>Gün sonu bildiriminde görüntüleme sayıları (röntgen, USG)</li>
+          <li>Paket kartı, veri kalitesi panosu, SKRS kod eşleme</li>
+        </ul></div>
+    </div>
+    <div class="not mavi">KTS denetim maddeleri <b>H10</b> ve <b>D19</b> ("Radyoloji sonuç veri paketi gönderimi var mı?") 409 paketiyle karşılandı.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 11 MALİYET, STOK, PRİM -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">💹</div><h2>Maliyet, sarf ve gönderen hekim primi</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">💉</span>Kontrast ve sarf</div>
+        <ul class="mad kucuk">
+          <li>Çekim protokolünde malzeme listesi (otomatik / istenirse)</li>
+          <li>"Çekildi" işaretlenince <span class="k">sarf onay penceresi</span>; teknisyen onaylar</li>
+          <li>Mevcut stok hattından <span class="k">stok çıkış fişi</span>: lot, miad, maliyet</li>
+          <li>Miadı önce dolan lot başta, kritik seviye uyarısı</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🤝</span>Prim / hakediş</div>
+        <ul class="mad kucuk">
+          <li>Roller <span class="k">istemden otomatik</span>: gönderen hekim / kurum, teknisyen, raporlayan, onaylayan</li>
+          <li>Elle düzeltilen rol ezilmez</li>
+          <li>Prim tahsilatta ya da faturalamada doğar; oran belge türü, pay ve tahsilat türüne göre</li>
+          <li>Hakediş: taslak → kesin → onaylı (kilitli) → ödendi</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">👨‍⚕️</span>Dış doktor ve kurum</div>
+        <ul class="mad kucuk">
+          <li>Dış doktor kartı: branş, bağlı kurum, temsilci</li>
+          <li><span class="k">Gönderim geçmişi</span> ve modalite dağılımı</li>
+          <li>"Hangi kurumdan kaç hasta geldi" kayıtlı cari bağıyla cevaplanır</li>
+          <li>Kasa, cari ve muhasebe fişi aynı platformda</li>
+        </ul></div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 12 YÖNETİM -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📊</div><h2>Yönetim: pano, dökümler, kalite ve yetki</h2></div>
+  <div class="govde">
+    <div class="izgara i4" style="gap: 12px; margin-bottom: 20px;">
+      <div class="sayac"><div class="s">Bekleyen istem</div><div class="v">—</div><div class="s">çekim bekliyor</div></div>
+      <div class="sayac"><div class="s">Çekildi</div><div class="v">—</div><div class="s">rapor yazılacak</div></div>
+      <div class="sayac uy"><div class="s">Rapor bekleyen</div><div class="v">—</div><div class="s">onaylanmamış</div></div>
+      <div class="sayac okk"><div class="s">Bugün onaylanan</div><div class="v">—</div><div class="s">tamamlanan rapor</div></div>
+    </div>
+    <div class="izgara i3">
+      <div>
+        <h3>📈 Radyoloji panosu</h3>
+        <ul class="mad kucuk">
+          <li>Tıklanır sayaçlar, cihaz doluluğu (mesai, öğle ve kapatmalar düşülerek)</li>
+          <li>"Dikkat gerektirenler" kutusu</li>
+          <li>30 günlük modalite dağılımı, çekim → onay ortalama süresi</li>
+          <li>Radyolog yükü</li>
+        </ul>
+      </div>
+      <div>
+        <h3>🛡️ Kalite ve izlenebilirlik</h3>
+        <ul class="mad kucuk">
+          <li>Kontrol listesinde "kim, ne zaman yanıtladı" izi</li>
+          <li>Kritik bulgu, konsültasyon ve teslim takip listeleri</li>
+          <li>Cihaz QA / lisans takvimi ve uyarıları</li>
+          <li>Her değişiklik alan alan işlem günlüğünde</li>
+          <li>SQL'siz tanımlı <span class="k">dökümler &amp; istatistik</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>🔐 Rol ve yetki</h3>
+        <ul class="mad kucuk">
+          <li>Yetki matrisi = menü (Gör / Ekle / Değiştir / Sil)</li>
+          <li>Aksiyon yetkileri ayrı: <span class="k">istem açma, rapor yazma, teslim, iptal</span></li>
+          <li>Kabul memuru rapor yazamaz; dış doktor ayar ekranlarını göremez</li>
+          <li>Şube süzgeci sunucuda; salt okuma şubesi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 13 YAPAY ZEKÂ & KULLANIM -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🤖</div><h2>Yapay zekâ desteği ve kullanım kolaylığı</h2></div>
+  <div class="govde">
+    <div class="izgara i2" style="gap: 28px;">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🤖</span>YZ istem önerisi</div>
+        <ul class="mad kucuk">
+          <li>Muayene/istem ekranında "🤖 YZ Önerisi": görüntüleme önerisi <span class="k">modalite + bölge</span> olarak gelir, radyoloji hizmet kataloğuyla eşlenir</li>
+          <li>Bağlam sunucuda <span class="k">anonimleştirilir</span>: ad, soyad, kimlik no, doğum tarihi modele gitmez</li>
+          <li>Katalogda olmayan öneri atılır; karar hekimindir</li>
+          <li>Kontör ile kullanım; bakiye yoksa model çağrılmaz</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">💬</span>Bağlamsal yardım asistanı</div>
+        <ul class="mad kucuk">
+          <li>Açık ekranı bilen yardım: "Cihaza randevu nasıl verilir?", "Kontrast sarfı nasıl düşülür?"</li>
+          <li>Yardım belgeleri ekran ekran yazılı (radyoloji istem, çekim, rapor, teslim)</li>
+          <li>Kişisel veri maskelenir; klinik soru modele gitmez</li>
+        </ul></div>
+    </div>
+    <div class="izgara i3" style="margin-top: 22px; gap: 16px;">
+      <div class="modul"><span class="e">⌨️</span>Ctrl+K komut paleti, Ctrl+N / Enter kısayolları</div>
+      <div class="modul"><span class="e">🌍</span>Tarayıcıdan erişim, kurulum gerektirmez</div>
+      <div class="modul"><span class="e">🔤</span>Türkçe ve İngilizce arayüz</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 14 TEKNİK ALTYAPI -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏗️</div><h2>Teknik altyapı</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🧱</span>Mimari</div>
+        <ul class="mad kucuk">
+          <li>Web: React + TypeScript</li>
+          <li>Sunucu: ASP.NET Core (.NET 10)</li>
+          <li>Veritabanı: <span class="k">PostgreSQL</span></li>
+          <li>Ekran metadatası (kolon, alan, zorunluluk) sunucudan; iş kuralı istemcide yok</li>
+          <li>Para hesabı tek yerde, sunucuda</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🔒</span>Güvenlik</div>
+        <ul class="mad kucuk">
+          <li>Yetki her istekte yeniden çözülür, token'a gömülmez</li>
+          <li>Liste sorguları beyaz listeden üretilir, değerler hep parametre</li>
+          <li>Yetkisiz kolon hiç gönderilmez</li>
+          <li>Eşzamanlı düzenlemede çakışma koruması</li>
+          <li>Silme ve değişiklik günlüğü; parola geçmişi kuralı</li>
+        </ul></div>
+      <div class="kutu vurgu"><div class="baslik"><span class="e">🏢</span>Kurulum ve şube</div>
+        <ul class="mad kucuk">
+          <li>Her müşteriye <span class="k">ayrı veritabanı</span></li>
+          <li>Çok şubeli yapı; her yazmaya aktif şube damgası</li>
+          <li>Şube bazında kurum tipi ve modül paketi</li>
+          <li>Sunucuya yayın veya kurum içi kurulum</li>
+          <li>Otomatik testlerle (xUnit, vitest) doğrulanan geliştirme</li>
+        </ul></div>
+    </div>
+    <div class="not mavi">Aynı platform ERP (cari, stok, kasa, muhasebe, e-Belge) ve HBYS'yi tek şemada taşır: görüntüleme merkezinin finans ve stok tarafı ayrı bir yazılım gerektirmez.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 15 YOL HARİTASI -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🛣️</div><h2>Yol haritası</h2><div class="etiket">Henüz devrede olmayan, planlanan başlıklar</div></div>
+  <div class="govde">
+    <div class="yol">
+      <div class="m"><span class="e">📡</span><div><b>DICOM Modality Worklist ve MPPS</b><span>Kabulde seçilen "MWL'e gönder" işaretinin cihaza gerçekten inmesi; çekim tamamlandı bildirimi.</span></div></div>
+      <div class="m"><span class="e">🖥️</span><div><b>"PACS'ta aç" görüntüleyici bağlantısı</b><span>Merkezin mevcut PACS'ına bağlanarak (WADO / DICOMweb) çalışma listesinden görüntüyü açma.</span></div></div>
+      <div class="m"><span class="e">📥</span><div><b>Teleradyolojide DICOM görüntü alımı</b><span>Gelen çalışmanın erişim no ile isteğe eşlenmesi, "görüntü geldi" olayı. Pilot kurumla netleşecek.</span></div></div>
+      <div class="m"><span class="e">🔏</span><div><b>Nitelikli e-imza (NES)</b><span>PAdES + zaman damgalı imzalı PDF, uzman için toplu imza kuyruğu. Süreç tasarımı hazır.</span></div></div>
+      <div class="m"><span class="e">🏛️</span><div><b>Medula canlı bağlantı</b><span>Ekranlar ve kuyruk hazır, bugün simülasyon kapısıyla çalışıyor; canlı SGK servisine geçiş.</span></div></div>
+      <div class="m"><span class="e">✉️</span><div><b>Kabul sonrası SMS / hazırlık bildirimi</b><span>Kabulde kaydedilen SMS isteğinin otomatik gönderime bağlanması (SMS / e-posta kanalı mevcut).</span></div></div>
+    </div>
+    <div class="not mavi" style="margin-top: 20px;">Entegrasyon başlıkları karşı uca (cihaz, PACS, kurum) bağlıdır; kurulum bilgileri netleşen pilot merkezle birlikte devreye alınır.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Görüntüleme Merkezi</span><span class="sayfa"></span></div>
+</section>
+
+<!-- 16 KAPANIŞ -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5"><circle cx="60" cy="52" r="40"/><circle cx="60" cy="52" r="20"/><path d="M10 104h100M28 104l10-24h44l10 24" stroke-linejoin="round"/></svg></div>
+  <div class="ic" style="top: 170px;">
+    <div class="urun">Gentegre AI</div>
+    <h1>Teşekkürler</h1>
+    <div class="alt-baslik">Canlı demo: randevudan onaylı rapora tek bir hastanın yolculuğu.<br>Sorularınız için hazırız.</div>
+  </div>
+  <div class="serit">
+    <span>Görüntüleme Merkezi</span><span>Görüntüleme + Lab</span><span>Teleradyoloji</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+</section>
+
+</div>
+
+<div id="gezinti">
+  <button id="geri" title="Önceki (←)">←</button>
+  <span id="sayac">1 / 1</span>
+  <button id="ileri" title="Sonraki (→)">→</button>
+</div>
+
+<script>
+(function () {
+  var slaytlar = Array.prototype.slice.call(document.querySelectorAll('.slayt'));
+  var toplam = slaytlar.length, i = 0;
+  slaytlar.forEach(function (s, n) {
+    var y = s.querySelector('.sayfa');
+    if (y) y.textContent = (n + 1) + ' / ' + toplam;
+  });
+  function olcekle() {
+    var o = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    slaytlar.forEach(function (s) { s.style.transform = 'scale(' + o + ')'; });
+  }
+  function goster(n) {
+    i = Math.max(0, Math.min(toplam - 1, n));
+    slaytlar.forEach(function (s, k) { s.classList.toggle('aktif', k === i); });
+    document.getElementById('sayac').textContent = (i + 1) + ' / ' + toplam;
+    document.getElementById('ilerleme').style.width = ((i + 1) / toplam * 100) + '%';
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goster(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goster(i - 1); }
+    else if (e.key === 'Home') goster(0);
+    else if (e.key === 'End') goster(toplam - 1);
+  });
+  document.getElementById('geri').onclick = function () { goster(i - 1); };
+  document.getElementById('ileri').onclick = function () { goster(i + 1); };
+  window.addEventListener('resize', olcekle);
+  var bas = parseInt((location.hash || '').replace('#', ''), 10);
+  olcekle();
+  goster(isNaN(bas) ? 0 : bas - 1);
+})();
+</script>
+</body>
+</html>
