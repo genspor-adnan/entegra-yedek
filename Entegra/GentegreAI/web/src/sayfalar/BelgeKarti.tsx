@@ -1218,7 +1218,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     if (id) cik();
   };
 
-  if (!ekleyebilir)
+  // EKLEME YETKİSİ YALNIZ YENİ BELGEDE ARANIR (kullanıcı 09.10.2026: "uzman
+  //   doktor rolü başvuru ekleme yetkisi yok ama düzenleme yetkisi var..
+  //   karta girince hata: Belge ekleme yetkiniz yok"). Kayıtlı belge görme
+  //   yetkisiyle açılır; değiştirme hakkını kaydederken sunucu denetler.
+  if (!ekleyebilir && !mevcutBelge)
     return (
       <Modal baslik="Belge" onKapat={() => void kapat()}
              alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>{c('Kapat')}</button>}>
