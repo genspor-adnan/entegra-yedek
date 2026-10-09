@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Yetki;
+﻿namespace Gentegre.Cekirdek.Yetki;
 
 /// <summary>
 /// DB'deki fn_kullanici_yetkileri satiri. tur = 0 kaynak (gor/ekle/degistir/sil),
@@ -54,6 +54,10 @@ public sealed class YetkiSeti
         if (VarTam(kaynakKodu, islem)) return true;
         foreach (var alt in EkranKodlari.VeriKapisiAltlari(kaynakKodu))
             if (VarTam(alt, islem)) return true;
+        // Seçim kapısı yalnız okumada (ücret girerken hizmet / fiyat arama).
+        if (islem == Islem.Gor)
+            foreach (var alt in EkranKodlari.GorKapisiAltlari(kaynakKodu))
+                if (VarTam(alt, Islem.Ekle) || VarTam(alt, Islem.Degistir)) return true;
         return false;
     }
 

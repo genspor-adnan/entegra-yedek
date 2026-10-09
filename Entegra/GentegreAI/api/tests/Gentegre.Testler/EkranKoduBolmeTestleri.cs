@@ -312,4 +312,24 @@ public sealed class EkranKoduBolmeTestleri
         Assert.True(Set("cari.kisi").Var("cari", Islem.Gor));
         Assert.True(Set("stok.kategori").Var("stok", Islem.Gor));
     }
+
+    // ------------------------------------------------ seçim kapısı (ücret) ---
+
+    [Fact]
+    public void Satir_ekleyebilen_hizmet_ve_fiyati_yalniz_okur()
+    {
+        // Kullanıcı: "başvuru açtım ama ücret ekleyemedim.. yetkisiz dedi".
+        var banko = new YetkiSeti(1, [new YetkiKaydi("belge_satir", 0, true, true, true, false)], []);
+        Assert.True(banko.Var("hizmet", Islem.Gor));
+        Assert.True(banko.Var("fiyat_listesi", Islem.Gor));
+        Assert.True(banko.Var("stok", Islem.Gor));        // malzeme + birimler
+        Assert.True(banko.Var("katalog", Islem.Gor));     // ilaç kataloğu
+        Assert.False(banko.Var("stok", Islem.Degistir));
+        Assert.False(banko.Var("hizmet", Islem.Ekle));          // hizmet kartı açamaz
+        Assert.False(banko.Var("fiyat_listesi", Islem.Degistir));
+        Assert.False(banko.VarTam("hizmet", Islem.Gor));        // menüye girmez
+        // Yalnız görme hakkı olan satır yetkisi seçim kapısını açmaz.
+        var salt = new YetkiSeti(1, [new YetkiKaydi("belge_satir", 0, true, false, false, false)], []);
+        Assert.False(salt.Var("hizmet", Islem.Gor));
+    }
 }

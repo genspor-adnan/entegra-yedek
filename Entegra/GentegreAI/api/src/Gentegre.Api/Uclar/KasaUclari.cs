@@ -213,15 +213,25 @@ public static class KasaUclari
 
         // POST /api/kasa-islem
         grup.MapPost("/", async (
-            KasaIslemYazmaIstegi istek, BaglamCozucu cozucu, KasaDeposu depo,
+            KasaIslemYazmaIstegi istek, BaglamCozucu cozucu, KasaDeposu depo, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kasa_islem", Islem.Ekle);
 
             // Kesin kayit ayni anda kesinlestirme demektir - ayri yetki ister.
-            if (!istek.Secenekler.Taslak && !istek.Secenekler.Plan)
+            //   BANKO ISTISNASI (kullanici 09.10.2026: "hasan olarak basvuruya
+            //   ucret ve nakit tahsilat ekle"): banko gorevlisinin isi "fis ve
+            //   tahsilat" ama `kasa.kesinlestir` (her taslak kasa islemini
+            //   kesinlestirme) yalniz sorumluda. ACIK BANKO OTURUMU olan
+            //   kullanici BELGEYE BAGLI tahsilatini kesin kaydedebilir - denetim
+            //   oturumda: islem oturuma yazilir (997), gun sonunu sorumlu onaylar.
+            if (!istek.Secenekler.Taslak && !istek.Secenekler.Plan
+                && !(istek.Secenekler.BelgeId is > 0
+                     && await veri.TekDegerAsync<long?>("select public.fn_banko_acik_oturum(@p0)",
+                            [baglam.KullaniciId], iptal) is not null))
                 baglam.AksiyonIste("kasa.kesinlestir");
+            baglam.YazmaIste();
 
             var (id, uyarilar) = await depo.KaydetAsync(
                 BaslikDegerleri(istek.Islem), istek.Bacaklar, istek.Secenekler,

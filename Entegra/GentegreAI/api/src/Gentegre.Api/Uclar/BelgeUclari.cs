@@ -1181,15 +1181,20 @@ public static class BelgeUclari
     private static async Task BelgeYazmaIsteAsync(IstekBaglami baglam, VeriKaynagi veri,
         int? id, IDictionary<string, object?>? yeni, Islem islem, CancellationToken iptal)
     {
+        int[]? mevcut = null;
         if (id is not null)
         {
-            var mevcut = await veri.TekAsync("select tur, tipi from public.belge where id = @p0",
+            mevcut = await veri.TekAsync("select tur, tipi from public.belge where id = @p0",
                 [id.Value], r => new[] { (int)r.GetInt16(0), (int)r.GetInt16(1) }, iptal);
             if (mevcut is null || !TurIzinli(baglam, mevcut[0], mevcut[1], islem))
                 throw GentegreHatasi.Bulunamadi();
         }
-        if (yeni is not null && Sayi(yeni, "tur") is int tur
-            && !TurIzinli(baglam, tur, Sayi(yeni, "tipi") ?? 0, islem))
+        // GÖVDEDE OLMAYAN ALAN KAYITLIDAN (kullanıcı 09.10.2026: "başvuru
+        //   açtım ama ücret ekleyemedim.. yetkisiz dedi"): kart kaydederken
+        //   başlıkta türü gönderip tipi göndermiyor. Eksik tipi 0 saymak
+        //   başvuruyu (tipi 30) ERP belgesi sanıp reddediyordu.
+        if (yeni is not null && (Sayi(yeni, "tur") ?? mevcut?[0]) is int tur
+            && !TurIzinli(baglam, tur, Sayi(yeni, "tipi") ?? mevcut?[1] ?? 0, islem))
             throw GentegreHatasi.Yasak("Bu belge türünde işlem yetkiniz yok.");
     }
 

@@ -102,6 +102,30 @@ public static partial class EkranKodlari
         return d.ToDictionary(x => x.Key, x => x.Value.ToArray(), StringComparer.Ordinal);
     });
 
+    /// <summary>
+    /// SEÇİM KAPISI - yalnız GÖR (kullanıcı 09.10.2026: "başvuru açtım ama
+    /// ücret ekleyemedim.. yetkisiz dedi"). Başvuruya ücret satırı eklerken
+    /// hizmet aranır ve fiyat listesinden fiyat okunur. Banko görevlisine
+    /// `hizmet` / `fiyat_listesi` vermek menüde Hizmetler ve Fiyat Listeleri
+    /// ekranlarını açardı (matris = menü). Satır ekleyebilen kişi (`belge_satir`)
+    /// bu kaynakları yalnız OKUR - menüsü `/ben`'deki gerçek kodlardan
+    /// çizildiği için değişmez, yazma hakkı da gelmez.
+    /// </summary>
+    private static readonly Dictionary<string, string[]> GorKapisi = new(StringComparer.Ordinal)
+    {
+        ["hizmet"]        = ["belge_satir"],
+        ["fiyat_listesi"] = ["belge_satir"],
+        // Ücret penceresi stok (malzeme + birimleri) ve ilaç kataloğunu da
+        //   aynı aramada sorar; biri kapalıysa arama bütünüyle düşüyordu
+        //   (kullanıcı: "ücret ekleyemedim yine: Bu islem icin yetkiniz yok").
+        ["stok"]          = ["belge_satir"],
+        ["katalog"]       = ["belge_satir"],
+    };
+
+    /// <summary>Bu kaynağı yalnız görme işleminde açan kodlar (yoksa boş).</summary>
+    public static IReadOnlyList<string> GorKapisiAltlari(string veriKodu)
+        => GorKapisi.TryGetValue(veriKodu, out var a) ? a : [];
+
     /// <summary>Bu veri kodunun kapısını da açan ekran kodları (yoksa boş).</summary>
     public static IReadOnlyList<string> VeriKapisiAltlari(string veriKodu)
         => TumVeriKapisi.Value.TryGetValue(veriKodu, out var a) ? a : [];

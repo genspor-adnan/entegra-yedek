@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { KategoriSuzgeci } from './KategoriSuzgeci';
-import { type Kosul, type ListeSatiri, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
+import { ApiHatasi, type Kosul, type ListeSatiri, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
 import { aramaSirala } from './aramaSirasi';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -251,27 +251,36 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
         //   dal secen kullanici o dalda TANIMLI kalemleri istiyor.
         kategoriKosulu('kategoriId'));
 
+      // YETKİSİZ KAYNAK ARAMAYI DÜŞÜRMEZ (kullanıcı 09.10.2026: "ücret
+      //   ekleyemedim yine: Bu islem icin yetkiniz yok"): stok / hizmet / ilaç
+      //   birlikte aranır; birine yetkisi olmayan kullanıcıda o kaynak boş
+      //   sayılır, öteki kaynaklarla arama sürer. Başka hata yine gösterilir.
+      const yetkisizseBos = (p: Promise<{ satirlar: ListeSatiri[] }>) =>
+        p.catch(h => {
+          if (h instanceof ApiHatasi && h.durum === 403) return { satirlar: [] as ListeSatiri[] };
+          throw h;
+        });
       const [stoklar, hizmetler, ilaclar] = await Promise.all([
         yalnizHizmet ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                      // KULLANIM SIRASI (552): stok da bolumun gecmisine gore.
-                     : api.liste('stok', gorunum
+                     : yetkisizseBos(api.liste('stok', gorunum
                          ? { sayfa: 1, boyut: 25, filtre: stokFiltresi, gorunum }
                          : { sayfa: 1, boyut: 25, filtre: stokFiltresi,
-                             gorunum: 'kullanim', bolum: bolumId ?? 0 }),
+                             gorunum: 'kullanim', bolum: bolumId ?? 0 })),
         yalnizStok ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                    // KULLANIM SIRASI (550): "Tüm Liste"de hizmetler bolumun
                    //   gecmisine gore siralanir. Son/Sik gorunumu secildiyse
                    //   kullanicinin kendi gecmisi kazanir - kisisel secim
                    //   kurumun ortalamasindan once gelir.
-                   : api.liste('hizmet', gorunum
+                   : yetkisizseBos(api.liste('hizmet', gorunum
                        ? { sayfa: 1, boyut: 25, filtre, gorunum }
                        : { sayfa: 1, boyut: 25, filtre,
-                           gorunum: 'kullanim', bolum: bolumId ?? 0 }),
-        ilacAranir ? api.liste('ilac', gorunum
+                           gorunum: 'kullanim', bolum: bolumId ?? 0 })),
+        ilacAranir ? yetkisizseBos(api.liste('ilac', gorunum
                        ? { sayfa: 1, boyut: 25, filtre: ilacFiltresi, gorunum }
                        // Ilacin puani STOK KARTINDAN gelir (552).
                        : { sayfa: 1, boyut: 25, filtre: ilacFiltresi,
-                           gorunum: 'kullanim', bolum: bolumId ?? 0 })
+                           gorunum: 'kullanim', bolum: bolumId ?? 0 }))
                    : Promise.resolve({ satirlar: [] as ListeSatiri[] }),
       ]);
 
