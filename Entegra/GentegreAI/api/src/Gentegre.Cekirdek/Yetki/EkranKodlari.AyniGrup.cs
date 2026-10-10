@@ -35,6 +35,7 @@ public static partial class EkranKodlari
         ("maliyet.hasta_basi", "kasa.finans"),                  // Finans › Hasta Başı Maliyet (1024)
         ("prim.sevk_eden", "prim"),                             // İK › Sevk Eden İcmali (1025)
         ("lab.icmal", "lab.onay"),                              // Laboratuvar › Laboratuvar İcmali (1026)
+        ("radyoloji.icmal", "teleradyoloji.kurum.fatura"),      // Radyoloji › Görüntüleme İcmali (1027)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

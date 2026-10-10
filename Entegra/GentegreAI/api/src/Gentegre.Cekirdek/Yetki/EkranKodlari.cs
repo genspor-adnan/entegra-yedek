@@ -263,6 +263,8 @@ public static partial class EkranKodlari
         "prim.sevk_eden",
         // Laboratuvar İcmali (1026): /api/lab-icmal kendi koduna bakar.
         "lab.icmal",
+        // Görüntüleme İcmali (1027): /api/goruntuleme-icmal kendi koduna bakar.
+        "radyoloji.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

@@ -202,4 +202,13 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
   //  e-Nabiz gunluk isleyen bir akis (paket uretimi, gonderim, hata takibi),
   //  ayarlar menusunun dibinde aranmamali.
   // ===================================================================
+  {
+    // GÖRÜNTÜLEME İCMALİ (1027, mockup İcmal/goruntuleme_icmali.html): modalite /
+    //   tetkik çekim, ciro, kontrast-sarf, marj, rapor süresi, cihaz doluluğu, telerad.
+    kaynak: 'goruntuleme-icmal', rota: 'goruntuleme-icmal', ozelSayfa: true,
+    baslik: 'Görüntüleme İcmali', yol: 'Radyoloji › Görüntüleme İcmali',
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Görüntüleme İcmali', ic: '📈',
+    yetkiKodu: 'radyoloji.icmal', menuSira: 25,
+  },
 ];
