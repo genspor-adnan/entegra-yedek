@@ -21,7 +21,7 @@ import { stil } from './icmal/icmalStil';
  * kalan borçtan kendiliğinden düşmez. Tablolar `icmal/IcmalTablolari`,
  * A4 belge `icmal/IcmalA4`, saf hesaplar `icmal/icmalOrtak` (testli).
  */
-type Sekme = 'basvuru' | 'hizmet' | 'tahsilat' | 'provizyon' | 'hareket';
+type Sekme = 'basvuru' | 'hizmet' | 'tahsilat' | 'provizyon' | 'hareket' | 'onizleme';
 
 export function HastaIcmal() {
   const { hastaId } = useParams();
@@ -56,7 +56,7 @@ export function HastaIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['basvuru', 'Başvurular', veri.basvurular.length], ['hizmet', 'Hizmetler', veri.hizmetler.length],
     ['tahsilat', 'Tahsilatlar', veri.tahsilatlar.length], ['provizyon', 'Kurum Provizyonları', veri.provizyonlar.length],
-    ['hareket', 'Hareket Özeti', null]] : [];
+    ['hareket', 'Hareket Özeti', null], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
 
   return (
     <div className="hi">
@@ -114,9 +114,9 @@ export function HastaIcmal() {
             {sekme === 'tahsilat' && <TahsilatTablosu v={veri} />}
             {sekme === 'provizyon' && <ProvizyonTablosu v={veri} />}
             {sekme === 'hareket' && <HareketTablosu v={veri} />}
-          </div>
-          <div className="hi-sag">
-            <IcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
+            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
+              <IcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
+            </div>
           </div>
         </div>
       </>)}

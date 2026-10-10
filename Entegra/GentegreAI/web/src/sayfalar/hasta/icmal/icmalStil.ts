@@ -16,8 +16,11 @@ export const stil = `
 .hi-kutu .deg { font-size:16px; font-weight:bold; color:var(--baslik,#14315a); }
 .hi-kutu .alt { font-size:10.5px; color:var(--soluk,#6b7a8b); }
 .hi-kutu.mor .deg { color:#6a3fb5; } .hi-kutu.iyi .deg { color:#2e7d46; } .hi-kutu.uy .deg { color:#b7791f; } .hi-kutu.teh .deg { color:#b3261e; }
-.hi-govde { display:grid; grid-template-columns:minmax(0,1fr) 440px; gap:10px; padding:10px 12px; }
-@media (max-width:1200px) { .hi-govde { grid-template-columns:1fr; } }
+.hi-govde { padding:10px 12px; }
+/* Önizleme sekmesi: A4 ortada, kağıt genişliğinde. Yazdır her sekmede çalışsın
+   diye belge hep DOM'da; başka sekmedeyken yalnız EKRANDA gizli. */
+.hi-onizleme { max-width:794px; margin:12px auto 0; }
+@media screen { .hi-onizleme.gizli { display:none; } }
 .hi-sol .katab { margin-bottom:0; }
 .hi-tablo { width:100%; border-collapse:collapse; font-size:12px; background:var(--yuz,#fff); }
 .hi-tablo th, .hi-tablo td { border-bottom:1px solid var(--cizgi-ince,#e3e9f0); padding:5px 8px; text-align:left; }
