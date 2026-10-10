@@ -54,7 +54,9 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   // KALİTE / GÜVENLİK / PLATFORM (kullanıcı 10.10.2026): Yönetim grubunun alt
   //   başlıklarıydı; bölgenin kendi grupları oldu, Doküman'dan sonra.
   { ad: 'Yönetim',          renk: '#6b7a8b',
-    gruplar: ['İK', 'Doküman', 'Kalite', 'Güvenlik', 'Platform', 'Yönetim'] },
+    // ONAY (kullanıcı 10.10.2026): Onayımdakiler, Onay Akışları, Onay
+    //   Vekâleti Yönetim'den kendi grubuna, Doküman'dan sonra.
+    gruplar: ['İK', 'Doküman', 'Onay', 'Kalite', 'Güvenlik', 'Platform', 'Yönetim'] },
 ];
 
 /** HBYS grup sırası = bölgelerin düzleştirilmiş hali (tek kaynak). */

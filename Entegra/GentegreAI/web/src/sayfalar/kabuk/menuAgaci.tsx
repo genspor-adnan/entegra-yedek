@@ -69,7 +69,7 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Sabit Varlıklar',
+  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Onay', 'Sabit Varlıklar',
   // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Yönetim yine en sonda).
   'Kalite', 'Güvenlik', 'Platform',
 ];
@@ -242,6 +242,7 @@ export const GRUP_IKON: Record<string, string> = {
   // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
   //   grup olunca aynı simgeler.
   'Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
+  'Onay': '✅',
 };
 
 /** ALT GRUP ikonu: ikinci seviye eskiden HEP ⚙️ ciziyordu, ayar olmayan alt

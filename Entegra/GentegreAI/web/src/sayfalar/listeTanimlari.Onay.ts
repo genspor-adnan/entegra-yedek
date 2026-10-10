@@ -16,7 +16,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'onayKutusu', rota: 'onay-kutusu',
     baslik: 'Onayımdakiler',
-    yol: 'Yönetim › Onaylar',
+    yol: 'Onay › Onayımdakiler',
     aksiyonEkrani: 'onay-kutusu-liste',
     tarihAlani: 'baslama',
     // İLK ÇİP GÜNLÜK İŞ KÜMESİ: bekleyen her şey. "Geciken" ile açsaydık
@@ -40,7 +40,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     //   ister ve grup tavanı 28'dir. Tek ekran için ikisini birden esnetmek,
     //   kuralı kuralsızlığa çevirirdi. İzin ve avans gelince "Onaylar"
     //   grubu kendi dökümleriyle birlikte açılacak.
-    menuGrup: 'Yönetim', menuAd: 'Onayımdakiler', ic: '✍️',
+    menuGrup: 'Onay', menuAd: 'Onayımdakiler', ic: '✍️',
     yetkiKodu: 'panel', menuSira: 1,
   },
   {
@@ -58,7 +58,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     //   dosyası yazmak demekti, yani kural yine koda gömülüydü.
     kaynak: 'onayAkis', rota: 'onay-akis',
     baslik: 'Onay Akışları',
-    yol: 'Yönetim › Onay Akışları',
+    yol: 'Onay › Onay Akışları',
     kartYolu: '/onay-akis', kartBaslik: 'Onay Akışı',
     aksiyonEkrani: 'onay-akis-liste',
     cipler: [
@@ -69,7 +69,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gecikmesi olan', filtre: { alan: 'geciken', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Yönetim', menuAd: 'Onay Akışları', ic: '🧭',
+    menuGrup: 'Onay', menuAd: 'Onay Akışları', ic: '🧭',
     yetkiKodu: 'kullanici.onay_akis', menuSira: 3,
   },
   {
@@ -78,7 +78,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     //   ver"de buluyor - imzanın kime ait olduğu o noktada kayboluyor.
     kaynak: 'onayVekalet', rota: 'onay-vekalet',
     baslik: 'Onay Vekâletleri',
-    yol: 'Yönetim › Onay Vekâleti',
+    yol: 'Onay › Onay Vekâleti',
     kartYolu: '/onay-vekalet', kartBaslik: 'Onay Vekâleti',
     aksiyonEkrani: 'onay-vekalet-liste',
     tarihAlani: 'baslangic',
@@ -90,7 +90,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif',        filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Yönetim', menuAd: 'Onay Vekâleti', ic: '🤝',
+    menuGrup: 'Onay', menuAd: 'Onay Vekâleti', ic: '🤝',
     yetkiKodu: 'kullanici.onay_vekalet', menuSira: 2,
   },
 ];

@@ -55,7 +55,8 @@ describe('menü düzeni', () => {
     // ÇAĞRI MERKEZİ (839) 14. HBYS grubu: hasta akışının ilk teması, randevunun önünde.
     // 33: Kalite · Güvenlik · Platform (10.10.2026, kullanıcı) Yönetim'in alt
     //   başlığıydı, Yönetim bölgesinde ayrı grup oldu.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(33);
+    // 34: Onay grubu (10.10.2026, kullanıcı) - Yönetim'den ayrıldı.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(34);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -65,7 +66,7 @@ describe('menü düzeni', () => {
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
       // Kalite / Güvenlik / Platform (10.10.2026): yönetim ayar grupları, Yönetim gibi.
-      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform'].includes(g)) continue;
+      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform', 'Onay'].includes(g)) continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });
@@ -121,10 +122,10 @@ describe('menü düzeni', () => {
     expect(BOLGE_HBYS.length).toBeLessThanOrEqual(8);
     // 6: Yönetim bölgesi (10.10.2026, kullanıcı): Kalite · Güvenlik · Platform
     //   Yönetim'in alt başlığıyken ayrı grup oldu - İK · Doküman · Kalite ·
-    //   Güvenlik · Platform · Yönetim.
+    //   Güvenlik · Platform · Yönetim. 7: + Onay (10.10.2026).
     for (const b of BOLGE_HBYS)
       // 5: Klinikler bölgesine İşyeri Hekimliği (741) eklendi - beşinci klinik dal.
-      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(6);
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(7);
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup iki bölgede birden').toEqual([]);
   });
