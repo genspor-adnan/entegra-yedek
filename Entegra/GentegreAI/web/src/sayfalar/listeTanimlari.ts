@@ -173,6 +173,9 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'Medula':        'medula',
   // ÇAĞRI MERKEZİ (839): santral / WhatsApp / kampanya - modül kapalıysa grup çizilmez.
   'Çağrı Merkezi': 'cagri',
+  // FORMLAR (10.10.2026): Yönetim'in alt başlığıyken her ekran modul: 'form'
+  //   taşıyordu; ayrı grup olunca grubun modülü de form.
+  'Formlar':       'form',
   // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da
   //   acili olmayan kurumda menu grubu hic cizilmesin. Bagli olmasalardi
   //   hicbir kuruluma kapatilamazlardi ve poliklinige olmayan bir yetenek

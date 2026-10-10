@@ -9,7 +9,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
 export const FORM_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'form-sablon', rota: 'form-sablon', aksiyonEkrani: 'form-sablon-liste', baslik: 'Form Şablonları',
-    yol: 'Yönetim › Formlar › Şablonlar',
+    yol: 'Formlar › Şablonlar',
     kartYolu: '/form-sablon', kartBaslik: 'Form Şablonu',
     cipler: [
       { ad: 'Onam',           filtre: { alan: 'aile', op: 'esit', deger: 1 } },
@@ -20,16 +20,16 @@ export const FORM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'form',
-    menuGrup: 'Yönetim', menuAltGrup: 'Formlar', menuAd: 'Form Şablonları', ic: '🗂', yetkiKodu: 'form.sablon', menuSira: 10,
+    menuGrup: 'Formlar', menuAd: 'Form Şablonları', ic: '🗂', yetkiKodu: 'form.sablon', menuSira: 10,
   },
   {
-    kaynak: 'form-kutuphane', ozelSayfa: true, baslik: 'Form Kütüphanesi', yol: 'Yönetim › Formlar › Kütüphane',
+    kaynak: 'form-kutuphane', ozelSayfa: true, baslik: 'Form Kütüphanesi', yol: 'Formlar › Kütüphane',
     urunModu: 2, modul: 'form',
-    menuGrup: 'Yönetim', menuAltGrup: 'Formlar', menuAd: 'Kütüphane (Bakanlık / SKS)', ic: '📚', yetkiKodu: 'form.kutuphane', menuSira: 20,
+    menuGrup: 'Formlar', menuAd: 'Kütüphane (Bakanlık / SKS)', ic: '📚', yetkiKodu: 'form.kutuphane', menuSira: 20,
   },
   {
     kaynak: 'form-istek', rota: 'form-istek', aksiyonEkrani: 'form-istek-liste', baslik: 'Doldurulan Formlar',
-    yol: 'Yönetim › Formlar › Doldurulan Formlar',
+    yol: 'Formlar › Doldurulan Formlar',
     tarihAlani: 'eklemeTarihi',
     cipler: [
       { ad: 'Bekleyen',    filtre: { alan: 'durum', op: 'icinde', deger: [1, 2, 3] } },
@@ -39,13 +39,13 @@ export const FORM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'form',
-    menuGrup: 'Yönetim', menuAltGrup: 'Formlar', menuAd: 'Doldurulan Formlar', ic: '📋', yetkiKodu: 'form.istek', menuSira: 30,
+    menuGrup: 'Formlar', menuAd: 'Doldurulan Formlar', ic: '📋', yetkiKodu: 'form.istek', menuSira: 30,
   },
   {
     kaynak: 'form-kural', rota: 'form-kural', aksiyonEkrani: 'form-kural-liste', baslik: 'Form Kuralları (tetikleyiciler)',
-    yol: 'Yönetim › Formlar › Kurallar',
+    yol: 'Formlar › Kurallar',
     kartYolu: '/form-kural', kartBaslik: 'Form Kuralı',
     urunModu: 2, modul: 'form',
-    menuGrup: 'Yönetim', menuAltGrup: 'Formlar', menuAd: 'Kurallar (tetikleyiciler)', ic: '⚡', yetkiKodu: 'form.kural', menuSira: 40,
+    menuGrup: 'Formlar', menuAd: 'Kurallar (tetikleyiciler)', ic: '⚡', yetkiKodu: 'form.kural', menuSira: 40,
   },
 ];

@@ -56,7 +56,8 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   { ad: 'Yönetim',          renk: '#6b7a8b',
     // ONAY (kullanıcı 10.10.2026): Onayımdakiler, Onay Akışları, Onay
     //   Vekâleti Yönetim'den kendi grubuna, Doküman'dan sonra.
-    gruplar: ['İK', 'Doküman', 'Onay', 'Kalite', 'Güvenlik', 'Platform', 'Yönetim'] },
+    // FORMLAR (10.10.2026): Yönetim › Formlar alt başlığı, Platform'dan önce.
+    gruplar: ['İK', 'Doküman', 'Onay', 'Kalite', 'Güvenlik', 'Formlar', 'Platform', 'Yönetim'] },
 ];
 
 /** HBYS grup sırası = bölgelerin düzleştirilmiş hali (tek kaynak). */
