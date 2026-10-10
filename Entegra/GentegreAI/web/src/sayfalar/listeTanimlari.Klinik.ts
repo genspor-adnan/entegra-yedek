@@ -302,6 +302,15 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'iskonto_onay', menuSira: 30,
   },
   {
+    // İSKONTO İCMALİ (1023, kullanıcı 10.10.2026: "iskonto İcmali ayrı olsun.
+    //   İskonto onaya ekleme"): dönem sonu denetim raporu - onay kuyruğundan
+    //   ayrı ekran, bütün iskontolar (talepli + kampanya + banko talepsiz).
+    kaynak: 'iskonto-icmali', rota: 'iskonto-icmali', ozelSayfa: true,
+    baslik: 'İskonto İcmali', yol: 'Kayıt Kabul › İskonto İcmali', urunModu: 2,
+    menuGrup: 'Kayıt Kabul', menuAd: 'İskonto İcmali', ic: '🏷️',
+    yetkiKodu: 'iskonto.icmal', menuSira: 31,
+  },
+  {
     // HASTA AVANSLARI (779, kullanici: "hastadan alinan avans tahsilati
     //   takibi yapabilmeliyiz").
     //

@@ -13,6 +13,7 @@ namespace Gentegre.Api.Uclar;
 ///
 /// Dönemde hekim (belge_basvuru.personel_id) ya da bölüm başına: başvuru,
 /// hizmet kalemi, ciro (belge.genel_toplam - fn_belge_diptoplam'ın yazdığı),
+/// iskonto satır satır yuvarlanıp toplanır (İskonto İcmali ile aynı rakam),
 /// kurum payı (SGK + ÖSS dağılımı, toplamı aşamaz), hasta payı, iskonto
 /// (satır: adet x birim fiyat - tutar), tahsil (net kasa) ve HAKEDİŞ
 /// (hakedis_satir, dönem tarihli, iptal 0 hariç). Önceki eşit uzunluktaki
@@ -124,7 +125,7 @@ public static class HekimPerformansUclari
             var gruplar = await b.ListeAsync("""
                 select coalesce(kt.ad, 'Diğer'), count(*), sum(st.tutar),
                        sum(least(coalesce(dg.sgk, 0) + coalesce(dg.oss, 0), st.tutar)),
-                       round(sum(greatest(st.adet * st.birim_fiyat - st.tutar, 0)), 2)
+                       sum(round(greatest(st.adet * st.birim_fiyat - st.tutar, 0), 2))
                   from public.belge_satir st
                   left join public.belge_satir_dagilim dg on dg.belge_satir_id = st.id
                   left join public.hizmet h on h.id = st.hizmet_id
@@ -182,7 +183,7 @@ public static class HekimPerformansUclari
               left join public.taraf_kurum k on k.id = bb.odeyen_kurum_id
               left join lateral (
                   select sum(coalesce(dg.sgk, 0) + coalesce(dg.oss, 0)) as kurum,
-                         round(sum(greatest(st.adet * st.birim_fiyat - st.tutar, 0)), 2) as iskonto,
+                         sum(round(greatest(st.adet * st.birim_fiyat - st.tutar, 0), 2)) as iskonto,
                          count(*) as kalem
                     from public.belge_satir st
                     left join public.belge_satir_dagilim dg on dg.belge_satir_id = st.id

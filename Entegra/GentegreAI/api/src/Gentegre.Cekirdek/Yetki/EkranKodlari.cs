@@ -255,6 +255,8 @@ public static partial class EkranKodlari
         "hasta.borc_takip",
         // Doktor Performans İcmali (1021): /api/hekim-performans kendi koduna bakar.
         "prim.hekim_performans",
+        // İskonto İcmali (1023): /api/iskonto-icmal kendi koduna bakar.
+        "iskonto.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
