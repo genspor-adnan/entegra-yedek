@@ -1,5 +1,5 @@
 import type { SevkEdenIcmali } from '../../api/uclar/sevkEden';
-import { AntetLogo } from '../../bilesenler/AntetLogo';
+import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
 import { para, paraYaz } from '../../bilesenler/bicim';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { odemeRozeti, turRozeti } from './sevkOrtak';
@@ -17,13 +17,7 @@ export function SevkA4({ v, antet, duzenleyen }: {
   const doktorlar = v.secili.length ? v.doktorlar.filter(d => v.secili.includes(d.id)) : v.doktorlar;
   return (
     <div className="hi-a4">
-      <div className="a4-bas">
-        <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined} />
-        <div><div className="kurum">{String(antet?.unvan ?? '')}</div>
-          <div className="kurum-alt">{[antet?.adres, [antet?.ilce, antet?.il].filter(Boolean).join(' / '), antet?.telefon]
-            .filter(x => x && String(x).trim()).join(' · ')}</div></div>
-        <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
-      </div>
+      <IcmalAntet antet={antet} duzenleyen={duzenleyen} />
       <h3>SEVK EDEN HEKİM DÖNEM İCMALİ</h3>
       <div className="a4-hasta">
         <span>Dönem: <b>{tarihKisa(v.donem.bas)} - {tarihKisa(v.donem.bit)}</b></span>

@@ -1,5 +1,5 @@
 import type { MedulaMutabakati } from '../../../api/uclar/medulaMutabakat';
-import { AntetLogo } from '../../../bilesenler/AntetLogo';
+import { IcmalAntet } from '../../../bilesenler/cikti/IcmalAntet';
 import { paraYaz } from '../../../bilesenler/bicim';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 import { AY_ADLARI, donemDurumRozeti } from './mutabakatOrtak';
@@ -16,13 +16,7 @@ export function MutabakatA4({ v, antet, duzenleyen }: {
   const d = v.donem;
   return (
     <div className="hi-a4">
-      <div className="a4-bas">
-        <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined} />
-        <div><div className="kurum">{String(antet?.unvan ?? '')}</div>
-          <div className="kurum-alt">{[antet?.adres, [antet?.ilce, antet?.il].filter(Boolean).join(' / '), antet?.telefon]
-            .filter(x => x && String(x).trim()).join(' · ')}</div></div>
-        <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
-      </div>
+      <IcmalAntet antet={antet} duzenleyen={duzenleyen} />
       <h3>SGK DÖNEM MUTABAKAT TUTANAĞI</h3>
       <div className="a4-hasta">
         <span>Dönem: <b>{AY_ADLARI[v.ay - 1]} {v.yil}</b></span>

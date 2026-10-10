@@ -1,10 +1,9 @@
+import type { ExcelBlok } from '../../bilesenler/cikti/ciktiDonustur';
 import { gonderDosya } from '../cekirdek';
 
 /** Çıktı menüsü "Gönder › Excel" ucu (DisaAktarUclari). */
-export type ExcelHucresi = string | number | null;
-
 export const disaAktarUclari = {
-  /** Satırlardan gerçek .xlsx üretir; kalın satırlar başlık / toplam satırlarıdır. */
-  disaAktarExcel: (govde: { dosyaAdi: string; sayfaAdi: string; satirlar: ExcelHucresi[][]; kalinSatirlar: number[] }) =>
+  /** A4 belgesinin blokları (antet, başlık, bilgi, tablo, özet, not) → biçimli .xlsx. */
+  disaAktarExcel: (govde: { dosyaAdi: string; sayfaAdi: string; bloklar: ExcelBlok[] }) =>
     gonderDosya('/api/disa-aktar/excel', govde),
 };

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { api } from '../../api/istemci';
 import { dosyaAdiTemiz, dosyaIndir } from '../indir';
 import { guvenli, mesaj } from '../mesaj';
-import { belgeTablolari, htmlBelgesi, stilGomuluKopya, wordBelgesi } from './ciktiDonustur';
+import { excelDuzeni, htmlBelgesi, stilGomuluKopya, wordBelgesi, wordIcinDuzenle } from './ciktiDonustur';
 
 /**
  * ÇIKTI MENÜSÜ (kullanıcı 10.10.2026, İskonto İcmali'nde test - "olursa tüm
@@ -92,14 +92,14 @@ export function CiktiMenusu({ etiket, dosyaAdi, devre, children }: {
     switch (bicim) {
       case 'excel': {
         // Görünürken oku: gizli öğede innerText satır sonlarını (<br>) kaybeder.
-        const v = await gorunurken(async el => belgeTablolari(el));
-        const blob = await api.disaAktarExcel({ dosyaAdi: ad, sayfaAdi: etiket, satirlar: v.satirlar, kalinSatirlar: v.kalin });
+        const bloklar = await gorunurken(el => excelDuzeni(el, kutu.current?.closest('.hi') ?? document.body));
+        const blob = await api.disaAktarExcel({ dosyaAdi: ad, sayfaAdi: etiket, bloklar });
         return { blob, dosya: `${ad}.xlsx`, tip: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
       }
       case 'html': case 'word': {
         const kopya = await gorunurken(el => stilGomuluKopya(el));
         const tip = bicim === 'html' ? 'text/html;charset=utf-8' : 'application/msword';
-        const metin = bicim === 'html' ? htmlBelgesi(ad, kopya) : wordBelgesi(ad, kopya);
+        const metin = bicim === 'html' ? htmlBelgesi(ad, kopya) : wordBelgesi(ad, wordIcinDuzenle(kopya));
         return { blob: new Blob(['﻿' + metin], { type: tip }), dosya: `${ad}.${bicim === 'html' ? 'html' : 'doc'}`, tip };
       }
       default: throw new Error(bicim);

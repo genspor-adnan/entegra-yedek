@@ -1,5 +1,5 @@
 import type { GoruntulemeIcmali } from '../../api/uclar/goruntulemeIcmal';
-import { AntetLogo } from '../../bilesenler/AntetLogo';
+import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
 import { para, paraYaz } from '../../bilesenler/bicim';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { sure, yuzde } from '../labIcmal/labIcmalOrtak';
@@ -16,13 +16,7 @@ export function GoruntulemeA4({ v, antet, duzenleyen, secili, suzgec }: {
   const modaliteler = secili.length ? v.modaliteler.filter(m => secili.includes(m.modalite)) : v.modaliteler;
   return (
     <div className="hi-a4">
-      <div className="a4-bas">
-        <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined} />
-        <div><div className="kurum">{String(antet?.unvan ?? '')}</div>
-          <div className="kurum-alt">{[antet?.adres, [antet?.ilce, antet?.il].filter(Boolean).join(' / '), antet?.telefon]
-            .filter(x => x && String(x).trim()).join(' · ')}</div></div>
-        <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
-      </div>
+      <IcmalAntet antet={antet} duzenleyen={duzenleyen} />
       <h3>GÖRÜNTÜLEME DÖNEM İCMALİ</h3>
       <div className="a4-hasta">
         <span>Dönem: <b>{tarihKisa(v.donem.bas)} - {tarihKisa(v.donem.bit)}</b></span>

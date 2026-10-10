@@ -1,5 +1,5 @@
 import type { KurumIcmali } from '../../../api/uclar/kurumIcmal';
-import { AntetLogo } from '../../../bilesenler/AntetLogo';
+import { IcmalAntet } from '../../../bilesenler/cikti/IcmalAntet';
 import { para, paraYaz } from '../../../bilesenler/bicim';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 
@@ -19,13 +19,7 @@ export function KurumIcmalA4({ v, antet, duzenleyen, kurumAdi }: {
   const tekKurum = v.kurumId > 0;
   return (
     <div className="hi-a4">
-      <div className="a4-bas">
-        <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined} />
-        <div><div className="kurum">{String(antet?.unvan ?? '')}</div>
-          <div className="kurum-alt">{[antet?.adres, [antet?.ilce, antet?.il].filter(Boolean).join(' / '), antet?.telefon]
-            .filter(x => x && String(x).trim()).join(' · ')}</div></div>
-        <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
-      </div>
+      <IcmalAntet antet={antet} duzenleyen={duzenleyen} />
       <h3>KURUM HİZMET İCMALİ</h3>
       <div className="a4-hasta">
         <span>Kurum: <b>{kurumAdi}</b></span><span>Dönem: <b>{tarihKisa(v.donem.bas)} - {tarihKisa(v.donem.bit)}</b></span>

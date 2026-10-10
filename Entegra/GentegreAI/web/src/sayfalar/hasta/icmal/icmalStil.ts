@@ -42,7 +42,7 @@ export const stil = `
 .a4-bas { display:flex; gap:10px; align-items:flex-start; border-bottom:2px solid #1c4374; padding-bottom:6px; }
 .a4-bas .logo { width:40px; height:40px; object-fit:contain; }
 .a4-bas .kurum { font-weight:bold; font-size:12px; } .a4-bas .kurum-alt { color:#555; }
-.a4-tarih { margin-left:auto; text-align:right; color:#555; }
+.a4-tarih { margin-left:auto; text-align:right; color:#555; white-space:nowrap; }
 .hi-a4 h3 { text-align:center; margin:8px 0; font-size:13px; letter-spacing:.5px; }
 .a4-hasta { display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; border:1px solid #bbb; padding:5px 7px; margin-bottom:6px; }
 .a4-t, .a4-toplam { width:100%; border-collapse:collapse; }

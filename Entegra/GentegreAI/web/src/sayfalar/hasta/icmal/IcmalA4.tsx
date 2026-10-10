@@ -1,5 +1,5 @@
 import type { HastaIcmali } from '../../../api/uclar/hastaIcmal';
-import { AntetLogo } from '../../../bilesenler/AntetLogo';
+import { IcmalAntet } from '../../../bilesenler/cikti/IcmalAntet';
 import { para, paraYaz } from '../../../bilesenler/bicim';
 import { tarihKisa } from './icmalOrtak';
 
@@ -15,13 +15,7 @@ export function IcmalA4({ v, antet, duzenleyen }: {
   const p = (n: number) => para.format(n);
   return (
     <div className="hi-a4">
-      <div className="a4-bas">
-        <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined} />
-        <div><div className="kurum">{String(antet?.unvan ?? '')}</div>
-          <div className="kurum-alt">{[antet?.adres, [antet?.ilce, antet?.il].filter(Boolean).join(' / '), antet?.telefon]
-            .filter(x => x && String(x).trim()).join(' · ')}</div></div>
-        <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
-      </div>
+      <IcmalAntet antet={antet} duzenleyen={duzenleyen} />
       <h3>HASTA HESAP İCMALİ</h3>
       <div className="a4-hasta">
         <span>Hasta: <b>{v.hasta.ad}</b></span><span>Dosya No: {v.hasta.dosyaNo || '—'}</span>
