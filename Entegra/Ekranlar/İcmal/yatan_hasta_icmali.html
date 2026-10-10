@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Yatan Hasta İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+
+/* yatan hasta icmali ek: isi haritasi hucreleri satir ici renklenir */
+.isi td.orta { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🛏 Yatan Hasta / Servis İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Yatan Hasta · Merkez · 10.10.2026 · Dr. Canan ŞEN (Başhekim Yrd.)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Yatan Hasta İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🛏</span> Yatak Durumu</div>
+    <div class="btn"><span>📤</span> Taburcu Listesi</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: servis = odanin departmani (oda.departman_id); odeyen = yatis.odeyen_kurum_id. -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🏥 Servis: <b>Tümü</b> ▾ <span class="sonuk">Dahiliye · Genel Cerrahi · Kadın Doğum · Ortopedi · Yoğun Bakım · Çocuk</span></div>
+    <div class="sel">💳 Ödeyen: <b>Tümü</b> ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">13 açık hesaplı taburcu</span>
+    <span class="rz sari">2 yatış 30+ gün</span>
+  </div>
+
+  <!-- OZET: hasta-gun = doneme dusen gece; doluluk = hasta-gun / (yatak x gun); ALOS = taburcu edilenlerin gunu / taburcu. -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Yatış / Taburcu</div><div class="deg">256 / 258</div>
+      <div class="alt">dönemde kabul / çıkış</div></div>
+    <div class="kutu iyi"><div class="bas">Yatak Doluluğu</div><div class="deg">%80,2</div>
+      <div class="alt">962 hasta-gün / 1200 yatak-gün</div></div>
+    <div class="kutu"><div class="bas">Ort. Yatış Günü</div><div class="deg">3.9 gün</div>
+      <div class="alt">ALOS · 258 taburcu</div></div>
+    <div class="kutu"><div class="bas">Hasta-Gün</div><div class="deg">962</div>
+      <div class="alt">40 yatak · 30 gün</div></div>
+    <div class="kutu mor"><div class="bas">Ciro</div><div class="deg">4.402.750,00 ₺</div>
+      <div class="alt">yatış tahakkuku · gün başı 4.576,66</div></div>
+    <div class="kutu"><div class="bas">Kurum / Hasta Payı</div><div class="deg">3.697.230,00 ₺</div>
+      <div class="alt">hasta payı 705.520,00 ₺</div></div>
+    <div class="kutu teh"><div class="bas">Açık Hesap</div><div class="deg">98.715,00 ₺</div>
+      <div class="alt">13 taburcu · hesap kapanmadı</div></div>
+    <div class="kutu uy"><div class="bas">Yatak Devir Hızı</div><div class="deg">6.5</div>
+      <div class="alt">taburcu / yatak · 6 tekrar yatış (30 gün)</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="sv">Servisler <span class="rz">6</span></div>
+    <div class="sekme" data-s="ya">Yatışlar <span class="rz">256</span></div>
+    <div class="sekme" data-s="ah">Açık Hesaplar <span class="rz">13</span></div>
+    <div class="sekme" data-s="yk">Yatak Kullanımı</div>
+    <div class="sekme" data-s="td">Tanı / Doktor</div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: SERVISLER ============ -->
+  <div class="pnl" data-s="sv">
+    <div class="grp">
+      <h4>Servisler <span class="mini">satıra tıkla: doktor dağılımı · onay kutusuyla seçilenler diğer sekmeleri ve A4'ü süzer</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Servis</th><th class="orta">Yatak</th><th class="orta">Yatış</th>
+            <th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th>Doluluk</th><th class="orta">ALOS</th>
+            <th class="sag">Ciro</th><th class="sag">Gün Başı Ciro</th><th class="sag">Kurum Payı</th><th class="sag">Açık Hesap</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-d="s0"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Dahiliye</b></td>
+              <td class="orta">10</td><td class="orta">47</td><td class="orta">46</td><td class="orta">245</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:82%"></i></div>
+                <span class="rz ok">%81,7 normal</span></td>
+              <td class="orta">6.0</td><td class="sag"><b>477.450,00</b></td><td class="sag">1.948,78</td>
+              <td class="sag">380.560,00</td><td class="sag kir">23.025,00 (4)</td></tr>
+            <tr class="det" data-p="s0" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Uz.Dr. Kemal ARSLAN</td><td class="orta">13</td><td class="orta">14</td><td class="orta">52</td>
+                <td class="orta">4.6</td><td class="sag">109.200,00</td><td class="sag">—</td></tr><tr><td>Uz.Dr. Selin ÖZTÜRK</td><td class="orta">10</td><td class="orta">10</td><td class="orta">48</td>
+                <td class="orta">5.7</td><td class="sag">95.600,00</td><td class="sag">9.850,00</td></tr><tr><td>Uz.Dr. Hakan ER</td><td class="orta">24</td><td class="orta">22</td><td class="orta">145</td>
+                <td class="orta">6.9</td><td class="sag">272.650,00</td><td class="sag">13.175,00</td></tr></tbody></table></td></tr>
+            <tr class="ac" data-d="s1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Genel Cerrahi</b></td>
+              <td class="orta">8</td><td class="orta">56</td><td class="orta">55</td><td class="orta">194</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:81%"></i></div>
+                <span class="rz ok">%80,8 normal</span></td>
+              <td class="orta">3.8</td><td class="sag"><b>1.122.400,00</b></td><td class="sag">5.785,57</td>
+              <td class="sag">967.620,00</td><td class="sag kir">49.230,00 (3)</td></tr>
+            <tr class="det" data-p="s1" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Op.Dr. Murat KAYA</td><td class="orta">29</td><td class="orta">28</td><td class="orta">91</td>
+                <td class="orta">3.2</td><td class="sag">566.100,00</td><td class="sag">31.860,00</td></tr><tr><td>Op.Dr. Elif DEMİR</td><td class="orta">27</td><td class="orta">27</td><td class="orta">103</td>
+                <td class="orta">4.4</td><td class="sag">556.300,00</td><td class="sag">17.370,00</td></tr></tbody></table></td></tr>
+            <tr class="ac" data-d="s2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Kadın Doğum</b></td>
+              <td class="orta">8</td><td class="orta">80</td><td class="orta">82</td><td class="orta">172</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:72%"></i></div>
+                <span class="rz ok">%71,7 normal</span></td>
+              <td class="orta">2.1</td><td class="sag"><b>1.042.000,00</b></td><td class="sag">6.058,14</td>
+              <td class="sag">896.450,00</td><td class="sag kir">18.740,00 (3)</td></tr>
+            <tr class="det" data-p="s2" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Op.Dr. Nur ÖZKAN</td><td class="orta">39</td><td class="orta">37</td><td class="orta">82</td>
+                <td class="orta">2.2</td><td class="sag">505.200,00</td><td class="sag">4.740,00</td></tr><tr><td>Op.Dr. Ayşe ÇELİK</td><td class="orta">41</td><td class="orta">45</td><td class="orta">90</td>
+                <td class="orta">2.1</td><td class="sag">536.800,00</td><td class="sag">14.000,00</td></tr></tbody></table></td></tr>
+            <tr class="ac" data-d="s3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Ortopedi</b></td>
+              <td class="orta">6</td><td class="orta">27</td><td class="orta">27</td><td class="orta">147</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:82%"></i></div>
+                <span class="rz ok">%81,7 normal</span></td>
+              <td class="orta">4.9</td><td class="sag"><b>727.350,00</b></td><td class="sag">4.947,96</td>
+              <td class="sag">565.880,00</td><td class="sag ">—</td></tr>
+            <tr class="det" data-p="s3" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Op.Dr. Derya KILIÇ</td><td class="orta">12</td><td class="orta">12</td><td class="orta">74</td>
+                <td class="orta">5.1</td><td class="sag">336.700,00</td><td class="sag">—</td></tr><tr><td>Op.Dr. Tolga AKIN</td><td class="orta">15</td><td class="orta">15</td><td class="orta">73</td>
+                <td class="orta">4.7</td><td class="sag">390.650,00</td><td class="sag">—</td></tr></tbody></table></td></tr>
+            <tr class="ac" data-d="s4"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Yoğun Bakım</b></td>
+              <td class="orta">4</td><td class="orta">18</td><td class="orta">18</td><td class="orta">115</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:96%"></i></div>
+                <span class="rz kir">%95,8 sıkışık</span></td>
+              <td class="orta">6.9</td><td class="sag"><b>863.000,00</b></td><td class="sag">7.504,35</td>
+              <td class="sag">743.620,00</td><td class="sag kir">3.850,00 (1)</td></tr>
+            <tr class="det" data-p="s4" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Uz.Dr. Burcu YILDIZ</td><td class="orta">18</td><td class="orta">18</td><td class="orta">115</td>
+                <td class="orta">6.9</td><td class="sag">863.000,00</td><td class="sag">3.850,00</td></tr></tbody></table></td></tr>
+            <tr class="ac" data-d="s5"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Çocuk</b></td>
+              <td class="orta">4</td><td class="orta">28</td><td class="orta">30</td><td class="orta">89</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:74%"></i></div>
+                <span class="rz ok">%74,2 normal</span></td>
+              <td class="orta">3.4</td><td class="sag"><b>170.550,00</b></td><td class="sag">1.916,29</td>
+              <td class="sag">143.100,00</td><td class="sag kir">3.870,00 (2)</td></tr>
+            <tr class="det" data-p="s5" hidden><td></td><td colspan="11">
+              <table><thead><tr><th>Doktor</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">Hasta-Gün</th><th class="orta">ALOS</th><th class="sag">Ciro</th><th class="sag">Açık Hesap</th></tr></thead><tbody><tr><td>Uz.Dr. Zeynep AKSOY</td><td class="orta">28</td><td class="orta">30</td><td class="orta">89</td>
+                <td class="orta">3.4</td><td class="sag">170.550,00</td><td class="sag">3.870,00</td></tr></tbody></table></td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 6 servis</td><td class="orta">40</td><td class="orta">256</td>
+              <td class="orta">258</td><td class="orta">962</td><td>%80,2</td><td class="orta">3.9</td>
+              <td class="sag">4.402.750,00</td><td class="sag">4.576,66</td><td class="sag">3.697.230,00</td>
+              <td class="sag">98.715,00 (13)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: YATISLAR ============ -->
+  <div class="pnl" data-s="ya">
+    <div class="grp">
+      <h4>Dönemde Kabul Edilen Yatışlar <span class="mini">tutar = yatışın tamamı (dönem dışına taşan günler dahil) · satıra tıkla: yatış dosyası · sayfa 1 / 11</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Protokol No</th><th>Hasta</th><th>Servis</th><th>Doktor</th>
+            <th>Yatış</th><th>Taburcu</th><th class="orta">Gün</th><th>Ödeyen</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018066</td><td>Murat ŞAHİN</td><td>Dahiliye</td><td>Uz.Dr. Hakan ER</td>
+              <td>01.09.2026</td><td>04.09.2026</td><td class="orta">3</td><td>SGK</td>
+              <td class="sag">6.950,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018396</td><td>Elif AYDIN</td><td>Genel Cerrahi</td><td>Op.Dr. Murat KAYA</td>
+              <td>01.09.2026</td><td>05.09.2026</td><td class="orta">4</td><td>SGK</td>
+              <td class="sag">20.900,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018536</td><td>Kemal ASLAN</td><td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td>
+              <td>01.09.2026</td><td>03.09.2026</td><td class="orta">2</td><td>SGK</td>
+              <td class="sag">12.800,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018631</td><td>Meryem ÖZKAN</td><td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td>
+              <td>01.09.2026</td><td>04.09.2026</td><td class="orta">3</td><td>SGK</td>
+              <td class="sag">14.300,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018984</td><td>Ayşe KAYA</td><td>Yoğun Bakım</td><td>Uz.Dr. Burcu YILDIZ</td>
+              <td>01.09.2026</td><td>05.09.2026</td><td class="orta">4</td><td>SGK</td>
+              <td class="sag">31.700,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019061</td><td>Hatice ASLAN</td><td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td>
+              <td>01.09.2026</td><td>04.09.2026</td><td class="orta">3</td><td>SGK</td>
+              <td class="sag">5.850,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018082</td><td>Hüseyin KOÇ</td><td>Dahiliye</td><td>Uz.Dr. Hakan ER</td>
+              <td>02.09.2026</td><td>05.09.2026</td><td class="orta">3</td><td>SGK</td>
+              <td class="sag">6.950,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018262</td><td>Hüseyin ÇELİK</td><td>Genel Cerrahi</td><td>Op.Dr. Elif DEMİR</td>
+              <td>02.09.2026</td><td>07.09.2026</td><td class="orta">5</td><td>SGK</td>
+              <td class="sag">22.500,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018292</td><td>Ayşe ARSLAN</td><td>Genel Cerrahi</td><td>Op.Dr. Elif DEMİR</td>
+              <td>02.09.2026</td><td>05.09.2026</td><td class="orta">3</td><td>SGK</td>
+              <td class="sag">19.300,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018325</td><td>Zeynep ŞİMŞEK</td><td>Genel Cerrahi</td><td>Op.Dr. Murat KAYA</td>
+              <td>02.09.2026</td><td>09.09.2026</td><td class="orta">7</td><td>SGK</td>
+              <td class="sag">25.700,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018760</td><td>Meryem ÖZDEMİR</td><td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td>
+              <td>02.09.2026</td><td>03.09.2026</td><td class="orta">1</td><td>SGK</td>
+              <td class="sag">11.300,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018791</td><td>Sevgi YILDIRIM</td><td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td>
+              <td>02.09.2026</td><td>03.09.2026</td><td class="orta">1</td><td>Kurumu öder</td>
+              <td class="sag">11.300,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019098</td><td>Murat KAYA</td><td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td>
+              <td>02.09.2026</td><td>03.09.2026</td><td class="orta">1</td><td>SGK</td>
+              <td class="sag">3.150,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018097</td><td>Fatma ERDOĞAN</td><td>Dahiliye</td><td>Uz.Dr. Hakan ER</td>
+              <td>03.09.2026</td><td>10.09.2026</td><td class="orta">7</td><td>ÖSS</td>
+              <td class="sag">12.750,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018151</td><td>Meryem ÖZDEMİR</td><td>Dahiliye</td><td>Uz.Dr. Kemal ARSLAN</td>
+              <td>03.09.2026</td><td>08.09.2026</td><td class="orta">5</td><td>SGK</td>
+              <td class="sag">9.850,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018174</td><td>İbrahim KURT <span class="rz sari" title="Önceki çıkıştan 2 gün sonra">tekrar</span></td><td>Dahiliye</td><td>Uz.Dr. Hakan ER</td>
+              <td>03.09.2026</td><td>04.09.2026</td><td class="orta">1</td><td>SGK</td>
+              <td class="sag">4.050,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018228</td><td>Hüseyin KOÇ</td><td>Genel Cerrahi</td><td>Op.Dr. Elif DEMİR</td>
+              <td>03.09.2026</td><td>08.09.2026</td><td class="orta">5</td><td>SGK</td>
+              <td class="sag">22.500,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018482</td><td>Hülya ÖZTÜRK</td><td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td>
+              <td>03.09.2026</td><td>05.09.2026</td><td class="orta">2</td><td>SGK</td>
+              <td class="sag">12.800,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018679</td><td>Ali YILDIRIM</td><td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td>
+              <td>03.09.2026</td><td>05.09.2026</td><td class="orta">2</td><td>ÖSS</td>
+              <td class="sag">12.800,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018720</td><td>Derya DEMİR</td><td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td>
+              <td>03.09.2026</td><td>05.09.2026</td><td class="orta">2</td><td>SGK</td>
+              <td class="sag">12.800,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018762</td><td>Yusuf ÇETİN</td><td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td>
+              <td>03.09.2026</td><td>09.09.2026</td><td class="orta">6</td><td>SGK</td>
+              <td class="sag">18.800,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018859</td><td>Ahmet ŞAHİN <span class="rz sari" title="Önceki çıkıştan 7 gün sonra">tekrar</span></td><td>Ortopedi</td><td>Op.Dr. Derya KILIÇ</td>
+              <td>03.09.2026</td><td>05.09.2026</td><td class="orta">2</td><td>Ücretli</td>
+              <td class="sag">21.600,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019023</td><td>Zeynep KAYA</td><td>Yoğun Bakım</td><td>Uz.Dr. Burcu YILDIZ</td>
+              <td>03.09.2026</td><td>17.09.2026</td><td class="orta">14</td><td>SGK</td>
+              <td class="sag">99.700,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019146</td><td>Osman ŞAHİN</td><td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td>
+              <td>03.09.2026</td><td>08.09.2026</td><td class="orta">5</td><td>SGK</td>
+              <td class="sag">8.550,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019181</td><td>Ayşe ERDOĞAN</td><td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td>
+              <td>03.09.2026</td><td>05.09.2026</td><td class="orta">2</td><td>SGK</td>
+              <td class="sag">4.500,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="8">Dönem toplamı · 256 yatış (0 hâlâ yatıyor · 12 hesap açık) · ilk 25 gösteriliyor</td>
+              <td class="sag">4.256.600,00</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: ACIK HESAPLAR ============ -->
+  <div class="pnl" data-s="ah">
+    <div class="grp">
+      <h4>Açık Hesaplar <span class="mini">dönemde taburcu edilmiş, bakiyesi kalan yatışlar · gün = taburcudan bugüne (10.10.2026)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Protokol No</th><th>Hasta</th><th>Servis</th><th>Ödeyen</th><th>Taburcu</th>
+            <th>Bekleme</th><th class="sag">Toplam</th><th class="sag">Tahsil</th><th class="sag">Kalan</th><th>Neden</th></tr></thead>
+          <tbody>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019180</td><td>Yusuf ÖZDEMİR</td><td>Çocuk</td><td>SGK</td>
+              <td>03.09.2026</td><td><span class="rz kir">37 gün</span></td><td class="sag">7.200,00</td>
+              <td class="sag">6.480,00</td><td class="sag kir"><b>720,00</b></td>
+              <td><span class="rz sari">hasta payı tahsil edilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018085</td><td>Ahmet ERDOĞAN</td><td>Dahiliye</td><td>SGK</td>
+              <td>07.09.2026</td><td><span class="rz kir">33 gün</span></td><td class="sag">5.500,00</td>
+              <td class="sag">—</td><td class="sag kir"><b>5.500,00</b></td>
+              <td><span class="rz kir">fatura kesilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018398</td><td>İbrahim AYDIN</td><td>Genel Cerrahi</td><td>SGK</td>
+              <td>08.09.2026</td><td><span class="rz kir">32 gün</span></td><td class="sag">19.300,00</td>
+              <td class="sag">1.930,00</td><td class="sag kir"><b>17.370,00</b></td>
+              <td><span class="rz mavi">provizyon bekliyor</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018177</td><td>Elif ERDOĞAN</td><td>Dahiliye</td><td>SGK</td>
+              <td>09.09.2026</td><td><span class="rz kir">31 gün</span></td><td class="sag">9.850,00</td>
+              <td class="sag">—</td><td class="sag kir"><b>9.850,00</b></td>
+              <td><span class="rz kir">fatura kesilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018047</td><td>Hülya ŞİMŞEK</td><td>Dahiliye</td><td>SGK</td>
+              <td>12.09.2026</td><td><span class="rz sari">28 gün</span></td><td class="sag">14.200,00</td>
+              <td class="sag">12.780,00</td><td class="sag kir"><b>1.420,00</b></td>
+              <td><span class="rz sari">hasta payı tahsil edilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018232</td><td>Kemal ÇETİN</td><td>Genel Cerrahi</td><td>SGK</td>
+              <td>16.09.2026</td><td><span class="rz sari">24 gün</span></td><td class="sag">19.300,00</td>
+              <td class="sag">1.930,00</td><td class="sag kir"><b>17.370,00</b></td>
+              <td><span class="rz mavi">provizyon bekliyor</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018495</td><td>Mehmet YILDIRIM</td><td>Kadın Doğum</td><td>SGK</td>
+              <td>16.09.2026</td><td><span class="rz sari">24 gün</span></td><td class="sag">11.300,00</td>
+              <td class="sag">10.170,00</td><td class="sag kir"><b>1.130,00</b></td>
+              <td><span class="rz sari">hasta payı tahsil edilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019004</td><td>Meryem ÇETİN</td><td>Yoğun Bakım</td><td>SGK</td>
+              <td>19.09.2026</td><td><span class="rz sari">21 gün</span></td><td class="sag">38.500,00</td>
+              <td class="sag">34.650,00</td><td class="sag kir"><b>3.850,00</b></td>
+              <td><span class="rz sari">hasta payı tahsil edilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-019078</td><td>Yusuf KARA</td><td>Çocuk</td><td>SGK</td>
+              <td>22.09.2026</td><td><span class="rz sari">18 gün</span></td><td class="sag">3.150,00</td>
+              <td class="sag">—</td><td class="sag kir"><b>3.150,00</b></td>
+              <td><span class="rz kir">fatura kesilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018128</td><td>Ali KAYA</td><td>Dahiliye</td><td>SGK</td>
+              <td>23.09.2026</td><td><span class="rz sari">17 gün</span></td><td class="sag">6.950,00</td>
+              <td class="sag">695,00</td><td class="sag kir"><b>6.255,00</b></td>
+              <td><span class="rz mavi">provizyon bekliyor</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018810</td><td>Murat ŞİMŞEK</td><td>Kadın Doğum</td><td>ÖSS</td>
+              <td>27.09.2026</td><td><span class="rz ok">13 gün</span></td><td class="sag">15.800,00</td>
+              <td class="sag">11.060,00</td><td class="sag kir"><b>4.740,00</b></td>
+              <td><span class="rz sari">hasta payı tahsil edilmedi</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018310</td><td>Şerife KARA</td><td>Genel Cerrahi</td><td>SGK</td>
+              <td>30.09.2026</td><td><span class="rz ok">10 gün</span></td><td class="sag">16.100,00</td>
+              <td class="sag">1.610,00</td><td class="sag kir"><b>14.490,00</b></td>
+              <td><span class="rz mavi">provizyon bekliyor</span></td></tr>
+            <tr class="ac"><td><input type="checkbox"></td><td>P-018695</td><td>Osman DEMİR</td><td>Kadın Doğum</td><td>SGK</td>
+              <td>30.09.2026</td><td><span class="rz ok">10 gün</span></td><td class="sag">14.300,00</td>
+              <td class="sag">1.430,00</td><td class="sag kir"><b>12.870,00</b></td>
+              <td><span class="rz mavi">provizyon bekliyor</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="6">13 açık hesap · hasta payı tahsil edilmedi 5 · provizyon bekliyor 5 · fatura kesilmedi 3</td>
+              <td class="sag">181.450,00</td><td class="sag">82.735,00</td>
+              <td class="sag">98.715,00</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: YATAK KULLANIMI ============ -->
+  <div class="pnl" data-s="yk">
+    <div class="grp">
+      <h4>Haftalık Doluluk <span class="mini">hasta-gün / yatak-gün · koyu kırmızı ≥ %85 (sıkışık)</span></h4>
+      <div class="dg">
+        <table class="isi">
+          <thead><tr><th>Servis</th><th class="orta">01.09–07.09</th><th class="orta">08.09–14.09</th><th class="orta">15.09–21.09</th><th class="orta">22.09–28.09</th><th class="orta">29.09–30.09</th><th class="orta">Dönem</th><th class="orta">Kapalı Yatak-Gün</th><th class="orta">Boş Yatak-Gün</th></tr></thead>
+          <tbody>
+            <tr><td><b>Dahiliye</b> <span class="sonuk">10 yatak</span></td><td class="orta" style="background:rgba(59,130,196,0.52);color:#fff">%77,1</td><td class="orta" style="background:rgba(59,130,196,0.56);color:#fff">%84,3</td><td class="orta" style="background:rgba(59,130,196,0.53);color:#fff">%78,6</td><td class="orta" style="background:rgba(180,35,24,0.57);color:#fff">%85,7</td><td class="orta" style="background:rgba(180,35,24,0.57);color:#fff">%85,0</td><td class="orta"><b>%81,7</b></td><td class="orta">4</td><td class="orta">51</td></tr>
+            <tr><td><b>Genel Cerrahi</b> <span class="sonuk">8 yatak</span></td><td class="orta" style="background:rgba(59,130,196,0.54);color:#fff">%80,4</td><td class="orta" style="background:rgba(59,130,196,0.49);color:#16324f">%71,4</td><td class="orta" style="background:rgba(180,35,24,0.60);color:#fff">%91,1</td><td class="orta" style="background:rgba(59,130,196,0.54);color:#fff">%80,4</td><td class="orta" style="background:rgba(59,130,196,0.55);color:#fff">%81,2</td><td class="orta"><b>%80,8</b></td><td class="orta">—</td><td class="orta">46</td></tr>
+            <tr><td><b>Kadın Doğum</b> <span class="sonuk">8 yatak</span></td><td class="orta" style="background:rgba(59,130,196,0.49);color:#16324f">%71,4</td><td class="orta" style="background:rgba(59,130,196,0.54);color:#fff">%80,4</td><td class="orta" style="background:rgba(59,130,196,0.42);color:#16324f">%58,9</td><td class="orta" style="background:rgba(59,130,196,0.54);color:#fff">%80,4</td><td class="orta" style="background:rgba(59,130,196,0.41);color:#16324f">%56,2</td><td class="orta"><b>%71,7</b></td><td class="orta">2</td><td class="orta">66</td></tr>
+            <tr><td><b>Ortopedi</b> <span class="sonuk">6 yatak</span></td><td class="orta" style="background:rgba(59,130,196,0.51);color:#16324f">%73,8</td><td class="orta" style="background:rgba(180,35,24,0.60);color:#fff">%90,5</td><td class="orta" style="background:rgba(59,130,196,0.52);color:#fff">%76,2</td><td class="orta" style="background:rgba(180,35,24,0.58);color:#fff">%88,1</td><td class="orta" style="background:rgba(59,130,196,0.51);color:#16324f">%75,0</td><td class="orta"><b>%81,7</b></td><td class="orta">3</td><td class="orta">30</td></tr>
+            <tr><td><b>Yoğun Bakım</b> <span class="sonuk">4 yatak</span></td><td class="orta" style="background:rgba(180,35,24,0.65);color:#fff">%100,0</td><td class="orta" style="background:rgba(180,35,24,0.63);color:#fff">%96,4</td><td class="orta" style="background:rgba(180,35,24,0.59);color:#fff">%89,3</td><td class="orta" style="background:rgba(180,35,24,0.63);color:#fff">%96,4</td><td class="orta" style="background:rgba(180,35,24,0.65);color:#fff">%100,0</td><td class="orta"><b>%95,8</b></td><td class="orta">—</td><td class="orta">5</td></tr>
+            <tr><td><b>Çocuk</b> <span class="sonuk">4 yatak</span></td><td class="orta" style="background:rgba(59,130,196,0.51);color:#16324f">%75,0</td><td class="orta" style="background:rgba(59,130,196,0.45);color:#16324f">%64,3</td><td class="orta" style="background:rgba(59,130,196,0.55);color:#fff">%82,1</td><td class="orta" style="background:rgba(180,35,24,0.57);color:#fff">%85,7</td><td class="orta" style="background:rgba(59,130,196,0.31);color:#16324f">%37,5</td><td class="orta"><b>%74,2</b></td><td class="orta">—</td><td class="orta">31</td></tr>
+            <tr class="toplam"><td>Toplam · 40 yatak</td><td class="orta">%78,2</td><td class="orta">%81,1</td><td class="orta">%78,2</td><td class="orta">%85,0</td><td class="orta">%73,8</td><td class="orta">%80,2</td><td class="orta">9</td><td class="orta">229</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sonuk" style="margin-top:4px">Kapalı = arıza / tadilat nedeniyle kullanılamayan yatak-gün (yatak durumu 5). Boş = yatak-gün − hasta-gün − kapalı.
+        Kapalı günler dolulukta paydadan düşülmez; düşülseydi doluluk %80,8 olurdu.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: TANI / DOKTOR ============ -->
+  <div class="pnl" data-s="td">
+    <div class="ikili">
+    <div class="grp">
+      <h4>En Sık 10 Yatış Tanısı <span class="mini">yatış tanısı (ICD-10) · dönemde kabul edilen yatışlar</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>ICD</th><th>Tanı</th><th class="orta">Yatış</th><th class="orta">ALOS</th><th class="sag">Ort. Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>O82</td><td>Sezaryen ile doğum</td><td class="orta">34</td><td class="orta">2.1</td><td class="sag">12.932,35</td></tr>
+            <tr><td>N83.2</td><td>Over kisti</td><td class="orta">26</td><td class="orta">1.7</td><td class="sag">12.338,46</td></tr>
+            <tr><td>K80.2</td><td>Kolelitiazis</td><td class="orta">23</td><td class="orta">3.9</td><td class="sag">20.691,30</td></tr>
+            <tr><td>J18.9</td><td>Pnömoni, tanımlanmamış</td><td class="orta">21</td><td class="orta">4.6</td><td class="sag">8.814,29</td></tr>
+            <tr><td>K35.8</td><td>Akut apandisit</td><td class="orta">21</td><td class="orta">2.8</td><td class="sag">18.919,05</td></tr>
+            <tr><td>O80</td><td>Spontan doğum</td><td class="orta">20</td><td class="orta">2.5</td><td class="sag">13.550,00</td></tr>
+            <tr><td>M17.1</td><td>Gonartroz (diz protezi)</td><td class="orta">14</td><td class="orta">4.7</td><td class="sag">25.807,14</td></tr>
+            <tr><td>J21.9</td><td>Akut bronşiolit</td><td class="orta">14</td><td class="orta">2.6</td><td class="sag">5.367,86</td></tr>
+            <tr><td>S72.0</td><td>Femur boyun kırığı</td><td class="orta">13</td><td class="orta">4.9</td><td class="sag">26.130,77</td></tr>
+            <tr><td>K40.9</td><td>İnguinal herni</td><td class="orta">12</td><td class="orta">3.2</td><td class="sag">19.566,67</td></tr>
+            <tr class="toplam"><td colspan="2">İlk 10 tanı · dönemde 256 yatıştan 198</td><td class="orta">198</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Doktorlar <span class="mini">yatıran / sorumlu doktor (yatis.hekim_id)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Doktor</th><th>Servis</th><th class="orta">Yatış</th><th class="orta">Taburcu</th><th class="orta">ALOS</th><th class="sag">Ciro</th></tr></thead>
+          <tbody>
+            <tr><td>Uz.Dr. Burcu YILDIZ</td><td>Yoğun Bakım</td><td class="orta">18</td><td class="orta">18</td><td class="orta">6.9</td><td class="sag">863.000,00</td></tr>
+            <tr><td>Op.Dr. Murat KAYA</td><td>Genel Cerrahi</td><td class="orta">29</td><td class="orta">28</td><td class="orta">3.2</td><td class="sag">566.100,00</td></tr>
+            <tr><td>Op.Dr. Elif DEMİR</td><td>Genel Cerrahi</td><td class="orta">27</td><td class="orta">27</td><td class="orta">4.4</td><td class="sag">556.300,00</td></tr>
+            <tr><td>Op.Dr. Ayşe ÇELİK</td><td>Kadın Doğum</td><td class="orta">41</td><td class="orta">45</td><td class="orta">2.1</td><td class="sag">536.800,00</td></tr>
+            <tr><td>Op.Dr. Nur ÖZKAN</td><td>Kadın Doğum</td><td class="orta">39</td><td class="orta">37</td><td class="orta">2.2</td><td class="sag">505.200,00</td></tr>
+            <tr><td>Op.Dr. Tolga AKIN</td><td>Ortopedi</td><td class="orta">15</td><td class="orta">15</td><td class="orta">4.7</td><td class="sag">390.650,00</td></tr>
+            <tr><td>Op.Dr. Derya KILIÇ</td><td>Ortopedi</td><td class="orta">12</td><td class="orta">12</td><td class="orta">5.1</td><td class="sag">336.700,00</td></tr>
+            <tr><td>Uz.Dr. Hakan ER</td><td>Dahiliye</td><td class="orta">24</td><td class="orta">22</td><td class="orta">6.9</td><td class="sag">272.650,00</td></tr>
+            <tr><td>Uz.Dr. Zeynep AKSOY</td><td>Çocuk</td><td class="orta">28</td><td class="orta">30</td><td class="orta">3.4</td><td class="sag">170.550,00</td></tr>
+            <tr><td>Uz.Dr. Kemal ARSLAN</td><td>Dahiliye</td><td class="orta">13</td><td class="orta">14</td><td class="orta">4.6</td><td class="sag">109.200,00</td></tr>
+            <tr><td>Uz.Dr. Selin ÖZTÜRK</td><td>Dahiliye</td><td class="orta">10</td><td class="orta">10</td><td class="orta">5.7</td><td class="sag">95.600,00</td></tr>
+            <tr class="toplam"><td colspan="2">11 doktor</td><td class="orta">256</td><td class="orta">258</td><td class="orta">3.9</td><td class="sag">4.402.750,00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: A4 ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: YH-2026-09<br>Düzenleme: 10.10.2026 11:05<br>Düzenleyen: Dr. Canan ŞEN</div>
+        </div>
+        <h1>YATAN HASTA DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Yatak: 40 · 6 servis</div><div>Yatış / taburcu: 256 / 258</div>
+        </div>
+        <table>
+          <thead><tr><th>Servis</th><th>Yatak</th><th>Yatış</th><th>Taburcu</th><th>Hasta-Gün</th><th>Doluluk</th><th>ALOS</th><th>Ciro</th><th>Açık Hesap</th></tr></thead>
+          <tbody>
+            <tr><td>Dahiliye</td><td class="sag">10</td><td class="sag">47</td><td class="sag">46</td><td class="sag">245</td>
+              <td class="sag">%81,7</td><td class="sag">6.0</td><td class="sag">477.450,00</td><td class="sag">23.025,00</td></tr>
+            <tr><td>Genel Cerrahi</td><td class="sag">8</td><td class="sag">56</td><td class="sag">55</td><td class="sag">194</td>
+              <td class="sag">%80,8</td><td class="sag">3.8</td><td class="sag">1.122.400,00</td><td class="sag">49.230,00</td></tr>
+            <tr><td>Kadın Doğum</td><td class="sag">8</td><td class="sag">80</td><td class="sag">82</td><td class="sag">172</td>
+              <td class="sag">%71,7</td><td class="sag">2.1</td><td class="sag">1.042.000,00</td><td class="sag">18.740,00</td></tr>
+            <tr><td>Ortopedi</td><td class="sag">6</td><td class="sag">27</td><td class="sag">27</td><td class="sag">147</td>
+              <td class="sag">%81,7</td><td class="sag">4.9</td><td class="sag">727.350,00</td><td class="sag">0,00</td></tr>
+            <tr><td>Yoğun Bakım</td><td class="sag">4</td><td class="sag">18</td><td class="sag">18</td><td class="sag">115</td>
+              <td class="sag">%95,8</td><td class="sag">6.9</td><td class="sag">863.000,00</td><td class="sag">3.850,00</td></tr>
+            <tr><td>Çocuk</td><td class="sag">4</td><td class="sag">28</td><td class="sag">30</td><td class="sag">89</td>
+              <td class="sag">%74,2</td><td class="sag">3.4</td><td class="sag">170.550,00</td><td class="sag">3.870,00</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Yatak doluluğu</span><span>%80,2</span></div>
+          <div><span>Ortalama yatış günü (ALOS)</span><span>3.9 gün</span></div>
+          <div><span>Ciro (yatış tahakkuku)</span><span>4.402.750,00 ₺</span></div>
+          <div><span>Kurum payı / hasta payı</span><span>3.697.230,00 / 705.520,00 ₺</span></div>
+          <div class="b"><span>AÇIK HESAP (13 taburcu)</span><span>98.715,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Yatak devir hızı 6.5 · 30 gün içinde tekrar yatış 6 · 30+ gün yatan 2.
+          Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Hasta Hizmetleri · İmza</div><div>Onaylayan<br>Başhekim · İmza</div></div>
+        <div class="dip">Gentegre AI · YH-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>yatis (giriş / çıkış · durum · hekim · ödeyen · tanı)</code><code>yatis_yatak (yatak hareketi)</code><code>yatak · oda (departman = servis)</code>
+    <code>yatis_tahakkuk (günlük ücret)</code><code>belge (tür 19 · başvuru)</code><code>belge_satir_dagilim (kurum / hasta payı)</code><code>kasa_islem (tahsil)</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span>
+    <span>256 yatış · 258 taburcu · 962 hasta-gün</span><span>·</span>
+    <span>Doluluk %80,2 · ALOS 3.9</span><span>·</span>
+    <span>Açık hesap 98.715,00 ₺</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> yatan hasta tarafının dönem özeti — servis başına yatış, taburcu, hasta-gün, doluluk, ortalama yatış süresi,
+  ciro ve taburcu olmuş ama hesabı kapanmamış yatışlar.
+  <ul>
+    <li><b>Giriş:</b> Yönetim › İcmaller › Yatan Hasta; Yatan Hasta menüsünden "Dönem İcmali"; Yatak Durumu panosundan "İcmal".</li>
+    <li><b>Hasta-gün</b> = döneme düşen gece sayısı (yatış günü sayılır, çıkış günü sayılmaz); dönemden önce yatıp hâlâ yatan hastanın gecesi de dahildir.</li>
+    <li><b>Doluluk</b> = hasta-gün / (aktif yatak × gün). Arıza / tadilatta kapalı yatak-gün paydadan düşülmez, Yatak Kullanımı sekmesinde ayrıca görünür.</li>
+    <li><b>ALOS</b> = dönemde taburcu edilenlerin toplam yatış günü / taburcu sayısı (dönem dışına taşan günler dahil).</li>
+    <li><b>Ciro</b> = dönem tarihli yatış tahakkuku (yatak ücreti + kabul hizmetleri) ve yatış başvurusunun satırları; kurum payı satırın ödeyen dağılımından gelir, burada yeniden hesaplanmaz.</li>
+    <li><b>Açık hesap</b> = dönemde taburcu + bakiye &gt; 0 (provizyon bekleyen, fatura kesilmemiş, hasta payı tahsil edilmemiş). Bekleme günü taburcudan bugüne.</li>
+    <li><b>Tekrar yatış</b> = aynı hastanın önceki çıkışından sonraki 30 gün içinde yeniden yatması. <b>Yatak devir hızı</b> = taburcu / yatak.</li>
+    <li>İptal yatış (durum 0) hariç. Yatış listesinde Protokol No görünür, <b>hasta TC'si gösterilmez</b>; A4 belgede hasta bilgisi yoktur. Listeler soldaki onay kutusuyla seçilir; A4 önizleme ayrı sekmededir.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Servis satiri ac/kapa: doktor dagilimi
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+</script>
+
+</body>
+</html>

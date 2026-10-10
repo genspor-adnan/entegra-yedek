@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kasa / Gün Sonu Mutabakatı — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+  .dg.uzun{max-height:430px;overflow-y:auto}
+  tr.iptal td{text-decoration:line-through;color:#9aa6b2}
+  .acik{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:3px;padding:3px 5px;font:inherit;font-size:11px}
+  .engel{margin:12px;padding:8px 12px;border:1px solid #f0c9c4;background:#fff5f3;border-radius:4px;font-size:12px;color:#7a2a1f}
+  .engel ul{margin:4px 0 4px 18px;padding:0}
+  .engel li{margin:2px 0}
+  .a4{position:relative}
+  .a4 .taslak{position:absolute;top:42%;left:0;right:0;text-align:center;font-size:44px;color:rgba(200,40,40,.10);
+    transform:rotate(-24deg);font-weight:bold;pointer-events:none}
+  .kural{margin:12px;padding:8px 12px;font-size:12px;border:1px solid var(--line2);border-radius:4px;background:#fff}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🔐 Kasa / Gün Sonu Mutabakatı — 09.10.2026
+    <span class="sp">Gentegre AI · Finans · Merkez · 09.10.2026 18:45 · Ayten YAZ (Mali İşler)</span></div>
+
+  <div class="toolbar">
+    <div class="btn pas" title="3 engel var - Farklar / Açıklamalar sekmesi"><span>🔒</span> Günü Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Gün Sonu Raporu)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🏦</span> Vezne İcmali</div>
+    <div class="btn"><span>📒</span> Kasa Hareketleri</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: tek gun (Gunu Kapat yalniz tek gunde) ya da aralik (yalniz izleme). -->
+  <div class="serit">
+    <div class="sel">📅 Tarih: ‹ <b>09.10.2026 Cuma</b> › <span class="sonuk">(aralık seçilebilir)</span></div>
+    <div class="sel">🏥 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">💼 Kasa: <b>Tümü</b> ▾ <span class="sonuk">Ana Kasa · Banko 1-3 · Diş Banko</span></div>
+    <span class="sp"></span>
+    <span class="rz sari">Gün: Açık · kapatılamaz (3 engel)</span>
+    <span class="rz kir">1 kapanmamış banko oturumu</span>
+    <span class="rz kir">POS farkı −1.070,00 ₺</span>
+    <span class="sonuk">08.10.2026 kapatıldı · Ayten YAZ 19:02</span>
+  </div>
+
+  <!-- OZET: beklenen = devir + nakit giris - nakit cikis - bankaya yatirilan (kasalar arasi virman toplamda sifirlanir). -->
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Devir (Açılış)</div><div class="deg">14.400,00 ₺</div>
+      <div class="alt">5 kasa · 08.10 gün sonu</div></div>
+    <div class="kutu iyi"><div class="bas">Nakit Giriş</div><div class="deg">22.370,00 ₺</div>
+      <div class="alt">61 makbuz</div></div>
+    <div class="kutu uy"><div class="bas">Nakit Çıkış</div><div class="deg">2.730,00 ₺</div>
+      <div class="alt">2 iade · 3 gider ödemesi</div></div>
+    <div class="kutu teh"><div class="bas">Kasa Bakiyesi</div><div class="deg">14.040,00 ₺</div>
+      <div class="alt">beklenen · sayılan 11.490,00 / 11.520,00 (4 kasa) · fark −30,00</div></div>
+    <div class="kutu teh"><div class="bas">POS / Kredi Kartı</div><div class="deg">33.520,00 ₺</div>
+      <div class="alt">61 çekim · POS raporu 28.510,00 / 29.580,00 · fark −1.070,00 · T-03 bekliyor</div></div>
+    <div class="kutu mor"><div class="bas">Havale / EFT</div><div class="deg">5.950,00 ₺</div>
+      <div class="alt">5 işlem · ekstre 6.750,00 (+800,00)</div></div>
+    <div class="kutu "><div class="bas">Bankaya Yatırılan</div><div class="deg">20.000,00 ₺</div>
+      <div class="alt">Ana Kasa → Garanti BBVA · dekont eşleşti</div></div>
+    <div class="kutu uy"><div class="bas">Ertesi Gün Devri</div><div class="deg">14.010,00 ₺</div>
+      <div class="alt">sayılan 11.490,00 + açık Banko 3 2.520,00 · kesin değil</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ks">Kasalar <span class="rz">5</span></div>
+    <div class="sekme" data-s="pos">POS Mutabakatı <span class="rz">4</span></div>
+    <div class="sekme" data-s="bn">Banka Hareketleri <span class="rz">2</span></div>
+    <div class="sekme" data-s="hr">Hareketler <span class="rz">141</span></div>
+    <div class="sekme" data-s="fk">Farklar / Açıklamalar <span class="rz kir">3</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: KASALAR ============ -->
+  <div class="pnl" data-s="ks">
+    <div class="grp">
+      <h4>Kasalar <span class="mini">satıra tıkla: ödeme türü kırılımı · onay kutusuyla seçilenler A4'ü ve diğer sekmeleri süzer</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kasa</th><th class="sag">Açılış</th><th class="sag">Giriş</th>
+            <th class="sag">Çıkış</th><th class="sag">Transfer</th><th class="sag">Beklenen</th><th class="sag">Sayılan</th><th>Fark</th>
+            <th>Sorumlu</th><th>Oturum</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-d="k0"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Ana Kasa</b> <span class="sonuk">K-100</span></td>
+              <td class="sag">12.400,00</td><td class="sag">1.200,00</td><td class="sag">2.350,00</td>
+              <td class="sag">−1.260,00</td><td class="sag"><b>9.990,00</b></td>
+              <td class="sag">9.990,00</td><td><span class="rz ok">0,00 · tuttu</span></td><td>Ayten YAZ</td><td><span class="rz ok">Sayıldı 18:40</span></td></tr>
+            <tr class="det" data-p="k0" hidden><td></td><td colspan="10">💵 Nakit tahsilat 1 · 1.200,00 &nbsp;|&nbsp; 🧾 Gider ödemesi 3 · 2.350,00 &nbsp;|&nbsp; ⇄ Bankolardan teslim +18.740,00 &nbsp;|&nbsp; 🏦 Bankaya yatırılan −20.000,00 &nbsp;|&nbsp; gün sonu sayımı 18:40 (küpür dökümlü)</td></tr>
+            <tr class="ac" data-d="k1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Banko 1</b> <span class="sonuk">K-101</span></td>
+              <td class="sag">500,00</td><td class="sag">8.640,00</td><td class="sag">260,00</td>
+              <td class="sag">−8.380,00</td><td class="sag"><b>500,00</b></td>
+              <td class="sag">500,00</td><td><span class="rz ok">0,00 · tuttu</span></td><td>Elif KARACA</td><td><span class="rz ok">Kapandı 17:05 · teslim edildi</span></td></tr>
+            <tr class="det" data-p="k1" hidden><td></td><td colspan="10">💵 Nakit tahsilat 26 makbuz · 8.640,00 &nbsp;|&nbsp; ↩ Nakit iade 260,00 &nbsp;|&nbsp; 💳 POS 24 çekim · 11.860,00 <span class='sonuk'>(kasaya girmez, POS sekmesi)</span> &nbsp;|&nbsp; sayım 8.880,00 − teslim 8.380,00 = kasada 500,00</td></tr>
+            <tr class="ac" data-d="k2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Banko 2</b> <span class="sonuk">K-102</span></td>
+              <td class="sag">500,00</td><td class="sag">5.980,00</td><td class="sag">—</td>
+              <td class="sag">−5.930,00</td><td class="sag"><b>550,00</b></td>
+              <td class="sag">500,00</td><td><span class="rz kir">−50,00</span></td><td>Murat TUNÇ</td><td><span class="rz ok">Kapandı 17:10 · teslim edildi</span></td></tr>
+            <tr class="det" data-p="k2" hidden><td></td><td colspan="10">💵 Nakit tahsilat 18 makbuz · 5.980,00 &nbsp;|&nbsp; ↩ Nakit iade — &nbsp;|&nbsp; 💳 POS 17 çekim · 8.420,00 <span class='sonuk'>(kasaya girmez, POS sekmesi)</span> &nbsp;|&nbsp; sayım 6.430,00 − teslim 5.930,00 = kasada 500,00</td></tr>
+            <tr class="ac" data-d="k3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Banko 3</b> <span class="sonuk">K-103</span></td>
+              <td class="sag">500,00</td><td class="sag">2.140,00</td><td class="sag">120,00</td>
+              <td class="sag">—</td><td class="sag"><b>2.520,00</b></td>
+              <td class="sag">—</td><td><span class="rz pas">sayım yok</span></td><td>Seda AYDIN</td><td><span class="rz kir">Açık · akşam vardiyası</span></td></tr>
+            <tr class="det" data-p="k3" hidden><td></td><td colspan="10">💵 Nakit tahsilat 7 makbuz · 2.140,00 &nbsp;|&nbsp; ↩ Nakit iade 120,00 &nbsp;|&nbsp; 💳 POS 9 çekim · 3.940,00 <span class='sonuk'>(kasaya girmez, POS sekmesi)</span> &nbsp;|&nbsp; oturum açık · sayım yok</td></tr>
+            <tr class="ac" data-d="k4"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Diş Banko</b> <span class="sonuk">K-104</span></td>
+              <td class="sag">500,00</td><td class="sag">4.410,00</td><td class="sag">—</td>
+              <td class="sag">−4.430,00</td><td class="sag"><b>480,00</b></td>
+              <td class="sag">500,00</td><td><span class="rz sari">+20,00</span></td><td>Derya KOÇ</td><td><span class="rz sari">Kapandı 18:02 · onay bekliyor</span></td></tr>
+            <tr class="det" data-p="k4" hidden><td></td><td colspan="10">💵 Nakit tahsilat 9 makbuz · 4.410,00 &nbsp;|&nbsp; ↩ Nakit iade — &nbsp;|&nbsp; 💳 POS 11 çekim · 9.300,00 <span class='sonuk'>(kasaya girmez, POS sekmesi)</span> &nbsp;|&nbsp; sayım 4.930,00 − teslim 4.430,00 = kasada 500,00</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 5 kasa</td><td class="sag">14.400,00</td><td class="sag">22.370,00</td>
+              <td class="sag">2.730,00</td><td class="sag">−20.000,00</td><td class="sag">14.040,00</td>
+              <td class="sag">11.490,00</td><td><span class="rz kir">−30,00</span></td>
+              <td colspan="2" class="sonuk">transfer net = bankaya yatırılan · kasalar arası virman sıfırlanır</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="kural">
+      <b>Kural:</b> Beklenen = açılış + giriş − çıkış + transfer. Toplamda 14.400,00 + 22.370,00 − 2.730,00 − 20.000,00 (bankaya) =
+      <b>14.040,00 ₺</b>. Fark = sayılan − beklenen; açık oturumun sayımı yoktur, farkı toplama girmez
+      (sayılan kasalarda 11.490,00 − 11.520,00 = −30,00). Bankolar oturumu kapatırken sayar,
+      500,00 ₺ açılış avansını bırakıp kalanı Ana Kasaya teslim eder.
+    </div>
+  </div>
+
+  <!-- ============ SEKME: POS ============ -->
+  <div class="pnl" data-s="pos" hidden>
+    <div class="grp">
+      <h4>POS Gün Sonu Mutabakatı <span class="mini">sistemdeki POS tahsilatları (tür 25) ↔ terminalin gün sonu (batch) raporu</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Terminal</th><th>Banka</th><th>Kasa</th><th class="orta">Sistem Adet</th>
+            <th class="sag">Sistem Tutar</th><th class="orta">POS Adet</th><th class="sag">POS (Batch) Tutar</th><th class="sag">Fark</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>T-01 · 10234567</b></td><td>Garanti BBVA</td><td>Banko 1</td><td class="orta">24</td>
+              <td class="sag">11.860,00</td><td class="orta">24</td>
+              <td class="sag">11.860,00</td><td class="sag">0,00</td><td><span class="rz ok">Eşleşti</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>T-02 · 20456789</b></td><td>İş Bankası</td><td>Banko 2</td><td class="orta">17</td>
+              <td class="sag">8.420,00</td><td class="orta">18</td>
+              <td class="sag">8.670,00</td><td class="sag"><b>+250,00</b></td><td><span class="rz kir">1 eşleşmeyen işlem</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>T-03 · 30987654</b></td><td>Yapı Kredi</td><td>Banko 3</td><td class="orta">9</td>
+              <td class="sag">3.940,00</td><td class="orta">—</td>
+              <td class="sag">—</td><td class="sag">—</td><td><span class="rz sari">Batch bekleniyor · oturum açık</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>T-04 · 40112233</b></td><td>Akbank</td><td>Diş Banko</td><td class="orta">11</td>
+              <td class="sag">9.300,00</td><td class="orta">10</td>
+              <td class="sag">7.980,00</td><td class="sag"><b>−1.320,00</b></td><td><span class="rz kir">2 eşleşmeyen işlem</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="3">Toplam · 4 terminal</td><td class="orta">61</td><td class="sag">33.520,00</td>
+              <td class="orta">52</td><td class="sag">28.510,00</td><td class="sag">−1.070,00</td>
+              <td class="sonuk">batch'li 3 terminalin sistemi 29.580,00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Eşleşmeyen İşlemler <span class="mini">eşleme: terminal + saat (±5 dk) + tutar · provizyon no varsa önce o</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Terminal</th><th>Saat</th><th>Protokol No</th><th class="sag">Sistem</th>
+            <th class="sag">POS</th><th class="sag">Fark</th><th>Durum</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>T-02</td><td>14:32</td><td>—</td>
+              <td class="sag">—</td><td class="sag">250,00</td>
+              <td class="sag">+250,00</td><td><span class="rz mor">POS'ta var · sistemde yok</span></td><td class="sonuk">POS fişi var, makbuz kesilmemiş</td></tr>
+            <tr><td><input type="checkbox"></td><td>T-04</td><td>11:18</td><td>P-021461</td>
+              <td class="sag">1.200,00</td><td class="sag">—</td>
+              <td class="sag">−1.200,00</td><td><span class="rz kir">Sistemde var · POS'ta yok</span></td><td class="sonuk">Sistemde POS tahsilatı var, gün sonu fişinde yok (provizyon iptal?)</td></tr>
+            <tr><td><input type="checkbox"></td><td>T-04</td><td>10:47</td><td>P-021455</td>
+              <td class="sag">1.320,00</td><td class="sag">1.200,00</td>
+              <td class="sag">−120,00</td><td><span class="rz sari">Tutar farklı</span></td><td class="sonuk">Makbuz 1.320,00 · POS 1.200,00</td></tr>
+            <tr class="toplam"><td></td><td colspan="5">3 eşleşmeyen işlem</td>
+              <td class="sag">−1.070,00</td><td colspan="2" class="sonuk">= POS farkı</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: BANKA ============ -->
+  <div class="pnl" data-s="bn" hidden>
+    <div class="grp">
+      <h4>Banka Hareketleri <span class="mini">beklenen = sistemdeki kayıt · gerçekleşen = banka ekstresi (içe aktarma ya da elle)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Banka Hesabı</th><th class="sag">Yatış · Beklenen</th>
+            <th class="sag">Yatış · Gerçekleşen</th><th class="orta">Havale/EFT Adet</th><th class="sag">Havale · Sistem</th>
+            <th class="sag">Havale · Ekstre</th><th class="sag">Fark</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Garanti BBVA · Merkez TL</b><br><span class="sonuk">TR12 0006 2000 1230 0006 2954 18</span></td>
+              <td class="sag">20.000,00</td><td class="sag">20.000,00</td>
+              <td class="orta">3</td><td class="sag">4.150,00</td><td class="sag">4.150,00</td>
+              <td class="sag">0,00</td><td><span class="rz ok">Eşleşti</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>İş Bankası · Kızılay TL</b><br><span class="sonuk">TR33 0006 4000 0011 2345 6789 01</span></td>
+              <td class="sag">—</td><td class="sag">—</td>
+              <td class="orta">2</td><td class="sag">1.800,00</td><td class="sag">2.600,00</td>
+              <td class="sag">+800,00</td><td><span class="rz sari">Ekstrede fazla</span><br><span class="sonuk">Ekstrede 800,00 ₺ EFT var, sistemde tahsilat yok · gönderen: ÖZEL SAĞLIK SİGORTA A.Ş.</span></td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 2 hesap</td><td class="sag">20.000,00</td>
+              <td class="sag">20.000,00</td><td class="orta">5</td><td class="sag">5.950,00</td>
+              <td class="sag">6.750,00</td><td class="sag">+800,00</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="kural">
+      POS tahsilatları bankaya <b>valörle</b> (blokeli) geçer: bugünkü 33.520,00 ₺ POS tahsilatı burada değil, valör gününde
+      "POS'tan Bankaya Aktarım" (tür 44) olarak görünür. Fark = (gerçekleşen − beklenen yatış) + (ekstre − sistem havale).
+    </div>
+  </div>
+
+  <!-- ============ SEKME: HAREKETLER ============ -->
+  <div class="pnl" data-s="hr" hidden>
+    <div class="grp">
+      <h4>Gün İçi Hareketler <span class="mini">139 geçerli · 2 iptal (üstü çizili, toplama girmez)</span></h4>
+      <div class="dg uzun">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Saat</th><th>Kasa / Hesap</th><th>Tür</th><th>Yön</th><th>Ödeme</th>
+            <th>Protokol No / Açıklama</th><th class="sag">Tutar</th><th>Kullanıcı</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>08:01</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021441</td>
+              <td class="sag">380,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:05</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021408</td>
+              <td class="sag">360,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:05</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021513</td>
+              <td class="sag">790,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:06</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021506</td>
+              <td class="sag">140,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:24</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021436</td>
+              <td class="sag">370,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:30</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021411</td>
+              <td class="sag">290,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:33</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021418</td>
+              <td class="sag">430,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:39</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021464</td>
+              <td class="sag">530,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:42</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021428</td>
+              <td class="sag">410,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:48</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021392</td>
+              <td class="sag">420,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:48</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021423</td>
+              <td class="sag">450,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:52</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021498</td>
+              <td class="sag">640,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:57</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021400</td>
+              <td class="sag">300,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>08:58</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021508</td>
+              <td class="sag">860,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:07</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021422</td>
+              <td class="sag">470,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:12</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021412</td>
+              <td class="sag">310,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:15</td><td>Ana Kasa</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>Personel avans iadesi</td>
+              <td class="sag">1.200,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:17</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021507</td>
+              <td class="sag">840,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:26</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021409</td>
+              <td class="sag">250,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:30</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021414</td>
+              <td class="sag">360,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:33</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021456</td>
+              <td class="sag">270,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:34</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021402</td>
+              <td class="sag">310,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:35</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021503</td>
+              <td class="sag">410,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:37</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021407</td>
+              <td class="sag">200,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:50</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021396</td>
+              <td class="sag">380,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:50</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021501</td>
+              <td class="sag">490,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>09:53</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021433</td>
+              <td class="sag">520,00</td><td>Elif KARACA</td></tr>
+            <tr class="iptal"><td><input type="checkbox"></td><td>10:02</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021520 · yanlış hasta</td>
+              <td class="sag">450,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:03</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021471</td>
+              <td class="sag">520,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:14</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021462</td>
+              <td class="sag">420,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:19</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021477</td>
+              <td class="sag">450,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:20</td><td>Ana Kasa</td>
+              <td>Nakit Ödeme <span class="sonuk">(31)</span></td><td>Çıkış</td><td>Nakit</td><td>Kırtasiye · Ofis Dünyası</td>
+              <td class="sag">−850,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:24</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021444</td>
+              <td class="sag">290,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:25</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021435</td>
+              <td class="sag">560,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:29</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021420</td>
+              <td class="sag">540,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:30</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021472</td>
+              <td class="sag">540,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:37</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021430</td>
+              <td class="sag">540,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:45</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021495</td>
+              <td class="sag">410,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:47</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021455</td>
+              <td class="sag">1.320,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:54</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021419</td>
+              <td class="sag">510,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>10:54</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021451</td>
+              <td class="sag">360,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:18</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021461</td>
+              <td class="sag">1.200,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:20</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021496</td>
+              <td class="sag">520,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:20</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021499</td>
+              <td class="sag">440,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:26</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021410</td>
+              <td class="sag">300,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:30</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021468</td>
+              <td class="sag">500,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:30</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021475</td>
+              <td class="sag">510,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:31</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021413</td>
+              <td class="sag">260,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:54</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021394</td>
+              <td class="sag">310,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>11:57</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021398</td>
+              <td class="sag">360,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:02</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021463</td>
+              <td class="sag">520,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:02</td><td>Garanti BBVA</td>
+              <td>Banka Tahsilat (Havale/EFT) <span class="sonuk">(22)</span></td><td>Giriş</td><td>Havale/EFT</td><td>P-021516</td>
+              <td class="sag">1.460,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:04</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021447</td>
+              <td class="sag">370,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:05</td><td>Ana Kasa</td>
+              <td>Nakit Ödeme <span class="sonuk">(31)</span></td><td>Çıkış</td><td>Nakit</td><td>Kargo · Yurtiçi</td>
+              <td class="sag">−300,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:06</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021500</td>
+              <td class="sag">510,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:09</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021434</td>
+              <td class="sag">500,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:23</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021438</td>
+              <td class="sag">490,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:30</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021399</td>
+              <td class="sag">390,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:31</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021427</td>
+              <td class="sag">510,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:36</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021405</td>
+              <td class="sag">380,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:40</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021395</td>
+              <td class="sag">310,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:40</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021497</td>
+              <td class="sag">540,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:45</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021443</td>
+              <td class="sag">370,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:48</td><td>Garanti BBVA</td>
+              <td>Banka Tahsilat (Havale/EFT) <span class="sonuk">(22)</span></td><td>Giriş</td><td>Havale/EFT</td><td>P-021515</td>
+              <td class="sag">1.430,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>12:50</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021391</td>
+              <td class="sag">390,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:01</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021470</td>
+              <td class="sag">490,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:02</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021429</td>
+              <td class="sag">560,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:05</td><td>Diş Banko</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021502</td>
+              <td class="sag">450,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:13</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021510</td>
+              <td class="sag">980,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:26</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021450</td>
+              <td class="sag">300,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:30</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021424</td>
+              <td class="sag">470,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:30</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021514</td>
+              <td class="sag">840,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:37</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021390</td>
+              <td class="sag">270,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:40</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021474</td>
+              <td class="sag">520,00</td><td>Murat TUNÇ</td></tr>
+            <tr class="iptal"><td><input type="checkbox"></td><td>13:44</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021521 · mükerrer</td>
+              <td class="sag">380,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:52</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021393</td>
+              <td class="sag">360,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>13:53</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021397</td>
+              <td class="sag">340,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:06</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021403</td>
+              <td class="sag">390,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:06</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021425</td>
+              <td class="sag">510,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:06</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021448</td>
+              <td class="sag">420,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:14</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021437</td>
+              <td class="sag">480,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:20</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021476</td>
+              <td class="sag">450,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:20</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021511</td>
+              <td class="sag">810,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:26</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021432</td>
+              <td class="sag">560,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:33</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021431</td>
+              <td class="sag">490,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:35</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021415</td>
+              <td class="sag">300,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:39</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021512</td>
+              <td class="sag">850,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:43</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021404</td>
+              <td class="sag">370,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>14:47</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021457</td>
+              <td class="sag">260,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:01</td><td>Garanti BBVA</td>
+              <td>Banka Tahsilat (Havale/EFT) <span class="sonuk">(22)</span></td><td>Giriş</td><td>Havale/EFT</td><td>P-021517</td>
+              <td class="sag">1.260,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:05</td><td>İş Bankası</td>
+              <td>Banka Tahsilat (Havale/EFT) <span class="sonuk">(22)</span></td><td>Giriş</td><td>Havale/EFT</td><td>P-021519</td>
+              <td class="sag">880,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:11</td><td>Diş Banko</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-04</td><td>P-021509</td>
+              <td class="sag">670,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:12</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021454</td>
+              <td class="sag">270,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:14</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021401</td>
+              <td class="sag">390,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:19</td><td>İş Bankası</td>
+              <td>Banka Tahsilat (Havale/EFT) <span class="sonuk">(22)</span></td><td>Giriş</td><td>Havale/EFT</td><td>P-021518</td>
+              <td class="sag">920,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:23</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021446</td>
+              <td class="sag">320,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:40</td><td>Ana Kasa</td>
+              <td>Nakit Ödeme <span class="sonuk">(31)</span></td><td>Çıkış</td><td>Nakit</td><td>Temizlik malzemesi · Hijyen Ltd.</td>
+              <td class="sag">−1.200,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:48</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021459</td>
+              <td class="sag">250,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:50</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021449</td>
+              <td class="sag">370,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>15:53</td><td>Banko 1</td>
+              <td>Nakit Ödeme (İade) <span class="sonuk">(31)</span></td><td>Çıkış</td><td>Nakit</td><td>P-021440 · iade</td>
+              <td class="sag">−260,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:00</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021445</td>
+              <td class="sag">310,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:01</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021442</td>
+              <td class="sag">390,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:03</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021416</td>
+              <td class="sag">470,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:05</td><td>Banko 1</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021406</td>
+              <td class="sag">340,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:07</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021439</td>
+              <td class="sag">550,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:08</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021469</td>
+              <td class="sag">450,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:09</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021467</td>
+              <td class="sag">450,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:10</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021458</td>
+              <td class="sag">450,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:18</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021466</td>
+              <td class="sag">440,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:19</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021421</td>
+              <td class="sag">560,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:20</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021490</td>
+              <td class="sag">430,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:27</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021417</td>
+              <td class="sag">490,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:29</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021452</td>
+              <td class="sag">280,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:29</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021487</td>
+              <td class="sag">460,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:37</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021489</td>
+              <td class="sag">450,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:39</td><td>Banko 1</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-01</td><td>P-021426</td>
+              <td class="sag">420,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:41</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021488</td>
+              <td class="sag">450,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:46</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021473</td>
+              <td class="sag">660,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:49</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021460</td>
+              <td class="sag">480,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:49</td><td>Banko 2</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-02</td><td>P-021465</td>
+              <td class="sag">490,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:50</td><td>Banko 2</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021453</td>
+              <td class="sag">320,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>16:51</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021484</td>
+              <td class="sag">350,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:12</td><td>Ana Kasa</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Giriş</td><td>Nakit</td><td>Banko 1 teslimi</td>
+              <td class="sag">8.380,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:12</td><td>Banko 1</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Çıkış</td><td>Nakit</td><td>Ana Kasaya teslim</td>
+              <td class="sag">−8.380,00</td><td>Elif KARACA</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:15</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021482</td>
+              <td class="sag">300,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:18</td><td>Ana Kasa</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Giriş</td><td>Nakit</td><td>Banko 2 teslimi</td>
+              <td class="sag">5.930,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:18</td><td>Banko 2</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Çıkış</td><td>Nakit</td><td>Ana Kasaya teslim</td>
+              <td class="sag">−5.930,00</td><td>Murat TUNÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:22</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021480</td>
+              <td class="sag">200,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:27</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021483</td>
+              <td class="sag">380,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:36</td><td>Banko 3</td>
+              <td>Nakit Ödeme (İade) <span class="sonuk">(31)</span></td><td>Çıkış</td><td>Nakit</td><td>P-021494 · iade</td>
+              <td class="sag">−120,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>17:43</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021491</td>
+              <td class="sag">400,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>18:10</td><td>Ana Kasa</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Giriş</td><td>Nakit</td><td>Diş Banko teslimi</td>
+              <td class="sag">4.430,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>18:10</td><td>Diş Banko</td>
+              <td>Kasadan Kasaya Virman <span class="sonuk">(40)</span></td><td>Çıkış</td><td>Nakit</td><td>Ana Kasaya teslim</td>
+              <td class="sag">−4.430,00</td><td>Derya KOÇ</td></tr>
+            <tr><td><input type="checkbox"></td><td>18:14</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021479</td>
+              <td class="sag">280,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>18:19</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021486</td>
+              <td class="sag">440,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>18:25</td><td>Ana Kasa</td>
+              <td>Kasadan Bankaya <span class="sonuk">(41)</span></td><td>Çıkış</td><td>Nakit</td><td>Garanti BBVA · dekont 884512</td>
+              <td class="sag">−20.000,00</td><td>Ayten YAZ</td></tr>
+            <tr><td><input type="checkbox"></td><td>19:24</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021481</td>
+              <td class="sag">330,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>19:39</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021485</td>
+              <td class="sag">470,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>20:09</td><td>Banko 3</td>
+              <td>Nakit Tahsilat <span class="sonuk">(21)</span></td><td>Giriş</td><td>Nakit</td><td>P-021478</td>
+              <td class="sag">300,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>20:22</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021492</td>
+              <td class="sag">440,00</td><td>Seda AYDIN</td></tr>
+            <tr><td><input type="checkbox"></td><td>20:51</td><td>Banko 3</td>
+              <td>Kredi Kartı / POS Tahsilat <span class="sonuk">(25)</span></td><td>Giriş</td><td>POS T-03</td><td>P-021493</td>
+              <td class="sag">400,00</td><td>Seda AYDIN</td></tr>
+            <tr class="toplam"><td></td><td colspan="6">Nakit net (tahsilat − ödeme) 19.640,00 · POS 33.520,00 · Havale/EFT 5.950,00
+              · kasalar arası virman 0,00 · bankaya −20.000,00</td><td class="sag">39.110,00</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: FARKLAR ============ -->
+  <div class="pnl" data-s="fk" hidden>
+    <div class="engel"><b>Gün kapatılamaz — 3 engel:</b>
+      <ul>
+        <li>Banko 3 oturumu açık (akşam vardiyası) — kapanış sayımı ve onayı gerekli.</li>
+        <li>T-03 (Yapı Kredi) gün sonu batch raporu girilmedi.</li>
+        <li>3 farkın açıklaması yok — açıklamasız fark varken gün kapanmaz.</li>
+      </ul>
+      <span class="sonuk">Banka ekstresi farkı (İş Bankası +800,00) engel değildir: tahsilat girilince kendiliğinden kapanır.</span>
+    </div>
+    <div class="grp">
+      <h4>Farklar ve Açıklamalar <span class="mini">neden + açıklama zorunlu · kasa farkı ayrı fişle muhasebeleşir (kasa sayımla eşitlenir)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kalem</th><th class="sag">Fark</th><th>Sorumlu</th>
+            <th style="width:150px">Neden</th><th>Açıklama</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Kasa · Banko 2</b></td><td class="sag">−50,00</td><td>Murat TUNÇ</td>
+              <td>1 · para üstü hatası</td><td><input class="acik" value="Öğleden sonra 50 ₺ fazla para üstü verildi; hasta aranıyor."></td><td><span class="rz ok">Açıklandı</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Kasa · Diş Banko</b></td><td class="sag">+20,00</td><td>Derya KOÇ</td>
+              <td><span class="sonuk">— seçiniz ▾</span></td><td><input class="acik" placeholder="Açıklama zorunlu…"></td><td><span class="rz kir">Açıklama bekliyor</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>POS · T-02 (İş Bankası) · 14:32</b></td><td class="sag">+250,00</td><td>Murat TUNÇ</td>
+              <td><span class="sonuk">— seçiniz ▾</span></td><td><input class="acik" placeholder="Açıklama zorunlu…"></td><td><span class="rz kir">Açıklama bekliyor</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>POS · T-04 / P-021461</b></td><td class="sag">−1.200,00</td><td>Derya KOÇ</td>
+              <td><span class="sonuk">— seçiniz ▾</span></td><td><input class="acik" placeholder="Açıklama zorunlu…"></td><td><span class="rz kir">Açıklama bekliyor</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>POS · T-04 / P-021455</b></td><td class="sag">−120,00</td><td>Derya KOÇ</td>
+              <td>tutar hatası</td><td><input class="acik" value="Makbuz 1.320 yazıldı, POS 1.200 çekildi; 120 ₺ nakit alındı, makbuz düzeltilecek."></td><td><span class="rz ok">Açıklandı</span></td></tr>
+            <tr class="toplam"><td></td><td>5 fark · kasa −30,00 · POS −1.070,00</td>
+              <td class="sag">−1.100,00</td><td colspan="4" class="sonuk">3 açıklama bekliyor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: ONIZLEME ============ -->
+  <div class="pnl" data-s="onz" hidden>
+    <div class="onz">
+      <div class="a4">
+        <div class="taslak">TASLAK · GÜN AÇIK</div>
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: GS-2026-10-09<br>Düzenleme: 09.10.2026 18:45<br>Düzenleyen: Ayten YAZ</div>
+        </div>
+        <h1>GÜN SONU KASA RAPORU</h1>
+        <div class="bilgi">
+          <div>Tarih: <b>09.10.2026 Cuma</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Gün durumu: <b>Açık (taslak)</b></div><div>Kasa 5 · POS 4 · Banka 2</div>
+        </div>
+        <table>
+          <thead><tr><th>Kasa</th><th>Açılış</th><th>Giriş</th><th>Çıkış</th><th>Transfer</th><th>Beklenen</th><th>Sayılan</th><th>Fark</th></tr></thead>
+          <tbody>
+            <tr><td>Ana Kasa</td><td class="sag">12.400,00</td><td class="sag">1.200,00</td><td class="sag">2.350,00</td>
+              <td class="sag">−1.260,00</td><td class="sag">9.990,00</td>
+              <td class="sag">9.990,00</td><td class="sag">0,00</td></tr>
+            <tr><td>Banko 1</td><td class="sag">500,00</td><td class="sag">8.640,00</td><td class="sag">260,00</td>
+              <td class="sag">−8.380,00</td><td class="sag">500,00</td>
+              <td class="sag">500,00</td><td class="sag">0,00</td></tr>
+            <tr><td>Banko 2</td><td class="sag">500,00</td><td class="sag">5.980,00</td><td class="sag">0,00</td>
+              <td class="sag">−5.930,00</td><td class="sag">550,00</td>
+              <td class="sag">500,00</td><td class="sag">−50,00</td></tr>
+            <tr><td>Banko 3</td><td class="sag">500,00</td><td class="sag">2.140,00</td><td class="sag">120,00</td>
+              <td class="sag">0,00</td><td class="sag">2.520,00</td>
+              <td class="sag">açık</td><td class="sag">—</td></tr>
+            <tr><td>Diş Banko</td><td class="sag">500,00</td><td class="sag">4.410,00</td><td class="sag">0,00</td>
+              <td class="sag">−4.430,00</td><td class="sag">480,00</td>
+              <td class="sag">500,00</td><td class="sag">20,00</td></tr>
+            <tr><td><b>Toplam</b></td><td class="sag">14.400,00</td><td class="sag">22.370,00</td><td class="sag">2.730,00</td>
+              <td class="sag">−20.000,00</td><td class="sag">14.040,00</td><td class="sag">11.490,00</td><td class="sag">−30,00</td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>POS Terminal</th><th>Sistem</th><th>POS (Batch)</th><th>Fark</th></tr></thead>
+          <tbody>
+            <tr><td>T-01 · 10234567 · Garanti BBVA</td><td class="sag">11.860,00</td>
+              <td class="sag">11.860,00</td><td class="sag">0,00</td></tr>
+            <tr><td>T-02 · 20456789 · İş Bankası</td><td class="sag">8.420,00</td>
+              <td class="sag">8.670,00</td><td class="sag">250,00</td></tr>
+            <tr><td>T-03 · 30987654 · Yapı Kredi</td><td class="sag">3.940,00</td>
+              <td class="sag">bekleniyor</td><td class="sag">—</td></tr>
+            <tr><td>T-04 · 40112233 · Akbank</td><td class="sag">9.300,00</td>
+              <td class="sag">7.980,00</td><td class="sag">−1.320,00</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Devir (açılış)</span><span>14.400,00 ₺</span></div>
+          <div><span>+ Nakit giriş</span><span>22.370,00 ₺</span></div>
+          <div><span>− Nakit çıkış</span><span>2.730,00 ₺</span></div>
+          <div><span>− Bankaya yatırılan</span><span>20.000,00 ₺</span></div>
+          <div><span>= Beklenen kasa bakiyesi</span><span>14.040,00 ₺</span></div>
+          <div><span>Sayım farkı</span><span>−30,00 ₺</span></div>
+          <div class="b"><span>ERTESİ GÜN DEVRİ</span><span>14.010,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">POS 33.520,00 ₺ (61 çekim, batch farkı −1.070,00) · Havale/EFT 5.950,00 ₺
+          (5 işlem, ekstre farkı +800,00). Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Kasa Sorumlusu<br>Ad Soyad · İmza</div><div>Mali İşler<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · GS-2026-10-09 · gün kapatılınca "TASLAK" kalkar ve rapor kilitlenir</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>hesap (tür K kasa · B banka · P POS)</code><code>kasa_islem</code><code>kasa_islem_turu (21 · 22 · 25 · 31 · 40 · 41 · 44)</code>
+    <code>banko</code><code>banko_oturum</code><code>banko_oturum_kupur</code><code>banko_pos</code><code>banko_oturum_pos</code><code>v_hesap_ekstre</code>
+    <code>yeni: kasa_gun_kapanis</code><code>yeni: pos_batch / pos_batch_satir</code><code>yeni: banka_ekstre_satir</code>
+    <span class="sonuk">· hesap sunucuda</span>
+  </div>
+
+  <div class="statusbar">
+    <span>09.10.2026 · Merkez · gün açık</span><span>·</span>
+    <span>Beklenen kasa 14.040,00 ₺ · fark −30,00</span><span>·</span>
+    <span>POS 33.520,00 ₺ · fark −1.070,00</span><span>·</span>
+    <span>Ertesi gün devri 14.010,00 ₺</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> şubenin bir günündeki <b>bütün</b> para hesaplarını — Ana Kasa, banko kasaları, POS terminalleri, banka hesapları —
+  tek yerde mutabık eder ve günü kilitler. Vezne İcmali bir alt düzeydir (banko oturumları, görevli, vardiya, teslim); bu ekran onun
+  üstünde Ana Kasa, banka ekstresi ve POS batch'ini de kapsar.
+  <ul>
+    <li><b>Giriş:</b> Finans › Kasa / Gün Sonu; Vezne İcmali'nden "Gün Sonu Mutabakatı"; ana sayfada "dün kapatılmadı" uyarısından.</li>
+    <li><b>Beklenen</b> = devir + nakit giriş − nakit çıkış − bankaya yatırılan (kasa başına + transfer; kasalar arası virman toplamda
+      sıfırlanır). İptal hareketler (kasa_islem.durum 3) hariç.</li>
+    <li><b>Sayılan</b> bankolarda oturum kapanışından gelir (banko_oturum.kapanis_sayim − teslim_edilen = kasada bırakılan); Ana Kasa
+      sayımı bu ekranda girilir. Açık oturumun sayımı yoktur, farkı toplama girmez.</li>
+    <li><b>POS mutabakatı</b> = sistemdeki POS tahsilatları (tür 25) ↔ terminalin gün sonu batch toplamı; eşleşmeyen işlemler terminal +
+      saat + tutar ile bulunur.</li>
+    <li><b>Günü Kapat</b> engelleri: açık banko oturumu, batch'i girilmemiş terminal, açıklamasız fark. Kapalı güne geriye dönük kasa
+      hareketi yazılamaz; günü yalnız yetkili açar, açma gerekçesiyle loglanır.</li>
+    <li><b>Şemada VAR:</b> hesap (K/B/P), kasa_islem + kasa_islem_turu (yön türden gelir — kasa_islem'de yon kolonu yok; durum 3 iptal),
+      banko_oturum (devir, kapanış sayım / beklenen / fark, fark_neden, teslim_edilen, kasada_birakilan), banko_oturum_kupur,
+      banko_pos, banko_oturum_pos (cihaz_toplam ↔ sistem_toplam — yalnız oturum toplamı), v_hesap_ekstre, mali_donem (ay düzeyi).</li>
+    <li><b>YENİ gerekir:</b> <code>kasa_gun_kapanis</code> (şube + tarih kilidi, kapatan, zaman, açma gerekçesi) ve kasa_islem yazımında
+      kilit kontrolü · <code>pos_batch / pos_batch_satir</code> (işlem düzeyinde batch — içe aktarma ya da elle) ·
+      <code>banka_ekstre_satir</code> (ekstre içe aktarma + eşleme) · Ana Kasa sayım kaydı (banko dışı kasa) · POS / banka farkı için
+      neden + açıklama.</li>
+    <li><b>Hasta TC'si gösterilmez</b>; hareketler Protokol No ile, A4'te hasta bilgisi yok. Listeler soldaki onay kutusuyla seçilir;
+      <b>A4 önizleme ayrı sekmededir</b>.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Basvuru satiri ac/kapa: hizmet detayini gosterir
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+</script>
+
+</body>
+</html>
