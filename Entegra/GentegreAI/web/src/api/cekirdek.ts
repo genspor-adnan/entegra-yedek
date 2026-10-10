@@ -177,6 +177,12 @@ export async function dosyaYukle<T>(yol: string, form: FormData): Promise<T> {
   return yanit.json() as Promise<T>;
 }
 
+/** JSON gövdeli POST, yanıt DOSYA (Blob) - sunucuda üretilen çıktı (or. .xlsx). */
+export async function gonderDosya(yol: string, govde: unknown): Promise<Blob> {
+  const yanit = await ham(yol, { method: 'POST', body: JSON.stringify(govde) }, true);
+  return yanit.blob();
+}
+
 /** İçerik indirme - blob URL doner, <img>/indirme icin (Authorization header ile, token URL'e sizmaz). */
 export async function dosyaIndir(yol: string): Promise<string> {
   const yanit = await ham(yol, {}, false);

@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { IskontoIcmali } from '../../api/uclar/iskontoIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -23,7 +24,7 @@ import { KAYNAKLAR, oranMetni } from './iskontoIcmalOrtak';
  * verene / gerekçeye göre; eşik üstü talepsiz iskonto uyarısı; A4.
  * Rakamlar SUNUCUDAN (IskontoIcmalUclari).
  */
-type Sekme = 'isk' | 'onaylayan' | 'veren' | 'gerekce' | 'ucretsiz' | 'red' | 'onizleme';
+type Sekme = 'isk' | 'onaylayan' | 'veren' | 'gerekce' | 'ucretsiz' | 'red';
 
 export function IskontoIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -62,8 +63,7 @@ export function IskontoIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['isk', 'İskontolar', veri.basvurular.length], ['onaylayan', 'Onaylayana Göre', veri.onaylayanaGore.length],
     ['veren', 'Verene Göre', veri.verenGore.length], ['gerekce', 'Gerekçeye Göre', veri.gerekceGore.length],
-    ['ucretsiz', 'Ücretsiz Hizmetler', veri.ucretsizler.length], ['red', 'Reddedilen Talepler', veri.redler.length],
-    ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['ucretsiz', 'Ücretsiz Hizmetler', veri.ucretsizler.length], ['red', 'Reddedilen Talepler', veri.redler.length]] : [];
 
   return (
     <div className="hi">
@@ -76,7 +76,11 @@ export function IskontoIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 İskonto İcmali)</button>
+        {/* ÇIKTI MENÜSÜ (test, 10.10.2026): Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ -
+              A4 belgesi menünün içinde yaşar, ayrı "Önizleme" sekmesi yok. */}
+        <CiktiMenusu etiket="İskonto İcmali" dosyaAdi={`İskonto İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <IskontoIcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} />}
+        </CiktiMenusu>
         {secili.length > 0 && <span className="ki-soluk">A4 yalnız seçili {secili.length} başvuruyu basar</span>}
         <span className="sp" />
         <button onClick={() => git('/iskonto-onay')}>✅ İskonto Onayı</button>
@@ -130,9 +134,6 @@ export function IskontoIcmal() {
             {sekme === 'gerekce' && <GrupTablosu baslik="Gerekçe" gruplar={veri.gerekceGore} bos="Bu dönemde iskonto yok." />}
             {sekme === 'ucretsiz' && <UcretsizTablosu v={veri} />}
             {sekme === 'red' && <RedTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <IskontoIcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} />
-            </div>
           </div>
         </div>
       </>)}
