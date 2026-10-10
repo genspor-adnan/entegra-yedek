@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sterilizasyon İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+  tr.sec td{background:#e8f0fb}
+  .dg.uzun{max-height:430px;overflow-y:auto}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media (max-width:900px){.ikili{grid-template-columns:1fr}}
+  .kural{margin:12px;padding:8px 12px;font-size:12px;border:1px solid var(--line2);border-radius:4px;background:#fff}
+  .isi td.h{text-align:center;font-size:10.5px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🧼 Sterilizasyon İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Sterilizasyon · Merkez · 10.10.2026 · Nurcan TEKİN (Sterilizasyon Sorumlusu)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Sterilizasyon İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🔁</span> Döngüler</div>
+    <div class="btn"><span>📦</span> Paket İzleme</div>
+    <div class="btn"><span>🚨</span> Geri Çağırmalar</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏥 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">⚙ Cihaz: <b>Tümü</b> ▾ <span class="sonuk">OTK-1 · OTK-2 · YD-1 · US-1</span></div>
+    <div class="sel">🧰 Set: <b>Tümü</b> ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">7 indikatör başarısız</span>
+    <span class="rz sari">1 geri çağırma (kapandı)</span>
+    <span class="rz sari">3 paket karantinada</span>
+    <span class="rz kir">OTK-2 validasyonu doldu (05.10.2025)</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Sterilizasyon Döngüsü</div><div class="deg">290</div>
+      <div class="alt">284 serbest · 52 test · 284 yıkama döngüsü</div></div>
+    <div class="kutu "><div class="bas">Cihaz Doluluğu</div><div class="deg">%75,4</div>
+      <div class="alt">3.847 birim / 5.102 kapasite (yük)</div></div>
+    <div class="kutu mor"><div class="bas">Üretilen Paket</div><div class="deg">1.832</div>
+      <div class="alt">12 set türü · 140 birim</div></div>
+    <div class="kutu iyi"><div class="bas">Kullanılan Paket</div><div class="deg">1.471</div>
+      <div class="alt">5 bölüm · 327 steril depoda</div></div>
+    <div class="kutu teh"><div class="bas">İndikatör Başarısız</div><div class="deg">7</div>
+      <div class="alt">439 okuma · Sınıf 5 entegratör 5 · Bowie-Dick 1 · Biyolojik 1</div></div>
+    <div class="kutu uy"><div class="bas">Karantina / Geri Çağırma</div><div class="deg">3 / 37</div>
+      <div class="alt">BI bekleyen · geri çağrılan paket (36 kullanılmış)</div></div>
+    <div class="kutu uy"><div class="bas">Süresi Dolan Paket</div><div class="deg">16</div>
+      <div class="alt">önceki dönem stoku · yeniden işlendi</div></div>
+    <div class="kutu teh"><div class="bas">Eşiğe Yakın Birim</div><div class="deg">7</div>
+      <div class="alt">ömür çevrimi eşiğin %90'ı üstünde</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ch">Cihazlar <span class="rz">4</span></div>
+    <div class="sekme" data-s="st">Setler <span class="rz">12</span></div>
+    <div class="sekme" data-s="in">İndikatörler <span class="rz kir">7</span></div>
+    <div class="sekme" data-s="kr">Karantina / Geri Çağırma <span class="rz sari">56</span></div>
+    <div class="sekme" data-s="bl">Bölümler <span class="rz">5</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <div class="pnl" data-s="ch">
+    <div class="grp">
+      <h4>Cihazlar <span class="mini">satıra tıkla: program dağılımı · tık tek, Ctrl / Shift çoklu · seçilenler A4'ü süzer</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Cihaz</th><th>Tür</th><th class="sag">Döngü</th><th class="sag">Serbest</th>
+          <th class="sag">Karantina</th><th class="sag">Başarısız / İptal</th><th class="sag">Test</th><th class="sag">Yüklenen</th>
+          <th class="sag">Kapasite</th><th>Doluluk</th><th class="sag">Ort. Süre</th><th>Validasyon</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="c0"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>OTK-1</b> Tuttnauer 5075 ELV</td><td>Buharlı otoklav</td>
+            <td class="sag">122</td><td class="sag">120</td><td class="sag">—</td>
+            <td class="sag">2</td><td class="sag">26</td><td class="sag">1083</td><td class="sag">1464</td>
+            <td><div class="cubuk"><i style="width:74%"></i></div> <span class="rz ok">%74,0</span></td><td class="sag">57 dk</td><td><span class="rz ok">12.03.2026</span></td></tr>
+          <tr class="det" data-p="c0" hidden><td></td><td colspan="12">Programlar: 134 °C · 4 dk standart 86 &nbsp;·&nbsp; 121 °C · 20 dk tekstil 22 &nbsp;·&nbsp; 134 °C · 18 dk prion 14 &nbsp;|&nbsp; son bakım 22.08.2026</td></tr>
+          <tr class="ac" data-d="c1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>OTK-2</b> Melag Vacuklav 41B+ (Diş)</td><td>Buharlı otoklav</td>
+            <td class="sag">168</td><td class="sag">164</td><td class="sag">1</td>
+            <td class="sag">3</td><td class="sag">26</td><td class="sag">749</td><td class="sag">1008</td>
+            <td><div class="cubuk"><i style="width:74%"></i></div> <span class="rz ok">%74,3</span></td><td class="sag">56 dk</td><td><span class="rz kir">05.10.2025</span></td></tr>
+          <tr class="det" data-p="c1" hidden><td></td><td colspan="12">Programlar: 134 °C · 5,5 dk B sınıfı 146 &nbsp;·&nbsp; 121 °C · 20,5 dk 22 &nbsp;|&nbsp; son bakım 18.07.2026</td></tr>
+          <tr class="ac" data-d="c2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>YD-1</b> Miele PG 8536 yıkayıcı-dezenfektör</td><td>Yıkayıcı-dezenfektör</td>
+            <td class="sag">179</td><td class="sag">178</td><td class="sag">—</td>
+            <td class="sag">1</td><td class="sag">—</td><td class="sag">1398</td><td class="sag">1790</td>
+            <td><div class="cubuk"><i style="width:78%"></i></div> <span class="rz ok">%78,1</span></td><td class="sag">63 dk</td><td><span class="rz ok">02.02.2026</span></td></tr>
+          <tr class="det" data-p="c2" hidden><td></td><td colspan="12">Programlar: Vario TD (A0 3000) 136 &nbsp;·&nbsp; Anestezi / solunum 43 &nbsp;|&nbsp; son bakım 30.08.2026</td></tr>
+          <tr class="ac" data-d="c3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>US-1</b> Elma TI-H-20 ultrasonik</td><td>Ultrasonik yıkayıcı</td>
+            <td class="sag">105</td><td class="sag">104</td><td class="sag">—</td>
+            <td class="sag">1</td><td class="sag">—</td><td class="sag">617</td><td class="sag">840</td>
+            <td><div class="cubuk"><i style="width:73%"></i></div> <span class="rz ok">%73,5</span></td><td class="sag">12 dk</td><td><span class="rz pas">—</span></td></tr>
+          <tr class="det" data-p="c3" hidden><td></td><td colspan="12">Programlar: Ön yıkama 10 dk 105 &nbsp;|&nbsp; son bakım 11.06.2026</td></tr>
+          <tr class="toplam"><td></td><td>Toplam · 4 cihaz</td><td></td><td class="sag">574</td><td class="sag">566</td>
+            <td class="sag">1</td><td class="sag">7</td><td class="sag">52</td>
+            <td class="sag">3.847</td><td class="sag">5.102</td><td>%75,4</td><td></td><td></td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="kural"><b>Kural:</b> Döngü = cihazın çalıştırdığı yük (günlük Bowie-Dick / vakum testi ayrı sayılır). Doluluk = yüklenen birim /
+      (cihaz kapasitesi × döngü). Başarısız döngünün paketleri iptal edilir ve yeniden işlenir. Validasyonu bir yılı geçen cihaz kırmızıdır.</div>
+  </div>
+
+  <div class="pnl" data-s="st" hidden>
+    <div class="grp">
+      <h4>Setler <span class="mini">çevrim = dönemde üretilen paket · ömür = birimin bugüne kadarki toplam çevrimi · eşik = üretici / kurum sınırı</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kod</th><th>Set</th><th class="sag">Birim</th><th>Paket</th>
+          <th class="sag">Dönem Çevrimi</th><th class="sag">Birim Başı</th><th class="sag">Kullanılan</th><th class="sag">Ömür Ort. / Eşik</th>
+          <th>Eşiğe Yakın</th><th class="sag">Steril Depoda / Min.</th></tr></thead>
+        <tbody>
+          <tr class="ac"><td><input type="checkbox"></td><td>DIS-MUA</td><td><b>Diş muayene seti</b> </td>
+            <td class="sag">40</td><td>Kağıt-plastik</td><td class="sag">374</td><td class="sag">9.3</td><td class="sag">292</td>
+            <td class="sag">258 / 500</td><td><span class="rz kir">2 birim</span></td>
+            <td class="sag">73 / 20 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>DIS-ENDO</td><td><b>Endodonti seti</b> </td>
+            <td class="sag">12</td><td>Kağıt-plastik</td><td class="sag">96</td><td class="sag">8.0</td><td class="sag">66</td>
+            <td class="sag">150 / 300</td><td>—</td>
+            <td class="sag">27 / 5 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>DIS-ANG</td><td><b>Anguldurva (döner alet)</b> </td>
+            <td class="sag">15</td><td>Kağıt-plastik</td><td class="sag">127</td><td class="sag">8.5</td><td class="sag">108</td>
+            <td class="sag">533 / 1000</td><td><span class="rz kir">1 birim</span></td>
+            <td class="sag">18 / 6 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>DIS-TUR</td><td><b>Turbin (döner alet)</b> </td>
+            <td class="sag">12</td><td>Kağıt-plastik</td><td class="sag">115</td><td class="sag">9.6</td><td class="sag">102</td>
+            <td class="sag">519 / 1000</td><td>—</td>
+            <td class="sag">12 / 5 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>DIS-IMP</td><td><b>İmplant cerrahi seti</b> <span class="rz mor">implant</span></td>
+            <td class="sag">4</td><td>Konteyner</td><td class="sag">37</td><td class="sag">9.2</td><td class="sag">28</td>
+            <td class="sag">129 / 250</td><td>—</td>
+            <td class="sag">7 / 2 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>CER-K</td><td><b>Küçük cerrahi seti</b> </td>
+            <td class="sag">8</td><td>Tekstil çift kat</td><td class="sag">141</td><td class="sag">17.6</td><td class="sag">116</td>
+            <td class="sag">219 / 400</td><td>—</td>
+            <td class="sag">24 / 4 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>DOG</td><td><b>Doğum seti</b> </td>
+            <td class="sag">6</td><td>Tekstil çift kat</td><td class="sag">121</td><td class="sag">20.2</td><td class="sag">102</td>
+            <td class="sag">249 / 400</td><td><span class="rz kir">1 birim</span></td>
+            <td class="sag">19 / 3 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>KUR</td><td><b>Kürtaj seti</b> </td>
+            <td class="sag">4</td><td>Kağıt-plastik çift kat</td><td class="sag">82</td><td class="sag">20.5</td><td class="sag">66</td>
+            <td class="sag">250 / 400</td><td>—</td>
+            <td class="sag">14 / 2 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>PAN</td><td><b>Pansuman seti</b> </td>
+            <td class="sag">24</td><td>Kağıt-plastik</td><td class="sag">453</td><td class="sag">18.9</td><td class="sag">360</td>
+            <td class="sag">347 / 600</td><td><span class="rz kir">2 birim</span></td>
+            <td class="sag">84 / 10 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>LAP</td><td><b>Laparoskopi seti</b> </td>
+            <td class="sag">2</td><td>Konteyner</td><td class="sag">46</td><td class="sag">23.0</td><td class="sag">33</td>
+            <td class="sag">179 / 200</td><td><span class="rz kir">1 birim</span></td>
+            <td class="sag">12 / 1 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>ORT</td><td><b>Ortopedi temel set</b> <span class="rz mor">implant</span></td>
+            <td class="sag">3</td><td>Konteyner</td><td class="sag">56</td><td class="sag">18.7</td><td class="sag">49</td>
+            <td class="sag">171 / 300</td><td>—</td>
+            <td class="sag">6 / 1 </td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>KBB</td><td><b>KBB muayene seti</b> </td>
+            <td class="sag">10</td><td>Kağıt-plastik</td><td class="sag">184</td><td class="sag">18.4</td><td class="sag">149</td>
+            <td class="sag">308 / 500</td><td>—</td>
+            <td class="sag">31 / 4 </td></tr>
+          <tr class="toplam"><td></td><td colspan="2">Toplam · 12 set</td><td class="sag">140</td><td></td>
+            <td class="sag">1832</td><td class="sag">13.1</td><td class="sag">1471</td><td></td>
+            <td>7 birim</td><td class="sag">327</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="in" hidden>
+    <div class="grp">
+      <h4>İndikatörler <span class="mini">Bowie-Dick günlük · Sınıf 5 her yük · biyolojik haftalık + her implant yükü</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Tür</th><th class="sag">Okuma</th><th class="sag">Geçti</th><th class="sag">Kaldı</th><th class="sag">Bekliyor</th><th>Başarı</th></tr></thead>
+        <tbody>
+          <tr><td><b>Bowie-Dick</b></td><td class="sag">52</td><td class="sag">51</td><td class="sag"><span class="rz kir">1</span></td>
+            <td class="sag">—</td><td><div class="cubuk"><i style="width:98%"></i></div></td></tr>
+          <tr><td><b>Vakum (sızdırmazlık)</b></td><td class="sag">8</td><td class="sag">8</td><td class="sag">—</td>
+            <td class="sag">—</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+          <tr><td><b>Sınıf 5 entegratör</b></td><td class="sag">290</td><td class="sag">285</td><td class="sag"><span class="rz kir">5</span></td>
+            <td class="sag">—</td><td><div class="cubuk"><i style="width:98%"></i></div></td></tr>
+          <tr><td><b>Biyolojik</b></td><td class="sag">89</td><td class="sag">87</td><td class="sag"><span class="rz kir">1</span></td>
+            <td class="sag">1</td><td><div class="cubuk"><i style="width:98%"></i></div></td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">439</td><td class="sag">431</td><td class="sag">7</td>
+            <td class="sag">1</td><td>%98,2</td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="grp">
+      <h4>Başarısız İndikatörler <span class="mini">her biri döngüyü durdurur; biyolojik pozitif geri çağırma başlatır</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Tarih</th><th>Cihaz</th><th>Döngü</th><th>Tür</th><th>Lot</th><th>Sonuç</th><th>Aksiyon</th></tr></thead>
+        <tbody>
+          <tr class="ac"><td><input type="checkbox"></td><td>04.09.2026</td><td>OTK-2</td><td>#1084</td>
+            <td>Sınıf 5 entegratör</td><td>IN5-3671</td><td><span class="rz kir">kaldı</span></td><td>Plato sıcaklığı düşük (E-12) · 4 paket iptal, yeniden işlendi</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>14.09.2026</td><td>OTK-1</td><td>#1258</td>
+            <td>Bowie-Dick</td><td>BD-26153</td><td><span class="rz kir">kaldı</span></td><td>BD başarısız — cihaz durduruldu, servis 14.09 13:20 sonrası tekrar test geçti</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>16.09.2026</td><td>OTK-2</td><td>#1314</td>
+            <td>Biyolojik</td><td>BI-817</td><td><span class="rz kir">kaldı</span></td><td>Geri çağırma GC-2026-004 açıldı · cihaz kullanım dışı</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>22.09.2026</td><td>OTK-1</td><td>#1433</td>
+            <td>Sınıf 5 entegratör</td><td>IN5-1964</td><td><span class="rz kir">kaldı</span></td><td>Kapı contası kaçak (E-05) · 8 paket iptal, yeniden işlendi</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>25.09.2026</td><td>OTK-2</td><td>#1513</td>
+            <td>Sınıf 5 entegratör</td><td>IN5-2633</td><td><span class="rz kir">kaldı</span></td><td>Vakum hatası (E-21) · 5 paket iptal, yeniden işlendi</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>25.09.2026</td><td>OTK-2</td><td>#1519</td>
+            <td>Sınıf 5 entegratör</td><td>IN5-3457</td><td><span class="rz kir">kaldı</span></td><td>Plato sıcaklığı düşük (E-12) · 3 paket iptal, yeniden işlendi</td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>28.09.2026</td><td>OTK-1</td><td>#1549</td>
+            <td>Sınıf 5 entegratör</td><td>IN5-9750</td><td><span class="rz kir">kaldı</span></td><td>Plato sıcaklığı düşük (E-12) · 10 paket iptal, yeniden işlendi</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="kr" hidden>
+    <div class="grp">
+      <h4>Geri Çağırmalar <span class="mini">biyolojik pozitif: son negatif BI'den sonraki bütün yükler etkilenir</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>No</th><th>Cihaz</th><th>Tetik</th><th>Kapsam</th><th class="sag">Döngü</th><th class="sag">Paket</th>
+          <th class="sag">Kullanılmış</th><th class="sag">Hasta</th><th class="sag">Bloke (geri alınan)</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td>GC-2026-004</td><td>OTK-2</td><td>BI pozitif · 16.09.2026 döngü #1314</td>
+            <td>16.09 – 16.09.2026</td>
+            <td class="sag">9</td><td class="sag">37</td><td class="sag">36</td><td class="sag">36</td>
+            <td class="sag">1</td><td><span class="rz ok">kapandı · 24.09</span></td></tr>
+          <tr class="toplam"><td colspan="4">Toplam · 1 geri çağırma</td><td class="sag">9</td><td class="sag">37</td>
+            <td class="sag">36</td><td class="sag">36</td><td class="sag">1</td><td></td></tr>
+        </tbody></table></div>
+      <div class="kural">Kullanılmış 36 paketin hastaları Protokol No ile enfeksiyon kontrol komitesine bildirildi; kullanılmamış
+        1 paket depodan çekilip yeniden işlendi. Hasta listesi geri çağırma kaydındadır, bu icmalde gösterilmez.</div>
+    </div>
+    <div class="ikili">
+    <div class="grp">
+      <h4>Karantinadaki Paketler <span class="mini">implant yükü · biyolojik sonucu bekliyor</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Döngü</th><th>Cihaz</th><th>Set</th><th class="sag">Paket</th><th>BI Bitişi</th></tr></thead>
+        <tbody>
+          <tr class="ac"><td><input type="checkbox"></td><td>#1616</td><td>OTK-2</td><td>Anguldurva (döner alet)</td><td class="sag">1</td><td><span class="rz sari">01.10.2026 09:00</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>#1616</td><td>OTK-2</td><td>Diş muayene seti</td><td class="sag">1</td><td><span class="rz sari">01.10.2026 09:00</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>#1616</td><td>OTK-2</td><td>İmplant cerrahi seti</td><td class="sag">1</td><td><span class="rz sari">01.10.2026 09:00</span></td></tr>
+          <tr class="toplam"><td></td><td colspan="3">Toplam</td><td class="sag">3</td><td></td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="grp">
+      <h4>Süresi Dolan Paketler <span class="mini">son kullanma tarihi dönemde geçen · önceki dönem stoku</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Barkod</th><th>Set</th><th>Raf</th><th>SKT</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP37365358</td><td>Küçük cerrahi seti</td><td>A-2</td>
+            <td>05.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP53632474</td><td>Doğum seti</td><td>A-2</td>
+            <td>07.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP97096398</td><td>İmplant cerrahi seti</td><td>B-3</td>
+            <td>11.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP13794280</td><td>Doğum seti</td><td>A-1</td>
+            <td>12.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP81943815</td><td>Küçük cerrahi seti</td><td>B-1</td>
+            <td>13.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP37397880</td><td>Doğum seti</td><td>B-3</td>
+            <td>13.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP88105962</td><td>Endodonti seti</td><td>B-3</td>
+            <td>16.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP66600225</td><td>Endodonti seti</td><td>A-1</td>
+            <td>16.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP34268319</td><td>Küçük cerrahi seti</td><td>B-3</td>
+            <td>17.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP93623896</td><td>Küçük cerrahi seti</td><td>B-1</td>
+            <td>18.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP65962253</td><td>Diş muayene seti</td><td>D-2</td>
+            <td>21.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP37417700</td><td>Diş muayene seti</td><td>B-1</td>
+            <td>23.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP70597726</td><td>Ortopedi temel set</td><td>B-3</td>
+            <td>24.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP76890217</td><td>Laparoskopi seti</td><td>B-3</td>
+            <td>25.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP14500700</td><td>İmplant cerrahi seti</td><td>A-2</td>
+            <td>26.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="ac"><td><input type="checkbox"></td><td>SP43612264</td><td>Pansuman seti</td><td>A-2</td>
+            <td>26.09.2026</td><td><span class="rz pas">yeniden işlendi</span></td></tr>
+          <tr class="toplam"><td></td><td colspan="4">Toplam · süresi dolan</td><td>16</td></tr>
+        </tbody></table></div>
+    </div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="bl" hidden>
+    <div class="grp">
+      <h4>Bölümler <span class="mini">teslim edilen = bölümde hastaya okutulan paket · satıra tıkla: set kırılımı</span></h4>
+      <div class="dg"><table class="secli">
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Bölüm</th><th class="sag">Teslim / Kullanılan Paket</th><th class="sag">Set Çeşidi</th>
+          <th class="sag">İmplant Seti</th><th class="sag">Hasta</th><th class="sag">Ort. Depoda Bekleme</th><th>Pay</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="b0"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Diş Kliniği</b></td><td class="sag">596</td>
+            <td class="sag">5</td><td class="sag">28</td><td class="sag">595</td><td class="sag">4.5 gün</td>
+            <td><div class="cubuk"><i style="width:100%"></i></div> %40,5</td></tr>
+          <tr class="det" data-p="b0" hidden><td></td><td colspan="7">Diş muayene seti 292 &nbsp;·&nbsp; Anguldurva (döner alet) 108 &nbsp;·&nbsp; Turbin (döner alet) 102 &nbsp;·&nbsp; Endodonti seti 66 &nbsp;·&nbsp; İmplant cerrahi seti 28</td></tr>
+          <tr class="ac" data-d="b1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Ameliyathane</b></td><td class="sag">196</td>
+            <td class="sag">4</td><td class="sag">49</td><td class="sag">196</td><td class="sag">4.6 gün</td>
+            <td><div class="cubuk"><i style="width:33%"></i></div> %13,3</td></tr>
+          <tr class="det" data-p="b1" hidden><td></td><td colspan="7">Pansuman seti 58 &nbsp;·&nbsp; Küçük cerrahi seti 56 &nbsp;·&nbsp; Ortopedi temel set 49 &nbsp;·&nbsp; Laparoskopi seti 33</td></tr>
+          <tr class="ac" data-d="b2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Kadın Doğum</b></td><td class="sag">168</td>
+            <td class="sag">2</td><td class="sag">—</td><td class="sag">168</td><td class="sag">4.7 gün</td>
+            <td><div class="cubuk"><i style="width:28%"></i></div> %11,4</td></tr>
+          <tr class="det" data-p="b2" hidden><td></td><td colspan="7">Doğum seti 102 &nbsp;·&nbsp; Kürtaj seti 66</td></tr>
+          <tr class="ac" data-d="b3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Acil</b></td><td class="sag">230</td>
+            <td class="sag">2</td><td class="sag">—</td><td class="sag">230</td><td class="sag">4.9 gün</td>
+            <td><div class="cubuk"><i style="width:39%"></i></div> %15,6</td></tr>
+          <tr class="det" data-p="b3" hidden><td></td><td colspan="7">Pansuman seti 189 &nbsp;·&nbsp; Küçük cerrahi seti 41</td></tr>
+          <tr class="ac" data-d="b4"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Poliklinik</b></td><td class="sag">281</td>
+            <td class="sag">3</td><td class="sag">—</td><td class="sag">281</td><td class="sag">4.3 gün</td>
+            <td><div class="cubuk"><i style="width:47%"></i></div> %19,1</td></tr>
+          <tr class="det" data-p="b4" hidden><td></td><td colspan="7">KBB muayene seti 149 &nbsp;·&nbsp; Pansuman seti 113 &nbsp;·&nbsp; Küçük cerrahi seti 19</td></tr>
+          <tr class="toplam"><td></td><td>Toplam · 5 bölüm</td><td class="sag">1471</td><td class="sag">12</td>
+            <td class="sag">77</td><td class="sag">1469</td>
+            <td class="sag">4.6 gün</td><td></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="onz" hidden>
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: ST-2026-09<br>Düzenleme: 10.10.2026 11:05<br>Düzenleyen: Nurcan TEKİN</div>
+        </div>
+        <h1>STERİLİZASYON DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Döngü: 290 sterilizasyon · 284 yıkama</div><div>Paket: 1832 üretilen · 1471 kullanılan</div>
+        </div>
+        <table>
+          <thead><tr><th>Cihaz</th><th>Döngü</th><th>Serbest</th><th>Başarısız / İptal</th><th>Test</th><th>Doluluk</th></tr></thead>
+          <tbody>
+            <tr><td>OTK-1 Tuttnauer 5075 ELV</td><td class="sag">122</td><td class="sag">120</td>
+              <td class="sag">2</td><td class="sag">26</td><td class="sag">%74,0</td></tr>
+            <tr><td>OTK-2 Melag Vacuklav 41B+ (Diş)</td><td class="sag">168</td><td class="sag">164</td>
+              <td class="sag">3</td><td class="sag">26</td><td class="sag">%74,3</td></tr>
+            <tr><td>YD-1 Miele PG 8536 yıkayıcı-dezenfektör</td><td class="sag">179</td><td class="sag">178</td>
+              <td class="sag">1</td><td class="sag">0</td><td class="sag">%78,1</td></tr>
+            <tr><td>US-1 Elma TI-H-20 ultrasonik</td><td class="sag">105</td><td class="sag">104</td>
+              <td class="sag">1</td><td class="sag">0</td><td class="sag">%73,5</td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>Bölüm</th><th>Kullanılan Paket</th><th>Set Çeşidi</th><th>İmplant Seti</th></tr></thead>
+          <tbody>
+            <tr><td>Diş Kliniği</td><td class="sag">596</td><td class="sag">5</td><td class="sag">28</td></tr>
+            <tr><td>Ameliyathane</td><td class="sag">196</td><td class="sag">4</td><td class="sag">49</td></tr>
+            <tr><td>Kadın Doğum</td><td class="sag">168</td><td class="sag">2</td><td class="sag">0</td></tr>
+            <tr><td>Acil</td><td class="sag">230</td><td class="sag">2</td><td class="sag">0</td></tr>
+            <tr><td>Poliklinik</td><td class="sag">281</td><td class="sag">3</td><td class="sag">0</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>İndikatör okuması / başarısız</span><span>439 / 7</span></div>
+          <div><span>Geri çağrılan paket (kullanılmış)</span><span>37 (36)</span></div>
+          <div><span>Karantinada paket</span><span>3</span></div>
+          <div><span>Süresi dolan paket</span><span>16</span></div>
+          <div class="b"><span>CİHAZ DOLULUĞU</span><span>%75,4</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Eşiğe yakın birim: 7. OTK-2 yıllık validasyonu gecikmiştir. Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Sterilizasyon Sorumlusu · İmza</div><div>Onaylayan<br>Enfeksiyon Kontrol Komitesi · İmza</div></div>
+        <div class="dip">Gentegre AI · ST-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>steril_cihaz (kapasite)</code><code>steril_dongu</code><code>steril_program</code><code>steril_dongu_indikator</code>
+    <code>steril_set (dongu_esigi · raf_omru_ay · min_stok)</code><code>steril_birim (dongu_sayisi)</code><code>steril_paket (skt · durum)</code>
+    <code>steril_paket_kullanim (unite · belge_id)</code><code>steril_geri_cagirma</code><code>steril_bakim</code><code>steril_olay</code>
+    <code>yeni: steril_paket_kullanim bölüm (departman_id)</code>
+    <span class="sonuk">· hesap sunucuda</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span>
+    <span>290 sterilizasyon · 284 yıkama döngüsü</span><span>·</span>
+    <span>1832 paket · 1471 kullanıldı</span><span>·</span><span>7 indikatör başarısız</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> sterilizasyon ünitesinin dönemdeki iş hacmini (döngü, paket), cihaz verimini, indikatör güvenliğini, geri çağırma ve
+  karantinayı, set ömrünü ve bölümlere giden işi tek yerde toplar. Sterilizasyon panosu anlık durumu gösterir; bu ekran dönem özetidir.
+  <ul>
+    <li><b>Giriş:</b> Sterilizasyon › Sterilizasyon İcmali; panodan "Dönem İcmali"; Yönetim › İcmaller; Kalite (SKS) › Sterilizasyon göstergeleri.</li>
+    <li><b>Döngü</b> = steril_dongu (iptal ve test ayrı: durum 7 iptal, 8 test). Serbest = durum 4, karantina = 5, başarısız = 6.
+      Sterilizasyon döngüsü = paket üreten cihaz (otoklav); yıkama döngüsü = yıkayıcı-dezenfektör / ultrasonik.</li>
+    <li><b>Doluluk</b> = döngüdeki birim sayısı / (steril_cihaz.kapasite × döngü). Döngüdeki birim, o döngüye bağlı paket ya da yıkama
+      kaydıdır; <b>yıkama döngüsünde yük sayısı bugün tutulmuyor — yeni alan</b> (steril_dongu.yuk_adet).</li>
+    <li><b>İndikatör</b> = steril_dongu_indikator (tür 1 Bowie-Dick, 4 Sınıf 5, 6 biyolojik, 7 vakum; sonuç 1 geçti, 2 kaldı, 0/3 bekliyor).</li>
+    <li><b>Geri çağırma</b> = steril_geri_cagirma (etkilenen döngü / paket / kullanılan paket / hasta sayısı); kapsam son negatif BI'den sonraki
+      yüklerdir. Hastalar Protokol No ile geri çağırma kaydında izlenir; icmalde ve A4'te hasta bilgisi yoktur.</li>
+    <li><b>Set ömrü</b> = steril_birim.dongu_sayisi ↔ steril_set.dongu_esigi; eşiğin %90'ı üstü uyarı. Süresi dolan = steril_paket.skt
+      dönemde geçen (durum 6).</li>
+    <li><b>Bölüm</b> = steril_paket_kullanim.unite (serbest metin) — <b>bölüm kırılımı için departman bağı yeni gerekir</b>. Hasta sayısı =
+      farklı belge_id. Ort. depoda bekleme = paketleme → kullanım.</li>
+    <li>Hasta TC'si gösterilmez. Listeler soldaki onay kutusuyla seçilir (tık tek, Ctrl / Shift çoklu); <b>A4 önizleme ayrı sekmededir</b>.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Basvuru satiri ac/kapa: hizmet detayini gosterir
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+</script>
+<script>
+document.querySelectorAll('table.secli').forEach(function(t){
+  var son=null;
+  function satirlar(){return [].slice.call(t.querySelectorAll('tbody tr.ac'));}
+  function boya(){satirlar().forEach(function(r){var c=r.querySelector('input[type=checkbox]');
+    if(c) c.checked=r.classList.contains('sec');});}
+  t.querySelectorAll('tbody tr.ac').forEach(function(r){r.addEventListener('click',function(e){
+    var s=satirlar(), i=s.indexOf(r);
+    if(e.shiftKey && son!==null){var a=Math.min(son,i),b=Math.max(son,i);
+      if(!e.ctrlKey) s.forEach(function(x){x.classList.remove('sec');});
+      for(var k=a;k<=b;k++) s[k].classList.add('sec');}
+    else if(e.ctrlKey||e.metaKey){r.classList.toggle('sec');son=i;}
+    else{s.forEach(function(x){x.classList.remove('sec');});r.classList.add('sec');son=i;}
+    boya();});});
+  var hepsi=t.querySelector('thead input[type=checkbox]');
+  if(hepsi) hepsi.addEventListener('click',function(e){e.stopPropagation();
+    satirlar().forEach(function(x){x.classList.toggle('sec',hepsi.checked);});boya();});
+});
+</script>
+</body>
+</html>

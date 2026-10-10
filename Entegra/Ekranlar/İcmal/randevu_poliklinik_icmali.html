@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Randevu / Poliklinik İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+/* ek: secim, isi haritasi, uzun liste */
+.isi td.orta{font-variant-numeric:tabular-nums}
+.liste-not{padding:5px 10px;font-size:11px;color:#5b6b7d;background:#f9fbfd;border-top:1px solid #e3e9f0}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📅 Randevu / Poliklinik İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Poliklinik · Merkez · 10.10.2026 · Dr. Canan ŞEN (Başhekim Yrd.)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Poliklinik İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="btn"><span>📞</span> Seçilenleri Geri Arama Listesine Ekle</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📅</span> Randevular</div>
+    <div class="btn"><span>🗓</span> Çalışma Planı</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: poliklinik = randevu.bolum (departman); hekim = randevu.hekim_id; kanal = randevu.kaynak (kod_liste randevu.kaynak). -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🏥 Poliklinik: <b>Tümü</b> ▾</div>
+    <div class="sel">🩺 Hekim: <b>Tümü</b> ▾</div>
+    <div class="sel">📲 Kanal: <b>Tümü</b> ▾</div>
+    <div class="sel">🔖 Tip: <b>Tümü</b> ▾ <span class="sonuk">Muayene · Kontrol</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">gelmeme %11,5</span>
+    <span class="rz sari">159 randevu: hasta 3. kez gelmedi</span>
+  </div>
+
+  <!-- OZET: verilen = iptal edilmemis randevu; doluluk = verilen / plan slotu; bekleme = randevu saati -> muayene baslangici (yalniz gelenler) -->
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Verilen Randevu</div><div class="deg">5.196</div><div class="alt">5.684 kayıt · 488 iptal</div></div>
+    <div class="kutu iyi"><div class="bas">Gelen</div><div class="deg">4.601</div><div class="alt">%88,5 geldi</div></div>
+    <div class="kutu teh"><div class="bas">Gelmeyen</div><div class="deg">595</div><div class="alt">no-show %11,5</div></div>
+    <div class="kutu "><div class="bas">İptal</div><div class="deg">488</div><div class="alt">%8,6 kayıt iptal edildi</div></div>
+    <div class="kutu mor"><div class="bas">Slot Doluluğu</div><div class="deg">%78,5</div><div class="alt">5.196 / 6.620 slot · 1.424 boş</div></div>
+    <div class="kutu uy"><div class="bas">Ort. Bekleme</div><div class="deg">20 dk</div><div class="alt">randevu saati → muayene · 925 kişi 30+ dk</div></div>
+    <div class="kutu "><div class="bas">Randevusuz Muayene</div><div class="deg">530</div><div class="alt">toplam muayene 5.131</div></div>
+    <div class="kutu "><div class="bas">İlk / Kontrol</div><div class="deg">%62,7 / %37,3</div><div class="alt">2.884 ilk · 1.717 kontrol</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="pol">Poliklinikler <span class="rz">8</span></div>
+    <div class="sekme" data-s="hek">Hekimler <span class="rz">11</span></div>
+    <div class="sekme" data-s="kan">Kanallar <span class="rz">6</span></div>
+    <div class="sekme" data-s="zam">Gün / Saat</div>
+    <div class="sekme" data-s="gel">Gelmeyenler <span class="rz">595</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <div class="pnl" data-s="pol">
+    <div class="grp">
+      <h4>Poliklinikler <span class="mini">satıra tıkla: hekim kırılımı · onay kutusu: tık tek, Ctrl / Shift çoklu — seçim diğer sekmeleri ve A4'ü süzer</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Poliklinik</th><th class="orta">Hekim</th><th class="orta">Slot</th>
+            <th class="orta">Verilen</th><th>Doluluk</th><th class="orta">Gelen</th><th class="orta">Gelmeyen</th><th class="orta">No-show</th>
+            <th class="orta">İptal</th><th class="orta">Randevusuz</th><th class="orta">Ort. Bekleme</th><th class="orta">İlk / Kontrol</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-k="p0" data-d="p0"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Dahiliye</b></td>
+              <td class="orta">2</td><td class="orta">1.230</td><td class="orta">1.040</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:85%"></i></div> <span class="rz ok">%84,6 </span></td>
+              <td class="orta">956</td><td class="orta">84</td>
+              <td class="orta"><span class="rz ok">%8,1</span></td>
+              <td class="orta">101</td><td class="orta">97</td><td class="orta">22 dk</td>
+              <td class="orta">615 / 341</td></tr>
+            <tr class="det" data-p="p0" hidden><td></td><td>Uz.Dr. Kemal ARSLAN <span class="sonuk">20 gün · 2 izin</span></td><td></td>
+              <td class="orta">600</td><td class="orta">497</td><td>%82,8</td><td class="orta">464</td>
+              <td class="orta">33</td><td class="orta">%6,6</td><td class="orta">55</td><td class="orta">50</td>
+              <td class="orta">22 dk</td><td class="orta">297 / 167</td></tr>
+            <tr class="det" data-p="p0" hidden><td></td><td>Uz.Dr. Selin ÖZTÜRK <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">543</td><td>%86,2</td><td class="orta">492</td>
+              <td class="orta">51</td><td class="orta">%9,4</td><td class="orta">46</td><td class="orta">47</td>
+              <td class="orta">21 dk</td><td class="orta">318 / 174</td></tr>
+            <tr class="ac" data-k="p1" data-d="p1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Kardiyoloji</b></td>
+              <td class="orta">1</td><td class="orta">440</td><td class="orta">388</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:88%"></i></div> <span class="rz ok">%88,2 </span></td>
+              <td class="orta">362</td><td class="orta">26</td>
+              <td class="orta"><span class="rz ok">%6,7</span></td>
+              <td class="orta">30</td><td class="orta">46</td><td class="orta">18 dk</td>
+              <td class="orta">208 / 154</td></tr>
+            <tr class="det" data-p="p1" hidden><td></td><td>Uz.Dr. Hakan ER <span class="sonuk">20 gün · 2 izin</span></td><td></td>
+              <td class="orta">440</td><td class="orta">388</td><td>%88,2</td><td class="orta">362</td>
+              <td class="orta">26</td><td class="orta">%6,7</td><td class="orta">30</td><td class="orta">46</td>
+              <td class="orta">18 dk</td><td class="orta">208 / 154</td></tr>
+            <tr class="ac" data-k="p2" data-d="p2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Kadın Doğum</b></td>
+              <td class="orta">2</td><td class="orta">1.200</td><td class="orta">959</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:80%"></i></div> <span class="rz ok">%79,9 </span></td>
+              <td class="orta">870</td><td class="orta">89</td>
+              <td class="orta"><span class="rz ok">%9,3</span></td>
+              <td class="orta">93</td><td class="orta">92</td><td class="orta">25 dk</td>
+              <td class="orta">424 / 446</td></tr>
+            <tr class="det" data-p="p2" hidden><td></td><td>Op.Dr. Nur ÖZKAN <span class="sonuk">20 gün · 2 izin</span></td><td></td>
+              <td class="orta">600</td><td class="orta">483</td><td>%80,5</td><td class="orta">432</td>
+              <td class="orta">51</td><td class="orta">%10,6</td><td class="orta">49</td><td class="orta">52</td>
+              <td class="orta">25 dk</td><td class="orta">215 / 217</td></tr>
+            <tr class="det" data-p="p2" hidden><td></td><td>Op.Dr. Ayşe ÇELİK <span class="sonuk">20 gün · 2 izin</span></td><td></td>
+              <td class="orta">600</td><td class="orta">476</td><td>%79,3</td><td class="orta">438</td>
+              <td class="orta">38</td><td class="orta">%8,0</td><td class="orta">44</td><td class="orta">40</td>
+              <td class="orta">25 dk</td><td class="orta">209 / 229</td></tr>
+            <tr class="ac" data-k="p3" data-d="p3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Ortopedi</b></td>
+              <td class="orta">1</td><td class="orta">630</td><td class="orta">456</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:72%"></i></div> <span class="rz sari">%72,4 düşük</span></td>
+              <td class="orta">400</td><td class="orta">56</td>
+              <td class="orta"><span class="rz sari">%12,3</span></td>
+              <td class="orta">38</td><td class="orta">52</td><td class="orta">16 dk</td>
+              <td class="orta">244 / 156</td></tr>
+            <tr class="det" data-p="p3" hidden><td></td><td>Op.Dr. Derya KILIÇ <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">456</td><td>%72,4</td><td class="orta">400</td>
+              <td class="orta">56</td><td class="orta">%12,3</td><td class="orta">38</td><td class="orta">52</td>
+              <td class="orta">16 dk</td><td class="orta">244 / 156</td></tr>
+            <tr class="ac" data-k="p4" data-d="p4"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Çocuk</b></td>
+              <td class="orta">2</td><td class="orta">1.260</td><td class="orta">1.001</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:79%"></i></div> <span class="rz ok">%79,4 </span></td>
+              <td class="orta">852</td><td class="orta">149</td>
+              <td class="orta"><span class="rz sari">%14,9</span></td>
+              <td class="orta">104</td><td class="orta">91</td><td class="orta">23 dk</td>
+              <td class="orta">608 / 244</td></tr>
+            <tr class="det" data-p="p4" hidden><td></td><td>Uz.Dr. Zeynep AKSOY <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">494</td><td>%78,4</td><td class="orta">428</td>
+              <td class="orta">66</td><td class="orta">%13,4</td><td class="orta">52</td><td class="orta">41</td>
+              <td class="orta">23 dk</td><td class="orta">290 / 138</td></tr>
+            <tr class="det" data-p="p4" hidden><td></td><td>Uz.Dr. Burak TAN <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">507</td><td>%80,5</td><td class="orta">424</td>
+              <td class="orta">83</td><td class="orta">%16,4</td><td class="orta">52</td><td class="orta">50</td>
+              <td class="orta">23 dk</td><td class="orta">318 / 106</td></tr>
+            <tr class="ac" data-k="p5" data-d="p5"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Göz</b></td>
+              <td class="orta">1</td><td class="orta">630</td><td class="orta">423</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:67%"></i></div> <span class="rz sari">%67,1 düşük</span></td>
+              <td class="orta">376</td><td class="orta">47</td>
+              <td class="orta"><span class="rz sari">%11,1</span></td>
+              <td class="orta">36</td><td class="orta">49</td><td class="orta">17 dk</td>
+              <td class="orta">240 / 136</td></tr>
+            <tr class="det" data-p="p5" hidden><td></td><td>Op.Dr. Melis ŞAHİN <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">423</td><td>%67,1</td><td class="orta">376</td>
+              <td class="orta">47</td><td class="orta">%11,1</td><td class="orta">36</td><td class="orta">49</td>
+              <td class="orta">17 dk</td><td class="orta">240 / 136</td></tr>
+            <tr class="ac" data-k="p6" data-d="p6"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>KBB</b></td>
+              <td class="orta">1</td><td class="orta">630</td><td class="orta">403</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:64%"></i></div> <span class="rz sari">%64,0 düşük</span></td>
+              <td class="orta">352</td><td class="orta">51</td>
+              <td class="orta"><span class="rz sari">%12,7</span></td>
+              <td class="orta">35</td><td class="orta">57</td><td class="orta">18 dk</td>
+              <td class="orta">237 / 115</td></tr>
+            <tr class="det" data-p="p6" hidden><td></td><td>Op.Dr. Tolga AKIN <span class="sonuk">21 gün · 1 izin</span></td><td></td>
+              <td class="orta">630</td><td class="orta">403</td><td>%64,0</td><td class="orta">352</td>
+              <td class="orta">51</td><td class="orta">%12,7</td><td class="orta">35</td><td class="orta">57</td>
+              <td class="orta">18 dk</td><td class="orta">237 / 115</td></tr>
+            <tr class="ac" data-k="p7" data-d="p7"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Dermatoloji</b></td>
+              <td class="orta">1</td><td class="orta">600</td><td class="orta">526</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:88%"></i></div> <span class="rz ok">%87,7 </span></td>
+              <td class="orta">433</td><td class="orta">93</td>
+              <td class="orta"><span class="rz kir">%17,7</span></td>
+              <td class="orta">51</td><td class="orta">46</td><td class="orta">15 dk</td>
+              <td class="orta">308 / 125</td></tr>
+            <tr class="det" data-p="p7" hidden><td></td><td>Uz.Dr. Ece KOÇ <span class="sonuk">20 gün · 2 izin</span></td><td></td>
+              <td class="orta">600</td><td class="orta">526</td><td>%87,7</td><td class="orta">433</td>
+              <td class="orta">93</td><td class="orta">%17,7</td><td class="orta">51</td><td class="orta">46</td>
+              <td class="orta">15 dk</td><td class="orta">308 / 125</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 8 poliklinik</td><td class="orta">11</td><td class="orta">6.620</td>
+              <td class="orta">5.196</td><td>%78,5</td><td class="orta">4.601</td><td class="orta">595</td>
+              <td class="orta">%11,5</td><td class="orta">488</td><td class="orta">530</td><td class="orta">20 dk</td>
+              <td class="orta">2.884 / 1.717</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="hek">
+    <div class="grp">
+      <h4>Hekimler <span class="mini">slot = çalışma planı (randevu_bolum_ayar) × çalışılan gün · izin günü slot üretmez</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Hekim</th><th>Poliklinik</th><th class="orta">Gün</th><th class="orta">Slot</th>
+            <th class="orta">Dolu</th><th class="orta">Boş</th><th>Doluluk</th><th class="orta">No-show</th><th class="orta">Muayene</th>
+            <th class="orta">Gün Başı</th><th class="orta">Ort. Bekleme</th><th class="orta">30+ dk</th></tr></thead>
+          <tbody>
+            <tr data-k="Uz.Dr. Hakan ER"><td><input type="checkbox"></td><td><b>Uz.Dr. Hakan ER</b></td><td>Kardiyoloji</td><td class="orta">20</td><td class="orta">440</td>
+              <td class="orta">388</td><td class="orta">52</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:88%"></i></div> <span class="rz ok">%88,2</span></td>
+              <td class="orta">%6,7</td><td class="orta">408</td><td class="orta">20.4</td>
+              <td class="orta">18 dk</td><td class="orta kir">51</td></tr>
+            <tr data-k="Uz.Dr. Ece KOÇ"><td><input type="checkbox"></td><td><b>Uz.Dr. Ece KOÇ</b></td><td>Dermatoloji</td><td class="orta">20</td><td class="orta">600</td>
+              <td class="orta">526</td><td class="orta">74</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:88%"></i></div> <span class="rz ok">%87,7</span></td>
+              <td class="orta">%17,7</td><td class="orta">479</td><td class="orta">23.9</td>
+              <td class="orta">15 dk</td><td class="orta kir">40</td></tr>
+            <tr data-k="Uz.Dr. Selin ÖZTÜRK"><td><input type="checkbox"></td><td><b>Uz.Dr. Selin ÖZTÜRK</b></td><td>Dahiliye</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">543</td><td class="orta">87</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:86%"></i></div> <span class="rz ok">%86,2</span></td>
+              <td class="orta">%9,4</td><td class="orta">539</td><td class="orta">25.7</td>
+              <td class="orta">21 dk</td><td class="orta kir">106</td></tr>
+            <tr data-k="Uz.Dr. Kemal ARSLAN"><td><input type="checkbox"></td><td><b>Uz.Dr. Kemal ARSLAN</b></td><td>Dahiliye</td><td class="orta">20</td><td class="orta">600</td>
+              <td class="orta">497</td><td class="orta">103</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:83%"></i></div> <span class="rz ok">%82,8</span></td>
+              <td class="orta">%6,6</td><td class="orta">514</td><td class="orta">25.7</td>
+              <td class="orta">22 dk</td><td class="orta kir">106</td></tr>
+            <tr data-k="Op.Dr. Nur ÖZKAN"><td><input type="checkbox"></td><td><b>Op.Dr. Nur ÖZKAN</b></td><td>Kadın Doğum</td><td class="orta">20</td><td class="orta">600</td>
+              <td class="orta">483</td><td class="orta">117</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:80%"></i></div> <span class="rz ok">%80,5</span></td>
+              <td class="orta">%10,6</td><td class="orta">484</td><td class="orta">24.2</td>
+              <td class="orta">25 dk</td><td class="orta kir">136</td></tr>
+            <tr data-k="Uz.Dr. Burak TAN"><td><input type="checkbox"></td><td><b>Uz.Dr. Burak TAN</b></td><td>Çocuk</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">507</td><td class="orta">123</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:80%"></i></div> <span class="rz ok">%80,5</span></td>
+              <td class="orta">%16,4</td><td class="orta">474</td><td class="orta">22.6</td>
+              <td class="orta">23 dk</td><td class="orta kir">105</td></tr>
+            <tr data-k="Op.Dr. Ayşe ÇELİK"><td><input type="checkbox"></td><td><b>Op.Dr. Ayşe ÇELİK</b></td><td>Kadın Doğum</td><td class="orta">20</td><td class="orta">600</td>
+              <td class="orta">476</td><td class="orta">124</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:79%"></i></div> <span class="rz ok">%79,3</span></td>
+              <td class="orta">%8,0</td><td class="orta">478</td><td class="orta">23.9</td>
+              <td class="orta">25 dk</td><td class="orta kir">130</td></tr>
+            <tr data-k="Uz.Dr. Zeynep AKSOY"><td><input type="checkbox"></td><td><b>Uz.Dr. Zeynep AKSOY</b></td><td>Çocuk</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">494</td><td class="orta">136</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:78%"></i></div> <span class="rz ok">%78,4</span></td>
+              <td class="orta">%13,4</td><td class="orta">469</td><td class="orta">22.3</td>
+              <td class="orta">23 dk</td><td class="orta kir">105</td></tr>
+            <tr data-k="Op.Dr. Derya KILIÇ"><td><input type="checkbox"></td><td><b>Op.Dr. Derya KILIÇ</b></td><td>Ortopedi</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">456</td><td class="orta">174</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:72%"></i></div> <span class="rz sari">%72,4</span></td>
+              <td class="orta">%12,3</td><td class="orta">452</td><td class="orta">21.5</td>
+              <td class="orta">16 dk</td><td class="orta kir">48</td></tr>
+            <tr data-k="Op.Dr. Melis ŞAHİN"><td><input type="checkbox"></td><td><b>Op.Dr. Melis ŞAHİN</b></td><td>Göz</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">423</td><td class="orta">207</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:67%"></i></div> <span class="rz sari">%67,1</span></td>
+              <td class="orta">%11,1</td><td class="orta">425</td><td class="orta">20.2</td>
+              <td class="orta">17 dk</td><td class="orta kir">43</td></tr>
+            <tr data-k="Op.Dr. Tolga AKIN"><td><input type="checkbox"></td><td><b>Op.Dr. Tolga AKIN</b></td><td>KBB</td><td class="orta">21</td><td class="orta">630</td>
+              <td class="orta">403</td><td class="orta">227</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:64%"></i></div> <span class="rz sari">%64,0</span></td>
+              <td class="orta">%12,7</td><td class="orta">409</td><td class="orta">19.5</td>
+              <td class="orta">18 dk</td><td class="orta kir">55</td></tr>
+            <tr class="toplam"><td></td><td colspan="2">11 hekim</td><td class="orta">226</td><td class="orta">6.620</td>
+              <td class="orta">5.196</td><td class="orta">1.424</td><td>%78,5</td><td class="orta">%11,5</td>
+              <td class="orta">5.131</td><td class="orta">22.7</td><td class="orta">20 dk</td>
+              <td class="orta">925</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="kan">
+    <div class="grp">
+      <h4>Randevu Kanalları <span class="mini">randevu.kaynak · öne alma = randevunun verildiği gün → randevu günü</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Kanal</th><th class="orta">Kayıt</th><th>Pay</th><th class="orta">Verilen</th><th class="orta">Gelen</th><th class="orta">Gelmeyen</th>
+            <th class="orta">No-show</th><th class="orta">İptal</th><th class="orta">Ort. Öne Alma</th></tr></thead>
+          <tbody>
+            <tr><td><b>Telefon</b></td><td class="orta">1.551</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:27%"></i></div> %27,3</td><td class="orta">1.418</td>
+              <td class="orta">1.259</td><td class="orta">159</td>
+              <td class="orta"><span class="rz sari">%11,2</span></td>
+              <td class="orta">133</td><td class="orta">6.5 gün</td></tr>
+            <tr><td><b>Yerinde (banko)</b></td><td class="orta">1.088</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:19%"></i></div> %19,1</td><td class="orta">991</td>
+              <td class="orta">931</td><td class="orta">60</td>
+              <td class="orta"><span class="rz ok">%6,1</span></td>
+              <td class="orta">97</td><td class="orta">7.3 gün</td></tr>
+            <tr><td><b>Web / online</b></td><td class="orta">1.218</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:21%"></i></div> %21,4</td><td class="orta">1.132</td>
+              <td class="orta">951</td><td class="orta">181</td>
+              <td class="orta"><span class="rz kir">%16,0</span></td>
+              <td class="orta">86</td><td class="orta">6.4 gün</td></tr>
+            <tr><td><b>Çağrı Merkezi</b></td><td class="orta">948</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:17%"></i></div> %16,7</td><td class="orta">858</td>
+              <td class="orta">747</td><td class="orta">111</td>
+              <td class="orta"><span class="rz sari">%12,9</span></td>
+              <td class="orta">90</td><td class="orta">6.7 gün</td></tr>
+            <tr><td><b>Hekim Yönlendirmesi</b></td><td class="orta">518</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:9%"></i></div> %9,1</td><td class="orta">472</td>
+              <td class="orta">445</td><td class="orta">27</td>
+              <td class="orta"><span class="rz ok">%5,7</span></td>
+              <td class="orta">46</td><td class="orta">6.5 gün</td></tr>
+            <tr><td><b>MHRS</b></td><td class="orta">361</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:6%"></i></div> %6,4</td><td class="orta">325</td>
+              <td class="orta">268</td><td class="orta">57</td>
+              <td class="orta"><span class="rz kir">%17,5</span></td>
+              <td class="orta">36</td><td class="orta">6.8 gün</td></tr>
+            <tr class="toplam"><td>Toplam · 6 kanal</td><td class="orta">5.684</td><td></td><td class="orta">5.196</td>
+              <td class="orta">4.601</td><td class="orta">595</td><td class="orta">%11,5</td><td class="orta">488</td>
+              <td class="orta">6.7 gün</td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">Online ve MHRS randevularında gelmeme daha yüksek: hatırlatma SMS'i (randevudan 1 gün önce) bu kanallarda zorunlu tutulabilir.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="zam">
+    <div class="grp">
+      <h4>Gün × Saat Doluluğu <span class="mini">hücre: verilen randevu / o gün-saat diliminin toplam slotu · altında gelmeme oranı</span></h4>
+      <div class="dg">
+        <table class="isi">
+          <thead><tr><th>Saat dilimi</th><th class="orta">Pzt <span class="sonuk">(4 gün)</span></th><th class="orta">Sal <span class="sonuk">(5 gün)</span></th><th class="orta">Çar <span class="sonuk">(5 gün)</span></th><th class="orta">Per <span class="sonuk">(4 gün)</span></th><th class="orta">Cum <span class="sonuk">(4 gün)</span></th><th class="orta">Toplam</th></tr></thead>
+          <tbody>
+            <tr><td>08:30–09:30</td><td class="orta" style="background:#e7f4ea"><b>%76,5</b><br><span class="sonuk">123 · gelmeme %19,5</span></td><td class="orta" style="background:#e7f4ea"><b>%80,1</b><br><span class="sonuk">161 · gelmeme %9,3</span></td><td class="orta" style="background:#e7f4ea"><b>%81,1</b><br><span class="sonuk">163 · gelmeme %12,3</span></td><td class="orta" style="background:#fff6dd"><b>%65,3</b><br><span class="sonuk">105 · gelmeme %17,1</span></td><td class="orta" style="background:#e7f4ea"><b>%81,5</b><br><span class="sonuk">131 · gelmeme %10,7</span></td><td class="orta">683</td></tr>
+            <tr><td>09:30–10:30</td><td class="orta" style="background:#e7f4ea"><b>%79,0</b><br><span class="sonuk">127 · gelmeme %9,4</span></td><td class="orta" style="background:#e7f4ea"><b>%76,2</b><br><span class="sonuk">153 · gelmeme %16,3</span></td><td class="orta" style="background:#e7f4ea"><b>%83,1</b><br><span class="sonuk">167 · gelmeme %11,4</span></td><td class="orta" style="background:#e7f4ea"><b>%80,3</b><br><span class="sonuk">129 · gelmeme %7,8</span></td><td class="orta" style="background:#e7f4ea"><b>%79,6</b><br><span class="sonuk">128 · gelmeme %7,8</span></td><td class="orta">704</td></tr>
+            <tr><td>10:30–11:30</td><td class="orta" style="background:#e7f4ea"><b>%77,8</b><br><span class="sonuk">125 · gelmeme %16,8</span></td><td class="orta" style="background:#e7f4ea"><b>%82,1</b><br><span class="sonuk">165 · gelmeme %9,7</span></td><td class="orta" style="background:#e7f4ea"><b>%80,6</b><br><span class="sonuk">162 · gelmeme %12,3</span></td><td class="orta" style="background:#fff6dd"><b>%71,5</b><br><span class="sonuk">115 · gelmeme %9,6</span></td><td class="orta" style="background:#e7f4ea"><b>%85,2</b><br><span class="sonuk">137 · gelmeme %10,9</span></td><td class="orta">704</td></tr>
+            <tr><td>11:30–12:30</td><td class="orta" style="background:#e7f4ea"><b>%82,1</b><br><span class="sonuk">132 · gelmeme %12,1</span></td><td class="orta" style="background:#e7f4ea"><b>%80,6</b><br><span class="sonuk">162 · gelmeme %7,4</span></td><td class="orta" style="background:#e7f4ea"><b>%81,1</b><br><span class="sonuk">163 · gelmeme %10,4</span></td><td class="orta" style="background:#fff6dd"><b>%72,8</b><br><span class="sonuk">117 · gelmeme %8,5</span></td><td class="orta" style="background:#e7f4ea"><b>%80,9</b><br><span class="sonuk">130 · gelmeme %10,0</span></td><td class="orta">704</td></tr>
+            <tr><td>13:30–14:30</td><td class="orta" style="background:#e7f4ea"><b>%77,1</b><br><span class="sonuk">124 · gelmeme %15,3</span></td><td class="orta" style="background:#e7f4ea"><b>%76,2</b><br><span class="sonuk">153 · gelmeme %11,8</span></td><td class="orta" style="background:#e7f4ea"><b>%80,1</b><br><span class="sonuk">161 · gelmeme %12,4</span></td><td class="orta" style="background:#e7f4ea"><b>%75,9</b><br><span class="sonuk">122 · gelmeme %15,6</span></td><td class="orta" style="background:#e7f4ea"><b>%84,0</b><br><span class="sonuk">135 · gelmeme %8,9</span></td><td class="orta">695</td></tr>
+            <tr><td>14:30–15:30</td><td class="orta" style="background:#e7f4ea"><b>%81,5</b><br><span class="sonuk">131 · gelmeme %14,5</span></td><td class="orta" style="background:#fff6dd"><b>%71,2</b><br><span class="sonuk">143 · gelmeme %8,4</span></td><td class="orta" style="background:#fff6dd"><b>%74,7</b><br><span class="sonuk">150 · gelmeme %10,7</span></td><td class="orta" style="background:#e7f4ea"><b>%75,9</b><br><span class="sonuk">122 · gelmeme %12,3</span></td><td class="orta" style="background:#e7f4ea"><b>%86,5</b><br><span class="sonuk">139 · gelmeme %10,1</span></td><td class="orta">685</td></tr>
+            <tr><td>15:30–16:30</td><td class="orta" style="background:#fff6dd"><b>%69,7</b><br><span class="sonuk">112 · gelmeme %12,5</span></td><td class="orta" style="background:#e7f4ea"><b>%78,1</b><br><span class="sonuk">157 · gelmeme %10,8</span></td><td class="orta" style="background:#e7f4ea"><b>%79,6</b><br><span class="sonuk">160 · gelmeme %6,2</span></td><td class="orta" style="background:#e7f4ea"><b>%75,9</b><br><span class="sonuk">122 · gelmeme %13,1</span></td><td class="orta" style="background:#e7f4ea"><b>%79,6</b><br><span class="sonuk">128 · gelmeme %14,8</span></td><td class="orta">679</td></tr>
+            <tr><td>16:30–17:00</td><td class="orta" style="background:#e7f4ea"><b>%82,8</b><br><span class="sonuk">65 · gelmeme %7,7</span></td><td class="orta" style="background:#e7f4ea"><b>%81,5</b><br><span class="sonuk">80 · gelmeme %8,8</span></td><td class="orta" style="background:#e7f4ea"><b>%78,4</b><br><span class="sonuk">77 · gelmeme %10,4</span></td><td class="orta" style="background:#fff6dd"><b>%68,7</b><br><span class="sonuk">54 · gelmeme %14,8</span></td><td class="orta" style="background:#e7f4ea"><b>%84,0</b><br><span class="sonuk">66 · gelmeme %13,6</span></td><td class="orta">342</td></tr>
+            <tr class="toplam"><td>Toplam</td><td class="orta">939</td><td class="orta">1.174</td><td class="orta">1.203</td><td class="orta">886</td><td class="orta">994</td><td class="orta">5.196</td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">Hücre doluluğu yaklaşıktır: hekimin izin günü haftanın günlerine eşit dağıtılarak paydadan düşülür. Toplam satırı verilen randevu sayısıdır.</div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Bekleme Süresi Dağılımı <span class="mini">randevu saati → muayene başlangıcı (muayene.baslangic) · yalnız gelenler</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Bekleme</th><th class="orta">Hasta</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td>0–10 dk</td><td class="orta">1.373</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:30%"></i></div> %29,8</td></tr>
+            <tr><td>11–20 dk</td><td class="orta">1.387</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:30%"></i></div> %30,1</td></tr>
+            <tr><td>21–30 dk</td><td class="orta">916</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:20%"></i></div> %19,9</td></tr>
+            <tr><td>31–45 dk</td><td class="orta">596</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:13%"></i></div> %13,0</td></tr>
+            <tr><td>45 dk üstü</td><td class="orta">329</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:7%"></i></div> %7,2</td></tr>
+            <tr class="toplam"><td>Toplam · ort. 20 dk</td><td class="orta">4.601</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="gel">
+    <div class="grp">
+      <h4>Gelmeyen Randevular <span class="mini">sıra: daha önce de gelmeyen hasta önce · seçilenler çağrı merkezi geri arama listesine eklenir</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Randevu</th><th>Tarih / Saat</th><th>Hasta</th><th>Poliklinik</th><th>Hekim</th>
+            <th>Kanal</th><th>Tip</th><th class="orta">Önceki Gelmeme</th><th class="orta">Verilme</th></tr></thead>
+          <tbody>
+            <tr data-k="R-45112"><td><input type="checkbox"></td><td>R-45112</td><td>01.09.2026 09:30</td><td>Mehmet ŞİMŞEK</td>
+              <td>Dermatoloji</td><td>Uz.Dr. Ece KOÇ</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">30.08.2026</td></tr>
+            <tr data-k="R-43114"><td><input type="checkbox"></td><td>R-43114</td><td>01.09.2026 10:30</td><td>Zeynep ÖZDEMİR</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">23.08.2026</td></tr>
+            <tr data-k="R-41573"><td><input type="checkbox"></td><td>R-41573</td><td>01.09.2026 12:00</td><td>İbrahim KOÇ</td>
+              <td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">26.08.2026</td></tr>
+            <tr data-k="R-43145"><td><input type="checkbox"></td><td>R-43145</td><td>02.09.2026 14:15</td><td>Elif KURT</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Çağrı Merkezi</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">02.09.2026</td></tr>
+            <tr data-k="R-41157"><td><input type="checkbox"></td><td>R-41157</td><td>02.09.2026 14:50</td><td>Kemal ÖZKAN</td>
+              <td>Kardiyoloji</td><td>Uz.Dr. Hakan ER</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">27.08.2026</td></tr>
+            <tr data-k="R-43701"><td><input type="checkbox"></td><td>R-43701</td><td>02.09.2026 16:00</td><td>Mustafa ARSLAN</td>
+              <td>Çocuk</td><td>Uz.Dr. Burak TAN</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">31.08.2026</td></tr>
+            <tr data-k="R-44255"><td><input type="checkbox"></td><td>R-44255</td><td>03.09.2026 10:00</td><td>Hülya DOĞAN</td>
+              <td>Göz</td><td>Op.Dr. Melis ŞAHİN</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">23.08.2026</td></tr>
+            <tr data-k="R-41170"><td><input type="checkbox"></td><td>R-41170</td><td>03.09.2026 11:10</td><td>Murat POLAT</td>
+              <td>Kardiyoloji</td><td>Uz.Dr. Hakan ER</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">27.08.2026</td></tr>
+            <tr data-k="R-41626"><td><input type="checkbox"></td><td>R-41626</td><td>03.09.2026 12:00</td><td>Derya ÖZTÜRK</td>
+              <td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">02.09.2026</td></tr>
+            <tr data-k="R-42649"><td><input type="checkbox"></td><td>R-42649</td><td>03.09.2026 14:00</td><td>Ahmet POLAT</td>
+              <td>Ortopedi</td><td>Op.Dr. Derya KILIÇ</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">29.08.2026</td></tr>
+            <tr data-k="R-43170"><td><input type="checkbox"></td><td>R-43170</td><td>03.09.2026 14:15</td><td>Hasan KAYA</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Yerinde (banko)</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">30.08.2026</td></tr>
+            <tr data-k="R-43174"><td><input type="checkbox"></td><td>R-43174</td><td>03.09.2026 15:30</td><td>Sevgi DEMİR</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Telefon</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">01.09.2026</td></tr>
+            <tr data-k="R-43175"><td><input type="checkbox"></td><td>R-43175</td><td>03.09.2026 15:45</td><td>Esra YILMAZ</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">24.08.2026</td></tr>
+            <tr data-k="R-44284"><td><input type="checkbox"></td><td>R-44284</td><td>04.09.2026 11:15</td><td>Zeynep ÖZKAN</td>
+              <td>Göz</td><td>Op.Dr. Melis ŞAHİN</td><td>Çağrı Merkezi</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">22.08.2026</td></tr>
+            <tr data-k="R-44769"><td><input type="checkbox"></td><td>R-44769</td><td>07.09.2026 14:45</td><td>Yusuf YILMAZ</td>
+              <td>KBB</td><td>Op.Dr. Tolga AKIN</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">04.09.2026</td></tr>
+            <tr data-k="R-40148"><td><input type="checkbox"></td><td>R-40148</td><td>08.09.2026 13:30</td><td>Hasan ÖZDEMİR</td>
+              <td>Dahiliye</td><td>Uz.Dr. Kemal ARSLAN</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">03.09.2026</td></tr>
+            <tr data-k="R-43251"><td><input type="checkbox"></td><td>R-43251</td><td>08.09.2026 15:00</td><td>Ahmet ŞAHİN</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">28.08.2026</td></tr>
+            <tr data-k="R-43814"><td><input type="checkbox"></td><td>R-43814</td><td>09.09.2026 09:00</td><td>Mustafa YILMAZ</td>
+              <td>Çocuk</td><td>Uz.Dr. Burak TAN</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">09.09.2026</td></tr>
+            <tr data-k="R-40704"><td><input type="checkbox"></td><td>R-40704</td><td>09.09.2026 12:15</td><td>Ahmet YILMAZ</td>
+              <td>Dahiliye</td><td>Uz.Dr. Selin ÖZTÜRK</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">09.09.2026</td></tr>
+            <tr data-k="R-42266"><td><input type="checkbox"></td><td>R-42266</td><td>09.09.2026 15:00</td><td>Yusuf ŞİMŞEK</td>
+              <td>Kadın Doğum</td><td>Op.Dr. Ayşe ÇELİK</td><td>Yerinde (banko)</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">09.09.2026</td></tr>
+            <tr data-k="R-45306"><td><input type="checkbox"></td><td>R-45306</td><td>09.09.2026 16:00</td><td>Hüseyin YILMAZ</td>
+              <td>Dermatoloji</td><td>Uz.Dr. Ece KOÇ</td><td>Telefon</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">04.09.2026</td></tr>
+            <tr data-k="R-43842"><td><input type="checkbox"></td><td>R-43842</td><td>10.09.2026 08:30</td><td>Hatice ÇETİN</td>
+              <td>Çocuk</td><td>Uz.Dr. Burak TAN</td><td>Çağrı Merkezi</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">06.09.2026</td></tr>
+            <tr data-k="R-45312"><td><input type="checkbox"></td><td>R-45312</td><td>10.09.2026 09:00</td><td>Hasan ÖZDEMİR</td>
+              <td>Dermatoloji</td><td>Uz.Dr. Ece KOÇ</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">25.08.2026</td></tr>
+            <tr data-k="R-43301"><td><input type="checkbox"></td><td>R-43301</td><td>10.09.2026 13:45</td><td>Murat KURT</td>
+              <td>Çocuk</td><td>Uz.Dr. Zeynep AKSOY</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">03.09.2026</td></tr>
+            <tr data-k="R-45331"><td><input type="checkbox"></td><td>R-45331</td><td>10.09.2026 14:45</td><td>Murat DEMİR</td>
+              <td>Dermatoloji</td><td>Uz.Dr. Ece KOÇ</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">05.09.2026</td></tr>
+            <tr data-k="R-43864"><td><input type="checkbox"></td><td>R-43864</td><td>10.09.2026 15:30</td><td>Hülya ÖZDEMİR</td>
+              <td>Çocuk</td><td>Uz.Dr. Burak TAN</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">09.09.2026</td></tr>
+            <tr data-k="R-45336"><td><input type="checkbox"></td><td>R-45336</td><td>10.09.2026 16:00</td><td>Ahmet ŞAHİN</td>
+              <td>Dermatoloji</td><td>Uz.Dr. Ece KOÇ</td><td>Web / online</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">09.09.2026</td></tr>
+            <tr data-k="R-44846"><td><input type="checkbox"></td><td>R-44846</td><td>11.09.2026 10:15</td><td>Fatma KARA</td>
+              <td>KBB</td><td>Op.Dr. Tolga AKIN</td><td>Çağrı Merkezi</td><td>Muayene</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">02.09.2026</td></tr>
+            <tr data-k="R-41755"><td><input type="checkbox"></td><td>R-41755</td><td>11.09.2026 11:45</td><td>Esra POLAT</td>
+              <td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td><td>Web / online</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">04.09.2026</td></tr>
+            <tr data-k="R-41758"><td><input type="checkbox"></td><td>R-41758</td><td>11.09.2026 13:30</td><td>Mehmet YILMAZ</td>
+              <td>Kadın Doğum</td><td>Op.Dr. Nur ÖZKAN</td><td>Telefon</td><td>Kontrol</td>
+              <td class="orta"><span class="rz kir">3</span></td>
+              <td class="orta">26.08.2026</td></tr>
+            <tr class="toplam"><td></td><td colspan="9">Dönemde 595 gelmeyen randevu · ilk 30 gösteriliyor · 159 randevuda hasta en az 3. kez gelmedi</td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">Gelmeyen randevuda henüz başvuru açılmadığı için Protokol No yoktur; satır randevu numarasıyla izlenir. Hasta TC'si gösterilmez.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: RP-2026-09<br>Düzenleme: 10.10.2026 11:40<br>Düzenleyen: Dr. Canan ŞEN</div>
+        </div>
+        <h1>RANDEVU / POLİKLİNİK DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Poliklinik: 8 · hekim: 11</div><div>İş günü: 22</div>
+        </div>
+        <table>
+          <thead><tr><th>Poliklinik</th><th>Slot</th><th>Verilen</th><th>Doluluk</th><th>Gelen</th><th>Gelmeyen</th><th>No-show</th><th>Randevusuz</th><th>Ort. Bekleme</th></tr></thead>
+          <tbody>
+            <tr><td>Dahiliye</td><td class="sag">1.230</td><td class="sag">1.040</td><td class="sag">%84,6</td>
+              <td class="sag">956</td><td class="sag">84</td><td class="sag">%8,1</td><td class="sag">97</td>
+              <td class="sag">22 dk</td></tr>
+            <tr><td>Kardiyoloji</td><td class="sag">440</td><td class="sag">388</td><td class="sag">%88,2</td>
+              <td class="sag">362</td><td class="sag">26</td><td class="sag">%6,7</td><td class="sag">46</td>
+              <td class="sag">18 dk</td></tr>
+            <tr><td>Kadın Doğum</td><td class="sag">1.200</td><td class="sag">959</td><td class="sag">%79,9</td>
+              <td class="sag">870</td><td class="sag">89</td><td class="sag">%9,3</td><td class="sag">92</td>
+              <td class="sag">25 dk</td></tr>
+            <tr><td>Ortopedi</td><td class="sag">630</td><td class="sag">456</td><td class="sag">%72,4</td>
+              <td class="sag">400</td><td class="sag">56</td><td class="sag">%12,3</td><td class="sag">52</td>
+              <td class="sag">16 dk</td></tr>
+            <tr><td>Çocuk</td><td class="sag">1.260</td><td class="sag">1.001</td><td class="sag">%79,4</td>
+              <td class="sag">852</td><td class="sag">149</td><td class="sag">%14,9</td><td class="sag">91</td>
+              <td class="sag">23 dk</td></tr>
+            <tr><td>Göz</td><td class="sag">630</td><td class="sag">423</td><td class="sag">%67,1</td>
+              <td class="sag">376</td><td class="sag">47</td><td class="sag">%11,1</td><td class="sag">49</td>
+              <td class="sag">17 dk</td></tr>
+            <tr><td>KBB</td><td class="sag">630</td><td class="sag">403</td><td class="sag">%64,0</td>
+              <td class="sag">352</td><td class="sag">51</td><td class="sag">%12,7</td><td class="sag">57</td>
+              <td class="sag">18 dk</td></tr>
+            <tr><td>Dermatoloji</td><td class="sag">600</td><td class="sag">526</td><td class="sag">%87,7</td>
+              <td class="sag">433</td><td class="sag">93</td><td class="sag">%17,7</td><td class="sag">46</td>
+              <td class="sag">15 dk</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Verilen randevu / slot</span><span>5.196 / 6.620 (%78,5)</span></div>
+          <div><span>Gelen / gelmeyen</span><span>4.601 / 595</span></div>
+          <div><span>İptal</span><span>488</span></div>
+          <div><span>Randevusuz muayene</span><span>530</span></div>
+          <div class="b"><span>NO-SHOW ORANI</span><span>%11,5</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Ortalama bekleme 20 dk · 30 dakikadan uzun bekleyen 925 hasta · ilk muayene / kontrol
+          2.884 / 1.717. Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Hasta Hizmetleri · İmza</div><div>Onaylayan<br>Başhekim · İmza</div></div>
+        <div class="dip">Gentegre AI · RP-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>randevu (baslangic · sure_dk · durum 1 planlandı / 2 geldi / 3 gelmedi / 4 iptal · tip · kaynak · hekim_id · bolum)</code>
+    <code>randevu_bolum_ayar (çalışma saati · öğle · slot_dk · çalışma günleri)</code><code>muayene (randevu_id · baslangic · tur)</code>
+    <code>kod_liste randevu.tip / randevu.kaynak</code><code>departman</code><code>randevu.iptal_neden / iptal_zamani · yeni</code><code>hekim izin günü · yeni</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span><span>5.196 randevu · doluluk %78,5</span><span>·</span>
+    <span>No-show %11,5</span><span>·</span><span>Ort. bekleme 20 dk</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> poliklinik randevu sisteminin dönem özeti — verilen randevu, gelen / gelmeyen / iptal, hekim ve poliklinik başına slot doluluğu,
+  bekleme süresi, ilk muayene / kontrol oranı ve randevu kanalları.
+  <ul>
+    <li><b>Giriş:</b> Yönetim › İcmaller › Randevu / Poliklinik; Randevular ekranından "Dönem İcmali"; Çağrı Merkezi panosundan Gelmeyenler sekmesine.</li>
+    <li><b>Verilen</b> = iptal edilmemiş randevu (durum 1–3). <b>No-show</b> = gelmedi / verilen. İptal ayrı sayılır, doluluğa girmez.</li>
+    <li><b>Slot</b> = randevu_bolum_ayar çalışma planından (mesai − öğle) / slot_dk × çalışılan gün. Hekim izin / kongre günü slot üretmez:
+      izin günü bugün tutulmuyor, <b>yeni</b> (çalışma planında "kapalı gün").</li>
+    <li><b>Bekleme</b> = randevu saati → muayene.baslangic (yalnız gelen randevular; muayene.randevu_id ile bağlanır). Erken başlayan muayene 0 sayılır.</li>
+    <li><b>Randevusuz muayene</b> = randevu_id boş muayene. <b>İlk / kontrol</b> = randevu.tip (1 Muayene, 2 Kontrol). <b>Kanal</b> = randevu.kaynak
+      (Telefon, Yerinde, Web, Çağrı Merkezi, Hekim Yönlendirmesi, MHRS); öne alma = ekleme_tarihi → baslangic.</li>
+    <li><b>Önceki gelmeme</b> = aynı hastanın son 6 aydaki gelmediği randevu sayısı. İptal nedeni ve iptal zamanı bugün ayrı alan değil:
+      <code>randevu.iptal_neden / iptal_zamani</code> <b>yeni</b>.</li>
+    <li>Listeler soldaki onay kutusuyla seçilir (tık tek, Ctrl / Shift çoklu). Gelen hasta Protokol No ile izlenir, gelmeyen randevu numarasıyla;
+      <b>hasta TC'si gösterilmez</b>, A4 belgede hasta bilgisi yoktur. A4 önizleme ayrı sekmededir.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Satir ac/kapa (ok isareti) - onay kutusu tiklamasi acmaz
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(ev){
+  if(ev.target.tagName==='INPUT') return;
+  var d=document.querySelectorAll('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d.length) return;
+  var gizli=!d[0].hidden; d.forEach(function(x){x.hidden=gizli;});
+  var ok=tr.querySelector('.ok-ic'); if(ok) ok.textContent=gizli?'▸':'▾';});});
+// Secim: tik tek, Ctrl ekle/cikar, Shift aralik (liste basina)
+document.querySelectorAll('table[data-secim]').forEach(function(t){
+  var son=null;
+  function satirlar(){return [].slice.call(t.querySelectorAll('tbody tr[data-k]'));}
+  satirlar().forEach(function(tr){tr.querySelector('input').addEventListener('click',function(ev){
+    ev.stopPropagation(); var s=satirlar(), i=s.indexOf(tr);
+    if(ev.shiftKey&&son!==null){var a=Math.min(son,i),b=Math.max(son,i);
+      if(!ev.ctrlKey) s.forEach(function(x){x.classList.remove('sel');x.querySelector('input').checked=false;});
+      for(var j=a;j<=b;j++){s[j].classList.add('sel');s[j].querySelector('input').checked=true;}}
+    else if(ev.ctrlKey||ev.metaKey){tr.classList.toggle('sel');this.checked=tr.classList.contains('sel');son=i;}
+    else {s.forEach(function(x){x.classList.remove('sel');x.querySelector('input').checked=false;});
+      tr.classList.add('sel');this.checked=true;son=i;}
+  });});
+  var hepsi=t.querySelector('thead input'); if(hepsi) hepsi.addEventListener('click',function(){
+    var c=this.checked; satirlar().forEach(function(x){x.classList.toggle('sel',c);x.querySelector('input').checked=c;});});
+});
+</script>
+
+</body>
+</html>

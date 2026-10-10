@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTR İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+  .huni{display:flex;gap:6px;align-items:stretch;margin:4px 0 8px}
+  .huni .h{flex:1;border:1px solid #d5dfea;border-radius:6px;padding:6px 8px;background:#f7faff}
+  .huni .h b{display:block;font-size:15px;color:#2c4a6b}
+  .huni .h span{font-size:10.5px;color:#6b7a8b}
+  .huni .ok2{align-self:center;color:#8aa4c4;font-size:16px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🏃 FTR İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · FTR · Merkez · 10.10.2026 · Uzm.Dr. Hakan ER (FTR Sorumlusu)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 FTR İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🗂</span> Kür Panosu</div>
+    <div class="btn"><span>📅</span> Seans Takvimi</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🧑‍⚕️ Fizyoterapist: <b>Tümü</b> ▾</div>
+    <div class="sel">🦴 Bölge: <b>Tümü</b> ▾</div>
+    <div class="sel">💳 Ödeyen: <b>Tümü</b> ▾ Medula · ÖSS · Özel</div>
+    <span class="sp"></span>
+    <span class="rz sari">5 kürde ara değerlendirme gecikti</span>
+    <span class="rz kir">5 kür yarıda bırakıldı</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Kür</div><div class="deg">42</div><div class="alt">19 süren · 18 biten · 5 yarıda</div></div>
+    <div class="kutu"><div class="bas">Seans</div><div class="deg">316</div><div class="alt">13 yarım · 361 planlı</div></div>
+    <div class="kutu teh"><div class="bas">Gelmedi / İptal</div><div class="deg">37 / 8</div><div class="alt">devam oranı %89,5</div></div>
+    <div class="kutu"><div class="bas">Kür Başı Seans</div><div class="deg">12,2</div><div class="alt">tamamlanan kürlerde</div></div>
+    <div class="kutu mor"><div class="bas">Ciro</div><div class="deg">175.410,00 ₺</div><div class="alt">kurum 33.660,00 · hasta 141.750,00</div></div>
+    <div class="kutu"><div class="bas">Medula Payı</div><div class="deg">%44,0</div><div class="alt">seansların · ciro %14,1</div></div>
+    <div class="kutu iyi"><div class="bas">İyi Yanıt</div><div class="deg">%77,8</div><div class="alt">VAS ort. −4,2 puan</div></div>
+    <div class="kutu"><div class="bas">Kabin Doluluğu</div><div class="deg">%37,5</div><div class="alt">6 kabin / salon</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ter">Fizyoterapistler <span class="rz">4</span></div>
+    <div class="sekme" data-s="kur">Kürler <span class="rz">42</span></div>
+    <div class="sekme" data-s="ode">Ödeyen <span class="rz">3</span></div>
+    <div class="sekme" data-s="snc">Klinik Sonuç <span class="rz">18</span></div>
+    <div class="sekme" data-s="chz">Cihaz / Kabin <span class="rz">7</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <div class="pnl" data-s="ter">
+    <div class="grp">
+      <h4>Fizyoterapistler <span class="mini">satıra tıkla: bölge dağılımı · tık tek, Ctrl / Shift çoklu seçim · seçilenler diğer sekmeleri ve A4'ü süzer</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Fizyoterapist</th><th class="orta">Kür</th><th class="orta">Aktif</th><th class="orta">Seans</th>
+            <th class="orta">Yarım</th><th class="orta">Gelmedi</th><th>Devam</th><th class="sag">Süre</th><th class="sag">Ciro</th><th class="orta">Biten Kür</th>
+            <th class="orta">VAS Düşüşü</th><th>İş Yükü</th></tr></thead>
+          <tbody>
+            <tr class="ac sel" data-d="t0"><td><input type="checkbox" checked></td>
+              <td><span class="ok-ic">▸</span><b>Fzt. Aylin ŞEN</b></td><td class="orta">11</td><td class="orta">8</td><td class="orta">60</td>
+              <td class="orta">2</td><td class="orta">10</td><td><span class="rz sari">%85,7</span></td>
+              <td class="sag">60,0 sa</td><td class="sag">34.020,00</td><td class="orta">2</td>
+              <td class="orta">−3,0</td><td><div class="cubuk"><i style="width:61%"></i></div></td></tr>
+            <tr class="det" data-p="t0" hidden><td></td><td colspan="12">Bölge dağılımı (11 kür): Bel 2 · Boyun 3 · Diz 5 · Omuz 1</td></tr>
+            <tr class="ac" data-d="t1"><td><input type="checkbox"></td>
+              <td><span class="ok-ic">▸</span><b>Fzt. Oğuz DEMİR</b></td><td class="orta">11</td><td class="orta">4</td><td class="orta">94</td>
+              <td class="orta">6</td><td class="orta">9</td><td><span class="rz ok">%91,3</span></td>
+              <td class="sag">94,0 sa</td><td class="sag">60.850,00</td><td class="orta">5</td>
+              <td class="orta">−3,6</td><td><div class="cubuk"><i style="width:95%"></i></div></td></tr>
+            <tr class="det" data-p="t1" hidden><td></td><td colspan="12">Bölge dağılımı (11 kür): Bel 1 · Boyun 2 · Diz 2 · Omuz 3 · El-bilek 3</td></tr>
+            <tr class="ac" data-d="t2"><td><input type="checkbox"></td>
+              <td><span class="ok-ic">▸</span><b>Fzt. Merve YILDIZ</b></td><td class="orta">10</td><td class="orta">1</td><td class="orta">99</td>
+              <td class="orta">5</td><td class="orta">5</td><td><span class="rz ok">%95,2</span></td>
+              <td class="sag">99,0 sa</td><td class="sag">59.840,00</td><td class="orta">8</td>
+              <td class="orta">−4,6</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+            <tr class="det" data-p="t2" hidden><td></td><td colspan="12">Bölge dağılımı (10 kür): Bel 2 · Boyun 2 · Diz 1 · Omuz 2 · El-bilek 3</td></tr>
+            <tr class="ac" data-d="t3"><td><input type="checkbox"></td>
+              <td><span class="ok-ic">▸</span><b>Fzt. Kaan UÇAR</b></td><td class="orta">10</td><td class="orta">6</td><td class="orta">63</td>
+              <td class="orta">—</td><td class="orta">13</td><td><span class="rz sari">%82,9</span></td>
+              <td class="sag">63,0 sa</td><td class="sag">20.700,00</td><td class="orta">3</td>
+              <td class="orta">−4,7</td><td><div class="cubuk"><i style="width:64%"></i></div></td></tr>
+            <tr class="det" data-p="t3" hidden><td></td><td colspan="12">Bölge dağılımı (10 kür): Bel 1 · Boyun 2 · Diz 4 · El-bilek 3</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 4 fizyoterapist</td><td class="orta">42</td><td class="orta">19</td><td class="orta">316</td>
+              <td class="orta">13</td><td class="orta">37</td><td>%89,5</td><td class="sag">316,0 sa</td><td class="sag">175.410,00</td>
+              <td class="orta">18</td><td class="orta">−4,2</td><td></td></tr>
+          </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="kur">
+    <div class="grp">
+      <h4>Kürler <span class="mini">dönemde seansı olan programlar · seans = toplam yapılan / plan · dönem = Eylül'de yapılan</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Program No</th><th>Protokol No</th><th>Hasta</th><th>Bölge / Tanı</th><th>Ödeyen</th>
+            <th>Fizyoterapist</th><th class="orta">Seans</th><th class="orta">Dönem</th><th class="orta">Gelmedi</th><th class="orta">Kalan Hak</th><th>Durum</th><th>Yanıt</th>
+            <th class="sag">Ciro</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0318</td><td>P-018640</td><td>Cem L.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">4 / 15</td><td class="orta">4</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz kir">Sonlandırıldı</span></td>
+              <td></td>
+              <td class="sag">3.150,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0322</td><td>P-018788</td><td>Kemal F.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">5 / 10</td><td class="orta">5</td>
+              <td class="orta">—</td><td class="orta">5</td><td><span class="rz kir">Sonlandırıldı</span></td>
+              <td></td>
+              <td class="sag">900,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0324</td><td>P-018862</td><td>Okan C.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">3 / 10</td><td class="orta">3</td>
+              <td class="orta">—</td><td class="orta">7</td><td><span class="rz kir">Sonlandırıldı</span></td>
+              <td></td>
+              <td class="sag">540,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0331</td><td>P-019121</td><td>Ece K.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">2 / 10</td><td class="orta">2</td>
+              <td class="orta">—</td><td class="orta">8</td><td><span class="rz kir">Sonlandırıldı</span></td>
+              <td></td>
+              <td class="sag">360,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0333</td><td>P-019195</td><td>Melis G.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">3 / 10</td><td class="orta">3</td>
+              <td class="orta">3</td><td class="orta">—</td><td><span class="rz kir">Sonlandırıldı</span></td>
+              <td></td>
+              <td class="sag">2.700,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0304</td><td>P-018122</td><td>Mustafa D.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">9 / 20</td><td class="orta">9</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">8.100,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0305</td><td>P-018159</td><td>Elif Ş.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">2 / 10</td><td class="orta">2</td>
+              <td class="orta">—</td><td class="orta">8</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">360,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0306</td><td>P-018196</td><td>Ahmet T.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mor">ÖSS</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">5 / 15</td><td class="orta">5</td>
+              <td class="orta">3</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">3.250,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0308</td><td>P-018270</td><td>Burak Ç.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">6 / 20</td><td class="orta">4</td>
+              <td class="orta">3</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">3.600,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0309</td><td>P-018307</td><td>Seda E.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">4 / 10</td><td class="orta">4</td>
+              <td class="orta">1</td><td class="orta">6</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">720,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0312</td><td>P-018418</td><td>Onur G.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">3 / 10</td><td class="orta">3</td>
+              <td class="orta">3</td><td class="orta">7</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">540,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0313</td><td>P-018455</td><td>Gizem P.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">5 / 10</td><td class="orta">5</td>
+              <td class="orta">1</td><td class="orta">5</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">810,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0314</td><td>P-018492</td><td>Serkan İ.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">10 / 20</td><td class="orta">10</td>
+              <td class="orta">1</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">8.550,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0316</td><td>P-018566</td><td>Emre S.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">5 / 10</td><td class="orta">5</td>
+              <td class="orta">—</td><td class="orta">5</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">900,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0317</td><td>P-018603</td><td>Büşra H.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">4 / 10</td><td class="orta">4</td>
+              <td class="orta">2</td><td class="orta">6</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">720,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0325</td><td>P-018899</td><td>Pelin Y.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">5 / 10</td><td class="orta">5</td>
+              <td class="orta">—</td><td class="orta">5</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">900,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0327</td><td>P-018973</td><td>Esra T.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">7 / 10</td><td class="orta">7</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td><span class="kir">ara değ. gecikti</span></td>
+              <td class="sag">5.850,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0328</td><td>P-019010</td><td>Murat A.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">6 / 10</td><td class="orta">4</td>
+              <td class="orta">3</td><td class="orta">4</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">720,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0338</td><td>P-019380</td><td>Arda V.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">8 / 10</td><td class="orta">6</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz mavi">Sürüyor</span></td>
+              <td></td>
+              <td class="sag">4.950,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0302</td><td>P-018048</td><td>Mehmet Y.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">9 / 10</td><td class="orta">7</td>
+              <td class="orta">—</td><td class="orta">1</td><td><span class="rz mor">Ara değerlendirme</span></td>
+              <td></td>
+              <td class="sag">1.260,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0321</td><td>P-018751</td><td>İrem M.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">9 / 15</td><td class="orta">9</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz mor">Ara değerlendirme</span></td>
+              <td><span class="kir">ara değ. gecikti</span></td>
+              <td class="sag">8.100,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0329</td><td>P-019047</td><td>Hande B.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">7 / 10</td><td class="orta">3</td>
+              <td class="orta">—</td><td class="orta">3</td><td><span class="rz mor">Ara değerlendirme</span></td>
+              <td></td>
+              <td class="sag">540,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0332</td><td>P-019158</td><td>Yusuf E.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">9 / 10</td><td class="orta">9</td>
+              <td class="orta">—</td><td class="orta">1</td><td><span class="rz mor">Ara değerlendirme</span></td>
+              <td></td>
+              <td class="sag">1.620,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0337</td><td>P-019343</td><td>Gül U.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">4 / 10</td><td class="orta">4</td>
+              <td class="orta">1</td><td class="orta">6</td><td><span class="rz mor">Ara değerlendirme</span></td>
+              <td></td>
+              <td class="sag">720,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0301</td><td>P-018011</td><td>Ayşe K.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">2</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz kir">Yanıtsız</span></td>
+              <td class="sag">5.400,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0303</td><td>P-018085</td><td>Zeynep A.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mor">ÖSS</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">15 / 15</td><td class="orta">13</td>
+              <td class="orta">2</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">8.450,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0307</td><td>P-018233</td><td>Fatma Ö.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">—</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz sari">Kısmi yanıt</span></td>
+              <td class="sag">1.710,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0310</td><td>P-018344</td><td>Hakan B.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">3</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.080,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0311</td><td>P-018381</td><td>Derya U.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">—</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.800,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0315</td><td>P-018529</td><td>Nur V.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">—</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">990,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0319</td><td>P-018677</td><td>Tuğba R.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">20 / 20</td><td class="orta">20</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">18.000,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0320</td><td>P-018714</td><td>Volkan N.</td><td>Bel <span class="sonuk">M54.5</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">3</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.800,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0323</td><td>P-018825</td><td>Selin Z.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">8.100,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0326</td><td>P-018936</td><td>Sinan Ö.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">1</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.710,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0330</td><td>P-019084</td><td>Tolga D.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">15 / 15</td><td class="orta">15</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">12.600,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0334</td><td>P-019232</td><td>Barış İ.</td><td>Omuz <span class="sonuk">M75.1</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">20 / 20</td><td class="orta">20</td>
+              <td class="orta">1</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz kir">Yanıtsız</span></td>
+              <td class="sag">18.000,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0335</td><td>P-019269</td><td>Damla S.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">15 / 15</td><td class="orta">15</td>
+              <td class="orta">3</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">13.500,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0336</td><td>P-019306</td><td>Ozan T.</td><td>Diz <span class="sonuk">M17.1</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">10 / 10</td><td class="orta">10</td>
+              <td class="orta">1</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.800,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0339</td><td>P-019417</td><td>Ceren Y.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Merve YILDIZ</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">—</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.080,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0340</td><td>P-019454</td><td>Levent Z.</td><td>El-bilek <span class="sonuk">G56.0</span></td>
+              <td><span class="rz mavi">SGK (Medula)</span></td><td>Fzt. Kaan UÇAR</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">—</td><td class="orta">0</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">1.080,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0341</td><td>P-019491</td><td>Aslı K.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Aylin ŞEN</td><td class="orta">15 / 15</td><td class="orta">15</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz ok">İyi yanıt</span></td>
+              <td class="sag">13.050,00</td></tr>
+            <tr><td><input type="checkbox"></td><td>FTR-2026-0342</td><td>P-019528</td><td>Erkan P.</td><td>Boyun <span class="sonuk">M54.2</span></td>
+              <td><span class="rz ok">Özel</span></td><td>Fzt. Oğuz DEMİR</td><td class="orta">10 / 10</td><td class="orta">6</td>
+              <td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Tamamlandı</span></td>
+              <td><span class="rz sari">Kısmi yanıt</span></td>
+              <td class="sag">5.400,00</td></tr>
+            <tr class="toplam"><td></td><td colspan="6">Toplam · 42 kür</td><td class="orta">354 / 505</td>
+              <td class="orta">316</td><td class="orta">37</td><td colspan="3"></td><td class="sag">175.410,00</td></tr>
+          </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="ode">
+    <div class="grp">
+      <h4>Ödeyen Kırılımı <span class="mini">Medula seansı rapor hakkından düşer · yarım seans yarı ücret</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Ödeyen</th><th class="orta">Kür</th><th class="orta">Seans</th><th class="sag">Seans Ücreti</th>
+            <th class="sag">Ciro</th><th class="sag">Kurum Payı</th><th class="sag">Hasta Payı</th><th class="orta">Rapor Hakkı</th><th>Ciro Payı</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><span class="rz mavi">SGK (Medula)</span></td><td class="orta">24</td><td class="orta">139</td>
+              <td class="sag">180,00</td><td class="sag">24.660,00</td><td class="sag">24.660,00</td><td class="sag">0,00</td>
+              <td class="orta">163 / 240</td><td><div class="cubuk"><i style="width:14%"></i></div> <span class="sonuk">%14,1</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><span class="rz mor">ÖSS</span></td><td class="orta">2</td><td class="orta">18</td>
+              <td class="sag">650,00</td><td class="sag">11.700,00</td><td class="sag">9.000,00</td><td class="sag">2.700,00</td>
+              <td class="orta">—</td><td><div class="cubuk"><i style="width:7%"></i></div> <span class="sonuk">%6,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><span class="rz ok">Özel</span></td><td class="orta">16</td><td class="orta">159</td>
+              <td class="sag">900,00</td><td class="sag">139.050,00</td><td class="sag">0,00</td><td class="sag">139.050,00</td>
+              <td class="orta">—</td><td><div class="cubuk"><i style="width:79%"></i></div> <span class="sonuk">%79,3</span></td></tr>
+            <tr class="toplam"><td></td><td>Toplam</td><td class="orta">42</td><td class="orta">316</td><td></td><td class="sag">175.410,00</td>
+              <td class="sag">33.660,00</td><td class="sag">141.750,00</td><td></td><td></td></tr>
+          </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="snc">
+    <div class="grp">
+      <h4>Klinik Sonuç <span class="mini">dönemde TAMAMLANAN kürler · kür başı → kür sonu ölçek ortalaması · iyileşme = değişim / başlangıç</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Bölge</th><th>Ölçek</th><th class="orta">Kür</th><th class="orta">VAS</th>
+            <th class="orta">Ölçek Skoru</th><th>İyileşme</th><th class="orta">İyi</th><th class="orta">Kısmi</th><th class="orta">Yanıtsız</th><th>İyi Yanıt Oranı</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Bel</b></td><td>Oswestry (ODI)</td><td class="orta">3</td>
+              <td class="orta">8,0 → 4,0</td><td class="orta">40,3 → 20,3</td>
+              <td><span class="rz ok">%49,6</span></td>
+              <td class="orta">2</td><td class="orta">1</td><td class="orta">—</td>
+              <td><div class="cubuk"><i style="width:67%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Boyun</b></td><td>NDI (boyun)</td><td class="orta">4</td>
+              <td class="orta">7,2 → 2,8</td><td class="orta">49,5 → 32,8</td>
+              <td><span class="rz ok">%33,8</span></td>
+              <td class="orta">3</td><td class="orta">1</td><td class="orta">—</td>
+              <td><div class="cubuk"><i style="width:75%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Diz</b></td><td>WOMAC</td><td class="orta">2</td>
+              <td class="orta">8,5 → 6,0</td><td class="orta">49,5 → 35,0</td>
+              <td><span class="rz ok">%29,3</span></td>
+              <td class="orta">1</td><td class="orta">0</td><td class="orta">1</td>
+              <td><div class="cubuk"><i style="width:50%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Omuz</b></td><td>Constant (omuz)</td><td class="orta">4</td>
+              <td class="orta">6,8 → 2,8</td><td class="orta">50,0 → 65,2</td>
+              <td><span class="rz ok">%30,5</span></td>
+              <td class="orta">3</td><td class="orta">0</td><td class="orta">1</td>
+              <td><div class="cubuk"><i style="width:75%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>El-bilek</b></td><td>DASH</td><td class="orta">5</td>
+              <td class="orta">7,6 → 2,8</td><td class="orta">49,8 → 26,8</td>
+              <td><span class="rz ok">%46,2</span></td>
+              <td class="orta">5</td><td class="orta">0</td><td class="orta">—</td>
+              <td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Toplam · 5 bölge</td><td class="orta">18</td><td class="orta">VAS −4,2</td><td colspan="2"></td>
+              <td class="orta">14</td><td class="orta">2</td><td class="orta">2</td><td>%77,8</td></tr>
+          </tbody></table></div>
+    </div>
+    <div class="grp">
+      <h4>Ara Değerlendirme <span class="mini">plan ≥ 10 seans olan kürde 5. seansta beklenir (ftr_program.ara_degerlendirme_seans)</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th>Durum</th><th class="orta">Kür</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rz ok">Yapıldı</span></td><td class="orta">28</td><td class="sonuk">ftr_olcek aşama 2 kaydı var</td></tr>
+            <tr><td><span class="rz kir">Gecikti</span></td><td class="orta">5</td><td class="sonuk">5. seans geçti, ara ölçek girilmedi</td></tr>
+            <tr class="toplam"><td>Gereken</td><td class="orta">33</td><td></td></tr>
+          </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="chz">
+    <div class="grp">
+      <h4>Uygulama / Cihaz Kullanımı <span class="mini">ftr_seans_uygulama (yapıldı) · süre = uygulama süresi × adet</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Uygulama</th><th>Cihaz</th><th>Yer</th><th class="orta">Uygulama</th><th class="orta">Süre</th>
+            <th class="sag">Toplam</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Egzersiz (gözetimli)</b></td><td>—</td><td>Salon</td><td class="orta">316</td>
+              <td class="orta">30 dk</td><td class="sag">158,0 sa</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Sıcak paket</b></td><td>—</td><td>Kabin</td><td class="orta">316</td>
+              <td class="orta">20 dk</td><td class="sag">105,3 sa</td><td><div class="cubuk"><i style="width:67%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>TENS</b></td><td>Enraf Myomed 932</td><td>Kabin</td><td class="orta">316</td>
+              <td class="orta">20 dk</td><td class="sag">105,3 sa</td><td><div class="cubuk"><i style="width:67%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Manuel terapi</b></td><td>—</td><td>Kabin</td><td class="orta">160</td>
+              <td class="orta">20 dk</td><td class="sag">53,3 sa</td><td><div class="cubuk"><i style="width:34%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Terapötik ultrason</b></td><td>Chattanooga Intelect</td><td>Kabin</td><td class="orta">316</td>
+              <td class="orta">8 dk</td><td class="sag">42,1 sa</td><td><div class="cubuk"><i style="width:27%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Servikal / lomber traksiyon</b></td><td>Chattanooga Triton</td><td>Traksiyon</td><td class="orta">104</td>
+              <td class="orta">20 dk</td><td class="sag">34,7 sa</td><td><div class="cubuk"><i style="width:22%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Yüksek yoğunluklu lazer</b></td><td>BTL-6000 HIL</td><td>Kabin</td><td class="orta">166</td>
+              <td class="orta">10 dk</td><td class="sag">27,7 sa</td><td><div class="cubuk"><i style="width:18%"></i></div></td></tr>
+            <tr class="toplam"><td></td><td colspan="3">Toplam · 7 uygulama</td><td class="orta">1694</td><td></td><td class="sag">526,5 sa</td><td></td></tr>
+          </tbody></table></div>
+    </div>
+    <div class="grp">
+      <h4>Kabin / Salon Doluluğu <span class="mini">kapasite = 26 iş günü × 9 saat · aynı türdeki kabinlere eşit dağıtıldı (kabin bazında kayıt yeni)</span></h4>
+      <div class="dg"><table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kabin</th><th>Tür</th><th class="sag">Kullanım</th><th class="sag">Kapasite</th><th>Doluluk</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Kabin 1</b></td><td>Kabin</td><td class="sag">83,5 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:36%"></i></div></td><td><span class="rz sari">%35,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Kabin 2</b></td><td>Kabin</td><td class="sag">83,5 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:36%"></i></div></td><td><span class="rz sari">%35,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Kabin 3</b></td><td>Kabin</td><td class="sag">83,5 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:36%"></i></div></td><td><span class="rz sari">%35,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Kabin 4</b></td><td>Kabin</td><td class="sag">83,5 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:36%"></i></div></td><td><span class="rz sari">%35,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Traksiyon Odası</b></td><td>Traksiyon</td><td class="sag">34,7 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:15%"></i></div></td><td><span class="rz sari">%14,8</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Egzersiz Salonu</b></td><td>Salon</td><td class="sag">158,0 sa</td><td class="sag">234,0 sa</td>
+              <td><div class="cubuk"><i style="width:68%"></i></div></td><td><span class="rz ok">%67,5</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Toplam · 6</td><td class="sag">526,5 sa</td><td class="sag">1.404,0 sa</td><td></td><td>%37,5</td></tr>
+          </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="onz">
+    <div class="onz"><div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: FTR-2026-09<br>Düzenleme: 10.10.2026 10:45<br>Düzenleyen: Uzm.Dr. Hakan ER</div>
+        </div>
+        <h1>FİZİK TEDAVİ DÖNEM İCMALİ</h1>
+        <div class="bilgi"><div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Kür: 42 · seans: 316</div><div>Devam oranı: %89,5</div></div>
+        <table>
+          <thead><tr><th>Fizyoterapist</th><th>Kür</th><th>Seans</th><th>Gelmedi</th><th>Devam</th><th>Ciro</th></tr></thead>
+          <tbody><tr><td>Fzt. Aylin ŞEN</td><td class="sag">11</td><td class="sag">60</td><td class="sag">10</td><td class="sag">%85,7</td><td class="sag">34.020,00</td></tr>
+            <tr><td>Fzt. Oğuz DEMİR</td><td class="sag">11</td><td class="sag">94</td><td class="sag">9</td><td class="sag">%91,3</td><td class="sag">60.850,00</td></tr>
+            <tr><td>Fzt. Merve YILDIZ</td><td class="sag">10</td><td class="sag">99</td><td class="sag">5</td><td class="sag">%95,2</td><td class="sag">59.840,00</td></tr>
+            <tr><td>Fzt. Kaan UÇAR</td><td class="sag">10</td><td class="sag">63</td><td class="sag">13</td><td class="sag">%82,9</td><td class="sag">20.700,00</td></tr>
+            </tbody>
+        </table>
+        <table style="margin-top:6px">
+          <thead><tr><th>Ödeyen</th><th>Kür</th><th>Seans</th><th>Ciro</th><th>Kurum Payı</th><th>Hasta Payı</th></tr></thead>
+          <tbody><tr><td>SGK (Medula)</td><td class="sag">24</td><td class="sag">139</td><td class="sag">24.660,00</td><td class="sag">24.660,00</td><td class="sag">0,00</td></tr>
+            <tr><td>ÖSS</td><td class="sag">2</td><td class="sag">18</td><td class="sag">11.700,00</td><td class="sag">9.000,00</td><td class="sag">2.700,00</td></tr>
+            <tr><td>Özel</td><td class="sag">16</td><td class="sag">159</td><td class="sag">139.050,00</td><td class="sag">0,00</td><td class="sag">139.050,00</td></tr>
+            </tbody>
+        </table>
+        <div class="top">
+          <div><span>Ciro</span><span>175.410,00 ₺</span></div>
+          <div><span>Kurum payı</span><span>33.660,00 ₺</span></div>
+          <div class="b"><span>HASTA PAYI</span><span>141.750,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Tamamlanan 18 kürde iyi yanıt %77,8, ortalama VAS düşüşü 4,2 puan;
+          kür başı ortalama 12,2 seans. Yarıda bırakılan kür: 5. Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>FTR Sorumlusu · İmza</div><div>Onaylayan<br>Mesul Müdür · İmza</div></div>
+        <div class="dip">Gentegre AI · FTR-2026-09 · iç kullanım içindir</div>
+    </div></div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>ftr_program</code><code>ftr_seans</code><code>ftr_seans_uygulama</code><code>ftr_program_uygulama</code><code>ftr_olcek</code>
+    <code>ftr_degerlendirme</code><code>ftr_kabin · ftr_unite</code><code>belge_satir · belge_satir_dagilim</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span><span>42 kür · 316 seans · devam %89,5</span><span>·</span>
+    <span>Ciro 175.410,00 ₺</span><span>·</span><span>İyi yanıt %77,8</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> fizik tedavi ünitesinin dönemdeki kür ve seans hacmini, devamı, terapist iş yükünü, ödeyen kırılımını,
+  tedavi sonucunu (VAS ve ölçek) ve cihaz / kabin kullanımını tek yerde toplar.
+  <ul>
+    <li><b>Giriş:</b> FTR › FTR İcmali; Yönetim › İcmaller › FTR; FTR kür panosundan "İcmal".</li>
+    <li><b>Kür</b> = dönemde en az bir seansı olan ftr_program (taslak hariç). <b>Seans</b> = durumu Yapıldı veya Yarım olan ftr_seans; Gelmedi / İptal ayrı sayılır.</li>
+    <li><b>Devam oranı</b> = yapılan ÷ (yapılan + gelmedi); iptal (merkez kaynaklı) devama girmez.</li>
+    <li><b>Ciro</b> = seansın başvuru satırı (ftr_seans.belge_satir_id); yarım seans yarım ücretle faturalanır (fiyat kuralı <b>yeni</b>, şimdilik satır tutarı ne ise o). Kurum payı satırın dağılımından.</li>
+    <li><b>Medula</b>: SGK kürlerinde rapor hakkı (ftr_program.rapor_seans_hakki / kalan_hak) — kalan hak = hak − yapılan.</li>
+    <li><b>Klinik sonuç</b> yalnız Tamamlandı kürlerde: kür başı (ftr_olcek aşama 1) → kür sonu (aşama 3) ortalaması; yanıt ftr_program.yanit. VAS = ilk seans vas_once → son seans vas_sonra.</li>
+    <li><b>Ara değerlendirme gecikti</b> = yapılan seans ≥ ara_degerlendirme_seans ama aşama 2 ölçek yok.</li>
+    <li><b>Kabin doluluğu</b>: ftr_seans_uygulama'da kabin alanı <b>yeni</b> (şimdilik programın kabin_id'si ve uygulamanın yer türü); kapasite = iş günü × 9 saat.</li>
+    <li><b>Hasta TC'si gösterilmez</b>; listeler Protokol No / Program No ile, A4 belgede hasta bilgisi yoktur. Listeler soldaki onay kutusuyla seçilir (tık tek, Ctrl / Shift çoklu).</li>
+    <li><b>A4 önizleme ayrı sekmededir</b>; Yazdır yalnız A4 icmali basar.</li>
+  </ul>
+</div>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(e){
+  if(e.target.tagName==='INPUT') return;
+  var ds=document.querySelectorAll('tr.det[data-p="'+tr.dataset.d+'"]'); if(!ds.length) return;
+  var gizle=!ds[0].hidden; ds.forEach(function(d){d.hidden=gizle;});
+  var ic=tr.querySelector('.ok-ic'); if(ic) ic.textContent=gizle?'▸':'▾';});});
+</script>
+
+</body>
+</html>

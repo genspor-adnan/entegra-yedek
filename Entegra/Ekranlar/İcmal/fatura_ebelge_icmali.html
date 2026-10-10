@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fatura / e-Belge İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+/* ek: secim, isi haritasi, uzun liste */
+.isi td.orta{font-variant-numeric:tabular-nums}
+.liste-not{padding:5px 10px;font-size:11px;color:#5b6b7d;background:#f9fbfd;border-top:1px solid #e3e9f0}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🧾 Fatura / e-Belge İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Fatura · Merkez · 10.10.2026 · Selin ARAS (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 e-Belge İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="btn"><span>📤</span> Seçilenleri Yeniden Gönder</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🧾</span> Faturalar</div>
+    <div class="btn"><span>📮</span> e-Belge Gelen Kutusu</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: tur = e_belge.belge_turu; seri = ebelge_seri; alici grubu = belgenin tarafi (kurum / hasta / firma). -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">📄 Tür: <b>Tümü</b> ▾</div>
+    <div class="sel">🔢 Seri: <b>Tümü</b> ▾</div>
+    <div class="sel">👥 Alıcı: <b>Tümü</b> ▾ <span class="sonuk">Kurum · Hasta · Firma</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">17 belge GİB'e gitmedi</span>
+    <span class="rz sari">6 yanıt bekliyor</span>
+    <span class="rz kir">21 belge 7 günü aştı</span>
+  </div>
+
+  <!-- OZET: tutarlar gecerli (iptal edilmemis) satis belgeleri; iade ayri; sorunlu = gitmedi + hata + red + yanit + iptal talebi -->
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Kesilen Belge</div><div class="deg">1.160</div><div class="alt">1.184 kayıt · 19 iptal / talep</div></div>
+    <div class="kutu mor"><div class="bas">Toplam Tutar</div><div class="deg">9.769.879,78 ₺</div><div class="alt">matrah 8.826.730,41</div></div>
+    <div class="kutu "><div class="bas">KDV</div><div class="deg">943.149,37 ₺</div><div class="alt">fatura KDV 866.911,56</div></div>
+    <div class="kutu "><div class="bas">e-Fatura</div><div class="deg">42</div><div class="alt">5.316.245,21 ₺ · 7 iade</div></div>
+    <div class="kutu "><div class="bas">e-Arşiv</div><div class="deg">1.092</div><div class="alt">3.951.149,35 ₺</div></div>
+    <div class="kutu "><div class="bas">e-İrsaliye</div><div class="deg">26</div><div class="alt">502.485,22 ₺</div></div>
+    <div class="kutu teh"><div class="bas">Sorunlu Belge</div><div class="deg">27</div><div class="alt">17 GİB'e gitmedi · 2 red</div></div>
+    <div class="kutu uy"><div class="bas">7 Gün Kuralı</div><div class="deg">21</div><div class="alt">geç gönderilen / bekleyen</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="tur">Belge Türleri <span class="rz">3</span></div>
+    <div class="sekme" data-s="sorun">Sorunlu Belgeler <span class="rz">31</span></div>
+    <div class="sekme" data-s="kdv">KDV Özeti <span class="rz">4</span></div>
+    <div class="sekme" data-s="alici">Alıcı / Seri <span class="rz">4</span></div>
+    <div class="sekme" data-s="iade">İade / İptal <span class="rz">26</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <div class="pnl" data-s="tur">
+    <div class="grp">
+      <h4>Belge Türleri <span class="mini">satıra tıkla: seri kırılımı · onay kutusu: tık tek, Ctrl / Shift çoklu — seçim A4'ü süzer</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Tür</th><th class="orta">Belge</th><th class="sag">Matrah</th>
+            <th class="sag">KDV</th><th class="sag">Toplam</th><th class="orta">İade</th><th class="sag">İade Tutarı</th><th class="orta">İptal</th>
+            <th>GİB'e Ulaşan</th><th class="orta">Sorunlu</th><th class="orta">7 Gün Aşan</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-k="EF" data-d="tEF"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>e-Fatura</b></td>
+              <td class="orta">42</td><td class="sag">4.826.523,72</td><td class="sag">489.721,49</td><td class="sag"><b>5.316.245,21</b></td>
+              <td class="orta">7</td><td class="sag">45.944,91</td><td class="orta">3</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:100%"></i></div> <span class="rz ok">%100,0</span></td>
+              <td class="orta kir">10</td><td class="orta ">—</td></tr>
+            <tr class="det" data-p="tEF" hidden><td></td><td>Seri <b>GEF</b> <span class="sonuk">Merkez · kurum / firma</span></td><td class="orta">42</td>
+              <td class="sag">4.826.523,72</td><td class="sag">489.721,49</td><td class="sag">5.316.245,21</td><td class="orta">7</td>
+              <td class="sag">45.944,91</td><td class="orta">3</td><td>%100,0</td>
+              <td class="orta">10</td><td class="orta">—</td></tr>
+            <tr class="ac" data-k="EA" data-d="tEA"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>e-Arşiv</b></td>
+              <td class="orta">1.092</td><td class="sag">3.573.959,28</td><td class="sag">377.190,07</td><td class="sag"><b>3.951.149,35</b></td>
+              <td class="orta">—</td><td class="sag">—</td><td class="orta">16</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:99%"></i></div> <span class="rz sari">%98,7</span></td>
+              <td class="orta kir">14</td><td class="orta kir">18</td></tr>
+            <tr class="det" data-p="tEA" hidden><td></td><td>Seri <b>GEA</b> <span class="sonuk">Merkez · hasta</span></td><td class="orta">959</td>
+              <td class="sag">3.110.871,26</td><td class="sag">327.364,98</td><td class="sag">3.438.236,24</td><td class="orta">—</td>
+              <td class="sag">—</td><td class="orta">15</td><td>%98,9</td>
+              <td class="orta">11</td><td class="orta">15</td></tr>
+            <tr class="det" data-p="tEA" hidden><td></td><td>Seri <b>GED</b> <span class="sonuk">Diş · hasta</span></td><td class="orta">133</td>
+              <td class="sag">463.088,02</td><td class="sag">49.825,09</td><td class="sag">512.913,11</td><td class="orta">—</td>
+              <td class="sag">—</td><td class="orta">1</td><td>%97,8</td>
+              <td class="orta">3</td><td class="orta">3</td></tr>
+            <tr class="ac" data-k="EI" data-d="tEI"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>e-İrsaliye</b></td>
+              <td class="orta">26</td><td class="sag">426.247,41</td><td class="sag">76.237,81</td><td class="sag"><b>502.485,22</b></td>
+              <td class="orta">—</td><td class="sag">—</td><td class="orta">—</td>
+              <td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:88%"></i></div> <span class="rz sari">%88,5</span></td>
+              <td class="orta kir">3</td><td class="orta kir">3</td></tr>
+            <tr class="det" data-p="tEI" hidden><td></td><td>Seri <b>GEI</b> <span class="sonuk">Depo sevk</span></td><td class="orta">26</td>
+              <td class="sag">426.247,41</td><td class="sag">76.237,81</td><td class="sag">502.485,22</td><td class="orta">—</td>
+              <td class="sag">—</td><td class="orta">—</td><td>%88,5</td>
+              <td class="orta">3</td><td class="orta">3</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 3 tür</td><td class="orta">1.160</td><td class="sag">8.826.730,41</td>
+              <td class="sag">943.149,37</td><td class="sag">9.769.879,78</td><td class="orta">7</td><td class="sag">45.944,91</td>
+              <td class="orta">19</td><td>%98,6</td><td class="orta">27</td><td class="orta">21</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="sorun">
+    <div class="grp">
+      <h4>Sorunlu Belgeler <span class="mini">GİB'e gitmeyen · hata · red · yanıt bekleyen · iptal talebi · 7 günü aşan — seçilenler "Yeniden Gönder"e gider</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Belge No</th><th>Tarih</th><th>Tür</th><th>Alıcı</th><th>Protokol No</th>
+            <th class="sag">Tutar</th><th>Sorun</th><th>Açıklama / GİB Mesajı</th><th class="orta">Gönderim</th></tr></thead>
+          <tbody>
+            <tr data-k="GEA2026000000003"><td><input type="checkbox"></td><td>GEA2026000000003</td><td>01.09.2026</td><td>e-Arşiv</td>
+              <td>Meryem ARSLAN</td><td>P-018243</td><td class="sag">3.861,53</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">39 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Schematron 10003: KDV muafiyet nedeni eksik</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000037"><td><input type="checkbox"></td><td>GEA2026000000037</td><td>01.09.2026</td><td>e-Arşiv</td>
+              <td>Elif KILIÇ</td><td>P-018282</td><td class="sag">3.737,19</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">39 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GED2026000000002"><td><input type="checkbox"></td><td>GED2026000000002</td><td>01.09.2026</td><td>e-Arşiv</td>
+              <td>Ayşe KURT</td><td>P-018263</td><td class="sag">400,56</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">39 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GED2026000000004"><td><input type="checkbox"></td><td>GED2026000000004</td><td>01.09.2026</td><td>e-Arşiv</td>
+              <td>Ayşe ÖZKAN</td><td>P-018269</td><td class="sag">1.360,15</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">39 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000049"><td><input type="checkbox"></td><td>GEA2026000000049</td><td>02.09.2026</td><td>e-Arşiv</td>
+              <td>Hülya ÖZKAN</td><td>P-018296</td><td class="sag">3.753,66</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">38 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Schematron: alıcı VKN/TCKN boş</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000105"><td><input type="checkbox"></td><td>GEA2026000000105</td><td>03.09.2026</td><td>e-Arşiv</td>
+              <td>Esra ÖZKAN</td><td>P-018358</td><td class="sag">428,85</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">37 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000138"><td><input type="checkbox"></td><td>GEA2026000000138</td><td>04.09.2026</td><td>e-Arşiv</td>
+              <td>Esra POLAT</td><td>P-018395</td><td class="sag">3.889,57</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">36 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000217"><td><input type="checkbox"></td><td>GEA2026000000217</td><td>07.09.2026</td><td>e-Arşiv</td>
+              <td>Ayşe ÖZDEMİR</td><td>P-018484</td><td class="sag">1.096,27</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">33 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Schematron 10003: KDV muafiyet nedeni eksik</td><td class="orta">—</td></tr>
+            <tr data-k="GEI2026000000014"><td><input type="checkbox"></td><td>GEI2026000000014</td><td>16.09.2026</td><td>e-İrsaliye</td>
+              <td>Sterimed Dağıtım A.Ş.</td><td>—</td><td class="sag">8.358,95</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">24 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000552"><td><input type="checkbox"></td><td>GEA2026000000552</td><td>17.09.2026</td><td>e-Arşiv</td>
+              <td>Fatma KAYA</td><td>P-018872</td><td class="sag">10.831,92</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">23 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GED2026000000084"><td><input type="checkbox"></td><td>GED2026000000084</td><td>17.09.2026</td><td>e-Arşiv</td>
+              <td>Yusuf KARA</td><td>P-018882</td><td class="sag">1.464,89</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">23 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEI2026000000020"><td><input type="checkbox"></td><td>GEI2026000000020</td><td>17.09.2026</td><td>e-İrsaliye</td>
+              <td>Medikal Depo Ltd. (Ostim şube)</td><td>—</td><td class="sag">33.566,02</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">23 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Entegratör: araç plakası zorunlu</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000610"><td><input type="checkbox"></td><td>GEA2026000000610</td><td>18.09.2026</td><td>e-Arşiv</td>
+              <td>Elif YILDIZ</td><td>P-018944</td><td class="sag">10.409,43</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">22 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Entegratör: aynı ETTN ile belge var</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000620"><td><input type="checkbox"></td><td>GEA2026000000620</td><td>19.09.2026</td><td>e-Arşiv</td>
+              <td>Kemal AYDIN</td><td>P-018954</td><td class="sag">429,06</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">21 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000805"><td><input type="checkbox"></td><td>GEA2026000000805</td><td>25.09.2026</td><td>e-Arşiv</td>
+              <td>Sevgi ARSLAN</td><td>P-019158</td><td class="sag">2.586,82</td><td><span class="rz kir">Gönderim hatası</span> <span class="rz sari">15 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">Entegratör: aynı ETTN ile belge var</td><td class="orta">—</td></tr>
+            <tr data-k="GEA2026000000843"><td><input type="checkbox"></td><td>GEA2026000000843</td><td>26.09.2026</td><td>e-Arşiv</td>
+              <td>Elif YILDIZ</td><td>P-019207</td><td class="sag">931,67</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">14 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEI2026000000001"><td><input type="checkbox"></td><td>GEI2026000000001</td><td>26.09.2026</td><td>e-İrsaliye</td>
+              <td>Kızılay Şube Deposu</td><td>—</td><td class="sag">9.050,21</td><td><span class="rz kir">GİB'e gitmedi</span> <span class="rz sari">14 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">hazırlandı, gönderilmedi</td><td class="orta">—</td></tr>
+            <tr data-k="GEF2026000000033"><td><input type="checkbox"></td><td>GEF2026000000033</td><td>24.09.2026</td><td>e-Fatura</td>
+              <td>ABC Holding (anlaşmalı)</td><td>—</td><td class="sag">102.799,03</td><td><span class="rz kir">İptal reddedildi</span></td>
+              <td class="sonuk">alıcı iptal talebini reddetti</td><td class="orta">25.09.2026</td></tr>
+            <tr data-k="GEF2026000000008"><td><input type="checkbox"></td><td>GEF2026000000008</td><td>25.09.2026</td><td>e-Fatura</td>
+              <td>Allianz Sigorta A.Ş.</td><td>—</td><td class="sag">31.375,11</td><td><span class="rz kir">Alıcı reddetti</span></td>
+              <td class="sonuk">Alıcı reddetti: provizyon numarası eksik</td><td class="orta">25.09.2026</td></tr>
+            <tr data-k="GEF2026000000040"><td><input type="checkbox"></td><td>GEF2026000000040</td><td>26.09.2026</td><td>e-Fatura</td>
+              <td>Ankara Barosu (anlaşmalı)</td><td>—</td><td class="sag">59.830,52</td><td><span class="rz kir">Alıcı reddetti</span></td>
+              <td class="sonuk">Alıcı reddetti: fiyat farkı</td><td class="orta">26.09.2026</td></tr>
+            <tr data-k="GEF2026000000004"><td><input type="checkbox"></td><td>GEF2026000000004</td><td>18.09.2026</td><td>e-Fatura</td>
+              <td>Allianz Sigorta A.Ş.</td><td>—</td><td class="sag">46.665,27</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">18.09.2026</td></tr>
+            <tr data-k="GEF2026000000030"><td><input type="checkbox"></td><td>GEF2026000000030</td><td>21.09.2026</td><td>e-Fatura</td>
+              <td>ABC Holding (anlaşmalı)</td><td>—</td><td class="sag">119.230,22</td><td><span class="rz sari">İptal talebi bekliyor</span></td>
+              <td class="sonuk">iptal talebi yanıt bekliyor</td><td class="orta">21.09.2026</td></tr>
+            <tr data-k="GEF2026000000025"><td><input type="checkbox"></td><td>GEF2026000000025</td><td>22.09.2026</td><td>e-Fatura</td>
+              <td>Türkiye Sigorta A.Ş.</td><td>—</td><td class="sag">35.978,38</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">22.09.2026</td></tr>
+            <tr data-k="GEF2026000000007"><td><input type="checkbox"></td><td>GEF2026000000007</td><td>24.09.2026</td><td>e-Fatura</td>
+              <td>Allianz Sigorta A.Ş.</td><td>—</td><td class="sag">97.738,33</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">25.09.2026</td></tr>
+            <tr data-k="GEF2026000000039"><td><input type="checkbox"></td><td>GEF2026000000039</td><td>24.09.2026</td><td>e-Fatura</td>
+              <td>Ankara Barosu (anlaşmalı)</td><td>—</td><td class="sag">76.708,57</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">24.09.2026</td></tr>
+            <tr data-k="GEF2026000000035"><td><input type="checkbox"></td><td>GEF2026000000035</td><td>26.09.2026</td><td>e-Fatura</td>
+              <td>ABC Holding (anlaşmalı)</td><td>—</td><td class="sag">56.808,11</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">26.09.2026</td></tr>
+            <tr data-k="GEF2026000000001"><td><input type="checkbox"></td><td>GEF2026000000001</td><td>30.09.2026</td><td>e-Fatura</td>
+              <td>Sosyal Güvenlik Kurumu</td><td>—</td><td class="sag">625.504,93</td><td><span class="rz sari">Yanıt bekliyor</span></td>
+              <td class="sonuk">Ticari fatura · alıcı yanıtı bekleniyor</td><td class="orta">01.10.2026</td></tr>
+            <tr data-k="GEA2026000000182"><td><input type="checkbox"></td><td>GEA2026000000182</td><td>07.09.2026</td><td>e-Arşiv</td>
+              <td>Hasan KARA</td><td>P-018446</td><td class="sag">1.100,91</td><td><span class="rz sari">13 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">geç gönderildi</td><td class="orta">20.09.2026</td></tr>
+            <tr data-k="GEA2026000000195"><td><input type="checkbox"></td><td>GEA2026000000195</td><td>07.09.2026</td><td>e-Arşiv</td>
+              <td>Emine ARSLAN</td><td>P-018459</td><td class="sag">2.518,02</td><td><span class="rz sari">10 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">geç gönderildi</td><td class="orta">17.09.2026</td></tr>
+            <tr data-k="GEA2026000000334"><td><input type="checkbox"></td><td>GEA2026000000334</td><td>10.09.2026</td><td>e-Arşiv</td>
+              <td>Orhan DEMİR</td><td>P-018625</td><td class="sag">3.249,44</td><td><span class="rz sari">9 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">geç gönderildi</td><td class="orta">19.09.2026</td></tr>
+            <tr data-k="GEA2026000000553"><td><input type="checkbox"></td><td>GEA2026000000553</td><td>17.09.2026</td><td>e-Arşiv</td>
+              <td>Hasan KOÇ</td><td>P-018873</td><td class="sag">1.064,13</td><td><span class="rz sari">13 gün · 7 gün kuralı</span></td>
+              <td class="sonuk">geç gönderildi</td><td class="orta">30.09.2026</td></tr>
+            <tr class="toplam"><td></td><td colspan="5">31 sorunlu belge</td><td class="sag">1.356.727,72</td><td colspan="3"></td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">Bir belge hem sorunlu (ör. GİB'e gitmedi) hem 7 günü aşmış olabilir; satırda iki rozet görünür, listede tek satırdır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="kdv">
+    <div class="grp">
+      <h4>KDV Özeti <span class="mini">geçerli satış faturaları (e-Fatura + e-Arşiv) · iade ve iptal hariç · e-İrsaliye vergi belgesi değil</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>KDV Oranı</th><th class="orta">Satır</th><th class="orta">Belge</th><th class="sag">e-Fatura Matrah</th><th class="sag">e-Arşiv Matrah</th>
+            <th class="sag">Matrah</th><th class="sag">KDV</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td><b>%10</b> <span class="sonuk">sağlık hizmeti</span></td>
+              <td class="orta">1.416</td><td class="orta">946</td><td class="sag">4.755.832,54</td><td class="sag">2.461.332,72</td>
+              <td class="sag"><b>7.217.165,26</b></td><td class="sag">721.716,56</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:86%"></i></div> %85,9</td></tr>
+            <tr><td><b>%20</b> <span class="sonuk">tıbbi malzeme</span></td>
+              <td class="orta">367</td><td class="orta">335</td><td class="sag">70.691,18</td><td class="sag">641.293,67</td>
+              <td class="sag"><b>711.984,85</b></td><td class="sag">142.396,93</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:8%"></i></div> %8,5</td></tr>
+            <tr><td><b>%1</b> <span class="sonuk">ilaç</span></td>
+              <td class="orta">148</td><td class="orta">138</td><td class="sag">0,00</td><td class="sag">279.803,66</td>
+              <td class="sag"><b>279.803,66</b></td><td class="sag">2.798,07</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:3%"></i></div> %3,3</td></tr>
+            <tr><td><b>İstisna (%0)</b> <span class="sonuk">351 / istisna kodu</span></td>
+              <td class="orta">110</td><td class="orta">107</td><td class="sag">0,00</td><td class="sag">191.529,23</td>
+              <td class="sag"><b>191.529,23</b></td><td class="sag">0,00</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:2%"></i></div> %2,3</td></tr>
+            <tr class="toplam"><td>Toplam</td><td class="orta">2.041</td><td class="orta">1.134</td>
+              <td class="sag">4.826.523,72</td><td class="sag">3.573.959,28</td>
+              <td class="sag">8.400.483,00</td><td class="sag">866.911,56</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">Bir belge birden çok oranda sayılabilir (çok oranlı fatura); toplam satırındaki belge sayısı tekildir.
+          e-İrsaliye KDV'si (76.237,81 ₺) özet kutusundaki KDV'ye dahildir (866.911,56 + 76.237,81 = 943.149,37), beyana girmez.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="alici">
+    <div class="grp">
+      <h4>Alıcı Grubu <span class="mini">kurum faturası (e-Fatura) · hasta faturası (e-Arşiv) · firma (iade / irsaliye)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Alıcı</th><th class="orta">Belge</th><th class="sag">Matrah</th><th class="sag">KDV</th><th class="sag">Toplam</th>
+            <th class="orta">İade</th><th class="orta">İptal</th><th class="orta">Sorunlu</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td><b>Kurum</b></td><td class="orta">42</td><td class="sag">4.826.523,72</td>
+              <td class="sag">489.721,49</td><td class="sag"><b>5.316.245,21</b></td><td class="orta">—</td><td class="orta">3</td>
+              <td class="orta">10</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:54%"></i></div> %54,4</td></tr>
+            <tr><td><b>Hasta</b></td><td class="orta">1.092</td><td class="sag">3.573.959,28</td>
+              <td class="sag">377.190,07</td><td class="sag"><b>3.951.149,35</b></td><td class="orta">—</td><td class="orta">16</td>
+              <td class="orta">14</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:40%"></i></div> %40,4</td></tr>
+            <tr><td><b>Firma</b></td><td class="orta">26</td><td class="sag">426.247,41</td>
+              <td class="sag">76.237,81</td><td class="sag"><b>502.485,22</b></td><td class="orta">7</td><td class="orta">—</td>
+              <td class="orta">3</td><td><div class="cubuk" style="display:inline-block;width:80px;min-width:80px;vertical-align:middle"><i style="width:5%"></i></div> %5,1</td></tr>
+            <tr class="toplam"><td>Toplam</td><td class="orta">1.160</td><td class="sag">8.826.730,41</td><td class="sag">943.149,37</td>
+              <td class="sag">9.769.879,78</td><td class="orta">7</td><td class="orta">19</td><td class="orta">27</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Kurum Faturaları <span class="mini">geçerli kurum e-Faturaları · durum rozetleri sorunlu olanları sayar</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Kurum</th><th class="orta">Fatura</th><th class="sag">Toplam</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Sosyal Güvenlik Kurumu</td><td class="orta">3</td><td class="sag">1.730.208,55</td><td><span class="rz sari">Yanıt bekliyor 1</span></td></tr>
+            <tr><td>Türkiye Sigorta A.Ş.</td><td class="orta">9</td><td class="sag">842.966,67</td><td><span class="rz sari">Yanıt bekliyor 1</span></td></tr>
+            <tr><td>Ankara Barosu (anlaşmalı)</td><td class="orta">8</td><td class="sag">762.707,33</td><td><span class="rz sari">Yanıt bekliyor 1</span> <span class="rz kir">Alıcı reddetti 1</span></td></tr>
+            <tr><td>ABC Holding (anlaşmalı)</td><td class="orta">7</td><td class="sag">613.068,67</td><td><span class="rz sari">İptal talebi bekliyor 1</span> <span class="rz kir">İptal reddedildi 1</span> <span class="rz sari">Yanıt bekliyor 1</span></td></tr>
+            <tr><td>Anadolu Anonim Türk Sigorta</td><td class="orta">5</td><td class="sag">525.984,23</td><td><span class="rz ok">tümü kabul</span></td></tr>
+            <tr><td>Allianz Sigorta A.Ş.</td><td class="orta">6</td><td class="sag">449.835,58</td><td><span class="rz sari">Yanıt bekliyor 2</span> <span class="rz kir">Alıcı reddetti 1</span></td></tr>
+            <tr><td>AXA Sigorta A.Ş.</td><td class="orta">4</td><td class="sag">391.474,18</td><td><span class="rz ok">tümü kabul</span></td></tr>
+            <tr class="toplam"><td>7 kurum</td><td class="orta">42</td><td class="sag">5.316.245,21</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Seriler <span class="mini">numara sürekliliği: ilk – son no arasında atlama olmamalı · kayıt = geçerli + iade + iptal</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Seri</th><th>Tür</th><th>Kullanım</th><th>İlk No</th><th>Son No</th><th class="orta">Kayıt</th><th class="orta">Geçerli Satış</th>
+            <th class="orta">İade</th><th class="orta">İptal</th><th class="sag">Toplam</th><th>Süreklilik</th></tr></thead>
+          <tbody>
+            <tr><td><b>GEF</b></td><td>e-Fatura</td><td class="sonuk">Merkez · kurum / firma</td><td>GEF2026000000001</td><td>GEF2026000000050</td><td class="orta">50</td>
+              <td class="orta">42</td><td class="orta">7</td><td class="orta">3</td><td class="sag">5.316.245,21</td>
+              <td><span class="rz ok">atlama yok</span></td></tr>
+            <tr><td><b>GEA</b></td><td>e-Arşiv</td><td class="sonuk">Merkez · hasta</td><td>GEA2026000000001</td><td>GEA2026000000974</td><td class="orta">974</td>
+              <td class="orta">959</td><td class="orta">—</td><td class="orta">15</td><td class="sag">3.438.236,24</td>
+              <td><span class="rz ok">atlama yok</span></td></tr>
+            <tr><td><b>GED</b></td><td>e-Arşiv</td><td class="sonuk">Diş · hasta</td><td>GED2026000000001</td><td>GED2026000000134</td><td class="orta">134</td>
+              <td class="orta">133</td><td class="orta">—</td><td class="orta">1</td><td class="sag">512.913,11</td>
+              <td><span class="rz ok">atlama yok</span></td></tr>
+            <tr><td><b>GEI</b></td><td>e-İrsaliye</td><td class="sonuk">Depo sevk</td><td>GEI2026000000001</td><td>GEI2026000000026</td><td class="orta">26</td>
+              <td class="orta">26</td><td class="orta">—</td><td class="orta">—</td><td class="sag">502.485,22</td>
+              <td><span class="rz ok">atlama yok</span></td></tr>
+            <tr class="toplam"><td colspan="5">4 seri</td><td class="orta">1.184</td><td class="orta">1.160</td><td class="orta">7</td>
+              <td class="orta">19</td><td class="sag">9.769.879,78</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">İptal sütunu iptal talebi bekleyen / reddedilen e-Faturaları da sayar; bunlar "Geçerli Satış"tadır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="iade">
+    <div class="grp">
+      <h4>İade Faturaları <span class="mini">tedarikçiye iade (e-Fatura, profil İADE) · satış toplamına girmez, ayrı izlenir</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Belge No</th><th>Tarih</th><th>Alıcı</th><th class="sag">Matrah</th><th class="sag">KDV</th><th class="sag">Toplam</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr data-k="GEF2026000000045"><td><input type="checkbox"></td><td>GEF2026000000045</td><td>02.09.2026</td><td>Medikal Depo Ltd. (Ostim şube)</td><td class="sag">7.134,68</td>
+              <td class="sag">1.426,94</td><td class="sag">8.561,62</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000048"><td><input type="checkbox"></td><td>GEF2026000000048</td><td>04.09.2026</td><td>Ecza Deposu Selçuk A.Ş.</td><td class="sag">8.585,31</td>
+              <td class="sag">1.717,06</td><td class="sag">10.302,37</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000046"><td><input type="checkbox"></td><td>GEF2026000000046</td><td>07.09.2026</td><td>Medikal Depo Ltd. (Ostim şube)</td><td class="sag">2.264,34</td>
+              <td class="sag">452,87</td><td class="sag">2.717,21</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000047"><td><input type="checkbox"></td><td>GEF2026000000047</td><td>07.09.2026</td><td>Medikal Depo Ltd. (Ostim şube)</td><td class="sag">3.285,51</td>
+              <td class="sag">657,10</td><td class="sag">3.942,61</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000049"><td><input type="checkbox"></td><td>GEF2026000000049</td><td>22.09.2026</td><td>Medikal Depo Ltd. (Ostim şube)</td><td class="sag">5.182,03</td>
+              <td class="sag">1.036,41</td><td class="sag">6.218,44</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000050"><td><input type="checkbox"></td><td>GEF2026000000050</td><td>23.09.2026</td><td>Medikal Depo Ltd. (Ostim şube)</td><td class="sag">2.534,01</td>
+              <td class="sag">506,80</td><td class="sag">3.040,81</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr data-k="GEF2026000000044"><td><input type="checkbox"></td><td>GEF2026000000044</td><td>30.09.2026</td><td>Ecza Deposu Selçuk A.Ş.</td><td class="sag">9.301,54</td>
+              <td class="sag">1.860,31</td><td class="sag">11.161,85</td><td><span class="rz ok">gönderildi</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="3">7 iade faturası</td><td class="sag">38.287,42</td>
+              <td class="sag">7.657,49</td><td class="sag">45.944,91</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>İptaller <span class="mini">e-Arşiv iptali GİB'e bildirilir · e-Fatura iptali alıcıya talep olarak gider</span></h4>
+      <div class="dg">
+        <table data-secim>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Belge No</th><th>Tarih</th><th>Tür</th><th>Alıcı</th><th>Protokol No</th><th class="sag">Tutar</th><th>Durum</th><th>Gerekçe</th></tr></thead>
+          <tbody>
+            <tr data-k="GEA2026000000017"><td><input type="checkbox"></td><td>GEA2026000000017</td><td>01.09.2026</td><td>e-Arşiv</td><td>Murat YILMAZ</td><td>P-018258</td>
+              <td class="sag">1.043,75</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">kurum değişti, yeniden kesildi</td></tr>
+            <tr data-k="GEA2026000000146"><td><input type="checkbox"></td><td>GEA2026000000146</td><td>04.09.2026</td><td>e-Arşiv</td><td>Esra AYDIN</td><td>P-018404</td>
+              <td class="sag">4.208,45</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hatalı hasta payı</td></tr>
+            <tr data-k="GEA2026000000184"><td><input type="checkbox"></td><td>GEA2026000000184</td><td>07.09.2026</td><td>e-Arşiv</td><td>Murat AYDIN</td><td>P-018448</td>
+              <td class="sag">620,63</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">kurum değişti, yeniden kesildi</td></tr>
+            <tr data-k="GEA2026000000241"><td><input type="checkbox"></td><td>GEA2026000000241</td><td>08.09.2026</td><td>e-Arşiv</td><td>İbrahim ÖZDEMİR</td><td>P-018513</td>
+              <td class="sag">645,84</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hatalı hasta payı</td></tr>
+            <tr data-k="GED2026000000029"><td><input type="checkbox"></td><td>GED2026000000029</td><td>08.09.2026</td><td>e-Arşiv</td><td>Kemal KILIÇ</td><td>P-018502</td>
+              <td class="sag">12.763,70</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hasta vazgeçti</td></tr>
+            <tr data-k="GEA2026000000341"><td><input type="checkbox"></td><td>GEA2026000000341</td><td>10.09.2026</td><td>e-Arşiv</td><td>Mustafa KARA</td><td>P-018632</td>
+              <td class="sag">1.019,54</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">kurum değişti, yeniden kesildi</td></tr>
+            <tr data-k="GEA2026000000342"><td><input type="checkbox"></td><td>GEA2026000000342</td><td>11.09.2026</td><td>e-Arşiv</td><td>Can KURT</td><td>P-018633</td>
+              <td class="sag">1.540,34</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">mükerrer fatura</td></tr>
+            <tr data-k="GEF2026000000018"><td><input type="checkbox"></td><td>GEF2026000000018</td><td>11.09.2026</td><td>e-Fatura</td><td>AXA Sigorta A.Ş.</td><td>—</td>
+              <td class="sag">69.252,19</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">iptal talebi kabul edildi</td></tr>
+            <tr data-k="GEA2026000000385"><td><input type="checkbox"></td><td>GEA2026000000385</td><td>12.09.2026</td><td>e-Arşiv</td><td>Yusuf POLAT</td><td>P-018681</td>
+              <td class="sag">1.797,40</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hatalı hasta payı</td></tr>
+            <tr data-k="GEA2026000000435"><td><input type="checkbox"></td><td>GEA2026000000435</td><td>14.09.2026</td><td>e-Arşiv</td><td>Hülya ÖZKAN</td><td>P-018742</td>
+              <td class="sag">5.766,20</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hasta vazgeçti</td></tr>
+            <tr data-k="GEA2026000000580"><td><input type="checkbox"></td><td>GEA2026000000580</td><td>18.09.2026</td><td>e-Arşiv</td><td>Murat KAYA</td><td>P-018909</td>
+              <td class="sag">525,78</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hatalı hasta payı</td></tr>
+            <tr data-k="GEF2026000000030"><td><input type="checkbox"></td><td>GEF2026000000030</td><td>21.09.2026</td><td>e-Fatura</td><td>ABC Holding (anlaşmalı)</td><td>—</td>
+              <td class="sag">119.230,22</td><td><span class="rz sari">İptal talebi bekliyor</span></td><td class="sonuk">iptal talebi yanıt bekliyor</td></tr>
+            <tr data-k="GEA2026000000697"><td><input type="checkbox"></td><td>GEA2026000000697</td><td>22.09.2026</td><td>e-Arşiv</td><td>Fatma KURT</td><td>P-019045</td>
+              <td class="sag">1.477,60</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">mükerrer fatura</td></tr>
+            <tr data-k="GEF2026000000033"><td><input type="checkbox"></td><td>GEF2026000000033</td><td>24.09.2026</td><td>e-Fatura</td><td>ABC Holding (anlaşmalı)</td><td>—</td>
+              <td class="sag">102.799,03</td><td><span class="rz kir">İptal reddedildi</span></td><td class="sonuk">alıcı iptal talebini reddetti</td></tr>
+            <tr data-k="GEA2026000000814"><td><input type="checkbox"></td><td>GEA2026000000814</td><td>25.09.2026</td><td>e-Arşiv</td><td>Sevgi ÇETİN</td><td>P-019169</td>
+              <td class="sag">604,41</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hatalı hasta payı</td></tr>
+            <tr data-k="GEA2026000000816"><td><input type="checkbox"></td><td>GEA2026000000816</td><td>25.09.2026</td><td>e-Arşiv</td><td>Murat YILDIZ</td><td>P-019172</td>
+              <td class="sag">2.548,76</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">mükerrer fatura</td></tr>
+            <tr data-k="GEA2026000000865"><td><input type="checkbox"></td><td>GEA2026000000865</td><td>28.09.2026</td><td>e-Arşiv</td><td>Kemal ÇELİK</td><td>P-019232</td>
+              <td class="sag">1.296,03</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hasta vazgeçti</td></tr>
+            <tr data-k="GEA2026000000866"><td><input type="checkbox"></td><td>GEA2026000000866</td><td>28.09.2026</td><td>e-Arşiv</td><td>Zeynep DEMİR</td><td>P-019233</td>
+              <td class="sag">2.734,04</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">kurum değişti, yeniden kesildi</td></tr>
+            <tr data-k="GEA2026000000926"><td><input type="checkbox"></td><td>GEA2026000000926</td><td>29.09.2026</td><td>e-Arşiv</td><td>Ayşe KILIÇ</td><td>P-019296</td>
+              <td class="sag">5.658,78</td><td><span class="rz pas">İptal edildi</span></td><td class="sonuk">hasta vazgeçti</td></tr>
+            <tr class="toplam"><td></td><td colspan="5">19 iptal / iptal talebi</td><td class="sag">335.532,69</td><td colspan="2"></td></tr>
+          </tbody>
+        </table>
+        <div class="liste-not">İptal edilen belge tutarlara girmez. İptal talebi bekleyen / reddedilen e-Fatura geçerli sayılır ve satış toplamındadır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: EB-2026-09<br>Düzenleme: 10.10.2026 11:20<br>Düzenleyen: Selin ARAS</div>
+        </div>
+        <h1>FATURA / e-BELGE DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Kesilen belge: 1.160</div><div>İptal / iptal talebi: 19 · iade: 7</div>
+        </div>
+        <table>
+          <thead><tr><th>Tür</th><th>Belge</th><th>Matrah</th><th>KDV</th><th>Toplam</th><th>İade</th><th>Sorunlu</th></tr></thead>
+          <tbody>
+            <tr><td>e-Fatura</td><td class="sag">42</td><td class="sag">4.826.523,72</td><td class="sag">489.721,49</td><td class="sag">5.316.245,21</td>
+              <td class="sag">45.944,91</td><td class="sag">10</td></tr>
+            <tr><td>e-Arşiv</td><td class="sag">1.092</td><td class="sag">3.573.959,28</td><td class="sag">377.190,07</td><td class="sag">3.951.149,35</td>
+              <td class="sag">0,00</td><td class="sag">14</td></tr>
+            <tr><td>e-İrsaliye</td><td class="sag">26</td><td class="sag">426.247,41</td><td class="sag">76.237,81</td><td class="sag">502.485,22</td>
+              <td class="sag">0,00</td><td class="sag">3</td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>KDV Oranı</th><th>Matrah</th><th>KDV</th></tr></thead>
+          <tbody><tr><td>%10</td><td class="sag">7.217.165,26</td><td class="sag">721.716,56</td></tr><tr><td>%20</td><td class="sag">711.984,85</td><td class="sag">142.396,93</td></tr><tr><td>%1</td><td class="sag">279.803,66</td><td class="sag">2.798,07</td></tr><tr><td>İstisna</td><td class="sag">191.529,23</td><td class="sag">0,00</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Satış toplamı (geçerli)</span><span>9.769.879,78 ₺</span></div>
+          <div><span>İade faturaları</span><span>45.944,91 ₺</span></div>
+          <div><span>Fatura KDV (beyana esas)</span><span>866.911,56 ₺</span></div>
+          <div class="b"><span>NET (SATIŞ − İADE)</span><span>9.723.934,87 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">GİB'e gitmeyen 17 · alıcı reddi 2 · yanıt bekleyen 6 ·
+          7 gün kuralını aşan 21. Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Muhasebe · İmza</div><div>Onaylayan<br>Mali İşler Müdürü · İmza</div></div>
+        <div class="dip">Gentegre AI · EB-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>belge (tipi / tur · belge_seri · belge_no · efatura_durum · senaryo · kdv_tutari)</code>
+    <code>e_belge (belge_turu · durum · gib_durum_kodu · yanit_durum_kodu · iptal_tarihi · iptal_gerekce)</code>
+    <code>ebelge_seri</code><code>belge_satir (kdv oranı · matrah)</code><code>fn_ebelge_durum_adi</code><code>e_belge.gonderim_zamani · yeni</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span><span>1.160 belge · 9.769.879,78 ₺</span><span>·</span>
+    <span>Fatura KDV 866.911,56 ₺</span><span>·</span><span>27 sorunlu · 21 geç</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> dönemde kesilen bütün e-belgelerin (e-Fatura, e-Arşiv, e-İrsaliye) tek yerde özeti: adet / tutar / KDV, iade ve iptal,
+  GİB'e ulaşmayan, reddedilen ve yanıt bekleyen belgeler, 7 gün kuralı.
+  <ul>
+    <li><b>Giriş:</b> Finans › İcmaller › Fatura / e-Belge; Faturalar listesinden "Dönem İcmali"; e-Belge menüsünden "Sorunlu Belgeler" (doğrudan Sorunlu sekmesine).</li>
+    <li><b>Tutarlar</b> = geçerli satış belgeleri (iptal edilen hariç, iade ayrı). İptal talebi bekleyen / reddedilen e-Fatura geçerlidir. Toplam = matrah + KDV, satır bazında yuvarlanır.</li>
+    <li><b>KDV özeti</b> = e-Fatura + e-Arşiv satırlarının oran bazında matrah / KDV toplamı (belge_satir). e-İrsaliye vergi belgesi değildir, beyana esas KDV'ye girmez.</li>
+    <li><b>GİB'e gitmedi</b> = e_belge durumu "hazırlandı" (1 / 11 / 51) ya da gönderim hatası (gib_durum_kodu); <b>yanıt bekliyor</b> = ticari e-Fatura, alıcı
+      kabul / red vermedi (8 gün itiraz süresi); <b>red</b> = yanit_durum_kodu red. İptal aşamaları fn_ebelge_durum_adi kodlarından (21–24).</li>
+    <li><b>7 gün kuralı</b> = belge tarihinden gönderime (gönderilmediyse bugüne) 7 günden fazla. Gönderim zamanı bugün e_belge'de ayrı tutulmuyor:
+      <code>e_belge.gonderim_zamani</code> <b>yeni</b> alan (şimdilik durum değişim zamanından türetilebilir, kesin değil).</li>
+    <li><b>Alıcı grubu</b>: kurum = anlaşmalı kurum / sigorta / SGK (e-Fatura), hasta = e-Arşiv (Protokol No ile), firma = tedarikçi iadesi ve irsaliye.
+      <b>Seri sürekliliği</b> (numara atlaması kontrolü) <b>yeni</b> bir kontroldür.</li>
+    <li>Listeler soldaki onay kutusuyla seçilir (tık tek, Ctrl / Shift çoklu); seçilen sorunlu belgeler "Yeniden Gönder"e gider. <b>Hasta TC'si gösterilmez</b>;
+      A4 belgede hasta bilgisi yoktur. A4 önizleme ayrı sekmededir.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Satir ac/kapa (ok isareti) - onay kutusu tiklamasi acmaz
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(ev){
+  if(ev.target.tagName==='INPUT') return;
+  var d=document.querySelectorAll('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d.length) return;
+  var gizli=!d[0].hidden; d.forEach(function(x){x.hidden=gizli;});
+  var ok=tr.querySelector('.ok-ic'); if(ok) ok.textContent=gizli?'▸':'▾';});});
+// Secim: tik tek, Ctrl ekle/cikar, Shift aralik (liste basina)
+document.querySelectorAll('table[data-secim]').forEach(function(t){
+  var son=null;
+  function satirlar(){return [].slice.call(t.querySelectorAll('tbody tr[data-k]'));}
+  satirlar().forEach(function(tr){tr.querySelector('input').addEventListener('click',function(ev){
+    ev.stopPropagation(); var s=satirlar(), i=s.indexOf(tr);
+    if(ev.shiftKey&&son!==null){var a=Math.min(son,i),b=Math.max(son,i);
+      if(!ev.ctrlKey) s.forEach(function(x){x.classList.remove('sel');x.querySelector('input').checked=false;});
+      for(var j=a;j<=b;j++){s[j].classList.add('sel');s[j].querySelector('input').checked=true;}}
+    else if(ev.ctrlKey||ev.metaKey){tr.classList.toggle('sel');this.checked=tr.classList.contains('sel');son=i;}
+    else {s.forEach(function(x){x.classList.remove('sel');x.querySelector('input').checked=false;});
+      tr.classList.add('sel');this.checked=true;son=i;}
+  });});
+  var hepsi=t.querySelector('thead input'); if(hepsi) hepsi.addEventListener('click',function(){
+    var c=this.checked; satirlar().forEach(function(x){x.classList.toggle('sel',c);x.querySelector('input').checked=c;});});
+});
+</script>
+
+</body>
+</html>
