@@ -133,6 +133,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'prim.hekim_performans', menuSira: 31, urunModu: 2,
   },
   {
+    // SEVK EDEN İCMALİ (1025, mockup İcmal/sevk_eden_icmali.html): hasta
+    //   gönderen dış doktor / kurum, sevkli ciro, komisyon (gönderen primi).
+    kaynak: 'sevk-eden', rota: 'sevk-eden', ozelSayfa: true,
+    baslik: 'Sevk Eden İcmali', yol: 'İK › Sevk Eden İcmali',
+    menuGrup: 'İK', menuAd: 'Sevk Eden İcmali', ic: '🤝',
+    yetkiKodu: 'prim.sevk_eden', menuSira: 32, urunModu: 2,
+  },
+  {
     // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin
     //   ALTINDA TEK BASINA (kullanici; grupsuz duz oge). Iki modda ORTAK.
     kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',

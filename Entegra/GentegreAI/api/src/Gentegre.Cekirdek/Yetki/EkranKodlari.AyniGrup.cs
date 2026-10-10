@@ -33,6 +33,7 @@ public static partial class EkranKodlari
         ("prim.hekim_performans", "prim"),                      // İK › Doktor Performans İcmali (1021)
         ("iskonto.icmal", "iskonto_onay"),                      // Kayıt Kabul › İskonto İcmali (1023)
         ("maliyet.hasta_basi", "kasa.finans"),                  // Finans › Hasta Başı Maliyet (1024)
+        ("prim.sevk_eden", "prim"),                             // İK › Sevk Eden İcmali (1025)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

@@ -259,6 +259,8 @@ public static partial class EkranKodlari
         "iskonto.icmal",
         // Hasta Başı Maliyet (1024): /api/maliyet-icmal kendi koduna bakar.
         "maliyet.hasta_basi",
+        // Sevk Eden İcmali (1025): /api/sevk-eden kendi koduna bakar.
+        "prim.sevk_eden",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
