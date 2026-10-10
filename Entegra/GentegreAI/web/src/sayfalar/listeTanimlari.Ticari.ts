@@ -321,6 +321,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 70, menuAd: 'Vade / Planlar', ic: '📅', yetkiKodu: 'kasa.finans.vade',
   },
   {
+    // ALACAK YAŞLANDIRMA (1019, mockup İcmal/alacak_yaslandirma.html): hasta
+    //   ve kurum açık bakiyeleri gün dilimlerinde. Yalnız HBYS (hasta / kurum
+    //   payı kavramı).
+    kaynak: 'alacak-yaslandirma', rota: 'alacak-yaslandirma', ozelSayfa: true,
+    baslik: 'Alacak Yaşlandırma', yol: 'Finans › Alacak Yaşlandırma', urunModu: 2,
+    menuGrup: 'Finans', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '⏳', yetkiKodu: 'finans.alacak_yaslandirma',
+  },
+  {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
     // (mali-hareket) yeniden adlandirildi: hem sayfa basligi hem menu adi "Kasa
     // Hareketleri" oldu (Satış'in aksine kullanici burada baslik metnini ACIKCA verdi).

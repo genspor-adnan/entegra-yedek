@@ -249,6 +249,8 @@ public static partial class EkranKodlari
         "banko.vezne_icmal",
         // Medula Mutabakat İcmali (1017): /api/medula/mutabakat kendi koduna bakar.
         "medula.mutabakat",
+        // Alacak Yaşlandırma (1019): /api/alacak-yaslandirma kendi koduna bakar.
+        "finans.alacak_yaslandirma",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
