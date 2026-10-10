@@ -133,6 +133,13 @@ import { KasaIslemKarti } from './KasaIslemKarti';
 import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
   from './listeTanimlari';
 
+/**
+ * Şu anki ekranın uygulama içi yolu (taban yolu atılmış + sorgu) - açılan
+ * ekranın "Geri" dönüşü için. Beş aksiyon aynı ifadeyi tekrarlıyordu.
+ */
+const buYol = () =>
+  `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`;
+
 // Tanimlar ayri dosyada (listeTanimlari); disaridan alisilmis yol bozulmasin
 //   diye buradan da disa aktarilir (App.tsx / Kabuk.tsx LISTELER'i buradan alir).
 export { LISTELER };
@@ -596,8 +603,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     if (kod === 'hasta.icmal') {
       const s = satir ?? seciliSatir;
       if (!s) { mesaj('Önce bir hasta seçin.'); return }
-      const buradan = `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`;
-      git(`/hasta-icmal/${s.id}?geri=${encodeURIComponent(buradan)}`);
+      git(`/hasta-icmal/${s.id}?geri=${encodeURIComponent(buYol())}`);
       return;
     }
     if (kod === 'hasta.basvuru-ekle') {
@@ -836,28 +842,28 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await isgAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
-        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+        geri: buYol(),
       })) return;
 
       // STERILIZASYON (868): dongu karti, izleme, okutma, birim hazirlama adimlari, geri cagirma.
       if (await sterilAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
-        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+        geri: buYol(),
       })) return;
 
       // CAGRI MERKEZI (839): cagri karti, elle kayit, geri arama tamam, kampanya uret/calistir/durdur, kisi ara/sonuc.
       if (await cagriAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
-        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+        geri: buYol(),
       })) return;
 
       // FORM MOTORU (740): sablon kopyala/editor, istek ac/hatirlat/yeniden/iptal, hasta formlari.
       if (await formAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
-        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+        geri: buYol(),
       })) return;
 
       // FTR (719): planla, bugunku seans, sonlandir, seans bitir / gelmedi.
