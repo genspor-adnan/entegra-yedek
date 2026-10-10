@@ -23,6 +23,7 @@ import { isgUclari } from './uclar/isg';
 import { cagriUclari } from './uclar/cagri';
 import { bankoOturumUclari } from './uclar/bankoOturum';
 import { demirbasZimmetUclari } from './uclar/demirbasZimmet';
+import { hastaIcmalUclari } from './uclar/hastaIcmal';
 import { sterilUclari } from './uclar/steril';
 import { hastaUclari } from './uclar/hasta';
 import { medulaUclari } from './uclar/medula';
@@ -98,6 +99,7 @@ export const api = {
   ...cagriUclari,
   ...bankoOturumUclari,
   ...demirbasZimmetUclari,
+  ...hastaIcmalUclari,
   ...sterilUclari,
   ...hastaUclari,
   ...medulaUclari,

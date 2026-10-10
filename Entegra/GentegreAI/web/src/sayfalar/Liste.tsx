@@ -592,6 +592,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     // BAŞVURU EKLE (kullanici): hasta listesinde seçili hastaya başvuru aç
     //   (varsa kapanmamış başvurusu açılır, yoksa yeni). 2. sıra düğmesi.
+    // HASTA İCMALİ (10.10.2026): seçili hastanın hesap icmali; geri dönüş bu listeye.
+    if (kod === 'hasta.icmal') {
+      const s = satir ?? seciliSatir;
+      if (!s) { mesaj('Önce bir hasta seçin.'); return }
+      const buradan = `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`;
+      git(`/hasta-icmal/${s.id}?geri=${encodeURIComponent(buradan)}`);
+      return;
+    }
     if (kod === 'hasta.basvuru-ekle') {
       const s = satir ?? seciliSatir;
       if (!s) { mesaj('Önce bir hasta seçin.'); return }
