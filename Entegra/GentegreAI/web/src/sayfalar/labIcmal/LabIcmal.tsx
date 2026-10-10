@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { LabIcmali } from '../../api/uclar/labIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -21,7 +22,7 @@ import { CihazTablosu, DisLabTablosu, GrupTablosu, KaliteTablosu, TetkikTablosu 
  * numune ret; A4. Rakamlar SUNUCUDAN (LabIcmalUclari). Reaktif maliyeti
  * tetkik kartındaki "Test Başı Maliyet" alanından gelir.
  */
-type Sekme = 'tetkik' | 'grup' | 'cihaz' | 'dis' | 'kalite' | 'onizleme';
+type Sekme = 'tetkik' | 'grup' | 'cihaz' | 'dis' | 'kalite';
 
 export function LabIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -61,7 +62,7 @@ export function LabIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['tetkik', 'Tetkikler', veri.tetkikler.length], ['grup', 'Tetkik Grupları', veri.gruplar.length],
     ['cihaz', 'Cihazlar', veri.cihazlar.length], ['dis', 'Dış Laboratuvar', veri.disLablar.length],
-    ['kalite', 'Kalite / Süre', veri.ozet.asan], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['kalite', 'Kalite / Süre', veri.ozet.asan]] : [];
   const suzgec = [grup ? veri?.grupAdlari.find(g => g.id === grup)?.ad : '', bolum ? veri?.bolumAdlari.find(b => b.id === bolum)?.ad : '']
     .filter(Boolean).join(' · ') || 'Tüm tetkikler';
 
@@ -76,7 +77,10 @@ export function LabIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Laboratuvar İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Laboratuvar İcmali" dosyaAdi={`Laboratuvar İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <LabA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} suzgec={suzgec} />}
+        </CiktiMenusu>
         {secili.length > 0 && <span className="ki-soluk">A4 seçili {secili.length} tetkiki de listeler</span>}
         <span className="sp" />
         <button onClick={() => git('/lab-tetkik')}>📚 Tetkik Kataloğu</button>
@@ -139,9 +143,6 @@ export function LabIcmal() {
             {sekme === 'cihaz' && <CihazTablosu v={veri} />}
             {sekme === 'dis' && <DisLabTablosu v={veri} />}
             {sekme === 'kalite' && <KaliteTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <LabA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} suzgec={suzgec} />
-            </div>
           </div>
         </div>
       </>)}

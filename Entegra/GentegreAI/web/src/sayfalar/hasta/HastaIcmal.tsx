@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { HastaIcmali } from '../../api/uclar/hastaIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { IcmalA4 } from './icmal/IcmalA4';
 import {
@@ -21,7 +22,7 @@ import { stil } from './icmal/icmalStil';
  * kalan borçtan kendiliğinden düşmez. Tablolar `icmal/IcmalTablolari`,
  * A4 belge `icmal/IcmalA4`, saf hesaplar `icmal/icmalOrtak` (testli).
  */
-type Sekme = 'basvuru' | 'hizmet' | 'tahsilat' | 'provizyon' | 'hareket' | 'onizleme';
+type Sekme = 'basvuru' | 'hizmet' | 'tahsilat' | 'provizyon' | 'hareket';
 
 export function HastaIcmal() {
   const { hastaId } = useParams();
@@ -56,7 +57,7 @@ export function HastaIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['basvuru', 'Başvurular', veri.basvurular.length], ['hizmet', 'Hizmetler', veri.hizmetler.length],
     ['tahsilat', 'Tahsilatlar', veri.tahsilatlar.length], ['provizyon', 'Kurum Provizyonları', veri.provizyonlar.length],
-    ['hareket', 'Hareket Özeti', null], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['hareket', 'Hareket Özeti', null]] : [];
 
   return (
     <div className="hi">
@@ -69,7 +70,10 @@ export function HastaIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 İcmal)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Hasta İcmali" dosyaAdi={`Hasta İcmali ${veri?.hasta.ad ?? ''}`} devre={!veri}>
+          {veri && <IcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
+        </CiktiMenusu>
         <span className="sp" />
         {geri && <button onClick={() => git(geri)}>↩ Geri Dön</button>}
       </div>
@@ -114,9 +118,6 @@ export function HastaIcmal() {
             {sekme === 'tahsilat' && <TahsilatTablosu v={veri} />}
             {sekme === 'provizyon' && <ProvizyonTablosu v={veri} />}
             {sekme === 'hareket' && <HareketTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <IcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
-            </div>
           </div>
         </div>
       </>)}

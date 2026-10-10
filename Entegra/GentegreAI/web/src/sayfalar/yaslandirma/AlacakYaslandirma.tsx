@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { AlacakYaslandirma as Veri } from '../../api/uclar/alacakYaslandirma';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -21,7 +22,7 @@ import { bugunYerel } from './yaslandirmaOrtak';
  * aynı kural). Ad tıklanınca ilgili icmal açılır. Listelerde tık / Ctrl /
  * Shift seçimi A4'ü süzer. Görünüm icmallerle ortak.
  */
-type Sekme = 'kurum' | 'hasta' | 'grafik' | 'onizleme';
+type Sekme = 'kurum' | 'hasta' | 'grafik';
 
 const KURUM_TURLERI: [number, string][] = [[0, 'Tümü'], [3, 'SGK'], [2, 'ÖSS'], [4, 'Kurumu öder']];
 
@@ -60,7 +61,7 @@ export function AlacakYaslandirma() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ...(taraf !== 'hasta' ? [['kurum', 'Kurumlar', veri.kurumlar.length] as [Sekme, string, number]] : []),
     ...(taraf !== 'kurum' ? [['hasta', 'Hastalar', veri.hastalar.length] as [Sekme, string, number]] : []),
-    ['grafik', 'Dilim Grafiği', null], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['grafik', 'Dilim Grafiği', null]] : [];
   const yuzde = (n: number) => (o && o.toplam > 0 ? `%${Math.round((100 * n) / o.toplam)}` : '');
 
   return (
@@ -74,7 +75,10 @@ export function AlacakYaslandirma() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Yaşlandırma)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Alacak Yaşlandırma" dosyaAdi={`Alacak Yaşlandırma ${tarih}`} devre={!veri}>
+          {veri && <YaslandirmaA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} seciliKurum={seciliKurum} seciliHasta={seciliHasta} />}
+        </CiktiMenusu>
         {seciliKurum.length + seciliHasta.length > 0 && (
           <span className="ki-soluk">A4 yalnız seçili {seciliKurum.length} kurum · {seciliHasta.length} hastayı basar</span>
         )}
@@ -136,10 +140,6 @@ export function AlacakYaslandirma() {
                             hastaAc={id => git(`/hasta-icmal/${id}?geri=${encodeURIComponent(buYol())}`)} />
             )}
             {sekme === 'grafik' && <DilimGrafigi v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <YaslandirmaA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''}
-                             seciliKurum={seciliKurum} seciliHasta={seciliHasta} />
-            </div>
           </div>
         </div>
       </>)}

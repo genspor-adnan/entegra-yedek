@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { HekimPerformansIcmali } from '../../api/uclar/hekimPerformans';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -21,7 +22,7 @@ import { ayAraligi, degisimRozeti } from './performansOrtak';
  * 6 aylık trend, A4. Rakamlar SUNUCUDAN (HekimPerformansUclari). Hekim
  * seçimi (tık / Ctrl / Shift) grup, trend, özet ve A4'ü süzer.
  */
-type Sekme = 'hekim' | 'bolum' | 'grup' | 'trend' | 'onizleme';
+type Sekme = 'hekim' | 'bolum' | 'grup' | 'trend';
 
 const KURUM_TURLERI: [number, string][] = [[0, 'Tümü'], [1, 'Ücretli'], [3, 'SGK'], [2, 'ÖSS'], [4, 'Kurumu öder']];
 
@@ -66,7 +67,7 @@ export function HekimPerformans() {
   );
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['hekim', 'Doktorlar', veri.hekimler.length], ['bolum', 'Bölümler', veri.bolumler.length],
-    ['grup', 'Hizmet Grupları', veri.gruplar.length], ['trend', 'Aylık Trend', null], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['grup', 'Hizmet Grupları', veri.gruplar.length], ['trend', 'Aylık Trend', null]] : [];
   const dr = o ? degisimRozeti(o.degisim) : null;
 
   return (
@@ -80,7 +81,10 @@ export function HekimPerformans() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Doktor Performansı)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Doktor Performans İcmali" dosyaAdi={`Doktor Performans İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <PerformansA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
+        </CiktiMenusu>
         {secili.length > 0 && <span className="ki-soluk">Seçili {secili.length} doktor: özet, gruplar, trend ve A4 süzülü</span>}
         <span className="sp" />
         <button onClick={() => git('/hakedis')}>💼 Hakedişler</button>
@@ -136,9 +140,6 @@ export function HekimPerformans() {
             {sekme === 'bolum' && <BolumTablosu v={veri} />}
             {sekme === 'grup' && <GrupTablosu v={veri} />}
             {sekme === 'trend' && <TrendGrafigi v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <PerformansA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
-            </div>
           </div>
         </div>
       </>)}

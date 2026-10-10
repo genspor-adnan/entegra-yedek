@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { GoruntulemeIcmali } from '../../api/uclar/goruntulemeIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -20,7 +21,7 @@ import { CihazTablosu, ModaliteTablosu, RaporlayanTablosu, TeleradTablosu, Tetki
  * raporlayanlar ve rapor süresi; cihaz doluluğu; teleradyoloji giden / gelen;
  * A4. Rakamlar SUNUCUDAN (GoruntulemeIcmalUclari).
  */
-type Sekme = 'modalite' | 'tetkik' | 'raporlayan' | 'cihaz' | 'telerad' | 'onizleme';
+type Sekme = 'modalite' | 'tetkik' | 'raporlayan' | 'cihaz' | 'telerad';
 
 export function GoruntulemeIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -60,7 +61,7 @@ export function GoruntulemeIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['modalite', 'Modaliteler', veri.modaliteler.length], ['tetkik', 'Tetkikler', veri.tetkikler.length],
     ['raporlayan', 'Raporlayanlar', veri.raporlayanlar.length], ['cihaz', 'Cihazlar', veri.cihazlar.length],
-    ['telerad', 'Teleradyoloji', veri.teleradGiden.length + veri.teleradGelen.length], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['telerad', 'Teleradyoloji', veri.teleradGiden.length + veri.teleradGelen.length]] : [];
   const suzgec = [modalite ? veri?.modaliteAdlari.find(m => m.id === modalite)?.ad : '',
                   raporlayan === 1 ? 'İç raporlanan' : raporlayan === 2 ? 'Teleradyoloji' : ''].filter(Boolean).join(' · ') || 'Tüm modaliteler';
 
@@ -75,7 +76,10 @@ export function GoruntulemeIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Görüntüleme İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Görüntüleme İcmali" dosyaAdi={`Görüntüleme İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <GoruntulemeA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} suzgec={suzgec} />}
+        </CiktiMenusu>
         {secili.length > 0 && <span className="ki-soluk">A4 seçili {secili.length} modaliteyi listeler</span>}
         <span className="sp" />
         <button onClick={() => git('/radyoloji-pano')}>📊 Radyoloji Pano</button>
@@ -137,9 +141,6 @@ export function GoruntulemeIcmal() {
             {sekme === 'raporlayan' && <RaporlayanTablosu v={veri} />}
             {sekme === 'cihaz' && <CihazTablosu v={veri} />}
             {sekme === 'telerad' && <TeleradTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <GoruntulemeA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} suzgec={suzgec} />
-            </div>
           </div>
         </div>
       </>)}

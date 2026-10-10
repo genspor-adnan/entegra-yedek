@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { KurumIcmalKaydi, KurumIcmali } from '../../api/uclar/kurumIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -31,8 +32,8 @@ import { stil } from './icmal/kurumIcmalStil';
  * icmal kayıtları); eski adres `/kurum-icmal` buraya `?sekme=icmaller` ile
  * yönlenir. Fatura tablosu oraya taşındı, kalan sekme "Cari & Tahsilat".
  */
-type Sekme = 'kurumlar' | 'basvuru' | 'grup' | 'kesinti' | 'icmaller' | 'cari' | 'onizleme';
-const SEKMELER: Sekme[] = ['kurumlar', 'basvuru', 'grup', 'kesinti', 'icmaller', 'cari', 'onizleme'];
+type Sekme = 'kurumlar' | 'basvuru' | 'grup' | 'kesinti' | 'icmaller' | 'cari';
+const SEKMELER: Sekme[] = ['kurumlar', 'basvuru', 'grup', 'kesinti', 'icmaller', 'cari'];
 
 export function KurumIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -143,8 +144,7 @@ export function KurumIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['kurumlar', 'Dönemdeki Kurumlar', veri.kurumlar.length], ['basvuru', 'Başvurular', veri.basvurular.length],
     ['grup', 'Hizmet Grupları', veri.hizmetGruplari.length], ['kesinti', 'Kesinti & İtiraz', veri.kesintiler.length],
-    ['icmaller', 'İcmaller', null], ['cari', 'Cari & Tahsilat', veri.cari ? veri.cari.hareketler.length : null],
-    ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['icmaller', 'İcmaller', null], ['cari', 'Cari & Tahsilat', veri.cari ? veri.cari.hareketler.length : null]] : [];
 
   return (
     <div className="hi">
@@ -162,7 +162,10 @@ export function KurumIcmal() {
         <button className="hi-yesil" disabled={!hazirIcmal} title={hazirIcmal ? '' : 'Hazırlanmış icmal yok'}
                 onClick={faturala}>🧾 Kuruma Fatura Kes</button>
         <span className="ki-ayrac" />
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Kurum İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Kurum İcmali" dosyaAdi={`Kurum İcmali ${tekKurum ? tekKurum.ad + ' ' : ''}${bas} - ${bit}`} devre={!veri}>
+          {veri && <KurumIcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} kurumAdi={kurumAdi} />}
+        </CiktiMenusu>
         <span className="sp" />
         {geri && <button onClick={() => git(geri)}>↩ Geri Dön</button>}
       </div>
@@ -229,13 +232,10 @@ export function KurumIcmal() {
                                donem={`${bas} – ${bit}`} kurumSecIstegi={kurumSecIstegi}
                                icmalOlustur={icmalOlustur}
                                ac={k => icmaleGec(k, 'basvuru')}
-                               yazdir={k => { icmaleGec(k, 'onizleme'); setYazdirBekliyor(true) }}
+                               yazdir={k => { icmaleGec(k, 'basvuru'); setYazdirBekliyor(true) }}
                                faturaAc={id => git(`/belge/${id}`)} degisti={() => setTazele(t => t + 1)} />
             )}
             {sekme === 'cari' && <CariTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <KurumIcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} kurumAdi={kurumAdi} />
-            </div>
           </div>
         </div>
       </>)}

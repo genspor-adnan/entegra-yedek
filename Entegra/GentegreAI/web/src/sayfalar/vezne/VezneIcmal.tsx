@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { VezneIcmali } from '../../api/uclar/vezneIcmal';
 import { BankoOturumModali } from '../../bilesenler/banko/BankoOturumModali';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -23,7 +24,7 @@ import { bugun } from './icmal/vezneOrtak';
  * listesindeki onay kutuları diğer sekmeleri ve A4'ü süzer.
  * Görünüm hasta / kurum icmaliyle ortak.
  */
-type Sekme = 'oturum' | 'tur' | 'pos' | 'devir' | 'onizleme';
+type Sekme = 'oturum' | 'tur' | 'pos' | 'devir';
 
 const VARDIYALAR: [number, string][] = [[0, 'Tümü'], [1, 'Sabah'], [2, 'Öğleden sonra'], [3, 'Akşam'], [4, 'Gece / nöbet'], [9, 'Tüm gün']];
 
@@ -73,8 +74,7 @@ export function VezneIcmal() {
     ['oturum', 'Bankolar / Oturumlar', String(veri.oturumlar.length), ''],
     ['tur', 'Ödeme Türleri', String(veri.turler.length), ''],
     ['pos', 'POS Mutabakatı', posFarkli ? `${posFarkli} uyarı` : String(veri.pos.length), posFarkli ? ' kir' : ''],
-    ['devir', 'Merkez Kasa Devri', String(o!.devredilenOturum), ''],
-    ['onizleme', '🖨️ Önizleme (A4)', null, '']] : [];
+    ['devir', 'Merkez Kasa Devri', String(o!.devredilenOturum), '']] : [];
 
   return (
     <div className="hi">
@@ -87,7 +87,10 @@ export function VezneIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Vezne İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Vezne İcmali" dosyaAdi={`Vezne İcmali ${bas}${bit !== bas ? ' - ' + bit : ''}`} devre={!veri}>
+          {veri && <VezneA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} gunlu={gunlu} />}
+        </CiktiMenusu>
         <span className="sp" />
         <button onClick={() => git('/banko-oturumlar')}>📋 Banko Oturumları</button>
         <button onClick={() => git('/banko-onay')}>✅ Banko Onayları</button>
@@ -147,9 +150,6 @@ export function VezneIcmal() {
             {sekme === 'tur' && <TurTablosu v={veri} />}
             {sekme === 'pos' && <PosTablosu v={veri} />}
             {sekme === 'devir' && <DevirTablosu v={veri} gunlu={gunlu} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <VezneA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} gunlu={gunlu} />
-            </div>
           </div>
         </div>
       </>)}

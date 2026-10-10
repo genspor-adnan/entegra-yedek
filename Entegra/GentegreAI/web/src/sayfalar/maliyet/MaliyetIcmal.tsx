@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { MaliyetIcmali } from '../../api/uclar/maliyetIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -20,7 +21,7 @@ import { BasvuruTablosu, BolumTablosu, FaturasizTablosu, HizmetTablosu } from '.
  * ve bölüm kârlılığı; faturaya girmemiş sarf; A4. Rakamlar SUNUCUDAN
  * (MaliyetIcmalUclari). Başvuru seçimi tık / Ctrl / Shift (A4'ü süzer).
  */
-type Sekme = 'basvuru' | 'hizmet' | 'faturasiz' | 'bolum' | 'onizleme';
+type Sekme = 'basvuru' | 'hizmet' | 'faturasiz' | 'bolum';
 
 export function MaliyetIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -58,8 +59,7 @@ export function MaliyetIcmal() {
   );
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['basvuru', 'Başvurular', veri.basvurular.length], ['hizmet', 'Hizmetler', veri.hizmetler.length],
-    ['faturasiz', 'Faturalanmamış Sarf', veri.faturasizSarf.length], ['bolum', 'Bölümler', veri.bolumler.length],
-    ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['faturasiz', 'Faturalanmamış Sarf', veri.faturasizSarf.length], ['bolum', 'Bölümler', veri.bolumler.length]] : [];
   const marj = o?.marj != null ? `%${o.marj.toFixed(1).replace('.', ',')}` : '—';
 
   return (
@@ -73,7 +73,10 @@ export function MaliyetIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Maliyet İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Hasta Başı Maliyet İcmali" dosyaAdi={`Hasta Başı Maliyet İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <MaliyetA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} />}
+        </CiktiMenusu>
         {secili.length > 0 && <span className="ki-soluk">A4 seçili {secili.length} başvuruyu listeler</span>}
         <span className="sp" />
         <button onClick={() => git('/hekim-performans')}>🩺 Doktor Performans</button>
@@ -128,9 +131,6 @@ export function MaliyetIcmal() {
             {sekme === 'hizmet' && <HizmetTablosu v={veri} />}
             {sekme === 'faturasiz' && <FaturasizTablosu v={veri} />}
             {sekme === 'bolum' && <BolumTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <MaliyetA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={secili} />
-            </div>
           </div>
         </div>
       </>)}

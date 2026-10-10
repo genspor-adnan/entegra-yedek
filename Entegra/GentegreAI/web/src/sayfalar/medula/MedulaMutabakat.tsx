@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { MedulaMutabakati } from '../../api/uclar/medulaMutabakat';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -24,7 +25,7 @@ import { AY_ADLARI, donemDurumRozeti, gecenAyYilAy } from './mutabakat/mutabakat
  * "Eksikleri Faturala" toplu, onay kutusuyla seçilenler tek tek.
  * Görünüm hasta / kurum icmaliyle ortak.
  */
-type Sekme = 'huni' | 'faturasiz' | 'fark' | 'kesinti' | 'onizleme';
+type Sekme = 'huni' | 'faturasiz' | 'fark' | 'kesinti';
 
 export function MedulaMutabakat() {
   const [arama, setArama] = useSearchParams();
@@ -91,8 +92,7 @@ export function MedulaMutabakat() {
     ['huni', 'Huni', null, ''],
     ['faturasiz', 'Faturasız Takipler', String(o.faturasiz), o.faturasiz ? ' kir' : ''],
     ['fark', 'Tutar Farkları', String(o.farkli), o.farkli ? ' kir' : ''],
-    ['kesinti', 'Kesintiler', String(o.kesintiKalem), ''],
-    ['onizleme', '🖨️ Önizleme (A4)', null, '']] : [];
+    ['kesinti', 'Kesintiler', String(o.kesintiKalem), '']] : [];
   const dr = veri?.donem ? donemDurumRozeti(veri.donem.durum) : null;
 
   return (
@@ -112,7 +112,10 @@ export function MedulaMutabakat() {
         <button disabled={!secili.length || calisiyor} onClick={seciliFaturala}>
           ☑ Seçilileri Faturala{secili.length ? ` (${secili.length})` : ''}</button>
         <span className="ki-ayrac" />
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Tutanak)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Medula Mutabakat İcmali" dosyaAdi={`Medula Mutabakat ${yil}-${String(ay).padStart(2, '0')}`} devre={!veri}>
+          {veri && <MutabakatA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
+        </CiktiMenusu>
         <span className="sp" />
         <button onClick={() => git('/medula-fatura-donem')}>🧮 Fatura &amp; Dönem</button>
       </div>
@@ -163,9 +166,6 @@ export function MedulaMutabakat() {
             )}
             {sekme === 'fark' && <FarkTablosu v={veri} />}
             {sekme === 'kesinti' && <KesintiTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <MutabakatA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
-            </div>
           </div>
         </div>
       </>)}

@@ -95,7 +95,7 @@ public static class DisaAktarUclari
     {
         // Kolon sayısı: en geniş tablo (en az 4) - başlık / not bu genişlikte birleşir.
         var n = Math.Max(8, bloklar.Where(b => b.Tur == "tablo")
-            .Select(b => Math.Max(b.Basliklar?.Length ?? 0, b.TabloSatirlari?.Max(r => r.Length) ?? 0)).DefaultIfEmpty(0).Max());
+            .Select(b => Math.Max(b.Basliklar?.Length ?? 0, b.TabloSatirlari?.Select(r => r.Length).DefaultIfEmpty(0).Max() ?? 0)).DefaultIfEmpty(0).Max());
         var genislik = new double[n + 1];
         var r = 1;
 

@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { SevkEdenIcmali } from '../../api/uclar/sevkEden';
 import { paraYaz } from '../../bilesenler/bicim';
+import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -22,7 +23,7 @@ import { BasvuruTablosu, DoktorTablosu, OdemeTablosu } from './SevkTablolari';
  * motoru üretir; "Komisyonları Onayla" ve "Ödeme Listesi Oluştur" Prim
  * modülünün uçlarını çağırır (/api/prim/onayla, /api/prim/donem-kapat).
  */
-type Sekme = 'doktor' | 'basvuru' | 'odeme' | 'onizleme';
+type Sekme = 'doktor' | 'basvuru' | 'odeme';
 
 export function SevkEdenIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -85,7 +86,7 @@ export function SevkEdenIcmal() {
   );
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['doktor', 'Dış Doktorlar', veri.doktorlar.length], ['basvuru', 'Sevkli Başvurular', veri.basvurular.length],
-    ['odeme', 'Komisyon Ödemeleri', veri.odemeler.length], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['odeme', 'Komisyon Ödemeleri', veri.odemeler.length]] : [];
   const sevkDegisim = o && o.oncekiBasvuru > 0 ? Math.round(100 * (o.basvuru - o.oncekiBasvuru) / o.oncekiBasvuru) : null;
 
   return (
@@ -104,7 +105,10 @@ export function SevkEdenIcmal() {
         <button disabled={!listeye.length} title={listeye.length ? '' : 'Listeye alınacak komisyon yok'}
                 onClick={odemeListesi}>🧾 Ödeme Listesi Oluştur{listeye.length ? ` (${listeye.length})` : ''}</button>
         <span className="ki-ayrac" />
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Sevk İcmali)</button>
+        {/* ÇIKTI MENÜSÜ: Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸ - A4 menünün içinde, ayrı önizleme sekmesi yok. */}
+        <CiktiMenusu etiket="Sevk Eden İcmali" dosyaAdi={`Sevk Eden İcmali ${bas} - ${bit}`} devre={!veri}>
+          {veri && <SevkA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
+        </CiktiMenusu>
         <span className="sp" />
         <button onClick={() => git('/hakedis')}>💼 Hakedişler</button>
       </div>
@@ -147,9 +151,6 @@ export function SevkEdenIcmal() {
             {sekme === 'doktor' && <DoktorTablosu v={veri} secili={secili} setSecili={s => degistir({ gonderenler: s.join(',') })} />}
             {sekme === 'basvuru' && <BasvuruTablosu v={veri} />}
             {sekme === 'odeme' && <OdemeTablosu v={veri} />}
-            <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
-              <SevkA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />
-            </div>
           </div>
         </div>
       </>)}
