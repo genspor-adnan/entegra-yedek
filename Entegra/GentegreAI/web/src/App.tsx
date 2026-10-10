@@ -36,8 +36,6 @@ const KayitKabulAyarlar = tembel(() => import('./sayfalar/KayitKabulAyarlar'), '
 const KatalogAyarlar = tembel(() => import('./sayfalar/KatalogAyarlar'), 'KatalogAyarlar');
 const DepartmanGorev = tembel(() => import('./sayfalar/DepartmanGorev'), 'DepartmanGorev');
 const FirmaBilgileri = tembel(() => import('./sayfalar/FirmaBilgileri'), 'FirmaBilgileri');
-// MENÜ DÜZENİ (979): yalnız yöneticinin açtığı ekran - tembel yüklenir.
-const MenuDuzeni = tembel(() => import('./sayfalar/MenuDuzeni'), 'MenuDuzeni');
 const GenelAyarlar = tembel(() => import('./sayfalar/GenelAyarlar'), 'GenelAyarlar');
 const Mesajlar = tembel(() => import('./sayfalar/Mesajlar'), 'Mesajlar');
 const MuayeneSablonlari = tembel(() => import('./sayfalar/MuayeneSablonlari'), 'MuayeneSablonlari');
@@ -248,8 +246,7 @@ function Yollar() {
         {yetki('personel.bolum') && <Route path="/departman" element={<DepartmanGorev />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
         {/* Kurum profili (489): Firma Bilgileri'nin sekmesiydi, kendi ekrani. */}
-        {/* MENÜ DÜZENİ (979): menünün şube başına yerleşimi. */}
-        {yetki('menu.duzen') && <Route path="/menu-duzeni" element={<MenuDuzeni />} />}
+        {/* MENÜ DÜZENİ (979) yalnız GenProfil'de - web rotası kaldırıldı (10.10.2026). */}
         {yetki('belge.satis.ayar') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
         {yetki('belge.alis.ayar') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}

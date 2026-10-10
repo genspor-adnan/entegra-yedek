@@ -394,21 +394,10 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
   //   parolayla bağlanıp düzenler. Ekranın BİLEŞENİ (bilesenler/
   //   KurumTipiAyarlari) duruyor: GenProfil onu buradan paylaşıyor, iki kopya
   //   iki ayrı davranış demekti.
-  {
-    // MENU DUZENI (979): sol menunun sube basina yerlesimi - sira, gorunen ad,
-    //   gizleme. Liste degil (ozelSayfa); kendi yetkisi var cunku yanlis elde
-    //   butun kullanicilarin menusunu bozar.
-    kaynak: 'menu-duzen', rota: 'menu-duzeni', baslik: 'Menü Düzeni',
-    yol: 'Yönetim › Ayarlar › Menü Düzeni',
-    ozelSayfa: true,
-    // MENÜDE AYRI GİRDİ YOK (kullanıcı 06.10.2026: ekran Kurum Profili'nin
-    //   "Menü Düzeni" sekmesine taşındı): aynı ekranı iki yerden açmak,
-    //   hangisinin güncel olduğu sorusunu doğurur. Rota duruyor - derin
-    //   bağlantı ve yardım kaydı onu kullanıyor.
-    menuGizli: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Menü Düzeni', menuSira: 45,
-    ic: '🌳', yetkiKodu: 'menu.duzen',
-  },
+  // MENÜ DÜZENİ (979) WEB'DEN KALKTI (kullanıcı 10.10.2026: "Yönetim › Ayarlar ›
+  //   Menü Düzeni geldi.. projeden çıkarıp genprofil'e almıştık"): ekran yalnız
+  //   GenProfil'de (KurumTipiAyarlari içinde gömülü MenuDuzeni). Liste tanımı ve
+  //   rota duruyordu - komut paleti ve yardım asistanı onu öneriyordu.
   {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
