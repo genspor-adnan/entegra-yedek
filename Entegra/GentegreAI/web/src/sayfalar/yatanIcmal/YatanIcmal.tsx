@@ -68,7 +68,7 @@ export function YatanIcmal() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Yatan Hasta İcmali</h1>
-          <span className="yol">Yatan Hasta › Dönem İcmali</span>
+          <span className="yol">Yatan Hasta › Yatan Hasta İcmali</span>
         </div>
       </div>
 

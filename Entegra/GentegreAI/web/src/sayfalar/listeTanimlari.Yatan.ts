@@ -153,9 +153,9 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     // YATAN HASTA DÖNEM İCMALİ (1028, mockup İcmal/yatan_hasta_icmali.html): servis
     //   başına yatış / taburcu / hasta-gün / doluluk / ALOS / ciro, açık hesaplar.
     kaynak: 'yatan-icmal', rota: 'yatan-icmal', ozelSayfa: true,
-    baslik: 'Yatan Hasta İcmali', yol: 'Yatan Hasta › Dönem İcmali',
+    baslik: 'Yatan Hasta İcmali', yol: 'Yatan Hasta › Yatan Hasta İcmali',
     urunModu: 2,
-    menuGrup: 'Yatan Hasta', menuAd: 'Dönem İcmali', ic: '@icmal',
+    menuGrup: 'Yatan Hasta', menuAd: 'Yatan Hasta İcmali', ic: '@icmal',
     yetkiKodu: 'yatan.donem_icmal', menuSira: 55,
   },
 ];
