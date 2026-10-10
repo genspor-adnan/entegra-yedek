@@ -168,7 +168,11 @@ public sealed record KaynakTanimi(
     string? GrupKolonu = null,
     // Gruplarin SIRASI bu kolona gore (or. "dovizSira": yerel para 0, digerleri 1).
     //   Verilmezse grup kolonunun kendisi kullanilir.
-    string? GrupSiraKolonu = null
+    string? GrupSiraKolonu = null,
+    // URUN MODU (10.10.2026, kullanici: "uretimle ilgili dokumler sadece ERP
+    //   modunda olur"): 0 her kurulum · 1 yalniz ERP · 2 yalniz HBYS. Dokum
+    //   tasarimcisinin kaynak listesi buna gore suzulur (UrunModlari.Uyar).
+    int UrunModu = 0
 )
 {
     private Dictionary<string, KolonTanimi>? _dizin;

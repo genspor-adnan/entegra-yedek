@@ -17,6 +17,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi UrunAgaci() => new(
         Ad: "urun-agaci",
+        UrunModu: UrunModlari.Erp,   // uretim yalniz ERP
         YetkiKodu: "uretim",
         Kaynak: "public.urun_agaci a "
               + "  join public.stok s on s.id = a.stok_id "
@@ -88,6 +89,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi UretimEmri() => new(
         Ad: "uretim-emri",
+        UrunModu: UrunModlari.Erp,
         YetkiKodu: "uretim",
         Kaynak: "public.uretim_emri e "
               + "  join public.stok s on s.id = e.stok_id "
@@ -170,6 +172,7 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi IsMerkezi() => new(
         Ad: "is-merkezi",
+        UrunModu: UrunModlari.Erp,
         YetkiKodu: "uretim.is_merkezi",   // 1004 aşama 2: kendi kodu
         Kaynak: "public.is_merkezi m left join public.taraf f on f.id = m.fason_taraf_id",
         SubeKolonu: "m.sube_id",

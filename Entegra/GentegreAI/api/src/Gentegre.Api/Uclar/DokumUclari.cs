@@ -38,6 +38,8 @@ public static class DokumUclari
             var urunModu = await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal);
             var kaynaklar = KaynakKatalogu.Tumu
                 .Where(k => baglam.Yetkiler.Var(k.YetkiKodu, Islem.Gor))
+                // Urun modu: uretim kaynaklari HBYS'de listelenmez (10.10.2026).
+                .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu))
                 .Select(k => new KaynakMeta(k.Ad, k.YetkiKodu, KaynakBasligi(k),
                     GorunurKolonlar(k, baglam, urunModu)
                         .Select(c => new KolonBoyutMeta(c.Ad, c.Baslik, c.Tip, c.Filtrelenebilir,
