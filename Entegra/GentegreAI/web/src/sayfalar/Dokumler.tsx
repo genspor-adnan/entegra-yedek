@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import {
   hataMetni, type DokumKatalogu, type DokumKaydi, type DokumTanimi, type ListeYaniti, type OzetYaniti,
@@ -34,13 +35,22 @@ type Sekme = 'liste' | 'tasarla' | 'istatistik' | 'onizle' | 'baski';
 
 export function Dokumler() {
   const { kullanici, yetki } = useOturum();
+  // GRUP ADRESTEN, ROUTER ÜZERİNDEN (kullanıcı 10.10.2026: "radyoloji altındaki
+  //   dökümlere tıklıyorum ama olmuyor"): window.location'dan okununca bir
+  //   Dökümler ekranından ötekine (?grup=Laboratuvar -> ?grup=Radyoloji)
+  //   geçişte rota aynı kaldığı için ekran yeniden çizilmiyor, eski grup
+  //   kalıyordu. useSearchParams adres değişince yeniden çizdirir.
+  const [aramaParam] = useSearchParams();
+  const grup = aramaParam.get('grup') ?? '';
   // GRUBUN KENDİ KODU (1003): Finans › Dökümler `dokum.finans` ile açılır,
-  //   tasarımcı (grupsuz, Yönetim) `dokum.yonetim` ile.
-  const dokumYetki = dokumKodu(new URLSearchParams(window.location.search).get('grup'));
+  //   tasarımcı (grupsuz) `dokum.yonetim` ile.
+  const dokumYetki = dokumKodu(grup || null);
   const yazabilir = yetki(dokumYetki, 'ekle');
   const yonetici = yetki(dokumYetki, 'degistir');
 
   const [sekme, setSekme] = useState<Sekme>('liste');
+  // Başka grubun Dökümler'ine geçince liste sekmesine dön (açık döküm o gruba ait değil).
+  useEffect(() => { setSekme('liste') }, [grup]);
   const [katalog, setKatalog] = useState<DokumKatalogu | null>(null);
   const [liste, setListe] = useState<DokumKaydi[]>([]);
 
@@ -52,7 +62,6 @@ export function Dokumler() {
    * dokumu de o gruba aittir. Ayri bir "dokum grubu" alani acmak, ekran baska
    * gruba tasindiginda sessizce yanlis yere duserdi.
    */
-  const grup = new URLSearchParams(window.location.search).get('grup') ?? '';
 
   /**
    * Süzgeç DÖKÜMÜN KENDİ GRUBUNDAN (690). Kaynaktan türetmek yanlıştı: `belge`
@@ -198,8 +207,9 @@ export function Dokumler() {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>{c('Dökümler &amp; İstatistik')}</h1>
-          <span className="yol">{c('Yönetim › Dökümler')}</span>
+          {/* JSX'te `&amp;` metin olarak basılıyordu; yol grubu söylesin (10.10.2026). */}
+          <h1>{c('Dökümler & İstatistik')}</h1>
+          <span className="yol">{grup ? `${grup} › Dökümler` : c('Yönetim › Dökümler')}</span>
           {id > 0 && <span className="rozet mavi">{ad} · v{surum}</span>}
           {kirli && <span className="rozet uyari">kaydedilmedi</span>}
         </div>
