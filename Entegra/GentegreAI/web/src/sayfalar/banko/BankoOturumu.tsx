@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { odemeTuruIkonu } from './odemeTuru';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import {
@@ -1094,7 +1095,7 @@ function TurTablosu({ turler, oturum, poslar }: {
             const es = eslesmeRozeti(x, oturum, poslar ?? []);
             return (
               <tr key={x.tur}>
-                <td>{turIkonu(x)} {x.turAdi}</td>
+                <td>{odemeTuruIkonu(x)} {x.turAdi}</td>
                 <td>{x.adet}</td>
                 <td>{para(x.tahsilat)}</td>
                 <td>{x.iade ? '−' + para(x.iade) : '—'}</td>
@@ -1119,19 +1120,10 @@ function TurTablosu({ turler, oturum, poslar }: {
 
 /**
  * MOCKUP İKON + ROZET (kullanıcı 09.10.2026: "ödeme türleri mockup gibi
- * ikonlu ve son 2 sütun rozetli olsun"). Tür ayrımı ana hesap türünden:
- * K nakit, P POS, B havale; grup çek/senet ve kupon. `kasaDurumu` POS ile
- * havaleyi ayırmaz (ikisi de 2) - ikon ve eşleşme için hesap türüne bakılır.
+ * ikonlu ve son 2 sütun rozetli olsun"). İkon ortak (banko/odemeTuru).
+ * `kasaDurumu` POS ile havaleyi ayırmaz (ikisi de 2) - eşleşme için hesap
+ * türüne bakılır.
  */
-function turIkonu(x: TurOzeti): string {
-  if (x.hesapTuru === 'K') return '💵';
-  if (x.hesapTuru === 'P') return '💳';
-  if (x.hesapTuru === 'B') return '🏦';
-  if (x.turGrup === 'ceksenet') return '🧾';
-  if (x.turGrup === 'kupon') return '🎟';
-  return '💠';
-}
-
 function kasadaRozeti(x: TurOzeti): { ad: string; renk: string } {
   if (x.kasaDurumu === 1) return { ad: 'Evet · sayılır', renk: 'ok' };
   if (x.kasaDurumu === 3) return { ad: 'Fiziken evet · sayıma girmez', renk: 'pas' };

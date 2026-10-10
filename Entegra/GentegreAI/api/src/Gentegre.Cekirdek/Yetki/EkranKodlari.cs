@@ -245,6 +245,8 @@ public static partial class EkranKodlari
         // Sabit Varlıklar (1007): Zimmet / Hareketler kendi uçlarında
         //   (DemirbasZimmetUclari), demirbaş kartının kapısını açmaz.
         "demirbas.zimmet", "demirbas.ayar",
+        // Vezne İcmali (1016): kendi ucu (VezneIcmalUclari) kendi koduna bakar.
+        "banko.vezne_icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

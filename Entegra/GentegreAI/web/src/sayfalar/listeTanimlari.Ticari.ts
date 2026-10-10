@@ -412,6 +412,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kayıt Kabul', menuSira: 24, menuAd: 'Banko Oturumları', ic: '📋',
     yetkiKodu: 'banko_oturum',
   },
+  // --- VEZNE İCMALİ (1016, mockup İcmal/vezne_icmali.html): şubenin bütün
+  //     bankolarının günü tek ekranda - vezne sorumlusunun gün sonu özeti.
+  {
+    kaynak: 'vezne-icmali', rota: 'vezne-icmali', ozelSayfa: true,
+    baslik: 'Vezne İcmali', yol: 'Kayıt Kabul › Vezne İcmali',
+    menuGrup: 'Kayıt Kabul', menuSira: 25, menuAd: 'Vezne İcmali', ic: '💵',
+    yetkiKodu: 'banko.vezne_icmal',
+  },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {
