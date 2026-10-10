@@ -261,6 +261,8 @@ public static partial class EkranKodlari
         "maliyet.hasta_basi",
         // Sevk Eden İcmali (1025): /api/sevk-eden kendi koduna bakar.
         "prim.sevk_eden",
+        // Laboratuvar İcmali (1026): /api/lab-icmal kendi koduna bakar.
+        "lab.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

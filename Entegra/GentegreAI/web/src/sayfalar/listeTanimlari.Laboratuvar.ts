@@ -590,4 +590,12 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Eşleme', menuSira: 204,
     ic: '🔌', yetkiKodu: 'lab.cihaz',
   },
+  {
+    // LABORATUVAR İCMALİ (1026, mockup İcmal/laboratuvar_icmali.html): tetkik
+    //   adet / ciro / reaktif maliyeti / marj, cihaz, dış lab, TAT, numune ret.
+    kaynak: 'lab-icmal', rota: 'lab-icmal', ozelSayfa: true,
+    baslik: 'Laboratuvar İcmali', yol: 'Laboratuvar › Laboratuvar İcmali',
+    menuGrup: 'Laboratuvar', menuAd: 'Laboratuvar İcmali', ic: '📊',
+    yetkiKodu: 'lab.icmal', menuSira: 45, urunModu: 2, modul: 'lab',
+  },
 ];

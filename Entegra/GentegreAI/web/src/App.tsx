@@ -36,6 +36,7 @@ const HekimPerformans = tembel(() => import('./sayfalar/performans/HekimPerforma
 const IskontoIcmal = tembel(() => import('./sayfalar/iskontoIcmal/IskontoIcmal'), 'IskontoIcmal');
 const MaliyetIcmal = tembel(() => import('./sayfalar/maliyet/MaliyetIcmal'), 'MaliyetIcmal');
 const SevkEdenIcmal = tembel(() => import('./sayfalar/sevk/SevkEdenIcmal'), 'SevkEdenIcmal');
+const LabIcmal = tembel(() => import('./sayfalar/labIcmal/LabIcmal'), 'LabIcmal');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -250,6 +251,7 @@ function Yollar() {
         {yetki('iskonto.icmal') && <Route path="/iskonto-icmali" element={<IskontoIcmal />} />}
         {yetki('maliyet.hasta_basi') && <Route path="/maliyet-icmali" element={<MaliyetIcmal />} />}
         {yetki('prim.sevk_eden') && <Route path="/sevk-eden" element={<SevkEdenIcmal />} />}
+        {yetki('lab.icmal') && <Route path="/lab-icmal" element={<LabIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}

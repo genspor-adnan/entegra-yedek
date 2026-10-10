@@ -27,6 +27,14 @@ public static partial class KartKatalogu
         ["7"] = "İdrar", ["9"] = "Diğer",
     };
 
+    /// <summary>Tetkik bölümünün adı (icmaller); bilinmeyen kod "Diğer".</summary>
+    public static string LabTetkikBolumAdi(short kod)
+        => LabTetkikBolumKodlari.TryGetValue(kod.ToString(), out var ad) ? ad : "Diğer";
+
+    /// <summary>Bütün tetkik bölümleri (şerit süzgeci).</summary>
+    public static IEnumerable<(short Kod, string Ad)> LabTetkikBolumleri()
+        => LabTetkikBolumKodlari.Select(x => (short.Parse(x.Key), x.Value));
+
     /// <summary>
     /// ÇALIŞMA DÜZENİ (486). Laboratuvarda her tetkik her an çalışmaz: hormon
     /// paneli haftada üç gün seri hâlinde, tam kan sayımı sürekli çalışır.
@@ -126,6 +134,10 @@ public static partial class KartKatalogu
             // Hizmet 1:1: faturalama ve fiyat hizmet kartından gelir.
             new("hizmetId", "hizmet_id", "kod", KodTablosu: "public.v_hizmet_lookup",
                 Baslik: "Hizmet (fiyat/fatura)", Grup: "Genel", AltGrup: "Tanım"),
+            // TEST BAŞI MALİYET (1026): reaktif / kit / sarf - Laboratuvar İcmali
+            //   maliyeti ve marjı bundan hesaplar (× 1 + tekrar). Dış labda kullanılmaz.
+            new("testBasiMaliyet", "test_basi_maliyet", "sayi",
+                Baslik: "Test Başı Maliyet (reaktif / kit)", Grup: "Genel", AltGrup: "Tanım"),
             new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
 

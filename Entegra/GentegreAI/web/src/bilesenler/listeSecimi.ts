@@ -5,8 +5,8 @@
  * Ctrl (Mac'te Cmd) ekler / çıkarır; Shift son tıklanandan bu satıra kadar
  * aralığı seçer (Ctrl+Shift aralığı mevcut seçime ekler).
  */
-export function secimUygula(secili: number[], id: number, sira: number[], sonId: number | null,
-                            tus: { ctrl: boolean; shift: boolean }): number[] {
+export function secimUygula<K extends number | string>(secili: K[], id: K, sira: K[], sonId: K | null,
+                                                     tus: { ctrl: boolean; shift: boolean }): K[] {
   if (tus.shift && sonId != null && sira.includes(sonId)) {
     const a = sira.indexOf(sonId), b = sira.indexOf(id);
     const aralik = sira.slice(Math.min(a, b), Math.max(a, b) + 1);
