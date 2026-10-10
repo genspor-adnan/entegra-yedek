@@ -30,7 +30,7 @@ public static partial class EkranKodlari
         ("medula.mutabakat", "medula.fatura"),                  // Medula › Mutabakat İcmali (1017)
         ("finans.alacak_yaslandirma", "kasa.finans"),           // Finans › Alacak Yaşlandırma (1019)
         ("hasta.borc_takip", "banko_onay"),                     // Kayıt Kabul › Hasta Borç Takibi (1020)
-        ("prim.hekim_performans", "prim"),                      // İK › Hekim Performans İcmali (1021)
+        ("prim.hekim_performans", "prim"),                      // İK › Doktor Performans İcmali (1021)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

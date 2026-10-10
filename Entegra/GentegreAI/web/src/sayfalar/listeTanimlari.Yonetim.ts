@@ -127,8 +127,9 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // HEKİM PERFORMANS İCMALİ (1021, mockup İcmal/hekim_performans_icmali.html):
     //   hekim / bölüm başına ciro, kurum / hasta payı, iskonto, hakediş.
     kaynak: 'hekim-performans', rota: 'hekim-performans', ozelSayfa: true,
-    baslik: 'Hekim Performans İcmali', yol: 'İK › Hekim Performans İcmali',
-    menuGrup: 'İK', menuAd: 'Hekim Performans İcmali', ic: '🩺',
+    // AD (kullanıcı 10.10.2026): "Doktor Performans İcmali" - kod ve adres aynı kaldı.
+    baslik: 'Doktor Performans İcmali', yol: 'İK › Doktor Performans İcmali',
+    menuGrup: 'İK', menuAd: 'Doktor Performans İcmali', ic: '🩺',
     yetkiKodu: 'prim.hekim_performans', menuSira: 31, urunModu: 2,
   },
   {

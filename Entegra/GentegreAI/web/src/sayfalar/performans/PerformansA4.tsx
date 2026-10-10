@@ -23,14 +23,14 @@ export function PerformansA4({ v, antet, duzenleyen }: {
             .filter(x => x && String(x).trim()).join(' · ')}</div></div>
         <div className="a4-tarih">Düzenleme: {new Date().toLocaleString('tr-TR')}<br />Düzenleyen: {duzenleyen}</div>
       </div>
-      <h3>HEKİM PERFORMANS İCMALİ</h3>
+      <h3>DOKTOR PERFORMANS İCMALİ</h3>
       <div className="a4-hasta">
         <span>Dönem: <b>{tarihKisa(v.donem.bas)} - {tarihKisa(v.donem.bit)}</b></span>
         <span>Karşılaştırma: {tarihKisa(v.donem.oncekiBas)} - {tarihKisa(v.donem.oncekiBit)}</span>
-        <span>Hekim: {hekimler.length}{v.secili.length ? ' (seçili)' : ''}</span><span>Başvuru: {o.basvuru}</span>
+        <span>Doktor: {hekimler.length}{v.secili.length ? ' (seçili)' : ''}</span><span>Başvuru: {o.basvuru}</span>
       </div>
       <table className="a4-t pf-a4t">
-        <thead><tr><th>Hekim</th><th>Bölüm</th><th>Başvuru</th><th>Ciro</th><th>Kurum</th><th>Hasta</th>
+        <thead><tr><th>Doktor</th><th>Bölüm</th><th>Başvuru</th><th>Ciro</th><th>Kurum</th><th>Hasta</th>
           <th>İskonto</th><th>Hakediş</th><th>Değişim</th></tr></thead>
         <tbody>
           {hekimler.map(h => (
@@ -42,7 +42,7 @@ export function PerformansA4({ v, antet, duzenleyen }: {
         </tbody>
       </table>
       <table className="a4-toplam"><tbody>
-        <tr><td>Ciro{v.secili.length ? ' (seçili hekimler)' : ' (hekimsiz başvurular dahil)'}</td><td>{paraYaz(o.ciro)}</td></tr>
+        <tr><td>Ciro{v.secili.length ? ' (seçili doktorlar)' : ' (doktorsuz başvurular dahil)'}</td><td>{paraYaz(o.ciro)}</td></tr>
         <tr><td>Kurum payı (%{o.kurumOrani.toFixed(1).replace('.', ',')})</td><td>{paraYaz(o.kurumPayi)}</td></tr>
         <tr><td>Hasta payı</td><td>{paraYaz(o.hastaPayi)}</td></tr>
         <tr><td>İskonto</td><td>{paraYaz(o.iskonto)}</td></tr>

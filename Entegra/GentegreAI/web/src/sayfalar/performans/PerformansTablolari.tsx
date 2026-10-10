@@ -47,9 +47,9 @@ export function HekimTablosu({ v, secili, setSecili }: {
     <table className="hi-tablo">
       <thead><tr>
         <th style={{ width: 28 }}><input type="checkbox" checked={hepsi} onChange={() => setSecili(hepsi ? [] : v.hekimler.map(h => h.id))} /></th>
-        <th>Hekim</th><th>Bölüm</th>{BASLIKLAR.map(b => <th key={b} className={b === 'Değişim' ? '' : 'sag'}>{b}</th>)}</tr></thead>
+        <th>Doktor</th><th>Bölüm</th>{BASLIKLAR.map(b => <th key={b} className={b === 'Değişim' ? '' : 'sag'}>{b}</th>)}</tr></thead>
       <tbody>
-        {v.hekimler.length === 0 && <tr><td colSpan={12} className="bos">Bu dönemde hekime bağlı başvuru yok.</td></tr>}
+        {v.hekimler.length === 0 && <tr><td colSpan={12} className="bos">Bu dönemde doktora bağlı başvuru yok.</td></tr>}
         {v.hekimler.map(h => {
           const sec = secili.includes(h.id);
           return (
@@ -61,10 +61,10 @@ export function HekimTablosu({ v, secili, setSecili }: {
           );
         })}
         {v.hekimsiz.basvuru > 0 && (
-          <tr className="pf-soluk"><td /><td colSpan={2}>Hekimi girilmemiş başvuru</td><td className="sag">{v.hekimsiz.basvuru}</td>
+          <tr className="pf-soluk"><td /><td colSpan={2}>Doktoru girilmemiş başvuru</td><td className="sag">{v.hekimsiz.basvuru}</td>
             <td /><td className="sag">{p(v.hekimsiz.ciro)}</td><td colSpan={7} /></tr>
         )}
-        {v.hekimler.length > 0 && <ToplamSatiri d={v.ozet} etiket={secili.length ? `Seçili ${secili.length} hekim` : 'Toplam (hekimsiz dahil)'} onBos={1} etiketSpan={2} />}
+        {v.hekimler.length > 0 && <ToplamSatiri d={v.ozet} etiket={secili.length ? `Seçili ${secili.length} doktor` : 'Toplam (doktorsuz dahil)'} onBos={1} etiketSpan={2} />}
       </tbody>
     </table>
   );
@@ -73,7 +73,7 @@ export function HekimTablosu({ v, secili, setSecili }: {
 export function BolumTablosu({ v }: { v: HekimPerformansIcmali }) {
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Bölüm</th><th className="sag">Hekim</th>{BASLIKLAR.map(b => <th key={b} className={b === 'Değişim' ? '' : 'sag'}>{b}</th>)}</tr></thead>
+      <thead><tr><th>Bölüm</th><th className="sag">Doktor</th>{BASLIKLAR.map(b => <th key={b} className={b === 'Değişim' ? '' : 'sag'}>{b}</th>)}</tr></thead>
       <tbody>
         {v.bolumler.length === 0 && <tr><td colSpan={11} className="bos">Bu dönemde başvuru yok.</td></tr>}
         {v.bolumler.map(b => (
@@ -126,7 +126,7 @@ export function TrendGrafigi({ v }: { v: HekimPerformansIcmali }) {
           </div>
         ))}
       </div>
-      <div className="ki-soluk">Sütun: ciro · koyu kısım kurum payı{v.secili.length ? ` · seçili ${v.secili.length} hekim` : ''}</div>
+      <div className="ki-soluk">Sütun: ciro · koyu kısım kurum payı{v.secili.length ? ` · seçili ${v.secili.length} doktor` : ''}</div>
     </div>
   );
 }

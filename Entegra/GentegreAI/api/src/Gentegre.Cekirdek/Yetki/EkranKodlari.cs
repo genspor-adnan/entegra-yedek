@@ -253,7 +253,7 @@ public static partial class EkranKodlari
         "finans.alacak_yaslandirma",
         // Hasta Borç Takibi (1020): /api/hasta-borc kendi koduna bakar.
         "hasta.borc_takip",
-        // Hekim Performans İcmali (1021): /api/hekim-performans kendi koduna bakar.
+        // Doktor Performans İcmali (1021): /api/hekim-performans kendi koduna bakar.
         "prim.hekim_performans",
     };
 

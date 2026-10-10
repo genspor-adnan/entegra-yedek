@@ -65,7 +65,7 @@ export function HekimPerformans() {
     <div className={'hi-kutu ' + sinif}><div className="bas">{baslik}</div><div className="deg">{deg}</div><div className="alt">{alt}</div></div>
   );
   const sekmeler: [Sekme, string, number | null][] = veri ? [
-    ['hekim', 'Hekimler', veri.hekimler.length], ['bolum', 'Bölümler', veri.bolumler.length],
+    ['hekim', 'Doktorlar', veri.hekimler.length], ['bolum', 'Bölümler', veri.bolumler.length],
     ['grup', 'Hizmet Grupları', veri.gruplar.length], ['trend', 'Aylık Trend', null], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
   const dr = o ? degisimRozeti(o.degisim) : null;
 
@@ -74,14 +74,14 @@ export function HekimPerformans() {
       <style>{hastaIcmalStili + kurumIcmalStili + PERFORMANS_STILI}</style>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>Hekim Performans İcmali</h1>
-          <span className="yol">İK › Hekim Performans İcmali</span>
+          <h1>Doktor Performans İcmali</h1>
+          <span className="yol">İK › Doktor Performans İcmali</span>
         </div>
       </div>
 
       <div className="hi-arac">
-        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Performans)</button>
-        {secili.length > 0 && <span className="ki-soluk">Seçili {secili.length} hekim: özet, gruplar, trend ve A4 süzülü</span>}
+        <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Doktor Performansı)</button>
+        {secili.length > 0 && <span className="ki-soluk">Seçili {secili.length} doktor: özet, gruplar, trend ve A4 süzülü</span>}
         <span className="sp" />
         <button onClick={() => git('/hakedis')}>💼 Hakedişler</button>
       </div>
@@ -107,13 +107,13 @@ export function HekimPerformans() {
               {KURUM_TURLERI.map(([k, ad]) => <option key={k} value={k}>{ad}</option>)}
             </select>
           </div>
-          {secili.length > 0 && <div className="sel">☑ {secili.length} hekim <a className="ki-lnk" onClick={() => degistir({ hekimler: '' })}>temizle</a></div>}
+          {secili.length > 0 && <div className="sel">☑ {secili.length} doktor <a className="ki-lnk" onClick={() => degistir({ hekimler: '' })}>temizle</a></div>}
           <span className="sp" />
           <span className="ki-soluk">karşılaştırma: {new Date(veri.donem.oncekiBas).toLocaleDateString('tr-TR')} – {new Date(veri.donem.oncekiBit).toLocaleDateString('tr-TR')}</span>
         </div>
 
         <div className="hi-ozet">
-          {kutu('Başvuru', String(o.basvuru), `${veri.hekimler.length} hekim · ${veri.hekimsiz.basvuru} hekimsiz`)}
+          {kutu('Başvuru', String(o.basvuru), `${veri.hekimler.length} doktor · ${veri.hekimsiz.basvuru} doktorsuz`)}
           {kutu('Hizmet', String(o.hizmet), 'kalem')}
           {kutu('Ciro', paraYaz(o.ciro), dr ? `önceki döneme göre ${dr.ad}` : '', 'mor')}
           {kutu('Kurum Payı', paraYaz(o.kurumPayi), `%${o.kurumOrani.toFixed(1).replace('.', ',')}`)}

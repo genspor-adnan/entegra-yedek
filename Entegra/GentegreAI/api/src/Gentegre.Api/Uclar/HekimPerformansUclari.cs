@@ -32,7 +32,7 @@ public static class HekimPerformansUclari
 
     public static void HekimPerformansUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/hekim-performans").WithTags("Hekim Performans").RequireAuthorization();
+        var grup = yol.MapGroup("/api/hekim-performans").WithTags("Doktor Performans").RequireAuthorization();
 
         grup.MapGet("/", async (DateTime? bas, DateTime? bit, short? kurumTuru, int? bolum, string? hekimler,
                                 VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
