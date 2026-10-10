@@ -595,7 +595,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     //   adet / ciro / reaktif maliyeti / marj, cihaz, dış lab, TAT, numune ret.
     kaynak: 'lab-icmal', rota: 'lab-icmal', ozelSayfa: true,
     baslik: 'Laboratuvar İcmali', yol: 'Laboratuvar › Laboratuvar İcmali',
-    menuGrup: 'Laboratuvar', menuAd: 'Laboratuvar İcmali', ic: '📊',
+    menuGrup: 'Laboratuvar', menuAd: 'Laboratuvar İcmali', ic: '@icmal',
     yetkiKodu: 'lab.icmal', menuSira: 45, urunModu: 2, modul: 'lab',
   },
 ];

@@ -98,6 +98,22 @@ export function MenuIkon({ ic }: { ic: string }) {
   //   bakılır - uzun metin emoji gibi çizilirse menüde ham URL görünürdü.
   if (ic.startsWith('data:image/'))
     return <span className="ic" aria-hidden="true"><img src={ic} alt="" className="ic-gorsel" /></span>;
+  // '@icmal' (kullanıcı 10.10.2026: icmallerde ortak ikon): dönem özeti =
+  //   köşesi kıvrık belge + üstünde artan çubuklar. Bütün icmal ekranları bunu
+  //   kullanır; menüde icmal oldukları tek bakışta anlaşılsın.
+  if (ic === '@icmal')
+    return (
+      <span className="ic ic-hilal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path d="M5 2.8h9.6L19 7.2v14H5z" fill="#eef3fa" stroke="#2f6db3" strokeWidth="1.3" strokeLinejoin="round" />
+          <path d="M14.6 2.8v4.4H19" fill="none" stroke="#2f6db3" strokeWidth="1.3" strokeLinejoin="round" />
+          <path d="M7.6 6.4h4.6" stroke="#8aa4c4" strokeWidth="1.3" strokeLinecap="round" />
+          <rect x="7.4" y="14.2" width="2.4" height="4.6" rx=".4" fill="#2f6db3" />
+          <rect x="10.8" y="11.6" width="2.4" height="7.2" rx=".4" fill="#2e7d46" />
+          <rect x="14.2" y="9.4" width="2.4" height="9.4" rx=".4" fill="#e08a1e" />
+        </svg>
+      </span>
+    );
   // '@ameliyathane' (kullanici: "ameliyathane resmi olsun"): emoji seti
   //   ameliyat masasi tasimiyor - lamba + masa cizimi.
   if (ic === '@ameliyathane')

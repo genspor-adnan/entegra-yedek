@@ -4,7 +4,7 @@ import { hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 import { LISTELER } from './Liste';
-import { menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
+import { MenuIkon, menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
 import { BOLGE_HBYS } from './kabuk/menuBolgeleri';
 import { DUGUM } from './kabuk/menuDuzenHarita';
 import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
@@ -958,9 +958,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
                     {pasifAcikMi(d.kod) ? '▾' : '▸'}</button>
                 ) : <span className="mn-ok-bos" />}
                 {tasinabilir && <span className="tut">⠿</span>}
-                {ik && (ik.startsWith('data:image/')
-                  ? <img src={ik} alt="" className="ic-gorsel" />
-                  : <span>{ik}</span>)} {ad}
+                {ik && <MenuIkon ic={ik} />} {ad}
                 {!mirasla && !baslik && (
                   <button type="button" className="d mini mn-geri"
                           disabled={!duzenleyebilir}

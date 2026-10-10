@@ -326,14 +326,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   payı kavramı).
     kaynak: 'alacak-yaslandirma', rota: 'alacak-yaslandirma', ozelSayfa: true,
     baslik: 'Alacak Yaşlandırma', yol: 'Finans › Alacak Yaşlandırma', urunModu: 2,
-    menuGrup: 'Finans', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '⏳', yetkiKodu: 'finans.alacak_yaslandirma',
+    menuGrup: 'Finans', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '@icmal', yetkiKodu: 'finans.alacak_yaslandirma',
   },
   {
     // HASTA BAŞI MALİYET (1024, mockup İcmal/hasta_basi_maliyet_icmali.html):
     //   başvuru başına ciro - düşülen sarf / ilaç, hizmet ve bölüm kârlılığı.
     kaynak: 'maliyet-icmali', rota: 'maliyet-icmali', ozelSayfa: true,
     baslik: 'Hasta Başı Maliyet', yol: 'Finans › Hasta Başı Maliyet', urunModu: 2,
-    menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '📦', yetkiKodu: 'maliyet.hasta_basi',
+    menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '@icmal', yetkiKodu: 'maliyet.hasta_basi',
   },
   {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
@@ -432,7 +432,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'vezne-icmali', rota: 'vezne-icmali', ozelSayfa: true,
     baslik: 'Vezne İcmali', yol: 'Kayıt Kabul › Vezne İcmali',
-    menuGrup: 'Kayıt Kabul', menuSira: 25, menuAd: 'Vezne İcmali', ic: '💵',
+    menuGrup: 'Kayıt Kabul', menuSira: 25, menuAd: 'Vezne İcmali', ic: '@icmal',
     yetkiKodu: 'banko.vezne_icmal',
   },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak

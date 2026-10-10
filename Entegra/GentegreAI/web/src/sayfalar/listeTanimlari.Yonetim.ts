@@ -129,7 +129,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hekim-performans', rota: 'hekim-performans', ozelSayfa: true,
     // AD (kullanıcı 10.10.2026): "Doktor Performans İcmali" - kod ve adres aynı kaldı.
     baslik: 'Doktor Performans İcmali', yol: 'İK › Doktor Performans İcmali',
-    menuGrup: 'İK', menuAd: 'Doktor Performans İcmali', ic: '🩺',
+    menuGrup: 'İK', menuAd: 'Doktor Performans İcmali', ic: '@icmal',
     yetkiKodu: 'prim.hekim_performans', menuSira: 31, urunModu: 2,
   },
   {
@@ -137,7 +137,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   gönderen dış doktor / kurum, sevkli ciro, komisyon (gönderen primi).
     kaynak: 'sevk-eden', rota: 'sevk-eden', ozelSayfa: true,
     baslik: 'Sevk Eden İcmali', yol: 'İK › Sevk Eden İcmali',
-    menuGrup: 'İK', menuAd: 'Sevk Eden İcmali', ic: '🤝',
+    menuGrup: 'İK', menuAd: 'Sevk Eden İcmali', ic: '@icmal',
     yetkiKodu: 'prim.sevk_eden', menuSira: 32, urunModu: 2,
   },
   {

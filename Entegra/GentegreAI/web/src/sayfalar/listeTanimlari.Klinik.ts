@@ -307,7 +307,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   ayrı ekran, bütün iskontolar (talepli + kampanya + banko talepsiz).
     kaynak: 'iskonto-icmali', rota: 'iskonto-icmali', ozelSayfa: true,
     baslik: 'İskonto İcmali', yol: 'Kayıt Kabul › İskonto İcmali', urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'İskonto İcmali', ic: '🏷️',
+    menuGrup: 'Kayıt Kabul', menuAd: 'İskonto İcmali', ic: '@icmal',
     yetkiKodu: 'iskonto.icmal', menuSira: 31,
   },
   {

@@ -16,7 +16,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kurum-icmali', rota: 'kurum-icmali', ozelSayfa: true,
     baslik: 'Kurum İcmali', yol: 'Kurumlar & Sigorta › Kurum İcmali',
     urunModu: 2,
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmali', ic: '📊', yetkiKodu: 'kurum.icmal_ozet',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmali', ic: '@icmal', yetkiKodu: 'kurum.icmal_ozet',
     menuSira: 19,
   },
   {

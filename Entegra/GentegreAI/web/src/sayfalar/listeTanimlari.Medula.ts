@@ -23,7 +23,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     //   BAĞLANTIDIR (menuYol; App.tsx rota açmaz) - Dökümler deseni.
     kaynak: 'medula-kabul', rota: 'medula-kabul', ozelSayfa: true, baslik: 'Medula Hasta Kabul / Provizyon',
     yol: 'Kayıt Kabul › Medula Kabul', urunModu: 2, menuYol: '/medula-kabul',
-    menuGrup: 'Kayıt Kabul', menuAd: 'Medula Kabul', ic: '🪪', yetkiKodu: 'medula.kabul', menuSira: 25,   // 1003
+    menuGrup: 'Kayıt Kabul', menuAd: 'Medula Kabul', ic: '🏛️', yetkiKodu: 'medula.kabul', menuSira: 25,   // 1003
   },
   {
     kaynak: 'medula-takip', rota: 'medula-takip', aksiyonEkrani: 'medula-takip-liste', baslik: 'Medula Takipleri',
@@ -83,7 +83,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     //   döneminin hunisi, faturasız takipler, tutar farkları, kesintiler.
     kaynak: 'medula-mutabakat', rota: 'medula-mutabakat', ozelSayfa: true, baslik: 'Medula Mutabakat İcmali',
     yol: 'Medula › Mutabakat İcmali', urunModu: 2,
-    menuGrup: 'Medula', menuAd: 'Mutabakat İcmali', ic: '🔁', yetkiKodu: 'medula.mutabakat', menuSira: 51,
+    menuGrup: 'Medula', menuAd: 'Mutabakat İcmali', ic: '@icmal', yetkiKodu: 'medula.mutabakat', menuSira: 51,
   },
   {
     kaynak: 'medula-fatura', rota: 'medula-fatura', aksiyonEkrani: 'medula-fatura-liste', baslik: 'Medula Faturaları',

@@ -208,7 +208,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'goruntuleme-icmal', rota: 'goruntuleme-icmal', ozelSayfa: true,
     baslik: 'Görüntüleme İcmali', yol: 'Radyoloji › Görüntüleme İcmali',
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Görüntüleme İcmali', ic: '📈',
+    menuGrup: 'Radyoloji', menuAd: 'Görüntüleme İcmali', ic: '@icmal',
     yetkiKodu: 'radyoloji.icmal', menuSira: 25,
   },
 ];
