@@ -59,7 +59,8 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
     // FORMLAR (10.10.2026): Yönetim › Formlar alt başlığı, Platform'dan önce.
     // SİSTEM (10.10.2026, kullanıcı): eski "Yönetim" grubu - bölgeyle aynı adı
     //   taşıyor, "Yönetim › Yönetim" okunuyordu. Dökümler (tasarımcı) en sonda.
-    gruplar: ['İK', 'Doküman', 'Onay', 'Kalite', 'Güvenlik', 'Formlar', 'Platform',
+    // Kalite Onay'dan önce (kullanıcı 10.10.2026: "onay ve kaliteyi yer değiş").
+    gruplar: ['İK', 'Doküman', 'Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
               'Sistem', 'Dökümler'] },
 ];
 

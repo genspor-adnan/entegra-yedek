@@ -69,9 +69,9 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Onay', 'Sabit Varlıklar',
-  // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Yönetim yine en sonda).
-  'Kalite', 'Güvenlik', 'Formlar', 'Platform',
+  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Kalite', 'Onay', 'Sabit Varlıklar',
+  // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Sistem ve Dökümler en sonda).
+  'Güvenlik', 'Formlar', 'Platform',
 ];
 
 export type MenuSatiri =
@@ -351,7 +351,10 @@ export function menuSatirlariKur(
   //   grubunun bütün ekranları süzülünce grup tek başına Dökümler'le
   //   kalıyordu. Dökümler bir grubun eşlikçisidir, grubu ayakta tutmaz.
   const satirlar = grupla(ogeler, m => m.grup)
-    .filter(s => s.tur !== 'grup' || s.alt.some(m => m.kaynak !== 'dokumler'));
+    // Bağlantı = grubun süzgeçli Dökümler'i (`/dokumler?grup=`); tasarımcının
+    //   kendisi (Dökümler grubu, 10.10.2026) bağlantı değil, gerçek ekrandır.
+    .filter(s => s.tur !== 'grup'
+              || s.alt.some(m => !(m.kaynak === 'dokumler' && m.yol.includes('/dokumler?grup='))));
   // YONETIM HER ZAMAN EN SONDA (kullanici): grup sirasi tanim dizisindeki ILK
   //   ogeden gelir, Yonetim'in ilk ogesi (Kampanyalar) dizinin ortasinda oldugu
   //   icin menunun ortasina dusuyordu. Ayarlar/roller gibi seyrek kullanilan
