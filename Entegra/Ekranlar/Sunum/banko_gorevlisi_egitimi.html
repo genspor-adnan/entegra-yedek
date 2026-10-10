@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banko Görevlisi Eğitimi</title>
+<style>
+  :root {
+    --zem: #eef1f5; --yuz: #ffffff; --yuz2: #f3f6fa;
+    --cizgi: #cdd6e0; --cizgi2: #e3e9f0;
+    --yazi: #1f2d3a; --yazi2: #14315a; --soluk: #6b7a8b;
+    --mor: #2f6db3; --mor2: #d7e7fb; --koyu: #14315a;
+    --ok: #2e7d46; --okzem: #e2f3e8; --okkenar: #bfe3cb;
+    --uyari: #a9791a; --uyarizem: #fdf6e3; --uyarikenar: #eeddb4;
+    --hata: #b23b3b; --hatazem: #fdeceb; --hatakenar: #f6d3d1;
+    --grupzem: #eaf1f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0f2340; color: var(--yazi);
+    font-family: "Segoe UI", "Trebuchet MS", Tahoma, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #sahne { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .slayt {
+    position: absolute; width: 1280px; height: 720px; background: var(--zem);
+    display: none; overflow: hidden; transform-origin: center center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .slayt.aktif { display: block; }
+
+  /* ---------- ortak yerleşim ---------- */
+  .ust { height: 96px; padding: 26px 56px 0; display: flex; align-items: flex-end; gap: 18px;
+         background: linear-gradient(180deg, #ffffff 0%, #f0f5fa 100%); border-bottom: 3px solid var(--mor); }
+  .ust .ikon { font-size: 40px; line-height: 1; padding-bottom: 14px; }
+  .ust h2 { font-size: 34px; color: var(--yazi2); font-weight: 700; padding-bottom: 16px; letter-spacing: -.2px; }
+  .ust .etiket { margin-left: auto; padding-bottom: 20px; font-size: 14px; color: var(--soluk); }
+  .govde { padding: 30px 56px 0; height: 584px; }
+  .alt { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 0 56px;
+         display: flex; align-items: center; justify-content: space-between;
+         font-size: 13px; color: var(--soluk); border-top: 1px solid var(--cizgi2); background: #f7f9fc; }
+  .alt b { color: var(--mor); font-weight: 600; }
+
+  h3 { font-size: 21px; color: var(--yazi2); margin-bottom: 10px; }
+  ul.mad { list-style: none; }
+  ul.mad li { position: relative; padding-left: 26px; font-size: 19px; line-height: 1.42; margin-bottom: 9px; }
+  ul.mad li::before { content: ""; position: absolute; left: 4px; top: 10px; width: 10px; height: 10px;
+                      border-radius: 2px; background: var(--mor); }
+  ul.mad.kucuk li { font-size: 17px; margin-bottom: 7px; }
+  ul.mad.kucuk li::before { top: 9px; width: 8px; height: 8px; }
+  .k { color: var(--yazi2); font-weight: 650; }
+  .soluk { color: var(--soluk); }
+
+  .izgara { display: grid; gap: 22px; }
+  .i2 { grid-template-columns: 1fr 1fr; }
+  .i3 { grid-template-columns: 1fr 1fr 1fr; }
+  .i4 { grid-template-columns: repeat(4, 1fr); }
+  .kutu { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 8px; padding: 20px 22px;
+          box-shadow: 0 2px 8px rgba(20,40,70,.06); }
+  .kutu.vurgu { border-top: 4px solid var(--mor); }
+  .kutu .baslik { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; color: var(--yazi2); margin-bottom: 10px; }
+  .kutu .baslik .e { font-size: 26px; }
+  .kutu p { font-size: 16px; line-height: 1.45; color: var(--yazi); }
+
+  .rozet { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px;
+           letter-spacing: .3px; vertical-align: middle; }
+  .r-var { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar); }
+  .r-yol { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar); }
+  .r-ops { background: var(--mor2); color: var(--mor); border: 1px solid #b6d0f0; }
+
+  .not { margin-top: 18px; padding: 12px 16px; border-left: 4px solid var(--uyari); background: var(--uyarizem);
+         font-size: 15.5px; line-height: 1.45; border-radius: 0 6px 6px 0; }
+  .not.mavi { border-left-color: var(--mor); background: var(--grupzem); }
+
+  /* ---------- kapak ---------- */
+  .kapak { background: linear-gradient(135deg, #0f2a4d 0%, #1d4f8a 55%, #2f6db3 100%); color: #fff; }
+  .kapak .ic { position: absolute; left: 90px; top: 150px; right: 90px; }
+  .kapak .urun { font-size: 22px; letter-spacing: 3px; text-transform: uppercase; opacity: .85; }
+  .kapak h1 { font-size: 66px; line-height: 1.08; margin: 18px 0 22px; font-weight: 750; }
+  .kapak .alt-baslik { font-size: 26px; opacity: .92; max-width: 860px; line-height: 1.4; }
+  .kapak .serit { position: absolute; left: 90px; bottom: 70px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .kapak .serit span { border: 1px solid rgba(255,255,255,.45); padding: 8px 16px; border-radius: 20px; font-size: 16px; }
+  .kapak .buyuk-ikon { position: absolute; right: 100px; top: 150px; opacity: .22; }
+  .kapak .firma { position: absolute; right: 90px; top: 60px; font-size: 16px; opacity: .8; text-align: right; }
+
+  /* ---------- akış ---------- */
+  .akis { display: flex; align-items: stretch; gap: 0; margin-top: 10px; }
+  .adim { flex: 1; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 10px; padding: 18px 14px 16px;
+          text-align: center; position: relative; }
+  .adim .no { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px;
+              border-radius: 50%; background: var(--mor); color: #fff; font-weight: 700; font-size: 15px; line-height: 28px; }
+  .adim .e { font-size: 38px; margin: 6px 0 6px; }
+  .adim .ad { font-size: 18px; font-weight: 700; color: var(--yazi2); margin-bottom: 8px; }
+  .adim .ac { font-size: 14px; line-height: 1.4; color: var(--soluk); }
+  .ok { width: 30px; display: flex; align-items: center; justify-content: center; color: var(--mor); font-size: 26px; font-weight: 700; }
+  .durumlar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 30px; font-size: 16px; }
+  .durumlar .d { padding: 7px 14px; border-radius: 6px; background: var(--grupzem); border: 1px solid #c6d9ef; color: var(--yazi2); font-weight: 600; }
+  .durumlar .d.son { background: var(--okzem); border-color: var(--okkenar); color: var(--ok); }
+  .durumlar .y { color: var(--mor); font-weight: 700; }
+
+  /* ---------- mini ekran (mockup taklidi) ---------- */
+  .ekran { background: #fff; border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; font-size: 13px;
+           box-shadow: 0 6px 22px rgba(20,40,70,.14); }
+  .ekran .eb { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi); padding: 8px 12px;
+               font-weight: 700; color: var(--yazi2); font-size: 14px; }
+  .ekran .cipler { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap; }
+  .ekran .cip { padding: 3px 9px; border-radius: 10px; background: var(--yuz2); border: 1px solid var(--cizgi2); font-size: 12px; }
+  .ekran .cip.on { background: var(--mor); color: #fff; border-color: var(--mor); }
+  .ekran table { width: 100%; border-collapse: collapse; }
+  .ekran th { background: #f0f5fa; text-align: left; padding: 6px 8px; font-size: 12px; color: var(--grupyazi, #23405c); border-bottom: 1px solid var(--cizgi); }
+  .ekran td { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); font-size: 12.5px; }
+  .ekran tr.acil td { background: var(--hatazem); }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+  .t-acil { background: var(--hata); color: #fff; }
+  .t-n { background: var(--yuz2); color: var(--soluk); border: 1px solid var(--cizgi2); }
+  .t-ok { background: var(--okzem); color: var(--ok); }
+  .t-uy { background: var(--uyarizem); color: var(--uyari); }
+
+  /* ---------- modül matrisi ---------- */
+  .modul { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px;
+           padding: 11px 14px; font-size: 16.5px; font-weight: 600; color: var(--yazi2); }
+  .modul .e { font-size: 22px; }
+  .modul .rozet { margin-left: auto; }
+
+  /* ---------- sayaç ---------- */
+  .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; padding: 14px 16px; }
+  .sayac .s { font-size: 13px; color: var(--soluk); }
+  .sayac .v { font-size: 30px; font-weight: 750; color: var(--yazi2); }
+  .sayac.uy .v { color: var(--uyari); }
+  .sayac.okk .v { color: var(--ok); }
+
+  /* ---------- yol haritası ---------- */
+  .yol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  .yol .m { display: flex; gap: 14px; background: #fff; border: 1px solid var(--cizgi); border-left: 5px solid var(--uyari);
+            border-radius: 6px; padding: 13px 16px; }
+  .yol .m .e { font-size: 26px; }
+  .yol .m b { display: block; font-size: 17.5px; color: var(--yazi2); margin-bottom: 4px; }
+  .yol .m span { font-size: 14.5px; color: var(--soluk); line-height: 1.4; }
+
+  /* ---------- gezinti ---------- */
+  #gezinti { position: fixed; right: 18px; bottom: 14px; opacity: .3; transition: opacity .2s; display: flex; gap: 8px; align-items: center;
+             color: #cfe0f5; font-size: 14px; z-index: 5; user-select: none; }
+  #gezinti:hover { opacity: 1; }
+  #gezinti button { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.3);
+                    border-radius: 6px; padding: 6px 12px; font-size: 15px; cursor: pointer; }
+  #gezinti button:hover { background: rgba(255,255,255,.22); }
+  #ilerleme { position: fixed; left: 0; top: 0; height: 4px; background: #5aa0ea; z-index: 5; transition: width .2s; }
+
+
+  /* ---------- eğitim ekleri ---------- */
+  .foto { background: #fff; border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden;
+          box-shadow: 0 6px 22px rgba(20,40,70,.14); }
+  .foto img { display: block; width: 100%; height: auto; }
+  .foto-not { font-size: 12.5px; color: var(--soluk); margin-top: 6px; }
+  ol.adimlar { list-style: none; counter-reset: a; }
+  ol.adimlar li { counter-increment: a; position: relative; padding-left: 40px; font-size: 18px; line-height: 1.4; margin-bottom: 11px; }
+  ol.adimlar li::before { content: counter(a); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%;
+                          background: var(--mor); color: #fff; font-weight: 700; font-size: 15px; line-height: 28px; text-align: center; }
+  ol.adimlar.kucuk li { font-size: 16.5px; margin-bottom: 8px; padding-left: 36px; }
+  ol.adimlar.kucuk li::before { width: 25px; height: 25px; line-height: 25px; font-size: 13.5px; }
+  .b { display: inline-block; font-weight: 700; color: var(--yazi2); background: #fff; border: 1px solid #b6c6d8;
+       border-bottom-width: 2px; border-radius: 5px; padding: 0 7px; line-height: 1.45; white-space: nowrap; }
+  .b.ana { background: var(--mor); color: #fff; border-color: #22558f; }
+  .ipucu, .dikkat { margin-top: 14px; padding: 11px 16px 11px 16px; border-radius: 0 6px 6px 0; font-size: 15.5px; line-height: 1.45; }
+  .ipucu { border-left: 4px solid var(--ok); background: var(--okzem); }
+  .dikkat { border-left: 4px solid var(--hata); background: var(--hatazem); }
+  .ipucu > b:first-child { color: var(--ok); }
+  .dikkat > b:first-child { color: var(--hata); }
+  .mesaj { font-family: Consolas, "Courier New", monospace; font-size: 14.5px; background: #fff; border: 1px solid var(--hatakenar);
+           color: var(--hata); padding: 1px 6px; border-radius: 4px; }
+  table.hata { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; overflow: hidden; }
+  table.hata th { background: #f0f5fa; text-align: left; padding: 9px 14px; font-size: 14px; color: var(--yazi2); border-bottom: 1px solid var(--cizgi); }
+  table.hata td { padding: 9px 14px; font-size: 15px; line-height: 1.4; border-bottom: 1px solid var(--cizgi2); vertical-align: top; }
+  table.hata td:first-child { width: 44%; }
+  .gorev { display: flex; gap: 14px; background: #fff; border: 1px solid var(--cizgi); border-left: 5px solid var(--mor);
+           border-radius: 6px; padding: 12px 16px; }
+  .gorev .e { font-size: 26px; }
+  .gorev b { display: block; font-size: 17.5px; color: var(--yazi2); margin-bottom: 3px; }
+  .gorev span { font-size: 14.5px; color: var(--soluk); line-height: 1.4; }
+  .ortam { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .5px; padding: 3px 9px; border-radius: 4px; color: #fff; }
+  .ortam.demo { background: #d9822b; } .ortam.egitim { background: #7b4fc4; }
+
+  /* ---------- video modu: işaretler ---------- */
+  .foto { position: relative; }
+  .isaret { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+            background: #e0412f; color: #fff; font-weight: 800; font-size: 15px; line-height: 30px; text-align: center;
+            box-shadow: 0 0 0 3px #fff, 0 3px 10px rgba(0,0,0,.35); opacity: 0; transform: scale(.3);
+            transition: opacity .35s ease, transform .35s ease; z-index: 3; pointer-events: none; }
+  .isaret::after { content: attr(data-etiket); position: absolute; left: 38px; top: 50%; transform: translateY(-50%);
+                   white-space: nowrap; background: #14315a; color: #fff; font-size: 14px; font-weight: 600;
+                   padding: 4px 10px; border-radius: 5px; line-height: 1.3; opacity: 0; transition: opacity .3s; }
+  .isaret.sol::after { left: auto; right: 38px; }
+  .isaret:not([data-etiket])::after { display: none; }
+  .slayt.hepsi .isaret, .isaret.gor { opacity: 1; transform: scale(1); }
+  .isaret.simdi { animation: nabiz 1.3s ease-out infinite; }
+  .isaret.simdi::after { opacity: 1; }
+  @keyframes nabiz { 0% { box-shadow: 0 0 0 3px #fff, 0 0 0 3px rgba(224,65,47,.7); }
+                     100% { box-shadow: 0 0 0 3px #fff, 0 0 0 20px rgba(224,65,47,0); } }
+  .slayt [data-i]:not(.isaret) { transition: box-shadow .35s, background-color .35s; }
+  .slayt [data-i].simdi:not(.isaret) { box-shadow: 0 0 0 3px #f0a020, 0 0 18px rgba(240,160,32,.45); background-color: #fff8e6; border-radius: 6px; }
+  .kapak [data-i].simdi:not(.isaret) { background-color: rgba(255,255,255,.18); box-shadow: 0 0 0 2px #ffd27a; }
+  template.anlatim { display: none; }
+
+  /* ---------- altyazı ---------- */
+  #altyazi { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; z-index: 6; max-width: 80vw;
+             background: rgba(8,18,34,.86); color: #fff; font-size: 21px; line-height: 1.4; padding: 10px 22px;
+             border-radius: 8px; text-align: center; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #altyazi.acik { opacity: 1; }
+
+  /* ---------- oynatıcı ---------- */
+  #sahne { bottom: 58px; }
+  #oynatici { position: fixed; left: 0; right: 0; bottom: 0; height: 58px; z-index: 7; display: flex; align-items: center; gap: 8px;
+              padding: 0 14px; background: #0a1729; color: #d6e4f5; font-size: 14px; border-top: 1px solid #22385a; user-select: none; }
+  #oynatici button, #oynatici select { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25);
+              border-radius: 6px; padding: 6px 11px; font-size: 15px; cursor: pointer; font-family: inherit; }
+  #oynatici select option { color: #000; }
+  #oynatici button:hover { background: rgba(255,255,255,.2); }
+  #oynatici button.ana { background: #2f6db3; border-color: #5aa0ea; min-width: 118px; font-weight: 700; }
+  #oynatici label { display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+  #oCubuk { flex: 1; display: flex; gap: 3px; height: 10px; min-width: 120px; }
+  #oCubuk .p { flex: 1; background: rgba(255,255,255,.16); border-radius: 3px; cursor: pointer; position: relative; overflow: hidden; }
+  #oCubuk .p.bitti { background: #5aa0ea; }
+  #oCubuk .p i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #5aa0ea; transition: width .3s; }
+  #sayac { min-width: 54px; text-align: center; }
+  #oNot { font-size: 12px; color: #f3c46b; max-width: 220px; line-height: 1.2; }
+
+  /* ---------- başlangıç ekranı ---------- */
+  #baslangic { position: fixed; inset: 0; z-index: 9; display: flex; flex-direction: column; align-items: center; justify-content: center;
+               gap: 18px; background: rgba(6,16,32,.78); color: #fff; text-align: center; }
+  #baslangic h2 { font-size: 34px; font-weight: 700; }
+  #baslangic p { font-size: 17px; opacity: .85; max-width: 640px; line-height: 1.5; }
+  #baslangic .bas { font-size: 26px; font-weight: 700; padding: 18px 44px; border-radius: 40px; border: 0; cursor: pointer;
+                    background: #2f6db3; color: #fff; box-shadow: 0 8px 30px rgba(47,109,179,.6); }
+  #baslangic .bas:hover { background: #3a7fcc; }
+  #baslangic .sessiz { background: none; border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 15px; }
+  #baslangic.gizli { display: none; }
+  .konusmaci { display: none; }
+
+  @media print {
+    @page { size: 1280px 1010px; margin: 0; }
+    html, body { background: #fff; overflow: visible; height: auto; }
+    #sahne { position: static; display: block; }
+    .slayt { display: block !important; position: relative; transform: none !important; box-shadow: none;
+             -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .isaret { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .isaret::after { display: none; }
+    .konusmaci { display: block; width: 1280px; height: 290px; padding: 16px 56px 0; overflow: hidden;
+                 font-size: 15.5px; line-height: 1.5; color: #1f2d3a; border-top: 3px solid #2f6db3;
+                 page-break-after: always; break-after: page; }
+    .konusmaci:last-child { page-break-after: auto; break-after: auto; }
+    .konusmaci h4 { font-size: 14px; color: #2f6db3; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+    #oynatici, #ilerleme, #altyazi, #baslangic { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="ilerleme"></div>
+<div id="sahne">
+
+<!-- 1 KAPAK -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"><rect x="14" y="54" width="92" height="44" rx="4"/><path d="M8 54h104M36 54V34h48v20"/><circle cx="60" cy="22" r="10"/><path d="M48 76h24"/></svg></div>
+  <div class="ic">
+    <div class="urun">Gentegre AI · HBYS · Kullanıcı Eğitimi</div>
+    <h1>Banko Görevlisi<br>Eğitimi</h1>
+    <div class="alt-baslik">Vardiyayı açmaktan kasayı teslim etmeye kadar bankoda bir günün işleri: hasta, randevu, kabul, ücret, tahsilat ve gün sonu.</div>
+  </div>
+  <div class="serit">
+    <span data-i="1">Banko Oturumu</span><span data-i="2">Hasta Kaydı</span><span data-i="2">Randevu</span><span data-i="2">Kabul / Başvuru</span>
+    <span data-i="3">Tahsilat</span><span data-i="3">Gün Sonu</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+  <template class="anlatim">
+    <p>Banko görevlisi eğitimine hoş geldiniz.</p>
+    <p data-i="1">Bu eğitimde bankoda bir günün işlerini sırasıyla göreceğiz: önce vardiyanızı, yani banko oturumunuzu açacağız.</p>
+    <p data-i="2">Ardından hastayı bulmayı ya da kaydetmeyi, randevu vermeyi ve hasta geldiğinde kabulünü yapmayı göreceğiz.</p>
+    <p data-i="3">Son olarak ücreti yazıp tahsilatı almayı ve akşam kasayı sayıp teslim etmeyi öğreneceğiz.</p>
+    <p>İstediğiniz an boşluk tuşuyla duraklatabilir, ok tuşlarıyla ileri ya da geri gidebilirsiniz.</p>
+  </template>
+</section>
+
+<!-- 2 ROL VE GÜNÜN AKIŞI -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🗺️</div><h2>Rolünüz ve günün akışı</h2></div>
+  <div class="govde">
+    <div class="akis" style="margin-top: 16px;">
+      <div class="adim" data-i="1"><div class="no">1</div><div class="e">🔓</div><div class="ad">Vardiyayı aç</div>
+        <div class="ac">Kasayı say, banko oturumunu başlat</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="2"><div class="no">2</div><div class="e">📅</div><div class="ad">Randevu</div>
+        <div class="ac">Telefonla / yerinde randevu ver, değiştir</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="2"><div class="no">3</div><div class="e">🏥</div><div class="ad">Kabul</div>
+        <div class="ac">Hasta gelince başvuru (protokol) aç</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="3"><div class="no">4</div><div class="e">🧾</div><div class="ad">Ücret</div>
+        <div class="ac">Hizmetleri Ücretlendirme'ye yaz</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="3"><div class="no">5</div><div class="e">💵</div><div class="ad">Tahsilat</div>
+        <div class="ac">Nakit / POS ile hasta payını al</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="4"><div class="no">6</div><div class="e">🔒</div><div class="ad">Gün sonu</div>
+        <div class="ac">Say, farkı açıkla, kasayı teslim et</div></div>
+    </div>
+    <div class="izgara i2" style="margin-top: 30px; gap: 14px 24px;">
+      <div class="gorev"><span class="e">🙋</span><div><b>Hastayı karşılamak</b><span>Hastayı arar, yoksa kaydını açarsınız; kimlik, doğum tarihi, cinsiyet, telefon doğru olmalı.</span></div></div>
+      <div class="gorev"><span class="e">📅</span><div><b>Randevuyu yönetmek</b><span>Randevu verir, saatini değiştirir, gelmeyeni "Gelmedi", vazgeçeni "İptal" yaparsınız.</span></div></div>
+      <div class="gorev" data-i="5"><span class="e">💰</span><div><b>Parayı doğru almak</b><span>Her tahsilat sizin oturum numaranızı taşır: kim, hangi kasadan, ne aldı izlenir.</span></div></div>
+      <div class="gorev" data-i="4"><span class="e">🧮</span><div><b>Günü kapatmak</b><span>Akşam nakdi sayar, POS fişini girer, kasayı tutanakla teslim edersiniz.</span></div></div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p>Bankoda gününüz altı adımdan oluşur.</p>
+    <p data-i="1">Sabah önce kasayı sayıp banko oturumunuzu, yani vardiyanızı açarsınız.</p>
+    <p data-i="2">Gün içinde telefonla ya da yerinde randevu verirsiniz; hasta geldiğinde kabulünü yapar ve başvurusunu açarsınız.</p>
+    <p data-i="3">Başvuruya hizmet ücretlerini yazar, hasta payını nakit ya da POS ile tahsil edersiniz.</p>
+    <p data-i="4">Akşam nakdi sayar, fark varsa açıklar ve kasayı tutanakla teslim edersiniz.</p>
+    <p data-i="5">Her tahsilat sizin oturum numaranızı taşır; böylece kimin, hangi kasadan, ne aldığı her gün netleşir.</p>
+  </template>
+</section>
+
+<!-- 3 GİRİŞ, MENÜ, ÜST ŞERİT -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🧭</div><h2>Giriş, menü ve üst şerit</h2></div>
+  <div class="govde">
+    <div class="foto"><img src="img/banko/12_ust_serit.png" alt="Üst şerit">
+      <span class="isaret" data-i="2" data-etiket="Komut paleti (Ctrl K)" style="left: 37%; top: 50%;">1</span>
+      <span class="isaret sol" data-i="3" data-etiket="Ekran yardımı" style="left: 91.7%; top: 46%;">2</span>
+    </div>
+    <div class="izgara" style="grid-template-columns: 1.25fr 1fr; gap: 30px; margin-top: 22px;">
+      <div>
+        <ul class="mad kucuk">
+          <li data-i="1">Size verilen kullanıcı adı ve parolayla girin. Menüde yalnız <span class="k">rolünüzün yetkili olduğu</span> ekranlar görünür.</li>
+          <li data-i="1">İşlerinizin çoğu sol menüde: <span class="k">Kayıt Kabul</span> (Hasta Listesi, Başvurular, Banko Oturumları) ve <span class="k">Randevu › Randevular</span>.</li>
+          <li data-i="2"><span class="b">Ctrl K</span> komut paleti: ekran adını yazıp gidin ("Hasta", "Randevu", "Başvuru").</li>
+          <li data-i="3">Üst şeritteki <span class="b">?</span> açık ekranın yardımını açar.</li>
+          <li data-i="4">Sağ alttaki <span class="b ana">💡 Yapay Zekâya Sor</span> asistanı, bulunduğunuz ekranı bilerek "nasıl yapılır" sorularını yanıtlar; kayıt değiştirmez.</li>
+        </ul>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> Üstte <span class="ortam demo">DEMO ORTAMI</span> ya da <span class="ortam egitim">EĞİTİM ORTAMI</span> yazıyorsa deneme kurulumundasınız; rahatça pratik yapın. <b>Etiket yoksa canlıdasınız</b>: her kayıt gerçektir.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/banko/09_yz_sor.png" alt="Yapay Zekâya Sor paneli">
+          <span class="isaret" data-i="4" style="left: 5%; top: 8%;">3</span>
+          <span class="isaret" data-i="4" style="left: 4%; top: 51%;">4</span>
+          <span class="isaret" data-i="4" style="left: 4%; top: 90%;">5</span>
+        </div>
+        <div class="foto-not">💡 Yapay Zekâya Sor: "Bu ekranda ne yapabilirim?", "Rolüm ne yapabilir?" ya da kendi sorunuz.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Sisteme size verilen kullanıcı adı ve parolayla girersiniz; sol menüde yalnızca rolünüzün yetkili olduğu ekranlar görünür.</p>
+    <p data-i="2">Üst şeritteki arama kutusu komut paletidir: Kontrol ve K tuşlarına basıp ekran adını yazarak hızla gidebilirsiniz.</p>
+    <p data-i="3">Sağ üstteki soru işareti düğmesi, açık olan ekranın yardımını açar.</p>
+    <p data-i="4">Sağ alttaki Yapay Zekâya Sor düğmesi, bulunduğunuz ekranı bilen bir asistandır; hazır sorulardan birini seçebilir ya da kendi sorunuzu yazabilirsiniz.</p>
+    <p data-i="5">Üst şeritte Demo ya da Eğitim Ortamı etiketi görüyorsanız deneme kurulumundasınız; etiket yoksa girdiğiniz her kayıt gerçektir.</p>
+  </template>
+</section>
+
+<!-- 4 VARDİYA BAŞI: OTURUM AÇMA -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔓</div><h2>Vardiya başı: banko oturumunu açma</h2><div class="etiket">Kayıt Kabul › Banko Oturumları</div></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1fr 1.15fr; gap: 28px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1"><span class="k">Kayıt Kabul › Banko Oturumları</span> › <span class="b ana">＋ Yeni Oturum Aç</span></li>
+          <li data-i="2"><span class="k">Banko</span>'nuzu seçin; <span class="k">Vardiya</span> seçilince saat aralığı önerilir.</li>
+          <li data-i="3"><span class="k">Sistem devri</span> önceki vardiyanın kasada bıraktığı tutardır; değiştirilemez.</li>
+          <li data-i="4">Kasadaki parayı sayın, <span class="k">Kasada bulunan (devir sayımı)</span> alanına yazın. Fark varsa <span class="k">Not</span>'a açıklayın.</li>
+          <li data-i="5"><span class="b ana">🔓 Oturumu Aç</span>. Bankoda açılış onayı açıksa düğme <span class="b">📨 Onaya Gönder</span> olur; sorumlu onaylayana kadar tahsilat ve başvuru kaydı yapılamaz.</li>
+        </ol>
+        <div class="dikkat" data-i="4"><b>Dikkat:</b> Sayım farkı <b>açılışta</b> yazılır; başkasının farkını devralmazsınız. Sayımı tahmini yazmayın.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/banko/01_oturumlar.png" alt="Banko Oturumları listesi">
+          <span class="isaret sol" data-i="1" data-etiket="＋ Yeni Oturum Aç" style="left: 61%; top: 10.4%;">1</span>
+        </div>
+        <div class="foto" style="margin-top: 12px;"><img src="img/banko/02_oturum_ac.png" alt="Oturum açılış talebi">
+          <span class="isaret" data-i="6" data-etiket="Adım rozetleri" style="left: 70%; top: 16.8%;">6</span>
+          <span class="isaret" data-i="2" data-etiket="Banko" style="left: 11.4%; top: 46.8%;">2</span>
+          <span class="isaret" data-i="2" style="left: 30.6%; top: 46.8%;">2</span>
+          <span class="isaret sol" data-i="3" data-etiket="Sistem devri" style="left: 88.4%; top: 46.8%;">3</span>
+          <span class="isaret" data-i="4" data-etiket="Devir sayımı" style="left: 9.8%; top: 75.3%;">4</span>
+          <span class="isaret" data-i="5" data-etiket="🔓 Oturumu Aç" style="left: 13.5%; top: 89.7%;">5</span>
+        </div>
+        <div class="foto-not">Adım rozetleri: Oturum talebi → Sorumlu onayı (ops.) → Devir sayımı → Gün içi işlem → Gün sonu sayım → Teslim &amp; kapanış.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Vardiyaya başlamak için Kayıt Kabul menüsünden Banko Oturumları ekranını açın ve Yeni Oturum Aç düğmesine basın.</p>
+    <p data-i="2">Açılan formda önce bankonuzu, sonra vardiyanızı seçin; vardiya seçilince saat aralığı kendiliğinden önerilir.</p>
+    <p data-i="3">Sistem devri, bir önceki vardiyanın kasada bıraktığı tutardır ve elle değiştirilemez.</p>
+    <p data-i="4">Kasadaki parayı sayıp devir sayımı alanına yazın; fark çıkarsa nedenini not alanına açıklayın.</p>
+    <p data-i="5">Son olarak Oturumu Aç düğmesine basın. Açılış onayı açık olan bankoda düğme Onaya Gönder olur ve sorumlu onaylayana kadar tahsilat alınamaz.</p>
+    <p data-i="6">Üstteki adım rozetleri, vardiyanızın hangi aşamada olduğunu her zaman gösterir.</p>
+  </template>
+</section>
+
+<!-- 5 HASTA ARAMA / KAYIT -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔎</div><h2>Hasta arama ve yeni hasta kaydı</h2><div class="etiket">Kayıt Kabul › Hasta Listesi</div></div>
+  <div class="govde">
+    <div class="foto"><img src="img/banko/11_hasta_listesi.png" alt="Hasta listesi">
+      <span class="isaret" data-i="1" data-etiket="Ad / dosya no / kimlik no" style="left: 16%; top: 23.3%;">1</span>
+      <span class="isaret sol" data-i="2" data-etiket="✎ Düzenle" style="left: 69.4%; top: 5.5%;">2</span>
+      <span class="isaret sol" data-i="3" data-etiket="＋ Yeni" style="left: 60.5%; top: 5.5%;">3</span>
+      <span class="isaret" data-i="4" data-etiket="Kurum / ödeyen" style="left: 52%; top: 41%;">4</span>
+    </div>
+    <div class="izgara i2" style="gap: 30px; margin-top: 20px;">
+      <ol class="adimlar kucuk">
+        <li data-i="1">Arama kutusuna <span class="k">ad, dosya no ya da kimlik no</span> yazın.</li>
+        <li data-i="2">Bulunduysa satıra çift tıklayın (ya da <span class="b">✎ Düzenle</span>).</li>
+        <li data-i="3">Bulunamadıysa <span class="b ana">＋ Yeni</span>: Kimlik No, ad soyad, telefon; <span class="k">Doğum Tarihi</span> ve <span class="k">Cinsiyet</span> zorunlu.</li>
+        <li data-i="4">Kurumlu hastada <span class="k">Kurum / Ödeyen</span> sekmesine satır ekleyin (kurum, poliçe no). <span class="b">Kaydet</span>.</li>
+      </ol>
+      <div>
+        <div class="dikkat" data-i="5" style="margin-top: 0;"><b>Dikkat:</b> Önce arayın. Aynı kimlik numarasıyla ikinci kart açılmaz; sistem mevcut kartı açar.</div>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> "Aynı telefon" uyarısı engel değildir (aile bireyleri aynı numarayı kullanabilir): <b>Tamam</b> kaydeder, <b>Kapat</b> vazgeçer. Kimliği belirsiz hastada <b>Kimliksiz Hasta</b>'yı işaretleyin.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Hasta geldiğinde ya da aradığında önce Hasta Listesi'nde arama yapın: ad, dosya numarası ya da kimlik numarası yazmanız yeterli.</p>
+    <p data-i="2">Hasta bulunduysa satıra çift tıklayın ya da Düzenle düğmesine basın; yeni kart açmayın.</p>
+    <p data-i="3">Bulunamadıysa Yeni düğmesiyle kart açın; kimlik numarası, ad soyad ve telefonun yanında doğum tarihi ile cinsiyet de zorunludur.</p>
+    <p data-i="4">Hasta bir kurumdan ya da sigortadan yararlanıyorsa, kartın Kurum / Ödeyen sekmesine poliçe bilgisiyle bir satır ekleyin.</p>
+    <p data-i="5">Aynı kimlik numarasıyla ikinci kayıt açılamaz; aynı telefon uyarısı ise yalnızca bir hatırlatmadır.</p>
+  </template>
+</section>
+
+<!-- 6 RANDEVU -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📅</div><h2>Randevu verme, değiştirme, iptal</h2><div class="etiket">Randevu › Randevular</div></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1fr 1.2fr; gap: 26px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1 2"><span class="b">📅 Takvim</span> görünümüne geçin; görüntülemede <span class="b">Cihaz</span>, poliklinikte <span class="b">Doktor</span> sütunlarını seçin.</li>
+          <li data-i="3">Boş saate tıklayın; kart o saatle açılır. <span class="k">Hasta</span>yı seçin, hizmet / tetkik, süre, tip ve kaynağı girip <span class="b">Kaydet</span>.</li>
+          <li data-i="4">Saat değişikliği: satırı seçip <span class="b">✎ Düzenle</span>. Çakışan saat kaydedilmez.</li>
+          <li data-i="5">Gelmeyen hasta: <span class="b">✖ Gelmedi</span>. Vazgeçilen randevu: sağ tuş <span class="b">⊘ İptal</span>.</li>
+        </ol>
+        <div class="dikkat" data-i="5"><b>Dikkat:</b> Randevuyu <b>silmeyin</b>; Gelmedi / İptal kullanın. İstatistik ve hatırlatma buna bakar.</div>
+        <div class="ipucu" data-i="6"><b>İpucu:</b> Görüntülemede randevu hekime değil <b>cihaza</b> verilir. Soldaki "Randevu Bekleyen İstemler" paneli randevusu olmayan istemleri gösterir.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/banko/06_takvim.png" alt="Randevu takvimi, cihaz görünümü">
+          <span class="isaret" data-i="1" data-etiket="📅 Takvim" style="left: 21.1%; top: 8.3%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="Cihaz" style="left: 26.7%; top: 20.5%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Boş saate tıkla" style="left: 43%; top: 37.1%;">3</span>
+          <span class="isaret sol" data-i="4" data-etiket="✎ Düzenle" style="left: 60%; top: 3.2%;">4</span>
+          <span class="isaret sol" data-i="5" data-etiket="✖ Gelmedi" style="left: 75.7%; top: 3.2%;">5</span>
+          <span class="isaret" data-i="6" data-etiket="Bekleyen istemler" style="left: 2.5%; top: 31.4%;">6</span>
+        </div>
+        <div class="foto-not">Liste çipleri: Planlandı · Geldi · Gelmedi · İptal · Tümü. Öğle arası ve cihaz kapatmaları taralı görünür.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Randevular ekranında önce Takvim görünümüne geçin.</p>
+    <p data-i="2">Görüntüleme merkezinde randevu hekime değil cihaza verilir; bu yüzden Cihaz görünümünü seçin. Her sütun bir cihazdır.</p>
+    <p data-i="3">Boş bir saate tıkladığınızda randevu kartı o saatle açılır; hastayı, tetkiki ve süreyi seçip kaydedin.</p>
+    <p data-i="4">Saati değiştirmek için randevuyu seçip Düzenle'ye basın; çakışan bir saat kaydedilmez.</p>
+    <p data-i="5">Hasta gelmediyse Gelmedi, randevudan vazgeçildiyse sağ tuşla İptal seçin; randevuyu hiçbir zaman silmeyin.</p>
+    <p data-i="6">Soldaki panel, henüz randevusu verilmemiş istemleri gösterir.</p>
+  </template>
+</section>
+
+<!-- 7 KABUL / BAŞVURU -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏥</div><h2>Hasta geldi: kabul ve başvuru açma</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.1fr 1fr; gap: 28px;">
+      <div>
+        <h3>Randevulu görüntüleme hastası</h3>
+        <ol class="adimlar kucuk">
+          <li data-i="1"><span class="k">Randevu › Randevular</span>'da satırı seçin, <span class="b ana">✔ Geldi</span> (ya da <span class="b">➜ Başvuruya Dönüştür</span>).</li>
+          <li data-i="2"><span class="k">Radyoloji İstemi</span> penceresinde tetkiki kontrol edin; isteyen hekimi seçin, <span class="k">Klinik Bilgi</span>'yi yazın (zorunlu).</li>
+          <li data-i="3">Ödeyen kurumu ve tutarları kontrol edin; CD verilecekse <span class="k">Sonuç için CD hazırla</span>.</li>
+          <li data-i="4">Ödeme şimdi: <span class="b ana">💵 Tahsilat Al ve Kabul Et</span> · sonra: <span class="b">✔ İstemi Aç (n)</span>.</li>
+        </ol>
+        <h3 style="margin-top: 14px;">Randevusuz / poliklinik hastası</h3>
+        <ul class="mad kucuk">
+          <li data-i="5">Hasta kartında <span class="b">＋ Yeni Başvuru</span> ya da <span class="k">Kayıt Kabul › Başvurular</span> › <span class="b ana">＋ Yeni Başvuru</span>.</li>
+          <li data-i="5">Ödeyen kurum, bölüm ve hekimi seçip <span class="b">💾 Kaydet</span>: protokol numarası otomatik verilir.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ekran">
+          <div class="eb">🦴 Radyoloji İstemi — [hasta adı]</div>
+          <table>
+            <tr><th>Bölüm</th><th>İçerik</th></tr>
+            <tr data-i="2"><td><b>Tetkik Seçimi</b></td><td>Randevunun tetkiki seçili; her tetkik ayrı istem / Accession No</td></tr>
+            <tr data-i="2"><td><b>İstem Bilgisi</b></td><td>İsteyen hekim (kayıtlı / dış), Ön Tanı, <b>Klinik Bilgi *</b>, Öncelik, Kontrast</td></tr>
+            <tr data-i="3"><td><b>Ödeme / Kabul</b></td><td>Ödeyen Kurum, Poliçe No, Hastadan / Kurumdan, Genel Toplam</td></tr>
+            <tr data-i="3"><td><b>Kabul Sonrası</b></td><td>MWL'e gönder · SMS · Hazırlık talimatı · CD hazırla</td></tr>
+          </table>
+          <div class="cipler" data-i="4" style="justify-content: flex-end; border-bottom: 0;">
+            <span class="cip">📷 İstem Kâğıdını Tara</span><span class="cip">✔ İstemi Aç (1)</span><span class="cip on">💵 Tahsilat Al ve Kabul Et</span>
+          </div>
+        </div>
+        <div class="foto-not">Temsili çizim; düğme adları programdakiyle aynıdır.</div>
+        <div class="dikkat" data-i="6"><b>Dikkat:</b> Açık başvurusu olan hastaya aynı gün ikinci protokol açmayın. Sistem "Bu hastanın kapanmamış başvurusu var - o başvuru açıldı." der ve mevcut başvuruyu getirir.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Randevulu hasta geldiğinde, randevu listesinde satırını seçip Geldi düğmesine basın.</p>
+    <p data-i="2">Açılan Radyoloji İstemi penceresinde tetkiki kontrol edin, isteyen hekimi seçin ve klinik bilgiyi mutlaka yazın; radyolog raporunu bu bilgiyle yazar.</p>
+    <p data-i="3">Ödeyen kurumu ve tutarları kontrol edin; hastaya CD verilecekse Sonuç için CD hazırla kutusunu işaretleyin.</p>
+    <p data-i="4">Ödeme hemen alınacaksa Tahsilat Al ve Kabul Et, daha sonra alınacaksa İstemi Aç düğmesini kullanın.</p>
+    <p data-i="5">Randevusuz ya da poliklinik hastasında başvuruyu hasta kartından veya Başvurular ekranından Yeni Başvuru ile açarsınız; protokol numarası otomatik verilir.</p>
+    <p data-i="6">Hastanın kapanmamış bir başvurusu varsa sistem ikinci protokol açmaz, mevcut başvuruyu getirir.</p>
+  </template>
+</section>
+
+<!-- 8 ÜCRET EKLEME -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🧾</div><h2>Ücret (hizmet) ekleme</h2><div class="etiket">Başvuru kartı › Ücretlendirme</div></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.15fr 1fr; gap: 28px;">
+      <div>
+        <div class="foto"><img src="img/banko/07_ucretlendirme.png" alt="Başvuru kartı, Ücretlendirme sekmesi">
+          <span class="isaret" data-i="1" data-etiket="Ücretlendirme" style="left: 21%; top: 48.5%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="＋ Satır ekle" style="left: 14.5%; top: 60%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Eklenen hizmet" style="left: 50%; top: 79.4%;">3</span>
+          <span class="isaret sol" data-i="4" data-etiket="Genel Toplam" style="left: 64%; top: 93.1%;">4</span>
+          <span class="isaret" data-i="5" data-etiket="Aşama şeridi" style="left: 30%; top: 39.7%;">5</span>
+          <span class="isaret" data-i="5" data-etiket="💾 Kaydet" style="left: 9%; top: 13.5%;">6</span>
+        </div>
+        <div class="foto-not">Aşama şeridi: Başvuru → Ücretlendirme → (Provizyon) → Tahsilat → Belge Kesimi; yüzde başvurunun ne kadar tamamlandığını gösterir.</div>
+      </div>
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Başvuru kartında <span class="k">Ücretlendirme</span> sekmesine geçin.</li>
+          <li data-i="2"><span class="b ana">＋</span> ile hizmeti arayıp ekleyin; fiyat fiyat listesinden / kampanyadan gelir.</li>
+          <li data-i="3">Yanlış satırı seçip <span class="b">✎</span> düzeltin ya da <span class="b">🗑</span> silin.</li>
+          <li>Hekim muayenede istem yaptıysa araç çubuğundaki <span class="b">🩺 Doktor İstemi</span> ile ücretlendirin.</li>
+          <li data-i="5"><span class="b ana">💾 Kaydet</span>.</li>
+        </ol>
+        <div class="dikkat" data-i="6"><b>Dikkat:</b> Kurum eşiğini aşan iskonto satıra elle yazılamaz; <b>İskonto Onayı</b> talebi gerekir ve kimse kendi talebini onaylayamaz.</div>
+        <div class="ipucu" data-i="4"><b>İpucu:</b> Hastaya söylenecek rakam <b>Genel Toplam</b>'dır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Başvuru kartında Ücretlendirme sekmesine geçin.</p>
+    <p data-i="2">Artı düğmesiyle hizmeti arayıp ekleyin; fiyat, fiyat listesinden ya da kampanyadan kendiliğinden gelir.</p>
+    <p data-i="3">Eklenen hizmetler burada listelenir; yanlış satırı seçip düzeltebilir ya da silebilirsiniz.</p>
+    <p data-i="4">Hastaya söyleyeceğiniz tutar, sağ alttaki Genel Toplam'dır.</p>
+    <p data-i="5">Üstteki renkli şerit başvurunun hangi aşamada olduğunu gösterir; işiniz bitince Kaydet'e basın.</p>
+    <p data-i="6">Kurum eşiğini aşan bir iskonto gerekiyorsa onu satıra elle yazamazsınız; bunun için iskonto onayı talebi açılır.</p>
+  </template>
+</section>
+
+<!-- 9 TAHSİLAT: NAKİT -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">💵</div><h2>Tahsilat: nakit</h2><div class="etiket">Başvuru kartı › Tahsilat</div></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.2fr 1fr; gap: 28px;">
+      <div>
+        <div class="foto"><img src="img/banko/08_tahsilat.png" alt="Başvuru kartı, Tahsilat sekmesi">
+          <span class="isaret" data-i="1" data-etiket="Tahsilat" style="left: 27%; top: 42.5%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="💵 Nakit" style="left: 3%; top: 63.3%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Kasa / banko" style="left: 50.3%; top: 80%;">3</span>
+          <span class="isaret sol" data-i="4" data-etiket="Tahsil Edilen / Kalan" style="left: 76%; top: 94%;">4</span>
+          <span class="isaret sol" data-i="5" data-etiket="Avans mahsubu" style="left: 79%; top: 53%;">5</span>
+        </div>
+        <div class="foto-not">Altta <b>Tahsil Edilen / Kalan</b>: kalan sıfırsa hastanın borcu kapanmıştır.</div>
+      </div>
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Başvuru kartında <span class="k">Tahsilat</span> sekmesini açın.</li>
+          <li data-i="2"><span class="b ana">💵 Nakit</span>: satır açık borcun tamamıyla gelir.</li>
+          <li data-i="2">Hasta daha az ödüyorsa satırdaki tutarı değiştirin (kısmi tahsilat).</li>
+          <li>Parayı alın, makbuzu verin.</li>
+        </ol>
+        <ul class="mad kucuk" style="margin-top: 6px;">
+          <li data-i="3">Nakit, açık oturumunuzun bankosunun <span class="k">kasasına</span> girer.</li>
+          <li>Kayıt kabul penceresinde aynı iş <span class="b">💵 Tahsilat Al</span> ile yapılır.</li>
+        </ul>
+        <div class="dikkat" data-i="6"><b>Dikkat:</b> Açık oturum yoksa tahsilat kaydedilmez: <span class="mesaj">Tahsilat için açık banko oturumu gerekiyor.</span> Önce vardiyanızı açın.</div>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> Sarı şerit kullanılmamış avansı gösterir; <b>⇄ Bu Belgeye Mahsup Et</b> ile borca sayılır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Ücret yazıldıktan sonra başvuru kartının Tahsilat sekmesine geçin.</p>
+    <p data-i="2">Nakit düğmesine bastığınızda açık borcun tamamı için bir tahsilat satırı eklenir; hasta daha az ödüyorsa tutarı satırda değiştirebilirsiniz.</p>
+    <p data-i="3">Nakit tahsilat, açık oturumunuzun bankosunun kasasına girer; satırda kasanın ve bankonun adını görürsünüz.</p>
+    <p data-i="4">Alttaki Tahsil Edilen ve Kalan toplamı, borcun kapanıp kapanmadığını gösterir.</p>
+    <p data-i="5">Hastanın kullanılmamış avansı varsa, sarı şeritteki Bu Belgeye Mahsup Et düğmesiyle borca sayabilirsiniz.</p>
+    <p data-i="6">Unutmayın: açık banko oturumunuz yoksa tahsilat kaydedilmez; önce vardiyanızı açın.</p>
+  </template>
+</section>
+
+<!-- 10 POS, KISMİ, İADE -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">💳</div><h2>Tahsilat: POS, kısmi ödeme, avans ve iade</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu" data-i="1"><div class="baslik"><span class="e">💳</span>POS ile tahsilat</div>
+        <ol class="adimlar kucuk">
+          <li>Tahsilat sekmesinde <span class="b ana">💳 POS</span>.</li>
+          <li>Bankonuzda <b>tek çalışan POS</b> varsa kendiliğinden seçilir, soru gelmez.</li>
+          <li>Birden çok cihaz varsa <span class="k">💳 POS Seç</span> penceresinde kartı çektiğiniz terminali seçin.</li>
+          <li>Tutarı kontrol edin; cihazda çekimi tamamlayın.</li>
+        </ol></div>
+      <div class="kutu vurgu" data-i="2"><div class="baslik"><span class="e">➗</span>Kısmi ödeme ve avans</div>
+        <ul class="mad kucuk">
+          <li>Satır tutarını ödenen kadar yapın; kalan <span class="k">Açık Borç</span> olarak görünür.</li>
+          <li>Ödeme ikiye bölünebilir: bir kısmı nakit, bir kısmı POS.</li>
+          <li><span class="b">💰 Avans Al</span>: belgeye bağlanmayan ön ödeme.</li>
+          <li>Sonraki başvuruda <span class="b">⋯</span> › <span class="k">💰 Avans Kullan</span>.</li>
+          <li>Banka, Çek, Senet: <span class="b">⋯</span> menüsünde.</li>
+        </ul></div>
+      <div class="kutu vurgu" data-i="3"><div class="baslik"><span class="e">↩️</span>İade / iptal</div>
+        <ul class="mad kucuk">
+          <li><span class="b">↩ İade / İptal</span> › parayı aldığınız araç (Nakit / POS / Banka / Çek / Senet).</li>
+          <li>Tutar penceresine iade tutarını yazın; satır eksi işlenir.</li>
+          <li>Hatalı tahsilat silinmez; iade / düzeltme fişiyle çözülür.</li>
+        </ul></div>
+    </div>
+    <div class="dikkat" data-i="4"><b>Dikkat:</b> Para <b>hangi araçla alındıysa o araçla</b> iade edilir. Kartla alınan ödemeyi nakit iade etmek, kasada olmayan parayı çıkarmaktır.</div>
+    <div class="ipucu" data-i="5"><b>İpucu:</b> POS tutarı kasada para olarak durmaz; gün sonunda POS cihazının fişiyle karşılaştırılır.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Kartla ödeme için Tahsilat sekmesinde POS düğmesine basın. Bankonuzda tek çalışan POS cihazı varsa kendiliğinden seçilir; birden fazlaysa kartı çektiğiniz terminali seçersiniz.</p>
+    <p data-i="2">Hasta borcun bir kısmını öderse satır tutarını değiştirin; kalan, açık borç olarak görünür. Ödemeyi nakit ve POS olarak bölebilirsiniz.</p>
+    <p data-i="2">Banka, çek ve senet üç nokta menüsündedir; avans alma ve kullanma da bu düğmelerden yapılır.</p>
+    <p data-i="3">İade gerektiğinde İade / İptal düğmesinden, parayı hangi araçla aldıysanız o aracı seçip tutarı yazın.</p>
+    <p data-i="4">Kartla alınan ödeme asla nakit olarak iade edilmez.</p>
+    <p data-i="5">POS tutarı kasada para olarak durmaz; gün sonunda POS cihazının fişiyle karşılaştırılır.</p>
+  </template>
+</section>
+
+<!-- 11 KURUMLU HASTA -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏛️</div><h2>Kurumlu hasta (SGK / özel sigorta) ve hasta payı</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.1fr 1fr; gap: 30px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Hasta kartında <span class="k">Kurum / Ödeyen</span> satırı varsa başvuruya varsayılan olarak gelir.</li>
+          <li data-i="2">Başvuruda <span class="k">Ödeyen Kurum</span> ve <span class="k">Sözleşme / Poliçe</span>'yi kontrol edin. Ödeyen boşsa hasta kendisi öder.</li>
+          <li data-i="2">Özel sigortada <span class="k">Provizyon</span> sekmesi: sigorta şirketi, müstehaklık, karşılama %, onaylanan tutar.</li>
+          <li data-i="3">Tutar ikiye ayrılır: <span class="k">Hastadan</span> (hasta payı) ve <span class="k">Kurumdan</span> (kurum payı).</li>
+          <li data-i="4">Bankoda yalnız <b>hasta payını</b> tahsil edin.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="ekran" data-i="3">
+          <div class="eb">🧮 Ödeme / Kabul — örnek</div>
+          <table>
+            <tr><th>Tetkik</th><th>Liste</th><th>Hastadan</th><th>Kurumdan</th></tr>
+            <tr><td>Lomber MR</td><td>3.000,00</td><td>600,00</td><td>2.400,00</td></tr>
+            <tr><td>Tiroid USG</td><td>900,00</td><td>180,00</td><td>720,00</td></tr>
+            <tr><td><b>Genel Toplam</b></td><td><b>3.900,00</b></td><td><b>780,00</b></td><td><b>3.120,00</b></td></tr>
+          </table>
+        </div>
+        <div class="foto-not">Temsili tutarlar. Pay oranları kurum sözleşmesinden gelir.</div>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> <span class="mesaj" style="color: var(--ok); border-color: var(--okkenar);">Kurum tutarın tamamını karşılıyor — hastadan tahsilat yok.</span> bir bilgi mesajıdır; hastadan para alınmaz.</div>
+        <div class="dikkat" data-i="4"><b>Dikkat:</b> Kurum payı vezneden tahsil edilmez; oturum kartında <b>Kurum tahakkuku</b> olarak ayrı görünür. Poliçe no eksikse <span class="mesaj">Poliçe numarası girilmeli.</span> uyarısı gelir.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Kurumlu hastada ödeyen kurum, hasta kartındaki Kurum / Ödeyen satırından başvuruya kendiliğinden gelir.</p>
+    <p data-i="2">Başvuruda ödeyen kurumu ve poliçe numarasını kontrol edin; özel sigortada provizyon, Provizyon sekmesinden alınır.</p>
+    <p data-i="3">Tutar ikiye ayrılır: hastadan alınacak hasta payı ve kurumdan alınacak kurum payı. Oranlar kurum sözleşmesinden gelir.</p>
+    <p data-i="4">Bankoda yalnızca hasta payını tahsil edersiniz; kurum payı vezneden alınmaz, ayrıca tahakkuk edilir.</p>
+    <p data-i="5">Kurum tutarın tamamını karşılıyorsa sistem bunu bir bilgi mesajıyla söyler ve hastadan para alınmaz.</p>
+  </template>
+</section>
+
+<!-- 12 GÜN İÇİ KONTROL -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📊</div><h2>Gün içi kontrol: oturum kartı</h2><div class="etiket">Banko Oturumları › satır › ✎ Düzenle</div></div>
+  <div class="govde" style="padding-top: 22px;">
+    <div class="izgara" style="grid-template-columns: 880px 1fr; gap: 24px;">
+      <div>
+        <div class="foto"><img src="img/banko/13_vardiya_islemleri.png" alt="Banko oturum kartı, Vardiya İşlemleri sekmesi">
+          <span class="isaret" data-i="1" data-etiket="Gün içi işlem adımı" style="left: 40%; top: 15%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="Özet kutuları" style="left: 33%; top: 37.3%;">2</span>
+          <span class="isaret sol" data-i="3" data-etiket="Kasada Olması Gereken" style="left: 66%; top: 37.3%;">3</span>
+          <span class="isaret" data-i="4" data-etiket="Vardiya İşlemleri" style="left: 27%; top: 51.3%;">4</span>
+          <span class="isaret" data-i="5" data-etiket="Diğer sekmeler" style="left: 46%; top: 51.3%;">5</span>
+          <span class="isaret sol" data-i="6" data-etiket="🔒 Gün Sonu" style="left: 82%; top: 14.9%;">6</span>
+        </div>
+      </div>
+      <div>
+        <h3>Özet kutuları</h3>
+        <ul class="mad kucuk">
+          <li data-i="2"><span class="k">Başvuru · Tahsilat · Tahsil Edilen · Açık Borç</span></li>
+          <li data-i="3"><span class="k">Kasada Olması Gereken</span>: yalnız nakit (devir + nakit − iade)</li>
+          <li><span class="k">Sayım Farkı</span>: gün sonunda dolar</li>
+        </ul>
+      </div>
+    </div>
+    <h3 style="margin-top: 18px;">Sekmeler</h3>
+    <div class="izgara" style="grid-template-columns: repeat(5, 1fr); gap: 10px;">
+      <div class="kutu" data-i="5" style="padding: 10px 12px;"><b class="k">Ödeme Türleri</b><p style="font-size: 14px;">Türe göre döküm; hangisi kasada durur</p></div>
+      <div class="kutu" data-i="4" style="padding: 10px 12px;"><b class="k">Vardiya İşlemleri</b><p style="font-size: 14px;">Saat, başvuru, hasta, tutar, ödeme, durum</p></div>
+      <div class="kutu" data-i="5" style="padding: 10px 12px;"><b class="k">POS Gün Sonu</b><p style="font-size: 14px;">Cihaz fişi ↔ kasa kaydı</p></div>
+      <div class="kutu" data-i="5" style="padding: 10px 12px;"><b class="k">Açık Borçlar</b><p style="font-size: 14px;">Hastadan alınacak / kurum tahakkuku</p></div>
+      <div class="kutu" style="padding: 10px 12px;"><b class="k">Teslim Geçmişi</b><p style="font-size: 14px;">Bankonun önceki oturumları</p></div>
+    </div>
+    <div class="ipucu" data-i="5" style="margin-top: 12px;"><b>İpucu:</b> Öğlen bir kez <b>Açık Borçlar</b>'a bakın; akşama borç bırakmayın.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Gün içinde durumu görmek için Banko Oturumları listesinden oturumunuzu seçip Düzenle'ye basın; adım rozetlerinde Gün içi işlem etkin görünür.</p>
+    <p data-i="2">Üstteki kutular vardiyanızın özetidir: kaç başvuru ve kaç tahsilat yapıldığı, ne kadar tahsil edildiği ve ne kadar açık borç kaldığı.</p>
+    <p data-i="3">Kasada Olması Gereken kutusu yalnız nakdi gösterir: devir, artı nakit tahsilat, eksi nakit iade.</p>
+    <p data-i="4">Vardiya İşlemleri sekmesinde kimden, ne zaman, hangi araçla ne aldığınızı satır satır görürsünüz.</p>
+    <p data-i="5">Ödeme Türleri, POS Gün Sonu ve Açık Borçlar sekmeleri gün sonuna hazırlıktır; öğlen bir kez açık borçlara bakmak iyi bir alışkanlıktır.</p>
+    <p data-i="6">Vardiyayı kapatmaya hazır olduğunuzda sağ üstteki Gün Sonu düğmesine basarsınız.</p>
+  </template>
+</section>
+
+<!-- 13 GÜN SONU -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔒</div><h2>Gün sonu: sayım ve kasa teslimi</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1fr 1.1fr; gap: 26px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Oturum kartında sağ üstteki <span class="b ana">🔒 Gün Sonu</span>.</li>
+          <li data-i="2"><span class="k">POS Gün Sonu</span>: her terminalin fişindeki toplamı <span class="k">Cihaz</span> sütununa yazın, <span class="b">💳 POS Gün Sonunu Kaydet</span>.</li>
+          <li data-i="3">Nakdi sayıp <span class="k">Sayılan nakit</span>'e yazın; ekran Sayılan / Olması gereken / Fark gösterir.</li>
+          <li data-i="4">Fark varsa <span class="k">Fark nedeni</span> ve <span class="k">Açıklama</span> zorunlu.</li>
+          <li data-i="5"><span class="k">Kasada bırakılan (yarının devri)</span>; <span class="k">Teslim edilecek</span> kendiliğinden hesaplanır.</li>
+          <li data-i="5"><span class="b ana">🔒 Oturumu Kapat</span> (onay açıksa <span class="b">📨 Teslime Gönder (onaya)</span>). Vazgeçmek: <span class="b">↻ Vazgeç</span>.</li>
+          <li data-i="6">Tutanak no (TT-yyyy-nnnnnn) verilir; listede <span class="b">🧾 Teslim Tutanağı</span> ile yazdırın.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="foto"><img src="img/banko/05_gun_sonu.png" alt="Gün sonu kasa sayımı">
+          <span class="isaret" data-i="1" data-etiket="Ödeme türü dökümü" style="left: 23%; top: 10.4%;">1</span>
+          <span class="isaret sol" data-i="2" data-etiket="Cihaz fiş toplamı" style="left: 52%; top: 57.1%;">2</span>
+          <span class="isaret" data-i="2" style="left: 21%; top: 74.7%;">2</span>
+          <span class="isaret sol" data-i="3" data-etiket="Sayılan nakit" style="left: 66%; top: 89.2%;">3</span>
+          <span class="isaret" data-i="3" data-etiket="Olması gereken" style="left: 38%; top: 96%;">3</span>
+        </div>
+        <div class="kutu" data-i="4" style="margin-top: 10px; padding: 10px 14px;">
+          <div style="font-size: 14px; color: var(--yazi2); font-weight: 700; margin-bottom: 4px;">Fark nedenleri</div>
+          <div style="font-size: 14px; line-height: 1.5;">Para üstü hatası · Eksik tahsilat · Fazla tahsilat · Kayıt dışı ödeme · Sayım hatası · Diğer</div>
+        </div>
+        <div class="dikkat" data-i="5" style="margin-top: 10px; font-size: 14.5px;"><b>Dikkat:</b> Bırakılan tutar sayılandan fazla olamaz. POS farkı gün sonunu engellemez; banka ekstresiyle kapanır.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Akşam oturum kartındaki Gün Sonu düğmesine basın; ekranda ödeme türü dökümü ve sayım alanları açılır.</p>
+    <p data-i="2">Önce POS cihazlarının gün sonu fişindeki toplamı Cihaz sütununa yazın ve POS Gün Sonunu Kaydet'e basın.</p>
+    <p data-i="3">Ardından kasadaki nakdi sayıp Sayılan nakit alanına yazın; ekran, olması gereken tutarla aradaki farkı hesaplar.</p>
+    <p data-i="4">Fark varsa fark nedenini seçmeniz ve bir açıklama yazmanız zorunludur.</p>
+    <p data-i="5">Yarına kasada bırakacağınız tutarı yazın; teslim edilecek tutar kendiliğinden hesaplanır. Sonra Oturumu Kapat'a basın.</p>
+    <p data-i="6">Kapanışta bir tutanak numarası verilir; tutanağı Banko Oturumları listesinden Teslim Tutanağı ile yazdırabilirsiniz.</p>
+  </template>
+</section>
+
+<!-- 14 SIK HATALAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔧</div><h2>Sık karşılaşılan durumlar ve çözümleri</h2></div>
+  <div class="govde">
+    <table class="hata">
+      <tr><th>Ekranda gördüğünüz</th><th>Ne yapmalı?</th></tr>
+      <tr data-i="2"><td><span class="mesaj">Tahsilat için açık banko oturumu gerekiyor.</span></td><td>Kayıt Kabul › Banko Oturumları › <b>＋ Yeni Oturum Aç</b> ile vardiyanızı başlatın, sonra tahsilatı tekrar alın.</td></tr>
+      <tr data-i="2"><td><span class="mesaj">Yeni oturum açılamaz: açık bir oturumunuz var</span></td><td>Önceki oturumu gün sonuyla kapatın; bir görevli aynı anda tek oturum yürütür.</td></tr>
+      <tr data-i="2"><td>Seçtiğiniz bankoda oturum açılamıyor</td><td>Bankoda başka canlı oturum var, banko pasif, danışma türünde ya da başka şubede. Sorumlunuza danışın.</td></tr>
+      <tr data-i="3"><td>Menü / düğme görünmüyor, <b>YASAK (403)</b></td><td>Rolünüzde o işin yetkisi yok ya da şubede salt okuma hakkınız var; yöneticinize başvurun.</td></tr>
+      <tr data-i="4"><td>Teslim düğmesi kapalı</td><td>Fark var ama <b>Fark nedeni / Açıklama</b> boş ya da bırakılan tutar sayılandan fazla.</td></tr>
+      <tr data-i="4"><td>POS gün sonunda fark</td><td>Cihaz fişindeki toplamı yeniden kontrol edin; terminale bağlanmamış POS tahsilatı ayrı satırda görünür.</td></tr>
+      <tr data-i="5"><td><span class="mesaj">Hekimin bu saatte başka randevusu var.</span> / Cihaz bu saatte dolu</td><td>Başka saat ya da hekim / cihaz seçin; çakışan saat kaydedilmez.</td></tr>
+      <tr data-i="5"><td><b>CAKISMA (409)</b>: kaydı başka kullanıcı değiştirdi</td><td>Kartı yenileyin, değişikliği güncel kayıt üzerinde tekrar yapın.</td></tr>
+      <tr data-i="6"><td>Oturum yanlışlıkla kapandı</td><td>Kapanan oturum düzeltilmez; yetkili kişi <b>🔓 Yeniden Aç</b> kullanır (gerekçe kayda geçer).</td></tr>
+    </table>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p>Şimdi en sık karşılaşılan durumlara ve çözümlerine bakalım.</p>
+    <p data-i="2">Tahsilat için açık banko oturumu gerekiyor mesajı, vardiyanızı açmadığınızı gösterir; önce oturumu açın, sonra tahsilatı yeniden alın. Açık bir oturumunuz varken ikincisini açamazsınız.</p>
+    <p data-i="3">Bir menü ya da düğme görünmüyorsa veya Yasak hatası alıyorsanız, rolünüzde o yetki yoktur; yöneticinize başvurun.</p>
+    <p data-i="4">Teslim düğmesi kapalıysa fark nedeni ya da açıklama boştur, veya kasada bıraktığınız tutar saydığınızdan fazladır. POS farkında cihaz fişini yeniden kontrol edin.</p>
+    <p data-i="5">Randevu çakışmasında başka bir saat seçin; başka bir kullanıcının değiştirdiği kartta ise kartı yenileyip işlemi tekrarlayın.</p>
+    <p data-i="6">Yanlışlıkla kapanan bir oturumu yalnızca yetkili kişi yeniden açabilir.</p>
+  </template>
+</section>
+
+<!-- 15 ALIŞTIRMALAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏋️</div><h2>Alıştırmalar (eğitim ortamında)</h2><div class="etiket">Üstte <span class="ortam egitim">EĞİTİM ORTAMI</span> yazdığını kontrol edin</div></div>
+  <div class="govde">
+    <div class="yol">
+      <div class="m" data-i="2" style="border-left-color: var(--mor);"><span class="e">1️⃣</span><div><b>Vardiyayı açın</b><span>Bankonuzu seçin, devir sayımını yazın (örn. 500,00 ₺), farkı varsa nota açıklayın ve oturumu açın.</span></div></div>
+      <div class="m" data-i="2" style="border-left-color: var(--mor);"><span class="e">2️⃣</span><div><b>Yeni hasta + randevu</b><span>Örnek bir hasta kaydedin (doğum tarihi, cinsiyet, telefon). Takvimde yarın 10:00'a cihaz randevusu verin, sonra saati 11:00'e alın.</span></div></div>
+      <div class="m" data-i="3" style="border-left-color: var(--mor);"><span class="e">3️⃣</span><div><b>Kabul ve ücret</b><span>Bugünkü bir randevuya ✔ Geldi deyin; klinik bilgiyi yazıp istemi açın. Başvuruda Ücretlendirme'yi kontrol edin.</span></div></div>
+      <div class="m" data-i="4" style="border-left-color: var(--mor);"><span class="e">4️⃣</span><div><b>Bölünmüş tahsilat ve iade</b><span>Borcun bir kısmını 💵 Nakit, kalanını 💳 POS ile alın. Ardından nakit kısmın bir bölümünü ↩ İade / İptal › Nakit ile iade edin.</span></div></div>
+      <div class="m" data-i="5" style="border-left-color: var(--mor);"><span class="e">5️⃣</span><div><b>Gün sonu</b><span>POS fiş toplamını girin, nakdi sayın (bilerek 10 ₺ eksik yazın), fark nedenini seçin, kasada bırakılanı yazıp oturumu kapatın; tutanağı yazdırın.</span></div></div>
+      <div class="m" data-i="5" style="border-left-color: var(--ok);"><span class="e">✅</span><div><b>Kontrol</b><span>Oturum kartında Tahsil Edilen, Kasada Olması Gereken ve Sayım Farkı beklediğiniz rakamları gösteriyor mu?</span></div></div>
+    </div>
+    <div class="dikkat" data-i="6"><b>Dikkat:</b> Eğitim ortamına gerçek hasta bilgisi (TC kimlik no, telefon) girmeyin. Canlı kurulumda "deneme" kaydı açmayın.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Banko Görevlisi Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p>Şimdi öğrendiklerinizi eğitim ortamında deneyin; üst şeritte Eğitim Ortamı yazdığından emin olun.</p>
+    <p data-i="2">Önce vardiyanızı açın; sonra örnek bir hasta kaydedip ona yarın için bir cihaz randevusu verin ve saatini değiştirin.</p>
+    <p data-i="3">Bugünkü bir randevuya Geldi diyerek kabul yapın ve başvurudaki ücretlendirmeyi kontrol edin.</p>
+    <p data-i="4">Borcun bir kısmını nakit, kalanını POS ile alın; sonra nakit kısmın bir bölümünü iade edin.</p>
+    <p data-i="5">Son olarak gün sonunu bilerek küçük bir farkla kapatın, fark nedenini seçin, tutanağı yazdırın ve oturum kartındaki rakamları kontrol edin.</p>
+    <p data-i="6">Eğitim ortamına asla gerçek hasta bilgisi girmeyin.</p>
+  </template>
+</section>
+
+<!-- 16 KAPANIŞ -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"><circle cx="60" cy="60" r="44"/><path d="M46 48a14 14 0 1 1 20 12c-4 2-6 5-6 9v3"/><circle cx="60" cy="86" r="2.5" fill="#fff"/></svg></div>
+  <div class="ic" style="top: 140px;">
+    <div class="urun">Gentegre AI · Banko Görevlisi Eğitimi</div>
+    <h1>Takıldığınızda</h1>
+    <div class="alt-baslik" style="font-size: 23px; line-height: 1.6;">
+      <div data-i="1"><b>?</b> üst şeritte: açık ekranın yardımı</div>
+      <div data-i="1"><b>💡 Yapay Zekâya Sor</b>: "Gün sonu kasa sayımı nasıl yapılır?" gibi sorular</div>
+      <div data-i="2"><b>Banko sorumlusu</b>: açılış / teslim onayı, yeniden açma, yetki</div>
+      <div data-i="3"><b>Destek</b>: hata mesajındaki izleme numarasını iletin</div>
+    </div>
+  </div>
+  <div class="serit" data-i="4">
+    <span>Önce vardiyayı aç</span><span>Önce hastayı ara</span><span>Randevuyu silme</span><span>Aynı araçla iade</span><span>Sayımı tahmin etme</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+  <template class="anlatim">
+    <p data-i="1">Takıldığınızda üst şeritteki soru işaretiyle ekranın yardımını açabilir ya da Yapay Zekâya Sor asistanına sorabilirsiniz.</p>
+    <p data-i="2">Açılış ve teslim onayı, oturumu yeniden açma ve yetki konularında banko sorumlunuza başvurun.</p>
+    <p data-i="3">Bir hata sürüyorsa, mesajdaki izleme numarasını destek ekibine iletin.</p>
+    <p data-i="4">Unutmayın: önce vardiyayı açın, önce hastayı arayın, randevuyu silmeyin, parayı aldığınız araçla iade edin ve sayımı asla tahmin etmeyin. İyi çalışmalar!</p>
+  </template>
+</section>
+
+</div>
+
+<div id="altyazi" aria-live="polite"></div>
+
+<div id="oynatici">
+  <button id="oGeri" title="Önceki slayt (←)">⏮</button>
+  <button id="oOyna" class="ana" title="Oynat / duraklat (Boşluk)">▶ Oynat</button>
+  <button id="oIleri" title="Sonraki slayt (→)">⏭</button>
+  <div id="oCubuk"></div>
+  <span id="sayac">1 / 1</span>
+  <button id="oSes" title="Sesi aç / kapat (M)">🔊</button>
+  <select id="oHiz" title="Okuma hızı">
+    <option value="0.8">0.8x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option>
+  </select>
+  <label title="Anlatım bitince sonraki slayta geç"><input type="checkbox" id="oOto" checked> Otomatik geç</label>
+  <label title="Okunan cümleyi alt yazı olarak göster"><input type="checkbox" id="oAlt" checked> Altyazı</label>
+  <span id="oNot"></span>
+</div>
+
+<div id="baslangic">
+  <h2>Banko Görevlisi Eğitimi</h2>
+  <p>Eğitim bir video gibi ilerler: her slayt sesli anlatılır, okunan cümle altyazıda görünür ve ekran görüntüsündeki ilgili yer işaretlenir.
+     Boşluk tuşu duraklatır, ← / → slaytlar arasında gezer.</p>
+  <button class="bas" id="bBasla">▶ Eğitimi başlat</button>
+  <button class="sessiz" id="bSessiz">Sessiz incele (elle gez)</button>
+  <p id="bNot" style="font-size: 14px; color: #f3c46b;"></p>
+</div>
+
+<script>
+(function () {
+  var slaytlar = Array.prototype.slice.call(document.querySelectorAll('.slayt'));
+  var toplam = slaytlar.length, i = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---- anlatım metinleri: her slaytın <template class="anlatim"> içindeki <p>'ler ---- */
+  var anlatim = slaytlar.map(function (s) {
+    var t = s.querySelector('template.anlatim');
+    if (!t) return [];
+    return Array.prototype.slice.call(t.content.querySelectorAll('p')).map(function (p) {
+      return { metin: p.textContent.replace(/\s+/g, ' ').trim(),
+               ids: (p.getAttribute('data-i') || '').split(/\s+/).filter(Boolean) };
+    });
+  });
+
+  /* ---- baskı için konuşmacı notları (ekranda gizli) ---- */
+  slaytlar.forEach(function (s, n) {
+    var y = s.querySelector('.sayfa');
+    if (y) y.textContent = (n + 1) + ' / ' + toplam;
+    s.classList.add('hepsi');
+    var d = document.createElement('div');
+    d.className = 'konusmaci';
+    d.innerHTML = '<h4>Anlatım · slayt ' + (n + 1) + '</h4>';
+    var p = document.createElement('p');
+    p.textContent = anlatim[n].map(function (c) { return c.metin; }).join(' ');
+    d.appendChild(p);
+    s.parentNode.insertBefore(d, s.nextSibling);
+  });
+
+  /* ---- durum ---- */
+  var d = { oynuyor: false, ses: true, hiz: 1, oto: true, altyazi: true, cumle: 0, nesil: 0, zaman: null, slaytBitti: false };
+  var synth = window.speechSynthesis || null;
+  var trSes = null, sesListesiGeldi = false;
+
+  function sesSec() {
+    if (!synth) return;
+    var v = synth.getVoices() || [];
+    if (v.length) sesListesiGeldi = true;
+    var tr = v.filter(function (x) { return /^tr/i.test(x.lang); });
+    trSes = tr.filter(function (x) { return /natural|online/i.test(x.name); })[0] || tr[0] || null;
+    notYaz();
+  }
+  function notYaz() {
+    var m = '';
+    if (!synth) m = 'Bu tarayıcı sesli okumayı desteklemiyor: altyazıyla ilerler.';
+    else if (sesListesiGeldi && !trSes) m = 'Türkçe ses bulunamadı; varsayılan sesle okunuyor.';
+    $('oNot').textContent = m; $('bNot').textContent = m;
+    $('oNot').title = trSes ? 'Ses: ' + trSes.name : m;
+  }
+  if (synth) {
+    sesSec();
+    if (typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', sesSec);
+    else synth.onvoiceschanged = sesSec;
+    setTimeout(function () { sesSec(); sesListesiGeldi = true; notYaz(); }, 2500);
+  } else notYaz();
+
+  /* ---- ölçek ve altyazı konumu ---- */
+  function olcekle() {
+    var o = Math.min(window.innerWidth / 1280, (window.innerHeight - 58) / 720) * 0.96;
+    slaytlar.forEach(function (s) { s.style.transform = 'scale(' + o + ')'; });
+    var a = $('altyazi');
+    var altBosluk = ((window.innerHeight - 58) - 720 * o) / 2;
+    a.style.bottom = (58 + altBosluk + 52 * o) + 'px';
+    a.style.fontSize = Math.max(14, 22 * o) + 'px';
+    a.style.maxWidth = (1280 * o * 0.86) + 'px';
+  }
+
+  /* ---- vurgular ---- */
+  function hedefler(s) { return Array.prototype.slice.call(s.querySelectorAll('[data-i]')); }
+  function vurgula(k) {
+    var s = slaytlar[i], L = anlatim[i], gorulen = {}, simdi = {};
+    for (var n = 0; n <= k && n < L.length; n++) L[n].ids.forEach(function (x) { gorulen[x] = 1; });
+    if (L[k]) L[k].ids.forEach(function (x) { simdi[x] = 1; });
+    s.classList.remove('hepsi');
+    hedefler(s).forEach(function (e) {
+      var ids = e.getAttribute('data-i').split(/\s+/);
+      var g = ids.some(function (x) { return gorulen[x]; }), m = ids.some(function (x) { return simdi[x]; });
+      e.classList.toggle('gor', g);
+      e.classList.toggle('simdi', m);
+    });
+  }
+  function vurguTemizle(s, hepsi) {
+    hedefler(s).forEach(function (e) { e.classList.remove('simdi'); e.classList.remove('gor'); });
+    s.classList.toggle('hepsi', !!hepsi);
+  }
+  function altyaziYaz(t) {
+    var a = $('altyazi');
+    a.textContent = t || '';
+    a.classList.toggle('acik', !!t && d.altyazi);
+  }
+
+  /* ---- ilerleme çubuğu ---- */
+  var cubuk = $('oCubuk');
+  for (var n = 0; n < toplam; n++) {
+    var p = document.createElement('div');
+    p.className = 'p'; p.title = 'Slayt ' + (n + 1);
+    p.appendChild(document.createElement('i'));
+    (function (k) { p.onclick = function () { goster(k); }; })(n);
+    cubuk.appendChild(p);
+  }
+  function cubukGuncelle() {
+    var L = anlatim[i].length || 1;
+    Array.prototype.forEach.call(cubuk.children, function (p, k) {
+      p.classList.toggle('bitti', k < i);
+      p.firstChild.style.width = k === i ? (Math.min(d.cumle, L) / L * 100) + '%' : '0';
+    });
+    $('sayac').textContent = (i + 1) + ' / ' + toplam;
+    $('ilerleme').style.width = ((i + 1) / toplam * 100) + '%';
+  }
+
+  /* ---- konuşma motoru ---- */
+  function sus() {
+    d.nesil++;
+    clearTimeout(d.zaman);
+    if (synth) { try { synth.cancel(); } catch (e) {} }
+  }
+  function cumleOyna() {
+    var nesil = d.nesil, L = anlatim[i];
+    if (!d.oynuyor) return;
+    if (d.cumle >= L.length) { slaytSonu(); return; }
+    var c = L[d.cumle];
+    vurgula(d.cumle); altyaziYaz(c.metin); cubukGuncelle();
+    var bitti = false, emniyet = null;
+    function sonra() {
+      if (bitti) return; bitti = true; clearTimeout(emniyet);
+      if (nesil !== d.nesil || !d.oynuyor) return;
+      d.cumle++; cubukGuncelle();
+      d.zaman = setTimeout(cumleOyna, 350);
+    }
+    var tahmini = Math.max(1800, c.metin.length * 60 / d.hiz);
+    if (d.ses && synth) {
+      var u = new SpeechSynthesisUtterance(c.metin);
+      u.lang = 'tr-TR';
+      if (trSes) u.voice = trSes;
+      u.rate = d.hiz;
+      u.onend = sonra;
+      u.onerror = function (e) { if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; sonra(); };
+      // Emniyet: ses motoru olay göndermezse (ses yok / takılma) akış durmasın.
+      emniyet = setTimeout(sonra, tahmini * 2.2 + 4000);
+      synth.speak(u);
+    } else {
+      d.zaman = setTimeout(sonra, tahmini);
+    }
+  }
+  function slaytSonu() {
+    var nesil = d.nesil;
+    d.slaytBitti = true;
+    var s = slaytlar[i];
+    hedefler(s).forEach(function (e) { e.classList.remove('simdi'); });
+    s.classList.add('hepsi');
+    altyaziYaz('');
+    cubukGuncelle();
+    if (d.oto && i < toplam - 1) {
+      d.zaman = setTimeout(function () { if (nesil === d.nesil && d.oynuyor) goster(i + 1); }, 1200);
+    } else if (i >= toplam - 1 || !d.oto) {
+      d.oynuyor = false; dugmeler();
+    }
+  }
+  function oynat() {
+    sus();
+    d.oynuyor = true;
+    if (d.slaytBitti) {               // biten slaytta oynat: son slayt değilse sonrakine, sonsa baştan
+      if (i < toplam - 1 && d.oto) { goster(i + 1); dugmeler(); return; }
+      d.cumle = 0; d.slaytBitti = false;
+    }
+    if (d.cumle === 0) vurguTemizle(slaytlar[i], false);
+    dugmeler();
+    var nesil = d.nesil;
+    d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 300);
+  }
+  function duraklat() {
+    d.oynuyor = false;
+    sus();                            // cümle yeniden oynatıldığında baştan okunur
+    dugmeler();
+  }
+  function dugmeler() {
+    $('oOyna').textContent = d.oynuyor ? '⏸ Duraklat' : '▶ Oynat';
+    $('oSes').textContent = d.ses ? '🔊' : '🔇';
+  }
+
+  /* ---- slayt gösterme ---- */
+  function goster(n) {
+    n = Math.max(0, Math.min(toplam - 1, n));
+    sus();
+    vurguTemizle(slaytlar[i], true);
+    i = n;
+    d.cumle = 0; d.slaytBitti = false;
+    slaytlar.forEach(function (s, k) { s.classList.toggle('aktif', k === i); });
+    altyaziYaz('');
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (d.oynuyor) {
+      vurguTemizle(slaytlar[i], false);
+      var nesil = d.nesil;
+      d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 600);
+    } else vurguTemizle(slaytlar[i], true);
+    cubukGuncelle();
+    dugmeler();
+  }
+
+  /* ---- denetimler ---- */
+  $('oOyna').onclick = function () { d.oynuyor ? duraklat() : oynat(); };
+  $('oGeri').onclick = function () { goster(i - 1); };
+  $('oIleri').onclick = function () { goster(i + 1); };
+  $('oSes').onclick = function () {
+    d.ses = !d.ses; dugmeler();
+    if (d.oynuyor) { sus(); var nesil = d.nesil; d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 200); }
+  };
+  $('oHiz').onchange = function () { d.hiz = parseFloat(this.value) || 1; };
+  $('oOto').onchange = function () { d.oto = this.checked; };
+  $('oAlt').onchange = function () { d.altyazi = this.checked; $('altyazi').classList.toggle('acik', d.altyazi && !!$('altyazi').textContent); };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.key !== ' ') return;
+    if (!$('baslangic').classList.contains('gizli')) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basla(true); }
+      return;
+    }
+    if (e.key === ' ') { e.preventDefault(); d.oynuyor ? duraklat() : oynat(); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goster(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goster(i - 1); }
+    else if (e.key === 'Home') goster(0);
+    else if (e.key === 'End') goster(toplam - 1);
+    else if (e.key === 'm' || e.key === 'M') $('oSes').onclick();
+  });
+
+  function basla(sesli) {
+    $('baslangic').classList.add('gizli');
+    if (sesli) {
+      // Kullanıcı hareketi içinde boş bir cümle: bazı tarayıcılar sesi ancak böyle açar.
+      if (synth) { try { var u0 = new SpeechSynthesisUtterance(' '); u0.volume = 0; synth.speak(u0); } catch (e) {} }
+      oynat();
+    }
+  }
+  $('bBasla').onclick = function () { basla(true); };
+  $('bSessiz').onclick = function () { basla(false); };
+
+  window.addEventListener('beforeprint', function () {
+    duraklat();
+    slaytlar.forEach(function (s) { vurguTemizle(s, true); });
+  });
+  window.addEventListener('beforeunload', function () { if (synth) synth.cancel(); });
+  window.addEventListener('resize', olcekle);
+
+  var bas = parseInt((location.hash || '').replace('#', ''), 10);
+  olcekle();
+  goster(isNaN(bas) ? 0 : bas - 1);
+})();
+</script>
+</body>
+</html>
