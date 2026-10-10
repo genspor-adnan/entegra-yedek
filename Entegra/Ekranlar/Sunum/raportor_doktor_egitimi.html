@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raportör Doktor Eğitimi</title>
+<style>
+  :root {
+    --zem: #eef1f5; --yuz: #ffffff; --yuz2: #f3f6fa;
+    --cizgi: #cdd6e0; --cizgi2: #e3e9f0;
+    --yazi: #1f2d3a; --yazi2: #14315a; --soluk: #6b7a8b;
+    --mor: #2f6db3; --mor2: #d7e7fb; --koyu: #14315a;
+    --ok: #2e7d46; --okzem: #e2f3e8; --okkenar: #bfe3cb;
+    --uyari: #a9791a; --uyarizem: #fdf6e3; --uyarikenar: #eeddb4;
+    --hata: #b23b3b; --hatazem: #fdeceb; --hatakenar: #f6d3d1;
+    --grupzem: #eaf1f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0f2340; color: var(--yazi);
+    font-family: "Segoe UI", "Trebuchet MS", Tahoma, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #sahne { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .slayt {
+    position: absolute; width: 1280px; height: 720px; background: var(--zem);
+    display: none; overflow: hidden; transform-origin: center center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .slayt.aktif { display: block; }
+
+  /* ---------- ortak yerleşim ---------- */
+  .ust { height: 96px; padding: 26px 56px 0; display: flex; align-items: flex-end; gap: 18px;
+         background: linear-gradient(180deg, #ffffff 0%, #f0f5fa 100%); border-bottom: 3px solid var(--mor); }
+  .ust .ikon { font-size: 40px; line-height: 1; padding-bottom: 14px; }
+  .ust h2 { font-size: 34px; color: var(--yazi2); font-weight: 700; padding-bottom: 16px; letter-spacing: -.2px; }
+  .ust .etiket { margin-left: auto; padding-bottom: 20px; font-size: 14px; color: var(--soluk); }
+  .govde { padding: 30px 56px 0; height: 584px; }
+  .alt { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 0 56px;
+         display: flex; align-items: center; justify-content: space-between;
+         font-size: 13px; color: var(--soluk); border-top: 1px solid var(--cizgi2); background: #f7f9fc; }
+  .alt b { color: var(--mor); font-weight: 600; }
+
+  h3 { font-size: 21px; color: var(--yazi2); margin-bottom: 10px; }
+  ul.mad { list-style: none; }
+  ul.mad li { position: relative; padding-left: 26px; font-size: 19px; line-height: 1.42; margin-bottom: 9px; }
+  ul.mad li::before { content: ""; position: absolute; left: 4px; top: 10px; width: 10px; height: 10px;
+                      border-radius: 2px; background: var(--mor); }
+  ul.mad.kucuk li { font-size: 17px; margin-bottom: 7px; }
+  ul.mad.kucuk li::before { top: 9px; width: 8px; height: 8px; }
+  .k { color: var(--yazi2); font-weight: 650; }
+  .soluk { color: var(--soluk); }
+
+  .izgara { display: grid; gap: 22px; }
+  .i2 { grid-template-columns: 1fr 1fr; }
+  .i3 { grid-template-columns: 1fr 1fr 1fr; }
+  .i4 { grid-template-columns: repeat(4, 1fr); }
+  .kutu { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 8px; padding: 20px 22px;
+          box-shadow: 0 2px 8px rgba(20,40,70,.06); }
+  .kutu.vurgu { border-top: 4px solid var(--mor); }
+  .kutu .baslik { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; color: var(--yazi2); margin-bottom: 10px; }
+  .kutu .baslik .e { font-size: 26px; }
+  .kutu p { font-size: 16px; line-height: 1.45; color: var(--yazi); }
+
+  .rozet { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px;
+           letter-spacing: .3px; vertical-align: middle; }
+  .r-var { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar); }
+  .r-yol { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar); }
+  .r-ops { background: var(--mor2); color: var(--mor); border: 1px solid #b6d0f0; }
+
+  .not { margin-top: 18px; padding: 12px 16px; border-left: 4px solid var(--uyari); background: var(--uyarizem);
+         font-size: 15.5px; line-height: 1.45; border-radius: 0 6px 6px 0; }
+  .not.mavi { border-left-color: var(--mor); background: var(--grupzem); }
+
+  /* ---------- kapak ---------- */
+  .kapak { background: linear-gradient(135deg, #0f2a4d 0%, #1d4f8a 55%, #2f6db3 100%); color: #fff; }
+  .kapak .ic { position: absolute; left: 90px; top: 150px; right: 90px; }
+  .kapak .urun { font-size: 22px; letter-spacing: 3px; text-transform: uppercase; opacity: .85; }
+  .kapak h1 { font-size: 66px; line-height: 1.08; margin: 18px 0 22px; font-weight: 750; }
+  .kapak .alt-baslik { font-size: 26px; opacity: .92; max-width: 860px; line-height: 1.4; }
+  .kapak .serit { position: absolute; left: 90px; bottom: 70px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .kapak .serit span { border: 1px solid rgba(255,255,255,.45); padding: 8px 16px; border-radius: 20px; font-size: 16px; }
+  .kapak .buyuk-ikon { position: absolute; right: 100px; top: 150px; opacity: .22; }
+  .kapak .firma { position: absolute; right: 90px; top: 60px; font-size: 16px; opacity: .8; text-align: right; }
+
+  /* ---------- akış ---------- */
+  .akis { display: flex; align-items: stretch; gap: 0; margin-top: 10px; }
+  .adim { flex: 1; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 10px; padding: 18px 14px 16px;
+          text-align: center; position: relative; }
+  .adim .no { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px;
+              border-radius: 50%; background: var(--mor); color: #fff; font-weight: 700; font-size: 15px; line-height: 28px; }
+  .adim .e { font-size: 38px; margin: 6px 0 6px; }
+  .adim .ad { font-size: 18px; font-weight: 700; color: var(--yazi2); margin-bottom: 8px; }
+  .adim .ac { font-size: 14px; line-height: 1.4; color: var(--soluk); }
+  .ok { width: 30px; display: flex; align-items: center; justify-content: center; color: var(--mor); font-size: 26px; font-weight: 700; }
+  .durumlar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 30px; font-size: 16px; }
+  .durumlar .d { padding: 7px 14px; border-radius: 6px; background: var(--grupzem); border: 1px solid #c6d9ef; color: var(--yazi2); font-weight: 600; }
+  .durumlar .d.son { background: var(--okzem); border-color: var(--okkenar); color: var(--ok); }
+  .durumlar .y { color: var(--mor); font-weight: 700; }
+
+  /* ---------- mini ekran (mockup taklidi) ---------- */
+  .ekran { background: #fff; border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; font-size: 13px;
+           box-shadow: 0 6px 22px rgba(20,40,70,.14); }
+  .ekran .eb { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi); padding: 8px 12px;
+               font-weight: 700; color: var(--yazi2); font-size: 14px; }
+  .ekran .cipler { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap; }
+  .ekran .cip { padding: 3px 9px; border-radius: 10px; background: var(--yuz2); border: 1px solid var(--cizgi2); font-size: 12px; }
+  .ekran .cip.on { background: var(--mor); color: #fff; border-color: var(--mor); }
+  .ekran table { width: 100%; border-collapse: collapse; }
+  .ekran th { background: #f0f5fa; text-align: left; padding: 6px 8px; font-size: 12px; color: var(--grupyazi, #23405c); border-bottom: 1px solid var(--cizgi); }
+  .ekran td { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); font-size: 12.5px; }
+  .ekran tr.acil td { background: var(--hatazem); }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+  .t-acil { background: var(--hata); color: #fff; }
+  .t-n { background: var(--yuz2); color: var(--soluk); border: 1px solid var(--cizgi2); }
+  .t-ok { background: var(--okzem); color: var(--ok); }
+  .t-uy { background: var(--uyarizem); color: var(--uyari); }
+
+  /* ---------- modül matrisi ---------- */
+  .modul { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px;
+           padding: 11px 14px; font-size: 16.5px; font-weight: 600; color: var(--yazi2); }
+  .modul .e { font-size: 22px; }
+  .modul .rozet { margin-left: auto; }
+
+  /* ---------- sayaç ---------- */
+  .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; padding: 14px 16px; }
+  .sayac .s { font-size: 13px; color: var(--soluk); }
+  .sayac .v { font-size: 30px; font-weight: 750; color: var(--yazi2); }
+  .sayac.uy .v { color: var(--uyari); }
+  .sayac.okk .v { color: var(--ok); }
+
+  /* ---------- yol haritası ---------- */
+  .yol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  .yol .m { display: flex; gap: 14px; background: #fff; border: 1px solid var(--cizgi); border-left: 5px solid var(--uyari);
+            border-radius: 6px; padding: 13px 16px; }
+  .yol .m .e { font-size: 26px; }
+  .yol .m b { display: block; font-size: 17.5px; color: var(--yazi2); margin-bottom: 4px; }
+  .yol .m span { font-size: 14.5px; color: var(--soluk); line-height: 1.4; }
+
+  /* ---------- gezinti ---------- */
+  #gezinti { position: fixed; right: 18px; bottom: 14px; opacity: .3; transition: opacity .2s; display: flex; gap: 8px; align-items: center;
+             color: #cfe0f5; font-size: 14px; z-index: 5; user-select: none; }
+  #gezinti:hover { opacity: 1; }
+  #gezinti button { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.3);
+                    border-radius: 6px; padding: 6px 12px; font-size: 15px; cursor: pointer; }
+  #gezinti button:hover { background: rgba(255,255,255,.22); }
+  #ilerleme { position: fixed; left: 0; top: 0; height: 4px; background: #5aa0ea; z-index: 5; transition: width .2s; }
+
+
+  /* ---------- eğitim ekleri ---------- */
+  .foto { background: #fff; border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden;
+          box-shadow: 0 6px 22px rgba(20,40,70,.14); }
+  .foto img { display: block; width: 100%; height: auto; }
+  .foto-not { font-size: 12.5px; color: var(--soluk); margin-top: 6px; }
+  ol.adimlar { list-style: none; counter-reset: a; }
+  ol.adimlar li { counter-increment: a; position: relative; padding-left: 40px; font-size: 18px; line-height: 1.4; margin-bottom: 11px; }
+  ol.adimlar li::before { content: counter(a); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%;
+                          background: var(--mor); color: #fff; font-weight: 700; font-size: 15px; line-height: 28px; text-align: center; }
+  ol.adimlar.kucuk li { font-size: 16.5px; margin-bottom: 8px; padding-left: 36px; }
+  ol.adimlar.kucuk li::before { width: 25px; height: 25px; line-height: 25px; font-size: 13.5px; }
+  .b { display: inline-block; font-weight: 700; color: var(--yazi2); background: #fff; border: 1px solid #b6c6d8;
+       border-bottom-width: 2px; border-radius: 5px; padding: 0 7px; line-height: 1.45; white-space: nowrap; }
+  .b.ana { background: var(--mor); color: #fff; border-color: #22558f; }
+  .ipucu, .dikkat { margin-top: 14px; padding: 11px 16px 11px 16px; border-radius: 0 6px 6px 0; font-size: 15.5px; line-height: 1.45; }
+  .ipucu { border-left: 4px solid var(--ok); background: var(--okzem); }
+  .dikkat { border-left: 4px solid var(--hata); background: var(--hatazem); }
+  .ipucu > b:first-child { color: var(--ok); }
+  .dikkat > b:first-child { color: var(--hata); }
+  .mesaj { font-family: Consolas, "Courier New", monospace; font-size: 14.5px; background: #fff; border: 1px solid var(--hatakenar);
+           color: var(--hata); padding: 1px 6px; border-radius: 4px; }
+  table.hata { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; overflow: hidden; }
+  table.hata th { background: #f0f5fa; text-align: left; padding: 9px 14px; font-size: 14px; color: var(--yazi2); border-bottom: 1px solid var(--cizgi); }
+  table.hata td { padding: 9px 14px; font-size: 15px; line-height: 1.4; border-bottom: 1px solid var(--cizgi2); vertical-align: top; }
+  table.hata td:first-child { width: 44%; }
+  .gorev { display: flex; gap: 14px; background: #fff; border: 1px solid var(--cizgi); border-left: 5px solid var(--mor);
+           border-radius: 6px; padding: 12px 16px; }
+  .gorev .e { font-size: 26px; }
+  .gorev b { display: block; font-size: 17.5px; color: var(--yazi2); margin-bottom: 3px; }
+  .gorev span { font-size: 14.5px; color: var(--soluk); line-height: 1.4; }
+  .ortam { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .5px; padding: 3px 9px; border-radius: 4px; color: #fff; }
+  .ortam.demo { background: #d9822b; } .ortam.egitim { background: #7b4fc4; }
+
+  /* ---------- video modu: işaretler ---------- */
+  .foto { position: relative; }
+  .isaret { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+            background: #e0412f; color: #fff; font-weight: 800; font-size: 15px; line-height: 30px; text-align: center;
+            box-shadow: 0 0 0 3px #fff, 0 3px 10px rgba(0,0,0,.35); opacity: 0; transform: scale(.3);
+            transition: opacity .35s ease, transform .35s ease; z-index: 3; pointer-events: none; }
+  .isaret::after { content: attr(data-etiket); position: absolute; left: 38px; top: 50%; transform: translateY(-50%);
+                   white-space: nowrap; background: #14315a; color: #fff; font-size: 14px; font-weight: 600;
+                   padding: 4px 10px; border-radius: 5px; line-height: 1.3; opacity: 0; transition: opacity .3s; }
+  .isaret.sol::after { left: auto; right: 38px; }
+  .isaret:not([data-etiket])::after { display: none; }
+  .slayt.hepsi .isaret, .isaret.gor { opacity: 1; transform: scale(1); }
+  .isaret.simdi { animation: nabiz 1.3s ease-out infinite; }
+  .isaret.simdi::after { opacity: 1; }
+  @keyframes nabiz { 0% { box-shadow: 0 0 0 3px #fff, 0 0 0 3px rgba(224,65,47,.7); }
+                     100% { box-shadow: 0 0 0 3px #fff, 0 0 0 20px rgba(224,65,47,0); } }
+  .slayt [data-i]:not(.isaret) { transition: box-shadow .35s, background-color .35s; }
+  .slayt [data-i].simdi:not(.isaret) { box-shadow: 0 0 0 3px #f0a020, 0 0 18px rgba(240,160,32,.45); background-color: #fff8e6; border-radius: 6px; }
+  .kapak [data-i].simdi:not(.isaret) { background-color: rgba(255,255,255,.18); box-shadow: 0 0 0 2px #ffd27a; }
+  template.anlatim { display: none; }
+
+  /* ---------- altyazı ---------- */
+  #altyazi { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; z-index: 6; max-width: 80vw;
+             background: rgba(8,18,34,.86); color: #fff; font-size: 21px; line-height: 1.4; padding: 10px 22px;
+             border-radius: 8px; text-align: center; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #altyazi.acik { opacity: 1; }
+
+  /* ---------- oynatıcı ---------- */
+  #sahne { bottom: 58px; }
+  #oynatici { position: fixed; left: 0; right: 0; bottom: 0; height: 58px; z-index: 7; display: flex; align-items: center; gap: 8px;
+              padding: 0 14px; background: #0a1729; color: #d6e4f5; font-size: 14px; border-top: 1px solid #22385a; user-select: none; }
+  #oynatici button, #oynatici select { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25);
+              border-radius: 6px; padding: 6px 11px; font-size: 15px; cursor: pointer; font-family: inherit; }
+  #oynatici select option { color: #000; }
+  #oynatici button:hover { background: rgba(255,255,255,.2); }
+  #oynatici button.ana { background: #2f6db3; border-color: #5aa0ea; min-width: 118px; font-weight: 700; }
+  #oynatici label { display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+  #oCubuk { flex: 1; display: flex; gap: 3px; height: 10px; min-width: 120px; }
+  #oCubuk .p { flex: 1; background: rgba(255,255,255,.16); border-radius: 3px; cursor: pointer; position: relative; overflow: hidden; }
+  #oCubuk .p.bitti { background: #5aa0ea; }
+  #oCubuk .p i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #5aa0ea; transition: width .3s; }
+  #sayac { min-width: 54px; text-align: center; }
+  #oNot { font-size: 12px; color: #f3c46b; max-width: 220px; line-height: 1.2; }
+
+  /* ---------- başlangıç ekranı ---------- */
+  #baslangic { position: fixed; inset: 0; z-index: 9; display: flex; flex-direction: column; align-items: center; justify-content: center;
+               gap: 18px; background: rgba(6,16,32,.78); color: #fff; text-align: center; }
+  #baslangic h2 { font-size: 34px; font-weight: 700; }
+  #baslangic p { font-size: 17px; opacity: .85; max-width: 640px; line-height: 1.5; }
+  #baslangic .bas { font-size: 26px; font-weight: 700; padding: 18px 44px; border-radius: 40px; border: 0; cursor: pointer;
+                    background: #2f6db3; color: #fff; box-shadow: 0 8px 30px rgba(47,109,179,.6); }
+  #baslangic .bas:hover { background: #3a7fcc; }
+  #baslangic .sessiz { background: none; border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 15px; }
+  #baslangic.gizli { display: none; }
+  .konusmaci { display: none; }
+
+  @media print {
+    @page { size: 1280px 1010px; margin: 0; }
+    html, body { background: #fff; overflow: visible; height: auto; }
+    #sahne { position: static; display: block; }
+    .slayt { display: block !important; position: relative; transform: none !important; box-shadow: none;
+             -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .isaret { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .isaret::after { display: none; }
+    .konusmaci { display: block; width: 1280px; height: 290px; padding: 16px 56px 0; overflow: hidden;
+                 font-size: 15.5px; line-height: 1.5; color: #1f2d3a; border-top: 3px solid #2f6db3;
+                 page-break-after: always; break-after: page; }
+    .konusmaci:last-child { page-break-after: auto; break-after: auto; }
+    .konusmaci h4 { font-size: 14px; color: #2f6db3; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+    #oynatici, #ilerleme, #altyazi, #baslangic { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="ilerleme"></div>
+<div id="sahne">
+
+<!-- 1 KAPAK -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"><rect x="16" y="14" width="66" height="88" rx="4"/><path d="M28 34h42M28 48h42M28 62h30"/><path d="M62 92l30-30 10 10-30 30H62z"/></svg></div>
+  <div class="ic">
+    <div class="urun">Gentegre AI · HBYS · Görüntüleme Merkezi · Kullanıcı Eğitimi</div>
+    <h1>Raportör Doktor<br>Eğitimi</h1>
+    <div class="alt-baslik">Radyoloğun bir günü: rapor bekleyen işi bulmak, istemi okumak, şablon ve makrolarla raporu yazmak, onaylamak, kritik bulguyu bildirmek ve sonucu hastaya ulaştırmak.</div>
+  </div>
+  <div class="serit">
+    <span data-i="1">Çalışma Listesi</span><span data-i="1">İstem ve Klinik Bilgi</span><span data-i="2">Şablon · Makro</span>
+    <span data-i="2">Onay ve İmza</span><span data-i="3">Kritik Bulgu</span><span data-i="3">Ek Rapor</span><span data-i="3">Konsültasyon</span><span data-i="4">Teslim · e-Nabız</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+  <template class="anlatim">
+    <p>Raportör doktor eğitimine hoş geldiniz.</p>
+    <p data-i="1">Bu eğitimde önce rapor bekleyen işleri nerede bulacağınızı ve istemdeki klinik bilgiyi nasıl okuyacağınızı göreceğiz.</p>
+    <p data-i="2">Ardından şablon ve makrolarla raporu yazmayı, uzmana göndermeyi ve onaylayıp imzalamayı anlatacağız.</p>
+    <p data-i="3">Kritik bulgu bildirimi, ek rapor ve konsültasyon gibi özel durumlara da tek tek değineceğiz.</p>
+    <p data-i="4">Son olarak onaylanan raporun hastaya ve e-Nabız'a nasıl ulaştığını göreceğiz. Boşluk tuşuyla duraklatabilir, ok tuşlarıyla ileri ya da geri gidebilirsiniz.</p>
+  </template>
+</section>
+
+<!-- 2 GÜNÜN AKIŞI -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🗺️</div><h2>Raportörün günü ve iş akışı</h2></div>
+  <div class="govde">
+    <div class="akis" style="margin-top: 16px;">
+      <div class="adim" data-i="1"><div class="no">1</div><div class="e">📷</div><div class="ad">Çekim</div>
+        <div class="ac">Teknisyen <b>✔ Çekildi</b> işaretler; iş size düşer</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="2"><div class="no">2</div><div class="e">📋</div><div class="ad">Raporlanacak</div>
+        <div class="ac">Çalışma Listesi'nde sıranızı görürsünüz</div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="3"><div class="no">3</div><div class="e">✍️</div><div class="ad">Rapor</div>
+        <div class="ac">Şablon + makro; <b>💾 Taslak Kaydet</b></div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="4"><div class="no">4</div><div class="e">🧑‍⚕️</div><div class="ad">Uzman onayı</div>
+        <div class="ac">Asistan <b>➜ Uzmana Gönder</b>, uzman <b>✍ Onayla</b></div></div>
+      <div class="ok">›</div>
+      <div class="adim" data-i="5"><div class="no">5</div><div class="e">📦</div><div class="ad">Teslim / e-Nabız</div>
+        <div class="ac">Onayla rapor kilitlenir, e-Nabız paketi doğar</div></div>
+    </div>
+    <div class="durumlar" data-i="6">
+      <span class="soluk">İstem durumu:</span>
+      <span class="d">Bekleyen Çekim</span><span class="y">→</span><span class="d">Raporlanacak</span><span class="y">→</span>
+      <span class="d">Raporlanıyor</span><span class="y">→</span><span class="d">Onay Bekleyen</span><span class="y">→</span><span class="d son">Onaylandı</span>
+    </div>
+    <div class="izgara i2" style="margin-top: 26px; gap: 14px 24px;">
+      <div class="gorev"><span class="e">📖</span><div><b>Klinik soruyu anlamak</b><span>İstemdeki ön tanı ve klinik bilgi, önceki tetkikler; rapor bu soruya cevap verir.</span></div></div>
+      <div class="gorev"><span class="e">🧾</span><div><b>Raporu yazmak ve onaylamak</b><span>Zorunlu bölümleri doldurmak, uzman onayıyla raporu kilitlemek.</span></div></div>
+      <div class="gorev" data-i="7"><span class="e">🚨</span><div><b>Hasta güvenliği</b><span>Kritik bulguyu raporu beklemeden bildirmek ve kayda geçirmek.</span></div></div>
+      <div class="gorev" data-i="7"><span class="e">🔒</span><div><b>Kayıt bütünlüğü</b><span>Onaylı rapor değişmez; düzeltme yalnız ek rapor (addendum) ile yapılır.</span></div></div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Sizin işiniz, teknisyen çekimi tamamlayıp Çekildi işaretlediği anda başlar.</p>
+    <p data-i="2">O tetkik Çalışma Listesi'nde Raporlanacak olarak sıranıza düşer.</p>
+    <p data-i="3">Raporu şablon ve makrolarla yazar, taslak olarak kaydedersiniz.</p>
+    <p data-i="4">Asistan hekimseniz raporu uzmana gönderirsiniz; onay yetkiniz varsa raporu doğrudan onaylayıp imzalarsınız.</p>
+    <p data-i="5">Onaylanan rapor kilitlenir, rapor numarası alır, isteyen hekimin ekranına ve e-Nabız kuyruğuna gider; hastaya teslimi ayrıca kaydedilir.</p>
+    <p data-i="6">İstem bu yolculukta Bekleyen Çekim, Raporlanacak, Raporlanıyor, Onay Bekleyen ve Onaylandı durumlarından geçer.</p>
+    <p data-i="7">İki kural her şeyin üstündedir: kritik bulgu raporu beklemeden bildirilir, onaylı rapor ise asla yeniden yazılmaz.</p>
+  </template>
+</section>
+
+<!-- 3 GİRİŞ, MENÜ, ÜST ŞERİT -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🧭</div><h2>Giriş, menü ve yardım</h2></div>
+  <div class="govde">
+    <div class="foto"><img src="img/raportor/13_ust_serit.png" alt="Üst şerit">
+      <span class="isaret" data-i="2" data-etiket="Komut paleti (Ctrl K)" style="left: 37%; top: 50%;">1</span>
+      <span class="isaret sol" data-i="3" data-etiket="Ekran yardımı" style="left: 91.7%; top: 46%;">2</span>
+    </div>
+    <div class="izgara" style="grid-template-columns: 1.25fr 1fr; gap: 30px; margin-top: 22px;">
+      <div>
+        <ul class="mad kucuk">
+          <li data-i="1">Kendi kullanıcınızla girin; menüde yalnız <span class="k">rolünüzün yetkili olduğu</span> ekranlar görünür.</li>
+          <li data-i="1">İşleriniz <span class="k">Radyoloji</span> grubunda: <span class="k">Çalışma Listesi</span>, <span class="k">Pano</span>, <span class="k">Kritik Bulgular</span>, <span class="k">Konsültasyonlar</span>, <span class="k">Sonuç Teslim</span>; ayarlarda <span class="k">Rapor Şablonları</span>.</li>
+          <li data-i="2"><span class="b">Ctrl K</span> komut paleti: "Radyoloji" yazıp ekrana gidin.</li>
+          <li data-i="3">Üst şeritteki <span class="b">?</span> açık ekranın yardımını açar.</li>
+          <li data-i="4"><span class="b ana">💡 Yapay Zekâya Sor</span>: "Raporu nasıl onaylarım?" gibi kullanım sorularını yanıtlar; klinik soru yanıtlamaz, kayıt değiştirmez.</li>
+        </ul>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> Üstte <span class="ortam demo">DEMO ORTAMI</span> ya da <span class="ortam egitim">EĞİTİM ORTAMI</span> yazıyorsa deneme kurulumundasınız. <b>Etiket yoksa canlıdasınız</b>: onayladığınız rapor hastanın dosyasına ve e-Nabız'a gider.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/raportor/14_yz_sor.png" alt="Yapay Zekâya Sor paneli">
+          <span class="isaret" data-i="4" style="left: 5%; top: 8%;">3</span>
+          <span class="isaret" data-i="4" style="left: 4%; top: 51%;">4</span>
+          <span class="isaret" data-i="4" style="left: 4%; top: 90%;">5</span>
+        </div>
+        <div class="foto-not">💡 Yapay Zekâya Sor: "Bu ekranda ne yapabilirim?", "Rolüm ne yapabilir?" ya da kendi sorunuz.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Sisteme kendi kullanıcı adınızla girersiniz; sol menüdeki Radyoloji grubunda Çalışma Listesi, Kritik Bulgular, Konsültasyonlar ve Sonuç Teslim ekranlarını bulursunuz.</p>
+    <p data-i="2">Üst şeritteki arama kutusu komut paletidir; Kontrol ve K tuşlarına basıp Radyoloji yazarak hızla gidebilirsiniz.</p>
+    <p data-i="3">Sağ üstteki soru işareti, açık olan ekranın yardım belgesini açar.</p>
+    <p data-i="4">Sağ alttaki Yapay Zekâya Sor asistanı, programın kullanımıyla ilgili soruları bulunduğunuz ekranı bilerek yanıtlar; klinik yorum yapmaz ve kayıt değiştirmez.</p>
+    <p data-i="5">Üst şeritte Demo ya da Eğitim Ortamı etiketi varsa deneme kurulumundasınız; etiket yoksa onayladığınız her rapor gerçektir.</p>
+  </template>
+</section>
+
+<!-- 4 ÇALIŞMA LİSTESİ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📋</div><h2>Çalışma listesi: rapor bekleyen işler</h2><div class="etiket">Radyoloji › Çalışma Listesi</div></div>
+  <div class="govde">
+    <div class="foto"><img src="img/raportor/01_calisma_listesi.png" alt="Radyoloji çalışma listesi">
+      <span class="isaret" data-i="1" data-etiket="Durum çipleri" style="left: 4.4%; top: 27.4%;">1</span>
+      <span class="isaret" data-i="2" data-etiket="ACİL önce" style="left: 75.2%; top: 44.3%;">2</span>
+      <span class="isaret sol" data-i="2" data-etiket="Bekleme süresi" style="left: 97.4%; top: 44.3%;">3</span>
+      <span class="isaret sol" data-i="3" data-etiket="Modalite / radyolog / tarih" style="left: 80%; top: 27.4%;">4</span>
+      <span class="isaret sol" data-i="3" data-etiket="Hasta, accession ara" style="left: 89.5%; top: 15.4%;">5</span>
+      <span class="isaret" data-i="4" data-etiket="✎ Rapor Yaz" style="left: 4.4%; top: 15.1%;">6</span>
+    </div>
+    <div class="foto-not">Ekran mockup'ı. Programdaki çipler: Bekleyen Çekim · Raporlanacak · Raporlanıyor · Onay Bekleyen · Onaylandı · Tümü. "Görüntüyü Aç (PACS)" düğmesi henüz yok.</div>
+    <div class="izgara i2" style="gap: 30px; margin-top: 14px;">
+      <ol class="adimlar kucuk">
+        <li data-i="1">Güne <span class="k">Raporlanacak</span> çipiyle başlayın; asistanın gönderdikleri <span class="k">Onay Bekleyen</span>'dedir.</li>
+        <li data-i="2">Liste önceliğe (<span class="k">Çok Acil / Acil</span> önce) ve bekleme süresine göre sıralanır.</li>
+        <li data-i="4">Satırı seçip <span class="b ana">✎ Rapor Yaz</span>: rapor ekranı açılır.</li>
+      </ol>
+      <div class="ipucu" data-i="5" style="margin-top: 0;"><b>İpucu:</b> Hastayı listede göremiyorsanız çekim henüz <b>Çekildi</b> işaretlenmemiştir; <b>Bekleyen Çekim</b> çipine bakın ya da teknisyene sorun.</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Gününüz Radyoloji menüsündeki Çalışma Listesi'nde geçer; Raporlanacak çipi rapor bekleyen tetkikleri, Onay Bekleyen çipi ise asistanların uzmana gönderdiği ön raporları gösterir.</p>
+    <p data-i="2">Liste önce acil işleri, sonra en uzun bekleyenleri üste getirir; acil bekleme süresi bir kalite göstergesidir.</p>
+    <p data-i="3">Modalite, radyolog ve tarih süzgeçleriyle ya da arama kutusuna hasta adı veya accession numarası yazarak listeyi daraltabilirsiniz.</p>
+    <p data-i="4">Raporlayacağınız satırı seçip Rapor Yaz düğmesine basın.</p>
+    <p data-i="5">Bu görsel bir ekran mockup'ıdır; programdaki çip adları altta yazılıdır ve PACS'ta görüntü açma düğmesi henüz yoktur.</p>
+  </template>
+</section>
+
+<!-- 5 İSTEMİ OKUMA -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📖</div><h2>İstemi, klinik bilgiyi ve önceki tetkikleri okuma</h2></div>
+  <div class="govde">
+    <div class="izgara" style="grid-template-columns: 1.15fr 1fr; gap: 28px;">
+      <div>
+        <div class="foto"><img src="img/raportor/02_istem_karti.png" alt="Radyoloji istem kartı">
+          <span class="isaret" data-i="1" data-etiket="Akış şeridi" style="left: 58.1%; top: 39.2%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="İsteyen hekim" style="left: 10.5%; top: 68.7%;">2</span>
+          <span class="isaret" data-i="2" data-etiket="Ön tanı (ICD-10)" style="left: 10.5%; top: 80.5%;">3</span>
+          <span class="isaret" data-i="3" data-etiket="Klinik bilgi" style="left: 26.7%; top: 92.8%;">4</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı: istem kartının üst kısmı. Altında Çekim / Görüntü (cihaz, kontrast, doz, Study UID) ve Kontrol Listesi bölümleri vardır.</div>
+      </div>
+      <div>
+        <h3>Rapor ekranının sol sütunu</h3>
+        <ul class="mad kucuk">
+          <li data-i="4"><span class="k">Önceki Tetkikler</span>: hastanın eski raporları; tarih, raporlayan ve özet.</li>
+          <li data-i="3"><span class="k">İstem Bilgisi</span>: ön tanı, klinik bilgi, isteyen hekim, ödeyen kurum.</li>
+          <li data-i="5"><span class="k">Seri / Görüntü</span>: seri ve görüntü sayısı, Study UID; eşleşme yoksa "PACS eşleşmesi yok."</li>
+        </ul>
+        <div class="not mavi" data-i="4">Şablonda "Klinik" başlıklı bölüm varsa istemdeki klinik bilgiyle kendiliğinden dolar. Karşılaştırma gerekiyorsa önceki tetkiki ilgili bölüme siz yazarsınız.</div>
+        <div class="dikkat" data-i="6"><b>Dikkat:</b> Görüntüleri programın içinde açan bir görüntüleyici (PACS viewer) henüz yok; görüntüleri kurumunuzun PACS iş istasyonunda, aynı <b>Accession No</b> ile açın.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Her istemin kartında üstte bir akış şeridi vardır: istem, randevu, çekim, raporlama, onay ve teslim adımları zamanlarıyla işaretlenir.</p>
+    <p data-i="2">İstem Bilgisi bölümünde isteyen hekimi ve ICD-10 kodlu ön tanıyı görürsünüz.</p>
+    <p data-i="3">En önemli alan klinik bilgidir; raporunuz isteyen hekimin bu sorusuna cevap vermelidir.</p>
+    <p data-i="4">Rapor ekranının sol sütununda hastanın önceki tetkikleri ve istem bilgisi hep açıktır; karşılaştırma gerekiyorsa ilgili bölüme yazarsınız.</p>
+    <p data-i="5">Seri ve görüntü kutusu, çalışmanın PACS ile eşleşip eşleşmediğini gösterir.</p>
+    <p data-i="6">Program içinde görüntü açan bir görüntüleyici henüz yoktur; görüntüleri PACS iş istasyonunuzda aynı accession numarasıyla açarsınız.</p>
+  </template>
+</section>
+
+<!-- 6 RAPOR YAZMA: ŞABLON -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">✍️</div><h2>Rapor yazma: şablon ve bölümler</h2><div class="etiket">Çalışma Listesi › ✎ Rapor Yaz</div></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 860px 1fr; gap: 22px;">
+      <div>
+        <div class="foto"><img src="img/raportor/03_rapor_yaz.png" alt="Radyoloji rapor yazma ekranı">
+          <span class="isaret" data-i="1" data-etiket="Şablon" style="left: 89.2%; top: 25.2%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="Klinik bilgi" style="left: 22.8%; top: 25%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Bulgular *" style="left: 38.8%; top: 57%;">3</span>
+          <span class="isaret" data-i="3" data-etiket="Sonuç *" style="left: 30.8%; top: 78.5%;">4</span>
+          <span class="isaret" data-i="5" data-etiket="💾 Taslak Kaydet" style="left: 4.8%; top: 7.1%;">5</span>
+          <span class="isaret" data-i="6" style="left: 40.9%; top: 7.1%;">6</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı. "Dikte" (6) ve "PACS'te Aç" mockup'ta var, programda henüz yok.</div>
+      </div>
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Tetkiğe bağlı şablon <span class="k">kendiliğinden</span> gelir; başka şablon seçerseniz yazılmış metnin silineceği sorulur.</li>
+          <li data-i="2">Bölümler şablondan gelir (Teknik, Bulgular, Sonuç ve Öneriler…).</li>
+          <li data-i="3"><span class="k">*</span> işaretli bölümler zorunludur.</li>
+          <li data-i="4">Kurumda Bakanlık profili açıksa: <span class="k">Bulgular</span> en az 50 karakter, <span class="k">Sonuç ve Öneriler</span> dolu olmalı.</li>
+          <li data-i="5"><span class="b ana">💾 Taslak Kaydet</span>: "Rapor taslağı kaydedildi."; istem <span class="k">Raporlanıyor</span> olur.</li>
+        </ol>
+        <div class="dikkat" data-i="7"><b>Dikkat:</b> "Yazdırılmaz" işaretli bölümler çıktıya ve e-Nabız'a gitmez; hastanın görmesi gereken bilgiyi oraya yazmayın.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Rapor ekranı açıldığında tetkiğe bağlı şablon kendiliğinden yüklenir; farklı bir şablon seçerseniz program yazdığınız metnin silineceğini sorar.</p>
+    <p data-i="2">Bölümler şablondan gelir; klinik bilgi bölümü istemden dolar.</p>
+    <p data-i="3">Bulgular ve Sonuç gibi yıldızlı bölümler zorunludur; boş kalırlarsa rapor onaya gönderilemez.</p>
+    <p data-i="4">Kurumunuzda Bakanlık profili açıksa bulgular en az elli karakter olmalı ve sonuç bölümü boş bırakılmamalıdır.</p>
+    <p data-i="5">Ara ara Taslak Kaydet düğmesine basın; ilk kayıtla istem Raporlanıyor durumuna geçer.</p>
+    <p data-i="6">Mockup'taki Dikte ve PACS'te Aç düğmeleri programda henüz yoktur.</p>
+    <p data-i="7">Yazdırılmaz işaretli bölümler iç notlar içindir; çıktıya ve e-Nabız'a gitmez.</p>
+  </template>
+</section>
+
+<!-- 7 MAKROLAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">⚡</div><h2>Makrolar ve yapılandırılmış alanlar</h2></div>
+  <div class="govde">
+    <div class="foto" style="width: 900px; margin: 0 auto;"><img src="img/raportor/04_sablon_makrolar.png" alt="Rapor şablonu kartı, Makrolar sekmesi">
+      <span class="isaret" data-i="4" data-etiket="Şablonun makroları" style="left: 31.8%; top: 37.7%;">1</span>
+      <span class="isaret" data-i="1" data-etiket="Kısayol" style="left: 3%; top: 59.3%;">2</span>
+      <span class="isaret sol" data-i="2" data-etiket="Hedef bölüm" style="left: 84%; top: 59.3%;">3</span>
+    </div>
+    <div class="foto-not">Ekran mockup'ı: Radyoloji › Ayarlar › Rapor Şablonları › şablon kartı › Makrolar. Rapor ekranında aynı makrolar sağ sütunda düğme olarak listelenir.</div>
+    <div class="izgara i2" style="gap: 30px; margin-top: 14px;">
+      <ul class="mad kucuk">
+        <li data-i="1">Rapor ekranının sağındaki <span class="k">Makrolar</span> listesinde makroya <b>tıklayın</b>; hazır metin eklenir.</li>
+        <li data-i="2">Metin makronun <span class="k">hedef bölümüne</span>, hedefi yoksa en son yazdığınız bölüme eklenir.</li>
+        <li data-i="3"><span class="k">Yapılandırılmış Alanlar</span>: şablonun skor / ölçüm alanları (seçim ya da değer).</li>
+      </ul>
+      <div>
+        <div class="not mavi" data-i="5" style="margin-top: 0;">Bakanlık profili açık kurumda <span class="k">Bakanlık Değerlendirmesi</span> kutusu da çıkar: İstem Nedeni ve Çekim Kalitesi puanı.</div>
+        <div class="ipucu" data-i="6"><b>İpucu:</b> Mockup'taki "kısayolu yazıp Tab" kullanımı henüz yok; programda makro <b>tıklanarak</b> eklenir. Makro ve şablonu yetkili kişi düzenler.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Makrolar, sık yazdığınız cümlelerin hazır hâlidir; rapor ekranının sağ sütununda kısayol ve adıyla listelenir, tıkladığınızda metin rapora eklenir.</p>
+    <p data-i="2">Metin makronun hedef bölümüne gider; hedefi tanımlı değilse en son yazdığınız bölüme eklenir.</p>
+    <p data-i="3">Şablonda skor ya da ölçüm alanları varsa bunlar Yapılandırılmış Alanlar başlığında, seçim listesi ya da değer kutusu olarak gelir.</p>
+    <p data-i="4">Makrolar şablona bağlıdır ve Rapor Şablonları ekranında, şablon kartının Makrolar sekmesinde tanımlanır; bu görsel o ekranın mockup'ıdır.</p>
+    <p data-i="5">Bakanlık profili açık kurumda ayrıca istem nedeni ve çekim kalitesi puanını girersiniz.</p>
+    <p data-i="6">Mockup'ta gösterilen, kısayolu yazıp Tab tuşuyla genişletme henüz programda yoktur; makroyu tıklayarak eklersiniz.</p>
+  </template>
+</section>
+
+<!-- 8 UZMANA GÖNDER -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🧑‍⚕️</div><h2>Ön rapor ve uzmana gönderme</h2></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 0.85fr 1.4fr; gap: 26px;">
+      <div>
+        <h3>Asistan / genç hekim</h3>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Raporu yazın, <span class="b">💾 Taslak Kaydet</span>.</li>
+          <li data-i="2"><span class="b ana">➜ Uzmana Gönder</span>: "Ön rapor uzman onayına gönderildi."</li>
+          <li data-i="2">İstem <span class="k">Onay Bekleyen</span> olur; uzmanın listesine düşer.</li>
+        </ol>
+        <h3 style="margin-top: 12px;">Uzman</h3>
+        <ol class="adimlar kucuk">
+          <li data-i="3"><span class="k">Onay Bekleyen</span> çipinde raporu açın; metni okuyup gerekirse düzeltin.</li>
+          <li data-i="4"><span class="b ana">✍ Onayla ve İmzala</span> (sonraki slayt).</li>
+        </ol>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> Onayla düğmesi yetki hatası veriyorsa rolünüzde rapor onaylama yetkisi yoktur: <b>➜ Uzmana Gönder</b> kullanın.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/raportor/05_onay_zinciri.png" alt="Rapor ekranı, onay ve imza zinciri">
+          <span class="isaret" data-i="1" data-etiket="Asistan raporu" style="left: 59%; top: 36.3%;">1</span>
+          <span class="isaret" data-i="3" data-etiket="Uzman onayı" style="left: 64.5%; top: 42.1%;">2</span>
+          <span class="isaret" data-i="6" data-etiket="Nitelikli e-imza (yol haritası)" style="left: 70%; top: 47.9%;">3</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı (e-İmza tasarımı). Programda iki aşamalı onay var: yazan + onaylayan. Zincirdeki nitelikli e-imza ve zaman damgası henüz yok.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Radyolojide rapor çoğu zaman iki hekimden geçer: asistan ya da genç hekim raporu yazar ve taslak olarak kaydeder.</p>
+    <p data-i="2">Uzmana Gönder düğmesine bastığında ön rapor uzman onayına gider ve istem Onay Bekleyen durumuna geçer.</p>
+    <p data-i="3">Uzman, Çalışma Listesi'nde Onay Bekleyen çipinden raporu açar, okur ve gerekirse düzeltir.</p>
+    <p data-i="4">Ardından Onayla ve İmzala düğmesiyle raporu bitirir.</p>
+    <p data-i="5">Rolünüzde onay yetkisi yoksa onay düğmesi yetki hatası verir; o durumda raporu uzmana gönderirsiniz.</p>
+    <p data-i="6">Görseldeki onay zinciri e-imza tasarımının mockup'ıdır: bugün programda yazan ve onaylayan kaydı vardır, nitelikli elektronik imza ve zaman damgası ise yol haritasındadır.</p>
+  </template>
+</section>
+
+<!-- 9 ONAYLA VE İMZALA -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">✅</div><h2>Onayla ve İmzala; çıktı</h2></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 1.2fr 1fr; gap: 26px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1"><span class="b ana">✍ Onayla ve İmzala</span> → "Rapor onaylandı ve imzalandı; artık kilitlidir."</li>
+          <li data-i="2">Rapor numarası bu anda verilir; istem <span class="k">Onaylandı</span>, üst bilgide <span class="k">🔒 Kilitli</span>.</li>
+          <li data-i="3"><span class="b">🖨 Çıktı</span>: hastaya verilecek rapor; tarayıcıdan yazdırın ya da PDF kaydedin.</li>
+        </ol>
+        <h3 style="margin-top: 10px;">Onay engelleri</h3>
+        <table class="hata" data-i="4">
+          <tr><td><span class="mesaj">Zorunlu bölümler boş: rapor onaya gönderilemez.</span></td><td>Yıldızlı bölümleri doldurun.</td></tr>
+          <tr><td><span class="mesaj">Kritik bulgu bildirimi kaydedilmeden rapor onaylanamaz.</span></td><td>Önce <b>⚠ Kritik Bulgu Bildir</b>.</td></tr>
+          <tr><td>Bakanlık profili: Bulgular en az 50 karakter / Sonuç ve Öneriler boş</td><td>İki bölümü tamamlayın.</td></tr>
+        </table>
+        <div class="dikkat" data-i="6"><b>Yol haritası:</b> Nitelikli e-imza (akıllı kart / mobil imza), toplu imza kuyruğu ve görünür imza bloğu tasarım aşamasındadır; bugünkü onay "kim onayladı"yı kaydeder.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/raportor/08_rapor_cikti.png" alt="Rapor çıktısı">
+          <span class="isaret sol" data-i="2" data-etiket="Rapor No" style="left: 82.2%; top: 14.6%;">1</span>
+          <span class="isaret" data-i="3" data-etiket="Yazdır / PDF" style="left: 4.9%; top: 6.1%;">2</span>
+          <span class="isaret sol" data-i="5" data-etiket="Onaylayan + ön rapor" style="left: 74.4%; top: 95.2%;">3</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı. Onaysız raporun çıktısında "taslak" uyarısı çıkar; basılması engellenmez.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Onay yetkiniz varsa Onayla ve İmzala düğmesine basın; program raporun onaylandığını ve artık kilitli olduğunu söyler.</p>
+    <p data-i="2">Rapor numarası bu anda verilir, istem Onaylandı olur ve üst bilgide kilit işareti görünür.</p>
+    <p data-i="3">Çıktı düğmesi hastaya verilecek raporu açar; tarayıcıdan yazdırabilir ya da PDF olarak kaydedebilirsiniz. Onaysız raporun çıktısında taslak uyarısı bulunur.</p>
+    <p data-i="4">Zorunlu bölümler boşsa, kritik bulgu bildirilmemişse ya da Bakanlık profilinin koşulları sağlanmamışsa program onayı reddeder ve nedenini yazar.</p>
+    <p data-i="5">Çıktıda onaylayan uzmanın yanında ön raporu yazan hekim de görünür; sorumluluk zinciri kaybolmaz.</p>
+    <p data-i="6">Nitelikli elektronik imza ve toplu imza henüz yol haritasındadır; bugünkü onay, raporu kimin onayladığını kayda geçirir.</p>
+  </template>
+</section>
+
+<!-- 10 KRİTİK BULGU -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🚨</div><h2>Kritik bulgu bildirimi</h2><div class="etiket">Rapor ekranı · Radyoloji › Kritik Bulgular</div></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 1fr 1.3fr; gap: 26px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Önce <b>telefonla</b> haber verin; hayat kurtaran bildirimdir, imza değil.</li>
+          <li data-i="2">Rapor ekranında "Bu tetkikte kritik bulgu var" + <span class="b ana">⚠ Kritik Bulgu Bildir</span>.</li>
+          <li data-i="3"><span class="k">Bulgu</span>, <span class="k">Bildirilen kişi</span>, <span class="k">Yol</span> (Telefon · SMS · Yüz yüze · e-Posta), <span class="k">Geri bildirim</span> → <span class="b">Kaydet</span>.</li>
+          <li data-i="4">Bildirim kaydı olmadan rapor <b>onaylanmaz</b>.</li>
+          <li data-i="5">Teyit gelince <span class="k">Kritik Bulgular</span>'da <span class="b">✔ Kapat (teyit alındı)</span>.</li>
+        </ol>
+        <div class="durumlar" data-i="5" style="margin-top: 14px; font-size: 14px;">
+          <span class="d">Bildirilmedi</span><span class="y">→</span><span class="d">Teyit Bekleyen</span><span class="y">→</span><span class="d">Teyitli</span><span class="y">→</span><span class="d son">Kapatılan</span>
+        </div>
+        <div class="dikkat" data-i="6"><b>Dikkat:</b> Kritik işaretleyip bildirimi kaydetmeden bırakmayın; iş "Bildirilmedi" çipinde kalır ve süre kırmızıya döner.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/raportor/07_kritik_bulgu.png" alt="Kritik bulgu takibi">
+          <span class="isaret" data-i="6" data-etiket="Bildirilmemiş" style="left: 5%; top: 22%;">1</span>
+          <span class="isaret" data-i="3" data-etiket="Bildirilen kişi" style="left: 56.5%; top: 71.8%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Yol" style="left: 40.3%; top: 76%;">3</span>
+          <span class="isaret" data-i="5" data-etiket="✔ Kapat (teyit alındı)" style="left: 31.5%; top: 6.9%;">4</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı. Programdaki pencerede alanlar: Bulgu · Bildirilen kişi · Yol · Geri bildirim.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Kritik bir bulgu gördüğünüzde önce isteyen hekime ya da servise telefonla haber verin; hastanın hayatını kurtaran şey bu bildirimdir.</p>
+    <p data-i="2">Ardından rapor ekranında bu tetkikte kritik bulgu var kutusunu işaretleyip Kritik Bulgu Bildir düğmesine basın.</p>
+    <p data-i="3">Açılan pencereye bulguyu, haber verdiğiniz kişiyi, bildirim yolunu ve karşı tarafın geri bildirimini yazıp kaydedin.</p>
+    <p data-i="4">Kritik işaretli bir tetkikte bildirim kaydı olmadan rapor onaylanamaz.</p>
+    <p data-i="5">Karşı taraf teyit ettiğinde Kritik Bulgular listesinde satırı seçip Kapat düğmesine basarsınız; takip Bildirilmedi, Teyit Bekleyen, Teyitli ve Kapatılan adımlarından geçer.</p>
+    <p data-i="6">Bildirilmemiş kritik bulgu listeden düşmez ve geçen süre büyüdükçe kırmızıya döner.</p>
+  </template>
+</section>
+
+<!-- 11 EK RAPOR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📎</div><h2>Ek rapor (addendum) ve düzeltme kuralları</h2></div>
+  <div class="govde">
+    <div class="izgara i3">
+      <div class="kutu vurgu" data-i="1"><div class="baslik"><span class="e">✏️</span>Onaydan önce</div>
+        <ul class="mad kucuk">
+          <li>Taslak ve ön rapor serbestçe düzeltilir.</li>
+          <li>Uzman, asistanın metnini onaylamadan önce değiştirebilir.</li>
+          <li>Her kayıtta <span class="b">💾 Taslak Kaydet</span>.</li>
+        </ul></div>
+      <div class="kutu vurgu" data-i="2"><div class="baslik"><span class="e">🔒</span>Onaydan sonra</div>
+        <ul class="mad kucuk">
+          <li>Rapor <b>kilitlidir</b>; metin değiştirilemez.</li>
+          <li>Düzeltme denemesinde: <span class="mesaj" style="font-size: 13px;">Rapor onaylanmış ve kilitli; düzeltme için ek rapor (addendum) açın.</span></li>
+        </ul></div>
+      <div class="kutu vurgu" data-i="3"><div class="baslik"><span class="e">📎</span>Ek rapor</div>
+        <ul class="mad kucuk">
+          <li>Kilitli raporda <span class="b ana">＋ Ek Rapor</span>.</li>
+          <li>"Ek rapor (addendum) açıldı; orijinal rapor değişmeden kalır."</li>
+          <li>Ek rapor da onaylanır; ikisi birlikte durur.</li>
+        </ul></div>
+    </div>
+    <div class="izgara i2" style="gap: 22px; margin-top: 22px;">
+      <div class="dikkat" data-i="4" style="margin-top: 0;"><b>Dikkat:</b> Onaylı raporu düzeltmek için <b>yeni rapor yazmayın</b>. Hekim, hasta ve e-Nabız ilk raporu görmüştür; düzeltme izlenebilir olmalıdır.</div>
+      <div class="ipucu" data-i="5" style="margin-top: 0;"><b>Ne zaman?</b> Yazım ya da taraf hatası, sonradan gelen klinik bilgi, konsültasyon sonrası görüş değişikliği. Ek rapor ilk raporu "yanlış" göstermez; gerekçesini açıkça yazın.</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Onaydan önce taslak ve ön rapor serbestçe düzeltilebilir; uzman da asistanın metnini onaylamadan önce değiştirebilir.</p>
+    <p data-i="2">Onaylanan rapor ise kilitlenir; metni değiştirmeye çalışırsanız program ek rapor açmanızı söyler.</p>
+    <p data-i="3">Kilitli raporda Ek Rapor düğmesine bastığınızda bir addendum açılır; orijinal rapor değişmeden kalır ve ek rapor da ayrıca onaylanır.</p>
+    <p data-i="4">Onaylı bir raporu düzeltmek için asla yeni rapor yazmayın; ilk rapor hekime ve e-Nabız'a ulaşmıştır, düzeltme izlenebilir olmalıdır.</p>
+    <p data-i="5">Ek raporun sık nedenleri yazım ya da taraf hatası, sonradan gelen klinik bilgi ve konsültasyon sonrası görüş değişikliğidir; gerekçeyi açıkça yazın.</p>
+  </template>
+</section>
+
+<!-- 12 KONSÜLTASYON -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🤝</div><h2>Konsültasyon ve ikinci görüş</h2><div class="etiket">Rapor ekranı · Radyoloji › Konsültasyonlar</div></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 1fr 1.3fr; gap: 26px;">
+      <div>
+        <ol class="adimlar kucuk">
+          <li data-i="1">Rapor ekranının sağındaki <span class="k">Konsültasyon</span> kutusunda <span class="b ana">＋ İkinci Görüş İste</span>.</li>
+          <li data-i="1"><span class="k">Gerekçe</span>'yi yazın (zorunlu), <span class="b">Gönder</span>: "Konsültasyon istendi."</li>
+          <li data-i="2">Görüş <span class="k">Radyoloji › Konsültasyonlar</span>'da <span class="b">✎ Cevabı Yaz</span> ile yazılır; rapor ekranında <span class="b">✎ Görüşü Gir</span>.</li>
+          <li data-i="3">Gelen görüş rapora <span class="k">Görüş geldi</span> rozetiyle iliştirilir.</li>
+        </ol>
+        <div class="dikkat" data-i="4"><b>Dikkat:</b> Görüş raporu <b>değiştirmez</b>. Onaylı raporda değişiklik gerekiyorsa <b>＋ Ek Rapor</b> yazın.</div>
+        <div class="ipucu" data-i="5"><b>İpucu:</b> Rapor kilitli olsa da konsültasyon istenebilir.</div>
+      </div>
+      <div>
+        <div class="foto"><img src="img/raportor/09_konsultasyon.png" alt="Konsültasyon takibi">
+          <span class="isaret" data-i="1" data-etiket="Konsültasyon İste" style="left: 6%; top: 7.7%;">1</span>
+          <span class="isaret" data-i="2" data-etiket="✎ Cevabı Yaz" style="left: 15.3%; top: 7.7%;">2</span>
+          <span class="isaret sol" data-i="3" data-etiket="Gelen cevap" style="left: 75%; top: 36.4%;">3</span>
+          <span class="isaret" data-i="6" data-etiket="Kime / tip (mockup)" style="left: 47.6%; top: 68.1%;">4</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı. Programda istek yalnız gerekçeyle açılır; kişi / tip / aciliyet seçimi ve dış hekime görüntü bağlantısı mockup'ta.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Şüpheli bir olguda ikinci görüş almak için rapor ekranının sağındaki Konsültasyon kutusunda İkinci Görüş İste düğmesine basın, gerekçeyi yazıp gönderin.</p>
+    <p data-i="2">Görüş, Konsültasyonlar listesinde Cevabı Yaz ile ya da rapor ekranında Görüşü Gir ile yazılır.</p>
+    <p data-i="3">Gelen görüş, rapor ekranında Görüş geldi rozetiyle görünür.</p>
+    <p data-i="4">Görüş raporu kendiliğinden değiştirmez; onaylı raporda değişiklik gerekiyorsa ek rapor yazarsınız.</p>
+    <p data-i="5">Rapor kilitli olsa bile konsültasyon istenebilir.</p>
+    <p data-i="6">Mockup'taki kime, konsültasyon tipi ve aciliyet seçimi programda henüz yoktur; istek gerekçeyle açılır ve görüşü yazan kişi kayıttan bellidir.</p>
+  </template>
+</section>
+
+<!-- 13 TELERADYOLOJİ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🛰️</div><h2>Teleradyoloji: dış kurumların işleri</h2><div class="etiket">Teleradyoloji › Çalışma Listesi</div></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="foto"><img src="img/raportor/10_telerad_liste.png" alt="Teleradyoloji çalışma listesi">
+      <span class="isaret" data-i="1" data-etiket="Durum çipleri" style="left: 38.9%; top: 22.5%;">1</span>
+      <span class="isaret" data-i="2" data-etiket="👤 Bana Ata" style="left: 18.8%; top: 12.8%;">2</span>
+      <span class="isaret" data-i="2" data-etiket="▶ Okumaya Başla" style="left: 27.4%; top: 12.8%;">3</span>
+      <span class="isaret" data-i="3" data-etiket="Kalan dk / SLA" style="left: 65.8%; top: 37.5%;">4</span>
+    </div>
+    <div class="foto-not" data-i="5">Ekran mockup'ı. Mockup'ın "Faz 2" kısmı (PACS'ta görüntüleme, DICOM alımı, HL7 ile otomatik teslim, özet kartları) programda henüz yok.</div>
+    <div class="izgara i2" style="gap: 30px; margin-top: 12px;">
+      <ul class="mad kucuk">
+        <li data-i="1">Çipler: <span class="k">Bekleyen · Okunuyor · Taslak · Onaylı · Teslim · Tümü</span>.</li>
+        <li data-i="2"><span class="b">👤 Bana Ata</span> → <span class="b ana">▶ Okumaya Başla</span> → raporu aynı rapor ekranında yazın → <span class="b">📦 Teslim Et</span>.</li>
+        <li data-i="4">Kurumla yazışma: <span class="b">💬 Yazışma</span>. Atama ve teslim yetkiye bağlıdır.</li>
+      </ul>
+      <div class="not mavi" data-i="3" style="margin-top: 0;">Kalan dakika sözleşmedeki süreden (SLA) sunucuda hesaplanır; eksiye düşebilir. Acil ve SLA'sı yaklaşan işleri önce alın.</div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Kurumunuz başka hastane ya da merkezlere uzaktan raporlama yapıyorsa, bu işler Teleradyoloji menüsündeki Çalışma Listesi'nde bekleyen, okunuyor, taslak, onaylı ve teslim çiplerinde durur.</p>
+    <p data-i="2">İşi önce Bana Ata ile üstlenir, Okumaya Başla ile okumaya geçersiniz; rapor, kurum içi raporla aynı ekranda yazılır ve onaylanır.</p>
+    <p data-i="3">Kalan dakika sütunu sözleşmedeki süreden hesaplanır ve eksiye düşebilir; acil ve süresi yaklaşan işleri önce alın.</p>
+    <p data-i="4">Onaylanan rapor Teslim Et ile kuruma teslim edilir; kurumla Yazışma düğmesinden haberleşirsiniz. Atama ve teslim ayrı yetkilere bağlıdır.</p>
+    <p data-i="5">Mockup'ın altındaki Faz 2 şeridi, yani PACS'ta görüntüleme, DICOM alımı ve HL7 ile otomatik teslim henüz yapılmadı.</p>
+  </template>
+</section>
+
+<!-- 14 SONUÇ TESLİM VE E-NABIZ -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">📦</div><h2>Sonuç teslimi ve e-Nabız</h2></div>
+  <div class="govde" style="padding-top: 20px;">
+    <div class="izgara" style="grid-template-columns: 1.3fr 1fr; gap: 26px;">
+      <div>
+        <div class="foto"><img src="img/raportor/12_sonuc_teslim.png" alt="Sonuç teslim takibi">
+          <span class="isaret" data-i="2" data-etiket="Teslim Bekleyen" style="left: 5.9%; top: 23.8%;">1</span>
+          <span class="isaret" data-i="3" data-etiket="📦 Teslim Et" style="left: 4.4%; top: 7.5%;">2</span>
+          <span class="isaret" data-i="3" data-etiket="Teslim edilen kalemler" style="left: 38%; top: 66.5%;">3</span>
+          <span class="isaret" data-i="3" data-etiket="Teslim alan" style="left: 46.9%; top: 70.6%;">4</span>
+        </div>
+        <div class="foto-not">Ekran mockup'ı: Radyoloji › Sonuç Teslim. Teslimi çoğunlukla banko / sekreter yapar.</div>
+      </div>
+      <div>
+        <h3>Onayın tetiklediği işler</h3>
+        <ul class="mad kucuk">
+          <li data-i="1">Rapor isteyen hekimin muayene kartında <span class="k">İstem &amp; Sonuçlar</span>'da görünür.</li>
+          <li data-i="2">İş <span class="k">Sonuç Teslim › Teslim Bekleyen</span>'e düşer; onaysız rapor düşmez.</li>
+          <li data-i="3">Teslimde kalem (rapor, film, CD, dijital), <span class="k">teslim alan</span> ve kimlik yazılır.</li>
+          <li data-i="4">Onayda e-Nabız'a <span class="k">409 Radyoloji Sonuç Kayıt</span> paketi kendiliğinden üretilir; teslimi beklemez.</li>
+          <li data-i="5">Bölümler başlık + açıklama olarak gider; "yazdırılmaz" bölümler gitmez.</li>
+        </ul>
+        <div class="ipucu" data-i="6"><b>İpucu:</b> Paketin durumu <b>e-Nabız › Gönderim Kuyruğu</b>'ndadır. Hasta portalı açıksa hasta onaylı raporunu oradan görür.</div>
+      </div>
+    </div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p data-i="1">Raporu onayladığınız anda rapor, isteyen hekimin muayene kartındaki İstem ve Sonuçlar sekmesinde görünür.</p>
+    <p data-i="2">İş aynı anda Sonuç Teslim listesinin Teslim Bekleyen çipine düşer; onaylanmamış rapor bu listeye hiç gelmez.</p>
+    <p data-i="3">Teslimi genellikle banko yapar: hangi kalemlerin verildiğini, teslim alanı ve kimliğini yazar.</p>
+    <p data-i="4">e-Nabız için ayrıca bir şey yapmanız gerekmez; onayla birlikte dört yüz dokuz numaralı Radyoloji Sonuç Kayıt paketi kendiliğinden üretilir.</p>
+    <p data-i="5">Rapor bölümleri başlık ve açıklama olarak gider; yazdırılmaz işaretli bölümler gönderilmez.</p>
+    <p data-i="6">Paketin durumunu e-Nabız Gönderim Kuyruğu'nda görebilirsiniz; hasta portalı açıksa hasta onaylı raporunu oradan da görür.</p>
+  </template>
+</section>
+
+<!-- 15 SIK HATALAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🔧</div><h2>Sık karşılaşılan durumlar ve çözümleri</h2></div>
+  <div class="govde">
+    <table class="hata">
+      <tr><th>Ekranda gördüğünüz</th><th>Ne yapmalı?</th></tr>
+      <tr data-i="2"><td><span class="mesaj">Zorunlu bölümler boş: rapor onaya gönderilemez.</span></td><td>Şablonda yıldızlı bölümleri (Bulgular, Sonuç) doldurun.</td></tr>
+      <tr data-i="2"><td>Bakanlık profili: "Bulgular" en az 50 karakter / "Sonuç ve Öneriler" boş</td><td>Bakanlık profili açık kurumda bu iki bölüm zorunludur; tamamlayın.</td></tr>
+      <tr data-i="3"><td><span class="mesaj">Kritik bulgu bildirimi kaydedilmeden rapor onaylanamaz.</span></td><td>Haber verin, sonra <b>⚠ Kritik Bulgu Bildir</b> ile kaydedin; ardından onaylayın.</td></tr>
+      <tr data-i="3"><td><span class="mesaj">Bu istemde bildirim kaydı yok - önce kritik bulgu bildirimini kaydedin.</span></td><td>Kritik takibini kapatmadan önce bildirimi girin.</td></tr>
+      <tr data-i="4"><td><span class="mesaj">Rapor onaylanmış ve kilitli; düzeltme için ek rapor (addendum) açın.</span></td><td><b>＋ Ek Rapor</b> kullanın; yeni rapor yazmayın.</td></tr>
+      <tr data-i="5"><td>Onayla düğmesi yetki hatası (<b>YASAK 403</b>)</td><td>Rolünüzde onay yetkisi yok: <b>➜ Uzmana Gönder</b>.</td></tr>
+      <tr data-i="5"><td>Hasta Raporlanacak listesinde yok</td><td>Çekim "Çekildi" işaretlenmemiş; <b>Bekleyen Çekim</b>'e bakın, teknisyene sorun.</td></tr>
+      <tr data-i="6"><td>Şablon değiştirince "metin silinecek" sorusu</td><td>Yazdığınızı korumak için <b>vazgeçin</b>; şablonu yazmaya başlamadan seçin.</td></tr>
+      <tr data-i="6"><td><b>CAKISMA (409)</b>: kaydı başka kullanıcı değiştirdi</td><td>Ekranı yenileyin, değişikliği güncel kayıt üzerinde yapın.</td></tr>
+    </table>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p>Şimdi en sık karşılaşılan durumlara ve çözümlerine bakalım.</p>
+    <p data-i="2">Zorunlu bölümler boş uyarısında yıldızlı bölümleri doldurun; Bakanlık profili açık kurumda bulgular en az elli karakter olmalı, sonuç bölümü de boş kalmamalıdır.</p>
+    <p data-i="3">Kritik bulgu uyarısı aldıysanız önce haber verip bildirimi kaydedin, sonra onaylayın.</p>
+    <p data-i="4">Rapor kilitli uyarısı, onaylanmış bir raporu değiştirmeye çalıştığınızı gösterir; ek rapor açın.</p>
+    <p data-i="5">Onay düğmesi yetki hatası veriyorsa raporu uzmana gönderin; hasta listede yoksa çekim henüz tamamlanmamıştır.</p>
+    <p data-i="6">Şablon değiştirirken metin silinecek sorusunda vazgeçebilirsiniz; başka kullanıcının değiştirdiği kayıtta ise ekranı yenileyip işlemi tekrarlayın.</p>
+  </template>
+</section>
+
+<!-- 16 ALIŞTIRMALAR -->
+<section class="slayt">
+  <div class="ust"><div class="ikon">🏋️</div><h2>Alıştırmalar (demo ortamında)</h2><div class="etiket">Üstte <span class="ortam demo">DEMO ORTAMI</span> yazdığını kontrol edin</div></div>
+  <div class="govde">
+    <div class="not mavi" data-i="1" style="margin-top: 0; margin-bottom: 16px;">Demo kullanıcısı: <b>demo.radyolog</b> (parolayı eğitmeniniz verir). Asistan → uzman akışını denemek için onay yetkisi olmayan ikinci bir kullanıcı gerekir.</div>
+    <div class="yol">
+      <div class="m" data-i="2" style="border-left-color: var(--mor);"><span class="e">1️⃣</span><div><b>Listeyi tanıyın</b><span>Çalışma Listesi'nde Raporlanacak ve Onay Bekleyen çiplerini açın; bir acil satır bulun ve istem kartında klinik bilgiyi okuyun.</span></div></div>
+      <div class="m" data-i="3" style="border-left-color: var(--mor);"><span class="e">2️⃣</span><div><b>Taslak rapor</b><span>✎ Rapor Yaz; şablonun geldiğini görün, iki makro ekleyin, Bulgular ve Sonuç'u yazıp 💾 Taslak Kaydet. Durum Raporlanıyor oldu mu?</span></div></div>
+      <div class="m" data-i="4" style="border-left-color: var(--mor);"><span class="e">3️⃣</span><div><b>Onay engeli</b><span>Sonuç bölümünü boşaltıp ✍ Onayla ve İmzala deyin; uyarıyı okuyun. Sonra doldurup onaylayın ve 🖨 Çıktı'yı açın.</span></div></div>
+      <div class="m" data-i="5" style="border-left-color: var(--mor);"><span class="e">4️⃣</span><div><b>Kritik bulgu</b><span>Başka bir istemde "kritik bulgu var" işaretleyin; önce onaylamayı deneyin, sonra ⚠ bildirimi kaydedip onaylayın ve Kritik Bulgular'da kapatın.</span></div></div>
+      <div class="m" data-i="6" style="border-left-color: var(--mor);"><span class="e">5️⃣</span><div><b>Ek rapor ve görüş</b><span>Onayladığınız raporda ＋ Ek Rapor açın; bir başka raporda ＋ İkinci Görüş İste ile gerekçeli konsültasyon gönderin.</span></div></div>
+      <div class="m" data-i="6" style="border-left-color: var(--ok);"><span class="e">✅</span><div><b>Kontrol</b><span>Onaylı rapor kilitli mi, rapor numarası verildi mi, Sonuç Teslim'de Teslim Bekleyen olarak göründü mü?</span></div></div>
+    </div>
+    <div class="dikkat" data-i="7"><b>Dikkat:</b> Demo ortamına gerçek hasta bilgisi girmeyin. Canlı kurulumda "deneme" raporu onaylamayın: onaylı rapor e-Nabız'a gider.</div>
+  </div>
+  <div class="alt"><span><b>Gentegre AI</b> · Raportör Doktor Eğitimi</span><span class="sayfa"></span></div>
+  <template class="anlatim">
+    <p>Şimdi öğrendiklerinizi demo ortamında deneyin; üst şeritte Demo Ortamı yazdığından emin olun.</p>
+    <p data-i="1">Demo radyolog kullanıcısıyla girin; parolayı eğitmeniniz verir.</p>
+    <p data-i="2">Önce çalışma listesindeki çipleri tanıyın ve bir acil istemin klinik bilgisini okuyun.</p>
+    <p data-i="3">Sonra bir rapor açın, makrolarla yazıp taslak olarak kaydedin ve durumun Raporlanıyor olduğunu görün.</p>
+    <p data-i="4">Sonuç bölümünü bilerek boş bırakıp onaylamayı deneyin, uyarıyı okuyun; ardından tamamlayıp onaylayın ve çıktıyı açın.</p>
+    <p data-i="5">Bir istemde kritik bulgu işaretleyip bildirim olmadan onaylanamadığını görün; bildirimi kaydedip onaylayın ve takibi kapatın.</p>
+    <p data-i="6">Son olarak onaylı bir rapora ek rapor açın, başka birinde konsültasyon isteyin ve sonuçları kontrol edin.</p>
+    <p data-i="7">Demo ortamına asla gerçek hasta bilgisi girmeyin; canlıda deneme raporu onaylamayın.</p>
+  </template>
+</section>
+
+<!-- 17 KAPANIŞ -->
+<section class="slayt kapak">
+  <div class="buyuk-ikon"><svg width="300" height="300" viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"><circle cx="60" cy="60" r="44"/><path d="M46 48a14 14 0 1 1 20 12c-4 2-6 5-6 9v3"/><circle cx="60" cy="86" r="2.5" fill="#fff"/></svg></div>
+  <div class="ic" style="top: 140px;">
+    <div class="urun">Gentegre AI · Raportör Doktor Eğitimi</div>
+    <h1>Takıldığınızda</h1>
+    <div class="alt-baslik" style="font-size: 23px; line-height: 1.6;">
+      <div data-i="1"><b>?</b> üst şeritte: açık ekranın yardımı</div>
+      <div data-i="1"><b>💡 Yapay Zekâya Sor</b>: "Onaylı raporu nasıl düzeltirim?" gibi kullanım soruları</div>
+      <div data-i="2"><b>Sorumlu uzman / bölüm yöneticisi</b>: onay yetkisi, şablon ve makro değişikliği</div>
+      <div data-i="3"><b>Destek</b>: hata mesajındaki izleme numarasını iletin</div>
+    </div>
+  </div>
+  <div class="serit" data-i="4">
+    <span>Klinik soruyu oku</span><span>Zorunlu bölümleri doldur</span><span>Kritiği önce bildir</span><span>Onaylıyı yeniden yazma</span><span>Düzeltme = ek rapor</span>
+  </div>
+  <div class="firma">Feta Bilgisayar · Genyazılım</div>
+  <template class="anlatim">
+    <p data-i="1">Takıldığınızda üst şeritteki soru işaretiyle ekranın yardımını açabilir ya da Yapay Zekâya Sor asistanına kullanım sorunuzu sorabilirsiniz.</p>
+    <p data-i="2">Onay yetkisi, şablon ve makro değişiklikleri için sorumlu uzmanınıza ya da bölüm yöneticinize başvurun.</p>
+    <p data-i="3">Bir hata sürüyorsa, mesajdaki izleme numarasını destek ekibine iletin.</p>
+    <p data-i="4">Unutmayın: klinik soruyu okuyun, zorunlu bölümleri doldurun, kritik bulguyu önce bildirin ve onaylı raporu asla yeniden yazmayın; düzeltme ek raporla yapılır. İyi çalışmalar!</p>
+  </template>
+</section>
+
+</div>
+
+<div id="altyazi" aria-live="polite"></div>
+
+<div id="oynatici">
+  <button id="oGeri" title="Önceki slayt (←)">⏮</button>
+  <button id="oOyna" class="ana" title="Oynat / duraklat (Boşluk)">▶ Oynat</button>
+  <button id="oIleri" title="Sonraki slayt (→)">⏭</button>
+  <div id="oCubuk"></div>
+  <span id="sayac">1 / 1</span>
+  <button id="oSes" title="Sesi aç / kapat (M)">🔊</button>
+  <select id="oHiz" title="Okuma hızı">
+    <option value="0.8">0.8x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option>
+  </select>
+  <label title="Anlatım bitince sonraki slayta geç"><input type="checkbox" id="oOto" checked> Otomatik geç</label>
+  <label title="Okunan cümleyi alt yazı olarak göster"><input type="checkbox" id="oAlt" checked> Altyazı</label>
+  <span id="oNot"></span>
+</div>
+
+<div id="baslangic">
+  <h2>Raportör Doktor Eğitimi</h2>
+  <p>Eğitim bir video gibi ilerler: her slayt sesli anlatılır, okunan cümle altyazıda görünür ve ekran görüntüsündeki ilgili yer işaretlenir.
+     Boşluk tuşu duraklatır, ← / → slaytlar arasında gezer.</p>
+  <button class="bas" id="bBasla">▶ Eğitimi başlat</button>
+  <button class="sessiz" id="bSessiz">Sessiz incele (elle gez)</button>
+  <p id="bNot" style="font-size: 14px; color: #f3c46b;"></p>
+</div>
+
+<script>
+(function () {
+  var slaytlar = Array.prototype.slice.call(document.querySelectorAll('.slayt'));
+  var toplam = slaytlar.length, i = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---- anlatım metinleri: her slaytın <template class="anlatim"> içindeki <p>'ler ---- */
+  var anlatim = slaytlar.map(function (s) {
+    var t = s.querySelector('template.anlatim');
+    if (!t) return [];
+    return Array.prototype.slice.call(t.content.querySelectorAll('p')).map(function (p) {
+      return { metin: p.textContent.replace(/\s+/g, ' ').trim(),
+               ids: (p.getAttribute('data-i') || '').split(/\s+/).filter(Boolean) };
+    });
+  });
+
+  /* ---- baskı için konuşmacı notları (ekranda gizli) ---- */
+  slaytlar.forEach(function (s, n) {
+    var y = s.querySelector('.sayfa');
+    if (y) y.textContent = (n + 1) + ' / ' + toplam;
+    s.classList.add('hepsi');
+    var d = document.createElement('div');
+    d.className = 'konusmaci';
+    d.innerHTML = '<h4>Anlatım · slayt ' + (n + 1) + '</h4>';
+    var p = document.createElement('p');
+    p.textContent = anlatim[n].map(function (c) { return c.metin; }).join(' ');
+    d.appendChild(p);
+    s.parentNode.insertBefore(d, s.nextSibling);
+  });
+
+  /* ---- durum ---- */
+  var d = { oynuyor: false, ses: true, hiz: 1, oto: true, altyazi: true, cumle: 0, nesil: 0, zaman: null, slaytBitti: false };
+  var synth = window.speechSynthesis || null;
+  var trSes = null, sesListesiGeldi = false;
+
+  function sesSec() {
+    if (!synth) return;
+    var v = synth.getVoices() || [];
+    if (v.length) sesListesiGeldi = true;
+    var tr = v.filter(function (x) { return /^tr/i.test(x.lang); });
+    trSes = tr.filter(function (x) { return /natural|online/i.test(x.name); })[0]
+        || tr.filter(function (x) { return /tolga/i.test(x.name); })[0] || tr[0] || null;
+    notYaz();
+  }
+  function notYaz() {
+    var m = '';
+    if (!synth) m = 'Bu tarayıcı sesli okumayı desteklemiyor: altyazıyla ilerler.';
+    else if (sesListesiGeldi && !trSes) m = 'Türkçe ses bulunamadı; varsayılan sesle okunuyor.';
+    $('oNot').textContent = m; $('bNot').textContent = m;
+    $('oNot').title = trSes ? 'Ses: ' + trSes.name : m;
+  }
+  if (synth) {
+    sesSec();
+    if (typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', sesSec);
+    else synth.onvoiceschanged = sesSec;
+    setTimeout(function () { sesSec(); sesListesiGeldi = true; notYaz(); }, 2500);
+  } else notYaz();
+
+  /* ---- ölçek ve altyazı konumu ---- */
+  function olcekle() {
+    var o = Math.min(window.innerWidth / 1280, (window.innerHeight - 58) / 720) * 0.96;
+    slaytlar.forEach(function (s) { s.style.transform = 'scale(' + o + ')'; });
+    var a = $('altyazi');
+    var altBosluk = ((window.innerHeight - 58) - 720 * o) / 2;
+    a.style.bottom = (58 + altBosluk + 52 * o) + 'px';
+    a.style.fontSize = Math.max(14, 22 * o) + 'px';
+    a.style.maxWidth = (1280 * o * 0.86) + 'px';
+  }
+
+  /* ---- vurgular ---- */
+  function hedefler(s) { return Array.prototype.slice.call(s.querySelectorAll('[data-i]')); }
+  function vurgula(k) {
+    var s = slaytlar[i], L = anlatim[i], gorulen = {}, simdi = {};
+    for (var n = 0; n <= k && n < L.length; n++) L[n].ids.forEach(function (x) { gorulen[x] = 1; });
+    if (L[k]) L[k].ids.forEach(function (x) { simdi[x] = 1; });
+    s.classList.remove('hepsi');
+    hedefler(s).forEach(function (e) {
+      var ids = e.getAttribute('data-i').split(/\s+/);
+      var g = ids.some(function (x) { return gorulen[x]; }), m = ids.some(function (x) { return simdi[x]; });
+      e.classList.toggle('gor', g);
+      e.classList.toggle('simdi', m);
+    });
+  }
+  function vurguTemizle(s, hepsi) {
+    hedefler(s).forEach(function (e) { e.classList.remove('simdi'); e.classList.remove('gor'); });
+    s.classList.toggle('hepsi', !!hepsi);
+  }
+  function altyaziYaz(t) {
+    var a = $('altyazi');
+    a.textContent = t || '';
+    a.classList.toggle('acik', !!t && d.altyazi);
+  }
+
+  /* ---- ilerleme çubuğu ---- */
+  var cubuk = $('oCubuk');
+  for (var n = 0; n < toplam; n++) {
+    var p = document.createElement('div');
+    p.className = 'p'; p.title = 'Slayt ' + (n + 1);
+    p.appendChild(document.createElement('i'));
+    (function (k) { p.onclick = function () { goster(k); }; })(n);
+    cubuk.appendChild(p);
+  }
+  function cubukGuncelle() {
+    var L = anlatim[i].length || 1;
+    Array.prototype.forEach.call(cubuk.children, function (p, k) {
+      p.classList.toggle('bitti', k < i);
+      p.firstChild.style.width = k === i ? (Math.min(d.cumle, L) / L * 100) + '%' : '0';
+    });
+    $('sayac').textContent = (i + 1) + ' / ' + toplam;
+    $('ilerleme').style.width = ((i + 1) / toplam * 100) + '%';
+  }
+
+  /* ---- konuşma motoru ---- */
+  function sus() {
+    d.nesil++;
+    clearTimeout(d.zaman);
+    if (synth) { try { synth.cancel(); } catch (e) {} }
+  }
+  function cumleOyna() {
+    var nesil = d.nesil, L = anlatim[i];
+    if (!d.oynuyor) return;
+    if (d.cumle >= L.length) { slaytSonu(); return; }
+    var c = L[d.cumle];
+    vurgula(d.cumle); altyaziYaz(c.metin); cubukGuncelle();
+    var bitti = false, emniyet = null;
+    function sonra() {
+      if (bitti) return; bitti = true; clearTimeout(emniyet);
+      if (nesil !== d.nesil || !d.oynuyor) return;
+      d.cumle++; cubukGuncelle();
+      d.zaman = setTimeout(cumleOyna, 350);
+    }
+    var tahmini = Math.max(1800, c.metin.length * 60 / d.hiz);
+    if (d.ses && synth) {
+      var u = new SpeechSynthesisUtterance(c.metin);
+      u.lang = 'tr-TR';
+      if (trSes) u.voice = trSes;
+      u.rate = d.hiz;
+      u.onend = sonra;
+      u.onerror = function (e) { if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; sonra(); };
+      // Emniyet: ses motoru olay göndermezse (ses yok / takılma) akış durmasın.
+      emniyet = setTimeout(sonra, tahmini * 2.2 + 4000);
+      synth.speak(u);
+    } else {
+      d.zaman = setTimeout(sonra, tahmini);
+    }
+  }
+  function slaytSonu() {
+    var nesil = d.nesil;
+    d.slaytBitti = true;
+    var s = slaytlar[i];
+    hedefler(s).forEach(function (e) { e.classList.remove('simdi'); });
+    s.classList.add('hepsi');
+    altyaziYaz('');
+    cubukGuncelle();
+    if (d.oto && i < toplam - 1) {
+      d.zaman = setTimeout(function () { if (nesil === d.nesil && d.oynuyor) goster(i + 1); }, 1200);
+    } else if (i >= toplam - 1 || !d.oto) {
+      d.oynuyor = false; dugmeler();
+    }
+  }
+  function oynat() {
+    sus();
+    d.oynuyor = true;
+    if (d.slaytBitti) {               // biten slaytta oynat: son slayt değilse sonrakine, sonsa baştan
+      if (i < toplam - 1 && d.oto) { goster(i + 1); dugmeler(); return; }
+      d.cumle = 0; d.slaytBitti = false;
+    }
+    if (d.cumle === 0) vurguTemizle(slaytlar[i], false);
+    dugmeler();
+    var nesil = d.nesil;
+    d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 300);
+  }
+  function duraklat() {
+    d.oynuyor = false;
+    sus();                            // cümle yeniden oynatıldığında baştan okunur
+    dugmeler();
+  }
+  function dugmeler() {
+    $('oOyna').textContent = d.oynuyor ? '⏸ Duraklat' : '▶ Oynat';
+    $('oSes').textContent = d.ses ? '🔊' : '🔇';
+  }
+
+  /* ---- slayt gösterme ---- */
+  function goster(n) {
+    n = Math.max(0, Math.min(toplam - 1, n));
+    sus();
+    vurguTemizle(slaytlar[i], true);
+    i = n;
+    d.cumle = 0; d.slaytBitti = false;
+    slaytlar.forEach(function (s, k) { s.classList.toggle('aktif', k === i); });
+    altyaziYaz('');
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (d.oynuyor) {
+      vurguTemizle(slaytlar[i], false);
+      var nesil = d.nesil;
+      d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 600);
+    } else vurguTemizle(slaytlar[i], true);
+    cubukGuncelle();
+    dugmeler();
+  }
+
+  /* ---- denetimler ---- */
+  $('oOyna').onclick = function () { d.oynuyor ? duraklat() : oynat(); };
+  $('oGeri').onclick = function () { goster(i - 1); };
+  $('oIleri').onclick = function () { goster(i + 1); };
+  $('oSes').onclick = function () {
+    d.ses = !d.ses; dugmeler();
+    if (d.oynuyor) { sus(); var nesil = d.nesil; d.zaman = setTimeout(function () { if (nesil === d.nesil) cumleOyna(); }, 200); }
+  };
+  $('oHiz').onchange = function () { d.hiz = parseFloat(this.value) || 1; };
+  $('oOto').onchange = function () { d.oto = this.checked; };
+  $('oAlt').onchange = function () { d.altyazi = this.checked; $('altyazi').classList.toggle('acik', d.altyazi && !!$('altyazi').textContent); };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.key !== ' ') return;
+    if (!$('baslangic').classList.contains('gizli')) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basla(true); }
+      return;
+    }
+    if (e.key === ' ') { e.preventDefault(); d.oynuyor ? duraklat() : oynat(); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goster(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goster(i - 1); }
+    else if (e.key === 'Home') goster(0);
+    else if (e.key === 'End') goster(toplam - 1);
+    else if (e.key === 'm' || e.key === 'M') $('oSes').onclick();
+  });
+
+  function basla(sesli) {
+    $('baslangic').classList.add('gizli');
+    if (sesli) {
+      // Kullanıcı hareketi içinde boş bir cümle: bazı tarayıcılar sesi ancak böyle açar.
+      if (synth) { try { var u0 = new SpeechSynthesisUtterance(' '); u0.volume = 0; synth.speak(u0); } catch (e) {} }
+      oynat();
+    }
+  }
+  $('bBasla').onclick = function () { basla(true); };
+  $('bSessiz').onclick = function () { basla(false); };
+
+  window.addEventListener('beforeprint', function () {
+    duraklat();
+    slaytlar.forEach(function (s) { vurguTemizle(s, true); });
+  });
+  window.addEventListener('beforeunload', function () { if (synth) synth.cancel(); });
+  window.addEventListener('resize', olcekle);
+
+  var bas = parseInt((location.hash || '').replace('#', ''), 10);
+  olcekle();
+  goster(isNaN(bas) ? 0 : bas - 1);
+})();
+</script>
+</body>
+</html>
