@@ -499,7 +499,7 @@ function Yollar() {
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
-        <Route path="*" element={<Navigate to={ilkYol} replace />} />
+        <Route path="*" element={<BilinmeyenYol hedef={ilkYol} />} />
       </Route>
 
       {/* ZİYARET KARTI KABUĞUN DIŞINDA (776) — teknisyenin telefonu.
@@ -548,4 +548,31 @@ export default function App() {
       </OturumSaglayici>
     </BrowserRouter>
   );
+}
+
+/**
+ * BİLİNMEYEN YOL (kullanıcı 10.10.2026: "tıkladım açılmadı", "iskonto icmali
+ * ne giremedim"): açık sekme yeni bir ekran eklenmeden önce yüklendiyse menü
+ * canlı güncellenir ama rota listesi güncellenmez - tıklama "bilinmeyen yol"a
+ * düşüp sessizce ana sayfaya gidiyordu. Yol, kullanıcının yetkili olduğu bir
+ * menü ekranıysa sayfa bir kez TAM yenilenir (yeni rota yüklenir); aynı yol
+ * için dakikada en fazla bir kez - gerçekten açılmayan ekran döngüye girmesin.
+ */
+function BilinmeyenYol({ hedef }: { hedef: string }) {
+  const { yetki } = useOturum();
+  const konum = useLocation();
+  const yol = konum.pathname.replace(/^\//, '').split('/')[0];
+  const bilinen = !!yol && LISTELER.some(l => (l.rota ?? l.kaynak) === yol && yetki(l.yetkiKodu));
+  if (bilinen) {
+    const anahtar = `gentegre.yenile.${yol}`;
+    try {
+      const son = Number(sessionStorage.getItem(anahtar) ?? 0);
+      if (Date.now() - son > 60_000) {
+        sessionStorage.setItem(anahtar, String(Date.now()));
+        window.location.reload();
+        return null;
+      }
+    } catch { /* depolama kapalı: yönlendir */ }
+  }
+  return <Navigate to={hedef} replace />;
 }
