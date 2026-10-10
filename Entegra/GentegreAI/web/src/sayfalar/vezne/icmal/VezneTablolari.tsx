@@ -1,4 +1,6 @@
+import { useRef, type MouseEvent } from 'react';
 import type { VezneIcmali } from '../../../api/uclar/vezneIcmal';
+import { secimUygula } from '../../../bilesenler/listeSecimi';
 import { para } from '../../../bilesenler/bicim';
 import { odemeTuruIkonu } from '../../banko/odemeTuru';
 import { devirRozeti, neredeRozeti, oturumRozeti, saat, terminalRozeti } from './vezneOrtak';
@@ -11,15 +13,22 @@ const isaretli = (n: number) => (n > 0.005 ? `+${p(n)}` : p(n));
 
 /**
  * BANKOLAR / OTURUMLAR - soldaki onay kutusu (mockup) diğer sekmeleri ve A4'ü
- * süzer; hiçbiri seçili değilse bütün oturumlar. Çift tık banko oturumunu açar.
+ * süzer; hiçbiri seçili değilse bütün oturumlar. Tık tek oturumu seçer, Ctrl /
+ * Shift ile birden çok (secimUygula). Çift tık banko oturumunu açar.
  */
 export function OturumTablosu({ v, secili, setSecili, gunlu, oturumAc }: {
   v: VezneIcmali; secili: number[]; setSecili(s: number[]): void; gunlu: boolean;
   oturumAc(id: number): void;
 }) {
   const hepsi = v.oturumlar.length > 0 && v.oturumlar.every(o => secili.includes(o.id));
-  const degistir = (id: number) =>
-    setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
+  const sonTiklanan = useRef<number | null>(null);
+  const tikla = (id: number, e: MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) window.getSelection()?.removeAllRanges();
+    setSecili(secimUygula(secili, id, v.oturumlar.map(o => o.id), sonTiklanan.current,
+                          { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }));
+    if (!e.shiftKey) sonTiklanan.current = id;
+  };
   // Toplam satırı SUNUCU özetinden - seçim sunucuda uygulanır (v.secili).
   const z = v.ozet;
   return (
@@ -41,10 +50,10 @@ export function OturumTablosu({ v, secili, setSecili, gunlu, oturumAc }: {
           const sec = secili.includes(o.id);
           const fark = o.fark ?? 0;
           return (
-            <tr key={o.id} className={'ac' + (sec ? ' sec' : '')} onClick={() => degistir(o.id)}
-                onDoubleClick={() => oturumAc(o.id)} title="Çift tık: banko oturumunu aç">
-              <td><input type="checkbox" checked={sec} onClick={e => e.stopPropagation()}
-                         onChange={() => degistir(o.id)} /></td>
+            <tr key={o.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(o.id, e)}
+                onDoubleClick={() => oturumAc(o.id)}
+                title="Tıkla: yalnız bu oturum · Ctrl: ekle / çıkar · Shift: aralık · çift tık: oturumu aç">
+              <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(o.id, e)} /></td>
               <td><b>{o.banko || o.bankoKod}</b>{o.vardiya && <div className="ki-soluk">{o.vardiya}</div>}</td>
               <td>{o.gorevli}</td>
               <td>{saat(o.acilis, gunlu)} – {o.kapanis ? saat(o.kapanis, gunlu) : <span className="ki-soluk">açık</span>}</td>
