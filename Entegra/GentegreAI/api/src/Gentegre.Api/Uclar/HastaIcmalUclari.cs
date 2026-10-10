@@ -62,7 +62,9 @@ public static class HastaIcmalUclari
                            bb.bolum_id, bb.personel_id, bb.odeyen_kurum_id
                       from public.belge be
                       join public.belge_basvuru bb on bb.id = be.id
-                     where be.tipi = 30 and coalesce(bb.hasta_id, be.taraf_id) = @p0
+                     -- tur 19 = BAŞVURU; tipi 30 hasta / kurum tahakkukunu (16/17)
+                     --   da taşır - türetilmiş belge, sayılırsa çift sayım.
+                     where be.tipi = 30 and be.tur = 19 and coalesce(bb.hasta_id, be.taraf_id) = @p0
                        and be.belge_tarihi >= @p1 and be.belge_tarihi < @p2
                        and (@p3 = 0 or be.sube_id is null or be.sube_id = @p3))
                 select s.id, s.belge_no, s.belge_tarihi, s.durum, s.genel_toplam,
