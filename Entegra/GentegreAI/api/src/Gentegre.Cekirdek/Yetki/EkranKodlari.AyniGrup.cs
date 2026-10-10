@@ -27,6 +27,7 @@ public static partial class EkranKodlari
         ("ariza.ekip", "ariza"),                                // Teknik Servis › Arıza Ekipleri
         ("demirbas.zimmet", "demirbas"),                        // Sabit Varlıklar › Zimmet / Hareketler (1007)
         ("banko.vezne_icmal", "banko_onay"),                    // Kayıt Kabul › Vezne İcmali (1016)
+        ("medula.mutabakat", "medula.fatura"),                  // Medula › Mutabakat İcmali (1017)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

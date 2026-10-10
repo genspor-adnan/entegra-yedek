@@ -79,6 +79,13 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Medula', menuAd: 'Fatura & Dönem', ic: '🧮', yetkiKodu: 'medula.fatura', menuSira: 50,
   },
   {
+    // MUTABAKAT İCMALİ (1017, mockup İcmal/medula_mutabakat.html): SGK
+    //   döneminin hunisi, faturasız takipler, tutar farkları, kesintiler.
+    kaynak: 'medula-mutabakat', rota: 'medula-mutabakat', ozelSayfa: true, baslik: 'Medula Mutabakat İcmali',
+    yol: 'Medula › Mutabakat İcmali', urunModu: 2,
+    menuGrup: 'Medula', menuAd: 'Mutabakat İcmali', ic: '🔁', yetkiKodu: 'medula.mutabakat', menuSira: 51,
+  },
+  {
     kaynak: 'medula-fatura', rota: 'medula-fatura', aksiyonEkrani: 'medula-fatura-liste', baslik: 'Medula Faturaları',
     yol: 'Medula › Faturalar', kartYolu: '/medula-fatura', kartBaslik: 'Medula Faturası', tarihAlani: 'tarih',
     cipler: [

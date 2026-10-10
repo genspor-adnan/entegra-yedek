@@ -112,8 +112,8 @@ public sealed class EkranKoduBolmeTestleri
     [Fact]
     public void Ayni_grup_ekran_kodu_eski_kapiyi_acar_ve_kopya_kaynagi_eski_kod()
     {
-        Assert.Equal(120, EkranKodlari.AyniGrupEkranlari.Length);   // 1016 banko.vezne_icmal
-        Assert.Equal(120, EkranKodlari.AyniGrupEkranlari.Select(x => x.Yeni).Distinct().Count());
+        Assert.Equal(121, EkranKodlari.AyniGrupEkranlari.Length);   // 1017 medula.mutabakat
+        Assert.Equal(121, EkranKodlari.AyniGrupEkranlari.Select(x => x.Yeni).Distinct().Count());
         foreach (var (yeni, eski) in EkranKodlari.AyniGrupEkranlari)
         {
             Assert.Equal(eski, EkranKodlari.KopyaKaynagi(yeni));

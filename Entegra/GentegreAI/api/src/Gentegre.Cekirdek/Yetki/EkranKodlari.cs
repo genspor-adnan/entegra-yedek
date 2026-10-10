@@ -247,6 +247,8 @@ public static partial class EkranKodlari
         "demirbas.zimmet", "demirbas.ayar",
         // Vezne İcmali (1016): kendi ucu (VezneIcmalUclari) kendi koduna bakar.
         "banko.vezne_icmal",
+        // Medula Mutabakat İcmali (1017): /api/medula/mutabakat kendi koduna bakar.
+        "medula.mutabakat",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

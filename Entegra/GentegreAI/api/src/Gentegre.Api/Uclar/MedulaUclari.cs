@@ -31,6 +31,7 @@ public static partial class MedulaUclari
         HizmetUclariniEkle(grup);
         ReceteUclariniEkle(grup);
         FaturaUclariniEkle(grup);
+        MutabakatUclariniEkle(grup);   // mutabakat icmali (1017)
         KuyrukUclariniEkle(grup);
     }
 
