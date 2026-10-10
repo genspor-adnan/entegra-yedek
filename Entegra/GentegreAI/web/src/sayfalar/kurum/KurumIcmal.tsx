@@ -99,15 +99,34 @@ export function KurumIcmal() {
   };
 
   // İCMAL OLUŞTUR (289): dönemin açık kurum payını icmale bağlar - satırlar
-  //   kilitlenir, sonradan girilen başvuru yeni icmale düşer.
-  const icmalOlustur = () => void guvenli(async () => {
-    if (!tekKurum || !o) return;
-    if (!(await onay(`${tekKurum.ad} · ${bas} – ${bit}: açık kurum payı ${paraYaz(o.acikKurumPayi)}. `
-          + 'İcmal oluşturulsun mu? Satırlar bu icmale bağlanır.'))) return;
-    const y = await api.icmalOlustur({ kurumId: tekKurum.id, donemBas: bas, donemBit: bit });
-    mesaj(`İcmal oluşturuldu: ${y.satir} satır. "Kuruma Fatura Kes" ile tek fatura kesilir.`);
+  //   kilitlenir, sonradan girilen başvuru yeni icmale düşer. Kurum verilir
+  //   (tek kurum seçili değilse İcmaller sekmesinde seçtirilir - kullanıcı:
+  //   "İcmal Oluştur butonu çalışmıyor", tek kurum şartıyla pasif kalıyordu).
+  //   Tutar 289'un önizlemesinden: oluşturmayla AYNI küme.
+  const icmalOlustur = (kurumId: number, kurumAd: string) => guvenli(async () => {
+    const on = await api.icmalOnizleme(kurumId, bas, bit);
+    if (on.satirlar.length === 0) {
+      // NEDEN SÖYLENİR: düğme pasif kalınca "çalışmıyor" sanılıyordu. Kurum
+      //   payı olup açık payı olmayan dönemde pay ya başka icmalde, ya kurum
+      //   tahakkukuyla kapanmış ya da başvuru kesinleşmemiştir.
+      const kp = veri?.kurumlar.find(k => k.id === kurumId)?.kurumPayi ?? 0;
+      mesaj(`${kurumAd} için ${bas} – ${bit} döneminde icmale girmemiş açık kurum payı yok.`
+        + (kp > 0.005 ? ` Dönemdeki kurum payı (${paraYaz(kp)}) başka bir icmalde, kurum tahakkukuyla kapatılmış`
+          + ' ya da başvurular kesinleşmemiş.' : ''));
+      return;
+    }
+    if (!(await onay(`${kurumAd} · ${bas} – ${bit}: ${on.satirlar.length} satır, açık kurum payı `
+          + `${paraYaz(on.toplam)}. İcmal oluşturulsun mu? Satırlar bu icmale bağlanır.`))) return;
+    const y = await api.icmalOlustur({ kurumId, donemBas: bas, donemBit: bit });
+    mesaj(`İcmal oluşturuldu: ${y.satir} satır. "Faturala" ile kuruma tek fatura kesilir.`);
     setTazele(t => t + 1);
   });
+  const [kurumSecIstegi, setKurumSecIstegi] = useState(0);
+  /** Üst araç çubuğu: tek kurum varsa doğrudan, yoksa İcmaller'de kurum seçtir. */
+  const ustIcmalOlustur = () => {
+    if (tekKurum) { void icmalOlustur(tekKurum.id, tekKurum.ad); return }
+    setSekme('icmaller'); setKurumSecIstegi(n => n + 1);
+  };
 
   const faturala = () => void guvenli(async () => {
     if (!hazirIcmal) return;
@@ -138,9 +157,8 @@ export function KurumIcmal() {
       </div>
 
       <div className="hi-arac">
-        <button disabled={!tekKurum || !o || o.acikKurumPayi <= 0.005}
-                title={!tekKurum ? 'Tek kurum seçin' : 'Dönemin açık kurum payını icmale bağlar'}
-                onClick={icmalOlustur}>🔒 İcmal Oluştur (Kesinleştir)</button>
+        <button title="Dönemin açık kurum payını icmale bağlar" disabled={!veri}
+                onClick={ustIcmalOlustur}>🔒 İcmal Oluştur (Kesinleştir)</button>
         <button className="hi-yesil" disabled={!hazirIcmal} title={hazirIcmal ? '' : 'Hazırlanmış icmal yok'}
                 onClick={faturala}>🧾 Kuruma Fatura Kes</button>
         <span className="ki-ayrac" />
@@ -207,7 +225,9 @@ export function KurumIcmal() {
             {sekme === 'kesinti' && <KesintiTablosu v={veri} />}
             {sekme === 'icmaller' && (
               <IcmallerSekmesi seciliKurumlar={secili} tazele={tazele}
-                               icmalOlustur={tekKurum && o && o.acikKurumPayi > 0.005 ? icmalOlustur : null}
+                               kurumlar={veri.kurumlar} varsayilanKurum={tekKurum?.id ?? 0}
+                               donem={`${bas} – ${bit}`} kurumSecIstegi={kurumSecIstegi}
+                               icmalOlustur={icmalOlustur}
                                ac={k => icmaleGec(k, 'basvuru')}
                                yazdir={k => { icmaleGec(k, 'onizleme'); setYazdirBekliyor(true) }}
                                faturaAc={id => git(`/belge/${id}`)} degisti={() => setTazele(t => t + 1)} />

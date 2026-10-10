@@ -28,6 +28,12 @@ export const stil = `
 .ki-altarac button.hi-yesil { background:linear-gradient(#5cb87a,#3f9a5e); color:#fff; border-color:#3f9a5e; }
 .ki-cip { border:1px solid var(--cizgi,#cdd6e0); border-radius:12px; padding:2px 10px; font-size:11.5px; background:var(--yuz,#fff); color:#4d5d6e; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
 .ki-cip.on { background:#2f6db3; border-color:#2f6db3; color:#fff; }
+.ki-secim { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:7px 10px; margin-bottom:8px;
+  background:#eef4fc; border:1px solid #cfe0f5; border-radius:4px; font-size:12px; }
+.ki-secim select { border:1px solid var(--cizgi,#cdd6e0); border-radius:3px; font-size:12px; padding:2px 4px; min-width:220px; }
+.ki-secim button { border:1px solid var(--cizgi,#cdd6e0); border-radius:4px; padding:3px 10px; font-size:12px; background:var(--yuz,#fff); cursor:pointer; }
+.ki-secim button.hi-yesil { background:linear-gradient(#5cb87a,#3f9a5e); color:#fff; border-color:#3f9a5e; }
+.ki-secim button:disabled { opacity:.5; cursor:default; }
 /* A4: kurum tablosu daha çok sütun taşır - genişlikler hasta tablosundan farklı. */
 .a4-t.ki-a4t { font-size:9px; }
 .a4-t.ki-a4t th:nth-child(1) { width:10%; } .a4-t.ki-a4t th:nth-child(2) { width:15%; }

@@ -19,12 +19,19 @@ import { kayitRozeti } from './kurumIcmalOrtak';
  */
 type Cip = 'hepsi' | 'hazirlaniyor' | 'faturalandi' | 'tahsil';
 
-export function IcmallerSekmesi({ seciliKurumlar, tazele, icmalOlustur, ac, yazdir, faturaAc, degisti }: {
+export function IcmallerSekmesi({ seciliKurumlar, tazele, kurumlar, varsayilanKurum, donem, kurumSecIstegi, icmalOlustur, ac, yazdir, faturaAc, degisti }: {
   seciliKurumlar: number[];
   /** Ekranın tazeleme sayacı - icmal oluşturulunca liste de yenilenir. */
   tazele: number;
-  /** Üstteki "İcmal Oluştur" ile aynı iş (tek kurum + dönem); yoksa null. */
-  icmalOlustur: (() => void) | null;
+  /** Ekranın dönemindeki kurumlar - icmal oluştururken seçim listesi. */
+  kurumlar: { id: number; ad: string }[];
+  /** Tek kurum seçiliyse onun id'si: seçim sorulmaz. */
+  varsayilanKurum: number;
+  /** "01.09 – 30.09" - seçim satırında gösterilir. */
+  donem: string;
+  /** Üst araç çubuğundan "İcmal Oluştur" basıldı: seçim satırını aç. */
+  kurumSecIstegi: number;
+  icmalOlustur(kurumId: number, kurumAd: string): Promise<unknown>;
   ac(k: KurumIcmalKaydi): void;
   yazdir(k: KurumIcmalKaydi): void;
   faturaAc(belgeId: number): void;
@@ -39,6 +46,14 @@ export function IcmallerSekmesi({ seciliKurumlar, tazele, icmalOlustur, ac, yazd
   const [acik, setAcik] = useState<number | null>(null);
   const [satirlar, setSatirlar] = useState<Record<number, KurumIcmalSatiri[]>>({});
   const [yerel, setYerel] = useState(0);
+  // KURUM SEÇİMİ (tek kurum seçili değilken "İcmal Oluştur"): sekmede satır.
+  const [secimAcik, setSecimAcik] = useState(false);
+  const [secilenKurum, setSecilenKurum] = useState(0);
+  useEffect(() => { if (kurumSecIstegi > 0) setSecimAcik(true) }, [kurumSecIstegi]);
+  const olustur = (id: number) => {
+    const ad = kurumlar.find(k => k.id === id)?.ad ?? '';
+    void icmalOlustur(id, ad).then(() => { setSecimAcik(false); setSecilenKurum(0) });
+  };
   const suzgec = yalnizSecili ? seciliKurumlar : [];
   const suzgecAnahtar = suzgec.join(',');
 
@@ -90,8 +105,8 @@ export function IcmallerSekmesi({ seciliKurumlar, tazele, icmalOlustur, ac, yazd
           <input type="checkbox" checked={yalnizSecili} disabled={!seciliKurumlar.length}
                  onChange={e => setYalnizSecili(e.target.checked)} /> Yalnız seçili kurum</label>
         <span className="sp" />
-        <button disabled={!icmalOlustur} title={icmalOlustur ? '' : 'Tek kurum seçin ve dönemde açık kurum payı olsun'}
-                onClick={() => icmalOlustur?.()}>＋ İcmal Oluştur</button>
+        <button title="Seçilen dönemin açık kurum payını icmale bağlar"
+                onClick={() => (varsayilanKurum ? olustur(varsayilanKurum) : setSecimAcik(a => !a))}>＋ İcmal Oluştur</button>
         <button className="hi-yesil" disabled={!faturalanacak.length}
                 title={faturalanacak.length ? '' : 'Hazırlanan (faturasız) icmal işaretleyin'} onClick={faturala}>
           🧾 Faturala{faturalanacak.length ? ` (${faturalanacak.length})` : ''}</button>
@@ -99,6 +114,18 @@ export function IcmallerSekmesi({ seciliKurumlar, tazele, icmalOlustur, ac, yazd
         <button disabled={secilenler.length !== 1} title="Tek icmal işaretleyin"
                 onClick={() => secilenler[0] && yazdir(secilenler[0])}>🖨️ İcmali Yazdır</button>
       </div>
+      {secimAcik && (
+        <div className="ki-secim">
+          <span>＋ İcmal oluştur · dönem <b>{donem}</b> · kurum:</span>
+          <select value={secilenKurum} onChange={e => setSecilenKurum(Number(e.target.value))}>
+            <option value={0}>— kurum seçin —</option>
+            {kurumlar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+          </select>
+          <button className="hi-yesil" disabled={!secilenKurum} onClick={() => olustur(secilenKurum)}>Oluştur</button>
+          <button onClick={() => setSecimAcik(false)}>Vazgeç</button>
+          {kurumlar.length === 0 && <span className="ki-soluk">Bu dönemde kurum başvurusu yok - üstten dönemi değiştirin.</span>}
+        </div>
+      )}
       <table className="hi-tablo">
         <thead><tr>
           <th style={{ width: 28 }}><input type="checkbox" checked={hepsi}
