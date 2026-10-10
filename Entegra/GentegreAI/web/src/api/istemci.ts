@@ -36,6 +36,7 @@ import { sevkEdenUclari } from './uclar/sevkEden';
 import { labIcmalUclari } from './uclar/labIcmal';
 import { goruntulemeIcmalUclari } from './uclar/goruntulemeIcmal';
 import { disaAktarUclari } from './uclar/disaAktar';
+import { yatanIcmalUclari } from './uclar/yatanIcmal';
 import { sterilUclari } from './uclar/steril';
 import { hastaUclari } from './uclar/hasta';
 import { medulaUclari } from './uclar/medula';
@@ -124,6 +125,7 @@ export const api = {
   ...labIcmalUclari,
   ...goruntulemeIcmalUclari,
   ...disaAktarUclari,
+  ...yatanIcmalUclari,
   ...sterilUclari,
   ...hastaUclari,
   ...medulaUclari,

@@ -420,6 +420,7 @@ uygulama.SevkEdenIcmalUclariniEkle();   // sevk eden / dış doktor icmali (10.1
 uygulama.LabIcmalUclariniEkle();   // laboratuvar icmali (10.10.2026)
 uygulama.GoruntulemeIcmalUclariniEkle();   // görüntüleme icmali (10.10.2026)
 uygulama.DisaAktarUclariniEkle();   // çıktı menüsü: Excel (10.10.2026)
+uygulama.YatanDonemIcmalUclariniEkle();   // yatan hasta / servis dönem icmali (10.10.2026)
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();

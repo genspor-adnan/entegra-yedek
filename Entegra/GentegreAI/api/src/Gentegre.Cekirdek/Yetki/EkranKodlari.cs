@@ -265,6 +265,8 @@ public static partial class EkranKodlari
         "lab.icmal",
         // Görüntüleme İcmali (1027): /api/goruntuleme-icmal kendi koduna bakar.
         "radyoloji.icmal",
+        // Yatan Hasta Dönem İcmali (1028): /api/yatan-icmal kendi koduna bakar.
+        "yatan.donem_icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

@@ -149,4 +149,13 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Yatan Hasta', menuAltGrup: 'Ayarlar', menuAd: 'Odalar', ic: '🚪',
     yetkiKodu: 'yatan.yatak', menuSira: 90,
   },
+  {
+    // YATAN HASTA DÖNEM İCMALİ (1028, mockup İcmal/yatan_hasta_icmali.html): servis
+    //   başına yatış / taburcu / hasta-gün / doluluk / ALOS / ciro, açık hesaplar.
+    kaynak: 'yatan-icmal', rota: 'yatan-icmal', ozelSayfa: true,
+    baslik: 'Yatan Hasta İcmali', yol: 'Yatan Hasta › Dönem İcmali',
+    urunModu: 2,
+    menuGrup: 'Yatan Hasta', menuAd: 'Dönem İcmali', ic: '@icmal',
+    yetkiKodu: 'yatan.donem_icmal', menuSira: 55,
+  },
 ];
