@@ -329,6 +329,13 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '⏳', yetkiKodu: 'finans.alacak_yaslandirma',
   },
   {
+    // HASTA BAŞI MALİYET (1024, mockup İcmal/hasta_basi_maliyet_icmali.html):
+    //   başvuru başına ciro - düşülen sarf / ilaç, hizmet ve bölüm kârlılığı.
+    kaynak: 'maliyet-icmali', rota: 'maliyet-icmali', ozelSayfa: true,
+    baslik: 'Hasta Başı Maliyet', yol: 'Finans › Hasta Başı Maliyet', urunModu: 2,
+    menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '📦', yetkiKodu: 'maliyet.hasta_basi',
+  },
+  {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
     // (mali-hareket) yeniden adlandirildi: hem sayfa basligi hem menu adi "Kasa
     // Hareketleri" oldu (Satış'in aksine kullanici burada baslik metnini ACIKCA verdi).

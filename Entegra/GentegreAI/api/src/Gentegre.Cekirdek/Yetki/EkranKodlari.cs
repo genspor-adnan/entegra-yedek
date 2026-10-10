@@ -257,6 +257,8 @@ public static partial class EkranKodlari
         "prim.hekim_performans",
         // İskonto İcmali (1023): /api/iskonto-icmal kendi koduna bakar.
         "iskonto.icmal",
+        // Hasta Başı Maliyet (1024): /api/maliyet-icmal kendi koduna bakar.
+        "maliyet.hasta_basi",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

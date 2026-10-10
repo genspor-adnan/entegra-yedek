@@ -415,6 +415,7 @@ uygulama.AlacakYaslandirmaUclariniEkle();   // alacak yaşlandırma (10.10.2026)
 uygulama.HastaBorcTakipUclariniEkle();   // hasta borç takibi (10.10.2026)
 uygulama.HekimPerformansUclariniEkle();   // hekim / bölüm performans icmali (10.10.2026)
 uygulama.IskontoIcmalUclariniEkle();   // iskonto ve ücretsiz hizmet icmali (10.10.2026)
+uygulama.MaliyetIcmalUclariniEkle();   // hasta başı maliyet / sarf icmali (10.10.2026)
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();
