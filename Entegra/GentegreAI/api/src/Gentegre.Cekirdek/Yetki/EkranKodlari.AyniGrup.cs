@@ -75,6 +75,7 @@ public static partial class EkranKodlari
         ("kullanici.onay_akis", "kullanici"),                   // Yönetim › Onay Akışları
         ("kullanici.onay_vekalet", "kullanici"),                // Yönetim › Onay Vekâleti
         ("kurum.icmal", "kurum"),                               // Kurumlar & Sigorta › Kurum İcmalleri
+        ("kurum.icmal_ozet", "kurum"),                          // Kurumlar & Sigorta › Kurum İcmali (1015)
         ("lab.akilci_karar", "lab"),                            // Laboratuvar › Akılcı İstem Kararları
         ("lab.arsiv.kayit", "lab.arsiv"),                       // Laboratuvar › Arşiv Kayıtları
         ("lab.dislab.tanim", "lab.dislab"),                     // Laboratuvar › Ayarlar › Dış Laboratuvarlar

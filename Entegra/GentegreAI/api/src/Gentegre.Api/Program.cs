@@ -407,8 +407,9 @@ uygulama.IsgUclariniEkle();
 // ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
 uygulama.CagriUclariniEkle();
 uygulama.BankoOturumUclariniEkle();
-uygulama.DemirbasZimmetUclariniEkle();
-uygulama.HastaIcmalUclariniEkle();   // hasta hesap icmali (10.10.2026)   // 1007 Zimmet / Hareketler
+uygulama.DemirbasZimmetUclariniEkle();   // 1007 Zimmet / Hareketler
+uygulama.HastaIcmalUclariniEkle();   // hasta hesap icmali (10.10.2026)
+uygulama.KurumIcmalOzetUclariniEkle();   // kurum icmali ekrani (10.10.2026)
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();

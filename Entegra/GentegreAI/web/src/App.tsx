@@ -27,6 +27,7 @@ const KasaAyarlar = tembel(() => import('./sayfalar/KasaAyarlar'), 'KasaAyarlar'
 const DemirbasZimmet = tembel(() => import('./sayfalar/demirbas/DemirbasZimmet'), 'DemirbasZimmet');
 const DemirbasAyarlar = tembel(() => import('./sayfalar/demirbas/DemirbasAyarlar'), 'DemirbasAyarlar');
 const HastaIcmal = tembel(() => import('./sayfalar/hasta/HastaIcmal'), 'HastaIcmal');
+const KurumIcmal = tembel(() => import('./sayfalar/kurum/KurumIcmal'), 'KurumIcmal');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -230,6 +231,7 @@ function Yollar() {
         {yetki('demirbas.ayar') && <Route path="/demirbas-ayarlar" element={<DemirbasAyarlar />} />}
         {/* HASTA İCMALİ (10.10.2026): hasta listesinden "🧾 Hesap İcmali". */}
         {yetki('hasta') && yetki('belge') && <Route path="/hasta-icmal/:hastaId" element={<HastaIcmal />} />}
+        {yetki('kurum.icmal_ozet') && <Route path="/kurum-icmali" element={<KurumIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}

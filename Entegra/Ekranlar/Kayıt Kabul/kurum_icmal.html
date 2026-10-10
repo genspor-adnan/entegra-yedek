@@ -190,28 +190,28 @@
   <!-- ============ SEKME: TUM KURUMLAR ============ -->
   <div class="pnl" data-s="krm">
     <div class="grp">
-      <h4>Dönemdeki Kurumlar <span class="mini">satıra tıklayınca o kurumun icmali açılır · SGK faturası Medula'dan</span></h4>
+      <h4>Dönemdeki Kurumlar <span class="mini">onay kutusuyla seçilen kurumlar diğer sekmeleri süzer · tek kurumda icmal / fatura · SGK faturası Medula'dan</span></h4>
       <div class="dg">
         <table>
-          <thead><tr><th>Kurum</th><th>Tür</th><th class="orta">Başvuru</th><th class="sag">Toplam Hizmet</th>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kurum</th><th>Tür</th><th class="orta">Başvuru</th><th class="sag">Toplam Hizmet</th>
             <th class="sag">Kurum Payı</th><th class="sag">Kesinti</th><th class="sag">Net Alacak</th><th>Pay</th><th>Dönem Durumu</th></tr></thead>
           <tbody>
-            <tr class="ac"><td><b>SGK</b></td><td>Resmi · Medula</td><td class="orta">182</td><td class="sag">121.380,00</td>
+            <tr class="ac"><td><input type="checkbox"></td><td><b>SGK</b></td><td>Resmi · Medula</td><td class="orta">182</td><td class="sag">121.380,00</td>
               <td class="sag">96.430,00</td><td class="sag kir">1.240,00</td><td class="sag">95.190,00</td>
               <td><div class="cubuk"><i style="width:79%"></i></div></td><td><span class="rz mavi">Medula'ya gönderildi</span></td></tr>
-            <tr class="ac sel"><td><b>Anadolu Sigorta</b></td><td>Özel · Tamamlayıcı</td><td class="orta">7</td><td class="sag">18.900,00</td>
+            <tr class="ac sel"><td><input type="checkbox" checked></td><td><b>Anadolu Sigorta</b></td><td>Özel · Tamamlayıcı</td><td class="orta">7</td><td class="sag">18.900,00</td>
               <td class="sag">13.440,00</td><td class="sag kir">240,00</td><td class="sag">13.200,00</td>
               <td><div class="cubuk"><i style="width:11%"></i></div></td><td><span class="rz ok">Faturalandı</span></td></tr>
-            <tr class="ac"><td><b>Allianz Sigorta</b></td><td>Özel</td><td class="orta">4</td><td class="sag">8.625,00</td>
+            <tr class="ac"><td><input type="checkbox"></td><td><b>Allianz Sigorta</b></td><td>Özel</td><td class="orta">4</td><td class="sag">8.625,00</td>
               <td class="sag">6.900,00</td><td class="sag">0,00</td><td class="sag">6.900,00</td>
               <td><div class="cubuk"><i style="width:6%"></i></div></td><td><span class="rz sari">Kesinleşti · fatura bekliyor</span></td></tr>
-            <tr class="ac"><td><b>AXA Sigorta</b></td><td>Özel</td><td class="orta">2</td><td class="sag">2.690,00</td>
+            <tr class="ac"><td><input type="checkbox"></td><td><b>AXA Sigorta</b></td><td>Özel</td><td class="orta">2</td><td class="sag">2.690,00</td>
               <td class="sag">2.150,00</td><td class="sag">0,00</td><td class="sag">2.150,00</td>
               <td><div class="cubuk"><i style="width:2%"></i></div></td><td><span class="rz pas">Açık</span></td></tr>
-            <tr class="ac"><td><b>Maltepe Nakliyat A.Ş.</b></td><td>Anlaşmalı kurum · personel</td><td class="orta">5</td><td class="sag">1.880,00</td>
+            <tr class="ac"><td><input type="checkbox"></td><td><b>Maltepe Nakliyat A.Ş.</b></td><td>Anlaşmalı kurum · personel</td><td class="orta">5</td><td class="sag">1.880,00</td>
               <td class="sag">1.315,00</td><td class="sag">0,00</td><td class="sag">1.315,00</td>
               <td><div class="cubuk"><i style="width:1%"></i></div></td><td><span class="rz pas">Açık</span></td></tr>
-            <tr class="toplam"><td colspan="2">Eylül 2026 · 5 kurum</td><td class="orta">200</td><td class="sag">153.475,00</td>
+            <tr class="toplam"><td></td><td colspan="2">Eylül 2026 · 5 kurum</td><td class="orta">200</td><td class="sag">153.475,00</td>
               <td class="sag">120.235,00</td><td class="sag kir">1.480,00</td><td class="sag">118.755,00</td><td colspan="2"></td></tr>
           </tbody>
         </table>
@@ -226,30 +226,30 @@
       <div class="dg">
         <table>
           <thead><tr>
-            <th>Tarih</th><th>Başvuru No</th><th>Hasta</th><th>Poliçe / Provizyon No</th><th>Bölüm</th>
+            <th>Tarih</th><th>Protokol No</th><th>Hasta</th><th>Poliçe / Provizyon No</th><th>Bölüm</th>
             <th class="sag">Toplam</th><th class="sag">Kurum Payı</th><th class="sag">Hasta Payı</th>
             <th class="sag">Kesinti</th><th class="sag">Net</th><th>Provizyon</th>
           </tr></thead>
           <tbody>
-            <tr class="ac" data-d="b1"><td><span class="ok-ic">▸</span>03.09.2026</td><td>BSV-2026-018530</td><td><span class="lnk">Mehmet KOÇ</span> · 101******34</td><td>AS-PRV-77118802</td><td>Dahiliye</td>
+            <tr class="ac" data-d="b1"><td><span class="ok-ic">▸</span>03.09.2026</td><td>BSV-2026-018530</td><td><span class="lnk">Mehmet KOÇ</span></td><td>AS-PRV-77118802</td><td>Dahiliye</td>
               <td class="sag">1.450,00</td><td class="sag">1.160,00</td><td class="sag">290,00</td><td class="sag sonuk">—</td><td class="sag">1.160,00</td><td><span class="rz ok">Onaylı %80</span></td></tr>
             <tr class="det" data-p="b1" hidden><td colspan="11">520.020 Uzman muayenesi 650,00 · 900.200 Biyokimya paneli 590,00 · 901.620 Hemogram 90,00 · 900.200 Glukoz 120,00</td></tr>
-            <tr class="ac sel" data-d="b2"><td><span class="ok-ic">▾</span>09.09.2026</td><td>BSV-2026-019655</td><td><span class="lnk">Ayşe YILDIRIM</span> · 123******46</td><td>AS-PRV-77120458</td><td>Radyoloji</td>
+            <tr class="ac sel" data-d="b2"><td><span class="ok-ic">▾</span>09.09.2026</td><td>BSV-2026-019655</td><td><span class="lnk">Ayşe YILDIRIM</span></td><td>AS-PRV-77120458</td><td>Radyoloji</td>
               <td class="sag">6.400,00</td><td class="sag">5.120,00</td><td class="sag">1.280,00</td><td class="sag sonuk">—</td><td class="sag">5.120,00</td><td><span class="rz ok">Onaylı %80</span></td></tr>
             <tr class="det" data-p="b2"><td colspan="11">805.120 Kontrastlı beyin MR 1×6.400,00 · hasta payı %20 = 1.280,00 (POS ile tahsil edildi)</td></tr>
-            <tr class="ac" data-d="b3"><td><span class="ok-ic">▸</span>12.09.2026</td><td>BSV-2026-019902</td><td><span class="lnk">Zeynep AKIN</span> · 145******02</td><td>AS-PRV-77121337</td><td>Kadın Doğum</td>
+            <tr class="ac" data-d="b3"><td><span class="ok-ic">▸</span>12.09.2026</td><td>BSV-2026-019902</td><td><span class="lnk">Zeynep AKIN</span></td><td>AS-PRV-77121337</td><td>Kadın Doğum</td>
               <td class="sag">2.300,00</td><td class="sag">1.840,00</td><td class="sag">460,00</td><td class="sag sonuk">—</td><td class="sag">1.840,00</td><td><span class="rz ok">Onaylı %80</span></td></tr>
             <tr class="det" data-p="b3" hidden><td colspan="11">520.020 Uzman muayenesi 650,00 · 618.100 Obstetrik USG 1.100,00 · 901.910 TSH 180,00 · 902.040 Tam idrar 370,00</td></tr>
-            <tr class="ac" data-d="b4"><td><span class="ok-ic">▸</span>17.09.2026</td><td>BSV-2026-020702</td><td><span class="lnk">Ali ER</span> · 187******56</td><td>AS-PRV-77123015</td><td>Ortopedi</td>
+            <tr class="ac" data-d="b4"><td><span class="ok-ic">▸</span>17.09.2026</td><td>BSV-2026-020702</td><td><span class="lnk">Ali ER</span></td><td>AS-PRV-77123015</td><td>Ortopedi</td>
               <td class="sag">3.800,00</td><td class="sag">3.040,00</td><td class="sag">760,00</td><td class="sag kir">240,00</td><td class="sag">2.800,00</td><td><span class="rz sari">Kesintili</span></td></tr>
             <tr class="det" data-p="b4" hidden><td colspan="11">520.020 Uzman muayenesi 800,00 · 801.520 Diz grafisi 600,00 · 612.110 Eklem içi enjeksiyon 2.400,00 · kesinti: yıllık ayakta limit aşımı 240,00</td></tr>
-            <tr class="ac" data-d="b5"><td><span class="ok-ic">▸</span>21.09.2026</td><td>BSV-2026-021204</td><td><span class="lnk">Elif TAN</span> · 162******88</td><td>AS-PRV-77124480</td><td>Göz</td>
+            <tr class="ac" data-d="b5"><td><span class="ok-ic">▸</span>21.09.2026</td><td>BSV-2026-021204</td><td><span class="lnk">Elif TAN</span></td><td>AS-PRV-77124480</td><td>Göz</td>
               <td class="sag">1.900,00</td><td class="sag">1.520,00</td><td class="sag">380,00</td><td class="sag sonuk">—</td><td class="sag">1.520,00</td><td><span class="rz ok">Onaylı %80</span></td></tr>
             <tr class="det" data-p="b5" hidden><td colspan="11">520.020 Göz muayenesi 650,00 · 617.420 OCT 1.250,00</td></tr>
-            <tr class="ac" data-d="b6"><td><span class="ok-ic">▸</span>26.09.2026</td><td>BSV-2026-021880</td><td><span class="lnk">Murat YILDIZ</span> · 119******70</td><td>AS-PRV-77125902</td><td>Laboratuvar</td>
+            <tr class="ac" data-d="b6"><td><span class="ok-ic">▸</span>26.09.2026</td><td>BSV-2026-021880</td><td><span class="lnk">Murat YILDIZ</span></td><td>AS-PRV-77125902</td><td>Laboratuvar</td>
               <td class="sag">950,00</td><td class="sag">760,00</td><td class="sag">190,00</td><td class="sag sonuk">—</td><td class="sag">760,00</td><td><span class="rz ok">Onaylı %80</span></td></tr>
             <tr class="det" data-p="b6" hidden><td colspan="11">902.290 HbA1c 220,00 · 900.880 Lipid paneli 460,00 · 901.910 TSH 180,00 · 901.620 Hemogram 90,00</td></tr>
-            <tr class="ac red" data-d="b7"><td><span class="ok-ic">▸</span>29.09.2026</td><td>BSV-2026-022010</td><td><span class="lnk">Fatma ÖZ</span> · 138******14</td><td>AS-PRV-77126611</td><td>Kardiyoloji</td>
+            <tr class="ac red" data-d="b7"><td><span class="ok-ic">▸</span>29.09.2026</td><td>BSV-2026-022010</td><td><span class="lnk">Fatma ÖZ</span></td><td>AS-PRV-77126611</td><td>Kardiyoloji</td>
               <td class="sag">2.100,00</td><td class="sag">0,00</td><td class="sag">2.100,00</td><td class="sag sonuk">—</td><td class="sag">0,00</td><td><span class="rz kir">Red · hastaya</span></td></tr>
             <tr class="det" data-p="b7" hidden><td colspan="11">Provizyon reddedildi (poliçe teminat dışı: kardiyoloji ön onay yok) · tamamı hasta payına aktarıldı, banko tahsil etti</td></tr>
             <tr class="toplam"><td colspan="5">Toplam · 7 başvuru (1 red)</td>
@@ -355,14 +355,14 @@
           <div>Anlaşma: Tamamlayıcı sağlık · %80</div><div>Başvuru: 7 (6 provizyonlu · 1 red)</div>
         </div>
         <table>
-          <thead><tr><th>Tarih</th><th>Provizyon No</th><th>Hasta</th><th>T.C.</th><th>Bölüm</th><th>Toplam</th><th>Kurum</th><th>Kesinti</th><th>Net</th></tr></thead>
+          <thead><tr><th>Tarih</th><th>Protokol No</th><th>Hasta</th><th>Provizyon No</th><th>Toplam</th><th>Kurum</th><th>Kesinti</th><th>Net</th></tr></thead>
           <tbody>
-            <tr><td>03.09</td><td>AS-PRV-77118802</td><td>Mehmet KOÇ</td><td>101******34</td><td>Dahiliye</td><td class="sag">1.450,00</td><td class="sag">1.160,00</td><td class="sag">—</td><td class="sag">1.160,00</td></tr>
-            <tr><td>09.09</td><td>AS-PRV-77120458</td><td>Ayşe YILDIRIM</td><td>123******46</td><td>Radyoloji</td><td class="sag">6.400,00</td><td class="sag">5.120,00</td><td class="sag">—</td><td class="sag">5.120,00</td></tr>
-            <tr><td>12.09</td><td>AS-PRV-77121337</td><td>Zeynep AKIN</td><td>145******02</td><td>Kadın Doğum</td><td class="sag">2.300,00</td><td class="sag">1.840,00</td><td class="sag">—</td><td class="sag">1.840,00</td></tr>
-            <tr><td>17.09</td><td>AS-PRV-77123015</td><td>Ali ER</td><td>187******56</td><td>Ortopedi</td><td class="sag">3.800,00</td><td class="sag">3.040,00</td><td class="sag">240,00</td><td class="sag">2.800,00</td></tr>
-            <tr><td>21.09</td><td>AS-PRV-77124480</td><td>Elif TAN</td><td>162******88</td><td>Göz</td><td class="sag">1.900,00</td><td class="sag">1.520,00</td><td class="sag">—</td><td class="sag">1.520,00</td></tr>
-            <tr><td>26.09</td><td>AS-PRV-77125902</td><td>Murat YILDIZ</td><td>119******70</td><td>Laboratuvar</td><td class="sag">950,00</td><td class="sag">760,00</td><td class="sag">—</td><td class="sag">760,00</td></tr>
+            <tr><td>03.09</td><td>018530</td><td>Mehmet KOÇ</td><td>AS-PRV-77118802</td><td class="sag">1.450,00</td><td class="sag">1.160,00</td><td class="sag">—</td><td class="sag">1.160,00</td></tr>
+            <tr><td>09.09</td><td>019655</td><td>Ayşe YILDIRIM</td><td>AS-PRV-77120458</td><td class="sag">6.400,00</td><td class="sag">5.120,00</td><td class="sag">—</td><td class="sag">5.120,00</td></tr>
+            <tr><td>12.09</td><td>019902</td><td>Zeynep AKIN</td><td>AS-PRV-77121337</td><td class="sag">2.300,00</td><td class="sag">1.840,00</td><td class="sag">—</td><td class="sag">1.840,00</td></tr>
+            <tr><td>17.09</td><td>020702</td><td>Ali ER</td><td>AS-PRV-77123015</td><td class="sag">3.800,00</td><td class="sag">3.040,00</td><td class="sag">240,00</td><td class="sag">2.800,00</td></tr>
+            <tr><td>21.09</td><td>021204</td><td>Elif TAN</td><td>AS-PRV-77124480</td><td class="sag">1.900,00</td><td class="sag">1.520,00</td><td class="sag">—</td><td class="sag">1.520,00</td></tr>
+            <tr><td>26.09</td><td>021880</td><td>Murat YILDIZ</td><td>AS-PRV-77125902</td><td class="sag">950,00</td><td class="sag">760,00</td><td class="sag">—</td><td class="sag">760,00</td></tr>
           </tbody>
         </table>
         <div class="top">

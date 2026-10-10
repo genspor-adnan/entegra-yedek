@@ -10,6 +10,16 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const CARI_LISTELERI: ListeGirdisi[] = [
   {
+    // KURUM İCMALİ EKRANI (10.10.2026, mockup Kayıt Kabul/kurum_icmal.html):
+    //   dönemin kurum başvuruları, kurum payı, kesinti, icmal/fatura durumu.
+    //   İcmal oluşturma / faturalama aşağıdaki listeyle aynı uçlar (289).
+    kaynak: 'kurum-icmali', rota: 'kurum-icmali', ozelSayfa: true,
+    baslik: 'Kurum İcmali', yol: 'Kurumlar & Sigorta › Kurum İcmali',
+    urunModu: 2,
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmali', ic: '📊', yetkiKodu: 'kurum.icmal_ozet',
+    menuSira: 19,
+  },
+  {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip
     //   tek fatura kesilir. Liste donemleri ve durumlarini gosterir.
     kaynak: 'kurum-icmal', rota: 'kurum-icmal', baslik: 'Kurum İcmalleri',
