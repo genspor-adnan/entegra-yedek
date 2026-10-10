@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta İcmali — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .ana{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  /* A4 onizleme */
+  .onz{background:#dfe5ec;padding:12px;border-left:1px solid var(--line)}
+  .onz .ust{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-weight:bold;color:#2c4a6b}
+  .a4{background:#fff;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:18px 18px 14px;font-size:8.6px;line-height:1.35;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:5px}
+  .a4 .logo{width:34px;height:34px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12px;margin:8px 0 6px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:6px}
+  .a4 th,.a4 td{font-size:7.6px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:58%;margin-top:6px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:9.5px;color:var(--kirmizi);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ana{grid-template-columns:1fr}.onz{border-left:none;border-top:1px solid var(--line)}
+    .ozet{grid-template-columns:repeat(4,1fr)}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📑 Hasta İcmali — Ayşe YILDIRIM
+    <span class="sp">Gentegre AI · Kayıt Kabul · Merkez · 10.10.2026 · Vezne 1 · Elif KARACA</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok"><span>💵</span> Tahsilat Al</div>
+    <div class="btn"><span>🧾</span> Avans Mahsup Et</div>
+    <div class="sepv"></div>
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 İcmal)</div>
+    <div class="btn"><span>📄</span> PDF</div>
+    <div class="btn"><span>✉</span> E-posta / SMS ile Gönder</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>👤</span> Hasta Kartı</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- HASTA SERIDI: kim, hangi kurumla, hangi donem. Donem degisince tum sekmeler ve A4 yenilenir. -->
+  <div class="serit">
+    <div class="sel">👤 <b>Ayşe YILDIRIM</b> · TC 123******46 · 52 yaş · K</div>
+    <div class="sel">📁 Dosya No: <b>H-0048217</b></div>
+    <div class="sel">🏥 Kurum: <b>SGK</b> <span class="rz mavi">+ Tamamlayıcı · Anadolu Sigorta</span></div>
+    <div class="sel">📅 Dönem: <b>01.09.2026 – 10.10.2026</b> ▾</div>
+    <div class="sel">🗂 Kapsam: <b>Tüm başvurular</b> ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">Açık borç var</span>
+    <span class="sonuk">Son hareket 09.10.2026 · MKB-2026-006455</span>
+  </div>
+
+  <!-- OZET: hastaya soylenen rakam "Kalan borc"; kurum payi bilgi amaclidir, hastadan istenmez. -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Toplam Hizmet</div><div class="deg">21.980,00 ₺</div>
+      <div class="alt">8 başvuru · 22 kalem</div></div>
+    <div class="kutu mor"><div class="bas">Kurum Payı</div><div class="deg">12.160,00 ₺</div>
+      <div class="alt">SGK 4.840 · Özel 7.320</div></div>
+    <div class="kutu"><div class="bas">Hasta Payı</div><div class="deg">9.085,00 ₺</div>
+      <div class="alt">katılım + fark + ücretli</div></div>
+    <div class="kutu uy"><div class="bas">İskonto</div><div class="deg">735,00 ₺</div>
+      <div class="alt">2 başvuru · onaylı</div></div>
+    <div class="kutu iyi"><div class="bas">Tahsil Edilen</div><div class="deg">6.020,00 ₺</div>
+      <div class="alt">6 makbuz · 1 iptal hariç</div></div>
+    <div class="kutu"><div class="bas">İade</div><div class="deg">250,00 ₺</div>
+      <div class="alt">1 iade makbuzu</div></div>
+    <div class="kutu teh"><div class="bas">Kalan Borç</div><div class="deg">3.315,00 ₺</div>
+      <div class="alt">3 başvuru · mahsup sonrası 2.815</div></div>
+    <div class="kutu iyi"><div class="bas">Avans / Alacak</div><div class="deg">500,00 ₺</div>
+      <div class="alt">mahsup edilmedi</div></div>
+  </div>
+
+  <div class="ana">
+    <div>
+      <div class="sekmeler">
+        <div class="sekme on" data-s="bsv">Başvurular <span class="rz">8</span></div>
+        <div class="sekme" data-s="hzm">Hizmetler <span class="rz">22</span></div>
+        <div class="sekme" data-s="tah">Tahsilatlar <span class="rz">9</span></div>
+        <div class="sekme" data-s="prv">Kurum Provizyonları <span class="rz mavi">6</span></div>
+        <div class="sekme" data-s="hrk">Hareket Özeti</div>
+      </div>
+
+      <!-- ============ SEKME: BASVURULAR ============ -->
+      <div class="pnl" data-s="bsv">
+        <div class="grp">
+          <h4>Başvurular (protokoller) <span class="mini">belge · tür 19 · satıra tıklayınca hizmetler açılır</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th>Tarih</th><th>Başvuru No</th><th>Bölüm / Hekim</th><th>Kurum</th>
+                <th class="sag">Toplam</th><th class="sag">İskonto</th><th class="sag">Kurum Payı</th>
+                <th class="sag">Hasta Payı</th><th class="sag">Tahsil</th><th class="sag">Kalan</th><th>Durum</th>
+              </tr></thead>
+              <tbody>
+                <tr class="ac" data-d="b1"><td><span class="ok-ic">▸</span>02.09.2026</td><td>BSV-2026-018412</td><td>Dahiliye · Uz.Dr. Mehmet ARSLAN</td><td>SGK</td>
+                  <td class="sag">1.240,00</td><td class="sag sonuk">—</td><td class="sag">1.040,00</td><td class="sag">200,00</td><td class="sag">200,00</td><td class="sag">0,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+                <tr class="det" data-p="b1" hidden><td colspan="11">520.010 Normal poliklinik muayenesi 1×350,00 (kurum 150 · hasta 200 katılım) · 530.080 EKG 210,00 · 901.620 Hemogram 90,00 · 900.200 Biyokimya paneli 590,00</td></tr>
+                <tr class="ac" data-d="b2"><td><span class="ok-ic">▸</span>05.09.2026</td><td>BSV-2026-018977</td><td>Laboratuvar · Dahiliye istemi</td><td>SGK</td>
+                  <td class="sag">860,00</td><td class="sag sonuk">—</td><td class="sag">860,00</td><td class="sag">0,00</td><td class="sag">0,00</td><td class="sag">0,00</td><td><span class="rz mor">Kurumda</span></td></tr>
+                <tr class="det" data-p="b2" hidden><td colspan="11">901.910 TSH 180,00 · 902.290 HbA1c 220,00 · 900.880 Lipid paneli 460,00 — tamamı kurum payı</td></tr>
+                <tr class="ac sel" data-d="b3"><td><span class="ok-ic">▾</span>09.09.2026</td><td>BSV-2026-019655</td><td>Radyoloji · Uz.Dr. Burak ÖZTÜRK</td><td>Tamamlayıcı · Anadolu</td>
+                  <td class="sag">6.400,00</td><td class="sag sonuk">—</td><td class="sag">5.120,00</td><td class="sag">1.280,00</td><td class="sag">1.280,00</td><td class="sag">0,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+                <tr class="det" data-p="b3"><td colspan="11">805.120 Kontrastlı beyin MR 1×6.400,00 · provizyon %80 onaylı (5.120,00) · hasta payı %20 = 1.280,00 · POS ile tahsil</td></tr>
+                <tr class="ac" data-d="b4"><td><span class="ok-ic">▸</span>14.09.2026</td><td>BSV-2026-020311</td><td>Kardiyoloji · Doç.Dr. Selin KAYA</td><td>Ücretli</td>
+                  <td class="sag">3.150,00</td><td class="sag">315,00</td><td class="sag">0,00</td><td class="sag">2.835,00</td><td class="sag">2.000,00</td><td class="sag kir"><b>835,00</b></td><td><span class="rz sari">Kısmi</span></td></tr>
+                <tr class="det" data-p="b4" hidden><td colspan="11">520.020 Uzman muayenesi 750,00 · 615.010 Ekokardiyografi 1.650,00 · 615.030 Efor testi 750,00 · iskonto %10 (onay: Başhekim Yrd.)</td></tr>
+                <tr class="ac" data-d="b5"><td><span class="ok-ic">▸</span>18.09.2026</td><td>BSV-2026-020904</td><td>FTR · Uz.Dr. Canan DEMİR</td><td>SGK</td>
+                  <td class="sag">2.400,00</td><td class="sag sonuk">—</td><td class="sag">2.160,00</td><td class="sag">240,00</td><td class="sag">240,00</td><td class="sag">0,00</td><td><span class="rz ok">Kapandı</span></td></tr>
+                <tr class="det" data-p="b5" hidden><td colspan="11">551.300 FTR seansı (diz) 10×240,00 = 2.400,00 · katılım payı 240,00</td></tr>
+                <tr class="ac" data-d="b6"><td><span class="ok-ic">▸</span>23.09.2026</td><td>BSV-2026-021530</td><td>Göz · Op.Dr. Hakan ŞAHİN</td><td>Özel · Allianz</td>
+                  <td class="sag">2.750,00</td><td class="sag sonuk">—</td><td class="sag">2.200,00</td><td class="sag">550,00</td><td class="sag">550,00</td><td class="sag">0,00</td><td><span class="rz ok">Kapandı</span> <span class="rz">iade</span></td></tr>
+                <tr class="det" data-p="b6" hidden><td colspan="11">520.020 Göz muayenesi 650,00 · 617.420 OCT 1.400,00 · 617.300 Görme alanı 700,00 · 800,00 alındı, provizyon sonrası 250,00 iade</td></tr>
+                <tr class="ac" data-d="b7"><td><span class="ok-ic">▸</span>30.09.2026</td><td>BSV-2026-022116</td><td>Dahiliye · Uz.Dr. Mehmet ARSLAN</td><td>SGK</td>
+                  <td class="sag">980,00</td><td class="sag sonuk">—</td><td class="sag">780,00</td><td class="sag">200,00</td><td class="sag">0,00</td><td class="sag kir"><b>200,00</b></td><td><span class="rz kir">Açık</span></td></tr>
+                <tr class="det" data-p="b7" hidden><td colspan="11">520.030 Kontrol muayenesi 350,00 (hasta 200) · 902.290 HbA1c 220,00 · 900.200 Glukoz 60,00 · 900.210 Böbrek paneli 350,00</td></tr>
+                <tr class="ac" data-d="b8"><td><span class="ok-ic">▸</span>06.10.2026</td><td>BSV-2026-022870</td><td>Ortopedi · Prof.Dr. Levent ÇELİK</td><td>Ücretli</td>
+                  <td class="sag">4.200,00</td><td class="sag">420,00</td><td class="sag">0,00</td><td class="sag">3.780,00</td><td class="sag">1.500,00</td><td class="sag kir"><b>2.280,00</b></td><td><span class="rz sari">Kısmi</span></td></tr>
+                <tr class="det" data-p="b8" hidden><td colspan="11">520.020 Uzman muayenesi 800,00 · 801.520 Diz grafisi (2 yön) 600,00 · 612.110 Eklem içi enjeksiyon 2.800,00 · iskonto %10</td></tr>
+                <tr class="iptal"><td><span class="ok-ic"></span>08.10.2026</td><td>BSV-2026-023104</td><td>Laboratuvar · dış istem</td><td>Ücretli</td>
+                  <td class="sag">650,00</td><td class="sag">—</td><td class="sag">0,00</td><td class="sag">650,00</td><td class="sag">650,00</td><td class="sag">0,00</td><td><span class="rz pas">İptal</span></td></tr>
+                <tr class="toplam"><td colspan="4">Toplam (iptal hariç · 8 başvuru)</td>
+                  <td class="sag">21.980,00</td><td class="sag">735,00</td><td class="sag">12.160,00</td><td class="sag">9.085,00</td><td class="sag">6.020,00</td><td class="sag kir">3.315,00</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: HIZMETLER ============ -->
+      <div class="pnl" data-s="hzm">
+        <div class="grp">
+          <h4>Hizmet Satırları <span class="mini">belge_satir · başvuru sırasına göre</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Tarih</th><th>SUT / TTB</th><th>Hizmet</th><th>Başvuru</th><th class="orta">Adet</th>
+                <th class="sag">Birim Fiyat</th><th class="sag">Tutar</th><th class="sag">Kurum Payı</th><th class="sag">Hasta Payı</th></tr></thead>
+              <tbody>
+                <tr><td>02.09</td><td>520.010</td><td>Normal poliklinik muayenesi</td><td>018412</td><td class="orta">1</td><td class="sag">350,00</td><td class="sag">350,00</td><td class="sag">150,00</td><td class="sag">200,00</td></tr>
+                <tr><td>02.09</td><td>530.080</td><td>EKG</td><td>018412</td><td class="orta">1</td><td class="sag">210,00</td><td class="sag">210,00</td><td class="sag">210,00</td><td class="sag">0,00</td></tr>
+                <tr><td>02.09</td><td>901.620</td><td>Hemogram (tam kan)</td><td>018412</td><td class="orta">1</td><td class="sag">90,00</td><td class="sag">90,00</td><td class="sag">90,00</td><td class="sag">0,00</td></tr>
+                <tr><td>02.09</td><td>900.200</td><td>Biyokimya paneli</td><td>018412</td><td class="orta">1</td><td class="sag">590,00</td><td class="sag">590,00</td><td class="sag">590,00</td><td class="sag">0,00</td></tr>
+                <tr><td>05.09</td><td>901.910</td><td>TSH</td><td>018977</td><td class="orta">1</td><td class="sag">180,00</td><td class="sag">180,00</td><td class="sag">180,00</td><td class="sag">0,00</td></tr>
+                <tr><td>05.09</td><td>902.290</td><td>HbA1c</td><td>018977</td><td class="orta">1</td><td class="sag">220,00</td><td class="sag">220,00</td><td class="sag">220,00</td><td class="sag">0,00</td></tr>
+                <tr><td>05.09</td><td>900.880</td><td>Lipid paneli</td><td>018977</td><td class="orta">1</td><td class="sag">460,00</td><td class="sag">460,00</td><td class="sag">460,00</td><td class="sag">0,00</td></tr>
+                <tr><td>09.09</td><td>805.120</td><td>Kontrastlı beyin MR</td><td>019655</td><td class="orta">1</td><td class="sag">6.400,00</td><td class="sag">6.400,00</td><td class="sag">5.120,00</td><td class="sag">1.280,00</td></tr>
+                <tr><td>14.09</td><td>520.020</td><td>Uzman muayenesi (kardiyoloji)</td><td>020311</td><td class="orta">1</td><td class="sag">750,00</td><td class="sag">750,00</td><td class="sag">0,00</td><td class="sag">675,00</td></tr>
+                <tr><td>14.09</td><td>615.010</td><td>Ekokardiyografi</td><td>020311</td><td class="orta">1</td><td class="sag">1.650,00</td><td class="sag">1.650,00</td><td class="sag">0,00</td><td class="sag">1.485,00</td></tr>
+                <tr><td>14.09</td><td>615.030</td><td>Efor testi</td><td>020311</td><td class="orta">1</td><td class="sag">750,00</td><td class="sag">750,00</td><td class="sag">0,00</td><td class="sag">675,00</td></tr>
+                <tr><td>18.09</td><td>551.300</td><td>FTR seansı (diz)</td><td>020904</td><td class="orta">10</td><td class="sag">240,00</td><td class="sag">2.400,00</td><td class="sag">2.160,00</td><td class="sag">240,00</td></tr>
+                <tr><td>23.09</td><td>520.020</td><td>Göz muayenesi</td><td>021530</td><td class="orta">1</td><td class="sag">650,00</td><td class="sag">650,00</td><td class="sag">520,00</td><td class="sag">130,00</td></tr>
+                <tr><td>23.09</td><td>617.420</td><td>OCT (optik koherens tomografi)</td><td>021530</td><td class="orta">1</td><td class="sag">1.400,00</td><td class="sag">1.400,00</td><td class="sag">1.120,00</td><td class="sag">280,00</td></tr>
+                <tr><td>23.09</td><td>617.300</td><td>Görme alanı</td><td>021530</td><td class="orta">1</td><td class="sag">700,00</td><td class="sag">700,00</td><td class="sag">560,00</td><td class="sag">140,00</td></tr>
+                <tr><td>30.09</td><td>520.030</td><td>Kontrol muayenesi</td><td>022116</td><td class="orta">1</td><td class="sag">350,00</td><td class="sag">350,00</td><td class="sag">150,00</td><td class="sag">200,00</td></tr>
+                <tr><td>30.09</td><td>…</td><td colspan="2" class="sonuk">+ 3 satır (HbA1c, Glukoz, Böbrek paneli)</td><td class="orta">3</td><td class="sag">—</td><td class="sag">630,00</td><td class="sag">630,00</td><td class="sag">0,00</td></tr>
+                <tr><td>06.10</td><td>520.020</td><td>Uzman muayenesi (ortopedi)</td><td>022870</td><td class="orta">1</td><td class="sag">800,00</td><td class="sag">800,00</td><td class="sag">0,00</td><td class="sag">720,00</td></tr>
+                <tr><td>06.10</td><td>801.520</td><td>Diz grafisi (2 yön)</td><td>022870</td><td class="orta">1</td><td class="sag">600,00</td><td class="sag">600,00</td><td class="sag">0,00</td><td class="sag">540,00</td></tr>
+                <tr><td>06.10</td><td>612.110</td><td>Eklem içi enjeksiyon</td><td>022870</td><td class="orta">1</td><td class="sag">2.800,00</td><td class="sag">2.800,00</td><td class="sag">0,00</td><td class="sag">2.520,00</td></tr>
+                <tr class="toplam"><td colspan="6">Toplam · hasta payı iskonto sonrası</td><td class="sag">21.980,00</td><td class="sag">12.160,00</td><td class="sag">9.085,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: TAHSILATLAR ============ -->
+      <div class="pnl" data-s="tah">
+        <div class="grp">
+          <h4>Tahsilat ve İadeler <span class="mini">kasa_islem · tür 21 nakit · 22 havale · 25 POS</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Makbuz No</th><th>Tarih</th><th>Banko</th><th>Ödeme Türü</th><th>Başvuru</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td>MKB-2026-003812</td><td>02.09.2026 09:41</td><td>Vezne 1 · E. KARACA</td><td><span class="rz ok">Nakit</span></td><td>018412</td><td class="sag">200,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr><td>MKB-2026-004401</td><td>09.09.2026 11:15</td><td>Vezne 2 · M. TUNÇ</td><td><span class="rz mavi">POS</span></td><td>019655</td><td class="sag">1.280,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr><td>MKB-2026-004950</td><td>14.09.2026 10:02</td><td>Vezne 1 · E. KARACA</td><td><span class="rz mavi">POS · 3 taksit</span></td><td>020311</td><td class="sag">2.000,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr><td>MKB-2026-005322</td><td>18.09.2026 14:27</td><td>Vezne 1 · E. KARACA</td><td><span class="rz ok">Nakit</span></td><td>020904</td><td class="sag">240,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr><td>MKB-2026-005870</td><td>23.09.2026 16:05</td><td>Vezne 3 · S. AYDIN</td><td><span class="rz mavi">POS</span></td><td>021530</td><td class="sag">800,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr><td>IAD-2026-000214</td><td>24.09.2026 09:10</td><td>Vezne 3 · S. AYDIN</td><td><span class="rz kir">Nakit İade</span></td><td>021530</td><td class="sag kir">−250,00</td><td><span class="rz sari">İade · provizyon farkı</span></td></tr>
+                <tr><td>MKB-2026-006233</td><td>06.10.2026 15:48</td><td>Vezne 1 · E. KARACA</td><td><span class="rz mor">Havale</span></td><td>022870</td><td class="sag">1.500,00</td><td><span class="rz ok">Geçerli</span></td></tr>
+                <tr class="iptal"><td>MKB-2026-006410</td><td>08.10.2026 10:30</td><td>Vezne 2 · M. TUNÇ</td><td>Nakit</td><td>023104</td><td class="sag">650,00</td><td>İptal · başvuru iptal</td></tr>
+                <tr><td>MKB-2026-006455</td><td>09.10.2026 13:12</td><td>Vezne 1 · E. KARACA</td><td><span class="rz ok">Nakit</span></td><td class="sonuk">— avans</td><td class="sag">500,00</td><td><span class="rz mor">Avans · mahsup bekliyor</span></td></tr>
+                <tr class="toplam"><td colspan="5">Başvurulara tahsil 6.020,00 − iade 250,00 = net 5.770,00 · avans 500,00</td><td class="sag">6.270,00</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: KURUM PROVIZYONLARI ============ -->
+      <div class="pnl" data-s="prv">
+        <div class="grp">
+          <h4>Kurum Provizyonları <span class="mini">medula_islem · sigorta_provizyon · kurum_icmal</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Başvuru</th><th>Kurum</th><th>Takip / Provizyon No</th><th>Provizyon Tipi</th>
+                <th class="sag">Kurum Payı</th><th class="sag">Kesinti</th><th>Kurum İcmali</th><th>Fatura Durumu</th></tr></thead>
+              <tbody>
+                <tr><td>018412</td><td>SGK</td><td>4ZK8M1Q</td><td>Normal · Ayaktan</td><td class="sag">1.040,00</td><td class="sag">0,00</td><td>Kİ-2026-09-SGK</td><td><span class="rz ok">Faturalandı</span></td></tr>
+                <tr><td>018977</td><td>SGK</td><td>4ZM2P7T</td><td>Normal · Ayaktan</td><td class="sag">860,00</td><td class="sag">0,00</td><td>Kİ-2026-09-SGK</td><td><span class="rz ok">Faturalandı</span></td></tr>
+                <tr><td>019655</td><td>Anadolu · Tamamlayıcı</td><td>AS-PRV-77120458</td><td>Onaylı · %80</td><td class="sag">5.120,00</td><td class="sag">0,00</td><td>Kİ-2026-09-ANA</td><td><span class="rz mavi">Kuruma gönderildi</span></td></tr>
+                <tr><td>020904</td><td>SGK</td><td>4ZQ5H3D</td><td>Normal · FTR</td><td class="sag">2.160,00</td><td class="sag kir">120,00</td><td>Kİ-2026-09-SGK</td><td><span class="rz sari">Kesintili</span></td></tr>
+                <tr><td>021530</td><td>Allianz · Özel</td><td>AZ-1209-55831</td><td>Onaylı · %80</td><td class="sag">2.200,00</td><td class="sag">0,00</td><td class="sonuk">— dönem açık</td><td><span class="rz pas">Bekliyor</span></td></tr>
+                <tr><td>022116</td><td>SGK</td><td>4ZW9C0L</td><td>Normal · Ayaktan</td><td class="sag">780,00</td><td class="sag">0,00</td><td class="sonuk">— Ekim dönemi</td><td><span class="rz pas">Bekliyor</span></td></tr>
+                <tr class="toplam"><td colspan="4">Toplam kurum payı</td><td class="sag">12.160,00</td><td class="sag">120,00</td><td colspan="2" class="sonuk">kesinti hastaya yansıtılmaz</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: HAREKET OZETI ============ -->
+      <div class="pnl" data-s="hrk">
+        <div class="grp">
+          <h4>Hasta Hesap Hareketleri <span class="mini">ekstre · yalnız hasta payı (B = borçlu)</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th>Tarih</th><th>Belge</th><th>Açıklama</th><th class="sag">Borç</th><th class="sag">Alacak</th><th class="sag">Bakiye</th></tr></thead>
+              <tbody>
+                <tr><td>02.09.2026</td><td>BSV-018412</td><td>Dahiliye · hasta payı</td><td class="sag">200,00</td><td class="sag"></td><td class="sag">200,00 B</td></tr>
+                <tr><td>02.09.2026</td><td>MKB-003812</td><td>Tahsilat · nakit</td><td class="sag"></td><td class="sag">200,00</td><td class="sag">0,00</td></tr>
+                <tr><td>09.09.2026</td><td>BSV-019655</td><td>Radyoloji · tamamlayıcı farkı</td><td class="sag">1.280,00</td><td class="sag"></td><td class="sag">1.280,00 B</td></tr>
+                <tr><td>09.09.2026</td><td>MKB-004401</td><td>Tahsilat · POS</td><td class="sag"></td><td class="sag">1.280,00</td><td class="sag">0,00</td></tr>
+                <tr><td>14.09.2026</td><td>BSV-020311</td><td>Kardiyoloji · ücretli</td><td class="sag">3.150,00</td><td class="sag"></td><td class="sag">3.150,00 B</td></tr>
+                <tr><td>14.09.2026</td><td>BSV-020311</td><td>İskonto %10</td><td class="sag"></td><td class="sag">315,00</td><td class="sag">2.835,00 B</td></tr>
+                <tr><td>14.09.2026</td><td>MKB-004950</td><td>Tahsilat · POS 3 taksit</td><td class="sag"></td><td class="sag">2.000,00</td><td class="sag">835,00 B</td></tr>
+                <tr><td>18.09.2026</td><td>BSV-020904</td><td>FTR · katılım payı</td><td class="sag">240,00</td><td class="sag"></td><td class="sag">1.075,00 B</td></tr>
+                <tr><td>18.09.2026</td><td>MKB-005322</td><td>Tahsilat · nakit</td><td class="sag"></td><td class="sag">240,00</td><td class="sag">835,00 B</td></tr>
+                <tr><td>23.09.2026</td><td>BSV-021530</td><td>Göz · özel sigorta farkı</td><td class="sag">550,00</td><td class="sag"></td><td class="sag">1.385,00 B</td></tr>
+                <tr><td>23.09.2026</td><td>MKB-005870</td><td>Tahsilat · POS</td><td class="sag"></td><td class="sag">800,00</td><td class="sag">585,00 B</td></tr>
+                <tr><td>24.09.2026</td><td>IAD-000214</td><td>Fazla tahsilat iadesi</td><td class="sag">250,00</td><td class="sag"></td><td class="sag">835,00 B</td></tr>
+                <tr><td>30.09.2026</td><td>BSV-022116</td><td>Dahiliye kontrol · katılım payı</td><td class="sag">200,00</td><td class="sag"></td><td class="sag">1.035,00 B</td></tr>
+                <tr><td>06.10.2026</td><td>BSV-022870</td><td>Ortopedi · ücretli</td><td class="sag">4.200,00</td><td class="sag"></td><td class="sag">5.235,00 B</td></tr>
+                <tr><td>06.10.2026</td><td>BSV-022870</td><td>İskonto %10</td><td class="sag"></td><td class="sag">420,00</td><td class="sag">4.815,00 B</td></tr>
+                <tr><td>06.10.2026</td><td>MKB-006233</td><td>Tahsilat · havale</td><td class="sag"></td><td class="sag">1.500,00</td><td class="sag">3.315,00 B</td></tr>
+                <tr class="iptal"><td>08.10.2026</td><td>BSV-023104</td><td>Laboratuvar · iptal edildi</td><td class="sag">650,00</td><td class="sag">650,00</td><td class="sag">3.315,00 B</td></tr>
+                <tr><td>09.10.2026</td><td>MKB-006455</td><td>Avans · nakit</td><td class="sag"></td><td class="sag">500,00</td><td class="sag">2.815,00 B</td></tr>
+                <tr class="toplam"><td colspan="3">Dönem toplamı</td><td class="sag">10.070,00</td><td class="sag">7.255,00</td><td class="sag kir">2.815,00 B</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ A4 ONIZLEME ============ -->
+    <div class="onz">
+      <div class="ust">🖨 Baskı Önizleme · A4 <span class="sp"></span><span class="rz">1 / 1</span></div>
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: Hİ-2026-000731<br>Düzenleme: 10.10.2026 14:05<br>Düzenleyen: Elif KARACA</div>
+        </div>
+        <h1>HASTA HESAP İCMALİ</h1>
+        <div class="bilgi">
+          <div>Hasta: <b>Ayşe YILDIRIM</b></div><div>Dosya No: <b>H-0048217</b></div>
+          <div>T.C. Kimlik: 123******46</div><div>Doğum / Cinsiyet: 14.03.1974 / K</div>
+          <div>Kurum: SGK + Anadolu Tamamlayıcı</div><div>Dönem: 01.09.2026 – 10.10.2026</div>
+        </div>
+        <table>
+          <thead><tr><th>Tarih</th><th>Başvuru</th><th>Bölüm</th><th>Toplam</th><th>Kurum</th><th>Hasta</th><th>Tahsil</th><th>Kalan</th></tr></thead>
+          <tbody>
+            <tr><td>02.09</td><td>018412</td><td>Dahiliye</td><td class="sag">1.240,00</td><td class="sag">1.040,00</td><td class="sag">200,00</td><td class="sag">200,00</td><td class="sag">0,00</td></tr>
+            <tr><td>05.09</td><td>018977</td><td>Laboratuvar</td><td class="sag">860,00</td><td class="sag">860,00</td><td class="sag">0,00</td><td class="sag">0,00</td><td class="sag">0,00</td></tr>
+            <tr><td>09.09</td><td>019655</td><td>Radyoloji</td><td class="sag">6.400,00</td><td class="sag">5.120,00</td><td class="sag">1.280,00</td><td class="sag">1.280,00</td><td class="sag">0,00</td></tr>
+            <tr><td>14.09</td><td>020311</td><td>Kardiyoloji</td><td class="sag">3.150,00</td><td class="sag">0,00</td><td class="sag">2.835,00</td><td class="sag">2.000,00</td><td class="sag">835,00</td></tr>
+            <tr><td>18.09</td><td>020904</td><td>FTR</td><td class="sag">2.400,00</td><td class="sag">2.160,00</td><td class="sag">240,00</td><td class="sag">240,00</td><td class="sag">0,00</td></tr>
+            <tr><td>23.09</td><td>021530</td><td>Göz</td><td class="sag">2.750,00</td><td class="sag">2.200,00</td><td class="sag">550,00</td><td class="sag">550,00</td><td class="sag">0,00</td></tr>
+            <tr><td>30.09</td><td>022116</td><td>Dahiliye</td><td class="sag">980,00</td><td class="sag">780,00</td><td class="sag">200,00</td><td class="sag">0,00</td><td class="sag">200,00</td></tr>
+            <tr><td>06.10</td><td>022870</td><td>Ortopedi</td><td class="sag">4.200,00</td><td class="sag">0,00</td><td class="sag">3.780,00</td><td class="sag">1.500,00</td><td class="sag">2.280,00</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Toplam hizmet</span><span>21.980,00 ₺</span></div>
+          <div><span>Kurum payı</span><span>12.160,00 ₺</span></div>
+          <div><span>İskonto</span><span>735,00 ₺</span></div>
+          <div><span>Hasta payı</span><span>9.085,00 ₺</span></div>
+          <div><span>Tahsil edilen (iade sonrası)</span><span>5.770,00 ₺</span></div>
+          <div><span>Avans</span><span>500,00 ₺</span></div>
+          <div class="b"><span>ÖDENECEK KALAN</span><span>2.815,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Kurum payı bilgi amaçlıdır; hastadan talep edilmez. Bu belge fatura yerine geçmez.</div>
+        <div class="imza"><div>Hasta / Yakını<br>Ad Soyad · İmza</div><div>Vezne Yetkilisi<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Hİ-2026-000731 · doğrulama kodu 7F3K-92QD</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>belge (tür 19 · başvuru)</code><code>belge_satir</code><code>kasa_islem</code>
+    <code>belge_provizyon</code><code>medula_islem</code><code>sigorta_provizyon</code>
+    <code>kurum_icmal / kurum_icmal_satir</code><code>taraf (hasta)</code>
+    <span class="sonuk">· toplamlar <code>fn_belge_diptoplam</code>'dan, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Ayşe YILDIRIM · H-0048217</span><span>·</span>
+    <span>Dönem 01.09.2026 – 10.10.2026</span><span>·</span>
+    <span>8 başvuru · 1 iptal · 9 makbuz</span><span>·</span>
+    <span>Kalan borç 3.315,00 ₺ · avans 500,00 ₺</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> hastanın bir dönemdeki bütün başvurularını, kurum/hasta payı ayrımını, tahsilat ve iadelerini
+  tek yerde toplar; banko “bu hasta ne borçlu, neden” sorusunu buradan cevaplar ve A4 icmali hastaya verir.
+  Kurum tarafı (SGK/sigorta dönem icmali) ayrı ekrandır: <code>Kurum İcmalleri</code>.
+  <ul>
+    <li><b>Giriş:</b> Hasta kartı › “Hesap İcmali”, başvuru listesinde sağ tuş, banko tahsilat ekranından.</li>
+    <li><b>Hastaya söylenen rakam kalan borçtur.</b> Kurum payı bilgi amaçlıdır; kurum kesintisi hastaya otomatik yansımaz.</li>
+    <li><b>Avans ayrı durur:</b> başvuruya bağlanmamış tahsilat kalan borçtan kendiliğinden düşülmez; “Avans Mahsup Et” ile bağlanır.</li>
+    <li><b>İptal satırı silinmez,</b> üstü çizili görünür ve toplamlara girmez.</li>
+    <li><b>Gönder:</b> E-posta/SMS hastanın kayıtlı iletişimine PDF bağlantısı yollar; TC maskeli basılır.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var pnls=[].slice.call(bar.parentElement.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(bar.querySelector('.sekme.on').dataset.s);
+});
+// Basvuru satiri ac/kapa: hizmet detayini gosterir
+document.querySelectorAll('tr.ac').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+</script>
+
+</body>
+</html>
