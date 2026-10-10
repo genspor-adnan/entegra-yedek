@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Borç Takibi — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  /* Dilim grafigi (yigilmis cubuk) */
+  .grafik{background:#fff;padding:12px 14px}
+  .gs{display:grid;grid-template-columns:90px minmax(0,1fr) 90px;gap:10px;align-items:center;margin:8px 0}
+  .ga{color:#3a5573;font-size:11.5px}
+  .gc{height:16px;border-radius:4px;background:#eef2f7;display:flex;overflow:hidden}
+  .gc i{display:block;height:100%}
+  .gc i.k,.lejant i.k{background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .gc i.h,.lejant i.h{background:linear-gradient(90deg,#f0b24a,#c98a1c)}
+  .gt{text-align:right;font-weight:bold;font-size:11.5px}
+  .lejant{display:flex;gap:14px;align-items:center;margin-top:10px;font-size:11px}
+  .lejant i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  /* Mektup govdesi (A4) */
+  .a4 .mektup p{margin:6px 0;font-size:9px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📮 Hasta Borç Takibi — açık hasta payları
+    <span class="sp">Gentegre AI · İcmal · Merkez · 10.10.2026 · Elif KARACA (Vezne)</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok"><span>✉</span> Toplu SMS / E-posta Hatırlatma</div>
+    <div class="btn"><span>📌</span> Tahsilata Çağır İşaretle</div>
+    <div class="btn"><span>🗓</span> Ödeme Planı Öner</div>
+    <div class="btn"><span>🤝</span> Ödeme Sözü Kaydet</div>
+    <div class="sepv"></div>
+    <div class="btn primary"><span>🖨</span> Yazdır (Borç Bildirim Mektubu)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>⏳</span> Alacak Yaşlandırma</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: hangi borclular. Durum suzgeci takip asamasidir, tutar degil. -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Tüm açık borçlar</b> (28.04 – 10.10.2026) ▾</div>
+    <div class="sel">🩺 Bölüm: <b>Tümü</b> ▾</div>
+    <div class="sel">💰 En az: <b>100,00 ₺</b></div>
+    <div class="sel">🏷 Durum: <b>Hepsi</b> ▾
+      <span class="rz pas">Yeni 1</span><span class="rz mavi">Hatırlatıldı 1</span><span class="rz sari">Söz verdi 2</span>
+      <span class="rz mor">Planlı 2</span><span class="rz kir">Tahsilata çağrıldı 2</span></div>
+    <span class="sp"></span>
+    <span class="sonuk">3 seçili · 6.375,00 ₺</span>
+  </div>
+
+  <!-- OZET: toplam acik = borclular tablosunun toplami (13.700). 30+ / 90+ alacak yaslandirmasiyla ayni dilimler. -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Borçlu Hasta</div><div class="deg">8</div>
+      <div class="alt">11 açık protokol</div></div>
+    <div class="kutu teh"><div class="bas">Toplam Açık</div><div class="deg">13.700,00 ₺</div>
+      <div class="alt">hasta payı − net tahsilat</div></div>
+    <div class="kutu uy"><div class="bas">30+ Gün</div><div class="deg">7.955,00 ₺</div>
+      <div class="alt">5 hasta</div></div>
+    <div class="kutu teh"><div class="bas">90+ Gün</div><div class="deg">5.125,00 ₺</div>
+      <div class="alt">2 hasta · tahsilata çağrıldı/planlı</div></div>
+    <div class="kutu"><div class="bas">Hatırlatma Bekleyen</div><div class="deg">2.175,00 ₺</div>
+      <div class="alt">2 hasta · hiç ya da 14+ gün önce</div></div>
+    <div class="kutu mor"><div class="bas">Söz Verilen</div><div class="deg">3.795,00 ₺</div>
+      <div class="alt">2 hasta · en yakın 12.10</div></div>
+    <div class="kutu mor"><div class="bas">Ödeme Planında</div><div class="deg">4.380,00 ₺</div>
+      <div class="alt">2 plan · 6 taksit</div></div>
+    <div class="kutu iyi"><div class="bas">Bu Ay Tahsil</div><div class="deg">4.260,00 ₺</div>
+      <div class="alt">Ekim · borçlulardan 9 makbuz</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="brc">Borçlular <span class="rz">8</span></div>
+    <div class="sekme" data-s="htr">Hatırlatma Geçmişi <span class="rz">9</span></div>
+    <div class="sekme" data-s="pln">Ödeme Sözleri / Planları <span class="rz mor">4</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: BORCLULAR ============ -->
+  <div class="pnl" data-s="brc">
+    <div class="grp">
+      <h4>Açık Borcu Olan Hastalar <span class="mini">satıra tıklayınca açık protokoller · hasta adı = Hasta İcmali</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Hasta</th><th>Dosya No</th><th>Telefon</th>
+            <th>Son Başvuru</th><th>Protokol No</th><th class="sag">Açık Tutar</th><th class="orta">Gün</th>
+            <th>Son Hatırlatma</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-d="h1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><span class="lnk">Ayşe YILDIRIM</span></td><td>H-0048217</td><td>0532 *** ** 46</td>
+              <td>06.10.2026</td><td>2026-000022870 <span class="rz">+2</span></td><td class="sag">2.815,00</td><td class="orta">26</td>
+              <td>08.10 · SMS</td><td><span class="rz sari">Söz verdi · 15.10</span></td></tr>
+            <tr class="det" data-p="h1" hidden><td></td><td colspan="9">2026-000020311 · 14.09 · Kardiyoloji · kalan 835,00 &nbsp;|&nbsp; 2026-000022116 · 30.09 · Dahiliye · kalan 200,00 &nbsp;|&nbsp; 2026-000022870 · 06.10 · Ortopedi · kalan 1.780,00</td></tr>
+            <tr class="ac" data-d="h2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><span class="lnk">Mehmet KOÇ</span></td><td>H-0051102</td><td>0505 *** ** 18</td>
+              <td>03.10.2026</td><td>2026-000023250</td><td class="sag">450,00</td><td class="orta">7</td>
+              <td class="sonuk">—</td><td><span class="rz pas">Yeni</span></td></tr>
+            <tr class="det" data-p="h2" hidden><td></td><td colspan="9">2026-000023250 · 03.10 · Dahiliye · kalan 450,00 (POS reddedildi, nakit sözü yok)</td></tr>
+            <tr class="ac" data-d="h3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><span class="lnk">Fatma ÖZ</span></td><td>H-0049930</td><td>0544 *** ** 73</td>
+              <td>29.09.2026</td><td>2026-000022010</td><td class="sag">2.100,00</td><td class="orta">11</td>
+              <td>02.10 · SMS</td><td><span class="rz mavi">Hatırlatıldı</span></td></tr>
+            <tr class="det" data-p="h3" hidden><td></td><td colspan="9">2026-000022010 · 29.09 · Kardiyoloji · kalan 2.100,00 — Anadolu Sigorta provizyonu reddedildi, tutar hasta payına aktarıldı</td></tr>
+            <tr class="ac sel" data-d="h4"><td><input type="checkbox" checked></td><td><span class="ok-ic">▾</span><span class="lnk">Hakan DEMİR</span></td><td>H-0037741</td><td>0533 *** ** 05</td>
+              <td>18.08.2026</td><td>2026-000016480</td><td class="sag">1.250,00</td><td class="orta kir">53</td>
+              <td>01.10 · SMS + e-posta (2.)</td><td><span class="rz kir">Tahsilata çağrıldı</span></td></tr>
+            <tr class="det" data-p="h4"><td></td><td colspan="9">2026-000016480 · 18.08 · Göz · toplam 1.650,00 · tahsil 400,00 · kalan 1.250,00 — e-posta adresi geçersiz döndü, telefonla aranacak</td></tr>
+            <tr class="ac" data-d="h5"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><span class="lnk">Selin AKTAŞ</span></td><td>H-0042216</td><td>0542 *** ** 61</td>
+              <td>22.07.2026</td><td>2026-000014233</td><td class="sag">980,00</td><td class="orta kir">80</td>
+              <td>15.09 · telefon</td><td><span class="rz mor">Ödeme planı 2/2</span></td></tr>
+            <tr class="det" data-p="h5" hidden><td></td><td colspan="9">2026-000014233 · 22.07 · FTR · kalan 980,00 · plan: 2 × 490,00 (15.10 · 15.11)</td></tr>
+            <tr class="ac sel" data-d="h6"><td><input type="checkbox" checked></td><td><span class="ok-ic">▸</span><span class="lnk">Burak ÇELİK</span></td><td>H-0029504</td><td>0535 *** ** 90</td>
+              <td>16.05.2026</td><td>2026-000009812</td><td class="sag">3.400,00</td><td class="orta kir">147</td>
+              <td>20.09 · mektup</td><td><span class="rz mor">Ödeme planı 4/4</span></td></tr>
+            <tr class="det" data-p="h6" hidden><td></td><td colspan="9">2026-000009812 · 16.05 · Ortopedi · kalan 3.400,00 · plan: 4 × 850,00 (20.10 · 20.11 · 20.12 · 20.01)</td></tr>
+            <tr class="ac" data-d="h7"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><span class="lnk">Elif TAN</span></td><td>H-0055618</td><td>0546 *** ** 27</td>
+              <td>21.09.2026</td><td>2026-000021204 <span class="rz">+1</span></td><td class="sag">980,00</td><td class="orta">32</td>
+              <td>05.10 · e-posta</td><td><span class="rz sari">Söz verdi · 12.10</span></td></tr>
+            <tr class="det" data-p="h7" hidden><td></td><td colspan="9">2026-000019120 · 08.09 · Laboratuvar · kalan 600,00 &nbsp;|&nbsp; 2026-000021204 · 21.09 · Göz · kalan 380,00</td></tr>
+            <tr class="ac sel" data-d="h8"><td><input type="checkbox" checked></td><td><span class="ok-ic">▸</span><span class="lnk">Kemal ARSLAN</span></td><td>H-0033087</td><td>0531 *** ** 52</td>
+              <td>28.04.2026</td><td>2026-000008440</td><td class="sag">1.725,00</td><td class="orta kir">165</td>
+              <td>10.09 · SMS (iletilemedi)</td><td><span class="rz kir">Tahsilata çağrıldı</span></td></tr>
+            <tr class="det" data-p="h8" hidden><td></td><td colspan="9">2026-000008440 · 28.04 · Dahiliye · kalan 1.725,00 — numara kapalı, mektup önerilir</td></tr>
+            <tr class="toplam"><td></td><td colspan="5">8 hasta · 11 açık protokol</td><td class="sag">13.700,00</td><td colspan="3"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: HATIRLATMA GECMISI ============ -->
+  <div class="pnl" data-s="htr">
+    <div class="grp">
+      <h4>Hatırlatma Geçmişi <span class="mini">bildirim kuyruğu · şablon = Bildirim Şablonları</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Tarih</th><th>Hasta</th><th>Kanal</th><th>Şablon</th><th class="sag">Tutar</th><th>Gönderen</th><th>Sonuç</th></tr></thead>
+          <tbody>
+            <tr><td>08.10.2026 14:20</td><td>Ayşe YILDIRIM</td><td><span class="rz mavi">SMS</span></td><td>Borç hatırlatma (nazik)</td><td class="sag">2.815,00</td><td>E. KARACA</td><td><span class="rz ok">İletildi</span> · söz: 15.10</td></tr>
+            <tr><td>05.10.2026 10:05</td><td>Elif TAN</td><td><span class="rz mor">E-posta</span></td><td>Borç bildirimi + PDF icmal</td><td class="sag">980,00</td><td>E. KARACA</td><td><span class="rz ok">Açıldı</span> · söz: 12.10</td></tr>
+            <tr><td>02.10.2026 09:30</td><td>Fatma ÖZ</td><td><span class="rz mavi">SMS</span></td><td>Provizyon red bilgilendirme</td><td class="sag">2.100,00</td><td>G. ERTAŞ</td><td><span class="rz ok">İletildi</span></td></tr>
+            <tr><td>01.10.2026 11:12</td><td>Hakan DEMİR</td><td><span class="rz mavi">SMS</span></td><td>2. hatırlatma</td><td class="sag">1.250,00</td><td>Zamanlı iş</td><td><span class="rz ok">İletildi</span></td></tr>
+            <tr><td>01.10.2026 11:12</td><td>Hakan DEMİR</td><td><span class="rz mor">E-posta</span></td><td>2. hatırlatma</td><td class="sag">1.250,00</td><td>Zamanlı iş</td><td><span class="rz kir">Geri döndü · adres geçersiz</span></td></tr>
+            <tr><td>20.09.2026 16:40</td><td>Burak ÇELİK</td><td><span class="rz">Mektup</span></td><td>Borç Bildirim Mektubu (A4)</td><td class="sag">3.400,00</td><td>E. KARACA</td><td><span class="rz ok">Teslim</span> · plan yapıldı</td></tr>
+            <tr><td>15.09.2026 13:00</td><td>Selin AKTAŞ</td><td><span class="rz sari">Telefon</span></td><td>Vezne araması</td><td class="sag">980,00</td><td>E. KARACA</td><td><span class="rz ok">Görüşüldü</span> · plan yapıldı</td></tr>
+            <tr><td>10.09.2026 09:00</td><td>Kemal ARSLAN</td><td><span class="rz mavi">SMS</span></td><td>3. hatırlatma</td><td class="sag">1.725,00</td><td>Zamanlı iş</td><td><span class="rz kir">İletilemedi · numara kapalı</span></td></tr>
+            <tr><td>12.08.2026 09:00</td><td>Kemal ARSLAN</td><td><span class="rz mavi">SMS</span></td><td>2. hatırlatma</td><td class="sag">1.725,00</td><td>Zamanlı iş</td><td><span class="rz ok">İletildi</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: ODEME SOZLERI / PLANLARI ============ -->
+  <div class="pnl" data-s="pln">
+    <div class="ikili">
+      <div class="grp">
+        <h4>Ödeme Sözleri <span class="mini">söz tarihi geçince durum "Söz tutulmadı" olur</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Hasta</th><th>Alındığı</th><th>Kanal</th><th>Söz Tarihi</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>Ayşe YILDIRIM</td><td>08.10.2026</td><td>SMS yanıtı</td><td>15.10.2026</td><td class="sag">2.815,00</td><td><span class="rz sari">Bekliyor</span></td></tr>
+              <tr><td>Elif TAN</td><td>05.10.2026</td><td>E-posta yanıtı</td><td>12.10.2026</td><td class="sag">980,00</td><td><span class="rz sari">Bekliyor</span></td></tr>
+              <tr class="toplam"><td colspan="4">2 söz</td><td class="sag">3.795,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Ödeme Planları <span class="mini">"Ödeme Planı Öner": tutara göre 2 – 6 taksit</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Hasta</th><th>Plan</th><th class="sag">Toplam</th><th class="sag">Ödenen</th><th class="sag">Kalan</th><th>Sonraki Vade</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>Selin AKTAŞ</td><td>2 × 490,00</td><td class="sag">980,00</td><td class="sag">0,00</td><td class="sag">980,00</td><td>15.10.2026</td><td><span class="rz mor">Planlı</span></td></tr>
+              <tr><td>Burak ÇELİK</td><td>4 × 850,00</td><td class="sag">3.400,00</td><td class="sag">0,00</td><td class="sag">3.400,00</td><td>20.10.2026</td><td><span class="rz mor">Planlı</span></td></tr>
+              <tr class="toplam"><td colspan="2">2 plan · 6 taksit</td><td class="sag">4.380,00</td><td class="sag">0,00</td><td class="sag">4.380,00</td><td colspan="2"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: A4 ONIZLEME (BORC BILDIRIM MEKTUBU) ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: BB-2026-000184<br>Tarih: 10.10.2026<br>Düzenleyen: Elif KARACA</div>
+        </div>
+        <h1>BORÇ BİLDİRİM MEKTUBU</h1>
+        <div class="mektup">
+          <p>Sayın <b>Hakan DEMİR</b>,<br><span class="sonuk">Dosya No: H-0037741</span></p>
+          <p>Merkezimizde aldığınız hizmetlere ait aşağıdaki tutar 10.10.2026 tarihi itibarıyla ödenmemiş
+            görünmektedir. Ödemenizi vezneden, kredi kartıyla ya da aşağıdaki hesaba havale ile yapabilirsiniz.
+            Ödemeyi yaptıysanız bu mektubu dikkate almayınız.</p>
+        </div>
+        <table>
+          <thead><tr><th>Tarih</th><th>Protokol No</th><th>Bölüm</th><th>Hizmet Toplamı</th><th>Kurum Payı</th><th>Ödenen</th><th>Kalan</th></tr></thead>
+          <tbody>
+            <tr><td>18.08.2026</td><td>2026-000016480</td><td>Göz</td><td class="sag">1.650,00</td><td class="sag">0,00</td><td class="sag">400,00</td><td class="sag">1.250,00</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Hizmet toplamı</span><span>1.650,00 ₺</span></div>
+          <div><span>Ödenen</span><span>400,00 ₺</span></div>
+          <div class="b"><span>ÖDENECEK TUTAR</span><span>1.250,00 ₺</span></div>
+        </div>
+        <div class="mektup" style="margin-top:8px">
+          <p><b>Ödeme bilgileri:</b> Genotip Tıp Merkezi · IBAN TR00 0000 0000 0000 0000 0000 00 · açıklamaya
+            dosya numaranızı (H-0037741) yazınız.</p>
+          <p>Taksitlendirme için vezne ile görüşebilirsiniz: 0312 000 00 00 (dahili 120).</p>
+        </div>
+        <div class="imza"><div>Vezne Yetkilisi<br>Elif KARACA · İmza</div><div>Mali İşler<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · BB-2026-000184 · bu mektup bilgilendirme amaçlıdır, fatura yerine geçmez</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>belge (tür 19 · başvuru)</code><code>belge_satir_dagilim (hasta payı)</code><code>kasa_islem</code>
+    <code>v_cari_ekstre</code><code>bildirim · bildirim_sablon</code><code>odeme_sozu / odeme_plani (yeni)</code>
+    <span class="sonuk">· açık tutar sunucuda, hasta icmaliyle aynı kural</span>
+  </div>
+
+  <div class="statusbar">
+    <span>8 borçlu hasta · 11 açık protokol</span><span>·</span>
+    <span>Toplam açık 13.700,00 ₺</span><span>·</span>
+    <span>Seçili 3 hasta · 6.375,00 ₺</span><span>·</span>
+    <span>Son toplu hatırlatma 01.10.2026</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> açık hasta payı olan bütün hastaları tek listede toplar ve tahsilat takibini yürütür
+  (hatırlatma → söz → plan → tahsilata çağrı). Hasta İcmali'nin toplu halidir; hasta adı o icmale gider.
+  <ul>
+    <li><b>Giriş:</b> İcmal menüsü › Hasta Borç Takibi; Alacak Yaşlandırma ve banko gün sonu "Açık Borçlar" sekmesinden.</li>
+    <li><b>Açık tutar</b> = hasta payı − net tahsilat (iade düşülür, iptal sayılmaz); yalnız başvuru belgeleri (tür 19).
+      Kurum payı burada yoktur; kurum alacağı <code>Kurum İcmali</code>'ndedir.</li>
+    <li><b>Seçim:</b> soldaki onay kutusu; toplu hatırlatma, "Tahsilata Çağır" ve mektup yalnız seçililere uygulanır.</li>
+    <li><b>Hatırlatma</b> hastanın kayıtlı iletişimine gider, metin Bildirim Şablonlarından; aynı hastaya 7 günden sık gönderilmez.</li>
+    <li><b>Kişisel veri:</b> T.C. kimlik no gösterilmez/basılmaz, telefon maskelidir; hasta ad + dosya no ile tanınır.</li>
+    <li><b>A4 önizleme ayrı sekmededir</b> ve seçili satırın Borç Bildirim Mektubunu gösterir; çoklu seçimde her hasta ayrı sayfa basılır.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Basvuru satiri ac/kapa: hizmet detayini gosterir
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+</script>
+
+</body>
+</html>

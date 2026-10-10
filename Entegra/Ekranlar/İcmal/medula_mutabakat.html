@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medula Mutabakat İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+  .huni{padding:14px 18px;display:flex;flex-direction:column;gap:8px;background:#fff}
+  .huni .ad{flex:0 0 190px;font-weight:bold;color:#2c4a6b}
+  .huni .iz{flex:0 0 62%}
+  .huni .sat{display:flex;align-items:center;gap:10px}
+  .huni .bar{height:22px;border-radius:3px;background:linear-gradient(90deg,#4d8fd6,#2f6db3);color:#fff;
+    font-size:11px;display:flex;align-items:center;padding:0 8px;white-space:nowrap}
+  .huni .bar.kir{background:linear-gradient(90deg,#e06a5e,#b3261e)}
+  .huni .bar.yes{background:linear-gradient(90deg,#5cb87a,#2e7d46)}
+  .huni .bar.sari{background:linear-gradient(90deg,#e6b45a,#b7791f)}
+  .huni .acik{color:var(--muted);font-size:11px}
+  .ic{display:inline-block;width:18px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Medula Mutabakat İcmali (SGK) — Ağustos 2026
+    <span class="sp">Gentegre AI · İcmal · Merkez · 10.10.2026 · Tesis 11223344 · Gülşen ERTAŞ (Faturalama)</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok"><span>🧾</span> Eksikleri Faturala</div>
+    <div class="btn"><span>🔄</span> Medula'dan Sorgula</div>
+    <div class="sepv"></div>
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Mutabakat Tutanağı)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📑</span> Fatura &amp; Dönem</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: SGK donemi (ay), sube, takip turu. Sorgula Medula'daki fatura / odeme durumunu tazeler. -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Ağustos 2026</b> (01.08 – 31.08) ‹ › </div>
+    <div class="sel">🏥 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🗂 Takip Türü: <b>Tümü</b> (Ayaktan · Yatan · Günübirlik) ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">23 takip faturasız</span>
+    <span class="sonuk">Son Medula sorgusu 10.10.2026 09:14</span>
+  </div>
+
+  <!-- OZET: odenen = Medula tutari - kesinti. Acik = faturalanmamis hizmet tutari (kayip gelir adayi). -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Takip</div><div class="deg">412</div>
+      <div class="alt">380 ayaktan · 22 yatan · 10 günübirlik</div></div>
+    <div class="kutu iyi"><div class="bas">Faturalanan Takip</div><div class="deg">389</div>
+      <div class="alt">%94,4 · 3 fatura</div></div>
+    <div class="kutu teh"><div class="bas">Faturasız Takip</div><div class="deg">23</div>
+      <div class="alt">14 hizmetsiz · 9 hizmetli</div></div>
+    <div class="kutu mor"><div class="bas">Medula Tutarı</div><div class="deg">386.540,00 ₺</div>
+      <div class="alt">HBYS 388.112,40 · fark 1.572,40</div></div>
+    <div class="kutu uy"><div class="bas">Kesinti</div><div class="deg">4.215,60 ₺</div>
+      <div class="alt">11 kalem · 9 takip</div></div>
+    <div class="kutu uy"><div class="bas">İtiraz Bekleyen</div><div class="deg">1.640,00 ₺</div>
+      <div class="alt">4 kalem</div></div>
+    <div class="kutu iyi"><div class="bas">Ödenen</div><div class="deg">382.324,40 ₺</div>
+      <div class="alt">SGK ödemesi 30.09.2026</div></div>
+    <div class="kutu teh"><div class="bas">Açık</div><div class="deg">7.860,00 ₺</div>
+      <div class="alt">faturalanmamış hizmet</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="hun">Huni</div>
+    <div class="sekme" data-s="fsz">Faturasız Takipler <span class="rz kir">23</span></div>
+    <div class="sekme" data-s="frk">Tutar Farkları <span class="rz sari">4</span></div>
+    <div class="sekme" data-s="kes">Kesintiler <span class="rz">6</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: HUNI ============ -->
+  <div class="pnl" data-s="hun">
+    <div class="grp">
+      <h4>Takipten Ödemeye <span class="mini">her adımda düşen takip bir sonraki sekmede listelenir</span></h4>
+      <div class="huni">
+        <div class="sat"><div class="ad">1 · Takip alınan</div><div class="iz"><div class="bar" style="width:100%">412 takip</div></div></div>
+        <div class="sat"><div class="ad">2 · Hizmet girilen</div><div class="iz"><div class="bar" style="width:96.6%">398 takip</div></div>
+          <span class="acik">−14 hizmetsiz (silinmeli / iptal)</span></div>
+        <div class="sat"><div class="ad">3 · Faturalanan</div><div class="iz"><div class="bar yes" style="width:94.4%">389 takip · 386.540,00 ₺</div></div>
+          <span class="acik">−9 hizmetli faturasız · 7.860,00 ₺</span></div>
+        <div class="sat"><div class="ad">4 · Kesintili</div><div class="iz"><div class="bar sari" style="width:2.2%"></div></div>
+          <span class="acik">9 takip · 4.215,60 ₺ (1.640,00 itirazda)</span></div>
+        <div class="sat"><div class="ad">5 · Ödenen</div><div class="iz"><div class="bar yes" style="width:94.4%">382.324,40 ₺</div></div>
+          <span class="acik">= Medula tutarı − kesinti</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: FATURASIZ TAKIPLER ============ -->
+  <div class="pnl" data-s="fsz">
+    <div class="grp">
+      <h4>Faturaya Girmemiş Takipler <span class="mini">seçilenler "Eksikleri Faturala" ile ek faturaya alınır · hasta adı = Hasta İcmali</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Takip No</th><th>Protokol No</th><th>Hasta</th><th>Bölüm</th>
+            <th>Takip Tarihi</th><th class="sag">Hizmet Tutarı</th><th>Neden</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><input type="checkbox" checked></td><td>4ZT8K21</td><td>2026-000004812</td><td><span class="lnk">Hüseyin ÇELİK</span></td><td>Dahiliye</td><td>04.08.2026</td><td class="sag">1.240,00</td><td><span class="rz sari">Takip açık (çıkış yok)</span></td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td>4ZT9M07</td><td>2026-000004851</td><td><span class="lnk">Nermin AKSOY</span></td><td>Kardiyoloji</td><td>06.08.2026</td><td class="sag">860,00</td><td><span class="rz sari">Takip açık (çıkış yok)</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>4ZU1P33</td><td>2026-000004903</td><td><span class="lnk">Ramazan ÖZER</span></td><td>Ortopedi</td><td>08.08.2026</td><td class="sag">2.150,00</td><td><span class="rz kir">Provizyon hatası 1101</span></td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td>4ZU4C18</td><td>2026-000004977</td><td><span class="lnk">Gülay ŞEN</span></td><td>KBB</td><td>12.08.2026</td><td class="sag">430,00</td><td><span class="rz sari">Takip açık (çıkış yok)</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>4ZU7H52</td><td>2026-000005034</td><td><span class="lnk">Cemil YAVUZ</span></td><td>Göz</td><td>14.08.2026</td><td class="sag">980,00</td><td><span class="rz kir">Hekim tescil eksik</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>4ZV2D09</td><td>2026-000005120</td><td><span class="lnk">Sibel KORKMAZ</span></td><td>Kadın Doğum</td><td>19.08.2026</td><td class="sag">620,00</td><td><span class="rz kir">SUT kodu eşleşmedi</span></td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td>4ZV5L74</td><td>2026-000005188</td><td><span class="lnk">Okan TEKİN</span></td><td>Dahiliye</td><td>22.08.2026</td><td class="sag">540,00</td><td><span class="rz sari">Takip açık (çıkış yok)</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>4ZV8R41</td><td>2026-000005246</td><td><span class="lnk">Leyla BOZKURT</span></td><td>FTR</td><td>26.08.2026</td><td class="sag">340,00</td><td><span class="rz mavi">Seans tamamlanmadı</span></td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td>4ZW1T66</td><td>2026-000005301</td><td><span class="lnk">Erkan DEMİR</span></td><td>Üroloji</td><td>29.08.2026</td><td class="sag">700,00</td><td><span class="rz sari">Takip açık (çıkış yok)</span></td></tr>
+            <tr class="red"><td><input type="checkbox" disabled></td><td colspan="5" class="sonuk">+ 14 hizmetsiz takip (hizmet girilmemiş · faturalanamaz, iptal edilmeli)</td><td class="sag">0,00</td><td><span class="rz pas">Hizmet yok</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="5">23 takip · 5 seçili (3.770,00)</td><td class="sag">7.860,00</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: TUTAR FARKLARI ============ -->
+  <div class="pnl" data-s="frk">
+    <div class="grp">
+      <h4>HBYS ↔ Medula Tutar Farkları <span class="mini">faturalanan takiplerde HBYS hizmet tutarı ile Medula'nın onayladığı tutar</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Takip No</th><th>Protokol No</th><th>Hasta</th><th class="sag">HBYS Tutarı</th><th class="sag">Medula Tutarı</th>
+            <th class="sag">Fark</th><th>Neden</th></tr></thead>
+          <tbody>
+            <tr><td>4ZS3B90</td><td>2026-000004722</td><td>Mustafa KAYA</td><td class="sag">2.480,00</td><td class="sag">1.840,00</td><td class="sag kir">640,00</td><td><span class="rz sari">Fiyat listesi SUT 2026'ya güncel değil</span></td></tr>
+            <tr><td>4ZT2N15</td><td>2026-000004790</td><td>Aynur POLAT</td><td class="sag">1.236,40</td><td class="sag">824,00</td><td class="sag kir">412,40</td><td><span class="rz sari">Paket içi hizmet ayrı yazılmış</span></td></tr>
+            <tr><td>4ZU6F28</td><td>2026-000005011</td><td>Selim AKTAŞ</td><td class="sag">1.150,00</td><td class="sag">850,00</td><td class="sag kir">300,00</td><td><span class="rz mavi">Katılım payı Medula'da düşülmüş</span></td></tr>
+            <tr><td>4ZV9K63</td><td>2026-000005270</td><td>Hatice ARSLAN</td><td class="sag">980,00</td><td class="sag">760,00</td><td class="sag kir">220,00</td><td><span class="rz sari">Malzeme SUT tavanını aşıyor</span></td></tr>
+            <tr><td colspan="3" class="sonuk">Diğer 385 takip · farksız</td><td class="sag">382.266,00</td><td class="sag">382.266,00</td><td class="sag">0,00</td><td></td></tr>
+            <tr class="toplam"><td colspan="3">389 faturalanan takip</td><td class="sag">388.112,40</td><td class="sag">386.540,00</td><td class="sag kir">1.572,40</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: KESINTILER ============ -->
+  <div class="pnl" data-s="kes">
+    <div class="grp">
+      <h4>Medula Kesintileri <span class="mini">medula_kesinti · itiraz sonucu kabul edilirse iade tutarı ödemeye eklenir</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th>SUT Kodu</th><th>Hizmet</th><th>Kesinti Nedeni</th><th class="orta">Kalem</th><th class="sag">Tutar</th><th>İtiraz</th></tr></thead>
+          <tbody>
+            <tr><td>520.030</td><td>Kontrol muayenesi</td><td>Mükerrer muayene (10 gün kuralı)</td><td class="orta">2</td><td class="sag kir">360,00</td><td><span class="rz pas">İtiraz yok</span></td></tr>
+            <tr><td>802.580</td><td>MR (kontrastlı)</td><td>Endikasyon / rapor eksik</td><td class="orta">2</td><td class="sag kir">1.120,00</td><td><span class="rz mavi">İtiraz edildi · bekliyor</span></td></tr>
+            <tr><td>901.620</td><td>Tetkik (branş dışı)</td><td>Branş yetkisi dışı istem</td><td class="orta">2</td><td class="sag kir">520,00</td><td><span class="rz mavi">İtiraz edildi · bekliyor</span></td></tr>
+            <tr><td>530.080</td><td>EKG</td><td>Tanı ile uyumsuz</td><td class="orta">1</td><td class="sag kir">210,00</td><td><span class="rz kir">Reddedildi</span></td></tr>
+            <tr><td>610.200</td><td>Sütur malzemesi</td><td>Malzeme ayrıca faturalanamaz</td><td class="orta">2</td><td class="sag kir">1.385,60</td><td><span class="rz pas">İtiraz yok</span></td></tr>
+            <tr><td>702.010</td><td>Yatak günü</td><td>Taburcu günü faturalanamaz</td><td class="orta">2</td><td class="sag kir">620,00</td><td><span class="rz pas">İtiraz yok</span></td></tr>
+            <tr class="toplam"><td colspan="3">6 kesinti nedeni · 9 takip</td><td class="orta">11</td><td class="sag kir">4.215,60</td><td class="sonuk">itirazda 1.640,00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: A4 ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>SGK Tesis Kodu 11223344 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: MM-2026-08<br>Düzenleme: 10.10.2026 10:05<br>Düzenleyen: Gülşen ERTAŞ</div>
+        </div>
+        <h1>SGK DÖNEM MUTABAKAT TUTANAĞI</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.08.2026 – 31.08.2026</b></div><div>Kurum: <b>Sosyal Güvenlik Kurumu</b></div>
+          <div>Takip türü: Ayaktan · Yatan · Günübirlik</div><div>Medula faturası: 3 adet</div>
+        </div>
+        <table>
+          <thead><tr><th>Adım</th><th>Takip</th><th>Tutar (₺)</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td>Takip alınan</td><td class="sag">412</td><td class="sag">—</td><td>380 A · 22 Y · 10 G</td></tr>
+            <tr><td>Hizmet girilen</td><td class="sag">398</td><td class="sag">395.972,40</td><td>14 takip hizmetsiz</td></tr>
+            <tr><td>Faturalanan (HBYS)</td><td class="sag">389</td><td class="sag">388.112,40</td><td>9 takip faturasız · 7.860,00</td></tr>
+            <tr><td>Medula onaylı</td><td class="sag">389</td><td class="sag">386.540,00</td><td>tutar farkı 1.572,40</td></tr>
+            <tr><td>Kesinti</td><td class="sag">9</td><td class="sag">4.215,60</td><td>itirazda 1.640,00</td></tr>
+            <tr><td>Ödenen</td><td class="sag">389</td><td class="sag">382.324,40</td><td>30.09.2026</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Medula onaylı tutar</span><span>386.540,00 ₺</span></div>
+          <div><span>Kesinti</span><span>−4.215,60 ₺</span></div>
+          <div><span>SGK'dan ödenen</span><span>382.324,40 ₺</span></div>
+          <div><span>İtiraz sonucu beklenen (en çok)</span><span>1.640,00 ₺</span></div>
+          <div class="b"><span>FATURALANMAMIŞ HİZMET</span><span>7.860,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Faturalanmamış hizmetler ek faturayla dönem kapanış süresi içinde Medula'ya gönderilmelidir.
+          Hizmetsiz 14 takip iptal edilecektir.</div>
+        <div class="imza"><div>Faturalama Sorumlusu<br>Ad Soyad · İmza</div><div>Mesul Müdür<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · MM-2026-08 · doğrulama kodu 2RD7-M4KX</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>belge (tür 19 · başvuru)</code><code>belge_provizyon (sgk_takip_no · sgk_durum)</code><code>belge_satir_dagilim (sgk)</code>
+    <code>medula_fatura</code><code>medula_donem</code><code>medula_kesinti</code>
+    <span class="sonuk">· toplamlar sunucuda; tahakkuk belgeleri (tür 16/17) sayılmaz</span>
+  </div>
+
+  <div class="statusbar">
+    <span>SGK · Ağustos 2026 · Merkez</span><span>·</span>
+    <span>412 takip · 389 faturalı · 23 faturasız</span><span>·</span>
+    <span>Ödenen 382.324,40 ₺ · kesinti 4.215,60 ₺</span><span>·</span>
+    <span>Açık 7.860,00 ₺</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> bir SGK döneminde alınan her takibin ödemeye kadar nereye vardığını gösterir; faturalama birimi kaçan geliri
+  (faturasız takip, tutar farkı, kesinti) buradan yakalar ve A4 "SGK Dönem Mutabakat Tutanağı"nı mesul müdüre verir.
+  Faturanın kendisi ayrı ekrandır: <code>Medula › Fatura &amp; Dönem</code>.
+  <ul>
+    <li><b>Giriş:</b> Medula › Mutabakat İcmali; Fatura &amp; Dönem listesinde sağ tuş; Kurum İcmali'nde SGK satırından.</li>
+    <li><b>Yalnız başvuru (tür 19)</b> sayılır; hasta / kurum tahakkuku (16/17) türetilmiş belgedir, sayılırsa çift sayım olur.</li>
+    <li><b>Ödenen = Medula onaylı tutar − kesinti.</b> İtiraz kabul edilirse iade tutarı sonraki ödemeye eklenir.</li>
+    <li><b>Faturasız takip:</b> hizmetsiz olanlar faturalanamaz (iptal edilir); hizmetli olanlar onay kutusuyla seçilip "Eksikleri Faturala" ile ek faturaya alınır.</li>
+    <li><b>Hasta TC'si gösterilmez</b>; satırda Protokol No ve hasta adı yeter, ad Hasta İcmali'ni açar.</li>
+    <li><b>A4 önizleme ayrı sekmededir</b>; Yazdır her sekmeden yalnız tutanağı basar.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+</script>
+
+</body>
+</html>

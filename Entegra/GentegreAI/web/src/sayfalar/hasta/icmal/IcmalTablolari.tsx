@@ -13,7 +13,7 @@ export function BasvuruTablosu({ v }: { v: HastaIcmali }) {
   const gecerli = v.basvurular.filter(b => !b.iptal);
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Tarih</th><th>Başvuru No</th><th>Bölüm / Hekim</th><th>Kurum</th>
+      <thead><tr><th>Tarih</th><th>Protokol No</th><th>Bölüm / Hekim</th><th>Kurum</th>
         <th className="sag">Toplam</th><th className="sag">İskonto</th><th className="sag">Kurum Payı</th>
         <th className="sag">Hasta Payı</th><th className="sag">Tahsil</th><th className="sag">Kalan</th><th>Durum</th></tr></thead>
       <tbody>
@@ -53,7 +53,7 @@ export function BasvuruTablosu({ v }: { v: HastaIcmali }) {
 export function HizmetTablosu({ v }: { v: HastaIcmali }) {
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Tarih</th><th>Başvuru</th><th>Kod</th><th>Hizmet</th><th className="sag">Adet</th>
+      <thead><tr><th>Tarih</th><th>Protokol No</th><th>Kod</th><th>Hizmet</th><th className="sag">Adet</th>
         <th className="sag">Birim Fiyat</th><th className="sag">Tutar</th><th className="sag">Kurum</th><th className="sag">Hasta</th></tr></thead>
       <tbody>
         {v.hizmetler.map((h, i) => (
@@ -69,7 +69,7 @@ export function HizmetTablosu({ v }: { v: HastaIcmali }) {
 export function TahsilatTablosu({ v }: { v: HastaIcmali }) {
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Makbuz No</th><th>Tarih</th><th>Banko</th><th>Ödeme</th><th>İşlem</th><th>Başvuru</th>
+      <thead><tr><th>Makbuz No</th><th>Tarih</th><th>Banko</th><th>Ödeme</th><th>İşlem</th><th>Protokol No</th>
         <th className="sag">Tutar</th></tr></thead>
       <tbody>
         {v.tahsilatlar.length === 0 && <tr><td colSpan={7} className="bos">Bu dönemde tahsilat yok.</td></tr>}
@@ -91,7 +91,7 @@ export function TahsilatTablosu({ v }: { v: HastaIcmali }) {
 export function ProvizyonTablosu({ v }: { v: HastaIcmali }) {
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Başvuru</th><th>Provizyon / Takip No</th><th className="sag">SGK</th>
+      <thead><tr><th>Protokol No</th><th>Provizyon / Takip No</th><th className="sag">SGK</th>
         <th className="sag">Özel Sigorta</th><th className="sag">Satır</th><th>Durum</th></tr></thead>
       <tbody>
         {v.provizyonlar.length === 0 && <tr><td colSpan={6} className="bos">Kurum payı olan başvuru yok.</td></tr>}

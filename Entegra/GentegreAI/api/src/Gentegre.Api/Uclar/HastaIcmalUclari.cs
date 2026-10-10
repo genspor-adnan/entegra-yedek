@@ -6,7 +6,7 @@ using Gentegre.Veri;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// HASTA İCMALİ (mockup Ekranlar/Kayıt Kabul/hasta_icmal.html, kullanıcı
+/// HASTA İCMALİ (mockup Ekranlar/İcmal/hasta_icmal.html, kullanıcı
 /// 10.10.2026: "hasta icmal ekranını kodla").
 ///
 /// Hastanın bir dönemdeki başvuruları (belge tipi 30), hizmet satırları,

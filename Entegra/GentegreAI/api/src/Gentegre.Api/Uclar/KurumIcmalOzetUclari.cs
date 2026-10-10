@@ -6,7 +6,7 @@ using Gentegre.Veri;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// KURUM İCMALİ EKRANI (mockup Ekranlar/Kayıt Kabul/kurum_icmal.html,
+/// KURUM İCMALİ EKRANI (mockup Ekranlar/İcmal/kurum_icmal.html,
 /// kullanıcı 10.10.2026: "kurum icmal ekranını kodla").
 ///
 /// Ödeyen kurumların (ÖSS / SGK / kurumu öder - taraf_kurum.tur 2..4; tür 1

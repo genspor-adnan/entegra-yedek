@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İcmal Ekranları — Mockup Dizini (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1200px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:8px 12px;font-weight:bold;font-size:13px;
+    display:flex;gap:8px;align-items:center}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .giris{padding:10px 14px;color:#4d5d6e;line-height:1.6;border-bottom:1px solid var(--line2);background:#f7fafc}
+  h2{font-size:12px;color:#2c4a6b;margin:14px 14px 6px;text-transform:uppercase;letter-spacing:.4px}
+  .izgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;padding:0 14px 14px}
+  a.kart{display:flex;flex-direction:column;gap:5px;border:1px solid var(--line2);border-radius:5px;padding:10px 12px;
+    text-decoration:none;color:inherit;background:#fbfcfe;transition:box-shadow .15s,border-color .15s}
+  a.kart:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(47,109,179,.15)}
+  .kart .bas{display:flex;align-items:center;gap:7px;font-weight:bold;color:var(--navy);font-size:13px}
+  .kart .ic{font-size:17px}
+  .kart .ac{color:#4d5d6e;line-height:1.5}
+  .kart .alt{display:flex;gap:6px;align-items:center;margin-top:auto;padding-top:4px;flex-wrap:wrap}
+  .kart code{font-size:10.5px;color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);
+    background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .ortak{margin:0 14px 14px;border:1px solid var(--line2);border-radius:4px;padding:8px 12px;background:#fbfcfe;
+    color:#4d5d6e;line-height:1.65}
+  .ortak b{color:var(--ink)}
+  .ortak ul{margin:4px 0 0 18px;padding:0}
+  @media (max-width:640px){body{padding:6px}}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📑 İcmal Ekranları <span class="sp">Gentegre AI · mockup dizini · 10.10.2026</span></div>
+  <div class="giris">
+    Bir dönemin hesabını tek yerde toplayan, A4 olarak basılabilen özet ekranları. Her kart mockup'ı açar;
+    rozet ekranın durumunu söyler: <span class="rz ok">Kodlandı</span> web'de çalışıyor,
+    <span class="rz mavi">Mockup</span> tasarım aşamasında.
+  </div>
+
+  <h2>Hesap icmalleri</h2>
+  <div class="izgara">
+    <a class="kart" href="hasta_icmal.html">
+      <div class="bas"><span class="ic">🧾</span>Hasta İcmali</div>
+      <div class="ac">Hastanın dönemdeki başvuruları, kurum / hasta payı, tahsilat, iade, kalan borç.</div>
+      <div class="alt"><span class="rz ok">Kodlandı</span><code>/hasta-icmal/:id</code></div>
+    </a>
+    <a class="kart" href="kurum_icmal.html">
+      <div class="bas"><span class="ic">🏢</span>Kurum İcmali</div>
+      <div class="ac">Ödeyen kurumların dönem başvuruları, kurum payı, kesinti, icmal / fatura durumu ve cari.</div>
+      <div class="alt"><span class="rz ok">Kodlandı</span><code>/kurum-icmali</code></div>
+    </a>
+    <a class="kart" href="vezne_icmali.html">
+      <div class="bas"><span class="ic">💵</span>Vezne / Kasa Konsolide İcmali</div>
+      <div class="ac">Bütün bankoların günü: ödeme türleri, POS mutabakatı, farklar, merkez kasaya devir.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+  </div>
+
+  <h2>Tahsilat takibi</h2>
+  <div class="izgara">
+    <a class="kart" href="alacak_yaslandirma.html">
+      <div class="bas"><span class="ic">⏳</span>Alacak Yaşlandırma</div>
+      <div class="ac">Hasta ve kurum açık bakiyeleri 0–30 / 31–60 / 61–90 / 90+ gün dilimlerinde.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+    <a class="kart" href="hasta_borc_takibi.html">
+      <div class="bas"><span class="ic">📞</span>Hasta Borç Takibi</div>
+      <div class="ac">Açık borcu olan hastalar, toplu hatırlatma, ödeme sözü ve planı.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+    <a class="kart" href="medula_mutabakat.html">
+      <div class="bas"><span class="ic">🔁</span>Medula Mutabakat İcmali</div>
+      <div class="ac">SGK dönemi: takip → hizmet → fatura → kesinti → ödeme hunisi, faturasız takipler.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+  </div>
+
+  <h2>Yönetim ve kârlılık</h2>
+  <div class="izgara">
+    <a class="kart" href="hekim_performans_icmali.html">
+      <div class="bas"><span class="ic">🩺</span>Hekim / Bölüm Performans İcmali</div>
+      <div class="ac">Hekim ya da bölüm başına başvuru, hizmet, ciro, kurum / hasta payı, iskonto, hakediş.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+    <a class="kart" href="iskonto_icmali.html">
+      <div class="bas"><span class="ic">🏷️</span>İskonto ve Ücretsiz Hizmet İcmali</div>
+      <div class="ac">Kim ne kadar iskonto onayladı, hangi gerekçeyle; ücretsiz hizmetler. Denetim için.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+    <a class="kart" href="hasta_basi_maliyet_icmali.html">
+      <div class="bas"><span class="ic">📦</span>Hasta Başı Maliyet / Sarf İcmali</div>
+      <div class="ac">Düşülen sarf ve ilaç maliyeti ile faturalanan tutar; hizmet bazında kâr, faturalanmamış sarf.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+    <a class="kart" href="sevk_eden_icmali.html">
+      <div class="bas"><span class="ic">🤝</span>Sevk Eden / Dış Doktor İcmali</div>
+      <div class="ac">Dış doktorların gönderdiği hasta ve ciro, komisyon hesabı ve ödemeleri.</div>
+      <div class="alt"><span class="rz mavi">Mockup</span></div>
+    </a>
+  </div>
+
+  <h2>Başka yerde duran ilgili ekranlar</h2>
+  <div class="izgara">
+    <a class="kart" href="../Kayıt Kabul/vezne_durum_panosu.html">
+      <div class="bas"><span class="ic">📊</span>Vezne Durum Panosu</div>
+      <div class="ac">Anlık pano (icmal değil) - Vezne İcmali bunun gün sonu / dönem özetidir.</div>
+      <div class="alt"><span class="rz sari">Kayıt Kabul</span></div>
+    </a>
+    <a class="kart" href="../Prim/hakedis_listesi.html">
+      <div class="bas"><span class="ic">💼</span>Hakedişler</div>
+      <div class="ac">Hekim hakediş hesabı - Performans icmalinden "Hakedişe Aktar" buraya gider.</div>
+      <div class="alt"><span class="rz ok">Kodlandı</span><span class="rz sari">Prim</span></div>
+    </a>
+  </div>
+
+  <div class="ortak">
+    <b>Bütün icmallerde ortak kurallar</b>
+    <ul>
+      <li>Rakamlar sunucuda hesaplanır; ekran yalnız çizer. Başvuru = belge <code>tur 19</code> (hasta / kurum tahakkuku sayılmaz).</li>
+      <li>"Protokol No" yazılır, "Başvuru No" değil. Hasta listelerinde TC numarası gösterilmez (yalnız hasta icmalinde, kimlik için maskeli).</li>
+      <li>Seçilebilir listelerin ilk sütunu onay kutusudur; seçim diğer sekmeleri süzer.</li>
+      <li>A4 önizleme ayrı sekmededir (tabloları sıkıştırmaz); Yazdır her sekmeden yalnız A4 belgeyi basar.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

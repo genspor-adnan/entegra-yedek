@@ -13,7 +13,7 @@ import { isoGun } from './icmal/icmalOrtak';
 import { stil } from './icmal/icmalStil';
 
 /**
- * HASTA İCMALİ `/hasta-icmal/:hastaId` — mockup Ekranlar/Kayıt Kabul/
+ * HASTA İCMALİ `/hasta-icmal/:hastaId` — mockup Ekranlar/İcmal/
  * hasta_icmal.html (kullanıcı 10.10.2026: "hasta icmal ekranını kodla").
  *
  * Bütün rakamlar SUNUCUDAN (HastaIcmalUclari): ekran yalnız çizer.

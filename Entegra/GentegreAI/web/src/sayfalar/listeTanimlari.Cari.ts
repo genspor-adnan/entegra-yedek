@@ -10,7 +10,7 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const CARI_LISTELERI: ListeGirdisi[] = [
   {
-    // KURUM İCMALİ EKRANI (10.10.2026, mockup Kayıt Kabul/kurum_icmal.html):
+    // KURUM İCMALİ EKRANI (10.10.2026, mockup İcmal/kurum_icmal.html):
     //   dönemin kurum başvuruları, kurum payı, kesinti, icmal/fatura durumu.
     //   İcmal oluşturma / faturalama aşağıdaki listeyle aynı uçlar (289).
     kaynak: 'kurum-icmali', rota: 'kurum-icmali', ozelSayfa: true,

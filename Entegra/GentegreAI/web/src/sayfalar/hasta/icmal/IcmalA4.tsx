@@ -28,7 +28,7 @@ export function IcmalA4({ v, antet, duzenleyen }: {
         <span>T.C. Kimlik: {v.hasta.tc || '—'}</span><span>Dönem: {tarihKisa(v.donem.bas)} - {tarihKisa(v.donem.bit)}</span>
       </div>
       <table className="a4-t">
-        <thead><tr><th>Tarih</th><th>Başvuru</th><th>Toplam</th><th>Kurum</th><th>Hasta</th><th>Tahsil</th><th>Kalan</th></tr></thead>
+        <thead><tr><th>Tarih</th><th>Protokol No</th><th>Toplam</th><th>Kurum</th><th>Hasta</th><th>Tahsil</th><th>Kalan</th></tr></thead>
         <tbody>
           {v.basvurular.filter(b => !b.iptal).map(b => (
             <tr key={b.id}><td>{tarihKisa(b.tarih)}</td><td>{b.no}</td><td>{p(b.toplam)}</td>

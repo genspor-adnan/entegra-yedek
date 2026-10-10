@@ -15,7 +15,7 @@ import { donemAdimlari, gecenAy, yerelGun } from './icmal/kurumIcmalOrtak';
 import { stil } from './icmal/kurumIcmalStil';
 
 /**
- * KURUM İCMALİ `/kurum-icmali` — mockup Ekranlar/Kayıt Kabul/
+ * KURUM İCMALİ `/kurum-icmali` — mockup Ekranlar/İcmal/
  * kurum_icmal.html (kullanıcı 10.10.2026: "kurum icmal ekranını kodla").
  *
  * Ödeyen kurumların dönem başvuruları, kurum payı, kesinti, icmal / fatura

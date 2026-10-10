@@ -94,7 +94,7 @@ public static partial class AksiyonKatalogu
                 Islem: Islem.Ekle, KayitGerekir: true, Sira: 15, UrunModu: 2,
                 Ipucu: "Seçili hastaya başvuru/kabul açar"),
             // FORM MOTORU (740): hastanın formları (onam, değerlendirme, beyan).
-            // HASTA İCMALİ (10.10.2026, mockup Kayıt Kabul/hasta_icmal.html):
+            // HASTA İCMALİ (10.10.2026, mockup İcmal/hasta_icmal.html):
             //   dönemdeki başvurular, kurum / hasta payı, tahsilat, kalan borç.
             new("hasta.icmal", "🧾 Hesap İcmali", "hasta", Hedef: "araccubugu2,sagtus,palet",
                 KaynakKodu: "hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 55, UrunModu: 2,
