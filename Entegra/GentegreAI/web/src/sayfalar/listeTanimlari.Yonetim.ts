@@ -35,7 +35,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kilitli',    filtre: { alan: 'kilitli', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Yönetim', menuSira: 100, menuAltGrup: 'Güvenlik',
+    menuGrup: 'Güvenlik', menuSira: 100,
     menuAd: 'Kullanıcılar', ic: '👤', yetkiKodu: 'kullanici',
   },
   {
@@ -237,7 +237,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Silme',      filtre: { alan: 'islemTipiKod', op: 'esit', deger: 0 } },
     ],
     tarihAlani: 'tarih',
-    menuGrup: 'Yönetim', menuSira: 102, menuAltGrup: 'Güvenlik', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
+    menuGrup: 'Güvenlik', menuSira: 102, menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
   },
   {
     // GIRIS KAYITLARI (674, kullanici: "login bilgileri de log da tutulsun").
@@ -255,7 +255,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Başarısız', filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
     ],
     gizliKolonlar: ['kullaniciId'],
-    menuGrup: 'Yönetim', menuSira: 101, menuAltGrup: 'Güvenlik', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log.giris',
+    menuGrup: 'Güvenlik', menuSira: 101, menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log.giris',
   },
   {
     // YZ KONTOR & KULLANIM (934, mockup Ekranlar/Ayarlar/yz_kontor_kullanim.html):
@@ -280,7 +280,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   onam kopyasini yazmasin diye ortak platformda.
     kaynak: 'onam-metni', baslik: 'Onam Metinleri', yol: 'Yonetim › Onam Metinleri',
     kartYolu: '/onam-metni', cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuSira: 113, menuAltGrup: 'Platform',
+    menuGrup: 'Platform', menuSira: 113,
     menuAd: 'Onam Metinleri', ic: '📜', yetkiKodu: 'onam',
   },
   {
@@ -288,7 +288,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   icinden (hasta kabul, teletip gorusmesi) alinir.
     kaynak: 'onam', baslik: 'Onamlar', yol: 'Yonetim › Onamlar',
     aksiyonEkrani: 'cikti-liste', tarihAlani: 'tarih',
-    menuGrup: 'Yönetim', menuSira: 114, menuAltGrup: 'Platform',
+    menuGrup: 'Platform', menuSira: 114,
     menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam.kayit',
   },
   {
@@ -297,7 +297,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Yonetim › Bildirim Şablonları', kartYolu: '/bildirim-sablon',
     aksiyonEkrani: 'bildirim-sablon-liste',
     cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuSira: 110, menuAltGrup: 'Platform',
+    menuGrup: 'Platform', menuSira: 110,
     menuAd: 'Bildirim Şablonları', ic: '💬', yetkiKodu: 'bildirim_sablon',
   },
   {
@@ -311,7 +311,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Hata',        filtre: { alan: 'durum', op: 'esit', deger: 4 } },
     ],
-    menuGrup: 'Yönetim', menuSira: 111, menuAltGrup: 'Platform',
+    menuGrup: 'Platform', menuSira: 111,
     menuAd: 'Bildirim Kuyruğu', ic: '📨', yetkiKodu: 'bildirim',
   },
   {
@@ -320,7 +320,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'zamanli-is', baslik: 'Zamanlanmış İşler',
     yol: 'Yonetim › Ortak Platform › Zamanlanmış İşler', kartYolu: '/zamanli-is',
     aksiyonEkrani: 'zamanli-is-liste',
-    menuGrup: 'Yönetim', menuSira: 112, menuAltGrup: 'Platform',
+    menuGrup: 'Platform', menuSira: 112,
     menuAd: 'Zamanlanmış İşler', ic: '⏱️', yetkiKodu: 'zamanli_is',
   },
   {
@@ -375,7 +375,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
     //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
     //   menuSira 15: Personel Listesi (10) ile Prim grubunun (20+) arasi.
-    menuGrup: 'Yönetim', menuAltGrup: 'Güvenlik', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
+    menuGrup: 'Güvenlik', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
   },
   {
     // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.

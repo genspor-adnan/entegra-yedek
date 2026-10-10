@@ -51,7 +51,10 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
               'Teknik Servis'] },
   // Kalite Yönetim grubunun alt grubudur (KlinikKalite); Doküman kendi grubu
   //   (kullanıcı: "kurum dokümanı günlük iş, ayar değil").
-  { ad: 'Yönetim',          renk: '#6b7a8b', gruplar: ['İK', 'Doküman', 'Yönetim'] },
+  // KALİTE / GÜVENLİK / PLATFORM (kullanıcı 10.10.2026): Yönetim grubunun alt
+  //   başlıklarıydı; bölgenin kendi grupları oldu, Doküman'dan sonra.
+  { ad: 'Yönetim',          renk: '#6b7a8b',
+    gruplar: ['İK', 'Doküman', 'Kalite', 'Güvenlik', 'Platform', 'Yönetim'] },
 ];
 
 /** HBYS grup sırası = bölgelerin düzleştirilmiş hali (tek kaynak). */

@@ -53,7 +53,9 @@ describe('menü düzeni', () => {
     //   ayrıdır: biyomedikal teknisyeni ile saha servisi aynı kişiler değil ve
     //   çağrı/SLA/sözleşme yalnız dış işte var. ERP kurulumunda da çıkar.
     // ÇAĞRI MERKEZİ (839) 14. HBYS grubu: hasta akışının ilk teması, randevunun önünde.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(30);
+    // 33: Kalite · Güvenlik · Platform (10.10.2026, kullanıcı) Yönetim'in alt
+    //   başlığıydı, Yönetim bölgesinde ayrı grup oldu.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(33);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -62,7 +64,8 @@ describe('menü düzeni', () => {
                                     .map(l => l.menuGrup));
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
-      if (g === 'e-Nabız' || g === 'Yönetim' || g === 'Sabit Varlıklar') continue;
+      // Kalite / Güvenlik / Platform (10.10.2026): yönetim ayar grupları, Yönetim gibi.
+      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform'].includes(g)) continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });
@@ -116,9 +119,12 @@ describe('menü düzeni', () => {
     //   değil: eczane - satınalma - depo - biyomedikal aynı zincir. Finans'ın
     //   ve Yönetim'in içine dağıtılsalardı günlük tedarik işi iki dala bölünürdü.
     expect(BOLGE_HBYS.length).toBeLessThanOrEqual(8);
+    // 6: Yönetim bölgesi (10.10.2026, kullanıcı): Kalite · Güvenlik · Platform
+    //   Yönetim'in alt başlığıyken ayrı grup oldu - İK · Doküman · Kalite ·
+    //   Güvenlik · Platform · Yönetim.
     for (const b of BOLGE_HBYS)
       // 5: Klinikler bölgesine İşyeri Hekimliği (741) eklendi - beşinci klinik dal.
-      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(5);
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(6);
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup iki bölgede birden').toEqual([]);
   });

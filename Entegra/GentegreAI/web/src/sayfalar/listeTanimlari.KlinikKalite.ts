@@ -36,7 +36,7 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Yönetim', menuAltGrup: 'Kalite', menuAd: 'Klinik Kalite Göstergeleri',
+    menuGrup: 'Kalite', menuAd: 'Klinik Kalite Göstergeleri',
     ic: '📐', yetkiKodu: 'klinik_kalite.olgu', menuSira: 60,
   },
   {
@@ -52,7 +52,7 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Yönetim', menuAltGrup: 'Kalite', menuAd: 'Klinik Kalite Dönem Sonuçları',
+    menuGrup: 'Kalite', menuAd: 'Klinik Kalite Dönem Sonuçları',
     ic: '📊', yetkiKodu: 'klinik_kalite.donem', menuSira: 61,
   },
   {
@@ -68,7 +68,7 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Yönetim', menuAltGrup: 'Kalite', menuAd: 'Klinik Kalite Kod Havuzu',
+    menuGrup: 'Kalite', menuAd: 'Klinik Kalite Kod Havuzu',
     ic: '🔤', yetkiKodu: 'klinik_kalite', menuSira: 62,
   },
 ];

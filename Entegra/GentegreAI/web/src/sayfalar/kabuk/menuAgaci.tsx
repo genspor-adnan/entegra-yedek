@@ -70,6 +70,8 @@ export interface MenuOgesi {
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
   'Finans', 'Muhasebe', 'İK', 'Doküman', 'Sabit Varlıklar',
+  // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Yönetim yine en sonda).
+  'Kalite', 'Güvenlik', 'Platform',
 ];
 
 export type MenuSatiri =
@@ -237,6 +239,9 @@ export const GRUP_IKON: Record<string, string> = {
   //   cogu yazi tipinde bos kare. Pusula denizcilik cagrisimini koruyor
   //   ve her platformda ayni cizilir.
   'Yönetim': '🧭',
+  // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
+  //   grup olunca aynı simgeler.
+  'Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
 };
 
 /** ALT GRUP ikonu: ikinci seviye eskiden HEP ⚙️ ciziyordu, ayar olmayan alt
