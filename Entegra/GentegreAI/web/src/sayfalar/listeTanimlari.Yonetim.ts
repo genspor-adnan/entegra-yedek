@@ -124,6 +124,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
   },
   {
+    // HEKİM PERFORMANS İCMALİ (1021, mockup İcmal/hekim_performans_icmali.html):
+    //   hekim / bölüm başına ciro, kurum / hasta payı, iskonto, hakediş.
+    kaynak: 'hekim-performans', rota: 'hekim-performans', ozelSayfa: true,
+    baslik: 'Hekim Performans İcmali', yol: 'İK › Hekim Performans İcmali',
+    menuGrup: 'İK', menuAd: 'Hekim Performans İcmali', ic: '🩺',
+    yetkiKodu: 'prim.hekim_performans', menuSira: 31, urunModu: 2,
+  },
+  {
     // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin
     //   ALTINDA TEK BASINA (kullanici; grupsuz duz oge). Iki modda ORTAK.
     kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',

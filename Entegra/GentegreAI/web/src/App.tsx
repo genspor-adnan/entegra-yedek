@@ -32,6 +32,7 @@ const VezneIcmal = tembel(() => import('./sayfalar/vezne/VezneIcmal'), 'VezneIcm
 const MedulaMutabakat = tembel(() => import('./sayfalar/medula/MedulaMutabakat'), 'MedulaMutabakat');
 const AlacakYaslandirma = tembel(() => import('./sayfalar/yaslandirma/AlacakYaslandirma'), 'AlacakYaslandirma');
 const HastaBorcTakibi = tembel(() => import('./sayfalar/borc/HastaBorcTakibi'), 'HastaBorcTakibi');
+const HekimPerformans = tembel(() => import('./sayfalar/performans/HekimPerformans'), 'HekimPerformans');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -242,6 +243,7 @@ function Yollar() {
         {yetki('medula.mutabakat') && <Route path="/medula-mutabakat" element={<MedulaMutabakat />} />}
         {yetki('finans.alacak_yaslandirma') && <Route path="/alacak-yaslandirma" element={<AlacakYaslandirma />} />}
         {yetki('hasta.borc_takip') && <Route path="/hasta-borc-takibi" element={<HastaBorcTakibi />} />}
+        {yetki('prim.hekim_performans') && <Route path="/hekim-performans" element={<HekimPerformans />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}
