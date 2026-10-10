@@ -238,7 +238,9 @@ export const GRUP_IKON: Record<string, string> = {
   //   🛞 (tekerlek - lastik gibi cizilir). ⎈ (U+2388) anlamca dogru ama
   //   cogu yazi tipinde bos kare. Pusula denizcilik cagrisimini koruyor
   //   ve her platformda ayni cizilir.
-  'Yönetim': '🧭',
+  // 'Yönetim' grubu 10.10.2026'da 'Sistem' oldu; simge aynı.
+  'Sistem': '🧭',
+  'Dökümler': '📊',
   // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
   //   grup olunca aynı simgeler.
   'Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
@@ -375,10 +377,12 @@ export function menuSatirlariKur(
   for (let i = 0; i < satirlar.length; i++)
     if (satirlar[i].tur === 'grup') satirlar[i] = sirali[sayac++];
 
-  const YONETIM_ADLARI = ['Yönetim', 'Administration', 'Verwaltung'];
-  const yonetimIndeks = satirlar.findIndex(
-    s => s.tur === 'grup' && YONETIM_ADLARI.includes(s.ad));
-  if (yonetimIndeks >= 0) satirlar.push(...satirlar.splice(yonetimIndeks, 1));
+  // EN SONDA: Sistem (eski Yönetim grubu), ardından Dökümler (10.10.2026).
+  //   Çevrilmiş adlar da sayılır.
+  for (const adlar of [['Sistem', 'System', 'Administration', 'Verwaltung'], ['Dökümler', 'Reports', 'Berichte']]) {
+    const i = satirlar.findIndex(s => s.tur === 'grup' && adlar.includes(s.ad));
+    if (i >= 0) satirlar.push(...satirlar.splice(i, 1));
+  }
   // Sira YALNIZ grup icinde uygulanir: gruplarin kendi sirasi (Hasta, Cari,
   //   Satis...) tanim sirasindan gelir, menuSira onu kaydirmamali.
   satirlar.forEach(sat => {

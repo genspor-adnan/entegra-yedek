@@ -10,6 +10,9 @@
  */
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+
+/** Bölgede tek satır olarak çizilen gruplar (içinde tek ekran). */
+const TEK_SATIR_GRUPLAR = new Set(['Dökümler']);
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c, cm } from '../../dil/ceviri';
 import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
@@ -108,7 +111,13 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
     </NavLink>
   );
   /** Grup satiri (acilir-kapanir ana menu + alt gruplari) - bolgeli ve bolgesiz menude ortak. */
-  const grupCiz = (s: Extract<MenuSatiri, { tur: 'grup' }>) => (
+  const grupCiz = (s: Extract<MenuSatiri, { tur: 'grup' }>) =>
+    // TEK SATIRLIK GRUP (kullanıcı 10.10.2026: Dökümler "tek tıklık giriş"):
+    //   grup bölgedeki yerini korur (sıra, menü düzeni), ama açılır başlık
+    //   yerine doğrudan ekrana giden tek satır çizilir - grup adı ve ikonuyla.
+    s.alt.length === 1 && TEK_SATIR_GRUPLAR.has(s.alt[0].grupHam ?? '')
+      ? duzCiz({ ...s.alt[0], ad: s.ad, ic: s.ikon ?? GRUP_IKON[s.ad] ?? s.alt[0].ic })
+      : (
               <div key={s.ad}>
                 <button
                   type="button"

@@ -57,7 +57,8 @@ describe('menü düzeni', () => {
     //   başlığıydı, Yönetim bölgesinde ayrı grup oldu.
     // 34: Onay grubu (10.10.2026, kullanıcı) - Yönetim'den ayrıldı.
     // 35: Formlar grubu (10.10.2026) - Yönetim › Formlar alt başlığıydı.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(35);
+    // 36: Dökümler (tasarımcı) kendi grubu; Yönetim grubu Sistem adını aldı (10.10.2026).
+    expect(GRUPLAR.length).toBeLessThanOrEqual(36);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -67,7 +68,7 @@ describe('menü düzeni', () => {
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
       // Kalite / Güvenlik / Platform (10.10.2026): yönetim ayar grupları, Yönetim gibi.
-      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar'].includes(g)) continue;
+      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar', 'Sistem', 'Dökümler'].includes(g)) continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });
@@ -78,7 +79,8 @@ describe('menü düzeni', () => {
     // Yönetim › Dökümler TASARIMCIDIR (süzgeçsiz, gerçek ekran); grup içi
     //   öğeler ona süzgeçle giden bağlantılardır (plan kural 4).
     for (const l of LISTELER.filter(x => x.menuAd === 'Dökümler' && x.menuGrup
-                                      && x.menuGrup !== 'Yönetim')) {
+                                      // Tasarımcı 10.10.2026'dan beri kendi grubunda (Dökümler, tek satır).
+                                      && x.menuGrup !== 'Yönetim' && x.menuGrup !== 'Dökümler')) {
       expect(l.menuYol, `${l.menuGrup} › Dökümler bağlantısız`).toBeTruthy();
       expect(l.menuYol).toContain('/dokumler?grup=');
     }
@@ -123,10 +125,10 @@ describe('menü düzeni', () => {
     expect(BOLGE_HBYS.length).toBeLessThanOrEqual(8);
     // 6: Yönetim bölgesi (10.10.2026, kullanıcı): Kalite · Güvenlik · Platform
     //   Yönetim'in alt başlığıyken ayrı grup oldu - İK · Doküman · Kalite ·
-    //   Güvenlik · Platform · Yönetim. 7: + Onay (10.10.2026). 8: + Formlar.
+    //   Güvenlik · Platform · Yönetim. 7: + Onay (10.10.2026). 8: + Formlar. 9: Sistem + Dökümler.
     for (const b of BOLGE_HBYS)
       // 5: Klinikler bölgesine İşyeri Hekimliği (741) eklendi - beşinci klinik dal.
-      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(8);
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(9);
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup iki bölgede birden').toEqual([]);
   });

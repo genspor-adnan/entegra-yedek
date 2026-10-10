@@ -21,7 +21,7 @@ import type { ListeTanimi } from './listeTanimlari.Ortak';
  * Kod listesi sunucuda Gentegre.Cekirdek/Yetki/EkranKodlari ile aynı.
  */
 const DOKUM_KOD_EKI: Record<string, string> = {
-  'Yönetim': 'yonetim', 'Randevu': 'randevu', 'Kayıt Kabul': 'kayit_kabul',
+  'Yönetim': 'yonetim', 'Sistem': 'yonetim', 'Dökümler': 'yonetim', 'Randevu': 'randevu', 'Kayıt Kabul': 'kayit_kabul',
   'Muayene': 'muayene', 'Laboratuvar': 'laboratuvar', 'Radyoloji': 'radyoloji',
   'Göz': 'goz', 'Yatan Hasta': 'yatan_hasta', 'Diş': 'dis', 'FTR': 'ftr',
   'İşyeri Hekimliği': 'isyeri_hekimligi', 'Çağrı Merkezi': 'cagri_merkezi',

@@ -42,7 +42,9 @@ describe('modül süzmesi', () => {
     //   ayrı grup oldular - rol, işlem günlüğü, platform ayarı kapatılamaz.
     const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK',
                             'Kurumlar & Sigorta', 'Demirbaş', 'Medula',
-                            'Kalite', 'Güvenlik', 'Platform', 'Onay']);
+                            'Kalite', 'Güvenlik', 'Platform', 'Onay',
+                            // 10.10.2026: Yönetim grubu Sistem oldu; Dökümler (tasarımcı) ayrı grup.
+                            'Sistem', 'Dökümler']);
     const gruplar = new Set(LISTELER.map(l => l.menuGrup).filter(Boolean) as string[]);
 
     for (const g of gruplar) {
