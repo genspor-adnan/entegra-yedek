@@ -68,7 +68,10 @@ export const DOKUM_LISTELERI = [
   dokumOgesi('Randevu'),
   dokumOgesi('Kayıt Kabul'),
   dokumOgesi('Muayene'),
-  dokumOgesi('Laboratuvar'),
+  // Ayarlar'dan ÖNCE (kullanıcı 10.10.2026): kök öğeler 80'de alt başlıkların
+  //   (Biyokimya / Mikrobiyoloji / Genetik) üstünde kalıyordu; 150 = Genetik ile
+  //   Ayarlar (200+) arası.
+  dokumOgesi('Laboratuvar', 150),
   dokumOgesi('Radyoloji'),
   // Göz (691): "hangi hekim kaç fako yaptı", "DR tarama oranı", "gözlük
   //   reçetesi sayısı" - hepsi döküm sorusu.
