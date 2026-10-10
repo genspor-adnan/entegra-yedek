@@ -234,6 +234,8 @@ function Yollar() {
         {/* HASTA İCMALİ (10.10.2026): hasta listesinden "🧾 Hesap İcmali". */}
         {yetki('hasta') && yetki('belge') && <Route path="/hasta-icmal/:hastaId" element={<HastaIcmal />} />}
         {yetki('kurum.icmal_ozet') && <Route path="/kurum-icmali" element={<KurumIcmal />} />}
+        {/* Eski Kurum İcmalleri listesi (ver2): artık Kurum İcmali › İcmaller sekmesi. */}
+        <Route path="/kurum-icmal" element={<Navigate to="/kurum-icmali?sekme=icmaller" replace />} />
         {yetki('banko.vezne_icmal') && <Route path="/vezne-icmali" element={<VezneIcmal />} />}
         {yetki('medula.mutabakat') && <Route path="/medula-mutabakat" element={<MedulaMutabakat />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}

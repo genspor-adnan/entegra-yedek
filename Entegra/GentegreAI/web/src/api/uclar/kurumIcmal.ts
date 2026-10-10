@@ -39,10 +39,24 @@ export type KurumIcmali = {
   cari: { vkn: string; devreden: number; bakiye: number; hareketler: KurumCariHareketi[] } | null;
 };
 
+/** İcmaller sekmesi (ver2): dönemden bağımsız icmal kayıtları. */
+export type KurumIcmalKaydi = {
+  id: number; kurumId: number; kurum: string; donemBas: string; donemBit: string;
+  /** 1 hazırlanıyor, 2 faturalandı (kurum_icmal.durum). */
+  durum: number; durumKod: 'hazirlaniyor' | 'faturalandi' | 'tahsil';
+  kurumPayi: number; aciklama: string; satir: number; basvuru: number; kesinti: number;
+  belgeId?: number | null; faturaNo: string; faturaTarihi?: string | null; faturaTutari: number;
+  tahsil: number; vade?: string | null; vadesiGecti: boolean;
+};
+export type KurumIcmalSatiri = { protokolNo: string; tarih?: string | null; hasta: string; kalem: string; tutar: number };
+
 export const kurumIcmalUclari = {
   kurumIcmali: (kurumlar: number[], bas: string, bit: string) => {
     const q = new URLSearchParams({ bas, bit });
     if (kurumlar.length) q.set('kurumlar', kurumlar.join(','));
     return istek<KurumIcmali>(`/api/kurum-icmal/ozet?${q}`);
   },
+  kurumIcmalKayitlari: (kurumlar: number[]) =>
+    istek<{ kayitlar: KurumIcmalKaydi[] }>(`/api/kurum-icmal/kayitlar${kurumlar.length ? `?kurumlar=${kurumlar.join(',')}` : ''}`),
+  kurumIcmalSatirlari: (id: number) => istek<{ satirlar: KurumIcmalSatiri[] }>(`/api/kurum-icmal/${id}/satirlar`),
 };

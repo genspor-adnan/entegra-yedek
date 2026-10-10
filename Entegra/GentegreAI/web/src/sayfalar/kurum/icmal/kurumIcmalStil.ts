@@ -20,6 +20,14 @@ export const stil = `
 .ki-baslik { font-weight:bold; color:#2c4a6b; padding:8px 2px 4px; }
 .ki-soluk { color:var(--soluk,#6b7a8b); }
 .ki-not { padding:14px; color:var(--soluk,#6b7a8b); }
+/* İcmaller sekmesi (ver2): sekmeye özgü araç çubuğu + durum çipleri. */
+.ki-altarac { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:6px 2px 8px; }
+.ki-altarac .sp { flex:1; }
+.ki-altarac button { border:1px solid var(--cizgi,#cdd6e0); border-radius:4px; padding:4px 10px; font-size:12px; background:var(--yuz,#fff); cursor:pointer; }
+.ki-altarac button:disabled { opacity:.5; cursor:default; }
+.ki-altarac button.hi-yesil { background:linear-gradient(#5cb87a,#3f9a5e); color:#fff; border-color:#3f9a5e; }
+.ki-cip { border:1px solid var(--cizgi,#cdd6e0); border-radius:12px; padding:2px 10px; font-size:11.5px; background:var(--yuz,#fff); color:#4d5d6e; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
+.ki-cip.on { background:#2f6db3; border-color:#2f6db3; color:#fff; }
 /* A4: kurum tablosu daha çok sütun taşır - genişlikler hasta tablosundan farklı. */
 .a4-t.ki-a4t { font-size:9px; }
 .a4-t.ki-a4t th:nth-child(1) { width:10%; } .a4-t.ki-a4t th:nth-child(2) { width:15%; }

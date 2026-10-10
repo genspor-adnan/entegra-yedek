@@ -1,4 +1,4 @@
-import type { KurumIcmali } from '../../../api/uclar/kurumIcmal';
+import type { KurumIcmalKaydi, KurumIcmali } from '../../../api/uclar/kurumIcmal';
 
 /** Kurum icmalinin saf yardımcıları - ekran çizmez, test edilir. */
 
@@ -21,6 +21,22 @@ export function icmalRozeti(d: number): Rozet {
   if (d === 2) return { ad: 'Faturalandı', renk: 'ok' };
   if (d === 1) return { ad: 'Kesinleşti', renk: 'sari' };
   return { ad: 'Açık', renk: 'pas' };
+}
+
+/**
+ * İCMAL KAYDI DURUMU (İcmaller sekmesi): sunucunun durum kodu + vade / kısmi
+ * tahsil ayrıntısı - "faturalandı" tek başına parası gelmiş mi söylemiyor.
+ */
+export function kayitRozeti(k: Pick<KurumIcmalKaydi, 'durumKod' | 'vadesiGecti' | 'tahsil' | 'vade'>): Rozet {
+  if (k.durumKod === 'hazirlaniyor') return { ad: 'Hazırlanıyor · fatura bekliyor', renk: 'sari' };
+  if (k.durumKod === 'tahsil') return { ad: 'Tahsil edildi', renk: 'ok' };
+  if (k.vadesiGecti) return { ad: 'Faturalandı · vadesi geçti', renk: 'kir' };
+  if (k.tahsil > 0.005) return { ad: 'Faturalandı · kısmi tahsil', renk: 'sari' };
+  if (k.vade) {
+    const d = new Date(k.vade);
+    return { ad: `Faturalandı · vade ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`, renk: 'mavi' };
+  }
+  return { ad: 'Faturalandı', renk: 'mavi' };
 }
 
 export type Adim = { ad: string; durum: 'bitti' | 'simdi' | 'bekliyor' };

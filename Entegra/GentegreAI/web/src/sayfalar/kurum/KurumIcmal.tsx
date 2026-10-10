@@ -2,14 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
-import type { KurumIcmali } from '../../api/uclar/kurumIcmal';
+import type { KurumIcmalKaydi, KurumIcmali } from '../../api/uclar/kurumIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
+import { IcmallerSekmesi } from './icmal/IcmallerSekmesi';
 import { KurumIcmalA4 } from './icmal/KurumIcmalA4';
 import {
-  BasvuruTablosu, FaturaTablolari, HizmetGrubuTablosu, KesintiTablosu, KurumTablosu,
+  BasvuruTablosu, CariTablosu, HizmetGrubuTablosu, KesintiTablosu, KurumTablosu,
 } from './icmal/KurumIcmalTablolari';
 import { donemAdimlari, gecenAy, yerelGun } from './icmal/kurumIcmalOrtak';
 import { stil } from './icmal/kurumIcmalStil';
@@ -24,8 +25,14 @@ import { stil } from './icmal/kurumIcmalStil';
  * sekmeleri süzer; hiçbiri seçili değilse bütün kurumlar. Tek kurum
  * seçiliyken icmal oluşturma / faturalama (289'un uçları) ve cari açılır.
  * Görünüm hasta icmaliyle ortak (icmalStil); A4 önizleme ayrı sekmede.
+ *
+ * VER2 (mockup kurum_icmal_ver2.html, kullanıcı 10.10.2026: "ver2 yi kodla"):
+ * eski "Kurum İcmalleri" listesi "İcmaller" sekmesi oldu (dönemden bağımsız
+ * icmal kayıtları); eski adres `/kurum-icmal` buraya `?sekme=icmaller` ile
+ * yönlenir. Fatura tablosu oraya taşındı, kalan sekme "Cari & Tahsilat".
  */
-type Sekme = 'kurumlar' | 'basvuru' | 'grup' | 'kesinti' | 'fatura' | 'onizleme';
+type Sekme = 'kurumlar' | 'basvuru' | 'grup' | 'kesinti' | 'icmaller' | 'cari' | 'onizleme';
+const SEKMELER: Sekme[] = ['kurumlar', 'basvuru', 'grup', 'kesinti', 'icmaller', 'cari', 'onizleme'];
 
 export function KurumIcmal() {
   const [arama, setArama] = useSearchParams();
@@ -39,7 +46,12 @@ export function KurumIcmal() {
   const geri = arama.get('geri');
   const [veri, setVeri] = useState<KurumIcmali | null>(null);
   const [hata, setHata] = useState('');
-  const [sekme, setSekme] = useState<Sekme>(secili.length ? 'basvuru' : 'kurumlar');
+  // Açılış sekmesi adresten (eski Kurum İcmalleri bağlantısı ?sekme=icmaller).
+  const [sekme, setSekme] = useState<Sekme>(() => {
+    const a = arama.get('sekme') as Sekme | null;
+    return a && SEKMELER.includes(a) ? a : secili.length ? 'basvuru' : 'kurumlar';
+  });
+  const [yazdirBekliyor, setYazdirBekliyor] = useState(false);
   const [antet, setAntet] = useState<Record<string, unknown> | null>(null);
   const [tazele, setTazele] = useState(0);
 
@@ -57,6 +69,21 @@ export function KurumIcmal() {
       .then(setVeri).catch(h => setHata(hataMetni(h)));
   }, [seciliAnahtar, bas, bit, tazele]);
   useEffect(() => { api.dokumAntet().then(a => setAntet(a.kurum)).catch(() => setAntet(null)) }, []);
+  // İCMALİ YAZDIR (İcmaller sekmesi): ekran icmalin kurum ve dönemine geçer,
+  //   veri gelince A4 basılır - belge o kurum / dönemin icmalidir.
+  useEffect(() => {
+    if (!yazdirBekliyor || !veri) return;
+    setYazdirBekliyor(false);
+    const z = setTimeout(() => window.print(), 300);
+    return () => clearTimeout(z);
+  }, [yazdirBekliyor, veri]);
+
+  /** İcmal kaydının kurumuna ve dönemine geç (İcmaller sekmesinde çift tık). */
+  const icmaleGec = (k: KurumIcmalKaydi, hedef: Sekme) => {
+    setVeri(null);
+    degistir({ kurumlar: String(k.kurumId), bas: k.donemBas.slice(0, 10), bit: k.donemBit.slice(0, 10), sekme: '' });
+    setSekme(hedef);
+  };
 
   const o = veri?.ozet;
   const tekKurum = veri && veri.kurumId > 0 ? veri.kurumlar.find(k => k.id === veri.kurumId) ?? null : null;
@@ -97,7 +124,8 @@ export function KurumIcmal() {
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['kurumlar', 'Dönemdeki Kurumlar', veri.kurumlar.length], ['basvuru', 'Başvurular', veri.basvurular.length],
     ['grup', 'Hizmet Grupları', veri.hizmetGruplari.length], ['kesinti', 'Kesinti & İtiraz', veri.kesintiler.length],
-    ['fatura', 'Fatura & Tahsilat', veri.icmaller.length], ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
+    ['icmaller', 'İcmaller', null], ['cari', 'Cari & Tahsilat', veri.cari ? veri.cari.hareketler.length : null],
+    ['onizleme', '🖨️ Önizleme (A4)', null]] : [];
 
   return (
     <div className="hi">
@@ -118,7 +146,6 @@ export function KurumIcmal() {
         <span className="ki-ayrac" />
         <button className="hi-ana" disabled={!veri} onClick={() => window.print()}>🖨️ Yazdır (A4 Kurum İcmali)</button>
         <span className="sp" />
-        <button onClick={() => git('/kurum-icmal')}>🧾 Kurum İcmalleri</button>
         {geri && <button onClick={() => git(geri)}>↩ Geri Dön</button>}
       </div>
 
@@ -178,7 +205,14 @@ export function KurumIcmal() {
             )}
             {sekme === 'grup' && <HizmetGrubuTablosu v={veri} />}
             {sekme === 'kesinti' && <KesintiTablosu v={veri} />}
-            {sekme === 'fatura' && <FaturaTablolari v={veri} faturaAc={id => git(`/belge/${id}`)} />}
+            {sekme === 'icmaller' && (
+              <IcmallerSekmesi seciliKurumlar={secili} tazele={tazele}
+                               icmalOlustur={tekKurum && o && o.acikKurumPayi > 0.005 ? icmalOlustur : null}
+                               ac={k => icmaleGec(k, 'basvuru')}
+                               yazdir={k => { icmaleGec(k, 'onizleme'); setYazdirBekliyor(true) }}
+                               faturaAc={id => git(`/belge/${id}`)} degisti={() => setTazele(t => t + 1)} />
+            )}
+            {sekme === 'cari' && <CariTablosu v={veri} />}
             <div className={'hi-onizleme' + (sekme === 'onizleme' ? '' : ' gizli')}>
               <KurumIcmalA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} kurumAdi={kurumAdi} />
             </div>

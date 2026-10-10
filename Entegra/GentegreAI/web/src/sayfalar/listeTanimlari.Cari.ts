@@ -35,6 +35,11 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
     menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum.icmal',
     menuSira: 20,
+    // VER2 (kullanıcı 10.10.2026: "ver2 yi kodla"): liste Kurum İcmali
+    //   ekranının "İcmaller" sekmesi oldu - menüde tek giriş kalır. Kayıt
+    //   yetki kodu (matris) için duruyor; rota açmaz, eski adres App.tsx'te
+    //   sekmeye yönlenir.
+    menuGizli: true, menuYol: '/kurum-icmali?sekme=icmaller',
   },
   {
     // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini

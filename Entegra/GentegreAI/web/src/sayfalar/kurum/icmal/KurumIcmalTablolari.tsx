@@ -148,53 +148,28 @@ export function KesintiTablosu({ v }: { v: KurumIcmali }) {
   );
 }
 
-export function FaturaTablolari({ v, faturaAc }: { v: KurumIcmali; faturaAc(id: number): void }) {
+/** CARİ & TAHSİLAT (ver2): kurumun cari hareketleri - faturalar İcmaller sekmesinde. */
+export function CariTablosu({ v }: { v: KurumIcmali }) {
   const c = v.cari;
-  let bakiye = c?.devreden ?? 0;
+  if (!c) return <div className="bos ki-not">Cari hareketler tek kurum seçiliyken görünür (Dönemdeki Kurumlar'da bir kurum işaretleyin).</div>;
+  let bakiye = c.devreden;
   return (
-    <div className="ki-ikili">
-      <div>
-        <div className="ki-baslik">Dönem İcmalleri ve Faturaları</div>
-        <table className="hi-tablo">
-          <thead><tr><th>Kurum</th><th>Dönem</th><th>Fatura No</th><th>Tarih</th>
-            <th className="sag">Fatura</th><th className="sag">Tahsil</th><th>Durum</th></tr></thead>
-          <tbody>
-            {v.icmaller.length === 0 && <tr><td colSpan={7} className="bos">Bu dönem için icmal oluşturulmadı.</td></tr>}
-            {v.icmaller.map(i => {
-              const r = icmalRozeti(i.durum);
-              return (
-                <tr key={i.id}><td>{i.kurum}</td><td>{tarihKisa(i.donemBas)} – {tarihKisa(i.donemBit)}</td>
-                  <td>{i.belgeId ? <a className="ki-lnk" onClick={() => faturaAc(i.belgeId!)}>{i.faturaNo}</a> : '—'}</td>
-                  <td>{tarihKisa(i.faturaTarihi)}</td>
-                  <td className="sag">{i.belgeId ? p(i.faturaTutari) : p(i.toplam)}</td><td className="sag">{tire(i.tahsil)}</td>
-                  <td><span className={'bo-rz ' + r.renk}>{r.ad}</span></td></tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <div className="ki-baslik">Kurum Cari Hareketleri</div>
-        {!c ? <div className="bos ki-not">Cari hareketler tek kurum seçiliyken görünür.</div> : (
-          <table className="hi-tablo">
-            <thead><tr><th>Tarih</th><th>Belge</th><th>Açıklama</th><th className="sag">Borç</th>
-              <th className="sag">Alacak</th><th className="sag">Bakiye</th></tr></thead>
-            <tbody>
-              <tr><td>{tarihKisa(v.donem.bas)}</td><td /><td className="ki-soluk">Devreden</td><td /><td />
-                <td className="sag">{p(c.devreden)}</td></tr>
-              {c.hareketler.map((h, i) => {
-                bakiye += h.borc - h.alacak;
-                return (
-                  <tr key={i}><td>{tarihKisa(h.tarih)}</td><td>{h.belge}</td><td>{h.tur}{h.aciklama && ` · ${h.aciklama}`}</td>
-                    <td className="sag">{tire(h.borc)}</td><td className="sag">{tire(h.alacak)}</td>
-                    <td className={'sag' + (bakiye > 0.005 ? ' kir' : '')}>{p(bakiye)}</td></tr>
-                );
-              })}
-              <tr className="top"><td colSpan={5}>Kurum bakiyesi (borçlu)</td><td className="sag">{p(c.bakiye)}</td></tr>
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+    <table className="hi-tablo">
+      <thead><tr><th>Tarih</th><th>Belge</th><th>Açıklama</th><th className="sag">Borç</th>
+        <th className="sag">Alacak</th><th className="sag">Bakiye</th></tr></thead>
+      <tbody>
+        <tr><td>{tarihKisa(v.donem.bas)}</td><td /><td className="ki-soluk">Devreden</td><td /><td />
+          <td className="sag">{p(c.devreden)}</td></tr>
+        {c.hareketler.map((h, i) => {
+          bakiye += h.borc - h.alacak;
+          return (
+            <tr key={i}><td>{tarihKisa(h.tarih)}</td><td>{h.belge}</td><td>{h.tur}{h.aciklama && ` · ${h.aciklama}`}</td>
+              <td className="sag">{tire(h.borc)}</td><td className="sag">{tire(h.alacak)}</td>
+              <td className={'sag' + (bakiye > 0.005 ? ' kir' : '')}>{p(bakiye)}</td></tr>
+          );
+        })}
+        <tr className="top"><td colSpan={5}>Kurum bakiyesi (borçlu)</td><td className="sag">{p(c.bakiye)}</td></tr>
+      </tbody>
+    </table>
   );
 }

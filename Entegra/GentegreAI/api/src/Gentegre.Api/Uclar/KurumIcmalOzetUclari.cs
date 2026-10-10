@@ -297,5 +297,107 @@ public static class KurumIcmalOzetUclari
                 ozet, kurumlar = kurumOzetleri, basvurular, hizmetGruplari, kesintiler, icmaller, cari,
             });
         });
+
+        // ------------------------------------------------ icmal kayıtları ----
+        // İCMALLER SEKMESİ (ver2, kullanıcı 10.10.2026: "kurum icmallerini kurum
+        //   icmali ekranına sekme olarak alalım"): eski Kurum İcmalleri
+        //   listesinin yerine. DÖNEMDEN BAĞIMSIZ bütün icmal kayıtları; kurum
+        //   seçimi isteğe bağlı süzgeç. Durum: 1 hazırlanıyor, 2 faturalandı;
+        //   faturanın tamamı tahsil edildiyse "tahsil edildi" sayılır.
+        grup.MapGet("/kayitlar", async (string? kurumlar, VeriKaynagi veri, BaglamCozucu cozucu,
+                                        HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kurum", Islem.Gor);
+            var secili = (kurumlar ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(x => int.TryParse(x, out var n) ? n : 0).Where(n => n > 0).Distinct().ToArray();
+            await using var b = await veri.AcAsync(iptal);
+            var liste = await b.ListeAsync("""
+                select i.id, i.kurum_id,
+                       coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
+                       i.donem_bas, i.donem_bit, i.durum, coalesce(i.toplam, 0), coalesce(i.aciklama, ''),
+                       coalesce(s.satir, 0), coalesce(s.basvuru, 0), coalesce(kz.tutar, 0),
+                       i.belge_id, coalesce(f.belge_no, ''), f.belge_tarihi, coalesce(f.genel_toplam, 0),
+                       coalesce(f.vade_gun, 0),
+                       coalesce((select sum(case when kt.yon > 0 then ki.yerel_tutar else -ki.yerel_tutar end)
+                                   from public.kasa_islem ki
+                                   join public.kasa_islem_turu kt on kt.kod = ki.tur
+                                  where ki.belge_id = i.belge_id and ki.durum <> 9
+                                    and kt.grup in ('tahsilat', 'ceksenet', 'kupon')), 0)
+                  from public.kurum_icmal i
+                  left join public.taraf t on t.id = i.kurum_id
+                  left join public.belge f on f.id = i.belge_id
+                  left join lateral (
+                      select count(*) as satir, count(distinct st.belge_id) as basvuru
+                        from public.kurum_icmal_satir ks
+                        join public.belge_satir st on st.id = ks.belge_satir_id
+                       where ks.icmal_id = i.id) s on true
+                  -- Kesinti: icmaldeki başvuruların Medula kesintisi (iade düşülmüş).
+                  left join lateral (
+                      select sum(mk.tutar - coalesce(mk.iade_tutar, 0)) as tutar
+                        from public.medula_kesinti mk
+                        join public.medula_fatura mf on mf.id = mk.medula_fatura_id
+                       where mf.belge_id in (select st.belge_id from public.kurum_icmal_satir ks
+                                               join public.belge_satir st on st.id = ks.belge_satir_id
+                                              where ks.icmal_id = i.id)) kz on true
+                 where i.durum > 0
+                   and (cardinality(@p0::int[]) = 0 or i.kurum_id = any(@p0::int[]))
+                   and (@p1 = 0 or i.sube_id is null or i.sube_id = @p1)
+                 order by i.donem_bas desc, i.id desc
+                 limit 500
+                """, null, [secili, baglam.SubeId ?? 0], o =>
+            {
+                var durum = o.GetInt16(5);
+                var fatura = o.GetDecimal(14);
+                var tahsil = o.GetDecimal(16);
+                var faturaTarihi = o.IsDBNull(13) ? (DateTime?)null : o.GetDateTime(13);
+                var vadeGun = o.GetInt32(15);
+                DateTime? vade = faturaTarihi?.Date.AddDays(vadeGun);
+                return new
+                {
+                    id = o.GetInt32(0), kurumId = o.GetInt32(1), kurum = o.GetString(2),
+                    donemBas = o.GetDateTime(3), donemBit = o.GetDateTime(4), durum,
+                    kurumPayi = o.GetDecimal(6), aciklama = o.GetString(7),
+                    satir = o.GetInt64(8), basvuru = o.GetInt64(9), kesinti = o.GetDecimal(10),
+                    belgeId = o.IsDBNull(11) ? (int?)null : o.GetInt32(11), faturaNo = o.GetString(12),
+                    faturaTarihi, faturaTutari = fatura, tahsil, vade,
+                    // tahsil edildi > faturalandı (vadesi geçti / kısmi) > hazırlanıyor
+                    durumKod = durum == 1 ? "hazirlaniyor"
+                             : fatura > 0 && tahsil >= fatura - 0.005m ? "tahsil"
+                             : "faturalandi",
+                    vadesiGecti = durum == 2 && tahsil < fatura - 0.005m && vadeGun > 0
+                                  && vade < DateTime.Today,
+                };
+            }, iptal);
+            return Results.Ok(new { kayitlar = liste });
+        });
+
+        // İcmalin satırları (İcmaller sekmesinde satıra tıklayınca açılır).
+        grup.MapGet("/{id:int}/satirlar", async (int id, VeriKaynagi veri, BaglamCozucu cozucu,
+                                                HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kurum", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var satirlar = await b.ListeAsync("""
+                select be.belge_no, be.belge_tarihi,
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''),
+                       coalesce(hz.ad, sk.ad, ''), ks.tutar
+                  from public.kurum_icmal_satir ks
+                  join public.belge_satir st on st.id = ks.belge_satir_id
+                  join public.belge be on be.id = st.belge_id
+                  left join public.belge_basvuru bb on bb.id = be.id
+                  left join public.taraf h on h.id = coalesce(bb.hasta_id, be.taraf_id)
+                  left join public.hizmet hz on hz.id = st.hizmet_id
+                  left join public.stok sk on sk.id = st.stok_id
+                 where ks.icmal_id = @p0
+                 order by be.belge_tarihi, be.id, st.sira
+                """, null, [id], o => new
+            {
+                protokolNo = o.GetString(0), tarih = o.IsDBNull(1) ? (DateTime?)null : o.GetDateTime(1),
+                hasta = o.GetString(2), kalem = o.GetString(3), tutar = o.GetDecimal(4),
+            }, iptal);
+            return Results.Ok(new { satirlar });
+        });
     }
 }
