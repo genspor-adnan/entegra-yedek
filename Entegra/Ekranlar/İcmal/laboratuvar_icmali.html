@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .ikili .grp{min-width:0}
+</style>
+
+</head>
+<body>
+<div class="win">
+  <div class="title">🧪 Laboratuvar İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Laboratuvar · Merkez · 10.10.2026 · Dr. Selin KARACA (Lab. Sorumlusu)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Laboratuvar İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📄</span> Dökümler ▾</div>
+    <div class="btn"><span>🚚</span> Dış Lab Gönderimleri</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: kaynak = donemdeki tur 19 basvurularin lab istem kalemleri (iptal haric). Odeyen turu basvurunun odeme turunden. -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🏥 İsteyen Bölüm: <b>Tümü</b> ▾</div>
+    <div class="sel">💳 Ödeyen: <b>Tümü</b> ▾ <span class="sonuk">Ücretli · SGK · ÖSS · Kurumu öder</span></div>
+    <div class="sel">🧪 Tetkik Grubu: <b>Tümü</b> ▾ <span class="sonuk">Biyokimya · Hematoloji · Hormon · İdrar · Mikrobiyoloji · Özel</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">1 dış lab zarar ediyor</span>
+    <span class="rz sari">38 tetkik hedef süreyi aştı</span>
+  </div>
+
+  <!-- OZET: tumu sekme toplamlarindan. Brut kar = ciro - ic lab reaktif/kit - dis lab maliyeti (QC sarfi haric, Cihazlar sekmesinde). -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Tetkik</div><div class="deg">3.004</div>
+      <div class="alt">684 hasta · 931 istem</div></div>
+    <div class="kutu mor"><div class="bas">Ciro</div><div class="deg">303.130,00 ₺</div>
+      <div class="alt">başvuru satır tutarı</div></div>
+    <div class="kutu"><div class="bas">Kurum / Hasta Payı</div><div class="deg">152.853,90 ₺</div>
+      <div class="alt">hasta payı 150.276,10 ₺</div></div>
+    <div class="kutu uy"><div class="bas">Reaktif / Kit</div><div class="deg">50.259,30 ₺</div>
+      <div class="alt">iç lab · tekrarlar dahil</div></div>
+    <div class="kutu iyi"><div class="bas">Brüt Kâr</div><div class="deg">219.090,70 ₺</div>
+      <div class="alt">marj %72,3</div></div>
+    <div class="kutu"><div class="bas">Dış Lab</div><div class="deg">28 test</div>
+      <div class="alt">maliyet 33.780,00 · fatura 38.810,00</div></div>
+    <div class="kutu uy"><div class="bas">Tekrar / Ret</div><div class="deg">%0,7 / %1,7</div>
+      <div class="alt">21 tekrar · 23 ret numune</div></div>
+    <div class="kutu"><div class="bas">Ort. Sonuç Süresi</div><div class="deg">1 sa 11 dk</div>
+      <div class="alt">rutin · 38 tetkik hedefi aştı</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="tet">Tetkikler <span class="rz">18</span></div>
+    <div class="sekme" data-s="grp">Tetkik Grupları <span class="rz">6</span></div>
+    <div class="sekme" data-s="cih">Cihazlar <span class="rz">7</span></div>
+    <div class="sekme" data-s="dis">Dış Laboratuvar <span class="rz">3</span></div>
+    <div class="sekme" data-s="kal">Kalite / Süre <span class="rz kir">38</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: TETKIKLER ============ -->
+  <div class="pnl" data-s="tet">
+    <div class="grp">
+      <h4>Tetkikler <span class="mini">satıra tıkla: isteyen bölüm dağılımı · onay kutusuyla seçilenler A4'ü süzer</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kod</th><th>Tetkik</th><th>Grup</th><th class="sag">Adet</th><th class="sag">Birim Fiyat</th>
+            <th class="sag">Ciro</th><th class="orta">Kurum %</th><th class="sag">Maliyet / Test</th><th class="sag">Maliyet</th><th>Marj</th><th class="sag">Ort. TAT</th><th class="orta">Tekrar</th></tr></thead>
+          <tbody>
+            <tr class="ac sel" data-d="t0"><td><input type="checkbox" checked></td><td><span class="ok-ic">▸</span>900.200</td><td><b>Glukoz (açlık)</b></td><td>Biyokimya</td>
+              <td class="sag">412</td><td class="sag">45,00</td><td class="sag">18.540,00</td><td class="orta">%58</td>
+              <td class="sag">6,20</td><td class="sag">2.573,00</td><td><span class="rz ok">%86,1</span></td><td class="sag" title="hedef 2 sa 00 dk">52 dk</td><td class="orta">3</td></tr>
+            <tr class="det" data-p="t0" hidden><td colspan="13">İsteyen bölüm dağılımı (412): Dahiliye <b>140</b> · Check-up <b>115</b> · Kadın Doğum <b>37</b> · Acil <b>58</b> · Kardiyoloji <b>45</b> · Diğer <b>17</b></td></tr>
+            <tr class="ac" data-d="t1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>900.520</td><td><b>ALT (SGPT)</b></td><td>Biyokimya</td>
+              <td class="sag">318</td><td class="sag">50,00</td><td class="sag">15.900,00</td><td class="orta">%60</td>
+              <td class="sag">7,40</td><td class="sag">2.368,00</td><td><span class="rz ok">%85,1</span></td><td class="sag" title="hedef 2 sa 00 dk">58 dk</td><td class="orta">2</td></tr>
+            <tr class="det" data-p="t1" hidden><td colspan="13">İsteyen bölüm dağılımı (318): Dahiliye <b>121</b> · Check-up <b>98</b> · Kadın Doğum <b>19</b> · Acil <b>29</b> · Kardiyoloji <b>32</b> · Diğer <b>19</b></td></tr>
+            <tr class="ac" data-d="t2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>900.210</td><td><b>Kreatinin</b></td><td>Biyokimya</td>
+              <td class="sag">296</td><td class="sag">50,00</td><td class="sag">14.800,00</td><td class="orta">%61</td>
+              <td class="sag">6,80</td><td class="sag">2.019,60</td><td><span class="rz ok">%86,4</span></td><td class="sag" title="hedef 2 sa 00 dk">55 dk</td><td class="orta">1</td></tr>
+            <tr class="det" data-p="t2" hidden><td colspan="13">İsteyen bölüm dağılımı (296): Dahiliye <b>107</b> · Check-up <b>80</b> · Kadın Doğum <b>15</b> · Acil <b>44</b> · Kardiyoloji <b>38</b> · Diğer <b>12</b></td></tr>
+            <tr class="ac" data-d="t3"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>900.610</td><td><b>Lipid Profili</b></td><td>Biyokimya</td>
+              <td class="sag">184</td><td class="sag">160,00</td><td class="sag">29.440,00</td><td class="orta">%48</td>
+              <td class="sag">31,50</td><td class="sag">5.859,00</td><td><span class="rz ok">%80,1</span></td><td class="sag" title="hedef 2 sa 00 dk">1 sa 04 dk</td><td class="orta">2</td></tr>
+            <tr class="det" data-p="t3" hidden><td colspan="13">İsteyen bölüm dağılımı (184): Dahiliye <b>55</b> · Check-up <b>77</b> · Kadın Doğum <b>6</b> · Acil <b>4</b> · Kardiyoloji <b>35</b> · Diğer <b>7</b></td></tr>
+            <tr class="ac" data-d="t4"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>901.620</td><td><b>Tam Kan Sayımı (Hemogram)</b></td><td>Hematoloji</td>
+              <td class="sag">486</td><td class="sag">60,00</td><td class="sag">29.160,00</td><td class="orta">%63</td>
+              <td class="sag">9,80</td><td class="sag">4.802,00</td><td><span class="rz ok">%83,5</span></td><td class="sag" title="hedef 1 sa 00 dk">28 dk</td><td class="orta">4</td></tr>
+            <tr class="det" data-p="t4" hidden><td colspan="13">İsteyen bölüm dağılımı (486): Dahiliye <b>151</b> · Check-up <b>117</b> · Kadın Doğum <b>68</b> · Acil <b>92</b> · Kardiyoloji <b>39</b> · Diğer <b>19</b></td></tr>
+            <tr class="ac" data-d="t5"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>901.670</td><td><b>Sedimantasyon</b></td><td>Hematoloji</td>
+              <td class="sag">142</td><td class="sag">30,00</td><td class="sag">4.260,00</td><td class="orta">%66</td>
+              <td class="sag">3,10</td><td class="sag">440,20</td><td><span class="rz ok">%89,7</span></td><td class="sag" title="hedef 2 sa 00 dk">1 sa 15 dk</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t5" hidden><td colspan="13">İsteyen bölüm dağılımı (142): Dahiliye <b>62</b> · Check-up <b>30</b> · Kadın Doğum <b>17</b> · Acil <b>14</b> · Kardiyoloji <b>9</b> · Diğer <b>10</b></td></tr>
+            <tr class="ac" data-d="t6"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>901.700</td><td><b>PT-INR</b></td><td>Hematoloji</td>
+              <td class="sag">96</td><td class="sag">70,00</td><td class="sag">6.720,00</td><td class="orta">%70</td>
+              <td class="sag">14,60</td><td class="sag">1.430,80</td><td><span class="rz ok">%78,7</span></td><td class="sag" title="hedef 1 sa 00 dk">41 dk</td><td class="orta">2</td></tr>
+            <tr class="det" data-p="t6" hidden><td colspan="13">İsteyen bölüm dağılımı (96): Dahiliye <b>17</b> · Check-up <b>6</b> · Kadın Doğum <b>9</b> · Acil <b>20</b> · Kardiyoloji <b>37</b> · Diğer <b>7</b></td></tr>
+            <tr class="ac" data-d="t7"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>902.890</td><td><b>TSH</b></td><td>Hormon</td>
+              <td class="sag">228</td><td class="sag">120,00</td><td class="sag">27.360,00</td><td class="orta">%52</td>
+              <td class="sag">24,50</td><td class="sag">5.610,50</td><td><span class="rz ok">%79,5</span></td><td class="sag" title="hedef 4 sa 00 dk">2 sa 12 dk</td><td class="orta">1</td></tr>
+            <tr class="det" data-p="t7" hidden><td colspan="13">İsteyen bölüm dağılımı (228): Dahiliye <b>94</b> · Check-up <b>75</b> · Kadın Doğum <b>34</b> · Acil <b>2</b> · Kardiyoloji <b>14</b> · Diğer <b>9</b></td></tr>
+            <tr class="ac" data-d="t8"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>902.900</td><td><b>Serbest T4</b></td><td>Hormon</td>
+              <td class="sag">164</td><td class="sag">120,00</td><td class="sag">19.680,00</td><td class="orta">%51</td>
+              <td class="sag">26,80</td><td class="sag">4.395,20</td><td><span class="rz ok">%77,7</span></td><td class="sag" title="hedef 4 sa 00 dk">2 sa 18 dk</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t8" hidden><td colspan="13">İsteyen bölüm dağılımı (164): Dahiliye <b>70</b> · Check-up <b>51</b> · Kadın Doğum <b>26</b> · Acil <b>2</b> · Kardiyoloji <b>8</b> · Diğer <b>7</b></td></tr>
+            <tr class="ac" data-d="t9"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>903.100</td><td><b>Vitamin B12</b></td><td>Hormon</td>
+              <td class="sag">152</td><td class="sag">150,00</td><td class="sag">22.800,00</td><td class="orta">%44</td>
+              <td class="sag">34,20</td><td class="sag">5.232,60</td><td><span class="rz ok">%77,0</span></td><td class="sag" title="hedef 4 sa 00 dk">2 sa 25 dk</td><td class="orta">1</td></tr>
+            <tr class="det" data-p="t9" hidden><td colspan="13">İsteyen bölüm dağılımı (152): Dahiliye <b>70</b> · Check-up <b>58</b> · Kadın Doğum <b>12</b> · Kardiyoloji <b>6</b> · Diğer <b>6</b></td></tr>
+            <tr class="ac" data-d="t10"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>903.210</td><td><b>25-OH Vitamin D</b></td><td>Hormon</td>
+              <td class="sag">138</td><td class="sag">260,00</td><td class="sag">35.880,00</td><td class="orta">%38</td>
+              <td class="sag">61,00</td><td class="sag">8.540,00</td><td><span class="rz ok">%76,2</span></td><td class="sag" title="hedef 4 sa 00 dk">2 sa 48 dk</td><td class="orta">2</td></tr>
+            <tr class="det" data-p="t10" hidden><td colspan="13">İsteyen bölüm dağılımı (138): Dahiliye <b>54</b> · Check-up <b>62</b> · Kadın Doğum <b>12</b> · Kardiyoloji <b>4</b> · Diğer <b>6</b></td></tr>
+            <tr class="ac" data-d="t11"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>905.010</td><td><b>Tam İdrar Tahlili</b></td><td>İdrar</td>
+              <td class="sag">268</td><td class="sag">55,00</td><td class="sag">14.740,00</td><td class="orta">%62</td>
+              <td class="sag">8,40</td><td class="sag">2.276,40</td><td><span class="rz ok">%84,6</span></td><td class="sag" title="hedef 1 sa 00 dk">35 dk</td><td class="orta">3</td></tr>
+            <tr class="det" data-p="t11" hidden><td colspan="13">İsteyen bölüm dağılımı (268): Dahiliye <b>88</b> · Check-up <b>70</b> · Kadın Doğum <b>48</b> · Acil <b>43</b> · Kardiyoloji <b>8</b> · Diğer <b>11</b></td></tr>
+            <tr class="ac" data-d="t12"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>904.800</td><td><b>İdrar Kültürü</b></td><td>Mikrobiyoloji</td>
+              <td class="sag">74</td><td class="sag">280,00</td><td class="sag">20.720,00</td><td class="orta">%57</td>
+              <td class="sag">52,00</td><td class="sag">3.848,00</td><td><span class="rz ok">%81,4</span></td><td class="sag" title="hedef 3,0 gün">2,0 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t12" hidden><td colspan="13">İsteyen bölüm dağılımı (74): Dahiliye <b>22</b> · Check-up <b>4</b> · Kadın Doğum <b>30</b> · Acil <b>10</b> · Kardiyoloji <b>2</b> · Diğer <b>6</b></td></tr>
+            <tr class="ac" data-d="t13"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>904.910</td><td><b>Boğaz Kültürü</b></td><td>Mikrobiyoloji</td>
+              <td class="sag">18</td><td class="sag">240,00</td><td class="sag">4.320,00</td><td class="orta">%55</td>
+              <td class="sag">48,00</td><td class="sag">864,00</td><td><span class="rz ok">%80,0</span></td><td class="sag" title="hedef 3,0 gün">1,9 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t13" hidden><td colspan="13">İsteyen bölüm dağılımı (18): Dahiliye <b>8</b> · Kadın Doğum <b>1</b> · Acil <b>7</b> · Diğer <b>2</b></td></tr>
+            <tr class="ac" data-d="t14"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>906.420</td><td><b>HPV DNA Tiplendirme</b> <span class="rz mor">dış lab</span></td><td>Özel / Dış Lab</td>
+              <td class="sag">9</td><td class="sag">1.450,00</td><td class="sag">13.050,00</td><td class="orta">%35</td>
+              <td class="sag">1.180,00</td><td class="sag">10.620,00</td><td><span class="rz sari">%18,6</span></td><td class="sag" title="hedef 7,0 gün">5,0 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t14" hidden><td colspan="13">İsteyen bölüm dağılımı (9): Kadın Doğum <b>9</b></td></tr>
+            <tr class="ac" data-d="t15"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>906.610</td><td><b>Gıda Alerji Paneli (36)</b> <span class="rz mor">dış lab</span></td><td>Özel / Dış Lab</td>
+              <td class="sag">12</td><td class="sag">980,00</td><td class="sag">11.760,00</td><td class="orta">%20</td>
+              <td class="sag">640,00</td><td class="sag">7.680,00</td><td><span class="rz sari">%34,7</span></td><td class="sag" title="hedef 7,0 gün">4,0 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t15" hidden><td colspan="13">İsteyen bölüm dağılımı (12): Dahiliye <b>3</b> · Check-up <b>7</b> · Diğer <b>2</b></td></tr>
+            <tr class="ac" data-d="t16"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>906.900</td><td><b>Kromozom Analizi (Karyotip)</b> <span class="rz mor">dış lab</span></td><td>Özel / Dış Lab</td>
+              <td class="sag">3</td><td class="sag">3.800,00</td><td class="sag">11.400,00</td><td class="orta">%40</td>
+              <td class="sag">4.200,00</td><td class="sag">12.600,00</td><td><span class="rz kir">%-10,5</span></td><td class="sag" title="hedef 21,0 gün">14,0 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t16" hidden><td colspan="13">İsteyen bölüm dağılımı (3): Kadın Doğum <b>3</b></td></tr>
+            <tr class="ac" data-d="t17"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>906.950</td><td><b>Kurşun (Kan)</b> <span class="rz mor">dış lab</span></td><td>Özel / Dış Lab</td>
+              <td class="sag">4</td><td class="sag">650,00</td><td class="sag">2.600,00</td><td class="orta">%30</td>
+              <td class="sag">720,00</td><td class="sag">2.880,00</td><td><span class="rz kir">%-10,8</span></td><td class="sag" title="hedef 7,0 gün">6,0 gün</td><td class="orta"><span class="sonuk">—</span></td></tr>
+            <tr class="det" data-p="t17" hidden><td colspan="13">İsteyen bölüm dağılımı (4): Dahiliye <b>2</b> · Check-up <b>1</b> · Diğer <b>1</b></td></tr>
+            <tr class="toplam"><td></td><td colspan="3">Toplam · 18 tetkik</td><td class="sag">3.004</td><td></td><td class="sag">303.130,00</td>
+              <td class="orta">%50,4</td><td></td><td class="sag">84.039,30</td><td><span class="rz ok">%72,3</span></td><td class="sag sonuk">rutin 1 sa 11 dk</td><td class="orta">21</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: TETKIK GRUPLARI ============ -->
+  <div class="pnl" data-s="grp">
+    <div class="grp">
+      <h4>Tetkik Grupları <span class="mini">maliyet = iç lab reaktif/kit + dış lab fiyat listesi</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Grup</th><th class="orta">Tetkik Çeşidi</th><th class="sag">Adet</th><th class="sag">Ciro</th><th class="sag">Kurum Payı</th>
+            <th class="sag">Hasta Payı</th><th class="sag">Maliyet</th><th class="sag">Brüt Kâr</th><th>Marj</th><th class="orta">Tekrar</th><th>Ciro Payı</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Biyokimya</b></td><td class="orta">4</td><td class="sag">1.210</td><td class="sag">78.680,00</td><td class="sag">43.452,40</td>
+              <td class="sag">35.227,60</td><td class="sag">12.819,60</td><td class="sag">65.860,40</td><td><span class="rz ok">%83,7</span></td><td class="orta">8</td>
+              <td><div class="cubuk"><i style="width:26%"></i></div> <span class="sonuk">%26,0</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Hematoloji</b></td><td class="orta">3</td><td class="sag">724</td><td class="sag">40.140,00</td><td class="sag">25.886,40</td>
+              <td class="sag">14.253,60</td><td class="sag">6.673,00</td><td class="sag">33.467,00</td><td><span class="rz ok">%83,4</span></td><td class="orta">6</td>
+              <td><div class="cubuk"><i style="width:13%"></i></div> <span class="sonuk">%13,2</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Hormon</b></td><td class="orta">4</td><td class="sag">682</td><td class="sag">105.720,00</td><td class="sag">47.930,40</td>
+              <td class="sag">57.789,60</td><td class="sag">23.778,30</td><td class="sag">81.941,70</td><td><span class="rz ok">%77,5</span></td><td class="orta">4</td>
+              <td><div class="cubuk"><i style="width:35%"></i></div> <span class="sonuk">%34,9</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>İdrar</b></td><td class="orta">1</td><td class="sag">268</td><td class="sag">14.740,00</td><td class="sag">9.138,80</td>
+              <td class="sag">5.601,20</td><td class="sag">2.276,40</td><td class="sag">12.463,60</td><td><span class="rz ok">%84,6</span></td><td class="orta">3</td>
+              <td><div class="cubuk"><i style="width:5%"></i></div> <span class="sonuk">%4,9</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Mikrobiyoloji</b></td><td class="orta">2</td><td class="sag">92</td><td class="sag">25.040,00</td><td class="sag">14.186,40</td>
+              <td class="sag">10.853,60</td><td class="sag">4.712,00</td><td class="sag">20.328,00</td><td><span class="rz ok">%81,2</span></td><td class="orta">—</td>
+              <td><div class="cubuk"><i style="width:8%"></i></div> <span class="sonuk">%8,3</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Özel / Dış Lab</b></td><td class="orta">4</td><td class="sag">28</td><td class="sag">38.810,00</td><td class="sag">12.259,50</td>
+              <td class="sag">26.550,50</td><td class="sag">33.780,00</td><td class="sag">5.030,00</td><td><span class="rz sari">%13,0</span></td><td class="orta">—</td>
+              <td><div class="cubuk"><i style="width:13%"></i></div> <span class="sonuk">%12,8</span></td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 6 grup</td><td class="orta">18</td><td class="sag">3.004</td><td class="sag">303.130,00</td><td class="sag">152.853,90</td>
+              <td class="sag">150.276,10</td><td class="sag">84.039,30</td><td class="sag">219.090,70</td><td><span class="rz ok">%72,3</span></td><td class="orta">21</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: CIHAZLAR ============ -->
+  <div class="pnl" data-s="cih">
+    <div class="grp">
+      <h4>Cihazlar <span class="mini">test = hasta testi + tekrar · QC / kalibrasyon ayrı sayılır · test başı = (reaktif + QC sarfı) / test</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Cihaz / Tezgâh</th><th>Bölüm</th><th class="sag">Test</th><th class="sag">QC / Kalibrasyon</th><th class="orta">QC Oranı</th>
+            <th class="orta">Arıza</th><th class="sag">Reaktif</th><th class="sag">QC Sarfı</th><th class="sag">Test Başı Maliyet</th><th>Doluluk</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Roche cobas c 311</b><div class="sonuk">Glukoz (açlık), ALT (SGPT), Kreatinin, Lipid Profili</div></td><td>Biyokimya</td><td class="sag">1.218</td><td class="sag">120</td>
+              <td class="orta"><span class="rz pas">%9,0</span></td><td class="orta"><span class="sonuk">—</span></td><td class="sag">12.819,60</td><td class="sag">1.140,00</td>
+              <td class="sag"><b>11,46</b></td><td><div class="cubuk"><i style="width:41%"></i></div> <span class="sonuk">%41 · kap. 3.000</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Sysmex XN-550</b><div class="sonuk">Tam Kan Sayımı (Hemogram)</div></td><td>Hematoloji</td><td class="sag">490</td><td class="sag">90</td>
+              <td class="orta"><span class="rz sari">%15,5</span></td><td class="orta"><span class="rz kir">1 gün</span></td><td class="sag">4.802,00</td><td class="sag">1.080,00</td>
+              <td class="sag"><b>12,00</b></td><td><div class="cubuk"><i style="width:33%"></i></div> <span class="sonuk">%33 · kap. 1.500</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Diesse Ves-Matic Cube 30</b><div class="sonuk">Sedimantasyon</div></td><td>Hematoloji</td><td class="sag">142</td><td class="sag">30</td>
+              <td class="orta"><span class="rz sari">%17,4</span></td><td class="orta"><span class="sonuk">—</span></td><td class="sag">440,20</td><td class="sag">120,00</td>
+              <td class="sag"><b>3,95</b></td><td><div class="cubuk"><i style="width:24%"></i></div> <span class="sonuk">%24 · kap. 600</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Stago STart Max</b><div class="sonuk">PT-INR</div></td><td>Hematoloji</td><td class="sag">98</td><td class="sag">60</td>
+              <td class="orta"><span class="rz sari">%38,0</span></td><td class="orta"><span class="sonuk">—</span></td><td class="sag">1.430,80</td><td class="sag">672,00</td>
+              <td class="sag"><b>21,46</b></td><td><div class="cubuk"><i style="width:24%"></i></div> <span class="sonuk">%24 · kap. 400</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Roche cobas e 411</b><div class="sonuk">TSH, Serbest T4, Vitamin B12, 25-OH Vitamin D</div></td><td>Hormon</td><td class="sag">686</td><td class="sag">96</td>
+              <td class="orta"><span class="rz pas">%12,3</span></td><td class="orta"><span class="rz kir">2 gün</span></td><td class="sag">23.778,30</td><td class="sag">2.016,00</td>
+              <td class="sag"><b>37,60</b></td><td><div class="cubuk"><i style="width:57%"></i></div> <span class="sonuk">%57 · kap. 1.200</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Dirui H-800 + mikroskop</b><div class="sonuk">Tam İdrar Tahlili</div></td><td>İdrar</td><td class="sag">271</td><td class="sag">30</td>
+              <td class="orta"><span class="rz pas">%10,0</span></td><td class="orta"><span class="sonuk">—</span></td><td class="sag">2.276,40</td><td class="sag">165,00</td>
+              <td class="sag"><b>9,01</b></td><td><div class="cubuk"><i style="width:30%"></i></div> <span class="sonuk">%30 · kap. 900</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Manuel kültür (etüv)</b><div class="sonuk">İdrar Kültürü, Boğaz Kültürü</div></td><td>Mikrobiyoloji</td><td class="sag">92</td><td class="sag">8</td>
+              <td class="orta"><span class="rz pas">%8,0</span></td><td class="orta"><span class="sonuk">—</span></td><td class="sag">4.712,00</td><td class="sag">144,00</td>
+              <td class="sag"><b>52,78</b></td><td><div class="cubuk"><i style="width:46%"></i></div> <span class="sonuk">%46 · kap. 200</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Toplam · 7 cihaz / tezgâh</td><td class="sag">2.997</td><td class="sag">434</td>
+              <td class="orta">%12,6</td><td class="orta">3 gün</td><td class="sag">50.259,30</td><td class="sag">5.337,00</td>
+              <td class="sag">18,55</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: DIS LABORATUVAR ============ -->
+  <div class="pnl" data-s="dis">
+    <div class="grp">
+      <h4>Dış Laboratuvar <span class="mini">satıra tıkla: tetkik kırılımı · maliyet = dış lab fiyat listesi · zarar edenler kırmızı</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Dış Laboratuvar</th><th class="orta">Tetkik Çeşidi</th><th class="sag">Gönderilen</th><th class="sag">Bizim Faturaladığımız</th>
+            <th class="sag">Dış Lab Maliyeti</th><th class="sag">Fark</th><th>Durum</th><th class="sag">Ort. Sonuç</th></tr></thead>
+          <tbody>
+            <tr class="ac" data-d="dsynlab"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><b>Synlab Ankara</b></td><td class="orta">1</td><td class="sag">9</td><td class="sag">13.050,00</td>
+              <td class="sag">10.620,00</td><td class="sag">2.430,00</td><td><span class="rz ok">kâr 2.430,00</span></td><td class="sag">5,0 gün</td></tr>
+            <tr class="det" data-p="dsynlab" hidden><td colspan="3">906.420 HPV DNA Tiplendirme</td><td class="sag">9</td><td class="sag">13.050,00</td><td class="sag">10.620,00 <span class="sonuk">(1.180,00/test)</span></td><td class="sag">2.430,00</td><td></td><td class="sag">5,0 gün</td></tr>
+            <tr class="ac" data-d="dacibadem"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span><b>Acıbadem Labmed</b></td><td class="orta">1</td><td class="sag">12</td><td class="sag">11.760,00</td>
+              <td class="sag">7.680,00</td><td class="sag">4.080,00</td><td><span class="rz ok">kâr 4.080,00</span></td><td class="sag">4,0 gün</td></tr>
+            <tr class="det" data-p="dacibadem" hidden><td colspan="3">906.610 Gıda Alerji Paneli (36)</td><td class="sag">12</td><td class="sag">11.760,00</td><td class="sag">7.680,00 <span class="sonuk">(640,00/test)</span></td><td class="sag">4.080,00</td><td></td><td class="sag">4,0 gün</td></tr>
+            <tr class="ac" data-d="dduzen"><td><input type="checkbox"></td><td style="color:var(--kirmizi)"><span class="ok-ic">▸</span><b>Düzen Laboratuvarlar Grubu</b></td><td class="orta">2</td><td class="sag">7</td><td class="sag">14.000,00</td>
+              <td class="sag">15.480,00</td><td class="sag kir">-1.480,00</td><td><span class="rz kir">zarar 1.480,00</span></td><td class="sag">9,4 gün</td></tr>
+            <tr class="det" data-p="dduzen" hidden><td colspan="3">906.900 Kromozom Analizi (Karyotip)</td><td class="sag">3</td><td class="sag">11.400,00</td><td class="sag">12.600,00 <span class="sonuk">(4.200,00/test)</span></td><td class="sag kir">-1.200,00</td><td><span class="rz kir">fiyat listesi altında</span></td><td class="sag">14,0 gün</td></tr>
+            <tr class="det" data-p="dduzen" hidden><td colspan="3">906.950 Kurşun (Kan)</td><td class="sag">4</td><td class="sag">2.600,00</td><td class="sag">2.880,00 <span class="sonuk">(720,00/test)</span></td><td class="sag kir">-280,00</td><td><span class="rz kir">fiyat listesi altında</span></td><td class="sag">6,0 gün</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 3 dış laboratuvar</td><td class="orta">4</td><td class="sag">28</td><td class="sag">38.810,00</td>
+              <td class="sag">33.780,00</td><td class="sag">5.030,00</td><td><span class="rz sari">%13,0</span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: KALITE / SURE ============ -->
+  <div class="pnl" data-s="kal">
+    <div class="ikili">
+      <div class="grp">
+        <h4>Sonuç Süresi (TAT) Dağılımı <span class="mini">numune kabul → sonuç onayı · rutin iç lab</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Süre</th><th class="sag">Tetkik</th><th class="sag">Oran</th><th>Dağılım</th></tr></thead>
+            <tbody>
+            <tr><td>< 1 saat</td><td class="sag">1.529</td><td class="sag">%53,0</td><td><div class="cubuk"><i style="width:53%"></i></div></td></tr>
+            <tr><td>1 – 4 saat</td><td class="sag">1.257</td><td class="sag">%43,6</td><td><div class="cubuk"><i style="width:44%"></i></div></td></tr>
+            <tr><td>4 – 24 saat</td><td class="sag">92</td><td class="sag">%3,2</td><td><div class="cubuk"><i style="width:3%"></i></div></td></tr>
+            <tr><td>24 saat +</td><td class="sag">6</td><td class="sag">%0,2</td><td><div class="cubuk"><i style="width:0%"></i></div></td></tr>
+            <tr class="toplam"><td>Rutin toplam</td><td class="sag">2.884</td><td class="sag">%100,0</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Numune Ret Nedenleri <span class="mini">ret = numune bazında</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Neden</th><th class="sag">Adet</th><th class="sag">Pay</th><th>En Çok</th><th>Sonuç</th></tr></thead>
+            <tbody>
+            <tr><td>Hemoliz</td><td class="sag">11</td><td class="sag">%47,8</td><td>Acil</td><td class="sonuk">tekrar kan alındı</td></tr>
+            <tr><td>Pıhtılı numune (EDTA)</td><td class="sag">5</td><td class="sag">%21,7</td><td>Kadın Doğum</td><td class="sonuk">tekrar kan alındı</td></tr>
+            <tr><td>Yetersiz numune</td><td class="sag">4</td><td class="sag">%17,4</td><td>Dahiliye</td><td class="sonuk">3 tekrar · 1 iptal</td></tr>
+            <tr><td>Etiket / barkod hatası</td><td class="sag">3</td><td class="sag">%13,0</td><td>Check-up</td><td class="sonuk">yeniden etiketlendi</td></tr>
+            <tr class="toplam"><td>Toplam ret · 1.318 numune</td><td class="sag">23</td><td class="sag">%1,7</td><td colspan="2">ret oranı (numune bazında)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Hedef Süreyi En Çok Aşan İstemler <span class="mini">hedef tetkik tanımından (hemogram / PT 1 sa · biyokimya 2 sa · hormon 4 sa)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Tarih</th><th>Protokol No</th><th>Tetkik</th><th>İsteyen Bölüm</th><th class="sag">Hedef</th><th class="sag">Gerçek</th><th class="sag">Aşım</th><th>Neden</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>02.09.2026</td><td>P-018402</td><td>Tam Kan Sayımı (Hemogram)</td><td>Acil</td><td class="sag">1 sa 00 dk</td><td class="sag kir">1 sa 36 dk</td><td class="sag kir">+36 dk</td><td class="sonuk">Sysmex arızası (1 gün) · yedek cihaz</td></tr>
+            <tr><td><input type="checkbox"></td><td>02.09.2026</td><td>P-018417</td><td>PT-INR</td><td>Kardiyoloji</td><td class="sag">1 sa 00 dk</td><td class="sag kir">1 sa 28 dk</td><td class="sag kir">+28 dk</td><td class="sonuk">acil yoğunluğu · kuyruk</td></tr>
+            <tr><td><input type="checkbox"></td><td>09.09.2026</td><td>P-019205</td><td>TSH</td><td>Dahiliye</td><td class="sag">4 sa 00 dk</td><td class="sag kir">5 sa 18 dk</td><td class="sag kir">+1 sa 18 dk</td><td class="sonuk">cobas e 411 kalibrasyon</td></tr>
+            <tr><td><input type="checkbox"></td><td>09.09.2026</td><td>P-019211</td><td>25-OH Vitamin D</td><td>Check-up</td><td class="sag">4 sa 00 dk</td><td class="sag kir">5 sa 42 dk</td><td class="sag kir">+1 sa 42 dk</td><td class="sonuk">cobas e 411 kalibrasyon</td></tr>
+            <tr><td><input type="checkbox"></td><td>10.09.2026</td><td>P-019290</td><td>Vitamin B12</td><td>Check-up</td><td class="sag">4 sa 00 dk</td><td class="sag kir">4 sa 56 dk</td><td class="sag kir">+56 dk</td><td class="sonuk">cobas e 411 arızası</td></tr>
+            <tr><td><input type="checkbox"></td><td>16.09.2026</td><td>P-019901</td><td>Glukoz (açlık)</td><td>Acil</td><td class="sag">2 sa 00 dk</td><td class="sag kir">2 sa 38 dk</td><td class="sag kir">+38 dk</td><td class="sonuk">hemoliz · tekrar kan</td></tr>
+            <tr><td><input type="checkbox"></td><td>19.09.2026</td><td>P-020284</td><td>Tam İdrar Tahlili</td><td>Kadın Doğum</td><td class="sag">1 sa 00 dk</td><td class="sag kir">1 sa 21 dk</td><td class="sag kir">+21 dk</td><td class="sonuk">numune geç teslim</td></tr>
+            <tr><td><input type="checkbox"></td><td>23.09.2026</td><td>P-020738</td><td>Lipid Profili</td><td>Check-up</td><td class="sag">2 sa 00 dk</td><td class="sag kir">2 sa 51 dk</td><td class="sag kir">+51 dk</td><td class="sonuk">yetersiz numune · tekrar</td></tr>
+            <tr><td><input type="checkbox"></td><td>28.09.2026</td><td>P-021240</td><td>Kreatinin</td><td>Dahiliye</td><td class="sag">2 sa 00 dk</td><td class="sag kir">2 sa 19 dk</td><td class="sag kir">+19 dk</td><td class="sonuk">onay bekledi (uzman izinli)</td></tr>
+            <tr class="toplam"><td></td><td colspan="8">En çok aşan 9 istem gösteriliyor · dönemde toplam 38 tetkik hedefi aştı (rutin 2.884 tetkikte %1,32)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: A4 ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: LAB-2026-09<br>Düzenleme: 10.10.2026 10:40<br>Düzenleyen: Dr. Selin KARACA</div>
+        </div>
+        <h1>LABORATUVAR DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Tetkik: 3.004 · 684 hasta</div><div>Ödeyen: Tümü</div>
+        </div>
+        <table>
+          <thead><tr><th>Tetkik Grubu</th><th>Adet</th><th>Ciro</th><th>Kurum Payı</th><th>Hasta Payı</th><th>Maliyet</th><th>Brüt Kâr</th></tr></thead>
+          <tbody>
+            <tr><td>Biyokimya</td><td class="sag">1.210</td><td class="sag">78.680,00</td><td class="sag">43.452,40</td><td class="sag">35.227,60</td><td class="sag">12.819,60</td><td class="sag">65.860,40</td></tr>
+            <tr><td>Hematoloji</td><td class="sag">724</td><td class="sag">40.140,00</td><td class="sag">25.886,40</td><td class="sag">14.253,60</td><td class="sag">6.673,00</td><td class="sag">33.467,00</td></tr>
+            <tr><td>Hormon</td><td class="sag">682</td><td class="sag">105.720,00</td><td class="sag">47.930,40</td><td class="sag">57.789,60</td><td class="sag">23.778,30</td><td class="sag">81.941,70</td></tr>
+            <tr><td>İdrar</td><td class="sag">268</td><td class="sag">14.740,00</td><td class="sag">9.138,80</td><td class="sag">5.601,20</td><td class="sag">2.276,40</td><td class="sag">12.463,60</td></tr>
+            <tr><td>Mikrobiyoloji</td><td class="sag">92</td><td class="sag">25.040,00</td><td class="sag">14.186,40</td><td class="sag">10.853,60</td><td class="sag">4.712,00</td><td class="sag">20.328,00</td></tr>
+            <tr><td>Özel / Dış Lab</td><td class="sag">28</td><td class="sag">38.810,00</td><td class="sag">12.259,50</td><td class="sag">26.550,50</td><td class="sag">33.780,00</td><td class="sag">5.030,00</td></tr>
+            <tr style="font-weight:bold"><td>Toplam</td><td class="sag">3.004</td><td class="sag">303.130,00</td><td class="sag">152.853,90</td><td class="sag">150.276,10</td><td class="sag">84.039,30</td><td class="sag">219.090,70</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Ciro</span><span>303.130,00 ₺</span></div>
+          <div><span>Reaktif / kit (iç lab)</span><span>50.259,30 ₺</span></div>
+          <div><span>Dış laboratuvar maliyeti</span><span>33.780,00 ₺</span></div>
+          <div class="b"><span>BRÜT KÂR (%72,3)</span><span>219.090,70 ₺</span></div>
+        </div>
+        <div class="bilgi" style="margin-top:7px">
+          <div>Ort. sonuç süresi (rutin): <b>1 sa 11 dk</b></div><div>Hedef aşan tetkik: <b>38</b></div>
+          <div>Tekrar: <b>21</b> (%0,7)</div><div>Numune ret: <b>23</b> / 1.318 (%1,7)</div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">QC / kalibrasyon sarfı (5.337,00 ₺) brüt kâra dahil değildir. Hasta kimlik bilgisi bu belgede yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Laboratuvar Sorumlusu · İmza</div><div>Onaylayan<br>Mesul Müdür · İmza</div></div>
+        <div class="dip">Gentegre AI · LAB-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>belge (tür 19 · başvuru)</code><code>belge_satir</code><code>belge_satir_dagilim (kurum / hasta payı)</code>
+    <code>lab_istem</code><code>lab_numune</code><code>lab_sonuc</code><code>lab_dis_gonderim</code>
+    <code>stok çıkış (reaktif / kit)</code><code>lab cihaz · QC</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span>
+    <span>3.004 tetkik · 684 hasta</span><span>·</span>
+    <span>Ciro 303.130,00 ₺ · brüt kâr 219.090,70 ₺</span><span>·</span>
+    <span>Rutin TAT 1 sa 11 dk · ret %1,7</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> laboratuvarın dönemdeki tetkik hacmini, cirosunu, maliyetini (reaktif / kit ve dış lab), sonuç süresini ve
+  numune kalitesini tek yerde toplar.
+  <ul>
+    <li><b>Giriş:</b> Yönetim › İcmaller › Laboratuvar; Laboratuvar menüsünden "Dönem İcmali"; dış lab gönderim listesinden "İcmal".</li>
+    <li><b>Kaynak</b> yalnız tür 19 başvuruların lab istem kalemleridir; iptal edilen başvuru / kalem hariç. Tetkik = istem kalemi (panel tek kalem sayılır).</li>
+    <li><b>Ciro</b> = başvuru satır tutarı; <b>kurum / hasta payı</b> satırın ödeyen dağılımından (belge_satir_dagilim) gelir, burada yeniden hesaplanmaz.</li>
+    <li><b>Reaktif / kit maliyeti</b> = laboratuvar stok çıkışı; çıkış yoksa tetkik tanımındaki test başı maliyet × (adet + tekrar). <b>Dış lab maliyeti</b> = dış lab fiyat listesi × gönderilen test.</li>
+    <li><b>Brüt kâr</b> = ciro − reaktif / kit − dış lab maliyeti. QC / kalibrasyon sarfı brüt kâra girmez; Cihazlar sekmesinde test başı maliyete eklenir.</li>
+    <li><b>TAT</b> = numune kabul → sonuç onayı. Özet ve dağılım rutin iç lab içindir; mikrobiyoloji (kültür) ve dış lab kendi satırında gün olarak görünür. Hedef süre tetkik tanımından.</li>
+    <li><b>Tekrar oranı</b> = tekrar / iç lab tetkik; <b>ret oranı</b> = reddedilen numune / kabul edilen numune.</li>
+    <li><b>Hasta TC'si gösterilmez</b>; istemler Protokol No ile listelenir, A4 belgede hasta bilgisi yoktur. Listeler soldaki onay kutusuyla seçilir; A4 önizleme ayrı sekmededir.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Satir ac/kapa: tetkikte bolum dagilimi, dis labda tetkik kirilimi
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(e){
+  if(e.target.tagName==='INPUT') return;
+  var d=document.querySelectorAll('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d.length) return;
+  var gizle=!d[0].hidden; d.forEach(function(x){x.hidden=gizle;});
+  tr.querySelector('.ok-ic').textContent=gizle?'▸':'▾';});});
+</script>
+
+</body>
+</html>

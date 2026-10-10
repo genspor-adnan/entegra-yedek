@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görüntüleme İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .ust{color:var(--muted);font-size:10.5px}
+  .bar{display:flex;align-items:center;gap:6px}
+  .bar .cubuk{min-width:90px;flex:1}
+</style>
+
+</head>
+<body>
+<div class="win">
+  <div class="title">🩻 Görüntüleme (Radyoloji) İcmali — Eylül 2026
+    <span class="sp">Gentegre AI · Radyoloji · Merkez · 10.10.2026 · Burak AKSOY (Mali İşler)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Görüntüleme İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🩻</span> Radyoloji Pano</div>
+    <div class="btn"><span>🧾</span> Teleradyoloji Dönem Faturası</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: tum suzgecler sunucuya gider; secim tablolari (onay kutusu) A4'u suzer. -->
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> (01.09 – 30.09) ▾</div>
+    <div class="sel">🏥 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">🩻 Modalite: <b>Tümü</b> ▾ <span class="ust">MR · BT · USG · Röntgen · Mamografi · Doppler</span></div>
+    <div class="sel">💳 Ödeyen: <b>Tümü</b> ▾ <span class="ust">SGK · ÖSS · Ücretli · Kurum</span></div>
+    <div class="sel">🩺 Raporlayan: <b>Tümü</b> ▾ <span class="ust">İç · Teleradyoloji</span></div>
+    <span class="sp"></span>
+    <span class="rz sari">18 çekim rapor bekliyor</span>
+    <span class="rz kir">45 rapor hedef süreyi aştı</span>
+  </div>
+
+  <!-- OZET: ciro = tur 19 basvurularin radyoloji satirlari (iptal haric); kar = ciro - kontrast/sarf - telerad giden maliyeti. -->
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Çekim / Hasta</div><div class="deg">1.180 / 1.012</div>
+      <div class="alt">85 kontrastlı · 18 raporsuz</div></div>
+    <div class="kutu mor"><div class="bas">Ciro</div><div class="deg">676.090,00 ₺</div>
+      <div class="alt">ort. çekim 572,96 ₺</div></div>
+    <div class="kutu"><div class="bas">Kurum / Hasta Payı</div><div class="deg">%72,1</div>
+      <div class="alt">487.740,10 / 188.349,90 ₺</div></div>
+    <div class="kutu uy"><div class="bas">Kontrast + Sarf</div><div class="deg">43.488,00 ₺</div>
+      <div class="alt">cironun %6,4'i</div></div>
+    <div class="kutu iyi"><div class="bas">Brüt Kâr</div><div class="deg">610.082,00 ₺</div>
+      <div class="alt">marj %90,2 · telerad dahil</div></div>
+    <div class="kutu"><div class="bas">Ort. Rapor Süresi</div><div class="deg">8,1 sa</div>
+      <div class="alt">çekim → onaylı rapor · <span class="kir">45 hedef aşan</span></div></div>
+    <div class="kutu teh"><div class="bas">Teleradyoloji</div><div class="deg">-10.560,00 ₺</div>
+      <div class="alt">giden 132 / 22.520,00 · gelen 82 / 11.960,00</div></div>
+    <div class="kutu"><div class="bas">Cihaz Doluluğu</div><div class="deg">%59,5</div>
+      <div class="alt">742 / 1248 saat · 6 cihaz</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="mod">Modaliteler <span class="rz">6</span></div>
+    <div class="sekme" data-s="tet">Tetkikler <span class="rz">19</span></div>
+    <div class="sekme" data-s="rap">Raporlayanlar <span class="rz">5</span></div>
+    <div class="sekme" data-s="cih">Cihazlar <span class="rz">6</span></div>
+    <div class="sekme" data-s="tel">Teleradyoloji <span class="rz">5</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: MODALITELER ============ -->
+  <div class="pnl" data-s="mod">
+    <div class="grp">
+      <h4>Modaliteler <span class="mini">satıra tıkla: en çok çekilen 3 tetkik · onay kutusu A4'ü süzer (tık tek, Ctrl ekle, Shift aralık)</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Modalite</th><th class="sag">Çekim</th><th class="sag">Ciro</th><th class="sag">Kurum %</th>
+            <th class="sag">Kontrastlı</th><th class="sag">Kontrast + Sarf</th><th class="sag">Telerad Maliyeti</th><th class="sag">Brüt Kâr</th><th>Marj</th><th class="sag">Ort. Rapor Süresi</th></tr></thead>
+          <tbody>
+            <tr class="ac sel" data-d="MR"><td><input type="checkbox" checked></td><td><span class="ok-ic">▾</span> <b>MR</b></td>
+              <td class="sag">186</td><td class="sag">274.150,00</td><td class="sag">%72,0</td>
+              <td class="sag">43</td><td class="sag">24.140,00</td><td class="sag">16.820,00</td>
+              <td class="sag"><b>233.190,00</b></td><td><span class="rz sari">%85,1</span></td><td class="sag">11,6 sa <span class="rz sari">8 bekliyor</span></td></tr>
+            <tr class="det" data-p="MR"><td></td><td>Lomber Vertebra MR <span class="sonuk">· 806.660</span></td><td class="sag">58</td>
+              <td class="sag">84.100,00</td><td></td><td class="sag">4</td><td colspan="5" class="sonuk">birim 1.450,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="MR"><td></td><td>Beyin MR <span class="sonuk">· 806.630</span></td><td class="sag">46</td>
+              <td class="sag">66.700,00</td><td></td><td class="sag">18</td><td colspan="5" class="sonuk">birim 1.450,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="MR"><td></td><td>Diz MR <span class="sonuk">· 806.700</span></td><td class="sag">41</td>
+              <td class="sag">55.350,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 1.350,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="ac" data-d="BT"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>BT</b></td>
+              <td class="sag">150</td><td class="sag">141.090,00</td><td class="sag">%78,0</td>
+              <td class="sag">42</td><td class="sag">14.670,00</td><td class="sag">5.700,00</td>
+              <td class="sag"><b>120.720,00</b></td><td><span class="rz sari">%85,6</span></td><td class="sag">8,2 sa <span class="rz sari">4 bekliyor</span></td></tr>
+            <tr class="det" data-p="BT" hidden><td></td><td>Toraks BT <span class="sonuk">· 805.430</span></td><td class="sag">64</td>
+              <td class="sag">60.800,00</td><td></td><td class="sag">12</td><td colspan="5" class="sonuk">birim 950,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="BT" hidden><td></td><td>Beyin BT <span class="sonuk">· 805.390</span></td><td class="sag">38</td>
+              <td class="sag">29.640,00</td><td></td><td class="sag">3</td><td colspan="5" class="sonuk">birim 780,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="BT" hidden><td></td><td>Abdomen BT <span class="sonuk">· 805.320</span></td><td class="sag">31</td>
+              <td class="sag">38.750,00</td><td></td><td class="sag">27</td><td colspan="5" class="sonuk">birim 1.250,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="ac" data-d="USG"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>USG</b></td>
+              <td class="sag">295</td><td class="sag">121.470,00</td><td class="sag">%61,0</td>
+              <td class="sag">—</td><td class="sag">1.770,00</td><td class="sag">—</td>
+              <td class="sag"><b>119.700,00</b></td><td><span class="rz ok">%98,5</span></td><td class="sag">0,4 sa</td></tr>
+            <tr class="det" data-p="USG" hidden><td></td><td>Tüm Abdomen USG <span class="sonuk">· 804.040</span></td><td class="sag">142</td>
+              <td class="sag">59.640,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 420,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="USG" hidden><td></td><td>Tiroid USG <span class="sonuk">· 804.170</span></td><td class="sag">66</td>
+              <td class="sag">25.080,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 380,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="USG" hidden><td></td><td>Meme USG (bilateral) <span class="sonuk">· 804.110</span></td><td class="sag">48</td>
+              <td class="sag">19.200,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 400,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="ac" data-d="DOP"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Doppler</b></td>
+              <td class="sag">56</td><td class="sag">35.740,00</td><td class="sag">%66,0</td>
+              <td class="sag">—</td><td class="sag">448,00</td><td class="sag">—</td>
+              <td class="sag"><b>35.292,00</b></td><td><span class="rz ok">%98,7</span></td><td class="sag">0,6 sa</td></tr>
+            <tr class="det" data-p="DOP" hidden><td></td><td>Alt Ekstremite Venöz Doppler <span class="sonuk">· 804.250</span></td><td class="sag">34</td>
+              <td class="sag">22.100,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 650,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="DOP" hidden><td></td><td>Karotis-Vertebral Doppler <span class="sonuk">· 804.210</span></td><td class="sag">22</td>
+              <td class="sag">13.640,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 620,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="ac" data-d="RG"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Röntgen</b></td>
+              <td class="sag">432</td><td class="sag">71.920,00</td><td class="sag">%84,0</td>
+              <td class="sag">—</td><td class="sag">1.728,00</td><td class="sag">—</td>
+              <td class="sag"><b>70.192,00</b></td><td><span class="rz ok">%97,6</span></td><td class="sag">10,9 sa <span class="rz sari">6 bekliyor</span></td></tr>
+            <tr class="det" data-p="RG" hidden><td></td><td>Akciğer Grafisi (PA) <span class="sonuk">· 803.230</span></td><td class="sag">248</td>
+              <td class="sag">39.680,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 160,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="RG" hidden><td></td><td>Lomber Vertebra Grafisi (2 yön) <span class="sonuk">· 803.410</span></td><td class="sag">96</td>
+              <td class="sag">17.280,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 180,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="det" data-p="RG" hidden><td></td><td>Diz Grafisi (2 yön) <span class="sonuk">· 803.330</span></td><td class="sag">88</td>
+              <td class="sag">14.960,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 170,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="ac" data-d="MMG"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span> <b>Mamografi</b></td>
+              <td class="sag">61</td><td class="sag">31.720,00</td><td class="sag">%70,0</td>
+              <td class="sag">—</td><td class="sag">732,00</td><td class="sag">—</td>
+              <td class="sag"><b>30.988,00</b></td><td><span class="rz ok">%97,7</span></td><td class="sag">22,5 sa</td></tr>
+            <tr class="det" data-p="MMG" hidden><td></td><td>Bilateral Mamografi <span class="sonuk">· 803.590</span></td><td class="sag">61</td>
+              <td class="sag">31.720,00</td><td></td><td class="sag">—</td><td colspan="5" class="sonuk">birim 520,00 ₺ · en çok çekilen 3 tetkikten</td></tr>
+            <tr class="toplam"><td></td><td>Toplam · 6 modalite</td><td class="sag">1.180</td><td class="sag">676.090,00</td>
+              <td class="sag">%72,1</td><td class="sag">85</td><td class="sag">43.488,00</td><td class="sag">22.520,00</td>
+              <td class="sag">610.082,00</td><td><span class="rz ok">%90,2</span></td><td class="sag">8,1 sa · 18 bekliyor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: TETKIKLER ============ -->
+  <div class="pnl" data-s="tet">
+    <div class="grp">
+      <h4>Tetkikler <span class="mini">ciroya göre sıralı · marj = (ciro − kontrast/sarf) / ciro; telerad maliyeti modalite düzeyinde</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Tetkik</th><th>SUT Kodu</th><th>Modalite</th><th class="sag">Adet</th><th class="sag">Ciro</th>
+            <th class="sag">Ort. Fiyat</th><th class="sag">Kontrastlı</th><th class="sag">Sarf / Çekim</th><th class="sag">Sarf Toplam</th><th>Marj</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Lomber Vertebra MR</b></td><td>806.660</td><td>MR</td><td class="sag">58</td>
+              <td class="sag">84.100,00</td><td class="sag">1.450,00</td><td class="sag">4</td><td class="sag">63,28</td><td class="sag">3.670,00</td>
+              <td><span class="rz ok">%95,6</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Beyin MR</b></td><td>806.630</td><td>MR</td><td class="sag">46</td>
+              <td class="sag">66.700,00</td><td class="sag">1.450,00</td><td class="sag">18</td><td class="sag">195,43</td><td class="sag">8.990,00</td>
+              <td><span class="rz sari">%86,5</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Toraks BT</b></td><td>805.430</td><td>BT</td><td class="sag">64</td>
+              <td class="sag">60.800,00</td><td class="sag">950,00</td><td class="sag">12</td><td class="sag">73,75</td><td class="sag">4.720,00</td>
+              <td><span class="rz ok">%92,2</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Tüm Abdomen USG</b></td><td>804.040</td><td>USG</td><td class="sag">142</td>
+              <td class="sag">59.640,00</td><td class="sag">420,00</td><td class="sag">—</td><td class="sag">6,00</td><td class="sag">852,00</td>
+              <td><span class="rz ok">%98,6</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Diz MR</b></td><td>806.700</td><td>MR</td><td class="sag">41</td>
+              <td class="sag">55.350,00</td><td class="sag">1.350,00</td><td class="sag">—</td><td class="sag">35,00</td><td class="sag">1.435,00</td>
+              <td><span class="rz ok">%97,4</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Akciğer Grafisi (PA)</b></td><td>803.230</td><td>Röntgen</td><td class="sag">248</td>
+              <td class="sag">39.680,00</td><td class="sag">160,00</td><td class="sag">—</td><td class="sag">4,00</td><td class="sag">992,00</td>
+              <td><span class="rz ok">%97,5</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Abdomen BT</b></td><td>805.320</td><td>BT</td><td class="sag">31</td>
+              <td class="sag">38.750,00</td><td class="sag">1.250,00</td><td class="sag">27</td><td class="sag">251,45</td><td class="sag">7.795,00</td>
+              <td><span class="rz kir">%79,9</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Üst Abdomen MR (kontrastlı)</b></td><td>806.560</td><td>MR</td><td class="sag">19</td>
+              <td class="sag">36.100,00</td><td class="sag">1.900,00</td><td class="sag">19</td><td class="sag">445,00</td><td class="sag">8.455,00</td>
+              <td><span class="rz kir">%76,6</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Servikal Vertebra MR</b></td><td>806.650</td><td>MR</td><td class="sag">22</td>
+              <td class="sag">31.900,00</td><td class="sag">1.450,00</td><td class="sag">2</td><td class="sag">72,27</td><td class="sag">1.590,00</td>
+              <td><span class="rz ok">%95,0</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Bilateral Mamografi</b></td><td>803.590</td><td>Mamografi</td><td class="sag">61</td>
+              <td class="sag">31.720,00</td><td class="sag">520,00</td><td class="sag">—</td><td class="sag">12,00</td><td class="sag">732,00</td>
+              <td><span class="rz ok">%97,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Beyin BT</b></td><td>805.390</td><td>BT</td><td class="sag">38</td>
+              <td class="sag">29.640,00</td><td class="sag">780,00</td><td class="sag">3</td><td class="sag">45,53</td><td class="sag">1.730,00</td>
+              <td><span class="rz ok">%94,2</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Tiroid USG</b></td><td>804.170</td><td>USG</td><td class="sag">66</td>
+              <td class="sag">25.080,00</td><td class="sag">380,00</td><td class="sag">—</td><td class="sag">6,00</td><td class="sag">396,00</td>
+              <td><span class="rz ok">%98,4</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Alt Ekstremite Venöz Doppler</b></td><td>804.250</td><td>Doppler</td><td class="sag">34</td>
+              <td class="sag">22.100,00</td><td class="sag">650,00</td><td class="sag">—</td><td class="sag">8,00</td><td class="sag">272,00</td>
+              <td><span class="rz ok">%98,8</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Meme USG (bilateral)</b></td><td>804.110</td><td>USG</td><td class="sag">48</td>
+              <td class="sag">19.200,00</td><td class="sag">400,00</td><td class="sag">—</td><td class="sag">6,00</td><td class="sag">288,00</td>
+              <td><span class="rz ok">%98,5</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Obstetrik USG</b></td><td>804.090</td><td>USG</td><td class="sag">39</td>
+              <td class="sag">17.550,00</td><td class="sag">450,00</td><td class="sag">—</td><td class="sag">6,00</td><td class="sag">234,00</td>
+              <td><span class="rz ok">%98,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Lomber Vertebra Grafisi (2 yön)</b></td><td>803.410</td><td>Röntgen</td><td class="sag">96</td>
+              <td class="sag">17.280,00</td><td class="sag">180,00</td><td class="sag">—</td><td class="sag">4,00</td><td class="sag">384,00</td>
+              <td><span class="rz ok">%97,8</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Diz Grafisi (2 yön)</b></td><td>803.330</td><td>Röntgen</td><td class="sag">88</td>
+              <td class="sag">14.960,00</td><td class="sag">170,00</td><td class="sag">—</td><td class="sag">4,00</td><td class="sag">352,00</td>
+              <td><span class="rz ok">%97,6</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Karotis-Vertebral Doppler</b></td><td>804.210</td><td>Doppler</td><td class="sag">22</td>
+              <td class="sag">13.640,00</td><td class="sag">620,00</td><td class="sag">—</td><td class="sag">8,00</td><td class="sag">176,00</td>
+              <td><span class="rz ok">%98,7</span></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Paranazal Sinüs BT</b></td><td>805.470</td><td>BT</td><td class="sag">17</td>
+              <td class="sag">11.900,00</td><td class="sag">700,00</td><td class="sag">—</td><td class="sag">25,00</td><td class="sag">425,00</td>
+              <td><span class="rz ok">%96,4</span></td></tr>
+            <tr class="toplam"><td></td><td colspan="3">Toplam · 19 tetkik</td><td class="sag">1.180</td><td class="sag">676.090,00</td>
+              <td class="sag">572,96</td><td class="sag">85</td><td class="sag">36,85</td><td class="sag">43.488,00</td>
+              <td><span class="rz ok">%93,6</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: RAPORLAYANLAR ============ -->
+  <div class="pnl" data-s="rap">
+    <div class="grp">
+      <h4>Raporlayanlar <span class="mini">hedef: ayaktan 24 sa · "Hedef Aşan" sayısına tık: Protokol No ile çekim listesi</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Radyolog / Firma</th><th>Tür</th><th class="sag">Rapor</th><th class="sag">Ort. Süre</th>
+            <th class="sag">Hedef Aşan</th><th class="sag">Aşım Oranı</th><th class="sag">Kritik Bulgu Bildirimi</th><th class="sag">İkinci Okuma / Revizyon</th><th>İş Yükü</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Doç.Dr. Selin AKGÜN</b></td><td><span class="rz mavi">İç</span></td><td class="sag">412</td>
+              <td class="sag ">5,8 sa</td><td class="sag">6</td><td class="sag">%1,5</td><td class="sag">3</td><td class="sag">2</td>
+              <td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Uz.Dr. Murat ÇELİK</b></td><td><span class="rz mavi">İç</span></td><td class="sag">356</td>
+              <td class="sag ">7,4 sa</td><td class="sag">11</td><td class="sag">%3,1</td><td class="sag">2</td><td class="sag">4</td>
+              <td><div class="cubuk"><i style="width:86%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Uz.Dr. Elif ŞAHİN</b></td><td><span class="rz mavi">İç</span></td><td class="sag">262</td>
+              <td class="sag ">9,1 sa</td><td class="sag">14</td><td class="sag">%5,3</td><td class="sag">1</td><td class="sag">3</td>
+              <td><div class="cubuk"><i style="width:64%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Uzak Rapor Teleradyoloji A.Ş.</b></td><td><span class="rz mor">Teleradyoloji</span></td><td class="sag">112</td>
+              <td class="sag kir">14,2 sa</td><td class="sag">9</td><td class="sag">%8,0</td><td class="sag">1</td><td class="sag">5</td>
+              <td><div class="cubuk"><i style="width:27%"></i></div></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Anka Teleradyoloji Ltd.</b></td><td><span class="rz mor">Teleradyoloji</span></td><td class="sag">20</td>
+              <td class="sag kir">21,5 sa</td><td class="sag">5</td><td class="sag">%25,0</td><td class="sag">—</td><td class="sag">2</td>
+              <td><div class="cubuk"><i style="width:5%"></i></div></td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Toplam · 3 iç radyolog + 2 teleradyoloji</td><td class="sag">1.162</td>
+              <td class="sag">8,1 sa</td><td class="sag">45</td><td class="sag">%3,9</td><td class="sag">7</td><td class="sag">16</td><td class="sonuk">18 çekim rapor bekliyor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: CIHAZLAR ============ -->
+  <div class="pnl" data-s="cih">
+    <div class="grp">
+      <h4>Cihazlar <span class="mini">doluluk = çalışma saati / planlı kapasite · çekim başı maliyet = aylık sabit gider (amortisman + bakım sözleşmesi) / çekim</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Cihaz</th><th>Modalite</th><th class="sag">Çekim</th><th class="sag">Çalışma / Kapasite (sa)</th>
+            <th>Doluluk</th><th class="sag">Arıza / Bakım</th><th class="sag">Aylık Sabit Gider</th><th class="sag">Çekim Başı Maliyet</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Siemens Magnetom Altea 1.5T</b></td><td>MR</td><td class="sag">186</td><td class="sag">212 / 260</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:82%"></i></div><span>%81,5</span></div></td>
+              <td class="sag"><span class="rz sari">1 gün</span></td><td class="sag">96.000,00</td><td class="sag"><b>516,13</b></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>GE Revolution EVO 64 kesit</b></td><td>BT</td><td class="sag">150</td><td class="sag">118 / 260</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:45%"></i></div><span>%45,4</span></div></td>
+              <td class="sag">—</td><td class="sag">54.000,00</td><td class="sag"><b>360,00</b></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Samsung HS70A</b></td><td>USG / Doppler</td><td class="sag">203</td><td class="sag">164 / 208</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:79%"></i></div><span>%78,8</span></div></td>
+              <td class="sag">—</td><td class="sag">9.500,00</td><td class="sag"><b>46,80</b></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Mindray DC-80</b></td><td>USG</td><td class="sag">148</td><td class="sag">121 / 208</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:58%"></i></div><span>%58,2</span></div></td>
+              <td class="sag"><span class="rz sari">2 gün</span></td><td class="sag">7.200,00</td><td class="sag"><b>48,65</b></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Fujifilm FDR Smart X (DR)</b></td><td>Röntgen</td><td class="sag">432</td><td class="sag">96 / 208</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:46%"></i></div><span>%46,2</span></div></td>
+              <td class="sag">—</td><td class="sag">14.000,00</td><td class="sag"><b>32,41</b></td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Hologic Selenia Dimensions</b></td><td>Mamografi</td><td class="sag">61</td><td class="sag">31 / 104</td>
+              <td><div class="bar"><div class="cubuk"><i style="width:30%"></i></div><span>%29,8</span></div></td>
+              <td class="sag"><span class="rz sari">3 gün</span></td><td class="sag">21.000,00</td><td class="sag"><b>344,26</b></td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Toplam · 6 cihaz</td><td class="sag">1.180</td><td class="sag">742 / 1248</td>
+              <td>%59,5</td><td class="sag">6 gün</td><td class="sag">201.700,00</td><td class="sag">170,93</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: TELERADYOLOJI ============ -->
+  <div class="pnl" data-s="tel">
+    <div class="ikili">
+      <div class="grp">
+        <h4>Giden · dışarıya raporlatılan <span class="mini">maliyet sözleşme birim fiyatından</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Teleradyoloji Firması</th><th>Modalite</th><th class="sag">Çekim</th><th class="sag">Birim Ücret</th><th class="sag">Maliyet</th></tr></thead>
+            <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Uzak Rapor Teleradyoloji A.Ş.</b></td><td>MR</td><td class="sag">74</td><td class="sag">180,00</td><td class="sag">13.320,00</td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Uzak Rapor Teleradyoloji A.Ş.</b></td><td>BT</td><td class="sag">38</td><td class="sag">150,00</td><td class="sag">5.700,00</td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Anka Teleradyoloji Ltd.</b></td><td>MR</td><td class="sag">20</td><td class="sag">175,00</td><td class="sag">3.500,00</td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Giden toplam</td><td class="sag">132</td><td></td><td class="sag kir">22.520,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Gelen · bize raporlatan kurumlar <span class="mini">Teleradyoloji Dönem Faturası ile kesilir</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kurum</th><th>Modalite</th><th class="sag">Çekim</th><th class="sag">Birim Ücret</th><th class="sag">Gelir</th></tr></thead>
+            <tbody>
+            <tr><td><input type="checkbox"></td><td><b>Özel Polatlı Tıp Merkezi</b></td><td>BT / MR</td><td class="sag">58</td><td class="sag">140,00</td><td class="sag">8.120,00</td></tr>
+            <tr><td><input type="checkbox"></td><td><b>Kızılcahamam Devlet Hastanesi</b></td><td>BT</td><td class="sag">24</td><td class="sag">160,00</td><td class="sag">3.840,00</td></tr>
+            <tr class="toplam"><td></td><td colspan="2">Gelen toplam</td><td class="sag">82</td><td></td><td class="sag">11.960,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="grp" style="padding:8px 10px">
+      Net teleradyoloji: gelen 11.960,00 − giden 22.520,00 = <span class="rz kir">-10.560,00 ₺</span>
+      <span class="sonuk">· giden maliyet modalite kârından düşülür; gelen gelir ciroya katılmaz (kendi faturası ile izlenir)</span>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: A4 ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet">
+          <div style="display:flex;gap:7px;align-items:center"><div class="logo">G</div>
+            <div><b style="font-size:10px">GENOTİP TIP MERKEZİ</b><br>Merkez Şube · Atatürk Cad. No:12 Çankaya / ANKARA<br>Tel 0312 000 00 00 · VKN 1234567890</div></div>
+          <div style="text-align:right">Belge No: GR-2026-09<br>Düzenleme: 10.10.2026 10:15<br>Düzenleyen: Burak AKSOY</div>
+        </div>
+        <h1>GÖRÜNTÜLEME DÖNEM İCMALİ</h1>
+        <div class="bilgi">
+          <div>Dönem: <b>01.09.2026 – 30.09.2026</b></div><div>Şube: <b>Merkez</b></div>
+          <div>Çekim: 1.180 · hasta: 1.012</div><div>Ort. rapor süresi: 8,1 sa · hedef aşan 45</div>
+        </div>
+        <table>
+          <thead><tr><th>Modalite</th><th>Çekim</th><th>Ciro</th><th>Kurum Payı</th><th>Hasta Payı</th><th>Kontrast/Sarf</th><th>Telerad</th><th>Brüt Kâr</th><th>Rapor sa</th></tr></thead>
+          <tbody>
+            <tr><td>MR</td><td class="sag">186</td><td class="sag">274.150,00</td><td class="sag">197.388,00</td><td class="sag">76.762,00</td><td class="sag">24.140,00</td><td class="sag">16.820,00</td><td class="sag">233.190,00</td><td class="sag">11,6</td></tr>
+            <tr><td>BT</td><td class="sag">150</td><td class="sag">141.090,00</td><td class="sag">110.050,20</td><td class="sag">31.039,80</td><td class="sag">14.670,00</td><td class="sag">5.700,00</td><td class="sag">120.720,00</td><td class="sag">8,2</td></tr>
+            <tr><td>USG</td><td class="sag">295</td><td class="sag">121.470,00</td><td class="sag">74.096,70</td><td class="sag">47.373,30</td><td class="sag">1.770,00</td><td class="sag">0,00</td><td class="sag">119.700,00</td><td class="sag">0,4</td></tr>
+            <tr><td>Doppler</td><td class="sag">56</td><td class="sag">35.740,00</td><td class="sag">23.588,40</td><td class="sag">12.151,60</td><td class="sag">448,00</td><td class="sag">0,00</td><td class="sag">35.292,00</td><td class="sag">0,6</td></tr>
+            <tr><td>Röntgen</td><td class="sag">432</td><td class="sag">71.920,00</td><td class="sag">60.412,80</td><td class="sag">11.507,20</td><td class="sag">1.728,00</td><td class="sag">0,00</td><td class="sag">70.192,00</td><td class="sag">10,9</td></tr>
+            <tr><td>Mamografi</td><td class="sag">61</td><td class="sag">31.720,00</td><td class="sag">22.204,00</td><td class="sag">9.516,00</td><td class="sag">732,00</td><td class="sag">0,00</td><td class="sag">30.988,00</td><td class="sag">22,5</td></tr>
+            <tr><td><b>Toplam</b></td><td class="sag"><b>1.180</b></td><td class="sag"><b>676.090,00</b></td><td class="sag"><b>487.740,10</b></td><td class="sag"><b>188.349,90</b></td><td class="sag"><b>43.488,00</b></td><td class="sag"><b>22.520,00</b></td><td class="sag"><b>610.082,00</b></td><td class="sag"><b>8,1</b></td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Ciro</span><span>676.090,00 ₺</span></div>
+          <div><span>Kontrast + sarf maliyeti</span><span>43.488,00 ₺</span></div>
+          <div><span>Teleradyoloji (giden) maliyeti</span><span>22.520,00 ₺</span></div>
+          <div><span>Teleradyoloji (gelen) geliri — ayrı fatura</span><span>11.960,00 ₺</span></div>
+          <div class="b"><span>BRÜT KÂR (marj %90,2)</span><span>610.082,00 ₺</span></div>
+        </div>
+        <div style="margin-top:6px;color:#4d5d6e">Cihaz doluluğu %59,5 (742/1248 sa). Bu belgede hasta kimlik bilgisi yer almaz.</div>
+        <div class="imza"><div>Hazırlayan<br>Mali İşler · İmza</div><div>Radyoloji Sorumlusu<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · GR-2026-09 · iç kullanım içindir</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablolar">
+    <b style="color:#2c4a6b">Tablolar:</b>
+    <code>radyoloji_istem</code><code>radyoloji_rapor</code><code>radyoloji_sarf</code><code>telerad_gelen</code><code>telerad sözleşme</code>
+    <code>belge_satir</code><code>belge_satir_dagilim</code><code>cihaz</code>
+    <span class="sonuk">· hesap sunucuda, istemcide yeniden hesap yok</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Eylül 2026 · Merkez</span><span>·</span>
+    <span>1.180 çekim · 1.012 hasta</span><span>·</span>
+    <span>Ciro 676.090,00 ₺ · brüt kâr 610.082,00 ₺</span><span>·</span>
+    <span>Ort. rapor 8,1 sa · 18 bekleyen</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> görüntüleme biriminin dönem icmali — modalite / tetkik başına çekim ve ciro, kurum / hasta payı, kontrast ve sarf maliyeti,
+  raporlama süresi ve radyolog iş yükü, teleradyoloji gelen / giden ve cihaz doluluğu.
+  <ul>
+    <li><b>Giriş:</b> Radyoloji › İcmaller › Görüntüleme İcmali; Radyoloji Pano'dan "Dönem İcmali"; Radyoloji Dökümler (std-radyoloji-modalite) satırından.</li>
+    <li><b>Ciro</b> = yalnız <b>tür 19</b> başvuruların radyoloji hizmet satırı tutarı (belge_satir), iptal başvuru / satır hariç.
+      <b>Kurum payı</b> belge_satir_dagilim'dan (SGK + ÖSS), toplamla sınırlı; hasta payı = ciro − kurum payı.</li>
+    <li><b>Kontrast + sarf</b> = radyoloji_sarf düşümü × stok maliyeti (fn_uretim_stok_maliyeti). <b>Teleradyoloji maliyeti</b> sözleşme birim fiyatından;
+      giden maliyet modalite kârından düşülür, gelen gelir ciroya katılmaz (Teleradyoloji Dönem Faturası ile izlenir).</li>
+    <li><b>Rapor süresi</b> = çekim tarihi → rapor onayı; ortalama raporlanmış çekimler üzerinden, bekleyenler ayrı sayılır. Hedef aşan sayısına tıklayınca
+      çekimler <b>Protokol No</b> ile listelenir.</li>
+    <li><b>Cihaz doluluğu</b> = çalışma saati / planlı kapasite (çalışma planı); çekim başı maliyet = aylık sabit gider / çekim.</li>
+    <li><b>Hasta TC'si gösterilmez</b>; A4 belgede hasta bilgisi yoktur. Listeler soldaki onay kutusuyla seçilir. <b>A4 önizleme ayrı sekmededir</b>.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: data-s eslesmesi ile .pnl gosterilir
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+// Modalite satiri ac/kapa: en cok cekilen 3 tetkik
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(e){
+  if(e.target.tagName==='INPUT') return;
+  var d=[].slice.call(document.querySelectorAll('tr.det[data-p="'+tr.dataset.d+'"]')); if(!d.length) return;
+  var gizle=!d[0].hidden; d.forEach(function(x){x.hidden=gizle;});
+  tr.querySelector('.ok-ic').textContent=gizle?'▸':'▾';});});
+</script>
+
+</body>
+</html>
