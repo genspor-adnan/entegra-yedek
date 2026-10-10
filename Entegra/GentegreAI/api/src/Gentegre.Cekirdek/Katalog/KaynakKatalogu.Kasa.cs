@@ -481,7 +481,9 @@ public static partial class KaynakKatalogu
                               join public.banko_oturum o on o.id = k.oturum_id
                               join public.banko b on b.id = o.banko_id
                              where k.id = t.kasa_islem_id), '')",
-                "metin", "Banko", Genislik: 140, Filtrelenebilir: false),
+                // SÜZÜLEBİLİR (10.10.2026): Kayıt Kabul günlük kasa dökümü
+                //   tahsilatı bankoya göre gruplar (döküm boyutu = süzülebilir kolon).
+                "metin", "Banko", Genislik: 140),
             new("tutar",         "t.tutar",         "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
             new("yerelTutar",    "t.yerel_tutar",   "para",  "TL Tutar", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
             new("dovizCinsi",    "t.doviz_cinsi",   "metin", "Döviz", Hizalama: "orta", Varsayilan: false),
