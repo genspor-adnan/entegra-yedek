@@ -21,8 +21,8 @@ namespace Gentegre.Api.Uclar;
 /// pay dağılımda kapanır ve cariye geçer.</para>
 ///
 /// <para><b>Hasta alacağı</b> = başvuru başına hasta payı - net tahsilat;
-/// hasta icmaliyle (HastaIcmalUclari) AYNI kural, yalnız başvuru (tür 19),
-/// iptal (6) hariç. Avans mahsup edilmedikçe düşülmez.</para>
+/// kural HastaBorcSorgusu'nda (hasta icmaliyle aynı). Avans mahsup
+/// edilmedikçe düşülmez.</para>
 ///
 /// Yalnız OKUR. TC gösterilmez (hasta ad + dosya no).
 /// </summary>
@@ -143,34 +143,10 @@ public static class AlacakYaslandirmaUclari
             var hastalar = new List<HastaAlacagi>();
             if (hastaIste)
             {
-                var basvurular = await b.ListeAsync("""
-                    with bsv as (
-                        select be.id, be.belge_tarihi, be.genel_toplam, coalesce(bb.hasta_id, be.taraf_id) as hasta_id
-                          from public.belge be
-                          join public.belge_basvuru bb on bb.id = be.id
-                         where be.tipi = 30 and be.tur = 19 and be.durum <> 6
-                           and be.belge_tarihi < @p0
-                           and (@p1 = 0 or be.sube_id is null or be.sube_id = @p1))
-                    select s.hasta_id, s.id, s.belge_tarihi, s.genel_toplam,
-                           coalesce((select sum(coalesce(dg.sgk, 0) + coalesce(dg.oss, 0))
-                                       from public.belge_satir st
-                                       left join public.belge_satir_dagilim dg on dg.belge_satir_id = st.id
-                                      where st.belge_id = s.id), 0),
-                           coalesce((select sum(case when kt.yon > 0 then ki.yerel_tutar else -ki.yerel_tutar end)
-                                       from public.kasa_islem ki
-                                       join public.kasa_islem_turu kt on kt.kod = ki.tur
-                                      where ki.belge_id = s.id and ki.durum <> 9 and ki.islem_tarihi < @p0), 0),
-                           (select max(ki.islem_tarihi) from public.kasa_islem ki
-                             where ki.belge_id = s.id and ki.durum <> 9 and ki.islem_tarihi < @p0)
-                      from bsv s
-                    """, null, [bitis, sube], o =>
-                {
-                    var toplam = o.GetDecimal(3);
-                    var kurum = Math.Min(o.GetDecimal(4), toplam);
-                    return (hasta: o.IsDBNull(0) ? 0 : o.GetInt32(0), tarih: o.GetDateTime(2),
-                            kalan: toplam - kurum - o.GetDecimal(5),
-                            sonTahsilat: o.IsDBNull(6) ? (DateTime?)null : o.GetDateTime(6));
-                }, iptal);
+                // Borç kuralı TEK YERDE (HastaBorcSorgusu) - Hasta Borç Takibi aynısını kullanır.
+                var basvurular = (await HastaBorcSorgusu.BasvurularAsync(b, bitis, sube, null, iptal))
+                    .Select(x => (hasta: x.HastaId, tarih: x.Tarih, kalan: x.Kalan, sonTahsilat: x.SonTahsilat))
+                    .ToList();
 
                 var acik = basvurular.Where(x => x.kalan > 0.005m && x.hasta > 0).ToList();
                 var hastaIdler = acik.Select(x => x.hasta).Distinct().ToArray();

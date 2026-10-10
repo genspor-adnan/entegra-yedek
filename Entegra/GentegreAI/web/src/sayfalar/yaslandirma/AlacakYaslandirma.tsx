@@ -79,6 +79,7 @@ export function AlacakYaslandirma() {
           <span className="ki-soluk">A4 yalnız seçili {seciliKurum.length} kurum · {seciliHasta.length} hastayı basar</span>
         )}
         <span className="sp" />
+        <button onClick={() => git('/hasta-borc-takibi')}>📞 Hasta Borç Takibi</button>
         <button onClick={() => git('/kurum-icmali')}>🏢 Kurum İcmali</button>
       </div>
 

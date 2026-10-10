@@ -328,6 +328,14 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Avansları', ic: '💰',
     yetkiKodu: 'kasa_islem', menuSira: 35,
   },
+  {
+    // HASTA BORÇ TAKİBİ (1020, mockup İcmal/hasta_borc_takibi.html): açık
+    //   borçlu hastalar, toplu hatırlatma, ödeme sözü / planı.
+    kaynak: 'hasta-borc-takibi', rota: 'hasta-borc-takibi', ozelSayfa: true,
+    baslik: 'Hasta Borç Takibi', yol: 'Kayıt Kabul › Hasta Borç Takibi', urunModu: 2,
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Borç Takibi', ic: '📞',
+    yetkiKodu: 'hasta.borc_takip', menuSira: 36,
+  },
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {

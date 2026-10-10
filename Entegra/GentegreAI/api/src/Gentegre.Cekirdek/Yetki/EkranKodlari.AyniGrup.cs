@@ -29,6 +29,7 @@ public static partial class EkranKodlari
         ("banko.vezne_icmal", "banko_onay"),                    // Kayıt Kabul › Vezne İcmali (1016)
         ("medula.mutabakat", "medula.fatura"),                  // Medula › Mutabakat İcmali (1017)
         ("finans.alacak_yaslandirma", "kasa.finans"),           // Finans › Alacak Yaşlandırma (1019)
+        ("hasta.borc_takip", "banko_onay"),                     // Kayıt Kabul › Hasta Borç Takibi (1020)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

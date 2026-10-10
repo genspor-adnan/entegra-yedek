@@ -251,6 +251,8 @@ public static partial class EkranKodlari
         "medula.mutabakat",
         // Alacak Yaşlandırma (1019): /api/alacak-yaslandirma kendi koduna bakar.
         "finans.alacak_yaslandirma",
+        // Hasta Borç Takibi (1020): /api/hasta-borc kendi koduna bakar.
+        "hasta.borc_takip",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
