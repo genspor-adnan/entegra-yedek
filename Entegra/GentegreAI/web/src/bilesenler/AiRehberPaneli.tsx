@@ -73,6 +73,9 @@ function hataDurumu(h: unknown): { metin: string; tur: 'yetki' | 'yok' | 'kota' 
   return { metin: 'Sunucuya ulaşılamadı; bağlantınızı kontrol edip yeniden deneyin.', tur: 'ag' };
 }
 
+/** Üst şeritteki "?" düğmesinin gönderdiği olay (Kabuk). */
+export const YARDIM_AC_OLAYI = 'gentegre:yardim-ac';
+
 export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   const git = useNavigate();
   const konum = useLocation();
@@ -164,6 +167,16 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
     } catch (h) { setHata(hataDurumu(h)) }
     finally { setYukleniyor(false) }
   }, [urunModu, konum.pathname, ipucuAnahtari]);
+
+  // ÜST ŞERİTTEKİ "?" (kullanıcı 10.10.2026: "yardımı nasıl kullanacağım" ->
+  //   "evet yap"): paneli açar ve bulunduğu ekranın yardımını sorar. Bağlamsal
+  //   soru sunucuda ekranın belgesine gider; belgesi olmayan ekranda genel
+  //   rehber cevabı gelir.
+  useEffect(() => {
+    const ac = () => { setAcik(true); void sor('Bu ekranda ne yapabilirim?') };
+    window.addEventListener(YARDIM_AC_OLAYI, ac);
+    return () => window.removeEventListener(YARDIM_AC_OLAYI, ac);
+  }, [sor]);
 
   // KLAVYE: Esc kapatır; odak panelde kalır.
   const tusla = (e: React.KeyboardEvent) => {

@@ -264,15 +264,24 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
         var oran = kelimeler.Length == 0 ? 0m : (decimal)vurus / kelimeler.Length;
         var guven = Math.Round(Math.Min(1m, oran * 0.7m + (decimal)benzerlik * 1.5m), 2);
 
+        // ------------------------------------------ belge mi, konu mu?
+        // YARDIM BELGESİ ÖNCE TARTILIR (kullanıcı 10.10.2026: "yardımı nasıl
+        //   kullanacağım" -> "gün sonu kasa teslimi" sorusuna banko belgesi
+        //   yerine genel tahsilat konusu dönüyordu). Konu eşiği düşük (tek
+        //   kelime, %30): "kasa" geçen her soru Tahsilat konusunu kapıyordu.
+        //   Belge ekrana / konuya özel yazılır; güçlü eşleşen belge, ÇOK güçlü
+        //   olmayan konuyu geçer.
+        var vuruslar = dizin?.Ara(soru, ekran, baglam, urunModu, dil, 4) ?? [];
+        if (vuruslar.Count > 0 && BelgeKonuyuGecer(vuruslar[0], ekran, kelimeler.Length, guven))
+            return await BelgeYanitiAsync(baglanti, vuruslar, soru, urunModu, baglam, uyarilar,
+                                          kontorBakiye, istek, ekran, kronometre, iptal, enjeksiyon);
+
         if (enIyi is not null && vurus >= 1 && guven >= 0.30m)
         {
             var k = await KonuYanitiAsync(baglanti, enIyi, konular, soru, guven, urunModu, baglam,
                                           uyarilar, kontorBakiye, istek, ekran, kronometre, iptal);
             return k with { Ekran = Ozet(ekran), Dil = dil };
         }
-
-        // ------------------------------------------------- yardım belgeleri
-        var vuruslar = dizin?.Ara(soru, ekran, baglam, urunModu, dil, 4) ?? [];
 
         // --------------------------------------------------------- model
         var modelEkranlari = await EkranAraAsync(baglanti, soru, kelimeler, urunModu, baglam, 12, iptal);
@@ -325,6 +334,20 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             [], [], [], 0m,
             "Hangi modülde çalışıyorsunuz: hasta/randevu (HBYS) mu, fatura/stok (ERP) mü?",
             uyarilar, "", 0, kontorBakiye, Ekran: Ozet(ekran), Dil: dil);
+    }
+
+    /// <summary>
+    /// Belge cevabı konu cevabının ÖNÜNE geçer mi: bulunduğu ekranın belgesi
+    /// makul eşleşmede, başka ekranın belgesi soru kelimelerinin çoğunu
+    /// başlıkta tutturunca. Konu çok güçlüyse (güven ≥ 0.85) konu kalır.
+    /// </summary>
+    internal static bool BelgeKonuyuGecer(YardimDizini.Vurus enIyi, DogrulanmisBaglam ekran,
+                                          int kelimeSayisi, decimal konuGuveni)
+    {
+        if (konuGuveni >= 0.85m) return false;
+        var ekranBelgesi = ekran is { Bulundu: true, Yetkili: true } && YardimDizini.EkranUyar(enIyi.Belge, ekran);
+        if (ekranBelgesi && enIyi.Puan >= 6) return true;
+        return enIyi.Puan >= Math.Max(6, 2 * kelimeSayisi);
     }
 
     // ---------------------------------------------------------------- model --

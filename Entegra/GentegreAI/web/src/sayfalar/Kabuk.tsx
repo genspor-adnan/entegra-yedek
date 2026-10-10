@@ -23,7 +23,7 @@ import { Bayrak } from '../bilesenler/Bayrak';
 import { c, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi } from '../api/sozlesme';
-import { AiRehberPaneli } from '../bilesenler/AiRehberPaneli';
+import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 
 export function Kabuk() {
@@ -290,7 +290,11 @@ export function Kabuk() {
               onayi - tek tik islemle (taleplerim/TaleplerimPaneli). */}
           <BanaGelenlerPaneli />
 
-          <button className="ib" title={c('Yardım')}>?</button>
+          {/* "?" bulunduğu ekranın yardımını açar (AiRehberPaneli dinler). */}
+          {yetki('ai.rehber') && (
+            <button className="ib" title={c('Bu ekranın yardımı')}
+                    onClick={() => window.dispatchEvent(new Event(YARDIM_AC_OLAYI))}>?</button>
+          )}
           {/* ÇIKIŞ AYIRT EDİLİR (kullanıcı): zil/yardım/dil ikonlarıyla aynı
               görünümdeydi ve başlığı Türkçesizdi ("Cikis"). Yanlışlıkla
               basıldığında oturum kapanan tek düğme bu - komşularından ayrı
