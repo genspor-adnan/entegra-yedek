@@ -288,6 +288,8 @@ public static class BankoOturumUclari
             //   çıkarmak yanlış borç gösterirdi. Kurum payı olan başvuru
             //   `kurumPayli` işaretiyle ayrı bölümde: oradaki kalan kurum
             //   payını da içerir, vezneden istenecek tutar değildir.
+            //   Yalnız BAŞVURU (tur 19): tipi 30 hasta / kurum tahakkukunu (16/17)
+            //   da taşır - türetilmiş belge, sayılırsa aynı borç iki kez görünür.
             var acikBorclar = await b.ListeAsync("""
                 with oturum as (
                     select o.kullanici_id, coalesce(o.acilis_ts, o.acilis_talep_ts) as bas, o.kapanis_ts as son
@@ -297,7 +299,7 @@ public static class BankoOturumUclari
                      where k.oturum_id = @p0 and k.belge_id is not null
                     union
                     select be.id from public.belge be, oturum o
-                     where be.tipi = 30 and be.ekleyen = o.kullanici_id
+                     where be.tipi = 30 and be.tur = 19 and be.ekleyen = o.kullanici_id
                        and be.ekleme_tarihi >= o.bas and (o.son is null or be.ekleme_tarihi <= o.son))
                 select be.id, be.belge_no, be.belge_tarihi,
                        coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), be.taraf_unvan, ''),
@@ -309,7 +311,7 @@ public static class BankoOturumUclari
                                  join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
                                 where s.belge_id = be.id and (dg.sgk <> 0 or dg.oss <> 0))
                   from adaylar a
-                  join public.belge be on be.id = a.id and be.tipi = 30
+                  join public.belge be on be.id = a.id and be.tipi = 30 and be.tur = 19
                   left join public.belge_basvuru bb on bb.id = be.id
                   left join public.taraf h  on h.id = coalesce(bb.hasta_id, be.taraf_id)
                   left join public.departman d on d.id = bb.bolum_id
@@ -339,11 +341,11 @@ public static class BankoOturumUclari
                       from public.banko_oturum o where o.id = @p0)
                 select count(*) from (
                     select k.belge_id as id from public.kasa_islem k
-                      join public.belge be on be.id = k.belge_id and be.tipi = 30
+                      join public.belge be on be.id = k.belge_id and be.tipi = 30 and be.tur = 19
                      where k.oturum_id = @p0
                     union
                     select be.id from public.belge be, oturum o
-                     where be.tipi = 30 and be.ekleyen = o.kullanici_id
+                     where be.tipi = 30 and be.tur = 19 and be.ekleyen = o.kullanici_id
                        and be.ekleme_tarihi >= o.bas and (o.son is null or be.ekleme_tarihi <= o.son)) a
                 """, null, [id], iptal);
             return Results.Ok(new
