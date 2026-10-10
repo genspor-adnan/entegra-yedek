@@ -1,7 +1,8 @@
+import { useRef, type MouseEvent } from 'react';
 import type { KurumIcmali } from '../../../api/uclar/kurumIcmal';
 import { para } from '../../../bilesenler/bicim';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
-import { icmalRozeti, provizyonRozeti } from './kurumIcmalOrtak';
+import { icmalRozeti, provizyonRozeti, secimUygula } from './kurumIcmalOrtak';
 
 /** Kurum icmalinin sekme tabloları (KurumIcmal). Rakamlar sunucudan gelir. */
 
@@ -10,14 +11,22 @@ const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 /**
  * DÖNEMDEKİ KURUMLAR - soldaki onay kutusu (kullanıcı) diğer sekmeleri süzer;
- * hiçbiri seçili değilse bütün kurumlar. Satıra tıklamak da seçer.
+ * hiçbiri seçili değilse bütün kurumlar. Tıklama tek kurumu seçer, Ctrl / Shift
+ * ile birden çok (secimUygula); başlıktaki kutu hepsini seçer / bırakır.
  */
 export function KurumTablosu({ v, secili, setSecili }: {
   v: KurumIcmali; secili: number[]; setSecili(s: number[]): void;
 }) {
   const hepsi = v.kurumlar.length > 0 && v.kurumlar.every(k => secili.includes(k.id));
-  const degistir = (id: number) =>
-    setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
+  const sonTiklanan = useRef<number | null>(null);
+  const tikla = (id: number, e: MouseEvent) => {
+    e.stopPropagation();
+    // Shift+tık tarayıcıda metin seçer - aralık seçimini bozmasın.
+    if (e.shiftKey) window.getSelection()?.removeAllRanges();
+    setSecili(secimUygula(secili, id, v.kurumlar.map(k => k.id), sonTiklanan.current,
+                          { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }));
+    if (!e.shiftKey) sonTiklanan.current = id;
+  };
   const enBuyuk = Math.max(...v.kurumlar.map(k => k.kurumPayi), 1);
   const t = (f: (k: KurumIcmali['kurumlar'][number]) => number) => v.kurumlar.reduce((s, k) => s + f(k), 0);
   return (
@@ -36,9 +45,9 @@ export function KurumTablosu({ v, secili, setSecili }: {
           const r = icmalRozeti(k.icmalDurum);
           const sec = secili.includes(k.id);
           return (
-            <tr key={k.id} className={'ac' + (sec ? ' sec' : '')} onClick={() => degistir(k.id)}>
-              <td><input type="checkbox" checked={sec} onClick={e => e.stopPropagation()}
-                         onChange={() => degistir(k.id)} /></td>
+            <tr key={k.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(k.id, e)}
+                title="Tıkla: yalnız bu kurum · Ctrl: ekle / çıkar · Shift: aralık">
+              <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(k.id, e)} /></td>
               <td><b>{k.ad}</b></td><td>{k.turAdi}</td><td className="sag">{k.basvuru}</td>
               <td className="sag">{p(k.toplam)}</td><td className="sag">{p(k.kurumPayi)}</td>
               <td className={'sag' + (k.kesinti > 0.005 ? ' kir' : '')}>{tire(k.kesinti)}</td>

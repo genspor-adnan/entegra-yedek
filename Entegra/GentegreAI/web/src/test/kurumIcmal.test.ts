@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { KurumDonemIcmali, KurumIcmali } from '../api/uclar/kurumIcmal';
-import { donemAdimlari, gecenAy, icmalRozeti, kayitRozeti, provizyonRozeti } from '../sayfalar/kurum/icmal/kurumIcmalOrtak';
+import { donemAdimlari, gecenAy, icmalRozeti, kayitRozeti, provizyonRozeti, secimUygula } from '../sayfalar/kurum/icmal/kurumIcmalOrtak';
 
 const icmal = (durum: number, faturaTutari = 0, tahsil = 0): KurumDonemIcmali => ({
   id: 1, kurumId: 5, kurum: 'K', donemBas: '2026-09-01', donemBit: '2026-09-30', durum,
@@ -37,5 +37,21 @@ describe('kurum icmali', () => {
     expect(kayitRozeti({ ...k, vadesiGecti: true }).renk).toBe('kir');
     expect(kayitRozeti({ ...k, tahsil: 50 }).ad).toBe('Faturalandı · kısmi tahsil');
     expect(kayitRozeti({ ...k, vade: '2026-11-04T00:00:00' }).ad).toBe('Faturalandı · vade 04.11');
+  });
+});
+
+describe('kurum seçimi (tık / Ctrl / Shift)', () => {
+  const sira = [10, 20, 30, 40];
+  it('düz tık yalnız o kurumu seçer', () => {
+    expect(secimUygula([10, 30], 20, sira, 10, { ctrl: false, shift: false })).toEqual([20]);
+  });
+  it('Ctrl ekler ve çıkarır', () => {
+    expect(secimUygula([10], 30, sira, 10, { ctrl: true, shift: false })).toEqual([10, 30]);
+    expect(secimUygula([10, 30], 30, sira, 10, { ctrl: true, shift: false })).toEqual([10]);
+  });
+  it('Shift aralık seçer, Ctrl+Shift ekler', () => {
+    expect(secimUygula([20], 40, sira, 20, { ctrl: false, shift: true })).toEqual([20, 30, 40]);
+    expect(secimUygula([40], 10, sira, 40, { ctrl: false, shift: true })).toEqual([10, 20, 30, 40]);
+    expect(secimUygula([10], 40, sira, 30, { ctrl: true, shift: true })).toEqual([10, 30, 40]);
   });
 });
