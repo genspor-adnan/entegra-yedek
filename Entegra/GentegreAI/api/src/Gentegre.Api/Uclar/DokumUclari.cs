@@ -72,7 +72,12 @@ public static class DokumUclari
             //   kapaninca dokum kendiliginden kaybolur, tablo degismez.
             var urunModu = await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal);
             var acikModuller = await profil.AcikModullerAsync(baglam.SubeId ?? 0, iptal);
-            liste = liste.Where(d => !d.Sistem
+            // ÜRÜN MODU / MODÜL TAŞIYAN HER DÖKÜM (10.10.2026, kullanıcı: "Üretim
+            //   emirleri (durum)'u dökümlerden çıkar"): süzgeç yalnız `sistem`
+            //   işaretine bakıyordu; standart dökümün işareti 0'a düşünce (kopya /
+            //   düzenleme) ERP dökümü HBYS'de görünüyordu. Kullanıcının kendi
+            //   dökümü mod/modül taşımaz (0 / ''), her yerde görünür.
+            liste = liste.Where(d => (d.UrunModu == 0 && d.Modul.Length == 0)
                 || (UrunModlari.Uyar(d.UrunModu, urunModu)
                     && (d.Modul.Length == 0 || acikModuller.Contains(d.Modul)))).ToList();
             return Results.Ok(liste.Select(d => new
