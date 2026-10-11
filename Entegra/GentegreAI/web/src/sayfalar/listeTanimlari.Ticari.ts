@@ -130,6 +130,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   faturasındaki e-Fatura menüsünün aynısı, çoklu seçimle.
     ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
+    // TARIH ARALIGI (kullanici 11.10.2026): faturalardaki hazir aralik combosu, acilista tum tarihler.
+    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
@@ -143,6 +145,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Kurumlar & Sigorta › Satış İrsaliyeleri', aksiyonEkrani: 'irsaliye-liste',
     ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
+    // TARIH ARALIGI (kullanici 11.10.2026): faturalardaki hazir aralik combosu, acilista tum tarihler.
+    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
