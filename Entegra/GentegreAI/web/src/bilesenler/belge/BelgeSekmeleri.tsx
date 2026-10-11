@@ -357,8 +357,11 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           <th>Tür</th>
           <th className="hiza-sag" style={{ width: 100 }}>Miktar</th>
           <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
-          <th style={{ width: 90 }}>Durum</th>
-          <th style={{ width: 110 }}>e-Fatura</th>
+          {/* KOLONLAR (kullanici 11.10.2026): e-Belge turu, e-Belge durumu,
+              belge Durum'u en sonda. */}
+          <th style={{ width: 90 }}>e-Belge</th>
+          <th style={{ width: 130 }}>e-Belge Durum</th>
+          <th style={{ width: 80 }}>Durum</th>
         </tr>
       </thead>
       <tbody>
@@ -380,13 +383,14 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
             <td>{String(d.turAdi ?? '')}</td>
             <td className="hiza-sag">{Number(d.miktar ?? 0).toLocaleString('tr-TR')}</td>
             <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
+            <td>{eBelgeTuru(Number(d.efaturaDurum ?? 0), Number(d.tur ?? 0))}</td>
+            <td>{eBelgeDurumu(Number(d.efaturaDurum ?? 0), Number(d.efaturaSonuc ?? 0), Number(d.tur ?? 0))}</td>
             <td>{String(d.durumAdi ?? '')}</td>
-            <td>{efaturaRozeti(Number(d.efaturaDurum ?? 0), Number(d.tur ?? 0))}</td>
           </tr>
           );
         })}
         {donusumler.length === 0 && (
-          <tr><td colSpan={8} className="bos">
+          <tr><td colSpan={9} className="bos">
             {kayitliId > 0 ? 'Bu belgeden henüz belge türetilmemiş.' : 'Önce belgeyi kaydedin.'}
           </td></tr>
         )}
@@ -396,11 +400,18 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   );
 }
 
-/** Belgeye Dönüşüm listesinde e-Fatura durumu (fatura dışı belgede boş). */
-function efaturaRozeti(durum: number, tur: number) {
+/** Belgeye Dönüşüm: e-Belge türü (fatura dışı belgede boş; hazırlanmamışta "—"). */
+function eBelgeTuru(durum: number, tur: number) {
   if (tur !== 15) return null;
-  if (durum === 0) return <span className="rozet gri">—</span>;
-  const [ad, sinif] = durum === 2 ? ['e-Fatura ✓', 'ok'] : durum === 12 ? ['e-Arşiv ✓', 'ok']
-    : durum === 11 ? ['e-Arşiv hazır', 'uyari'] : ['e-Fatura hazır', 'uyari'];
-  return <span className={'rozet ' + sinif}>{ad}</span>;
+  return durum === 11 || durum === 12 ? 'e-Arşiv' : durum === 1 || durum === 2 ? 'e-Fatura' : '—';
+}
+
+/** Belgeye Dönüşüm: e-Belge durumu rozeti. */
+function eBelgeDurumu(durum: number, sonuc: number, tur: number) {
+  if (tur !== 15) return null;
+  if (durum === 2 || durum === 12) return <span className="rozet ok">Gönderildi</span>;
+  if (durum === 1 || durum === 11)
+    return sonuc === 3 ? <span className="rozet hata">Gönderim hatası</span>
+                       : <span className="rozet uyari">Hazır</span>;
+  return <span className="rozet gri">Hazırlanmadı</span>;
 }

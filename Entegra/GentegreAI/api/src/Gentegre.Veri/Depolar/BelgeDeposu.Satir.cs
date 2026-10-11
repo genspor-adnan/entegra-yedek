@@ -289,13 +289,14 @@ public sealed partial class BelgeDeposu
                    hb.durum,
                    case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi",
                    -- e-FATURA DURUMU (Belgeye Dönüşüm'deki e-Fatura menüsü, 11.10.2026)
-                   coalesce(hb.efatura_durum, 0)         as "efaturaDurum"
+                   coalesce(hb.efatura_durum, 0)         as "efaturaDurum",
+                   coalesce(hb.efatura_sonuc, 0)         as "efaturaSonuc"
               from public.belge_satir hs
               join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30
               join public.belge hb       on hb.id = hs.belge_id
               left join public.kasa_islem_turu ht on ht.kod = hb.tur
              where ks.belge_id = @p0
-             group by hb.id, hb.belge_no, hb.belge_tarihi, hb.tur, ht.ad, hb.taraf_unvan, hb.durum, hb.efatura_durum
+             group by hb.id, hb.belge_no, hb.belge_tarihi, hb.tur, ht.ad, hb.taraf_unvan, hb.durum, hb.efatura_durum, hb.efatura_sonuc
              order by hb.belge_tarihi, hb.id
             """, null,
             belgeId);
