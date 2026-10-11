@@ -86,6 +86,8 @@ export const ROZET_SINIFI: Record<string, string> = {
   'e-Fatura ✓': 'ok', 'e-Arşiv ✓': 'ok', 'e-İrsaliye ✓': 'ok',
   // Kaynak belge tipi (Kaynak kolonu, kart basligi): basvuru HBYS moru.
   'Başvuru': 'mor', 'Satış Siparişi': 'bilgi', 'Alış Siparişi': 'bilgi',
+  // ALICI GRUBU (satis faturasi listesi, kullanici 11.10.2026: "rozetleri renkli olsun").
+  'Kurum': 'lacivert', 'Hasta': 'turkuaz', 'Firma': 'turuncu',
   'Satış İrsaliyesi': 'bilgi', 'Alış İrsaliyesi': 'bilgi', 'Satış Teklifi': 'bilgi',
   // e-Belge Durum kolonu (11.10.2026).
   'Gönderildi': 'ok', 'Hazır': 'uyari', 'Gönderim hatası': 'hata', 'Hazırlanmadı': 'gri',
