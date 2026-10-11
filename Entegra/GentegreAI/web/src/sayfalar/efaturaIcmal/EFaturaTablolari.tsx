@@ -80,7 +80,7 @@ export function TurTablosu({ v, secili, setSecili }: { v: EFaturaIcmali; secili:
   );
 }
 
-/** SORUNLU BELGELER - seçilenler "Yeniden Gönder"e gider (yalnız hazır olanlar). */
+/** SORUNLU BELGELER - seçilenler üstteki e-Fatura menüsüyle işlenir (tek ya da çoklu). */
 export function SorunluTablosu({ v, secili, setSecili, belgeAc }: {
   v: EFaturaIcmali; secili: number[]; setSecili(x: number[]): void; belgeAc(id: number): void;
 }) {
@@ -119,8 +119,8 @@ export function SorunluTablosu({ v, secili, setSecili, belgeAc }: {
           )}
         </tbody>
       </table>
-      <div className="ki-not">Bir belge hem sorunlu (ör. GİB'e gitmedi) hem 7 günü aşmış olabilir; satırda iki rozet görünür. "Yeniden Gönder"
-        yalnız hazırlanmış belgeyi gönderir; e-Belgesi hazırlanmamış faturayı çift tıklayıp e-Fatura menüsünden hazırlayın.
+      <div className="ki-not">Bir belge hem sorunlu (ör. GİB'e gitmedi) hem 7 günü aşmış olabilir; satırda iki rozet görünür.
+        Seçili belgeler üstteki e-Fatura menüsüyle hazırlanır / gönderilir (Ctrl / Shift ile çoklu; uygun olmayan belge atlanır).
         Alıcı yanıtı ve iptal talebi giden belgede izlenmiyor.</div>
     </>
   );

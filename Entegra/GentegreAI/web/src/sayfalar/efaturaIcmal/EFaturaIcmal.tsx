@@ -5,14 +5,14 @@ import { hataMetni } from '../../api/sozlesme';
 import type { EFaturaIcmali } from '../../api/uclar/efaturaIcmal';
 import { para } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
-import { mesaj, onay } from '../../bilesenler/mesaj';
+import { EFaturaMenusu } from '../../bilesenler/efatura/EFaturaMenusu';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { ayAraligi } from '../performans/performansOrtak';
 import { BelgeKarti } from '../BelgeKarti';
 import { EFaturaA4 } from './EFaturaA4';
-import { gonderilebilir, yuzde } from './efaturaIcmalOrtak';
+import { yuzde } from './efaturaIcmalOrtak';
 import { AliciSeriTablosu, IadeIptalTablosu, KdvTablosu, SorunluTablosu, TurTablosu } from './EFaturaTablolari';
 
 /**
@@ -46,7 +46,6 @@ export function EFaturaIcmal() {
   const [seciliBelge, setSeciliBelge] = useState<number[]>([]);
   const [antet, setAntet] = useState<Record<string, unknown> | null>(null);
   const [yenile, setYenile] = useState(0);
-  const [gonderiyor, setGonderiyor] = useState(false);
 
   const degistir = useCallback((d: Record<string, string>) => {
     const yeni = new URLSearchParams(arama);
@@ -69,29 +68,6 @@ export function EFaturaIcmal() {
     <div className={'hi-kutu ' + sinif}><div className="bas">{baslik}</div><div className="deg">{deg}</div><div className="alt">{alt}</div></div>
   );
 
-  /** SEÇİLENLERİ YENİDEN GÖNDER: yalnız hazır belgeler, sırayla (sıra kuralı sunucuda). */
-  const yenidenGonder = async () => {
-    if (!veri) return;
-    const secilen = veri.sorunlu.filter(s => seciliBelge.includes(s.id));
-    const gidecek = secilen.filter(gonderilebilir);
-    if (gidecek.length === 0) {
-      mesaj(secilen.length ? 'Seçilenler arasında gönderilebilir (hazırlanmış) belge yok. Hazırlanmamış faturayı çift tıklayıp e-Fatura menüsünden hazırlayın.'
-                           : 'Önce Sorunlu Belgeler sekmesinden belge seçin.');
-      return;
-    }
-    if (!await onay(`${gidecek.length} belge GİB'e GÖNDERİLECEK${secilen.length > gidecek.length ? ` (${secilen.length - gidecek.length} hazırlanmamış belge atlanır)` : ''}.\n\n`
-                  + 'Gönderilen belge geri alınamaz. Onaylıyor musunuz?', true)) return;
-    setGonderiyor(true);
-    const sonuc: string[] = [];
-    for (const s of [...gidecek].sort((a, b) => a.belgeNo.localeCompare(b.belgeNo))) {
-      try { await api.efaturaGonder(s.id); sonuc.push(`✓ ${s.belgeNo}`) }
-      catch (h) { sonuc.push(`✗ ${s.belgeNo}: ${hataMetni(h)}`) }
-    }
-    setGonderiyor(false);
-    mesaj(sonuc.join('\n'));
-    setSeciliBelge([]); setYenile(y => y + 1);
-  };
-
   const sekmeler: [Sekme, string, number | null][] = veri ? [
     ['tur', 'Belge Türleri', veri.turler.length], ['sorunlu', 'Sorunlu Belgeler', veri.sorunlu.length],
     ['kdv', 'KDV Özeti', veri.kdvOzet.length], ['alici', 'Alıcı / Seri', veri.alicilar.length + veri.seriler.length],
@@ -111,10 +87,13 @@ export function EFaturaIcmal() {
         <CiktiMenusu etiket="Fatura / e-Belge İcmali" dosyaAdi={`Fatura e-Belge İcmali ${bas} - ${bit}`} devre={!veri}>
           {veri && <EFaturaA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} secili={seciliTur} />}
         </CiktiMenusu>
-        <button disabled={gonderiyor || seciliBelge.length === 0} onClick={() => void yenidenGonder()}
-                title={seciliBelge.length ? 'Seçili sorunlu belgelerden hazırlanmış olanları GİB\'e gönderir' : 'Sorunlu Belgeler sekmesinden belge seçin'}>
-          📤 {gonderiyor ? 'Gönderiliyor…' : `Seçilenleri Yeniden Gönder${seciliBelge.length ? ` (${seciliBelge.length})` : ''}`}
-        </button>
+        {/* e-FATURA MENUSU (kullanici 11.10.2026: "sorunlu faturalari hazirlayip,
+            gondermek vb islemler yaparim"): Sorunlu Belgeler'de secili TEK belge
+            icin Delphi menusu - Belgeye Donusum / fatura kartiyla ayni bilesen. */}
+        {/* "Seçilenleri Yeniden Gönder" KALKTI (kullanici): menude Gönder var, coklu da calisir. */}
+        <EFaturaMenusu belgeIdler={seciliBelge} devre={seciliBelge.length === 0}
+                       devreSebep="Sorunlu Belgeler sekmesinden belge seçin (Ctrl / Shift ile birden çok)." 
+                       onDegisti={() => setYenile(y => y + 1)} />
         {seciliTur.length > 0 && <span className="ki-soluk">A4 seçili {seciliTur.length} türü basar</span>}
         <span className="sp" />
         <button onClick={() => git('/fatura')}>🧾 Faturalar</button>

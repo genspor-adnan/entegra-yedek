@@ -25,40 +25,49 @@ export function mesajlariAc(belgeId: number, baslik: string) {
 }
 
 /**
- * HAZIRLA - sunucunun sorularını Delphi'deki sırayla sorar (test ortamı türü,
- * çok posta kutusu, e-Arşiv e-postası, serinin ilk numarası). İptalde false.
+ * ÇOKLU İŞLEMDE ORTAK CEVAPLAR: test ortamı türü ve e-Arşiv e-posta politikası
+ * bir kez sorulur, her belgede yeniden sorulmaz.
  */
-export async function hazirla(belgeId: number, ikinciSeri = false): Promise<boolean> {
-  const g: EFaturaHazirlaIstegi = { ikinciSeri };
+export type HazirlaCevaplari = { tur?: 'efatura' | 'earsiv'; epostaCaridan?: boolean };
+
+/**
+ * HAZIRLA - sunucunun sorularını Delphi'deki sırayla sorar (test ortamı türü,
+ * çok posta kutusu, e-Arşiv e-postası, serinin ilk numarası). Sonuç mesajını
+ * döner; vazgeçilirse null.
+ */
+export async function hazirla(belgeId: number, ikinciSeri = false, ortak?: HazirlaCevaplari): Promise<string | null> {
+  const g: EFaturaHazirlaIstegi = { ikinciSeri, tur: ortak?.tur };
   for (let tur = 0; tur < 6; tur++) {
     const y = await api.efaturaHazirla(belgeId, g);
-    if (!y.soru) { mesaj(y.mesaj); return true }
+    if (!y.soru) return y.mesaj;
     if (y.soru === 'tur') {
       const c = await secimSor(y.mesaj, [
         { kod: 'efatura', ad: 'e-Fatura', sinif: 'bir' },
         { kod: 'earsiv', ad: 'e-Arşiv' },
         { kod: 'iptal', ad: 'Vazgeç' },
       ], 'iptal');
-      if (c === 'iptal') return false;
+      if (c === 'iptal') return null;
       g.tur = c as 'efatura' | 'earsiv';
+      if (ortak) ortak.tur = g.tur;
     } else if (y.soru === 'eposta') {
+      if (ortak?.epostaCaridan) { g.eposta = y.varsayilan ?? ''; continue }
       const e = await metinSor(y.mesaj, y.varsayilan ?? '', 'Alıcı e-postası');
-      if (e === null) return false;
+      if (e === null) return null;
       g.eposta = e.trim();
     } else if (y.soru === 'alias') {
       const s = y.secenekler ?? [];
       const a = await listeSor(y.mesaj, s.map(x => ({ kod: x, ad: x })), s[0] ?? '', 'Posta kutusu');
-      if (a === null) return false;
+      if (a === null) return null;
       g.alias = a;
     } else if (y.soru === 'numara') {
       const n = await metinSor(y.mesaj, y.varsayilan ?? '1', 'Başlangıç no');
-      if (n === null) return false;
+      if (n === null) return null;
       const sayi = Number(n.trim());
-      if (!Number.isInteger(sayi) || sayi < 1) { mesaj('Geçerli bir sıra numarası girin.'); return false }
+      if (!Number.isInteger(sayi) || sayi < 1) { mesaj('Geçerli bir sıra numarası girin.'); return null }
       g.baslangicNo = sayi;
     }
   }
-  return false;
+  return null;
 }
 
 /** Yazdırma penceresi: PDF Kaydet tarayıcının "PDF olarak kaydet"iyle (başlık = dosya adı). */
@@ -82,7 +91,7 @@ export async function efaturaCalistir(kod: string, belgeId: number, b: EFaturaBa
 
     switch (kod as EFaturaKodu) {
       case 'ebelge.hazirla':
-        if (await hazirla(belgeId)) b.tazele?.();
+        { const m = await hazirla(belgeId); if (m) { mesaj(m); b.tazele?.() } }
         return true;
 
       // ÖNİZLE: hazırlanmamışsa önce hazırlanır (Delphi MenuOnizle). Hazırlama numara
@@ -129,7 +138,7 @@ export async function efaturaCalistir(kod: string, belgeId: number, b: EFaturaBa
       case 'ebelge.seri': {
         if (d.efaturaDurum === 0) {
           if (!await onay('e-Fatura ikinci uygun seriyle hazırlanacak. Devam edilsin mi?')) return true;
-          if (await hazirla(belgeId, true)) b.tazele?.();
+          { const m = await hazirla(belgeId, true); if (m) { mesaj(m); b.tazele?.() } }
           return true;
         }
         const s = await api.efaturaSeriler(belgeId);
@@ -160,3 +169,80 @@ export async function efaturaCalistir(kod: string, belgeId: number, b: EFaturaBa
   }
   return false;
 }
+
+/** Çoklu seçimde çalışan maddeler; ötekiler (önizle / PDF / seri / mesajlar) tek belge ister. */
+export const COKLU_KODLAR: EFaturaKodu[] = ['ebelge.hazirla', 'ebelge.gonder', 'ebelge.sifirla', 'ebelge.html', 'ebelge.xml'];
+
+/**
+ * ÇOKLU İŞLEM (kullanıcı 11.10.2026: "birden fazla seçili fatura üzerinde işlem
+ * yapılabilir"): uygun olmayan belge ATLANIR (sebebiyle), ortak sorular bir kez
+ * sorulur, sonuç tek mesajda. Gönderim numara sırasıyla (sıra kuralı).
+ */
+export async function efaturaCokluCalistir(kod: string, belgeIdler: number[], b: EFaturaBaglam = {}): Promise<void> {
+  if (belgeIdler.length === 1) { await efaturaCalistir(kod, belgeIdler[0], b); return }
+  const k = kod as EFaturaKodu;
+  if (!COKLU_KODLAR.includes(k)) { mesaj('Bu işlem için tek bir belge seçin.'); return }
+  try {
+    const durumlar = await Promise.all(belgeIdler.map(id => api.efaturaDurum(id)));
+    const uygun = durumlar.filter(d => !d.engeller[k]);
+    const atlanan = durumlar.filter(d => d.engeller[k]).map(d => `– ${no(d)}: ${d.engeller[k]}`);
+    if (uygun.length === 0) { mesaj('Seçilen belgelerin hiçbiri için uygun değil:\n' + atlanan.join('\n')); return }
+    const sonuc: string[] = [];
+    const sirali = [...uygun].sort((x, y) => no(x).localeCompare(no(y)));
+
+    switch (k) {
+      case 'ebelge.hazirla': {
+        if (!await onay(`${uygun.length} belge e-Fatura olarak hazırlanacak; her birine seri ve numara verilir.`
+                      + (atlanan.length ? `\n${atlanan.length} belge atlanacak.` : ''))) return;
+        const ortak: HazirlaCevaplari = {};
+        const e = await secimSor('e-Arşiv olarak hazırlanacak belgelerde alıcı e-postası:', [
+          { kod: 'cari', ad: 'Cari kartındaki adres', sinif: 'bir' },
+          { kod: 'sor', ad: 'Her belge için sor' },
+          { kod: 'iptal', ad: 'Vazgeç' },
+        ], 'iptal');
+        if (e === 'iptal') return;
+        ortak.epostaCaridan = e === 'cari';
+        for (const d of uygun) {
+          try { const m = await hazirla(d.belgeId, false, ortak); sonuc.push(m ? `✓ ${m}` : `– #${d.belgeId}: vazgeçildi`) }
+          catch (h) { sonuc.push(`✗ #${d.belgeId}: ${hataMetni(h)}`) }
+        }
+        break;
+      }
+      case 'ebelge.gonder': {
+        const test = uygun.some(d => d.testMi);
+        if (!await onay(`${uygun.length} belge GİB'e GÖNDERİLECEK${test ? ' (TEST ortamı)' : ''}.`
+                      + (atlanan.length ? ` ${atlanan.length} belge atlanacak.` : '')
+                      + '\n\nGönderilen belge geri alınamaz; düzeltme yalnız iade faturasıyla yapılır. Onaylıyor musunuz?', !test)) return;
+        for (const d of sirali) {
+          try { sonuc.push(`✓ ${(await api.efaturaGonder(d.belgeId)).mesaj}`) }
+          catch (h) { sonuc.push(`✗ ${no(d)}: ${hataMetni(h)}`) }
+        }
+        break;
+      }
+      case 'ebelge.sifirla': {
+        if (!await onay(`${uygun.length} belgenin hazırlığı geri alınacak; numaralar boşa düşer. Onaylıyor musunuz?`)) return;
+        for (const d of sirali) {
+          try { sonuc.push(`✓ ${(await api.efaturaSifirla(d.belgeId)).mesaj}`) }
+          catch (h) { sonuc.push(`✗ ${no(d)}: ${hataMetni(h)}`) }
+        }
+        break;
+      }
+      case 'ebelge.html':
+      case 'ebelge.xml':
+        for (const d of sirali) {
+          try {
+            if (k === 'ebelge.html') { const h = await api.efaturaHtml(d.belgeId, true); dosyaIndir(h.html, `${h.dosyaAdi}.html`, 'text/html;charset=utf-8') }
+            else { const x = await api.efaturaXml(d.belgeId); dosyaIndir(x.xml, `${x.dosyaAdi}.xml`, 'application/xml;charset=utf-8') }
+            sonuc.push(`✓ ${no(d)}`);
+          } catch (h) { sonuc.push(`✗ ${no(d)}: ${hataMetni(h)}`) }
+        }
+        break;
+    }
+    mesaj([...sonuc, ...(atlanan.length ? ['', 'Atlanan:', ...atlanan] : [])].join('\n'));
+    if (k !== 'ebelge.html' && k !== 'ebelge.xml') b.tazele?.();
+  } catch (h) {
+    mesaj(hataMetni(h));
+  }
+}
+
+const no = (d: { belgeNo: string; belgeId: number }) => (d.belgeNo && d.belgeNo !== '0' ? d.belgeNo : `#${d.belgeId}`);
