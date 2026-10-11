@@ -5168,6 +5168,10 @@ begin
         UyariGoster(Uyari, BildirimYapilmis)
       else if LNeden = 'DONUSUM' then
         UyariGoster(Uyari, DonusumYapilmis)
+      else if LNeden = 'IADE' then
+        UyariGoster(Uyari, IadeAlinmisSilinemez + #13#10 + BGBelgeTipi + ': ' + Q.FieldByName('BELGEAD').AsString +
+                    ' ' + BGBelge_tarihi + ': ' + Q.FieldByName('BELGETARIH').AsString +
+                    ' ' + BGBelge_no + ': ' + Q.FieldByName('BELGENO').AsString)
       else
         UyariGoster(Uyari, CikisYapilmis);
     end;
@@ -9251,8 +9255,17 @@ function TTablo.FiyatSor(FatTuru,FatTipi, RehberId, UrunTur, StokId, Birim:Integ
 var FYS:TFiyatSorDlg;
     K:Word;
     I:Integer;
+    EskiGTIP, YeniGTIP:String;
 begin
   Application.CreateForm(TFiyatSorDlg,FYS);
+  // GTIP stok kartindan okunur; Detay sekmesinde degistirilirse stok kartina geri yazilir.
+  EskiGTIP := '';
+  FYS.PanelGTIP.Visible := (UrunTur=1) and (StokId>0);
+  if FYS.PanelGTIP.Visible then begin
+    EskiGTIP := Trim(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'select GTIP from STOKLAR where ID=&ID', ['&ID'], [StokId], True)));
+    FYS.EditGTIP.Text := EskiGTIP;
+  end;
   FYS.PanelStokAdi.Caption := Ad;
   Tablo.TablodanSorguAc(1,'select ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_StokKart_Anabirim)+' and DEGER='+IntToStr(Birim));
   FYS.LabelBirim.Caption := Tablo.Query1.Fields[0].AsString;
@@ -9362,6 +9375,20 @@ begin
     EkipmanId := FYS.EditEkipman.Tag;
     AStokDegis := FYS.CheckStoktan.checked;
     PozNo := FYS.EditPozNo.EditValue;
+    if FYS.PanelGTIP.Visible then begin
+      YeniGTIP := Trim(FYS.EditGTIP.Text);
+      if YeniGTIP <> EskiGTIP then begin
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'update STOKLAR set GTIP=nullif(&GTIP,'''') where ID=&ID',
+          ['&GTIP','&ID'], [YeniGTIP, StokId]);
+        if LogGun > 0 then
+          try
+            ULog.LogYaz(ULog.liDegistir, TabNo_STOKLAR, StokId,
+              ULog.TLogKurucu.Yeni.Alan('GTIP', EskiGTIP, YeniGTIP), 'Fiyat Bilgisi',
+              0, 0, 0, StokId);
+          except end;
+      end;
+    end;
     if (EnBoyHesaplamaAktif)and (FYS.EditEn.Value<>0.0)and(FYS.EditBoy.Value<>0.0) then begin
       En := FYS.EditEn.Value;
       Boy := FYS.EditBoy.Value;

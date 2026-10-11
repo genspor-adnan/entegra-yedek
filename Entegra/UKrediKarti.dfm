@@ -1,8 +1,8 @@
 object KrediKarti: TKrediKarti
   Left = 0
   Top = 0
-  Width = 451
-  Height = 304
+  Width = 988
+  Height = 453
   Align = alClient
   Color = clWhite
   ParentBackground = False
@@ -12,8 +12,7 @@ object KrediKarti: TKrediKarti
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 445
-    Height = 29
+    Width = 982
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -40,6 +39,8 @@ object KrediKarti: TKrediKarti
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitWidth = 445
+    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -97,11 +98,13 @@ object KrediKarti: TKrediKarti
   end
   object ScrollBox1: TScrollBox
     Left = 0
-    Top = 32
-    Width = 451
-    Height = 272
+    Top = 35
+    Width = 988
+    Height = 418
     Align = alClient
     TabOrder = 1
+    ExplicitWidth = 451
+    ExplicitHeight = 269
     object Label2: TcxLabel
       Left = 5
       Top = 18

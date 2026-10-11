@@ -11,7 +11,10 @@ uses
   Fetautil, FetaKurulusSiniflari, cxLookAndFeels, cxLookAndFeelPainters, dxSkinLiquidSky,
   cxNavigator, cxContainer, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxSplitter,
   System.Generics.Collections, Vcl.StdCtrls, cxButtons, cxRadioGroup,
-  JvExControls, JvNavigationPane;
+  JvExControls, JvNavigationPane, dxDateRanges, dxScrollbarAnnotations,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
 

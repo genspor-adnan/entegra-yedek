@@ -167,6 +167,9 @@ type
     PanelPozNo: TPanel;
     cxLabel18: TcxLabel;
     EditPozNo: TcxCurrencyEdit;
+    PanelGTIP: TPanel;
+    LabelGTIP: TcxLabel;
+    EditGTIP: TcxTextEdit;
     PanelResimGoster: TPanel;
     cxLabel19: TcxLabel;
     CheckResimGoster: TcxCheckBox;

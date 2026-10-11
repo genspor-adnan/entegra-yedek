@@ -891,11 +891,17 @@ var
     procedure StokIrsaliyeBilgisiDoldur;
     var
       LDegerler: TStringList;
-      LUrunNo1, LUrunNo2, LLotNo, LDeger: string;
-    begin
-      if MemDataSorgu.IsEmpty then
-        Exit;
+      LUrunNo1, LUrunNo2, LLotNo, LDeger, LFiltreLot: string;
+      LStokEklenen: Integer;
 
+      function TarihStr(AAlan: TField): string;
+      begin
+        if AAlan.IsNull then
+          Result := ''
+        else
+          Result := FormatDateTime('yyyy-mm-dd', AAlan.AsDateTime);
+      end;
+    begin
       LUrunNo1 := UTSUrunNoNorm(EditUNO.Text);
       if LUrunNo1 = '' then
         Exit;
@@ -906,8 +912,10 @@ var
         LDegerler.NameValueSeparator := '=';
         Tablo.Query0.Close;
         Tablo.Query0.SQL.Text :=
-          'select LOTNO, sum(STOK_ARTI_IRSALIYE) STOK_ARTI_IRSALIYE from ('+
-          'SELECT SL.LOTNO, SUM(SDI.KALAN) + ISNULL(IRS.ACIK_IRSALIYE, 0) AS STOK_ARTI_IRSALIYE '+
+          'select LOTNO, sum(STOK_ARTI_IRSALIYE) STOK_ARTI_IRSALIYE, max(URUNNO) URUNNO, '+
+          'max(STOKADI) STOKADI, min(URT) URT, min(SKT) SKT from ('+
+          'SELECT SL.LOTNO, S.URUNNO, S.STOKADI, SL.URT, SL.SKT, '+
+          'SUM(SDI.KALAN) + ISNULL(IRS.ACIK_IRSALIYE, 0) AS STOK_ARTI_IRSALIYE '+
           'FROM STOKLAR S '+
           'INNER JOIN STOKSERILOT SL ON SL.STOKID = S.ID '+
           'INNER JOIN STOKDURUMIZLEME SDI ON SDI.STOKID = S.ID AND SDI.SERILOTID = SL.ID '+
@@ -915,7 +923,7 @@ var
           'WHERE STOKID = S.ID AND SERILOTID = SL.ID AND BELGETUR = 14) IRS '+
           'WHERE (S.URUNNO = '+QuotedStr(LUrunNo1)+' or S.URUNNO = '+QuotedStr(LUrunNo2)+') '+
           'AND S.IZLEME > 0 '+
-          'GROUP BY S.KOD, S.URUNNO, SL.ID, SL.LOTNO, IRS.ACIK_IRSALIYE'+
+          'GROUP BY S.KOD, S.URUNNO, S.STOKADI, SL.ID, SL.LOTNO, SL.URT, SL.SKT, IRS.ACIK_IRSALIYE'+
           ') X group by LOTNO';
         Tablo.Query0.Open;
         while not Tablo.Query0.Eof do begin
@@ -937,6 +945,40 @@ var
             end;
             MemDataSorgu.Next;
           end;
+
+          // Stokta (alis irsaliye/faturasiyla girmis) olup UTS sorgusunda donmeyen lotlar da
+          //   listelensin: UTS adetleri 0, Stok_Arti_AcikIrsaliye dolu, sahibi = 'ÜTS''DE YOK'.
+          //   Seri no ile sorgulandiysa lot bazli ekleme yapilmaz; lot girildiyse yalniz o lot.
+          LStokEklenen := 0;
+          LFiltreLot := Trim(EditLNO.Text);
+          if Trim(EditSNO.Text) = '' then begin
+            Tablo.Query0.First;
+            while not Tablo.Query0.Eof do begin
+              LLotNo := Tablo.Query0.FieldByName('LOTNO').AsString;
+              if (Trim(LLotNo) <> '') and
+                 ((LFiltreLot = '') or SameText(LLotNo, LFiltreLot)) and
+                 (Tablo.Query0.FieldByName('STOK_ARTI_IRSALIYE').AsFloat > 0) and
+                 not MemDataSorgu.Locate('lotBatchNumarasi', LLotNo, []) then begin
+                MemDataSorgu.Append;
+                MemDataSorgu.FieldByName('sahibi').AsString := 'ÜTS''DE YOK';
+                MemDataSorgu.FieldByName('sahibiUnvan').AsString := 'Stokta var, ÜTS sorgusunda dönmedi';
+                MemDataSorgu.FieldByName('urunNumarasi').AsString := Tablo.Query0.FieldByName('URUNNO').AsString;
+                MemDataSorgu.FieldByName('lotBatchNumarasi').AsString := LLotNo;
+                MemDataSorgu.FieldByName('adet').AsInteger := 0;
+                MemDataSorgu.FieldByName('kullanilabilirAdet').AsInteger := 0;
+                MemDataSorgu.FieldByName('Stok_Arti_AcikIrsaliye').AsString :=
+                  Tablo.Query0.FieldByName('STOK_ARTI_IRSALIYE').AsString;
+                MemDataSorgu.FieldByName('uretimTarihiString').AsString := TarihStr(Tablo.Query0.FieldByName('URT'));
+                MemDataSorgu.FieldByName('sonKullanmaTarihiString').AsString := TarihStr(Tablo.Query0.FieldByName('SKT'));
+                MemDataSorgu.FieldByName('urunTanimi').AsString := Tablo.Query0.FieldByName('STOKADI').AsString;
+                MemDataSorgu.Post;
+                Inc(LStokEklenen);
+              end;
+              Tablo.Query0.Next;
+            end;
+          end;
+          if LStokEklenen > 0 then
+            MemoLog.Lines.Add('Stokta olup ÜTS''de dönmeyen lot: ' + IntToStr(LStokEklenen));
         finally
           MemDataSorgu.EnableControls;
         end;

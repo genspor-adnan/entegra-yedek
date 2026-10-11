@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>ILAC_TIBBICIHAZ</cbc:ProfileID>
+<cbc:ID>FTE2026000000159</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>344BD4E0-742B-4A82-BF13-3823E4EC6B3F</cbc:UUID>
+<cbc:IssueDate>2026-10-05</cbc:IssueDate>
+<cbc:IssueTime>13:48:44</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız YüzOn Euro</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:Note>EFATURANOTU</cbc:Note>
+<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="TCKN">12345678901</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>aaaaaa</cbc:StreetName>
+<cbc:CitySubdivisionName>üsküdar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>çankaya</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Person>
+<cbc:FirstName>Proimtech Sağlık Ürünleri</cbc:FirstName>
+<cbc:FamilyName>A.Ş.</cbc:FamilyName>
+</cac:Person>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4840847211</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>İZİBİZ BİLİŞİM TEKNOLOJİLERİ A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>YILDIZ TEKNİK ÜNİVERSİTESİ TEKN. GELİŞTİRME BÖLG. NO:C-1 BLOK</cbc:StreetName>
+<cbc:CitySubdivisionName>MALTEPE</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>KÜÇÜKYALI</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>İZİBİZ BİLİŞİM TEKNOLOJİLERİ A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:PricingExchangeRate>
+<cbc:SourceCurrencyCode>EUR</cbc:SourceCurrencyCode>
+<cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+<cbc:CalculationRate>50</cbc:CalculationRate>
+<cbc:Date>2026-10-05</cbc:Date>
+</cac:PricingExchangeRate>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="EUR">10.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">10.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="EUR">100.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="EUR">110.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="EUR">110.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:Note>Lot No: 254673 Uretim Tarihi: 10.10.2025 Son Kullanma Tarihi: 10.10.2030 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="EUR">10.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">10.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>BL Ø4.8*10 mm İmplant RP</cbc:Name>
+<cbc:BrandName>Bilimplant</cbc:BrandName>
+<cbc:ModelName>Kemik Seviyesi İmplant</cbc:ModelName>
+<cac:BuyersItemIdentification><cbc:ID>PBL4810</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>PBL4810</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489700142</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489700142</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>254673</cbc:Value></cac:AdditionalItemProperty>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)8681489700142(LNO)254673(URT)251010</cbc:ID>
+</cac:AdditionalItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="EUR">100.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

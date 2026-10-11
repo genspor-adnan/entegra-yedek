@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+<cbc:ID>MAE2026000000013</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>599D4CB1-2872-4524-9324-AD060EDB6972</cbc:UUID>
+<cbc:IssueDate>2026-10-02</cbc:IssueDate>
+<cbc:IssueTime>14:22:07</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız AltmışBinDokuzYüzOtuzBeş Türk Lirası DoksanÜç Kuruş</cbc:Note>
+<cbc:DocumentCurrencyCode>€</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">6132160725</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="MERSISNO">0613221607200001</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">138685</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>MAYA GRUP TIBBİ CİHAZLAR SANAYİ VE TİCARET LİMİTED ŞİRKETİ</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>AKPINAR MAH. SANAYİ CAD. ÇALIŞKAN IŞ MERKEZI NO: 398 İÇ KAPI NO: 211</cbc:StreetName>
+<cbc:CitySubdivisionName>OSMANGAZİ</cbc:CitySubdivisionName>
+<cbc:CityName>BURSA</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>OSMANGAZİ</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>MAYA GRUP TIBBİ CİHAZLAR SANAYİ VE TİCARET LİMİTED ŞİRKETİ</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="TCKN">12354156416</cbc:ID></cac:PartyIdentification>
+<cac:PostalAddress>
+<cbc:StreetName>ALTAYÇEŞME MAH. ÇAMLI SK. 16 A</cbc:StreetName>
+<cbc:CitySubdivisionName>MALTEPE</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>KÜÇÜKYALI</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>İZİBİZ BİLİŞİM TEKNOLOJİLERİ ANONİM ŞİRKETİ</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Person>
+<cbc:FirstName>İZİBİZ BİLİŞİM TEKNOLOJİLERİ ANONİM</cbc:FirstName>
+<cbc:FamilyName>ŞİRKETİ</cbc:FamilyName>
+</cac:Person>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="€">5539.63</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="€">55396.30</cbc:TaxableAmount><cbc:TaxAmount currencyID="€">5539.63</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="€">55396.30</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="€">55396.30</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="€">60935.93</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="€">60935.93</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:Note>( 1 Adet BGSTPS233615 ÜRT: 20.12.2024 SKT: 20.12.2029 )</cbc:Note>
+<cbc:InvoicedQuantity unitCode="NIU">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="€">55396.30</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="€">5539.63</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="€">55396.30</cbc:TaxableAmount><cbc:TaxAmount currencyID="€">5539.63</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>BGuide Pin Sleeve</cbc:Name>
+<cac:BuyersItemIdentification><cbc:ID>BGSTPS</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>BGSTPS</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489737735</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489737735</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>BGSTPS233615</cbc:Value></cac:AdditionalItemProperty>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="€">55396.30</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

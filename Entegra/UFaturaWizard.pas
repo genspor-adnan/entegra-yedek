@@ -769,6 +769,7 @@ type
     procedure FatbaslikUserNavlunSigortaAlanlariOlustur;
     procedure NavlunSigortaBilgileriDuzenle;
     procedure NavlunSigortaGorunumAyarla;
+    procedure IhracatGtipKontrol;
     procedure KaynakBelgeNoGoster;
     procedure GenIniListeOku(const ARegistryAnahtar: string; AListe: TStrings);
     function FaturaIhracatJsonOku(AFaturaID: Integer): string;
@@ -1135,6 +1136,47 @@ begin
     LCaption := 'Navlun ve Sigorta';
   end;
   LabelNavlunSigorta.Caption := LCaption;
+end;
+
+procedure TFaturaWizardDlg.IhracatGtipKontrol;
+var
+  LYok, LHatali: string;
+  LGtip: string;
+  LMesaj: string;
+begin
+  LYok := '';
+  LHatali := '';
+  Tablo.TablodanSorguAc(1,
+    'select S.KOD, GTIP=ltrim(rtrim(isnull(S.GTIP,''''))) from FATURA F ' +
+    'inner join STOKLAR S on S.ID=F.URUNID ' +
+    'where F.FATBASID=' + TabFatbaslik.FieldByName('ID').AsString + ' and F.TUR in (1,11) ' +
+    'group by S.KOD, S.GTIP order by S.KOD');
+  while not Tablo.Query1.Eof do begin
+    LGtip := Tablo.Query1.FieldByName('GTIP').AsString;
+    if LGtip = '' then begin
+      if LYok <> '' then LYok := LYok + ', ';
+      LYok := LYok + Tablo.Query1.FieldByName('KOD').AsString;
+    end else if (Length(LGtip) <> 12) or (StrToInt64Def(LGtip, -1) < 0) then begin
+      if LHatali <> '' then LHatali := LHatali + ', ';
+      LHatali := LHatali + Tablo.Query1.FieldByName('KOD').AsString + ' [' + LGtip + ']';
+    end;
+    Tablo.Query1.Next;
+  end;
+  Tablo.Query1.Close;
+  if (LYok = '') and (LHatali = '') then
+    Exit;
+
+  LMesaj := 'İhracat faturasında GTİP eksik veya hatalı:' + sLineBreak;
+  if LYok <> '' then
+    LMesaj := LMesaj + sLineBreak + '- GTİP yok: ' + LYok;
+  if LHatali <> '' then
+    LMesaj := LMesaj + sLineBreak + '- GTİP 12 haneli rakam olmalı: ' + LHatali;
+  LMesaj := LMesaj + sLineBreak + sLineBreak +
+    'GTİP ürün kartından veya satırın Fiyat Bilgisi > Detay sekmesinden girilebilir.' +
+    sLineBreak + 'e-Fatura bu haliyle hazırlanamaz. Yine de kaydedilsin mi?';
+  if Application.MessageBox(PChar(LMesaj), PChar(SGenotipOnay),
+       MB_YESNO + MB_ICONWARNING + MB_DEFBUTTON2) <> IDYES then
+    Abort;
 end;
 
 procedure TFaturaWizardDlg.FaturaIhracatJsonKaydet(AFaturaID: Integer; const AJson: string);
@@ -4445,7 +4487,7 @@ end;
 
 procedure TFaturaWizardDlg.FATURAAfterInsert(DataSet: TDataSet);
 begin
-  OncekiStokMiktar := 0.0;
+   OncekiStokMiktar := 0.0;
 end;
 
 procedure TFaturaWizardDlg.FATURAAfterOpen(DataSet: TDataSet);
@@ -4980,8 +5022,9 @@ var
   FatTurGrubu:string;
   SQLStr:TArrayOfString;
   st, st2:Tstringlist;
-  FatBasID,IzlemId, FatSatirID,YeniFatSatirID,DonusumYeri,StkDurumDegis, Adet, DepoIade:Integer;
-  Mik : Variant;
+  FatBasID,IzlemId, FatSatirID,YeniFatSatirID,DonusumYeri,StkDurumDegis, DepoIade:Integer;
+  KalanAdet, SevkAdet : Extended;
+  Miktar : Variant;
   MikAdet : string[10];
   LotluUrunler, LotAlanlari : boolean;
 begin
@@ -5042,7 +5085,7 @@ begin
   SQLStr[0] := 'select '+DbUst(100)+'*';
   SQLStr[1] := '';
   SQLStr[2] := ' from ';
-  SQLStr[3] := '	(	select ';
+  SQLStr[3] := '	(	select FBID=FB.ID, FID=F.ID,';
   SQLStr[4] := '			Kod=CASE WHEN F.TUR IN(1,11)THEN(SELECT KOD FROM STOKLAR WHERE ID=F.URUNID )ELSE(SELECT KOD FROM MASRAFGELIR WHERE ID=F.URUNID)END, ';
   SQLStr[5] := '			UrunNo=CASE WHEN F.TUR IN(1,11)THEN(SELECT URUNNO FROM STOKLAR WHERE ID=F.URUNID )ELSE '''' END, ';
   SQLStr[6] := '			Ad=CASE WHEN F.TUR IN(1,11)THEN(SELECT STOKADI FROM STOKLAR WHERE ID=F.URUNID )ELSE(SELECT AD FROM MASRAFGELIR WHERE ID=F.URUNID)END, ';
@@ -5056,16 +5099,16 @@ begin
     SQLStr[8] := '			BelgeNo=COALESCE(NULLIF(FB.IRSALIYENO,''''),NULLIF(FB.FATURANO,''''),''''),Tarih=FB.FATURATARIH, '+
                  'Adet=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI IN (408,'+IntToStr(TabNo_IADE_ALISBELGE)+') AND F2.YERID=F.ID AND F2.ADET>0),0), ';
   //SQLStr[8] := '		  Adet=F.ADET-isnull((select sum(F2.ADET) from FATURA F2 inner join FATBASLIK FB2 on F2.FATBASID=FB2.ID where FB2.TIPI=2 and F2.TUR=1 and F2.YERI in (416,417) and F2.YERID=F.ID),0.0), ';
-  SQLStr[9] := '      Birim=F.BIRIM,Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,  FBID=FB.ID, FID=F.ID, Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
+  SQLStr[9] := '      Birim=F.BIRIM,Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,   Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
   // Seçim listesinde birim kodu yerine açıklaması gösterilir; lot/seri birimin hemen yanında tutulur.
   SQLStr[9] := '      Birim=(select ANAHTAR from GENINI where BOLUM=-2702 and DEGER=convert(varchar(10),F.BIRIM)), ';
   if LotAlanlari then
     SQLStr[9] := SQLStr[9] + 'LOTNO=SL.LOTNO, SERINO=SL.SERINO, ';
-  SQLStr[9] := SQLStr[9] + 'Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,  FBID=FB.ID, FID=F.ID, Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
+  SQLStr[9] := SQLStr[9] + 'Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,   Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
   SQLStr[9] := '      Birim=(select ANAHTAR from GENINI where BOLUM=-2702 and DEGER=convert(varchar(10),F.BIRIM)), ';
   if LotAlanlari then
     SQLStr[9] := SQLStr[9] + 'LOTNO=SL.LOTNO, Kalan=SI.KALAN, SERINO=SL.SERINO, ';
-  SQLStr[9] := SQLStr[9] + 'Birimfiyat=F.BIRIMFIYAT,Tutar=F.TUTAR, FBID=FB.ID, FID=F.ID, ';
+  SQLStr[9] := SQLStr[9] + 'Birimfiyat=F.BIRIMFIYAT,Tutar=F.TUTAR,  ';
   // Satis irsaliyesi/faturasi stoktan CIKIS yapar; alis belgeleri GIRIS yapar.
   // Iade alis faturasi seciminde kaynak TUR=15/16 oldugunda da cikis deposu
   // gelmelidir (onceki kontrol yalniz TUR=14'u kapsadigi icin alan bos kalirdi).
@@ -5135,15 +5178,15 @@ begin
   if Tablo.ListedenBilgiGetir(HizmetUrunSec,SQLStr,st,[nil,nil,nil,nil,nil,nil,nil,Tablo.repStokAnaBirim,nil,nil,nil,nil,nil,nil,nil],'FaturaWizardHizmetUrunSec') then begin
      IadeOlanUrununSatisTarihi := StrToDateTimeDef(st[5], Tablo.GENINI.BugunTrh-1000);
      if LotAlanlari then begin
-       FatBasID := StrToIntDef(st[10],0);
-       FatSatirID := StrToIntDef(st[11],0);
+        FatBasID := StrToIntDef(st[0],0);
+        FatSatirID := StrToIntDef(st[1],0);
      end else begin
-       FatBasID := StrToIntDef(st[10],0);
-       FatSatirID := StrToIntDef(st[11],0);
+        FatBasID := StrToIntDef(st[0],0);
+        FatSatirID := StrToIntDef(st[1],0);
      end;
-     Adet  := StrToIntDef(st[6],1);
+     KalanAdet  := StrToFloatDef(st[8],1);
      if LotAlanlari then
-       DepoIade := StrToIntDef(st[15],0)
+        DepoIade := StrToIntDef(st[15],0)
      else
        DepoIade := StrToIntDef(st[12],0);
      //iade olan depoya bakalım konsinye giriş veya ıçıkış olamaz
@@ -5179,14 +5222,22 @@ begin
       if Application.MessageBox(PChar(Urunfiyatfarkivardevamedecekmisin),PChar(Uyari),MB_YESNO)=mrNo then
         Abort;
     if FatSatirID>0 then begin
-       if Adet = 1 then  //iade edilen miktar 1 tane ise adet sormam?za gerek yok
+       if Adet = '1' then  //iade edilen miktar 1 tane ise adet sormam?za gerek yok
           MikAdet := '1'
        else begin
-            Mik := 1;
-            if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(KWMiktariGirin, @Mik, OndalikDijitSayMik)) <> mrOk then
+            Miktar := KalanAdet;
+            if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(KWMiktariGirin, @Miktar, OndalikDijitSayMik)) <> mrOk then
                Abort;
-            MikAdet := VarToStr(Mik);
+            MikAdet := VarToStr(Miktar);
             MikAdet := StringReplace(MikAdet, ',', '.', []);
+            SevkAdet :=  FStrToCurrDef(MikAdet, 0);
+            if SevkAdet = 0 then begin
+               ShowMessage('Sıfır olamaz!');
+               exit;
+            end else if SevkAdet > KalanAdet then begin
+               ShowMessage('Kalan miktardan büyük olamaz!');
+               exit;
+            end;
       end;
       //adeti 0 giriyoruz altta gerçek adet girilecek amaçı izlem bilgisini almaktır
       YeniFatSatirID := Tablo.SQLSatiriKopyala('FATURA',FatSatirID,['FATBASID','ADET','MIKTAR','YERI','YERID','STOKDURUMDEGIS', 'EKLEYEN','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
@@ -5226,8 +5277,8 @@ begin
 
       if (TabFatbaslik.FieldByName('TIPI').AsInteger in [2, 3])and(TabFatura.Locate('ID',YeniFatSatirID,[])) then begin//iade ise
             TabFatura.Edit;
-            TabFatura.FieldByName('ADET').AsString := MikAdet;    //VarToStr(Mik);
-            TabFatura.FieldByName('MIKTAR').AsString := MikAdet;  //VarToStr(Mik);
+            TabFatura.FieldByName('ADET').AsFloat := SevkAdet;    //VarToStr(Mik);
+            TabFatura.FieldByName('MIKTAR').AsFloat := SevkAdet;  //VarToStr(Mik);
             TabFatura.Post;
       end;
     end;
@@ -5704,6 +5755,12 @@ begin
        showmessage(SenaryoSecin);
        Abort;
    end;
+
+   // Ihracat satis faturasi: urun satirlarinda GTIP bos / 12 hane rakam degilse uyar.
+   //   (e-Belge hazirlarken IhracatEksikAlanlar zaten durdurur; burada kayit aninda haber verilir.)
+   if (TabFatbaslik.FieldByName('TUR').AsInteger = 15) and
+      (TabFatbaslik.FieldByName('SENARYO').AsInteger = 3) then
+     IhracatGtipKontrol;
 
 //AO 05.10.2025 ?TS kullan?mda ve bildirimi olan ürün varsa senaryo yu otomatik ilaç_t?bbicihaz yapacağız..
   if (UTSKullanimda)and (ComboSenaryo.enabled)and (EFaturaKullanimda>0) and (TabFatbaslik.FieldByName('TUR').AsInteger=15)and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger=0) then begin

@@ -315,6 +315,10 @@ end;
 procedure TIsEmriPersonelZamanDlg.EditOlcumKonusuPropertiesButtonClick(
   Sender: TObject; AButtonIndex: Integer);
 begin
+   if TabOlcum.state in [dsEdit, dsInsert] then begin
+      TabOlcum.Post;
+      TabOlcum.Edit;
+   end;
    Konusu(Lokasyon_Uretim_OlcumKonu, TabOlcum);
 end;
 

@@ -5,8 +5,9 @@
 --     @SatirID = 0  -> @FatBasID altindaki TUM satirlar (biri engelliyse toptan RED)
 --   Hep TEK satir doner: en oncelikli engel (yoksa SILINEBILIR=1).
 --   Kolonlar: SILINEBILIR(0/1), NEDEN, BELGEAD, BELGETARIH, BELGENO.
---   Kontroller: EBELGE(oncelik) / KULLANIM / IZLEME / UTSBILDIRIM / DONUSUM.
+--   Kontroller: EBELGE(oncelik) / KULLANIM / IZLEME / UTSBILDIRIM / DONUSUM / IADE.
 --   @KilitKaldirildi=1 -> e-belge (islem goren) engelini ATLA (wizard admin override).
+--   Satirin kaynak belgesi (iade -> iade edilen satis) engel sayilmaz.
 --   NOT: KILIT (MODUL/devir) app-side KilitKontrolEt'te (helper cagirir) - burada YOK.
 -- ============================================================================
 CREATE OR ALTER PROCEDURE dbo.sp_Prog_Fatura_Silinebilir_Mi
@@ -19,7 +20,10 @@ BEGIN
 
   ;WITH Satirlar AS (
     SELECT F.ID AS SATIRID, F.FATBASID, F.URUNID, F.IZLEME, F.ADET,
-           FB.TUR, FB.FATURATARIH, FB.EFATURADURUM
+           FB.TUR, FB.FATURATARIH, FB.EFATURADURUM,
+           -- Satirin KAYNAK belgesi (iade: YERID=iade edilen satis satiri, ANAKAYITID=satis
+           -- basligi). Kaynak belge asagi-akis cikis DEGILDIR -> KULLANIM/IZLEME'de haric.
+           ISNULL(F.YERID, 0) AS KAYNAKSATIRID, ISNULL(FB.ANAKAYITID, 0) AS KAYNAKBASID
     FROM FATURA F
     INNER JOIN FATBASLIK FB ON FB.ID = F.FATBASID
     WHERE (@SatirID > 0 AND F.ID = @SatirID)
@@ -51,6 +55,7 @@ BEGIN
       -- giristen KUCUK kalir ve saatli '>' kacirirdi). Kendi belgesi haric.
       AND CAST(FB2.FATURATARIH AS date) >= CAST(S.FATURATARIH AS date)
       AND FB2.ID <> S.FATBASID
+      AND F2.ID <> S.KAYNAKSATIRID AND FB2.ID <> S.KAYNAKBASID
 
     UNION ALL
     -- 2) IZLEME: izlemeli satir; seri/lot asagi-akista cikmis
@@ -69,6 +74,7 @@ BEGIN
       -- KULLANIM ile ayni: gun bazinda, ayni gun dahil, kendi belgesi haric.
       AND CAST(FBz.FATURATARIH AS date) >= CAST(S.FATURATARIH AS date)
       AND FBz.ID <> S.FATBASID
+      AND Fz.ID <> S.KAYNAKSATIRID AND FBz.ID <> S.KAYNAKBASID
 
     UNION ALL
     -- 3) UTS BILDIRIM: izlemeli satirin STOKIZLEME kaydinda YER/YERID dolu (bildirilmis)
@@ -90,6 +96,26 @@ BEGIN
         OR (S.TUR = 109 AND FD.YERI = 469)
         OR (S.TUR = 119 AND FD.YERI IN (462,468)))
     WHERE S.TUR IN (10,14,109,119)
+
+    UNION ALL
+    -- 5) IADE: bu belgeden/satirdan iade (416 alis-iade, 417 satis-iade) veya fiyat farki
+    --    (418/419) belgesi uretilmis. Kaynak silinirse iade sahipsiz kalir -> once iade silinmeli.
+    --    Satir modu: yalniz o satira bagli (YERID) iade satirlari; belge modu: ANAKAYITID de.
+    SELECT 0, 'IADE',
+      CAST((SELECT TOP 1 AD FROM ISLEMTURLERI I WHERE I.TUR = FBi.TUR) AS varchar(100)),
+      CAST(FBi.FATURATARIH AS datetime), CAST(FBi.FATURANO AS varchar(50)), 5
+    FROM Satirlar S
+    INNER JOIN FATURA Fi    ON Fi.YERID = S.SATIRID AND Fi.YERI IN (416,417,418,419)
+    INNER JOIN FATBASLIK FBi ON FBi.ID = Fi.FATBASID
+    WHERE FBi.ID <> S.FATBASID
+
+    UNION ALL
+    SELECT 0, 'IADE',
+      CAST((SELECT TOP 1 AD FROM ISLEMTURLERI I WHERE I.TUR = FBa.TUR) AS varchar(100)),
+      CAST(FBa.FATURATARIH AS datetime), CAST(FBa.FATURANO AS varchar(50)), 5
+    FROM FATBASLIK FBa
+    WHERE @SatirID = 0 AND @FatBasID > 0
+      AND FBa.ANAKAYITID = @FatBasID AND FBa.ID <> @FatBasID
 
     UNION ALL
     -- 99) ENGEL YOK -> silinebilir

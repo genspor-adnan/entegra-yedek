@@ -1,8 +1,8 @@
 object KredilerDlg: TKredilerDlg
   Left = 0
   Top = 0
-  Width = 920
-  Height = 524
+  Width = 1001
+  Height = 537
   Align = alClient
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
@@ -154,7 +154,7 @@ object KredilerDlg: TKredilerDlg
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 914
+    Width = 995
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -181,6 +181,8 @@ object KredilerDlg: TKredilerDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitWidth = 914
+    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -264,10 +266,11 @@ object KredilerDlg: TKredilerDlg
   object Panel3: TPanel
     Left = 0
     Top = 35
-    Width = 920
+    Width = 1001
     Height = 94
     Align = alTop
     TabOrder = 1
+    ExplicitWidth = 920
     object Label2: TcxLabel
       Left = 4
       Top = 35
@@ -534,22 +537,26 @@ object KredilerDlg: TKredilerDlg
     end
   end
   object PageControl1: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 129
-    Width = 920
-    Height = 395
+    Width = 1001
+    Height = 408
     Align = alClient
     TabOrder = 2
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
-    ClientRectBottom = 391
+    Properties.Images = Tablo.PNGImageList2
+    ExplicitWidth = 920
+    ExplicitHeight = 395
+    ClientRectBottom = 404
     ClientRectLeft = 4
-    ClientRectRight = 916
-    ClientRectTop = 24
+    ClientRectRight = 997
+    ClientRectTop = 25
     object cxTabSheet1: TcxTabSheet
       Caption = 'Genel'
       ImageIndex = 11
+      ExplicitWidth = 912
+      ExplicitHeight = 366
       object Bevel3: TBevel
         Left = 39
         Top = 21
@@ -1428,8 +1435,8 @@ object KredilerDlg: TKredilerDlg
       object GridGeriOdeme: TcxGrid
         Left = 0
         Top = 0
-        Width = 912
-        Height = 367
+        Width = 993
+        Height = 379
         Align = alClient
         PopupMenu = PopupMenu2
         TabOrder = 0
@@ -1607,8 +1614,8 @@ object KredilerDlg: TKredilerDlg
       ImageIndex = 38
       object Panel7: TPanel
         Left = 0
-        Top = 306
-        Width = 912
+        Top = 318
+        Width = 993
         Height = 41
         Align = alBottom
         TabOrder = 0
@@ -1619,10 +1626,10 @@ object KredilerDlg: TKredilerDlg
           Properties.ScrollBars = ssVertical
           TabOrder = 1
           Height = 39
-          Width = 764
+          Width = 845
         end
         object BtnMesajGonder: TcxButton
-          Left = 765
+          Left = 846
           Top = 1
           Width = 85
           Height = 39
@@ -1633,7 +1640,7 @@ object KredilerDlg: TKredilerDlg
           OnClick = BtnMesajGonderClick
         end
         object BtnDosyaGonder: TcxButton
-          Left = 850
+          Left = 931
           Top = 1
           Width = 61
           Height = 39
@@ -1647,7 +1654,7 @@ object KredilerDlg: TKredilerDlg
       end
       object labelFileName: TcxLabel
         Left = 0
-        Top = 347
+        Top = 359
         ParentCustomHint = False
         Align = alBottom
         ParentColor = False
@@ -1665,13 +1672,13 @@ object KredilerDlg: TKredilerDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        AnchorX = 912
+        AnchorX = 993
       end
       object GridYorum: TcxGrid
         Left = 0
         Top = 0
-        Width = 912
-        Height = 306
+        Width = 993
+        Height = 318
         Align = alClient
         TabOrder = 2
         object GridYorumDBCardView1: TcxGridDBCardView
@@ -2031,7 +2038,7 @@ object KredilerDlg: TKredilerDlg
   object DtsYorum: TDataSource
     DataSet = TabYorum
     Left = 413
-    Top = 220
+    Top = 140
   end
   object PopupYorumlar: TPopupMenu
     Images = Tablo.PNGImageList2
@@ -2087,8 +2094,8 @@ object KredilerDlg: TKredilerDlg
     Appearance.FontColor = 7214336
     Appearance.FontDisabledColor = 14599640
     Style = msDefault
-    Left = 423
-    Top = 276
+    Left = 359
+    Top = 380
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
@@ -2111,7 +2118,7 @@ object KredilerDlg: TKredilerDlg
       end>
     UseBuiltInPopupMenus = False
     AlwaysFireOnPopup = True
-    Left = 640
-    Top = 225
+    Left = 624
+    Top = 145
   end
 end

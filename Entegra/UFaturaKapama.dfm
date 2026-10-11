@@ -11,12 +11,10 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   WindowState = wsMaximized
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -25,8 +23,6 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
     Height = 422
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1049
-    ExplicitHeight = 397
     object GridBASol: TcxGrid
       Left = 1
       Top = 1
@@ -53,6 +49,7 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
         Navigator.Buttons.SaveBookmark.Visible = True
         Navigator.Buttons.GotoBookmark.Visible = True
         Navigator.Buttons.Filter.Visible = True
+        ScrollbarAnnotations.CustomAnnotations = <>
         OnCanFocusRecord = GridBASolDBTableViewBorcCanFocusRecord
         DataController.DataSource = DtsBorc
         DataController.Summary.DefaultGroupSummaryItems = <>
@@ -91,51 +88,61 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
         object GridBASolDBTableViewBorcTARIH: TcxGridDBColumn
           Caption = 'Tarih'
           DataBinding.FieldName = 'TARIH'
+          DataBinding.IsNullValueType = True
           Width = 62
         end
         object GridBASolDBTableViewBorcVADE: TcxGridDBColumn
           Caption = 'Vade'
           DataBinding.FieldName = 'VADE'
+          DataBinding.IsNullValueType = True
           Width = 61
         end
         object GridBASolDBTableViewBorcANAHTAR: TcxGridDBColumn
           Caption = 'A'#231#305'klama'
           DataBinding.FieldName = 'ANAHTAR'
+          DataBinding.IsNullValueType = True
           Width = 95
         end
         object GridBASolDBTableViewBorcBELGENO: TcxGridDBColumn
           Caption = 'Belge No'
           DataBinding.FieldName = 'BELGENO'
+          DataBinding.IsNullValueType = True
         end
         object GridBASolDBTableViewBorcTUTAR: TcxGridDBColumn
           Caption = 'Bor'#231
           DataBinding.FieldName = 'TUTAR'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 73
         end
         object GridBASolDBTableViewBorcKAPANAN: TcxGridDBColumn
           Caption = 'Kapanan'
           DataBinding.FieldName = 'KAPANAN'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 72
         end
         object GridBASolDBTableViewBorcKALAN: TcxGridDBColumn
           Caption = 'Kalan'
           DataBinding.FieldName = 'KALAN'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 77
         end
         object GridBASolDBTableViewBorcKUR: TcxGridDBColumn
           Caption = 'Kur'
           DataBinding.FieldName = 'KUR'
+          DataBinding.IsNullValueType = True
           Width = 26
         end
         object GridBASolDBTableViewBorcTUR: TcxGridDBColumn
           DataBinding.FieldName = 'TUR'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object GridBASolDBTableViewBorcID: TcxGridDBColumn
           DataBinding.FieldName = 'ID'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
       end
@@ -151,8 +158,6 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
       Align = alClient
       PopupMenu = PopupAlacak
       TabOrder = 1
-      ExplicitLeft = 512
-      ExplicitWidth = 487
       object GridBASagDBTableViewAlacak: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
         Navigator.Buttons.First.Visible = True
@@ -171,6 +176,7 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
         Navigator.Buttons.SaveBookmark.Visible = True
         Navigator.Buttons.GotoBookmark.Visible = True
         Navigator.Buttons.Filter.Visible = True
+        ScrollbarAnnotations.CustomAnnotations = <>
         OnCanFocusRecord = GridBASagDBTableViewAlacakCanFocusRecord
         OnCellClick = GridBASagDBTableViewAlacakCellDblClick
         DataController.DataSource = DtsAlacak
@@ -210,51 +216,61 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
         object GridBASagDBTableViewAlacakTARIH: TcxGridDBColumn
           Caption = 'Tarih'
           DataBinding.FieldName = 'TARIH'
+          DataBinding.IsNullValueType = True
           Width = 59
         end
         object GridBASagDBTableViewAlacakVADE: TcxGridDBColumn
           Caption = 'Vade'
           DataBinding.FieldName = 'VADE'
+          DataBinding.IsNullValueType = True
           Width = 58
         end
         object GridBASagDBTableViewAlacakANAHTAR: TcxGridDBColumn
           Caption = 'A'#231#305'klama'
           DataBinding.FieldName = 'ANAHTAR'
+          DataBinding.IsNullValueType = True
           Width = 110
         end
         object GridBASagDBTableViewAlacakBELGENO: TcxGridDBColumn
           Caption = 'Belge No'
           DataBinding.FieldName = 'BELGENO'
+          DataBinding.IsNullValueType = True
         end
         object GridBASagDBTableViewAlacakTUTAR: TcxGridDBColumn
           Caption = 'Alacak'
           DataBinding.FieldName = 'TUTAR'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 77
         end
         object GridBASagDBTableViewAlacakKAPANAN: TcxGridDBColumn
           Caption = 'Kapanan'
           DataBinding.FieldName = 'KAPANAN'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 76
         end
         object GridBASagDBTableViewAlacakKALAN: TcxGridDBColumn
           Caption = 'Kalan'
           DataBinding.FieldName = 'KALAN'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCurrencyGenel
           Width = 71
         end
         object GridBASagDBTableViewAlacakKUR: TcxGridDBColumn
           Caption = 'Kur'
           DataBinding.FieldName = 'KUR'
+          DataBinding.IsNullValueType = True
           Width = 23
         end
         object GridBASagDBTableViewAlacakTUR: TcxGridDBColumn
           DataBinding.FieldName = 'TUR'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object GridBASagDBTableViewAlacakID: TcxGridDBColumn
           DataBinding.FieldName = 'ID'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
       end
@@ -271,8 +287,6 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
       Control = GridBASol
       ShowHint = False
       ParentShowHint = False
-      ExplicitLeft = 488
-      ExplicitTop = -7
     end
     object MemoAlacakSQL: TMemo
       Left = 49
@@ -555,9 +569,8 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
     end
   end
   object TabBorc: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabBorcAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       '--Fatura Kapatma BOR'#199
@@ -678,7 +691,6 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
   end
   object TabAlacak: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       '')
     Left = 624
@@ -711,9 +723,8 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
     end
   end
   object TabCapraz: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabCaprazAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     Left = 424
     Top = 240
   end

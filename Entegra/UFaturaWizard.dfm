@@ -3690,7 +3690,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object PopupMenuYaz: TPopupMenu
     Images = Tablo.PNGImageList2
     OnPopup = PopupMenuYazPopup
-    Left = 397
+    Left = 453
     Top = 34
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'

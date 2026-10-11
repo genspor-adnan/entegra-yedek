@@ -458,6 +458,7 @@ resourcestring
     BildirimYapilmisDegisemez='ÜTS Bildirimi Yapılmış Değişemez!';
     DonusumYapilamaz='İzleme bilgisi olan belgel buradan dönüşüm yapılamaz! Yeni belge oluşturup dönüşüm butonundan seçin.';
     DonusumYapilmis='Dönüşüm Yapılmış!';
+    IadeAlinmisSilinemez='Bu belgeden iade/fiyat farkı belgesi oluşturulmuş, silinemez! Önce iade belgesini silin.';
     Butariheislemyapilmaz='Kilitlenmiş tarih alanına veya devir öncesine işlem yapılamaz!';
     DevirOncesineIslemEklenmez='İşlem yapmaya çalıştığınız tarihin sonrasında bir devir kaydı var!';
     Planlifaturaiptalolsunmu='Bu faturada oluşturulmuş plan vardır.İptal etmek istiyor musunuz? ';

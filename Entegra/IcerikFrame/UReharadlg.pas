@@ -2192,7 +2192,7 @@ begin
   if TabAlias.State in [dsEdit, dsInsert] then begin
     // ALIAS boÅŸsa kaydetmeye izin verme
     if Trim(TabAlias.FieldByName('ALIAS').AsString) = '' then begin
-      Application.MessageBox('Alias deÄŸeri boÅŸ olamaz.', PChar(SGenotipOnay),
+      Application.MessageBox('Alias değeri boş olamaz.', PChar(SGenotipOnay),
                              MB_ICONWARNING + MB_OK);
       Exit;
     end;
@@ -2989,7 +2989,7 @@ begin
     FreeAndNil(FaturaKapamaDlg);
   Application.CreateForm(TFaturaKapamaDlg,FaturaKapamaDlg);
   FaturaKapamaDlg.RehberID := REHBER.Fields[0].AsInteger;
-  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Bor�/Alacak Kapama';
+  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Borç/Alacak Kapama';
   FaturaKapamaDlg.ShowModal;
   FreeAndNil(FaturaKapamaDlg);
 end;
@@ -3774,7 +3774,12 @@ begin
      TopN := FSayfali.TopN
   else begin
      FSayfali.TopN(False);   // tetikleri pasiflestir
-     TopN := 100;
+     // Analiz modunda satir siniri yok (TopN=0 -> SP TOP koymaz): borclu/alacakli
+     //   listesi kismi gelirse toplam ve yaslandirma yaniltir.
+     if (AMod = 4) and (AnalizIdx > 0) then
+        TopN := 0
+     else
+        TopN := 100;
   end;
 
   if FArama.AraKod.Text <> '' then OrderCol := 1 else OrderCol := 0;  // KOD / FIRMA

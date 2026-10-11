@@ -1206,6 +1206,46 @@ object FiyatSorDlg: TFiyatSorDlg
           Width = 339
         end
       end
+      object PanelGTIP: TPanel
+        Left = 0
+        Top = 420
+        Width = 467
+        Height = 44
+        Align = alTop
+        BevelKind = bkSoft
+        BevelOuter = bvNone
+        Color = 12774133
+        ParentBackground = False
+        TabOrder = 12
+        Visible = False
+        object LabelGTIP: TcxLabel
+          Left = 20
+          Top = 15
+          Caption = 'GT'#304'P'
+          Properties.WordWrap = True
+          Transparent = True
+          Width = 28
+        end
+        object EditGTIP: TcxTextEdit
+          Left = 110
+          Top = 8
+          AutoSize = False
+          ParentFont = False
+          Properties.MaxLength = 30
+          Style.Color = clGradientActiveCaption
+          Style.Font.Charset = TURKISH_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -17
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = [fsBold]
+          Style.TextColor = clGreen
+          Style.TransparentBorder = True
+          Style.IsFontAssigned = True
+          TabOrder = 1
+          Height = 26
+          Width = 339
+        end
+      end
       object PanelResimGoster: TPanel
         Left = 0
         Top = 440

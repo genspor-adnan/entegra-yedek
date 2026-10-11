@@ -1128,7 +1128,7 @@ object UTSDlg: TUTSDlg
   end
   object DtsDepo: TDataSource
     DataSet = TabDepo
-    Left = 296
+    Left = 368
     Top = 32
   end
 end

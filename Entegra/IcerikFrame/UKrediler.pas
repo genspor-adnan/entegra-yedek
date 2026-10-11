@@ -706,7 +706,7 @@ begin
                                 +'KALANANA=sum(case when ODENMIS=1 then 0 else ANAPARA end) '
                                 +'from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString);
 
-    LabelKalanAdet.Caption:= '�denen('+Tablo.Query3.FieldByName('ODENENSAY').AsString+') / Kalan('+Tablo.Query3.FieldByName('ODENMEYENSAY').AsString+')' ;
+    LabelKalanAdet.Caption:= 'Ödenen('+Tablo.Query3.FieldByName('ODENENSAY').AsString+') / Kalan('+Tablo.Query3.FieldByName('ODENMEYENSAY').AsString+')' ;
     EditOdenen.Value:= Tablo.Query3.FieldByName('ODENEN').AsCurrency ;
     EditKalan.Value:= Tablo.Query3.FieldByName('KALAN').AsCurrency ;
     EditOdenen2.Value:= Tablo.Query3.FieldByName('ODENENANA').AsCurrency ;
