@@ -30,7 +30,7 @@ export function EFaturaMesajKatmani() {
   const kapat = () => setAcik(null);
   const detay = secili != null ? satirlar?.[secili] : null;
   return (
-    <Modal baslik={`e-Fatura Mesaj Geçmişi — ${acik.baslik}`} onKapat={kapat}
+    <Modal baslik={`e-Fatura Mesaj Geçmişi — ${acik.baslik}`} onKapat={kapat} enUst
            alt={<button className="d kapat-dugmesi" onClick={kapat}>Kapat</button>}>
       <div className="kagrup">
         {hata && <div className="hata-kutusu">{hata}</div>}

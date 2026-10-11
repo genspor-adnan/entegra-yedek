@@ -52,9 +52,13 @@ export function EFaturaMenusu({ belgeId, devre, devreSebep, onDegisti, etiket = 
     // PASIF DUGME SESSIZ KALMASIN: sebep mesajla soylenir (title'i kimse okumuyor).
     if (devre || !belgeId) { mesaj(devreSebep || 'Önce belgeyi kaydedin.'); return }
     const d = e.currentTarget.getBoundingClientRect();
-    const asagi = window.innerHeight - d.bottom > 380;
-    setKonum({ position: 'fixed', left: Math.min(d.left, window.innerWidth - 240),
-               ...(asagi ? { top: d.bottom + 3 } : { bottom: window.innerHeight - d.top + 3 }) });
+    // Asagida yer yoksa yukari acilir. top/bottom IKISI de acikca verilir: ortak
+    //   .dugme-menu-liste stilindeki `top: 100%` kalinca yukari acilan menu
+    //   ekranin altina itiliyordu (kullanici: 768 px ekranda "menü çıkmadı").
+    const asagi = window.innerHeight - d.bottom > 380 || d.top < window.innerHeight - d.bottom;
+    setKonum({ position: 'fixed', left: Math.max(4, Math.min(d.left, window.innerWidth - 290)),
+               maxHeight: (asagi ? window.innerHeight - d.bottom : d.top) - 12, overflowY: 'auto',
+               ...(asagi ? { top: d.bottom + 3, bottom: 'auto' } : { top: 'auto', bottom: window.innerHeight - d.top + 3 }) });
     setAcik(a => !a);
   };
 
@@ -111,7 +115,7 @@ export function EFaturaMenusu({ belgeId, devre, devreSebep, onDegisti, etiket = 
 }
 
 const EFM_STILI = `
-.efm-liste { min-width: 220px; z-index: 400; }
+.efm-liste { min-width: 220px; z-index: 10000; }   /* her modal katmaninin (enust 420) ustunde */
 .efm-liste .mi { display: flex; align-items: center; gap: 8px; padding: 5px 8px; }
 .efm-ikon { width: 18px; text-align: center; }
 .efm .efm-pasif { opacity: .55; }
