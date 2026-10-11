@@ -64,7 +64,7 @@ public static class KurumIcmalOzetUclari
                      where be.tipi = 30 and be.tur = 19 and be.durum <> 6 and k.tur in (2, 3, 4)
                        and (cardinality(@p0::int[]) = 0 or bb.odeyen_kurum_id = any(@p0::int[]))
                        and be.belge_tarihi >= @p1 and be.belge_tarihi < @p2
-                       and (@p3 = 0 or be.sube_id is null or be.sube_id = @p3))
+                       and (@p3 = 0 or coalesce(be.sube_id, 0) in (0, @p3)))
                 """;
 
             var basvurular = await b.ListeAsync(Basvurular + """
@@ -212,7 +212,7 @@ public static class KurumIcmalOzetUclari
                   left join public.belge f on f.id = i.belge_id
                  where i.durum > 0 and (cardinality(@p0::int[]) = 0 or i.kurum_id = any(@p0::int[]))
                    and i.donem_bas < @p2 and i.donem_bit >= @p1
-                   and (@p3 = 0 or i.sube_id is null or i.sube_id = @p3)
+                   and (@p3 = 0 or coalesce(i.sube_id, 0) in (0, @p3))
                  order by i.donem_bas, i.id
                 """, null, [secili, baslangic, bitis, sube], o => new
             {
@@ -342,7 +342,7 @@ public static class KurumIcmalOzetUclari
                                               where ks.icmal_id = i.id)) kz on true
                  where i.durum > 0
                    and (cardinality(@p0::int[]) = 0 or i.kurum_id = any(@p0::int[]))
-                   and (@p1 = 0 or i.sube_id is null or i.sube_id = @p1)
+                   and (@p1 = 0 or coalesce(i.sube_id, 0) in (0, @p1))
                  order by i.donem_bas desc, i.id desc
                  limit 500
                 """, null, [secili, baglam.SubeId ?? 0], o =>

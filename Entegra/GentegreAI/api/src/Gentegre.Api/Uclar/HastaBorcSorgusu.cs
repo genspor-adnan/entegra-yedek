@@ -33,7 +33,7 @@ internal static class HastaBorcSorgusu
                   join public.belge_basvuru bb on bb.id = be.id
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                    and be.belge_tarihi < @p0
-                   and (@p1 = 0 or be.sube_id is null or be.sube_id = @p1)
+                   and (@p1 = 0 or coalesce(be.sube_id, 0) in (0, @p1))
                    and (cardinality(@p2::int[]) = 0 or coalesce(bb.hasta_id, be.taraf_id) = any(@p2::int[])))
             select s.hasta_id, s.id, coalesce(s.belge_no, ''), s.belge_tarihi, coalesce(d.ad, ''), s.genel_toplam,
                    coalesce((select sum(coalesce(dg.sgk, 0) + coalesce(dg.oss, 0))

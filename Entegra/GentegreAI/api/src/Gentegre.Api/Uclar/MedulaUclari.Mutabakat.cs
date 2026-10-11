@@ -52,7 +52,7 @@ public static partial class MedulaUclari
                        (select f.hasta_katilim from public.medula_fatura f where f.id = v.medula_fatura_id)
                   from public.v_medula_takip v
                  where v.belge_tarihi >= @p0 and v.belge_tarihi < @p1
-                   and (v.sube_id = @p2 or @p2 = 0) and v.sgk_durum = 1
+                   and (@p2 = 0 or coalesce(v.sube_id, 0) in (0, @p2)) and v.sgk_durum = 1
                  order by v.belge_tarihi, v.belge_id
                 """, null, [bas, son, sube], o =>
             {
@@ -107,7 +107,7 @@ public static partial class MedulaUclari
                 select id, fatura_sayisi, toplam, kesinti, odenen, odeme_tarihi, sonlandirma,
                        coalesce(icmal_no, ''), durum
                   from public.medula_donem
-                 where (sube_id = @p0 or @p0 = 0) and yil = @p1 and ay = @p2 and fatura_turu = 0
+                 where (@p0 = 0 or coalesce(sube_id, 0) in (0, @p0)) and yil = @p1 and ay = @p2 and fatura_turu = 0
                  order by id limit 1
                 """, null, [sube, (short)bas.Year, (short)bas.Month], o => new
             {

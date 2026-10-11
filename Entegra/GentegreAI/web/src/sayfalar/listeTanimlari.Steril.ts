@@ -127,4 +127,11 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
     menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Test takvimi · Kurallar', ic: '📅', yetkiKodu: 'steril.ayar.kural', menuSira: 99,
   },
+  {
+    // STERİLİZASYON İCMALİ (1032, mockup İcmal/sterilizasyon_icmali.html): cihaz döngüsü / doluluk,
+    //   set ömrü, indikatör, karantina / geri çağırma / süresi dolan, bölümler.
+    kaynak: 'steril-icmal', rota: 'steril-icmal', ozelSayfa: true, baslik: 'Sterilizasyon İcmali',
+    yol: 'Diş › Sterilizasyon › Sterilizasyon İcmali', urunModu: 2,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Sterilizasyon İcmali', ic: '@icmal', yetkiKodu: 'steril.icmal', menuSira: 78,
+  },
 ];

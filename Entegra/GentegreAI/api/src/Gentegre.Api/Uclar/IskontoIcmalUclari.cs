@@ -83,7 +83,7 @@ public static class IskontoIcmalUclari
                   left join public.taraf tn on tn.id = t.onay_id
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                    and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                    and (@p3 = 0 or bb.bolum_id = @p3)
                    and st.adet * st.birim_fiyat - st.tutar > 0.005
                  order by be.belge_tarihi, be.id, st.id
@@ -110,7 +110,7 @@ public static class IskontoIcmalUclari
                   left join public.taraf ti on ti.id = it.isteyen_id
                   left join public.taraf tn on tn.id = it.onay_id
                  where it.durum = 2 and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                  order by it.istek_ts
                 """, null, [baslangic, bitis, sube], o => new
             {
@@ -125,7 +125,7 @@ public static class IskontoIcmalUclari
                   join public.belge_basvuru bb on bb.id = be.id
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                    and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                    and (@p3 = 0 or bb.bolum_id = @p3)
                 """, null, [baslangic, bitis, sube, bolum ?? 0], iptal) ?? 0m;
 

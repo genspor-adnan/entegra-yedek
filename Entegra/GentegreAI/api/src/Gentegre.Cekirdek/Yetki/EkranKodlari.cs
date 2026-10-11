@@ -271,6 +271,8 @@ public static partial class EkranKodlari
         "kasa.gun_sonu",
         // Çağrı Merkezi İcmali (1031): /api/cagri-icmal kendi koduna bakar.
         "cagri.icmal",
+        // Sterilizasyon İcmali (1032): /api/steril-icmal kendi koduna bakar.
+        "steril.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

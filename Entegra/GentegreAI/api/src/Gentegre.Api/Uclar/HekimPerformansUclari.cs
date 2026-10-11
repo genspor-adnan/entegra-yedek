@@ -190,7 +190,7 @@ public static class HekimPerformansUclari
                    where st.belge_id = be.id) p on true
              where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-               and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+               and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                and (@p3 = 0 or coalesce(k.tur, 1) = @p3)
                and (@p4 = 0 or bb.bolum_id = @p4)
             """, null, [bas, bitis, sube, kurumTuru, bolum], o =>

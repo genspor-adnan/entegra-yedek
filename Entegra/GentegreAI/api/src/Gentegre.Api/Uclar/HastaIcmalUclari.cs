@@ -66,7 +66,7 @@ public static class HastaIcmalUclari
                      --   da taşır - türetilmiş belge, sayılırsa çift sayım.
                      where be.tipi = 30 and be.tur = 19 and coalesce(bb.hasta_id, be.taraf_id) = @p0
                        and be.belge_tarihi >= @p1 and be.belge_tarihi < @p2
-                       and (@p3 = 0 or be.sube_id is null or be.sube_id = @p3))
+                       and (@p3 = 0 or coalesce(be.sube_id, 0) in (0, @p3)))
                 select s.id, s.belge_no, s.belge_tarihi, s.durum, s.genel_toplam,
                        coalesce(d.ad, ''),
                        coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), ''),

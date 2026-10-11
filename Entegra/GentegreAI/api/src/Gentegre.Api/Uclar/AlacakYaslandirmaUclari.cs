@@ -90,7 +90,7 @@ public static class AlacakYaslandirmaUclari
                     select e.taraf_id, e.islem_tarihi, e.yerel_borc, e.yerel_alacak
                       from public.v_cari_ekstre e
                      where e.taraf_id = any(@p0) and e.bakiye_dahil = 1 and e.islem_tarihi < @p1
-                       and (@p2 = 0 or e.sube_id is null or e.sube_id = @p2)
+                       and (@p2 = 0 or coalesce(e.sube_id, 0) in (0, @p2))
                      order by e.taraf_id, e.islem_tarihi, e.id
                     """, null, [idler, bitis, sube], o => (taraf: o.GetInt32(0), tarih: o.GetDateTime(1),
                         borc: o.GetDecimal(2), alacak: o.GetDecimal(3)), iptal);
@@ -105,7 +105,7 @@ public static class AlacakYaslandirmaUclari
                       join public.belge_satir_dagilim dg on dg.belge_satir_id = st.id
                      where be.tipi = 30 and be.tur = 19 and be.durum = 0
                        and bb.odeyen_kurum_id = any(@p0) and be.belge_tarihi < @p1
-                       and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                       and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                        and (dg.sgk + dg.oss) > (dg.sgk_kapatilan + dg.oss_kapatilan)
                      group by bb.odeyen_kurum_id, be.id, be.belge_tarihi
                     """, null, [idler, bitis, sube], o => (taraf: o.GetInt32(0), tarih: o.GetDateTime(1), tutar: o.GetDecimal(2)), iptal);

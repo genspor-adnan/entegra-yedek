@@ -42,6 +42,8 @@ public static partial class KartKatalogu
             new("seriNo",        "seri_no",        "metin", EnFazlaUzunluk: 60, Baslik: "Seri no", Grup: "Cihaz"),
             new("sinif",         "sinif",          "kod",   KodListesi: "steril.otoklav_sinif", Baslik: "Otoklav sınıfı", Grup: "Cihaz"),
             new("kapasite",      "kapasite",       "metin", EnFazlaUzunluk: 40, Baslik: "Kapasite", Grup: "Cihaz"),
+            // YÜK KAPASİTESİ (1032): bir döngüye sığan paket / birim - Sterilizasyon İcmali dolulukları bundan hesaplar.
+            new("yukKapasite",   "yuk_kapasite",   "sayi",  Baslik: "Yük kapasitesi (paket / döngü)", Grup: "Cihaz"),
             new("veriBaglanti",  "veri_baglanti",  "kod",   SabitKodlar: SterilVeriBaglanti, Baslik: "Veri bağlantısı", Grup: "Cihaz"),
             new("konum",         "konum",          "metin", EnFazlaUzunluk: 80, Baslik: "Konum", Grup: "Cihaz"),
             new("sorumluId",     "sorumlu_id",     "kod",   KodTablosu: "public.v_personel_lookup", AramaKaynagi: "personel", Baslik: "Sorumlu", Grup: "Cihaz"),

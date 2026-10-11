@@ -62,7 +62,7 @@ public static class MaliyetIcmalUclari
                   left join public.departman d on d.id = bb.bolum_id
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                    and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                    and (@p3 = 0 or bb.bolum_id = @p3)
                  order by be.belge_tarihi, be.id
                 """, null, [baslangic, bitis, sube, bolum ?? 0], o => new
