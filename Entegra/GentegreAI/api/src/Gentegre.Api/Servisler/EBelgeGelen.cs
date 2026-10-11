@@ -50,9 +50,11 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
 
         int okunan = 0, yeni = 0, guncel = 0;
 
-        // (yol, belgeTuru) — e-Fatura kutusu 1, e-Arsiv kutusu 2.
+        // (yol, belgeTuru) — e-Fatura kutusu 1, e-Arsiv kutusu 2, e-Irsaliye kutusu 7
+        //   (izibiz v2; satir bicimi farkli - SatirKaydetAsync esler).
         foreach (var (yol, tur) in new[] { ("/v1/einvoices/inbox", (short)1),
-                                           ("/v1/earchives/inbox", (short)2) })
+                                           ("/v1/earchives/inbox", (short)2),
+                                           ("/v2/edespatches/inbox", EFatura.EFaturaKodlari.TurEIrsaliye) })
         {
             for (var sayfa = 0; sayfa < 100; sayfa++)     // 100 sayfa = 5000 kayit tavani
             {
@@ -117,6 +119,45 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
         var zarf = satir.TryGetProperty("envelope", out var z) ? z : default;
         var durum = satir.TryGetProperty("documentStatus", out var ds) ? ds : default;
 
+        // e-IRSALIYE KUTUSU (v2): gonderen `sender`, alici `receiver`; yanit durumu
+        //   detail.responseStatus (WaitingForResponse / ACCEPTED / REJECTED /
+        //   PARTIAL_REJECTED / RESPONSE_TIME_EXPIRED). Bekleyen = bos kod (-> 100).
+        if (belgeTuru == EFatura.EFaturaKodlari.TurEIrsaliye)
+        {
+            var gonderen = satir.TryGetProperty("sender", out var sn) ? sn : default;
+            var alan = satir.TryGetProperty("receiver", out var rc) ? rc : default;
+            var detay = satir.TryGetProperty("detail", out var dt) ? dt : default;
+            var yanit = detay.ValueKind == JsonValueKind.Object && detay.TryGetProperty("responseStatus", out var rs) ? rs : default;
+            var yanitKodu = Metin(yanit, "value");
+            if (yanitKodu.Equals("WaitingForResponse", StringComparison.OrdinalIgnoreCase)
+                || yanitKodu.Equals("InProcessing", StringComparison.OrdinalIgnoreCase)) yanitKodu = "";
+            var ig = new Dictionary<string, object?>
+            {
+                ["uuid"]            = Metin(satir, "uuid"),
+                ["belgeNo"]         = Metin(satir, "documentNo"),
+                ["belgeTuru"]       = belgeTuru,
+                ["belgeTarihi"]     = Metin(satir, "issueDate"),
+                ["tutar"]           = Sayi(satir, "amount"),
+                ["vergiTutar"]      = Sayi(satir, "taxAmount"),
+                ["paraBirimi"]      = Metin(satir, "currency") is { Length: > 0 } ipb ? ipb : "TRY",
+                ["profil"]          = Metin(satir, "profile"),
+                ["senaryoAdi"]      = Metin(satir, "documentType"),
+                ["satirSayisi"]     = satir.TryGetProperty("lineCount", out var ilc)
+                                      && ilc.ValueKind == JsonValueKind.Number ? ilc.GetInt32() : 0,
+                ["gondericiVkno"]   = Metin(gonderen, "identifier"),
+                ["gondericiUnvan"]  = Metin(gonderen, "name"),
+                ["gondericiAlias"]  = Metin(gonderen, "alias"),
+                ["aliciAlias"]      = Metin(alan, "alias"),
+                ["yanitKodu"]       = yanitKodu,
+                ["yanitAdi"]        = Metin(yanit, "label"),
+                ["gibKod"]          = Metin(satir, "gibStatusCode"),
+                ["gibAciklama"]     = Metin(satir, "gibStatusDescription"),
+                ["entegratorKayit"] = satir.TryGetProperty("id", out var iid) ? iid.ToString() : "",
+                ["ham"]             = satir.GetRawText(),
+            };
+            return await KaydetAsync(ig);
+        }
+
         var govde = new Dictionary<string, object?>
         {
             ["uuid"]            = Metin(satir, "uuid"),
@@ -147,20 +188,25 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
             ["ham"]             = satir.GetRawText(),
         };
 
-        await using var komut = baglanti.Komut(
-            "select e_belge_id, yeni from public.fn_gelen_belge_kaydet(@p0::jsonb, @p1, @p2, @p3)", null,
-            JsonSerializer.Serialize(govde), (object?)subeId ?? DBNull.Value, entegrator, kullaniciId);
+        return await KaydetAsync(govde);
 
-        try
+        async Task<(long, bool)> KaydetAsync(Dictionary<string, object?> g)
         {
-            await using var o = await komut.ExecuteReaderAsync(iptal);
-            if (!await o.ReadAsync(iptal)) return (0, false);
-            return (o.GetInt64(0), o.GetBoolean(1));
-        }
-        catch (PostgresException)
-        {
-            // Tek bir bozuk satir TUM kutu cekimini durdurmasin.
-            return (0, false);
+            await using var komut = baglanti.Komut(
+                "select e_belge_id, yeni from public.fn_gelen_belge_kaydet(@p0::jsonb, @p1, @p2, @p3)", null,
+                JsonSerializer.Serialize(g), (object?)subeId ?? DBNull.Value, entegrator, kullaniciId);
+
+            try
+            {
+                await using var o = await komut.ExecuteReaderAsync(iptal);
+                if (!await o.ReadAsync(iptal)) return (0, false);
+                return (o.GetInt64(0), o.GetBoolean(1));
+            }
+            catch (PostgresException)
+            {
+                // Tek bir bozuk satir TUM kutu cekimini durdurmasin.
+                return (0, false);
+            }
         }
     }
 
@@ -197,8 +243,12 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
         var istemci = istemciUretici.CreateClient("ebelge");
         var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
 
-        var yol = belgeTuru == 2 ? "/v1/earchives/inbox/download/ubl"
-                                 : "/v1/einvoices/inbox/download/ubl";
+        var yol = belgeTuru switch
+        {
+            2 => "/v1/earchives/inbox/download/ubl",
+            EFatura.EFaturaKodlari.TurEIrsaliye => "/v2/edespatches/inbox/download/ubl",
+            _ => "/v1/einvoices/inbox/download/ubl",
+        };
         var govde = await EBelgeIstemcisi.IsteAsync(istemci, hesap, jeton, HttpMethod.Post, yol,
             new StringContent(
                 JsonSerializer.Serialize(new[]
@@ -265,10 +315,10 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
         await using var baglanti = await veri.AcAsync(iptal);
 
         string kayitNo = "", uuid = "", profil = "";
-        short durum = 0;
+        short durum = 0, belgeTuru = 1;
         await using (var oku = new NpgsqlCommand("""
             select coalesce(entegrator_kayit, ''), coalesce(uuid, ''),
-                   upper(coalesce(profil, '')), durum
+                   upper(coalesce(profil, '')), durum, belge_turu
               from public.e_belge where id = @p0 and yon = 2
             """, baglanti))
         {
@@ -276,7 +326,19 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
             await using var o = await oku.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
             kayitNo = o.GetString(0); uuid = o.GetString(1);
-            profil = o.GetString(2); durum = o.GetInt16(3);
+            profil = o.GetString(2); durum = o.GetInt16(3); belgeTuru = o.GetInt16(4);
+        }
+
+        if (belgeTuru == EFatura.EFaturaKodlari.TurEIrsaliye)
+        {
+            if (durum is 101 or 102) throw GentegreHatasi.IsKurali("Bu irsaliye için yanıt zaten verilmiş.");
+            if (durum == 103) throw GentegreHatasi.IsKurali("İrsaliyenin yanıt süresi geçmiş; yanıt verilemez.");
+            await IrsaliyeYanitlaAsync(baglanti, eBelgeId, kabul, (aciklama ?? "").Trim(), subeId, kullaniciId, iptal);
+            await using var iy = baglanti.Komut(
+                "select public.fn_gelen_belge_yanit_yaz(@p0, @p1, @p2, @p3)", null,
+                eBelgeId, kabul, aciklama ?? "", kullaniciId);
+            await iy.ExecuteNonQueryAsync(iptal);
+            return new YanitSonucu(true, kabul ? "İrsaliye kabul edildi (teslim alındı)." : "İrsaliye reddedildi.");
         }
 
         if (profil == "TEMELFATURA")
@@ -307,5 +369,113 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
         await yaz.ExecuteNonQueryAsync(iptal);
 
         return new YanitSonucu(true, kabul ? "Belge kabul edildi." : "Belge reddedildi.");
+    }
+
+    private static readonly System.Xml.Linq.XNamespace Cbc =
+        "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2";
+    private static readonly System.Xml.Linq.XNamespace Cac =
+        "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2";
+
+    /// <summary>
+    /// e-İRSALİYE YANITI (GİB ReceiptAdvice; izibiz /v2/edespatch-responses/send):
+    /// irsaliyenin satırları UBL'den okunur, kabulde tamamı teslim alınmış, redde
+    /// tamamı reddedilmiş olarak gider. Yanıtın kendi numarası bizim serimizden
+    /// (ebelge_seri tür 9; tanımlı değilse IYN) - giden e_belge kaydı (tür 9) numara
+    /// sırasını tutar. Kısmi teslim (satır bazında miktar) ilk sürümde yok.
+    /// </summary>
+    private async Task IrsaliyeYanitlaAsync(NpgsqlConnection b, long eBelgeId, bool kabul, string aciklama,
+                                            int? subeId, int kullaniciId, CancellationToken iptal)
+    {
+        var ubl = await IcerikIndirAsync(eBelgeId, subeId, kullaniciId, iptal);
+        var kok = System.Xml.Linq.XDocument.Parse(ubl).Root
+                  ?? throw GentegreHatasi.IsKurali("İrsaliye içeriği okunamadı.");
+        var irsNo = kok.Element(Cbc + "ID")?.Value.Trim() ?? "";
+        var irsTarih = DateTime.TryParse(kok.Element(Cbc + "IssueDate")?.Value, System.Globalization.CultureInfo.InvariantCulture,
+                                         System.Globalization.DateTimeStyles.None, out var it) ? it : DateTime.Today;
+
+        // Irsaliyeyi gonderen (DespatchSupplierParty) - yanitin ALICISI.
+        var p = kok.Element(Cac + "DespatchSupplierParty")?.Element(Cac + "Party");
+        string Pv(params System.Xml.Linq.XName[] yol)
+        {
+            System.Xml.Linq.XElement? e = p;
+            foreach (var y in yol) e = e?.Element(y);
+            return e?.Value.Trim() ?? "";
+        }
+        var gVkn = p?.Elements(Cac + "PartyIdentification").Select(x => x.Element(Cbc + "ID"))
+                     .FirstOrDefault(x => (string?)x?.Attribute("schemeID") is "VKN" or "TCKN")?.Value.Trim() ?? "";
+        var gUnvan = Pv(Cac + "PartyName", Cbc + "Name");
+        if (gUnvan.Length == 0) gUnvan = $"{Pv(Cac + "Person", Cbc + "FirstName")} {Pv(Cac + "Person", Cbc + "FamilyName")}".Trim();
+        var gonderen = new EFatura.EFaturaTaraf(gUnvan, gVkn, Pv(Cac + "PartyTaxScheme", Cac + "TaxScheme", Cbc + "Name"),
+            Pv(Cac + "PostalAddress", Cbc + "StreetName"), Pv(Cac + "PostalAddress", Cbc + "CitySubdivisionName"),
+            Pv(Cac + "PostalAddress", Cbc + "CityName"), "TR", "", "", "");
+
+        var satirlar = kok.Elements(Cac + "DespatchLine").Select((d, i) =>
+        {
+            var m = d.Element(Cbc + "DeliveredQuantity");
+            _ = decimal.TryParse(m?.Value, System.Globalization.NumberStyles.Any,
+                                 System.Globalization.CultureInfo.InvariantCulture, out var miktar);
+            return (No: int.TryParse(d.Element(Cbc + "ID")?.Value, out var n) ? n : i + 1,
+                    Ad: d.Element(Cac + "Item")?.Element(Cbc + "Name")?.Value.Trim() ?? "",
+                    Miktar: miktar,
+                    Birim: (string?)m?.Attribute("unitCode") ?? "C62");
+        }).ToList();
+        if (satirlar.Count == 0) throw GentegreHatasi.IsKurali("İrsaliyede satır bulunamadı; yanıt üretilemez.");
+
+        // Biz (yanitin gondereni): subenin e-Belge kimligi.
+        var biz = await b.TekAsync("""
+            select coalesce(unvan, '') unvan, coalesce(vkno, '') vkno, coalesce(vergi_dairesi, '') vd,
+                   coalesce(adres, '') adres, coalesce(ilce, '') ilce, coalesce(il, '') il,
+                   coalesce(gonderici_alias, '') alias
+              from public.v_ebelge_gonderici
+             where sube_id = coalesce(@p0, (select id from public.sube where varsayilan = 1 and aktif = 1 order by id limit 1))
+            """, null, [(object?)subeId ?? DBNull.Value], o => new Tuple<EFatura.EFaturaTaraf, string>(new EFatura.EFaturaTaraf(
+                o.Metin("unvan").Trim(), o.Metin("vkno").Trim(), o.Metin("vd").Trim(), o.Metin("adres").Trim(),
+                o.Metin("ilce").Trim(), o.Metin("il").Trim(), "TR", "", "", ""), o.Metin("alias").Trim()), iptal);
+        if (biz is null || EFatura.EFaturaKodlari.Rakam(biz.Item1.Vkno).Length is not (10 or 11))
+            throw GentegreHatasi.IsKurali("Firma (şube) vergi numarası eksik: Yönetim › Firma Bilgileri.");
+
+        var hesap = await EBelgeIstemcisi.HesapAsync(b, subeId, "e-İrsaliye yanıtı", iptal);
+        var aliciAlias = hesap.TestMi ? "urn:mail:defaultpk@izibiz.com.tr"
+            : await b.TekDegerAsync<string>("select coalesce(gonderici_alias, '') from public.e_belge where id = @p0",
+                                            null, [eBelgeId], iptal) ?? "";
+
+        var xslt = await b.TekDegerAsync<string>("""
+            select convert_from(di.icerik, 'UTF8')
+              from public.dokuman d join public.dokuman_icerik di on di.hash = d.hash
+             where d.kaynak = 'ebelge-xslt' and d.kaynak_id in (9, 7) and coalesce(d.yon, 0) in (0, 2)
+             order by (d.kaynak_id = 9) desc, d.varsayilan desc, d.id limit 1
+            """, null, null, iptal) ?? "";
+        if (xslt.Trim().Length == 0)
+            throw GentegreHatasi.IsKurali("e-İrsaliye XSLT şablonu yok: Ayarlar › Satış Belgeleri › e-Belge › XSLT.");
+
+        var seri = await b.TekDegerAsync<string>("""
+            select upper(btrim(seri)) from public.ebelge_seri
+             where belge_turu = 9 and durum = 1 and length(btrim(seri)) = 3 order by sira, id limit 1
+            """, null, null, iptal) ?? "IYN";
+
+        var zaman = DateTime.Now;
+        var uuid = Guid.NewGuid().ToString();
+        await using var tx = await b.BeginTransactionAsync(iptal);
+        var no = await EFatura.EFaturaServisi.NumaraUretAsync(b, tx, seri, zaman.Year, iptal);
+        var govde = EFatura.IzibizGovde.IrsaliyeYaniti(no, uuid, zaman, irsNo, irsTarih, gonderen, biz.Item1, satirlar,
+            kabul, aciklama, xslt, aliciAlias, biz.Item2).ToJsonString();
+
+        var istemci = istemciUretici.CreateClient("ebelge");
+        var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
+        await EBelgeIstemcisi.IsteAsync(istemci, hesap, jeton, HttpMethod.Post, "/v2/edespatch-responses/send",
+            new StringContent(govde, Encoding.UTF8, "application/json"), "İrsaliye yanıtı gönderme", iptal);
+
+        // Numara sirasi + iz: giden yanit kaydi (tur 9), gelen irsaliyenin carisine bagli.
+        await b.CalistirAsync("""
+            insert into public.e_belge (belge_id, taraf_id, belge_turu, yon, uuid, belge_no, gonderici_alias, alici_alias,
+                                        durum, api_json, sube_id, gonderici_vkno, gonderici_unvan, belge_tarihi, profil,
+                                        entegrator, yanit_aciklama, ekleyen)
+            select null, g.taraf_id, 9, 1, @p1, @p2, @p3, @p4, @p5, @p6, g.sube_id, @p7, @p8, @p9::date, 'TEMELIRSALIYE',
+                   @p10, @p11, @p12
+              from public.e_belge g where g.id = @p0
+            """, tx, [eBelgeId, uuid, no, biz.Item2, aliciAlias, (short)(kabul ? 101 : 102), govde.Length > 20000 ? "" : govde,
+                      EFatura.EFaturaKodlari.Rakam(biz.Item1.Vkno), biz.Item1.Unvan, zaman.Date, hesap.Entegrator,
+                      $"{(kabul ? "Kabul" : "Red")} yanıtı: {irsNo}", kullaniciId], iptal);
+        await tx.CommitAsync(iptal);
     }
 }

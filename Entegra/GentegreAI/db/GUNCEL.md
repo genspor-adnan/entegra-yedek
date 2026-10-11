@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (514 ad, 143 tanesi birden cok dosyada)
+## Fonksiyonlar (514 ad, 144 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -167,7 +167,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ftr_no_uret` | `719_ftr_modulu.sql` | — |
 | `fn_gebelik_hafta` | `900_gebelik_izlem.sql` | — |
 | `fn_gebelik_sonucla` | `902_gebelik_sonucu.sql` | — |
-| `fn_gelen_belge_kaydet` | `187_gelen_belge.sql` | — |
+| `fn_gelen_belge_kaydet` | `1039_gelen_irsaliye_yanit_kodlari.sql` | 187_gelen_belge.sql |
 | `fn_gelen_belge_yanit_yaz` | `187_gelen_belge.sql` | — |
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
 | `fn_gelen_mesajlar` | `189_gelen_mesajlar.sql` | — |

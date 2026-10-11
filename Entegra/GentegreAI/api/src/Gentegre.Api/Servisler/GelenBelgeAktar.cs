@@ -58,9 +58,13 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             belgeNo = o.GetString(3); belgeTuru = o.GetInt16(4);
         }
 
+        // GELEN e-IRSALIYE (tur 7) ALIS IRSALIYESINE (10) aktarilir; satirlar
+        //   DespatchLine'dan, gonderen DespatchSupplierParty'den.
+        var irsaliye = belgeTuru == EFatura.EFaturaKodlari.TurEIrsaliye;
+        var hedefAdi = irsaliye ? "alış irsaliyesine" : "alış faturasına";
         if (mevcutBelge is { } eski)
             throw GentegreHatasi.IsKurali(
-                $"Bu belge zaten alış faturasına aktarılmış (belge #{eski}).");
+                $"Bu belge zaten {hedefAdi} aktarılmış (belge #{eski}).");
 
         // 2) UBL - yoksa entegratorden indirilir.
         var ubl = await gelen.IcerikIndirAsync(eBelgeId, baglam.SubeId, baglam.KullaniciId, iptal);
@@ -69,7 +73,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
         // 3) Cari: VKN ile eslesen taraf; yoksa TEDARIKCI olarak acilir.
         var tarafId = await TarafBulVeyaAcAsync(baglanti, gondericiVkno, gondericiUnvan,
-                                                kok, baglam, iptal);
+                                                kok, baglam, iptal, irsaliye ? "DespatchSupplierParty" : "AccountingSupplierParty");
 
         // 4) Baslik + satirlar.
         var doviz = (kok.Element(Cbc + "DocumentCurrencyCode")?.Value ?? "TRY").Trim();
@@ -83,7 +87,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
         //   cozer. JsonElement verilince "IConvertible" cevrim hatasi aliniyordu.
         var belge = new Dictionary<string, object?>
         {
-            ["tur"]          = 11,                              // Alis Faturasi
+            ["tur"]          = irsaliye ? 10 : 11,              // Alis Irsaliyesi / Alis Faturasi
             ["tipi"]         = 1,
             ["tarafId"]      = tarafId,
             ["belgeTarihi"]  = tarih,
@@ -91,17 +95,27 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             //   tuketilmez (alis belgesinde numara zaten alfanumerik gelir).
             ["belgeNo"]      = belgeNo.Length > 20 ? belgeNo[..20] : belgeNo,
             ["belgeDovizi"]  = doviz.Length > 5 ? doviz[..5] : doviz,
-            ["aciklama"]     = $"e-Fatura kutusundan aktarıldı ({belgeNo})",
+            ["aciklama"]     = $"{(irsaliye ? "e-İrsaliye" : "e-Fatura")} kutusundan aktarıldı ({belgeNo})",
         };
+        if (irsaliye)
+        {
+            // Fiili sevk tarihi irsaliye tarihi olarak (belge_tarihi = duzenleme tarihi).
+            var sevk = kok.Element(Cac + "Shipment")?.Element(Cac + "Delivery")?.Element(Cac + "Despatch");
+            if (Tarih(sevk?.Element(Cbc + "ActualDespatchDate")?.Value) is { } st) belge["irsaliyeTarihi"] = st;
+        }
 
         var satirlar = new List<Dictionary<string, JsonElement>>();
         var eslesen = 0;
 
-        foreach (var satir in kok.Elements(Cac + "InvoiceLine"))
+        foreach (var satir in kok.Elements(Cac + (irsaliye ? "DespatchLine" : "InvoiceLine")))
         {
-            var miktar = Sayi(satir.Element(Cbc + "InvoicedQuantity")?.Value);
-            var tutar  = Sayi(satir.Element(Cbc + "LineExtensionAmount")?.Value);
-            var fiyat  = Sayi(satir.Element(Cac + "Price")?.Element(Cbc + "PriceAmount")?.Value);
+            // Irsaliye satirinda fiyat/tutar istege bagli: Shipment/GoodsItem/InvoiceLine altinda olabilir.
+            var fiyatYeri = irsaliye
+                ? satir.Element(Cac + "Shipment")?.Element(Cac + "GoodsItem")?.Element(Cac + "InvoiceLine")
+                : satir;
+            var miktar = Sayi(satir.Element(Cbc + (irsaliye ? "DeliveredQuantity" : "InvoicedQuantity"))?.Value);
+            var tutar  = Sayi(fiyatYeri?.Element(Cbc + "LineExtensionAmount")?.Value);
+            var fiyat  = Sayi(fiyatYeri?.Element(Cac + "Price")?.Element(Cbc + "PriceAmount")?.Value);
             if (fiyat == 0 && miktar != 0) fiyat = tutar / miktar;
 
             var kdv = (short)Sayi(satir.Element(Cac + "TaxTotal")
@@ -143,6 +157,14 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
             baglam, iptal);
 
+        // ALIS IRSALIYESI kendi sayacindan numara alir (yalniz alis faturasi dis
+        //   numarali); gelen e-Irsaliyede numara GONDERENINDIR - e-Irsaliye no
+        //   belgeye yazilir ki fatura geldiginde irsaliye referansi eslessin.
+        if (irsaliye && belgeNo.Length > 0)
+            foreach (var sql in new[] { "update public.belge set belge_no = @p1 where id = @p0",
+                                        "update public.mali_hareket set belge_no = @p1 where belge_id = @p0" })
+                await baglanti.CalistirAsync(sql, null, [belgeId, belgeNo.Length > 20 ? belgeNo[..20] : belgeNo], iptal);
+
         // 6) Bag: kutu satiri artik belgeye isaret eder (tekrar aktarim engellenir).
         await using (var bag = new NpgsqlCommand("""
             update public.e_belge set belge_id = @p1, taraf_id = coalesce(taraf_id, @p2), tasnif = 2,
@@ -157,7 +179,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             await bag.ExecuteNonQueryAsync(iptal);
         }
 
-        var mesaj = $"Alış faturası oluşturuldu ({satirlar.Count} kalem, " +
+        var mesaj = $"{(irsaliye ? "Alış irsaliyesi" : "Alış faturası")} oluşturuldu ({satirlar.Count} kalem, " +
                     $"{eslesen} kalem stok kartıyla eşleşti).";
         if (uyarilar.Count > 0) mesaj += " " + string.Join(" • ", uyarilar);
 
@@ -166,7 +188,8 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
     // --------------------------------------------------------------- cari ----
     private static async Task<int> TarafBulVeyaAcAsync(NpgsqlConnection baglanti,
-        string vkno, string unvan, XElement kok, YazmaBaglami baglam, CancellationToken iptal)
+        string vkno, string unvan, XElement kok, YazmaBaglami baglam, CancellationToken iptal,
+        string partiAdi = "AccountingSupplierParty")
     {
         var temiz = new string((vkno ?? "").Where(char.IsDigit).ToArray());
 
@@ -180,7 +203,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
         // Yeni TEDARIKCI karti: unvan/VKN/vergi dairesi/adres UBL'deki gonderen
         //   bloguna gore doldurulur; kullanici sonra duzeltir.
-        var taraf = kok.Element(Cac + "AccountingSupplierParty")?.Element(Cac + "Party");
+        var taraf = kok.Element(Cac + partiAdi)?.Element(Cac + "Party");
         var ad = unvan.Length > 0
                  ? unvan
                  : taraf?.Element(Cac + "PartyName")?.Element(Cbc + "Name")?.Value?.Trim() ?? "";

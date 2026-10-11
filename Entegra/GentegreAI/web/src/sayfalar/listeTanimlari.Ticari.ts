@@ -46,6 +46,22 @@ const GELEN_SEKMELERI = [
   { ad: 'Kullanım Dışı', rota: 'gelen-belge-disi', sekme: true, kosul: 'ebelge' as const },
 ];
 
+/** Alis irsaliyesi / gelen e-Irsaliye ANA SEKMELERI (e-Irsaliye entegrasyonu, 11.10.2026). */
+const GELEN_IRSALIYE_SEKMELERI = [
+  { ad: 'Sistem', rota: 'alis-irsaliye', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Gelen Kutusu', rota: 'gelen-irsaliye', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Kullanım Dışı', rota: 'gelen-irsaliye-disi', sekme: true, kosul: 'ebelge' as const },
+];
+
+/** Gelen kutusu belge turu suzgeci: fatura kutusu e-Fatura + e-Arsiv (1, 2), irsaliye kutusu 7. */
+const gelenSuzgec = (tasnif: number, turler: number[]) => ({
+  op: 'and' as const,
+  kosullar: [
+    { alan: 'tasnif', op: 'esit' as const, deger: tasnif },
+    { alan: 'belgeTuru', op: 'icinde' as const, deger: turler },
+  ],
+});
+
 export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -
@@ -220,7 +236,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alış Faturaları › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
     ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
-    sabitFiltre: { alan: 'tasnif', op: 'esit', deger: 1 },
+    // Yalniz FATURA kutusu (e-Fatura + e-Arsiv); gelen e-Irsaliye kendi listesinde.
+    sabitFiltre: gelenSuzgec(1, [1, 2]),
     cipler: [
       { ad: 'Alındı' },
       { ad: 'Yanıt Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 100 } },
@@ -232,6 +249,39 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',
   },
   {
+    // GELEN e-IRSALIYE KUTUSU (kullanici 11.10.2026: "alış/satış irsaliyelerin izibiz
+    //   entegrasyonu"): Alış İrsaliyeleri'nin "Gelen Kutusu" sekmesi. Kabul / Red GİB'e
+    //   irsaliye yanıtı gönderir; kabul ve "Sistem"e aktarım alış irsaliyesi oluşturur.
+    kaynak: 'gelen-belge', rota: 'gelen-irsaliye', baslik: 'Gelen e-İrsaliyeler',
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'gondericiUnvan'],
+    gizliKolonlar: ['vergiTutar'],
+    yol: 'Alış İrsaliyeleri › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
+    ebelgeMenusu: 'E-İrsaliye',
+    toplam: ['tutar'],
+    sabitFiltre: gelenSuzgec(1, [7]),
+    cipler: [
+      { ad: 'Alındı' },
+      { ad: 'Yanıt Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 100 } },
+      { ad: 'Red',            filtre: { alan: 'durum', op: 'esit', deger: 102 } },
+      { ad: 'Süresi Geçen',   filtre: { alan: 'durum', op: 'esit', deger: 103 } },
+      ...GELEN_IRSALIYE_SEKMELERI,
+    ],
+    menuGizli: true, modul: '',
+    menuGrup: 'Stok & Hizmet', menuSira: 69, menuAd: 'Gelen e-İrsaliyeler', ic: '📥', yetkiKodu: 'belge.alis.irsaliye',
+  },
+  {
+    kaynak: 'gelen-belge', rota: 'gelen-irsaliye-disi', baslik: 'Kullanım Dışı e-İrsaliyeler',
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'gondericiUnvan'],
+    gizliKolonlar: ['vergiTutar'],
+    yol: 'Alış İrsaliyeleri › Kullanım Dışı', aksiyonEkrani: 'gelen-belge-liste',
+    ebelgeMenusu: 'E-İrsaliye',
+    toplam: ['tutar'],
+    sabitFiltre: gelenSuzgec(3, [7]),
+    cipler: [{ ad: 'Tümü' }, ...GELEN_IRSALIYE_SEKMELERI],
+    menuGizli: true, modul: '',
+    menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Kullanım Dışı e-İrsaliyeler', ic: '📥', yetkiKodu: 'belge.alis.irsaliye',
+  },
+  {
     // KULLANIM DISI (1037, Delphi 'Kullanım Dışı'na Taşı): islenmeyecek gelen belgeler.
     kaynak: 'gelen-belge', rota: 'gelen-belge-disi', baslik: 'Kullanım Dışı',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Gönderici en solda.
@@ -239,7 +289,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alış Faturaları › Kullanım Dışı', aksiyonEkrani: 'gelen-belge-liste',
     ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
-    sabitFiltre: { alan: 'tasnif', op: 'esit', deger: 3 },
+    sabitFiltre: gelenSuzgec(3, [1, 2]),
     cipler: [{ ad: 'Tümü' }, ...GELEN_SEKMELERI],
     menuGizli: true, modul: '',
     menuGrup: 'Stok & Hizmet', menuSira: 68, menuAd: 'Kullanım Dışı', ic: '📥', yetkiKodu: 'belge.alis_fatura',
@@ -318,6 +368,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
       { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
+      // DELPHI GIBI SEKMELI (alis faturasiyla ayni): Sistem / Gelen Kutusu / Kullanım Dışı.
+      ...GELEN_IRSALIYE_SEKMELERI,
     ],
     // ALIS FATURASININ ALTINDA (kullanici 11.10.2026): Stok & Hizmet - iki urunde de acik.
     menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge.alis.irsaliye',

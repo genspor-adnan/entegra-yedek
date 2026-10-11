@@ -82,7 +82,10 @@ export async function gelenCokluAksiyonu(kod: string, satirlar: ListeSatiri[], y
       catch (h) { sonuc.push(`✗ ${no(s)}: ${hataMetni(h)}`) }
     }
   } else if (kod === 'gelen.aktar') {
-    if (!await onay(`${satirlar.length} belge alış faturasına aktarılacak. Onaylıyor musunuz?`)) return true;
+    // Gelen e-Irsaliye (belge turu 7) alis irsaliyesine, fatura alis faturasina aktarilir.
+    const hedef = satirlar.every(s => Number(s.belgeTuru) === 7) ? 'alış irsaliyesine'
+      : satirlar.some(s => Number(s.belgeTuru) === 7) ? 'alış belgesine' : 'alış faturasına';
+    if (!await onay(`${satirlar.length} belge ${hedef} aktarılacak (Sistem). Onaylıyor musunuz?`)) return true;
     for (const s of satirlar) {
       try { sonuc.push(`✓ ${no(s)}: ${(await api.gelenBelgeAktar(Number(s.id))).mesaj}`) }
       catch (h) { sonuc.push(`✗ ${no(s)}: ${hataMetni(h)}`) }

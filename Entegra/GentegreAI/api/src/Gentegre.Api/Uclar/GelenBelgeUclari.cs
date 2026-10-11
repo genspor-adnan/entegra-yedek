@@ -154,7 +154,7 @@ public static class GelenBelgeUclari
                 }
                 catch (Exception h)
                 {
-                    ek = " Ancak alış faturasına aktarılamadı: " + h.Message;
+                    ek = " Ancak alış belgesine aktarılamadı: " + h.Message;
                 }
             }
 

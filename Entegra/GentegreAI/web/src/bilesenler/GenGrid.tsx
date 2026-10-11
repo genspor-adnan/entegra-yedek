@@ -491,8 +491,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       { kod: 'gelen.aktar', ad: 'Sistem' },
       { kod: 'gelen.tasi-gelen', ad: 'Gelen Kutusu' },
       { kod: 'gelen.tasi-disi', ad: 'Kullanım Dışı' },
-    ].filter(o => !(o.kod === 'gelen.tasi-gelen' && !window.location.pathname.endsWith('/gelen-belge-disi'))
-               && !(o.kod === 'gelen.tasi-disi' && window.location.pathname.endsWith('/gelen-belge-disi'))) } : {}),
+    ].filter(o => !(o.kod === 'gelen.tasi-gelen' && !window.location.pathname.endsWith('-disi'))
+               && !(o.kod === 'gelen.tasi-disi' && window.location.pathname.endsWith('-disi'))) } : {}),
     'genel.yazdir': [
       { kod: 'genel.csv', ad: '📄 CSV Kaydet' },
       { kod: 'genel.yazdir.dogrudan', ad: '🖨️ Yazdır' },
@@ -791,7 +791,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 donduruyorsa cizilir - sube e-Fatura mukellefi degilse hic
                 gelmez (179). Secilen islem ANINDA calisir; kutu sonra bosalir
                 ki yanlislikla ikinci kez tetiklenmesin. */}
-            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && kaynak !== 'gelen-belge' && (
+            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && kaynak !== 'gelen-belge' && kaynak !== 'irsaliye' && (
               <select
                 className="ebk"
                 // Islemlerin tamami SECILI BELGEYE uygulanir (kullanici):

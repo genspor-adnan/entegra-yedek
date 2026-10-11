@@ -475,7 +475,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     /// aynı seri+yılda en büyük + 1. Seri+yıl kilidiyle - eşzamanlı iki hazırlama
     /// aynı numarayı alamaz.
     /// </summary>
-    private static async Task<string> NumaraUretAsync(NpgsqlConnection b, NpgsqlTransaction tx, string seri, int yil,
+    internal static async Task<string> NumaraUretAsync(NpgsqlConnection b, NpgsqlTransaction tx, string seri, int yil,
                                                       CancellationToken iptal, long baslangic = 1)
     {
         var onek = seri + yil.ToString(System.Globalization.CultureInfo.InvariantCulture);
