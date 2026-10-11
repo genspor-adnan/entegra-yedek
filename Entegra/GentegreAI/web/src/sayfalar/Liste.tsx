@@ -565,6 +565,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     const EBELGE_TURLERI = [10, 11, 14, 15];
     if (tanim.kaynak === 'belge' && !EBELGE_TURLERI.includes(tanim.yeniBelgeTuru ?? 0))
       liste.push('efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'senaryo', 'efaturaKodu');
+    // Basvurudan kesilen faturalarin e-Belge ozeti yalniz basvuru / siparis (19) listesinde.
+    if (tanim.kaynak === 'belge' && tanim.yeniBelgeTuru !== 19) liste.push('faturaEBelgeDurum');
     return liste;
   }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur]);
 

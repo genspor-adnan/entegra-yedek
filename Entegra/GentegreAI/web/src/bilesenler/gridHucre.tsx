@@ -89,6 +89,7 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Satış İrsaliyesi': 'bilgi', 'Alış İrsaliyesi': 'bilgi', 'Satış Teklifi': 'bilgi',
   // e-Belge Durum kolonu (11.10.2026).
   'Gönderildi': 'ok', 'Hazır': 'uyari', 'Gönderim hatası': 'hata', 'Hazırlanmadı': 'gri',
+  'Kısmen gönderildi': 'uyari',
   // Irsaliye listesi: e-Belge hic hazirlanmamis belge KAGIT (notr gri),
   //   GIB yaniti gelenler kabul/red (yesil/kirmizi).
   'Kağıt': 'gri', 'Kabul': 'ok', 'Red': 'hata',

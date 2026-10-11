@@ -71,6 +71,25 @@ public static partial class KaynakKatalogu
                 """,                             "metin", "e-Belge", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 90,
                                                  Siralanabilir: false, Filtrelenebilir: false),
+            // BASVURU LISTESI e-BELGE DURUMU (kullanici 11.10.2026): basvurunun
+            //   kendisi e-Belge degil; basvurudan kesilen FATURALARIN ozeti (baslik
+            //   bagi kaynak_tur = 30, iptaller haric). Yalniz tur 19 listesinde
+            //   gorunur (Liste.tsx).
+            new("faturaEBelgeDurum",
+                """
+                case when b.tur <> 19 then '' else coalesce((
+                    select case when count(*) = 0 then ''
+                                when bool_or(f.efatura_durum in (1, 11) and coalesce(f.efatura_sonuc, 0) = 3) then 'Gönderim hatası'
+                                when bool_and(f.efatura_durum in (2, 12)) then 'Gönderildi'
+                                when bool_or(f.efatura_durum in (2, 12)) then 'Kısmen gönderildi'
+                                when bool_or(f.efatura_durum in (1, 11)) then 'Hazır'
+                                else 'Hazırlanmadı' end
+                      from public.belge f
+                     where f.kaynak_tur = 30 and f.kaynak_id = b.id and f.kaynak_id > 0
+                       and f.tur = 15 and f.durum <> 2), '') end
+                """,                             "metin", "e-Belge Durum", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 130,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("eBelgeDurumAdi",
                 """
                 case when coalesce(b.efatura_durum, 0) in (2, 12, 52) then 'Gönderildi'

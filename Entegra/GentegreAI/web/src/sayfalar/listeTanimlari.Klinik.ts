@@ -261,7 +261,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   sonradan listeden kaldirildi (kullanici).
     kolonSirasi: ['belgeTarihi', 'tamamlanma', 'belgeNo', 'hastaAdi',
                   'odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor',
-                  'genelToplam', 'tahsilat'],
+                  'genelToplam', 'tahsilat',
+                  // e-BELGE DURUM (11.10.2026): basvurudan kesilen faturalarin ozeti.
+                  'faturaEBelgeDurum'],
     // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel
     //   toplamin yaninda okunsun - ikisinin farki gunun acik borcudur.
     toplam: ['genelToplam', 'tahsilat'],
