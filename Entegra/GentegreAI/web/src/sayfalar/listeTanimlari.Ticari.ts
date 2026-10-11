@@ -121,8 +121,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   bağı yok - fatura ticari bir eklenti değil, kurumun temel işi.
     //   Yeri Kurumlar & Sigorta: hastanede fatura kuruma/hastaya kesilir,
     //   kurum icmalleriyle aynı yerde aranır.
-    kaynak: 'belge', rota: 'fatura', baslik: 'Faturalar',
-    yol: 'Kurumlar & Sigorta › Faturalar',
+    // AD "Satış Faturaları" (kullanici 11.10.2026: "Faturalar (liste) rename Satış Faturaları").
+    kaynak: 'belge', rota: 'fatura', baslik: 'Satış Faturaları',
+    yol: 'Kurumlar & Sigorta › Satış Faturaları',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
@@ -133,7 +134,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
     urunModu: 2, modul: '',
-    menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Faturalar',
+    menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Satış Faturaları',
     ic: '🧾', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
   },
   {

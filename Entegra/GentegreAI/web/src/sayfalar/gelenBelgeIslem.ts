@@ -1,6 +1,6 @@
 import { api } from '../api/istemci';
 import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
-import { type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
+import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
 import { belgeGoruntusuAc, dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './ebelgeIslem';
 import { xmlAyristir, xsltUygula, hamXmlGorunumu } from './xsltGoruntu';
 
@@ -40,6 +40,55 @@ function goruntuUret(ubl: string): string {
     if (goruntu) return goruntu;
   }
   return hamXmlGorunumu(ubl);
+}
+
+/**
+ * COKLU SECIM (kullanici 11.10.2026: gelen kutusu yeni menuye): kabul / red /
+ * aktar / HTML / XML seçili belgelerin hepsinde - onay ve gerekce BIR KEZ
+ * sorulur, sonuc tek mesajda. Kabul / red yalniz yanit bekleyen (100) belgede;
+ * ötekiler atlanir. Tek belgede `gelenBelgeAksiyonu`.
+ */
+export async function gelenCokluAksiyonu(kod: string, satirlar: ListeSatiri[], yenile: () => void): Promise<boolean> {
+  if (!['gelen.kabul', 'gelen.red', 'gelen.aktar', 'ebelge.html', 'ebelge.xml'].includes(kod)) {
+    mesaj('Bu işlem için tek bir belge seçin.');
+    return true;
+  }
+  const no = (s: ListeSatiri) => String(s.belgeNo ?? s.id);
+  const sonuc: string[] = [];
+  if (kod === 'gelen.kabul' || kod === 'gelen.red') {
+    const kabul = kod === 'gelen.kabul';
+    const uygun = satirlar.filter(s => Number(s.durum) === 100);
+    const atlanan = satirlar.length - uygun.length;
+    if (uygun.length === 0) { mesaj('Seçilenler arasında yanıt bekleyen belge yok.'); return true }
+    if (!await onay(`${uygun.length} belge ${kabul ? 'KABUL' : 'RED'} edilecek${atlanan ? ` (${atlanan} belge yanıt beklemiyor, atlanır)` : ''}.\n\n`
+                  + 'Yanıt GİB’e gönderilir ve geri alınamaz. Onaylıyor musunuz?', !kabul)) return true;
+    const aciklama = await metinSor(kabul ? 'Kabul notu (isteğe bağlı, hepsine):' : 'Red gerekçesi (zorunlu, hepsine):', '');
+    if (aciklama === null) return true;
+    if (!kabul && !aciklama.trim()) { mesaj('Red gerekçesi zorunlu.'); return true }
+    for (const s of uygun) {
+      try { sonuc.push(`✓ ${no(s)}: ${(await api.gelenBelgeYanit(Number(s.id), kabul, aciklama)).mesaj}`) }
+      catch (h) { sonuc.push(`✗ ${no(s)}: ${hataMetni(h)}`) }
+    }
+  } else if (kod === 'gelen.aktar') {
+    if (!await onay(`${satirlar.length} belge alış faturasına aktarılacak. Onaylıyor musunuz?`)) return true;
+    for (const s of satirlar) {
+      try { sonuc.push(`✓ ${no(s)}: ${(await api.gelenBelgeAktar(Number(s.id))).mesaj}`) }
+      catch (h) { sonuc.push(`✗ ${no(s)}: ${hataMetni(h)}`) }
+    }
+  } else {
+    for (const s of satirlar) {
+      try {
+        const y = await api.gelenBelgeUbl(Number(s.id));
+        const ad = ebelgeDosyaAdi(ebelgeTurAdi(s), no(s), String(s.gondericiUnvan ?? ''));
+        if (kod === 'ebelge.html') dosyaIndir(goruntuUret(y.ubl), `${ad}.html`, 'text/html;charset=utf-8');
+        else dosyaIndir(y.ubl, `${ad}.xml`, 'application/xml;charset=utf-8');
+        sonuc.push(`✓ ${no(s)}`);
+      } catch (h) { sonuc.push(`✗ ${no(s)}: ${hataMetni(h)}`) }
+    }
+  }
+  mesaj(sonuc.join('\n'));
+  yenile();
+  return true;
 }
 
 /**

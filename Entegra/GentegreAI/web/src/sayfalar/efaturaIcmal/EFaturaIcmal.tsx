@@ -96,7 +96,7 @@ export function EFaturaIcmal() {
                        onDegisti={() => setYenile(y => y + 1)} />
         {seciliTur.length > 0 && <span className="ki-soluk">A4 seçili {seciliTur.length} türü basar</span>}
         <span className="sp" />
-        <button onClick={() => git('/fatura')}>🧾 Faturalar</button>
+        <button onClick={() => git('/fatura')}>🧾 Satış Faturaları</button>
         <button onClick={() => git('/gelen-belge')}>📮 e-Belge Gelen Kutusu</button>
         <button onClick={() => git(-1)}>↩ Geri Dön</button>
       </div>

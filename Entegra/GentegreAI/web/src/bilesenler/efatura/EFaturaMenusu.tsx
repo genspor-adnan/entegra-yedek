@@ -144,7 +144,7 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
   );
 }
 
-const EFM_STILI = `
+export const EFM_STILI = `
 .efm-liste { min-width: 220px; z-index: 10000; }   /* her modal katmaninin (enust 420) ustunde */
 .efm-liste .mi { display: flex; align-items: center; gap: 8px; padding: 5px 8px; }
 .efm-ikon { width: 18px; text-align: center; display: inline-flex; justify-content: center; }

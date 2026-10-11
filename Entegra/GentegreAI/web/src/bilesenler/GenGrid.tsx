@@ -22,6 +22,7 @@ import { useGridTercihleri } from './grid/useGridTercihleri';
 import { useTarihAraligi } from './grid/useTarihAraligi';
 import { useGridSecimi } from './grid/useGridSecimi';
 import { EFaturaMenusu } from './efatura/EFaturaMenusu';
+import { GelenMenusu } from './efatura/GelenMenusu';
 import { useListeVerisi } from './grid/useListeVerisi';
 import { useKolonTercihi } from './grid/kolonTercihi';
 
@@ -756,7 +757,13 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                              devreSebep="Önce fatura seçin (Ctrl / Shift ile birden çok)."
                              onDegisti={onEBelgeDegisti} etiket={ebelgeMenusu} />
             )}
-            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && (
+            {/* GELEN KUTUSU (kullanici 11.10.2026): eski kutu yerine Delphi gelen menusu, coklu. */}
+            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak === 'gelen-belge' && (
+              <GelenMenusu etiket={ebelgeMenusu}
+                           satirlar={satirlar.filter((sr, i) => secili.has(String(sr.id ?? i)))}
+                           onSec={aksiyonCalistir} />
+            )}
+            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && kaynak !== 'gelen-belge' && (
               <select
                 className="ebk"
                 // Islemlerin tamami SECILI BELGEYE uygulanir (kullanici):

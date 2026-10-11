@@ -28,7 +28,7 @@ import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
 import { efaturaCalistir } from '../bilesenler/efatura/efaturaIslem';
-import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
+import { gelenBelgeAksiyonu, gelenCokluAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
@@ -617,8 +617,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     try {
       // GELEN KUTUSU once: oradaki id e_belge kaydidir, belge id'si degil -
       //   ayni "ebelge.*" kodlari farkli uclara gider.
+      if (tanim.kaynak === 'gelen-belge' && (secililer?.length ?? 0) > 1
+          && await gelenCokluAksiyonu(kod, secililer!, () => setYenile(t => t + 1))) return;
       if (tanim.kaynak === 'gelen-belge'
-          && await gelenBelgeAksiyonu(kod, satir ?? null, () => setYenile(t => t + 1),
+          && await gelenBelgeAksiyonu(kod, satir ?? secililer?.[0] ?? null, () => setYenile(t => t + 1),
                                       setEBelgeMesajlari)) return;
 
       // GIDEN e-FATURA (11.10.2026, Delphi e-Fatura menusu): fatura listesinin
