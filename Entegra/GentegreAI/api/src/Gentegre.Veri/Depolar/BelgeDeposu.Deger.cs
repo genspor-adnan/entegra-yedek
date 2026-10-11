@@ -248,6 +248,12 @@ public sealed partial class BelgeDeposu
                             nullif(ms.ad, ''), '') as "stokAdi",
                    coalesce(hz.ad, '')  as "hizmetAdi", coalesce(ms.ad, '') as "masrafAdi",
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
+                   -- BELGEYE DONUSMUS SATIR (kullanici 11.10.2026: "belgeye
+                   --   dönüşmüş ücret satırları da silinemez"): miktar (kapatilan)
+                   --   ya da tutar (hedef satirin kaynagi) bazli donusum.
+                   (coalesce(s.kapatilan_miktar, 0) > 0
+                    or exists (select 1 from public.belge_satir h
+                                where h.kaynak_tur = 30 and h.kaynak_id = s.id)) as "donustu",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
                    s.teslim_tarihi as "teslimTarihi", s.rezerve,
                    -- KURUM / HASTA PAYI artik DAGILIMDAN turetilir (478):

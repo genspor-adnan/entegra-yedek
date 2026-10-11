@@ -56,6 +56,8 @@ export interface SatirDurumu {
   iskonto2: string;
   /** ONAYLI ISKONTO (662): 1 ise iskonto/birim fiyat kilitli - gridde 🔒. */
   iskontoKilit?: boolean;
+  /** Belgeye (fiş / fatura / tahakkuk) dönüşmüş satır - silinemez (11.10.2026). */
+  donustu?: boolean;
   kdv: string;
   /** Satir aciklamasi (belge_satir.aciklama) - gridde stok adinin saginda. */
   aciklama: string;
@@ -315,6 +317,7 @@ export function yanittanSatirlar(
     iskonto: String(r.iskonto ?? 0),
     iskonto2: String(r.iskonto2 ?? 0),
     iskontoKilit: Number(r.iskontoKilit ?? 0) === 1,
+    donustu: r.donustu === true,
     kdv: String(r.kdv ?? 0),
     // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca kullanici
     //   hangi lottan kac adet girdigini gormeli.

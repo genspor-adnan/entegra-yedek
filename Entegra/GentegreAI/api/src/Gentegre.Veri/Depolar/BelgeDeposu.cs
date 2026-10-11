@@ -167,9 +167,15 @@ public sealed partial class BelgeDeposu
         if (duzenlemeGun == 0)
             throw GentegreHatasi.IsKurali(
                 "Belge duzenleme kapali (Ayarlar > belge.duzenleme_gun).");
+        // e-FATURA HAZIR / GONDERILMIS (kullanici 11.10.2026: "hazırlanmış/
+        //   gönderilmiş fatura değişemez/silinemez"): hazir belgenin numarasi
+        //   ve ETTN'si alinmis, gonderilen GIB'dedir.
+        if (efaturaDurum is 2 or 12 or 52)
+            throw GentegreHatasi.IsKurali(
+                "e-Fatura gönderilmiş belge değiştirilemez. Düzeltme için iade faturası kesin.");
         if (efaturaDurum > 0)
             throw GentegreHatasi.IsKurali(
-                "e-Belge gonderilmis belge degistirilemez; iptal edip yeniden kesin.");
+                "e-Fatura hazırlanmış belge değiştirilemez. Önce e-Fatura menüsünden \"Hazırı Geri Al\".");
         // DONUSMUS BELGE (kapanma_durum > 0)
         //   SIPARIS: duzenlenebilir. Kullanici kapanmis siparise YENI SATIR
         //     ekleyebilmeli; donusmus satirlar ise KORUNUR (hedef belge onlara
@@ -225,6 +231,36 @@ public sealed partial class BelgeDeposu
         {
             await using var o = await oku.ExecuteReaderAsync(iptal);
             while (await o.ReadAsync(iptal)) korunan.Add(o.GetInt32(0));
+        }
+
+        // BELGEYE DONUSMUS UCRET SATIRI SILINEMEZ (kullanici 11.10.2026): yukaridaki
+        //   koruma satiri sessizce yerinde birakiyordu - kullanici sildim sanip
+        //   kaydediyor, satir geri geliyordu. Istemci (satir kimlikleriyle
+        //   gonderirken) donusmus bir satiri listeden cikardiysa acik hata.
+        var gelenIdler = satirlar
+            .Select(x => x.TryGetValue("satirId", out var sid) && sid.ValueKind == JsonValueKind.Number ? sid.GetInt32()
+                       : x.TryGetValue("id", out var kid) && kid.ValueKind == JsonValueKind.Number ? kid.GetInt32() : 0)
+            .Where(i => i > 0).ToHashSet();
+        // Hic kimlik tasimayan dolu govde (eski istemci) disinda HER kayitta denetlenir;
+        //   bos satir listesi = hepsi silindi.
+        if (gelenIdler.Count > 0 || satirlar.Count == 0)
+        {
+            var silinen = new List<string>();
+            await using (var oku = baglanti.Komut("""
+                select coalesce(nullif(btrim(s.aciklama), ''), hz.ad, st.ad, '#' || s.id::text) from public.belge_satir s
+                  left join public.hizmet hz on hz.id = s.hizmet_id
+                  left join public.stok st on st.id = s.stok_id
+                 where s.belge_id = @p0 and not (s.id = any(@p1::int[]))
+                   and (coalesce(s.kapatilan_miktar, 0) > 0
+                        or exists (select 1 from public.belge_satir h where h.kaynak_tur = 30 and h.kaynak_id = s.id))
+                """, islem, belgeId, gelenIdler.ToArray()))
+            {
+                await using var o = await oku.ExecuteReaderAsync(iptal);
+                while (await o.ReadAsync(iptal)) silinen.Add(o.GetString(0));
+            }
+            if (silinen.Count > 0)
+                throw GentegreHatasi.IsKurali("Belgeye dönüşmüş ücret satırı silinemez: " + string.Join(", ", silinen)
+                    + ". Önce Belgeye Dönüşüm'den oluşan belgeyi silin.");
         }
 
         await using (var sil = new NpgsqlCommand("""

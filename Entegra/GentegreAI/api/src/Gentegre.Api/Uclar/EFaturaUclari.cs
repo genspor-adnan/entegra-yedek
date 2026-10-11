@@ -127,8 +127,10 @@ public static class EFaturaUclari
             var bg = await ErisimAsync(cozucu, veri, ctx, id, true, iptal);
             await using var b = await veri.AcAsync(iptal);
             var durum = await b.TekDegerAsync<short?>("select efatura_durum from public.belge where id = @p0", null, [id], iptal) ?? 0;
-            if (EFaturaKodlari.Gonderildi(durum))
-                throw GentegreHatasi.IsKurali("e-Fatura gönderilmiş; bilgileri değiştirilemez.");
+            if (durum > 0)
+                throw GentegreHatasi.IsKurali(EFaturaKodlari.Gonderildi(durum)
+                    ? "e-Fatura gönderilmiş; bilgileri değiştirilemez."
+                    : "e-Fatura hazırlanmış; bilgileri değiştirmek için önce \"Hazırı Geri Al\".");
             var h = g.TryGetProperty("baslik", out var hb) ? hb : default;
             string M(string a) => h.ValueKind == JsonValueKind.Object && h.TryGetProperty(a, out var x) && x.ValueKind == JsonValueKind.String ? x.GetString()!.Trim() : "";
             decimal D(JsonElement e, string a) => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(a, out var x) && x.ValueKind == JsonValueKind.Number ? x.GetDecimal() : 0;

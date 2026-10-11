@@ -45,6 +45,12 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
       void mesaj('İskontosu onaylanmış satır silinemez - önce iskonto onayını kaldırın.');
       return;
     }
+    // BELGEYE DONUSMUS SATIR SILINMEZ (kullanici 11.10.2026): fiş / fatura /
+    //   tahakkuk ona bagli. Sunucu da reddeder.
+    if (satirlar.some(x => x.donustu && seciliSatirlar.has(x.anahtar))) {
+      void mesaj('Belgeye dönüşmüş ücret satırı silinemez - önce oluşan belgeyi (Belgeye Dönüşüm) silin.');
+      return;
+    }
     // PAKET satırı silinince İÇERİĞİ de gider - yoksa sahipsiz içerik
     //   satırları belgede kalırdı.
     setSatirlar(s => s.filter(x =>

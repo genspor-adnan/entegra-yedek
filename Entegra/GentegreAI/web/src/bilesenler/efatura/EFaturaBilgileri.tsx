@@ -41,8 +41,8 @@ export function EFaturaBilgileri({ belgeId, tipi, senaryo, kilitli }: {
   if (!(ihracat || kamu || tevkifat || istisna || ihracKayitli || sgk || sifirKdv)) return null;
   if (!b || !kodlar) return hata ? <div className="hata-kutusu">{hata}</div> : null;
 
-  const gonderildi = b.efaturaDurum === 2 || b.efaturaDurum === 12;
-  const kapali = kilitli || gonderildi;
+  // HAZIR / GONDERILMIS e-Fatura degismez (kullanici 11.10.2026).
+  const kapali = kilitli || b.efaturaDurum > 0;
   const ata = <K extends keyof EFaturaBilgiBaslik>(k: K, v: EFaturaBilgiBaslik[K]) => { setB({ ...b, [k]: v }); setDegisti(true) };
   const satirAta = (i: number, k: keyof EFaturaBilgiSatiri, v: string | number) => {
     setSatirlar(satirlar.map((s, j) => (j === i ? { ...s, [k]: v } : s))); setDegisti(true);

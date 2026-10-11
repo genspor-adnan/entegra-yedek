@@ -227,8 +227,15 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   const cevir = (id: number) =>
     setSecili(o => (o.includes(id) ? o.filter(x => x !== id) : [...o, id]));
   const tekSecili = secili.length === 1 ? secili[0] : 0;
-  const tekFatura = tekSecili && donusumler.some(d => Number(d.belgeId) === tekSecili && Number(d.tur) === 15)
-                    ? tekSecili : 0;
+  // e-FATURA HEDEFI: secili tek fatura; secim yoksa ve basvurudan TEK fatura
+  //   dogduysa o (kullanici: "efatura ya tıklıyorum menü çıkmıyor" - satir
+  //   secilmeden dugme pasif kaliyordu).
+  const faturalar = donusumler.filter(d => Number(d.tur) === 15).map(d => Number(d.belgeId));
+  // e-Fatura HAZIR / GONDERILMIS fatura silinemez (kullanici 11.10.2026; sunucu
+  //   fn_belge_silinebilir de reddeder - dugme bastan pasif).
+  const eKilitli = donusumler.some(d => secili.includes(Number(d.belgeId)) && Number(d.efaturaDurum ?? 0) > 0);
+  const tekFatura = tekSecili ? (faturalar.includes(tekSecili) ? tekSecili : 0)
+                   : secili.length === 0 && faturalar.length === 1 ? faturalar[0] : 0;
 
   /* SATIR TIKLAMA GRID DAVRANISI (kullanici): duz tik TEK satir secer -
      onceki isaretler kalkar; Ctrl (Cmd) tek satir ekler/cikarir; Shift son
@@ -318,16 +325,19 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
                      : secili.length > 1 ? 'Düzenleme için tek satır seçin'
                      : 'Seçili belgenin kartını aç'}
               onClick={() => tekSecili && donusumAc?.(tekSecili)}>✎</button>
-      <button type="button" className="d bir teh" disabled={!secili.length}
-              title={secili.length ? 'Seçili belgeleri sil' : 'Önce satır seçin'}
+      <button type="button" className="d bir teh" disabled={!secili.length || eKilitli}
+              title={eKilitli ? 'e-Fatura hazırlanmış / gönderilmiş fatura silinemez'
+                     : secili.length ? 'Seçili belgeleri sil' : 'Önce satır seçin'}
               onClick={() => { void donusumSil?.(secili).then(() => setSecili([])) }}>🗑</button>
       {/* e-FATURA (kullanici 11.10.2026: "bu sekmedeyken hastanın faturasını
           gönderebileyim.. e-Fatura butonu olacak"): secili TEK fatura icin
           Delphi e-Fatura menusu. Fiş / tahakkuk e-Fatura degildir. */}
       {kayitliId > 0 && !teklifMi && (
         <EFaturaMenusu belgeId={tekFatura} devre={!tekFatura}
-                       devreSebep={secili.length !== 1 ? 'Listeden tek bir fatura seçin'
-                                                         : 'Seçili belge fatura değil (fiş / tahakkuk e-Fatura olmaz)'}
+                       devreSebep={faturalar.length === 0 ? 'Bu başvurudan henüz fatura kesilmemiş; önce "Fatura" ile fatura oluşturun.'
+                                   : secili.length > 1 ? 'e-Fatura için listeden tek bir fatura seçin.'
+                                   : secili.length === 1 ? 'Seçili belge fatura değil (fiş / tahakkuk e-Fatura olmaz).'
+                                   : 'Listeden e-Fatura işlemi yapılacak faturayı seçin.'}
                        onDegisti={donusumYenile} />
       )}
       {secili.length > 1 && (

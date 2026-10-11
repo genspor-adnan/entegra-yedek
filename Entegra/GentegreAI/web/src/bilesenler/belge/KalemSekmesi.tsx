@@ -122,6 +122,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
    * gondermemek icindir - satirdaki 🔒 neden kapali oldugunu soyler.
    */
   const kilitliSecili = satirlar.some(x => x.iskontoKilit && seciliSatirlar.has(x.anahtar));
+  const donusmusSecili = satirlar.some(x => x.donustu && seciliSatirlar.has(x.anahtar));
 
   /**
    * DOVIZ CERCEVESI (kullanici): dovizli islem YOKSA "Rapor Dövizi / Sipariş
@@ -199,8 +200,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       ✎
     </button>
     <button type="button" className="d teh ikon"
-            disabled={kilitli || kilitliSecili || seciliSatirlar.size === 0}
+            disabled={kilitli || kilitliSecili || donusmusSecili || seciliSatirlar.size === 0}
             title={kilitli ? 'Kesin belgeden satır silinemez.'
+                  : donusmusSecili ? 'Belgeye dönüşmüş ücret satırı silinemez - önce oluşan belgeyi silin.'
                   : kilitliSecili ? 'İskontosu onaylanmış satır silinemez - '
                                   + 'önce iskonto onayını kaldırın.'
                   : seciliSatirlar.size === 0 ? 'Önce satır seçin'

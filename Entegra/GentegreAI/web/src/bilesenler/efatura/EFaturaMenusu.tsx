@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { api } from '../../api/istemci';
 import type { EFaturaDurumu, EFaturaKodu } from '../../api/uclar/efatura';
 import { efaturaCalistir } from './efaturaIslem';
+import { mesaj } from '../mesaj';
 
 /**
  * e-FATURA ▾ - Delphi UFaturalar e-Fatura menüsünün giden fatura maddeleri, AYNI
@@ -48,6 +49,8 @@ export function EFaturaMenusu({ belgeId, devre, devreSebep, onDegisti, etiket = 
   const [konum, setKonum] = useState<React.CSSProperties>({});
   const ac = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    // PASIF DUGME SESSIZ KALMASIN: sebep mesajla soylenir (title'i kimse okumuyor).
+    if (devre || !belgeId) { mesaj(devreSebep || 'Önce belgeyi kaydedin.'); return }
     const d = e.currentTarget.getBoundingClientRect();
     const asagi = window.innerHeight - d.bottom > 380;
     setKonum({ position: 'fixed', left: Math.min(d.left, window.innerWidth - 240),
@@ -76,7 +79,7 @@ export function EFaturaMenusu({ belgeId, devre, devreSebep, onDegisti, etiket = 
 
   return (
     <span className="dugme-menu efm" ref={kok}>
-      <button type="button" className="d bir" disabled={devre || !belgeId}
+      <button type="button" className={'d bir' + (devre || !belgeId ? ' efm-pasif' : '')}
               title={devre ? devreSebep : 'e-Fatura işlemleri'}
               onClick={ac}>
         📨 {etiket} ▾
@@ -111,6 +114,7 @@ const EFM_STILI = `
 .efm-liste { min-width: 220px; z-index: 400; }
 .efm-liste .mi { display: flex; align-items: center; gap: 8px; padding: 5px 8px; }
 .efm-ikon { width: 18px; text-align: center; }
+.efm .efm-pasif { opacity: .55; }
 .efm-bas { font-size: 11.5px; color: var(--soluk); padding: 4px 8px 6px; border-bottom: 1px solid var(--cizgi); margin-bottom: 4px; white-space: nowrap; }
 .efm-bas.hata { color: var(--kirmizi, #c0392b); white-space: normal; }
 .efm-test { margin-left: 6px; font-size: 10px; font-weight: bold; color: #b45309; background: #fef3c7; border-radius: 3px; padding: 0 4px; }
