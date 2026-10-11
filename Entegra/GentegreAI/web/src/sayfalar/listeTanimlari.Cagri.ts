@@ -107,4 +107,11 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'cagri',
     menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Santral · IVR · Kanallar', ic: '⚙️', yetkiKodu: 'cagri.ayar.santral', menuSira: 93,
   },
+  {
+    // ÇAĞRI MERKEZİ İCMALİ (1031, mockup İcmal/cagri_merkezi_icmali.html): kuyruk, SLA,
+    //   temsilci, saat yoğunluğu, geri arama zamanlaması, kampanya başarısı.
+    kaynak: 'cagri-icmal', rota: 'cagri-icmal', ozelSayfa: true, baslik: 'Çağrı Merkezi İcmali',
+    yol: 'Çağrı Merkezi › Çağrı Merkezi İcmali', urunModu: 2,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı Merkezi İcmali', ic: '@icmal', yetkiKodu: 'cagri.icmal', menuSira: 45,
+  },
 ];

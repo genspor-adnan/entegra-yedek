@@ -101,7 +101,7 @@ public static class GoruntulemeIcmalUclari
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
                    and r.durum <> 0 and coalesce(r.kaynak, 1) in (1, 3)
                    and coalesce(r.cekim_tarihi, r.ekleme_tarihi) >= @p0 and coalesce(r.cekim_tarihi, r.ekleme_tarihi) < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                 """, null, [baslangic, bitis, sube], o => new Cekim(
                     o.GetInt32(0), o.GetInt32(1), o.GetString(2), o.GetDateTime(3), o.GetInt32(4), o.GetInt16(5), o.GetInt16(6),
                     o.GetInt16(7), o.GetInt32(8), o.GetString(9), o.GetString(10), o.GetString(11), o.GetInt32(12), o.GetBoolean(13),
@@ -206,7 +206,7 @@ public static class GoruntulemeIcmalUclari
                        coalesce(c.ogle_baslangic, ''), coalesce(c.ogle_bitis, ''), coalesce(c.varsayilan_sure, c.slot_dk, 0)::int,
                        coalesce(c.calisma_gunleri, '')
                   from public.radyoloji_cihaz c
-                 where c.id = any(@p0) or (coalesce(c.durum, 1) = 1 and (@p1 = 0 or c.sube_id is null or c.sube_id = @p1))
+                 where c.id = any(@p0) or (coalesce(c.durum, 1) = 1 and (@p1 = 0 or coalesce(c.sube_id, 0) in (0, @p1)))
                 """, null, [cihazIdler, sube], o => (id: o.GetInt32(0), ad: o.GetString(1), modalite: o.GetInt16(2),
                     bas: o.GetString(3), bit: o.GetString(4), ob: o.GetString(5), oe: o.GetString(6), sure: o.GetInt32(7),
                     gunler: o.GetString(8)), iptal);
@@ -257,7 +257,7 @@ public static class GoruntulemeIcmalUclari
                   left join public.telerad_kurum tk on tk.id = t.kurum_id
                   left join public.taraf kt on kt.id = tk.taraf_id
                  where t.yon = 1 and t.durum <> 0 and t.gelis_zamani >= @p0 and t.gelis_zamani < @p1
-                   and (@p2 = 0 or t.sube_id is null or t.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(t.sube_id, 0) in (0, @p2))
                  group by 1, 2 order by 4 desc, 3 desc
                 """, null, [baslangic, bitis, sube], o => new
             {

@@ -89,7 +89,7 @@ public static class YatanDonemIcmalUclari
                   left join public.icd i on i.kod = y.yatis_tani_kodu
                  where coalesce(y.durum, 1) <> 0
                    and y.giris_tarihi < @p1 and (y.cikis_tarihi is null or y.cikis_tarihi >= @p2)
-                   and (@p3 = 0 or y.sube_id is null or y.sube_id = @p3)
+                   and (@p3 = 0 or coalesce(y.sube_id, 0) in (0, @p3))
                 """, null, [baslangic, bitis, baslangic.AddDays(-30), sube], o => new Yatis(
                     o.GetInt32(0), o.GetString(1), o.GetInt32(2), o.GetString(3), o.GetInt32(4), o.GetString(5),
                     o.GetInt32(6), o.GetString(7), o.GetDateTime(8), o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetInt16(10),
@@ -101,7 +101,7 @@ public static class YatanDonemIcmalUclari
                 select coalesce(o.departman_id, 0), count(*)::int, count(*) filter (where yk.durum = 5)::int
                   from public.yatak yk join public.oda o on o.id = yk.oda_id
                  where coalesce(yk.aktif, 1) = 1 and coalesce(o.aktif, 1) = 1
-                   and (@p0 = 0 or yk.sube_id is null or yk.sube_id = @p0)
+                   and (@p0 = 0 or coalesce(yk.sube_id, 0) in (0, @p0))
                  group by 1
                 """, null, [sube], x => (servis: x.GetInt32(0), yatak: x.GetInt32(1), kapali: x.GetInt32(2)), iptal))
                 .ToDictionary(x => x.servis);

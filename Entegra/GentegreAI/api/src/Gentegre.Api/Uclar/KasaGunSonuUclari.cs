@@ -194,7 +194,7 @@ public static class KasaGunSonuUclari
              where e.hesap_id is not null and e.hesap_ekstre = 1 and e.islem_durum = 2
                and e.hesap_turu in ('K', 'P', 'B')
                and (e.islem_tarihi at time zone 'Europe/Istanbul')::date <= @p0::date
-               and (@p1 = 0 or e.sube_id is null or e.sube_id = @p1)
+               and (@p1 = 0 or coalesce(e.sube_id, 0) in (0, @p1))
             """, null, [tarih, sube], o => new Hareket(o.GetInt32(0), o.GetInt32(1), o.GetString(2), o.GetString(3), o.GetInt16(4),
                 o.GetString(5), o.GetDecimal(6), o.GetDecimal(7), o.GetDateTime(8), o.GetString(9), o.GetString(10), o.GetString(11),
                 o.GetBoolean(12)), iptal);
@@ -213,7 +213,7 @@ public static class KasaGunSonuUclari
                    order by (x.durum in (1, 2, 3)) desc, x.kapanis_ts desc nulls first limit 1) o on true
               left join public.taraf u on u.id = o.kullanici_id
              where bk.hesap_id is not null and coalesce(bk.aktif, 1) = 1
-               and (@p1 = 0 or bk.sube_id is null or bk.sube_id = @p1)
+               and (@p1 = 0 or coalesce(bk.sube_id, 0) in (0, @p1))
             """, null, [tarih, sube], o => (hesap: o.GetInt32(0), ad: o.GetString(1), durum: o.IsDBNull(2) ? (short)0 : o.GetInt16(2),
                 birakilan: o.IsDBNull(3) ? (decimal?)null : o.GetDecimal(3), kapanis: o.IsDBNull(4) ? (DateTime?)null : o.GetDateTime(4),
                 sorumlu: o.GetString(5), oturum: o.IsDBNull(6) ? 0L : o.GetInt64(6)), iptal);
@@ -235,7 +235,7 @@ public static class KasaGunSonuUclari
               join public.banko_pos bp on bp.id = op.banko_pos_id
              where bp.hesap_id is not null and op.cihaz_toplam is not null
                and (o.kapanis_ts at time zone 'Europe/Istanbul')::date = @p0::date
-               and (@p1 = 0 or o.sube_id is null or o.sube_id = @p1)
+               and (@p1 = 0 or coalesce(o.sube_id, 0) in (0, @p1))
              group by 1
             """, null, [tarih, sube], o => (hesap: o.GetInt32(0), tutar: o.GetDecimal(1)), iptal)).ToDictionary(x => x.hesap, x => x.tutar);
         var posTerminal = (await b.ListeAsync("""

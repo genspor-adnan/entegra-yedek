@@ -187,6 +187,6 @@ public static class SevkEdenIcmalUclari
              where r.rol = 1 and r.taraf_id is not null
                and be.tipi = 30 and be.tur = 19 and be.durum <> 6
                and be.belge_tarihi >= @p0 and be.belge_tarihi < @p1
-               and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+               and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
             """, null, [bas, bitis, sube], o => new SevkSatiri(o.GetInt32(0), o.GetInt32(1), o.GetDateTime(2), o.GetDecimal(3)), iptal);
 }

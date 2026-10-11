@@ -99,7 +99,7 @@ public static class LabIcmalUclari
                        order by x.id desc limit 1) dt on true
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6 and s.durum <> 0
                    and i.istem_tarihi >= @p0 and i.istem_tarihi < @p1
-                   and (@p2 = 0 or be.sube_id is null or be.sube_id = @p2)
+                   and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                 """, null, [baslangic, bitis, sube], o => new Kalem(
                     o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetString(3), o.GetDateTime(4), o.GetInt32(5),
                     o.GetInt16(6), o.GetString(7), o.GetString(8), o.GetString(9), o.GetInt16(10), o.GetInt32(11),

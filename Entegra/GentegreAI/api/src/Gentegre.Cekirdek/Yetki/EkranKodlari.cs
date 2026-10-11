@@ -269,6 +269,8 @@ public static partial class EkranKodlari
         "yatan.donem_icmal",
         // Kasa / Gün Sonu Mutabakatı (1030): /api/kasa-gun-sonu kendi koduna bakar.
         "kasa.gun_sonu",
+        // Çağrı Merkezi İcmali (1031): /api/cagri-icmal kendi koduna bakar.
+        "cagri.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
