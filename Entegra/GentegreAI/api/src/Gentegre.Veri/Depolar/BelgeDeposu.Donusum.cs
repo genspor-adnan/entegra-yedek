@@ -284,7 +284,10 @@ public sealed partial class BelgeDeposu
         var belge = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["tur"] = hedefTur,
-            ["tipi"] = kaynak["tipi"],
+            // BASVURU TIPI (30) HEDEFE TASINMAZ (kullanici 11.10.2026): 30 yalniz
+            //   basvuru (tur 19) icin anlamli; fis / fatura / tahakkukta "Tanımsız
+            //   (30)" gorunuyordu. Basvurudan dogan belge normal satistir (1).
+            ["tipi"] = Convert.ToInt32(kaynak["tipi"] ?? 0) == 30 ? 1 : kaynak["tipi"],
             // KURUM PAYI KURUMA FATURALANIR (289): hedef belgenin carisi hasta
             //   degil odeyen kurumdur - fatura sigortaya/SGK'ya kesilir.
             // KURUM PAYLARI (2 SGK · 3 sigorta) kuruma faturalanir; hasta
