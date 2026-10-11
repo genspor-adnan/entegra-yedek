@@ -361,7 +361,10 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'alis-irsaliye', baslik: 'Alış İrsaliyeleri',
     yol: 'Alis › İrsaliyeler', aksiyonEkrani: 'irsaliye-liste', yeniBelgeTuru: 10,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 10 },
-    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
+    // ILGISIZ KOLONLAR GIZLI (kullanici 11.10.2026): alis irsaliyesi giden e-Belge degil
+    //   (gelen e-Irsaliye kendi sekmesinde), senaryo/tipi fatura kavrami, hasta HBYS faturasi.
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum',
+                    'efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'tipiAdi', 'hastaAdi'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
