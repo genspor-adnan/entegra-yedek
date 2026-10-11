@@ -21,6 +21,7 @@ import { GridMenu, gridMenuOgeleri } from './grid/GridMenu';
 import { useGridTercihleri } from './grid/useGridTercihleri';
 import { useTarihAraligi } from './grid/useTarihAraligi';
 import { useGridSecimi } from './grid/useGridSecimi';
+import { EFaturaMenusu } from './efatura/EFaturaMenusu';
 import { useListeVerisi } from './grid/useListeVerisi';
 import { useKolonTercihi } from './grid/kolonTercihi';
 
@@ -210,6 +211,8 @@ interface Props {
   dovizsizGizle?: string[];
   /** Degisince (kart kaydedilince - ekleme ya da duzenleme) grid yeniden yuklenir. */
   yenile?: number;
+  /** e-Fatura menusunden sonra (hazirla / gonder) listeyi tazele. */
+  onEBelgeDegisti?(): void;
   /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
       sirasinda (son_tarih desc) zaten ilk sirada oldugu icin liste otomatik onu gosterir. */
   odaklaSonEklenen?: number;
@@ -255,7 +258,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
                           onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
-                          yenile, odaklaSonEklenen,
+                          yenile, odaklaSonEklenen, onEBelgeDegisti,
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
   //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
@@ -745,7 +748,15 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 donduruyorsa cizilir - sube e-Fatura mukellefi degilse hic
                 gelmez (179). Secilen islem ANINDA calisir; kutu sonra bosalir
                 ki yanlislikla ikinci kez tetiklenmesin. */}
-            {aksiyonEkrani && ebelgeKombo.length > 0 && (
+            {/* BELGE LISTESI (kullanici 11.10.2026: "fatura listesinde de coklu secimle
+                e-Fatura menusu olsun"): Belgeye Donusum / kart / icmaldeki menunun
+                aynisi, secili satirlarin HEPSINDE calisir. Gelen kutusu eski kutuda. */}
+            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak === 'belge' && (
+              <EFaturaMenusu belgeIdler={[...secili].map(Number).filter(Boolean)} devre={secili.size === 0}
+                             devreSebep="Önce fatura seçin (Ctrl / Shift ile birden çok)."
+                             onDegisti={onEBelgeDegisti} etiket={ebelgeMenusu} />
+            )}
+            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && (
               <select
                 className="ebk"
                 // Islemlerin tamami SECILI BELGEYE uygulanir (kullanici):

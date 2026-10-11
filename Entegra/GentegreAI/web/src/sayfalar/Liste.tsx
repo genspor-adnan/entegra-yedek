@@ -1112,6 +1112,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       aksiyonEkrani={tanim.aksiyonEkrani}
       aracCubuguAltSatir={tanim.aracCubuguAltSatir}
       ebelgeMenusu={tanim.ebelgeMenusu}
+      onEBelgeDegisti={() => setYenile(t => t + 1)}
       // KLASOR KOLONU YALNIZ "TUMU"DE (kullanici): belli bir klasor
       //   secildiginde her satirda ayni klasor adi yazmak, dar ekranda
       //   yer harcayan bir tekrar olurdu.
