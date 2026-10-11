@@ -883,7 +883,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
     yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
     cariId: cari?.id ?? null, odeyenKurumId, fiyatListesiId, kampanyaId,
-    basvuruBilgi, alisMi: bilgi.alis,
+    basvuruBilgi, alisMi: bilgi.alis, basvuruMu,
   });
 
   /*

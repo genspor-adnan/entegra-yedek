@@ -21,6 +21,7 @@ import { IzlemPenceresi } from './IzlemPenceresi';
 import { SAF_SGK_ROTA, iskontoEkranLimiti } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
+import { secimSor } from '../mesaj';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
                          basvuruMu, ustSerit, tarifeTipi = 0, rota = 0,
@@ -140,6 +141,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   const kurElle = useRef(false);
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */
   const kaydedildi = useRef(false);
+  /** Sifir ucret sorusu (basvuru): cevap beklenirken ikinci Enter yeniden sormasin. */
+  const sifirSoruluyor = useRef(false);
+  const sifirOnaylandi = useRef(false);
+  const fiyatKutusu = useRef<HTMLInputElement>(null);
 
   const { aksiyonDegeri, aksiyonVar, kullanici } = useOturum();
   /**
@@ -261,6 +266,22 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     //   kaydedilmesini imkansiz kilardi.
     if (sutKutusu && String(r.sgkListe ?? '').trim() === '') {
       setHata('SGK (SUT) bedeli girilmeli. SGK bu hizmeti ödemiyorsa 0 yazın.');
+      return;
+    }
+    // SIFIR UCRET ONAYI (kullanici 12.10.2026): basvuruya ucret 0 ile eklenecekse
+    //   sorulur - fiyat listesinde fiyati olmayan hizmet sessizce bedelsiz girmesin.
+    if (basvuruMu && fiyat <= 0 && !sifirOnaylandi.current) {
+      if (sifirSoruluyor.current) return;
+      sifirSoruluyor.current = true;
+      void secimSor('Ücret 0 (Sıfır) olarak eklenecektir! Onaylıyor musunuz?', [
+        { kod: 'evet', ad: 'Evet', sinif: 'teh' },
+        { kod: 'hayir', ad: 'Hayır' },
+      ], 'hayir').then(cevap => {
+        sifirSoruluyor.current = false;
+        if (cevap === 'evet') { sifirOnaylandi.current = true; kaydet() }
+        // HAYIR (kullanici): fiyat ekranina geri donulur - imlec fiyat kutusunda, secili.
+        else setTimeout(() => { fiyatKutusu.current?.focus(); fiyatKutusu.current?.select() }, 0);
+      });
       return;
     }
     // Izlemli stokta once LOT dagitimi: miktar ve fiyat girildikten sonra lot
@@ -401,7 +422,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 {/* DAHIL modunda kutuda BRUT deger durur; satira yazilan
                     her zaman MATRAHTIR (satir matematigi, dip toplam ve
                     e-Belge matrah uzerinden yurur). */}
-                <input className="hiza-sag one-cikan"
+                <input className="hiza-sag one-cikan" ref={fiyatKutusu}
                        /* KILITLIYKEN BICIMLI GOSTER: kutu duzenlenemiyorsa
                           icindeki sayi ham metin olarak durmamali - ekranda
                           "2000" yaziyordu, yanindaki Tutar ise "2.000,00".
