@@ -385,7 +385,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
             <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
             <td>{eBelgeTuru(Number(d.efaturaDurum ?? 0), Number(d.tur ?? 0))}</td>
             <td>{eBelgeDurumu(Number(d.efaturaDurum ?? 0), Number(d.efaturaSonuc ?? 0), Number(d.tur ?? 0))}</td>
-            <td>{String(d.durumAdi ?? '')}</td>
+            <td>{durumRozeti(String(d.durumAdi ?? ''))}</td>
           </tr>
           );
         })}
@@ -403,7 +403,16 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
 /** Belgeye Dönüşüm: e-Belge türü (fatura dışı belgede boş; hazırlanmamışta "—"). */
 function eBelgeTuru(durum: number, tur: number) {
   if (tur !== 15) return null;
-  return durum === 11 || durum === 12 ? 'e-Arşiv' : durum === 1 || durum === 2 ? 'e-Fatura' : '—';
+  if (durum === 11 || durum === 12) return <span className="rozet bilgi">e-Arşiv</span>;
+  if (durum === 1 || durum === 2) return <span className="rozet bilgi">e-Fatura</span>;
+  return <span className="rozet gri">—</span>;
+}
+
+/** Belgeye Dönüşüm: belge durumu rozeti (kullanıcı 11.10.2026: "ebelge ve durum rozet olsun"). */
+function durumRozeti(ad: string) {
+  if (!ad) return null;
+  const sinif = ad === 'Kesin' ? 'ok' : ad === 'İptal' ? 'hata' : ad === 'Taslak' ? 'uyari' : 'gri';
+  return <span className={'rozet ' + sinif}>{ad}</span>;
 }
 
 /** Belgeye Dönüşüm: e-Belge durumu rozeti. */

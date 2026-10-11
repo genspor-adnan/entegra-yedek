@@ -226,7 +226,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   'kaynak' (donusum zincirinde onceki belge) da gizli: basvuru zincirin
     //   BASI, kolon hep bos duruyordu. 'tipi'/'kapanmaDurum' ham KOD
     //   kolonlaridir (filtre icin) - okunur karsiliklari zaten var (kullanici).
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum',
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum',
     //   'subeId' (Şube Kodu) ve 'vadeGun' de gizli: sube ADI zaten var, vade
     //   basvuruda yok - yerine Ödeyen Kurum kullaniliyor (kullanici).
     //   'senaryoAdi'/'senaryo' e-Fatura kavrami - basvuruda karsiligi yok.

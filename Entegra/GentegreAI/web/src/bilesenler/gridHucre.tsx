@@ -84,6 +84,8 @@ export const ROZET_SINIFI: Record<string, string> = {
   // HAZIRLANDI mavi/sari (henuz gonderilmedi), GONDERILDI yesil: belge
   //   listesinde asama bir bakista ayrilsin (163/164).
   'e-Fatura ✓': 'ok', 'e-Arşiv ✓': 'ok', 'e-İrsaliye ✓': 'ok',
+  // e-Belge Durum kolonu (11.10.2026).
+  'Gönderildi': 'ok', 'Hazır': 'uyari', 'Gönderim hatası': 'hata', 'Hazırlanmadı': 'gri',
   // Irsaliye listesi: e-Belge hic hazirlanmamis belge KAGIT (notr gri),
   //   GIB yaniti gelenler kabul/red (yesil/kirmizi).
   'Kağıt': 'gri', 'Kabul': 'ok', 'Red': 'hata',

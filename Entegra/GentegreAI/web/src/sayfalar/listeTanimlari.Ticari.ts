@@ -21,7 +21,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // e-Fatura/kapanma teklif icin anlamsiz.
     // 'kaynak' teklifte anlamsiz (zincirin BASI); belge durum rozeti (Pasif)
     //   yerine teklif akisinin "Durumu" kolonu gosterilir (kullanici).
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'kapanmaAdi', 'kapanmaDurum',
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'kapanmaAdi', 'kapanmaDurum',
                     'kaynak', 'durumAdi', 'durum', 'tipi', 'belgeSeri', 'tarafId'],
     // Sira (kullanici): Satış Temsilcisi | Durumu | Belge No en solda.
     //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
@@ -56,7 +56,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { alan: 'tipi', op: 'esitDegil', deger: 30 },
     ] },
     // e-Fatura durumu SIPARISTE anlamsiz (siparis e-Belge degil).
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -180,7 +180,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'tahakkuk', baslik: 'Satış Tahakkukları',
     yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Satış', menuSira: 60, menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge.satis.tahakkuk',
   },
@@ -209,7 +209,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'alis-siparis', baslik: 'Alış Siparişleri',
     yol: 'Alis › Siparişler', aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 9,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 9 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -254,7 +254,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişleri',
     yol: 'Alis › Fişler', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 12,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     menuGrup: 'Alış', menuSira: 50, menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge.alis.fis',
   },
@@ -263,7 +263,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Alış Tahakkukları',
     yol: 'Alis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Alış', menuSira: 60, menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge.alis.tahakkuk',
   },
@@ -271,7 +271,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinyeler',
     yol: 'Alis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 109,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 109 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },

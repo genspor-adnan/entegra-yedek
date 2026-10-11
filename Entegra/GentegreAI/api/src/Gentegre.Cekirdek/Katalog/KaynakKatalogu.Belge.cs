@@ -58,16 +58,28 @@ public static partial class KaynakKatalogu
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
             //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
             //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
+            // e-BELGE (kullanici 11.10.2026: "e-fatura rename e-Belge, e-Belge Durum
+            //   ekle"): TUR ve ASAMA ayri kolonlarda - Belgeye Donusum listesiyle ayni.
             new("efaturaDurum",
                 """
                 case coalesce(b.efatura_durum, 0)
                      when 0  then ''
-                     when 1  then 'e-Fatura'    when 2  then 'e-Fatura ✓'
-                     when 11 then 'e-Arşiv'     when 12 then 'e-Arşiv ✓'
-                     when 51 then 'e-İrsaliye'  when 52 then 'e-İrsaliye ✓'
+                     when 1  then 'e-Fatura'    when 2  then 'e-Fatura'
+                     when 11 then 'e-Arşiv'     when 12 then 'e-Arşiv'
+                     when 51 then 'e-İrsaliye'  when 52 then 'e-İrsaliye'
                      else 'Bilinmiyor' end
-                """,                             "metin", "e-Fatura", Hizalama: "orta",
-                                                 Bicim: "rozet", Genislik: 110,
+                """,                             "metin", "e-Belge", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 90,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
+            new("eBelgeDurumAdi",
+                """
+                case when coalesce(b.efatura_durum, 0) in (2, 12, 52) then 'Gönderildi'
+                     when coalesce(b.efatura_durum, 0) > 0 and coalesce(b.efatura_sonuc, 0) = 3 then 'Gönderim hatası'
+                     when coalesce(b.efatura_durum, 0) > 0 then 'Hazır'
+                     when b.tur = 15 then 'Hazırlanmadı'
+                     else '' end
+                """,                             "metin", "e-Belge Durum", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 120,
                                                  Siralanabilir: false, Filtrelenebilir: false),
             // Senaryo ve fatura tipi e-Fatura durumunun SAGINDA (kullanici):
             //   "hangi belge, hangi senaryoda, ne tipte" ucu yan yana okunur.
@@ -398,14 +410,6 @@ public static partial class KaynakKatalogu
                                                   Varsayilan: false, Filtrelenebilir: false),
             new("acikKapali",    "b.acik_kapali",    "kod",   "Açık/Kapalı Kodu", Hizalama: "orta",
                                                                             Varsayilan: false),
-            new("durumAdi",
-                """
-                case coalesce(b.durum, 0)
-                     when 0 then 'Kesin' when 1 then 'Taslak' when 2 then 'İptal'
-                     else 'Bilinmiyor' end
-                """,                             "metin", "Durum", Hizalama: "orta",
-                                                 Bicim: "rozet", Genislik: 100,
-                                                 Filtrelenebilir: false),
             new("durum",         "b.durum",          "kod",   "Durum Kodu",  Hizalama: "orta",
                                                                             Varsayilan: false),
             // Teklif durumu (218) - teklif listesinin cipleri/guard'i icin.
@@ -460,7 +464,16 @@ public static partial class KaynakKatalogu
                 "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
                 "            join public.belge hb on hb.id = hs.belge_id " +
                 "           where ks.belge_id = b.id and hb.durum <> 2), 0)",
-                                                      "sayi", "Hedef Id", Varsayilan: false)
+                                                      "sayi", "Hedef Id", Varsayilan: false),
+            // DURUM EN SONDA (kullanici 11.10.2026: "Durum sütununu da sona al").
+            new("durumAdi",
+                """
+                case coalesce(b.durum, 0)
+                     when 0 then 'Kesin' when 1 then 'Taslak' when 2 then 'İptal'
+                     else 'Bilinmiyor' end
+                """,                             "metin", "Durum", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 100,
+                                                 Filtrelenebilir: false)
         });
 
     // ----------------------------------------------------------- personel ----

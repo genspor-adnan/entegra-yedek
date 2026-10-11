@@ -564,7 +564,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     if (tanim.kaynak === 'dokuman' && klasorSecim.tur !== 'tum') liste.push('klasorYolu');
     const EBELGE_TURLERI = [10, 11, 14, 15];
     if (tanim.kaynak === 'belge' && !EBELGE_TURLERI.includes(tanim.yeniBelgeTuru ?? 0))
-      liste.push('efaturaDurum', 'senaryoAdi', 'senaryo', 'efaturaKodu');
+      liste.push('efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'senaryo', 'efaturaKodu');
     return liste;
   }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur]);
 
