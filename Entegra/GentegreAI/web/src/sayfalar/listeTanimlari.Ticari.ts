@@ -185,11 +185,12 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
-      // e-FATURA / e-ARSIV (kullanici 11.10.2026): hazirlanmis / gonderilmis belgenin turu
-      //   (1/2 e-Fatura, 11/12 e-Arsiv); taslakta tur henuz belli degil.
-      { ad: 'e-Fatura', filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [1, 2] }, kosul: 'ebelge' },
-      { ad: 'e-Arşiv',  filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [11, 12] }, kosul: 'ebelge' },
       { ad: 'Hata/Red', filtre: { alan: 'efaturaSonucKodu', op: 'esit', deger: 3 }, kosul: 'ebelge' },
+      // e-FATURA / e-ARSIV (kullanici 11.10.2026): hazirlanmis / gonderilmis belgenin turu
+      //   (1/2 e-Fatura, 11/12 e-Arsiv); taslakta tur henuz belli degil. Iki ayrac arasinda
+      //   (bu ayrac + tarih kutusununki).
+      { ad: 'e-Fatura', filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [1, 2] }, kosul: 'ebelge', ayracOnce: true },
+      { ad: 'e-Arşiv',  filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [11, 12] }, kosul: 'ebelge' },
       ...SATIS_FATURA_SEKMELERI,
     ],
     // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
@@ -229,11 +230,12 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
-      // e-FATURA / e-ARSIV (kullanici 11.10.2026): hazirlanmis / gonderilmis belgenin turu
-      //   (1/2 e-Fatura, 11/12 e-Arsiv); taslakta tur henuz belli degil.
-      { ad: 'e-Fatura', filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [1, 2] }, kosul: 'ebelge' },
-      { ad: 'e-Arşiv',  filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [11, 12] }, kosul: 'ebelge' },
       { ad: 'Hata/Red', filtre: { alan: 'efaturaSonucKodu', op: 'esit', deger: 3 }, kosul: 'ebelge' },
+      // e-FATURA / e-ARSIV (kullanici 11.10.2026): hazirlanmis / gonderilmis belgenin turu
+      //   (1/2 e-Fatura, 11/12 e-Arsiv); taslakta tur henuz belli degil. Iki ayrac arasinda
+      //   (bu ayrac + tarih kutusununki).
+      { ad: 'e-Fatura', filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [1, 2] }, kosul: 'ebelge', ayracOnce: true },
+      { ad: 'e-Arşiv',  filtre: { alan: 'efaturaKodu', op: 'icinde', deger: [11, 12] }, kosul: 'ebelge' },
       ...SATIS_FATURA_SEKMELERI,
     ],
     urunModu: 2, modul: '',

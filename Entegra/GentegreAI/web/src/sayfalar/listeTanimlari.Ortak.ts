@@ -102,7 +102,7 @@ export interface ListeTanimi {
   /** `kosul: 'ebelge'` verilen cip YALNIZ e-Fatura mukellefinde cizilir
       (sunucu e-Belge aksiyonu donduruyorsa). */
   /** `sekme`: rotali cip ANA SEKME olarak (Delphi PageControl) listenin ustunde cizilir. */
-  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean }[];
+  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean; ayracOnce?: boolean }[];
   /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
   menuGizli?: boolean;
   /**

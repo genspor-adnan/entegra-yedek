@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';
@@ -59,7 +59,7 @@ interface Props {
       (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
   /** `kosul: 'ebelge'` verilen cip YALNIZ e-Fatura mukellefinde cizilir
       (sunucu e-Belge aksiyonu donduruyorsa). */
-  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean }[];
+  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean; ayracOnce?: boolean }[];
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
@@ -767,9 +767,10 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 gelir; suzme yalniz cizimi etkiler. */}
             {(cipler ?? []).map((c, i) => ({ c, i }))
               .filter(({ c }) => !c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef))
-              .map(({ c, i }) => (
+              .map(({ c, i }) => (<Fragment key={c.ad}>
+              {/* AYRAC (kullanici 11.10.2026): cip grubunu ayirir (or. e-Fatura / e-Arşiv). */}
+              {c.ayracOnce && <span className="durumseg-ayrac" />}
               <button
-                key={c.ad}
                 className={i === cipIndeks ? 'on' : ''}
                 onClick={() => {
                   // Rotali cip: kendi listesine gider, secili cip DEGISMEZ -
@@ -785,7 +786,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
               >
                 {cev(c.ad)}
               </button>
-            ))}
+            </Fragment>))}
             {/* e-BELGE KUTUSU: Tüm Liste / Son / Sık dugmeleriyle AYNI seritte,
                 saga yanasik (kullanici). Yalniz sunucu bu aksiyonlari
                 donduruyorsa cizilir - sube e-Fatura mukellefi degilse hic
