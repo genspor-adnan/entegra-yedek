@@ -83,7 +83,7 @@ public static partial class KaynakKatalogu
                                 when bool_and(f.efatura_durum in (2, 12)) then 'Gönderildi'
                                 when bool_or(f.efatura_durum in (2, 12)) then 'Kısmen gönderildi'
                                 when bool_or(f.efatura_durum in (1, 11)) then 'Hazır'
-                                else 'Hazırlanmadı' end
+                                else 'Taslak' end
                       from public.belge f
                      where f.kaynak_tur = 30 and f.kaynak_id = b.id and f.kaynak_id > 0
                        and f.tur = 15 and f.durum <> 2), '') end
@@ -95,7 +95,7 @@ public static partial class KaynakKatalogu
                 case when coalesce(b.efatura_durum, 0) in (2, 12, 52) then 'Gönderildi'
                      when coalesce(b.efatura_durum, 0) > 0 and coalesce(b.efatura_sonuc, 0) = 3 then 'Gönderim hatası'
                      when coalesce(b.efatura_durum, 0) > 0 then 'Hazır'
-                     when b.tur = 15 then 'Hazırlanmadı'
+                     when b.tur = 15 then 'Taslak'
                      else '' end
                 """,                             "metin", "e-Belge Durum", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 120,

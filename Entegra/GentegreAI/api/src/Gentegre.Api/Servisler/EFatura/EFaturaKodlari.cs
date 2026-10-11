@@ -42,7 +42,7 @@ public static class EFaturaKodlari
 
     public static string DurumAdi(int durum, int sonuc) => durum switch
     {
-        0 => "Hazırlanmadı",
+        0 => "Taslak",
         1 or 11 => sonuc == SonucHata ? "Hazır · gönderim hatası" : "Hazır",
         2 or 12 => "Gönderildi",
         _ => "",

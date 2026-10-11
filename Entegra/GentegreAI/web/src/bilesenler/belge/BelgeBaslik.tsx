@@ -223,7 +223,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         {[2, 12, 52].includes(efDurum) ? <span className="rozet ok">{c('Gönderildi')}</span>
           : efDurum > 0 && efSonuc === 3 ? <span className="rozet hata">{c('Gönderim hatası')}</span>
           : efDurum > 0 ? <span className="rozet uyari">{c('Hazır')}</span>
-          : <span className="rozet gri">{c('Hazırlanmadı')}</span>}
+          : <span className="rozet gri">{c('Taslak')}</span>}
       </span>
     </label>
     ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu ? null : kapanmaGoster ? kapanmaAlani : (

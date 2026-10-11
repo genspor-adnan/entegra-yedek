@@ -150,7 +150,7 @@ export function EBelgeSekmesi({
               ? <span className={'rozet ' + (Number(belge?.efaturaSonuc ?? 0) === 3 ? 'hata' : 'uyari')}>
                   {efDurum === 11 ? 'e-Arşiv hazır' : 'e-Fatura hazır'}
                   {Number(belge?.efaturaSonuc ?? 0) === 3 ? ' · gönderim hatası' : ''}</span>
-              : <span className="rozet gri">{c('Hazırlanmadı')}</span>}
+              : <span className="rozet gri">{c('Taslak')}</span>}
           {belge?.gibDurumAciklama
             ? <span className="sonuk">{String(belge.gibDurumAciklama)}</span>
             : null}
@@ -422,5 +422,5 @@ function eBelgeDurumu(durum: number, sonuc: number, tur: number) {
   if (durum === 1 || durum === 11)
     return sonuc === 3 ? <span className="rozet hata">Gönderim hatası</span>
                        : <span className="rozet uyari">Hazır</span>;
-  return <span className="rozet gri">Hazırlanmadı</span>;
+  return <span className="rozet gri">Taslak</span>;
 }

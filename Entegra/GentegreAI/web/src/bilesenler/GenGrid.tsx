@@ -709,22 +709,6 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           <div className="hata-kutusu">{hata ?? kolonHatasi}</div>
         )}
 
-        {/* ANA SEKMELER (kullanici 11.10.2026: "delphi gibi sekmeli olsun"): `sekme`
-            isaretli rotali cipler Delphi PageControlTur gibi listenin USTUNDE -
-            Sistem | Gelen Kutusu | Kullanim Disi. Etkin sekme = acik rota. */}
-        {(cipler ?? []).some(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)) && (
-          <div className="katab liste-sekme">
-            {(cipler ?? []).filter(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)).map(c => (
-              <div key={c.ad}
-                   className={'kat' + ((c.rota ? window.location.pathname.replace(/\/+$/, '').endsWith('/' + c.rota)
-                                               : (cipler ?? []).indexOf(c) === sekmeIndeks) ? ' on' : '')}
-                   onClick={() => {
-                     if (c.rota) { onCipRota?.(c.rota); return }
-                     secimiUygula(new Set()); setSekmeIndeks((cipler ?? []).indexOf(c)); setSayfa(1);
-                   }}>{cev(c.ad)}</div>
-            ))}
-          </div>
-        )}
         {/* Serit, CIP OLMASA DA cizilir: basvuru listesinde cipler yerini
             combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
             "Tum Liste / Son / Sik" dugmeleriyle birlikte o combolar da
@@ -880,6 +864,25 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
               );
             })()}
             {cipSonu && <><span className="durumseg-ayrac" />{cipSonu}</>}
+          </div>
+        )}
+
+        {/* ANA SEKMELER (kullanici 11.10.2026: "delphi gibi sekmeli olsun"): `sekme`
+            Sik / Son / Tumu ve Fatura / Iade cip seridi arama kutusunun HEMEN ALTINDA,
+            sekmeler onun altinda - listenin ustunde (kullanici).
+            isaretli rotali cipler Delphi PageControlTur gibi listenin USTUNDE -
+            Sistem | Gelen Kutusu | Kullanim Disi. Etkin sekme = acik rota. */}
+        {(cipler ?? []).some(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)) && (
+          <div className="katab liste-sekme">
+            {(cipler ?? []).filter(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)).map(c => (
+              <div key={c.ad}
+                   className={'kat' + ((c.rota ? window.location.pathname.replace(/\/+$/, '').endsWith('/' + c.rota)
+                                               : (cipler ?? []).indexOf(c) === sekmeIndeks) ? ' on' : '')}
+                   onClick={() => {
+                     if (c.rota) { onCipRota?.(c.rota); return }
+                     secimiUygula(new Set()); setSekmeIndeks((cipler ?? []).indexOf(c)); setSayfa(1);
+                   }}>{cev(c.ad)}</div>
+            ))}
           </div>
         )}
 

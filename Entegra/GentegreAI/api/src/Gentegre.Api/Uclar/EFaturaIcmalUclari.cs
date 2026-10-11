@@ -194,7 +194,7 @@ public static class EFaturaIcmalUclari
             object Satir(Belge x) => new
             {
                 x.Id, belgeNo = x.No, tarih = x.Tarih, tur = x.ETur, x.Alici, protokol = x.Protokol, matrah = x.Matrah, kdv = x.Kdv,
-                toplam = x.Toplam, durum = x.Gonderildi ? "Gönderildi" : x.Hazir ? (x.Sonuc == 3 ? "Gönderim hatası" : "Hazır") : "Hazırlanmadı",
+                toplam = x.Toplam, durum = x.Gonderildi ? "Gönderildi" : x.Hazir ? (x.Sonuc == 3 ? "Gönderim hatası" : "Hazır") : "Taslak",
             };
             var iadeler = eBelgeler.Where(x => x.Iade && !x.Iptal).Select(Satir).ToList();
             var iptaller = eBelgeler.Where(x => x.Iptal).Select(Satir).ToList();
