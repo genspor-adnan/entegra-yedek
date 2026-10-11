@@ -1,44 +1,17 @@
-import { api } from '../api/istemci';
-import { mesaj, onay } from '../bilesenler/mesaj';
-import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
+import { mesaj } from '../bilesenler/mesaj';
+import type { ListeSatiri } from '../api/sozlesme';
 
 /**
- * e-BELGE MENUSUNUN "cikti" adimlari: Ön İzle · PDF · HTML · XML · Mesaj Geçmişi.
- *
- * `Liste.tsx`ten AYRILDI (180 refaktor): aksiyon switch'i 100 satiri gecmisti ve
- * bu bes adim listeden bagimsiz - hepsi tek bir belge id'si alip ciktisini
- * uretiyor. Hazırla/Gönder/Seri/Sıfırla listede KALDI: onlar listeyi tazeliyor
- * ve onay diyalogu istiyor, yani ekranin durumuna bagli.
+ * GELEN KUTUSU CIKTI YARDIMCILARI (gelenBelgeIslem): goruntu penceresi ve
+ * dosya adi. GIDEN e-Fatura 11.10.2026'da Delphi'ye gore yeniden yazildi -
+ * bilesenler/efatura/efaturaIslem.ts.
  */
 
-/** Satir sonu - sablon dizgede kacis karisikligi olmasin diye sabit. */
-const NL = '\n';
 
 // Indirme `bilesenler/indir.ts`e tasindi (bes kopyasi vardi); buradan
 //   yeniden disa vuruluyor ki e-Belge cagrilari degismesin.
 import { dosyaIndir } from '../bilesenler/indir';
-import { xsltUygula } from './xsltGoruntu';
 export { dosyaIndir };
-
-/**
- * GIB GORUNTUSU: UBL'e goruntuleme XSLT'si uygulanir (182) - GIB'e giden
- * belgenin gordugu goruntunun AYNISI. Sablon yoksa ya da donusum basarisiz
- * olursa uygulamanin kendi sade HTML onizlemesine duseriz; kullanici bos ekran
- * gormesin.
- */
-async function goruntuUret(belgeId: number): Promise<string> {
-  try {
-    const y = await api.belgeEBelgeUbl(belgeId);
-    if (y.xslt && y.ubl) {
-      const goruntu = xsltUygula(y.ubl, y.xslt);
-      if (goruntu) return goruntu;
-    }
-  } catch {
-    /* XSLT yoksa/bozuksa sade onizlemeye dusulur */
-  }
-  const h = await api.belgeEBelgeOnizle(belgeId);
-  return h.html;
-}
 
 /**
  * Goruntuyu yeni sekmede acar. `yazdir` ise yazdirma penceresini de tetikler -
@@ -61,11 +34,6 @@ export async function belgeGoruntusuAc(html: string, baslik: string, yazdir: boo
   try { pencere.document.title = baslik } catch { /* farkli koken - onemsiz */ }
   if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
 }
-
-async function onizle(belgeId: number, yazdir: boolean, baslik: string) {
-  await belgeGoruntusuAc(await goruntuUret(belgeId), baslik, yazdir);
-}
-
 
 /**
  * KAYDET dosya adi (kullanici kurali): "<tür adı> <belge no> <cari adı ilk 2 kelime>"
@@ -90,88 +58,4 @@ export function ebelgeTurAdi(satir: ListeSatiri): string {
     .map(x => String(x ?? '').trim())
     .find(x => x.length > 0 && x !== 'Kağıt' && x !== 'Bilinmiyor');
   return aday ?? 'e-Belge';
-}
-
-/**
- * Menunun cikti adimlarini calistirir. Bilinen bir kod degilse `false` doner -
- * cagiran kendi switch'ine devam eder.
- *
- * @param mesajGoster mesaj gecmisi penceresini acan geri cagrim
- */
-export async function ebelgeCiktisi(
-  kod: string,
-  satir: ListeSatiri,
-  mesajGoster: (veri: { belgeNo: string; satirlar: EBelgeMesaji[] }) => void,
-  yenile?: () => void,
-): Promise<boolean> {
-  const id = Number(satir.id);
-  const belgeNo = String(satir.belgeNo ?? satir.id);
-  const dosyaAdi = ebelgeDosyaAdi(ebelgeTurAdi(satir), belgeNo,
-                                  String(satir.tarafUnvan ?? ''));
-  const hazirlanmamis = Number(satir.efaturaDurum ?? 0) === 0;
-
-  /**
-   * ONIZLEMEDEN ONCE HAZIRLA (kullanici; Delphi MenuOnizle de boyle yapar):
-   * hazirlanmamis belgenin numarasi ve turu HENUZ YOK - onizleme "belge no -"
-   * gosterirdi. Kullanici onay verirse once hazirlanir, sonra onizlenir.
-   * Hazirlama numara ve seri TUKETIR, o yuzden sessizce yapilmaz.
-   */
-  const hazirlaGerekirse = async (): Promise<boolean> => {
-    if (!hazirlanmamis) return true;
-    if (!await onay(`"${belgeNo}" için e-Belge henüz hazırlanmamış.
-
-`
-                  + 'Ön izleme için önce hazırlansın mı? '
-                  + 'Belgeye seri ve e-Belge numarası verilir.')) return false;
-    const h = await api.belgeEBelgeHazirla(id);
-    mesaj((h.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
-    yenile?.();
-    return true;
-  };
-
-  try {
-    switch (kod) {
-      case 'ebelge.onizle':
-        if (!await hazirlaGerekirse()) return true;
-        await onizle(id, false, dosyaAdi);
-        return true;
-      case 'ebelge.pdf':
-        if (!await hazirlaGerekirse()) return true;
-        await onizle(id, true, dosyaAdi);
-        return true;
-      case 'ebelge.html': {
-        // Ekranda gorulen GORUNTUNUN aynisi insin (XSLT varsa o).
-        dosyaIndir(await goruntuUret(id), `${dosyaAdi}.html`, 'text/html;charset=utf-8');
-        return true;
-      }
-      // XML KAYDET: artik GERCEK UBL (182). Entegratore giden ham istek
-      //   (izibiz'de JSON) ayri bir uctan alinabiliyor; kullanici "XML" derken
-      //   GIB belgesini kastediyor.
-      case 'ebelge.xml': {
-        const y = await api.belgeEBelgeUbl(id);
-        dosyaIndir(y.ubl, `${dosyaAdi}.xml`, 'application/xml;charset=utf-8');
-        return true;
-      }
-      // DURUM SORGULA (183): entegratordeki GIB durumunu ceker ve kayda isler.
-      case 'ebelge.durum': {
-        const d = await api.belgeEBelgeDurum(id);
-        const ek = d.degisti ? 'Durum güncellendi.' : 'Durum değişmemiş.';
-        mesaj(d.kod
-          ? `${d.belgeNo}: ${d.aciklama || d.kod}` + NL + NL + ek
-          : `${d.belgeNo}: ${d.aciklama}`);
-        if (d.degisti) yenile?.();
-        return true;
-      }
-      case 'ebelge.mesajlar': {
-        const y = await api.belgeEBelgeMesajlar(id);
-        mesajGoster({ belgeNo, satirlar: y.mesajlar });
-        return true;
-      }
-      default:
-        return false;
-    }
-  } catch (h) {
-    mesaj(hataMetni(h));
-    return true;                 // ele alindi: cagiran yeniden denemesin
-  }
 }

@@ -477,10 +477,25 @@ Kabul ölçütü (F1-10): satış temsilcisi rolüyle maliyet alanı ağ yanıt�
 ```http
 GET  /api/log?tabloId=71&kayitId=4865           // kart geçmişi (islem_log)
 POST /api/log/{id}/geriAl                        // silinen kaydı dirilt
-POST /api/ebelge/gonder                          // { belgeId, belgeTuru }
-GET  /api/ebelge/{id}/durum                      // GİB/servis durum sorgusu
-GET  /api/ebelge/{id}/xml | /pdf | /html
 ```
+
+**Giden e-Fatura / e-Arşiv (1033, Delphi e-Fatura menüsü):** `EFaturaUclari` + `Servisler/EFatura`.
+
+```http
+GET  /api/efatura/{belgeId}/durum      // durum + menü maddelerinin pasiflik sebebi (EFaturaKodlari.Engel)
+POST /api/efatura/{belgeId}/hazirla    // { tur?, eposta?, alias?, ikinciSeri?, baslangicNo? }
+                                       //   -> { soru: tur|eposta|alias|numara } ya da { mesaj, belgeNo, turAdi }
+POST /api/efatura/{belgeId}/gonder     // izibiz JSON (o anki veriden); sıra kuralı
+POST /api/efatura/{belgeId}/sifirla    // Hazırı Geri Al
+GET  /api/efatura/{belgeId}/seriler    // POST /seri { seri }
+GET  /api/efatura/{belgeId}/html?filigran=true   // GİB görüntüsü (UBL + XSLT, sunucuda); gönderilmemişte TASLAK
+GET  /api/efatura/{belgeId}/xml        // UBL-TR
+GET  /api/efatura/{belgeId}/mesajlar   // e_belge_mesaj
+GET|PUT /api/efatura/{belgeId}/bilgi   // tevkifat / istisna / ihracat / SGK / kamu (belge_efatura[_satir])
+GET  /api/efatura/kodlar
+```
+
+Hazırla sorusu döndüğünde hiçbir şey yazılmamıştır; arayüz soruyu sorup cevabıyla yeniden çağırır. Yazma uçları belgenin türünde değiştirme yetkisi + `ebelge.gonder` aksiyonu ister.
 
 `islem_log` tarihe göre bölümlenmiştir (`log_2026`, `log_2027`, `log_diger`); sorgu her zaman tarih aralığı ister — bölüm atlama (partition pruning) çalışsın diye.
 

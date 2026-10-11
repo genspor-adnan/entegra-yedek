@@ -1,3 +1,5 @@
+import { EFaturaBilgileri } from '../efatura/EFaturaBilgileri';
+import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
 import { useRef, useState } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { TESLIM_SEKLI, SENARYO_SECENEK, eBelgeTipi } from '../../sayfalar/belgeSabitleri';
@@ -95,22 +97,28 @@ export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
 }
 
 export function EBelgeSekmesi({
-  kilitli, irsaliyeMi, tur, senaryo, setSenaryo, belge,
+  kilitli, irsaliyeMi, tur, senaryo, setSenaryo, belge, belgeYenile,
 }: {
   kilitli: boolean;
   irsaliyeMi: boolean;
   tur: number;
   senaryo: number; setSenaryo(v: number): void;
   belge?: BelgeYaniti['belge'];
+  belgeYenile?(): void;
 }) {
+  const belgeId = Number(belge?.id ?? 0);
+  const efDurum = Number(belge?.efaturaDurum ?? 0);
+  const faturaMi = tur === 15;
   return (
   <div className="kagrup">
     {/* Alan sirasi Ekranlar/satis_faturasi.html "e-Belge" sekmesiyle AYNI:
-        Belge Tipi · Alias (URN) · Senaryo · Durum · ETTN/Zarf No · XSLT.
+        Belge Tipi · Alias (URN) · Senaryo · Durum · ETTN/Zarf No.
         Adres mockup'ta yok, kullanici istegiyle burada duruyor. */}
     <h6>
       {irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura / e-Arşiv'}
-      <span className="kapt">belge.efatura* · e_belge</span>
+      {/* e-FATURA MENUSU (11.10.2026): Delphi e-Fatura menusu - eski pasif
+          "henuz baglanmadi" dugmelerinin yerine. */}
+      {faturaMi && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} />}
     </h6>
     {/* Mockup'ta (.grid2) her alan KENDI SATIRINDA: etiket solda, deger
         sagda. Uc sutuna yayilinca sira okunmuyordu. */}
@@ -136,9 +144,13 @@ export function EBelgeSekmesi({
       <label className="alan">
         <span className="etiket">Durum</span>
         <span className="deger-serit">
-          {Number(belge?.efaturaDurum ?? 0) > 0
-            ? <span className="rozet ok">{c('Gönderildi')}</span>
-            : <span className="rozet gri">{c('Kâğıt / gönderilmedi')}</span>}
+          {efDurum === 2 || efDurum === 12
+            ? <span className="rozet ok">{efDurum === 12 ? 'e-Arşiv gönderildi' : 'e-Fatura gönderildi'}</span>
+            : efDurum === 1 || efDurum === 11
+              ? <span className={'rozet ' + (Number(belge?.efaturaSonuc ?? 0) === 3 ? 'hata' : 'uyari')}>
+                  {efDurum === 11 ? 'e-Arşiv hazır' : 'e-Fatura hazır'}
+                  {Number(belge?.efaturaSonuc ?? 0) === 3 ? ' · gönderim hatası' : ''}</span>
+              : <span className="rozet gri">{c('Hazırlanmadı')}</span>}
           {belge?.gibDurumAciklama
             ? <span className="sonuk">{String(belge.gibDurumAciklama)}</span>
             : null}
@@ -152,14 +164,6 @@ export function EBelgeSekmesi({
             ? String(belge?.zarfId) : '']
             .filter(Boolean).join(' / ') || '—'} />
       </label>
-      <label className="alan">
-        <span className="etiket">{c('XSLT Tasarımı')}</span>
-        {/* Tasarim listesi (DOKUMLER) henuz baglanmadi - combo GORUNUR
-            ama tek secenekli ve pasif; sahte secenek uretmiyoruz. */}
-        <select disabled title={c('Tasarım listesi henüz bağlanmadı')}>
-          <option>{c('Genel Fatura Tasarımı')}</option>
-        </select>
-      </label>
 
       {/* Adres basliktan buraya tasindi: e-Belge XML'ine giden alici
           bilgisi, kesim sirasinda degil gonderim baglaminda okunuyor. */}
@@ -171,27 +175,16 @@ export function EBelgeSekmesi({
       </label>
     </div>
 
-    {/* Mockup'taki dugme seridi. Gonderim/sorgulama UCLARI HENUZ YOK -
-        dugmeler gorunur ama pasif (yalanci calisma yerine durust durum). */}
-    <div className="katoolbar" style={{ margin: 10 }}>
-      <button className="d" disabled title={c('Gönderim ucu henüz bağlanmadı')}>📤 Yeniden Gönder</button>
-      <button className="d" disabled title={c('Önizleme henüz bağlanmadı')}>👁 Önizle (PDF)</button>
-      <button className="d" disabled title={c('XML indirme henüz bağlanmadı')}>⬇ XML İndir</button>
-      <button className="d" disabled title={c('GİB durum sorgulama henüz bağlanmadı')}>{c('📋 Durum Sorgula')}</button>
-    </div>
-
-    <div className="not">
-      ETTN / zarf no ve GİB yanıtı e-Belge kuyruğundan (e_belge) okunur;
-      gönderim ucu henüz bağlanmadı. XSLT tasarım seçimi de dokümanlar
-      tablosuna bağlanacak.
-    </div>
+    {faturaMi && (
+      <EFaturaBilgileri belgeId={belgeId} tipi={Number(belge?.tipi ?? 0)} senaryo={senaryo} kilitli={kilitli} />
+    )}
   </div>
   );
 }
 
 export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi, kurumPayliMi,
                                     teklifDurum, donusumAc, donusumSil,
-                                    hizliDonustur, olcu = 'adet', setOlcu }: {
+                                    hizliDonustur, olcu = 'adet', setOlcu, donusumYenile }: {
   donusumler: Record<string, unknown>[];
   kayitliId: number;
   /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
@@ -221,6 +214,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   /** Donusum olcusu: 'adet' kalan MIKTAR, 'tutar' tahsil edilen/kalan TUTAR. */
   olcu?: 'adet' | 'tutar';
   setOlcu?(v: 'adet' | 'tutar'): void;
+  /** Listeyi yeniden oku (e-Fatura menusunden sonra). */
+  donusumYenile?(): void;
 }) {
   const donusumKapali = !!teklifMi && teklifDurum !== '3';
   /* COKLU SECIM (kullanici): bir basvurudan birden cok belge turuyor
@@ -232,6 +227,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   const cevir = (id: number) =>
     setSecili(o => (o.includes(id) ? o.filter(x => x !== id) : [...o, id]));
   const tekSecili = secili.length === 1 ? secili[0] : 0;
+  const tekFatura = tekSecili && donusumler.some(d => Number(d.belgeId) === tekSecili && Number(d.tur) === 15)
+                    ? tekSecili : 0;
 
   /* SATIR TIKLAMA GRID DAVRANISI (kullanici): duz tik TEK satir secer -
      onceki isaretler kalkar; Ctrl (Cmd) tek satir ekler/cikarir; Shift son
@@ -324,6 +321,15 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
       <button type="button" className="d bir teh" disabled={!secili.length}
               title={secili.length ? 'Seçili belgeleri sil' : 'Önce satır seçin'}
               onClick={() => { void donusumSil?.(secili).then(() => setSecili([])) }}>🗑</button>
+      {/* e-FATURA (kullanici 11.10.2026: "bu sekmedeyken hastanın faturasını
+          gönderebileyim.. e-Fatura butonu olacak"): secili TEK fatura icin
+          Delphi e-Fatura menusu. Fiş / tahakkuk e-Fatura degildir. */}
+      {kayitliId > 0 && !teklifMi && (
+        <EFaturaMenusu belgeId={tekFatura} devre={!tekFatura}
+                       devreSebep={secili.length !== 1 ? 'Listeden tek bir fatura seçin'
+                                                         : 'Seçili belge fatura değil (fiş / tahakkuk e-Fatura olmaz)'}
+                       onDegisti={donusumYenile} />
+      )}
       {secili.length > 1 && (
         <span className="kapt">{secili.length} belge seçili</span>
       )}
@@ -342,6 +348,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           <th className="hiza-sag" style={{ width: 100 }}>Miktar</th>
           <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
           <th style={{ width: 90 }}>Durum</th>
+          <th style={{ width: 110 }}>e-Fatura</th>
         </tr>
       </thead>
       <tbody>
@@ -364,11 +371,12 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
             <td className="hiza-sag">{Number(d.miktar ?? 0).toLocaleString('tr-TR')}</td>
             <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
             <td>{String(d.durumAdi ?? '')}</td>
+            <td>{efaturaRozeti(Number(d.efaturaDurum ?? 0), Number(d.tur ?? 0))}</td>
           </tr>
           );
         })}
         {donusumler.length === 0 && (
-          <tr><td colSpan={7} className="bos">
+          <tr><td colSpan={8} className="bos">
             {kayitliId > 0 ? 'Bu belgeden henüz belge türetilmemiş.' : 'Önce belgeyi kaydedin.'}
           </td></tr>
         )}
@@ -376,4 +384,13 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
     </table>
   </div>
   );
+}
+
+/** Belgeye Dönüşüm listesinde e-Fatura durumu (fatura dışı belgede boş). */
+function efaturaRozeti(durum: number, tur: number) {
+  if (tur !== 15) return null;
+  if (durum === 0) return <span className="rozet gri">—</span>;
+  const [ad, sinif] = durum === 2 ? ['e-Fatura ✓', 'ok'] : durum === 12 ? ['e-Arşiv ✓', 'ok']
+    : durum === 11 ? ['e-Arşiv hazır', 'uyari'] : ['e-Fatura hazır', 'uyari'];
+  return <span className={'rozet ' + sinif}>{ad}</span>;
 }

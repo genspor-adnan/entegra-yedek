@@ -1,3 +1,4 @@
+import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
 import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
 import { c } from '../../dil/ceviri';
 
@@ -16,8 +17,10 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur,
+  basvuruIptalGorunur, belgeYenile,
 }: {
+  /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
+  belgeYenile?(): void;
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
   duzenlenebilir: boolean;
@@ -244,10 +247,11 @@ export function BelgeAracCubugu({
   {/* e-Belge olmayan turlerde (fis/konsinye/tahakkuk) gonderim dugmeleri YOK. */}
   {!siparisMi && !irsaliyeMi && !eBelgeYok && (
     <>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
-        📤 e‑Fatura Gönder
-      </button>
+      {/* e-FATURA MENUSU (11.10.2026, Delphi e-Fatura menusu) - yalniz satis faturasi. */}
+      {!alisMi && (
+        <EFaturaMenusu belgeId={kayitliId} devre={!kayitliId} devreSebep="Önce belgeyi kaydedin."
+                       onDegisti={belgeYenile} />
+      )}
       {/* TAHSILAT ve IADE dugmeleri arac cubugundan KALKTI (kullanici):
           tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /
           Senet dugmeleriyle, arac aracina gore), iade ise faturanin TIPI -

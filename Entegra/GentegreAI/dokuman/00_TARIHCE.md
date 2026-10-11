@@ -7,6 +7,20 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 11.10.2026 — Giden e-Fatura / e-Arşiv Delphi'ye göre yeniden (1033)
+
+Kullanıcı: *"başvuru da belgeye dönüşüm sekmesinde e-Fatura butonu ekle.. Hazırla, önizle, gönder, pdf kaydet.. daha önce bunları yapmıştın.. onları tamamen sil.. delphi projesine bakarak bu sistemi yeniden yaz"*; *"tüm tiplere göre olsun"*.
+
+- Eski SQL motoru (`fn_ebelge_hazirla`, `fn_ebelge_govde_izibiz`, `fn_ebelge_ubl`, `fn_ebelge_html`, seri/iptal/durum…) ve uçları silindi. Gelen kutusu, seri / XSLT / hesap ayarları kaldı.
+- Yeni motor C#: `Servisler/EFatura` (Delphi UEBelgeOlusturucu karşılığı). Gönderilen izibiz JSON'u; UBL yalnız önizleme / XML için. Önizleme sunucuda XSLT.
+- Menü (Delphi sırası): Hazırla · Önizle · Gönder | PDF / HTML / XML Kaydet | Seri Değiştir · Hazırı Geri Al | Mesaj Geçmişi. Belgeye Dönüşüm, fatura kartı (araç çubuğu + e-Belge sekmesi), fatura listesi kombosu.
+- Tipler: satış, iade (billingReference zorunlu), tevkifat, KDV istisna, ihraç kayıtlı, ihracat (Gümrük + buyerCustomerParty, GTİP / teslim / taşıma / kap), SGK, kamu (IBAN), döviz. 351'e sessiz düşüş yok.
+- Tevkifat / istisna / ihraç kayıtlı kod listeleri Delphi GENINI'ye eşitlendi; `fn_tevkifat_orani` koddan.
+- Serinin ilk belgesinde başlangıç numarası sorulur (izibiz test hesabı ortak: GNY 1 ve 6 "10009 mükerrer" döndü).
+- Kapsam dışı: e-İrsaliye gönderimi, giden belge iptali ve GİB durum sorgusu (Delphi'de de yok).
+
+---
+
 ## 18.08.2026 — Faz 0 başladı: veri modeli ve altyapı
 
 ### Kararlar

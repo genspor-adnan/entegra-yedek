@@ -558,39 +558,33 @@ public static partial class AksiyonKatalogu
             //   Aksiyon siparis-liste ve irsaliye-liste ekranlarinda duruyor.
             new("belge.iptal", "Belgeyi Iptal Et", "belge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
-            // e-BELGE MENUSU (Delphi menu sirasiyla ayni, kullanici istegi):
-            //   Hazırla · Ön İzle · Gönder | Seri Değiştir · Hazırı Geri Al |
-            //   PDF / HTML / XML Kaydet | Mesaj Geçmişi.
-            //   AYRAC: kodu "ebelge.ayrac*" olan satirlar - combo'da cizgi
-            //   olarak cizilir, secilemez. Sira degerleri bosluklu ki araya
-            //   yeni adim girerse numaralar yeniden yazilmasin.
+            // e-FATURA MENUSU - Delphi UFaturalar MenueFatura'nin giden fatura
+            //   maddeleri, AYNI sira ve ayraclarla (kullanici 11.10.2026: "daha
+            //   once delphi de yaptigimiz gibi"): Hazırla · Önizle · Gönder |
+            //   PDF / HTML / XML Kaydet | Seri Değiştir · Hazırı Geri Al |
+            //   Mesaj Geçmişini Göster. Ayrac: kodu "ebelge.ayrac*" - combo'da
+            //   secilemez cizgi. Aktif/pasif kurali EFaturaKurallari'nda (tek yer).
             new("ebelge.hazirla", "Hazırla", "ebelge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 41),
-            new("ebelge.onizle", "Ön İzle", "ebelge", Hedef: "sagtus,palet",
+            new("ebelge.onizle", "Önizle", "ebelge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 42),
             new("ebelge.gonder", "Gönder", "ebelge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 43),
             new("ebelge.ayrac1", "─", "ebelge", Hedef: "sagtus", Sira: 44),
-            new("ebelge.seri", "Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 45),
-            new("ebelge.sifirla", "Hazırı Geri Al", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 46),
-            // IPTAL (188): e-Arsivde dogrudan iptal, e-Faturada IPTAL TALEBI.
-            //   Hangisi oldugunu sunucu belirler; kullanici tek dugme gorur.
-            new("ebelge.iptal", "İptal Et / İptal Talebi", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 47),
-            new("ebelge.ayrac2", "─", "ebelge", Hedef: "sagtus", Sira: 48),
             new("ebelge.pdf", "PDF Kaydet", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 49),
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 45),
             new("ebelge.html", "HTML Kaydet", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 50),
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 46),
             new("ebelge.xml", "XML Kaydet", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 51),
-            new("ebelge.ayrac3", "─", "ebelge", Hedef: "sagtus", Sira: 52),
-            new("ebelge.durum", "Durum Sorgula", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 53),
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 47),
+            new("ebelge.ayrac2", "─", "ebelge", Hedef: "sagtus", Sira: 48),
+            new("ebelge.seri", "Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 49),
+            new("ebelge.sifirla", "Hazırı Geri Al", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 50),
+            new("ebelge.ayrac3", "─", "ebelge", Hedef: "sagtus", Sira: 51),
             new("ebelge.mesajlar", "Mesaj Geçmişini Göster", "ebelge", Hedef: "sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 54),
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 52),
             // MUHASEBE FISI (190) ve DONUSUM ZINCIRI (F8): belgeden tek
             //   tikla fise ve zincirin iki ucuna gidilir.
             new("belge.fis-gor",   "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",

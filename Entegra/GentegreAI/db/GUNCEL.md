@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (512 ad, 142 tanesi birden cok dosyada)
+## Fonksiyonlar (514 ad, 143 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -207,6 +207,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kalem_kullan` | `552_stok_ilac_kisa_ad_kullanim.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
 | `fn_kasa_dagitim_iade` | `660_iade_satir_tahsil.sql` | — |
+| `fn_kasa_gun_kapali` | `1030_kasa_gun_sonu.sql` | — |
+| `fn_kasa_gun_kilidi` | `1030_kasa_gun_sonu.sql` | — |
 | `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |
@@ -397,7 +399,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `fn_tevkifat_orani` | `176_tevkifat_istisna.sql` | — |
+| `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
 | `fn_ubl_taraf` | `182_ebelge_ubl.sql` | — |
 | `fn_uretim_emri_no` | `429_uretim_v1.sql` | — |

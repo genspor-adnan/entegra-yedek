@@ -10,6 +10,7 @@ import { Kabuk } from './sayfalar/Kabuk';
 import { PortalKabuk } from './sayfalar/portal/PortalKabuk';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
+import { EFaturaMesajKatmani } from './bilesenler/efatura/EFaturaMesajKatmani';
 import { Panel } from './sayfalar/Panel';
 import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
 import { calismaOku } from './bilesenler/calismaTercihi';
@@ -561,6 +562,7 @@ export default function App() {
             Yollar'dan SONRA cizilir ve perdesi enUst'tur: kart modali acikken
             sorulan onay arkada kaybolmasin. */}
         <MesajKatmani />
+        <EFaturaMesajKatmani />
       </OturumSaglayici>
     </BrowserRouter>
   );

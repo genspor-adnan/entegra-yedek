@@ -25,10 +25,6 @@ public static class GelenBelgeUclari
         public string? Aciklama { get; set; }
     }
 
-    public sealed class IptalIstegi
-    {
-        public string? Gerekce { get; set; }
-    }
 
     private static Gentegre.Veri.Depolar.YazmaBaglami Baglam(dynamic baglam, HttpContext ctx)
         => new(baglam.KullaniciId, (int?)baglam.SubeId, BaglamCozucu.IpCoz(ctx));
@@ -136,20 +132,6 @@ public static class GelenBelgeUclari
             return Results.Ok(new { s.Basarili, mesaj = s.Mesaj + ek, belgeId,
                                     izlemeNo = baglam.IzlemeNo });
         });
-
-        // POST /api/belge/{id}/ebelge-iptal - GIDEN belge iptali / iptal talebi (188).
-        //   Kutu ucu degil ama ayni servis sinifi; e-Belge disa bakan tarafi
-        //   tek yerde toplandi.
-        yol.MapPost("/api/belge/{id:int}/ebelge-iptal", async (
-            int id, IptalIstegi istek, BaglamCozucu cozucu, EBelgeGelen gelen,
-            HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("belge", Islem.Degistir);
-            var s = await gelen.IptalEtAsync(id, istek.Gerekce ?? "", baglam.SubeId,
-                                             baglam.KullaniciId, iptal);
-            return Results.Ok(new { s.Basarili, s.YeniDurum, s.Mesaj, izlemeNo = baglam.IzlemeNo });
-        }).RequireAuthorization();
 
         // POST /api/gelen-belge/{id}/aktar - alis faturasi olustur.
         //   Yanit gerektirmeyen belgeler (temel fatura, e-Arsiv) ve kabulde

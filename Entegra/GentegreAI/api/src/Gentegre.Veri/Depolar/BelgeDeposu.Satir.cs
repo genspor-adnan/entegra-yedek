@@ -35,115 +35,6 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
-    /// e-BELGE SIFIRLA (164) - Delphi `MenuSifirla`. Hazirlanmis belgeyi geri
-    /// alir; GONDERILMIS belgede calismaz (numarasi GIB'e gitmistir).
-    /// </summary>
-    public Task<string> EBelgeSifirlaAsync(int belgeId, YazmaBaglami baglam,
-        CancellationToken iptal = default)
-        => IsKuraliCevirAsync(() => EBelgeSifirlaIcAsync(belgeId, baglam, iptal));
-
-    private async Task<string> EBelgeSifirlaIcAsync(int belgeId, YazmaBaglami baglam,
-        CancellationToken iptal)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-        await using var komut = baglanti.Komut(
-            "select public.fn_ebelge_sifirla(@p0, @p1)", islem,
-            belgeId, baglam.KullaniciId);
-        var mesaj = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
-
-        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
-            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-            new Dictionary<string, string> { ["eBelgeSifirla"] = mesaj }, iptal: iptal);
-
-        await islem.CommitAsync(iptal);
-        return mesaj;
-    }
-
-    /// <summary>
-    /// e-BELGE SERI DEGISTIR (164) - Delphi `MenuSeriDegistir`. Seri
-    /// verilmezse siradaki kurala gecer; yeni numara uretilir.
-    /// </summary>
-    public Task<(string Numara, string Seri)> EBelgeSeriDegistirAsync(int belgeId,
-        string? seri, YazmaBaglami baglam, CancellationToken iptal = default)
-        => IsKuraliCevirAsync(() => EBelgeSeriDegistirIcAsync(belgeId, seri, baglam, iptal));
-
-    private async Task<(string Numara, string Seri)> EBelgeSeriDegistirIcAsync(int belgeId,
-        string? seri, YazmaBaglami baglam, CancellationToken iptal)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-        await using var komut = baglanti.Komut(
-            "select * from public.fn_ebelge_seri_degistir(@p0, @p1, @p2)", islem,
-            belgeId, baglam.KullaniciId, string.IsNullOrWhiteSpace(seri) ? DBNull.Value : seri.Trim());
-
-        string no, yeniSeri;
-        await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
-        {
-            if (!await okuyucu.ReadAsync(iptal))
-                throw GentegreHatasi.IsKurali("Seri değiştirilemedi.");
-            no = okuyucu.GetString(0);
-            yeniSeri = okuyucu.GetString(1);
-        }
-
-        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
-            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-            new Dictionary<string, string> { ["eBelgeSeri"] = $"{yeniSeri} / {no}" }, iptal: iptal);
-
-        await islem.CommitAsync(iptal);
-        return (no, yeniSeri);
-    }
-
-    /// <summary>
-    /// e-BELGE HAZIRLA (163) - Delphi `TEBelgeOlusturucu.MenuHazirla` karsiligi.
-    ///
-    /// Is kurallari SUNUCUDA (fn_ebelge_hazirla): dogrulama, belge turu karari
-    /// (e-Fatura / e-Arsiv / e-Irsaliye), seri secimi, numara uretimi ve
-    /// e_belge satirinin acilmasi tek transaction icinde olur - Delphi'deki
-    /// "dogrulama en basta, numara en son" sirasi orada korunuyor.
-    ///
-    /// UBL/XML BU ADIMDA URETILMEZ; belge kuyruga alinir, gonderim asamasi
-    /// XML'i sonra kurar.
-    /// </summary>
-    public Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
-        EBelgeHazirlaAsync(int belgeId, YazmaBaglami baglam, CancellationToken iptal = default)
-        => IsKuraliCevirAsync(() => EBelgeHazirlaIcAsync(belgeId, baglam, iptal));
-
-    private async Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
-        EBelgeHazirlaIcAsync(int belgeId, YazmaBaglami baglam, CancellationToken iptal)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-        await using var komut = baglanti.Komut(
-            "select * from public.fn_ebelge_hazirla(@p0, @p1)", islem,
-            belgeId, baglam.KullaniciId);
-
-        long eBelgeId; int tur; string no, seri, uyari;
-        await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
-        {
-            if (!await okuyucu.ReadAsync(iptal))
-                throw GentegreHatasi.IsKurali("e-Belge hazırlanamadı.");
-            eBelgeId = okuyucu.GetInt64(0);
-            tur      = okuyucu.GetInt16(1);
-            no       = okuyucu.GetString(2);
-            seri     = okuyucu.GetString(3);
-            uyari    = okuyucu.IsDBNull(4) ? "" : okuyucu.GetString(4);
-        }
-
-        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
-            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-            new Dictionary<string, string> { ["eBelgeHazirla"] = $"{seri} / {no}" },
-            iptal: iptal);
-
-        await islem.CommitAsync(iptal);
-        return (eBelgeId, tur, no, seri, uyari);
-    }
-
-
-    /// <summary>
     /// TERMIN GUNCELLEME (140): satirlarin teslim tarihini toplu degistirir.
     ///
     /// Belgeyi YENIDEN YAZMAZ. Termin ne stok ne cari ne de tutar etkiler; bu
@@ -396,13 +287,15 @@ public sealed partial class BelgeDeposu
                    --   satirlarda bos olabilir, o zaman matrahtan turetilir.
                    sum({{YazilanBrutSql}}) as tutar,
                    hb.durum,
-                   case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi"
+                   case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi",
+                   -- e-FATURA DURUMU (Belgeye Dönüşüm'deki e-Fatura menüsü, 11.10.2026)
+                   coalesce(hb.efatura_durum, 0)         as "efaturaDurum"
               from public.belge_satir hs
               join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30
               join public.belge hb       on hb.id = hs.belge_id
               left join public.kasa_islem_turu ht on ht.kod = hb.tur
              where ks.belge_id = @p0
-             group by hb.id, hb.belge_no, hb.belge_tarihi, hb.tur, ht.ad, hb.taraf_unvan, hb.durum
+             group by hb.id, hb.belge_no, hb.belge_tarihi, hb.tur, ht.ad, hb.taraf_unvan, hb.durum, hb.efatura_durum
              order by hb.belge_tarihi, hb.id
             """, null,
             belgeId);
@@ -410,64 +303,6 @@ public sealed partial class BelgeDeposu
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
         while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
-        return liste;
-    }
-
-    /// <summary>Onizleme HTML'i (178). Belge hazirlanmamis olsa da uretilir.</summary>
-    public async Task<string> EBelgeHtmlAsync(int belgeId, CancellationToken iptal = default)
-        => await IsKuraliCevirAsync(async () =>
-        {
-            await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = baglanti.Komut(
-                "select public.fn_ebelge_html(@p0)", null,
-                belgeId);
-            return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
-        });
-
-    /// <summary>
-    /// Gonderim govdesi + onerilen dosya adi. Bicim 1 JSON / 2 UBL-XML
-    /// (entegratore gore, 167) - dosya uzantisi buna gore secilir.
-    /// </summary>
-    public async Task<(short Bicim, string Govde, string DosyaAdi)> EBelgeGovdeAsync(
-        int belgeId, CancellationToken iptal = default)
-        => await IsKuraliCevirAsync(async () =>
-        {
-            await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = baglanti.Komut("""
-                select g.bicim, g.govde::text,
-                       coalesce(nullif(e.belge_no, ''), 'belge-' || @p0::text)
-                  from public.fn_ebelge_gonderim_govdesi(@p0) g
-                  left join lateral (select e2.belge_no from public.e_belge e2
-                                      where e2.belge_id = @p0 order by e2.id desc limit 1) e on true
-                """, null,
-                belgeId);
-            await using var o = await komut.ExecuteReaderAsync(iptal);
-            if (!await o.ReadAsync(iptal))
-                throw GentegreHatasi.IsKurali("Gönderim gövdesi üretilemedi.");
-            return (o.GetInt16(0), o.GetString(1), o.GetString(2));
-        });
-
-    public sealed record EBelgeMesaji(int Sira, DateTime? Tarih, string Olay,
-                                      string Durum, string Kod, string Aciklama);
-
-    /// <summary>Belgenin e-Belge gecmisi: hazirlama, gonderim, GIB yaniti (178).</summary>
-    public async Task<IReadOnlyList<EBelgeMesaji>> EBelgeMesajlarAsync(
-        int belgeId, CancellationToken iptal = default)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = baglanti.Komut(
-            "select sira, tarih, olay, durum, kod, aciklama from public.fn_ebelge_mesajlar(@p0)", null,
-            belgeId);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        var liste = new List<EBelgeMesaji>();
-        while (await o.ReadAsync(iptal))
-            liste.Add(new EBelgeMesaji(
-                o.GetInt32(0),
-                o.IsDBNull(1) ? null : o.GetDateTime(1),
-                o.IsDBNull(2) ? "" : o.GetString(2),
-                o.IsDBNull(3) ? "" : o.GetString(3),
-                o.IsDBNull(4) ? "" : o.GetString(4),
-                o.IsDBNull(5) ? "" : o.GetString(5)));
         return liste;
     }
 
@@ -534,82 +369,5 @@ public sealed partial class BelgeDeposu
             "select public.fn_belge_silinebilir(@p0)", null,
             belgeId);
         return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
-    }
-
-    /// <summary>
-    /// Belgenin UBL-XML'i + (varsa) goruntuleme XSLT'si (182).
-    ///
-    /// XSLT'yi de AYNI cagrida doner: arayuz ikisini birlestirip GIB'in gordugu
-    /// goruntuyu cizer. Ayri iki istek, 1-2 MB'lik sablonu ikinci kez cekmek
-    /// demekti.
-    /// </summary>
-    public async Task<(string Ubl, string Xslt, string DosyaAdi)> EBelgeUblAsync(
-        int belgeId, CancellationToken iptal = default)
-        => await IsKuraliCevirAsync(async () =>
-        {
-            await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = baglanti.Komut("""
-                select xmlserialize(document public.fn_ebelge_ubl(@p0) as text),
-                       coalesce((select convert_from(di.icerik, 'UTF8')
-                                   from public.dokuman d
-                                   join public.dokuman_icerik di on di.hash = d.hash
-                                  where d.kaynak = 'ebelge-xslt' and d.durum = 1
-                                    and d.kaynak_id = coalesce(
-                                        (select e.belge_turu from public.e_belge e
-                                          where e.belge_id = @p0 order by e.id desc limit 1),
-                                        case when (select bl.tur from public.belge bl
-                                                    where bl.id = @p0) = 14 then 7 else 1 end)
-                                  order by d.varsayilan desc, d.id limit 1), ''),
-                       coalesce((select nullif(e.belge_no, '') from public.e_belge e
-                                  where e.belge_id = @p0 order by e.id desc limit 1),
-                                'belge-' || @p0::text)
-                """, null,
-                belgeId);
-            await using var o = await komut.ExecuteReaderAsync(iptal);
-            if (!await o.ReadAsync(iptal))
-                throw GentegreHatasi.IsKurali("UBL üretilemedi.");
-            return (o.GetString(0), o.GetString(1), o.GetString(2));
-        });
-
-    public sealed record TopluSonuc(int BelgeId, bool Basarili, string BelgeNo, string Mesaj);
-
-    /// <summary>
-    /// Secili belgeleri TEK cagrida hazirlar (183). Hata tek belgeyi duserir,
-    /// digerleri devam eder - tek transaction olsaydi bir hatali belge yuzunden
-    /// dogru olanlar da geri alinirdi.
-    /// </summary>
-    public async Task<IReadOnlyList<TopluSonuc>> EBelgeTopluHazirlaAsync(
-        IReadOnlyList<int> belgeIdler, YazmaBaglami baglam, CancellationToken iptal = default)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = baglanti.Komut(
-            "select belge_id, basarili, belge_no, mesaj from public.fn_ebelge_toplu_hazirla(@p0, @p1)", null,
-            belgeIdler.ToArray(), baglam.KullaniciId);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        var liste = new List<TopluSonuc>();
-        while (await o.ReadAsync(iptal))
-            liste.Add(new TopluSonuc(o.GetInt32(0), o.GetBoolean(1),
-                                     o.IsDBNull(2) ? "" : o.GetString(2),
-                                     o.IsDBNull(3) ? "" : o.GetString(3)));
-        return liste;
-    }
-
-    public sealed record AliciBilgisi(short BelgeTuru, string Alias, string OnerilenMail,
-                                      string TarafUnvan);
-
-    /// <summary>
-    /// Gonderim oncesi alici adresi (184). e-ARSIVDE alias alani alici
-    /// e-postasidir; bos ise arayuz sorar ve carinin adresini onerir.
-    /// </summary>
-    public async Task<AliciBilgisi> EBelgeAliciAsync(int belgeId, CancellationToken iptal = default)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = baglanti.Komut(
-            "select belge_turu, alias, onerilen_mail, taraf_unvan from public.fn_ebelge_alici_bilgi(@p0)", null,
-            belgeId);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        if (!await o.ReadAsync(iptal))
-            throw GentegreHatasi.IsKurali("Belge icin e-Belge kaydi yok.");
-        return new AliciBilgisi(o.GetInt16(0), o.GetString(1), o.GetString(2), o.GetString(3));
     }
 }

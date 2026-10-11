@@ -279,7 +279,7 @@ kurucu.Services.AddHttpClient("uts", i => i.Timeout = TimeSpan.FromMinutes(2));
 // SKRS (Saglik.NET kod sunucusu, 336): kod listeleri buyuk olabiliyor.
 kurucu.Services.AddHttpClient("skrs", i => i.Timeout = TimeSpan.FromMinutes(2));
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.UtsServisi>();
-kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EFatura.EFaturaServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeSorgu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGelen>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GelenBelgeAktar>();
@@ -377,6 +377,7 @@ uygulama.DokumUclariniEkle();
 uygulama.DokumanUclariniEkle();
 uygulama.DokumanYonetimUclariniEkle();
 uygulama.GelenBelgeUclariniEkle();
+uygulama.EFaturaUclariniEkle();
 uygulama.CeviriUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();

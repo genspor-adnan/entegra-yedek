@@ -13,7 +13,7 @@ import { c } from '../../dil/ceviri';
  */
 export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
                                     irsaliyeMi, tur, senaryo, setSenaryo,
-                                    faturalama }: {
+                                    faturalama, belgeYenile }: {
   aktifSekme: string;
   kilitli: boolean;
   sevkiyat: ReturnType<typeof useSevkiyatBilgisi>;
@@ -24,6 +24,8 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   setSenaryo(v: number): void;
   /** Faturalama sekmesinin tüm girdisi - kart kurar, burada aynen geçer. */
   faturalama: React.ComponentProps<typeof FaturalamaSekmesi>;
+  /** Belge başlığını sunucudan yeniden oku (e-Fatura menüsünden sonra). */
+  belgeYenile?(): void;
 }) {
   if (aktifSekme === 'tasiyici') {
     return <TasiyiciSekmesi kilitli={kilitli} sevkiyat={sevkiyat} belge={belge} />;
@@ -31,7 +33,8 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   if (aktifSekme === 'ebelge') {
     return (
       <EBelgeSekmesi kilitli={kilitli} irsaliyeMi={irsaliyeMi} tur={tur}
-                     senaryo={senaryo} setSenaryo={setSenaryo} belge={belge} />
+                     senaryo={senaryo} setSenaryo={setSenaryo} belge={belge}
+                     belgeYenile={belgeYenile} />
     );
   }
   if (aktifSekme === 'fatura') return <FaturalamaSekmesi {...faturalama} />;

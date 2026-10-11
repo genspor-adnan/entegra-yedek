@@ -145,6 +145,11 @@ public static class EBelgeIstemcisi
         {
             using var belge = JsonDocument.Parse(govde);
             var kok = belge.RootElement;
+            // izibiz: {"error": {"code": "10009", "message": "..."}}
+            if (kok.ValueKind == JsonValueKind.Object && kok.TryGetProperty("error", out var h)
+                && h.ValueKind == JsonValueKind.Object && h.TryGetProperty("message", out var hm)
+                && hm.ValueKind == JsonValueKind.String)
+                return (h.TryGetProperty("code", out var hk) ? hk.ToString() + " - " : "") + hm.GetString();
             foreach (var ad in new[] { "message", "description", "errorMessage", "error" })
                 if (kok.ValueKind == JsonValueKind.Object && kok.TryGetProperty(ad, out var d)
                     && d.ValueKind == JsonValueKind.String)

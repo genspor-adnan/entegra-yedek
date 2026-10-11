@@ -72,7 +72,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kaynak siparis, faturalama durumu). Ekran satisa daraltir (tur=14).
     kaynak: 'irsaliye', rota: 'satis-irsaliye', baslik: 'Satış İrsaliyeleri',
     yol: 'Satis › Irsaliyeler', aksiyonEkrani: 'irsaliye-liste',
-    ebelgeMenusu: 'E-İrsaliye',
+    // e-İrsaliye menüsü YOK (11.10.2026): giden e-Belge yeniden yazılırken kapsam e-Fatura + e-Arşiv.
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],

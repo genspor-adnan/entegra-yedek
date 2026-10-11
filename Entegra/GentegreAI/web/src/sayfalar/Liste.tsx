@@ -27,7 +27,7 @@ import { TARIH_ON_AYARLAR } from './liste/tarihAralik';
 import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
-import { ebelgeCiktisi } from './ebelgeIslem';
+import { efaturaCalistir } from '../bilesenler/efatura/efaturaIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
@@ -92,7 +92,6 @@ import { medulaAksiyonu } from './liste/medulaAksiyonlari';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
-import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
 import { ListeKarti } from './liste/ListeKarti';
 import { useRandevuEkrani } from './liste/useRandevuEkrani';
 import { useRadyolojiModallari } from './liste/useRadyolojiModallari';
@@ -117,7 +116,7 @@ import { GozPanoSolPanel, GozPanoTazeleSeridi, useGozPanoOzeti, useGozPanoSuzgec
 import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
   usePersonelGostergesi } from './liste/PersonelPanelleri';
-import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
+import { belgeAksiyonu } from './liste/belgeAksiyonlari';
 import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
 import { teleradAksiyonu } from './liste/teleradAksiyonlari';
@@ -614,23 +613,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     }
 
     try {
-      // TOPLU e-BELGE (183): coklu secimde Hazırla/Gönder tek istekte calisir.
-      //   Gelen kutusu ve e-Belge ciktilari ayni "ebelge.*" kodlarini
-      //   kullaniyor - toplu secim onlardan ONCE yakalanmali.
-      if (await ebelgeTopluAksiyonu(kod, secililer,
-                                    { tazele: () => setYenile(t => t + 1) })) return;
-
-      // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
-      //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
-      //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
       // GELEN KUTUSU once: oradaki id e_belge kaydidir, belge id'si degil -
       //   ayni "ebelge.*" kodlari farkli uclara gider.
       if (tanim.kaynak === 'gelen-belge'
           && await gelenBelgeAksiyonu(kod, satir ?? null, () => setYenile(t => t + 1),
                                       setEBelgeMesajlari)) return;
 
-      if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari,
-                                       () => setYenile(t => t + 1))) return;
+      // GIDEN e-FATURA (11.10.2026, Delphi e-Fatura menusu): fatura listesinin
+      //   kombosu, Belgeye Donusum ve fatura kartindaki menuyle AYNI modul.
+      if (satir && kod.startsWith('ebelge.')
+          && await efaturaCalistir(kod, Number(satir.id), { tazele: () => setYenile(t => t + 1) })) return;
 
       // KONU BAZLI AKSIYONLAR ayri dosyalarda (refactor): `aksiyon()` 950
       //   satira ve 44 case'e ulasmisti. Her modul "ele aldim mi" doner;
@@ -907,8 +899,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         git: yol => git(yol),
         setIceriAl,
       })) return;
-
-      if (await ebelgeAksiyonu(kod, satir, { tazele: () => setYenile(t => t + 1) })) return;
 
       if (await belgeAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),

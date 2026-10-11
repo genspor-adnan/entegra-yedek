@@ -121,25 +121,11 @@ public static class AksiyonUclari
                 case "belge.iptal" when durum == 2:
                     return (false, "Belge zaten iptal edilmiş.");
 
-                case "ebelge.hazirla" when gonderildi:
-                    return (false, $"{turAdi} zaten gönderilmiş.");
-                case "ebelge.hazirla" when hazirlandi:
-                    return (false, $"{turAdi} zaten hazırlanmış. Değiştirmek için "
-                                 + "\"Seri Değiştir\" ya da \"Hazırı Geri Al\" kullanın.");
-                case "ebelge.hazirla" when durum == 2:
-                    return (false, "İptal edilmiş belge için e-Belge hazırlanamaz.");
-
-                case "ebelge.gonder" when gonderildi:
-                    return (false, $"{turAdi} zaten gönderilmiş.");
-                case "ebelge.gonder" when !hazirlandi:
-                    return (false, "Önce \"Hazırla\" ile e-Belge oluşturun.");
-                case "ebelge.gonder" when belgeNo.Length == 0:
-                    return (false, "Taslak belge gönderilemez - önce kesinleştirin.");
-
-                case "ebelge.seri" or "ebelge.sifirla" when gonderildi:
-                    return (false, $"{turAdi} gönderilmiş; serisi değiştirilemez, geri alınamaz.");
-                case "ebelge.seri" or "ebelge.sifirla" when !hazirlandi:
-                    return (false, "Önce \"Hazırla\" ile e-Belge oluşturun.");
+                // e-FATURA MENUSU: kural tek yerde (EFaturaKodlari.Engel) - menu,
+                //   kombo ve servis ayni cevabi verir.
+                case { } k when k.StartsWith("ebelge.", StringComparison.Ordinal)
+                                && Servisler.EFatura.EFaturaKodlari.Engel(k, Sayi(belge, "tur"), durum, efaturaDurum) is { } sebep:
+                    return (false, sebep);
 
                 // MUHASEBE FISI ve DONUSUM ZINCIRI (190 / F8): hedefi olmayan
                 //   aksiyon pasif gorunur, sebebi title'da yazar.

@@ -1258,6 +1258,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
           basvuruMu={basvuruMu}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
+          belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
@@ -1449,6 +1450,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           aktifSekme={aktifSekme} kilitli={kilitli} sevkiyat={sevkiyat}
           belge={sonuc?.belge} irsaliyeMi={irsaliyeMi} tur={tur}
           senaryo={senaryo} setSenaryo={setSenaryo}
+          belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
           faturalama={{
             donusumler: donusumListesi,
             kayitliId,
@@ -1471,6 +1473,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             //   boş sonuç verirdi. Başvuru DIŞI belgelerde ayrım yok.
             kurumPayliMi: basvuruMu ? provizyonVar : undefined,
             olcu: donusumler.olcu, setOlcu: donusumler.setOlcu,
+            // e-FATURA MENUSU (11.10.2026): hazirla / gonder sonrasi liste tazelenir.
+            donusumYenile: () => { if (kayitliId) void donusumler.yukle(kayitliId) },
           }}
         />
 
