@@ -246,6 +246,9 @@ function KatlaOku({ yon }: { yon: 'sol' | 'sag' }) {
  * Kolonlar SUNUCUDAN gelir (/kolonlar): yetkisiz kolon listede hic donmedigi icin
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
+/** Birden cok satir seciliyken de acik kalan liste aksiyonlari. */
+const COKLU_AKSIYONLAR = new Set(['gelen.kabul', 'gelen.red', 'gelen.aktar']);
+
 export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
@@ -433,9 +436,16 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
 
   // Aksiyonlar secili kayda gore yeniden cozulur: "belge zaten gonderilmis" gibi
   //   kosullar sunucuda degerlendirilir, istemci kural yazmaz.
-  const { aksiyonlar } = useAksiyonlar(
+  const { aksiyonlar: aksiyonlarHam } = useAksiyonlar(
     aksiyonEkrani ?? 'cari-liste',
     seciliSatir?.id != null ? Number(seciliSatir.id) : null);
+  // COKLU SECIMDE CALISAN AKSIYONLAR (kullanici 11.10.2026: "gelen kutusu coklu
+  //   secimde ustteki butonlar aktarma kabul ret calisabilmeli"): tek kayit yokken
+  //   sunucu bunlari "Once bir kayit secin" diye pasif doner; isi coklu isleyici
+  //   (gelenCokluAksiyonu) yapar, uygun olmayan belgeyi o atlar.
+  const aksiyonlar = useMemo(() => (secili.size > 1
+    ? aksiyonlarHam.map(a => COKLU_AKSIYONLAR.has(a.kod) ? { ...a, aktif: true, pasifSebep: undefined } : a)
+    : aksiyonlarHam), [aksiyonlarHam, secili]);
 
   const aksiyonCalistir = (kod: string) => {
     // CSV disariya CIKMAZ: veri (satirlar, kolonlar, filtre) burada, disarida degil.
@@ -475,11 +485,19 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       alt menuler (ör. kasa tahsilat araclari) korunur. */
   const toolbarAltSecenekler = useMemo(() => ({
     ...(altSecenekler ?? {}),
+    // AKTAR ▾ (kullanici 11.10.2026): gelen kutusunda acik OLMAYAN sekmeler listelenir,
+    //   isaretli belgeler secilen sekmeye aktarilir (Sistem = alis faturasina aktar).
+    ...(kaynak === 'gelen-belge' ? { 'gelen.aktar': [
+      { kod: 'gelen.aktar', ad: 'Sistem' },
+      { kod: 'gelen.tasi-gelen', ad: 'Gelen Kutusu' },
+      { kod: 'gelen.tasi-disi', ad: 'Kullanım Dışı' },
+    ].filter(o => !(o.kod === 'gelen.tasi-gelen' && !window.location.pathname.endsWith('/gelen-belge-disi'))
+               && !(o.kod === 'gelen.tasi-disi' && window.location.pathname.endsWith('/gelen-belge-disi'))) } : {}),
     'genel.yazdir': [
       { kod: 'genel.csv', ad: '📄 CSV Kaydet' },
       { kod: 'genel.yazdir.dogrudan', ad: '🖨️ Yazdır' },
     ],
-  }), [altSecenekler]);
+  }), [altSecenekler, kaynak]);
 
   // GENEL aksiyonlar ile e-BELGE menusu AYRI kutularda (kullanici): e-Belge'nin
   //   dokuz adimi genel listeye karisinca "Aç / Yeni / Sil" arasinda kayboluyordu.

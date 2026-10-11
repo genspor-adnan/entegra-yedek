@@ -118,6 +118,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
+    // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
+    kolonBasliklari: { tarafUnvan: 'Alıcı' },
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -157,6 +159,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
+    // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
+    kolonBasliklari: { tarafUnvan: 'Alıcı' },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
@@ -180,6 +184,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   _GelenSekmeUygula). Modul suzgeci YOK (modul: ''): hastane de tedarikciden
     //   e-Fatura alir - HBYS'de ekran acilmiyordu.
     kaynak: 'gelen-belge', rota: 'gelen-belge', baslik: 'Gelen Kutusu',
+    // KOLON SIRASI (kullanici): Tarih · Belge No · Gönderici en solda.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'gondericiUnvan'],
     yol: 'Alış Faturaları › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
     ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
@@ -197,6 +203,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     // KULLANIM DISI (1037, Delphi 'Kullanım Dışı'na Taşı): islenmeyecek gelen belgeler.
     kaynak: 'gelen-belge', rota: 'gelen-belge-disi', baslik: 'Kullanım Dışı',
+    // KOLON SIRASI (kullanici): Tarih · Belge No · Gönderici en solda.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'gondericiUnvan'],
     yol: 'Alış Faturaları › Kullanım Dışı', aksiyonEkrani: 'gelen-belge-liste',
     ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
@@ -289,6 +297,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
+    // GONDERICI: alis faturasinda cari fatura kesendir (gelen kutusuyla ayni ad).
+    kolonBasliklari: { tarafUnvan: 'Gönderici' },
     yol: 'Alis › Faturalar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 11,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 11 },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],

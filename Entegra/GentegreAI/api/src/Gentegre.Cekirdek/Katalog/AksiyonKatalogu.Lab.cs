@@ -614,7 +614,7 @@ public static partial class AksiyonKatalogu
             //   (kutunun kendisi cari borc/alacak URETMEZ - kullanici kurali).
             //   Kabulde otomatik calisir; burada yanit gerekmeyen belgeler
             //   (temel fatura / e-Arsiv) ve tekrar denemeler icin durur.
-            new("gelen.aktar",   "🧾 Faturaya Aktar", "gelen",
+            new("gelen.aktar",   "🔀 Aktar", "gelen",
                 KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 25),
             // e-FATURA KOMBOSU (kullanici): giden listedekiyle AYNI serit -
             //   grup "ebelge" oldugu icin arac cubugunda degil kombo'da cikar.
