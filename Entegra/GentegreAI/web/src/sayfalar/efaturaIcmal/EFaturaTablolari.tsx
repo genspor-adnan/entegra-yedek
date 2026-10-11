@@ -157,7 +157,9 @@ export function KdvTablosu({ v }: { v: EFaturaIcmali }) {
 export function AliciSeriTablosu({ v }: { v: EFaturaIcmali }) {
   return (
     <>
-      <div className="lb-bas">Alıcı Grubu <span className="ki-soluk">kurum · hasta · firma (cari kartındaki rol)</span></div>
+      {/* MOCKUP (Ekranlar/İcmal/fatura_ebelge_icmali.html "Alıcı / Seri"): pay çubuklu,
+          toplam satırlı; kurum tablosunda Durum geniş. */}
+      <div className="lb-bas">Alıcı Grubu <span className="ki-soluk">kurum faturası (e-Fatura) · hasta faturası (e-Arşiv) · firma · cari kartındaki rol</span></div>
       <table className="hi-tablo">
         <thead><tr><th>Alıcı</th><th className="sag">Belge</th><th className="sag">Matrah</th><th className="sag">KDV</th><th className="sag">Toplam</th>
           <th className="sag">İade</th><th className="sag">İptal</th><th className="sag">Sorunlu</th><th className="sag">Pay</th></tr></thead>
@@ -167,21 +169,35 @@ export function AliciSeriTablosu({ v }: { v: EFaturaIcmali }) {
             <tr key={a.grup}><td><b>{a.grup}</b></td><td className="sag">{a.belge}</td><td className="sag">{tl(a.matrah)}</td>
               <td className="sag">{tl(a.kdv)}</td><td className="sag">{tl(a.toplam)}</td><td className="sag">{tire(a.iade)}</td>
               <td className="sag">{tire(a.iptal)}</td><td className={'sag' + (a.sorunlu ? ' kir' : '')}>{tire(a.sorunlu)}</td>
-              <td className="sag">{yuzde(a.pay)}</td></tr>
+              <td className="sag"><span className="lb-bar"><span style={{ width: `${Math.min(100, a.pay)}%` }} /></span> {yuzde(a.pay)}</td></tr>
           ))}
+          {v.alicilar.length > 1 && (
+            <tr className="top"><td>Toplam</td><td className="sag">{v.alicilar.reduce((t, a) => t + a.belge, 0)}</td>
+              <td className="sag">{tl(v.alicilar.reduce((t, a) => t + a.matrah, 0))}</td>
+              <td className="sag">{tl(v.alicilar.reduce((t, a) => t + a.kdv, 0))}</td>
+              <td className="sag">{tl(v.alicilar.reduce((t, a) => t + a.toplam, 0))}</td>
+              <td className="sag">{tire(v.alicilar.reduce((t, a) => t + a.iade, 0))}</td>
+              <td className="sag">{tire(v.alicilar.reduce((t, a) => t + a.iptal, 0))}</td>
+              <td className="sag">{tire(v.alicilar.reduce((t, a) => t + a.sorunlu, 0))}</td><td /></tr>
+          )}
         </tbody>
       </table>
 
       <div className="lb-bas">Kurum Faturaları <span className="ki-soluk">geçerli kurum faturaları · rozetler sorunlu olanları sayar</span></div>
       <table className="hi-tablo">
-        <thead><tr><th>Kurum</th><th className="sag">Fatura</th><th className="sag">Toplam</th><th>Durum</th></tr></thead>
+        <thead><tr><th style={{ width: '34%' }}>Kurum</th><th className="sag" style={{ width: 80 }}>Fatura</th>
+          <th className="sag" style={{ width: 140 }}>Toplam</th><th style={{ paddingLeft: 16 }}>Durum</th></tr></thead>
         <tbody>
           {v.kurumlar.length === 0 && <tr><td colSpan={4} className="bos">Kurum faturası yok.</td></tr>}
           {v.kurumlar.map(k => (
             <tr key={k.ad}><td>{k.ad}</td><td className="sag">{k.fatura}</td><td className="sag">{tl(k.toplam)}</td>
-              <td>{k.durumlar.length === 0 ? <span className="bo-rz ok">tümü gönderildi</span>
+              <td style={{ paddingLeft: 16 }}>{k.durumlar.length === 0 ? <span className="bo-rz ok">tümü gönderildi</span>
                 : k.durumlar.map(d => <span key={d.ad} className={'bo-rz ' + sorunRengi(d.ad)} style={{ marginRight: 4 }}>{d.ad} {d.adet}</span>)}</td></tr>
           ))}
+          {v.kurumlar.length > 1 && (
+            <tr className="top"><td>{v.kurumlar.length} kurum</td><td className="sag">{v.kurumlar.reduce((t, k) => t + k.fatura, 0)}</td>
+              <td className="sag">{tl(v.kurumlar.reduce((t, k) => t + k.toplam, 0))}</td><td /></tr>
+          )}
         </tbody>
       </table>
 

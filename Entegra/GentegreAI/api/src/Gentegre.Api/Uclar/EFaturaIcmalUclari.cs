@@ -20,7 +20,8 @@ namespace Gentegre.Api.Uclar;
 /// HİÇ hazırlanmamış satış faturası. Alıcı yanıtı / iptal talebi giden belgede
 /// izlenmiyor (Delphi'de de yok) - o rozetler yok.</para>
 ///
-/// <para><b>Alıcı grubu:</b> taraf.kurum = Kurum, taraf.hasta = Hasta, diğeri Firma.
+/// <para><b>Alıcı grubu:</b> taraf.kurum = Kurum, taraf.hasta = Hasta, diğeri Firma (öncelik kurum -
+/// satış faturası listesinin "Alıcı Grubu" kolonuyla aynı).
 /// Hasta kimlik no gösterilmez; protokol no başvurudan (kaynak tipi 30).</para>
 /// </summary>
 public static class EFaturaIcmalUclari
@@ -63,7 +64,7 @@ public static class EFaturaIcmalUclari
                        coalesce(bl.efatura_durum, 0)::smallint, coalesce(bl.efatura_sonuc, 0)::smallint, coalesce(bl.tipi, 0)::smallint,
                        bl.tur, coalesce(bl.matrah, 0), coalesce(bl.kdv_tutari, 0), coalesce(bl.genel_toplam, 0),
                        coalesce(bl.taraf_id, 0), coalesce(nullif(bl.taraf_unvan, ''), public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(200), ''),
-                       case when coalesce(t.hasta, 0) = 1 then 'Hasta' when coalesce(t.kurum, 0) = 1 then 'Kurum' else 'Firma' end,
+                       case when coalesce(t.kurum, 0) = 1 then 'Kurum' when coalesce(t.hasta, 0) = 1 then 'Hasta' else 'Firma' end,
                        case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then coalesce(kb.belge_no, '') else '' end,
                        (select min(m.ekleme_tarihi) from public.e_belge_mesaj m where m.belge_id = bl.id and m.islem = 2 and m.tip = 2),
                        coalesce((select m.mesaj from public.e_belge_mesaj m where m.belge_id = bl.id and m.tip = 9
