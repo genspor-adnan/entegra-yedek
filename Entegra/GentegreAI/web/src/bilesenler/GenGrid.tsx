@@ -293,9 +293,11 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const filtreSekmeleri = (cipler ?? []).map((c, i) => ({ c, i })).filter(x => x.c.sekme && !x.c.rota);
   const [sekmeIndeks, setSekmeIndeks] = useState<number>(filtreSekmeleri[0]?.i ?? -1);
   const sekmeFiltresi = sekmeIndeks >= 0 ? cipler?.[sekmeIndeks]?.filtre : undefined;
-  const sabitFiltreSekmeli: Kosul | undefined = sekmeFiltresi
+  // useMemo SART: her cizimde yeni nesne olursa liste "suzgec degisti" sanip
+  //   durmadan yeniden yukluyordu (kullanici: "taslak sekmesinde liste surekli yenileniyor").
+  const sabitFiltreSekmeli = useMemo<Kosul | undefined>(() => (sekmeFiltresi
     ? (sabitFiltre ? { op: 'and', kosullar: [sabitFiltre, sekmeFiltresi] } : sekmeFiltresi)
-    : sabitFiltre;
+    : sabitFiltre), [sabitFiltre, sekmeFiltresi]);
   /**
    * DISARIDAN GELEN CIP degisince ic state de gecmeli.
    *
@@ -506,6 +508,18 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     () => aksiyonlar.some(a => ebelgeGrubu(a) || a.grup === 'gelen'), [aksiyonlar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
 
+  // e-FATURA MENUSU UST ARAC CUBUGUNDA, Yazdir'in solunda (kullanici 11.10.2026).
+  //   Belge listesinde giden menu, gelen kutusunda gelen menu; secili satirlarin hepsinde.
+  const efaturaMenusu = !aksiyonEkrani || ebelgeKombo.length === 0 ? null
+    : kaynak === 'belge'
+      ? <EFaturaMenusu belgeIdler={[...secili].map(Number).filter(Boolean)} devre={secili.size === 0}
+                       devreSebep="Önce fatura seçin (Ctrl / Shift ile birden çok)."
+                       onDegisti={onEBelgeDegisti} etiket={ebelgeMenusu} />
+      : kaynak === 'gelen-belge'
+        ? <GelenMenusu etiket={ebelgeMenusu} satirlar={satirlar.filter((sr, i) => secili.has(String(sr.id ?? i)))}
+                       onSec={aksiyonCalistir} />
+        : null;
+
   const filtreSatiriDegisti = (alan: string, deger: string) => {
     window.clearTimeout(filtreZamanlayici.current);
     filtreZamanlayici.current = window.setTimeout(() => {
@@ -595,7 +609,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             {yol && <span className="yol">{yol}</span>}
             <div className="sag">
               {aksiyonEkrani && <GenToolbar aksiyonlar={aracCubuguAltSatir ? aksiyonlar.filter(x => !altSatirda(x.kod)) : aksiyonlar}
-                                            calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />}
+                                            calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler}
+                                            yazdirOncesi={efaturaMenusu} />}
             </div>
           </div>
           {aracCubuguAltSatir && aksiyonEkrani && (
@@ -774,20 +789,6 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 donduruyorsa cizilir - sube e-Fatura mukellefi degilse hic
                 gelmez (179). Secilen islem ANINDA calisir; kutu sonra bosalir
                 ki yanlislikla ikinci kez tetiklenmesin. */}
-            {/* BELGE LISTESI (kullanici 11.10.2026: "fatura listesinde de coklu secimle
-                e-Fatura menusu olsun"): Belgeye Donusum / kart / icmaldeki menunun
-                aynisi, secili satirlarin HEPSINDE calisir. Gelen kutusu eski kutuda. */}
-            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak === 'belge' && (
-              <EFaturaMenusu belgeIdler={[...secili].map(Number).filter(Boolean)} devre={secili.size === 0}
-                             devreSebep="Önce fatura seçin (Ctrl / Shift ile birden çok)."
-                             onDegisti={onEBelgeDegisti} etiket={ebelgeMenusu} />
-            )}
-            {/* GELEN KUTUSU (kullanici 11.10.2026): eski kutu yerine Delphi gelen menusu, coklu. */}
-            {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak === 'gelen-belge' && (
-              <GelenMenusu etiket={ebelgeMenusu}
-                           satirlar={satirlar.filter((sr, i) => secili.has(String(sr.id ?? i)))}
-                           onSec={aksiyonCalistir} />
-            )}
             {aksiyonEkrani && ebelgeKombo.length > 0 && kaynak !== 'belge' && kaynak !== 'gelen-belge' && (
               <select
                 className="ebk"

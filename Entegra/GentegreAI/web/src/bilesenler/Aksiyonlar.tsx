@@ -46,8 +46,10 @@ interface CalistirProps {
  */
 export interface AltSecenek { kod: string; ad: string }
 
-export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProps & {
+export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi }: CalistirProps & {
   altSecenekler?: Record<string, AltSecenek[]>;
+  /** Yazdir dugmesinin SOLUNA konan ek dugme (e-Fatura menusu, 11.10.2026); yazdir yoksa sona. */
+  yazdirOncesi?: React.ReactNode;
 }) {
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
   // IKINCI SIRA (hedef "araccubugu2"): gunluk akisin disinda kalan, daha
@@ -65,7 +67,13 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
     return () => window.removeEventListener('click', kapat);
   }, [acikMenu]);
 
-  if (gorunen.length === 0 && ikinciSira.length === 0) return null;
+  if (gorunen.length === 0 && ikinciSira.length === 0 && !yazdirOncesi) return null;
+  const yazdirSira = gorunen.findIndex(a => a.kod.startsWith('genel.yazdir'));
+  const birinci = (): React.ReactNode[] => {
+    const d: React.ReactNode[] = gorunen.map(dugme);
+    if (yazdirOncesi) d.splice(yazdirSira >= 0 ? yazdirSira : d.length, 0, <span key="yazdir-oncesi">{yazdirOncesi}</span>);
+    return d;
+  };
 
   const dugme = (a: AksiyonYaniti) => {
         const alt = altSecenekler?.[a.kod];
@@ -114,11 +122,11 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
   // Tek sirada eskisi gibi TEK kap: ikinci sira yoksa fazladan sarmalayici
   //   koymak, saga yaslama duzenini bozardi.
   if (ikinciSira.length === 0)
-    return <div className="arac-cubugu">{gorunen.map(dugme)}</div>;
+    return <div className="arac-cubugu">{birinci()}</div>;
 
   return (
     <div className="arac-cubugu-sar">
-      <div className="arac-cubugu">{gorunen.map(dugme)}</div>
+      <div className="arac-cubugu">{birinci()}</div>
       <div className="arac-cubugu ikinci">{ikinciSira.map(dugme)}</div>
     </div>
   );
