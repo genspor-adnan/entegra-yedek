@@ -102,7 +102,27 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Satış', menuSira: 30, menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge.satis.irsaliye',
+    // FATURANIN ALTINDA (kullanici 11.10.2026: "Satış Faturası menüsünün altına Satış İrsaliyesi").
+    menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge.satis.irsaliye',
+  },
+  {
+    // HBYS IKIZI: Satış grubu (erp_satis) hastanede kapali - irsaliye Kurumlar & Sigorta ›
+    //   Satış Faturaları'nın altında (satis faturasi ikiziyle ayni desen; rota farkli olmak zorunda).
+    kaynak: 'irsaliye', rota: 'satis-irsaliyeleri', baslik: 'Satış İrsaliyeleri',
+    yol: 'Kurumlar & Sigorta › Satış İrsaliyeleri', aksiyonEkrani: 'irsaliye-liste',
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
+    yeniBelgeTuru: 14,
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    urunModu: 2, modul: '',
+    // Kendi menu kodu (1038): bir yetki kodu tek menu ekrani acar (menuKoduTekEkran); haklar
+    //   belge.satis.irsaliye'den kopyalanir, veri yine o kodla okunur.
+    menuGrup: 'Kurumlar & Sigorta', menuSira: 61, menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge.kurum_irsaliye',
   },
   {
     // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
@@ -198,7 +218,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       ...GELEN_SEKMELERI,
     ],
     menuGizli: true, modul: '',
-    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',
+    menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',
   },
   {
     // KULLANIM DISI (1037, Delphi 'Kullanım Dışı'na Taşı): islenmeyecek gelen belgeler.
@@ -211,7 +231,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tasnif', op: 'esit', deger: 3 },
     cipler: [{ ad: 'Tümü' }, ...GELEN_SEKMELERI],
     menuGizli: true, modul: '',
-    menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'Kullanım Dışı', ic: '📥', yetkiKodu: 'belge.alis_fatura',
+    menuGrup: 'Stok & Hizmet', menuSira: 68, menuAd: 'Kullanım Dışı', ic: '📥', yetkiKodu: 'belge.alis_fatura',
   },
   {
     // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
@@ -288,7 +308,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Alış', menuSira: 30, menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge.alis.irsaliye',
+    // ALIS FATURASININ ALTINDA (kullanici 11.10.2026): Stok & Hizmet - iki urunde de acik.
+    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge.alis.irsaliye',
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturaları',
