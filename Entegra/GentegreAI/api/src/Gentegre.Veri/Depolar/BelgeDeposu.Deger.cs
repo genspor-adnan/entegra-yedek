@@ -178,7 +178,12 @@ public sealed partial class BelgeDeposu
                              where ks.belge_id = b.id), 0) as "donusenBelgeTutari",
                    b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
                    kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
-                   kt.ad as "kaynakTurAdi", b.aciklama,
+                   -- KAYNAK BASVURU (kullanici 11.10.2026: "ERP de iken Satış Siparişi
+                   --   HBYS iken Başvuru"): kayit ayni (tur 19), ad TIPE gore - basvuru
+                   --   tipi 30, ERP siparisi 1. Urun moduna baglanmadi: mod yalniz menuyu
+                   --   belirler, kaydin ne oldugunu tip soyler (kullanici karari).
+                   case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then 'Başvuru' else kt.ad end as "kaynakTurAdi",
+                   coalesce(kb.tur = 19 and coalesce(kb.tipi, 0) = 30, false) as "kaynakBasvuru", b.aciklama,
                    -- Muhasebe fisi (190) ve zincirin ILERI ucu (F8): kartta
                    --   gosterilmez ama aksiyonlarin aktifligi bunlara bakar.
                    coalesce(b.muhasebe_fis_id, 0) as "fisId",

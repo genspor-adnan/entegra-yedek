@@ -117,9 +117,13 @@ public static partial class KaynakKatalogu
             //   Iptal (durum=2) hedefler sayilmaz.
             new("kaynak",
                 "case when kb.id is null then '' " +
-                "else coalesce(kt2.ad, '') || case when kb.belge_no <> '' " +
-                "then ' ' || kb.belge_no else '' end end",
-                                                      "metin", "Kaynak",      Genislik: 170,
+                "else case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then 'Başvuru' " +
+                "          else coalesce(kt2.ad, '') end || case when kb.belge_no <> '' " +
+                // " · " AYRACI (kullanici 11.10.2026: "protokol no ve belge tipini
+                //   ayri ayri rozet yap"): grid her parcayi ayri rozet cizer;
+                //   disa aktarimda da okunur kalir.
+                "then ' · ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",      Genislik: 190, Bicim: "rozet",
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
                 // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir
@@ -538,9 +542,13 @@ public static partial class KaynakKatalogu
             //   belge numaralari birlestirilir. Iptal (durum=2) hedefler sayilmaz.
             new("kaynak",
                 "case when kb.id is null then '' " +
-                "else coalesce(kt2.ad, '') || case when kb.belge_no <> '' " +
-                "then ' ' || kb.belge_no else '' end end",
-                                                      "metin", "Kaynak",    Genislik: 170,
+                "else case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then 'Başvuru' " +
+                "          else coalesce(kt2.ad, '') end || case when kb.belge_no <> '' " +
+                // " · " AYRACI (kullanici 11.10.2026: "protokol no ve belge tipini
+                //   ayri ayri rozet yap"): grid her parcayi ayri rozet cizer;
+                //   disa aktarimda da okunur kalir.
+                "then ' · ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",    Genislik: 190, Bicim: "rozet",
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
                 // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir

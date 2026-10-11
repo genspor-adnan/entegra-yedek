@@ -1156,10 +1156,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   const bagliSiparisAlani = (
     <label className="alan">
-      <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
+      {/* KAYNAK BASVURU (kullanici 11.10.2026): HBYS'de "Bağlı Sipariş / Satış
+          Siparişi" yerine "Başvuru / Protokol No". */}
+      {/* Etiket SABIT (kullanici 11.10.2026: "label ... Sipariş No olarak kalsın");
+          basvuru / siparis ayrimi rozette. */}
+      <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Sipariş No'}</span>
       <span className="deger-serit">
         {sonuc?.belge.kaynakBelgeNo
-          ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
+          ? <>{/* BELGE TIPI ve NO AYRI ROZET (kullanici 11.10.2026) - listedeki
+                 Kaynak kolonuyla ayni gorunum. */}
+              <span className={'rozet ' + (sonuc.belge.kaynakBasvuru ? 'mor' : 'bilgi')}>
+                {String(sonuc.belge.kaynakTurAdi ?? '')}</span>
+              <span className="rozet gri" title={sonuc.belge.kaynakBasvuru ? 'Protokol No' : 'Belge No'}>
+                {String(sonuc.belge.kaynakBelgeNo)}</span></>
           : <span className="sonuk">—</span>}
       </span>
     </label>

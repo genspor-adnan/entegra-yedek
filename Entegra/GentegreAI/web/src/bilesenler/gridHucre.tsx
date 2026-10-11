@@ -84,6 +84,9 @@ export const ROZET_SINIFI: Record<string, string> = {
   // HAZIRLANDI mavi/sari (henuz gonderilmedi), GONDERILDI yesil: belge
   //   listesinde asama bir bakista ayrilsin (163/164).
   'e-Fatura ✓': 'ok', 'e-Arşiv ✓': 'ok', 'e-İrsaliye ✓': 'ok',
+  // Kaynak belge tipi (Kaynak kolonu, kart basligi): basvuru HBYS moru.
+  'Başvuru': 'mor', 'Satış Siparişi': 'bilgi', 'Alış Siparişi': 'bilgi',
+  'Satış İrsaliyesi': 'bilgi', 'Alış İrsaliyesi': 'bilgi', 'Satış Teklifi': 'bilgi',
   // e-Belge Durum kolonu (11.10.2026).
   'Gönderildi': 'ok', 'Hazır': 'uyari', 'Gönderim hatası': 'hata', 'Hazırlanmadı': 'gri',
   // Irsaliye listesi: e-Belge hic hazirlanmamis belge KAGIT (notr gri),
@@ -277,6 +280,11 @@ export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   if (kolon.bicim !== 'rozet') return null;
   const metin = String(deger ?? '').trim();
   if (metin === '') return null;
+  // COKLU ROZET (11.10.2026): " · " ile birlesik deger ("Başvuru · P-000161")
+  //   her parca ayri rozet - belge tipi ve numara ayri okunur.
+  if (metin.includes(' · '))
+    return <span className="rozet-dizi">{metin.split(' · ').map((p, i) => (
+      <span key={i} className={`rozet ${i === 0 ? (ROZET_SINIFI[p] ?? 'gri') : 'gri'}`}>{c(p, 'kod')}</span>))}</span>;
   // Sozlukte olmayan metin (sube adi gibi degisken deger) NOTR GRI rozet:
   //   sinifsiz rozet yalniz "kalin yazi" gibi gorunuyordu, kolon rozet
   //   istendigi halde duz metinden ayirt edilemiyordu (kullanici).
