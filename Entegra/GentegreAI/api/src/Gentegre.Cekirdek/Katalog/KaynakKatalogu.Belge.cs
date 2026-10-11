@@ -105,17 +105,25 @@ public static partial class KaynakKatalogu
             //   Liste katmani kod listesi cozmez; metin SQL'de uretilir.
             new("senaryoAdi",
                 """
-                case coalesce(b.senaryo, 0)
-                     when 1 then 'Temel'   when 2 then 'Ticari'
-                     when 3 then 'İhracat' when 7 then 'Kamu'
-                     when 8 then 'İlaç / Tıbbi Cihaz'
-                     else '' end
+                -- BOS KALMAZ (kullanici 11.10.2026: "senaryo ve tipi görünmüyor"): e-Arsiv
+                --   olarak hazirlanan belge 'e-Arşiv' (Delphi SP de senaryoyu boyle yazar),
+                --   senaryosu girilmemis (0) belge 'Temel' - e-Fatura profili de TEMELFATURA.
+                case when coalesce(b.efatura_durum, 0) in (11, 12) then 'e-Arşiv'
+                     else case coalesce(b.senaryo, 0)
+                          when 0 then 'Temel'   when 1 then 'Temel'   when 2 then 'Ticari'
+                          when 3 then 'İhracat' when 7 then 'Kamu'
+                          when 8 then 'İlaç / Tıbbi Cihaz'
+                          else '' end end
                 """,                             "metin", "Senaryo", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 130,
                                                  Filtrelenebilir: false),
             new("tipiAdi",
                 """
+                -- Normal (1) ve tipsiz (0 / basvurudan 30) belge 'Satış' / 'Alış' (alis turleri 9-13).
                 case coalesce(b.tipi, 0)
+                     when 0  then case when b.tur between 9 and 13 then 'Alış' else 'Satış' end
+                     when 1  then case when b.tur between 9 and 13 then 'Alış' else 'Satış' end
+                     when 30 then 'Satış'
                      when 2  then 'İade'          when 3  then 'Fiyat Farkı'
                      when 5  then 'Kur Farkı'     when 9  then 'İhraç Kayıtlı'
                      when 22 then 'Tevkifatlı'    when 24 then 'KDV İstisna'

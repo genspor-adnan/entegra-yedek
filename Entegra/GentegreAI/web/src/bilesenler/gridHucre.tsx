@@ -106,6 +106,7 @@ export const ROZET_SINIFI: Record<string, string> = {
   // Teklif akisi (218): Kabul/Red/İptal yukarida zaten var.
   'Hazırlanıyor': 'gri', 'Sunuldu': 'bilgi',
   'Tevkifatlı': 'uyari', 'KDV İstisna': 'bilgi', 'İhraç Kayıtlı': 'bilgi',
+  'Satış': 'gri', 'Alış': 'gri',
   'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi',
   // Randevu durumlari (243, kullanici: "randevu listesi durum rozet olsun").
   'Planlandı': 'bilgi', 'Geldi': 'ok', 'Gelmedi': 'hata',
