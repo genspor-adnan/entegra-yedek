@@ -58,6 +58,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
   const teklifMi = belgeAdi === 'Teklif';
+  const efDurum = Number(sonuc?.belge.efaturaDurum ?? 0);
+  const efSonuc = Number(sonuc?.belge.efaturaSonuc ?? 0);
 
   /**
    * Belge turunun adi - "İrsaliye No" / "Fatura No" / "Sipariş No". Depo
@@ -211,12 +213,17 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     <label className="alan">
       <span className="etiket">e-Belge</span>
       <span className="deger-serit">
+        {/* TUR + DURUM (11.10.2026): listedeki "e-Belge" ve "e-Belge Durum"
+            kolonlariyla ayni kural. Eski hali hazirlanmis belgeye de
+            "Gönderildi" diyor, e-Arsivi e-Fatura gosteriyordu. */}
         <span className="rozet bilgi">
-          {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
+          {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye'
+            : [11, 12].includes(efDurum) ? 'e-Arşiv' : 'e-Fatura'}
         </span>
-        {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
-          ? <span className="rozet olumlu">{c('✓ Gönderildi')}</span>
-          : <span className="rozet">gönderilmedi</span>}
+        {[2, 12, 52].includes(efDurum) ? <span className="rozet ok">{c('Gönderildi')}</span>
+          : efDurum > 0 && efSonuc === 3 ? <span className="rozet hata">{c('Gönderim hatası')}</span>
+          : efDurum > 0 ? <span className="rozet uyari">{c('Hazır')}</span>
+          : <span className="rozet gri">{c('Hazırlanmadı')}</span>}
       </span>
     </label>
     ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu ? null : kapanmaGoster ? kapanmaAlani : (
