@@ -336,6 +336,13 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '@icmal', yetkiKodu: 'maliyet.hasta_basi',
   },
   {
+    // KASA / GÜN SONU MUTABAKATI (1030, mockup İcmal/kasa_gun_sonu_mutabakati.html): kasalar,
+    //   POS, banka; beklenen / sayılan / fark, fark açıklaması, Günü Kapat (kasa kilidi).
+    kaynak: 'kasa-gun-sonu', rota: 'kasa-gun-sonu', ozelSayfa: true,
+    baslik: 'Kasa / Gün Sonu Mutabakatı', yol: 'Finans › Kasa / Gün Sonu', urunModu: 2,
+    menuGrup: 'Finans', menuSira: 70, menuAd: 'Kasa / Gün Sonu', ic: '@icmal', yetkiKodu: 'kasa.gun_sonu',
+  },
+  {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
     // (mali-hareket) yeniden adlandirildi: hem sayfa basligi hem menu adi "Kasa
     // Hareketleri" oldu (Satış'in aksine kullanici burada baslik metnini ACIKCA verdi).

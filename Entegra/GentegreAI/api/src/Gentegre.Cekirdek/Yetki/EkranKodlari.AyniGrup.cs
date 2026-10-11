@@ -37,6 +37,7 @@ public static partial class EkranKodlari
         ("lab.icmal", "lab.onay"),                              // Laboratuvar › Laboratuvar İcmali (1026)
         ("radyoloji.icmal", "teleradyoloji.kurum.fatura"),      // Radyoloji › Görüntüleme İcmali (1027)
         ("yatan.donem_icmal", "yatan.icmal"),                   // Yatan Hasta › Yatan Hasta İcmali (1028, ad 1029)
+        ("kasa.gun_sonu", "kasa.finans"),                       // Finans › Kasa / Gün Sonu (1030)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri

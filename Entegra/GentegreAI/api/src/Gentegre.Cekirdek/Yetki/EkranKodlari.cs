@@ -267,6 +267,8 @@ public static partial class EkranKodlari
         "radyoloji.icmal",
         // Yatan Hasta İcmali (1028): /api/yatan-icmal kendi koduna bakar.
         "yatan.donem_icmal",
+        // Kasa / Gün Sonu Mutabakatı (1030): /api/kasa-gun-sonu kendi koduna bakar.
+        "kasa.gun_sonu",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):
