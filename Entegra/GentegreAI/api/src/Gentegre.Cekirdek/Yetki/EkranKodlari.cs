@@ -273,6 +273,8 @@ public static partial class EkranKodlari
         "cagri.icmal",
         // Sterilizasyon İcmali (1032): /api/steril-icmal kendi koduna bakar.
         "steril.icmal",
+        // Fatura / e-Belge İcmali (1035): /api/efatura-icmal kendi koduna bakar.
+        "efatura.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

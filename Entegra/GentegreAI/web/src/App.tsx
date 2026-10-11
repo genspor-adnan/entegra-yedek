@@ -43,6 +43,7 @@ const YatanIcmal = tembel(() => import('./sayfalar/yatanIcmal/YatanIcmal'), 'Yat
 const KasaGunSonu = tembel(() => import('./sayfalar/kasaGunSonu/KasaGunSonu'), 'KasaGunSonu');
 const CagriIcmal = tembel(() => import('./sayfalar/cagriIcmal/CagriIcmal'), 'CagriIcmal');
 const SterilIcmal = tembel(() => import('./sayfalar/sterilIcmal/SterilIcmal'), 'SterilIcmal');
+const EFaturaIcmal = tembel(() => import('./sayfalar/efaturaIcmal/EFaturaIcmal'), 'EFaturaIcmal');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -263,6 +264,7 @@ function Yollar() {
         {yetki('kasa.gun_sonu') && <Route path="/kasa-gun-sonu" element={<KasaGunSonu />} />}
         {yetki('cagri.icmal') && <Route path="/cagri-icmal" element={<CagriIcmal />} />}
         {yetki('steril.icmal') && <Route path="/steril-icmal" element={<SterilIcmal />} />}
+        {yetki('efatura.icmal') && <Route path="/efatura-icmal" element={<EFaturaIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}

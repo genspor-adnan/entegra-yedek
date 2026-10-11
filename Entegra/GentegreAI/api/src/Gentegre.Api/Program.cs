@@ -378,6 +378,7 @@ uygulama.DokumanUclariniEkle();
 uygulama.DokumanYonetimUclariniEkle();
 uygulama.GelenBelgeUclariniEkle();
 uygulama.EFaturaUclariniEkle();
+uygulama.EFaturaIcmalUclariniEkle();
 uygulama.CeviriUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();

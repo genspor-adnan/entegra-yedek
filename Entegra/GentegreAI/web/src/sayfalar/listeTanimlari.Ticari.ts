@@ -336,6 +336,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '@icmal', yetkiKodu: 'maliyet.hasta_basi',
   },
   {
+    // FATURA / e-BELGE İCMALİ (1035, mockup İcmal/fatura_ebelge_icmali.html): e-belgeler türe /
+    //   seriye göre, GİB'e gitmeyen / hatalı / 7 günü aşan, KDV özeti, alıcı / seri, iade / iptal.
+    //   ERP ve HBYS'de (fatura iki üründe de kesilir).
+    kaynak: 'efatura-icmal', rota: 'efatura-icmal', ozelSayfa: true,
+    baslik: 'Fatura / e-Belge İcmali', yol: 'Finans › Fatura / e-Belge İcmali',
+    menuGrup: 'Finans', menuSira: 74, menuAd: 'Fatura / e-Belge İcmali', ic: '@icmal', yetkiKodu: 'efatura.icmal',
+  },
+  {
     // KASA / GÜN SONU MUTABAKATI (1030, mockup İcmal/kasa_gun_sonu_mutabakati.html): kasalar,
     //   POS, banka; beklenen / sayılan / fark, fark açıklaması, Günü Kapat (kasa kilidi).
     kaynak: 'kasa-gun-sonu', rota: 'kasa-gun-sonu', ozelSayfa: true,

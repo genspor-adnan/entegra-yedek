@@ -39,7 +39,8 @@ public static partial class EkranKodlari
         ("yatan.donem_icmal", "yatan.icmal"),                   // Yatan Hasta › Yatan Hasta İcmali (1028, ad 1029)
         ("kasa.gun_sonu", "kasa.finans"),                       // Finans › Kasa / Gün Sonu (1030)
         ("cagri.icmal", "cagri.supervizor"),                    // Çağrı Merkezi › Çağrı Merkezi İcmali (1031)
-        ("steril.icmal", "steril.pano"),                        // Sterilizasyon › Sterilizasyon İcmali (1032)
+        ("steril.icmal", "steril.pano"),
+        ("efatura.icmal", "belge.satis.fatura"),                // Finans › Fatura / e-Belge İcmali (1035)                        // Sterilizasyon › Sterilizasyon İcmali (1032)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma
         ("belge.alis.ayar", "belge.alis"),                      // Alış › Ayarlar › Alış Belgeleri
