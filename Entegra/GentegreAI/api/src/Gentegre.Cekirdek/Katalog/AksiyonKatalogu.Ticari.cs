@@ -505,19 +505,40 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
             new("belge.donustur", "🧾 Faturaya Dönüştür", "belge",
                 AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
-            // e-IRSALIYE MENUSU YOK (11.10.2026): giden e-Belge Delphi'ye gore
-            //   yeniden yazilirken kapsam e-Fatura + e-Arsiv tutuldu; e-Irsaliye
-            //   gonderimi ayri is.
             new("belge.iptal",    "✖ İrsaliyeyi İptal Et", "belge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 50),
+            // e-IRSALIYE MENUSU (kullanici 11.10.2026: "irsaliyelerin izibiz entegrasyonu"):
+            //   satis faturasindaki e-Fatura menusunun AYNI maddeleri; aktif/pasif kurali
+            //   yine EFaturaKodlari.Engel'de (irsaliye 51/52 kodlariyla).
+            new("ebelge.hazirla", "Hazırla", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 51),
+            new("ebelge.onizle", "Önizle", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 52),
+            new("ebelge.gonder", "Gönder", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 53),
+            new("ebelge.ayrac1", "─", "ebelge", Hedef: "sagtus", Sira: 54),
+            new("ebelge.pdf", "PDF Kaydet", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 55),
+            new("ebelge.html", "HTML Kaydet", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 56),
+            new("ebelge.xml", "XML Kaydet", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 57),
+            new("ebelge.ayrac2", "─", "ebelge", Hedef: "sagtus", Sira: 58),
+            new("ebelge.seri", "Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 59),
+            new("ebelge.sifirla", "Hazırı Geri Al", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 60),
+            new("ebelge.ayrac3", "─", "ebelge", Hedef: "sagtus", Sira: 61),
+            new("ebelge.mesajlar", "Mesaj Geçmişini Göster", "ebelge", Hedef: "sagtus,palet",
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 62),
             // MUHASEBE FISI (190) ve DONUSUM ZINCIRI (F8): belgeden tek
             //   tikla fise ve zincirin iki ucuna gidilir.
             new("belge.fis-gor",   "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",
-                KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 70),
             new("belge.kaynak-ac", "Kaynak Belgeyi Aç",  "belge", Hedef: "sagtus,palet",
-                KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+                KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 71),
             new("belge.hedef-ac",  "Hedef Belgeyi Aç",   "belge", Hedef: "sagtus,palet",
-                KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 62),
+                KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 72),
             new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                 AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
         };

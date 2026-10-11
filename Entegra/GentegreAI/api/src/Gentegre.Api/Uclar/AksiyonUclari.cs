@@ -114,7 +114,7 @@ public static class AksiyonUclari
                 //   gitmistir; duzeltme ancak IADE faturasiyla yapilir.
                 case "belge.iptal" or "belge.sil" when gonderildi:
                     return (false, $"{turAdi} gönderilmiş; belge iptal edilemez/silinemez. "
-                                 + "Düzeltme için iade faturası kesin.");
+                                 + $"Düzeltme için iade {(efaturaDurum == 52 ? "irsaliyesi" : "faturası")} kesin.");
                 case "belge.iptal" or "belge.sil" when hazirlandi:
                     return (false, $"{turAdi} hazırlanmış; önce \"Hazırı Geri Al\" ile "
                                  + "e-Belge kaydını kaldırın.");

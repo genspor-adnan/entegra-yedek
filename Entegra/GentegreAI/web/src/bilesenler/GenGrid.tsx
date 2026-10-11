@@ -529,9 +529,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   // e-FATURA MENUSU UST ARAC CUBUGUNDA, Yazdir'in solunda (kullanici 11.10.2026).
   //   Belge listesinde giden menu, gelen kutusunda gelen menu; secili satirlarin hepsinde.
   const efaturaMenusu = !aksiyonEkrani || ebelgeKombo.length === 0 ? null
-    : kaynak === 'belge'
+    : kaynak === 'belge' || kaynak === 'irsaliye'
       ? <EFaturaMenusu belgeIdler={[...secili].map(Number).filter(Boolean)} devre={secili.size === 0}
-                       devreSebep="Önce fatura seçin (Ctrl / Shift ile birden çok)."
+                       devreSebep="Önce belge seçin (Ctrl / Shift ile birden çok)."
                        onDegisti={onEBelgeDegisti} etiket={ebelgeMenusu} />
       : kaynak === 'gelen-belge'
         ? <GelenMenusu etiket={ebelgeMenusu} satirlar={satirlar.filter((sr, i) => secili.has(String(sr.id ?? i)))}

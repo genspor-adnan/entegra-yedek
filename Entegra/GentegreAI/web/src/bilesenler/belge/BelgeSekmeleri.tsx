@@ -119,6 +119,7 @@ export function EBelgeSekmesi({
       {/* e-FATURA MENUSU (11.10.2026): Delphi e-Fatura menusu - eski pasif
           "henuz baglanmadi" dugmelerinin yerine. */}
       {faturaMi && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} />}
+      {tur === 14 && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} etiket="e-İrsaliye" />}
     </h6>
     {/* Mockup'ta (.grid2) her alan KENDI SATIRINDA: etiket solda, deger
         sagda. Uc sutuna yayilinca sira okunmuyordu. */}

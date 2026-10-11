@@ -98,6 +98,14 @@ public sealed class EFaturaVerisi
     public string KamuBanka { get; init; } = "";
     public string KamuSube { get; init; } = "";
 
+    // e-İRSALİYE SEVKİYATI (belge_sevkiyat; Delphi TSevkBilgisi). Sevk zamanı = irsaliye_tarihi.
+    public string Plaka { get; init; } = "";
+    public string SoforAd { get; init; } = "";
+    public string SoforTckn { get; init; } = "";
+    public string TasiyiciUnvan { get; init; } = "";
+    public string TasiyiciVkno { get; init; } = "";
+    public bool Irsaliye => EFaturaKodlari.IrsaliyeMi(Tur);
+
     // Son e_belge kaydı (giden)
     public long EBelgeId { get; set; }
     public short ETur { get; set; }
@@ -120,8 +128,10 @@ public sealed class EFaturaVerisi
     public List<TevkifatGrubu> TevkifatGruplari { get; } = [];
 
     public bool Arsiv => ETur == EFaturaKodlari.TurEArsiv;
-    public string Profil => EFaturaKodlari.Profil(Arsiv, Senaryo);
-    public string FaturaTipi => EFaturaKodlari.FaturaTipi(Tipi, Profil);
+    public string Profil => Irsaliye ? "TEMELIRSALIYE" : EFaturaKodlari.Profil(Arsiv, Senaryo);
+    public string FaturaTipi => Irsaliye ? "SEVK" : EFaturaKodlari.FaturaTipi(Tipi, Profil);
+    /// <summary>Sevk zamanı: irsaliyenin sevk tarihi, yoksa belge tarihi.</summary>
+    public DateTime SevkZamani => IrsaliyeTarihi ?? Tarih;
     public bool IhracKayitli => Tipi == 9;
 
     /// <summary>
@@ -167,8 +177,9 @@ public sealed class EFaturaVerisi
     public List<string> Eksikler()
     {
         var e = new List<string>();
-        if (!EFaturaKodlari.FaturaMi(Tur)) e.Add("e-Fatura yalnız satış faturasında kesilir.");
+        if (!EFaturaKodlari.EBelgeMi(Tur)) e.Add("e-Belge yalnız satış faturasında / satış irsaliyesinde kesilir.");
         if (Durum == 2) e.Add("Belge iptal edilmiş.");
+        if (Irsaliye) return IrsaliyeEksikleri(e);
         if (TarafId == 0) e.Add("Belgede cari / hasta seçilmemiş.");
         var vkn = EFaturaKodlari.Rakam(Alici.Vkno);
         if (Senaryo != 3 && vkn.Length is not (10 or 11))
@@ -230,6 +241,28 @@ public sealed class EFaturaVerisi
         return e;
     }
 
+    /// <summary>
+    /// e-İRSALİYE DOĞRULAMASI (Delphi SevkBilgisiDogrula): vergi / tevkifat / istisna
+    /// kuralları uygulanmaz; taşıma sorumlusu ZORUNLU - ya taşıyıcı (ünvan + vergi no)
+    /// ya şoför (ad soyad + TC no). Plaka zorunlu değil.
+    /// </summary>
+    private List<string> IrsaliyeEksikleri(List<string> e)
+    {
+        if (TarafId == 0) e.Add("İrsaliyede cari seçilmemiş.");
+        if (EFaturaKodlari.Rakam(Alici.Vkno).Length is not (10 or 11))
+            e.Add($"{Alici.Unvan}: vergi / kimlik numarası 10 ya da 11 hane olmalı.");
+        if (Alici.Il.Length == 0) e.Add("Teslimat adresinde il eksik (cari kartı adresi).");
+        if (Satirlar.Count == 0) e.Add("İrsaliyede kalem yok.");
+        if (Satirlar.Any(s => s.Miktar <= 0)) e.Add("Miktarı sıfır olan kalem var.");
+        if (string.IsNullOrWhiteSpace(Gonderici.Unvan) || EFaturaKodlari.Rakam(Gonderici.Vkno).Length is not (10 or 11))
+            e.Add("Firma (şube) ünvanı / vergi numarası eksik: Yönetim › Firma Bilgileri.");
+        var tasiyiciTam = TasiyiciUnvan.Length > 0 && EFaturaKodlari.Rakam(TasiyiciVkno).Length is 10 or 11;
+        var soforTam = SoforAd.Trim().Length > 0 && EFaturaKodlari.Rakam(SoforTckn).Length == 11;
+        if (!tasiyiciTam && !soforTam)
+            e.Add("Sevk bilgisi eksik (Taşıma sekmesi): taşıyıcı firma (ünvan + vergi no) YA DA şoför (ad soyad + 11 haneli TC no) girilmeli.");
+        return e;
+    }
+
     /// <summary>TR IBAN mod-97 (Delphi KamuFaturaHazirlikDogrula).</summary>
     public static bool IbanGecerli(string iban)
     {
@@ -274,7 +307,9 @@ public sealed class EFaturaVerisi
                    coalesce(ef.sgk_tip, '') sgk_tip, coalesce(ef.sgk_mukellef_kod, '') sgk_mukellef_kod,
                    coalesce(ef.sgk_mukellef_ad, '') sgk_mukellef_ad, coalesce(ef.sgk_dosya_no, '') sgk_dosya_no,
                    ef.sgk_donem_bas, ef.sgk_donem_bit,
-                   coalesce(h.iban, '') kamu_iban, coalesce(h.banka_adi, '') kamu_banka, coalesce(h.banka_subesi, '') kamu_sube
+                   coalesce(h.iban, '') kamu_iban, coalesce(h.banka_adi, '') kamu_banka, coalesce(h.banka_subesi, '') kamu_sube,
+                   coalesce(sv.arac_plaka, '') plaka, coalesce(sv.sofor_ad, '') sofor_ad, coalesce(sv.sofor_tckn, '') sofor_tckn,
+                   coalesce(nullif(btrim(tt.unvan), ''), btrim(coalesce(tt.ad, '') || ' ' || coalesce(tt.soyad, '')), '') tasiyici_unvan, coalesce(tt.vkno, '') tasiyici_vkno
               from public.belge bl
               left join public.taraf t on t.id = bl.taraf_id
               left join public.taraf_adres ta on ta.id = coalesce(bl.taraf_adres_id,
@@ -282,6 +317,8 @@ public sealed class EFaturaVerisi
                           order by a.varsayilan desc, a.id limit 1))
               left join public.belge_efatura ef on ef.belge_id = bl.id
               left join public.hesap h on h.id = ef.kamu_hesap_id
+              left join public.belge_sevkiyat sv on sv.id = bl.id
+              left join public.taraf tt on tt.id = sv.tasiyici_id
              where bl.id = @p0
             """, tx, [belgeId], o => new EFaturaVerisi
         {
@@ -304,6 +341,9 @@ public sealed class EFaturaVerisi
             SgkMukellefAd = o.Metin("sgk_mukellef_ad").Trim(), SgkDosyaNo = o.Metin("sgk_dosya_no").Trim(),
             SgkDonemBas = o.Tarih("sgk_donem_bas"), SgkDonemBit = o.Tarih("sgk_donem_bit"),
             KamuIban = o.Metin("kamu_iban").Replace(" ", ""), KamuBanka = o.Metin("kamu_banka"), KamuSube = o.Metin("kamu_sube"),
+            Plaka = o.Metin("plaka").Replace(" ", "").ToUpperInvariant(), SoforAd = o.Metin("sofor_ad").Trim(),
+            SoforTckn = o.Metin("sofor_tckn").Trim(), TasiyiciUnvan = o.Metin("tasiyici_unvan").Trim(),
+            TasiyiciVkno = o.Metin("tasiyici_vkno").Trim(),
             Gonderici = null!,
         }, iptal) ?? throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
 
@@ -333,6 +373,8 @@ public sealed class EFaturaVerisi
             SgkTip = v.SgkTip, SgkMukellefKod = v.SgkMukellefKod, SgkMukellefAd = v.SgkMukellefAd,
             SgkDosyaNo = v.SgkDosyaNo, SgkDonemBas = v.SgkDonemBas, SgkDonemBit = v.SgkDonemBit,
             KamuIban = v.KamuIban, KamuBanka = v.KamuBanka, KamuSube = v.KamuSube,
+            Plaka = v.Plaka, SoforAd = v.SoforAd, SoforTckn = v.SoforTckn,
+            TasiyiciUnvan = v.TasiyiciUnvan, TasiyiciVkno = v.TasiyiciVkno,
         };
 
         // Son giden e_belge kaydı.

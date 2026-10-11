@@ -21,6 +21,7 @@ public static class UblUretici
 
     public static string Uret(EFaturaVerisi v, IReadOnlyList<string> notlar, string xslt)
     {
+        if (v.Irsaliye) return Irsaliye(v, notlar, xslt);
         var para = v.ParaKodu;
         XElement T(string ad, decimal d) => new(Cbc + ad, new XAttribute("currencyID", para), d.ToString("0.00", C));
         XElement B(string ad, object? d) => new(Cbc + ad, d);
@@ -145,6 +146,87 @@ public static class UblUretici
             kok.Add(satir);
         }
 
+        return Yaz(kok);
+    }
+
+    private static readonly XNamespace Des = "urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2";
+
+    /// <summary>
+    /// UBL-TR 1.2 e-İRSALİYE (DespatchAdvice) - Delphi UBLXMLUret irsaliye dalı. Önizleme /
+    /// XML için; GİB'e izibiz JSON'u gider (<see cref="IzibizGovde"/>), rakamlar aynı veriden.
+    /// </summary>
+    private static string Irsaliye(EFaturaVerisi v, IReadOnlyList<string> notlar, string xslt)
+    {
+        XElement B(string ad, object? d) => new(Cbc + ad, d);
+        var tarih = v.Tarih.ToString("yyyy-MM-dd", C);
+        var kok = new XElement(Des + "DespatchAdvice",
+            new XAttribute(XNamespace.Xmlns + "cac", Cac), new XAttribute(XNamespace.Xmlns + "cbc", Cbc),
+            new XAttribute(XNamespace.Xmlns + "ext", Ext),
+            new XElement(Ext + "UBLExtensions", new XElement(Ext + "UBLExtension", new XElement(Ext + "ExtensionContent"))),
+            B("UBLVersionID", "2.1"), B("CustomizationID", "TR1.2.1"), B("ProfileID", v.Profil),
+            B("ID", v.EBelgeNo), B("CopyIndicator", "false"), B("UUID", v.Uuid),
+            B("IssueDate", tarih), B("IssueTime", v.Tarih.ToString("HH:mm:ss", C)),
+            B("DespatchAdviceTypeCode", v.FaturaTipi),
+            notlar.Select(n => B("Note", n)),
+            B("LineCountNumeric", v.Satirlar.Count));
+        foreach (var s in v.SiparisReferanslari)
+            kok.Add(new XElement(Cac + "OrderReference", B("ID", s.No), B("IssueDate", s.Tarih.ToString("yyyy-MM-dd", C))));
+        if (xslt.Length > 0)
+            kok.Add(new XElement(Cac + "AdditionalDocumentReference", B("ID", v.Uuid), B("IssueDate", tarih),
+                B("DocumentType", "XSLT"),
+                new XElement(Cac + "Attachment", new XElement(Cbc + "EmbeddedDocumentBinaryObject",
+                    new XAttribute("characterSetCode", "UTF-8"), new XAttribute("encodingCode", "Base64"),
+                    new XAttribute("filename", v.EBelgeNo + ".xslt"), new XAttribute("mimeCode", "application/xml"),
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(xslt))))));
+        kok.Add(new XElement(Cac + "Signature",
+            new XElement(Cbc + "ID", new XAttribute("schemeID", "VKN_TCKN"), EFaturaKodlari.Rakam(v.Gonderici.Vkno)),
+            new XElement(Cac + "SignatoryParty", Parti(v.Gonderici, false).Elements()),
+            new XElement(Cac + "DigitalSignatureAttachment", new XElement(Cac + "ExternalReference", B("URI", "#Signature")))));
+        kok.Add(new XElement(Cac + "DespatchSupplierParty", Parti(v.Gonderici, true)));
+        kok.Add(new XElement(Cac + "DeliveryCustomerParty", Parti(v.Alici, false)));
+
+        var tasiyici = v.TasiyiciUnvan.Length > 0 || v.TasiyiciVkno.Length > 0
+            ? new XElement(Cac + "CarrierParty",
+                Parti(new EFaturaTaraf(v.TasiyiciUnvan, v.TasiyiciVkno, "", "", "", "", "Türkiye", "", "", ""), false).Elements())
+            : null;
+        var (ad, soyad) = EFaturaKodlari.AdSoyad(v.SoforAd);
+        kok.Add(new XElement(Cac + "Shipment", B("ID", "1"),
+            new XElement(Cac + "GoodsItem", new XElement(Cbc + "ValueAmount", new XAttribute("currencyID", v.ParaKodu), v.Net.ToString("0.00", C))),
+            new XElement(Cac + "ShipmentStage",
+                v.Plaka.Length > 0
+                    ? new XElement(Cac + "TransportMeans", new XElement(Cac + "RoadTransport",
+                        new XElement(Cbc + "LicensePlateID", new XAttribute("schemeID", "PLAKA"), v.Plaka)))
+                    : null,
+                v.SoforAd.Length > 0
+                    ? new XElement(Cac + "DriverPerson", B("FirstName", ad), B("FamilyName", soyad), B("Title", "Şoför"),
+                        v.SoforTckn.Length > 0 ? B("NationalityID", v.SoforTckn) : null)
+                    : null),
+            new XElement(Cac + "Delivery",
+                new XElement(Cac + "DeliveryAddress", B("StreetName", v.Alici.Adres), B("CitySubdivisionName", v.Alici.Ilce),
+                    B("CityName", v.Alici.Il), B("PostalZone", v.Alici.PostaKodu.Length > 0 ? v.Alici.PostaKodu : "34000"),
+                    new XElement(Cac + "Country", B("Name", "Türkiye"))),
+                tasiyici,
+                new XElement(Cac + "Despatch", B("ActualDespatchDate", v.SevkZamani.ToString("yyyy-MM-dd", C)),
+                    B("ActualDespatchTime", v.SevkZamani.ToString("HH:mm:ss", C))))));
+
+        foreach (var s in v.Satirlar)
+            kok.Add(new XElement(Cac + "DespatchLine", B("ID", s.No),
+                new XElement(Cbc + "DeliveredQuantity", new XAttribute("unitCode", s.BirimKodu), s.Miktar.ToString("0.######", C)),
+                new XElement(Cac + "OrderLineReference", B("LineID", s.No)),
+                new XElement(Cac + "Item", B("Name", s.Ad),
+                    s.StokKodu.Length > 0 ? new XElement(Cac + "SellersItemIdentification", B("ID", s.StokKodu)) : null),
+                new XElement(Cac + "Shipment", B("ID", ""),
+                    new XElement(Cac + "GoodsItem", new XElement(Cac + "InvoiceLine", B("ID", ""),
+                        new XElement(Cbc + "InvoicedQuantity", 0),
+                        new XElement(Cbc + "LineExtensionAmount", new XAttribute("currencyID", v.ParaKodu), s.Net.ToString("0.00", C)),
+                        new XElement(Cac + "Item", B("Name", "")),
+                        new XElement(Cac + "Price", new XElement(Cbc + "PriceAmount", new XAttribute("currencyID", v.ParaKodu),
+                            s.Fiyat.ToString("0.######", C))))))));
+        return Yaz(kok);
+    }
+
+    private static string Yaz(XElement kok)
+    {
         var ayar = new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(false), OmitXmlDeclaration = false };
         var sb = new StringBuilder();
         using (var w = XmlWriter.Create(new Utf8StringWriter(sb), ayar)) new XDocument(kok).Save(w);

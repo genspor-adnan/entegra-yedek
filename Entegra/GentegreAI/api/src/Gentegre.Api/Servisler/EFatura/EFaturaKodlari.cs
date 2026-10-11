@@ -11,12 +11,19 @@ namespace Gentegre.Api.Servisler.EFatura;
 /// belge.efatura_durum: 0 hazırlanmadı · 1 e-Fatura hazır · 2 e-Fatura gönderildi ·
 ///                      11 e-Arşiv hazır · 12 e-Arşiv gönderildi (51/52 e-İrsaliye).
 /// belge.efatura_sonuc (Delphi EFATURASONUC): 0 yeni · 3 hata · 9 GİB'e gönderildi.
-/// e_belge.belge_turu: 1 e-Fatura · 2 e-Arşiv.
+/// e_belge.belge_turu: 1 e-Fatura · 2 e-Arşiv · 7 e-İrsaliye · 8 e-SMM · 9 e-İrsaliye yanıtı (gelen irsaliyeye).
+///
+/// e-İRSALİYE (kullanıcı 11.10.2026, Delphi EBelgeTuruEIrsaliye): satış irsaliyesi (14)
+/// aynı menüden hazırlanır / gönderilir; profil TEMELIRSALIYE, tip SEVK, vergi bloğu yok,
+/// yerine sevkiyat (plaka / şoför / taşıyıcı). e-Arşiv karşılığı YOK: alıcı e-İrsaliye
+/// kullanıcısı değilse kâğıt irsaliye kesilir.
 /// </summary>
 public static class EFaturaKodlari
 {
     public const short TurEFatura = 1;
     public const short TurEArsiv = 2;
+    public const short TurEIrsaliye = 7;
+    public const short TurIrsaliyeYaniti = 9;   // 8 = e-SMM (fn_ebelge_mukellef_mi)
 
     public const short SonucYeni = 0;
     public const short SonucHata = 3;
@@ -25,12 +32,27 @@ public static class EFaturaKodlari
     /// <summary>e-Fatura kesilen belge türleri: satış faturası (15).</summary>
     public static bool FaturaMi(int tur) => tur == 15;
 
-    public static bool Hazir(int durum) => durum is 1 or 11;
+    /// <summary>e-İrsaliye kesilen belge türü: satış irsaliyesi (14).</summary>
+    public static bool IrsaliyeMi(int tur) => tur == 14;
+
+    /// <summary>Giden e-Belge menüsünün açıldığı türler.</summary>
+    public static bool EBelgeMi(int tur) => FaturaMi(tur) || IrsaliyeMi(tur);
+
+    /// <summary>Türün hazırlanmamış hâldeki adı (menü başlığı).</summary>
+    public static string BosAdi(int tur) => IrsaliyeMi(tur) ? "e-İrsaliye" : "e-Fatura";
+
+    public static bool Hazir(int durum) => durum is 1 or 11 or 51;
     public static bool Gonderildi(int durum) => durum is 2 or 12 or 52;
 
-    public static short HazirDurum(short eTur) => eTur == TurEArsiv ? (short)11 : (short)1;
-    public static short GonderildiDurum(short eTur) => eTur == TurEArsiv ? (short)12 : (short)2;
-    public static short ETur(int durum) => durum is 11 or 12 ? TurEArsiv : TurEFatura;
+    public static short HazirDurum(short eTur) => eTur switch { TurEArsiv => 11, TurEIrsaliye => 51, _ => 1 };
+    public static short GonderildiDurum(short eTur) => eTur switch { TurEArsiv => 12, TurEIrsaliye => 52, _ => 2 };
+    public static short ETur(int durum) => durum switch { 11 or 12 => TurEArsiv, 51 or 52 => TurEIrsaliye, _ => TurEFatura };
+
+    /// <summary>e_belge türünün adı (seri / XSLT uyarıları).</summary>
+    public static string ETurAdi(short eTur) => eTur switch
+    {
+        TurEArsiv => "e-Arşiv", TurEIrsaliye => "e-İrsaliye", TurIrsaliyeYaniti => "e-İrsaliye yanıtı", _ => "e-Fatura",
+    };
 
     public static string TurAdi(int durum) => durum switch
     {
@@ -43,8 +65,8 @@ public static class EFaturaKodlari
     public static string DurumAdi(int durum, int sonuc) => durum switch
     {
         0 => "Taslak",
-        1 or 11 => sonuc == SonucHata ? "Hazır · gönderim hatası" : "Hazır",
-        2 or 12 => "Gönderildi",
+        1 or 11 or 51 => sonuc == SonucHata ? "Hazır · gönderim hatası" : "Hazır",
+        2 or 12 or 52 => "Gönderildi",
         _ => "",
     };
 
@@ -54,22 +76,23 @@ public static class EFaturaKodlari
     /// </summary>
     public static string? Engel(string kod, int tur, int belgeDurum, int efaturaDurum)
     {
-        if (!FaturaMi(tur)) return "e-Fatura yalnız satış faturasında kesilir.";
-        var adi = TurAdi(efaturaDurum);
+        if (!EBelgeMi(tur)) return "e-Belge yalnız satış faturasında / satış irsaliyesinde kesilir.";
+        var adi = efaturaDurum == 0 ? BosAdi(tur) : TurAdi(efaturaDurum);
+        var bos = BosAdi(tur);
         var hazir = Hazir(efaturaDurum);
         var gonderildi = Gonderildi(efaturaDurum);
         return kod switch
         {
             "ebelge.hazirla" when gonderildi => $"{adi} zaten gönderilmiş.",
             "ebelge.hazirla" when hazir => $"{adi} zaten hazırlanmış. Değiştirmek için \"Seri Değiştir\" ya da \"Hazırı Geri Al\".",
-            "ebelge.hazirla" or "ebelge.onizle" when belgeDurum == 2 => "İptal edilmiş belge için e-Fatura hazırlanamaz.",
+            "ebelge.hazirla" or "ebelge.onizle" when belgeDurum == 2 => $"İptal edilmiş belge için {bos} hazırlanamaz.",
             "ebelge.gonder" when gonderildi => $"{adi} zaten gönderilmiş.",
-            "ebelge.gonder" when !hazir => "Önce \"Hazırla\" ile e-Fatura oluşturun.",
+            "ebelge.gonder" when !hazir => $"Önce \"Hazırla\" ile {bos} oluşturun.",
             "ebelge.seri" when gonderildi => $"{adi} gönderilmiş; serisi değiştirilemez.",
             "ebelge.seri" when belgeDurum == 2 => "İptal edilmiş belge.",
-            "ebelge.sifirla" when gonderildi => $"{adi} gönderilmiş; geri alınamaz. Düzeltme iade faturasıyla yapılır.",
-            "ebelge.sifirla" when !hazir => "Hazırlanmış e-Fatura yok.",
-            "ebelge.pdf" or "ebelge.html" or "ebelge.xml" when efaturaDurum == 0 => "Önce \"Hazırla\" ile e-Fatura oluşturun.",
+            "ebelge.sifirla" when gonderildi => $"{adi} gönderilmiş; geri alınamaz. Düzeltme iade {(IrsaliyeMi(tur) ? "irsaliyesiyle" : "faturasıyla")} yapılır.",
+            "ebelge.sifirla" when !hazir => $"Hazırlanmış {bos} yok.",
+            "ebelge.pdf" or "ebelge.html" or "ebelge.xml" when efaturaDurum == 0 => $"Önce \"Hazırla\" ile {bos} oluşturun.",
             _ => null,
         };
     }

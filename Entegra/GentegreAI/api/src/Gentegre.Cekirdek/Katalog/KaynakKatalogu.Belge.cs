@@ -549,18 +549,29 @@ public static partial class KaynakKatalogu
             //   anlayayim"). Kodlar e-Belge turune gore ayri: e-Irsaliye 51
             //   hazirlandi / 52 gonderildi. Eskiden burada FATURA kodlari (1/2/3/4)
             //   yaziyordu - hazirlanmis irsaliye "Kağıt" gorunuyordu.
+            // e-BELGE + e-BELGE DURUM (kullanici 11.10.2026, e-Irsaliye entegrasyonu):
+            //   satis faturasi listesiyle ayni iki kolon - TUR (hazirlaninca 'e-İrsaliye')
+            //   ve ASAMA (Taslak / Hazır / Gönderim hatası / Gönderildi).
             new("eIrsaliye",
                 """
-                case coalesce(b.efatura_durum, 0)
-                     when 0  then 'Kağıt'
-                     when 51 then 'e-İrsaliye'
-                     when 52 then 'e-İrsaliye ✓'
-                     when 53 then 'Kabul'
-                     when 54 then 'Red'
-                     else 'Bilinmiyor' end
-                """,                                 "metin", "e-İrsaliye", Hizalama: "orta",
+                case when coalesce(b.efatura_durum, 0) in (51, 52) then 'e-İrsaliye' else '' end
+                """,                                 "metin", "e-Belge", Hizalama: "orta",
+                                                      Bicim: "rozet", Genislik: 105,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("eBelgeDurumAdi",
+                """
+                case when coalesce(b.efatura_durum, 0) = 52 then 'Gönderildi'
+                     when coalesce(b.efatura_durum, 0) = 51 and coalesce(b.efatura_sonuc, 0) = 3 then 'Gönderim hatası'
+                     when coalesce(b.efatura_durum, 0) = 51 then 'Hazır'
+                     when b.tur = 14 then 'Taslak'
+                     else '' end
+                """,                                 "metin", "e-Belge Durum", Hizalama: "orta",
                                                       Bicim: "rozet", Genislik: 120,
                                                       Siralanabilir: false, Filtrelenebilir: false),
+            new("efaturaKodu",   "coalesce(b.efatura_durum, 0)", "sayi", "e-Belge Kodu", Hizalama: "orta",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("efaturaSonucKodu", "coalesce(b.efatura_sonuc, 0)", "sayi", "e-Belge Sonuç Kodu",
+                                                      Hizalama: "orta", Varsayilan: false, Siralanabilir: false),
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta",
                                                       Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),

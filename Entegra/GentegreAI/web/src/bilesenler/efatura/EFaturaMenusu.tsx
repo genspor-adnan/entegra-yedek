@@ -110,7 +110,7 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
   return (
     <span className="dugme-menu efm" ref={kok}>
       <button type="button" className={'d bir' + (devre || idler.length === 0 ? ' efm-pasif' : '')}
-              title={devre ? devreSebep : 'e-Fatura işlemleri'}
+              title={devre ? devreSebep : `${etiket} işlemleri`}
               onClick={ac}>
         <img src={efaturaIkon} alt="" width={16} height={16} className="efm-dugme-ikon" /> {etiket}{coklu ? ` (${idler.length})` : ''} ▾
       </button>

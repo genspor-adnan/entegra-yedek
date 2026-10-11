@@ -20,6 +20,7 @@ public static class IzibizGovde
 
     public static JsonObject Uret(EFaturaVerisi v, IReadOnlyList<string> notlar, string xslt)
     {
+        if (v.Irsaliye) return Irsaliye(v, notlar, xslt);
         var tarih = v.Tarih.ToString("yyyy-MM-dd", Inv);
         var content = new JsonObject
         {
@@ -111,16 +112,7 @@ public static class IzibizGovde
             });
 
         // XSLT GÖMÜLÜ (her belge türünde).
-        ekRef.Add(new JsonObject
-        {
-            ["id"] = v.Uuid, ["documentType"] = "XSLT", ["issueDate"] = tarih,
-            ["attachment"] = new JsonObject
-            {
-                ["characterSetCode"] = "UTF-8", ["encodingCode"] = "Base64",
-                ["filename"] = $"{v.EBelgeNo}.xslt", ["mimeCode"] = "application/xml",
-                ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(xslt)),
-            },
-        });
+        ekRef.Add(XsltRef(v.Uuid, v.EBelgeNo, tarih, xslt));
         content["additionalReferences"] = ekRef;
 
         // SATICI
@@ -206,6 +198,157 @@ public static class IzibizGovde
         kok["content"] = content;
         return kok;
     }
+
+    /// <summary>
+    /// e-İRSALİYE GÖVDESİ (Delphi _IzibizJSONOlustur, LIsIrsaliye dalı; izibiz
+    /// /v2/edespatches/send taslak gönderimiyle doğrulandı 11.10.2026): vergi / toplam
+    /// bloğu yok; shipment = mal değeri + sevk aşaması (plaka, şoför, taşıyıcı) +
+    /// teslimat adresi + fiili sevk zamanı. compressed "false": içerik base64 sanılmasın.
+    /// </summary>
+    private static JsonObject Irsaliye(EFaturaVerisi v, IReadOnlyList<string> notlar, string xslt)
+    {
+        var tarih = v.Tarih.ToString("yyyy-MM-dd", Inv);
+        var content = new JsonObject
+        {
+            ["profile"] = v.Profil,
+            ["documentTypeCode"] = v.FaturaTipi,
+            ["documentNo"] = v.EBelgeNo,
+            ["uuid"] = v.Uuid,
+            ["issueDate"] = tarih,
+            ["issueTime"] = v.Tarih.ToString("HH:mm:ss", Inv),
+            ["notes"] = new JsonArray(notlar.Select(n => (JsonNode?)n).ToArray()),
+            ["currencyCode"] = v.ParaKodu,
+        };
+        // Sipariş referansı irsaliyede DİZİ (Delphi: tekil anahtar izibiz'de sessizce düşüyordu).
+        if (v.SiparisReferanslari.Count > 0)
+            content["orderReferences"] = new JsonArray(v.SiparisReferanslari.Select(s => (JsonNode?)new JsonObject
+            { ["id"] = s.No, ["issueDate"] = s.Tarih.ToString("yyyy-MM-dd", Inv) }).ToArray());
+        content["additionalReferences"] = new JsonArray(XsltRef(v.Uuid, v.EBelgeNo, tarih, xslt));
+        content["supplierParty"] = Taraf(v.Gonderici, arsivIletisim: false, kimlikler: true);
+        content["customerParty"] = Taraf(v.Alici, arsivIletisim: false, kimlikler: false);
+
+        // TAŞIYICI: firma girildiyse o; yoksa şoför tek başına yeter (Delphi SevkTasiyiciTaraf).
+        JsonObject? Tasiyici() => v.TasiyiciUnvan.Length == 0 && v.TasiyiciVkno.Length == 0 ? null
+            : Taraf(new EFaturaTaraf(v.TasiyiciUnvan, v.TasiyiciVkno, "", "", "", "", "TR", "", "", ""), false, false);
+
+        var asama = new JsonObject();
+        if (v.Plaka.Length > 0) asama["licensePlateID"] = v.Plaka;
+        if (v.SoforAd.Length > 0 || v.SoforTckn.Length > 0)
+        {
+            // GİB DriverPerson: FirstName + FamilyName ZORUNLU; tek kelimede ikisi aynı (Delphi SoforAdSoyadAyir).
+            var (ad, soyad) = EFaturaKodlari.AdSoyad(v.SoforAd);
+            var sofor = new JsonObject { ["firstName"] = ad, ["familyName"] = soyad, ["title"] = "Surucu" };
+            if (v.SoforTckn.Length > 0) sofor["nationalityID"] = EFaturaKodlari.Rakam(v.SoforTckn);
+            asama["driverPerson"] = sofor;
+        }
+        if (Tasiyici() is { } t1) asama["carrierParty"] = new JsonArray(t1);
+
+        var teslim = new JsonObject();
+        if (Tasiyici() is { } t2) teslim["carrierParty"] = new JsonArray(t2);
+        var adres = new JsonObject { ["country"] = "TR", ["postalZone"] = v.Alici.PostaKodu.Length > 0 ? v.Alici.PostaKodu : "34000" };
+        if (v.Alici.Il.Length > 0) adres["city"] = v.Alici.Il;
+        if (v.Alici.Ilce.Length > 0) adres["subCity"] = v.Alici.Ilce;
+        if (v.Alici.Adres.Length > 0) adres["streetName"] = v.Alici.Adres;
+        teslim["deliveryAddress"] = adres;
+        teslim["despatch"] = new JsonObject
+        {
+            ["actualDespatchDate"] = v.SevkZamani.ToString("yyyy-MM-dd", Inv),
+            ["actualDespatchTime"] = v.SevkZamani.ToString("HH:mm:ss", Inv),
+        };
+
+        content["shipment"] = new JsonObject
+        {
+            ["id"] = 1,
+            ["goodsItems"] = new JsonArray(new JsonObject { ["currencyId"] = v.ParaKodu, ["valueAmount"] = Y(v.Net) }),
+            ["shipmentStages"] = new JsonArray(asama),
+            ["delivery"] = teslim,
+        };
+
+        content["lines"] = new JsonArray(v.Satirlar.Select(s =>
+        {
+            var o = new JsonObject
+            {
+                ["id"] = s.No, ["quantity"] = s.Miktar, ["unitCode"] = s.BirimKodu,
+                ["lineExtensionAmount"] = Y(s.Net), ["itemName"] = s.Ad, ["itemPrice"] = s.Fiyat,
+            };
+            if (s.StokKodu.Length > 0) o["sellerIdentificationId"] = s.StokKodu;
+            if (s.LotNo.Length > 0)
+                o["additionalItemProperties"] = new JsonArray(new JsonObject { ["name"] = "LOTNO", ["value"] = s.LotNo });
+            o["currencyId"] = v.ParaKodu;
+            return (JsonNode?)o;
+        }).ToArray());
+
+        var kok = new JsonObject
+        {
+            ["documentAction"] = "SEND",
+            ["assignNumber"] = v.EBelgeNo.Length > 0 ? "false" : "true",
+            ["seriePrefix"] = v.EBelgeNo.Length >= 3 ? v.EBelgeNo[..3] : "",
+            ["compressed"] = "false",
+        };
+        if (v.AliciAlias.Length > 0) kok["receiverAlias"] = v.AliciAlias;
+        if (v.GondericiAlias.Length > 0) kok["senderAlias"] = v.GondericiAlias;
+        kok["content"] = content;
+        return kok;
+    }
+
+    /// <summary>
+    /// e-İRSALİYE YANITI (gelen irsaliyeye; izibiz /v2/edespatch-responses/send taslakla
+    /// doğrulandı 11.10.2026): kabulde her satır teslim alınan, redde reddedilen miktarla
+    /// gider. supplierParty = irsaliyeyi bize gönderen, customerParty = biz.
+    /// </summary>
+    public static JsonObject IrsaliyeYaniti(string no, string uuid, DateTime zaman, string irsaliyeNo, DateTime irsaliyeTarihi,
+        EFaturaTaraf irsaliyeyiGonderen, EFaturaTaraf biz, IReadOnlyList<(int No, string Ad, decimal Miktar, string Birim)> satirlar,
+        bool kabul, string aciklama, string xslt, string aliciAlias, string gondericiAlias)
+    {
+        var tarih = zaman.ToString("yyyy-MM-dd", Inv);
+        var content = new JsonObject
+        {
+            ["profile"] = "TEMELIRSALIYE",
+            ["documentTypeCode"] = "SEVK",
+            ["documentNo"] = no,
+            ["uuid"] = uuid,
+            ["issueDate"] = tarih,
+            ["issueTime"] = zaman.ToString("HH:mm:ss", Inv),
+            ["notes"] = new JsonArray(aciklama.Length > 0 ? aciklama : kabul ? "Teslim alındı." : "Reddedildi."),
+            ["despatchDocumentReference"] = new JsonArray(new JsonObject
+            { ["id"] = irsaliyeNo, ["issueDate"] = irsaliyeTarihi.ToString("yyyy-MM-dd", Inv) }),
+            ["additionalReferences"] = new JsonArray(XsltRef(uuid, no, tarih, xslt)),
+            ["supplierParty"] = Taraf(irsaliyeyiGonderen, false, false),
+            ["customerParty"] = Taraf(biz, false, true),
+            ["lines"] = new JsonArray(satirlar.Select(s =>
+            {
+                var o = new JsonObject { ["id"] = s.No, ["itemName"] = s.Ad, ["unitCode"] = s.Birim };
+                if (kabul) o["receivedQuantity"] = new JsonObject { ["quantity"] = s.Miktar, ["unitCode"] = s.Birim };
+                else
+                {
+                    o["receivedQuantity"] = new JsonObject { ["quantity"] = 0, ["unitCode"] = s.Birim };
+                    o["rejectedQuantity"] = new JsonObject { ["quantity"] = s.Miktar, ["unitCode"] = s.Birim };
+                    if (aciklama.Length > 0) o["rejectReason"] = aciklama;
+                }
+                return (JsonNode?)o;
+            }).ToArray()),
+        };
+        var kok = new JsonObject
+        {
+            ["documentAction"] = "SEND", ["assignNumber"] = "false", ["seriePrefix"] = no[..3],
+            ["compressed"] = "false",
+        };
+        if (aliciAlias.Length > 0) kok["receiverAlias"] = aliciAlias;
+        if (gondericiAlias.Length > 0) kok["senderAlias"] = gondericiAlias;
+        kok["content"] = content;
+        return kok;
+    }
+
+    private static JsonObject XsltRef(string uuid, string no, string tarih, string xslt) => new()
+    {
+        ["id"] = uuid, ["documentType"] = "XSLT", ["issueDate"] = tarih,
+        ["attachment"] = new JsonObject
+        {
+            ["characterSetCode"] = "UTF-8", ["encodingCode"] = "Base64",
+            ["filename"] = $"{no}.xslt", ["mimeCode"] = "application/xml",
+            ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(xslt)),
+        },
+    };
 
     private static JsonObject Satir(EFaturaVerisi v, EFaturaSatiri s)
     {

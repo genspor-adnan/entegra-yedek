@@ -216,11 +216,12 @@ export function BelgeAracCubugu({
     <>
       {/* Konsinyede e-Belge YOK: mal birakma GIB'e gitmez, faturasi
           satildikca ayri kesilir. */}
-      {!eBelgeYok && (
-        <button className="d bir" disabled={!kayitliId}
-                title={kayitliId ? 'e-İrsaliye gönderimi henüz bağlanmadı.' : 'Önce irsaliyeyi kaydedin.'}>
-          ✉ e‑İrsaliye Gönder
-        </button>
+      {/* e-İRSALİYE MENUSU (kullanici 11.10.2026): e-Fatura menusuyle ayni maddeler
+          (Hazirla / Onizle / Gonder / Kaydet / Seri / Geri Al / Mesajlar) - yalniz
+          satis irsaliyesi; alis irsaliyesi gelen kutusundan gelir. */}
+      {!eBelgeYok && !alisMi && (
+        <EFaturaMenusu belgeId={kayitliId} devre={!kayitliId} devreSebep="Önce irsaliyeyi kaydedin."
+                       onDegisti={belgeYenile} etiket="e-İrsaliye" />
       )}
       <button className="d" disabled={!kayitliId}
               title={kayitliId ? 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'

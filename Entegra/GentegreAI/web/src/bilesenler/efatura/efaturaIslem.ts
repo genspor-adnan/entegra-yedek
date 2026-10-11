@@ -98,8 +98,8 @@ export async function efaturaCalistir(kod: string, belgeId: number, b: EFaturaBa
       //   tükettiği için sorulur.
       case 'ebelge.onizle': {
         if (d.efaturaDurum === 0) {
-          if (!await onay('e-Fatura henüz hazırlanmamış. Önizleme için önce hazırlansın mı?\n'
-                        + 'Belgeye seri ve e-Fatura numarası verilir.')) return true;
+          if (!await onay(`${d.turAdi} henüz hazırlanmamış. Önizleme için önce hazırlansın mı?\n`
+                        + `Belgeye seri ve ${d.turAdi} numarası verilir.`)) return true;
           if (!await hazirla(belgeId)) return true;
           b.tazele?.();
         }
@@ -137,7 +137,7 @@ export async function efaturaCalistir(kod: string, belgeId: number, b: EFaturaBa
       //   hazırda seri seçtirip yeni numara verir (ETTN değişmez).
       case 'ebelge.seri': {
         if (d.efaturaDurum === 0) {
-          if (!await onay('e-Fatura ikinci uygun seriyle hazırlanacak. Devam edilsin mi?')) return true;
+          if (!await onay(`${d.turAdi} ikinci uygun seriyle hazırlanacak. Devam edilsin mi?`)) return true;
           { const m = await hazirla(belgeId, true); if (m) { mesaj(m); b.tazele?.() } }
           return true;
         }
@@ -192,7 +192,7 @@ export async function efaturaCokluCalistir(kod: string, belgeIdler: number[], b:
 
     switch (k) {
       case 'ebelge.hazirla': {
-        if (!await onay(`${uygun.length} belge e-Fatura olarak hazırlanacak; her birine seri ve numara verilir.`
+        if (!await onay(`${uygun.length} belge e-Belge olarak hazırlanacak; her birine seri ve numara verilir.`
                       + (atlanan.length ? `\n${atlanan.length} belge atlanacak.` : ''))) return;
         const ortak: HazirlaCevaplari = {};
         const e = await secimSor('e-Arşiv olarak hazırlanacak belgelerde alıcı e-postası:', [

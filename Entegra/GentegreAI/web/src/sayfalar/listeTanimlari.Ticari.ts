@@ -21,6 +21,24 @@ const SATIS_FATURA_SEKMELERI = [
   { ad: 'Gönderilmiş', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'icinde' as const, deger: [2, 12] } },
 ];
 
+/** Satis irsaliyesi e-Irsaliye sekmeleri (e-Irsaliye entegrasyonu, 11.10.2026): 51 hazir, 52 gonderildi. */
+const SATIS_IRSALIYE_SEKMELERI = [
+  { ad: 'Tümü', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Taslak', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'esit' as const, deger: 0 } },
+  { ad: 'Hazır', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'esit' as const, deger: 51 } },
+  { ad: 'Gönderilmiş', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'esit' as const, deger: 52 } },
+];
+
+/** Satis irsaliyesi cipleri: faturalama durumu + e-Irsaliye sekmeleri (iki urunde ayni). */
+const SATIS_IRSALIYE_CIPLERI = [
+  { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit' as const, deger: 0 } },
+  { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit' as const, deger: 1 } },
+  { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit' as const, deger: 2 } },
+  { ad: 'Tumu' },
+  { ad: 'Hata/Red', filtre: { alan: 'efaturaSonucKodu', op: 'esit' as const, deger: 3 }, kosul: 'ebelge' as const },
+  ...SATIS_IRSALIYE_SEKMELERI,
+];
+
 /** Alis faturasi / gelen belge ANA SEKMELERI (Delphi UFaturalar, 1037). */
 const GELEN_SEKMELERI = [
   { ad: 'Sistem', rota: 'alis-fatura', sekme: true, kosul: 'ebelge' as const },
@@ -92,16 +110,13 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kaynak siparis, faturalama durumu). Ekran satisa daraltir (tur=14).
     kaynak: 'irsaliye', rota: 'satis-irsaliye', baslik: 'Satış İrsaliyeleri',
     yol: 'Satis › Irsaliyeler', aksiyonEkrani: 'irsaliye-liste',
-    // e-İrsaliye menüsü YOK (11.10.2026): giden e-Belge yeniden yazılırken kapsam e-Fatura + e-Arşiv.
+    // e-İRSALİYE MENÜSÜ (kullanıcı 11.10.2026: "irsaliyelerin izibiz entegrasyonu"): satış
+    //   faturasındaki e-Fatura menüsünün aynısı, çoklu seçimle.
+    ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
-    cipler: [
-      { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
-      { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
-      { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
-      { ad: 'Tumu' },
-    ],
+    cipler: SATIS_IRSALIYE_CIPLERI,
     // FATURANIN ALTINDA (kullanici 11.10.2026: "Satış Faturası menüsünün altına Satış İrsaliyesi").
     menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge.satis.irsaliye',
   },
@@ -110,15 +125,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   Satış Faturaları'nın altında (satis faturasi ikiziyle ayni desen; rota farkli olmak zorunda).
     kaynak: 'irsaliye', rota: 'satis-irsaliyeleri', baslik: 'Satış İrsaliyeleri',
     yol: 'Kurumlar & Sigorta › Satış İrsaliyeleri', aksiyonEkrani: 'irsaliye-liste',
+    ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
-    cipler: [
-      { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
-      { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
-      { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
-      { ad: 'Tumu' },
-    ],
+    cipler: SATIS_IRSALIYE_CIPLERI,
     urunModu: 2, modul: '',
     // Kendi menu kodu (1038): bir yetki kodu tek menu ekrani acar (menuKoduTekEkran); haklar
     //   belge.satis.irsaliye'den kopyalanir, veri yine o kodla okunur.

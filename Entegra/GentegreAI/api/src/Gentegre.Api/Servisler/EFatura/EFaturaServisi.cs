@@ -51,6 +51,11 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         await using var b = await veri.AcAsync(iptal);
         var v = await EFaturaVerisi.OkuAsync(b, null, belgeId, iptal);
         var kullanimda = await b.TekDegerAsync<bool?>("select public.fn_ebelge_acik(@p0)", null, [v.SubeId], iptal) ?? false;
+        // e-İRSALİYE: şubenin ayrıca e-İrsaliye mükellefi olması gerekir (e-Fatura mükellefi olmak yetmez).
+        if (kullanimda && v.Irsaliye)
+            kullanimda = await b.TekDegerAsync<bool?>("select public.fn_ebelge_mukellef_mi(@p0, @p1)", null,
+                                                       [v.SubeId, (int)EFaturaKodlari.TurEIrsaliye], iptal) ?? false;
+        var bos = EFaturaKodlari.BosAdi(v.Tur);
         bool testMi = false;
         try { testMi = (await EBelgeIstemcisi.HesapAsync(b, v.SubeId, "e-Fatura", iptal)).TestMi; } catch (GentegreHatasi) { }
         string[] kodlar = ["ebelge.hazirla", "ebelge.onizle", "ebelge.gonder", "ebelge.pdf", "ebelge.html", "ebelge.xml",
@@ -58,13 +63,13 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         return new
         {
             belgeId, v.Tur, v.EfaturaDurum, v.EfaturaSonuc, kullanimda, testMi,
-            turAdi = v.EfaturaDurum == 0 ? "e-Fatura" : EFaturaKodlari.TurAdi(v.EfaturaDurum),
+            turAdi = v.EfaturaDurum == 0 ? bos : EFaturaKodlari.TurAdi(v.EfaturaDurum),
             durumAdi = EFaturaKodlari.DurumAdi(v.EfaturaDurum, v.EfaturaSonuc),
             belgeNo = v.EBelgeNo.Length > 0 ? v.EBelgeNo : v.BelgeNo, ettn = v.Uuid, aliciAlias = v.AliciAlias,
             dosyaAdi = DosyaAdi(v),
             engeller = kodlar.ToDictionary(k => k, k => kullanimda
                 ? EFaturaKodlari.Engel(k, v.Tur, v.Durum, v.EfaturaDurum)
-                : "Şube e-Fatura mükellefi değil (Yönetim › Firma Bilgileri › e-Belge)."),
+                : $"Şube {bos} mükellefi değil (Yönetim › Firma Bilgileri › e-Belge)."),
         };
     }
 
@@ -75,17 +80,48 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         var v = await EFaturaVerisi.OkuAsync(b, null, belgeId, iptal);
         if (EFaturaKodlari.Engel("ebelge.hazirla", v.Tur, v.Durum, v.EfaturaDurum) is { } engel)
             throw GentegreHatasi.IsKurali(engel);
+        var bos = EFaturaKodlari.BosAdi(v.Tur);
         if (!(await b.TekDegerAsync<bool?>("select public.fn_ebelge_acik(@p0)", null, [v.SubeId], iptal) ?? false))
-            throw GentegreHatasi.IsKurali("Şube e-Fatura mükellefi değil (Yönetim › Firma Bilgileri › e-Belge).");
+            throw GentegreHatasi.IsKurali($"Şube {bos} mükellefi değil (Yönetim › Firma Bilgileri › e-Belge).");
 
         // 1) DOĞRULAMA - numara tüketilmeden.
         var eksik = v.Eksikler();
         if (eksik.Count > 0)
-            throw GentegreHatasi.IsKurali("e-Fatura hazırlanamadı:\n• " + string.Join("\n• ", eksik));
+            throw GentegreHatasi.IsKurali($"{bos} hazırlanamadı:\n• " + string.Join("\n• ", eksik));
 
         // 2) ALICI: e-Fatura mı e-Arşiv mi (Delphi AliasIslemiYap).
-        var hesap = await EBelgeIstemcisi.HesapAsync(b, v.SubeId, "e-Fatura", iptal);
+        var hesap = await EBelgeIstemcisi.HesapAsync(b, v.SubeId, bos, iptal);
         short eTur; string alias;
+        if (v.Irsaliye)
+        {
+            // e-İRSALİYE: alıcının İRSALİYE posta kutusu (GİB listesinde DESPATCHADVICE). e-Arşiv
+            //   karşılığı yok - alıcı e-İrsaliye kullanıcısı değilse kâğıt irsaliye kesilir.
+            eTur = EFaturaKodlari.TurEIrsaliye;
+            if (hesap.TestMi) alias = TestAlias;
+            else
+            {
+                var kayitli = await b.TekDegerAsync<string>("select coalesce(alias_irsaliye, '') from public.taraf where id = @p0",
+                                                             null, [v.TarafId], iptal) ?? "";
+                List<string> kutular;
+                try { kutular = await GibKutulariAsync(hesap, v.Alici.Vkno, iptal, irsaliye: true); }
+                catch (GentegreHatasi) when (kayitli.Length > 0) { kutular = [kayitli]; }
+                await b.CalistirAsync("""
+                    update public.taraf set eirsaliye = @p1,
+                           alias_irsaliye = case when @p1 = 1 and @p2 <> '' then @p2 else alias_irsaliye end,
+                           degistiren = @p3, degistirme_tarihi = now()
+                     where id = @p0
+                    """, null, [v.TarafId, (short)(kutular.Count > 0 ? 1 : 0), kutular.Count == 1 ? kutular[0] : "", bg.KullaniciId], iptal);
+                if (kutular.Count == 0)
+                    throw GentegreHatasi.IsKurali($"{v.Alici.Unvan} GİB e-İrsaliye kullanıcısı değil; bu irsaliye kâğıt olarak düzenlenir.");
+                if (kutular.Count == 1) alias = kutular[0];
+                else if (istek.Alias is { } secilen && kutular.Contains(secilen)) alias = secilen;
+                else if (kutular.Contains(kayitli)) alias = kayitli;
+                else return new HazirlaSonucu("alias", $"{v.Alici.Unvan} birden çok e-İrsaliye posta kutusu kullanıyor; hangisine gönderilsin?",
+                                              Secenekler: kutular);
+            }
+        }
+        else
+        {
         var taraf = await b.TekAsync("""
             select coalesce(efatura, 0) efatura, coalesce(alias_eposta, '') alias, efatura_sorgu_tarihi,
                    coalesce(eposta, '') eposta
@@ -139,9 +175,10 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
                     Varsayilan: v.Alici.Eposta.Length > 0 ? v.Alici.Eposta : taraf.Item4);
             alias = string.Join(";", IzibizGovde.Mailler(istek.Eposta));
         }
+        }
 
         if (!(await b.TekDegerAsync<bool?>("select public.fn_ebelge_mukellef_mi(@p0, @p1)", null, [v.SubeId, eTur], iptal) ?? false))
-            throw GentegreHatasi.IsKurali($"Şube {(eTur == EFaturaKodlari.TurEArsiv ? "e-Arşiv" : "e-Fatura")} mükellefi değil (Yönetim › Firma Bilgileri › e-Belge).");
+            throw GentegreHatasi.IsKurali($"Şube {EFaturaKodlari.ETurAdi(eTur)} mükellefi değil (Yönetim › Firma Bilgileri › e-Belge).");
 
         // 3) SERİ + NUMARA + KAYIT (tek işlem).
         var seri = await SeriBulAsync(b, null, eTur, v.Senaryo, bg.KullaniciId, istek.IkinciSeri, null, iptal);
@@ -167,7 +204,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             returning id
             """, tx, [belgeId, v.TarafId == 0 ? null : v.TarafId, eTur, uuid, no, v.GondericiAlias, alias, durum, v.SubeId,
                       EFaturaKodlari.Rakam(v.Gonderici.Vkno), Kirp(v.Gonderici.Unvan, 200), v.Tarih.Date, v.Odenecek, v.Kdv,
-                      v.ParaKodu, eTur == EFaturaKodlari.TurEArsiv ? "EARSIVFATURA" : EFaturaKodlari.Profil(false, v.Senaryo),
+                      v.ParaKodu, eTur == EFaturaKodlari.TurEArsiv ? "EARSIVFATURA" : v.Irsaliye ? v.Profil : EFaturaKodlari.Profil(false, v.Senaryo),
                       hesap.Entegrator, bg.KullaniciId], iptal);
         await b.CalistirAsync("""
             update public.belge set efatura_durum = @p1, efatura_sonuc = 0, belge_no = @p2, belge_seri = @p3,
@@ -186,7 +223,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     /// GİB e-Fatura kullanıcı listesi (GET /v1/resources/gib-users): alıcının
     /// AKTİF fatura posta kutuları. Boş = GİB kullanıcısı değil (e-Arşiv).
     /// </summary>
-    private async Task<List<string>> GibKutulariAsync(EBelgeHesabi hesap, string vkno, CancellationToken iptal)
+    private async Task<List<string>> GibKutulariAsync(EBelgeHesabi hesap, string vkno, CancellationToken iptal, bool irsaliye = false)
     {
         var istemci = istemciUretici.CreateClient("ebelge");
         var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
@@ -209,7 +246,9 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             if (k.TryGetProperty("active", out var ak) && ak.ValueKind == JsonValueKind.False) continue;
             var a = k.TryGetProperty("alias", out var al) && al.ValueKind == JsonValueKind.String ? (al.GetString() ?? "").Trim() : "";
             var tur = k.TryGetProperty("documentType", out var dt) && dt.ValueKind == JsonValueKind.String ? (dt.GetString() ?? "").ToUpperInvariant() : "";
-            if (a.Length == 0 || tur == "DESPATCHADVICE" || a.ToUpperInvariant().Contains("IRSALIYE")) continue;
+            // e-Fatura kutusu ile e-İrsaliye kutusu AYRI: irsaliye yalnız DESPATCHADVICE kutusuna gider.
+            var irsaliyeKutusu = tur == "DESPATCHADVICE" || (tur.Length == 0 && a.ToUpperInvariant().Contains("IRSALIYE"));
+            if (a.Length == 0 || irsaliyeKutusu != irsaliye) continue;
             if (!liste.Contains(a)) liste.Add(a);
         }
         return liste;
@@ -241,7 +280,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         if (!string.IsNullOrEmpty(once))
             throw GentegreHatasi.IsKurali($"Aynı seride önce {once} gönderilmeli (numara sırası).");
 
-        var hesap = await EBelgeIstemcisi.HesapAsync(b, v.SubeId, "e-Fatura gönderimi", iptal);
+        var hesap = await EBelgeIstemcisi.HesapAsync(b, v.SubeId, $"{EFaturaKodlari.BosAdi(v.Tur)} gönderimi", iptal);
         if (string.IsNullOrWhiteSpace(hesap.Kullanici) || string.IsNullOrWhiteSpace(hesap.Sifre))
             throw GentegreHatasi.IsKurali("Entegratör kullanıcı adı / şifresi girilmemiş (Ayarlar › Genel › Entegrasyon).");
 
@@ -261,7 +300,8 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             throw;
         }
 
-        var yol = v.Arsiv ? "/v1/earchives" : "/v1/einvoices";
+        // Delphi Gonder: irsaliye v2 ve /send sonekli.
+        var yol = v.Irsaliye ? "/v2/edespatches/send" : v.Arsiv ? "/v1/earchives" : "/v1/einvoices";
         using var istek = new HttpRequestMessage(HttpMethod.Post, hesap.Taban + yol)
         { Content = new StringContent(govde, Encoding.UTF8, "application/json") };
         istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
@@ -280,6 +320,12 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             {
                 var hata = EBelgeIstemcisi.HataMetni(metin, yanit.StatusCode);
                 await HataYazAsync(b, v, $"HTTP {kod}: {Kirp(metin, 700)}", kod, hesap.TestMi, bg, iptal);
+                if (v.Irsaliye && metin.Contains("RECEIVER_COULD_NOT_FOUND", StringComparison.OrdinalIgnoreCase))
+                {
+                    await b.CalistirAsync("update public.taraf set eirsaliye = 0 where id = @p0", null, [v.TarafId], iptal);
+                    throw GentegreHatasi.IsKurali("Alıcı GİB e-İrsaliye kullanıcı listesinde yok; irsaliye kâğıt olarak düzenlenmeli. " +
+                                                  "\"Hazırı Geri Al\" ile hazırlığı kaldırın.");
+                }
                 if (!v.Arsiv && metin.Contains("RECEIVER_COULD_NOT_FOUND", StringComparison.OrdinalIgnoreCase))
                 {
                     await b.CalistirAsync("update public.taraf set efatura = 0, efatura_sorgu_tarihi = now() where id = @p0",
@@ -418,7 +464,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     {
         var liste = (await SeriListesiAsync(b, tx, eTur, senaryo, kullanici, iptal)).Where(s => s != haric).ToList();
         if (liste.Count == 0)
-            throw GentegreHatasi.IsKurali($"{(eTur == EFaturaKodlari.TurEArsiv ? "e-Arşiv" : "e-Fatura")} için seri tanımı yok: Firma Bilgileri › e-Belge › Seri.");
+            throw GentegreHatasi.IsKurali($"{EFaturaKodlari.ETurAdi(eTur)} için seri tanımı yok: Firma Bilgileri › e-Belge › Seri.");
         if (ikinci && liste.Count < 2)
             throw GentegreHatasi.IsKurali("İkinci bir seri tanımlı değil.");
         return ikinci ? liste[1] : liste[0];
@@ -462,7 +508,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         string html;
         try { html = xslt.Length > 0 ? Donustur(ubl, xslt) : SadeHtml(v); }
         catch (Exception h) when (h is XsltException or XmlException) { html = SadeHtml(v); }
-        if (filigran && !EFaturaKodlari.Gonderildi(v.EfaturaDurum)) html = FiligranEkle(html);
+        if (filigran && !EFaturaKodlari.Gonderildi(v.EfaturaDurum)) html = FiligranEkle(html, v.Irsaliye ? "TASLAK İRSALİYE" : "TASLAK FATURA");
         return (html, DosyaAdi(v));
     }
 
@@ -478,7 +524,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     {
         var v = await EFaturaVerisi.OkuAsync(b, null, belgeId, iptal);
         if (v.EfaturaDurum == 0 || v.EBelgeId == 0)
-            throw GentegreHatasi.IsKurali("Önce \"Hazırla\" ile e-Fatura oluşturun.");
+            throw GentegreHatasi.IsKurali($"Önce \"Hazırla\" ile {EFaturaKodlari.BosAdi(v.Tur)} oluşturun.");
         v.ETur = EFaturaKodlari.ETur(v.EfaturaDurum);
         v.Hesapla();
         return v;
@@ -495,11 +541,11 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         return sb.ToString();
     }
 
-    private static string FiligranEkle(string html)
+    private static string FiligranEkle(string html, string yazi)
     {
-        const string f = """
+        var f = $"""
             <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999">
-              <div style="transform:rotate(-35deg);font:bold 110px Arial,sans-serif;color:rgba(200,0,0,.13);letter-spacing:8px;white-space:nowrap">TASLAK FATURA</div>
+              <div style="transform:rotate(-35deg);font:bold 110px Arial,sans-serif;color:rgba(200,0,0,.13);letter-spacing:8px;white-space:nowrap">{yazi}</div>
             </div>
             """;
         var i = html.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
@@ -528,7 +574,10 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     /// <summary>Delphi MenuDosyaKaydet: "&lt;E-Fatura|E-ArsivFatura&gt; &lt;no&gt; &lt;carinin ilk 2 kelimesi&gt;".</summary>
     private static string DosyaAdi(EFaturaVerisi v)
     {
-        var tur = EFaturaKodlari.ETur(v.EfaturaDurum) == EFaturaKodlari.TurEArsiv ? "E-ArsivFatura" : "E-Fatura";
+        var tur = (v.Irsaliye ? EFaturaKodlari.TurEIrsaliye : EFaturaKodlari.ETur(v.EfaturaDurum)) switch
+        {
+            EFaturaKodlari.TurEArsiv => "E-ArsivFatura", EFaturaKodlari.TurEIrsaliye => "E-Irsaliye", _ => "E-Fatura",
+        };
         var cari = string.Join(' ', v.Alici.Unvan.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2));
         var ad = $"{tur} {(v.EBelgeNo.Length > 0 ? v.EBelgeNo : v.BelgeNo)} {cari}";
         return Regex.Replace(ad, @"[\\/:*?""<>|]", " ").Trim();
@@ -577,7 +626,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
              order by d.varsayilan desc, d.id limit 1
             """, null, [eTur], iptal) ?? "";
         if (zorunlu && x.Trim().Length == 0)
-            throw GentegreHatasi.IsKurali($"{(eTur == EFaturaKodlari.TurEArsiv ? "e-Arşiv" : "e-Fatura")} için XSLT şablonu yok: Ayarlar › Satış Belgeleri › e-Belge › XSLT.");
+            throw GentegreHatasi.IsKurali($"{EFaturaKodlari.ETurAdi(eTur)} için XSLT şablonu yok: Ayarlar › Satış Belgeleri › e-Belge › XSLT.");
         return x;
     }
 
@@ -588,7 +637,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     private static async Task<List<string>> NotlarAsync(NpgsqlConnection b, EFaturaVerisi v, CancellationToken iptal)
     {
         var sablon = await b.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", null,
-                                                    [v.Arsiv ? "earsiv.sabit_notlar" : "efatura.sabit_notlar"], iptal) ?? "{ACIKLAMA}";
+                                                    [v.Irsaliye ? "eirsaliye.sabit_notlar" : v.Arsiv ? "earsiv.sabit_notlar" : "efatura.sabit_notlar"], iptal) ?? "{ACIKLAMA}";
         var alanlar = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["ACIKLAMA"] = v.Aciklama, ["ACIKLAMA2"] = "", ["BELGENO"] = v.EBelgeNo,
@@ -609,6 +658,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             if (dolu.Length > 0 && (!bos || !Regex.IsMatch(satir, @"\{[A-Za-z0-9_]+\}")))
                 notlar.Add(dolu);
         }
+        if (v.Irsaliye) return notlar;   // irsaliyede vergi notu yok
         foreach (var g in v.VergiGruplari.Where(g => g.IstisnaKodu > 0).Select(g => g.IstisnaAdi).Distinct())
             notlar.Add("KDV İstisna Nedeni: " + g);
         foreach (var g in v.TevkifatGruplari)
