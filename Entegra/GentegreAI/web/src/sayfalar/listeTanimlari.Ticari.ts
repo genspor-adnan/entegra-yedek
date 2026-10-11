@@ -113,6 +113,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kaybediyordu) ve baslik menu adiyla ayni olmali.
     kaynak: 'belge', baslik: 'Satış Faturaları', yol: 'Satis › Satış Faturaları',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
+    // TARIH ARALIGI (kullanici 11.10.2026: "alış ve satış faturalarına tarih aralığı ekle"):
+    //   hazir aralik combosu, acilista tum tarihler.
+    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
+    // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -147,6 +152,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'fatura', baslik: 'Satış Faturaları',
     yol: 'Kurumlar & Sigorta › Satış Faturaları',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
+    // TARIH ARALIGI (kullanici 11.10.2026: "alış ve satış faturalarına tarih aralığı ekle"):
+    //   hazir aralik combosu, acilista tum tarihler.
+    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
+    // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
@@ -274,6 +284,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturaları',
+    // TARIH ARALIGI (kullanici 11.10.2026: "alış ve satış faturalarına tarih aralığı ekle"):
+    //   hazir aralik combosu, acilista tum tarihler.
+    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
+    // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
     yol: 'Alis › Faturalar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 11,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 11 },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],

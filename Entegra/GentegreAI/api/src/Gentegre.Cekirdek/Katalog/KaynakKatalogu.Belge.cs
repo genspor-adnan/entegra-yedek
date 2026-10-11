@@ -146,11 +146,9 @@ public static partial class KaynakKatalogu
                 "case when kb.id is null then '' " +
                 "else case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then 'Başvuru' " +
                 "          else coalesce(kt2.ad, '') end || case when kb.belge_no <> '' " +
-                // " · " AYRACI (kullanici 11.10.2026: "protokol no ve belge tipini
-                //   ayri ayri rozet yap"): grid her parcayi ayri rozet cizer;
-                //   disa aktarimda da okunur kalir.
-                "then ' · ' || kb.belge_no else '' end end",
-                                                      "metin", "Kaynak",      Genislik: 190, Bicim: "rozet",
+                // ROZETSIZ duz metin (kullanici 11.10.2026: "kaynakta rozetleri kaldir").
+                "then ' ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",      Genislik: 190,
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
                 // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir
@@ -575,11 +573,9 @@ public static partial class KaynakKatalogu
                 "case when kb.id is null then '' " +
                 "else case when kb.tur = 19 and coalesce(kb.tipi, 0) = 30 then 'Başvuru' " +
                 "          else coalesce(kt2.ad, '') end || case when kb.belge_no <> '' " +
-                // " · " AYRACI (kullanici 11.10.2026: "protokol no ve belge tipini
-                //   ayri ayri rozet yap"): grid her parcayi ayri rozet cizer;
-                //   disa aktarimda da okunur kalir.
-                "then ' · ' || kb.belge_no else '' end end",
-                                                      "metin", "Kaynak",    Genislik: 190, Bicim: "rozet",
+                // ROZETSIZ duz metin (kullanici 11.10.2026: "kaynakta rozetleri kaldir").
+                "then ' ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",    Genislik: 190,
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
                 // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir
@@ -641,7 +637,7 @@ public static partial class KaynakKatalogu
             new("soforAd",       "sv.sofor_ad",      "metin", "Şoför",     Varsayilan: false),
             new("tur",           "b.tur",            "sayi",  "Tür Kodu",  Hizalama: "orta", Varsayilan: false),
             new("durumAdi",      "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
-                                                      "metin", "Durum",     Hizalama: "orta"),
+                                                      "metin", "Durum",     Hizalama: "orta", Bicim: "rozet"),
             new("durum",         "b.durum",          "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             new("subeId",        "b.sube_id",        "sayi",  "Şube",      Varsayilan: false)
         });

@@ -50,6 +50,8 @@ export interface ListeTanimi {
    * iki tarih kutusu doldurmak yerine tek secim (kullanici).
    */
   tarihCombo?: boolean;
+  /** Combo kipinin ACILIS secimi; verilmezse 'bugun'. '' = tum tarihler. */
+  tarihComboVarsayilan?: 'bugun' | 'dun' | 'son3gun' | 'son1hafta' | 'son1ay' | 'son3ay' | 'buyil' | '';
   /**
    * Ciplerin sagina PRIM ROLU + KISI combolari koyar (kullanici, hakedis
    * satirlari). Kisi listesi secili role gore daralir.

@@ -1154,6 +1154,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
       tarihAlani={tanim.tarihAlani}
       tarihCombo={tanim.tarihCombo}
+      tarihComboVarsayilan={tanim.tarihComboVarsayilan}
       // Ekstreden donunce ayni hesap secili kalsin.
       seciliBaslangicId={sonSeciliId}
       cipBaslangic={cipIndeks}

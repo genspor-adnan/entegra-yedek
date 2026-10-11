@@ -210,7 +210,7 @@ public static partial class KaynakKatalogu
                                               Siralanabilir: false, Filtrelenebilir: false),
         new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
         new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
-                                              "metin", "Durum", Hizalama: "orta"),
+                                              "metin", "Durum", Hizalama: "orta", Bicim: "rozet"),
         new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
         new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false),
     };

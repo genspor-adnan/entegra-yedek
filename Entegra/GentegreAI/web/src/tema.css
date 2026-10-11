@@ -418,7 +418,7 @@ table.grid tr.flt input {
 .rozet.hata { background: var(--hatazem); color: var(--hata) }
 .rozet.uyari { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar) }
 .rozet.mor { background: var(--mor2); color: var(--mor) }
-.rozet.gri { background: var(--yuz2); color: var(--soluk) }
+.rozet.gri { background: var(--yuz2); color: var(--soluk); border: 1px solid var(--cizgi) }   /* kenarsiz gri rozet duz metin gibi okunuyordu (Taslak) */
 /* Birden cok rozet tek hucrede (Kaynak: "Başvuru · P-000161"). */
 .rozet-dizi { display: inline-flex; gap: 4px; flex-wrap: nowrap; white-space: nowrap }
 .deger-serit .rozet + .rozet { margin-left: 4px }
