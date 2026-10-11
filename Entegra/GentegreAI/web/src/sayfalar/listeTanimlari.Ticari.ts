@@ -168,12 +168,15 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   hazir aralik combosu, acilista tum tarihler.
     tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
-    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
+    // ALICI GRUBU e-Belge'nin yerinde (kullanici 11.10.2026: "e-belge sütununu gizle
+    //   onun yerine Alıcı Grubu ekle (Hasta/Kurum/Firma)"); e-Fatura / e-Arşiv ayrimi
+    //   Senaryo kolonunda zaten var.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan', 'aliciGrubu'],
     // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
     kolonBasliklari: { tarafUnvan: 'Alıcı' },
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
-    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum', 'efaturaDurum'],
     // Yalniz SATIS FATURASI (15). 16 "Satis Fisi" ayri ekran; iade ise ayri tur
     //   degil, belge.tipi = 2 - cipler onu kullanir.
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
@@ -209,10 +212,13 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   hazir aralik combosu, acilista tum tarihler.
     tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
-    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
+    // ALICI GRUBU e-Belge'nin yerinde (kullanici 11.10.2026: "e-belge sütununu gizle
+    //   onun yerine Alıcı Grubu ekle (Hasta/Kurum/Firma)"); e-Fatura / e-Arşiv ayrimi
+    //   Senaryo kolonunda zaten var.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan', 'aliciGrubu'],
     // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
     kolonBasliklari: { tarafUnvan: 'Alıcı' },
-    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum', 'efaturaDurum'],
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [

@@ -90,6 +90,17 @@ public static partial class KaynakKatalogu
                 """,                             "metin", "e-Belge Durum", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 130,
                                                  Siralanabilir: false, Filtrelenebilir: false),
+            // ALICI GRUBU (kullanici 11.10.2026): carinin rol bayragindan - kurum (SGK /
+            //   anlasmali kurum) > hasta > digerleri Firma. Satis faturasi listelerinde.
+            new("aliciGrubu",
+                """
+                (select case when coalesce(tg.kurum, 0) = 1 then 'Kurum'
+                             when coalesce(tg.hasta, 0) = 1 then 'Hasta'
+                             else 'Firma' end
+                   from public.taraf tg where tg.id = b.taraf_id)
+                """,                             "metin", "Alıcı Grubu", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 100, Varsayilan: false,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("eBelgeDurumAdi",
                 """
                 case when coalesce(b.efatura_durum, 0) in (2, 12, 52) then 'Gönderildi'
