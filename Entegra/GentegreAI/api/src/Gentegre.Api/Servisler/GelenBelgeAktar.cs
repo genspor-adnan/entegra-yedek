@@ -145,7 +145,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
         // 6) Bag: kutu satiri artik belgeye isaret eder (tekrar aktarim engellenir).
         await using (var bag = new NpgsqlCommand("""
-            update public.e_belge set belge_id = @p1, taraf_id = coalesce(taraf_id, @p2),
+            update public.e_belge set belge_id = @p1, taraf_id = coalesce(taraf_id, @p2), tasnif = 2,
                    degistiren = @p3, degistirme_tarihi = now()::timestamp
              where id = @p0
             """, baglanti))

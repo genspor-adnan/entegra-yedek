@@ -59,7 +59,7 @@ interface Props {
       (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
   /** `kosul: 'ebelge'` verilen cip YALNIZ e-Fatura mukellefinde cizilir
       (sunucu e-Belge aksiyonu donduruyorsa). */
-  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge' }[];
+  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean }[];
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
@@ -685,6 +685,17 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           <div className="hata-kutusu">{hata ?? kolonHatasi}</div>
         )}
 
+        {/* ANA SEKMELER (kullanici 11.10.2026: "delphi gibi sekmeli olsun"): `sekme`
+            isaretli rotali cipler Delphi PageControlTur gibi listenin USTUNDE -
+            Sistem | Gelen Kutusu | Kullanim Disi. Etkin sekme = acik rota. */}
+        {(cipler ?? []).some(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)) && (
+          <div className="katab liste-sekme">
+            {(cipler ?? []).filter(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)).map(c => (
+              <div key={c.ad} className={'kat' + (window.location.pathname.replace(/\/+$/, '').endsWith('/' + c.rota) ? ' on' : '')}
+                   onClick={() => c.rota && onCipRota?.(c.rota)}>{cev(c.ad)}</div>
+            ))}
+          </div>
+        )}
         {/* Serit, CIP OLMASA DA cizilir: basvuru listesinde cipler yerini
             combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
             "Tum Liste / Son / Sik" dugmeleriyle birlikte o combolar da
@@ -724,7 +735,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 acan sekme gostermeyelim. Indeksler ciplerin KENDI dizisinden
                 gelir; suzme yalniz cizimi etkiler. */}
             {(cipler ?? []).map((c, i) => ({ c, i }))
-              .filter(({ c }) => c.kosul !== 'ebelge' || ebelgeMukellef)
+              .filter(({ c }) => !c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef))
               .map(({ c, i }) => (
               <button
                 key={c.ad}

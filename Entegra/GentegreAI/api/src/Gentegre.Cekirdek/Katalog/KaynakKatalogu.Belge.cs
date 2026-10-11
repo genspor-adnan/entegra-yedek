@@ -753,6 +753,11 @@ public static partial class KaynakKatalogu
             new("yanitAciklama",   "e.yanit_aciklama",    "metin", "Yanıt Notu", Varsayilan: false),
             new("gibAciklama",     "e.gib_durum_aciklama", "metin", "GİB Durumu", Varsayilan: false),
             new("durum",           "e.durum",             "sayi",  "Durum Kodu", Varsayilan: false),
+            // TASNIF (1037, Delphi sekmeleri): 1 Gelen Kutusu · 2 Sistem · 3 Kullanim Disi.
+            new("tasnif",          "e.tasnif",            "sayi",  "Tasnif",   Varsayilan: false),
+            // SURESI GECEN: ticari faturaya 8 gun icinde yanit verilmedi (Delphi EFATURASONUC 5).
+            new("suresiGecti",     "case when e.durum = 100 and e.belge_tarihi < now() - interval '8 days' then 1 else 0 end",
+                                                          "sayi",  "Süresi Geçti", Varsayilan: false),
             new("belgeTuru",       "e.belge_turu",        "sayi",  "Tür Kodu", Varsayilan: false),
             new("tarafId",         "e.taraf_id",          "sayi",  "Cari Id",  Varsayilan: false),
             new("subeId",          "e.sube_id",           "sayi",  "Şube",     Varsayilan: false)

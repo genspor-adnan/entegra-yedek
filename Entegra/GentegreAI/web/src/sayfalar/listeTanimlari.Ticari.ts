@@ -8,6 +8,13 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  * sürüyordu. Tanımlar değişmedi, yalnız yer değiştirdi - dizi sırası
  * da birebir korundu (ana dosya parçaları sırayla birleştirir).
  */
+/** Alis faturasi / gelen belge ANA SEKMELERI (Delphi UFaturalar, 1037). */
+const GELEN_SEKMELERI = [
+  { ad: 'Sistem', rota: 'alis-fatura', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Gelen Kutusu', rota: 'gelen-belge', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Kullanım Dışı', rota: 'gelen-belge-disi', sekme: true, kosul: 'ebelge' as const },
+];
+
 export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -
@@ -140,22 +147,36 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.
     //   Kart YOK - belge bizim degil; cift tik gonderenin goruntusunu acar.
+    // DELPHI SEKMELERI (1037, kullanici: "delphi gibi sekmeli olsun"): Alis Faturalari
+    //   ekraninin ana sekmeleri Sistem | Gelen Kutusu | Kullanim Disi; Gelen Kutusu'nun
+    //   alt sekmeleri Alindi | Yanit Bekleyen | Hata/Red | Suresi Gecen (Delphi
+    //   _GelenSekmeUygula). Modul suzgeci YOK (modul: ''): hastane de tedarikciden
+    //   e-Fatura alir - HBYS'de ekran acilmiyordu.
     kaynak: 'gelen-belge', rota: 'gelen-belge', baslik: 'Gelen Kutusu',
-    yol: 'Alis › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
+    yol: 'Alış Faturaları › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
     ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
+    sabitFiltre: { alan: 'tasnif', op: 'esit', deger: 1 },
     cipler: [
+      { ad: 'Alındı' },
       { ad: 'Yanıt Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 100 } },
-      { ad: 'Kabul',          filtre: { alan: 'durum', op: 'esit', deger: 101 } },
-      { ad: 'Red',            filtre: { alan: 'durum', op: 'esit', deger: 102 } },
-      { ad: 'Tumu' },
-      // Geri donus: iki liste tek ekranin iki sekmesi gibi calissin.
-      { ad: '🧾 Alış Faturaları', rota: 'alis-fatura' },
+      { ad: 'Hata/Red',       filtre: { alan: 'durum', op: 'esit', deger: 102 } },
+      { ad: 'Süresi Geçen',   filtre: { alan: 'suresiGecti', op: 'esit', deger: 1 } },
+      ...GELEN_SEKMELERI,
     ],
-    // MENUDE YOK (kullanici): Alis Faturalari > "Gelen Kutusu" sekmesinden
-    //   girilir; menude ikinci bir giris ayni ekrani iki yerde gosterirdi.
-    menuGizli: true,
-    menuGrup: 'Alış', menuSira: 10, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',   // 1004: Alış Faturaları çipi
+    menuGizli: true, modul: '',
+    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge.alis_fatura',
+  },
+  {
+    // KULLANIM DISI (1037, Delphi 'Kullanım Dışı'na Taşı): islenmeyecek gelen belgeler.
+    kaynak: 'gelen-belge', rota: 'gelen-belge-disi', baslik: 'Kullanım Dışı',
+    yol: 'Alış Faturaları › Kullanım Dışı', aksiyonEkrani: 'gelen-belge-liste',
+    ebelgeMenusu: 'E-Fatura',
+    toplam: ['tutar'],
+    sabitFiltre: { alan: 'tasnif', op: 'esit', deger: 3 },
+    cipler: [{ ad: 'Tümü' }, ...GELEN_SEKMELERI],
+    menuGizli: true, modul: '',
+    menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'Kullanım Dışı', ic: '📥', yetkiKodu: 'belge.alis_fatura',
   },
   {
     // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
@@ -244,9 +265,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
-      // Bize KESILEN e-Faturalar (187): ayni serit, ayri kaynak. Alis
-      //   faturasi olarak islenecek belgeler once burada gorunur.
-      { ad: '📥 Gelen Kutusu', rota: 'gelen-belge', kosul: 'ebelge' },
+      // Bize KESILEN e-Faturalar (187/1037): Delphi gibi ANA SEKMELER (Sistem =
+      //   bu liste). Sube mukellef degilse cizilmez.
+      ...GELEN_SEKMELERI,
     ],
     menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturaları', ic: '🧾',
     yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod

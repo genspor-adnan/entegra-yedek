@@ -42,6 +42,17 @@ function goruntuUret(ubl: string): string {
   return hamXmlGorunumu(ubl);
 }
 
+/** TASNIF TASIMA (1037, Delphi 'Gelen Kutusu'na / 'Kullanım Dışı'na Taşı) - tek ya da çoklu. */
+async function tasi(kod: string, satirlar: ListeSatiri[], yenile: () => void): Promise<boolean> {
+  const hedef = kod === 'gelen.tasi-gelen' ? 1 : 3;
+  await guvenli(async () => {
+    const y = await api.gelenBelgeTasi(satirlar.map(s => Number(s.id)), hedef);
+    mesaj(y.mesaj);
+    yenile();
+  });
+  return true;
+}
+
 /**
  * COKLU SECIM (kullanici 11.10.2026: gelen kutusu yeni menuye): kabul / red /
  * aktar / HTML / XML seçili belgelerin hepsinde - onay ve gerekce BIR KEZ
@@ -49,6 +60,7 @@ function goruntuUret(ubl: string): string {
  * ötekiler atlanir. Tek belgede `gelenBelgeAksiyonu`.
  */
 export async function gelenCokluAksiyonu(kod: string, satirlar: ListeSatiri[], yenile: () => void): Promise<boolean> {
+  if (kod === 'gelen.tasi-gelen' || kod === 'gelen.tasi-disi') return tasi(kod, satirlar, yenile);
   if (!['gelen.kabul', 'gelen.red', 'gelen.aktar', 'ebelge.html', 'ebelge.xml'].includes(kod)) {
     mesaj('Bu işlem için tek bir belge seçin.');
     return true;
@@ -151,6 +163,11 @@ export async function gelenBelgeAksiyonu(
         mesajGoster?.({ belgeNo: no, satirlar: y.mesajlar });
       });
       return true;
+
+    case 'gelen.tasi-gelen':
+    case 'gelen.tasi-disi':
+      if (!satir) return true;
+      return tasi(kod, [satir], yenile);
 
     case 'gelen.yenile':
       await guvenli(async () => {

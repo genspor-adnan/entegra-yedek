@@ -162,6 +162,10 @@ export const belgeUclari = {
   gelenBelgeMesajlar: (id: number) =>
     istek<{ mesajlar: EBelgeMesaji[] }>(`/api/gelen-belge/${id}/mesajlar`),
 
+  /** Gelen belgeyi Gelen Kutusu (1) / Kullanım Dışı (3) tasnifine taşır (1037). */
+  gelenBelgeTasi: (idler: number[], hedef: 1 | 3) =>
+    gonder<{ tasinan: number; mesaj: string }>('/api/gelen-belge/tasi', { idler, hedef }),
+
   /** Gelen belgeyi ALIS FATURASINA aktarir (187). */
   gelenBelgeAktar: (id: number) =>
     gonder<{ belgeId: number; belgeNo: string; satirSayisi: number;

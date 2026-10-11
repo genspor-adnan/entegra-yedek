@@ -7,7 +7,9 @@ import { EFM_STILI } from './EFaturaMenusu';
 //   menusunun GELEN belge maddeleri (Onizle 46, Kabul Et 11, Red Et 31, 'Sistem'e Tasi 11,
 //   PDF/HTML/XML 10, Mesajlar 43; dugme 30).
 import efaturaIkon from './ikon/efatura.png';
+import gelenKutusuIkon from './ikon/gelenkutusu.png';
 import kabulIkon from './ikon/kabul.png';
+import kullanimDisiIkon from './ikon/kullanimdisi.png';
 import kaydetIkon from './ikon/kaydet.png';
 import mesajlarIkon from './ikon/mesajlar.png';
 import onizleIkon from './ikon/onizle.png';
@@ -29,7 +31,10 @@ const MADDELER: (readonly [string, string, string] | null)[] = [
   null,
   ['gelen.kabul', kabulIkon, 'Kabul Et'],
   ['gelen.red', redIkon, 'Red Et'],
-  ['gelen.aktar', kabulIkon, 'Alış Faturasına Aktar'],
+  // TASNIF (1037, Delphi): 'Sistem'e Tasi = alis faturasina aktar.
+  ['gelen.aktar', kabulIkon, "'Sistem'e Taşı"],
+  ['gelen.tasi-gelen', gelenKutusuIkon, "'Gelen Kutusu'na Taşı"],
+  ['gelen.tasi-disi', kullanimDisiIkon, "'Kullanım Dışı'na Taşı"],
   null,
   ['ebelge.pdf', kaydetIkon, 'PDF Kaydet'],
   ['ebelge.html', kaydetIkon, 'HTML Kaydet'],
@@ -44,6 +49,10 @@ export function gelenEngel(kod: string, satirlar: ListeSatiri[]): string | null 
   if (satirlar.length > 1 && TEK.includes(kod)) return 'Bu işlem için tek bir belge seçin.';
   if ((kod === 'gelen.kabul' || kod === 'gelen.red') && !satirlar.some(s => Number(s.durum) === 100))
     return 'Yalnız yanıt bekleyen (ticari) belge kabul / red edilir.';
+  const tasnif = (s: ListeSatiri) => Number(s.tasnif ?? 1);
+  if (kod === 'gelen.aktar' && satirlar.every(s => tasnif(s) === 2)) return 'Belge(ler) zaten sistemde.';
+  if (kod === 'gelen.tasi-gelen' && satirlar.every(s => tasnif(s) !== 3)) return "Yalnız Kullanım Dışı'ndaki belge Gelen Kutusu'na taşınır.";
+  if (kod === 'gelen.tasi-disi' && satirlar.every(s => tasnif(s) !== 1)) return "Yalnız Gelen Kutusu'ndaki belge Kullanım Dışı'na taşınır.";
   return null;
 }
 
