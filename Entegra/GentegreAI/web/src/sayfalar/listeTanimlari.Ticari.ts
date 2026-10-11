@@ -8,6 +8,19 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  * sürüyordu. Tanımlar değişmedi, yalnız yer değiştirdi - dizi sırası
  * da birebir korundu (ana dosya parçaları sırayla birleştirir).
  */
+/**
+ * SATIS FATURASI ANA SEKMELERI (Delphi UFaturalar PageControlTur, giden 15; kullanici
+ * 11.10.2026: "satış faturaları listesi de delphi gibi sekmeli olsun"): Tumu | Taslak
+ * (e-Belge hazirlanmadi) | Hazir | Gonderilmis. Delphi'nin Gonderilmis alt sekmelerinden
+ * Bekleyen / Suresi Gecen giden belgede izlenmiyor; Hata/Red alt cipte (gonderim hatasi).
+ */
+const SATIS_FATURA_SEKMELERI = [
+  { ad: 'Tümü', sekme: true, kosul: 'ebelge' as const },
+  { ad: 'Taslak', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'esit' as const, deger: 0 } },
+  { ad: 'Hazır', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'icinde' as const, deger: [1, 11] } },
+  { ad: 'Gönderilmiş', sekme: true, kosul: 'ebelge' as const, filtre: { alan: 'efaturaKodu', op: 'icinde' as const, deger: [2, 12] } },
+];
+
 /** Alis faturasi / gelen belge ANA SEKMELERI (Delphi UFaturalar, 1037). */
 const GELEN_SEKMELERI = [
   { ad: 'Sistem', rota: 'alis-fatura', sekme: true, kosul: 'ebelge' as const },
@@ -111,6 +124,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+      { ad: 'Hata/Red', filtre: { alan: 'efaturaSonucKodu', op: 'esit', deger: 3 }, kosul: 'ebelge' },
+      ...SATIS_FATURA_SEKMELERI,
     ],
     // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
     //   aşağıdaki ikiz tanıma bak.
@@ -139,6 +154,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+      { ad: 'Hata/Red', filtre: { alan: 'efaturaSonucKodu', op: 'esit', deger: 3 }, kosul: 'ebelge' },
+      ...SATIS_FATURA_SEKMELERI,
     ],
     urunModu: 2, modul: '',
     menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Satış Faturaları',

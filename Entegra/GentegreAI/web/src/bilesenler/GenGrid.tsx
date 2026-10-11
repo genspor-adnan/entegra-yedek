@@ -287,6 +287,15 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const { satirBoyu, satirBoyuSec, yanKapali, setYanKapali, solKapali, setSolKapali } =
     useGridTercihleri(kaynak, !!solPanel);
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
+  // FILTRE SEKMESI (Delphi PageControlTur, 11.10.2026): rotasiz `sekme` cipi listenin
+  //   ustunde sekme olarak cizilir ve kendi suzgecini sabit suzgece EKLER; alttaki
+  //   cipler (Tumu / Fatura / Iade) sekmenin icinde suzer.
+  const filtreSekmeleri = (cipler ?? []).map((c, i) => ({ c, i })).filter(x => x.c.sekme && !x.c.rota);
+  const [sekmeIndeks, setSekmeIndeks] = useState<number>(filtreSekmeleri[0]?.i ?? -1);
+  const sekmeFiltresi = sekmeIndeks >= 0 ? cipler?.[sekmeIndeks]?.filtre : undefined;
+  const sabitFiltreSekmeli: Kosul | undefined = sekmeFiltresi
+    ? (sabitFiltre ? { op: 'and', kosullar: [sabitFiltre, sekmeFiltresi] } : sekmeFiltresi)
+    : sabitFiltre;
   /**
    * DISARIDAN GELEN CIP degisince ic state de gecmeli.
    *
@@ -355,7 +364,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           yukleniyor, hata, sureMs,
           yukle, csvIndir, sonSayfa } =
     useListeVerisi({
-      kaynak, baslik, kolonlar, sabitFiltre, toplam, sayfaBoyu, cipler, cipIndeks,
+      kaynak, baslik, kolonlar, sabitFiltre: sabitFiltreSekmeli, toplam, sayfaBoyu, cipler, cipIndeks,
       kodSuzgeci, kodSuzgecDeger, tarihAlani, tarihBas, tarihBit, varsayilanGrup,
       yenile, odaklaSonEklenen, filtreSatiriFiltresi,
     });
@@ -691,8 +700,13 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
         {(cipler ?? []).some(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)) && (
           <div className="katab liste-sekme">
             {(cipler ?? []).filter(c => c.sekme && (c.kosul !== 'ebelge' || ebelgeMukellef)).map(c => (
-              <div key={c.ad} className={'kat' + (window.location.pathname.replace(/\/+$/, '').endsWith('/' + c.rota) ? ' on' : '')}
-                   onClick={() => c.rota && onCipRota?.(c.rota)}>{cev(c.ad)}</div>
+              <div key={c.ad}
+                   className={'kat' + ((c.rota ? window.location.pathname.replace(/\/+$/, '').endsWith('/' + c.rota)
+                                               : (cipler ?? []).indexOf(c) === sekmeIndeks) ? ' on' : '')}
+                   onClick={() => {
+                     if (c.rota) { onCipRota?.(c.rota); return }
+                     secimiUygula(new Set()); setSekmeIndeks((cipler ?? []).indexOf(c)); setSayfa(1);
+                   }}>{cev(c.ad)}</div>
             ))}
           </div>
         )}

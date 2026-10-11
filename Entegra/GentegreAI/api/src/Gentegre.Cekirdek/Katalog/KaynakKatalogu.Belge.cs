@@ -441,6 +441,10 @@ public static partial class KaynakKatalogu
             // Ham e-Belge kodu (230): ÜTS verme secim listesi "hazirlanmis/
             //   gonderilmis" suzmesi icin filtrelenebilir sayi (gorunen
             //   'efaturaDurum' CASE metni filtrelenemiyor).
+            // e-Belge sonuc kodu (Delphi EFATURASONUC): 3 gonderim hatasi - satis faturasi
+            //   listesinin Hata/Red alt sekmesi (sekmeli liste, 11.10.2026).
+            new("efaturaSonucKodu", "coalesce(b.efatura_sonuc, 0)", "sayi", "e-Belge Sonuç Kodu",
+                Hizalama: "orta", Varsayilan: false, Siralanabilir: false),
             new("efaturaKodu",   "coalesce(b.efatura_durum, 0)",
                                                  "sayi", "e-Belge Kodu", Hizalama: "orta",
                                                  Varsayilan: false, Siralanabilir: false),

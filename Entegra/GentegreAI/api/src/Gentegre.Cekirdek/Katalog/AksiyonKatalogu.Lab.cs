@@ -605,10 +605,11 @@ public static partial class AksiyonKatalogu
                 AksiyonYetkisi: "ebelge.gonder", Sira: 10),
             new("gelen.goruntule", "Belgeyi Görüntüle", "gelen", Kisayol: "Enter",
                 KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+            // RENK (kullanici 11.10.2026): Kabul yesil, Red kirmizi.
             new("gelen.kabul",   "✓ Kabul Et",      "gelen", Hedef: "araccubugu,sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 30),
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 30, Bicim: "onay"),
             new("gelen.red",     "✕ Reddet",        "gelen", Hedef: "araccubugu,sagtus,palet",
-                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 40),
+                AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 40, Bicim: "ret"),
             // ALIS FATURASINA AKTAR: kutu satiri muhasebeye ancak boyle girer
             //   (kutunun kendisi cari borc/alacak URETMEZ - kullanici kurali).
             //   Kabulde otomatik calisir; burada yanit gerekmeyen belgeler
