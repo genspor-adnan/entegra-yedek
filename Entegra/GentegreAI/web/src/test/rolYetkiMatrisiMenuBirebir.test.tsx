@@ -22,10 +22,10 @@ const YETKILER = [
   satir(1, 'panel', 'Sistem'),
   satir(2, 'gorev', 'CRM'),
   satir(3, 'radyoloji-istem', 'Sistem'),
-  satir(4, 'klinik_kalite.olgu', 'Kalite'),
+  satir(4, 'klinik_kalite.olgu', 'Klinik Kalite'),
   // Sunucu rolün TÜM yetki satırlarını döndürür; alt ekranın üst kodu da
   //   listede (kapalı) durur.
-  satir(5, 'klinik_kalite', 'Kalite', false),
+  satir(5, 'klinik_kalite', 'Klinik Kalite', false),
 ];
 
 vi.mock('../api/istemci', () => ({

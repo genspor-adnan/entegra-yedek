@@ -70,7 +70,7 @@ export function KaliteIcmal() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Kalite / SKS İcmali</h1>
-          <span className="yol">Kalite › Kalite / SKS İcmali</span>
+          <span className="yol">Klinik Kalite › Kalite / SKS İcmali</span>
         </div>
       </div>
 

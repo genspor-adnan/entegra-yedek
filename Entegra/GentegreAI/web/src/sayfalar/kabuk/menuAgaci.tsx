@@ -69,7 +69,7 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Kalite', 'Onay', 'Sabit Varlıklar',
+  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Klinik Kalite', 'Onay', 'Sabit Varlıklar',
   // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Sistem ve Dökümler en sonda).
   'Güvenlik', 'Formlar', 'Platform',
 ];
@@ -259,7 +259,7 @@ export const GRUP_IKON: Record<string, string> = {
   'Dökümler': '📊',
   // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
   //   grup olunca aynı simgeler.
-  'Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
+  'Klinik Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
   'Onay': '✅', 'Formlar': '🗂',
 };
 
@@ -290,7 +290,7 @@ export const ALTGRUP_IKON: Record<string, string> = {
   //   simge, iki alt grup birbirinden ayirt edilemiyordu. Madalya KALITE
   //   BELGESINI/akreditasyonu anlatiyor; 🎯 (Satis Firsatlari, Prim Planlari)
   //   ve 📊 (e-Nabiz Veri Kalitesi) zaten kullanimda.
-  'Kalite': '🏅',
+  'Klinik Kalite': '🏅',
   // TELERADYOLOJI (799): tabloda yoktu, varsayilan ⚙️ ile ciziliyordu -
   //   Radyoloji'nin altinda "Ayarlar" ile AYNI simge. Uydu, isin disaridan
   //   gelip disariya gitmesini anlatiyor; ☢️ zaten Radyoloji'nin kendisi.

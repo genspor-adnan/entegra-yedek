@@ -60,7 +60,7 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
     // SİSTEM (10.10.2026, kullanıcı): eski "Yönetim" grubu - bölgeyle aynı adı
     //   taşıyor, "Yönetim › Yönetim" okunuyordu. Dökümler (tasarımcı) en sonda.
     // Kalite Onay'dan önce (kullanıcı 10.10.2026: "onay ve kaliteyi yer değiş").
-    gruplar: ['İK', 'Doküman', 'Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
+    gruplar: ['İK', 'Doküman', 'Klinik Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
               'Sistem', 'Dökümler'] },
 ];
 

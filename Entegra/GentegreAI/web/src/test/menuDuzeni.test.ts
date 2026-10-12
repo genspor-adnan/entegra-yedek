@@ -68,7 +68,7 @@ describe('menü düzeni', () => {
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
       // Kalite / Güvenlik / Platform (10.10.2026): yönetim ayar grupları, Yönetim gibi.
-      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar', 'Sistem', 'Dökümler'].includes(g)) continue;
+      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Klinik Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar', 'Sistem', 'Dökümler'].includes(g)) continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });
