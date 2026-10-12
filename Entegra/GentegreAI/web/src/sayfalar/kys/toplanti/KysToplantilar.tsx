@@ -52,6 +52,11 @@ export function KysToplantilar() {
               if (!secili || !await silOnayi(String(secili.karar ?? secili.toplantiAdi ?? ''))) return;
               await api.kartSil(secKaynak, Number(secili.id)); setSecili(null); setYenile(t => t + 1);
             })} />
+          {/* Mockup: "🖨️ Toplantı Tutanağı" araç çubuğunda - seçili toplantının
+              (Kararlar sekmesinde seçili kararın toplantısının) tutanağı. */}
+          <button className="d" disabled={!secili}
+                  onClick={() => secili && void tutanakYazdir(Number(sekme === 'k' ? secili.toplantiId : secili.id))}>
+            🖨️ {c('Toplantı Tutanağı')}</button>
         </div></div></div>
 
       <div className="katab">
@@ -86,17 +91,16 @@ export function KysToplantilar() {
       {sekme === 't' && (
         <table className="fm-tablo">
           <thead><tr><th style={{ width: 100 }}>{c('Tarih')}</th><th style={{ width: 240 }}>{c('Toplantı')}</th><th>{c('Katılımcılar')}</th>
-            <th className="orta" style={{ width: 70 }}>{c('Karar')}</th><th className="orta" style={{ width: 70 }}>{c('Açık')}</th><th style={{ width: 150 }} /></tr></thead>
+            <th style={{ width: 70, textAlign: 'center' }}>{c('Karar')}</th><th style={{ width: 70, textAlign: 'center' }}>{c('Açık')}</th></tr></thead>
           <tbody>
             {(toplantilar ?? []).map(t => (
               <tr key={String(t.id)} className={secili?.id === t.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
                     onClick={() => setSecili(t)} onDoubleClick={() => git(`/kys-toplanti/${t.id}${GERI}`)}>
                 <td>{tarih(t.tarih)}</td><td>{String(t.toplantiAdi ?? '')}</td><td>{String(t.katilimcilar ?? '')}</td>
-                <td className="orta">{String(t.kararSayisi ?? 0)}</td><td className="orta">{String(t.acikKarar ?? 0)}</td>
-                <td><button className="d mini" onClick={e => { e.stopPropagation(); void tutanakYazdir(Number(t.id)) }}>🖨️ {c('Tutanak')}</button></td>
+                <td style={{ textAlign: 'center' }}>{String(t.kararSayisi ?? 0)}</td><td style={{ textAlign: 'center' }}>{String(t.acikKarar ?? 0)}</td>
               </tr>
             ))}
-            {toplantilar && !toplantilar.length && <tr><td colSpan={6} className="sonuk">{c('Toplantı yok - ＋ Toplantı ile ekleyin.')}</td></tr>}
+            {toplantilar && !toplantilar.length && <tr><td colSpan={5} className="sonuk">{c('Toplantı yok - ＋ Toplantı ile ekleyin.')}</td></tr>}
           </tbody>
         </table>
       )}
