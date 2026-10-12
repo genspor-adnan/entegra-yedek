@@ -43,6 +43,16 @@ import { CAGRI_LISTELERI } from './listeTanimlari.Cagri';
 import { STERIL_LISTELERI } from './listeTanimlari.Steril';
 import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
 import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
+import { KYS_AYAR_LISTELERI } from './listeTanimlari.KysAyar';
+import { KYS_EGITIM_LISTELERI } from './listeTanimlari.KysEgitim';
+import { KYS_KALIBRASYON_LISTELERI } from './listeTanimlari.KysKalibrasyon';
+import { KYS_PANO_LISTELERI } from './listeTanimlari.KysPano';
+import { KYS_TEDARIKCI_LISTELERI } from './listeTanimlari.KysTedarikci';
+import { KYS_DOF_LISTELERI } from './listeTanimlari.KysDof';
+import { KYS_DENETIM_LISTELERI } from './listeTanimlari.KysDenetim';
+import { KYS_OLAY_RISK_LISTELERI } from './listeTanimlari.KysOlayRisk';
+import { KYS_GOSTERGE_LISTELERI } from './listeTanimlari.KysGosterge';
+import { KYS_TOPLANTI_LISTELERI } from './listeTanimlari.KysToplanti';
 import { AMELIYATHANE_LISTELERI } from './listeTanimlari.Ameliyathane';
 import { ACIL_LISTELERI } from './listeTanimlari.Acil';
 import { ENABIZ_LISTELERI } from './listeTanimlari.Enabiz';
@@ -118,6 +128,16 @@ export const LISTELER: ListeGirdisi[] = [
   ...STERIL_LISTELERI,
   ...MEDULA_LISTELERI,
   ...KLINIK_KALITE_LISTELERI,
+  ...KYS_OLAY_RISK_LISTELERI,
+  ...KYS_DOF_LISTELERI,
+  ...KYS_DENETIM_LISTELERI,
+  ...KYS_GOSTERGE_LISTELERI,
+  ...KYS_TOPLANTI_LISTELERI,
+  ...KYS_TEDARIKCI_LISTELERI,
+  ...KYS_PANO_LISTELERI,
+  ...KYS_KALIBRASYON_LISTELERI,
+  ...KYS_EGITIM_LISTELERI,
+  ...KYS_AYAR_LISTELERI,
   ...AMELIYATHANE_LISTELERI,
   ...ACIL_LISTELERI,
   ...ENABIZ_LISTELERI,
@@ -167,6 +187,8 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'FTR':           'ftr',
   // ISG (741): isyeri hekimligi - OSGB / hastane / tip merkezi.
   'İşyeri Hekimliği': 'isg',
+  // KURUMSAL KALİTE (1048): ISO 9001 / SKS - modül kapalı kurumda grup çizilmez.
+  'Kalite':        'kys',
   // MEDULA (707, kullanıcı: "standart olmasın"): SGK'ya fatura kesen kurumlar -
   //   dal merkezleri, tıp merkezi, hastane. OSGB / muayenehane / ERP'de kapalı
   //   (kurum_tipi_modul, db/904). Karşılığı yoktu, her yerde çiziliyordu.

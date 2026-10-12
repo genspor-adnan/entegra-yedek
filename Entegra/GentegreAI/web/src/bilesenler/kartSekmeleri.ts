@@ -277,6 +277,11 @@ export function sekmeleriKur(secenek: {
   if (kaynak === 'demirbas' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Belgeler' });
   }
+  // KALİBRASYON SERTİFİKASI (1058): Kalite › Kalibrasyon kartı demirbaş
+  //   satırıdır; sertifika demirbaşın belgelerine yazılır (kys.kalibrasyon kapısı).
+  if (kaynak === 'kys-kalibrasyon' && !yeniMi) {
+    s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Sertifikalar' });
+  }
   // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
   //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
   //   Yeni kayıtta yalnız `yenideDe` işaretli olanlar (kayda bağlı olmayanlar).

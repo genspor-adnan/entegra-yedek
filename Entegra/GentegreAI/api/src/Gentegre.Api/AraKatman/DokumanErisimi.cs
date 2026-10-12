@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -47,7 +47,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["servis-ziyaret"]  = new(["servis"], ["servis-ziyaret"]),
         // CİHAZ BELGELERİ (967): lisans, servis sözleşmesi, test raporu, kılavuz.
         ["rad-cihaz"]       = new(["radyoloji"], ["radyoloji-cihaz"]),
-        ["demirbas"]        = new(["demirbas"], ["demirbas"]),
+        // Kalite › Kalibrasyon (1058) aynı demirbaş satırına sertifika ekler.
+        ["demirbas"]        = new(["demirbas", "kys.kalibrasyon"], ["demirbas", "kys-kalibrasyon"]),
         ["klasor"]          = new(["dokuman"], []),
         ["sube"]            = new(["sube"], [], HerkeseGor: true),
         ["ebelge-xslt"]     = new(["ebelge_xslt"], [], HerkeseGor: true),

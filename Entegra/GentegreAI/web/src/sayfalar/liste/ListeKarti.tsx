@@ -1021,6 +1021,23 @@ export function ListeKarti({
           // ISG (741): olay / ziyaret firma ve calisan on dolu (calisan karti, pano).
           : tanim.kaynak.startsWith('isg-') && (sorgu.get('firmaId') || sorgu.get('calisanId'))
           ? { ...tanim.yeniKayitVarsayilanlari, ...(sorgu.get('firmaId') ? { firmaId: Number(sorgu.get('firmaId')) } : {}), ...(sorgu.get('calisanId') ? { calisanId: Number(sorgu.get('calisanId')) } : {}) }
+          // KURUMSAL KALİTE (1050): olay / risk / denetim bulgusundan açılan DÖF kaynağı dolu.
+          : tanim.kaynak === 'kys-dof' && sorgu.get('kaynakTur')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              kaynakTur: Number(sorgu.get('kaynakTur')),
+              ...(sorgu.get('kaynakId') ? { kaynakId: Number(sorgu.get('kaynakId')) } : {}),
+              ...(sorgu.get('kaynakNo') ? { kaynakNo: sorgu.get('kaynakNo')! } : {}),
+              ...(sorgu.get('birimId') ? { departmanId: Number(sorgu.get('birimId')) } : {}),
+              ...(sorgu.get('tanim') ? { tanim: sorgu.get('tanim')! } : {}),
+            }
+          // KURUMSAL KALİTE (1057): "Yeniden değerlendir" tedarikçi dolu.
+          : tanim.kaynak === 'kys-tedarikci' && sorgu.get('tarafId')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              tarafId: Number(sorgu.get('tarafId')),
+              ...(sorgu.get('neAliniyor') ? { neAliniyor: sorgu.get('neAliniyor')! } : {}),
+            }
           : tanim.kaynak.startsWith('calisma-') && sorgu.get('hekimId')
           ? { ...tanim.yeniKayitVarsayilanlari, hekimId: Number(sorgu.get('hekimId')) }
           : HASTA_KAYIT_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')

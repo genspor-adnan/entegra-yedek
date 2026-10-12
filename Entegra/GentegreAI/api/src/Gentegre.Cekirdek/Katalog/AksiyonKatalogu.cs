@@ -63,6 +63,7 @@ public static partial class AksiyonKatalogu
         EkleGoz(s);
         EkleDis(s);
         EkleKalite(s);
+        EkleKysAyar(s); EkleKysDof(s); EkleKysDenetim(s); EkleKysOlayRisk(s); EkleKysGosterge(s); EkleKysToplanti(s); EkleKysTedarikci(s); EkleKysKalibrasyon(s); EkleKysEgitim(s);   // kurumsal kalite (1048)
         EkleMedula(s);
         EkleAmeliyathane(s);
         EkleKlinik(s);

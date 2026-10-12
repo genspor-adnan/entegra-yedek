@@ -34,6 +34,10 @@ import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
+import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
+import { kysDofBagAksiyonu } from './liste/kysGostergeAksiyonlari';
+import { KysPolitikaSeridi } from './liste/KysPolitikaSeridi';
+import { kysTedarikciAksiyonu } from './liste/kysTedarikciAksiyonlari';
 import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
 import { acilAksiyonu } from './liste/acilAksiyonlari';
 import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
@@ -646,6 +650,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
       })) return;
 
+      // KURUMSAL KALİTE (1052): olay / risk satırından "DÖF aç".
+      if (await kysOlayRiskAksiyonu(kod, satir, { git: yol => git(yol) })) return;
+      if (await kysDofBagAksiyonu(kod, satir, { git: yol => git(yol) })) return;
+      if (await kysTedarikciAksiyonu(kod, satir, { git: yol => git(yol) })) return;
+
       // AMELİYATHANE ve ACİL akış aksiyonları (715/716/719): zaman damgaları,
       //   triyaj, yatak ve çıkış kararı. Kart yazmakla olmayan işler - kural
       //   sunucuda, ekran yalnız soruyu soruyor.
@@ -1234,6 +1243,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   ilk okunan satir "neye bakmam gerek" olsun.
       ustSerit={tanim.kaynak === 'kullanici'
         ? <KullaniciOzetSeridi yenile={yenile} onCip={setCipIndeks} />
+        // KURUMSAL KALİTE (1059): Politika & Hedefler listesinin üstünde politika / kapsam.
+        : tanim.kaynak === 'kys-gosterge' ? <KysPolitikaSeridi />
         : undefined}
       // GOZ UNITE AKISI (mockup goz_hasta_listesi.html `.kanban`): bes
       //   istasyon yan yana - grid "kim var"i, kanban "hangi masada yigilma

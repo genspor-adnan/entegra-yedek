@@ -312,6 +312,8 @@ public sealed partial class KartDeposu
             // ÇAĞRI MERKEZİ (839): konu / alt konu (ust_id konuya bağlı), kuyruk, kampanya.
             "public.v_cagri_konu_lookup", "public.v_cagri_altkonu_lookup", "public.v_cagri_kuyruk_lookup", "public.v_cagri_kampanya_lookup", "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
             // STERİLİZASYON (868): cihaz, program, set, birim.
+            // KURUMSAL KALİTE (1048): komite, toplantı.
+            "public.v_kalite_komite_lookup", "public.v_kalite_toplanti_lookup",
             "public.v_steril_cihaz_lookup", "public.v_steril_program_lookup", "public.v_steril_set_lookup", "public.v_steril_birim_lookup",
             // BOLUM AGACI (577): ust_id tasiyan gorunum - duz lookup agac cizemez.
             "public.v_departman_agac_lookup",

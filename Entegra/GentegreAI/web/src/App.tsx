@@ -49,6 +49,8 @@ const DisIcmal = tembel(() => import('./sayfalar/disIcmal/DisIcmal'), 'DisIcmal'
 const EczaneIcmal = tembel(() => import('./sayfalar/eczaneIcmal/EczaneIcmal'), 'EczaneIcmal');
 const FtrIcmal = tembel(() => import('./sayfalar/ftrIcmal/FtrIcmal'), 'FtrIcmal');
 const IsgIcmal = tembel(() => import('./sayfalar/isgIcmal/IsgIcmal'), 'IsgIcmal');
+const KysEgitimKarti = tembel(() => import('./sayfalar/kys/egitim/KysEgitimKarti'), 'KysEgitimKarti');
+const KysPano = tembel(() => import('./sayfalar/kys/pano/KysPano'), 'KysPano');
 const KaliteIcmal = tembel(() => import('./sayfalar/kaliteIcmal/KaliteIcmal'), 'KaliteIcmal');
 const RandevuIcmal = tembel(() => import('./sayfalar/randevuIcmal/RandevuIcmal'), 'RandevuIcmal');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
@@ -277,6 +279,7 @@ function Yollar() {
         {yetki('eczane.icmal') && <Route path="/eczane-icmal" element={<EczaneIcmal />} />}
         {yetki('ftr.icmal') && <Route path="/ftr-icmal" element={<FtrIcmal />} />}
         {yetki('isg.icmal') && <Route path="/isg-icmal" element={<IsgIcmal />} />}
+        {yetki('kys.pano') && <Route path="/kys-pano" element={<KysPano />} />}
         {yetki('kalite.icmal') && <Route path="/kalite-icmal" element={<KaliteIcmal />} />}
         {yetki('randevu.icmal') && <Route path="/randevu-icmal" element={<RandevuIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
@@ -438,6 +441,13 @@ function Yollar() {
           <Route path="/dis-seans/:id" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'dis-seans')!} />
             <DisSeansKarti />
+          </>} />
+        )}
+        {/* KURUMSAL KALİTE (1056): eğitim kaydı özel kart (katılımcı listesi), arkada Eğitim listesi. */}
+        {yetki('kys.egitim') && (
+          <Route path="/kys-egitim/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'kys-egitim')!} />
+            <KysEgitimKarti />
           </>} />
         )}
         {/* FTR (719): unite panosu ozel sayfa; program ve seans kartlari modal.

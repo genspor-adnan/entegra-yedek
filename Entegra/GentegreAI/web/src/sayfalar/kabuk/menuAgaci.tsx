@@ -69,7 +69,7 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Klinik Kalite', 'Onay', 'Sabit Varlıklar',
+  'Finans', 'Muhasebe', 'İK', 'Doküman', 'Kalite', 'Klinik Kalite', 'Onay', 'Sabit Varlıklar',
   // 10.10.2026: Yönetim'in alt başlıklarıydı, ayrı gruplar (Sistem ve Dökümler en sonda).
   'Güvenlik', 'Formlar', 'Platform',
 ];
@@ -259,6 +259,8 @@ export const GRUP_IKON: Record<string, string> = {
   'Dökümler': '📊',
   // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
   //   grup olunca aynı simgeler.
+  // KURUMSAL KALITE (1048, ISO 9001 / SKS): kupa - Klinik Kalite'nin madalyasindan ayri.
+  'Kalite': '🏆',
   'Klinik Kalite': '🏅', 'Güvenlik': '🛡️', 'Platform': '🧩',
   'Onay': '✅', 'Formlar': '🗂',
 };

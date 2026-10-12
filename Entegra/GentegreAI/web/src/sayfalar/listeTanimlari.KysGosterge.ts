@@ -1,0 +1,27 @@
+import type { ListeGirdisi } from './listeTanimlari.Ortak';
+
+/**
+ * KURUMSAL KALİTE — POLİTİKA & HEDEFLER (db/1053 + 1059, sade) — mockup
+ * `Ekranlar/Kalite2/hedefler.html`. Üstte politika & kapsam şeridi
+ * (KysPolitikaSeridi), altta hedef / gösterge tablosu; hedef dışı satırdan
+ * "DÖF aç" (kaynak 7). Müşteri memnuniyeti ayrı ekran değil, bir hedef satırı.
+ *
+ * Liste son dönem değerini ve hedefte / hedef dışı durumunu gösterir; generic
+ * kart (kod, ad, formül, hedef, yön, periyot, birim, sorumlu) altında Dönem
+ * değerleri tablosu. Klinik Kalite göstergeleri ayrı menüde (Klinik Kalite).
+ */
+export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
+  {
+    kaynak: 'kys-gosterge', rota: 'kys-gosterge', aksiyonEkrani: 'kys-gosterge-liste', baslik: 'Kalite Politikası & Hedefler',
+    yol: 'Kalite › Politika & Hedefler',
+    kartYolu: '/kys-gosterge', kartBaslik: 'Hedef',
+    cipler: [
+      { ad: 'Aktif',      filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Hedef dışı', filtre: { alan: 'durumAdi', op: 'esit', deger: 'Hedef dışı' } },
+      { ad: 'Veri yok',   filtre: { alan: 'durumAdi', op: 'esit', deger: 'Veri yok' } },
+      { ad: 'Tümü' },
+    ],
+    modul: 'kys',
+    menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 60,
+  },
+];

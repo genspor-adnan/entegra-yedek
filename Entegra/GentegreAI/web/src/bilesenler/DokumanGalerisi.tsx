@@ -312,6 +312,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                 placeholder={kartAdi === 'personelMasraf'
                   ? 'Hangi harcamanın fişi (belge no)'
                   : kartAdi === 'demirbas' ? 'Fatura, garanti belgesi, tutanak...'
+                  : kartAdi === 'kys-kalibrasyon' ? 'Kalibrasyon sertifikası'
                   : 'İş sözleşmesi, sağlık raporu...'}
               />
               <datalist id="dokuman-belge-turu-secenekleri">

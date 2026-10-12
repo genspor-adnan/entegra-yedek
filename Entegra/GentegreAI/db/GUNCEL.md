@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (514 ad, 144 tanesi birden cok dosyada)
+## Fonksiyonlar (520 ad, 144 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -205,6 +205,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_izin_hak_gun` | `743_izin_modulu.sql` | — |
 | `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kalem_kullan` | `552_stok_ilac_kisa_ad_kullanim.sql` | — |
+| `fn_kalite_dof_termin` | `1059_kys_politika_dof_baglari.sql` | — |
+| `fn_kalite_no` | `1048_kurumsal_kalite_temel.sql` | — |
+| `fn_kalite_olay_risk_no` | `1052_kurumsal_kalite_olay_risk.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
 | `fn_kasa_dagitim_iade` | `660_iade_satir_tahsil.sql` | — |
 | `fn_kasa_gun_kapali` | `1030_kasa_gun_sonu.sql` | — |
@@ -255,6 +258,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_sozlesme_sec` | `468_kurum_sozlesme_1n.sql` | — |
 | `fn_kurum_tipi_rol_portal_atla` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | — |
 | `fn_kurum_tipi_rol_uygula` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | 786_kurum_tipi_rol.sql |
+| `fn_kys_egitim_anahtar` | `1056_kys_egitim.sql` | — |
+| `fn_kys_egitim_tarih` | `1056_kys_egitim.sql` | — |
+| `fn_kys_risk_seviye` | `1052_kurumsal_kalite_olay_risk.sql` | — |
 | `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
 | `fn_lab_akilci_kontrol` | `873_akilci_test_istemi.sql` | — |
 | `fn_lab_antibiyogram_bildirim` | `887_lab_antibiyogram_kisit.sql` | 436_lab_mikrobiyoloji.sql, 437_lab_kombinasyon_ajani.sql |
@@ -523,7 +529,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (324 ad, 143 tanesi birden cok dosyada)
+## Gorunumler (341 ad, 143 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -692,6 +698,23 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kabul_its_bildirim` | `736_kabul_its_bildirim.sql` | — |
 | `v_kabul_karekod_satir` | `737_mal_kabul_duzeltmeleri.sql` | 734_kabul_karekod.sql |
 | `v_kabul_siparis_lookup` | `940_personel_unvan_yalniz_onek.sql` | 737_mal_kabul_duzeltmeleri.sql |
+| `v_kalite_birim_sorumlu` | `1049_kys_ayar_dokuman.sql` | — |
+| `v_kalite_denetim` | `1051_kalite_ic_denetim.sql` | — |
+| `v_kalite_denetim_bulgu` | `1059_kys_politika_dof_baglari.sql` | — |
+| `v_kalite_dof` | `1050_kalite_dof.sql` | — |
+| `v_kalite_egitim` | `1056_kys_egitim.sql` | — |
+| `v_kalite_egitim_eksik` | `1056_kys_egitim.sql` | — |
+| `v_kalite_gosterge` | `1053_kurumsal_kalite_gosterge_toplanti.sql` | — |
+| `v_kalite_kalibrasyon` | `1058_kalite_kalibrasyon.sql` | — |
+| `v_kalite_karar` | `1053_kurumsal_kalite_gosterge_toplanti.sql` | — |
+| `v_kalite_komite` | `1049_kys_ayar_dokuman.sql` | — |
+| `v_kalite_komite_lookup` | `1048_kurumsal_kalite_temel.sql` | — |
+| `v_kalite_olay` | `1052_kurumsal_kalite_olay_risk.sql` | — |
+| `v_kalite_risk` | `1052_kurumsal_kalite_olay_risk.sql` | — |
+| `v_kalite_tedarikci` | `1057_kys_tedarikci_degerlendirme.sql` | — |
+| `v_kalite_toplanti` | `1053_kurumsal_kalite_gosterge_toplanti.sql` | — |
+| `v_kalite_toplanti_lookup` | `1053_kurumsal_kalite_gosterge_toplanti.sql` | — |
+| `v_kalite_zorunlu_egitim` | `1056_kys_egitim.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
 | `v_kategori_lookup` | `505_skrs_liste_duzeltme_kategori_tur.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql, 347_sonomed_rad_kategori.sql |

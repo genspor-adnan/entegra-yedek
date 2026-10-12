@@ -60,7 +60,9 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
     // SİSTEM (10.10.2026, kullanıcı): eski "Yönetim" grubu - bölgeyle aynı adı
     //   taşıyor, "Yönetim › Yönetim" okunuyordu. Dökümler (tasarımcı) en sonda.
     // Kalite Onay'dan önce (kullanıcı 10.10.2026: "onay ve kaliteyi yer değiş").
-    gruplar: ['İK', 'Doküman', 'Klinik Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
+    // KALİTE (1048, kullanıcı 12.10.2026: "Dokümandan sonra Kalite menüsü aç"):
+    //   ISO / SKS kurumsal kalite; eski "Kalite" grubu Klinik Kalite adını aldı.
+    gruplar: ['İK', 'Doküman', 'Kalite', 'Klinik Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
               'Sistem', 'Dökümler'] },
 ];
 

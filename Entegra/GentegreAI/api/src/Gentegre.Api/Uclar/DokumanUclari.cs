@@ -233,6 +233,9 @@ public static class DokumanUclari
         // DEMİRBAŞ BELGELERİ (10.10.2026): fatura, garanti, servis raporu,
         //   zimmet tutanağı... kaynak_id demirbaş kimliğidir.
         "demirbas" => "demirbas",
+        // KALİBRASYON SERTİFİKASI (1058): Kalite › Kalibrasyon kartı demirbaş
+        //   satırıdır; ek demirbaşın belgelerine yazılır, kapı kys.kalibrasyon.
+        "kys-kalibrasyon" => "demirbas",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -286,6 +289,7 @@ public static class DokumanUclari
         "personelAvans" => "ik.avans",
         "personelBelgeTalep" => "ik.belge_talep",
         "radyoloji-cihaz" => "radyoloji",
+        "kys-kalibrasyon" => "kys.kalibrasyon",
         "servisZiyaret" => "servis",
         _ => kartAdi
     };

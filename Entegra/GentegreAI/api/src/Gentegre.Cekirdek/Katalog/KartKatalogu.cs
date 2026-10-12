@@ -361,6 +361,7 @@ public static partial class KartKatalogu
         Ekle(IsgFirmaKarti()); Ekle(IsgCalisanKarti()); Ekle(IsgMuayeneKarti()); Ekle(IsgZiyaretKarti()); Ekle(IsgOlayKarti());   // isg (741)
         Ekle(CagriKarti()); Ekle(CagriKonuKarti()); Ekle(CagriKuyrukKarti()); Ekle(CagriAgentKarti()); Ekle(CagriKampanyaKarti()); Ekle(CagriKaliteKarti());   // çağrı merkezi (839)
         Ekle(SterilCihazKarti()); Ekle(SterilProgramKarti()); Ekle(SterilSetKarti()); Ekle(SterilBirimKarti()); Ekle(SterilBakimKarti()); Ekle(SterilDonguKarti());   // sterilizasyon (868)
+        Ekle(KysBirimSorumluKarti()); Ekle(KysKomiteKarti()); Ekle(KysDofKarti()); Ekle(KysDenetimKarti()); Ekle(KysOlayKarti()); Ekle(KysRiskKarti()); Ekle(KysGostergeKarti()); Ekle(KysToplantiKarti()); Ekle(KysKararKarti()); Ekle(KysTedarikciKarti()); Ekle(KysKalibrasyonKarti()); Ekle(KysZorunluEgitimKarti());   // kurumsal kalite (1048)
         Ekle(MedulaKesintiKarti());
         Ekle(MedulaDonemKarti());
         Ekle(MedulaFaturaKarti());

@@ -58,7 +58,8 @@ describe('menü düzeni', () => {
     // 34: Onay grubu (10.10.2026, kullanıcı) - Yönetim'den ayrıldı.
     // 35: Formlar grubu (10.10.2026) - Yönetim › Formlar alt başlığıydı.
     // 36: Dökümler (tasarımcı) kendi grubu; Yönetim grubu Sistem adını aldı (10.10.2026).
-    expect(GRUPLAR.length).toBeLessThanOrEqual(36);
+    // 37: Kalite (1048, ISO / SKS kurumsal kalite) Doküman'dan sonra; eski Kalite = Klinik Kalite.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(37);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -68,7 +69,7 @@ describe('menü düzeni', () => {
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
       // Kalite / Güvenlik / Platform (10.10.2026): yönetim ayar grupları, Yönetim gibi.
-      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Klinik Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar', 'Sistem', 'Dökümler'].includes(g)) continue;
+      if (['e-Nabız', 'Yönetim', 'Sabit Varlıklar', 'Kalite', 'Klinik Kalite', 'Güvenlik', 'Platform', 'Onay', 'Formlar', 'Sistem', 'Dökümler'].includes(g)) continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });
@@ -126,9 +127,10 @@ describe('menü düzeni', () => {
     // 6: Yönetim bölgesi (10.10.2026, kullanıcı): Kalite · Güvenlik · Platform
     //   Yönetim'in alt başlığıyken ayrı grup oldu - İK · Doküman · Kalite ·
     //   Güvenlik · Platform · Yönetim. 7: + Onay (10.10.2026). 8: + Formlar. 9: Sistem + Dökümler.
+    //   10: + Kalite (1048, kurumsal kalite; eski Kalite = Klinik Kalite).
     for (const b of BOLGE_HBYS)
       // 5: Klinikler bölgesine İşyeri Hekimliği (741) eklendi - beşinci klinik dal.
-      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(9);
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(10);
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup iki bölgede birden').toEqual([]);
   });
