@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 import type { GenForm } from '../../bilesenler/GenForm';
+import { faaliyetSayaci } from '../kys/dof/kysDofKarti';
 
 /**
  * KARTA ÖZEL YERLEŞİM - kaynak adına göre, tek yerde.
@@ -259,7 +260,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   //   ListeKarti sekmeSarmalayici verir). Sekme yok.
   'kys-dof': {
     seritAlanlari: ['no', 'tur', 'departmanId', 'sorumluId', 'kaynakTur', 'kaynakNo', 'termin', 'durum', 'ekleyen', 'eklemeTarihi'],
-    detayGrupta: { faaliyetler: { grup: 'DÖF' } },
+    detayGrupta: { faaliyetler: { grup: 'DÖF', baslikEk: faaliyetSayaci } },
   },
 };
 

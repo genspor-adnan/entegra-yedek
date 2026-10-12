@@ -154,6 +154,8 @@ interface Props {
                                  yeni?: () => void;
                                  /** Sütun başlığının sağına içerik (alan adıyla). */
                                  kolonBaslikEk?: Record<string, React.ReactNode>;
+                                 /** Tablo başlığının yanına satırlardan kısa bilgi. */
+                                 baslikEk?(satirlar: Record<string, unknown>[]): React.ReactNode;
                                  /** Önerili kutu: alan -> öneri listesi kolonu. */
                                  oneri?: Record<string, string> }>;
   /**

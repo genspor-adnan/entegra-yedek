@@ -938,6 +938,10 @@ tr.panel-basligi .d.mini {
    genis - ikisi tek kararin iki parcasi, yan yana okunur. Dar ekranda alt
    alta duser. */
 .alan-izgara.katilim-payi-satiri { grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr) }
+/* KURUMSAL KALİTE DÖF KARTI (1050, mockup Kalite2/dof_karti.html .hdr.k2): doğrulama
+   iki alanı yan yana; faaliyet başlığında "2 / 3 tamamlandı". */
+.kys-dof-dogrulama .alan-izgara.tek-sutun, .kys-dof-dogrulama .alan-izgara { grid-template-columns: 1fr 1fr; gap: 8px 14px }
+.detay-baslik-ek { margin-left: 10px; font-weight: normal; font-size: 11px }
 @media (max-width: 900px) {
   .alan-izgara.katilim-payi-satiri { grid-template-columns: 1fr }
 }

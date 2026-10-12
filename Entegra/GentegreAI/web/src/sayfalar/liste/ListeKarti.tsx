@@ -50,6 +50,7 @@ import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
+import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKapatModali, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
@@ -261,7 +262,8 @@ export function ListeKarti({
         //   özeti, altta tamamlama koşulları - yalnız kayıtlı kartta.
         sekmeGruplari={tanim.kaynak === 'goz-muayene' ? GOZ_SEKME_GRUPLARI : undefined}
         // Başlık rozetleri (kullanıcı): H hasta no · P protokol no.
-        baslikRozet={tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
+        // DÖF (1050): başlıkta '#id' yok - numara baslikEk rozetinde.
+        baslikRozet={tanim.kaynak === 'kys-dof' && kartId !== 'yeni' ? <></> : tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
           <>
             {String(gorOnizleme.kayit.hastaNo ?? '') && <span className="rozet gri" title={c('Hasta no')}>No {String(gorOnizleme.kayit.hastaNo)}</span>}
             {String(gorOnizleme.kayit.protokol ?? '') && <span className="rozet gri" title={c('Protokol no')}>Prt {String(gorOnizleme.kayit.protokol)}</span>}
@@ -318,7 +320,7 @@ export function ListeKarti({
           // DÖF (1050, mockup Kalite2/dof_karti.html): sorun / kök neden ->
           //   faaliyetler -> doğrulama. Varsayılan sıra tabloyu en alta koyardı.
           ? (_baslik, icerik, _d, _izgara, p) => p
-              ? <>{p.altGrupCiz('Sorun')}{p.tablolar.faaliyetler}{p.altGrupCiz('Doğrulama')}</>
+              ? <>{p.altGrupCiz('Sorun')}{p.tablolar.faaliyetler}<div className="kys-dof-dogrulama">{p.altGrupCiz('Doğrulama')}</div></>
               : icerik
           : tanim.kaynak === 'yatis-order'
           // ORDER (968): Order sekmesinin sağında özet (toplam / verilen / sonraki doz).
@@ -503,7 +505,7 @@ export function ListeKarti({
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme'].includes(tanim.kaynak)}
-        baslikEk={tanim.kaynak === 'muayene'
+        baslikEk={tanim.kaynak === 'kys-dof' ? dofBaslikEk : tanim.kaynak === 'muayene'
           ? (d) => {
               const kod = String(d.durum ?? '');
               const ad = MUAYENE_DURUM[Number(kod)] ?? '';
@@ -763,7 +765,9 @@ export function ListeKarti({
         // ORDER KARTI ARAÇ ÇUBUĞU (968 mockup): hekim onayı · durdur · doz değiştir · tekrarla.
         // GÖZLÜK REÇETESİ ARAÇ ÇUBUĞU (mockup): imzala · yazdır (A5) · optiğe ver · teslim.
         // GÖZ GÖRÜNTÜLEME ARAÇ ÇUBUĞU (974 mockup): çekildi (ödenmişse) · değerlendir ve imzala · yeniden çekim · yazdır.
-        ekAraclar={tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
+        // DÖF (1050 mockup): kaynak kaydına git · DÖF formu (A4).
+        ekAraclar={tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
+          : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
           ? (d) => {
               const durum = Number(d.durum ?? 1), serbest = Number(d.serbest ?? 1);
               const islem = (f: () => Promise<unknown>) => void guvenli(async () => { await f(); setKartTazele(t => t + 1); setYenile(t => t + 1) });

@@ -208,6 +208,9 @@ interface Props {
   /** Sütun BAŞLIĞININ SAĞINA ekrana özel içerik (alan adıyla) - ör. fizik
    *  muayenede "Bulgu" başlığının yanında "Tümü normal · Şablon Uygula". */
   kolonBaslikEk?: Record<string, React.ReactNode>;
+  /** Tablo BAŞLIĞININ yanına güncel satırlardan üretilen kısa bilgi - ör. DÖF
+   *  faaliyetlerinde "2 / 3 tamamlandı". Düzenledikçe güncellenir. */
+  baslikEk?(satirlar: Record<string, unknown>[]): React.ReactNode;
   /** ÖNERİLİ KUTU (combo): alan adı -> satırda öneri listesini (JSON metin
    *  dizisi) taşıyan kolon. Kutu açılır liste olur; serbest yazı da kalır. */
   oneriAlanlari?: Record<string, string>;
@@ -377,7 +380,7 @@ function oneriListesi(ham: unknown): string[] {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
-                               silGizli, onYeni, kolonBaslikEk, oneriAlanlari,
+                               silGizli, onYeni, kolonBaslikEk, baslikEk, oneriAlanlari,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
@@ -932,6 +935,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       {!sadeGrid && (
       <h6>
         {meta.baslik}
+        {baslikEk && <span className="sonuk detay-baslik-ek">{baslikEk(durum.guncel)}</span>}
         {!saltOkunur && (
           ikonlu ? (
             <span className="baslik-eylem">
