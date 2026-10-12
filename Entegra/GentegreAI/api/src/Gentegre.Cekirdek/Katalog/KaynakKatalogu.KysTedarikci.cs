@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE — TEDARİKÇİ DEĞERLENDİRME (1057), mockup
@@ -24,11 +24,13 @@ public static partial class KaynakKatalogu
             new("kalite",       "d.kalite",        "sayi",    "Kalite", Hizalama: "orta"),
             new("teslim",       "d.teslim",        "sayi",    "Teslim", Hizalama: "orta"),
             new("fiyat",        "d.fiyat",         "sayi",    "Fiyat", Hizalama: "orta"),
-            new("puan",         "d.puan",          "ondalik", "Puan", Hizalama: "orta"),
+            new("puan",         "d.puan",          "sayi",    "Puan", Hizalama: "orta", Bicim: "#,##0.0"),
             new("sonucAdi",     "d.sonuc_adi",     "metin",   "Sonuç", Genislik: 90, Bicim: "rozet"),
             new("tarih",        "d.tarih",         "tarih",   "Son değerlendirme"),
-            new("uygunsuzluk",  "d.uygunsuzluk",   "sayi",    "Uygunsuzluk", Hizalama: "orta"),
-            new("sonDofNo",     "d.son_dof_no",    "metin",   "Son DÖF", Genislik: 120),
+            // Mockup (1066): uygunsuzluk tek kolonda "3 · DÖF-2026-018", yoksa "—".
+            new("uygunsuzlukMetin", "d.uygunsuzluk_metin", "metin", "Uygunsuzluk", Genislik: 150),
+            new("uygunsuzluk",  "d.uygunsuzluk",   "sayi",    "Uygunsuzluk sayısı", Hizalama: "orta", Varsayilan: false),
+            new("sonDofNo",     "d.son_dof_no",    "metin",   "Son DÖF", Genislik: 120, Varsayilan: false),
             new("aciklama",     "d.aciklama",      "metin",   "Açıklama", Genislik: 220, Varsayilan: false),
             new("sonuc",        "d.sonuc",         "sayi",    "Sonuç Kodu", Varsayilan: false),
             new("vakti",        "d.vakti",         "sayi",    "Değerlendirme vakti", Varsayilan: false),

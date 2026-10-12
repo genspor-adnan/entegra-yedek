@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Yetki;
+﻿using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Cekirdek.Katalog;
 
@@ -17,6 +17,8 @@ public static partial class AksiyonKatalogu
             .. Crud("kys-tedarikci", "kys", "kys.tedarikci", ekleAdi: "＋ Değerlendir", yazdir: false),
             new("kys.tedarikci-yeniden", "↻ Yeniden değerlendir", "kys", KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, KayitGerekir: true, Sira: 35),
             new("kys.tedarikci-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
+            // Mockup (1066): onaylı tedarikçilerin A4 listesi (ISO 8.4 kanıtı).
+            new("kys.tedarikci-onayli", "🖨️ Onaylı Tedarikçi Listesi", "kys", KaynakKodu: "kys.tedarikci", Sira: 45),
             Yazdir(),
         ];
     }
