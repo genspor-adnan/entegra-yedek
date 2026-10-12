@@ -17,9 +17,11 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "kys.kalibrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
             // Mockup (1067): "＋ Cihaz" demirbaş kartını açar (envanter Sabit
             //   Varlıklar'da, demirbaş ekleme yetkisi ister); "Kalibrasyon Planı" A4.
-            new("kys.kalibrasyon-cihaz", "＋ Cihaz", "kys", KaynakKodu: "demirbas", Islem: Islem.Ekle, Sira: 5),
+            new("kys.kalibrasyon-cihaz", "＋ Cihaz", "kys", KaynakKodu: "demirbas", Islem: Islem.Ekle, Sira: 5, Bicim: "bir"),
             new("kys.kalibrasyon-plan", "🖨️ Kalibrasyon Planı", "kys", KaynakKodu: "kys.kalibrasyon", Sira: 30),
-            Yazdir(),
+            // Mockup (1071): araç çubuğunda yalnız Cihaz / Kalibrasyon Gir / Plan;
+            //   genel Yazdır (CSV) palette.
+            Yazdir() with { Hedef = "palet" },
         ];
     }
 }

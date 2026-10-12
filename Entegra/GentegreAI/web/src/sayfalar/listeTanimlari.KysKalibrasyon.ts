@@ -9,8 +9,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_KALIBRASYON_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-kalibrasyon', rota: 'kys-kalibrasyon', baslik: 'Ölçüm Cihazları & Kalibrasyon',
-    yol: 'Kalite › Kalibrasyon',
+    kaynak: 'kys-kalibrasyon', rota: 'kys-kalibrasyon', baslik: '📏 Ölçüm Cihazları & Kalibrasyon',
+    yol: 'Kalite › Kalibrasyon · ISO 9001 · 7.1.5 izleme ve ölçme kaynakları',
     kartYolu: '/kys-kalibrasyon', kartBaslik: 'Kalibrasyon',
     aksiyonEkrani: 'kys-kalibrasyon-liste',
     // Açılış "30 gün içinde": geçmiş + yaklaşan birlikte (durum 2 ve 3).
