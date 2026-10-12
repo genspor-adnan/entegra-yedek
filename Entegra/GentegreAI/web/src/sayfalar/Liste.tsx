@@ -35,6 +35,7 @@ import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
+import { kysKalibrasyonAksiyonu } from './liste/kysKalibrasyonAksiyonlari';
 import { kysDofBagAksiyonu } from './liste/kysGostergeAksiyonlari';
 import { KysPolitikaSeridi } from './liste/KysPolitikaSeridi';
 import { KysOlayPaneli } from './kys/olay/KysOlayPaneli';
@@ -654,6 +655,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       // KURUMSAL KALİTE (1052): olay / risk satırından "DÖF aç".
       if (await kysOlayRiskAksiyonu(kod, satir, { git: yol => git(yol) })) return;
+      if (await kysKalibrasyonAksiyonu(kod, satir, { git: yol => git(yol) })) return;
       if (await kysDofBagAksiyonu(kod, satir, { git: yol => git(yol) })) return;
       if (await kysTedarikciAksiyonu(kod, satir, { git: yol => git(yol) })) return;
 
