@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE — OLAY kartı (1052, sade). Kayıt silinmez: bildirim
@@ -27,16 +27,17 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",                "id",                 "sayi",  Yazilabilir: false),
-            new("no",                "no",                 "metin", Yazilabilir: false, Baslik: "Olay No", Grup: "Olay"),
-            new("tarih",             "tarih",              "zaman", Zorunlu: true, Baslik: "Tarih / saat", Grup: "Olay"),
-            new("tur",               "tur",                "kod",   Zorunlu: true, KodListesi: "kys.olay_tur", Baslik: "Olay türü", Grup: "Olay"),
-            new("departmanId",       "departman_id",       "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "Olay"),
-            new("zarar",             "zarar",              "kod",   Zorunlu: true, KodListesi: "kys.olay_zarar", Baslik: "Zarar düzeyi", Grup: "Olay"),
-            new("anonim",            "anonim",             "mantik", Baslik: "Anonim (bildiren gösterilmez)", Grup: "Olay"),
-            new("aciklama",          "aciklama",           "metin", Zorunlu: true, EnFazlaUzunluk: 2000, Baslik: "Açıklama", Grup: "Olay"),
-            new("anlikMudahale",     "anlik_mudahale",     "metin", EnFazlaUzunluk: 1000, Baslik: "Anlık müdahale", Grup: "Olay"),
-            new("komiteId",          "komite_id",          "kod",   KodTablosu: "public.v_kalite_komite_lookup", Baslik: "Sorumlu komite", Grup: "Değerlendirme"),
-            new("degerlendirmeNotu", "degerlendirme_notu", "metin", EnFazlaUzunluk: 2000, Baslik: "Değerlendirme notu", Grup: "Değerlendirme"),
-            new("durum",             "durum",              "kod",   Zorunlu: true, SabitKodlar: KysOlayDurum, Baslik: "Durum", Grup: "Değerlendirme"),
+            // Mockup Kalite2/olay_bildirim.html (1060): künye kimlik şeridinde,
+            //   altında üç metin. Komite yok (sade - kolon durur, ekranda yok).
+            new("no",                "no",                 "metin", Yazilabilir: false, Baslik: "No", Grup: "Kimlik"),
+            new("tarih",             "tarih",              "zaman", Zorunlu: true, Baslik: "Tarih", Grup: "Kimlik"),
+            new("tur",               "tur",                "kod",   Zorunlu: true, KodListesi: "kys.olay_tur", Baslik: "Tür", Grup: "Kimlik"),
+            new("departmanId",       "departman_id",       "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "Kimlik"),
+            new("zarar",             "zarar",              "kod",   Zorunlu: true, KodListesi: "kys.olay_zarar", Baslik: "Etki", Grup: "Kimlik"),
+            new("durum",             "durum",              "kod",   Zorunlu: true, SabitKodlar: KysOlayDurum, Baslik: "Durum", Grup: "Kimlik"),
+            new("anonim",            "anonim",             "mantik", Baslik: "Anonim (bildiren gösterilmez)", Grup: "Kimlik"),
+            new("aciklama",          "aciklama",           "metin", Zorunlu: true, EnFazlaUzunluk: 2000, Baslik: "Ne oldu?", Grup: "Olay"),
+            new("anlikMudahale",     "anlik_mudahale",     "metin", EnFazlaUzunluk: 1000, Baslik: "Hemen ne yapıldı?", Grup: "Olay"),
+            new("degerlendirmeNotu", "degerlendirme_notu", "metin", EnFazlaUzunluk: 2000, Baslik: "Değerlendirme (kalite sorumlusu)", Grup: "Olay"),
         });
 }

@@ -9,8 +9,9 @@ const DOF_KAYNAK = { 'kys.olay-dof': 2, 'kys.risk-dof': 4 } as const;
  * Tanım satırdaki açıklamadan (olay: tür + zarar, risk: tanım) kısaltılır.
  */
 export function dofAcmaYolu(kaynakTur: number, satir: ListeSatiri): string {
+  // Olay: açıklama (sağ kart "Ne oldu?" / liste konusu), yoksa tür · etki.
   const tanim = kaynakTur === 2
-    ? [satir.turAdi, satir.zararAdi].filter(Boolean).join(' · ')
+    ? String(satir.tanim || satir.konu || '') || [satir.turAdi, satir.zararAdi].filter(Boolean).join(' · ')
     : String(satir.tanim ?? '');
   const p = new URLSearchParams({
     kaynakTur: String(kaynakTur),

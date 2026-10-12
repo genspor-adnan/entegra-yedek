@@ -942,6 +942,19 @@ tr.panel-basligi .d.mini {
    ve doğrulamanın iki alanı yan yana; faaliyet başlığında "2 / 3 tamamlandı". */
 .kys-dof-yanyana .alan-izgara.tek-sutun, .kys-dof-yanyana .alan-izgara { grid-template-columns: 1fr 1fr; gap: 8px 14px }
 .kys-dof-yanyana textarea { height: 46px; min-height: 46px }
+/* OLAY BİLDİRİMİ (1060, mockup Kalite2/olay_bildirim.html .yanyana): liste ile
+   sağ kart yarı yarıya; kartta künye iki sütun, altında üç metin. */
+.grid-yan-duzen:has(.kys-olay-panel):not(.kapali) { grid-template-columns: minmax(0, 1fr) 440px }
+.kys-olay-panel.sonuk { padding: 14px }
+.kys-olay-panel .kagrup > h6 { justify-content: space-between }
+.kys-olay-hdr { grid-template-columns: 1fr 1fr; padding: 8px 10px }
+.kys-olay-hdr .alan, .kys-olay-metin .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
+.kys-olay-hdr .etiket, .kys-olay-metin .etiket { text-align: left }
+.kys-olay-bildiren { display: flex; align-items: center; gap: 6px; height: 24px }
+.kys-olay-metin { display: grid; gap: 8px; padding: 0 10px 8px }
+.kys-olay-metin textarea { height: 54px; min-height: 54px; width: 100% }
+.kys-olay-arac { display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--cizgi2) }
+.kys-olay-arac .kys-olay-sag { margin-left: auto }
 .detay-baslik-ek { margin-left: 10px; font-weight: normal; font-size: 11px }
 @media (max-width: 900px) {
   .alan-izgara.katilim-payi-satiri { grid-template-columns: 1fr }

@@ -258,6 +258,10 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // TEK SAYFA (mockup Ekranlar/Kalite2/dof_karti.html): başlık alanları kimlik
   //   şeridinde; altında sorun / kök neden, faaliyetler, doğrulama (sırayı
   //   ListeKarti sekmeSarmalayici verir). Sekme yok.
+  // OLAY BİLDİRİMİ (1060): modal kartta da künye şeritte, altında üç metin.
+  'kys-olay': {
+    seritAlanlari: ['no', 'tarih', 'tur', 'departmanId', 'zarar', 'durum', 'anonim'],
+  },
   'kys-dof': {
     seritAlanlari: ['no', 'tur', 'departmanId', 'sorumluId', 'kaynakTur', 'kaynakNo', 'termin', 'durum', 'ekleyen', 'eklemeTarihi'],
     detayGrupta: { faaliyetler: { grup: 'DÖF', baslikEk: faaliyetSayaci } },
