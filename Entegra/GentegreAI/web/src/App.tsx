@@ -51,6 +51,7 @@ const FtrIcmal = tembel(() => import('./sayfalar/ftrIcmal/FtrIcmal'), 'FtrIcmal'
 const IsgIcmal = tembel(() => import('./sayfalar/isgIcmal/IsgIcmal'), 'IsgIcmal');
 const KysEgitimKarti = tembel(() => import('./sayfalar/kys/egitim/KysEgitimKarti'), 'KysEgitimKarti');
 const KysHedefler = tembel(() => import('./sayfalar/kys/hedef/KysHedefler'), 'KysHedefler');
+const KysToplantilar = tembel(() => import('./sayfalar/kys/toplanti/KysToplantilar'), 'KysToplantilar');
 const KysPano = tembel(() => import('./sayfalar/kys/pano/KysPano'), 'KysPano');
 const KaliteIcmal = tembel(() => import('./sayfalar/kaliteIcmal/KaliteIcmal'), 'KaliteIcmal');
 const RandevuIcmal = tembel(() => import('./sayfalar/randevuIcmal/RandevuIcmal'), 'RandevuIcmal');
@@ -282,6 +283,7 @@ function Yollar() {
         {yetki('isg.icmal') && <Route path="/isg-icmal" element={<IsgIcmal />} />}
         {yetki('kys.pano') && <Route path="/kys-pano" element={<KysPano />} />}
         {yetki('kys.gosterge') && <Route path="/kys-hedefler" element={<KysHedefler />} />}
+        {yetki('kys.toplanti') && <Route path="/kys-toplantilar" element={<KysToplantilar />} />}
         {yetki('kalite.icmal') && <Route path="/kalite-icmal" element={<KaliteIcmal />} />}
         {yetki('randevu.icmal') && <Route path="/randevu-icmal" element={<RandevuIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}

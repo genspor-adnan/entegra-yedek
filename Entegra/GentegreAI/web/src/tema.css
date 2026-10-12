@@ -968,6 +968,9 @@ tr.panel-basligi .d.mini {
 .kys-politika-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
 .kys-politika-onay { display: flex; gap: 6px }
 .kys-politika-onay input:first-child { flex: 1 }
+/* TOPLANTI KARTI (1064): katılımcılar | gündem yan yana, tam genişlik. */
+.kart-kys-toplanti .alan-izgara:has(.alan-gundem) { grid-template-columns: 1fr 1fr }
+.kart-kys-toplanti .alan-katilimcilar textarea, .kart-kys-toplanti .alan-gundem textarea { width: 100%; height: 60px; min-height: 60px }
 /* İÇ DENETİM KARTI (1061): sonuç notu bulguların altında tam genişlik, alçak. */
 .kart-kys-denetim .alan-sonucNotu { grid-column: 1 / -1 }
 .kart-kys-denetim .alan-sonucNotu textarea { height: 46px; min-height: 46px }

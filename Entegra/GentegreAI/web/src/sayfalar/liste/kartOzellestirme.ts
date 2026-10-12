@@ -268,6 +268,12 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     seritAlanlari: ['no', 'departmanId', 'planTarih', 'gerceklesen', 'basDenetciId', 'ekip', 'kapsam', 'durum'],
     detayGrupta: { bulgular: { grup: 'Denetim', ustte: true } },
   },
+  // TOPLANTI (1064, mockup Kalite2/toplanti_kararlar.html): ad / tarih / komite /
+  //   yer şeritte; altında katılımcılar, gündem ve Kararlar (tek sayfa).
+  'kys-toplanti': {
+    seritAlanlari: ['baslik', 'tarih', 'komiteId', 'yer'],
+    detayGrupta: { kararlar: { grup: 'Toplantı' } },
+  },
   'kys-dof': {
     seritAlanlari: ['no', 'tur', 'departmanId', 'sorumluId', 'kaynakTur', 'kaynakNo', 'termin', 'durum', 'ekleyen', 'eklemeTarihi'],
     detayGrupta: { faaliyetler: { grup: 'DÖF', baslikEk: faaliyetSayaci } },

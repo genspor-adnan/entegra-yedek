@@ -13,7 +13,7 @@ public static partial class AksiyonKatalogu
         s["kys-toplanti-liste"] = Crud("kys-toplanti", "kys", "kys.toplanti", ekleAdi: "＋ Toplantı");
         s["kys-karar-liste"] =
         [
-            .. Crud("kys-karar", "kys", "kys.karar", ekleAdi: "＋ Karar"),
+            .. Crud("kys-karar", "kys", "kys.toplanti", ekleAdi: "＋ Karar"),
             new("kys.karar-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
         ];
     }

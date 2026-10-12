@@ -10,7 +10,7 @@ public static partial class KartKatalogu
     private const int LogKysToplanti = 1443;
     private const int LogKysKarar    = 1444;
 
-    private static readonly Dictionary<string, string> KysKararDurum = new() { ["1"] = "Açık", ["2"] = "Tamam", ["3"] = "İptal" };
+    private static readonly Dictionary<string, string> KysKararDurum = new() { ["1"] = "Devam", ["2"] = "Tamam", ["3"] = "İptal" };
 
     private static KartTanimi KysToplantiKarti() => new(
         Ad: "kys-toplanti",
@@ -26,11 +26,14 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",           "id",           "sayi",  Yazilabilir: false),
-            new("tarih",        "tarih",        "zaman", Zorunlu: true, Baslik: "Tarih / saat", Grup: "Toplantı"),
-            new("komiteId",     "komite_id",    "kod",   KodTablosu: "public.v_kalite_komite_lookup", Baslik: "Komite (boş = YGG)", Grup: "Toplantı"),
-            new("yer",          "yer",          "metin", EnFazlaUzunluk: 120, Baslik: "Yer", Grup: "Toplantı"),
-            new("gundem",       "gundem",       "metin", EnFazlaUzunluk: 4000, Baslik: "Gündem", Grup: "Toplantı"),
+            // Mockup Kalite2/toplanti_kararlar.html (1064): ad + tarih + komite + yer şeritte,
+            //   altında katılımcılar, gündem ve Kararlar (tek sayfa).
+            new("baslik",       "baslik",       "metin", EnFazlaUzunluk: 120, Baslik: "Toplantı (YGG 2026/1...)", Grup: "Kimlik"),
+            new("tarih",        "tarih",        "zaman", Zorunlu: true, Baslik: "Tarih / saat", Grup: "Kimlik"),
+            new("komiteId",     "komite_id",    "kod",   KodTablosu: "public.v_kalite_komite_lookup", Baslik: "Komite (boş = YGG)", Grup: "Kimlik"),
+            new("yer",          "yer",          "metin", EnFazlaUzunluk: 120, Baslik: "Yer", Grup: "Kimlik"),
             new("katilimcilar", "katilimcilar", "metin", EnFazlaUzunluk: 2000, Baslik: "Katılımcılar", Grup: "Toplantı"),
+            new("gundem",       "gundem",       "metin", EnFazlaUzunluk: 4000, Baslik: "Gündem", Grup: "Toplantı"),
         },
         Detaylar: new DetayTanimi[]
         {
@@ -46,7 +49,7 @@ public static partial class KartKatalogu
 
     private static KartTanimi KysKararKarti() => new(
         Ad: "kys-karar",
-        YetkiKodu: "kys.karar",
+        YetkiKodu: "kys.toplanti",
         Tablo: "public.kalite_karar",
         LogTabloId: LogKysKarar,
         SubeKolonu: "sube_id",

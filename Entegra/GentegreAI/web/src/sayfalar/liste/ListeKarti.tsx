@@ -52,6 +52,7 @@ import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { BulguDofHucresi, DenetimAraclari, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
+import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKapatModali, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
@@ -777,6 +778,7 @@ export function ListeKarti({
         // DÖF (1050 mockup): kaynak kaydına git · DÖF formu (A4).
         ekAraclar={tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
           : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
+          : tanim.kaynak === 'kys-toplanti' ? (d) => <ToplantiAraclari deger={d} />
           : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
           ? (d) => {
               const durum = Number(d.durum ?? 1), serbest = Number(d.serbest ?? 1);
