@@ -27,6 +27,8 @@ const ayOnce = (n: number) => {
 };
 const sayi = (v: unknown) => v == null || v === '' ? '' : Number(v).toLocaleString('tr-TR', { maximumFractionDigits: 2 });
 const GERI = `?geri=${encodeURIComponent('/kys-hedefler')}`;
+/** "6 aylık" yerine okunan cümle: 12 -> yılda 1, 6 -> yılda 2, 3 -> yılda 4. */
+const periyotNotu = (ay: number) => ay >= 12 ? c('yılda 1 ölçüm') : ay > 1 && 12 % ay === 0 ? `${c('yılda')} ${12 / ay} ${c('ölçüm')}` : `${ay} ${c('ayda bir')}`;
 
 export function KysHedefler() {
   const git = useNavigate();
@@ -84,7 +86,11 @@ export function KysHedefler() {
                 <tr key={String(s.id)} className={secili?.id === s.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
                     onClick={() => setSecili(s)} onDoubleClick={() => git(`/kys-gosterge/${s.id}${GERI}`)}>
                   <td>{String(s.ad ?? '')}</td><td>{String(s.olcu ?? '')}</td><td>{String(s.hedefMetin ?? '')}</td>
-                  <td className="sag">{sayi(s.m1)}</td><td className="sag">{sayi(s.m2)}</td><td className="sag"><b>{sayi(s.m3)}</b></td>
+                  {Number(s.periyotAy) > 1 && s.m1 == null && s.m2 == null
+                    // Her ay ölçülmeyen hedef (mockup "yılda 2 anket"): boş aylar tek hücrede.
+                    ? <td colSpan={2} className="sonuk" style={{ textAlign: 'center' }}>{periyotNotu(Number(s.periyotAy))}</td>
+                    : <><td className="sag">{sayi(s.m1)}</td><td className="sag">{sayi(s.m2)}</td></>}
+                  <td className="sag"><b>{sayi(s.m3)}</b></td>
                   <td>
                     <span className={`rozet ${disi ? 'hata' : s.durumAdi === 'Hedefte' ? 'ok' : 'gri'}`}>{String(s.durumAdi ?? '')}</span>
                     {disi && yetki('kys.dof', 'ekle') && (

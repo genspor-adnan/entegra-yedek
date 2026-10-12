@@ -19,6 +19,7 @@ public static partial class KaynakKatalogu
             new("ad",          "g.ad",          "metin",   "Gösterge", Genislik: 260),
             new("birimAdi",    "g.birim_adi",   "metin",   "Birim", Genislik: 150),
             new("periyotAdi",  "g.periyot_adi", "metin",   "Periyot", Genislik: 70),
+            new("periyotAy",   "g.periyot_ay",  "sayi",    "Periyot (ay)", Varsayilan: false),
             new("hedefMetin",  "g.hedef_metin", "metin",   "Hedef", Hizalama: "sag", Genislik: 70),
             new("sonDonem",    "g.son_donem",   "tarih",   "Son dönem"),
             new("sonDeger",    "g.son_deger",   "ondalik", "Son değer", Hizalama: "sag"),
