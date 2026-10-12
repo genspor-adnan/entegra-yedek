@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -26,9 +26,10 @@ public static class KysPolitikaUclari
         ("kys.kapsam",             "kapsam",     2000),
         ("kys.politika_onaylayan", "onaylayan",  120),
         ("kys.politika_tarih",     "tarih",      40),
+        ("kys.politika_yayin",     "yayin",      200),   // 1063, mockup "Yayın"
     ];
 
-    public sealed record KysPolitika(string Politika, string Kapsam, string Onaylayan, string Tarih);
+    public sealed record KysPolitika(string Politika, string Kapsam, string Onaylayan, string Tarih, string? Yayin = null);
 
     public static void KysPolitikaUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -42,7 +43,7 @@ public static class KysPolitikaUclari
             var d = await OkuAsync(baglanti, iptal);
             return Results.Ok(new
             {
-                politika = d.Politika, kapsam = d.Kapsam, onaylayan = d.Onaylayan, tarih = d.Tarih,
+                politika = d.Politika, kapsam = d.Kapsam, onaylayan = d.Onaylayan, tarih = d.Tarih, yayin = d.Yayin ?? "",
                 duzenle = baglam.Yetkiler.Var("kys.gosterge", Islem.Degistir),
                 izlemeNo = baglam.IzlemeNo,
             });
@@ -60,6 +61,7 @@ public static class KysPolitikaUclari
                 ["kys.kapsam"] = (istek?.Kapsam ?? "").Trim(),
                 ["kys.politika_onaylayan"] = (istek?.Onaylayan ?? "").Trim(),
                 ["kys.politika_tarih"] = (istek?.Tarih ?? "").Trim(),
+                ["kys.politika_yayin"] = (istek?.Yayin ?? "").Trim(),
             };
             foreach (var (anahtar, alan, enFazla) in Alanlar)
                 if (yeni[anahtar].Length > enFazla)
@@ -72,6 +74,7 @@ public static class KysPolitikaUclari
             {
                 ["kys.politika"] = eski.Politika, ["kys.kapsam"] = eski.Kapsam,
                 ["kys.politika_onaylayan"] = eski.Onaylayan, ["kys.politika_tarih"] = eski.Tarih,
+                ["kys.politika_yayin"] = eski.Yayin ?? "",
             };
 
             // Değişiklik logu alan alan; hiçbir şey değişmediyse satır yok (ULog kuralı).
@@ -96,7 +99,7 @@ public static class KysPolitikaUclari
             return Results.Ok(new
             {
                 politika = yeni["kys.politika"], kapsam = yeni["kys.kapsam"],
-                onaylayan = yeni["kys.politika_onaylayan"], tarih = yeni["kys.politika_tarih"],
+                onaylayan = yeni["kys.politika_onaylayan"], tarih = yeni["kys.politika_tarih"], yayin = yeni["kys.politika_yayin"],
                 duzenle = true, izlemeNo = baglam.IzlemeNo,
             });
         });
@@ -111,6 +114,6 @@ public static class KysPolitikaUclari
         await using (var o = await komut.ExecuteReaderAsync(iptal))
             while (await o.ReadAsync(iptal)) d[o.GetString(0)] = o.GetString(1);
         string Al(string k) => d.TryGetValue(k, out var v) ? v : "";
-        return new KysPolitika(Al("kys.politika"), Al("kys.kapsam"), Al("kys.politika_onaylayan"), Al("kys.politika_tarih"));
+        return new KysPolitika(Al("kys.politika"), Al("kys.kapsam"), Al("kys.politika_onaylayan"), Al("kys.politika_tarih"), Al("kys.politika_yayin"));
     }
 }

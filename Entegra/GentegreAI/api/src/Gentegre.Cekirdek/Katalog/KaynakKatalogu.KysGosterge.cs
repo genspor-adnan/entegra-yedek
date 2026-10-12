@@ -24,6 +24,12 @@ public static partial class KaynakKatalogu
             new("sonDeger",    "g.son_deger",   "ondalik", "Son değer", Hizalama: "sag"),
             new("durumAdi",    "g.durum_adi",   "metin",   "Durum", Genislik: 90, Bicim: "rozet"),
             new("sorumluAdi",  "g.sorumlu_adi", "metin",   "Sorumlu", Genislik: 140, Varsayilan: false),
+            // Hedefler sekmesi (1063, mockup Kalite2/hedefler.html): ölçü + son üç ay.
+            new("olcu",        "g.olcu",        "metin",   "Ölçü", Genislik: 80, Varsayilan: false),
+            new("m1",          "g.m1",          "ondalik", "3 ay önce", Hizalama: "sag", Varsayilan: false),
+            new("m2",          "g.m2",          "ondalik", "2 ay önce", Hizalama: "sag", Varsayilan: false),
+            new("m3",          "g.m3",          "ondalik", "Geçen ay", Hizalama: "sag", Varsayilan: false),
+            new("sorumluId",   "g.sorumlu_id",  "sayi",    "Sorumlu Id", Varsayilan: false),
             new("formul",      "g.formul",      "metin",   "Formül", Genislik: 220, Varsayilan: false),
             new("aktif",       "g.aktif",       "sayi",    "Aktif", Varsayilan: false),
             // "DÖF aç" (1059) birimi bundan doldurur.

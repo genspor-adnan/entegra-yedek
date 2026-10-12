@@ -11,6 +11,15 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  * değerleri tablosu. Klinik Kalite göstergeleri ayrı menüde (Klinik Kalite).
  */
 export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
+  // MENÜ GİRİŞİ (1063, mockup Kalite2/hedefler.html): Hedefler + Politika & Kapsam
+  //   sekmeli özel sayfa (KysHedefler). Aşağıdaki generic liste menüde görünmez;
+  //   hedef kartı (/kys-gosterge/:id) ve dönem değerleri onunla açılır.
+  {
+    kaynak: 'kys-hedefler', rota: 'kys-hedefler', ozelSayfa: true, baslik: 'Kalite Politikası & Hedefler',
+    yol: 'Kalite › Politika & Hedefler',
+    modul: 'kys',
+    menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 60,
+  },
   {
     kaynak: 'kys-gosterge', rota: 'kys-gosterge', aksiyonEkrani: 'kys-gosterge-liste', baslik: 'Kalite Politikası & Hedefler',
     yol: 'Kalite › Politika & Hedefler',
@@ -22,6 +31,6 @@ export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 60,
+    menuGrup: 'Kalite', menuAd: 'Hedef Listesi', menuGizli: true, ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 61,
   },
 ];

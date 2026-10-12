@@ -66,7 +66,7 @@ export function KysPano() {
         {kart('kys-olay', 'Değerlendirilecek bildirim', o.olay, 'sari')}
         {kart('kys-denetim', 'Bu ay denetim', o.denetimAy, '', o.denetimAy ? `${o.denetimYapilan}'i yapıldı` : undefined)}
         {kart('kys-risk', 'Yüksek risk', o.yuksekRisk, 'kir')}
-        {kart('kys-gosterge', 'Hedef dışı', o.hedefDisi, 'sari', `/ ${o.hedefToplam} hedef`)}
+        {kart('kys-hedefler', 'Hedef dışı', o.hedefDisi, 'sari', `/ ${o.hedefToplam} hedef`)}
         {kart('kys-kalibrasyon', 'Kalibrasyonu yaklaşan', kalibrasyon, o.kalibrasyonGecen ? 'kir' : 'sari',
               o.kalibrasyonGecen ? `${o.kalibrasyonGecen}'i geçti` : undefined)}
         {kart('kys-egitim', 'Eksik zorunlu eğitim', o.eksikEgitim, 'sari', 'kişi')}

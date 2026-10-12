@@ -958,6 +958,16 @@ tr.panel-basligi .d.mini {
 /* RİSK SKORU (1062, mockup Kalite2 .skor d/o/y/c): seviye renginde kutu. */
 .risk-skor { display: inline-block; min-width: 26px; text-align: center; border-radius: 3px; font-weight: bold; padding: 1px 5px; color: #fff; background: #98a6b5 }
 .risk-skor.s1 { background: #5cb87a } .risk-skor.s2 { background: #d9a12b } .risk-skor.s3 { background: #e67e22 } .risk-skor.s4 { background: #c0392b }
+/* POLİTİKA & HEDEFLER (1063, mockup Kalite2/hedefler.html). */
+.kys-hedef-tablo td.sag, .kys-hedef-tablo th.sag { text-align: right }
+.kys-politika { display: grid; gap: 10px; max-width: 1100px; padding: 10px 2px }
+.kys-politika .alan { display: flex; flex-direction: column; align-items: stretch; gap: 3px }
+.kys-politika .etiket { text-align: left; font-weight: bold; width: auto; justify-content: flex-start }
+.kys-politika input { width: 100% }
+.kys-politika textarea { min-height: 70px; width: 100% }
+.kys-politika-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+.kys-politika-onay { display: flex; gap: 6px }
+.kys-politika-onay input:first-child { flex: 1 }
 /* İÇ DENETİM KARTI (1061): sonuç notu bulguların altında tam genişlik, alçak. */
 .kart-kys-denetim .alan-sonucNotu { grid-column: 1 / -1 }
 .kart-kys-denetim .alan-sonucNotu textarea { height: 46px; min-height: 46px }

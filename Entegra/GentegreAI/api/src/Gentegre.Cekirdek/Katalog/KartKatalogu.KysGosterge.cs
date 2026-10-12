@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE (1053) — gösterge kartı + dönem değerleri detayı.
@@ -24,9 +24,10 @@ public static partial class KartKatalogu
         {
             new("id",          "id",           "sayi",    Yazilabilir: false),
             new("kod",         "kod",          "metin",   Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Gösterge"),
-            new("ad",          "ad",           "metin",   Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Gösterge adı", Grup: "Gösterge"),
+            new("ad",          "ad",           "metin",   Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Hedef", Grup: "Gösterge"),
+            new("olcu",        "olcu",         "metin",   EnFazlaUzunluk: 30, Baslik: "Ölçü (%, adet / ay, puan / 5)", Grup: "Gösterge"),
             new("formul",      "formul",       "metin",   EnFazlaUzunluk: 400, Baslik: "Formül", Grup: "Gösterge"),
-            new("hedef",       "hedef",        "ondalik", Baslik: "Hedef", Grup: "Gösterge"),
+            new("hedef",       "hedef",        "ondalik", Baslik: "Hedef değer", Grup: "Gösterge"),
             new("yon",         "yon",          "kod",     Zorunlu: true, SabitKodlar: KysGostergeYon, Baslik: "Hedef yönü", Grup: "Gösterge"),
             new("periyotAy",   "periyot_ay",   "kod",     Zorunlu: true, SabitKodlar: KysGostergePeriyot, Baslik: "Periyot", Grup: "Gösterge"),
             new("departmanId", "departman_id", "kod",     KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "Gösterge"),

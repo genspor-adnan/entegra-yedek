@@ -13,6 +13,7 @@ describe('kurumsal kalite göstergeler / toplantılar', () => {
     }
   });
   it('generic kart rotaları kaynakla aynı', () => {
-    for (const l of hepsi) expect(l.kartYolu).toBe(`/${l.rota}`);
+    // Özel sayfa (Politika & Hedefler, 1063) kartsızdır - hedef kartı generic listenin.
+    for (const l of hepsi.filter(x => !x.ozelSayfa)) expect(l.kartYolu).toBe(`/${l.rota}`);
   });
 });
