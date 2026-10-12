@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riskler — Mockup (GenoTIP AI · Kalite 2 Sade)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<link rel="stylesheet" href="k2.css">
+</head>
+<body>
+<div class="k2nav">Kalite (sade):
+  <span data-git="kalite_panosu.html">🏆 Pano</span>
+  <span data-git="olay_bildirim.html">⚠️ Olay / Uygunsuzluk</span>
+  <span data-git="dof_listesi.html">🛠️ DÖF</span>
+  <span data-git="ic_denetim.html">🔎 İç Denetim</span>
+  <span class="on" data-git="risk_listesi.html">🎯 Riskler</span>
+  <span data-git="hedefler.html">📈 Politika & Hedefler</span>
+  <span data-git="toplanti_kararlar.html">👥 YGG & Kararlar</span>
+  <span data-git="egitim.html">🎓 Eğitim</span>
+  <span data-git="tedarikci.html">🚚 Tedarikçi</span>
+  <span data-git="kalibrasyon.html">📏 Kalibrasyon</span>
+  <span data-git="kalite_dokumanlari.html">📄 Kalite Dokümanları</span>
+  <span data-git="ayarlar.html">⚙️ Ayarlar</span>
+  <span class="kars" data-git="karsilastirma.html">⇄ Kalite / Kalite 2 karşılaştır</span>
+</div>
+<div class="win">
+  <div class="title"><span>🎯 Riskler</span><span class="sp">skor = olasılık × şiddet (1–25)</span></div>
+  <div class="toolbar"><div class="btn primary">＋ Yeni Risk</div><div class="sp"></div><div class="btn">🖨️ Risk Listesi</div></div>
+  <div class="arama">
+    <div class="kutu">🔍 Risk, süreç, birim…</div>
+    <span class="chip on">Açık <b>14</b></span><span class="chip">Yüksek <b>3</b></span><span class="chip">Gözden geçirme vakti <b>2</b></span><span class="chip">Tümü</span>
+  </div>
+  <div class="yanyana">
+    <div class="dg"><table>
+      <thead><tr><th>No</th><th>Risk</th><th>Birim</th><th class="orta">O</th><th class="orta">Ş</th><th class="orta">Skor</th><th>Sahibi</th></tr></thead>
+      <tbody>
+        <tr class="tik sel"><td><code>RSK-012</code></td><td>Tek tedarikçiye bağımlılık (ana hammadde)</td><td>Satınalma</td><td class="orta">4</td><td class="orta">5</td><td class="orta"><span class="skor c">20</span></td><td>S. Arslan</td></tr>
+        <tr class="tik"><td><code>RSK-009</code></td><td>Yanlış ürün sevkiyatı</td><td>Satış</td><td class="orta">3</td><td class="orta">4</td><td class="orta"><span class="skor y">12</span></td><td>M. Kaya</td></tr>
+        <tr class="tik"><td><code>RSK-007</code></td><td>Yedeksiz sunucu, veri kaybı</td><td>Bilgi İşlem</td><td class="orta">2</td><td class="orta">5</td><td class="orta"><span class="skor y">10</span></td><td>K. Şahin</td></tr>
+        <tr class="tik"><td><code>RSK-004</code></td><td>Kalibrasyon takibinin unutulması</td><td>Üretim</td><td class="orta">2</td><td class="orta">3</td><td class="orta"><span class="skor o">6</span></td><td>S. Arslan</td></tr>
+        <tr class="tik"><td><code>RSK-002</code></td><td>Kilit personelin ayrılması</td><td>Yönetim</td><td class="orta">2</td><td class="orta">2</td><td class="orta"><span class="skor d">4</span></td><td>A. Yılmaz</td></tr>
+      </tbody>
+    </table></div>
+    <div>
+      <div class="hdr k2">
+        <div class="fld"><label>No</label><div class="inp ro">RSK-012</div></div>
+        <div class="fld"><label class="req">Birim / süreç</label><div class="inp combo">Satınalma</div></div>
+        <div class="fld"><label class="req">Olasılık (1–5)</label><div class="inp combo">4 — Sık</div></div>
+        <div class="fld"><label class="req">Şiddet (1–5)</label><div class="inp combo">5 — Çok ciddi</div></div>
+        <div class="fld"><label>Skor</label><div class="inp ro"><span class="skor c">20</span> Çok yüksek</div></div>
+        <div class="fld"><label>Gözden geçirme</label><div class="inp">01.12.2026</div></div>
+      </div>
+      <div class="ic">
+        <div class="fld"><label class="req">Risk</label><div class="inp uzun">Ana hammadde tek tedarikçiden; teslimat aksarsa üretim durur.</div></div><br>
+        <div class="fld"><label>Alınan / alınacak önlem</label><div class="inp uzun">İkinci tedarikçi onaya alınacak; 2 haftalık emniyet stoğu tutulacak.</div></div><br>
+        <div class="btn" style="display:inline-flex">🛠️ DÖF Aç</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not"><b>Sade:</b> risk listesi + yanda kart. Skor rengi eşikleri ayarda (≤4 düşük · ≤9 orta · ≤14 yüksek · üstü çok yüksek). 5×5 matris ekranı, FMEA, fırsatlar, kalıntı risk yok.</div>
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
