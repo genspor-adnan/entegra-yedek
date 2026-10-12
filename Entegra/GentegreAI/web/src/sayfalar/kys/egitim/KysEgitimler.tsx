@@ -73,7 +73,7 @@ export function KysEgitimler() {
                 <td><span className={`rozet ${Number(e.zorunlu) === 1 ? 'mavi' : 'gri'}`}>{String(e.zorunluAdi ?? '')}</span></td>
                 <td>{String(e.egitmen ?? '')}</td>
                 <td title={String(e.katilimcilar ?? '')}>{String(e.katilimci ?? 0)} {c('kişi')}</td>
-                <td>{Number(e.belgeSayisi) > 0 ? `📎 ${e.belgeSayisi} ${c('belge')}` : <span className="sonuk">—</span>}</td>
+                <td title={`${e.belgeSayisi ?? 0} ${c('belge')}`}>{Number(e.belgeSayisi) > 0 ? `📎 ${String(e.belgeOzet ?? '') || c('belge')}` : <span className="sonuk">—</span>}</td>
               </tr>
             ))}
             {egitimler && !egitimler.length && <tr><td colSpan={6} className="sonuk">{c('Eğitim kaydı yok - ＋ Eğitim Kaydı ile ekleyin.')}</td></tr>}

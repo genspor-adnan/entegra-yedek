@@ -32,6 +32,7 @@ public static partial class KaynakKatalogu
             new("zorunlu",      "e.zorunlu",      "mantik", "Zorunlu mu", Varsayilan: false),
             // Mockup "Belge" kolonu (1065): katılım listesi / sertifika eki sayısı.
             new("belgeSayisi",  "e.belge_sayisi", "sayi",  "Belge", Hizalama: "orta"),
+            new("belgeOzet",    "e.belge_ozet",   "metin", "Belge türleri", Varsayilan: false),
         });
 
     /// <summary>Eksik zorunlu eğitim: hiç almamış, süresi geçmiş ya da 60 gün içinde dolacak.</summary>

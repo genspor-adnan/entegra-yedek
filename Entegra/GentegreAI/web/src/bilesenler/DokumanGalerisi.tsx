@@ -313,11 +313,13 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                   ? 'Hangi harcamanın fişi (belge no)'
                   : kartAdi === 'demirbas' ? 'Fatura, garanti belgesi, tutanak...'
                   : kartAdi === 'kys-kalibrasyon' ? 'Kalibrasyon sertifikası'
+                  : kartAdi === 'kys-egitim' ? 'Katılım listesi, sertifika...'
                   : 'İş sözleşmesi, sağlık raporu...'}
               />
               <datalist id="dokuman-belge-turu-secenekleri">
                 {(kartAdi === 'sube' ? FIRMA_GORSELLERI
                   : kartAdi === 'demirbas' ? DEMIRBAS_BELGELERI
+                  : kartAdi === 'kys-egitim' ? ['Katılım listesi', 'Sertifika', 'Eğitim sunumu', 'Sınav']
                   : kartAdi === 'personelMasraf' ? masrafBelgeNolari
                   : OZLUK_TURLERI)
                   .map(s => <option key={s} value={s} />)}
