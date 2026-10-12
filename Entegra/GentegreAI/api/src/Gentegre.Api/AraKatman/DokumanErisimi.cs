@@ -49,6 +49,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["rad-cihaz"]       = new(["radyoloji"], ["radyoloji-cihaz"]),
         // Kalite › Kalibrasyon (1058) aynı demirbaş satırına sertifika ekler.
         ["demirbas"]        = new(["demirbas", "kys.kalibrasyon"], ["demirbas", "kys-kalibrasyon"]),
+        // Kalite › Eğitim belgeleri (1065): kayıt kapsamı eğitim listesinden.
+        ["kys-egitim"]      = new(["kys.egitim"], ["kys-egitim"]),
         ["klasor"]          = new(["dokuman"], []),
         ["sube"]            = new(["sube"], [], HerkeseGor: true),
         ["ebelge-xslt"]     = new(["ebelge_xslt"], [], HerkeseGor: true),

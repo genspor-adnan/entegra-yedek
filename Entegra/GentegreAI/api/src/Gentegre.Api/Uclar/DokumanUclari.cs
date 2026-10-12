@@ -236,6 +236,9 @@ public static class DokumanUclari
         // KALİBRASYON SERTİFİKASI (1058): Kalite › Kalibrasyon kartı demirbaş
         //   satırıdır; ek demirbaşın belgelerine yazılır, kapı kys.kalibrasyon.
         "kys-kalibrasyon" => "demirbas",
+        // EĞİTİM BELGELERİ (1065): katılım listesi, sertifika - kaynak_id
+        //   eğitim grubunun kimliği (v_kalite_egitim.id).
+        "kys-egitim" => "kys-egitim",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -290,6 +293,7 @@ public static class DokumanUclari
         "personelBelgeTalep" => "ik.belge_talep",
         "radyoloji-cihaz" => "radyoloji",
         "kys-kalibrasyon" => "kys.kalibrasyon",
+        "kys-egitim" => "kys.egitim",
         "servisZiyaret" => "servis",
         _ => kartAdi
     };

@@ -18,6 +18,15 @@ const SEKMELER = [
 ];
 
 export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
+  // MENÜ GİRİŞİ (1065, mockup Kalite2/egitim.html): Eğitimler + Eksik Zorunlu Eğitim
+  //   sekmeli özel sayfa (KysEgitimler). Aşağıdaki generic listeler menüde
+  //   görünmez; zorunlu tanımlar sayfadaki bağlantıyla açılır.
+  {
+    kaynak: 'kys-egitimler', rota: 'kys-egitimler', ozelSayfa: true, baslik: 'Eğitim & Yetkinlik Kayıtları',
+    yol: 'Kalite › Eğitim',
+    modul: 'kys',
+    menuGrup: 'Kalite', menuAd: 'Eğitim', ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 80,
+  },
   {
     kaynak: 'kys-egitim', rota: 'kys-egitim', aksiyonEkrani: 'kys-egitim-liste', baslik: 'Eğitim & Yetkinlik Kayıtları',
     yol: 'Kalite › Eğitim',
@@ -29,7 +38,7 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
       ...SEKMELER,
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Eğitim', ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 80,
+    menuGrup: 'Kalite', menuAd: 'Eğitim Listesi', menuGizli: true, ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 81,
   },
   {
     kaynak: 'kys-egitim-eksik', rota: 'kys-egitim-eksik', baslik: 'Eksik Zorunlu Eğitim',

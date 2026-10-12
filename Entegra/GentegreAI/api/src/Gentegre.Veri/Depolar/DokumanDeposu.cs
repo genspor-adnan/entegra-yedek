@@ -50,9 +50,17 @@ public sealed class DokumanDeposu
         //   başvuruda hastanın getirdiği istek kağıdı taranıp başvuruya eklenir;
         //   kaynak_id BELGE (başvuru) kimliğidir. SGK/sigorta faturalamasında
         //   "istem belgesi nerede" sorusunun başvuru düzeyindeki cevabı.
+        //   EKSİK KALANLAR (12.10.2026): DokumanUclari.FizikselKaynak'a eklenen
+        //   kaynaklar (arıza 954, duyuru 957, izin 959, avans 960, belge talebi
+        //   962, radyoloji cihazı 967, demirbaş 10.10.2026) bu listeye girmemişti;
+        //   belgeler sekmeleri "Bilinmeyen kaynak" ile 500 veriyordu. Yetki
+        //   DokumanErisimi'nde - liste yalnız tablo kaynağı adını sınırlar.
+        //   "kys-egitim" (1065): kalite eğitimi katılım listesi / sertifika.
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
-              "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge" };
+              "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge",
+              "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
+              "kys-egitim" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

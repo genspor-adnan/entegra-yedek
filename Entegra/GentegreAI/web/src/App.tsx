@@ -52,6 +52,7 @@ const IsgIcmal = tembel(() => import('./sayfalar/isgIcmal/IsgIcmal'), 'IsgIcmal'
 const KysEgitimKarti = tembel(() => import('./sayfalar/kys/egitim/KysEgitimKarti'), 'KysEgitimKarti');
 const KysHedefler = tembel(() => import('./sayfalar/kys/hedef/KysHedefler'), 'KysHedefler');
 const KysToplantilar = tembel(() => import('./sayfalar/kys/toplanti/KysToplantilar'), 'KysToplantilar');
+const KysEgitimler = tembel(() => import('./sayfalar/kys/egitim/KysEgitimler'), 'KysEgitimler');
 const KysPano = tembel(() => import('./sayfalar/kys/pano/KysPano'), 'KysPano');
 const KaliteIcmal = tembel(() => import('./sayfalar/kaliteIcmal/KaliteIcmal'), 'KaliteIcmal');
 const RandevuIcmal = tembel(() => import('./sayfalar/randevuIcmal/RandevuIcmal'), 'RandevuIcmal');
@@ -447,10 +448,12 @@ function Yollar() {
             <DisSeansKarti />
           </>} />
         )}
-        {/* KURUMSAL KALİTE (1056): eğitim kaydı özel kart (katılımcı listesi), arkada Eğitim listesi. */}
+        {/* KURUMSAL KALİTE (1056 / 1065): eğitim sayfası (Eğitimler / Eksik Zorunlu sekmeleri);
+            kayıt özel kart (katılımcı listesi, belgeler), arkada eğitim sayfası. */}
+        {yetki('kys.egitim') && <Route path="/kys-egitimler" element={<KysEgitimler />} />}
         {yetki('kys.egitim') && (
           <Route path="/kys-egitim/:id" element={<>
-            <Liste tanim={LISTELER.find(l => l.kaynak === 'kys-egitim')!} />
+            <KysEgitimler />
             <KysEgitimKarti />
           </>} />
         )}

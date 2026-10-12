@@ -7,6 +7,7 @@ import { useOturum } from '../../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../../bilesenler/mesaj';
 import { useEscIleKapat } from '../../../bilesenler/Modal';
 import { c } from '../../../dil/ceviri';
+import { DokumanGalerisi } from '../../../bilesenler/DokumanGalerisi';
 
 /**
  * KURUMSAL KALİTE — EĞİTİM KAYDI KARTI (1056) — mockup `Ekranlar/Kalite2/egitim.html`
@@ -23,7 +24,7 @@ export function KysEgitimKarti() {
   const konum = useLocation();
   const [sorgu] = useSearchParams();
   const { yetki } = useOturum();
-  const geri = (konum.state as { geri?: string } | null)?.geri ?? sorgu.get('geri') ?? '/kys-egitim';
+  const geri = (konum.state as { geri?: string } | null)?.geri ?? sorgu.get('geri') ?? '/kys-egitimler';
   const kapat = useCallback(() => git(geri), [git, geri]);
   useEscIleKapat(kapat);
 
@@ -133,7 +134,12 @@ export function KysEgitimKarti() {
                 </table></div>
               </div>}
             </div>
-            <div className="ds-ic sonuk">{c('Zorunlu eğitim, adı "Zorunlu Eğitimler" sekmesindeki tanımla aynı yazılınca sayılır.')}</div>
+            {/* BELGELER (1065, mockup "📎 katılım listesi / sertifikalar"): kayıtlı eğitimde. */}
+            {!yeni && <div className="ds-grp" style={{ marginTop: 8 }}>
+              <div className="ds-gb">📎 {c('Belgeler')} <span className="sonuk">{c('katılım listesi, sertifika')}</span></div>
+              <DokumanGalerisi kartAdi="kys-egitim" kaynakId={id} saltOkunur={!yazar} />
+            </div>}
+            <div className="ds-ic sonuk">{c('Zorunlu eğitim, adı zorunlu eğitim tanımıyla aynı yazılınca sayılır (Eksik Zorunlu Eğitim sekmesi › tanımlar).')}</div>
           </>)}
         </div>
       </div>

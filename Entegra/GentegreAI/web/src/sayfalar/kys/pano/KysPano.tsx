@@ -69,7 +69,7 @@ export function KysPano() {
         {kart('kys-hedefler', 'Hedef dışı', o.hedefDisi, 'sari', `/ ${o.hedefToplam} hedef`)}
         {kart('kys-kalibrasyon', 'Kalibrasyonu yaklaşan', kalibrasyon, o.kalibrasyonGecen ? 'kir' : 'sari',
               o.kalibrasyonGecen ? `${o.kalibrasyonGecen}'i geçti` : undefined)}
-        {kart('kys-egitim', 'Eksik zorunlu eğitim', o.eksikEgitim, 'sari', 'kişi')}
+        {kart('kys-egitimler', 'Eksik zorunlu eğitim', o.eksikEgitim, 'sari', 'kişi')}
       </div>
       <section className="fm-bolum">
         <h3 className="fm-bolum-bas">📌 Bana düşenler <span className="sonuk" style={{ fontWeight: 'normal', fontSize: 11 }}>yalnız bana atananlar</span></h3>

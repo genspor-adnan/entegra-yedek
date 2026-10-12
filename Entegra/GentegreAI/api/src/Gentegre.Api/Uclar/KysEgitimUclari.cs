@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -141,6 +141,12 @@ public static class KysEgitimUclari
                 select min(id) from public.personel_egitim
                  where ad = @p0 and tur = @p1 and kurum = @p2 and tarih = @p3 and sube_id = @p4
                 """, tx, [istek.Ad, istek.Tur, istek.Egitmen, istek.Tarih, grupSube], iptal);
+            // BELGELER GRUPLA GİDER (1065): katılım listesi / sertifika grup
+            //   kimliğine bağlı; o satır çıkarıldıysa kimlik değişti, ekler taşınır.
+            if (id != 0 && yeniKimlik != id)
+                await b.CalistirAsync("""
+                    update public.dokuman set kaynak_id = @p1 where kaynak = 'kys-egitim' and kaynak_id = @p0
+                    """, tx, [id, yeniKimlik], iptal);
             await tx.CommitAsync(iptal);
             return Results.Ok(new { id = yeniKimlik, izlemeNo = baglam.IzlemeNo });
         });
@@ -153,6 +159,11 @@ public static class KysEgitimUclari
             await using var b = await veri.AcAsync(iptal);
             await using var tx = await b.BeginTransactionAsync(iptal);
             var satirlar = await GrupAsync(b, tx, id, baglam, iptal);
+            // Belgesi olan eğitim silinmez (1065): ek sahipsiz kalırdı.
+            if (await b.TekDegerAsync<bool>("""
+                    select exists (select 1 from public.dokuman where kaynak = 'kys-egitim' and kaynak_id = @p0)
+                    """, tx, [id], iptal))
+                throw GentegreHatasi.IsKurali("Eğitimin belgeleri var; önce Belgeler bölümünden silin.");
             foreach (var s in satirlar)
             {
                 await log.YazAsync(b, tx, LogIslemi.Sil, LogPersonelEgitim, s.Id, baglam.KullaniciId,

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE (1056) — Eğitim &amp; Yetkinlik (sade, ISO 9001 7.2).
@@ -30,6 +30,8 @@ public static partial class KaynakKatalogu
             new("gecerlilik",   "e.gecerlilik",   "metin", "Geçerlilik", Genislik: 110, Varsayilan: false),
             new("tarihMetin",   "e.tarih_metin",  "metin", "Tarih (girilen)", Varsayilan: false),
             new("zorunlu",      "e.zorunlu",      "mantik", "Zorunlu mu", Varsayilan: false),
+            // Mockup "Belge" kolonu (1065): katılım listesi / sertifika eki sayısı.
+            new("belgeSayisi",  "e.belge_sayisi", "sayi",  "Belge", Hizalama: "orta"),
         });
 
     /// <summary>Eksik zorunlu eğitim: hiç almamış, süresi geçmiş ya da 60 gün içinde dolacak.</summary>
