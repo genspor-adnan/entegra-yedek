@@ -12,8 +12,17 @@ public static partial class AksiyonKatalogu
     {
         s["kys-denetim-liste"] =
         [
-            .. Crud("kys-denetim", "kys", "kys.denetim", ekleAdi: "＋ Denetim Planla", silHedef: null),
-            new("kys.denetim-bulgular", "📋 Bulgular / DÖF", "kys", KaynakKodu: "kys.denetim", KayitGerekir: true, Sira: 40),
+            // Mockup Kalite2/ic_denetim.html (1071): araç çubuğu "＋ Denetim Planla ·
+            //   🖨️ Yıllık Plan" (yıllık plan = tarihli denetim listesinin çıktısı).
+            //   Kartı aç / sil / bulgular sağ tık; bulgudan DÖF kartın içinde.
+            new("kys-denetim.yeni", "＋ Denetim Planla", "kys", Kisayol: "Ctrl+N",
+                KaynakKodu: "kys.denetim", Islem: Islem.Ekle, Sira: 10),
+            new("kys-denetim.duzenle", "✎ Kartı aç", "kys", Hedef: "sagtus,palet", Kisayol: "Enter",
+                KaynakKodu: "kys.denetim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            new("kys-denetim.sil", "🗑 Sil", "kys", Hedef: "sagtus,palet", Kisayol: "Del",
+                KaynakKodu: "kys.denetim", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            new("kys.denetim-bulgular", "📋 Bulgular / DÖF", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.denetim", KayitGerekir: true, Sira: 40),
+            Yazdir() with { Ad = "🖨️ Yıllık Plan" },
         ];
         s["kys-denetim-bulgu-liste"] =
         [

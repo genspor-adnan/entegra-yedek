@@ -6,7 +6,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-denetim', rota: 'kys-denetim', baslik: 'İç Denetimler', yol: 'Kalite › İç Denetimler',
+    kaynak: 'kys-denetim', rota: 'kys-denetim', baslik: '🔎 İç Denetimler', yol: 'Kalite › İç Denetimler · yıllık plan = tarihli denetim listesi',
     kartYolu: '/kys-denetim', kartBaslik: 'İç Denetim', aksiyonEkrani: 'kys-denetim-liste',
     tarihAlani: 'tarih',
     cipler: [

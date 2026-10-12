@@ -26,8 +26,11 @@ public static partial class KaynakKatalogu
             new("basDenetciAdi", "d.bas_denetci_adi", "metin", "Baş denetçi", Genislik: 150, Varsayilan: false),
             new("ekip",          "d.ekip",            "metin", "Ekip", Genislik: 200, Varsayilan: false),
             new("kapsam",        "d.kapsam",          "metin", "Kapsam", Genislik: 240, Varsayilan: false),
-            new("bulguOzet",     "d.bulgu_ozet",      "metin", "Bulgu", Genislik: 150),
-            new("dofSayisi",     "d.dof_sayisi",      "sayi",  "Açılan DÖF", Hizalama: "orta"),
+            // Boşsa "—" (mockup, 1071).
+            new("bulguMetin",    "d.bulgu_metin",     "metin", "Bulgu", Genislik: 170),
+            new("dofMetin",      "d.dof_metin",       "metin", "Açılan DÖF", Hizalama: "orta"),
+            new("bulguOzet",     "d.bulgu_ozet",      "metin", "Bulgu özeti", Genislik: 150, Varsayilan: false),
+            new("dofSayisi",     "d.dof_sayisi",      "sayi",  "Açılan DÖF sayısı", Hizalama: "orta", Varsayilan: false),
             new("durumAdi",      "d.durum_adi",       "metin", "Durum", Genislik: 100, Bicim: "rozet"),
             new("departmanId",   "d.departman_id",    "sayi",  "Birim Id", Varsayilan: false),
             new("gecikti",       "d.gecikti",         "mantik", "Gecikti", Varsayilan: false),
