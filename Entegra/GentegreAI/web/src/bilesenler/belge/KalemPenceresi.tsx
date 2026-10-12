@@ -24,7 +24,7 @@ import { c } from '../../dil/ceviri';
 import { secimSor } from '../mesaj';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
-                         basvuruMu, ustSerit, tarifeTipi = 0, rota = 0,
+                         basvuruMu, sifirFiyatSor, ustSerit, tarifeTipi = 0, rota = 0,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
@@ -57,6 +57,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   ustSerit?: { hasta?: string; odeyen?: string; liste?: string };
   /** Basvuru (kayit kabul): fiyat HER ZAMAN KDV dahil girilir. */
   basvuruMu?: boolean;
+  /** Fiyatin anlamli oldugu belge: kalem 0 fiyatla kaydedilirken onay sorulur. */
+  sifirFiyatSor?: boolean;
   /**
    * BELGENIN FIYAT LISTESININ TARIFE TIPI (586): 1 Özel · 2 TTB/HUV · 3 SUT.
    *
@@ -268,12 +270,12 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
       setHata('SGK (SUT) bedeli girilmeli. SGK bu hizmeti ödemiyorsa 0 yazın.');
       return;
     }
-    // SIFIR UCRET ONAYI (kullanici 12.10.2026): basvuruya ucret 0 ile eklenecekse
+    // SIFIR UCRET / FIYAT ONAYI (kullanici 12.10.2026; basvuru + satis faturasi ...): kalem 0 ile eklenecekse
     //   sorulur - fiyat listesinde fiyati olmayan hizmet sessizce bedelsiz girmesin.
-    if (basvuruMu && fiyat <= 0 && !sifirOnaylandi.current) {
+    if (sifirFiyatSor && fiyat <= 0 && !sifirOnaylandi.current) {
       if (sifirSoruluyor.current) return;
       sifirSoruluyor.current = true;
-      void secimSor('Ücret 0 (Sıfır) olarak eklenecektir! Onaylıyor musunuz?', [
+      void secimSor(`${basvuruMu ? 'Ücret' : 'Fiyat'} 0 (Sıfır) olarak eklenecektir! Onaylıyor musunuz?`, [
         { kod: 'evet', ad: 'Evet', sinif: 'teh' },
         { kod: 'hayir', ad: 'Hayır' },
       ], 'hayir').then(cevap => {

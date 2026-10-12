@@ -104,7 +104,7 @@ export interface BelgeKartiModalProps {
   aramaEklenen: { sayi: number; son: string };
   setAramaEklenen: Ayarla<{ sayi: number; son: string }>;
   /** `hizli` (786): kalem penceresi acilmadan 1 adet eklenir. */
-  stokSecildi(sec: Record<string, unknown>, hizli?: boolean): void | Promise<void>;
+  stokSecildi(sec: Record<string, unknown>, hizli?: boolean): Promise<boolean>;
   kalem: SatirDurumu | null;
   setKalem: Ayarla<SatirDurumu | null>;
   kalemKaydet(satir: SatirDurumu): void;
@@ -349,8 +349,10 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           //   sayaci BURASI artirir - pencere yoluyla eklemede sayaci kalem
           //   penceresinin onKaydet'i artiriyor.
           onSec={(sec, hizli) => void (async () => {
-            await stokSecildi(sec, hizli);
-            if (hizli)
+            // Sayac yalniz satir GERCEKTEN eklendiyse artar: sifir fiyatli kalem
+            //   hizli eklenmez, fiyat penceresi acilir (orada onKaydet artirir).
+            const eklendi = await stokSecildi(sec, hizli);
+            if (eklendi)
               setAramaEklenen(o => ({ sayi: o.sayi + 1,
                                       son: String(sec.ad ?? sec.stokAdi ?? '') }));
           })()}
@@ -360,6 +362,8 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
       {/* 2) Adet / birim fiyat - Enter satiri gride ekler ve buraya doner. */}
       {kalem !== null && (
         <KalemPenceresi
+          // SIFIR FIYAT ONAYI: fiyatin anlamli oldugu belgelerde (transfer / stok fisi disi).
+          sifirFiyatSor={!depoBelgesi && !stokFisiMi}
           satir={kalem}
           transferMi={bilgi.kalem === 'miktar'}
           siparisMi={siparisMi}

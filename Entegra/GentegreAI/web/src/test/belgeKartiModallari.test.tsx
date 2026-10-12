@@ -72,7 +72,7 @@ const temel = (y: Partial<BelgeKartiModalProps> = {}): BelgeKartiModalProps => (
   setTeslimEden: yok, setTeslimAlan: yok,
   satirlar: [], setSatirlar: yok, stokArama: false, setStokArama: yok,
   aramaEklenen: { sayi: 0, son: '' }, setAramaEklenen: yok,
-  stokSecildi: yok, kalem: null, setKalem: yok, kalemKaydet: yok,
+  stokSecildi: async () => false, kalem: null, setKalem: yok, kalemKaydet: yok,
   iadeArama: false, setIadeArama: yok,
   tahsilat: {} as BelgeKartiModalProps['tahsilat'],
   tahsilatTutariSor: async () => 0,

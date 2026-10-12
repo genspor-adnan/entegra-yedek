@@ -21,7 +21,7 @@ import type { BasvuruBilgi } from '../../bilesenler/belge/BasvuruSekmesi';
 export function useKalemAkisi({
   satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
   yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
-  cariId, odeyenKurumId, fiyatListesiId, kampanyaId, basvuruBilgi, alisMi, basvuruMu = false,
+  cariId, odeyenKurumId, fiyatListesiId, kampanyaId, basvuruBilgi, alisMi, sifirFiyatSor = false,
 }: {
   satirlar: SatirDurumu[];
   setSatirlar: (f: (s: SatirDurumu[]) => SatirDurumu[]) => void;
@@ -38,8 +38,8 @@ export function useKalemAkisi({
   kampanyaId: number | null;
   basvuruBilgi: BasvuruBilgi;
   alisMi: boolean;
-  /** Basvuru (ucret) belgesi: sifir fiyatli hizmet hizli eklenmez. */
-  basvuruMu?: boolean;
+  /** Fiyatin anlamli oldugu belge (depo transferi / stok fisi DISI): sifir fiyatli kalem hizli eklenmez. */
+  sifirFiyatSor?: boolean;
 }) {
   /**
    * STOK / HİZMET SEÇİLDİ (arama penceresinden): kalem penceresini açar.
@@ -115,16 +115,18 @@ export function useKalemAkisi({
    * giriliyor; her birinde pencere acip Enter'lamak fazladan iki tus.
    * Miktar/fiyat degistirilecekse "Miktar Ekle (F12)" penceresi acilir.
    */
-  const stokSecildi = async (sec: Record<string, unknown>, hizli = false) => {
+  /** Satir pencere ACMADAN gride dustuyse `true` (arama penceresinin sayaci icin). */
+  const stokSecildi = async (sec: Record<string, unknown>, hizli = false): Promise<boolean> => {
     const yeni = await stokSeciminiCoz(sec, {
       satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
       fiyatListesiId, kampanyaId, basvuruBilgi,
     });
     // FIYATI SIFIR UCRET HIZLI EKLENMEZ (kullanici 12.10.2026: "ücret sıfırsa fiyat
-    //   ekranı açılsın"): basvuruda Enter ile secilen hizmetin fiyati yoksa kalem
+    //   ekranı açılsın"; 12.10.2026 satis faturasina da): Enter ile secilen kalemin fiyati yoksa kalem
     //   (fiyat) penceresi acilir; orada da 0 ile kaydedilirse onay sorulur.
-    if (hizli && !(basvuruMu && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return }
+    if (hizli && !(sifirFiyatSor && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return true }
     setKalem(yeni);
+    return false;
   };
 
   return { stokSecildi, kalemKaydet };
