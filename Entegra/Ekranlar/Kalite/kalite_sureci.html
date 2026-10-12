@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kurumsal Kalite Süreci — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .nav{max-width:1400px;margin:0 auto 10px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .nav .sonuk{margin-right:4px}
+  .akis{display:flex;gap:0;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{flex:1;border:1px solid var(--line);background:#fff;padding:8px 12px;min-width:150px;font-size:11px}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad b{display:block;color:var(--navy);margin-bottom:2px}
+  .akis .ad.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff} .akis .ad.on b{color:#fff}
+  .dg td.w{white-space:normal}
+  .puko{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px}
+  .puko .p{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:10px 12px;font-size:11px;line-height:1.55}
+  .puko .p h4{margin:0 0 6px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .puko .p h4 i{font-style:normal;width:26px;height:26px;border-radius:50%;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  .puko .p.pl h4 i{background:#2f6db3} .puko .p.uy h4 i{background:#3f9a5e}
+  .puko .p.ko h4 i{background:#d9a12b} .puko .p.ol h4 i{background:#6a3fb5}
+  .puko .p ul{margin:0;padding-left:16px}
+  .harita{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px}
+  .harita .ek{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:9px 11px;font-size:11px;line-height:1.5}
+  .harita .ek:hover{border-color:#2f6db3;box-shadow:0 2px 8px rgba(47,109,179,.15)}
+  .harita .ek b{display:block;color:var(--navy);font-size:12px;margin-bottom:3px}
+  .harita .ek .kod{color:var(--muted);font-size:10px;margin-top:4px}
+  .harita h5{grid-column:1/-1;margin:6px 0 0;font-size:11px;color:#3a5573;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .zincir{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
+  .zincir .z{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .zincir .z .n{border:1px solid var(--line2);background:#fff;padding:6px 10px;font-size:11px;min-width:140px;flex:1}
+  .zincir .z .n b{display:block;color:var(--navy)}
+  .zincir .z .o{display:flex;align-items:center;padding:0 6px;color:#2f6db3;font-weight:bold}
+  .zincir .z .bas{min-width:170px;flex:none;background:#eef4fc;border-color:#cfe0f5;font-weight:bold;color:#2f6db3;display:flex;align-items:center}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="sonuk">Kurumsal Kalite ekranları:</span>
+  <span class="chip on" data-git="kalite_sureci.html">📘 Süreç</span>
+  <span class="chip" data-git="kalite_panosu.html">🏅 Kalite Panosu</span>
+  <span class="chip" data-git="kalite_dokuman_yonetimi.html">📚 Doküman Yönetimi</span>
+  <span class="chip" data-git="kalite_dof.html">🛠️ DÖF</span>
+  <span class="chip" data-git="kalite_ic_denetim.html">🔎 İç Denetim</span>
+  <span class="chip" data-git="kalite_olay_bildirim.html">⚠️ Olay Bildirim</span>
+  <span class="chip" data-git="kalite_risk_yonetimi.html">🎯 Risk Yönetimi</span>
+  <span class="chip" data-git="kalite_hedef_gosterge.html">📈 Hedef &amp; Gösterge</span>
+  <span class="chip" data-git="kalite_ygg_toplanti.html">👥 YGG &amp; Toplantı</span>
+  <span class="chip" data-git="kalite_egitim.html">🎓 Eğitim</span>
+  <span class="chip" data-git="kalite_sikayet_gorus.html">💬 Şikâyet &amp; Görüş</span>
+  <span class="chip" data-git="kalite_tedarikci_degerlendirme.html">🚚 Tedarikçi Değerlendirme</span>
+  <span class="chip" data-git="kalite_ayarlar.html">⚙️ Ayarlar</span>
+</div>
+
+<div class="win">
+  <div class="title">📘 Kurumsal Kalite Yönetimi — Süreç
+    <span class="sp">ISO 9001:2015 · SKS Hastane Seti · Genotıp Tıp Merkezi · Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+
+  <div class="akis">
+    <div class="ad"><b>1 · Dokümante Et</b>Prosedür · talimat · form · liste · plan; onay, yayın, okundu takibi, periyodik gözden geçirme</div>
+    <div class="ad"><b>2 · Ölç</b>Hedef &amp; gösterge kartları · dönem verisi · SKS / klinik kalite göstergeleri</div>
+    <div class="ad on"><b>3 · Tespit Et</b>Olay / ramak kala bildirimi · iç denetim bulgusu · şikâyet · risk analizi · tedarikçi uygunsuzluğu</div>
+    <div class="ad"><b>4 · Düzelt / Önle</b>DÖF: kök neden (5 Neden / balık kılçığı) · faaliyet planı · termin · sorumlu</div>
+    <div class="ad"><b>5 · Doğrula</b>Etkinlik kontrolü · kapanış onayı · tekrar eden uygunsuzluk izlemi</div>
+    <div class="ad"><b>6 · Gözden Geçir</b>Komite toplantıları · Yönetimin Gözden Geçirmesi (YGG) · yeni hedefler</div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="puko">PUKÖ Döngüsü</div>
+    <div class="sekme" data-s="rol">Roller &amp; Yetkiler</div>
+    <div class="sekme" data-s="akis">Modüller Arası Akış</div>
+    <div class="sekme" data-s="standart">Standart Eşlemesi</div>
+    <div class="sekme" data-s="harita">Ekran Haritası<span class="sy">16</span></div>
+    <div class="sekme" data-s="veri">Veri Modeli</div>
+    <div class="sekme" data-s="kalan">Mevcut ↔ Yeni</div>
+  </div>
+
+  <!-- =================================================================== PUKÖ ===== -->
+  <div class="pnl" data-s="puko">
+    <div class="puko">
+      <div class="p pl"><h4><i>P</i>Planla</h4>
+        <ul>
+          <li>Kalite politikası ve <b>kalite hedefleri</b> (yıllık, birim bazında)</li>
+          <li>Süreç haritası, prosedür ve talimatlar (KY.PR / KY.TL)</li>
+          <li><b>Risk değerlendirmesi</b> (5×5 matris, FMEA) · fırsatlar</li>
+          <li>İç denetim programı (DEN-2026), eğitim planı (KY.PL.002)</li>
+        </ul>
+      </div>
+      <div class="p uy"><h4><i>U</i>Uygula</h4>
+        <ul>
+          <li>Dokümanların yayını ve <b>okundu onayı</b> (birim / rol hedefli)</li>
+          <li>Formlarla kayıt (KY.FR) — hasta bakımı, cihaz, temizlik…</li>
+          <li>Olay / ramak kala bildirimi (anonim seçilebilir)</li>
+          <li>Eğitimlerin verilmesi, katılım ve değerlendirme</li>
+        </ul>
+      </div>
+      <div class="p ko"><h4><i>K</i>Kontrol Et</h4>
+        <ul>
+          <li>Gösterge ölçümü: hedefte / hedef dışı, trend</li>
+          <li><b>İç denetim</b> — kontrol listesi, bulgu sınıfı (majör / minör / gözlem)</li>
+          <li>Hasta / çalışan memnuniyeti, şikâyet analizi</li>
+          <li>Tedarikçi performans puanı</li>
+        </ul>
+      </div>
+      <div class="p ol"><h4><i>Ö</i>Önlem Al</h4>
+        <ul>
+          <li><b>DÖF</b> aç: kök neden + faaliyet planı + etkinlik kontrolü</li>
+          <li>Komite kararları → aksiyon (DÖF ya da görev)</li>
+          <li><b>YGG</b>: girdiler (ISO 9.3.2) → kararlar, kaynak, yeni hedefler</li>
+          <li>Doküman revizyonu (rev. no artar, eski sürüm arşive)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grp"><div class="gb">Kalite politikası (özet) <span class="sp">KY.PL.001 · Rev.04 · 02.01.2026 · Başhekim onaylı</span></div>
+      <div class="ic">Genotıp Tıp Merkezi; hasta ve çalışan güvenliğini önceleyen, kanıta dayalı, ölçülebilir hedeflerle sürekli iyileşen; yasal şartlara ve SKS Hastane Setine uyan; hasta haklarına ve mahremiyete saygılı bir sağlık hizmeti sunmayı taahhüt eder.</div>
+    </div>
+  </div>
+
+  <!-- =================================================================== ROLLER ===== -->
+  <div class="pnl" data-s="rol">
+    <div class="dg"><table>
+      <thead><tr><th style="width:190px">Rol</th><th style="width:220px">Kim</th><th>Ne yapar</th><th style="width:300px">Ekranlar</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kalite Direktörü</b></td><td>Uzm. Hem. Aylin Yılmaz</td><td class="w">Sistemin sahibi. Doküman yayın onayı (son imza), DÖF kapanış onayı, iç denetim programı, YGG gündemi ve raporu, hedef belirleme. Tüm birimleri görür.</td><td class="w">Pano, Doküman, DÖF, İç Denetim, YGG, Ayarlar</td></tr>
+        <tr><td><b>Kalite Birim Sorumlusu</b></td><td>Her birimde 1 kişi (22 birim)</td><td class="w">Biriminin dokümanlarını hazırlar / revize eder, birim göstergelerini girer, birimine atanan DÖF'leri yürütür, okundu takibini izler.</td><td class="w">Doküman, Gösterge, DÖF (kendi birimi)</td></tr>
+        <tr><td><b>Komite Üyesi</b></td><td>4 komite · 31 üye</td><td class="w">Komite toplantısına katılır, olayları değerlendirir (Hasta / Çalışan Güvenliği), karar alır, karar → DÖF / görev.</td><td class="w">Olay Bildirim, YGG &amp; Toplantı</td></tr>
+        <tr><td><b>İç Denetçi</b></td><td>Eğitimli 9 personel (sertifikalı)</td><td class="w">Kendi biriminin dışında denetler; kontrol listesi doldurur, bulgu yazar, bulgudan DÖF önerir.</td><td class="w">İç Denetim, Denetim Kartı</td></tr>
+        <tr><td><b>Birim Yöneticisi</b></td><td>Sorumlu hekim / hemşire / müdür</td><td class="w">Dokümanı ön onaylar (hazırlayan → kontrol eden), DÖF faaliyetlerine kaynak ayırır, risk sahibidir.</td><td class="w">Doküman (kontrol), DÖF, Risk</td></tr>
+        <tr><td><b>Tüm Çalışanlar</b></td><td>—</td><td class="w">Kendisine yayınlanan dokümanı okur ve "okudum, anladım" onayı verir; olay / ramak kala bildirir (anonim seçilebilir); eğitimlere katılır; görüş / öneri yazar.</td><td class="w">Bana Düşenler (pano), Olay Bildirim, Eğitim</td></tr>
+        <tr><td><b>Üst Yönetim</b></td><td>Başhekim · Müdür</td><td class="w">Kalite politikasını onaylar, YGG'ye başkanlık eder, kaynak kararları verir.</td><td class="w">Pano (salt okuma), YGG</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grp"><div class="gb">Yetki ilkeleri</div>
+      <div class="ic sonuk">Çalışan yalnız kendi bildirdiği olayı ve kendisine yayınlanan dokümanı görür. Anonim bildirimin bildireni hiçbir ekranda (Kalite Direktörü dâhil) gösterilmez. Birim sorumlusu yalnız kendi biriminin DÖF / gösterge / dokümanını düzenler. Olay kaydında hasta adı baş harfle, TC hiç gösterilmez; protokol no ile bağlanır.</div>
+    </div>
+  </div>
+
+  <!-- =================================================================== AKIŞ ===== -->
+  <div class="pnl" data-s="akis">
+    <div class="zincir">
+      <div class="z"><div class="n bas">⚠️ Olay bildirimi</div><div class="o">→</div>
+        <div class="n"><b>Ön değerlendirme</b>Kalite birimi · 24 saat içinde · sınıf (ramak kala / zararsız / zararlı / sentinel)</div><div class="o">→</div>
+        <div class="n"><b>Komite</b>Hasta / Çalışan Güvenliği Komitesi · kök neden analizi</div><div class="o">→</div>
+        <div class="n"><b>DÖF</b>DÖF-2026-0xx · faaliyet + termin</div><div class="o">→</div>
+        <div class="n"><b>Etkinlik</b>30-90 gün sonra tekrar var mı? → kapanış</div></div>
+      <div class="z"><div class="n bas">🔎 İç denetim bulgusu</div><div class="o">→</div>
+        <div class="n"><b>Bulgu</b>DEN-2026-0xx · majör / minör / gözlem · standart maddesi</div><div class="o">→</div>
+        <div class="n"><b>DÖF (majör / minör)</b>Gözlem → isteğe bağlı iyileştirme önerisi</div><div class="o">→</div>
+        <div class="n"><b>Takip denetimi</b>Bir sonraki denetimde doğrulanır</div></div>
+      <div class="z"><div class="n bas">🎯 Risk değerlendirmesi</div><div class="o">→</div>
+        <div class="n"><b>Skor</b>Olasılık × Şiddet (5×5) · 15+ yüksek</div><div class="o">→</div>
+        <div class="n"><b>Aksiyon</b>Yüksek risk → zorunlu DÖF (önleyici) · orta → kontrol tedbiri</div><div class="o">→</div>
+        <div class="n"><b>Kalan risk</b>Yeniden skor · yılda bir gözden geçirme</div></div>
+      <div class="z"><div class="n bas">💬 Şikâyet / 📈 hedef dışı gösterge / 🚚 tedarikçi</div><div class="o">→</div>
+        <div class="n"><b>Analiz</b>Haklı / haksız · tekrar sayısı · 2 dönem üst üste hedef dışı</div><div class="o">→</div>
+        <div class="n"><b>DÖF</b>Kaynak alanı bu kaydı gösterir (izlenebilirlik)</div></div>
+      <div class="z"><div class="n bas">👥 YGG girdileri (ISO 9.3.2)</div><div class="o">→</div>
+        <div class="n"><b>Otomatik derlenir</b>Önceki YGG kararları · hedef gerçekleşme · denetim sonuçları · DÖF durumu · şikâyet / memnuniyet · tedarikçi performansı · risk / fırsat · kaynak yeterliliği</div><div class="o">→</div>
+        <div class="n"><b>Çıktılar</b>Karar → sorumlu + termin (görev ya da DÖF) · yeni dönem hedefleri</div></div>
+    </div>
+    <div class="grp"><div class="gb">Dış modüllerle bağ</div>
+      <div class="ic sonuk">Klinik Kalite modülü (Klinik Kalite › Göstergeler) Bakanlık klinik kalite göstergelerini hesaplar; Hedef &amp; Gösterge ekranı bunları salt okunur çeker. Demirbaş (kalibrasyon / bakım) gecikmeleri ve Sterilizasyon başarısız indikatörleri olay bildirimi önerisi üretir. Eğitim katılımı İK personel kartına işlenir. Tedarikçi değerlendirmesi Satınalma tedarikçi kartında görünür.</div>
+    </div>
+  </div>
+
+  <!-- =================================================================== STANDART ===== -->
+  <div class="pnl" data-s="standart">
+    <div class="dg"><table>
+      <thead><tr><th style="width:140px">ISO 9001:2015</th><th style="width:260px">Konu</th><th style="width:260px">SKS Hastane Seti</th><th>Karşılayan ekran</th></tr></thead>
+      <tbody>
+        <tr><td><code>4.4</code></td><td>Kalite yönetim sistemi ve prosesleri</td><td>Kurumsal Hizmet Yönetimi › Kalite Yönetimi</td><td>Süreç, Doküman Yönetimi (süreç kartları)</td></tr>
+        <tr><td><code>5.2</code></td><td>Kalite politikası</td><td>Kurumsal Yapı</td><td>Doküman Yönetimi (KY.PL.001)</td></tr>
+        <tr><td><code>6.1</code></td><td>Riskler ve fırsatlar</td><td>Risk Yönetimi · Hasta / Çalışan Güvenliği</td><td>Risk Yönetimi</td></tr>
+        <tr><td><code>6.2</code></td><td>Kalite hedefleri</td><td>Kalite Göstergeleri</td><td>Hedef &amp; Gösterge</td></tr>
+        <tr><td><code>7.2 · 7.3</code></td><td>Yetkinlik · farkındalık</td><td>Eğitim Yönetimi</td><td>Eğitim</td></tr>
+        <tr><td><code>7.5</code></td><td>Dokümante edilmiş bilgi</td><td>Doküman Yönetimi</td><td>Doküman Yönetimi, Doküman Kartı</td></tr>
+        <tr><td><code>8.4</code></td><td>Dış tedarik</td><td>Satın Alma / Tedarikçi</td><td>Tedarikçi Değerlendirme</td></tr>
+        <tr><td><code>9.1.2</code></td><td>Müşteri memnuniyeti</td><td>Hasta Deneyimi · Görüş-Öneri</td><td>Şikâyet &amp; Görüş</td></tr>
+        <tr><td><code>9.2</code></td><td>İç denetim</td><td>Öz Değerlendirme</td><td>İç Denetim, Denetim Kartı</td></tr>
+        <tr><td><code>9.3</code></td><td>Yönetimin gözden geçirmesi</td><td>Komiteler · Üst Yönetim</td><td>YGG &amp; Toplantı</td></tr>
+        <tr><td><code>10.2</code></td><td>Uygunsuzluk ve düzeltici faaliyet</td><td>Güvenlik Raporlama Sistemi (GRS)</td><td>Olay Bildirim, DÖF, DÖF Kartı</td></tr>
+        <tr><td><code>10.3</code></td><td>Sürekli iyileştirme</td><td>Kalite Yönetimi</td><td>Pano, YGG</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- =================================================================== HARİTA ===== -->
+  <div class="pnl" data-s="harita">
+    <div class="harita">
+      <h5>Genel</h5>
+      <div class="ek" data-git="kalite_panosu.html"><b>🏅 Kalite Panosu</b>Açık / vadesi geçen DÖF, denetim takvimi, bekleyen onaylar, son olaylar, bana düşenler.<div class="kod">kalite_panosu.html</div></div>
+      <div class="ek" data-git="kalite_ayarlar.html"><b>⚙️ Kalite Ayarları</b>Birimler &amp; sorumlular, komiteler, doküman numaralama, DÖF kaynakları, risk matrisi, bildirim kuralları.<div class="kod">kalite_ayarlar.html</div></div>
+      <div class="ek" data-git="kalite_sureci.html"><b>📘 Süreç</b>Bu belge: PUKÖ, roller, akış, standart eşlemesi.<div class="kod">kalite_sureci.html</div></div>
+      <div class="ek" data-git="kalite_ygg_toplanti.html"><b>👥 YGG &amp; Toplantı</b>Komite toplantıları, gündem, katılım, kararlar → aksiyon; Yönetimin Gözden Geçirmesi raporu.<div class="kod">kalite_ygg_toplanti.html</div></div>
+
+      <h5>Doküman</h5>
+      <div class="ek" data-git="kalite_dokuman_yonetimi.html"><b>📚 Doküman Yönetimi</b>Doküman listesi, tür / birim ağacı, revizyon ve gözden geçirme vadesi, okundu oranı.<div class="kod">kalite_dokuman_yonetimi.html</div></div>
+      <div class="ek" data-git="kalite_dokuman_karti.html"><b>📄 Doküman Kartı</b>Hazırlayan → kontrol → onay akışı, revizyon geçmişi, dağıtım / okundu listesi, ilgili dokümanlar.<div class="kod">kalite_dokuman_karti.html</div></div>
+
+      <h5>Tespit &amp; Düzeltme</h5>
+      <div class="ek" data-git="kalite_olay_bildirim.html"><b>⚠️ Olay Bildirim</b>Hasta / çalışan güvenliği olayı, ramak kala, sentinel; sınıflandırma, komite değerlendirmesi.<div class="kod">kalite_olay_bildirim.html</div></div>
+      <div class="ek" data-git="kalite_dof.html"><b>🛠️ DÖF Listesi</b>Kaynak (olay / denetim / şikâyet / risk / gösterge), birim, termin, durum, etkinlik.<div class="kod">kalite_dof.html</div></div>
+      <div class="ek" data-git="kalite_dof_karti.html"><b>🧩 DÖF Kartı</b>Uygunsuzluk tanımı, kök neden (5 Neden / balık kılçığı), faaliyet planı, etkinlik kontrolü, kapanış.<div class="kod">kalite_dof_karti.html</div></div>
+      <div class="ek" data-git="kalite_risk_yonetimi.html"><b>🎯 Risk Yönetimi</b>Risk envanteri, 5×5 ısı haritası, kontrol tedbirleri, kalan risk, gözden geçirme.<div class="kod">kalite_risk_yonetimi.html</div></div>
+
+      <h5>Denetim &amp; Ölçüm</h5>
+      <div class="ek" data-git="kalite_ic_denetim.html"><b>🔎 İç Denetim</b>Yıllık program, denetim takvimi, denetçi ataması, bulgu özetleri.<div class="kod">kalite_ic_denetim.html</div></div>
+      <div class="ek" data-git="kalite_denetim_karti.html"><b>📋 Denetim Kartı</b>Kontrol listesi (standart maddesi bazında), bulgu (majör / minör / gözlem), kanıt, DÖF'e aktar.<div class="kod">kalite_denetim_karti.html</div></div>
+      <div class="ek" data-git="kalite_hedef_gosterge.html"><b>📈 Hedef &amp; Gösterge</b>Gösterge kartları, dönem verisi, hedef / gerçekleşen, trend, hedef dışı → DÖF.<div class="kod">kalite_hedef_gosterge.html</div></div>
+      <div class="ek" data-git="kalite_tedarikci_degerlendirme.html"><b>🚚 Tedarikçi Değerlendirme</b>Kriter puanları, A/B/C sınıfı, onaylı tedarikçi listesi, uygunsuzluk kayıtları.<div class="kod">kalite_tedarikci_degerlendirme.html</div></div>
+
+      <h5>Çalışan &amp; Hasta</h5>
+      <div class="ek" data-git="kalite_egitim.html"><b>🎓 Eğitim</b>Yıllık eğitim planı, oturumlar, katılım, ön / son test, etkinlik değerlendirmesi.<div class="kod">kalite_egitim.html</div></div>
+      <div class="ek" data-git="kalite_sikayet_gorus.html"><b>💬 Şikâyet &amp; Görüş</b>Hasta / yakın şikâyet ve önerileri, SABİM, memnuniyet anketleri, yanıt süresi.<div class="kod">kalite_sikayet_gorus.html</div></div>
+    </div>
+  </div>
+
+  <!-- =================================================================== VERİ ===== -->
+  <div class="pnl" data-s="veri">
+    <div class="ic" style="line-height:1.7">
+      <p><code>kalite_birim</code> (departman_id, sorumlu_personel_id, yedek) · <code>kalite_komite</code> (ad, başkan, sekreter, toplantı sıklığı) + <code>kalite_komite_uye</code>.</p>
+      <p><code>kalite_dokuman</code> (kod KY.PR.001, ad, tür [PR/TL/FR/LS/PL/SÜ/GT], birim, rev_no, rev_tarihi, yayın_tarihi, gözden geçirme_vadesi, durum [taslak / kontrolde / onayda / yayında / iptal], dosya_id) · <code>kalite_dokuman_surum</code> (eski revizyonlar, değişiklik özeti) · <code>kalite_dokuman_onay</code> (adım, kişi, karar, zaman) · <code>kalite_dokuman_dagitim</code> (rol / birim / kişi) · <code>kalite_dokuman_okundu</code> (personel, zaman).</p>
+      <p><code>kalite_olay</code> (no OLY-2026-0xxx, tür [hasta / çalışan / tesis], sınıf [ramak kala / zararsız / hafif / ciddi / sentinel], yer, zaman, anonim, bildiren_id (anonimse NULL), hasta belge_id, açıklama, komite_kararı) · <code>kalite_dof</code> (no DÖF-2026-0xx, tür [düzeltici / önleyici / iyileştirme], kaynak_tur + kaynak_id, birim, uygunsuzluk, kök_neden JSON, termin, sorumlu, durum, etkinlik_tarihi, etkinlik_sonuç) · <code>kalite_dof_faaliyet</code> (faaliyet, sorumlu, termin, tamamlandı).</p>
+      <p><code>kalite_denetim_program</code> (yıl) · <code>kalite_denetim</code> (no DEN-2026-0xx, birim, tarih, baş denetçi, denetçiler, kapsam) · <code>kalite_denetim_soru</code> (standart maddesi, soru) · <code>kalite_denetim_bulgu</code> (sınıf, kanıt, dof_id).</p>
+      <p><code>kalite_risk</code> (RSK-0xx, süreç, tehlike, olasılık 1-5, şiddet 1-5, skor, kontrol, kalan skor, sahip, gözden geçirme) · <code>kalite_gosterge</code> (kod, ad, formül, pay/payda tanımı, hedef, yön, periyot, birim) + <code>kalite_gosterge_veri</code> · <code>kalite_toplanti</code> (komite / YGG, tarih, gündem, katılımcılar, kararlar) · <code>kalite_egitim</code> + <code>kalite_egitim_katilim</code> · <code>kalite_sikayet</code> · <code>kalite_tedarikci_degerlendirme</code>.</p>
+    </div>
+  </div>
+
+  <!-- =================================================================== KALAN ===== -->
+  <div class="pnl" data-s="kalan">
+    <div class="dg"><table>
+      <thead><tr><th style="width:240px">Konu</th><th style="width:150px">Bugün</th><th>Yeni modülde</th></tr></thead>
+      <tbody>
+        <tr><td>Klinik kalite göstergeleri</td><td><span class="rz ok">Var</span></td><td class="w">Klinik Kalite menüsü aynen kalır; Hedef &amp; Gösterge ekranı oradan salt okunur çeker.</td></tr>
+        <tr><td>Kalite / SKS İcmali</td><td><span class="rz ok">Var</span></td><td class="w">"Kaynak yok" görünen SKS.GR1 (kök neden), HK1, IU1 bu modülle dolar.</td></tr>
+        <tr><td>GRS bildirimi (form motoru)</td><td><span class="rz sari">Kısmi</span></td><td class="w">Form motorundaki GRS formu Olay Bildirim kaydına dönüşür; takip / komite / DÖF bağı eklenir.</td></tr>
+        <tr><td>Doküman modülü</td><td><span class="rz sari">Kısmi</span></td><td class="w">Genel doküman klasörleri durur; kalite dokümanı ayrı tür: kod, revizyon, onay akışı, okundu onayı.</td></tr>
+        <tr><td>DÖF, iç denetim, risk, YGG, tedarikçi değerlendirme</td><td><span class="rz kir">Yok</span></td><td class="w">Bu setle gelir.</td></tr>
+        <tr><td>Eski ERP mockup'ları (Ekranlar/kalite_*.html)</td><td><span class="rz pas">Eski</span></td><td class="w">Denetim / DÖF / eğitim / sapma / toplantı kart-liste ikilileri bu setle yerine konur.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="statusbar"><span>Kalite Yönetim Birimi</span><span>Merkez</span><span>12.10.2026</span><span>Belge: KY.SÜ.001 · Rev.02</span></div>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

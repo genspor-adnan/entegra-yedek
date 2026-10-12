@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kurumsal Hedefler ve Göstergeler — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+.spark{display:inline-flex;align-items:flex-end;gap:2px;height:22px;vertical-align:middle}
+.spark i{display:block;width:6px;background:#9dbfe6;border-radius:1px}
+.spark i.son{background:#2f6db3}
+.spark.kt i.son{background:#c0392b}
+.politika{padding:10px 14px;font-size:12px;line-height:1.7;color:#24415f;background:#fbfcfe}
+.politika ol{margin:4px 0 0 18px;padding:0}
+.gkart{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 12px}
+.gk{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+.gk .u{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 9px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;gap:6px}
+.gk .u .sp{margin-left:auto}
+.gk .g{padding:7px 9px;font-size:11px;line-height:1.55}
+.gk .g .v{font-size:20px;font-weight:bold;color:var(--navy)}
+.gk .g .v.kir{color:var(--kirmizi)} .gk .g .v.ok{color:var(--ok)}
+.gk .f{font-family:Consolas,monospace;font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🏁 Kurumsal Hedefler ve Göstergeler</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · 2026 hedef dönemi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Gösterge</div>
+    <div class="btn">🎯 Yeni Hedef</div>
+    <div class="btn">✍️ Dönem Verisi Gir</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_dof_karti.html">🛠️ Hedef Dışından DÖF</div>
+    <div class="btn" data-git="kalite_ygg_toplanti.html">🏛️ YGG'ye Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_panosu.html">📊 Kalite Panosu</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Gösterge Karnesi</div>
+    <div class="btn">📤 Excel</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Kurumsal hedef</div><div class="d">8 <small>2026</small></div></div>
+    <div class="kart"><div class="b">Kurumsal gösterge</div><div class="d">42 <small>18 birim</small></div></div>
+    <div class="kart ok"><div class="b">Hedefte</div><div class="d">31 <small>%74</small></div></div>
+    <div class="kart kir"><div class="b">Hedef dışı</div><div class="d">7 <small>3'ü 2 dönem üst üste</small></div></div>
+    <div class="kart sari"><div class="b">Veri girilmemiş</div><div class="d">4 <small>Eylül dönemi</small></div></div>
+    <div class="kart"><div class="b">Hedef dışından DÖF</div><div class="d">5</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="politika">Politika &amp; Kurumsal Hedefler</div>
+    <div class="sekme" data-s="gosterge">Göstergeler<span class="sy">42</span></div>
+    <div class="sekme" data-s="kart">Gösterge Kartları</div>
+    <div class="sekme" data-s="birim">Birim Hedefleri<span class="sy">18</span></div>
+  </div>
+
+  <!-- ===================================================== POLİTİKA ===== -->
+  <div class="pnl" data-s="politika">
+    <div class="grp">
+      <div class="gb">Kalite Politikası <span class="sp">KY.PL.002 · Rev. 04 · 15.01.2026 · onay: Başhekim</span></div>
+      <div class="politika">
+        Genotıp Tıp Merkezi olarak; hasta ve çalışan güvenliğini her kararın önünde tutan, kanıta dayalı, erişilebilir ve sürekli iyileşen sağlık hizmeti sunmayı taahhüt ederiz.
+        <ol>
+          <li>Hasta güvenliği olaylarını bildirmeyi teşvik eder, cezalandırıcı olmayan bir kültür sürdürürüz.</li>
+          <li>Yasal mevzuat, SKS ve ISO 9001:2015 gereklerine uyarız.</li>
+          <li>Hasta ve çalışan memnuniyetini ölçer, geri bildirimle iyileştiririz.</li>
+          <li>Kaynaklarımızı verimli kullanır, çevreye duyarlı çalışırız.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>No</th><th>Kurumsal hedef (2026)</th><th>Bağlı göstergeler</th><th>Sahibi</th><th>İlerleme</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>KH-1</b></td><td>Önlenebilir hasta güvenliği olaylarını %20 azaltmak</td><td>Düşme oranı, ilaç hatası, bası yarası</td><td>Hasta Güvenliği Komitesi</td><td><div class="bar s"><i style="width:55%"></i></div></td><td><span class="rz sari">Risk altında</span></td></tr>
+          <tr class="tik"><td><b>KH-2</b></td><td>Hasta memnuniyetini %85 üzerinde tutmak</td><td>Memnuniyet, şikayet yanıt süresi</td><td>Hasta Hizmetleri Md.</td><td><div class="bar"><i style="width:82%"></i></div></td><td><span class="rz ok">Yolunda</span></td></tr>
+          <tr class="tik"><td><b>KH-3</b></td><td>Poliklinik bekleme süresini 20 dk altına indirmek</td><td>Ort. bekleme, randevuya uyum</td><td>Başhekim Yrd.</td><td><div class="bar k"><i style="width:35%"></i></div></td><td><span class="rz kir">Hedef dışı</span></td></tr>
+          <tr class="tik"><td><b>KH-4</b></td><td>Sağlık çalışanına şiddet olaylarını %30 azaltmak</td><td>Beyaz Kod sayısı, eğitim kapsamı</td><td>Çalışan Güvenliği Komitesi</td><td><div class="bar s"><i style="width:40%"></i></div></td><td><span class="rz sari">Risk altında</span></td></tr>
+          <tr class="tik"><td><b>KH-5</b></td><td>El hijyeni uyumunu %85 üzerine çıkarmak</td><td>El hijyeni gözlem uyumu</td><td>Enfeksiyon Kontrol Komitesi</td><td><div class="bar"><i style="width:90%"></i></div></td><td><span class="rz ok">Yolunda</span></td></tr>
+          <tr class="tik"><td><b>KH-6</b></td><td>Personel yıllık eğitim planı gerçekleşmesi ≥ %90</td><td>Eğitim gerçekleşme, katılım</td><td>Eğitim Birimi</td><td><div class="bar"><i style="width:76%"></i></div></td><td><span class="rz ok">Yolunda</span></td></tr>
+          <tr class="tik"><td><b>KH-7</b></td><td>DÖF kapanma süresini 45 günün altına indirmek</td><td>Ort. DÖF kapanma, etkinlik onayı</td><td>Kalite Yönetim Birimi</td><td><div class="bar"><i style="width:70%"></i></div></td><td><span class="rz ok">Yolunda</span></td></tr>
+          <tr class="tik"><td><b>KH-8</b></td><td>Enerji tüketimini m² başına %5 azaltmak</td><td>kWh/m², su m³/yatak</td><td>Tesis Güvenliği Komitesi</td><td><div class="bar m"><i style="width:48%"></i></div></td><td><span class="rz mavi">İzleniyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== GÖSTERGELER ===== -->
+  <div class="pnl" data-s="gosterge">
+    <div class="arama">
+      <div class="kutu">🔍 Gösterge kodu, ad, birim…</div>
+      <span class="chip on">Tümü <b>42</b></span><span class="chip">Hedef dışı <b>7</b></span><span class="chip">Veri bekleyen <b>4</b></span>
+      <span class="chip">Aylık</span><span class="chip">3 aylık</span><span class="chip">Yıllık</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Kod</th><th>Gösterge</th><th>Birim</th><th>Periyot</th><th class="sag">Hedef</th><th class="sag">Tem</th><th class="sag">Ağu</th><th class="sag">Eyl</th><th>Trend</th><th>Durum</th><th>DÖF</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td><code class="k">KG.HB.01</code></td><td>Poliklinik ortalama bekleme süresi (dk)</td><td>Poliklinikler</td><td>Aylık</td><td class="sag">≤ 20</td><td class="sag">27</td><td class="sag">25</td><td class="sag"><b>26</b></td>
+            <td><span class="spark kt"><i style="height:60%"></i><i style="height:70%"></i><i style="height:80%"></i><i style="height:75%"></i><i class="son" style="height:78%"></i></span></td><td><span class="rz kir">Hedef dışı ×3</span></td><td><a>DÖF-2026-062</a></td></tr>
+          <tr class="tik"><td><code class="k">KG.HG.04</code></td><td>Yatan hastada ilaç hatası (‰ hasta-gün)</td><td>Servisler</td><td>Aylık</td><td class="sag">≤ 1,0</td><td class="sag">0,9</td><td class="sag">1,2</td><td class="sag"><b>1,4</b></td>
+            <td><span class="spark kt"><i style="height:40%"></i><i style="height:45%"></i><i style="height:50%"></i><i style="height:65%"></i><i class="son" style="height:80%"></i></span></td><td><span class="rz kir">Hedef dışı ×2</span></td><td><span class="btn mini">DÖF Aç</span></td></tr>
+          <tr class="tik"><td><code class="k">KG.HH.02</code></td><td>Şikayetlere yanıt süresi (iş günü)</td><td>Hasta Hizmetleri</td><td>Aylık</td><td class="sag">≤ 5</td><td class="sag">4,1</td><td class="sag">3,8</td><td class="sag"><b>4,4</b></td>
+            <td><span class="spark"><i style="height:70%"></i><i style="height:60%"></i><i style="height:55%"></i><i style="height:50%"></i><i class="son" style="height:58%"></i></span></td><td><span class="rz ok">Hedefte</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><code class="k">KG.EK.01</code></td><td>El hijyeni uyum oranı (%)</td><td>Tüm klinikler</td><td>Aylık</td><td class="sag">≥ 85</td><td class="sag">86</td><td class="sag">88</td><td class="sag"><b>87</b></td>
+            <td><span class="spark"><i style="height:60%"></i><i style="height:70%"></i><i style="height:75%"></i><i style="height:80%"></i><i class="son" style="height:78%"></i></span></td><td><span class="rz ok">Hedefte</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><code class="k">KG.CG.03</code></td><td>Beyaz Kod bildirimi (adet)</td><td>Tüm birimler</td><td>Aylık</td><td class="sag">≤ 3</td><td class="sag">4</td><td class="sag">2</td><td class="sag"><b>5</b></td>
+            <td><span class="spark kt"><i style="height:60%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:35%"></i><i class="son" style="height:85%"></i></span></td><td><span class="rz kir">Hedef dışı</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><code class="k">KG.KY.01</code></td><td>DÖF ortalama kapanma süresi (gün)</td><td>Kalite Yönetim Birimi</td><td>Aylık</td><td class="sag">≤ 45</td><td class="sag">52</td><td class="sag">47</td><td class="sag"><b>41</b></td>
+            <td><span class="spark"><i style="height:85%"></i><i style="height:80%"></i><i style="height:75%"></i><i style="height:70%"></i><i class="son" style="height:62%"></i></span></td><td><span class="rz ok">Hedefte</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><code class="k">KG.EG.02</code></td><td>Yıllık eğitim planı gerçekleşme (%)</td><td>Eğitim Birimi</td><td>3 aylık</td><td class="sag">≥ 90</td><td class="sag">—</td><td class="sag">—</td><td class="sag"><b>76</b></td>
+            <td><span class="spark"><i style="height:30%"></i><i style="height:50%"></i><i class="son" style="height:76%"></i></span></td><td><span class="rz mavi">Yolunda (Q3)</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><code class="k">KG.TS.05</code></td><td>Elektrik tüketimi (kWh/m²)</td><td>Teknik Servis</td><td>Aylık</td><td class="sag">≤ 14,5</td><td class="sag">15,8</td><td class="sag">16,1</td><td class="sag"><span class="rz sari">veri yok</span></td>
+            <td><span class="spark"><i style="height:70%"></i><i style="height:80%"></i><i style="height:82%"></i></span></td><td><span class="rz sari">Veri bekleniyor</span></td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>Hedef dışı ×N = art arda N dönem · 2 dönem üst üste hedef dışında DÖF önerilir</span><span class="sp">Veri girişi: dönem bitimini izleyen 10 gün içinde</span></div>
+  </div>
+
+  <!-- ===================================================== KARTLAR ===== -->
+  <div class="pnl" data-s="kart">
+    <div class="gkart">
+      <div class="gk">
+        <div class="u"><code class="k">KG.HB.01</code> Poliklinik bekleme süresi <span class="sp rz kir">Hedef dışı</span></div>
+        <div class="g">
+          <div class="v kir">26 dk</div>
+          <div>Hedef ≤ 20 dk · önceki dönem 25</div>
+          <div class="f">Σ(muayene başlangıç − kayıt saati) / muayene sayısı</div>
+          <div>Kaynak: HBYS otomatik · Sorumlu: Başhekim Yrd.</div>
+        </div>
+      </div>
+      <div class="gk">
+        <div class="u"><code class="k">KG.HG.04</code> İlaç hatası <span class="sp rz kir">Hedef dışı</span></div>
+        <div class="g">
+          <div class="v kir">1,4 ‰</div>
+          <div>Hedef ≤ 1,0 · önceki dönem 1,2</div>
+          <div class="f">ilaç hatası bildirimi / yatan hasta-gün × 1000</div>
+          <div>Kaynak: Olay bildirimleri · Sorumlu: Ecz. N. G.</div>
+        </div>
+      </div>
+      <div class="gk">
+        <div class="u"><code class="k">KG.EK.01</code> El hijyeni uyumu <span class="sp rz ok">Hedefte</span></div>
+        <div class="g">
+          <div class="v ok">%87</div>
+          <div>Hedef ≥ %85 · 412 fırsat gözlendi</div>
+          <div class="f">uyulan endikasyon / gözlenen endikasyon × 100</div>
+          <div>Kaynak: Gözlem formu · Sorumlu: Enf. Hem. P. T.</div>
+        </div>
+      </div>
+      <div class="gk">
+        <div class="u"><code class="k">KG.KY.01</code> DÖF kapanma süresi <span class="sp rz ok">Hedefte</span></div>
+        <div class="g">
+          <div class="v ok">41 gün</div>
+          <div>Hedef ≤ 45 · 12 DÖF kapandı</div>
+          <div class="f">Σ(kapanış − açılış) / kapanan DÖF</div>
+          <div>Kaynak: DÖF modülü (otomatik)</div>
+        </div>
+      </div>
+      <div class="gk">
+        <div class="u"><code class="k">KG.HH.01</code> Hasta memnuniyeti <span class="sp rz ok">Hedefte</span></div>
+        <div class="g">
+          <div class="v ok">%88</div>
+          <div>Hedef ≥ %85 · 1.214 anket</div>
+          <div class="f">4–5 puan veren / yanıtlayan × 100</div>
+          <div>Kaynak: <a data-git="kalite_sikayet_gorus.html">Anket sonuçları</a></div>
+        </div>
+      </div>
+      <div class="gk">
+        <div class="u"><code class="k">KG.CG.03</code> Beyaz Kod <span class="sp rz kir">Hedef dışı</span></div>
+        <div class="g">
+          <div class="v kir">5</div>
+          <div>Hedef ≤ 3 / ay · 4'ü Acil Servis</div>
+          <div class="f">ay içindeki Beyaz Kod bildirimi</div>
+          <div>Kaynak: <a data-git="kalite_olay_bildirim.html">Olay bildirimleri</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== BİRİM ===== -->
+  <div class="pnl" data-s="birim">
+    <div class="dg">
+      <table>
+        <thead><tr><th>Birim</th><th>Birim hedefi</th><th>Bağlı kurumsal hedef</th><th class="sag">Gösterge</th><th class="sag">Hedefte</th><th>Durum</th><th>Sorumlu</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>Acil Servis</td><td>Triyaj sonrası hekim görme süresi ≤ 10 dk (kırmızı alan)</td><td>KH-3, KH-4</td><td class="sag">4</td><td class="sag">2</td><td><span class="rz kir">Hedef dışı</span></td><td>Uzm. Dr. T. K.</td></tr>
+          <tr class="tik"><td>Yoğun Bakım</td><td>VİP oranı ≤ 5 ‰ ventilatör-gün</td><td>KH-1</td><td class="sag">3</td><td class="sag">3</td><td><span class="rz ok">Hedefte</span></td><td>Uzm. Dr. R. A.</td></tr>
+          <tr class="tik"><td>Laboratuvar</td><td>Kritik değer bildirimi ≤ 30 dk</td><td>KH-1</td><td class="sag">3</td><td class="sag">2</td><td><span class="rz sari">Kısmen</span></td><td>Lab. Sor. E. K.</td></tr>
+          <tr class="tik"><td>Sterilizasyon Ünitesi</td><td>BD testi başarısızlık = 0</td><td>KH-1</td><td class="sag">2</td><td class="sag">2</td><td><span class="rz ok">Hedefte</span></td><td>Uzm. Hem. A. Y.</td></tr>
+          <tr class="tik"><td>Hasta Hizmetleri</td><td>Şikayet yanıtı ≤ 5 iş günü</td><td>KH-2</td><td class="sag">2</td><td class="sag">2</td><td><span class="rz ok">Hedefte</span></td><td>Hasta Hizm. Md.</td></tr>
+          <tr class="tik"><td>Poliklinikler</td><td>Randevulu hastanın ≤ 15 dk içinde muayenesi</td><td>KH-3</td><td class="sag">2</td><td class="sag">0</td><td><span class="rz kir">Hedef dışı</span></td><td>Başhekim Yrd.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>ISO 9001:2015 · 6.2 Kalite hedefleri · 9.1 İzleme, ölçme, analiz</span>
+    <span>SKS · Kurumsal Hizmetler — Kalite Yönetimi / Göstergelerin izlenmesi</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Klinik Kalite göstergeleri ayrı ekranda:</b> Bakanlık Türkiye Klinik Kalite Programı göstergeleri (DP.G1 vb.) burada değil, <code>Ekranlar/Klinik Kalite/</code> mockup'larında ve web'de <b>Klinik Kalite</b> menüsünde izlenir. Bu ekran kurumun <b>kendi</b> belirlediği ISO / SKS kurumsal hedef ve göstergelerini tutar.
+  <ul>
+    <li>Otomatik göstergeler (bekleme süresi, DÖF kapanma, olay oranları) HBYS verisinden hesaplanır; manuel göstergeler için dönem veri girişi yapılır.</li>
+    <li>İki dönem üst üste hedef dışı kalan gösterge için DÖF önerilir ve YGG girdi raporuna eklenir.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

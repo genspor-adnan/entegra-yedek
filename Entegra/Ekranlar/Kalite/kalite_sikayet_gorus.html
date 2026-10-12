@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görüş, Öneri, Şikayet ve Memnuniyet — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+.puan{display:flex;align-items:center;gap:6px}
+.puan .bar{flex:1;max-width:140px}
+.dagilim{display:flex;height:14px;border-radius:3px;overflow:hidden;min-width:160px}
+.dagilim i{display:block;height:100%}
+.dagilim .p1{background:#c0392b} .dagilim .p2{background:#e67e22} .dagilim .p3{background:#f0c05a}
+.dagilim .p4{background:#8fcf9f} .dagilim .p5{background:#3f9a5e}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>💬 Görüş, Öneri, Şikayet ve Memnuniyet</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Hasta Hakları ve Kalite Yönetim Birimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Başvuru</div>
+    <div class="btn">📥 SABİM / CİMER Aktar</div>
+    <div class="btn">🗳️ Kutu Açılış Tutanağı</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_dof_karti.html">🛠️ DÖF Aç</div>
+    <div class="btn">📝 Yanıt Yaz</div>
+    <div class="sepv"></div>
+    <div class="btn">📋 Anket Tanımları</div>
+    <div class="btn" data-git="kalite_hedef_gosterge.html">🏁 Göstergeler</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Aylık Rapor</div>
+    <div class="btn">📤 Excel</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Bu ay başvuru</div><div class="d">38 <small>12 şikayet · 9 öneri · 17 teşekkür</small></div></div>
+    <div class="kart sari"><div class="b">Yanıt bekleyen</div><div class="d">7 <small>2'si süre aşımında</small></div></div>
+    <div class="kart ok"><div class="b">Ort. yanıt süresi</div><div class="d">4,3 <small>iş günü · hedef ≤ 5</small></div></div>
+    <div class="kart kir"><div class="b">SABİM / CİMER</div><div class="d">4 <small>yasal süre 15 gün</small></div></div>
+    <div class="kart ok"><div class="b">Hasta memnuniyeti</div><div class="d">%88 <small>1.214 anket</small></div></div>
+    <div class="kart"><div class="b">Çalışan memnuniyeti</div><div class="d">%71 <small>2026 anketi · 412</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="basvuru">Başvurular<span class="sy">38</span></div>
+    <div class="sekme" data-s="detay">Başvuru Kartı</div>
+    <div class="sekme" data-s="anket">Anket Sonuçları</div>
+    <div class="sekme" data-s="analiz">Konu Analizi</div>
+  </div>
+
+  <!-- ===================================================== BAŞVURULAR ===== -->
+  <div class="pnl" data-s="basvuru">
+    <div class="arama">
+      <div class="kutu">🔍 Başvuru no, konu, birim, personel…</div>
+      <span class="chip on">Tümü</span><span class="chip">Şikayet <b>12</b></span><span class="chip">Öneri <b>9</b></span><span class="chip">Teşekkür <b>17</b></span>
+      <span class="chip">Bekleyen <b>7</b></span><span class="chip">SABİM/CİMER <b>4</b></span><span class="chip">Çalışan <b>3</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>No</th><th>Tarih</th><th>Kanal</th><th>Başvuran</th><th>Tür</th><th>Konu</th><th>İlgili birim</th>
+          <th>Yanıt süresi</th><th>Sonuç</th><th>Durum</th><th>DÖF</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>GÖŞ-2026-0214</b></td><td class="nw">11.10.2026</td><td><span class="rz kir">SABİM</span></td><td>Hasta yakını (A. B.)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Acil serviste 3 saat bekleme, bilgi verilmedi</td><td>Acil Servis</td><td><span class="rz sari">1 / 15 gün</span></td><td class="sonuk">—</td><td><span class="rz sari">İnceleniyor</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0213</b></td><td class="nw">10.10.2026</td><td><span class="rz mavi">Web formu</span></td><td>Hasta (M. Ç.)</td><td><span class="rz ok">Teşekkür</span></td>
+            <td>Fizik tedavi ekibine teşekkür</td><td>FTR</td><td>1 gün</td><td><span class="rz ok">İletildi</span></td><td><span class="rz ok">Kapandı</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0211</b></td><td class="nw">09.10.2026</td><td><span class="rz pas">Görüş kutusu</span></td><td>Anonim</td><td><span class="rz mavi">Öneri</span></td>
+            <td>Bekleme salonuna şarj istasyonu</td><td>Poliklinikler</td><td>2 gün</td><td><span class="rz ok">Kabul — fırsat FRS-009</span></td><td><span class="rz ok">Kapandı</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0209</b></td><td class="nw">08.10.2026</td><td><span class="rz sari">Telefon</span></td><td>Hasta (S. K.)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Laboratuvar sonucu e-Nabız'a geç düştü</td><td>Laboratuvar</td><td>3 gün</td><td><span class="rz ok">Haklı — düzeltildi</span></td><td><span class="rz ok">Kapandı</span></td><td><a>DÖF-2026-069</a></td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0207</b></td><td class="nw">07.10.2026</td><td><span class="rz kir">CİMER</span></td><td>Hasta (R. T.)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Randevu saatinde muayene edilmedi</td><td>Kardiyoloji Pol.</td><td><span class="rz sari">5 / 15 gün</span></td><td class="sonuk">—</td><td><span class="rz sari">Birim görüşü bekleniyor</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0203</b></td><td class="nw">03.10.2026</td><td><span class="rz mavi">Web formu</span></td><td>Hasta (E. D.)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Faturada açıklanmayan fark ücreti</td><td>Hasta Kabul / Vezne</td><td><span class="rz kir">7 iş günü · aşıldı</span></td><td class="sonuk">—</td><td><span class="rz kir">Süre aşımı</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0198</b></td><td class="nw">01.10.2026</td><td><span class="rz mor">Çalışan portalı</span></td><td>Çalışan (anonim)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Gece vardiyasında güvenlik görevlisi yetersiz</td><td>Acil Servis</td><td>4 gün</td><td><span class="rz ok">Haklı — risk kaydı</span></td><td><span class="rz ok">Kapandı</span></td><td><a data-git="kalite_risk_yonetimi.html">RSK-032</a></td></tr>
+          <tr class="tik"><td><b>GÖŞ-2026-0195</b></td><td class="nw">29.09.2026</td><td><span class="rz pas">Görüş kutusu</span></td><td>Hasta (H. Ö.)</td><td><span class="rz kir">Şikayet</span></td>
+            <td>Servis odası temizliği</td><td>Ortopedi Servisi</td><td>3 gün</td><td><span class="rz pas">Haksız — bilgi verildi</span></td><td><span class="rz ok">Kapandı</span></td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>Kanallar: görüş kutusu · web formu · telefon · e-posta · SABİM · CİMER · çalışan portalı</span><span class="sp">Kutu açılışı haftalık, tutanakla (Hasta Hakları Birimi + Kalite)</span></div>
+  </div>
+
+  <!-- ===================================================== BAŞVURU KARTI ===== -->
+  <div class="pnl" data-s="detay">
+    <div class="hdr k4">
+      <div class="fld"><label>Başvuru no</label><div class="inp ro big">GÖŞ-2026-0214</div></div>
+      <div class="fld"><label>Kanal</label><div class="inp combo">SABİM · 184-2026-551203</div></div>
+      <div class="fld"><label>Geliş / yasal son tarih</label><div class="inp">11.10.2026 → <b>&nbsp;26.10.2026</b></div></div>
+      <div class="fld"><label>Tür</label><div class="inp combo">Şikayet</div></div>
+      <div class="fld"><label>Başvuran</label><div class="inp">Hasta yakını A. B. · iletişim izni var</div></div>
+      <div class="fld"><label>İlgili hasta</label><div class="inp">Protokol 2026-119022 (Z. B.)</div></div>
+      <div class="fld"><label>İlgili birim</label><div class="inp combo">Acil Servis</div></div>
+      <div class="fld"><label>Konu sınıfı</label><div class="inp combo">Bekleme süresi / bilgilendirme</div></div>
+    </div>
+    <div class="grp">
+      <div class="gb">Başvuru metni</div>
+      <div class="ic"><div class="inp uzun">Annemi saat 21:00'de acile getirdik, triyajdan sonra 3 saat boyunca kimse ne beklediğimizi söylemedi. Tahlil sonuçları çıktı mı diye sorduğumuzda personel ilgisiz davrandı.</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <div class="grp">
+        <div class="gb">İnceleme <span class="sp">birim görüşü 3 iş günü içinde</span></div>
+        <ul class="kontrol">
+          <li class="ok"><span class="kutu">✓</span>HBYS kaydı: triyaj sarı 21:12, hekim muayenesi 21:40, lab sonuç 23:05, taburcu 00:20<span class="imza">sistem</span></li>
+          <li class="ok"><span class="kutu">✓</span>Birim sorumlusu görüşü istendi<span class="imza">12.10 · Uzm. Dr. T. K.</span></li>
+          <li class="bos"><span class="kutu"></span>Sorumlu hemşire görüşü</li>
+          <li class="bos"><span class="kutu"></span>Başvurana ara bilgilendirme</li>
+        </ul>
+      </div>
+      <div class="grp">
+        <div class="gb">Sonuç</div>
+        <div class="ic">
+          <div class="arama" style="background:none;border:none;padding:0 0 8px">
+            <span class="chip">Haklı</span><span class="chip on">Kısmen haklı</span><span class="chip">Haksız</span><span class="chip">Bilgi amaçlı</span>
+          </div>
+          <div class="inp uzun">Bekleme süresi triyaj kategorisine uygun; ancak bilgilendirme yapılmamış. Acil serviste sonuç bekleme sürecinde 60 dk'da bir bilgilendirme uygulamasına geçilecek.</div>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+      <div class="btn" data-git="kalite_dof_karti.html">🛠️ DÖF Aç</div>
+      <div class="btn" data-git="kalite_risk_yonetimi.html">🎯 Risk Kaydına Ekle</div>
+      <div class="btn">👤 Personele Geri Bildirim</div>
+      <div class="sp"></div>
+      <div class="btn">📝 Yanıt Taslağı</div>
+      <div class="btn ok">📨 Yanıtı Gönder ve Kapat</div>
+    </div>
+  </div>
+
+  <!-- ===================================================== ANKET ===== -->
+  <div class="pnl" data-s="anket">
+    <div class="arama">
+      <span class="chip on">Yatan hasta</span><span class="chip">Ayaktan hasta</span><span class="chip">Çalışan memnuniyeti 2026</span>
+      <span class="sp"></span><span class="chip">Q3 2026</span><span class="chip">2026 YTD</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Birim</th><th class="sag">Anket</th><th>Puan dağılımı (1–5)</th><th class="sag">Ort.</th><th>Memnuniyet (4–5)</th><th class="sag">Önceki</th><th>En düşük madde</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>Dahiliye Servisi</td><td class="sag">184</td><td><div class="dagilim"><i class="p1" style="width:2%"></i><i class="p2" style="width:4%"></i><i class="p3" style="width:6%"></i><i class="p4" style="width:34%"></i><i class="p5" style="width:54%"></i></div></td>
+            <td class="sag">4,34</td><td><div class="puan"><div class="bar"><i style="width:88%"></i></div>%88</div></td><td class="sag">%86</td><td>Yemek sıcaklığı</td></tr>
+          <tr class="tik"><td>Genel Cerrahi Servisi</td><td class="sag">142</td><td><div class="dagilim"><i class="p1" style="width:1%"></i><i class="p2" style="width:3%"></i><i class="p3" style="width:5%"></i><i class="p4" style="width:31%"></i><i class="p5" style="width:60%"></i></div></td>
+            <td class="sag">4,46</td><td><div class="puan"><div class="bar"><i style="width:91%"></i></div>%91</div></td><td class="sag">%90</td><td>Taburculuk bilgilendirmesi</td></tr>
+          <tr class="tik"><td>Kadın Doğum Servisi</td><td class="sag">121</td><td><div class="dagilim"><i class="p1" style="width:1%"></i><i class="p2" style="width:2%"></i><i class="p3" style="width:4%"></i><i class="p4" style="width:28%"></i><i class="p5" style="width:65%"></i></div></td>
+            <td class="sag">4,54</td><td><div class="puan"><div class="bar"><i style="width:93%"></i></div>%93</div></td><td class="sag">%92</td><td>Refakatçi koşulları</td></tr>
+          <tr class="tik"><td>Ortopedi Servisi</td><td class="sag">96</td><td><div class="dagilim"><i class="p1" style="width:4%"></i><i class="p2" style="width:6%"></i><i class="p3" style="width:9%"></i><i class="p4" style="width:36%"></i><i class="p5" style="width:45%"></i></div></td>
+            <td class="sag">4,12</td><td><div class="puan"><div class="bar s"><i style="width:81%"></i></div>%81</div></td><td class="sag">%84</td><td>Oda temizliği</td></tr>
+          <tr class="tik"><td>Yoğun Bakım (hasta yakını)</td><td class="sag">58</td><td><div class="dagilim"><i class="p1" style="width:3%"></i><i class="p2" style="width:7%"></i><i class="p3" style="width:12%"></i><i class="p4" style="width:38%"></i><i class="p5" style="width:40%"></i></div></td>
+            <td class="sag">4,05</td><td><div class="puan"><div class="bar s"><i style="width:78%"></i></div>%78</div></td><td class="sag">%80</td><td>Ziyaret saatleri / bilgilendirme</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grp">
+      <div class="gb">Çalışan memnuniyeti 2026 <span class="sp">412 yanıt · katılım %58 · anonim</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th>Boyut</th><th>Memnuniyet</th><th class="sag">2025</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td>Yöneticiyle iletişim</td><td><div class="puan"><div class="bar"><i style="width:79%"></i></div>%79</div></td><td class="sag">%75</td><td class="sonuk">—</td></tr>
+            <tr><td>Fiziki çalışma ortamı</td><td><div class="puan"><div class="bar s"><i style="width:64%"></i></div>%64</div></td><td class="sag">%66</td><td>Dinlenme odaları</td></tr>
+            <tr><td>Güvenlik hissi (şiddet)</td><td><div class="puan"><div class="bar k"><i style="width:52%"></i></div>%52</div></td><td class="sag">%58</td><td>Acil Servis %31 → <a data-git="kalite_risk_yonetimi.html">RSK-032</a></td></tr>
+            <tr><td>Eğitim ve gelişim</td><td><div class="puan"><div class="bar"><i style="width:74%"></i></div>%74</div></td><td class="sag">%70</td><td class="sonuk">—</td></tr>
+            <tr><td>İş yükü dengesi</td><td><div class="puan"><div class="bar k"><i style="width:48%"></i></div>%48</div></td><td class="sag">%51</td><td>Hemşirelik</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== ANALİZ ===== -->
+  <div class="pnl" data-s="analiz">
+    <div class="dg">
+      <table>
+        <thead><tr><th>Konu sınıfı (12 ay)</th><th class="sag">Şikayet</th><th class="sag">Haklı</th><th class="sag">Haklılık %</th><th>En çok birim</th><th>Eğilim</th><th>Aksiyon</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>Bekleme süresi</td><td class="sag">58</td><td class="sag">31</td><td class="sag">%53</td><td>Acil Servis, Poliklinikler</td><td><span class="rz sari">▲</span></td><td><a>DÖF-2026-062</a></td></tr>
+          <tr class="tik"><td>İletişim / bilgilendirme</td><td class="sag">41</td><td class="sag">27</td><td class="sag">%66</td><td>Acil Servis, Yoğun Bakım</td><td><span class="rz sari">▲</span></td><td>Eğitim planına eklendi</td></tr>
+          <tr class="tik"><td>Ücret / fatura</td><td class="sag">26</td><td class="sag">9</td><td class="sag">%35</td><td>Vezne</td><td><span class="rz pas">=</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>Temizlik / otelcilik</td><td class="sag">22</td><td class="sag">14</td><td class="sag">%64</td><td>Ortopedi Servisi</td><td><span class="rz ok">▼</span></td><td>Tedarikçi değerlendirmesi (temizlik firması)</td></tr>
+          <tr class="tik"><td>Tıbbi bakım / tedavi</td><td class="sag">17</td><td class="sag">4</td><td class="sag">%24</td><td>—</td><td><span class="rz ok">▼</span></td><td>Hasta Güvenliği Komitesi</td></tr>
+          <tr class="tik"><td>Randevu</td><td class="sag">15</td><td class="sag">8</td><td class="sag">%53</td><td>Kardiyoloji Pol.</td><td><span class="rz pas">=</span></td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>ISO 9001:2015 · 9.1.2 Müşteri memnuniyeti · 8.2.1 Müşteri ile iletişim</span>
+    <span>SKS · Hasta ve Çalışan Odaklı Hizmetler — Hasta deneyimi / Hasta hakları</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Akış:</b> başvuru (her kanaldan tek listeye) → birim görüşü → sonuç (haklı / kısmen / haksız) → yanıt → gerekirse DÖF veya risk kaydı.
+  <ul>
+    <li>SABİM / CİMER başvurularında yasal yanıt süresi (15 gün) ayrı izlenir; kurum içi hedef 5 iş günüdür (<code>KG.HH.02</code>).</li>
+    <li>Anket sonuçları Hedef / Gösterge ekranındaki memnuniyet göstergesini ve Klinik Kalite icmalini besler.</li>
+    <li>Çalışan şikayetleri ve memnuniyet anketi anonimdir; başvuran yalnız takip kodu ile izler.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DÖF Kartı — DÖF-2026-087 — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .akis{display:flex;gap:0;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .akis .ad{flex:1;text-align:center;padding:6px 4px;font-size:11px;border:1px solid var(--line);background:#f4f6f9;color:var(--muted);position:relative}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .akis .ad.simdi{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold;border-color:#2f6db3}
+  .akis .ad small{display:block;font-size:10px;opacity:.85}
+  .kilcik{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
+  .kilcik .k{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe}
+  .kilcik .k b{display:block;background:linear-gradient(#f4f7fb,#e7eef6);padding:4px 8px;font-size:11px;color:#2c4a6b}
+  .kilcik .k ul{margin:0;padding:6px 8px 6px 22px;font-size:11.5px;line-height:1.6}
+  .kilcik .bas{grid-column:1/-1;text-align:center;border:2px solid #c0392b;border-radius:4px;padding:6px;font-weight:bold;color:#b3261e;background:#fbe9e7}
+  .neden{counter-reset:n;margin:0;padding:0;list-style:none}
+  .neden li{padding:6px 10px 6px 34px;border-bottom:1px solid var(--line2);position:relative;font-size:11.5px}
+  .neden li::before{counter-increment:n;content:"Neden " counter(n);position:absolute;left:8px;top:6px;font-size:9.5px;color:var(--muted);width:26px;line-height:1.1}
+  .neden li.kok{background:#fdf6e3;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🛠️ DÖF Kartı — DÖF-2026-087</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Kalite Yönetim Birimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn ok">➡️ Doğrulamaya Gönder</div>
+    <div class="btn">⏱️ Termin Uzatma Talebi</div>
+    <div class="btn">👥 Ekip</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_denetim_karti.html">🔗 Kaynak: DEN-2026-014</div>
+    <div class="btn" data-git="kalite_dof.html">📋 DÖF Listesi</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ DÖF Formu (KY.FR.034)</div>
+  </div>
+
+  <div class="akis">
+    <div class="ad bitti">Açıldı<small>18.09.2026 · A. Yılmaz</small></div>
+    <div class="ad bitti">Analiz<small>25.09.2026 · kök neden onaylandı</small></div>
+    <div class="ad simdi">Faaliyet<small>3 / 5 tamamlandı</small></div>
+    <div class="ad">Doğrulama<small>planlanan 18.11.2026</small></div>
+    <div class="ad">Kapandı<small>—</small></div>
+  </div>
+
+  <div class="hdr k4">
+    <div class="fld"><label>DÖF No</label><div class="inp ro big">DÖF-2026-087</div></div>
+    <div class="fld"><label class="req">Tür</label><div class="inp combo">Düzeltici faaliyet</div></div>
+    <div class="fld"><label class="req">Birim</label><div class="inp combo">Dahiliye Servisi</div></div>
+    <div class="fld"><label class="req">DÖF sorumlusu</label><div class="inp combo">Sorumlu Hem. Esra Kılıç</div></div>
+    <div class="fld"><label>Açan</label><div class="inp ro">Uzm. Hem. Aylin Yılmaz · 18.09.2026</div></div>
+    <div class="fld"><label class="req">Termin</label><div class="inp">18.10.2026 <span class="rz sari">6 gün</span></div></div>
+    <div class="fld"><label>Önem</label><div class="inp combo"><span class="rz kir">Yüksek — hasta güvenliği</span></div></div>
+    <div class="fld"><label>Komite</label><div class="inp combo">Hasta Güvenliği Komitesi</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="tanim">Tanım</div>
+    <div class="sekme" data-s="kok">Kök Neden</div>
+    <div class="sekme" data-s="aksiyon">Aksiyon Planı<span class="sy">3/5</span></div>
+    <div class="sekme" data-s="etkinlik">Etkinlik Doğrulama</div>
+    <div class="sekme" data-s="ek">Ekler &amp; Geçmiş<span class="sy">7</span></div>
+  </div>
+
+  <!-- ================================================================ TANIM ===== -->
+  <div class="pnl" data-s="tanim">
+    <div class="grp">
+      <div class="gb">Uygunsuzluk tanımı</div>
+      <div class="ic">
+        <div class="inp uzun">Yüksek riskli ilaç (KCl, insülin, heparin) uygulamalarında <b>çift kontrol imzası</b>
+          eksik. İç denetimde rastgele seçilen 20 order'dan 6'sında ikinci hemşire imzası yok (%30).
+          KY.PR.014 "İlaç Yönetimi Prosedürü" madde 6.3'e aykırı.</div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Kaynak bağlantısı <span class="sp">kaynak elle yazılmaz, kayda bağlanır</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:130px">Kaynak türü</th><th style="width:140px">Kayıt</th><th>Özet</th><th style="width:170px">Standart</th></tr></thead>
+          <tbody>
+            <tr class="tik sel" data-git="kalite_denetim_karti.html"><td><span class="rz mor">İç denetim</span></td><td><code>DEN-2026-014</code> bulgu B-3</td>
+              <td>Dahiliye Servisi süreç denetimi · minör uygunsuzluk</td><td>ISO 9001 md. 8.5.1 · SKS İlaç Yönetimi</td></tr>
+            <tr class="tik" data-git="kalite_olay_bildirim.html"><td><span class="rz kir">İlgili olay</span></td><td><code>OLY-2026-0388</code></td>
+              <td>İnsülin doz hatası — ramak kala (hemşire fark etti)</td><td>SKS Hasta Güvenliği</td></tr>
+            <tr class="tik" data-git="kalite_risk_yonetimi.html"><td><span class="rz">İlgili risk</span></td><td><code>RSK-017</code></td>
+              <td>Yüksek riskli ilaç uygulama hatası · RPN 144</td><td>ISO 9001 md. 6.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Anlık düzeltme (containment)</div>
+      <div class="ic"><div class="inp uzun">19.09.2026 — Servis sorumlusu tüm vardiyalara yazılı hatırlatma yaptı; yüksek
+        riskli ilaç dolabına "çift kontrol" etiketi asıldı. Son 7 günün order'ları geriye dönük kontrol edildi, hasta zararı yok.</div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ KÖK NEDEN ===== -->
+  <div class="pnl" data-s="kok" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp" style="margin-right:6px">
+          <div class="gb">5 Neden analizi</div>
+          <ul class="neden">
+            <li>Çift kontrol imzası atılmamış — neden?</li>
+            <li>İkinci hemşire gece vardiyasında başka hastadaydı, uygulama bekletilmedi.</li>
+            <li>Gece vardiyasında servis başına 2 hemşire var; biri hasta transferindeyken tek kişi kalıyor.</li>
+            <li>Prosedür "ikinci kontrol bulunamazsa" durumunu tanımlamıyor.</li>
+            <li class="kok">KY.PR.014 istisna akışı yok ve ilaç order ekranı ikinci onay olmadan uygulamayı kaydetmeye izin veriyor.</li>
+          </ul>
+        </div>
+        <div class="grp" style="margin-right:6px">
+          <div class="gb">Analiz ekibi</div>
+          <div class="ic" style="line-height:1.7">Sorumlu Hem. Esra Kılıç · Uzm. Dr. Hakan Erdem (Dahiliye) ·
+            Ecz. Zeynep Aydın · Uzm. Hem. Aylin Yılmaz (kolaylaştırıcı)<br>
+            <span class="sonuk">Toplantı: 25.09.2026 · 45 dk · tutanak ekte</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="kilcik">
+          <div class="bas">ETKİ: Yüksek riskli ilaçta çift kontrol %30 eksik</div>
+          <div class="k"><b>İnsan</b><ul><li>Yeni başlayan 3 hemşire oryantasyon almamış</li><li>Alışkanlık: "acil" algısı</li></ul></div>
+          <div class="k"><b>Yöntem</b><ul><li><b>Prosedürde istisna akışı yok</b></li><li>Hangi ilaçların yüksek riskli olduğu listesi (KY.LS.005) güncel değil</li></ul></div>
+          <div class="k"><b>Makine / Sistem</b><ul><li><b>Order ekranı ikinci onay istemiyor</b></li></ul></div>
+          <div class="k"><b>Malzeme</b><ul><li>Yüksek riskli ilaç etiketleri soluk</li></ul></div>
+          <div class="k"><b>Ölçüm</b><ul><li>Çift kontrol uyumu izlenmiyordu (gösterge yok)</li></ul></div>
+          <div class="k"><b>Çevre</b><ul><li>Gece vardiyası yoğunluğu, transfer sırasında tek hemşire</li></ul></div>
+        </div>
+        <div class="statusbar"><span><b>Kalın maddeler kök neden olarak işaretlendi</b> — aksiyon planı bunlara bağlanır.</span>
+          <span class="sp">Yöntem: 5 Neden + 6M (balık kılçığı)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= AKSİYON PLANI ===== -->
+  <div class="pnl" data-s="aksiyon" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:40px" class="orta">#</th><th>Faaliyet</th><th style="width:130px">Kök nedene bağlı</th>
+          <th style="width:170px">Sorumlu</th><th style="width:95px" class="orta">Termin</th>
+          <th style="width:120px" class="orta">Durum</th><th style="width:150px">Kanıt</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">1</td><td>KY.PR.014 revizyonu: ikinci kontrol bulunamazsa nöbetçi sorumlu hemşire çağrılır</td>
+            <td><span class="rz">Yöntem</span></td><td>Uzm. Hem. Aylin Yılmaz</td><td class="orta">05.10.2026</td>
+            <td class="orta"><span class="rz ok">Tamamlandı</span></td><td><code>KY.PR.014 Rev.04</code></td></tr>
+          <tr class="tik"><td class="orta">2</td><td>KY.LS.005 Yüksek riskli ilaç listesinin güncellenmesi ve dolaplara asılması</td>
+            <td><span class="rz">Yöntem</span></td><td>Ecz. Zeynep Aydın</td><td class="orta">30.09.2026</td>
+            <td class="orta"><span class="rz ok">Tamamlandı</span></td><td>Fotoğraf · 4 dosya</td></tr>
+          <tr class="tik"><td class="orta">3</td><td>Yeni başlayan hemşirelere ilaç güvenliği eğitimi</td>
+            <td><span class="rz">İnsan</span></td><td>Eğitim Hem. Gül Aksoy</td><td class="orta">10.10.2026</td>
+            <td class="orta"><span class="rz ok">Tamamlandı</span></td><td data-git="kalite_egitim.html"><code>EGT-2026-041</code> · 9 kişi</td></tr>
+          <tr class="tik sel"><td class="orta">4</td><td>Order ekranında yüksek riskli ilaçta ikinci hemşire onayı zorunlu hale getirilsin (talep BT'ye)</td>
+            <td><span class="rz">Sistem</span></td><td>Bilgi İşlem · M. Tunç</td><td class="orta">18.10.2026</td>
+            <td class="orta"><span class="rz sari">Sürüyor · %60</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td class="orta">5</td><td>"Çift kontrol uyum oranı" göstergesi tanımlansın (aylık, hedef ≥ %95)</td>
+            <td><span class="rz">Ölçüm</span></td><td>Uzm. Hem. Aylin Yılmaz</td><td class="orta">18.10.2026</td>
+            <td class="orta"><span class="rz mavi">Başlamadı</span></td><td data-git="kalite_hedef_gosterge.html" class="sonuk">gösterge kartı →</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Her faaliyet bir kök nedene bağlanmak zorunda — bağsız faaliyet kaydedilmez.</span>
+      <span class="sp">Tüm faaliyetler tamamlanınca DÖF <b>Doğrulama</b> aşamasına geçer.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== ETKİNLİK DOĞRULAMA ===== -->
+  <div class="pnl" data-s="etkinlik" hidden>
+    <div class="hdr k4">
+      <div class="fld"><label class="req">Doğrulama yöntemi</label><div class="inp combo">Kayıt örneklemesi + gösterge izlemi</div></div>
+      <div class="fld"><label class="req">Doğrulama tarihi</label><div class="inp">18.11.2026 <span class="sonuk">(faaliyetten +30 gün)</span></div></div>
+      <div class="fld"><label class="req">Doğrulayıcı</label><div class="inp combo">Uzm. Hem. Aylin Yılmaz</div></div>
+      <div class="fld"><label>Kabul kriteri</label><div class="inp">Çift kontrol uyumu ≥ %95, 2 ay üst üste</div></div>
+    </div>
+    <div class="grp">
+      <div class="gb">Doğrulama sonucu <span class="sp">doğrulama tarihi gelmedi</span></div>
+      <div class="ic">
+        <div class="hdr k4" style="padding:0;border:none;background:none">
+          <div class="fld"><label>Ölçülen</label><div class="inp ro">—</div></div>
+          <div class="fld"><label>Sonuç</label><div class="inp combo ro">○ Etkin · ○ Kısmen etkin · ○ Etkin değil</div></div>
+          <div class="fld"><label>Tekrar DÖF</label><div class="inp ro">"Etkin değil" seçilirse otomatik açılır</div></div>
+          <div class="fld"><label>Onay</label><div class="inp ro">Kalite Direktörü</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Örnek: kapanmış DÖF'te sonuç <span class="sp">DÖF-2026-068 (tedarikçi)</span></div>
+      <div class="dg"><table>
+        <thead><tr><th style="width:110px">Tarih</th><th>Bulgu</th><th style="width:130px" class="orta">Sonuç</th><th style="width:150px">Tekrar DÖF</th></tr></thead>
+        <tbody><tr class="tik"><td>05.10.2026</td><td>Eylül teslimlerinde 2 yanlış lot daha — tedarikçi giriş kontrolü yetersiz</td>
+          <td class="orta"><span class="rz kir">Etkin değil</span></td><td><code>DÖF-2026-089</code> açıldı</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ======================================================= EKLER & GEÇMİŞ ===== -->
+  <div class="pnl" data-s="ek" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:140px">Zaman</th><th style="width:180px">Kişi</th><th style="width:140px">Olay</th><th>Ayrıntı</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>10.10.2026 16:20</td><td>Eğitim Hem. Gül Aksoy</td><td><span class="rz ok">Faaliyet bitti</span></td><td>#3 eğitim · katılım listesi eklendi (PDF)</td></tr>
+          <tr class="tik"><td>05.10.2026 11:02</td><td>Uzm. Hem. Aylin Yılmaz</td><td><span class="rz ok">Faaliyet bitti</span></td><td>#1 KY.PR.014 Rev.04 yayımlandı</td></tr>
+          <tr class="tik"><td>30.09.2026 09:45</td><td>Ecz. Zeynep Aydın</td><td><span class="rz ok">Faaliyet bitti</span></td><td>#2 liste güncellendi · 4 fotoğraf</td></tr>
+          <tr class="tik"><td>25.09.2026 15:30</td><td>Uzm. Hem. Aylin Yılmaz</td><td><span class="rz mavi">Aşama</span></td><td>Analiz → Faaliyet · kök neden toplantı tutanağı eklendi</td></tr>
+          <tr class="tik"><td>19.09.2026 08:10</td><td>Sorumlu Hem. Esra Kılıç</td><td><span class="rz">Not</span></td><td>Anlık düzeltme yazıldı</td></tr>
+          <tr class="tik"><td>18.09.2026 14:55</td><td>Uzm. Hem. Aylin Yılmaz</td><td><span class="rz mavi">Açıldı</span></td><td>DEN-2026-014 bulgu B-3'ten "DÖF Aç"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>7 ek dosya · Tüm değişiklikler denetim izine yazılır, kapanmış DÖF düzenlenemez.</span></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>DÖF kartı beş aşamalı tek akıştır:</b> Açıldı → Analiz → Faaliyet → Doğrulama → Kapandı.
+  Kök neden onaylanmadan faaliyet girilmez; her faaliyet bir kök nedene bağlanır. Faaliyetler bitince
+  DÖF kapanmaz, <b>Doğrulama</b>'ya geçer — etkinlik belirlenen tarihte veriyle ölçülür (ISO 9001 md. 10.2.1 d).
+  "Etkin değil" sonucu kapanışla birlikte bağlı bir tekrar DÖF açar.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

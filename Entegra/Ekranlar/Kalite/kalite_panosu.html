@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalite Yönetim Panosu — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .nav{max-width:1400px;margin:0 auto 10px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .nav .sonuk{margin-right:4px}
+  .dg td.w{white-space:normal}
+  .kart[data-git]:hover{border-color:#2f6db3}
+  .iki{display:grid;grid-template-columns:2fr 1fr;gap:0}
+  .iki>div{border-right:1px solid var(--line2)} .iki>div:last-child{border-right:none}
+  .gec{color:var(--kirmizi);font-weight:bold}
+  .yak{color:var(--uyari);font-weight:bold}
+  .tkv{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px 12px}
+  .tkv .g{border:1px solid var(--line2);border-radius:4px;background:#fff;min-height:74px;padding:4px 6px;font-size:10.5px}
+  .tkv .g b{display:block;color:#3a5573;font-size:11px;margin-bottom:3px}
+  .tkv .g.bos{background:#f7f9fc;color:#b9c4d0}
+  .tkv .g.bugun{border-color:#2f6db3;box-shadow:inset 0 0 0 1px #2f6db3}
+  .tkv .h{font-size:10.5px;color:var(--muted);text-align:center;font-weight:bold}
+  .tkv .e{display:block;border-radius:3px;padding:1px 4px;margin-top:2px;background:#eef4fc;color:#24415f;border:1px solid #cfe0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tkv .e.ok{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46}
+  .tkv .e.kom{background:#f1ecfa;border-color:#ddd0f2;color:#6a3fb5}
+  .bar{display:inline-block;width:90px;vertical-align:middle;margin-right:6px}
+  .bar i{display:block;height:100%;background:#3f9a5e}
+  .bar i.s{background:#d9a12b} .bar i.k{background:#c0392b}
+  .yan .grp{margin:10px}
+  .mini{list-style:none;margin:0;padding:0}
+  .mini li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .mini li:last-child{border-bottom:none}
+  .mini li .sp{color:var(--muted);font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="sonuk">Kurumsal Kalite ekranları:</span>
+  <span class="chip" data-git="kalite_sureci.html">📘 Süreç</span>
+  <span class="chip on" data-git="kalite_panosu.html">🏅 Kalite Panosu</span>
+  <span class="chip" data-git="kalite_dokuman_yonetimi.html">📚 Doküman Yönetimi</span>
+  <span class="chip" data-git="kalite_dof.html">🛠️ DÖF</span>
+  <span class="chip" data-git="kalite_ic_denetim.html">🔎 İç Denetim</span>
+  <span class="chip" data-git="kalite_olay_bildirim.html">⚠️ Olay Bildirim</span>
+  <span class="chip" data-git="kalite_risk_yonetimi.html">🎯 Risk Yönetimi</span>
+  <span class="chip" data-git="kalite_hedef_gosterge.html">📈 Hedef &amp; Gösterge</span>
+  <span class="chip" data-git="kalite_ygg_toplanti.html">👥 YGG &amp; Toplantı</span>
+  <span class="chip" data-git="kalite_egitim.html">🎓 Eğitim</span>
+  <span class="chip" data-git="kalite_sikayet_gorus.html">💬 Şikâyet &amp; Görüş</span>
+  <span class="chip" data-git="kalite_tedarikci_degerlendirme.html">🚚 Tedarikçi Değerlendirme</span>
+  <span class="chip" data-git="kalite_ayarlar.html">⚙️ Ayarlar</span>
+</div>
+
+<div class="win">
+  <div class="title">🏅 Kalite Yönetim Panosu
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="kalite_olay_bildirim.html">⚠️ Olay Bildir</div>
+    <div class="btn" data-git="kalite_dof_karti.html">🛠️ Yeni DÖF</div>
+    <div class="btn" data-git="kalite_dokuman_karti.html">📄 Yeni Doküman</div>
+    <div class="btn" data-git="kalite_denetim_karti.html">📋 Denetim Başlat</div>
+    <div class="sepv"></div>
+    <div class="btn">📅 Dönem: Ekim 2026 ▾</div>
+    <div class="btn">🏥 Birim: Tümü ▾</div>
+    <div class="sp"></div>
+    <div class="btn" data-git="kalite_ygg_toplanti.html">👥 YGG Girdileri</div>
+    <div class="btn">🖨️ Aylık Kalite Raporu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir" data-git="kalite_dof.html"><div class="b">Açık DÖF / vadesi geçen</div><div class="d">27 <small>/ 6 gecikmiş</small></div></div>
+    <div class="kart" data-git="kalite_ic_denetim.html"><div class="b">Bu ay iç denetim</div><div class="d">5 <small>2 yapıldı · 3 planlı</small></div></div>
+    <div class="kart sari" data-git="kalite_dokuman_yonetimi.html"><div class="b">Bekleyen onay / revizyon</div><div class="d">8 <small>/ 14 vadesi gelen</small></div></div>
+    <div class="kart sari" data-git="kalite_dokuman_yonetimi.html"><div class="b">Okunmamış doküman</div><div class="d">%12 <small>412 okuma bekliyor</small></div></div>
+    <div class="kart" data-git="kalite_olay_bildirim.html"><div class="b">Yeni olay bildirimi</div><div class="d">9 <small>son 7 gün · 1 ciddi</small></div></div>
+    <div class="kart kir" data-git="kalite_risk_yonetimi.html"><div class="b">Yüksek risk (≥15)</div><div class="d">4 <small>/ 63 risk</small></div></div>
+    <div class="kart sari" data-git="kalite_hedef_gosterge.html"><div class="b">Hedef dışı gösterge</div><div class="d">7 <small>/ 48 · 2'si 2 dönemdir</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="bana">Bana Düşenler<span class="sy">6</span></div>
+    <div class="sekme" data-s="dof">DÖF Vadeleri<span class="sy">27</span></div>
+    <div class="sekme" data-s="denetim">Denetim Takvimi<span class="sy">5</span></div>
+    <div class="sekme" data-s="dokuman">Doküman Onayları<span class="sy">8</span></div>
+    <div class="sekme" data-s="olay">Son Olaylar<span class="sy">9</span></div>
+  </div>
+
+  <!-- =========================================================== BANA DÜŞENLER ===== -->
+  <div class="pnl" data-s="bana">
+    <div class="iki">
+      <div>
+        <div class="arama">
+          <div class="kutu">🔍 İş, belge no, birim…</div>
+          <span class="chip on">Tümü <b>6</b></span>
+          <span class="chip">Onay <b>3</b></span>
+          <span class="chip">DÖF <b>2</b></span>
+          <span class="chip">Okuma <b>1</b></span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:90px">Tür</th><th style="width:130px">Belge</th><th>İş</th><th style="width:150px">Birim</th><th style="width:95px">Son tarih</th><th style="width:80px"></th></tr></thead>
+          <tbody>
+            <tr class="tik" data-git="kalite_dokuman_karti.html"><td><span class="rz mor">Onay</span></td><td><code>KY.PR.014</code></td><td class="w">İlaç Yönetimi Prosedürü · Rev.05 — son onay (kontrol: Eczane Sor. Ecz. M. Aksoy)</td><td>Eczane</td><td class="nw yak">14.10.2026</td><td><span class="btn mini ok">Onayla</span></td></tr>
+            <tr class="tik" data-git="kalite_dokuman_karti.html"><td><span class="rz mor">Onay</span></td><td><code>KY.TL.012</code></td><td class="w">El Hijyeni Talimatı · Rev.03 — son onay</td><td>Enfeksiyon Kontrol</td><td class="nw">17.10.2026</td><td><span class="btn mini ok">Onayla</span></td></tr>
+            <tr class="tik" data-git="kalite_dof_karti.html"><td><span class="rz mor">Onay</span></td><td><code>DÖF-2026-041</code></td><td class="w">Etkinlik kontrolü tamamlandı — kapanış onayı bekliyor (düşme önlem paketi, 7. Kat)</td><td>Dahiliye Servisi</td><td class="nw">15.10.2026</td><td><span class="btn mini">Aç</span></td></tr>
+            <tr class="tik" data-git="kalite_dof_karti.html"><td><span class="rz kir">DÖF</span></td><td><code>DÖF-2026-052</code></td><td class="w">Hasta kimlik doğrulama — bileklik takılmadan lab numunesi alınmış (OLY-2026-0187)</td><td>Acil Servis</td><td class="nw gec">08.10.2026</td><td><span class="btn mini">Aç</span></td></tr>
+            <tr class="tik" data-git="kalite_dof_karti.html"><td><span class="rz kir">DÖF</span></td><td><code>DÖF-2026-058</code></td><td class="w">Kök neden analizi istendi — ilaç uzlaştırma formu eksik (DEN-2026-019 minör bulgu)</td><td>Genel Cerrahi Servisi</td><td class="nw yak">13.10.2026</td><td><span class="btn mini">Aç</span></td></tr>
+            <tr class="tik" data-git="kalite_dokuman_karti.html"><td><span class="rz mavi">Okuma</span></td><td><code>KY.PR.003</code></td><td class="w">Olay Bildirim Prosedürü · Rev.07 — "okudum, anladım" onayı bekleniyor</td><td>Kalite Yönetim Birimi</td><td class="nw">20.10.2026</td><td><span class="btn mini">Oku</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="yan">
+        <div class="grp"><div class="gb">Komite toplantıları <span class="sp">bu ay</span></div>
+          <ul class="mini">
+            <li>🩺 <b>Hasta Güvenliği Komitesi</b><span class="sp sp">16.10 · 14:00</span></li>
+            <li>🦺 <b>Çalışan Güvenliği Komitesi</b><span class="sp">21.10 · 10:00</span></li>
+            <li>🧫 <b>Enfeksiyon Kontrol Komitesi</b><span class="sp">23.10 · 13:30</span></li>
+            <li>🏢 <b>Tesis Güvenliği Komitesi</b><span class="sp">28.10 · 11:00</span></li>
+          </ul>
+        </div>
+        <div class="grp"><div class="gb">Gösterge özeti <span class="sp">Eylül 2026</span></div>
+          <ul class="mini">
+            <li>Hasta memnuniyeti<span class="sp" style="margin-left:auto"><span class="bar"><i style="width:89%"></i></span>%89 (h ≥%85)</span></li>
+            <li>El hijyeni uyumu<span class="sp" style="margin-left:auto"><span class="bar"><i class="s" style="width:78%"></i></span>%78 (h ≥%85)</span></li>
+            <li>Düşme oranı ‰<span class="sp" style="margin-left:auto"><span class="bar"><i class="k" style="width:64%"></i></span>1,6 (h ≤1,2)</span></li>
+            <li>DÖF zamanında kapanma<span class="sp" style="margin-left:auto"><span class="bar"><i style="width:81%"></i></span>%81 (h ≥%80)</span></li>
+            <li>Doküman okundu<span class="sp" style="margin-left:auto"><span class="bar"><i class="s" style="width:88%"></i></span>%88 (h ≥%95)</span></li>
+          </ul>
+        </div>
+        <div class="grp"><div class="gb">Yaklaşan</div>
+          <ul class="mini">
+            <li>📅 <b>YGG 2026/2</b> — 18.12.2026<span class="sp" style="margin-left:auto">girdiler %62 hazır</span></li>
+            <li>🏛️ <b>Bakanlık SKS değerlendirmesi</b><span class="sp" style="margin-left:auto">Kasım 2026 (tahmini)</span></li>
+            <li>📚 <b>14 doküman</b> gözden geçirme vadesi<span class="sp" style="margin-left:auto">30 gün içinde</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================== DÖF VADELERİ ===== -->
+  <div class="pnl" data-s="dof">
+    <div class="arama">
+      <div class="kutu">🔍 DÖF no, uygunsuzluk, birim, sorumlu…</div>
+      <span class="chip on">Gecikmiş <b>6</b></span>
+      <span class="chip">7 gün içinde <b>5</b></span>
+      <span class="chip">Etkinlik bekleyen <b>4</b></span>
+      <span class="chip">Tüm açık <b>27</b></span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:115px">DÖF No</th><th style="width:90px">Tür</th><th style="width:110px">Kaynak</th><th>Uygunsuzluk</th><th style="width:150px">Birim</th><th style="width:150px">Sorumlu</th><th style="width:90px">Termin</th><th style="width:110px">Faaliyet</th><th style="width:100px">Durum</th></tr></thead>
+      <tbody>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-052</code></td><td>Düzeltici</td><td><code>OLY-2026-0187</code></td><td class="w">Bileklik takılmadan numune alınması</td><td>Acil Servis</td><td>Sor. Hem. G. Tunç</td><td class="nw gec">08.10.2026</td><td><span class="bar"><i class="s" style="width:50%"></i></span>2/4</td><td><span class="rz kir">4 gün gecikti</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-047</code></td><td>Düzeltici</td><td><code>DEN-2026-016</code></td><td class="w">Buzdolabı ısı takip formu 9 gün boş (KY.FR.034)</td><td>Laboratuvar</td><td>Bio. S. Erdem</td><td class="nw gec">05.10.2026</td><td><span class="bar"><i class="k" style="width:33%"></i></span>1/3</td><td><span class="rz kir">7 gün gecikti</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-044</code></td><td>Önleyici</td><td><code>RSK-017</code></td><td class="w">Yüksek riskli ilaç (KCl) servis dolabında ayrı kilitli değil</td><td>Yoğun Bakım</td><td>Uzm. Dr. K. Arslan</td><td class="nw gec">30.09.2026</td><td><span class="bar"><i class="s" style="width:67%"></i></span>2/3</td><td><span class="rz kir">12 gün gecikti</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-039</code></td><td>Düzeltici</td><td>Şikâyet <code>ŞK-0312</code></td><td class="w">Poliklinik bekleme süresi (randevulu hasta 45+ dk)</td><td>Poliklinikler</td><td>Hst. Md. Yrd. T. Kılıç</td><td class="nw gec">01.10.2026</td><td><span class="bar"><i class="s" style="width:75%"></i></span>3/4</td><td><span class="rz kir">11 gün gecikti</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-058</code></td><td>Düzeltici</td><td><code>DEN-2026-019</code></td><td class="w">İlaç uzlaştırma formu eksik</td><td>Genel Cerrahi Servisi</td><td>Sor. Hem. N. Öz</td><td class="nw yak">13.10.2026</td><td><span class="bar"><i style="width:0%"></i></span>0/2</td><td><span class="rz sari">Kök neden</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-055</code></td><td>Düzeltici</td><td>Gösterge <code>KG.HG.01</code></td><td class="w">Düşme oranı 2 dönemdir hedef dışı</td><td>Dahiliye Servisi</td><td>Sor. Hem. A. Demir</td><td class="nw yak">16.10.2026</td><td><span class="bar"><i class="s" style="width:60%"></i></span>3/5</td><td><span class="rz mavi">Faaliyette</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-041</code></td><td>Düzeltici</td><td><code>OLY-2026-0142</code></td><td class="w">Düşme önlem paketi — 7. Kat</td><td>Dahiliye Servisi</td><td>Sor. Hem. A. Demir</td><td class="nw">15.09.2026</td><td><span class="bar"><i style="width:100%"></i></span>4/4</td><td><span class="rz mor">Etkinlik ✓ · onay</span></td></tr>
+        <tr class="tik" data-git="kalite_dof_karti.html"><td><code>DÖF-2026-036</code></td><td>İyileştirme</td><td>Tedarikçi <code>Medisa Ltd.</code></td><td class="w">Sarf teslimlerinde SKT &lt; 6 ay ürün</td><td>Satın Alma</td><td>Stn. Alm. Md. B. Şen</td><td class="nw">20.10.2026</td><td><span class="bar"><i style="width:50%"></i></span>1/2</td><td><span class="rz mavi">Faaliyette</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="statusbar"><span>27 açık DÖF</span><span>6 gecikmiş</span><span>Ort. kapanma: 34 gün</span><span>Zamanında kapanma (son 12 ay): %81</span><span class="sp" data-git="kalite_dof.html">Tüm DÖF listesi →</span></div>
+  </div>
+
+  <!-- =========================================================== DENETİM TAKVİMİ ===== -->
+  <div class="pnl" data-s="denetim">
+    <div class="toolbar" style="background:#fff">
+      <span class="btn mini">‹</span><b style="margin:0 8px">Ekim 2026</b><span class="btn mini">›</span>
+      <span class="sp"></span>
+      <span class="rz mavi">Planlı denetim</span><span class="rz ok">Yapıldı</span><span class="rz mor">Komite</span>
+    </div>
+    <div class="tkv">
+      <div class="h">Pzt</div><div class="h">Sal</div><div class="h">Çar</div><div class="h">Per</div><div class="h">Cum</div><div class="h">Cmt</div><div class="h">Paz</div>
+      <div class="g bos">29</div><div class="g bos">30</div>
+      <div class="g"><b>1</b></div><div class="g"><b>2</b><span class="e ok">DEN-2026-016 Lab</span></div><div class="g"><b>3</b></div><div class="g"><b>4</b></div><div class="g"><b>5</b></div>
+      <div class="g"><b>6</b></div><div class="g"><b>7</b><span class="e ok">DEN-2026-019 Gn. Cerrahi</span></div><div class="g"><b>8</b></div><div class="g"><b>9</b></div><div class="g"><b>10</b></div><div class="g"><b>11</b></div><div class="g"><b>12</b></div>
+      <div class="g bugun"><b>13</b></div><div class="g"><b>14</b><span class="e">DEN-2026-021 Eczane</span></div><div class="g"><b>15</b></div><div class="g"><b>16</b><span class="e kom">Hasta Güvenliği Kom.</span></div><div class="g"><b>17</b></div><div class="g"><b>18</b></div><div class="g"><b>19</b></div>
+      <div class="g"><b>20</b><span class="e">DEN-2026-022 Ameliyathane</span></div><div class="g"><b>21</b><span class="e kom">Çalışan Güvenliği Kom.</span></div><div class="g"><b>22</b></div><div class="g"><b>23</b><span class="e kom">Enfeksiyon Kontrol Kom.</span></div><div class="g"><b>24</b></div><div class="g"><b>25</b></div><div class="g"><b>26</b></div>
+      <div class="g"><b>27</b><span class="e">DEN-2026-023 Mutfak</span></div><div class="g"><b>28</b><span class="e kom">Tesis Güvenliği Kom.</span></div><div class="g"><b>29</b></div><div class="g"><b>30</b></div><div class="g"><b>31</b></div><div class="g bos">1</div><div class="g bos">2</div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:120px">Denetim</th><th style="width:90px">Tarih</th><th style="width:170px">Birim</th><th>Kapsam</th><th style="width:200px">Denetçiler</th><th style="width:130px">Bulgu</th><th style="width:100px">Durum</th></tr></thead>
+      <tbody>
+        <tr class="tik" data-git="kalite_denetim_karti.html"><td><code>DEN-2026-016</code></td><td>02.10.2026</td><td>Laboratuvar</td><td class="w">SKS Laboratuvar Hizmetleri · ISO 7.1.5, 8.5</td><td>Uzm. Hem. A. Yılmaz, Bio. D. Koç</td><td>0 majör · 2 minör · 3 gözlem</td><td><span class="rz ok">Tamamlandı</span></td></tr>
+        <tr class="tik" data-git="kalite_denetim_karti.html"><td><code>DEN-2026-019</code></td><td>07.10.2026</td><td>Genel Cerrahi Servisi</td><td class="w">Hasta bakımı · ilaç yönetimi · hasta kimliği</td><td>Hem. F. Uçar, Ecz. M. Aksoy</td><td>0 majör · 1 minör · 2 gözlem</td><td><span class="rz ok">Tamamlandı</span></td></tr>
+        <tr class="tik" data-git="kalite_denetim_karti.html"><td><code>DEN-2026-021</code></td><td>14.10.2026</td><td>Eczane</td><td class="w">İlaç yönetimi · soğuk zincir · miad</td><td>Uzm. Hem. A. Yılmaz, Hem. F. Uçar</td><td>—</td><td><span class="rz mavi">Planlı</span></td></tr>
+        <tr class="tik" data-git="kalite_denetim_karti.html"><td><code>DEN-2026-022</code></td><td>20.10.2026</td><td>Ameliyathane</td><td class="w">Güvenli cerrahi · sterilizasyon · enfeksiyon</td><td>Op. Dr. E. Polat, Hem. S. Kurt</td><td>—</td><td><span class="rz mavi">Planlı</span></td></tr>
+        <tr class="tik" data-git="kalite_denetim_karti.html"><td><code>DEN-2026-023</code></td><td>27.10.2026</td><td>Mutfak / Beslenme</td><td class="w">Gıda güvenliği · tedarik · hijyen</td><td>Dyt. H. Arı, Hem. F. Uçar</td><td>—</td><td><span class="rz mavi">Planlı</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- =========================================================== DOKÜMAN ONAYLARI ===== -->
+  <div class="pnl" data-s="dokuman">
+    <div class="arama">
+      <div class="kutu">🔍 Doküman kodu, ad, birim…</div>
+      <span class="chip on">Onay bekleyen <b>8</b></span>
+      <span class="chip">Gözden geçirme vadesi <b>14</b></span>
+      <span class="chip">Okundu oranı düşük <b>5</b></span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:110px">Kod</th><th>Doküman</th><th style="width:60px">Rev.</th><th style="width:160px">Birim</th><th style="width:150px">Hazırlayan</th><th style="width:170px">Adım</th><th style="width:100px">Bekliyor</th></tr></thead>
+      <tbody>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.PR.014</code></td><td>İlaç Yönetimi Prosedürü</td><td class="orta">05</td><td>Eczane</td><td>Ecz. M. Aksoy</td><td><span class="rz mor">Son onay · Kalite Dir.</span></td><td>2 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.TL.012</code></td><td>El Hijyeni Talimatı</td><td class="orta">03</td><td>Enfeksiyon Kontrol</td><td>Enf. Hem. Ö. Yıldız</td><td><span class="rz mor">Son onay · Kalite Dir.</span></td><td>1 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.FR.034</code></td><td>Buzdolabı Isı Takip Formu</td><td class="orta">02</td><td>Laboratuvar</td><td>Bio. S. Erdem</td><td><span class="rz sari">Kontrol · Lab Sor. Uzm.</span></td><td class="yak">6 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.PR.021</code></td><td>Mavi Kod Prosedürü</td><td class="orta">06</td><td>Acil Servis</td><td>Uzm. Dr. B. Can</td><td><span class="rz sari">Kontrol · Başhekim Yrd.</span></td><td>3 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.LS.005</code></td><td>Yüksek Riskli İlaçlar Listesi</td><td class="orta">04</td><td>Eczane</td><td>Ecz. M. Aksoy</td><td><span class="rz sari">Kontrol · Eczane Sor.</span></td><td>2 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.PL.002</code></td><td>2027 Hizmet İçi Eğitim Planı</td><td class="orta">00</td><td>Eğitim Birimi</td><td>Hem. L. Aydın</td><td><span class="rz pas">Taslak</span></td><td>—</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.TL.031</code></td><td>Kan Transfüzyonu Talimatı</td><td class="orta">02</td><td>Kan Merkezi</td><td>Uzm. Dr. İ. Tekin</td><td><span class="rz sari">Kontrol · Başhekim Yrd.</span></td><td class="gec">11 gün</td></tr>
+        <tr class="tik" data-git="kalite_dokuman_karti.html"><td><code>KY.PR.009</code></td><td>Atık Yönetimi Prosedürü</td><td class="orta">04</td><td>Destek Hizmetleri</td><td>Çevre Müh. R. Toprak</td><td><span class="rz mor">Son onay · Kalite Dir.</span></td><td>4 gün</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- =========================================================== SON OLAYLAR ===== -->
+  <div class="pnl" data-s="olay">
+    <div class="arama">
+      <div class="kutu">🔍 Olay no, yer, tür…</div>
+      <span class="chip on">Son 7 gün <b>9</b></span>
+      <span class="chip">Değerlendirme bekleyen <b>4</b></span>
+      <span class="chip">Ciddi / sentinel <b>1</b></span>
+      <span class="chip">Ramak kala <b>5</b></span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:125px">Olay No</th><th style="width:120px">Zaman</th><th style="width:110px">Tür</th><th style="width:110px">Sınıf</th><th>Özet</th><th style="width:150px">Yer</th><th style="width:90px">Bildiren</th><th style="width:130px">Durum</th></tr></thead>
+      <tbody>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0194</code></td><td class="nw">12.10 · 08:40</td><td>Hasta</td><td><span class="rz kir">Ciddi</span></td><td class="w">Hasta (M.K., 78) yataktan düşme — kalça ağrısı, grafi istendi</td><td>Ortopedi Servisi · 412</td><td>Hemşire</td><td><span class="rz sari">Ön değerlendirme</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0193</code></td><td class="nw">11.10 · 22:15</td><td>Hasta</td><td><span class="rz sari">Ramak kala</span></td><td class="w">Benzer isimli ilaç (LASA) yanlış raftan alındı, uygulama öncesi fark edildi</td><td>Kardiyoloji Servisi</td><td><i class="sonuk">Anonim</i></td><td><span class="rz sari">Ön değerlendirme</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0192</code></td><td class="nw">11.10 · 14:02</td><td>Çalışan</td><td><span class="rz sari">Hafif</span></td><td class="w">Kesici-delici alet yaralanması (kullanılmış iğne)</td><td>Acil Servis</td><td>Hemşire</td><td><span class="rz mavi">Komitede</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0191</code></td><td class="nw">10.10 · 09:30</td><td>Tesis</td><td><span class="rz sari">Ramak kala</span></td><td class="w">Yangın kapısı takozla açık tutulmuş</td><td>B Blok 2. Kat</td><td>Güvenlik</td><td><span class="rz ok">DÖF açıldı</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0190</code></td><td class="nw">09.10 · 16:48</td><td>Hasta</td><td><span class="rz sari">Ramak kala</span></td><td class="w">Kan ürünü etiketi ile istem formu barkodu uyuşmadı, transfüzyon öncesi yakalandı</td><td>Genel Cerrahi Servisi</td><td><i class="sonuk">Anonim</i></td><td><span class="rz mavi">Komitede</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0189</code></td><td class="nw">08.10 · 11:20</td><td>Hasta</td><td><span class="rz ok">Zararsız</span></td><td class="w">Tetkik tekrarı — numune hemolizli</td><td>Laboratuvar</td><td>Teknisyen</td><td><span class="rz pas">Kapandı</span></td></tr>
+        <tr class="tik" data-git="kalite_olay_bildirim.html"><td><code>OLY-2026-0188</code></td><td class="nw">07.10 · 03:10</td><td>Çalışan</td><td><span class="rz sari">Ramak kala</span></td><td class="w">Ajite hasta yakınının sözlü tehdidi — Beyaz Kod</td><td>Acil Servis</td><td>Güvenlik</td><td><span class="rz mavi">Komitede</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="statusbar"><span>Son 7 gün: 9 olay</span><span>Ramak kala oranı: %56</span><span>Anonim: 2</span><span>Ort. ön değerlendirme süresi: 9 saat (hedef ≤24)</span><span class="sp" data-git="kalite_olay_bildirim.html">Tüm olaylar →</span></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Notlar.</b> Pano oturum açan kişiye göre süzülür: çalışan yalnız "Bana Düşenler"i (kendi okumaları, kendine atanan DÖF faaliyetleri) görür; birim sorumlusu kendi birimini; Kalite Direktörü tümünü. Özet kartları tıklanınca ilgili listeye süzgeçli gider. Olaylarda hasta yalnız baş harf ve yaşla gösterilir; anonim bildirimde bildiren hiç gösterilmez.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eğitim Yönetimi — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .ay{display:inline-block;width:18px;height:14px;border-radius:2px;margin-right:2px;vertical-align:middle;background:#eef2f6;border:1px solid var(--line2)}
+  .ay.p{background:#eef4fc;border-color:#cfe0f5}
+  .ay.y{background:#5cb87a;border-color:#3f9a5e}
+  .ay.g{background:#e06a5e;border-color:#c0392b}
+  .ay.b{background:#f0c05a;border-color:#d9a12b}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🎓 Eğitim Yönetimi</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Eğitim Hemşiresi: Hem. Gül Arslan · ISO 9001:2015 7.2 · SKS Kurumsal Hizmet › Eğitim Yönetimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Eğitim Oturumu Aç</div>
+    <div class="btn">📋 Yoklama / İmza</div>
+    <div class="btn">📝 Ön / Son Test</div>
+    <div class="btn">🏅 Sertifika Bas</div>
+    <div class="sepv"></div>
+    <div class="btn">📅 2026 Eğitim Planı (KY.PL.004)</div>
+    <div class="btn">⬇️ Excel</div>
+    <div class="sp"></div>
+    <div class="btn" data-git="kalite_panosu.html">🏅 Kalite Panosu</div>
+    <div class="btn" data-git="kalite_dokuman_yonetimi.html">📚 Dokümanlar</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">2026 planlanan eğitim</div><div class="d">64 <small>23 SKS zorunlu</small></div></div>
+    <div class="kart ok"><div class="b">Gerçekleşen</div><div class="d">47 <small>%73 · Eki sonu hedef %75</small></div></div>
+    <div class="kart sari"><div class="b">Ertelenen</div><div class="d">5</div></div>
+    <div class="kart"><div class="b">Kişi × saat</div><div class="d">8.940 <small>ort. 15,8 sa/kişi</small></div></div>
+    <div class="kart kir"><div class="b">Zorunlu eğitimi eksik personel</div><div class="d">38 <small>/ 565</small></div></div>
+    <div class="kart ok"><div class="b">Ortalama etkinlik (son − ön test)</div><div class="d">+21 <small>puan</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="plan">Yıllık Eğitim Planı<span class="sy">64</span></div>
+    <div class="sekme" data-s="oturum">Eğitim Oturumları<span class="sy">112</span></div>
+    <div class="sekme" data-s="personel">Personel Eğitim Geçmişi<span class="sy">38 eksik</span></div>
+    <div class="sekme" data-s="etkinlik">Etkinlik Ölçümü</div>
+    <div class="sekme" data-s="oryantasyon">Oryantasyon<span class="sy">9</span></div>
+  </div>
+
+  <!-- ================================================== YILLIK PLAN ===== -->
+  <div class="pnl" data-s="plan">
+    <div class="arama">
+      <div class="kutu">🔍 Eğitim konusu, hedef kitle, eğitici…</div>
+      <span class="chip on">Tümü <b>64</b></span>
+      <span class="chip">SKS zorunlu <b>23</b></span>
+      <span class="chip">Mevzuat zorunlu (İSG, radyasyon) <b>8</b></span>
+      <span class="chip">Birim içi <b>33</b></span>
+      <span class="chip">Geciken <b>5</b></span>
+      <span class="sp"></span>
+      <span class="sonuk"><span class="ay p"></span>plan <span class="ay y"></span>yapıldı <span class="ay b"></span>ertelendi <span class="ay g"></span>gecikti</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:95px">Kod</th><th>Eğitim Konusu</th><th style="width:150px">Hedef Kitle</th><th style="width:70px" class="orta">Süre</th><th style="width:70px" class="orta">Periyot</th>
+          <th style="width:250px">Oca Şub Mar Nis May Haz Tem Ağu Eyl Eki Kas Ara</th><th style="width:140px">Katılım</th><th style="width:100px">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="8">SKS zorunlu eğitimler</td></tr>
+          <tr class="tik sel"><td><code>EĞT-01</code></td><td>Hasta ve Çalışan Güvenliği — Temel</td><td>Tüm personel</td><td class="orta">2 sa</td><td class="orta">Yıllık</td><td><span class="ay y"></span><span class="ay y"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay p"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:91%"></i></div> <span class="sonuk">514/565</span></td><td><span class="rz ok">Sürüyor</span></td></tr>
+          <tr class="tik"><td><code>EĞT-02</code></td><td>El Hijyeni ve Enfeksiyon Kontrolü</td><td>Tüm personel</td><td class="orta">1 sa</td><td class="orta">6 ay</td><td><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:97%"></i></div> <span class="sonuk">548/565</span></td><td><span class="rz ok">Tamam</span></td></tr>
+          <tr class="tik"><td><code>EĞT-03</code></td><td>Acil Durum ve Afet Yönetimi (Yangın, HAP)</td><td>Tüm personel</td><td class="orta">2 sa</td><td class="orta">Yıllık</td><td><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay g"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar k"><i style="width:31%"></i></div> <span class="sonuk">175/565</span></td><td><span class="rz kir">Gecikti</span></td></tr>
+          <tr class="tik"><td><code>EĞT-04</code></td><td>Hasta Kimliği Doğrulama (Rev 06)</td><td>Klinik personel</td><td class="orta">45 dk</td><td class="orta">Revizyon</td><td><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay p"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar s"><i style="width:66%"></i></div> <span class="sonuk">243/369</span></td><td><span class="rz ok">Sürüyor</span></td></tr>
+          <tr class="tik"><td><code>EĞT-05</code></td><td>Düşmelerin Önlenmesi</td><td>Hemşire, hasta bakım</td><td class="orta">1 sa</td><td class="orta">Yıllık</td><td><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:95%"></i></div> <span class="sonuk">201/212</span></td><td><span class="rz ok">Tamam</span></td></tr>
+          <tr class="tik"><td><code>EĞT-06</code></td><td>Atık Yönetimi</td><td>Temizlik, klinik</td><td class="orta">1 sa</td><td class="orta">Yıllık</td><td><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay b"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay p"></span><span class="ay"></span></td><td><span class="sonuk">—</span></td><td><span class="rz sari">Ertelendi → Kas</span></td></tr>
+          <tr class="tik"><td><code>EĞT-07</code></td><td>Beyaz Kod — Çalışana Şiddet</td><td>Tüm personel</td><td class="orta">1 sa</td><td class="orta">Yıllık</td><td><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:89%"></i></div> <span class="sonuk">503/565</span></td><td><span class="rz ok">Tamam</span></td></tr>
+          <tr class="grup"><td colspan="8">Mevzuat zorunlu</td></tr>
+          <tr class="tik"><td><code>EĞT-21</code></td><td>Temel İSG Eğitimi (çok tehlikeli sınıf, 16 sa)</td><td>Tüm personel</td><td class="orta">16 sa</td><td class="orta">Yıllık</td><td><span class="ay y"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:94%"></i></div> <span class="sonuk">531/565</span></td><td><span class="rz ok">Tamam</span></td></tr>
+          <tr class="tik"><td><code>EĞT-24</code></td><td>Radyasyon Güvenliği</td><td>Görüntüleme, ameliyathane</td><td class="orta">2 sa</td><td class="orta">Yıllık</td><td><span class="ay"></span><span class="ay"></span><span class="ay y"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span><span class="ay"></span></td><td><div class="bar"><i style="width:100%"></i></div> <span class="sonuk">61/61</span></td><td><span class="rz ok">Tamam</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== OTURUMLAR ===== -->
+  <div class="pnl" data-s="oturum">
+    <div class="arama">
+      <div class="kutu">🔍 Oturum, eğitici, salon…</div>
+      <span class="chip on">Bu ay <b>14</b></span>
+      <span class="chip">Yaklaşan <b>6</b></span>
+      <span class="chip">İmzası eksik <b>2</b></span>
+      <span class="chip">Testi eksik <b>3</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+    <div class="ikiPanel">
+      <div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:120px">Tarih / Saat</th><th>Oturum</th><th style="width:70px" class="sag">Katılım</th></tr></thead>
+          <tbody>
+            <tr class="tik sel"><td>10.10.2026 14:00</td><td>EĞT-04 Hasta Kimliği — Dahili Klinikler</td><td class="sag">38/41</td></tr>
+            <tr class="tik"><td>08.10.2026 09:30</td><td>EĞT-01 HÇG Temel — Yeni başlayanlar</td><td class="sag">9/9</td></tr>
+            <tr class="tik"><td>03.10.2026 15:00</td><td>EĞT-04 Hasta Kimliği — Acil</td><td class="sag">27/32</td></tr>
+            <tr class="tik"><td>15.10.2026 13:30</td><td>EĞT-03 Yangın tatbikatı + eğitim</td><td class="sag"><span class="rz mavi">plan</span></td></tr>
+            <tr class="tik"><td>22.10.2026 10:00</td><td>EĞT-01 HÇG Temel — İdari</td><td class="sag"><span class="rz mavi">plan</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="hdr k4">
+          <div class="fld" style="grid-column:span 2"><label>Oturum</label><div class="inp big ro">EĞT-04 Hasta Kimliğinin Doğrulanması (HG.PR.002 Rev 06)</div></div>
+          <div class="fld"><label>Tarih</label><div class="inp ro">10.10.2026 14:00 – 14:45</div></div>
+          <div class="fld"><label>Yer</label><div class="inp ro">Konferans Salonu B</div></div>
+          <div class="fld"><label>Eğitici</label><div class="inp ro">Hem. Gül Arslan (iç)</div></div>
+          <div class="fld"><label>Yöntem</label><div class="inp ro">Yüz yüze + vaka çalışması</div></div>
+          <div class="fld"><label>Ön / son test ort.</label><div class="inp ro">58 → 86 <span class="rz ok">+28</span></div></div>
+          <div class="fld"><label>Materyal</label><div class="inp ro">📎 sunum.pdf · test.pdf</div></div>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th>Personel</th><th style="width:140px">Birim</th><th style="width:90px" class="orta">Yoklama</th><th style="width:90px" class="orta">İmza</th><th style="width:70px" class="sag">Ön</th><th style="width:70px" class="sag">Son</th><th style="width:100px">Sonuç</th></tr></thead>
+          <tbody>
+            <tr><td>Hem. Ayşe Doğan</td><td>Dahiliye Servisi</td><td class="orta">✔</td><td class="orta">✍ e-imza</td><td class="sag">60</td><td class="sag">90</td><td><span class="rz ok">Başarılı</span></td></tr>
+            <tr><td>Hem. Burak Çelik</td><td>Kardiyoloji Servisi</td><td class="orta">✔</td><td class="orta">✍ tablet</td><td class="sag">50</td><td class="sag">80</td><td><span class="rz ok">Başarılı</span></td></tr>
+            <tr><td>Hem. Zeynep Aydın</td><td>Nöroloji Servisi</td><td class="orta">✔</td><td class="orta">—</td><td class="sag">70</td><td class="sag">60</td><td><span class="rz kir">Tekrar (&lt;70)</span></td></tr>
+            <tr><td>Sağ. Tek. Emre Kılıç</td><td>Dahiliye Servisi</td><td class="orta">✖</td><td class="orta">—</td><td class="sag">—</td><td class="sag">—</td><td><span class="rz sari">Katılmadı · sonraki oturum</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================== PERSONEL EĞİTİM GEÇMİŞİ ===== -->
+  <div class="pnl" data-s="personel">
+    <div class="arama">
+      <div class="kutu">🔍 Personel adı, sicil, birim…</div>
+      <span class="chip on">Zorunlu eğitimi eksik <b>38</b></span>
+      <span class="chip">Süresi 30 gün içinde dolacak <b>61</b></span>
+      <span class="chip">Tüm personel <b>565</b></span>
+      <span class="sp"></span>
+      <span class="btn mini">🔔 Eksiklere görev ata</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:80px">Sicil</th><th>Personel</th><th style="width:150px">Birim / Unvan</th><th style="width:90px" class="sag">Saat (2026)</th><th>Eksik Zorunlu Eğitimler</th><th style="width:120px">Son eğitim</th></tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>P-0412</td><td>Hem. Zeynep Aydın</td><td>Nöroloji Servisi · Hemşire</td><td class="sag">11,0</td><td><span class="rz kir">EĞT-03 Acil Durum</span> <span class="rz sari">EĞT-04 tekrar</span></td><td>10.10.2026</td></tr>
+          <tr class="tik"><td>P-0388</td><td>Sağ. Tek. Emre Kılıç</td><td>Dahiliye · Sağlık Tek.</td><td class="sag">6,5</td><td><span class="rz kir">EĞT-03</span> <span class="rz kir">EĞT-04</span> <span class="rz kir">EĞT-01</span></td><td>12.06.2026</td></tr>
+          <tr class="tik"><td>P-0207</td><td>Dr. Can Yıldız</td><td>Genel Cerrahi · Uzman Hekim</td><td class="sag">4,0</td><td><span class="rz kir">EĞT-03</span> <span class="rz kir">EĞT-07 Beyaz Kod</span></td><td>02.03.2026</td></tr>
+          <tr class="tik"><td>P-0544</td><td>Tem. Pers. Hasan Er</td><td>Destek Hizmetleri</td><td class="sag">9,0</td><td><span class="rz sari">EĞT-06 Atık (ertelenen oturum)</span></td><td>18.09.2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grp">
+      <div class="gb">Seçili personel — Hem. Zeynep Aydın · eğitim karnesi <span class="sp">işe giriş 04.02.2024</span></div>
+      <div class="dg"><table>
+        <thead><tr><th style="width:100px">Tarih</th><th>Eğitim</th><th style="width:70px" class="orta">Süre</th><th style="width:90px" class="sag">Ön / Son</th><th style="width:120px">Geçerlilik</th><th style="width:100px">Belge</th></tr></thead>
+        <tbody>
+          <tr><td>10.10.2026</td><td>EĞT-04 Hasta Kimliği Doğrulama</td><td class="orta">45 dk</td><td class="sag">70 / 60</td><td><span class="rz kir">Başarısız</span></td><td>—</td></tr>
+          <tr><td>14.07.2026</td><td>EĞT-02 El Hijyeni</td><td class="orta">1 sa</td><td class="sag">80 / 95</td><td>14.01.2027</td><td>🏅 sertifika</td></tr>
+          <tr><td>19.04.2026</td><td>EĞT-05 Düşmelerin Önlenmesi</td><td class="orta">1 sa</td><td class="sag">65 / 90</td><td>19.04.2027</td><td>🏅 sertifika</td></tr>
+          <tr><td>11.02.2026</td><td>EĞT-21 Temel İSG</td><td class="orta">16 sa</td><td class="sag">—</td><td>11.02.2027</td><td>📎 İSG belgesi</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===================================================== ETKİNLİK ===== -->
+  <div class="pnl" data-s="etkinlik">
+    <div class="arama">
+      <span class="chip on">2026</span><span class="chip">2025</span>
+      <span class="sp"></span>
+      <span class="sonuk">Etkinlik: Kirkpatrick 1 (memnuniyet) · 2 (öğrenme: ön/son test) · 3 (davranış: sahada gözlem)</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Eğitim</th><th style="width:80px" class="sag">Katılımcı</th><th style="width:90px" class="sag">Memnuniyet</th><th style="width:80px" class="sag">Ön test</th><th style="width:80px" class="sag">Son test</th><th style="width:90px" class="sag">Kazanım</th><th style="width:90px" class="sag">Başarı (≥70)</th><th>Sahada Gözlem (Davranış)</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>EĞT-02 El Hijyeni</td><td class="sag">548</td><td class="sag">4,5/5</td><td class="sag">71</td><td class="sag">92</td><td class="sag"><span class="rz ok">+21</span></td><td class="sag">%97</td><td>El hijyeni uyumu %78 → %86 (gözlem, Enf. Kontrol Komitesi)</td></tr>
+          <tr class="tik"><td>EĞT-04 Hasta Kimliği</td><td class="sag">243</td><td class="sag">4,2/5</td><td class="sag">57</td><td class="sag">84</td><td class="sag"><span class="rz ok">+27</span></td><td class="sag">%91</td><td>Kimlik doğrulama gözlemi Kasım'da — <span class="rz mavi">planlandı</span></td></tr>
+          <tr class="tik"><td>EĞT-05 Düşmelerin Önlenmesi</td><td class="sag">201</td><td class="sag">4,6/5</td><td class="sag">66</td><td class="sag">88</td><td class="sag"><span class="rz ok">+22</span></td><td class="sag">%95</td><td>Düşme oranı 0,9‰ → 0,6‰ (OLY kayıtları)</td></tr>
+          <tr class="tik"><td>EĞT-07 Beyaz Kod</td><td class="sag">503</td><td class="sag">3,9/5</td><td class="sag">74</td><td class="sag">81</td><td class="sag"><span class="rz sari">+7</span></td><td class="sag">%88</td><td>Kazanım düşük → içerik revizyonu önerisi (YGG gündemi)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================================================== ORYANTASYON ===== -->
+  <div class="pnl" data-s="oryantasyon">
+    <div class="arama">
+      <div class="kutu">🔍 Yeni başlayan personel…</div>
+      <span class="chip on">Süren <b>9</b></span>
+      <span class="chip">Tamamlanan (2026) <b>47</b></span>
+      <span class="chip">Süresi aşılan <b>1</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Personel</th><th style="width:160px">Birim / Unvan</th><th style="width:100px">Başlama</th><th style="width:220px">Genel oryantasyon (kurum)</th><th style="width:220px">Birim oryantasyonu</th><th style="width:150px">Sorumlu</th><th style="width:110px">Durum</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>Hem. Selin Koç</td><td>Yoğun Bakım · Hemşire</td><td>01.10.2026</td><td><div class="bar"><i style="width:100%"></i></div> <span class="sonuk">8/8 modül</span></td><td><div class="bar m"><i style="width:45%"></i></div> <span class="sonuk">9/20 yetkinlik</span></td><td>Sor. Hem. Nur Ateş</td><td><span class="rz ok">Süre içinde</span></td></tr>
+          <tr class="tik"><td>Dr. Ahmet Polat</td><td>Ortopedi · Uzman Hekim</td><td>06.10.2026</td><td><div class="bar s"><i style="width:50%"></i></div> <span class="sonuk">4/8</span></td><td><div class="bar m"><i style="width:20%"></i></div> <span class="sonuk">2/10</span></td><td>Klinik Şefi</td><td><span class="rz ok">Süre içinde</span></td></tr>
+          <tr class="tik"><td>Tem. Pers. Fatma Uçar</td><td>Destek Hizmetleri</td><td>08.09.2026</td><td><div class="bar s"><i style="width:75%"></i></div> <span class="sonuk">6/8</span></td><td><div class="bar s"><i style="width:60%"></i></div> <span class="sonuk">6/10</span></td><td>Destek Hiz. Sor.</td><td><span class="rz kir">30 gün aşıldı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Plan: KY.PL.004 Rev 01 · YGG onayı 15.01.2026</span>
+    <span>Başarı eşiği: son test ≥ 70</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Mockup notu.</b>
+  <ul>
+    <li>Personel ve birim İK'dan (<code>taraf</code> personel rolü) gelir; zorunlu eğitim matrisi <b>unvan × birim</b> ile tanımlanır (Ayarlar). Eksik hesaplanan personele görev atanır.</li>
+    <li>Yeni doküman revizyonu "eğitim gerektirir" işaretliyse (Doküman Kartı) planla otomatik bağlantı kurulur — örn. HG.PR.002 Rev 06 → EĞT-04.</li>
+    <li>Etkinlik 3. düzeyi (davranış) gösterge sonuçlarından okunur: el hijyeni uyumu, düşme oranı — Hedef &amp; Göstergeler ekranıyla aynı veri.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

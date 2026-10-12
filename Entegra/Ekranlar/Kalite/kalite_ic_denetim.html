@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İç Denetim — Program ve Denetimler — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .takvim td.ay{text-align:center;padding:3px;width:62px}
+  .takvim .d{display:inline-block;min-width:44px;border-radius:3px;padding:2px 4px;font-size:10px;border:1px solid var(--line)}
+  .takvim .d.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .takvim .d.plan{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .takvim .d.gec{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .takvim .d.surer{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf;font-weight:bold}
+  .takvim th.bu{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🔎 İç Denetim — 2026 Programı</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Program onayı: Kalite Direktörü Uzm. Hem. Aylin Yılmaz · 05.01.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="kalite_denetim_karti.html">➕ Yeni Denetim</div>
+    <div class="btn" data-git="kalite_denetim_karti.html">📂 Aç</div>
+    <div class="btn">📅 Programı Düzenle</div>
+    <div class="btn">✉️ Denetim Bildirimi Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_dof.html">🛠️ DÖF'ler</div>
+    <div class="btn" data-git="kalite_panosu.html">📊 Kalite Panosu</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yıllık Denetim Programı (KY.PL.002)</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">2026 planlanan</div><div class="d">24 <small>denetim</small></div></div>
+    <div class="kart ok"><div class="b">Tamamlanan</div><div class="d">15 <small>%63</small></div></div>
+    <div class="kart sari"><div class="b">Bu ay</div><div class="d">3 <small>1'i sürüyor</small></div></div>
+    <div class="kart kir"><div class="b">Ertelenen / geciken</div><div class="d">2</div></div>
+    <div class="kart"><div class="b">Bulgu</div><div class="d">63 <small>4 majör · 31 minör · 28 gözlem</small></div></div>
+    <div class="kart"><div class="b">DÖF'e dönüşen</div><div class="d">35 <small>%100 majör+minör</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="program">Yıllık Denetim Programı</div>
+    <div class="sekme" data-s="liste">Denetimler<span class="sy">24</span></div>
+    <div class="sekme" data-s="denetci">Denetçi Havuzu<span class="sy">11</span></div>
+    <div class="sekme" data-s="bulgu">Bulgu Özeti<span class="sy">63</span></div>
+  </div>
+
+  <!-- ============================================================ PROGRAM ===== -->
+  <div class="pnl" data-s="program">
+    <div class="arama">
+      <div class="kutu">🔍 Birim / süreç…</div>
+      <span class="chip on">Tüm birimler</span>
+      <span class="chip">Klinik</span>
+      <span class="chip">İdari / destek</span>
+      <span class="chip">Yüksek riskli (yılda 2)</span>
+    </div>
+    <div class="dg takvim">
+      <table>
+        <thead><tr>
+          <th style="width:200px">Birim / süreç</th><th style="width:70px" class="orta">Risk</th>
+          <th class="orta">Oca</th><th class="orta">Şub</th><th class="orta">Mar</th><th class="orta">Nis</th><th class="orta">May</th><th class="orta">Haz</th>
+          <th class="orta">Tem</th><th class="orta">Ağu</th><th class="orta">Eyl</th><th class="orta bu">Eki</th><th class="orta">Kas</th><th class="orta">Ara</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>Acil Servis</b></td><td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-003</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-013</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Yoğun Bakım</b></td><td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="ay"></td><td class="ay"><span class="d bitti">DEN-002</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"><span class="d bitti">DEN-011</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Dahiliye Servisi</b></td><td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-014</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Ameliyathane</b></td><td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-005</span></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d surer">DEN-016</span></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Sterilizasyon Ünitesi</b></td><td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-007</span></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d plan">DEN-019</span></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Laboratuvar</b></td><td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-008</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Eczane</b></td><td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"><span class="d gec">DEN-010 ertelendi</span></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d plan">DEN-017</span></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Görüntüleme</b></td><td class="orta"><span class="rz">Düşük</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d plan">DEN-020</span></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Doküman yönetimi (süreç)</b></td><td class="orta"><span class="rz">Düşük</span></td>
+            <td class="ay"><span class="d bitti">DEN-001</span></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Satın alma / tedarikçi</b></td><td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d bitti">DEN-009</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Tesis güvenliği / Teknik</b></td><td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"><span class="d gec">DEN-012 gecikti</span></td><td class="ay"></td><td class="ay"><span class="d plan">DEN-018</span></td><td class="ay"></td><td class="ay"></td></tr>
+          <tr class="tik"><td><b>Hasta kabul / vezne</b></td><td class="orta"><span class="rz">Düşük</span></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td>
+            <td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"></td><td class="ay"><span class="d plan">DEN-021</span></td></tr>
+          <tr class="grup"><td colspan="14">+ 12 birim daha (Kadın Doğum, Pediatri, Diş, FTR, Mutfak, Çamaşırhane, Arşiv, İK, Bilgi İşlem…)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><span class="rz ok">Tamamlandı</span> <span class="rz mavi">Planlandı</span> <span class="rz sari">Sürüyor</span> <span class="rz kir">Ertelendi / gecikti</span></span>
+      <span class="sp">Sıklık riske göre: yüksek riskli birim yılda 2 kez, diğerleri yılda 1 (ISO 9001 md. 9.2.2 a).</span>
+    </div>
+  </div>
+
+  <!-- =========================================================== DENETİMLER ===== -->
+  <div class="pnl" data-s="liste" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Denetim no, birim, denetçi…</div>
+      <span class="chip on">Tümü <b>24</b></span>
+      <span class="chip">Planlandı <b>7</b></span>
+      <span class="chip">Sürüyor <b>1</b></span>
+      <span class="chip">Rapor bekliyor <b>1</b></span>
+      <span class="chip">Tamamlandı <b>15</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Denetim No</th><th style="width:180px">Birim / süreç</th><th style="width:90px" class="orta">Tür</th>
+          <th style="width:95px" class="orta">Tarih</th><th>Denetçi ekibi</th><th style="width:160px">Kriter</th>
+          <th style="width:110px" class="orta">Bulgu</th><th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-016</b></td><td>Ameliyathane</td><td class="orta"><span class="rz">Birim</span></td>
+            <td class="orta">12.10.2026</td><td>Hem. Derya Koç (baş) · Dr. Murat Şahin</td><td>SKS Ameliyathane · ISO 8.5</td>
+            <td class="orta">2 minör · 1 gözlem</td><td class="orta"><span class="rz sari">Sürüyor</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-014</b></td><td>Dahiliye Servisi</td><td class="orta"><span class="rz">Birim</span></td>
+            <td class="orta">16.09.2026</td><td>Uzm. Hem. Aylin Yılmaz (baş) · Ecz. Zeynep Aydın</td><td>SKS İlaç Yönetimi · ISO 8.5.1</td>
+            <td class="orta">3 minör · 2 gözlem</td><td class="orta"><span class="rz mavi">Rapor bekliyor</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-013</b></td><td>Acil Servis</td><td class="orta"><span class="rz">Birim</span></td>
+            <td class="orta">09.09.2026</td><td>Hem. Derya Koç (baş) · Tekn. Ali Bulut</td><td>SKS Acil Servis</td>
+            <td class="orta">1 majör · 2 minör</td><td class="orta"><span class="rz ok">Tamamlandı</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-012</b></td><td>Tesis güvenliği</td><td class="orta"><span class="rz mor">Süreç</span></td>
+            <td class="orta">— <span class="sonuk">(Ağu)</span></td><td>Müh. Cem Ertürk (baş)</td><td>SKS Tesis Yönetimi</td>
+            <td class="orta">—</td><td class="orta"><span class="rz kir">Gecikti</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-011</b></td><td>Yoğun Bakım</td><td class="orta"><span class="rz">Birim</span></td>
+            <td class="orta">19.08.2026</td><td>Uzm. Hem. Aylin Yılmaz (baş) · Dr. Murat Şahin</td><td>SKS Yoğun Bakım · Enfeksiyon</td>
+            <td class="orta">4 minör · 3 gözlem</td><td class="orta"><span class="rz ok">Tamamlandı</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-010</b></td><td>Eczane</td><td class="orta"><span class="rz">Birim</span></td>
+            <td class="orta">— <span class="sonuk">(Tem)</span></td><td>Hem. Derya Koç (baş)</td><td>SKS Eczane</td>
+            <td class="orta">—</td><td class="orta"><span class="rz kir">Ertelendi → Eki</span></td></tr>
+          <tr class="tik" data-git="kalite_denetim_karti.html"><td><b>DEN-2026-009</b></td><td>Satın alma / tedarikçi</td><td class="orta"><span class="rz mor">Süreç</span></td>
+            <td class="orta">17.06.2026</td><td>Muh. Seda Kurt (baş)</td><td>ISO 9001 md. 8.4</td>
+            <td class="orta">2 minör · 4 gözlem</td><td class="orta"><span class="rz ok">Tamamlandı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>Gösterilen 7 / 24 · Rapor, denetimden sonra 10 iş günü içinde yayımlanır.</span></div>
+  </div>
+
+  <!-- ======================================================= DENETÇİ HAVUZU ===== -->
+  <div class="pnl" data-s="denetci" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:190px">Denetçi</th><th style="width:160px">Kendi birimi</th><th style="width:170px">Eğitim / sertifika</th>
+          <th style="width:95px" class="orta">Geçerlilik</th><th style="width:80px" class="sag">2026</th>
+          <th>Denetleyemeyeceği birim (bağımsızlık)</th><th style="width:110px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>Uzm. Hem. Aylin Yılmaz</b></td><td>Kalite Yönetim Birimi</td><td>ISO 9001 Baş Denetçi (IRCA)</td>
+            <td class="orta">03.2028</td><td class="sag">6</td><td>Kalite Yönetim Birimi</td><td class="orta"><span class="rz ok">Baş denetçi</span></td></tr>
+          <tr class="tik"><td><b>Hem. Derya Koç</b></td><td>Enfeksiyon Kontrol</td><td>İç Denetçi Eğitimi (24 sa)</td>
+            <td class="orta">11.2027</td><td class="sag">5</td><td>Enfeksiyon Kontrol, Yoğun Bakım</td><td class="orta"><span class="rz ok">Baş denetçi</span></td></tr>
+          <tr class="tik"><td><b>Dr. Murat Şahin</b></td><td>Anestezi</td><td>İç Denetçi Eğitimi (24 sa)</td>
+            <td class="orta">06.2027</td><td class="sag">3</td><td>Anestezi, <b>Ameliyathane</b> <span class="rz sari">DEN-016'da ekip üyesi — uyarı</span></td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="tik"><td><b>Ecz. Zeynep Aydın</b></td><td>Eczane</td><td>İç Denetçi Eğitimi (24 sa)</td>
+            <td class="orta">06.2027</td><td class="sag">2</td><td>Eczane</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="tik"><td><b>Muh. Seda Kurt</b></td><td>Muhasebe</td><td>ISO 9001 İç Denetçi</td>
+            <td class="orta">09.2026</td><td class="sag">2</td><td>Muhasebe, Vezne</td><td class="orta"><span class="rz kir">Sertifika süresi doldu</span></td></tr>
+          <tr class="tik"><td><b>Müh. Cem Ertürk</b></td><td>Teknik Hizmetler</td><td>İç Denetçi Eğitimi (16 sa)</td>
+            <td class="orta">02.2027</td><td class="sag">1</td><td>Teknik Hizmetler, Tesis Güvenliği <span class="rz kir">DEN-012 baş denetçisi — çakışma</span></td><td class="orta"><span class="rz sari">Aday</span></td></tr>
+          <tr class="tik"><td><b>Tekn. Ali Bulut</b></td><td>Görüntüleme</td><td>İç Denetçi Eğitimi (24 sa)</td>
+            <td class="orta">11.2027</td><td class="sag">1</td><td>Görüntüleme</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="grup"><td colspan="7">+ 4 denetçi (eğitimi planlanan 2 aday dahil)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Bağımsızlık kontrolü:</b> denetçi kendi biriminin denetimine atanamaz — atamada uyarı, baş denetçilikte engel (ISO 9001 md. 9.2.2 c).</span>
+      <span class="sp">Süresi dolan sertifika ataması engellenir · eğitim kaydı → <span data-git="kalite_egitim.html"><b>Eğitimler</b></span></span>
+    </div>
+  </div>
+
+  <!-- ========================================================= BULGU ÖZETİ ===== -->
+  <div class="pnl" data-s="bulgu" hidden>
+    <div class="ozet">
+      <div class="kart kir"><div class="b">Majör uygunsuzluk</div><div class="d">4 <small>hepsi DÖF</small></div></div>
+      <div class="kart sari"><div class="b">Minör uygunsuzluk</div><div class="d">31 <small>hepsi DÖF</small></div></div>
+      <div class="kart"><div class="b">Gözlem / iyileştirme fırsatı</div><div class="d">28 <small>7'si önleyici DÖF</small></div></div>
+      <div class="kart ok"><div class="b">Kapanan DÖF (denetim kaynaklı)</div><div class="d">29 <small>/ 42</small></div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:220px">Standart / madde</th><th style="width:70px" class="sag">Majör</th><th style="width:70px" class="sag">Minör</th>
+          <th style="width:70px" class="sag">Gözlem</th><th style="width:220px">Dağılım</th><th style="width:90px" class="sag">DÖF</th><th>Tekrarlayan birim</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td>SKS İlaç Yönetimi · ISO 8.5.1</td><td class="sag">1</td><td class="sag">8</td><td class="sag">5</td>
+            <td><span class="bar k" style="display:inline-block;width:160px"><i style="width:100%"></i></span></td><td class="sag">10</td><td>Dahiliye, Ortopedi</td></tr>
+          <tr class="tik"><td>SKS Enfeksiyonların Önlenmesi</td><td class="sag">1</td><td class="sag">6</td><td class="sag">6</td>
+            <td><span class="bar s" style="display:inline-block;width:160px"><i style="width:86%"></i></span></td><td class="sag">8</td><td>Yoğun Bakım</td></tr>
+          <tr class="tik"><td>ISO 7.5 Dokümante bilgi</td><td class="sag">0</td><td class="sag">7</td><td class="sag">4</td>
+            <td><span class="bar s" style="display:inline-block;width:160px"><i style="width:73%"></i></span></td><td class="sag">7</td><td>Birden çok birim (eski sürüm doküman)</td></tr>
+          <tr class="tik"><td>SKS Hasta Güvenliği</td><td class="sag">1</td><td class="sag">4</td><td class="sag">3</td>
+            <td><span class="bar m" style="display:inline-block;width:160px"><i style="width:53%"></i></span></td><td class="sag">5</td><td>Acil Servis</td></tr>
+          <tr class="tik"><td>SKS Tesis Yönetimi</td><td class="sag">1</td><td class="sag">3</td><td class="sag">4</td>
+            <td><span class="bar m" style="display:inline-block;width:160px"><i style="width:53%"></i></span></td><td class="sag">4</td><td>Teknik Hizmetler</td></tr>
+          <tr class="tik"><td>ISO 7.2 Yetkinlik / eğitim</td><td class="sag">0</td><td class="sag">3</td><td class="sag">6</td>
+            <td><span class="bar" style="display:inline-block;width:160px"><i style="width:40%"></i></span></td><td class="sag">4</td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span><b>Majör ve minör uygunsuzluk DÖF'e dönüşmek zorunda</b>; gözlem isteğe bağlı önleyici DÖF olur.</span>
+      <span class="sp">Bu tablo YGG girdisidir (ISO 9001 md. 9.3.2 c-5).</span></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Program riske göre kurulur, denetim programa bağlıdır:</b> takvimdeki her hücre bir denetim kaydıdır,
+  tıklanınca karta gider. Denetçi ataması bağımsızlık ve sertifika geçerliliğiyle kontrol edilir.
+  Bulgular denetim kartında sınıflanır; majör/minör bulgu "DÖF Aç" ile <span data-git="kalite_dof.html"><b>DÖF</b></span>'e
+  dönüşür ve kaynak bağlantısı korunur. Ertelenen denetim silinmez, yeni tarihe taşınır ve gerekçesi kalır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

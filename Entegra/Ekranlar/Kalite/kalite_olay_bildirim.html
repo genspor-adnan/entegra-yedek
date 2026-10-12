@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olay / Sapma Bildirimleri — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+.isi td.h{width:46px;text-align:center;font-weight:bold;border-radius:0}
+.isi td.h0{background:#f7f9fc;color:#b9c4d0} .isi td.h1{background:#eef4fc;color:#2f6db3}
+.isi td.h2{background:#fdf6e3;color:#8a6218} .isi td.h3{background:#fbe0c8;color:#9a4a10}
+.isi td.h4{background:#f6c9c3;color:#b3261e}
+.trend{display:flex;align-items:flex-end;gap:6px;height:110px;padding:8px 12px 0}
+.trend .s{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+.trend .s i{display:block;width:100%;border-radius:3px 3px 0 0;background:linear-gradient(#4d8fd6,#2f6db3)}
+.trend .s i.rk{background:linear-gradient(#9fd3ae,#5cb87a)}
+.ikili{display:flex;gap:2px;width:100%;align-items:flex-end;height:90px}
+.form-onizleme{max-width:760px}
+.anonim{border:1px dashed #cfe0f5;background:#f5f9fe;border-radius:4px;padding:8px 10px;margin:10px 12px;font-size:11.5px;color:#24415f}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>⚠️ Olay / Sapma / Ramak Kala Bildirimleri</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Kalite Yönetim Birimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Bildirim</div>
+    <div class="btn">🕵️ Anonim Bildirim Bağlantısı</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_dof.html">🛠️ DÖF Aç</div>
+    <div class="btn">📨 GRS'ye Aktar</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_panosu.html">📊 Kalite Panosu</div>
+    <div class="btn" data-git="kalite_risk_yonetimi.html">🎯 Risk Kaydı</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Dönem Raporu</div>
+    <div class="btn">📤 Excel</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Bu ay bildirim</div><div class="d">47 <small>geçen ay 39</small></div></div>
+    <div class="kart sari"><div class="b">Değerlendirme bekleyen</div><div class="d">9 <small>3'ü 7 gün+</small></div></div>
+    <div class="kart ok"><div class="b">Ramak kala oranı</div><div class="d">%38 <small>hedef ≥ %30</small></div></div>
+    <div class="kart kir"><div class="b">Ciddi / ölüm</div><div class="d">2 <small>kök neden zorunlu</small></div></div>
+    <div class="kart"><div class="b">Anonim bildirim</div><div class="d">11 <small>%23</small></div></div>
+    <div class="kart sari"><div class="b">GRS'ye aktarılmamış</div><div class="d">5 <small>hasta güvenliği</small></div></div>
+    <div class="kart"><div class="b">DÖF'e dönüşen</div><div class="d">6 <small>bu ay</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="liste">Bildirimler<span class="sy">47</span></div>
+    <div class="sekme" data-s="yeni">Yeni Bildirim (önizleme)</div>
+    <div class="sekme" data-s="deger">Değerlendirme<span class="sy">9</span></div>
+    <div class="sekme" data-s="analiz">Analiz</div>
+  </div>
+
+  <!-- ===================================================== BİLDİRİMLER ===== -->
+  <div class="pnl" data-s="liste">
+    <div class="arama">
+      <div class="kutu">🔍 Olay no, birim, bildiren, açıklama…</div>
+      <span class="chip on">Tümü <b>47</b></span>
+      <span class="chip">Hasta güvenliği <b>24</b></span>
+      <span class="chip">Çalışan güvenliği <b>9</b></span>
+      <span class="chip">Uygunsuzluk / sapma <b>8</b></span>
+      <span class="chip">Tesis güvenliği <b>6</b></span>
+      <span class="chip">Ramak kala <b>18</b></span>
+      <span class="chip">Bekleyen <b>9</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Olay No</th><th>Tarih</th><th>Tür</th><th>Alt Tür</th><th>Birim</th>
+          <th>Zarar Düzeyi</th><th>Bildiren</th><th>Durum</th><th>Komite</th><th>GRS</th><th>DÖF</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel">
+            <td class="nw"><b>OLY-2026-0412</b></td><td class="nw">12.10.2026 08:40</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>Düşme</td><td>Dahiliye Servisi</td>
+            <td><span class="rz sari">Hafif zarar</span></td><td>Hem. S. Ö.</td>
+            <td><span class="rz sari">Değerlendirmede</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz pas">Bekliyor</span></td><td class="sonuk">—</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0411</b></td><td class="nw">11.10.2026 22:15</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>İlaç — yanlış doz</td><td>Yoğun Bakım</td>
+            <td><span class="rz mavi">Ramak kala</span></td><td><span class="rz mor">🕵️ Anonim</span></td>
+            <td><span class="rz sari">Değerlendirmede</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz pas">Bekliyor</span></td><td class="sonuk">—</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0409</b></td><td class="nw">11.10.2026 14:02</td>
+            <td><span class="rz sari">Çalışan güvenliği</span></td><td>Kesici-delici alet yaralanması</td><td>Acil Servis</td>
+            <td><span class="rz sari">Hafif zarar</span></td><td>Tekn. M. A.</td>
+            <td><span class="rz ok">Kapandı</span></td><td>Çalışan Güvenliği</td>
+            <td class="sonuk">— (çalışan)</td><td><a>DÖF-2026-071</a></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0405</b></td><td class="nw">10.10.2026 09:30</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>Yanlış hasta — kan alma</td><td>Laboratuvar</td>
+            <td><span class="rz mavi">Ramak kala</span></td><td>Bio. E. K.</td>
+            <td><span class="rz mavi">DÖF açıldı</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz ok">Aktarıldı</span></td><td><a>DÖF-2026-070</a></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0398</b></td><td class="nw">08.10.2026 03:10</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>Bası yarası (evre 3)</td><td>Nöroloji Servisi</td>
+            <td><span class="rz kir">Ciddi zarar</span></td><td>Hem. A. D.</td>
+            <td><span class="rz sari">Kök neden analizi</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz ok">Aktarıldı</span></td><td><a>DÖF-2026-068</a></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0391</b></td><td class="nw">06.10.2026 16:45</td>
+            <td><span class="rz mavi">Tesis güvenliği</span></td><td>Su kaçağı — elektrik panosu</td><td>B Blok Bodrum</td>
+            <td><span class="rz mavi">Ramak kala</span></td><td>Tekn. H. Y.</td>
+            <td><span class="rz ok">Kapandı</span></td><td>Tesis Güvenliği</td>
+            <td class="sonuk">—</td><td class="sonuk">—</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0388</b></td><td class="nw">05.10.2026 11:20</td>
+            <td><span class="rz pas">Uygunsuzluk</span></td><td>Sterilizasyon — indikatör kaydı eksik</td><td>Sterilizasyon Ünitesi</td>
+            <td><span class="rz pas">Zarar yok</span></td><td>Uzm. Hem. A. Y.</td>
+            <td><span class="rz mavi">DÖF açıldı</span></td><td>Enfeksiyon Kontrol</td>
+            <td class="sonuk">—</td><td><a>DÖF-2026-066</a></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0384</b></td><td class="nw">04.10.2026 19:05</td>
+            <td><span class="rz sari">Çalışan güvenliği</span></td><td>Sözel şiddet (Beyaz Kod)</td><td>Poliklinik — Kardiyoloji</td>
+            <td><span class="rz pas">Zarar yok</span></td><td>Dr. K. T.</td>
+            <td><span class="rz ok">Kapandı</span></td><td>Çalışan Güvenliği</td>
+            <td class="sonuk">— (Beyaz Kod)</td><td class="sonuk">—</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0377</b></td><td class="nw">02.10.2026 07:55</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>Cerrahi — taraf işaretleme eksik</td><td>Ameliyathane</td>
+            <td><span class="rz mavi">Ramak kala</span></td><td><span class="rz mor">🕵️ Anonim</span></td>
+            <td><span class="rz ok">Kapandı</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz ok">Aktarıldı</span></td><td><a>DÖF-2026-064</a></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>OLY-2026-0371</b></td><td class="nw">30.09.2026 13:40</td>
+            <td><span class="rz kir">Hasta güvenliği</span></td><td>Transfüzyon — kimlik doğrulama</td><td>Genel Cerrahi Servisi</td>
+            <td><span class="rz kir">Ölüm / kalıcı</span></td><td>Uzm. Dr. B. Ç.</td>
+            <td><span class="rz sari">Kök neden analizi</span></td><td>Hasta Güvenliği</td>
+            <td><span class="rz ok">Aktarıldı</span></td><td><a>DÖF-2026-061</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>47 bildirim · 18 ramak kala · 11 anonim</span>
+      <span>Bildiren adı yalnız Kalite Yönetim Birimi'ne görünür; anonim bildirimde hiç tutulmaz</span>
+      <span class="sp">Seçili: OLY-2026-0412</span>
+    </div>
+  </div>
+
+  <!-- ================================================ YENİ BİLDİRİM ===== -->
+  <div class="pnl" data-s="yeni">
+    <div class="anonim">
+      🕵️ <b>Anonim bildirim:</b> işaretlenirse bildirenin kullanıcı adı, IP ve oturum bilgisi <b>kaydedilmez</b>.
+      Bildirim yalnızca olay numarası ile izlenir; geri bildirim, ekranda verilen <code class="k">takip kodu</code> ile sorgulanır.
+      QR afişlerdeki bağlantı oturum açmadan bu formu açar.
+    </div>
+    <div class="form-onizleme">
+      <div class="hdr k2">
+        <div class="fld"><label class="req">Olay tarihi / saati</label><div class="inp">12.10.2026 08:40</div></div>
+        <div class="fld"><label class="req">Olayın gerçekleştiği birim</label><div class="inp combo">Dahiliye Servisi — 3. Kat</div></div>
+        <div class="fld"><label class="req">Olay türü</label><div class="inp combo">Hasta güvenliği</div></div>
+        <div class="fld"><label class="req">Alt tür</label><div class="inp combo">Düşme</div></div>
+        <div class="fld"><label class="req">Zarar düzeyi</label>
+          <div class="inp">
+            <span class="chip">Ramak kala</span><span class="chip">Zarar yok</span><span class="chip on">Hafif</span>
+            <span class="chip">Orta</span><span class="chip">Ciddi</span><span class="chip">Ölüm / kalıcı</span>
+          </div>
+        </div>
+        <div class="fld"><label>Etkilenen</label><div class="inp combo">Hasta — Protokol 2026-118804 (M. K.)</div></div>
+      </div>
+      <div class="grp">
+        <div class="gb">Ne oldu?</div>
+        <div class="ic"><div class="inp uzun">Hasta gece tuvalete kalkarken yatak kenarında dengesini kaybedip düştü. Yatak korkuluğu inikti, çağrı zili hastanın erişiminde değildi. Sağ dirsekte sıyrık; nöbetçi hekim muayene etti, görüntüleme gerekmedi.</div></div>
+      </div>
+      <div class="grp">
+        <div class="gb">Hemen yapılan</div>
+        <div class="ic"><div class="inp uzun">Pansuman yapıldı, Itaki düşme riski yeniden değerlendirildi (yüksek risk), korkuluk kaldırıldı, hasta yakınına bilgi verildi.</div></div>
+      </div>
+      <div class="hdr k4">
+        <div class="fld"><label>Bildiren</label><div class="inp ro">Hem. S. Ö. (Dahiliye)</div></div>
+        <div class="fld"><label>Anonim</label><div class="inp">☐ Kimliğim kaydedilmesin</div></div>
+        <div class="fld"><label>Ek (fotoğraf / belge)</label><div class="inp">📎 1 dosya</div></div>
+        <div class="fld"><label>Hekime bildirildi</label><div class="inp">☑ Dr. F. A. · 08:55</div></div>
+      </div>
+      <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+        <div class="sp"></div>
+        <div class="btn">Vazgeç</div>
+        <div class="btn ok">📨 Bildirimi Gönder</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ DEĞERLENDİRME ===== -->
+  <div class="pnl" data-s="deger">
+    <div class="ikiPanel">
+      <div data-liste>
+        <div class="olgu on"><span class="kk">0412</span><span class="ad">Düşme — Dahiliye<br><span class="sy">Hafif zarar · 0 gün</span></span><span class="rz sari">Yeni</span></div>
+        <div class="olgu"><span class="kk">0411</span><span class="ad">İlaç yanlış doz — YB<br><span class="sy">Ramak kala · 1 gün</span></span><span class="rz sari">Yeni</span></div>
+        <div class="olgu"><span class="kk">0398</span><span class="ad">Bası yarası — Nöroloji<br><span class="sy">Ciddi · 4 gün</span></span><span class="rz kir">KNA</span></div>
+        <div class="olgu"><span class="kk">0371</span><span class="ad">Transfüzyon — Gen. Cerrahi<br><span class="sy">Ölüm/kalıcı · 12 gün</span></span><span class="rz kir">KNA</span></div>
+        <div class="olgu"><span class="kk">0366</span><span class="ad">Hasta kimliği bileklik yok<br><span class="sy">Ramak kala · 13 gün</span></span><span class="rz sari">7 gün+</span></div>
+        <div class="olgu"><span class="kk">0359</span><span class="ad">Sedye freni arızası<br><span class="sy">Zarar yok · 15 gün</span></span><span class="rz sari">7 gün+</span></div>
+      </div>
+      <div>
+        <div class="hdr k4">
+          <div class="fld"><label>Olay</label><div class="inp ro big">OLY-2026-0412</div></div>
+          <div class="fld"><label>Sorumlu komite</label><div class="inp combo">Hasta Güvenliği Komitesi</div></div>
+          <div class="fld"><label>Değerlendiren</label><div class="inp combo">Uzm. Hem. Aylin Yılmaz</div></div>
+          <div class="fld"><label>Son değerlendirme tarihi</label><div class="inp">19.10.2026</div></div>
+          <div class="fld"><label>Önlenebilir mi?</label><div class="inp combo">Evet</div></div>
+          <div class="fld"><label>Tekrarlama olasılığı</label><div class="inp combo">Orta (3)</div></div>
+          <div class="fld"><label>Risk skoru</label><div class="inp"><span class="rz sari">9 — Orta</span></div></div>
+          <div class="fld"><label>Kök neden analizi</label><div class="inp combo">Gerekli değil (hafif zarar)</div></div>
+        </div>
+        <div class="grp">
+          <div class="gb">Katkıda bulunan faktörler <span class="sp">SKS Hasta Güvenliği · düşme önleme</span></div>
+          <ul class="kontrol">
+            <li class="ok"><span class="kutu">✓</span>Hasta faktörü — gece idrara çıkma, diüretik tedavisi<span class="imza">Hem. S. Ö.</span></li>
+            <li class="ok"><span class="kutu">✓</span>Ortam — yatak korkuluğu indirilmiş, zil erişimde değil<span class="imza">Hem. S. Ö.</span></li>
+            <li class="bos"><span class="kutu"></span>İletişim — vardiya devrinde düşme riski aktarılmadı mı?<span class="imza">inceleniyor</span></li>
+            <li class="bos"><span class="kutu"></span>Ekipman — gece lambası yok</li>
+          </ul>
+        </div>
+        <div class="grp">
+          <div class="gb">Karar</div>
+          <div class="ic">
+            <div class="arama" style="background:none;border:none;padding:0 0 8px">
+              <span class="chip">Bilgi amaçlı kapat</span>
+              <span class="chip on">Birim içi iyileştirme</span>
+              <span class="chip">DÖF aç</span>
+              <span class="chip">Risk kaydına ekle</span>
+            </div>
+            <div class="inp uzun">Servis sorumlu hemşiresi gece vizitinde yüksek riskli hastalarda korkuluk ve zil kontrolünü KY.FR.034 kontrol listesine ekleyecek. Tekrarında DÖF açılacak.</div>
+          </div>
+        </div>
+        <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+          <div class="btn">📨 GRS'ye Aktar</div>
+          <div class="btn" data-git="kalite_dof_karti.html">🛠️ DÖF Aç</div>
+          <div class="btn" data-git="kalite_risk_yonetimi.html">🎯 Risk Kaydına Ekle</div>
+          <div class="sp"></div>
+          <div class="btn ok">✔ Değerlendirmeyi Kaydet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== ANALİZ ===== -->
+  <div class="pnl" data-s="analiz">
+    <div class="arama">
+      <span class="chip">Bu ay</span><span class="chip on">Son 12 ay</span><span class="chip">2025</span>
+      <span class="sp"></span><span class="sonuk">Sayılar bildirim sayısıdır; oran için hasta-gün paydası Kalite Panosu'nda</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <div class="grp">
+        <div class="gb">Birim × tür <span class="sp">son 12 ay</span></div>
+        <div class="dg isi">
+          <table>
+            <thead><tr><th>Birim</th><th class="orta">Hasta</th><th class="orta">Çalışan</th><th class="orta">Uygunsuzluk</th><th class="orta">Tesis</th><th class="sag">Toplam</th></tr></thead>
+            <tbody>
+              <tr><td>Acil Servis</td><td class="h h3">38</td><td class="h h4">21</td><td class="h h1">6</td><td class="h h1">4</td><td class="sag"><b>69</b></td></tr>
+              <tr><td>Yoğun Bakım</td><td class="h h4">44</td><td class="h h1">5</td><td class="h h1">7</td><td class="h h0">1</td><td class="sag"><b>57</b></td></tr>
+              <tr><td>Dahiliye Servisi</td><td class="h h3">31</td><td class="h h1">4</td><td class="h h1">3</td><td class="h h0">2</td><td class="sag"><b>40</b></td></tr>
+              <tr><td>Ameliyathane</td><td class="h h2">17</td><td class="h h1">6</td><td class="h h2">11</td><td class="h h0">2</td><td class="sag"><b>36</b></td></tr>
+              <tr><td>Laboratuvar</td><td class="h h2">14</td><td class="h h1">3</td><td class="h h2">9</td><td class="h h0">0</td><td class="sag"><b>26</b></td></tr>
+              <tr><td>Sterilizasyon Ünitesi</td><td class="h h0">2</td><td class="h h1">4</td><td class="h h2">12</td><td class="h h0">1</td><td class="sag"><b>19</b></td></tr>
+              <tr><td>Teknik Servis / Tesis</td><td class="h h0">0</td><td class="h h1">5</td><td class="h h0">2</td><td class="h h3">14</td><td class="sag"><b>21</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="gb">Aylık trend <span class="sp">mavi: olay · yeşil: ramak kala</span></div>
+        <div class="trend">
+          <div class="s"><div class="ikili"><i style="height:44%"></i><i class="rk" style="height:22%"></i></div>Kas</div>
+          <div class="s"><div class="ikili"><i style="height:50%"></i><i class="rk" style="height:20%"></i></div>Ara</div>
+          <div class="s"><div class="ikili"><i style="height:41%"></i><i class="rk" style="height:24%"></i></div>Oca</div>
+          <div class="s"><div class="ikili"><i style="height:47%"></i><i class="rk" style="height:26%"></i></div>Şub</div>
+          <div class="s"><div class="ikili"><i style="height:52%"></i><i class="rk" style="height:28%"></i></div>Mar</div>
+          <div class="s"><div class="ikili"><i style="height:45%"></i><i class="rk" style="height:30%"></i></div>Nis</div>
+          <div class="s"><div class="ikili"><i style="height:40%"></i><i class="rk" style="height:31%"></i></div>May</div>
+          <div class="s"><div class="ikili"><i style="height:43%"></i><i class="rk" style="height:33%"></i></div>Haz</div>
+          <div class="s"><div class="ikili"><i style="height:38%"></i><i class="rk" style="height:30%"></i></div>Tem</div>
+          <div class="s"><div class="ikili"><i style="height:36%"></i><i class="rk" style="height:32%"></i></div>Ağu</div>
+          <div class="s"><div class="ikili"><i style="height:39%"></i><i class="rk" style="height:35%"></i></div>Eyl</div>
+          <div class="s"><div class="ikili"><i style="height:48%"></i><i class="rk" style="height:36%"></i></div>Eki*</div>
+        </div>
+        <div class="ic sonuk">* Ekim 12 günlük. Ramak kala bildiriminin artması olumlu: bildirim kültürü göstergesi (SKS — Hasta Güvenliği).</div>
+        <div class="dg">
+          <table>
+            <thead><tr><th>En sık alt tür (12 ay)</th><th class="sag">Adet</th><th>Eğilim</th></tr></thead>
+            <tbody>
+              <tr><td>Düşme</td><td class="sag">41</td><td><span class="rz ok">▼ azalıyor</span></td></tr>
+              <tr><td>İlaç hatası (doz / zaman / hasta)</td><td class="sag">36</td><td><span class="rz sari">▲ artıyor</span></td></tr>
+              <tr><td>Kesici-delici yaralanma</td><td class="sag">22</td><td><span class="rz pas">= sabit</span></td></tr>
+              <tr><td>Hasta kimliği doğrulama</td><td class="sag">19</td><td><span class="rz ok">▼ azalıyor</span></td></tr>
+              <tr><td>Sözel / fiziksel şiddet</td><td class="sag">17</td><td><span class="rz sari">▲ artıyor</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>ISO 9001:2015 · 10.2 Uygunsuzluk ve düzeltici faaliyet</span>
+    <span>SKS · Hasta Güvenliği / Çalışan Güvenliği / Tesis Yönetimi</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Akış:</b> bildirim (anonim olabilir) → sorumlu komite değerlendirir → karar: bilgi amaçlı kapat / birim içi iyileştirme / DÖF / risk kaydı.
+  <ul>
+    <li>Ciddi zarar ve ölüm/kalıcı hasarda <b>kök neden analizi</b> zorunlu; DÖF kartından yürür (<code>kalite_dof_karti.html</code>).</li>
+    <li>Hasta güvenliği olayları Sağlık Bakanlığı <b>GRS</b>'ye aktarılır; GRS kolonu aktarım durumunu gösterir. Çalışan güvenliği / Beyaz Kod kendi kanalına gider.</li>
+    <li>Klinik Kalite icmalindeki GRS ve düşme göstergeleri bu kayıtlardan beslenir (bkz. <code>Ekranlar/Klinik Kalite/</code>).</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

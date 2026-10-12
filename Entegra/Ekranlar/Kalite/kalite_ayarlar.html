@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalite Ayarları — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .nav{max-width:1400px;margin:0 auto 10px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .nav .sonuk{margin-right:4px}
+  .dg td.w{white-space:normal}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .iki>div{border-right:1px solid var(--line2)} .iki>div:last-child{border-right:none}
+  .sablon{display:flex;gap:4px;align-items:center;padding:10px 12px;flex-wrap:wrap;font-size:12px}
+  .sablon .p{border:1px solid var(--line);border-radius:4px;padding:6px 10px;background:#fff;text-align:center;min-width:70px}
+  .sablon .p b{display:block;font-size:14px;color:var(--navy);font-family:Consolas,monospace}
+  .sablon .p span{font-size:10px;color:var(--muted)}
+  .sablon .n{font-size:16px;color:var(--muted);font-family:Consolas,monospace}
+  .matris{display:grid;grid-template-columns:110px repeat(5,1fr);gap:3px;padding:10px 12px;max-width:760px}
+  .matris .h{font-size:10.5px;color:var(--muted);text-align:center;padding:4px;font-weight:bold}
+  .matris .y{font-size:10.5px;color:#3a5573;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;text-align:right;font-weight:bold}
+  .matris .c{height:46px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:15px}
+  .matris .c small{font-size:9.5px;font-weight:normal;opacity:.9}
+  .c.d{background:#5cb87a} .c.o{background:#f0c05a;color:#5e4510} .c.y{background:#e67e22} .c.ck{background:#c0392b}
+  .esik{display:flex;gap:8px;padding:6px 12px 12px;flex-wrap:wrap}
+  .esik .e{border:1px solid var(--line2);border-radius:4px;padding:6px 10px;font-size:11px;background:#fff;min-width:200px}
+  .esik .e i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+  .kural{display:grid;grid-template-columns:24px 1fr;gap:6px;padding:7px 12px;border-bottom:1px solid var(--line2);font-size:11.5px;align-items:start}
+  .kural .ck{width:16px;height:16px;border:1px solid var(--line);border-radius:3px;text-align:center;line-height:15px;font-size:11px;background:#fff;margin-top:1px}
+  .kural .ck.on{background:#3f9a5e;color:#fff;border-color:#2e7d46}
+  .kural b{color:var(--navy)}
+  .kural .sonuk{font-size:10.5px}
+  .adimlar{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adimlar span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:#3a5573}
+  .adimlar span+span{border-left:none}
+  .adimlar span.on{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="sonuk">Kurumsal Kalite ekranları:</span>
+  <span class="chip" data-git="kalite_sureci.html">📘 Süreç</span>
+  <span class="chip" data-git="kalite_panosu.html">🏅 Kalite Panosu</span>
+  <span class="chip" data-git="kalite_dokuman_yonetimi.html">📚 Doküman Yönetimi</span>
+  <span class="chip" data-git="kalite_dof.html">🛠️ DÖF</span>
+  <span class="chip" data-git="kalite_ic_denetim.html">🔎 İç Denetim</span>
+  <span class="chip" data-git="kalite_olay_bildirim.html">⚠️ Olay Bildirim</span>
+  <span class="chip" data-git="kalite_risk_yonetimi.html">🎯 Risk Yönetimi</span>
+  <span class="chip" data-git="kalite_hedef_gosterge.html">📈 Hedef &amp; Gösterge</span>
+  <span class="chip" data-git="kalite_ygg_toplanti.html">👥 YGG &amp; Toplantı</span>
+  <span class="chip" data-git="kalite_egitim.html">🎓 Eğitim</span>
+  <span class="chip" data-git="kalite_sikayet_gorus.html">💬 Şikâyet &amp; Görüş</span>
+  <span class="chip" data-git="kalite_tedarikci_degerlendirme.html">🚚 Tedarikçi Değerlendirme</span>
+  <span class="chip on" data-git="kalite_ayarlar.html">⚙️ Ayarlar</span>
+</div>
+
+<div class="win">
+  <div class="title">⚙️ Kalite Ayarları
+    <span class="sp">Genotıp Tıp Merkezi · Merkez · Kalite Yönetim Birimi · son değişiklik 03.10.2026 Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div>
+    <div class="btn">↶ Vazgeç</div>
+    <div class="sepv"></div>
+    <div class="btn">📜 Değişiklik Geçmişi</div>
+    <div class="sp"></div>
+    <div class="btn" data-git="kalite_sureci.html">📘 Süreç</div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="birim">Birimler &amp; Sorumlular<span class="sy">22</span></div>
+    <div class="sekme" data-s="komite">Komiteler<span class="sy">4</span></div>
+    <div class="sekme" data-s="dokuman">Doküman Türleri &amp; Numaralama</div>
+    <div class="sekme" data-s="dof">DÖF Kaynakları &amp; Termin</div>
+    <div class="sekme" data-s="risk">Risk Matrisi</div>
+    <div class="sekme" data-s="kural">Bildirim &amp; Onay Kuralları</div>
+  </div>
+
+  <!-- ========================================================= BİRİMLER ===== -->
+  <div class="pnl" data-s="birim">
+    <div class="arama">
+      <div class="kutu">🔍 Birim, sorumlu…</div>
+      <span class="chip on">Tümü <b>22</b></span>
+      <span class="chip">Klinik <b>12</b></span>
+      <span class="chip">Destek <b>6</b></span>
+      <span class="chip">İdari <b>4</b></span>
+      <span class="chip">Sorumlusu boş <b>1</b></span>
+      <span class="sp"></span><span class="btn mini">＋ Birim ekle</span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:36px">Kod</th><th style="width:200px">Birim (departman)</th><th style="width:80px">Tür</th><th style="width:200px">Kalite birim sorumlusu</th><th style="width:180px">Yedek</th><th style="width:160px">Birim yöneticisi (kontrol)</th><th style="width:80px" class="sag">Doküman</th><th style="width:80px" class="sag">Açık DÖF</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="9">Klinik birimler</td></tr>
+        <tr class="tik"><td><code>AC</code></td><td>Acil Servis</td><td>Klinik</td><td>Sor. Hem. G. Tunç</td><td>Hem. D. Şahin</td><td>Uzm. Dr. B. Can</td><td class="sag">31</td><td class="sag">4</td><td class="sonuk">7/24 · triyaj</td></tr>
+        <tr class="tik"><td><code>DH</code></td><td>Dahiliye Servisi</td><td>Klinik</td><td>Sor. Hem. A. Demir</td><td>Hem. E. Kara</td><td>Uzm. Dr. Z. Er</td><td class="sag">24</td><td class="sag">3</td><td></td></tr>
+        <tr class="tik"><td><code>GC</code></td><td>Genel Cerrahi Servisi</td><td>Klinik</td><td>Sor. Hem. N. Öz</td><td>Hem. C. Yalçın</td><td>Op. Dr. E. Polat</td><td class="sag">22</td><td class="sag">2</td><td></td></tr>
+        <tr class="tik"><td><code>YB</code></td><td>Yoğun Bakım</td><td>Klinik</td><td>Sor. Hem. P. Güler</td><td>Hem. A. Bal</td><td>Uzm. Dr. K. Arslan</td><td class="sag">36</td><td class="sag">3</td><td class="sonuk">Yüksek riskli ilaç</td></tr>
+        <tr class="tik"><td><code>AM</code></td><td>Ameliyathane</td><td>Klinik</td><td>Hem. S. Kurt</td><td>Hem. M. Bulut</td><td>Op. Dr. E. Polat</td><td class="sag">28</td><td class="sag">1</td><td></td></tr>
+        <tr class="tik"><td><code>OR</code></td><td>Ortopedi Servisi</td><td>Klinik</td><td><span class="rz kir">Atanmamış</span></td><td>—</td><td>Op. Dr. U. Aydemir</td><td class="sag">18</td><td class="sag">1</td><td class="sonuk">Sorumlu ayrıldı 30.09</td></tr>
+        <tr class="tik"><td><code>PL</code></td><td>Poliklinikler</td><td>Klinik</td><td>Hst. Md. Yrd. T. Kılıç</td><td>Sek. H. Uysal</td><td>Başhekim Yrd. Dr. O. Sezer</td><td class="sag">15</td><td class="sag">2</td><td></td></tr>
+        <tr class="grup"><td colspan="9">Destek birimleri</td></tr>
+        <tr class="tik"><td><code>LB</code></td><td>Laboratuvar</td><td>Destek</td><td>Bio. S. Erdem</td><td>Bio. D. Koç</td><td>Uzm. Dr. R. Ateş</td><td class="sag">42</td><td class="sag">3</td><td class="sonuk">ISO 15189 hazırlığı</td></tr>
+        <tr class="tik"><td><code>EC</code></td><td>Eczane</td><td>Destek</td><td>Ecz. M. Aksoy</td><td>Ecz. Tkn. Y. Can</td><td>Ecz. M. Aksoy</td><td class="sag">19</td><td class="sag">1</td><td></td></tr>
+        <tr class="tik"><td><code>ST</code></td><td>Sterilizasyon Ünitesi</td><td>Destek</td><td>Hem. İ. Oral</td><td>Tkn. K. Sarı</td><td>Op. Dr. E. Polat</td><td class="sag">14</td><td class="sag">0</td><td></td></tr>
+        <tr class="grup"><td colspan="9">İdari birimler</td></tr>
+        <tr class="tik"><td><code>KY</code></td><td>Kalite Yönetim Birimi</td><td>İdari</td><td>Uzm. Hem. Aylin Yılmaz</td><td>Hem. F. Uçar</td><td>Başhekim Dr. N. Erol</td><td class="sag">23</td><td class="sag">0</td><td class="sonuk">Kalite Direktörü</td></tr>
+        <tr class="tik"><td><code>SA</code></td><td>Satın Alma</td><td>İdari</td><td>Stn. Alm. Md. B. Şen</td><td>Mmr. G. Ay</td><td>Müdür S. Karaca</td><td class="sag">9</td><td class="sag">1</td><td></td></tr>
+      </tbody>
+    </table></div>
+    <div class="statusbar"><span>22 birim</span><span>1 birimin sorumlusu yok — o birime gelen DÖF / okuma işleri Kalite Direktörüne düşer</span></div>
+  </div>
+
+  <!-- ========================================================= KOMİTELER ===== -->
+  <div class="pnl" data-s="komite">
+    <div class="iki">
+      <div>
+        <div class="dg"><table>
+          <thead><tr><th>Komite</th><th style="width:150px">Başkan</th><th style="width:130px">Sekreter</th><th style="width:60px" class="sag">Üye</th><th style="width:110px">Sıklık</th><th style="width:100px">Son toplantı</th></tr></thead>
+          <tbody>
+            <tr class="tik sel"><td>🩺 <b>Hasta Güvenliği Komitesi</b></td><td>Başhekim Yrd. Dr. O. Sezer</td><td>Hem. F. Uçar</td><td class="sag">9</td><td>3 ayda bir</td><td>17.07.2026</td></tr>
+            <tr class="tik"><td>🦺 <b>Çalışan Güvenliği Komitesi</b></td><td>Müdür S. Karaca</td><td>İSG Uzm. C. Er</td><td class="sag">8</td><td>3 ayda bir</td><td>22.07.2026</td></tr>
+            <tr class="tik"><td>🧫 <b>Enfeksiyon Kontrol Komitesi</b></td><td>Uzm. Dr. L. Kaya (Enf. Hst.)</td><td>Enf. Hem. Ö. Yıldız</td><td class="sag">7</td><td>Ayda bir</td><td>25.09.2026</td></tr>
+            <tr class="tik"><td>🏢 <b>Tesis Güvenliği Komitesi</b></td><td>Teknik Md. H. Yurt</td><td>Tkn. A. Çelik</td><td class="sag">7</td><td>3 ayda bir</td><td>29.07.2026</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">🩺 Hasta Güvenliği Komitesi — üyeler <span class="sp"><span class="btn mini">＋ Üye</span></span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Üye</th><th style="width:130px">Görev</th><th style="width:90px">Oy</th></tr></thead>
+            <tbody>
+              <tr><td>Başhekim Yrd. Dr. O. Sezer</td><td>Başkan</td><td>✓</td></tr>
+              <tr><td>Uzm. Hem. Aylin Yılmaz</td><td>Kalite Direktörü</td><td>✓</td></tr>
+              <tr><td>Hem. F. Uçar</td><td>Sekreter</td><td>—</td></tr>
+              <tr><td>Uzm. Dr. K. Arslan</td><td>Yoğun Bakım</td><td>✓</td></tr>
+              <tr><td>Op. Dr. E. Polat</td><td>Cerrahi birimler</td><td>✓</td></tr>
+              <tr><td>Ecz. M. Aksoy</td><td>Eczane</td><td>✓</td></tr>
+              <tr><td>Sor. Hem. G. Tunç</td><td>Acil Servis</td><td>✓</td></tr>
+              <tr><td>Bio. S. Erdem</td><td>Laboratuvar</td><td>✓</td></tr>
+              <tr><td>Hasta Hakları Sor. N. Gül</td><td>Hasta hakları</td><td>✓</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="grp"><div class="gb">Görev alanı</div>
+          <div class="ic sonuk">Hasta güvenliği olaylarını (ciddi / sentinel 72 saat içinde) değerlendirir; kök neden analizi ister; hasta güvenliği hedeflerini (kimlik, ilaç, düşme, güvenli cerrahi, iletişim) izler; karar → DÖF ya da görev. Toplantı tutanağı YGG girdisidir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= DOKÜMAN ===== -->
+  <div class="pnl" data-s="dokuman">
+    <div class="grp"><div class="gb">Doküman kodu şablonu <span class="sp">örnek: <code>KY.PR.001</code> · Rev.04</span></div>
+      <div class="sablon">
+        <div class="p"><b>KY</b><span>Kurum öneki</span></div><span class="n">.</span>
+        <div class="p"><b>PR</b><span>Tür kodu</span></div><span class="n">.</span>
+        <div class="p"><b>001</b><span>Sıra (3 hane, tür içinde)</span></div>
+        <span class="sp"></span>
+        <div class="fld" style="min-width:180px"><label>Birim kodu eklensin</label><div class="inp combo">Hayır (KY.PR.001)</div></div>
+        <div class="fld" style="min-width:180px"><label>Revizyon gösterimi</label><div class="inp combo">Rev.04 (2 hane)</div></div>
+      </div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:60px">Kod</th><th style="width:200px">Tür</th><th style="width:90px" class="sag">Son no</th><th style="width:150px">Onay akışı</th><th style="width:130px">Gözden geçirme</th><th style="width:110px">Okundu onayı</th><th style="width:100px">Şablon</th><th>Açıklama</th></tr></thead>
+      <tbody>
+        <tr class="tik"><td><code>PR</code></td><td>Prosedür</td><td class="sag">032</td><td>Hazırlayan → Birim Yön. → Kalite Dir.</td><td>2 yılda bir</td><td><span class="rz ok">Zorunlu</span></td><td>📄 .docx</td><td class="w">Bir sürecin kim / ne / ne zaman tarifi</td></tr>
+        <tr class="tik"><td><code>TL</code></td><td>Talimat</td><td class="sag">048</td><td>Hazırlayan → Birim Yön. → Kalite Dir.</td><td>2 yılda bir</td><td><span class="rz ok">Zorunlu</span></td><td>📄 .docx</td><td class="w">Tek işin adım adım nasıl yapılacağı</td></tr>
+        <tr class="tik"><td><code>FR</code></td><td>Form</td><td class="sag">127</td><td>Hazırlayan → Kalite Dir.</td><td>3 yılda bir</td><td><span class="rz pas">Hayır</span></td><td>📄 .docx</td><td class="w">Kayıt tutmak için boş şablon (dolu hali kayıt)</td></tr>
+        <tr class="tik"><td><code>LS</code></td><td>Liste</td><td class="sag">019</td><td>Hazırlayan → Kalite Dir.</td><td>Yılda bir</td><td><span class="rz ok">Zorunlu</span></td><td>📊 .xlsx</td><td class="w">Yüksek riskli ilaçlar, LASA, kısaltmalar…</td></tr>
+        <tr class="tik"><td><code>PL</code></td><td>Plan</td><td class="sag">011</td><td>Hazırlayan → Birim Yön. → Kalite Dir. → Başhekim</td><td>Yılda bir</td><td><span class="rz ok">Zorunlu</span></td><td>📄 .docx</td><td class="w">Eğitim, acil durum, enfeksiyon kontrol planları; KY.PL.001 = Kalite Politikası</td></tr>
+        <tr class="tik"><td><code>SÜ</code></td><td>Süreç kartı</td><td class="sag">014</td><td>Hazırlayan → Kalite Dir.</td><td>2 yılda bir</td><td><span class="rz pas">Hayır</span></td><td>📄 .docx</td><td class="w">Girdi / çıktı / sahip / gösterge (ISO 4.4)</td></tr>
+        <tr class="tik"><td><code>GT</code></td><td>Görev tanımı</td><td class="sag">067</td><td>Hazırlayan → İK → Kalite Dir.</td><td>2 yılda bir</td><td><span class="rz ok">İlgili rol</span></td><td>📄 .docx</td><td class="w">Unvan bazında görev, yetki, sorumluluk</td></tr>
+        <tr class="tik"><td><code>DD</code></td><td>Dış kaynaklı doküman</td><td class="sag">038</td><td>Kalite Dir.</td><td>Mevzuat değişince</td><td><span class="rz pas">Hayır</span></td><td>—</td><td class="w">Yönetmelik, rehber, kullanım kılavuzu (yalnız kayıt + geçerlilik)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grp"><div class="gb">Yayın kuralları</div>
+      <div class="kural"><span class="ck on">✓</span><div><b>Yayında yalnız tek geçerli sürüm.</b> Yeni revizyon yayınlanınca eski sürüm otomatik "Geçersiz" damgasıyla arşive gider. <span class="sonuk">— basılı kopyada filigran</span></div></div>
+      <div class="kural"><span class="ck on">✓</span><div><b>Revizyonda değişiklik özeti zorunlu.</b> Okundu onayı revizyonla sıfırlanır.</div></div>
+      <div class="kural"><span class="ck on">✓</span><div><b>Gözden geçirme vadesi 30 gün kala</b> hazırlayana ve birim sorumlusuna görev düşer.</div></div>
+      <div class="kural"><span class="ck">&nbsp;</span><div><b>Basılı kopya numaralandırma</b> (kontrollü kopya no) <span class="sonuk">— kapalı: dağıtım elektronik</span></div></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= DÖF ===== -->
+  <div class="pnl" data-s="dof">
+    <div class="iki">
+      <div>
+        <div class="grp"><div class="gb">DÖF kaynakları <span class="sp">kaynak, DÖF kartında izlenebilirlik bağıdır</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Kaynak</th><th style="width:160px">Bağlanan kayıt</th><th style="width:150px">Otomatik DÖF</th><th style="width:90px">Varsayılan tür</th></tr></thead>
+            <tbody>
+              <tr><td>⚠️ Olay bildirimi</td><td><code>OLY-2026-0xxx</code></td><td>Ciddi / sentinel → zorunlu</td><td>Düzeltici</td></tr>
+              <tr><td>🔎 İç denetim bulgusu</td><td><code>DEN-2026-0xx</code></td><td>Majör / minör → zorunlu</td><td>Düzeltici</td></tr>
+              <tr><td>🏛️ Dış denetim (Bakanlık SKS, ISO belgelendirme)</td><td>Rapor no</td><td>Her bulgu</td><td>Düzeltici</td></tr>
+              <tr><td>🎯 Risk değerlendirmesi</td><td><code>RSK-0xx</code></td><td>Skor ≥ 15 → zorunlu</td><td>Önleyici</td></tr>
+              <tr><td>📈 Hedef dışı gösterge</td><td>Gösterge kodu</td><td>2 dönem üst üste</td><td>Düzeltici</td></tr>
+              <tr><td>💬 Şikâyet</td><td><code>ŞK-0xxx</code></td><td>Haklı + tekrar (3/ay)</td><td>Düzeltici</td></tr>
+              <tr><td>🚚 Tedarikçi uygunsuzluğu</td><td>Tedarikçi</td><td>C sınıfına düşünce</td><td>Düzeltici</td></tr>
+              <tr><td>👥 Komite / YGG kararı</td><td>Toplantı no</td><td>Elle</td><td>İyileştirme</td></tr>
+              <tr><td>💡 Çalışan önerisi</td><td>—</td><td>Elle</td><td>İyileştirme</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Termin ve etkinlik</div>
+          <div class="hdr k2">
+            <div class="fld"><label class="req">Kök neden analizi için süre</label><div class="inp">7 gün</div></div>
+            <div class="fld"><label class="req">Varsayılan faaliyet termini</label><div class="inp">30 gün</div></div>
+            <div class="fld"><label>Ciddi / sentinel olay DÖF termini</label><div class="inp">15 gün</div></div>
+            <div class="fld"><label>Termin uzatma</label><div class="inp combo">En fazla 1 kez · Kalite Dir. onayıyla</div></div>
+            <div class="fld"><label class="req">Etkinlik kontrolü (kapanıştan sonra)</label><div class="inp">60 gün</div></div>
+            <div class="fld"><label>Etkinsiz bulunursa</label><div class="inp combo">Aynı DÖF yeniden açılır (rev.)</div></div>
+            <div class="fld"><label>Kök neden yöntemi</label><div class="inp combo">5 Neden · Balık kılçığı (seçmeli)</div></div>
+            <div class="fld"><label>Gecikme hatırlatması</label><div class="inp">Termin −3 gün · +1 gün · her hafta</div></div>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">DÖF durumları</div>
+          <div class="adimlar"><span>Açıldı</span><span>Kök neden</span><span class="on">Faaliyette</span><span>Doğrulama</span><span>Etkinlik</span><span>Kapandı</span></div>
+          <div class="ic sonuk">"Kapandı" yalnız Kalite Direktörü onayıyla; etkinlik kontrolü yapılmadan kapanış düğmesi pasif.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= RİSK ===== -->
+  <div class="pnl" data-s="risk">
+    <div class="iki">
+      <div>
+        <div class="grp"><div class="gb">5 × 5 risk matrisi <span class="sp">Skor = Olasılık × Şiddet</span></div>
+          <div class="matris">
+            <div></div><div class="h">1 · Önemsiz</div><div class="h">2 · Küçük</div><div class="h">3 · Orta</div><div class="h">4 · Ciddi</div><div class="h">5 · Felaket</div>
+            <div class="y">5 · Çok yüksek</div><div class="c o">5</div><div class="c y">10</div><div class="c ck">15</div><div class="c ck">20</div><div class="c ck">25</div>
+            <div class="y">4 · Yüksek</div><div class="c d">4</div><div class="c o">8</div><div class="c y">12</div><div class="c ck">16</div><div class="c ck">20</div>
+            <div class="y">3 · Orta</div><div class="c d">3</div><div class="c o">6</div><div class="c o">9</div><div class="c y">12</div><div class="c ck">15</div>
+            <div class="y">2 · Düşük</div><div class="c d">2</div><div class="c d">4</div><div class="c o">6</div><div class="c o">8</div><div class="c y">10</div>
+            <div class="y">1 · Çok düşük</div><div class="c d">1</div><div class="c d">2</div><div class="c d">3</div><div class="c d">4</div><div class="c o">5</div>
+          </div>
+          <div class="ic sonuk" style="padding-top:0">Dikey: Olasılık · Yatay: Şiddet. Hücre rengi alttaki eşik tablosundan gelir; eşik değişince matris anında yeniden boyanır.</div>
+          <div class="esik">
+            <div class="e"><i style="background:#5cb87a"></i><b>1–4 Düşük</b> · kabul edilebilir, izlenir</div>
+            <div class="e"><i style="background:#f0c05a"></i><b>5–9 Orta</b> · kontrol tedbiri, yılda bir gözden geçirme</div>
+            <div class="e"><i style="background:#e67e22"></i><b>10–14 Önemli</b> · 3 ay içinde aksiyon planı</div>
+            <div class="e"><i style="background:#c0392b"></i><b>15–25 Yüksek</b> · zorunlu önleyici DÖF, risk sahibi + Kalite Dir. bilgisi</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Olasılık ölçeği</div>
+          <div class="dg"><table><tbody>
+            <tr><td style="width:40px" class="orta"><b>5</b></td><td>Çok yüksek — haftada bir ya da daha sık</td></tr>
+            <tr><td class="orta"><b>4</b></td><td>Yüksek — ayda bir</td></tr>
+            <tr><td class="orta"><b>3</b></td><td>Orta — yılda birkaç kez</td></tr>
+            <tr><td class="orta"><b>2</b></td><td>Düşük — yılda bir</td></tr>
+            <tr><td class="orta"><b>1</b></td><td>Çok düşük — beklenmez</td></tr>
+          </tbody></table></div>
+        </div>
+        <div class="grp"><div class="gb">Şiddet ölçeği <span class="sp">hasta / çalışan / kurum</span></div>
+          <div class="dg"><table><tbody>
+            <tr><td style="width:40px" class="orta"><b>5</b></td><td>Felaket — ölüm, kalıcı sakatlık, hizmetin durması</td></tr>
+            <tr><td class="orta"><b>4</b></td><td>Ciddi — kalıcı olmayan ciddi zarar, ek tedavi / yatış</td></tr>
+            <tr><td class="orta"><b>3</b></td><td>Orta — geçici zarar, ek gözlem / tetkik</td></tr>
+            <tr><td class="orta"><b>2</b></td><td>Küçük — zarar yok, hizmette gecikme</td></tr>
+            <tr><td class="orta"><b>1</b></td><td>Önemsiz — fark edilmeyecek etki</td></tr>
+          </tbody></table></div>
+        </div>
+        <div class="grp"><div class="gb">Risk kategorileri</div>
+          <div class="ic"><span class="rz">Hasta güvenliği</span> <span class="rz">Çalışan güvenliği</span> <span class="rz">Enfeksiyon</span> <span class="rz">Tesis / yangın</span> <span class="rz">İlaç</span> <span class="rz">Cihaz</span> <span class="rz">Bilgi güvenliği / KVKK</span> <span class="rz">Finansal</span> <span class="rz">Yasal uyum</span> <span class="rz">Tedarik</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= KURALLAR ===== -->
+  <div class="pnl" data-s="kural">
+    <div class="iki">
+      <div>
+        <div class="grp"><div class="gb">Olay bildirimi</div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Anonim bildirim açık.</b> Anonim seçilirse bildiren hiçbir ekranda ve dökümde görünmez. <span class="sonuk">— SKS: cezalandırıcı olmayan bildirim kültürü</span></div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Ön değerlendirme süresi 24 saat.</b> Aşınca Kalite Direktörüne bildirim.</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Ciddi / sentinel olay</b> anında SMS: Kalite Direktörü + Başhekim + ilgili komite başkanı.</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Çalışan güvenliği olayı</b> (kesici-delici, şiddet) İSG birimine ve Çalışan Güvenliği Komitesine de düşer; Beyaz Kod kaydıyla eşleşir.</div></div>
+          <div class="kural"><span class="ck">&nbsp;</span><div><b>Bildirene geri bildirim</b> (olay kapanınca "bildiriminiz değerlendirildi") <span class="sonuk">— anonimde gönderilmez</span></div></div>
+        </div>
+        <div class="grp"><div class="gb">Doküman</div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Yeni yayın</b> hedef rol / birimdeki herkese görev olarak düşer; okuma süresi <b>15 gün</b>.</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Okundu onayı</b> "okudum, anladım" + oturum parolası değil, tek tık (kimlik oturumdan).</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Onay adımında 5 gün bekleyen</b> doküman bir üst onaycıya hatırlatma.</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">DÖF &amp; denetim</div>
+          <div class="kural"><span class="ck on">✓</span><div><b>DÖF faaliyet sorumlusuna</b> görev + e-posta; termin −3 gün hatırlatma.</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Gecikmiş DÖF</b> haftalık özet: birim yöneticisi + Kalite Direktörü (Pazartesi 08:00).</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Denetçi kendi birimini denetleyemez</b> (atama engeli).</div></div>
+          <div class="kural"><span class="ck on">✓</span><div><b>Denetim raporu</b> denetimden sonra en geç 5 iş günü içinde birime gönderilir.</div></div>
+        </div>
+        <div class="grp"><div class="gb">Onay yetkileri</div>
+          <div class="dg"><table>
+            <thead><tr><th>İşlem</th><th style="width:220px">Onaylayan</th><th style="width:150px">Vekâlet</th></tr></thead>
+            <tbody>
+              <tr><td>Doküman yayını (son onay)</td><td>Kalite Direktörü</td><td>Hem. F. Uçar</td></tr>
+              <tr><td>Plan (PL) yayını</td><td>Kalite Dir. → Başhekim</td><td>Başhekim Yrd.</td></tr>
+              <tr><td>DÖF kapanışı</td><td>Kalite Direktörü</td><td>Hem. F. Uçar</td></tr>
+              <tr><td>DÖF termin uzatma</td><td>Kalite Direktörü</td><td>—</td></tr>
+              <tr><td>Yıllık iç denetim programı</td><td>Kalite Dir. → Başhekim</td><td>—</td></tr>
+              <tr><td>Kalite hedefleri</td><td>YGG kararı (Başhekim)</td><td>—</td></tr>
+              <tr><td>Tedarikçi onaylı listeden çıkarma</td><td>Satın Alma Md. + Kalite Dir.</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">Vekâletler genel Onay › Vekâletler ekranından da yönetilir; burada yalnız kalite işlemleri için varsayılan vekil.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Kalite Yönetim Birimi</span><span>Merkez</span><span>12.10.2026</span><span>Ayar değişiklikleri işlem loguna yazılır</span></div>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Denetim Kartı — DEN-2026-016 — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .sec{display:inline-flex;gap:3px}
+  .sec span{border:1px solid var(--line);border-radius:3px;padding:1px 7px;font-size:10.5px;background:#fff;color:var(--muted)}
+  .sec span.u.on{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb;font-weight:bold}
+  .sec span.ud.on{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf;font-weight:bold}
+  .sec span.na.on{background:#eceff2;color:#4d5d6e;font-weight:bold}
+  .imzalar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 12px}
+  .imzalar .i{border:1px dashed var(--line);border-radius:4px;padding:10px;text-align:center;font-size:11px;min-height:70px}
+  .imzalar .i.ok{border-style:solid;border-color:#bfe3cb;background:#f3faf5}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🔎 Denetim Kartı — DEN-2026-016 · Ameliyathane</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Kalite Yönetim Birimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn ok">✅ Denetimi Bitir</div>
+    <div class="btn">📄 Rapor Oluştur</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_ic_denetim.html">📅 Denetim Programı</div>
+    <div class="btn" data-git="kalite_dof.html">🛠️ DÖF'ler</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Denetim Raporu</div>
+  </div>
+
+  <div class="hdr k4">
+    <div class="fld"><label>Denetim No</label><div class="inp ro big">DEN-2026-016</div></div>
+    <div class="fld"><label class="req">Denetlenen birim</label><div class="inp combo">Ameliyathane</div></div>
+    <div class="fld"><label class="req">Tür</label><div class="inp combo">Birim denetimi (planlı)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz sari">Sürüyor</span> · soru 31 / 42</div></div>
+    <div class="fld"><label class="req">Tarih / saat</label><div class="inp">12.10.2026 · 09:00 – 13:00</div></div>
+    <div class="fld"><label class="req">Baş denetçi</label><div class="inp combo">Hem. Derya Koç</div></div>
+    <div class="fld"><label>Ekip</label><div class="inp">Dr. Murat Şahin <span class="rz sari">bağımsızlık uyarısı</span></div></div>
+    <div class="fld"><label>Birim temsilcisi</label><div class="inp combo">Ameliyathane Sor. Hem. Nur Çelik</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme" data-s="plan">Plan</div>
+    <div class="sekme on" data-s="soru">Soru Listesi<span class="sy">31/42</span></div>
+    <div class="sekme" data-s="bulgu">Bulgular<span class="sy">3</span></div>
+    <div class="sekme" data-s="rapor">Rapor &amp; İmza</div>
+    <div class="sekme" data-s="onceki">Önceki Denetim</div>
+  </div>
+
+  <!-- ================================================================ PLAN ===== -->
+  <div class="pnl" data-s="plan" hidden>
+    <div class="grp">
+      <div class="gb">Kapsam ve amaç</div>
+      <div class="ic"><div class="inp uzun">Ameliyathane süreçleri: güvenli cerrahi kontrol listesi, cerrahi alan işaretleme,
+        sayım (gazlı bez / alet), steril malzeme izlenebilirliği, ameliyat sonrası transfer. Mart'taki DEN-2026-005
+        bulgularının (2 minör) kapanışının yerinde doğrulanması.</div></div>
+    </div>
+    <div class="grp">
+      <div class="gb">Kriterler <span class="sp">soru listesi bu maddelerden üretildi</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:200px">Standart</th><th style="width:140px">Madde / boyut</th><th>Konu</th><th style="width:90px" class="sag">Soru</th></tr></thead>
+          <tbody>
+            <tr class="tik"><td>SKS Hastane Seti</td><td>Ameliyathane</td><td>Güvenli cerrahi, sayım, işaretleme</td><td class="sag">18</td></tr>
+            <tr class="tik"><td>SKS Hastane Seti</td><td>Enfeksiyonların Önlenmesi</td><td>Steril alan, el hijyeni, cerrahi profilaksi</td><td class="sag">9</td></tr>
+            <tr class="tik"><td>ISO 9001:2015</td><td>md. 8.5.2</td><td>Tanımlama ve izlenebilirlik (steril set)</td><td class="sag">5</td></tr>
+            <tr class="tik"><td>ISO 9001:2015</td><td>md. 7.5</td><td>Dokümante bilgi (talimat sürümleri)</td><td class="sag">6</td></tr>
+            <tr class="tik"><td>ISO 9001:2015</td><td>md. 7.2</td><td>Yetkinlik (oryantasyon kayıtları)</td><td class="sag">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Gündem</div>
+      <div class="ic" style="line-height:1.8">09:00 Açılış toplantısı · 09:15 Salon 1-2 yerinde gözlem · 10:30 Kayıt incelemesi (20 ameliyat, rastgele)
+        · 12:00 Personel görüşmeleri · 12:40 Kapanış toplantısı <span class="sonuk">— denetim bildirimi 05.10.2026'da birime gönderildi</span></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= SORU LİSTESİ ===== -->
+  <div class="pnl" data-s="soru">
+    <div class="arama">
+      <div class="kutu">🔍 Soru, madde…</div>
+      <span class="chip on">Tümü <b>42</b></span>
+      <span class="chip">Cevaplanmadı <b>11</b></span>
+      <span class="chip">Uygun değil <b>3</b></span>
+      <span class="chip">Kanıtsız <b>2</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:40px" class="orta">#</th><th style="width:130px">Madde</th><th>Soru</th>
+          <th style="width:190px" class="orta">Değerlendirme</th><th style="width:260px">Kanıt / not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="5">SKS Ameliyathane — Güvenli cerrahi</td></tr>
+          <tr class="tik"><td class="orta">1</td><td><code>SKS.AM.04</code></td><td>Güvenli cerrahi kontrol listesi üç aşamada (giriş / kesi / çıkış) doldurulmuş mu?</td>
+            <td class="orta"><span class="sec"><span class="u on">Uygun</span><span class="ud">Değil</span><span class="na">NA</span></span></td>
+            <td>20 ameliyattan 20'si tam · KY.FR.034 örnekleri</td></tr>
+          <tr class="tik sel"><td class="orta">2</td><td><code>SKS.AM.05</code></td><td>Cerrahi alan işaretlemesi hasta uyanıkken ve ameliyat eden hekimce yapılıyor mu?</td>
+            <td class="orta"><span class="sec"><span class="u">Uygun</span><span class="ud on">Değil</span><span class="na">NA</span></span></td>
+            <td>2 / 20 ortopedi vakasında işaretleme yok · <span class="rz kir">bulgu B-1</span></td></tr>
+          <tr class="tik"><td class="orta">3</td><td><code>SKS.AM.07</code></td><td>Gazlı bez / alet sayımı kayıt altında ve iki kişi imzalı mı?</td>
+            <td class="orta"><span class="sec"><span class="u on">Uygun</span><span class="ud">Değil</span><span class="na">NA</span></span></td>
+            <td>Sayım formu tam · 📎 3 fotoğraf</td></tr>
+          <tr class="tik"><td class="orta">4</td><td><code>SKS.AM.09</code></td><td>Lokal anestezi uygulanan hastalarda izlem formu var mı?</td>
+            <td class="orta"><span class="sec"><span class="u">Uygun</span><span class="ud">Değil</span><span class="na on">NA</span></span></td>
+            <td class="sonuk">Örneklemde lokal anestezi vakası yok</td></tr>
+          <tr class="grup"><td colspan="5">ISO 9001 md. 8.5.2 — İzlenebilirlik</td></tr>
+          <tr class="tik"><td class="orta">22</td><td><code>ISO 8.5.2</code></td><td>Kullanılan steril set barkodu hasta kaydına okutulmuş mu?</td>
+            <td class="orta"><span class="sec"><span class="u">Uygun</span><span class="ud on">Değil</span><span class="na">NA</span></span></td>
+            <td>Salon 2'de 3 vaka elle yazılmış, okutulmamış · <span class="rz kir">bulgu B-2</span></td></tr>
+          <tr class="grup"><td colspan="5">ISO 9001 md. 7.5 — Dokümante bilgi</td></tr>
+          <tr class="tik"><td class="orta">29</td><td><code>ISO 7.5.3</code></td><td>Kullanımdaki talimatlar yürürlükteki sürüm mü? (KY.TL.012 vb.)</td>
+            <td class="orta"><span class="sec"><span class="u">Uygun</span><span class="ud on">Değil</span><span class="na">NA</span></span></td>
+            <td>Cerrahi el yıkama talimatı Rev.02 asılı, yürürlükte Rev.03 · <span class="rz sari">gözlem G-1</span></td></tr>
+          <tr class="tik"><td class="orta">30</td><td><code>ISO 7.5.3</code></td><td>Kontrolsüz kopya (fotokopi, el yazısı) var mı?</td>
+            <td class="orta"><span class="sec"><span class="u on">Uygun</span><span class="ud">Değil</span><span class="na">NA</span></span></td>
+            <td class="sonuk">Bulunmadı</td></tr>
+          <tr class="tik"><td class="orta">31</td><td><code>ISO 7.2</code></td><td>Son 6 ayda başlayan personelin oryantasyon kaydı var mı?</td>
+            <td class="orta"><span class="sec"><span class="u on">Uygun</span><span class="ud">Değil</span><span class="na">NA</span></span></td>
+            <td>4 / 4 personel · <span data-git="kalite_egitim.html"><b>eğitim kayıtları</b></span></td></tr>
+          <tr class="tik"><td class="orta">32</td><td><code>ISO 7.2</code></td><td>Steril alan sorumlusunun sertifikası geçerli mi?</td>
+            <td class="orta"><span class="sec"><span class="u">Uygun</span><span class="ud">Değil</span><span class="na">NA</span></span></td>
+            <td class="sonuk">— cevaplanmadı</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>31 / 42 cevaplandı · 26 uygun · 3 uygun değil · 2 NA</span>
+      <span class="sp"><b>"Uygun değil" seçilen soru kanıt ister</b> ve bulgu taslağı açar.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================= BULGULAR ===== -->
+  <div class="pnl" data-s="bulgu" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:60px">No</th><th style="width:110px" class="orta">Sınıf</th><th>Bulgu</th><th style="width:140px">Kriter</th>
+          <th style="width:130px">Soru</th><th style="width:160px" class="orta">DÖF</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>B-1</b></td><td class="orta"><span class="rz sari">Minör</span></td>
+            <td>2 / 20 ortopedi vakasında cerrahi alan işaretlemesi yapılmamış (yanlış taraf riski)</td>
+            <td>SKS.AM.05</td><td>#2</td><td class="orta"><span class="btn mini primary" data-git="kalite_dof_karti.html">➕ DÖF Aç</span></td></tr>
+          <tr class="tik"><td><b>B-2</b></td><td class="orta"><span class="rz sari">Minör</span></td>
+            <td>Salon 2'de steril set barkodu hasta kaydına okutulmamış (3 vaka) — izlenebilirlik kopuk</td>
+            <td>ISO 9001 md. 8.5.2</td><td>#22</td><td class="orta"><span class="btn mini primary" data-git="kalite_dof_karti.html">➕ DÖF Aç</span></td></tr>
+          <tr class="tik"><td><b>G-1</b></td><td class="orta"><span class="rz">Gözlem</span></td>
+            <td>Cerrahi el yıkama talimatının eski sürümü asılı (Rev.02, yürürlükte Rev.03)</td>
+            <td>ISO 9001 md. 7.5.3</td><td>#29</td><td class="orta"><span class="btn mini">Önleyici DÖF (isteğe bağlı)</span></td></tr>
+          <tr class="tik"><td><b>+</b></td><td class="orta" colspan="5" style="text-align:left"><span class="sonuk">Olumlu bulgu: sayım ve güvenli cerrahi kontrol listesi uyumu %100 — DEN-2026-005 bulgusu kapanmış ve etkin.</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><span class="rz kir">Majör</span> sistemin işlemediği / hasta zararı riski yüksek · <span class="rz sari">Minör</span> tekil sapma · <span class="rz">Gözlem</span> iyileştirme fırsatı</span>
+      <span class="sp">"DÖF Aç" bulguyu kaynak bağlantısıyla DÖF kartına taşır; DÖF no buraya döner.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================== RAPOR & İMZA ===== -->
+  <div class="pnl" data-s="rapor" hidden>
+    <div class="grp">
+      <div class="gb">Denetim sonucu özeti</div>
+      <div class="ic"><div class="inp uzun">Ameliyathane'de güvenli cerrahi ve sayım uygulamaları olgun; Mart denetimindeki bulgular etkin
+        biçimde kapanmış. İki minör uygunsuzluk (işaretleme, set izlenebilirliği) ve bir gözlem tespit edildi.
+        Birimin genel uyum oranı <b>%90</b> (26 / 29 uygulanabilir soru).</div></div>
+    </div>
+    <div class="ozet">
+      <div class="kart ok"><div class="b">Uyum oranı</div><div class="d">%90 <small>önceki %84</small></div></div>
+      <div class="kart"><div class="b">Bulgu</div><div class="d">3 <small>0 majör · 2 minör · 1 gözlem</small></div></div>
+      <div class="kart"><div class="b">Rapor yayım termini</div><div class="d" style="font-size:13px">26.10.2026 <small>10 iş günü</small></div></div>
+      <div class="kart"><div class="b">Dağıtım</div><div class="d" style="font-size:12px">Birim · Başhekim · Hasta Güvenliği Komitesi</div></div>
+    </div>
+    <div class="imzalar">
+      <div class="i"><b>Baş denetçi</b><br>Hem. Derya Koç<br><span class="sonuk">imza bekliyor</span></div>
+      <div class="i"><b>Denetçi</b><br>Dr. Murat Şahin<br><span class="sonuk">imza bekliyor</span></div>
+      <div class="i"><b>Birim temsilcisi</b><br>Sor. Hem. Nur Çelik<br><span class="sonuk">kapanış toplantısında</span></div>
+    </div>
+    <div class="statusbar"><span>Rapor imzalanınca kilitlenir; Kalite Direktörü (Uzm. Hem. Aylin Yılmaz) onayıyla yayımlanır.</span></div>
+  </div>
+
+  <!-- ========================================================= ÖNCEKİ DENETİM ===== -->
+  <div class="pnl" data-s="onceki" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:200px">Ölçüt</th><th style="width:160px" class="orta">DEN-2025-018 (Eki 2025)</th>
+          <th style="width:160px" class="orta">DEN-2026-005 (Nis 2026)</th><th style="width:160px" class="orta">DEN-2026-016 (bu)</th><th>Eğilim</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td>Uyum oranı</td><td class="orta">%79</td><td class="orta">%84</td><td class="orta"><b>%90</b></td>
+            <td><span class="bar" style="display:inline-block;width:160px"><i style="width:90%"></i></span> ↑ iyileşiyor</td></tr>
+          <tr class="tik"><td>Majör bulgu</td><td class="orta">1</td><td class="orta">0</td><td class="orta">0</td><td><span class="rz ok">kalıcı</span></td></tr>
+          <tr class="tik"><td>Minör bulgu</td><td class="orta">4</td><td class="orta">2</td><td class="orta">2</td><td><span class="rz sari">sabit</span></td></tr>
+          <tr class="tik"><td>Cerrahi alan işaretleme</td><td class="orta"><span class="rz kir">Uygun değil</span></td><td class="orta"><span class="rz ok">Uygun</span></td>
+            <td class="orta"><span class="rz kir">Uygun değil</span></td><td><span class="rz kir">tekrarladı</span> — DÖF-2025-061 etkinliği sorgulanmalı</td></tr>
+          <tr class="tik"><td>Sayım kaydı</td><td class="orta"><span class="rz kir">Uygun değil</span></td><td class="orta"><span class="rz ok">Uygun</span></td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td><span class="rz ok">DÖF etkin</span></td></tr>
+          <tr class="tik"><td>Set izlenebilirliği</td><td class="orta"><span class="rz ok">Uygun</span></td><td class="orta"><span class="rz ok">Uygun</span></td>
+            <td class="orta"><span class="rz kir">Uygun değil</span></td><td><span class="rz sari">yeni</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span><b>Tekrarlayan bulgu otomatik işaretlenir:</b> kapatılmış bir DÖF'ün konusu yeniden çıkarsa önceki DÖF'ün etkinliği sorgulanır.</span></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Denetim kartı plandan rapora tek kayıttır:</b> kriterler (ISO maddesi / SKS boyutu) soru listesini üretir;
+  her soru Uygun / Uygun değil / NA ve kanıtla cevaplanır. "Uygun değil" bulgu taslağı açar; bulgu sınıflanır ve
+  majör/minör bulgu <b>DÖF Aç</b> ile <span data-git="kalite_dof_karti.html"><b>DÖF kartına</b></span> taşınır. Önceki denetim
+  sekmesi aynı birimin geçmişini yan yana koyar — tekrarlayan bulgu, kapanmış DÖF'ün etkin olmadığını gösterir.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

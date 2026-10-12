@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk ve Fırsat Yönetimi — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+.skor{display:inline-block;min-width:30px;text-align:center;border-radius:3px;font-weight:bold;padding:1px 6px;font-size:11px}
+.skor.d{background:#e2f3e8;color:#2e7d46} .skor.o{background:#fdf6e3;color:#8a6218}
+.skor.y{background:#fbe0c8;color:#9a4a10} .skor.c{background:#f6c9c3;color:#b3261e}
+.matris{display:grid;grid-template-columns:90px repeat(5,1fr);gap:3px;padding:12px;max-width:720px}
+.matris .e{font-size:10.5px;color:var(--muted);display:flex;align-items:center;justify-content:center;text-align:center}
+.matris .h{height:70px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#24415f;gap:2px}
+.matris .h b{font-size:17px}
+.matris .h.d{background:#d9f0e0} .matris .h.o{background:#fbefc9} .matris .h.y{background:#f8d2ae} .matris .h.c{background:#f2b3ab}
+.matris .h span{font-family:Consolas,monospace;font-size:9.5px}
+.eksen{font-size:11px;color:#3a5573;font-weight:bold;padding:0 12px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🎯 Risk ve Fırsat Yönetimi</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · ISO 9001:2015 md. 6.1</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Risk</div>
+    <div class="btn">💡 Yeni Fırsat</div>
+    <div class="btn">🧪 Yeni FMEA</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_dof_karti.html">🛠️ Aksiyondan DÖF</div>
+    <div class="btn" data-git="kalite_olay_bildirim.html">⚠️ Olay Bildirimleri</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_panosu.html">📊 Kalite Panosu</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Risk Değerlendirme Raporu (KY.LS.005)</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Kayıtlı risk</div><div class="d">86 <small>14 süreç</small></div></div>
+    <div class="kart kir"><div class="b">Çok yüksek (≥ 20)</div><div class="d">3</div></div>
+    <div class="kart sari"><div class="b">Yüksek (12–19)</div><div class="d">11</div></div>
+    <div class="kart sari"><div class="b">Yeniden değerlendirme gecikmiş</div><div class="d">7</div></div>
+    <div class="kart"><div class="b">Açık aksiyon</div><div class="d">24 <small>5 gecikmiş</small></div></div>
+    <div class="kart ok"><div class="b">Kalıntı riski düşen</div><div class="d">%62 <small>son 12 ay</small></div></div>
+    <div class="kart"><div class="b">Fırsat</div><div class="d">9 <small>4 uygulamada</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kayit">Risk Kaydı<span class="sy">86</span></div>
+    <div class="sekme" data-s="matris">Risk Matrisi (5×5)</div>
+    <div class="sekme" data-s="fmea">FMEA<span class="sy">4</span></div>
+    <div class="sekme" data-s="aksiyon">Aksiyon &amp; Yeniden Değerlendirme<span class="sy">24</span></div>
+    <div class="sekme" data-s="firsat">Fırsatlar<span class="sy">9</span></div>
+  </div>
+
+  <!-- ===================================================== RİSK KAYDI ===== -->
+  <div class="pnl" data-s="kayit">
+    <div class="arama">
+      <div class="kutu">🔍 Risk no, süreç, birim, tehlike…</div>
+      <span class="chip on">Tümü</span>
+      <span class="chip">Çok yüksek <b>3</b></span>
+      <span class="chip">Yüksek <b>11</b></span>
+      <span class="chip">Hasta güvenliği</span>
+      <span class="chip">Çalışan güvenliği</span>
+      <span class="chip">Süreç / operasyon</span>
+      <span class="chip">Bilgi güvenliği</span>
+      <span class="chip">Gecikmiş gözden geçirme <b>7</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Risk No</th><th>Süreç / Birim</th><th>Tehlike / Risk</th><th>Kategori</th>
+          <th class="orta">O</th><th class="orta">Ş</th><th class="orta">Skor</th><th>Mevcut kontrol</th>
+          <th class="orta">Kalıntı</th><th>Sahibi</th><th>Gözden geçirme</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel">
+            <td class="nw"><b>RSK-014</b></td><td>İlaç Yönetimi / Yoğun Bakım</td>
+            <td>Yüksek riskli ilaçların (KCl, insülin) yanlış dozda uygulanması</td><td>Hasta güvenliği</td>
+            <td class="orta">4</td><td class="orta">5</td><td class="orta"><span class="skor c">20</span></td>
+            <td>Çift kontrol talimatı KY.TL.012</td><td class="orta"><span class="skor y">12</span></td>
+            <td>Ecz. N. G.</td><td class="nw"><span class="rz kir">01.09.2026 · gecikti</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-003</b></td><td>Cerrahi Süreç / Ameliyathane</td>
+            <td>Yanlış taraf / yanlış hasta cerrahisi</td><td>Hasta güvenliği</td>
+            <td class="orta">2</td><td class="orta">5</td><td class="orta"><span class="skor o">10</span></td>
+            <td>Güvenli Cerrahi Kontrol Listesi KY.FR.034</td><td class="orta"><span class="skor d">5</span></td>
+            <td>Op. Dr. C. Ş.</td><td class="nw">15.12.2026</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-021</b></td><td>Hasta Bakımı / Servisler</td>
+            <td>Yatan hastada düşme</td><td>Hasta güvenliği</td>
+            <td class="orta">4</td><td class="orta">4</td><td class="orta"><span class="skor y">16</span></td>
+            <td>Itaki ölçeği, düşme önleme prosedürü KY.PR.009</td><td class="orta"><span class="skor o">8</span></td>
+            <td>Sor. Hem. G. B.</td><td class="nw">30.11.2026</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-032</b></td><td>Acil Servis</td>
+            <td>Sağlık çalışanına şiddet</td><td>Çalışan güvenliği</td>
+            <td class="orta">5</td><td class="orta">4</td><td class="orta"><span class="skor c">20</span></td>
+            <td>Beyaz Kod, güvenlik görevlisi</td><td class="orta"><span class="skor y">15</span></td>
+            <td>Uzm. Dr. T. K.</td><td class="nw"><span class="rz sari">20.10.2026</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-040</b></td><td>Sterilizasyon Ünitesi</td>
+            <td>Steril olmayan setin kullanıma çıkması</td><td>Hasta güvenliği</td>
+            <td class="orta">2</td><td class="orta">5</td><td class="orta"><span class="skor o">10</span></td>
+            <td>BD testi + biyolojik indikatör, serbest bırakma onayı</td><td class="orta"><span class="skor d">4</span></td>
+            <td>Uzm. Hem. A. Y.</td><td class="nw">31.12.2026</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-047</b></td><td>Bilgi Yönetimi / HBYS</td>
+            <td>HBYS kesintisinde hasta kaydı yapılamaması</td><td>Süreç / operasyon</td>
+            <td class="orta">3</td><td class="orta">4</td><td class="orta"><span class="skor y">12</span></td>
+            <td>Kesinti prosedürü, kâğıt form seti</td><td class="orta"><span class="skor o">8</span></td>
+            <td>Bil. İşl. O. D.</td><td class="nw">15.01.2027</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-052</b></td><td>Bilgi Güvenliği</td>
+            <td>Kişisel sağlık verisinin yetkisiz paylaşımı (KVKK)</td><td>Bilgi güvenliği</td>
+            <td class="orta">3</td><td class="orta">5</td><td class="orta"><span class="skor y">15</span></td>
+            <td>Rol bazlı yetki, erişim logu</td><td class="orta"><span class="skor o">9</span></td>
+            <td>Bil. İşl. O. D.</td><td class="nw"><span class="rz kir">15.08.2026 · gecikti</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-058</b></td><td>Satın Alma</td>
+            <td>Kritik sarf malzemenin (kateter, set) tedarik kesintisi</td><td>Süreç / operasyon</td>
+            <td class="orta">3</td><td class="orta">3</td><td class="orta"><span class="skor o">9</span></td>
+            <td>Min. stok, alternatif tedarikçi (KY.LS.005)</td><td class="orta"><span class="skor d">6</span></td>
+            <td>Sat. Al. Ş. E.</td><td class="nw">28.02.2027</td>
+          </tr>
+          <tr class="tik">
+            <td class="nw"><b>RSK-063</b></td><td>Tesis / Teknik</td>
+            <td>Jeneratör devreye girmemesi (ameliyathane, YB)</td><td>Tesis güvenliği</td>
+            <td class="orta">2</td><td class="orta">5</td><td class="orta"><span class="skor o">10</span></td>
+            <td>Aylık yük testi, UPS</td><td class="orta"><span class="skor d">5</span></td>
+            <td>Tekn. H. Y.</td><td class="nw">31.10.2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Skor = Olasılık (1–5) × Şiddet (1–5) · 1–6 düşük · 8–10 orta · 12–16 yüksek · 20–25 çok yüksek</span>
+      <span class="sp">Kalıntı = mevcut kontroller sonrası skor</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== MATRİS ===== -->
+  <div class="pnl" data-s="matris">
+    <div class="arama">
+      <span class="chip on">Başlangıç skoru</span><span class="chip">Kalıntı skoru</span>
+      <span class="sp"></span><span class="sonuk">Hücre: risk sayısı · tıklayınca liste süzülür</span>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div>
+        <div class="eksen" style="padding-top:12px">OLASILIK ↓ · ŞİDDET →</div>
+        <div class="matris">
+          <div class="e"></div><div class="e">1 Önemsiz</div><div class="e">2 Hafif</div><div class="e">3 Orta</div><div class="e">4 Ciddi</div><div class="e">5 Felaket</div>
+          <div class="e">5 Çok sık</div>
+          <div class="h o"><b>0</b>5</div><div class="h o"><b>1</b>10</div><div class="h y"><b>2</b>15</div><div class="h c"><b>2</b>20<span>RSK-032…</span></div><div class="h c"><b>0</b>25</div>
+          <div class="e">4 Sık</div>
+          <div class="h d"><b>2</b>4</div><div class="h o"><b>3</b>8</div><div class="h y"><b>4</b>12</div><div class="h y"><b>3</b>16<span>RSK-021…</span></div><div class="h c"><b>1</b>20<span>RSK-014</span></div>
+          <div class="e">3 Ara sıra</div>
+          <div class="h d"><b>4</b>3</div><div class="h d"><b>6</b>6</div><div class="h o"><b>9</b>9</div><div class="h y"><b>5</b>12</div><div class="h y"><b>2</b>15<span>RSK-052…</span></div>
+          <div class="e">2 Nadir</div>
+          <div class="h d"><b>3</b>2</div><div class="h d"><b>7</b>4</div><div class="h d"><b>8</b>6</div><div class="h o"><b>6</b>8</div><div class="h o"><b>5</b>10<span>RSK-003…</span></div>
+          <div class="e">1 Çok nadir</div>
+          <div class="h d"><b>2</b>1</div><div class="h d"><b>3</b>2</div><div class="h d"><b>2</b>3</div><div class="h d"><b>1</b>4</div><div class="h o"><b>3</b>5</div>
+        </div>
+      </div>
+      <div class="grp" style="flex:1;margin-top:28px">
+        <div class="gb">Kabul edilebilirlik kuralı <span class="sp">kalite_ayarlar.html</span></div>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Skor</th><th>Düzey</th><th>Ne yapılır</th><th>Gözden geçirme</th></tr></thead>
+            <tbody>
+              <tr><td><span class="skor d">1–6</span></td><td>Düşük</td><td>Kabul edilebilir, izlenir</td><td>Yılda 1</td></tr>
+              <tr><td><span class="skor o">8–10</span></td><td>Orta</td><td>Kontrol önlemi planlanır</td><td>6 ayda 1</td></tr>
+              <tr><td><span class="skor y">12–16</span></td><td>Yüksek</td><td>Aksiyon planı zorunlu, sahibi atanır</td><td>3 ayda 1</td></tr>
+              <tr><td><span class="skor c">20–25</span></td><td>Çok yüksek</td><td>Derhal aksiyon, DÖF + YGG gündemi</td><td>Aylık</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== FMEA ===== -->
+  <div class="pnl" data-s="fmea">
+    <div class="arama">
+      <span class="chip on">FMEA-2026-03 · Kan transfüzyon süreci</span>
+      <span class="chip">FMEA-2026-02 · Yüksek riskli ilaç uygulama</span>
+      <span class="chip">FMEA-2026-01 · Numune alma–etiketleme</span>
+      <span class="chip">FMEA-2025-04 · Hasta transferi</span>
+      <span class="sp"></span><span class="sonuk">Ekip: Hasta Güvenliği Komitesi + Kan Merkezi</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Süreç adımı</th><th>Hata türü</th><th>Olası etki</th><th>Olası neden</th>
+          <th class="orta">Ş</th><th class="orta">O</th><th class="orta">S (saptanabilirlik)</th><th class="orta">RPN</th>
+          <th>Önerilen önlem</th><th>Sorumlu / termin</th><th class="orta">Yeni RPN</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>İstem</td><td>Yanlış hastaya istem</td><td>Uyumsuz transfüzyon</td><td>Aynı isimli hasta, barkodsuz istem</td>
+            <td class="orta">10</td><td class="orta">3</td><td class="orta">5</td><td class="orta"><span class="skor c">150</span></td>
+            <td>İstemde iki kimlik belirteci zorunlu (HBYS)</td><td>Bil. İşl. O. D. · 30.10.2026</td><td class="orta"><span class="skor o">40</span></td></tr>
+          <tr class="tik"><td>Numune alma</td><td>Tüp yanlış etiketleme</td><td>Kan grubu hatası</td><td>Etiketin hasta başında basılmaması</td>
+            <td class="orta">10</td><td class="orta">4</td><td class="orta">4</td><td class="orta"><span class="skor c">160</span></td>
+            <td>Yatak başı barkod basımı + bileklik okutma</td><td>Sor. Hem. G. B. · 15.11.2026</td><td class="orta"><span class="skor o">40</span></td></tr>
+          <tr class="tik"><td>Cross-match</td><td>Sonuç geç bildirimi</td><td>Ameliyat gecikmesi</td><td>Telefonla bildirim</td>
+            <td class="orta">6</td><td class="orta">4</td><td class="orta">3</td><td class="orta"><span class="skor y">72</span></td>
+            <td>HBYS sonuç bildirimi + kritik değer akışı</td><td>Lab. Sor. E. K. · 30.11.2026</td><td class="orta"><span class="skor d">24</span></td></tr>
+          <tr class="tik"><td>Uygulama</td><td>Yatak başı kimlik doğrulama yapılmaması</td><td>Uyumsuz transfüzyon</td><td>İş yükü, tek hemşire</td>
+            <td class="orta">10</td><td class="orta">3</td><td class="orta">6</td><td class="orta"><span class="skor c">180</span></td>
+            <td>Çift imza + ürün barkodu–bileklik eşleşmesi</td><td>Kalite Yön. Bir. · 31.10.2026</td><td class="orta"><span class="skor o">30</span></td></tr>
+          <tr class="tik"><td>İzlem</td><td>İlk 15 dk vital takip yok</td><td>Reaksiyonun geç fark edilmesi</td><td>Form eksik</td>
+            <td class="orta">8</td><td class="orta">4</td><td class="orta">4</td><td class="orta"><span class="skor y">128</span></td>
+            <td>Transfüzyon izlem formu KY.FR.041 zorunlu alan</td><td>Sor. Hem. G. B. · 15.11.2026</td><td class="orta"><span class="skor d">32</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>RPN = Şiddet × Olasılık × Saptanabilirlik (1–10) · ≥ 100 öncelikli önlem</span><span class="sp">Tetikleyen: OLY-2026-0371</span></div>
+  </div>
+
+  <!-- ============================================== AKSİYON ===== -->
+  <div class="pnl" data-s="aksiyon">
+    <div class="arama">
+      <span class="chip on">Açık <b>24</b></span><span class="chip">Gecikmiş <b>5</b></span><span class="chip">Yeniden değerlendirme bekleyen <b>7</b></span><span class="chip">Tamamlanan</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Risk</th><th>Aksiyon</th><th>Sorumlu</th><th>Termin</th><th>İlerleme</th><th>Durum</th><th class="orta">Önce → Sonra</th><th>Bağlantı</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>RSK-014</b></td><td>İnfüzyon pompalarına ilaç kütüphanesi yüklenmesi</td><td>Biyomed. E. K.</td><td class="nw"><span class="rz kir">30.09.2026</span></td>
+            <td><div class="bar k"><i style="width:60%"></i></div></td><td><span class="rz kir">Gecikti</span></td><td class="orta"><span class="skor c">20</span> → <span class="skor y">12</span></td><td><a>DÖF-2026-058</a></td></tr>
+          <tr class="tik"><td><b>RSK-032</b></td><td>Acil triyaj alanına panik butonu + kamera</td><td>Tekn. H. Y.</td><td class="nw">31.10.2026</td>
+            <td><div class="bar s"><i style="width:40%"></i></div></td><td><span class="rz sari">Sürüyor</span></td><td class="orta"><span class="skor c">20</span> → <span class="skor y">15</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>RSK-021</b></td><td>Gece lambası ve zil erişim kontrolü (gece vizit listesi)</td><td>Sor. Hem. G. B.</td><td class="nw">15.11.2026</td>
+            <td><div class="bar m"><i style="width:20%"></i></div></td><td><span class="rz sari">Sürüyor</span></td><td class="orta"><span class="skor y">16</span> → <span class="skor o">8</span></td><td><a>OLY-2026-0412</a></td></tr>
+          <tr class="tik"><td><b>RSK-052</b></td><td>Yıllık erişim yetki gözden geçirmesi</td><td>Bil. İşl. O. D.</td><td class="nw"><span class="rz kir">15.08.2026</span></td>
+            <td><div class="bar k"><i style="width:10%"></i></div></td><td><span class="rz kir">Gecikti</span></td><td class="orta"><span class="skor y">15</span> → <span class="skor o">9</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>RSK-040</b></td><td>Serbest bırakma onayının sistemde zorunlu hale getirilmesi</td><td>Uzm. Hem. A. Y.</td><td class="nw">01.09.2026</td>
+            <td><div class="bar"><i style="width:100%"></i></div></td><td><span class="rz ok">Tamam · etkinlik bekliyor</span></td><td class="orta"><span class="skor o">10</span> → <span class="skor d">4</span></td><td><a>DÖF-2026-066</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== FIRSAT ===== -->
+  <div class="pnl" data-s="firsat">
+    <div class="dg">
+      <table>
+        <thead><tr><th>No</th><th>Fırsat</th><th>Kaynak</th><th>Beklenen fayda</th><th>Sahibi</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>FRS-004</b></td><td>e-Nabız randevu entegrasyonu ile no-show azaltma</td><td>YGG 2026/1</td><td>No-show %18 → %12</td><td>Hasta Hizm. Md.</td><td><span class="rz sari">Uygulamada</span></td></tr>
+          <tr class="tik"><td><b>FRS-005</b></td><td>Sterilizasyon yükleme planlaması ile otoklav doluluğu artışı</td><td>İç denetim DEN-2026-011</td><td>Döngü sayısı −%15, enerji tasarrufu</td><td>Uzm. Hem. A. Y.</td><td><span class="rz sari">Uygulamada</span></td></tr>
+          <tr class="tik"><td><b>FRS-007</b></td><td>Taburculuk eğitimi videoları (QR)</td><td>Hasta görüş-öneri</td><td>Tekrar başvuru −, memnuniyet +</td><td>Eğitim Hem. D. S.</td><td><span class="rz mavi">Planlandı</span></td></tr>
+          <tr class="tik"><td><b>FRS-008</b></td><td>Tedarikçi konsinye stok modeli (ortopedi implant)</td><td>Tedarikçi değerlendirme</td><td>Stok maliyeti −%20</td><td>Sat. Al. Ş. E.</td><td><span class="rz pas">Değerlendirmede</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>ISO 9001:2015 · 6.1 Risk ve fırsatları belirleme faaliyetleri</span>
+    <span>SKS · Kurumsal Hizmetler — Risk Yönetimi</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Kaynaklar:</b> riskler süreç sahiplerinin yıllık değerlendirmesinden, olay bildirimlerinden (<code>kalite_olay_bildirim.html</code>), iç denetim bulgularından ve FMEA çalışmalarından gelir.
+  <ul>
+    <li>Çok yüksek (≥ 20) risk otomatik olarak bir sonraki <b>YGG</b> gündemine düşer (<code>kalite_ygg_toplanti.html</code>).</li>
+    <li>Aksiyon tamamlanınca risk yeniden puanlanır; kalıntı skor düşmediyse DÖF açılması önerilir.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

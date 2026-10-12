@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YGG ve Komite Toplantıları — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+.takvim{display:grid;grid-template-columns:150px repeat(12,1fr);font-size:11px}
+.takvim>div{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 4px;text-align:center;min-height:28px}
+.takvim .bs{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:#3a5573}
+.takvim .ad{text-align:left;background:#fbfcfe;font-weight:bold;color:#2c4a6b}
+.nk{display:inline-block;border-radius:3px;padding:1px 5px;font-size:10px}
+.nk.y{background:#e2f3e8;color:#2e7d46} .nk.p{background:#eef4fc;color:#2f6db3} .nk.g{background:#fbe9e7;color:#b3261e}
+.nk.b{background:#f1ecfa;color:#6a3fb5;font-weight:bold}
+.gundem{margin:0;padding:0 0 0 18px;font-size:11.5px;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🏛️ Yönetimin Gözden Geçirmesi ve Komite Toplantıları</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · Kalite Yönetim Birimi</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Toplantı</div>
+    <div class="btn">🏛️ YGG Planla</div>
+    <div class="btn">📥 YGG Girdi Raporu Oluştur</div>
+    <div class="sepv"></div>
+    <div class="btn">✉️ Davet Gönder</div>
+    <div class="btn">🖨️ Tutanak (KY.FR.012)</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="kalite_panosu.html">📊 Kalite Panosu</div>
+    <div class="sp"></div>
+    <div class="btn">📤 Excel</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">2026 toplantı</div><div class="d">38 <small>planlanan 44</small></div></div>
+    <div class="kart sari"><div class="b">Yaklaşan (30 gün)</div><div class="d">5 <small>YGG 2026/2 dahil</small></div></div>
+    <div class="kart"><div class="b">Açık karar</div><div class="d">27</div></div>
+    <div class="kart kir"><div class="b">Termini geçen karar</div><div class="d">6</div></div>
+    <div class="kart ok"><div class="b">Karar kapanma oranı</div><div class="d">%81</div></div>
+    <div class="kart kir"><div class="b">Yapılmayan toplantı</div><div class="d">2 <small>Tesis Güv. — Ağu, Eyl</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="takvim">Toplantı Takvimi</div>
+    <div class="sekme" data-s="kart">Toplantı Kartı</div>
+    <div class="sekme" data-s="karar">Karar Takibi<span class="sy">27</span></div>
+    <div class="sekme" data-s="ygg">YGG Girdileri</div>
+  </div>
+
+  <!-- ===================================================== TAKVİM ===== -->
+  <div class="pnl" data-s="takvim">
+    <div class="arama">
+      <span class="chip">2025</span><span class="chip on">2026</span>
+      <span class="sp"></span>
+      <span class="nk y">✓ yapıldı</span><span class="nk p">planlı</span><span class="nk g">✗ yapılmadı</span><span class="nk b">YGG</span>
+    </div>
+    <div class="takvim">
+      <div class="bs ad">Kurul / Komite</div>
+      <div class="bs">Oca</div><div class="bs">Şub</div><div class="bs">Mar</div><div class="bs">Nis</div><div class="bs">May</div><div class="bs">Haz</div>
+      <div class="bs">Tem</div><div class="bs">Ağu</div><div class="bs">Eyl</div><div class="bs">Eki</div><div class="bs">Kas</div><div class="bs">Ara</div>
+
+      <div class="ad">Yönetimin Gözden Geçirmesi</div>
+      <div></div><div></div><div></div><div></div><div></div><div><span class="nk b">✓ 2026/1</span></div>
+      <div></div><div></div><div></div><div></div><div><span class="nk b">06.11 · 2026/2</span></div><div></div>
+
+      <div class="ad">Hasta Güvenliği Komitesi</div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk p">22.10</span></div><div><span class="nk p">plan</span></div><div><span class="nk p">plan</span></div>
+
+      <div class="ad">Çalışan Güvenliği Komitesi</div>
+      <div></div><div><span class="nk y">✓</span></div><div></div><div></div><div><span class="nk y">✓</span></div><div></div>
+      <div></div><div><span class="nk y">✓</span></div><div></div><div></div><div><span class="nk p">13.11</span></div><div></div>
+
+      <div class="ad">Enfeksiyon Kontrol Komitesi</div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk p">17.10</span></div><div><span class="nk p">plan</span></div><div><span class="nk p">plan</span></div>
+
+      <div class="ad">Tesis Güvenliği Komitesi</div>
+      <div></div><div><span class="nk y">✓</span></div><div></div><div></div><div><span class="nk y">✓</span></div><div></div>
+      <div></div><div><span class="nk g">✗</span></div><div><span class="nk g">✗ ertelendi</span></div><div><span class="nk p">29.10</span></div><div></div><div></div>
+
+      <div class="ad">Kalite Yönetim Birimi (birim içi)</div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div>
+      <div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓</span></div><div><span class="nk y">✓ 08.10</span></div><div><span class="nk p">plan</span></div><div><span class="nk p">plan</span></div>
+    </div>
+    <div class="statusbar"><span>Periyot: YGG 6 ayda 1 · Hasta Güv. ve Enf. Kontrol aylık · Çalışan / Tesis Güv. 3 ayda 1 (SKS)</span><span class="sp">Toplantı yapılmazsa gerekçe zorunlu</span></div>
+  </div>
+
+  <!-- ===================================================== TOPLANTI KARTI ===== -->
+  <div class="pnl" data-s="kart">
+    <div class="hdr k4">
+      <div class="fld"><label>Toplantı</label><div class="inp ro big">HGK-2026-09</div></div>
+      <div class="fld"><label>Kurul / komite</label><div class="inp combo">Hasta Güvenliği Komitesi</div></div>
+      <div class="fld"><label>Tarih / saat</label><div class="inp">24.09.2026 14:00–15:30</div></div>
+      <div class="fld"><label>Yer</label><div class="inp">Toplantı Salonu B / çevrim içi</div></div>
+      <div class="fld"><label>Başkan</label><div class="inp">Başhekim Prof. Dr. M. Ö.</div></div>
+      <div class="fld"><label>Raportör</label><div class="inp">Uzm. Hem. Aylin Yılmaz</div></div>
+      <div class="fld"><label>Katılım</label><div class="inp"><span class="rz ok">9 / 11 · nisap var</span></div></div>
+      <div class="fld"><label>Durum</label><div class="inp"><span class="rz ok">Tutanak onaylandı</span></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <div class="grp">
+        <div class="gb">Gündem</div>
+        <div class="ic">
+          <ol class="gundem">
+            <li>Önceki toplantı kararlarının durumu (5 açık)</li>
+            <li>Ağustos–Eylül olay bildirimleri özeti — 86 bildirim, 2 ciddi</li>
+            <li>OLY-2026-0371 transfüzyon olayı kök neden analizi</li>
+            <li>FMEA-2026-03 kan transfüzyon süreci sonuçları</li>
+            <li>Düşme oranı ve Itaki uygulama denetimi</li>
+            <li>Dilekler</li>
+          </ol>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="gb">Katılımcılar</div>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Ad</th><th>Görev</th><th>Katılım</th></tr></thead>
+            <tbody>
+              <tr><td>Prof. Dr. M. Ö.</td><td>Başhekim — Başkan</td><td><span class="rz ok">Katıldı</span></td></tr>
+              <tr><td>Uzm. Hem. Aylin Yılmaz</td><td>Kalite Direktörü — Raportör</td><td><span class="rz ok">Katıldı</span></td></tr>
+              <tr><td>Hem. Hiz. Md. F. K.</td><td>Sağlık Bakım Hiz. Müdürü</td><td><span class="rz ok">Katıldı</span></td></tr>
+              <tr><td>Ecz. N. G.</td><td>Eczacı</td><td><span class="rz ok">Katıldı</span></td></tr>
+              <tr><td>Op. Dr. C. Ş.</td><td>Cerrahi branş temsilcisi</td><td><span class="rz ok">Katıldı</span></td></tr>
+              <tr><td>Uzm. Dr. R. A.</td><td>Yoğun bakım sorumlusu</td><td><span class="rz pas">Mazeretli</span></td></tr>
+              <tr><td>Lab. Sor. E. K.</td><td>Laboratuvar sorumlusu</td><td><span class="rz ok">Katıldı</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Kararlar <span class="sp">karar → sorumlu → termin; kapanış Karar Takibi sekmesinden</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th>No</th><th>Karar</th><th>Sorumlu</th><th>Termin</th><th>Bağlantı</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr class="tik"><td>K-1</td><td>Yatak başı transfüzyonda barkod–bileklik eşleşmesi zorunlu olacak</td><td>Bil. İşl. O. D.</td><td>31.10.2026</td><td><a>DÖF-2026-061</a></td><td><span class="rz sari">Sürüyor</span></td></tr>
+            <tr class="tik"><td>K-2</td><td>Tüm servislerde gece vizit kontrol listesine korkuluk/zil maddesi eklenecek</td><td>Hem. Hiz. Md. F. K.</td><td>15.10.2026</td><td><a>KY.FR.034</a></td><td><span class="rz ok">Tamam</span></td></tr>
+            <tr class="tik"><td>K-3</td><td>Yüksek riskli ilaç listesi güncellenip servislere asılacak</td><td>Ecz. N. G.</td><td>30.09.2026</td><td><a>KY.LS.005</a></td><td><span class="rz kir">Gecikti</span></td></tr>
+            <tr class="tik"><td>K-4</td><td>Düşme önleme eğitimi tüm hemşirelere tekrarlanacak</td><td>Eğitim Hem. D. S.</td><td>30.11.2026</td><td><a data-git="kalite_egitim.html">Eğitim planı</a></td><td><span class="rz mavi">Planlandı</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== KARAR TAKİBİ ===== -->
+  <div class="pnl" data-s="karar">
+    <div class="arama">
+      <div class="kutu">🔍 Karar, sorumlu, toplantı…</div>
+      <span class="chip on">Açık <b>27</b></span><span class="chip">Termini geçen <b>6</b></span><span class="chip">Bu ay termin <b>8</b></span><span class="chip">Kapanan</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Toplantı</th><th>No</th><th>Karar</th><th>Sorumlu</th><th>Termin</th><th>Kalan</th><th>Durum</th><th>Kanıt</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>HGK-2026-09</td><td>K-3</td><td>Yüksek riskli ilaç listesi güncellenmesi</td><td>Ecz. N. G.</td><td>30.09.2026</td><td><span class="rz kir">−12 gün</span></td><td><span class="rz kir">Gecikti</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>YGG-2026/1</td><td>K-7</td><td>Acil triyaj alanına güvenlik kamerası ve panik butonu</td><td>Tekn. H. Y.</td><td>31.08.2026</td><td><span class="rz kir">−42 gün</span></td><td><span class="rz kir">Gecikti</span></td><td class="sonuk">satın alma bekliyor</td></tr>
+          <tr class="tik"><td>TGK-2026-05</td><td>K-2</td><td>Jeneratör yük testinin aylık tutanakla kayıt altına alınması</td><td>Tekn. H. Y.</td><td>30.06.2026</td><td><span class="rz kir">−104 gün</span></td><td><span class="rz kir">Gecikti</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>EKK-2026-09</td><td>K-1</td><td>Sterilizasyon serbest bırakma onayının sisteme alınması</td><td>Uzm. Hem. A. Y.</td><td>30.09.2026</td><td><span class="rz ok">kapandı</span></td><td><span class="rz ok">Tamam</span></td><td>📎 ekran görüntüsü</td></tr>
+          <tr class="tik"><td>HGK-2026-09</td><td>K-1</td><td>Transfüzyonda barkod–bileklik eşleşmesi</td><td>Bil. İşl. O. D.</td><td>31.10.2026</td><td><span class="rz sari">19 gün</span></td><td><span class="rz sari">Sürüyor</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>YGG-2026/1</td><td>K-3</td><td>Poliklinik bekleme süresi iyileştirme projesi</td><td>Başhekim Yrd.</td><td>31.12.2026</td><td><span class="rz mavi">80 gün</span></td><td><span class="rz sari">Sürüyor</span></td><td><a>DÖF-2026-062</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== YGG GİRDİLERİ ===== -->
+  <div class="pnl" data-s="ygg">
+    <div class="hdr k4">
+      <div class="fld"><label>YGG</label><div class="inp ro big">YGG-2026/2</div></div>
+      <div class="fld"><label>Tarih</label><div class="inp">06.11.2026 10:00</div></div>
+      <div class="fld"><label>Kapsanan dönem</label><div class="inp">01.05.2026 – 31.10.2026</div></div>
+      <div class="fld"><label>Girdi raporu</label><div class="inp"><span class="rz sari">Taslak · 7 / 9 bölüm hazır</span></div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>ISO 9.3.2 girdisi</th><th>Özet (sistemden)</th><th>Kaynak ekran</th><th>Hazır</th></tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="4">a) Önceki YGG eylemlerinin durumu</td></tr>
+          <tr><td>YGG-2026/1 kararları</td><td>12 karardan 8 tamam, 3 sürüyor, 1 gecikti (acil güvenlik kamerası)</td><td>Karar Takibi</td><td><span class="rz ok">✓</span></td></tr>
+          <tr class="grup"><td colspan="4">b) İç ve dış hususlardaki değişiklikler</td></tr>
+          <tr><td>Mevzuat / SKS değişiklikleri</td><td>SKS Hastane Seti v6.1 güncellemesi; KVKK sağlık verisi yönetmeliği</td><td>Manuel giriş</td><td><span class="rz sari">bekliyor</span></td></tr>
+          <tr class="grup"><td colspan="4">c) Kalite yönetim sisteminin performansı</td></tr>
+          <tr><td>Hasta memnuniyeti ve geri bildirim</td><td>Memnuniyet %88 (hedef %85) · 214 başvuru, 61 şikayet, ort. yanıt 4,3 iş günü</td><td><a data-git="kalite_sikayet_gorus.html">Şikayet / Görüş</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Kalite hedeflerinin karşılanma derecesi</td><td>8 hedeften 4 yolunda, 3 risk altında, 1 hedef dışı (bekleme süresi)</td><td><a data-git="kalite_hedef_gosterge.html">Hedef / Gösterge</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Süreç performansı ve ürün/hizmet uygunluğu</td><td>42 göstergeden 31'i hedefte, 7'si hedef dışı</td><td><a data-git="kalite_hedef_gosterge.html">Hedef / Gösterge</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Uygunsuzluklar ve düzeltici faaliyetler</td><td>34 DÖF açıldı, 27 kapandı, ort. 41 gün; etkinlik onayı %85</td><td><a data-git="kalite_dof.html">DÖF</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>İzleme ve ölçme sonuçları / olaylar</td><td>263 olay bildirimi, %38 ramak kala, 3 ciddi/ölüm (KNA tamam: 2)</td><td><a data-git="kalite_olay_bildirim.html">Olay Bildirimi</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Denetim sonuçları</td><td>İç denetim 14/16 birim; 22 bulgu (3 majör) · SKS öz değerlendirme puanı 91,4</td><td><a data-git="kalite_ic_denetim.html">İç Denetim</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Dış tedarikçilerin performansı</td><td>38 tedarikçi değerlendirildi; 2'si C sınıfı (izleme), 1'i listeden çıkarıldı</td><td><a data-git="kalite_tedarikci_degerlendirme.html">Tedarikçi Değerlendirme</a></td><td><span class="rz sari">bekliyor</span></td></tr>
+          <tr class="grup"><td colspan="4">d–f) Kaynak yeterliliği · risk ve fırsat eylemlerinin etkinliği · iyileştirme fırsatları</td></tr>
+          <tr><td>Risk ve fırsatlar</td><td>86 risk, 3 çok yüksek (RSK-014, RSK-032, …); 9 fırsat, 4 uygulamada</td><td><a data-git="kalite_risk_yonetimi.html">Risk Yönetimi</a></td><td><span class="rz ok">✓</span></td></tr>
+          <tr><td>Eğitim ve yetkinlik</td><td>Yıllık plan gerçekleşmesi %76 (Q3), oryantasyon %100</td><td><a data-git="kalite_egitim.html">Eğitim</a></td><td><span class="rz ok">✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>ISO 9001:2015 · 9.3.2 YGG girdileri · 9.3.3 çıktılar (kararlar → Karar Takibi)</span><span class="sp">Rapor, toplantıdan 5 gün önce üyelere gönderilir</span></div>
+  </div>
+
+  <div class="statusbar">
+    <span>ISO 9001:2015 · 9.3 Yönetimin gözden geçirmesi</span>
+    <span>SKS · Kurumsal Hizmetler — Komiteler / Kalite Yönetimi</span>
+    <span class="sp">Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Akış:</b> takvimden toplantı açılır → gündem + davet → toplantıda katılım ve kararlar → tutanak onayı → kararlar Karar Takibi'nde sorumlu/termin ile izlenir.
+  <ul>
+    <li>YGG girdi raporu diğer kalite ekranlarından <b>otomatik</b> derlenir; yalnız mevzuat / dış husus gibi maddeler elle girilir.</li>
+    <li>Kararlardan DÖF, doküman revizyonu veya eğitim planı kaydı açılabilir; bağlantı kolonunda görünür.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

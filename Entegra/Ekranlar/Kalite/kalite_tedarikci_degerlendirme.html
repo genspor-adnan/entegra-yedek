@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tedarikçi Değerlendirme — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .sinif{display:inline-block;width:22px;height:22px;line-height:20px;text-align:center;border-radius:50%;font-weight:bold;border:1px solid}
+  .sinif.a{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .sinif.b{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .sinif.c{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .puan{display:inline-flex;gap:3px}
+  .puan i{width:18px;height:18px;border:1px solid var(--line);border-radius:3px;font-style:normal;font-size:10px;text-align:center;line-height:16px;background:#fff;color:var(--muted)}
+  .puan i.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🤝 Tedarikçi Değerlendirme</span>
+    <span class="sp">12.10.2026 · Merkez · Genotıp Tıp Merkezi · ISO 9001:2015 8.4 · SKS Kurumsal Hizmet › Satın Alma Hizmetleri · Dönem: 2026/2. yarı</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">📝 Dönem Değerlendirmesi Başlat</div>
+    <div class="btn">➕ Uygunsuzluk Kaydı</div>
+    <div class="btn" data-git="kalite_dof_karti.html">🛠️ DÖF Aç</div>
+    <div class="sepv"></div>
+    <div class="btn">📋 Onaylı Tedarikçi Listesi (KY.LS.009)</div>
+    <div class="btn">🖨️ Değerlendirme Raporu</div>
+    <div class="sp"></div>
+    <div class="btn" data-git="kalite_panosu.html">🏅 Kalite Panosu</div>
+    <div class="btn" data-git="kalite_ayarlar.html">⚙️ Kriterler</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Kritik tedarikçi</div><div class="d">46 <small>/ 212 aktif</small></div></div>
+    <div class="kart ok"><div class="b">A sınıfı (≥ 85)</div><div class="d">29</div></div>
+    <div class="kart sari"><div class="b">B sınıfı (70–84)</div><div class="d">13</div></div>
+    <div class="kart kir"><div class="b">C sınıfı (&lt; 70)</div><div class="d">4 <small>2'si DÖF'te</small></div></div>
+    <div class="kart sari"><div class="b">Bu dönem değerlendirilecek</div><div class="d">17 <small>9 tamamlandı</small></div></div>
+    <div class="kart"><div class="b">Açık uygunsuzluk</div><div class="d">7 <small>son 6 ay 23</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="liste">Tedarikçiler<span class="sy">46</span></div>
+    <div class="sekme" data-s="form">Dönem Değerlendirme Formu</div>
+    <div class="sekme" data-s="uygunsuz">Uygunsuzluk Geçmişi<span class="sy">7</span></div>
+    <div class="sekme" data-s="kriter">Değerlendirme Kriterleri</div>
+    <div class="sekme" data-s="onayli">Onaylı Tedarikçi Listesi<span class="sy">42</span></div>
+  </div>
+
+  <!-- ================================================== TEDARİKÇİLER ===== -->
+  <div class="pnl" data-s="liste">
+    <div class="arama">
+      <div class="kutu">🔍 Tedarikçi, ürün/hizmet grubu, VKN…</div>
+      <span class="chip on">Kritik <b>46</b></span>
+      <span class="chip">A <b>29</b></span>
+      <span class="chip">B <b>13</b></span>
+      <span class="chip">C <b>4</b></span>
+      <span class="chip">Değerlendirmesi geciken <b>3</b></span>
+      <span class="chip">Tümü <b>212</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Tedarikçi</th><th style="width:190px">Ürün / Hizmet Grubu</th><th style="width:70px" class="orta">Sınıf</th><th style="width:80px" class="sag">Puan</th>
+          <th style="width:80px" class="sag">Önceki</th><th style="width:110px" class="sag">Sipariş (6 ay)</th><th style="width:100px" class="sag">Uygunsuzluk</th><th style="width:120px">Son Değerlendirme</th><th style="width:120px">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="9">Tıbbi sarf ve ilaç</td></tr>
+          <tr class="tik sel"><td><b>Medikal Ecza Deposu A.Ş.</b></td><td>İlaç, serum</td><td class="orta"><span class="sinif a">A</span></td><td class="sag"><b>92</b></td><td class="sag">90 ↑</td><td class="sag">418</td><td class="sag">1</td><td>04.10.2026</td><td><span class="rz ok">Onaylı</span></td></tr>
+          <tr class="tik"><td><b>Steril Tıbbi Malzeme Ltd.</b></td><td>Cerrahi sarf, dikiş</td><td class="orta"><span class="sinif b">B</span></td><td class="sag"><b>76</b></td><td class="sag">83 ↓</td><td class="sag">162</td><td class="sag"><span class="rz sari">4</span></td><td>06.10.2026</td><td><span class="rz sari">İzlemede</span></td></tr>
+          <tr class="tik"><td><b>Ortomed Implant San.</b></td><td>Ortopedik implant (konsinye)</td><td class="orta"><span class="sinif c">C</span></td><td class="sag"><b>64</b></td><td class="sag">72 ↓</td><td class="sag">37</td><td class="sag"><span class="rz kir">6</span></td><td>02.10.2026</td><td><span class="rz kir">DÖF-2026-044</span></td></tr>
+          <tr class="grup"><td colspan="9">Hizmet alımı</td></tr>
+          <tr class="tik"><td><b>Temiz Hizmet Yönetimi A.Ş.</b></td><td>Temizlik (hizmet alımı)</td><td class="orta"><span class="sinif b">B</span></td><td class="sag"><b>78</b></td><td class="sag">78</td><td class="sag">aylık</td><td class="sag">2</td><td>30.09.2026</td><td><span class="rz ok">Onaylı</span></td></tr>
+          <tr class="tik"><td><b>BioKalibre Mühendislik</b></td><td>Kalibrasyon (biyomedikal)</td><td class="orta"><span class="sinif a">A</span></td><td class="sag"><b>89</b></td><td class="sag">87 ↑</td><td class="sag">24</td><td class="sag">0</td><td>21.09.2026</td><td><span class="rz ok">Onaylı · TÜRKAK</span></td></tr>
+          <tr class="tik"><td><b>Gıda Catering Ltd.</b></td><td>Hasta / personel yemeği</td><td class="orta"><span class="sinif a">A</span></td><td class="sag"><b>86</b></td><td class="sag">81 ↑</td><td class="sag">aylık</td><td class="sag">1</td><td>18.09.2026</td><td><span class="rz ok">Onaylı</span></td></tr>
+          <tr class="tik"><td><b>Ekolojik Atık Bertaraf</b></td><td>Tıbbi atık taşıma</td><td class="orta"><span class="sinif c">C</span></td><td class="sag"><b>67</b></td><td class="sag">—</td><td class="sag">haftalık</td><td class="sag"><span class="rz kir">3</span></td><td><span class="rz kir">geçti · 31.07</span></td><td><span class="rz kir">DÖF-2026-039</span></td></tr>
+          <tr class="grup"><td colspan="9">Laboratuvar</td></tr>
+          <tr class="tik"><td><b>Diagnostik Reaktif Tic.</b></td><td>Biyokimya kit, kalibratör</td><td class="orta"><span class="sinif a">A</span></td><td class="sag"><b>94</b></td><td class="sag">93</td><td class="sag">96</td><td class="sag">0</td><td>11.09.2026</td><td><span class="rz ok">Onaylı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ======================================= DÖNEM DEĞERLENDİRME FORMU ===== -->
+  <div class="pnl" data-s="form">
+    <div class="hdr k4">
+      <div class="fld" style="grid-column:span 2"><label>Tedarikçi</label><div class="inp big combo">Steril Tıbbi Malzeme Ltd.</div></div>
+      <div class="fld"><label>Dönem</label><div class="inp combo">2026 / 2. yarı (01.04–30.09)</div></div>
+      <div class="fld"><label>Form</label><div class="inp ro">KY.FR.041 Tedarikçi Değerlendirme Formu</div></div>
+      <div class="fld"><label>Değerlendiren</label><div class="inp ro">Satın Alma Md. Okan Bilgin + Ameliyathane Sor.</div></div>
+      <div class="fld"><label>Otomatik veriler</label><div class="inp ro">162 sipariş · 9 geç teslim · 4 uygunsuzluk</div></div>
+      <div class="fld"><label>Hesaplanan puan</label><div class="inp big ro">76 / 100 <span class="sinif b">B</span></div></div>
+      <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz mavi">Onaya gönderilecek</span></div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Kriter</th><th style="width:70px" class="orta">Ağırlık</th><th style="width:110px">Kaynak</th><th style="width:160px">Ölçüm</th><th style="width:150px">Puan (1–5)</th><th style="width:80px" class="sag">Katkı</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td>Ürün / hizmet kalitesi (uygunsuzluk oranı)</td><td class="orta">%30</td><td><span class="rz mavi">otomatik</span></td><td>4 / 162 = %2,5</td><td><span class="puan"><i>1</i><i>2</i><i class="on">3</i><i>4</i><i>5</i></span></td><td class="sag">18,0</td><td>2'si steril paket bütünlüğü</td></tr>
+          <tr><td>Teslimat zamanlaması</td><td class="orta">%20</td><td><span class="rz mavi">otomatik</span></td><td>153 / 162 zamanında (%94)</td><td><span class="puan"><i>1</i><i>2</i><i>3</i><i class="on">4</i><i>5</i></span></td><td class="sag">16,0</td><td></td></tr>
+          <tr><td>Fiyat / ödeme koşulları</td><td class="orta">%15</td><td>Satın alma</td><td>piyasa ortalaması +%3</td><td><span class="puan"><i>1</i><i>2</i><i>3</i><i class="on">4</i><i>5</i></span></td><td class="sag">12,0</td><td></td></tr>
+          <tr><td>Belge / mevzuat uygunluğu (ÜTS, CE, ruhsat)</td><td class="orta">%15</td><td><span class="rz mavi">ÜTS kontrolü</span></td><td>1 üründe ÜTS kaydı eksik</td><td><span class="puan"><i>1</i><i>2</i><i class="on">3</i><i>4</i><i>5</i></span></td><td class="sag">9,0</td><td>DÖF önerisi</td></tr>
+          <tr><td>İletişim ve şikâyete yanıt</td><td class="orta">%10</td><td>Kullanıcı birim</td><td>ort. yanıt 3 gün</td><td><span class="puan"><i>1</i><i>2</i><i>3</i><i class="on">4</i><i>5</i></span></td><td class="sag">8,0</td><td></td></tr>
+          <tr><td>Satış sonrası destek / eğitim</td><td class="orta">%10</td><td>Kullanıcı birim</td><td>—</td><td><span class="puan"><i>1</i><i>2</i><i>3</i><i>4</i><i class="on">5</i></span></td><td class="sag">10,0</td><td></td></tr>
+          <tr class="grup"><td colspan="5">Toplam</td><td class="sag">73,0 → <b>76</b> <span class="sonuk">(+3 iyileştirme bonusu)</span></td><td>Sınıf B · "İzlemede", 6 ayda yeniden</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="toolbar"><div class="sp"></div><div class="btn">💾 Taslak Kaydet</div><div class="btn ok">✔ Onaya Gönder</div></div>
+  </div>
+
+  <!-- ================================================ UYGUNSUZLUKLAR ===== -->
+  <div class="pnl" data-s="uygunsuz">
+    <div class="arama">
+      <div class="kutu">🔍 Tedarikçi, ürün, lot…</div>
+      <span class="chip on">Açık <b>7</b></span>
+      <span class="chip">Son 6 ay <b>23</b></span>
+      <span class="chip">DÖF açılan <b>5</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:95px">Tarih</th><th style="width:190px">Tedarikçi</th><th>Uygunsuzluk</th><th style="width:130px">Ürün / Lot</th><th style="width:110px">Kaynak</th><th style="width:90px">Önem</th><th style="width:130px">DÖF</th><th style="width:100px">Durum</th></tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>29.09.2026</td><td>Ortomed Implant San.</td><td>Konsinye set ameliyattan 40 dk önce eksik teslim; ameliyat ertelendi</td><td>Kalça protez seti</td><td><span class="rz mavi">OLY-2026-0331</span></td><td><span class="rz kir">Yüksek</span></td><td><span class="rz mor" data-git="kalite_dof_karti.html">DÖF-2026-044</span></td><td><span class="rz sari">Açık</span></td></tr>
+          <tr class="tik"><td>17.09.2026</td><td>Steril Tıbbi Malzeme Ltd.</td><td>Steril paket bütünlüğü bozuk (2 koli)</td><td>Dikiş 3/0 · lot 26A114</td><td>Mal kabul</td><td><span class="rz sari">Orta</span></td><td>—</td><td><span class="rz sari">İade bekliyor</span></td></tr>
+          <tr class="tik"><td>05.09.2026</td><td>Ekolojik Atık Bertaraf</td><td>Atık alımı 2 gün aksadı, geçici depo kapasitesi aşıldı</td><td>—</td><td><span class="rz mavi">OLY-2026-0302</span></td><td><span class="rz kir">Yüksek</span></td><td><span class="rz mor">DÖF-2026-039</span></td><td><span class="rz sari">Açık</span></td></tr>
+          <tr class="tik"><td>22.08.2026</td><td>Steril Tıbbi Malzeme Ltd.</td><td>ÜTS'de kayıtsız ürün teslimi</td><td>Kanül 18G</td><td>ÜTS kontrolü</td><td><span class="rz sari">Orta</span></td><td>—</td><td><span class="rz ok">Kapandı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== KRİTERLER ===== -->
+  <div class="pnl" data-s="kriter">
+    <div class="ikiPanel">
+      <div data-liste>
+        <div class="olgu on"><span class="ad"><b>Tıbbi sarf ve ilaç</b></span><span class="sy">6 kriter · 6 ay</span></div>
+        <div class="olgu"><span class="ad">Hizmet alımı (temizlik, yemek, güvenlik)</span><span class="sy">6 kriter · 6 ay</span></div>
+        <div class="olgu"><span class="ad">Kalibrasyon / teknik servis</span><span class="sy">5 kriter · yıllık</span></div>
+        <div class="olgu"><span class="ad">Laboratuvar reaktif</span><span class="sy">6 kriter · 6 ay</span></div>
+        <div class="olgu"><span class="ad">Kritik olmayan</span><span class="sy">3 kriter · yıllık</span></div>
+      </div>
+      <div>
+        <div class="grp">
+          <div class="gb">Tıbbi sarf ve ilaç — kriter seti <span class="sp">toplam ağırlık %100</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Kriter</th><th style="width:80px" class="orta">Ağırlık</th><th style="width:150px">Veri kaynağı</th><th>Puanlama kuralı</th></tr></thead>
+            <tbody>
+              <tr><td>Ürün kalitesi</td><td class="orta">%30</td><td>Mal kabul + olay bildirimi</td><td>uygunsuzluk ≤%1 → 5 · ≤%2 → 4 · ≤%4 → 3 · ≤%6 → 2 · üstü 1</td></tr>
+              <tr><td>Teslimat zamanlaması</td><td class="orta">%20</td><td>Sipariş / irsaliye tarihleri</td><td>zamanında ≥%98 → 5 · ≥%93 → 4 · ≥%85 → 3 …</td></tr>
+              <tr><td>Fiyat</td><td class="orta">%15</td><td>Satın alma (elle)</td><td>değerlendirici puanı</td></tr>
+              <tr><td>Belge / mevzuat</td><td class="orta">%15</td><td>ÜTS / ruhsat kontrolü</td><td>eksik belge yok → 5, her eksik −1</td></tr>
+              <tr><td>İletişim</td><td class="orta">%10</td><td>Kullanıcı birim</td><td>değerlendirici puanı</td></tr>
+              <tr><td>Satış sonrası destek</td><td class="orta">%10</td><td>Kullanıcı birim</td><td>değerlendirici puanı</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="grp">
+          <div class="gb">Sınıf eşikleri ve eylem</div>
+          <div class="ic">
+            <span class="sinif a">A</span> ≥ 85 — onaylı, yıllık değerlendirme &nbsp;·&nbsp;
+            <span class="sinif b">B</span> 70–84 — onaylı / izlemede, 6 ayda bir &nbsp;·&nbsp;
+            <span class="sinif c">C</span> &lt; 70 — DÖF zorunlu; iki dönem üst üste C → onaylı listeden çıkar (YGG kararı)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ ONAYLI TEDARİKÇİ LİSTESİ ===== -->
+  <div class="pnl" data-s="onayli">
+    <div class="arama">
+      <div class="kutu">🔍 Onaylı tedarikçi, kapsam…</div>
+      <span class="chip on">Onaylı <b>42</b></span>
+      <span class="chip">Şartlı / izlemede <b>6</b></span>
+      <span class="chip">Listeden çıkarılan <b>3</b></span>
+      <span class="sp"></span>
+      <span class="sonuk">KY.LS.009 Rev otomatik · son yayın 06.10.2026</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tedarikçi</th><th style="width:220px">Onay Kapsamı</th><th style="width:70px" class="orta">Sınıf</th><th style="width:110px">Onay Tarihi</th><th style="width:150px">Sertifikalar</th><th style="width:120px">Sonraki Değ.</th></tr></thead>
+        <tbody>
+          <tr class="tik"><td>Diagnostik Reaktif Tic.</td><td>Biyokimya / hormon reaktifleri</td><td class="orta"><span class="sinif a">A</span></td><td>11.09.2026</td><td>ISO 13485 · ISO 9001</td><td>11.09.2027</td></tr>
+          <tr class="tik"><td>Medikal Ecza Deposu A.Ş.</td><td>İlaç, serum, antiseptik</td><td class="orta"><span class="sinif a">A</span></td><td>04.10.2026</td><td>İTS · GDP</td><td>04.10.2027</td></tr>
+          <tr class="tik"><td>BioKalibre Mühendislik</td><td>Biyomedikal kalibrasyon</td><td class="orta"><span class="sinif a">A</span></td><td>21.09.2026</td><td>TÜRKAK ISO 17025 <span class="rz sari">bitiş 30.11.2026</span></td><td>21.09.2027</td></tr>
+          <tr class="tik"><td>Steril Tıbbi Malzeme Ltd.</td><td>Cerrahi sarf</td><td class="orta"><span class="sinif b">B</span></td><td>06.10.2026</td><td>ISO 13485</td><td><span class="rz sari">06.04.2027 · izlemede</span></td></tr>
+          <tr class="tik"><td>Ortomed Implant San.</td><td>Ortopedik implant (konsinye)</td><td class="orta"><span class="sinif c">C</span></td><td>02.10.2026</td><td>ISO 13485</td><td><span class="rz kir">Şartlı · DÖF kapanınca</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Tedarikçi kaydı: Cari kart (tedarikçi rolü)</span>
+    <span>Otomatik veri: sipariş, irsaliye, mal kabul, ÜTS, olay bildirimi</span>
+    <span class="sp">Sorumlu: Satın Alma Md. Okan Bilgin · Kalite Direktörü: Uzm. Hem. Aylin Yılmaz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Mockup notu.</b>
+  <ul>
+    <li>Tedarikçi ayrı bir kart değil, <b>cari kart (tedarikçi rolü)</b>; burada yalnız "kritik" işaretli olanlar dönemsel değerlendirmeye girer.</li>
+    <li>Kalite ve teslimat puanları sipariş / irsaliye / mal kabul ve olay bildirimlerinden <b>otomatik</b> hesaplanır; fiyat, iletişim ve destek değerlendirici tarafından girilir.</li>
+    <li>C sınıfı sonuç ve "Yüksek" önemli uygunsuzluk DÖF açmayı zorunlu kılar (DÖF kartına bağlanır). Onaylı tedarikçi listesi (KY.LS.009) doküman sisteminde otomatik yayımlanır.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
