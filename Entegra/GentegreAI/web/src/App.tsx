@@ -44,6 +44,13 @@ const KasaGunSonu = tembel(() => import('./sayfalar/kasaGunSonu/KasaGunSonu'), '
 const CagriIcmal = tembel(() => import('./sayfalar/cagriIcmal/CagriIcmal'), 'CagriIcmal');
 const SterilIcmal = tembel(() => import('./sayfalar/sterilIcmal/SterilIcmal'), 'SterilIcmal');
 const EFaturaIcmal = tembel(() => import('./sayfalar/efaturaIcmal/EFaturaIcmal'), 'EFaturaIcmal');
+const AmeliyathaneIcmal = tembel(() => import('./sayfalar/ameliyathaneIcmal/AmeliyathaneIcmal'), 'AmeliyathaneIcmal');
+const DisIcmal = tembel(() => import('./sayfalar/disIcmal/DisIcmal'), 'DisIcmal');
+const EczaneIcmal = tembel(() => import('./sayfalar/eczaneIcmal/EczaneIcmal'), 'EczaneIcmal');
+const FtrIcmal = tembel(() => import('./sayfalar/ftrIcmal/FtrIcmal'), 'FtrIcmal');
+const IsgIcmal = tembel(() => import('./sayfalar/isgIcmal/IsgIcmal'), 'IsgIcmal');
+const KaliteIcmal = tembel(() => import('./sayfalar/kaliteIcmal/KaliteIcmal'), 'KaliteIcmal');
+const RandevuIcmal = tembel(() => import('./sayfalar/randevuIcmal/RandevuIcmal'), 'RandevuIcmal');
 const IceriAlma = tembel(() => import('./sayfalar/IceriAlma'), 'IceriAlma');
 const DemoVerisi = tembel(() => import('./sayfalar/DemoVerisi'), 'DemoVerisi');
 const CalismaPlani = tembel(() => import('./sayfalar/CalismaPlani'), 'CalismaPlani');
@@ -265,6 +272,13 @@ function Yollar() {
         {yetki('cagri.icmal') && <Route path="/cagri-icmal" element={<CagriIcmal />} />}
         {yetki('steril.icmal') && <Route path="/steril-icmal" element={<SterilIcmal />} />}
         {yetki('efatura.icmal') && <Route path="/efatura-icmal" element={<EFaturaIcmal />} />}
+        {yetki('ameliyathane.icmal') && <Route path="/ameliyathane-icmal" element={<AmeliyathaneIcmal />} />}
+        {yetki('dis.icmal') && <Route path="/dis-icmal" element={<DisIcmal />} />}
+        {yetki('eczane.icmal') && <Route path="/eczane-icmal" element={<EczaneIcmal />} />}
+        {yetki('ftr.icmal') && <Route path="/ftr-icmal" element={<FtrIcmal />} />}
+        {yetki('isg.icmal') && <Route path="/isg-icmal" element={<IsgIcmal />} />}
+        {yetki('kalite.icmal') && <Route path="/kalite-icmal" element={<KaliteIcmal />} />}
+        {yetki('randevu.icmal') && <Route path="/randevu-icmal" element={<RandevuIcmal />} />}
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar.iceri_alma') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {/* DEMO VERİSİ (964): tanıtım kurulumu verisi - yalnız DEMO kurulumda yazar. */}

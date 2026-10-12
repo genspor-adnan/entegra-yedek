@@ -79,4 +79,11 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'ftr',
     menuGrup: 'FTR', menuAltGrup: 'Ayarlar', menuAd: 'Üniteler & Kabinler', ic: '🚪', yetkiKodu: 'ftr.unite', menuSira: 90,
   },
+  {
+    // FTR İCMALİ (1043, mockup İcmal/ftr_icmali.html): kür / seans / devam, fizyoterapist, ödeyen,
+    //   klinik sonuç (VAS, ölçek, yanıt), ara değerlendirme, uygulama / kabin doluluğu.
+    kaynak: 'ftr-icmal', rota: 'ftr-icmal', ozelSayfa: true, baslik: 'FTR İcmali',
+    yol: 'FTR › FTR İcmali', urunModu: 2, modul: 'ftr',
+    menuGrup: 'FTR', menuAd: 'FTR İcmali', ic: '@icmal', yetkiKodu: 'ftr.icmal', menuSira: 60,
+  },
 ];

@@ -71,4 +71,11 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kalite', menuAd: 'Klinik Kalite Kod Havuzu',
     ic: '🔤', yetkiKodu: 'klinik_kalite', menuSira: 62,
   },
+  {
+    // KALİTE / SKS İCMALİ (1045, mockup İcmal/kalite_sks_icmali.html): SKS + klinik göstergeler,
+    //   kritik / panik bildirim süresi, GRS, düşme / bası yarası, el hijyeni, memnuniyet.
+    kaynak: 'kalite-icmal', rota: 'kalite-icmal', ozelSayfa: true, baslik: 'Kalite / SKS İcmali',
+    yol: 'Kalite › Kalite / SKS İcmali', urunModu: 2,
+    menuGrup: 'Kalite', menuAd: 'Kalite / SKS İcmali', ic: '@icmal', yetkiKodu: 'kalite.icmal', menuSira: 63,
+  },
 ];

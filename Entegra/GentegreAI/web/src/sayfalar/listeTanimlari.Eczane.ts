@@ -145,4 +145,11 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Eczane', menuAd: 'Miad & Tüketim', ic: '⏳',
     yetkiKodu: 'eczane.miad', menuSira: 70,   // 1003
   },
+  {
+    // ECZANE / İLAÇ İCMALİ (1042, mockup İcmal/eczane_ilac_icmali.html): servis / ilaç tüketimi, maliyet,
+    //   faturalanan / faturalanmayan, miad / iade, İTS.
+    kaynak: 'eczane-icmal', rota: 'eczane-icmal', ozelSayfa: true, baslik: 'Eczane / İlaç İcmali',
+    yol: 'Eczane › Eczane / İlaç İcmali', urunModu: 2,
+    menuGrup: 'Eczane', menuAd: 'Eczane / İlaç İcmali', ic: '@icmal', yetkiKodu: 'eczane.icmal', menuSira: 80,
+  },
 ];

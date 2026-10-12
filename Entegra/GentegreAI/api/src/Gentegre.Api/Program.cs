@@ -426,6 +426,13 @@ uygulama.YatanDonemIcmalUclariniEkle();   // yatan hasta / servis dönem icmali 
 uygulama.KasaGunSonuUclariniEkle();   // kasa / gün sonu mutabakatı (11.10.2026)
 uygulama.CagriIcmalUclariniEkle();   // çağrı merkezi icmali (11.10.2026)
 uygulama.SterilIcmalUclariniEkle();   // sterilizasyon icmali (11.10.2026)
+uygulama.AmeliyathaneIcmalUclariniEkle();   // ameliyathane icmali (12.10.2026)
+uygulama.DisIcmalUclariniEkle();            // dis icmali (12.10.2026)
+uygulama.EczaneIcmalUclariniEkle();         // eczane / ilac icmali (12.10.2026)
+uygulama.FtrIcmalUclariniEkle();            // FTR icmali (12.10.2026)
+uygulama.IsgIcmalUclariniEkle();            // ISG / OSGB icmali (12.10.2026)
+uygulama.KaliteIcmalUclariniEkle();         // kalite / SKS icmali (12.10.2026)
+uygulama.RandevuIcmalUclariniEkle();        // randevu / poliklinik icmali (12.10.2026)
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();

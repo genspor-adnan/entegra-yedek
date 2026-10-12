@@ -40,6 +40,13 @@ import { yatanIcmalUclari } from './uclar/yatanIcmal';
 import { kasaGunSonuUclari } from './uclar/kasaGunSonu';
 import { cagriIcmalUclari } from './uclar/cagriIcmal';
 import { sterilIcmalUclari } from './uclar/sterilIcmal';
+import { ameliyathaneIcmalUclari } from './uclar/ameliyathaneIcmal';
+import { disIcmalUclari } from './uclar/disIcmal';
+import { eczaneIcmalUclari } from './uclar/eczaneIcmal';
+import { ftrIcmalUclari } from './uclar/ftrIcmal';
+import { isgIcmalUclari } from './uclar/isgIcmal';
+import { kaliteIcmalUclari } from './uclar/kaliteIcmal';
+import { randevuIcmalUclari } from './uclar/randevuIcmal';
 import { efaturaUclari } from './uclar/efatura';
 import { efaturaIcmalUclari } from './uclar/efaturaIcmal';
 import { sterilUclari } from './uclar/steril';
@@ -134,6 +141,13 @@ export const api = {
   ...kasaGunSonuUclari,
   ...cagriIcmalUclari,
   ...sterilIcmalUclari,
+  ...ameliyathaneIcmalUclari,
+  ...disIcmalUclari,
+  ...eczaneIcmalUclari,
+  ...ftrIcmalUclari,
+  ...isgIcmalUclari,
+  ...kaliteIcmalUclari,
+  ...randevuIcmalUclari,
   ...efaturaUclari,
   ...efaturaIcmalUclari,
   ...sterilUclari,

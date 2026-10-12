@@ -85,4 +85,11 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Ameliyathane', menuAltGrup: 'Ayarlar', menuAd: 'Salonlar', ic: '🚪',
     yetkiKodu: 'ameliyathane.salon', menuSira: 90,
   },
+  {
+    // AMELİYATHANE İCMALİ (1040, mockup İcmal/ameliyathane_icmali.html): salon doluluğu, süre disiplini,
+    //   cerrah / anestezi, tür bazında sarf / marj, faturasız sarf, iptal / ertelenen.
+    kaynak: 'ameliyathane-icmal', rota: 'ameliyathane-icmal', ozelSayfa: true, baslik: 'Ameliyathane İcmali',
+    yol: 'Ameliyathane › Ameliyathane İcmali', urunModu: 2,
+    menuGrup: 'Ameliyathane', menuAd: 'Ameliyathane İcmali', ic: '@icmal', yetkiKodu: 'ameliyathane.icmal', menuSira: 80,
+  },
 ];

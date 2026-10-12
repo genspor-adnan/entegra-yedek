@@ -258,6 +258,9 @@ public static partial class KartKatalogu
             new("departmanId", "departman_id", "sayi", Baslik: "Bölüm",
                 KodTablosu: "public.v_departman_lookup"),
             new("acilAyrilmis", "acil_ayrilmis", "mantik", Baslik: "Acile Ayrılmış"),
+            // MESAİ (1040): Ameliyathane İcmali doluluğu = mesai içi masa süresi / (iş günü × mesai). Boş = 08:00-17:00.
+            new("mesaiBas", "mesai_bas", "saat", Baslik: "Mesai başlangıcı", Grup: "Çalışma"),
+            new("mesaiBit", "mesai_bit", "saat", Baslik: "Mesai bitişi", Grup: "Çalışma"),
             new("sira", "sira", "sayi", Baslik: "Sıra"),
             new("aktif", "aktif", "mantik", Baslik: "Aktif"),
         },

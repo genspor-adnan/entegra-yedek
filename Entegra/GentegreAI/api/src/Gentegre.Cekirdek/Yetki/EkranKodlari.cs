@@ -275,6 +275,20 @@ public static partial class EkranKodlari
         "steril.icmal",
         // Fatura / e-Belge İcmali (1035): /api/efatura-icmal kendi koduna bakar.
         "efatura.icmal",
+        // Ameliyathane İcmali (1040): /api/ameliyathane-icmal kendi koduna bakar.
+        "ameliyathane.icmal",
+        // Diş İcmali (1041): /api/dis-icmal kendi koduna bakar.
+        "dis.icmal",
+        // Eczane / İlaç İcmali (1042): /api/eczane-icmal kendi koduna bakar.
+        "eczane.icmal",
+        // FTR İcmali (1043): /api/ftr-icmal kendi koduna bakar.
+        "ftr.icmal",
+        // İSG / OSGB İcmali (1044): /api/isg-icmal kendi koduna bakar.
+        "isg.icmal",
+        // Kalite / SKS İcmali (1045): /api/kalite-icmal kendi koduna bakar.
+        "kalite.icmal",
+        // Randevu / Poliklinik İcmali (1046): /api/randevu-icmal kendi koduna bakar.
+        "randevu.icmal",
     };
 
     // BİLİNÇLİ KÖPRÜ - MUAYENE (1004 aşama 2, kullanıcı: "Muayene'ye geç"):

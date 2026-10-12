@@ -53,6 +53,8 @@ public static partial class KartKatalogu
             new("isgUzmanId",     "isg_uzman_id",    "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "İSG uzmanı", Grup: "Atama & Sözleşme"),
             new("dspId",          "dsp_id",          "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Diğer sağlık personeli (DSP)", Grup: "Atama & Sözleşme"),
             new("aylikDk",        "aylik_dk",        "sayi",  Baslik: "Sözleşme dakikası / ay (0 = çalışan × katsayı)", Grup: "Atama & Sözleşme"),
+            // AYLIK HİZMET BEDELİ (1044): İSG / OSGB İcmali hizmet bedeli sekmesi.
+            new("aylikUcret",     "aylik_ucret",     "para",  Baslik: "Aylık hizmet bedeli (TL)", Grup: "Atama & Sözleşme"),
             new("sozlesmeBas",    "sozlesme_bas",    "tarih", Baslik: "Sözleşme başlangıç", Grup: "Atama & Sözleşme"),
             new("sozlesmeBit",    "sozlesme_bit",    "tarih", Baslik: "Sözleşme bitiş", Grup: "Atama & Sözleşme"),
             new("ziyaretSikligi", "ziyaret_sikligi", "metin", EnFazlaUzunluk: 80, Baslik: "Ziyaret sıklığı", Grup: "Atama & Sözleşme"),

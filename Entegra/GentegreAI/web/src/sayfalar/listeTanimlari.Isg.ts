@@ -102,4 +102,11 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'isg',
     menuGrup: 'İşyeri Hekimliği', menuAltGrup: 'Ayarlar', menuAd: 'Firmalar (işveren, bölüm)', ic: '🏢', yetkiKodu: 'isg.firma', menuSira: 90,
   },
+  {
+    // İSG / OSGB İCMALİ (1044, mockup İcmal/isg_osgb_icmali.html): hizmet süresi, Ek-2 muayene, geciken
+    //   periyodik, ziyaret / defter, olay / SGK bildirimi, hizmet bedeli / sözleşme.
+    kaynak: 'isg-icmal', rota: 'isg-icmal', ozelSayfa: true, baslik: 'İSG / OSGB İcmali',
+    yol: 'İşyeri Hekimliği › İSG / OSGB İcmali', urunModu: 2, modul: 'isg',
+    menuGrup: 'İşyeri Hekimliği', menuAd: 'İSG / OSGB İcmali', ic: '@icmal', yetkiKodu: 'isg.icmal', menuSira: 70,
+  },
 ];

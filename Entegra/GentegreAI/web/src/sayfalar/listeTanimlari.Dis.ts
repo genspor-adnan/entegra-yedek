@@ -112,4 +112,11 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
     menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Laboratuvarlar', ic: '🏭', yetkiKodu: 'dis.unit.lab', menuSira: 91,
   },
+  {
+    // DİŞ İCMALİ (1041, mockup İcmal/dis_icmali.html): hekim ciro / sarf / lab / kâr, plan hunisi,
+    //   yarım kalan planlar, işlem türleri, lab ve ünite doluluğu.
+    kaynak: 'dis-icmal', rota: 'dis-icmal', ozelSayfa: true, baslik: 'Diş İcmali',
+    yol: 'Diş › Diş İcmali', urunModu: 2,
+    menuGrup: 'Diş', menuAd: 'Diş İcmali', ic: '@icmal', yetkiKodu: 'dis.icmal', menuSira: 70,
+  },
 ];

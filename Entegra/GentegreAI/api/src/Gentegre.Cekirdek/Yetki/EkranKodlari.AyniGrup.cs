@@ -41,6 +41,13 @@ public static partial class EkranKodlari
         ("cagri.icmal", "cagri.supervizor"),                    // Çağrı Merkezi › Çağrı Merkezi İcmali (1031)
         ("steril.icmal", "steril.pano"),
         ("efatura.icmal", "belge.satis.fatura"),
+        ("ameliyathane.icmal", "ameliyathane.plan"),
+        ("dis.icmal", "dis.odeme"),
+        ("eczane.icmal", "eczane.miad"),
+        ("ftr.icmal", "ftr.seans"),
+        ("isg.icmal", "isg.pano"),
+        ("kalite.icmal", "klinik_kalite.donem"),
+        ("randevu.icmal", "randevu"),
         ("belge.kurum_irsaliye", "belge.satis.irsaliye"),       // Kurumlar & Sigorta › Satış İrsaliyeleri (1038, HBYS ikizi)                // Finans › Fatura / e-Belge İcmali (1035)                        // Sterilizasyon › Sterilizasyon İcmali (1032)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma

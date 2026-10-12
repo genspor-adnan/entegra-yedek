@@ -152,6 +152,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Randevu', menuAd: 'Çalışma Planları', ic: '🗓', yetkiKodu: 'randevu.plan', menuSira: 20,
   },
   {
+    // RANDEVU / POLİKLİNİK İCMALİ (1046, mockup İcmal/randevu_poliklinik_icmali.html): verilen / gelen /
+    //   gelmeyen / iptal, slot doluluğu (çalışma planı), kanallar, gün × saat, bekleme, gelmeyenler.
+    kaynak: 'randevu-icmal', rota: 'randevu-icmal', ozelSayfa: true, baslik: 'Randevu / Poliklinik İcmali',
+    yol: 'Randevu › Randevu / Poliklinik İcmali', urunModu: 2,
+    menuGrup: 'Randevu', menuAd: 'Randevu / Poliklinik İcmali', ic: '@icmal', yetkiKodu: 'randevu.icmal', menuSira: 30,
+  },
+  {
     // OZEL LISTE (mockup calisma_sablonlari_listesi.html): sayfa sayfalar/calisma.
     kaynak: 'calisma-sablon', rota: 'calisma-sablon', ozelSayfa: true, aksiyonEkrani: 'calisma-sablon-liste', baslik: 'Çalışma Şablonları',
     yol: 'Randevu › Çalışma Şablonları',
