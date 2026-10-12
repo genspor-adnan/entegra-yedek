@@ -186,7 +186,7 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Bitti': 'gri',
   // KURUMSAL KALİTE (1048-1058): DÖF / olay / risk / hedef / tedarikçi / kalibrasyon durumları.
   'Değerlendirmede': 'uyari', 'Faaliyette': 'uyari', 'Doğrulamada': 'mavi', 'Gecikti': 'hata', 'Hedefte': 'ok',
-  'Hedef dışı': 'hata', 'Veri yok': 'gri', 'Düşük': 'ok', 'Orta': 'uyari', 'Yüksek': 'hata',
+  'Hedef dışı': 'hata', 'Veri yok': 'gri', 'Düşük': 'gri', 'Orta': 'uyari', 'Yüksek': 'hata',
   'Çok yüksek': 'hata', 'Kabul edildi': 'gri', 'Önlem uygulanıyor': 'bilgi', 'Yeni': 'bilgi', 'Ramak kala': 'uyari',
   'Zarar yok': 'gri', 'Hafif': 'uyari', 'Ciddi': 'hata', 'Ölüm / kalıcı': 'hata', 'Şartlı': 'uyari',
   'Süresi geçti': 'hata', 'Yaklaşıyor': 'uyari',

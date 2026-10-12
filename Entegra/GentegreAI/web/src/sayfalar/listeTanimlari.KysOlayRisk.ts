@@ -7,8 +7,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-olay', rota: 'kys-olay', baslik: 'Olay Bildirimleri',
-    yol: 'Kalite › Olay Bildirimleri',
+    kaynak: 'kys-olay', rota: 'kys-olay', baslik: '⚠️ Olay / Uygunsuzluk Bildirimleri',
+    yol: 'Kalite › Olay Bildirimleri · Her çalışan bildirebilir · anonim seçenekli',
     kartYolu: '/kys-olay', kartBaslik: 'Olay Bildirimi',
     aksiyonEkrani: 'kys-olay-liste',
     tarihAlani: 'tarih',
