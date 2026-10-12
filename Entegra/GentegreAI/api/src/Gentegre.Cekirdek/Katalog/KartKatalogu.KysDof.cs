@@ -2,6 +2,9 @@
 
 /// <summary>
 /// KURUMSAL KALİTE — DÖF kartı (1050, sade): generic kart + faaliyetler detayı.
+/// TEK SAYFA (mockup Ekranlar/Kalite2/dof_karti.html): başlık alanları
+/// "Kimlik" grubunda (kimlik şeridi), geri kalanı tek "DÖF" grubunda - Sorun /
+/// Faaliyetler / Doğrulama sırası web'de (kartOzellestirme + ListeKarti).
 /// Numara tablo varsayılanından (fn_kalite_no). Kaynaktan "DÖF Aç" yeni kartı
 /// kaynakTur / kaynakId / kaynakNo / departmanId / tanim dolu açar (ListeKarti).
 /// Log tablo kodları 1410-1411.
@@ -24,21 +27,24 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",              "id",               "sayi",  Yazilabilir: false),
-            new("no",              "no",               "metin", Yazilabilir: false, Baslik: "DÖF No", Grup: "DÖF"),
-            new("tur",             "tur",              "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofTurleri, Baslik: "Tür", Grup: "DÖF"),
-            new("durum",           "durum",            "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofDurumlari, Baslik: "Durum", Grup: "DÖF"),
-            new("kaynakTur",       "kaynak_tur",       "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofKaynaklari, Baslik: "Kaynak", Grup: "DÖF"),
-            new("kaynakNo",        "kaynak_no",        "metin", EnFazlaUzunluk: 40, Baslik: "Kaynak no (DEN / OLY / RSK...)", Grup: "DÖF"),
+            new("no",              "no",               "metin", Yazilabilir: false, Baslik: "DÖF No", Grup: "Kimlik"),
+            new("tur",             "tur",              "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofTurleri, Baslik: "Tür", Grup: "Kimlik"),
+            new("durum",           "durum",            "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofDurumlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("kaynakTur",       "kaynak_tur",       "kod",   Zorunlu: true, SabitKodlar: KaynakKatalogu.KysDofKaynaklari, Baslik: "Kaynak", Grup: "Kimlik"),
+            new("kaynakNo",        "kaynak_no",        "metin", EnFazlaUzunluk: 40, Baslik: "Kaynak no", Grup: "Kimlik"),
             new("kaynakId",        "kaynak_id",        "sayi",  Baslik: "Kaynak kayıt Id", Grup: "DÖF"),
-            new("departmanId",     "departman_id",     "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "DÖF"),
-            new("sorumluId",       "sorumlu_id",       "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "DÖF sorumlusu", Grup: "DÖF"),
+            new("departmanId",     "departman_id",     "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "Kimlik"),
+            new("sorumluId",       "sorumlu_id",       "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Kimlik"),
             // Termin boş bırakılırsa INSERT tetiği bugün + kys.dof_termin_gun yazar (1059):
             //   katalog varsayılanı sabit, ayardaki gün sayısını okuyamaz.
-            new("termin",          "termin",           "tarih", Baslik: "Termin (boşsa ayardaki gün)", Grup: "DÖF"),
-            new("tanim",           "tanim",            "metin", Zorunlu: true, EnFazlaUzunluk: 4000, Baslik: "Uygunsuzluk tanımı", Grup: "Tanım & Kök Neden"),
-            new("kokNeden",        "kok_neden",        "metin", EnFazlaUzunluk: 2000, Baslik: "Kök neden", Grup: "Tanım & Kök Neden"),
-            new("dogrulamaTarihi", "dogrulama_tarihi", "tarih", Baslik: "Doğrulama tarihi", Grup: "Doğrulama"),
-            new("dogrulamaSonuc",  "dogrulama_sonuc",  "kod",   SabitKodlar: KysDofSonuclari, Baslik: "Doğrulama sonucu", Grup: "Doğrulama"),
+            new("termin",          "termin",           "tarih", Ipucu: "Boş bırakılırsa ayardaki gün sayısı eklenir.", Baslik: "Termin", Grup: "Kimlik"),
+            new("tanim",           "tanim",            "metin", Zorunlu: true, EnFazlaUzunluk: 4000, Baslik: "Sorun nedir?", Grup: "DÖF", AltGrup: "Sorun"),
+            new("kokNeden",        "kok_neden",        "metin", EnFazlaUzunluk: 2000, Baslik: "Kök neden", Grup: "DÖF", AltGrup: "Sorun"),
+            new("dogrulamaSonuc",  "dogrulama_sonuc",  "kod",   SabitKodlar: KysDofSonuclari, Baslik: "Etkili oldu mu? (doğrulama)", Grup: "DÖF", AltGrup: "Doğrulama"),
+            new("dogrulamaTarihi", "dogrulama_tarihi", "tarih", Baslik: "Doğrulama tarihi", Grup: "DÖF", AltGrup: "Doğrulama"),
+            // Açan / açılış (mockup "Açan"): kimlik şeridinde salt okunur.
+            new("ekleyen",         "ekleyen",          "kod",   Yazilabilir: false, KodTablosu: "public.v_kullanici_lookup", Baslik: "Açan", Grup: "Kimlik"),
+            new("eklemeTarihi",    "ekleme_tarihi",    "tarih", Yazilabilir: false, Baslik: "Açılış", Grup: "Kimlik"),
         },
         Detaylar: new DetayTanimi[]
         {

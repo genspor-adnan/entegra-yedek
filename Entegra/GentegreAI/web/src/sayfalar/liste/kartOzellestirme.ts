@@ -253,6 +253,14 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     },
     sekmeSirasi: ['Tanım', 'Kapsam', 'Alanlar'],
   },
+  // ------------------------------------------- kurumsal kalite DÖF (1050) ----
+  // TEK SAYFA (mockup Ekranlar/Kalite2/dof_karti.html): başlık alanları kimlik
+  //   şeridinde; altında sorun / kök neden, faaliyetler, doğrulama (sırayı
+  //   ListeKarti sekmeSarmalayici verir). Sekme yok.
+  'kys-dof': {
+    seritAlanlari: ['no', 'tur', 'departmanId', 'sorumluId', 'kaynakTur', 'kaynakNo', 'termin', 'durum', 'ekleyen', 'eklemeTarihi'],
+    detayGrupta: { faaliyetler: { grup: 'DÖF' } },
+  },
 };
 
 /** Kartın özelleştirmesi; tanımsızsa boş nesne - çağıran koşul yazmasın. */

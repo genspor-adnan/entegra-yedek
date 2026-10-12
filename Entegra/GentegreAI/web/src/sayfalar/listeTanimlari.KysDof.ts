@@ -13,6 +13,8 @@ export const KYS_DOF_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kys-dof', rota: 'kys-dof', aksiyonEkrani: 'kys-dof-liste', baslik: 'DÖF — Düzeltici / Önleyici Faaliyetler',
     yol: 'Kalite › DÖF',
     kartYolu: '/kys-dof', kartBaslik: 'DÖF',
+    // Kaynak kaydın kimliği: "DÖF Aç" doldurur, kullanıcı görmez (kaynak no görünür).
+    gizliKartAlanlari: ['kaynakId'],
     tarihAlani: 'acilis',
     cipler: [
       { ad: 'Açık',         filtre: { alan: 'acik', op: 'esit', deger: 1 } },

@@ -314,6 +314,12 @@ export function ListeKarti({
               : baslik === 'Tanı & Plan'
               ? <div className="gz-iki"><div>{icerik}</div><GozTaniPlanPaneli id={Number(kartId)} yenile={kartTazele} /></div>
               : icerik
+          : tanim.kaynak === 'kys-dof'
+          // DÖF (1050, mockup Kalite2/dof_karti.html): sorun / kök neden ->
+          //   faaliyetler -> doğrulama. Varsayılan sıra tabloyu en alta koyardı.
+          ? (_baslik, icerik, _d, _izgara, p) => p
+              ? <>{p.altGrupCiz('Sorun')}{p.tablolar.faaliyetler}{p.altGrupCiz('Doğrulama')}</>
+              : icerik
           : tanim.kaynak === 'yatis-order'
           // ORDER (968): Order sekmesinin sağında özet (toplam / verilen / sonraki doz).
           ? (baslik, icerik) => baslik === 'Order' && kartId !== 'yeni' && kartId !== null
