@@ -18,8 +18,11 @@ public static partial class AksiyonKatalogu
             //   sağ tık / Enter (modal kart).
             new("kys-olay.yeni", "＋ Yeni Bildirim", "kys", Kisayol: "Ctrl+N",
                 KaynakKodu: "kys.olay", Islem: Islem.Ekle, Sira: 10),
-            new("kys-olay.duzenle", "✎ Kartı aç", "kys", Hedef: "sagtus,palet", Kisayol: "Enter",
+            // Kullanıcı (12.10.2026): "ekleme butonu olan yerlerin yanına düzenle ve sil".
+            new("kys-olay.duzenle", "✎ Düzenle", "kys", Kisayol: "Enter",
                 KaynakKodu: "kys.olay", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            new("kys-olay.sil", "🗑 Sil", "kys", Kisayol: "Del",
+                KaynakKodu: "kys.olay", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
             new("kys.olay-dof", "🛠️ DÖF Aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
             Yazdir() with { Ad = "🖨️ Liste" },
         ];

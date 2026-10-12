@@ -1,8 +1,9 @@
 ﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
-/// KURUMSAL KALİTE — OLAY kartı (1052, sade). Kayıt silinmez: bildirim
-/// kurumsal kayıttır, yanlışsa "Kapandı" + değerlendirme notu. Log 1430.
+/// KURUMSAL KALİTE — OLAY kartı (1052, sade). Log 1430. SİLME (1072, kullanıcı
+/// "düzenle ve sil ekle"): yanlış açılan bildirim silinir; DÖF açılmışsa
+/// veritabanı tetiği engeller (DÖF kaynağı boşa düşmesin).
 /// </summary>
 public static partial class KartKatalogu
 {
@@ -19,7 +20,6 @@ public static partial class KartKatalogu
         Tablo: "public.kalite_olay",
         LogTabloId: LogKysOlay,
         SubeKolonu: "sube_id",
-        SilmeYok: true,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["tarih"] = "@simdi", ["tur"] = (short)1, ["zarar"] = (short)2, ["durum"] = (short)1,

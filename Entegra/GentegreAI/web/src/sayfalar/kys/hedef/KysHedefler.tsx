@@ -8,6 +8,7 @@ import { guvenli, mesaj } from '../../../bilesenler/mesaj';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
 import { dofAcmaYolu } from '../../liste/kysOlayRiskAksiyonlari';
+import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
 
 /**
  * KURUMSAL KALİTE — POLİTİKA & HEDEFLER (1063, mockup Ekranlar/Kalite2/hedefler.html).
@@ -35,6 +36,7 @@ export function KysHedefler() {
   const [hata, setHata] = useState<string | null>(null);
   const [degerGir, setDegerGir] = useState(false);
   const [yenile, setYenile] = useState(0);
+  const [secili, setSecili] = useState<ListeSatiri | null>(null);
 
   useEffect(() => {
     api.liste('kys-gosterge', { boyut: 500, filtre: { alan: 'aktif', op: 'esit', deger: 1 }, sirala: [{ alan: 'kod', yon: 'asc' }] })
@@ -53,6 +55,12 @@ export function KysHedefler() {
         <span className="yol">Kalite › Politika & Hedefler · ISO 9001 · 4.3 kapsam · 5.2 politika · 6.2 hedefler</span>
         <div className="sag">
           {yetki('kys.gosterge', 'ekle') && <button className="d bir" onClick={() => git(`/kys-gosterge/yeni${GERI}`)}>＋ {c('Hedef')}</button>}
+          <DuzenleSilDugmeleri secili={!!secili && sekme === 'h'} duzenleYetki={yetki('kys.gosterge', 'degistir')} silYetki={yetki('kys.gosterge', 'sil')}
+            duzenle={() => secili && git(`/kys-gosterge/${secili.id}${GERI}`)}
+            sil={() => void guvenli(async () => {
+              if (!secili || !await silOnayi(String(secili.ad ?? ''))) return;
+              await api.kartSil('kys-gosterge', Number(secili.id)); setSecili(null); setYenile(t => t + 1);
+            })} />
           {yetki('kys.gosterge', 'degistir') && <button className="d" onClick={() => setDegerGir(true)} disabled={!satirlar?.length}>✎ {c('Değer Gir')} ({a3.uzun})</button>}
           <button className="d" onClick={() => void yazdir(satirlar ?? [], [a1, a2, a3].map(a => a.kisa))}>🖨️ {c('Politika & Hedefler')}</button>
         </div></div></div>
@@ -73,7 +81,8 @@ export function KysHedefler() {
             {(satirlar ?? []).map(s => {
               const disi = s.durumAdi === 'Hedef dışı';
               return (
-                <tr key={String(s.id)} style={{ cursor: 'pointer' }} onClick={() => git(`/kys-gosterge/${s.id}${GERI}`)}>
+                <tr key={String(s.id)} className={secili?.id === s.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
+                    onClick={() => setSecili(s)} onDoubleClick={() => git(`/kys-gosterge/${s.id}${GERI}`)}>
                   <td>{String(s.ad ?? '')}</td><td>{String(s.olcu ?? '')}</td><td>{String(s.hedefMetin ?? '')}</td>
                   <td className="sag">{sayi(s.m1)}</td><td className="sag">{sayi(s.m2)}</td><td className="sag"><b>{sayi(s.m3)}</b></td>
                   <td>

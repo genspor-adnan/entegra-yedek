@@ -7,7 +7,7 @@ public static partial class AksiyonKatalogu
 {
     private static void EkleKysDof(Dictionary<string, IReadOnlyList<AksiyonTanimi>> s)
     {
-        s["kys-dof-liste"] = Crud("kys-dof", "kys", "kys.dof", ekleAdi: "＋ Yeni DÖF",
+        s["kys-dof-liste"] = Crud("kys-dof", "kys", "kys.dof", ekleAdi: "＋ Yeni DÖF", silHedef: null,
             silIpucu: "Yanlış açılan DÖF silinir; işlem görmüş DÖF'ü 'İptal' durumuna alın.");
     }
 }

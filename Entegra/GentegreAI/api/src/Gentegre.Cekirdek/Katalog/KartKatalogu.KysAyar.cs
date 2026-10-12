@@ -37,9 +37,13 @@ public static partial class KartKatalogu
         YetkiKodu: "kys.ayar",
         Tablo: "public.kalite_komite",
         LogTabloId: LogKysKomite,
-        // Komite toplantı / olay / DÖF kayıtlarında geçer (diğer kalite ekranları):
-        //   silinmez, pasife alınır - kayıtlardaki komite adı boşa düşmesin.
-        SilmeYok: true,
+        // Komite toplantı / olay kayıtlarında geçiyorsa silinmez, pasife alınır
+        //   (kayıtlardaki komite adı boşa düşmesin); hiç kullanılmamış komite silinir (1072).
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.kalite_toplanti", "komite_id", "Komitenin toplantısı var; komiteyi pasife alın."),
+            new("public.kalite_olay", "komite_id", "Komite olay kayıtlarında geçiyor; komiteyi pasife alın."),
+        },
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1, ["toplantiPeriyotAy"] = (short)3 },
         Alanlar: new KartAlani[]
         {

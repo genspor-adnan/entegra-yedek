@@ -6,6 +6,7 @@ import type { KysAyar } from '../../../api/uclar/kysAyar';
 import { guvenli } from '../../../bilesenler/mesaj';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
+import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
 
 /**
  * KURUMSAL KALİTE — AYARLAR (1069, mockup Ekranlar/Kalite2/ayarlar.html).
@@ -22,11 +23,13 @@ export function KysAyarlar() {
   const [sekme, setSekme] = useState<'b' | 'g'>('b');
   const [satirlar, setSatirlar] = useState<ListeSatiri[] | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  const [secili, setSecili] = useState<ListeSatiri | null>(null);
+  const [yenile, setYenile] = useState(0);
 
   useEffect(() => {
     api.liste('kys-birim-sorumlu', { boyut: 500 })
       .then(y => setSatirlar(y.satirlar)).catch(h => setHata(hataMetni(h)));
-  }, []);
+  }, [yenile]);
 
   return (
     <div className="fm-sayfa">
@@ -42,13 +45,20 @@ export function KysAyarlar() {
 
       {sekme === 'b' && (<>
         {yetki('kys.ayar', 'ekle') && (
-          <div style={{ margin: '6px 0' }}><button className="d bir" onClick={() => git(`/kys-birim-sorumlu/yeni${GERI}`)}>＋ {c('Ekle')}</button></div>
+          <div className="kys-ayar-arac"><button className="d bir" onClick={() => git(`/kys-birim-sorumlu/yeni${GERI}`)}>＋ {c('Ekle')}</button>
+            <DuzenleSilDugmeleri secili={!!secili} duzenleYetki={yetki('kys.ayar', 'degistir')} silYetki={yetki('kys.ayar', 'sil')}
+              duzenle={() => secili && git(`/kys-birim-sorumlu/${secili.id}${GERI}`)}
+              sil={() => void guvenli(async () => {
+                if (!secili || !await silOnayi(String(secili.departmanAdi ?? ''))) return;
+                await api.kartSil('kys-birim-sorumlu', Number(secili.id)); setSecili(null); setYenile(t => t + 1);
+              })} /></div>
         )}
         <table className="fm-tablo">
           <thead><tr><th>{c('Birim')}</th><th>{c('Kalite sorumlusu')}</th><th>{c('Yedek')}</th></tr></thead>
           <tbody>
             {(satirlar ?? []).map(s => (
-              <tr key={String(s.id)} style={{ cursor: 'pointer' }} onClick={() => git(`/kys-birim-sorumlu/${s.id}${GERI}`)}>
+              <tr key={String(s.id)} className={secili?.id === s.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
+                    onClick={() => setSecili(s)} onDoubleClick={() => git(`/kys-birim-sorumlu/${s.id}${GERI}`)}>
                 <td>{String(s.departmanAdi ?? '')}</td><td>{String(s.sorumluAdi ?? '') || '—'}</td><td>{String(s.yedekAdi ?? '') || '—'}</td>
               </tr>
             ))}

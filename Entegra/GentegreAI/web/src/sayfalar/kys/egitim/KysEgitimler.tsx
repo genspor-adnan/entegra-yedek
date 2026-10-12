@@ -5,6 +5,7 @@ import { hataMetni, type ListeSatiri } from '../../../api/sozlesme';
 import { guvenli, mesaj } from '../../../bilesenler/mesaj';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
+import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
 
 /**
  * KURUMSAL KALİTE — EĞİTİM & YETKİNLİK (1065, mockup Ekranlar/Kalite2/egitim.html).
@@ -27,13 +28,15 @@ export function KysEgitimler() {
   const [egitimler, setEgitimler] = useState<ListeSatiri[] | null>(null);
   const [eksikler, setEksikler] = useState<ListeSatiri[] | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  const [secili, setSecili] = useState<ListeSatiri | null>(null);
+  const [yenile, setYenile] = useState(0);
 
   useEffect(() => {
     api.liste('kys-egitim', { boyut: 500, sirala: [{ alan: 'tarih', yon: 'desc' }] })
       .then(y => setEgitimler(y.satirlar)).catch(h => setHata(hataMetni(h)));
     api.liste('kys-egitim-eksik', { boyut: 1000, sirala: [{ alan: 'sonTarih', yon: 'asc' }] })
       .then(y => setEksikler(y.satirlar)).catch(h => setHata(hataMetni(h)));
-  }, []);
+  }, [yenile]);
 
   return (
     <div className="fm-sayfa">
@@ -41,6 +44,12 @@ export function KysEgitimler() {
         <span className="yol">Kalite › Eğitim · ISO 9001 · 7.2 {c('yetkinlik kanıtı')}</span>
         <div className="sag">
           {yetki('kys.egitim', 'ekle') && <button className="d bir" onClick={() => git(`/kys-egitim/yeni${GERI}`)}>＋ {c('Eğitim Kaydı')}</button>}
+          <DuzenleSilDugmeleri secili={!!secili && sekme === 'e'} duzenleYetki={yetki('kys.egitim', 'degistir')} silYetki={yetki('kys.egitim', 'sil')}
+            duzenle={() => secili && git(`/kys-egitim/${secili.id}${GERI}`)}
+            sil={() => void guvenli(async () => {
+              if (!secili || !await silOnayi(`${secili.ad ?? ''} (${secili.katilimci ?? 0} katılımcı kaydı, personel kartlarından da)`)) return;
+              await api.kysEgitimSil(Number(secili.id)); setSecili(null); setYenile(t => t + 1);
+            })} />
           <button className="d" onClick={() => void yillikPlan(egitimler ?? [])}>🖨️ {c('Yıllık Eğitim Planı')}</button>
         </div></div></div>
 
@@ -57,7 +66,8 @@ export function KysEgitimler() {
             <th style={{ width: 170 }}>{c('Eğitmen')}</th><th style={{ width: 100 }}>{c('Katılımcı')}</th><th style={{ width: 110 }}>{c('Belge')}</th></tr></thead>
           <tbody>
             {(egitimler ?? []).map(e => (
-              <tr key={String(e.id)} style={{ cursor: 'pointer' }} onClick={() => git(`/kys-egitim/${e.id}${GERI}`)}>
+              <tr key={String(e.id)} className={secili?.id === e.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
+                    onClick={() => setSecili(e)} onDoubleClick={() => git(`/kys-egitim/${e.id}${GERI}`)}>
                 <td style={{ whiteSpace: 'nowrap' }}>{tarih(e.tarih) || String(e.tarihMetin ?? '')}</td>
                 <td>{String(e.ad ?? '')}</td>
                 <td><span className={`rozet ${Number(e.zorunlu) === 1 ? 'mavi' : 'gri'}`}>{String(e.zorunluAdi ?? '')}</span></td>

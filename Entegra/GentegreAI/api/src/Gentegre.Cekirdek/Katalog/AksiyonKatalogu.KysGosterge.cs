@@ -12,7 +12,7 @@ public static partial class AksiyonKatalogu
     {
         s["kys-gosterge-liste"] =
         [
-            .. Crud("kys-gosterge", "kys", "kys.gosterge", ekleAdi: "＋ Hedef"),
+            .. Crud("kys-gosterge", "kys", "kys.gosterge", ekleAdi: "＋ Hedef", silHedef: null),
             new("kys.gosterge-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
         ];
     }

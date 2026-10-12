@@ -6,6 +6,7 @@ import { guvenli, mesaj } from '../../../bilesenler/mesaj';
 import type { Deger } from '../../../bilesenler/kartAlanCizim';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
+import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
 
 /**
  * KURUMSAL KALİTE — YGG & KARARLAR (1064, mockup Ekranlar/Kalite2/toplanti_kararlar.html).
@@ -27,13 +28,17 @@ export function KysToplantilar() {
   const [kararlar, setKararlar] = useState<ListeSatiri[] | null>(null);
   const [toplantilar, setToplantilar] = useState<ListeSatiri[] | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  const [secili, setSecili] = useState<ListeSatiri | null>(null);
+  const [yenile, setYenile] = useState(0);
 
   useEffect(() => {
     api.liste('kys-karar', { boyut: 500, filtre: { alan: 'durum', op: 'esit', deger: 1 }, sirala: [{ alan: 'termin', yon: 'asc' }] })
       .then(y => setKararlar(y.satirlar)).catch(h => setHata(hataMetni(h)));
     api.liste('kys-toplanti', { boyut: 200, sirala: [{ alan: 'tarih', yon: 'desc' }] })
       .then(y => setToplantilar(y.satirlar)).catch(h => setHata(hataMetni(h)));
-  }, []);
+  }, [yenile]);
+  // Seçili satır sekmeye göre karar ya da toplantı; sekme değişince seçim düşer.
+  const secKaynak = sekme === 'k' ? 'kys-karar' : 'kys-toplanti';
 
   return (
     <div className="fm-sayfa">
@@ -41,11 +46,17 @@ export function KysToplantilar() {
         <span className="yol">Kalite › YGG & Kararlar · {c('YGG (Yönetimin Gözden Geçirmesi) + kalite toplantıları')}</span>
         <div className="sag">
           {yetki('kys.toplanti', 'ekle') && <button className="d bir" onClick={() => git(`/kys-toplanti/yeni${GERI}`)}>＋ {c('Toplantı')}</button>}
+          <DuzenleSilDugmeleri secili={!!secili} duzenleYetki={yetki('kys.toplanti', 'degistir')} silYetki={yetki('kys.toplanti', 'sil')}
+            duzenle={() => secili && git(`/${secKaynak}/${secili.id}${GERI}`)}
+            sil={() => void guvenli(async () => {
+              if (!secili || !await silOnayi(String(secili.karar ?? secili.toplantiAdi ?? ''))) return;
+              await api.kartSil(secKaynak, Number(secili.id)); setSecili(null); setYenile(t => t + 1);
+            })} />
         </div></div></div>
 
       <div className="katab">
-        <div className={`kat${sekme === 'k' ? ' on' : ''}`} onClick={() => setSekme('k')}>{c('Açık Kararlar')}<span className="b">{kararlar?.length ?? 0}</span></div>
-        <div className={`kat${sekme === 't' ? ' on' : ''}`} onClick={() => setSekme('t')}>{c('Toplantılar')}<span className="b">{toplantilar?.length ?? 0}</span></div>
+        <div className={`kat${sekme === 'k' ? ' on' : ''}`} onClick={() => { setSekme('k'); setSecili(null) }}>{c('Açık Kararlar')}<span className="b">{kararlar?.length ?? 0}</span></div>
+        <div className={`kat${sekme === 't' ? ' on' : ''}`} onClick={() => { setSekme('t'); setSecili(null) }}>{c('Toplantılar')}<span className="b">{toplantilar?.length ?? 0}</span></div>
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -58,7 +69,8 @@ export function KysToplantilar() {
             {(kararlar ?? []).map(k => {
               const gecikti = k.durumAdi === 'Gecikti';
               return (
-                <tr key={String(k.id)} style={{ cursor: 'pointer' }} onClick={() => git(`/kys-karar/${k.id}${GERI}`)}>
+                <tr key={String(k.id)} className={secili?.id === k.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
+                    onClick={() => setSecili(k)} onDoubleClick={() => git(`/kys-karar/${k.id}${GERI}`)}>
                   <td>{String(k.toplantiAdi ?? '')}</td><td>{String(k.karar ?? '')}</td><td>{String(k.sorumluAdi ?? '')}</td>
                   <td style={{ whiteSpace: 'nowrap', color: gecikti ? 'var(--hata)' : undefined }}>{tarih(k.termin)}</td>
                   <td><span className={`rozet ${gecikti ? 'hata' : 'uyari'}`}>{String(k.durumAdi ?? '')}</span></td>
@@ -77,7 +89,8 @@ export function KysToplantilar() {
             <th className="orta" style={{ width: 70 }}>{c('Karar')}</th><th className="orta" style={{ width: 70 }}>{c('Açık')}</th><th style={{ width: 150 }} /></tr></thead>
           <tbody>
             {(toplantilar ?? []).map(t => (
-              <tr key={String(t.id)} style={{ cursor: 'pointer' }} onClick={() => git(`/kys-toplanti/${t.id}${GERI}`)}>
+              <tr key={String(t.id)} className={secili?.id === t.id ? 'kys-secili' : undefined} style={{ cursor: 'pointer' }}
+                    onClick={() => setSecili(t)} onDoubleClick={() => git(`/kys-toplanti/${t.id}${GERI}`)}>
                 <td>{tarih(t.tarih)}</td><td>{String(t.toplantiAdi ?? '')}</td><td>{String(t.katilimcilar ?? '')}</td>
                 <td className="orta">{String(t.kararSayisi ?? 0)}</td><td className="orta">{String(t.acikKarar ?? 0)}</td>
                 <td><button className="d mini" onClick={e => { e.stopPropagation(); void tutanakYazdir(Number(t.id)) }}>🖨️ {c('Tutanak')}</button></td>

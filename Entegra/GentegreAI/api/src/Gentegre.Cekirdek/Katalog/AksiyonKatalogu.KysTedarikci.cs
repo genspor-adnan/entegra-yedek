@@ -19,9 +19,9 @@ public static partial class AksiyonKatalogu
             //   DÖF aç sağ tık; genel Yazdır (CSV) yalnız palet.
             new("kys-tedarikci.yeni", "＋ Değerlendir", "kys", Kisayol: "Ctrl+N",
                 KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, Sira: 10),
-            new("kys-tedarikci.duzenle", "✎ Kartı aç", "kys", Hedef: "sagtus,palet", Kisayol: "Enter",
+            new("kys-tedarikci.duzenle", "✎ Düzenle", "kys", Kisayol: "Enter",
                 KaynakKodu: "kys.tedarikci", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-            new("kys-tedarikci.sil", "🗑 Sil", "kys", Hedef: "sagtus,palet", Kisayol: "Del",
+            new("kys-tedarikci.sil", "🗑 Sil", "kys", Kisayol: "Del",
                 KaynakKodu: "kys.tedarikci", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
             new("kys.tedarikci-yeniden", "↻ Yeniden değerlendir", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, KayitGerekir: true, Sira: 35),
             new("kys.tedarikci-dof", "🛠️ DÖF Aç", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),

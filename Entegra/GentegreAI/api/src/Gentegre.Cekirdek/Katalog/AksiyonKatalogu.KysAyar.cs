@@ -16,13 +16,17 @@ public static partial class AksiyonKatalogu
         [
             new("dokuman.yukle", "⬆ Doküman Yükle", "dokuman", Hedef: "araccubugu,palet",
                 KaynakKodu: "dokuman", Islem: Islem.Ekle, Sira: 5),
+            new("dokuman.duzenle", "✎ Düzenle", "dokuman", Kisayol: "Enter",
+                KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+            new("dokuman.sil", "🗑 Sil", "dokuman", Kisayol: "Del",
+                KaynakKodu: "dokuman", Islem: Islem.Sil, KayitGerekir: true, Sira: 15),
             new("dokuman.ac", "⬇ Aç / İndir", "dokuman", Hedef: "araccubugu,sagtus,palet",
                 KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
             new("kys.dokuman-tumu", "🗄️ Tüm Dokümanlar", "kys", KaynakKodu: "dokuman", Sira: 40),
             Yazdir(),
         ];
-        s["kys-birim-sorumlu-liste"] = Crud("kys-birim-sorumlu", "kys", "kys.ayar", ekleAdi: "＋ Sorumlu ata", yazdir: false);
+        s["kys-birim-sorumlu-liste"] = Crud("kys-birim-sorumlu", "kys", "kys.ayar", ekleAdi: "＋ Sorumlu ata", yazdir: false, silHedef: null);
         // Komite silinmez (kart SilmeYok) - pasife alınır.
-        s["kys-komite-liste"] = Crud("kys-komite", "kys", "kys.ayar", ekleAdi: "＋ Komite", yazdir: false, sil: false);
+        s["kys-komite-liste"] = Crud("kys-komite", "kys", "kys.ayar", ekleAdi: "＋ Komite", yazdir: false, silHedef: null);
     }
 }
