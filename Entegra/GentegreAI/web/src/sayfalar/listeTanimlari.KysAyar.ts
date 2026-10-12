@@ -4,40 +4,27 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  * KURUMSAL KALİTE — AYARLAR + KALİTE DOKÜMANLARI (db/1048, 1049).
  * Mockuplar Ekranlar/Kalite/kalite_ayarlar.html, kalite_dokuman_yonetimi.html.
  *
- * KALİTE DOKÜMANLARI ayrı ekran DEĞİL (kullanıcı 12.10.2026: "yalnız doküman
- * kartını yapma.. onu doküman modülünden kullanalım"): doküman modülünün
- * listesi ve kartı, "Kalite Dokümanları" kategori ağacına süzülü. Yükleme,
- * sürüm, onaya gönderme, yayın, paylaşım doküman kartından / aksiyonlarından.
- * Sunucu listesi `dokuman` yetkisini ister - kalite menüsü (kys.dokuman)
- * görünür ama doküman yetkisi olmayan kullanıcı listeyi açamaz.
+ * KALİTE DOKÜMANLARI (1068, mockup Kalite2/kalite_dokumanlari.html): kendi
+ * listesi (v_kalite_dokuman, kys.dokuman yetkisi) - "Kalite Dokümanları"
+ * kategori ağacı. Kart yeniden yazılmaz (kullanıcı 12.10.2026: "doküman
+ * kartını doküman modülünden kullanalım"): satır Doküman modülünün kartını
+ * açar; sürüm, onay, yayın, paylaşım orada. Yükle / Aç doküman yetkisi ister.
  *
  * Ayarlar: birim kalite sorumluları ve komiteler (+ üyeler) generic liste + kart,
  * Birim sorumluları kys.ayar, komiteler kys.komite (1054).
  */
-const KALITE_KOKU = 'Kalite Dokümanları';
-
 export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'dokuman', rota: 'kys-dokuman', baslik: 'Kalite Dokümanları',
-    yol: 'Kalite › Kalite Dokümanları',
-    kartYolu: '/kys-dokuman', kartBaslik: 'Doküman',
-    aksiyonEkrani: 'dokuman-liste',
-    tarihAlani: 'eklemeTarihi',
-    // Kategori YOLU kökle başlar (431 tetiği "Kalite Dokümanları › Prosedür" yazar).
-    sabitFiltre: { alan: 'kategoriAdi', op: 'baslar', deger: KALITE_KOKU },
-    kolonSirasi: ['dosyaTipi', 'kod', 'ad', 'kategoriAdi', 'surumNo', 'sahipAdi', 'gecerliBit', 'degistirmeTarihi', 'durumAdi'],
-    kolonBasliklari: { kategoriAdi: 'Tür', surumNo: 'Rev.' },
-    gizliKolonlar: ['kaynakYolu', 'boyutKb', 'paylasimSayisi'],
+    // 1068 (mockup Kalite2/kalite_dokumanlari.html): kendi kaynağı (v_kalite_dokuman,
+    //   kys.dokuman yetkisi); kart Doküman modülünün kartı.
+    kaynak: 'kys-dokuman', rota: 'kys-dokuman', baslik: 'Kalite Dokümanları',
+    yol: 'Kalite › Kalite Dokümanları · Doküman modülünün kalite kategorileri',
+    kartYolu: '/dokuman', kartBaslik: 'Doküman',
+    aksiyonEkrani: 'kys-dokuman-liste',
     cipler: [
-      { ad: 'Yürürlükte',     filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Taslak',         filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Onay bekliyor',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Arşiv',          filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      { ad: 'Prosedür', ayracOnce: true, filtre: { alan: 'kategoriAdi', op: 'esit', deger: `${KALITE_KOKU} › Prosedür` } },
-      { ad: 'Talimat',        filtre: { alan: 'kategoriAdi', op: 'esit', deger: `${KALITE_KOKU} › Talimat` } },
-      { ad: 'Form',           filtre: { alan: 'kategoriAdi', op: 'esit', deger: `${KALITE_KOKU} › Form` } },
-      { ad: 'Liste',          filtre: { alan: 'kategoriAdi', op: 'esit', deger: `${KALITE_KOKU} › Liste` } },
-      { ad: 'Plan',           filtre: { alan: 'kategoriAdi', op: 'esit', deger: `${KALITE_KOKU} › Plan` } },
+      { ad: 'Yürürlükte',           filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Onay bekliyor',        filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Gözden geçirme vakti', filtre: { alan: 'gozdenGecti', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     menuGrup: 'Kalite', menuAd: 'Kalite Dokümanları', modul: 'kys', ic: '📚', yetkiKodu: 'kys.dokuman', menuSira: 15,

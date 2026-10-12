@@ -35,6 +35,7 @@ import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
+import { kysDokumanAksiyonu } from './liste/kysDokumanAksiyonlari';
 import { kysKalibrasyonAksiyonu } from './liste/kysKalibrasyonAksiyonlari';
 import { kysDofBagAksiyonu } from './liste/kysGostergeAksiyonlari';
 import { KysPolitikaSeridi } from './liste/KysPolitikaSeridi';
@@ -655,6 +656,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       // KURUMSAL KALİTE (1052): olay / risk satırından "DÖF aç".
       if (await kysOlayRiskAksiyonu(kod, satir, { git: yol => git(yol) })) return;
+      if (await kysDokumanAksiyonu(kod, satir, { git: yol => git(yol) })) return;
       if (await kysKalibrasyonAksiyonu(kod, satir, { git: yol => git(yol) })) return;
       if (await kysDofBagAksiyonu(kod, satir, { git: yol => git(yol) })) return;
       if (await kysTedarikciAksiyonu(kod, satir, { git: yol => git(yol) })) return;
@@ -1162,7 +1164,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // Gelen belgenin KARTI YOK: cift tik gonderenin goruntusunu acar.
         else if (tanim.kaynak === 'gelen-belge')
           void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));
-        else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
+        // BAŞKA MODÜLÜN KARTI (kalite dokümanı -> /dokuman/:id, 1068): kapatınca
+        //   bu listeye dönülsün diye ?geri ile açılır.
+        else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}${tanim.kartYolu !== `/${tanim.rota ?? tanim.kaynak}`
+          ? `?geri=${encodeURIComponent(`/${tanim.rota ?? tanim.kaynak}`)}` : ''}`);
       }}
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
       tarihAlani={tanim.tarihAlani}

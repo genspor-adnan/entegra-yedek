@@ -242,7 +242,7 @@ public static partial class KaynakKatalogu
         Ekle(IsgFirma()); Ekle(IsgCalisan()); Ekle(IsgMuayene()); Ekle(IsgZiyaret()); Ekle(IsgOlay());   // isg (741)
         Ekle(Cagri()); Ekle(CagriKonu()); Ekle(CagriKuyruk()); Ekle(CagriAgent()); Ekle(CagriKampanya()); Ekle(CagriKampanyaKisi()); Ekle(CagriKalite());   // çağrı merkezi (839)
         Ekle(SterilDongu()); Ekle(SterilPaket()); Ekle(SterilBirim()); Ekle(SterilSet()); Ekle(SterilCihaz()); Ekle(SterilProgram()); Ekle(SterilKullanim()); Ekle(SterilBakim()); Ekle(SterilGeriCagirma());   // sterilizasyon (868)
-        Ekle(KysBirimSorumlu()); Ekle(KysKomite()); Ekle(KysDof()); Ekle(KysDenetim()); Ekle(KysDenetimBulgu()); Ekle(KysOlay()); Ekle(KysRisk()); Ekle(KysGosterge()); Ekle(KysToplanti()); Ekle(KysKarar()); Ekle(KysTedarikci()); Ekle(KysKalibrasyon()); Ekle(KysEgitim()); Ekle(KysEgitimEksik()); Ekle(KysZorunluEgitim());   // kurumsal kalite (1048)
+        Ekle(KysDokuman()); Ekle(KysBirimSorumlu()); Ekle(KysKomite()); Ekle(KysDof()); Ekle(KysDenetim()); Ekle(KysDenetimBulgu()); Ekle(KysOlay()); Ekle(KysRisk()); Ekle(KysGosterge()); Ekle(KysToplanti()); Ekle(KysKarar()); Ekle(KysTedarikci()); Ekle(KysKalibrasyon()); Ekle(KysEgitim()); Ekle(KysEgitimEksik()); Ekle(KysZorunluEgitim());   // kurumsal kalite (1048)
         Ekle(ArizaTalep());   // arıza / talep hizmet masası (911)
         Ekle(Kampanya());
         Ekle(Kategori());

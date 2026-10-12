@@ -190,6 +190,8 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Çok yüksek': 'hata', 'Kabul edildi': 'gri', 'Önlem uygulanıyor': 'bilgi', 'Yeni': 'bilgi', 'Ramak kala': 'uyari',
   'Zarar yok': 'gri', 'Hafif': 'uyari', 'Ciddi': 'hata', 'Ölüm / kalıcı': 'hata', 'Şartlı': 'uyari',
   'Süresi geçti': 'hata', 'Yaklaşıyor': 'uyari',
+  // KALİTE DOKÜMANLARI (1068).
+  'Yürürlükte': 'ok', 'Onay bekliyor': 'uyari', 'Gözden geçirilmeli': 'hata',
 };
 
 /**
