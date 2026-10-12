@@ -40,7 +40,7 @@ public static partial class KartKatalogu
             new("termin",          "termin",           "tarih", Ipucu: "Boş bırakılırsa ayardaki gün sayısı eklenir.", Baslik: "Termin", Grup: "Kimlik"),
             new("tanim",           "tanim",            "metin", Zorunlu: true, EnFazlaUzunluk: 4000, Baslik: "Sorun nedir?", Grup: "DÖF", AltGrup: "Sorun"),
             new("kokNeden",        "kok_neden",        "metin", EnFazlaUzunluk: 2000, Baslik: "Kök neden", Grup: "DÖF", AltGrup: "Sorun"),
-            new("dogrulamaSonuc",  "dogrulama_sonuc",  "kod",   SabitKodlar: KysDofSonuclari, Baslik: "Etkili oldu mu? (doğrulama)", Grup: "DÖF", AltGrup: "Doğrulama"),
+            new("dogrulamaSonuc",  "dogrulama_sonuc",  "kod",   SabitKodlar: KysDofSonuclari, Baslik: "Etkili oldu mu?", Grup: "DÖF", AltGrup: "Doğrulama"),
             new("dogrulamaTarihi", "dogrulama_tarihi", "tarih", Baslik: "Doğrulama tarihi", Grup: "DÖF", AltGrup: "Doğrulama"),
             // Açan / açılış (mockup "Açan"): kimlik şeridinde salt okunur.
             new("ekleyen",         "ekleyen",          "kod",   Yazilabilir: false, KodTablosu: "public.v_kullanici_lookup", Baslik: "Açan", Grup: "Kimlik"),

@@ -320,7 +320,7 @@ export function ListeKarti({
           // DÖF (1050, mockup Kalite2/dof_karti.html): sorun / kök neden ->
           //   faaliyetler -> doğrulama. Varsayılan sıra tabloyu en alta koyardı.
           ? (_baslik, icerik, _d, _izgara, p) => p
-              ? <>{p.altGrupCiz('Sorun')}{p.tablolar.faaliyetler}<div className="kys-dof-dogrulama">{p.altGrupCiz('Doğrulama')}</div></>
+              ? <><div className="kys-dof-yanyana">{p.altGrupCiz('Sorun')}</div>{p.tablolar.faaliyetler}<div className="kys-dof-yanyana">{p.altGrupCiz('Doğrulama')}</div></>
               : icerik
           : tanim.kaynak === 'yatis-order'
           // ORDER (968): Order sekmesinin sağında özet (toplam / verilen / sonraki doz).
