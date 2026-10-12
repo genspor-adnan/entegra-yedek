@@ -46,6 +46,7 @@ import { eczaneIcmalUclari } from './uclar/eczaneIcmal';
 import { ftrIcmalUclari } from './uclar/ftrIcmal';
 import { isgIcmalUclari } from './uclar/isgIcmal';
 import { kysPanoUclari } from './uclar/kysPano';
+import { kysAyarUclari } from './uclar/kysAyar';
 import { kysEgitimUclari } from './uclar/kysEgitim';
 import { kysPolitikaUclari } from './uclar/kysPolitika';
 import { kaliteIcmalUclari } from './uclar/kaliteIcmal';
@@ -150,6 +151,7 @@ export const api = {
   ...ftrIcmalUclari,
   ...isgIcmalUclari,
   ...kysPanoUclari,
+  ...kysAyarUclari,
   ...kysEgitimUclari,
   ...kysPolitikaUclari,
   ...kaliteIcmalUclari,

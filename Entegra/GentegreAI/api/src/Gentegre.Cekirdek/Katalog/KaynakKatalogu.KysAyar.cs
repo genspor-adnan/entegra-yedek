@@ -36,7 +36,7 @@ public static partial class KaynakKatalogu
     /// <summary>Komiteler (Hasta Güvenliği, Çalışan Güvenliği, Enfeksiyon Kontrol, Tesis Güvenliği...).</summary>
     private static KaynakTanimi KysKomite() => new(
         Ad: "kys-komite",
-        YetkiKodu: "kys.komite",
+        YetkiKodu: "kys.ayar",
         Kaynak: "public.v_kalite_komite k",
         SubeKosulu: "(k.sube_id = 0 or k.sube_id = {sube})",
         VarsayilanSirala: "k.sira, k.ad",

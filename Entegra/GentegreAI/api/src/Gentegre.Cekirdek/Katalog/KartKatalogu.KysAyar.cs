@@ -34,7 +34,7 @@ public static partial class KartKatalogu
 
     private static KartTanimi KysKomiteKarti() => new(
         Ad: "kys-komite",
-        YetkiKodu: "kys.komite",
+        YetkiKodu: "kys.ayar",
         Tablo: "public.kalite_komite",
         LogTabloId: LogKysKomite,
         // Komite toplantı / olay / DÖF kayıtlarında geçer (diğer kalite ekranları):

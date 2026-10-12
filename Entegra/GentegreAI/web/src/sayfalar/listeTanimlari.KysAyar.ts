@@ -11,7 +11,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  * açar; sürüm, onay, yayın, paylaşım orada. Yükle / Aç doküman yetkisi ister.
  *
  * Ayarlar: birim kalite sorumluları ve komiteler (+ üyeler) generic liste + kart,
- * Birim sorumluları kys.ayar, komiteler kys.komite (1054).
+ * Birim sorumluları ve komiteler kys.ayar (1069: kys.komite pasif - tek ekran tek kod).
  */
 export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
   {
@@ -29,6 +29,14 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
     ],
     menuGrup: 'Kalite', menuAd: 'Kalite Dokümanları', modul: 'kys', ic: '📚', yetkiKodu: 'kys.dokuman', menuSira: 15,
   },
+  // AYARLAR (1069, mockup Kalite2/ayarlar.html): tek menü girdisi - Birim
+  //   Sorumluları + Genel sekmeli özel sayfa (KysAyarlar). Birim sorumlusu ve
+  //   komite listeleri menüde görünmez; kartlar onlarla açılır.
+  {
+    kaynak: 'kys-ayarlar', rota: 'kys-ayarlar', ozelSayfa: true, baslik: 'Kalite Ayarları',
+    yol: 'Kalite › Ayarlar',
+    menuGrup: 'Kalite', menuAd: 'Ayarlar', modul: 'kys', ic: '⚙️', yetkiKodu: 'kys.ayar', menuSira: 200,
+  },
   {
     kaynak: 'kys-birim-sorumlu', rota: 'kys-birim-sorumlu', baslik: 'Birim Kalite Sorumluları',
     yol: 'Kalite › Ayarlar › Birim Sorumluları',
@@ -39,7 +47,7 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Sorumlusuz', filtre: { alan: 'sorumluYok', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kalite', menuAltGrup: 'Ayarlar', menuAd: 'Birim Sorumluları', modul: 'kys', ic: '👤',
+    menuGrup: 'Kalite', menuAd: 'Birim Sorumluları', menuGizli: true, modul: 'kys', ic: '👤',
     yetkiKodu: 'kys.ayar', menuSira: 210,
   },
   {
@@ -51,7 +59,7 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kalite', menuAltGrup: 'Ayarlar', menuAd: 'Komiteler', modul: 'kys', ic: '👥',
-    yetkiKodu: 'kys.komite', menuSira: 220,
+    menuGrup: 'Kalite', menuAd: 'Komiteler', menuGizli: true, modul: 'kys', ic: '👥',
+    yetkiKodu: 'kys.ayar', menuSira: 220,
   },
 ];

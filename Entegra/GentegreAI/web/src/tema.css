@@ -968,6 +968,9 @@ tr.panel-basligi .d.mini {
 .kys-politika-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
 .kys-politika-onay { display: flex; gap: 6px }
 .kys-politika-onay input:first-child { flex: 1 }
+/* KALİTE AYARLARI (1069): risk eşikleri satır içi üç küçük kutu. */
+.kys-ayar-esik { display: flex; align-items: center; gap: 5px; flex-wrap: wrap }
+.kys-politika .kys-ayar-esik input { width: 54px }
 /* TOPLANTI KARTI (1064): katılımcılar | gündem yan yana, tam genişlik. */
 .kart-kys-toplanti .alan-izgara:has(.alan-gundem) { grid-template-columns: 1fr 1fr }
 .kart-kys-toplanti .alan-katilimcilar textarea, .kart-kys-toplanti .alan-gundem textarea { width: 100%; height: 60px; min-height: 60px }

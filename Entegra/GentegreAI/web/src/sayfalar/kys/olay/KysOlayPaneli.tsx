@@ -38,7 +38,12 @@ export function KysOlayPaneli({ satir, yenile }: { satir: ListeSatiri | null; ye
   const [duzenle, setDuzenle] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
 
-  useEffect(() => { api.kartAlanlari('kys-olay').then(setMeta).catch(h => setHata(hataMetni(h))) }, []);
+  // ANONİM SEÇENEĞİ (1069 Kalite Ayarları): kapalıysa kutu çizilmez (DB tetiği de yazmaz).
+  const [anonimAcik, setAnonimAcik] = useState(true);
+  useEffect(() => {
+    api.kartAlanlari('kys-olay').then(setMeta).catch(h => setHata(hataMetni(h)));
+    api.kysAyar().then(a => setAnonimAcik(a.olayAnonim)).catch(() => { /* varsayılan açık */ });
+  }, []);
   useEffect(() => {
     setIlk(null); setHata(null);
     if (!(id > 0)) return;
@@ -101,9 +106,9 @@ export function KysOlayPaneli({ satir, yenile }: { satir: ListeSatiri | null; ye
           <label className="alan"><span className="etiket">{c('Etki')}</span>{secim('zarar')}</label>
           <label className="alan"><span className="etiket">{c('Bildiren')}</span>
             <span className="kys-olay-bildiren">
-              <input type="checkbox" checked={d.anonim === '1'} disabled={salt}
+              {anonimAcik && <><input type="checkbox" checked={d.anonim === '1'} disabled={salt}
                      onChange={e => setD(x => ({ ...x, anonim: e.target.checked ? '1' : '0' }))} />
-              {c('Anonim')} · {d.anonim === '1' ? '—' : String(satir?.bildirenAdi ?? '') || '—'}
+              {c('Anonim')} · </>}{d.anonim === '1' ? '—' : String(satir?.bildirenAdi ?? '') || '—'}
             </span></label>
         </div>
         <div className="kys-olay-metin">

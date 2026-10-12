@@ -23,6 +23,6 @@ public static partial class AksiyonKatalogu
         ];
         s["kys-birim-sorumlu-liste"] = Crud("kys-birim-sorumlu", "kys", "kys.ayar", ekleAdi: "＋ Sorumlu ata", yazdir: false);
         // Komite silinmez (kart SilmeYok) - pasife alınır.
-        s["kys-komite-liste"] = Crud("kys-komite", "kys", "kys.komite", ekleAdi: "＋ Komite", yazdir: false, sil: false);
+        s["kys-komite-liste"] = Crud("kys-komite", "kys", "kys.ayar", ekleAdi: "＋ Komite", yazdir: false, sil: false);
     }
 }
