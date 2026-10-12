@@ -25,9 +25,17 @@ public static partial class AksiyonKatalogu
         ];
         s["kys-risk-liste"] =
         [
-            .. Crud("kys-risk", "kys", "kys.risk", ekleAdi: "＋ Yeni Risk", silHedef: null, yazdir: false),
-            new("kys.risk-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
-            Yazdir(),
+            // Mockup Kalite2/risk_listesi.html (1071): araç çubuğu "＋ Yeni Risk ·
+            //   🖨️ Risk Listesi". Düzenleme ve DÖF Aç yandaki kartta; kartı açma,
+            //   silme ve DÖF sağ tık / Enter.
+            new("kys-risk.yeni", "＋ Yeni Risk", "kys", Kisayol: "Ctrl+N",
+                KaynakKodu: "kys.risk", Islem: Islem.Ekle, Sira: 10),
+            new("kys-risk.duzenle", "✎ Kartı aç", "kys", Hedef: "sagtus,palet", Kisayol: "Enter",
+                KaynakKodu: "kys.risk", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            new("kys-risk.sil", "🗑 Sil", "kys", Hedef: "sagtus,palet", Kisayol: "Del",
+                KaynakKodu: "kys.risk", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            new("kys.risk-dof", "🛠️ DÖF Aç", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
+            Yazdir() with { Ad = "🖨️ Risk Listesi" },
         ];
     }
 }

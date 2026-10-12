@@ -22,8 +22,8 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kalite', menuAd: 'Olay Bildirimleri', ic: '⚠️', yetkiKodu: 'kys.olay', menuSira: 20,
   },
   {
-    kaynak: 'kys-risk', rota: 'kys-risk', baslik: 'Riskler',
-    yol: 'Kalite › Riskler',
+    kaynak: 'kys-risk', rota: 'kys-risk', baslik: '🎯 Riskler',
+    yol: 'Kalite › Riskler · skor = olasılık × şiddet (1–25)',
     kartYolu: '/kys-risk', kartBaslik: 'Risk',
     aksiyonEkrani: 'kys-risk-liste',
     cipler: [
