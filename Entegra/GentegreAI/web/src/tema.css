@@ -955,6 +955,9 @@ tr.panel-basligi .d.mini {
 .kys-olay-metin textarea { height: 54px; min-height: 54px; width: 100% }
 .kys-olay-arac { display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--cizgi2) }
 .kys-olay-arac .kys-olay-sag { margin-left: auto }
+/* RİSK SKORU (1062, mockup Kalite2 .skor d/o/y/c): seviye renginde kutu. */
+.risk-skor { display: inline-block; min-width: 26px; text-align: center; border-radius: 3px; font-weight: bold; padding: 1px 5px; color: #fff; background: #98a6b5 }
+.risk-skor.s1 { background: #5cb87a } .risk-skor.s2 { background: #d9a12b } .risk-skor.s3 { background: #e67e22 } .risk-skor.s4 { background: #c0392b }
 /* İÇ DENETİM KARTI (1061): sonuç notu bulguların altında tam genişlik, alçak. */
 .kart-kys-denetim .alan-sonucNotu { grid-column: 1 / -1 }
 .kart-kys-denetim .alan-sonucNotu textarea { height: 46px; min-height: 46px }

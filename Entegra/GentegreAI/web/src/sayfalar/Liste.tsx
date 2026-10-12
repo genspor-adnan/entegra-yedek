@@ -38,6 +38,7 @@ import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
 import { kysDofBagAksiyonu } from './liste/kysGostergeAksiyonlari';
 import { KysPolitikaSeridi } from './liste/KysPolitikaSeridi';
 import { KysOlayPaneli } from './kys/olay/KysOlayPaneli';
+import { KysRiskPaneli } from './kys/risk/KysRiskPaneli';
 import { kysTedarikciAksiyonu } from './liste/kysTedarikciAksiyonlari';
 import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
 import { acilAksiyonu } from './liste/acilAksiyonlari';
@@ -1359,6 +1360,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : personelEkrani ? <PersonelOnizleme satir={seciliSatir} yenile={yenile} />
         // KURUMSAL KALİTE (1060, mockup Kalite2/olay_bildirim.html): liste + sağda kart.
         : tanim.kaynak === 'kys-olay' ? <KysOlayPaneli satir={seciliSatir} yenile={() => setYenile(t => t + 1)} />
+        // RİSK (1062, mockup Kalite2/risk_listesi.html): liste + yanda kart.
+        : tanim.kaynak === 'kys-risk' ? <KysRiskPaneli satir={seciliSatir} yenile={() => setYenile(t => t + 1)} />
         : tanim.kaynak === 'radyoloji-sablon' ? <SablonOnizlemePaneli satir={seciliSatir} />
         : tanim.kaynak === 'radyoloji-protokol' ? <ProtokolOnizlemePaneli satir={seciliSatir} />
         : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />

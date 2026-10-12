@@ -287,6 +287,12 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
 ];
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
+  // RİSK SKORU (1062, mockup Kalite2/risk_listesi.html): "skor|seviye" -> skor,
+  //   seviyenin renginde kutu (1 düşük yeşil · 2 orta sarı · 3 yüksek turuncu · 4 kırmızı).
+  if (kolon.bicim === 'riskSkor') {
+    const [skor, seviye] = String(deger ?? '').split('|');
+    return skor ? <span className={`risk-skor s${seviye || 0}`}>{skor}</span> : null;
+  }
   if (kolon.bicim !== 'rozet') return null;
   const metin = String(deger ?? '').trim();
   if (metin === '') return null;

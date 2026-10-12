@@ -90,7 +90,7 @@ export function KysOlayPaneli({ satir, yenile }: { satir: ListeSatiri | null; ye
     <div className="kys-olay-panel">
       <div className="kagrup">
         <h6>{String(satir?.no ?? '')}
-          <span className={`rozet ${kapali ? 'gri' : ilk.durum === '2' ? 'uyari' : 'bilgi'}`}>{String(satir?.durumAdi ?? '')}</span>
+          <span className={`rozet ${kapali ? 'gri' : ilk.durum === '2' ? 'uyari' : 'bilgi'}`}>{kodlar('durum')[ilk.durum] ?? ''}</span>
         </h6>
         <div className="alan-izgara kys-olay-hdr">
           <label className="alan"><span className="etiket">{c('No')}</span><input value={String(satir?.no ?? '')} disabled /></label>

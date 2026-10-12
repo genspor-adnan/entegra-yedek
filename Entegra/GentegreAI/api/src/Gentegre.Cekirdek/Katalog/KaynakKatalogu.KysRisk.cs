@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE — RİSK KAYDI (1052), mockup
@@ -17,18 +17,22 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",                 "r.id",                   "sayi",  "Id", Varsayilan: false),
-            new("no",                 "r.no",                   "metin", "Risk No", Genislik: 110),
-            new("surec",              "r.surec",                "metin", "Süreç", Genislik: 140),
-            new("birimAdi",           "r.birim_adi",            "metin", "Birim", Genislik: 140),
-            new("tanim",              "r.tanim",                "metin", "Tehlike / Risk", Genislik: 300),
+            // Mockup Kalite2/risk_listesi.html (1062): No · Risk · Birim · O · Ş ·
+            //   Skor (seviye renginde kutu) · Sahibi.
+            new("no",                 "r.no",                   "metin", "No", Genislik: 125),
+            new("tanim",              "r.tanim",                "metin", "Risk", Genislik: 300),
+            new("birimAdi",           "r.birim_adi",            "metin", "Birim", Genislik: 120),
             new("olasilik",           "r.olasilik",             "sayi",  "O", Hizalama: "orta"),
             new("siddet",             "r.siddet",               "sayi",  "Ş", Hizalama: "orta"),
-            new("skor",               "r.skor",                 "sayi",  "Skor", Hizalama: "orta"),
-            new("seviyeAdi",          "r.seviye_adi",           "metin", "Düzey", Genislik: 100, Bicim: "rozet"),
-            new("kontrolOnlem",       "r.kontrol_onlem",        "metin", "Kontrol / önlem", Genislik: 220, Varsayilan: false),
+            new("skorRozet",          "r.skor_rozet",           "metin", "Skor", Hizalama: "orta", Bicim: "riskSkor"),
             new("sahipAdi",           "r.sahip_adi",            "metin", "Sahibi", Genislik: 140),
-            new("gozdenGecirme",      "r.gozden_gecirme",       "tarih", "Gözden geçirme"),
-            new("durumAdi",           "r.durum_adi",            "metin", "Durum", Genislik: 120, Bicim: "rozet"),
+            new("surec",              "r.surec",                "metin", "Süreç", Genislik: 140, Varsayilan: false),
+            new("skor",               "r.skor",                 "sayi",  "Skor (sayı)", Hizalama: "orta", Varsayilan: false),
+            new("seviyeAdi",          "r.seviye_adi",           "metin", "Düzey", Genislik: 100, Bicim: "rozet", Varsayilan: false),
+            new("kontrolOnlem",       "r.kontrol_onlem",        "metin", "Önlem", Genislik: 220, Varsayilan: false),
+            new("gozdenGecirme",      "r.gozden_gecirme",       "tarih", "Gözden geçirme", Varsayilan: false),
+            new("durumAdi",           "r.durum_adi",            "metin", "Durum", Genislik: 120, Bicim: "rozet", Varsayilan: false),
+            new("sahipId",            "r.sahip_id",             "sayi",  "Sahip Id", Varsayilan: false),
             new("seviye",             "r.seviye",               "sayi",  "Düzey Kodu", Varsayilan: false),
             new("gozdenGecirmeGecti", "r.gozden_gecirme_gecti", "sayi",  "Gözden geçirme geçti", Varsayilan: false),
             new("departmanId",        "r.departman_id",         "sayi",  "Birim Id", Varsayilan: false),

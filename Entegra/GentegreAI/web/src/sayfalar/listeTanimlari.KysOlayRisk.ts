@@ -22,18 +22,18 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kalite', menuAd: 'Olay Bildirimleri', ic: '⚠️', yetkiKodu: 'kys.olay', menuSira: 20,
   },
   {
-    kaynak: 'kys-risk', rota: 'kys-risk', baslik: 'Risk Kaydı',
-    yol: 'Kalite › Risk Kaydı',
+    kaynak: 'kys-risk', rota: 'kys-risk', baslik: 'Riskler',
+    yol: 'Kalite › Riskler',
     kartYolu: '/kys-risk', kartBaslik: 'Risk',
     aksiyonEkrani: 'kys-risk-liste',
     cipler: [
-      { ad: 'Açık',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Önlemde',    filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Yüksek +',   filtre: { alan: 'seviye', op: 'buyukEsit', deger: 3 } },
-      { ad: 'Kapandı',    filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      // Mockup Kalite2/risk_listesi.html (1062): Açık · Yüksek · Gözden geçirme vakti · Tümü.
+      { ad: 'Açık',       filtre: { alan: 'durum', op: 'icinde', deger: [1, 2] } },
+      { ad: 'Yüksek',     filtre: { alan: 'seviye', op: 'buyukEsit', deger: 3 } },
+      { ad: 'Gözden geçirme vakti', filtre: { alan: 'gozdenGecirmeGecti', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Risk Kaydı', ic: '🎯', yetkiKodu: 'kys.risk', menuSira: 50,
+    menuGrup: 'Kalite', menuAd: 'Riskler', ic: '🎯', yetkiKodu: 'kys.risk', menuSira: 50,
   },
 ];

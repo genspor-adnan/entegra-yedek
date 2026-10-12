@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Yetki;
+﻿using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Cekirdek.Katalog;
 
@@ -18,7 +18,7 @@ public static partial class AksiyonKatalogu
         ];
         s["kys-risk-liste"] =
         [
-            .. Crud("kys-risk", "kys", "kys.risk", ekleAdi: "＋ Risk", silHedef: null, yazdir: false),
+            .. Crud("kys-risk", "kys", "kys.risk", ekleAdi: "＋ Yeni Risk", silHedef: null, yazdir: false),
             new("kys.risk-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
             Yazdir(),
         ];
