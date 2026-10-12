@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE — DÖF listesi (1050, sade), mockup <c>Ekranlar/Kalite/kalite_dof.html</c>.
@@ -28,16 +28,20 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",          "d.id",          "sayi",  "Id", Varsayilan: false),
-            new("no",          "d.no",          "metin", "DÖF No", Genislik: 110),
-            new("turAdi",      "d.tur_adi",     "metin", "Tür", Genislik: 90, Bicim: "rozet"),
-            new("tanim",       "d.tanim",       "metin", "Uygunsuzluk / Konu", Genislik: 320),
-            new("kaynakAdi",   "d.kaynak_adi",  "metin", "Kaynak", Genislik: 120),
-            new("kaynakNo",    "d.kaynak_no",   "metin", "Kaynak No", Genislik: 110),
-            new("birimAdi",    "d.birim_adi",   "metin", "Birim", Genislik: 150),
-            new("sorumluAdi",  "d.sorumlu_adi", "metin", "Sorumlu", Genislik: 150),
+            // Mockup Kalite2/dof_listesi.html (1070): No · Açılış · Tür · Konu · Kaynak ·
+            //   Birim · Sorumlu · Termin · Faaliyet (ilerleme) · Durum.
+            new("no",          "d.no",          "metin", "No", Genislik: 115),
             new("acilis",      "d.acilis",      "tarih", "Açılış"),
+            new("turAdi",      "d.tur_adi",     "metin", "Tür", Genislik: 85),
+            new("tanim",       "d.tanim",       "metin", "Konu", Genislik: 280),
+            new("kaynakMetin", "d.kaynak_metin","metin", "Kaynak", Genislik: 190),
+            new("birimAdi",    "d.birim_adi",   "metin", "Birim", Genislik: 110),
+            new("sorumluAdi",  "d.sorumlu_adi", "metin", "Sorumlu", Genislik: 130),
             new("termin",      "d.termin",      "tarih", "Termin"),
-            new("durumAdi",    "d.durum_adi",   "metin", "Durum", Genislik: 140, Bicim: "rozet"),
+            new("tamamlanma",  "d.tamamlanma",  "sayi",  "Faaliyet", Genislik: 110, Bicim: "yuzde"),
+            new("durumAdi",    "d.durum_adi",   "metin", "Durum", Genislik: 110, Bicim: "rozet"),
+            new("kaynakAdi",   "d.kaynak_adi",  "metin", "Kaynak türü", Genislik: 120, Varsayilan: false),
+            new("kaynakNo",    "d.kaynak_no",   "metin", "Kaynak No", Genislik: 110, Varsayilan: false),
             new("dogrulamaTarihi", "d.dogrulama_tarihi", "tarih", "Doğrulama", Varsayilan: false),
             new("tur",         "d.tur",         "sayi",  "Tür Kodu", Varsayilan: false, Kodlar: KysDofTurleri),
             new("kaynakTur",   "d.kaynak_tur",  "sayi",  "Kaynak Türü", Varsayilan: false, Kodlar: KysDofKaynaklari),
