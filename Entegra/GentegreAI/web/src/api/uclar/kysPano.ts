@@ -3,6 +3,8 @@ import { istek } from '../cekirdek';
 /** Kalite panosu (KysPanoUclari, 1055). Sayılar sunucuda hesaplanır. */
 export type KysPano = {
   bugun: string;
+  /** Ayarlar › Genel'deki genel kalite sorumlusu (1069); yoksa boş. */
+  kaliteSorumlusu?: string;
   ozet: {
     acikDof: number; vadesiGecenDof: number; olay: number; denetimAy: number; denetimYapilan: number;
     yuksekRisk: number; hedefDisi: number; hedefToplam: number; kalibrasyonYaklasan: number;

@@ -22,6 +22,20 @@ export function kysPanoHedefi(rota: string, gorebilir: (kod: string) => boolean)
   return `/${rota}`;
 }
 
+/**
+ * SAYININ İYELİK EKİ (mockup "3'ü vadesi geçti"): son okunan basamağa göre
+ * ünlü uyumu - 1'i 2'si 3'ü 4'ü 5'i 6'sı 7'si 8'i 9'u, 10'u 20'si 30'u 40'ı
+ * 50'si 60'ı 70'i 80'i 90'ı, 100'ü 1000'i.
+ */
+export function iyelik(n: number): string {
+  const birler = ['', "'i", "'si", "'ü", "'ü", "'i", "'sı", "'si", "'i", "'u"];
+  const onlar = ['', "'u", "'si", "'u", "'ı", "'si", "'ı", "'i", "'i", "'ı"];
+  if (n % 10) return `${n}${birler[n % 10]}`;
+  if (n % 100) return `${n}${onlar[(n % 100) / 10]}`;
+  if (n % 1000) return `${n}'ü`;
+  return `${n}'i`;
+}
+
 const tarih = (s?: string | null) => (s ? new Date(s).toLocaleDateString('tr-TR') : '');
 
 /**
@@ -55,20 +69,20 @@ export function KysPano() {
   return (
     <div className="fm-sayfa">
       <div className="sayfabas"><div className="basrow"><h1>🏆 Kalite Panosu</h1>
-        <span className="yol">Kalite › Pano · {tarih(p.bugun)}</span>
+        <span className="yol">Kalite › Pano · {tarih(p.bugun)}{p.kaliteSorumlusu ? ` · Kalite Sorumlusu: ${p.kaliteSorumlusu}` : ''}</span>
         <div className="sag">
           {yetki('kys.olay', 'ekle') && <button className="d bir" onClick={() => git('/kys-olay/yeni?geri=%2Fkys-pano')}>⚠️ Olay / Uygunsuzluk Bildir</button>}
           {yetki('kys.dof', 'ekle') && <button className="d" onClick={() => git('/kys-dof/yeni?geri=%2Fkys-pano')}>＋ Yeni DÖF</button>}
           {yetki('kys.denetim', 'ekle') && <button className="d" onClick={() => git('/kys-denetim/yeni?geri=%2Fkys-pano')}>＋ Denetim Planla</button>}
         </div></div></div>
       <div className="fm-kpis">
-        {kart('kys-dof', 'Açık DÖF', o.acikDof, 'kir', o.vadesiGecenDof ? `${o.vadesiGecenDof}'i vadesi geçti` : undefined)}
+        {kart('kys-dof', 'Açık DÖF', o.acikDof, 'kir', o.vadesiGecenDof ? `${iyelik(o.vadesiGecenDof)} vadesi geçti` : undefined)}
         {kart('kys-olay', 'Değerlendirilecek bildirim', o.olay, 'sari')}
-        {kart('kys-denetim', 'Bu ay denetim', o.denetimAy, '', o.denetimAy ? `${o.denetimYapilan}'i yapıldı` : undefined)}
+        {kart('kys-denetim', 'Bu ay denetim', o.denetimAy, '', o.denetimYapilan ? `${iyelik(o.denetimYapilan)} yapıldı` : undefined)}
         {kart('kys-risk', 'Yüksek risk', o.yuksekRisk, 'kir')}
         {kart('kys-hedefler', 'Hedef dışı', o.hedefDisi, 'sari', `/ ${o.hedefToplam} hedef`)}
         {kart('kys-kalibrasyon', 'Kalibrasyonu yaklaşan', kalibrasyon, o.kalibrasyonGecen ? 'kir' : 'sari',
-              o.kalibrasyonGecen ? `${o.kalibrasyonGecen}'i geçti` : undefined)}
+              o.kalibrasyonGecen ? `${iyelik(o.kalibrasyonGecen)} geçti` : undefined)}
         {kart('kys-egitimler', 'Eksik zorunlu eğitim', o.eksikEgitim, 'sari', 'kişi')}
       </div>
       <section className="fm-bolum">

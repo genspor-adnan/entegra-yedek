@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
@@ -137,9 +137,17 @@ public static class KysPanoUclari
                     yol = o.GetString(6),
                 }, iptal);
 
+            // Başlıktaki "Kalite Sorumlusu: …" (mockup) - Ayarlar › Genel (1069).
+            var sorumlu = await b.TekDegerAsync<string>("""
+                select coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::text, '')
+                  from public.referans r join public.taraf t on t.id = nullif(r.deger, '')::integer
+                 where r.anahtar = 'kys.genel_sorumlu_id'
+                """, null, [], iptal);
+
             return Results.Ok(new
             {
                 bugun = DateTime.Today,
+                kaliteSorumlusu = sorumlu ?? "",
                 ozet = new
                 {
                     acikDof = s[0], vadesiGecenDof = s[1], olay = s[2], denetimAy = s[3], denetimYapilan = s[4],

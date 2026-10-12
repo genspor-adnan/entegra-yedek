@@ -5409,6 +5409,8 @@ textarea.fm-giris { resize: vertical }
 .fm-kpi .b { font-size: 10.5px; color: var(--soluk) }
 .fm-kpi .d { font-size: 17px; font-weight: 700; color: var(--yazi2); border: 0; background: none; height: auto; padding: 0 }
 .fm-kpi .d.ok { color: var(--ok) } .fm-kpi .d.kir { color: var(--hata) } .fm-kpi .d.sari { color: var(--uyari) }
+/* Sayının yanındaki açıklama (mockup "9 <small>3'ü vadesi geçti</small>") küçük, gri. */
+.fm-kpi .d small { font-size: 11px; font-weight: normal; color: var(--soluk); margin-left: 3px }
 .fm-tablo { width: 100%; border-collapse: collapse; font-size: 12px }
 .fm-tablo th { text-align: left; font-size: 11px; color: var(--soluk); border-bottom: 1px solid var(--cizgi); padding: 4px 6px; white-space: nowrap }
 .fm-tablo td { padding: 5px 6px; border-bottom: 1px solid var(--cizgi); vertical-align: top }

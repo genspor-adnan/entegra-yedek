@@ -21,3 +21,11 @@ describe('Kalite panosu (1055)', () => {
     expect(kysPanoHedefi('kys-dof', k => k === 'kys.dof')).toBe('/kys-dof');
   });
 });
+
+describe('kalite panosu iyelik eki', async () => {
+  const { iyelik } = await import('../sayfalar/kys/pano/KysPano');
+  it("mockup '3'ü vadesi geçti' - son basamağa göre ünlü uyumu", () => {
+    expect([1, 2, 3, 6, 9, 10, 40, 60, 100, 1000].map(iyelik))
+      .toEqual(["1'i", "2'si", "3'ü", "6'sı", "9'u", "10'u", "40'ı", "60'ı", "100'ü", "1000'i"]);
+  });
+});
