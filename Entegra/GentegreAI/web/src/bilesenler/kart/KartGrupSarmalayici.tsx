@@ -42,6 +42,7 @@ export interface KartGrupSarmalayiciOzellikleri {
                                  gizli?: string[]; etiket?: string[]; ustte?: boolean;
                                  yeni?: () => void; kolonBaslikEk?: Record<string, ReactNode>;
                                  baslikEk?(satirlar: Record<string, unknown>[]): ReactNode;
+                                 ekKolon?: { baslik: string; genislik?: number; ciz(satir: Record<string, unknown>): ReactNode };
                                  oneri?: Record<string, string> }>;
   detayIzgara?: Record<string, { sinif?: string; baslik?: string;
                                  alanSirasi?: string[]; not?: ReactNode;
@@ -141,6 +142,7 @@ export function KartGrupSarmalayici({
                 onYeni={detayGrupta?.[d.ad]?.yeni}
                 kolonBaslikEk={detayGrupta?.[d.ad]?.kolonBaslikEk}
                 baslikEk={detayGrupta?.[d.ad]?.baslikEk}
+                ekKolon={detayGrupta?.[d.ad]?.ekKolon}
                 oneriAlanlari={detayGrupta?.[d.ad]?.oneri}
                 gizliAlanlar={detayGrupta?.[d.ad]?.gizli
                   ? new Set(detayGrupta[d.ad].gizli) : undefined}

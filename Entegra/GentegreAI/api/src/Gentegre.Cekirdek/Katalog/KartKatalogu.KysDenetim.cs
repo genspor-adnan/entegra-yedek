@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KURUMSAL KALİTE - İÇ DENETİM (1051, sade) kartı: denetim + bulgular.
@@ -22,14 +22,16 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",           "id",             "sayi",  Yazilabilir: false),
-            new("no",           "no",             "metin", Yazilabilir: false, Baslik: "Denetim No", Grup: "Denetim"),
-            new("departmanId",  "departman_id",   "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Denetlenen birim", Grup: "Denetim"),
-            new("planTarih",    "plan_tarih",     "tarih", Zorunlu: true, Baslik: "Plan tarihi", Grup: "Denetim"),
-            new("gerceklesen",  "gerceklesen",    "tarih", Baslik: "Gerçekleşen tarih", Grup: "Denetim"),
-            new("basDenetciId", "bas_denetci_id", "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Baş denetçi", Grup: "Denetim"),
-            new("ekip",         "ekip",           "metin", EnFazlaUzunluk: 300, Baslik: "Denetçi ekibi", Grup: "Denetim"),
-            new("durum",        "durum",          "kod",   SabitKodlar: KysDenetimDurum, Baslik: "Durum", Grup: "Denetim"),
-            new("kapsam",       "kapsam",         "metin", EnFazlaUzunluk: 2000, Baslik: "Kapsam ve kriterler", Grup: "Denetim"),
+            // Mockup Kalite2/denetim_karti.html (1061): künye kimlik şeridinde,
+            //   altında Bulgular tablosu ve sonuç notu (tek sayfa).
+            new("no",           "no",             "metin", Yazilabilir: false, Baslik: "No", Grup: "Kimlik"),
+            new("departmanId",  "departman_id",   "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Birim", Grup: "Kimlik"),
+            new("planTarih",    "plan_tarih",     "tarih", Zorunlu: true, Baslik: "Plan tarihi", Grup: "Kimlik"),
+            new("gerceklesen",  "gerceklesen",    "tarih", Baslik: "Yapıldığı tarih", Grup: "Kimlik"),
+            new("basDenetciId", "bas_denetci_id", "kod",   Zorunlu: true, KodTablosu: "public.v_personel_lookup", Baslik: "Baş denetçi", Grup: "Kimlik"),
+            new("ekip",         "ekip",           "metin", EnFazlaUzunluk: 300, Baslik: "Ekip", Grup: "Kimlik"),
+            new("kapsam",       "kapsam",         "metin", EnFazlaUzunluk: 300, Baslik: "Kapsam", Grup: "Kimlik"),
+            new("durum",        "durum",          "kod",   SabitKodlar: KysDenetimDurum, Baslik: "Durum", Grup: "Kimlik"),
             new("sonucNotu",    "sonuc_notu",     "metin", EnFazlaUzunluk: 2000, Baslik: "Sonuç notu", Grup: "Denetim"),
         },
         Detaylar: new DetayTanimi[]
@@ -39,7 +41,7 @@ public static partial class KartKatalogu
                 new("id",       "id",       "sayi",  Yazilabilir: false),
                 new("sinif",    "sinif",    "kod",   Zorunlu: true, SabitKodlar: KysDenetimBulguSinif, Baslik: "Sınıf"),
                 new("aciklama", "aciklama", "metin", Zorunlu: true, EnFazlaUzunluk: 1000, Baslik: "Bulgu"),
-                new("madde",    "madde",    "metin", EnFazlaUzunluk: 80, Baslik: "ISO / SKS madde"),
+                new("madde",    "madde",    "metin", EnFazlaUzunluk: 80, Baslik: "Madde"),
             }, Sirala: "sinif, id", Baslik: "Bulgular", LogTabloId: LogKysDenetimBulgu),
         });
 }

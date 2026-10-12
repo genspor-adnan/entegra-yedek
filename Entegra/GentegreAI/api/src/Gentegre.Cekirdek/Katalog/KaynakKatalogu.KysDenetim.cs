@@ -15,15 +15,19 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "d.id",              "sayi",  "Id", Varsayilan: false),
-            new("no",            "d.no",              "metin", "Denetim No", Genislik: 110),
-            new("birimAdi",      "d.birim_adi",       "metin", "Birim", Genislik: 180),
+            // Mockup Kalite2/ic_denetim.html (1061): No · Birim · Plan tarihi ·
+            //   Yapıldı · Denetçi · Bulgu · Açılan DÖF · Durum.
+            new("no",            "d.no",              "metin", "No", Genislik: 110),
+            new("birimAdi",      "d.birim_adi",       "metin", "Birim", Genislik: 150),
             new("planTarih",     "d.plan_tarih",      "tarih", "Plan tarihi"),
-            new("gerceklesen",   "d.gerceklesen",     "tarih", "Gerçekleşen"),
+            new("gerceklesen",   "d.gerceklesen",     "tarih", "Yapıldı"),
             new("tarih",         "d.tarih",           "tarih", "Tarih", Varsayilan: false),
-            new("basDenetciAdi", "d.bas_denetci_adi", "metin", "Baş denetçi", Genislik: 150),
-            new("ekip",          "d.ekip",            "metin", "Ekip", Genislik: 200),
+            new("denetci",       "d.denetci",         "metin", "Denetçi", Genislik: 200),
+            new("basDenetciAdi", "d.bas_denetci_adi", "metin", "Baş denetçi", Genislik: 150, Varsayilan: false),
+            new("ekip",          "d.ekip",            "metin", "Ekip", Genislik: 200, Varsayilan: false),
             new("kapsam",        "d.kapsam",          "metin", "Kapsam", Genislik: 240, Varsayilan: false),
             new("bulguOzet",     "d.bulgu_ozet",      "metin", "Bulgu", Genislik: 150),
+            new("dofSayisi",     "d.dof_sayisi",      "sayi",  "Açılan DÖF", Hizalama: "orta"),
             new("durumAdi",      "d.durum_adi",       "metin", "Durum", Genislik: 100, Bicim: "rozet"),
             new("departmanId",   "d.departman_id",    "sayi",  "Birim Id", Varsayilan: false),
             new("gecikti",       "d.gecikti",         "mantik", "Gecikti", Varsayilan: false),

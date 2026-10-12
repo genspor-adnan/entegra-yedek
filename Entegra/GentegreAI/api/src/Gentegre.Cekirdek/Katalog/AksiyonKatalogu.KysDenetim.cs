@@ -12,7 +12,7 @@ public static partial class AksiyonKatalogu
     {
         s["kys-denetim-liste"] =
         [
-            .. Crud("kys-denetim", "kys", "kys.denetim", ekleAdi: "＋ Yeni Denetim", silHedef: null),
+            .. Crud("kys-denetim", "kys", "kys.denetim", ekleAdi: "＋ Denetim Planla", silHedef: null),
             new("kys.denetim-bulgular", "📋 Bulgular / DÖF", "kys", KaynakKodu: "kys.denetim", KayitGerekir: true, Sira: 40),
         ];
         s["kys-denetim-bulgu-liste"] =

@@ -211,6 +211,9 @@ interface Props {
   /** Tablo BAŞLIĞININ yanına güncel satırlardan üretilen kısa bilgi - ör. DÖF
    *  faaliyetlerinde "2 / 3 tamamlandı". Düzenledikçe güncellenir. */
   baslikEk?(satirlar: Record<string, unknown>[]): React.ReactNode;
+  /** SATIR SONUNA SALT GÖRÜNÜM KOLONU (veri alanı değil) - ör. denetim
+   *  bulgusunda açılmış DÖF no ya da "DÖF Aç" düğmesi. */
+  ekKolon?: { baslik: string; genislik?: number; ciz(satir: Record<string, unknown>): React.ReactNode };
   /** ÖNERİLİ KUTU (combo): alan adı -> satırda öneri listesini (JSON metin
    *  dizisi) taşıyan kolon. Kutu açılır liste olur; serbest yazı da kalır. */
   oneriAlanlari?: Record<string, string>;
@@ -380,7 +383,7 @@ function oneriListesi(ham: unknown): string[] {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
-                               silGizli, onYeni, kolonBaslikEk, baslikEk, oneriAlanlari,
+                               silGizli, onYeni, kolonBaslikEk, baslikEk, ekKolon, oneriAlanlari,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
@@ -1105,6 +1108,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   : <>{kolonBasligi(a)}{a.zorunlu && ' *'}</>}
               </th>
             ))}
+            {ekKolon && <th style={ekKolon.genislik ? { width: ekKolon.genislik } : undefined}>{ekKolon.baslik}</th>}
             {!modalDuzenle && !saltOkunur && <th />}
           </tr>
         </thead>
@@ -1534,6 +1538,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   )}
                 </td>
               ))}
+              {ekKolon && <td className="detay-ek-kolon">{ekKolon.ciz(satir)}</td>}
               {!modalDuzenle && !saltOkunur && !sadeGrid && (
                 <td className="hiza-orta">
                   <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
@@ -1548,7 +1553,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           })}
           {gorunurler.length === 0 && (
             <tr><td colSpan={gridAlanlari.length + (satirlarGrid ? 2 : 0)
-                             + (huvKolonu ? 1 : 0) + 1} className="bos">
+                             + (huvKolonu ? 1 : 0) + (ekKolon ? 1 : 0) + 1} className="bos">
               {durum.guncel.length === 0 ? 'Satır yok' : 'Eşleşen satır yok'}
             </td></tr>
           )}

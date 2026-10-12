@@ -51,6 +51,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
+import { BulguDofHucresi, DenetimAraclari, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKapatModali, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
@@ -118,6 +119,8 @@ export function ListeKarti({
   const [gebeHasta, setGebeHasta] = useState<{ id: number; ad: string } | null>(null);
   // CİHAZ KARTI "Kapat / bakıma al" penceresi (967).
   const [cihazKapat, setCihazKapat] = useState(false);
+  // İÇ DENETİM (1061): bulgulardan açılmış DÖF'ler (Bulgular tablosunun DÖF kolonu).
+  const bulguDoflari = useBulguDoflari(tanim.kaynak === 'kys-denetim' && typeof kartId === 'number' ? kartId : 0);
   const { kullanici } = useOturum();
   // BİRLEŞİK İSTEM SEPETİ (kullanici: "lab ve radyoloji tek istem ekranı,
   //   sekmeli"): muayeneId set olunca modal açılır.
@@ -263,7 +266,7 @@ export function ListeKarti({
         sekmeGruplari={tanim.kaynak === 'goz-muayene' ? GOZ_SEKME_GRUPLARI : undefined}
         // Başlık rozetleri (kullanıcı): H hasta no · P protokol no.
         // DÖF (1050): başlıkta '#id' yok - numara baslikEk rozetinde.
-        baslikRozet={tanim.kaynak === 'kys-dof' && kartId !== 'yeni' ? <></> : tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
+        baslikRozet={(tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim') && kartId !== 'yeni' ? <></> : tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
           <>
             {String(gorOnizleme.kayit.hastaNo ?? '') && <span className="rozet gri" title={c('Hasta no')}>No {String(gorOnizleme.kayit.hastaNo)}</span>}
             {String(gorOnizleme.kayit.protokol ?? '') && <span className="rozet gri" title={c('Protokol no')}>Prt {String(gorOnizleme.kayit.protokol)}</span>}
@@ -505,7 +508,7 @@ export function ListeKarti({
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme'].includes(tanim.kaynak)}
-        baslikEk={tanim.kaynak === 'kys-dof' ? dofBaslikEk : tanim.kaynak === 'muayene'
+        baslikEk={tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
           ? (d) => {
               const kod = String(d.durum ?? '');
               const ad = MUAYENE_DURUM[Number(kod)] ?? '';
@@ -724,6 +727,12 @@ export function ListeKarti({
               // TANI ＋ = ICD arama (grid başlığında, düzenle/sil ile aynı bar).
               tanilar: { ...kartOzel.detayGrupta.tanilar,
                          yeni: () => setIcdAramaAcik(true) } }
+          : tanim.kaynak === 'kys-denetim' && kartOzel.detayGrupta?.bulgular
+          // İÇ DENETİM (1061 mockup): her bulgudan tek tıkla DÖF.
+          ? { ...kartOzel.detayGrupta,
+              bulgular: { ...kartOzel.detayGrupta.bulgular,
+                          ekKolon: { baslik: 'DÖF', genislik: 140,
+                                     ciz: s => <BulguDofHucresi satir={s} doflar={bulguDoflari} /> } } }
           : kartOzel.detayGrupta}
         detayIzgara={kartOzel.detayIzgara}
         seritAlanlari={kartOzel.seritAlanlari}
@@ -767,6 +776,7 @@ export function ListeKarti({
         // GÖZ GÖRÜNTÜLEME ARAÇ ÇUBUĞU (974 mockup): çekildi (ödenmişse) · değerlendir ve imzala · yeniden çekim · yazdır.
         // DÖF (1050 mockup): kaynak kaydına git · DÖF formu (A4).
         ekAraclar={tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
+          : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
           : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
           ? (d) => {
               const durum = Number(d.durum ?? 1), serbest = Number(d.serbest ?? 1);

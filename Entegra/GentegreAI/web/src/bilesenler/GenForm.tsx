@@ -156,6 +156,8 @@ interface Props {
                                  kolonBaslikEk?: Record<string, React.ReactNode>;
                                  /** Tablo başlığının yanına satırlardan kısa bilgi. */
                                  baslikEk?(satirlar: Record<string, unknown>[]): React.ReactNode;
+                                 /** Satır sonuna salt görünüm kolonu (GenDetayTablo.ekKolon). */
+                                 ekKolon?: { baslik: string; genislik?: number; ciz(satir: Record<string, unknown>): React.ReactNode };
                                  /** Önerili kutu: alan -> öneri listesi kolonu. */
                                  oneri?: Record<string, string> }>;
   /**

@@ -262,6 +262,12 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   'kys-olay': {
     seritAlanlari: ['no', 'tarih', 'tur', 'departmanId', 'zarar', 'durum', 'anonim'],
   },
+  // İÇ DENETİM (1061, mockup Kalite2/denetim_karti.html): künye şeritte, altında
+  //   Bulgular (DÖF kolonu ListeKarti'de) ve sonuç notu - tek sayfa.
+  'kys-denetim': {
+    seritAlanlari: ['no', 'departmanId', 'planTarih', 'gerceklesen', 'basDenetciId', 'ekip', 'kapsam', 'durum'],
+    detayGrupta: { bulgular: { grup: 'Denetim', ustte: true } },
+  },
   'kys-dof': {
     seritAlanlari: ['no', 'tur', 'departmanId', 'sorumluId', 'kaynakTur', 'kaynakNo', 'termin', 'durum', 'ekleyen', 'eklemeTarihi'],
     detayGrupta: { faaliyetler: { grup: 'DÖF', baslikEk: faaliyetSayaci } },
