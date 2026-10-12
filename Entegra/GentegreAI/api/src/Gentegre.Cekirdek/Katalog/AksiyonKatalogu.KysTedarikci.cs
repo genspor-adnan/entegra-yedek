@@ -14,12 +14,20 @@ public static partial class AksiyonKatalogu
     {
         s["kys-tedarikci-liste"] =
         [
-            .. Crud("kys-tedarikci", "kys", "kys.tedarikci", ekleAdi: "＋ Değerlendir", yazdir: false),
-            new("kys.tedarikci-yeniden", "↻ Yeniden değerlendir", "kys", KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, KayitGerekir: true, Sira: 35),
-            new("kys.tedarikci-dof", "🛠 DÖF aç", "kys", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
+            // Mockup Kalite2/tedarikci.html (1071): araç çubuğu "＋ Değerlendir ·
+            //   🖨️ Onaylı Tedarikçi Listesi". Kartı aç / sil / yeniden değerlendir /
+            //   DÖF aç sağ tık; genel Yazdır (CSV) yalnız palet.
+            new("kys-tedarikci.yeni", "＋ Değerlendir", "kys", Kisayol: "Ctrl+N",
+                KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, Sira: 10),
+            new("kys-tedarikci.duzenle", "✎ Kartı aç", "kys", Hedef: "sagtus,palet", Kisayol: "Enter",
+                KaynakKodu: "kys.tedarikci", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            new("kys-tedarikci.sil", "🗑 Sil", "kys", Hedef: "sagtus,palet", Kisayol: "Del",
+                KaynakKodu: "kys.tedarikci", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            new("kys.tedarikci-yeniden", "↻ Yeniden değerlendir", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.tedarikci", Islem: Islem.Ekle, KayitGerekir: true, Sira: 35),
+            new("kys.tedarikci-dof", "🛠️ DÖF Aç", "kys", Hedef: "sagtus,palet", KaynakKodu: "kys.dof", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
             // Mockup (1066): onaylı tedarikçilerin A4 listesi (ISO 8.4 kanıtı).
             new("kys.tedarikci-onayli", "🖨️ Onaylı Tedarikçi Listesi", "kys", KaynakKodu: "kys.tedarikci", Sira: 45),
-            Yazdir(),
+            Yazdir() with { Hedef = "palet" },
         ];
     }
 }

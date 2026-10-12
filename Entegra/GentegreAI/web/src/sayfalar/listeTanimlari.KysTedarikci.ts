@@ -10,8 +10,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
 export const KYS_TEDARIKCI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'kys-tedarikci', rota: 'kys-tedarikci', aksiyonEkrani: 'kys-tedarikci-liste',
-    baslik: 'Tedarikçi Değerlendirme',
-    yol: 'Kalite › Tedarikçi Değerlendirme',
+    baslik: '🚚 Tedarikçi Değerlendirme',
+    yol: 'Kalite › Tedarikçi Değerlendirme · ISO 9001 · 8.4 dış tedarikçi kontrolü · yılda 1',
     kartYolu: '/kys-tedarikci', kartBaslik: 'Tedarikçi Değerlendirmesi',
     cipler: [
       { ad: 'Onaylı',              filtre: { alan: 'sonuc', op: 'esit', deger: 1 } },
