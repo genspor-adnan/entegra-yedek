@@ -43,7 +43,7 @@ export function KysToplantilar() {
   return (
     <div className="fm-sayfa">
       <div className="sayfabas"><div className="basrow"><h1>👥 {c('Toplantı & Kararlar')}</h1>
-        <span className="yol">Kalite › YGG & Kararlar · {c('YGG (Yönetimin Gözden Geçirmesi) + kalite toplantıları')}</span>
+        <span className="yol">Kalite › Toplantı & Kararlar · {c('YGG (Yönetimin Gözden Geçirmesi) + kalite toplantıları')}</span>
         <div className="sag">
           {yetki('kys.toplanti', 'ekle') && <button className="d bir" onClick={() => git(`/kys-toplanti/yeni${GERI}`)}>＋ {c('Toplantı')}</button>}
           <DuzenleSilDugmeleri secili={!!secili} duzenleYetki={yetki('kys.toplanti', 'degistir')} silYetki={yetki('kys.toplanti', 'sil')}

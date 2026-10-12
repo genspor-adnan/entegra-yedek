@@ -14,9 +14,11 @@ export const KYS_TOPLANTI_LISTELERI: ListeGirdisi[] = [
   //   liste menüde görünmez; toplantı ve karar kartları onlarla açılır.
   {
     kaynak: 'kys-toplantilar', rota: 'kys-toplantilar', ozelSayfa: true, baslik: 'Toplantı & Kararlar',
-    yol: 'Kalite › YGG & Kararlar',
+    // Menü adı sayfa başlığıyla aynı (kullanıcı "toplantı listesi yok" - "YGG &
+    //   Kararlar" adıyla aranınca bulunmuyordu).
+    yol: 'Kalite › Toplantı & Kararlar',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'YGG & Kararlar', ic: '👥', yetkiKodu: 'kys.toplanti', menuSira: 70,
+    menuGrup: 'Kalite', menuAd: 'Toplantı & Kararlar', ic: '👥', yetkiKodu: 'kys.toplanti', menuSira: 70,
   },
   {
     kaynak: 'kys-toplanti', rota: 'kys-toplanti', aksiyonEkrani: 'kys-toplanti-liste', baslik: 'Kalite Toplantıları (Komite / YGG)',
