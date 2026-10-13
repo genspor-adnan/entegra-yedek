@@ -242,3 +242,6 @@
 .kt-kok .vk-inp{border:1px solid var(--line);border-radius:3px;padding:3px 7px;font-size:11.5px;min-width:220px}
 .kt-kok .vk-anahtar{display:flex;align-items:center;gap:8px;margin-top:6px}
 .kt-kok .vk-anahtar code{background:#1f2d3a;color:#c6f5d0;padding:6px 9px;border-radius:3px;font-size:11.5px;letter-spacing:.4px;word-break:break-all}
+.kt-kok .vk-esleme{display:flex;flex-direction:column;gap:2px}
+.kt-kok .vk-esleme .vk-satir{margin-top:4px}
+.kt-kok .vk-inp.vk-kisa{min-width:60px;width:70px}

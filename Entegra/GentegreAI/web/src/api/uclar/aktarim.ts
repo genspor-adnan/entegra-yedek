@@ -33,6 +33,7 @@ export const aktarimUclari = {
 export type AktarimProfili = {
   veriKaynagi: 'web' | 'delphi'; hareketBaslangic: string | null; varsayilanSube: string | null;
   subeEsleme: { delphiSube: number; subeId: number; subeAd: string }[];
+  subeler: { id: number; ad: string }[];
   ajanlar: AktarimDurumu['ajanlar'];
 };
 
@@ -41,5 +42,8 @@ export const aktarimProfilUclari = {
   aktarimProfiliYaz: (govde: { veriKaynagi?: 'web' | 'delphi'; hareketBaslangic?: string }) =>
     gonder<{ tamam: boolean }>('/api/kurum-profil/aktarim', govde, 'PUT'),
   aktarimAjanEkle: (ad: string) => gonder<{ anahtar: string }>('/api/kurum-profil/aktarim/ajan', { ad }),
+  /** Tam liste yazılır; değişirse ajan bütün tabloları yeniden yükler. */
+  aktarimSubeEslemeYaz: (satirlar: { delphiSube: number; subeId: number }[]) =>
+    gonder<{ yenidenYukleme: boolean }>('/api/kurum-profil/aktarim/sube-esleme', satirlar, 'PUT'),
   aktarimAjanPasif: (id: number) => istek<{ id: number }>(`/api/kurum-profil/aktarim/ajan/${id}/pasif`, { method: 'POST' }),
 };

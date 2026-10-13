@@ -19,6 +19,8 @@ export function VeriKaynagiPaneli() {
   const [tarih, setTarih] = useState('');
   const [yeniAd, setYeniAd] = useState('');
   const [anahtar, setAnahtar] = useState<string | null>(null);
+  // Şube eşlemesi düzenleme (null = görünüm kipi).
+  const [esleme, setEsleme] = useState<{ delphiSube: string; subeId: number }[] | null>(null);
 
   const yukle = useCallback(() => {
     api.aktarimProfili().then(p => { setV(p); setTarih(p.hareketBaslangic ?? ''); setHata('') })
@@ -55,6 +57,19 @@ export function VeriKaynagiPaneli() {
     try { await api.aktarimAjanPasif(id); yukle() } catch (h) { setHata(hataMetni(h)) }
   };
 
+  const eslemeKaydet = async () => {
+    if (!esleme || !v) return;
+    const satirlar = esleme.filter(e => e.delphiSube.trim() !== '').map(e => ({ delphiSube: Number(e.delphiSube), subeId: e.subeId }));
+    if (satirlar.some(e => !Number.isInteger(e.delphiSube) || e.delphiSube < 0)) { setHata('Delphi şube numarası 0 ya da pozitif tam sayı olmalı.'); return }
+    if (!await onay('Şube eşlemesi kaydedilsin mi?\n\nEşleme değiştiyse ajan bir sonraki turda BÜTÜN tabloları yeniden yükler '
+      + '(kayıtların şubesi yeni eşlemeyle düzelir; büyük veritabanında birkaç dakika - mesai dışı önerilir).')) return;
+    try {
+      const y = await api.aktarimSubeEslemeYaz(satirlar);
+      setEsleme(null); yukle();
+      if (y.yenidenYukleme) mesaj('Eşleme kaydedildi; ajan tabloları yeniden yükleyecek.');
+    } catch (h) { setHata(hataMetni(h)) }
+  };
+
   const kopyala = async () => {
     if (!anahtar) return;
     try { await navigator.clipboard.writeText(anahtar); mesaj('Anahtar panoya kopyalandı.') }
@@ -68,7 +83,7 @@ export function VeriKaynagiPaneli() {
       {hata && <div className="uyari">{hata}</div>}
 
       <div className="grp">
-        <div className="hdr">Veri kaynağı <span className="rz mavi">kurum geneli - bütün şubeler</span></div>
+        <div className="hdr">Veri kaynağı <span className="rz mavi" style={{ justifySelf: 'start', width: 'fit-content' }}>kurum geneli - bütün şubeler</span></div>
         <div className="ic">
           <label className="vk-sec">
             <input type="radio" checked={v.veriKaynagi === 'web'} onChange={() => void kipDegistir('web')} />
@@ -86,10 +101,35 @@ export function VeriKaynagiPaneli() {
           </div>
           <div className="vk-satir">
             <span className="vk-et">Şube eşlemesi</span>
-            <span>{v.subeEsleme.length
-              ? v.subeEsleme.map(e => `Delphi şube ${e.delphiSube} → ${e.subeAd}`).join(' · ')
-              : <span className="sonuk">eşleme yok</span>}
-              {' '}<span className="sonuk">· eşlenmeyen → {v.varsayilanSube ?? '—'}</span></span>
+            {esleme === null ? (<>
+              <span>{v.subeEsleme.length
+                ? v.subeEsleme.map(e => `Delphi şube ${e.delphiSube} → ${e.subeAd}`).join(' · ')
+                : <span className="sonuk">eşleme yok</span>}
+                {' '}<span className="sonuk">· eşlenmeyen → {v.varsayilanSube ?? '—'}</span></span>
+              <div className="btn" onClick={() => setEsleme(v.subeEsleme.map(e => ({ delphiSube: String(e.delphiSube), subeId: e.subeId })))}>Düzenle</div>
+            </>) : (
+              <div className="vk-esleme">
+                {esleme.map((e, i) => (
+                  <div key={i} className="vk-satir">
+                    <span className="sonuk">Delphi şube</span>
+                    <input className="vk-inp vk-kisa" inputMode="numeric" value={e.delphiSube}
+                           onChange={x => setEsleme(esleme.map((y, j) => j === i ? { ...y, delphiSube: x.target.value } : y))} />
+                    <span>→</span>
+                    <select className="vk-inp" value={e.subeId}
+                            onChange={x => setEsleme(esleme.map((y, j) => j === i ? { ...y, subeId: Number(x.target.value) } : y))}>
+                      {v.subeler.map(s => <option key={s.id} value={s.id}>{s.ad}</option>)}
+                    </select>
+                    <div className="btn" onClick={() => setEsleme(esleme.filter((_, j) => j !== i))}>Sil</div>
+                  </div>
+                ))}
+                <div className="vk-satir">
+                  <div className="btn" onClick={() => setEsleme([...esleme, { delphiSube: '', subeId: v.subeler[0]?.id ?? 0 }])}>＋ Satır</div>
+                  <div className="btn primary" onClick={() => void eslemeKaydet()}>Kaydet</div>
+                  <div className="btn" onClick={() => setEsleme(null)}>Vazgeç</div>
+                  <span className="sonuk">Delphi şube numarası = Delphi'deki SUBEID (0 genelde merkez).</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

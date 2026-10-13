@@ -273,6 +273,28 @@ public sealed class AktarimUcTestleri(ApiSunucuOlgusu api)
             var p = await h.GetFromJsonAsync<JsonElement>("/api/kurum-profil/aktarim");
             Assert.Equal(baska, p.GetProperty("hareketBaslangic").GetString());
             Assert.Equal(400, (int)(await h.PutAsJsonAsync("/api/kurum-profil/aktarim", new { veriKaynagi = "excel" })).StatusCode);
+
+            // Şube eşlemesi değişince bütün tablolar yeniden yüklenir; aynısı yazılınca dokunulmaz.
+            var oncekiEsleme = p.GetProperty("subeEsleme").EnumerateArray()
+                .Select(e => new { delphiSube = e.GetProperty("delphiSube").GetInt32(), subeId = e.GetProperty("subeId").GetInt32() }).ToArray();
+            var sube = p.GetProperty("subeler").EnumerateArray().First().GetProperty("id").GetInt32();
+            try
+            {
+                await b.CalistirAsync("insert into public.aktarim_durum (tablo, versiyon) values ('DEPOLAR', 77) on conflict (tablo) do nothing", null, [], ct);
+                var es = await (await h.PutAsJsonAsync("/api/kurum-profil/aktarim/sube-esleme",
+                    new[] { new { delphiSube = 990, subeId = sube } })).Content.ReadFromJsonAsync<JsonElement>();
+                Assert.True(es.GetProperty("yenidenYukleme").GetBoolean());
+                Assert.Equal(0L, await b.TekDegerAsync<long>("select count(*) from public.aktarim_durum", null, [], ct));
+                es = await (await h.PutAsJsonAsync("/api/kurum-profil/aktarim/sube-esleme",
+                    new[] { new { delphiSube = 990, subeId = sube } })).Content.ReadFromJsonAsync<JsonElement>();
+                Assert.False(es.GetProperty("yenidenYukleme").GetBoolean());
+                Assert.Equal(400, (int)(await h.PutAsJsonAsync("/api/kurum-profil/aktarim/sube-esleme",
+                    new[] { new { delphiSube = 1, subeId = sube }, new { delphiSube = 1, subeId = sube } })).StatusCode);
+            }
+            finally
+            {
+                await h.PutAsJsonAsync("/api/kurum-profil/aktarim/sube-esleme", oncekiEsleme);
+            }
         }
         finally
         {

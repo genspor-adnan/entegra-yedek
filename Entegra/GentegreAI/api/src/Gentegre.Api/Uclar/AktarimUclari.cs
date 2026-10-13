@@ -234,6 +234,7 @@ public static class AktarimUclari
 
     public sealed record AktarimProfilIstegi(string? VeriKaynagi, DateTime? HareketBaslangic);
     public sealed record AjanIstegi(string? Ad);
+    public sealed record SubeEslemeSatiri(int DelphiSube, int SubeId);
 
     /// <summary>Hareket tabloları: başlangıç tarihi değişince yeniden (tam) yüklenir.</summary>
     private static readonly string[] HareketTablolari = ["FATBASLIK", "FATURA", "STOKIZLEME", "KASA"];
@@ -258,6 +259,8 @@ public static class AktarimUclari
                                      'subeAd', s.ad) order by e.delphi_sube_id), '[]')
                                    from public.aktarim_sube_esleme e join public.sube s on s.id = e.sube_id),
                   'varsayilanSube', (select s.ad from public.sube s where s.id = public.fn_aktarim_sube(null)),
+                  'subeler', (select coalesce(json_agg(json_build_object('id', s.id, 'ad', s.ad) order by s.id), '[]')
+                                from public.sube s where s.aktif = 1),
                   'ajanlar', (select coalesce(json_agg(json_build_object('id', a.id, 'ad', a.ad, 'aktif', a.aktif,
                                   'olusturma', a.olusturma, 'sonNabiz', a.son_nabiz, 'surum', a.surum)
                                   order by a.aktif desc, a.id desc), '[]') from public.aktarim_ajan a))::text
@@ -306,6 +309,30 @@ public static class AktarimUclari
             await using var b = await veri.AcAsync(iptal);
             var anahtar = await b.TekDegerAsync<string>("select public.fn_aktarim_ajan_ekle(@p0)", null, [g.Ad ?? ""], iptal);
             return Results.Ok(new { anahtar });
+        });
+
+        // ŞUBE EŞLEMESİ (mockup sekme 3 "Düzenle"): Delphi SUBEID -> web şube. Tam liste
+        //   yazılır. Değişirse bütün tabloların versiyonu silinir: ajan bir sonraki turda
+        //   hepsini TAM yükler, kayıtların sube_id'si yeni eşlemeyle düzelir.
+        grup.MapPut("/sube-esleme", async (SubeEslemeSatiri[] satirlar, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            (await cozucu.CozAsync(ctx, iptal)).YetkiIste("ayar", Islem.Degistir);
+            if (satirlar.GroupBy(x => x.DelphiSube).Any(x => x.Count() > 1))
+                throw GentegreHatasi.Dogrulama("Aynı Delphi şubesi iki kez eşlenmiş.");
+            await using var b = await veri.AcAsync(iptal);
+            await using var t = await b.BeginTransactionAsync(iptal);
+            var once = await b.TekDegerAsync<string>(
+                "select coalesce(string_agg(delphi_sube_id || '>' || sube_id, ',' order by delphi_sube_id), '') from public.aktarim_sube_esleme",
+                t, [], iptal) ?? "";
+            await b.CalistirAsync("delete from public.aktarim_sube_esleme", t, [], iptal);
+            foreach (var x in satirlar)
+                await b.CalistirAsync("insert into public.aktarim_sube_esleme (delphi_sube_id, sube_id) values (@p0, @p1)",
+                                      t, [x.DelphiSube, x.SubeId], iptal);
+            var sonra = string.Join(",", satirlar.OrderBy(x => x.DelphiSube).Select(x => $"{x.DelphiSube}>{x.SubeId}"));
+            var yeniden = once != sonra;
+            if (yeniden) await b.CalistirAsync("delete from public.aktarim_durum", t, [], iptal);
+            await t.CommitAsync(iptal);
+            return Results.Ok(new { yenidenYukleme = yeniden });
         });
 
         grup.MapPost("/ajan/{id:int}/pasif", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>

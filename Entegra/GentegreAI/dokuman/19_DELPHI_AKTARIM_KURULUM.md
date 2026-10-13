@@ -41,9 +41,9 @@ dış verisi istemeden), API konteyneri yoksa kurulur, web. Göç adımı sunucu
 2. **Hareket başlangıcı**: belge / kasa / stok izleme bu tarihten aktarılır (tanımların hepsi gelir). Öneri: içinde bulunulan yılın 1 Ocak'ı — Delphi yıl devrini (açılış bakiyeleri) 1 Ocak'ta yazar.
 3. **Veri kaynağı: Delphi ERP** → onay. Aktarılan kaynaklar (cari, stok, hizmet, belge, kasa…) web'de salt okunur olur.
 4. **＋ Yeni anahtar üret** (ad: ör. "Merkez sunucusu"). Anahtar **yalnız bu an** görünür — kopyalayın.
-5. Delphi'de birden çok şube varsa eşleme (şimdilik SQL ile, ekranı yok):
-   `insert into aktarim_sube_esleme (delphi_sube_id, sube_id) values (0, 1), (1, 3);`
-   Eşlenmeyen Delphi şubesi kurumun varsayılan şubesine düşer (sekmede görünür).
+5. Delphi'de birden çok şube varsa **Şube eşlemesi › Düzenle**: Delphi SUBEID → web şubesi.
+   Eşlenmeyen Delphi şubesi kurumun varsayılan şubesine düşer. Eşlemeyi ilk yüklemeden ÖNCE
+   yapın: sonradan değişirse ajan bütün tabloları yeniden yükler (kayıtların şubesi düzelir).
 
 ## 2. Müşteri sunucusu — MSSQL (bir kez)
 
