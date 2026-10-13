@@ -154,6 +154,10 @@ Dikkat gerektirenler:
 | Gecikme | Yoklama, 5 sn (gerekirse sonra Service Broker bildirimi) |
 | Kapsam | §11.1'deki tablo listesi (göç betiklerinin kapsadığı ERP verisi) |
 | Kurum | 1 Delphi veritabanı = 1 Gentegre AI kurumu; şubeler bugünkü göç kuralıyla (018) |
+| Delphi kaydına web eki (13.10.2026, mockup `Ekranlar/aktarim_durumu.html`) | Web'e özgü ekler açık (not, ek belge, görev, yorum); kaydın alanları / satırları kapalı |
+| e-Belge gönderimi | Delphi'de kalır; web belgeyi ve durumunu gösterir |
+| Aktarılan kaynakta yeni kayıt | Kapalı. İstisna: personel / hasta / kişi `taraf` kaydı web'in - yalnız cari rolü (müşteri, tedarikçi) kapalı |
+| Hata kuyruğunda "Atla" | Yok; yalnız "Çözüldü say" (veri atlanmaz) |
 | Açık | Pilot müşteri ve SQL Server sürümleri |
 
 ## 11. Uygulama planı
@@ -380,7 +384,16 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - Delphi'de STOKIZLEME BELGETUR 101 (113 bin satır) TUR 6 belgelerine bağlı -
      aynı belge ailesi, süzülmez.
 
-   Sırada: plan adım 6 - salt okunur kip + Aktarım Durumu ekranı (önce mockup).
+   **Adım 6 sürüyor.** Mockup `Ekranlar/aktarim_durumu.html` (4 karar §10'da).
+   - **6a yapıldı (1089):** `kurum_profil.veri_kaynagi` (`web` | `delphi`, kurum
+     geneli = sube_id 0). Kural VERİTABANINDA: 26 aktarılan tabloda
+     `trg_aktarim_salt_okunur` - Delphi satırı güncellenmez/silinmez, yeni kayıt
+     açılmaz (taraf'ta yalnız cari rolü; adres yalnız Delphi carisine), stok
+     bakiyesine yazılmaz; hata GK422 -> 422. Kart, özel uç, zamanlı iş - her yol
+     aynı karar. Aktarım `gentegre.aktarim` oturumuyla geçer (fn_aktar_paket
+     başında). `hizmet.oto_pasif` (552) Delphi kalemini atlar.
+   - Sırada 6b: kart / liste metaverisinde salt okunur + "Delphi'den gelir"
+     rozeti; 6c Aktarım Durumu ekranı; 6d GenProfil veri kaynağı + ajan anahtarı.
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (551 ad, 148 tanesi birden cok dosyada)
+## Fonksiyonlar (554 ad, 150 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -22,7 +22,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_kasa` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
-| `fn_aktar_paket` | `1086_aktarim_paket.sql` | — |
+| `fn_aktar_paket` | `1089_aktarim_salt_okunur.sql` | 1086_aktarim_paket.sql |
 | `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -34,6 +34,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1082_aktarim_stok_kalem_hesap.sql` | 1080_aktarim_kaynak_kimligi.sql |
+| `fn_aktarim_salt_okunur` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktarim_tarih` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktarim_ust` | `1087_aktarim_ust.sql` | — |
@@ -103,6 +104,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_dagilim_pay_grubu` | `470_belge_satir_dagilim.sql` | — |
 | `fn_dagilim_rota` | `915_dagilim_rota_kurum_oder.sql` | 470_belge_satir_dagilim.sql, 493_kurum_turu_kurumu_oder.sql, 597_tss_sgk_kullanilmasin.sql |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
+| `fn_delphi_kaynakli` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_demirbas_amortisman_varsayilan` | `1007_demirbas_zimmet_ekrani.sql` | — |
 | `fn_demirbas_hareket_yaz` | `1006_demirbas_sekmeleri.sql` | — |
 | `fn_demirbas_is_emri_no_uret` | `731_tedarik_numaralari.sql` | — |
@@ -209,7 +211,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hesap_atama_adi` | `940_personel_unvan_yalniz_onek.sql` | 196_kasa_atama.sql, 197_kasa_atama_tek_alan.sql |
 | `fn_hesap_plani_alt_ac` | `940_personel_unvan_yalniz_onek.sql` | 076_fn_kasa.sql |
 | `fn_hizmet_kullan` | `552_stok_ilac_kisa_ad_kullanim.sql` | 550_hizmet_kullanim_puani.sql, 551_hizmet_oto_pasif_durum.sql |
-| `fn_hizmet_kullanilmayan_pasife` | `552_stok_ilac_kisa_ad_kullanim.sql` | 550_hizmet_kullanim_puani.sql, 551_hizmet_oto_pasif_durum.sql |
+| `fn_hizmet_kullanilmayan_pasife` | `1089_aktarim_salt_okunur.sql` | 550_hizmet_kullanim_puani.sql, 551_hizmet_oto_pasif_durum.sql, 552_stok_ilac_kisa_ad_kullanim.sql |
 | `fn_hizmet_modalite_coz` | `460_hizmet_modalite_onarim.sql` | — |
 | `fn_hizmet_paket_ac` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `fn_hizmet_paket_derinlik` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
@@ -414,7 +416,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_steril_paket_kullanilabilir` | `868_sterilizasyon.sql` | — |
 | `fn_stok_kart_fiyat` | `128_fn_stok_kart_fiyat.sql` | — |
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
-| `fn_stok_kullanilmayan_pasife` | `552_stok_ilac_kisa_ad_kullanim.sql` | — |
+| `fn_stok_kullanilmayan_pasife` | `1089_aktarim_salt_okunur.sql` | 552_stok_ilac_kisa_ad_kullanim.sql |
 | `fn_stok_paket_kontrol` | `124_stok_paket.sql` | — |
 | `fn_stok_rezerve_tazele` | `142_siparis_rezervasyon.sql` | — |
 | `fn_sube_depo_subeleri` | `227_baz_sube.sql` | 173_sube_depo.sql, 174_merkez_depo_kullan.sql |
@@ -446,6 +448,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_urun_agaci_maliyet` | `429_uretim_v1.sql` | — |
 | `fn_urun_modu` | `489_urun_modu_profilden.sql` | — |
 | `fn_uts_hesap` | `338_entegrasyon_baz_sube.sql` | 223_uts_sema.sql, 227_baz_sube.sql, 337_entegrasyon_uts_ebelge.sql |
+| `fn_veri_kaynagi_delphi` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_yas_metni` | `488_lab_yas_metni.sql` | — |
 | `fn_yatak_ucreti_tahakkuk` | `700_yatis_tahakkuk.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
