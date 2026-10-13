@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Patoloji — Vaka Takibi — Mockup (Gentegre AI · Patoloji)</title>
+<title>Patoloji — Vakalar — Mockup (Gentegre AI · Patoloji)</title>
 <link rel="stylesheet" href="_patoloji.css">
 <style>
   .zaman{list-style:none;margin:0;padding:6px 10px}
@@ -17,7 +17,7 @@
 <body>
 
 <div class="win">
-  <div class="title">⏱ Patoloji — Vaka Takibi <span class="sp">Dış laboratuvardaki vakalar · 13.10.2026</span></div>
+  <div class="title">🔬 Patoloji — Vakalar <span class="sp">ORTAK liste: kurum içi + dış laboratuvar · 13.10.2026</span></div>
   <div class="toolbar">
     <div class="btn primary">👁 Vakayı Aç</div><div class="btn">📞 Laba Sor</div><div class="btn">🔁 Durumu Yenile</div>
     <div class="sepv"></div><div class="btn">🧫 Lam / Blok İste</div><div class="btn">📎 Elle Rapor Yükle</div><div class="btn sp">🖨 Liste ▾</div>
@@ -31,7 +31,7 @@
 
   <div class="pnl" data-s="vaka">
     <div class="ozet">
-      <div class="kart"><div class="b">Labda açık vaka</div><div class="d">23</div></div>
+      <div class="kart"><div class="b">Açık vaka</div><div class="d">31 <small>· 23 dış lab · 8 kurum içi</small></div></div>
       <div class="kart"><div class="b">Bu hafta gelen rapor</div><div class="d">41 <small>· 6'sı hekim görmedi</small></div></div>
       <div class="kart sari"><div class="b">Ek inceleme onayı bekleyen</div><div class="d">2</div></div>
       <div class="kart kir"><div class="b">Sözleşme TAT'ını aşan</div><div class="d">3 <small>· en eskisi 4 gün</small></div></div>
@@ -39,20 +39,22 @@
     </div>
     <div class="arama">
       <div class="kutu">🔍 Vaka, lab vaka no, hasta, isteyen hekim…</div>
-      <span class="chip on">Açık</span><span class="chip">TAT aşan</span><span class="chip">Rapor geldi · görülmedi</span><span class="chip">Kapandı</span>
-      <span class="sepv"></span><span class="chip">🏥 Laboratuvar ▾</span><span class="chip">👤 İsteyen ▾</span><span class="chip">🏷 Bölüm ▾</span>
+      <span class="chip on">Açık</span><span class="chip">🏠 Kurum içi</span><span class="chip">🚚 Dış lab</span><span class="chip">TAT aşan</span><span class="chip">Rapor geldi · görülmedi</span><span class="chip">Kapandı</span>
+      <span class="sepv"></span><span class="chip">🏥 Nerede ▾</span><span class="chip">👤 İsteyen ▾</span><span class="chip">🏷 Bölüm ▾</span>
     </div>
     <div class="ucPanel" style="grid-template-columns:1fr 380px">
       <div>
         <div class="dg"><table>
-          <thead><tr><th>Vaka</th><th>Lab no</th><th>Hasta</th><th>Materyal</th><th>Laboratuvar</th><th>İsteyen</th><th class="orta">Lab kabul</th><th>TAT</th><th class="orta">Lab durumu</th></tr></thead>
+          <thead><tr><th>Vaka</th><th>Nerede</th><th>Lab / patoloji no</th><th>Hasta</th><th>Materyal</th><th>İsteyen</th><th class="orta">Kabul</th><th>TAT</th><th class="orta">Durum</th></tr></thead>
           <tbody>
-            <tr class="sel"><td><b>PI-2026/0858</b></td><td>P26-18833</td><td>Elif Sarı</td><td>Sol meme tru-cut</td><td>Anadolu Patoloji</td><td>Dr. B. Akın</td><td class="orta">09.10</td><td><div class="bar k"><i style="width:100%"></i></div><span style="color:#b3261e">4 / 3 iş günü</span></td><td class="orta"><span class="rz pembe">Ek inceleme · onay bekliyor</span></td></tr>
-            <tr><td>PI-2026/0860</td><td>P26-18840</td><td>Kemal Usta</td><td>Sol hemikolektomi</td><td>Anadolu Patoloji</td><td>Op. Dr. M. Tan</td><td class="orta">09.10</td><td><div class="bar s"><i style="width:80%"></i></div><span class="sonuk">4 / 5 iş günü</span></td><td class="orta"><span class="rz mor">Mikroskopide</span></td></tr>
-            <tr><td>PI-2026/0862</td><td>MD-55120</td><td>Fatma Demir</td><td>Endometrium küretajı</td><td>Medlab Patoloji</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:45%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz mor">İşlemde</span></td></tr>
-            <tr><td>PI-2026/0865</td><td>EGE-2026-7781</td><td>Gül Tekin</td><td>Servikal smear</td><td>Ege Üniv. (portal)</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:100%"></i></div><span class="sonuk">rapor 12.10</span></td><td class="orta"><span class="rz ok">Rapor geldi · görülmedi</span></td></tr>
-            <tr><td>PI-2026/0866</td><td>P26-18902</td><td>Ali Yurt</td><td>Prostat biyopsisi (12 kadran)</td><td>Anadolu Patoloji</td><td>Dr. E. Gün</td><td class="orta">10.10</td><td><div class="bar s"><i style="width:65%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz kir">Lab: 11 kadran geldi</span></td></tr>
-            <tr><td>PI-2026/0868</td><td>—</td><td>Okan Er</td><td>Servikal lenf nodu</td><td>Medlab Patoloji</td><td>Dr. T. Uçar</td><td class="orta"><span class="rz kir">yanıt yok</span></td><td><span class="sonuk">gönderim 11.10 · 2 gün</span></td><td class="orta"><span class="rz kir">Kabul bekleniyor</span></td></tr>
+            <tr class="sel"><td><b>PI-2026/0858</b></td><td><span class="rz mavi">🚚 Anadolu Patoloji</span></td><td>P26-18833</td><td>Elif Sarı</td><td>Sol meme tru-cut</td><td>Dr. B. Akın</td><td class="orta">09.10</td><td><div class="bar k"><i style="width:100%"></i></div><span style="color:#b3261e">4 / 3 iş günü</span></td><td class="orta"><span class="rz pembe">Ek inceleme onayı</span></td></tr>
+            <tr><td>PI-2026/0860</td><td><span class="rz mavi">🚚 Anadolu Patoloji</span></td><td>P26-18840</td><td>Kemal Usta</td><td>Sol hemikolektomi</td><td>Op. Dr. M. Tan</td><td class="orta">09.10</td><td><div class="bar s"><i style="width:80%"></i></div><span class="sonuk">4 / 5 iş günü</span></td><td class="orta"><span class="rz mor">Mikroskopide</span></td></tr>
+            <tr><td>PI-2026/0862</td><td><span class="rz mavi">🚚 Medlab Patoloji</span></td><td>MD-55120</td><td>Selin Ar</td><td>Deri eksizyonu</td><td>Dr. A. Bilgin</td><td class="orta">10.10</td><td><div class="bar"><i style="width:45%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz mor">İşlemde</span></td></tr>
+            <tr><td>PI-2026/0865</td><td><span class="rz mavi">🚚 Ege Üniv. (portal)</span></td><td>EGE-2026-7781</td><td>Gül Tekin</td><td>Servikal smear</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:100%"></i></div><span class="sonuk">rapor 12.10</span></td><td class="orta"><span class="rz ok">Rapor geldi · görülmedi</span></td></tr>
+            <tr><td>PI-2026/0866</td><td><span class="rz mavi">🚚 Anadolu Patoloji</span></td><td>P26-18902</td><td>Ali Yurt</td><td>Prostat biyopsisi (12 kadran)</td><td>Dr. E. Gün</td><td class="orta">10.10</td><td><div class="bar s"><i style="width:65%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz kir">Lab: 11 kadran geldi</span></td></tr>
+            <tr><td>PI-2026/0867</td><td><span class="rz ok">🏠 Kurum içi</span></td><td>P26-01235 · Fz1</td><td>Nur Kılıç</td><td>Sağ tiroid lobu (frozen)</td><td>Op. Dr. T. Uçar</td><td class="orta">10:31</td><td><div class="bar s"><i style="width:65%"></i></div><span class="sonuk">13 / 20 dk</span></td><td class="orta"><span class="rz mor">Mikroskopide</span></td></tr>
+            <tr><td>PI-2026/0863</td><td><span class="rz ok">🏠 Kurum içi</span></td><td>P26-01224</td><td>Fatma Demir</td><td>Endometrium küretajı</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:45%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz mavi">Doku takibinde</span></td></tr>
+            <tr><td>PI-2026/0868</td><td><span class="rz mavi">🚚 Medlab Patoloji</span></td><td>—</td><td>Okan Er</td><td>Servikal lenf nodu</td><td>Dr. T. Uçar</td><td class="orta"><span class="rz kir">yanıt yok</span></td><td><span class="sonuk">gönderim 11.10 · 2 gün</span></td><td class="orta"><span class="rz kir">Kabul bekleniyor</span></td></tr>
           </tbody></table></div>
       </div>
       <div>
@@ -111,10 +113,10 @@
     <div class="not" style="margin:8px 12px">Lab faturası (e-Fatura ile gelen alış faturası ya da labın gönderdiği döküm) vaka bazında eşleştirilir: lab no + test kodu. Sözleşme fiyatından farklı, onaysız ek inceleme ya da bizde kaydı olmayan satır işaretlenir; ödeme engellenmez, itiraz listesi çıkar.</div>
   </div>
 
-  <div class="statusbar"><span>23 açık vaka · 3 TAT aşan · 2 onay bekleyen</span><span class="sp">TAT = lab kabulü → rapor (sözleşme günleri, iş günü takvimi)</span></div>
+  <div class="statusbar"><span>31 açık vaka (23 dış lab · 8 kurum içi) · 3 TAT aşan · 2 onay bekleyen</span><span class="sp">TAT = lab kabulü → rapor (sözleşme günleri, iş günü takvimi)</span></div>
 </div>
 
-<div class="not"><b>Labın verdiği ayrıntı labdan laba değişir:</b> API'li lab "makroskopide / mikroskopide" der, portal kullanan lab yalnız "kabul" ve "rapor" der. Ekran hangi durum gelirse onu gösterir; TAT hesabı yalnız kabul ve rapor zamanına dayanır. <b>Hekim görmedi</b> listesi kurum için önemlidir: rapor gelmiş ama isteyen hekim açmamışsa (özellikle malign tanı) hatırlatma gider.</div>
+<div class="not"><b>Tek liste, iki iş yeri.</b> Kurum içi ve dış lab vakaları aynı listede; "Nerede" vakanın kim tarafından çalışıldığıdır (materyal tipinden / kurum ayarından gelir, istemde değiştirilebilir). Kurum içi vakanın satırı patolog iş listesine ve rapor ekranına (KurumIci/) gider; dış lab vakası buradaki zaman çizelgesine. Sekmelerden <b>Ek inceleme onayı</b> ve <b>Mutabakat</b> yalnız dış lab modülü açıksa görünür. <b>Labın verdiği ayrıntı labdan laba değişir:</b> API'li lab "makroskopide / mikroskopide" der, portal kullanan lab yalnız "kabul" ve "rapor" der. Ekran hangi durum gelirse onu gösterir; TAT hesabı yalnız kabul ve rapor zamanına dayanır. <b>Hekim görmedi</b> listesi kurum için önemlidir: rapor gelmiş ama isteyen hekim açmamışsa (özellikle malign tanı) hatırlatma gider.</div>
 
 <script>
 document.querySelectorAll('.sekmeler').forEach(function(bar){

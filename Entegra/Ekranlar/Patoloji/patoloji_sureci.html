@@ -27,6 +27,7 @@
   <div class="sekmeler">
     <div class="sekme on" data-s="akis">Akış</div>
     <div class="sekme" data-s="durum">Durumlar &amp; Roller</div>
+    <div class="sekme" data-s="menu">Menü &amp; modüller</div>
     <div class="sekme" data-s="ent">Entegrasyon modelleri</div>
     <div class="sekme" data-s="tablo">Tablolar (taslak)</div>
   </div>
@@ -35,9 +36,9 @@
   <div class="pnl" data-s="akis">
     <div class="mod">
       <div class="kart on"><div class="b">ÇALIŞMA ŞEKLİ 1 · çoğu müşteri</div><div class="d" style="font-size:14px">Dış patoloji laboratuvarı</div>
-        <div class="sonuk" style="margin-top:4px">Kurum numuneyi alır, hazırlar, sözleşmeli laba gönderir. Rapor labdan gelir (entegrasyonla ya da elle). Bu klasördeki ana ekranlar.</div></div>
+        <div class="sonuk" style="margin-top:4px">Kurum numuneyi alır, hazırlar, sözleşmeli laba gönderir. Rapor labdan gelir (entegrasyonla ya da elle). Modül: <b>Patoloji (dış lab)</b>.</div></div>
       <div class="kart"><div class="b">ÇALIŞMA ŞEKLİ 2 · isteğe bağlı modül</div><div class="d" style="font-size:14px">Kurum içi patoloji</div>
-        <div class="sonuk" style="margin-top:4px">Kurumun kendi patoloji laboratuvarı ve patoloğu var: makroskopi, doku laboratuvarı, patolog raporu. <a href="KurumIci/patoloji_kurum_ici_sureci.html">KurumIci/</a> klasörü. İkisi aynı kurumda birlikte çalışabilir (örn. frozen içeride, İHK dışarıda).</div></div>
+        <div class="sonuk" style="margin-top:4px">Kurumun kendi patoloji laboratuvarı ve patoloğu var: makroskopi, doku laboratuvarı, patolog raporu. Modül: <b>Patoloji (kurum içi)</b> · <a href="KurumIci/patoloji_kurum_ici_sureci.html">KurumIci/</a>. İkisi aynı kurumda birlikte açılabilir (örn. frozen içeride, İHK dışarıda) - vaka listesi, istem ve sonuç ORTAK.</div></div>
     </div>
     <div class="grp"><div class="gb">Dış lab akışı <span class="sp">her adımın ekranı altında</span></div>
       <div class="akis">
@@ -49,11 +50,11 @@
         <div class="ok-isaret">›</div>
         <div class="adim"><span class="no">4</span><b>Lab kabulü</b>Lab "teslim aldım" der, kendi vaka numarasını döner (P26-xxxx). Eksik / uygunsuz numune bildirimi buraya düşer.</div>
         <div class="ok-isaret">›</div>
-        <div class="adim on"><span class="no">5</span><b>Takip</b>Labdan gelen durumlar; TAT; lab ek inceleme (İHK) isterse <b>kurum onayı</b> (ücret). <a href="patoloji_takip.html">takip</a></div>
+        <div class="adim on"><span class="no">5</span><b>Takip</b>Labdan gelen durumlar; TAT; lab ek inceleme (İHK) isterse <b>kurum onayı</b> (ücret). <a href="patoloji_vakalar.html">vakalar</a></div>
         <div class="ok-isaret">›</div>
         <div class="adim"><span class="no">6</span><b>Rapor gelir</b>PDF + yapılandırılmış alanlar (tanı, ICD-O, sinoptik). Lab patoloğunun e-imzası doğrulanır. Hekime bildirim. <a href="patoloji_sonuc.html">sonuç</a></div>
         <div class="ok-isaret">›</div>
-        <div class="adim"><span class="no">7</span><b>Kapanış</b>Hekim "gördüm"; e-Nabız; hasta portalı; labın faturası gönderimle eşleşir (mutabakat). <a href="patoloji_takip.html">mutabakat</a></div>
+        <div class="adim"><span class="no">7</span><b>Kapanış</b>Hekim "gördüm"; e-Nabız; hasta portalı; labın faturası gönderimle eşleşir (mutabakat). <a href="patoloji_vakalar.html">mutabakat</a></div>
       </div>
     </div>
     <div class="izgara">
@@ -98,6 +99,47 @@
           </tbody></table></div>
         <div class="grp"><div class="gb">TAT</div>
           <div class="ic">Sözleşme TAT'ı labın kartında (küçük biyopsi / rezeksiyon / sitoloji / İHK ayrı gün). Lab kabulünden rapora sayılır; gönderimden kabule kadarki süre ayrı izlenir (kurye gecikmesi labın suçu değildir).</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="pnl" data-s="menu">
+    <div>
+      <div>
+        <div class="grp"><div class="gb">Menü <span class="sp">HBYS · "Tanı &amp; Tetkik" bölgesi, Laboratuvar ve Radyoloji'nin yanında</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Ekran</th><th class="orta">Görünür</th><th>Mockup</th></tr></thead>
+            <tbody>
+              <tr class="grup"><td colspan="3">🔬 Patoloji</td></tr>
+              <tr><td>&nbsp;&nbsp;Vakalar <span class="sonuk">(sekmeler: ek inceleme onayı · lam/blok · mutabakat)</span></td><td class="orta"><span class="rz ok">her iki modül</span></td><td><a href="patoloji_vakalar.html">patoloji_vakalar</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Dış Lab Gönderimi</td><td class="orta"><span class="rz mavi">dış lab</span></td><td><a href="patoloji_gonderim.html">patoloji_gonderim</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Materyal Kabul</td><td class="orta"><span class="rz mor">kurum içi</span></td><td><a href="KurumIci/patoloji_istem_kabul.html">KurumIci/…istem_kabul</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Makroskopi</td><td class="orta"><span class="rz mor">kurum içi</span></td><td><a href="KurumIci/patoloji_makroskopi.html">KurumIci/…makroskopi</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Doku Laboratuvarı</td><td class="orta"><span class="rz mor">kurum içi</span></td><td><a href="KurumIci/patoloji_doku_laboratuvari.html">KurumIci/…doku_laboratuvari</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Patolog İş Listesi</td><td class="orta"><span class="rz mor">kurum içi</span></td><td><a href="KurumIci/patoloji_calisma_listesi.html">KurumIci/…calisma_listesi</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Arşiv</td><td class="orta"><span class="rz mor">kurum içi</span></td><td><a href="KurumIci/patoloji_arsiv_tanimlar.html">KurumIci/…arsiv_tanimlar</a></td></tr>
+              <tr><td>&nbsp;&nbsp;Tanımlar <span class="sonuk">(materyal tipleri · şablonlar · boya/antikor)</span></td><td class="orta"><span class="rz ok">her iki modül</span></td><td><a href="KurumIci/patoloji_arsiv_tanimlar.html">…arsiv_tanimlar</a> (Tanımlar)</td></tr>
+              <tr><td>&nbsp;&nbsp;Dış Laboratuvarlar <span class="sonuk">(Lab ile ORTAK kart)</span></td><td class="orta"><span class="rz mavi">dış lab</span></td><td><a href="patoloji_dis_lab_entegrasyon.html">patoloji_dis_lab_entegrasyon</a></td></tr>
+              <tr class="grup"><td colspan="3">Menüde değil - başka ekranlardan açılır</td></tr>
+              <tr><td>&nbsp;&nbsp;İstem</td><td class="orta">ortak</td><td><a href="patoloji_istem.html">patoloji_istem</a> · ameliyat kartı, muayene İstem sekmesi, endoskopi, yatan order</td></tr>
+              <tr><td>&nbsp;&nbsp;Sonuç (rapor görüntüleme)</td><td class="orta">ortak</td><td><a href="patoloji_sonuc.html">patoloji_sonuc</a> · Vakalar'dan çift tık, hastanın Patoloji sekmesi</td></tr>
+              <tr><td>&nbsp;&nbsp;Rapor yazma (patolog)</td><td class="orta">kurum içi</td><td><a href="KurumIci/patoloji_rapor.html">KurumIci/…rapor</a> · iş listesinden</td></tr>
+            </tbody></table></div></div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Modül bayrakları <span class="sp">kurum profili › Modüller</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Kurum</th><th class="orta">Patoloji (dış lab)</th><th class="orta">Patoloji (kurum içi)</th><th>Menüde</th></tr></thead>
+            <tbody>
+              <tr><td>Tıp merkezi, küçük hastane</td><td class="orta">✔</td><td class="orta">—</td><td class="sar">Vakalar, Dış Lab Gönderimi, Tanımlar, Dış Laboratuvarlar</td></tr>
+              <tr><td>Patoloji bölümü olan hastane</td><td class="orta">—</td><td class="orta">✔</td><td class="sar">Vakalar, Kabul, Makroskopi, Doku Lab, İş Listesi, Arşiv, Tanımlar</td></tr>
+              <tr><td>Karma (frozen içeride, İHK/moleküler dışarıda)</td><td class="orta">✔</td><td class="orta">✔</td><td class="sar">Hepsi; vaka bazında "Nerede"</td></tr>
+            </tbody></table></div></div>
+        <div class="grp"><div class="gb">Neden tek grup</div>
+          <div class="ic sonuk" style="line-height:1.65">Hekim için fark yok: istem aynı form, sonuç aynı ekran, hastanın patoloji geçmişi tek liste. Fark yalnız işi kimin yaptığıdır - bu vakanın alanıdır ("Nerede"), menünün değil. İki ayrı menü, karma kurumda aynı hastanın vakalarını iki yere böler ve yetki matrisinde aynı işi iki satıra çıkarırdı. Laboratuvar'ın alt grubu yerine ayrı grup: Lab modülü kapalı (Lab'ı dışarıya veren) kurumda Patoloji yine açılabilsin.</div></div>
+        <div class="grp"><div class="gb">"Nerede" nasıl belirlenir</div>
+          <div class="ic sonuk" style="line-height:1.65">Materyal tipinin varsayılanı (Tanımlar: "Frozen → kurum içi", "İHK → Anadolu Patoloji") › yoksa kurum varsayılanı › istemde değiştirilebilir. Yalnız dış lab modülü açıksa seçim sorulmaz.</div></div>
       </div>
     </div>
   </div>
