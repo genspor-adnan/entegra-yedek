@@ -281,8 +281,41 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - İşaretleme fonksiyonu 080'in `eski_tablo/eski_id` ve doğal anahtarlı alt satırları
      da kapsıyor; pencereyle bir kez hesaplanıyor (ilişkili alt sorgu karesel
      büyüyüp testi zaman aşımına düşürmüştü), `p_tablo` süzgeci var.
+   **Kapsam kararı (kullanıcı, 13.10.2026):** tanımların HEPSİ (stok, hizmet,
+   fiyat, reçete...), hareketlerden (belge, kasa, stok hareketi) **yalnız bu yıl**.
+   BILIM 2026: 519 belge, 804 kasa, 230 stok izleme satırı; 1 Ocak'ta Delphi'nin
+   yıl devri var (KASA TUR 2 = 714, FATBASLIK TUR 2 = 7) - açılış bakiyeleri devirle
+   gelir. Sınır web'de `aktarim_ayar.hareket_baslangic` olacak (1084), ajanın ilk
+   yüklemesi de aynı tarihle süzer.
+
+   **Dilim 2b yapıldı (1083 + MSSQL Update_SQL_209): reçete -> ürün ağacı.**
+   URETIMRECETE / DETAY / OPR + LOKASYON (TUR 7/8 makine) -> urun_agaci / satir /
+   operasyon + is_merkezi. Delphi modeli: mamulün kendi satırı ANAURUN = 1, +1
+   (bileşen değil); bileşen MIKTAR < 0; reçete 1 birim içindir; TUR 0 pasif; birden
+   çok reçetede en küçük id varsayılan; operasyon SURE saat -> dakika. BILIM tam
+   verisi (dev kopyası): 2.869 / 2.871 reçete (2'sinin mamul stoğu Delphi'de yok),
+   6.600 bileşen (2.742'si yarı mamul -> kendi ağacına bağlı), 18.899 operasyon,
+   121 iş merkezi; ikinci koşu 0 yazım. Göç hiç reçete taşımamıştı - eşdeğerlik
+   yerine Delphi sayımıyla doğrulandı.
+
    Sırada: **belge (FATBASLIK + FATURA), mali hareket (KASA), stok hareketi
-   (STOKIZLEME)** - en büyük dilim. Ardından sırayla depo/döviz → cari → stok/kalem/hesap →
+   (STOKIZLEME)** - en büyük dilim. Ön inceleme (014 sonrası göçlerin veriye
+   uyguladıkları) bulguları:
+   - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,
+     ödeme, kasa/banka) 081 ile **kasa_islem başlığı + 2 bacak** olmuş (işaret
+     çevrilmiş, karşı bacak C/M/-). Yeni Delphi tahsilatı da öyle yazılmalı, yoksa
+     cari ekstrede görünmez. fn_kasa_islem_bacak_uret kullanılamaz (işaretleri
+     farklı).
+   - Fatura cari satırı Delphi KASA'dan (FATURAID) gelir, 161 kuralıyla belgeden
+     yeniden hesaplanır; web'in BelgeDeposu yolu çağrılmaz (çift sayım olmasın).
+   - **Numaralandırma riski:** web'de tur 10/14 İRSALİYE (cariyi etkilemez, 136);
+     Delphi 10/14 karşılığı doğrulanmalı.
+   - Para / kur / KDV: 026 (boş döviz TL, kur 0 -> 1), 083 ISO, 134 ekstre dövizi,
+     371/372 kdvli fiyat/tutar (CHECK toleransı), 373 kdv_durum, 131 tipi 0 -> 1,
+     334 tur 13 -> 17, 112 devir kuru, 137 tahakkuk yönü.
+   - stok_izleme: seri_lot (stok, lot, seri) ile çözülür (114 birleştirme),
+     depo_id 115/116 kuralı.
+   - belge_satir AFTER tetiği kapanma durumunu tazeler: kaynak belge önce gelmeli. Ardından sırayla depo/döviz → cari → stok/kalem/hesap →
    belge/mali/stok hareketi. **Eşdeğerlik testi:** boş test DB'de bütün Delphi
    verisi fonksiyonlarla aktarılır, `kur.ps1` göç sonucuyla tablo tablo
    karşılaştırılır (satır sayısı, belge toplamları, cari bakiyeleri). Fark 0
