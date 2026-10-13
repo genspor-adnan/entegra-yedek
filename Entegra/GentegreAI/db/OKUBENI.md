@@ -90,7 +90,8 @@ kullanmayın**: defteri toptan doldurmak gerçek geçmişi gizler.
   araması bunları sayıyor, normal dosyaları yarım bırakıyordu).
 - **Kilit**: `pg_advisory` (7340928) — iki güncelleyici aynı dosyayı iki kez uygulayamaz.
 - **Defter**: `dosya`, `ozet` (sha256, LF'e normalize), `yontem`
-  (`islem` · `islem_disi` · `aktarim_yok` · `temel_al` · `tohum`). Eski kayıtlarda ozet
+  (`islem` · `islem_disi` · `aktarim_yok` · `temel_al` · `tohum` · `uzlastirma` ·
+  `uzlastirma_veri`). Eski kayıtlarda ozet
   YOKTUR (doğrulanmamış) — geçmiş için bugün özet uydurulmaz.
 - **Çıkış kodu**: 0 tamam · 1 hata · 2 dış veri ön koşulu (`kurulum/dis_veri_onkosullari.txt`).
 - **Boş kurulum** (`-SadeceSema`; sunucuda defter ve stg boşken kendiliğinden): her
@@ -119,8 +120,11 @@ yeniden numaralandırma). Özet `goc_uygula` ile aynı kural. Çıkış kodu 0 g
 
 **Geliştirmede göçü `psql -f` ile değil `goc_uygula.ps1` ile uygulayın**
 (`-Db gentegre_ai -Dosyalar 1080_x.sql`): elle uygulanan dosya deftere düşmez,
-bu rapor da onu "bekleyen" gösterir. (13.10.2026 ölçüm: dev defteri 05.10'da
-kalmış — 371 dosya defterde yok; 940, 965-967 uygulandıktan sonra düzenlenmiş.)
+bu rapor da onu "bekleyen" gösterir. (13.10.2026: dev defteri 05.10'da kalmıştı -
+371 dosya kayıtsızdı; `goc_uzlastir.ps1` ile tamamlandı: nesneleri bulunan 224 dosya
+`uzlastirma`, yalnız veri içeren 147 dosya `uzlastirma_veri` (örneklemeyle
+doğrulandı), özetsiz. Önceki defter `goc_gecmisi_yedek_20261013`'te. 940, 965-967
+uygulandıktan sonra düzenlenmiş - bilgi, yeniden çalıştırılmadı.)
 
 ### Defter uzlaştırma raporu (salt okunur)
 

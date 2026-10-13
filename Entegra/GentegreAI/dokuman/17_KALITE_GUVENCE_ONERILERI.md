@@ -128,6 +128,10 @@ görmüyordu:
   **371 dosya defterde yok** (elle `psql -f` ile uygulananlar deftere
   düşmüyordu); 940, 965-967 uygulandıktan sonra düzenlenmiş; 843 sahipsiz
   (870'e taşınmıştı). Bundan sonra dev'de göç `goc_uygula.ps1` ile uygulanır.
+  **Dev defteri tamamlandı (13.10.2026):** `goc_uzlastir.ps1` 1000+ dosyaları
+  görmüyordu (eski `\d{3}_` kalıbı, ad sırası) - düzeltildi. 224 dosya nesne
+  kanıtıyla `uzlastirma`, 147 veri dosyası `uzlastirma_veri` olarak yazıldı;
+  bekleyen 0, en yüksek 1079. Yedek: `goc_gecmisi_yedek_20261013`.
 
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 

@@ -109,7 +109,11 @@ if ($defterVar) {
 }
 
 # ---------------------------------------------------------------- dosyalar ---
-$dosyalar = @(Get-ChildItem $DbDizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3}_' } | Sort-Object Name)
+# 1000+ dahil, SAYISAL sira (13.10.2026): eski '^\d{3}_' kalibi 1000 ve sonrasini
+#   hic gormuyordu, ad sirasi 1000_'i 101_'den once koyup "sonradan silinen
+#   nesne" ayiklamasini bozuyordu (kur.ps1'deki 09.10 duzeltmesinin esi).
+$dosyalar = @(Get-ChildItem $DbDizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3,}_' } |
+              Sort-Object { [int]($_.Name -split '_')[0] }, Name)
 $metinler = @{}
 foreach ($d in $dosyalar) { $metinler[$d.Name] = Temizle ([System.IO.File]::ReadAllText($d.FullName)) }
 
