@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Rapor ve Onay — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+<style>
+  .sin td:first-child{color:var(--muted);width:240px}
+  .sin td{white-space:normal}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📝 Patoloji — Rapor <span class="sp">P26-01219 · Kemal Usta 61 E · Sol hemikolektomi · Doç. Dr. Ş. Aydın</span></div>
+  <div class="toolbar">
+    <div class="btn">💾 Taslak</div><div class="btn">👁 Önizle</div><div class="btn">🧫 Ek İstek</div><div class="btn">👥 Konsültasyon İste</div>
+    <div class="sepv"></div><div class="btn ok">✍ Onayla + e-İmza</div>
+    <div class="sepv"></div><div class="btn pas">＋ Ek Rapor</div><div class="btn pas">↺ Revize</div><div class="btn sp">🖨 Yazdır / PDF ▾</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">Kemal Usta · 61 E · 2345678****</div></div>
+    <div class="fld"><label>Gönderen</label><div class="inp ro">Genel Cerrahi · Op. Dr. M. Tan</div></div>
+    <div class="fld"><label>Kabul / TAT</label><div class="inp ro">09.10.2026 10:12 · <b>4 / 5 iş günü</b></div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz mor">Mikroskopide</span> → onayda <span class="rz ok">Onaylandı</span></div></div>
+    <div class="fld" style="grid-column:span 2"><label>Klinik bilgi</label><div class="inp ro">Sol kolonda kitle, kolonoskopik biyopsi adenokarsinom (P26-00870). Neoadjuvan yok.</div></div>
+    <div class="fld"><label>Ön tanı</label><div class="inp ro">C18.6 · İnen kolon malign neoplazmı</div></div>
+    <div class="fld"><label>Materyaller</label><div class="inp ro">A: Sol hemikolektomi · B: Apikal LN</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="rapor">Rapor</div>
+    <div class="sekme" data-s="sinoptik">Sinoptik (kolon) <span class="rz ok">12/13</span></div>
+    <div class="sekme" data-s="ihk">İHK / özel boya <span class="rz ok">4</span></div>
+    <div class="sekme" data-s="frozen">Frozen</div>
+    <div class="sekme" data-s="surum">Sürümler &amp; imza</div>
+  </div>
+
+  <!-- RAPOR -->
+  <div class="pnl" data-s="rapor">
+    <div class="ucPanel" style="grid-template-columns:1fr 330px">
+      <div>
+        <div class="grp"><div class="gb">Makroskopi <span class="sp">makro ekranından · burada salt okunur</span></div>
+          <div class="ic sonuk" style="line-height:1.6">"Sol hemikolektomi" etiketli kapta 28 cm kolon. İnen kolonda 4,6 × 3,8 × 1,5 cm ülsere kitle; radyal sınıra 0,9 cm. Perikolik dokuda 18 lenf nodu… <a href="patoloji_makroskopi.html">tamamı</a></div></div>
+        <div class="grp"><div class="gb">Mikroskopi <span class="sp">şablon: kolon adenokarsinomu · dikte açık</span></div>
+          <div class="ic"><div class="inp alan buyuk">Kesitlerde glandüler yapılar oluşturan, kribriform alanlar içeren, nükleer pleomorfizm gösteren atipik epitel hücrelerinden oluşan tümör izlendi. Tümör muskularis propriayı aşarak perikolik yağ dokuya infiltre olmaktadır. Lenfovasküler invazyon izlendi; perinöral invazyon izlenmedi. Tümör tomurcuklanması düşük (Bd1). İncelenen 18 lenf nodunun 2'sinde metastaz izlendi; ekstranodal yayılım yok. Cerrahi sınırlar tümörsüz.</div></div></div>
+        <div class="grp"><div class="gb">Tanı <span class="sp">raporun başında yer alır · kısa ve kesin</span></div>
+          <div class="ic"><div class="inp alan" style="font-weight:bold;color:#14315a">SOL KOLON, HEMİKOLEKTOMİ MATERYALİ:<br>– ADENOKARSİNOM, DÜŞÜK DERECELİ (G2)<br>– Perikolik yağ dokuya invazyon (pT3)<br>– Lenf nodu metastazı: 2/18 (pN1b)<br>– Cerrahi sınırlar tümörsüz<br>– MMR proteinleri korunmuş (İHK)</div></div></div>
+      </div>
+      <div>
+        <div class="grp" style="margin:10px"><div class="gb">Kodlama</div>
+          <div class="ic">
+            <div class="fld"><label class="req">ICD-O-3 topografi</label><div class="inp combo">C18.6 · İnen kolon</div></div>
+            <div class="fld" style="margin-top:6px"><label class="req">ICD-O-3 morfoloji</label><div class="inp combo">8140/3 · Adenokarsinom, NOS</div></div>
+            <div class="fld" style="margin-top:6px"><label>Derece</label><div class="inp combo">2 · Orta diferansiye</div></div>
+            <div class="fld" style="margin-top:6px"><label>ICD-10 (başvuru tanısı)</label><div class="inp combo">C18.6</div></div>
+            <div class="sonuk" style="margin-top:6px">/3 (malign) morfoloji → kanser kayıt listesine düşer.</div>
+          </div></div>
+        <div class="grp" style="margin:10px"><div class="gb">Mikroskop görüntüsü</div>
+          <div class="ic"><div class="mikro">A3 · H&amp;E · ×20</div><div class="sonuk" style="margin-top:4px">Kamera / lam tarayıcıdan. Rapor PDF'ine eklenmesi isteğe bağlı.</div></div></div>
+        <div class="grp" style="margin:10px"><div class="gb">Bildirim</div>
+          <div class="ic">
+            <div class="inp" style="display:block">☐ Kritik / beklenmeyen bulgu<div class="sonuk">→ isteyen hekime anlık bildirim, okundu takibi</div></div>
+            <div class="inp" style="margin-top:6px;display:block">☑ Tümör konseyine gönder<div class="sonuk">GİS konseyi · 15.10</div></div>
+          </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SINOPTIK -->
+  <div class="pnl" data-s="sinoptik">
+    <div class="ikiPanel">
+      <div>
+        <div class="dg sin"><table>
+          <thead><tr><th>Alan (protokol: kolon ve rektum rezeksiyonu)</th><th>Değer</th></tr></thead>
+          <tbody>
+            <tr><td>Prosedür</td><td>Sol hemikolektomi</td></tr>
+            <tr><td>Tümör yeri</td><td>İnen kolon</td></tr>
+            <tr><td>Histolojik tip</td><td>Adenokarsinom</td></tr>
+            <tr><td>Histolojik derece</td><td>Düşük dereceli (G2)</td></tr>
+            <tr><td>Tümör boyutu</td><td>4,6 cm (en büyük boyut)</td></tr>
+            <tr><td>Tümör yayılımı</td><td>Muskularis propriayı aşıp perikolik dokuya</td></tr>
+            <tr><td>Lenfovasküler invazyon</td><td>Var</td></tr>
+            <tr><td>Perinöral invazyon</td><td>Yok</td></tr>
+            <tr><td>Tümör tomurcuklanması</td><td>Düşük (Bd1)</td></tr>
+            <tr><td>Cerrahi sınırlar</td><td>Tümörsüz · radyal sınıra 0,9 cm</td></tr>
+            <tr><td>Lenf nodları</td><td>2 / 18 metastatik · ekstranodal yayılım yok</td></tr>
+            <tr><td>Tümör depozitleri</td><td><span class="rz sari">girilmedi</span></td></tr>
+            <tr><td><b>Patolojik evre</b></td><td><b>pT3 pN1b</b> <span class="sonuk">(AJCC 8)</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Nasıl çalışır</div>
+          <div class="ic sonuk" style="line-height:1.65">Sinoptik şablon materyal tipine bağlı (kolon, meme, prostat, tiroid, endometrium…) ve <b>form motoruyla</b> tanımlanır; zorunlu alan boşken onay verilmez. Makroda girilen değerler (boyut, sınır, LN sayısı) buraya kendiliğinden gelir. pT/pN alanları seçimlerden önerilir, patolog onaylar. Şablonlar CAP/ICCR protokollerinden uyarlanır; sürümlü saklanır (rapor hangi şablon sürümüyle yazıldıysa o).</div></div>
+        <div class="grp"><div class="gb">Eksik</div>
+          <div class="ic"><span class="rz sari">Tümör depozitleri</span> zorunlu - girilmeden onay düğmesi pasif.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IHK -->
+  <div class="pnl" data-s="ihk">
+    <div class="dg"><table>
+      <thead><tr><th>Blok</th><th>Boya / antikor</th><th>Klon</th><th>Sonuç</th><th>Yorum</th><th class="orta">Kontrol</th><th class="orta">Lot</th><th class="orta">Değerlendiren</th></tr></thead>
+      <tbody>
+        <tr><td>B1</td><td>MLH1</td><td>ES05</td><td><span class="rz ok">Korunmuş</span></td><td>Nükleer boyanma var</td><td class="orta">✔</td><td class="orta">L2611</td><td class="orta">Ş. Aydın</td></tr>
+        <tr><td>B1</td><td>PMS2</td><td>EP51</td><td><span class="rz ok">Korunmuş</span></td><td></td><td class="orta">✔</td><td class="orta">L2598</td><td class="orta">Ş. Aydın</td></tr>
+        <tr><td>B1</td><td>MSH2</td><td>G219-1129</td><td><span class="rz ok">Korunmuş</span></td><td></td><td class="orta">✔</td><td class="orta">L2604</td><td class="orta">Ş. Aydın</td></tr>
+        <tr><td>B1</td><td>MSH6</td><td>EP49</td><td><span class="rz ok">Korunmuş</span></td><td></td><td class="orta">✔</td><td class="orta">L2601</td><td class="orta">Ş. Aydın</td></tr>
+        <tr class="grup"><td colspan="8">Başka vaka örneği · meme (P26-01218) - skorlu sonuç alanları</td></tr>
+        <tr><td>A2</td><td>ER</td><td>SP1</td><td>%90 · güçlü</td><td>Allred 8</td><td class="orta">✔</td><td class="orta">—</td><td class="orta">O. Şen</td></tr>
+        <tr><td>A2</td><td>HER2</td><td>4B5</td><td><span class="rz sari">2+</span></td><td>Şüpheli → ISH önerilir</td><td class="orta">✔</td><td class="orta">—</td><td class="orta">O. Şen</td></tr>
+        <tr><td>A2</td><td>Ki-67</td><td>30-9</td><td>%25</td><td></td><td class="orta">✔</td><td class="orta">—</td><td class="orta">O. Şen</td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Sonuç alanı antikora göre değişir (katalogda tanımlı): korunmuş/kayıp, yüzde + yoğunluk, skor (HER2 0–3+), Allred. Onaydan sonra gelen sonuç <b>ek rapor</b> olarak yayınlanır.</div>
+  </div>
+
+  <!-- FROZEN -->
+  <div class="pnl" data-s="frozen">
+    <div class="ic sonuk" style="padding:14px">Bu vakada frozen yok. Frozen'lı vakada: materyal, alınma saati, sözlü sonuç metni, bildiren patolog, bildirilen kişi ve saat, <b>süre</b> (kabul → bildirim) ve parafin tanıyla <b>uyum</b> (uyumlu / ertelendi / uyumsuz + gerekçe). Uyumsuzluk oranı kalite göstergesidir.</div>
+  </div>
+
+  <!-- SURUM -->
+  <div class="pnl" data-s="surum">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Sürüm</th><th>Tür</th><th>Yazan</th><th>Onaylayan</th><th class="orta">Zaman</th><th>Gerekçe</th><th class="orta">e-İmza</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">—</td><td><span class="rz sari">Taslak</span></td><td>Uzm. Yrd. Dr. E. Can</td><td>—</td><td class="orta">12.10 16:20</td><td>Ön rapor</td><td class="orta">—</td></tr>
+        <tr class="sonuk"><td class="orta">1</td><td>Ana rapor</td><td>—</td><td>Doç. Dr. Ş. Aydın</td><td class="orta">onayda</td><td></td><td class="orta">bekliyor</td></tr>
+      </tbody></table></div>
+    <div class="grp"><div class="gb">Kurallar</div>
+      <div class="ic sonuk" style="line-height:1.65">Onaylı rapor <b>değiştirilemez</b>. Sonradan gelen bilgi → <b>Ek rapor</b> (sürüm 2, ana rapora bağlı). Hata düzeltme → <b>Revize rapor</b>: gerekçe zorunlu, eski sürüm okunur halde saklanır, isteyen hekime ve e-Nabız'a yeni sürüm gider. e-İmza radyoloji raporuyla aynı yoldan (kart/mobil imza).</div></div>
+  </div>
+
+  <div class="statusbar"><span>Taslak · son kayıt 12.10 16:20</span><span class="sp">Onayda: e-Nabız 201 kuyruğu · hekime bildirim · portal (kurum ayarı) · TAT durur</span></div>
+</div>
+
+<div class="not"><b>Uzman yardımcısı</b> raporu yazar ve "Ön rapor" olarak sorumlu patoloğa gönderir; onay ve imza yalnız patologdadır. <b>Sitoloji</b> raporunda sinoptik sekmesinin yerine sınıflama gelir (serviks: Bethesda 2014 - NILM, ASC-US, LSIL…; tiroid: Bethesda I–VI).</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>

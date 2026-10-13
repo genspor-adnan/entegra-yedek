@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Arşiv ve Tanımlar — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🗄 Patoloji — Arşiv <span class="sp">Blok / lam arşivi · emanet · imha</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📷 Okut</div><div class="btn">📥 Arşive Kaldır</div><div class="btn">📤 Emanet Ver</div><div class="btn ok">↩ İade Al</div>
+    <div class="sepv"></div><div class="btn danger">🗑 İmha Listesi</div><div class="btn sp">🖨 Emanet Tutanağı ▾</div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="arsiv">Arşiv</div>
+    <div class="sekme" data-s="emanet">Emanet <span class="rz sari">3 açık</span></div>
+    <div class="sekme" data-s="imha">İmha</div>
+  </div>
+
+  <div class="pnl" data-s="arsiv">
+    <div class="arama">
+      <div class="kutu">🔍 Vaka no, blok / lam barkodu, hasta…</div>
+      <span class="chip on">Tümü</span><span class="chip">Blok</span><span class="chip">Lam</span><span class="chip">Islak doku</span><span class="chip">Arşivde değil</span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th>Barkod</th><th>Tür</th><th>Hasta</th><th>İçerik</th><th>Yer</th><th class="orta">Arşive</th><th class="orta">Saklama sonu</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>P26-01212 A3</b></td><td>Blok</td><td>Ali Yurt</td><td>Sağ apeks · Gleason 3+4</td><td>Blok dolabı 4 · Çekmece 12</td><td class="orta">12.10.2026</td><td class="orta">uzun süreli</td><td class="orta"><span class="rz ok">Arşivde</span></td></tr>
+        <tr><td>P26-01212 A3-1</td><td>Lam · H&amp;E</td><td>Ali Yurt</td><td></td><td>Lam dolabı 2 · Kutu 318</td><td class="orta">12.10.2026</td><td class="orta">uzun süreli</td><td class="orta"><span class="rz sari">Emanette</span></td></tr>
+        <tr><td>P26-01212 A</td><td>Islak doku</td><td>Ali Yurt</td><td>Kalan materyal (formalinde)</td><td>Islak arşiv raf 3</td><td class="orta">12.10.2026</td><td class="orta">12.11.2026</td><td class="orta"><span class="rz ok">Arşivde</span></td></tr>
+        <tr><td>P26-01188 B1</td><td>Blok</td><td>Seda Uçar</td><td>Meme · ER/PR/HER2</td><td>Blok dolabı 4 · Çekmece 11</td><td class="orta">03.10.2026</td><td class="orta">uzun süreli</td><td class="orta"><span class="rz mavi">Moleküler çalışmada</span></td></tr>
+      </tbody></table></div>
+    <div class="ozet">
+      <div class="kart"><div class="b">Arşivdeki blok</div><div class="d">48.210</div></div>
+      <div class="kart"><div class="b">Arşivdeki lam</div><div class="d">131.904</div></div>
+      <div class="kart"><div class="b">Islak doku</div><div class="d">212 <small>· 31'inin süresi bu ay doluyor</small></div></div>
+      <div class="kart sari"><div class="b">Açık emanet</div><div class="d">3 <small>· 1 gecikmiş</small></div></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="emanet">
+    <div class="dg"><table>
+      <thead><tr><th>Malzeme</th><th>Hasta</th><th>Teslim alan</th><th>Amaç</th><th class="orta">Veriliş</th><th class="orta">İade beklenen</th><th>Belge</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>P26-01212 A3-1</b> (lam)</td><td>Ali Yurt</td><td>Hasta yakını · Ayşe Yurt (kimlik ✔)</td><td>Başka merkezde görüş</td><td class="orta">13.10</td><td class="orta">13.11</td><td>Dilekçe + tutanak</td><td class="orta"><span class="rz sari">Emanette</span></td></tr>
+        <tr><td>P26-01188 B1 (blok)</td><td>Seda Uçar</td><td>Genetik Lab (iç)</td><td>Moleküler (BRCA)</td><td class="orta">03.10</td><td class="orta">17.10</td><td>İç istem</td><td class="orta"><span class="rz mavi">Çalışmada</span></td></tr>
+        <tr><td>P25-08812 A2 (blok)</td><td>Hakan Dal</td><td>Özel Merkez Patoloji</td><td>Konsültasyon</td><td class="orta">12.08</td><td class="orta">12.09</td><td>Resmî yazı</td><td class="orta"><span class="rz kir">Gecikti · 31 gün</span></td></tr>
+      </tbody></table></div>
+    <div class="grp"><div class="gb">Kurallar</div>
+      <div class="ic sonuk" style="line-height:1.65">Blok vermeden önce gerekiyorsa yedek kesit (lam) alınır; emanet kaydı kimlik, imza ve amaçla açılır. Gecikmiş iade listede kırmızı ve haftalık hatırlatma. Lam/blok vakadan "emanette" diye görünür - rapor ekranında da uyarı çıkar.</div></div>
+  </div>
+
+  <div class="pnl" data-s="imha">
+    <div class="dg"><table>
+      <thead><tr><th>Malzeme</th><th class="orta">Adet</th><th>Kural</th><th class="orta">Süre doldu</th><th>Onay</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Islak doku (onaylı raporlu vakalar)</td><td class="orta">31</td><td>Rapor onayından +1 ay (kurum ayarı)</td><td class="orta">Ekim 2026</td><td>Sorumlu patolog</td><td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+        <tr><td>Islak doku · emanette / ek rapor bekleyen</td><td class="orta">2</td><td>İmha edilmez</td><td class="orta">—</td><td>—</td><td class="orta"><span class="rz pas">Hariç</span></td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Blok ve lam saklama süreleri mevzuata göre kurum ayarıdır (uzun süreli); bu mockup süre değeri belirlemez. İmha toplu tutanakla, vaka bazında iz bırakarak yapılır.</div>
+  </div>
+
+  <div class="statusbar"><span>Her hareket <code>pat_hareket</code> satırı</span><span class="sp">Yer: dolap / çekmece / kutu tanımlı lokasyonlar</span></div>
+</div>
+
+<div class="win">
+  <div class="title">⚙ Patoloji — Tanımlar <span class="sp">yönetici / bölüm sorumlusu</span></div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="mat">Materyal tipleri</div>
+    <div class="sekme" data-s="sab">Makro şablonları</div>
+    <div class="sekme" data-s="boya">Boya &amp; antikor kataloğu</div>
+    <div class="sekme" data-s="sin">Sinoptik protokoller</div>
+    <div class="sekme" data-s="ret">Ret nedenleri &amp; ayarlar</div>
+  </div>
+
+  <div class="pnl" data-s="mat">
+    <div class="dg"><table>
+      <thead><tr><th>Materyal tipi</th><th>Vaka türü</th><th>Makro şablonu</th><th>Sinoptik</th><th class="orta">TAT</th><th>Hizmet (ücret)</th><th class="orta">Aktif</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kolon rezeksiyonu</b></td><td>Histo · rezeksiyon</td><td>Kolon rezeksiyonu v3</td><td>Kolon ve rektum</td><td class="orta">5 g</td><td>Patoloji · büyük rezeksiyon</td><td class="orta">✔</td></tr>
+        <tr><td>Meme tru-cut biyopsi</td><td>Histo · biyopsi</td><td>İğne biyopsisi</td><td>Meme (biyopsi)</td><td class="orta">3 g</td><td>Patoloji · küçük biyopsi</td><td class="orta">✔</td></tr>
+        <tr><td>Prostat iğne biyopsisi</td><td>Histo · biyopsi</td><td>Prostat kadran</td><td>Prostat (biyopsi)</td><td class="orta">3 g</td><td>Patoloji · çoklu biyopsi</td><td class="orta">✔</td></tr>
+        <tr><td>Endometrium küretajı</td><td>Histo · biyopsi</td><td>Küretaj</td><td>—</td><td class="orta">3 g</td><td>Patoloji · küçük biyopsi</td><td class="orta">✔</td></tr>
+        <tr><td>Servikal smear (sıvı bazlı)</td><td>Sitoloji</td><td>—</td><td>Bethesda (serviks)</td><td class="orta">2 g</td><td>Sitoloji · servikal</td><td class="orta">✔</td></tr>
+        <tr><td>Tiroid İİAB</td><td>Sitoloji</td><td>—</td><td>Bethesda (tiroid)</td><td class="orta">2 g</td><td>Sitoloji · İİAB</td><td class="orta">✔</td></tr>
+        <tr><td>Frozen</td><td>Frozen</td><td>Frozen kısa</td><td>—</td><td class="orta">20 dk</td><td>Patoloji · intraoperatif</td><td class="orta">✔</td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Ücret hizmet kartından: SUT/HUV kodu hizmette tutulur, patoloji bunları kopyalamaz (tek kaynak).</div>
+  </div>
+
+  <div class="pnl" data-s="sab">
+    <div class="ikiPanel">
+      <div><ul class="liste">
+        <li class="sel"><b>Kolon rezeksiyonu v3</b><span class="sp">kullanımda · 214 vaka</span></li>
+        <li>Mastektomi<span class="sp">kullanımda</span></li><li>İğne biyopsisi<span class="sp">kullanımda</span></li><li>Prostat kadran<span class="sp">kullanımda</span></li><li>Tiroidektomi<span class="sp">kullanımda</span></li>
+      </ul></div>
+      <div class="ic">
+        <div class="fld"><label>Şablon metni</label><div class="inp alan buyuk" style="font-family:Consolas,monospace;font-size:11px">"{etiket}" olarak etiketli kapta, {fiksatif} içinde gönderilmiş, {kolon_uzunluk} cm uzunluğunda kolon{ileum? ve {ileum_uzunluk} cm terminal ileum}dan oluşan rezeksiyon materyali. {tumor_yeri} yerleşimli, {tumor_boyut} boyutlarında {tumor_gorunum} kitle izlendi. Radyal sınıra uzaklık {radyal} cm. Perikolik dokuda {ln_sayi} adet lenf nodu ayrıldı.</div></div>
+        <div class="fld" style="margin-top:6px"><label>Kontrol listesi (zorunlu yer tutucular)</label><div class="inp ro">tumor_boyut · tumor_yeri · radyal · ln_sayi · perforasyon · mezokolon</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="boya">
+    <div class="dg"><table>
+      <thead><tr><th>Ad</th><th>Tür</th><th>Klon</th><th>Platform</th><th>Sonuç biçimi</th><th>Kontrol doku</th><th>Hizmet</th><th class="orta">Aktif</th></tr></thead>
+      <tbody>
+        <tr><td>H&amp;E</td><td>Rutin</td><td>—</td><td>Otomatik boyama</td><td>—</td><td>—</td><td>(materyale dahil)</td><td class="orta">✔</td></tr>
+        <tr><td>PAS / PAS-D</td><td>Özel boya</td><td>—</td><td>Manuel</td><td>Pozitif / negatif</td><td>Böbrek</td><td>Özel boya</td><td class="orta">✔</td></tr>
+        <tr><td>ER</td><td>İHK</td><td>SP1</td><td>Ventana Benchmark</td><td>% + yoğunluk · Allred</td><td>Meme / tonsil</td><td>İHK · tek antikor</td><td class="orta">✔</td></tr>
+        <tr><td>HER2</td><td>İHK</td><td>4B5</td><td>Ventana Benchmark</td><td>Skor 0 / 1+ / 2+ / 3+</td><td>Bilinen 0/1+/3+ seti</td><td>İHK · tek antikor</td><td class="orta">✔</td></tr>
+        <tr><td>MLH1</td><td>İHK</td><td>ES05</td><td>Leica Bond</td><td>Korunmuş / kayıp</td><td>Normal kolon</td><td>İHK · tek antikor</td><td class="orta">✔</td></tr>
+        <tr><td>Ki-67</td><td>İHK</td><td>30-9</td><td>Ventana Benchmark</td><td>%</td><td>Tonsil</td><td>İHK · tek antikor</td><td class="orta">✔</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="pnl" data-s="sin">
+    <div class="dg"><table>
+      <thead><tr><th>Protokol</th><th>Kaynak</th><th class="orta">Sürüm</th><th class="orta">Alan</th><th class="orta">Zorunlu</th><th>Evreleme</th><th>Form motoru şablonu</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kolon ve rektum (rezeksiyon)</b></td><td>CAP / ICCR uyarlaması</td><td class="orta">3</td><td class="orta">13</td><td class="orta">11</td><td>AJCC 8 pTNM</td><td>pat-sin-kolon</td></tr>
+        <tr><td>Meme (biyopsi)</td><td>CAP / ICCR uyarlaması</td><td class="orta">2</td><td class="orta">9</td><td class="orta">7</td><td>—</td><td>pat-sin-meme-biyopsi</td></tr>
+        <tr><td>Prostat (biyopsi)</td><td>ISUP / CAP</td><td class="orta">1</td><td class="orta">10</td><td class="orta">8</td><td>Gleason / Grade grup</td><td>pat-sin-prostat</td></tr>
+        <tr><td>Bethesda (serviks)</td><td>Bethesda 2014</td><td class="orta">1</td><td class="orta">5</td><td class="orta">3</td><td>—</td><td>pat-sin-bethesda-serviks</td></tr>
+        <tr><td>Bethesda (tiroid)</td><td>Bethesda 2023</td><td class="orta">1</td><td class="orta">4</td><td class="orta">2</td><td>—</td><td>pat-sin-bethesda-tiroid</td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Protokol yeni sürüme geçince eski raporlar kendi sürümüyle açılır. Alan kodları e-Nabız 201 eşlemesinde kullanılır; eşleme SKRS'ye göre yapılır.</div>
+  </div>
+
+  <div class="pnl" data-s="ret">
+    <div class="ikiPanel">
+      <div><div class="dg"><table>
+        <thead><tr><th>Ret nedeni</th><th>Davranış</th><th class="orta">Aktif</th></tr></thead>
+        <tbody>
+          <tr><td>Etiketsiz kap</td><td>Ret · hekime bildirim</td><td class="orta">✔</td></tr>
+          <tr><td>Kimlik uyumsuz</td><td>Ret · hekime bildirim</td><td class="orta">✔</td></tr>
+          <tr><td>Fiksatifsiz / kurumuş</td><td>Koşullu kabul (tekrar alınamıyorsa)</td><td class="orta">✔</td></tr>
+          <tr><td>Kap sayısı uyumsuz</td><td>Koşullu kabul · eksik vakada açık</td><td class="orta">✔</td></tr>
+          <tr><td>İstemsiz materyal</td><td>Bekletilir · istem istenir</td><td class="orta">✔</td></tr>
+        </tbody></table></div></div>
+      <div class="hdr k1">
+        <div class="fld"><label>Vaka no biçimi</label><div class="inp">P{YY}-{sayaç 5 hane} <span class="sonuk">· sitoloji C{YY}-…, frozen aynı vaka içinde Fz1</span></div></div>
+        <div class="fld"><label>İş günü takvimi</label><div class="inp combo">Kurum çalışma takvimi (tatiller dahil)</div></div>
+        <div class="fld"><label>Hasta portalında rapor</label><div class="inp combo">Hekim görüşmesinden sonra (hekim "paylaş" der)</div></div>
+        <div class="fld"><label>Islak doku saklama</label><div class="inp">Rapor onayından sonra 1 ay</div></div>
+        <div class="fld"><label>Soğuk iskemi uyarı sınırı</label><div class="inp">60 dk <span class="sonuk">· meme materyali</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not"><b>Tanımlar</b> materyal tipini merkez yapar: şablon, sinoptik, TAT ve ücret materyal tipinden gelir; vaka açılırken ayrıca seçilmez. Boya/antikor kataloğu hizmet kartına bağlıdır - ek istek ücreti oradan.</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>

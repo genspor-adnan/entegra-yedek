@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Doku Laboratuvarı — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧫 Patoloji — Doku Laboratuvarı <span class="sp">Teknisyen iş listesi · 13.10.2026 · Histoloji lab</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📷 Barkod Okut</div>
+    <div class="sepv"></div><div class="btn">⚙ Takip Cihazına Yükle</div><div class="btn">🧊 Bloklandı</div><div class="btn">🔪 Kesildi</div><div class="btn">🎨 Boyandı</div><div class="btn ok">📦 Patoloğa Teslim</div>
+    <div class="sepv"></div><div class="btn">🏷 Lam Etiketi</div><div class="btn sp">🖨 İş Listesi ▾</div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="akis">Akış (pano)</div>
+    <div class="sekme" data-s="ek">Ek istekler <span class="rz pembe">5</span></div>
+    <div class="sekme" data-s="iz">Blok / lam izi</div>
+  </div>
+
+  <div class="pnl" data-s="akis">
+    <div class="ozet">
+      <div class="kart"><div class="b">Bugün kaset</div><div class="d">142 <small>· 23 vaka</small></div></div>
+      <div class="kart"><div class="b">Takip cihazında</div><div class="d">64 <small>· TP-1 gece programı 18:00</small></div></div>
+      <div class="kart"><div class="b">Kesit bekleyen blok</div><div class="d">38</div></div>
+      <div class="kart sari"><div class="b">Ek istek (İHK/özel boya)</div><div class="d">5 <small>· 2'si dünden</small></div></div>
+      <div class="kart kir"><div class="b">Yeniden kesit / sorunlu</div><div class="d">1 <small>· katlanma</small></div></div>
+    </div>
+    <div class="kanban">
+      <div class="kol"><div class="kb">Takibe girecek <span class="sp">kaset</span></div>
+        <div class="is"><b>P26-01234 A1–A10, B1</b>Kolon rezeksiyonu · 11 kaset<br><span class="sonuk">makro 11:40 · gece programı</span></div>
+        <div class="is"><b>P26-01236 A1–A4</b>Meme tru-cut · 4 kaset<br><span class="sonuk">kısa program (biyopsi)</span></div>
+        <div class="is"><b>P26-01237 A1–A12</b>Prostat biyopsisi · 12 kaset</div>
+      </div>
+      <div class="kol"><div class="kb">Takipte / bloklama <span class="sp">blok</span></div>
+        <div class="is"><b>P26-01229 A1–A6</b>Endometrium küretajı<br><span class="sonuk">TP-1 · çıkış 07:30 · bloklanıyor</span></div>
+        <div class="is"><b>P26-01230 A1–A2</b>Deri eksizyonu</div>
+      </div>
+      <div class="kol"><div class="kb">Kesit &amp; boyama <span class="sp">lam</span></div>
+        <div class="is acil"><b>P26-01233 A1–A2 · ACİL</b>Mide biyopsisi (H. pylori)<br><span class="sonuk">H&amp;E + Giemsa · 2 seviye</span></div>
+        <div class="is"><b>P26-01226 A1–A8</b>Tiroidektomi<br><span class="sonuk">H&amp;E · 8 lam</span></div>
+      </div>
+      <div class="kol"><div class="kb">Patoloğa teslim <span class="sp">tepsi</span></div>
+        <div class="is"><b>P26-01224 · 6 lam</b>→ Doç. Dr. Ş. Aydın</div>
+        <div class="is"><b>P26-01225 · 3 lam</b>→ Dr. O. Şen</div>
+      </div>
+      <div class="kol"><div class="kb">Frozen <span class="sp">anlık</span></div>
+        <div class="is frozen"><b>P26-01235 · Fz1</b>Sağ tiroid lobu · Ameliyathane 1<br><span class="sonuk">kabul 10:31 · kesit 10:38 · patologda</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="ek">
+    <div class="dg"><table>
+      <thead><tr><th>Vaka</th><th>Blok</th><th>İstek</th><th>Tür</th><th>İsteyen patolog</th><th class="orta">İstendi</th><th>Klon / kit</th><th class="orta">Kontrol doku</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>P26-01218</b></td><td>A2</td><td>ER, PR, HER2, Ki-67</td><td><span class="rz pembe">İHK</span></td><td>Dr. O. Şen</td><td class="orta">dün 15:10</td><td>SP1 · 1E2 · 4B5 · 30-9</td><td class="orta">✔</td><td class="orta"><span class="rz mavi">Cihazda (Benchmark)</span></td></tr>
+        <tr><td>P26-01221</td><td>A1</td><td>Sitokeratin AE1/AE3, CD45</td><td><span class="rz pembe">İHK</span></td><td>Doç. Dr. Ş. Aydın</td><td class="orta">dün 16:40</td><td>AE1/AE3 · 2B11+PD7/26</td><td class="orta">✔</td><td class="orta"><span class="rz sari">Kesit bekliyor</span></td></tr>
+        <tr><td>P26-01227</td><td>A3</td><td>PAS, PAS-D</td><td><span class="rz mor">Özel boya</span></td><td>Dr. O. Şen</td><td class="orta">08:50</td><td>—</td><td class="orta">✔</td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+        <tr><td>P26-01226</td><td>A4</td><td>3 seviye ek kesit</td><td><span class="rz">Ek kesit</span></td><td>Doç. Dr. Ş. Aydın</td><td class="orta">09:20</td><td>—</td><td class="orta">—</td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+        <tr><td>P26-01219</td><td>B1</td><td>MLH1, PMS2, MSH2, MSH6</td><td><span class="rz pembe">İHK</span></td><td>Doç. Dr. Ş. Aydın</td><td class="orta">dün 11:00</td><td>ES05 · EP51 · G219-1129 · EP49</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Boyandı · teslim</span></td></tr>
+      </tbody></table></div>
+    <div class="grp"><div class="gb">Kurallar</div>
+      <div class="ic sonuk" style="line-height:1.65">Her İHK/özel boya katalogdaki hizmete bağlı → başvuruya ücret satırı düşer (SUT/HUV kodu hizmette). Kontrol doku zorunlu (lamda pozitif kontrol). Kit lot no ve cihaz çalıştırma kaydı lama yazılır - kalite denetimi bu izden yapılır. Ek istek açıkken vaka "Ek inceleme" durumunda bekler, TAT işlemeye devam eder.</div></div>
+  </div>
+
+  <div class="pnl" data-s="iz">
+    <div class="hdr k4">
+      <div class="fld"><label>Barkod</label><div class="inp big">P26-01234 A3</div></div>
+      <div class="fld"><label>İçerik</label><div class="inp ro">Tümör – en derin invazyon · 1 parça</div></div>
+      <div class="fld"><label>Şu an</label><div class="inp ro">Takip cihazı TP-1</div></div>
+      <div class="fld"><label>Lam</label><div class="inp ro">— henüz kesilmedi</div></div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th>Zaman</th><th>Hareket</th><th>Kim</th><th>Yer / cihaz</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>11:40</td><td>Kaset açıldı</td><td>Doç. Dr. Ş. Aydın</td><td>Makro masası 1</td><td>Kaset yazıcısından basıldı</td></tr>
+        <tr><td>11:52</td><td>Formalinde bekleme</td><td>Tekn. H. Koç</td><td>Kaset kabı 3</td><td></td></tr>
+        <tr><td>18:00</td><td>Takip cihazına yüklendi</td><td>Tekn. H. Koç</td><td>TP-1 · gece programı</td><td>Program: Rezeksiyon 12 s</td></tr>
+        <tr class="sonuk"><td>—</td><td>Bloklama</td><td></td><td></td><td>bekleniyor</td></tr>
+        <tr class="sonuk"><td>—</td><td>Kesit → H&amp;E</td><td></td><td></td><td>bekleniyor</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="statusbar"><span>Okutulan her barkod bir hareket yazar - blok/lam "nerede" sorusunun cevabı</span><span class="sp"><code>pat_blok</code> · <code>pat_lam</code> · <code>pat_hareket</code> · <code>pat_ek_istem</code></span></div>
+</div>
+
+<div class="not"><b>İzlenebilirlik.</b> Kaset, blok ve lam her adımda barkodla okutulur; kayıt "kim, ne zaman, nerede" taşır. Bir lamın kaybolduğu ya da yanlış hastaya karıştığı şüphesinde iz bu ekrandan çıkar. Cihaz entegrasyonu (takip cihazı, otomatik boyama, İHK cihazı) Lab cihaz entegrasyonu deseniyle ileride bağlanır.</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>
