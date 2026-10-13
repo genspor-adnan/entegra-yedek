@@ -20,6 +20,15 @@
 #  ve orada sunucu-guncelle.sh'i calistirir (goc -> web -> api -> saglik
 #  kontrolu; kontrol duserse otomatik geri alma).
 #
+#  AYNI ANDA TEK YAYIN (13.10.2026): iki yayin birlikte kosunca hem yerelde
+#  ayni web/dist'e farkli alt yollarla derleniyor hem sunucuda ayni paket
+#  dosyasina yukleniyordu ("tar: A lone zero block", iki kurulum dustu).
+#    * yerel kilit  : %TEMP%\gentegre-yayin.kilit (bu makinede ikinci yayin
+#                     hemen durur - derleme klasoru ortak)
+#    * sunucu kilidi: flock /tmp/gentegre-yayin.kilit (baska makineden gelen
+#                     yayin da BEKLER, en fazla 30 dk)
+#    * uzak dosyalar kurulum + damga ile benzersiz
+#
 #  nginx'e DOKUNMAZ (sudo istemez). Yollar kurulum basina sabit:
 #     web  -> ~/<kok>/web        (nginx alias)
 #     api  -> ~/<kok>/api        (docker <konteyner>, kendi portunda)
@@ -101,8 +110,22 @@ $secilen =
 function Adim($m) { Write-Host "`n=== $m" -ForegroundColor Cyan }
 function Bilgi($m) { Write-Host "  $m" }
 
+# YEREL KILIT: dosya paylasimsiz acik tutulur; surec bitince (hata dahil)
+#   isletim sistemi birakir - eski kilit dosyasi kalsa bile engellemez.
+$kilitYolu = Join-Path $env:TEMP 'gentegre-yayin.kilit'
+try {
+    $kilit = [System.IO.File]::Open($kilitYolu, 'OpenOrCreate', 'ReadWrite', 'None')
+} catch [System.IO.IOException] {
+    throw "Bu makinede baska bir yayin suruyor ($kilitYolu). Bitmesini bekleyin; iki yayin ayni web/dist klasorunu ve sunucu adimini paylasir."
+}
+
+try {
 foreach ($k in $secilen) {
     Write-Host "`n################ $($k.Etiket) -> $($k.Yol)" -ForegroundColor Yellow
+    # Uzak dosyalar benzersiz: ayni sabit /tmp yoluna iki yayin yuklemesin.
+    $damga     = "$($k.Ad)-$(Get-Date -Format yyyyMMddHHmmss)"
+    $uzakPaket = "/tmp/gentegre-ai-paket-$damga.tgz"
+    $uzakBetik = "/tmp/sunucu-guncelle-$damga.sh"
 
     $gecici = Join-Path $env:TEMP "gentegre-yayin-$($k.Ad)-$(Get-Date -Format yyyyMMddHHmmss)"
     $paket  = Join-Path $env:TEMP "gentegre-ai-paket-$($k.Ad).tgz"
@@ -179,7 +202,7 @@ foreach ($k in $secilen) {
     if ($LASTEXITCODE -ne 0) { throw 'tar basarisiz' }
     Bilgi "paket: $([math]::Round((Get-Item $paket).Length/1MB,1)) MB"
 
-    scp -q $paket "${Sunucu}:/tmp/gentegre-ai-paket.tgz"
+    scp -q $paket "${Sunucu}:$uzakPaket"
     if ($LASTEXITCODE -ne 0) { throw 'scp basarisiz' }
 
     # Sunucu betigi de her seferinde tazelenir (bu depo tek dogruluk kaynagi).
@@ -190,18 +213,24 @@ foreach ($k in $secilen) {
     $betikLf = Join-Path $env:TEMP 'sunucu-guncelle.sh'
     [IO.File]::WriteAllText($betikLf,
         ((Get-Content (Join-Path $PSScriptRoot 'sunucu-guncelle.sh') -Raw) -replace "`r`n", "`n"))
-    scp -q $betikLf "${Sunucu}:/tmp/sunucu-guncelle.sh"
-    ssh $Sunucu "mkdir -p ~/$($k.Kok) && cp /tmp/sunucu-guncelle.sh ~/$($k.Kok)/sunucu-guncelle.sh && chmod +x ~/$($k.Kok)/sunucu-guncelle.sh"
+    scp -q $betikLf "${Sunucu}:$uzakBetik"
+    ssh $Sunucu "mkdir -p ~/$($k.Kok) && mv $uzakBetik ~/$($k.Kok)/sunucu-guncelle.sh && chmod +x ~/$($k.Kok)/sunucu-guncelle.sh"
 
     # ------------------------------------------------------------ uygula ----
     Adim 'sunucuda uygulaniyor'
     $bayrak = if ($TemelAl) { '--temel-al' } else { '' }
     # Kurulum bilgisi ORTAM DEGISKENIYLE gecer: betik tek, kurulum coktur.
     $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol)"
-    ssh $Sunucu "$ortam bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"
+    # SUNUCU KILIDI: baska bir yayin (baska makineden de) sunucu adimindaysa
+    #   BEKLER (en fazla 30 dk); sure dolarsa 75 ile cikar, hicbir sey yapilmaz.
+    ssh $Sunucu "flock -w 1800 -E 75 /tmp/gentegre-yayin.kilit env $ortam PAKET=$uzakPaket bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"
+    if ($LASTEXITCODE -eq 75) { throw 'sunucuda baska bir yayin 30 dakikadir suruyor - bu kurulum ATLANDI, hicbir sey degismedi' }
     if ($LASTEXITCODE -ne 0) { throw 'sunucu guncellemesi basarisiz (sunucu kendi geri almasini yapti)' }
 
     Remove-Item $gecici -Recurse -Force
     Remove-Item $paket -ErrorAction SilentlyContinue
     Write-Host "YAYIN TAMAM -> http://46.36.201.170$($k.Yol)" -ForegroundColor Green
+}
+} finally {
+    $kilit.Dispose()
 }

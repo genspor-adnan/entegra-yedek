@@ -16,7 +16,7 @@
 #  sudo GEREKTIRMEZ: nginx'e dokunulmaz (yollar sabit), yalniz ev dizini ve
 #  docker kullanilir. API konteyneri YOKSA kurulur (yeni kurulum).
 #
-#  Kullanim (paket /tmp/gentegre-ai-paket.tgz olarak yuklenmis olmali):
+#  Kullanim (paket PAKET= ile verilen yolda, yoksa /tmp/gentegre-ai-paket.tgz):
 #      KOK=$HOME/gentegre-erp DB=gentegre_erp KAP=gentegre-api-erp PORT=5181 \
 #        bash ~/gentegre-erp/sunucu-guncelle.sh [--temel-al]
 #
@@ -34,7 +34,10 @@ PG=gentegre-pg18
 AG=gentegre-net
 IMAJ=mcr.microsoft.com/dotnet/aspnet:10.0
 
-PAKET=/tmp/gentegre-ai-paket.tgz
+# Paket yolu yayinla.ps1'den gelir (kurulum + damga ile benzersiz): ayni
+#   sabit dosyaya iki yayin birden yuklenince arsiv bozuluyordu (13.10.2026,
+#   "tar: A lone zero block"). Eski cagri bicimi icin varsayilan durur.
+PAKET=${PAKET:-/tmp/gentegre-ai-paket.tgz}
 GECICI=$(mktemp -d)
 DAMGA=$(date +%Y%m%d-%H%M%S)
 TEMEL_AL=0
