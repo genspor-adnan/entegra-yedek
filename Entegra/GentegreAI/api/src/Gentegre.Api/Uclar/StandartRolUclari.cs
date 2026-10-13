@@ -305,7 +305,8 @@ public static class StandartRolUclari
         ["isyeri_hekimi"] = "isg", ["isg_uzmani"] = "isg", ["dsp"] = "isg",
         ["osgb_sekreter"] = "isg", ["firma_yetkilisi"] = "isg",
         ["cagri_operator"] = "cagri", ["cagri_supervizor"] = "cagri",
-        ["steril_sorumlu"] = "steril",
+        // Sterilizasyon 908'den beri Diş modülünün altında; "steril" modül kodu yok.
+        ["steril_sorumlu"] = "dis",
         // ERP rolleri de kendi modullerine bagli (795): stok modulu kapaliysa
         //   depo sorumlusu onerilmez.
         ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",

@@ -1,4 +1,4 @@
-using Gentegre.Api.Servisler;
+﻿using Gentegre.Api.Servisler;
 using Gentegre.Veri;
 
 namespace Gentegre.Testler;
@@ -66,7 +66,7 @@ public sealed class RolRehberTestleri(VeritabaniOlgusu olgu)
         var ekran = await veri.TekDegerAsync<long>("""
             select count(*)
               from public.rol_yetki ry
-              join public.rol r on r.id = ry.rol_id and r.kod = 'kayit_kabul'
+              join public.rol r on r.id = ry.rol_id and r.kod = 'banko_gorevlisi'
               join public.yetki y on y.id = ry.yetki_id
               join public.ai_rehber_ekran e on e.yetki_kodu = y.kod and e.durum = 0
              where ry.gor = 1
@@ -79,7 +79,7 @@ public sealed class RolRehberTestleri(VeritabaniOlgusu olgu)
         var islem = await veri.TekDegerAsync<long>("""
             select count(*)
               from public.rol_yetki ry
-              join public.rol r on r.id = ry.rol_id and r.kod = 'kayit_kabul'
+              join public.rol r on r.id = ry.rol_id and r.kod = 'banko_gorevlisi'
               join public.yetki y on y.id = ry.yetki_id and y.tur = 1
              where ry.gor = 1
             """, [], CancellationToken.None);
@@ -103,7 +103,7 @@ public sealed class RolRehberTestleri(VeritabaniOlgusu olgu)
         var tavan = await veri.TekDegerAsync<string>("""
             select ry.deger
               from public.rol_yetki ry
-              join public.rol r on r.id = ry.rol_id and r.kod = 'kayit_kabul'
+              join public.rol r on r.id = ry.rol_id and r.kod = 'banko_gorevlisi'
               join public.yetki y on y.id = ry.yetki_id and y.kod = 'basvuru.iskonto'
             """, [], CancellationToken.None);
         Assert.False(string.IsNullOrWhiteSpace(tavan),

@@ -105,7 +105,7 @@ public sealed class PortalKapsamiTestleri(VeritabaniOlgusu olgu)
             values ('test_portal', 'Test Portal', 'test', 0, 1, 1) returning id
             """, t, [], CancellationToken.None);
         var icRol = await b.TekDegerAsync<int>(
-            "select id from public.rol where kod = 'kayit_kabul'", t, [],
+            "select id from public.rol where kod = 'banko_gorevlisi'", t, [],
             CancellationToken.None);
         var kullanici = await b.TekDegerAsync<int>(
             "select id from public.taraf_kullanici where aktif = 1 order by id limit 1",

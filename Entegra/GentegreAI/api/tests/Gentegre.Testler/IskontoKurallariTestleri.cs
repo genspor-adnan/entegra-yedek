@@ -1,4 +1,4 @@
-using Gentegre.Veri;
+﻿using Gentegre.Veri;
 using Npgsql;
 
 namespace Gentegre.Testler;
@@ -336,7 +336,8 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
 /// 785 birim basamağını `kayit_kabul` rolüne vermişti: bankodaki her çalışan
 /// birim onaycısı oluyordu. 783 kişinin KENDİ talebini onaylamasını kapatıyor
 /// ama yanındaki mesai arkadaşı imzalayabiliyordu - denetim değil karşılıklı
-/// imza. Basamak `kayit_kabul_sorumlu` (banko şefi) rolüne taşındı.
+/// imza. Basamak `kayit_kabul_sorumlu` (banko şefi) rolüne taşındı. Rol kodları 1000 / 1001'de
+/// `banko_gorevlisi` / `banko_sorumlusu` oldu.
 /// </summary>
 public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
     : IClassFixture<VeritabaniOlgusu>
@@ -358,10 +359,10 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         if (!_olgu.Baglandi(nameof(Birim_imzasi_BANKODA_degil_SORUMLUDA))) return;
         var veri = _olgu.Gerekli();
 
-        Assert.Equal(0, await YetkiSayisiAsync(veri, "kayit_kabul", "belge.iskonto_onay_birim"));
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "belge.iskonto_onay_birim"));
+        Assert.Equal(0, await YetkiSayisiAsync(veri, "banko_gorevlisi", "belge.iskonto_onay_birim"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "banko_sorumlusu", "belge.iskonto_onay_birim"));
         // Karar veren denetim izini de görür (685).
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "iskonto_onay"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "banko_sorumlusu", "iskonto_onay"));
     }
 
     [VtFact]
@@ -373,17 +374,17 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         // Üç kademe üç ayrı KADRO rolünde (754/787/788). Departman rolüne
         //   (banko, muhasebe) verilirse aynı masadaki iki kişi birbirinin
         //   indirimini onaylar - denetim değil karşılıklı imza olur.
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "belge.iskonto_onay_birim"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "banko_sorumlusu", "belge.iskonto_onay_birim"));
         Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe_sorumlu", "belge.iskonto_onay_mali"));
         Assert.Equal(1, await YetkiSayisiAsync(veri, "ust_yonetim", "belge.iskonto_onay_ust"));
 
         // DEPARTMAN ROLLERİ İMZA TAŞIMAZ (787/788)...
-        Assert.Equal(0, await YetkiSayisiAsync(veri, "kayit_kabul", "belge.iskonto_onay_birim"));
+        Assert.Equal(0, await YetkiSayisiAsync(veri, "banko_gorevlisi", "belge.iskonto_onay_birim"));
         Assert.Equal(0, await YetkiSayisiAsync(veri, "muhasebe", "belge.iskonto_onay_mali"));
 
         // ...ama kararları GÖRÜRLER (685): kendi talebinin nerede olduğunu
         //   izleyemeyen kullanıcı aynı talebi ikinci kez açar.
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul", "iskonto_onay"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "banko_gorevlisi", "iskonto_onay"));
         Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe", "iskonto_onay"));
 
         // YÖNETİCİ ARTIK İMZA ATMAZ (789, kullanıcı: "yönetici rolünden
@@ -404,14 +405,15 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
 
         // Mesul müdür dökümleri görür, kayıt DEĞİŞTİRMEZ; farkı imzadır.
         //   `rapor_goruntuleyici`den ayrı bir rol olmasının sebebi bu: o rol
-        //   bilerek karar VERMEYEN roldür.
+        //   bilerek karar VERMEYEN roldür. `ariza.talep` (911) her role verilen
+        //   self-servis arıza bildirimidir, kayıt yetkisi sayılmaz.
         var yazan = await veri.TekDegerAsync<long>(
             "select count(*) from public.rol r "
             + "  join public.rol_yetki ry on ry.rol_id = r.id "
             + "  join public.yetki y on y.id = ry.yetki_id "
             + " where r.kod = 'ust_yonetim' and y.tur = 0 "
             + "   and (ry.ekle = 1 or ry.degistir = 1 or ry.sil = 1) "
-            + "   and y.kod <> 'iskonto_onay'",
+            + "   and y.kod not in ('iskonto_onay', 'ariza.talep')",
             [], CancellationToken.None);
         Assert.Equal(0, yazan);
         Assert.Equal(1, await YetkiSayisiAsync(veri, "ust_yonetim", "belge.iskonto_onay_ust"));
@@ -425,7 +427,7 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
 
         // Sorumlu bankonun işini de yapar: hasta, randevu, başvuru, tahsilat.
         foreach (var kod in new[] { "hasta", "randevu", "belge", "kasa_islem" })
-            Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", kod));
+            Assert.Equal(1, await YetkiSayisiAsync(veri, "banko_sorumlusu", kod));
     }
 }
 
@@ -451,7 +453,7 @@ public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
         NpgsqlConnection b, NpgsqlTransaction t)
     {
         var rolId = await b.TekDegerAsync<int>(
-            "select id from public.rol where kod = 'kayit_kabul_sorumlu'",
+            "select id from public.rol where kod = 'banko_sorumlusu'",
             t, [], CancellationToken.None);
         var kullanici = await b.TekDegerAsync<int>(
             "select id from public.taraf_kullanici where aktif = 1 order by id limit 1",
@@ -531,7 +533,7 @@ public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
 
         // Banko calisani (imzasi yok): esik ustu yazamaz - 783 oldugu gibi.
         var rolId = await b.TekDegerAsync<int>(
-            "select id from public.rol where kod = 'kayit_kabul'", t, [],
+            "select id from public.rol where kod = 'banko_gorevlisi'", t, [],
             CancellationToken.None);
         var kullanici = await b.TekDegerAsync<int>(
             "select id from public.taraf_kullanici where aktif = 1 order by id limit 1",

@@ -70,7 +70,7 @@ public sealed class StandartRolModulTestleri(VeritabaniOlgusu olgu)
         //   kurulumda geçerli. Haritaya girerlerse modülü kapalı bir kurumda
         //   hiç önerilmezler ve kurum rolsüz kalır.
         var harita = HaritaOku().Select(x => x.Rol).ToHashSet();
-        foreach (var kod in new[] { "kayit_kabul", "muhasebe", "vezne",
+        foreach (var kod in new[] { "banko_gorevlisi", "muhasebe", "vezne",
                                     "rapor_goruntuleyici", "kalite", "bilgi_islem" })
             Assert.DoesNotContain(kod, harita);
     }

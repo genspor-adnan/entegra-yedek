@@ -79,6 +79,16 @@ görmüyordu:
     "steril" modül kodu, banko şefi rolleri, YZ kontör),
   - **portal kapsamı**: `dis_doktor` ve `dis_istem_kurumu` rolleri `departman`
     listesini kapsam kuralı olmadan görüyor - gözden geçirilmeli.
+
+  **Düzeltildi (13.10.2026) - 653 / 653 yeşil:**
+  - 10 test 1000 / 1001'deki rol kodu değişikliğini izlememişti
+    (`kayit_kabul` → `banko_gorevlisi`, `kayit_kabul_sorumlu` →
+    `banko_sorumlusu`); "rol_id 0" hatası da bundandı. Testler güncellendi.
+  - `steril_sorumlu` rolü 908'de kaldırılan `steril` modülüne bağlıydı; artık `dis`.
+  - Portal: `departman` yetkisi dış doktor / dış kurum rollerinden alındı (1077).
+    Bu portallarda bölüm süzgeci kullanan ekran yok; hasta portalı (randevu) korundu.
+  - Üst yönetim salt-okuma testi, her role verilen self-servis `ariza.talep`
+    (911) yetkisini dışlıyor.
 - **Duman testi** - `npm run duman` (web/duman/menu.duman.ts). Bütün menü 377
   ekran, ~5 dk. İlk koşuda **4 gerçek hata**:
   1. İK › İzin Hakedişi: menü katalogda olmayan kaynağa bağlı
