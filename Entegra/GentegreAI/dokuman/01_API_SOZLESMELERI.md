@@ -1499,6 +1499,8 @@ yok / yanlış / ajan pasif → `401 YETKISIZ`.
 ```http
 GET  /api/aktarim/durum     // X-Aktarim-Surum? → { hareket_baslangic, tablolar[{tablo, versiyon, son_paket}], adimlar[{sira, fonksiyon, tablolar}], hatalar[{adim, tablolar, mesaj, deneme, son_zaman}], kolonlar{TABLO: [kolon]} }
 POST /api/aktarim/ust       // (1087) { TABLO: [silinen alt satır id] } → { KOK_TABLO: [kök Delphi id] } - web eşlemesinden
+POST /api/aktarim/mutabakat // (1091) { tablo, idler[] } → { delphi, web, eksik[], fazla[] } - yazmaz
+POST /api/aktarim/mutabakat/kayit // { tablo, delphi, web, eksik, fazla, giderilen, atlanan, ornek } - ekranın Mutabakat paneli
 POST /api/aktarim/paket     // { paket, V: {TABLO: ct_versiyon}, U: {TABLO: [satır]}, D: {TABLO: [id | {anahtar}]} } → { paket, sonuc{fonksiyon: sayaçlar}, hata?{adim, tablolar, mesaj}, ilerleyen[], tekrar? }
 ```
 
@@ -1534,6 +1536,10 @@ ve `disKaynak: "Delphi"`; aktarılan kaynağa yazan aksiyon ve e-Belge pasif.
 - **Toplam:** pakette olmayan alt satır web'de silinir; kök (belge, cari, stok, kalem,
   reçete) hangi sebeple gönderilirse gönderilsin bütün alt satırlarıyla gider. Delphi'de
   silinen alt satırın kökü Change Tracking'de yok - ajan `ust` ile sorar.
+- **Mutabakat** (gece / `--mutabakat`): eksik = Delphi'de var web'de hiç yok (ajan yeniden
+  yollar; ikinci sorguda hâlâ eksik olan kural gereği aktarılmayandır - "atlanan");
+  fazla = web'de AKTİF, Delphi listesinde yok (ajan Delphi'de yeniden doğrular, gerçekten
+  yoksa D). Kapsam dışı: DOVIZ, STOKDURUM.
 - Bilinmeyen tablo / geçersiz JSON → `400 DOGRULAMA`, hiçbir şey yazılmaz.
   Paket sınırı **64 MB** (`413`); ilk yükleme sayfalı gönderilir (BILIM 2026'nın
   tamamı yıl süzgeçsiz STOKIZLEME ile 193 MB, tek çağrı ~33 sn).

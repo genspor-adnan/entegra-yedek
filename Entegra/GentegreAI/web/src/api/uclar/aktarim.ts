@@ -18,6 +18,9 @@ export type AktarimDurumu = {
   ajanlar: { id: number; ad: string; aktif: number; olusturma: string; sonNabiz: string | null; surum: string | null }[];
   bugun: { paket: number; satir: number; silme: number; ortMs: number; hatali: number };
   adimlar: AktarimAdimi[]; hatalar: AktarimHatasi[]; sonPaketler: AktarimPaketi[];
+  /** Tablo başına son mutabakat (1091). */
+  mutabakat: { tablo: string; zaman: string; delphi: number; web: number; eksik: number; fazla: number;
+               giderilen: number; atlanan: number; ornek: { eksik?: number[]; fazla?: number[] } | null }[];
 };
 
 export const aktarimUclari = {

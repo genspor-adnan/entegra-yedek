@@ -20,6 +20,8 @@ public sealed class Ayarlar
     public int NabizSn { get; set; } = 60;
     public int PaketMb { get; set; } = 32;
     public string GunlukKlasoru { get; set; } = "gunluk";
+    /// <summary>Gece mutabakatının saati (yerel, 0-23); -1 kapalı.</summary>
+    public int MutabakatSaati { get; set; } = 3;
 
     private static readonly byte[] Tuz = "Gentegre.Aktarim.Ajan"u8.ToArray();
     private static readonly JsonSerializerOptions Secenek = new() { WriteIndented = true };

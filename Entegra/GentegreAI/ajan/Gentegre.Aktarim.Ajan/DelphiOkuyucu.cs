@@ -21,11 +21,28 @@ public sealed class DelphiOkuyucu(string baglanti)
     private readonly Dictionary<string, string[]> _pk = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string>> _kolon = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Bağlantı açılışı geçici hatada yeniden denenir (1 sn, 2 sn, 4 sn, 8 sn). Dayanıklılık
+    /// testinde (500 bin satırlık tam yükleme) SQL Browser örnek adını bir kez çözemedi
+    /// (error 26) ve tur baştan başladı - tam yüklemede bu, dakikalarca işin kaybı demek.
+    /// </summary>
     private async Task<SqlConnection> AcAsync(CancellationToken iptal)
     {
-        var b = new SqlConnection(baglanti);
-        await b.OpenAsync(iptal);
-        return b;
+        for (var deneme = 1; ; deneme++)
+        {
+            var b = new SqlConnection(baglanti);
+            try
+            {
+                await b.OpenAsync(iptal);
+                return b;
+            }
+            catch (SqlException) when (deneme < 5 && !iptal.IsCancellationRequested)
+            {
+                await b.DisposeAsync();
+                SqlConnection.ClearPool(b);
+                await Task.Delay(TimeSpan.FromSeconds(1 << (deneme - 1)), iptal);
+            }
+        }
     }
 
     private static SqlCommand Komut(SqlConnection b, string sql, params SqlParameter[] p)

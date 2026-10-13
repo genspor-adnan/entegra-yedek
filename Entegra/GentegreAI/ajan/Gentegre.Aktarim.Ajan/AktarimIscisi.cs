@@ -16,6 +16,7 @@ public sealed class AktarimIscisi(Ayarlar ayar, ILogger<AktarimIscisi> gunluk) :
 
         long sonVersiyon = -1;
         var sonNabiz = DateTime.MinValue;
+        var sonMutabakat = DateTime.MinValue;
         var bekle = TimeSpan.FromSeconds(30);
         while (!iptal.IsCancellationRequested)
         {
@@ -33,6 +34,14 @@ public sealed class AktarimIscisi(Ayarlar ayar, ILogger<AktarimIscisi> gunluk) :
                         bekle = TimeSpan.FromSeconds(30);
                         if (!s.DegisiklikYok)
                             gunluk.LogInformation("Tur: versiyon {V}, {P} paket, {K} kök, {S} silme", s.Versiyon, s.Paket, s.Kok, s.Silinen);
+                        // GECE MUTABAKATI: günde bir kez, ayarlı saatten sonraki ilk hatasız turun ardından.
+                        if (ayar.MutabakatSaati >= 0 && DateTime.Now.Hour >= ayar.MutabakatSaati && sonMutabakat != DateTime.Today)
+                        {
+                            sonMutabakat = DateTime.Today;
+                            var m = await aktarici.MutabakatAsync(iptal);
+                            gunluk.LogInformation("Mutabakat: {T} tablo, eksik {E}, fazla {F}, giderilen {G}, kural gereği atlanan {A}",
+                                                  m.Count, m.Sum(x => x.Eksik), m.Sum(x => x.Fazla), m.Sum(x => x.Giderilen), m.Sum(x => x.Atlanan));
+                        }
                     }
                     else
                     {

@@ -6,6 +6,7 @@
 //
 //    GentegreAktarimAjani                 konsol kipi (Ctrl+C ile durur)
 //    GentegreAktarimAjani --tek-tur       bir tur çalış, çık (0 = tamam, 1 = hata)
+//    GentegreAktarimAjani --mutabakat     Delphi <-> web kimlik mutabakatı, çık (gece kendiliğinden de çalışır)
 //    GentegreAktarimAjani --sifrele       ajan.json'daki düz sırları DPAPI ile şifrele
 //    GentegreAktarimAjani --ayar <yol>    başka ayar dosyası (varsayılan exe yanında ajan.json)
 //    sc create GentegreAktarim binPath= "<yol>\GentegreAktarimAjani.exe" start= auto
@@ -29,13 +30,21 @@ var ayar = Ayarlar.Oku(ayarYolu);
 var gunlukKlasoru = Path.IsPathRooted(ayar.GunlukKlasoru) ? ayar.GunlukKlasoru
                   : Path.Combine(Path.GetDirectoryName(ayarYolu)!, ayar.GunlukKlasoru);
 
-if (args.Contains("--tek-tur"))
+if (args.Contains("--tek-tur") || args.Contains("--mutabakat"))
 {
     using var fabrika = LoggerFactory.Create(b => b.AddSimpleConsole(o => o.SingleLine = true)
                                                    .AddProvider(new DosyaGunlugu(gunlukKlasoru)));
     var gunluk = fabrika.CreateLogger("Ajan");
     using var api = new ApiIstemci(ayar, gunluk);
     var aktarici = new Aktarici(new DelphiOkuyucu(ayar.GercekBaglanti), api, ayar, gunluk);
+    if (args.Contains("--mutabakat"))
+    {
+        var m = await aktarici.MutabakatAsync(CancellationToken.None);
+        foreach (var x in m)
+            gunluk.LogInformation("{T,-16} Delphi {D,7}  web {W,7}  eksik {E,5}  fazla {F,5}  giderilen {G,5}  kural gereği atlanan {A,5}",
+                                  x.Tablo, x.Delphi, x.Web, x.Eksik, x.Fazla, x.Giderilen, x.Atlanan);
+        return 0;
+    }
     var s = await aktarici.TurAsync(CancellationToken.None);
     gunluk.LogInformation("Tur: versiyon {V}, {P} paket, {K} kök, {S} silme{H}", s.Versiyon, s.Paket, s.Kok, s.Silinen,
                           s.Hata is null ? "" : " - HATA " + s.Hata);

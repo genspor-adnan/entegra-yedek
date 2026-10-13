@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (554 ad, 150 tanesi birden cok dosyada)
+## Fonksiyonlar (556 ad, 151 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,14 +13,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
-| `fn_aktar_belge` | `1088_aktarim_belge_donus.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql |
+| `fn_aktar_belge` | `1093_aktarim_metin_kirp.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_depo` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
-| `fn_aktar_kasa` | `1085_aktarim_kasa.sql` | — |
+| `fn_aktar_kasa` | `1093_aktarim_metin_kirp.sql` | 1085_aktarim_kasa.sql |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_paket` | `1089_aktarim_salt_okunur.sql` | 1086_aktarim_paket.sql |
 | `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -34,11 +34,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1082_aktarim_stok_kalem_hesap.sql` | 1080_aktarim_kaynak_kimligi.sql |
+| `fn_aktarim_mutabakat` | `1091_aktarim_mutabakat.sql` | — |
 | `fn_aktarim_salt_okunur` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktarim_tarih` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktarim_ust` | `1087_aktarim_ust.sql` | — |
 | `fn_aktarim_web_id` | `1082_aktarim_stok_kalem_hesap.sql` | 1081_aktarim_cari_depo.sql |
+| `fn_aktarim_web_kimlikleri` | `1091_aktarim_mutabakat.sql` | — |
 | `fn_aktarim_zaman` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_ameliyat_no_uret` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_not_imza_kilidi` | `719_ameliyathane_acil_akis.sql` | — |

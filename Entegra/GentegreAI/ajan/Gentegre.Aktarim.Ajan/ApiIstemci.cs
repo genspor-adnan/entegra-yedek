@@ -42,6 +42,24 @@ public sealed class ApiIstemci : IDisposable
     public async Task<JsonObject> PaketAsync(string govde, CancellationToken iptal)
         => await GonderAsync(() => Post("api/aktarim/paket", govde), iptal);
 
+    public async Task<JsonObject> MutabakatAsync(string tablo, IReadOnlyCollection<long> idler, CancellationToken iptal)
+    {
+        var govde = new JsonObject { ["tablo"] = tablo, ["idler"] = new JsonArray([.. idler.Select(i => JsonValue.Create(i))]) }.ToJsonString();
+        return await GonderAsync(() => Post("api/aktarim/mutabakat", govde), iptal);
+    }
+
+    public async Task MutabakatKaydetAsync(MutabakatSonucu s, Dictionary<string, long[]> ornek, CancellationToken iptal)
+    {
+        var o = new JsonObject();
+        foreach (var (k, v) in ornek) o[k] = new JsonArray([.. v.Select(i => JsonValue.Create(i))]);
+        var govde = new JsonObject
+        {
+            ["tablo"] = s.Tablo, ["delphi"] = s.Delphi, ["web"] = s.Web, ["eksik"] = s.Eksik, ["fazla"] = s.Fazla,
+            ["giderilen"] = s.Giderilen, ["atlanan"] = s.Atlanan, ["ornek"] = o,
+        }.ToJsonString();
+        await GonderAsync(() => Post("api/aktarim/mutabakat/kayit", govde), iptal);
+    }
+
     private static HttpRequestMessage Post(string yol, string govde)
         => new(HttpMethod.Post, yol) { Content = new StringContent(govde, Encoding.UTF8, "application/json") };
 

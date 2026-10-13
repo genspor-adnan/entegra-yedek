@@ -172,6 +172,36 @@ export function AktarimDurumu() {
             <p className="ak-not">Versiyon = Delphi Change Tracking numarası. "Bugün" = ajandan gelen satır (aynı içerik web'e yeniden yazılmaz).</p>
           </div>
 
+          <div>
+          <div className="ak-grp">
+            <h4>Mutabakat <span className="ak-tag">gece · Delphi ↔ web kimlik karşılaştırması</span></h4>
+            {veri.mutabakat.length === 0
+              ? <p className="ak-not">Henüz mutabakat çalışmadı (ajan gece kendiliğinden yapar; elle: <code>GentegreAktarimAjani --mutabakat</code>).</p>
+              : (<>
+                <table className="hi-tablo">
+                  <thead><tr><th>Tablo</th><th className="r">Delphi</th><th className="r">Web</th><th className="r">Giderilen</th><th className="r">Kural gereği</th><th>Sonuç</th></tr></thead>
+                  <tbody>
+                    {veri.mutabakat.map(m => {
+                      const kalan = m.eksik + m.fazla - m.giderilen - m.atlanan;
+                      return (
+                        <tr key={m.tablo} className={kalan > 0 ? 'ak-hata' : ''}>
+                          <td>{m.tablo}</td>
+                          <td className="r">{sayi(m.delphi)}</td><td className="r">{sayi(m.web)}</td>
+                          <td className="r">{m.giderilen ? sayi(m.giderilen) : '—'}</td>
+                          <td className="r" title="Kural gereği aktarılmayan (ör. makine olmayan lokasyon, mamulü çözülmeyen reçete)">
+                            {m.atlanan ? sayi(m.atlanan) : '—'}</td>
+                          <td>{kalan > 0
+                            ? <><span className="ak-isik teh" />{sayi(kalan)} fark kaldı</>
+                            : <><span className="ak-isik iyi" />Eşit{m.giderilen ? ' (giderildi)' : ''}</>}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <p className="ak-not">Son: {saat(veri.mutabakat.reduce((a, m) => (m.zaman > a ? m.zaman : a), ''))}.
+                  Eksik (web'de yok) yeniden yollanır; fazla (Delphi'de silinmiş) Delphi'de yeniden doğrulanıp web'de pasif yapılır / silinir.</p>
+              </>)}
+          </div>
           <div className="ak-grp">
             <h4>Son paketler</h4>
             <table className="hi-tablo">
@@ -190,6 +220,7 @@ export function AktarimDurumu() {
                 ))}
               </tbody>
             </table>
+          </div>
           </div>
         </div>
       </>)}

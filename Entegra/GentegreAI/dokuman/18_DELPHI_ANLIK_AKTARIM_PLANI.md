@@ -405,9 +405,37 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      tablolarının versiyonu silinir -> ajan yeniden yükler), şube eşlemesi (görünüm),
      ajan anahtarları (üret - yalnız o an görünür, pasif yap). Web'e dönünce bütün
      anahtarlar pasif. Uçlar `/api/kurum-profil/aktarim` (yetki `ayar`).
-   **Adım 6 tamam.** Sırada adım 7: gece mutabakatı (kayıt sayısı, belge toplamı,
-   cari bakiye; Delphi'de silinmiş web'de duran kayıt) + dayanıklılık testleri
-   (§11.5: uzun kesinti -> yeniden eşitleme, 500 bin satır, Türkçe/emoji/tarih).
+   **Adım 6 tamam.**
+
+   **Adım 7 yapıldı (1091-1093, 13.10.2026).**
+   - **Mutabakat (1091):** ajan gece (`MutabakatSaati`, varsayılan 3) ya da
+     `--mutabakat` ile her kök tablonun Delphi kimliklerini yollar; sunucu eksik
+     (web'de yok) / fazla (web'de AKTİF, Delphi'de yok) döner. Ajan eksiği yeniden
+     yollar, ikinci sorguda hâlâ eksik olanı "kural gereği" sayar; fazlayı Delphi'de
+     yeniden doğrulayıp D yollar. Sonuç `aktarim_mutabakat` -> Aktarım Durumu
+     "Mutabakat" paneli ("Eşit"). DOVIZ ve STOKDURUM kapsam dışı.
+   - **Ölçütler (§11.5):** 1) fatura açıklaması 3,4 sn / geri 4,7 sn, tahsilat < 1 sn,
+     cari 2 sn, barkod 1,4 sn, silinen barkod 5,3 sn. 3) CT saklama süresi aşımı
+     (sunucu versiyonu min geçerlinin altında) -> grup kendiliğinden TAM yüklendi;
+     kaçırılmış silme (versiyon elle ilerletildi) -> mutabakat buldu, depo pasif.
+     7) mutabakat 3-7 sn, fark yoksa "Eşit". 8) **BILIM bütün yıllar tam yükleme:
+     80.237 belge, 499.990 FATURA, 454.447 izleme, 121.807 KASA - 14 dk 8 sn,
+     464 paket**, ardından mutabakat FATBASLIK 80.237 = 80.237.
+   - Kural gereği aktarılmayan (mutabakatta "atlanan", hata değil): LOKASYON 86
+     (makine değil), URETIMRECETE 2 (mamul yok), PROJELER 2 (kod çakışması), REHBER 1
+     (-1 kendi firma), KASA 5 (tanımsız tür / irsaliye), STOKIZLEME 4 (stok / seri-lot yok).
+   - **Bulunan ve düzeltilenler:** 1092 `belge.stok_iskonto` (9,4) -> (18,4) - Delphi
+     üretim fişinde STOKISK = ADET (390.000'e kadar); 1093 metin alanları kolon boyuna
+     kırpılır - faturanın cari satırı açıklamaya ünvanı (200) yazıyordu, kolon 100
+     (web'in kendi yazımı BelgeDeposu.MaliHareketYazAsync da aynı hataya açıktı ->
+     `left(.., 100)`); ajan Delphi bağlantısını geçici hatada 5 kez yeniden dener
+     (deneme sırasında SQL Server tek kullanıcı kipine girip yeniden başladı, error 26).
+   - Açık: emoji Delphi'de oluşamaz (BILIM metin kolonları varchar CP1254); cari
+     bakiye karşılaştırması mutabakata alınmadı (bakiye kuralı ekstre ekranında,
+     1085 eşdeğerlik testi 575/580 birebir). Klon `gentegre_ai_aktarim` artık bütün
+     yılları taşıyor (hareket başlangıcı 1900, 1 GB).
+
+   Sırada adım 8: kurulum rehberi (ajan kurulumu, SQL kullanıcısı, anahtar) + pilot.
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

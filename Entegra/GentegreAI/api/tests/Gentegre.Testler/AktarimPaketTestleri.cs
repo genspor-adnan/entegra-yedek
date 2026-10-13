@@ -115,6 +115,46 @@ public sealed class AktarimPaketTestleri(VeritabaniOlgusu olgu) : IClassFixture<
 }
 
 /// <summary>
+/// MUTABAKAT (1091): Delphi kimlik listesi <-> web. Eksik = web'de hiç yok; fazla = web'de
+/// AKTİF ve listede yok (D ile zaten pasifleşmiş satır fazla sayılmaz - her gece yeniden
+/// D gönderilmesin). Bilinmeyen tablo reddedilir. İşlem içinde, geri alınır.
+/// </summary>
+public sealed class AktarimMutabakatTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    [VtFact]
+    public async Task Mutabakat_eksik_ve_aktif_fazlayi_bulur_pasifi_saymaz()
+    {
+        if (!_olgu.Baglandi(nameof(Mutabakat_eksik_ve_aktif_fazlayi_bulur_pasifi_saymaz))) return;
+        await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
+        await using var t = await b.BeginTransactionAsync();
+        var ct = CancellationToken.None;
+
+        await b.CalistirAsync("select public.fn_aktar_depo(@p0::jsonb)", t, ["""
+            {"U": {"DEPOLAR": [{"id": 990007001, "depoadi": "Mut A", "durum": 1},
+                               {"id": 990007002, "depoadi": "Mut B", "durum": 1},
+                               {"id": 990007004, "depoadi": "Mut D", "durum": 1}]},
+             "D": {"DEPOLAR": [990007002]}}
+            """], ct);
+        // Delphi'de: A var, C var (web'e hiç gelmemiş); B silinmiş (web'de zaten pasif), D silinmiş (web'de aktif).
+        var json = await b.TekDegerAsync<string>("""
+            select public.fn_aktarim_mutabakat('DEPOLAR',
+                   array[990007001, 990007003]::bigint[] || array(select aktarim_id from public.depo
+                                                                  where aktarim_kaynak = 1 and aktarim_tablo = 'DEPOLAR'
+                                                                    and aktarim_id not between 990007000 and 990007999))::text
+            """, t, [], ct);
+        var s = System.Text.Json.Nodes.JsonNode.Parse(json!)!;
+        Assert.Equal("[990007003]", s["eksik"]!.ToJsonString());
+        Assert.Equal("[990007004]", s["fazla"]!.ToJsonString());
+
+        await Assert.ThrowsAsync<PostgresException>(() =>
+            b.TekDegerAsync<string>("select public.fn_aktarim_mutabakat('DOVIZ', '{}')::text", t, [], ct));
+        await t.RollbackAsync();
+    }
+}
+
+/// <summary>
 /// Gerçek API süreci: ajan uçları oturum değil makine anahtarı ister; bilinmeyen
 /// tablo 400; tamamlanan paketin tekrarı uygulanmaz; durum versiyonu gösterir.
 /// API kendi işlemini commit'ler - test kendi satırlarını siler.

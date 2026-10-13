@@ -103,7 +103,41 @@ public static class AktarimUclari
                     ? pg.MessageText["AKTARIM_TABLO: ".Length..] : "Paket geçerli JSON değil.");
             }
         }).WithMetadata(new RequestSizeLimitAttribute(PaketSiniri));
+
+        // MUTABAKAT (1091): Delphi kök kimlikleri -> eksik / fazla. Yazmaz.
+        grup.MapPost("/mutabakat", async (MutabakatIstegi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            await using var b = await veri.AcAsync(iptal);
+            await AjanAsync(b, ctx, iptal);
+            try
+            {
+                await using var k = b.Komut("select public.fn_aktarim_mutabakat(@p0, @p1)::text", null, [g.Tablo, g.Idler ?? []]);
+                k.CommandTimeout = 300;
+                return Results.Content((string?)await k.ExecuteScalarAsync(iptal) ?? "{}", "application/json; charset=utf-8");
+            }
+            catch (PostgresException pg) when (pg.MessageText.StartsWith("AKTARIM_TABLO"))
+            {
+                throw GentegreHatasi.Dogrulama(pg.MessageText["AKTARIM_TABLO: ".Length..]);
+            }
+        }).WithMetadata(new RequestSizeLimitAttribute(PaketSiniri));
+
+        // Mutabakat sonucu (ekranın "Mutabakat" paneli).
+        grup.MapPost("/mutabakat/kayit", async (MutabakatKaydi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            await using var b = await veri.AcAsync(iptal);
+            var ajan = await AjanAsync(b, ctx, iptal);
+            await b.CalistirAsync("""
+                insert into public.aktarim_mutabakat (ajan_id, tablo, delphi, web, eksik, fazla, giderilen, atlanan, ornek)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8::jsonb)
+                """, null, [ajan, g.Tablo, g.Delphi, g.Web, g.Eksik, g.Fazla, g.Giderilen, g.Atlanan,
+                            System.Text.Json.JsonSerializer.Serialize(g.Ornek ?? new())], iptal);
+            return Results.Ok(new { tamam = true });
+        });
     }
+
+    public sealed record MutabakatIstegi(string Tablo, long[]? Idler);
+    public sealed record MutabakatKaydi(string Tablo, int Delphi, int Web, int Eksik, int Fazla, int Giderilen, int Atlanan,
+                                        Dictionary<string, long[]>? Ornek);
 
     /// <summary>Aktarım Durumu ekranı (1090, mockup Ekranlar/aktarim_durumu.html) - kullanıcı oturumuyla.</summary>
     public const string EkranKodu = "aktarim.durum";
@@ -149,6 +183,11 @@ public static class AktarimUclari
                                   'mesaj', h.mesaj, 'deneme', h.deneme, 'ilk', h.ilk_zaman, 'son', h.son_zaman,
                                   'sira', (select a.sira from public.fn_aktarim_adimlari() a where a.fonksiyon = h.adim)) order by h.id), '[]')
                                 from public.aktarim_hata h where h.cozulme is null),
+                  -- Son mutabakat: tablo başına en son satır (1091).
+                  'mutabakat', (select coalesce(json_agg(json_build_object('tablo', m.tablo, 'zaman', m.zaman,
+                                    'delphi', m.delphi, 'web', m.web, 'eksik', m.eksik, 'fazla', m.fazla,
+                                    'giderilen', m.giderilen, 'atlanan', m.atlanan, 'ornek', m.ornek) order by m.tablo), '[]')
+                                  from (select distinct on (tablo) * from public.aktarim_mutabakat order by tablo, zaman desc) m),
                   'sonPaketler', (select coalesce(json_agg(x order by x.alinma desc), '[]') from (
                                   select p.alinma, p.sure_ms as "sureMs", p.durum, p.ozet,
                                          p.sonuc->'hata'->>'mesaj' as hata,

@@ -612,7 +612,8 @@ public sealed partial class BelgeDeposu
                    case when @p1 then b.genel_toplam else 0 end,
                    case when @p1 then 0 else b.genel_toplam end,
                    d.cins, d.kur,
-                   b.taraf_unvan, b.sube_id, @p2
+                   -- mali_hareket.aciklama 100, ünvan 200 (1093): uzun ünvanlı cariye fatura reddedilmesin.
+                   left(b.taraf_unvan, 100), b.sube_id, @p2
               from public.belge b
               cross join lateral (
                   -- EKSTRE DOVIZI (134): cari hesaba hangi dovizde islenecek.

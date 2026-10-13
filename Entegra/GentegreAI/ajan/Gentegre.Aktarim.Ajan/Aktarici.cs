@@ -27,7 +27,7 @@ public sealed record TurSonucu(long Versiyon, int Paket, int Kok, int Silinen, s
 /// Okuma anı ile versiyon arasındaki değişiklik bir sonraki turda yeniden gelir;
 /// yeniden gönderim zararsızdır (sunucu içeriği aynı satırı yazmaz).
 /// </summary>
-public sealed class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarlar ayar, ILogger gunluk)
+public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarlar ayar, ILogger gunluk)
 {
     private int _paket, _kok, _silinen;
 
@@ -61,13 +61,7 @@ public sealed class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarlar ayar,
                 if (!sunucu.TryGetValue(t, out var v)) { tamSebep = $"{t} sunucuda hiç yok"; break; }
                 if (v < await delphi.EnAzVersiyonAsync(t, iptal)) { tamSebep = $"{t} versiyonu ({v}) CT saklama süresini geçti"; break; }
             }
-            var kol = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
-            foreach (var t in tablolar)
-            {
-                kol[t] = await delphi.KolonlarAsync(t, kolonlar[t]?.AsArray().Select(x => x!.GetValue<string>()) ?? [], iptal);
-                if (kol[t].Count == 0)
-                    throw new InvalidOperationException($"{t}: sunucunun istediği kolonların hiçbiri Delphi tablosunda yok.");
-            }
+            var kol = await KolonlarAsync(g, kolonlar, iptal);
 
             hata = tamSebep is not null
                 ? await TamAsync(g, kol, baslangic, tamSebep, iptal)
@@ -83,6 +77,19 @@ public sealed class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarlar ayar,
             await GonderAsync(new JsonObject { ["V"] = v }, iptal);
         }
         return new TurSonucu(guncel, _paket, _kok, _silinen, hata, false);
+    }
+
+    /// <summary>Grubun tablolarında okunacak kolonlar (sunucunun stg listesi ∩ Delphi).</summary>
+    private async Task<Dictionary<string, Dictionary<string, string>>> KolonlarAsync(Grup g, JsonObject kolonlar, CancellationToken iptal)
+    {
+        var kol = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
+        foreach (var t in g.Tablolar)
+        {
+            kol[t] = await delphi.KolonlarAsync(t, kolonlar[t]?.AsArray().Select(x => x!.GetValue<string>()) ?? [], iptal);
+            if (kol[t].Count == 0)
+                throw new InvalidOperationException($"{t}: sunucunun istediği kolonların hiçbiri Delphi tablosunda yok.");
+        }
+        return kol;
     }
 
     // ---------------------------------------------------------------- tam ----
