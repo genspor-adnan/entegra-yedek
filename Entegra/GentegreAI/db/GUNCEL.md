@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (543 ad, 146 tanesi birden cok dosyada)
+## Fonksiyonlar (546 ad, 148 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,18 +13,21 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
-| `fn_aktar_belge` | `1084_aktarim_belge.sql` | — |
+| `fn_aktar_belge` | `1085_aktarim_kasa.sql` | 1084_aktarim_belge.sql |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_depo` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_kasa` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |
+| `fn_aktarim_cari_id` | `1085_aktarim_kasa.sql` | — |
+| `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1082_aktarim_stok_kalem_hesap.sql` | 1080_aktarim_kaynak_kimligi.sql |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
@@ -233,7 +236,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
 | `fn_kasa_dagitim_iade` | `660_iade_satir_tahsil.sql` | — |
 | `fn_kasa_gun_kapali` | `1030_kasa_gun_sonu.sql` | — |
-| `fn_kasa_gun_kilidi` | `1030_kasa_gun_sonu.sql` | — |
+| `fn_kasa_gun_kilidi` | `1085_aktarim_kasa.sql` | 1030_kasa_gun_sonu.sql |
 | `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |

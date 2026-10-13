@@ -309,7 +309,9 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      web alacak (132). BILIM 2026: 2 iade, 136,40 TL.
    - **"Tanımsız Cari" (REHBER.ID 0):** 2026'da 171 alış faturası (912.925 TL) bu
      karta kesilmiş, Delphi ekstresinde görünüyor; web'de ID ≤ 0 kart yok, bu
-     faturaların cari satırı oluşmuyor. KARAR BEKLİYOR.
+     faturaların cari satırı oluşmuyor. **Karar (kullanıcı, 13.10.2026): web'de
+     "Tanımsız Cari" kartı açılır** (1085, fn_aktarim_cari_id) - yalnız belge
+     başlığı ve kasa cari satırı kullanır; başka yerde Delphi 0 = "yok".
    - Delphi numaralandırması web ile aynı (FATBASLIK.TUR = ISLEMTURLERI.TUR:
      10/14 irsaliye, 11/15 fatura, 13 alış / 17 satış tahakkuku) - 334 takası
      uygulanmaz.
@@ -320,7 +322,22 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - İzlem dönüş satırı (DONUSID) sonraki pakette gelirse bir sonraki eşitlemede
      bağlanır.
 
-   Sırada: **mali hareket (KASA)** - cari dışı satır kasa_islem + 2 bacak (081).
+   **Dilim 3b yapıldı (1085): kasa hareketi + Tanımsız Cari + tedarikçi bayrağı.**
+   KASA cari satırı tek mali_hareket; hesap satırı (K/H/B/P/V/R) kasa_islem
+   başlığı + 2 bacak (081: hesap bacağı işaret ters, karşı bacak C / M / '-').
+   BILIM 2026 (dev kopyası): 804 satır = 624 cari + 180 işlem (360 bacak), dengesiz
+   başlık 0; 9 kuru yazılmamış döviz devri 112 kuralıyla; ikinci koşu 0 yazım.
+   **Cari bakiye mutabakatı:** 580 carinin 2026 TL bakiyesi Delphi ekstre kuralıyla
+   karşılaştırıldı - 575'i kuruşu kuruşuna aynı; 5 fark açıklandı (rakam döviz
+   kodu ve TL karşılığı boş döviz devri göç kuralıyla, tahsilat planı (61) web'de
+   ekstre dışı, 1 dev'de web'den girilmiş fatura).
+   Bulunanlar: kasa gün sonu kilidi (1030) Delphi hareketini reddediyordu ->
+   aktarım oturumunda (`gentegre.aktarim`) uygulanmaz; Delphi türü 125 "POS ile
+   Ödeme" katalogda yoktu -> pasif eklendi; **geçici tablo adı çakışması** (aynı
+   işlemde iki fn_aktar_* aynı adlı farklı yapıda geçici tablo) -> fonksiyona özgü
+   önek. 136 / 137 / 161 bilerek uygulanmadı (dosya başı).
+
+   Sırada: plan adım 4 - API ucu (`/api/aktarim/paket`) ve paket sırası.
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,
