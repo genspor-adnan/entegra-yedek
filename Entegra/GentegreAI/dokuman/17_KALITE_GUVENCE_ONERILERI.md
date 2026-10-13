@@ -105,6 +105,18 @@ görmüyordu:
   anahtarlı Fragment. Duman testi sonrası: **377 ekran, 0 hata.**
   Betik ayrıca sayfanın kendi yönlenmesine karşı yeniden deniyor (yanlış alarm).
 
+- **Hata günlüğü özeti (§2.1, 1078)** - hata_log türüne göre gün gün:
+  imza = kod + HTTP + yöntem + yol + mesaj (sayılar normalize), "yeni" = o gün
+  ilk kez görülen tür.
+  - Ekran: **Yönetim › Güvenlik › Hata Özeti** (`hata_ozet` yetkisi; yönetici +
+    bilgi işlem, salt okunur). Çipler: Tümü / Sunucu / Yeni.
+  - Zamanlı iş `hata.ozet` her sabah dünün tek satır özetini işin son
+    sonucuna yazar (kimseye mesaj göndermez).
+  - Terminal: `db/araclar/hata_ozet.ps1` (`-Gun 7`, `-Hepsi`) - 5xx ve yeni
+    türler, izleme numarasıyla.
+  - Not: zamanlı işlerin saati UTC yorumlanıyor (ekranda 07:30 = yerel
+    10:30) - bütün işler için eski davranış, ayrıca ele alınmalı.
+
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 
 | Sıra | İş | Tahmini | Getirisi |

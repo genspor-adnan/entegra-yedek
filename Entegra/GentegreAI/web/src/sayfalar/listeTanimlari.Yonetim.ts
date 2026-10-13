@@ -275,6 +275,20 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Güvenlik', menuSira: 101, menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log.giris',
   },
   {
+    // HATA ÖZETİ (1078, dokuman/17): hata günlüğü TÜRÜNE göre, gün gün. Aynı
+    //   yol + mesaj tek satır; "Yeni" o gün ilk kez görülen tür - bakılacak
+    //   ilk yer. Ayrıntı izleme numarasıyla hata_log'da. Salt okunur.
+    kaynak: 'hata-ozet', baslik: 'Hata Özeti',
+    yol: 'Yönetim › Hata Özeti',
+    tarihAlani: 'gun',
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Sunucu', filtre: { alan: 'sinif', op: 'esit', deger: 'Sunucu' } },
+      { ad: 'Yeni',   filtre: { alan: 'yeni',  op: 'esit', deger: 1 } },
+    ],
+    menuGrup: 'Güvenlik', menuSira: 104, menuAd: 'Hata Özeti', ic: '🧯', yetkiKodu: 'hata_ozet',
+  },
+  {
     // YZ KONTOR & KULLANIM (934, mockup Ekranlar/Ayarlar/yz_kontor_kullanim.html):
     //   bakiye, kullanim, plan / kontor satin alma (kredi karti - odeme kurulusu
     //   formunda), kurum YZ ayarlari. Liste degil, ozel sayfa.

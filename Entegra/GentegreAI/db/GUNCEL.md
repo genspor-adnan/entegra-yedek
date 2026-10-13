@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (522 ad, 144 tanesi birden cok dosyada)
+## Fonksiyonlar (523 ad, 144 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -174,6 +174,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
 | `fn_hakedis_kapat` | `388_prim_kademe_baglandi.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql |
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
+| `fn_hata_ozet_metin` | `1078_hata_gunluk_ozet.sql` | — |
 | `fn_hekim_calisma_bloklari` | `952_ik_izni_subeden_bagimsiz.sql` | 718_hekim_calisma_plani.sql, 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql, 951_ik_izin_saatli_plan.sql |
 | `fn_hekim_izin_cakisan` | `950_ik_izin_saatli_istisna_izinsiz.sql` | — |
 | `fn_hekim_izinli` | `748_izin_calisma_plani.sql` | — |
@@ -531,7 +532,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (342 ad, 154 tanesi birden cok dosyada)
+## Gorunumler (343 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -668,6 +669,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hasta_avans_bakiye` | `781_belge_tahsilat_avans_kullanimi.sql` | 779_hasta_avansi.sql, 780_avans_iadesi.sql |
 | `v_hasta_lookup` | `940_personel_unvan_yalniz_onek.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql, 266_aday_hasta.sql |
 | `v_hasta_tibbi_ozet` | `420_hasta_tibbi_gecmis.sql` | — |
+| `v_hata_gunluk` | `1078_hata_gunluk_ozet.sql` | — |
 | `v_hekim_calisma_istisna` | `940_personel_unvan_yalniz_onek.sql` | 718_hekim_calisma_plani.sql |
 | `v_hekim_calisma_sablon` | `940_personel_unvan_yalniz_onek.sql` | 718_hekim_calisma_plani.sql |
 | `v_hekim_lookup` | `940_personel_unvan_yalniz_onek.sql` | 252_personel_randevu_verilebilir.sql, 253_hekim_pasif_dislama.sql, 718_hekim_calisma_plani.sql |

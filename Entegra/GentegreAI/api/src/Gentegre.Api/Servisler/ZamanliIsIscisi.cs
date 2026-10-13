@@ -306,6 +306,17 @@ public static class ZamanliIsler
                 "select aciklama from public.fn_klinik_kalite_gece()", null, iptal)
                 ?? "Sonuc okunamadi.";
         },
+        // HATA ÖZETİ (1078, dokuman/17): dünkü hatalar türüne göre - yeni
+        //   türler ve sunucu hataları önde. Sonuç işin son sonucunda okunur,
+        //   ayrıntı Yönetim › Hata Özeti. Kimseye mesaj GÖNDERMEZ (bildirim
+        //   kuyruğu dışarıya SMS / e-posta yollar).
+        ["hata.ozet"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>(
+                "select public.fn_hata_ozet_metin(((now() at time zone 'Europe/Istanbul')::date - 1))",
+                null, iptal) ?? "Sonuc okunamadi.";
+        },
         // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
         //   dinleyicisi surekli acik oldugu icin ise ihtiyaci yok; klasor
         //   izleme ise yoklamayla yurur.
