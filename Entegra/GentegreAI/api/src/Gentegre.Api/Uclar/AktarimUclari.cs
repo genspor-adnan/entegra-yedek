@@ -41,9 +41,36 @@ public static class AktarimUclari
                   'hatalar', (select coalesce(json_agg(json_build_object('adim', h.adim, 'tablolar', h.tablolar,
                                                                          'mesaj', h.mesaj, 'deneme', h.deneme,
                                                                          'son_zaman', h.son_zaman) order by h.id), '[]')
-                                from public.aktarim_hata h where h.cozulme is null))::text
+                                from public.aktarim_hata h where h.cozulme is null),
+                  -- Ajan Delphi'den YALNIZ bu kolonları okur (stg şeması = fn_aktar_*'ın tanıdığı kolonlar).
+                  --   Tablo adı ASCII küçültülür: tr-TR ICU'da lower('FATBASLIK') = 'fatbaslık'.
+                  'kolonlar', (select json_object_agg(t.tablo, (select json_agg(c.column_name::text order by c.ordinal_position)
+                                                                  from information_schema.columns c
+                                                                 where c.table_schema = 'stg'
+                                                                   and c.table_name = lower(t.tablo collate "C")))
+                                 from (select unnest(a.tablolar) tablo from public.fn_aktarim_adimlari() a) t))::text
                 """, null, [], iptal);
             return Results.Content(json, "application/json; charset=utf-8");
+        });
+
+        // Silinen alt satırın üstü (1087): {FATURA: [id]} -> {FATBASLIK: [id]}. Ajan üstü toplamıyla yeniden yollar.
+        grup.MapPost("/ust", async (HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            await using var b = await veri.AcAsync(iptal);
+            await AjanAsync(b, ctx, iptal);
+            string govde;
+            using (var okuyucu = new StreamReader(ctx.Request.Body))
+                govde = await okuyucu.ReadToEndAsync(iptal);
+            try
+            {
+                var json = await b.TekDegerAsync<string>("select public.fn_aktarim_ust(@p0::jsonb)::text", null,
+                                                         [string.IsNullOrWhiteSpace(govde) ? "{}" : govde], iptal);
+                return Results.Content(json ?? "{}", "application/json; charset=utf-8");
+            }
+            catch (PostgresException pg) when (pg.SqlState == PostgresErrorCodes.InvalidTextRepresentation)
+            {
+                throw GentegreHatasi.Dogrulama("İstek geçerli JSON değil.");
+            }
         });
 
         // Paket: tek SQL çağrısı (tek işlem). Yanıt fn_aktar_paket'in sonucu; bir adım

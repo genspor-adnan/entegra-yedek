@@ -129,6 +129,48 @@ public sealed class AktarimBelgeTestleri(VeritabaniOlgusu olgu) : IClassFixture<
         await t.RollbackAsync();
     }
 
+    // 1088: satış ve iadesi AYNI pakette - iadenin izlemi satışın (yeni yazılan) izlemine döner.
+    private const string SatisIade = """
+        {"U": {
+          "FATBASLIK": [
+            {"id": 990003501, "tur": 15, "tipi": 1, "rehberid": 0, "faturatarih": "2026-07-01T10:00:00", "fatura_tutari": 100},
+            {"id": 990003502, "tur": 15, "tipi": 2, "rehberid": 0, "faturatarih": "2026-07-02T10:00:00", "fatura_tutari": 100}],
+          "FATURA": [
+            {"id": 990003511, "fatbasid": 990003501, "tur": 1, "urunid": 990003001, "miktar": 1, "birimfiyat": 100, "tutar": 100},
+            {"id": 990003512, "fatbasid": 990003502, "tur": 1, "urunid": 990003001, "miktar": 1, "birimfiyat": 100, "tutar": 100}],
+          "STOKIZLEME": [
+            {"id": 990003602, "stokid": 990003001, "serilotid": 990003051, "baslikid": 990003502, "satirid": 990003512,
+             "belgetur": 15, "izlemtur": 1, "adet": 1, "donusid": 990003601},
+            {"id": 990003601, "stokid": 990003001, "serilotid": 990003051, "baslikid": 990003501, "satirid": 990003511,
+             "belgetur": 15, "izlemtur": 1, "adet": 1}]}}
+        """;
+
+    [VtFact]
+    public async Task Ayni_paketteki_donus_izlemi_ilk_geciste_baglanir()
+    {
+        if (!_olgu.Baglandi(nameof(Ayni_paketteki_donus_izlemi_ilk_geciste_baglanir))) return;
+        await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
+        await using var t = await b.BeginTransactionAsync();
+        var ct = CancellationToken.None;
+
+        await b.CalistirAsync(
+            "update public.aktarim_ayar set deger = '2026-01-01' where anahtar = 'hareket_baslangic'", t, [], ct);
+        await AktarAsync(b, t, "fn_aktar_stok", Tanimlar);
+
+        var ilk = await AktarAsync(b, t, "fn_aktar_belge", SatisIade);
+        Assert.Equal(2, Sayi(ilk, "izlem"));
+        Assert.Equal(1, Sayi(ilk, "izlem_donus"));
+        Assert.True(await b.TekDegerAsync<bool>("""
+            select x.donus_id = w.id from public.stok_izleme x, public.stok_izleme w
+             where x.aktarim_kaynak = 1 and x.aktarim_tablo = 'STOKIZLEME' and x.aktarim_id = 990003602
+               and w.aktarim_kaynak = 1 and w.aktarim_tablo = 'STOKIZLEME' and w.aktarim_id = 990003601
+            """, t, [], ct));
+
+        var ikinci = await AktarAsync(b, t, "fn_aktar_belge", SatisIade);
+        Assert.Equal(0, Sayi(ikinci, "izlem") + Sayi(ikinci, "izlem_donus"));
+        await t.RollbackAsync();
+    }
+
     [VtFact]
     public async Task Stok_bakiyesi_Delphi_STOKDURUM_aynasi()
     {

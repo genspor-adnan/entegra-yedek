@@ -353,7 +353,34 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - Ajan anahtarını üretecek ekran yok (GenProfil, adım 6); şimdilik
      `select fn_aktarim_ajan_ekle('ad')`.
 
-   Sırada: plan adım 5 - ajan (konsol kipi, dev'de: Delphi'de fatura kes -> web'de görünür).
+   **Adım 5 yapıldı (`GentegreAI/ajan/Gentegre.Aktarim.Ajan` + 1087 + 1088).**
+   .NET 10 tek exe: konsol kipi, `--tek-tur`, `--sifrele` (DPAPI, makine kapsamı),
+   Windows servisi (`sc create`). Ayar `ajan.json` (depoda `ajan.ornek.json`), günlük
+   `gunluk/ajan-yyyyMMdd.log` (30 gün). Toplam kuralları `Toplamlar.cs`; tur mantığı
+   `Aktarici.cs`:
+   - Sunucuda versiyonu olmayan / CT saklama süresini geçen grup TAM yüklenir
+     (hareket tablosu hareket_baslangic'tan; cari bağlı kişiler üst cariden sonra).
+   - Artımlı: kök değişikliği + değişen alt satırın kökü (satırdan) + silinen alt
+     satırın kökü (sunucudan, `POST /api/aktarim/ust`, 1087). Kök Delphi'de yoksa D.
+   - CT versiyonu OKUMADAN ÖNCE alınır, paketler versiyonsuz gider, versiyon turun
+     son paketinde yalnız hatasız gruplar için. Hatalı grupta tur durur, sonraki
+     tur üstel beklemeyle (30 sn -> 10 dk).
+   - Paket sınırı aşılırsa sayfa yarıya iner.
+   Dev gösterimi (BILIM -> klon `gentegre_ai_aktarim`, ikinci API 5190): ilk tam
+   yükleme 36 paket / 23.733 kök / 29 sn, hatasız. Artımlı: STOKBARKOD'a satır
+   ekle -> web'de 1,4 sn; sil -> 5,3 sn (`ust` yolu); cari adı değiştir -> 2 sn,
+   geri al -> 4,6 sn (BILIM test sonunda eski hâlinde).
+   Bulgular:
+   - **1088:** fn_aktar_belge dönüş izlemini (DONUSID) yazmadan önce çözüyordu;
+     hedefi aynı pakette yeni gelen satır 0 kalıyordu (ilk tam yüklemede 3 satır,
+     artımlı kipte kalıcı olurdu) -> yazımdan sonra ikinci geçiş.
+   - Microsoft.Data.SqlClient `InvariantGlobalization` ile açılmıyor (Türkçe collation).
+   - Tam yükleme Delphi'de SİLİNMİŞ kaydı göremez; REHBERBILGI silmesinin web
+     karşılığı yok - ikisi de gece mutabakatına (adım 7) bırakıldı.
+   - Delphi'de STOKIZLEME BELGETUR 101 (113 bin satır) TUR 6 belgelerine bağlı -
+     aynı belge ailesi, süzülmez.
+
+   Sırada: plan adım 6 - salt okunur kip + Aktarım Durumu ekranı (önce mockup).
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

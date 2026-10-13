@@ -1,0 +1,7 @@
+# Derleme çıktısı
+bin/
+obj/
+
+# Kurulumdaki ayar (sır içerir) ve günlükler - depoya yalnız ajan.ornek.json girer
+ajan.json
+gunluk/

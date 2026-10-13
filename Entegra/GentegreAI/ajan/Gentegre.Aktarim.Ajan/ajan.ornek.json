@@ -1,0 +1,11 @@
+{
+  "ApiAdres": "https://sunucu.ornek/ai/",
+  "Anahtar": "",
+  "AnahtarSifreli": "",
+  "MssqlBaglanti": "Server=.\\SQLEXPRESS;Database=BILIM;User Id=gentegre_aktarim;Password=;TrustServerCertificate=True",
+  "MssqlBaglantiSifreli": "",
+  "YoklamaSn": 5,
+  "NabizSn": 60,
+  "PaketMb": 32,
+  "GunlukKlasoru": "gunluk"
+}

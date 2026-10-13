@@ -1497,7 +1497,8 @@ anahtar `fn_aktarim_ajan_ekle(ad)` ile üretilir ve yalnız o an görülür. Ana
 yok / yanlış / ajan pasif → `401 YETKISIZ`.
 
 ```http
-GET  /api/aktarim/durum     // X-Aktarim-Surum? → { hareket_baslangic, tablolar[{tablo, versiyon, son_paket}], adimlar[{sira, fonksiyon, tablolar}], hatalar[{adim, tablolar, mesaj, deneme, son_zaman}] }
+GET  /api/aktarim/durum     // X-Aktarim-Surum? → { hareket_baslangic, tablolar[{tablo, versiyon, son_paket}], adimlar[{sira, fonksiyon, tablolar}], hatalar[{adim, tablolar, mesaj, deneme, son_zaman}], kolonlar{TABLO: [kolon]} }
+POST /api/aktarim/ust       // (1087) { TABLO: [silinen alt satır id] } → { KOK_TABLO: [kök Delphi id] } - web eşlemesinden
 POST /api/aktarim/paket     // { paket, V: {TABLO: ct_versiyon}, U: {TABLO: [satır]}, D: {TABLO: [id | {anahtar}]} } → { paket, sonuc{fonksiyon: sayaçlar}, hata?{adim, tablolar, mesaj}, ilerleyen[], tekrar? }
 ```
 
@@ -1513,6 +1514,10 @@ POST /api/aktarim/paket     // { paket, V: {TABLO: ct_versiyon}, U: {TABLO: [sat
   gitmez. Ajan kaldığı yeri `durum`'dan okur.
 - Tamamlanmış `paket` kimliği tekrar gelirse uygulanmaz, kayıtlı sonuç
   `tekrar: true` ile döner; hatalı paket aynı kimlikle yeniden uygulanır.
+- `kolonlar`: ajan Delphi'den yalnız bunları okur (stg şeması = fn_aktar_*'ın tanıdığı kolonlar).
+- **Toplam:** pakette olmayan alt satır web'de silinir; kök (belge, cari, stok, kalem,
+  reçete) hangi sebeple gönderilirse gönderilsin bütün alt satırlarıyla gider. Delphi'de
+  silinen alt satırın kökü Change Tracking'de yok - ajan `ust` ile sorar.
 - Bilinmeyen tablo / geçersiz JSON → `400 DOGRULAMA`, hiçbir şey yazılmaz.
   Paket sınırı **64 MB** (`413`); ilk yükleme sayfalı gönderilir (BILIM 2026'nın
   tamamı yıl süzgeçsiz STOKIZLEME ile 193 MB, tek çağrı ~33 sn).
