@@ -1,0 +1,98 @@
+# Gentegre AI - surekli tumlesme (dokuman/17).
+#
+# Her push / PR'da: API derleme + testler, web lint + tip denetimi + derleme +
+# birim testleri, GenProfil derlemesi. Yalniz GentegreAI degisince calisir;
+# depodan yalniz o klasor cekilir (Delphi agaci ve arsivler inmez).
+#
+# VERITABANI TESTLERI ([VtFact], ~365) burada ATLANIR: dev verisine dayali
+# fikstur ister (rol, yetki, belge satirlari). Yerelde GENTEGRE_TEST_DB ile
+# kosulur (api/tests/Gentegre.Testler/OKUBENI.md). Ozette "Atlanan" sayisi
+# bu yuzden sifir degil - atlanan gecti demek degildir.
+
+name: Gentegre AI
+
+on:
+  push:
+    branches: [pg-migration, main]
+    paths:
+      - 'Entegra/GentegreAI/**'
+      - '.github/workflows/gentegre-ai.yml'
+  pull_request:
+    paths:
+      - 'Entegra/GentegreAI/**'
+      - '.github/workflows/gentegre-ai.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gentegre-ai-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: API (derleme + test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: Entegra/GentegreAI/api
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: Entegra/GentegreAI
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Derle
+        run: dotnet build Gentegre.slnx -c Debug
+      - name: Test (veritabani testleri atlanir)
+        run: >
+          dotnet test tests/Gentegre.Testler --no-build -c Debug
+          --logger "trx;LogFileName=sonuc.trx"
+          --logger "console;verbosity=normal"
+      - name: Test sonucu
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-sonucu
+          path: Entegra/GentegreAI/api/tests/Gentegre.Testler/TestResults/*.trx
+          if-no-files-found: ignore
+
+  web:
+    name: Web + GenProfil
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: Entegra/GentegreAI/web
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: Entegra/GentegreAI
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            Entegra/GentegreAI/web/package-lock.json
+            Entegra/GentegreAI/genprofil/package-lock.json
+      - name: Bagimliliklar (web)
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Tip denetimi + derleme
+        run: npm run build
+      - name: Birim testleri
+        run: npm test
+      # GenProfil web/src'yi @web takma adiyla derler: web'deki bir degisiklik
+      #   onu da kirabilir.
+      - name: GenProfil derleme
+        working-directory: Entegra/GentegreAI/genprofil
+        run: |
+          npm ci
+          npm run build

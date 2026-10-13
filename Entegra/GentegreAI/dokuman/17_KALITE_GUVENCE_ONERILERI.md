@@ -133,6 +133,13 @@ görmüyordu:
   kanıtıyla `uzlastirma`, 147 veri dosyası `uzlastirma_veri` olarak yazıldı;
   bekleyen 0, en yüksek 1079. Yedek: `goc_gecmisi_yedek_20261013`.
 
+- **CI (GitHub Actions)** - `.github/workflows/gentegre-ai.yml` (depo kökünde):
+  GentegreAI değişince her push / PR'da API derleme + testler, web lint + tip
+  denetimi + derleme + birim testleri, GenProfil derlemesi. Veritabanı testleri
+  (~365) ve duman testi CI'da YOK - dev verisine dayalı fikstür ister; yerelde
+  koşulmaya devam eder. Sonraki adım: test DB'si kurulabilen bir koşucu
+  (self-hosted ya da fikstür dökümü) ile bunları da CI'ya almak.
+
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 
 | Sıra | İş | Tahmini | Getirisi |
