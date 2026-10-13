@@ -50,6 +50,9 @@ public static class AktarimUclari
                                                                          'mesaj', h.mesaj, 'deneme', h.deneme,
                                                                          'son_zaman', h.son_zaman) order by h.id), '[]')
                                 from public.aktarim_hata h where h.cozulme is null),
+                  -- Cari bakiye mutabakatında Delphi tarafından düşülecek kasa türleri (1096).
+                  'bakiye_disi_turler', (select coalesce(json_agg(kod order by kod), '[]')
+                                           from public.kasa_islem_turu where bakiye_dahil = 0),
                   -- Ajan Delphi'den YALNIZ bu kolonları okur (stg şeması = fn_aktar_*'ın tanıdığı kolonlar).
                   --   Tablo adı ASCII küçültülür: tr-TR ICU'da lower('FATBASLIK') = 'fatbaslık'.
                   'kolonlar', (select json_object_agg(t.tablo, (select json_agg(c.column_name::text order by c.ordinal_position)
@@ -127,6 +130,24 @@ public static class AktarimUclari
             }
         }).WithMetadata(new RequestSizeLimitAttribute(sinir));
 
+        // CARİ BAKİYE MUTABAKATI (1096): Delphi cari TL bakiyeleri -> web ekstresiyle karşılaştırma,
+        //   sonuç doğrudan mutabakat kaydına (tablo 'CARI_BAKIYE').
+        grup.MapPost("/mutabakat/bakiye", async (BakiyeIstegi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            await using var b = await veri.AcAsync(iptal);
+            var ajan = await AjanAsync(b, ctx, iptal);
+            var govde = System.Text.Json.JsonSerializer.Serialize(g.Bakiyeler ?? []);
+            await using var k = b.Komut("select public.fn_aktarim_bakiye_mutabakat(@p0::jsonb)::text", null, [govde]);
+            k.CommandTimeout = 300;
+            var sonuc = (string?)await k.ExecuteScalarAsync(iptal) ?? "{}";
+            await b.CalistirAsync("""
+                insert into public.aktarim_mutabakat (ajan_id, tablo, delphi, web, eksik, fazla, ornek)
+                select @p0, 'CARI_BAKIYE', @p1, (s->>'cari')::int, (s->>'farkli')::int, 0, s->'ornek'
+                  from (select @p2::jsonb s) x
+                """, null, [ajan, g.Bakiyeler?.Length ?? 0, sonuc], iptal);
+            return Results.Content(sonuc, "application/json; charset=utf-8");
+        }).WithMetadata(new RequestSizeLimitAttribute(sinir));
+
         // Mutabakat sonucu (ekranın "Mutabakat" paneli).
         grup.MapPost("/mutabakat/kayit", async (MutabakatKaydi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
         {
@@ -142,6 +163,8 @@ public static class AktarimUclari
     }
 
     public sealed record MutabakatIstegi(string Tablo, long[]? Idler);
+    /// <summary>[[rehber_id, tl_bakiye], ...]</summary>
+    public sealed record BakiyeIstegi(decimal[][]? Bakiyeler);
     public sealed record MutabakatKaydi(string Tablo, int Delphi, int Web, int Eksik, int Fazla, int Giderilen, int Atlanan,
                                         Dictionary<string, long[]>? Ornek);
 

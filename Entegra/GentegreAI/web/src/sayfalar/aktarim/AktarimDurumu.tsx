@@ -184,8 +184,10 @@ export function AktarimDurumu() {
                     {veri.mutabakat.map(m => {
                       const kalan = m.eksik + m.fazla - m.giderilen - m.atlanan;
                       return (
-                        <tr key={m.tablo} className={kalan > 0 ? 'ak-hata' : ''}>
-                          <td>{m.tablo}</td>
+                        <tr key={m.tablo} className={kalan > 0 ? 'ak-hata' : ''}
+                            title={Array.isArray(m.ornek) && m.ornek.length
+                              ? m.ornek.slice(0, 10).map(o => `${o.unvan ?? o.id}: Delphi ${o.delphi}, web ${o.web}`).join('\n') : undefined}>
+                          <td>{m.tablo === 'CARI_BAKIYE' ? 'Cari bakiye (TL)' : m.tablo}</td>
                           <td className="r">{sayi(m.delphi)}</td><td className="r">{sayi(m.web)}</td>
                           <td className="r">{m.giderilen ? sayi(m.giderilen) : '—'}</td>
                           <td className="r" title="Kural gereği aktarılmayan (ör. makine olmayan lokasyon, mamulü çözülmeyen reçete)">

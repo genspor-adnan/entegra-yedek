@@ -119,6 +119,38 @@ public sealed class DelphiOkuyucu(string baglanti)
         return l;
     }
 
+    /// <summary>
+    /// Cari başına TL bakiye, Delphi ekstre kuralıyla (1096 - 1085 eşdeğerlik testindeki kural):
+    /// KASA cari satırı ve carisi olan hesap satırı olduğu gibi (döviz satırında TL karşılığı),
+    /// faturalar TUR 15/16/17 borç, 8/11/12/13 alacak, iade (TIPI 2) ters, DURUM 6 hariç.
+    /// <paramref name="disi"/>: web'de bakiyeye girmeyen kasa türleri (sunucudan, sayı).
+    /// </summary>
+    public async Task<List<(long Id, decimal Tutar)>> CariBakiyeleriAsync(DateTime bas, IReadOnlyCollection<int> disi, CancellationToken iptal)
+    {
+        var haric = disi.Count == 0 ? "" : $" AND K.TUR NOT IN ({string.Join(",", disi.Select(x => x.ToString(CultureInfo.InvariantCulture)))})";
+        await using var b = await AcAsync(iptal);
+        await using var k = Komut(b, $"""
+            SELECT x.REHBERID, CAST(SUM(x.t) AS decimal(19, 2)) FROM (
+              SELECT K.REHBERID, CASE WHEN ISNULL(K.KUR, 'TL') IN ('TL', '') THEN K.BORC - K.ALACAK
+                                      WHEN K.BORC <> 0 THEN K.DOVIZ_TUTARI ELSE -K.DOVIZ_TUTARI END t
+                FROM dbo.KASA K
+               WHERE K.ISLEMTARIHI >= @bas{haric}
+                 AND (K.REHBERID > 0 OR (K.REHBERID = 0 AND ISNULL(K.HESAPTURU, '') IN ('', '1', 'C')))
+              UNION ALL
+              SELECT F.REHBERID, CASE WHEN F.TUR IN (15, 16, 17) THEN 1 ELSE -1 END
+                               * CASE WHEN F.TIPI = 2 THEN -1 ELSE 1 END * F.FATURA_TUTARI
+                FROM dbo.FATBASLIK F
+               WHERE F.FATURATARIH >= @bas AND F.TUR IN (8, 11, 12, 13, 15, 16, 17)
+                 AND ISNULL(F.DURUM, 0) <> 6 AND F.REHBERID >= 0) x
+            GROUP BY x.REHBERID
+            """, new SqlParameter("@bas", bas));
+        var l = new List<(long, decimal)>();
+        await using var r = await k.ExecuteReaderAsync(iptal);
+        while (await r.ReadAsync(iptal))
+            if (!r.IsDBNull(0)) l.Add((Convert.ToInt64(r.GetValue(0), CultureInfo.InvariantCulture), r.IsDBNull(1) ? 0 : r.GetDecimal(1)));
+        return l;
+    }
+
     /// <summary>Kök tam yükleme: kimlikler (süzgeç + sıra).</summary>
     public async Task<List<long>> KimliklerAsync(string tablo, string? nerede, string? sira, SqlParameter[] p, CancellationToken iptal)
     {

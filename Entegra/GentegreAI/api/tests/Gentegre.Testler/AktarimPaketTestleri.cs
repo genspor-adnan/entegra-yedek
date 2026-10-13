@@ -152,6 +152,37 @@ public sealed class AktarimMutabakatTestleri(VeritabaniOlgusu olgu) : IClassFixt
             b.TekDegerAsync<string>("select public.fn_aktarim_mutabakat('DOVIZ', '{}')::text", t, [], ct));
         await t.RollbackAsync();
     }
+
+    /// <summary>1096: cari TL bakiyesi Delphi (ajanın hesabı) ile web ekstresi; 0,05 TL tolerans.</summary>
+    [VtFact]
+    public async Task Bakiye_mutabakati_esiti_ve_farki_bulur()
+    {
+        if (!_olgu.Baglandi(nameof(Bakiye_mutabakati_esiti_ve_farki_bulur))) return;
+        await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
+        await using var t = await b.BeginTransactionAsync();
+        var ct = CancellationToken.None;
+
+        await b.CalistirAsync("update public.aktarim_ayar set deger = '2026-01-01' where anahtar = 'hareket_baslangic'", t, [], ct);
+        await b.CalistirAsync("select public.fn_aktar_cari(@p0::jsonb)", t, ["""
+            {"U": {"REHBER": [{"id": 990007201, "kod": "AKT-BK", "firma": "Bakiye Carisi", "durum": 1, "vno": "9900000071"}]}}
+            """], ct);
+        await b.CalistirAsync("select public.fn_aktar_kasa(@p0::jsonb)", t, ["""
+            {"U": {"KASA": [{"id": 990007301, "tur": 2, "hesapturu": "", "rehberid": 990007201, "borc": 500, "alacak": 0,
+                             "kur": "TL", "doviz_tutari": 500, "islemtarihi": "2026-02-01T00:00:00"}]}}
+            """], ct);
+
+        async Task<System.Text.Json.Nodes.JsonNode> Karsilastir(decimal delphi) => System.Text.Json.Nodes.JsonNode.Parse(
+            (await b.TekDegerAsync<string>("select public.fn_aktarim_bakiye_mutabakat(@p0::jsonb)::text", t,
+                [$"[[990007201, {delphi.ToString(System.Globalization.CultureInfo.InvariantCulture)}]]"], ct))!)!;
+
+        var esit = await Karsilastir(500.03m);
+        Assert.DoesNotContain(esit["ornek"]!.AsArray(), o => o!["id"]!.GetValue<long>() == 990007201);
+        var fark = await Karsilastir(400m);
+        var o = Assert.Single(fark["ornek"]!.AsArray(), o => o!["id"]!.GetValue<long>() == 990007201);
+        Assert.Equal("Bakiye Carisi", o!["unvan"]!.GetValue<string>());
+        Assert.Equal(500m, o["web"]!.GetValue<decimal>());
+        await t.RollbackAsync();
+    }
 }
 
 /// <summary>

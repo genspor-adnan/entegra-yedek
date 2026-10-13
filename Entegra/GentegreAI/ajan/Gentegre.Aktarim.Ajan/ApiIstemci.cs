@@ -48,6 +48,13 @@ public sealed class ApiIstemci : IDisposable
         return await GonderAsync(() => Post("api/aktarim/mutabakat", govde), iptal);
     }
 
+    public async Task<JsonObject> BakiyeMutabakatAsync(IReadOnlyList<(long Id, decimal Tutar)> bakiyeler, CancellationToken iptal)
+    {
+        var dizi = new JsonArray([.. bakiyeler.Select(x => (JsonNode?)new JsonArray(JsonValue.Create(x.Id), JsonValue.Create(x.Tutar)))]);
+        var govde = new JsonObject { ["bakiyeler"] = dizi }.ToJsonString();
+        return await GonderAsync(() => Post("api/aktarim/mutabakat/bakiye", govde), iptal);
+    }
+
     public async Task MutabakatKaydetAsync(MutabakatSonucu s, Dictionary<string, long[]> ornek, CancellationToken iptal)
     {
         var o = new JsonObject();

@@ -90,6 +90,9 @@ Büyük veritabanında ilk kurulumu mesai dışında yapın.
    → "Mutabakat" paneli: tablolar "Eşit". "Kural gereği" sütunu hata değildir: makine olmayan
    lokasyon, mamulü tanımsız reçete, kodu çakışan proje, Delphi'nin kendi firma kaydı (-1),
    tanımsız türdeki kasa satırı web'e bilerek alınmaz.
+   **Cari bakiye (TL)** satırı cari başına Delphi ve web bakiyesini karşılaştırır (satırın
+   üzerine gelince farklı cariler). Bilinen fark: Delphi'de TL karşılığı boş döviz devri
+   (web günün kuruyla çevirir) ve rakam/bozuk döviz kodu (web TL sayar).
 
 ## 5. İşletim
 

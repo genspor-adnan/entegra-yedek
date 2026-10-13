@@ -81,6 +81,17 @@ public sealed partial class Aktarici
                 gunluk.LogInformation("Mutabakat {Tablo}: Delphi {D}, web {W}, eksik {E}, fazla {F}, giderilen {G}, kural gereği atlanan {A}",
                                       s.Tablo, s.Delphi, s.Web, s.Eksik, s.Fazla, s.Giderilen, s.Atlanan);
         }
+
+        // CARİ BAKİYE (1096): kimlikler eşitlendikten SONRA - eksik yeniden yollanmış olur.
+        var disi = (durum["bakiye_disi_turler"]?.AsArray() ?? []).Select(x => x!.GetValue<int>()).ToList();
+        var bakiyeler = await delphi.CariBakiyeleriAsync(baslangic, disi, iptal);
+        var b = await api.BakiyeMutabakatAsync(bakiyeler, iptal);
+        var farkli = b["farkli"]?.GetValue<int>() ?? 0;
+        sonuc.Add(new MutabakatSonucu("CARI_BAKIYE", bakiyeler.Count, b["cari"]?.GetValue<int>() ?? 0, farkli, 0, 0, 0));
+        if (farkli > 0)
+            foreach (var o in (b["ornek"]?.AsArray() ?? []).Take(5))
+                gunluk.LogInformation("Cari bakiye farkı: Delphi {Id} {Unvan} - Delphi {D}, web {W}",
+                                      o!["id"], o["unvan"], o["delphi"], o["web"]);
         return sonuc;
     }
 

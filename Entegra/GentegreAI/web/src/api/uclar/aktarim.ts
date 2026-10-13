@@ -20,7 +20,9 @@ export type AktarimDurumu = {
   adimlar: AktarimAdimi[]; hatalar: AktarimHatasi[]; sonPaketler: AktarimPaketi[];
   /** Tablo başına son mutabakat (1091). */
   mutabakat: { tablo: string; zaman: string; delphi: number; web: number; eksik: number; fazla: number;
-               giderilen: number; atlanan: number; ornek: { eksik?: number[]; fazla?: number[] } | null }[];
+               giderilen: number; atlanan: number;
+               /** Kimlik mutabakatında {eksik, fazla}; CARI_BAKIYE'de en büyük farklar (1096). */
+               ornek: { eksik?: number[]; fazla?: number[] } | { id: number; unvan: string | null; delphi: number; web: number }[] | null }[];
 };
 
 export const aktarimUclari = {

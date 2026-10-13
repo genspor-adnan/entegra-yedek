@@ -430,9 +430,13 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      (web'in kendi yazımı BelgeDeposu.MaliHareketYazAsync da aynı hataya açıktı ->
      `left(.., 100)`); ajan Delphi bağlantısını geçici hatada 5 kez yeniden dener
      (deneme sırasında SQL Server tek kullanıcı kipine girip yeniden başladı, error 26).
-   - Açık: emoji Delphi'de oluşamaz (BILIM metin kolonları varchar CP1254); cari
-     bakiye karşılaştırması mutabakata alınmadı (bakiye kuralı ekstre ekranında,
-     1085 eşdeğerlik testi 575/580 birebir). Klon `gentegre_ai_aktarim` artık bütün
+   - Açık: emoji Delphi'de oluşamaz (BILIM metin kolonları varchar CP1254).
+   - **Cari bakiye mutabakatı (1096, 14.10.2026):** ajan Delphi'de cari başına TL
+     bakiyeyi 1085 eşdeğerlik kuralıyla hesaplar (web'de bakiyeye girmeyen kasa türleri
+     sunucudan, hariç), sunucu web ekstresiyle karşılaştırır (0,05 TL), sonuç
+     `CARI_BAKIYE` satırı. Boş ERP provasında 578 carinin 576'sı birebir; kalan 2 bilinen
+     göç kuralı: 112 (TL karşılığı boş döviz devri günün kuruyla) ve 083 (rakam döviz
+     kodu TL). Klon `gentegre_ai_aktarim` artık bütün
      yılları taşıyor (hareket başlangıcı 1900, 1 GB).
 
    **Adım 8a yapıldı: kurulum rehberi `dokuman/19_DELPHI_AKTARIM_KURULUM.md` +

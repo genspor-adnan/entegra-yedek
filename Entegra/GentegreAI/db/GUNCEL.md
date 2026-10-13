@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (556 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (557 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -30,6 +30,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_adimlari` | `1086_aktarim_paket.sql` | — |
 | `fn_aktarim_ajan_bul` | `1086_aktarim_paket.sql` | — |
 | `fn_aktarim_ajan_ekle` | `1086_aktarim_paket.sql` | — |
+| `fn_aktarim_bakiye_mutabakat` | `1096_aktarim_bakiye_mutabakat.sql` | — |
 | `fn_aktarim_cari_id` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
