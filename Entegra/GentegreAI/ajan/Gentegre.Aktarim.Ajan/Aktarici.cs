@@ -205,9 +205,17 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
                 if (boy == 1 || Encoding.UTF8.GetByteCount(paket.ToJsonString()) <= sinir) break;
                 boy = Math.Max(1, boy / 2);
             }
-            _kok += boy;
-            var hata = await GonderAsync(paket, iptal);
+            string? hata;
+            try { hata = await GonderAsync(paket, iptal); }
+            catch (SunucuReddi r) when (r.Durum == System.Net.HttpStatusCode.RequestEntityTooLarge && boy > 1)
+            {
+                // Aradaki vekil (nginx) API'den küçük sınır koymuş olabilir: sayfayı yarıla, aynı yerden.
+                gunluk.LogWarning("{Kok}: paket büyük bulundu (413), sayfa {Boy} -> {Yeni}", g.Kok, boy, boy / 2);
+                sinir = Math.Min(sinir, Encoding.UTF8.GetByteCount(paket.ToJsonString()) / 2);
+                continue;
+            }
             if (hata is not null) return hata;
+            _kok += boy;
             bas += boy;
         }
         return null;

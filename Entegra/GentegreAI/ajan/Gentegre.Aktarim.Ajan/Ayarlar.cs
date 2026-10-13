@@ -18,7 +18,7 @@ public sealed class Ayarlar
     public string MssqlBaglantiSifreli { get; set; } = "";
     public int YoklamaSn { get; set; } = 5;
     public int NabizSn { get; set; } = 60;
-    public int PaketMb { get; set; } = 32;
+    public int PaketMb { get; set; } = 20;   // sunucu nginx client_max_body_size 25m
     public string GunlukKlasoru { get; set; } = "gunluk";
     /// <summary>Gece mutabakatının saati (yerel, 0-23); -1 kapalı.</summary>
     public int MutabakatSaati { get; set; } = 3;
@@ -37,7 +37,7 @@ public sealed class Ayarlar
         if (string.IsNullOrWhiteSpace(a.ApiAdres)) throw new InvalidOperationException("ApiAdres boş.");
         if (!a.ApiAdres.EndsWith('/')) a.ApiAdres += "/";
         if (a.YoklamaSn < 1) a.YoklamaSn = 1;
-        if (a.PaketMb is < 1 or > 60) a.PaketMb = 32;   // sunucu sınırı 64 MB
+        if (a.PaketMb is < 1 or > 60) a.PaketMb = 20;   // API 64 MB, önündeki nginx 25 MB
         return a;
     }
 

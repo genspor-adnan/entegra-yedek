@@ -435,7 +435,17 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      1085 eşdeğerlik testi 575/580 birebir). Klon `gentegre_ai_aktarim` artık bütün
      yılları taşıyor (hareket başlangıcı 1900, 1 GB).
 
-   Sırada adım 8: kurulum rehberi (ajan kurulumu, SQL kullanıcısı, anahtar) + pilot.
+   **Adım 8a yapıldı: kurulum rehberi `dokuman/19_DELPHI_AKTARIM_KURULUM.md` +
+   `ajan/kurulum/`** - `mssql_hazirla.sql` (CT + salt okur `gentegre_aktarim` girişi;
+   BILIM'de denendi: ajan turu ve mutabakat bu kullanıcıyla çalıştı, yazma `Msg 229`
+   ile reddedildi), `servis_kur.ps1` (sırları şifreler, deneme turu başarısızsa
+   servisi kurmaz, gecikmeli otomatik + çökünce yeniden başlat; ayrıştırma
+   denetlendi, makinede servis KURULMADI), `yayinla_ajan.ps1` (tek dosya,
+   self-contained, 86 MB; çıktı `yayin/ajan/` git dışı). Bulgu: sunucudaki nginx
+   gövde sınırı 25 MB (`client_max_body_size`) - ajan varsayılanı 32'den 20 MB'a
+   indi, 413 gelirse sayfayı yarılar (bu yol canlı denenmedi).
+
+   Sırada 8b: **pilot** - kurulum (hangi müşteri / hangi web kurulumu) kullanıcı kararı.
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

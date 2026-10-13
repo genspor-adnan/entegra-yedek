@@ -6,3 +6,4 @@ api/src/Gentegre.Api/gizli/
 # dotnet test ciktilari (trx, kapsam raporlari): uretim artigi.
 api/TestResults/
 api/**/TestResults/
+yayin/ajan/
