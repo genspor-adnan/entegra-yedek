@@ -71,17 +71,17 @@ public sealed class AktarimKimligiTestleri(VeritabaniOlgusu olgu) : IClassFixtur
         if (hedef is null) return;   // eşleşen göç kaydı yok - test anlamsız
 
         var once = await b.TekDegerAsync<long>(
-            "select eslesen from public.fn_aktarim_kaynak_isaretle() where tablo = 'taraf'", t, [], ct);
+            "select eslesen from public.fn_aktarim_kaynak_isaretle(false, 'taraf')", t, [], ct);
 
         // Aynı id kalsın, KOD değişsin: artık kanıtlanamaz, işaretlenmemeli.
         await b.CalistirAsync("update public.taraf set kod = coalesce(kod, '') || '#test' where id = @p0",
             t, [hedef], ct);
         var sonra = await b.TekDegerAsync<long>(
-            "select eslesen from public.fn_aktarim_kaynak_isaretle() where tablo = 'taraf'", t, [], ct);
+            "select eslesen from public.fn_aktarim_kaynak_isaretle(false, 'taraf')", t, [], ct);
         Assert.Equal(once - 1, sonra);
 
         // Uygula: kodu bozulan satır işaretsiz kalır, kanıtlanan satırlar damgalanır.
-        await b.CalistirAsync("select count(*) from public.fn_aktarim_kaynak_isaretle(true)", t, [], ct);
+        await b.CalistirAsync("select count(*) from public.fn_aktarim_kaynak_isaretle(true, 'taraf')", t, [], ct);
         Assert.Null(await b.TekDegerAsync<short?>(
             "select aktarim_kaynak from public.taraf where id = @p0", t, [hedef], ct));
         Assert.True(await b.TekDegerAsync<long>("""
@@ -91,7 +91,7 @@ public sealed class AktarimKimligiTestleri(VeritabaniOlgusu olgu) : IClassFixtur
 
         // İkinci çağrı hiçbir şey yapmaz (idempotent).
         Assert.Equal(0, await b.TekDegerAsync<long>(
-            "select coalesce(sum(isaretlenen), 0) from public.fn_aktarim_kaynak_isaretle(true)", t, [], ct));
+            "select coalesce(sum(isaretlenen), 0) from public.fn_aktarim_kaynak_isaretle(true, 'taraf')", t, [], ct));
 
         await t.RollbackAsync();
     }

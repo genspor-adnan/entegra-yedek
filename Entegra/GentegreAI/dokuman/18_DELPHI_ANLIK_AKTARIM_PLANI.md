@@ -260,8 +260,29 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - `kisi` rolü yalnız üst cari gerçekten bağlanabildiyse (göç kuralı).
    - Silinen cari / depo / adres **pasifleşir** (belgede kullanılmış olabilir).
    - stg.rehber'de `r` adında KOLON var - `to_jsonb(r)` takma adı tuzağı.
-   Sırada: döviz, masraf merkezi / proje, stok, hizmet / masraf, hesap; sonra belge ve
-   hareketler. Ardından sırayla depo/döviz → cari → stok/kalem/hesap →
+   **Dilim 2 yapıldı (1082, 13.10.2026): döviz, masraf merkezi, proje, kalem (hizmet /
+   masraf + fiyat), stok (barkod, fiyat, seri/lot), hesap (kasa, banka, POS, kredi
+   kartı, kredi).** Eşdeğerlik: döviz 8.210 satırın hepsi göçle birebir (fark 0), kredi
+   fark 0; 5.081 stok / 1.418 barkod / 20.329 fiyat / 36.505 seri-lot / 133 hesap
+   aktarıldı. Kalan farklar açıklandı (hesap sorumlusu 0 → boş, proje bütçe $ → USD,
+   proje şubesi -1 → 1 - web verisinin kendi tutarsızlıkları; 10 personel "maaş avansı"
+   kasası dev'de kaldırılmış). Testle / eşdeğerlikle bulunan kurallar:
+   - **Para birimi ISO** (`fn_doviz_iso`, 083): çevrilmeyince aynı günün kuru hem USD
+     hem $ satırı olmuştu.
+   - **Tarih kolonu saat dilimine girmez** (`fn_aktarim_tarih`): timestamptz → date UTC
+     ile çevrilip proje/kredi/seri-lot tarihleri bir gün geride kalıyordu.
+   - **Delphi 0 = "yok"** (`fn_aktarim_web_id` 0'ı kimlik sanıyordu).
+   - **Çakışma denetiminde NULL:** `not (aktarim_kaynak = 1 and …)` web kaydında NULL
+     döner, çakışma görülmez, insert patlar → `not coalesce(…, false)`.
+   - **MASRAFGELIR hizmet/masraf ayrımı** anlık aktarımda GELIRMI ile; karşı tarafı
+     kullanan belge gelince karşılık belge diliminde açılacak.
+   - `stok.kullanim` 545'te kaldırılmış; fonksiyon kolonları göç listesinden değil
+     güncel şemadan alınmalı. `MASRAFGELIR.ID` smallint.
+   - İşaretleme fonksiyonu 080'in `eski_tablo/eski_id` ve doğal anahtarlı alt satırları
+     da kapsıyor; pencereyle bir kez hesaplanıyor (ilişkili alt sorgu karesel
+     büyüyüp testi zaman aşımına düşürmüştü), `p_tablo` süzgeci var.
+   Sırada: **belge (FATBASLIK + FATURA), mali hareket (KASA), stok hareketi
+   (STOKIZLEME)** - en büyük dilim. Ardından sırayla depo/döviz → cari → stok/kalem/hesap →
    belge/mali/stok hareketi. **Eşdeğerlik testi:** boş test DB'de bütün Delphi
    verisi fonksiyonlarla aktarılır, `kur.ps1` göç sonucuyla tablo tablo
    karşılaştırılır (satır sayısı, belge toplamları, cari bakiyeleri). Fark 0
