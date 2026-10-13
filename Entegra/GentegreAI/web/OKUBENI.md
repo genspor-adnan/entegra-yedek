@@ -17,6 +17,25 @@ API adresi `.env` içinde (`VITE_API=http://localhost:5180`). API'nin CORS liste
 
 Giriş (dev DB): `admin` / `Genotip!2026` — çok şubeli olduğu için şube seçim adımı gelir.
 
+### Duman testi (bütün menü, gerçek tarayıcı)
+
+```powershell
+# API (5180) ve web (5173) ayakta olmalı
+$env:DUMAN_SIFRE = '...'        # giriş parolası - koda / depoya yazılmaz
+npm run duman                   # ~5 dk: menüdeki her ekran + ilk kaydın kartı
+$env:DUMAN_GRUP = 'Kalite'      # yalnız bir menü grubu (~40 sn)
+$env:DUMAN_PARALEL = '4'        # aynı anda sekme (varsayılan 3)
+$env:DUMAN_KART = '0'           # kartları açma
+```
+
+`duman/menu.duman.ts` menü tanımlarından (`LISTELER`) her ekranı açar, listede
+kayıt varsa ilk satırın kartını da açar; JS / konsol hatası, sunucudan 500
+(izleme numarasıyla) ve ekrandaki gerçek hata kutusu toplanır. İş uyarısı
+kutuları ("biyolojik test yapılmadı") raporda **uyarı** olarak geçer, testi
+kırmızı yapmaz. Rapor: `duman/sonuc/duman-<tarih>.md` (git'e girmez).
+Yalnız OKUR - kart açılır, kaydedilmez, aksiyon düğmesine basılmaz.
+`npm test` bunu çalıştırmaz (ayrı yapılandırma: `vitest.duman.config.ts`).
+
 ## Yapı
 
 | Klasör | Sorumluluk |

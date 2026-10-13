@@ -29,3 +29,6 @@ dist-ssr
 .playwright/
 test-results/
 playwright-report/
+
+# Duman testi raporlari (npm run duman)
+duman/sonuc/

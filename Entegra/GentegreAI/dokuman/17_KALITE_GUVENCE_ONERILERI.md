@@ -63,7 +63,33 @@ görmüyordu:
 - **Kalıcı notlar:** öğrenilen tuzakları (beyaz liste, detay kolonları, Vite'ın
   eski dosya sunması) belleğe yazmak.
 
-## 5. Önerilen ilk adımlar
+## 5. Kurulanlar (13.10.2026)
+
+- **Katalog tutarlılık testleri** - `KatalogSemaTestleri` (liste SQL'i, kart /
+  detay kolonları, yetki kodları; test DB'si) + `DokumanKaynakBeyazListeTestleri`
+  (DB gerekmez). İlk koşu: **21 tabloda** kartın yazdığı `ekleyen` /
+  `degistiren` / `sube_id` eksikti (acil, ameliyat, lab, çağrı, personel,
+  sterilizasyon...) - hepsi 1075 ile eklendi. Beyaz liste testi eksik
+  "demirbas" ile denendi, yakalıyor.
+- **Test DB'si** `gentegre_ai_test` dev DB'den yenilendi (934. migration'da
+  kalmıştı). `GENTEGRE_TEST_DB` ile **653 testin 638'i geçiyor, 15'i kırmızı**
+  (önceden 362'si atlanıyordu). Kırmızılar bugüne dek hiç koşmamış eski testler:
+  - 3 test yok olan rol id'si (0) ile kullanıcı açmaya çalışıyor (fixture),
+  - rol / yetki beklentileri veriyle uyuşmuyor (iskonto tavanı, rehber ekranı,
+    "steril" modül kodu, banko şefi rolleri, YZ kontör),
+  - **portal kapsamı**: `dis_doktor` ve `dis_istem_kurumu` rolleri `departman`
+    listesini kapsam kuralı olmadan görüyor - gözden geçirilmeli.
+- **Duman testi** - `npm run duman` (web/duman/menu.duman.ts). Bütün menü 377
+  ekran, ~5 dk. İlk koşuda **4 gerçek hata**:
+  1. İK › İzin Hakedişi: menü katalogda olmayan kaynağa bağlı
+     ("Bilinmeyen liste kaynagi: personelIzinHak") - ekran hiç açılmıyor.
+  2. Kronik Tanılar kartı 500: kod çözümleyici ICD kodu "I10"u sayıya
+     çevirmeye çalışıyor.
+  3. Platform › Zamanlanmış İşler: satıra çift tık `/zamanli-is/undefined`
+     açıyor (kimlik kolonu `kod`, çift tık `id` kullanıyor).
+  4. e-Nabız Gün Sonu: React "key" uyarısı.
+
+## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 
 | Sıra | İş | Tahmini | Getirisi |
 |---|---|---|---|

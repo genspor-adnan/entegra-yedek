@@ -55,6 +55,23 @@ Bu testler **kendi verisini açar ve siler**; ortak veriye dokunmaz.
 - **Katalog bütünlüğü** — her kaynağın yetki kodu, kimlik kolonu ve varsayılan
   sıralaması var; kaynak/kolon/aksiyon adları tekil. Yeni kaynak eklendiğinde
   kendiliğinden kapsanır.
+- **Katalog ↔ şema** (`KatalogSemaTestleri`, DB gerekir, salt okur - dokuman/17):
+  her liste kaynağının SQL'i test DB'de çalışıyor mu; her kartın / detayın
+  YAZDIĞI kolonlar (alanlar + `ekleyen` / `degistiren` / `sube_id`) tabloda var
+  mı; katalogda kullanılan her yetki kodu `yetki` tablosunda aktif mi. İlk
+  koşuda 21 tabloda eksik kolon buldu (1075).
+- **Belge kaynağı beyaz listesi** (`DokumanKaynakBeyazListeTestleri`, DB
+  gerekmez): kartın belge kaynağı (`DokumanUclari.FizikselKaynak`)
+  `DokumanDeposu` beyaz listesinde mi - eksikse o kartın Belgeler sekmesi 500.
+
+Test DB'si eskiyince (yeni migration'lar) geliştirme DB'sinden yenilenir:
+
+```bash
+docker exec gentegre-pg18 sh -c "pg_dump -U postgres -Fc -d gentegre_ai -f /tmp/g.dump \
+  && psql -U postgres -c 'drop database if exists gentegre_ai_test' \
+  && psql -U postgres -c \"create database gentegre_ai_test template template0 encoding 'UTF8' locale_provider icu icu_locale 'tr-TR'\" \
+  && pg_restore -U postgres -d gentegre_ai_test --no-owner /tmp/g.dump; rm /tmp/g.dump"
+```
 - **Bildirim kuyruğu** — şablon değişkenleri doluyor, aynı satır iki kez
   alınmıyor (`for update skip locked`), başarısız gönderim kuyrukta kalıp ileri
   atılıyor, pasif şablon kuyruğa girmiyor.
