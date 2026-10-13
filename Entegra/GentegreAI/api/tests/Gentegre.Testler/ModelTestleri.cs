@@ -12,7 +12,9 @@ namespace Gentegre.Testler;
 /// Buradaki testler modelin dört sınırını tutuyor: uydurduğu ekran geçmez,
 /// kullanıcının göremediği ekran modele hiç gitmez, kontör yoksa çağrı
 /// yapılmaz, model düşerse asistan susmaz (katalog cevabı verilir).
+/// Kontör satırına yazdığı için AiKontorTestleri ile SIRAYLA koşar.
 /// </summary>
+[Collection(KontorKoleksiyonu.Ad)]
 public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu;

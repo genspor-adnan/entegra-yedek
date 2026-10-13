@@ -118,8 +118,9 @@ görmüyordu:
     bütün günlük / haftalık / aylık işler 3 saat geç). **1079 ile düzeldi:**
     saat kurumun duvar saati (`Kurulus:SaatDilimi`); kartta zamanlama
     değişince sıradaki zaman bir dakika içinde yeniden hesaplanıyor.
-  - Gözlem: `AiKontorTestleri.Odeme_sonucu_bir_kez_islenir...` bütün takımda
-    bir kez kırmızı, tek başına ve tekrar koşuda yeşil - aralıklı (flaky).
+  - `AiKontorTestleri` aralıklı kırmızıydı (flaky): `ModelTestleri` aynı tek
+    satırlık `ai_kontor` bakiyesini paralel olarak 10'a sabitliyordu. İkisi
+    `KontorKoleksiyonu`nda sırayla koşuyor; üç tam koşu 658 / 658.
 
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 

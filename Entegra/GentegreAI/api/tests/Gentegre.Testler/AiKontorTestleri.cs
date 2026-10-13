@@ -11,7 +11,9 @@ namespace Gentegre.Testler;
 /// · Kurumda kapatılan özellik (oz_tani) kontör kapısından geçmez.
 /// Test kurumun tek satırlık ai_kontor / ai_abonelik kaydını değiştirir ve
 /// sonunda eski hâline döndürür; kendi sipariş ve hareketlerini siler.
+/// Aynı satıra yazan ModelTestleri ile SIRAYLA koşar (KontorKoleksiyonu).
 /// </summary>
+[Collection(KontorKoleksiyonu.Ad)]
 public sealed class AiKontorTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
