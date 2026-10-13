@@ -70,6 +70,57 @@ public class ZamanlamaTestleri
         => Assert.Equal(Cumartesi.AddHours(1),
                         ZamanlamaHesabi.Sonraki(Cumartesi, periyot: 1, gun: 0, saat: 0, dakika: 0));
 
+    // ------------------------------------------------- kurum saati (1079) ----
+    private static readonly TimeZoneInfo Istanbul = Gentegre.Cekirdek.Saat.Dilim("Europe/Istanbul");
+    private static DateTime Utc(int ay, int gun, int saat, int dakika = 0)
+        => new(2026, ay, gun, saat, dakika, 0, DateTimeKind.Utc);
+
+    [Fact]
+    public void SonrakiAn_saat_KURUMUN_DUVAR_SAATI()
+    {
+        // 13.10 06:00 UTC = 09:00 İstanbul. "Günlük 07:30" bugün geçti ->
+        //   yarın 07:30 İstanbul = 04:30 UTC. Eskiden 07:30 UTC (yerel 10:30).
+        var s = ZamanlamaHesabi.SonrakiAn(Utc(10, 13, 6), Istanbul, 2, 1, 7, 30);
+        Assert.Equal(Utc(10, 14, 4, 30), s);
+        Assert.Equal(DateTimeKind.Utc, s.Kind);
+    }
+
+    [Fact]
+    public void SonrakiAn_GUN_yerel_gune_gore()
+    {
+        // 13.10 22:00 UTC = 14.10 01:00 İstanbul: yerelde gün DÖNMÜŞ. "Günlük
+        //   04:00" aynı yerel gün 04:00 = 14.10 01:00 UTC. UTC'de hesaplansa
+        //   14.10 04:00 UTC (yerel 07:00) çıkardı.
+        Assert.Equal(Utc(10, 14, 1),
+                     ZamanlamaHesabi.SonrakiAn(Utc(10, 13, 22), Istanbul, 2, 1, 4, 0));
+    }
+
+    [Fact]
+    public void SonrakiAn_haftalik_YEREL_pazartesi()
+    {
+        // 11.10 Pazar 21:30 UTC = 12.10 Pazartesi 00:30 İstanbul. "Pazartesi
+        //   04:00" -> aynı gece 04:00 yerel = 12.10 01:00 UTC (UTC'ye göre
+        //   hâlâ Pazar olduğu için eskiden gün kayardı).
+        Assert.Equal(Utc(10, 12, 1),
+                     ZamanlamaHesabi.SonrakiAn(Utc(10, 11, 21, 30), Istanbul, 3, 1, 4, 0));
+    }
+
+    [Fact]
+    public void SonrakiAn_saatlik_dilimden_bagimsiz()
+        => Assert.Equal(Utc(10, 13, 7),
+                        ZamanlamaHesabi.SonrakiAn(Utc(10, 13, 6), Istanbul, 1, 0, 0, 0));
+
+    [Fact]
+    public void SonrakiAn_yaz_saati_OLMAYAN_saat_atlanmaz()
+    {
+        // Berlin 29.03.2026 02:00 -> 03:00 (02:30 yok). "Günlük 02:30" o gün
+        //   03:30 yerel = 01:30 UTC'ye kayar, gün atlanmaz.
+        var berlin = Gentegre.Cekirdek.Saat.Dilim("Europe/Berlin");
+        Assert.Equal(new DateTime(2026, 3, 29, 1, 30, 0, DateTimeKind.Utc),
+                     ZamanlamaHesabi.SonrakiAn(new DateTime(2026, 3, 28, 23, 0, 0, DateTimeKind.Utc),
+                                               berlin, 2, 1, 2, 30));
+    }
+
     // ------------------------------------------------------------- şablon ----
     [Fact]
     public void Sablon_DegiskenleriDoldurur()

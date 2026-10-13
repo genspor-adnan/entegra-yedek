@@ -114,8 +114,12 @@ görmüyordu:
     sonucuna yazar (kimseye mesaj göndermez).
   - Terminal: `db/araclar/hata_ozet.ps1` (`-Gun 7`, `-Hepsi`) - 5xx ve yeni
     türler, izleme numarasıyla.
-  - Not: zamanlı işlerin saati UTC yorumlanıyor (ekranda 07:30 = yerel
-    10:30) - bütün işler için eski davranış, ayrıca ele alınmalı.
+  - Zamanlı işlerin saati UTC yorumlanıyordu (ekranda 07:30 = yerel 10:30,
+    bütün günlük / haftalık / aylık işler 3 saat geç). **1079 ile düzeldi:**
+    saat kurumun duvar saati (`Kurulus:SaatDilimi`); kartta zamanlama
+    değişince sıradaki zaman bir dakika içinde yeniden hesaplanıyor.
+  - Gözlem: `AiKontorTestleri.Odeme_sonucu_bir_kez_islenir...` bütün takımda
+    bir kez kırmızı, tek başına ve tekrar koşuda yeşil - aralıklı (flaky).
 
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 

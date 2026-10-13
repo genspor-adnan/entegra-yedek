@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (523 ad, 144 tanesi birden cok dosyada)
+## Fonksiyonlar (524 ad, 144 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -531,6 +531,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
+| `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
 ## Gorunumler (343 ad, 154 tanesi birden cok dosyada)
 

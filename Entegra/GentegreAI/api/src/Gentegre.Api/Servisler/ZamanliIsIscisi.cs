@@ -414,6 +414,14 @@ public sealed class ZamanliIsIscisi : BackgroundService
         await using var kapsam = _servisler.CreateAsyncScope();
         var veri = kapsam.ServiceProvider.GetRequiredService<VeriKaynagi>();
 
+        // Sonraki zamanı boşalmış işler (kartta zamanlaması değişti - 1079
+        //   tetiği boşaltır) bu turda hesaplansın; yalnız açılışta yapılınca
+        //   yeni saat ancak servis yeniden başlayınca geçerli oluyordu.
+        var bos = await veri.ListeAsync(
+            "select kod from public.zamanli_is where aktif = 1 and sonraki is null",
+            null, o => o.GetString(0), iptal);
+        foreach (var k in bos) await SonrakiYazAsync(veri, k, iptal);
+
         // Zamanı gelen İLK işi kilitleyerek al (aynı anda tek iş yeter).
         var kod = await veri.TekDegerAsync<string>("""
             with secilen as (
@@ -513,9 +521,11 @@ public sealed class ZamanliIsIscisi : BackgroundService
         //   saat dilimindeyse fark kadar GERIDE bir zaman yaziliyor ve is
         //   HER TURDA yeniden calisiyordu - sunucuda enabiz.gonder dakikada
         //   bir calisip gunlugu dolduruyordu.
+        //   Saat KURUMUN duvar saatidir (1079): hesap kuruluş diliminde,
+        //   yazılan değer UTC an.
         var simdi = await veri.TekDegerAsync<DateTime>("select now()", null, iptal);
-        var hedef = Cekirdek.Zamanlama.ZamanlamaHesabi.Sonraki(
-            simdi, s.Periyot, s.Gun, s.Saat, s.Dakika);
+        var hedef = Cekirdek.Zamanlama.ZamanlamaHesabi.SonrakiAn(
+            simdi, Cekirdek.Saat.Dilim(null), s.Periyot, s.Gun, s.Saat, s.Dakika);
 
         await veri.CalistirAsync("update public.zamanli_is set sonraki = @p1 where kod = @p0",
             new object?[] { kod, hedef }, iptal);

@@ -19,6 +19,30 @@ public static class ZamanlamaHesabi
             _ => Haftalik(simdi, Math.Clamp(gun, 1, 7), saat, dakika),
         };
 
+    /// <summary>
+    /// UTC ANDAN UTC ANA (1079). Zamanlamadaki saat KURUMUN DUVAR SAATİDİR:
+    /// "günlük 07:30" İstanbul'da 07:30 demek. Önceden hesap UTC'de yapılıyordu
+    /// (`now()` UTC döner) ve her günlük / haftalık / aylık iş yerel saatle
+    /// 3 saat geç çalışıyordu - ekranda 07:30, gerçekte 10:30.
+    /// Hesap dilimde yapılır, sonuç UTC ana çevrilir. Saatlik iş dilimden
+    /// bağımsızdır.
+    /// </summary>
+    public static DateTime SonrakiAn(DateTime simdiUtc, TimeZoneInfo dilim,
+                                     int periyot, int gun, int saat, int dakika)
+    {
+        var utc = simdiUtc.Kind == DateTimeKind.Utc
+            ? simdiUtc : DateTime.SpecifyKind(simdiUtc, DateTimeKind.Utc);
+        if (periyot == 1) return utc.AddHours(1);
+
+        var yerel = TimeZoneInfo.ConvertTimeFromUtc(utc, dilim);
+        var hedef = DateTime.SpecifyKind(Sonraki(yerel, periyot, gun, saat, dakika),
+                                         DateTimeKind.Unspecified);
+        // Yaz saatine geçiş gecesi OLMAYAN saat (02:30): bir saat sonrası.
+        //   İşi o gün atlamak, haftalık işi bir hafta kaçırmak olurdu.
+        if (dilim.IsInvalidTime(hedef)) hedef = hedef.AddHours(1);
+        return TimeZoneInfo.ConvertTimeToUtc(hedef, dilim);
+    }
+
     /// <summary>Bugünün saati geçtiyse yarın.</summary>
     public static DateTime Gunluk(DateTime simdi, int saat, int dakika)
     {
