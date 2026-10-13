@@ -187,6 +187,92 @@ public static class AktarimUclari
         });
     }
 
+    public sealed record AktarimProfilIstegi(string? VeriKaynagi, DateTime? HareketBaslangic);
+    public sealed record AjanIstegi(string? Ad);
+
+    /// <summary>Hareket tabloları: başlangıç tarihi değişince yeniden (tam) yüklenir.</summary>
+    private static readonly string[] HareketTablolari = ["FATBASLIK", "FATURA", "STOKIZLEME", "KASA"];
+
+    /// <summary>
+    /// GenProfil / Kurum Profili › Veri Kaynağı (adım 6d, mockup sekme 3). Yetki kurum
+    /// profilinin yazımlarıyla aynı: "ayar". Ajan anahtarı yalnız üretildiği yanıtta görünür.
+    /// </summary>
+    public static void AktarimProfilUclariniEkle(this IEndpointRouteBuilder yol)
+    {
+        var grup = yol.MapGroup("/api/kurum-profil/aktarim").WithTags("KurumProfil").RequireAuthorization();
+
+        grup.MapGet("/", async (VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            (await cozucu.CozAsync(ctx, iptal)).YetkiIste("ayar", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var json = await b.TekDegerAsync<string>("""
+                select json_build_object(
+                  'veriKaynagi', (select k.veri_kaynagi from public.kurum_profil k where k.sube_id = 0),
+                  'hareketBaslangic', (select deger from public.aktarim_ayar where anahtar = 'hareket_baslangic'),
+                  'subeEsleme', (select coalesce(json_agg(json_build_object('delphiSube', e.delphi_sube_id, 'subeId', e.sube_id,
+                                     'subeAd', s.ad) order by e.delphi_sube_id), '[]')
+                                   from public.aktarim_sube_esleme e join public.sube s on s.id = e.sube_id),
+                  'varsayilanSube', (select s.ad from public.sube s where s.id = public.fn_aktarim_sube(null)),
+                  'ajanlar', (select coalesce(json_agg(json_build_object('id', a.id, 'ad', a.ad, 'aktif', a.aktif,
+                                  'olusturma', a.olusturma, 'sonNabiz', a.son_nabiz, 'surum', a.surum)
+                                  order by a.aktif desc, a.id desc), '[]') from public.aktarim_ajan a))::text
+                """, null, [], iptal);
+            return Results.Content(json!, "application/json; charset=utf-8");
+        });
+
+        grup.MapPut("/", async (AktarimProfilIstegi g, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            (await cozucu.CozAsync(ctx, iptal)).YetkiIste("ayar", Islem.Degistir);
+            if (g.VeriKaynagi is not null and not ("web" or "delphi"))
+                throw GentegreHatasi.Dogrulama("Veri kaynağı 'web' ya da 'delphi' olmalı.", new AlanHatasi("veriKaynagi", "Geçersiz değer."));
+            await using var b = await veri.AcAsync(iptal);
+            await using var t = await b.BeginTransactionAsync(iptal);
+            if (g.VeriKaynagi is { } vk)
+            {
+                await b.CalistirAsync("update public.kurum_profil set veri_kaynagi = @p0 where sube_id = 0", t, [vk], iptal);
+                // Web'e dönen kurumda ajan yazamasın: anahtarlar pasifleşir (geri açmak = yeni anahtar).
+                if (vk == "web")
+                    await b.CalistirAsync("update public.aktarim_ajan set aktif = 0 where aktif = 1", t, [], iptal);
+            }
+            if (g.HareketBaslangic is { } hb)
+            {
+                var yeni = hb.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+                var eski = await b.TekDegerAsync<string>(
+                    "select deger from public.aktarim_ayar where anahtar = 'hareket_baslangic'", t, [], iptal);
+                if (eski != yeni)
+                {
+                    await b.CalistirAsync("""
+                        insert into public.aktarim_ayar (anahtar, deger, aciklama) values ('hareket_baslangic', @p0,
+                               'Belge / kasa / stok izleme bu tarihten aktarılır')
+                        on conflict (anahtar) do update set deger = excluded.deger
+                        """, t, [yeni], iptal);
+                    // Ajan bir sonraki turda hareket tablolarını yeni tarihle TAM yükler.
+                    await b.CalistirAsync("delete from public.aktarim_durum where tablo = any (@p0)", t, [HareketTablolari], iptal);
+                }
+            }
+            await t.CommitAsync(iptal);
+            return Results.Ok(new { tamam = true });
+        });
+
+        // Yeni ajan anahtarı: düz değer YALNIZ bu yanıtta - sistemde özeti kalır.
+        grup.MapPost("/ajan", async (AjanIstegi g, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            (await cozucu.CozAsync(ctx, iptal)).YetkiIste("ayar", Islem.Degistir);
+            await using var b = await veri.AcAsync(iptal);
+            var anahtar = await b.TekDegerAsync<string>("select public.fn_aktarim_ajan_ekle(@p0)", null, [g.Ad ?? ""], iptal);
+            return Results.Ok(new { anahtar });
+        });
+
+        grup.MapPost("/ajan/{id:int}/pasif", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            (await cozucu.CozAsync(ctx, iptal)).YetkiIste("ayar", Islem.Degistir);
+            await using var b = await veri.AcAsync(iptal);
+            if (await b.CalistirAsync("update public.aktarim_ajan set aktif = 0 where id = @p0", null, [id], iptal) == 0)
+                throw GentegreHatasi.Bulunamadi("Ajan bulunamadı.");
+            return Results.Ok(new { id });
+        });
+    }
+
     private static async Task<int> AjanAsync(NpgsqlConnection b, HttpContext ctx, CancellationToken iptal)
         => await b.TekDegerAsync<int?>("select public.fn_aktarim_ajan_bul(@p0)", null,
                                        [ctx.Request.Headers[AnahtarBasligi].ToString()], iptal)

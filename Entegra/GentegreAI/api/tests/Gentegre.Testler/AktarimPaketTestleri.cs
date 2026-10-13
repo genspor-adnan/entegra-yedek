@@ -184,5 +184,63 @@ public sealed class AktarimUcTestleri(ApiSunucuOlgusu api)
         }
     }
 
+    /// <summary>
+    /// Kurum Profili › Veri Kaynağı (6d): "ayar" yetkisi ister; üretilen anahtar ajan
+    /// uçlarında çalışır, pasif yapılınca reddedilir; hareket başlangıcı değişince
+    /// hareket tablolarının versiyonu silinir (ajan yeniden yükler), tanımlarınki kalır.
+    /// Veri kaynağı bu testte DEĞİŞTİRİLMEZ (paylaşılan test DB'sinde tetik açılırdı).
+    /// </summary>
+    [VtFact]
+    public async Task Veri_kaynagi_paneli_anahtar_uretir_pasif_yapar_hareket_baslangici_yeniden_yukletir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var (yetkisiz, yKod) = await d.KullaniciAsync(await d.RolAsync("vk-yok", "lab:g"), 1);
+        await d.SubeVerAsync(yetkisiz, 1, yazma: true, varsayilan: true);
+        var (yetkili, kod) = await d.KullaniciAsync(await d.RolAsync("vk", "ayar:gd"), 1);
+        await d.SubeVerAsync(yetkili, 1, yazma: true, varsayilan: true);
+
+        using (var h0 = api.Istemci((await api.GirisAsync(yKod, TestDunyasi.Parola)).Access))
+            Assert.Equal(HttpStatusCode.Forbidden, (await h0.GetAsync("/api/kurum-profil/aktarim")).StatusCode);
+
+        using var h = api.Istemci((await api.GirisAsync(kod, TestDunyasi.Parola)).Access);
+        await using var b = await api.Veri.AcAsync(CancellationToken.None);
+        var ct = CancellationToken.None;
+        var oncekiTarih = await b.TekDegerAsync<string>("select deger from public.aktarim_ayar where anahtar = 'hareket_baslangic'", null, [], ct);
+        int? ajan = null;
+        try
+        {
+            var y = await (await h.PostAsJsonAsync("/api/kurum-profil/aktarim/ajan", new { ad = "panel testi" }))
+                .Content.ReadFromJsonAsync<JsonElement>();
+            var anahtar = y.GetProperty("anahtar").GetString()!;
+            ajan = await b.TekDegerAsync<int>("select public.fn_aktarim_ajan_bul(@p0)", null, [anahtar], ct);
+            using var a = api.Istemci();
+            a.DefaultRequestHeaders.Add("X-Aktarim-Anahtar", anahtar);
+            Assert.Equal(HttpStatusCode.OK, (await a.GetAsync("/api/aktarim/durum")).StatusCode);
+
+            Assert.Equal(HttpStatusCode.OK, (await h.PostAsync($"/api/kurum-profil/aktarim/ajan/{ajan}/pasif", null)).StatusCode);
+            Assert.Equal(HttpStatusCode.Unauthorized, (await a.GetAsync("/api/aktarim/durum")).StatusCode);
+
+            // Hareket başlangıcı: hareket tablosunun versiyonu silinir, tanımınki kalır.
+            await b.CalistirAsync("""
+                insert into public.aktarim_durum (tablo, versiyon) values ('KASA', 77), ('DEPOLAR', 77)
+                on conflict (tablo) do nothing
+                """, null, [], ct);
+            var baska = oncekiTarih == "2026-02-01" ? "2026-03-01" : "2026-02-01";
+            Assert.Equal(HttpStatusCode.OK, (await h.PutAsJsonAsync("/api/kurum-profil/aktarim", new { hareketBaslangic = baska })).StatusCode);
+            Assert.Equal(0L, await b.TekDegerAsync<long>("select count(*) from public.aktarim_durum where tablo = 'KASA'", null, [], ct));
+            Assert.Equal(1L, await b.TekDegerAsync<long>("select count(*) from public.aktarim_durum where tablo = 'DEPOLAR'", null, [], ct));
+
+            var p = await h.GetFromJsonAsync<JsonElement>("/api/kurum-profil/aktarim");
+            Assert.Equal(baska, p.GetProperty("hareketBaslangic").GetString());
+            Assert.Equal(400, (int)(await h.PutAsJsonAsync("/api/kurum-profil/aktarim", new { veriKaynagi = "excel" })).StatusCode);
+        }
+        finally
+        {
+            await b.CalistirAsync("update public.aktarim_ayar set deger = @p0 where anahtar = 'hareket_baslangic'", null, [oncekiTarih], ct);
+            await b.CalistirAsync("delete from public.aktarim_durum where tablo in ('KASA', 'DEPOLAR') and versiyon = 77", null, [], ct);
+            if (ajan is not null) await b.CalistirAsync("delete from public.aktarim_ajan where id = @p0", null, [ajan], ct);
+        }
+    }
+
     private static StringContent Json(string s) => new(s, Encoding.UTF8, "application/json");
 }

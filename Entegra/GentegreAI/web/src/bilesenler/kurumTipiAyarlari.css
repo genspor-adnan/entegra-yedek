@@ -234,3 +234,11 @@
 }
 .kt-kok .kt-sekme-ic { font-size: 17px }
 .kt-kok .kt-sekme-ad { font-size: 11px; white-space: nowrap }
+/* Veri Kaynağı sekmesi (Delphi aktarımı, adım 6d) */
+.kt-kok .vk-kok{padding:10px;display:flex;flex-direction:column;gap:10px}
+.kt-kok .vk-sec{display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer}
+.kt-kok .vk-satir{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.kt-kok .vk-et{width:130px;color:var(--muted);font-size:11px;text-align:right}
+.kt-kok .vk-inp{border:1px solid var(--line);border-radius:3px;padding:3px 7px;font-size:11.5px;min-width:220px}
+.kt-kok .vk-anahtar{display:flex;align-items:center;gap:8px;margin-top:6px}
+.kt-kok .vk-anahtar code{background:#1f2d3a;color:#c6f5d0;padding:6px 9px;border-radius:3px;font-size:11.5px;letter-spacing:.4px;word-break:break-all}

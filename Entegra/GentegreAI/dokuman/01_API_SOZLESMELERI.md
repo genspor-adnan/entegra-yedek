@@ -1514,6 +1514,22 @@ POST /api/aktarim/paket     // { paket, V: {TABLO: ct_versiyon}, U: {TABLO: [sat
   gitmez. Ajan kaldığı yeri `durum`'dan okur.
 - Tamamlanmış `paket` kimliği tekrar gelirse uygulanmaz, kayıtlı sonuç
   `tekrar: true` ile döner; hatalı paket aynı kimlikle yeniden uygulanır.
+Ekran uçları (kullanıcı oturumuyla):
+
+```http
+GET  /api/aktarim-yonetim/durum               // aktarim.durum:g → özet, adimlar[], hatalar[], sonPaketler[] (Aktarım Durumu ekranı)
+GET  /api/aktarim-yonetim/hata/{id}/ham       // aktarim.durum:g → adımın pakette gelen U / D kısmı
+POST /api/aktarim-yonetim/hata/{id}/cozuldu   // aktarim.durum:d → kaydı kapatır, VERİ ATLANMAZ ("Atla" yok)
+GET  /api/kurum-profil/aktarim                // ayar:g → { veriKaynagi, hareketBaslangic, subeEsleme[], varsayilanSube, ajanlar[] }
+PUT  /api/kurum-profil/aktarim                // ayar:d { veriKaynagi?: web|delphi, hareketBaslangic? } - web'e dönünce ajanlar pasif; tarih değişince hareket tablolarının versiyonu silinir (yeniden yükleme)
+POST /api/kurum-profil/aktarim/ajan           // ayar:d { ad } → { anahtar } - düz anahtar YALNIZ burada
+POST /api/kurum-profil/aktarim/ajan/{id}/pasif
+```
+
+Salt okunur kip (1089): `veri_kaynagi = delphi` iken aktarılan tabloya web yazımı
+`422 IS_KURALI` ("Delphi ERP'den gelir"); kart okumada Delphi satırı `yetki.duzenle/sil = false`
+ve `disKaynak: "Delphi"`; aktarılan kaynağa yazan aksiyon ve e-Belge pasif.
+
 - `kolonlar`: ajan Delphi'den yalnız bunları okur (stg şeması = fn_aktar_*'ın tanıdığı kolonlar).
 - **Toplam:** pakette olmayan alt satır web'de silinir; kök (belge, cari, stok, kalem,
   reçete) hangi sebeple gönderilirse gönderilsin bütün alt satırlarıyla gider. Delphi'de

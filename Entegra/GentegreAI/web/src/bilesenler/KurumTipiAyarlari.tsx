@@ -7,6 +7,7 @@ import { MenuDuzeni } from '../sayfalar/MenuDuzeni';
 import { hataMetni, type KurumProfil, type KurumProfilYaniti, type ProfilRolu }
   from '../api/sozlesme';
 import { mesaj, onay } from './mesaj';
+import { VeriKaynagiPaneli } from './VeriKaynagiPaneli';
 import { c } from '../dil/ceviri';
 
 /**
@@ -67,6 +68,9 @@ const SEKMELER: { ad: string; ic: string }[] = [
   { ad: 'Entegrasyonlar',       ic: '🔌' },
   { ad: 'Kaynaklar',            ic: '🪑' },
   { ad: 'Özet & Kurulum',       ic: '✅' },
+  // DELPHI AKTARIMI (adım 6d): veri kaynağı + ajan anahtarları. En sonda -
+  //   öteki sekmelerin numaraları (aktif === n) kaymasın.
+  { ad: 'Veri Kaynağı',         ic: '⇄' },
 ];
 
 /**
@@ -977,6 +981,10 @@ export function KurumTipiAyarlari({ kaydetBagla }: {
             <div className="btn" onClick={() => void yukle()}>🔄 Adımları yenile</div>
           </div>
           <div className="ic sonuk">{c('Kaydet →')}<code>kurum_profil</code> + <code>kurum_modul</code> güncellenir; menü (listeTanimlari <code>urunModu/kurumTipi</code> süzmesi), yetki şablonları, kart sekmeleri (KartKatalogu <code>kurumTipi</code>), varsayılan ayarlar (ayar tablosu) tek işlemle uygulanır; değişiklik <code>islem_log</code>'a.</div>
+        </div>
+
+        <div className="pnl" hidden={aktif !== 9}>
+          {aktif === 9 && <VeriKaynagiPaneli />}
         </div>
     </div>
   );

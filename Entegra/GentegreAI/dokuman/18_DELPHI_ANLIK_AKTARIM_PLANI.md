@@ -400,7 +400,14 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      `/api/aktarim-yonetim/durum`, `/hata/{id}/ham`, `/hata/{id}/cozuldu`; web
      `Yönetim › Platform › Aktarım Durumu` (10 sn yenileme). Klon `gentegre_ai_aktarim`
      Delphi kipinde bırakıldı (ekran / kart denemesi için).
-   - Sırada 6d: GenProfil'de veri kaynağı + ajan anahtarı üretme.
+   - **6d yapıldı:** Kurum Profili (GenProfil paylaşır) › "⇄ Veri Kaynağı" sekmesi:
+     web / Delphi ERP (onaylı, kurum geneli), hareket başlangıcı (değişince hareket
+     tablolarının versiyonu silinir -> ajan yeniden yükler), şube eşlemesi (görünüm),
+     ajan anahtarları (üret - yalnız o an görünür, pasif yap). Web'e dönünce bütün
+     anahtarlar pasif. Uçlar `/api/kurum-profil/aktarim` (yetki `ayar`).
+   **Adım 6 tamam.** Sırada adım 7: gece mutabakatı (kayıt sayısı, belge toplamı,
+   cari bakiye; Delphi'de silinmiş web'de duran kayıt) + dayanıklılık testleri
+   (§11.5: uzun kesinti -> yeniden eşitleme, 500 bin satır, Türkçe/emoji/tarih).
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,
