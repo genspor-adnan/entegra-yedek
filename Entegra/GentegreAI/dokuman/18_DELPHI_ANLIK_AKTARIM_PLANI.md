@@ -298,8 +298,30 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    121 iş merkezi; ikinci koşu 0 yazım. Göç hiç reçete taşımamıştı - eşdeğerlik
    yerine Delphi sayımıyla doğrulandı.
 
-   Sırada: **belge (FATBASLIK + FATURA), mali hareket (KASA), stok hareketi
-   (STOKIZLEME)** - en büyük dilim. Ön inceleme (014 sonrası göçlerin veriye
+   **Dilim 3a yapıldı (1084 + MSSQL Update_SQL_210): belge + izlem + faturanın
+   cari satırı + stok bakiyesi.** BILIM 2026 tam verisi (dev kopyası): 519 belge,
+   6.330 satır, 209 izlem, 204 cari satırı - tür başına sayı ve tutar toplamı
+   Delphi ile birebir; ikinci koşu 0 yazım; 519 belge 28 sn. Bulunanlar:
+   - **Delphi faturaya KASA satırı yazmaz** (BILIM 2021-2026: 0); Delphi ekstresi
+     FATBASLIK'ı doğrudan okur. Cari satırını aktarım web'in kaydetme kuralıyla
+     (MaliHareketYazAsync) yazar - `fn_belge_cikis_mi` = BelgeTuru.CikisMi.
+   - **İade yönü Delphi'den bilerek farklı:** Delphi ekstresi 15/2'yi borç yazıyor,
+     web alacak (132). BILIM 2026: 2 iade, 136,40 TL.
+   - **"Tanımsız Cari" (REHBER.ID 0):** 2026'da 171 alış faturası (912.925 TL) bu
+     karta kesilmiş, Delphi ekstresinde görünüyor; web'de ID ≤ 0 kart yok, bu
+     faturaların cari satırı oluşmuyor. KARAR BEKLİYOR.
+   - Delphi numaralandırması web ile aynı (FATBASLIK.TUR = ISLEMTURLERI.TUR:
+     10/14 irsaliye, 11/15 fatura, 13 alış / 17 satış tahakkuku) - 334 takası
+     uygulanmaz.
+   - Stok bakiyesi satırdan hesaplanmaz: stok_durum = Delphi STOKDURUM aynası.
+   - Kartsız serbest satır (URUNID 0, gelen e-fatura kalemleri) kalemsiz kalır -
+     göçte de öyleydi. Satışta yalnız masraf olarak bilinen kalemin hizmeti açılır.
+   - `now()` varsayılanı her eşitlemede değişip belgeyi yeniden yazıyordu.
+   - İzlem dönüş satırı (DONUSID) sonraki pakette gelirse bir sonraki eşitlemede
+     bağlanır.
+
+   Sırada: **mali hareket (KASA)** - cari dışı satır kasa_islem + 2 bacak (081).
+   Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,
      ödeme, kasa/banka) 081 ile **kasa_islem başlığı + 2 bacak** olmuş (işaret

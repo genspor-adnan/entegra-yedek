@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (539 ad, 146 tanesi birden cok dosyada)
+## Fonksiyonlar (543 ad, 146 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,6 +13,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
+| `fn_aktar_belge` | `1084_aktarim_belge.sql` | — |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_depo` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -23,6 +24,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |
+| `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1082_aktarim_stok_kalem_hesap.sql` | 1080_aktarim_kaynak_kimligi.sql |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktarim_tarih` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -47,6 +50,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
 | `fn_basvuru_istem_serbest_uygula` | `974_goz_goruntuleme_istem.sql` | 919_istem_bazli_serbest.sql, 925_basvuru_istem_serbest_panel.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
+| `fn_belge_cikis_mi` | `1084_aktarim_belge.sql` | — |
 | `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
 | `fn_belge_fis_geri_al` | `190_belge_fisle.sql` | — |
