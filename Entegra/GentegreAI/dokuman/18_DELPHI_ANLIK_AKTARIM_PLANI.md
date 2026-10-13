@@ -181,19 +181,31 @@ toplamın tamamı gider.
 GENINI (ayar), SAYAC (web'de belge kesilmez), STOKDURUM (türetilmiş - web'de
 hareketten hesaplanır, mutabakat karşılaştırır), MODUL.
 
-### 11.2 Kimlik çakışması (EN ÖNCE)
+### 11.2 Kimlik çakışması - YAPILDI (1080, 13.10.2026)
 
-Göç MSSQL kimliklerini korur (`taraf.id = REHBER.ID`). Ama web de aynı
-tablolara yazıyor: **HBYS hastaları `taraf`'a açılır**. Delphi'de sonradan
-açılan cari, web'de açılmış bir hastanın id'sini alabilir.
+Pilot: **kaynak BILIM, hedef sunucudaki ERP (`gentegre_erp`)**. Ölçüldü: hedef
+BILIM'in kopyası DEĞİL - 21 taraf (id 1–36: yönetici + 20 örnek kişi), 332 stok,
+18 hizmet, 1 depo, belge/hareket yok. BILIM'in cari id'leri 1–5906 → "Delphi
+id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk taslaktaki
+"dizi ofseti" yerine:
 
-- Aktarılan tabloların PG dizileri `1.000.000.000`'dan başlatılır (web'in
-  açtığı kayıt bu aralıkta, Delphi'nin kimlikleri altında kalır).
-- Aktarılan satırlara kaynak damgası: `kaynak_sistem smallint` (1 = Delphi).
-  Upsert yalnız `kaynak_sistem = 1` satırı günceller; web kökenli satır
-  (hasta) Delphi'den gelen veriyle **asla ezilmez** - çakışma hata kuyruğuna.
-- Mevcut kurulumlar için migration: dizi zaten bu aralığın altındaysa ileri
-  alınır; aralığın üstünde Delphi id'si varsa (olmamalı) rapor eder, durur.
+- **Web kendi id'sini her zaman kendisi üretir.** Delphi kimliği ayrı kolonlarda:
+  `aktarim_kaynak` (1 = Delphi), `aktarim_tablo` (REHBER, KASALAR…),
+  `aktarim_id` (Delphi ID); üçlüye benzersiz kısmi indeks. 20 tabloda.
+- `aktarim_tablo` şart: `hesap` dört Delphi tablosundan gelir, id'ler çakışabilir.
+- Ad öneki `aktarim_`: belge/mali_hareket/stok_izleme'deki `kaynak_tur/kaynak_id`
+  iş anlamı taşıyor.
+- Referanslar (faturanın carisi, satırın stoğu) aktarımda bu kolonlarla çözülür.
+- Web'de açılmış kayıt (kullanıcı, hasta, örnek veri) hiçbir koşulda ezilmez:
+  aktarım yalnız `aktarim_kaynak = 1` satırı günceller.
+- **Göçle gelmiş eski kayıtlar** (`kur.ps1` kurulumları) `fn_aktarim_kaynak_isaretle()`
+  ile işaretlenir - ELLE çağrılır, varsayılan yalnız rapor. Satır ancak stg'de
+  aynı id **ve** ikinci bir alan (kod / bağlı kayıt) tutarsa işaretlenir.
+  Gerçek vaka: test DB'de 3.672 stok id'si stg ile örtüşüyor ama kodları farklı
+  (stok tablosu sonradan başka kaynaktan doldurulmuş) - yalnız id'ye bakılsaydı
+  hepsi yanlış damgalanırdı. **Hedef ERP'de bu fonksiyon çalıştırılmaz** (stg'si
+  BILIM'den değil); oraya BILIM verisi ilk yüklemeyle yeni kayıt olarak girer.
+- Testler: `AktarimKimligiTestleri` (kolon + indeks, "yalnız id'ye güvenme").
 
 ### 11.3 Bileşenler ve dosyalar
 
@@ -213,8 +225,7 @@ açılan cari, web'de açılmış bir hastanın id'sini alabilir.
 
 ### 11.4 İş sırası (her adım ayrı commit, adım sonunda gösterim)
 
-1. **Kimlik koruması (§11.2)** - dizi ofseti + `kaynak_sistem`. Aktarım olmasa da
-   bugünkü göçlü kurulumlarda çakışma riskini kapatır.
+1. ~~**Kimlik koruması (§11.2)**~~ - **yapıldı (1080).**
 2. **MSSQL hazırlığı** - `Update_SQL_<N>` dev BILIM'de; CT'nin değişiklik
    yakaladığı `sqlcmd` ile gösterilir.
 3. **Aktarım fonksiyonları** - sırayla depo/döviz → cari → stok/kalem/hesap →
