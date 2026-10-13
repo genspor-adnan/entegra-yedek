@@ -4,6 +4,12 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
+// TESTLER KURUM SAATINDE KOSAR (13.10.2026): tarih testleri (bugunIso "yerel
+//   gun, UTC degil") Istanbul saatini varsayiyor. CI sunucusu UTC'de calisinca
+//   kirmiziya donuyordu - uygulama hatasi degil, ortam farki. Yalniz vitest
+//   altinda; isciler bu ortami devralir.
+if (process.env.VITEST) process.env.TZ = 'Europe/Istanbul'
+
 // https://vite.dev/config/
 // base: uygulama KOKTE degil bir ALT YOLDA yayinlanabiliyor (sunucuda /ai).
 //   Yerel gelistirmede bos kalir; yayinda `VITE_BASE=/ai/ npm run build`.

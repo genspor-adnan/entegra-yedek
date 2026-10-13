@@ -42,10 +42,10 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: Entegra/GentegreAI
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - name: Derle
@@ -57,7 +57,7 @@ jobs:
           --logger "console;verbosity=normal"
       - name: Test sonucu
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: api-test-sonucu
           path: Entegra/GentegreAI/api/tests/Gentegre.Testler/TestResults/*.trx
@@ -71,10 +71,10 @@ jobs:
       run:
         working-directory: Entegra/GentegreAI/web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: Entegra/GentegreAI
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '24'
           cache: npm
