@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 public static partial class KartKatalogu
 {
@@ -13,7 +13,9 @@ public static partial class KartKatalogu
         Ad: "zamanli-is",
         YetkiKodu: "zamanli_is",
         Tablo: "public.zamanli_is",
-        IdKolonu: "kod",
+        // Sayısal kimlik (1076): kart uçları /{id:long} ister; `kod` metin olduğu
+        //   için kart hiç açılamıyordu (çift tık /zamanli-is/undefined).
+        IdKolonu: "id",
         LogTabloId: 1289,
         SubeKolonu: null,
         Alanlar: new KartAlani[]

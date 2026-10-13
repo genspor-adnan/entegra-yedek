@@ -77,7 +77,18 @@ async function girisYap(tarayici: Browser) {
 
 /** Sayfa içinde SPA gezinmesi (tam yükleme yok - hızlı). */
 async function git(p: Page, yol: string) {
-  await p.evaluate(y => { history.pushState({}, '', y); dispatchEvent(new PopStateEvent('popstate')) }, yol);
+  // Önceki ekran sayfayı yeniden yüklüyorsa (yönlendirme) bağlam yok olur:
+  //   yüklenmesini bekleyip yeniden dene - bu uygulama hatası değil.
+  for (let i = 0; ; i++) {
+    try {
+      await p.evaluate(y => { history.pushState({}, '', y); dispatchEvent(new PopStateEvent('popstate')) }, yol);
+      return;
+    } catch (h) {
+      if (i >= 2) throw h;
+      await p.waitForLoadState('load').catch(() => {});
+      await p.waitForTimeout(1500);
+    }
+  }
 }
 
 async function ekranDene(p: Page, e: ReturnType<typeof ekranlar>[number]): Promise<Sonuc> {

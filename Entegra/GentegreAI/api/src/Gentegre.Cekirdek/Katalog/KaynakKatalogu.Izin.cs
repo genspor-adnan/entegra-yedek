@@ -83,6 +83,32 @@ public static partial class KaynakKatalogu
             new("tarafId", "v.taraf_id", "sayi", "Personel Id", Varsayilan: false),
         });
 
+    // ------------------------------------------------------- hakediş ----
+    // İZİN HAKEDİŞİ LİSTESİ: kart (personelIzinHak) vardı, liste kaynağı yoktu -
+    //   menü / "Hakediş" aksiyonu "Bilinmeyen liste kaynagi: personelIzinHak"
+    //   veriyordu (duman testi 13.10.2026). Satır = personelin yıllık hak kaydı.
+    private static KaynakTanimi IzinHakKaynagi() => new(
+        Ad: "personelIzinHak",
+        YetkiKodu: "ik.izin_hak",
+        Kaynak: "public.personel_izin_hak h join public.taraf t on t.id = h.taraf_id",
+        SubeKolonu: "h.sube_id",
+        VarsayilanSirala: "h.yil desc, t.ad, t.soyad",
+        Kolonlar: new KolonTanimi[]
+        {
+            // Gün kolonları "sayi": ondalık tipi istemcide biçimlenmiyor ("14.0").
+            new("id", "h.id", "sayi", "Id", Varsayilan: false),
+            new("tarafId", "h.taraf_id", "sayi", "Personel Id", Varsayilan: false),
+            new("personelAd", "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)", "metin", "Personel", Genislik: 220),
+            // Yıl metin: sayı binlik ayracı alıp "2.026" görünüyordu (bkz. bakiye).
+            new("yil", "h.yil::text", "metin", "Yıl", Hizalama: "orta", Genislik: 70),
+            new("hakGun", "h.hak_gun", "sayi", "Kanunî hak", Hizalama: "sag", Genislik: 100),
+            new("devirGun", "h.devir_gun", "sayi", "Devreden", Hizalama: "sag", Genislik: 100),
+            new("ekGun", "h.ek_gun", "sayi", "Ek gün", Hizalama: "sag", Genislik: 90),
+            new("toplam", "coalesce(h.hak_gun, 0) + coalesce(h.devir_gun, 0) + coalesce(h.ek_gun, 0)",
+                "sayi", "Toplam", Hizalama: "sag", Genislik: 90),
+            new("aciklama", "h.aciklama", "metin", "Açıklama", Genislik: 260),
+        });
+
     // --------------------------------------------------------- bakiye ----
     private static KaynakTanimi IzinBakiyeKaynagi() => new(
         Ad: "izinBakiye",

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// ZAMANLI İŞLER (405) — ne zaman çalışacağı ve son durumu.
@@ -15,6 +15,7 @@ public static partial class KaynakKatalogu
         VarsayilanSirala: "z.aktif desc, z.sonraki asc nulls last",
         Kolonlar: new KolonTanimi[]
         {
+            new("id",    "z.id",  "sayi",  "Id", Varsayilan: false),   // 1076: kart kimliği
             new("kod",   "z.kod", "metin", "Kod", Genislik: 160),
             new("ad",    "z.ad",  "metin", "İş", Genislik: 280),
             new("periyotAdi",

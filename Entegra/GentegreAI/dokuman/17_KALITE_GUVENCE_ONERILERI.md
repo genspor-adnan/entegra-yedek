@@ -89,6 +89,12 @@ görmüyordu:
      açıyor (kimlik kolonu `kod`, çift tık `id` kullanıyor).
   4. e-Nabız Gün Sonu: React "key" uyarısı.
 
+  **Dördü de düzeltildi (13.10.2026):** İzin Hakedişi liste kaynağı eklendi;
+  kart kod çözümleyicisi metin kimlikli lookup'ı (ICD) sayıya çevirmiyor;
+  `zamanli_is`'e sayısal `id` (1076) - kart artık açılıyor; e-Nabız gün sonunda
+  anahtarlı Fragment. Duman testi sonrası: **377 ekran, 0 hata.**
+  Betik ayrıca sayfanın kendi yönlenmesine karşı yeniden deniyor (yanlış alarm).
+
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 
 | Sıra | İş | Tahmini | Getirisi |

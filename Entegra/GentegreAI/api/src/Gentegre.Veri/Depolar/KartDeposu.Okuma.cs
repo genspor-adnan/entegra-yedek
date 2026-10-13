@@ -249,9 +249,17 @@ public sealed partial class KartDeposu
 
             if (alan.KodTablosu is { } tablo)
             {
+                // KİMLİK METİN OLABİLİR: v_icd_lookup'ta id ICD kodudur ("I10").
+                //   Hepsini Convert.ToInt32'ye sokmak kronik tanı kartını
+                //   "The input string 'I10' was not in a correct format" ile 500
+                //   veriyordu (duman testi 13.10.2026). Sayı ise sayı, değilse metin.
+                object kimlik = deger is string s
+                    ? (int.TryParse(s, System.Globalization.NumberStyles.Integer,
+                                    CultureInfo.InvariantCulture, out var n) ? n : s)
+                    : Convert.ToInt32(deger, CultureInfo.InvariantCulture);
                 var ad3 = await _veri.TekDegerAsync<string>(
                     $"select ad from {KodTablosuDogrula(tablo)} where id = @p0 limit 1",
-                    new object?[] { Convert.ToInt32(deger) }, iptal);
+                    new object?[] { kimlik }, iptal);
                 if (!string.IsNullOrEmpty(ad3))
                     sonuc[alan.Ad] = new Dictionary<string, string> { [anahtar] = ad3 };
                 continue;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { AySonuSatiri, GunSonuPanosu } from '../api/uclar/enabiz';
 import { hataMetni } from '../api/sozlesme';
@@ -119,8 +119,9 @@ export function EnabizGunSonu() {
             </tr></thead>
             <tbody>
               {veri.gunler.map(g => (
-                <>
-                  <tr key={g.id} onClick={() => void gunAc(g.id)} style={{ cursor: 'pointer' }}>
+                // Anahtar FRAGMENT'ta: iki satır (gün + açılır ayrıntı) tek öğe.
+                <Fragment key={g.id}>
+                  <tr onClick={() => void gunAc(g.id)} style={{ cursor: 'pointer' }}>
                     <td className="orta">{gunNokta(g.tarih)}</td>
                     <td className="orta">{g.olcut}</td>
                     <td className="sag">{g.toplam}</td>
@@ -146,7 +147,7 @@ export function EnabizGunSonu() {
                       </table>
                     </td></tr>
                   )}
-                </>
+                </Fragment>
               ))}
               {veri.gunler.length === 0 && (
                 <tr><td colSpan={5} className="sonuk">{cev('Gün sonu kaydı yok - tarih seçip hesaplayın.')}</td></tr>
@@ -203,8 +204,8 @@ export function EnabizGunSonu() {
           </tr></thead>
           <tbody>
             {aylar.map(a => (
-              <>
-                <tr key={a.id} onClick={() => void ayAc(a.id)} style={{ cursor: 'pointer' }}>
+              <Fragment key={a.id}>
+                <tr onClick={() => void ayAc(a.id)} style={{ cursor: 'pointer' }}>
                   <td className="orta"><b>{String(a.ay).padStart(2, '0')}.{a.yil}</b></td>
                   <td className="orta">{a.klinik}</td>
                   <td className="orta">{a.satir}</td>
@@ -233,7 +234,7 @@ export function EnabizGunSonu() {
                     </table>
                   </td></tr>
                 )}
-              </>
+              </Fragment>
             ))}
             {aylar.length === 0 && (
               <tr><td colSpan={5} className="sonuk">{cev('Ay sonu kaydı yok.')}</td></tr>
