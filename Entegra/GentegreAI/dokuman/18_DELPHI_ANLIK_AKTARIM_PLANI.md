@@ -145,15 +145,122 @@ Dikkat gerektirenler:
 | CT ek yükü | Hafif (yalnız anahtar + versiyon); Express'in 10 GB sınırına etkisi küçük, saklama 7 gün |
 | Güvenlik | Ajan → HTTPS, kurum başına makine anahtarı (döndürülebilir); MSSQL kullanıcısı salt okur; sırlar ajanın makinesinde şifreli (DPAPI) |
 
-## 10. Karar bekleyenler
+## 10. Kararlar (13.10.2026)
 
-1. **Tek yön kabul mü?** Gentegre AI aktarılan verilerde salt okunur olacak.
-2. **Gecikme hedefi:** saniyeler yeterli mi (yoklama), yoksa gerçek "anında"
-   (SQL Server Service Broker bildirimi) mi? Öneri: önce yoklama, gerekirse
-   sonra bildirim.
-3. **İlk kapsam:** §2'deki liste mi, daha dar mı (ör. yalnız cari + stok + fatura)?
-4. **Şube eşlemesi:** bir Delphi veritabanı = bir Gentegre AI kurumu mu,
-   yoksa birden çok Delphi veritabanı tek kurumun şubeleri mi?
-5. **Pilot müşteri** ve onun SQL Server sürümü (CT 2008+; hepsi uygun olmalı).
-6. **Geçiş sonu:** aktarım kalıcı mı (Delphi + web birlikte, sürekli), yoksa
-   geçiş dönemi için mi (bir gün Delphi kapanır, aktarım durur)?
+| Konu | Karar |
+|---|---|
+| Yön | **Tek yön: Delphi → web** (kullanıcı: "tek yön delphi de web e migration olsun"). Web'de aktarılan veriler salt okunur |
+| Süre | Kalıcı aktarım varsayılır; geçiş dönemi de aynı yapıyla çalışır (Delphi kapanınca ajan durur, veri web'de kalır) |
+| Gecikme | Yoklama, 5 sn (gerekirse sonra Service Broker bildirimi) |
+| Kapsam | §11.1'deki tablo listesi (göç betiklerinin kapsadığı ERP verisi) |
+| Kurum | 1 Delphi veritabanı = 1 Gentegre AI kurumu; şubeler bugünkü göç kuralıyla (018) |
+| Açık | Pilot müşteri ve SQL Server sürümleri |
+
+## 11. Uygulama planı
+
+### 11.1 Kapsam: tablo eşleme
+
+Kaynak: bugünkü göç betikleri (`003`, `013`, `014`, `018`, `080`). Aktarım bir
+**toplam** (aggregate) birimiyle yapılır: toplamın herhangi bir satırı değişince
+toplamın tamamı gider.
+
+| Sıra | Toplam | Delphi tabloları | Web tabloları | Göç kaynağı |
+|---|---|---|---|---|
+| 0 | depo | DEPOLAR | depo | 013 |
+| 0 | döviz kuru | DOVIZ | doviz_kur | 013 |
+| 0 | masraf merkezi, proje | SRMMERKEZI, PROJELER | masraf_merkezi, proje | 080 |
+| 1 | **cari** | REHBER + REHBERBILGI + REHBERILETISIM | taraf, taraf_adres, taraf_musteri/tedarikci/kisi | 003, 018 |
+| 2 | **stok** | STOKLAR + STOKBARKOD + STOKFIYAT + STOKSERILOT | stok, stok_barkod, stok_fiyat, stok_seri_lot | 013 |
+| 2 | hizmet / masraf | MASRAFGELIR + FIYATLAR | hizmet, masraf, *_fiyat, goc_kalem_eslesme | 013 |
+| 2 | kasa / banka hesabı | KASALAR, BANKAHESAPLAR, KREDIKARTI, POS, KREDILER | hesap, kredi | 080 |
+| 3 | **belge** | FATBASLIK + FATURA | belge, belge_satir | 014 |
+| 3 | mali hareket | KASA | mali_hareket | 014 |
+| 3 | stok hareketi | STOKIZLEME | stok_izleme | 014 |
+
+**Aktarılmaz:** KULLANICI / ROLLER / YETKI* (güvenlik web'de yönetilir),
+GENINI (ayar), SAYAC (web'de belge kesilmez), STOKDURUM (türetilmiş - web'de
+hareketten hesaplanır, mutabakat karşılaştırır), MODUL.
+
+### 11.2 Kimlik çakışması (EN ÖNCE)
+
+Göç MSSQL kimliklerini korur (`taraf.id = REHBER.ID`). Ama web de aynı
+tablolara yazıyor: **HBYS hastaları `taraf`'a açılır**. Delphi'de sonradan
+açılan cari, web'de açılmış bir hastanın id'sini alabilir.
+
+- Aktarılan tabloların PG dizileri `1.000.000.000`'dan başlatılır (web'in
+  açtığı kayıt bu aralıkta, Delphi'nin kimlikleri altında kalır).
+- Aktarılan satırlara kaynak damgası: `kaynak_sistem smallint` (1 = Delphi).
+  Upsert yalnız `kaynak_sistem = 1` satırı günceller; web kökenli satır
+  (hasta) Delphi'den gelen veriyle **asla ezilmez** - çakışma hata kuyruğuna.
+- Mevcut kurulumlar için migration: dizi zaten bu aralığın altındaysa ileri
+  alınır; aralığın üstünde Delphi id'si varsa (olmamalı) rapor eder, durur.
+
+### 11.3 Bileşenler ve dosyalar
+
+| Katman | Dosya / nesne | İş |
+|---|---|---|
+| MSSQL | `GenUpdate/Update_SQL_<N>.sql` (sıradaki numara) | Veritabanında + §11.1 tablolarında Change Tracking (saklama 7 gün, otomatik temizlik); `SNAPSHOT` yalıtımına izin; salt okur `gentegre_aktarim` kullanıcısı (`SELECT` + `VIEW CHANGE TRACKING`). İdempotent, Delphi koduna dokunmaz |
+| PG | `db/<N>_aktarim_temel.sql` | `aktarim_ajan` (kurum, anahtar özeti, son nabız), `aktarim_durum` (tablo, son CT versiyonu), `aktarim_paket` (alınan paketler, özet), `aktarim_hata` (ham paket, mesaj, deneme); `kurum_profil.veri_kaynagi`; `kaynak_sistem` kolonları; dizi ofseti; `islem_log.kaynak` |
+| PG | `db/<N>_fn_aktar_*.sql` | Toplam başına upsert: `fn_aktar_cari(jsonb)`, `fn_aktar_stok`, `fn_aktar_kalem`, `fn_aktar_hesap`, `fn_aktar_belge`, `fn_aktar_mali`, `fn_aktar_stok_izleme`, `fn_aktar_sil(tur, id)`. Göç SQL'i referans; **güncel şemaya** yazılır (göçten sonra şema çok değişti) |
+| Çekirdek | `Gentegre.Cekirdek/Aktarim/` | Paket sözleşmesi (DTO): ajan, tablo versiyonları, toplamlar `{tur, id, islem: U|D, satirlar: {TABLO: [...]}}`; aktarılan kaynak listesi (salt okunur kipi için tek kaynak) |
+| API | `Uclar/AktarimUclari.cs`, `Servisler/AktarimServisi.cs` | `GET /api/aktarim/durum`, `POST /api/aktarim/paket`; makine anahtarıyla kimlik (oturum değil); kurum başına tek eşzamanlı uygulama (advisory lock); paket tek işlemde; hata → `aktarim_hata`; paket boyu sınırı |
+| API | `KartDeposu` / liste aksiyonları | `veri_kaynagi = delphi` ise aktarılan kaynaklarda yazma **sunucuda** reddedilir (422 "Delphi'den gelir") |
+| Ajan | `GentegreAI/ajan/Gentegre.Aktarim.Ajan` (yeni, .NET 10 worker, `Microsoft.Data.SqlClient`) | CT okuyucu (snapshot içinde), toplam kurucu, gönderici (yeniden deneme, üstel bekleme), tam yeniden eşitleme (tablo bazında, sayfalı), Windows servisi + konsol kipi; ayar `ajan.json`, sırlar DPAPI ile; dosya günlüğü |
+| Web | Aktarım Durumu ekranı (Yönetim › Platform) | Tablo başına versiyon / son paket / gecikme, hata listesi, yeniden dene / atla. **Önce mockup** (`Ekranlar/`) |
+| Web | Kart/liste | "Delphi'den gelir" rozeti; aktarılan kaynaklarda ekle/düzelt/sil gizli |
+| Zamanlı iş | `aktarim.nabiz` (5 dk), `aktarim.mutabakat` (gece) | Ajan susarsa uyarı; kayıt sayısı + belge toplamı + cari bakiye karşılaştırması |
+| GenProfil | Kurum profili | "Veri kaynağı: Delphi" seçimi + ajan anahtarı üretme |
+
+### 11.4 İş sırası (her adım ayrı commit, adım sonunda gösterim)
+
+1. **Kimlik koruması (§11.2)** - dizi ofseti + `kaynak_sistem`. Aktarım olmasa da
+   bugünkü göçlü kurulumlarda çakışma riskini kapatır.
+2. **MSSQL hazırlığı** - `Update_SQL_<N>` dev BILIM'de; CT'nin değişiklik
+   yakaladığı `sqlcmd` ile gösterilir.
+3. **Aktarım fonksiyonları** - sırayla depo/döviz → cari → stok/kalem/hesap →
+   belge/mali/stok hareketi. **Eşdeğerlik testi:** boş test DB'de bütün Delphi
+   verisi fonksiyonlarla aktarılır, `kur.ps1` göç sonucuyla tablo tablo
+   karşılaştırılır (satır sayısı, belge toplamları, cari bakiyeleri). Fark 0
+   olana kadar sonraki adıma geçilmez. *(en büyük adım)*
+4. **API uçları** + xUnit testleri (idempotentlik, sıra, yetkisiz ajan, büyük paket).
+5. **Ajan** - önce konsol kipinde dev'de: Delphi'de fatura kes → web'de görünür.
+6. **Salt okunur kip + Aktarım Durumu ekranı** (mockup → onay → kod).
+7. **Dayanıklılık testleri** (§11.5).
+8. **Kurulum rehberi** (ajanın müşteriye kurulumu, SQL kullanıcısı, anahtar) +
+   pilot.
+
+### 11.5 Kabul ölçütleri
+
+1. Delphi'de cari / stok / fatura / tahsilat **ekle-düzelt-sil** → web'de
+   **≤ 10 sn** içinde görünür (normal yükte).
+2. Eşdeğerlik: tam aktarım ile göç sonucu arasında fark **0** (satır, toplam, bakiye).
+3. Ajan 1 saat kapalı → açılınca kayıpsız yetişir; CT saklama süresi aşılırsa
+   tablo kendiliğinden tam eşitlenir.
+4. Aynı paket iki kez gelirse sonuç değişmez.
+5. Web'de aktarılan bir karta yazma denemesi **sunucuda** reddedilir.
+6. Web'de açılmış hasta (taraf) Delphi verisiyle ezilmez; çakışma hata listesinde.
+7. Gece mutabakatı fark raporu üretir; fark yoksa "eşit".
+8. İlk tam yükleme (500 bin FATURA) gece penceresinde biter; ölçülür, yazılır.
+
+### 11.6 Tahmin
+
+| Adım | Süre |
+|---|---|
+| 1 Kimlik koruması | 0,5 gün |
+| 2 MSSQL hazırlığı | 0,5 gün |
+| 3 Aktarım fonksiyonları + eşdeğerlik | 5 gün |
+| 4 API | 2 gün |
+| 5 Ajan | 3 gün |
+| 6 Salt okunur + ekran (mockup dahil) | 2 gün |
+| 7 Dayanıklılık testleri | 2 gün |
+| 8 Rehber + pilot hazırlığı | 1 gün |
+| **Toplam** | **~16 iş günü** (+ pilotta 1 hafta gözlem) |
+
+### 11.7 Hâlâ açık
+
+- **Pilot müşteri** ve SQL Server sürümü (CT 2008+).
+- Delphi tarafında bugün aktarımı etkileyecek **toplu işlemler** (yıl sonu
+  devri, toplu fiyat güncelleme) - pilotta ölçülür.
+- Web'de Delphi'den gelen cariye **HBYS rolü** eklenebilsin mi (ör. bir firma
+  hem Delphi carisi hem web'de anlaşmalı kurum)? Öneri: rol bayrakları web'e
+  ait alanlar, Delphi verisi ezmez.
