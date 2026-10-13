@@ -103,6 +103,25 @@ kullanmayın**: defteri toptan doldurmak gerçek geçmişi gizler.
   veri düzeltmelerine dayanır; bugünkü SKRS listeleriyle boş veritabanında
   tamamlanmayabilir (ayrıntı: `dokuman/DENETIM_DUZELTME_SONUCU_2026-09-28.md`).
 
+### Göç durumu: ne uygulandı, ne bekliyor? (salt okunur, dokuman/17 2.5)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\araclar\goc_durum.ps1                       # yerel gentegre_ai
+powershell -ExecutionPolicy Bypass -File .\araclar\goc_durum.ps1 -Db gentegre_ai_test
+powershell -ExecutionPolicy Bypass -File .\araclar\goc_durum.ps1 -Sunucu gentegre@46.36.201.170 -Db gentegre_ai_dis
+```
+
+Dosyaları defterle karşılaştırır: **BEKLEYEN** (dosya var, defterde yok),
+**DEĞİŞMİŞ** (defterdeki özet dosyayla tutmuyor — uygulandıktan sonra düzenlenmiş;
+çalışan sürüm depodakiyle aynı değil), **SAHİPSİZ** (defterde var, dosyası yok —
+yeniden numaralandırma). Özet `goc_uygula` ile aynı kural. Çıkış kodu 0 güncel ·
+2 bekleyen/değişmiş var · 1 hata. Yayından önce sunucuya, sonra doğrulama için.
+
+**Geliştirmede göçü `psql -f` ile değil `goc_uygula.ps1` ile uygulayın**
+(`-Db gentegre_ai -Dosyalar 1080_x.sql`): elle uygulanan dosya deftere düşmez,
+bu rapor da onu "bekleyen" gösterir. (13.10.2026 ölçüm: dev defteri 05.10'da
+kalmış — 371 dosya defterde yok; 940, 965-967 uygulandıktan sonra düzenlenmiş.)
+
 ### Defter uzlaştırma raporu (salt okunur)
 
 ```powershell

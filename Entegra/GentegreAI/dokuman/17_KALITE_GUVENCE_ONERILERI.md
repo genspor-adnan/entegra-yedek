@@ -122,6 +122,13 @@ görmüyordu:
     satırlık `ai_kontor` bakiyesini paralel olarak 10'a sabitliyordu. İkisi
     `KontorKoleksiyonu`nda sırayla koşuyor; üç tam koşu 658 / 658.
 
+- **Göç durumu (§2.5)** - `db/araclar/goc_durum.ps1` (salt okur): her
+  veritabanı için bekleyen / uygulandıktan sonra değişmiş / sahipsiz göçler;
+  `-Sunucu` ile sunucudaki kurulum. İlk ölçüm (dev): defter 05.10'da kalmış,
+  **371 dosya defterde yok** (elle `psql -f` ile uygulananlar deftere
+  düşmüyordu); 940, 965-967 uygulandıktan sonra düzenlenmiş; 843 sahipsiz
+  (870'e taşınmıştı). Bundan sonra dev'de göç `goc_uygula.ps1` ile uygulanır.
+
 ## 6. Önerilen ilk adımlar (13.10.2026 öncesi plan)
 
 | Sıra | İş | Tahmini | Getirisi |
