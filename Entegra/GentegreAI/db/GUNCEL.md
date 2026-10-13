@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (525 ad, 144 tanesi birden cok dosyada)
+## Fonksiyonlar (530 ad, 144 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,7 +13,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
+| `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktar_depo` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1080_aktarim_kaynak_kimligi.sql` | — |
+| `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktarim_web_id` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktarim_zaman` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_ameliyat_no_uret` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_not_imza_kilidi` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_salon_cakisma` | `940_personel_unvan_yalniz_onek.sql` | 719_ameliyathane_acil_akis.sql |

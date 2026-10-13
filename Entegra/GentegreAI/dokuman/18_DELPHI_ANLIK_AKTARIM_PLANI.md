@@ -243,7 +243,25 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    - FATBASLIK / FATURA / KASA / STOKLAR'da Delphi tetikleri (cari bakiye, stok
      durumu, maliyet, fiyat) var: aktarım bu tetiklerin SONUCUNU okur, mantığını
      web'de yeniden çalıştırmaz.
-3. **Aktarım fonksiyonları** - sırayla depo/döviz → cari → stok/kalem/hesap →
+3. **Aktarım fonksiyonları** - *(sürüyor)* **Dilim 1 yapıldı (1081, 13.10.2026): depo
+   + cari.** Paket `{"U": {TABLO: [satırlar]}, "D": {TABLO: [id]}}`, satırlar
+   `jsonb_populate_recordset(null::stg.<tablo>)` ile stg şekline çevrilir (göç SQL'i
+   neredeyse aynen). Eşdeğerlik (`db/araclar/aktarim_esdegerlik.sql`, dev kopyası
+   `gentegre_ai_aktarim`): 2.713 cari / 1.766 adres / 8 depo aktarıldı; kalan farkların
+   hepsi açıklandı (dev'de elle düzenlenmiş 22 alan → Delphi değeri; 349 cari dev'de
+   silinmiş/kodu değişmiş → yeni kayıt). Testle bulunan kurallar:
+   - İçeriği aynı satıra **yazılmaz** (web tetiği `degistirme_tarihi`'ni her UPDATE'te
+     şimdi yapıyor; ilk koşuda 2.364 boş "değişiklik").
+   - **Web'in sahip olduğu kart** (personel, hasta) ezilmez - personel modelinde unvan
+     yalnız önek, ad/soyad ayrı.
+   - Delphi'de **birden çok varsayılan depo** (BILIM: 1, 8, 9, 12) - web tek varsayılan;
+     en küçük kimlik kazanır, ayrı adımda (tetik aynı komutta çakışıyordu).
+   - Delphi "boş tarih" (1900) → boş (saat dilimi tarihsel LMT ile anlamsız değer veriyordu).
+   - `kisi` rolü yalnız üst cari gerçekten bağlanabildiyse (göç kuralı).
+   - Silinen cari / depo / adres **pasifleşir** (belgede kullanılmış olabilir).
+   - stg.rehber'de `r` adında KOLON var - `to_jsonb(r)` takma adı tuzağı.
+   Sırada: döviz, masraf merkezi / proje, stok, hizmet / masraf, hesap; sonra belge ve
+   hareketler. Ardından sırayla depo/döviz → cari → stok/kalem/hesap →
    belge/mali/stok hareketi. **Eşdeğerlik testi:** boş test DB'de bütün Delphi
    verisi fonksiyonlarla aktarılır, `kur.ps1` göç sonucuyla tablo tablo
    karşılaştırılır (satır sayısı, belge toplamları, cari bakiyeleri). Fark 0
