@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Vaka Takibi — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+<style>
+  .zaman{list-style:none;margin:0;padding:6px 10px}
+  .zaman li{display:grid;grid-template-columns:86px 18px 1fr;gap:6px;padding:4px 0;font-size:11.5px;align-items:start}
+  .zaman .t{color:var(--muted);font-size:10.5px;padding-top:1px}
+  .zaman .n{width:10px;height:10px;border-radius:5px;background:#9fb4cc;margin-top:3px}
+  .zaman .n.lab{background:#6a3fb5} .zaman .n.ok{background:#3f9a5e} .zaman .n.uy{background:#d9a12b}
+  .zaman .bekle{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">⏱ Patoloji — Vaka Takibi <span class="sp">Dış laboratuvardaki vakalar · 13.10.2026</span></div>
+  <div class="toolbar">
+    <div class="btn primary">👁 Vakayı Aç</div><div class="btn">📞 Laba Sor</div><div class="btn">🔁 Durumu Yenile</div>
+    <div class="sepv"></div><div class="btn">🧫 Lam / Blok İste</div><div class="btn">📎 Elle Rapor Yükle</div><div class="btn sp">🖨 Liste ▾</div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="vaka">Vakalar</div>
+    <div class="sekme" data-s="onay">Ek inceleme onayı <span class="rz pembe">2</span></div>
+    <div class="sekme" data-s="iade">Lam / blok istekleri <span class="rz sari">1</span></div>
+    <div class="sekme" data-s="mut">Mutabakat</div>
+  </div>
+
+  <div class="pnl" data-s="vaka">
+    <div class="ozet">
+      <div class="kart"><div class="b">Labda açık vaka</div><div class="d">23</div></div>
+      <div class="kart"><div class="b">Bu hafta gelen rapor</div><div class="d">41 <small>· 6'sı hekim görmedi</small></div></div>
+      <div class="kart sari"><div class="b">Ek inceleme onayı bekleyen</div><div class="d">2</div></div>
+      <div class="kart kir"><div class="b">Sözleşme TAT'ını aşan</div><div class="d">3 <small>· en eskisi 4 gün</small></div></div>
+      <div class="kart kir"><div class="b">Lab kabul yanıtı yok (&gt;24 s)</div><div class="d">1</div></div>
+    </div>
+    <div class="arama">
+      <div class="kutu">🔍 Vaka, lab vaka no, hasta, isteyen hekim…</div>
+      <span class="chip on">Açık</span><span class="chip">TAT aşan</span><span class="chip">Rapor geldi · görülmedi</span><span class="chip">Kapandı</span>
+      <span class="sepv"></span><span class="chip">🏥 Laboratuvar ▾</span><span class="chip">👤 İsteyen ▾</span><span class="chip">🏷 Bölüm ▾</span>
+    </div>
+    <div class="ucPanel" style="grid-template-columns:1fr 380px">
+      <div>
+        <div class="dg"><table>
+          <thead><tr><th>Vaka</th><th>Lab no</th><th>Hasta</th><th>Materyal</th><th>Laboratuvar</th><th>İsteyen</th><th class="orta">Lab kabul</th><th>TAT</th><th class="orta">Lab durumu</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><b>PI-2026/0858</b></td><td>P26-18833</td><td>Elif Sarı</td><td>Sol meme tru-cut</td><td>Anadolu Patoloji</td><td>Dr. B. Akın</td><td class="orta">09.10</td><td><div class="bar k"><i style="width:100%"></i></div><span style="color:#b3261e">4 / 3 iş günü</span></td><td class="orta"><span class="rz pembe">Ek inceleme · onay bekliyor</span></td></tr>
+            <tr><td>PI-2026/0860</td><td>P26-18840</td><td>Kemal Usta</td><td>Sol hemikolektomi</td><td>Anadolu Patoloji</td><td>Op. Dr. M. Tan</td><td class="orta">09.10</td><td><div class="bar s"><i style="width:80%"></i></div><span class="sonuk">4 / 5 iş günü</span></td><td class="orta"><span class="rz mor">Mikroskopide</span></td></tr>
+            <tr><td>PI-2026/0862</td><td>MD-55120</td><td>Fatma Demir</td><td>Endometrium küretajı</td><td>Medlab Patoloji</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:45%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz mor">İşlemde</span></td></tr>
+            <tr><td>PI-2026/0865</td><td>EGE-2026-7781</td><td>Gül Tekin</td><td>Servikal smear</td><td>Ege Üniv. (portal)</td><td>Dr. S. Uz</td><td class="orta">10.10</td><td><div class="bar"><i style="width:100%"></i></div><span class="sonuk">rapor 12.10</span></td><td class="orta"><span class="rz ok">Rapor geldi · görülmedi</span></td></tr>
+            <tr><td>PI-2026/0866</td><td>P26-18902</td><td>Ali Yurt</td><td>Prostat biyopsisi (12 kadran)</td><td>Anadolu Patoloji</td><td>Dr. E. Gün</td><td class="orta">10.10</td><td><div class="bar s"><i style="width:65%"></i></div><span class="sonuk">2 / 3 iş günü</span></td><td class="orta"><span class="rz kir">Lab: 11 kadran geldi</span></td></tr>
+            <tr><td>PI-2026/0868</td><td>—</td><td>Okan Er</td><td>Servikal lenf nodu</td><td>Medlab Patoloji</td><td>Dr. T. Uçar</td><td class="orta"><span class="rz kir">yanıt yok</span></td><td><span class="sonuk">gönderim 11.10 · 2 gün</span></td><td class="orta"><span class="rz kir">Kabul bekleniyor</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div>
+        <div class="hdr k1">
+          <div class="fld"><label>Vaka</label><div class="inp ro big">PI-2026/0858 · Elif Sarı 52 K</div></div>
+          <div class="fld"><label>Lab / lab vaka no</label><div class="inp ro">Anadolu Patoloji · P26-18833 · patolog Dr. O. Şen</div></div>
+        </div>
+        <div class="grp" style="margin:10px"><div class="gb">Zaman çizelgesi <span class="sp">mor = labdan gelen</span></div>
+          <ul class="zaman">
+            <li><span class="t">08.10 08:40</span><span class="n"></span><span>İstem · Dr. B. Akın · tru-cut 4 parça</span></li>
+            <li><span class="t">08.10 14:12</span><span class="n"></span><span>Laba iletildi (API) · PG-2026/0405</span></li>
+            <li><span class="t">09.10 09:05</span><span class="n lab"></span><span>Lab kabul etti · P26-18833 · numune uygun</span></li>
+            <li><span class="t">10.10 11:30</span><span class="n lab"></span><span>Mikroskopide</span></li>
+            <li><span class="t">12.10 16:02</span><span class="n uy"></span><span><b>Lab ek inceleme istedi:</b> ER, PR, HER2, Ki-67 (invaziv karsinom)</span></li>
+            <li><span class="t">—</span><span class="n"></span><span class="bekle">Kurum onayı bekleniyor (sözleşmede "meme paneli" otomatik değil)</span></li>
+            <li><span class="t">—</span><span class="n"></span><span class="bekle">Rapor</span></li>
+          </ul></div>
+        <div class="grp" style="margin:10px"><div class="gb">Bu vakada</div>
+          <div class="ic" style="display:flex;gap:6px;flex-wrap:wrap"><div class="btn ok">✔ Ek incelemeyi onayla</div><div class="btn">📞 Laba sor</div><div class="btn">🧫 Lam iste</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="onay">
+    <div class="dg"><table>
+      <thead><tr><th>Vaka</th><th>Hasta</th><th>Lab</th><th>Lab'ın istediği</th><th>Gerekçe (lab)</th><th class="sag">Ek ücret (alış)</th><th>SUT (hastadan)</th><th class="orta">İstendi</th><th>Onaylayacak</th><th class="orta">İşlem</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>PI-2026/0858</b></td><td>Elif Sarı</td><td>Anadolu Patoloji</td><td>ER, PR, HER2, Ki-67</td><td class="sar">İnvaziv meme karsinomu - tedavi planı için zorunlu</td><td class="sag">1.600,00</td><td>İHK × 4</td><td class="orta">12.10 16:02</td><td>İsteyen hekim · Dr. B. Akın</td><td class="orta"><span class="btn ok" style="display:inline-flex">Onayla</span> <span class="btn" style="display:inline-flex">Reddet</span></td></tr>
+        <tr><td>PI-2026/0860</td><td>Kemal Usta</td><td>Anadolu Patoloji</td><td>MLH1, PMS2, MSH2, MSH6</td><td class="sar">Kolorektal karsinom - MMR taraması</td><td class="sag">1.400,00</td><td>İHK × 4</td><td class="orta">13.10 10:15</td><td><span class="rz ok">sözleşme: otomatik</span></td><td class="orta"><span class="rz ok">Onaylandı (oto)</span></td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Onay kuralı lab kartında: sözleşmede listelenen paketler <b>otomatik</b>, gerisi <b>onay ister</b> (kim onaylar: isteyen hekim / patoloji sorumlusu / başhekimlik - kurum ayarı). Onay labın sistemine geri iletilir. Onaysız gelen ek inceleme <b>mutabakatta</b> "onaysız" işaretlenir. Onaylanan ek inceleme hastanın başvurusuna da (SUT) ücret satırı olarak düşer.</div>
+  </div>
+
+  <div class="pnl" data-s="iade">
+    <div class="dg"><table>
+      <thead><tr><th>Vaka</th><th>Hasta</th><th>İstenen</th><th>Amaç</th><th>İsteyen</th><th class="orta">İstendi</th><th class="orta">Lab gönderdi</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>PI-2026/0731</td><td>Seda Uçar</td><td>A2 bloğu</td><td>Moleküler test (BRCA) · Genetik Lab</td><td>Dr. O. Kaya (onkoloji)</td><td class="orta">10.10</td><td class="orta">—</td><td class="orta"><span class="rz sari">Labda hazırlanıyor</span></td></tr>
+        <tr><td>PI-2026/0688</td><td>Hakan Dal</td><td>4 lam (H&amp;E)</td><td>Başka merkezde ikinci görüş · hasta talebi</td><td>Hasta (dilekçe)</td><td class="orta">02.10</td><td class="orta">05.10</td><td class="orta"><span class="rz ok">Hastaya teslim · tutanak</span></td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="pnl" data-s="mut">
+    <div class="ozet">
+      <div class="kart"><div class="b">Eylül · Anadolu Patoloji faturası</div><div class="d">48.320,00 <small>₺ · AF-2026-000522</small></div></div>
+      <div class="kart"><div class="b">Bizim kaydımızda</div><div class="d">46.720,00 <small>₺ · 61 vaka</small></div></div>
+      <div class="kart kir"><div class="b">Fark</div><div class="d">1.600,00 <small>₺ · 1 satır</small></div></div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th>Lab satırı</th><th>Lab no</th><th>Bizdeki vaka</th><th>Test</th><th class="sag">Lab tutarı</th><th class="sag">Sözleşme</th><th class="orta">Eşleşme</th></tr></thead>
+      <tbody>
+        <tr><td>58</td><td>P26-17410</td><td>PI-2026/0702</td><td>Büyük rezeksiyon</td><td class="sag">1.850,00</td><td class="sag">1.850,00</td><td class="orta"><span class="rz ok">✔</span></td></tr>
+        <tr class="sel"><td>59</td><td>P26-17455</td><td>PI-2026/0711</td><td>İHK × 4 (ER/PR/HER2/Ki-67)</td><td class="sag">1.600,00</td><td class="sag">—</td><td class="orta"><span class="rz kir">Onaysız ek inceleme</span></td></tr>
+        <tr><td>60</td><td>P26-17460</td><td>PI-2026/0712</td><td>Küçük biyopsi</td><td class="sag">420,00</td><td class="sag">420,00</td><td class="orta"><span class="rz ok">✔</span></td></tr>
+      </tbody></table></div>
+    <div class="not" style="margin:8px 12px">Lab faturası (e-Fatura ile gelen alış faturası ya da labın gönderdiği döküm) vaka bazında eşleştirilir: lab no + test kodu. Sözleşme fiyatından farklı, onaysız ek inceleme ya da bizde kaydı olmayan satır işaretlenir; ödeme engellenmez, itiraz listesi çıkar.</div>
+  </div>
+
+  <div class="statusbar"><span>23 açık vaka · 3 TAT aşan · 2 onay bekleyen</span><span class="sp">TAT = lab kabulü → rapor (sözleşme günleri, iş günü takvimi)</span></div>
+</div>
+
+<div class="not"><b>Labın verdiği ayrıntı labdan laba değişir:</b> API'li lab "makroskopide / mikroskopide" der, portal kullanan lab yalnız "kabul" ve "rapor" der. Ekran hangi durum gelirse onu gösterir; TAT hesabı yalnız kabul ve rapor zamanına dayanır. <b>Hekim görmedi</b> listesi kurum için önemlidir: rapor gelmiş ama isteyen hekim açmamışsa (özellikle malign tanı) hatırlatma gider.</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>

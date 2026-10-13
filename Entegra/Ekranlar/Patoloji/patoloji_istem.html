@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — İstem ve Numune Hazırlama — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔬 Patoloji İstemi <span class="sp">Ameliyathane 2 · Genel Cerrahi · Op. Dr. M. Tan · 13.10.2026 09:05</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 İstemi Kaydet</div><div class="btn">＋ Materyal Ekle</div><div class="btn">🏷 Kap Etiketlerini Bas</div>
+    <div class="sepv"></div><div class="btn">📋 Önceki istemden kopyala</div><div class="btn sp">🖨 İstem Formu (basılı)</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">Hasan Er · 67 E · 3456789****</div></div>
+    <div class="fld"><label>Başvuru</label><div class="inp ro">2026/20431 · Genel Cerrahi (yatan)</div></div>
+    <div class="fld"><label class="req">İsteyen hekim</label><div class="inp combo">Op. Dr. M. Tan</div></div>
+    <div class="fld"><label class="req">Vaka türü</label><div class="inp combo">Histopatoloji</div></div>
+    <div class="fld" style="grid-column:span 2"><label class="req">Klinik bilgi <span class="sonuk">(labın patoloğu tanıyı buna göre koyar)</span></label><div class="inp alan">Çekumda kitle, kolonoskopik biyopsi: adenokarsinom (P26-00988, Anadolu Patoloji). Neoadjuvan tedavi almadı. Sağ hemikolektomi.</div></div>
+    <div class="fld"><label class="req">Ön tanı (ICD-10)</label><div class="inp combo">C18.0 · Çekum malign neoplazmı</div></div>
+    <div class="fld"><label>Önceki patoloji</label><div class="inp ro">P26-00988 · 28.09 · Adenokarsinom <span class="sonuk">· rapor ekli</span></div></div>
+  </div>
+
+  <div class="grp"><div class="gb">Materyaller <span class="sp">her satır bir kap · etiket kaba yapıştırılır</span></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Kap</th><th>Materyal tipi</th><th>Lokalizasyon / not</th><th>Fiksatif</th><th class="orta">Alım</th><th class="orta">Fiksatife giriş</th><th class="orta">Soğuk iskemi</th><th class="orta">Kap barkodu</th><th>Hizmet (SUT)</th><th class="sag">Lab fiyatı</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="orta"><b>A</b></td><td>Kolon rezeksiyonu</td><td>Sağ hemikolektomi · ileum dahil</td><td>%10 tamponlu formalin</td><td class="orta">09:05</td><td class="orta">09:25</td><td class="orta"><span class="rz ok">20 dk</span></td><td class="orta">PK-087101</td><td>Patoloji · büyük rezeksiyon</td><td class="sag">1.850,00</td></tr>
+        <tr><td class="orta"><b>B</b></td><td>Lenf nodu</td><td>Apikal (ileokolik pedikül)</td><td>%10 tamponlu formalin</td><td class="orta">09:05</td><td class="orta">09:25</td><td class="orta"><span class="rz ok">20 dk</span></td><td class="orta">PK-087102</td><td>Patoloji · küçük biyopsi</td><td class="sag">420,00</td></tr>
+        <tr><td class="orta"><b>C</b></td><td>Omentum</td><td>—</td><td>%10 tamponlu formalin</td><td class="orta">09:10</td><td class="orta">—</td><td class="orta"><span class="rz sari">girilmedi</span></td><td class="orta">PK-087103</td><td>Patoloji · küçük biyopsi</td><td class="sag">420,00</td></tr>
+      </tbody></table></div>
+    <div class="statusbar" style="border-top:1px solid var(--line2)"><span>3 kap · lab: <b>Anadolu Patoloji</b> (sözleşme) · rezeksiyon TAT 5 iş günü</span><span class="sp">Hastadan alınacak (SUT): başvuruya · Laba ödenecek: 2.690,00 ₺ (alış)</span></div>
+  </div>
+
+  <div class="ikiPanel">
+    <div>
+      <div class="grp"><div class="gb">Dış laboratuvar <span class="sp">materyal tipinden önerilir, değiştirilebilir</span></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr">
+          <div class="fld"><label class="req">Laboratuvar</label><div class="inp combo">Anadolu Patoloji Lab. <span class="rz ok">API bağlı</span></div></div>
+          <div class="fld"><label>Neden bu lab</label><div class="inp ro">Kurum varsayılanı · GİS rezeksiyon sözleşmede</div></div>
+          <div class="fld"><label>Ek inceleme (İHK) onayı</label><div class="inp combo">Sözleşme listesindekiler otomatik · diğerleri onay ister</div></div>
+          <div class="fld"><label>Öncelik</label><div class="inp combo">Rutin</div></div>
+        </div>
+        <div class="ic sonuk">Lab seçenekleri: <b>Anadolu Patoloji</b> (API) · <b>Medlab Patoloji</b> (HL7) · <b>Ege Üniv. Patoloji</b> (portal) · <b>Kurum içi</b> (modül açıksa). Frozen istemi dış laba gönderilemez - kurum içi ya da labın ameliyathanede nöbetçi patoloğu (sözleşmeye bağlı).</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp"><div class="gb">Kontrol <span class="sp">kayıt öncesi</span></div>
+        <div class="ic" style="line-height:1.8">
+          ✔ Klinik bilgi ve ön tanı dolu<br>
+          ✔ Her kapta materyal tipi ve barkod<br>
+          ✔ Materyal tipleri labın kod eşlemesinde var (A → AP-1102, B → AP-1010, C → AP-1010)<br>
+          <span style="color:#8a6218">⚠ C kabında fiksatife giriş saati yok - soğuk iskemi hesaplanamaz</span><br>
+          <span class="sonuk">Meme materyalinde soğuk iskemi &gt; 60 dk ise uyarı (ER/PR/HER2 güvenilirliği), 6–72 saat fiksasyon şartı rapora not olarak gider.</span>
+        </div></div>
+      <div class="grp"><div class="gb">Etiket önizleme</div>
+        <div class="ic" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          <div class="is"><b>PK-087101 · A</b>Er H. 67E · 13.10<br>Kolon rezeksiyonu</div>
+          <div class="is"><b>PK-087102 · B</b>Er H. · Apikal LN</div>
+          <div class="is"><b>PK-087103 · C</b>Er H. · Omentum</div>
+        </div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Kaydedince vaka: PI-2026/0871 · durum <span class="rz sari">Hazırlandı</span> → gönderim listesine düşer</span><span class="sp">İstem nereden açılır: ameliyat kartı · muayene İstem sekmesi · endoskopi · yatan order</span></div>
+</div>
+
+<div class="not"><b>Neden bu kadar alan.</b> Dış lab hastayı görmez; elindeki tek bilgi bu formdur. Klinik bilgisi eksik istem, patoloğun telefonla aramasına ya da yanlış tanıya yol açar - bu yüzden zorunlu. <b>Fiyat iki tane:</b> hastadan/SGK'dan alınan (SUT, başvuruya) ve laba ödenen (sözleşme, alış). Fark kurumun kâr/zarar raporuna gider. <b>Ameliyat kartı</b>ndaki bugünkü "Patoloji Materyali" serbest metni bu istemin kısayolu olur.</div>
+
+</body>
+</html>

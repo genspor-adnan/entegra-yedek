@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Sonuç (Dış Lab Raporu) — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+<style>
+  .pdf{border:1px solid var(--line);background:#fff;margin:10px;padding:18px 22px;box-shadow:0 2px 8px rgba(20,40,70,.08);font-size:11.5px;line-height:1.6;min-height:520px}
+  .pdf .ust{display:flex;justify-content:space-between;border-bottom:2px solid #14315a;padding-bottom:6px;margin-bottom:10px}
+  .pdf h4{margin:10px 0 3px;font-size:11.5px;color:#14315a}
+  .pdf .tani{font-weight:bold;color:#14315a}
+  .sin td:first-child{color:var(--muted);width:200px}
+  .sin td{white-space:normal}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📄 Patoloji Sonucu <span class="sp">PI-2026/0860 · Kemal Usta 61 E · Anadolu Patoloji · lab no P26-18840</span></div>
+  <div class="toolbar">
+    <div class="btn ok">👁 Gördüm / Okudum</div><div class="btn">🔔 Hastaya Paylaş</div><div class="btn">🗂 Tümör Konseyine</div>
+    <div class="sepv"></div><div class="btn">⬇ PDF</div><div class="btn">📞 Laba Soru</div><div class="btn sp">🖨 Yazdır</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label>Rapor</label><div class="inp ro">Ana rapor · sürüm 1 · 13.10.2026 15:42</div></div>
+    <div class="fld"><label>Raporlayan patolog (lab)</label><div class="inp ro">Doç. Dr. Ş. Aydın · Anadolu Patoloji</div></div>
+    <div class="fld"><label>e-İmza</label><div class="inp ro"><span class="rz ok">✔ doğrulandı</span> · nitelikli elektronik sertifika</div></div>
+    <div class="fld"><label>Geliş</label><div class="inp ro">API · otomatik · TAT 4 / 5 iş günü</div></div>
+  </div>
+  <div class="ucPanel" style="grid-template-columns:1fr 420px">
+    <div style="background:#eef1f5">
+      <div class="pdf">
+        <div class="ust"><b>ANADOLU PATOLOJİ LABORATUVARI</b><span class="sonuk">Rapor No P26-18840 · Sayfa 1/2</span></div>
+        <div class="sonuk">Hasta: Kemal Usta · 61 E · Gönderen: Gentegre Hastanesi, Genel Cerrahi · Op. Dr. M. Tan · Kabul 09.10.2026</div>
+        <h4>Klinik bilgi</h4>Sol kolonda kitle, kolonoskopik biyopsi adenokarsinom.
+        <h4>Makroskopi</h4>"Sol hemikolektomi" etiketli kapta 28 cm kolon. İnen kolonda 4,6 × 3,8 × 1,5 cm ülsere kitle… 18 lenf nodu.
+        <h4>Mikroskopi</h4>Muskularis propriayı aşarak perikolik yağ dokuya infiltre adenokarsinom. Lenfovasküler invazyon mevcut; perinöral invazyon yok. 2/18 lenf nodunda metastaz.
+        <h4>İmmünhistokimya</h4>MLH1, PMS2, MSH2, MSH6: nükleer ekspresyon korunmuş.
+        <h4>Tanı</h4><div class="tani">SOL KOLON, HEMİKOLEKTOMİ MATERYALİ:<br>– ADENOKARSİNOM, DÜŞÜK DERECELİ (G2)<br>– pT3 pN1b (2/18) · Cerrahi sınırlar tümörsüz<br>– MMR proteinleri korunmuş</div>
+        <div class="sonuk" style="margin-top:14px">Elektronik olarak imzalanmıştır · Doç. Dr. Ş. Aydın · 13.10.2026 15:40</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Yapılandırılmış alanlar <span class="sp">labdan geldi · aranabilir, raporlanabilir</span></div>
+        <div class="dg sin"><table><tbody>
+          <tr><td>Tanı (özet)</td><td><b>Adenokarsinom, G2</b></td></tr>
+          <tr><td>ICD-O-3 topografi</td><td>C18.6 · İnen kolon</td></tr>
+          <tr><td>ICD-O-3 morfoloji</td><td>8140/3 · Adenokarsinom <span class="rz kir">malign</span></td></tr>
+          <tr><td>pTNM</td><td>pT3 pN1b</td></tr>
+          <tr><td>Cerrahi sınır</td><td>Tümörsüz</td></tr>
+          <tr><td>Lenf nodu</td><td>2 / 18</td></tr>
+          <tr><td>MMR</td><td>Korunmuş</td></tr>
+        </tbody></table></div>
+        <div class="ic sonuk">Lab yapılandırılmış alan göndermezse (portal / elle PDF) rapor yalnız PDF olarak durur; ICD-O ve tanı özetini kurumda <b>patoloji sorumlusu kodlar</b> (kanser kayıt ve e-Nabız için).</div></div>
+      <div class="grp" style="margin:10px"><div class="gb">Bildirim</div>
+        <div class="ic" style="line-height:1.75">
+          <span class="rz kir">Malign tanı</span> → isteyen hekime anlık bildirim gönderildi 15:43 · <b>okunmadı</b><br>
+          <span class="sonuk">48 saat okunmazsa bölüm sorumlusuna hatırlatma (kurum ayarı)</span><br>
+          Hasta portalı: <span class="rz pas">kapalı</span> <span class="sonuk">· hekim "Hastaya Paylaş" deyince açılır</span>
+        </div></div>
+      <div class="grp" style="margin:10px"><div class="gb">Sürümler</div>
+        <div class="dg"><table>
+          <thead><tr><th class="orta">Sürüm</th><th>Tür</th><th class="orta">Geldi</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="orta">1</td><td>Ana rapor</td><td class="orta">13.10 15:42</td><td></td></tr>
+            <tr class="sonuk"><td class="orta">—</td><td>Ek / revize</td><td class="orta">—</td><td>labdan gelirse yeni sürüm; eskisi saklı, hekime yeniden bildirim</td></tr>
+          </tbody></table></div></div>
+      <div class="grp" style="margin:10px"><div class="gb">e-Nabız · fatura</div>
+        <div class="ic" style="line-height:1.75">
+          e-Nabız 201: <span class="rz sari">gönderecek: kurum</span> <span class="sonuk">(hizmet alımı ayarı) · kuyrukta</span><br>
+          Başvuru (SUT): rezeksiyon + İHK × 4 <span class="rz ok">satırlar düştü</span><br>
+          Alış (lab): 1.850,00 + 1.400,00 ₺ <span class="sonuk">· mutabakatta eşleşecek</span>
+        </div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Rapor geldi · hekim görmedi</span><span class="sp">PDF = doküman deposu (GENDEPO.DOSYA deseni) · alanlar = <code>pat_rapor</code></span></div>
+</div>
+
+<div class="not"><b>Rapor değiştirilmez:</b> lab raporu imzalı bir belgedir; kurum metni düzenleyemez. Kurumun ekledikleri (hekim notu, konsey kararı, kodlama) ayrı alanlarda tutulur. <b>Hekim ekranı:</b> aynı rapor muayene / yatan hasta / ameliyat kartında "Patoloji" sekmesinde görünür; "Gördüm" oradan da verilir. <b>Önceki raporlar:</b> hastanın tüm patoloji geçmişi (iç ve dış lab) tek listede.</div>
+
+</body>
+</html>

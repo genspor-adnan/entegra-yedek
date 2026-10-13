@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Dış Lab Entegrasyonu — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+<style>.kod{font-family:Consolas,monospace;font-size:10.5px}</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔌 Dış Laboratuvarlar &amp; Entegrasyon <span class="sp">Lab ve Patoloji ORTAK · yönetici / bilgi işlem</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Laboratuvar Ekle</div><div class="btn">🔍 Bağlantıyı Test Et</div><div class="btn">↻ Bekleyenleri Yeniden Dene</div>
+    <div class="sepv"></div><div class="btn">⬇ Kod Listesini Labdan Çek</div><div class="btn sp">📘 Bağlantı Rehberi</div>
+  </div>
+  <div class="ucPanel" style="grid-template-columns:260px 1fr">
+    <div>
+      <ul class="liste">
+        <li class="sel"><b>Anadolu Patoloji</b><span class="sp"><span class="rz ok">API</span></span></li>
+        <li>Medlab Patoloji<span class="sp"><span class="rz kir">HL7 · 1 hata</span></span></li>
+        <li>Ege Üniv. Patoloji<span class="sp"><span class="rz mor">Portal</span></span></li>
+        <li>Düzen Laboratuvarlar<span class="sp"><span class="rz mavi">Lab (biyokimya)</span></span></li>
+        <li>Özel Merkez Patoloji<span class="sp"><span class="rz pas">Elle</span></span></li>
+      </ul>
+      <div class="ic sonuk">Aynı lab hem biyokimya hem patoloji yapabilir - kart tek, hizmet alanları ayrı.</div>
+    </div>
+    <div>
+      <div class="sekmeler">
+        <div class="sekme on" data-s="bag">Bağlantı</div>
+        <div class="sekme" data-s="soz">Sözleşme &amp; TAT</div>
+        <div class="sekme" data-s="kod">Kod eşleme <span class="rz ok">24</span></div>
+        <div class="sekme" data-s="log">Mesaj günlüğü</div>
+        <div class="sekme" data-s="portal">Portal kullanıcıları</div>
+      </div>
+
+      <div class="pnl" data-s="bag">
+        <div class="hdr">
+          <div class="fld"><label>Laboratuvar (cari)</label><div class="inp combo">Anadolu Patoloji Lab. Hiz. A.Ş.</div></div>
+          <div class="fld"><label class="req">Bağlantı türü</label><div class="inp combo">1 · Labın API'si (REST/JSON)</div></div>
+          <div class="fld"><label>Bağdaştırıcı</label><div class="inp combo">anadolu-patoloji v1 <span class="sonuk">· labın dokümanına göre</span></div></div>
+          <div class="fld"><label>Adres</label><div class="inp kod">https://api.anadolupatoloji.example/v1</div></div>
+          <div class="fld"><label>Kimlik doğrulama</label><div class="inp">OAuth2 istemci · sır sunucuda saklı <span class="rz ok">tanımlı</span></div></div>
+          <div class="fld"><label>Kurum kodu (labdaki)</label><div class="inp kod">GENT-0042</div></div>
+          <div class="fld"><label>Durum alma</label><div class="inp combo">Labın bildirimi (webhook) + 15 dk yoklama</div></div>
+          <div class="fld"><label>Rapor alma</label><div class="inp combo">PDF + yapılandırılmış JSON</div></div>
+          <div class="fld"><label>Ek inceleme sorusu</label><div class="inp combo">Var · onay yanıtı API'den döner</div></div>
+        </div>
+        <div class="grp"><div class="gb">Son test <span class="sp">13.10 09:00 · otomatik günlük</span></div>
+          <div class="ic"><span class="rz ok">✔ Kimlik</span> <span class="rz ok">✔ İstem gönder (test hasta)</span> <span class="rz ok">✔ Durum al</span> <span class="rz ok">✔ Rapor al</span> <span class="rz ok">✔ Webhook imzası</span></div></div>
+        <div class="grp"><div class="gb">Bağlantı türleri</div>
+          <div class="dg"><table>
+            <thead><tr><th>Tür</th><th>Kurulum</th><th>Ne gerekir (labdan)</th></tr></thead>
+            <tbody>
+              <tr><td><b>API (REST)</b></td><td class="sar">Lab başına bağdaştırıcı (kod) - ilk müşterinin labıyla başlanır</td><td class="sar">API dokümanı, test ortamı, kurum kodu, kimlik bilgisi</td></tr>
+              <tr><td><b>HL7 v2</b></td><td class="sar">Ayar ile: MLLP adres/port, mesaj tipleri (OML^O21 / ORM^O01 → ORU^R01), kod eşleme</td><td class="sar">HL7 profili, test kodları listesi, VPN/IP izni</td></tr>
+              <tr><td><b>FHIR</b></td><td class="sar">Ayar ile: taban adres, ServiceRequest / DiagnosticReport profilleri</td><td class="sar">FHIR sunucusu, profil, kimlik</td></tr>
+              <tr><td><b>Portal</b></td><td class="sar">Laba kullanıcı aç (dış kurum portalı) - yazılım gerekmez</td><td class="sar">Labda raporu yükleyecek kişi</td></tr>
+              <tr><td><b>Elle</b></td><td class="sar">Yok - basılı form, sekreter PDF yükler</td><td class="sar">—</td></tr>
+            </tbody></table></div></div>
+      </div>
+
+      <div class="pnl" data-s="soz">
+        <div class="dg"><table>
+          <thead><tr><th>Hizmet</th><th class="orta">TAT (iş günü)</th><th class="sag">Fiyat (alış)</th><th>Ek inceleme onayı</th></tr></thead>
+          <tbody>
+            <tr><td>Küçük biyopsi</td><td class="orta">3</td><td class="sag">420,00</td><td>—</td></tr>
+            <tr><td>Büyük rezeksiyon</td><td class="orta">5</td><td class="sag">1.850,00</td><td>—</td></tr>
+            <tr><td>Sitoloji (servikal / İİAB)</td><td class="orta">2</td><td class="sag">260,00</td><td>—</td></tr>
+            <tr><td>İHK (antikor başına)</td><td class="orta">+2</td><td class="sag">400,00</td><td><span class="rz sari">onay ister</span></td></tr>
+            <tr><td>MMR paneli (kolorektal karsinomda)</td><td class="orta">+2</td><td class="sag">1.400,00</td><td><span class="rz ok">otomatik</span></td></tr>
+            <tr><td>Özel boya</td><td class="orta">+1</td><td class="sag">180,00</td><td><span class="rz ok">otomatik</span></td></tr>
+            <tr><td>Konsültasyon (dış blok/lam)</td><td class="orta">5</td><td class="sag">1.200,00</td><td>—</td></tr>
+          </tbody></table></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="fld"><label>Onaylayan</label><div class="inp combo">İsteyen hekim; yoksa patoloji sorumlusu</div></div>
+          <div class="fld"><label>Blok / lam saklama (labda)</label><div class="inp">Sözleşmeye göre · iade isteği ücretsiz</div></div>
+          <div class="fld"><label>e-Nabız 201'i gönderen</label><div class="inp combo">Kurum <span class="sonuk">(hizmet alımı - netleşecek)</span></div></div>
+        </div>
+      </div>
+
+      <div class="pnl" data-s="kod">
+        <div class="dg"><table>
+          <thead><tr><th>Bizde (materyal tipi / hizmet)</th><th>SUT</th><th>Labın kodu</th><th>Labdaki adı</th><th class="orta">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Kolon rezeksiyonu</td><td class="kod">—</td><td class="kod">AP-1102</td><td>Büyük Rezeksiyon - GİS</td><td class="orta"><span class="rz ok">eşli</span></td></tr>
+            <tr><td>Küçük biyopsi (genel)</td><td class="kod">—</td><td class="kod">AP-1010</td><td>Küçük Biyopsi</td><td class="orta"><span class="rz ok">eşli</span></td></tr>
+            <tr><td>Meme tru-cut biyopsi</td><td class="kod">—</td><td class="kod">AP-2040</td><td>Meme Kalın İğne Biyopsisi</td><td class="orta"><span class="rz ok">eşli</span></td></tr>
+            <tr><td>ER (İHK)</td><td class="kod">—</td><td class="kod">AP-IHK-ER</td><td>Östrojen Reseptörü</td><td class="orta"><span class="rz ok">eşli</span></td></tr>
+            <tr><td>Endometrium küretajı</td><td class="kod">—</td><td class="kod sonuk">—</td><td class="sonuk">labdan çekilen listede eşi var: "AP-1030 Küretaj Materyali"</td><td class="orta"><span class="rz sari">öneri</span></td></tr>
+          </tbody></table></div>
+        <div class="not" style="margin:8px 12px">Eşlemesi olmayan materyal tipi bu laba elektronik gönderilemez (gönderim ekranında uyarı). SUT kodu bizim hizmet kartında; labın kodu yalnız iletim içindir - ücret mantığı değişmez.</div>
+      </div>
+
+      <div class="pnl" data-s="log">
+        <div class="arama"><div class="kutu">🔍 Vaka, lab no, mesaj türü…</div><span class="chip on">Tümü</span><span class="chip">Hata</span><span class="chip">Giden</span><span class="chip">Gelen</span></div>
+        <div class="dg"><table>
+          <thead><tr><th class="orta">Zaman</th><th class="orta">Yön</th><th>Tür</th><th>Vaka</th><th>Özet</th><th class="orta">Sonuç</th><th class="orta">Deneme</th></tr></thead>
+          <tbody>
+            <tr><td class="orta">15:42</td><td class="orta">←</td><td>Rapor</td><td>PI-2026/0860</td><td>P26-18840 · PDF 184 KB + JSON · imza ✔</td><td class="orta"><span class="rz ok">işlendi</span></td><td class="orta">1</td></tr>
+            <tr><td class="orta">14:12</td><td class="orta">→</td><td>İstem</td><td>PI-2026/0871</td><td>POST /orders · 3 materyal</td><td class="orta"><span class="rz ok">201</span></td><td class="orta">1</td></tr>
+            <tr class="sel"><td class="orta">13:31</td><td class="orta">→</td><td>İstem (HL7 OML)</td><td>PI-2026/0869</td><td>Medlab · OBR-4 "88305-MED" bilinmiyor</td><td class="orta"><span class="rz kir">ACK AE</span></td><td class="orta">3</td></tr>
+            <tr><td class="orta">12:16</td><td class="orta">←</td><td>Ek inceleme sorusu</td><td>PI-2026/0858</td><td>ER, PR, HER2, Ki-67 · onay istendi</td><td class="orta"><span class="rz sari">bekliyor</span></td><td class="orta">—</td></tr>
+          </tbody></table></div>
+        <div class="grp"><div class="gb">Seçili mesaj · ham içerik <span class="sp">saklanır - "lab ne gönderdi" sorusunun cevabı</span></div>
+          <div class="ic kod" style="background:#f7fafc;line-height:1.5">MSH|^~\&amp;|GENTEGRE|GENT-0042|MEDLAB|MDL|20261013133100||OML^O21|PG04110001|P|2.5<br>PID|1||4567890****^^^TC||DEMIR^FATMA||19630514|F<br>ORC|NW|PI-2026/0869<br>OBR|1|PI-2026/0869||88305-MED^Endometrium kuretaji|…<br>← MSA|AE|PG04110001|Unknown test code</div></div>
+      </div>
+
+      <div class="pnl" data-s="portal">
+        <div class="dg"><table>
+          <thead><tr><th>Kullanıcı</th><th>Laboratuvar</th><th>Rol</th><th>Görür</th><th class="orta">Son giriş</th></tr></thead>
+          <tbody>
+            <tr><td>ege.pat.sekreter</td><td>Ege Üniv. Patoloji</td><td>Dış patoloji lab (portal)</td><td class="sar">Yalnız kendisine gönderilen vakalar: istem formu, klinik bilgi. Rapor PDF'i yükler, tanı + ICD-O girer</td><td class="orta">12.10</td></tr>
+          </tbody></table></div>
+        <div class="not" style="margin:8px 12px">Mevcut <b>dış kurum portalı</b> altyapısı kullanılır (portal rolü + kapsam kuralı: lab yalnız kendi gönderimlerini görür). Hasta bilgisi en az düzeyde: ad, yaş, cinsiyet, klinik bilgi; T.C. no maskeli.</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>5 laboratuvar · 1 bağlantı hatası</span><span class="sp">Gizli bilgiler (sır, parola) yalnız sunucuda; ekranda maskeli</span></div>
+</div>
+
+<div class="not"><b>Yaklaşım.</b> Her lab farklı konuşur; bu yüzden içeride tek bir sözleşme var (istem gönder · durum al · ek inceleme sor/yanıtla · rapor al) ve her bağlantı türü buna çevrilir. Yeni bir lab: önce portal ile başlanabilir (gün içinde), API/HL7 hazır olunca bağlantı türü değiştirilir - ekranlar ve kayıtlar aynı kalır. Lab'daki biyokimya "Dış Lab Gönderimleri" de aynı lab kartını ve günlüğü kullanır.</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>

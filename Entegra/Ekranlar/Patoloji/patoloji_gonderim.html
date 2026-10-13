@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Dış Lab Gönderimi — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="_patoloji.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🚚 Patoloji — Dış Lab Gönderimi <span class="sp">Numune sorumlusu · 13.10.2026 14:20 · Merkez</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Gönderim</div><div class="btn">📷 Kap Okut (pakete ekle)</div>
+    <div class="sepv"></div><div class="btn">📤 Laba İlet</div><div class="btn">🚚 Kurye Teslim Aldı</div><div class="btn ok">📦 Lab Teslim Aldı</div>
+    <div class="sepv"></div><div class="btn sp">🖨 Sevk Listesi (manifesto) ▾</div>
+  </div>
+  <div class="ozet">
+    <div class="kart"><div class="b">Gönderilmeyi bekleyen kap</div><div class="d">9 <small>· 5 vaka</small></div></div>
+    <div class="kart"><div class="b">Bugünkü paket</div><div class="d">2 <small>· kurye 16:00</small></div></div>
+    <div class="kart"><div class="b">Yolda</div><div class="d">1</div></div>
+    <div class="kart sari"><div class="b">Lab kabulü bekleyen</div><div class="d">1 <small>· dün gönderildi</small></div></div>
+    <div class="kart kir"><div class="b">İletim hatası</div><div class="d">1 <small>· Medlab HL7</small></div></div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Gönderim no, vaka, hasta, kap barkodu, lab vaka no…</div>
+    <span class="chip on">Açık</span><span class="chip">Hazırlanıyor</span><span class="chip">Yolda</span><span class="chip">Lab kabul etti</span><span class="chip">Tümü</span>
+    <span class="sepv"></span><span class="chip">🏥 Laboratuvar ▾</span><span class="chip">📅 Bugün ▾</span>
+  </div>
+
+  <div class="ucPanel" style="grid-template-columns:1fr 400px">
+    <div>
+      <div class="dg"><table>
+        <thead><tr><th>Gönderim</th><th>Laboratuvar</th><th class="orta">Bağlantı</th><th class="orta">Vaka / kap</th><th class="orta">Hazırlandı</th><th>Kurye</th><th class="orta">Laba iletim</th><th class="orta">Lab kabul</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td><b>PG-2026/0412</b></td><td>Anadolu Patoloji</td><td class="orta"><span class="rz ok">API</span></td><td class="orta">3 / 6</td><td class="orta">14:10</td><td>Lab kuryesi · 16:00</td><td class="orta"><span class="rz ok">✔ 14:12</span></td><td class="orta">—</td><td class="orta"><span class="rz sari">Hazırlanıyor</span></td></tr>
+          <tr><td>PG-2026/0411</td><td>Medlab Patoloji</td><td class="orta"><span class="rz mavi">HL7</span></td><td class="orta">2 / 3</td><td class="orta">13:30</td><td>Aras Kargo</td><td class="orta"><span class="rz kir">✖ hata</span></td><td class="orta">—</td><td class="orta"><span class="rz kir">İletilemedi</span></td></tr>
+          <tr><td>PG-2026/0410</td><td>Anadolu Patoloji</td><td class="orta"><span class="rz ok">API</span></td><td class="orta">4 / 7</td><td class="orta">dün 15:40</td><td>Lab kuryesi</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta"><span class="rz sari">bekliyor</span></td><td class="orta"><span class="rz mavi">Yolda</span></td></tr>
+          <tr><td>PG-2026/0409</td><td>Ege Üniv. Patoloji</td><td class="orta"><span class="rz mor">Portal</span></td><td class="orta">1 / 1</td><td class="orta">dün 10:00</td><td>Kurum kuryesi</td><td class="orta"><span class="rz ok">portalda</span></td><td class="orta">dün 15:30</td><td class="orta"><span class="rz ok">Lab kabul etti</span></td></tr>
+        </tbody></table></div>
+
+      <div class="grp"><div class="gb">PG-2026/0412 · Paketteki vakalar <span class="sp">kap okutuldukça eklenir; aynı vaka iki pakete giremez</span></div>
+        <div class="dg"><table>
+          <thead><tr><th>Vaka</th><th>Hasta</th><th>Materyal</th><th class="orta">Kap</th><th>Lab test kodu</th><th class="orta">İletim</th><th>Lab vaka no</th><th class="orta">Lab kabul</th></tr></thead>
+          <tbody>
+            <tr><td><b>PI-2026/0871</b></td><td>Hasan Er</td><td>Sağ hemikolektomi (+ LN, omentum)</td><td class="orta">3 / 3 ✔</td><td>AP-1102 · AP-1010 ×2</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">kabulde gelir</td><td class="orta">—</td></tr>
+            <tr><td>PI-2026/0872</td><td>Elif Sarı</td><td>Sol meme tru-cut</td><td class="orta">1 / 1 ✔</td><td>AP-2040 (+ ER/PR/HER2/Ki-67 paket)</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td><td class="orta">—</td></tr>
+            <tr><td>PI-2026/0874</td><td>Murat Ay</td><td>Mide biyopsisi</td><td class="orta"><span class="rz sari">1 / 2</span></td><td>AP-1001</td><td class="orta"><span class="rz sari">kap eksik</span></td><td class="sonuk"></td><td class="orta">—</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="hdr k1">
+        <div class="fld"><label>Laboratuvar</label><div class="inp ro big">Anadolu Patoloji Lab. <span class="rz ok">API</span></div></div>
+        <div class="fld"><label>Laba iletim</label><div class="inp ro">14:12 · 2 vaka iletildi · 1 vaka kap eksik (iletilmedi)</div></div>
+        <div class="fld"><label>Kurye</label><div class="inp combo">Lab kuryesi · teslim alma 16:00</div></div>
+        <div class="fld"><label>Taşıma</label><div class="inp combo">Oda sıcaklığı · formalinde (sızdırmaz kap, çift ambalaj)</div></div>
+        <div class="fld"><label>Teslim eden / alan</label><div class="inp">Hemşire C. Ok → (kurye adı teslimde)</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Lab yanıtı (son mesaj) <span class="sp">entegrasyon günlüğünden</span></div>
+        <div class="ic" style="font-family:Consolas,monospace;font-size:10.5px;line-height:1.55;background:#f7fafc">
+          14:12 → POST /orders · PI-2026/0871 · 201 Created<br>
+          14:12 ← siparis_ref AP-ORD-552190 · durum: "beklenen numune"<br>
+          14:12 → POST /orders · PI-2026/0872 · 201 Created
+        </div></div>
+      <div class="grp" style="margin:10px"><div class="gb">İletim hatası · PG-2026/0411 (Medlab)</div>
+        <div class="ic"><span class="rz kir">HL7 ACK AE</span> "OBR-4 bilinmeyen test kodu: 88305-MED"<br><span class="sonuk">Kod eşlemesi eksik: "Endometrium küretajı" Medlab'da tanımlı değil.</span>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><div class="btn">🔗 Kod Eşlemesine Git</div><div class="btn">↻ Yeniden Dene</div><div class="btn">🖨 Basılı forma dön</div></div></div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>4 gönderim · 1 iletim hatası</span><span class="sp">Gönderim = <code>pat_gonderim</code> · Lab'daki dış gönderim deseni (kurye, teslim, alış faturası)</span></div>
+</div>
+
+<div class="not"><b>İki ayrı şey gidiyor:</b> fiziksel kap (kuryeyle) ve istem bilgisi (entegrasyonla, kap yola çıkmadan). Lab numune gelmeden istemi görür, kabulde barkodu okutup eşleştirir ve kendi vaka numarasını döner. <b>İletim başarısızsa</b> paket yine gönderilebilir: basılı istem formu kapla gider, entegrasyon düzelince yeniden denenir - kurye bekletilmez. <b>Lab kabul etmezse</b> (24 saat içinde kabul yanıtı yok) gönderim kırmızıya döner: kayıp numune şüphesi en erken burada görülür.</div>
+
+</body>
+</html>

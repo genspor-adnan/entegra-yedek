@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patoloji — Süreç ve Tablolar — Mockup (Gentegre AI · Patoloji)</title>
+<link rel="stylesheet" href="../_patoloji.css">
+<style>
+  .tablo{border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:#fff}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 9px;font-weight:bold;color:#2c4a6b;font-size:11.5px;display:flex;gap:8px}
+  .tablo .tb .sp{font-weight:normal;color:var(--muted);font-size:10.5px}
+  .tablo table{border-collapse:collapse;width:100%}
+  .tablo td{border-top:1px solid var(--line2);padding:3px 9px;font-size:11px;vertical-align:top}
+  .tablo td.k{font-family:Consolas,monospace;color:#1c4374;white-space:nowrap;width:150px}
+  .tablo td.t{color:var(--muted);white-space:nowrap;width:90px}
+  .izgara{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 12px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔬 Patoloji — Süreç Haritası <span class="sp">KURUM İÇİ PATOLOJİ (isteğe bağlı modül) · Materyal kabulünden onaylı rapora · e-Nabız 201 Patoloji Kayıt</span></div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="akis">Akış</div>
+    <div class="sekme" data-s="durum">Durumlar &amp; Roller</div>
+    <div class="sekme" data-s="tablo">Tablolar (taslak)</div>
+    <div class="sekme" data-s="bag">Bağlantılar</div>
+  </div>
+
+  <!-- AKIS -->
+  <div class="pnl" data-s="akis">
+    <div class="grp"><div class="gb">Histopatoloji (doku) <span class="sp">ameliyat, biyopsi, endoskopi materyali</span></div>
+      <div class="akis">
+        <div class="adim"><span class="no">1</span><b>İstem</b>Ameliyathane, endoskopi, poliklinik ya da dış kurum. Klinik bilgi, ön tanı, materyal listesi, kap sayısı.</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim"><span class="no">2</span><b>Materyal kabul</b>Kap–istem eşleşmesi, fiksatif, alım/fiksasyon saati, soğuk iskemi. Patoloji no (P26-…) + barkod. Uygunsuzsa ret.</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim"><span class="no">3</span><b>Makroskopi</b>Tarif (şablon), ölçü, ağırlık, fotoğraf, boyama mürekkebi, kaset haritası (A1, A2…).</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim"><span class="no">4</span><b>Doku laboratuvarı</b>Doku takibi → bloklama → kesit (lam) → H&amp;E boyama. Her adım barkod okutularak.</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim on"><span class="no">5</span><b>Mikroskopi</b>Patolog lamı inceler; gerekirse ek kesit, özel boya, İHK ister (vaka bekler).</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim"><span class="no">6</span><b>Rapor &amp; onay</b>Mikroskopi + tanı (ICD-O topografi/morfoloji), sinoptik alanlar. Patolog e-imzası; kritik bulguda hekime bildirim.</div>
+        <div class="ok-isaret">›</div>
+        <div class="adim"><span class="no">7</span><b>Arşiv &amp; e-Nabız</b>Blok/lam arşive. Onaylı rapor e-Nabız 201'e, hekim ekranına, hasta portalına.</div>
+      </div>
+    </div>
+    <div class="izgara">
+      <div class="grp" style="margin:0"><div class="gb">Frozen (intraoperatif)</div>
+        <div class="ic">Ameliyat sırasında taze doku. Kabul → dondurma kesit → patolog sözlü sonuç <b>ameliyathaneye</b> (telefon/ekran, saat damgalı). Kesin tanı parafin rapordadır; frozen sonucu rapora ayrı bölüm olarak girer, uyumsuzluk kaydedilir. Hedef süre: 20 dk.</div></div>
+      <div class="grp" style="margin:0"><div class="gb">Sitoloji</div>
+        <div class="ic">Servikal smear (PAP), ince iğne aspirasyonu (tiroid, meme, lenf nodu), sıvı sitolojisi. Makroskopi kısa; lam doğrudan boyanır. Rapor sınıflama sistemiyle: <b>Bethesda</b> (serviks, tiroid), Milano (tükürük bezi), Paris (idrar).</div></div>
+      <div class="grp" style="margin:0"><div class="gb">Konsültasyon &amp; ek rapor</div>
+        <div class="ic">Dış merkezden gelen blok/lam için ikinci görüş (kendi vaka no'su, kaynak rapor ekli). Onaydan sonra gelen İHK/moleküler sonuç <b>ek rapor</b> olur; onaylı rapor değişmez, düzeltme <b>revize rapor</b> (gerekçeli, eski sürüm saklı).</div></div>
+    </div>
+  </div>
+
+  <!-- DURUM -->
+  <div class="pnl" data-s="durum">
+    <div class="ikiPanel">
+      <div>
+        <div class="dg"><table>
+          <thead><tr><th>Vaka durumu</th><th>Kim ilerletir</th><th>Ne olunca</th><th class="orta">TAT sayacı</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rz sari">İstendi</span></td><td>Klinik / ameliyathane</td><td>İstem kaydedildi, materyal yolda</td><td class="orta sonuk">—</td></tr>
+            <tr><td><span class="rz mavi">Kabul edildi</span></td><td>Patoloji sekreteri / teknisyen</td><td>Kaplar okutuldu, patoloji no verildi</td><td class="orta"><b>başlar</b></td></tr>
+            <tr><td><span class="rz mavi">Makroskopide</span></td><td>Patolog / uzman yardımcısı</td><td>Tarif + kaset haritası kaydedildi</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz mavi">Doku takibinde</span></td><td>Teknisyen</td><td>Kasetler cihaza girdi</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz mavi">Kesit / boyama</span></td><td>Teknisyen</td><td>Bloklar kesildi, lamlar boyandı</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz mor">Mikroskopide</span></td><td>Patolog</td><td>Lamlar patoloğa teslim</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz pembe">Ek inceleme</span></td><td>Patolog → teknisyen</td><td>İHK / özel boya / ek kesit istendi</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz sari">Ön rapor</span></td><td>Patolog</td><td>Rapor yazıldı, onay bekliyor</td><td class="orta">işler</td></tr>
+            <tr><td><span class="rz ok">Onaylandı</span></td><td>Patolog (e-imza)</td><td>İmza atıldı, rapor yayınlandı</td><td class="orta"><b>durur</b></td></tr>
+            <tr><td><span class="rz ok">Ek rapor</span> / <span class="rz kir">Revize</span></td><td>Patolog (e-imza)</td><td>Onay sonrası ek bilgi / düzeltme</td><td class="orta sonuk">ayrı sayaç</td></tr>
+            <tr><td><span class="rz kir">Ret</span></td><td>Kabul</td><td>Etiketsiz, fiksatifsiz, kap–istem uyumsuz…</td><td class="orta sonuk">—</td></tr>
+          </tbody></table></div>
+      </div>
+      <div>
+        <div class="dg"><table>
+          <thead><tr><th>Rol</th><th>Ekranlar</th><th>Yetki notu</th></tr></thead>
+          <tbody>
+            <tr><td><b>Patolog</b></td><td>Çalışma listesi, makroskopi, rapor, onay</td><td class="sar">Yalnız patolog onaylar / e-imzalar; vaka atanan patologda, devir kayıtlı</td></tr>
+            <tr><td><b>Patoloji uzman yardımcısı</b></td><td>Makroskopi, ön rapor</td><td class="sar">Onaylayamaz; ön raporu sorumlu patoloğa gönderir</td></tr>
+            <tr><td><b>Patoloji teknisyeni</b></td><td>Doku laboratuvarı, arşiv</td><td class="sar">Rapor göremez; blok/lam hareketleri ve ek boyama</td></tr>
+            <tr><td><b>Patoloji sekreteri</b></td><td>Materyal kabul, rapor teslim</td><td class="sar">Rapor metnini düzenleyemez</td></tr>
+            <tr><td><b>İsteyen hekim</b></td><td>Muayene / ameliyat kartı içinde</td><td class="sar">İstem açar, onaylı raporu görür; frozen sonucunu ameliyathanede görür</td></tr>
+            <tr><td><b>Hasta</b></td><td>Hasta portalı</td><td class="sar">Onaylı raporu görür (kurum ayarı: hekim görüşmesinden sonra)</td></tr>
+          </tbody></table></div>
+        <div class="grp"><div class="gb">TAT hedefleri (kurum ayarı)</div>
+          <div class="ic">Küçük biyopsi <b>3 iş günü</b> · Rezeksiyon <b>5 iş günü</b> · Sitoloji <b>2 iş günü</b> · Frozen <b>20 dakika</b> · İHK eklenirse <b>+2 iş günü</b>. Gecikenler çalışma listesinde kırmızı, panoda sayılır.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLOLAR -->
+  <div class="pnl" data-s="tablo">
+    <div class="izgara">
+      <div class="tablo"><div class="tb">pat_vaka <span class="sp">bir patoloji numarası</span></div><table>
+        <tr><td class="k">id</td><td class="t">bigint</td><td></td></tr>
+        <tr><td class="k">vaka_no</td><td class="t">varchar(20)</td><td>P26-01234 · yıl + sayaç (belge no üretici)</td></tr>
+        <tr><td class="k">tur</td><td class="t">smallint</td><td>1 histopatoloji · 2 sitoloji · 3 frozen · 4 konsültasyon</td></tr>
+        <tr><td class="k">hasta_id</td><td class="t">int</td><td>taraf (hasta rolü)</td></tr>
+        <tr><td class="k">basvuru_id</td><td class="t">bigint</td><td>belge (tür 19) - ücret başvuruya</td></tr>
+        <tr><td class="k">isteyen_id / birim_id</td><td class="t">int</td><td>hekim, bölüm</td></tr>
+        <tr><td class="k">klinik_bilgi / on_tani</td><td class="t">text</td><td>ICD-10 ön tanı</td></tr>
+        <tr><td class="k">durum</td><td class="t">smallint</td><td>yukarıdaki durumlar</td></tr>
+        <tr><td class="k">patolog_id</td><td class="t">int</td><td>atanan (devir izlenir)</td></tr>
+        <tr><td class="k">kabul / onay</td><td class="t">timestamptz</td><td>TAT bu ikisinden</td></tr>
+        <tr><td class="k">sube_id, ekleyen…</td><td class="t"></td><td>ortak denetim kolonları</td></tr>
+      </table></div>
+      <div class="tablo"><div class="tb">pat_materyal <span class="sp">vaka içindeki her kap</span></div><table>
+        <tr><td class="k">vaka_id</td><td class="t">bigint</td><td></td></tr>
+        <tr><td class="k">harf</td><td class="t">varchar(3)</td><td>A, B, C… (kaset önekleri)</td></tr>
+        <tr><td class="k">materyal_tipi</td><td class="t">int</td><td>tanım: kolon rezeksiyonu, tru-cut…</td></tr>
+        <tr><td class="k">lokalizasyon / taraf</td><td class="t">varchar</td><td>sağ / sol / orta</td></tr>
+        <tr><td class="k">fiksatif</td><td class="t">smallint</td><td>%10 formalin · taze · alkol…</td></tr>
+        <tr><td class="k">alim / fiksasyon_bas</td><td class="t">timestamptz</td><td>soğuk iskemi = fark</td></tr>
+        <tr><td class="k">makro_metin</td><td class="t">text</td><td>şablondan</td></tr>
+        <tr><td class="k">olcu / agirlik</td><td class="t">varchar / numeric</td><td></td></tr>
+      </table></div>
+      <div class="tablo"><div class="tb">pat_blok · pat_lam <span class="sp">fiziksel izlenebilirlik</span></div><table>
+        <tr><td class="k">blok.kod</td><td class="t">varchar</td><td>P26-01234 A3 (barkod)</td></tr>
+        <tr><td class="k">blok.parca_sayisi</td><td class="t">smallint</td><td>kasetteki doku parçası</td></tr>
+        <tr><td class="k">blok.aciklama</td><td class="t">varchar</td><td>"proksimal cerrahi sınır"</td></tr>
+        <tr><td class="k">lam.boya</td><td class="t">int</td><td>H&amp;E, PAS, İHK antikoru…</td></tr>
+        <tr><td class="k">lam.seviye</td><td class="t">smallint</td><td>ek kesit seviyesi</td></tr>
+        <tr><td class="k">hareket</td><td class="t">tablo</td><td>pat_hareket: takip, kesit, boya, teslim, arşiv, emanet (kim, ne zaman, nerede)</td></tr>
+      </table></div>
+      <div class="tablo"><div class="tb">pat_ek_istem <span class="sp">İHK, özel boya, ek kesit</span></div><table>
+        <tr><td class="k">vaka_id / blok_id</td><td class="t">bigint</td><td></td></tr>
+        <tr><td class="k">tur / test_id</td><td class="t">int</td><td>antikor / boya kataloğu (hizmet kartına bağlı - ücret)</td></tr>
+        <tr><td class="k">sonuc</td><td class="t">jsonb</td><td>skorlar: ER %, HER2 0–3+, Ki-67 %…</td></tr>
+        <tr><td class="k">durum</td><td class="t">smallint</td><td>istendi · çalışıldı · değerlendirildi</td></tr>
+      </table></div>
+      <div class="tablo"><div class="tb">pat_rapor <span class="sp">sürümlü</span></div><table>
+        <tr><td class="k">vaka_id / surum</td><td class="t">bigint / smallint</td><td>revize yeni sürüm, eski saklı</td></tr>
+        <tr><td class="k">tur</td><td class="t">smallint</td><td>ana · ek · revize · frozen</td></tr>
+        <tr><td class="k">makro / mikro / tani</td><td class="t">text</td><td></td></tr>
+        <tr><td class="k">sinoptik</td><td class="t">jsonb</td><td>şablon alanları (form motoru)</td></tr>
+        <tr><td class="k">icdo_topografi / morfoloji</td><td class="t">varchar</td><td>C18.7 · 8140/3</td></tr>
+        <tr><td class="k">imza_id / onay</td><td class="t"></td><td>e-imza kaydı (radyoloji ile aynı yol)</td></tr>
+      </table></div>
+      <div class="tablo"><div class="tb">tanımlar</div><table>
+        <tr><td class="k">pat_materyal_tipi</td><td colspan="2">ad, varsayılan makro şablonu, sinoptik şablonu, TAT sınıfı</td></tr>
+        <tr><td class="k">pat_makro_sablon</td><td colspan="2">metin + yer tutucular ({olcu}, {renk}…)</td></tr>
+        <tr><td class="k">pat_boya</td><td colspan="2">H&amp;E, özel boyalar, İHK antikorları (klon, kit, hizmet)</td></tr>
+        <tr><td class="k">pat_sinoptik</td><td colspan="2">CAP/ICCR uyumlu protokol; form motoru şablonu</td></tr>
+        <tr><td class="k">pat_ret_nedeni</td><td colspan="2">kabul ret listesi</td></tr>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- BAGLANTILAR -->
+  <div class="pnl" data-s="bag">
+    <div class="dg"><table>
+      <thead><tr><th>Nereden / nereye</th><th>Ne</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>Ameliyathane kartı</td><td>"Patoloji Materyali" alanı → istem</td><td class="sar">Bugünkü serbest metin alanı istem satırlarına dönüşür; frozen istemi ameliyat sırasında</td></tr>
+        <tr><td>Göz cerrahisi</td><td>"Patolojiye gönderildi" işareti → istem</td><td class="sar">İşaret yerine istem bağlantısı (vaka no görünür)</td></tr>
+        <tr><td>Endoskopi / poliklinik</td><td>Muayene İstem sekmesi</td><td class="sar">Lab/Radyoloji istemiyle aynı yer</td></tr>
+        <tr><td>Başvuru (belge 19)</td><td>Ücret satırları</td><td class="sar">Materyal ve ek boya/İHK hizmet kartına bağlı; SUT/HUV kodu hizmette</td></tr>
+        <tr><td>e-Nabız</td><td><b>201 Patoloji Kayıt</b> paketi</td><td class="sar">Onayda kuyruğa; iş listesinde "ileride" (dokuman/16). Alan eşlemesi SKRS'ye birebir - kod uydurulmaz</td></tr>
+        <tr><td>Kanser kayıt</td><td>ICD-O-3 kodları</td><td class="sar">Malign morfolojide (/3) bildirim listesi</td></tr>
+        <tr><td>Hasta portalı / hekim ekranı</td><td>Onaylı rapor PDF</td><td class="sar">Kritik bulgu: hekime anlık bildirim + okundu takibi</td></tr>
+        <tr><td>Dijital patoloji (ileride)</td><td>Lam tarayıcı görüntüleri</td><td class="sar">Vaka ekranında görüntü bağlantısı; teletıp konsültasyonu</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="statusbar"><span>Mockup · 13.10.2026</span><span class="sp">Kaynak: Lab (istem/numune/rapor) ve Radyoloji (rapor/e-imza) desenleri</span></div>
+</div>
+<div class="not"><b>Not.</b> Bu dosyalar tasarım aşamasıdır; kod, yetki ve tablo adları karar sonrası netleşir. SKRS / e-Nabız alanları resmî listelerden birebir alınacak.</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+</body>
+</html>
