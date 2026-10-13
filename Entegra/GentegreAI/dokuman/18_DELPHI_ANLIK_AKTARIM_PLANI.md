@@ -226,8 +226,23 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
 ### 11.4 İş sırası (her adım ayrı commit, adım sonunda gösterim)
 
 1. ~~**Kimlik koruması (§11.2)**~~ - **yapıldı (1080).**
-2. **MSSQL hazırlığı** - `Update_SQL_<N>` dev BILIM'de; CT'nin değişiklik
-   yakaladığı `sqlcmd` ile gösterilir.
+2. ~~**MSSQL hazırlığı**~~ - **yapıldı (`GenUpdate/Update_SQL_208`, 13.10.2026).**
+   Betik AYAR DEĞİŞTİRMEZ, yalnız `sp_Aktarim_Hazirla @Ac=1|0` ve
+   `sp_Aktarim_Durum` yordamlarını kurar; asıl açma aktarımı kullanacak kurumda
+   ajan kurulurken elle çağrılır (güncelleme Delphi'nin kendi bağlantısında
+   koşuyor, `ALTER DATABASE` işlem içinde çalışmaz; aktarım kullanmayan müşteride
+   yük olmasın). BILIM'de açıldı: veritabanı + 22 tablo, saklama 7 gün,
+   `gentegre_aktarim_okur` rolü (SELECT + VIEW CHANGE TRACKING). Gösterildi:
+   REHBER 5906 güncellemesi → `CHANGETABLE` "U, versiyon 1".
+   Öğrenilenler (ajana girdi):
+   - **SNAPSHOT yalıtımı açılmadı** - Delphi'nin her yazmasına tempdb yükü
+     getirirdi; ajan versiyon aralığıyla okur, tekrar gönderim zararsız.
+   - Değişiklik **commit'te** görünür; geri alınan işlem ajana hiç ulaşmaz.
+   - Bağlantıda `QUOTED_IDENTIFIER ON` şart (BILIM'de filtreli indeksler var;
+     `sqlcmd` varsayılanı OFF → güncelleme reddedilir).
+   - FATBASLIK / FATURA / KASA / STOKLAR'da Delphi tetikleri (cari bakiye, stok
+     durumu, maliyet, fiyat) var: aktarım bu tetiklerin SONUCUNU okur, mantığını
+     web'de yeniden çalıştırmaz.
 3. **Aktarım fonksiyonları** - sırayla depo/döviz → cari → stok/kalem/hesap →
    belge/mali/stok hareketi. **Eşdeğerlik testi:** boş test DB'de bütün Delphi
    verisi fonksiyonlarla aktarılır, `kur.ps1` göç sonucuyla tablo tablo
