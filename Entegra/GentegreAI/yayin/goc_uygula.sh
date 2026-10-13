@@ -16,6 +16,9 @@
 #   * pg_advisory kilidi: iki guncelleyici ayni dosyayi iki kez calistiramaz.
 #   * Bos kurulum (stg semasi yok): her bekleyen dosyadan once tohum;
 #     MSSQL aktarim adimlari calistirilmaz, `aktarim_yok` yazilir.
+#   * Bos kurulum duzeltmeleri (14.10.2026, <paket>/kurulum/bos/OKUBENI.txt):
+#     bos/once/<dosya> gocten once, bos/yerine/<dosya> (URUN=erp ise once
+#     bos/erp/yerine/<dosya>) gocun YERINE calisir, deftere `bos_yerine`.
 #   * Cikis: 0 basari · 1 hata · 2 dis veri on kosulu bekleniyor.
 #
 #  DB GERI ALINMAZ: yayin geri alma yalniz api/web dosyalarini geri getirir.
@@ -29,6 +32,7 @@ PAKET=${1:?paket dizini gerekli}
 TEMEL_AL=0; [ "${2:-}" = "--temel-al" ] && TEMEL_AL=1
 DB=${DB:?DB gerekli}
 PG=${PG:-gentegre-pg18}
+URUN=${URUN:-}
 KILIT=7340928
 
 GECICI=$(mktemp -d)
@@ -111,13 +115,48 @@ select exists (select 1 from public.goc_gecmisi where dosya = :'dosya') as goc_v
 do \$\$ begin perform pg_advisory_unlock($KILIT); end \$\$;
 SQL
 [ -f "$PAKET/kurulum/000_bos_kurulum.sql" ] && normal "$PAKET/kurulum/000_bos_kurulum.sql" > "$GECICI/_tohum.sql"
+cat > "$GECICI/_yerine.sql" <<SQL
+begin;
+do \$\$ begin perform pg_advisory_xact_lock($KILIT); end \$\$;
+select exists (select 1 from public.goc_gecmisi where dosya = :'dosya') as goc_var \gset
+\if :goc_var
+  \echo GOC_ZATEN_UYGULANMIS
+  rollback;
+\else
+  \i :yol
+  insert into public.goc_gecmisi (dosya, ozet, yontem) values (:'dosya', :'ozet', 'bos_yerine');
+  commit;
+\endif
+SQL
+# Bos kurulum duzeltmeleri gecici dizine (ad onekli) - yalniz BOS=1 iken kullanilir.
+bos_yerine() {
+    if [ -n "$URUN" ] && [ -f "$PAKET/kurulum/bos/$URUN/yerine/$1" ]; then echo "$PAKET/kurulum/bos/$URUN/yerine/$1"; return; fi
+    if [ -f "$PAKET/kurulum/bos/yerine/$1" ]; then echo "$PAKET/kurulum/bos/yerine/$1"; fi
+}
 
 # SAYISAL SIRA, EN AZ UC HANE (09.10.2026): 1000 ve sonrasi da goc.
 #   Eski kalip `[0-9][0-9][0-9]_` 1000_*.sql dosyalarini HIC almiyordu,
 #   duz `sort` da 1000_'i 101_'den once siraliyordu. `sort -V` sayiyi
 #   sayi olarak karsilastirir.
 DOSYALAR=$(ls "$PAKET"/db/[0-9][0-9][0-9]*_*.sql 2>/dev/null | sort -V || true)
-for D in $DOSYALAR; do normal "$D" > "$GECICI/$(basename "$D")"; done
+# ILK SIRA (14.10.2026): 027 oncesi dosyalar sayi sirasiyla kurulamaz (003 gocu
+#   010-017 semasina dayanir) - kurulum/ilk_sira.txt'deki sirayla basa alinir
+#   (kur.ps1 ile ayni liste). Bos kurulum disinda bunlar zaten uygulanmistir.
+ILK=$(liste "$PAKET/kurulum/ilk_sira.txt" | tr '
+' ' ')
+if [ -n "$ILK" ]; then
+    ONCE=""; for A in $ILK; do [ -f "$PAKET/db/$A" ] && ONCE="$ONCE $PAKET/db/$A"; done
+    SONRA=""; for D in $DOSYALAR; do case " $ILK " in *" $(basename "$D") "*) ;; *) SONRA="$SONRA $D" ;; esac; done
+    DOSYALAR="$ONCE $SONRA"
+fi
+for D in $DOSYALAR; do
+    normal "$D" > "$GECICI/$(basename "$D")"
+    if [ "$BOS" = "1" ]; then
+        Y=$(bos_yerine "$(basename "$D")")
+        [ -n "$Y" ] && normal "$Y" > "$GECICI/_bos_yerine__$(basename "$D")"
+        [ -f "$PAKET/kurulum/bos/once/$(basename "$D")" ] && normal "$PAKET/kurulum/bos/once/$(basename "$D")" > "$GECICI/_bos_once__$(basename "$D")"
+    fi
+done
 docker exec "$PG" mkdir -p "$KAPDIZIN"
 # Windows'ta (Git Bash, yerel test) docker.exe MSYS yolunu anlamaz; sunucuda
 #   cygpath yoktur ve yol oldugu gibi gider.
@@ -148,6 +187,18 @@ insert into public.goc_gecmisi (dosya, ozet, yontem) values (:'dosya', :'ozet', 
 on conflict (dosya) do nothing;
 SQL
         AKTARIM_YOK=$((AKTARIM_YOK+1)); continue
+    fi
+
+    if [ "$BOS" = "1" ] && [ -f "$GECICI/_bos_once__$AD" ]; then
+        psqlq -f "$KAPDIZIN/_bos_once__$AD" >/dev/null || { echo "HATA: bos kurulum on adimi: $AD" >&2; exit 1; }
+    fi
+    if [ "$BOS" = "1" ] && [ -f "$GECICI/_bos_yerine__$AD" ]; then
+        if ! CIKTI=$(psqlq -v dosya="$AD" -v ozet="$OZET" -v yol="$KAPDIZIN/_bos_yerine__$AD" -f "$KAPDIZIN/_yerine.sql" 2>&1); then
+            echo "$CIKTI" >&2; echo "HATA: bos kurulum yerine dosyasi: $AD" >&2; exit 1
+        fi
+        case "$CIKTI" in *GOC_ZATEN_UYGULANMIS*) ATLANAN=$((ATLANAN+1)); continue ;; esac
+        echo "  goc: $AD [bos kurulum: yerine]"
+        UYGULANAN=$((UYGULANAN+1)); continue
     fi
 
     if islem_disi_mi "$GECICI/$AD"; then

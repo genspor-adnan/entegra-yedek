@@ -445,7 +445,26 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    gövde sınırı 25 MB (`client_max_body_size`) - ajan varsayılanı 32'den 20 MB'a
    indi, 413 gelirse sayfayı yarılar (bu yol canlı denenmedi).
 
-   Sırada 8b: **pilot** - kurulum (hangi müşteri / hangi web kurulumu) kullanıcı kararı.
+   **8b hazırlık (14.10.2026, kullanıcı: "yeni boş kurulum"):** yayın profili `delphi`
+   (`/gentegreai/delphi/`, DB `gentegre_erp_delphi`, port 5182, `Urun = 'erp'`),
+   `yayin/delphi-pilot-hazirla.sh` (DB + nginx, sudo) + `nginx-delphi.conf`.
+   **Boş kurulum onarıldı** (kullanıcı: "boş kurulumu düzelt") - zincir boş DB'de
+   uçtan uca hiç geçmiyordu:
+   - Sunucu çalıştırıcısı dosyaları sayı sırasıyla koşuyordu, zincir ise `kur.ps1`'in
+     özel sırasıyla (003 göçü 010-017 şemasına dayanır) kurulur -> sunucuda boş kurulum
+     003'te kırılıyordu. Sıra tek kaynağa alındı: `db/kurulum/ilk_sira.txt` (sh okur,
+     `kur.ps1` kendi listesini karşılaştırır, ayrışırsa durur).
+   - Canlı tarihçenin boş DB'de anlamsız/kırık 5 adımı için `db/kurulum/bos/`:
+     `once/734` (`stok_barkod` 145'te düşmüştü, canlıda yeniden kuruldu), `yerine/573`
+     ve `yerine/926` (dev verisi), `erp/yerine/521` (SKRS katalog) ve `erp/yerine/559`
+     (yalnız şema) - ERP canlısında elle yapılanın aynısı. İki çalıştırıcı da (ps1 +
+     sh) uygular; ürün `yayinla.ps1` kurulumundan `URUN`.
+   - Doğrulama: yerelde sıfırdan, elle müdahalesiz - ps1 ve sh (sunucu paketiyle)
+     ikisi de 1076 göç / çıkış 0. Ardından boş ERP DB'ye ajanla BILIM 2026 provası:
+     iki gerçek sorun -> **1094** depo sahiplenme (tohum "Anadepo" = Delphi deposu,
+     `ux_depo_ad`), **1095** Delphi içi aynı proje kodu (`-<id>` eki; klonda "kural
+     gereği 2" diye atlanıyordu). Sonra mutabakat eşit, proje 8 = 8, açık hata 0.
+   Sırada: kullanıcı sunucuda hazırlık + `yayinla.ps1 -Kurulum delphi` (rehber §0b).
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

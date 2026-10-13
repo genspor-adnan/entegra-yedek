@@ -45,7 +45,9 @@ param(
   [string[]]$Dosyalar = @(),
   # Siralı dosya adlari, satir basina bir ad (uzun listeler icin - kur.ps1).
   [string]$ListeDosyasi = "",
-  [switch]$BosKurulum
+  [switch]$BosKurulum,
+  # Bos kurulumda urune ozgu duzeltmeler (db/kurulum/bos/erp/yerine): 'erp' ya da bos.
+  [string]$Urun = ""
 )
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -65,6 +67,15 @@ foreach ($s in (Satirlar (Join-Path $DbDizin "kurulum\dis_veri_onkosullari.txt")
   $p = $s.Split("|", 2); $DisVeri[$p[0]] = $p[1]
 }
 $Tohum = Join-Path $DbDizin "kurulum\000_bos_kurulum.sql"
+# BOS KURULUM DUZELTMELERI (14.10.2026, db/kurulum/bos/OKUBENI.txt): canli
+#   tarihcenin bos veritabaninda anlamsiz / kirik adimlari icin "once" ve
+#   "yerine" dosyalari. Sunucu esi goc_uygula.sh ayni kural.
+$BosDizin = Join-Path $DbDizin "kurulum\bos"
+function BosYerine([string]$Ad) {
+  if ($Urun -ne "") { $y = Join-Path $BosDizin "$Urun\yerine\$Ad"; if (Test-Path $y) { return $y } }
+  $y = Join-Path $BosDizin "yerine\$Ad"; if (Test-Path $y) { return $y }
+  return $null
+}
 
 # KENDI ISLEMINI YONETEN DOSYA (tekrar denetim 28.09.2026 #2): USTDUZEYDE bir
 #   IFADENIN TAMAMI BEGIN/COMMIT/ROLLBACK/END [WORK|TRANSACTION] ya da START
@@ -153,7 +164,13 @@ commit;
   foreach ($ad in $Sirali) {
     $metin = Normal (Join-Path $Dizin $ad)
     Yaz $ad $metin
-    $Bilgi[$ad] = @{ Ozet = (Ozet $metin); IslemDisi = (IslemDisiMi $metin) }
+    $Bilgi[$ad] = @{ Ozet = (Ozet $metin); IslemDisi = (IslemDisiMi $metin); Yerine = $false; Once = $false }
+    if ($BosKurulum) {
+      $y = BosYerine $ad
+      if ($y) { Yaz ("_bos_yerine__" + $ad) (Normal $y); $Bilgi[$ad].Yerine = $true }
+      $o = Join-Path $BosDizin "once\$ad"
+      if (Test-Path $o) { Yaz ("_bos_once__" + $ad) (Normal $o); $Bilgi[$ad].Once = $true }
+    }
   }
   if (Test-Path $Tohum) { Yaz "_tohum.sql" (Normal $Tohum) }
 
@@ -181,6 +198,19 @@ select exists (select 1 from public.goc_gecmisi where dosya = :'dosya') as goc_v
   insert into public.goc_gecmisi (dosya, ozet, yontem) values (:'dosya', :'ozet', 'islem_disi');
 \endif
 do `$`$ begin perform pg_advisory_unlock($Kilit); end `$`$;
+"@
+  Yaz "_yerine.sql" @"
+begin;
+do `$`$ begin perform pg_advisory_xact_lock($Kilit); end `$`$;
+select exists (select 1 from public.goc_gecmisi where dosya = :'dosya') as goc_var \gset
+\if :goc_var
+  \echo GOC_ZATEN_UYGULANMIS
+  rollback;
+\else
+  \i :yol
+  insert into public.goc_gecmisi (dosya, ozet, yontem) values (:'dosya', :'ozet', 'bos_yerine');
+  commit;
+\endif
 "@
   Yaz "_aktarim.sql" @"
 insert into public.goc_gecmisi (dosya, ozet, yontem) values (:'dosya', :'ozet', 'aktarim_yok')
@@ -220,6 +250,17 @@ on conflict (dosya) do nothing;
       $r = Psql "_aktarim.sql" @{ dosya = $ad; ozet = $b.Ozet }
       if ($r.Kod -ne 0) { Write-Host $r.Cikti; exit 1 }
       $aktarimYok++; continue
+    }
+    if ($BosKurulum -and $b.Once) {
+      $r = Psql ("_bos_once__" + $ad)
+      if ($r.Kod -ne 0) { Write-Host $r.Cikti; Write-Host ("HATA: bos kurulum on adimi: " + $ad) -ForegroundColor Red; exit 1 }
+    }
+    if ($BosKurulum -and $b.Yerine) {
+      $r = Psql "_yerine.sql" @{ dosya = $ad; ozet = $b.Ozet; yol = ($KapDizin + "/_bos_yerine__" + $ad) }
+      if ($r.Kod -ne 0) { Write-Host $r.Cikti; Write-Host ("HATA: bos kurulum yerine dosyasi: " + $ad) -ForegroundColor Red; exit 1 }
+      if ($r.Cikti -match "GOC_ZATEN_UYGULANMIS") { $atlanan++; continue }
+      Write-Host ("  goc: " + $ad + " [bos kurulum: yerine]")
+      $uygulanan++; continue
     }
     $sarmal = if ($b.IslemDisi) { "_islemdisi.sql" } else { "_islemli.sql" }
     $r = Psql $sarmal @{ dosya = $ad; ozet = $b.Ozet; yol = ($KapDizin + "/" + $ad) }

@@ -1,0 +1,3 @@
+-- BOŞ ERP KURULUMU: 521 ATLANIR. SKRS ambarından (SUT, işlem puanı, LOINC)
+-- hizmet/stok kataloğu kurar - HBYS'e özgü dış veri. ERP canlısında da
+-- 'atlandi_erp' ile atlanmıştı. HBYS boş kurulumunda dış veri ön koşulu olarak kalır.

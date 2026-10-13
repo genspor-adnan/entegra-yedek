@@ -66,7 +66,7 @@ $KURULUMLAR = @(
     [ordered]@{
         Ad = 'erp';   Etiket = 'Gentegre AI (ERP)';
         Yol = '/gentegreai/'; Kok = 'gentegre-erp';
-        Db = 'gentegre_erp'; Kap = 'gentegre-api-erp'; Port = 5181
+        Db = 'gentegre_erp'; Kap = 'gentegre-api-erp'; Port = 5181; Urun = 'erp'
     },
     # DELPHI AKTARIMI PILOTU (14.10.2026, kullanici: "yeni bos kurulum"): bos ERP
     #   veritabani, veri Delphi'den aktarim ajaniyla gelir (dokuman/19). Sunucu
@@ -75,7 +75,7 @@ $KURULUMLAR = @(
     [ordered]@{
         Ad = 'delphi'; Etiket = 'Gentegre AI (ERP - Delphi aktarimi pilotu)';
         Yol = '/gentegreai/delphi/'; Kok = 'gentegre-erp-delphi';
-        Db = 'gentegre_erp_delphi'; Kap = 'gentegre-api-erp-delphi'; Port = 5182
+        Db = 'gentegre_erp_delphi'; Kap = 'gentegre-api-erp-delphi'; Port = 5182; Urun = 'erp'
     }
 )
 
@@ -229,7 +229,8 @@ foreach ($k in $secilen) {
     Adim 'sunucuda uygulaniyor'
     $bayrak = if ($TemelAl) { '--temel-al' } else { '' }
     # Kurulum bilgisi ORTAM DEGISKENIYLE gecer: betik tek, kurulum coktur.
-    $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol)"
+    # URUN: bos kurulumda urune ozgu duzeltmeler (db/kurulum/bos/erp) - goc_uygula.sh.
+    $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol) URUN=$($k.Urun)"
     # SUNUCU KILIDI: baska bir yayin (baska makineden de) sunucu adimindaysa
     #   BEKLER (en fazla 30 dk); sure dolarsa 75 ile cikar, hicbir sey yapilmaz.
     ssh $Sunucu "flock -w 1800 -E 75 /tmp/gentegre-yayin.kilit env $ortam PAKET=$uzakPaket bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"

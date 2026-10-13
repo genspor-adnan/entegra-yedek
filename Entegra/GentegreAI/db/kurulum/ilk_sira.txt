@@ -1,0 +1,28 @@
+# ILK DOSYALARIN KURULUM SIRASI (027 oncesi) - tek kaynak.
+#
+# Zincir SAYI SIRASIYLA kurulamaz: 003 (goc) 010-017 semasina dayanir, 019
+# gocten sonra gelmelidir. Bos kurulumda (stg bos) bu sirayla; 027 ve sonrasi
+# sayisal sira. Okuyanlar: yayin/goc_uygula.sh (sunucu), db/kur.ps1 (yerel;
+# kendi Sema1+Goc+Kimlik listesini bu dosyayla KARSILASTIRIR, ayrisirsa durur).
+# Satir basi # yorumdur. (14.10.2026: sunucu boş kurulumu sayi sirasiyla
+# 003'te kiriliyordu - "relation public.cari does not exist".)
+001_sema_taraf.sql
+002_stg_kaynak_tablolar.sql
+010_sema_ortak.sql
+011_sema_stok.sql
+012_sema_belge.sql
+015_sema_log_ebelge.sql
+016_arama_indeksleri.sql
+017_sema_sube_rol.sql
+003_goc_taraf.sql
+013_goc_faz1.sql
+014_goc_belge.sql
+018_goc_sube_rol.sql
+019_sema_cok_sube.sql
+020_sema_kimlik.sql
+021_goc_kimlik.sql
+022_sema_sube_ebelge.sql
+023_sema_belge_hesap.sql
+024_fn_belge_diptoplam.sql
+025_fn_belge_no.sql
+026_doviz_tutar_kurali.sql

@@ -1,0 +1,2 @@
+-- BOŞ KURULUM: 926 ATLANIR. Dev'e örnek check-up paketleri ekleyen veri göçü;
+-- boş kurulumda şube / hizmet yok (fk_hizmet_sube). ERP canlısında da atlanmıştı.

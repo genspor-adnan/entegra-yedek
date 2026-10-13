@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (556 ad, 151 tanesi birden cok dosyada)
+## Fonksiyonlar (556 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -15,7 +15,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
 | `fn_aktar_belge` | `1093_aktarim_metin_kirp.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
-| `fn_aktar_depo` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
@@ -23,7 +23,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_kasa` | `1093_aktarim_metin_kirp.sql` | 1085_aktarim_kasa.sql |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_paket` | `1089_aktarim_salt_okunur.sql` | 1086_aktarim_paket.sql |
-| `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_proje` | `1095_aktarim_proje_ayni_kod.sql` | 1082_aktarim_stok_kalem_hesap.sql |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |

@@ -19,6 +19,21 @@ Delphi ERP asıl sistemdir; web aktarılan veriyi gösterir, değiştirmez.
 | Gentegre AI | Göçler **1080-1093** yayında (`yayinla.ps1 -Kurulum <ad>`). |
 | Hedef kurum | **Boş** ya da bu Delphi veritabanından **göçle** kurulmuş olmalı. Başka veriyle dolu kurumda web kayıtları Delphi kayıtlarıyla yan yana iki kez görünür (kod çakışırsa aktarım `cakisma` sayar). Göçle kurulmuşsa önce eşleştirme: `select fn_aktarim_kaynak_isaretle(false)` (deneme) → sonuçlar doğruysa `(true)`. **Canlı kurumda eşleştirmeyi teknik ekip yapar.** |
 
+## 0b. Yeni boş kurulum (sunucu, bir kez — pilot: `/gentegreai/delphi/`)
+
+Yayın profili `yayinla.ps1 -Kurulum delphi` (DB `gentegre_erp_delphi`, API 5182, ürün ERP).
+
+```bash
+scp GentegreAI/yayin/nginx-delphi.conf GentegreAI/yayin/delphi-pilot-hazirla.sh gentegre@46.36.201.170:/tmp/
+ssh gentegre@46.36.201.170 "sed -i 's/$//' /tmp/delphi-pilot-hazirla.sh && sudo bash /tmp/delphi-pilot-hazirla.sh"
+```
+Boş veritabanını (UTF8 + ICU tr-TR) ve nginx bloğunu kurar; ikisi de varsa dokunmaz.
+Sonra yerelden `powershell -ExecutionPolicy Bypass -File GentegreAI/yayin/yayinla.ps1 -Kurulum delphi`:
+boş veritabanına tohum + bütün göçler (`db/kurulum/bos/` düzeltmeleriyle, ERP'de SKRS
+dış verisi istemeden), API konteyneri yoksa kurulur, web. Göç adımı sunucuda ~20 dk.
+İlk giriş `admin` / kurulum parolası — hemen değiştirin; GenProfil'de ürün modunu **ERP** yapın.
+(Yerel prova 14.10.2026: aynı boş kurulum + ajanla BILIM 2026 aktarımı, mutabakat eşit.)
+
 ## 1. Gentegre AI tarafı (GenProfil)
 
 1. GenProfil → kurumun adresi → **Kurum Profili › ⇄ Veri Kaynağı**.

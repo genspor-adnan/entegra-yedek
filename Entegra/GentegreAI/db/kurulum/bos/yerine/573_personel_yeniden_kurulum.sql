@@ -1,0 +1,3 @@
+-- BOŞ KURULUM: 573 ATLANIR. Dev veritabanının personelini silip bölüm başına
+-- örnek hekim üreten tek seferlik bir veri düzenlemesi; boş kurulumda silinecek
+-- personel ve örnek adların anlamı yok (rol tablosu da henüz boş -> FK ihlali).

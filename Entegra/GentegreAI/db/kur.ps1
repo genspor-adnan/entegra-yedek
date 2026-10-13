@@ -35,7 +35,10 @@ param(
   [string]$MssqlDb     = "BILIM",
   [string]$MssqlUser   = "sa",
   [string]$MssqlPass   = "FETAGEN",
-  [int]$Yil            = 2026        # belge/hareket gocu icin yil filtresi (0 = tum yillar)
+  [int]$Yil            = 2026,       # belge/hareket gocu icin yil filtresi (0 = tum yillar)
+  # -SadeceSema (bos kurulum) icin urun: 'erp' ise HBYS'e ozgu dis veri gocleri
+  #   (SKRS katalogu) kurulum/bos/erp/yerine'deki karsiliklariyla gecer.
+  [string]$Urun        = ""
 )
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -90,7 +93,7 @@ function Goc([string[]]$Liste, [switch]$Bos) {
   $a = @("-ExecutionPolicy", "Bypass", "-File", $Uygulayici, "-Kap", $Kap, "-Db", $Db,
          "-Kul", $Kul, "-Parola", $Parola, "-Dizin", $Dizin, "-ListeDosyasi", $listeYolu)
   if ($PgHost -ne "") { $a += @("-PgHost", $PgHost, "-PgPort", $PgPort) }
-  if ($Bos) { $a += "-BosKurulum" }
+  if ($Bos) { $a += "-BosKurulum"; if ($Urun -ne "") { $a += @("-Urun", $Urun) } }
   & powershell @a
   $kod = $LASTEXITCODE
   Remove-Item $listeYolu -ErrorAction SilentlyContinue
@@ -126,6 +129,14 @@ $Goc     = @("003_goc_taraf.sql", "013_goc_faz1.sql", "014_goc_belge.sql", "018_
 $Kimlik  = @("020_sema_kimlik.sql", "021_goc_kimlik.sql", "022_sema_sube_ebelge.sql",
              "023_sema_belge_hesap.sql", "024_fn_belge_diptoplam.sql",
              "025_fn_belge_no.sql", "026_doviz_tutar_kurali.sql")
+# Sunucu (goc_uygula.sh) ayni sirayi kurulum/ilk_sira.txt'den okur: iki liste
+#   ayrisirsa sunucudaki bos kurulum yereldekinden farkli kurar - burada durdur.
+$ilkSira = @([System.IO.File]::ReadAllLines((Join-Path $Dizin "kurulum\ilk_sira.txt")) |
+             ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" -and -not $_.StartsWith("#") })
+if (($ilkSira -join ",") -ne (($Sema1 + $Goc + $Kimlik) -join ",")) {
+  Kotu "kurulum/ilk_sira.txt ile kur.ps1 Sema1+Goc+Kimlik listesi ayrisiyor - ikisini birlikte guncelleyin."
+  exit 1
+}
 # 027 ve sonrasi: dosya sirasi.
 $Kalan   = @(Get-ChildItem $Dizin -Filter "*.sql" |
              Where-Object { $_.Name -match '^(\d{3,})_' -and [int]$Matches[1] -ge 27 } |
