@@ -48,7 +48,9 @@ $sql = "select dosya || '|' || coalesce(ozet, '') || '|' || coalesce(yontem, '')
        "to_char(uygulama, 'YYYY-MM-DD') from public.goc_gecmisi"
 $var = "select to_regclass('public.goc_gecmisi') is not null"
 if ($Sunucu -ne "") {
-  $q = { param($s) ssh $Sunucu "docker exec $Kap psql -U postgres -d $Db -tA -c `"$s`"" }
+  # Sorgu STDIN'den gider: PowerShell 5.1 yerel programa gecen argumandaki ic
+  #   tirnaklari siliyor (-c "..." uzak kabukta parcalaniyordu).
+  $q = { param($s) $s | ssh -o BatchMode=yes $Sunucu "docker exec -i $Kap psql -U postgres -d $Db -tA -v ON_ERROR_STOP=1" }
 } else {
   $env:MSYS_NO_PATHCONV = "1"
   $q = { param($s) docker exec $Kap psql -U postgres -d $Db -tA -c $s }
