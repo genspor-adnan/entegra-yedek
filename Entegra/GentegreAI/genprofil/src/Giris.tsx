@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { adresDeposu } from './vekil';
+import { ParolaGirdisi } from '@web/bilesenler/ParolaGirdisi';
 
 export type Baglanti = { adres: string; kod: string; parola: string };
 
@@ -52,7 +53,7 @@ export function Giris({ onBagla, hata }: {
         </label>
         <label className="gp-alan">
           <span>Parola</span>
-          <input type="password" value={parola} onChange={e => setParola(e.target.value)}
+          <ParolaGirdisi value={parola} onChange={e => setParola(e.target.value)}
                  autoComplete="current-password" />
         </label>
         <button type="submit" className="d birincil"

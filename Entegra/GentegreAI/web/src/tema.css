@@ -1222,6 +1222,20 @@ input.skt-gecmis {
 .giris-kart .giris-baglanti { align-self: flex-end; margin-top: 2px; font-size: 11px; color: var(--vurgu); text-decoration: none; cursor: pointer }
 .giris-kart .giris-baglanti:hover { text-decoration: underline }
 
+/* PAROLA + GÖZ (ParolaGirdisi): düğme alanın içinde, sağda. Giriş kartının
+   "her düğme mavi ve 34px" kuralını ezmek için seçici iki sınıflı. */
+.parola-girdi { position: relative; display: block }
+.parola-girdi input { width: 100%; box-sizing: border-box; padding-right: 34px }
+.parola-girdi .parola-goz, .giris-kart .parola-girdi .parola-goz {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 26px; height: 26px; margin: 0; padding: 0; border: 0; border-radius: 3px;
+  background: transparent; color: var(--soluk); font-weight: normal;
+  display: grid; place-items: center; cursor: pointer;
+}
+.parola-girdi .parola-goz:hover { color: var(--yazi2); background: color-mix(in srgb, var(--soluk) 12%, transparent) }
+.parola-girdi .parola-goz:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px }
+.parola-girdi .parola-goz[aria-pressed="true"] { color: var(--vurgu) }
+
 .tam-ekran-bilgi { display: grid; place-items: center; min-height: 100vh; color: var(--soluk) }
 .yukleniyor-satir { padding: 24px; text-align: center; color: var(--soluk) }
 .dip-toplam { max-width: 400px; margin-left: auto }

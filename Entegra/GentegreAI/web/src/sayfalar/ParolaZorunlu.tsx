@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { hataMetni, urunAdi } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
+import { ParolaGirdisi } from '../bilesenler/ParolaGirdisi';
 
 /**
  * ZORUNLU PAROLA DEĞİŞİMİ (674) — kullanıcı: "ilk giriş şifreleri default
@@ -58,15 +59,15 @@ export function ParolaZorunlu() {
         </div>
         <label>
           Mevcut parola
-          <input type="password" value={eski} autoFocus autoComplete="current-password"
+          <ParolaGirdisi value={eski} autoFocus autoComplete="current-password"
                  onChange={e => setEski(e.target.value)} />
         </label>
-        <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
+        <label>{c('Yeni parola')}<ParolaGirdisi value={yeni1} autoComplete="new-password"
                  onChange={e => setYeni1(e.target.value)} />
         </label>
         <label>
           Yeni parola (tekrar)
-          <input type="password" value={yeni2} autoComplete="new-password"
+          <ParolaGirdisi value={yeni2} autoComplete="new-password"
                  onChange={e => setYeni2(e.target.value)} />
         </label>
         <p className="sonuk">{PAROLA_KURALI}</p>

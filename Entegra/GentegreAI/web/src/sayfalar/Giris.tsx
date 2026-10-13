@@ -4,6 +4,7 @@ import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 import { sonKullaniciOku } from '../kimlik/sonKullanici';
+import { ParolaGirdisi } from '../bilesenler/ParolaGirdisi';
 
 /**
  * Giris ekrani. Cok subeli kullanicida sube secimi giris akisinin parcasidir:
@@ -189,12 +190,12 @@ export function Giris() {
                 <input value={dogrulamaKodu} maxLength={6} inputMode="numeric" autoFocus autoComplete="one-time-code"
                        onChange={e => setDogrulamaKodu(e.target.value.replace(/\D/g, ''))} />
               </label>
-              <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
+              <label>{c('Yeni parola')}<ParolaGirdisi value={yeni1} autoComplete="new-password"
                        onChange={e => setYeni1(e.target.value)} />
               </label>
               <label>
                 Yeni parola (tekrar)
-                <input type="password" value={yeni2} autoComplete="new-password"
+                <ParolaGirdisi value={yeni2} autoComplete="new-password"
                        onChange={e => setYeni2(e.target.value)} />
               </label>
               <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
@@ -253,12 +254,12 @@ export function Giris() {
                 <input value={dogrulamaKodu} maxLength={6} inputMode="numeric" autoFocus autoComplete="one-time-code"
                        onChange={e => setDogrulamaKodu(e.target.value.replace(/\D/g, ''))} />
               </label>
-              <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
+              <label>{c('Yeni parola')}<ParolaGirdisi value={yeni1} autoComplete="new-password"
                        onChange={e => setYeni1(e.target.value)} />
               </label>
               <label>
                 Yeni parola (tekrar)
-                <input type="password" value={yeni2} autoComplete="new-password"
+                <ParolaGirdisi value={yeni2} autoComplete="new-password"
                        onChange={e => setYeni2(e.target.value)} />
               </label>
               <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
@@ -306,7 +307,7 @@ export function Giris() {
             <label>
               Parola
               {/* Kod hazır geliyorsa imleç doğrudan parolada. */}
-              <input type="password" value={parola} autoComplete="new-password"
+              <ParolaGirdisi value={parola} autoComplete="new-password"
                      autoFocus={!!kod} onChange={e => setParola(e.target.value)} />
             </label>
           </>
