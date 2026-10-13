@@ -13,6 +13,11 @@ public sealed class KartYaniti
     public IDictionary<string, IDictionary<string, string>>? KodAd { get; set; }
     public KartYetkisi Yetki { get; set; } = new();
     /// <summary>
+    /// Kaydın dış kaynağı (1089): "Delphi" ise satır Delphi ERP'den aktarılır, web'de
+    /// salt okunurdur (Yetki.Duzenle / Sil false) - ekran rozet ve bilgi bandı gösterir.
+    /// </summary>
+    public string? DisKaynak { get; set; }
+    /// <summary>
     /// Kayit YAZILDIKTAN SONRA calisan is akislarinin soyledigi seyler
     /// (or. dis kurum numunesinin ucretlendirilmesi). Kaydi DUSURMEZ -
     /// bu yuzden hata degil uyaridir; ekran seritte gosterir.

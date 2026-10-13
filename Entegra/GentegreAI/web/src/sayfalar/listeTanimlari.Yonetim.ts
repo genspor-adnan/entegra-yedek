@@ -359,6 +359,13 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuAd: 'Zamanlanmış İşler', ic: '⏱️', yetkiKodu: 'zamanli_is',
   },
   {
+    // AKTARIM DURUMU (1090, mockup Ekranlar/aktarim_durumu.html): Delphi ERP -> web
+    //   tek yön aktarımın durumu - ajan nabzı, tablo versiyonları, hata kuyruğu.
+    kaynak: 'aktarim-durumu', rota: 'aktarim-durumu', ozelSayfa: true,
+    baslik: 'Aktarım Durumu', yol: 'Yönetim › Platform › Aktarım Durumu',
+    menuGrup: 'Platform', menuSira: 115, menuAd: 'Aktarım Durumu', ic: '⇄', yetkiKodu: 'aktarim.durum',
+  },
+  {
     // KLINIK KATALOGLAR (400): durum + dosyadan yukleme. Liste degil,
     //   ozel sayfa - iki katalog ve iki dosya kutusu.
     kaynak: 'katalog-ayarlar', rota: 'katalog-ayarlar', baslik: 'Klinik Kataloglar',

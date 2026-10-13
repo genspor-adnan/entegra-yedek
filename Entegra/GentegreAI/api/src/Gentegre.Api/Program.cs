@@ -410,6 +410,7 @@ uygulama.IsgUclariniEkle();
 uygulama.CagriUclariniEkle();
 // DELPHI AKTARIMI (1086): ajanın durum + paket uçları, makine anahtarıyla.
 uygulama.AktarimUclariniEkle();
+uygulama.AktarimYonetimUclariniEkle();   // 1090 Aktarım Durumu ekranı
 uygulama.BankoOturumUclariniEkle();
 uygulama.DemirbasZimmetUclariniEkle();   // 1007 Zimmet / Hareketler
 uygulama.HastaIcmalUclariniEkle();   // hasta hesap icmali (10.10.2026)

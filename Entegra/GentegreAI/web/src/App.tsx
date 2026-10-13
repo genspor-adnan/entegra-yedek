@@ -31,6 +31,7 @@ const HastaIcmal = tembel(() => import('./sayfalar/hasta/HastaIcmal'), 'HastaIcm
 const KurumIcmal = tembel(() => import('./sayfalar/kurum/KurumIcmal'), 'KurumIcmal');
 const VezneIcmal = tembel(() => import('./sayfalar/vezne/VezneIcmal'), 'VezneIcmal');
 const MedulaMutabakat = tembel(() => import('./sayfalar/medula/MedulaMutabakat'), 'MedulaMutabakat');
+const AktarimDurumu = tembel(() => import('./sayfalar/aktarim/AktarimDurumu'), 'AktarimDurumu');
 const AlacakYaslandirma = tembel(() => import('./sayfalar/yaslandirma/AlacakYaslandirma'), 'AlacakYaslandirma');
 const HastaBorcTakibi = tembel(() => import('./sayfalar/borc/HastaBorcTakibi'), 'HastaBorcTakibi');
 const HekimPerformans = tembel(() => import('./sayfalar/performans/HekimPerformans'), 'HekimPerformans');
@@ -265,6 +266,7 @@ function Yollar() {
         <Route path="/kurum-icmal" element={<Navigate to="/kurum-icmali?sekme=icmaller" replace />} />
         {yetki('banko.vezne_icmal') && <Route path="/vezne-icmali" element={<VezneIcmal />} />}
         {yetki('medula.mutabakat') && <Route path="/medula-mutabakat" element={<MedulaMutabakat />} />}
+        {yetki('aktarim.durum') && <Route path="/aktarim-durumu" element={<AktarimDurumu />} />}
         {yetki('finans.alacak_yaslandirma') && <Route path="/alacak-yaslandirma" element={<AlacakYaslandirma />} />}
         {yetki('hasta.borc_takip') && <Route path="/hasta-borc-takibi" element={<HastaBorcTakibi />} />}
         {yetki('prim.hekim_performans') && <Route path="/hekim-performans" element={<HekimPerformans />} />}

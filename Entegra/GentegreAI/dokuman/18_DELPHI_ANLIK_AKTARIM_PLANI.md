@@ -392,8 +392,15 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
      bakiyesine yazılmaz; hata GK422 -> 422. Kart, özel uç, zamanlı iş - her yol
      aynı karar. Aktarım `gentegre.aktarim` oturumuyla geçer (fn_aktar_paket
      başında). `hizmet.oto_pasif` (552) Delphi kalemini atlar.
-   - Sırada 6b: kart / liste metaverisinde salt okunur + "Delphi'den gelir"
-     rozeti; 6c Aktarım Durumu ekranı; 6d GenProfil veri kaynağı + ajan anahtarı.
+   - **6b yapıldı:** `AktarilanKaynaklar` (Cekirdek, tek liste) - kart okumada
+     Delphi satırı `Yetki.Duzenle/Sil=false` + `disKaynak: "Delphi"` (GenForm rozet +
+     bilgi bandı); araç çubuğunda aktarılan kaynağa yazan aksiyon ve e-Belge pasif
+     (sebep "Delphi'den gelir"); `/api/kart` `ekle` kapalı.
+   - **6c yapıldı (1090):** `aktarim.durum` ekran kodu (haklar zamanli_is'ten),
+     `/api/aktarim-yonetim/durum`, `/hata/{id}/ham`, `/hata/{id}/cozuldu`; web
+     `Yönetim › Platform › Aktarım Durumu` (10 sn yenileme). Klon `gentegre_ai_aktarim`
+     Delphi kipinde bırakıldı (ekran / kart denemesi için).
+   - Sırada 6d: GenProfil'de veri kaynağı + ajan anahtarı üretme.
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

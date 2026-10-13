@@ -346,6 +346,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const yuklenenRef = useRef<string | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
   const [yetki, setYetki] = useState<KartYetkisi>({ duzenle: false, sil: false, gizliAlanlar: [] });
+  // DELPHI KAYDI (1089): sunucu "Delphi" derse rozet + bilgi bandı; düzenleme yetkisi zaten kapalı gelir.
+  const [disKaynak, setDisKaynak] = useState<string | null>(null);
   const [detaylar, setDetaylar] = useState<Record<string, DetayDurumu>>({});
   /**
    * SAYFALI DETAY (525, kullanici: "fiyat listesinde satirlar cok fazla
@@ -787,6 +789,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
           : null;
         setSurum(k.kart.surum as string | undefined);
         setYetki(k.yetki);
+        setDisKaynak(k.disKaynak ?? null);
         m.detaylar.forEach(d => {
           bosDetaylar[d.ad] = bosDetay(k.detaylar?.[d.ad] ?? []);
         });
@@ -1424,7 +1427,9 @@ Yine de yeni kayıt eklensin mi?`);
           )}
           {surum && !surumGizli && <span className="rozet gri">surum {surum}</span>}
           {baslikEk?.(deger)}
-          {salt && <span className="rozet uyari">salt okunur</span>}
+          {disKaynak
+            ? <span className="rozet mor" title={c("Bu kayıt Delphi ERP'de tutulur ve oradan aktarılır.")}>⇄ {c("Delphi'den gelir")}</span>
+            : salt && <span className="rozet uyari">salt okunur</span>}
         </>
       }
       ustSerit={sekmeMaks && sekmeler.length > 1 ? undefined : (
@@ -1433,6 +1438,11 @@ Yine de yeni kayıt eklensin mi?`);
             alerji/kronik/aktif ilac hekimin yazarken gormesi gereken bilgi -
             ayri sekmede durursa bakilmaz. */}
         {ustBaglam?.(deger)}
+        {disKaynak && !yeniMi && (
+          <div className="bilgi-kutusu">
+            {c("Bu kayıt Delphi ERP'de tutulur ve oradan otomatik aktarılır. Değişikliği Delphi'de yapın; birkaç saniye içinde burada görünür.")}
+          </div>
+        )}
         {kimlikAlanlari.length > 0 && (
           <KartKimlikSeridi
             yeniMi={yeniMi}

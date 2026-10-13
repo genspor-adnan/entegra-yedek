@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Gentegre.Cekirdek.Aktarim;
+using System.Globalization;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
@@ -108,6 +109,8 @@ public static class KartUclari
             };
 
             var detay = await depo.DetaylarAsync(tanim, id, iptal);
+            // DELPHI KAYDI (1089): salt okunur - asıl ret veritabanı tetiğinde, burada düğmeler kapanır.
+            var delphi = await depo.DelphiKaydiAsync(tanim, id, iptal);
 
             return Results.Ok(new KartYaniti
             {
@@ -117,12 +120,13 @@ public static class KartUclari
                 KodAd = await depo.KodAdAsync(tanim, kart.Kart, iptal),
                 Yetki = new KartYetkisi
                 {
-                    Duzenle = baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Degistir),
+                    Duzenle = !delphi && baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Degistir),
                     // SİLİNMEYEN KART: yetki olsa da `sil` kapalı döner -
                     //   ekran var olmayan bir yolu düğme olarak göstermesin.
-                    Sil = !tanim.SilmeYok && baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Sil),
+                    Sil = !delphi && !tanim.SilmeYok && baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Sil),
                     GizliAlanlar = gizli
                 },
+                DisKaynak = delphi ? "Delphi" : null,
                 IzlemeNo = baglam.IzlemeNo
             });
         });
@@ -490,15 +494,16 @@ public static class KartUclari
         });
 
         // kullanicinin acabilecegi kartlar
-        grup.MapGet("/", async (BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapGet("/", async (BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            var delphiKipi = await depo.DelphiKipiAsync(iptal);
             var kartlar = KartKatalogu.Tumu
                 .Where(k => baglam.Yetkiler.Var(k.YetkiKodu, Islem.Gor))
                 .Select(k => new
                 {
                     k.Ad,
-                    ekle = baglam.Yetkiler.Var(k.YetkiKodu, Islem.Ekle),
+                    ekle = !(delphiKipi && AktarilanKaynaklar.KartKapali(k)) && baglam.Yetkiler.Var(k.YetkiKodu, Islem.Ekle),
                     degistir = baglam.Yetkiler.Var(k.YetkiKodu, Islem.Degistir),
                     sil = baglam.Yetkiler.Var(k.YetkiKodu, Islem.Sil)
                 })

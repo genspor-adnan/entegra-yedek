@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek.Aktarim;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri.Depolar;
@@ -40,6 +41,8 @@ public static class AksiyonUclari
             //   arayan suzgec, karma kurulumda iki urunun ozel aksiyonlarini
             //   birden gizliyordu.
             var urunModu = await kartlar.UrunModuAsync(baglam.SubeId ?? 0, iptal);
+            // DELPHI KİPİ (1089): aktarılan kaynağa yazan aksiyon ve e-Belge pasif, sebebiyle.
+            var delphiKipi = await kartlar.DelphiKipiAsync(iptal);
 
             var sonuc = tanimlar
                 // "gelen" grubu da e-Belgeye baglidir: mukellef olmayan sirkette
@@ -52,7 +55,9 @@ public static class AksiyonUclari
                 .OrderBy(a => a.Sira)
                 .Select(a =>
                 {
-                    var (aktif, sebep) = Kosul(a, baglam, kayitId, belge);
+                    var (aktif, sebep) = delphiKipi && AktarilanKaynaklar.AksiyonKapali(a)
+                        ? (false, AktarilanKaynaklar.Mesaj)
+                        : Kosul(a, baglam, kayitId, belge);
                     return new AksiyonYaniti(a.Kod, a.Ad, a.Grup, a.Hedef, a.Kisayol,
                                              a.KayitGerekir, aktif, sebep, a.Bicim, a.Ipucu);
                 })

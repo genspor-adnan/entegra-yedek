@@ -16,6 +16,8 @@ export interface KartYaniti {
   detayToplam?: Record<string, number>;
   kodAd?: Record<string, Record<string, string>>;
   yetki: KartYetkisi;
+  /** Dış kaynak (1089): "Delphi" ise kayıt Delphi ERP'den aktarılır, salt okunur (yetki zaten kapalı gelir). */
+  disKaynak?: string | null;
   izlemeNo: string;
 }
 
