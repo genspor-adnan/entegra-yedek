@@ -40,7 +40,7 @@ param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
-    [ValidateSet('hepsi','hbys','erp','profiller',
+    [ValidateSet('hepsi','hbys','erp','delphi','profiller',
                  'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
@@ -67,6 +67,15 @@ $KURULUMLAR = @(
         Ad = 'erp';   Etiket = 'Gentegre AI (ERP)';
         Yol = '/gentegreai/'; Kok = 'gentegre-erp';
         Db = 'gentegre_erp'; Kap = 'gentegre-api-erp'; Port = 5181
+    },
+    # DELPHI AKTARIMI PILOTU (14.10.2026, kullanici: "yeni bos kurulum"): bos ERP
+    #   veritabani, veri Delphi'den aktarim ajaniyla gelir (dokuman/19). Sunucu
+    #   hazirligi bir kez: yayin\delphi-pilot-hazirla.sh (DB + nginx, sudo).
+    #   'hepsi' bu kurulumu da yayinlar.
+    [ordered]@{
+        Ad = 'delphi'; Etiket = 'Gentegre AI (ERP - Delphi aktarimi pilotu)';
+        Yol = '/gentegreai/delphi/'; Kok = 'gentegre-erp-delphi';
+        Db = 'gentegre_erp_delphi'; Kap = 'gentegre-api-erp-delphi'; Port = 5182
     }
 )
 
