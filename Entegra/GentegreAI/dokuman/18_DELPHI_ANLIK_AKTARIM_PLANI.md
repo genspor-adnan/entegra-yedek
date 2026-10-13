@@ -443,7 +443,7 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    denetlendi, makinede servis KURULMADI), `yayinla_ajan.ps1` (tek dosya,
    self-contained, 86 MB; çıktı `yayin/ajan/` git dışı). Bulgu: sunucudaki nginx
    gövde sınırı 25 MB (`client_max_body_size`) - ajan varsayılanı 32'den 20 MB'a
-   indi, 413 gelirse sayfayı yarılar (bu yol canlı denenmedi).
+   indi, 413 gelirse sayfayı yarılar (14.10: API sınırı ayarla 1 MB yapılarak denendi - `Aktarim:PaketSiniriMb`; stok grubu 500 -> 62 sayfayla tamamen geçti).
 
    **8b hazırlık (14.10.2026, kullanıcı: "yeni boş kurulum"):** yayın profili `delphi`
    (`/gentegreai/delphi/`, DB `gentegre_erp_delphi`, port 5182, `Urun = 'erp'`),

@@ -25,7 +25,8 @@ Yayın profili `yayinla.ps1 -Kurulum delphi` (DB `gentegre_erp_delphi`, API 5182
 
 ```bash
 scp GentegreAI/yayin/nginx-delphi.conf GentegreAI/yayin/delphi-pilot-hazirla.sh gentegre@46.36.201.170:/tmp/
-ssh gentegre@46.36.201.170 "sed -i 's/$//' /tmp/delphi-pilot-hazirla.sh && sudo bash /tmp/delphi-pilot-hazirla.sh"
+ssh gentegre@46.36.201.170 "sed -i 's/
+$//' /tmp/delphi-pilot-hazirla.sh && sudo bash /tmp/delphi-pilot-hazirla.sh"
 ```
 Boş veritabanını (UTF8 + ICU tr-TR) ve nginx bloğunu kurar; ikisi de varsa dokunmaz.
 Sonra yerelden `powershell -ExecutionPolicy Bypass -File GentegreAI/yayin/yayinla.ps1 -Kurulum delphi`:
@@ -107,7 +108,7 @@ Büyük veritabanında ilk kurulumu mesai dışında yapın.
 | Belirti | Sebep / çözüm |
 |---|---|
 | `401` (günlükte "Sunucu 401") | Anahtar yanlış ya da pasif. GenProfil'de yeni anahtar. |
-| `413` | Paket nginx sınırını aştı: ajan sayfayı yarılar; sürekli oluyorsa `PaketMb`'yi düşürün. |
+| `413` | Paket sınırı aşıldı: ajan sayfayı yarılar (14.10.2026 denendi: 1 MB sınırda 500 -> 62, tamamı geçti). API'nin kendi sınırı `Aktarim:PaketSiniriMb` (varsayılan 64) - nginx'in `client_max_body_size`'ının altında tutulursa 413'ü API verir. |
 | "Change Tracking kapalı" | `mssql_hazirla.sql` çalıştırılmamış ya da veritabanı geri yüklenmiş (geri yükleme CT'yi kapatır) — betiği yeniden çalıştırın; ajan tam yükler. |
 | SQL error 26 / "Server is in single user mode" | SQL Server örneğine ulaşılamadı ya da bakımda. Ajan bağlantıyı 5 kez dener, sonra turu üstel beklemeyle yeniden dener — bakım bitince kendiliğinden devam eder. |
 | `QUOTED_IDENTIFIER` hatası (betik çalıştırırken) | `sqlcmd`'ye `-I` ekleyin. |

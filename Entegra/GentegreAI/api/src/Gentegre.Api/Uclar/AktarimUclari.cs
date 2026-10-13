@@ -17,12 +17,18 @@ public static class AktarimUclari
 {
     private const string AnahtarBasligi = "X-Aktarim-Anahtar";
 
-    /// <summary>İlk yükleme sayfalı gelir; tek paket bundan büyükse ajan bölmeli.</summary>
+    /// <summary>
+    /// Varsayılan paket sınırı. Ayar <c>Aktarim:PaketSiniriMb</c> ile değişir - önündeki
+    /// vekilin (nginx client_max_body_size) altında tutulursa 413'ü API verir, ajan
+    /// sayfayı yarılar. İlk yükleme sayfalı gelir; tek paket bundan büyükse ajan böler.
+    /// </summary>
     public const long PaketSiniri = 64L * 1024 * 1024;
 
     public static void AktarimUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/aktarim").WithTags("Delphi aktarımı (ajan)").AllowAnonymous();
+        var mb = yol.ServiceProvider.GetRequiredService<IConfiguration>().GetValue<int?>("Aktarim:PaketSiniriMb");
+        var sinir = mb is > 0 ? mb.Value * 1024L * 1024 : PaketSiniri;
 
         // Ajan kaldığı yeri sorar: tablo başına son uygulanan CT versiyonu, hareket sınırı, açık hatalar.
         grup.MapGet("/durum", async (HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
@@ -81,7 +87,7 @@ public static class AktarimUclari
         {
             await using var b = await veri.AcAsync(iptal);
             var ajan = await AjanAsync(b, ctx, iptal);
-            if (ctx.Request.ContentLength > PaketSiniri)
+            if (ctx.Request.ContentLength > sinir)
                 return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
 
             string govde;
@@ -102,7 +108,7 @@ public static class AktarimUclari
                 throw GentegreHatasi.Dogrulama(pg.MessageText.StartsWith("AKTARIM_TABLO")
                     ? pg.MessageText["AKTARIM_TABLO: ".Length..] : "Paket geçerli JSON değil.");
             }
-        }).WithMetadata(new RequestSizeLimitAttribute(PaketSiniri));
+        }).WithMetadata(new RequestSizeLimitAttribute(sinir));
 
         // MUTABAKAT (1091): Delphi kök kimlikleri -> eksik / fazla. Yazmaz.
         grup.MapPost("/mutabakat", async (MutabakatIstegi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
@@ -119,7 +125,7 @@ public static class AktarimUclari
             {
                 throw GentegreHatasi.Dogrulama(pg.MessageText["AKTARIM_TABLO: ".Length..]);
             }
-        }).WithMetadata(new RequestSizeLimitAttribute(PaketSiniri));
+        }).WithMetadata(new RequestSizeLimitAttribute(sinir));
 
         // Mutabakat sonucu (ekranın "Mutabakat" paneli).
         grup.MapPost("/mutabakat/kayit", async (MutabakatKaydi g, HttpContext ctx, VeriKaynagi veri, CancellationToken iptal) =>
