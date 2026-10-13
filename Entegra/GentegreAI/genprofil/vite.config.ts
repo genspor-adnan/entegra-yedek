@@ -16,7 +16,14 @@ export default defineConfig({
     react(),
     {
       name: 'genprofil-vekil',
-      configureServer(sunucu) { sunucu.middlewares.use(vekilAraKatmani) },
+      configureServer(sunucu) {
+        sunucu.middlewares.use(vekilAraKatmani);
+        // WEB KAYNAGI DA IZLENIR (13.10.2026): Vite yalniz kendi kokunu
+        //   izliyor; ../web/src'deki degisiklik (yeni menu ekrani, liste tanimi)
+        //   gelistirme sunucusu yeniden baslatilana kadar GORUNMUYORDU - 09.10'da
+        //   acilan sunucu Kalite ve icmal ekranlarini hic gostermedi.
+        sunucu.watcher.add(webSrc);
+      },
       configurePreviewServer(sunucu) { sunucu.middlewares.use(vekilAraKatmani) },
     },
   ],
