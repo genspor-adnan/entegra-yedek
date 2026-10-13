@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delphi Aktarımı — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --warn:#b5731a; --err:#b23b3b; --grpbg:#fbfcfd;
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f; --s-kri:#fbe6ae; --s-kri-t:#7a5407; --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;
+    --dlp:#6a4c93; --dlpbg:#efe8f8; --dlpbd:#cdbbe6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .ust{max-width:1380px;margin:0 auto 10px;display:flex;gap:4px;align-items:flex-end}
+  .ust h1{font-size:15px;margin:0 14px 6px 2px;color:var(--navy)}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;cursor:pointer;color:#3a5573}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .sayfa{display:none}.sayfa.on{display:block}
+  .win{max-width:1380px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .yol{font-weight:normal;opacity:.8;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .govde{padding:12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:9px 11px}
+  .kutu .e{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .d{font-size:18px;font-weight:bold;color:var(--navy);margin-top:3px}
+  .kutu .a{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.ok{border-left:4px solid var(--ok)} .kutu.uy{border-left:4px solid var(--warn)} .kutu.hata{border-left:4px solid var(--err)}
+  .isik{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .isik.ok{background:#3fa35c}.isik.uy{background:#e0a23a}.isik.hata{background:#d24b47}.isik.gri{background:#b8c2cc}
+  .dg{border:1px solid var(--line);border-radius:3px;background:#fff;overflow-x:auto}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}.dg .c{text-align:center}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-pas td{background:#f4f4f4;color:var(--s-pas-t)}
+  .dg tr.grpbas td{background:#f0f4f9;color:var(--navy);font-weight:bold;font-size:10.5px}
+  .iki{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+  .mini{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:2px 8px;font-size:10.5px}
+  .not{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .rozet{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:bold;color:var(--dlp);
+    background:var(--dlpbg);border:1px solid var(--dlpbd);border-radius:10px;padding:1px 8px}
+  .title .rozet{background:#efe8f8;margin-left:6px}
+  .bant{background:var(--dlpbg);border-bottom:1px solid var(--dlpbd);color:#4b3470;padding:6px 12px;font-size:11.5px;display:flex;gap:8px;align-items:center}
+  .form{display:grid;grid-template-columns:130px 1fr 130px 1fr;gap:6px 10px;align-items:center}
+  .form label{color:#3a5573;font-size:11px;text-align:right}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:4px 6px;background:#fff;font-size:11.5px;min-height:24px}
+  .inp.ro{background:#f3f4f6;color:#4a5866}
+  .karar{border:1px solid #e3cf9a;background:#fffaf0;border-radius:4px;padding:10px 14px;margin-bottom:10px}
+  .karar h5{margin:0 0 6px;font-size:12px;color:#7a5407}
+  .karar ol{margin:4px 0 0 18px;padding:0}.karar li{margin:4px 0;line-height:1.5}
+  .oneri{color:var(--ok);font-weight:bold}
+  .anahtar{font-family:Consolas,monospace;background:#1f2d3a;color:#c6f5d0;padding:6px 9px;border-radius:3px;font-size:11.5px;letter-spacing:.5px}
+  .anahtar .mini{color:var(--ink);font-family:"Trebuchet MS",sans-serif;letter-spacing:0}
+  .radio{display:flex;gap:16px}.radio span{display:flex;gap:5px;align-items:center}
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <h1>Delphi → Web Aktarımı</h1>
+  <div class="tab active" data-s="s1">1 · Aktarım Durumu</div>
+  <div class="tab" data-s="s2">2 · Salt okunur kart / liste</div>
+  <div class="tab" data-s="s3">3 · GenProfil: kurum ayarı</div>
+  <div class="tab" data-s="s4">Açık kararlar</div>
+</div>
+
+<!-- =============================================================== 1 ======= -->
+<div class="sayfa on" id="s1">
+<div class="win">
+  <div class="title"><span class="dot"></span>Aktarım Durumu <span class="yol">· Yönetim › Platform</span>
+    <span class="sp">Yenileme: 10 sn · son 14:32:08</span></div>
+  <div class="toolbar">
+    <span class="btn">⟳ Yenile</span>
+    <span class="btn">📄 Mutabakat raporu</span>
+    <span class="sepv"></span>
+    <span class="btn">⬇ Günlük (son 500 paket)</span>
+    <span class="sepv"></span>
+    <span class="not" style="margin-left:6px">Bu ekran yalnız GÖSTERİR: aktarımı ajan yürütür, sıra ve kurallar sunucuda.</span>
+  </div>
+  <div class="govde">
+
+    <div class="ozet" style="margin-bottom:12px">
+      <div class="kutu ok"><div class="e">Ajan</div><div class="d"><span class="isik ok"></span>Çalışıyor</div>
+        <div class="a">BILIM sunucusu · sürüm 0.1.0 · son nabız 4 sn önce</div></div>
+      <div class="kutu ok"><div class="e">Gecikme</div><div class="d">3 sn</div>
+        <div class="a">Delphi'deki son değişiklik → web</div></div>
+      <div class="kutu"><div class="e">Bugün</div><div class="d">412 paket</div>
+        <div class="a">1.874 kayıt · 23 silme · ort. 180 ms</div></div>
+      <div class="kutu hata"><div class="e">Açık hata</div><div class="d">1</div>
+        <div class="a">Cari adımı · 7. deneme · sonraki adımlar bekliyor</div></div>
+      <div class="kutu"><div class="e">Hareket başlangıcı</div><div class="d">01.01.2026</div>
+        <div class="a">Belge / kasa / stok izleme bu tarihten</div></div>
+    </div>
+
+    <div class="grp">
+      <h4>Hata kuyruğu <span class="tag">adım başına tek açık kayıt</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <tr><th>Adım</th><th>Tablolar</th><th>Mesaj</th><th class="r">Deneme</th><th>İlk</th><th>Son</th><th>Etkilenen</th><th></th></tr>
+          <tr class="s-yok"><td>4 · Cari</td><td>REHBER, REHBERILETISIM, REHBERBILGI</td>
+            <td>value too long for type character varying(20) (vkno)</td><td class="r">7</td>
+            <td>14:05:12</td><td>14:31:40</td><td>Cari 5906 · "ATLAS MEDİKAL…"</td>
+            <td><span class="mini">Ham paketi göster</span> <span class="mini">Çözüldü say</span></td></tr>
+        </table></div>
+        <p class="not" style="margin:8px 2px 0">
+          Hatalı adım ve <b>sonrakiler</b> (proje → kasa) bu hata çözülene kadar bekler: hatalı cari varken gelen belge carisiz kalırdı.
+          Önceki adımlar (depo, döviz, masraf merkezi) akmaya devam eder. Ajan 30 sn → 10 dk aralıkla kendisi yeniden dener;
+          düzeltme <b>Delphi'de</b> yapılır (veri) ya da sunucu sürümüyle (kural). "Çözüldü say" yalnız kaydı kapatır, veriyi atlamaz.
+        </p>
+      </div>
+    </div>
+
+    <div class="iki">
+      <div class="grp">
+        <h4>Tablolar <span class="tag">sunucu sırası (fn_aktarim_adimlari)</span></h4>
+        <div class="body" style="padding:0">
+          <div class="dg" style="border:none"><table>
+            <tr><th>Adım</th><th>Delphi tablosu</th><th>Web</th><th class="r">Versiyon</th><th>Son paket</th><th class="r">Bugün</th><th class="c">Durum</th></tr>
+            <tr class="grpbas"><td colspan="7">Tanımlar</td></tr>
+            <tr><td>1</td><td>DEPOLAR</td><td>Depo</td><td class="r">48.212</td><td>14:31:58</td><td class="r">0</td><td class="c"><span class="isik ok"></span>Güncel</td></tr>
+            <tr><td>2</td><td>DOVIZ</td><td>Döviz kuru</td><td class="r">48.212</td><td>14:31:58</td><td class="r">12</td><td class="c"><span class="isik ok"></span>Güncel</td></tr>
+            <tr><td>3</td><td>SRMMERKEZI</td><td>Masraf merkezi</td><td class="r">48.212</td><td>14:31:58</td><td class="r">0</td><td class="c"><span class="isik ok"></span>Güncel</td></tr>
+            <tr class="s-yok"><td>4</td><td>REHBER + İLETİŞİM + BİLGİ</td><td>Cari, adres</td><td class="r">48.130</td><td>14:05:12</td><td class="r">36</td><td class="c"><span class="isik hata"></span>Hata</td></tr>
+            <tr class="s-kri"><td>5</td><td>PROJELER</td><td>Proje</td><td class="r">48.130</td><td>14:05:12</td><td class="r">0</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>6</td><td>MASRAFGELIR + FIYATLAR</td><td>Hizmet / masraf</td><td class="r">48.130</td><td>14:05:12</td><td class="r">4</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>7</td><td>STOKLAR + barkod / fiyat / seri-lot</td><td>Stok</td><td class="r">48.130</td><td>14:05:12</td><td class="r">58</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>8</td><td>KASALAR · BANKA · POS · KK · KREDİ</td><td>Hesap</td><td class="r">48.130</td><td>14:05:12</td><td class="r">0</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>9–10</td><td>LOKASYON · URETIMRECETE + satır / opr.</td><td>İş merkezi, ürün ağacı</td><td class="r">48.130</td><td>14:05:12</td><td class="r">2</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="grpbas"><td colspan="7">Hareketler (01.01.2026'dan)</td></tr>
+            <tr class="s-kri"><td>11</td><td>STOKDURUM</td><td>Stok bakiyesi</td><td class="r">48.130</td><td>14:05:12</td><td class="r">311</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>12</td><td>FATBASLIK + FATURA + STOKIZLEME</td><td>Belge, satır, izlem</td><td class="r">48.130</td><td>14:05:12</td><td class="r">97</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+            <tr class="s-kri"><td>13</td><td>KASA</td><td>Cari hareket, kasa işlemi</td><td class="r">48.130</td><td>14:05:12</td><td class="r">41</td><td class="c"><span class="isik uy"></span>Bekliyor</td></tr>
+          </table></div>
+          <p class="not" style="margin:6px 10px 8px">Versiyon = Delphi Change Tracking numarası; Delphi'nin şu anki versiyonu <b>48.215</b>.
+            "Bugün" = web'e yazılan kayıt (aynı içerik yeniden yazılmaz, sayılmaz).</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="grp">
+          <h4>Son paketler</h4>
+          <div class="body" style="padding:0">
+            <div class="dg" style="border:none"><table>
+              <tr><th>Saat</th><th>İçerik</th><th class="r">Süre</th><th>Sonuç</th></tr>
+              <tr><td>14:31:58</td><td>DOVIZ 4</td><td class="r">42 ms</td><td><span class="isik ok"></span>Tamam · 4 kur</td></tr>
+              <tr class="s-yok"><td>14:31:40</td><td>REHBER 1 · İLETİŞİM 2 · FATBASLIK 1 · FATURA 3</td><td class="r">95 ms</td><td><span class="isik hata"></span>Cari adımı hata</td></tr>
+              <tr><td>14:28:10</td><td>STOKLAR 1 · STOKFIYAT 3</td><td class="r">61 ms</td><td><span class="isik ok"></span>Tamam · 1 fiyat</td></tr>
+              <tr><td>14:05:12</td><td>FATBASLIK 1 · FATURA 6 · KASA 1</td><td class="r">310 ms</td><td><span class="isik ok"></span>Tamam · 1 belge, 6 satır</td></tr>
+              <tr class="s-pas"><td>14:05:12</td><td>(versiyon bildirimi)</td><td class="r">8 ms</td><td>27 tablo → 48.130</td></tr>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Mutabakat (gece) <span class="tag">adım 7</span></h4>
+          <div class="body">
+            <div class="dg"><table>
+              <tr><th>Kontrol</th><th class="r">Delphi</th><th class="r">Web</th><th class="c">Sonuç</th></tr>
+              <tr><td>Cari sayısı</td><td class="r">2.715</td><td class="r">2.715</td><td class="c"><span class="isik ok"></span></td></tr>
+              <tr><td>2026 belge sayısı / toplamı</td><td class="r">519 · 18,4 M</td><td class="r">519 · 18,4 M</td><td class="c"><span class="isik ok"></span></td></tr>
+              <tr class="s-kri"><td>Cari bakiyesi farklı</td><td class="r" colspan="2">5 cari (açıklamalı)</td><td class="c"><span class="isik uy"></span></td></tr>
+              <tr class="s-kri"><td>Delphi'de silinmiş, web'de duran</td><td class="r" colspan="2">2 kayıt → pasif yapılacak</td><td class="c"><span class="isik uy"></span></td></tr>
+            </table></div>
+            <p class="not" style="margin:6px 2px 0">Son mutabakat 03:10 · ajan susarsa (5 dk nabız yok) yöneticilere bildirim.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- =============================================================== 2 ======= -->
+<div class="sayfa" id="s2">
+<div class="win">
+  <div class="title"><span class="dot"></span>Cari Kartı — ATLAS MEDİKAL TİC. LTD. ŞTİ. <span class="rozet">⇄ Delphi'den gelir</span>
+    <span class="sp">kod 120.01.0045</span></div>
+  <div class="bant">ⓘ Bu kayıt Delphi ERP'de tutulur ve oradan otomatik aktarılır. Değişikliği <b>Delphi'de</b> yapın; birkaç saniye içinde burada görünür.</div>
+  <div class="toolbar">
+    <span class="btn pas">💾 Kaydet</span><span class="btn pas">🗑 Sil</span>
+    <span class="sepv"></span>
+    <span class="btn">🖨 Yazdır</span><span class="btn">✉ E-posta</span><span class="btn">📎 Belge ekle</span><span class="btn">💬 Not</span>
+    <span class="sepv"></span>
+    <span class="btn">📊 Ekstre</span>
+    <span class="not" style="margin-left:8px">Kaydet / Sil / alan düzenleme <b>kapalı</b> (sunucu da reddeder: 422 "Delphi'den gelir").</span>
+  </div>
+  <div class="govde">
+    <div class="form">
+      <label>Kod</label><div class="inp ro">120.01.0045</div>
+      <label>Durum</label><div class="inp ro">Aktif</div>
+      <label>Ünvan</label><div class="inp ro" style="grid-column:span 3">ATLAS MEDİKAL TİC. LTD. ŞTİ.</div>
+      <label>Vergi dairesi</label><div class="inp ro">Kızılbey</div>
+      <label>VKN</label><div class="inp ro">0960012345</div>
+      <label>Rol</label><div class="inp ro">Müşteri · Tedarikçi</div>
+      <label>Şube</label><div class="inp ro">Merkez</div>
+    </div>
+    <p class="not" style="margin-top:10px">Alanlar salt okunur görünür (gri). Web'e özgü bilgiler (notlar, ekli belgeler, görevler) bu kayda eklenebilir — karar 1.</p>
+  </div>
+</div>
+
+<div class="win">
+  <div class="title"><span class="dot"></span>Cari Listesi <span class="rozet">⇄ Delphi'den gelir</span><span class="sp">2.715 kayıt</span></div>
+  <div class="toolbar">
+    <span class="btn pas">＋ Yeni</span><span class="btn pas">✎ Toplu düzelt</span><span class="btn pas">⬆ Veri al</span>
+    <span class="sepv"></span><span class="btn">⬇ Excel</span><span class="btn">🖨 Yazdır</span>
+    <span class="not" style="margin-left:8px">Yeni / toplu düzelt / veri al gizlenir; liste, arama, dışa aktarma açık.</span>
+  </div>
+  <div class="govde" style="padding:0">
+    <div class="dg" style="border:none"><table>
+      <tr><th>Kod</th><th>Ünvan</th><th>VKN</th><th>Rol</th><th class="r">Bakiye</th></tr>
+      <tr><td>120.01.0045</td><td>ATLAS MEDİKAL TİC. LTD. ŞTİ.</td><td>0960012345</td><td>Müşteri</td><td class="r">48.250,00</td></tr>
+      <tr><td>320.01.0012</td><td>BORA AMBALAJ A.Ş.</td><td>1840098765</td><td>Tedarikçi</td><td class="r">-12.400,00</td></tr>
+      <tr><td>000</td><td>Tanımsız Cari</td><td></td><td>Müşteri · Tedarikçi</td><td class="r">-912.925,00</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<div class="grp" style="max-width:1380px;margin:0 auto">
+  <h4>Salt okunur olan kaynaklar <span class="tag">veri kaynağı = Delphi iken</span></h4>
+  <div class="body">
+    <div class="dg"><table>
+      <tr><th>Kaynak (web)</th><th>Delphi</th><th>Web'de açık kalan</th></tr>
+      <tr><td>Cari (taraf), adres</td><td>REHBER, REHBERILETISIM, REHBERBILGI</td><td>Not, ek belge, görev, ekstre/yazdır</td></tr>
+      <tr><td>Stok, barkod, fiyat, seri-lot, stok bakiyesi</td><td>STOKLAR…, STOKDURUM</td><td>Görüntüleme, etiket yazdırma</td></tr>
+      <tr><td>Hizmet / masraf kalemi + fiyatları</td><td>MASRAFGELIR, FIYATLAR</td><td>Görüntüleme</td></tr>
+      <tr><td>Depo, döviz kuru, masraf merkezi, proje</td><td>DEPOLAR, DOVIZ, SRMMERKEZI, PROJELER</td><td>Görüntüleme</td></tr>
+      <tr><td>Kasa / banka / POS / kredi kartı / kredi hesabı</td><td>KASALAR…KREDILER</td><td>Görüntüleme, hesap ekstresi</td></tr>
+      <tr><td>Belge (fatura, irsaliye, fiş, tahakkuk), satır, izlem</td><td>FATBASLIK, FATURA, STOKIZLEME</td><td>Yazdır/PDF, e-posta — e-Belge gönderimi <b>Delphi'de</b> (karar 2)</td></tr>
+      <tr><td>Kasa işlemi, cari hareket</td><td>KASA</td><td>Makbuz yazdır</td></tr>
+      <tr><td>Ürün ağacı (reçete), iş merkezi</td><td>URETIMRECETE…, LOKASYON</td><td>Görüntüleme</td></tr>
+    </table></div>
+    <p class="not" style="margin:8px 2px 0">Hangi kaynağın salt okunur olduğu <b>sunucudan</b> gelir (tek kaynak: aktarılan kaynaklar listesi); istemci kendisi gizlemez.
+      Aktarılmayan modüller (HBYS, görev, CRM, doküman…) web'de normal çalışır.</p>
+  </div>
+</div>
+</div>
+
+<!-- =============================================================== 3 ======= -->
+<div class="sayfa" id="s3">
+<div class="win" style="max-width:900px">
+  <div class="title"><span class="dot"></span>GenProfil — Kurum: BİLİM MEDİKAL <span class="yol">· Kurum profili › Veri kaynağı</span></div>
+  <div class="govde">
+    <div class="grp">
+      <h4>Veri kaynağı</h4>
+      <div class="body">
+        <div class="radio" style="margin-bottom:10px">
+          <span>○ Web (bu sistemde girilir)</span>
+          <span>● <b>Delphi ERP</b> (aktarım ajanıyla, tek yön)</span>
+        </div>
+        <div class="form" style="grid-template-columns:150px 1fr">
+          <label>Hareket başlangıcı</label><div class="inp" style="width:140px">01.01.2026</div>
+          <label></label><div class="not">Belge, kasa ve stok izleme bu tarihten aktarılır; tanımların hepsi gelir. İlk yüklemeden sonra değiştirilirse ilgili tablolar yeniden yüklenir.</div>
+          <label>Şube eşlemesi</label><div class="inp">Delphi şube 0 → Merkez · 1 → Ankara <span class="mini" style="float:right">Düzenle</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Ajan anahtarları</h4>
+      <div class="body">
+        <div class="dg" style="margin-bottom:8px"><table>
+          <tr><th>Ad</th><th>Oluşturma</th><th>Son nabız</th><th>Sürüm</th><th class="c">Durum</th><th></th></tr>
+          <tr><td>BILIM sunucusu</td><td>13.10.2026</td><td>4 sn önce</td><td>0.1.0</td><td class="c"><span class="isik ok"></span>Aktif</td><td><span class="mini">Pasif yap</span></td></tr>
+          <tr class="s-pas"><td>Eski sunucu</td><td>02.10.2026</td><td>05.10.2026</td><td>0.1.0</td><td class="c">Pasif</td><td></td></tr>
+        </table></div>
+        <span class="btn primary" style="display:inline-flex">＋ Yeni anahtar üret</span>
+        <div style="margin-top:10px">
+          <div class="not" style="margin-bottom:4px">Anahtar <b>yalnız şimdi</b> görünür, sistemde saklanmaz (yalnız özeti). Ajanın <code>ajan.json</code>'una yazın, sonra <code>--sifrele</code>.</div>
+          <div class="anahtar">3f9c2a…e81d07 (64 karakter) <span class="mini" style="float:right">Kopyala</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- =========================================================== kararlar ==== -->
+<div class="sayfa" id="s4">
+<div class="win" style="max-width:1000px">
+  <div class="title"><span class="dot"></span>Açık kararlar (onay bekliyor)</div>
+  <div class="govde">
+    <div class="karar"><h5>1. Delphi kaydına web'de ne eklenebilir?</h5>
+      <ol type="a"><li>Hiçbir şey — tamamen salt okunur.</li>
+      <li><span class="oneri">Öneri:</span> web'e özgü EKLER açık: not, ek belge, görev, yorum. Kaydın kendi alanları ve satırları kapalı.</li></ol></div>
+    <div class="karar"><h5>2. e-Fatura / e-Arşiv / e-İrsaliye gönderimi</h5>
+      <ol type="a"><li><span class="oneri">Öneri:</span> Delphi'de kalır (GİB durumu, numara, XML Delphi'nin). Web belgeyi ve durumunu gösterir.</li>
+      <li>Web'den gönderilir — durum Delphi'ye geri yazılamaz (tek yön), iki sistemde ayrışır.</li></ol></div>
+    <div class="karar"><h5>3. Aktarılan kaynaklarda web'de YENİ kayıt</h5>
+      <ol type="a"><li><span class="oneri">Öneri:</span> kapalı (ör. web'den yeni cari/fatura açılamaz) — tek kaynak Delphi.</li>
+      <li>Açık; web'de açılan kayıt Delphi'ye gitmez, yalnız web'de yaşar (rozetsiz).</li></ol></div>
+    <div class="karar"><h5>4. Hata kuyruğunda "Atla"</h5>
+      <ol type="a"><li><span class="oneri">Öneri:</span> yok. Yalnız "Çözüldü say" (kayıt kapanır, veri atlanmaz); düzeltme Delphi verisinde ya da sunucu sürümünde.</li>
+      <li>Var: bozuk kaydı yok sayıp sonraki adımları akıt — o kayıt web'de eksik/eski kalır, mutabakat gösterir.</li></ol></div>
+    <div class="karar"><h5>5. Ekranın yeri ve yetkisi</h5>
+      <ol type="a"><li><span class="oneri">Öneri:</span> Yönetim › Platform › Aktarım Durumu, yetki kodu <code>aktarim_durum:g</code> (yalnız görme); "Çözüldü say" için <code>aktarim_durum:y</code>.</li>
+      <li>Ajan anahtarı yalnız GenProfil'de (kurum kullanıcısı üretemez).</li></ol></div>
+  </div>
+</div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+    document.querySelectorAll('.sayfa').forEach(s => s.classList.toggle('on', s.id === t.dataset.s));
+  });
+</script>
+</body>
+</html>
