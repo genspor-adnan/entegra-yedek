@@ -408,6 +408,8 @@ uygulama.FormUclariniEkle();
 uygulama.IsgUclariniEkle();
 // ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
 uygulama.CagriUclariniEkle();
+// DELPHI AKTARIMI (1086): ajanın durum + paket uçları, makine anahtarıyla.
+uygulama.AktarimUclariniEkle();
 uygulama.BankoOturumUclariniEkle();
 uygulama.DemirbasZimmetUclariniEkle();   // 1007 Zimmet / Hareketler
 uygulama.HastaIcmalUclariniEkle();   // hasta hesap icmali (10.10.2026)

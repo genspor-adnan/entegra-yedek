@@ -1488,6 +1488,35 @@ Lab istem KARTINDAN (GenForm) satır eklenirken sunucu denetimi yoktur
 (kart kaydı `KartUclari` yolundan gider); kural yalnız `POST /api/lab/istem`
 ve muayene istemi yollarında zorunludur.
 
+## 9.19 Delphi aktarım ajanı (1086)
+
+Tek yön Delphi → web (dokuman/18). Müşteri sunucusundaki ajan Change Tracking
+değişikliklerini paketler. Kimlik **oturum değil makine anahtarı**:
+`X-Aktarim-Anahtar` başlığı, `aktarim_ajan.anahtar_ozet` (sha256) ile eşleşir;
+anahtar `fn_aktarim_ajan_ekle(ad)` ile üretilir ve yalnız o an görülür. Anahtar
+yok / yanlış / ajan pasif → `401 YETKISIZ`.
+
+```http
+GET  /api/aktarim/durum     // X-Aktarim-Surum? → { hareket_baslangic, tablolar[{tablo, versiyon, son_paket}], adimlar[{sira, fonksiyon, tablolar}], hatalar[{adim, tablolar, mesaj, deneme, son_zaman}] }
+POST /api/aktarim/paket     // { paket, V: {TABLO: ct_versiyon}, U: {TABLO: [satır]}, D: {TABLO: [id | {anahtar}]} } → { paket, sonuc{fonksiyon: sayaçlar}, hata?{adim, tablolar, mesaj}, ilerleyen[], tekrar? }
+```
+
+- **Sıra sunucuda** (`fn_aktarim_adimlari`): depo, döviz, masraf merkezi, cari,
+  proje, kalem, stok, hesap, iş merkezi, reçete, stok bakiyesi, belge, kasa.
+  Ajan tabloları istediği gibi paketler; satır anahtarları Delphi kolon adının
+  küçük harfi, tablo adları BÜYÜK ASCII.
+- Paket **tek işlem**, kurum başına tek eşzamanlı uygulama (advisory lock).
+  Adım başına savepoint: bir adım hata verirse o adım ve **sonrakiler** uygulanmaz,
+  öncekiler kalır; yanıt yine **200**, `hata` dolu. Hata `aktarim_hata`'ya (adım
+  başına tek açık kayıt, `deneme` sayacı), adım sonra başarılı olunca kapanır.
+- `V`: yalnız uygulanan adımların tabloları ilerler (`ilerleyen`), versiyon geri
+  gitmez. Ajan kaldığı yeri `durum`'dan okur.
+- Tamamlanmış `paket` kimliği tekrar gelirse uygulanmaz, kayıtlı sonuç
+  `tekrar: true` ile döner; hatalı paket aynı kimlikle yeniden uygulanır.
+- Bilinmeyen tablo / geçersiz JSON → `400 DOGRULAMA`, hiçbir şey yazılmaz.
+  Paket sınırı **64 MB** (`413`); ilk yükleme sayfalı gönderilir (BILIM 2026'nın
+  tamamı yıl süzgeçsiz STOKIZLEME ile 193 MB, tek çağrı ~33 sn).
+
 ---
 
 ## 10. Sürümleme

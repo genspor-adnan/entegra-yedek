@@ -337,7 +337,23 @@ id'sini web'de aynen kullan" yaklaşımı burada doğrudan çakışır. İlk tas
    işlemde iki fn_aktar_* aynı adlı farklı yapıda geçici tablo) -> fonksiyona özgü
    önek. 136 / 137 / 161 bilerek uygulanmadı (dosya başı).
 
-   Sırada: plan adım 4 - API ucu (`/api/aktarim/paket`) ve paket sırası.
+   **Adım 4 yapıldı (1086 + `AktarimUclari.cs`, sözleşme §9.19).**
+   `GET /api/aktarim/durum`, `POST /api/aktarim/paket`; makine anahtarı
+   (`aktarim_ajan`, sha256 özeti); `aktarim_durum` (tablo başına CT versiyonu,
+   geri gitmez), `aktarim_paket` (paket kimliği başına sonuç - tamamlanan tekrar
+   uygulanmaz), `aktarim_hata` (adım başına tek açık kayıt + deneme). Sıra
+   `fn_aktarim_adimlari` (13 adım) - tek kaynak. Hatalı adım ve SONRAKİLER durur
+   (hatalı cari varken belge yazılsa carisiz kalırdı), öncekiler kalır.
+   Klonda BILIM 2026'nın tamamı tek pakette: 27 tablo, 193 MB, ~33 sn, hata yok;
+   aynı işlemde ikinci paket 0 yazım. Bulgular (ajana girdi):
+   - Paket sınırı 64 MB -> ilk yükleme sayfalı. Ağırlık STOKIZLEME (454 bin
+     satır, yıl süzgeçsiz); ajan onu bu yılın belgelerine göre süzmeli.
+   - Tablo adı BÜYÜK ASCII gönderilir; PG'de `lower('FATBASLIK')` tr-TR ICU'da
+     `fatbaslık` olur (harness'ta yaşandı) - adla dinamik SQL'de `collate "C"`.
+   - Ajan anahtarını üretecek ekran yok (GenProfil, adım 6); şimdilik
+     `select fn_aktarim_ajan_ekle('ad')`.
+
+   Sırada: plan adım 5 - ajan (konsol kipi, dev'de: Delphi'de fatura kes -> web'de görünür).
    Ön inceleme (014 sonrası göçlerin veriye
    uyguladıkları) bulguları:
    - KASA satırı tek başına mali_hareket değil: cari dışı her satır (tahsilat,

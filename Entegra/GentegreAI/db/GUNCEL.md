@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (546 ad, 148 tanesi birden cok dosyada)
+## Fonksiyonlar (550 ad, 148 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -22,10 +22,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_kasa` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_paket` | `1086_aktarim_paket.sql` | — |
 | `fn_aktar_proje` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |
+| `fn_aktarim_adimlari` | `1086_aktarim_paket.sql` | — |
+| `fn_aktarim_ajan_bul` | `1086_aktarim_paket.sql` | — |
+| `fn_aktarim_ajan_ekle` | `1086_aktarim_paket.sql` | — |
 | `fn_aktarim_cari_id` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
