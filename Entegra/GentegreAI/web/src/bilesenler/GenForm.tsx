@@ -102,7 +102,8 @@ interface Props {
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
   seritAlanlari?: string[];
-  onKaydedildi?(id: number): void;
+  /** `acikKal`: kart AÇIK kalarak kaydedildi (çerçeve 💾, özetten kaydet) - çağıran kapatmaz. */
+  onKaydedildi?(id: number, acikKal?: boolean): void;
   /** Hasta kartı: kimlik numarası kayıtlı bir hastaya aitse kaydetmek yerine O kart açılır.
       Verilmezse onKaydedildi(mevcutId) + onKapat ile aynı yola düşer. */
   onMevcutKayit?(id: number): void;
@@ -1327,7 +1328,7 @@ Yine de yeni kayıt eklensin mi?`);
       await ekKaydetleriCalistir();
 
       kayitBasarili.current = true;
-      onKaydedildi?.(Number(yanit.kart.id));
+      onKaydedildi?.(Number(yanit.kart.id), acikKal && !yeniMi);
       if (acikKal && !yeniMi) { await yukle(); return; }
       onKapat?.();
       return;
@@ -1417,6 +1418,8 @@ Yine de yeni kayıt eklensin mi?`);
     <>
       {aktif?.tur === 'grup' && meta && (
         <KartGrupSarmalayici
+          // ÇERÇEVE 💾: kayıt istek sayacıyla (güncel değer bir sonraki çizimde gider), kart kapanmaz.
+          kaydetKal={salt ? undefined : () => setKayitIstegi(n => n + 1)}
           aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
           deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}

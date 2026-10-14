@@ -30,6 +30,7 @@ import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../../bilesenler/sekmeBaglami';
 import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
 import { MakroluMetin } from '../../bilesenler/MakroluMetin';
@@ -214,6 +215,8 @@ export function ListeKarti({
   const [fizikDuzen, setFizikDuzen] = useState<boolean | null>(null);
   useEffect(() => { setFizikDuzen(null) }, [kartId]);
   const fizikIlk = useRef<{ id: unknown; duzen: boolean } | null>(null);
+  /** Sekmesizde değerlendirme / sonuç çerçevesinin reçeteden sonraki yeri (portal hedefi). */
+  const [degerlendirmeYeri, setDegerlendirmeYeri] = useState<HTMLDivElement | null>(null);
   const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
   useEffect(() => {
     if (!sekmesiz) return;
@@ -618,8 +621,8 @@ export function ListeKarti({
                                 anamnezIlk.current = { id: kartId, duzen: !satirlar.some(([, v]) => v) };
                               const duzen = anamnezDuzen ?? anamnezIlk.current?.duzen ?? true;
                               if (duzen) return parcalar?.altGrupCiz('Anamnez', {
-                                tikla: () => setAnamnezDuzen(false),
-                                ek: <span title={c('Gösterime dön · kart Kaydet ile yazılır')}>💾</span> });
+                                tikla: () => { setAnamnezDuzen(false); parcalar?.kaydet() },
+                                ek: <span title={c('Kaydet ve gösterime dön')}>💾</span> });
                               return (
                                 <div className="kasira"><div className="kagrup katlanir-kapali">
                                   <h6 className="katlanir-bas" onClick={() => setAnamnezDuzen(true)}>
@@ -666,9 +669,9 @@ export function ListeKarti({
                               const duzen = fizikDuzen ?? fizikIlk.current?.duzen ?? true;
                               return (
                                 <div className="kasira"><div className={`kagrup${duzen ? '' : ' katlanir-kapali'}`}>
-                                  <h6 className="katlanir-bas" onClick={() => setFizikDuzen(!duzen)}>
+                                  <h6 className="katlanir-bas" onClick={() => { if (duzen) parcalar?.kaydet(); setFizikDuzen(!duzen) }}>
                                     {c('Fizik muayene')}
-                                    <span className="katlanir-sag" title={duzen ? c('Gösterime dön · kart Kaydet ile yazılır') : c('Düzenle')}>
+                                    <span className="katlanir-sag" title={duzen ? c('Kaydet ve gösterime dön') : c('Düzenle')}>
                                       {duzen ? '💾' : '✎'}</span></h6>
                                   {duzen ? <div className="fm-duzen">
                             {/* FIZIK MUAYENE DUGMELERI GRIDIN HEMEN USTUNDE (kullanici). */}
@@ -704,8 +707,12 @@ export function ListeKarti({
                                 onKapat={() => setVucutAcik(false)}
                                 onKaydedildi={() => setKartTazele(t => t + 1)} />
                             )}
-                            {/* DEĞERLENDİRME / SONUÇ EN ALTTA (mockup v7 sırası). */}
-                            {parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
+                            {/* DEĞERLENDİRME / SONUÇ EN ALTTA (mockup v7 sırası). SEKMESİZDE REÇETEDEN SONRA
+                                (kullanıcı 15.10.2026): reçete ayrı (özel) bölüm - çerçeve oradaki yer
+                                tutucuya portal ile çizilir; alanlar ve kayıt bu sekmenin aynısı. */}
+                            {sekmesiz && degerlendirmeYeri
+                              ? createPortal(parcalar?.altGrupCiz('Değerlendirme / Sonuç'), degerlendirmeYeri)
+                              : parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
                           </div>
                         </div>
                       </>
@@ -919,14 +926,16 @@ export function ListeKarti({
               // e-RECETE YINE AYRI SEKME (kullanici 02.10.2026: "recete
               //   sekmesini geri getir") - Muayene sekmesinden alindi.
               { anahtar: 'ozel:recete', baslik: 'e-Reçete',
-                ciz: () => (
+                ciz: () => (<>
                   <MuayeneReceteSekmesi
                     veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
                     muayeneId={Number(kartId)}
                     tazele={() => setKartTazele(t => t + 1)}
                     ilacAra={receteIlacAra}
                     onIlacAraTamam={() => setReceteIlacAra(false)} />
-                ) },
+                  {/* Sekmesizde değerlendirme / sonuç çerçevesinin yeri (Muayene bölümünden portal). */}
+                  {sekmesiz && <div ref={setDegerlendirmeYeri} className="mi-sol" />}
+                </>) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },
@@ -1319,7 +1328,14 @@ export function ListeKarti({
         onKapat={() => yeniSekmede ? ekranSekmesi!.kapat() : git(sorgu.get('geri') ?? tanim.kartYolu!)}
         // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
         onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
-        onKaydedildi={yeniId => {
+        onKaydedildi={(yeniId, acikKal) => {
+          // AÇIK KALARAK KAYIT (çerçeve 💾, kullanıcı 15.10.2026: "save etsin ama kapanmasın"):
+          //   kart yerinde yeniden yüklenir; yalnız açık liste ve band tazelenir.
+          if (acikKal) {
+            window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            setKayitSayaci(t => t + 1);
+            return;
+          }
           // KART KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, KOMŞU sekmeye
           //   dönülür (liste açık değilse açılmaz - kullanıcı); açık liste tazelenir.
           if (yeniSekmede) {

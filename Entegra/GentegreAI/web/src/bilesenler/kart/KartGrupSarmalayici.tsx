@@ -54,6 +54,8 @@ export interface KartGrupSarmalayiciOzellikleri {
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
                     izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void, alt?: ReactNode) => ReactNode,
                     parcalar?: SekmeParcalari): ReactNode;
+  /** Kartı KAPATMADAN kaydeder (çerçeve 💾'si). */
+  kaydetKal?(): void;
 }
 
 /**
@@ -70,7 +72,7 @@ export function KartGrupSarmalayici({
   aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart,
   deger, setDeger, alanDegistir, detaylar, setDetaylar, alanHatalari,
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici,
+  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici, kaydetKal,
 }: KartGrupSarmalayiciOzellikleri) {
         const grupCiz = (sekme: typeof aktif, altBaslik?: AltGrupBaslik) => (
         <KartGrupSekmesi
@@ -182,7 +184,7 @@ export function KartGrupSarmalayici({
               not={alt ?? ayar.not}
               onBaslikTikla={tikla}
               // DÜZENLEMEDE 💾 (kullanıcı): tıklayınca kutulara döner; değerler kartın Kaydet'iyle yazılır.
-              baslikSonEk={tikla ? <span title={c('Kutulara dön · kart Kaydet ile yazılır')}>💾</span> : undefined}
+              baslikSonEk={tikla ? <span title={c('Kaydet ve kutulara dön')}>💾</span> : undefined}
             />
           ) : (
             <div className="kasira"><div className="kagrup katlanir-kapali">
@@ -205,7 +207,7 @@ export function KartGrupSarmalayici({
           return (
             <div className={ayar.sinif}>
               {ayar.katlanir
-                ? <KatlanirIzgara dolu={durum.guncel.length > 0} ciz={kutu} />
+                ? <KatlanirIzgara dolu={durum.guncel.length > 0} ciz={kutu} onKapandi={kaydetKal} />
                 : kutu(true)}
             </div>
           );
@@ -215,6 +217,7 @@ export function KartGrupSarmalayici({
           alanlar: tam,
           tablolar: Object.fromEntries(gomulu.map((d, i) => [d.ad, tablolar[i]])),
           alanDegistir,
+          kaydet: () => kaydetKal?.(),
           detayVerisi: ad => {
             const d = (meta?.detaylar ?? []).find(x => x.ad === ad);
             return d ? { meta: d, satirlar: (detaylar[ad] ?? bosDetay()).guncel } : null;
@@ -233,14 +236,16 @@ export function KartGrupSarmalayici({
  * yoksa yalniz baslik, varsa acik. Baslik tiklaninca acilir/kapanir; sonradan
  * veri gelirse (kart tazelendi) kendiliginden acilir.
  */
-function KatlanirIzgara({ ciz }: {
+function KatlanirIzgara({ ciz, onKapandi }: {
   dolu: boolean;
   ciz(acik: boolean, tikla: () => void): ReactNode;
+  /** Düzenlemeden kutulara dönünce (💾): kart kapanmadan kaydedilir (kullanıcı 15.10.2026). */
+  onKapandi?(): void;
 }) {
   // Kullanıcı 14.10.2026: varsayılan KUTU görünümü (doluysa ölçüm kutuları, boşsa yalnız
   //   başlık); başlığa tıklayınca düzenleme, tekrar tıklayınca kutular.
   const [acik, setAcik] = useState(false);
-  return <>{ciz(acik, () => setAcik(a => !a))}</>;
+  return <>{ciz(acik, () => { if (acik) onKapandi?.(); setAcik(!acik) })}</>;
 }
 
 /**

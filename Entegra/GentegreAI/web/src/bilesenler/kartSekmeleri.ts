@@ -315,6 +315,8 @@ export interface SekmeParcalari {
   /** Kartin bir alanini yazar (kaydedilmemis degisiklik olarak - Kaydet ile
       gider). Ekran-ozel paneller icin (ör. muayenede dikte metni). */
   alanDegistir(ad: string, deger: Deger): void;
+  /** Kartı KAPATMADAN kaydeder (çerçeve 💾'si, kullanıcı 15.10.2026). */
+  kaydet(): void;
   /** Bir detayın metası ve EKRANDAKİ (düzenlenmiş) satırları - ekran kendi
       gösterimini çizebilsin (muayene: fizik muayene bulgularının sade görünümü). */
   detayVerisi(ad: string): { meta: KartDetayMeta; satirlar: Record<string, unknown>[] } | null;
