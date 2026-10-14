@@ -45,7 +45,11 @@ public static partial class MuayeneUclari
             var satir = (await b.ListeAsync("""
                 select (select d.ad from public.kod_deger d join public.kod_liste l on l.id = d.liste_id
                          where l.kod = 'taraf.kan_grubu' and d.dil = 0 and d.deger = th.kan_grubu) as "kanGrubu",
-                       coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as kurum,
+                       -- KURUM = BU BAŞVURUNUN ödeyen kurumu (kullanıcı 14.10.2026); başvuruda yoksa
+                       --   hastanın kayıtlı kurumu. Sözleşme varsa yanında.
+                       coalesce(public.fn_taraf_ad(bk.unvan, bk.ad, bk.soyad)::varchar(120),
+                                public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as kurum,
+                       coalesce(sz.ad, '') as sozlesme,
                        (select count(*) from public.taraf o
                          where o.hasta = 1 and o.id <> t.id and coalesce(t.ad, '') <> ''
                            and lower(o.ad) = lower(t.ad) and lower(coalesce(o.soyad, '')) = lower(coalesce(t.soyad, '')))::int as "ayniAd"
@@ -53,6 +57,9 @@ public static partial class MuayeneUclari
                   join public.taraf t on t.id = m.taraf_id
                   left join public.taraf_hasta th on th.id = t.id
                   left join public.taraf k on k.id = th.kurum_id
+                  left join public.belge_basvuru bb on bb.id = m.belge_id
+                  left join public.taraf bk on bk.id = bb.odeyen_kurum_id
+                  left join public.kurum_sozlesme sz on sz.id = bb.sozlesme_id
                  where m.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)).FirstOrDefault();
             return Results.Ok(satir ?? new Dictionary<string, object?>());

@@ -87,7 +87,9 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
           )}
         </div>
         <div className="hbnd-alt"><b>{cins}{m(u?.yasMetni) ? ` ${m(u?.yasMetni)}` : ''}</b>
-          {m(bilgi?.band.kurum) && <> · <b>{m(bilgi?.band.kurum)}</b></>}</div>
+          {/* Yaşın sağında BU BAŞVURUNUN kurumu ve varsa sözleşmesi (kullanıcı 14.10.2026). */}
+          {m(bilgi?.band.kurum) && <> · <b>{m(bilgi?.band.kurum)}</b></>}
+          {m(bilgi?.band.sozlesme) && <span className="not"> · {m(bilgi?.band.sozlesme)}</span>}</div>
         {/* D / P: numara kendi önekini taşıyorsa ("H-000079", "P-000154") tekrar eklenmez. */}
         <div className="hbnd-alt">{[onekli('D', m(u?.dosyaNo)), onekli('P', m(u?.protokolNo))].filter(Boolean).join(' · ')}</div>
       </div>

@@ -194,7 +194,7 @@ export const listeUclari = {
 
   /** Hasta bandının ek bilgisi: kan grubu, kurum, aynı adlı başka hasta sayısı. */
   muayeneBand: (muayeneId: number) =>
-    istek<{ kanGrubu?: string | null; kurum?: string; ayniAd?: number }>(`/api/muayene/${muayeneId}/band`),
+    istek<{ kanGrubu?: string | null; kurum?: string; sozlesme?: string; ayniAd?: number }>(`/api/muayene/${muayeneId}/band`),
   /** Hastanın her tetkikinin son onaylı sonucu (sekmesiz muayenenin sağ sütunu). */
   muayeneSonSonuclar: (muayeneId: number) =>
     istek<{ kod: string; ad: string; deger: string; birim: string | null; bayrak: string | null;
