@@ -33,7 +33,7 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   // GÖZ MUAYENEDEN SONRA (kullanıcı): günlük iş hacmi en yüksek dallardan biri.
   // İŞYERİ HEKİMLİĞİ (741) beşinci klinik dal: OSGB kurum tipinde tek klinik.
   { ad: 'Klinikler',        renk: '#3f9a5e', gruplar: ['Muayene', 'Göz', 'Diş', 'FTR', 'İşyeri Hekimliği'] },
-  { ad: 'Tanı & Tetkik',    renk: '#6a3fb5', gruplar: ['Laboratuvar', 'Radyoloji'] },
+  { ad: 'Tanı & Tetkik',    renk: '#6a3fb5', gruplar: ['Laboratuvar', 'Radyoloji', 'Patoloji'] },
   { ad: 'Yatan & Cerrahi',  renk: '#c0392b', gruplar: ['Yatan Hasta', 'Ameliyathane'] },
   // MEDULA (707) klinik akışın ardında, para önünde.
   { ad: 'Ödeyen & Fatura',  renk: '#d9a12b', gruplar: ['Medula', 'Kurumlar & Sigorta', 'e-Nabız'] },

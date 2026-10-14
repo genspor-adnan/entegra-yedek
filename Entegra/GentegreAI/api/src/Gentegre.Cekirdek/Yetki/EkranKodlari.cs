@@ -31,7 +31,7 @@ public static partial class EkranKodlari
     public static readonly IReadOnlyList<string> DokumKodlari =
     [
         "dokum.yonetim", "dokum.randevu", "dokum.kayit_kabul", "dokum.muayene",
-        "dokum.laboratuvar", "dokum.radyoloji", "dokum.goz", "dokum.yatan_hasta",
+        "dokum.laboratuvar", "dokum.radyoloji", "dokum.patoloji", "dokum.goz", "dokum.yatan_hasta",
         "dokum.dis", "dokum.ftr", "dokum.isyeri_hekimligi", "dokum.cagri_merkezi",
         "dokum.medula", "dokum.ameliyathane", "dokum.acil", "dokum.kurumlar_sigorta",
         "dokum.cari_crm", "dokum.satis", "dokum.alis", "dokum.stok_hizmet",
@@ -51,6 +51,7 @@ public static partial class EkranKodlari
         ["dis_doktor"]         = "personel",          // Kurumlar & Sigorta › Dış Doktorlar
         ["medula.kabul"]       = "medula.provizyon",  // Kayıt Kabul › Medula Kabul
         ["demirbas.ayar"]      = "ayar",              // Sabit Varlıklar › Ayarlar › Demirbaş (1007)
+        ["patoloji.dislab"]    = "lab.dislab",        // Patoloji › Dış Laboratuvarlar (Lab ile ORTAK kart, 1104)
     };
 
     /// <summary>
@@ -71,6 +72,7 @@ public static partial class EkranKodlari
                                 "belge.stok", "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis"],
         ["cari"]             = ["cari.tedarikci"],
         ["medula.provizyon"] = ["medula.kabul"],
+        ["lab.dislab"]       = ["patoloji.dislab"],
         ["dokum"]            = [.. DokumKodlari],
         // 1004 aşama 2 Finans: hesap ekranı kodu `hesap` kaynağını ve liste
         //   içi ekstreyi açar; hangi satırı göreceğini SatirKisitlari belirler.

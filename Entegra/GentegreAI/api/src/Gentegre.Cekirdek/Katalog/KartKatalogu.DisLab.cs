@@ -15,6 +15,16 @@ public static partial class KartKatalogu
         ["1"] = "PDF / e-posta", ["2"] = "HL7", ["3"] = "Portal", ["4"] = "Elden",
     };
 
+    private static readonly Dictionary<string, string> DisLabEvetHayir = new() { ["1"] = "Evet", ["0"] = "Hayır" };
+    private static readonly Dictionary<string, string> DisLabBaglantiKodlari = new()
+    {
+        ["1"] = "API (REST/JSON)", ["2"] = "HL7 v2", ["3"] = "FHIR", ["4"] = "Portal (dış kurum)", ["5"] = "Elle (basılı form)",
+    };
+    private static readonly Dictionary<string, string> DisLabEkOnayKodlari = new()
+    {
+        ["1"] = "Sözleşmedekiler otomatik, gerisi onay ister", ["2"] = "Hepsi onay ister", ["3"] = "Hepsi otomatik",
+    };
+
     private static KartTanimi LabDisLabKarti() => new(
         Ad: "lab-dis-lab",
         YetkiKodu: "lab.dislab",
@@ -26,9 +36,12 @@ public static partial class KartKatalogu
             ["sonucKanali"] = (short)1,
             ["sozlesmeTatGun"] = (short)3,
             ["durum"] = (short)0,
+            ["biyokimya"] = (short)1, ["patoloji"] = (short)0, ["baglantiTuru"] = (short)5,
+            ["patTatGun"] = (short)3, ["patEkOnay"] = (short)1,
         },
         SilmeEngelleri: new SilmeEngeli[]
         {
+            new("public.pat_gonderim", "dis_lab_id", "Bu laboratuvara patoloji gönderimi yapılmış - silinemez, pasife alın."),
             new("public.lab_dis_gonderim", "dis_lab_id",
                 "Bu laboratuvara gönderim yapılmış - silinemez, pasife alın."),
         },
@@ -63,6 +76,15 @@ public static partial class KartKatalogu
                 Baslik: "E-posta", Grup: "İletişim"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400,
                 Baslik: "Açıklama", Grup: "İletişim"),
+
+            // PATOLOJİ (1104): aynı lab hem biyokimya hem patoloji yapabilir - kart tek,
+            //   hizmet alanları ayrı. Bağlantı türü istemin laba nasıl gittiğini belirler.
+            new("biyokimya", "biyokimya", "kod", SabitKodlar: DisLabEvetHayir, Baslik: "Biyokimya / Lab Hizmeti", Grup: "Patoloji"),
+            new("patoloji", "patoloji", "kod", SabitKodlar: DisLabEvetHayir, Baslik: "Patoloji Hizmeti", Grup: "Patoloji"),
+            new("baglantiTuru", "baglanti_turu", "kod", SabitKodlar: DisLabBaglantiKodlari, Baslik: "Bağlantı Türü", Grup: "Patoloji"),
+            new("kurumKodu", "kurum_kodu", "metin", EnFazlaUzunluk: 40, Baslik: "Kurum Kodu (labdaki)", Grup: "Patoloji"),
+            new("patTatGun", "pat_tat_gun", "sayi", Baslik: "Patoloji TAT (iş günü)", Grup: "Patoloji"),
+            new("patEkOnay", "pat_ek_onay", "kod", SabitKodlar: DisLabEkOnayKodlari, Baslik: "Ek İnceleme (İHK) Onayı", Grup: "Patoloji"),
         },
         Detaylar: new DetayTanimi[]
         {
@@ -86,5 +108,6 @@ public static partial class KartKatalogu
                     Baslik: "Durum"),
             }, SubeKolonu: null, Sirala: "tetkik_id", Baslik: "Anlaşmalı Testler",
                LogTabloId: 1029),
+            PatolojiDisKodDetayi(),
         });
 }

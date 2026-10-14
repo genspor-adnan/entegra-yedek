@@ -475,6 +475,7 @@ public static partial class KartKatalogu
         // DIS LABORATUVAR (445). GONDERIMIN KARTI YOK: gonderim bir surectir
         //   ve "teslim edildi" zamani geriye donuk degistirilememeli.
         Ekle(LabDisLabKarti());
+        Ekle(PatolojiVakaKarti()); Ekle(PatolojiGonderimKarti()); Ekle(PatolojiMateryalTipiKarti()); Ekle(PatolojiBoyaKarti()); Ekle(PatolojiRetNedeniKarti());   // patoloji (1104)
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

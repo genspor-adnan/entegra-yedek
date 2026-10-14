@@ -212,6 +212,7 @@ export const GRUP_IKON: Record<string, string> = {
   // Klinik moduller (360): kurum profilinde kapaliysa menude hic gorunmezler.
   'Muayene': '🩺',
   'Laboratuvar': '🧪',
+  'Patoloji': '🔬',
   // Cari + CRM tek grup (plan): ayni kisiler iki yerde araniyordu.
   'Cari & CRM': '🤝',
   'Satış':   '🛍️',

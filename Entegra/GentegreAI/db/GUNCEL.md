@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (558 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (565 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -204,6 +204,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
 | `fn_gelen_mesajlar` | `189_gelen_mesajlar.sql` | — |
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
+| `fn_gosterge_blok` | `1103_gosterge_paneli.sql` | — |
+| `fn_gosterge_kutu` | `1103_gosterge_paneli.sql` | — |
 | `fn_hakedis_kapat` | `388_prim_kademe_baglandi.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql |
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `fn_hata_ozet_metin` | `1078_hata_gunluk_ozet.sql` | — |
@@ -361,6 +363,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_para_tr` | `769_para_bicimi_tr.sql` | — |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
+| `fn_pat_no` | `1104_patoloji.sql` | — |
 | `fn_personel_kadro` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_gunluk` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_uygula` | `843_kadro_ana_rol.sql` | 840_personel_hareket.sql, 841_kadro_bolum_gorev_senkron.sql |
@@ -516,6 +519,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
 | `tg_muayene_vital_bki` | `463_vital_bki.sql` | — |
 | `tg_onay_adim_tek_imza` | `784_onay_tek_imza_ve_iskonto_rolu.sql` | — |
+| `tg_pat_gonderim_no` | `1104_patoloji.sql` | — |
+| `tg_pat_rapor_kilit` | `1104_patoloji.sql` | — |
+| `tg_pat_rapor_vaka` | `1104_patoloji.sql` | — |
+| `tg_pat_vaka_no` | `1104_patoloji.sql` | — |
 | `tg_personel_giris_cikis_iz` | `843_kadro_ana_rol.sql` | 841_kadro_bolum_gorev_senkron.sql, 842_kadro_bolum_gorev_dolgu.sql |
 | `tg_personel_hareket_uygula` | `840_personel_hareket.sql` | — |
 | `tg_personel_izin_gun` | `953_izin_saatli_tek_gun_mesaj.sql` | 950_ik_izin_saatli_istisna_izinsiz.sql |
@@ -567,7 +574,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (343 ad, 154 tanesi birden cok dosyada)
+## Gorunumler (348 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -822,6 +829,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_kutusu` | `940_personel_unvan_yalniz_onek.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql, 758_dokuman_onay_omurga.sql, 764_masraf_beyani.sql, 765_personel_belge_talebi.sql |
 | `v_onay_sozlu` | `940_personel_unvan_yalniz_onek.sql` | 763_sozlu_onay_takibi.sql |
 | `v_onay_vekalet` | `940_personel_unvan_yalniz_onek.sql` | 746_onay_bildirim_vekalet.sql |
+| `v_pat_boya_lookup` | `1104_patoloji.sql` | — |
+| `v_pat_dis_lab_lookup` | `1104_patoloji.sql` | — |
+| `v_pat_gonderim_lookup` | `1104_patoloji.sql` | — |
+| `v_pat_materyal_tipi_lookup` | `1104_patoloji.sql` | — |
+| `v_pat_ret_nedeni_lookup` | `1104_patoloji.sql` | — |
 | `v_personel_avans` | `940_personel_unvan_yalniz_onek.sql` | 753_avans_modulu.sql, 755_avans_kaynak_tur_duzeltmesi.sql |
 | `v_personel_belge_talep` | `940_personel_unvan_yalniz_onek.sql` | 765_personel_belge_talebi.sql |
 | `v_personel_durum` | `963_personel_listesi.sql` | — |

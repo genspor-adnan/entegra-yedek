@@ -454,6 +454,9 @@ public sealed partial class KartDeposu
             "public.v_lab_kk_lot_lookup",
             // Dis laboratuvar (445): tetkik kartinda ve gonderimde secim.
             "public.v_lab_dis_lab_lookup",
+            // patoloji (1104)
+            "public.v_pat_materyal_tipi_lookup", "public.v_pat_boya_lookup", "public.v_pat_ret_nedeni_lookup",
+            "public.v_pat_dis_lab_lookup", "public.v_pat_gonderim_lookup",
             // Stok/hizmet siniflandirmasi (544): kategori agaci TUR BAZINDA
             //   ayrildi - stok kartinda hizmet dallari cikiyordu.
             "public.v_stok_kategori_lookup", "public.v_hizmet_kategori_lookup",

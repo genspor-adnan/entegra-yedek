@@ -447,6 +447,7 @@ uygulama.RandevuIcmalUclariniEkle();        // randevu / poliklinik icmali (12.1
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();
+uygulama.PatolojiUclariniEkle();   // patoloji (1104)
 // ASI MODULU (898, KTS H10): uygulama kaydi + USS 207 paketi.
 uygulama.AsiUclariniEkle();
 // BEBEK/COCUK IZLEM (899, KTS H10): izlem kaydi + persentil + USS 209.

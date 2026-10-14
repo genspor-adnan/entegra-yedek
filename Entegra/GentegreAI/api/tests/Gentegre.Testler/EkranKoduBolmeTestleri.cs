@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Testler;
@@ -67,7 +67,7 @@ public sealed class EkranKoduBolmeTestleri
         foreach (var k in new[] { "belge.kurum_fatura", "belge.alis_fatura", "eczane.miad",
                                   "kayit_kabul.ayar", "cari.tedarikci", "dis_doktor", "medula.kabul" })
             Assert.NotNull(EkranKodlari.KopyaKaynagi(k));
-        Assert.Equal(29, EkranKodlari.DokumKodlari.Count);   // 1007 Sabit Varlıklar
+        Assert.Equal(30, EkranKodlari.DokumKodlari.Count);   // 1007 Sabit Varlıklar · 1104 Patoloji
         Assert.All(EkranKodlari.DokumKodlari, k => Assert.Equal("dokum", EkranKodlari.KopyaKaynagi(k)));
         Assert.Null(EkranKodlari.KopyaKaynagi("belge.satis"));
     }

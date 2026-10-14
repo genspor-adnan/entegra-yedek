@@ -67,6 +67,7 @@ import { mikroAksiyonu } from './liste/mikroAksiyonlari';
 import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
+import { patolojiAksiyonu } from './liste/patolojiAksiyonlari';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
@@ -809,6 +810,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await disLabAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      // PATOLOJİ (1104): vaka / gönderim adımları; "Pakete Ekle" çoklu seçimle.
+      if (await patolojiAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;

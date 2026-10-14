@@ -59,7 +59,8 @@ describe('menü düzeni', () => {
     // 35: Formlar grubu (10.10.2026) - Yönetim › Formlar alt başlığıydı.
     // 36: Dökümler (tasarımcı) kendi grubu; Yönetim grubu Sistem adını aldı (10.10.2026).
     // 37: Kalite (1048, ISO / SKS kurumsal kalite) Doküman'dan sonra; eski Kalite = Klinik Kalite.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(37);
+    // 38: Patoloji (1104) Tanı & Tetkik bölgesinde, Laboratuvar / Radyoloji yanında.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(38);
   });
 
   it('her grubun sonunda Dökümler var', () => {

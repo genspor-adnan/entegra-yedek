@@ -428,6 +428,7 @@ public static partial class KaynakKatalogu
         // DIS LABORATUVAR (445): gonderimler ve dis lab tanimlari.
         Ekle(LabDisGonderim());
         Ekle(LabDisLab());
+        Ekle(PatolojiVaka()); Ekle(PatolojiGonderim()); Ekle(PatolojiMateryalTipi()); Ekle(PatolojiBoya()); Ekle(PatolojiRetNedeni());   // patoloji (1104)
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

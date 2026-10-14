@@ -322,7 +322,7 @@ export function ListeKarti({
           const metin = (x: unknown) => String(x ?? '').trim();
           const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
             || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
-            || metin(d.belgeNo) || metin(d.kod)
+            || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kod)
             || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
         } : undefined}

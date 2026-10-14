@@ -22,7 +22,7 @@ import type { ListeTanimi } from './listeTanimlari.Ortak';
  */
 const DOKUM_KOD_EKI: Record<string, string> = {
   'Yönetim': 'yonetim', 'Sistem': 'yonetim', 'Dökümler': 'yonetim', 'Randevu': 'randevu', 'Kayıt Kabul': 'kayit_kabul',
-  'Muayene': 'muayene', 'Laboratuvar': 'laboratuvar', 'Radyoloji': 'radyoloji',
+  'Muayene': 'muayene', 'Laboratuvar': 'laboratuvar', 'Radyoloji': 'radyoloji', 'Patoloji': 'patoloji',
   'Göz': 'goz', 'Yatan Hasta': 'yatan_hasta', 'Diş': 'dis', 'FTR': 'ftr',
   'İşyeri Hekimliği': 'isyeri_hekimligi', 'Çağrı Merkezi': 'cagri_merkezi',
   'Medula': 'medula', 'Ameliyathane': 'ameliyathane', 'Acil': 'acil',
@@ -73,6 +73,7 @@ export const DOKUM_LISTELERI = [
   //   Ayarlar (200+) arası.
   dokumOgesi('Laboratuvar', 150),
   dokumOgesi('Radyoloji'),
+  dokumOgesi('Patoloji'),
   // Göz (691): "hangi hekim kaç fako yaptı", "DR tarama oranı", "gözlük
   //   reçetesi sayısı" - hepsi döküm sorusu.
   dokumOgesi('Göz'),
