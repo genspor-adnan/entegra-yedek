@@ -173,8 +173,13 @@ export function Kabuk() {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
   }, [kullanici?.id, kullanici?.subeId]);
   const panelEkranlari = useMemo(() => paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })), [paneller]);
-  const panelBasliklari = useMemo(() => Object.fromEntries(paneller.map(p => [`/gosterge/${p.kod}`, { ad: p.ad, ikon: p.ikon }])), [paneller]);
-  const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari });
+  const panelBasliklari = useMemo(() => ({
+    ...Object.fromEntries(paneller.map(p => [`/gosterge/${p.kod}`, { ad: p.ad, ikon: p.ikon }])),
+  }), [paneller]);
+  // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): kartYolu -> yeni kayıt sekme başlığı.
+  const kartSekmeleri = useMemo(() => Object.fromEntries(
+    LISTELER.filter(l => l.yeniSekmede && l.kartYolu).map(l => [l.kartYolu!, l.yeniSekmede!])), []);
+  const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari, kartSekmeleri });
   // KART PERDESİ SEKME ÇUBUĞUNUN ALTINDAN BAŞLAR: kart açıkken de sekmeler arasında
   //   geçilebilsin (gizli sekmenin kartı canlı kalır).
   useEffect(() => {

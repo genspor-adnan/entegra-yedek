@@ -83,6 +83,12 @@ export interface ListeTanimi {
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
   /**
+   * YENİ KAYIT AYRI SEKMEDE (ana ekran v3 denemesi, kullanıcı 14.10.2026): "Yeni" kartı liste
+   * sekmesinin üstünde değil KENDİ sekmesinde açar; değer sekme başlığıdır. Kaydedince
+   * sekme kapanır, liste tazelenir. Ekran sekmeleri kapalıysa etkisiz.
+   */
+  yeniSekmede?: string;
+  /**
    * Kart baslıgı. Verilmezse liste basligindan turetilir (sondaki -ler/-lar
    * atilir). "Radyoloji Çalışma Listesi" gibi baslikta bu turetme ise yaramaz:
    * kart tek bir ISTEM'i gosterir, listenin adini tasimamali.

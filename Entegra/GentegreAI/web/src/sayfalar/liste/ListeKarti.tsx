@@ -29,7 +29,8 @@ import { IstemSepetiModal } from '../../bilesenler/IstemSepetiModal';
 import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../../bilesenler/sekmeBaglami';
 import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
 import { MakroIpucu } from '../../bilesenler/MakroIpucu';
 
@@ -179,6 +180,9 @@ export function ListeKarti({
   const [receteIlacAra, setReceteIlacAra] = useState(false);
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
+  /** Kart KENDİ ekran sekmesinde mi (liste tanımı yeniSekmede + sekmeler açık): yeni ve düzenle. */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const yeniSekmede = kartId !== null && !!tanim.yeniSekmede && !!ekranSekmesi && !sorgu.get('geri');
   const [kayitSayaci, setKayitSayaci] = useState(0);
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
@@ -307,6 +311,13 @@ export function ListeKarti({
         kaynak={tanim.kaynak}
         id={kartId}
         kaydetBagla={f => { kartKaydetRef.current = f }}
+        // KART KENDİ SEKMESİNDE: çerçevesiz, ilk alana odak; sekme başlığı = kaydın adı.
+        sayfaKipi={yeniSekmede}
+        onYuklendi={yeniSekmede ? d => {
+          // Tam ad (unvan) varsa o - ad/soyad zaten içinde; yoksa ad + soyad.
+          const ad = String(d.unvan ?? '').trim() || [d.ad, d.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ');
+          if (ad) ekranSekmesi!.baslik(ad);
+        } : undefined}
         // GÖZ KARTI v4 (mockup goz_muayene_karti_v4): solda aşamalı gezinti, sağda OD/OS
         //   özeti, altta tamamlama koşulları - yalnız kayıtlı kartta.
         sekmeGruplari={tanim.kaynak === 'goz-muayene' ? GOZ_SEKME_GRUPLARI : undefined}
@@ -1191,10 +1202,17 @@ export function ListeKarti({
         //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
         onBasvuruAc={onBasvuruAc}
-        onKapat={() => git(sorgu.get('geri') ?? tanim.kartYolu!)}
+        onKapat={() => yeniSekmede ? ekranSekmesi!.kapat(tanim.kartYolu!) : git(sorgu.get('geri') ?? tanim.kartYolu!)}
         // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
         onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={yeniId => {
+          // YENİ KAYIT KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, liste
+          //   sekmesine dönülür ve oradaki liste tazelenir (canlı sekme kendini bilmez).
+          if (yeniSekmede) {
+            window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            ekranSekmesi!.kapat(tanim.kartYolu!);
+            return;
+          }
           setYenile(t => t + 1);
           setKayitSayaci(t => t + 1);
           // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat

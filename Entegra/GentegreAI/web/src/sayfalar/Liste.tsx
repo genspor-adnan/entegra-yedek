@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../bilesenler/sekmeBaglami';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
@@ -199,6 +200,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
   const [yenile, setYenile] = useState(0);
+  /** KART KENDİ SEKMESİNDE (tanim.yeniSekmede): bu sekmede liste çizilmez, yalnız kart. */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  // BAŞKA SEKMEDE kayıt eklendi (ör. "Yeni Hasta Kartı" sekmesi kaydedip kapandı): tazele.
+  useEffect(() => {
+    const tazele = (e: Event) => { if ((e as CustomEvent<string>).detail === tanim.kaynak) setYenile(t => t + 1) };
+    window.addEventListener(LISTE_TAZELE_OLAYI, tazele);
+    return () => window.removeEventListener(LISTE_TAZELE_OLAYI, tazele);
+  }, [tanim.kaynak]);
   /** Kategori suzgeci (kullanici): secilen dal + alt agaci. */
   const [kategoriDal, setKategoriDal] = useState<{ id: number; agac: number[] } | null>(null);
   /** Sol kategori AGAC paneli acik mi (kullanici: "acilir kapanir olsun"). */
@@ -1011,8 +1020,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     }
   }
 
+  const kartSekmesi = kartId !== null && !!tanim.yeniSekmede && !!ekranSekmesi && !sorgu.get('geri');
   return (
     <>
+    {!kartSekmesi && <>
     {/* EKSTRE MODU (A): grid ekstre kaynagina doner. Ust cip seridinden
         Aktif/Pasif/Tumu'ye basmak listeye geri getirir. */}
     {ekstre && tanim.ekstre ? (
@@ -1827,6 +1838,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         }}
       />
     )}
+
+    </>}
 
     {/* KART (modal GenForm): muayene/lab tetkik ozel yerlesimi dahil,
         kendi dosyasinda (liste/ListeKarti). */}

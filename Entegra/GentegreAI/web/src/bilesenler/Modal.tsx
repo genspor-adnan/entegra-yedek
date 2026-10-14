@@ -48,8 +48,13 @@ export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
  * dairesel import olurdu.
  */
 export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit, alt, dar, ekSinif, enUst,
-                       buyutmeYok, olcumYok, onKapat, children }: {
+                       buyutmeYok, olcumYok, onKapat, sayfa, children }: {
   baslik: string;
+  /**
+   * SAYFA KİPİ (ana ekran v3 - kart kendi ekran sekmesinde, kullanıcı: "kartın çerçevesini
+   * kaldır"): portal / perde / pencere çerçevesi yok; kart sekmenin içine sayfa gibi oturur.
+   */
+  sayfa?: boolean;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
   sekmeBar?: React.ReactNode;
@@ -281,9 +286,9 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
     return yeni;
   });
 
-  return createPortal(
-    <div className={`kaperde${enUst ? ' enust' : ''}`} hidden={!sekmeGorunur}
-         onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
+  const pencere = (
+    <div className={`kaperde${enUst ? ' enust' : ''}${sayfa ? ' sayfa' : ''}`} hidden={!sayfa && !sekmeGorunur}
+         onMouseDown={e => { if (!sayfa && e.target === e.currentTarget) onKapat?.() }}>
       <div className={`kawin${dar ? '' : ' genis'}${tamEkran ? ' tam' : ''}`
                       + `${ekSinif ? ' ' + ekSinif : ''}`}
            onMouseDown={e => e.stopPropagation()}
@@ -299,7 +304,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
         {/* Baslik cubugundan tutup FAREYLE TASINIR (kullanici): arkadaki listeyi
             gormek icin pencereyi kenara cekmek gerekiyordu. Cift tik ilk yerine
             dondurur; dugmeler/girdiler surukleme baslatmaz. */}
-        <div className="kabas"
+        <div className={`kabas${sayfa ? ' kabas-sayfa' : ''}`}
              style={{ cursor: tamEkran ? 'default' : 'move', userSelect: 'none' }}
              onMouseDown={tamEkran ? undefined : surukleBasla}
              onDoubleClick={() => setKaydirma({ x: 0, y: 0 })}>
@@ -332,8 +337,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
         )}
         {altSerit && <div className="kaalt">{altSerit}</div>}
       </div>
-    </div>,
-    document.body,
+    </div>
   );
+  return sayfa ? pencere : createPortal(pencere, document.body);
 }
 

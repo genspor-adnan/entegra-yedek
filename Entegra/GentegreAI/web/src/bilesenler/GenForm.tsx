@@ -228,6 +228,10 @@ interface Props {
   /** Tek sayfa kipinde sol gezintinin YERİNE ekranın menüsü (sekmesiz muayene:
       tamamlama maddeleri + işlemler). `git` başlığı verilen bölüme kaydırır. */
   gezintiOzel?(git: (baslik: string) => void): React.ReactNode;
+  /** SAYFA KİPİ (ana ekran v3): kart kendi ekran sekmesinde - çerçevesiz, açılınca ilk alana odaklanır. */
+  sayfaKipi?: boolean;
+  /** Kayıt yüklenince kartın değerleri (ör. sekme başlığına hasta adı). */
+  onYuklendi?(deger: Record<string, unknown>): void;
   /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
       satır adedi yerine o yazılır; undefined dönerse adet (varsayılan). */
   detayRozeti?(detayAd: string, satirlar: Record<string, unknown>[]): string | undefined;
@@ -309,7 +313,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -802,6 +806,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
         setSurum(k.kart.surum as string | undefined);
         setYetki(k.yetki);
         setDisKaynak(k.disKaynak ?? null);
+        onYuklendi?.(gelen);
         m.detaylar.forEach(d => {
           bosDetaylar[d.ad] = bosDetay(k.detaylar?.[d.ad] ?? []);
         });
@@ -1012,6 +1017,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   });
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
+  // SAYFA KİPİ: kart açılınca imleç İLK düzenlenebilir alana (kullanıcı: "ilk edit alana konumlansın").
+  useEffect(() => {
+    if (!sayfaKipi || !meta) return;
+    const t = setTimeout(() => {
+      const kok = document.querySelector('.kaperde.sayfa:not([hidden])') ?? document;
+      const ilk = kok.querySelector<HTMLElement>(
+        '.kawin input:not([type=hidden]):not([type=checkbox]):not([disabled]):not([readonly]), '
+        + '.kawin select:not([disabled]), .kawin textarea:not([disabled]):not([readonly])');
+      ilk?.focus();
+    }, 120);
+    return () => clearTimeout(t);
+  }, [sayfaKipi, meta, id]);
   // TEK SAYFA: görünen bölüm gezintide işaretlenir (kaydırınca).
   useEffect(() => {
     if (!tekSayfaKip) return;
@@ -1652,7 +1669,8 @@ Yine de yeni kayıt eklensin mi?`);
     <Modal
       baslik={`${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
-      buyutmeYok={buyutmeYok}
+      buyutmeYok={buyutmeYok || sayfaKipi}
+      sayfa={sayfaKipi}
         // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
         //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
         //   sinifi tek basina her kartin "durum" alanini etkilerdi.

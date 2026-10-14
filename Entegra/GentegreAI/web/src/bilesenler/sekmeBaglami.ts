@@ -9,3 +9,12 @@ import { createContext } from 'react';
  * Sekmesiz çalışan her yerde varsayılan `true`: davranış değişmez.
  */
 export const SekmeGorunurBaglami = createContext(true);
+
+/**
+ * İÇİNDE BULUNULAN EKRAN SEKMESİ: ekran kendi sekmesini kapatabilir (ör. "Yeni Hasta
+ * Kartı" sekmesinde Kaydet -> sekme kapanır, listeye dönülür). Sekmeler kapalıyken null.
+ */
+export const EkranSekmesiBaglami = createContext<{ kapat(hedef?: string): void; baslik(ad: string): void } | null>(null);
+
+/** Bir listenin kayıtları değişti (başka sekmeden): liste tazelenir. detail = kaynak. */
+export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';

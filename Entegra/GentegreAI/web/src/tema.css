@@ -6472,6 +6472,14 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
 
+/* KART SAYFA KİPİ (ana ekran v3): kart kendi sekmesinde - perde, gölge, çerçeve yok. */
+.kaperde.sayfa { position: static; inset: auto; background: none; z-index: auto; flex: 1; min-height: 0; display: flex }
+.kaperde.sayfa > .kawin { position: static; transform: none; top: auto; left: auto; width: 100%; max-width: none;
+  height: auto; max-height: none; flex: 1; border: 0; border-radius: 0; box-shadow: none }
+.kabas-sayfa { background: var(--yuz2) !important; color: var(--yazi2) !important; border-bottom: 1px solid var(--cizgi2); cursor: default !important }
+.kabas-sayfa .kapt { display: none }
+body.ekran-sekmeli .kaperde.sayfa:not(.enust) { top: auto }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavigationType, UNSAFE_LocationContext, type Location } from 'react-router-dom';
-import { SekmeGorunurBaglami } from '../../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, SekmeGorunurBaglami } from '../../bilesenler/sekmeBaglami';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c } from '../../dil/ceviri';
 import type { MenuSatiri } from './menuAgaci';
@@ -21,9 +21,20 @@ import type { MenuSatiri } from './menuAgaci';
 export const SEKME_SINIRI = 8;
 const BASLANGIC = '/panel';
 
-interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location; erisim: number }
+interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location; erisim: number;
+                 /** Kart sekmesinin listesi (kartYolu): sekme listenin HEMEN YANINDA açılır. */
+                 ust?: string }
 
-function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, { ad: string; ikon: string }>) {
+function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, { ad: string; ikon: string }>,
+                  kartSekmeleri?: Record<string, string>) {
+  // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): "/hasta/yeni" ve "/hasta/123" ayrı
+  //   sekme; yeni kayıt tanımdaki başlıkla, kayıtlı kart (ad kart yüklenince gelir) "Kart".
+  for (const [kartYolu, yeniBaslik] of Object.entries(kartSekmeleri ?? {})) {
+    const kalan = konum.pathname.startsWith(kartYolu + '/') ? konum.pathname.slice(kartYolu.length + 1) : '';
+    const m = kalan && !kalan.includes('/') ? [kalan, kalan] : null;
+    if (m) return m[1] === 'yeni' ? { anahtar: konum.pathname, baslik: yeniBaslik, ikon: '＋', ust: kartYolu }
+                                   : { anahtar: konum.pathname, baslik: 'Kart', ikon: '📝', ust: kartYolu };
+  }
   const yol = menuYolu(konum.pathname, konum.state);
   if (yol === '/' || yolEslesir(yol, BASLANGIC)) return { anahtar: BASLANGIC, baslik: 'Başlangıç', ikon: '🏠' };
   // Menüde olmayan bilinen ekran (gösterge paneli) kendi adıyla.
@@ -34,10 +45,12 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
            : { anahtar: konum.pathname, baslik: konum.pathname.replace(/^\//, ''), ikon: '▫' };
 }
 
-export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar }: {
+export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar, kartSekmeleri }: {
   satirlar: MenuSatiri[];
   /** Menüde olmayan ekranların sekme başlığı (yol -> ad, ikon). */
   ekBasliklar?: Record<string, { ad: string; ikon: string }>;
+  /** Kartı kendi sekmesinde açılan listeler: kartYolu -> yeni kayıt sekme başlığı. */
+  kartSekmeleri?: Record<string, string>;
   konum: Location;
   navTuru: NavigationType;
   outlet: React.ReactNode;
@@ -48,16 +61,25 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   /** Her sekmenin SON çizilen ekranı (gizliyken bu çizilir - durum korunur). */
   const ekranlar = useRef(new Map<string, React.ReactNode>());
 
-  const simdiki = sekmeBul(satirlar, konum, ekBasliklar);
+  const simdiki = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
+  /** Ekranın kendisinin verdiği sekme başlığı (ör. hasta kartında hastanın adı). */
+  const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>({});
+  const ad = (s: { anahtar: string; baslik: string }) => ozelBaslik[s.anahtar] ?? s.baslik;
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
   useEffect(() => {
     setSekmeler(onceki => {
       const var_ = onceki.find(s => s.anahtar === simdiki.anahtar);
-      let yeni = var_
-        ? onceki.map(s => s.anahtar === simdiki.anahtar ? { ...s, ...simdiki, konum, erisim: Date.now() } : s)
-        : [...onceki, { ...simdiki, konum, erisim: Date.now() }];
+      let yeni: Sekme[];
+      if (var_) yeni = onceki.map(s => s.anahtar === simdiki.anahtar ? { ...s, ...simdiki, konum, erisim: Date.now() } : s);
+      else {
+        // KART SEKMESİ listesinin hemen yanına (kullanıcı: "hasta kartı hemen yanına yeni sekme
+        //   olarak açılacak"); liste yoksa sona. Diğer ekranlar sona.
+        const yeniSekme: Sekme = { ...simdiki, konum, erisim: Date.now() };
+        const listeI = simdiki.ust ? onceki.findIndex(s => s.anahtar === simdiki.ust) : -1;
+        yeni = listeI >= 0 ? [...onceki.slice(0, listeI + 1), yeniSekme, ...onceki.slice(listeI + 1)] : [...onceki, yeniSekme];
+      }
       const kapanabilir = yeni.filter(s => s.anahtar !== BASLANGIC);
       if (kapanabilir.length > SEKME_SINIRI) {
         const eski = kapanabilir.filter(s => s.anahtar !== simdiki.anahtar).sort((a, b) => a.erisim - b.erisim)[0];
@@ -69,7 +91,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     });
   // YALNIZ ADRES DEĞİŞİNCE: menü satırları her çizimde yeniden kurulur, bağımlılık
   //   olsa effect her çizimde çalışıp döngüye girerdi.
-  }, [konum.key]);   // eslint-disable-line react-hooks/exhaustive-deps
+  //   Adres de bağımlılıkta: geçmişe dışarıdan yazılan girişlerin anahtarı aynı olabilir.
+  }, [konum.key, konum.pathname, konum.search]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!bildirim) return;
@@ -84,11 +107,12 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const baslangicVar = liste.some(s => s.anahtar === BASLANGIC);
 
   const ac = (s: Sekme) => git(s.konum.pathname + s.konum.search, { state: s.konum.state });
-  const kapat = (anahtar: string) => {
+  const kapat = (anahtar: string, hedef?: string) => {
     if (anahtar === BASLANGIC) return;
     const i = liste.findIndex(s => s.anahtar === anahtar);
     ekranlar.current.delete(anahtar);
     setSekmeler(o => o.filter(s => s.anahtar !== anahtar));
+    if (hedef) { git(hedef); return }
     if (anahtar === simdiki.anahtar) {
       const komsu = liste.filter(s => s.anahtar !== anahtar)[Math.max(0, i - 1)];
       if (komsu) ac(komsu); else git(BASLANGIC);
@@ -116,11 +140,11 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
       {liste.map(s => (
         <div key={s.anahtar} role="tab" aria-selected={s.anahtar === simdiki.anahtar}
              className={`es-sekme${s.anahtar === simdiki.anahtar ? ' on' : ''}${s.anahtar === BASLANGIC ? ' es-ev' : ''}`}
-             title={c(s.baslik)}
+             title={c(ad(s))}
              onClick={() => ac(s)}
              onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapat(s.anahtar) } }}>
           <span className="es-ikon">{s.ikon}</span>
-          {s.anahtar !== BASLANGIC && <span className="es-ad">{c(s.baslik)}</span>}
+          {s.anahtar !== BASLANGIC && <span className="es-ad">{c(ad(s))}</span>}
           {s.anahtar !== BASLANGIC && (
             <span className="es-x" title={c('Kapat (Alt+W)')}
                   onClick={e => { e.stopPropagation(); kapat(s.anahtar) }}>×</span>
@@ -137,10 +161,14 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     return (
       <div key={s.anahtar} className="es-govde" hidden={!aktif}>
         <SekmeGorunurBaglami.Provider value={aktif}>
+         <EkranSekmesiBaglami.Provider value={{
+           kapat: hedef => kapat(s.anahtar, hedef),
+           baslik: b => setOzelBaslik(o => (o[s.anahtar] === b ? o : { ...o, [s.anahtar]: b })) }}>
           <UNSAFE_LocationContext.Provider
             value={{ location: aktif ? konum : s.konum, navigationType: aktif ? navTuru : NavigationType.Pop }}>
             {aktif ? outlet : ekranlar.current.get(s.anahtar)}
           </UNSAFE_LocationContext.Provider>
+         </EkranSekmesiBaglami.Provider>
         </SekmeGorunurBaglami.Provider>
       </div>
     );
