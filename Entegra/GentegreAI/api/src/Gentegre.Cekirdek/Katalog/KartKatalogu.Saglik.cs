@@ -505,7 +505,9 @@ public static partial class KartKatalogu
                 new("kiloKg", "kilo_kg", "ondalik", Baslik: "Kilo (kg)"),
                 // BKI SAKLANIR: boy/kilo sonradan duzeltilse bile o anki
                 //   olcumun degeri degismemeli - kayit tarihcedir.
-                new("bki", "bki", "ondalik", Baslik: "BKİ"),
+                //   ELLE GİRİLMEZ (kullanıcı 14.10.2026): tetik (463) boy / kilodan hesaplar,
+                //   ekran etiket olarak gösterir.
+                new("bki", "bki", "ondalik", Yazilabilir: false, Baslik: "BKİ"),
                 new("belCevresiCm", "bel_cevresi_cm", "sayi", Baslik: "Bel çevresi (cm)"),
                 new("glukozParmak", "glukoz_parmak", "sayi", Baslik: "Parmak glukoz (mg/dL)"),
                 new("gks", "gks", "sayi", Baslik: "GKS"),

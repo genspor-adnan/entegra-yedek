@@ -33,6 +33,13 @@ export interface KartOzellestirme {
   seritAlanlari?: GenFormProps['seritAlanlari'];
 }
 
+/** BKİ = kilo / boy(m)² - 1 ondalık; boy ya da kilo yoksa kayıtlı değer. */
+function bkiHesapla(s: Record<string, unknown>): string {
+  const boy = Number(s.boyCm ?? 0), kilo = Number(s.kiloKg ?? 0);
+  const v = boy > 0 && kilo > 0 ? kilo / ((boy / 100) ** 2) : Number(s.bki ?? 0);
+  return v > 0 ? v.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '';
+}
+
 export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // ------------------------------------------- radyoloji tanımları (965) ----
   // Mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html · radyoloji_protokol_karti.html:
@@ -197,11 +204,13 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
         // Tanı sekmesi panelindeki sıra (kullanıcı): tansiyon, nabız, SpO2 · ateş,
         //   solunum, ağrı · boy-kilo, BKİ, bel. Glukoz/GKS ve ölçüm kimliği
         //   Vital Bulgular sekmesinde.
-        alanSirasi: ['sistolik', 'nabiz', 'spo2', 'ates', 'solunum', 'agriVas',
+        // Ağrı (VAS) bu ızgarada YOK (kullanıcı 14.10.2026) - Vital Bulgular sekmesinde girilir.
+        alanSirasi: ['sistolik', 'nabiz', 'spo2', 'ates', 'solunum',
                      'boyCm', 'bki', 'belCevresiCm'],
+        // BKİ GİRİLMEZ (kullanıcı 14.10.2026): boy / kilodan anında hesaplanıp etiket olarak
+        //   gösterilir; kayıtta sunucu tetiği (463 tg_muayene_vital_bki) aynı formülle yazar.
+        hesaplanan: { bki: bkiHesapla },
         yeniDugmesi: true,
-        not: 'Ölçüm zamanı ve kaynağı kayıtta kalır; '
-           + 'BKİ o anki boy/kilodan hesaplanır.',
         // Geçmiş listesi ÖZET: takip edilen ölçüler kalır, antropometri ve tek
         //   seferlik değerler üst ızgarada zaten görünür.
         gecmisGizli: ['boyCm', 'kiloKg', 'bki', 'belCevresiCm', 'glukozParmak',

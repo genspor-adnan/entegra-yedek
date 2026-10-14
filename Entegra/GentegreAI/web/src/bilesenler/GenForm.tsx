@@ -67,7 +67,7 @@ interface Props {
                     /** Bir DETAYI (ör. vitaller) etiket+kutu ızgarası olarak
                         istenen yere çizer - anamnez sekmesinin sağ paneline
                         düzenlenebilir vital ızgarası koymak için. */
-                    izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void) => React.ReactNode,
+                    izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void, alt?: React.ReactNode) => React.ReactNode,
                     /** Sekmenin PARÇALARI ayrı ayrı: alanlar ve gruba gömülü
                         tablolar (detay adıyla) - ekran bir tabloyu alanlardan
                         ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
@@ -175,7 +175,9 @@ interface Props {
                                  /** Gecmis listesinde CIZILMEYECEK alanlar. */
                                  gecmisGizli?: string[];
                                  /** Veri yoksa yalniz baslik (kapali), varsa acik. */
-                                 katlanir?: boolean }>;
+                                 katlanir?: boolean;
+                                 /** HESAPLANAN alanlar (vital BKİ): girdi değil etiket, değer anında hesaplanır. */
+                                 hesaplanan?: Record<string, (satir: Record<string, unknown>) => string> }>;
   /**
    * KENDI SEKMESINDE cizilen detaya ekran-ozel secenekler (gizli kolon, grid
    * kipi, sade cerceve). `detayGrupta` yalnizca bir GRUBA gomulen detaya

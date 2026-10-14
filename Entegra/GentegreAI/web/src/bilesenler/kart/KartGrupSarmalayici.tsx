@@ -48,9 +48,11 @@ export interface KartGrupSarmalayiciOzellikleri {
   detayIzgara?: Record<string, { sinif?: string; baslik?: string;
                                  alanSirasi?: string[]; not?: ReactNode;
                                  /** Veri yoksa yalniz baslik (kapali), varsa acik. */
-                                 katlanir?: boolean }>;
+                                 katlanir?: boolean;
+                                 /** HESAPLANAN alanlar (vital BKİ): girdi değil etiket, değer anında hesaplanır. */
+                                 hesaplanan?: Record<string, (satir: Record<string, unknown>) => string> }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
-                    izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void) => ReactNode,
+                    izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void, alt?: ReactNode) => ReactNode,
                     parcalar?: SekmeParcalari): ReactNode;
 }
 
@@ -160,7 +162,7 @@ export function KartGrupSarmalayici({
         // IZGARA CIZICI: ekran bir DETAYI (or. vitaller) istedigi yere
         //   etiket+kutu izgarasi olarak koyabilsin - anamnez sekmesinin sag
         //   paneli boyle: hekim sikayeti yazarken vitali AYNI ekranda girer.
-        const izgaraCiz = (detayAd: string, kutuTikla?: (alanAd: string) => void) => {
+        const izgaraCiz = (detayAd: string, kutuTikla?: (alanAd: string) => void, alt?: ReactNode) => {
           const d = (meta?.detaylar ?? []).find(x => x.ad === detayAd);
           if (!d) return null;
           const ayar = detayIzgara?.[detayAd] ?? {};
@@ -175,7 +177,9 @@ export function KartGrupSarmalayici({
               onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
               baslik={ayar.baslik ?? d.baslik}
               alanSirasi={ayar.alanSirasi}
-              not={ayar.not}
+              hesaplanan={ayar.hesaplanan}
+              // ALT SATIR (vital: 📈 Geçmiş kısayolları) çerçevenin İÇİNDE; yoksa ızgaranın notu.
+              not={alt ?? ayar.not}
               onBaslikTikla={tikla}
               // DÜZENLEMEDE 💾 (kullanıcı): tıklayınca kutulara döner; değerler kartın Kaydet'iyle yazılır.
               baslikSonEk={tikla ? <span title={c('Kutulara dön · kart Kaydet ile yazılır')}>💾</span> : undefined}
@@ -195,6 +199,7 @@ export function KartGrupSarmalayici({
                   ))}
                 </div>
               )}
+              {alt && <div className="izg-alt">{alt}</div>}
             </div></div>
           );
           return (
@@ -257,8 +262,9 @@ function ozetKutulari(d: { alanlar: { ad: string; baslik?: string | null }[] },
   const sayi = (v: unknown) => { const n = Number(v); return v != null && v !== '' && Number.isFinite(n) && n !== 0 ? n : null };
   const bicim = (n: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
   const adlar = [...(sira ?? d.alanlar.map(a => a.ad))];
-  // Boy + kilo TEK kutu ("180 / 77"); grafiği kilonun.
+  // Boy + kilo TEK kutu ("180 / 77"); grafiği kilonun. BKİ girilen boy / kilodan anında.
   const boy = sayi(satir.boyCm), kilo = sayi(satir.kiloKg);
+  if (boy && kilo) satir = { ...satir, bki: Math.round(kilo / ((boy / 100) ** 2) * 10) / 10 };
   const kutular: { ad: string; baslik: string; deger: string; kir: boolean }[] = [];
   for (const ad of adlar) {
     if (ad === 'diyastolik' || ad === 'kiloKg') continue;

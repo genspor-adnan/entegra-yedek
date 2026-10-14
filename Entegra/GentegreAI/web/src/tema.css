@@ -6477,6 +6477,23 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .vt-kutu { border: 1px solid var(--cizgi); border-radius: 3px; padding: 5px 8px; background: var(--yuz) }
 .vt-kutu .vt-b { font-size: 10px; color: var(--soluk) }
 .vt-kutu.tik { cursor: pointer }
+/* MUAYENE VİTAL FORMU TEK SATIR (kullanıcı 14.10.2026): tek değerli kutular dar, tansiyon ve
+   boy / kilo çift kutu; sığmazsa alta kayar. Yalnız muayene anamnez yanındaki ızgara (.mi-vital). */
+.mi-vital .vital-izgara-kip .alan-izgara { display: flex !important; flex-wrap: wrap; gap: 6px 10px; align-items: flex-end }
+.mi-vital .vital-izgara-kip .alan { display: flex !important; flex-direction: column; gap: 2px; width: auto; min-width: 0 }
+.mi-vital .vital-izgara-kip .alan .etiket { font-size: 10.5px; text-align: left; white-space: nowrap }
+.mi-vital .vital-izgara-kip .alan > input { width: 48px !important; min-width: 0 }
+.mi-vital .vital-izgara-kip .alan.ikili { display: grid !important; grid-template-columns: 48px 48px; column-gap: 4px }
+.mi-vital .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+.mi-vital .vital-izgara-kip .alan.ikili input { width: 48px !important }
+.mi-vital .vital-izgara-kip .tk-hesap { min-width: 0; padding: 4px 2px }
+
+/* Katlanmış ızgaranın alt satırı (vital: Geçmiş kısayolları) çerçevenin içinde. */
+.izg-alt { padding: 0 10px 8px }
+
+/* Hesaplanan alan (vital BKİ): girdi değil etiket. */
+.tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }
+
 /* SEKMESİZ MUAYENE TAMAMLAMA İKONLARI (mockup muayene_karti_v7 .dizin .d). */
 .smn-d { width: 15px; height: 15px; border-radius: 50%; flex: none; border: 1.5px solid #b8c2cc; font-size: 9px;
   display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: bold }

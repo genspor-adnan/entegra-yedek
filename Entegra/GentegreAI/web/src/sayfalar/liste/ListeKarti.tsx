@@ -575,15 +575,15 @@ export function ListeKarti({
                             {/* VİTAL: hikâyenin altında, katlanır - ölçüm yoksa kapalı, varsa açık. */}
                             <div className="mi-vital">
                               {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
-                              {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) })}
-                              {/* GEÇMİŞ GRAFİĞİ (mockup muayene_karti_v7): hastanın bütün ölçümleri. */}
-                              <div className="olcum-kisayol">
-                                <span className="not">📈 {c('Geçmiş')}:</span>
-                                {VITAL_GRAFIKLERI.map(([k, ad]) => (
-                                  <button key={k} type="button" className="baglanti"
-                                          onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
-                                ))}
-                              </div>
+                              {/* GEÇMİŞ GRAFİĞİ kısayolları vital çerçevesinin İÇİNDE (kullanıcı 14.10.2026). */}
+                              {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) },
+                                <div className="olcum-kisayol">
+                                  <span className="not">📈 {c('Geçmiş')}:</span>
+                                  {VITAL_GRAFIKLERI.map(([k, ad]) => (
+                                    <button key={k} type="button" className="baglanti"
+                                            onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
+                                  ))}
+                                </div>)}
                               {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
                                                             onKapat={() => setVitalGrafik(null)} />}
                             </div>

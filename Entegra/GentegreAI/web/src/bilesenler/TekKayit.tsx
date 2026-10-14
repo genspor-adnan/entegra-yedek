@@ -18,6 +18,8 @@ interface Props {
   baslikOnEk?: React.ReactNode;
   /** Başlığın SAĞ ucunda (vital: 💾 düzenlemeyi kapat). */
   baslikSonEk?: React.ReactNode;
+  /** Hesaplanan alanlar: girdi yerine etiket (değer satırdan anında hesaplanır, ör. BKİ). */
+  hesaplanan?: Record<string, (satir: Record<string, unknown>) => string>;
   /** Kutunun altinda aciklama satiri. */
   not?: React.ReactNode;
   /** Verilirse alanlar TEK kutu yerine YAN YANA kutulara bolunur (or. sube
@@ -77,7 +79,7 @@ interface Props {
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
                            alanSirasi, dislar, ustAlanlar, aramaAc, secilenAdlar,
                            ekAlanlar, ekAlanlarSira, cerceveSiz,
-                           onBaslikTikla, baslikOnEk, baslikSonEk }: Props) {
+                           onBaslikTikla, baslikOnEk, baslikSonEk, hesaplanan }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -100,6 +102,9 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
 
   const girdi = (a: KartAlanMeta) => {
     const deger = satir[a.ad];
+    // HESAPLANAN (kullanıcı: "BKİ edit olmasın, label olsun ve hesaplansın").
+    if (hesaplanan?.[a.ad])
+      return <span className="tk-hesap" title={c('Hesaplanır')}>{hesaplanan[a.ad](satir) || '—'}</span>;
     // Telefon her yerde ayni kutu: ulke kodu + gruplu numara (genel kural).
     if (telefonAlaniMi(a.ad))
       return (
