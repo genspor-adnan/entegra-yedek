@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { c } from '../../dil/ceviri';
 import { KartGrupSekmesi } from './KartGrupSekmesi';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { TekKayit } from '../TekKayit';
@@ -49,7 +50,7 @@ export interface KartGrupSarmalayiciOzellikleri {
                                  /** Veri yoksa yalniz baslik (kapali), varsa acik. */
                                  katlanir?: boolean }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
-                    izgaraCiz?: (detayAd: string) => ReactNode,
+                    izgaraCiz?: (detayAd: string, kutuTikla?: (alanAd: string) => void) => ReactNode,
                     parcalar?: SekmeParcalari): ReactNode;
 }
 
@@ -159,11 +160,13 @@ export function KartGrupSarmalayici({
         // IZGARA CIZICI: ekran bir DETAYI (or. vitaller) istedigi yere
         //   etiket+kutu izgarasi olarak koyabilsin - anamnez sekmesinin sag
         //   paneli boyle: hekim sikayeti yazarken vitali AYNI ekranda girer.
-        const izgaraCiz = (detayAd: string) => {
+        const izgaraCiz = (detayAd: string, kutuTikla?: (alanAd: string) => void) => {
           const d = (meta?.detaylar ?? []).find(x => x.ad === detayAd);
           if (!d) return null;
           const ayar = detayIzgara?.[detayAd] ?? {};
           const durum = detaylar[d.ad] ?? bosDetay();
+          // Grafiği olan kutu: çağıran kutuTikla verdiyse ve alan grafik listesindeyse.
+          const grafikli = (ad: string) => !!kutuTikla && GRAFIKLI_ALANLAR.has(ad);
           const kutu = (acik: boolean, tikla?: () => void) => acik ? (
             <TekKayit
               meta={d}
@@ -174,12 +177,24 @@ export function KartGrupSarmalayici({
               alanSirasi={ayar.alanSirasi}
               not={ayar.not}
               onBaslikTikla={tikla}
-              baslikOnEk={tikla ? <span className="katlanir-ok">▾ </span> : undefined}
+              // DÜZENLEMEDE 💾 (kullanıcı): tıklayınca kutulara döner; değerler kartın Kaydet'iyle yazılır.
+              baslikSonEk={tikla ? <span title={c('Kutulara dön · kart Kaydet ile yazılır')}>💾</span> : undefined}
             />
           ) : (
             <div className="kasira"><div className="kagrup katlanir-kapali">
               <h6 className="katlanir-bas" onClick={tikla}>
-                <span className="katlanir-ok">▸ </span>{ayar.baslik ?? d.baslik}</h6>
+                {ayar.baslik ?? d.baslik}<span className="katlanir-sag" title={c('Düzenle')}>✎</span></h6>
+              {/* ÖZET KUTULARI (kullanıcı 14.10.2026, mockup muayene_karti_v7): dolu ölçümler
+                  etiket + değer kutusu; başlığa tıklayınca düzenleme, tekrar tıklayınca buraya döner. */}
+              {ozetKutulari(d, durum.guncel[0], ayar.alanSirasi).length > 0 && (
+                <div className="vt-kutular">
+                  {ozetKutulari(d, durum.guncel[0], ayar.alanSirasi).map(k => (
+                    <div key={k.ad} className={`vt-kutu${grafikli(k.ad) ? ' tik' : ''}${k.kir ? ' kir' : ''}`} title={grafikli(k.ad) ? c('Geçmiş grafiği') : undefined}
+                         onClick={grafikli(k.ad) ? () => kutuTikla!(k.ad) : undefined}>
+                      <div className="vt-b">{c(k.baslik)}{grafikli(k.ad) && <span className="vt-gr"> 📈</span>}</div><div className="vt-d">{k.deger}</div></div>
+                  ))}
+                </div>
+              )}
             </div></div>
           );
           return (
@@ -209,11 +224,63 @@ export function KartGrupSarmalayici({
  * yoksa yalniz baslik, varsa acik. Baslik tiklaninca acilir/kapanir; sonradan
  * veri gelirse (kart tazelendi) kendiliginden acilir.
  */
-function KatlanirIzgara({ dolu, ciz }: {
+function KatlanirIzgara({ ciz }: {
   dolu: boolean;
   ciz(acik: boolean, tikla: () => void): ReactNode;
 }) {
-  const [acik, setAcik] = useState(dolu);
-  useEffect(() => { if (dolu) setAcik(true) }, [dolu]);
+  // Kullanıcı 14.10.2026: varsayılan KUTU görünümü (doluysa ölçüm kutuları, boşsa yalnız
+  //   başlık); başlığa tıklayınca düzenleme, tekrar tıklayınca kutular.
+  const [acik, setAcik] = useState(false);
   return <>{ciz(acik, () => setAcik(a => !a))}</>;
+}
+
+/**
+ * VİTAL REFERANS ARALIKLARI - sunucunun ölçüm geçmişi grafiğiyle AYNI sınırlar
+ * (MuayeneUclari.OlcumGecmisi VitalSerileri). Dışındaki değer kutuda kırmızı (mockup v7).
+ */
+const VITAL_ARALIK: Record<string, [number, number]> = {
+  sistolik: [90, 140], diyastolik: [60, 90], nabiz: [60, 100], spo2: [95, 100], ates: [36, 37.5],
+  solunum: [12, 20], agriVas: [0, 3], bki: [18.5, 25], glukozParmak: [70, 140],
+};
+const disinda = (ad: string, n: number) => { const r = VITAL_ARALIK[ad]; return !!r && (n < r[0] || n > r[1]) };
+
+/** Geçmiş grafiği olan vital alanları (sunucu ölçüm geçmişi ucunun anahtarları). */
+const GRAFIKLI_ALANLAR = new Set(['sistolik', 'nabiz', 'spo2', 'ates', 'solunum', 'kiloKg', 'bki']);
+
+/**
+ * Katlanmış ızgaranın ÖZET KUTULARI: güncel satırın dolu alanları, ızgaranın alan sırasıyla.
+ * Tansiyon tek kutu (sistolik/diyastolik), SpO₂ "%", ağrı "/10"; sıfır ve boş yazılmaz.
+ */
+function ozetKutulari(d: { alanlar: { ad: string; baslik?: string | null }[] },
+                      satir: Record<string, unknown> | undefined, sira?: string[]) {
+  if (!satir) return [];
+  const sayi = (v: unknown) => { const n = Number(v); return v != null && v !== '' && Number.isFinite(n) && n !== 0 ? n : null };
+  const bicim = (n: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+  const adlar = [...(sira ?? d.alanlar.map(a => a.ad))];
+  // Boy + kilo TEK kutu ("180 / 77"); grafiği kilonun.
+  const boy = sayi(satir.boyCm), kilo = sayi(satir.kiloKg);
+  const kutular: { ad: string; baslik: string; deger: string; kir: boolean }[] = [];
+  for (const ad of adlar) {
+    if (ad === 'diyastolik' || ad === 'kiloKg') continue;
+    if (ad === 'boyCm') {
+      if (boy || kilo) kutular.push({ ad: 'kiloKg', baslik: 'Boy / Kilo', deger: `${boy ? bicim(boy) : '—'} / ${kilo ? bicim(kilo) : '—'}`, kir: false });
+      continue;
+    }
+    const alan = d.alanlar.find(a => a.ad === ad);
+    if (!alan) continue;
+    if (ad === 'sistolik') {
+      const s = sayi(satir.sistolik), di = sayi(satir.diyastolik);
+      if (s) kutular.push({ ad, baslik: 'TA', deger: di ? `${bicim(s)}/${bicim(di)}` : bicim(s),
+                            kir: disinda('sistolik', s) || (di !== null && disinda('diyastolik', di)) });
+      continue;
+    }
+    const n = sayi(satir[ad]);
+    if (n !== null) {
+      const deger = ad === 'spo2' ? `%${bicim(n)}` : ad === 'agriVas' ? `${bicim(n)}/10` : bicim(n);
+      kutular.push({ ad, baslik: alan.baslik ?? ad, deger, kir: disinda(ad, n) });
+    } else if (typeof satir[ad] === 'string' && String(satir[ad]).trim() && Number.isNaN(Number(satir[ad]))) {
+      kutular.push({ ad, baslik: alan.baslik ?? ad, deger: String(satir[ad]).trim(), kir: false });
+    }
+  }
+  return kutular;
 }

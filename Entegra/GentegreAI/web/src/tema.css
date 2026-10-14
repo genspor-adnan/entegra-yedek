@@ -6472,6 +6472,21 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
 
+/* KATLANMIŞ IZGARA ÖZET KUTULARI (vital bulgular, mockup muayene_karti_v7). */
+.vt-kutular { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; padding: 8px 10px 10px }
+.vt-kutu { border: 1px solid var(--cizgi); border-radius: 3px; padding: 5px 8px; background: var(--yuz) }
+.vt-kutu .vt-b { font-size: 10px; color: var(--soluk) }
+.vt-kutu.tik { cursor: pointer }
+/* Katlanır kutu başlığının sağ ucu: ✎ düzenle / 💾 kutulara dön. */
+.katlanir-bas { display: flex; align-items: center }
+.katlanir-sag { margin-left: auto; padding-left: 8px; font-size: 14px; cursor: pointer }
+/* Referans aralığı dışı (mockup v7): kırmızı. */
+.vt-kutu.kir { border-color: #e8b4b0; background: #fdecea }
+.vt-kutu.kir .vt-d { color: #c0392b }
+.vt-kutu.tik:hover { border-color: var(--mavi, #2f6db3); background: var(--yuz2) }
+.vt-kutu .vt-gr { opacity: .55 }
+.vt-kutu .vt-d { font-size: 14px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }
+
 /* SEKMESİZ MUAYENE Özet / Detay görünüm düğmeleri yan yana. */
 .smn-gorunum { display: flex; gap: 2px }
 .smn-gorunum .kanav-o { flex: 1 }
@@ -8073,3 +8088,22 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   text-align: left; padding: 6px 8px; font-size: 11px; color: var(--metin2); white-space: nowrap }
 .mn-enabiz .me-tablo td { border-bottom: 1px solid var(--cizgi2); padding: 5px 8px;
   font-size: 11.5px; white-space: nowrap }
+
+/* MUAYENE TEK SUTUN (kullanici 14.10.2026, mockup muayene_karti_v7): sikayet ->
+   hikaye -> vital (katlanir; olcum yoksa kapali) -> fizik muayene -> degerlendirme.
+   Vital ve degerlendirme eskiden sag sutundaydi (.mi-sag kurallari); sol sutunun
+   "her alan tek kolon" kurali vital izgarasini tek kolona dusurmesin diye kurallar
+   burada daha ozgul. Tam genislikte vital alti kolon (mockup .vitaller). */
+.muayene-ikili.msb-tek { grid-template-columns: minmax(0, 1fr) }
+.muayene-ikili .mi-sol .mi-vital { margin: 8px 0 0 }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan-izgara { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px }
+@media (max-width: 900px) { .muayene-ikili .mi-sol .vital-izgara-kip .alan-izgara { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan { grid-template-columns: 1fr; row-gap: 2px; align-items: start }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan .etiket { grid-column: 1; font-size: 10.5px; text-align: left }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan input,
+.muayene-ikili .mi-sol .vital-izgara-kip .alan select { grid-column: 1; min-width: 0 }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+.muayene-ikili .mi-sol .vital-izgara-kip .alan.ikili input { grid-column: auto; width: 100%; min-width: 0 }
+/* Degerlendirme kutusu sol sutunda da etiketsiz, tam genislik (eski .mi-sag kurali). */
+.muayene-ikili .mi-sol .alan:has(> textarea[data-alan="karar"]) > .etiket { display: none }

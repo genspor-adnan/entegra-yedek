@@ -111,6 +111,11 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
   'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
 ]);
 
+/** Vital özet kutusu alanı → geçmiş grafiği anahtarı (grafiği olmayan alan tıklanmaz). */
+const VITAL_ALAN_GRAFIK: Record<string, string> = {
+  sistolik: 'ta', nabiz: 'nabiz', spo2: 'spo2', ates: 'ates', solunum: 'solunum', kiloKg: 'kilo', bki: 'bki',
+};
+
 /** Muayene vital ızgarasının altındaki geçmiş grafiği kısayolları (sunucu anahtarı, etiket). */
 const VITAL_GRAFIKLERI: [string, string][] = [
   ['ta', 'Tansiyon'], ['nabiz', 'Nabız'], ['spo2', 'SpO₂'], ['ates', 'Ateş'],
@@ -554,7 +559,10 @@ export function ListeKarti({
                             hikayeyi de diger tarafa al"; mockup muayene_karti_v2):
                             solda Anamnez · fizik muayene · Degerlendirme, sagda
                             vital. Ilk sekme derlenmis "Özet". */}
-                        <div className="muayene-ikili msb-ikili">
+                        {/* TEK SÜTUN, MOCKUP v7 SIRASI (kullanıcı 14.10.2026): şikâyet →
+                            hikâye → vital (ölçüm yoksa kapalı) → fizik muayene →
+                            değerlendirme. Eskiden vital ve değerlendirme sağ sütundaydı. */}
+                        <div className="muayene-ikili msb-ikili msb-tek">
                           <div className="mi-sol">
                             {/* DIKTE KAYNAGI: basliktaki Dikte bu sekmenin GUNCEL
                                 alan okuyucu/yazicisini kullanir. Cizime bir sey eklemez. */}
@@ -564,6 +572,21 @@ export function ListeKarti({
                               return null;
                             })()}
                             {parcalar?.altGrupCiz('Anamnez')}
+                            {/* VİTAL: hikâyenin altında, katlanır - ölçüm yoksa kapalı, varsa açık. */}
+                            <div className="mi-vital">
+                              {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
+                              {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) })}
+                              {/* GEÇMİŞ GRAFİĞİ (mockup muayene_karti_v7): hastanın bütün ölçümleri. */}
+                              <div className="olcum-kisayol">
+                                <span className="not">📈 {c('Geçmiş')}:</span>
+                                {VITAL_GRAFIKLERI.map(([k, ad]) => (
+                                  <button key={k} type="button" className="baglanti"
+                                          onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
+                                ))}
+                              </div>
+                              {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
+                                                            onKapat={() => setVitalGrafik(null)} />}
+                            </div>
                             {/* FIZIK MUAYENE DUGMELERI GRIDIN HEMEN USTUNDE (kullanici). */}
                             <div className="muayene-arac mfz-arac">
                               <button type="button" className="d"
@@ -589,21 +612,7 @@ export function ListeKarti({
                                 onKaydedildi={() => setKartTazele(t => t + 1)} />
                             )}
                             <div className="mfz-tek-satir">{parcalar?.tablolar.bulgular ?? icerik}</div>
-                          </div>
-                          {/* DEGERLENDIRME / PLAN + CIKIS SAGDA, vitalin altinda: bulgu
-                              tablosu uzun, altta kalsa kaydirmadan gorunmuyordu. */}
-                          <div className="mi-sag">
-                            {izgaraCiz?.('vitaller')}
-                            {/* GEÇMİŞ GRAFİĞİ (mockup muayene_karti_v7): hastanın bütün ölçümleri. */}
-                            <div className="olcum-kisayol">
-                              <span className="not">📈 {c('Geçmiş')}:</span>
-                              {VITAL_GRAFIKLERI.map(([k, ad]) => (
-                                <button key={k} type="button" className="baglanti"
-                                        onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
-                              ))}
-                            </div>
-                            {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
-                                                          onKapat={() => setVitalGrafik(null)} />}
+                            {/* DEĞERLENDİRME / SONUÇ EN ALTTA (mockup v7 sırası). */}
                             {parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
                           </div>
                         </div>
