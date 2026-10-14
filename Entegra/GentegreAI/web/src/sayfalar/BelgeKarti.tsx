@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { EkranSekmesiBaglami } from '../bilesenler/sekmeBaglami';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
@@ -72,10 +73,16 @@ interface Props {
   onKapat?(): void;
   /** Kayit sonrasi cagirani (grid) tazelemek icin. */
   onKaydedildi?(): void;
+  /**
+   * SAYFA KİPİ (ana ekran v3 - başvuru kartı kendi ekran sekmesinde, hasta kartı deseni):
+   * çerçevesiz; sekmenin × / Alt+W'si kartın Kapat'ı (kayıtsız değişiklik sorusu);
+   * sekme başlığı protokol no + hasta.
+   */
+  sayfa?: boolean;
 }
 
 export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
-                            tarafUnvan: onDolguUnvan, onKapat, onKaydedildi }: Props = {}) {
+                            tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
@@ -1208,6 +1215,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * olurdu ve `temizImza` state'i henuz guncellenmemis oldugu icin kart hala
    * "kirli" gorunuyordu.
    */
+  // SAYFA KİPİ: sekme × = bu Kapat; sekme başlığı kayıtlı belgenin no + hastası.
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  // Sekmenin KENDİ adresi (arka sekmede dondurulmuş) - tarayıcının o anki adresi değil.
+  const sekmeKonumu = useLocation();
+  const kapatRef = useRef<() => void>(() => {});
+  kapatRef.current = () => void kapat();
+  useEffect(() => {
+    if (!sayfa || !ekranSekmesi) return;
+    ekranSekmesi.kapatmaIsleyicisi(() => kapatRef.current());
+    return () => ekranSekmesi.kapatmaIsleyicisi(null);
+  }, [sayfa, ekranSekmesi]);
+  const sekmeBasligi = [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',
+                        String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || ''].filter(Boolean).join(' · ');
+  useEffect(() => {
+    if (sayfa && ekranSekmesi && kayitliId && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
+  }, [sayfa, ekranSekmesi, kayitliId, sekmeBasligi]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const kapat = async (zorla = false) => {
     const cik = () => { if (onKapat) onKapat(); else git(basvuruMu ? '/basvuru' : bilgi.liste) };
     if (zorla || !kirli) { cik(); return }
@@ -1233,7 +1257,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   yetkisiyle açılır; değiştirme hakkını kaydederken sunucu denetler.
   if (!ekleyebilir && !mevcutBelge)
     return (
-      <Modal baslik="Belge" onKapat={() => void kapat()}
+      <Modal baslik="Belge" onKapat={() => void kapat()} sayfa={sayfa}
              alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>{c('Kapat')}</button>}>
         <div className="hata-kutusu">{c('Belge ekleme yetkiniz yok.')}</div>
       </Modal>
@@ -1241,6 +1265,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   return (
     <Modal
+      sayfa={sayfa} buyutmeYok={sayfa || undefined}
       // GenoTIP'te ayni tur "Başvuru" adiyla acilir (279): tur katalogundaki ad
       //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
       baslik={kartBasligi({

@@ -43,13 +43,13 @@ describe('yetki matrisi - aktif menüde olmayan ekran', () => {
     await act(async () => { await Promise.resolve() });
     await act(async () => { fireEvent.click(k.getByText('Tümünü Aç')) });
     const metin = k.container.textContent ?? '';
-    expect(metin).toContain('Başvurular');
+    expect(metin).toContain('Başvuru Listesi');
     expect(metin).toContain('Belgeyi kesinleştir');
     // Satış Faturaları HBYS menüsünde yok: matriste de yok.
     expect(metin).not.toContain('Satış Faturaları');
     // Alış Fişleri HBYS menüsünde VAR: kendi Alış grubunda, Başvurular'ın altında değil.
     const sira = metin.indexOf('Alış Fişleri');
     expect(sira).toBeGreaterThan(metin.indexOf('Alış('));
-    expect(metin.slice(metin.indexOf('Başvurular'), metin.indexOf('Alış('))).not.toContain('Alış Fişleri');
+    expect(metin.slice(metin.indexOf('Başvuru Listesi'), metin.indexOf('Alış('))).not.toContain('Alış Fişleri');
   });
 });

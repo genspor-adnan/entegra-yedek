@@ -216,8 +216,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   ekranidir. Ayni belge ERP kurulumunda "Satış Siparişleri" listesinde
     //   gorunur; iki liste ayni turu gostermesin diye ikisi de urunModu ile
     //   suzulur.
-    kaynak: 'belge', rota: 'basvuru', baslik: 'Başvurular',
-    yol: 'Kayıt Kabul › Başvurular',
+    kaynak: 'belge', rota: 'basvuru', baslik: 'Başvuru Listesi',
+    yol: 'Kayıt Kabul › Başvuru Listesi',
+    // KART KENDİ SEKMESİNDE (14.10.2026, hasta deseni): Yeni / Aç -> başvuru kartı sekmesi.
+    yeniSekmede: 'Yeni Başvuru Kartı',
     aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 19,
     // BASVURU ile SATIS SIPARISI ayni turdur (19); ayirt eden belge TIPIDIR
     //   (301): basvuru 30, ERP siparisi 1. urunModu zaten iki ekrani ayri
@@ -291,7 +293,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   her zaman hastadir, "Cari" ERP dilidir.
     kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '♿', yetkiKodu: 'belge',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Başvuru Listesi', ic: '♿', yetkiKodu: 'belge',
     menuSira: 20,
   },
   {

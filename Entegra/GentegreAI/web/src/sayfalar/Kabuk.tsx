@@ -31,8 +31,14 @@ import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 import { TarafArama } from '../bilesenler/TarafArama';
 
-/** Komut paletinde "Kayıtlı Hasta Kartı" - yol değil, hasta arama penceresini açar. */
-const KAYITLI_HASTA = '#kayitli-hasta';
+import { BasvuruArama } from '../bilesenler/BasvuruArama';
+import type { ListeGirdisi } from './listeTanimlari.Ortak';
+
+/** Komut paletinde "Kayıtlı ... Kartı" - yol değil, kaynağın arama penceresini açar. */
+const KAYITLI_ARAMA: Record<string, string> = { hasta: '#kayitli-hasta', belge: '#kayitli-basvuru' };
+/** Listenin menü yolu ve kart sekmesinin yolu (kartYolu yoksa liste rotası - belge kartları). */
+const listeYolu = (l: ListeGirdisi) => `/${l.rota ?? l.kaynak}`;
+const kartSekmeYolu = (l: ListeGirdisi) => l.kartYolu ?? listeYolu(l);
 
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
@@ -177,6 +183,7 @@ export function Kabuk() {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
   }, [kullanici?.id, kullanici?.subeId]);
   const [kayitliHastaAcik, setKayitliHastaAcik] = useState(false);
+  const [kayitliBasvuruAcik, setKayitliBasvuruAcik] = useState(false);
   /** Ekran kullanıcının (yetkili) menüsünde mi. */
   const menudeVar = useCallback((yol: string) => kodSatirlari.some(sat =>
     sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
@@ -184,11 +191,12 @@ export function Kabuk() {
     ...paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })),
     // YENİ KAYIT KISAYOLU (kullanıcı: "liste olmadan da ekleyebileyim"): Ctrl+K'da "＋ Yeni Hasta
     //   Kartı" -> doğrudan kart sekmesi. Yalnız listesi menüsünde olan (yetkili) kullanıcıya.
-    ...LISTELER.filter(l => l.yeniSekmede && l.kartYolu && menudeVar(l.kartYolu))
+    ...LISTELER.filter(l => l.yeniSekmede && menudeVar(listeYolu(l)))
                .flatMap(l => [
-                 { yol: `${l.kartYolu}/yeni`, ad: l.yeniSekmede!, grup: 'Hasta', islem: true },
-                 // KAYITLI KART (kullanıcı): genel hasta arama penceresi -> seçilen kayıt kart sekmesinde.
-                 ...(l.kaynak === 'hasta' ? [{ yol: KAYITLI_HASTA, ad: 'Kayıtlı Hasta Kartı', grup: 'Hasta', islem: true, ikon: '📂' }] : []),
+                 { yol: `${kartSekmeYolu(l)}/yeni`, ad: l.yeniSekmede!, grup: l.menuGrup ?? '', islem: true },
+                 // KAYITLI KART (kullanıcı): kaynağın arama penceresi -> seçilen kayıt kart sekmesinde.
+                 ...(KAYITLI_ARAMA[l.kaynak] ? [{ yol: KAYITLI_ARAMA[l.kaynak], ad: l.yeniSekmede!.replace(/^Yeni /, 'Kayıtlı '),
+                                                 grup: l.menuGrup ?? '', islem: true, ikon: '📂' }] : []),
                ]),
   ], [paneller, menudeVar]);
   const panelBasliklari = useMemo(() => ({
@@ -196,7 +204,7 @@ export function Kabuk() {
   }), [paneller]);
   // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): kartYolu -> yeni kayıt sekme başlığı.
   const kartSekmeleri = useMemo(() => Object.fromEntries(
-    LISTELER.filter(l => l.yeniSekmede && l.kartYolu).map(l => [l.kartYolu!, l.yeniSekmede!])), []);
+    LISTELER.filter(l => l.yeniSekmede).map(l => [kartSekmeYolu(l), l.yeniSekmede!])), []);
   const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari, kartSekmeleri });
   // KART PERDESİ SEKME ÇUBUĞUNUN ALTINDAN BAŞLAR: kart açıkken de sekmeler arasında
   //   geçilebilsin (gizli sekmenin kartı canlı kalır).
@@ -454,13 +462,16 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={yol => yol === KAYITLI_HASTA ? setKayitliHastaAcik(true) : git(yol)}
+                   git={yol => yol === KAYITLI_ARAMA.hasta ? setKayitliHastaAcik(true)
+                             : yol === KAYITLI_ARAMA.belge ? setKayitliBasvuruAcik(true) : git(yol)}
                    ekEkranlar={panelEkranlari} />
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
       <TarafArama acik={kayitliHastaAcik} kaynaklar={['hasta']} kartYok
                   yerTutucu={c('Hasta ara (ad, dosya no, kimlik no, telefon)…')}
                   onKapat={() => setKayitliHastaAcik(false)}
                   onSec={h => { setKayitliHastaAcik(false); git(`/hasta/${h.id}`) }} />
+      <BasvuruArama acik={kayitliBasvuruAcik} onKapat={() => setKayitliBasvuruAcik(false)}
+                    onSec={id => git(`/basvuru/${id}`)} />
 
       {/* YENI TALEP PENCERESI: panelden de sayfadan da yeniTalepAc() ile. */}
       <YeniTalepKatmani />

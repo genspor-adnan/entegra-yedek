@@ -52,7 +52,7 @@ describe('yetki matrisi - başka gruptaki alt ekran', () => {
     expect(k.container.textContent).toContain('Kurumlar & Sigorta');
 
     // Başvurular satırının GÖR kutusu (ilk sütun): alt dalındaki aksiyonu açar, Satış'ı açmaz.
-    const basvuru = satirBul('Başvurular');
+    const basvuru = satirBul('Başvuru Listesi');
     const gor = basvuru.querySelector('input[type=checkbox]')!;
     await act(async () => { fireEvent.click(gor) });
 

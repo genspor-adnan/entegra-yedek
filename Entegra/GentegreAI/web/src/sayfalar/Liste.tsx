@@ -202,6 +202,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [yenile, setYenile] = useState(0);
   /** KART KENDİ SEKMESİNDE (tanim.yeniSekmede): bu sekmede liste çizilmez, yalnız kart. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  /** BELGE KARTI KENDİ SEKMESİNDE (başvuru, hasta deseni): kart yolu liste rotası. */
+  const belgeSekmeYolu = tanim.yeniSekmede && tanim.kaynak === 'belge' && ekranSekmesi
+    ? `/${tanim.rota ?? tanim.kaynak}` : null;
   // BAŞKA SEKMEDE kayıt eklendi (ör. "Yeni Hasta Kartı" sekmesi kaydedip kapandı): tazele.
   useEffect(() => {
     const tazele = (e: Event) => { if ((e as CustomEvent<string>).detail === tanim.kaynak) setYenile(t => t + 1) };
@@ -928,6 +931,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         setIceriAl,
       })) return;
 
+      // BAŞVURU KARTI KENDİ SEKMESİNDE: Yeni / Aç pencere değil kart sekmesi açar.
+      if (belgeSekmeYolu && kod === 'belge.yeni') { git(`${belgeSekmeYolu}/yeni`); return }
+      if (belgeSekmeYolu && kod === 'belge.ac' && satir) { git(`${belgeSekmeYolu}/${satir.id}`); return }
+
       if (await belgeAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
@@ -1164,8 +1171,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
             || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
             || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis'
-            || tanim.kaynak === 'satinalmaSiparis')
-          setAcikBelgeId(Number(satir.id));
+            || tanim.kaynak === 'satinalmaSiparis') {
+          if (belgeSekmeYolu) git(`${belgeSekmeYolu}/${satir.id}`);
+          else setAcikBelgeId(Number(satir.id));
+        }
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
         // BANKO OTURUMU cift tikta MODAL (kullanici 08.10.2026: "Banko
@@ -1843,6 +1852,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {/* KART (modal GenForm): muayene/lab tetkik ozel yerlesimi dahil,
         kendi dosyasinda (liste/ListeKarti). */}
+    {/* BAŞVURU KARTI KENDİ SEKMESİNDE (hasta deseni): BelgeKarti çerçevesiz, sekmeyi doldurur. */}
+    {kartSekmesi && belgeSekmeYolu ? (
+      <BelgeKarti key={String(kartId)} sayfa
+                  {...(kartId === 'yeni' ? { tur: tanim.yeniBelgeTuru ?? 19 } : { id: Number(kartId) })}
+                  onKapat={() => ekranSekmesi!.kapat()}
+                  onKaydedildi={() => window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }))} />
+    ) : (
     <ListeKarti
       tanim={tanim} kartId={kartId} kartOzel={kartOzel} sekmeVerisi={sekmeVerisi}
       aksiyon={aksiyon}
@@ -1854,6 +1870,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       setOdaklaSonEklenen={setOdaklaSonEklenen}
       onBasvuruAc={(tarafId, unvan) => void basvuruAc(tarafId, unvan)}
     />
+    )}
     </>
   );
 }

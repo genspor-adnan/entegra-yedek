@@ -223,7 +223,8 @@ function Yollar() {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
-            ...(l.kartYolu && !l.ozelKart ? [
+            // KART SEKMESİ (yeniSekmede): belge kartı da /<rota>/:id ile kendi sekmesinde açılır.
+            ...((l.kartYolu || l.yeniSekmede) && !l.ozelKart ? [
               <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
             ] : []),
           ];
