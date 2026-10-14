@@ -14,7 +14,12 @@ export const SekmeGorunurBaglami = createContext(true);
  * İÇİNDE BULUNULAN EKRAN SEKMESİ: ekran kendi sekmesini kapatabilir (ör. "Yeni Hasta
  * Kartı" sekmesinde Kaydet -> sekme kapanır, listeye dönülür). Sekmeler kapalıyken null.
  */
-export const EkranSekmesiBaglami = createContext<{ kapat(hedef?: string): void; baslik(ad: string, yol: string): void } | null>(null);
+export const EkranSekmesiBaglami = createContext<{
+  kapat(hedef?: string): void;
+  baslik(ad: string, yol: string): void;
+  /** Sekmenin × / Alt+W'si ekranın KENDİ Kapat'ını çağırsın (kayıtsız değişiklik sorusu). null = kaldır. */
+  kapatmaIsleyicisi(f: (() => void) | null): void;
+} | null>(null);
 
 /** Bir listenin kayıtları değişti (başka sekmeden): liste tazelenir. detail = kaynak. */
 export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';

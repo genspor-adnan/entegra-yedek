@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavigationType, UNSAFE_LocationContext, type Location } from 'react-router-dom';
 import { EkranSekmesiBaglami, SekmeGorunurBaglami } from '../../bilesenler/sekmeBaglami';
+import { PALET_AC_OLAYI } from '../Baslangic';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c } from '../../dil/ceviri';
 import type { MenuSatiri } from './menuAgaci';
@@ -106,12 +107,27 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
 
   // Çizilecek liste: ilk çizimde geçerli sekme henüz state'te yoksa SONA eklenir
   //   (effect ekleyince yeri değişmez - ekran yeniden kurulmaz).
-  const liste = sekmeler.some(s => s.anahtar === simdiki.anahtar)
-    ? sekmeler : [...sekmeler, { ...simdiki, konum, erisim: Date.now() }];
+  //   BAŞLANGIÇ (🏠) HER ZAMAN EN SOLDA (kullanıcı 14.10.2026) - sonradan açılsa da.
+  const liste = (sekmeler.some(s => s.anahtar === simdiki.anahtar)
+    ? sekmeler : [...sekmeler, { ...simdiki, konum, erisim: Date.now() }])
+    .slice().sort((a, b) => Number(b.anahtar === BASLANGIC) - Number(a.anahtar === BASLANGIC));
   const baslangicVar = liste.some(s => s.anahtar === BASLANGIC);
 
   const ac = (s: Sekme) => git(s.konum.pathname + s.konum.search, { state: s.konum.state });
+  /**
+   * SEKME × = EKRANIN KAPAT DÜĞMESİ (kullanıcı): ekran bir kapatma işleyicisi verdiyse (kart:
+   * kayıtsız değişiklik varsa "kaydedilsin mi?") o çalışır; sekme işleyici kapatınca kapanır.
+   * Arka sekmede soru görünmez - önce o sekme öne alınır.
+   */
+  const kapatIsleyicileri = useRef(new Map<string, () => void>());
+  const kapatIste = (anahtar: string) => {
+    const f = kapatIsleyicileri.current.get(anahtar);
+    if (!f) { kapat(anahtar); return }
+    const s = liste.find(x => x.anahtar === anahtar);
+    if (s && anahtar !== simdiki.anahtar) { ac(s); setTimeout(f, 50) } else f();
+  };
   const kapat = (anahtar: string, hedef?: string) => {
+    kapatIsleyicileri.current.delete(anahtar);
     if (anahtar === BASLANGIC) return;
     const i = liste.findIndex(s => s.anahtar === anahtar);
     ekranlar.current.delete(anahtar);
@@ -126,7 +142,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   // KISAYOLLAR: Alt+W sekmeyi kapat (Ctrl+W tarayıcının), Ctrl+1..9 sekmeye git, Ctrl+Home başlangıç.
   useEffect(() => {
     const tus = (e: KeyboardEvent) => {
-      if (e.altKey && e.key.toLowerCase() === 'w') { e.preventDefault(); kapat(simdiki.anahtar) }
+      if (e.altKey && e.key.toLowerCase() === 'w') { e.preventDefault(); kapatIste(simdiki.anahtar) }
       else if (e.ctrlKey && e.key === 'Home') { e.preventDefault(); git(BASLANGIC) }
       else if (e.ctrlKey && !e.shiftKey && /^[1-9]$/.test(e.key)) {
         const s = liste[Number(e.key) - 1]; if (s) { e.preventDefault(); ac(s) }
@@ -146,15 +162,18 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
              className={`es-sekme${s.anahtar === simdiki.anahtar ? ' on' : ''}${s.anahtar === BASLANGIC ? ' es-ev' : ''}`}
              title={c(ad(s))}
              onClick={() => ac(s)}
-             onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapat(s.anahtar) } }}>
+             onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapatIste(s.anahtar) } }}>
           <span className="es-ikon">{s.ikon}</span>
           {s.anahtar !== BASLANGIC && <span className="es-ad">{c(ad(s))}</span>}
           {s.anahtar !== BASLANGIC && (
             <span className="es-x" title={c('Kapat (Alt+W)')}
-                  onClick={e => { e.stopPropagation(); kapat(s.anahtar) }}>×</span>
+                  onClick={e => { e.stopPropagation(); kapatIste(s.anahtar) }}>×</span>
           )}
         </div>
       ))}
+      {/* ＋ (kullanıcı): sekmelerin sağında - arama (komut paleti) açılır. */}
+      <span className="es-sekme es-ekle" role="button" title={c('Ekran aç / yeni işlem (Ctrl+K)')}
+            onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>＋</span>
       <span className="es-sayi">{liste.filter(s => s.anahtar !== BASLANGIC).length} / {SEKME_SINIRI}</span>
       {bildirim && <div className="es-bildirim">{bildirim}</div>}
     </div>
@@ -167,6 +186,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
         <SekmeGorunurBaglami.Provider value={aktif}>
          <EkranSekmesiBaglami.Provider value={{
            kapat: hedef => kapat(s.anahtar, hedef),
+           kapatmaIsleyicisi: f => { if (f) kapatIsleyicileri.current.set(s.anahtar, f); else kapatIsleyicileri.current.delete(s.anahtar) },
            // Yol ÇAĞIRANDAN: kart yüklenirken sekmenin kayıtlı adresi henüz eski olabilir.
            baslik: (b, yol) => setOzelBaslik(o => (o[yol] === b ? o : { ...o, [yol]: b })) }}>
           <UNSAFE_LocationContext.Provider

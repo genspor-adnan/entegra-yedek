@@ -6472,6 +6472,13 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
 
+/* SEKME ÇUBUĞU ＋ (arama/komut paleti). */
+.es-ekle { font-weight: bold; padding: 0 10px; cursor: pointer }
+
+/* PALET BÖLÜMLERİ (mockup ana_ekran_sekmeli_v3): Son açılanlar / Ekranlar / İşlemler. */
+.palet-bolum { font-size: 11px; font-weight: bold; color: var(--yazi2); opacity: .75; text-transform: uppercase;
+  letter-spacing: .4px; padding: 10px 12px 4px }
+
 /* KART SAYFA KİPİ (ana ekran v3): kart kendi sekmesinde - perde, gölge, çerçeve yok. */
 .kaperde.sayfa { position: static; inset: auto; background: none; z-index: auto; flex: 1; min-height: 0; display: flex }
 .kaperde.sayfa > .kawin { position: static; transform: none; top: auto; left: auto; width: 100%; max-width: none;

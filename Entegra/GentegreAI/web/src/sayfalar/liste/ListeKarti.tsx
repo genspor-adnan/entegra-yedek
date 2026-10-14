@@ -235,7 +235,7 @@ export function ListeKarti({
     if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
     await aksiyon('goz.muayene-tamamla', { id: Number(kartId) } as ListeSatiri);
   };
-  const { aksiyonVar, yetki } = useOturum();
+  const { aksiyonVar } = useOturum();
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
@@ -313,6 +313,8 @@ export function ListeKarti({
         kaydetBagla={f => { kartKaydetRef.current = f }}
         // KART KENDİ SEKMESİNDE: çerçevesiz, ilk alana odak; sekme başlığı = kaydın adı.
         sayfaKipi={yeniSekmede}
+        // HASTA KARTI: Sil ve Hesap İcmali kartta yok (kullanıcı 14.10.2026) - listede durur.
+        silYok={tanim.kaynak === 'hasta'}
         onYuklendi={yeniSekmede ? d => {
           // Tam ad (unvan) varsa o - ad/soyad zaten içinde; yoksa ad + soyad.
           const ad = String(d.unvan ?? '').trim() || [d.ad, d.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ');
@@ -1017,15 +1019,6 @@ export function ListeKarti({
                             onClick={() => setAsiHasta({
                               id: hid, ad: String(d.unvan ?? d.ad ?? '') })}>
                       💉 Aşı Uygula
-                    </button>
-                  )}
-                  {/* HASTA İCMALİ (10.10.2026): kart açıkken liste düğmesi
-                      "önce kayıt seçin" diye pasif kalıyordu - kartın
-                      kendi düğmesi; geri dönüş bu karta. */}
-                  {yetki('hasta') && yetki('belge') && (
-                    <button type="button" className="d"
-                            onClick={() => void aksiyon('hasta.icmal', { id: hid } as ListeSatiri)}>
-                      🧾 {c('Hesap İcmali')}
                     </button>
                   )}
                   <EnabizButonu tur="erisim" hastaId={hid} />

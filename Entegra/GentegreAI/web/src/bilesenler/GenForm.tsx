@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { EkranSekmesiBaglami } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
 import { PersonelTalepleri } from './taleplerim/PersonelTalepleri';
 import { api, oturum } from '../api/istemci';
@@ -230,6 +231,8 @@ interface Props {
   gezintiOzel?(git: (baslik: string) => void): React.ReactNode;
   /** SAYFA KİPİ (ana ekran v3): kart kendi ekran sekmesinde - çerçevesiz, açılınca ilk alana odaklanır. */
   sayfaKipi?: boolean;
+  /** Kartta Sil düğmesi yok (hasta kartı, kullanıcı 14.10.2026 - silme listeden). */
+  silYok?: boolean;
   /** Kayıt yüklenince kartın değerleri (ör. sekme başlığına hasta adı). */
   onYuklendi?(deger: Record<string, unknown>): void;
   /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
@@ -313,7 +316,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -1147,6 +1150,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     }
     onKapat?.();
   }, [kaydedilmemisDegisiklikVar, onKapat]);
+  // SAYFA KİPİ: sekmenin × / Alt+W'si bu Kapat'ı çağırır (kayıtsız değişiklik sorusu dahil).
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const kapatIstendiRef = useRef(kapatIstendi);
+  kapatIstendiRef.current = kapatIstendi;
+  useEffect(() => {
+    if (!sayfaKipi || !ekranSekmesi) return;
+    ekranSekmesi.kapatmaIsleyicisi(() => kapatIstendiRef.current());
+    return () => ekranSekmesi.kapatmaIsleyicisi(null);
+  }, [sayfaKipi, ekranSekmesi]);
 
   /**
    * YENİ BAŞVURU: hasta kartını KAPATIP başvuru kartını açar (kullanıcı).
@@ -1890,7 +1902,7 @@ Yine de yeni kayıt eklensin mi?`);
               {kaydediyor ? 'Kaydediliyor…' : 'Kaydet'}
             </button>
           )}
-          {!yeniMi && yetki.sil && (
+          {!yeniMi && yetki.sil && !silYok && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
           {/* FIYAT GUNCELLE (kullanici: "özel fiyat tipinde Sil butonu

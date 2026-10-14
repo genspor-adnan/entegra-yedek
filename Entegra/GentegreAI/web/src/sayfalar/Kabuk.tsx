@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { DILLER } from '../bilesenler/diller';
@@ -29,6 +29,10 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi } from '../api/sozlesme';
 import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
+import { TarafArama } from '../bilesenler/TarafArama';
+
+/** Komut paletinde "Kayıtlı Hasta Kartı" - yol değil, hasta arama penceresini açar. */
+const KAYITLI_HASTA = '#kayitli-hasta';
 
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
@@ -172,7 +176,21 @@ export function Kabuk() {
     if (!kullanici?.id) return;
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
   }, [kullanici?.id, kullanici?.subeId]);
-  const panelEkranlari = useMemo(() => paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })), [paneller]);
+  const [kayitliHastaAcik, setKayitliHastaAcik] = useState(false);
+  /** Ekran kullanıcının (yetkili) menüsünde mi. */
+  const menudeVar = useCallback((yol: string) => kodSatirlari.some(sat =>
+    sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
+  const panelEkranlari = useMemo(() => [
+    ...paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })),
+    // YENİ KAYIT KISAYOLU (kullanıcı: "liste olmadan da ekleyebileyim"): Ctrl+K'da "＋ Yeni Hasta
+    //   Kartı" -> doğrudan kart sekmesi. Yalnız listesi menüsünde olan (yetkili) kullanıcıya.
+    ...LISTELER.filter(l => l.yeniSekmede && l.kartYolu && menudeVar(l.kartYolu))
+               .flatMap(l => [
+                 { yol: `${l.kartYolu}/yeni`, ad: l.yeniSekmede!, grup: 'Hasta', islem: true },
+                 // KAYITLI KART (kullanıcı): genel hasta arama penceresi -> seçilen kayıt kart sekmesinde.
+                 ...(l.kaynak === 'hasta' ? [{ yol: KAYITLI_HASTA, ad: 'Kayıtlı Hasta Kartı', grup: 'Hasta', islem: true }] : []),
+               ]),
+  ], [paneller, menudeVar]);
   const panelBasliklari = useMemo(() => ({
     ...Object.fromEntries(paneller.map(p => [`/gosterge/${p.kod}`, { ad: p.ad, ikon: p.ikon }])),
   }), [paneller]);
@@ -436,7 +454,13 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={git} ekEkranlar={panelEkranlari} />
+                   git={yol => yol === KAYITLI_HASTA ? setKayitliHastaAcik(true) : git(yol)}
+                   ekEkranlar={panelEkranlari} />
+      {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
+      <TarafArama acik={kayitliHastaAcik} kaynaklar={['hasta']} kartYok
+                  yerTutucu={c('Hasta ara (ad, dosya no, kimlik no, telefon)…')}
+                  onKapat={() => setKayitliHastaAcik(false)}
+                  onSec={h => { setKayitliHastaAcik(false); git(`/hasta/${h.id}`) }} />
 
       {/* YENI TALEP PENCERESI: panelden de sayfadan da yeniTalepAc() ile. */}
       <YeniTalepKatmani />

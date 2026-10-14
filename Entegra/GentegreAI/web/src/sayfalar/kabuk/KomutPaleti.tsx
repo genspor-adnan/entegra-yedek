@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../../dil/ceviri';
 import { usePaletKomutlari } from './paletKomutlari';
 import type { MenuSatiri } from './menuAgaci';
@@ -36,7 +36,9 @@ export function paletSadelestir(metin: string) {
   return sonuc;
 }
 
-export interface PaletEkrani { yol: string; ad: string; grup: string }
+export interface PaletEkrani { yol: string; ad: string; grup: string;
+  /** İŞLEM (ekran değil, bir iş başlatır: "＋ Yeni Hasta Kartı"): "İşlemler" bölümünde durur. */
+  islem?: boolean }
 
 /** Menü satırlarını düz "ekran" listesine indirger (grup adı yol olarak kalır). */
 export function paletEkranlari(satirlar: MenuSatiri[]): PaletEkrani[] {
@@ -88,10 +90,13 @@ interface Props {
   ekEkranlar?: PaletEkrani[];
 }
 
-type Oge =
-  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string }
+/** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
+ *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
+type Bolum = 'Son açılanlar' | 'Ekranlar' | 'İşlemler';
+type Oge = { bolum: Bolum } & (
+  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
-      aktif: boolean; kisayol?: string; pasifSebep?: string };
+      aktif: boolean; kisayol?: string; pasifSebep?: string });
 
 export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git, ekEkranlar }: Props) {
   const [arama, setArama] = useState('');
@@ -131,13 +136,15 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
       const sirali = [...favoriler, ...sonMenuler.filter(y => !favoriler.includes(y))];
       const kisaYol = sirali
         .map(yolAdi)
-        .filter((e): e is PaletEkrani => e !== undefined)
+        .filter((e): e is PaletEkrani => e !== undefined && !e.islem)
         .slice(0, 8)
-        .map<Oge>(e => ({ tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol }));
+        .map<Oge>(e => ({ bolum: 'Son açılanlar', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol }));
       return [
         ...kisaYol,
+        ...ekranlar.filter(e => e.islem).map<Oge>(e => ({
+          bolum: 'İşlemler', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol, islem: true })),
         ...komutlar.map<Oge>(k => ({
-          tur: 'komut', anahtar: 'k' + k.kod, ad: k.ad, grup: k.grup || c('Bu ekranda'),
+          bolum: 'İşlemler', tur: 'komut', anahtar: 'k' + k.kod, ad: k.ad, grup: k.grup || c('Bu ekranda'),
           kod: k.kod, aktif: k.aktif, kisayol: k.kisayol, pasifSebep: k.pasifSebep,
         })),
       ];
@@ -152,19 +159,22 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
       //   zaten tasiyor (menuSira), palet de onu izlesin.
       .sort((a, b) => a.puan - b.puan || a.i - b.i)
       .slice(0, 20)
-      .map<Oge>(x => ({ tur: 'ekran', anahtar: 'e' + x.e.yol, ad: x.e.ad, grup: x.e.grup, yol: x.e.yol }));
+      .map<Oge>(x => ({ bolum: x.e.islem ? 'İşlemler' : 'Ekranlar', tur: 'ekran', anahtar: 'e' + x.e.yol,
+                         ad: x.e.ad, grup: x.e.grup, yol: x.e.yol, islem: x.e.islem }));
 
     const komutEslesen = komutlar
       .map(k => ({ k, puan: paletPuan(k.ad, k.grup, q) }))
       .filter((x): x is { k: typeof komutlar[number]; puan: number } => x.puan !== null)
       .sort((a, b) => a.puan - b.puan)
       .map<Oge>(x => ({
-        tur: 'komut', anahtar: 'k' + x.k.kod, ad: x.k.ad, grup: x.k.grup || c('Bu ekranda'),
+        bolum: 'İşlemler', tur: 'komut', anahtar: 'k' + x.k.kod, ad: x.k.ad, grup: x.k.grup || c('Bu ekranda'),
         kod: x.k.kod, aktif: x.k.aktif, kisayol: x.k.kisayol, pasifSebep: x.k.pasifSebep,
       }));
 
     // EKRAN ÖNCE: kutunun işi "şu ekrana git"; komut aynı ada sahipse altında kalsın.
-    return [...ekranEslesen, ...komutEslesen];
+    //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
+    return [...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
+            ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
   }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler]);
 
   if (!acik) return null;
@@ -193,23 +203,23 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
           onChange={e => { setArama(e.target.value); setSecili(0) }}
         />
         <div className="palet-liste">
-          {gorunen.map((o, i) => (
+          {gorunen.map((o, i) => (<Fragment key={o.anahtar}>
+            {(i === 0 || gorunen[i - 1].bolum !== o.bolum) && <div className="palet-bolum">{c(o.bolum)}</div>}
             <button
-              key={o.anahtar}
               className={i === secili ? 'secili' : ''}
               disabled={o.tur === 'komut' && !o.aktif}
               onMouseEnter={() => setSecili(i)}
               onClick={() => sec(o)}
             >
               {/* Ekran mı komut mu: ok işareti "gider", şimşek "çalıştırır". */}
-              <span className="palet-tur">{o.tur === 'ekran' ? '↗' : '⚡'}</span>
+              <span className="palet-tur">{o.tur === 'ekran' ? (o.islem ? '＋' : '↗') : '⚡'}</span>
               <span>{c(o.ad)}</span>
               <span className="grup">{o.grup}</span>
               {o.tur === 'komut' && o.kisayol && <span className="kisayol">{o.kisayol}</span>}
               {o.tur === 'komut' && !o.aktif && o.pasifSebep &&
                 <span className="pasif-sebep">{o.pasifSebep}</span>}
             </button>
-          ))}
+          </Fragment>))}
           {gorunen.length === 0 && (
             <div className="bos">
               {arama.trim() === ''

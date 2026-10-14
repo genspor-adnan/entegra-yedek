@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';
@@ -7,6 +7,7 @@ import { bicimle } from './bicim';
 import { gorunumOku } from './gorunum';
 import { GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
+import { SekmeGorunurBaglami } from './sekmeBaglami';
 import { paletKomutlariAyarla, paletKomutlariTemizle }
   from '../sayfalar/kabuk/paletKomutlari';
 import { Modal } from './Modal';
@@ -467,8 +468,10 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const paletCalistirRef = useRef(aksiyonCalistir);
   paletCalistirRef.current = aksiyonCalistir;
   const paletEkrani = aksiyonEkrani ?? '';
+  // EKRAN SEKMELERİ: arka sekmedeki liste komutlarını palete yazmaz - görünür sekmenin olur.
+  const sekmeGorunur = useContext(SekmeGorunurBaglami);
   useEffect(() => {
-    if (!paletEkrani) return;
+    if (!paletEkrani || !sekmeGorunur) return;
     paletKomutlariAyarla({
       ekran: paletEkrani,
       komutlar: aksiyonlar.filter(a => hedefte(a, 'palet')).map(a => ({
@@ -479,7 +482,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       calistir: kod => paletCalistirRef.current(kod),
     });
     return () => paletKomutlariTemizle(paletEkrani);
-  }, [paletEkrani, aksiyonlar]);
+  }, [paletEkrani, aksiyonlar, sekmeGorunur]);
 
   /** "🖨️ Yazdır" dugmesi acilir menu: CSV Kaydet + Yazdir. Disaridan gelen
       alt menuler (ör. kasa tahsilat araclari) korunur. */
