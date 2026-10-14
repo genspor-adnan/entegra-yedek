@@ -32,12 +32,8 @@ export function sifreGucu(sifre: string, adSoyad = ''): SifreGucu {
 }
 
 /** "Dr. Osman AKAR" → "OA"; tek kelime → ilk iki harf; boş → "?". */
-export function basHarfler(ad: string): string {
-  const p = ad.replace(/\b(dr|prof|doç|op|uzm|dt)\.?\s*/gi, '').trim().split(/\s+/).filter(Boolean);
-  if (p.length === 0) return '?';
-  if (p.length === 1) return p[0].slice(0, 2).toLocaleUpperCase('tr-TR');
-  return (p[0][0] + p[p.length - 1][0]).toLocaleUpperCase('tr-TR');
-}
+//   Ortak kural (basHarfler.ts): ünvan atılır, ad + soyad baş harfi.
+export { basHarfler } from './basHarfler';
 
 /** ISO tarih → "62 gün önce" / "bugün" / "dün". */
 export function gunOnce(iso: string, c: (m: string) => string = m => m, simdi = new Date()): string {

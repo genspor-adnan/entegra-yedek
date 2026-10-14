@@ -1,3 +1,4 @@
+import { basHarfler } from './basHarfler';
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { c } from '../dil/ceviri';
@@ -72,7 +73,7 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
   const [alerjiAcik, setAlerjiAcik] = useState(false);
   const u = bilgi?.ust ?? null;
   const ad = m(u?.hastaAdi);
-  const bas = ad.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toLocaleUpperCase('tr');
+  const bas = basHarfler(ad);
   const panik = (bilgi?.sonuclar ?? []).filter(s => Number(s.panik ?? 0) === 1);
   const cins = m(u?.cinsiyetKisa);
   return (

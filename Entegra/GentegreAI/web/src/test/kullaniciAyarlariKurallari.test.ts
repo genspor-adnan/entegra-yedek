@@ -27,6 +27,11 @@ describe('baş harfler', () => {
     expect(basHarfler('Ayşe Nur Öztürk')).toBe('AÖ');
     expect(basHarfler('admin')).toBe('AD');
     expect(basHarfler('')).toBe('?');
+    // Ünvan baş harfe girmez (kullanıcı 14.10.2026): yalnız ad + soyad.
+    expect(basHarfler('Prof. Dr. Ayşe Nur Öztürk')).toBe('AÖ');
+    expect(basHarfler('Op.Dr. Ali Can')).toBe('AC');
+    expect(basHarfler('Uzm Dr Mehmet Kaya')).toBe('MK');
+    expect(basHarfler('Doç. Dr. Şule Aydın (nöbet)')).toBe('ŞA');
   });
 });
 

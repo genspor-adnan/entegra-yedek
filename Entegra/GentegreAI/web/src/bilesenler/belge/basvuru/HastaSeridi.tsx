@@ -1,3 +1,4 @@
+import { basHarfler } from '../../basHarfler';
 import { useEffect, useState } from 'react';
 import { api } from '../../../api/istemci';
 import { paraYaz } from '../../bicim';
@@ -84,8 +85,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   }, [tarafId]);
 
   const ad = String(h?.unvan ?? '');
-  const bas = ad.split(/\s+/).filter(Boolean).slice(0, 2)
-                .map(x => x[0]?.toLocaleUpperCase('tr') ?? '').join('');
+  const bas = basHarfler(ad);
   /* Cinsiyet seritte IKON + TEK HARF (kullanici): "Erkek"/"Kadın" hucrede
      yer kapliyordu, ikon tek bakista okunuyor. Kayitsizsa hic yazilmaz. */
   const cinsiyetAdi = String(h?.cinsiyetAdi ?? '');

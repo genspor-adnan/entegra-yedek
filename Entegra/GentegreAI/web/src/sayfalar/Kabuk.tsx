@@ -1,3 +1,4 @@
+import { basHarfler as basHarfHesapla } from '../bilesenler/basHarfler';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -263,8 +264,8 @@ export function Kabuk() {
   useEffect(() => {
     document.title = `${urunAdi(kullanici?.urunModu)}${aktifSube ? ` · ${aktifSube.ad}` : ''}`;
   }, [kullanici?.urunModu, aktifSube]);
-  const basHarfler = (kullanici?.ad ?? '?')
-    .split(' ').filter(Boolean).slice(0, 2).map(p => p[0]?.toLocaleUpperCase('tr')).join('');
+  // Avatar: ünvansız ad + soyad baş harfi (ortak kural, basHarfler.ts).
+  const basHarfler = basHarfHesapla(kullanici?.ad);
   // PROFIL FOTOGRAFI: personel kartinin varsayilan resmi (profilResmi.ts) -
   //   yoksa bas harfler. Ayarlar penceresinden yuklenince burada da tazelenir.
   const profilResmi = useProfilResmi(kullanici?.id);

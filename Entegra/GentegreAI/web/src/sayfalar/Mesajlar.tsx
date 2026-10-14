@@ -1,3 +1,4 @@
+import { basHarfler } from '../bilesenler/basHarfler';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
@@ -67,9 +68,7 @@ function gunEtiketi(iso: string): string {
 
 /** Adın baş harfleri (mockup'taki yuvarlak avatar). */
 function basHarf(ad: string): string {
-  const p = ad.trim().split(/\s+/).filter(Boolean);
-  if (p.length === 0) return '?';
-  return (p[0][0] + (p.length > 1 ? p[p.length - 1][0] : '')).toLocaleUpperCase('tr');
+  return basHarfler(ad);   // ortak kural: ünvan atılır (basHarfler.ts)
 }
 
 /** Avatar rengi addan türetilir - aynı kişi her yerde aynı renk. */

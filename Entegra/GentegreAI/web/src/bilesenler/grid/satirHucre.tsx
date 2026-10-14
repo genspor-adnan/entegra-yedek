@@ -18,10 +18,9 @@ import { sayi } from '../bicim';
  */
 
 /** "Dr. Aslı Demir" -> "AD" (unvan öneki ve "(çağrı)" gibi parantezli ekler atlanır). */
-export function basHarfler(ad: string): string {
-  const p = ad.replace(/\([^)]*\)/g, ' ').split(/\s+/).filter(x => /^\p{L}/u.test(x) && !x.endsWith('.'));
-  return ((p[0]?.[0] ?? '') + (p.length > 1 ? p[p.length - 1][0] : '')).toLocaleUpperCase('tr-TR') || '?';
-}
+//   Ortak kural (basHarfler.ts): ünvan ve parantezli ekler atılır.
+import { basHarfler } from '../basHarfler';
+export { basHarfler };
 
 const RENKLER = ['#2f6db3', '#8e44ad', '#16a085', '#c0392b', '#d35400', '#27ae60', '#2c3e50', '#2980b9', '#7f8c8d', '#b7950b'];
 /** Aynı kişi her ekranda aynı renk: addan türetilir. */
