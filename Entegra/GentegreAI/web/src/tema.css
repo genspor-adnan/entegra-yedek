@@ -6531,6 +6531,11 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 
 /* Katlanmış ızgaranın alt satırı (vital: Geçmiş kısayolları) çerçevenin içinde. */
 .izg-alt { padding: 0 10px 8px }
+/* Anamnez gösterim kipi (muayene): etiket + düz metin, düzenleme ✎ ile. */
+.anm-goster { padding: 6px 10px 8px; display: grid; gap: 6px }
+.anm-satir { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: baseline }
+.anm-b { font-size: 11.5px; color: var(--soluk) }
+.anm-d { white-space: pre-wrap; word-break: break-word; color: var(--yazi2) }
 
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
 .tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }

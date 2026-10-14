@@ -10,7 +10,7 @@ import { RolKullanicilari } from '../RolKullanicilari';
 import { KartKullaniciRolu } from '../KartKullaniciRolu';
 import { YatisAcikIsler } from '../yatan/YatisAcikIsler';
 import { KullaniciGuvenlik } from '../KullaniciGuvenlik';
-import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
+import { TEK_SUTUN_KARTLAR, type AltGrupBaslik } from '../kartSekmeleri';
 import { VARSAYILAN_UYRUK } from '../yerlerHook';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -36,7 +36,7 @@ export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
     aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
     detaylar, setDetaylar, alanHatalari, gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-    aramaAc, secilenAdlar,
+    aramaAc, secilenAdlar, altBaslik: altBaslikEki,
   } = p;
 const gruplanmis = altGruplaVar(aktif.alanlar);
 const adli = gruplanmis.filter(([b]) => b);
@@ -249,7 +249,8 @@ const adliBlok = (
           //   kimlik seridine cizilir - kullanici temsilci ile yer degistirdi.
           return (
             <div className="kagrup" key={altBaslik}>
-              <h6>{c(altBaslik)}</h6>
+              <h6 className={altBaslikEki?.tikla ? 'katlanir-bas' : undefined} onClick={altBaslikEki?.tikla}>
+                {c(altBaslik)}{altBaslikEki?.ek && <span className="katlanir-sag">{altBaslikEki.ek}</span>}</h6>
               <div className="alan-izgara tek-sutun">
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
@@ -800,4 +801,6 @@ export interface KartGrupSekmesiProps {
   /** Jenerik arama modalini acar (305): 1:1 uzanti formundaki kurum secimi. */
   aramaAc?(alan: string, kaynak: string, uygula?: (deger: string) => void): void;
   secilenAdlar?: Record<string, string>;
+  /** Alt grup başlığının ekran eki (tıklama + simge; ör. muayene anamnez 💾). */
+  altBaslik?: AltGrupBaslik;
 }

@@ -114,6 +114,9 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
 ]);
 
 /** Vital özet kutusu alanı → geçmiş grafiği anahtarı (grafiği olmayan alan tıklanmaz). */
+/** Anamnez gösterim kipinin satırları (alan, etiket) - katalogdaki sırayla. */
+const ANAMNEZ_ALANLARI: readonly (readonly [string, string])[] = [['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye']];
+
 const VITAL_ALAN_GRAFIK: Record<string, string> = {
   sistolik: 'ta', nabiz: 'nabiz', spo2: 'spo2', ates: 'ates', solunum: 'solunum', kiloKg: 'kilo', bki: 'bki',
 };
@@ -200,6 +203,12 @@ export function ListeKarti({
   useEffect(() => { setSekmesizGorunum(null) }, [kartId]);
   const etkinGorunum: 'ozet' | 'detay' = sekmesizGorunum
     ?? (Number(hastaBilgisi?.ust?.durum ?? 0) === 3 ? 'ozet' : 'detay');
+  /** ANAMNEZ GÖSTERİM / DÜZENLEME (kullanıcı 14.10.2026, vital gibi): null = kendiliğinden -
+      şikâyet ya da hikâye doluysa gösterim (yalnız etiketler), boşsa düzenleme. */
+  const [anamnezDuzen, setAnamnezDuzen] = useState<boolean | null>(null);
+  useEffect(() => { setAnamnezDuzen(null) }, [kartId]);
+  /** Kendiliğinden kip YÜKLEMEDE bir kez belirlenir - yazarken alan dolunca gösterime atlamasın. */
+  const anamnezIlk = useRef<{ id: unknown; duzen: boolean } | null>(null);
   const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
   useEffect(() => {
     if (!sekmesiz) return;
@@ -595,7 +604,31 @@ export function ListeKarti({
                                 oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
                               return null;
                             })()}
-                            {parcalar?.altGrupCiz('Anamnez')}
+                            {(() => {
+                              // ANAMNEZ: gösterimde etiket + düz metin (✎ düzenle); düzenlemede
+                              //   alanlar ve 💾 (gösterime döner, değer kartın Kaydet'iyle yazılır).
+                              const satirlar = ANAMNEZ_ALANLARI
+                                .map(([ad, b]) => [b, String(deger[ad] ?? '').trim()] as const);
+                              if (deger.id != null && anamnezIlk.current?.id !== kartId)
+                                anamnezIlk.current = { id: kartId, duzen: !satirlar.some(([, v]) => v) };
+                              const duzen = anamnezDuzen ?? anamnezIlk.current?.duzen ?? true;
+                              if (duzen) return parcalar?.altGrupCiz('Anamnez', {
+                                tikla: () => setAnamnezDuzen(false),
+                                ek: <span title={c('Gösterime dön · kart Kaydet ile yazılır')}>💾</span> });
+                              return (
+                                <div className="kasira"><div className="kagrup katlanir-kapali">
+                                  <h6 className="katlanir-bas" onClick={() => setAnamnezDuzen(true)}>
+                                    {c('Anamnez')}<span className="katlanir-sag" title={c('Düzenle')}>✎</span></h6>
+                                  <div className="anm-goster">
+                                    {satirlar.filter(([, v]) => v).map(([b, v]) => (
+                                      <div key={b} className="anm-satir">
+                                        <span className="anm-b">{c(b)}</span><span className="anm-d">{v}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div></div>
+                              );
+                            })()}
                             {/* VİTAL: hikâyenin altında, katlanır - ölçüm yoksa kapalı, varsa açık. */}
                             <div className="mi-vital">
                               {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}

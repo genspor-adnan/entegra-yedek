@@ -8,7 +8,7 @@ import { RandevuOzetSeridi } from '../RandevuOzetSeridi';
 import { RandevuTetkikUyum } from '../RandevuTetkikUyum';
 import type { Deger } from '../kartAlanCizim';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
-import type { SekmeParcalari, SekmeTanimi } from '../kartSekmeleri';
+import type { AltGrupBaslik, SekmeParcalari, SekmeTanimi } from '../kartSekmeleri';
 
 export interface KartGrupSarmalayiciOzellikleri {
   /** Acik sekme (tur === 'grup' oldugu YERDE cagrilir). */
@@ -72,7 +72,7 @@ export function KartGrupSarmalayici({
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
   setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici,
 }: KartGrupSarmalayiciOzellikleri) {
-        const grupCiz = (sekme: typeof aktif) => (
+        const grupCiz = (sekme: typeof aktif, altBaslik?: AltGrupBaslik) => (
         <KartGrupSekmesi
           aktif={sekme} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
@@ -82,7 +82,7 @@ export function KartGrupSarmalayici({
           resimYerTutucu={resimYerTutucu} gruplar={gruplar}
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
           aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
-          secilenAdlar={secilenAdlar}
+          secilenAdlar={secilenAdlar} altBaslik={altBaslik}
         />
         );
         const govde = grupCiz(aktif);
@@ -215,9 +215,9 @@ export function KartGrupSarmalayici({
           alanlar: tam,
           tablolar: Object.fromEntries(gomulu.map((d, i) => [d.ad, tablolar[i]])),
           alanDegistir,
-          altGrupCiz: alt => {
+          altGrupCiz: (alt, baslik) => {
             const alanlar = aktif.alanlar.filter(a => (a.altGrup ?? '') === alt);
-            return alanlar.length ? grupCiz({ ...aktif, alanlar }) : null;
+            return alanlar.length ? grupCiz({ ...aktif, alanlar }, baslik) : null;
           },
         };
         return sekmeSarmalayici

@@ -299,6 +299,10 @@ export function sekmeleriKur(secenek: {
   return s;
 }
 
+/** Alt grup başlığına ekran eki: tıklanabilir başlık + başlığın hemen sağına simge
+    (muayene anamnez: düzenlemede 💾, tıklayınca gösterim kipine döner). */
+export interface AltGrupBaslik { tikla?(): void; ek?: ReactNode }
+
 /** Grup sekmesinin parçaları: alan ızgarası ve gömülü detay tabloları - ekran
     bir tabloyu alanlardan ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
 export interface SekmeParcalari {
@@ -307,7 +311,7 @@ export interface SekmeParcalari {
   /** Sekmenin YALNIZ bir alt grubunun alanlarını çizer ('' = alt grupsuz
       alanlar) - ekran alanları bölüp araya kendi panelini koyabilsin
       (muayene: şikâyet/hikâye · reçete · değerlendirme/plan). */
-  altGrupCiz(altGrup: string): ReactNode;
+  altGrupCiz(altGrup: string, baslik?: AltGrupBaslik): ReactNode;
   /** Kartin bir alanini yazar (kaydedilmemis degisiklik olarak - Kaydet ile
       gider). Ekran-ozel paneller icin (ör. muayenede dikte metni). */
   alanDegistir(ad: string, deger: Deger): void;
