@@ -222,6 +222,9 @@ interface Props {
   /** TEK SAYFA (SEKMESİZ) KİP (mockup muayene_karti_v7, kullanıcı tercihi): AYNI sekmeler
       alt alta bölüm olarak çizilir, soldaki gezinti bölüme kaydırır. Alanlar değişmez. */
   tekSayfa?: boolean;
+  /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
+      `git` başlığı verilen sekmeye/bölüme götürür. */
+  gezintiEk?(git: (baslik: string) => void): React.ReactNode;
   /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
       satır adedi yerine o yazılır; undefined dönerse adet (varsayılan). */
   detayRozeti?(detayAd: string, satirlar: Record<string, unknown>[]): string | undefined;
@@ -303,7 +306,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -1824,7 +1827,8 @@ Yine de yeni kayıt eklensin mi?`);
               );
             });
             const kalan = sekmeler.filter(s => !kullanilan.has(s.anahtar));
-            return <>{bloklar}{kalan.length > 0 && <div className="kanav-g">{kalan.map(satir)}</div>}</>;
+            return <>{bloklar}{kalan.length > 0 && <div className="kanav-g">{kalan.map(satir)}</div>}
+                     {gezintiEk?.(sekmeyeGitBaslik)}</>;
           })()}
         </nav>
       ) : sekmeler.length > 1 && (

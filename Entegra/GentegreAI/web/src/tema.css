@@ -6392,6 +6392,8 @@ textarea.fm-giris { resize: vertical }
 .duzen-anahtar button { border: 0; background: transparent; color: inherit; font: inherit; font-size: 10.5px; padding: 1px 8px; cursor: pointer; opacity: .8 }
 .duzen-anahtar button.on { background: rgba(255,255,255,.25); font-weight: 600; opacity: 1 }
 
+.kanav-ek { border-top: 1px solid var(--cizgi2); margin-top: 6px; padding-top: 4px }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

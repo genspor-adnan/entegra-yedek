@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { tarihSaat } from './bicim';
 import { c, ilacAdi } from '../dil/ceviri';
 import { Modal } from './Modal';
+import { KendimeNotPenceresi, useKendimeNotVar } from './KendimeNot';
 import type { EkSekmeBaglami } from './GenForm';
 import type { SekmeVerisi } from './MuayeneSekmeleri';
 
@@ -55,21 +56,9 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
   const [tamamlandi, setTamamlandi] = useState(false);
   /** Çıkış şekli seçim penceresi (kontrol listesinde "Çıkış şekli"ne tık). */
   const [cikisAcik, setCikisAcik] = useState(false);
-  /** KENDİME NOT (1098): yalnız oturumdaki hekimin notu; null = pencere kapalı. */
-  const [ozelNot, setOzelNot] = useState('');
-  const [notTaslak, setNotTaslak] = useState<string | null>(null);
-  const [notHata, setNotHata] = useState('');
-  useEffect(() => {
-    let iptal = false;
-    void api.muayeneOzelNot(muayeneId).then(y => { if (!iptal) setOzelNot(y.metin) }).catch(() => {});
-    return () => { iptal = true };
-  }, [muayeneId]);
-  const notKaydet = () => {
-    if (notTaslak === null) return;
-    api.muayeneOzelNotYaz(muayeneId, notTaslak)
-      .then(y => { setOzelNot(y.metin); setNotTaslak(null); setNotHata('') })
-      .catch(h => setNotHata(h instanceof Error ? h.message : String(h)));
-  };
+  /** KENDİME NOT (1098): yalnız oturumdaki hekimin notu (pencere ortak bileşen). */
+  const [notVar, setNotVar] = useKendimeNotVar(muayeneId);
+  const [notAcik, setNotAcik] = useState(false);
 
   useEffect(() => {
     let iptal = false;
@@ -182,7 +171,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
   const raporSay = baglam.detaySayisi('raporlar');
   const gecmisSay = (sekme?.gecmis ?? []).length;
   const islemler: { ad: string; ikon: string; bilgi?: string; ac(): void }[] = [
-    { ad: 'Kendime Not', ikon: '📝', bilgi: ozelNot ? '🔒' : undefined, ac: () => setNotTaslak(ozelNot) },
+    { ad: 'Kendime Not', ikon: '📝', bilgi: notVar ? '🔒' : undefined, ac: () => setNotAcik(true) },
     { ad: 'Rapor', ikon: '📄', bilgi: raporSay > 0 ? String(raporSay) : undefined, ac: () => git('Rapor') },
     { ad: 'Sevk', ikon: '↗', bilgi: sayi(d.yonlendirme) > 0 ? yonlendirmeAd : undefined, ac: () => git('Sevk') },
     { ad: 'Konsültasyon', ikon: '🤝', bilgi: m(d.konsultasyonSoru) ? c('soru yazıldı') : undefined, ac: () => git('Sevk') },
@@ -210,19 +199,8 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
           </ul>
         </Modal>
       )}
-      {notTaslak !== null && (
-        <Modal baslik={`🔒 ${c('Kendime Not')}`} dar enUst buyutmeYok onKapat={() => setNotTaslak(null)}
-               alt={<>
-                 <button type="button" className="d" onClick={() => setNotTaslak(null)}>{c('Vazgeç')}</button>
-                 <button type="button" className="d bir" onClick={notKaydet}>{c('Kaydet')}</button>
-               </>}>
-          <textarea className="moz-not" value={notTaslak} maxLength={4000} autoFocus
-                    placeholder={c('Bu hastaya dair yalnız sizin göreceğiniz not…')}
-                    onChange={e => setNotTaslak(e.target.value)} />
-          <p className="not moz-not-bilgi">{c('Yalnız siz görürsünüz. Başka hekim, hemşire, yönetici ya da hasta görmez; epikrize, rapora, çıktıya, e-Nabız\'a ve YZ\'ye gitmez. Bu hastanın sonraki muayenelerinde yine görürsünüz.')}</p>
-          {notHata && <p className="hata-kutusu">{notHata}</p>}
-        </Modal>
-      )}
+      {notAcik && <KendimeNotPenceresi muayeneId={muayeneId} onKapat={() => setNotAcik(false)}
+                                       onKaydedildi={m => setNotVar(!!m)} />}
       {/* OZET KUTULARI bilgi bandina rozet oldu (kullanici; MuayeneDurumSeridi). */}
       <div className="moz-gvd">
         <div className="kagrup moz-metin">

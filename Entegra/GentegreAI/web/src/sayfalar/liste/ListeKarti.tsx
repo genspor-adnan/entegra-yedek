@@ -8,6 +8,7 @@ import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
 import { MuayeneEpikrizSekmesi } from '../../bilesenler/MuayeneEpikrizSekmesi';
+import { KendimeNotPenceresi } from '../../bilesenler/KendimeNot';
 import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/gorunum';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
@@ -157,6 +158,8 @@ export function ListeKarti({
     setMuayeneDuzeni(d);
     void gorunumKaydet({ ...gorunumOku(), muayeneDuzeni: d }).catch(() => {});
   };
+  /** Sekmesiz düzenin sol listesinden açılan Kendime Not penceresi. */
+  const [notAcik, setNotAcik] = useState(false);
   /** MUAYENE EPİKRİZİ (1100): sekme kayıt varsa ya da istenince açılır. */
   const [epikrizDurum, setEpikrizDurum] = useState<'taslak' | 'imzali' | null>(null);
   const [epikrizIstendi, setEpikrizIstendi] = useState(false);
@@ -333,6 +336,22 @@ export function ListeKarti({
             }
           : undefined}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
+        // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
+        //   zaten bölüm olarak listede - ikinci kez konmaz.
+        gezintiEk={tanim.kaynak === 'muayene' && typeof kartId === 'number'
+          ? () => (
+              <div className="kanav-g kanav-ek">
+                <div className="kanav-o" onClick={() => setNotAcik(true)}>📝 <span>{c('Kendime Not')}</span></div>
+                {/* Epikriz bölümü açılınca listede ZATEN bölüm olarak var - ikinci kez gösterilmez. */}
+                {epikrizDurum === null && !epikrizIstendi && (
+                  <div className="kanav-o" onClick={() => { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) }}>
+                    📄 <span>{c('Epikriz')}</span>
+                  </div>
+                )}
+                {notAcik && <KendimeNotPenceresi muayeneId={kartId} onKapat={() => setNotAcik(false)} />}
+              </div>
+            )
+          : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
           : undefined}
