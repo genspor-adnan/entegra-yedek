@@ -62,8 +62,8 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'acilCagri', rota: 'acil-cagri',
-    baslik: 'Acil — Çağrılar',
-    yol: 'Acil › Çağrılar',
+    baslik: 'Acil — Çağrı Listesi',
+    yol: 'Acil › Çağrı Listesi',
     aksiyonEkrani: 'acil-cagri-liste',
     tarihAlani: 'cagriZamani',
     cipler: [
@@ -73,13 +73,13 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Acil', menuAd: 'Çağrılar', ic: '📞',
+    menuGrup: 'Acil', menuAd: 'Çağrı Listesi', ic: '📞',
     yetkiKodu: 'acil.pano.cagri', menuSira: 30,
   },
   {
     kaynak: 'acilYatak', rota: 'acil-yatak',
-    baslik: 'Acil Yatakları',
-    yol: 'Acil › Yataklar',
+    baslik: 'Acil Yatakı Listesi',
+    yol: 'Acil › Yatak Listesi',
     kartYolu: '/acil-yatak', kartBaslik: 'Acil Yatağı',
     aksiyonEkrani: 'acil-yatak-liste',
     cipler: [
@@ -88,7 +88,7 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Acil', menuAltGrup: 'Ayarlar', menuAd: 'Yataklar', ic: '🛏️',
+    menuGrup: 'Acil', menuAltGrup: 'Ayarlar', menuAd: 'Yatak Listesi', ic: '🛏️',
     yetkiKodu: 'acil.yatak', menuSira: 90,
   },
 ];

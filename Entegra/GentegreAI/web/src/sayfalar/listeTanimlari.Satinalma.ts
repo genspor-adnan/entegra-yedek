@@ -24,8 +24,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
 export const SATINALMA_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'satinalmaTalep', rota: 'satinalma-talep',
-    baslik: 'Satınalma Talepleri',
-    yol: 'Satınalma › Talepler',
+    baslik: 'Satınalma Talebi Listesi',
+    yol: 'Satınalma › Talep Listesi',
     kartYolu: '/satinalma-talep', kartBaslik: 'Satınalma Talebi',
     aksiyonEkrani: 'satinalma-talep-liste',
     tarihAlani: 'tarih',
@@ -46,13 +46,13 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Birleştirilebilir', filtre: { alan: 'birlestirilebilir', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Satınalma', menuAd: 'Talepler', ic: '📝',
+    menuGrup: 'Satınalma', menuAd: 'Talep Listesi', ic: '📝',
     yetkiKodu: 'satinalma.talep', menuSira: 10,
   },
   {
     kaynak: 'satinalmaTeklif', rota: 'satinalma-teklif',
     baslik: 'Teklif / İhale',
-    yol: 'Satınalma › Teklifler',
+    yol: 'Satınalma › Teklif Listesi',
     kartYolu: '/satinalma-teklif', kartBaslik: 'Teklif',
     aksiyonEkrani: 'satinalma-teklif-liste',
     cipler: [
@@ -65,13 +65,13 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'En düşük alınmadı', filtre: { alan: 'enDusukAlindi', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Satınalma', menuAd: 'Teklifler', ic: '⚖️',
+    menuGrup: 'Satınalma', menuAd: 'Teklif Listesi', ic: '⚖️',
     yetkiKodu: 'satinalma.teklif', menuSira: 20,
   },
   {
     kaynak: 'satinalmaSiparis', rota: 'satinalma-siparis',
     baslik: 'Sipariş Takibi',
-    yol: 'Satınalma › Siparişler',
+    yol: 'Satınalma › Sipariş Listesi',
     aksiyonEkrani: 'satinalma-siparis-liste',
     // KART YOK, BELGE MODALI VAR: sipariş `belge` tür 9'dur ve satır kimliği
     //   belge id'sidir - çift tık Liste.tsx'te belge kartını modal açar.
@@ -85,7 +85,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Cezası işlenmedi', filtre: { alan: 'cezaIslendi', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Satınalma', menuAd: 'Siparişler', ic: '📦',
+    menuGrup: 'Satınalma', menuAd: 'Sipariş Listesi', ic: '📦',
     yetkiKodu: 'satinalma.siparis', menuSira: 30,
   },
   {
@@ -137,7 +137,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'satinalmaTedarikci', rota: 'satinalma-tedarikci',
     baslik: 'Tedarikçi Performansı',
-    yol: 'Satınalma › Tedarikçiler',
+    yol: 'Satınalma › Tedarikçi Listesi',
     kartYolu: '/cari', kartBaslik: 'Tedarikçi',
     aksiyonEkrani: 'satinalma-tedarikci-liste',
     // DURUM ROZETİ SQL'DE HESAPLANIR ama metindir, süzülemez: çipler skorun
@@ -151,7 +151,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Belgesi doldu',  filtre: { alan: 'belgeSuresiDoldu', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Satınalma', menuAd: 'Tedarikçiler', ic: '🤝',
+    menuGrup: 'Satınalma', menuAd: 'Tedarikçi Listesi', ic: '🤝',
     yetkiKodu: 'satinalma.tedarikci', menuSira: 50,
   },
   {

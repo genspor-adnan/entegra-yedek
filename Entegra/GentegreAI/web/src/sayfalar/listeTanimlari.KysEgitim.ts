@@ -22,13 +22,13 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
   //   sekmeli özel sayfa (KysEgitimler). Aşağıdaki generic listeler menüde
   //   görünmez; zorunlu tanımlar sayfadaki bağlantıyla açılır.
   {
-    kaynak: 'kys-egitimler', rota: 'kys-egitimler', ozelSayfa: true, baslik: 'Eğitim & Yetkinlik Kayıtları',
+    kaynak: 'kys-egitimler', rota: 'kys-egitimler', ozelSayfa: true, baslik: 'Eğitim & Yetkinlik Kaydı Listesi',
     yol: 'Kalite › Eğitim',
     modul: 'kys',
     menuGrup: 'Kalite', menuAd: 'Eğitim', ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 80,
   },
   {
-    kaynak: 'kys-egitim', rota: 'kys-egitim', aksiyonEkrani: 'kys-egitim-liste', baslik: 'Eğitim & Yetkinlik Kayıtları',
+    kaynak: 'kys-egitim', rota: 'kys-egitim', aksiyonEkrani: 'kys-egitim-liste', baslik: 'Eğitim & Yetkinlik Kaydı Listesi',
     yol: 'Kalite › Eğitim',
     kartYolu: '/kys-egitim', kartBaslik: 'Eğitim Kaydı', ozelKart: true,
     tarihAlani: 'tarih',
@@ -54,9 +54,9 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
     modul: 'kys', menuGrup: 'Kalite', menuGizli: true, yetkiKodu: 'kys.egitim',
   },
   {
-    kaynak: 'kys-zorunlu-egitim', rota: 'kys-zorunlu-egitim', aksiyonEkrani: 'kys-zorunlu-egitim-liste', baslik: 'Zorunlu Eğitimler',
-    yol: 'Kalite › Eğitim › Zorunlu Eğitimler',
-    menuAd: 'Zorunlu Eğitimler', ic: '📋',
+    kaynak: 'kys-zorunlu-egitim', rota: 'kys-zorunlu-egitim', aksiyonEkrani: 'kys-zorunlu-egitim-liste', baslik: 'Zorunlu Eğitim Listesi',
+    yol: 'Kalite › Eğitim › Zorunlu Eğitim Listesi',
+    menuAd: 'Zorunlu Eğitim Listesi', ic: '📋',
     kartYolu: '/kys-zorunlu-egitim', kartBaslik: 'Zorunlu Eğitim',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },

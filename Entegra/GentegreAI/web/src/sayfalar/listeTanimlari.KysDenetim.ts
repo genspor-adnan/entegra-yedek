@@ -6,7 +6,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-denetim', rota: 'kys-denetim', baslik: '🔎 İç Denetimler', yol: 'Kalite › İç Denetimler · yıllık plan = tarihli denetim listesi',
+    kaynak: 'kys-denetim', rota: 'kys-denetim', baslik: '🔎 İç Denetim Listesi', yol: 'Kalite › İç Denetimler · yıllık plan = tarihli denetim listesi',
     kartYolu: '/kys-denetim', kartBaslik: 'İç Denetim', aksiyonEkrani: 'kys-denetim-liste',
     tarihAlani: 'tarih',
     cipler: [
@@ -15,13 +15,13 @@ export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'İç Denetimler', ic: '🔎', yetkiKodu: 'kys.denetim', menuSira: 40,
+    menuGrup: 'Kalite', menuAd: 'İç Denetim Listesi', ic: '🔎', yetkiKodu: 'kys.denetim', menuSira: 40,
   },
   // DENETİM BULGULARI (1059): kart detay satırında düğme yok - "DÖF aç"
   //   (kaynak 1) bu listenin satır aksiyonu. Menüde görünmez (tek kod tek
   //   menü); denetim listesindeki "📋 Bulgular / DÖF" ?denetimId= ile açar.
   {
-    kaynak: 'kys-denetim-bulgu', rota: 'kys-denetim-bulgu', baslik: 'Denetim Bulguları',
+    kaynak: 'kys-denetim-bulgu', rota: 'kys-denetim-bulgu', baslik: 'Denetim Bulgusu Listesi',
     yol: 'Kalite › İç Denetimler › Bulgular', aksiyonEkrani: 'kys-denetim-bulgu-liste',
     urlFiltreAlani: 'denetimId', tarihAlani: 'tarih',
     cipler: [
@@ -30,6 +30,6 @@ export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Denetim Bulguları', menuGizli: true, ic: '📋', yetkiKodu: 'kys.denetim', menuSira: 41,
+    menuGrup: 'Kalite', menuAd: 'Denetim Bulgusu Listesi', menuGizli: true, ic: '📋', yetkiKodu: 'kys.denetim', menuSira: 41,
   },
 ];

@@ -83,11 +83,13 @@ export interface ListeTanimi {
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
   /**
-   * YENİ KAYIT AYRI SEKMEDE (ana ekran v3 denemesi, kullanıcı 14.10.2026): "Yeni" kartı liste
-   * sekmesinin üstünde değil KENDİ sekmesinde açar; değer sekme başlığıdır. Kaydedince
-   * sekme kapanır, liste tazelenir. Ekran sekmeleri kapalıysa etkisiz.
+   * KART SEKMESİ (kullanıcı 14.10.2026 - bütün proje): kart liste penceresinde değil KENDİ
+   * ekran sekmesinde açılır (bkz. `kartSekmesiVar`). Bu alan yalnız YENİ kayıt sekmesinin
+   * başlığını özelleştirir; verilmezse "Yeni <kart adı> Kartı" türetilir.
    */
   yeniSekmede?: string;
+  /** Kart sekmesi İSTENMEZ (istisna; varsayılan: kartı olan her liste sekmede açar). */
+  kartSekmesi?: false;
   /**
    * Kart baslıgı. Verilmezse liste basligindan turetilir (sondaki -ler/-lar
    * atilir). "Radyoloji Çalışma Listesi" gibi baslikta bu turetme ise yaramaz:
@@ -196,3 +198,35 @@ export const DURUM_CIPLERI: ListeTanimi['cipler'] = [
   { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
   { ad: 'Tumu' },
 ];
+
+/** Kartı BelgeKarti olan kaynaklar (liste satırı belge id'sidir). */
+export const BELGE_KARTI_KAYNAKLARI = ['belge', 'irsaliye', 'stok-transfer', 'stok-talep',
+  'giris-fis', 'cikis-fis', 'satinalmaSiparis'];
+
+/**
+ * KARTIN ADI (kullanıcı 14.10.2026: "Hasta Kartı, Muayene Kartı... kartlar isimli olacak";
+ * listeler "X Listesi"): "Hasta Listesi" -> "Hasta Kartı". Liste adı bu kalıpta değilse
+ * eski türetme (sondaki -ler/-lar atılır) + " Kartı". kartBaslik verilmişse o (+ " Kartı").
+ */
+export const kartAdi = (t: ListeTanimi) => {
+  const kok = t.kartBaslik ?? t.baslik.replace(/\s*\(.*\)$/, '');
+  const ad = t.kartBaslik ? kok : / Listesi$/.test(kok) ? kok.replace(/ Listesi$/, '') : kok.replace(/ler$|lar$/, '');
+  return /Kart[ıi]$/.test(ad) ? ad : `${ad} Kartı`;
+};
+
+/**
+ * KART KENDİ SEKMESİNDE Mİ (kullanıcı 14.10.2026: "hep sekmede açsın; yalnız özel bilgi alma,
+ * mesaj, arama vb. modal"): genel kart (kartYolu) ve belge kartı olan her liste; özel kartlar
+ * (ozelKart - kendi pencereleri) uyarlanana kadar ve `kartSekmesi: false` istisnaları hariç.
+ */
+export const kartSekmesiVar = (t: ListeTanimi) => t.kartSekmesi !== false && !t.ozelKart && !t.ozelSayfa
+  && (!!t.kartYolu || BELGE_KARTI_KAYNAKLARI.includes(t.kaynak));
+
+/** Yeni kayıt sekmesinin başlığı. */
+export const yeniSekmeBasligi = (t: ListeTanimi) => {
+  if (t.yeniSekmede) return t.yeniSekmede;
+  return `Yeni ${kartAdi(t)}`;
+};
+
+/** Kart sekmesinin yolu: kartYolu, yoksa liste rotası (belge kartları /<rota>/:id). */
+export const kartSekmeYolu = (t: ListeTanimi) => t.kartYolu ?? `/${t.rota ?? t.kaynak}`;

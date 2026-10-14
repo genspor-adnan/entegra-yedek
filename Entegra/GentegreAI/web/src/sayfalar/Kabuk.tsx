@@ -33,13 +33,18 @@ import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 import { TarafArama } from '../bilesenler/TarafArama';
 
-import type { ListeGirdisi } from './listeTanimlari.Ortak';
+import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { KayitArama } from '../bilesenler/KayitArama';
 
-/** Komut paletinde "Kayıtlı ... Kartı" - yol değil, kaynağın arama penceresini açar. */
-const KAYITLI_ARAMA: Record<string, string> = { hasta: '#kayitli-hasta', belge: '#kayitli-basvuru' };
+/** Komut paletinde "Kayıtlı ... Kartı" - yol değil, arama penceresini açar: `#kayitli:<kart yolu>`. */
+const KAYITLI_ONEK = '#kayitli:';
+/** Hasta ve başvuru: genel HASTA araması (başvuruda hastanın son başvurusu); boş palette hep görünür. */
+const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru'> = { '/hasta': 'hasta', '/basvuru': 'basvuru' };
+/** Kartı sekmede açılan listeler, kart yolu başına bir tane. */
+const kartListeleri = LISTELER.filter(l => kartSekmesiVar(l) && !l.menuYol)
+  .filter((l, i, a) => a.findIndex(x => kartSekmeYolu(x) === kartSekmeYolu(l)) === i);
 /** Listenin menü yolu ve kart sekmesinin yolu (kartYolu yoksa liste rotası - belge kartları). */
 const listeYolu = (l: ListeGirdisi) => `/${l.rota ?? l.kaynak}`;
-const kartSekmeYolu = (l: ListeGirdisi) => l.kartYolu ?? listeYolu(l);
 
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
@@ -185,28 +190,38 @@ export function Kabuk() {
   }, [kullanici?.id, kullanici?.subeId]);
   /** Ctrl+K "Kayıtlı Hasta / Başvuru Kartı": ikisi de hasta araması, seçimden sonrası farklı. */
   const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | null>(null);
+  /** Genel "Kayıtlı X Kartı" araması (listenin kendi kaynağı ve kolonları). */
+  const [kayitliListe, setKayitliListe] = useState<ListeGirdisi | null>(null);
   /** Ekran kullanıcının (yetkili) menüsünde mi. */
   const menudeVar = useCallback((yol: string) => kodSatirlari.some(sat =>
     sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
   const panelEkranlari = useMemo(() => [
     ...paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })),
-    // YENİ KAYIT KISAYOLU (kullanıcı: "liste olmadan da ekleyebileyim"): Ctrl+K'da "＋ Yeni Hasta
-    //   Kartı" -> doğrudan kart sekmesi. Yalnız listesi menüsünde olan (yetkili) kullanıcıya.
-    ...LISTELER.filter(l => l.yeniSekmede && menudeVar(listeYolu(l)))
-               .flatMap(l => [
-                 { yol: `${kartSekmeYolu(l)}/yeni`, ad: l.yeniSekmede!, grup: l.menuGrup ?? '', islem: true },
-                 // KAYITLI KART (kullanıcı): kaynağın arama penceresi -> seçilen kayıt kart sekmesinde.
-                 ...(KAYITLI_ARAMA[l.kaynak] ? [{ yol: KAYITLI_ARAMA[l.kaynak], ad: l.yeniSekmede!.replace(/^Yeni /, 'Kayıtlı '),
-                                                 grup: l.menuGrup ?? '', islem: true, ikon: '📂' }] : []),
-               ]),
+    // YENİ / KAYITLI KART (kullanıcı: "aramada hasta ve başvuru kartı deseninde yeni açma ve kayıtlı
+    //   getirme olmalı"): kartı sekmede açılan HER liste için iki işlem; yalnız listesi menüsünde olan
+    //   (yetkili) kullanıcıya. Aynı kart yolunu paylaşan listelerden ilki. Boş palette yalnız son
+    //   açılan / favori listelerinkiler ve hasta-başvuru görünür (KomutPaleti), tamamı aramada.
+    ...kartListeleri.filter(l => menudeVar(listeYolu(l))).flatMap(l => {
+      const yol = kartSekmeYolu(l), kart = kartAdi(l);
+      return [
+        { yol: `${yol}/yeni`, ad: yeniSekmeBasligi(l), grup: l.menuGrup ?? '', islem: true, listeYol: listeYolu(l), sabit: !!SABIT_ARAMA[yol] },
+        { yol: `${KAYITLI_ONEK}${yol}`, ad: `Kayıtlı ${kart}`, grup: l.menuGrup ?? '', islem: true, ikon: '📂',
+          listeYol: listeYolu(l), sabit: !!SABIT_ARAMA[yol] },
+      ];
+    }),
   ], [paneller, menudeVar]);
   const panelBasliklari = useMemo(() => ({
     ...Object.fromEntries(paneller.map(p => [`/gosterge/${p.kod}`, { ad: p.ad, ikon: p.ikon }])),
   }), [paneller]);
   // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): kartYolu -> yeni kayıt sekme başlığı.
-  const kartSekmeleri = useMemo(() => Object.fromEntries(
-    LISTELER.filter(l => l.yeniSekmede).map(l => [kartSekmeYolu(l), l.yeniSekmede!])), []);
+  const kartSekmeleri = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const l of LISTELER) if (kartSekmesiVar(l)) m[kartSekmeYolu(l)] ??= yeniSekmeBasligi(l);
+    return m;
+  }, []);
   const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari, kartSekmeleri });
+  /** Palet / kayıtlı arama kart açar: sekmeler açıksa kayıtsız değişiklikli kart korunur. */
+  const kartaGit = (yol: string) => gorunum.ekranSekmeleri ? sekme.kartaGit(yol) : git(yol);
   // KART PERDESİ SEKME ÇUBUĞUNUN ALTINDAN BAŞLAR: kart açıkken de sekmeler arasında
   //   geçilebilsin (gizli sekmenin kartı canlı kalır).
   useEffect(() => {
@@ -463,17 +478,25 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={yol => yol === KAYITLI_ARAMA.hasta ? setKayitliArama('hasta')
-                             : yol === KAYITLI_ARAMA.belge ? setKayitliArama('basvuru') : git(yol)}
+                   git={yol => {
+                     if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
+                     const kartYol = yol.slice(KAYITLI_ONEK.length);
+                     if (SABIT_ARAMA[kartYol]) { setKayitliArama(SABIT_ARAMA[kartYol]); return }
+                     setKayitliListe(kartListeleri.find(l => kartSekmeYolu(l) === kartYol) ?? null);
+                   }}
                    ekEkranlar={panelEkranlari} />
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
+      <KayitArama acik={!!kayitliListe} baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
+                  kaynak={kayitliListe?.kaynak ?? ''} sabitFiltre={kayitliListe?.sabitFiltre}
+                  onKapat={() => setKayitliListe(null)}
+                  onSec={id => { if (kayitliListe) kartaGit(`${kartSekmeYolu(kayitliListe)}/${id}`) }} />
       {/* KAYITLI BAŞVURU KARTI da aynı hasta araması (kullanıcı): seçilen hastanın SON başvurusu açılır. */}
       <TarafArama acik={kayitliArama !== null} kaynaklar={['hasta']} kartYok
                   yerTutucu={c('Hasta ara (ad, dosya no, kimlik no, telefon)…')}
                   onKapat={() => setKayitliArama(null)}
                   onSec={h => {
                     const tur = kayitliArama; setKayitliArama(null);
-                    if (tur === 'hasta') { git(`/hasta/${h.id}`); return }
+                    if (tur === 'hasta') { kartaGit(`/hasta/${h.id}`); return }
                     void api.liste('belge', {
                       sayfa: 1, boyut: 1,
                       sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
@@ -482,7 +505,7 @@ export function Kabuk() {
                         { alan: 'hastaId', op: 'esit', deger: h.id } ] },
                     }).then(y => {
                       const son = y.satirlar[0];
-                      if (son) git(`/basvuru/${son.id}`);
+                      if (son) kartaGit(`/basvuru/${son.id}`);
                       else mesaj(c('{0} için kayıtlı başvuru yok.').replace('{0}', h.unvan));
                     }).catch(e => mesaj(hataMetni(e)));
                   }} />

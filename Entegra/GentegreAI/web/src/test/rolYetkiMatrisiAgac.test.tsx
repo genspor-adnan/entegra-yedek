@@ -75,6 +75,6 @@ describe('yetki matrisi ağacı', () => {
     //   Hata varken "ilk yüklemede tüm dallar kapalı" efekti yeniden çalışıp
     //   her tıklamada ağacı çöktürüyordu.
     expect(k.container.textContent).toContain('Hasta Listesi');
-    expect(k.container.textContent).toContain('Randevular');
+    expect(k.container.textContent).toContain('Randevu Listesi');
   });
 });

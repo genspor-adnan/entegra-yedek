@@ -16,9 +16,14 @@ export const SekmeGorunurBaglami = createContext(true);
  */
 export const EkranSekmesiBaglami = createContext<{
   kapat(hedef?: string): void;
+  /** Kart aç - aynı kart sekmesindeki kart kayıtsız değişiklikliyse açmaz, onu öne alır. */
+  kartaGit(yol: string): void;
   baslik(ad: string, yol: string): void;
-  /** Sekmenin × / Alt+W'si ekranın KENDİ Kapat'ını çağırsın (kayıtsız değişiklik sorusu). null = kaldır. */
-  kapatmaIsleyicisi(f: (() => void) | null): void;
+  /**
+   * Sekmenin × / Alt+W'si ekranın KENDİ Kapat'ını çağırsın (kayıtsız değişiklik sorusu). null = kaldır.
+   * `kirli`: kart sekmesinde kayıtsız değişiklik var mı - varken aynı sekmede başka kart açılmaz.
+   */
+  kapatmaIsleyicisi(f: (() => void) | null, kirli?: () => boolean): void;
 } | null>(null);
 
 /** Bir listenin kayıtları değişti (başka sekmeden): liste tazelenir. detail = kaynak. */

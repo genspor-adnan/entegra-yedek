@@ -55,6 +55,7 @@ import { randevuTercihiYaz } from './randevuTercihi';
 import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
+import { kartAdi, kartSekmesiVar } from '../listeTanimlari.Ortak';
 import type { KartOzellestirme } from './kartOzellestirme';
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { BulguDofHucresi, DenetimAraclari, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
@@ -180,9 +181,9 @@ export function ListeKarti({
   const [receteIlacAra, setReceteIlacAra] = useState(false);
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
-  /** Kart KENDİ ekran sekmesinde mi (liste tanımı yeniSekmede + sekmeler açık): yeni ve düzenle. */
+  /** Kart KENDİ ekran sekmesinde mi (kartSekmesiVar + sekmeler açık): yeni ve düzenle. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const yeniSekmede = kartId !== null && !!tanim.yeniSekmede && !!ekranSekmesi && !sorgu.get('geri');
+  const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   const [kayitSayaci, setKayitSayaci] = useState(0);
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
@@ -1113,7 +1114,7 @@ export function ListeKarti({
               );
             }
           : undefined}
-        baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
+        baslik={kartAdi(tanim)}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         gizliAlanlar={tanim.gizliKartAlanlari}
         gizliSekmeler={tanim.gizliKartSekmeleri}

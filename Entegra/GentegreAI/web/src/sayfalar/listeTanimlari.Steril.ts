@@ -18,8 +18,8 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Sterilizasyon Panosu', ic: '🧪', yetkiKodu: 'steril.pano', menuSira: 70,
   },
   {
-    kaynak: 'steril-dongu', rota: 'steril-dongu', aksiyonEkrani: 'steril-dongu-liste', baslik: 'Döngüler',
-    yol: 'Diş › Sterilizasyon › Döngüler',
+    kaynak: 'steril-dongu', rota: 'steril-dongu', aksiyonEkrani: 'steril-dongu-liste', baslik: 'Döngü Listesi',
+    yol: 'Diş › Sterilizasyon › Döngü Listesi',
     kartYolu: '/steril-dongu', kartBaslik: 'Döngü', ozelKart: true,
     tarihAlani: 'baslama',
     cipler: [
@@ -31,7 +31,7 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Döngüler', ic: '♨️', yetkiKodu: 'steril.dongu', menuSira: 71,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Döngü Listesi', ic: '♨️', yetkiKodu: 'steril.dongu', menuSira: 71,
   },
   {
     // GENERİC DÖNGÜ KARTI (menüde gizli): parametre / not / indikatör düzeltme ve silme GenForm'da;
@@ -43,7 +43,7 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Döngü (kart)', menuGizli: true, ic: '♨️', yetkiKodu: 'steril.dongu', menuSira: 77,
   },
   {
-    kaynak: 'steril-paket', rota: 'steril-paket', aksiyonEkrani: 'steril-paket-liste', baslik: 'Steril Depo · Paketler',
+    kaynak: 'steril-paket', rota: 'steril-paket', aksiyonEkrani: 'steril-paket-liste', baslik: 'Steril Depo · Paket Listesi',
     yol: 'Diş › Sterilizasyon › Steril Depo',
     cipler: [
       { ad: 'Steril', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
@@ -54,7 +54,7 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Steril Depo · Paketler', ic: '📦', yetkiKodu: 'steril.birim', menuSira: 72,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Steril Depo · Paket Listesi', ic: '📦', yetkiKodu: 'steril.birim', menuSira: 72,
   },
   {
     kaynak: 'steril-birim', rota: 'steril-birim', aksiyonEkrani: 'steril-birim-liste', baslik: 'Setler · Döner Aletler',
@@ -72,11 +72,11 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Setler · Döner Aletler', ic: '🧰', yetkiKodu: 'steril.birim.set_alet', menuSira: 73,
   },
   {
-    kaynak: 'steril-kullanim', rota: 'steril-kullanim', aksiyonEkrani: 'steril-kullanim-liste', baslik: 'Kullanım Kayıtları',
-    yol: 'Diş › Sterilizasyon › Kullanım Kayıtları',
+    kaynak: 'steril-kullanim', rota: 'steril-kullanim', aksiyonEkrani: 'steril-kullanim-liste', baslik: 'Kullanım Kaydı Listesi',
+    yol: 'Diş › Sterilizasyon › Kullanım Kaydı Listesi',
     tarihAlani: 'zaman',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Kullanım Kayıtları', ic: '🦷', yetkiKodu: 'steril.izleme', menuSira: 74,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Kullanım Kaydı Listesi', ic: '🦷', yetkiKodu: 'steril.izleme', menuSira: 74,
   },
   {
     kaynak: 'steril-izleme', ozelSayfa: true, baslik: 'İzlenebilirlik · Geri Çağırma', yol: 'Diş › Sterilizasyon › İzlenebilirlik',
@@ -84,35 +84,35 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'İzlenebilirlik · Kayıt Defteri', ic: '🔍', yetkiKodu: 'steril.izleme.defter', menuSira: 75,
   },
   {
-    kaynak: 'steril-geri-cagirma', rota: 'steril-geri-cagirma', aksiyonEkrani: 'steril-geri-cagirma-liste', baslik: 'Geri Çağırmalar',
-    yol: 'Diş › Sterilizasyon › Geri Çağırmalar',
+    kaynak: 'steril-geri-cagirma', rota: 'steril-geri-cagirma', aksiyonEkrani: 'steril-geri-cagirma-liste', baslik: 'Geri Çağırma Listesi',
+    yol: 'Diş › Sterilizasyon › Geri Çağırma Listesi',
     cipler: [
       { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Geri Çağırmalar', menuGizli: true, ic: '🚨', yetkiKodu: 'steril.izleme', menuSira: 76,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Geri Çağırma Listesi', menuGizli: true, ic: '🚨', yetkiKodu: 'steril.izleme', menuSira: 76,
   },
   {
-    kaynak: 'steril-set', rota: 'steril-set', aksiyonEkrani: 'steril-set-liste', baslik: 'Set Tanımları',
-    yol: 'Diş › Sterilizasyon › Ayarlar › Set Tanımları',
+    kaynak: 'steril-set', rota: 'steril-set', aksiyonEkrani: 'steril-set-liste', baslik: 'Set Tanımı Listesi',
+    yol: 'Diş › Sterilizasyon › Ayarlar › Set Tanımı Listesi',
     kartYolu: '/steril-set', kartBaslik: 'Set tanımı',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Set tanımları (içerik)', ic: '📋', yetkiKodu: 'steril.birim.set_tanim', menuSira: 95,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Set tanımı Listesi (içerik)', ic: '📋', yetkiKodu: 'steril.birim.set_tanim', menuSira: 95,
   },
   {
-    kaynak: 'steril-cihaz', rota: 'steril-cihaz', aksiyonEkrani: 'steril-cihaz-liste', baslik: 'Cihazlar',
-    yol: 'Diş › Sterilizasyon › Ayarlar › Cihazlar',
+    kaynak: 'steril-cihaz', rota: 'steril-cihaz', aksiyonEkrani: 'steril-cihaz-liste', baslik: 'Cihaz Listesi',
+    yol: 'Diş › Sterilizasyon › Ayarlar › Cihaz Listesi',
     kartYolu: '/steril-cihaz', kartBaslik: 'Cihaz',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '⚙️', yetkiKodu: 'steril.ayar', menuSira: 96,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Listesi', ic: '⚙️', yetkiKodu: 'steril.ayar', menuSira: 96,
   },
   {
-    kaynak: 'steril-program', rota: 'steril-program', aksiyonEkrani: 'steril-program-liste', baslik: 'Programlar',
-    yol: 'Diş › Sterilizasyon › Ayarlar › Programlar',
+    kaynak: 'steril-program', rota: 'steril-program', aksiyonEkrani: 'steril-program-liste', baslik: 'Program Listesi',
+    yol: 'Diş › Sterilizasyon › Ayarlar › Program Listesi',
     kartYolu: '/steril-program', kartBaslik: 'Program',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Programlar', ic: '🌡', yetkiKodu: 'steril.ayar.program', menuSira: 97,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Program Listesi', ic: '🌡', yetkiKodu: 'steril.ayar.program', menuSira: 97,
   },
   {
     kaynak: 'steril-bakim', rota: 'steril-bakim', aksiyonEkrani: 'steril-bakim-liste', baslik: 'Bakım · Validasyon',

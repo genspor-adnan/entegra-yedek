@@ -20,8 +20,8 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Çağrı Merkezi', menuAd: 'Giden Arama · Kampanya', ic: '📤', yetkiKodu: 'cagri.giden', menuSira: 20,
   },
   {
-    kaynak: 'cagri', rota: 'cagri', aksiyonEkrani: 'cagri-liste', baslik: 'Çağrı Kayıtları',
-    yol: 'Çağrı Merkezi › Çağrı Kayıtları',
+    kaynak: 'cagri', rota: 'cagri', aksiyonEkrani: 'cagri-liste', baslik: 'Çağrı Kaydı Listesi',
+    yol: 'Çağrı Merkezi › Çağrı Kaydı Listesi',
     kartYolu: '/cagri', kartBaslik: 'Çağrı Kartı', ozelKart: true,
     tarihAlani: 'baslama',
     cipler: [
@@ -33,7 +33,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı Kayıtları', ic: '📞', yetkiKodu: 'cagri.kayit', menuSira: 30,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı Kaydı Listesi', ic: '📞', yetkiKodu: 'cagri.kayit', menuSira: 30,
   },
   {
     // GENERIC ÇAĞRI KARTI (menüde gizli): alan düzenleme (konu / sonuç / not) ve
@@ -45,8 +45,8 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı (kart)', menuGizli: true, ic: '📞', yetkiKodu: 'cagri.kayit', menuSira: 31,
   },
   {
-    kaynak: 'cagri-kampanya', rota: 'cagri-kampanya', aksiyonEkrani: 'cagri-kampanya-liste', baslik: 'Kampanyalar',
-    yol: 'Çağrı Merkezi › Kampanyalar',
+    kaynak: 'cagri-kampanya', rota: 'cagri-kampanya', aksiyonEkrani: 'cagri-kampanya-liste', baslik: 'Kampanya Listesi',
+    yol: 'Çağrı Merkezi › Kampanya Listesi',
     kartYolu: '/cagri-kampanya', kartBaslik: 'Kampanya',
     cipler: [
       { ad: 'Çalışıyor', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -54,11 +54,11 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanyalar', ic: '📣', yetkiKodu: 'cagri.kampanya', menuSira: 40,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Listesi', ic: '📣', yetkiKodu: 'cagri.kampanya', menuSira: 40,
   },
   {
-    kaynak: 'cagri-kampanya-kisi', rota: 'cagri-kampanya-kisi', aksiyonEkrani: 'cagri-kampanya-kisi-liste', baslik: 'Kampanya Kişileri',
-    yol: 'Çağrı Merkezi › Kampanya Kişileri',
+    kaynak: 'cagri-kampanya-kisi', rota: 'cagri-kampanya-kisi', aksiyonEkrani: 'cagri-kampanya-kisi-liste', baslik: 'Kampanya Kişisi Listesi',
+    yol: 'Çağrı Merkezi › Kampanya Kişisi Listesi',
     cipler: [
       { ad: 'Aranacak',    filtre: { alan: 'aranacak', op: 'esit', deger: 1 } },
       { ad: 'Bekliyor',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -67,7 +67,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Kişileri', menuGizli: true, ic: '👥', yetkiKodu: 'cagri.kampanya', menuSira: 41,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Kişisi Listesi', menuGizli: true, ic: '👥', yetkiKodu: 'cagri.kampanya', menuSira: 41,
   },
   {
     kaynak: 'cagri-supervizor', ozelSayfa: true, baslik: 'Süpervizör Panosu', yol: 'Çağrı Merkezi › Süpervizör Panosu',
@@ -75,11 +75,11 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Çağrı Merkezi', menuAd: 'Süpervizör Panosu', ic: '📊', yetkiKodu: 'cagri.supervizor', menuSira: 50,
   },
   {
-    kaynak: 'cagri-kalite', rota: 'cagri-kalite', aksiyonEkrani: 'cagri-kalite-liste', baslik: 'Kalite Değerlendirmeleri',
+    kaynak: 'cagri-kalite', rota: 'cagri-kalite', aksiyonEkrani: 'cagri-kalite-liste', baslik: 'Kalite Değerlendirmesi Listesi',
     yol: 'Çağrı Merkezi › Kalite',
     kartYolu: '/cagri-kalite', kartBaslik: 'Kalite değerlendirmesi',
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Kalite Değerlendirmeleri', ic: '⭐', yetkiKodu: 'cagri.kalite', menuSira: 60,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Kalite Değerlendirmesi Listesi', ic: '⭐', yetkiKodu: 'cagri.kalite', menuSira: 60,
   },
   {
     kaynak: 'cagri-konu', rota: 'cagri-konu', aksiyonEkrani: 'cagri-konu-liste', baslik: 'Konu Ağacı',
@@ -89,18 +89,18 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Konu ağacı & SLA', ic: '🗂', yetkiKodu: 'cagri.ayar', menuSira: 90,
   },
   {
-    kaynak: 'cagri-kuyruk', rota: 'cagri-kuyruk', aksiyonEkrani: 'cagri-kuyruk-liste', baslik: 'Kuyruklar',
-    yol: 'Çağrı Merkezi › Ayarlar › Kuyruklar',
+    kaynak: 'cagri-kuyruk', rota: 'cagri-kuyruk', aksiyonEkrani: 'cagri-kuyruk-liste', baslik: 'Kuyruk Listesi',
+    yol: 'Çağrı Merkezi › Ayarlar › Kuyruk Listesi',
     kartYolu: '/cagri-kuyruk', kartBaslik: 'Kuyruk',
     urunModu: 2, modul: 'cagri',
     menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Kuyruklar & SLA', ic: '👥', yetkiKodu: 'cagri.ayar.kuyruk', menuSira: 91,
   },
   {
-    kaynak: 'cagri-agent', rota: 'cagri-agent', aksiyonEkrani: 'cagri-agent-liste', baslik: 'Agentlar',
-    yol: 'Çağrı Merkezi › Ayarlar › Agentlar',
+    kaynak: 'cagri-agent', rota: 'cagri-agent', aksiyonEkrani: 'cagri-agent-liste', baslik: 'Agent Listesi',
+    yol: 'Çağrı Merkezi › Ayarlar › Agent Listesi',
     kartYolu: '/cagri-agent', kartBaslik: 'Agent',
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Agentlar (dahili)', ic: '🎧', yetkiKodu: 'cagri.ayar.agent', menuSira: 92,
+    menuGrup: 'Çağrı Merkezi', menuAltGrup: 'Ayarlar', menuAd: 'Agent Listesi (dahili)', ic: '🎧', yetkiKodu: 'cagri.ayar.agent', menuSira: 92,
   },
   {
     kaynak: 'cagri-santral', ozelSayfa: true, baslik: 'Santral · IVR · Kanallar', yol: 'Çağrı Merkezi › Ayarlar › Santral',

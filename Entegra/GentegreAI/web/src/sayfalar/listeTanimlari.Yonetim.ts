@@ -21,8 +21,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // KART YOK: hesap burada "yeni kayıt" gibi açılmaz (personelden açılır) ve
     //   SİLİNMEZ (işlem günlüğü, belge ve log satırları kullanıcıya bağlı;
     //   silinen hesap geçmişi sahipsiz bırakır) - pasife alma onun yerini tutar.
-    kaynak: 'kullanici', rota: 'kullanici', baslik: 'Kullanıcılar',
-    yol: 'Yönetim › Güvenlik › Kullanıcılar',
+    kaynak: 'kullanici', rota: 'kullanici', baslik: 'Kullanıcı Listesi',
+    yol: 'Yönetim › Güvenlik › Kullanıcı Listesi',
     aksiyonEkrani: 'kullanici-liste',
     // KART VAR ama "Yeni" YOK: hesap personelden açılır (kişi kaydı olmayan
     //   hesap, kime ait olduğu bilinmeyen hesaptır) ve silinmez - pasife alınır.
@@ -36,7 +36,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Güvenlik', menuSira: 100,
-    menuAd: 'Kullanıcılar', ic: '👤', yetkiKodu: 'kullanici',
+    menuAd: 'Kullanıcı Listesi', ic: '👤', yetkiKodu: 'kullanici',
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
@@ -68,18 +68,18 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // PRİM PLANLARI (324): kampanyanın prim karşılığı - kapsam + oran
     //   satırları. Satırda hedef, BELGE TÜRÜ ve PAY birlikte kriter.
     kaynak: 'prim-plani', rota: 'prim-plani',
-    baslik: 'Prim Planları', yol: 'Prim › Planlar',
+    baslik: 'Prim Planı Listesi', yol: 'Prim › Planlar',
     kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
-    menuGrup: 'İK', menuAd: 'Prim Planları', ic: '🎯',
+    menuGrup: 'İK', menuAd: 'Prim Planı Listesi', ic: '🎯',
     yetkiKodu: 'prim.plan', menuSira: 40, urunModu: 2,
   },
   {
     // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
     //   Prim tahsil edildikçe doğduğu için satırın tarihi TAHSİLAT tarihidir.
     kaynak: 'hakedis-satir', rota: 'hakedis-satir',
-    baslik: 'Hakediş Satırları', yol: 'Prim › Hakediş Satırları',
+    baslik: 'Hakediş Satırı Listesi', yol: 'Prim › Hakediş Satırı Listesi',
     aksiyonEkrani: 'hakedis-liste',
     kartYolu: undefined,
     // Kapatılmış dönemin satırlarına başlıktan geçilir: /hakedis-satir?hakedisId=7
@@ -103,14 +103,14 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       //   toplanir - isaret kaldirilmis ya da yanlis role prim dogmus demektir.
       { ad: 'İşaret yok', filtre: { alan: 'rolIsaretli', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
-    ], menuAd: 'Hakediş Satırları', menuGizli: true, ic: '🧾',
+    ], menuAd: 'Hakediş Satırı Listesi', menuGizli: true, ic: '🧾',
     yetkiKodu: 'prim', urunModu: 2,
   },
   {
     // HAKEDİŞLER (324): kapatılmış dönemler. Kapanan satır DONDURULUR -
     //   sonradan çıkan fark sonraki döneme düzeltme olarak girer.
     kaynak: 'hakedis', rota: 'hakedis',
-    baslik: 'Hakedişler', yol: 'Prim › Hakedişler',
+    baslik: 'Hakediş Listesi', yol: 'Prim › Hakediş Listesi',
     aksiyonEkrani: 'hakedis-donem',
     tarihAlani: 'donemBitis',
     toplam: ['toplam'],
@@ -120,7 +120,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK', menuAd: 'Hakedişler', ic: '💰',
+    menuGrup: 'İK', menuAd: 'Hakediş Listesi', ic: '💰',
     yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
   },
   {
@@ -171,8 +171,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // DOKUMAN LISTESI - KAYNAK USTU gorunum. Kart galerileri ayni
     //   tabloyu gormeye devam eder; burasi klasor/tur/surum/durum ile kurum
     //   genelinde bakilan liste.
-    kaynak: 'dokuman', rota: 'dokuman', baslik: 'Dokümanlar',
-    yol: 'Doküman › Dokümanlar',
+    kaynak: 'dokuman', rota: 'dokuman', baslik: 'Doküman Listesi',
+    yol: 'Doküman › Doküman Listesi',
     // Cift tiklama kartı acar (kullanici). Kart YENI KAYIT ACMAZ: dokuman bir
     //   DOSYADIR, once icerik yuklenir ve kaynak o anda belirlenir.
     kartYolu: '/dokuman', kartBaslik: 'Doküman',
@@ -192,7 +192,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // ORTAK MOD (kullanici): urunModu VERILMEZ - dokuman yonetimi hem ERP
     //   hem HBYS'de ayni; moda baglamak, ayni tabloyu bir urunde gorunmez
     //   kilardi.
-    menuGrup: 'Doküman', menuSira: 10, menuAd: 'Dokümanlar', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman',
+    menuGrup: 'Doküman', menuSira: 10, menuAd: 'Doküman Listesi', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman',
   },
   {
     // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
@@ -207,7 +207,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // DOKUMAN KATEGORILERI (419/431) - agac yapili; surumlu mu, hangi akis,
     //   hangi gizlilik. Stok/hizmet kategorisiyle ayni desen.
     kaynak: 'dokuman-kategori', modul: 'dokuman', rota: 'dokuman-kategori',
-    baslik: 'Doküman Kategorileri', yol: 'Doküman › Ayarlar › Kategoriler',
+    baslik: 'Doküman Kategorisi Listesi', yol: 'Doküman › Ayarlar › Kategori Listesi',
     kartYolu: '/dokuman-kategori', kartBaslik: 'Doküman Kategorisi',
     aksiyonEkrani: 'dokuman-kategori-liste',
     cipler: [
@@ -217,13 +217,13 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Kategoriler/Klasorler AYARDIR: yol zaten "Doküman › Ayarlar › ..." -
     //   gunluk listelerle ayni duzeyde durmasinlar.
     menuGrup: 'Doküman', menuSira: 30, menuAltGrup: 'Ayarlar',
-    menuAd: 'Kategoriler', ic: '🏷️', yetkiKodu: 'dokuman.kategori',
+    menuAd: 'Kategori Listesi', ic: '🏷️', yetkiKodu: 'dokuman.kategori',
   },
   {
     // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
     //   (kaynak+kaynak_id'den turer, klasor kaydi gerekmez).
-    kaynak: 'dokuman-klasor', modul: 'dokuman', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
-    yol: 'Doküman › Ayarlar › Klasörler',
+    kaynak: 'dokuman-klasor', modul: 'dokuman', rota: 'dokuman-klasor', baslik: 'Doküman Klasörü Listesi',
+    yol: 'Doküman › Ayarlar › Klasör Listesi',
     kartYolu: '/dokuman-klasor', kartBaslik: 'Doküman Klasörü',
     aksiyonEkrani: 'dokuman-klasor-liste',
     cipler: [
@@ -231,7 +231,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Doküman', menuSira: 31, menuAltGrup: 'Ayarlar',
-    menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman.klasor',
+    menuAd: 'Klasör Listesi', ic: '🗂️', yetkiKodu: 'dokuman.klasor',
   },
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
@@ -263,8 +263,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   "parola hatali" satirlari deneme-yanilma, ayni IP'den farkli kodlar
     //   tarama demektir; yalniz basarililari gostermek bakilmasi gereken tek
     //   seyi gizlerdi.
-    kaynak: 'giris-log', baslik: 'Giriş Kayıtları',
-    yol: 'Yönetim › Giriş Kayıtları',
+    kaynak: 'giris-log', baslik: 'Giriş Kaydı Listesi',
+    yol: 'Yönetim › Giriş Kaydı Listesi',
     tarihAlani: 'tarih',
     cipler: [
       { ad: 'Tümü' },
@@ -272,7 +272,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Başarısız', filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
     ],
     gizliKolonlar: ['kullaniciId'],
-    menuGrup: 'Güvenlik', menuSira: 101, menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log.giris',
+    menuGrup: 'Güvenlik', menuSira: 101, menuAd: 'Giriş Kaydı Listesi', ic: '🔑', yetkiKodu: 'islem_log.giris',
   },
   {
     // HATA ÖZETİ (1078, dokuman/17): hata günlüğü TÜRÜNE göre, gün gün. Aynı
@@ -313,27 +313,27 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
     //   islem ve KVKK aydinlatmasi ayni tablodan beslenir - her modul kendi
     //   onam kopyasini yazmasin diye ortak platformda.
-    kaynak: 'onam-metni', baslik: 'Onam Metinleri', yol: 'Yonetim › Onam Metinleri',
+    kaynak: 'onam-metni', baslik: 'Onam Metni Listesi', yol: 'Yonetim › Onam Metni Listesi',
     kartYolu: '/onam-metni', cipler: DURUM_CIPLERI,
     menuGrup: 'Platform', menuSira: 113,
-    menuAd: 'Onam Metinleri', ic: '📜', yetkiKodu: 'onam',
+    menuAd: 'Onam Metni Listesi', ic: '📜', yetkiKodu: 'onam',
   },
   {
     // VERILEN ONAMLAR (398): salt gorunum - onam kart ekranindan degil, akisin
     //   icinden (hasta kabul, teletip gorusmesi) alinir.
-    kaynak: 'onam', baslik: 'Onamlar', yol: 'Yonetim › Onamlar',
+    kaynak: 'onam', baslik: 'Onam Listesi', yol: 'Yonetim › Onam Listesi',
     aksiyonEkrani: 'cikti-liste', tarihAlani: 'tarih',
     menuGrup: 'Platform', menuSira: 114,
-    menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam.kayit',
+    menuAd: 'Onam Kaydı Listesi', ic: '✍️', yetkiKodu: 'onam.kayit',
   },
   {
     // BILDIRIM SABLONLARI (399): kod SABIT (kodla cagrilir), metin serbest.
-    kaynak: 'bildirim-sablon', baslik: 'Bildirim Şablonları',
-    yol: 'Yonetim › Bildirim Şablonları', kartYolu: '/bildirim-sablon',
+    kaynak: 'bildirim-sablon', baslik: 'Bildirim Şablonu Listesi',
+    yol: 'Yonetim › Bildirim Şablonu Listesi', kartYolu: '/bildirim-sablon',
     aksiyonEkrani: 'bildirim-sablon-liste',
     cipler: DURUM_CIPLERI,
     menuGrup: 'Platform', menuSira: 110,
-    menuAd: 'Bildirim Şablonları', ic: '💬', yetkiKodu: 'bildirim_sablon',
+    menuAd: 'Bildirim Şablonu Listesi', ic: '💬', yetkiKodu: 'bildirim_sablon',
   },
   {
     // BILDIRIM KUYRUGU (399): "gitti mi" sorusunun TEK yeri. Cipler durum
@@ -352,11 +352,11 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
   {
     // ZAMANLI ISLER (405): TITCK haftalik guncelleme gibi kendiliginden
     //   calisan isler. Kart yalniz ZAMANLAMAYI duzenler - isin kendisi kodda.
-    kaynak: 'zamanli-is', baslik: 'Zamanlanmış İşler',
-    yol: 'Yonetim › Ortak Platform › Zamanlanmış İşler', kartYolu: '/zamanli-is',
+    kaynak: 'zamanli-is', baslik: 'Zamanlanmış İş Listesi',
+    yol: 'Yonetim › Ortak Platform › Zamanlanmış İş Listesi', kartYolu: '/zamanli-is',
     aksiyonEkrani: 'zamanli-is-liste',
     menuGrup: 'Platform', menuSira: 112,
-    menuAd: 'Zamanlanmış İşler', ic: '⏱️', yetkiKodu: 'zamanli_is',
+    menuAd: 'Zamanlanmış İş Listesi', ic: '⏱️', yetkiKodu: 'zamanli_is',
   },
   {
     // AKTARIM DURUMU (1090, mockup Ekranlar/aktarim_durumu.html): Delphi ERP -> web
@@ -399,7 +399,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
     //   UYMAZ, kullanilmadi (yoksa "Bilinmeyen alan: durum" 400 verirdi).
-    kaynak: 'rol', baslik: 'Roller', yol: 'IK › Roller ve Yetkiler', kartYolu: '/rol',
+    kaynak: 'rol', baslik: 'Rol Listesi', yol: 'IK › Roller ve Yetkiler', kartYolu: '/rol',
     aksiyonEkrani: 'rol-liste',
     // VARSAYILAN GORUNUM AKTIF ROLLER (793, kullanici: "görüntülemede rol
     //   listesi ne giriyorum hala bütün roller geliyor"): kurum profilinde
@@ -417,7 +417,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
     //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
     //   menuSira 15: Personel Listesi (10) ile Prim grubunun (20+) arasi.
-    menuGrup: 'Güvenlik', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
+    menuGrup: 'Güvenlik', menuAd: 'Rol Listesi', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
   },
   {
     // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.

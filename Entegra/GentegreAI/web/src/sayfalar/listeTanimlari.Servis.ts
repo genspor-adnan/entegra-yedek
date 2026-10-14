@@ -16,8 +16,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
 export const SERVIS_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'servis-cagri', rota: 'servis-cagri',
-    baslik: 'Servis Çağrıları',
-    yol: 'Teknik Servis › Çağrılar',
+    baslik: 'Servis Çağrısı Listesi',
+    yol: 'Teknik Servis › Çağrı Listesi',
     kartYolu: '/servis-cagri', kartBaslik: 'Servis Çağrısı',
     aksiyonEkrani: 'servis-cagri-liste',
     tarihAlani: 'acilis',
@@ -31,13 +31,13 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Parça bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'Çağrılar', ic: '📞',
+    menuGrup: 'Teknik Servis', menuAd: 'Çağrı Listesi', ic: '📞',
     yetkiKodu: 'servis', modul: 'servis', menuSira: 10,
   },
   {
     kaynak: 'servis-is-emri', rota: 'servis-is-emri',
-    baslik: 'Servis İş Emirleri',
-    yol: 'Teknik Servis › İş Emirleri',
+    baslik: 'Servis İş Emiri Listesi',
+    yol: 'Teknik Servis › İş Emiri Listesi',
     // KART YOLU BİYOMEDİKALİN KARTI: aynı tabloyu yazar (773'te genişletildi),
     //   ikinci bir kart aynı satırın iki doğrulama kümesiyle düzenlenmesi olurdu.
     kartYolu: '/demirbas-is-emri', kartBaslik: 'Servis İş Emri',
@@ -52,7 +52,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Emanetli', filtre: { alan: 'acikEmanet', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'İş Emirleri', ic: '🔧',
+    menuGrup: 'Teknik Servis', menuAd: 'İş Emiri Listesi', ic: '🔧',
     yetkiKodu: 'servis.is_emri', modul: 'servis', menuSira: 20,
   },
   {
@@ -66,8 +66,8 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'servis-ziyaret', rota: 'servis-ziyaret',
-    baslik: 'Ziyaretler',
-    yol: 'Teknik Servis › Ziyaretler',
+    baslik: 'Ziyaret Listesi',
+    yol: 'Teknik Servis › Ziyaret Listesi',
     kartYolu: '/servis-ziyaret', kartBaslik: 'Servis Ziyareti',
     aksiyonEkrani: 'servis-ziyaret-liste',
     tarihAlani: 'varis',
@@ -79,13 +79,13 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'İmzasız',     filtre: { alan: 'imzaAlindi', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'Ziyaretler', ic: '🚐',
+    menuGrup: 'Teknik Servis', menuAd: 'Ziyaret Listesi', ic: '🚐',
     yetkiKodu: 'servis.ziyaret', modul: 'servis', menuSira: 30,
   },
   {
     kaynak: 'servis-emanet', rota: 'servis-emanet',
-    baslik: 'Emanet Cihazlar',
-    yol: 'Teknik Servis › Emanet Cihazlar',
+    baslik: 'Emanet Cihaz Listesi',
+    yol: 'Teknik Servis › Emanet Cihaz Listesi',
     kartYolu: '/servis-emanet', kartBaslik: 'Emanet Cihaz',
     aksiyonEkrani: 'servis-emanet-liste',
     tarihAlani: 'veris',
@@ -93,7 +93,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Dışarıda', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'Emanet Cihazlar', ic: '🔄',
+    menuGrup: 'Teknik Servis', menuAd: 'Emanet Cihaz Listesi', ic: '🔄',
     yetkiKodu: 'servis.emanet', modul: 'servis', menuSira: 40,
   },
   {
@@ -115,8 +115,8 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'servis-sozlesme', rota: 'servis-sozlesme',
-    baslik: 'Servis Sözleşmeleri',
-    yol: 'Teknik Servis › Sözleşmeler',
+    baslik: 'Servis Sözleşmesi Listesi',
+    yol: 'Teknik Servis › Sözleşme Listesi',
     kartYolu: '/servis-sozlesme', kartBaslik: 'Bakım Sözleşmesi',
     aksiyonEkrani: 'servis-sozlesme-liste',
     tarihAlani: 'bitis',
@@ -127,7 +127,7 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'SLA aşımı var', filtre: { alan: 'slaAsim', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'Sözleşmeler', ic: '📑',
+    menuGrup: 'Teknik Servis', menuAd: 'Sözleşme Listesi', ic: '📑',
     yetkiKodu: 'servis.sozlesme', modul: 'servis', menuSira: 60,
   },
 ];

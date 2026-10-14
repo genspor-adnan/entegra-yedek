@@ -32,8 +32,8 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
 export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'klinikGosterge', rota: 'klinik-gosterge', aksiyonEkrani: 'klinik-gosterge-liste',
-    baslik: 'Klinik Kalite Göstergeleri',
-    yol: 'Klinik Kalite › Klinik Kalite Göstergeleri',
+    baslik: 'Klinik Kalite Göstergesi Listesi',
+    yol: 'Klinik Kalite › Klinik Kalite Göstergesi Listesi',
     kartYolu: '/klinik-gosterge', kartBaslik: 'Gösterge Kartı',
     cipler: [
       { ad: 'Otomatik',   filtre: { alan: 'otomatik', op: 'esit', deger: 1 } },
@@ -41,14 +41,14 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Klinik Kalite', menuAd: 'Klinik Kalite Göstergeleri',
+    menuGrup: 'Klinik Kalite', menuAd: 'Klinik Kalite Göstergesi Listesi',
     ic: '📐', yetkiKodu: 'klinik_kalite.olgu', menuSira: 60,
   },
   {
     kaynak: 'klinikGostergeDonem', rota: 'klinik-gosterge-donem',
     aksiyonEkrani: 'klinik-kalite-donem-liste',
-    baslik: 'Klinik Kalite Dönem Sonuçları',
-    yol: 'Klinik Kalite › Klinik Kalite Dönem Sonuçları',
+    baslik: 'Klinik Kalite Dönem Sonucu Listesi',
+    yol: 'Klinik Kalite › Klinik Kalite Dönem Sonucu Listesi',
     kartYolu: '/klinik-gosterge-donem', kartBaslik: 'Dönem Ölçümü',
     cipler: [
       { ad: 'Taslak',     filtre: { alan: 'durum', op: 'esit', deger: 0 } },
@@ -57,7 +57,7 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Klinik Kalite', menuAd: 'Klinik Kalite Dönem Sonuçları',
+    menuGrup: 'Klinik Kalite', menuAd: 'Klinik Kalite Dönem Sonucu Listesi',
     ic: '📊', yetkiKodu: 'klinik_kalite.donem', menuSira: 61,
   },
   {

@@ -79,8 +79,8 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'eczaneIade', rota: 'eczane-iade',
-    baslik: 'Servis İadeleri',
-    yol: 'Eczane › İadeler',
+    baslik: 'Servis İadesi Listesi',
+    yol: 'Eczane › İade Listesi',
     kartYolu: '/eczane-iade', kartBaslik: 'İade',
     aksiyonEkrani: 'eczane-iade-liste',
     cipler: [
@@ -90,12 +90,12 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Eczane', menuAd: 'İadeler', ic: '↩️',
+    menuGrup: 'Eczane', menuAd: 'İade Listesi', ic: '↩️',
     yetkiKodu: 'eczane.iade', menuSira: 40,
   },
   {
     kaynak: 'eczaneImha', rota: 'eczane-imha',
-    baslik: 'İmha Tutanakları',
+    baslik: 'İmha Tutanakı Listesi',
     yol: 'Eczane › İmha',
     kartYolu: '/eczane-imha', kartBaslik: 'İmha Tutanağı',
     aksiyonEkrani: 'eczane-imha-liste',

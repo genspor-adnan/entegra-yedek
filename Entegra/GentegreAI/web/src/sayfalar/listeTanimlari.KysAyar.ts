@@ -17,7 +17,7 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
   {
     // 1068 (mockup Kalite2/kalite_dokumanlari.html): kendi kaynağı (v_kalite_dokuman,
     //   kys.dokuman yetkisi); kart Doküman modülünün kartı.
-    kaynak: 'kys-dokuman', rota: 'kys-dokuman', baslik: 'Kalite Dokümanları',
+    kaynak: 'kys-dokuman', rota: 'kys-dokuman', baslik: 'Kalite Dokümanı Listesi',
     yol: 'Kalite › Kalite Dokümanları · Doküman modülünün kalite kategorileri',
     kartYolu: '/dokuman', kartBaslik: 'Doküman',
     aksiyonEkrani: 'kys-dokuman-liste',
@@ -27,7 +27,7 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gözden geçirme vakti', filtre: { alan: 'gozdenGecti', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kalite', menuAd: 'Kalite Dokümanları', modul: 'kys', ic: '📚', yetkiKodu: 'kys.dokuman', menuSira: 15,
+    menuGrup: 'Kalite', menuAd: 'Kalite Dokümanı Listesi', modul: 'kys', ic: '📚', yetkiKodu: 'kys.dokuman', menuSira: 15,
   },
   // AYARLAR (1069, mockup Kalite2/ayarlar.html): tek menü girdisi - Birim
   //   Sorumluları + Genel sekmeli özel sayfa (KysAyarlar). Birim sorumlusu ve
@@ -38,8 +38,8 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kalite', menuAd: 'Ayarlar', modul: 'kys', ic: '⚙️', yetkiKodu: 'kys.ayar', menuSira: 200,
   },
   {
-    kaynak: 'kys-birim-sorumlu', rota: 'kys-birim-sorumlu', baslik: 'Birim Kalite Sorumluları',
-    yol: 'Kalite › Ayarlar › Birim Sorumluları',
+    kaynak: 'kys-birim-sorumlu', rota: 'kys-birim-sorumlu', baslik: 'Birim Kalite Sorumlusu Listesi',
+    yol: 'Kalite › Ayarlar › Birim Sorumlusu Listesi',
     kartYolu: '/kys-birim-sorumlu', kartBaslik: 'Birim Kalite Sorumlusu',
     aksiyonEkrani: 'kys-birim-sorumlu-liste',
     cipler: [
@@ -47,19 +47,19 @@ export const KYS_AYAR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Sorumlusuz', filtre: { alan: 'sorumluYok', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kalite', menuAd: 'Birim Sorumluları', menuGizli: true, modul: 'kys', ic: '👤',
+    menuGrup: 'Kalite', menuAd: 'Birim Sorumlusu Listesi', menuGizli: true, modul: 'kys', ic: '👤',
     yetkiKodu: 'kys.ayar', menuSira: 210,
   },
   {
-    kaynak: 'kys-komite', rota: 'kys-komite', baslik: 'Komiteler',
-    yol: 'Kalite › Ayarlar › Komiteler',
+    kaynak: 'kys-komite', rota: 'kys-komite', baslik: 'Komite Listesi',
+    yol: 'Kalite › Ayarlar › Komite Listesi',
     kartYolu: '/kys-komite', kartBaslik: 'Komite',
     aksiyonEkrani: 'kys-komite-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kalite', menuAd: 'Komiteler', menuGizli: true, modul: 'kys', ic: '👥',
+    menuGrup: 'Kalite', menuAd: 'Komite Listesi', menuGizli: true, modul: 'kys', ic: '👥',
     yetkiKodu: 'kys.ayar', menuSira: 220,
   },
 ];

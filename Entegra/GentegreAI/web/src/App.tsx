@@ -1,7 +1,10 @@
+import { useContext } from 'react';
+import { EkranSekmesiBaglami } from './bilesenler/sekmeBaglami';
 import { ReceteKartiSayfa, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
+import { kartSekmesiVar } from './sayfalar/listeTanimlari.Ortak';
 import { DOKUM_KODLARI } from './sayfalar/listeTanimlari.Dokumler';
 import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
@@ -223,14 +226,15 @@ function Yollar() {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
-            // KART SEKMESİ (yeniSekmede): belge kartı da /<rota>/:id ile kendi sekmesinde açılır.
-            ...((l.kartYolu || l.yeniSekmede) && !l.ozelKart ? [
+            // KART SEKMESİ: belge kartı da /<rota>/:id ile kendi sekmesinde açılır.
+            ...((l.kartYolu || kartSekmesiVar(l)) && !l.ozelKart ? [
               <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
             ] : []),
           ];
         })}
 
-        <Route path="/belge/yeni" element={<BelgeKarti />} />
+        {/* Doğrudan /belge/yeni: ekran sekmesindeyse kart sekmesi (sayfa kipi), değilse eski pencere. */}
+        <Route path="/belge/yeni" element={<BelgeYeniRota />} />
 
         {/* Kasa islem karti BESPOKE (GenForm degil): tur sablonu, bacaklar ve fis
             paneli generic karta sigmaz. LISTELER dongusu 'kasa-islem' icin kart
@@ -635,4 +639,10 @@ function BilinmeyenYol({ hedef }: { hedef: string }) {
     } catch { /* depolama kapalı: yönlendir */ }
   }
   return <Navigate to={hedef} replace />;
+}
+
+/** /belge/yeni (Satış Faturası "Yeni"): kart sekmesindeyse çerçevesiz, Kapat sekmeyi kapatır. */
+function BelgeYeniRota() {
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  return ekranSekmesi ? <BelgeKarti sayfa onKapat={() => ekranSekmesi.kapat()} /> : <BelgeKarti />;
 }

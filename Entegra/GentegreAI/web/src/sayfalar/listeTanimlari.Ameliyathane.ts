@@ -54,8 +54,8 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'ameliyatTalep', rota: 'ameliyat-talep',
-    baslik: 'Bekleyen Ameliyat Talepleri',
-    yol: 'Ameliyathane › Bekleyen Talepler',
+    baslik: 'Bekleyen Ameliyat Talebi Listesi',
+    yol: 'Ameliyathane › Bekleyen Talep Listesi',
     kartYolu: '/ameliyat-talep', kartBaslik: 'Ameliyat Talebi',
     aksiyonEkrani: 'ameliyat-talep-liste',
     cipler: [
@@ -68,13 +68,13 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Ameliyathane', menuAd: 'Bekleyen Talepler', ic: '📋',
+    menuGrup: 'Ameliyathane', menuAd: 'Bekleyen Talep Listesi', ic: '📋',
     yetkiKodu: 'ameliyathane.talep', menuSira: 20,
   },
   {
     kaynak: 'ameliyatSalon', rota: 'ameliyat-salon',
-    baslik: 'Ameliyathane Salonları',
-    yol: 'Ameliyathane › Salonlar',
+    baslik: 'Ameliyathane Salonu Listesi',
+    yol: 'Ameliyathane › Salon Listesi',
     kartYolu: '/ameliyat-salon', kartBaslik: 'Salon',
     aksiyonEkrani: 'ameliyat-salon-liste',
     cipler: [
@@ -82,7 +82,7 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Ameliyathane', menuAltGrup: 'Ayarlar', menuAd: 'Salonlar', ic: '🚪',
+    menuGrup: 'Ameliyathane', menuAltGrup: 'Ayarlar', menuAd: 'Salon Listesi', ic: '🚪',
     yetkiKodu: 'ameliyathane.salon', menuSira: 90,
   },
   {

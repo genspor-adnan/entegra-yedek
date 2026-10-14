@@ -1154,9 +1154,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const kapatIstendiRef = useRef(kapatIstendi);
   kapatIstendiRef.current = kapatIstendi;
+  const kirliRef = useRef(kaydedilmemisDegisiklikVar);
+  kirliRef.current = kaydedilmemisDegisiklikVar;
   useEffect(() => {
     if (!sayfaKipi || !ekranSekmesi) return;
-    ekranSekmesi.kapatmaIsleyicisi(() => kapatIstendiRef.current());
+    ekranSekmesi.kapatmaIsleyicisi(() => kapatIstendiRef.current(), () => kirliRef.current);
     return () => ekranSekmesi.kapatmaIsleyicisi(null);
   }, [sayfaKipi, ekranSekmesi]);
 
@@ -1175,8 +1177,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     const unvan = String(deger.unvan
       ?? `${deger.ad ?? ''} ${deger.soyad ?? ''}`.trim());
     onBasvuruAc(id as number, unvan);
-    kapatIstendi();
-  }, [onBasvuruAc, deger, id, kapatIstendi]);
+    // KART SEKMESİNDE hasta kartı AÇIK KALIR: başvuru yeni sekmede açılır (kullanıcı 14.10.2026, karar 2).
+    if (!sayfaKipi) kapatIstendi();
+  }, [onBasvuruAc, deger, id, kapatIstendi, sayfaKipi]);
 
 
   // Kart acildiginda/kapatildiginda bekleyen ek kayit isleri temizlenir -
@@ -1359,7 +1362,7 @@ Yine de yeni kayıt eklensin mi?`);
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok}
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok || sayfaKipi} sayfa={sayfaKipi}
         ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">{c('Yukleniyor…')}</div>
       </Modal>
@@ -1367,7 +1370,7 @@ Yine de yeni kayıt eklensin mi?`);
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok}
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok || sayfaKipi} sayfa={sayfaKipi}
         ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>

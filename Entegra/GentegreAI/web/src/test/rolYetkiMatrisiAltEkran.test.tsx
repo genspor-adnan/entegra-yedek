@@ -56,7 +56,7 @@ describe('yetki matrisi - başka gruptaki alt ekran', () => {
     const gor = basvuru.querySelector('input[type=checkbox]')!;
     await act(async () => { fireEvent.click(gor) });
 
-    const satis = satirBul('Faturalar');
+    const satis = satirBul('Satış Faturası Listesi');
     const satisGor = satis.querySelector('input[type=checkbox]') as HTMLInputElement;
     expect(satisGor.checked).toBe(false);
     const kes = satirBul('Kesinleştir');

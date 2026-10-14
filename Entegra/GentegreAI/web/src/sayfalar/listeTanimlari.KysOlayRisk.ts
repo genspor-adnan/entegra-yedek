@@ -7,7 +7,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-olay', rota: 'kys-olay', baslik: '⚠️ Olay / Uygunsuzluk Bildirimleri',
+    kaynak: 'kys-olay', rota: 'kys-olay', baslik: '⚠️ Olay / Uygunsuzluk Bildirimi Listesi',
     yol: 'Kalite › Olay Bildirimleri · Her çalışan bildirebilir · anonim seçenekli',
     kartYolu: '/kys-olay', kartBaslik: 'Olay Bildirimi',
     aksiyonEkrani: 'kys-olay-liste',
@@ -19,10 +19,10 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Olay Bildirimleri', ic: '⚠️', yetkiKodu: 'kys.olay', menuSira: 20,
+    menuGrup: 'Kalite', menuAd: 'Olay Bildirimi Listesi', ic: '⚠️', yetkiKodu: 'kys.olay', menuSira: 20,
   },
   {
-    kaynak: 'kys-risk', rota: 'kys-risk', baslik: '🎯 Riskler',
+    kaynak: 'kys-risk', rota: 'kys-risk', baslik: '🎯 Risk Listesi',
     yol: 'Kalite › Riskler · skor = olasılık × şiddet (1–25)',
     kartYolu: '/kys-risk', kartBaslik: 'Risk',
     aksiyonEkrani: 'kys-risk-liste',
@@ -34,6 +34,6 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Riskler', ic: '🎯', yetkiKodu: 'kys.risk', menuSira: 50,
+    menuGrup: 'Kalite', menuAd: 'Risk Listesi', ic: '🎯', yetkiKodu: 'kys.risk', menuSira: 50,
   },
 ];

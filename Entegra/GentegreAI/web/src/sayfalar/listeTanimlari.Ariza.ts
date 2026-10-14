@@ -25,8 +25,8 @@ export const ARIZA_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'ariza-talep', rota: 'ariza-talep',
-    baslik: 'Arıza Talepleri',
-    yol: 'Teknik Servis › Arıza Talepleri',
+    baslik: 'Arıza Talebi Listesi',
+    yol: 'Teknik Servis › Arıza Talebi Listesi',
     aksiyonEkrani: 'ariza-talep-liste',
     tarihAlani: 'ekleme',
     cipler: [
@@ -36,7 +36,7 @@ export const ARIZA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Çözüldü',    filtre: { alan: 'durum', op: 'esit', deger: 4 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Teknik Servis', menuAd: 'Arıza Talepleri', ic: '🧰',
+    menuGrup: 'Teknik Servis', menuAd: 'Arıza Talebi Listesi', ic: '🧰',
     yetkiKodu: 'ariza', modul: 'servis', menuSira: 8,
   },
   {

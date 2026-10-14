@@ -50,7 +50,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
     //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
     kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',
-    baslik: 'Rapor Şablonları', yol: 'Radyoloji › Rapor Şablonları',
+    baslik: 'Rapor Şablonu Listesi', yol: 'Radyoloji › Rapor Şablonu Listesi',
     kartYolu: '/radyoloji-sablon', kartBaslik: 'Rapor Şablonu',
     aksiyonEkrani: 'cari-liste',
     // 965 (mockup radyoloji_sablon_listesi_v2.html): modalite çipleri, ⭐ varsayılan, ⚠ hizmetsiz.
@@ -68,7 +68,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     kolonSirasi: ['yildiz', 'kod', 'ad', 'modaliteAdi', 'tetkik', 'bolumSayisi', 'alanSayisi', 'makroSayisi', 'surumAdi', 'kullanim30', 'durum'],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji.sablon',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonu Listesi', ic: '📄', yetkiKodu: 'radyoloji.sablon',
     menuSira: 90,
   },
   {
@@ -76,8 +76,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   kapasitesini, hazırlık metni hastaya verilen talimatı, özel uyarı
     //   da çekim öncesi sorulması gerekeni besler. Protokolü olmayan
     //   tetkikte modalite varsayılanı (311) devreye girer.
-    kaynak: 'radyoloji-protokol', baslik: 'Çekim Protokolleri',
-    yol: 'Radyoloji › Çekim Protokolleri',
+    kaynak: 'radyoloji-protokol', baslik: 'Çekim Protokolü Listesi',
+    yol: 'Radyoloji › Çekim Protokolü Listesi',
     kartYolu: '/radyoloji-protokol', kartBaslik: 'Çekim Protokolü',
     aksiyonEkrani: 'cari-liste',
     gizliKolonlar: ['modalite', 'hizmetId', 'hazirlikMetni', 'ozelUyari', 'seriTarifi', 'kontrast', 'bolge'],
@@ -94,15 +94,15 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     kolonSirasi: ['tetkikAdi', 'modaliteAdi', 'sureDk', 'kontrastAdi', 'seriAdi', 'hazirlik', 'kontrolSayisi', 'malzemeSayisi', 'cihazlar', 'eksik', 'durum'],
-    menuGrup: 'Radyoloji', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Çekim Protokolleri', ic: '⚙️',
+    menuGrup: 'Radyoloji', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Çekim Protokolü Listesi', ic: '⚙️',
     yetkiKodu: 'radyoloji.protokol', urunModu: 2,
   },
   {
     // CİHAZLAR (283/315): radyolojinin kaynağı - randevu ona verilir, MWL
     //   ona iner, çekim onda yapılır. Kart randevu ayarlarını (mesai, slot,
     //   çalışma günü) ve kapatma/bakım takvimini taşır.
-    kaynak: 'radyoloji-cihaz', baslik: 'Cihazlar',
-    yol: 'Radyoloji › Cihazlar',
+    kaynak: 'radyoloji-cihaz', baslik: 'Cihaz Listesi',
+    yol: 'Radyoloji › Cihaz Listesi',
     kartYolu: '/radyoloji-cihaz', kartBaslik: 'Radyoloji Cihazı',
     aksiyonEkrani: 'cari-liste',
     // 967 (mockup radyoloji_cihaz_listesi_v2.html): durum + modalite çipleri; gösterge,
@@ -119,7 +119,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     gizliKolonlar: ['modalite', 'subeId', 'cihazAlt', 'suAnKod', 'yuzTavan', 'qaGeciken', 'goruntuEksik'],
     kolonSirasi: ['kod', 'ad', 'modaliteAdi', 'oda', 'suAn', 'bugun', 'sirada', 'doluluk', 'protokolSayisi', 'baglanti', 'qa', 'durum'],
-    menuGrup: 'Radyoloji', menuSira: 92, menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🖥️',
+    menuGrup: 'Radyoloji', menuSira: 92, menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Listesi', ic: '🖥️',
     yetkiKodu: 'radyoloji.cihaz', urunModu: 2,
   },
   {
@@ -137,7 +137,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   kaydı değil, kritik işaretli İSTEM - "işaretlendi ama haber
     //   verilmedi" boşluğu tam da burada görünür.
     kaynak: 'radyoloji-kritik', rota: 'radyoloji-kritik',
-    baslik: 'Kritik Bulgular', yol: 'Radyoloji › Kritik Bulgular',
+    baslik: 'Kritik Bulgu Listesi', yol: 'Radyoloji › Kritik Bulgu Listesi',
     aksiyonEkrani: 'radyoloji-kritik-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
@@ -153,14 +153,14 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Kritik Bulgular', ic: '🚨',
+    menuGrup: 'Radyoloji', menuAd: 'Kritik Bulgu Listesi', ic: '🚨',
     yetkiKodu: 'radyoloji.kritik', menuSira: 30,
   },
   {
     // KONSÜLTASYON TAKİBİ (318): cevap bekleyen ikinci görüşler. Cevaplanmayan
     //   konsültasyon raporu da askıda tutar.
     kaynak: 'radyoloji-konsultasyon', rota: 'radyoloji-konsultasyon',
-    baslik: 'Konsültasyonlar', yol: 'Radyoloji › Konsültasyonlar',
+    baslik: 'Konsültasyon Listesi', yol: 'Radyoloji › Konsültasyon Listesi',
     aksiyonEkrani: 'radyoloji-konsultasyon-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
@@ -172,7 +172,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Konsültasyonlar', ic: '🧑‍⚕️',
+    menuGrup: 'Radyoloji', menuAd: 'Konsültasyon Listesi', ic: '🧑‍⚕️',
     yetkiKodu: 'radyoloji.konsultasyon', menuSira: 40,
   },
   {

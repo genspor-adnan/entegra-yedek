@@ -13,8 +13,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // AŞI UYGULAMALARI (898, KTS H10 / USS 207): hasta bazlı kayıt.
     //   Uygulama HASTA KARTINDAN yapılır (doz numarasını sunucu hesaplıyor);
     //   bu liste kayıtların dökümü ve e-Nabız durumu için.
-    kaynak: 'asi-uygulama', rota: 'asi-uygulama', baslik: 'Aşı Uygulamaları',
-    yol: 'Muayene › Aşı Uygulamaları',
+    kaynak: 'asi-uygulama', rota: 'asi-uygulama', baslik: 'Aşı Uygulaması Listesi',
+    yol: 'Muayene › Aşı Uygulaması Listesi',
     tarihAlani: 'uygulamaZamani',
     cipler: [
       { ad: 'Uygulanan', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -24,14 +24,14 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'asi',
     // YENİ MENÜ GRUBU AÇILMADI: grup tavanı dolu (30) ve aşı zaten
     //   poliklinikte uygulanıyor - "Muayene" grubunun içinde duruyor.
-    menuGrup: 'Muayene', menuAd: 'Aşı Uygulamaları', menuSira: 40,
+    menuGrup: 'Muayene', menuAd: 'Aşı Uygulaması Listesi', menuSira: 40,
     ic: '\u{1F489}', yetkiKodu: 'asi',
   },
   {
     // GEBELİK DOSYALARI (900, KTS H10): izlem buna bağlanır; aynı hastada
     //   aynı anda tek açık dosya olur.
-    kaynak: 'gebelik', rota: 'gebelik', baslik: 'Gebelik Dosyaları',
-    yol: 'Muayene › Gebelik Dosyaları',
+    kaynak: 'gebelik', rota: 'gebelik', baslik: 'Gebelik Dosyası Listesi',
+    yol: 'Muayene › Gebelik Dosyası Listesi',
     cipler: [
       { ad: 'Devam eden', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Riskli', filtre: { alan: 'riskDurumu', op: 'esit', deger: 1 } },
@@ -39,14 +39,14 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'gebe',
-    menuGrup: 'Muayene', menuAd: 'Gebelik Dosyaları', menuSira: 47,
+    menuGrup: 'Muayene', menuAd: 'Gebelik Dosyası Listesi', menuSira: 47,
     ic: '\u{1F930}', yetkiKodu: 'gebe.dosya',
   },
   {
     // GEBE İZLEMLERİ (900 / USS 221): kilo KİLOGRAM - 209'daki gram
     //   çevrimi burada yok.
-    kaynak: 'gebe-izlem', rota: 'gebe-izlem', baslik: 'Gebe İzlemleri',
-    yol: 'Muayene › Gebe İzlemleri',
+    kaynak: 'gebe-izlem', rota: 'gebe-izlem', baslik: 'Gebe İzlemi Listesi',
+    yol: 'Muayene › Gebe İzlemi Listesi',
     tarihAlani: 'izlemTarihi',
     cipler: [
       { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -54,28 +54,28 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'gebe',
-    menuGrup: 'Muayene', menuAd: 'Gebe İzlemleri', menuSira: 48,
+    menuGrup: 'Muayene', menuAd: 'Gebe İzlemi Listesi', menuSira: 48,
     ic: '\u{1FAC4}', yetkiKodu: 'gebe.izlem',
   },
   {
     // GEBELİK SONUÇLARI (902 / USS 224): doğum, düşük ya da tıbbi tahliye.
     //   Kayıt dosyayı kapatır ve paketi doğurur.
-    kaynak: 'gebelik-sonuc', rota: 'gebelik-sonuc', baslik: 'Gebelik Sonuçları',
-    yol: 'Muayene › Gebelik Sonuçları',
+    kaynak: 'gebelik-sonuc', rota: 'gebelik-sonuc', baslik: 'Gebelik Sonucu Listesi',
+    yol: 'Muayene › Gebelik Sonucu Listesi',
     tarihAlani: 'sonlanmaTarihi',
     cipler: [
       { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'gebe',
-    menuGrup: 'Muayene', menuAd: 'Gebelik Sonuçları', menuSira: 49,
+    menuGrup: 'Muayene', menuAd: 'Gebelik Sonucu Listesi', menuSira: 49,
     ic: '\u{1F476}‍⚕️', yetkiKodu: 'gebe.sonuc',
   },
   {
     // ÇOCUK İZLEMLERİ (899, KTS H10 / USS 209): persentil kolonları eğri
     //   verisi yüklüyse dolu gelir - boş persentil "hesaplanamadı" demektir.
-    kaynak: 'cocuk-izlem', rota: 'cocuk-izlem', baslik: 'Çocuk İzlemleri',
-    yol: 'Muayene › Çocuk İzlemleri',
+    kaynak: 'cocuk-izlem', rota: 'cocuk-izlem', baslik: 'Çocuk İzlemi Listesi',
+    yol: 'Muayene › Çocuk İzlemi Listesi',
     tarihAlani: 'izlemTarihi',
     cipler: [
       { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -83,7 +83,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cocuk',
-    menuGrup: 'Muayene', menuAd: 'Çocuk İzlemleri', menuSira: 45,
+    menuGrup: 'Muayene', menuAd: 'Çocuk İzlemi Listesi', menuSira: 45,
     ic: '\u{1F476}', yetkiKodu: 'cocuk.izlem',
   },
   {
@@ -128,7 +128,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   Kayıt Kabul menusunun ust tarafina; icine Randevu ve Randevu Ayarlarini
     //   al; bunlar hbys icin gecerli"). Grup sirasi bu dizideki ILK gorulme
     //   sirasindan gelir - bu yuzden Hasta/Kayıt Kabul girdisinden ONCE durur.
-    kaynak: 'randevu', baslik: 'Randevular', yol: 'Randevu › Randevular',
+    kaynak: 'randevu', baslik: 'Randevu Listesi', yol: 'Randevu › Randevu Listesi',
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',
     cipler: [
@@ -139,7 +139,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAd: 'Randevular', ic: '📅', yetkiKodu: 'randevu',
+    menuGrup: 'Randevu', menuAd: 'Randevu Listesi', ic: '📅', yetkiKodu: 'randevu',
     menuSira: 10,
   },
   {
@@ -187,7 +187,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
     // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
-    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta', yeniSekmede: 'Yeni Hasta Kartı',
+    kaynak: 'hasta', baslik: 'Hasta Listesi', yol: 'Hasta › Hasta Listesi', kartYolu: '/hasta', yeniSekmede: 'Yeni Hasta Kartı',
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
     // Acik borc HASTA SERIDI icin katalogda duruyor (basvuru kartinin
     //   ustundeki serit onu okuyor) ama gridde gosterilmez.
@@ -329,8 +329,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   goruluyordu, ama finans diliyle ve butun carilerle birlikte. Kayit
     //   kabulun sordugu soru daha dar: HANGI HASTANIN ne kadar avansi kaldi.
     //   Bu yuzden ayri bir ekran - ayni veriye hasta kiriliminda bakar.
-    kaynak: 'hasta-avans', rota: 'hasta-avans', baslik: 'Hasta Avansları',
-    yol: 'Kayıt Kabul › Hasta Avansları',
+    kaynak: 'hasta-avans', rota: 'hasta-avans', baslik: 'Hasta Avansı Listesi',
+    yol: 'Kayıt Kabul › Hasta Avansı Listesi',
     aksiyonEkrani: 'avans-liste',
     // Kart YOK: avansin kendisi bir kasa islemi, "Aç" onu modalde acar.
     tarihAlani: 'islemTarihi',
@@ -345,7 +345,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['alinan', 'kullanilan', 'iade', 'kalan'],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Avansları', ic: '💰',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Avansı Listesi', ic: '💰',
     yetkiKodu: 'kasa_islem', menuSira: 35,
   },
   {
@@ -362,7 +362,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // SIGORTA PROVIZYONLARI (430). Provizyon burada ALINMAZ - basvuru
     //   kartindan alinir (kalemler orada); bu ekran takip ve duzeltmedir.
     kaynak: 'sigorta-provizyon', rota: 'sigorta-provizyon',
-    baslik: 'Sigorta Provizyonları', yol: 'Cari › Sigorta › Provizyonlar',
+    baslik: 'Sigorta Provizyonu Listesi', yol: 'Cari › Sigorta › Provizyon Listesi',
     aksiyonEkrani: 'sigorta-provizyon-liste',
     tarihAlani: 'provizyonTarihi',
     cipler: [
@@ -378,13 +378,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   bir CARI kayittir; ayarlari da o kartin yaninda aranir.
     //   YALNIZ HBYS (urunModu 2): ozel saglik sigortasi ERP kurulumunda yok.
     menuGrup: 'Kayıt Kabul',
-    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 40,
+    menuAd: 'Provizyon Listesi', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 40,
   },
   {
     // KURUM HESAPLARI (430): hangi sigorta sirketi hangi saglayici uzerinden.
     //   Parola/istemci sirri BURADA GORUNMEZ - entegrasyon hesabi kartinda.
-    kaynak: 'sigorta-hesap', rota: 'sigorta-hesap', baslik: 'Sigorta Hesapları',
-    yol: 'Cari › Sigorta › Kurum Hesapları',
+    kaynak: 'sigorta-hesap', rota: 'sigorta-hesap', baslik: 'Sigorta Hesabı Listesi',
+    yol: 'Cari › Sigorta › Kurum Hesabı Listesi',
     kartYolu: '/sigorta-hesap', kartBaslik: 'Sigorta Hesabı',
     aksiyonEkrani: 'sigorta-hesap-liste',
     cipler: [
@@ -393,7 +393,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta',
-    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta.tanim', menuSira: 30,
+    menuAd: 'Kurum Hesabı Listesi', ic: '🔌', yetkiKodu: 'sigorta.tanim', menuSira: 30,
   },
   {
     // KOD ESLEME (430): kanonik deger <-> saglayici degeri. Yeni sirket
@@ -426,8 +426,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // CIHAZLAR (432) - laboratuvar/goz/goruntuleme cihazlarinin baglanti
     //   tanimi. Randevu tarafindaki radyoloji_cihaz'dan AYRI: o cekim
     //   planlamasi, bu entegrasyon kaydi.
-    kaynak: 'cihaz', rota: 'cihaz', baslik: 'Cihazlar',
-    yol: 'Laboratuvar › Biyokimya › Cihazlar',
+    kaynak: 'cihaz', rota: 'cihaz', baslik: 'Cihaz Listesi',
+    yol: 'Laboratuvar › Biyokimya › Cihaz Listesi',
     kartYolu: '/cihaz', kartBaslik: 'Cihaz',
     aksiyonEkrani: 'cihaz-liste',
     cipler: [
@@ -440,13 +440,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   zorluyordu. Sira lab ekranlarinin ARDINDAN (70/80).
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 103,
+    menuAd: 'Cihaz Listesi', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 103,
   },
   {
     // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
     //   penceresinde okunur: cozumleme hatasinda bakilacak tek yer orasi.
-    kaynak: 'cihaz-mesaj', rota: 'cihaz-mesaj', baslik: 'Cihaz Mesajları',
-    yol: 'Laboratuvar › Biyokimya › Cihaz Mesajları',
+    kaynak: 'cihaz-mesaj', rota: 'cihaz-mesaj', baslik: 'Cihaz Mesajı Listesi',
+    yol: 'Laboratuvar › Biyokimya › Cihaz Mesajı Listesi',
     aksiyonEkrani: 'cihaz-mesaj-liste',
     tarihAlani: 'eklemeTarihi',
     icerikAlani: 'ham', icerikBaslik: 'Ham Cihaz Mesajı',
@@ -458,14 +458,14 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz.mesaj', menuSira: 104,
+    menuAd: 'Cihaz Mesajı Listesi', ic: '📡', yetkiKodu: 'cihaz.mesaj', menuSira: 104,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
     //   UTS ile KARISTIRILMAZ: UTS tibbi cihaz, ITS ilac; ayri kurum, ayri
     //   servis, ayri ekran.
-    kaynak: 'its-bildirim', rota: 'its-bildirim', baslik: 'İTS Bildirimleri',
-    yol: 'Stok & Hizmet › İTS › Bildirimler',
+    kaynak: 'its-bildirim', rota: 'its-bildirim', baslik: 'İTS Bildirimi Listesi',
+    yol: 'Stok & Hizmet › İTS › Bildirim Listesi',
     aksiyonEkrani: 'its-liste',
     tarihAlani: 'islemTarihi',
     cipler: [
@@ -479,13 +479,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   (ITS ilac, UTS tibbi cihaz) ama ayni is - karekod bildirimi; yan yana
     //   dururlar. Sira 68: UTS alt grubu 70'ten basliyor.
     menuSira: 100, menuGrup: 'Stok & Hizmet', menuAltGrup: 'İTS',
-    menuAd: 'Bildirimler', ic: '💊', yetkiKodu: 'stok.its',
+    menuAd: 'Bildirim Listesi', ic: '💊', yetkiKodu: 'stok.its',
   },
   {
     // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:
     //   imzalaninca degismez, ilac adi satira kopyalanir.
-    kaynak: 'recete', rota: 'recete', baslik: 'Reçeteler',
-    yol: 'Muayene › Reçeteler',
+    kaynak: 'recete', rota: 'recete', baslik: 'Reçete Listesi',
+    yol: 'Muayene › Reçete Listesi',
     // OZEL KART (mockup recete_karti.html): /recete/:id ReceteKarti acar.
     kartYolu: '/recete', kartBaslik: 'Reçete', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
@@ -497,7 +497,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene.recete',
+    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçete Listesi', ic: '💊', yetkiKodu: 'muayene.recete',
   },
   {
     // HAKEDISLERIM (mockup Ekranlar/Muayene/hekim_hakedislerim.html):
@@ -538,8 +538,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // KRONIK TANILAR (420) - muayenede "kronik" isaretlenen tani buraya
     //   TETIKLE duser; hekime "bir de tibbi ozete ekle" dedirtmek,
     //   unutuldugunda sonraki hekimin eksik bilgiyle karar vermesi demekti.
-    kaynak: 'hasta-kronik', rota: 'hasta-kronik', baslik: 'Kronik Tanılar',
-    yol: 'Muayene › Kronik Tanılar',
+    kaynak: 'hasta-kronik', rota: 'hasta-kronik', baslik: 'Kronik Tanı Listesi',
+    yol: 'Muayene › Kronik Tanı Listesi',
     kartYolu: '/hasta-kronik', kartBaslik: 'Kronik Tanı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
@@ -547,43 +547,43 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Geçmiş', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene', menuAd: 'Kronik Tanılar', menuGizli: true, ic: '🩹', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Kronik Tanı Listesi', menuGizli: true, ic: '🩹', yetkiKodu: 'muayene',
   },
   {
     // GECMIS OLAYLAR (420) - ameliyat / girisim / yatis / asi / travma.
-    kaynak: 'hasta-gecmis', rota: 'hasta-gecmis', baslik: 'Geçmiş Olaylar',
-    yol: 'Muayene › Geçmiş Olaylar',
+    kaynak: 'hasta-gecmis', rota: 'hasta-gecmis', baslik: 'Geçmiş Olay Listesi',
+    yol: 'Muayene › Geçmiş Olay Listesi',
     kartYolu: '/hasta-gecmis', kartBaslik: 'Geçmiş Olay', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     tarihAlani: 'tarih',
-    urunModu: 2, modul: 'muayene', menuAd: 'Geçmiş Olaylar', menuGizli: true, ic: '🏥', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Geçmiş Olay Listesi', menuGizli: true, ic: '🏥', yetkiKodu: 'muayene',
   },
   {
     // HASTA ALERJILERI (413) - ETKEN MADDE bazli. Marka uzerinden tutmak
     //   ayni etkeni tasiyan baska markayi kacirirdi.
-    kaynak: 'hasta-alerji', rota: 'hasta-alerji', baslik: 'Hasta Alerjileri',
-    yol: 'Muayene › Alerjiler',
+    kaynak: 'hasta-alerji', rota: 'hasta-alerji', baslik: 'Hasta Alerjisi Listesi',
+    yol: 'Muayene › Alerji Listesi',
     kartYolu: '/hasta-alerji', kartBaslik: 'Alerji Kaydı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene', menuAd: 'Alerjiler', menuGizli: true, ic: '⚠️', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Alerji Listesi', menuGizli: true, ic: '⚠️', yetkiKodu: 'muayene',
   },
   {
     // HASTANIN KULLANDIGI ILACLAR (413) - recete satirlarinin kopyasi DEGIL:
     //   hasta baska kurumdan aldigini da kullanir, bizim yazdigimizin bir
     //   kismini kullanmaz. Etkilesim kontrolu KULLANILANA bakar.
-    kaynak: 'hasta-ilac', rota: 'hasta-ilac', baslik: 'Kullanılan İlaçlar',
-    yol: 'Muayene › Kullanılan İlaçlar',
+    kaynak: 'hasta-ilac', rota: 'hasta-ilac', baslik: 'Kullanılan İlaç Listesi',
+    yol: 'Muayene › Kullanılan İlaç Listesi',
     kartYolu: '/hasta-ilac', kartBaslik: 'İlaç Kaydı', ozelKart: true,
     aksiyonEkrani: 'cari-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene', menuAd: 'Kullanılan İlaçlar', menuGizli: true, ic: '🧾', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Kullanılan İlaç Listesi', menuGizli: true, ic: '🧾', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE SABLONLARI (411) - brans/kisisel fizik muayene sablonlari.
@@ -634,8 +634,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
   {
     // METIN MAKROLARI (411) - kisayoldan hazir metin. Sablon ALAN tanimlar,
     //   makro METIN uretir: biri yapiyi, oteki hizi cozer.
-    kaynak: 'metin-makro', rota: 'metin-makro', baslik: 'Metin Makroları',
-    yol: 'Muayene › Muayene Ayarları › Metin Makroları',
+    kaynak: 'metin-makro', rota: 'metin-makro', baslik: 'Metin Makrosu Listesi',
+    yol: 'Muayene › Muayene Ayarları › Metin Makrosu Listesi',
     kartYolu: '/metin-makro', kartBaslik: 'Metin Makrosu',
     aksiyonEkrani: 'cari-liste',
     cipler: [
@@ -644,7 +644,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 91, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene.makro',
+    menuAd: 'Metin Makrosu Listesi', ic: '⌨️', yetkiKodu: 'muayene.makro',
   },
   {
     // HEKIM CALISMA LISTESI (410, Faz 1) - hekimin gun icindeki isi.
@@ -672,8 +672,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   basvurudan dogar; anamnez, vital, sablonlu bulgu, ICD-10 tani ve
     //   istemler kartin sekmelerinde. Cipler gunun isini bolumler: once
     //   hekimin siradaki isi (acik), sonra sonuc bekleyenler.
-    kaynak: 'muayene', rota: 'muayene', baslik: 'Muayeneler',
-    yol: 'Muayene › Muayeneler',
+    kaynak: 'muayene', rota: 'muayene', baslik: 'Muayene Listesi',
+    yol: 'Muayene › Muayene Listesi',
     kartYolu: '/muayene', kartBaslik: 'Muayene',
     // KART IZGARASINDAN CIKANLAR (kullanici): hasta, basvuru protokol id,
     //   muayene no ve kayit tarihi BAGLAM SERIDINDE zaten var; durum ise
@@ -693,6 +693,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene.liste',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayene Listesi', ic: '🩺', yetkiKodu: 'muayene.liste',
   },
 ];

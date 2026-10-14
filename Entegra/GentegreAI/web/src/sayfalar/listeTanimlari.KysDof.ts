@@ -10,7 +10,7 @@ import type { ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KYS_DOF_LISTELERI: ListeGirdisi[] = [
   {
-    kaynak: 'kys-dof', rota: 'kys-dof', aksiyonEkrani: 'kys-dof-liste', baslik: 'DÖF — Düzeltici / Önleyici Faaliyetler',
+    kaynak: 'kys-dof', rota: 'kys-dof', aksiyonEkrani: 'kys-dof-liste', baslik: 'DÖF — Düzeltici / Önleyici Faaliyet Listesi',
     yol: 'Kalite › DÖF',
     kartYolu: '/kys-dof', kartBaslik: 'DÖF',
     // Kaynak kaydın kimliği: "DÖF Aç" doldurur, kullanıcı görmez (kaynak no görünür).

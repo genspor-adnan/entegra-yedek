@@ -26,8 +26,8 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kayıt Kabul', menuAd: 'Medula Kabul', ic: '🏛️', yetkiKodu: 'medula.kabul', menuSira: 25,   // 1003
   },
   {
-    kaynak: 'medula-takip', rota: 'medula-takip', aksiyonEkrani: 'medula-takip-liste', baslik: 'Medula Takipleri',
-    yol: 'Medula › Takipler', tarihAlani: 'tarih',
+    kaynak: 'medula-takip', rota: 'medula-takip', aksiyonEkrani: 'medula-takip-liste', baslik: 'Medula Takipi Listesi',
+    yol: 'Medula › Takip Listesi', tarihAlani: 'tarih',
     cipler: [
       { ad: 'Açık takip',      filtre: { alan: 'acik', op: 'esit', deger: 1 } },
       { ad: 'Fatura bekleyen', filtre: { alan: 'faturasiz', op: 'esit', deger: 1 } },
@@ -35,11 +35,11 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Provizyonsuz',    filtre: { alan: 'sgkDurum', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Takipler', ic: '📋', yetkiKodu: 'medula', menuSira: 20,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Takip Listesi', ic: '📋', yetkiKodu: 'medula', menuSira: 20,
   },
   {
-    kaynak: 'medula-islem', rota: 'medula-islem', aksiyonEkrani: 'medula-islem-liste', baslik: 'Medula Hizmet Kayıtları',
-    yol: 'Medula › Hizmet Kayıtları', tarihAlani: 'tarih',
+    kaynak: 'medula-islem', rota: 'medula-islem', aksiyonEkrani: 'medula-islem-liste', baslik: 'Medula Hizmet Kaydı Listesi',
+    yol: 'Medula › Hizmet Kaydı Listesi', tarihAlani: 'tarih',
     cipler: [
       { ad: 'Hatalı',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -48,7 +48,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['tutar'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Hizmet Kayıtları', ic: '🧾', yetkiKodu: 'medula.hizmet', menuSira: 30,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Hizmet Kaydı Listesi', ic: '🧾', yetkiKodu: 'medula.hizmet', menuSira: 30,
   },
   {
     // e-REÇETE: reçete listesinin Medula görünümü - imzala, gönder, sil.
@@ -86,8 +86,8 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Medula', menuAd: 'Mutabakat İcmali', ic: '@icmal', yetkiKodu: 'medula.mutabakat', menuSira: 51,
   },
   {
-    kaynak: 'medula-fatura', rota: 'medula-fatura', aksiyonEkrani: 'medula-fatura-liste', baslik: 'Medula Faturaları',
-    yol: 'Medula › Faturalar', kartYolu: '/medula-fatura', kartBaslik: 'Medula Faturası', tarihAlani: 'tarih',
+    kaynak: 'medula-fatura', rota: 'medula-fatura', aksiyonEkrani: 'medula-fatura-liste', baslik: 'Medula Faturası Listesi',
+    yol: 'Medula › Fatura Listesi', kartYolu: '/medula-fatura', kartBaslik: 'Medula Faturası', tarihAlani: 'tarih',
     cipler: [
       { ad: 'Kaydedildi',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Dönemde',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
@@ -96,16 +96,16 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['yerelTutar', 'medulaTutar', 'katilim', 'kesinti'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Faturalar', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
   },
   {
-    kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemleri',
-    yol: 'Medula › Dönemler', kartYolu: '/medula-donem', kartBaslik: 'Dönem',
+    kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemi Listesi',
+    yol: 'Medula › Dönem Listesi', kartYolu: '/medula-donem', kartBaslik: 'Dönem',
     toplam: ['toplam', 'kesinti', 'net', 'odenen', 'kalan'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönemler', ic: '📅', yetkiKodu: 'medula.fatura.donem', menuSira: 65,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönem Listesi', ic: '📅', yetkiKodu: 'medula.fatura.donem', menuSira: 65,
   },
   {
-    kaynak: 'medula-kesinti', rota: 'medula-kesinti', aksiyonEkrani: 'medula-kesinti-liste', baslik: 'Medula Kesintileri',
+    kaynak: 'medula-kesinti', rota: 'medula-kesinti', aksiyonEkrani: 'medula-kesinti-liste', baslik: 'Medula Kesintisi Listesi',
     yol: 'Medula › Kesinti / İtiraz', kartYolu: '/medula-kesinti', kartBaslik: 'Kesinti', tarihAlani: 'itirazZaman',
     cipler: [
       { ad: 'İtiraz edilmedi', filtre: { alan: 'itirazDurum', op: 'esit', deger: 0 } },

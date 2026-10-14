@@ -45,7 +45,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     //   kaynağı. Ayar ekranı ama liste aynı zamanda panonun küçük hâli -
     //   kurulumda "doğru yeri mi tanımladım" sorusu burada cevaplanıyor.
     kaynak: 'goz-kaynak', rota: 'goz-kaynak', aksiyonEkrani: 'goz-kaynak-liste',
-    baslik: 'Göz Ünitesi Oda / Cihazları',
+    baslik: 'Göz Ünitesi Oda / Cihazı Listesi',
     yol: 'Göz › Oda / Cihaz Tanımı',
     kartYolu: '/goz-kaynak', kartBaslik: 'Oda / Cihaz',
     cipler: [
@@ -62,8 +62,8 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
   {
     // GÖZ MUAYENELERİ - yapılmış ziyaretler. Listede OD/OS BCVA ve GİB durur:
     //   bir göz muayenesini hatırlatan iki sayı bunlardır.
-    kaynak: 'goz-muayene', rota: 'goz-muayene', aksiyonEkrani: 'goz-muayene-liste', baslik: 'Göz Muayeneleri',
-    yol: 'Göz › Muayeneler',
+    kaynak: 'goz-muayene', rota: 'goz-muayene', aksiyonEkrani: 'goz-muayene-liste', baslik: 'Göz Muayenesi Listesi',
+    yol: 'Göz › Muayene Listesi',
     kartYolu: '/goz-muayene', kartBaslik: 'Göz Muayenesi',
     tarihAlani: 'tarih',
     // 970 (mockup goz_muayene_listesi_v2.html): dönem / durum + takip çipleri;
@@ -82,14 +82,14 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['dilate', 'tarih'],
     kolonSirasi: ['saat', 'hasta', 'turAdi', 'bcvaOd', 'gibOd', 'tani', 'hekim', 'kontrol', 'durumAdi', 'uyari'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Muayeneler', ic: '👁️', yetkiKodu: 'goz.muayene', menuSira: 20,
+    menuGrup: 'Göz', menuAd: 'Muayene Listesi', ic: '👁️', yetkiKodu: 'goz.muayene', menuSira: 20,
   },
   {
     // GÖRÜNTÜLEME - OCT, görme alanı, biyometri, fundus foto TEK listede:
     //   hekimin sorusu "bugün hangi çekimler değerlendirilmedi"; cihaz başına
     //   ayrı liste bu soruyu cihaz sayısına bölerdi.
     kaynak: 'goz-goruntuleme', rota: 'goz-goruntuleme', aksiyonEkrani: 'goz-goruntuleme-liste', baslik: 'Göz Görüntüleme',
-    yol: 'Göz › Görüntüleme & Testler',
+    yol: 'Göz › Görüntüleme & Test Listesi',
     kartYolu: '/goz-goruntuleme', kartBaslik: 'Göz Görüntüleme',
     tarihAlani: 'istemZamani',
     // 974 (mockup goz_goruntuleme_listesi_v2.html): kayıt istem sepetinden doğar (başvuru →
@@ -106,14 +106,14 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['cihaz', 'istemZamani', 'cekimZamani'],
     kolonSirasi: ['istemSaat', 'hasta', 'tetkikAdi', 'goz', 'durumAdi', 'kalite', 'anaOd', 'degerlendiren', 'beklemeDk', 'uyari'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Görüntüleme & Testler', ic: '🔬', yetkiKodu: 'goz.goruntuleme',
+    menuGrup: 'Göz', menuAd: 'Görüntüleme & Test Listesi', ic: '🔬', yetkiKodu: 'goz.goruntuleme',
     menuSira: 30,
   },
   {
     // İŞLEMLER - enjeksiyon / lazer / ameliyat tek listede: ünitenin günlük
     //   planı "on enjeksiyon, üç lazer, iki fako" diye okunur.
-    kaynak: 'goz-islem', rota: 'goz-islem', aksiyonEkrani: 'goz-islem-liste', baslik: 'Göz İşlemleri',
-    yol: 'Göz › İşlemler',
+    kaynak: 'goz-islem', rota: 'goz-islem', aksiyonEkrani: 'goz-islem-liste', baslik: 'Göz İşlemi Listesi',
+    yol: 'Göz › İşlem Listesi',
     kartYolu: '/goz-islem', kartBaslik: 'Göz İşlemi',
     tarihAlani: 'planlananTarih',
     cipler: [
@@ -125,13 +125,13 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'İşlemler', ic: '💉', yetkiKodu: 'goz.islem', menuSira: 40,
+    menuGrup: 'Göz', menuAd: 'İşlem Listesi', ic: '💉', yetkiKodu: 'goz.islem', menuSira: 40,
   },
   {
     // GÖZLÜK REÇETELERİ - reçete muayenenin alanı değil kendi kaydı: hastaya
     //   verilir, optikte kullanılır, geçerlilik süresi ve SGK hakkı vardır.
-    kaynak: 'goz-gozluk-recete', rota: 'goz-gozluk-recete', aksiyonEkrani: 'goz-gozluk-recete-liste', baslik: 'Gözlük Reçeteleri',
-    yol: 'Göz › Gözlük Reçeteleri',
+    kaynak: 'goz-gozluk-recete', rota: 'goz-gozluk-recete', aksiyonEkrani: 'goz-gozluk-recete-liste', baslik: 'Gözlük Reçetesi Listesi',
+    yol: 'Göz › Gözlük Reçetesi Listesi',
     kartYolu: '/goz-gozluk-recete', kartBaslik: 'Gözlük Reçetesi',
     tarihAlani: 'tarih',
     // 973 (mockup goz_gozluk_recete_listesi_v2.html): dönem / durum çipleri
@@ -153,7 +153,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     // Değerler kartın kendi "Reçete" sekmesinde (GozlukReceteFormu) - katalog grubu gizli.
     gizliKartSekmeleri: ['Değerler'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Gözlük Reçeteleri', ic: '👓', yetkiKodu: 'goz.recete', menuSira: 50,
+    menuGrup: 'Göz', menuAd: 'Gözlük Reçetesi Listesi', ic: '👓', yetkiKodu: 'goz.recete', menuSira: 50,
   },
   {
     // HASTALIK TAKİBİ - bu liste "kim geldi"yi değil KİM GELMEDİ'yi sorar:
@@ -207,23 +207,23 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
   {
     // İŞLEM PROTOKOLLERİ AYARDIR: postop kontrol planı bir ŞABLON - işleme
     //   bağlanınca randevular ve damla şeması ondan üretilir.
-    kaynak: 'goz-islem-protokol', rota: 'goz-islem-protokol', aksiyonEkrani: 'goz-islem-protokol-liste', baslik: 'İşlem Protokolleri',
-    yol: 'Göz › Ayarlar › İşlem Protokolleri',
+    kaynak: 'goz-islem-protokol', rota: 'goz-islem-protokol', aksiyonEkrani: 'goz-islem-protokol-liste', baslik: 'İşlem Protokolü Listesi',
+    yol: 'Göz › Ayarlar › İşlem Protokolü Listesi',
     kartYolu: '/goz-islem-protokol', kartBaslik: 'İşlem Protokolü',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'İşlem Protokolleri', ic: '📋',
+    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'İşlem Protokolü Listesi', ic: '📋',
     yetkiKodu: 'goz.islem.protokol', menuSira: 91,
   },
   {
     // CİHAZ MESAJLARI bir İŞ KUYRUĞUDUR, hata günlüğü değil: hasta eşleşmesi
     //   tutmayan ölçüm kimseye yazılmaz ve burada bekler. KART YOK - satır
     //   cihazdan gelen ham kayıt, elle düzeltilecek veri değil.
-    kaynak: 'goz-cihaz-mesaj', rota: 'goz-cihaz-mesaj', aksiyonEkrani: 'goz-cihaz-mesaj-liste', baslik: 'Cihaz Mesajları',
-    yol: 'Göz › Ayarlar › Cihaz Mesajları',
+    kaynak: 'goz-cihaz-mesaj', rota: 'goz-cihaz-mesaj', aksiyonEkrani: 'goz-cihaz-mesaj-liste', baslik: 'Cihaz Mesajı Listesi',
+    yol: 'Göz › Ayarlar › Cihaz Mesajı Listesi',
     tarihAlani: 'zaman',
     cipler: [
       { ad: 'Sahipsiz', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
@@ -232,14 +232,14 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Mesajları', ic: '📡',
+    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Mesajı Listesi', ic: '📡',
     yetkiKodu: 'goz.cihaz.mesaj', menuSira: 92,
   },
   {
     // CİHAZLAR AYARLARIN ALTINDA: günlük iş değil kurulum işi. Lab cihaz
     //   katmanıyla aynı entegrasyon modeli (dinleyici + ham mesaj + eşleme).
-    kaynak: 'goz-cihaz', rota: 'goz-cihaz', aksiyonEkrani: 'goz-cihaz-liste', baslik: 'Göz Cihazları',
-    yol: 'Göz › Ayarlar › Cihazlar',
+    kaynak: 'goz-cihaz', rota: 'goz-cihaz', aksiyonEkrani: 'goz-cihaz-liste', baslik: 'Göz Cihazı Listesi',
+    yol: 'Göz › Ayarlar › Cihaz Listesi',
     kartYolu: '/goz-cihaz', kartBaslik: 'Göz Cihazı',
     // 978 (mockup goz_goruntuleme_cihazlar_v2.html): gösterge, tür / bağlantı /
     //   durum (sol) ve cihaz önizlemesi (sağ) panelleri Liste'de. MWL ·
@@ -260,7 +260,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     //   gösterilmiyor: bir virgül hatası cihazın bütün ölçümlerini susturur.
     gizliKartSekmeleri: ['Bağlantı'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🛠️',
+    menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Listesi', ic: '🛠️',
     yetkiKodu: 'goz.cihaz', menuSira: 90,
   },
   {

@@ -57,8 +57,8 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     //   taşınmıştı ama düzenleyecek ekran yoktu - eşiği değiştirmek göç
     //   dosyası yazmak demekti, yani kural yine koda gömülüydü.
     kaynak: 'onayAkis', rota: 'onay-akis',
-    baslik: 'Onay Akışları',
-    yol: 'Onay › Onay Akışları',
+    baslik: 'Onay Akışı Listesi',
+    yol: 'Onay › Onay Akışı Listesi',
     kartYolu: '/onay-akis', kartBaslik: 'Onay Akışı',
     aksiyonEkrani: 'onay-akis-liste',
     cipler: [
@@ -69,7 +69,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gecikmesi olan', filtre: { alan: 'geciken', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Onay', menuAd: 'Onay Akışları', ic: '🧭',
+    menuGrup: 'Onay', menuAd: 'Onay Akışı Listesi', ic: '🧭',
     yetkiKodu: 'kullanici.onay_akis', menuSira: 3,
   },
   {
@@ -77,7 +77,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     //   zinciri kişinin izniyle birlikte duruyor; kurum da çareyi "şifresini
     //   ver"de buluyor - imzanın kime ait olduğu o noktada kayboluyor.
     kaynak: 'onayVekalet', rota: 'onay-vekalet',
-    baslik: 'Onay Vekâletleri',
+    baslik: 'Onay Vekâleti Listesi',
     yol: 'Onay › Onay Vekâleti',
     kartYolu: '/onay-vekalet', kartBaslik: 'Onay Vekâleti',
     aksiyonEkrani: 'onay-vekalet-liste',

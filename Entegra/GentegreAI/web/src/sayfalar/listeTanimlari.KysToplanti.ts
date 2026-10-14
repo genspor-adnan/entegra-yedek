@@ -21,12 +21,12 @@ export const KYS_TOPLANTI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kalite', menuAd: 'Toplantı & Kararlar', ic: '👥', yetkiKodu: 'kys.toplanti', menuSira: 70,
   },
   {
-    kaynak: 'kys-toplanti', rota: 'kys-toplanti', aksiyonEkrani: 'kys-toplanti-liste', baslik: 'Kalite Toplantıları (Komite / YGG)',
-    yol: 'Kalite › Toplantılar',
+    kaynak: 'kys-toplanti', rota: 'kys-toplanti', aksiyonEkrani: 'kys-toplanti-liste', baslik: 'Kalite Toplantısı Listesi (Komite / YGG)',
+    yol: 'Kalite › Toplantı Listesi',
     kartYolu: '/kys-toplanti', kartBaslik: 'Toplantı',
     tarihAlani: 'tarih',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Toplantılar', menuGizli: true, ic: '🏛️', yetkiKodu: 'kys.toplanti', menuSira: 72,
+    menuGrup: 'Kalite', menuAd: 'Toplantı Listesi', menuGizli: true, ic: '🏛️', yetkiKodu: 'kys.toplanti', menuSira: 72,
   },
   {
     kaynak: 'kys-karar', rota: 'kys-karar', aksiyonEkrani: 'kys-karar-liste', baslik: 'Karar Takibi',

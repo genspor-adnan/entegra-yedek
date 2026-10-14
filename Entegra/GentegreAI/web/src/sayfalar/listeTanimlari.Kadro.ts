@@ -15,7 +15,7 @@ import { type ListeGirdisi } from './listeTanimlari.Ortak';
 export const KADRO_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'personel-hareket', rota: 'personel-hareket',
-    baslik: 'Kadro Hareketleri', yol: 'İK › Kadro Hareketleri',
+    baslik: 'Kadro Hareketi Listesi', yol: 'İK › Kadro Hareketi Listesi',
     kartYolu: '/personel-hareket', kartBaslik: 'Kadro Hareketi',
     aksiyonEkrani: 'personel-hareket-liste',
     tarihAlani: 'yururluk',
@@ -29,7 +29,7 @@ export const KADRO_LISTELERI: ListeGirdisi[] = [
       { ad: 'Şube nakli',    filtre: { alan: 'tur', op: 'esit', deger: 5 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK', menuAd: 'Kadro Hareketleri', ic: '🪜',
+    menuGrup: 'İK', menuAd: 'Kadro Hareketi Listesi', ic: '🪜',
     yetkiKodu: 'ik.kadro', modul: 'ik', menuSira: 12,
   },
 ];

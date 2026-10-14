@@ -1221,9 +1221,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const sekmeKonumu = useLocation();
   const kapatRef = useRef<() => void>(() => {});
   kapatRef.current = () => void kapat();
+  const kirliRef = useRef(false);
+  kirliRef.current = kirli;
   useEffect(() => {
     if (!sayfa || !ekranSekmesi) return;
-    ekranSekmesi.kapatmaIsleyicisi(() => kapatRef.current());
+    ekranSekmesi.kapatmaIsleyicisi(() => kapatRef.current(), () => kirliRef.current);
     return () => ekranSekmesi.kapatmaIsleyicisi(null);
   }, [sayfa, ekranSekmesi]);
   const sekmeBasligi = [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',

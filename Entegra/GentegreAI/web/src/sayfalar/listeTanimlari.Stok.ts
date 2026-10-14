@@ -11,7 +11,7 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 export const STOK_LISTELERI: ListeGirdisi[] = [
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
-    kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
+    kaynak: 'stok', baslik: 'Stok Listesi', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
     // Kategori KOD'un SOLUNDA (kullanici) - hizmet listesiyle ayni duzen.
     // Kisa Ad, Ad'in SOLUNDA (552 - hizmet listesiyle ayni duzen).
@@ -34,7 +34,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   kaldi: o satis kalemi degil, gider kalemi.
     // kartYolu + aksiyonEkrani (kullanici): ekle/duzenle deseni - hizmet karti
     //   generic GenForm ile acilir, aksiyonlar hizmet-liste Crud'undan gelir.
-    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', kartYolu: '/hizmet',
+    kaynak: 'hizmet', baslik: 'Hizmet Listesi', yol: 'Stok › Hizmet Listesi', kartYolu: '/hizmet',
     aksiyonEkrani: 'hizmet-liste', cipler: DURUM_CIPLERI,
     // Ciplerin sagina KATEGORI AGACI combosu (kullanici): secilen dal alt
     //   agaciyla birlikte suzer.
@@ -79,8 +79,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // ÜTS askidaki/gelen urunler (223): karsi kurumlarin bize VERDIGI tekil
     //   urunler. "Askıdakileri Getir" ÜTS'den senkronlar; satirdan "Alma
     //   Bildirimi Yap" ile alinir (askı adeti duser).
-    kaynak: 'uts-envanter', baslik: 'ÜTS Askıdaki Ürünler',
-    yol: 'Stok › ÜTS Askıdaki Ürünler', aksiyonEkrani: 'uts-envanter-liste',
+    kaynak: 'uts-envanter', baslik: 'ÜTS Askıdaki Ürün Listesi',
+    yol: 'Stok › ÜTS Askıdaki Ürün Listesi', aksiyonEkrani: 'uts-envanter-liste',
     aramaGorunumGizli: true,
     cipler: [
       { ad: 'Askıda',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -96,8 +96,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
   {
     // ÜTS bildirim gecmisi (223): gonderilen alma/verme/kullanim bildirimleri,
     //   ham istek/cevap JSON'u Icerik penceresinde.
-    kaynak: 'uts-bildirim', baslik: 'ÜTS Bildirimleri',
-    yol: 'Stok › ÜTS Bildirimleri', aksiyonEkrani: 'uts-bildirim-liste',
+    kaynak: 'uts-bildirim', baslik: 'ÜTS Bildirimi Listesi',
+    yol: 'Stok › ÜTS Bildirimi Listesi', aksiyonEkrani: 'uts-bildirim-liste',
     tarihAlani: 'tarih', icerikAlani: 'cevapJson', icerikBaslik: 'ÜTS Cevabı',
     aramaGorunumGizli: true,
     // "＋ Bildirim" dugmesine asagi acilir menu (kullanici).
@@ -119,7 +119,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
-    menuAd: 'Bildirimler', ic: '📡',
+    menuAd: 'Bildirim Listesi', ic: '📡',
     yetkiKodu: 'uts.bildirim', menuSira: 111,
   },
   {
@@ -136,7 +136,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   ETKILEMEZ - asil hareketi, talep karsilaninca kesilen transfer yapar.
     //   Kart transferin kardesi: para yok, e-Belge yok; teslim eden yerine
     //   TALEP EDEN sorulur.
-    kaynak: 'stok-talep', baslik: 'Stoktan Talepler',
+    kaynak: 'stok-talep', baslik: 'Stoktan Talep Listesi',
     yol: 'Stok › Stoktan Talep', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 105,
     cipler: [
       { ad: 'Bekleyen', filtre: { alan: 'kapanmaDurum', op: 'esitDegil', deger: 2 } },
@@ -152,7 +152,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   dalidir (fiyat/KDV/e-Belge sutunlari gizli).
     // kartYolu YOK: kart generic GenForm degil BelgeKarti (modal) - onSatirAc
     //   'stok-transfer' kaynagini da belge kartina yonlendirir.
-    kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
+    kaynak: 'stok-transfer', baslik: 'Stok Transferi Listesi',
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
     menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge.stok.transfer',
@@ -162,7 +162,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
     //   belgeler - fire, sarf, imha, sayim farki. Muhasebe fisi URETIRLER
     //   (kasa_islem_turu.fis_mi=1, F7'de baglanacak). TIPI fisin sebebidir.
-    kaynak: 'giris-fis', baslik: 'Giriş Fişleri', yol: 'Stok › Giriş Fişi',
+    kaynak: 'giris-fis', baslik: 'Giriş Fişi Listesi', yol: 'Stok › Giriş Fişi',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 3,
     toplam: ['genelToplam'],
     cipler: [
@@ -174,7 +174,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     menuSira: 50,
   },
   {
-    kaynak: 'cikis-fis', baslik: 'Çıkış Fişleri', yol: 'Stok › Çıkış Fişi',
+    kaynak: 'cikis-fis', baslik: 'Çıkış Fişi Listesi', yol: 'Stok › Çıkış Fişi',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 4,
     toplam: ['genelToplam'],
     cipler: [
@@ -191,8 +191,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   Ayni kod birden cok SURUMLE listelenir: eski surum silinmez, pasiflesir
     //   (acik emirler kendi surumunde yasar). Bu yuzden varsayilan sirama
     //   kod + surum, cipler de surum degil DURUM uzerinden.
-    kaynak: 'urun-agaci', rota: 'urun-agaci', baslik: 'Ürün Ağaçları',
-    yol: 'Üretim › Ürün Ağaçları',
+    kaynak: 'urun-agaci', rota: 'urun-agaci', baslik: 'Ürün Ağacı Listesi',
+    yol: 'Üretim › Ürün Ağacı Listesi',
     kartYolu: '/urun-agaci', kartBaslik: 'Ürün Ağacı',
     aksiyonEkrani: 'urun-agaci-liste',
     cipler: [
@@ -203,7 +203,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'Ürün Ağaçları', menuSira: 20,
+    menuGrup: 'Üretim', menuAd: 'Ürün Ağacı Listesi', menuSira: 20,
     ic: '🌳', yetkiKodu: 'uretim.urun_agaci',
   },
   {
@@ -211,8 +211,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   "Geciken" cipi SAKLANAN bir alana degil, hesaplanan `gecikti`
     //   kolonuna bakar: gecikme termin ile bugunun farkidir, her gece bir isin
     //   guncellemesi gerekseydi is calismadigi gun liste yalan soylerdi.
-    kaynak: 'uretim-emri', rota: 'uretim-emri', baslik: 'Üretim Emirleri',
-    yol: 'Üretim › Üretim Emirleri',
+    kaynak: 'uretim-emri', rota: 'uretim-emri', baslik: 'Üretim Emiri Listesi',
+    yol: 'Üretim › Üretim Emiri Listesi',
     kartYolu: '/uretim-emri', kartBaslik: 'Üretim Emri',
     aksiyonEkrani: 'uretim-emri-liste',
     tarihAlani: 'termin',
@@ -225,13 +225,13 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['adet', 'uretilenAdet', 'gercekToplam'],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'Üretim Emirleri', menuSira: 10,
+    menuGrup: 'Üretim', menuAd: 'Üretim Emiri Listesi', menuSira: 10,
     ic: '🏭', yetkiKodu: 'uretim',
   },
   {
     // IS MERKEZLERI (429) - saat ucreti iscilik maliyetinin kaynagi.
-    kaynak: 'is-merkezi', rota: 'is-merkezi', baslik: 'İş Merkezleri',
-    yol: 'Üretim › İş Merkezleri',
+    kaynak: 'is-merkezi', rota: 'is-merkezi', baslik: 'İş Merkezi Listesi',
+    yol: 'Üretim › İş Merkezi Listesi',
     kartYolu: '/is-merkezi', kartBaslik: 'İş Merkezi',
     aksiyonEkrani: 'is-merkezi-liste',
     cipler: [
@@ -240,7 +240,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezleri', menuSira: 90,
+    menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezi Listesi', menuSira: 90,
     ic: '⚙️', yetkiKodu: 'uretim.is_merkezi',
   },
 ];

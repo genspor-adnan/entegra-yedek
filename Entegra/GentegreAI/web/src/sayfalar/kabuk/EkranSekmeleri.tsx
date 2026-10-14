@@ -58,7 +58,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   konum: Location;
   navTuru: NavigationType;
   outlet: React.ReactNode;
-  git(yol: string, secenek?: { state?: unknown }): void;
+  git(yol: string, secenek?: { state?: unknown; replace?: boolean }): void;
 }) {
   const [sekmeler, setSekmeler] = useState<Sekme[]>([]);
   const [bildirim, setBildirim] = useState('');
@@ -70,6 +70,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>({});
   // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
   const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[s.konum.pathname] ?? s.baslik;
+  /** Kart sekmelerinin "kayıtsız değişiklik var mı" sorusu (bkz. kartaGit). */
+  const kirliler = useRef(new Map<string, () => boolean>());
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
@@ -125,6 +127,23 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     if (!f) { kapat(anahtar); return }
     const s = liste.find(x => x.anahtar === anahtar);
     if (s && anahtar !== simdiki.anahtar) { ac(s); setTimeout(f, 50) } else f();
+  };
+  /**
+   * KARTA GİT - KİRLİ KART KORUNUR (tek kart sekmesi, "yerine bunu koysun"): açık kartta kayıtsız
+   * değişiklik varken aynı kart sekmesine başka kayıt AÇILMAZ - o kart öne alınır, kullanıcı
+   * uyarılır. Gezinmeden ÖNCE sorulur: gelen adresle kart yeniden çizilirse değişiklik kaybolurdu.
+   */
+  const kartaGit = (yol: string) => {
+    const [yolu, sorgu = ''] = yol.split('?');
+    const hedef = sekmeBul(satirlar, { pathname: yolu, search: sorgu ? `?${sorgu}` : '', hash: '', state: null, key: '' },
+                           ekBasliklar, kartSekmeleri);
+    const s = liste.find(x => x.anahtar === hedef.anahtar);
+    if (s && hedef.ust && s.konum.pathname !== yolu && kirliler.current.get(s.anahtar)?.()) {
+      ac(s);
+      setBildirim(c('Açık kartta kaydedilmemiş değişiklik var - önce kaydedin ya da kapatın.'));
+      return;
+    }
+    git(yol);
   };
   const kapat = (anahtar: string, hedef?: string) => {
     kapatIsleyicileri.current.delete(anahtar);
@@ -186,7 +205,11 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
         <SekmeGorunurBaglami.Provider value={aktif}>
          <EkranSekmesiBaglami.Provider value={{
            kapat: hedef => kapat(s.anahtar, hedef),
-           kapatmaIsleyicisi: f => { if (f) kapatIsleyicileri.current.set(s.anahtar, f); else kapatIsleyicileri.current.delete(s.anahtar) },
+           kartaGit,
+           kapatmaIsleyicisi: (f, kirli) => {
+             if (f) kapatIsleyicileri.current.set(s.anahtar, f); else kapatIsleyicileri.current.delete(s.anahtar);
+             if (f && kirli) kirliler.current.set(s.anahtar, kirli); else kirliler.current.delete(s.anahtar);
+           },
            // Yol ÇAĞIRANDAN: kart yüklenirken sekmenin kayıtlı adresi henüz eski olabilir.
            baslik: (b, yol) => setOzelBaslik(o => (o[yol] === b ? o : { ...o, [yol]: b })) }}>
           <UNSAFE_LocationContext.Provider
@@ -199,5 +222,5 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     );
   });
 
-  return { cubuk, govde };
+  return { cubuk, govde, kartaGit };
 }

@@ -138,6 +138,7 @@ import { randevuAksiyonu } from './liste/randevuAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
+import { BELGE_KARTI_KAYNAKLARI, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
 import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
   from './listeTanimlari';
 
@@ -200,11 +201,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
   const [yenile, setYenile] = useState(0);
-  /** KART KENDİ SEKMESİNDE (tanim.yeniSekmede): bu sekmede liste çizilmez, yalnız kart. */
+  /** KART KENDİ SEKMESİNDE (kartSekmesiVar): bu sekmede liste çizilmez, yalnız kart. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  /** Kart açan gezinme: sekmeler açıksa kayıtsız değişiklikli kartı korur (EkranSekmeleri.kartaGit). */
+  const gitKart = (yol: string) => ekranSekmesi ? ekranSekmesi.kartaGit(yol) : git(yol);
   /** BELGE KARTI KENDİ SEKMESİNDE (başvuru, hasta deseni): kart yolu liste rotası. */
-  const belgeSekmeYolu = tanim.yeniSekmede && tanim.kaynak === 'belge' && ekranSekmesi
-    ? `/${tanim.rota ?? tanim.kaynak}` : null;
+  const belgeSekmeYolu = ekranSekmesi && !tanim.kartYolu && kartSekmesiVar(tanim)
+    && BELGE_KARTI_KAYNAKLARI.includes(tanim.kaynak) ? kartSekmeYolu(tanim) : null;
   // BAŞKA SEKMEDE kayıt eklendi (ör. "Yeni Hasta Kartı" sekmesi kaydedip kapandı): tazele.
   useEffect(() => {
     const tazele = (e: Event) => { if ((e as CustomEvent<string>).detail === tanim.kaynak) setYenile(t => t + 1) };
@@ -319,11 +322,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       const acik = Number(y.satirlar[0]?.id ?? 0);
       if (acik) {
         mesaj('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.');
-        setAcikBelgeId(acik);
+        // KART İÇİNDEN AÇILAN KART YENİ SEKMEDE (kullanıcı 14.10.2026, karar 2).
+        if (ekranSekmesi) git(`/basvuru/${acik}`); else setAcikBelgeId(acik);
         return;
       }
     } catch { /* sorgu basarisizsa yeni basvuru acilir */ }
-    setYeniBasvuruHasta({ id: tarafId, unvan });
+    if (ekranSekmesi) git(`/basvuru/yeni?tarafId=${tarafId}&tarafUnvan=${encodeURIComponent(unvan)}`);
+    else setYeniBasvuruHasta({ id: tarafId, unvan });
   }
 
   const [yeniBasvuruHasta, setYeniBasvuruHasta] =
@@ -616,7 +621,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                          secililer?: ListeSatiri[],
                          /** Ekran-ozel ek girdi (or. tani arama metni). */
                          ek?: string) {
-    const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
+    const kartaGit = (kayitId: unknown) => gitKart(`${tanim.kartYolu}/${kayitId}`);
 
     // BAŞVURU EKLE (kullanici): hasta listesinde seçili hastaya başvuru aç
     //   (varsa kapanmamış başvurusu açılır, yoksa yeni). 2. sıra düğmesi.
@@ -911,7 +916,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         taburcuAc: id => setYatisTaburcu(id),
         dozAc: (yatisId, dozId, atla) =>
           setDozSatiri({ yatisId, dozId, atla: !!atla }),
-        kartAc: id => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${id}`) },
+        kartAc: id => { if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${id}`) },
       })) return;
 
       if (await bildirimAksiyonu(kod, satir, secililer, {
@@ -932,8 +937,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       // BAŞVURU KARTI KENDİ SEKMESİNDE: Yeni / Aç pencere değil kart sekmesi açar.
-      if (belgeSekmeYolu && kod === 'belge.yeni') { git(`${belgeSekmeYolu}/yeni`); return }
-      if (belgeSekmeYolu && kod === 'belge.ac' && satir) { git(`${belgeSekmeYolu}/${satir.id}`); return }
+      if (belgeSekmeYolu && kod === 'belge.yeni') { gitKart(`${belgeSekmeYolu}/yeni`); return }
+      if (belgeSekmeYolu && kod === 'belge.ac' && satir) { gitKart(`${belgeSekmeYolu}/${satir.id}`); return }
 
       if (await belgeAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
@@ -1006,7 +1011,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           arBolum ? `bolum=${arBolum}` : '',
         ].filter(Boolean) : [];
         const ek = parca.length ? `?${parca.join('&')}` : '';
-        git(`${tanim.kartYolu}/yeni${ek}`);
+        gitKart(`${tanim.kartYolu}/yeni${ek}`);
       }
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
       //   ekranda kaydi gorunce sasiriyordu. Onay sorulur; silme engelleri
@@ -1027,7 +1032,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     }
   }
 
-  const kartSekmesi = kartId !== null && !!tanim.yeniSekmede && !!ekranSekmesi && !sorgu.get('geri');
+  const kartSekmesi = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   return (
     <>
     {!kartSekmesi && <>
@@ -1172,7 +1177,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
             || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis'
             || tanim.kaynak === 'satinalmaSiparis') {
-          if (belgeSekmeYolu) git(`${belgeSekmeYolu}/${satir.id}`);
+          if (belgeSekmeYolu) gitKart(`${belgeSekmeYolu}/${satir.id}`);
           else setAcikBelgeId(Number(satir.id));
         }
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
@@ -1186,7 +1191,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));
         // BAŞKA MODÜLÜN KARTI (kalite dokümanı -> /dokuman/:id, 1068): kapatınca
         //   bu listeye dönülsün diye ?geri ile açılır.
-        else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}${tanim.kartYolu !== `/${tanim.rota ?? tanim.kaynak}`
+        else if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${satir.id}${tanim.kartYolu !== `/${tanim.rota ?? tanim.kaynak}`
           ? `?geri=${encodeURIComponent(`/${tanim.rota ?? tanim.kaynak}`)}` : ''}`);
       }}
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
@@ -1855,7 +1860,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     {/* BAŞVURU KARTI KENDİ SEKMESİNDE (hasta deseni): BelgeKarti çerçevesiz, sekmeyi doldurur. */}
     {kartSekmesi && belgeSekmeYolu ? (
       <BelgeKarti key={String(kartId)} sayfa
-                  {...(kartId === 'yeni' ? { tur: tanim.yeniBelgeTuru ?? 19 } : { id: Number(kartId) })}
+                  {...(kartId === 'yeni' ? { tur: tanim.yeniBelgeTuru,
+                        // Hasta kartından "＋ Yeni Başvuru": hasta seçili gelir.
+                        tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined }
+                     : { id: Number(kartId) })}
                   onKapat={() => ekranSekmesi!.kapat()}
                   onKaydedildi={() => window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }))} />
     ) : (

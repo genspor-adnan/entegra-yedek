@@ -18,7 +18,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     // YATAN HASTALAR - modülün ana çalışma ekranı. Hekim vizitte, hemşire
     //   nöbet devrinde, başhemşire yatak planlarken aynı listeye bakar;
     //   üçünün de ilk sorusu "kim, nerede, kaçıncı gün".
-    kaynak: 'yatan', rota: 'yatan', baslik: 'Yatan Hastalar',
+    kaynak: 'yatan', rota: 'yatan', baslik: 'Yatan Hasta Listesi',
     yol: 'Yatan Hasta › Servis Listesi',
     kartYolu: '/yatan', kartBaslik: 'Yatış',
     tarihAlani: 'girisTarihi', aksiyonEkrani: 'yatan-liste',
@@ -30,7 +30,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Yatan Hasta', menuAd: 'Yatan Hastalar', ic: '🛏️',
+    menuGrup: 'Yatan Hasta', menuAd: 'Yatan Hasta Listesi', ic: '🛏️',
     yetkiKodu: 'yatan', menuSira: 10,
   },
   {
@@ -138,15 +138,15 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
   {
     // ODALAR AYARLARIN ALTINDA: kurulum işi. Kural odanın (cinsiyet,
     //   izolasyon, ücret sınıfı), yatak odanın içinde.
-    kaynak: 'oda', rota: 'oda', baslik: 'Odalar',
-    yol: 'Yatan Hasta › Ayarlar › Odalar',
+    kaynak: 'oda', rota: 'oda', baslik: 'Oda Listesi',
+    yol: 'Yatan Hasta › Ayarlar › Oda Listesi',
     kartYolu: '/oda', kartBaslik: 'Oda', aksiyonEkrani: 'oda-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Yatan Hasta', menuAltGrup: 'Ayarlar', menuAd: 'Odalar', ic: '🚪',
+    menuGrup: 'Yatan Hasta', menuAltGrup: 'Ayarlar', menuAd: 'Oda Listesi', ic: '🚪',
     yetkiKodu: 'yatan.yatak', menuSira: 90,
   },
   {

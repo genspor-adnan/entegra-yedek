@@ -59,14 +59,14 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // KURUMLAR: cari kartına bağlı teleradyoloji ilişkisi (yön, DICOM AE,
     //   teslim kanalı). "Kurum var ama sözleşmesi yok" en sık eksiklik
     //   olduğu için aktif sözleşme sayısı listede.
-    kaynak: 'telerad-kurum', rota: 'telerad-kurum', baslik: 'Teleradyoloji Kurumları',
+    kaynak: 'telerad-kurum', rota: 'telerad-kurum', baslik: 'Teleradyoloji Kurumu Listesi',
     yol: 'Teleradyoloji › Kurumlar',
     // KART (800): kurum ve sözleşme yalnız göç/betikle açılabiliyordu - iş
     //   ilişkisi ekrandan hiç kurulamıyordu. Kart rotası liste rotasından
     //   türetilir (/telerad-kurum/:id).
     kartYolu: '/telerad-kurum', kartBaslik: 'Teleradyoloji Kurumu',
     aksiyonEkrani: 'telerad-kurum-liste',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Kurumları',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Kurumu Listesi',
     ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum', modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -99,11 +99,11 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
   {
     // ATAMA KURALLARI (801): "hangi iş kime". Sıra KARAR sırasıdır - ilk uyan
     //   kural kazanır, liste de o sırada okunur.
-    kaynak: 'telerad-kural', rota: 'telerad-kural', baslik: 'Teleradyoloji Atama Kuralları',
-    yol: 'Teleradyoloji › Atama Kuralları',
+    kaynak: 'telerad-kural', rota: 'telerad-kural', baslik: 'Teleradyoloji Atama Kuralı Listesi',
+    yol: 'Teleradyoloji › Atama Kuralı Listesi',
     kartYolu: '/telerad-kural', kartBaslik: 'Atama Kuralı',
     aksiyonEkrani: 'telerad-kural-liste',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Atama Kuralları',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Atama Kuralı Listesi',
     ic: '🤖', menuSira: 48, yetkiKodu: 'teleradyoloji.kural',
     modul: 'teleradyoloji', urunModu: 2,
   },
@@ -111,11 +111,11 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // SÖZLEŞMELER: dönem, ücret modeli, tarife ve SLA süreleri. İsteğe
     //   KOPYALANIR (db/797) - sözleşme sonradan değişince geçmiş isteğin sözü
     //   değişmesin.
-    kaynak: 'telerad-sozlesme', rota: 'telerad-sozlesme', baslik: 'Teleradyoloji Sözleşmeleri',
-    yol: 'Teleradyoloji › Sözleşmeler',
+    kaynak: 'telerad-sozlesme', rota: 'telerad-sozlesme', baslik: 'Teleradyoloji Sözleşmesi Listesi',
+    yol: 'Teleradyoloji › Sözleşme Listesi',
     kartYolu: '/telerad-sozlesme', kartBaslik: 'Teleradyoloji Sözleşmesi',
     aksiyonEkrani: 'telerad-sozlesme-liste',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Sözleşmeleri',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Sözleşmesi Listesi',
     ic: '📜', menuSira: 44, yetkiKodu: 'teleradyoloji.sozlesme', modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -132,10 +132,10 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // GELEN RAPORLAR (817): dışarıdan ORU ile gelen raporlar. Eşleşmeyen satır
     //   kırmızı - karşı taraf raporu gönderdiğini sanıyor, bizde hiçbir işe
     //   oturmadı.
-    kaynak: 'telerad-gelen', rota: 'telerad-gelen', baslik: 'Gelen Raporlar',
-    yol: 'Teleradyoloji › Gelen Raporlar',
+    kaynak: 'telerad-gelen', rota: 'telerad-gelen', baslik: 'Gelen Rapor Listesi',
+    yol: 'Teleradyoloji › Gelen Rapor Listesi',
     aksiyonEkrani: 'telerad-gelen-liste',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Gelen Raporlar',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Gelen Rapor Listesi',
     ic: '📥', menuSira: 51, yetkiKodu: 'teleradyoloji.gelen', modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -144,11 +144,11 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   kapalıysa liste BOŞ kalır - özel hastane müşterisi bu ekranı açsa da
     //   bir şey görmez.
     kaynak: 'telerad-bakanlik-eksik', rota: 'telerad-bakanlik-eksik',
-    baslik: 'Bakanlık Gönderim Eksikleri',
-    yol: 'Teleradyoloji › Bakanlık Eksikleri',
+    baslik: 'Bakanlık Gönderim Eksiği Listesi',
+    yol: 'Teleradyoloji › Bakanlık Eksiği Listesi',
     // KART YOK: düzeltme yeri isteğin kendi kartı, ayrı bir kart açmak aynı
     //   veriyi iki ekrandan yazılabilir kılardı.
-    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Bakanlık Eksikleri',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Bakanlık Eksiği Listesi',
     ic: '🏛', menuSira: 49, yetkiKodu: 'teleradyoloji.bakanlik_eksik', modul: 'teleradyoloji', urunModu: 2,
   },
 ];

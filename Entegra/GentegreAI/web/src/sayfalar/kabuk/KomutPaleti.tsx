@@ -40,7 +40,11 @@ export interface PaletEkrani { yol: string; ad: string; grup: string;
   /** İŞLEM (ekran değil, bir iş başlatır: "＋ Yeni Hasta Kartı"): "İşlemler" bölümünde durur. */
   islem?: boolean;
   /** Satırın sol ikonu (verilmezse ekran ↗, işlem ＋). */
-  ikon?: string }
+  ikon?: string;
+  /** İşlemin listesi: boş palette yalnız son açılan / favori listelerin işlemleri görünür. */
+  listeYol?: string;
+  /** Boş palette hep görünür (Yeni / Kayıtlı Hasta ve Başvuru Kartı). */
+  sabit?: boolean }
 
 /** Menü satırlarını düz "ekran" listesine indirger (grup adı yol olarak kalır). */
 export function paletEkranlari(satirlar: MenuSatiri[]): PaletEkrani[] {
@@ -143,7 +147,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         .map<Oge>(e => ({ bolum: 'Son açılanlar', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol }));
       return [
         ...kisaYol,
-        ...ekranlar.filter(e => e.islem).map<Oge>(e => ({
+        ...ekranlar.filter(e => e.islem && (e.sabit || (e.listeYol && sirali.includes(e.listeYol)))).map<Oge>(e => ({
           bolum: 'İşlemler', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol, islem: true, ikon: e.ikon })),
         ...komutlar.map<Oge>(k => ({
           bolum: 'İşlemler', tur: 'komut', anahtar: 'k' + k.kod, ad: k.ad, grup: k.grup || c('Bu ekranda'),

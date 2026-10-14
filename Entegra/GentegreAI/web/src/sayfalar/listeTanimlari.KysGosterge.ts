@@ -15,13 +15,13 @@ export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
   //   sekmeli özel sayfa (KysHedefler). Aşağıdaki generic liste menüde görünmez;
   //   hedef kartı (/kys-gosterge/:id) ve dönem değerleri onunla açılır.
   {
-    kaynak: 'kys-hedefler', rota: 'kys-hedefler', ozelSayfa: true, baslik: 'Kalite Politikası & Hedefler',
+    kaynak: 'kys-hedefler', rota: 'kys-hedefler', ozelSayfa: true, baslik: 'Kalite Politikası & Hedef Listesi',
     yol: 'Kalite › Politika & Hedefler',
     modul: 'kys',
     menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 60,
   },
   {
-    kaynak: 'kys-gosterge', rota: 'kys-gosterge', aksiyonEkrani: 'kys-gosterge-liste', baslik: 'Kalite Politikası & Hedefler',
+    kaynak: 'kys-gosterge', rota: 'kys-gosterge', aksiyonEkrani: 'kys-gosterge-liste', baslik: 'Kalite Politikası & Hedef Listesi',
     yol: 'Kalite › Politika & Hedefler',
     kartYolu: '/kys-gosterge', kartBaslik: 'Hedef',
     cipler: [

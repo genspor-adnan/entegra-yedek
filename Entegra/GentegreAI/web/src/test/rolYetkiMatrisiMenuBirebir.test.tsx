@@ -48,7 +48,7 @@ describe('yetki matrisi - menüdeki her ekran matriste', () => {
     await act(async () => { await Promise.resolve() });
     await act(async () => { fireEvent.click(k.getByText('Tümünü Aç')) });
 
-    for (const ad of ['Onayımdakiler', 'Görevler', 'Klinik Kalite Göstergeleri']) {
+    for (const ad of ['Onayımdakiler', 'Görev Listesi', 'Klinik Kalite Göstergesi Listesi']) {
       const tr = [...k.container.querySelectorAll('tr')].find(x => x.textContent?.includes(ad));
       expect(tr, ad).toBeTruthy();
       expect((tr!.querySelector('input[type=checkbox]') as HTMLInputElement).checked, ad).toBe(true);
