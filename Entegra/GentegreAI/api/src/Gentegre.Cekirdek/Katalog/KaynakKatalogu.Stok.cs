@@ -353,6 +353,8 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Hizmet() => new(
         Ad: "hizmet",
         YetkiKodu: "hizmet",
+        // İstem seçeneği: herkes okur (kullanıcı 15.10.2026 "yetkiye bağlama").
+        HerkesOkur: true,
         Kaynak: "public.hizmet h",
         VarsayilanSirala: "h.ad asc",
         // KULLANIM PUANI (550, kullanici: "sistem polikliniğe göre seçilen

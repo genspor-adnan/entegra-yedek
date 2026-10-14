@@ -23,7 +23,7 @@ public static class ListeUclari
             // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
             //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
             baglam.MenuAcikIste(kaynak);
-            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             // URUN MODU BURADA DA COZULUR: kolon metasi (asagidaki /kolonlar)
             //   cozuyordu ama VERI sorgusu cozmuyordu. Sonuc: meta kolonu vaat
@@ -77,7 +77,7 @@ public static class ListeUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
-            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             // Ad ALANI kataloğun kendisinden okunur; kaynak beyaz listede
             //   (KaynakKatalogu) olduğu için tablo adı istekten GELMEZ.
@@ -115,7 +115,7 @@ public static class ListeUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
-            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             await veri.CalistirAsync(
                 "insert into public.kullanici_katalog (kullanici_id, kaynak, kod) " +
@@ -152,7 +152,7 @@ public static class ListeUclari
             // MENÜ KAPISI (979): gizlenmiş ekran hiçbir yerde kullanılamaz -
             //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
             baglam.MenuAcikIste(kaynak);
-            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var kolonlar = GorunurKolonlar(tanim, baglam,
                     await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal))

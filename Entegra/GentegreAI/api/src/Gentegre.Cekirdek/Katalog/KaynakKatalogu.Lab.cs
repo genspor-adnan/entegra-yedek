@@ -15,6 +15,8 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi LabTetkik() => new(
         Ad: "lab-tetkik",
         YetkiKodu: "lab.tetkik",
+        // İstem seçeneği: herkes okur (kullanıcı 15.10.2026 "yetkiye bağlama").
+        HerkesOkur: true,
         Kaynak: "public.lab_tetkik t "
               + "  left join public.stok h on h.id = t.hizmet_id "
               + "  left join public.cihaz c on c.id = t.varsayilan_cihaz_id",
@@ -171,6 +173,8 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi LabPanel() => new(
         Ad: "lab-panel",
         YetkiKodu: "lab.tetkik",
+        // İstem seçeneği: herkes okur (kullanıcı 15.10.2026 "yetkiye bağlama").
+        HerkesOkur: true,
         // `hizmet_id` HIZMETE bakar, stoga degil: liste "Hizmet" kolonunda
         //   ayni id'li bir STOGUN adini gosteriyordu (501 koprusunden sonra
         //   panellerin hepsinde dolu - hata gorunur hale geldi).

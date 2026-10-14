@@ -172,7 +172,12 @@ public sealed record KaynakTanimi(
     // URUN MODU (10.10.2026, kullanici: "uretimle ilgili dokumler sadece ERP
     //   modunda olur"): 0 her kurulum · 1 yalniz ERP · 2 yalniz HBYS. Dokum
     //   tasarimcisinin kaynak listesi buna gore suzulur (UrunModlari.Uyar).
-    int UrunModu = 0
+    int UrunModu = 0,
+    // HERKES OKUR (15.10.2026, kullanıcı: "bunları herkes ekleyebilir · yetkiye bağlama"):
+    //   istem seçenek katalogları (tetkik, panel, hizmet) - hekim, hemşire, banko istem
+    //   açarken listeyi okur. Yalnız OKUMA uçları (liste, kolonlar, sık kullanılan) yetki
+    //   istemez; kart açma / yazma kendi yetkisinde kalır. Menü kapısı (979) yine geçerli.
+    bool HerkesOkur = false
 )
 {
     private Dictionary<string, KolonTanimi>? _dizin;
