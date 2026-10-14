@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
+import { hataMetni } from '../api/sozlesme';
+import { mesaj } from '../bilesenler/mesaj';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { DILLER } from '../bilesenler/diller';
 import { KullaniciAyarlari, type AyarSekmesi } from '../bilesenler/KullaniciAyarlari';
@@ -31,7 +33,6 @@ import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 import { TarafArama } from '../bilesenler/TarafArama';
 
-import { BasvuruArama } from '../bilesenler/BasvuruArama';
 import type { ListeGirdisi } from './listeTanimlari.Ortak';
 
 /** Komut paletinde "Kayıtlı ... Kartı" - yol değil, kaynağın arama penceresini açar. */
@@ -182,8 +183,8 @@ export function Kabuk() {
     if (!kullanici?.id) return;
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
   }, [kullanici?.id, kullanici?.subeId]);
-  const [kayitliHastaAcik, setKayitliHastaAcik] = useState(false);
-  const [kayitliBasvuruAcik, setKayitliBasvuruAcik] = useState(false);
+  /** Ctrl+K "Kayıtlı Hasta / Başvuru Kartı": ikisi de hasta araması, seçimden sonrası farklı. */
+  const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | null>(null);
   /** Ekran kullanıcının (yetkili) menüsünde mi. */
   const menudeVar = useCallback((yol: string) => kodSatirlari.some(sat =>
     sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
@@ -462,16 +463,29 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={yol => yol === KAYITLI_ARAMA.hasta ? setKayitliHastaAcik(true)
-                             : yol === KAYITLI_ARAMA.belge ? setKayitliBasvuruAcik(true) : git(yol)}
+                   git={yol => yol === KAYITLI_ARAMA.hasta ? setKayitliArama('hasta')
+                             : yol === KAYITLI_ARAMA.belge ? setKayitliArama('basvuru') : git(yol)}
                    ekEkranlar={panelEkranlari} />
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
-      <TarafArama acik={kayitliHastaAcik} kaynaklar={['hasta']} kartYok
+      {/* KAYITLI BAŞVURU KARTI da aynı hasta araması (kullanıcı): seçilen hastanın SON başvurusu açılır. */}
+      <TarafArama acik={kayitliArama !== null} kaynaklar={['hasta']} kartYok
                   yerTutucu={c('Hasta ara (ad, dosya no, kimlik no, telefon)…')}
-                  onKapat={() => setKayitliHastaAcik(false)}
-                  onSec={h => { setKayitliHastaAcik(false); git(`/hasta/${h.id}`) }} />
-      <BasvuruArama acik={kayitliBasvuruAcik} onKapat={() => setKayitliBasvuruAcik(false)}
-                    onSec={id => git(`/basvuru/${id}`)} />
+                  onKapat={() => setKayitliArama(null)}
+                  onSec={h => {
+                    const tur = kayitliArama; setKayitliArama(null);
+                    if (tur === 'hasta') { git(`/hasta/${h.id}`); return }
+                    void api.liste('belge', {
+                      sayfa: 1, boyut: 1,
+                      sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
+                      filtre: { op: 'and', kosullar: [
+                        { alan: 'tur', op: 'esit', deger: 19 }, { alan: 'tipi', op: 'esit', deger: 30 },
+                        { alan: 'hastaId', op: 'esit', deger: h.id } ] },
+                    }).then(y => {
+                      const son = y.satirlar[0];
+                      if (son) git(`/basvuru/${son.id}`);
+                      else mesaj(c('{0} için kayıtlı başvuru yok.').replace('{0}', h.unvan));
+                    }).catch(e => mesaj(hataMetni(e)));
+                  }} />
 
       {/* YENI TALEP PENCERESI: panelden de sayfadan da yeniTalepAc() ile. */}
       <YeniTalepKatmani />
