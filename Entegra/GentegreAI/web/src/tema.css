@@ -6473,7 +6473,9 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
 
 /* SEKME ÇUBUĞU ＋ (arama/komut paleti). */
-.es-ekle { font-weight: bold; padding: 0 10px; cursor: pointer }
+.ekran-sekmeleri .es-sekme.es-ekle { font-weight: bold; font-size: 16px; padding: 0 10px; cursor: pointer; border: 0 !important;
+  background: none !important; box-shadow: none !important; color: var(--yazi2) }
+.ekran-sekmeleri .es-sekme.es-ekle:hover { color: var(--mavi, #2563eb) }
 
 /* PALET BÖLÜMLERİ (mockup ana_ekran_sekmeli_v3): Son açılanlar / Ekranlar / İşlemler. */
 .palet-bolum { font-size: 11px; font-weight: bold; color: var(--yazi2); opacity: .75; text-transform: uppercase;
