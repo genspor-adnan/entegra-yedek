@@ -222,13 +222,6 @@ public static partial class KartKatalogu
         ["3"] = "Hasta kendi imkânı",
     };
 
-    /// <summary>Vaka turu (SKRS): adli/kaza ayrimi bildirim ve fatura kurallarini degistirir.</summary>
-    private static readonly Dictionary<string, string> VakaTuruKodlari = new()
-    {
-        ["0"] = "Normal", ["1"] = "Adli vaka", ["2"] = "İş kazası",
-        ["3"] = "Trafik kazası", ["4"] = "Meslek hastalığı", ["9"] = "Diğer",
-    };
-
     /// <summary>Evet / hayır sorusu (1099): boş = cevaplanmadı, "hayır"dan ayrı.</summary>
     private static readonly Dictionary<string, string> EvetHayirKodlari = new() { ["1"] = "Evet", ["0"] = "Hayır" };
 
@@ -455,13 +448,15 @@ public static partial class KartKatalogu
                 Baslik: "Ambulans", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("ambulansZaman", "ambulans_zaman", "zaman",
                 Baslik: "Ambulans saati", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+            // KONTROL DEĞERLENDİRME / SONUÇ'TA (kullanıcı 15.10.2026: "kontrol gün ve kontrol
+            //   randevu id'yi değerlendirme / sonuç kısmına taşı").
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",
-                Baslik: "Kontrol (gün)", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
+                Baslik: "Kontrol (gün)", Grup: "Muayene", AltGrup: "Değerlendirme / Sonuç"),
             new("kontrolRandevuId", "kontrol_randevu_id", "sayi",
-                Baslik: "Kontrol Randevu Id", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
-            new("vakaTuru", "vaka_turu", "kod", SabitKodlar: VakaTuruKodlari,
-                Baslik: "Vaka Türü",
-                Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
+                Baslik: "Kontrol Randevu Id", Grup: "Muayene", AltGrup: "Değerlendirme / Sonuç"),
+            // VAKA TÜRÜ KALDIRILDI (kullanıcı 15.10.2026, db/1106): başvurunun "Geliş Nedeni"nde
+            //   - e-Nabız'a giden SKRS VAKA TÜRÜ oradan. muayene.vaka_turu kolonu eski kayıtlar
+            //   için durur; 1106 dolu değerleri başvuruya taşıdı.
             new("konsultasyonSoru", "konsultasyon_soru", "metin", EnFazlaUzunluk: 500,
                 Baslik: "Konsültasyon sorusu", Grup: "Sevk / Konsültasyon",
                 AltGrup: "Konsültasyon"),
