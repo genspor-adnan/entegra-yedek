@@ -1,0 +1,235 @@
+import { useEffect, useState } from 'react';
+import { api } from '../api/istemci';
+import { c } from '../dil/ceviri';
+import { tarihSaat } from './bicim';
+import { OlcumGrafigi } from './OlcumGrafigi';
+import { OncekiKopyaPenceresi } from './MuayeneSekmeleri';
+
+/**
+ * SEKMESİZ MUAYENE DÜZENİNİN ÜÇ PARÇASI (mockup Ekranlar/Muayene/muayene_karti_v7.html,
+ * Ayarlar/hasta_bandi.html). Sekmeli düzen bunları KULLANMAZ - orada mevcut şerit ve
+ * Özet sekmesi aynen kalır (kullanıcı: "sekmeli eski düzenimi bozma").
+ *
+ *  - MuayeneHastaBandi: başlık = hasta bandı (kimlik · kan · alerji/kronik · uyarılar · şu an).
+ *  - MuayeneSolMenu: tamamlama kontrolü maddeleri HEM menü HEM kontrol (✓ / ⚠ / –),
+ *    altında işlemler; tıklayınca ilgili bölüme kaydırır.
+ *  - MuayeneYanPanel: kullandığı ilaçlar, son sonuçlar (📈), önceki muayeneler (↺ seçmeli kopyala).
+ */
+type Satir = Record<string, unknown>;
+const m = (v: unknown) => String(v ?? '').trim();
+const onekli = (on: string, v: string) => !v ? '' : /^[A-ZÇĞİÖŞÜ]+-/.test(v) ? v : `${on} ${v}`;
+
+export interface MuayeneHastaBilgisi {
+  ust: Satir | null; alerji: Satir[]; kronik: Satir[]; ilac: Satir[];
+  sonuclar: Awaited<ReturnType<typeof api.muayeneSonSonuclar>>;
+  band: Awaited<ReturnType<typeof api.muayeneBand>>;
+}
+
+async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
+  try {
+    const y = await api.liste(kaynak, { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } });
+    return (y.satirlar ?? []) as Satir[];
+  } catch { return [] }
+}
+
+/** Band ve sağ sütunun ORTAK verisi (tek yükleme). */
+export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number): MuayeneHastaBilgisi | null {
+  const [b, setB] = useState<MuayeneHastaBilgisi | null>(null);
+  useEffect(() => {
+    if (!(muayeneId > 0)) return;
+    let iptal = false;
+    void (async () => {
+      let ust: Satir | null = null;
+      try {
+        const y = await api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: muayeneId } });
+        ust = (y.satirlar?.[0] ?? null) as Satir | null;
+      } catch { /* band zorunlu değil */ }
+      const hastaId = Number(ust?.tarafId ?? 0);
+      const [a, k, i, s, bd] = await Promise.all([
+        hastaId > 0 ? listele('hasta-alerji', hastaId) : [],
+        hastaId > 0 ? listele('hasta-kronik', hastaId) : [],
+        hastaId > 0 ? listele('hasta-ilac', hastaId) : [],
+        api.muayeneSonSonuclar(muayeneId).catch(() => []),
+        api.muayeneBand(muayeneId).catch(() => ({})),
+      ]);
+      if (iptal) return;
+      setB({
+        ust,
+        alerji: a.filter(x => Number(x.aktif ?? 1) === 1),
+        kronik: k.filter(x => Number(x.durum ?? 1) !== 0),
+        ilac: i.filter(x => Number(x.aktif ?? 1) === 1),
+        sonuclar: s, band: bd,
+      });
+    })();
+    return () => { iptal = true };
+  }, [muayeneId, tazele]);
+  return b;
+}
+
+/* ================================================================ BAND ==== */
+
+export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null }) {
+  const [alerjiAcik, setAlerjiAcik] = useState(false);
+  const u = bilgi?.ust ?? null;
+  const ad = m(u?.hastaAdi);
+  const bas = ad.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toLocaleUpperCase('tr');
+  const panik = (bilgi?.sonuclar ?? []).filter(s => Number(s.panik ?? 0) === 1);
+  const cins = m(u?.cinsiyetKisa);
+  return (
+    <div className="hbnd">
+      <div className="hbnd-foto">{bas || '?'}</div>
+      <div className="hbnd-kim">
+        <div className="hbnd-ad">{ad || '—'}
+          {Number(bilgi?.band.ayniAd ?? 0) > 0 && (
+            <span className="hbnd-ayni" title={c('Bu kurumda aynı ad soyadlı başka hasta var')}>
+              {c('AYNI AD')} ×{bilgi?.band.ayniAd}</span>
+          )}
+        </div>
+        <div className="hbnd-alt"><b>{cins}{m(u?.yasMetni) ? ` ${m(u?.yasMetni)}` : ''}</b>
+          {m(bilgi?.band.kurum) && <> · <b>{m(bilgi?.band.kurum)}</b></>}</div>
+        {/* D / P: numara kendi önekini taşıyorsa ("H-000079", "P-000154") tekrar eklenmez. */}
+        <div className="hbnd-alt">{[onekli('D', m(u?.dosyaNo)), onekli('P', m(u?.protokolNo))].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div className="hbnd-blok">
+        <span className={`hbnd-kg${m(bilgi?.band.kanGrubu) ? '' : ' yok'}`}>{m(bilgi?.band.kanGrubu) || c('kan grubu ?')}</span>
+        {m(u?.sonVital) && <div className="hbnd-alt" title={c('Son vital')}>{m(u?.sonVital)}</div>}
+      </div>
+      <div className="hbnd-blok">
+        <div className="hbnd-b">{c('Alerji / Kronik')}</div>
+        <div className="hbnd-rozetler">
+          {bilgi && bilgi.alerji.length === 0 && <span className="rozet olumlu">{c('Alerji: yok')}</span>}
+          {(bilgi?.alerji.length ?? 0) > 0 && (
+            <span className="rozet hata hbnd-tik" onClick={() => setAlerjiAcik(a => !a)}>
+              ⚠ {m(bilgi!.alerji[0].etken) || m(bilgi!.alerji[0].etkenMadde)}
+              {bilgi!.alerji.length > 1 ? ` +${bilgi!.alerji.length - 1}` : ''}
+            </span>
+          )}
+          {(bilgi?.kronik ?? []).slice(0, 3).map((k, i) => (
+            <span key={i} className="rozet uyari" title={m(k.taniAd) || m(k.icdKod)}>{m(k.taniAd) || m(k.icdKod)}</span>
+          ))}
+          {(bilgi?.kronik.length ?? 0) > 3 && <span className="rozet gri">+{bilgi!.kronik.length - 3}</span>}
+        </div>
+      </div>
+      <div className="hbnd-blok hbnd-genis">
+        <div className="hbnd-b">{c('Uyarılar')}</div>
+        <div className="hbnd-rozetler">
+          {panik.map((s, i) => <span key={i} className="rozet hata">{c('Panik sonuç')}: {m(s.ad)}</span>)}
+          {m(u?.uyari) && <span className="rozet uyari">{m(u?.uyari)}</span>}
+          {panik.length === 0 && !m(u?.uyari) && <span className="not">—</span>}
+        </div>
+      </div>
+      <div className="hbnd-blok hbnd-simdi">
+        <div className="hbnd-b">{c('Şu an')}</div>
+        <div><b>{m(u?.bolumAdi) || '—'}</b></div>
+        <div className="hbnd-alt">{m(u?.hekimAdi)}{u?.baslangic ? ` · ${tarihSaat(u.baslangic).slice(11)}` : ''}</div>
+      </div>
+      {alerjiAcik && bilgi && (
+        <div className="hbnd-ayr" onClick={() => setAlerjiAcik(false)}>
+          <h5>⚠ {c('Alerjiler')} ({bilgi.alerji.length})</h5>
+          {bilgi.alerji.map((a, i) => (
+            <div key={i} className="hbnd-ayr-s"><b>{m(a.etken) || m(a.etkenMadde)}</b>
+              {m(a.turAdi) && ` · ${m(a.turAdi)}`}{m(a.reaksiyon) && ` · ${m(a.reaksiyon)}`}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================ SOL MENÜ ==== */
+
+export interface KontrolMaddesi { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }
+
+export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler }: {
+  kontrol: KontrolMaddesi[] | null;
+  git(baslik: string): void;
+  muayeneyeAl(): void;
+  /** İstem maddesinin yanında "3/5". */
+  istemRozeti?: string;
+  islemler: { ad: string; ikon: string; bilgi?: string; ac(): void }[];
+}) {
+  // Kontrol maddesi → bölüm (Özet sekmesindeki eşlemenin aynısı).
+  const hedef: Record<string, () => void> = {
+    baslangic: muayeneyeAl, sikayet: () => git('Muayene'), tanilar: () => git('Tanı'),
+    istem: () => git('İstem'), recete: () => git('e-Reçete'), karar: () => git('Muayene'),
+    cikisSekli: () => git('Muayene'),
+  };
+  const eksik = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
+  return (
+    <>
+      <div className="kanav-g bas">
+        <div className="kanav-o" onClick={() => git('Özet')}><span className="kanav-d">≡</span><span>{c('Özet')}</span></div>
+      </div>
+      <div className="kanav-g">
+        <h6>{c('Tamamlama')}<i className={eksik === 0 ? 'tamam' : ''}>{kontrol === null ? '…' : eksik === 0 ? c('hazır') : `${eksik} ${c('eksik')}`}</i></h6>
+        {(kontrol ?? []).map(k => (
+          <div key={k.alan} className={`kanav-o smn-k${k.tamam ? ' ok' : k.zorunlu ? ' eksik' : ''}`}
+               title={k.tamam ? undefined : k.mesaj} onClick={hedef[k.alan]}>
+            <span className={`kanav-d${k.tamam ? ' d-ok' : k.zorunlu ? ' d-uy' : ' d-bos'}`}>{k.tamam ? '✓' : k.zorunlu ? '!' : '–'}</span>
+            <span>{c(k.ad)}</span>
+            {k.alan === 'istem' && istemRozeti && <small>{istemRozeti}</small>}
+          </div>
+        ))}
+      </div>
+      <div className="kanav-g kanav-ek">
+        <h6>{c('İşlemler')}</h6>
+        {islemler.map(i => (
+          <div key={i.ad} className="kanav-o" onClick={i.ac}>
+            <span className="kanav-d">{i.ikon}</span><span>{c(i.ad)}</span>{i.bilgi && <small>{i.bilgi}</small>}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ========================================================== SAĞ SÜTUN ==== */
+
+export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi }: {
+  muayeneId: number;
+  bilgi: MuayeneHastaBilgisi | null;
+  gecmis: Satir[];
+  onKopyalandi(): void;
+}) {
+  const [grafik, setGrafik] = useState<string | null>(null);
+  const [kopya, setKopya] = useState<number | null>(null);
+  return (
+    <div className="myp">
+      <div className="myp-k">
+        <div className="myp-b">{c('Kullandığı ilaçlar')}</div>
+        {bilgi && bilgi.ilac.length === 0 && <div className="not">{c('Kayıtlı ilaç yok.')}</div>}
+        {(bilgi?.ilac ?? []).map((i, n) => (
+          <div key={n} className="myp-s">{m(i.ilacAd)}<span className="not">{[m(i.doz), m(i.periyot)].filter(Boolean).join(' ')}</span></div>
+        ))}
+      </div>
+      <div className="myp-k">
+        <div className="myp-b">{c('Son sonuçlar')} <span className="not">· {c('tıkla: grafik')}</span></div>
+        {bilgi && bilgi.sonuclar.length === 0 && <div className="not">{c('Onaylı sonuç yok.')}</div>}
+        {(bilgi?.sonuclar ?? []).map((s, n) => {
+          const kir = Number(s.panik ?? 0) === 1 || ['H', 'L', 'HH', 'LL'].includes(m(s.bayrak));
+          return (
+            <div key={n} className="myp-s myp-tik" onClick={() => setGrafik(s.kod)}>
+              <span className={kir ? 'myp-kir' : ''}>{s.ad} {s.deger}{s.birim ? ` ${s.birim}` : ''}</span>
+              <span className="not">{tarihSaat(s.zaman).slice(0, 10)} 📈</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="myp-k">
+        <div className="myp-b">{c('Önceki muayeneler')} <span className="not">· ↺ {c('kopyala')}</span></div>
+        {gecmis.length === 0 && <div className="not">{c('Önceki muayene yok.')}</div>}
+        {gecmis.slice(0, 6).map(g => (
+          <div key={String(g.id)} className="myp-s">
+            <span>{tarihSaat(g.tarih).slice(0, 10)} · {m(g.bolum) || m(g.hekim)}
+              <span className="not"> {m(g.tanilar) || m(g.ozet)}</span></span>
+            <button type="button" className="myp-kopya" title={c('Seçerek bu muayeneye kopyala')}
+                    onClick={() => setKopya(Number(g.id))}>↺</button>
+          </div>
+        ))}
+      </div>
+      {grafik && <OlcumGrafigi muayeneId={muayeneId} secim={{ tetkik: grafik }} onKapat={() => setGrafik(null)} />}
+      {kopya !== null && <OncekiKopyaPenceresi muayeneId={muayeneId} kaynakId={kopya}
+                                               onKapat={() => setKopya(null)} onKopyalandi={onKopyalandi} />}
+    </div>
+  );
+}

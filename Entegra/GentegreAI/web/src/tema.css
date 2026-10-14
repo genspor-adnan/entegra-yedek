@@ -6394,6 +6394,40 @@ textarea.fm-giris { resize: vertical }
 
 .kanav-ek { border-top: 1px solid var(--cizgi2); margin-top: 6px; padding-top: 4px }
 
+/* SEKMESİZ MUAYENE (mockup v7 + hasta_bandi): üstte hasta bandı, solda menü, sağda sütun. */
+.hbnd { position: relative; display: flex; align-items: stretch; background: var(--yuz); border: 1px solid var(--cizgi);
+  border-left: 5px solid var(--vurgu); border-radius: var(--r); font-size: 11.5px; margin-bottom: 8px }
+.hbnd-foto { width: 50px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--yuz2);
+  font-weight: 700; color: var(--vurgu); font-size: 16px; border-right: 1px solid var(--cizgi2) }
+.hbnd-kim, .hbnd-blok { padding: 6px 12px; border-right: 1px solid var(--cizgi2); min-width: 0 }
+.hbnd-kim { min-width: 210px }
+.hbnd-ad { font-size: 15px; font-weight: 700; color: var(--vurgu); display: flex; align-items: center; gap: 6px }
+.hbnd-ayni { font-size: 10px; font-weight: 700; color: var(--uyari); background: var(--uyarizem); border-radius: 3px; padding: 0 5px }
+.hbnd-alt { color: var(--soluk); margin-top: 2px; white-space: nowrap }
+.hbnd-alt b { color: var(--yazi); font-weight: 400 }
+.hbnd-b { font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px }
+.hbnd-rozetler { display: flex; gap: 4px; flex-wrap: wrap }
+.hbnd-tik { cursor: pointer }
+.hbnd-genis { flex: 1 }
+.hbnd-simdi { border-right: 0; white-space: nowrap }
+.hbnd-kg { font-family: Consolas, monospace; font-weight: 700; color: var(--hata); background: var(--hatazem); border-radius: 3px; padding: 1px 6px }
+.hbnd-kg.yok { color: var(--soluk); background: var(--yuz2); font-family: inherit; font-weight: 400 }
+.hbnd-ayr { position: absolute; top: 100%; left: 280px; z-index: 6; width: 320px; background: var(--yuz); border: 1px solid var(--cizgi);
+  border-radius: var(--r); box-shadow: 0 10px 30px rgba(8,20,40,.2); padding: 10px 12px; cursor: pointer }
+.hbnd-ayr h5 { margin: 0 0 6px; color: var(--hata); font-size: 12px }
+.hbnd-ayr-s { padding: 3px 0; border-top: 1px solid var(--cizgi2) }
+@media (max-width: 1300px) { .hbnd-simdi { display: none } }
+.smn-k.eksik { background: var(--uyarizem) }
+.kanav-d.d-ok { color: var(--ok, #2e7d46) } .kanav-d.d-uy { color: var(--uyari) } .kanav-d.d-bos { color: var(--soluk) }
+.myp { font-size: 11.5px }
+.myp-k { padding: 8px 12px; border-bottom: 1px solid var(--cizgi2) }
+.myp-b { font-size: 10.5px; font-weight: 700; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 5px }
+.myp-s { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0 }
+.myp-s .not { margin-left: 6px; white-space: nowrap }
+.myp-tik { cursor: pointer; border-radius: 3px } .myp-tik:hover { background: var(--satirust) }
+.myp-kir { color: var(--hata); font-weight: 600 }
+.myp-kopya { border: 0; background: none; cursor: pointer; color: var(--vurgu); font-size: 13px; padding: 0 4px }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

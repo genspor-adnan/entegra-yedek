@@ -9,6 +9,7 @@ import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
 import { MuayeneEpikrizSekmesi } from '../../bilesenler/MuayeneEpikrizSekmesi';
 import { KendimeNotPenceresi } from '../../bilesenler/KendimeNot';
+import { MuayeneHastaBandi, MuayeneSolMenu, MuayeneYanPanel, useMuayeneHastaBilgisi, type KontrolMaddesi } from '../../bilesenler/MuayeneSekmesiz';
 import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/gorunum';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
@@ -179,6 +180,17 @@ export function ListeKarti({
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
   const [kayitSayaci, setKayitSayaci] = useState(0);
+  /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
+  const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
+  const hastaBilgisi = useMuayeneHastaBilgisi(sekmesiz ? Number(kartId) : 0, kartTazele * 1000 + kayitSayaci);
+  const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
+  useEffect(() => {
+    if (!sekmesiz) return;
+    let iptal = false;
+    void api.muayeneTamamlamaKontrol(Number(kartId))
+      .then(y => { if (!iptal) setKontrol(y.kontroller) }).catch(() => {});
+    return () => { iptal = true };
+  }, [sekmesiz, kartId, kartTazele, kayitSayaci]);
   // GÖZ KARTI v4: sol gezinti durumları + kontrol listesi (kayıt / tazeleme ile yenilenir).
   const gozKontrol = useGozKontrol(tanim.kaynak === 'goz-muayene' && typeof kartId === 'number' ? kartId : 0,
                                    kartTazele * 1000 + kayitSayaci);
@@ -338,22 +350,36 @@ export function ListeKarti({
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
         //   zaten bölüm olarak listede - ikinci kez konmaz.
-        gezintiEk={tanim.kaynak === 'muayene' && typeof kartId === 'number'
-          ? () => (
-              <div className="kanav-g kanav-ek">
-                <div className="kanav-o" onClick={() => setNotAcik(true)}>📝 <span>{c('Kendime Not')}</span></div>
-                {/* Epikriz bölümü açılınca listede ZATEN bölüm olarak var - ikinci kez gösterilmez. */}
-                {epikrizDurum === null && !epikrizIstendi && (
-                  <div className="kanav-o" onClick={() => { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) }}>
-                    📄 <span>{c('Epikriz')}</span>
-                  </div>
-                )}
-                {notAcik && <KendimeNotPenceresi muayeneId={kartId} onKapat={() => setNotAcik(false)} />}
-              </div>
+        // SEKMESİZ SOL MENÜ (kullanıcı): tamamlama maddeleri hem menü hem kontrol, altında işlemler.
+        gezintiOzel={sekmesiz
+          ? git => (
+              <>
+                <MuayeneSolMenu kontrol={kontrol} git={git}
+                  muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
+                  islemler={[
+                    { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
+                    { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
+                    { ad: 'Sevk', ikon: '↗', ac: () => git('Sevk') },
+                    { ad: 'Konsültasyon', ikon: '🤝', ac: () => git('Sevk') },
+                    { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
+                    { ad: 'Geçmiş', ikon: '🕘', ac: () => git('Geçmiş') },
+                    { ad: 'Dosyalar', ikon: '📎', ac: () => git('Dosyalar') },
+                    { ad: 'e-Nabız', ikon: '🌐', ac: () => git('e-Nabız') },
+                    { ad: 'Epikriz', ikon: '📄',
+                      bilgi: epikrizDurum === 'imzali' ? c('imzalı') : epikrizDurum === 'taslak' ? c('taslak') : undefined,
+                      ac: () => { if (epikrizDurum !== null || epikrizIstendi) git('Epikriz');
+                                  else { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) } } },
+                  ]} />
+                {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
+              </>
             )
           : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
+          : sekmesiz
+          ? <MuayeneYanPanel muayeneId={Number(kartId)} bilgi={hastaBilgisi}
+                             gecmis={(sekmeVerisi.veri?.gecmis ?? []) as Record<string, unknown>[]}
+                             onKopyalandi={() => setKartTazele(t => t + 1)} />
           : undefined}
         altSerit={tanim.kaynak === 'goz-muayene'
           ? (git => <GozKuralSeridi kontrol={gozKontrol} sekmeyeGit={git} onTamamla={() => void gozTamamla()} />) : undefined}
@@ -613,7 +639,10 @@ export function ListeKarti({
         // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
         //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
         //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
-        ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+        ustBaglam={sekmesiz
+          // BAŞLIK = HASTA BANDI (mockup hasta_bandi / v7) - yalnız sekmesiz düzende.
+          ? () => <MuayeneHastaBandi bilgi={hastaBilgisi} />
+          : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => (
             <>
               <MuayeneBaglamSeridi muayeneId={Number(kartId)}
@@ -753,7 +782,8 @@ export function ListeKarti({
                       ilacEkle: () => setReceteIlacAra(true),
                       epikrizAc: () => { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) },
                     }}
-                    epikrizDurum={epikrizDurum} epikrizGit={epikrizGit} />
+                    epikrizDurum={epikrizDurum} epikrizGit={epikrizGit}
+                    solMenude={muayeneDuzeni === 'sekmesiz'} />
                 ) },
               // e-RECETE YINE AYRI SEKME (kullanici 02.10.2026: "recete
               //   sekmesini geri getir") - Muayene sekmesinden alindi.

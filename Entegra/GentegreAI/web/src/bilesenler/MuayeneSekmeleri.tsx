@@ -364,6 +364,43 @@ export function MuayeneUcretSekmesi({ veri, hata }:
   );
 }
 
+/**
+ * ÖNCEKİ MUAYENEDEN SEÇMELİ KOPYALAMA PENCERESİ (mockup v7): Geçmiş sekmesi ve
+ * sekmesiz düzenin sağ sütunu aynı pencereyi açar. Fizik muayene ve vital
+ * listede yok - o günün ölçümüdür (sunucu kuralı).
+ */
+export function OncekiKopyaPenceresi({ muayeneId, kaynakId, onKapat, onKopyalandi }: {
+  muayeneId: number; kaynakId: number; onKapat(): void; onKopyalandi(): void;
+}) {
+  const [kopyaAlan, setKopyaAlan] = useState<string[]>(KOPYA_ALANLARI.map(a => a[0]));
+  const kopyala = () => guvenli(async () => {
+    if (kopyaAlan.length === 0) return;
+    const y = await api.muayeneOncekiKopyala(muayeneId, kaynakId, kopyaAlan);
+    onKapat();
+    mesaj(y.mesaj);
+    onKopyalandi();
+  });
+  return (
+        <Modal baslik={c('Önceki muayeneden kopyala')} dar enUst buyutmeYok onKapat={() => onKapat()}
+               alt={<>
+                 <button type="button" className="d" onClick={() => onKapat()}>{c('Vazgeç')}</button>
+                 <button type="button" className="d bir" disabled={kopyaAlan.length === 0}
+                         onClick={() => void kopyala()}>↺ {c('Kopyala')}</button>
+               </>}>
+          <p className="not">{c('Boş alanlar doldurulur, yazdıklarınız değişmez. Tanılar eklenir; aynı ICD varsa atlanır.')}</p>
+          {KOPYA_ALANLARI.map(([k, ad]) => (
+            <label key={k} className="kopya-secim">
+              <input type="checkbox" checked={kopyaAlan.includes(k)}
+                     onChange={e => setKopyaAlan(l => e.target.checked ? [...l, k] : l.filter(x => x !== k))} />
+              {c(ad)}
+            </label>
+          ))}
+          <p className="not">{c('Fizik muayene ve vital kopyalanmaz: o günün ölçümüdür.')}</p>
+        </Modal>
+      
+  );
+}
+
 /** Önceki muayeneden kopyalanabilen alanlar (sunucu anahtarı, etiket). */
 const KOPYA_ALANLARI: [string, string][] = [
   ['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye'],
@@ -387,35 +424,11 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
   // SEÇMELİ KOPYALAMA (mockup muayene_karti_v7): hangi alanlar taşınsın.
   //   Fizik muayene ve vital listede YOK - o günün ölçümüdür (sunucu kuralı).
   const [kopyaKaynak, setKopyaKaynak] = useState<number | null>(null);
-  const [kopyaAlan, setKopyaAlan] = useState<string[]>(KOPYA_ALANLARI.map(a => a[0]));
-  const kopyala = () => guvenli(async () => {
-    if (kopyaKaynak === null || kopyaAlan.length === 0) return;
-    const y = await api.muayeneOncekiKopyala(muayeneId, kopyaKaynak, kopyaAlan);
-    setKopyaKaynak(null);
-    mesaj(y.mesaj);
-    tazele();
-  });
 
   return (
     <Kabuk hata={hata} veri={veri}>
-      {kopyaKaynak !== null && (
-        <Modal baslik={c('Önceki muayeneden kopyala')} dar enUst buyutmeYok onKapat={() => setKopyaKaynak(null)}
-               alt={<>
-                 <button type="button" className="d" onClick={() => setKopyaKaynak(null)}>{c('Vazgeç')}</button>
-                 <button type="button" className="d bir" disabled={kopyaAlan.length === 0}
-                         onClick={() => void kopyala()}>↺ {c('Kopyala')}</button>
-               </>}>
-          <p className="not">{c('Boş alanlar doldurulur, yazdıklarınız değişmez. Tanılar eklenir; aynı ICD varsa atlanır.')}</p>
-          {KOPYA_ALANLARI.map(([k, ad]) => (
-            <label key={k} className="kopya-secim">
-              <input type="checkbox" checked={kopyaAlan.includes(k)}
-                     onChange={e => setKopyaAlan(l => e.target.checked ? [...l, k] : l.filter(x => x !== k))} />
-              {c(ad)}
-            </label>
-          ))}
-          <p className="not">{c('Fizik muayene ve vital kopyalanmaz: o günün ölçümüdür.')}</p>
-        </Modal>
-      )}
+      {kopyaKaynak !== null && <OncekiKopyaPenceresi muayeneId={muayeneId} kaynakId={kopyaKaynak}
+                                                     onKapat={() => setKopyaKaynak(null)} onKopyalandi={tazele} />}
       <div className="muayene-ikili">
         <div className="mi-sol">
           <div className="kagrup">

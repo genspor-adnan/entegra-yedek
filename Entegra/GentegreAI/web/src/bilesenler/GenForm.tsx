@@ -225,6 +225,9 @@ interface Props {
   /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
       `git` başlığı verilen sekmeye/bölüme götürür. */
   gezintiEk?(git: (baslik: string) => void): React.ReactNode;
+  /** Tek sayfa kipinde sol gezintinin YERİNE ekranın menüsü (sekmesiz muayene:
+      tamamlama maddeleri + işlemler). `git` başlığı verilen bölüme kaydırır. */
+  gezintiOzel?(git: (baslik: string) => void): React.ReactNode;
   /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
       satır adedi yerine o yazılır; undefined dönerse adet (varsayılan). */
   detayRozeti?(detayAd: string, satirlar: Record<string, unknown>[]): string | undefined;
@@ -306,7 +309,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -1800,7 +1803,7 @@ Yine de yeni kayıt eklensin mi?`);
                 </div>
               );
             })
-          ) : (() => {
+          ) : tekSayfaKip && gezintiOzel ? gezintiOzel(sekmeyeGitBaslik) : (() => {
             const kullanilan = new Set<string>();
             const satir = (s: SekmeTanimi) => {
               kullanilan.add(s.anahtar);

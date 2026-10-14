@@ -188,6 +188,14 @@ export const listeUclari = {
   muayeneEpikrizImzala: (muayeneId: number) =>
     gonder<{ imzali: boolean }>(`/api/muayene/${muayeneId}/epikriz/imzala`, {}),
 
+  /** Hasta bandının ek bilgisi: kan grubu, kurum, aynı adlı başka hasta sayısı. */
+  muayeneBand: (muayeneId: number) =>
+    istek<{ kanGrubu?: string | null; kurum?: string; ayniAd?: number }>(`/api/muayene/${muayeneId}/band`),
+  /** Hastanın her tetkikinin son onaylı sonucu (sekmesiz muayenenin sağ sütunu). */
+  muayeneSonSonuclar: (muayeneId: number) =>
+    istek<{ kod: string; ad: string; deger: string; birim: string | null; bayrak: string | null;
+            panik: number | null; zaman: string }[]>(`/api/muayene/${muayeneId}/son-sonuclar`),
+
   /** KENDİME NOT (1098): oturumdaki hekimin bu hastaya özel notu - başkası görmez. */
   muayeneOzelNot: (muayeneId: number) =>
     istek<{ metin: string; degistirme: string | null }>(`/api/muayene/${muayeneId}/ozel-not`),

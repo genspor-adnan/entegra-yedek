@@ -33,6 +33,56 @@ public static partial class MuayeneUclari
 
     private static void OlcumGecmisiUclariniEkle(RouteGroupBuilder grup)
     {
+        // GET /api/muayene/{id}/band - hasta bandının liste satırında olmayan üç bilgisi
+        //   (sekmesiz düzen, mockup hasta_bandi): kan grubu, kurum, AYNI AD sayısı
+        //   (aynı ad soyadlı başka hasta - yanlış hasta hatasının en sık sebebi).
+        grup.MapGet("/{id:int}/band", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var satir = (await b.ListeAsync("""
+                select (select d.ad from public.kod_deger d join public.kod_liste l on l.id = d.liste_id
+                         where l.kod = 'taraf.kan_grubu' and d.dil = 0 and d.deger = th.kan_grubu) as "kanGrubu",
+                       coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), '') as kurum,
+                       (select count(*) from public.taraf o
+                         where o.hasta = 1 and o.id <> t.id and coalesce(t.ad, '') <> ''
+                           and lower(o.ad) = lower(t.ad) and lower(coalesce(o.soyad, '')) = lower(coalesce(t.soyad, '')))::int as "ayniAd"
+                  from public.muayene m
+                  join public.taraf t on t.id = m.taraf_id
+                  left join public.taraf_hasta th on th.id = t.id
+                  left join public.taraf k on k.id = th.kurum_id
+                 where m.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)).FirstOrDefault();
+            return Results.Ok(satir ?? new Dictionary<string, object?>());
+        });
+
+        // GET /api/muayene/{id}/son-sonuclar - hastanın her tetkikinin SON onaylı sonucu
+        //   (sekmesiz düzenin sağ sütunu, mockup v7). Panik ve bayraklılar önce.
+        grup.MapGet("/{id:int}/son-sonuclar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var satirlar = await b.ListeAsync("""
+                select * from (
+                  select distinct on (t.kod) t.kod, t.ad, ls.deger_metin as deger, ls.birim, ls.bayrak,
+                         ls.panik, coalesce(ls.olcum_zamani, ls.onay_zamani) as zaman
+                    from public.muayene m
+                    join public.lab_istem i on i.taraf_id = m.taraf_id and i.durum <> 9
+                    join public.lab_istem_satir s on s.istem_id = i.id
+                    join public.lab_tetkik t on t.id = s.tetkik_id
+                    join public.lab_sonuc ls on ls.istem_satir_id = s.id and ls.durum = 3
+                   where m.id = @p0
+                   order by t.kod, coalesce(ls.olcum_zamani, ls.onay_zamani) desc) x
+                 order by (x.panik = 1) desc, (coalesce(x.bayrak, '') not in ('', 'N')) desc, x.zaman desc
+                 limit 8
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(satirlar);
+        });
+
         // GET /api/muayene/{id}/olcum-gecmisi?vital=ta  |  ?tetkik=<lab_tetkik.kod>
         grup.MapGet("/{id:int}/olcum-gecmisi", async (
             int id, string? vital, string? tetkik, BaglamCozucu cozucu, VeriKaynagi veri,

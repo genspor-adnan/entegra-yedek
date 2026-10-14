@@ -35,7 +35,7 @@ export interface OzetEylemleri {
   epikrizAc?(): void;
 }
 
-export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler, epikrizDurum, epikrizGit }: {
+export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler, epikrizDurum, epikrizGit, solMenude }: {
   baglam: EkSekmeBaglami;
   muayeneId: number;
   sekme: SekmeVerisi | null;
@@ -46,6 +46,8 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
   epikrizDurum?: 'taslak' | 'imzali' | null;
   /** Artınca Epikriz sekmesine geçilir (sekme bir sonraki çizimde var olur). */
   epikrizGit?: number;
+  /** SEKMESİZ DÜZEN: tamamlama kontrolü ve işlemler sol menüde - burada çizilmez. */
+  solMenude?: boolean;
 }) {
   const [sonuc, setSonuc] = useState<{ istemler: Satir[]; sonuclar: Satir[]; radyoloji: Satir[] } | null>(null);
   /** Fizik muayene metni: KAYDEDILMIS bulgu satirlarindan, sunucuda derlenir
@@ -230,7 +232,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
         </div>
 
         <div className="moz-sag">
-          <div className="kagrup">
+          {!solMenude && <div className="kagrup">
             <h6 className="moz-bas">{c('Tamamlama kontrolü')}
               <span className="moz-sp not">{kontrol === null ? '…'
                 : eksikSay === 0 ? c('hazır') : `${eksikSay} ${c('eksik')}`}</span></h6>
@@ -255,12 +257,12 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
                 </li>
               ))}
             </ul>
-          </div>
+          </div>}
 
           {/* İŞLEMLER (kullanıcı 14.10.2026, mockup muayene_karti_v7): sekmesiz düzendeki
               sol menünün alt grubu - sekmeli kartta tamamlama kontrolünün altında. Kartta
               sekmesi olan madde O SEKMEYE götürür (içerik ikinci yerde kurulmaz). */}
-          <div className="kagrup">
+          {!solMenude && <div className="kagrup">
             <h6 className="moz-bas">{c('İşlemler')}</h6>
             <ul className="moz-liste">
               {islemler.map(i => (
@@ -270,7 +272,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
                 </li>
               ))}
             </ul>
-          </div>
+          </div>}
 
           <div className="kagrup">
             <h6 className="moz-bas">{c('Bekleyen istemler')}</h6>
