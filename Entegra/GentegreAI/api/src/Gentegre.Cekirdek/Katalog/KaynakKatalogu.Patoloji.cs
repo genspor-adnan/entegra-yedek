@@ -71,7 +71,11 @@ public static partial class KaynakKatalogu
             new("ekOnayBekleyen", "(select count(*) from public.pat_ek_inceleme e where e.vaka_id = v.id and e.onay = 1)",
                 "sayi", "Onay Bekleyen Ek İnceleme", Varsayilan: false),
             new("gonderimNo", "coalesce(g.gonderim_no, '')", "metin", "Gönderim", Hizalama: "orta", Genislik: 120, Varsayilan: false),
-            new("durumAdi", PatVakaDurumSql, "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 170, Filtrelenebilir: false),
+            // BAŞVURU KAPISI (1105): hekim istemi bankoda ücretlendirilip başvuru kaydedilene kadar çalışılmaz.
+            new("durumAdi", "case when v.serbest = 0 and v.durum not in (0, 90) then '⏳ Başvuru kaydı bekliyor' else " + PatVakaDurumSql + " end",
+                "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 190, Filtrelenebilir: false),
+            new("serbest", "v.serbest", "kod", "Çalışılabilir", Varsayilan: false),
+            new("basvuruNo", "coalesce((select bl.belge_no from public.belge bl where bl.id = v.basvuru_id), '')", "metin", "Başvuru (protokol)", Hizalama: "orta", Genislik: 120, Varsayilan: false),
             new("durum", "v.durum", "kod", "Durum Kodu", Varsayilan: false),
             new("onTani", "v.on_tani", "metin", "Ön Tanı", Genislik: 90, Varsayilan: false),
         });

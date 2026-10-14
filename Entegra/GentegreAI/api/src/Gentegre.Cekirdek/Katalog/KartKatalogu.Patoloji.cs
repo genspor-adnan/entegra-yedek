@@ -60,6 +60,8 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> PatRetDavranisKodlari = new()
         { ["1"] = "Ret · hekime bildirim", ["2"] = "Koşullu kabul", ["3"] = "Bekletilir · istem istenir" };
     private static readonly Dictionary<string, string> PatAktifKodlari = new() { ["1"] = "Aktif", ["0"] = "Pasif" };
+    private static readonly Dictionary<string, string> PatSerbestKodlari = new()
+        { ["1"] = "Çalışılabilir", ["0"] = "⏳ Başvuru kaydı bekliyor (banko)" };
     private static readonly Dictionary<string, string> PatEvetHayirKodlari = new() { ["1"] = "Evet", ["0"] = "Hayır" };
 
     private static KartTanimi PatolojiVakaKarti() => new(
@@ -88,6 +90,7 @@ public static partial class KartKatalogu
             new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "İstem"),
             new("istemYeri", "istem_yeri", "metin", EnFazlaUzunluk: 120, Baslik: "İstem Yeri (ameliyathane, endoskopi…)", Grup: "İstem"),
             new("oncelik", "oncelik", "kod", SabitKodlar: PatOncelikKodlari, Baslik: "Öncelik", Grup: "İstem"),
+            new("serbest", "serbest", "kod", Yazilabilir: false, SabitKodlar: PatSerbestKodlari, Baslik: "Başvuru Kapısı", Grup: "İstem"),
             new("istemZamani", "istem_zamani", "zaman", Yazilabilir: false, Baslik: "İstem Zamanı", Grup: "İstem"),
 
             // Labın patoloğu tanıyı buna göre koyar - ZORUNLU.

@@ -27,6 +27,9 @@ public static class PatolojiUclari
     public sealed record KuryeIstegi(string? Kurye);
     public sealed record TeslimIstegi(string? TeslimAlan);
 
+    /// <summary>Başvuru kapısı (1105): hekim istemi bankoda ücretlendirilip başvuru kaydedilmeden çalışılmaz.</summary>
+    private const string BankoBekliyor = "Vaka başvuru kaydı bekliyor: bankoda ücretlendirilip başvuru kaydedilmeden çalışılamaz.";
+
     private static string Kirp(string? s, int n) => (s ?? "").Trim() is var t && t.Length > n ? t[..n] : (s ?? "").Trim();
 
     public static void PatolojiUclariniEkle(this IEndpointRouteBuilder yol)
@@ -40,9 +43,10 @@ public static class PatolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("patoloji.vaka", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var v = await b.TekAsync("select durum, calisma_yeri, dis_lab_id, (select count(*) from public.pat_materyal m where m.vaka_id = v.id)::int from public.pat_vaka v where id = @p0",
-                null, [id], o => new { durum = o.GetInt16(0), yer = o.GetInt16(1), lab = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), kap = o.GetInt32(3) }, iptal)
+            var v = await b.TekAsync("select durum, calisma_yeri, dis_lab_id, (select count(*) from public.pat_materyal m where m.vaka_id = v.id)::int, serbest from public.pat_vaka v where id = @p0",
+                null, [id], o => new { durum = o.GetInt16(0), yer = o.GetInt16(1), lab = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), kap = o.GetInt32(3), serbest = o.GetInt16(4) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Vaka bulunamadı.");
+            if (v.serbest == 0) throw GentegreHatasi.IsKurali(BankoBekliyor);
             if (v.durum != 1) throw GentegreHatasi.IsKurali("Yalnız 'İstendi' durumundaki vaka hazırlanabilir.");
             if (v.kap == 0) throw GentegreHatasi.IsKurali("Vakada materyal (kap) yok - önce materyal ekleyin.");
             if (v.yer == 1 && v.lab is null) throw GentegreHatasi.IsKurali("Dış laboratuvar seçilmemiş.");
@@ -60,12 +64,14 @@ public static class PatolojiUclari
             if (g.Idler is not { Length: > 0 }) throw GentegreHatasi.Dogrulama("Vaka seçilmedi.");
             await using var b = await veri.AcAsync(iptal);
             var vakalar = await b.ListeAsync(
-                "select id, vaka_no, durum, calisma_yeri, dis_lab_id, gonderim_id from public.pat_vaka where id = any(@p0)",
+                "select id, vaka_no, durum, calisma_yeri, dis_lab_id, gonderim_id, serbest from public.pat_vaka where id = any(@p0)",
                 null, [g.Idler], o => new { id = o.GetInt32(0), no = o.GetString(1), durum = o.GetInt16(2), yer = o.GetInt16(3),
-                                            lab = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), paket = o.IsDBNull(5) ? (int?)null : o.GetInt32(5) }, iptal);
+                                            lab = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), paket = o.IsDBNull(5) ? (int?)null : o.GetInt32(5),
+                                            serbest = o.GetInt16(6) }, iptal);
             var eklenen = new List<string>(); var atlanan = new List<string>(); var paketler = new HashSet<string>();
             foreach (var v in vakalar)
             {
+                if (v.serbest == 0) { atlanan.Add($"{v.no} (başvuru kaydı bekliyor)"); continue; }
                 if (v.yer != 1 || v.lab is null) { atlanan.Add($"{v.no} (kurum içi / lab yok)"); continue; }
                 if (v.paket is not null) { atlanan.Add($"{v.no} (zaten pakette)"); continue; }
                 if (v.durum is not (1 or 2)) { atlanan.Add($"{v.no} (durum uygun değil)"); continue; }
@@ -112,8 +118,8 @@ public static class PatolojiUclari
             await using var b = await veri.AcAsync(iptal);
             var n = await b.CalistirAsync(
                 "update public.pat_vaka set durum = 4, lab_vaka_no = @p1, kabul_zamani = coalesce(kabul_zamani, now()), degistiren = @p2, degistirme_tarihi = now() " +
-                " where id = @p0 and calisma_yeri = 1 and durum in (2, 3)", null, [id, no, baglam.KullaniciId], iptal);
-            if (n == 0) throw GentegreHatasi.IsKurali("Lab kabulü yalnız hazırlanmış / gönderilmiş dış lab vakasında girilir.");
+                " where id = @p0 and calisma_yeri = 1 and durum in (2, 3) and serbest = 1", null, [id, no, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Lab kabulü yalnız başvurusu kaydedilmiş, hazırlanmış / gönderilmiş dış lab vakasında girilir.");
             await log.YazAsync(LogIslemi.Degistir, LogVaka, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Lab kabul etti", labVakaNo = no }, iptal: iptal);
             return Results.Ok(new { id, mesaj = $"Lab kabul etti · {no} - TAT başladı." });
         });
@@ -130,6 +136,22 @@ public static class PatolojiUclari
             if (n == 0) throw GentegreHatasi.IsKurali("Rapor aşamasına geçmiş vaka reddedilemez.");
             await log.YazAsync(LogIslemi.Degistir, LogVaka, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Reddedildi", g.RetNedeniId, g.Aciklama }, iptal: iptal);
             return Results.Ok(new { id, mesaj = "Vaka reddedildi - isteyen hekime bildirilmeli." });
+        });
+
+        // İPTAL: hekim istemden vazgeçti (muayeneden "🗑"). Yalnız hazırlanmamış, pakete
+        //   girmemiş vaka; başvuruya düşen ücret satırı bankoda ayrıca kaldırılır.
+        grup.MapPost("/vaka/{id:int}/iptal", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            if (!baglam.Yetkiler.Var("patoloji.vaka", Islem.Degistir) && !baglam.Yetkiler.Var("muayene", Islem.Degistir))
+                throw GentegreHatasi.Yasak();
+            await using var b = await veri.AcAsync(iptal);
+            var n = await b.CalistirAsync(
+                "update public.pat_vaka set durum = 0, degistiren = @p1, degistirme_tarihi = now() " +
+                " where id = @p0 and durum = 1 and gonderim_id is null", null, [id, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Hazırlanmış / gönderilmiş vaka iptal edilemez.");
+            await log.YazAsync(LogIslemi.Degistir, LogVaka, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "İptal" }, iptal: iptal);
+            return Results.Ok(new { id, mesaj = "Patoloji istemi iptal edildi." });
         });
 
         // GÖRDÜM: isteyen hekim raporu açtı / okudu. Raporsuz vaka "görülemez".

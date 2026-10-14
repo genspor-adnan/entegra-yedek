@@ -496,7 +496,12 @@ public static partial class MuayeneUclari
                                      /// <summary>Akılcı istem kararları (873).</summary>
                                      Servisler.LabServisi.AkilciKarar[]? Akilci = null,
                                      /// <summary>Göz görüntüleme (Tur 6, 974): goz.tetkik kodu ve göz (1 OD · 2 OS · 3 OU).</summary>
-                                     short? GozTetkik = null, short? Goz = null);
+                                     short? GozTetkik = null, short? Goz = null,
+                                     /// <summary>Patoloji (Tur 7, 1105): vaka türü, klinik bilgi, nerede, dış lab, materyaller (kaplar).</summary>
+                                     short? PatTur = null, string? KlinikBilgi = null, short? Nerede = null, int? DisLabId = null,
+                                     PatMateryalIstegi[]? Materyaller = null);
+    /// <summary>Patoloji istemindeki bir kap: materyal tipi + lokalizasyon.</summary>
+    public sealed record PatMateryalIstegi(int MateryalTipiId, string? Lokalizasyon);
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);

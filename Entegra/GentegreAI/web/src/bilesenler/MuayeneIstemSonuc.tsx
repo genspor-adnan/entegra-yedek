@@ -8,6 +8,8 @@ import { c } from '../dil/ceviri';
 import { BOLUM, ISTEM_DURUM } from './labKodlari';
 import { GOZ_SONUC, GOZ_TARAF, GOZ_TETKIK } from './goz/gozKodlari';
 import { OlcumGrafigi } from './OlcumGrafigi';
+import { PatolojiIstemModal } from './PatolojiIstemModal';
+import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
  * MUAYENE › İSTEM & SONUÇLAR (443; düzen: mockup muayene_karti_v2.html).
@@ -48,7 +50,7 @@ const sayiyaCevir = (v: unknown): number | null => {
 };
 
 /** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
-type Kalem = { tur: 'lab' | 'radyoloji' | 'goz'; id: number; ham: Satir; bagli: boolean; panik: boolean };
+type Kalem = { tur: 'lab' | 'radyoloji' | 'goz' | 'patoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
 
 export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   muayeneId: number;
@@ -60,11 +62,15 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   const git = useNavigate();
   const [veri, setVeri] = useState<{
     belgeId: number | null; istemler: Satir[]; sonuclar: Satir[];
-    kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[]; goz?: Satir[];
+    kulturler: Satir[]; vakalar: Satir[]; radyoloji: Satir[]; goz?: Satir[]; patoloji?: Satir[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   // Seçili istem: sağ panel bunu gösterir, kırmızı 🗑 bunu siler.
-  const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji' | 'goz'; id: number } | null>(null);
+  const [secili, setSecili] = useState<{ tur: Kalem['tur']; id: number } | null>(null);
+  /** Patoloji istem penceresi (1105) - modül açıksa. */
+  const [patolojiAcik, setPatolojiAcik] = useState(false);
+  const { kullanici } = useOturum();
+  const patolojiModulu = (kullanici?.moduller ?? []).includes('patoloji');
   /** Geçmiş grafiği açık tetkik kodu (mockup v7). */
   const [grafikKod, setGrafikKod] = useState<string | null>(null);
 
@@ -92,7 +98,11 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
     const goz = (veri.goz ?? []).map(g => ({
       tur: 'goz' as const, id: Number(g.id), ham: g, bagli: Number(g.bagId ?? 0) > 0, panik: false,
     }));
-    return [...lab, ...rad, ...goz];
+    // PATOLOJİ (1105): aynı listede; rapor gelince sağ panelde tanı.
+    const pat = (veri.patoloji ?? []).map(v => ({
+      tur: 'patoloji' as const, id: Number(v.id), ham: v, bagli: Number(v.bagId ?? 0) > 0, panik: false,
+    }));
+    return [...lab, ...rad, ...goz, ...pat];
   }, [veri]);
 
   // VARSAYILAN SEÇİM: panikli istem varsa o (hekimin ilk görmesi gereken),
@@ -111,7 +121,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
       ? await api.labIstemSil(secili.id)
       : secili.tur === 'goz'
         ? await api.gozGoruntulemeIptal(secili.id)
-        : await api.radyolojiIstemSil(secili.id);
+        : secili.tur === 'patoloji'
+          ? await api.patolojiIptal(secili.id)
+          : await api.radyolojiIstemSil(secili.id);
     mesaj(y.mesaj);
     setSecili(null);
     await yukle();
@@ -130,6 +142,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   const arac = (
     <div className="muayene-arac" style={{ alignItems: 'center' }}>
       {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>{c('＋ İstem Sepeti')}</button>}
+      {patolojiModulu && <button type="button" className="d" onClick={() => setPatolojiAcik(true)}>🔬 {c('Patoloji İstemi')}</button>}
+      {patolojiAcik && <PatolojiIstemModal muayeneId={muayeneId} onKapat={() => setPatolojiAcik(false)}
+                         onKaydedildi={() => { setPatolojiAcik(false); void yukle(); onDegisti?.() }} />}
       <button type="button" className="d sil" title={c('Seçili istemi sil')}
         disabled={!secili} onClick={() => void sil()}>🗑</button>
       <span className="not" style={{ marginLeft: 6 }}>
@@ -204,6 +219,19 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
         </tr>
       );
     }
+    if (k.tur === 'patoloji') {
+      const v = k.ham;
+      const pd = Number(v.durum ?? 1);
+      return (
+        <tr key={anahtar} {...ortak}>
+          <td>{c('Patoloji')}</td>
+          <td className="isn-ad">{String(v.materyal ?? '') || String(v.vakaNo ?? '')} <span className="not">· {String(v.vakaNo ?? '')}</span></td>
+          <td className="hiza-orta">—</td>
+          <td className="hiza-orta">{v.istemZamani ? tarihSaat(v.istemZamani) : '—'}</td>
+          <td className="hiza-orta"><span className={`rozet ${pd >= 11 ? 'olumlu' : pd === 0 || pd === 90 ? 'gri' : 'uyari'}`}>{c(patolojiDurumAdi(v))}</span></td>
+        </tr>
+      );
+    }
     const r = k.ham;
     const durum = Number(r.durum ?? 0);
     return (
@@ -269,6 +297,8 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
                 onGordu={gordu} onGrafik={setGrafikKod} />
             : secKalem.tur === 'goz'
               ? <GozGoruntuPaneli g={secKalem.ham} onGordu={gordu} onAc={() => git(`/goz-goruntuleme/${secKalem.id}`)} />
+            : secKalem.tur === 'patoloji'
+              ? <PatolojiPaneli v={secKalem.ham} onGordu={gordu} onAc={() => git(`/patoloji-vaka/${secKalem.id}`)} />
               : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
         </div>
       </div>
@@ -491,6 +521,49 @@ function GozGoruntuPaneli({ g, onGordu, onAc }: { g: Satir; onGordu: (bagId: num
           </>
         )}
         {d === 2 && <div className="not">{c('Çekildi; hekim değerlendirmesi bekleniyor.')}</div>}
+      </div>
+    </div>
+  );
+}
+
+/** Patoloji vakasının muayenedeki durum adı (1105): başvuru kapısı önce. */
+function patolojiDurumAdi(v: Satir): string {
+  const d = Number(v.durum ?? 1);
+  if (d === 0) return 'İptal';
+  if (d === 90) return 'Reddedildi';
+  if (d === 12) return 'Hekim gördü';
+  if (d === 11) return 'Rapor geldi';
+  if (Number(v.serbest ?? 1) === 0) return 'Başvuru kaydı bekliyor';
+  if (d === 1) return 'İstendi';
+  if (d === 2) return 'Hazırlandı';
+  if (d === 3) return 'Laba gönderildi';
+  return Number(v.calismaYeri ?? 1) === 2 ? 'Patolojide çalışılıyor' : 'Labda çalışılıyor';
+}
+
+function PatolojiPaneli({ v, onGordu, onAc }: { v: Satir; onGordu: (bagId: number) => void; onAc: () => void }) {
+  const bagId = Number(v.bagId ?? 0);
+  const d = Number(v.durum ?? 1);
+  const tani = String(v.tani ?? '');
+  return (
+    <div className="kagrup">
+      <h6>
+        <b>🔬 {String(v.vakaNo ?? '')}</b>
+        <span className={`rozet ${d >= 11 ? 'olumlu' : d === 0 || d === 90 ? 'gri' : 'uyari'}`}>{c(patolojiDurumAdi(v))}</span>
+        <span className="not">{Number(v.calismaYeri ?? 1) === 2 ? c('Kurum içi') : String(v.disLab ?? '')}
+          {v.raporZamani ? ` · ${c('rapor')} ${tarihSaat(v.raporZamani)}` : ''}</span>
+        <span style={{ marginLeft: 'auto' }} />
+        <button className="d" onClick={onAc}>{c('📄 Vakayı aç')}</button>
+        {bagId > 0 && d >= 11 && (v.hekimGordu
+          ? <span className="rozet olumlu">{c('Görüldü')} · {tarihSaat(v.hekimGordu)}</span>
+          : <button className="d bir" onClick={() => onGordu(bagId)}>{c('👁 Gördüm')}</button>)}
+      </h6>
+      <div className="ic">
+        <div><span className="not">{c('Materyal')}:</span> {String(v.materyal ?? '') || '—'}</div>
+        {Number(v.serbest ?? 1) === 0 && d === 1 &&
+          <div className="not">{c('Bankoda ücretlendirilip başvuru kaydedilince patolojide çalışılır.')}</div>}
+        {tani
+          ? <div style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}><span className="not">{c('Tanı')}:</span> <b>{tani}</b></div>
+          : d < 11 && <div className="not" style={{ marginTop: 6 }}>{c('Rapor henüz gelmedi.')}</div>}
       </div>
     </div>
   );

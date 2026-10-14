@@ -191,7 +191,10 @@ export const uretimUclari = {
                                                /** Akılcı istem kararları (873). */
                                                akilci?: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[];
                                                /** Göz görüntüleme (tur 6, 974): goz.tetkik kodu + göz (1 OD · 2 OS · 3 OU). */
-                                               gozTetkik?: number; goz?: number }) =>
+                                               gozTetkik?: number; goz?: number;
+                                               /** Patoloji (tur 7, 1105): vaka türü, klinik bilgi, nerede, dış lab, kaplar. */
+                                               patTur?: number; klinikBilgi?: string; nerede?: number; disLabId?: number;
+                                               materyaller?: { materyalTipiId: number; lokalizasyon?: string }[] }) =>
     gonder<{ istemId: number; hedefTablo: string; hedefId: number | null; mesaj: string }>(
       `/api/muayene/${muayeneId}/istem`, istek),
 

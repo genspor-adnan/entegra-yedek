@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (565 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (567 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -60,7 +60,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_basvuru_hekim_dis_mi` | `578_basvuru_hekim_kaynagi.sql` | — |
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
-| `fn_basvuru_istem_serbest_uygula` | `974_goz_goruntuleme_istem.sql` | 919_istem_bazli_serbest.sql, 925_basvuru_istem_serbest_panel.sql |
+| `fn_basvuru_istem_serbest_uygula` | `1105_patoloji_basvuru_kapisi.sql` | 919_istem_bazli_serbest.sql, 925_basvuru_istem_serbest_panel.sql, 974_goz_goruntuleme_istem.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
 | `fn_belge_cikis_mi` | `1084_aktarim_belge.sql` | — |
 | `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
@@ -364,6 +364,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_pat_no` | `1104_patoloji.sql` | — |
+| `fn_patoloji_sonuc_durumu` | `1105_patoloji_basvuru_kapisi.sql` | — |
 | `fn_personel_kadro` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_gunluk` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_uygula` | `843_kadro_ana_rol.sql` | 840_personel_hareket.sql, 841_kadro_bolum_gorev_senkron.sql |
@@ -514,6 +515,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_masraf_toplam` | `766_masraf_satir_kilit_duzeltmesi.sql` | 764_masraf_beyani.sql |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
+| `tg_muayene_istem_patoloji` | `1105_patoloji_basvuru_kapisi.sql` | — |
 | `tg_muayene_istem_radyoloji` | `418_muayene_istem_bagi.sql` | — |
 | `tg_muayene_rapor_bitis` | `464_muayene_rapor_mockup.sql` | — |
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |

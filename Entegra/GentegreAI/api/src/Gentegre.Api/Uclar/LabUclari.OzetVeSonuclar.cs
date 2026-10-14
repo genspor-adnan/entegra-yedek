@@ -296,8 +296,30 @@ public static partial class LabUclari
                  order by g.id desc
                 """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // PATOLOJİ (1105): aynı sekmede - vaka, materyal, nerede, durum, son onaylı raporun tanısı.
+            var patoloji = await veri.ListeAsync("""
+                select v.id, v.vaka_no as "vakaNo", v.durum, v.serbest, v.calisma_yeri as "calismaYeri",
+                       coalesce(d.ad, '') as "disLab", v.istem_zamani as "istemZamani", v.rapor_zamani as "raporZamani",
+                       coalesce((select string_agg(coalesce(t.ad, '') || case when m.lokalizasyon <> '' then ' · ' || m.lokalizasyon else '' end,
+                                                   ', ' order by m.harf)
+                                   from public.pat_materyal m left join public.pat_materyal_tipi t on t.id = m.materyal_tipi_id
+                                  where m.vaka_id = v.id), '') as materyal,
+                       coalesce((select r.tani from public.pat_rapor r where r.vaka_id = v.id and r.durum = 3
+                                  order by r.surum desc, r.id desc limit 1), '') as tani,
+                       (select mi.id from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id limit 1) as "bagId",
+                       (select mi.hekim_gordu from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id limit 1) as "hekimGordu"
+                  from public.pat_vaka v
+                  left join public.lab_dis_lab d on d.id = v.dis_lab_id
+                 where (v.basvuru_id = @p1 and @p1 is not null)
+                    or exists (select 1 from public.muayene_istem mi
+                                where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id)
+                 order by v.id desc
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
             return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId, baglar,
-                                    istemler, sonuclar, kulturler, vakalar, radyoloji, goz,
+                                    istemler, sonuclar, kulturler, vakalar, radyoloji, goz, patoloji,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

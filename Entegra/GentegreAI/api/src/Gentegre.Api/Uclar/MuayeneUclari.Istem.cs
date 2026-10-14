@@ -131,6 +131,69 @@ public static partial class MuayeneUclari
                 hedefTablo = "goz_goruntuleme";
             }
 
+            // PATOLOJİ (1105): lab / radyoloji / göz ile AYNI kapı - vaka muayenenin
+            //   başvurusuna bağlanır, poliklinikte serbest = 0 (banko ücretlendirip
+            //   başvuruyu kaydedince serbest). Klinik bilgi ve ön tanı ZORUNLU: dış lab
+            //   hastayı görmez, elindeki tek bilgi istem formudur. Her materyal bir kap;
+            //   ücret hizmeti ve "nerede" materyal tipinden gelir.
+            if (istek.Tur == 7)
+            {
+                if (m.BelgeId is not > 0)
+                    throw GentegreHatasi.IsKurali("Patoloji istemi için muayenenin başvurusu olmalı.");
+                var klinik = (istek.KlinikBilgi ?? istek.Aciklama ?? "").Trim();
+                if (klinik.Length == 0)
+                    throw GentegreHatasi.Dogrulama("Klinik bilgi zorunlu (lab tanıyı buna göre koyar).",
+                        [new("klinikBilgi", "Klinik bilgi yazın.")]);
+                if (m.OnTani.Length == 0)
+                    throw GentegreHatasi.IsKurali("Patoloji istemi için muayenede ön tanı (ICD-10) girilmeli.");
+                var kaplar = istek.Materyaller ?? [];
+                if (kaplar.Length == 0)
+                    throw GentegreHatasi.Dogrulama("En az bir materyal (kap) girilmeli.",
+                        [new("materyaller", "Materyal ekleyin.")]);
+                var tipIdler = kaplar.Select(k => k.MateryalTipiId).Distinct().ToArray();
+                var tipler = await baglanti.ListeAsync(
+                    "select id, hizmet_id, calisma_yeri, dis_lab_id, vaka_turu from public.pat_materyal_tipi where id = any(@p0) and aktif = 1",
+                    islem, [tipIdler],
+                    o => new { id = o.GetInt32(0), hizmet = o.IsDBNull(1) ? (int?)null : o.GetInt32(1), yer = o.GetInt16(2),
+                               lab = o.IsDBNull(3) ? (int?)null : o.GetInt32(3), tur = o.GetInt16(4) }, iptal);
+                if (tipler.Count != tipIdler.Length)
+                    throw GentegreHatasi.Dogrulama("Geçersiz ya da pasif materyal tipi.", [new("materyaller", "Materyal tipini kontrol edin.")]);
+                var ilk = tipler.First(t => t.id == kaplar[0].MateryalTipiId);
+                short nerede = istek.Nerede is 1 or 2 ? istek.Nerede.Value : ilk.yer;
+                int? disLab = nerede == 1
+                    ? istek.DisLabId ?? ilk.lab ?? await baglanti.TekDegerAsync<int?>(
+                          "select id from public.lab_dis_lab where patoloji = 1 and durum = 0 order by id limit 1", islem, [], iptal)
+                    : null;
+                if (nerede == 1 && disLab is null)
+                    throw GentegreHatasi.IsKurali("Patoloji yapan dış laboratuvar tanımlı değil (Patoloji › Ayarlar › Dış Laboratuvar).");
+                hedefId = await baglanti.TekDegerAsync<int>("""
+                    insert into public.pat_vaka
+                        (sube_id, hasta_id, basvuru_id, isteyen_id, tur, klinik_bilgi, on_tani, calisma_yeri, dis_lab_id,
+                         oncelik, istem_yeri, serbest, ekleyen)
+                    values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, 'Poliklinik (muayene)',
+                            public.fn_istem_serbest((select basvuru_turu from public.belge_basvuru where id = @p2)::smallint,
+                                                    @p9::smallint, 1::smallint),
+                            @p10)
+                    returning id
+                    """, islem,
+                    [m.SubeId, m.HastaId, m.BelgeId, m.HekimId, (short)(istek.PatTur is >= 1 and <= 4 ? istek.PatTur.Value : ilk.tur),
+                     klinik, m.OnTani, nerede, disLab, (short)(istek.Aciliyet is 2 ? 2 : 1), baglam.KullaniciId], iptal);
+                for (var i = 0; i < kaplar.Length; i++)
+                {
+                    var t = tipler.First(x => x.id == kaplar[i].MateryalTipiId);
+                    await baglanti.CalistirAsync("""
+                        insert into public.pat_materyal (vaka_id, harf, materyal_tipi_id, lokalizasyon, hizmet_id, lab_fiyat, sube_id, ekleyen)
+                        values (@p0, @p1, @p2, @p3, @p4,
+                                (select k.birim_fiyat from public.pat_dis_kod k
+                                  where k.dis_lab_id = @p5 and k.materyal_tipi_id = @p2 and k.durum = 0 limit 1),
+                                @p6, @p7)
+                        """, islem,
+                        [hedefId, ((char)('A' + i % 26)).ToString(), t.id, (kaplar[i].Lokalizasyon ?? "").Trim(),
+                         t.hizmet, disLab, m.SubeId, baglam.KullaniciId], iptal);
+                }
+                hedefTablo = "pat_vaka";
+            }
+
             if (istek.Tur == 1)
             {
                 if (m.BelgeId is not > 0)
