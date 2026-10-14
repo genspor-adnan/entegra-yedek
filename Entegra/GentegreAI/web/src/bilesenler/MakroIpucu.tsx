@@ -38,7 +38,8 @@ export function MakroIpucu({ alan, makrolar, yaz }: {
   };
 
   return (
-    <span className="makro-ipucu">
+    // "tıkla ya da yaz + boşluk" yazısı YOK (kullanıcı 14.10.2026): bilgi ipucunda (title).
+    <span className="makro-ipucu" title={c('Makro: tıklayın ya da kısayolu yazıp boşluk basın')}>
       ⌨
       {liste.map(m => (
         <button key={`${m.kisayol}-${m.alan}`} type="button" disabled={!yaz}
@@ -46,7 +47,6 @@ export function MakroIpucu({ alan, makrolar, yaz }: {
                 onMouseDown={e => e.preventDefault()}
                 onClick={e => tikla(e, m)}>{m.kisayol}</button>
       ))}
-      <small>{c('tıkla ya da yaz + boşluk')}</small>
     </span>
   );
 }
