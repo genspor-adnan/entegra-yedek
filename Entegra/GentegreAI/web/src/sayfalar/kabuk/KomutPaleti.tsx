@@ -84,6 +84,8 @@ interface Props {
   onKapat(): void;
   onAc(): void;
   git(yol: string): void;
+  /** Menüde olmayan ama aranabilen ekranlar (1103: gösterge panelleri, "gösterge" yazınca). */
+  ekEkranlar?: PaletEkrani[];
 }
 
 type Oge =
@@ -91,7 +93,7 @@ type Oge =
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string };
 
-export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git }: Props) {
+export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git, ekEkranlar }: Props) {
   const [arama, setArama] = useState('');
   const [secili, setSecili] = useState(0);
   const kutu = useRef<HTMLInputElement>(null);
@@ -115,7 +117,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   //   onu yeni sorgunun cevabı sanıyor.
   useEffect(() => { if (acik) { setArama(''); setSecili(0) } }, [acik]);
 
-  const ekranlar = useMemo(() => paletEkranlari(satirlar), [satirlar]);
+  const ekranlar = useMemo(() => [...paletEkranlari(satirlar), ...(ekEkranlar ?? [])], [satirlar, ekEkranlar]);
 
   const gorunen = useMemo<Oge[]>(() => {
     const q = arama.trim();

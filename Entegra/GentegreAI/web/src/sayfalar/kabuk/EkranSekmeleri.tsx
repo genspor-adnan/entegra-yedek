@@ -23,17 +23,21 @@ const BASLANGIC = '/panel';
 
 interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location; erisim: number }
 
-function sekmeBul(satirlar: MenuSatiri[], konum: Location) {
+function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, { ad: string; ikon: string }>) {
   const yol = menuYolu(konum.pathname, konum.state);
   if (yol === '/' || yolEslesir(yol, BASLANGIC)) return { anahtar: BASLANGIC, baslik: 'Başlangıç', ikon: '🏠' };
+  // Menüde olmayan bilinen ekran (gösterge paneli) kendi adıyla.
+  if (ek?.[konum.pathname]) return { anahtar: konum.pathname, baslik: ek[konum.pathname].ad, ikon: ek[konum.pathname].ikon };
   const hepsi = satirlar.flatMap(s => (s.tur === 'duz' ? [s.m] : s.alt));
   const m = hepsi.filter(x => yolEslesir(yol, x.yol.split('?')[0])).sort((a, b) => b.yol.length - a.yol.length)[0];
   return m ? { anahtar: m.yol.split('?')[0], baslik: m.ad, ikon: m.ic }
            : { anahtar: konum.pathname, baslik: konum.pathname.replace(/^\//, ''), ikon: '▫' };
 }
 
-export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git }: {
+export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar }: {
   satirlar: MenuSatiri[];
+  /** Menüde olmayan ekranların sekme başlığı (yol -> ad, ikon). */
+  ekBasliklar?: Record<string, { ad: string; ikon: string }>;
   konum: Location;
   navTuru: NavigationType;
   outlet: React.ReactNode;
@@ -44,7 +48,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git }: {
   /** Her sekmenin SON çizilen ekranı (gizliyken bu çizilir - durum korunur). */
   const ekranlar = useRef(new Map<string, React.ReactNode>());
 
-  const simdiki = sekmeBul(satirlar, konum);
+  const simdiki = sekmeBul(satirlar, konum, ekBasliklar);
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.

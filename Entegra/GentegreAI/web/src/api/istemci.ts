@@ -28,6 +28,7 @@ import { kurumIcmalUclari } from './uclar/kurumIcmal';
 import { vezneIcmalUclari } from './uclar/vezneIcmal';
 import { medulaMutabakatUclari } from './uclar/medulaMutabakat';
 import { aktarimProfilUclari, aktarimUclari } from './uclar/aktarim';
+import { gostergeUclari } from './uclar/gosterge';
 import { alacakYaslandirmaUclari } from './uclar/alacakYaslandirma';
 import { hastaBorcUclari } from './uclar/hastaBorc';
 import { hekimPerformansUclari } from './uclar/hekimPerformans';
@@ -135,6 +136,7 @@ export const api = {
   ...medulaMutabakatUclari,
   ...aktarimUclari,
   ...aktarimProfilUclari,
+  ...gostergeUclari,
   ...alacakYaslandirmaUclari,
   ...hastaBorcUclari,
   ...hekimPerformansUclari,

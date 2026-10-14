@@ -413,6 +413,7 @@ uygulama.CagriUclariniEkle();
 // DELPHI AKTARIMI (1086): ajanın durum + paket uçları, makine anahtarıyla.
 uygulama.AktarimUclariniEkle();
 uygulama.AktarimYonetimUclariniEkle();   // 1090 Aktarım Durumu ekranı
+uygulama.GostergeUclariniEkle();   // 1103 gösterge panelleri + rol başlangıcı
 uygulama.AktarimProfilUclariniEkle();   // GenProfil › Veri Kaynağı (adım 6d)
 uygulama.BankoOturumUclariniEkle();
 uygulama.DemirbasZimmetUclariniEkle();   // 1007 Zimmet / Hareketler

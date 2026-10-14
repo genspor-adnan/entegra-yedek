@@ -6452,6 +6452,26 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .ana-sekmeli > .es-govde { flex: 1; min-height: 0; display: flex; flex-direction: column }
 .ana-sekmeli > .ekran-sekmeleri { margin: 0 }
 
+/* BAŞLANGIÇ (1103): büyük arama + rolün kutucukları; ilk kutucuk gösterge panelleri. */
+.bsl-ara { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 980px; height: 42px; padding: 0 14px;
+  border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz); color: var(--soluk); font: inherit; font-size: 13.5px;
+  cursor: text; margin-bottom: 18px; text-align: left }
+.bsl-ara kbd { margin-left: auto; font-family: Consolas, monospace; font-size: 10.5px; border: 1px solid var(--cizgi); border-radius: 3px; padding: 0 5px }
+.bsl-bolum { font-size: 10.5px; font-weight: 700; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px; margin: 0 0 8px }
+.bsl-bolum .sonuk { text-transform: none; letter-spacing: 0; font-weight: 400 }
+.bsl-kutular { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px }
+.bsl-kutu { border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; background: var(--yuz) }
+.bsl-kb { display: flex; align-items: center; gap: 7px; padding: 8px 12px; font-weight: 700; color: var(--yazi2);
+  background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+.bsl-kb .rozet { margin-left: auto }
+.bsl-kutu a { display: flex; justify-content: space-between; gap: 8px; padding: 6px 12px; color: var(--yazi); cursor: pointer; text-decoration: none }
+.bsl-kutu a:hover { background: var(--satirust); color: var(--vurgu) }
+.bsl-kutu a .s { color: var(--soluk); font-size: 10.5px; white-space: nowrap }
+.bsl-kutu a .s.k { color: var(--hata); font-weight: 700 }
+.bsl-gp { border-color: var(--vurgu) }
+.gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
+.gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

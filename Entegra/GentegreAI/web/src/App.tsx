@@ -11,7 +11,8 @@ import { PortalKabuk } from './sayfalar/portal/PortalKabuk';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { EFaturaMesajKatmani } from './bilesenler/efatura/EFaturaMesajKatmani';
-import { Panel } from './sayfalar/Panel';
+import { Baslangic } from './sayfalar/Baslangic';
+import { GostergePaneli } from './sayfalar/GostergePaneli';
 import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
 import { calismaOku } from './bilesenler/calismaTercihi';
 import { useOtomatikTamamlamaKapali } from './bilesenler/otomatikTamamlama';
@@ -240,7 +241,10 @@ function Yollar() {
             (Hasta) dusuyordu, kullanici nerede oldugunu anlamiyordu.
             YETKIYE BAGLI (241): menude gizlemek yetmiyordu, rota acik kalinca
             giris sonrasi yine ana sayfa aciliyordu (kullanici). */}
-        {yetki('panel') && <Route path="/panel" element={<Panel />} />}
+        {/* BAŞLANGIÇ (1103): rolün kutucukları + yetkili gösterge panelleri. Önceki Ana
+            Sayfa paneli "Genel" gösterge paneli olarak /gosterge/genel'de. */}
+        {yetki('panel') && <Route path="/panel" element={<Baslangic />} />}
+        <Route path="/gosterge/:kod" element={<GostergePaneli />} />
 
         {/* İletişim & AI (341): menude Ana Sayfa'nin hemen altinda, her iki
             urun modunda. Ekranlar simdilik kapsam sayfasi. */}

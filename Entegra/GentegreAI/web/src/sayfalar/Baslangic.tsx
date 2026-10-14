@@ -1,0 +1,110 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../api/istemci';
+import type { BaslangicKutucugu, GostergePaneliOzet } from '../api/uclar/gosterge';
+import { gostergeDegeri } from '../bilesenler/GostergeIcerik';
+import { c } from '../dil/ceviri';
+import { useOturum } from '../kimlik/OturumBaglami';
+import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/menuAgaci';
+import { LISTELER } from './Liste';
+
+/** Başlangıç'taki büyük arama kutusu Kabuk'un komut paletini açar. */
+export const PALET_AC_OLAYI = 'gentegre-palet-ac';
+
+function selam(): string {
+  const s = new Date().getHours();
+  if (s < 6) return c('İyi geceler');
+  if (s < 12) return c('Günaydın');
+  if (s < 18) return c('İyi çalışmalar');
+  return c('İyi akşamlar');
+}
+
+/** Öneri (rolün elle düzeni yoksa): menüden en fazla bu kadar kutucuk. */
+const ONERI_SINIRI = 12;
+
+/**
+ * BAŞLANGIÇ SEKMESİ (ana ekran v3 + mockup Ekranlar/Dashboard/gosterge_panelleri.html).
+ *
+ *  - İLK KUTUCUK = rolün yetkili olduğu gösterge panelleri (ayrı bölüm yok); satırda
+ *    panelin ilk göstergesi.
+ *  - Sonra ROLÜN kutucukları: kurum rol başına ELLE düzenler (rol_baslangic). Düzen
+ *    yoksa rolün yetkili menüsünden öneri çizilir (grup başına bir kutucuk).
+ *  - Satırdaki sayı gösterge kataloğundan (kutucuk düzeninde seçilen gösterge).
+ * Önceki Ana Sayfa paneli "Genel" gösterge paneli olarak açılır (/gosterge/genel).
+ */
+export function Baslangic() {
+  const git = useNavigate();
+  const { kullanici, yetki } = useOturum();
+  const [paneller, setPaneller] = useState<GostergePaneliOzet[] | null>(null);
+  const [rolKutucuklari, setRolKutucuklari] = useState<BaslangicKutucugu[] | null>(null);
+
+  useEffect(() => {
+    void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
+    void api.baslangic().then(setRolKutucuklari).catch(() => setRolKutucuklari([]));
+  }, [kullanici?.id, kullanici?.subeId]);
+
+  // ÖNERİ: rolün yetkili menüsü (sol menüyle aynı süzgeç), grup başına bir kutucuk.
+  const oneri = useMemo<BaslangicKutucugu[]>(() => {
+    const satirlar = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
+    const kutular: BaslangicKutucugu[] = [];
+    const duzler: BaslangicKutucugu['satirlar'] = [];
+    for (const s of satirlar) {
+      if (s.tur === 'duz') { if (s.m.yol !== '/panel') duzler.push({ yol: s.m.yol, ad: s.m.ad }); continue }
+      kutular.push({ ad: s.ad, ikon: s.ikon ?? GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁',
+                     satirlar: s.alt.slice(0, 6).map(m => ({ yol: m.yol, ad: m.ad })) });
+    }
+    if (duzler.length) kutular.push({ ad: c('Diğer'), ikon: '📁', satirlar: duzler.slice(0, 6) });
+    return kutular.slice(0, ONERI_SINIRI);
+  }, [yetki, kullanici?.urunModu, kullanici?.moduller]);
+
+  const elle = (rolKutucuklari?.length ?? 0) > 0;
+  const kutucuklar = elle ? rolKutucuklari! : oneri;
+
+  return (
+    <>
+      <div className="sayfabas">
+        <div className="basrow">
+          <h1>{selam()}, {kullanici?.ad ?? ''}</h1>
+          <span className="yol">
+            {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            {kullanici?.rolAdi ? ` · ${kullanici.rolAdi}` : ''}
+          </span>
+        </div>
+      </div>
+      <div className="sahne bsl">
+        <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
+          🔍 <span>{c('Ne açmak istiyorsunuz? (ekran, hasta, gösterge paneli…)')}</span><kbd>Ctrl K</kbd>
+        </button>
+
+        <div className="bsl-bolum">{c('Ekranlarım')}
+          {!elle && rolKutucuklari !== null && <span className="sonuk"> · {c('rolünüz için önerilen düzen')}</span>}
+        </div>
+        <div className="bsl-kutular">
+          {(paneller?.length ?? 0) > 0 && (
+            <div className="bsl-kutu bsl-gp">
+              <div className="bsl-kb">📊 {c('Gösterge Panelleri')}<span className="rozet mavi">{paneller!.length}</span></div>
+              {paneller!.map(p => (
+                <a key={p.kod} onClick={() => git(`/gosterge/${p.kod}`)}>
+                  <span>{p.ikon} {c(p.ad)}</span>
+                  {p.ilk && <span className={`s ${p.ilk.vurgu === 'tehlike' ? 'k' : ''}`}>
+                    {gostergeDegeri(p.ilk)} · {c(p.ilk.baslik).toLocaleLowerCase('tr')}</span>}
+                </a>
+              ))}
+            </div>
+          )}
+          {kutucuklar.map((k, i) => (
+            <div key={i} className="bsl-kutu">
+              <div className="bsl-kb"><MenuIkon ic={k.ikon || '📁'} /> {c(k.ad)}</div>
+              {k.satirlar.map((s, j) => (
+                <a key={j} onClick={() => git(s.yol)}>
+                  <span>{c(s.ad)}</span>
+                  {s.deger && <span className={`s ${s.deger.vurgu === 'tehlike' ? 'k' : ''}`}>{gostergeDegeri(s.deger)}</span>}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}

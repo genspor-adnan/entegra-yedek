@@ -48,6 +48,8 @@ const UST_KOD: Record<string, string> = {
 /** Menude listesi olmayan ama yetkisi olan ekranlar (kod -> agac grubu). */
 const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa', 'kabuk.menu': 'Ana Sayfa' };   // 1102: sol menü
 const ANA_SAYFA = 'Ana Sayfa';
+/** GÖSTERGE PANELLERİ (1103): her panel `gosterge.<kod>` - menüde değil, matriste kendi başlığında. */
+const GOSTERGE = 'Gösterge Panelleri';
 
 interface Dugum {
   anahtar: string;
@@ -165,7 +167,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
    * açılıyordu. Kök ancak aktif menüde varsa (grup, bölge ya da Ana Sayfa)
    * oluşur; yoksa o yetki satırı çizilmez.
    */
-  const aktifBasliklar = new Set<string>([...grupSirasi, ...bolgeSirasi, ANA_SAYFA]);
+  const aktifBasliklar = new Set<string>([...grupSirasi, ...bolgeSirasi, ANA_SAYFA, GOSTERGE]);
 
   const kokBul = (ad: string, ic?: string): Dugum | null => {
     if (!aktifBasliklar.has(ad)) return null;
@@ -310,6 +312,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   kokler.sort((a, b) => sira(a) - sira(b));
   function sira(d: Dugum) {
     if (d.ad === ANA_SAYFA) return -1;      // en basta (kullanici)
+    if (d.ad === GOSTERGE) return -0.5;     // Ana Sayfa'nın hemen altında
     // Bölge ve grup aynı dizide sıralanır: bölgeli menüde kök düğümler
     //   bölgelerdir, bölgesiz gruplar menüde olduğu gibi onların arasında.
     const b = bolgeSirasi.indexOf(d.ad);

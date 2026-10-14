@@ -13,6 +13,8 @@ import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate, useNavigationType, useOutlet } from 'react-router-dom';
 import { useEkranSekmeleri } from './kabuk/EkranSekmeleri';
+import { PALET_AC_OLAYI } from './Baslangic';
+import type { GostergePaneliOzet } from '../api/uclar/gosterge';
 import { gorunumOku, GORUNUM_OLAYI } from '../bilesenler/gorunum';
 import { menuYolu, yolEslesir } from '../bilesenler/taleplerim/personelTalebi';
 import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu, BanaGelenlerPaneli } from '../bilesenler/taleplerim/TaleplerimPaneli';
@@ -164,7 +166,15 @@ export function Kabuk() {
   // EKRAN SEKMELERİ (ana ekran v3): tercih kapalıysa düz <Outlet/> - eski davranış.
   const outlet = useOutlet();
   const navTuru = useNavigationType();
-  const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git });
+  // GÖSTERGE PANELLERİ (1103): Ctrl+K'da "gösterge" ile ve sekme başlığında adıyla.
+  const [paneller, setPaneller] = useState<GostergePaneliOzet[]>([]);
+  useEffect(() => {
+    if (!kullanici?.id) return;
+    void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
+  }, [kullanici?.id, kullanici?.subeId]);
+  const panelEkranlari = useMemo(() => paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })), [paneller]);
+  const panelBasliklari = useMemo(() => Object.fromEntries(paneller.map(p => [`/gosterge/${p.kod}`, { ad: p.ad, ikon: p.ikon }])), [paneller]);
+  const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari });
   // KART PERDESİ SEKME ÇUBUĞUNUN ALTINDAN BAŞLAR: kart açıkken de sekmeler arasında
   //   geçilebilsin (gizli sekmenin kartı canlı kalır).
   useEffect(() => {
@@ -214,6 +224,12 @@ export function Kabuk() {
    * olmuyordu - kullanicinin gozunde dugme bozuktu.
    */
   const [paletAcik, setPaletAcik] = useState(false);
+  // Başlangıç'taki büyük arama kutusu paleti açar.
+  useEffect(() => {
+    const ac = () => setPaletAcik(true);
+    window.addEventListener(PALET_AC_OLAYI, ac);
+    return () => window.removeEventListener(PALET_AC_OLAYI, ac);
+  }, []);
 
   /** Bayraktan dil degistir - Kullanici Ayarlari'ndaki kutuyla ayni ucu cagirir. */
   async function dilSec(dil: number) {
@@ -415,7 +431,7 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={git} />
+                   git={git} ekEkranlar={panelEkranlari} />
 
       {/* YENI TALEP PENCERESI: panelden de sayfadan da yeniTalepAc() ile. */}
       <YeniTalepKatmani />
