@@ -214,7 +214,8 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
               onClick={() => sec(o)}
             >
               {/* Ekran mı komut mu: ok işareti "gider", şimşek "çalıştırır". */}
-              <span className="palet-tur">{o.tur === 'ekran' ? (o.ikon ?? (o.islem ? '＋' : '↗')) : '⚡'}</span>
+              <span className={`palet-tur${o.tur === 'ekran' && o.islem && !o.ikon ? ' palet-yeni' : ''}`}>
+                {o.tur === 'ekran' ? (o.ikon ?? (o.islem ? '＋' : '↗')) : '⚡'}</span>
               <span>{c(o.ad)}</span>
               <span className="grup">{o.grup}</span>
               {o.tur === 'komut' && o.kisayol && <span className="kisayol">{o.kisayol}</span>}

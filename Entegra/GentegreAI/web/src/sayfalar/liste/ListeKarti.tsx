@@ -1195,15 +1195,15 @@ export function ListeKarti({
         //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
         onBasvuruAc={onBasvuruAc}
-        onKapat={() => yeniSekmede ? ekranSekmesi!.kapat(tanim.kartYolu!) : git(sorgu.get('geri') ?? tanim.kartYolu!)}
+        onKapat={() => yeniSekmede ? ekranSekmesi!.kapat() : git(sorgu.get('geri') ?? tanim.kartYolu!)}
         // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
         onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={yeniId => {
-          // YENİ KAYIT KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, liste
-          //   sekmesine dönülür ve oradaki liste tazelenir (canlı sekme kendini bilmez).
+          // KART KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, KOMŞU sekmeye
+          //   dönülür (liste açık değilse açılmaz - kullanıcı); açık liste tazelenir.
           if (yeniSekmede) {
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
-            ekranSekmesi!.kapat(tanim.kartYolu!);
+            ekranSekmesi!.kapat();
             return;
           }
           setYenile(t => t + 1);

@@ -6478,6 +6478,11 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
   background: none !important; box-shadow: none !important; color: var(--yazi2) }
 .ekran-sekmeleri .es-sekme.es-ekle:hover { color: var(--mavi, #2563eb) }
 
+/* Palette yeni kayıt işlemi: yeşil, belirgin ＋. */
+.palet-tur.palet-yeni { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
+  border-radius: 3px; background: #16a34a; color: #fff; font-weight: 900; font-size: 14px; line-height: 1; opacity: 1;
+  margin-right: -4px }
+
 /* PALET BÖLÜMLERİ (mockup ana_ekran_sekmeli_v3): Son açılanlar / Ekranlar / İşlemler. */
 .palet-bolum { font-size: 11px; font-weight: bold; color: var(--yazi2); opacity: .75; text-transform: uppercase;
   letter-spacing: .4px; padding: 10px 12px 4px }
