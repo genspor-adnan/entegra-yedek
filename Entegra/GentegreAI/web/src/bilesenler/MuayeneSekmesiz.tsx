@@ -179,9 +179,9 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
   return (
     <>
       <div className="kanav-g bas smn-gorunum">
-        <div className={`kanav-o${gorunum === 'ozet' ? ' on' : ''}`} onClick={() => onGorunum ? onGorunum('ozet') : git('Özet')}>
+        <div className={`kanav-o smn-g${gorunum === 'ozet' ? ' on' : ''}`} onClick={() => onGorunum ? onGorunum('ozet') : git('Özet')}>
           <span className="kanav-d">≡</span><span>{c('Özet')}</span></div>
-        {onGorunum && <div className={`kanav-o${gorunum === 'detay' ? ' on' : ''}`} onClick={() => onGorunum('detay')}>
+        {onGorunum && <div className={`kanav-o smn-g${gorunum === 'detay' ? ' on' : ''}`} onClick={() => onGorunum('detay')}>
           <span className="kanav-d">☰</span><span>{c('Detay')}</span></div>}
       </div>
       <div className="kanav-g">

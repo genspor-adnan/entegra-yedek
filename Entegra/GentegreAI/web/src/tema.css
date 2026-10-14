@@ -6489,7 +6489,7 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 
 /* SEKMESİZ MUAYENE Özet / Detay görünüm düğmeleri yan yana. */
 .smn-gorunum { display: flex; gap: 2px }
-.smn-gorunum .kanav-o { flex: 1 }
+.smn-g { flex: 1 }
 
 /* BAŞLANGIÇ kutucuk satırlarında menü ikonu. */
 .bsl-kutu a .bsl-ad { display: inline-flex; align-items: center; gap: 6px }
