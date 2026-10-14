@@ -37,7 +37,7 @@ export interface AiRehberYaniti {
 export interface AiKontorOzet {
   kontor: { bakiye: number; cagriUcreti: number; uyariEsigi: number; modelAktif: boolean; gunlukSinir: number;
             kullaniciGunlukSinir: number; ozRehber: boolean; ozTani: boolean; ozTetkik: boolean; ozIlac: boolean;
-            otomatikEkPaket: string; bugunCagri: number; bugunKontor: number; buAy: number; gecenAy: number;
+            ozEpikriz?: boolean; otomatikEkPaket: string; bugunCagri: number; bugunKontor: number; buAy: number; gecenAy: number;
             basarisizAy: number };
   sureler: { ozellik: string; ortalamaMs: number }[];
   seri: { gun: string; ozellik: string; adet: number }[];
@@ -155,7 +155,8 @@ export const yapayZekaUclari = {
     istek<{ satirlar: { id: number; tarih: string; tur: number; aciklama: string; kontor: number; toplam: number;
                         durum: number; hata: string; faturaNo: string; odemeTarihi: string | null }[] }>('/api/ai/kontor/siparisler'),
   aiKontorAyar: (a: Partial<{ gunlukSinir: number; kullaniciGunlukSinir: number; uyariEsigi: number; modelAktif: boolean;
-                               ozRehber: boolean; ozTani: boolean; ozTetkik: boolean; ozIlac: boolean; otomatikEkPaket: string }>) =>
+                               ozRehber: boolean; ozTani: boolean; ozTetkik: boolean; ozIlac: boolean; ozEpikriz: boolean;
+                               otomatikEkPaket: string }>) =>
     gonder<{ mesaj: string }>('/api/ai/kontor/ayar', a, 'PUT'),
   /** Sipariş: tutar SUNUCUDA hesaplanır. Ödeme kuruluşu formunda ödenir (kart bu sunucuya gelmez). */
   aiKontorSiparis: (s: { tur: 'plan' | 'paket'; kod: string; donemAy?: number;

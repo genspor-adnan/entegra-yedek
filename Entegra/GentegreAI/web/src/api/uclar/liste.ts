@@ -185,6 +185,10 @@ export const listeUclari = {
             taslak: MuayeneEpikrizKaydi }>(`/api/muayene/${muayeneId}/epikriz`),
   muayeneEpikrizKaydet: (muayeneId: number, k: MuayeneEpikrizKaydi) =>
     gonder<{ id: number }>(`/api/muayene/${muayeneId}/epikriz`, k),
+  /** YZ ile düzenle (1101, kontörlü): yalnız dil; hasta adı maskeli gider. Sonuç KAYDEDİLMEZ. */
+  muayeneEpikrizYz: (muayeneId: number, k: MuayeneEpikrizKaydi) =>
+    gonder<MuayeneEpikrizKaydi & { ucret: number; model: string; uyari: string }>(
+      `/api/muayene/${muayeneId}/epikriz/yz-duzenle`, k),
   muayeneEpikrizImzala: (muayeneId: number) =>
     gonder<{ imzali: boolean }>(`/api/muayene/${muayeneId}/epikriz/imzala`, {}),
 

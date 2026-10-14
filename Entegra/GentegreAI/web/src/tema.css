@@ -6382,6 +6382,8 @@ textarea.fm-giris { resize: vertical }
   border: 1px solid var(--cizgi); border-radius: var(--r) }
 .epk-alan textarea[readonly] { background: var(--yuz2); border-color: var(--cizgi2) }
 .epk-alt { display: flex; gap: 8px; align-items: center; margin-top: 6px }
+.epk-yz { display: flex; align-items: center; gap: 10px; margin-bottom: 10px }
+.epk-yz .d { margin-left: auto }
 
 /* TEK SAYFA (SEKMESİZ) KART: sekmeler alt alta bölüm; başlık bölümü ayırır. */
 .ts-bolum { padding: 4px 0 18px; border-bottom: 1px solid var(--cizgi2); margin-bottom: 14px; scroll-margin-top: 8px }

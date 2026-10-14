@@ -24,7 +24,8 @@ public static class AiKontorUclari
     private const decimal KdvOrani = 0.20m;
 
     public sealed record AyarIstegi(int? GunlukSinir, int? KullaniciGunlukSinir, decimal? UyariEsigi,
-        bool? ModelAktif, bool? OzRehber, bool? OzTani, bool? OzTetkik, bool? OzIlac, string? OtomatikEkPaket);
+        bool? ModelAktif, bool? OzRehber, bool? OzTani, bool? OzTetkik, bool? OzIlac, string? OtomatikEkPaket,
+        bool? OzEpikriz = null);
     public sealed record FaturaBilgisi(string? Unvan, string? Vkn, string? VergiDairesi, string? Adres, string? Eposta,
                                        string? Il = null);
     public sealed record SiparisIstegi(string Tur, string Kod, int? DonemAy, FaturaBilgisi? Fatura);
@@ -57,7 +58,8 @@ public static class AiKontorUclari
                          where h.tur = 2 and h.tarih >= date_trunc('month', now()) - interval '1 month'
                            and h.tarih < date_trunc('month', now())),
                        (select count(*) from public.ai_kontor_hareket h
-                         where h.tur = 2 and h.basarili = 0 and h.tarih >= date_trunc('month', now()))
+                         where h.tur = 2 and h.basarili = 0 and h.tarih >= date_trunc('month', now())),
+                       k.oz_epikriz
                   from public.ai_kontor k where k.id = 1
                 """, null, [], o => new
                 {
@@ -67,6 +69,7 @@ public static class AiKontorUclari
                     ozIlac = o.GetInt16(9) == 1, otomatikEkPaket = o.GetString(10),
                     bugunCagri = o.GetInt64(11), bugunKontor = o.GetDecimal(12),
                     buAy = o.GetDecimal(13), gecenAy = o.GetDecimal(14), basarisizAy = o.GetInt64(15),
+                    ozEpikriz = o.GetInt16(16) == 1,
                 }, iptal) ?? throw GentegreHatasi.Bulunamadi();
 
             var sureler = await b.ListeAsync("""
@@ -231,10 +234,12 @@ public static class AiKontorUclari
                    oz_rehber = coalesce(@p4::smallint, oz_rehber), oz_tani = coalesce(@p5::smallint, oz_tani),
                    oz_tetkik = coalesce(@p6::smallint, oz_tetkik), oz_ilac = coalesce(@p7::smallint, oz_ilac),
                    otomatik_ek_paket       = coalesce(@p8, otomatik_ek_paket),
+                   oz_epikriz = coalesce(@p9::smallint, oz_epikriz),
                    degistirme_tarihi = now()
                  where id = 1
                 """, [istek.GunlukSinir, istek.KullaniciGunlukSinir, istek.UyariEsigi, M(istek.ModelAktif),
-                      M(istek.OzRehber), M(istek.OzTani), M(istek.OzTetkik), M(istek.OzIlac), istek.OtomatikEkPaket], iptal);
+                      M(istek.OzRehber), M(istek.OzTani), M(istek.OzTetkik), M(istek.OzIlac), istek.OtomatikEkPaket,
+                      M(istek.OzEpikriz)], iptal);
             return Results.Ok(new { mesaj = "YZ ayarları kaydedildi.", izlemeNo = baglam.IzlemeNo });
         });
 

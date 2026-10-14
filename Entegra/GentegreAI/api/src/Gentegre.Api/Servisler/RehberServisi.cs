@@ -582,7 +582,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
     /// KONTÖR KAPISI (rehber ve YZ önerileri ortak; 934). Sırayla: model açık mı,
     /// özellik açık mı (<c>oz_*</c>), bakiye, kurum günlük sınırı (rehber log +
     /// YZ önerisi hareketleri), kullanıcı günlük sınırı. <paramref name="ozellik"/>:
-    /// rehber / tani / tetkik / ilac.
+    /// rehber / tani / tetkik / ilac / epikriz (1101).
     /// </summary>
     public static async Task<(bool Izin, decimal Ucret, string Sebep)> KontorDurumAsync(
         NpgsqlConnection baglanti, CancellationToken iptal, string ozellik = "rehber", int? kullaniciId = null)
@@ -591,11 +591,12 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             select k.bakiye, k.cagri_ucreti as "ucret", k.model_aktif as "aktif",
                    k.gunluk_cagri_siniri as "sinir", k.kullanici_gunluk_siniri as "ksinir",
                    case @p0 when 'tani' then k.oz_tani when 'tetkik' then k.oz_tetkik
-                            when 'ilac' then k.oz_ilac else k.oz_rehber end as "ozacik",
+                            when 'ilac' then k.oz_ilac when 'epikriz' then k.oz_epikriz
+                            else k.oz_rehber end as "ozacik",
                    (select count(*) from public.ai_rehber_log l
                      where l.kaynak = 5 and l.tarih >= current_date)
                    + (select count(*) from public.ai_kontor_hareket h
-                       where h.tur = 2 and h.ozellik in ('tani', 'tetkik', 'ilac')
+                       where h.tur = 2 and h.ozellik in ('tani', 'tetkik', 'ilac', 'epikriz')
                          and h.tarih >= current_date) as "bugun",
                    (select count(*) from public.ai_kontor_hareket h
                      where h.tur = 2 and h.basarili = 1 and h.kullanici_id = @p1

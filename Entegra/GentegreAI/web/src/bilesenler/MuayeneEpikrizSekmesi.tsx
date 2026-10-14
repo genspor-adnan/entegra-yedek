@@ -30,6 +30,10 @@ export function MuayeneEpikrizSekmesi({ muayeneId, saltOkunur, onDegisti }: {
   const [form, setForm] = useState<MuayeneEpikrizKaydi>(BOS);
   const [kirli, setKirli] = useState(false);
   const [hata, setHata] = useState('');
+  /** YZ düzenlemesinden ÖNCEKİ metin ("Geri al"); null = YZ kullanılmadı. */
+  const [yzOnceki, setYzOnceki] = useState<MuayeneEpikrizKaydi | null>(null);
+  const [yzBekliyor, setYzBekliyor] = useState(false);
+  const [yzNot, setYzNot] = useState('');
 
   const yukle = useCallback(() => {
     api.muayeneEpikriz(muayeneId).then(v => {
@@ -46,7 +50,18 @@ export function MuayeneEpikrizSekmesi({ muayeneId, saltOkunur, onDegisti }: {
   const imzali = veri?.kayit?.imzaDurum === 1;
   const kilitli = imzali || saltOkunur;
 
-  const derle = () => { if (veri) { setForm(veri.taslak); setKirli(true) } };
+  const derle = () => { if (veri) { setForm(veri.taslak); setKirli(true); setYzOnceki(null); setYzNot('') } };
+  // YZ İLE DÜZENLE (1101, kontörlü): yalnız dil; sonuç forma ÖNERİ olarak gelir, kayıt hekimde.
+  const yzDuzenle = () => guvenli(async () => {
+    setYzBekliyor(true);
+    try {
+      const y = await api.muayeneEpikrizYz(muayeneId, form);
+      setYzOnceki(form);
+      setForm(Object.fromEntries(BOLUMLER.map(([a]) => [a, String(y[a] ?? '')])) as never);
+      setKirli(true);
+      setYzNot(`${y.uyari} (${y.ucret} ${c('kontör')})`);
+    } finally { setYzBekliyor(false) }
+  });
   const kaydet = () => guvenli(async () => {
     await api.muayeneEpikrizKaydet(muayeneId, form);
     mesaj(c('Epikriz kaydedildi.'));
@@ -78,7 +93,17 @@ export function MuayeneEpikrizSekmesi({ muayeneId, saltOkunur, onDegisti }: {
         </span>
         <span style={{ marginLeft: 'auto' }} />
         {!kilitli && <button type="button" className="d" onClick={derle}>⟳ {c('Karttan yeniden derle')}</button>}
+        {!kilitli && <button type="button" className="d" onClick={() => void yzDuzenle()} disabled={yzBekliyor}
+                             title={c('Metni akıcı hâle getirir, bilgi eklemez / değiştirmez. Kontör kullanır.')}>
+          ✨ {yzBekliyor ? c('Düzenleniyor…') : c('YZ ile düzenle (kontörlü)')}</button>}
       </div>
+      {yzOnceki && (
+        <div className="bilgi-kutusu epk-yz">
+          {yzNot}
+          <button type="button" className="d" onClick={() => { setForm(yzOnceki); setYzOnceki(null); setYzNot('') }}>
+            ↶ {c('Geri al')}</button>
+        </div>
+      )}
 
       {BOLUMLER.map(([a, ad]) => (
         <label key={a} className="epk-alan">

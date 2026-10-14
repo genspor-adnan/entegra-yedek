@@ -29,8 +29,9 @@ const OZELLIK: Record<string, { ad: string; ik: string; sinif: string }> = {
   tetkik: { ad: 'Tetkik önerisi', ik: '🔬', sinif: 'yk-s-tetkik' },
   ilac: { ad: 'İlaç önerisi', ik: '💊', sinif: 'yk-s-ilac' },
   rehber: { ad: 'YZ Rehber', ik: '❓', sinif: 'yk-s-rehber' },
+  epikriz: { ad: 'Epikriz düzenleme', ik: '📄', sinif: 'yk-s-rehber' },
 };
-const OZ_SIRA = ['tani', 'tetkik', 'ilac', 'rehber'];
+const OZ_SIRA = ['tani', 'tetkik', 'ilac', 'epikriz', 'rehber'];
 const SEKMELER = ['Özet', 'Hareketler', 'Kullanıcıya Göre', 'Plan & Faturalar', 'Ayarlar', 'Gizlilik & Denetim'] as const;
 type Sekme = typeof SEKMELER[number];
 
@@ -432,12 +433,13 @@ function AyarSekmesi({ ozet, degistirir, onKaydedildi }: { ozet: AiKontorOzet; d
   const [d, setD] = useState({
     gunlukSinir: k.gunlukSinir, kullaniciGunlukSinir: k.kullaniciGunlukSinir, uyariEsigi: k.uyariEsigi,
     modelAktif: k.modelAktif, ozRehber: k.ozRehber, ozTani: k.ozTani, ozTetkik: k.ozTetkik, ozIlac: k.ozIlac,
+    ozEpikriz: k.ozEpikriz ?? true,
     otomatikEkPaket: k.otomatikEkPaket,
   });
   const [paketler, setPaketler] = useState<{ kod: string; kontor: number }[]>([]);
   useEffect(() => { void api.aiKontorPlanlar().then(y => setPaketler(y.paketler)).catch(() => {}) }, []);
   const yaz = <K extends keyof typeof d>(a: K, v: (typeof d)[K]) => setD(o => ({ ...o, [a]: v }));
-  const ozSatir = (anahtar: 'ozTani' | 'ozTetkik' | 'ozIlac' | 'ozRehber', oz: string, nerede: string) => (
+  const ozSatir = (anahtar: 'ozTani' | 'ozTetkik' | 'ozIlac' | 'ozRehber' | 'ozEpikriz', oz: string, nerede: string) => (
     <tr key={oz}>
       <td>{OZELLIK[oz].ik} {c(OZELLIK[oz].ad)}</td><td className="sonuk">{c(nerede)}</td>
       <td className="hiza-orta"><input type="checkbox" aria-label={OZELLIK[oz].ad} checked={d[anahtar]} disabled={!degistirir}
@@ -476,6 +478,7 @@ function AyarSekmesi({ ozet, degistirir, onKaydedildi }: { ozet: AiKontorOzet; d
                 {ozSatir('ozTani', 'tani', 'ICD tanı arama › 🤖 YZ Önerisi')}
                 {ozSatir('ozTetkik', 'tetkik', 'İstem ekranı › 🤖 YZ Önerisi')}
                 {ozSatir('ozIlac', 'ilac', 'Reçete › İlaç ara › 🤖 YZ Önerisi')}
+                {ozSatir('ozEpikriz', 'epikriz', 'Muayene › Epikriz › ✨ YZ ile düzenle')}
                 {ozSatir('ozRehber', 'rehber', 'Yardım asistanı')}
               </tbody>
             </table>
