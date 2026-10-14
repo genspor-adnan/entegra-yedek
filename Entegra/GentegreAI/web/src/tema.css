@@ -6482,10 +6482,10 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .mi-vital .vital-izgara-kip .alan-izgara { display: flex !important; flex-wrap: wrap; gap: 6px 10px; align-items: flex-end }
 .mi-vital .vital-izgara-kip .alan { display: flex !important; flex-direction: column; gap: 2px; width: auto; min-width: 0 }
 .mi-vital .vital-izgara-kip .alan .etiket { font-size: 10.5px; text-align: left; white-space: nowrap }
-.mi-vital .vital-izgara-kip .alan > input { width: 48px !important; min-width: 0 }
-.mi-vital .vital-izgara-kip .alan.ikili { display: grid !important; grid-template-columns: 48px 48px; column-gap: 4px }
+.mi-vital .vital-izgara-kip .alan > input { width: 50px !important; min-width: 0 }
+.mi-vital .vital-izgara-kip .alan.ikili { display: grid !important; grid-template-columns: 50px 50px; column-gap: 4px }
 .mi-vital .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
-.mi-vital .vital-izgara-kip .alan.ikili input { width: 48px !important }
+.mi-vital .vital-izgara-kip .alan.ikili input { width: 50px !important }
 .mi-vital .vital-izgara-kip .tk-hesap { min-width: 0; padding: 4px 2px }
 
 /* METİN MAKROSU KARTI (mockup Ekranlar/Muayene/metin_makrosu_karti.html). */
