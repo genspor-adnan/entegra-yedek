@@ -32,6 +32,7 @@ import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../../bilesenler/sekmeBaglami';
 import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
+import { MakroluMetin } from '../../bilesenler/MakroluMetin';
 import { MakroIpucu } from '../../bilesenler/MakroIpucu';
 
 /** Makro açılan muayene alanları (katalog MakroAlanKodlari ile aynı). */
@@ -431,6 +432,11 @@ export function ListeKarti({
         // MAKRO IPUCU (kullanici): makro alanlarinin altinda gecerli kisayollar.
         //   Yalniz makro katalogundaki metin alanlari (KartKatalogu
         //   MakroAlanKodlari) - vital/kod alanlarinda kisayol anlamsiz.
+        // MAKRO ROZETLİ METİN (kullanıcı 14.10.2026): makro alanları rozet tutabilen kutu; değer düz metin.
+        alanGirdisi={muayeneKarti
+          ? (ad, d, yaz, salt) => MAKRO_ALANLARI.has(ad)
+              ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt} /> : undefined
+          : undefined}
         alanIpucu={muayeneKarti
           ? (ad, yaz) => MAKRO_ALANLARI.has(ad) ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz} /> : null
           : undefined}

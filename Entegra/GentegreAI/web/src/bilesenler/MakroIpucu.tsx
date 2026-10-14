@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react';
 import { alanMakrolari, makroEkle, makroKullanildi, type Makro } from './muayeneMakro';
 import { c } from '../dil/ceviri';
+import { MAKRO_EKLE_OLAYI } from './MakroluMetin';
 
 /**
  * MAKRO İPUCU (kullanıcı: "makro kısayollarını alan altında ipucu olarak
@@ -23,8 +24,13 @@ export function MakroIpucu({ alan, makrolar, yaz }: {
   const tikla = (e: MouseEvent<HTMLButtonElement>, m: Makro) => {
     e.preventDefault();
     if (!yaz) return;
-    const kutu = e.currentTarget.closest('label')
-      ?.querySelector<HTMLTextAreaElement | HTMLInputElement>(`[data-alan="${alan}"]`);
+    const hedef = e.currentTarget.closest('label')?.querySelector<HTMLElement>(`[data-alan="${alan}"]`);
+    // ROZETLİ KUTU (MakroluMetin): makroyu kendisi rozet olarak koyar.
+    if (hedef && !(hedef instanceof HTMLTextAreaElement) && !(hedef instanceof HTMLInputElement)) {
+      hedef.dispatchEvent(new CustomEvent(MAKRO_EKLE_OLAYI, { detail: m }));
+      return;
+    }
+    const kutu = hedef as HTMLTextAreaElement | HTMLInputElement | null | undefined;
     const metin = kutu?.value ?? '';
     // Alan odakta değilse (çipe tık odağı çalmaz: mousedown engelli) sona ekle.
     const imlec = kutu && document.activeElement === kutu && typeof kutu.selectionStart === 'number'

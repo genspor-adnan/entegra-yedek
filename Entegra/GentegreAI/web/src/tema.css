@@ -6488,6 +6488,15 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .mi-vital .vital-izgara-kip .alan.ikili input { width: 72px !important }
 .mi-vital .vital-izgara-kip .tk-hesap { min-width: 0; padding: 4px 2px }
 
+/* MAKRO ROZETLİ METİN KUTUSU (muayene makro alanları): textarea görünümünde içerik düzenlenebilir. */
+.mlm { min-height: 64px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); padding: 5px 7px;
+  white-space: pre-wrap; word-break: break-word; line-height: 1.6; outline: none; cursor: text; width: 100% }
+.mlm:focus { border-color: var(--mavi, #2f6db3); box-shadow: 0 0 0 2px rgba(47, 109, 179, .18) }
+.mlm.salt { background: var(--yuz2); cursor: default }
+.mlm-rozet { background: #eef4fc; border: 1px solid #cfe0f5; border-radius: 10px; padding: 0 4px 0 8px; color: #1f4f86 }
+.mlm-x { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 50%; cursor: pointer; color: #6b7a8b; font-weight: bold; user-select: none }
+.mlm-x:hover { background: #d3e2f5; color: #b3261e }
+
 /* METİN MAKROSU KARTI (mockup Ekranlar/Muayene/metin_makrosu_karti.html). */
 .mk-kimlik { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 4px 10px; border-bottom: 1px solid var(--cizgi2); margin-bottom: 10px }
 .mk-kisayol { font-family: Consolas, monospace; font-size: 18px; font-weight: bold; color: var(--lacivert, #1f3a5f); background: #eef4fc; border: 1px solid #cfe0f5; border-radius: 4px; padding: 2px 10px }

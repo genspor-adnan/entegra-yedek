@@ -259,6 +259,9 @@ interface Props {
   buyutmeYok?: boolean;
   /** Alanin altinda gosterilecek ipucu (ör. muayene makro kisayollari). */
   alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
+  /** Uzun metin alanının GİRDİSİ yerine ekran-özel kutu (muayene: makro rozetli metin);
+      undefined dönerse alan olağan textarea ile çizilir. */
+  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean): React.ReactNode | undefined;
   /** Bu EKRANDA zorunlu sayilacak alanlar (ör. Aday kartinda "Temsilci").
       Katalogda zorunlu YAPILMAZ: ayni alan Musteri kartinda bos olabilir ve
       eski kayitlarin duzenlenmesini kilitlerdi. */
@@ -323,7 +326,7 @@ const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
-                          gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
+                          gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu, alanGirdisi }: Props) {
   const { kullanici } = useOturum();
   const yeniMi = id === 'yeni';
   // Dis hekim (305) de ad/soyad ile calisir: unvan gosterilmez, ad+soyaddan
@@ -1388,7 +1391,7 @@ Yine de yeni kayıt eklensin mi?`);
   const { altGruplaVar, renderAlanListesi } = alanCizici({
     kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
-    secilenAdlar, alanIpucu,
+    secilenAdlar, alanIpucu, alanGirdisi,
     aramaAc: (alanAdi, kaynakAdi, uygula) =>
       setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi, uygula }),
     listeDuzenle: a => {

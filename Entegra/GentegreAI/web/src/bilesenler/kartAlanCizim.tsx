@@ -75,6 +75,9 @@ export interface AlanCizimBaglami {
   /** Alanin ALTINDA gosterilecek ekran ipucu (ör. muayene metin makrolari, 931);
       `yaz` alanin kendi yazicisidir (ipucundan alana deger yazmak icin). */
   alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
+  /** Uzun metin alanının GİRDİSİ yerine ekran-özel kutu (muayene: makro rozetli metin);
+      undefined dönerse alan olağan textarea ile çizilir. */
+  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean): React.ReactNode | undefined;
 }
 
 /**
@@ -92,7 +95,7 @@ export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
           bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc,
-          listeDuzenle, alanIpucu } = b;
+          listeDuzenle, alanIpucu, alanGirdisi } = b;
 
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
@@ -340,7 +343,7 @@ export function alanCizici(b: AlanCizimBaglami) {
         //   yazilani gormeden yaziliyordu. Esik alan tanimindan gelir -
         //   sunucu "bu alan uzun" bilgisini zaten enFazlaUzunluk ile veriyor,
         //   sozlesmeye yeni bayrak eklemek gerekmedi.
-        <textarea
+        alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir) ?? <textarea
           key={a.ad}
           // data-alan: kart duzeyindeki klavye yakalayicilari (muayene metin
           //   makrosu, 931) hangi alanda yazildigini bilsin.
