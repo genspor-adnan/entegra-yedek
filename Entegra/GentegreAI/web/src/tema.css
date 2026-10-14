@@ -6473,7 +6473,8 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }
 
 /* SEKME ÇUBUĞU ＋ (arama/komut paleti). */
-.ekran-sekmeleri .es-sekme.es-ekle { font-weight: bold; font-size: 16px; padding: 0 10px; cursor: pointer; border: 0 !important;
+.ekran-sekmeleri .es-sekme.es-ekle { font-weight: bold; font-size: 16px; line-height: 1; padding: 0 5px; margin-left: -1px;
+  align-self: stretch; display: flex; align-items: center; cursor: pointer; border: 0 !important;
   background: none !important; box-shadow: none !important; color: var(--yazi2) }
 .ekran-sekmeleri .es-sekme.es-ekle:hover { color: var(--mavi, #2563eb) }
 
