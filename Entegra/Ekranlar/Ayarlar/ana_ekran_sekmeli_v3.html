@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Ekran v3 — Karma — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#d7e7fb; --head:#f3f6fa;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;
+    display:flex;flex-direction:column}
+
+  /* Üst çubuk */
+  .ust{display:flex;align-items:center;gap:10px;padding:0 10px;height:42px;
+    background:linear-gradient(#2b5c95,#1c4374);color:#fff;flex:none}
+  .menu-dug{width:32px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:17px}
+  .menu-dug:hover,.menu-dug.on{background:rgba(255,255,255,.18)}
+  .logo{font-weight:bold;font-size:14px;white-space:nowrap}
+  .ara{flex:1;max-width:540px;margin:0 auto;display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:5px;cursor:text;color:#dbe7f5}
+  .ara:hover{background:rgba(255,255,255,.2)}
+  .kbd{font-family:Consolas,monospace;font-size:10.5px;border:1px solid currentColor;border-radius:3px;padding:0 5px;margin-left:auto;opacity:.75}
+  .kul{position:relative;white-space:nowrap;cursor:pointer;padding:5px 8px;border-radius:4px}
+  .kul:hover{background:rgba(255,255,255,.14)}
+  .kul-men{position:absolute;right:0;top:34px;width:240px;background:#fff;color:var(--ink);border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 10px 30px rgba(8,20,40,.25);z-index:20;padding:6px 0;cursor:default}
+  .kul-men .s{padding:7px 14px;display:flex;align-items:center;gap:8px}
+  .kul-men .s:hover{background:#f5f9fe}
+  .kul-men .ayr{height:1px;background:var(--line2);margin:5px 0}
+  .anah{margin-left:auto;width:30px;height:16px;border-radius:8px;background:#c4ced9;position:relative;cursor:pointer}
+  .anah::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .15s}
+  .anah.on{background:var(--accent)}
+  .anah.on::after{left:16px}
+
+  /* Gövde: (isteğe bağlı) sol menü + sekmeler + içerik */
+  .govde{flex:1;display:flex;min-height:0}
+  .sol{width:230px;flex:none;background:#fff;border-right:1px solid var(--line);overflow:auto}
+  .bolge{border-bottom:1px solid var(--line2)}
+  .bolge .bb{display:flex;align-items:center;gap:8px;padding:8px 12px;font-weight:bold;color:var(--navy);cursor:pointer}
+  .bolge .bb .nokta{width:8px;height:8px;border-radius:50%}
+  .bolge .bb .ok{margin-left:auto;color:var(--muted);font-weight:normal}
+  .bolge .gr{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:6px 12px 2px 28px}
+  .bolge a{display:block;padding:5px 12px 5px 28px;color:var(--ink);text-decoration:none;cursor:pointer}
+  .bolge a:hover{background:#f5f9fe;color:var(--accent)}
+  .bolge a.acik{color:var(--accent);font-weight:bold}
+
+  .sag{flex:1;display:flex;flex-direction:column;min-width:0}
+  .sekmeler{display:flex;align-items:flex-end;gap:2px;padding:6px 8px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+  .sekme{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 11px;max-width:210px;
+    border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;background:#e3e9f1;color:#4d5d6e;
+    cursor:pointer;white-space:nowrap;user-select:none}
+  .sekme .ad{overflow:hidden;text-overflow:ellipsis}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .x{width:16px;height:16px;line-height:15px;text-align:center;border-radius:3px;color:var(--muted);font-weight:normal}
+  .sekme .x:hover{background:#d3dce7;color:var(--ink)}
+  .sekme.ev{padding-right:11px}
+  .sekme-say{margin-left:auto;align-self:center;color:var(--muted);font-size:10.5px;padding:0 6px 4px;white-space:nowrap}
+
+  .icerik{flex:1;position:relative;min-height:0}
+  .icerik iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:var(--bg)}
+
+  /* Başlangıç */
+  .ana{position:absolute;inset:0;overflow:auto;padding:26px 20px 40px}
+  .ana .ic{max-width:1000px;margin:0 auto}
+  .ana h1{font-size:18px;color:var(--navy);margin:0 0 4px}
+  .ana .alt{color:var(--muted);margin-bottom:14px}
+  .buyuk-ara{display:flex;align-items:center;gap:10px;height:42px;padding:0 14px;background:#fff;border:1px solid var(--line);
+    border-radius:6px;color:var(--muted);font-size:14px;cursor:text;margin-bottom:20px}
+  .bolum{display:flex;align-items:baseline;gap:10px;font-size:11px;font-weight:bold;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.4px;margin:18px 0 8px}
+  .bolum a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:normal;cursor:pointer}
+  .moduller{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .modul{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .modul .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;font-weight:bold;color:var(--navy);
+    background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2)}
+  .modul .bas .rozet{margin-left:auto;background:#b3261e;color:#fff;border-radius:9px;padding:0 7px;font-size:10.5px}
+  .modul a{display:flex;justify-content:space-between;padding:6px 12px;color:var(--ink);text-decoration:none;cursor:pointer}
+  .modul a:hover{background:#f5f9fe;color:var(--accent)}
+  .modul a .s{color:var(--muted);font-size:10.5px}
+  .modul a .s.k{color:#b3261e;font-weight:bold}
+  .son{display:flex;gap:6px;flex-wrap:wrap}
+  .son span{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px 12px;cursor:pointer}
+  .son span:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* Palet */
+  .perde{position:fixed;inset:0;background:rgba(15,30,55,.35);display:none;justify-content:center;align-items:flex-start;padding-top:12vh;z-index:30}
+  .perde.acik{display:flex}
+  .palet{width:580px;max-width:calc(100% - 32px);background:#fff;border-radius:8px;box-shadow:0 18px 50px rgba(8,20,40,.35);overflow:hidden}
+  .palet input{width:100%;border:none;border-bottom:1px solid var(--line2);padding:14px 16px;font-size:15px;outline:none;font-family:inherit}
+  .liste{max-height:360px;overflow:auto;padding:6px 0}
+  .pgrup{font-size:10.5px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 16px 4px}
+  .oge{display:flex;gap:10px;padding:7px 16px;cursor:pointer}
+  .oge .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .oge.sec{background:var(--sel)}
+  .yok{padding:16px;color:var(--muted)}
+
+  .bilgi{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1f2d3a;color:#fff;padding:8px 14px;
+    border-radius:5px;font-size:11.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:40}
+
+  /* Dar ekran / tablet: menü üstte kayar, arama metni kısalır */
+  @media(max-width:800px){
+    .sol{position:fixed;top:42px;bottom:0;left:0;z-index:25;box-shadow:6px 0 20px rgba(0,0,0,.2)}
+    .logo,.ara .metin,.ara .kbd{display:none}
+    .ara{flex:none;width:36px;margin:0 0 0 auto;justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <div class="menu-dug" id="menuDug" title="Menüyü aç / kapat">☰</div>
+  <div class="logo">🩺 Gentegre</div>
+  <div class="ara" id="araAc">🔍 <span class="metin">Ekran, hasta, işlem ara…</span> <span class="kbd">Ctrl K</span></div>
+  <div class="kul" id="kul">Dr. Selin TAN ▾
+    <div class="kul-men" id="kulMen" hidden>
+      <div class="s">Menü her zaman açık <span class="anah" id="menuAyar"></span></div>
+      <div class="s">Açık sekmeler girişte geri gelsin <span class="anah on"></span></div>
+      <div class="ayr"></div>
+      <div class="s">⌨ Kısayollar</div>
+      <div class="s">Çıkış</div>
+    </div>
+  </div>
+</div>
+
+<div class="govde">
+  <nav class="sol" id="sol" hidden></nav>
+  <div class="sag">
+    <div class="sekmeler" id="sekmeler"></div>
+    <div class="icerik" id="icerik">
+      <div class="ana" data-k="ana"><div class="ic" id="anaIc"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="perde" id="perde">
+  <div class="palet">
+    <input id="sorgu" placeholder="Ekran, hasta ya da işlem yazın…" autocomplete="off">
+    <div class="liste" id="liste"></div>
+  </div>
+</div>
+<div class="bilgi" id="bilgi" hidden></div>
+
+<script>
+// Menü = web ürününün menü V2 bölgeleri (menuBolgeleri.ts). Burada kısaltılmış örnek.
+// Arama, kutucuklar ve sol menü AYNI katalogdan; yetkisiz ekran hiçbirinde görünmez.
+const BOLGELER = [
+  { ad:'Hasta Akışı', renk:'#2f6db3', gruplar:[
+    { ad:'Kayıt Kabul', ekranlar:[ { k:'banko', ad:'Hasta Kabul', url:'../Kayıt Kabul/banko_tanimi_v2.html', a:'kayıt başvuru' } ] },
+    { ad:'Acil', ekranlar:[ { k:'acil', ad:'Acil Hasta Kartı', url:'../Acil/acil_hasta_karti.html' } ] } ] },
+  { ad:'Klinikler', renk:'#3f9a5e', gruplar:[
+    { ad:'Muayene', i:'🩺', ekranlar:[
+      { k:'muayene', ad:'Muayene Listesi', url:'../Muayene/muayene_listesi.html', s:'12 hasta' },
+      { k:'kons', ad:'Konsültasyonlar', url:'../Muayene/konsultasyon_listesi.html', s:'3 bekliyor', kir:1, a:'konsultasyon' },
+      { k:'konsis', ad:'Konsültasyon İsteği', url:'../Muayene/konsultasyon_karti.html', a:'konsultasyon iste' } ] } ] },
+  { ad:'Tanı & Tetkik', renk:'#6a3fb5', gruplar:[
+    { ad:'Laboratuvar', i:'🧪', ekranlar:[ { k:'lab', ad:'Numune Kabul', url:'../Lab/lab_istem_numune_kabul.html', s:'7 numune', a:'tahlil tüp' } ] } ] },
+  { ad:'Yatan & Cerrahi', renk:'#c0392b', gruplar:[
+    { ad:'Yatan Hasta', i:'🛏', ekranlar:[
+      { k:'yatan', ad:'Yatan Hasta Listesi', url:'../Yatan/yatan_hasta_listesi.html', s:'18 hasta', a:'servis' },
+      { k:'yatak', ad:'Yatak Panosu', url:'../Yatan/yatak_panosu.html', s:'4 boş' } ] },
+    { ad:'Kan Merkezi', i:'🩸', ekranlar:[
+      { k:'kan', ad:'Kan Merkezi Panosu', url:'../KanMerkezi/kan_merkezi_panosu.html', s:'1 çok acil', kir:1, a:'transfüzyon stok' },
+      { k:'kanrez', ad:'Kan Rezervasyonu', url:'../KanMerkezi/kan_rezervasyon_v2.html', a:'transfüzyon istem' },
+      { k:'kabul', ad:'Ünite Kabul', url:'../KanMerkezi/kan_unite_kabul.html', a:'kızılay' } ] },
+    { ad:'Ameliyathane', i:'🔪', ekranlar:[ { k:'ameliyat', ad:'Ameliyathane Panosu', url:'../Ameliyathane/ameliyathane_panosu.html', s:'2 bugün', a:'cerrahi operasyon' } ] } ] },
+  { ad:'Finans', renk:'#1c8b8b', gruplar:[
+    { ad:'Finans', i:'💳', ekranlar:[
+      { k:'cari', ad:'Cari Listesi', url:'../cari_liste_ekrani.html', a:'müşteri tedarikçi' },
+      { k:'satis', ad:'Satış Faturaları', url:'../fatura_satis_listesi.html', a:'fatura' } ] } ] },
+  { ad:'Tedarik & Teknik', renk:'#8a6d3b', gruplar:[
+    { ad:'Stok', i:'📦', ekranlar:[ { k:'stok', ad:'Stok Listesi', url:'../stok_listesi.html', a:'malzeme ilaç depo' } ] } ] },
+];
+const EKRANLAR = BOLGELER.flatMap(b => b.gruplar.flatMap(g => g.ekranlar.map(e => ({ ...e, i:g.i ?? '▫', yol:g.ad }))));
+const ISLEMLER = [
+  { k:'konsis', ad:'Konsültasyon iste', i:'＋', yol:'Muayene' },
+  { k:'kanrez', ad:'Kan rezervasyonu yap', i:'＋', yol:'Kan Merkezi' },
+];
+// Rol başına başlangıç kutucukları (menuBolgeleri.ts'teki görünümlerle aynı fikir).
+const KUTU_GRUPLARI = ['Muayene', 'Yatan Hasta', 'Kan Merkezi', 'Laboratuvar', 'Ameliyathane'];
+const SEKME_SINIRI = 8;
+
+const $ = id => document.getElementById(id);
+const kucuk = s => s.toLocaleLowerCase('tr');
+const ekran = k => EKRANLAR.find(e => e.k === k);
+const depo = { al(a, v) { try { const x = localStorage.getItem('v3.' + a); return x == null ? v : JSON.parse(x); } catch { return v; } },
+               yaz(a, v) { try { localStorage.setItem('v3.' + a, JSON.stringify(v)); } catch {} } };
+
+let acik = ['kons', 'kan'];
+let aktif = 'ana';
+let son = ['kons', 'kan', 'yatan', 'kanrez'];
+let menuSabit = depo.al('menuSabit', false);
+let menuAcik = menuSabit;
+let acikBolge = 'Yatan & Cerrahi';
+
+function bilgi(m) { const b = $('bilgi'); b.textContent = m; b.hidden = false; clearTimeout(bilgi.t); bilgi.t = setTimeout(() => b.hidden = true, 3500); }
+
+function solCiz() {
+  $('sol').hidden = !menuAcik;
+  $('menuDug').classList.toggle('on', menuAcik);
+  $('menuAyar').classList.toggle('on', menuSabit);
+  $('sol').innerHTML = BOLGELER.map(b => `
+    <div class="bolge">
+      <div class="bb" data-bolge="${b.ad}"><span class="nokta" style="background:${b.renk}"></span>${b.ad}<span class="ok">${b.ad === acikBolge ? '▾' : '▸'}</span></div>
+      ${b.ad === acikBolge ? b.gruplar.map(g => `<div class="gr">${g.ad}</div>` +
+          g.ekranlar.map(e => `<a data-ac="${e.k}" class="${acik.includes(e.k) ? 'acik' : ''}">${e.ad}</a>`).join('')).join('') : ''}
+    </div>`).join('');
+}
+
+function anaCiz() {
+  const kutular = BOLGELER.flatMap(b => b.gruplar).filter(g => KUTU_GRUPLARI.includes(g.ad));
+  $('anaIc').innerHTML = `
+    <h1>Günaydın, Dr. Selin TAN</h1>
+    <div class="alt">Ekranı kutucuktan seçin ya da yazarak bulun. Açtıklarınız üstte sekme olur.</div>
+    <div class="buyuk-ara" data-palet="1">🔍 Ne açmak istiyorsunuz? <span class="kbd" style="margin-left:auto">Ctrl K</span></div>
+    <div class="bolum">Son açılanlar</div>
+    <div class="son">${son.map(ekran).filter(Boolean).map(e => `<span data-ac="${e.k}">${e.i} ${e.ad}</span>`).join('')}</div>
+    <div class="bolum">Ekranlarım <a data-menu="1">Tüm ekranlar (menü) ›</a></div>
+    <div class="moduller">${kutular.map(g => {
+      const rozet = g.ekranlar.filter(e => e.kir).length;
+      return `<div class="modul"><div class="bas">${g.i ?? ''} ${g.ad}${rozet ? `<span class="rozet">${rozet}</span>` : ''}</div>
+        ${g.ekranlar.map(e => `<a data-ac="${e.k}"><span>${e.ad}</span><span class="s${e.kir ? ' k' : ''}">${e.s ?? ''}</span></a>`).join('')}</div>`;
+    }).join('')}</div>`;
+}
+
+function sekmeCiz() {
+  $('sekmeler').innerHTML = `<div class="sekme ev${aktif === 'ana' ? ' on' : ''}" data-git="ana" title="Başlangıç (Ctrl+Home)">🏠</div>`
+    + acik.map(k => { const e = ekran(k);
+      return `<div class="sekme${k === aktif ? ' on' : ''}" data-git="${k}" title="${e.yol} › ${e.ad}"><span>${e.i}</span><span class="ad">${e.ad}</span><span class="x" data-x="${k}">×</span></div>`; }).join('')
+    + `<span class="sekme-say">${acik.length} / ${SEKME_SINIRI}</span>`;
+}
+
+function icerikCiz() {
+  const kap = $('icerik');
+  acik.forEach(k => { if (!kap.querySelector(`[data-k="${k}"]`)) {
+    const f = document.createElement('iframe'); f.src = ekran(k).url; f.dataset.k = k; kap.appendChild(f); } });
+  kap.querySelectorAll('[data-k]').forEach(el => {
+    if (el.dataset.k !== 'ana' && !acik.includes(el.dataset.k)) el.remove(); else el.hidden = el.dataset.k !== aktif; });
+}
+
+function ciz() { solCiz(); sekmeCiz(); icerikCiz(); if (aktif === 'ana') anaCiz(); }
+
+function ac(k) {
+  if (!ekran(k)) return;
+  if (!acik.includes(k)) {
+    // Sınır: en uzun süre bakılmayan sekme kapanır, kullanıcıya söylenir.
+    if (acik.length >= SEKME_SINIRI) {
+      const eski = son.slice().reverse().find(x => acik.includes(x) && x !== k) ?? acik[0];
+      acik = acik.filter(x => x !== eski);
+      bilgi(`8 sekme sınırı: "${ekran(eski).ad}" kapatıldı (en uzun süredir bakılmayan).`);
+    }
+    acik.push(k);
+  }
+  son = [k, ...son.filter(x => x !== k)].slice(0, 8);
+  aktif = k;
+  if (!menuSabit) menuAcik = false;     // menü geçici açıldıysa seçimden sonra kapanır
+  ciz();
+}
+function kapat(k) {
+  const i = acik.indexOf(k); if (i < 0) return;
+  acik.splice(i, 1);
+  if (aktif === k) aktif = acik[i] ?? acik[i - 1] ?? 'ana';
+  ciz();
+}
+
+document.body.addEventListener('click', ev => {
+  const t = ev.target;
+  if (t.closest('#kul') && !t.closest('#kulMen')) { $('kulMen').hidden = !$('kulMen').hidden; return; }
+  if (!t.closest('#kulMen')) $('kulMen').hidden = true;
+  if (t.id === 'menuAyar') { menuSabit = !menuSabit; menuAcik = menuSabit; depo.yaz('menuSabit', menuSabit); ciz(); return; }
+  if (t.closest('#menuDug') || t.closest('[data-menu]')) { menuAcik = !menuAcik; ciz(); return; }
+  if (t.closest('#araAc') || t.closest('[data-palet]')) return paletAc();
+  if (t.dataset.x) return kapat(t.dataset.x);
+  const b = t.closest('[data-bolge]'); if (b) { acikBolge = acikBolge === b.dataset.bolge ? '' : b.dataset.bolge; solCiz(); return; }
+  const a = t.closest('[data-ac]'); if (a) return ac(a.dataset.ac);
+  const g = t.closest('[data-git]'); if (g) { aktif = g.dataset.git; ciz(); }
+});
+$('sekmeler').addEventListener('auxclick', ev => { const g = ev.target.closest('[data-git]'); if (g && ev.button === 1 && g.dataset.git !== 'ana') kapat(g.dataset.git); });
+
+// ---- Palet
+let sonuc = [], sec = 0;
+function paletCiz() {
+  const q = kucuk($('sorgu').value.trim());
+  const uy = e => !q || kucuk(`${e.ad} ${e.yol} ${e.a ?? ''}`).includes(q);
+  const gruplar = q ? [['Ekranlar', EKRANLAR.filter(uy)], ['İşlemler', ISLEMLER.filter(uy)]]
+                    : [['Son açılanlar', son.map(ekran).filter(Boolean)], ['İşlemler', ISLEMLER]];
+  sonuc = gruplar.flatMap(g => g[1]);
+  sec = Math.min(sec, Math.max(sonuc.length - 1, 0));
+  let n = 0;
+  $('liste').innerHTML = sonuc.length ? gruplar.filter(g => g[1].length).map(([b, l]) => `<div class="pgrup">${b}</div>` +
+    l.map(e => `<div class="oge${n === sec ? ' sec' : ''}" data-n="${n++}"><span>${e.i}</span><span>${e.ad}</span><span class="y">${e.yol}${acik.includes(e.k) ? ' · açık' : ''}</span></div>`).join('')).join('')
+    : '<div class="yok">Sonuç yok. Menüden bakmak için ☰.</div>';
+  $('liste').querySelector('.sec')?.scrollIntoView({ block:'nearest' });
+}
+function paletAc() { $('perde').classList.add('acik'); $('sorgu').value = ''; sec = 0; paletCiz(); $('sorgu').focus(); }
+function paletKapat() { $('perde').classList.remove('acik'); }
+$('perde').addEventListener('click', ev => { if (ev.target.id === 'perde') paletKapat(); });
+$('sorgu').addEventListener('input', () => { sec = 0; paletCiz(); });
+$('liste').addEventListener('click', ev => { const o = ev.target.closest('.oge'); if (o) { paletKapat(); ac(sonuc[+o.dataset.n].k); } });
+$('sorgu').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown') { sec = Math.min(sec + 1, sonuc.length - 1); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'ArrowUp') { sec = Math.max(sec - 1, 0); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'Enter' && sonuc[sec]) { const k = sonuc[sec].k; paletKapat(); ac(k); }
+  else if (ev.key === 'Escape') paletKapat();
+});
+
+// Kısayollar: Ctrl+K arama, Ctrl+B menü, Ctrl+Home başlangıç, Alt+W sekme kapat, Ctrl+1..9 sekmeye git.
+document.addEventListener('keydown', ev => {
+  const t = kucuk(ev.key);
+  if ((ev.ctrlKey || ev.metaKey) && t === 'k') { ev.preventDefault(); paletAc(); }
+  else if (ev.ctrlKey && t === 'b') { ev.preventDefault(); menuAcik = !menuAcik; ciz(); }
+  else if (ev.ctrlKey && ev.key === 'Home') { aktif = 'ana'; ciz(); }
+  else if (ev.altKey && t === 'w' && aktif !== 'ana') { ev.preventDefault(); kapat(aktif); }
+  else if (ev.ctrlKey && /^[1-9]$/.test(ev.key)) { const k = ['ana', ...acik][+ev.key - 1]; if (k) { ev.preventDefault(); aktif = k; ciz(); } }
+  else if (ev.key === 'Escape') { paletKapat(); if (!menuSabit && menuAcik) { menuAcik = false; ciz(); } }
+});
+
+ciz();
+</script>
+
+<!--
+  v3 = KARMA (v1 + v2 + menü):
+  - Menü varsayılan KAPALI; ☰ / Ctrl+B / başlangıçtaki "Tüm ekranlar" geçici açar, seçimden sonra kapanır.
+    Kullanıcı menüsünde "Menü her zaman açık" anahtarı: sabitler (rol varsayılanı ayarlanabilir).
+  - Başlangıç sekmesi: büyük arama + son açılanlar + rolün kutucukları (bekleyen iş sayaçlı).
+  - Açık ekranlar üstte sekme; 8 sınırı - aşınca en uzun süredir bakılmayan kapanır, bildirilir.
+  - Arama, kutucuk ve menü aynı katalogdan (yetki süzgeci tek yerde); arama anahtar kelimeyi de tanır
+    ("transfüzyon" -> Kan Merkezi) - gerçekte ai_rehber_ekran.anahtar.
+  - Dar ekran / tablet: arama tek simge, menü üstte kayan panel.
+-->
+</body>
+</html>

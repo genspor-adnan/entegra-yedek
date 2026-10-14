@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Kartı v5A — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{padding:0;background:#fff;display:flex;flex-direction:column}
+
+  /* Sayfa başlığı (çerçevesiz, v4 dili) */
+  .bas{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap;flex:none}
+  .bas h1{margin:0;font-size:16px;color:var(--navy)}
+  .bas .ki{color:var(--muted);font-size:11.5px}
+  .bas .sure{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap}
+
+  /* HASTA BANDI - Ayarlar/hasta_bandi.html ile birebir ("alt" yerine "hb-alt": kartın alt çubuğuyla çakışıyordu) */
+  .hb{position:relative;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--line);
+    border-left:5px solid #2f6db3;font-size:11.5px}
+  .hb .foto{width:52px;flex:none;display:flex;align-items:center;justify-content:center;background:#eef3f9;
+    font-weight:bold;color:var(--navy);font-size:16px;border-right:1px solid var(--line2)}
+  .hb .kim{padding:7px 12px;min-width:230px;border-right:1px solid var(--line2)}
+  .hb .ad{font-size:15px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .hb .esad{font-size:10px;font-weight:bold;color:#8a6218;background:#fdf6e3;border:1px solid #f2ddbf;border-radius:3px;padding:0 5px}
+  .hb .hb-alt{color:var(--muted);margin-top:2px;white-space:nowrap}
+  .hb .hb-alt b{color:var(--ink);font-weight:normal}
+  .hb .kg{font-family:Consolas,monospace;font-weight:bold;color:#b3261e;border:1px solid #f3c4bf;background:#fbe9e7;border-radius:3px;padding:0 5px}
+  .hb .blok{padding:7px 12px;border-right:1px solid var(--line2);min-width:0}
+  .hb .blok .b{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .hb .riskler{display:flex;gap:4px;flex-wrap:wrap}
+  .hb .yer{white-space:nowrap}
+  .hb .yer b{color:var(--navy)}
+  .hb .hb-sag{margin-left:auto;display:flex;align-items:center;gap:4px;padding:0 10px}
+  .hb .ik{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .hb .ik:hover{background:#eef3f9}
+  .hb .ik .s{position:absolute;top:1px;right:0;background:#b3261e;color:#fff;border-radius:7px;font-size:9px;padding:0 4px;line-height:13px}
+  #hbAlerji{cursor:pointer}
+  .ayr{position:absolute;top:100%;left:290px;z-index:5;width:330px;background:#fff;border:1px solid var(--line);
+    border-radius:5px;box-shadow:0 10px 30px rgba(8,20,40,.2);padding:10px 12px}
+  .ayr h5{margin:0 0 6px;color:#b3261e;font-size:12px}
+  .ayr .s{padding:3px 0;border-top:1px solid #eef2f6}
+  .ayr .s:first-of-type{border-top:none}
+  @media(max-width:900px){.hb{flex-wrap:wrap}.hb .gizle-dar{display:none}.hb .kim{min-width:0;flex:1;border-right:none}.ayr{left:10px}}
+  .dizin .ayrac{height:1px;background:var(--line);margin:8px 14px}
+  .form2{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center;max-width:680px}
+  .form2 label{color:var(--muted);font-size:11.5px}
+  .form2 .inp{max-width:260px}
+  .perde2{position:fixed;inset:0;background:rgba(15,30,55,.25);z-index:20}
+  .cekmece{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:#fff;z-index:21;
+    box-shadow:-10px 0 30px rgba(8,20,40,.2);display:flex;flex-direction:column}
+  .cekmece .cb{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line2);font-weight:bold;color:var(--navy);font-size:14px}
+  .cekmece .cb .x{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:normal}
+  .cekmece .ci{flex:1;overflow:auto;padding:12px 16px}
+  .cekmece .sat2{padding:7px 0;border-bottom:1px solid #eef2f6}
+  .duzen{flex:1;display:grid;grid-template-columns:170px minmax(0,1fr) 280px;min-height:0}
+
+  /* Sol: bölüm dizini (sekme değil - tıklayınca o bölüme kayar) */
+  .dizin{border-right:1px solid var(--line2);padding:12px 0;overflow:auto;background:#fbfcfe}
+  .dizin a{display:flex;align-items:center;gap:7px;padding:6px 14px;color:#4d5d6e;text-decoration:none;cursor:pointer;border-left:3px solid transparent}
+  .dizin a:hover{background:#f0f5fb}
+  .dizin a.on{color:var(--navy);font-weight:bold;border-left-color:var(--accent);background:#eef4fc}
+  .dizin .d{width:15px;height:15px;border-radius:50%;flex:none;border:1.5px solid #b8c2cc;font-size:9px;
+    display:flex;align-items:center;justify-content:center;color:#fff}
+  .dizin .d.ok{background:#2e7d46;border-color:#2e7d46}
+  .dizin .d.uy{background:#d9a12b;border-color:#d9a12b}
+  .dizin .d.kir{background:#b3261e;border-color:#b3261e}
+  .dizin .say{margin-left:auto;font-size:10px;color:var(--muted);font-weight:normal}
+
+  /* Orta: tek kayan sayfa */
+  .sayfa{overflow:auto;padding:4px 22px 90px;scroll-behavior:smooth}
+  .bolum{padding:14px 0 6px;border-bottom:1px solid var(--line2)}
+  .bolum:last-child{border-bottom:none}
+  .bolum h2{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;color:var(--navy)}
+  .bolum h2 .ek{margin-left:auto;font-weight:normal;font-size:11px;color:var(--accent);cursor:pointer}
+  .bolum h2 .ek + .ek{margin-left:12px}
+  .metin{border:1px solid var(--line);border-radius:3px;padding:7px 9px;line-height:1.55;font-size:12px;background:#fff;min-height:34px}
+  .metin.bos{color:var(--muted);font-style:italic}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .etiket{font-size:10.5px;color:var(--muted);margin:6px 0 3px}
+  .vitaller{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .vt{border:1px solid var(--line);border-radius:3px;padding:5px 8px}
+  .vt .b{font-size:10px;color:var(--muted)}
+  .vt .d{font-size:14px;font-weight:bold;color:var(--navy);font-family:Consolas,monospace}
+  .vt.uy{border-color:#f2ddbf;background:#fdf6e3}
+  .vt.uy .d{color:#8a6218}
+  .fm td:first-child{font-weight:bold;color:#2c4a6b;width:140px}
+  .fm td{white-space:normal}
+  .ekle-satir{color:var(--accent);padding:6px 0;cursor:pointer;font-size:11.5px}
+  .karar{display:flex;gap:6px;flex-wrap:wrap}
+  .karar span{border:1px solid var(--line);border-radius:3px;padding:4px 11px;background:#fff}
+  .karar span.on{background:#b3261e;border-color:#b3261e;color:#fff;font-weight:bold}
+
+  /* Sağ: sabit hasta bilgisi */
+  .yan{border-left:1px solid var(--line2);overflow:auto;background:#fbfcfe}
+  .yan .k{padding:10px 14px;border-bottom:1px solid var(--line2)}
+  .yan .kb{font-size:10.5px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+  .yan .sat{padding:3px 0;font-size:11.5px}
+  .yan .sat+.sat{border-top:none}
+  .yan .soluk{color:var(--muted);font-size:10.5px}
+
+  /* Alt sabit eylem çubuğu */
+  .alt{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;
+    border-top:1px solid var(--line);box-shadow:0 -4px 12px rgba(20,40,70,.06);flex:none;flex-wrap:wrap}
+  .alt .kontrol{display:flex;gap:10px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .alt .kontrol b{color:var(--ok)}
+  .alt .kontrol b.uy{color:var(--uyari)}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4caf6e,#2e7d46);color:#fff;font-weight:bold}
+
+  @media(max-width:1200px){.duzen{grid-template-columns:150px minmax(0,1fr)}.yan{display:none}}
+  @media(max-width:800px){.duzen{grid-template-columns:1fr}.dizin{display:none}.vitaller{grid-template-columns:repeat(3,1fr)}.ikili{grid-template-columns:1fr}}
+  .gecis{position:fixed;right:12px;bottom:12px;z-index:30;background:#1f2d3a;color:#c9d6e6;border-radius:16px;
+    padding:5px 6px 5px 12px;font-size:11px;display:flex;gap:4px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .gecis a{color:#c9d6e6;text-decoration:none;padding:2px 9px;border-radius:12px}
+  .gecis a.on{background:#2f6db3;color:#fff;font-weight:bold}
+  .alt.ust-cubuk{position:static;bottom:auto;padding:6px 16px;border-top:none;border-bottom:1px solid var(--line);
+    box-shadow:none;background:#f8fafc}
+</style>
+</head>
+<body>
+
+<!-- HASTA BANDI (ortak bileşen, Ayarlar/hasta_bandi.html ile aynı) -->
+<div class="hb">
+  <div class="foto">MK</div>
+  <div class="kim">
+    <div class="ad">Mehmet KAYA <span class="esad" title="Bu kurumda aynı ad soyadlı 2 hasta daha var">AYNI AD ×2</span></div>
+    <div class="hb-alt"><b>58 E</b> · <b>SGK</b> (aktif)</div>
+    <div class="hb-alt">D 104882 · P 2026/20390</div>
+  </div>
+  <div class="blok">
+    <div><span class="kg">A Rh(+)</span></div>
+    <div class="hb-alt">174 cm · 86 kg · VKİ 28,4</div>
+  </div>
+  <div class="blok">
+    <div class="b">Alerji / Kronik</div>
+    <div class="riskler">
+      <span class="rz kir" id="hbAlerji">⚠ Penisilin +1</span>
+      <span class="rz sari">DM tip 2</span><span class="rz sari">HT</span><span class="rz sari">Hiperlipidemi</span>
+    </div>
+  </div>
+  <div class="blok" style="flex:1">
+    <div class="b">Uyarılar</div>
+    <div class="riskler">
+      <span class="rz kir">Panik sonuç: Troponin</span>
+      <span class="rz mor">Antikoagülan yok</span>
+    </div>
+  </div>
+  <div class="blok gizle-dar">
+    <div class="b">Şu an</div>
+    <div class="yer"><b>Dahiliye polikliniği</b></div>
+    <div class="hb-alt">Uzm. Dr. Ali KOÇ · 10:28'den beri</div>
+  </div>
+  <div class="ayr" id="hbAyr" hidden>
+    <h5>⚠ Alerjiler (2)</h5>
+    <div class="s"><b>Penisilin</b> · ilaç · ağır · anafilaksi <span class="sonuk">· 2019, e-Nabız</span></div>
+    <div class="s"><b>Lateks</b> · madde · orta · kontakt dermatit <span class="sonuk">· 2024, kurum</span></div>
+  </div>
+</div>
+
+<div class="alt ust-cubuk">
+  <div class="kontrol">
+    <span>Tamamlama: <b>Tanı ✓</b></span><span><b>Şikâyet ✓</b></span><span><b class="uy">Reçete imzasız</b></span><span><b class="uy">İstem 3/5 sonuç</b></span>
+  </div>
+  <div class="sp"></div>
+  <div class="btn">🖨 Yazdır ▾</div>
+  <div class="btn">🤖 AI özet</div>
+  <div class="btn primary">💾 Kaydet</div>
+  <div class="btn ok">✔ Muayeneyi Tamamla</div>
+</div>
+
+<div class="duzen">
+  <nav class="dizin" id="dizin">
+    <a data-git="sikayet" class="on"><span class="d ok">✓</span>Şikâyet, hikâye</a>
+    <a data-git="vital"><span class="d uy">!</span>Vital</a>
+    <a data-git="fizik"><span class="d ok">✓</span>Fizik muayene</a>
+    <a data-git="tani"><span class="d ok">✓</span>Tanı<span class="say">3</span></a>
+    <a data-git="istem"><span class="d kir">!</span>İstem, sonuç<span class="say" title="5 istemin 3'ünün sonucu geldi">3/5</span></a>
+    <a data-git="recete"><span class="d"></span>Reçete<span class="say">taslak</span></a>
+    <a data-git="karar"><span class="d"></span>Değerlendirme / Sonuç</a>
+    <div class="ayrac"></div>
+    <a data-pnl="rapor">📄 Rapor</a>
+    <a data-pnl="sevk">↗ Sevk</a>
+    <a data-pnl="kons">🤝 Konsültasyon<span class="say">1</span></a>
+    <a data-pnl="islem">₺ İşlem &amp; Ücret</a>
+    <a data-pnl="gecmis">🕘 Geçmiş<span class="say">12</span></a>
+    <a data-pnl="dis">🧾 Dış tetkik bilgileri<span class="say">2</span></a>
+    <a data-pnl="dosya">📎 Dosyalar<span class="say">4</span></a>
+    <a data-pnl="enabiz">🌐 e-Nabız<span class="say">✓</span></a>
+  </nav>
+
+  <main class="sayfa" id="sayfa">
+
+    <section class="bolum" id="sikayet">
+      <h2>Şikâyet ve hikâye <span class="ek">📋 Önceki muayeneden</span><span class="ek">🎙 Dikte</span></h2>
+      <div class="metin">Göğüste baskı hissi, 2 saattir; sol kola yayılıyor. Terleme, bulantı.</div>
+      <div class="etiket">Hikâye</div>
+      <div class="metin">Sabah 08:30'da istirahatte başlamış. Daha önce benzer ağrı yok. DM ve HT tanılı, ilaçlarını düzenli kullanıyor. Sigara 30 paket-yıl.</div>
+    </section>
+
+    <section class="bolum" id="vital">
+      <h2>Vital bulgular <span class="ek">＋ Yeni ölçüm</span></h2>
+      <div class="vitaller">
+        <div class="vt uy"><div class="b">TA</div><div class="d">158/96</div></div>
+        <div class="vt"><div class="b">Nabız</div><div class="d">96</div></div>
+        <div class="vt"><div class="b">SpO₂</div><div class="d">%95</div></div>
+        <div class="vt"><div class="b">Ateş</div><div class="d">36,8</div></div>
+        <div class="vt"><div class="b">Solunum</div><div class="d">20</div></div>
+        <div class="vt"><div class="b">Ağrı</div><div class="d">7/10</div></div>
+      </div>
+    </section>
+
+    <section class="bolum" id="fizik">
+      <h2>Fizik muayene <span class="ek">Şablon: Kardiyovasküler ▾</span></h2>
+      <table class="fm">
+        <tr><td>Genel durum</td><td>Orta, bilinç açık, terli</td></tr>
+        <tr><td>Kardiyovasküler</td><td>S1 S2 ritmik, ek ses yok, üfürüm yok</td></tr>
+        <tr><td>Solunum</td><td>Bilateral eşit, ral yok</td></tr>
+        <tr><td>Ekstremite</td><td>Ödem yok, periferik nabızlar alınıyor</td></tr>
+      </table>
+      <div class="ekle-satir">＋ Sistem ekle</div>
+    </section>
+
+    <section class="bolum" id="tani">
+      <h2>Tanı (ICD-10) <span class="ek">🔍 Tanı ara</span></h2>
+      <table>
+        <thead><tr><th>Kod</th><th>Tanı</th><th>Tür</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><b>I21.0</b></td><td>Ön duvar akut transmural miyokard enfarktüsü</td><td><span class="rz mavi">Ana · ön tanı</span></td><td>✕</td></tr>
+          <tr><td>E11</td><td>Tip 2 diabetes mellitus</td><td><span class="rz">Ek · kronik</span></td><td>✕</td></tr>
+          <tr><td>I10</td><td>Esansiyel hipertansiyon</td><td><span class="rz">Ek · kronik</span></td><td>✕</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="bolum" id="istem">
+      <h2>İstem ve sonuçlar <span class="rz mavi" title="5 istemin 3'ünün sonucu geldi">3/5 sonuç</span> <span class="ek">＋ Laboratuvar</span><span class="ek">＋ Görüntüleme</span><span class="ek">＋ Konsültasyon</span></h2>
+      <table>
+        <thead><tr><th>İstem</th><th>Saat</th><th>Durum</th><th>Sonuç</th></tr></thead>
+        <tbody>
+          <tr class="teh"><td>Troponin T hs</td><td>10:31</td><td><span class="rz ok">Sonuçlandı</span></td><td><b style="color:#b3261e">412 ng/L · panik</b> <span class="rz kir">teyit edildi</span></td></tr>
+          <tr><td>EKG</td><td>10:29</td><td><span class="rz ok">Çekildi</span></td><td>V1–V4 ST elevasyonu</td></tr>
+          <tr><td>Kardiyak panel (CK-MB, BNP)</td><td>10:31</td><td><span class="rz ok">Sonuçlandı</span></td><td>CK-MB 38 U/L (H) · BNP 180</td></tr>
+          <tr><td>Akciğer PA</td><td>10:33</td><td><span class="rz sari">Bekliyor</span></td><td class="sonuk">—</td></tr>
+          <tr><td>Konsültasyon · Kardiyoloji</td><td>10:36</td><td><span class="rz mavi">Geliyor</span></td><td class="sonuk">Dr. B. Tan · çok acil</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="bolum" id="recete">
+      <h2>Reçete <span class="ek">＋ İlaç</span><span class="ek">e-Reçete gönder</span></h2>
+      <table>
+        <thead><tr><th>İlaç</th><th>Doz</th><th>Kullanım</th><th>Kutu</th></tr></thead>
+        <tbody>
+          <tr><td>Asetilsalisilik asit 300 mg</td><td>1 × 1</td><td>Çiğnenerek, hemen</td><td>1</td></tr>
+          <tr><td>Klopidogrel 75 mg</td><td>4 tb yükleme</td><td>Ağızdan</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div class="etiket">Etkileşim / alerji kontrolü: temiz · reçete imzasız</div>
+    </section>
+
+    <section class="bolum" id="karar">
+      <h2>Değerlendirme / Sonuç</h2>
+      <div class="form2">
+        <label>Çıkış şekli</label>
+        <div class="inp combo">Kurum dışı sevk</div>
+
+        <label>Kontrol ihtiyacı</label>
+        <div class="karar" id="kontrol"><span class="on" data-v="0">Yok</span><span data-v="1">Var</span></div>
+
+        <label class="kz" hidden>Kontrol zamanı</label>
+        <div class="inp combo kz" hidden>Ekim 2026</div>
+
+        <label>Hastaya ameliyat ya da girişim planlıyor musunuz?</label>
+        <div class="karar"><span>Evet</span><span class="on">Hayır</span></div>
+      </div>
+      <div class="ikili" style="margin-top:10px">
+        <div><div class="etiket">Sevk edilen</div><div class="metin">Şehir Hastanesi · Kardiyoloji (primer PKG)</div></div>
+        <div><div class="etiket">Ulaşım</div><div class="metin">112 çağrıldı · 10:38</div></div>
+      </div>
+      <div class="etiket">Değerlendirme / plan</div>
+      <div class="metin">Akut ön duvar MI. ASA + klopidogrel yüklendi, primer PKG için sevk. Kardiyoloji konsültasyonu yolda.</div>
+    </section>
+
+  </main>
+
+  <aside class="yan">
+    <div class="k">
+      <div class="kb">Kullandığı ilaçlar <span class="soluk">· e-Nabız</span></div>
+      <div class="sat">Metformin 1000 mg 2×1</div>
+      <div class="sat">Ramipril 5 mg 1×1</div>
+      <div class="sat">Atorvastatin 20 mg 1×1</div>
+    </div>
+    <div class="k">
+      <div class="kb">Son sonuçlar</div>
+      <div class="sat"><b style="color:#b3261e">Troponin 412</b> <span class="soluk">bugün 10:42</span></div>
+      <div class="sat">HbA1c %8,1 <span class="soluk">08.2026</span></div>
+      <div class="sat">LDL 142 <span class="soluk">08.2026</span></div>
+    </div>
+    <div class="k">
+      <div class="kb">Önceki muayeneler</div>
+      <div class="sat">02.09.2026 · Dahiliye · <span class="soluk">DM kontrol</span></div>
+      <div class="sat">11.06.2026 · Dahiliye · <span class="soluk">HT kontrol</span></div>
+      <div class="sat">03.02.2026 · Göz · <span class="soluk">retinopati taraması</span></div>
+    </div>
+  </aside>
+</div>
+
+<div class="perde2" id="perde" hidden></div>
+<div class="cekmece" id="cekmece" hidden>
+  <div class="cb"><span id="cBas"></span><span class="x" id="cKapat">✕</span></div>
+  <div class="ci" id="cIc"></div>
+</div>
+
+
+<script>
+// Dizin: tıklayınca bölüme kayar; kaydırınca görünen bölüm işaretlenir (sekme değil, aynı sayfa).
+const sayfa = document.getElementById('sayfa');
+const linkler = [...document.querySelectorAll('#dizin a[data-git]')];
+linkler.forEach(a => a.addEventListener('click', () => {
+  sayfa.scrollTo({ top: document.getElementById(a.dataset.git).offsetTop - 8 });
+}));
+sayfa.addEventListener('scroll', () => {
+  const y = sayfa.scrollTop + 40;
+  let aktif = linkler[0];
+  linkler.forEach(a => { if (document.getElementById(a.dataset.git).offsetTop <= y) aktif = a; });
+  if (sayfa.scrollTop + sayfa.clientHeight >= sayfa.scrollHeight - 4) aktif = linkler[linkler.length - 1];
+  linkler.forEach(a => a.classList.toggle('on', a === aktif));
+});
+const hbAyr = document.getElementById('hbAyr');
+document.getElementById('hbAlerji').addEventListener('click', ev => { ev.stopPropagation(); hbAyr.hidden = !hbAyr.hidden; });
+document.addEventListener('click', () => hbAyr.hidden = true);
+
+// Kontrol ihtiyacı: "Var" seçilince Kontrol zamanı görünür.
+document.querySelectorAll('.karar').forEach(g => g.addEventListener('click', ev => {
+  const sp = ev.target.closest('span'); if (!sp) return;
+  [...g.children].forEach(x => x.classList.toggle('on', x === sp));
+  if (g.id === 'kontrol') document.querySelectorAll('.kz').forEach(x => x.hidden = sp.dataset.v !== '1');
+}));
+
+// Alt menü: bölüm değil, sağdan açılan panel (muayene açık kalır).
+const PANELLER = {
+  rapor:  ['📄 Rapor', ['İstirahat raporu · ＋ yeni', 'Sağlık kurulu raporu · ＋ yeni', 'İlaç raporu · DM (geçerli 2027)']],
+  sevk:   ['↗ Sevk', ['Kurum dışı · Şehir Hastanesi Kardiyoloji · 10:38', 'Ulaşım: 112 · sevk formu e-imza bekliyor']],
+  kons:   ['🤝 Konsültasyon', ['Kardiyoloji · çok acil · Dr. S. Tan üstlendi 10:41', '＋ Yeni konsültasyon iste']],
+  islem:  ['₺ İşlem & Ücret', ['Muayene · SGK', 'EKG · SGK', 'Troponin, kardiyak panel · SGK', 'Hasta payı: 0 ₺']],
+  gecmis: ['🕘 Geçmiş', ['02.09.2026 · Dahiliye · DM kontrol', '11.06.2026 · Dahiliye · HT kontrol', '03.02.2026 · Göz · retinopati taraması', '… 9 kayıt daha']],
+  dis:    ['🧾 Dış tetkik bilgileri', ['Özel X Lab · HbA1c %8,1 · 08.2026', 'Özel Y Görüntüleme · Karotis Doppler · 05.2026']],
+  dosya:  ['📎 Dosyalar', ['EKG 13.10 10:29 (PDF)', 'Acil yönlendirme notu', 'Kimlik fotokopisi', 'Önceki epikriz (PDF)']],
+  enabiz: ['🌐 e-Nabız', ['Muayene paketi: tamamlanınca gönderilir', 'Kullandığı ilaçlar: e-Nabız ✓', 'Hasta gizlilik izni: var']],
+};
+const perde = document.getElementById('perde'), cek = document.getElementById('cekmece');
+document.querySelectorAll('#dizin a[data-pnl]').forEach(a => a.addEventListener('click', () => {
+  const [bas, sat] = PANELLER[a.dataset.pnl];
+  document.getElementById('cBas').textContent = bas;
+  document.getElementById('cIc').innerHTML = sat.map(x => `<div class="sat2">${x}</div>`).join('');
+  perde.hidden = cek.hidden = false;
+}));
+[perde, document.getElementById('cKapat')].forEach(x => x.addEventListener('click', () => perde.hidden = cek.hidden = true));
+</script>
+
+<!--
+  v5A: düğme çubuğu hasta bandının hemen altında, tam genişlik (kontrol solda, düğmeler sağda).
+  v5 = v3 sekmesiz + hasta bandı:
+  - Sol menüde ayraç altına Rapor, Sevk, Konsültasyon, İşlem & Ücret, Geçmiş, Dış tetkik, Dosyalar, e-Nabız (sağdan panel).
+  - Bant kısayolları kaldırıldı (menüye geldi); uyarılar ikiye bölündü: Alerji / Kronik ve Uyarılar.
+  - İstem sayacı 3/5 = 5 istemin 3'ünün sonucu geldi.
+  - Karar -> Değerlendirme / Sonuç: çıkış şekli, kontrol ihtiyacı (+ zamanı), ameliyat / girişim planı.
+  SEKMESİZ MUAYENE (v2'de 5+ sekme vardı):
+  - Bütün muayene tek sayfa, klinik sırada: şikâyet → vital → fizik → tanı → istem → reçete → karar.
+    Hekim muayeneyi zaten bu sırayla yazar; sekmeler arası atlamak bir şeyi unutturuyordu.
+  - Sol dizin sekme değil, içindekiler: tıkla → bölüme kay; işaretler (✓ / ! / boş) eksiği gösterir.
+  - Sağ sütun hasta bilgisi her an görünür (alerji, ilaç, son sonuç, geçmiş) - v2'de bağlam şeridiydi.
+  - Alt çubuk sabit: Kaydet / Tamamla ve tamamlama kontrolü hep elde.
+  - Ekranın adı ve mavi başlık yok (v4 çerçevesiz dili); başlık = hasta adı.
+  - Dar ekranda sağ sütun, daha darda sol dizin gizlenir; tek sütun kalır.
+-->
+<div class="gecis">Karşılaştır: <a href="muayene_karti_v5a.html" class="on">A · üst çubuk</a><a href="muayene_karti_v5b.html" class="">B · bandın sağı</a><a href="muayene_karti_v5c.html" class="">C · sol menü</a></div>
+</body>
+</html>

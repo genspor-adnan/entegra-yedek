@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Ekran v2 — Kutucuk + Görev Çubuğu — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#d7e7fb; --head:#f3f6fa;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;
+    display:flex;flex-direction:column}
+
+  /* İnce üst çubuk: yalnız arama ve kullanıcı */
+  .ust{display:flex;align-items:center;gap:12px;padding:0 12px;height:38px;background:#fff;border-bottom:1px solid var(--line);flex:none}
+  .logo{font-weight:bold;color:var(--navy);white-space:nowrap}
+  .ara{flex:1;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;
+    background:var(--head);border:1px solid var(--line);border-radius:14px;color:var(--muted);cursor:text}
+  .kbd{font-family:Consolas,monospace;font-size:10.5px;border:1px solid var(--line);border-radius:3px;padding:0 5px;margin-left:auto;color:var(--muted)}
+  .ust .sag{white-space:nowrap;color:var(--muted)}
+
+  .icerik{flex:1;position:relative}
+  .icerik iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:var(--bg)}
+
+  /* Başlangıç: modül kutucukları */
+  .ana{position:absolute;inset:0;overflow:auto;padding:28px 20px 40px}
+  .ana .ic{max-width:980px;margin:0 auto}
+  .ana h1{font-size:18px;color:var(--navy);margin:0 0 18px}
+  .moduller{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .modul{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .modul .bas{display:flex;align-items:center;gap:8px;padding:9px 12px;font-weight:bold;color:var(--navy);
+    background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2)}
+  .modul .bas .i{font-size:16px}
+  .modul .bas .rozet{margin-left:auto;background:#b3261e;color:#fff;border-radius:9px;padding:0 7px;font-size:10.5px}
+  .modul a{display:flex;justify-content:space-between;padding:6px 12px;color:var(--ink);text-decoration:none;cursor:pointer}
+  .modul a:hover{background:#f5f9fe;color:var(--accent)}
+  .modul a .s{color:var(--muted);font-size:10.5px}
+  .modul a .s.k{color:#b3261e;font-weight:bold}
+
+  /* Alt görev çubuğu: açık ekranlar */
+  .gorev{display:flex;align-items:center;gap:4px;padding:4px 8px;height:40px;background:#1c3352;flex:none;overflow-x:auto}
+  .gorev .ev{width:32px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+  .gorev .ev:hover,.gorev .ev.on{background:rgba(255,255,255,.16)}
+  .gorev .ayr{width:1px;height:22px;background:rgba(255,255,255,.2);margin:0 4px}
+  .pen{display:flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 10px;border-radius:4px;color:#c9d6e6;
+    cursor:pointer;white-space:nowrap;max-width:200px;border-bottom:2px solid transparent}
+  .pen:hover{background:rgba(255,255,255,.1)}
+  .pen.on{background:rgba(255,255,255,.18);color:#fff;border-bottom-color:#7fb3ec}
+  .pen .ad{overflow:hidden;text-overflow:ellipsis}
+  .pen .x{width:16px;height:16px;line-height:15px;text-align:center;border-radius:3px;opacity:.7}
+  .pen .x:hover{background:rgba(255,255,255,.2);opacity:1}
+  .gorev .bos{color:#8ea3bd;font-size:11px;padding-left:4px}
+
+  /* Komut paleti (v1 ile aynı davranış) */
+  .perde{position:fixed;inset:0;background:rgba(15,30,55,.35);display:none;justify-content:center;align-items:flex-start;padding-top:12vh;z-index:10}
+  .perde.acik{display:flex}
+  .palet{width:560px;max-width:calc(100% - 32px);background:#fff;border-radius:8px;box-shadow:0 18px 50px rgba(8,20,40,.35);overflow:hidden}
+  .palet input{width:100%;border:none;border-bottom:1px solid var(--line2);padding:14px 16px;font-size:15px;outline:none;font-family:inherit}
+  .liste{max-height:360px;overflow:auto;padding:6px 0}
+  .oge{display:flex;gap:10px;padding:7px 16px;cursor:pointer}
+  .oge .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .oge.sec{background:var(--sel)}
+  .yok{padding:16px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <div class="logo">🩺 Gentegre</div>
+  <div class="ara" id="araAc">🔍 Ara… <span class="kbd">Ctrl K</span></div>
+  <div class="sag">Dr. Selin TAN ▾</div>
+</div>
+
+<div class="icerik" id="icerik">
+  <div class="ana" data-k="ana"><div class="ic">
+    <h1>Günaydın, Dr. Selin TAN</h1>
+    <div class="moduller" id="moduller"></div>
+  </div></div>
+</div>
+
+<div class="gorev" id="gorev"></div>
+
+<div class="perde" id="perde">
+  <div class="palet">
+    <input id="sorgu" placeholder="Ekran adı yazın…" autocomplete="off">
+    <div class="liste" id="liste"></div>
+  </div>
+</div>
+
+<script>
+// Kutucuklar = yetkili modüller; içindeki satırlar = o modülün ekranları (sayaç sunucudan).
+const MODULLER = [
+  { ad:'Muayene', i:'🩺', rozet:3, ekranlar:[
+    { k:'muayene', ad:'Muayene Listesi', s:'12 hasta', url:'../Muayene/muayene_listesi.html' },
+    { k:'kons',    ad:'Konsültasyonlar', s:'3 bekliyor', kir:1, url:'../Muayene/konsultasyon_listesi.html' } ] },
+  { ad:'Yatan Hasta', i:'🛏', ekranlar:[
+    { k:'yatan', ad:'Yatan Hasta Listesi', s:'18 hasta', url:'../Yatan/yatan_hasta_listesi.html' },
+    { k:'yatak', ad:'Yatak Panosu', s:'4 boş', url:'../Yatan/yatak_panosu.html' } ] },
+  { ad:'Kan Merkezi', i:'🩸', rozet:1, ekranlar:[
+    { k:'kan',    ad:'Pano', s:'1 çok acil', kir:1, url:'../KanMerkezi/kan_merkezi_panosu.html' },
+    { k:'kanrez', ad:'Kan Rezervasyonu', s:'', url:'../KanMerkezi/kan_rezervasyon_v2.html' },
+    { k:'kabul',  ad:'Ünite Kabul', s:'', url:'../KanMerkezi/kan_unite_kabul.html' } ] },
+  { ad:'Ameliyathane', i:'🔪', ekranlar:[
+    { k:'ameliyat', ad:'Ameliyathane Panosu', s:'2 bugün', url:'../Ameliyathane/ameliyathane_panosu.html' } ] },
+  { ad:'Laboratuvar', i:'🧪', ekranlar:[
+    { k:'lab', ad:'Numune Kabul', s:'7 numune', url:'../Lab/lab_istem_numune_kabul.html' } ] },
+  { ad:'Finans', i:'💳', ekranlar:[
+    { k:'cari',  ad:'Cari Listesi', s:'', url:'../cari_liste_ekrani.html' },
+    { k:'satis', ad:'Satış Faturaları', s:'', url:'../fatura_satis_listesi.html' } ] },
+];
+const EKRANLAR = MODULLER.flatMap(m => m.ekranlar.map(e => ({ ...e, i:m.i, yol:m.ad })));
+
+let acik = [];        // açık ekranların sırası (görev çubuğu)
+let aktif = 'ana';
+const $ = id => document.getElementById(id);
+const kucuk = s => s.toLocaleLowerCase('tr');
+
+$('moduller').innerHTML = MODULLER.map(m => `
+  <div class="modul">
+    <div class="bas"><span class="i">${m.i}</span>${m.ad}${m.rozet ? `<span class="rozet">${m.rozet}</span>` : ''}</div>
+    ${m.ekranlar.map(e => `<a data-ac="${e.k}"><span>${e.ad}</span><span class="s${e.kir ? ' k' : ''}">${e.s}</span></a>`).join('')}
+  </div>`).join('');
+
+function ciz() {
+  $('gorev').innerHTML = `<div class="ev${aktif === 'ana' ? ' on' : ''}" data-git="ana" title="Başlangıç (Ctrl+Home)">🏠</div><div class="ayr"></div>`
+    + (acik.length ? acik.map(k => { const e = EKRANLAR.find(x => x.k === k);
+        return `<div class="pen${k === aktif ? ' on' : ''}" data-git="${k}" title="${e.yol} › ${e.ad}"><span>${e.i}</span><span class="ad">${e.ad}</span><span class="x" data-x="${k}">×</span></div>`; }).join('')
+      : '<span class="bos">Açık ekran yok — kutucuktan ya da Ctrl K ile açın</span>');
+  const kap = $('icerik');
+  acik.forEach(k => {
+    if (!kap.querySelector(`[data-k="${k}"]`)) {
+      const f = document.createElement('iframe'); f.src = EKRANLAR.find(e => e.k === k).url; f.dataset.k = k; kap.appendChild(f);
+    }
+  });
+  kap.querySelectorAll('[data-k]').forEach(el => {
+    if (el.dataset.k !== 'ana' && !acik.includes(el.dataset.k)) el.remove(); else el.hidden = el.dataset.k !== aktif;
+  });
+}
+function ac(k) { if (!acik.includes(k)) acik.push(k); aktif = k; ciz(); }
+function kapat(k) {
+  const i = acik.indexOf(k); acik.splice(i, 1);
+  if (aktif === k) aktif = acik[i] ?? acik[i - 1] ?? 'ana';
+  ciz();
+}
+
+$('moduller').addEventListener('click', ev => { const a = ev.target.closest('[data-ac]'); if (a) ac(a.dataset.ac); });
+$('gorev').addEventListener('click', ev => {
+  if (ev.target.dataset.x) return kapat(ev.target.dataset.x);
+  const g = ev.target.closest('[data-git]'); if (g) { aktif = g.dataset.git; ciz(); }
+});
+$('gorev').addEventListener('auxclick', ev => { const g = ev.target.closest('.pen'); if (g && ev.button === 1) kapat(g.dataset.git); });
+
+// Palet
+let sonuc = [], sec = 0;
+function paletCiz() {
+  const q = kucuk($('sorgu').value.trim());
+  sonuc = EKRANLAR.filter(e => !q || kucuk(e.ad + ' ' + e.yol).includes(q));
+  sec = Math.min(sec, Math.max(sonuc.length - 1, 0));
+  $('liste').innerHTML = sonuc.length ? sonuc.map((e, n) =>
+    `<div class="oge${n === sec ? ' sec' : ''}" data-n="${n}"><span>${e.i}</span><span>${e.ad}</span><span class="y">${e.yol}${acik.includes(e.k) ? ' · açık' : ''}</span></div>`).join('')
+    : '<div class="yok">Sonuç yok.</div>';
+}
+function paletAc() { $('perde').classList.add('acik'); $('sorgu').value = ''; sec = 0; paletCiz(); $('sorgu').focus(); }
+function paletKapat() { $('perde').classList.remove('acik'); }
+$('araAc').addEventListener('click', paletAc);
+$('perde').addEventListener('click', ev => { if (ev.target.id === 'perde') paletKapat(); });
+$('sorgu').addEventListener('input', () => { sec = 0; paletCiz(); });
+$('liste').addEventListener('click', ev => { const o = ev.target.closest('.oge'); if (o) { paletKapat(); ac(sonuc[+o.dataset.n].k); } });
+$('sorgu').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown') { sec = Math.min(sec + 1, sonuc.length - 1); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'ArrowUp') { sec = Math.max(sec - 1, 0); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'Enter' && sonuc[sec]) { const k = sonuc[sec].k; paletKapat(); ac(k); }
+  else if (ev.key === 'Escape') paletKapat();
+});
+document.addEventListener('keydown', ev => {
+  if ((ev.ctrlKey || ev.metaKey) && kucuk(ev.key) === 'k') { ev.preventDefault(); paletAc(); }
+  else if (ev.ctrlKey && ev.key === 'Home') { aktif = 'ana'; ciz(); }
+  else if (ev.altKey && kucuk(ev.key) === 'w' && aktif !== 'ana') { ev.preventDefault(); kapat(aktif); }
+});
+
+ciz();
+</script>
+
+<!--
+  v1'den farkı (ana_ekran_sekmeli.html):
+  - Açık ekranlar üstte sekme değil, ALTTA görev çubuğunda (Windows gibi); 🏠 her zaman ilk.
+  - Başlangıç = modül kutucukları: menüyü bilmeyen kullanıcı aramadan da bulur; satırda sayaç (bekleyen iş).
+  - Ctrl K aynı; üst çubuk ince ve beyaz, içerik alanı büyük.
+-->
+</body>
+</html>

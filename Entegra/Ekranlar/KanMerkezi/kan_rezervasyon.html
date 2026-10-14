@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Kan Rezervasyonu — Mockup (Gentegre AI · Kan Merkezi)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .hasta-serit{display:flex;gap:18px;align-items:center;padding:8px 12px;background:#fbfcfe;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap;font-size:11.5px}
+  .hasta-serit b{color:var(--navy)}
+  .kg{font-family:Consolas,monospace;font-size:15px;font-weight:bold;color:#b3261e;
+    border:1px solid #f3c4bf;background:#fbe9e7;border-radius:4px;padding:2px 10px}
+  .kg.yok{color:var(--muted);background:#f4f6f9;border-color:var(--line)}
+  .onay{display:inline-flex;gap:12px;align-items:center}
+  .onay span{display:inline-flex;gap:4px;align-items:center}
+  .cb{width:13px;height:13px;border:1px solid #9aa7b4;border-radius:2px;background:#fff;display:inline-block}
+  .cb.on{background:#2f6db3;border-color:#2f6db3;box-shadow:inset 0 0 0 2px #fff}
+  .rd{width:13px;height:13px;border:1px solid #9aa7b4;border-radius:50%;background:#fff;display:inline-block}
+  .rd.on{background:#2f6db3;border-color:#2f6db3;box-shadow:inset 0 0 0 3px #fff}
+  .sayac{display:flex;align-items:center;border:1px solid var(--line);border-radius:3px;background:#fff;min-height:27px}
+  .sayac i{font-style:normal;padding:0 8px;color:var(--muted);border-right:1px solid var(--line2)}
+  .sayac i:last-child{border-right:none;border-left:1px solid var(--line2)}
+  .sayac b{flex:1;text-align:center;font-family:Consolas,monospace}
+  .sayac small{color:var(--muted);padding-right:6px}
+  .urun-tab td .inp,.urun-tab td .sayac{min-height:24px}
+  .stok{font-family:Consolas,monospace}
+  .stok.az{color:var(--uyari);font-weight:bold}
+  .stok.yok{color:var(--kirmizi);font-weight:bold}
+  .soru{display:grid;grid-template-columns:1fr 130px 1.1fr;gap:6px 12px;align-items:center;padding:8px 12px}
+  .soru>div:nth-child(3n+1){font-size:11.5px}
+  .lab{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line2)}
+  .lab>div{background:#fff;padding:7px 10px}
+  .lab .b{font-size:10.5px;color:var(--muted)}
+  .lab .d{font-size:14px;font-weight:bold;color:var(--navy)}
+  .lab .d.dus{color:var(--kirmizi)}
+  .lab .a{font-size:10.5px;color:var(--muted)}
+  .akis{display:flex;gap:0;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{flex:1;min-width:110px;text-align:center;font-size:11px;padding:6px 4px;border:1px solid var(--line2);
+    background:#f8fafc;color:var(--muted);position:relative}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad.ok{background:#e2f3e8;color:#2e7d46;font-weight:bold}
+  .akis .ad.su{background:#eef4fc;color:#2f6db3;font-weight:bold;box-shadow:inset 0 -3px 0 #2f6db3}
+  @media(max-width:1000px){.soru{grid-template-columns:1fr}.lab{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- ======================================================= 1) İSTEM PENCERESİ -->
+<div class="win" style="max-width:1100px">
+  <div class="title">🩸 Hasta Kan Rezervasyonu
+    <span class="sp">Muayene / Yatış / Ameliyat › Kan Rezervasyonu · Ayşe DEMİR · Y-2026-0431</span></div>
+
+  <div class="hasta-serit">
+    <span>Hasta <b>Ayşe DEMİR</b> · K · 54 yaş · 68 kg</span>
+    <span>Yatış <b>Genel Cerrahi · B-212/1</b></span>
+    <span>Planlı ameliyat <b>14.10.2026 09:00 · Kolesistektomi (açık)</b></span>
+    <span style="margin-left:auto">Kan grubu</span>
+    <span class="kg">B Rh(+)</span>
+    <span class="rz ok">2 ayrı numunede doğrulandı · 02.10.2026</span>
+  </div>
+
+  <div class="alanlar dort">
+    <label>Aciliyet</label>
+    <div class="inp combo">Rutin (24 saat içinde)</div>
+    <label>Durum</label>
+    <div class="onay">
+      <span><i class="cb"></i> Otolog</span>
+      <span><i class="cb on"></i> Doğum yapmış / gebelik öyküsü</span>
+    </div>
+
+    <label>Bölüm *</label>
+    <div class="inp combo">Genel Cerrahi</div>
+    <label>Birim *</label>
+    <div class="inp combo">Genel Cerrahi Servisi (B Blok 2. kat)</div>
+
+    <label>İsteyen hekim *</label>
+    <div class="inp combo">Op. Dr. Kemal ARSLAN</div>
+    <label>Kullanım tarihi *</label>
+    <div class="inp">14.10.2026 08:00 <span class="sonuk" style="margin-left:auto">📅</span></div>
+
+    <label>İlgili işlem</label>
+    <div class="inp combo tam" style="grid-column:2/-1">Kolesistektomi (açık) · ameliyat planı A-2026-0388 <span class="rz mavi" style="margin-left:8px">ameliyattan geldi</span></div>
+
+    <label>Açıklama</label>
+    <div class="inp tam" style="grid-column:2/-1">Preop Hb 8,4; olası kanama riski nedeniyle hazırda bulundurulsun.</div>
+  </div>
+
+  <div class="grp" style="margin-top:0">
+    <h4>İstenen kan ürünleri <span class="mini">bir istemde birden çok ürün · stok Kan Merkezi'nden anlık</span></h4>
+    <div class="dg">
+      <table class="urun-tab">
+        <thead><tr>
+          <th>Kan ürünü *</th><th>Kan grubu</th><th>Endikasyon *</th><th>Endikasyon açıklaması</th>
+          <th class="sag">Miktar *</th><th class="sag">Birim hacim</th><th>İşlem</th><th class="sag">Uygun stok</th><th></th>
+        </tr></thead>
+        <tbody>
+          <tr class="sel">
+            <td>Eritrosit süspansiyonu (lökositten arındırılmış)</td>
+            <td><b>B Rh(+)</b></td>
+            <td>Cerrahi kan kaybı beklenen preop anemi</td>
+            <td class="sonuk">Hb 8,4 g/dL</td>
+            <td><div class="sayac"><i>−</i><b>2</b><small>ünite</small><i>+</i></div></td>
+            <td class="sag">300 ml</td>
+            <td>Cross-match</td>
+            <td class="sag stok">14</td>
+            <td>✕</td>
+          </tr>
+          <tr>
+            <td>Taze donmuş plazma</td>
+            <td><b>B</b> <span class="sonuk">(AB uyumlu)</span></td>
+            <td>Masif transfüzyon hazırlığı</td>
+            <td class="sonuk">—</td>
+            <td><div class="sayac"><i>−</i><b>2</b><small>ünite</small><i>+</i></div></td>
+            <td class="sag">200 ml</td>
+            <td>Grup uygunluğu</td>
+            <td class="sag stok az">3</td>
+            <td>✕</td>
+          </tr>
+          <tr>
+            <td colspan="9" class="sonuk">＋ Ürün ekle (Eritrosit · TDP · Trombosit (havuz / aferez) · Kriyopresipitat · Tam kan)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not"><b>Ürün grubu hastanın doğrulanmış kan grubundan gelir</b>, elle seçilmez;
+      plazma için uyumlu gruplar (AB) uygun stokta sayılır. Işınlama, yıkama, CMV negatif gibi
+      <b>özel işlemler</b> ürün satırında seçilir (satır seçiliyken alt panel).</div>
+  </div>
+
+  <div class="grp">
+    <h4>Son laboratuvar <span class="mini">endikasyon için · LBYS'den otomatik</span></h4>
+    <div class="lab">
+      <div><div class="b">Hemoglobin</div><div class="d dus">8,4 g/dL</div><div class="a">13.10 06:10 · ↓</div></div>
+      <div><div class="b">Hematokrit</div><div class="d dus">%25,9</div><div class="a">13.10 06:10</div></div>
+      <div><div class="b">Trombosit</div><div class="d">212 ×10³/µL</div><div class="a">13.10 06:10</div></div>
+      <div><div class="b">INR</div><div class="d">1,1</div><div class="a">12.10 18:40</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Hasta özgeçmişi <span class="mini"><span class="btn" style="display:inline-flex;padding:2px 8px">Önceki cevapları yükle · 02.10.2026</span></span></h4>
+    <div class="soru">
+      <div>Daha önce transfüzyon yapıldı mı?</div>
+      <div class="onay"><span><i class="rd on"></i> Evet</span><span><i class="rd"></i> Hayır</span></div>
+      <div class="inp">2019, Ankara Şehir H. · 2 ünite ES</div>
+
+      <div>Hiç transfüzyon reaksiyonu oldu mu?</div>
+      <div class="onay"><span><i class="rd"></i> Evet</span><span><i class="rd on"></i> Hayır</span></div>
+      <div class="inp sonuk">Açıklama...</div>
+
+      <div>Diğer öyküler / özel durumlar</div>
+      <div class="onay"><span><i class="rd"></i> Evet</span><span><i class="rd on"></i> Hayır</span></div>
+      <div class="inp sonuk">Açıklama...</div>
+    </div>
+  </div>
+
+  <div class="uyari sari">
+    <span>⚠</span>
+    <div><b>Doğum yapmış hasta + önceki transfüzyon:</b> alloantikor riski. Kan Merkezi
+      cross-match öncesi <b>antikor taraması</b> ister; istem kaydedilince tarama istemi
+      otomatik eklenir (yeni numune: 1 adet EDTA mor kapak, 72 saat geçerli).</div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div><b>Kan transfüzyonu bilgilendirilmiş onam formu</b> bu yatış için imzalı değil.
+      İstem kaydedilir; ürün <b>hastaya verilmeden önce</b> onam zorunlu (form motorundan
+      SMS ya da tablette imza).</div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> İstem Formu</div>
+    <div class="btn primary">💾 Kaydet ve Kan Merkezi'ne Gönder</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kan grubu: 2 ayrı numune kuralı</span><span>·</span>
+    <span>Numune geçerliliği 72 saat</span><span>·</span>
+    <span>İstem ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<!-- ============================================= 2) KAN GRUBU YOKKEN İSTEM -->
+<div class="perde">
+  <div class="modal genis">
+    <div class="mb">🩸 Hasta Kan Rezervasyonu <span class="sp">kan grubu doğrulanmamış hasta · ÇOK ACİL</span></div>
+    <div class="hasta-serit">
+      <span>Hasta <b>Mehmet KAYA</b> · E · 38 yaş · Acil Servis (trafik kazası)</span>
+      <span style="margin-left:auto">Kan grubu</span>
+      <span class="kg yok">bilinmiyor</span>
+    </div>
+    <div class="alanlar dort">
+      <label>Aciliyet</label><div class="inp combo">Çok acil — cross-match beklenmeden</div>
+      <label>Kan ürünü</label><div class="inp combo">Eritrosit süspansiyonu · 0 Rh(−)</div>
+      <label>Miktar</label><div class="sayac"><i>−</i><b>2</b><small>ünite</small><i>+</i></div>
+      <label>Uygun stok</label><div class="inp ro">0 Rh(−) ES · <b style="margin-left:4px">6 ünite</b></div>
+    </div>
+    <div class="uyari kir">
+      <span>⚠</span>
+      <div><b>Cross-match'siz verme hekim sorumluluğundadır.</b> Kaydette hekim gerekçesi ve
+        e-imza istenir; aynı anda kan grubu + cross-match numunesi alınır, sonuç gelince
+        uyumsuzluk varsa Kan Merkezi ve servis anında uyarılır. Kan grubu elle girilemez —
+        ilk sonuç gelene kadar hasta <b>0 Rh(−) / AB plazma</b> alır.</div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="sp"></div>
+      <div class="btn danger">Gerekçe ve İmza ile Gönder</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== 3) İSTEMİN SÜRECİ -->
+<div class="win" style="max-width:1100px">
+  <div class="title">📋 Hastanın Kan İstemleri <span class="sp">Ayşe DEMİR · yatış kartı › Kan sekmesi</span></div>
+  <div class="akis">
+    <div class="ad ok">İstem</div>
+    <div class="ad ok">Numune alındı</div>
+    <div class="ad su">Cross-match</div>
+    <div class="ad">Rezerve (hazır)</div>
+    <div class="ad">Çıkış / teslim</div>
+    <div class="ad">Transfüzyon izlemi</div>
+    <div class="ad">Kullanıldı / iade / imha</div>
+  </div>
+  <div class="dg">
+    <table>
+      <thead><tr><th>İstem</th><th>Tarih</th><th>Ürün</th><th class="sag">İstenen</th><th class="sag">Rezerve</th>
+        <th class="sag">Verilen</th><th>Ünite no</th><th>Durum</th><th>Rezerv bitişi</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td>KR-2026-0912</td><td>13.10 10:42</td><td>Eritrosit süsp. B Rh(+)</td><td class="sag">2</td>
+          <td class="sag">0</td><td class="sag">0</td><td class="sonuk">—</td><td><span class="rz mavi">Cross-match'te</span></td><td class="sonuk">—</td></tr>
+        <tr><td>KR-2026-0912</td><td>13.10 10:42</td><td>TDP B</td><td class="sag">2</td>
+          <td class="sag">2</td><td class="sag">0</td><td>2610-04471 · 2610-04480</td><td><span class="rz ok">Hazır</span></td><td>16.10 10:42</td></tr>
+        <tr class="pasif"><td>KR-2026-0855</td><td>04.10 22:15</td><td>Eritrosit süsp. B Rh(+)</td><td class="sag">1</td>
+          <td class="sag">1</td><td class="sag">1</td><td>2609-11873</td><td><span class="rz pas">Kullanıldı · reaksiyon yok</span></td><td class="sonuk">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="statusbar">
+    <span>Rezerv süresi dolan ünite stoğa döner (cross-match 72 saat)</span><span>·</span>
+    <span>Ünite no barkodla okutulur, hastaya verirken bileklik + ünite eşleşmesi zorunlu</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Kan Rezervasyonu — tasarım notları</h4>
+  Referans: <code>Ekranlar/kan rezerve.png</code> (önceki üründeki "Hasta Kan Rezervasyon Ekle").
+  Alanları korundu; aşağıdaki farklar bilinçli.
+  <ul>
+    <li><b>Kan grubu seçilmez, hastadan gelir.</b> Eski ekranda combo idi; yanlış grup seçimi
+      transfüzyonun en ağır hatası. Grup, iki ayrı numunede doğrulanmış laboratuvar
+      sonucundan okunur; yoksa "bilinmiyor" görünür ve acilde 0 Rh(−) yolu açılır.</li>
+    <li><b>Bir istemde birden çok ürün.</b> Ameliyat için ES + TDP tek istemdir; eski ekranda
+      her ürün ayrı rezervasyondu ve açıklama / özgeçmiş tekrar soruluyordu.</li>
+    <li><b>Uygun stok istem anında görünür.</b> "3 ünite TDP" gören hekim ya miktarı ya
+      tarihi değiştirir; telefonla sormak gerekmez.</li>
+    <li><b>Endikasyonun yanında son Hb / Htc / Trombosit / INR.</b> Akılcı kan kullanımı
+      denetimi istemin gerekçesini laboratuvarla birlikte görür (akılcı test istemi deseni,
+      873: kural eşiği aşılmıyorsa gerekçe zorunlu).</li>
+    <li><b>"Önceki cevapları yükle" korundu</b> ama tarih gösterilir; eski cevap körlemesine
+      kopyalanmaz, kullanıcı tarihini görerek yükler.</li>
+    <li><b>Ameliyattan gelen istem planla bağlıdır.</b> Ameliyat kartındaki <code>kan_hazir</code>
+      bayrağı (715) elle değil, rezerve ürün sayısından türetilir.</li>
+    <li><b>Kod listeleri SKRS'den</b> (kan ürünü, aciliyet, endikasyon); kendi kod uydurulmaz.
+      Ünite numarası Kızılay ISBT 128 barkodudur.</li>
+    <li><b>Kapsam dışı (ayrı mockup):</b> Kan Merkezi tarafı — stok giriş, cross-match sonuç
+      girişi, ünite çıkışı, transfüzyon izlem formu, reaksiyon bildirimi (hemovijilans).</li>
+  </ul>
+</div>
+
+</body>
+</html>

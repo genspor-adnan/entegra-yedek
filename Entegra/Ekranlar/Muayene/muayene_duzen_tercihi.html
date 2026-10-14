@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Düzeni Tercihi — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .ornek{max-width:1280px;margin:0 auto 22px}
+  .ornek h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kutu2{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+
+  /* Seçim kartları (mini çizim) */
+  .secenekler{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px}
+  .sk{border:2px solid var(--line);border-radius:6px;padding:10px;cursor:pointer;background:#fff}
+  .sk:hover{border-color:#9ec1e8}
+  .sk.on{border-color:var(--accent);background:#f5f9fe}
+  .sk .ad{font-weight:bold;color:var(--navy);margin-top:8px;display:flex;align-items:center;gap:6px}
+  .sk .ac{color:var(--muted);font-size:11px;margin-top:3px;line-height:1.45}
+  .rd{width:13px;height:13px;border:1px solid #9aa7b4;border-radius:50%;background:#fff;display:inline-block}
+  .sk.on .rd{background:#2f6db3;border-color:#2f6db3;box-shadow:inset 0 0 0 3px #fff}
+  .mini{height:92px;border:1px solid var(--line2);border-radius:3px;background:#fbfcfe;display:flex;flex-direction:column;overflow:hidden}
+  .mini .bnd{height:12px;background:#dbe6f3;flex:none}
+  .mini .sek{display:flex;gap:2px;padding:3px 4px 0;flex:none}
+  .mini .sek i{width:22px;height:7px;background:#cfdbe8;border-radius:2px 2px 0 0}
+  .mini .sek i:first-child{background:#2f6db3}
+  .mini .gv{flex:1;display:flex;gap:4px;padding:4px}
+  .mini .sol{width:20%;display:flex;flex-direction:column;gap:3px}
+  .mini .sol i{height:5px;background:#cfdbe8;border-radius:2px}
+  .mini .sol i:first-child{background:#2f6db3}
+  .mini .ic{flex:1;display:flex;flex-direction:column;gap:3px}
+  .mini .ic i{height:9px;background:#e7edf4;border-radius:2px}
+  .mini .sag{width:18%;background:#eef2f6;border-radius:2px}
+  .mini.kurum{align-items:center;justify-content:center;color:var(--muted);font-size:22px}
+
+  /* Muayene ekranındaki geçiş anahtarı */
+  .serit-ust{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);border-left:5px solid #2f6db3}
+  .serit-ust b{color:var(--navy);font-size:14px}
+  .gorunum{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;font-size:11px}
+  .gorunum span{padding:4px 10px;cursor:pointer;display:flex;gap:5px;align-items:center;background:#fff}
+  .gorunum span.on{background:var(--accent);color:#fff;font-weight:bold}
+  .bildirim{display:flex;gap:8px;align-items:center;margin:10px 12px;padding:8px 11px;border-radius:4px;background:#e2f3e8;color:#1f5c33;border:1px solid #bfe3cb;font-size:11.5px}
+  .bildirim .geri{margin-left:auto;color:var(--accent);cursor:pointer}
+  .alan-gri{padding:14px 12px;color:var(--muted)}
+  @media(max-width:800px){.secenekler{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ========================= 1) KULLANICI AYARLARI ========================= -->
+<div class="ornek">
+  <h3>1 · Kullanıcı Ayarları › Görünüm — hekim kendi seçer (hesabında saklanır, her bilgisayarda aynı)</h3>
+  <div class="kutu2">
+    <div class="alanlar" style="grid-template-columns:150px 1fr;padding-bottom:0">
+      <label>Yoğunluk</label><div class="inp combo" style="max-width:220px">Normal</div>
+      <label>Açılış ekranı</label><div class="inp combo" style="max-width:220px">Muayene Listesi</div>
+      <label style="align-self:start;padding-top:12px">Muayene ekranı</label><div></div>
+    </div>
+    <div class="secenekler" id="sec1">
+      <div class="sk" data-v="sekmeli">
+        <div class="mini"><div class="bnd"></div><div class="sek"><i></i><i></i><i></i></div><div class="gv"><div class="ic"><i></i><i></i><i></i><i></i></div></div></div>
+        <div class="ad"><span class="rd"></span>1 · Sekmeli</div>
+        <div class="ac">Aynı alanlar, bölümler sekmelerde; ek menü "Diğer ▾" altında. <a href="muayene_karti_v7.html?duzen=sekmeli" target="_blank">Önizle ↗</a></div>
+      </div>
+      <div class="sk on" data-v="sekmesiz">
+        <div class="mini"><div class="bnd"></div><div class="gv"><div class="sol"><i></i><i></i><i></i><i></i><i></i></div><div class="ic"><i></i><i></i><i></i><i></i><i></i></div><div class="sag"></div></div></div>
+        <div class="ad"><span class="rd"></span>2 · Sekmesiz</div>
+        <div class="ac">Tek sayfa; solda bölüm listesi + Epikriz, Rapor, Sevk…; sağda ilaç, sonuç grafiği, önceki muayeneler. <a href="muayene_karti_v7.html?duzen=sekmesiz" target="_blank">Önizle ↗</a></div>
+      </div>
+      <div class="sk" data-v="kurum">
+        <div class="mini kurum">🏥</div>
+        <div class="ad"><span class="rd"></span>Kurum varsayılanı</div>
+        <div class="ac">Şu an: <b>Sekmeli</b>. Kurum değiştirirse sizinki de değişir.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 2) MUAYENE EKRANINDAN GEÇİŞ ========================= -->
+<div class="ornek">
+  <h3>2 · Muayene ekranında — ayarlara gitmeden dener; seçim tercihine yazılır <span class="sonuk" style="font-weight:normal">(dene: aynı ekran, iki düzen - alanlar aynı)</span></h3>
+  <div class="kutu2">
+    <div class="serit-ust">
+      <b>Mehmet KAYA</b><span class="sonuk">58 E · SGK · D 104882 · P 2026/20390</span>
+      <div class="gorunum" id="gor" title="Muayene ekranı düzeni">
+        <span data-v="sekmeli">▤ Sekmeli</span><span data-v="sekmesiz" class="on">☰ Sekmesiz</span>
+      </div>
+    </div>
+    <div class="bildirim" id="bil" hidden>✔ <span id="bilMetin"></span><span class="geri" id="geriAl">Geri al</span></div>
+    <iframe id="onizleme" src="muayene_karti_v7.html?duzen=sekmesiz" style="width:100%;height:620px;border:none;display:block;border-top:1px solid var(--line2)"></iframe>
+  </div>
+  <p class="sonuk" style="font-size:11px;margin:5px 0 0">Anahtar bandın altında, ekranın sağ üst köşesinde küçük durur. Geçişte veri yeniden yüklenmez,
+    kaydedilmemiş değişiklik kaybolmaz.</p>
+</div>
+
+<!-- ========================= 3) KURUM AYARI ========================= -->
+<div class="ornek">
+  <h3>3 · Ayarlar › Muayene — yönetici varsayılanı belirler</h3>
+  <div class="kutu2">
+    <div class="alanlar" style="grid-template-columns:230px 1fr">
+      <label>Varsayılan muayene ekranı</label><div class="inp combo" style="max-width:220px">Sekmeli</div>
+      <label>Hekim kendi düzenini seçebilir</label><div><span class="rz ok">Evet</span></div>
+    </div>
+    <div class="not">Tercih yapmamış hekim varsayılanı görür. "Hekim seçebilir" kapalıysa anahtar ve ayar seçeneği gizlenir,
+      herkes kurum düzenini kullanır (eğitim döneminde tek düzen istenebilir).</div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Muayene düzeni tercihi — kurallar</h4>
+  <ul>
+    <li><b>Tek ekran, iki yerleşim:</b> bölümler (şikâyet, vital, tanı, istem, reçete, değerlendirme, epikriz…) ortak;
+      sekmeli düzen onları sekmelere, sekmesiz düzen alt alta dizer. Yeni özellik bir kez eklenir, iki düzende de çıkar.</li>
+    <li><b>Öncelik:</b> hekimin tercihi → kurum varsayılanı. Kurum "hekim seçebilir"i kapatırsa yalnız kurum düzeni.</li>
+    <li><b>Saklama:</b> kullanıcı tercihi <code>gorunum.muayeneDuzeni</code> (397 tercih tablosu, mevcut <code>gorunum</code> anahtarı);
+      kurum varsayılanı muayene ayarlarında.</li>
+    <li>Yetki, kayıt ve rota düzenden bağımsız.</li>
+  </ul>
+</div>
+
+<script>
+// Ayarlar: kart seçimi
+document.getElementById('sec1').addEventListener('click', ev => {
+  const k = ev.target.closest('.sk'); if (!k) return;
+  document.querySelectorAll('#sec1 .sk').forEach(x => x.classList.toggle('on', x === k));
+});
+// Ekrandan geçiş + geri al
+let onceki = 'sekmesiz';
+function sec(v, bildir) {
+  document.querySelectorAll('#gor span').forEach(x => x.classList.toggle('on', x.dataset.v === v));
+  document.getElementById('onizleme').src = 'muayene_karti_v7.html?duzen=' + v;
+  if (bildir) {
+    document.getElementById('bilMetin').textContent = `${v === 'sekmeli' ? 'Sekmeli' : 'Sekmesiz'} düzene geçildi. Bundan sonraki muayeneler de böyle açılır.`;
+    document.getElementById('bil').hidden = false;
+  }
+}
+document.getElementById('gor').addEventListener('click', ev => {
+  const s = ev.target.closest('span'); if (!s || s.classList.contains('on')) return;
+  onceki = document.querySelector('#gor span.on').dataset.v; sec(s.dataset.v, true);
+});
+document.getElementById('geriAl').addEventListener('click', () => { sec(onceki, false); document.getElementById('bil').hidden = true; });
+</script>
+</body>
+</html>

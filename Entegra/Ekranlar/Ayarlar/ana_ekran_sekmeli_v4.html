@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Ekran v4 — Çerçevesiz Formlar — Mockup (Gentegre AI)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<link rel="stylesheet" href="../KanMerkezi/_kan.css">
+<style>
+  /* ---- Kabuk (v3 ile aynı; sınıflar k- önekli, ekran stilleriyle çakışmasın) ---- */
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{margin:0;padding:0;display:flex;flex-direction:column;background:var(--bg)}
+  .k-ust{display:flex;align-items:center;gap:10px;padding:0 10px;height:42px;
+    background:linear-gradient(#2b5c95,#1c4374);color:#fff;flex:none}
+  .k-dug{width:32px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px}
+  .k-dug:hover,.k-dug.on{background:rgba(255,255,255,.18)}
+  .k-logo{font-weight:bold;font-size:14px;white-space:nowrap}
+  .k-ara{flex:1;max-width:540px;margin:0 auto;display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:5px;cursor:text;color:#dbe7f5}
+  .k-kbd{font-family:Consolas,monospace;font-size:10.5px;border:1px solid currentColor;border-radius:3px;padding:0 5px;margin-left:auto;opacity:.75}
+  .k-kul{white-space:nowrap}
+  .k-govde{flex:1;display:flex;min-height:0}
+  .k-sol{width:220px;flex:none;background:#fff;border-right:1px solid var(--line);overflow:auto}
+  .k-sol .b{padding:8px 12px;font-weight:bold;color:var(--navy);border-bottom:1px solid var(--line2)}
+  .k-sol a{display:block;padding:5px 12px 5px 24px;color:var(--ink);text-decoration:none;cursor:pointer}
+  .k-sol a:hover{background:#f5f9fe;color:var(--accent)}
+  .k-sag{flex:1;display:flex;flex-direction:column;min-width:0}
+  .k-sekmeler{display:flex;align-items:flex-end;gap:2px;padding:6px 8px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+  .k-sekme{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 11px;max-width:210px;
+    border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;background:#e3e9f1;color:#4d5d6e;
+    cursor:pointer;white-space:nowrap;user-select:none}
+  .k-sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .k-sekme .x{width:16px;height:16px;line-height:15px;text-align:center;border-radius:3px;color:var(--muted);font-weight:normal}
+  .k-sekme .x:hover{background:#d3dce7}
+  .k-gorunum{margin-left:auto;align-self:center;display:flex;gap:0;margin-bottom:4px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .k-gorunum span{padding:3px 10px;font-size:11px;background:#fff;cursor:pointer;white-space:nowrap}
+  .k-gorunum span.on{background:var(--accent);color:#fff;font-weight:bold}
+  .k-icerik{flex:1;position:relative;min-height:0}
+  .k-ekran{position:absolute;inset:0;overflow:auto;background:#fff}
+  .k-ekran iframe{width:100%;height:100%;border:none;display:block}
+  .k-ana{position:absolute;inset:0;overflow:auto;padding:26px 20px;background:var(--bg)}
+  .k-ana .ic{max-width:900px;margin:0 auto}
+  .k-ana h1{font-size:18px;color:var(--navy);margin:0 0 14px}
+  .k-kutular{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+  .k-kutu{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;cursor:pointer}
+  .k-kutu:hover{border-color:var(--accent)}
+  .k-kutu b{color:var(--navy)}
+  .k-kutu div{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .k-perde{position:fixed;inset:0;background:rgba(15,30,55,.35);display:none;justify-content:center;align-items:flex-start;padding-top:12vh;z-index:30}
+  .k-perde.acik{display:flex}
+  .k-palet{width:560px;max-width:calc(100% - 32px);background:#fff;border-radius:8px;box-shadow:0 18px 50px rgba(8,20,40,.35);overflow:hidden}
+  .k-palet input{width:100%;border:none;border-bottom:1px solid var(--line2);padding:14px 16px;font-size:15px;outline:none;font-family:inherit}
+  .k-oge{display:flex;gap:10px;padding:7px 16px;cursor:pointer}
+  .k-oge.sec{background:var(--sel)}
+  .k-oge .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+
+  /* ================== ÇERÇEVESİZ (varsayılan) ==================
+     Ekran sekmenin içine "yapışır": mavi başlık yok, kenarlık/gölge/boşluk yok.
+     Başlık yerine beyaz sayfa başlığı (ad + yol + sağda ana eylemler). */
+  .win{max-width:none;margin:0;border:none;border-radius:0;box-shadow:none}
+  .win > .title{display:none}
+  .sayfa-bas{display:flex;align-items:center;gap:12px;padding:12px 16px 10px;background:#fff;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sayfa-bas h1{margin:0;font-size:16px;color:var(--navy)}
+  .sayfa-bas .yol{color:var(--muted);font-size:11px}
+  .sayfa-bas .eylem{margin-left:auto;display:flex;gap:6px}
+  .win .toolbar{background:#fff;border-bottom:1px solid var(--line2);padding:6px 16px}
+  .win .alanlar{padding:14px 16px}
+  .win .grp{margin:10px 16px}
+  .win .malt{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line2);padding:10px 16px}
+  .win .statusbar{background:#fff;border-top:1px solid var(--line2);color:var(--muted)}
+  .form-dar{max-width:820px}
+
+  /* ================== ÇERÇEVELİ (bugünkü görünüm, karşılaştırma) ================== */
+  body.cerceveli .k-ekran{background:var(--bg);padding:14px}
+  body.cerceveli .win{max-width:1480px;margin:0 auto;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14)}
+  body.cerceveli .win.form-dar{max-width:820px}
+  body.cerceveli .win > .title{display:flex}
+  body.cerceveli .sayfa-bas{display:none}
+  body.cerceveli .win .toolbar{background:var(--head);border-bottom-color:var(--line);padding:6px 8px}
+  body.cerceveli .win .alanlar{padding:12px}
+  body.cerceveli .win .grp{margin:10px}
+  body.cerceveli .win .malt{position:static;background:var(--head);border-top-color:var(--line);padding:10px 12px}
+  body.cerceveli .win .statusbar{background:var(--head)}
+</style>
+</head>
+<body>
+
+<div class="k-ust">
+  <div class="k-dug" id="menuDug" title="Menü (Ctrl+B)">☰</div>
+  <div class="k-logo">🩺 Gentegre</div>
+  <div class="k-ara" id="araAc">🔍 Ekran, hasta, işlem ara… <span class="k-kbd">Ctrl K</span></div>
+  <div class="k-kul">Dr. Selin TAN ▾</div>
+</div>
+
+<div class="k-govde">
+  <nav class="k-sol" id="sol" hidden></nav>
+  <div class="k-sag">
+    <div class="k-sekmeler" id="sekmeler"></div>
+    <div class="k-icerik" id="icerik"></div>
+  </div>
+</div>
+
+<div class="k-perde" id="perde">
+  <div class="k-palet"><input id="sorgu" placeholder="Ekran adı yazın…" autocomplete="off"><div id="liste" style="max-height:340px;overflow:auto;padding:6px 0"></div></div>
+</div>
+
+<!-- ======================= EKRAN 1: Konsültasyonlar (liste) ======================= -->
+<template id="t-kons">
+<div class="win">
+  <div class="title">🤝 Konsültasyonlar <span class="sp">Muayene › Konsültasyonlar</span></div>
+  <div class="sayfa-bas">
+    <h1>Konsültasyonlar</h1><span class="yol">Muayene › Konsültasyonlar</span>
+    <div class="eylem"><div class="btn primary">✋ Üstlen</div><div class="btn">🩺 Yanıtla</div></div>
+  </div>
+  <div class="ozet">
+    <div class="k teh"><div class="bas">Süresi geçen</div><div class="deg">1</div><div class="alt">çok acil · 30 dk</div></div>
+    <div class="k uy"><div class="bas">Üstlenilmemiş</div><div class="deg">2</div><div class="alt">bölüme gelen</div></div>
+    <div class="k"><div class="bas">Üstlendiklerim</div><div class="deg">2</div><div class="alt">hastaya gidilecek</div></div>
+    <div class="k"><div class="bas">Bugün yanıtlanan</div><div class="deg">6</div><div class="alt">ort. 48 dk</div></div>
+    <div class="k iyi"><div class="bas">e-Nabız 252</div><div class="deg">6 / 6</div><div class="alt">gönderildi</div></div>
+    <div class="k"><div class="bas">Dış merkez</div><div class="deg">1</div><div class="alt">yanıt bekliyor</div></div>
+  </div>
+  <div class="toolbar">
+    <div class="kutu ara">🔍 Hasta, protokol, isteyen hekim…</div>
+    <span class="cip on">Açık</span><span class="cip">Çok acil</span><span class="cip">Acil</span><span class="cip">Rutin</span><span class="cip">Yanıtlandı</span>
+  </div>
+  <div class="dg">
+    <table>
+      <thead><tr><th>Aciliyet</th><th>Kalan</th><th>Hasta</th><th>Nerede</th><th>İsteyen</th><th>Soru</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr class="teh"><td><span class="rz kir">Çok acil</span></td><td><b style="color:#b3261e">+12 dk</b></td><td><b>Ahmet ŞEN</b> · E 67</td><td>Acil · Kırmızı 3</td><td>Dr. M. Yurt</td><td>ST elevasyonu, troponin 412. Primer PKG?</td><td><span class="rz sari">Üstlenilmedi</span></td></tr>
+        <tr class="sel"><td><span class="rz kir">Çok acil</span></td><td><b style="color:#8a6218">8 dk</b></td><td><b>Ayşe DEMİR</b> · K 54</td><td>Genel Cerrahi · B-212/1</td><td>Asist. Dr. E. Akay</td><td>Preop EKG'de yeni AF. Ameliyata engel mi?</td><td><span class="rz mavi">Üstlendim</span></td></tr>
+        <tr><td><span class="rz sari">Acil</span></td><td>1 sa 34 dk</td><td><b>Hüseyin KOÇ</b> · E 71</td><td>Dahiliye · A-306/2</td><td>Dr. O. Akar</td><td>Dispne, BNP 2.800. EF değerlendirmesi.</td><td><span class="rz sari">Üstlenilmedi</span></td></tr>
+        <tr><td><span class="rz">Rutin</span></td><td>19 sa</td><td><b>Fatma YILDIZ</b> · K 48</td><td>Poliklinik · Ortopedi</td><td>Dr. C. Er</td><td>Diz protezi öncesi kardiyak risk.</td><td><span class="rz mavi">Randevu 14.10</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="statusbar"><span>Süre sınırları: çok acil 30 dk · acil 2 sa · rutin 24 sa</span></div>
+</div>
+</template>
+
+<!-- ======================= EKRAN 2: Kan Rezervasyonu (form) ======================= -->
+<template id="t-kanrez">
+<div class="win form-dar">
+  <div class="title">🩸 Kan Rezervasyonu <span class="sp">Ayşe DEMİR · Genel Cerrahi · B-212/1</span></div>
+  <div class="sayfa-bas">
+    <h1>Kan Rezervasyonu</h1><span class="yol">Ayşe DEMİR · Genel Cerrahi · B-212/1</span>
+  </div>
+  <div class="hasta-serit"><span>Kan grubu</span><span class="kg">B Rh(+)</span><span class="sonuk">laboratuvar sonucundan</span></div>
+  <div class="alanlar dort">
+    <label>Aciliyet</label><div class="inp combo">Rutin</div>
+    <label>Otolog / doğum</label><div class="inp ro">Doğum yapmış</div>
+    <label>Bölüm *</label><div class="inp combo">Genel Cerrahi</div>
+    <label>Doktor *</label><div class="inp combo">Op. Dr. Kemal ARSLAN</div>
+    <label>Kan ürünü *</label><div class="inp combo">Eritrosit süspansiyonu</div>
+    <label>Miktar *</label><div class="inp">2 ünite</div>
+    <label>Endikasyon *</label><div class="inp combo">Cerrahi kan kaybı beklenen anemi</div>
+    <label>Kullanım tarihi *</label><div class="inp">14.10.2026</div>
+    <label>Açıklama</label><div class="inp" style="grid-column:2/-1">Preop Hb 8,4.</div>
+  </div>
+  <div class="grp">
+    <h4>Hasta özgeçmişi <span class="mini">Önceki cevapları yükle</span></h4>
+    <div class="ic">
+      <div class="sat"><span>Daha önce transfüzyon yapıldı mı?</span><b>Evet · 2019 · 2 ünite</b></div>
+      <div class="sat"><span>Transfüzyon reaksiyonu oldu mu?</span><b>Hayır</b></div>
+    </div>
+  </div>
+  <div class="malt"><div class="btn">✕ Kapat</div><div class="sp"></div><div class="btn primary">💾 Kaydet</div></div>
+</div>
+</template>
+
+<!-- ======================= EKRAN 3: Kan Merkezi (pano) ======================= -->
+<template id="t-kan">
+<div class="win">
+  <div class="title">🩸 Kan Merkezi <span class="sp">Kan Merkezi › Pano</span></div>
+  <div class="sayfa-bas">
+    <h1>Kan Merkezi</h1><span class="yol">Kan Merkezi › Pano</span>
+    <div class="eylem"><div class="btn primary">📥 Ünite Kabul</div><div class="btn">🧪 İstem İşle</div></div>
+  </div>
+  <div class="toolbar" style="display:none"></div>
+  <div class="iki" style="border-top:none">
+    <div><div class="grp"><h4>Stok</h4><div class="dg"><table class="matris">
+      <thead><tr><th>Ürün</th><th>0−</th><th>0+</th><th>A−</th><th>A+</th><th>B−</th><th>B+</th><th>AB−</th><th>AB+</th></tr></thead>
+      <tbody>
+        <tr><td>Eritrosit</td><td>2</td><td>4</td><td class="yok">0</td><td>4</td><td class="yok">0</td><td>3</td><td class="yok">0</td><td class="az">1</td></tr>
+        <tr><td>Taze donmuş plazma</td><td colspan="2">3</td><td colspan="2">3</td><td colspan="2" class="az">1</td><td colspan="2">2</td></tr>
+      </tbody></table></div></div></div>
+    <div><div class="grp"><h4>Bekleyen istemler</h4><div class="dg"><table>
+      <thead><tr><th>Aciliyet</th><th>Hasta</th><th>Grup</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr class="teh"><td><span class="rz kir">Çok acil</span></td><td>Mehmet KAYA</td><td><span class="kg k yok">?</span></td><td>Çıkış bekliyor</td></tr>
+        <tr><td><span class="rz sari">Acil</span></td><td>Hüseyin KOÇ</td><td><span class="kg k">A+</span></td><td>Cross-match</td></tr>
+        <tr><td><span class="rz">Rutin</span></td><td>Ayşe DEMİR</td><td><span class="kg k">B+</span></td><td>Cross-match</td></tr>
+      </tbody></table></div></div></div>
+  </div>
+</div>
+</template>
+
+<script>
+// Üç ekran bu dosyada (çerçevesiz stil uygulanabilsin diye); diğerleri bugünkü mockup'tan, ÇERÇEVELİ açılır.
+const EKRANLAR = [
+  { k:'kons',   ad:'Konsültasyonlar',     yol:'Muayene',     i:'🤝', t:'t-kons' },
+  { k:'kanrez', ad:'Kan Rezervasyonu',    yol:'Kan Merkezi', i:'🩸', t:'t-kanrez' },
+  { k:'kan',    ad:'Kan Merkezi',         yol:'Kan Merkezi', i:'🩸', t:'t-kan' },
+  { k:'yatan',  ad:'Yatan Hasta Listesi', yol:'Yatan Hasta', i:'🛏', url:'../Yatan/yatan_hasta_listesi.html' },
+  { k:'muayene',ad:'Muayene Listesi',     yol:'Muayene',     i:'🩺', url:'../Muayene/muayene_listesi.html' },
+];
+const $ = id => document.getElementById(id);
+const kucuk = s => s.toLocaleLowerCase('tr');
+const ekran = k => EKRANLAR.find(e => e.k === k);
+let acik = ['kons', 'kanrez', 'kan'], aktif = 'kons', menuAcik = false;
+
+function ciz() {
+  $('sol').hidden = !menuAcik;
+  $('menuDug').classList.toggle('on', menuAcik);
+  $('sol').innerHTML = ['Muayene', 'Kan Merkezi', 'Yatan Hasta'].map(g =>
+    `<div class="b">${g}</div>` + EKRANLAR.filter(e => e.yol === g).map(e => `<a data-ac="${e.k}">${e.ad}</a>`).join('')).join('');
+  const cer = document.body.classList.contains('cerceveli');
+  $('sekmeler').innerHTML = `<div class="k-sekme${aktif === 'ana' ? ' on' : ''}" data-git="ana">🏠</div>`
+    + acik.map(k => { const e = ekran(k);
+      return `<div class="k-sekme${k === aktif ? ' on' : ''}" data-git="${k}"><span>${e.i}</span><span>${e.ad}</span><span class="x" data-x="${k}">×</span></div>`; }).join('')
+    + `<div class="k-gorunum" title="Karşılaştırma"><span data-gor="0" class="${cer ? '' : 'on'}">Çerçevesiz</span><span data-gor="1" class="${cer ? 'on' : ''}">Çerçeveli (bugün)</span></div>`;
+  const kap = $('icerik');
+  ['ana', ...acik].forEach(k => {
+    if (kap.querySelector(`[data-k="${k}"]`)) return;
+    const el = document.createElement('div'); el.dataset.k = k;
+    if (k === 'ana') { el.className = 'k-ana';
+      el.innerHTML = `<div class="ic"><h1>Günaydın, Dr. Selin TAN</h1><div class="k-kutular">${EKRANLAR.map(e =>
+        `<div class="k-kutu" data-ac="${e.k}"><b>${e.i} ${e.ad}</b><div>${e.yol}${e.url ? ' · bugünkü mockup (çerçeveli)' : ''}</div></div>`).join('')}</div></div>`; }
+    else { el.className = 'k-ekran'; const e = ekran(k);
+      el.innerHTML = e.t ? $(e.t).innerHTML : `<iframe src="${e.url}"></iframe>`; }
+    kap.appendChild(el);
+  });
+  kap.querySelectorAll('[data-k]').forEach(el => {
+    if (el.dataset.k !== 'ana' && !acik.includes(el.dataset.k)) el.remove(); else el.hidden = el.dataset.k !== aktif; });
+}
+function ac(k) { if (!acik.includes(k)) acik.push(k); aktif = k; menuAcik = false; ciz(); }
+function kapat(k) { const i = acik.indexOf(k); acik.splice(i, 1); if (aktif === k) aktif = acik[i] ?? acik[i - 1] ?? 'ana'; ciz(); }
+
+document.body.addEventListener('click', ev => {
+  const t = ev.target;
+  if (t.dataset.gor != null) { document.body.classList.toggle('cerceveli', t.dataset.gor === '1'); ciz(); return; }
+  if (t.closest('#menuDug')) { menuAcik = !menuAcik; ciz(); return; }
+  if (t.closest('#araAc')) return paletAc();
+  if (t.dataset.x) return kapat(t.dataset.x);
+  const a = t.closest('[data-ac]'); if (a) return ac(a.dataset.ac);
+  const g = t.closest('[data-git]'); if (g) { aktif = g.dataset.git; ciz(); }
+});
+
+let sonuc = [], sec = 0;
+function paletCiz() {
+  const q = kucuk($('sorgu').value.trim());
+  sonuc = EKRANLAR.filter(e => !q || kucuk(e.ad + ' ' + e.yol).includes(q));
+  sec = Math.min(sec, Math.max(sonuc.length - 1, 0));
+  $('liste').innerHTML = sonuc.map((e, n) => `<div class="k-oge${n === sec ? ' sec' : ''}" data-n="${n}"><span>${e.i}</span><span>${e.ad}</span><span class="y">${e.yol}</span></div>`).join('');
+}
+function paletAc() { $('perde').classList.add('acik'); $('sorgu').value = ''; sec = 0; paletCiz(); $('sorgu').focus(); }
+function paletKapat() { $('perde').classList.remove('acik'); }
+$('perde').addEventListener('click', ev => { if (ev.target.id === 'perde') paletKapat(); });
+$('sorgu').addEventListener('input', () => { sec = 0; paletCiz(); });
+$('liste').addEventListener('click', ev => { const o = ev.target.closest('.k-oge'); if (o) { paletKapat(); ac(sonuc[+o.dataset.n].k); } });
+$('sorgu').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown') { sec = Math.min(sec + 1, sonuc.length - 1); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'ArrowUp') { sec = Math.max(sec - 1, 0); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'Enter' && sonuc[sec]) { const k = sonuc[sec].k; paletKapat(); ac(k); }
+  else if (ev.key === 'Escape') paletKapat();
+});
+document.addEventListener('keydown', ev => {
+  if ((ev.ctrlKey || ev.metaKey) && kucuk(ev.key) === 'k') { ev.preventDefault(); paletAc(); }
+  else if (ev.ctrlKey && kucuk(ev.key) === 'b') { ev.preventDefault(); menuAcik = !menuAcik; ciz(); }
+});
+
+ciz();
+</script>
+
+<!--
+  v4 = v3 kabuğu + ÇERÇEVESİZ ekranlar.
+  - Mavi başlık çubuğu kalkar: ekranın adı zaten sekmede; içeride beyaz sayfa başlığı (ad + yol + ana eylemler sağda).
+  - Pencere kenarlığı, gölge, dış boşluk yok: ekran sekmenin tamamını kullanır.
+  - Araç çubuğu, alt düğme şeridi, durum çubuğu beyaz; gri zemin yerine ince çizgi ayırır.
+  - Formun alt düğmeleri (Kapat / Kaydet) aşağı kaydırınca da görünür (yapışkan).
+  - Dar form (Kan Rezervasyonu) çerçevesizde de 820 px'te kalır: geniş ekranda alanlar satır boyu uzamasın.
+  - Modal pencereler (onay, yönlendirme) mavi başlığını KORUR: üstte açılan pencere olduğu belli olmalı.
+-->
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kan İstem İşle — Mockup (Gentegre AI · Kan Merkezi)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<link rel="stylesheet" href="_kan.css">
+</head>
+<body>
+
+<div class="win" style="max-width:1000px">
+  <div class="title">🧪 İstem İşle
+    <span class="sp">Kan Merkezi › KR-2026-0912</span></div>
+
+  <div class="hasta-serit">
+    <span><b>Ayşe DEMİR</b> · K 54 · Genel Cerrahi · B-212/1</span>
+    <span>İstem <b>2 ES · 2 TDP</b> · rutin · kullanım 14.10 08:00</span>
+    <span style="margin-left:auto" class="kg">B Rh(+)</span>
+  </div>
+
+  <div class="akis">
+    <div class="ad ok">İstem</div>
+    <div class="ad ok">Numune</div>
+    <div class="ad su">Cross-match</div>
+    <div class="ad">Hazır</div>
+    <div class="ad">Çıkış</div>
+  </div>
+
+  <div class="okut">
+    <span class="ik">▥</span>
+    <div class="inp">Ünite barkodunu okutun…</div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr><th>Ünite no</th><th>Ürün</th><th>Grup</th><th>SKT</th><th>Cross-match</th><th></th></tr></thead>
+      <tbody>
+        <tr><td class="unite">W0412 26 104411</td><td>Eritrosit</td><td>B Rh+</td><td>16.10</td>
+          <td><div class="secim"><span class="on">Uygun</span><span>Uygunsuz</span></div></td><td>✕</td></tr>
+        <tr><td class="unite">W0412 26 104502</td><td>Eritrosit</td><td>B Rh+</td><td>21.10</td>
+          <td><div class="secim"><span>Uygun</span><span>Uygunsuz</span></div></td><td>✕</td></tr>
+        <tr><td class="unite">W0412 26 099130</td><td>TDP</td><td>B</td><td>02.2027</td>
+          <td class="sonuk">gerekmez</td><td>✕</td></tr>
+        <tr><td class="unite">W0412 26 099131</td><td>TDP</td><td>B</td><td>02.2027</td>
+          <td class="sonuk">gerekmez</td><td>✕</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="btn danger">İstemi Reddet</div>
+    <div class="sp"></div>
+    <div class="btn">💾 Kaydet</div>
+    <div class="btn primary">✔ Hazır (Rezerve Et)</div>
+  </div>
+</div>
+
+<!-- ÇIKIŞ -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">📤 Ünite Çıkışı <span class="sp">servise teslim</span></div>
+    <div class="alanlar">
+      <label>Teslim alan</label><div class="inp combo">Hemş. Elif KARA · Genel Cerrahi</div>
+      <label>Üniteler</label><div class="inp ro">W0412 26 104411 · W0412 26 104502</div>
+    </div>
+    <div class="malt"><div class="btn">Vazgeç</div><div class="sp"></div><div class="btn primary">Teslim Et</div></div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <ul>
+    <li>Okutulan ünitenin grubu hastaya uymuyorsa satır eklenmez.</li>
+    <li>Rezerv 72 saat sonra biter, ünite stoğa döner.</li>
+  </ul>
+</div>
+
+</body>
+</html>

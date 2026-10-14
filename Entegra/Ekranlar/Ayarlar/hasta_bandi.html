@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Bandı — Mockup (Gentegre AI · Ortak bileşen)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  /* ============================ HASTA BANDI ============================ */
+  .hb{position:relative;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--line);
+    border-left:5px solid var(--hb-renk,#2f6db3);font-size:11.5px}
+  .hb .foto{width:52px;flex:none;display:flex;align-items:center;justify-content:center;background:#eef3f9;
+    font-weight:bold;color:var(--navy);font-size:16px;border-right:1px solid var(--line2)}
+  .hb .kim{padding:7px 12px;min-width:230px;border-right:1px solid var(--line2)}
+  .hb .ad{font-size:15px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .hb .ad .esad{font-size:10px;font-weight:bold;color:#8a6218;background:#fdf6e3;border:1px solid #f2ddbf;border-radius:3px;padding:0 5px}
+  .hb .alt{color:var(--muted);margin-top:2px;white-space:nowrap}
+  .hb .alt b{color:var(--ink);font-weight:normal}
+  .hb .kg{font-family:Consolas,monospace;font-weight:bold;color:#b3261e;border:1px solid #f3c4bf;background:#fbe9e7;border-radius:3px;padding:0 5px}
+  .hb .blok{padding:7px 12px;border-right:1px solid var(--line2);min-width:0}
+  .hb .blok .b{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .hb .riskler{display:flex;gap:4px;flex-wrap:wrap}
+  .hb .rz{cursor:pointer}
+  .hb .yer{white-space:nowrap}
+  .hb .yer b{color:var(--navy)}
+  .hb .sag{margin-left:auto;display:flex;align-items:center;gap:4px;padding:0 10px}
+  .hb .ik{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .hb .ik:hover{background:#eef3f9}
+  .hb .ik .s{position:absolute;top:1px;right:0;background:#b3261e;color:#fff;border-radius:7px;font-size:9px;padding:0 4px;line-height:13px}
+  .hb.acil{--hb-renk:#c0392b}
+  .hb.yatan{--hb-renk:#3f9a5e}
+
+  /* Daraltılmış (sayfa aşağı kayınca, tek satır) */
+  .hb.dar{align-items:center;min-height:32px}
+  .hb.dar .foto{width:32px;font-size:12px;align-self:stretch}
+  .hb.dar .kim{display:flex;gap:10px;align-items:center;padding:4px 12px;min-width:0;border-right:none}
+  .hb.dar .ad{font-size:13px}
+  .hb.dar .alt{margin:0}
+  .hb.dar .blok{border-right:none;padding:4px 6px}
+
+  /* Açılır ayrıntı (alerji vb.) */
+  .ayr{position:absolute;top:100%;left:290px;z-index:5;width:330px;background:#fff;border:1px solid var(--line);
+    border-radius:5px;box-shadow:0 10px 30px rgba(8,20,40,.2);padding:10px 12px;font-size:11.5px}
+  .ayr h5{margin:0 0 6px;color:#b3261e;font-size:12px}
+  .ayr .s{padding:3px 0;border-top:1px solid #eef2f6}
+  .ayr .s:first-of-type{border-top:none}
+  .ayr .sonuk{font-size:10.5px}
+
+  /* Örnek çerçeve */
+  .ornek{max-width:1300px;margin:0 auto 22px}
+  .ornek h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .ornek .not2{color:var(--muted);font-size:11px;margin:5px 0 0}
+  .sahte{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .sahte .sekme-cub{display:flex;gap:2px;padding:6px 8px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sahte .sk{padding:5px 11px;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;background:#e3e9f1;color:#4d5d6e;font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .sahte .sk.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sahte .sk i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .sahte .gov{padding:14px 16px;color:var(--muted);min-height:70px;background:#fff}
+  .yok{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#f8fafc;border-bottom:1px solid var(--line);border-left:5px solid #b8c2cc;color:var(--muted)}
+  .yok .kutu{flex:1;max-width:420px}
+
+  @media(max-width:900px){
+    .hb{flex-wrap:wrap}
+    .hb .blok.gizle-dar{display:none}
+    .hb .kim{min-width:0;flex:1;border-right:none}
+    .ayr{left:10px}
+  }
+</style>
+</head>
+<body>
+
+<div class="win" style="margin-bottom:22px">
+  <div class="title">🪪 Hasta Bandı <span class="sp">ortak bileşen · hastayla ilgili bütün ekranlarda en üstte</span></div>
+  <div class="not" style="border-top:none">Hasta seçildiğinde (hasta kartı, muayene, yatış, istem, kan rezervasyonu, konsültasyon, vezne…)
+    ekranın en üstünde aynı band görünür. Ekran bandı kendisi çizmez; kabuk, ekranın <b>hasta bağlamından</b> (hasta_id + varsa başvuru / yatış)
+    çizer. Bilgi tek sunucu çağrısından gelir, yetkiye göre süzülür.</div>
+</div>
+
+<!-- ============================ 1) POLİKLİNİK (tam) ============================ -->
+<div class="ornek">
+  <h3>1 · Poliklinik / muayene — tam görünüm</h3>
+  <div class="sahte">
+    <div class="sekme-cub">
+      <div class="sk">🏠</div>
+      <div class="sk on"><i style="background:#2f6db3"></i>Muayene · M. KAYA</div>
+      <div class="sk"><i style="background:#3f9a5e"></i>Yatış · A. DEMİR</div>
+      <div class="sk">Konsültasyonlar</div>
+    </div>
+
+    <div class="hb" id="hb1">
+      <div class="foto">MK</div>
+      <div class="kim">
+        <div class="ad">Mehmet KAYA <span class="esad" title="Bu kurumda aynı ad soyadlı 2 hasta daha var">AYNI AD ×2</span></div>
+        <div class="alt"><b>58 E</b> · <b>SGK</b> (aktif)</div>
+        <div class="alt">D 104882 · P 2026/20390</div>
+      </div>
+      <div class="blok">
+        <div class="b">Kan · boy / kilo</div>
+        <div><span class="kg">A Rh(+)</span></div>
+        <div class="alt">174 cm · 86 kg · VKİ 28,4</div>
+      </div>
+      <div class="blok" style="flex:1">
+        <div class="b">Uyarılar</div>
+        <div class="riskler">
+          <span class="rz kir" data-ayr="alerji">⚠ Alerji: Penisilin +1</span>
+          <span class="rz sari">DM tip 2</span><span class="rz sari">HT</span>
+          <span class="rz kir">Panik sonuç: Troponin</span>
+          <span class="rz mor">Antikoagülan yok</span>
+        </div>
+      </div>
+      <div class="blok gizle-dar">
+        <div class="b">Şu an</div>
+        <div class="yer"><b>Dahiliye polikliniği</b></div>
+        <div class="alt">Uzm. Dr. Ali KOÇ · 10:28'den beri</div>
+      </div>
+      <div class="sag">
+        <div class="ik" title="Tıbbi özet">📋</div>
+        <div class="ik" title="Açık istemler">🧪<span class="s">3</span></div>
+        <div class="ik" title="Belgeler">📎</div>
+        <div class="ik" title="Hesap: 0 ₺ borç">₺</div>
+        <div class="ik" title="Diğer">⋯</div>
+      </div>
+      <div class="ayr" id="ayr1" hidden>
+        <h5>⚠ Alerjiler (2)</h5>
+        <div class="s"><b>Penisilin</b> · ilaç · ağır · anafilaksi <span class="sonuk">· 2019, e-Nabız</span></div>
+        <div class="s"><b>Lateks</b> · madde · orta · kontakt dermatit <span class="sonuk">· 2024, kurum</span></div>
+        <div class="sonuk" style="margin-top:6px">Alerji yalnız Alerji Kartı'ndan değişir; reçete ve istemde otomatik denetlenir.</div>
+      </div>
+    </div>
+
+    <div class="gov">… ekranın kendisi (muayene kartı) …</div>
+  </div>
+  <p class="not2">Kırmızı rozetlere tıklayınca ayrıntı açılır (dene: "Alerji"). Sol kenar rengi sekme noktasıyla aynı: iki hastanın
+    sekmesi yan yana açıkken hangi hastada olduğunuz renkten de anlaşılır.</p>
+</div>
+
+<!-- ============================ 2) YATAN ============================ -->
+<div class="ornek">
+  <h3>2 · Yatan hasta — yer bilgisi yatak, gün sayısı ve sorumlu hekimle</h3>
+  <div class="sahte">
+    <div class="hb yatan">
+      <div class="foto">AD</div>
+      <div class="kim">
+        <div class="ad">Ayşe DEMİR</div>
+        <div class="alt"><b>54 K</b> · <b>SGK</b></div>
+        <div class="alt">D 099310 · P 2026/19877 · Yatış Y-2026-0431</div>
+      </div>
+      <div class="blok">
+        <div class="b">Kan · boy / kilo</div>
+        <div><span class="kg">B Rh(+)</span></div>
+        <div class="alt">162 cm · 68 kg</div>
+      </div>
+      <div class="blok" style="flex:1">
+        <div class="b">Uyarılar</div>
+        <div class="riskler">
+          <span class="rz kir">⚠ Alerji: Penisilin</span>
+          <span class="rz sari">Düşme riski: yüksek</span>
+          <span class="rz mavi">Ameliyat yarın 09:00</span>
+          <span class="rz mor">Kan: 2 ES hazır</span>
+          <span class="rz">Aç (NPO) 00:00'dan</span>
+        </div>
+      </div>
+      <div class="blok gizle-dar">
+        <div class="b">Şu an</div>
+        <div class="yer"><b>Genel Cerrahi · B-212/1</b> · 3. gün</div>
+        <div class="alt">Sorumlu: Prof. Dr. Emre BALIK</div>
+      </div>
+      <div class="sag"><div class="ik">📋</div><div class="ik">🧪<span class="s">2</span></div><div class="ik">📎</div><div class="ik">₺</div><div class="ik">⋯</div></div>
+    </div>
+    <div class="gov">… yatış kartı / order / kan rezervasyonu …</div>
+  </div>
+</div>
+
+<!-- ============================ 3) ACİL ============================ -->
+<div class="ornek">
+  <h3>3 · Acil — triaj rengi kenarda, kimliği belirsiz hasta</h3>
+  <div class="sahte">
+    <div class="hb acil">
+      <div class="foto">?</div>
+      <div class="kim">
+        <div class="ad">Kimliği belirsiz erkek <span class="esad" style="color:#b3261e;background:#fbe9e7;border-color:#f3c4bf">GEÇİCİ KAYIT</span></div>
+        <div class="alt"><b>~40 E</b> · 112 ile geldi 21:02</div>
+        <div class="alt">Geçici no A-2026-0918 · kimlik bulununca birleştirilir</div>
+      </div>
+      <div class="blok">
+        <div class="b">Kan grubu</div>
+        <div><span class="kg" style="color:var(--muted);background:#f4f6f9;border-color:var(--line)">bilinmiyor</span></div>
+        <div class="alt">0 Rh(−) verilebilir</div>
+      </div>
+      <div class="blok" style="flex:1">
+        <div class="b">Uyarılar</div>
+        <div class="riskler"><span class="rz kir">Triaj: KIRMIZI</span><span class="rz">Alerji bilinmiyor</span><span class="rz sari">Adli vaka</span></div>
+      </div>
+      <div class="blok gizle-dar">
+        <div class="b">Şu an</div>
+        <div class="yer"><b>Acil · Kırmızı alan 3</b></div>
+        <div class="alt">Dr. M. YURT · 18 dk</div>
+      </div>
+      <div class="sag"><div class="ik">📋</div><div class="ik">🧪<span class="s">4</span></div><div class="ik">⋯</div></div>
+    </div>
+    <div class="gov">… acil hasta kartı …</div>
+  </div>
+</div>
+
+<!-- ============================ 4) DARALTILMIŞ ============================ -->
+<div class="ornek">
+  <h3>4 · Daraltılmış — sayfa aşağı kaydırılınca tek satıra iner, kaybolmaz</h3>
+  <div class="sahte">
+    <div class="hb dar">
+      <div class="foto">MK</div>
+      <div class="kim">
+        <span class="ad">Mehmet KAYA</span>
+        <span class="alt"><b>58 E</b> · P 2026/20390</span>
+        <span class="kg">A Rh(+)</span>
+      </div>
+      <div class="blok"><div class="riskler"><span class="rz kir">⚠ Penisilin +1</span><span class="rz kir">Panik sonuç</span></div></div>
+      <div class="sag"><div class="ik">📋</div><div class="ik">🧪<span class="s">3</span></div><div class="ik">⋯</div></div>
+    </div>
+    <div class="gov">Kırmızı uyarılar (alerji, panik sonuç, triaj) daraltılmış hâlde de kalır; sarı ve bilgi rozetleri düşer.</div>
+  </div>
+</div>
+
+<!-- ============================ 5) HASTA YOK ============================ -->
+<div class="ornek">
+  <h3>5 · Hasta seçilmemiş — hasta gerektiren ekran açıldığında</h3>
+  <div class="sahte">
+    <div class="yok">👤 Hasta seçilmedi <div class="kutu ara">🔍 Ad soyad, TC, dosya (D) ya da protokol (P) no…</div> <span>son: M. KAYA · A. DEMİR</span></div>
+    <div class="gov">Ekran hasta seçilene kadar boş durur; başka hastanın verisi gösterilmez.</div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Hasta Bandı — kurallar</h4>
+  <ul>
+    <li><b>Tek bileşen, kabuğun işi:</b> ekranlar bandı çizmez, yalnız hasta bağlamını bildirir (<code>hasta_id</code>, varsa
+      <code>basvuru_id</code> / <code>yatis_id</code>). Böylece yeni ekran eklendiğinde band kendiliğinden gelir ve her yerde aynı kalır.</li>
+    <li><b>Sabit sıra:</b> kimlik → kan grubu, boy/kilo → uyarılar → şu an nerede → kısayollar. Hekim gözünü her ekranda aynı yere atar.</li>
+    <li><b>Kimlik satırı kısa:</b> ad soyad, yaş/cinsiyet, kurum; altında <b>D</b> dosya no ve <b>P</b> protokol no. Doğum tarihi ve TC bantta yok (hasta özetinde).</li>
+    <li><b>Aynı ad uyarısı:</b> kurumda aynı ad soyadlı başka hasta varsa "AYNI AD" rozeti — yanlış hasta hatasının en sık sebebi.</li>
+    <li><b>Uyarı sırası:</b> kırmızı (alerji, panik sonuç, triaj kırmızı, izolasyon) → sarı (kronik, düşme riski, adli vaka)
+      → bilgi (planlı ameliyat, hazır kan, NPO). Fazlası "+n" ile toplanır; tıklanınca ayrıntı açılır.</li>
+    <li><b>Kan grubu</b> yalnız doğrulanmış laboratuvar sonucundan; yoksa "bilinmiyor".</li>
+    <li><b>Renk:</b> sol kenar ve sekme noktası aynı renk; acilde triaj rengi, yatanda yeşil, poliklinikte mavi.
+      Farklı hastaların sekmeleri yan yana açıkken karışmasın.</li>
+    <li><b>Daraltılmış hâl:</b> sayfa kayınca tek satır; kırmızı uyarılar kalır.</li>
+    <li><b>Kısayollar</b> (tıbbi özet, açık istemler, belgeler, hesap) sekme olarak açılır; sayaçlar canlıdır.</li>
+    <li><b>Gizlilik:</b> özel gizlilikli hasta (VIP, personel, adli) için ad yetkisiz kullanıcıya kısaltılmış görünür;
+      bandın her açılışı erişim loguna yazılır.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelector('[data-ayr="alerji"]').addEventListener('click', ev => {
+  ev.stopPropagation(); const a = document.getElementById('ayr1'); a.hidden = !a.hidden;
+});
+document.addEventListener('click', () => document.getElementById('ayr1').hidden = true);
+</script>
+</body>
+</html>

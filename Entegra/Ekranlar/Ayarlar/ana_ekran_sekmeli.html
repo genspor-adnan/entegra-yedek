@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Ekran — Sekmeli, Menüsüz — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3; --sel:#d7e7fb; --head:#f3f6fa;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;
+    display:flex;flex-direction:column}
+
+  /* Üst çubuk */
+  .ust{display:flex;align-items:center;gap:12px;padding:0 12px;height:44px;
+    background:linear-gradient(#2b5c95,#1c4374);color:#fff;flex:none}
+  .logo{font-weight:bold;font-size:14px;white-space:nowrap}
+  .ara{flex:1;max-width:560px;margin:0 auto;display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:5px;cursor:text;color:#dbe7f5}
+  .ara:hover{background:rgba(255,255,255,.2)}
+  .ara kbd,.kbd{font-family:Consolas,monospace;font-size:10.5px;border:1px solid rgba(255,255,255,.4);border-radius:3px;padding:0 5px;margin-left:auto}
+  .ust .sag{display:flex;gap:14px;align-items:center;white-space:nowrap;font-size:11.5px}
+  .ust .sag span{opacity:.9}
+
+  /* Sekmeler */
+  .sekmeler{display:flex;align-items:flex-end;gap:2px;padding:6px 8px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+  .sekme{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 11px;max-width:220px;
+    border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;background:#e3e9f1;color:#4d5d6e;
+    cursor:pointer;white-space:nowrap;user-select:none}
+  .sekme .ad{overflow:hidden;text-overflow:ellipsis}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .x{width:16px;height:16px;line-height:15px;text-align:center;border-radius:3px;color:var(--muted);font-weight:normal}
+  .sekme .x:hover{background:#d3dce7;color:var(--ink)}
+  .sekme.sabit{padding-right:11px}
+  .sekme.sabit .ad{display:none}
+  .sekme-ekle{padding:5px 10px;color:var(--muted);cursor:pointer;border-radius:4px;margin-bottom:3px}
+  .sekme-ekle:hover{background:#e3e9f1}
+
+  /* İçerik */
+  .icerik{flex:1;position:relative;background:#fff}
+  .icerik iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:var(--bg)}
+  .baslangic{position:absolute;inset:0;overflow:auto;padding:40px 20px;background:var(--bg)}
+  .baslangic .ic{max-width:760px;margin:0 auto}
+  .baslangic h1{font-size:20px;color:var(--navy);margin:0 0 4px}
+  .baslangic .alt{color:var(--muted);margin-bottom:22px}
+  .buyuk-ara{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;background:#fff;border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 2px 8px rgba(20,40,70,.06);color:var(--muted);font-size:14px;cursor:text;margin-bottom:26px}
+  .buyuk-ara .kbd{border-color:var(--line);color:var(--muted)}
+  .bolum{font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:18px 0 8px}
+  .kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+  .kart{background:#fff;border:1px solid var(--line);border-radius:5px;padding:10px 12px;cursor:pointer}
+  .kart:hover{border-color:var(--accent);background:#f5f9fe}
+  .kart .i{font-size:16px}
+  .kart .a{font-weight:bold;color:var(--navy);margin-top:4px}
+  .kart .y{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+  /* Komut paleti */
+  .perde{position:fixed;inset:0;background:rgba(15,30,55,.35);display:none;justify-content:center;align-items:flex-start;padding-top:12vh;z-index:10}
+  .perde.acik{display:flex}
+  .palet{width:600px;max-width:calc(100% - 32px);background:#fff;border-radius:8px;box-shadow:0 18px 50px rgba(8,20,40,.35);overflow:hidden}
+  .palet input{width:100%;border:none;border-bottom:1px solid var(--line2);padding:14px 16px;font-size:15px;outline:none;font-family:inherit}
+  .liste{max-height:380px;overflow:auto;padding:6px 0}
+  .grup{font-size:10.5px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 16px 4px}
+  .oge{display:flex;align-items:center;gap:10px;padding:7px 16px;cursor:pointer}
+  .oge .i{width:20px;text-align:center}
+  .oge .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .oge.sec{background:var(--sel)}
+  .oge mark{background:none;color:var(--accent);font-weight:bold}
+  .palet .ayak{display:flex;gap:14px;padding:7px 16px;background:var(--head);border-top:1px solid var(--line2);font-size:10.5px;color:var(--muted)}
+  .palet .ayak .kbd{border-color:var(--line);margin:0 3px 0 0}
+  .bos{padding:18px 16px;color:var(--muted)}
+
+  .notlar{flex:none;max-height:0}
+  @media(max-width:700px){.ust .sag span:not(:last-child){display:none}.logo{display:none}}
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <div class="logo">🩺 Gentegre</div>
+  <div class="ara" id="araAc">🔍 Ekran, hasta, işlem ara… <kbd>Ctrl K</kbd></div>
+  <div class="sag"><span>Merkez şube</span><span>🔔 3</span><span>Dr. Selin TAN ▾</span></div>
+</div>
+
+<div class="sekmeler" id="sekmeler"></div>
+
+<div class="icerik" id="icerik"></div>
+
+<div class="perde" id="perde">
+  <div class="palet">
+    <input id="sorgu" placeholder="Ekran, hasta ya da işlem yazın…" autocomplete="off">
+    <div class="liste" id="liste"></div>
+    <div class="ayak">
+      <span><span class="kbd">↑↓</span>seç</span>
+      <span><span class="kbd">Enter</span>aç</span>
+      <span><span class="kbd">Ctrl Enter</span>arka sekmede aç</span>
+      <span><span class="kbd">Esc</span>kapat</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Ekran kataloğu = bugünkü menünün kendisi (yetkiye göre süzülmüş hali sunucudan gelir).
+const EKRANLAR = [
+  { k:'muayene',   ad:'Muayene Listesi',        yol:'Muayene',      i:'🩺', url:'../Muayene/muayene_listesi.html' },
+  { k:'konsliste', ad:'Konsültasyonlar',        yol:'Muayene',      i:'🤝', url:'../Muayene/konsultasyon_listesi.html' },
+  { k:'konskart',  ad:'Konsültasyon İsteği',    yol:'Muayene',      i:'➕', url:'../Muayene/konsultasyon_karti.html' },
+  { k:'yatan',     ad:'Yatan Hasta Listesi',    yol:'Yatan Hasta',  i:'🛏', url:'../Yatan/yatan_hasta_listesi.html' },
+  { k:'yatak',     ad:'Yatak Panosu',           yol:'Yatan Hasta',  i:'🗺', url:'../Yatan/yatak_panosu.html' },
+  { k:'kanpano',   ad:'Kan Merkezi',            yol:'Kan Merkezi',  i:'🩸', url:'../KanMerkezi/kan_merkezi_panosu.html' },
+  { k:'kanrez',    ad:'Kan Rezervasyonu',       yol:'Kan Merkezi',  i:'🩸', url:'../KanMerkezi/kan_rezervasyon_v2.html' },
+  { k:'kankabul',  ad:'Ünite Kabul',            yol:'Kan Merkezi',  i:'📥', url:'../KanMerkezi/kan_unite_kabul.html' },
+  { k:'ameliyat',  ad:'Ameliyathane Panosu',    yol:'Ameliyathane', i:'🔪', url:'../Ameliyathane/ameliyathane_panosu.html' },
+  { k:'lab',       ad:'Numune Kabul',           yol:'Laboratuvar',  i:'🧪', url:'../Lab/lab_istem_numune_kabul.html' },
+  { k:'stok',      ad:'Stok Listesi',           yol:'Stok',         i:'📦', url:'../stok_listesi.html' },
+  { k:'cari',      ad:'Cari Listesi',           yol:'Finans',       i:'👥', url:'../cari_liste_ekrani.html' },
+  { k:'satis',     ad:'Satış Faturaları',       yol:'Finans',       i:'🧾', url:'../fatura_satis_listesi.html' },
+];
+const ISLEMLER = [
+  { k:'i-hasta',  ad:'Yeni hasta kaydı',          yol:'Kayıt Kabul', i:'＋', url:'../Kayıt Kabul/banko_tanimi_v2.html' },
+  { k:'i-kons',   ad:'Konsültasyon iste',         yol:'Muayene',     i:'＋', url:'../Muayene/konsultasyon_karti.html' },
+  { k:'i-kan',    ad:'Kan rezervasyonu yap',      yol:'Kan Merkezi', i:'＋', url:'../KanMerkezi/kan_rezervasyon_v2.html' },
+];
+const HASTALAR = [
+  { k:'h-1', ad:'Ayşe DEMİR',   yol:'K 54 · B-212/1 · Genel Cerrahi', i:'👤', url:'../Yatan/yatis_karti.html' },
+  { k:'h-2', ad:'Ahmet ŞEN',    yol:'E 67 · Acil kırmızı alan',       i:'👤', url:'../Acil/acil_hasta_karti.html' },
+  { k:'h-3', ad:'Hüseyin KOÇ',  yol:'E 71 · A-306/2 · Dahiliye',      i:'👤', url:'../Yatan/yatis_karti.html' },
+];
+const TUMU = [...EKRANLAR, ...ISLEMLER, ...HASTALAR];
+
+// Sekme durumu. Gerçekte kullanıcı başına sunucuda saklanır: çıkış-giriş sonrası aynı sekmeler.
+let sekmeler = [
+  { k:'baslangic', ad:'Başlangıç', i:'🏠', sabit:true },
+  { ...EKRANLAR.find(e => e.k === 'konsliste') },
+  { ...EKRANLAR.find(e => e.k === 'kanpano') },
+];
+let aktif = 'konsliste';
+let sonAcilanlar = ['konsliste', 'kanpano', 'yatan', 'kanrez'];
+const SIK = ['muayene', 'yatan', 'konsliste', 'kanpano', 'lab'];
+
+const $ = id => document.getElementById(id);
+const kucuk = s => s.toLocaleLowerCase('tr');
+
+function cizSekmeler() {
+  $('sekmeler').innerHTML = sekmeler.map(s => `
+    <div class="sekme${s.k === aktif ? ' on' : ''}${s.sabit ? ' sabit' : ''}" data-k="${s.k}" title="${s.yol ? s.yol + ' › ' : ''}${s.ad}">
+      <span>${s.i}</span><span class="ad">${s.ad}</span>${s.sabit ? '' : '<span class="x" data-x="1">×</span>'}
+    </div>`).join('') + '<div class="sekme-ekle" id="ekle" title="Ctrl K">＋</div>';
+}
+
+// Her sekmenin iframe'i bir kez açılır, geçişte gizlenir: sekmeye dönünce ekran kaldığı yerde.
+function cizIcerik() {
+  const kap = $('icerik');
+  sekmeler.forEach(s => {
+    let el = kap.querySelector(`[data-k="${s.k}"]`);
+    if (!el) {
+      if (s.k === 'baslangic') { el = document.createElement('div'); el.className = 'baslangic'; }
+      else { el = document.createElement('iframe'); el.src = s.url; }
+      el.dataset.k = s.k; kap.appendChild(el);
+    }
+    el.hidden = s.k !== aktif;
+  });
+  kap.querySelectorAll('[data-k]').forEach(el => { if (!sekmeler.some(s => s.k === el.dataset.k)) el.remove(); });
+  const b = kap.querySelector('.baslangic');
+  if (b && !b.hidden) b.innerHTML = baslangicHtml();
+}
+
+function kart(e) { return `<div class="kart" data-ac="${e.k}"><div class="i">${e.i}</div><div class="a">${e.ad}</div><div class="y">${e.yol}</div></div>`; }
+function baslangicHtml() {
+  const bul = k => TUMU.find(e => e.k === k);
+  return `<div class="ic">
+    <h1>Günaydın, Dr. Selin TAN</h1>
+    <div class="alt">Menü yok: açmak istediğiniz ekranı yazın. Açtıklarınız üstte sekme olarak kalır.</div>
+    <div class="buyuk-ara" data-palet="1">🔍 Ne açmak istiyorsunuz? <span class="kbd" style="margin-left:auto">Ctrl K</span></div>
+    <div class="bolum">Son açılanlar</div><div class="kartlar">${sonAcilanlar.map(bul).filter(Boolean).map(kart).join('')}</div>
+    <div class="bolum">Sık kullandıklarım</div><div class="kartlar">${SIK.map(bul).filter(Boolean).map(kart).join('')}</div>
+    <div class="bolum">Bekleyen işler</div><div class="kartlar">
+      ${kart({k:'konsliste', i:'🤝', ad:'3 konsültasyon', yol:'1 tanesinin süresi geçti'})}
+      ${kart({k:'kanpano', i:'🩸', ad:'1 çok acil kan istemi', yol:'Kan Merkezi'})}
+    </div></div>`;
+}
+
+function ciz() { cizSekmeler(); cizIcerik(); }
+
+function ac(k, arkada = false) {
+  const e = TUMU.find(x => x.k === k);
+  if (!e) return;
+  // Aynı ekran ikinci kez açılmaz, mevcut sekmeye gidilir (hasta kartı hasta başına ayrı sekme olur).
+  if (!sekmeler.some(s => s.k === k)) sekmeler.push({ ...e });
+  sonAcilanlar = [k, ...sonAcilanlar.filter(x => x !== k)].slice(0, 8);
+  if (!arkada) aktif = k;
+  ciz();
+}
+function kapat(k) {
+  const i = sekmeler.findIndex(s => s.k === k);
+  if (i < 0 || sekmeler[i].sabit) return;
+  sekmeler.splice(i, 1);
+  if (aktif === k) aktif = (sekmeler[i] ?? sekmeler[i - 1]).k;
+  ciz();
+}
+
+$('sekmeler').addEventListener('click', ev => {
+  const s = ev.target.closest('.sekme');
+  if (ev.target.id === 'ekle') return paletAc();
+  if (!s) return;
+  if (ev.target.dataset.x) kapat(s.dataset.k); else { aktif = s.dataset.k; ciz(); }
+});
+$('sekmeler').addEventListener('auxclick', ev => { const s = ev.target.closest('.sekme'); if (s && ev.button === 1) kapat(s.dataset.k); });
+$('icerik').addEventListener('click', ev => {
+  if (ev.target.closest('[data-palet]')) return paletAc();
+  const k = ev.target.closest('[data-ac]'); if (k) ac(k.dataset.ac);
+});
+
+// ---- Komut paleti
+let sonuc = [], secili = 0;
+function vurgula(ad, q) {
+  if (!q) return ad;
+  const i = kucuk(ad).indexOf(q);
+  return i < 0 ? ad : ad.slice(0, i) + '<mark>' + ad.slice(i, i + q.length) + '</mark>' + ad.slice(i + q.length);
+}
+function paletCiz() {
+  const q = kucuk($('sorgu').value.trim());
+  const uy = e => !q || kucuk(e.ad + ' ' + e.yol).includes(q);
+  const gruplar = q
+    ? [['Ekranlar', EKRANLAR.filter(uy)], ['İşlemler', ISLEMLER.filter(uy)], ['Hastalar', HASTALAR.filter(uy)]]
+    : [['Son açılanlar', sonAcilanlar.map(k => TUMU.find(e => e.k === k)).filter(Boolean)], ['İşlemler', ISLEMLER]];
+  sonuc = gruplar.flatMap(g => g[1]);
+  secili = Math.min(secili, Math.max(sonuc.length - 1, 0));
+  let n = 0;
+  $('liste').innerHTML = sonuc.length ? gruplar.filter(g => g[1].length).map(([b, l]) =>
+    `<div class="grup">${b}</div>` + l.map(e => {
+      const acik = sekmeler.some(s => s.k === e.k) ? ' · açık sekme' : '';
+      return `<div class="oge${n === secili ? ' sec' : ''}" data-n="${n++}"><span class="i">${e.i}</span><span>${vurgula(e.ad, q)}</span><span class="y">${e.yol}${acik}</span></div>`;
+    }).join('')).join('') : '<div class="bos">Sonuç yok. Yetkiniz olmayan ekranlar listede görünmez.</div>';
+  $('liste').querySelector('.sec')?.scrollIntoView({ block:'nearest' });
+}
+function paletAc() { $('perde').classList.add('acik'); $('sorgu').value = ''; secili = 0; paletCiz(); $('sorgu').focus(); }
+function paletKapat() { $('perde').classList.remove('acik'); }
+
+$('araAc').addEventListener('click', paletAc);
+$('perde').addEventListener('click', ev => { if (ev.target.id === 'perde') paletKapat(); });
+$('sorgu').addEventListener('input', () => { secili = 0; paletCiz(); });
+$('liste').addEventListener('click', ev => { const o = ev.target.closest('.oge'); if (o) { paletKapat(); ac(sonuc[+o.dataset.n].k); } });
+$('sorgu').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown') { secili = Math.min(secili + 1, sonuc.length - 1); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'ArrowUp') { secili = Math.max(secili - 1, 0); paletCiz(); ev.preventDefault(); }
+  else if (ev.key === 'Enter' && sonuc[secili]) { const k = sonuc[secili].k; paletKapat(); ac(k, ev.ctrlKey); }
+  else if (ev.key === 'Escape') paletKapat();
+});
+
+// Kısayollar: Ctrl+K palet, Alt+W sekme kapat (Ctrl+W tarayıcının), Ctrl+1..9 sekmeye git.
+document.addEventListener('keydown', ev => {
+  if ((ev.ctrlKey || ev.metaKey) && kucuk(ev.key) === 'k') { ev.preventDefault(); paletAc(); }
+  else if (ev.altKey && kucuk(ev.key) === 'w') { ev.preventDefault(); kapat(aktif); }
+  else if (ev.ctrlKey && /^[1-9]$/.test(ev.key) && sekmeler[+ev.key - 1]) { ev.preventDefault(); aktif = sekmeler[+ev.key - 1].k; ciz(); }
+  else if (ev.key === 'Escape') paletKapat();
+});
+
+ciz();
+</script>
+
+<!--
+  TASARIM NOTLARI
+  - Sol menü yok; ekran kataloğu menünün kendisi (yetki ve ürün modu süzgeci aynı).
+  - Aynı ekran ikinci sekme açmaz; hasta kartı hasta başına ayrı sekme.
+  - Sekme sırası ve açık sekmeler kullanıcı başına sunucuda saklanır.
+  - Başlangıç sekmesi sabit, kapanmaz: son açılanlar, sık kullanılanlar, bekleyen işler.
+  - Kısayollar: Ctrl+K arama, Alt+W sekme kapat, Ctrl+1..9 sekmeye git, orta tık kapat.
+-->
+</body>
+</html>

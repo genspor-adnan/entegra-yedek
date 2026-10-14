@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konsültasyon Kartı — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .hasta-serit{display:flex;gap:18px;align-items:center;padding:8px 12px;background:#fbfcfe;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap;font-size:11.5px}
+  .hasta-serit b{color:var(--navy)}
+  .iki-taraf{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line2)}
+  .iki-taraf>div+div{border-left:1px solid var(--line2)}
+  .taraf-bas{padding:8px 12px 0;font-weight:bold;color:#2f6db3;font-size:12px;display:flex;gap:8px;align-items:center}
+  .taraf-bas .sonuk{font-weight:normal;font-size:11px}
+  .inp.zor{background:#fdf1f0;border-color:#f3c4bf}
+  .metin{min-height:96px;align-items:flex-start;line-height:1.55;white-space:normal}
+  .secim{display:inline-flex;gap:4px}
+  .secim span{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff}
+  .secim span.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .akis{display:flex;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{flex:1;min-width:110px;text-align:center;font-size:11px;padding:6px 4px;border:1px solid var(--line2);
+    background:#f8fafc;color:var(--muted)}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad.ok{background:#e2f3e8;color:#2e7d46;font-weight:bold}
+  .akis .ad.su{background:#eef4fc;color:#2f6db3;font-weight:bold;box-shadow:inset 0 -3px 0 #2f6db3}
+  .alinti{margin:8px 12px;padding:8px 10px;border-left:3px solid #2f6db3;background:#f5f9fe;font-size:12px;line-height:1.55}
+  .alinti small{display:block;color:var(--muted);font-size:10.5px;margin-bottom:3px}
+  @media(max-width:1000px){.iki-taraf{grid-template-columns:1fr}.iki-taraf>div+div{border-left:none}}
+</style>
+</head>
+<body>
+
+<!-- ============================================== 1) İSTEK (isteyen hekim) -->
+<div class="win" style="max-width:1100px">
+  <div class="title">🩺 Konsültasyon İsteği
+    <span class="sp">Muayene / Yatış › Konsültasyon · yeni</span></div>
+
+  <div class="hasta-serit">
+    <span>Başvuru <b>105 · 15.09.2026 18:01 · Bireysel hasta</b></span>
+    <span><b>Ayşe DEMİR</b> · K · 54 · Genel Cerrahi · B-212/1</span>
+    <span>Sorumlu <b>Prof. Dr. Emre BALIK</b></span>
+    <span style="margin-left:auto" class="rz kir">Alerji: Penisilin</span>
+  </div>
+
+  <div class="iki-taraf">
+    <div>
+      <div class="taraf-bas">İsteyen <span class="sonuk">· kim, neden soruyor</span></div>
+      <div class="alanlar">
+        <label>İstek zamanı *</label><div class="inp ro">13.10.2026 21:18 <span class="sonuk" style="margin-left:auto">otomatik</span></div>
+        <label>Bölüm / birim *</label><div class="inp ro">Genel Cerrahi · Genel Cerrahi Kliniği</div>
+        <label>İsteyen hekim *</label><div class="inp combo">Asist. Dr. Emre AKAY</div>
+        <label>Sorumlu hekim</label><div class="inp combo">Prof. Dr. Emre BALIK <span class="sonuk" style="margin-left:6px">asistan isteğinde zorunlu</span></div>
+        <label>Neden *</label><div class="inp combo">Ameliyat öncesi değerlendirme</div>
+      </div>
+    </div>
+    <div>
+      <div class="taraf-bas">Karşılayan <span class="sonuk">· kime, nerede</span></div>
+      <div class="alanlar">
+        <label>Merkez</label><div class="inp combo">Kurum içi (Merkez şube)</div>
+        <label>Bölüm *</label><div class="inp combo">Kardiyoloji</div>
+        <label>Hekim</label><div class="inp combo"><span class="sonuk">Bölüme gönder (nöbetçi üstlenir)</span></div>
+        <label>Karşılama yeri *</label><div class="inp combo">Yatak başı (B-212/1)</div>
+        <label>Aciliyet *</label>
+        <div class="secim"><span>Rutin · 24 sa</span><span>Acil · 2 sa</span><span class="on">Çok acil · 30 dk</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alanlar">
+    <label>Soru / istek notu *</label>
+    <div class="inp metin">Planlı açık kolesistektomi (14.10 09:00). Preop EKG'de daha önce bilinmeyen AF, hız 112.
+      Ameliyata engel mi? Antikoagülasyon başlansın mı, cerrahi öncesi köprüleme gerekir mi?</div>
+    <label></label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <div class="btn">📋 Şablondan</div>
+      <div class="btn">🎙 Dikte</div>
+      <div class="btn">📎 Ek: EKG 13.10 18:40 ✓</div>
+      <span class="sonuk" style="align-self:center;margin-left:auto">412 / 500 karakter · e-Nabız konsültasyon notu</span>
+    </div>
+  </div>
+
+  <div class="grp" style="margin-top:0">
+    <h4>Konsültana otomatik giden özet <span class="mini">kart açıldığında karşı tarafta görünür · düzenlenmez</span></h4>
+    <div class="ic">
+      <div class="sat"><span>Tanılar</span><b>K80.2 Safra kesesi taşı · I48 Atriyal fibrilasyon (ön tanı)</b></div>
+      <div class="sat"><span>Son lab</span><b>Hb 8,4 ↓ · INR 1,1 · K 3,6 · Kreatinin 0,9</b></div>
+      <div class="sat"><span>Aktif ilaçlar</span><b>Metoprolol 50 mg 1×1 · Pantoprazol 40 mg</b></div>
+      <div class="sat"><span>Planlı işlem</span><b>Kolesistektomi (açık) · 14.10 09:00 · A-2026-0388</b></div>
+    </div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div>Bölüme gönderilen <b>çok acil</b> istem Kardiyoloji nöbetçisine bildirim olarak düşer;
+      30 dk içinde üstlenilmezse bölüm sorumlusu da uyarılır.</div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="sp"></div>
+    <div class="btn">💾 Taslak</div>
+    <div class="btn primary">📤 Gönder</div>
+  </div>
+</div>
+
+<!-- ====================================== 2) YANIT (konsültan hekim) -->
+<div class="win" style="max-width:1100px;margin-top:18px">
+  <div class="title">🩺 Konsültasyon Yanıtı
+    <span class="sp">KN-2026-1184 · Ayşe DEMİR · Dr. Selin TAN (Kardiyoloji)</span></div>
+
+  <div class="akis">
+    <div class="ad ok">İstek · 21:18</div>
+    <div class="ad ok">Üstlenildi · 21:24</div>
+    <div class="ad su">Hastada · 21:31</div>
+    <div class="ad">Yanıtlandı</div>
+    <div class="ad">İsteyen gördü</div>
+    <div class="ad">e-Nabız 252</div>
+  </div>
+
+  <div class="alinti"><small>SORU · Asist. Dr. Emre AKAY (Genel Cerrahi) · 21:18 · çok acil · yatak başı</small>
+    Planlı açık kolesistektomi (14.10 09:00). Preop EKG'de daha önce bilinmeyen AF, hız 112.
+    Ameliyata engel mi? Antikoagülasyon başlansın mı, cerrahi öncesi köprüleme gerekir mi?</div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Değerlendirme</div>
+    <div class="sekme">Tanı (ICD-10)</div>
+    <div class="sekme">İstemler <span class="rz">2</span></div>
+    <div class="sekme">Reçete / order</div>
+    <div class="sekme">Hasta özeti</div>
+  </div>
+
+  <div class="alanlar">
+    <label>Başlama / bitiş</label>
+    <div class="inp ro">13.10.2026 21:31 → <span class="sonuk">tamamlayınca</span></div>
+    <label>Bulgular</label>
+    <div class="inp metin">Hemodinamik stabil, TA 128/76, nabız 108 düzensiz. Göğüs ağrısı yok. EKG: hızlı ventrikül yanıtlı AF,
+      iskemik değişiklik yok. Yatak başı EKO: EF %55, sol atriyum 4,3 cm, kapak patolojisi yok.</div>
+    <label>Değerlendirme / öneri *</label>
+    <div class="inp metin zor">Yeni başlangıçlı AF (&lt;48 sa belirsiz). Hız kontrolü: metoprolol 2×50 mg. CHA₂DS₂-VASc 1
+      (kadın) — rutin antikoagülasyon gerekmiyor, köprüleme gereksiz. Hız &lt;100 sağlanınca cerrahiye kardiyak engel yok.
+      TSH istendi. Postop poliklinik kontrolü 2 hafta.</div>
+    <label>Sonuç *</label>
+    <div class="secim">
+      <span class="on">Engel yok / önerilerle</span><span>Ertelenmeli</span><span>Devralınmalı (nakil)</span><span>Takip edeceğim</span>
+    </div>
+    <label>Tanı</label>
+    <div class="inp">I48.0 Paroksismal atriyal fibrilasyon <span class="rz mavi" style="margin-left:6px">kesin</span></div>
+  </div>
+
+  <div class="iki">
+    <div>
+      <div class="grp">
+        <h4>Bu yanıttan doğan istemler <span class="mini">konsültan adına, kendi muayenesinde</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Lab</span><b>TSH, sT4 · rutin</b></div>
+          <div class="sat"><span>Order önerisi</span><b>Metoprolol 50 mg 2×1 <span class="rz sari">sorumlu hekim onayına</span></b></div>
+        </div>
+        <div class="not">Yatan hastaya order'ı <b>sorumlu hekim</b> verir; konsültanın ilaç önerisi
+          isteyen tarafa onay bekleyen öneri olarak düşer. Doğrudan order yazılsaydı aynı ilaç
+          iki hekimden iki kez başlanabilirdi.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Ücret ve bildirim</h4>
+        <div class="ic">
+          <div class="sat"><span>Hizmet</span><b>520.030 Konsültasyon · başvuru 105'e satır</b></div>
+          <div class="sat"><span>Hekim hakedişi</span><b>Dr. Selin TAN</b></div>
+          <div class="sat"><span>İsteyen hekime</span><b>bildirim + muayene kartında yanıt</b></div>
+          <div class="sat"><span>e-Nabız</span><b>252 Konsültasyon Kayıt · 24 sa içinde</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="btn">↪ Yönlendir</div>
+    <div class="btn danger">Reddet</div>
+    <div class="sp"></div>
+    <div class="btn">💾 Kaydet</div>
+    <div class="btn primary">✔ Tamamla ve Yanıtla</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yanıt = muayene (tür 3, ust_muayene_id)</span><span>·</span>
+    <span>Soru isteyen hekimin, değiştirilemez</span><span>·</span>
+    <span>ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<!-- ============================================== 3) RET / YÖNLENDİRME -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">↪ Konsültasyonu Yönlendir / Reddet <span class="sp">gerekçe zorunlu</span></div>
+    <div class="alanlar">
+      <label>İşlem</label><div class="secim"><span class="on">Yönlendir</span><span>Reddet</span></div>
+      <label>Yeni hedef</label><div class="inp combo">Kalp ve Damar Cerrahisi · bölüm</div>
+      <label>Gerekçe *</label><div class="inp metin" style="min-height:60px">Kapak cerrahisi sorusu; KVC değerlendirmesi uygun.</div>
+    </div>
+    <div class="uyari mavi"><span>ℹ</span><div>İstem kapanmaz, yeni hedefe taşınır; süre sayacı
+      sıfırlanmaz. İsteyen hekim bildirim alır.</div></div>
+    <div class="malt"><div class="btn">Vazgeç</div><div class="sp"></div><div class="btn primary">Yönlendir</div></div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Konsültasyon Kartı — tasarım notları</h4>
+  Referans: <code>konsültasyon ekranı.png</code> (önceki ürün). İstek / Karşılama ikili düzeni
+  korundu; aşağıdaki farklar bilinçli.
+  <ul>
+    <li><b>Karşılayan hekim zorunlu değil</b>, bölüm yeter. Eski ekranda karşılama bölümü
+      zorunluydu, hekim seçilince istem yalnız ona gidiyordu; gece o hekim yoksa istem kalıyordu.</li>
+    <li><b>Asistan isteğinde sorumlu hekim zorunlu.</b> Eski ekrandaki "Asistan" alanı tersine
+      çevrildi: isteyen asistansa sorumlu uzman da kayda girer.</li>
+    <li><b>Aciliyet süreyle birlikte seçilir</b> (30 dk / 2 sa / 24 sa); süre listedeki sayacı ve
+      bildirimi besler.</li>
+    <li><b>İstek notu e-Nabız 252'nin konsültasyon notudur</b> (zorunlu, 500 karakter sınırı
+      muayene.konsultasyon_soru ile aynı).</li>
+    <li><b>Yanıt ayrı muayene</b> (tür 3, <code>ust_muayene_id</code>): tanı, istem, ücret,
+      hakediş ve e-Nabız paketi oradan. Yapı zaten var (465, 880); ekran onun yüzü.</li>
+    <li><b>Sonuç alanı yapısal</b> (engel yok / ertelenmeli / devralınmalı / takip): ameliyat
+      planı ve yatış kartı serbest metni okumadan bu sonucu gösterebilir.</li>
+    <li><b>Dış merkez</b> (Merkez alanı başka kurum) seçilirse karşılayan alanlar serbest metne
+      döner, yanıt PDF eki olarak işlenir.</li>
+  </ul>
+</div>
+
+</body>
+</html>

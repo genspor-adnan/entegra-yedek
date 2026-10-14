@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Kartı v4 — Dinamik İstem — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{padding:0;background:#fff;display:flex;flex-direction:column}
+
+  /* HASTA BANDI - Ayarlar/hasta_bandi.html ile birebir ("alt" yerine "hb-alt": kartın alt çubuğuyla çakışıyordu) */
+  .hb{position:relative;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--line);
+    border-left:5px solid #2f6db3;font-size:11.5px}
+  .hb .foto{width:52px;flex:none;display:flex;align-items:center;justify-content:center;background:#eef3f9;
+    font-weight:bold;color:var(--navy);font-size:16px;border-right:1px solid var(--line2)}
+  .hb .kim{padding:7px 12px;min-width:230px;border-right:1px solid var(--line2)}
+  .hb .ad{font-size:15px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .hb .esad{font-size:10px;font-weight:bold;color:#8a6218;background:#fdf6e3;border:1px solid #f2ddbf;border-radius:3px;padding:0 5px}
+  .hb .hb-alt{color:var(--muted);margin-top:2px;white-space:nowrap}
+  .hb .hb-alt b{color:var(--ink);font-weight:normal}
+  .hb .kg{font-family:Consolas,monospace;font-weight:bold;color:#b3261e;border:1px solid #f3c4bf;background:#fbe9e7;border-radius:3px;padding:0 5px}
+  .hb .blok{padding:7px 12px;border-right:1px solid var(--line2);min-width:0}
+  .hb .blok .b{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .hb .riskler{display:flex;gap:4px;flex-wrap:wrap}
+  .hb .yer{white-space:nowrap}
+  .hb .yer b{color:var(--navy)}
+  .hb .hb-sag{margin-left:auto;display:flex;align-items:center;gap:4px;padding:0 10px}
+  .hb .ik{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .hb .ik:hover{background:#eef3f9}
+  .hb .ik .s{position:absolute;top:1px;right:0;background:#b3261e;color:#fff;border-radius:7px;font-size:9px;padding:0 4px;line-height:13px}
+  #hbAlerji{cursor:pointer}
+  .ayr{position:absolute;top:100%;left:290px;z-index:5;width:330px;background:#fff;border:1px solid var(--line);
+    border-radius:5px;box-shadow:0 10px 30px rgba(8,20,40,.2);padding:10px 12px}
+  .ayr h5{margin:0 0 6px;color:#b3261e;font-size:12px}
+  .ayr .s{padding:3px 0;border-top:1px solid #eef2f6}
+  .ayr .s:first-of-type{border-top:none}
+  @media(max-width:900px){.hb{flex-wrap:wrap}.hb .gizle-dar{display:none}.hb .kim{min-width:0;flex:1;border-right:none}.ayr{left:10px}}
+  .ms{display:flex;gap:22px;padding:0 16px;border-bottom:1px solid var(--line);flex:none}
+  .ms span{padding:9px 2px;cursor:pointer;color:#4d5d6e;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .ms span.on{color:var(--navy);font-weight:bold;border-bottom-color:var(--accent)}
+  .ms .n{display:inline-block;min-width:16px;padding:0 5px;margin-left:4px;border-radius:8px;background:#e7edf4;font-size:10.5px;text-align:center}
+  .ms .n.kir{background:#b3261e;color:#fff}
+
+  .govde{flex:1;overflow:auto;padding:14px 16px 20px}
+  .pano{max-width:1100px}
+  .etiket{font-size:10.5px;color:var(--muted);margin:10px 0 3px}
+  .etiket:first-child{margin-top:0}
+  .metin{border:1px solid var(--line);border-radius:3px;padding:7px 9px;line-height:1.55;background:#fff;min-height:32px}
+  .vitaller{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .vt{border:1px solid var(--line);border-radius:3px;padding:5px 8px}
+  .vt .b{font-size:10px;color:var(--muted)}
+  .vt .d{font-size:14px;font-weight:bold;color:var(--navy);font-family:Consolas,monospace}
+  .vt.uy{background:#fdf6e3;border-color:#f2ddbf}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* İstem ekleme şeridi: sık kullanılan türler + "Diğer" (katalogdan) */
+  .ekle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .ekle .t{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:5px 12px;
+    background:#fff;cursor:pointer}
+  .ekle .t:hover{border-color:var(--accent);color:var(--accent);background:#f5f9fe}
+  .ekle .t.diger{border-style:dashed;color:var(--muted)}
+  .ekle .ac{margin-left:auto;color:var(--muted);font-size:11px}
+
+  table.ist td{white-space:normal}
+  .tur{display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .sonuc-kir{color:#b3261e;font-weight:bold}
+
+  /* Sağdan açılan istem paneli: formu türün tanımından üretilir */
+  .perde2{position:fixed;inset:0;background:rgba(15,30,55,.25);z-index:20}
+  .cekmece{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#fff;z-index:21;
+    box-shadow:-10px 0 30px rgba(8,20,40,.2);display:flex;flex-direction:column}
+  .cekmece .cb{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line2);font-weight:bold;color:var(--navy);font-size:14px}
+  .cekmece .cb .x{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:normal}
+  .cekmece .ci{flex:1;overflow:auto;padding:12px 16px}
+  .cekmece .ca{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line2)}
+  .alan{margin-bottom:10px}
+  .alan label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .alan input,.alan select,.alan textarea{width:100%;border:1px solid var(--line);border-radius:3px;padding:6px 8px;font:inherit;background:#fff}
+  .alan textarea{min-height:70px;resize:vertical}
+  .secim{display:flex;gap:4px;flex-wrap:wrap}
+  .secim span{border:1px solid var(--line);border-radius:3px;padding:4px 10px;cursor:pointer;background:#fff}
+  .secim span.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .bilgi{background:#eef4fc;border:1px solid #cfe0f5;color:#1d4a80;border-radius:4px;padding:7px 9px;font-size:11.5px;margin-bottom:10px}
+  .katalog .k{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line2);border-radius:4px;margin-bottom:6px;cursor:pointer}
+  .katalog .k:hover{border-color:var(--accent);background:#f5f9fe}
+  .katalog .k .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+
+  .alt{display:flex;align-items:center;gap:8px;padding:9px 16px;border-top:1px solid var(--line);flex:none;flex-wrap:wrap}
+  .alt .kontrol{font-size:11px;color:var(--muted)}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4caf6e,#2e7d46);color:#fff;font-weight:bold}
+  @media(max-width:800px){.ikili{grid-template-columns:1fr}.vitaller{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- HASTA BANDI (ortak bileşen, Ayarlar/hasta_bandi.html ile aynı) -->
+<div class="hb">
+  <div class="foto">MK</div>
+  <div class="kim">
+    <div class="ad">Mehmet KAYA <span class="esad" title="Bu kurumda aynı ad soyadlı 2 hasta daha var">AYNI AD ×2</span></div>
+    <div class="hb-alt"><b>58 E</b> · <b>SGK</b> (aktif)</div>
+    <div class="hb-alt">D 104882 · P 2026/20390</div>
+  </div>
+  <div class="blok">
+    <div class="b">Kan · boy / kilo</div>
+    <div><span class="kg">A Rh(+)</span></div>
+    <div class="hb-alt">174 cm · 86 kg · VKİ 28,4</div>
+  </div>
+  <div class="blok" style="flex:1">
+    <div class="b">Uyarılar</div>
+    <div class="riskler">
+      <span class="rz kir" id="hbAlerji">⚠ Alerji: Penisilin +1</span>
+      <span class="rz sari">DM tip 2</span><span class="rz sari">HT</span>
+      <span class="rz kir">Panik sonuç: Troponin</span>
+      <span class="rz mor">Antikoagülan yok</span>
+    </div>
+  </div>
+  <div class="blok gizle-dar">
+    <div class="b">Şu an</div>
+    <div class="yer"><b>Dahiliye polikliniği</b></div>
+    <div class="hb-alt">Uzm. Dr. Ali KOÇ · 10:28'den beri</div>
+  </div>
+  <div class="hb-sag">
+    <div class="ik" title="Tıbbi özet">📋</div>
+    <div class="ik" title="Açık istemler">🧪<span class="s">3</span></div>
+    <div class="ik" title="Belgeler">📎</div>
+    <div class="ik" title="Hesap: 0 ₺ borç">₺</div>
+    <div class="ik" title="Diğer">⋯</div>
+  </div>
+  <div class="ayr" id="hbAyr" hidden>
+    <h5>⚠ Alerjiler (2)</h5>
+    <div class="s"><b>Penisilin</b> · ilaç · ağır · anafilaksi <span class="sonuk">· 2019, e-Nabız</span></div>
+    <div class="s"><b>Lateks</b> · madde · orta · kontakt dermatit <span class="sonuk">· 2024, kurum</span></div>
+  </div>
+</div>
+
+<div class="ms" id="ms">
+  <span data-s="muayene" class="on">Muayene</span>
+  <span data-s="istem">İstemler <span class="n kir" id="istemSay">5</span></span>
+  <span data-s="karar">Reçete ve karar</span>
+</div>
+
+<div class="govde">
+  <!-- ================= MUAYENE ================= -->
+  <div class="pano" data-s="muayene">
+    <div class="ikili">
+      <div>
+        <div class="etiket">Şikâyet</div>
+        <div class="metin">Göğüste baskı hissi, 2 saattir; sol kola yayılıyor. Terleme.</div>
+        <div class="etiket">Hikâye</div>
+        <div class="metin">İstirahatte başlamış. DM ve HT tanılı, sigara 30 paket-yıl.</div>
+      </div>
+      <div>
+        <div class="etiket">Fizik muayene <span class="sonuk">· şablon: Kardiyovasküler</span></div>
+        <div class="metin">Genel durum orta, terli. S1 S2 ritmik, üfürüm yok. Akciğerler doğal. Ödem yok.</div>
+        <div class="etiket">Tanı</div>
+        <div class="metin"><b>I21.0</b> Akut ön duvar MI <span class="rz mavi">ana · ön tanı</span> · E11 · I10 <span class="sonuk" style="margin-left:6px">＋ tanı</span></div>
+      </div>
+    </div>
+    <div class="etiket">Vital</div>
+    <div class="vitaller">
+      <div class="vt uy"><div class="b">TA</div><div class="d">158/96</div></div>
+      <div class="vt"><div class="b">Nabız</div><div class="d">96</div></div>
+      <div class="vt"><div class="b">SpO₂</div><div class="d">%95</div></div>
+      <div class="vt"><div class="b">Ateş</div><div class="d">36,8</div></div>
+      <div class="vt"><div class="b">Solunum</div><div class="d">20</div></div>
+      <div class="vt"><div class="b">Ağrı</div><div class="d">7/10</div></div>
+    </div>
+  </div>
+
+  <!-- ================= İSTEMLER ================= -->
+  <div class="pano" data-s="istem" hidden>
+    <div class="ekle" id="ekle"></div>
+    <table class="ist">
+      <thead><tr><th>Tür</th><th>İstem</th><th>Aciliyet</th><th>Saat</th><th>Durum</th><th>Sonuç</th></tr></thead>
+      <tbody id="istemler"></tbody>
+    </table>
+    <div class="etiket" style="margin-top:12px">Bütün istemler tek listede, ortak durumla (İstendi · İşlemde · Sonuçlandı · İptal). Satıra tıklayınca türün kendi ekranı açılır.</div>
+  </div>
+
+  <!-- ================= REÇETE VE KARAR ================= -->
+  <div class="pano" data-s="karar" hidden>
+    <div class="etiket">Reçete <span class="sonuk">· etkileşim / alerji kontrolü temiz · imzasız</span></div>
+    <table>
+      <thead><tr><th>İlaç</th><th>Doz</th><th>Kullanım</th></tr></thead>
+      <tbody>
+        <tr><td>Asetilsalisilik asit 300 mg</td><td>1 × 1</td><td>Çiğnenerek, hemen</td></tr>
+        <tr><td>Klopidogrel 75 mg</td><td>4 tb yükleme</td><td>Ağızdan</td></tr>
+      </tbody>
+    </table>
+    <div class="etiket">Karar</div>
+    <div class="secim" id="karar">
+      <span>Ayaktan · kontrol</span><span>Yatış</span><span class="on">Kurum dışı sevk</span><span>Konsültasyon bekle</span>
+    </div>
+    <div class="etiket">Değerlendirme / plan</div>
+    <div class="metin">Akut ön duvar MI. ASA + klopidogrel yüklendi, primer PKG için sevk.</div>
+  </div>
+</div>
+
+<div class="alt">
+  <span class="kontrol">Reçete imzasız · 2 sonuç bekliyor</span>
+  <div class="sp"></div>
+  <div class="btn primary">💾 Kaydet</div>
+  <div class="btn ok">✔ Muayeneyi Tamamla</div>
+</div>
+
+<div class="perde2" id="perde" hidden></div>
+<div class="cekmece" id="cekmece" hidden>
+  <div class="cb"><span id="cBas"></span><span class="x" id="cKapat">✕</span></div>
+  <div class="ci" id="cIc"></div>
+  <div class="ca" id="cAlt"><div class="btn" id="cVaz">Vazgeç</div><div class="sp"></div><div class="btn primary" id="cKay">İste</div></div>
+</div>
+
+<script>
+/*
+ * İSTEM TÜRÜ KATALOĞU - ekranın bildiği tek şey bu liste.
+ * Gerçekte sunucudan gelir (istem_turu tablosu): kod, ad, ikon, alanlar (form motoru şablonu),
+ * hedef modül, yetki kodu, sık kullanılan mı, aktif. Yeni tür = yeni satır + form şablonu;
+ * muayene kartına kod yazılmaz. Lab / görüntüleme gibi karmaşık türler kendi seçicisini getirir (ozel).
+ */
+const TURLER = [
+  { kod:'lab', ad:'Laboratuvar', i:'🧪', sik:1, ozel:'Test / panel seçici (lab modülünün bileşeni)',
+    alanlar:[ { ad:'Testler', tip:'metin', ipucu:'Hemogram, CRP… (panel de seçilebilir)' }, { ad:'Aciliyet', tip:'secim', secenek:['Rutin','Acil'] } ] },
+  { kod:'rad', ad:'Görüntüleme', i:'🩻', sik:1,
+    alanlar:[ { ad:'Tetkik', tip:'liste', secenek:['Akciğer PA','BT toraks','USG batın','EKO'] }, { ad:'Klinik bilgi', tip:'yazi' }, { ad:'Aciliyet', tip:'secim', secenek:['Rutin','Acil'] } ] },
+  { kod:'kons', ad:'Konsültasyon', i:'🤝', sik:1,
+    alanlar:[ { ad:'Bölüm', tip:'liste', secenek:['Kardiyoloji','Genel Cerrahi','Nöroloji','Göğüs Hastalıkları'] },
+              { ad:'Hekim', tip:'liste', secenek:['Bölüme gönder (nöbetçi)','Dr. Selin TAN','Dr. B. TAN'] },
+              { ad:'Aciliyet', tip:'secim', secenek:['Rutin · 24 sa','Acil · 2 sa','Çok acil · 30 dk'] },
+              { ad:'Soru', tip:'yazi', zorunlu:1 } ] },
+  { kod:'kan', ad:'Kan', i:'🩸', sik:1, bilgi:'Kan grubu: B Rh(+) · laboratuvar sonucundan',
+    alanlar:[ { ad:'Ürün', tip:'liste', secenek:['Eritrosit süspansiyonu','Taze donmuş plazma'] }, { ad:'Miktar (ünite)', tip:'sayi', deger:2 },
+              { ad:'Endikasyon', tip:'liste', secenek:['Akut kan kaybı','Semptomatik anemi','Cerrahi hazırlık'] },
+              { ad:'Aciliyet', tip:'secim', secenek:['Rutin','Acil','Çok acil'] } ] },
+  { kod:'islem', ad:'İşlem', i:'💉', sik:1,
+    alanlar:[ { ad:'İşlem', tip:'liste', secenek:['EKG','Pansuman','IV kanül','Sonda'] }, { ad:'Not', tip:'yazi' } ] },
+  { kod:'diyet', ad:'Diyet', i:'🍽', alanlar:[ { ad:'Diyet', tip:'liste', secenek:['Diyabetik','Tuzsuz','Aç (NPO)'] } ] },
+  { kod:'ftr', ad:'Fizik tedavi', i:'🏃', alanlar:[ { ad:'Program', tip:'liste', secenek:['Bel','Diz','Omuz'] }, { ad:'Seans', tip:'sayi', deger:10 } ] },
+  { kod:'patoloji', ad:'Patoloji', i:'🔬', alanlar:[ { ad:'Materyal', tip:'metin' }, { ad:'Klinik bilgi', tip:'yazi' } ] },
+  { kod:'evde', ad:'Evde bakım', i:'🏠', alanlar:[ { ad:'Hizmet', tip:'liste', secenek:['Pansuman','İlaç uygulama','Hemşire ziyareti'] } ] },
+];
+
+let istemler = [
+  { tur:'lab',  ic:'Troponin T hs', ac:'Acil', saat:'10:31', durum:'Sonuçlandı', sonuc:'412 ng/L · panik', kir:1 },
+  { tur:'islem',ic:'EKG', ac:'Acil', saat:'10:29', durum:'Sonuçlandı', sonuc:'V1–V4 ST elevasyonu' },
+  { tur:'lab',  ic:'Kardiyak panel (CK-MB, BNP)', ac:'Acil', saat:'10:31', durum:'İşlemde', sonuc:'' },
+  { tur:'rad',  ic:'Akciğer PA', ac:'Acil', saat:'10:33', durum:'İstendi', sonuc:'' },
+  { tur:'kons', ic:'Kardiyoloji · bölüme · "Primer PKG?"', ac:'Çok acil · 30 dk', saat:'10:36', durum:'İşlemde', sonuc:'Dr. S. Tan üstlendi' },
+];
+
+const $ = id => document.getElementById(id);
+const tur = k => TURLER.find(t => t.kod === k);
+const durumRz = d => ({ 'İstendi':'', 'İşlemde':'mavi', 'Sonuçlandı':'ok', 'İptal':'pas' })[d] ?? '';
+
+function ciz() {
+  $('ekle').innerHTML = TURLER.filter(t => t.sik).map(t => `<span class="t" data-tur="${t.kod}">${t.i} ${t.ad}</span>`).join('')
+    + `<span class="t diger" data-katalog="1">＋ Diğer…</span><span class="ac">Sık kullanılanlar kişiye göre</span>`;
+  $('istemler').innerHTML = istemler.map(s => { const t = tur(s.tur);
+    return `<tr${s.kir ? ' class="teh"' : ''}><td><span class="tur">${t.i} ${t.ad}</span></td><td>${s.ic}</td><td>${s.ac}</td><td>${s.saat}</td>
+      <td><span class="rz ${durumRz(s.durum)}">${s.durum}</span></td><td class="${s.kir ? 'sonuc-kir' : 'sonuk'}">${s.sonuc || '—'}</td></tr>`; }).join('');
+  $('istemSay').textContent = istemler.length;
+}
+
+function alanHtml(a, n) {
+  const id = 'a' + n;
+  if (a.tip === 'liste') return `<select id="${id}">${a.secenek.map(s => `<option>${s}</option>`).join('')}</select>`;
+  if (a.tip === 'secim') return `<div class="secim" data-secim="${id}">${a.secenek.map((s, i) => `<span class="${i === 0 ? 'on' : ''}">${s}</span>`).join('')}</div>`;
+  if (a.tip === 'yazi')  return `<textarea id="${id}" placeholder="${a.ipucu ?? ''}"></textarea>`;
+  if (a.tip === 'sayi')  return `<input id="${id}" type="number" value="${a.deger ?? 1}">`;
+  return `<input id="${id}" placeholder="${a.ipucu ?? ''}">`;
+}
+let acikTur = null;
+function cekmeceAc(t) {
+  acikTur = t;
+  $('cBas').textContent = `${t.i} ${t.ad} iste`;
+  $('cIc').innerHTML = (t.bilgi ? `<div class="bilgi">${t.bilgi}</div>` : '')
+    + (t.ozel ? `<div class="bilgi">Bu tür kendi seçicisini getirir: ${t.ozel}</div>` : '')
+    + t.alanlar.map((a, n) => `<div class="alan"><label>${a.ad}${a.zorunlu ? ' *' : ''}</label>${alanHtml(a, n)}</div>`).join('');
+  $('cAlt').hidden = false;
+  $('perde').hidden = $('cekmece').hidden = false;
+}
+function katalogAc() {
+  acikTur = null;
+  $('cBas').textContent = 'İstem türü seç';
+  $('cIc').innerHTML = `<div class="katalog">${TURLER.map(t => `<div class="k" data-tur="${t.kod}">${t.i} ${t.ad}<span class="y">${t.sik ? 'sık' : ''}</span></div>`).join('')}</div>
+    <div class="etiket">Liste sunucudan gelir; yetkisi olmayan tür görünmez. Yeni tür eklemek için Ayarlar › İstem Türleri.</div>`;
+  $('cAlt').hidden = true;
+  $('perde').hidden = $('cekmece').hidden = false;
+}
+function kapat() { $('perde').hidden = $('cekmece').hidden = true; }
+
+document.body.addEventListener('click', ev => {
+  const t = ev.target;
+  const s = t.closest('#ms [data-s]');
+  if (s) { document.querySelectorAll('#ms [data-s]').forEach(x => x.classList.toggle('on', x === s));
+           document.querySelectorAll('.pano').forEach(p => p.hidden = p.dataset.s !== s.dataset.s); return; }
+  const tr = t.closest('[data-tur]'); if (tr) return cekmeceAc(tur(tr.dataset.tur));
+  if (t.closest('[data-katalog]')) return katalogAc();
+  const sc = t.closest('.secim > span'); if (sc) { [...sc.parentNode.children].forEach(x => x.classList.toggle('on', x === sc)); return; }
+  if (t.id === 'perde' || t.id === 'cKapat' || t.id === 'cVaz') return kapat();
+  if (t.id === 'cKay' && acikTur) {
+    // İlk alan "içerik" özetidir; aciliyet varsa seçili olan.
+    const ilk = $('a0'); const ac = $('cIc').querySelector('[data-secim] .on');
+    istemler.push({ tur:acikTur.kod, ic:(ilk?.value || ilk?.textContent || acikTur.ad), ac:ac?.textContent ?? 'Rutin',
+      saat:new Date().toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }), durum:'İstendi', sonuc:'' });
+    kapat(); ciz();
+  }
+});
+
+ciz();
+$('hbAlerji').addEventListener('click', ev => { ev.stopPropagation(); $('hbAyr').hidden = !$('hbAyr').hidden; });
+document.addEventListener('click', () => $('hbAyr').hidden = true);
+</script>
+
+<!--
+  TASARIM NOTLARI
+  - 3 sekme: Muayene · İstemler · Reçete ve karar. (v2'de 5+, sekmesiz v3'te tek sayfa.)
+  - İSTEMLER DİNAMİK: kart istem türlerini bilmez, KATALOĞU çizer.
+      istem_turu (kod, ad, ikon, form_sablon_id -> form motoru 740, hedef_modul, yetki_kodu, sik, aktif, sira)
+      muayene_istem (muayene_id, tur, hedef_tablo, hedef_id, aciliyet, durum, sonuc_ozet)  <- bugün var (409), tur sabit sayı yerine kataloğa bağlanır
+    Basit tür (diyet, evde bakım, fizik tedavi...) = katalog satırı + form şablonu, kod yok.
+    Karmaşık tür (lab, görüntüleme) kendi seçici bileşenini kaydeder; liste ve durum yine ortak.
+  - Ortak durum dili: İstendi · İşlemde · Sonuçlandı · İptal. Her modül kendi ayrıntılı durumunu bu dörde eşler,
+    böylece kart tek tabloda gösterebilir; ayrıntı satıra tıklayınca türün kendi ekranında.
+  - Sık kullanılan türler üstte düğme (kişi / bölüm bazlı), gerisi "Diğer…" katalogdan.
+  - Form sağdan çekmece: hekim istemi verirken muayeneyi görmeye devam eder.
+-->
+</body>
+</html>

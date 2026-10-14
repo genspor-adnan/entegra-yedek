@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kan Merkezi Panosu — Mockup (Gentegre AI · Kan Merkezi)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<link rel="stylesheet" href="_kan.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩸 Kan Merkezi
+    <span class="sp">Kan Merkezi › Pano · 13.10.2026 21:52</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">📥 Ünite Kabul</div>
+    <div class="btn">🧪 İstem İşle</div>
+    <div class="btn">↩ İade / İmha</div>
+  </div>
+
+  <div class="iki" style="border-top:none">
+    <div>
+      <div class="grp">
+        <h4>Stok <span class="mini">kullanılabilir ünite</span></h4>
+        <div class="dg">
+          <table class="matris">
+            <thead><tr><th>Ürün</th><th>0−</th><th>0+</th><th>A−</th><th>A+</th><th>B−</th><th>B+</th><th>AB−</th><th>AB+</th></tr></thead>
+            <tbody>
+              <tr><td>Eritrosit</td><td>2</td><td>4</td><td class="yok">0</td><td>4</td><td class="yok">0</td><td>3</td><td class="yok">0</td><td class="az">1</td></tr>
+              <tr><td>Taze donmuş plazma</td><td colspan="2">3</td><td colspan="2">3</td><td colspan="2" class="az">1</td><td colspan="2">2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Bekleyen istemler</h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Aciliyet</th><th>Hasta</th><th>Grup</th><th>İstem</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr class="teh"><td><span class="rz kir">Çok acil</span></td><td>Mehmet KAYA · Acil</td><td><span class="kg k yok">?</span></td><td>2 ES 0−</td><td>Çıkış bekliyor</td></tr>
+              <tr class="sel"><td><span class="rz sari">Acil</span></td><td>Hüseyin KOÇ · Dahiliye</td><td><span class="kg k">A+</span></td><td>2 ES</td><td>Cross-match</td></tr>
+              <tr><td><span class="rz">Rutin</span></td><td>Ayşe DEMİR · Genel Cerrahi</td><td><span class="kg k">B+</span></td><td>2 ES · 2 TDP</td><td>Cross-match</td></tr>
+              <tr><td><span class="rz">Rutin</span></td><td>Ali VURAL · KVC</td><td><span class="kg k">A+</span></td><td>4 ES</td><td><span class="rz ok">Hazır</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kırmızı = stok yok · sarı = kritik seviye altı</span><span>·</span>
+    <a href="kan_unite_kabul.html">Ünite Kabul</a><span>·</span>
+    <a href="kan_istem_isle.html">İstem İşle</a><span>·</span>
+    <a href="kan_rezervasyon.html">Kan Rezervasyonu (hekim)</a>
+  </div>
+</div>
+
+<div class="aciklama">
+  <ul>
+    <li>Stok, tek tek ünitelerin durumundan hesaplanır (ayrı sayaç tutulmaz).</li>
+    <li>Plazmada Rh ayrımı yok.</li>
+    <li>Küçük hastane: stokta yalnız eritrosit ve plazma. Trombosit gibi ürünler gerektiğinde
+      Kızılay'dan istenir; geldiğinde Ünite Kabul'den girilir. Ürün listesi ayardan genişler.</li>
+  </ul>
+</div>
+
+</body>
+</html>

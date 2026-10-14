@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konsültasyon Listesi — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .sure{font-family:Consolas,monospace;font-weight:bold}
+  .sure.gec{color:var(--kirmizi)}
+  .sure.yak{color:var(--uyari)}
+  .sure.ok{color:var(--ok)}
+  .soru{white-space:normal;max-width:340px;color:#3a4a5a}
+  .onizleme{display:grid;grid-template-columns:1.2fr 1fr;border-top:1px solid var(--line)}
+  .onizleme>div+div{border-left:1px solid var(--line2)}
+  .alinti{margin:8px 12px;padding:8px 10px;border-left:3px solid #2f6db3;background:#f5f9fe;
+    font-size:12px;line-height:1.55}
+  .alinti.cevap{border-left-color:#2e7d46;background:#f3faf5}
+  .alinti small{display:block;color:var(--muted);font-size:10.5px;margin-bottom:3px}
+  @media(max-width:1000px){.onizleme{grid-template-columns:1fr}.onizleme>div+div{border-left:none}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Konsültasyonlar
+    <span class="sp">Muayene › Konsültasyonlar · Dr. Selin TAN (Kardiyoloji) · 13.10.2026 21:40</span></div>
+
+  <div class="sekmeler">
+    <div class="sekme on">📥 Bana / bölümüme gelen <span class="rz kir">3</span></div>
+    <div class="sekme">📤 İstediklerim <span class="rz">5</span></div>
+    <div class="sekme">🏥 Bölüm geneli (sorumlu)</div>
+  </div>
+
+  <div class="ozet">
+    <div class="k teh"><div class="bas">Süresi geçen</div><div class="deg">1</div><div class="alt">çok acil · 30 dk sınırı</div></div>
+    <div class="k uy"><div class="bas">Üstlenilmemiş</div><div class="deg">2</div><div class="alt">bölüme gelen, hekim atanmamış</div></div>
+    <div class="k"><div class="bas">Üstlendiklerim</div><div class="deg">2</div><div class="alt">hastaya gidilecek</div></div>
+    <div class="k"><div class="bas">Bugün yanıtlanan</div><div class="deg">6</div><div class="alt">ort. 48 dk</div></div>
+    <div class="k iyi"><div class="bas">e-Nabız 252</div><div class="deg">6 / 6</div><div class="alt">gönderildi</div></div>
+    <div class="k"><div class="bas">Dış merkez</div><div class="deg">1</div><div class="alt">Koç Ünv. H. · yanıt bekliyor</div></div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ara">🔍 Hasta, protokol, isteyen hekim, bölüm…</div>
+    <div class="kutu combo" style="min-width:150px">Tarih: <b>Bugün + açıklar</b></div>
+    <span class="cip on">Açık</span>
+    <span class="cip">Çok acil</span>
+    <span class="cip">Acil</span>
+    <span class="cip">Rutin</span>
+    <span class="cip">Yanıtlandı</span>
+    <span class="cip">İptal / ret</span>
+    <span class="sepv"></span>
+    <span class="cip">Yatan</span>
+    <span class="cip">Acil servis</span>
+    <span class="cip">Poliklinik</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">✋ Üstlen</div>
+    <div class="btn">🩺 Yanıtla (muayene aç)</div>
+    <div class="btn">↪ Başka hekime / bölüme yönlendir</div>
+    <div class="btn">✕ Reddet (gerekçeli)</div>
+    <div class="sepv"></div>
+    <div class="btn">📞 İsteyen hekimi ara</div>
+    <div class="btn">🖨 Liste</div>
+    <div class="sp"></div>
+    <span class="sonuk">Satır rengi: kırmızı = süre geçti · sarı = yaklaşıyor</span>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th>Aciliyet</th><th>Kalan / geçen</th><th>İstek</th><th>Hasta</th><th>Nerede</th>
+        <th>İsteyen</th><th>Soru</th><th>Hedef</th><th>Karşılama yeri</th><th>Durum</th>
+      </tr></thead>
+      <tbody>
+        <tr class="teh">
+          <td><span class="rz kir">Çok acil</span></td>
+          <td class="sure gec">+12 dk</td>
+          <td>21:02</td>
+          <td><b>Ahmet ŞEN</b> · E 67</td>
+          <td>Acil · Kırmızı alan 3</td>
+          <td>Dr. M. Yurt (Acil Tıp)</td>
+          <td class="soru">Göğüs ağrısı, V1-V4 ST elevasyonu, troponin 412. Primer PKG?</td>
+          <td>Kardiyoloji <span class="sonuk">· bölüm</span></td>
+          <td>Yatak başı</td>
+          <td><span class="rz sari">Üstlenilmedi</span></td>
+        </tr>
+        <tr class="sel">
+          <td><span class="rz kir">Çok acil</span></td>
+          <td class="sure yak">8 dk</td>
+          <td>21:18</td>
+          <td><b>Ayşe DEMİR</b> · K 54</td>
+          <td>Genel Cerrahi · B-212/1</td>
+          <td>Asist. Dr. Emre AKAY</td>
+          <td class="soru">Preop EKG'de yeni AF. Ameliyata engel mi, antikoagülasyon?</td>
+          <td><b>Dr. Selin TAN</b></td>
+          <td>Yatak başı</td>
+          <td><span class="rz mavi">Üstlendim · 21:24</span></td>
+        </tr>
+        <tr>
+          <td><span class="rz sari">Acil</span></td>
+          <td class="sure ok">1 sa 34 dk</td>
+          <td>20:46</td>
+          <td><b>Hüseyin KOÇ</b> · E 71</td>
+          <td>Dahiliye · A-306/2</td>
+          <td>Dr. O. Akar (Dahiliye)</td>
+          <td class="soru">Dispne, BNP 2.800. EF değerlendirmesi ve tedavi önerisi.</td>
+          <td>Kardiyoloji <span class="sonuk">· bölüm</span></td>
+          <td>Ekokardiyografi odası</td>
+          <td><span class="rz sari">Üstlenilmedi</span></td>
+        </tr>
+        <tr>
+          <td><span class="rz">Rutin</span></td>
+          <td class="sure ok">19 sa</td>
+          <td>16:10</td>
+          <td><b>Fatma YILDIZ</b> · K 48</td>
+          <td>Poliklinik · Ortopedi</td>
+          <td>Dr. C. Er (Ortopedi)</td>
+          <td class="soru">Elektif diz protezi öncesi kardiyak risk değerlendirmesi.</td>
+          <td><b>Dr. Selin TAN</b></td>
+          <td>Kardiyoloji polikliniği</td>
+          <td><span class="rz mavi">Üstlendim · randevu 14.10 10:20</span></td>
+        </tr>
+        <tr class="pasif">
+          <td><span class="rz sari">Acil</span></td>
+          <td class="sure">42 dk</td>
+          <td>14:05</td>
+          <td><b>Kerem US</b> · E 45</td>
+          <td>Acil · Sarı alan</td>
+          <td>Dr. M. Yurt (Acil Tıp)</td>
+          <td class="soru">Çarpıntı, SVT? Kardiyoversiyon sonrası takip önerisi.</td>
+          <td>Dr. Selin TAN</td>
+          <td>Yatak başı</td>
+          <td><span class="rz ok">Yanıtlandı · 14:47</span> <span class="rz mor">e-Nabız ✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="onizleme">
+    <div>
+      <div class="grp">
+        <h4>Seçili istem · KN-2026-1184 <span class="mini">başvuru 105 · Genel Cerrahi · SGK</span></h4>
+        <div class="alinti"><small>İSTEK NOTU · Asist. Dr. Emre AKAY · 21:18 · sorumlu: Prof. Dr. Emre BALIK</small>
+          Planlı açık kolesistektomi (14.10 09:00). Preop EKG'de daha önce bilinmeyen AF, hız 112.
+          Ameliyata engel mi? Antikoagülasyon başlansın mı, cerrahi öncesi köprüleme gerekir mi?</div>
+        <div class="ic">
+          <div class="sat"><span>Tanılar</span><b>K80.2 Safra kesesi taşı · I48 Atriyal fibrilasyon (ön tanı)</b></div>
+          <div class="sat"><span>Son lab</span><b>Hb 8,4 ↓ · INR 1,1 · K 3,6 · Kreatinin 0,9</b></div>
+          <div class="sat"><span>İlaçlar</span><b>Metoprolol 50 mg 1×1 · Pantoprazol</b></div>
+          <div class="sat"><span>Alerji</span><b style="color:#b3261e">Penisilin</b></div>
+          <div class="sat"><span>Ekler</span><b>EKG 13.10 18:40 (PDF) · Akciğer PA</b></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Geçmiş konsültasyonlar <span class="mini">bu hasta · Kardiyoloji</span></h4>
+        <div class="alinti cevap"><small>YANIT · Dr. B. Tan · 02.10.2026 · yatış öncesi değerlendirme</small>
+          Sinüs ritmi, EF %55. Cerrahiye kardiyak engel yok. Beta bloker devam.</div>
+        <div class="not">Yanıt <b>ayrı bir muayenedir</b> (tür 3, <code>ust_muayene_id</code> = isteyen
+          muayene): tanı, istem, reçete ve ücret kendi muayenesinde. Konsültan "Yanıtla" ile
+          o muayeneyi açar; isteyen hekim yanıtı kendi muayene kartının istem satırında görür.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Süre sınırları: çok acil 30 dk · acil 2 sa · rutin 24 sa (Ayarlar › Muayene)</span><span>·</span>
+    <span>Süre geçince bölüm sorumlusuna bildirim</span><span>·</span>
+    <span>Yanıt tamamlanınca e-Nabız 252 paketi kuyruğa</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Konsültasyon Listesi — tasarım notları</h4>
+  Konsültan hekimin çalışma listesi; muayene listesindeki "Konsültasyon" çipi bu ekrana açılır.
+  <ul>
+    <li><b>Hedef bölüm ya da hekim olabilir.</b> Gece istemde hekim seçilmez, bölüme düşer;
+      nöbetçi "Üstlen" der. Hekim zorunlu tutulsaydı isteyen hekim rastgele birini seçer,
+      o hekim nöbette değilse istem saatlerce görülmezdi.</li>
+    <li><b>Kalan süre sütunu ilk sırada,</b> liste aciliyete ve kalan süreye göre sıralı.
+      Eski üründe istek saatine göre sıralıydı; çok acil istem rutinlerin altında kalıyordu.</li>
+    <li><b>"İstediklerim" sekmesi</b> isteyen hekime yanıtın durumunu gösterir — "geldi mi"
+      diye telefon trafiği biter.</li>
+    <li><b>Ret ve yönlendirme gerekçelidir</b> ve isteyen hekime bildirilir; istem
+      sessizce kapanmaz.</li>
+    <li><b>Dış merkez</b> (başka hastane) istemleri aynı listede ayrı çiple; yanıtı dış
+      merkezden PDF / not olarak işlenir.</li>
+    <li>Ön izleme hekimin "neden çağrıldım"ını tek bakışta görmesi için: soru, tanılar,
+      son lab, ilaç, alerji, ekler.</li>
+  </ul>
+</div>
+
+</body>
+</html>
