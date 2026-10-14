@@ -316,7 +316,7 @@ export function ListeKarti({
         onYuklendi={yeniSekmede ? d => {
           // Tam ad (unvan) varsa o - ad/soyad zaten içinde; yoksa ad + soyad.
           const ad = String(d.unvan ?? '').trim() || [d.ad, d.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ');
-          if (ad) ekranSekmesi!.baslik(ad);
+          if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
         } : undefined}
         // GÖZ KARTI v4 (mockup goz_muayene_karti_v4): solda aşamalı gezinti, sağda OD/OS
         //   özeti, altta tamamlama koşulları - yalnız kayıtlı kartta.

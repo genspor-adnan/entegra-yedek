@@ -32,8 +32,11 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
   for (const [kartYolu, yeniBaslik] of Object.entries(kartSekmeleri ?? {})) {
     const kalan = konum.pathname.startsWith(kartYolu + '/') ? konum.pathname.slice(kartYolu.length + 1) : '';
     const m = kalan && !kalan.includes('/') ? [kalan, kalan] : null;
-    if (m) return m[1] === 'yeni' ? { anahtar: konum.pathname, baslik: yeniBaslik, ikon: '＋', ust: kartYolu }
-                                   : { anahtar: konum.pathname, baslik: 'Kart', ikon: '📝', ust: kartYolu };
+    // TEK KART SEKMESİ (kullanıcı: "tek hasta kartı açık olsun.. yeni hasta tıklandığında diğerini
+    //   kapatıp yerine bunu koysun"): anahtar listenin kart sekmesidir, kaydın kendisi değil -
+    //   başka kart açılınca aynı sekme, aynı yerde yeni kartla dolar.
+    if (m) return m[1] === 'yeni' ? { anahtar: `${kartYolu}#kart`, baslik: yeniBaslik, ikon: '＋', ust: kartYolu }
+                                   : { anahtar: `${kartYolu}#kart`, baslik: 'Kart', ikon: '📝', ust: kartYolu };
   }
   const yol = menuYolu(konum.pathname, konum.state);
   if (yol === '/' || yolEslesir(yol, BASLANGIC)) return { anahtar: BASLANGIC, baslik: 'Başlangıç', ikon: '🏠' };
@@ -64,7 +67,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const simdiki = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
   /** Ekranın kendisinin verdiği sekme başlığı (ör. hasta kartında hastanın adı). */
   const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>({});
-  const ad = (s: { anahtar: string; baslik: string }) => ozelBaslik[s.anahtar] ?? s.baslik;
+  // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
+  const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[s.konum.pathname] ?? s.baslik;
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
@@ -163,7 +167,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
         <SekmeGorunurBaglami.Provider value={aktif}>
          <EkranSekmesiBaglami.Provider value={{
            kapat: hedef => kapat(s.anahtar, hedef),
-           baslik: b => setOzelBaslik(o => (o[s.anahtar] === b ? o : { ...o, [s.anahtar]: b })) }}>
+           // Yol ÇAĞIRANDAN: kart yüklenirken sekmenin kayıtlı adresi henüz eski olabilir.
+           baslik: (b, yol) => setOzelBaslik(o => (o[yol] === b ? o : { ...o, [yol]: b })) }}>
           <UNSAFE_LocationContext.Provider
             value={{ location: aktif ? konum : s.konum, navigationType: aktif ? navTuru : NavigationType.Pop }}>
             {aktif ? outlet : ekranlar.current.get(s.anahtar)}
