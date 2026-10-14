@@ -14,6 +14,7 @@ import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
+import { tarihYaz } from '../../bilesenler/bicim';
 import {
   useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi, ReceteGosterim, gosterilenRecete,
   MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
@@ -422,8 +423,9 @@ export function ListeKarti({
             }
           : undefined}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
-        // "Tanı (ICD-10)" BAŞLIĞI YOK (kullanıcı 15.10.2026): çerçevenin "Tanılar" başlığı yeter.
-        tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') : undefined}
+        // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
+        //   başlıkları (Tanılar, Anamnez...) yeter.
+        tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') || sablonMuayeneMi(b) : undefined}
         tekSayfaSuzgec={sekmesiz ? a => (a === 'ozel:ozet') === (etkinGorunum === 'ozet') : undefined}
         // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
         //   zaten bölüm olarak listede - ikinci kez konmaz.
@@ -543,7 +545,7 @@ export function ListeKarti({
                 ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
                 : icerik)
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (baslik, icerik, deger, izgaraCiz, parcalar) => (
+          ? (baslik, icerik, deger, izgaraCiz, parcalar, detay) => (
             // MAKRO: bütün muayene sekmelerinde kısayol + boşluk metne açılır.
             <div className="muayene-sekme-zemin"
                  onKeyDownCapture={e => makroTusu(e, makrolar, parcalar?.alanDegistir)}>{
@@ -580,8 +582,31 @@ export function ListeKarti({
                 })()
                 : baslik === 'Vital Bulgular' ? icerik
                 : baslik === 'Rapor' ? (
-                  // MOCKUP RAPOR ARAC CUBUGU: rapor ekleme grid basliginda,
-                  //   imza SUNUCU ucunda (eksik rapor reddedilir).
+                  // RAPOR ÇERÇEVESİ (kullanıcı 15.10.2026): ✎ düzenleme (araç çubuğu + grid),
+                  //   💾 kaydet ve gösterim - tür · alt tür · başlangıç · süre · no · imza.
+                  <KipCercevesi baslik="Raporlar"
+                    duzen={kipOku('rapor', detay && deger.id != null ? detay.satirlar.length > 0 : null)}
+                    onDuzen={kipYaz('rapor')} onKaydet={kartiKaydetKal}
+                    gosterim={(() => {
+                      const satirlar = detay?.satirlar ?? [];
+                      if (satirlar.length === 0) return <div className="fm-bos">{c('Rapor yazılmadı')}</div>;
+                      const kod = (ad: string, v: unknown) =>
+                        detay?.meta.alanlar.find(a => a.ad === ad)?.kodlar?.[String(v ?? '')] ?? '';
+                      return (
+                        <table className="fm-goster fm-tablo">
+                          <thead><tr><th>{c('Tür')}</th><th>{c('Alt tür')}</th><th>{c('Başlangıç')}</th>
+                            <th className="hiza-orta">{c('Süre')}</th><th>{c('Rapor No')}</th><th>{c('İmza')}</th></tr></thead>
+                          <tbody>{satirlar.map((s, i) => (
+                            <tr key={String(s.id ?? i)}>
+                              <td>{kod('tur', s.tur)}</td><td>{kod('altTur', s.altTur)}</td>
+                              <td>{s.baslangic ? tarihYaz(String(s.baslangic)) : '—'}</td>
+                              <td className="hiza-orta">{Number(s.gun) > 0 ? `${String(s.gun)} ${c('gün')}` : '—'}</td>
+                              <td>{String(s.raporNo ?? '') || '—'}</td>
+                              <td>{s.imzaZamani ? <span className="rozet olumlu">{c('İmzalı')}</span> : <span className="rozet uyari">{c('Taslak')}</span>}</td>
+                            </tr>))}</tbody>
+                        </table>
+                      );
+                    })()}>
                   <>
                     <div className="muayene-arac">
                       <button type="button" className="d"
@@ -610,6 +635,7 @@ export function ListeKarti({
                       imzalanan rapor değiştirilemez.
                     </div>
                   </>
+                  </KipCercevesi>
                 )
                 : baslik.startsWith('Sevk') ? (
                   // Sevk alanlarinin ALTINDA bu muayeneden istenen
@@ -753,9 +779,39 @@ export function ListeKarti({
                             {/* DEĞERLENDİRME / SONUÇ EN ALTTA (mockup v7 sırası). SEKMESİZDE REÇETEDEN SONRA
                                 (kullanıcı 15.10.2026): reçete ayrı (özel) bölüm - çerçeve oradaki yer
                                 tutucuya portal ile çizilir; alanlar ve kayıt bu sekmenin aynısı. */}
-                            {sekmesiz && degerlendirmeYeri
-                              ? createPortal(parcalar?.altGrupCiz('Değerlendirme / Sonuç'), degerlendirmeYeri)
-                              : parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
+                            {(() => {
+                              // DEĞERLENDİRME / SONUÇ GÖSTERİM / DÜZENLEME (kullanıcı 15.10.2026, anamnez gibi):
+                              //   gösterimde dolu alanlar etiket + değer (kod alanında seçeneğin adı).
+                              const AG = 'Değerlendirme / Sonuç';
+                              const satirlar = (parcalar?.altGrupAlanlari(AG) ?? []).map(a => {
+                                const v = deger[a.ad];
+                                const ham = v === null || v === undefined ? '' : String(v).trim();
+                                const metin = a.tip === 'kod' ? (ham !== '' ? a.kodlar?.[ham] ?? '' : '')
+                                  : a.tip === 'mantik' ? (Number(v) === 1 || v === true ? c('Evet') : '')
+                                  : ham;
+                                return [a.baslik ?? a.ad, metin] as const;
+                              }).filter(([, m]) => m !== '' && m !== '—');
+                              const dolu = satirlar.length > 0;
+                              const duzen = kipOku('degerlendirme', deger.id != null ? dolu : null);
+                              const govde = duzen
+                                ? parcalar?.altGrupCiz(AG, {
+                                    tikla: () => { kipYaz('degerlendirme')(false); parcalar?.kaydet() },
+                                    ek: <span title={c('Kaydet ve gösterime dön')}>💾</span> })
+                                : (
+                                  <div className="kasira"><div className="kagrup katlanir-kapali">
+                                    <h6 className="katlanir-bas" onClick={() => kipYaz('degerlendirme')(true)}>
+                                      {c(AG)}<span className="katlanir-sag" title={c('Düzenle')}>✎</span></h6>
+                                    {dolu ? (
+                                      <div className="anm-goster">
+                                        {satirlar.map(([b, m]) => (
+                                          <div key={b} className="anm-satir"><span className="anm-b">{c(b)}</span><span className="anm-d">{m}</span></div>
+                                        ))}
+                                      </div>
+                                    ) : <div className="fm-bos">{c('Değerlendirme girilmedi')}</div>}
+                                  </div></div>
+                                );
+                              return sekmesiz && degerlendirmeYeri ? createPortal(govde, degerlendirmeYeri) : govde;
+                            })()}
                           </div>
                         </div>
                       </>
@@ -989,7 +1045,8 @@ export function ListeKarti({
                     onIlacAraTamam={() => setReceteIlacAra(false)} />
                   </KipCercevesi>
                   {/* Sekmesizde değerlendirme / sonuç çerçevesinin yeri (Muayene bölümünden portal). */}
-                  {sekmesiz && <div ref={setDegerlendirmeYeri} className="mi-sol" />}
+                  {/* Muayene bölümünün yerleşimi (etiket üstte tek satır, makro çipleri kutunun altında). */}
+                  {sekmesiz && <div className="muayene-ikili msb-ikili msb-tek"><div ref={setDegerlendirmeYeri} className="mi-sol" /></div>}
                 </>) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}

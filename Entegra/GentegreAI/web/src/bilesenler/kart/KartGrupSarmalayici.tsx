@@ -222,6 +222,7 @@ export function KartGrupSarmalayici({
             const d = (meta?.detaylar ?? []).find(x => x.ad === ad);
             return d ? { meta: d, satirlar: (detaylar[ad] ?? bosDetay()).guncel } : null;
           },
+          altGrupAlanlari: alt => aktif.alanlar.filter(a => (a.altGrup ?? '') === alt),
           altGrupCiz: (alt, baslik) => {
             const alanlar = aktif.alanlar.filter(a => (a.altGrup ?? '') === alt);
             return alanlar.length ? grupCiz({ ...aktif, alanlar }, baslik) : null;

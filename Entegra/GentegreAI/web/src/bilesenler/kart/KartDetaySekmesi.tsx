@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { KartDetayMeta } from '../../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
 import { KategoriSuzgeci } from '../KategoriSuzgeci';
@@ -38,7 +39,9 @@ export interface KartDetaySekmesiOzellikleri {
   setSeciliSatirlar(v: ReadonlySet<number>): void;
   /** Ekran sekmenin altina kendi panelini ekleyebilir (muayene sonuclari). */
   sekmeSarmalayici?(baslik: string, icerik: ReactNode,
-                    deger: Record<string, Deger>): ReactNode;
+                    deger: Record<string, Deger>, izgaraCiz?: undefined, parcalar?: undefined,
+                    /** Detay sekmesinin metası ve ekrandaki satırları (muayene rapor gösterim kipi). */
+                    detay?: { meta: KartDetayMeta; satirlar: Record<string, unknown>[] }): ReactNode;
 }
 
 /**
@@ -348,5 +351,8 @@ export function KartDetaySekmesi({
         //   "Istem & Sonuclar" paneli bir DETAY sekmesinin altina giriyor;
         //   sarmalayici yalniz grup sekmelerinde cagrildigi icin panel hic
         //   cizilmiyordu (grid "satir yok" derken sonuclar duruyordu).
-        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, grid, deger) : grid;
+        return sekmeSarmalayici
+          ? sekmeSarmalayici(aktif.baslik, grid, deger, undefined, undefined,
+                             { meta: aktif.detay, satirlar: (detaylar[aktif.detay.ad] ?? bosDetay()).guncel })
+          : grid;
 }

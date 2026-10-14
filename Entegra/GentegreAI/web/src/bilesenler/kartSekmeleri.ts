@@ -312,6 +312,8 @@ export interface SekmeParcalari {
       alanlar) - ekran alanları bölüp araya kendi panelini koyabilsin
       (muayene: şikâyet/hikâye · reçete · değerlendirme/plan). */
   altGrupCiz(altGrup: string, baslik?: AltGrupBaslik): ReactNode;
+  /** Alt grubun alan metaları (sekmenin görünür alanları) - ekran gösterim kipini çizebilsin. */
+  altGrupAlanlari(altGrup: string): KartAlanMeta[];
   /** Kartin bir alanini yazar (kaydedilmemis degisiklik olarak - Kaydet ile
       gider). Ekran-ozel paneller icin (ör. muayenede dikte metni). */
   alanDegistir(ad: string, deger: Deger): void;

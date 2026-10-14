@@ -6532,9 +6532,10 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 /* Katlanmış ızgaranın alt satırı (vital: Geçmiş kısayolları) çerçevenin içinde. */
 .izg-alt { padding: 0 10px 8px }
 /* Anamnez gösterim kipi (muayene): etiket + düz metin, düzenleme ✎ ile. */
-.anm-goster { padding: 6px 10px 8px; display: grid; gap: 6px }
-.anm-satir { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: baseline }
-.anm-b { font-size: 11.5px; color: var(--soluk) }
+/* Etiket sütunu en uzun etikete göre (tek satır, kullanıcı 15.10.2026); satırlar ortak ızgarada hizalı. */
+.anm-goster { padding: 6px 10px 8px; display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; align-items: baseline }
+.anm-satir { display: contents }
+.anm-b { font-size: 11.5px; color: var(--soluk); white-space: nowrap }
 .anm-d { white-space: pre-wrap; word-break: break-word; color: var(--yazi2) }
 /* Fizik muayene gösterim kipi (mockup v7 .fm): sistem + bulgu, yalnız bulgu girilmiş satırlar. */
 .fm-goster { width: 100%; border-collapse: collapse; margin: 4px 0 6px }

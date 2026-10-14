@@ -7,7 +7,7 @@ import { dokumanDosyaAdi, dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
-  type KartMetaYaniti, type KartYetkisi, hataMetni, silmeEngeliMi } from '../api/sozlesme';
+  type KartMetaYaniti, type KartYetkisi, type KartDetayMeta, hataMetni, silmeEngeliMi } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
@@ -71,7 +71,9 @@ interface Props {
                     /** Sekmenin PARÇALARI ayrı ayrı: alanlar ve gruba gömülü
                         tablolar (detay adıyla) - ekran bir tabloyu alanlardan
                         ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
-                    parcalar?: SekmeParcalari): React.ReactNode;
+                    parcalar?: SekmeParcalari,
+                    /** DETAY sekmesinde: detayın metası ve ekrandaki satırları. */
+                    detay?: { meta: KartDetayMeta; satirlar: Record<string, unknown>[] }): React.ReactNode;
   /** SERIDIN USTUNDE cizilen ekran-ozel baglam kutulari (or. muayene kartinda
       hasta/alerji/aktif ilac - mockup muayene_karti.html). Kart degerini alir
       cunku hangi hastanin gosterilecegi karttan cikar. */
