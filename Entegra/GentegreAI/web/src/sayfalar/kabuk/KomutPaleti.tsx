@@ -38,7 +38,9 @@ export function paletSadelestir(metin: string) {
 
 export interface PaletEkrani { yol: string; ad: string; grup: string;
   /** İŞLEM (ekran değil, bir iş başlatır: "＋ Yeni Hasta Kartı"): "İşlemler" bölümünde durur. */
-  islem?: boolean }
+  islem?: boolean;
+  /** Satırın sol ikonu (verilmezse ekran ↗, işlem ＋). */
+  ikon?: string }
 
 /** Menü satırlarını düz "ekran" listesine indirger (grup adı yol olarak kalır). */
 export function paletEkranlari(satirlar: MenuSatiri[]): PaletEkrani[] {
@@ -94,7 +96,7 @@ interface Props {
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
 type Bolum = 'Son açılanlar' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
-  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean }
+  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
@@ -142,7 +144,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
       return [
         ...kisaYol,
         ...ekranlar.filter(e => e.islem).map<Oge>(e => ({
-          bolum: 'İşlemler', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol, islem: true })),
+          bolum: 'İşlemler', tur: 'ekran', anahtar: 'e' + e.yol, ad: e.ad, grup: e.grup, yol: e.yol, islem: true, ikon: e.ikon })),
         ...komutlar.map<Oge>(k => ({
           bolum: 'İşlemler', tur: 'komut', anahtar: 'k' + k.kod, ad: k.ad, grup: k.grup || c('Bu ekranda'),
           kod: k.kod, aktif: k.aktif, kisayol: k.kisayol, pasifSebep: k.pasifSebep,
@@ -160,7 +162,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
       .sort((a, b) => a.puan - b.puan || a.i - b.i)
       .slice(0, 20)
       .map<Oge>(x => ({ bolum: x.e.islem ? 'İşlemler' : 'Ekranlar', tur: 'ekran', anahtar: 'e' + x.e.yol,
-                         ad: x.e.ad, grup: x.e.grup, yol: x.e.yol, islem: x.e.islem }));
+                         ad: x.e.ad, grup: x.e.grup, yol: x.e.yol, islem: x.e.islem, ikon: x.e.ikon }));
 
     const komutEslesen = komutlar
       .map(k => ({ k, puan: paletPuan(k.ad, k.grup, q) }))
@@ -212,7 +214,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
               onClick={() => sec(o)}
             >
               {/* Ekran mı komut mu: ok işareti "gider", şimşek "çalıştırır". */}
-              <span className="palet-tur">{o.tur === 'ekran' ? (o.islem ? '＋' : '↗') : '⚡'}</span>
+              <span className="palet-tur">{o.tur === 'ekran' ? (o.ikon ?? (o.islem ? '＋' : '↗')) : '⚡'}</span>
               <span>{c(o.ad)}</span>
               <span className="grup">{o.grup}</span>
               {o.tur === 'komut' && o.kisayol && <span className="kisayol">{o.kisayol}</span>}

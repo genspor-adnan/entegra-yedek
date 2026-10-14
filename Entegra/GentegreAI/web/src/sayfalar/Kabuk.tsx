@@ -188,7 +188,7 @@ export function Kabuk() {
                .flatMap(l => [
                  { yol: `${l.kartYolu}/yeni`, ad: l.yeniSekmede!, grup: 'Hasta', islem: true },
                  // KAYITLI KART (kullanıcı): genel hasta arama penceresi -> seçilen kayıt kart sekmesinde.
-                 ...(l.kaynak === 'hasta' ? [{ yol: KAYITLI_HASTA, ad: 'Kayıtlı Hasta Kartı', grup: 'Hasta', islem: true }] : []),
+                 ...(l.kaynak === 'hasta' ? [{ yol: KAYITLI_HASTA, ad: 'Kayıtlı Hasta Kartı', grup: 'Hasta', islem: true, ikon: '📂' }] : []),
                ]),
   ], [paneller, menudeVar]);
   const panelBasliklari = useMemo(() => ({
