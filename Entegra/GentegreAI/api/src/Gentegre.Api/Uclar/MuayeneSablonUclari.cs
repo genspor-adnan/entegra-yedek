@@ -359,13 +359,73 @@ public static class MuayeneSablonUclari
                 """, null, [muayeneId],
                 o => new { kisayol = o.GetString(0), alan = o.GetString(1), metin = o.GetString(2),
                            kaynak = o.GetString(3), id = o.GetInt32(4), kullanim = o.GetInt32(5) }, iptal);
-            return Results.Ok(new { tanilar, receteler, paneller, makrolar, izlemeNo = baglam.IzlemeNo });
+
+            // YER TUTUCULAR (kullanıcı 14.10.2026, mockup metin_makrosu_karti): {hasta_adi} {yas}
+            //   {cinsiyet} {tarih} {hekim} {bolum} {son_muayene} BU muayeneden doldurulur.
+            //   {|} (imleç) istemcide işlenir. Veri yoksa yer tutucu boş kalır.
+            var yt = await b.TekAsync("""
+                select public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120),
+                       coalesce(extract(year from age(current_date, th.dogum_tarihi))::int::text, ''),
+                       case th.cinsiyet when 1 then 'erkek' when 2 then 'kadın' else '' end,
+                       to_char(coalesce(m.muayene_tarihi, m.ekleme_tarihi), 'DD.MM.YYYY'),
+                       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), ''),
+                       coalesce(d.ad, ''),
+                       coalesce((select to_char(coalesce(o.muayene_tarihi, o.ekleme_tarihi), 'DD.MM.YYYY')
+                                        || coalesce(' (' || nullif(od.ad, '') || ')', '')
+                                   from public.muayene o left join public.departman od on od.id = o.bolum_id
+                                  where o.taraf_id = m.taraf_id and o.id <> m.id
+                                    and coalesce(o.muayene_tarihi, o.ekleme_tarihi) < coalesce(m.muayene_tarihi, m.ekleme_tarihi)
+                                  order by coalesce(o.muayene_tarihi, o.ekleme_tarihi) desc limit 1), '')
+                  from public.muayene m
+                  join public.taraf h on h.id = m.taraf_id
+                  left join public.taraf_hasta th on th.id = h.id
+                  left join public.taraf p on p.id = m.personel_id
+                  left join public.departman d on d.id = m.bolum_id
+                 where m.id = @p0
+                """, null, [muayeneId], o => new Dictionary<string, string>
+                {
+                    ["{hasta_adi}"] = o.IsDBNull(0) ? "" : o.GetString(0), ["{yas}"] = o.GetString(1),
+                    ["{cinsiyet}"] = o.GetString(2), ["{tarih}"] = o.IsDBNull(3) ? "" : o.GetString(3),
+                    ["{hekim}"] = o.GetString(4), ["{bolum}"] = o.GetString(5), ["{son_muayene}"] = o.GetString(6),
+                }, iptal) ?? new Dictionary<string, string>();
+            var dolu = makrolar.Select(x => x with { metin = yt.Aggregate(x.metin, (s, kv) => s.Replace(kv.Key, kv.Value)) }).ToList();
+            return Results.Ok(new { tanilar, receteler, paneller, makrolar = dolu, izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/muayene-sablon/makro-kullanim - muayenede alana yazılan makronun
         //   kullanım sayısı (932): ipucu çipi ya da kısayol + boşluk. kaynak 's' =
         //   şablon makrosu, 'k' = kurum makrosu (metin_makro). Yalnız sayaç:
         //   islem_log'a yazılmaz (her tıkta log satırı gürültü olurdu).
+        // GET /api/muayene-sablon/makro-cakisma?kisayol=.rut&haric=12 - metin makrosu kartı
+        //   (mockup metin_makrosu_karti): aynı kısayolun BAŞKA makrolardaki eşleri - kurum
+        //   makroları (kapsamıyla) ve şablon makroları. Muayenede en yakını açılır
+        //   (kişisel → bölüm → kurum; şablon makrosu kurumunkinin üstünde).
+        grup.MapGet("/makro-cakisma", async (
+            string kisayol, int? haric, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene.makro", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var satirlar = await b.ListeAsync("""
+                select 'k' as kaynak,
+                       case when k.hekim_id is not null then 'Kişisel · ' || coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')
+                            when k.bolum_id is not null then 'Bölüm · ' || coalesce(d.ad, '')
+                            else 'Kurum geneli' end as kapsam,
+                       k.alan, k.metin
+                  from public.metin_makro k
+                  left join public.taraf p on p.id = k.hekim_id
+                  left join public.departman d on d.id = k.bolum_id
+                 where lower(k.kisayol) = lower(@p0) and k.id <> coalesce(@p1, 0) and k.durum = 1
+                union all
+                select 's', 'Şablon · ' || s.ad, t.alan, t.metin
+                  from public.muayene_sablon_makro t join public.muayene_sablon s on s.id = t.sablon_id
+                 where lower(t.kisayol) = lower(@p0)
+                 order by 1, 2
+                """, null, [kisayol.Trim(), haric], o => new
+                { kaynak = o.GetString(0), kapsam = o.GetString(1), alan = o.GetString(2), metin = o.GetString(3) }, iptal);
+            return Results.Ok(satirlar);
+        });
+
         grup.MapPost("/makro-kullanim", async (
             MakroKullanimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {

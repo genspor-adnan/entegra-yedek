@@ -52,7 +52,15 @@ export function makroGenislet(metin: string, imlec: number, alan: string, makrol
   const makro = makrolar.find(x => x.kisayol === kisayol && x.alan === alan)
     ?? makrolar.find(x => x.kisayol === kisayol && x.alan === '');
   if (!makro) return null;
-  const bas = once.slice(0, once.length - kisayol.length) + makro.metin + ek;
+  // {|} İMLEÇ (mockup metin_makrosu_karti): makro açılınca imleç oraya konur, işaret silinir.
+  const onEk = once.slice(0, once.length - kisayol.length);
+  const i = makro.metin.indexOf('{|}');
+  if (i >= 0) {
+    const govde = makro.metin.replace('{|}', '');
+    const deger = onEk + govde + (i === makro.metin.length - 3 ? ek : '') + metin.slice(imlec);
+    return { deger, imlec: onEk.length + i + (i === makro.metin.length - 3 ? ek.length : 0), makro };
+  }
+  const bas = onEk + makro.metin + ek;
   return { deger: bas + metin.slice(imlec), imlec: bas.length, makro };
 }
 
@@ -65,9 +73,13 @@ export function makroEkle(metin: string, imlec: number, makroMetni: string): { d
   const i = Math.max(0, Math.min(imlec, metin.length));
   const once = metin.slice(0, i);
   const sonra = metin.slice(i);
-  const bas = once + (once && !/\s$/.test(once) ? ' ' : '') + makroMetni;
+  const onEk = once + (once && !/\s$/.test(once) ? ' ' : '');
+  // {|} İMLEÇ: işaret silinir, imleç oraya konur.
+  const k = makroMetni.indexOf('{|}');
+  const govde = k >= 0 ? makroMetni.replace('{|}', '') : makroMetni;
+  const bas = onEk + govde;
   const ara = sonra && !/^\s/.test(sonra) ? ' ' : '';
-  return { deger: bas + ara + sonra, imlec: bas.length + ara.length };
+  return { deger: bas + ara + sonra, imlec: k >= 0 ? onEk.length + k : bas.length + ara.length };
 }
 
 /**

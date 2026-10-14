@@ -797,9 +797,9 @@ public static partial class KartKatalogu
             new("kullanim", "kullanim", "sayi", Yazilabilir: false,
                 Baslik: "Kullanım", Grup: "Tanım"),
             new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "Hekim (kişisel)", Grup: "Kapsam"),
+                Baslik: "Hekim (kişisel)", Grup: "Tanım"),
             new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
-                Baslik: "Bölüm (branş)", Grup: "Kapsam")
+                Baslik: "Bölüm (branş)", Grup: "Tanım")
         });
 
 }

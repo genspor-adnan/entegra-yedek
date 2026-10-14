@@ -56,6 +56,7 @@ import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import { kartAdi, kartSekmesiVar } from '../listeTanimlari.Ortak';
+import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
 import type { KartOzellestirme } from './kartOzellestirme';
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { BulguDofHucresi, DenetimAraclari, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
@@ -332,7 +333,7 @@ export function ListeKarti({
           const metin = (x: unknown) => String(x ?? '').trim();
           const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
             || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
-            || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kod)
+            || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)
             || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
         } : undefined}
@@ -433,7 +434,11 @@ export function ListeKarti({
         alanIpucu={muayeneKarti
           ? (ad, yaz) => MAKRO_ALANLARI.has(ad) ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz} /> : null
           : undefined}
-        sekmeSarmalayici={tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
+        sekmeSarmalayici={tanim.kaynak === 'metin-makro' && kartId !== null
+          // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
+          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
+              <MetinMakroGovdesi id={kartId} deger={deger} alanDegistir={(ad, v) => parcalar?.alanDegistir(ad, v)} />)
+          : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
           // GÖZ MUAYENESİ (970): Tonometri sağında GİB eğilimi, Tanı & Plan sağında tanılar + işler.
           ? (baslik, icerik) => baslik === 'Tonometri & Pakimetri'
               ? <div className="gz-iki"><div>{icerik}</div><GozGibEgilimi id={Number(kartId)} yenile={kartTazele} /></div>

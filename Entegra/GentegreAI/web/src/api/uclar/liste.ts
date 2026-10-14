@@ -140,6 +140,10 @@ export const listeUclari = {
     istek<{ sablonlar: MuayeneSablonSecenek[]; onerilen: MuayeneSablonSecenek | null }>(
       `/api/muayene-sablon/muayene/${muayeneId}/sablonlar`),
   /** Muayenede alana yazılan makronun kullanım sayısını artırır (932). */
+  /** Metin makrosu kartı: aynı kısayolun başka makrolardaki eşleri (çakışma). */
+  makroCakisma: (kisayol: string, haric: number) =>
+    istek<{ kaynak: string; kapsam: string; alan: string; metin: string }[]>(
+      `/api/muayene-sablon/makro-cakisma?kisayol=${encodeURIComponent(kisayol)}&haric=${haric}`),
   makroKullanim: (kaynak: 's' | 'k', id: number) =>
     gonder<{ izlemeNo: string }>('/api/muayene-sablon/makro-kullanim', { kaynak, id }),
   muayeneSablonTercihleri: (muayeneId: number) =>
@@ -194,7 +198,8 @@ export const listeUclari = {
 
   /** Hasta bandının ek bilgisi: kan grubu, kurum, aynı adlı başka hasta sayısı. */
   muayeneBand: (muayeneId: number) =>
-    istek<{ kanGrubu?: string | null; kurum?: string; sozlesme?: string; ayniAd?: number }>(`/api/muayene/${muayeneId}/band`),
+    istek<{ kanGrubu?: string | null; kurum?: string; sozlesme?: string; ayniAd?: number;
+            boyCm?: number | null; kiloKg?: number | null; bki?: number | null }>(`/api/muayene/${muayeneId}/band`),
   /** Hastanın her tetkikinin son onaylı sonucu (sekmesiz muayenenin sağ sütunu). */
   muayeneSonSonuclar: (muayeneId: number) =>
     istek<{ kod: string; ad: string; deger: string; birim: string | null; bayrak: string | null;
