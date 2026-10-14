@@ -141,8 +141,12 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
 
 export interface KontrolMaddesi { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }
 
-export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler }: {
+export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler, gorunum, onGorunum }: {
   kontrol: KontrolMaddesi[] | null;
+  /** ÖZET / DETAY (kullanıcı 14.10.2026): özet = orta kısımda yalnız özet; detay = özetsiz tüm
+      bölümler. Varsayılan: muayene tamamlandıysa özet, değilse detay. */
+  gorunum?: 'ozet' | 'detay';
+  onGorunum?(g: 'ozet' | 'detay'): void;
   git(baslik: string): void;
   muayeneyeAl(): void;
   /** İstem maddesinin yanında "3/5". */
@@ -158,8 +162,11 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
   const eksik = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
   return (
     <>
-      <div className="kanav-g bas">
-        <div className="kanav-o" onClick={() => git('Özet')}><span className="kanav-d">≡</span><span>{c('Özet')}</span></div>
+      <div className="kanav-g bas smn-gorunum">
+        <div className={`kanav-o${gorunum === 'ozet' ? ' on' : ''}`} onClick={() => onGorunum ? onGorunum('ozet') : git('Özet')}>
+          <span className="kanav-d">≡</span><span>{c('Özet')}</span></div>
+        {onGorunum && <div className={`kanav-o${gorunum === 'detay' ? ' on' : ''}`} onClick={() => onGorunum('detay')}>
+          <span className="kanav-d">☰</span><span>{c('Detay')}</span></div>}
       </div>
       <div className="kanav-g">
         <h6>{c('Tamamlama')}<i className={eksik === 0 ? 'tamam' : ''}>{kontrol === null ? '…' : eksik === 0 ? c('hazır') : `${eksik} ${c('eksik')}`}</i></h6>

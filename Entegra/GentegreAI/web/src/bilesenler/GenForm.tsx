@@ -223,6 +223,8 @@ interface Props {
   /** TEK SAYFA (SEKMESİZ) KİP (mockup muayene_karti_v7, kullanıcı tercihi): AYNI sekmeler
       alt alta bölüm olarak çizilir, soldaki gezinti bölüme kaydırır. Alanlar değişmez. */
   tekSayfa?: boolean;
+  /** Tek sayfa kipinde hangi bölümler çizilsin (sekmesiz muayene Özet / Detay görünümü). */
+  tekSayfaSuzgec?(anahtar: string): boolean;
   /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
       `git` başlığı verilen sekmeye/bölüme götürür. */
   gezintiEk?(git: (baslik: string) => void): React.ReactNode;
@@ -316,7 +318,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -2203,7 +2205,7 @@ Yine de yeni kayıt eklensin mi?`);
 
       {/* TEK SAYFA: bütün sekmeler alt alta bölüm (aynı çizim, aynı alanlar). */}
       {tekSayfaKip
-        ? sekmeler.map(s => (
+        ? sekmeler.filter(s => !tekSayfaSuzgec || tekSayfaSuzgec(s.anahtar)).map(s => (
             <section key={s.anahtar} id={`ts-${s.anahtar}`} data-ts={s.anahtar} className="ts-bolum">
               <h2 className="ts-bas">{c(s.baslik)}</h2>
               {sekmeGovdesi(s)}

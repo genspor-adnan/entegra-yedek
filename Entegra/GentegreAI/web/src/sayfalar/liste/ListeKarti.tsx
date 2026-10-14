@@ -188,6 +188,11 @@ export function ListeKarti({
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
   const hastaBilgisi = useMuayeneHastaBilgisi(sekmesiz ? Number(kartId) : 0, kartTazele * 1000 + kayitSayaci);
+  /** SEKMESİZ ÖZET / DETAY (kullanıcı 14.10.2026): seçilmediyse muayene tamamlandıysa özet, değilse detay. */
+  const [sekmesizGorunum, setSekmesizGorunum] = useState<'ozet' | 'detay' | null>(null);
+  useEffect(() => { setSekmesizGorunum(null) }, [kartId]);
+  const etkinGorunum: 'ozet' | 'detay' = sekmesizGorunum
+    ?? (Number(hastaBilgisi?.ust?.durum ?? 0) === 3 ? 'ozet' : 'detay');
   const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
   useEffect(() => {
     if (!sekmesiz) return;
@@ -367,13 +372,18 @@ export function ListeKarti({
             }
           : undefined}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
+        tekSayfaSuzgec={sekmesiz ? a => (a === 'ozel:ozet') === (etkinGorunum === 'ozet') : undefined}
         // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
         //   zaten bölüm olarak listede - ikinci kez konmaz.
         // SEKMESİZ SOL MENÜ (kullanıcı): tamamlama maddeleri hem menü hem kontrol, altında işlemler.
         gezintiOzel={sekmesiz
           ? git => (
               <>
-                <MuayeneSolMenu kontrol={kontrol} git={git}
+                <MuayeneSolMenu kontrol={kontrol}
+                  gorunum={etkinGorunum}
+                  onGorunum={g => { setSekmesizGorunum(g); setTimeout(() => git(g === 'ozet' ? 'Özet' : 'Muayene'), 60) }}
+                  // Özet görünümünde bir bölüme gidilirse önce Detay'a geçilir (bölüm orada).
+                  git={b => { if (b !== 'Özet' && etkinGorunum === 'ozet') { setSekmesizGorunum('detay'); setTimeout(() => git(b), 60) } else git(b) }}
                   muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
                   islemler={[
                     { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
