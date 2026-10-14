@@ -6488,6 +6488,9 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .mi-vital .vital-izgara-kip .alan.ikili input { width: 72px !important }
 .mi-vital .vital-izgara-kip .tk-hesap { min-width: 0; padding: 4px 2px }
 
+/* Makro çiplerinin sağındaki ＋ (yeni makro). */
+.makro-ipucu button.makro-yeni { border: 0; background: none; padding: 0 2px; margin-left: -2px; font-weight: bold; color: var(--mavi, #2f6db3) }
+
 /* MAKRO ROZETLİ METİN KUTUSU (muayene makro alanları): textarea görünümünde içerik düzenlenebilir. */
 .mlm { min-height: 64px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); padding: 5px 7px;
   white-space: pre-wrap; word-break: break-word; line-height: 1.6; outline: none; cursor: text; width: 100% }

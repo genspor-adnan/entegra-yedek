@@ -252,6 +252,13 @@ export function ListeKarti({
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
+  // Yeni / düzenlenen makro (kendi sekmesinde) kaydedilince muayenedeki liste tazelenir.
+  const [makroTazele, setMakroTazele] = useState(0);
+  useEffect(() => {
+    const dinle = (e: Event) => { if ((e as CustomEvent<string>).detail === 'metin-makro') setMakroTazele(t => t + 1) };
+    window.addEventListener(LISTE_TAZELE_OLAYI, dinle);
+    return () => window.removeEventListener(LISTE_TAZELE_OLAYI, dinle);
+  }, []);
   const muayeneKarti = tanim.kaynak === 'muayene' && kartId !== null && kartId !== 'yeni';
   useEffect(() => {
     if (!muayeneKarti) { setMakrolar([]); return }
@@ -260,7 +267,7 @@ export function ListeKarti({
       .then(y => { if (!iptal) setMakrolar(y.makrolar) })
       .catch(() => { /* makro yoksa kısayol açılmaz, yazım etkilenmez */ });
     return () => { iptal = true };
-  }, [muayeneKarti, kartId, kartTazele]);
+  }, [muayeneKarti, kartId, kartTazele, makroTazele]);
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
 
@@ -438,7 +445,13 @@ export function ListeKarti({
               ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt} /> : undefined
           : undefined}
         alanIpucu={muayeneKarti
-          ? (ad, yaz) => MAKRO_ALANLARI.has(ad) ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz} /> : null
+          ? (ad, yaz) => MAKRO_ALANLARI.has(ad)
+              // ＋ YENİ MAKRO: kart kendi sekmesinde, alan seçili (kart içinden açılan kart yeni sekmede).
+              ? <MakroIpucu alan={ad} makrolar={makrolar} yaz={yaz}
+                           onYeni={a => git(`/metin-makro/yeni?alan=${encodeURIComponent(a)}`)}
+                           // SAĞ TIK = DÜZENLE: kurum makrosu kendi kartında; şablon makrosu şablon kartında.
+                           onDuzenle={m => m.kaynak === 'k' && m.id ? git(`/metin-makro/${m.id}`)
+                             : mesaj(c('Bu makro bir muayene şablonuna ait - Muayene › Ayarlar › Muayene Şablonları’ndan düzenlenir.'))} /> : null
           : undefined}
         sekmeSarmalayici={tanim.kaynak === 'metin-makro' && kartId !== null
           // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
@@ -1159,7 +1172,10 @@ export function ListeKarti({
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
         //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
-        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum') || sorgu.get('hastaId'))
+        yeniKayitVarsayilanlari={tanim.kaynak === 'metin-makro' && kartId === 'yeni' && sorgu.get('alan') !== null
+          // Muayenedeki ＋'dan: hangi alanın altından açıldıysa o alan seçili gelir.
+          ? { ...tanim.yeniKayitVarsayilanlari, alan: sorgu.get('alan')!, durum: 1 }
+          : tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum') || sorgu.get('hastaId'))
           ? {
               ...tanim.yeniKayitVarsayilanlari,
               ...(sorgu.get('baslangic') ? { baslangic: sorgu.get('baslangic')! } : {}),

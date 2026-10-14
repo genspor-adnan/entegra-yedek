@@ -13,13 +13,17 @@ import { MAKRO_EKLE_OLAYI } from './MakroluMetin';
  * Alan elemanı aynı etiketteki `data-alan` kutusudur; yazım kartın kendi
  * yazıcısıyla (`yaz`) - React durumu tek kaynak.
  */
-export function MakroIpucu({ alan, makrolar, yaz }: {
+export function MakroIpucu({ alan, makrolar, yaz, onYeni, onDuzenle }: {
   alan: string;
   makrolar: readonly Makro[];
   yaz?(v: string): void;
+  /** ＋ (kullanıcı 14.10.2026): bu alan için yeni makro tanımla. Verilirse makro yokken de çizilir. */
+  onYeni?(alan: string): void;
+  /** SAĞ TIK = DÜZENLE: makronun kartı. */
+  onDuzenle?(m: Makro): void;
 }) {
   const liste = alanMakrolari(alan, makrolar);
-  if (liste.length === 0) return null;
+  if (liste.length === 0 && !onYeni) return null;
 
   const tikla = (e: MouseEvent<HTMLButtonElement>, m: Makro) => {
     e.preventDefault();
@@ -49,10 +53,17 @@ export function MakroIpucu({ alan, makrolar, yaz }: {
       ⌨
       {liste.map(m => (
         <button key={`${m.kisayol}-${m.alan}`} type="button" disabled={!yaz}
-                title={`${m.metin}\n\n${m.kullanim ? `${m.kullanim} ${c('kez kullanıldı')} · ` : ''}${c('Tıklayın: alana yazılır · ya da kısayolu yazıp boşluk basın')}`}
+                title={`${m.metin}\n\n${m.kullanim ? `${m.kullanim} ${c('kez kullanıldı')} · ` : ''}${c('Tıklayın: alana yazılır · ya da kısayolu yazıp boşluk basın')}${onDuzenle ? ` · ${c('sağ tık: düzenle')}` : ''}`}
                 onMouseDown={e => e.preventDefault()}
+                // SAĞ TIK = DÜZENLE (kullanıcı: "editi nasıl yaparız").
+                onContextMenu={onDuzenle ? e => { e.preventDefault(); onDuzenle(m) } : undefined}
                 onClick={e => tikla(e, m)}>{m.kisayol}</button>
       ))}
+      {onYeni && (
+        <button type="button" className="makro-yeni" title={c('Bu alan için yeni metin makrosu tanımla')}
+                onMouseDown={e => e.preventDefault()}
+                onClick={e => { e.preventDefault(); onYeni(alan) }}>＋</button>
+      )}
     </span>
   );
 }
