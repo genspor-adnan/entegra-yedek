@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gösterge Panelleri + Rol Başlangıcı — Mockup (Gentegre AI)</title>
+<link rel="stylesheet" href="_ortak.css">
+<style>
+  .ornek h3{max-width:1440px;margin:0 auto 6px;font-size:12.5px;color:var(--navy)}
+  .rol-sec{display:flex;gap:4px;flex-wrap:wrap;align-items:center;padding:8px 14px;background:var(--head);border-bottom:1px solid var(--line2)}
+  .rol-sec span{border:1px solid var(--line);border-radius:14px;padding:3px 12px;cursor:pointer;background:#fff;font-size:11.5px}
+  .rol-sec span.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .ara-buyuk{display:flex;align-items:center;gap:10px;height:40px;margin:12px 14px;padding:0 14px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);font-size:13.5px;cursor:pointer}
+  .ara-buyuk kbd{margin-left:auto;font-family:Consolas,monospace;font-size:10.5px;border:1px solid var(--line);border-radius:3px;padding:0 5px}
+  .bolum{display:flex;align-items:baseline;gap:10px;margin:14px 14px 6px;font-size:10.5px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .bolum a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:normal;cursor:pointer}
+  .cipler{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px}
+  .cip{border:1px solid var(--line);border-radius:14px;padding:4px 12px;background:#fff;cursor:pointer;font-size:11.5px}
+  .cip:hover{border-color:var(--accent);color:var(--accent)}
+  .gp-cip{background:#eef4fc;border-color:#cfe0f5;color:#1d4a80}
+  .moduller{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:0 14px 14px}
+  .modul{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:#fff}
+  .modul .mb{display:flex;align-items:center;gap:7px;padding:7px 11px;font-weight:bold;color:var(--navy);background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2)}
+  .modul .mb .rz{margin-left:auto}
+  .modul a{display:flex;justify-content:space-between;padding:5px 11px;color:var(--ink);text-decoration:none;cursor:pointer}
+  .modul a:hover{background:#f5f9fe;color:var(--accent)}
+  .modul a .s{color:var(--muted);font-size:10.5px}
+  .modul a .s.k{color:var(--kirmizi);font-weight:bold}
+  .gp-modul{border-color:#9ec1e8}
+  .gp-modul .mb{background:linear-gradient(#eef4fc,#e2edf9)}
+  .palet{max-width:620px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 18px 50px rgba(8,20,40,.25);overflow:hidden;border:1px solid var(--line)}
+  .palet .in{padding:13px 16px;font-size:15px;border-bottom:1px solid var(--line2)}
+  .palet .g{font-size:10.5px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 16px 4px}
+  .palet .o{display:flex;gap:10px;padding:7px 16px;cursor:pointer}
+  .palet .o.sec{background:var(--sel)}
+  .palet .o .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .gp-ust{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line2)}
+  .gp-ust h2{margin:0;font-size:15px;color:var(--navy)}
+  .gp-ust select{margin-left:auto;border:1px solid var(--line);border-radius:3px;padding:3px 6px;font:inherit}
+  .kutu.tik{cursor:pointer} .kutu.tik:hover{border-color:var(--accent)}
+  .tanim{display:grid;grid-template-columns:260px 1fr;min-height:320px}
+  .tanim .sol{border-right:1px solid var(--line2);background:#fbfcfe}
+  .tanim .sol div{padding:7px 12px;border-bottom:1px solid var(--line2);cursor:pointer;display:flex;gap:6px}
+  .tanim .sol div.on{background:var(--sel);font-weight:bold}
+  .tanim .sol div .sonuk{margin-left:auto}
+  .tanim .sag2{padding:12px 14px}
+  .alan2{display:grid;grid-template-columns:140px 1fr;gap:7px 12px;align-items:center;margin-bottom:10px}
+  .alan2 label{color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:5px 8px;background:#fff}
+  .kutu-liste{display:flex;flex-direction:column;gap:4px}
+  .kutu-liste .ks{display:flex;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:4px;padding:5px 9px;background:#fff}
+  .kutu-liste .ks .tut{cursor:grab;color:var(--muted)}
+  .kutu-liste .ks .sonuk{margin-left:auto}
+  .aciklama{max-width:1440px;margin:16px auto 0;color:#5a6b7c;font-size:11px;line-height:1.7}
+  .aciklama h4{margin:0 0 6px;color:var(--ink);font-size:13px}
+  .aciklama b{color:var(--ink)} .aciklama ul{margin:6px 0 0 18px;padding:0} .aciklama li{margin:4px 0}
+  .aciklama code{background:#eef2f7;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- ============================ 1) BAŞLANGIÇ (rol / profil başına) ============================ -->
+<div class="ornek">
+  <h3>1 · Başlangıç sekmesi — kutucuklar role / profile göre <span class="sonuk" style="font-weight:normal">(dene: rol değiştir)</span></h3>
+  <div class="win">
+    <div class="title">🏠 Başlangıç <span class="sp" id="rolBas">Dr. Selin TAN · Uzman Hekim</span></div>
+    <div class="rol-sec" id="rolSec"></div>
+    <div class="selam" id="selam">Günaydın, Dr. Selin TAN <span>14 Ekim 2026 Salı</span></div>
+    <div class="ara-buyuk" onclick="paletAc('')">🔍 Ne açmak istiyorsunuz? (ekran, hasta, gösterge paneli…) <kbd>Ctrl K</kbd></div>
+    <div class="bolum">Son açılanlar</div>
+    <div class="cipler" id="son"></div>
+    <div class="bolum">Ekranlarım <a>Tüm ekranlar (menü) ›</a></div>
+    <div class="moduller" id="moduller"></div>
+  </div>
+</div>
+
+<!-- ============================ 2) Ctrl+K "gösterge" ============================ -->
+<div class="ornek">
+  <h3>2 · Ctrl+K — "gösterge" yazınca bütün gösterge panelleri (yalnız yetkili olanlar)</h3>
+  <div class="palet" id="palet">
+    <div class="in" id="paletIn">gösterge</div>
+    <div id="paletListe"></div>
+  </div>
+</div>
+
+<!-- ============================ 3) GÖSTERGE PANELİ ============================ -->
+<div class="ornek" style="margin-top:16px">
+  <h3>3 · Seçilen gösterge paneli — kendi sekmesinde açılır</h3>
+  <div class="win">
+    <div class="title">📊 Gösterge Paneli <span class="sp">Gösterge Panelleri › <b id="gpYol"></b></span></div>
+    <div class="gp-ust">
+      <h2 id="gpAd"></h2><span class="sonuk" id="gpAc"></span>
+      <select id="gpSec"></select>
+      <span class="rz">yenileme 60 sn</span>
+    </div>
+    <div class="kutular" id="gpKutu"></div>
+    <div class="satir" id="gpBlok"></div>
+  </div>
+</div>
+
+<!-- ============================ 4) TANIM (YÖNETİM) ============================ -->
+<div class="ornek">
+  <h3>4 · Yönetim › Gösterge Panelleri — panel sayısı zamanla artar (veri, kod değil)</h3>
+  <div class="win">
+    <div class="title">⚙ Gösterge Paneli Tanımları <span class="sp">yetki: gosterge.tanim</span></div>
+    <div class="tanim">
+      <div class="sol" id="tanimListe"></div>
+      <div class="sag2">
+        <div class="alan2">
+          <label>Ad</label><div class="inp" id="tAd"></div>
+          <label>Profil</label><div class="inp" id="tProfil"></div>
+          <label>Kimler görür</label><div class="inp">Yetki matrisinde <b id="tYetki"></b> · Gör (rol başına) <span class="rz mavi">matris</span></div>
+          <label>Başlangıçta</label><div class="inp">Bu profilin rollerinde "Gösterge panellerim"de çıkar</div>
+        </div>
+        <div class="bolum" style="margin:6px 0">Kutular <span class="sonuk" style="font-weight:normal;text-transform:none">sürükle: sıra · ＋ katalogdan ekle</span></div>
+        <div class="kutu-liste" id="tKutu"></div>
+        <div style="margin-top:8px"><span class="cip">＋ Kutu ekle (katalog: 48 gösterge)</span> <span class="cip">＋ Liste bloğu ekle</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 5) ROL BAŞLANGIÇ DÜZENİ ============================ -->
+<div class="ornek">
+  <h3>5 · Yönetim › Rol Başlangıç Düzeni — kurum, her rolün Başlangıç kutucuklarını ELLE düzenler</h3>
+  <div class="win">
+    <div class="title">⚙ Rol Başlangıç Düzeni <span class="sp">yetki: rol.baslangic</span></div>
+    <div class="rol-sec" id="dRolSec"></div>
+    <div class="tanim">
+      <div class="sol" id="dKutular"></div>
+      <div class="sag2">
+        <div class="alan2">
+          <label>Kutucuk adı</label><div class="inp" id="dAd"></div>
+          <label>Sıra</label><div class="inp">Soldaki listede sürükle-bırak</div>
+          <label>Sayaç</label><div class="inp">Her satırın yanında gösterge kataloğundan bir sayı (isteğe bağlı)</div>
+        </div>
+        <div class="bolum" style="margin:6px 0">Satırlar <span class="sonuk" style="font-weight:normal;text-transform:none">ekran (rolün yetkili olduğu) · sayaç</span></div>
+        <div class="kutu-liste" id="dSatir"></div>
+        <div style="margin-top:8px"><span class="cip">＋ Ekran ekle (yetkili ekranlardan)</span> <span class="cip">＋ Kutucuk ekle</span></div>
+        <div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="cip">⟳ Varsayılandan başlat</span>
+          <span class="cip">⎘ Başka rolden kopyala</span>
+          <span class="cip" style="margin-left:auto;background:var(--accent);color:#fff;border-color:var(--accent)">💾 Kaydet</span>
+        </div>
+        <p class="sonuk" style="margin-top:8px;line-height:1.5">İlk kutucuk (📊 Gösterge Panelleri) sabittir: içeriği yetki matrisinden gelir.
+          Rolün yetkisi olmayan ekran listeye eklenemez; rol yetkisi sonradan kaldırılırsa satır o kullanıcıda kendiliğinden gizlenir.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Gösterge panelleri + rol başlangıcı — tasarım</h4>
+  <ul>
+    <li><b>Panel = veri satırı:</b> <code>gosterge_paneli</code> (kod, ad, profil, ikon, sıra) + <code>gosterge_paneli_kutu</code>
+      (hangi göstergeler, hangi sırada). Yeni panel eklemek kod değil, tanım ekranından bir satır.</li>
+    <li><b>Gösterge kataloğu sunucuda:</b> her kutu (bugünkü randevu, sonuç bekleyen, açık tahsilat, kritik stok…) sunucudaki
+      beyaz listeden hesaplanır; panel yalnız hangilerini göstereceğini seçer. Bugünkü Ana Sayfa kutuları (<code>fn_panel_profil</code>) bu kataloğun ilk satırları olur.</li>
+    <li><b>Kim görür = yetki matrisi:</b> her panelin bir yetki kodu (<code>gosterge.&lt;kod&gt;</code>) olur, matriste "Gösterge Panelleri" grubunda.
+      Kurulumda panel, profilinin ana ekranını gören rollere verilir (Hekim Paneli → muayene yetkili roller).</li>
+    <li><b>Ctrl+K:</b> "gösterge" yazınca yetkili bütün paneller listelenir; seçilen panel kendi sekmesinde açılır.</li>
+    <li><b>Ayrı "gösterge panellerim" bölümü yok:</b> Ekranlarım'ın İLK kutucuğu rolün yetkili olduğu gösterge panelleridir
+      (satırda panelin ilk göstergesi); tıklayınca panel kendi sekmesinde açılır.</li>
+    <li><b>Kutucukları kurum elle düzenler</b> (kullanıcı kararı): Yönetim › Rol Başlangıç Düzeni, rol başına
+      <code>rol_baslangic</code> (kutucuk, sıra, satır = ekran + sayaç). "Varsayılandan başlat" rolün yetkili menü
+      gruplarından bir başlangıç önerir; kayıt edilene kadar o öneri görünür.</li>
+    <li><b>Başlangıç kutucukları role göre:</b> rolün yetkili olduğu menü gruplarından kurulur, sırası rolün <b>profiline</b>
+      (Hekim, Hemşire, Banko, Lab, Muhasebe, Tedarik — menüdeki çalışma alanları) göre; satır yanındaki sayılar aynı gösterge kataloğundan.
+      Kurum isterse rol başına kutucukları elle düzenler (<code>rol_baslangic</code>); düzenlemediyse otomatik kurulum geçerli.</li>
+    <li>Bugünkü Ana Sayfa paneli kaybolmaz: kurum profilinin paneli "Genel" gösterge paneli olarak kalır.</li>
+  </ul>
+</div>
+
+<script>
+const G = {   // gösterge kataloğu (örnek değerler)
+  randevu: ['Bugünkü randevu', '18', '12 geldi · 2 gelmedi'], bekleyen: ['Bekleyen hasta', '6', 'ort. bekleme 14 dk', 'uy'],
+  sonucB: ['Sonuç bekleyen', '9', '3 panik', 'teh'], kons: ['Konsültasyon', '3', '1 süresi geçti', 'teh'],
+  yatan: ['Yatan hasta', '18', '4 boş yatak'], order: ['Bekleyen order', '11', '2 gecikmiş', 'uy'],
+  kabul: ['Bugünkü kabul', '64', '8 bekliyor'], provizyon: ['Provizyonsuz', '7', 'tahakkuk edilemez', 'teh'],
+  tahsilat: ['Bugün tahsilat', '41.250 ₺', 'nakit 18.400 · POS 22.850', 'ok'], acikT: ['Açık tahsilat', '27.933 ₺', '26 başvuru', 'uy'],
+  numune: ['Numune kabul', '42', '7 bekliyor'], onay: ['Onay bekleyen', '13', 'ort. TAT 52 dk', 'uy'], panik: ['Panik sonuç', '2', 'bildirilmedi', 'teh'],
+  ciro: ['Bu ay satış', '1,24 M ₺', '312 belge', 'ok'], gider: ['Bu ay alış', '684 B ₺', '98 belge'], kritik: ['Kritik stok', '14', 'sipariş önerisi', 'uy'],
+  kasa: ['Kasa / banka', '412 B ₺', '6 hesap'], enabiz: ['e-Nabız hatalı', '0', 'son 24 saat', 'ok'], kan: ['Kan stoku kritik', '2', 'A− · B−', 'teh'],
+};
+const PANELLER = [
+  { kod: 'hekim', ad: 'Hekim Paneli', ic: '🩺', profil: 'Hekim', kutu: ['randevu', 'bekleyen', 'sonucB', 'kons', 'yatan'], blok: ['Bugünkü hastalarım', 'Sonucu gelenler'] },
+  { kod: 'poliklinik', ad: 'Poliklinik Akışı', ic: '🏥', profil: 'Yönetici', kutu: ['randevu', 'bekleyen', 'kabul', 'kons'], blok: ['Bölüm bazında bekleme', 'Hekim yükü'] },
+  { kod: 'hemsire', ad: 'Servis / Hemşire', ic: '🛏', profil: 'Hemşire', kutu: ['yatan', 'order', 'kan', 'sonucB'], blok: ['Geciken order', 'Vital bekleyen'] },
+  { kod: 'banko', ad: 'Banko & Vezne', ic: '🧾', profil: 'Banko', kutu: ['kabul', 'provizyon', 'tahsilat', 'acikT'], blok: ['Kurum & sözleşme', 'Kasa hareketleri'] },
+  { kod: 'lab', ad: 'Laboratuvar', ic: '🧪', profil: 'Lab', kutu: ['numune', 'onay', 'panik', 'sonucB'], blok: ['Cihaz kuyruğu', 'TAT aşımı'] },
+  { kod: 'finans', ad: 'Finans Özeti', ic: '💳', profil: 'Muhasebe', kutu: ['ciro', 'gider', 'tahsilat', 'acikT', 'kasa'], blok: ['Büyük bakiyeler', 'Vadesi gelen'] },
+  { kod: 'tedarik', ad: 'Stok & Satınalma', ic: '📦', profil: 'Tedarik', kutu: ['kritik', 'gider', 'kan'], blok: ['Sipariş bekleyen', 'Son girişler'] },
+  { kod: 'yonetici', ad: 'Yönetici Özeti', ic: '📈', profil: 'Yönetici', kutu: ['ciro', 'kabul', 'tahsilat', 'yatan', 'enabiz', 'provizyon'], blok: ['Aylık trend', 'Dikkat gerektiren'] },
+];
+// Rol -> profil, görebildiği paneller, başlangıç kutucukları (menü grubu: ekranlar + sayaç göstergesi)
+const ROLLER = {
+  'Uzman Hekim': { ad: 'Dr. Selin TAN', profil: 'Hekim', gp: ['hekim', 'poliklinik'], son: ['Konsültasyonlar', 'Muayeneler', 'Kan Rezervasyonu'],
+    m: [['🩺 Muayene', [['Muayene Listesi', 'bekleyen'], ['Konsültasyonlar', 'kons'], ['Reçeteler']]], ['🧪 Tanı & Tetkik', [['Sonuçlarım', 'sonucB'], ['Radyoloji raporları']]],
+        ['🛏 Yatan Hasta', [['Hastalarım', 'yatan'], ['Order listesi']]], ['🩸 Kan Merkezi', [['Kan Rezervasyonu']]]] },
+  'Hemşire': { ad: 'Hmş. Elif KARA', profil: 'Hemşire', gp: ['hemsire'], son: ['Yatak Panosu', 'Order İlaç Uygulama'],
+    m: [['🛏 Yatan Hasta', [['Yatak Panosu', 'yatan'], ['Order İlaç Uygulama', 'order'], ['Hemşire İzlem']]], ['🩸 Kan Merkezi', [['Kan istemleri', 'kan']]], ['🩺 Muayene', [['Vital giriş']]]] },
+  'Banko': { ad: 'Ayşe YILMAZ', profil: 'Banko', gp: ['banko'], son: ['Hasta Kabul', 'Vezne'],
+    m: [['🧾 Kayıt Kabul', [['Hasta Kabul', 'kabul'], ['Provizyon', 'provizyon'], ['Randevular', 'randevu']]], ['💰 Vezne', [['Tahsilat', 'tahsilat'], ['Açık başvurular', 'acikT']]], ['📞 Çağrı Merkezi', [['Geri aramalar']]]] },
+  'Laboratuvar': { ad: 'Tek. Murat ÖZ', profil: 'Lab', gp: ['lab'], son: ['Numune Kabul', 'Onay'],
+    m: [['🧪 Laboratuvar', [['Numune Kabul', 'numune'], ['Sonuç Onay', 'onay'], ['Panik bildirimleri', 'panik']]], ['🔬 Kalite Kontrol', [['QC çalışmaları']]]] },
+  'Muhasebe': { ad: 'Fatma AK', profil: 'Muhasebe', gp: ['finans', 'tedarik'], son: ['Satış Faturaları', 'Cari Listesi'],
+    m: [['💳 Finans', [['Satış Faturaları', 'ciro'], ['Kasa / Banka', 'kasa'], ['Açık tahsilat', 'acikT']]], ['📦 Stok', [['Kritik stok', 'kritik']]], ['🧾 Ödeyen & Fatura', [['Kurum icmalleri']]]] },
+  'Yönetici': { ad: 'Sistem Yöneticisi', profil: 'Yönetici', gp: ['yonetici', 'poliklinik', 'finans', 'hekim', 'banko', 'lab', 'hemsire', 'tedarik'], son: ['Yönetici Özeti', 'Rol Yetkileri'],
+    m: [['📈 Yönetim', [['Yönetici Özeti', 'ciro'], ['Rol yetkileri'], ['Gösterge Panelleri']]], ['🏥 Klinik', [['Poliklinik akışı', 'kabul'], ['Yatan', 'yatan']]], ['💳 Finans', [['Tahsilat', 'tahsilat']]]] },
+};
+let rol = 'Uzman Hekim', panel = 'hekim';
+const $ = id => document.getElementById(id);
+function baslangic() {
+  const r = ROLLER[rol];
+  $('rolSec').innerHTML = '<span class="sonuk" style="border:0;background:none;cursor:default">Rol:</span>' + Object.keys(ROLLER).map(k => `<span class="${k === rol ? 'on' : ''}" data-rol="${k}">${k}</span>`).join('');
+  $('rolBas').textContent = `${r.ad} · ${rol} · profil: ${r.profil}`;
+  $('selam').innerHTML = `Günaydın, ${r.ad} <span>14 Ekim 2026 Salı</span>`;
+  $('son').innerHTML = r.son.map(s => `<span class="cip">${s}</span>`).join('');
+  // İLK KUTUCUK = yetkili gösterge panelleri (ayrı bölüm yok); satırda panelin ilk göstergesi.
+  const gpKutu = `<div class="modul gp-modul"><div class="mb">📊 Gösterge Panelleri<span class="rz mavi">${r.gp.length}</span></div>` +
+    r.gp.map(k => { const p = PANELLER.find(x => x.kod === k); const g = G[p.kutu[0]];
+      return `<a data-gp="${k}"><span>${p.ic} ${p.ad}</span><span class="s${g[3] === 'teh' ? ' k' : ''}">${g[1]} · ${g[0].toLocaleLowerCase('tr')}</span></a>` }).join('') + '</div>';
+  $('moduller').innerHTML = gpKutu + r.m.map(([ad, ekr]) => {
+    const kir = ekr.filter(e => e[1] && G[e[1]][3] === 'teh').length;
+    return `<div class="modul"><div class="mb">${ad}${kir ? `<span class="rz kir">${kir}</span>` : ''}</div>` +
+      ekr.map(([e, g]) => `<a><span>${e}</span><span class="s${g && G[g][3] === 'teh' ? ' k' : ''}">${g ? G[g][1] + ' · ' + G[g][0].toLocaleLowerCase('tr') : ''}</span></a>`).join('') + '</div>';
+  }).join('');
+}
+function paletAc(q) {
+  $('paletIn').textContent = q || 'gösterge';
+  const r = ROLLER[rol];
+  $('paletListe').innerHTML = '<div class="g">Gösterge panelleri · ' + rol + '</div>' +
+    PANELLER.filter(p => r.gp.includes(p.kod)).map((p, i) => `<div class="o${p.kod === panel ? ' sec' : ''}" data-gp="${p.kod}">${p.ic} ${p.ad}<span class="y">profil: ${p.profil}${i === 0 ? ' · varsayılan' : ''}</span></div>`).join('') +
+    `<div class="g">Erişimi olmayanlar listede görünmez (${PANELLER.length - r.gp.length} panel)</div>`;
+  document.getElementById('palet').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function gosterge() {
+  const p = PANELLER.find(x => x.kod === panel);
+  $('gpYol').textContent = p.ad; $('gpAd').textContent = `${p.ic} ${p.ad}`; $('gpAc').textContent = `profil: ${p.profil} · ${p.kutu.length} gösterge`;
+  $('gpSec').innerHTML = PANELLER.filter(x => ROLLER[rol].gp.includes(x.kod)).map(x => `<option value="${x.kod}" ${x.kod === panel ? 'selected' : ''}>${x.ad}</option>`).join('');
+  $('gpKutu').innerHTML = p.kutu.map(k => { const g = G[k]; return `<div class="kutu tik ${g[3] ?? ''}"><div class="b">${g[0]}</div><div class="d">${g[1]}</div><div class="a">${g[2]}</div></div>` }).join('');
+  $('gpBlok').innerHTML = p.blok.map(b => `<div class="blok"><h4>${b}<span class="sp">ilk 5</span></h4><table><tbody>${[1, 2, 3].map(i => `<tr><td>Örnek satır ${i}</td><td class="sag sonuk">—</td></tr>`).join('')}</tbody></table></div>`).join('');
+}
+function tanim(k) {
+  const p = PANELLER.find(x => x.kod === k);
+  $('tanimListe').innerHTML = PANELLER.map(x => `<div class="${x.kod === k ? 'on' : ''}" data-tanim="${x.kod}">${x.ic} ${x.ad}<span class="sonuk">${x.kutu.length}</span></div>`).join('') + '<div style="color:var(--accent)">＋ Yeni gösterge paneli</div>';
+  $('tAd').textContent = p.ad; $('tProfil').textContent = p.profil; $('tYetki').textContent = 'gosterge.' + p.kod;
+  $('tKutu').innerHTML = p.kutu.map(kk => `<div class="ks"><span class="tut">⋮⋮</span>${G[kk][0]}<span class="sonuk">${kk}</span> ✕</div>`).join('');
+}
+document.body.addEventListener('click', e => {
+  const r = e.target.closest('[data-rol]'); if (r) { rol = r.dataset.rol; panel = ROLLER[rol].gp[0]; baslangic(); gosterge(); paletAc('gösterge'); return }
+  const g = e.target.closest('[data-gp]'); if (g) { panel = g.dataset.gp; gosterge(); paletAc('gösterge'); document.getElementById('gpAd').scrollIntoView({ behavior: 'smooth', block: 'center' }); return }
+  const t = e.target.closest('[data-tanim]'); if (t) tanim(t.dataset.tanim);
+});
+$('gpSec').addEventListener('change', e => { panel = e.target.value; gosterge(); paletAc('gösterge') });
+let dRol = 'Uzman Hekim', dKutu = 0;
+function duzen() {
+  const r = ROLLER[dRol];
+  $('dRolSec').innerHTML = '<span class="sonuk" style="border:0;background:none;cursor:default">Rol:</span>' + Object.keys(ROLLER).map(k => `<span class="${k === dRol ? 'on' : ''}" data-drol="${k}">${k}</span>`).join('');
+  $('dKutular').innerHTML = '<div style="color:var(--muted);cursor:default">📊 Gösterge Panelleri <span class="sonuk">sabit</span></div>' +
+    r.m.map(([ad, ekr], i) => `<div class="${i === dKutu ? 'on' : ''}" data-dkutu="${i}"><span class="tut" style="cursor:grab;color:var(--muted)">⋮⋮</span>${ad}<span class="sonuk">${ekr.length}</span></div>`).join('');
+  const [ad, ekr] = r.m[dKutu];
+  $('dAd').textContent = ad;
+  $('dSatir').innerHTML = ekr.map(([e, g]) => `<div class="ks"><span class="tut">⋮⋮</span>${e}<span class="sonuk">${g ? 'sayaç: ' + G[g][0] : 'sayaç yok'}</span> ✕</div>`).join('');
+}
+document.body.addEventListener('click', e => {
+  const r = e.target.closest('[data-drol]'); if (r) { dRol = r.dataset.drol; dKutu = 0; duzen(); return }
+  const k = e.target.closest('[data-dkutu]'); if (k) { dKutu = Number(k.dataset.dkutu); duzen() }
+});
+baslangic(); paletAc('gösterge'); gosterge(); tanim('hekim'); duzen();
+</script>
+</body>
+</html>
