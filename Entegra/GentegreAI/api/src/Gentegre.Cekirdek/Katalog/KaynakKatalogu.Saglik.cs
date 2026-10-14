@@ -57,6 +57,9 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "m.id",             "sayi",  "Id", Varsayilan: false),
+            // HASTA ID (gizli): "Kayıtlı Muayene Kartı" hasta aramasından hastanın SON
+            //   muayenesini bulmak için süzgeç (kullanıcı 15.10.2026).
+            new("hastaId",       "m.taraf_id",       "sayi",  "Hasta Id", Varsayilan: false),
             new("muayeneNo",     "m.muayene_no",     "metin", "Muayene No", Hizalama: "orta",
                                                      Genislik: 120),
             new("muayeneTarihi", "m.muayene_tarihi", "tarih", "Tarih / Saat", Hizalama: "orta",

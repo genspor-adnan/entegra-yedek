@@ -41,7 +41,8 @@ import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 /** Komut paletinde "Kayıtlı ... Kartı" - yol değil, arama penceresini açar: `#kayitli:<kart yolu>`. */
 const KAYITLI_ONEK = '#kayitli:';
 /** Hasta ve başvuru: genel HASTA araması (başvuruda hastanın son başvurusu); boş palette hep görünür. */
-const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru'> = { '/hasta': 'hasta', '/basvuru': 'basvuru' };
+// Muayene (kullanıcı 15.10.2026): hasta aranır, hastanın SON muayenesi açılır.
+const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru' | 'muayene'> = { '/hasta': 'hasta', '/basvuru': 'basvuru', '/muayene': 'muayene' };
 /** Stok ve hizmet: belgedeki genel stok arama penceresi (kart açma kipi). */
 const STOK_ARAMA: Record<string, 'stok' | 'hizmet'> = { '/stok': 'stok', '/hizmet': 'hizmet' };
 /** Kartı sekmede açılan listeler, kart yolu başına bir tane. */
@@ -193,7 +194,7 @@ export function Kabuk() {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
   }, [kullanici?.id, kullanici?.subeId]);
   /** Ctrl+K "Kayıtlı Hasta / Başvuru Kartı": ikisi de hasta araması, seçimden sonrası farklı. */
-  const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | null>(null);
+  const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | 'muayene' | null>(null);
   /** Genel "Kayıtlı X Kartı" araması (listenin kendi kaynağı ve kolonları). */
   const [kayitliListe, setKayitliListe] = useState<ListeGirdisi | null>(null);
   /** "Kayıtlı Stok / Hizmet Kartı": belgedeki genel stok arama penceresi (kart açma kipi). */
@@ -509,6 +510,18 @@ export function Kabuk() {
                   onSec={h => {
                     const tur = kayitliArama; setKayitliArama(null);
                     if (tur === 'hasta') { kartaGit(`/hasta/${h.id}`); return }
+                    if (tur === 'muayene') {
+                      void api.liste('muayene', {
+                        sayfa: 1, boyut: 1,
+                        sirala: [{ alan: 'muayeneTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
+                        filtre: { op: 'and', kosullar: [{ alan: 'hastaId', op: 'esit', deger: h.id }] },
+                      }).then(y => {
+                        const son = y.satirlar[0];
+                        if (son) kartaGit(`/muayene/${son.id}`);
+                        else mesaj(c('{0} için kayıtlı muayene yok.').replace('{0}', h.unvan));
+                      }).catch(e => mesaj(hataMetni(e)));
+                      return;
+                    }
                     void api.liste('belge', {
                       sayfa: 1, boyut: 1,
                       sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
