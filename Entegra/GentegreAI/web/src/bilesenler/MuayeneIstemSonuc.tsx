@@ -546,14 +546,15 @@ function GozGoruntuPaneli({ g, onGordu, onAc }: { g: Satir; onGordu: (bagId: num
   );
 }
 
-/** Patoloji vakasının muayenedeki durum adı (1105): başvuru kapısı önce. */
+/** Patoloji vakasının muayenedeki durum adı (1105). */
 function patolojiDurumAdi(v: Satir): string {
   const d = Number(v.durum ?? 1);
   if (d === 0) return 'İptal';
   if (d === 90) return 'Reddedildi';
   if (d === 12) return 'Hekim gördü';
   if (d === 11) return 'Rapor geldi';
-  if (Number(v.serbest ?? 1) === 0) return 'Başvuru kaydı bekliyor';
+  // Başvuru kaydı (ücret) beklenirken de hekime "İstendi" - diğer lab istemleri gibi
+  //   (kullanıcı 15.10.2026). Banko kapısı patoloji listesinde ayrıca görünür.
   if (d === 1) return 'İstendi';
   if (d === 2) return 'Hazırlandı';
   if (d === 3) return 'Laba gönderildi';
