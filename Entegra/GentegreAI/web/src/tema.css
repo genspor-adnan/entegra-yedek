@@ -6430,6 +6430,28 @@ textarea.fm-giris { resize: vertical }
 .myp-kir { color: var(--hata); font-weight: 600 }
 .myp-kopya { border: 0; background: none; cursor: pointer; color: var(--vurgu); font-size: 13px; padding: 0 4px }
 
+/* EKRAN SEKMELERİ (ana ekran v3): açılan ekranlar üstte sekme; gizli sekme canlı kalır. */
+.ekran-sekmeleri { position: sticky; top: 0; z-index: 5; display: flex; align-items: flex-end; gap: 2px; flex-wrap: nowrap;
+  overflow-x: auto; padding: 6px 8px 0; margin: 0 0 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi) }
+.es-sekme { display: flex; align-items: center; gap: 6px; max-width: 210px; padding: 5px 8px 5px 11px; cursor: pointer;
+  border: 1px solid var(--cizgi); border-bottom: 0; border-radius: 5px 5px 0 0; background: var(--cizgi2); color: var(--soluk);
+  white-space: nowrap; font-size: 12px; user-select: none }
+.es-sekme.on { background: var(--yuz); color: var(--yazi); font-weight: 600; position: relative; top: 1px }
+.es-sekme.es-ev { padding-right: 11px }
+.es-ad { overflow: hidden; text-overflow: ellipsis }
+.es-x { width: 16px; height: 16px; line-height: 15px; text-align: center; border-radius: 3px; font-weight: 400; opacity: .7 }
+.es-x:hover { background: var(--cizgi); opacity: 1 }
+.es-sayi { margin-left: auto; align-self: center; color: var(--soluk); font-size: 10.5px; padding: 0 6px 4px; white-space: nowrap }
+.es-bildirim { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: #1f2d3a; color: #fff;
+  padding: 8px 14px; border-radius: 5px; font-size: 11.5px; z-index: 400; box-shadow: 0 6px 20px rgba(0,0,0,.25) }
+.es-govde[hidden] { display: none !important }
+body.ekran-sekmeli .kaperde:not(.enust) { top: var(--perde-ust, 0px) }
+/* Kart, perdeye göre konumlanır: perde aşağı başlayınca merkez o kadar yukarı alınır. */
+body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
+  top: calc(var(--my, calc(50% + var(--perde-ust, 0px))) - var(--perde-ust, 0px)) }
+.ana-sekmeli > .es-govde { flex: 1; min-height: 0; display: flex; flex-direction: column }
+.ana-sekmeli > .ekran-sekmeleri { margin: 0 }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

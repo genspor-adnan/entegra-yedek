@@ -11,7 +11,9 @@ import { YanMenu } from './kabuk/YanMenu';
 import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, useNavigationType, useOutlet } from 'react-router-dom';
+import { useEkranSekmeleri } from './kabuk/EkranSekmeleri';
+import { gorunumOku, GORUNUM_OLAYI } from '../bilesenler/gorunum';
 import { menuYolu, yolEslesir } from '../bilesenler/taleplerim/personelTalebi';
 import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu, BanaGelenlerPaneli } from '../bilesenler/taleplerim/TaleplerimPaneli';
 import { useTaleplerimOzeti } from '../bilesenler/taleplerim/useTaleplerimOzeti';
@@ -104,6 +106,7 @@ export function Kabuk() {
   //   ve Taleplerim sayfasi ayni ozeti okur - tek yerde, 60 sn'de bir.
   const talepOzeti = useTaleplerimOzeti(kullanici?.id);
 
+
   const ayar = useKullaniciAyari({
     mevcutDil: kullanici?.dil ?? 0, dilDegistir, cikisYap,
   });
@@ -121,13 +124,63 @@ export function Kabuk() {
   //   ayni etkiyi verir ama oturum ve konum korunur.
   useEffect(() => { void ceviriYukle(kullanici?.dil ?? 0) }, [kullanici?.dil]);
   /** Sol menu acik/kapali - tercih tarayicida kalir (dar ekranda kapali calisilir). */
-  const [menuKapali, setMenuKapali] = useState<boolean>(() => {
+  const [menuKapaliKalici, setMenuKapaliKalici] = useState<boolean>(() => {
     try { return localStorage.getItem('gentegre.menu') === 'kapali' } catch { return false }
   });
-  const menuCevir = () => setMenuKapali(k => {
-    try { localStorage.setItem('gentegre.menu', k ? 'acik' : 'kapali') } catch { /* gizli sekme */ }
-    return !k;
+  /**
+   * ANA EKRAN v3 TERCİHLERİ (gorunum): ekran sekmeleri ve sol menü davranışı.
+   * "Seçince kapansın" (menuSabit=false): menü kapalı başlar, ☰ / Ctrl+B geçici
+   * açar, bir ekran seçilince kapanır. Varsayılan "her zaman açık" - bugünkü davranış.
+   */
+  const [gorunum, setGorunum] = useState(() => gorunumOku());
+  useEffect(() => {
+    const yenile = () => setGorunum(gorunumOku());
+    window.addEventListener(GORUNUM_OLAYI, yenile);
+    return () => window.removeEventListener(GORUNUM_OLAYI, yenile);
+  }, []);
+  const [geciciAcik, setGeciciAcik] = useState(false);
+  /** ROL YETKİSİ (1102 kabuk.menu): menüyü görmeyen rol Ctrl+K, Başlangıç ve sekmelerle çalışır. */
+  const menuGorur = yetki('kabuk.menu');
+  const menuKapali = !menuGorur || (gorunum.menuSabit ? menuKapaliKalici : !geciciAcik);
+  const menuCevir = () => {
+    if (!menuGorur) return;
+    if (!gorunum.menuSabit) { setGeciciAcik(a => !a); return }
+    setMenuKapaliKalici(k => {
+      try { localStorage.setItem('gentegre.menu', k ? 'acik' : 'kapali') } catch { /* gizli sekme */ }
+      return !k;
+    });
+  };
+  // Geçici açılan menü ekran seçilince kapanır.
+  useEffect(() => { setGeciciAcik(false) }, [konum.key]);
+  // Ctrl+B: menüyü aç / kapat (v3 kısayolu).
+  useEffect(() => {
+    const tus = (e: KeyboardEvent) => {
+      if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'b') { e.preventDefault(); menuCevir() }
+    };
+    window.addEventListener('keydown', tus);
+    return () => window.removeEventListener('keydown', tus);
   });
+
+  // EKRAN SEKMELERİ (ana ekran v3): tercih kapalıysa düz <Outlet/> - eski davranış.
+  const outlet = useOutlet();
+  const navTuru = useNavigationType();
+  const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git });
+  // KART PERDESİ SEKME ÇUBUĞUNUN ALTINDAN BAŞLAR: kart açıkken de sekmeler arasında
+  //   geçilebilsin (gizli sekmenin kartı canlı kalır).
+  useEffect(() => {
+    const kok = document.documentElement;
+    if (!gorunum.ekranSekmeleri) { document.body.classList.remove('ekran-sekmeli'); return }
+    document.body.classList.add('ekran-sekmeli');
+    const olc = () => {
+      const c = document.querySelector('.ekran-sekmeleri');
+      if (c) kok.style.setProperty('--perde-ust', `${Math.round(c.getBoundingClientRect().bottom)}px`);
+    };
+    olc();
+    const g = new ResizeObserver(olc);
+    const c = document.querySelector('.ekran-sekmeleri'); if (c) g.observe(c);
+    window.addEventListener('resize', olc);
+    return () => { g.disconnect(); window.removeEventListener('resize', olc); document.body.classList.remove('ekran-sekmeli') };
+  }, [gorunum.ekranSekmeleri, menuKapali]);
   const aktifSube = kullanici?.subeler.find(s => s.id === kullanici?.subeId);
   // ŞUBE MARKASI (kullanıcı: "başlıktaki merkez combosunu kaldır, onun yerine
   //   şube logo ve adını soldaki GenoTIP AI gibi yaz"): combo yerine logo + ad;
@@ -181,11 +234,13 @@ export function Kabuk() {
     <div className={`kabuk${menuKapali ? ' menu-kapali' : ''}`}>
       <header className="ust">
         {/* Menu ac/kapa: markanin SOLUNDA - kapaninca ana alan tam genislige acilir. */}
-        <button className="ib menu-tus" onClick={menuCevir}
-                title={menuKapali ? 'Menüyü aç' : 'Menüyü kapat'}
-                aria-expanded={!menuKapali}>
-          ☰
-        </button>
+        {menuGorur && (
+          <button className="ib menu-tus" onClick={menuCevir}
+                  title={`${menuKapali ? c('Menüyü aç') : c('Menüyü kapat')} (Ctrl+B)`}
+                  aria-expanded={!menuKapali}>
+            ☰
+          </button>
+        )}
         <div className="marka marka-bag" role="link" tabIndex={0}
              title={c('Ana sayfa')}
              onClick={() => git('/panel')}
@@ -332,14 +387,16 @@ export function Kabuk() {
       </header>
 
       <div className="govde">
-        <aside className="yan">
+        {menuGorur && <aside className="yan">
           <YanMenu satirlar={satirlar} bolgeliMenu={bolgeliMenu} tercih={tercih}
                    panelYetkisi={yetki('panel')} aktifSubeAd={aktifSube?.ad}
                    kullaniciKod={kullanici?.ad || kullanici?.kod} rolAdi={kullanici?.rolAdi}
                    kurumProfilAdi={kullanici?.kurumTipiAdi} />
-        </aside>
+        </aside>}
 
-        <main className="ana" key={ceviriSurumu}><Outlet /></main>
+        <main className={`ana${gorunum.ekranSekmeleri ? ' ana-sekmeli' : ''}`} key={ceviriSurumu}>
+          {gorunum.ekranSekmeleri ? <>{sekme.cubuk}{sekme.govde}</> : <Outlet />}
+        </main>
       </div>
 
       {/* KULLANICI AYARLARI (669): dort sekmeli pencere ayri bilesende

@@ -501,6 +501,17 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
               <option value="sekmeli">{c('Sekmeli')}</option>
               <option value="sekmesiz">{c('Sekmesiz (tek sayfa)')}</option>
             </select>
+            {/* ANA EKRAN v3: ekran sekmeleri + sol menü davranışı. */}
+            <label>{c('Ekran sekmeleri')}</label>
+            <select value={g.ekranSekmeleri ? '1' : '0'} onChange={e => void yaz({ ...g, ekranSekmeleri: e.target.value === '1' })}>
+              <option value="1">{c('Açık - açtığım ekranlar üstte sekme olarak kalsın')}</option>
+              <option value="0">{c('Kapalı - tek ekran')}</option>
+            </select>
+            <label>{c('Sol menü')}</label>
+            <select value={g.menuSabit ? '1' : '0'} onChange={e => void yaz({ ...g, menuSabit: e.target.value === '1' })}>
+              <option value="1">{c('Her zaman açık')}</option>
+              <option value="0">{c('Seçince kapansın (☰ / Ctrl+B ile açılır)')}</option>
+            </select>
           </div>
           <div className="kanot">
             {c('“Sıkışık” aynı ekrana daha çok satır sığdırır — veznede ekran küçük, listede satır sayısı kararı hızlandırır. Yazı boyu tüm arayüzü ölçekler.')}

@@ -29,6 +29,12 @@ export interface GorunumTercihi {
   /** MUAYENE KARTI DÜZENİ (mockup muayene_duzen_tercihi): aynı alanlar, sekmeli ya da
       tek sayfa (sekmesiz). Varsayılan sekmeli - mevcut düzen değişmez. */
   muayeneDuzeni: MuayeneDuzeni;
+  /** ANA EKRAN v3 (mockup ana_ekran_sekmeli_v3): açılan ekranlar üstte sekme olarak
+      kalır, dönünce kaldığı yerde. Kapatılırsa eski tek ekran davranışı. */
+  ekranSekmeleri: boolean;
+  /** Sol menü her zaman açık (true) ya da ☰ / Ctrl+B ile geçici açılıp seçimden
+      sonra kapanır (false, v3). Varsayılan true - bugünkü davranış. */
+  menuSabit: boolean;
 }
 
 export type MuayeneDuzeni = 'sekmeli' | 'sekmesiz';
@@ -42,8 +48,10 @@ export const GRID_CIZGI_SECENEKLERI: { deger: GridCizgi; ad: string }[] = [
 ];
 
 const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince',
-                                     muayeneDuzeni: 'sekmeli' };
+                                     muayeneDuzeni: 'sekmeli', ekranSekmeleri: true, menuSabit: true };
 const AYNA = 'gentegre.gorunum';
+/** Görünüm tercihi değişti (uygulandı) olayı. */
+export const GORUNUM_OLAYI = 'gentegre-gorunum';
 
 let mevcut: GorunumTercihi = aynadanOku();
 
@@ -67,6 +75,8 @@ function duzelt(h: unknown): GorunumTercihi {
     yaziBoyu: yb === 90 || yb === 110 ? yb : 100,
     gridCizgi: o.gridCizgi === 'belirgin' || o.gridCizgi === 'yok' ? o.gridCizgi : 'ince',
     muayeneDuzeni: o.muayeneDuzeni === 'sekmesiz' ? 'sekmesiz' : 'sekmeli',
+    ekranSekmeleri: o.ekranSekmeleri !== false,
+    menuSabit: o.menuSabit !== false,
   };
 }
 
@@ -83,6 +93,8 @@ export function gorunumUygula(t: GorunumTercihi) {
   (document.documentElement.style as CSSStyleDeclaration & { zoom?: string }).zoom =
     t.yaziBoyu === 100 ? '' : `${t.yaziBoyu}%`;
   try { localStorage.setItem(AYNA, JSON.stringify(t)) } catch { /* yoksay */ }
+  // Kabuk (ekran sekmeleri, sol menü) tercih değişince anında tepki verir.
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(GORUNUM_OLAYI));
 }
 
 /** Oturum açılışında: aynayı uygula, sonra sunucudakini getir. */

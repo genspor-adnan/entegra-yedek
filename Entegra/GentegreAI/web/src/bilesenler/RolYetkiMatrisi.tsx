@@ -46,7 +46,7 @@ const UST_KOD: Record<string, string> = {
 };
 
 /** Menude listesi olmayan ama yetkisi olan ekranlar (kod -> agac grubu). */
-const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa' };
+const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa', 'kabuk.menu': 'Ana Sayfa' };   // 1102: sol menü
 const ANA_SAYFA = 'Ana Sayfa';
 
 interface Dugum {

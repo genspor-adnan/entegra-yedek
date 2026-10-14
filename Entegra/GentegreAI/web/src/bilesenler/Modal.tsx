@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { SekmeGorunurBaglami } from './sekmeBaglami';
 
 /** Acik pencereler, acilis sirasiyla (Esc'i en ustteki isler). */
-const PENCERE_YIGINI: { enUst: boolean }[] = [];
+const PENCERE_YIGINI: { enUst: boolean; gizli?: boolean }[] = [];
 
 /**
  * ESC YALNIZ EN USTTEKI PENCEREYI KAPATIR (kullanici: istem penceresinde Esc
@@ -17,13 +18,18 @@ const PENCERE_YIGINI: { enUst: boolean }[] = [];
 export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
   const kapatRef = useRef(kapat);
   kapatRef.current = kapat;
+  // GİZLİ SEKMEDEKİ pencere Esc yığınında sayılmaz (ana ekran v3 sekmeleri).
+  const gorunur = useContext(SekmeGorunurBaglami);
+  const benRef = useRef<{ enUst: boolean; gizli?: boolean } | null>(null);
+  if (benRef.current) benRef.current.gizli = !gorunur;
   useEffect(() => {
-    const ben = { enUst };
+    const ben = { enUst, gizli: !gorunur };
+    benRef.current = ben;
     PENCERE_YIGINI.push(ben);
     const tus = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      const ust = [...PENCERE_YIGINI].reverse().find(p => p.enUst)
-               ?? PENCERE_YIGINI[PENCERE_YIGINI.length - 1];
+      const gorunen = PENCERE_YIGINI.filter(p => !p.gizli);
+      const ust = [...gorunen].reverse().find(p => p.enUst) ?? gorunen[gorunen.length - 1];
       if (ust === ben) kapatRef.current?.();
     };
     window.addEventListener('keydown', tus);
@@ -87,6 +93,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
   children: React.ReactNode;
 }) {
   useEscIleKapat(onKapat, enUst);
+  // Gizli ekran sekmesinin penceresi çizilir ama GÖRÜNMEZ (durum korunur).
+  const sekmeGorunur = useContext(SekmeGorunurBaglami);
 
   // YUKSEKLIK KILIDI (kullanici): sekme degisince pencere ALCALMASIN -
   //   icerik buyudukce yukselir, o yukseklik minHeight olarak korunur.
@@ -125,7 +133,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
   useLayoutEffect(() => {
     const hesapla = () => {
       const pencere = govdeRef.current?.parentElement;
-      const ana = document.querySelector('main.ana, main.pk-icerik');
+      // EKRAN SEKMELERİ: içerik alanı aktif sekmenin gövdesidir (sekme çubuğu hariç).
+      const ana = document.querySelector('div.es-govde:not([hidden])') ?? document.querySelector('main.ana, main.pk-icerik');
       if (!pencere || !ana) { setMerkez(null); return }
       const r = ana.getBoundingClientRect();
       const sol = Math.max(r.left, 0), sag = Math.min(r.right, innerWidth);
@@ -273,7 +282,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
   });
 
   return createPortal(
-    <div className={`kaperde${enUst ? ' enust' : ''}`}
+    <div className={`kaperde${enUst ? ' enust' : ''}`} hidden={!sekmeGorunur}
          onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
       <div className={`kawin${dar ? '' : ' genis'}${tamEkran ? ' tam' : ''}`
                       + `${ekSinif ? ' ' + ekSinif : ''}`}
