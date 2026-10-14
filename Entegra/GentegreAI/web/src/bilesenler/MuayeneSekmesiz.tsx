@@ -69,6 +69,17 @@ export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number): Muaye
 
 /* ================================================================ BAND ==== */
 
+/** "174 cm · 86 kg" ve ayrı satırda "VKİ 28,4" (kullanıcı 14.10.2026) - olmayan parça yazılmaz. */
+function antropometri(bd: MuayeneHastaBilgisi['band'] | undefined): { boyKilo: string; vki: string } {
+  const say = (v: unknown) => { const n = Number(v ?? 0); return n > 0 ? n : 0 };
+  const sayi = (n: number, h: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: h });
+  const boy = say(bd?.boyCm), kilo = say(bd?.kiloKg), bki = say(bd?.bki);
+  return {
+    boyKilo: [boy ? `${sayi(boy, 0)} cm` : '', kilo ? `${sayi(kilo, 1)} kg` : ''].filter(Boolean).join(' · '),
+    vki: bki ? `VKİ ${sayi(bki, 1)}` : '',
+  };
+}
+
 export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null }) {
   const [alerjiAcik, setAlerjiAcik] = useState(false);
   const u = bilgi?.ust ?? null;
@@ -95,6 +106,9 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
       </div>
       <div className="hbnd-blok">
         <span className={`hbnd-kg${m(bilgi?.band.kanGrubu) ? '' : ' yok'}`}>{m(bilgi?.band.kanGrubu) || c('kan grubu ?')}</span>
+        {/* BOY · KİLO · VKİ (mockup v7): hastanın son girilen değerleri. */}
+        {antropometri(bilgi?.band).boyKilo && <div className="hbnd-alt" title={c('Son boy / kilo')}>{antropometri(bilgi?.band).boyKilo}</div>}
+        {antropometri(bilgi?.band).vki && <div className="hbnd-alt" title={c('Vücut kitle indeksi')}>{antropometri(bilgi?.band).vki}</div>}
         {m(u?.sonVital) && <div className="hbnd-alt" title={c('Son vital')}>{m(u?.sonVital)}</div>}
       </div>
       <div className="hbnd-blok">
