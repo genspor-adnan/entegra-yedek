@@ -189,7 +189,8 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
         {(kontrol ?? []).map(k => (
           <div key={k.alan} className={`kanav-o smn-k${k.tamam ? ' ok' : k.zorunlu ? ' eksik' : ''}`}
                title={k.tamam ? undefined : k.mesaj} onClick={hedef[k.alan]}>
-            <span className={`kanav-d${k.tamam ? ' d-ok' : k.zorunlu ? ' d-uy' : ' d-bos'}`}>{k.tamam ? '✓' : k.zorunlu ? '!' : '–'}</span>
+            {/* Mockup v7 dizini: dolu yuvarlak - tamam yeşil ✓, zorunlu eksik kırmızı !, isteğe bağlı eksik boş halka. */}
+            <span className={`smn-d ${k.tamam ? 'smn-d-ok' : k.zorunlu ? 'smn-d-kir' : 'smn-d-bos'}`}>{k.tamam ? '✓' : k.zorunlu ? '!' : ''}</span>
             <span>{c(k.ad)}</span>
             {k.alan === 'istem' && istemRozeti && <small>{istemRozeti}</small>}
           </div>

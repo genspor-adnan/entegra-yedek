@@ -6477,9 +6477,16 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .vt-kutu { border: 1px solid var(--cizgi); border-radius: 3px; padding: 5px 8px; background: var(--yuz) }
 .vt-kutu .vt-b { font-size: 10px; color: var(--soluk) }
 .vt-kutu.tik { cursor: pointer }
+/* SEKMESİZ MUAYENE TAMAMLAMA İKONLARI (mockup muayene_karti_v7 .dizin .d). */
+.smn-d { width: 15px; height: 15px; border-radius: 50%; flex: none; border: 1.5px solid #b8c2cc; font-size: 9px;
+  display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: bold }
+.smn-d-ok { background: #2e7d46; border-color: #2e7d46 }
+.smn-d-kir { background: #b3261e; border-color: #b3261e }
+.smn-d-bos { background: transparent }
+
 /* Katlanır kutu başlığının sağ ucu: ✎ düzenle / 💾 kutulara dön. */
 .katlanir-bas { display: flex; align-items: center }
-.katlanir-sag { margin-left: auto; padding-left: 8px; font-size: 14px; cursor: pointer }
+.katlanir-sag { margin-left: 8px; font-size: 13px; cursor: pointer }
 /* Referans aralığı dışı (mockup v7): kırmızı. */
 .vt-kutu.kir { border-color: #e8b4b0; background: #fdecea }
 .vt-kutu.kir .vt-d { color: #c0392b }
