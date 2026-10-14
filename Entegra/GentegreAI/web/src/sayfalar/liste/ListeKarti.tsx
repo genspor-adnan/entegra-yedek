@@ -317,8 +317,13 @@ export function ListeKarti({
         // HASTA KARTI: Sil ve Hesap İcmali kartta yok (kullanıcı 14.10.2026) - listede durur.
         silYok={tanim.kaynak === 'hasta'}
         onYuklendi={yeniSekmede ? d => {
-          // Tam ad (unvan) varsa o - ad/soyad zaten içinde; yoksa ad + soyad.
-          const ad = String(d.unvan ?? '').trim() || [d.ad, d.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ');
+          // SEKME BAŞLIĞI = kaydın adı: unvan, ad + soyad, sonra kaynakların ortak ad alanları;
+          //   hiçbiri yoksa "Randevu Kartı #30" (kart adı + kayıt no).
+          const metin = (x: unknown) => String(x ?? '').trim();
+          const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
+            || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
+            || metin(d.belgeNo) || metin(d.kod)
+            || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
         } : undefined}
         // GÖZ KARTI v4 (mockup goz_muayene_karti_v4): solda aşamalı gezinti, sağda OD/OS
