@@ -37,12 +37,11 @@ export function PatolojiIstemModal({ muayeneId, onKapat, onKaydedildi }: {
 
   useEffect(() => {
     void guvenli(async () => {
-      const t = await api.liste('patoloji-materyal-tipi', { sayfa: 1, boyut: 200, filtre: { alan: 'aktif', op: 'esit', deger: 1 } });
-      setTipler(t.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad), vakaTuru: r.vakaTuruAdi === 'Sitoloji' ? 2 : r.vakaTuruAdi === 'Frozen' ? 3 : r.vakaTuruAdi === 'Konsültasyon' ? 4 : 1,
-                                       calismaYeri: r.nerede === 'Kurum içi' ? 2 : 1, disLabId: null, tatGun: Number(r.tatGun ?? 0) })));
-      const l = await api.liste('lab-dis-lab', { sayfa: 1, boyut: 100, filtre: { op: 'and', kosullar: [
-        { alan: 'patoloji', op: 'esit', deger: 1 }, { alan: 'durum', op: 'esit', deger: 0 } ] } });
-      setLablar(l.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad) })));
+      // SEÇENEKLER MUAYENE YETKİSİYLE (15.10.2026): tanım listeleri (patoloji.tanim.materyal,
+      //   lab.dislab) hekimde yetkisiz -> "yetkiniz yok" + boş combo idi.
+      const y = await api.patolojiIstemSecenekleri(muayeneId);
+      setTipler(y.tipler);
+      setLablar(y.lablar);
     });
   }, []);
 

@@ -252,6 +252,33 @@ public static partial class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/patoloji-secenekler - patoloji istem penceresinin seçenekleri
+        //   (kullanıcı 15.10.2026: "materyal tipi combosu boş · yetkiniz yok diyor"). Pencere
+        //   tanım listelerini (patoloji.tanim.materyal, lab.dislab) okuyordu; hekimde bu tanım
+        //   yetkileri yok. İstemi açan MUAYENE yetkisidir - seçenekler de onunla gelir. Yalnız
+        //   aktif materyal tipleri ve patoloji yapan aktif dış lablar; tanımlar şube ortaktır.
+        grup.MapGet("/{id:int}/patoloji-secenekler", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            var tipler = await veri.ListeAsync("""
+                select id, ad, vaka_turu, calisma_yeri, dis_lab_id, tat_gun
+                  from public.pat_materyal_tipi where aktif = 1 order by sira, ad
+                """, [], o => new
+                {
+                    id = o.GetInt32(0), ad = o.GetString(1), vakaTuru = (int)o.GetInt16(2),
+                    calismaYeri = (int)o.GetInt16(3), disLabId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4),
+                    tatGun = (int)o.GetInt16(5),
+                }, iptal);
+            var lablar = await veri.ListeAsync("""
+                select id, ad from public.lab_dis_lab where patoloji = 1 and durum = 0 order by ad
+                """, [], o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
+
+            return Results.Ok(new { tipler, lablar, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/istem/{id}/gordu - hekim sonucu gördü
         //   Panik değer teyidi ve "sonuç bekliyor" rozetinin kapanması bunun
         //   üzerinden yürür: sonucun gelmesi ile hekimin görmesi ayrı olaylar.

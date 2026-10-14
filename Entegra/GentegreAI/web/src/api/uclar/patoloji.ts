@@ -1,7 +1,12 @@
-import { gonder } from '../cekirdek';
+import { gonder, istek } from '../cekirdek';
 
 /** PATOLOJİ (1104) - vaka ve dış lab gönderimi adımları (/api/patoloji). */
 export const patolojiUclari = {
+  /** Patoloji istem penceresinin seçenekleri - muayene yetkisiyle (tanım yetkisi gerekmez). */
+  patolojiIstemSecenekleri: (muayeneId: number) => istek<{
+    tipler: { id: number; ad: string; vakaTuru: number; calismaYeri: number; disLabId: number | null; tatGun: number }[];
+    lablar: { id: number; ad: string }[];
+  }>(`/api/muayene/${muayeneId}/patoloji-secenekler`),
   patolojiHazirlandi: (id: number) => gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/hazirlandi`, {}),
   patolojiPaketeEkle: (idler: number[]) => gonder<{ mesaj: string }>('/api/patoloji/vaka/pakete-ekle', { idler }),
   patolojiPakettenCikar: (id: number) => gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/paketten-cikar`, {}),
