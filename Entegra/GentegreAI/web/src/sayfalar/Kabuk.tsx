@@ -35,11 +35,14 @@ import { TarafArama } from '../bilesenler/TarafArama';
 
 import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
 import { KayitArama } from '../bilesenler/KayitArama';
+import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 
 /** Komut paletinde "Kayıtlı ... Kartı" - yol değil, arama penceresini açar: `#kayitli:<kart yolu>`. */
 const KAYITLI_ONEK = '#kayitli:';
 /** Hasta ve başvuru: genel HASTA araması (başvuruda hastanın son başvurusu); boş palette hep görünür. */
 const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru'> = { '/hasta': 'hasta', '/basvuru': 'basvuru' };
+/** Stok ve hizmet: belgedeki genel stok arama penceresi (kart açma kipi). */
+const STOK_ARAMA: Record<string, 'stok' | 'hizmet'> = { '/stok': 'stok', '/hizmet': 'hizmet' };
 /** Kartı sekmede açılan listeler, kart yolu başına bir tane. */
 const kartListeleri = LISTELER.filter(l => kartSekmesiVar(l) && !l.menuYol)
   .filter((l, i, a) => a.findIndex(x => kartSekmeYolu(x) === kartSekmeYolu(l)) === i);
@@ -192,6 +195,8 @@ export function Kabuk() {
   const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | null>(null);
   /** Genel "Kayıtlı X Kartı" araması (listenin kendi kaynağı ve kolonları). */
   const [kayitliListe, setKayitliListe] = useState<ListeGirdisi | null>(null);
+  /** "Kayıtlı Stok / Hizmet Kartı": belgedeki genel stok arama penceresi (kart açma kipi). */
+  const [stokArama, setStokArama] = useState<'stok' | 'hizmet' | null>(null);
   /** Ekran kullanıcının (yetkili) menüsünde mi. */
   const menudeVar = useCallback((yol: string) => kodSatirlari.some(sat =>
     sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
@@ -482,10 +487,16 @@ export function Kabuk() {
                      if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
                      const kartYol = yol.slice(KAYITLI_ONEK.length);
                      if (SABIT_ARAMA[kartYol]) { setKayitliArama(SABIT_ARAMA[kartYol]); return }
+                     if (STOK_ARAMA[kartYol]) { setStokArama(STOK_ARAMA[kartYol]); return }
                      setKayitliListe(kartListeleri.find(l => kartSekmeYolu(l) === kartYol) ?? null);
                    }}
                    ekEkranlar={panelEkranlari} />
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
+      {stokArama && (
+        <StokAramaPenceresi etkin kartAc yalnizStok={stokArama === 'stok'} yalnizHizmet={stokArama === 'hizmet'}
+                            onKapat={() => setStokArama(null)}
+                            onSec={r => { setStokArama(null); kartaGit(`/${r.tip === 'hizmet' ? 'hizmet' : 'stok'}/${r.id}`) }} />
+      )}
       <KayitArama acik={!!kayitliListe} baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
                   kaynak={kayitliListe?.kaynak ?? ''} sabitFiltre={kayitliListe?.sabitFiltre}
                   onKapat={() => setKayitliListe(null)}

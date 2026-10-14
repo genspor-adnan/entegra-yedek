@@ -34,7 +34,13 @@ function kisaAdSirasi(satir: Record<string, unknown>, aranan: string): number {
 
 export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
                                     eklenen, fiyatListesiId, sgkBaglami, bolumId,
-                                    hizmetEkFiltre, zatenVarMi }: {
+                                    hizmetEkFiltre, zatenVarMi, kartAc }: {
+  /**
+   * KART AÇMA KİPİ (Ctrl+K "Kayıtlı Stok / Hizmet Kartı", kullanıcı 14.10.2026): aynı arama ve
+   * kolonlar, ekleme düğmeleri yerine "Kartı Aç"; ilaç kataloğu aranmaz (seçim stok kartı
+   * üretmesin).
+   */
+  kartAc?: boolean;
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -107,7 +113,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    * stok girer - boylece ne katalog stok listesini bogar, ne de eczane
    * cikisi icin memurun once elle stok karti acmasi gerekir.
    */
-  const ilacAranir = kullanici?.urunModu === URUN_GENOTIP && !yalnizHizmet;
+  const ilacAranir = kullanici?.urunModu === URUN_GENOTIP && !yalnizHizmet && !kartAc;
   const [arama, setArama] = useState('');
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   /**
@@ -487,7 +493,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
 
   return (
     <Modal
-      baslik={yalnizHizmet ? "Hizmet Ara"
+      baslik={kartAc ? (yalnizHizmet ? 'Kayıtlı Hizmet Kartı' : 'Kayıtlı Stok Kartı')
+              : yalnizHizmet ? "Hizmet Ara"
               : ilacAranir ? (yalnizStok ? "Stok / İlaç Ara" : "Stok / Hizmet / İlaç Ara")
               : yalnizStok ? "Stok Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
@@ -505,6 +512,14 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
          bilgisi yaninda, Kapat sagda. */
       alt={
         <>
+          {kartAc ? (
+            <span className="stok-ara-eylem" style={{ marginRight: 'auto' }}>
+              <button className="d bir" disabled={!satirlar[secili]}
+                      onClick={() => satirlar[secili] && void sec(satirlar[secili], true)}>
+                📂 {c('Kartı Aç')} (Enter)
+              </button>
+            </span>
+          ) : (
           <span className="stok-ara-eylem" style={{ marginRight: 'auto' }}>
             <button className="d bir" disabled={!satirlar[secili]}
                     title="Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)"
@@ -529,6 +544,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               </span>
             )}
           </span>
+          )}
           <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }

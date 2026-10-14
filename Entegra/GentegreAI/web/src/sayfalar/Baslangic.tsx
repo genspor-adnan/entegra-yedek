@@ -43,9 +43,19 @@ export function Baslangic() {
     void api.baslangic().then(setRolKutucuklari).catch(() => setRolKutucuklari([]));
   }, [kullanici?.id, kullanici?.subeId]);
 
+  const menu = useMemo(() => menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller),
+                       [yetki, kullanici?.urunModu, kullanici?.moduller]);
+  /** MENÜ İKONLARI (kullanıcı 14.10.2026: "açılış ekrandaki menülere ikonlar gelsin"): satırın
+      ikonu sol menüdeki ikonudur (yola göre) - rolün elle düzenlediği kutucuklarda da. */
+  const ikonlar = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const sat of menu) for (const o of sat.tur === 'duz' ? [sat.m] : sat.alt) m.set(o.yol, o.ic);
+    return m;
+  }, [menu]);
+
   // ÖNERİ: rolün yetkili menüsü (sol menüyle aynı süzgeç), grup başına bir kutucuk.
   const oneri = useMemo<BaslangicKutucugu[]>(() => {
-    const satirlar = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
+    const satirlar = menu;
     const kutular: BaslangicKutucugu[] = [];
     const duzler: BaslangicKutucugu['satirlar'] = [];
     for (const s of satirlar) {
@@ -55,7 +65,7 @@ export function Baslangic() {
     }
     if (duzler.length) kutular.push({ ad: c('Diğer'), ikon: '📁', satirlar: duzler.slice(0, 6) });
     return kutular.slice(0, ONERI_SINIRI);
-  }, [yetki, kullanici?.urunModu, kullanici?.moduller]);
+  }, [menu]);
 
   const elle = (rolKutucuklari?.length ?? 0) > 0;
   const kutucuklar = elle ? rolKutucuklari! : oneri;
@@ -97,7 +107,7 @@ export function Baslangic() {
               <div className="bsl-kb"><MenuIkon ic={k.ikon || '📁'} /> {c(k.ad)}</div>
               {k.satirlar.map((s, j) => (
                 <a key={j} onClick={() => git(s.yol)}>
-                  <span>{c(s.ad)}</span>
+                  <span className="bsl-ad">{ikonlar.get(s.yol) && <MenuIkon ic={ikonlar.get(s.yol)!} />}{c(s.ad)}</span>
                   {s.deger && <span className={`s ${s.deger.vurgu === 'tehlike' ? 'k' : ''}`}>{gostergeDegeri(s.deger)}</span>}
                 </a>
               ))}
