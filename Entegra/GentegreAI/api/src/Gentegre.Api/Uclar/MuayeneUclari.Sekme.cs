@@ -191,10 +191,16 @@ public static partial class MuayeneUclari
         //
         //   FİZİK MUAYENE VE VİTAL KOPYALANMAZ: onlar O GÜNÜN ölçümüdür;
         //   geçen muayenenin bulgusunu bugüne yazmak kayıt uydurmaktır.
+        //   SEÇMELİ (mockup muayene_karti_v7): gövdede `alanlar` (sikayet, hikaye,
+        //   gecmis, tanilar) verilirse yalnız onlar; verilmezse hepsi (eski davranış).
         grup.MapPost("/{id:int}/onceki-kopyala/{kaynakId:int}", async (
-            int id, int kaynakId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, int kaynakId, OncekiKopyalaIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
+            var secim = istek?.Alanlar is { Length: > 0 } a
+                ? new HashSet<string>(a, StringComparer.Ordinal)
+                : new HashSet<string>(StringComparer.Ordinal) { "sikayet", "hikaye", "gecmis", "tanilar" };
+            bool S(string ad) => secim.Contains(ad);
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
             if (id == kaynakId)
@@ -212,28 +218,29 @@ public static partial class MuayeneUclari
             if (ayniHasta != 1)
                 throw GentegreHatasi.IsKurali("Kaynak muayene bu hastaya ait degil.");
 
+            // Seçilmeyen alan kendisine eşitlenir (@p3..@p5 = sikayet / hikaye / gecmis).
             await baglanti.CalistirAsync(
                 "update public.muayene m " +
-                "   set sikayet = case when coalesce(trim(m.sikayet), '') = '' " +
+                "   set sikayet = case when @p3 and coalesce(trim(m.sikayet), '') = '' " +
                 "                      then k.sikayet else m.sikayet end, " +
-                "       hikaye = case when coalesce(trim(m.hikaye), '') = '' " +
+                "       hikaye = case when @p4 and coalesce(trim(m.hikaye), '') = '' " +
                 "                     then k.hikaye else m.hikaye end, " +
-                "       ozgecmis_notu = case when coalesce(trim(m.ozgecmis_notu), '') = '' " +
+                "       ozgecmis_notu = case when @p5 and coalesce(trim(m.ozgecmis_notu), '') = '' " +
                 "                            then k.ozgecmis_notu else m.ozgecmis_notu end, " +
-                "       soygecmis_notu = case when coalesce(trim(m.soygecmis_notu), '') = '' " +
+                "       soygecmis_notu = case when @p5 and coalesce(trim(m.soygecmis_notu), '') = '' " +
                 "                             then k.soygecmis_notu else m.soygecmis_notu end, " +
-                "       aliskanlik_notu = case when coalesce(trim(m.aliskanlik_notu), '') = '' " +
+                "       aliskanlik_notu = case when @p5 and coalesce(trim(m.aliskanlik_notu), '') = '' " +
                 "                              then k.aliskanlik_notu else m.aliskanlik_notu end, " +
                 "       degistiren = @p2, degistirme_tarihi = now() " +
                 "  from public.muayene k " +
                 " where m.id = @p0 and k.id = @p1",
-                islem, [id, kaynakId, baglam.KullaniciId], iptal);
+                islem, [id, kaynakId, baglam.KullaniciId, S("sikayet"), S("hikaye"), S("gecmis")], iptal);
 
             var anaVar = await baglanti.TekDegerAsync<int>(
                 "select count(*) from public.tani where muayene_id = @p0 and tur = 1",
                 islem, [id], iptal);
 
-            var taniEklenen = await baglanti.CalistirAsync(
+            var taniEklenen = !S("tanilar") ? 0 : await baglanti.CalistirAsync(
                 "insert into public.tani (muayene_id, icd_kod, tur, kesinlik, kronik, " +
                 "                         not_metni, ekleyen) " +
                 "select @p0, t.icd_kod, " +
@@ -248,7 +255,7 @@ public static partial class MuayeneUclari
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, kaynakId, taniEklenen,
-                                    mesaj = $"Onceki muayeneden anamnez kopyalandi"
+                                    mesaj = $"Onceki muayeneden secilenler kopyalandi"
                                           + (taniEklenen > 0 ? $", {taniEklenen} tani eklendi." : "."),
                                     izlemeNo = baglam.IzlemeNo });
         });

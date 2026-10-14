@@ -5,10 +5,11 @@ import { hataMetni } from '../api/sozlesme';
 import { KaynakArama } from './KaynakArama';
 import { ReceteKarti } from './recete/ReceteKarti';
 import type { SablonTercihleri } from '../api/uclar/liste';
-import { guvenli, mesaj, onay } from './mesaj';
+import { guvenli, mesaj } from './mesaj';
 import { tarihSaat, para } from './bicim';
 import { c } from '../dil/ceviri';
 import { MUAYENE_DURUM } from './muayeneKodlari';
+import { Modal } from './Modal';
 
 /**
  * MUAYENE KARTININ EK SEKMELERİ (mockup `muayene_karti.html`):
@@ -363,12 +364,18 @@ export function MuayeneUcretSekmesi({ veri, hata }:
   );
 }
 
+/** Önceki muayeneden kopyalanabilen alanlar (sunucu anahtarı, etiket). */
+const KOPYA_ALANLARI: [string, string][] = [
+  ['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye'],
+  ['gecmis', 'Özgeçmiş / soygeçmiş / alışkanlık notları'], ['tanilar', 'Tanılar'],
+];
+
 /**
  * GEÇMİŞ (mockup `muayene_karti.html`): solda **Önceki muayeneler (kurum)**
  * - Tarih · Hekim · Tanı · Özet · aç / kopyala; sağda **e-Nabız / dış kurum**
  * kutusu.
  *
- * <b>"↺ Kopyala" sunucuda:</b> kronik hastanın anamnezi ve tanıları önceki
+ * <b>"↺ Kopyala" sunucuda</b> (seçmeli - pencerede alanlar işaretlenir): kronik hastanın anamnezi ve tanıları önceki
  * muayeneden taşınır; boş alan doldurulur, hekimin yazdığı EZİLMEZ. Fizik
  * muayene ve vital kopyalanmaz - onlar o günün ölçümüdür.
  */
@@ -377,17 +384,38 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
     muayeneId: number; tazele(): void }) {
   const git = useNavigate();
 
-  const kopyala = (kaynakId: number) => guvenli(async () => {
-    if (!await onay('Önceki muayenenin anamnezi ve tanıları bu muayeneye '
-                  + 'kopyalanacak. Boş alanlar doldurulur, yazdıklarınız '
-                  + 'değişmez. Onaylıyor musunuz?')) return;
-    const y = await api.muayeneOncekiKopyala(muayeneId, kaynakId);
+  // SEÇMELİ KOPYALAMA (mockup muayene_karti_v7): hangi alanlar taşınsın.
+  //   Fizik muayene ve vital listede YOK - o günün ölçümüdür (sunucu kuralı).
+  const [kopyaKaynak, setKopyaKaynak] = useState<number | null>(null);
+  const [kopyaAlan, setKopyaAlan] = useState<string[]>(KOPYA_ALANLARI.map(a => a[0]));
+  const kopyala = () => guvenli(async () => {
+    if (kopyaKaynak === null || kopyaAlan.length === 0) return;
+    const y = await api.muayeneOncekiKopyala(muayeneId, kopyaKaynak, kopyaAlan);
+    setKopyaKaynak(null);
     mesaj(y.mesaj);
     tazele();
   });
 
   return (
     <Kabuk hata={hata} veri={veri}>
+      {kopyaKaynak !== null && (
+        <Modal baslik={c('Önceki muayeneden kopyala')} dar enUst buyutmeYok onKapat={() => setKopyaKaynak(null)}
+               alt={<>
+                 <button type="button" className="d" onClick={() => setKopyaKaynak(null)}>{c('Vazgeç')}</button>
+                 <button type="button" className="d bir" disabled={kopyaAlan.length === 0}
+                         onClick={() => void kopyala()}>↺ {c('Kopyala')}</button>
+               </>}>
+          <p className="not">{c('Boş alanlar doldurulur, yazdıklarınız değişmez. Tanılar eklenir; aynı ICD varsa atlanır.')}</p>
+          {KOPYA_ALANLARI.map(([k, ad]) => (
+            <label key={k} className="kopya-secim">
+              <input type="checkbox" checked={kopyaAlan.includes(k)}
+                     onChange={e => setKopyaAlan(l => e.target.checked ? [...l, k] : l.filter(x => x !== k))} />
+              {c(ad)}
+            </label>
+          ))}
+          <p className="not">{c('Fizik muayene ve vital kopyalanmaz: o günün ölçümüdür.')}</p>
+        </Modal>
+      )}
       <div className="muayene-ikili">
         <div className="mi-sol">
           <div className="kagrup">
@@ -418,7 +446,7 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
                                 onClick={() => git(`/muayene/${sayi(g.id)}`)}>📂</button>
                         <button type="button" className="d ikon-dugme"
                                 title={c('Anamnez ve tanıları bu muayeneye kopyala')}
-                                onClick={() => void kopyala(sayi(g.id))}>↺</button>
+                                onClick={() => setKopyaKaynak(sayi(g.id))}>↺</button>
                       </td>
                     </tr>
                   ))}

@@ -151,7 +151,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     //   sıra bozulmasın.
     sekmeSirasi: ['Özet', 'Muayene', 'Şablon Muayene', 'Fizik Muayene', 'Anamnez', 'Vital Bulgular', 'Tanı', 'İstem & Sonuçlar',
                   'e-Reçete', 'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş',
-                  'Dosyalar'],
+                  'Dosyalar', 'e-Nabız', 'Epikriz'],
     // VİTAL ÖLÇÜM ŞABLON MUAYENE SEKMESİNİN SAĞ PANELİNDE (kullanıcı, 02.10.2026;
     //   önce Tanı/Vital sekmesindeydi) - aynı veriyi iki sekmede göstermek hangisinin
     //   geçerli olduğunu belirsiz bırakıyordu.

@@ -2,6 +2,12 @@ import {
   type ListeIstegi, type ListeYaniti, } from '../sozlesme';
 import { istek, gonder, dosyaYukle } from '../cekirdek';
 
+/** Muayene epikrizinin metin bölümleri (1100). */
+export interface MuayeneEpikrizKaydi {
+  sikayet: string; hikaye: string; bulgular: string; tani: string;
+  tetkikOzet: string; tedavi: string; oneriler: string;
+}
+
 /** YZ tanı önerisi yanıtı: öneri hekime; kod ICD kataloğunda doğrulanmış. */
 export interface YzTaniOnerisiYaniti {
   oneriler: { kod: string; ad: string; olasilik: 'yuksek' | 'orta' | 'dusuk'; gerekce: string }[];
@@ -163,6 +169,31 @@ export const listeUclari = {
             kontroller: { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }[] }>(
       `/api/muayene/${muayeneId}/tamamlama-kontrol`),
 
+  /** ÖLÇÜM GEÇMİŞİ GRAFİĞİ: hastanın bütün ölçümleri - vital (ta, nabiz, spo2, ates,
+      solunum, agri, kilo, bki, glukoz) ya da tetkik kodu (yalnız onaylı sonuç). */
+  muayeneOlcumGecmisi: (muayeneId: number, secim: { vital: string } | { tetkik: string }) =>
+    istek<{ ad: string; birim: string; referans: number[] | null; referans2: number[] | null;
+            noktalar: { zaman: string; deger: number | null; deger2?: number | null; metin?: string;
+                        bu: boolean; yer?: string | null }[] }>(
+      `/api/muayene/${muayeneId}/olcum-gecmisi?` + ('vital' in secim
+        ? `vital=${encodeURIComponent(secim.vital)}` : `tetkik=${encodeURIComponent(secim.tetkik)}`)),
+
+  /** MUAYENE EPİKRİZİ (1100): kayıt (yoksa gelmez) + karttan derlenmiş ücretsiz taslak. */
+  muayeneEpikriz: (muayeneId: number) =>
+    istek<{ kayit?: MuayeneEpikrizKaydi & { id: number; imzaDurum: number; imzaZamani: string | null;
+                                            kayitZamani: string | null };
+            taslak: MuayeneEpikrizKaydi }>(`/api/muayene/${muayeneId}/epikriz`),
+  muayeneEpikrizKaydet: (muayeneId: number, k: MuayeneEpikrizKaydi) =>
+    gonder<{ id: number }>(`/api/muayene/${muayeneId}/epikriz`, k),
+  muayeneEpikrizImzala: (muayeneId: number) =>
+    gonder<{ imzali: boolean }>(`/api/muayene/${muayeneId}/epikriz/imzala`, {}),
+
+  /** KENDİME NOT (1098): oturumdaki hekimin bu hastaya özel notu - başkası görmez. */
+  muayeneOzelNot: (muayeneId: number) =>
+    istek<{ metin: string; degistirme: string | null }>(`/api/muayene/${muayeneId}/ozel-not`),
+  muayeneOzelNotYaz: (muayeneId: number, metin: string) =>
+    gonder<{ metin: string }>(`/api/muayene/${muayeneId}/ozel-not`, { metin }, 'PUT'),
+
   /** Vucut semasi: secili bolgeler + not (sablonun tip 5 bulgu satiri). */
   muayeneVucutSemasi: (muayeneId: number) =>
     istek<{ bolgeler: string[]; not: string }>(`/api/muayene/${muayeneId}/vucut-semasi`),
@@ -198,9 +229,9 @@ export const listeUclari = {
       `/api/liste/${kaynak}/kullanilan/${encodeURIComponent(kod)}`, {}),
 
   /** Onceki muayeneden anamnez + tanilari kopyalar (bos alan doldurulur). */
-  muayeneOncekiKopyala: (muayeneId: number, kaynakId: number) =>
+  muayeneOncekiKopyala: (muayeneId: number, kaynakId: number, alanlar?: string[]) =>
     gonder<{ taniEklenen: number; mesaj: string }>(
-      `/api/muayene/${muayeneId}/onceki-kopyala/${kaynakId}`, {}),
+      `/api/muayene/${muayeneId}/onceki-kopyala/${kaynakId}`, alanlar ? { alanlar } : {}),
 
   /** Kartin raporlari (imza secimi icin). */
   muayeneRaporlari: (muayeneId: number) =>

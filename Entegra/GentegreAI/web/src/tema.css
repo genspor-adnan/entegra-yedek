@@ -6352,6 +6352,41 @@ textarea.fm-giris { resize: vertical }
 .moz-cikis li.secili { font-weight: 600 }
 .moz-liste .moz-ikon { width: 18px; text-align: center; color: var(--vurgu); opacity: .75 }
 .moz-liste li.tik:hover .moz-ikon { opacity: 1 }
+/* ÖLÇÜM GEÇMİŞİ GRAFİĞİ (mockup muayene_karti_v7): vital kısayolları + pencere. */
+.olcum-kisayol { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; margin: -4px 0 10px; font-size: 11px }
+.olcum-kisayol button { border: 0; background: none; padding: 0; color: var(--vurgu); cursor: pointer; font: inherit }
+.olcum-kisayol button:hover { text-decoration: underline }
+.olcum-ac { border: 0; background: none; padding: 0 0 0 4px; cursor: pointer; font-size: 11px; opacity: .55 }
+.olcum-ac:hover { opacity: 1 }
+.olcum-ust { display: flex; align-items: center; gap: 10px; margin-bottom: 6px }
+.olcum-aralik { margin-left: auto; display: flex; border: 1px solid var(--cizgi); border-radius: var(--r); overflow: hidden }
+.olcum-aralik button { border: 0; background: var(--yuz); padding: 3px 10px; font: inherit; font-size: 11px; cursor: pointer; color: var(--yazi) }
+.olcum-aralik button.on { background: var(--vurgu); color: #fff }
+.olcum-svg { width: 100%; height: 230px; display: block; color: var(--yazi) }
+.olcum-ref { fill: var(--okzem); opacity: .8 }
+.olcum-izgara { stroke: var(--cizgi2) }
+.olcum-eksen { fill: var(--soluk) }
+.olcum-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11.5px }
+.olcum-tablo th, .olcum-tablo td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--cizgi2) }
+.olcum-tablo tr.bu td { font-weight: 600 }
+.olcum-dis { color: var(--hata); font-weight: 600 }
+
+.kopya-secim { display: flex; gap: 8px; align-items: center; padding: 5px 0; cursor: pointer }
+
+/* MUAYENE EPİKRİZİ (1100): bölüm başına metin kutusu; imzalıyken salt okunur. */
+.epk { max-width: 980px }
+.epk-ust { display: flex; align-items: center; gap: 10px; margin-bottom: 10px }
+.epk-alan { display: block; margin-bottom: 9px }
+.epk-alan > span { display: block; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px }
+.epk-alan textarea { width: 100%; min-height: 54px; resize: vertical; font: inherit; line-height: 1.5; padding: 6px 8px;
+  border: 1px solid var(--cizgi); border-radius: var(--r) }
+.epk-alan textarea[readonly] { background: var(--yuz2); border-color: var(--cizgi2) }
+.epk-alt { display: flex; gap: 8px; align-items: center; margin-top: 6px }
+
+/* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
+.moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
+  border: 1px solid var(--cizgi); border-radius: var(--r) }
+.moz-not-bilgi { margin: 8px 0 0; padding: 7px 9px; border-radius: var(--r); background: var(--mor2); color: var(--mor); line-height: 1.5 }
 
 /* e-RECETE SEKMESI = recete karti GOMULU (mockup recete_karti.html):
    ust arac cubugu, altta kartla ayni govde; sekme zemininde beyaz kutu. */

@@ -229,6 +229,9 @@ public static partial class KartKatalogu
         ["3"] = "Trafik kazası", ["4"] = "Meslek hastalığı", ["9"] = "Diğer",
     };
 
+    /// <summary>Evet / hayır sorusu (1099): boş = cevaplanmadı, "hayır"dan ayrı.</summary>
+    private static readonly Dictionary<string, string> EvetHayirKodlari = new() { ["1"] = "Evet", ["0"] = "Hayır" };
+
     private static readonly Dictionary<string, string> YonlendirmeKodlari = new()
     {
         ["0"] = "Yok", ["1"] = "Kurum İçi Sevk", ["2"] = "Kurum Dışı Sevk",
@@ -427,6 +430,10 @@ public static partial class KartKatalogu
             //   kendisi (609), ayri bir esleme yok.
             new("cikisSekli", "cikis_sekli", "kod", KodListesi: "cikis.sekli",
                 Baslik: "Çıkış Şekli", Grup: "Muayene", AltGrup: "Değerlendirme / Sonuç"),
+            // GİRİŞİM PLANI (1099, mockup muayene_karti_v7): boş = cevaplanmadı.
+            new("girisimPlani", "girisim_plani", "kod", SabitKodlar: EvetHayirKodlari,
+                Baslik: "Hastaya ameliyat ya da girişim planlıyor musunuz?", Grup: "Muayene",
+                AltGrup: "Değerlendirme / Sonuç"),
             // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
             //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,

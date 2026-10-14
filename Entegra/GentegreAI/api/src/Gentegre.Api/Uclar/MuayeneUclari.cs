@@ -36,6 +36,9 @@ public static partial class MuayeneUclari
         TaniUclariniEkle(grup);
         YzUclariniEkle(grup);
         IstemUclariniEkle(grup);
+        OzelNotUclariniEkle(grup);   // 1098 Kendime Not
+        OlcumGecmisiUclariniEkle(grup);   // ölçüm geçmişi grafiği
+        EpikrizUclariniEkle(grup);   // 1100 muayene epikrizi
 
         // POST /api/muayene/{id}/al - "Muayeneye Al"
         // GET /api/muayene/ozet?gun=YYYY-MM-DD - LISTE OZET SERIDI (461)
@@ -497,6 +500,8 @@ public static partial class MuayeneUclari
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);
+    /// <summary>Önceki muayeneden seçmeli kopyalama: sikayet, hikaye, gecmis, tanilar (boş = hepsi).</summary>
+    public sealed record OncekiKopyalaIstegi(string[]? Alanlar);
 
     /// <summary>Ozet onizlemesi icin ekrandaki bulgu satiri.</summary>
     public sealed record BulguSatiri(int SablonAlanId, bool Normal, string? DegerMetin,

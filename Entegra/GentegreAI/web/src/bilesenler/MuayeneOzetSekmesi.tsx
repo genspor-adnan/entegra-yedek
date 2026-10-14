@@ -30,15 +30,21 @@ export interface OzetEylemleri {
   taniEkle(): void;
   istemAc(): void;
   ilacEkle(): void;
+  /** EPİKRİZ (1100): sekmeyi açtırır (yalnız istenince açılan sekme). */
+  epikrizAc?(): void;
 }
 
-export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler }: {
+export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler, epikrizDurum, epikrizGit }: {
   baglam: EkSekmeBaglami;
   muayeneId: number;
   sekme: SekmeVerisi | null;
   /** Kart her kaydedildiğinde artar - kontrol listesi ve sonuçlar tazelenir. */
   tazele: number;
   eylemler: OzetEylemleri;
+  /** Epikriz kaydının durumu (null = yok). */
+  epikrizDurum?: 'taslak' | 'imzali' | null;
+  /** Artınca Epikriz sekmesine geçilir (sekme bir sonraki çizimde var olur). */
+  epikrizGit?: number;
 }) {
   const [sonuc, setSonuc] = useState<{ istemler: Satir[]; sonuclar: Satir[]; radyoloji: Satir[] } | null>(null);
   /** Fizik muayene metni: KAYDEDILMIS bulgu satirlarindan, sunucuda derlenir
@@ -49,6 +55,21 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
   const [tamamlandi, setTamamlandi] = useState(false);
   /** Çıkış şekli seçim penceresi (kontrol listesinde "Çıkış şekli"ne tık). */
   const [cikisAcik, setCikisAcik] = useState(false);
+  /** KENDİME NOT (1098): yalnız oturumdaki hekimin notu; null = pencere kapalı. */
+  const [ozelNot, setOzelNot] = useState('');
+  const [notTaslak, setNotTaslak] = useState<string | null>(null);
+  const [notHata, setNotHata] = useState('');
+  useEffect(() => {
+    let iptal = false;
+    void api.muayeneOzelNot(muayeneId).then(y => { if (!iptal) setOzelNot(y.metin) }).catch(() => {});
+    return () => { iptal = true };
+  }, [muayeneId]);
+  const notKaydet = () => {
+    if (notTaslak === null) return;
+    api.muayeneOzelNotYaz(muayeneId, notTaslak)
+      .then(y => { setOzelNot(y.metin); setNotTaslak(null); setNotHata('') })
+      .catch(h => setNotHata(h instanceof Error ? h.message : String(h)));
+  };
 
   useEffect(() => {
     let iptal = false;
@@ -76,6 +97,8 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
 
   const d = baglam.deger;
   const git = baglam.sekmeyeGit;
+  // Epikriz sekmesi istekle AÇILDIĞI için geçiş bir çizim sonra yapılır.
+  useEffect(() => { if (epikrizGit) git('Epikriz') }, [epikrizGit]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   // VİTAL: detay satırları sunucuda "zaman desc" sıralı - ilk satır son ölçüm.
   const v = baglam.detaySatirlari('vitaller')[0] as Satir | undefined;
@@ -153,6 +176,25 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
   //   kartın normal Kaydet yolundan yazılır.
   const cikisKodlari = baglam.meta?.alanlar.find(a => a.ad === 'cikisSekli')?.kodlar ?? {};
 
+  // İŞLEMLER LİSTESİ: sırası sekmesiz düzenin sol menüsüyle aynı. Konsültasyon
+  //   alanları "Sevk / Konsültasyon" sekmesinde - ikisi de oraya götürür.
+  const yonlendirmeAd = baglam.meta?.alanlar.find(a => a.ad === 'yonlendirme')?.kodlar?.[m(d.yonlendirme)];
+  const raporSay = baglam.detaySayisi('raporlar');
+  const gecmisSay = (sekme?.gecmis ?? []).length;
+  const islemler: { ad: string; ikon: string; bilgi?: string; ac(): void }[] = [
+    { ad: 'Kendime Not', ikon: '📝', bilgi: ozelNot ? '🔒' : undefined, ac: () => setNotTaslak(ozelNot) },
+    { ad: 'Rapor', ikon: '📄', bilgi: raporSay > 0 ? String(raporSay) : undefined, ac: () => git('Rapor') },
+    { ad: 'Sevk', ikon: '↗', bilgi: sayi(d.yonlendirme) > 0 ? yonlendirmeAd : undefined, ac: () => git('Sevk') },
+    { ad: 'Konsültasyon', ikon: '🤝', bilgi: m(d.konsultasyonSoru) ? c('soru yazıldı') : undefined, ac: () => git('Sevk') },
+    { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
+    { ad: 'Geçmiş', ikon: '🕘', bilgi: gecmisSay > 0 ? String(gecmisSay) : undefined, ac: () => git('Geçmiş') },
+    { ad: 'Dosyalar', ikon: '📎', ac: () => git('Dosyalar') },
+    { ad: 'e-Nabız', ikon: '🌐', ac: () => git('e-Nabız') },
+    ...(eylemler.epikrizAc ? [{ ad: 'Epikriz', ikon: '📄',
+        bilgi: epikrizDurum === 'imzali' ? c('imzalı') : epikrizDurum === 'taslak' ? c('taslak') : undefined,
+        ac: eylemler.epikrizAc }] : []),
+  ];
+
   return (
     <div className="moz">
       {cikisAcik && (
@@ -166,6 +208,19 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
               </li>
             ))}
           </ul>
+        </Modal>
+      )}
+      {notTaslak !== null && (
+        <Modal baslik={`🔒 ${c('Kendime Not')}`} dar enUst buyutmeYok onKapat={() => setNotTaslak(null)}
+               alt={<>
+                 <button type="button" className="d" onClick={() => setNotTaslak(null)}>{c('Vazgeç')}</button>
+                 <button type="button" className="d bir" onClick={notKaydet}>{c('Kaydet')}</button>
+               </>}>
+          <textarea className="moz-not" value={notTaslak} maxLength={4000} autoFocus
+                    placeholder={c('Bu hastaya dair yalnız sizin göreceğiniz not…')}
+                    onChange={e => setNotTaslak(e.target.value)} />
+          <p className="not moz-not-bilgi">{c('Yalnız siz görürsünüz. Başka hekim, hemşire, yönetici ya da hasta görmez; epikrize, rapora, çıktıya, e-Nabız\'a ve YZ\'ye gitmez. Bu hastanın sonraki muayenelerinde yine görürsünüz.')}</p>
+          {notHata && <p className="hata-kutusu">{notHata}</p>}
         </Modal>
       )}
       {/* OZET KUTULARI bilgi bandina rozet oldu (kullanici; MuayeneDurumSeridi). */}
@@ -219,6 +274,21 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler 
                       return <span className="moz-ikon" title={c(t)}>{i}</span>;
                     })()}
                   </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* İŞLEMLER (kullanıcı 14.10.2026, mockup muayene_karti_v7): sekmesiz düzendeki
+              sol menünün alt grubu - sekmeli kartta tamamlama kontrolünün altında. Kartta
+              sekmesi olan madde O SEKMEYE götürür (içerik ikinci yerde kurulmaz). */}
+          <div className="kagrup">
+            <h6 className="moz-bas">{c('İşlemler')}</h6>
+            <ul className="moz-liste">
+              {islemler.map(i => (
+                <li key={i.ad} className="tik" onClick={i.ac}>
+                  {i.ikon} {c(i.ad)}
+                  <span className="moz-sp not">{i.bilgi}</span>
                 </li>
               ))}
             </ul>

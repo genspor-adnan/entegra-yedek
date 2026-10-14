@@ -219,6 +219,9 @@ interface Props {
   sekmeDurumu?(baslik: string): { durum: string; ipucu?: string; ikon?: string } | undefined;
   /** Gövdenin sağında hep görünen panel (yalnız kayıtlı kartta). */
   yanPanel?: React.ReactNode;
+  /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
+      satır adedi yerine o yazılır; undefined dönerse adet (varsayılan). */
+  detayRozeti?(detayAd: string, satirlar: Record<string, unknown>[]): string | undefined;
   /** Gövdenin altında sabit şerit; sekmeyeGit eksik koşuldan bölüme götürür. */
   altSerit?(sekmeyeGit: (baslik: string) => void): React.ReactNode;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
@@ -297,7 +300,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -1539,7 +1542,8 @@ Yine de yeni kayıt eklensin mi?`);
               {/* SAYFALI DETAYDA ROZET TOPLAMI GOSTERIR (525): ekranda 200
                   satir duruyor olsa da sekmenin sordugu "kac tane var". */}
               {s.tur === 'detay' && <span className="b">{
-                (detayToplam[s.detay.ad]
+                detayRozeti?.(s.detay.ad, (detaylar[s.detay.ad] ?? bosDetay()).guncel)
+                ?? (detayToplam[s.detay.ad]
                   ?? (detaylar[s.detay.ad] ?? bosDetay()).guncel.length).toLocaleString('tr')
               }</span>}
             </div>

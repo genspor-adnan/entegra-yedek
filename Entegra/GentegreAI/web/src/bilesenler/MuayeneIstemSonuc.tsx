@@ -7,6 +7,7 @@ import { tarihSaat } from './bicim';
 import { c } from '../dil/ceviri';
 import { BOLUM, ISTEM_DURUM } from './labKodlari';
 import { GOZ_SONUC, GOZ_TARAF, GOZ_TETKIK } from './goz/gozKodlari';
+import { OlcumGrafigi } from './OlcumGrafigi';
 
 /**
  * MUAYENE › İSTEM & SONUÇLAR (443; düzen: mockup muayene_karti_v2.html).
@@ -64,6 +65,8 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   const [hata, setHata] = useState<string | null>(null);
   // Seçili istem: sağ panel bunu gösterir, kırmızı 🗑 bunu siler.
   const [secili, setSecili] = useState<{ tur: 'lab' | 'radyoloji' | 'goz'; id: number } | null>(null);
+  /** Geçmiş grafiği açık tetkik kodu (mockup v7). */
+  const [grafikKod, setGrafikKod] = useState<string | null>(null);
 
   const yukle = useCallback(async () => {
     try { setVeri(await api.muayeneSonuclari(muayeneId) as never) }
@@ -223,6 +226,8 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   return (
     <div className="istem-sonuc">
       {arac}
+      {grafikKod && <OlcumGrafigi muayeneId={muayeneId} secim={{ tetkik: grafikKod }}
+                                  onKapat={() => setGrafikKod(null)} />}
       {/* PANİK UYARISI EN ÜSTTE: hekimin görmesi gereken tek şey buysa,
           listenin arasında kaybolmamalı. */}
       {panikVar && (
@@ -261,7 +266,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
           ) : secKalem.tur === 'lab'
             ? <LabSonucPaneli istem={secKalem.ham} veri={veri}
                 onRapor={() => git(`/lab/rapor/${secKalem.id}`)}
-                onGordu={gordu} />
+                onGordu={gordu} onGrafik={setGrafikKod} />
             : secKalem.tur === 'goz'
               ? <GozGoruntuPaneli g={secKalem.ham} onGordu={gordu} onAc={() => git(`/goz-goruntuleme/${secKalem.id}`)} />
               : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
@@ -271,8 +276,10 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   );
 }
 
-function LabSonucPaneli({ istem: i, veri, onRapor, onGordu }: {
+function LabSonucPaneli({ istem: i, veri, onRapor, onGordu, onGrafik }: {
   istem: Satir;
+  /** Tetkikin geçmiş grafiği (mockup v7). */
+  onGrafik: (kod: string) => void;
   veri: { sonuclar: Satir[]; kulturler: Satir[]; vakalar: Satir[] };
   onRapor: () => void;
   onGordu: (bagId: number) => void;
@@ -342,6 +349,11 @@ function LabSonucPaneli({ istem: i, veri, onRapor, onGordu }: {
                       ? <span className="not">{c('sonuç bekleniyor')}</span>
                       : <b className={satirPanik || bayrak === 'LL' || bayrak === 'HH' ? 'isn-vurgu' : ''}>
                           {String(s.deger)}</b>}
+                    {/* GEÇMİŞ GRAFİĞİ (mockup v7): bu tetkikin bütün onaylı sonuçları. */}
+                    {!bekliyor && s.kod != null && (
+                      <button type="button" className="olcum-ac" title={c('Geçmiş grafiği')}
+                              onClick={() => onGrafik(String(s.kod))}>📈</button>
+                    )}
                   </td>
                   <td>{String(s.birim ?? '')}</td>
                   <td>{ref || '—'}</td>

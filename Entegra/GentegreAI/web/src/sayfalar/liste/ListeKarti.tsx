@@ -1,4 +1,4 @@
-import { GenForm } from '../../bilesenler/GenForm';
+import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { LabCalismaTakvimi, type CalismaDuzeni }
@@ -6,6 +6,8 @@ import { LabCalismaTakvimi, type CalismaDuzeni }
 import { MuayeneBaglamSeridi, MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
+import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
+import { MuayeneEpikrizSekmesi } from '../../bilesenler/MuayeneEpikrizSekmesi';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import {
@@ -104,6 +106,12 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
   'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
 ]);
 
+/** Muayene vital ızgarasının altındaki geçmiş grafiği kısayolları (sunucu anahtarı, etiket). */
+const VITAL_GRAFIKLERI: [string, string][] = [
+  ['ta', 'Tansiyon'], ['nabiz', 'Nabız'], ['spo2', 'SpO₂'], ['ates', 'Ateş'],
+  ['solunum', 'Solunum'], ['kilo', 'Kilo'], ['bki', 'BKİ'],
+];
+
 export function ListeKarti({
   tanim, kartId, kartOzel, sekmeVerisi, aksiyon,
   muayeneBilgiAcik, setMuayeneBilgiAcik, setIcdAramaAcik, icdAc,
@@ -140,6 +148,21 @@ export function ListeKarti({
   const kartKaydetRef = useRef<(() => Promise<boolean>) | null>(null);
   /** Vucut semasi penceresi (Muayene sekmesi). */
   const [vucutAcik, setVucutAcik] = useState(false);
+  /** Vital geçmiş grafiği (mockup v7): ta, nabiz, spo2, ates, solunum, kilo, bki. */
+  const [vitalGrafik, setVitalGrafik] = useState<string | null>(null);
+  /** MUAYENE EPİKRİZİ (1100): sekme kayıt varsa ya da istenince açılır. */
+  const [epikrizDurum, setEpikrizDurum] = useState<'taslak' | 'imzali' | null>(null);
+  const [epikrizIstendi, setEpikrizIstendi] = useState(false);
+  const [epikrizGit, setEpikrizGit] = useState(0);
+  useEffect(() => {
+    setEpikrizDurum(null); setEpikrizIstendi(false);
+    if (tanim.kaynak !== 'muayene' || typeof kartId !== 'number') return;
+    let iptal = false;
+    void api.muayeneEpikriz(kartId).then(v => {
+      if (!iptal) setEpikrizDurum(!v.kayit ? null : v.kayit.imzaDurum === 1 ? 'imzali' : 'taslak');
+    }).catch(() => {});
+    return () => { iptal = true };
+  }, [tanim.kaynak, kartId]);
   /** e-Recete sekmesine "ilac aramayi ac" istegi (ozet kontrol listesi);
       sekme acilip aramayi actiginda tuketilir. */
   const [receteIlacAra, setReceteIlacAra] = useState(false);
@@ -293,6 +316,15 @@ export function ListeKarti({
           const d = gozKontrol?.bolumler.find(x => x.baslik === bas);
           return d ? { durum: d.durum, ipucu: d.ipucu } : undefined;
         }) : undefined}
+        // İSTEM ROZETİ "3/5" (mockup muayene_karti_v7): sonuçlanan / toplam, iptal sayılmaz.
+        detayRozeti={tanim.kaynak === 'muayene'
+          ? (ad, satirlar) => {
+              if (ad !== 'istemler') return undefined;
+              const gecerli = satirlar.filter(r => Number(r.sonucDurum ?? 0) !== 3);
+              return gecerli.length === 0 ? undefined
+                : `${gecerli.filter(r => Number(r.sonucDurum ?? 0) === 2).length}/${gecerli.length}`;
+            }
+          : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
           : undefined}
@@ -479,6 +511,16 @@ export function ListeKarti({
                               tablosu uzun, altta kalsa kaydirmadan gorunmuyordu. */}
                           <div className="mi-sag">
                             {izgaraCiz?.('vitaller')}
+                            {/* GEÇMİŞ GRAFİĞİ (mockup muayene_karti_v7): hastanın bütün ölçümleri. */}
+                            <div className="olcum-kisayol">
+                              <span className="not">📈 {c('Geçmiş')}:</span>
+                              {VITAL_GRAFIKLERI.map(([k, ad]) => (
+                                <button key={k} type="button" className="baglanti"
+                                        onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
+                              ))}
+                            </div>
+                            {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
+                                                          onKapat={() => setVitalGrafik(null)} />}
                             {parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
                           </div>
                         </div>
@@ -675,7 +717,9 @@ export function ListeKarti({
                       taniEkle: () => setIcdAramaAcik(true),
                       istemAc: () => setIstem(Number(kartId)),
                       ilacEkle: () => setReceteIlacAra(true),
-                    }} />
+                      epikrizAc: () => { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) },
+                    }}
+                    epikrizDurum={epikrizDurum} epikrizGit={epikrizGit} />
                 ) },
               // e-RECETE YINE AYRI SEKME (kullanici 02.10.2026: "recete
               //   sekmesini geri getir") - Muayene sekmesinden alindi.
@@ -717,6 +761,14 @@ export function ListeKarti({
                 ciz: () => <DokumanGalerisi kartAdi="muayene"
                                             kaynakId={Number(kartId)}
                                             saltOkunur={false} /> },
+              // EPİKRİZ (1100): YALNIZ İSTENİNCE (kullanıcı) - kayıt varsa ya da
+              //   Özet › İşlemler › Epikriz'e basıldıysa. Mevcut sekmelere dokunulmaz.
+              ...(epikrizDurum !== null || epikrizIstendi ? [{
+                anahtar: 'ozel:epikriz', baslik: 'Epikriz',
+                ciz: (baglam: EkSekmeBaglami) => (
+                  <MuayeneEpikrizSekmesi muayeneId={Number(kartId)} saltOkunur={baglam.saltOkunur}
+                                         onDegisti={setEpikrizDurum} />
+                ) }] : []),
             ]
           : undefined}
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum TANI sekmesinin
