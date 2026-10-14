@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metin Makrosu Kartı — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .kimlik{display:flex;align-items:center;gap:12px;padding:8px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kisayol-buyuk{font-family:Consolas,monospace;font-size:18px;font-weight:bold;color:var(--navy);background:#eef4fc;border:1px solid #cfe0f5;border-radius:4px;padding:2px 10px}
+  .kimlik .mini{color:var(--muted);font-size:11px}
+  .gvd{display:grid;grid-template-columns:minmax(0,1fr) 330px}
+  @media(max-width:860px){.gvd{grid-template-columns:1fr}}
+  .sol{padding:12px 14px;border-right:1px solid var(--line2);background:#f4f5f7}
+  .sag{padding:12px 14px;background:#fafcfe;display:flex;flex-direction:column;gap:12px}
+  .kutu{background:#fff;border:1px solid var(--line2);border-radius:4px;margin:0 0 12px;overflow:hidden}
+  .kutu > h6{margin:0;padding:6px 10px;font-size:11px;color:#2c4a6b;background:linear-gradient(#f6f9fc,#eaf0f6);border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px}
+  .kutu > h6 .k{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:10px;display:grid;gap:10px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .zor{color:#b23b3b}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:5px 7px;background:#fff;min-height:27px;display:flex;align-items:center;gap:6px;width:100%;font:inherit}
+  .inp.mono{font-family:Consolas,monospace;font-size:13px;font-weight:bold;color:var(--navy)}
+  textarea.inp{min-height:150px;line-height:1.55;resize:vertical;display:block}
+  .iki{display:grid;grid-template-columns:200px 1fr;gap:10px;align-items:start}
+  .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .seg span{border:1px solid var(--line);border-radius:3px;padding:4px 10px;font-size:11px;background:#fff;cursor:pointer}
+  .seg span.on{border-color:#2f6db3;background:var(--sel);font-weight:bold}
+  .cipler{display:flex;gap:4px;flex-wrap:wrap}
+  .cip{font-family:Consolas,monospace;font-size:10.5px;border:1px dashed #9db8da;background:#f5f9fe;color:#1f4f86;border-radius:3px;padding:2px 6px;cursor:pointer}
+  .cip:hover{background:#e6f0fb}
+  .kucuk{color:var(--muted);font-size:10.5px}
+  .bant{border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.5;background:#eef4fc;border:1px solid #cfe0f5;color:#1f4f86}
+  .bant.sari{background:#fdf6e3;border-color:#f2ddbf;color:#7a5413}
+  .onizleme{border:1px solid var(--line);border-radius:3px;background:#fff;padding:8px 10px;line-height:1.55;min-height:90px;white-space:pre-wrap}
+  .onizleme .yt{background:#fff4c2;border-radius:2px;padding:0 2px}
+  .onizleme .imlec{display:inline-block;width:1px;height:14px;background:#1f2d3a;vertical-align:-2px;animation:yan 1s steps(1) infinite}
+  @keyframes yan{50%{opacity:0}}
+  .alan-ornek{font-size:10.5px;color:var(--muted);margin-bottom:4px}
+  table.t{width:100%;border-collapse:collapse;font-size:11px}
+  table.t td{padding:4px 6px;border-bottom:1px solid var(--line2)}
+  table.t td:last-child{text-align:right;color:var(--muted)}
+  .sayilar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .sayi{border:1px solid var(--line2);border-radius:3px;padding:6px 8px;background:#fff}
+  .sayi b{display:block;font-size:16px;color:var(--navy)}
+  .sayi span{font-size:10px;color:var(--muted)}
+  .alt{display:flex;gap:8px;align-items:center;padding:7px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{font-size:11px;color:var(--muted);line-height:1.5;margin:12px auto 0;max-width:1040px}
+  .not b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📝 Metin Makrosu Kartı <span class="sp">Muayene › Ayarlar › Metin Makrosu Listesi</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn danger">🗑 Sil</span>
+    <span class="btn">⧉ Kopyala (kişisel / bölüm)</span>
+    <span class="btn">🧪 Muayenede Dene</span>
+    <span class="sp"></span>
+    <span class="btn">Kapat</span>
+  </div>
+
+  <div class="kimlik">
+    <span class="kisayol-buyuk" id="kBuyuk">.rut</span>
+    <span>Rutin kontrol şikâyeti</span>
+    <span class="rz ok">Aktif</span>
+    <span class="rz mavi" id="kKapsam">Bölüm · Kardiyoloji</span>
+    <span class="rz" id="kAlan">Şikâyet</span>
+    <span class="sp mini">142 kullanım · son 13.10.2026 · Dr. Barış Güneş</span>
+  </div>
+
+  <div class="gvd">
+    <div class="sol">
+      <div class="kutu">
+        <h6>Tanım</h6>
+        <div class="ic">
+          <div class="iki">
+            <div class="fld"><label>Kısayol <span class="zor">*</span></label>
+              <input class="inp mono" id="kisayol" value=".rut" maxlength="20"></div>
+            <div class="fld"><label>Açıklama</label>
+              <input class="inp" value="Rutin kontrol şikâyeti" maxlength="200"></div>
+          </div>
+          <div class="fld"><label>Hangi alanda açılır</label>
+            <div class="seg" id="alanSeg">
+              <span data-a="">Tüm alanlar</span>
+              <span data-a="Şikâyet" class="on">Şikâyet</span>
+              <span data-a="Hikâye">Hikâye</span>
+              <span data-a="Muayene bulguları">Muayene bulguları</span>
+              <span data-a="Değerlendirme / Sonuç">Değerlendirme / Sonuç</span>
+            </div>
+            <div class="kucuk" style="margin-top:4px">Aynı kısayol farklı alanda farklı metin açabilir (ör. <b>.rut</b> şikâyette ve karar alanında ayrı).</div>
+          </div>
+          <div class="fld"><label>Metin <span class="zor">*</span> <span class="kucuk">· yer tutucu eklemek için çipe tıklayın</span></label>
+            <div class="cipler" style="margin-bottom:5px">
+              <span class="cip" data-y="{hasta_adi}">{hasta_adi}</span>
+              <span class="cip" data-y="{yas}">{yas}</span>
+              <span class="cip" data-y="{cinsiyet}">{cinsiyet}</span>
+              <span class="cip" data-y="{tarih}">{tarih}</span>
+              <span class="cip" data-y="{hekim}">{hekim}</span>
+              <span class="cip" data-y="{bolum}">{bolum}</span>
+              <span class="cip" data-y="{son_muayene}">{son_muayene}</span>
+              <span class="cip" data-y="{|}" title="Makro açılınca imleç buraya gelir">{|} imleç</span>
+            </div>
+            <textarea class="inp" id="metin">{yas} yaşında {cinsiyet} hasta, rutin kontrol amacıyla başvurdu. Son muayenesi {son_muayene}. Bilinen kronik hastalıkları dışında yeni bir yakınması yok. {|}</textarea>
+            <div class="kucuk" style="margin-top:4px"><span id="say">0</span> / 4000 karakter</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kutu">
+        <h6>Kapsam <span class="k">kim kullanır</span></h6>
+        <div class="ic">
+          <div class="seg" id="kapsamSeg">
+            <span data-k="kurum">🏥 Kurum geneli</span>
+            <span data-k="bolum" class="on">🏷 Bölüm</span>
+            <span data-k="kisi">👤 Kişisel (hekim)</span>
+          </div>
+          <div class="iki" style="grid-template-columns:1fr 1fr">
+            <div class="fld" id="fBolum"><label>Bölüm (branş)</label><div class="inp">Kardiyoloji <span class="sp">▾</span></div></div>
+            <div class="fld" id="fHekim" style="opacity:.45"><label>Hekim</label><div class="inp"><span class="ph" style="color:#9aa8b6">— kişisel değil —</span><span class="sp">▾</span></div></div>
+          </div>
+          <div class="bant">Aynı kısayol birden çok kapsamda tanımlıysa <b>kişisel → bölüm → kurum</b> sırasıyla en yakın olan açılır. Hekim kendi kişisel kopyasını oluşturup değiştirebilir; bölümün makrosu bozulmaz.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <div class="kutu" style="margin:0">
+        <h6>👁 Önizleme <span class="k">örnek hasta ile</span></h6>
+        <div class="ic">
+          <div>
+            <div class="alan-ornek" id="onAlan">Şikâyet alanında <b>.rut</b> + boşluk:</div>
+            <div class="onizleme" id="onizleme"></div>
+          </div>
+          <div class="kucuk">Sarı = yer tutucudan gelen değer · imleç makrodan sonra kaldığı yerden devam eder.</div>
+        </div>
+      </div>
+
+      <div class="kutu" style="margin:0">
+        <h6>⚠ Çakışma</h6>
+        <div class="ic">
+          <div class="bant sari"><b>.rut</b> kurum genelinde de var ("Rutin kontrol."). Kardiyoloji hekimleri bu makroyu görür, diğer bölümler kurum makrosunu.</div>
+        </div>
+      </div>
+
+      <div class="kutu" style="margin:0">
+        <h6>📊 Kullanım <span class="k">son 90 gün</span></h6>
+        <div class="ic">
+          <div class="sayilar">
+            <div class="sayi"><b>142</b><span>toplam</span></div>
+            <div class="sayi"><b>38</b><span>bu ay</span></div>
+            <div class="sayi"><b>6</b><span>hekim</span></div>
+          </div>
+          <table class="t">
+            <tr><td>Dr. Barış Güneş</td><td>61</td></tr>
+            <tr><td>Dr. Ahmet Yılmaz</td><td>44</td></tr>
+            <tr><td>Dr. Ceren Çelik</td><td>19</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="kutu" style="margin:0">
+        <h6>💡 Nasıl kullanılır</h6>
+        <div class="kucuk" style="line-height:1.6;padding:10px">
+          Muayenede metin alanına <b>.rut</b> yazıp <b>boşluk</b>a basın ya da alanın altındaki <b>.rut</b> çipine tıklayın.
+          Alanda makro yazarken liste açılır: kısayol + açıklama, en çok kullanılan üstte.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alt">Durum: <span class="rz ok">Aktif</span> · Ekleyen Dr. Barış Güneş 02.09.2026 · Değiştiren 13.10.2026<span class="sp">metin_makro · muayene.makro yetkisi</span></div>
+</div>
+
+<div class="not">
+  <b>Neden bu düzen.</b> Bugünkü kart düz form (kısayol, alan, metin, hekim, bölüm, aktif). Hekim makroyu yazarken
+  <b>muayenede nasıl açılacağını</b> görmüyordu; yer tutucular ezbere yazılıyordu, aynı kısayolun başka kapsamdaki eşi fark edilmiyordu.
+  Önizleme, yer tutucu çipleri ve çakışma uyarısı bunları kartın içinde çözer. <b>Kapsam</b> (kurum / bölüm / kişisel) bugünkü
+  "Hekim" ve "Bölüm" alanlarının tek seçimli hâlidir - ikisi birden dolduğunda hangisinin geçerli olduğu belirsizdi.
+  <b>Tasarım aşaması:</b> yer tutucu listesi (<code>{hasta_adi}</code>, <code>{yas}</code>…) ve <code>{|}</code> imleç işareti karar sonrası kesinleşir.
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ORNEK = { '{hasta_adi}': 'Ramiz Ongun', '{yas}': '74', '{cinsiyet}': 'erkek', '{tarih}': '14.10.2026',
+                '{hekim}': 'Dr. Barış Güneş', '{bolum}': 'Kardiyoloji', '{son_muayene}': '19.09.2026 (İç Hastalıkları)' };
+function onizle() {
+  const m = $('metin').value;
+  $('say').textContent = m.length;
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  let h = esc(m).replace(/\{[a-z_]+\}/g, y => ORNEK[y] ? `<span class="yt">${ORNEK[y]}</span>` : y);
+  h = h.replace('{|}', '<span class="imlec"></span>');
+  $('onizleme').innerHTML = h;
+  const k = $('kisayol').value || '.?';
+  $('kBuyuk').textContent = k;
+  const alan = document.querySelector('#alanSeg span.on').dataset.a;
+  $('onAlan').innerHTML = `${alan ? alan + ' alanında' : 'Her metin alanında'} <b>${esc(k)}</b> + boşluk:`;
+  $('kAlan').textContent = alan || 'Tüm alanlar';
+}
+$('metin').addEventListener('input', onizle);
+$('kisayol').addEventListener('input', onizle);
+document.querySelectorAll('.cip').forEach(c => c.addEventListener('click', () => {
+  const t = $('metin'), y = c.dataset.y, i = t.selectionStart ?? t.value.length;
+  t.value = t.value.slice(0, i) + y + t.value.slice(t.selectionEnd ?? i);
+  t.focus(); t.selectionStart = t.selectionEnd = i + y.length; onizle();
+}));
+document.querySelectorAll('#alanSeg span').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('#alanSeg span').forEach(x => x.classList.toggle('on', x === s)); onizle();
+}));
+document.querySelectorAll('#kapsamSeg span').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('#kapsamSeg span').forEach(x => x.classList.toggle('on', x === s));
+  const k = s.dataset.k;
+  $('fBolum').style.opacity = k === 'bolum' ? 1 : .45;
+  $('fHekim').style.opacity = k === 'kisi' ? 1 : .45;
+  $('kKapsam').textContent = k === 'kurum' ? 'Kurum geneli' : k === 'bolum' ? 'Bölüm · Kardiyoloji' : 'Kişisel · Dr. Barış Güneş';
+}));
+onizle();
+</script>
+</body>
+</html>
