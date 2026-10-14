@@ -1552,6 +1552,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     </div>
     </>
     )}
+    </>}
+    {/* PENCERELER LİSTE BLOĞUNUN DIŞINDA (15.10.2026): kart kendi sekmesindeyken liste gizli -
+        karttan açılan pencereler (ICD arama, sonuç girişi, dönüşüm...) yine çizilmeli. */}
 
     {acikKasaId !== null && (
       <KasaIslemKarti
@@ -1860,7 +1863,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       />
     )}
 
-    </>}
 
     {/* KART (modal GenForm): muayene/lab tetkik ozel yerlesimi dahil,
         kendi dosyasinda (liste/ListeKarti). */}
