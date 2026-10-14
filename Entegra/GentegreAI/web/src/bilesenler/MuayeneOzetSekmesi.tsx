@@ -274,7 +274,9 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
             </ul>
           </div>}
 
-          <div className="kagrup">
+          {/* SEKMESİZ DÜZENDE (solMenude) bu iki kutu sağ bandın altında (MuayeneYanPanel,
+              kullanıcı 14.10.2026); sekmeli düzen aynen kalır. */}
+          {!solMenude && <div className="kagrup">
             <h6 className="moz-bas">{c('Bekleyen istemler')}</h6>
             <ul className="moz-liste">
               {bekleyenLab.length + bekleyenRad.length === 0 && <li className="not">{c('Bekleyen istem yok.')}</li>}
@@ -290,9 +292,9 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
                   <span className="moz-sp not">{r.cekimTarihi ? c('rapor bekliyor') : c('sırada')}</span></li>
               ))}
             </ul>
-          </div>
+          </div>}
 
-          <div className="kagrup">
+          {!solMenude && <div className="kagrup">
             <h6 className="moz-bas">{c('Son muayeneler')}</h6>
             <ul className="moz-liste">
               {(sekme?.gecmis ?? []).length === 0 && <li className="not">{c('Önceki muayene yok.')}</li>}
@@ -304,7 +306,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
                 </li>
               ))}
             </ul>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

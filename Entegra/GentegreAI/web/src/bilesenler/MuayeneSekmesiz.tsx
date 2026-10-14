@@ -186,14 +186,36 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
 
 /* ========================================================== SAĞ SÜTUN ==== */
 
-export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi }: {
+export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi, tazele = 0 }: {
   muayeneId: number;
   bilgi: MuayeneHastaBilgisi | null;
   gecmis: Satir[];
   onKopyalandi(): void;
+  /** İstem açılınca / kaydedilince bekleyen istemler yeniden okunur. */
+  tazele?: number;
 }) {
   const [grafik, setGrafik] = useState<string | null>(null);
   const [kopya, setKopya] = useState<number | null>(null);
+  // BEKLEYEN İSTEMLER (kullanıcı 14.10.2026: sekmesiz kartta özetten sağ bandın altına).
+  const [bekleyen, setBekleyen] = useState<{ ad: string; durum: string; acil: boolean }[] | null>(null);
+  useEffect(() => {
+    if (!(muayeneId > 0)) return;
+    let iptal = false;
+    void api.muayeneSonuclari(muayeneId).then(y0 => {
+      if (iptal) return;
+      const y = y0 as unknown as { istemler?: Satir[]; radyoloji?: Satir[]; goz?: Satir[]; patoloji?: Satir[] };
+      const sayi = (x: unknown) => Number(x ?? 0);
+      setBekleyen([
+        ...(y.istemler ?? []).filter(i => ![5, 9].includes(sayi(i.durum ?? 1))).map(i => ({
+          ad: `${c('Lab')} ${m(i.istemNo)}`, durum: `${sayi(i.onayli)}/${sayi(i.tetkik)} ${c('onaylı')}`, acil: sayi(i.oncelik) === 3 })),
+        ...(y.radyoloji ?? []).filter(r => !r.onayTarihi).map(r => ({
+          ad: m(r.tetkik), durum: r.cekimTarihi ? c('rapor bekliyor') : c('sırada'), acil: false })),
+        ...(y.patoloji ?? []).filter(v => sayi(v.durum) < 11 && ![0, 90].includes(sayi(v.durum))).map(v => ({
+          ad: `🔬 ${m(v.vakaNo)}`, durum: sayi(v.serbest ?? 1) === 0 ? c('başvuru bekliyor') : c('çalışılıyor'), acil: false })),
+      ]);
+    }).catch(() => { if (!iptal) setBekleyen([]) });
+    return () => { iptal = true };
+  }, [muayeneId, tazele]);
   return (
     <div className="myp">
       <div className="myp-k">
@@ -225,6 +247,27 @@ export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi }: {
               <span className="not"> {m(g.tanilar) || m(g.ozet)}</span></span>
             <button type="button" className="myp-kopya" title={c('Seçerek bu muayeneye kopyala')}
                     onClick={() => setKopya(Number(g.id))}>↺</button>
+          </div>
+        ))}
+      </div>
+      <div className="myp-k">
+        <div className="myp-b">{c('Bekleyen istemler')}</div>
+        {bekleyen && bekleyen.length === 0 && <div className="not">{c('Bekleyen istem yok.')}</div>}
+        {(bekleyen ?? []).map((b, n) => (
+          <div key={n} className="myp-s">
+            <span>{b.acil && <span className="rozet hata">{c('Acil')}</span>} {b.ad}</span>
+            <span className="not">{b.durum}</span>
+          </div>
+        ))}
+      </div>
+      <div className="myp-k">
+        <div className="myp-b">{c('Son 3 Muayene')}</div>
+        {gecmis.length === 0 && <div className="not">{c('Önceki muayene yok.')}</div>}
+        {gecmis.slice(0, 3).map((g, n) => (
+          <div key={n} className="myp-s" style={{ display: 'block' }} title={m(g.anaTani) || m(g.ozet)}>
+            <div>{tarihSaat(g.tarih).slice(0, 10)}{m(g.hekim) ? <span className="not"> · {m(g.hekim)}</span> : null}</div>
+            <div className="not" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {m(g.anaTani) || m(g.ozet) || '—'}</div>
           </div>
         ))}
       </div>

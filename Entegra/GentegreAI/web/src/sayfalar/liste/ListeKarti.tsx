@@ -398,7 +398,8 @@ export function ListeKarti({
           : sekmesiz
           ? <MuayeneYanPanel muayeneId={Number(kartId)} bilgi={hastaBilgisi}
                              gecmis={(sekmeVerisi.veri?.gecmis ?? []) as Record<string, unknown>[]}
-                             onKopyalandi={() => setKartTazele(t => t + 1)} />
+                             onKopyalandi={() => setKartTazele(t => t + 1)}
+                             tazele={kartTazele * 1000 + kayitSayaci} />
           : undefined}
         altSerit={tanim.kaynak === 'goz-muayene'
           ? (git => <GozKuralSeridi kontrol={gozKontrol} sekmeyeGit={git} onTamamla={() => void gozTamamla()} />) : undefined}
