@@ -422,6 +422,8 @@ export function ListeKarti({
             }
           : undefined}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
+        // "Tanı (ICD-10)" BAŞLIĞI YOK (kullanıcı 15.10.2026): çerçevenin "Tanılar" başlığı yeter.
+        tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') : undefined}
         tekSayfaSuzgec={sekmesiz ? a => (a === 'ozel:ozet') === (etkinGorunum === 'ozet') : undefined}
         // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
         //   zaten bölüm olarak listede - ikinci kez konmaz.
