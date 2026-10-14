@@ -6383,6 +6383,15 @@ textarea.fm-giris { resize: vertical }
 .epk-alan textarea[readonly] { background: var(--yuz2); border-color: var(--cizgi2) }
 .epk-alt { display: flex; gap: 8px; align-items: center; margin-top: 6px }
 
+/* TEK SAYFA (SEKMESİZ) KART: sekmeler alt alta bölüm; başlık bölümü ayırır. */
+.ts-bolum { padding: 4px 0 18px; border-bottom: 1px solid var(--cizgi2); margin-bottom: 14px; scroll-margin-top: 8px }
+.ts-bolum:last-child { border-bottom: 0 }
+.ts-bas { margin: 0 0 10px; font-size: 13.5px; color: var(--baslik, var(--vurgu)) }
+
+.duzen-anahtar { display: inline-flex; margin-left: 8px; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; overflow: hidden; vertical-align: middle }
+.duzen-anahtar button { border: 0; background: transparent; color: inherit; font: inherit; font-size: 10.5px; padding: 1px 8px; cursor: pointer; opacity: .8 }
+.duzen-anahtar button.on { background: rgba(255,255,255,.25); font-weight: 600; opacity: 1 }
+
 /* KENDİME NOT (1098): yalnız hekimin gördüğü not - mor bilgi şeridi gizliliği anlatır. */
 .moz-not { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.5; padding: 7px 9px;
   border: 1px solid var(--cizgi); border-radius: var(--r) }

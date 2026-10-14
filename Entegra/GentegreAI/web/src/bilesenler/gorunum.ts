@@ -26,7 +26,12 @@ export interface GorunumTercihi {
   yaziBoyu: YaziBoyu;
   /** Mockup "Grid çizgileri": tablo hücre çizgisi kalınlığı. */
   gridCizgi: GridCizgi;
+  /** MUAYENE KARTI DÜZENİ (mockup muayene_duzen_tercihi): aynı alanlar, sekmeli ya da
+      tek sayfa (sekmesiz). Varsayılan sekmeli - mevcut düzen değişmez. */
+  muayeneDuzeni: MuayeneDuzeni;
 }
+
+export type MuayeneDuzeni = 'sekmeli' | 'sekmesiz';
 
 export const LISTE_SATIR_SECENEKLERI = [25, 50, 100, 200];
 export const YAZI_BOYU_SECENEKLERI: { deger: YaziBoyu; ad: string }[] = [
@@ -36,7 +41,8 @@ export const GRID_CIZGI_SECENEKLERI: { deger: GridCizgi; ad: string }[] = [
   { deger: 'ince', ad: 'İnce' }, { deger: 'belirgin', ad: 'Belirgin' }, { deger: 'yok', ad: 'Yok' },
 ];
 
-const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince' };
+const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince',
+                                     muayeneDuzeni: 'sekmeli' };
 const AYNA = 'gentegre.gorunum';
 
 let mevcut: GorunumTercihi = aynadanOku();
@@ -60,6 +66,7 @@ function duzelt(h: unknown): GorunumTercihi {
     listeSatir: LISTE_SATIR_SECENEKLERI.includes(n) ? n : VARSAYILAN.listeSatir,
     yaziBoyu: yb === 90 || yb === 110 ? yb : 100,
     gridCizgi: o.gridCizgi === 'belirgin' || o.gridCizgi === 'yok' ? o.gridCizgi : 'ince',
+    muayeneDuzeni: o.muayeneDuzeni === 'sekmesiz' ? 'sekmesiz' : 'sekmeli',
   };
 }
 

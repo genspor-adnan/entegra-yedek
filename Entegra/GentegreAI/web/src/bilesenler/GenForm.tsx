@@ -219,6 +219,9 @@ interface Props {
   sekmeDurumu?(baslik: string): { durum: string; ipucu?: string; ikon?: string } | undefined;
   /** Gövdenin sağında hep görünen panel (yalnız kayıtlı kartta). */
   yanPanel?: React.ReactNode;
+  /** TEK SAYFA (SEKMESİZ) KİP (mockup muayene_karti_v7, kullanıcı tercihi): AYNI sekmeler
+      alt alta bölüm olarak çizilir, soldaki gezinti bölüme kaydırır. Alanlar değişmez. */
+  tekSayfa?: boolean;
   /** DETAY SEKMESİ ROZETİ (muayene istemi "3/5" = sonuçlanan / toplam): metin dönerse
       satır adedi yerine o yazılır; undefined dönerse adet (varsayılan). */
   detayRozeti?(detayAd: string, satirlar: Record<string, unknown>[]): string | undefined;
@@ -300,7 +303,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu }: Props) {
@@ -976,9 +979,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   // TAM EŞLEŞME ÖNCE, sonra baş eşleşmesi: "Tanı" "Tanılar"ı değil "Tanı"yı açmalı.
   const sekmeyeGitBaslik = (b: string) => {
     const s = sekmeler.find(x => x.baslik === b) ?? sekmeler.find(x => x.baslik.startsWith(b));
-    if (s) setAktifSekme(s.anahtar);
+    if (s) sekmeSec(s.anahtar);
   };
-  const dikeyGezinti = !!sekmeGruplari && !yeniMi && sekmeler.length > 1;
+  /** Sekmeli kipte sekmeyi açar; tek sayfa kipinde o bölüme kaydırır. */
+  const sekmeSec = (anahtar: string) => {
+    setAktifSekme(anahtar);
+    if (tekSayfaKip) document.getElementById(`ts-${anahtar}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const dikeyGezinti = (!!sekmeGruplari || !!tekSayfa) && !yeniMi && sekmeler.length > 1;
+  const tekSayfaKip = !!tekSayfa && dikeyGezinti;
   // SOL GEZİNTİ KATLANIR (kullanıcı): dar ekranda gövdeye yer açılır; kart türü başına hatırlanır.
   const [navKapali, setNavKapali] = useState(() => {
     try { return localStorage.getItem(`kartNavKapali.${kaynak}`) === '1' } catch { return false }
@@ -997,6 +1006,17 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   });
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
+  // TEK SAYFA: görünen bölüm gezintide işaretlenir (kaydırınca).
+  useEffect(() => {
+    if (!tekSayfaKip) return;
+    const io = new IntersectionObserver(girdiler => {
+      const ilk = girdiler.filter(g => g.isIntersecting)
+        .sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
+      if (ilk) setAktifSekme((ilk.target as HTMLElement).dataset.ts ?? null);
+    }, { rootMargin: '0px 0px -70% 0px' });
+    document.querySelectorAll<HTMLElement>('.ts-bolum').forEach(b => io.observe(b));
+    return () => io.disconnect();
+  }, [tekSayfaKip, sekmeler]);
   /**
    * SEKMEYI BUYUT (kullanici: "sekmeler hizasinda saga yanasik sekmeyi
    * maksimum yapma butonu.. ustteki kaydet butonuna kadar"): sekmenin
@@ -1343,6 +1363,285 @@ Yine de yeni kayıt eklensin mi?`);
     },
   });
 
+  /**
+   * SEKMENİN GÖVDESİ: sekmeli kipte yalnız aktif sekme için, tek sayfa kipinde
+   * her sekme için çağrılır. Parametre adı bilerek `aktif` - gövde eskiden
+   * dış değişkeni okuyordu, çizim kuralları aynen kalsın.
+   */
+  const sekmeGovdesi = (aktif: SekmeTanimi | undefined) => (
+    <>
+      {aktif?.tur === 'grup' && meta && (
+        <KartGrupSarmalayici
+          aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
+          salt={salt} personelGibiKart={personelGibiKart}
+          deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}
+          detaylar={detaylar} setDetaylar={setDetaylar}
+          alanHatalari={alanHatalari} gizliSekmeler={gizliSekmeler}
+          resimYerTutucu={resimYerTutucu} gruplar={gruplar}
+          altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
+          setAramaAlani={setAramaAlani} secilenAdlar={secilenAdlar}
+          detayGrupta={detayGrupta} detayIzgara={detayIzgara}
+          sekmeSarmalayici={sekmeSarmalayici}
+        />
+      )}
+
+      {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
+          Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}
+      {/* DIS HEKIM "Hekim Bilgisi" (305): 1:1 uzanti - satir ekle/sil'li grid
+          degil TEK KAYIT formu (kullanici: "mockup gibi label ve edit olsun").
+          Ikinci satir DB'de zaten yazilamaz; grid yanlis bir vaat. */}
+      {aktif?.tur === 'detay' && kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim' && (
+        <TekKayit
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          baslik="Hekim Bilgisi"
+        />
+      )}
+
+      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'uts' && (
+        <TekKayit
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          baslik="ÜTS / Medikal Bilgileri"
+          not={<>ÜTS REF ve GTIN, ÜTS bildiriminde ürün eşleştirmesinde kullanılır.
+               Menşei ülke listesi ülke tablosundan gelir.</>}
+        />
+      )}
+
+      {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
+          gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
+      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
+        <PaketSekmesi
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+        />
+      )}
+
+      {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
+        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
+        // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
+        //   ayrica cizilirse ayni detay iki kez gorunur.
+        && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
+        // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
+        //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
+        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar')
+        && !detayIzgara?.[aktif.detay.ad] && (
+        <KartDetaySekmesi
+          aktif={aktif} kaynak={kaynak} salt={salt}
+          deger={deger} alanHatalari={alanHatalari}
+          detaylar={detaylar} setDetaylar={setDetaylar}
+          detaySayfa={detaySayfa} detayToplam={detayToplam}
+          detaySayfaYuk={detaySayfaYuk} detaySayfaDegis={detaySayfaDegis}
+          detaySuzgecUygula={detaySuzgecUygula}
+          detaySecenekleri={detaySecenekleri}
+          satirKategori={satirKategori} setSatirKategori={setSatirKategori}
+          satirKategorileri={satirKategorileri}
+          setSeciliSatirlar={setSeciliSatirlar}
+          sekmeSarmalayici={sekmeSarmalayici}
+        />
+      )}
+
+      {/* DETAY IZGARASI (mockup vital bulgular): en ustteki satir etiket+kutu
+          izgarasinda duzenlenir, gecmis satirlar altta salt gorunum. */}
+      {aktif?.tur === 'detay' && detayIzgara?.[aktif.detay.ad] && (() => {
+        const ayar = detayIzgara[aktif.detay.ad];
+        const durum = detaylar[aktif.detay.ad] ?? bosDetay();
+        const gecmis = durum.guncel.slice(1);
+        return (
+          <div className={ayar.sinif}>
+            {ayar.yeniDugmesi && !salt && (
+              <div className="muayene-arac">
+                <button type="button" className="d"
+                        onClick={() => setDetaylar(t => {
+                          const d = t[aktif.detay.ad] ?? bosDetay();
+                          // Yeni olcum EN USTE: izgara hep en son olcumu gosterir.
+                          const yeniSatir: Record<string, unknown> = {
+                            zaman: new Date().toISOString().slice(0, 16) };
+                          return { ...t, [aktif.detay.ad]:
+                            { ...d, guncel: [yeniSatir, ...d.guncel] } };
+                        })}>
+                  ＋ Yeni ölçüm
+                </button>
+              </div>
+            )}
+            <TekKayit
+              meta={aktif.detay}
+              durum={durum}
+              saltOkunur={salt || aktif.detay.saltOkunur}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+              baslik={ayar.baslik ?? aktif.detay.baslik}
+              alanSirasi={ayar.alanSirasi}
+              not={ayar.not}
+            />
+            {gecmis.length > 0 && (
+              <GenDetayTablo
+                meta={{ ...aktif.detay, baslik: `Önceki ölçümler (${gecmis.length})` }}
+                durum={{ ...durum, guncel: gecmis }}
+                saltOkunur
+                hatalar={alanHatalari}
+                gizliAlanlar={ayar.gecmisGizli ? new Set(ayar.gecmisGizli) : undefined}
+                onDegis={() => {}}
+              />
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
+          (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
+          hizmet_fiyat gridi kaldirildi). */}
+      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar' && (
+        yeniMi
+          ? <div className="not" style={{ marginTop: 12 }}>
+              Fiyatlar kart kaydedildikten sonra fiyat listelerinden gelir.
+            </div>
+          : <HizmetListeFiyatlari hizmetId={id as number} />
+      )}
+
+      {/* EKRANA OZEL EK SEKME (mockup muayene karti): icerigi ekran cizer. */}
+      {aktif?.tur === 'ozel'
+        && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz({
+             deger, meta,
+             detaySayisi: ad => detaylar[ad]?.guncel.length ?? 0,
+             detaySatirlari: ad => (detaylar[ad]?.guncel ?? []) as Record<string, Deger>[],
+             sekmeyeGit: sekmeyeGitBaslik,
+             alanYaz: (ad, v, kaydetSonra) => {
+               if (salt) return;
+               alanDegistir(ad, v);
+               if (kaydetSonra) setKayitIstegi(n => n + 1);
+             },
+             saltOkunur: salt,
+           })}
+
+      {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
+        <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
+      )}
+
+
+      {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
+          basvuru gecmisi. Cift tik basvuruyu KARTIN USTUNDE acar - liste
+          ekranina gitmek hasta kartindan kopmak demekti. */}
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:talepler' && (
+        <PersonelTalepleri tarafId={id as number}
+          // Personelde unvan yalnız önek (Dr.) - görünen ad önek + ad + soyad.
+          ad={[deger.unvan, deger.ad, deger.soyad].filter(Boolean).join(' ')} />
+      )}
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:basvurular' && (
+        <OncekiBasvurular tarafId={id as number} baslik="Başvuru Geçmişi"
+                          onAc={b => setAcilanBasvuru(b)}
+                          onYeni={() => setAcilanBasvuru(0)} />
+      )}
+      {/* 0 = YENI basvuru (bu hastayla acilir), >0 = mevcut basvuru. */}
+      {acilanBasvuru !== null && (
+        <BelgeKarti
+          {...(acilanBasvuru > 0
+               ? { id: acilanBasvuru }
+               // YENI basvuru bu hastayla acilir - cari aramasi cikmaz.
+               : { tur: 19, tarafId: id as number,
+                   tarafUnvan: String(deger.unvan
+                     ?? `${deger.ad ?? ''} ${deger.soyad ?? ''}`.trim()) })}
+          onKapat={() => setAcilanBasvuru(null)}
+        />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
+        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokDurum' && (
+        <StokDurumSekmesi stokId={id as number} duzenlenebilir={!salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokHareket' && (
+        <StokHareketSekmesi stokId={id as number} />
+      )}
+
+      {/* DIS HEKIM "Gönderim Geçmişi" (305): kart DETAYI degil - baska bir
+          ekranin kayitlari (radyoloji istemleri). Duzenlenebilir satir gridi
+          yerine liste ekranlarindaki GenGrid, SALT OKUNUR ve hekim filtreli.
+          Sekme yer tutucu olarak aciliyor, icini burasi dolduruyor. */}
+      {/* Cekim oncesi kontrol listesi (310) - yer tutucu sekme. */}
+      {aktif?.tur === 'yerTutucu' && kaynak === 'radyoloji-istem'
+       && aktif.baslik === 'Kontrol Listesi' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            İstem kaydedildikten sonra kontrol listesi doldurulur.
+          </div>
+        ) : (
+          <KontrolListesi istemId={id as number} saltOkunur={salt} />
+        )
+      )}
+
+      {aktif?.tur === 'yerTutucu' && kaynak === 'dis-hekim'
+       && aktif.baslik === 'Gönderim Geçmişi' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            Hekim kaydedildikten sonra gönderdiği tetkikler burada listelenir.
+          </div>
+        ) : (
+          <>
+            {/* Ozet + modalite dagilimi GRIDIN USTUNDE: satirlar "hangi
+                tetkik", ozet "ne kadar / hangi cihaz" sorusunu cevaplar. */}
+            <HekimGonderimOzeti hekimId={id as number} />
+            <GenGrid
+              kaynak="radyoloji-istem"
+              gomulu
+              seritGizli
+              boyut={25}
+              sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
+            />
+          </>
+        )
+      )}
+
+      {/* BANKO "Oturumlar" (mockup banko_tanimi_v2.html): bankonun vardiya
+          geçmişi. Oturum = banko + görevli; fark eğilimi buradan okunur.
+          Kart detayı değil, Banko Oturumları listesinin bu bankoya süzülmüş
+          hali - salt okunur. */}
+      {aktif?.tur === 'yerTutucu' && kaynak === 'banko' && aktif.baslik === 'Oturumlar' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            Banko kaydedildikten sonra açılan oturumlar burada listelenir.
+          </div>
+        ) : (
+          <GenGrid
+            kaynak="bankoOturum"
+            gomulu
+            seritGizli
+            boyut={25}
+            sabitFiltre={{ alan: 'bankoId', op: 'esit', deger: id as number }}
+            kolonSirasi={['id', 'acilisTs', 'gorevli', 'devirTutar', 'nakitTahsilat',
+                          'posTutar', 'kapanisSayim', 'kapanisFark', 'teslimAlan', 'durumAdi']}
+            cipler={[
+              { ad: 'Tümü' },
+              { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+              { ad: 'Farklı kapananlar', filtre: { op: 'and', kosullar: [
+                { alan: 'durum', op: 'esit', deger: 4 },
+                { alan: 'kapanisFark', op: 'esitDegil', deger: 0 },
+              ] } },
+            ]}
+          />
+        )
+      )}
+
+      {aktif?.tur === 'yerTutucu'
+       && !(kaynak === 'banko' && aktif.baslik === 'Oturumlar')
+       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi')
+       && !(kaynak === 'radyoloji-istem' && aktif.baslik === 'Kontrol Listesi') && (
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
+          {aktif.baslik} sekmesi yakında.
+        </div>
+      )}
+
+    </>
+  );
+
   return (
     <Modal
       baslik={`${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`}
@@ -1493,7 +1792,7 @@ Yine de yeni kayıt eklensin mi?`);
               const d = sekmeDurumu?.(s.baslik);
               return (
                 <div key={s.anahtar} className={`kanav-nokta${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
-                     title={c(s.baslik)} onClick={() => setAktifSekme(s.anahtar)}>
+                     title={c(s.baslik)} onClick={() => sekmeSec(s.anahtar)}>
                   <span className={`kanav-d${d?.durum ? ` d-${d.durum}` : ''}${d?.ikon ? ' ikon' : ''}`}>{d?.ikon ?? (d?.durum === 'ok' || d?.durum === 'uy' ? '●' : d?.durum === 'bos' ? '○' : '·')}</span>
                 </div>
               );
@@ -1505,14 +1804,14 @@ Yine de yeni kayıt eklensin mi?`);
               const d = sekmeDurumu?.(s.baslik);
               return (
                 <div key={s.anahtar} className={`kanav-o${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
-                     onClick={() => setAktifSekme(s.anahtar)}>
+                     onClick={() => sekmeSec(s.anahtar)}>
                   <span className={`kanav-d${d?.durum ? ` d-${d.durum}` : ''}${d?.ikon ? ' ikon' : ''}`}>{d?.ikon ?? (d?.durum === 'ok' || d?.durum === 'uy' ? '●' : d?.durum === 'bos' ? '○' : '·')}</span>
                   <span>{c(s.baslik)}</span>
                   {d?.ipucu && <small>{d.ipucu}</small>}
                 </div>
               );
             };
-            const bloklar = sekmeGruplari!.map((g, i) => {
+            const bloklar = (sekmeGruplari ?? []).map((g, i) => {
               const ic = g.sekmeler.map(b => sekmeler.find(s => s.baslik === b)).filter((s): s is SekmeTanimi => !!s);
               if (ic.length === 0) return null;
               const tamam = ic.filter(s => sekmeDurumu?.(s.baslik)?.durum === 'ok').length;
@@ -1862,274 +2161,15 @@ Yine de yeni kayıt eklensin mi?`);
         </div>
       )}
 
-      {aktif?.tur === 'grup' && meta && (
-        <KartGrupSarmalayici
-          aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
-          salt={salt} personelGibiKart={personelGibiKart}
-          deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}
-          detaylar={detaylar} setDetaylar={setDetaylar}
-          alanHatalari={alanHatalari} gizliSekmeler={gizliSekmeler}
-          resimYerTutucu={resimYerTutucu} gruplar={gruplar}
-          altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
-          setAramaAlani={setAramaAlani} secilenAdlar={secilenAdlar}
-          detayGrupta={detayGrupta} detayIzgara={detayIzgara}
-          sekmeSarmalayici={sekmeSarmalayici}
-        />
-      )}
-
-      {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
-          Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}
-      {/* DIS HEKIM "Hekim Bilgisi" (305): 1:1 uzanti - satir ekle/sil'li grid
-          degil TEK KAYIT formu (kullanici: "mockup gibi label ve edit olsun").
-          Ikinci satir DB'de zaten yazilamaz; grid yanlis bir vaat. */}
-      {aktif?.tur === 'detay' && kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim' && (
-        <TekKayit
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          baslik="Hekim Bilgisi"
-        />
-      )}
-
-      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'uts' && (
-        <TekKayit
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          baslik="ÜTS / Medikal Bilgileri"
-          not={<>ÜTS REF ve GTIN, ÜTS bildiriminde ürün eşleştirmesinde kullanılır.
-               Menşei ülke listesi ülke tablosundan gelir.</>}
-        />
-      )}
-
-      {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
-          gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
-      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
-        <PaketSekmesi
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-        />
-      )}
-
-      {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
-        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
-        // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
-        //   ayrica cizilirse ayni detay iki kez gorunur.
-        && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
-        // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
-        //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
-        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar')
-        && !detayIzgara?.[aktif.detay.ad] && (
-        <KartDetaySekmesi
-          aktif={aktif} kaynak={kaynak} salt={salt}
-          deger={deger} alanHatalari={alanHatalari}
-          detaylar={detaylar} setDetaylar={setDetaylar}
-          detaySayfa={detaySayfa} detayToplam={detayToplam}
-          detaySayfaYuk={detaySayfaYuk} detaySayfaDegis={detaySayfaDegis}
-          detaySuzgecUygula={detaySuzgecUygula}
-          detaySecenekleri={detaySecenekleri}
-          satirKategori={satirKategori} setSatirKategori={setSatirKategori}
-          satirKategorileri={satirKategorileri}
-          setSeciliSatirlar={setSeciliSatirlar}
-          sekmeSarmalayici={sekmeSarmalayici}
-        />
-      )}
-
-      {/* DETAY IZGARASI (mockup vital bulgular): en ustteki satir etiket+kutu
-          izgarasinda duzenlenir, gecmis satirlar altta salt gorunum. */}
-      {aktif?.tur === 'detay' && detayIzgara?.[aktif.detay.ad] && (() => {
-        const ayar = detayIzgara[aktif.detay.ad];
-        const durum = detaylar[aktif.detay.ad] ?? bosDetay();
-        const gecmis = durum.guncel.slice(1);
-        return (
-          <div className={ayar.sinif}>
-            {ayar.yeniDugmesi && !salt && (
-              <div className="muayene-arac">
-                <button type="button" className="d"
-                        onClick={() => setDetaylar(t => {
-                          const d = t[aktif.detay.ad] ?? bosDetay();
-                          // Yeni olcum EN USTE: izgara hep en son olcumu gosterir.
-                          const yeniSatir: Record<string, unknown> = {
-                            zaman: new Date().toISOString().slice(0, 16) };
-                          return { ...t, [aktif.detay.ad]:
-                            { ...d, guncel: [yeniSatir, ...d.guncel] } };
-                        })}>
-                  ＋ Yeni ölçüm
-                </button>
-              </div>
-            )}
-            <TekKayit
-              meta={aktif.detay}
-              durum={durum}
-              saltOkunur={salt || aktif.detay.saltOkunur}
-              onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-              baslik={ayar.baslik ?? aktif.detay.baslik}
-              alanSirasi={ayar.alanSirasi}
-              not={ayar.not}
-            />
-            {gecmis.length > 0 && (
-              <GenDetayTablo
-                meta={{ ...aktif.detay, baslik: `Önceki ölçümler (${gecmis.length})` }}
-                durum={{ ...durum, guncel: gecmis }}
-                saltOkunur
-                hatalar={alanHatalari}
-                gizliAlanlar={ayar.gecmisGizli ? new Set(ayar.gecmisGizli) : undefined}
-                onDegis={() => {}}
-              />
-            )}
-          </div>
-        );
-      })()}
-
-      {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
-          (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
-          hizmet_fiyat gridi kaldirildi). */}
-      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar' && (
-        yeniMi
-          ? <div className="not" style={{ marginTop: 12 }}>
-              Fiyatlar kart kaydedildikten sonra fiyat listelerinden gelir.
-            </div>
-          : <HizmetListeFiyatlari hizmetId={id as number} />
-      )}
-
-      {/* EKRANA OZEL EK SEKME (mockup muayene karti): icerigi ekran cizer. */}
-      {aktif?.tur === 'ozel'
-        && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz({
-             deger, meta,
-             detaySayisi: ad => detaylar[ad]?.guncel.length ?? 0,
-             detaySatirlari: ad => (detaylar[ad]?.guncel ?? []) as Record<string, Deger>[],
-             sekmeyeGit: sekmeyeGitBaslik,
-             alanYaz: (ad, v, kaydetSonra) => {
-               if (salt) return;
-               alanDegistir(ad, v);
-               if (kaydetSonra) setKayitIstegi(n => n + 1);
-             },
-             saltOkunur: salt,
-           })}
-
-      {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
-        <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
-      )}
-
-
-      {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
-          basvuru gecmisi. Cift tik basvuruyu KARTIN USTUNDE acar - liste
-          ekranina gitmek hasta kartindan kopmak demekti. */}
-      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:talepler' && (
-        <PersonelTalepleri tarafId={id as number}
-          // Personelde unvan yalnız önek (Dr.) - görünen ad önek + ad + soyad.
-          ad={[deger.unvan, deger.ad, deger.soyad].filter(Boolean).join(' ')} />
-      )}
-      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:basvurular' && (
-        <OncekiBasvurular tarafId={id as number} baslik="Başvuru Geçmişi"
-                          onAc={b => setAcilanBasvuru(b)}
-                          onYeni={() => setAcilanBasvuru(0)} />
-      )}
-      {/* 0 = YENI basvuru (bu hastayla acilir), >0 = mevcut basvuru. */}
-      {acilanBasvuru !== null && (
-        <BelgeKarti
-          {...(acilanBasvuru > 0
-               ? { id: acilanBasvuru }
-               // YENI basvuru bu hastayla acilir - cari aramasi cikmaz.
-               : { tur: 19, tarafId: id as number,
-                   tarafUnvan: String(deger.unvan
-                     ?? `${deger.ad ?? ''} ${deger.soyad ?? ''}`.trim()) })}
-          onKapat={() => setAcilanBasvuru(null)}
-        />
-      )}
-
-      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
-        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />
-      )}
-
-      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokDurum' && (
-        <StokDurumSekmesi stokId={id as number} duzenlenebilir={!salt} />
-      )}
-
-      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokHareket' && (
-        <StokHareketSekmesi stokId={id as number} />
-      )}
-
-      {/* DIS HEKIM "Gönderim Geçmişi" (305): kart DETAYI degil - baska bir
-          ekranin kayitlari (radyoloji istemleri). Duzenlenebilir satir gridi
-          yerine liste ekranlarindaki GenGrid, SALT OKUNUR ve hekim filtreli.
-          Sekme yer tutucu olarak aciliyor, icini burasi dolduruyor. */}
-      {/* Cekim oncesi kontrol listesi (310) - yer tutucu sekme. */}
-      {aktif?.tur === 'yerTutucu' && kaynak === 'radyoloji-istem'
-       && aktif.baslik === 'Kontrol Listesi' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            İstem kaydedildikten sonra kontrol listesi doldurulur.
-          </div>
-        ) : (
-          <KontrolListesi istemId={id as number} saltOkunur={salt} />
-        )
-      )}
-
-      {aktif?.tur === 'yerTutucu' && kaynak === 'dis-hekim'
-       && aktif.baslik === 'Gönderim Geçmişi' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            Hekim kaydedildikten sonra gönderdiği tetkikler burada listelenir.
-          </div>
-        ) : (
-          <>
-            {/* Ozet + modalite dagilimi GRIDIN USTUNDE: satirlar "hangi
-                tetkik", ozet "ne kadar / hangi cihaz" sorusunu cevaplar. */}
-            <HekimGonderimOzeti hekimId={id as number} />
-            <GenGrid
-              kaynak="radyoloji-istem"
-              gomulu
-              seritGizli
-              boyut={25}
-              sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
-            />
-          </>
-        )
-      )}
-
-      {/* BANKO "Oturumlar" (mockup banko_tanimi_v2.html): bankonun vardiya
-          geçmişi. Oturum = banko + görevli; fark eğilimi buradan okunur.
-          Kart detayı değil, Banko Oturumları listesinin bu bankoya süzülmüş
-          hali - salt okunur. */}
-      {aktif?.tur === 'yerTutucu' && kaynak === 'banko' && aktif.baslik === 'Oturumlar' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            Banko kaydedildikten sonra açılan oturumlar burada listelenir.
-          </div>
-        ) : (
-          <GenGrid
-            kaynak="bankoOturum"
-            gomulu
-            seritGizli
-            boyut={25}
-            sabitFiltre={{ alan: 'bankoId', op: 'esit', deger: id as number }}
-            kolonSirasi={['id', 'acilisTs', 'gorevli', 'devirTutar', 'nakitTahsilat',
-                          'posTutar', 'kapanisSayim', 'kapanisFark', 'teslimAlan', 'durumAdi']}
-            cipler={[
-              { ad: 'Tümü' },
-              { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-              { ad: 'Farklı kapananlar', filtre: { op: 'and', kosullar: [
-                { alan: 'durum', op: 'esit', deger: 4 },
-                { alan: 'kapanisFark', op: 'esitDegil', deger: 0 },
-              ] } },
-            ]}
-          />
-        )
-      )}
-
-      {aktif?.tur === 'yerTutucu'
-       && !(kaynak === 'banko' && aktif.baslik === 'Oturumlar')
-       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi')
-       && !(kaynak === 'radyoloji-istem' && aktif.baslik === 'Kontrol Listesi') && (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
-          {aktif.baslik} sekmesi yakında.
-        </div>
-      )}
+      {/* TEK SAYFA: bütün sekmeler alt alta bölüm (aynı çizim, aynı alanlar). */}
+      {tekSayfaKip
+        ? sekmeler.map(s => (
+            <section key={s.anahtar} id={`ts-${s.anahtar}`} data-ts={s.anahtar} className="ts-bolum">
+              <h2 className="ts-bas">{c(s.baslik)}</h2>
+              {sekmeGovdesi(s)}
+            </section>
+          ))
+        : sekmeGovdesi(aktif)}
 
       {kaynak === 'kisi' && (
         <TarafArama

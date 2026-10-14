@@ -8,6 +8,7 @@ import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
 import { MuayeneEpikrizSekmesi } from '../../bilesenler/MuayeneEpikrizSekmesi';
+import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/gorunum';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import {
@@ -150,6 +151,12 @@ export function ListeKarti({
   const [vucutAcik, setVucutAcik] = useState(false);
   /** Vital geçmiş grafiği (mockup v7): ta, nabiz, spo2, ates, solunum, kilo, bki. */
   const [vitalGrafik, setVitalGrafik] = useState<string | null>(null);
+  /** MUAYENE DÜZENİ (kullanıcı tercihi gorunum.muayeneDuzeni): sekmeli / tek sayfa. */
+  const [muayeneDuzeni, setMuayeneDuzeni] = useState<MuayeneDuzeni>(() => gorunumOku().muayeneDuzeni);
+  const duzenDegis = (d: MuayeneDuzeni) => {
+    setMuayeneDuzeni(d);
+    void gorunumKaydet({ ...gorunumOku(), muayeneDuzeni: d }).catch(() => {});
+  };
   /** MUAYENE EPİKRİZİ (1100): sekme kayıt varsa ya da istenince açılır. */
   const [epikrizDurum, setEpikrizDurum] = useState<'taslak' | 'imzali' | null>(null);
   const [epikrizIstendi, setEpikrizIstendi] = useState(false);
@@ -325,6 +332,7 @@ export function ListeKarti({
                 : `${gecerli.filter(r => Number(r.sonucDurum ?? 0) === 2).length}/${gecerli.length}`;
             }
           : undefined}
+        tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
           : undefined}
@@ -561,6 +569,13 @@ export function ListeKarti({
                 <>
                   <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
                   {ad && <span className={`rozet ${sinif}`}>{ad}</span>}
+                  {/* DÜZEN ANAHTARI: seçim tercihe yazılır, sonraki muayeneler de böyle açılır. */}
+                  <span className="duzen-anahtar" title={c('Muayene ekranı düzeni')}>
+                    <button type="button" className={muayeneDuzeni === 'sekmeli' ? 'on' : ''}
+                            onClick={() => duzenDegis('sekmeli')}>▤ {c('Sekmeli')}</button>
+                    <button type="button" className={muayeneDuzeni === 'sekmesiz' ? 'on' : ''}
+                            onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
+                  </span>
                 </>
               );
             }

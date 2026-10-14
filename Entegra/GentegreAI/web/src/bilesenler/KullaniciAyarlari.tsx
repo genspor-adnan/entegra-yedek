@@ -16,7 +16,7 @@ import { Bayrak } from './Bayrak';
 import { telefonAyir, telefonBirlestir, ulkeEtiketi, ULKE_KODLARI } from './telefon';
 import {
   gorunumOku, gorunumKaydet, LISTE_SATIR_SECENEKLERI, YAZI_BOYU_SECENEKLERI,
-  GRID_CIZGI_SECENEKLERI, type GorunumTercihi, type Yogunluk, type YaziBoyu, type GridCizgi,
+  GRID_CIZGI_SECENEKLERI, type GorunumTercihi, type Yogunluk, type YaziBoyu, type GridCizgi, type MuayeneDuzeni,
 } from './gorunum';
 import {
   bildirimOku, bildirimKaydet, olaylar, masaustuIzniIste, denemeBildirimi,
@@ -494,6 +494,12 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
             <label>{c('Grid çizgileri')}</label>
             <select value={g.gridCizgi} onChange={e => void yaz({ ...g, gridCizgi: e.target.value as GridCizgi })}>
               {GRID_CIZGI_SECENEKLERI.map(s => <option key={s.deger} value={s.deger}>{c(s.ad)}</option>)}
+            </select>
+            {/* MUAYENE DÜZENİ (mockup muayene_duzen_tercihi): alanlar aynı, yerleşim farklı. */}
+            <label>{c('Muayene ekranı')}</label>
+            <select value={g.muayeneDuzeni} onChange={e => void yaz({ ...g, muayeneDuzeni: e.target.value as MuayeneDuzeni })}>
+              <option value="sekmeli">{c('Sekmeli')}</option>
+              <option value="sekmesiz">{c('Sekmesiz (tek sayfa)')}</option>
             </select>
           </div>
           <div className="kanot">
