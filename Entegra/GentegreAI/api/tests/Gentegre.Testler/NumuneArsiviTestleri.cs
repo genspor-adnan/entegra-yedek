@@ -202,7 +202,10 @@ public sealed class NumuneArsiviTestleri(VeritabaniOlgusu olgu)
             var hedef = await veri.TekDegerAsync<DateTime?>("""
                 select imha_hedef from public.lab_numune_arsiv where numune_id = @p0
                 """, [n1], CancellationToken.None);
-            Assert.Equal(DateTime.Today.AddDays(30), hedef);
+            // Beklenen tarih VERİTABANININ gününden: fonksiyon current_date + gün yazar, oturum
+            //   UTC'de. Makinenin DateTime.Today'i yerel (İstanbul) - 00:00-03:00 arası bir gün
+            //   ileride olup testi saate bağlı kırıyordu.
+            Assert.Equal(await veri.TekDegerAsync<DateTime>("select current_date + 30", null, CancellationToken.None), hedef);
 
             // SÜRE DOLUNCA İMHA LİSTESİNE DÜŞER; imhayı SİSTEM YAPMAZ, liste
             //   yalnız gösterir.
