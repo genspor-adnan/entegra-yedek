@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -323,7 +324,7 @@ public static class BiyomedikalUclari
                     uyarilar.Add("Kurumun ödediği parçalar henüz stoktan düşülmedi.");
             }
 
-            var zaman = istek.Zaman ?? DateTime.Now;
+            var zaman = istek.Zaman ?? Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // İLK MÜDAHALE bir kez yazılır: yanıt süresi ondan hesaplanır,
@@ -494,7 +495,7 @@ public static class BiyomedikalUclari
             {
                 ["tur"] = 4,                       // 4 = Stok Çıkış Fişi (carisiz)
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["cikisDepoId"] = depoId,
@@ -584,7 +585,7 @@ public static class BiyomedikalUclari
 
             // REFERANS CİHAZIN SERTİFİKASI GEÇERLİ OLMALI. Geçersiz referansla
             //   yapılan ölçüm ölçüm değil tahmindir; sertifika da onu belgeler.
-            if (k["referansGecerlilik"] is DateTime rg && rg.Date < DateTime.Today)
+            if (k["referansGecerlilik"] is DateTime rg && Saat.Gun(rg) < Saat.Bugun)
             {
                 if (!istek.Zorla)
                     throw GentegreHatasi.IsKurali(
@@ -621,7 +622,7 @@ public static class BiyomedikalUclari
             // GEÇERLİLİK: verilmezse cihazın periyodundan türer. Periyot da
             //   yoksa boş kalır - uydurulmuş bir geçerlilik tarihi, olmayan
             //   bir güvenceyi belgelemektir.
-            var tarih = k["tarih"] is DateTime t ? t : DateTime.Today;
+            var tarih = k["tarih"] is DateTime t ? t : Saat.Bugun;
             var periyot = Convert.ToInt32(k["periyotAy"] ?? 0);
             DateTime? gecerlilik = istek.Gecerlilik
                 ?? (sonuc != 2 && periyot > 0 ? tarih.AddMonths(periyot) : null);
@@ -733,7 +734,7 @@ public static class BiyomedikalUclari
                 _ => (null, null, null)
             };
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var hareketId = await baglanti.TekDegerAsync<long>("""

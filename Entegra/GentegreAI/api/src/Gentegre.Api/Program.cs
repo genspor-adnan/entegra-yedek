@@ -295,6 +295,8 @@ uygulama.UseAuthorization();
 // OTURUM KAPISI (denetim 28.09.2026 #4): pasif hesap ve zorunlu parola
 //   degisimi SUNUCUDA - istemcideki yonlendirme tek basina koruma degildi.
 uygulama.UseMiddleware<OturumKapisi>();
+// SAAT DILIMI (1097): istegin subesinin dilimi - Saat.Simdi/Bugun ve DB oturumu (current_date).
+uygulama.UseMiddleware<SaatDilimiKapisi>();
 
 if (uygulama.Environment.IsDevelopment())
     uygulama.MapOpenApi();

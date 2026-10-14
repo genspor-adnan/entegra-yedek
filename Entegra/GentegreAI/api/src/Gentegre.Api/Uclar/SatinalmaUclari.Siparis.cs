@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -168,7 +169,7 @@ public static partial class SatinalmaUclari
                 ["tur"] = 9,                        // 9 = Alış Siparişi
                 ["tipi"] = 1,
                 ["tarafId"] = istek.TarafId,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["subeId"] = baglam.SubeId ?? t["subeId"],
@@ -286,7 +287,7 @@ public static partial class SatinalmaUclari
             if (Convert.ToInt16(s["takipDurum"] ?? (short)0) == 8 && istek.TakipDurum != 8)
                 throw GentegreHatasi.IsKurali("İptal edilmiş siparişte takip ilerletilemez.");
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // GECİKME GÜNÜ SÖZ VERİLEN TARİHTEN sayılır, sipariş tarihinden
@@ -395,7 +396,7 @@ public static partial class SatinalmaUclari
                 }
             }
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             await baglanti.CalistirAsync("""
@@ -559,7 +560,7 @@ public static partial class SatinalmaUclari
             if (mevcut is not null)
                 throw GentegreHatasi.IsKurali("Bu belge için kabul tutanağı zaten var.");
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var kabulId = await baglanti.TekDegerAsync<long>("""
@@ -776,7 +777,7 @@ public static partial class SatinalmaUclari
             if (istek.Sonuc != 3)
                 uyarilar.AddRange(await KarekodEksigiUyarisi(baglanti, id, iptal));
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             await baglanti.CalistirAsync("""
@@ -930,7 +931,7 @@ public static partial class SatinalmaUclari
                 sonuc = sonuc == 1 ? (short)2 : (short)5;
             }
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var kayitId = await baglanti.TekDegerAsync<long>("""
@@ -1018,7 +1019,7 @@ public static partial class SatinalmaUclari
                 throw GentegreHatasi.Dogrulama("Farklı faturada onay gerekçesi ya da mahsup zorunlu.",
                     new AlanHatasi("metin", $"Fark {fark:N2} - gerekçe ya da mahsup tutarı girin."));
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
 
             await baglanti.CalistirAsync("""
                 update public.satinalma_fatura_kontrol

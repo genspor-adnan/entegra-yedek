@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -90,7 +91,7 @@ public static partial class SatinalmaUclari
             if (mevcutFirma + yeniFirmalar.Count == 0)
                 throw GentegreHatasi.IsKurali("Davet edilecek firma yok.");
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var eklenen = 0;
@@ -177,7 +178,7 @@ public static partial class SatinalmaUclari
 
             // SON TARİH KAPISI. Erken açılan bir teklif, diğer firmalara
             //   söylenebilecek bir bilgidir.
-            if (k["sonTarih"] is DateTime st && DateTime.Now < st)
+            if (k["sonTarih"] is DateTime st && Saat.An < Saat.AnOlarak(st))
             {
                 if (!istek.Zorla)
                     throw GentegreHatasi.IsKurali(
@@ -191,7 +192,7 @@ public static partial class SatinalmaUclari
             if (Convert.ToInt32(k["teklifVeren"] ?? 0) == 0)
                 throw GentegreHatasi.IsKurali("Hiç teklif girilmemiş - açılacak bir şey yok.");
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // --- TEKNİK ELEME. Zorunlu kriteri "karşılamıyor" (3) ya da hiç
@@ -360,7 +361,7 @@ public static partial class SatinalmaUclari
                     new AlanHatasi("gerekce",
                         $"En düşük teklif {k["enDusukTutar"]} - neden bu firma seçildi?"));
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             await baglanti.CalistirAsync("""

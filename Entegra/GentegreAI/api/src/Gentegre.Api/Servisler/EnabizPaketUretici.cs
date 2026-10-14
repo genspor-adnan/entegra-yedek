@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Gentegre.Cekirdek;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Gentegre.Veri;
@@ -239,7 +240,7 @@ public sealed partial class EnabizPaketUretici
             "select public.fn_numara_kimlik_uret(904, @p0, 'enabiz_paket', "
             + "'paket_no', current_date)", islem, [baglam.SubeId], iptal);
         var paketNo = string.IsNullOrEmpty(sablonNo)
-            ? $"PK-{DateTime.Today:yyyy}-{paketId:000000}" : sablonNo;
+            ? $"PK-{Saat.Bugun:yyyy}-{paketId:000000}" : sablonNo;
         await baglanti.CalistirAsync(
             "update public.enabiz_paket set paket_no = @p1 where id = @p0",
             islem, [paketId, paketNo], iptal);
@@ -471,7 +472,7 @@ public sealed partial class EnabizPaketUretici
         o.IsDBNull(1) ? null : o.GetInt32(1),
         o.IsDBNull(2) ? null : o.GetInt32(2),
         o.GetInt32(3),
-        o.IsDBNull(4) ? DateTime.Now : o.GetDateTime(4));
+        o.IsDBNull(4) ? Saat.Simdi : o.GetDateTime(4));
 
     /// <summary>
     /// USS alanlarını kaynak kolonlardan çözer.

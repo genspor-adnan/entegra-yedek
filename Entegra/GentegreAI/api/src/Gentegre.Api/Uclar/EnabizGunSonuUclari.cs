@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -36,8 +37,8 @@ public static class EnabizGunSonuUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("enabiz.gun_sonu", Islem.Gor);
             var baslangic = DateOnly.TryParse(bas, out var b1) ? b1
-                : DateOnly.FromDateTime(DateTime.Now.AddDays(-14));
-            var bitis = DateOnly.TryParse(bit, out var b2) ? b2 : DateOnly.FromDateTime(DateTime.Now);
+                : DateOnly.FromDateTime(Saat.Simdi.AddDays(-14));
+            var bitis = DateOnly.TryParse(bit, out var b2) ? b2 : DateOnly.FromDateTime(Saat.Simdi);
 
             await using var b = await veri.AcAsync(iptal);
             var gunler = await b.ListeAsync("""
@@ -176,11 +177,11 @@ public static class EnabizGunSonuUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("enabiz.gun_sonu", Islem.Degistir);
-            var d = DateTime.Now.AddMonths(-1);
+            var d = Saat.Simdi.AddMonths(-1);
             var yil = istek?.Yil ?? d.Year;
             var ay = istek?.Ay ?? d.Month;
             if (ay is < 1 or > 12) throw GentegreHatasi.Dogrulama("Ay 1-12 arası olmalı.");
-            if (new DateTime(yil, ay, 1) > new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))
+            if (new DateTime(yil, ay, 1) > new DateTime(Saat.Simdi.Year, Saat.Simdi.Month, 1))
                 throw GentegreHatasi.Dogrulama("Gelecek bir ayın özeti hesaplanamaz.");
 
             var s = await servis.AyHesaplaAsync(yil, ay, istek?.SubeId ?? baglam.SubeId ?? 0,
@@ -199,8 +200,8 @@ public static class EnabizGunSonuUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("enabiz.gun_sonu", Islem.Degistir);
             var tarih = DateOnly.TryParse(istek?.Tarih, out var t) ? t
-                : DateOnly.FromDateTime(DateTime.Now.AddDays(-1));
-            if (tarih > DateOnly.FromDateTime(DateTime.Now))
+                : DateOnly.FromDateTime(Saat.Simdi.AddDays(-1));
+            if (tarih > DateOnly.FromDateTime(Saat.Simdi))
                 throw GentegreHatasi.Dogrulama("Gelecek bir günün gün sonu hesaplanamaz.");
 
             var s = await servis.HesaplaAsync(tarih, istek?.SubeId ?? baglam.SubeId ?? 0,

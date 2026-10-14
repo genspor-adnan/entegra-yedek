@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -52,7 +53,7 @@ public static partial class MuayeneUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Gor);
 
-            var tarih = DateTime.TryParse(gun, out var t) ? t.Date : DateTime.Today;
+            var tarih = DateTime.TryParse(gun, out var t) ? t.Date : Saat.Bugun;
             var sube = baglam.SubeId ?? 0;
 
             await using var baglanti = await veri.AcAsync(iptal);

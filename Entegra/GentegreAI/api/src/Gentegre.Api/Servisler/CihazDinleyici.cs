@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -169,7 +170,7 @@ public sealed class CihazDinleyici(IServiceScopeFactory kapsam,
 
     private static byte[] Ack(string kontrolNo, string kod)
     {
-        var zaman = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var zaman = Saat.Simdi.ToString("yyyyMMddHHmmss");
         var govde = $"MSH|^~\\&|GENTEGRE|AI|CIHAZ|LAB|{zaman}||ACK|{zaman}|P|2.5\r"
                   + $"MSA|{kod}|{kontrolNo}\r";
         var veri = Encoding.UTF8.GetBytes(govde);

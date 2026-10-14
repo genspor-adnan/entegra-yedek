@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -110,7 +111,7 @@ public static partial class AvansUclari
 
             var donem = (istek.IlkDonem ?? "").Trim();
             if (donem.Length == 0)
-                donem = DateTime.Today.AddMonths(1).ToString("yyyy-MM");
+                donem = Saat.Bugun.AddMonths(1).ToString("yyyy-MM");
             if (!System.Text.RegularExpressions.Regex.IsMatch(donem, @"^\d{4}-\d{2}$"))
                 throw GentegreHatasi.Dogrulama("Dönem biçimi yyyy-AA olmalı.",
                     new AlanHatasi("ilkDonem", "Örnek: 2026-11"));
@@ -255,7 +256,7 @@ public static partial class AvansUclari
                     : "Yalnız ONAYLANMIŞ avans ödenir - önce onay zincirini tamamlayın.");
 
             var tutar = Convert.ToDecimal(a["tutar"] ?? 0m);
-            var tarih = (istek.Tarih ?? DateOnly.FromDateTime(DateTime.Today))
+            var tarih = (istek.Tarih ?? DateOnly.FromDateTime(Saat.Bugun))
                 .ToDateTime(TimeOnly.MinValue);
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -281,7 +282,7 @@ public static partial class AvansUclari
             var taksit = Convert.ToInt16(a["taksit"] ?? (short)1);
             var ilkDonem = a["ilkDonem"] as string ?? "";
             var bas = DateTime.TryParse(ilkDonem + "-01", out var d0)
-                ? d0 : DateTime.Today.AddMonths(1);
+                ? d0 : Saat.Bugun.AddMonths(1);
 
             // SON TAKSİT KALANI ALIR: 1000/3 = 333,33 üç kez yazılırsa
             //   1 kuruş açık kalır ve avans hiç kapanmaz.
@@ -341,7 +342,7 @@ public static partial class AvansUclari
                 ?? throw GentegreHatasi.IsKurali("Bekleyen kesinti yok.");
 
             var kesintiId = Convert.ToInt32(k["id"]);
-            var tarih = (istek.Tarih ?? DateOnly.FromDateTime(DateTime.Today))
+            var tarih = (istek.Tarih ?? DateOnly.FromDateTime(Saat.Bugun))
                 .ToDateTime(TimeOnly.MinValue);
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);

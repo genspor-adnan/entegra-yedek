@@ -1,3 +1,4 @@
+using Gentegre.Cekirdek;
 using System.Text.Json.Nodes;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Bildirim;
@@ -139,8 +140,9 @@ public static partial class CagriUclari
             int? gorevId = c.gorevId;
             if (geriAranacak)
             {
-                // gorev.termin/hatirlatma timestamptz: istemci yerel saat gönderir (offset yok) -> UTC'ye çevrilir.
-                var geriUtc = DateTime.SpecifyKind(g.GeriArama!.Value, DateTimeKind.Local).ToUniversalTime();
+                // gorev.termin/hatirlatma timestamptz: istemci yerel saat gönderir (offset yok) -> ŞUBENİN
+                //   diliminde UTC'ye (1097; önce sunucunun yerel saatiyle çevriliyordu - konteyner UTC).
+                var geriUtc = Saat.UtcYap(DateTime.SpecifyKind(g.GeriArama!.Value, DateTimeKind.Unspecified));
                 gorevId = (int)await b.TekDegerAsync<long>("""
                     insert into public.gorev (konu, aciklama, tur, oncelik, durum, sorumlu_id, acan_id, taraf_id, termin, hatirlatma, sube_id, ekleyen)
                     values (@p0, @p1, 2, @p2, 0, @p3, @p3, @p4, @p5, @p5, @p6, @p3) returning id
@@ -165,7 +167,7 @@ public static partial class CagriUclari
                        durum = 5, degistiren = @p10, degistirme_tarihi = now()
                  where id = @p0
                 """, null, [id, g.KonuId, g.AltKonuId, g.Sonuc ?? (short)1, Kirp(g.Notu, 1200), g.Oncelik, tarafId,
-                            g.GeriArama is null ? null : DateTime.SpecifyKind(g.GeriArama.Value, DateTimeKind.Unspecified), gorevId, g.Memnuniyet, baglam.KullaniciId], iptal);
+                            g.GeriArama is null ? null : Saat.UtcYap(DateTime.SpecifyKind(g.GeriArama.Value, DateTimeKind.Unspecified)), gorevId, g.Memnuniyet, baglam.KullaniciId], iptal);
             await OlayYazAsync(b, id, 9, baglam.KullaniciId, "Kayıt tamamlandı", "", iptal);
             if (c.kisiId is not null)
             {

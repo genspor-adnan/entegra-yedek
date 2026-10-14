@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -288,7 +289,7 @@ public static class AcilUclari
                  where id = @p0
                 """, islem,
                 [id, istek.HekimId ?? baglam.KullaniciId,
-                 istek.Zaman ?? DateTime.Now, baglam.KullaniciId], iptal);
+                 istek.Zaman ?? Saat.Simdi, baglam.KullaniciId], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBasvuru, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -402,7 +403,7 @@ public static class AcilUclari
                  where id = @p0
                 """, islem,
                 [id, istek.CikisSekli, istek.CikisTani.Trim(), istek.HedefBolumId,
-                 istek.CikisNotu, istek.Zaman ?? DateTime.Now, baglam.KullaniciId], iptal);
+                 istek.CikisNotu, istek.Zaman ?? Saat.Simdi, baglam.KullaniciId], iptal);
 
             // YATAK BOŞ DEĞİL, TEMİZLİKTE: temizlenmemiş yatağa hasta yollamak
             //   panonun yalan söylemesidir. "Temizlik bitti" ayrı bir olaydır.

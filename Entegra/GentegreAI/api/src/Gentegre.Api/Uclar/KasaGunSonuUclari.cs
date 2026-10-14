@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
@@ -59,7 +60,7 @@ public static class KasaGunSonuUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            return Results.Ok((await HesaplaAsync(b, (tarih ?? DateTime.Today.AddDays(-1)).Date, baglam.SubeId ?? 0, iptal)).Veri);
+            return Results.Ok((await HesaplaAsync(b, (tarih ?? Saat.Bugun.AddDays(-1)).Date, baglam.SubeId ?? 0, iptal)).Veri);
         });
 
         grup.MapPost("/sayim", async (SayimIstegi i, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>

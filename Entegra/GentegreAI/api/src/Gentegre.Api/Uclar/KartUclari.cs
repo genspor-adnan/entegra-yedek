@@ -1,4 +1,5 @@
-﻿using Gentegre.Cekirdek.Aktarim;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Cekirdek.Aktarim;
 using System.Globalization;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
@@ -474,7 +475,7 @@ public static class KartUclari
                 Varsayilanlar = (tanim.YeniKayitVarsayilanlari
                     ?? new Dictionary<string, object?>())
                     .ToDictionary(x => x.Key, x => x.Value as string == "@bugun"
-                        ? DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                        ? Saat.Bugun.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
                         : x.Value),
                 AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
                 Doviz = dovizMeta,

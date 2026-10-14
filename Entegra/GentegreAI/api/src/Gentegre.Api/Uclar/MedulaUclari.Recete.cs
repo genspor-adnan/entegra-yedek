@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Security.Cryptography;
 using System.Text;
 using Gentegre.Api.AraKatman;

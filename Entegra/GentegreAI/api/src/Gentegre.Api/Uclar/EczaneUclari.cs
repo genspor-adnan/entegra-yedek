@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -207,7 +208,7 @@ public static partial class EczaneUclari
                         new AlanHatasi("gerekce", "Gerekçe zorunlu."));
             }
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // BİLDİRİM ZAMANI YALNIZ İLK KEZ YAZILIR: hekime kaç kez söylendiği
@@ -256,7 +257,7 @@ public static partial class EczaneUclari
                     new AlanHatasi("yanit", "Hekim yanıtı boş olamaz."));
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
 
             var etkilenen = await baglanti.CalistirAsync("""
                 update public.eczane_kontrol
@@ -352,11 +353,11 @@ public static partial class EczaneUclari
             //   hastaya gitmesi ile stok bakiyesinin yanlış olması aynı ağırlıkta
             //   sayılamaz.
             if (adim is "hazirla" or "kontrol" or "teslim"
-                && d["skt"] is DateTime skt && skt.Date < DateTime.Today)
+                && d["skt"] is DateTime skt && Saat.Gun(skt) < Saat.Bugun)
                 throw GentegreHatasi.IsKurali(
                     $"Lotun miadı geçmiş ({skt:dd.MM.yyyy}) - bu doz verilemez.");
 
-            var zaman = istek.Zaman ?? DateTime.Now;
+            var zaman = istek.Zaman ?? Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // Her adım kendi damgasını yazar; durum GERİ GİTMEZ (iade/imha
@@ -508,7 +509,7 @@ public static partial class EczaneUclari
             if (adim == "teslim" && h["dogrulamaZamani"] is null)
                 throw GentegreHatasi.IsKurali("Doğrulanmamış karışım teslim edilemez.");
 
-            var zaman = istek.Zaman ?? DateTime.Now;
+            var zaman = istek.Zaman ?? Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var sql = adim switch

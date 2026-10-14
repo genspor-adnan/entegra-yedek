@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -36,7 +37,7 @@ public static class VezneIcmalUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
-            var baslangic = (bas ?? DateTime.Today).Date;
+            var baslangic = (bas ?? Saat.Bugun).Date;
             var sonGun = (bit ?? baslangic).Date;
             if (sonGun < baslangic) sonGun = baslangic;
             var bitis = sonGun.AddDays(1);

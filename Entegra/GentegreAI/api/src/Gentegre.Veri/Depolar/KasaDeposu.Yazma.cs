@@ -396,7 +396,7 @@ public sealed partial class KasaDeposu
         }
         else if (kur <= 0)
         {
-            var tarih = Tarih(islem, "islemTarihi") ?? DateTime.Today;
+            var tarih = Tarih(islem, "islemTarihi") ?? Saat.Bugun;
             var yon = (short)(Sayi(islem, "tur") is 21 or 22 or 23 or 24 or 25 or 26 or 87 ? 1 : 2);
 
             await using var komut = baglanti.Komut(

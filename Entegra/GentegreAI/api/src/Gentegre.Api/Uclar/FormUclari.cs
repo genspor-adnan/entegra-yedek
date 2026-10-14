@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
@@ -425,7 +426,7 @@ public static class FormUclari
             var i = await AcikOturumAsync(b, kod, g.Oturum, iptal);
             await b.CalistirAsync("update public.form_istek set taslak = cast(@p1 as jsonb), durum = 3 where id = @p0 and durum in (1, 2, 3)",
                 null, [i.id, (g.Taslak ?? new JsonObject()).ToJsonString()], iptal);
-            return Results.Ok(new { kaydedildi = DateTime.Now });
+            return Results.Ok(new { kaydedildi = Saat.Simdi });
         });
 
         // GÖNDER: rıza + cevap + (beyan imzası) → tamamlandı, bağlantı kapanır.
@@ -446,7 +447,7 @@ public static class FormUclari
             // Hekim bölümü cevapları korunur: hasta yalnız kendi bölümlerini yazar.
             var birlesik = Birlestir(i.cevap, cevap, i.tanim);
             var imzalar = g.Imzalar ?? new JsonArray();
-            imzalar.Add(new JsonObject { ["rol"] = "hasta", ["ad"] = i.hastaAd, ["yontem"] = 5, ["zaman"] = DateTime.Now, ["ip"] = BaglamCozucu.IpCoz(ctx) });
+            imzalar.Add(new JsonObject { ["rol"] = "hasta", ["ad"] = i.hastaAd, ["yontem"] = 5, ["zaman"] = Saat.Simdi, ["ip"] = BaglamCozucu.IpCoz(ctx) });
             var (skor, sonuc) = SkorHesapla(i.tanim, birlesik);
             // Hekim/hemşire bölümü olan form (Ek-2 gibi) hastanın gönderimiyle BİTMEZ:
             //   beyan alındı (durum 3), bağlantı kapanır, personel iç ekranda tamamlar.
@@ -459,7 +460,7 @@ public static class FormUclari
                        oturum_anahtari = '', belirtec_ozet = ''
                  where id = @p0
                 """, null, [i.id, birlesik, imzalar.ToJsonString(), $"v{i.surum}", skor, sonuc, BaglamCozucu.IpCoz(ctx), Ua(ctx), yeniDurum], iptal);
-            return Results.Ok(new { durum = (int)yeniDurum, tamamlanma = DateTime.Now, skor, sonuc, personelBolumuVar });
+            return Results.Ok(new { durum = (int)yeniDurum, tamamlanma = Saat.Simdi, skor, sonuc, personelBolumuVar });
         });
     }
 
@@ -628,7 +629,7 @@ public static class FormUclari
     /// <summary>Metin bloklarındaki {hasta.ad} {kurum.ad} ve hekim bölümü cevapları ({islem} gibi).</summary>
     private static Dictionary<string, string> Parametreler(string hastaAd, string kurum, string cevapJson)
     {
-        var p = new Dictionary<string, string> { ["hasta.ad"] = hastaAd, ["kurum.ad"] = kurum, ["tarih"] = DateTime.Today.ToString("dd.MM.yyyy") };
+        var p = new Dictionary<string, string> { ["hasta.ad"] = hastaAd, ["kurum.ad"] = kurum, ["tarih"] = Saat.Bugun.ToString("dd.MM.yyyy") };
         if (JsonNode.Parse(cevapJson) is JsonObject c)
             foreach (var (k, v) in c) if (v is JsonValue) p[k] = v.ToString();
         return p;

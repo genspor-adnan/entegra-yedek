@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -354,7 +355,7 @@ public static partial class RadyolojiUclari
                     ["tarafUnvan"] = hasta["unvan"],
                     ["tarafVkno"] = hasta["vkno"],
                     ["tarafVd"] = hasta["vd"],
-                    ["belgeTarihi"] = DateTime.Now,
+                    ["belgeTarihi"] = Saat.Simdi,
                     ["belgeDovizi"] = "TL",
                     ["dovizKuru"] = 1m,
                     ["fiyatListesiId"] = listeId,

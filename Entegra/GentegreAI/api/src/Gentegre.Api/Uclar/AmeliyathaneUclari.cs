@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -131,7 +132,7 @@ public static partial class AmeliyathaneUclari
             //   "suzgec yok" demektir, hata degil.
             int? salon = int.TryParse(salonId, out var sid) && sid > 0 ? sid : null;
 
-            var g = (gun ?? DateTime.Today).Date;
+            var g = (gun ?? Saat.Bugun).Date;
             var subeId = baglam.SubeId ?? 0;
 
             await using var baglanti = await veri.AcAsync(iptal);
@@ -573,7 +574,7 @@ public static partial class AmeliyathaneUclari
                     uyarilar.Add("Kapanış sayımı girilmemiş kalem var.");
             }
 
-            var zaman = istek.Zaman ?? DateTime.Now;
+            var zaman = istek.Zaman ?? Saat.Simdi;
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 

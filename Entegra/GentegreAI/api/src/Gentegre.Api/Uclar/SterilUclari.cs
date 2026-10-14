@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Gentegre.Api.AraKatman;
@@ -123,8 +124,8 @@ public static partial class SterilUclari
         {
             if (c.bd == 0 && c.bugun > 0) u.Add(new { tur = "bd", seviye = "kir", cihazId = c.id, mesaj = $"{c.ad}: bugün Bowie-Dick sonucu kayıtlı değil; döngüler {(k.BdKurali == "engel" ? "engellenir" : "sorumlu onayıyla açılıyor")}." });
             else if (c.bd == 0) u.Add(new { tur = "bd", seviye = "sari", cihazId = c.id, mesaj = $"{c.ad}: günün Bowie-Dick testi henüz yapılmadı (ilk döngü, boş kazan)." });
-            if (c.bakim is { } bk && bk <= DateTime.Today.AddDays(30)) u.Add(new { tur = "bakim", seviye = bk < DateTime.Today ? "kir" : "sari", cihazId = c.id, mesaj = $"{c.ad}: periyodik bakım {bk:dd.MM.yyyy}{(bk < DateTime.Today ? " GECİKTİ" : "")}." });
-            if (c.val is { } vl && vl <= DateTime.Today.AddDays(60)) u.Add(new { tur = "validasyon", seviye = vl < DateTime.Today ? "kir" : "sari", cihazId = c.id, mesaj = $"{c.ad}: validasyon / kalibrasyon {vl:dd.MM.yyyy}{(vl < DateTime.Today ? " GECİKTİ" : "")}." });
+            if (c.bakim is { } bk && bk <= Saat.Bugun.AddDays(30)) u.Add(new { tur = "bakim", seviye = bk < Saat.Bugun ? "kir" : "sari", cihazId = c.id, mesaj = $"{c.ad}: periyodik bakım {bk:dd.MM.yyyy}{(bk < Saat.Bugun ? " GECİKTİ" : "")}." });
+            if (c.val is { } vl && vl <= Saat.Bugun.AddDays(60)) u.Add(new { tur = "validasyon", seviye = vl < Saat.Bugun ? "kir" : "sari", cihazId = c.id, mesaj = $"{c.ad}: validasyon / kalibrasyon {vl:dd.MM.yyyy}{(vl < Saat.Bugun ? " GECİKTİ" : "")}." });
         }
         var bakimGerekli = await b.ListeAsync("select id, ad from public.steril_cihaz where durum = 2", null, [], o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
         foreach (var c in bakimGerekli) u.Add(new { tur = "cihaz", seviye = "kir", cihazId = c.id, mesaj = $"{c.ad}: bakım gerekli (kullanım dışı)." });
@@ -140,7 +141,7 @@ public static partial class SterilUclari
             """, null, [], o => new { id = o.GetInt32(0), ad = o.GetString(1), son = o.IsDBNull(2) ? (DateTime?)null : o.GetDateTime(2) }, iptal);
         foreach (var c in sonBio)
         {
-            var gun = c.son is null ? 999 : (DateTime.Now - c.son.Value).Days;
+            var gun = c.son is null ? 999 : (Saat.An - Saat.AnOlarak(c.son.Value)).Days;
             if (c.son is null) u.Add(new { tur = "bio_gecikme", seviye = "sari", cihazId = c.id, mesaj = $"{c.ad}: biyolojik test hiç yapılmadı; ilk döngüye biyolojik indikatör (lot) ekleyin." });
             else if (gun >= k.BioGecikmeUyariGun) u.Add(new { tur = "bio_gecikme", seviye = gun >= k.BioGecikmeEngelGun ? "kir" : "sari", cihazId = c.id, mesaj = $"{c.ad}: haftalık biyolojik test {gun} gündür yapılmadı{(gun >= k.BioGecikmeEngelGun ? " — biyolojik indikatörsüz döngü engellenir" : "")}." });
         }

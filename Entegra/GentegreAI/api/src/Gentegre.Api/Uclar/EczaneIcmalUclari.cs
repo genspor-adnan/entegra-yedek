@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -56,7 +57,7 @@ public static class EczaneIcmalUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
-            var buAy = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var buAy = new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var baslangic = (bas ?? buAy.AddMonths(-1)).Date;
             var sonGun = (bit ?? buAy.AddDays(-1)).Date;
             if (sonGun < baslangic) sonGun = baslangic;
@@ -248,7 +249,7 @@ public static class EczaneIcmalUclari
             }).OrderByDescending(x => x.tutar).ThenBy(x => x.tarih).ToList();
 
             // ------------------------------------------------------------------ miad --
-            var bugun = DateTime.Today;
+            var bugun = Saat.Bugun;
             var miad = miadHam.Where(m => depo is not > 0 || m.depoId == depo).Select(m => new
             {
                 m.ad, m.lot, m.depo, m.skt, m.kalanGun, m.miktar, m.tutar, m.gunluk,

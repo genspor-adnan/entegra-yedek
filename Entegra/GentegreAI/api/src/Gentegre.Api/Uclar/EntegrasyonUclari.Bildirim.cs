@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Bildirim;
@@ -76,7 +77,7 @@ public static class EntegrasyonBildirimUclari
 
             var kanal = kanalKodu == "1" ? BildirimKanali.Sms : BildirimKanali.Eposta;
             var govde = string.IsNullOrWhiteSpace(istek.Mesaj)
-                ? $"Gentegre AI sınama mesajı ({DateTime.Now:dd.MM.yyyy HH:mm})."
+                ? $"Gentegre AI sınama mesajı ({Saat.Simdi:dd.MM.yyyy HH:mm})."
                 : istek.Mesaj!.Trim();
 
             // KUYRUĞA GİRMEZ: Id = 0 olan geçici kayıt, doğrudan sağlayıcıya.

@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -37,7 +38,7 @@ public static class KurumIcmalOzetUclari
             //   ile "kurum"u açar, 1015).
             baglam.YetkiIste("kurum", Islem.Gor);
             // Varsayılan dönem: geçen ay (kurum faturası ay kapanınca kesilir).
-            var buAy = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var buAy = new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var baslangic = (bas ?? buAy.AddMonths(-1)).Date;
             var sonGun = (bit ?? buAy.AddDays(-1)).Date;
             var bitis = sonGun.AddDays(1);
@@ -366,7 +367,7 @@ public static class KurumIcmalOzetUclari
                              : fatura > 0 && tahsil >= fatura - 0.005m ? "tahsil"
                              : "faturalandi",
                     vadesiGecti = durum == 2 && tahsil < fatura - 0.005m && vadeGun > 0
-                                  && vade < DateTime.Today,
+                                  && vade < Saat.Bugun,
                 };
             }, iptal);
             return Results.Ok(new { kayitlar = liste });

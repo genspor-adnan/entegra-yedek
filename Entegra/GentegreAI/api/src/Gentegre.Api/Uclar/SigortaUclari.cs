@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sigorta;
@@ -67,7 +68,7 @@ public static class SigortaUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("sigorta", Islem.Gor);
 
-            var tarih = DateTime.TryParse(istek.Tarih, out var t) ? t : DateTime.Now;
+            var tarih = DateTime.TryParse(istek.Tarih, out var t) ? t : Saat.Simdi;
             var (id, sonuc) = await servis.PoliceSorgulaAsync(
                 istek.TarafId, istek.KurumId, istek.HekimId, istek.PoliceNo ?? "",
                 tarih, baglam, iptal);

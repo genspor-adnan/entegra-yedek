@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -294,7 +295,7 @@ public static class DokumanYonetimUclari
                 returning id
                 """,
                 [id, kod, baglam.KullaniciId,
-                 istek.GunSayisi is > 0 ? DateTime.Now.AddDays(istek.GunSayisi.Value) : null,
+                 istek.GunSayisi is > 0 ? Saat.Simdi.AddDays(istek.GunSayisi.Value) : null,
                  (short)(istek.IndirmeIzni == false ? 0 : 1),
                  istek.AzamiAcilma ?? 0, istek.AliciEposta ?? ""], iptal);
 

@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -54,7 +55,7 @@ public static class AlacakYaslandirmaUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
-            var refTarih = (tarih ?? DateTime.Today).Date;
+            var refTarih = (tarih ?? Saat.Bugun).Date;
             var bitis = refTarih.AddDays(1);
             var sube = baglam.SubeId ?? 0;
             var kurumIste = taraf is null or "" or "hepsi" or "kurum";

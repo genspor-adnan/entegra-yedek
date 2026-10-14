@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -84,12 +85,12 @@ public static class IsgIcmalUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
-            var buAy = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var buAy = new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var baslangic = (bas ?? buAy.AddMonths(-1)).Date;
             var sonGun = (bit ?? buAy.AddDays(-1)).Date;
             if (sonGun < baslangic) sonGun = baslangic;
             var bitis = sonGun.AddDays(1);
-            var bugun = DateTime.Today;
+            var bugun = Saat.Bugun;
             var sube = baglam.SubeId ?? 0;
             var secim = (firmalar ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => int.TryParse(x, out var i) ? i : 0).Where(i => i > 0).ToHashSet();

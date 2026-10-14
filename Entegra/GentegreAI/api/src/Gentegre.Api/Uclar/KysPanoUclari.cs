@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
@@ -133,7 +134,7 @@ public static class KysPanoUclari
                     @is = o.IsDBNull(3) ? "" : o.GetString(3),
                     birim = o.GetString(4),
                     termin = o.IsDBNull(5) ? (DateTime?)null : o.GetDateTime(5),
-                    gecikti = !o.IsDBNull(5) && o.GetDateTime(5) < DateTime.Today,
+                    gecikti = !o.IsDBNull(5) && Saat.Gun(o.GetDateTime(5)) < Saat.Bugun,
                     yol = o.GetString(6),
                 }, iptal);
 
@@ -146,7 +147,7 @@ public static class KysPanoUclari
 
             return Results.Ok(new
             {
-                bugun = DateTime.Today,
+                bugun = Saat.Bugun,
                 kaliteSorumlusu = sorumlu ?? "",
                 ozet = new
                 {

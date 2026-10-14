@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Gentegre.Cekirdek;
+using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Katalog;
@@ -442,7 +443,7 @@ public static class BelgeUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
 
-            var gun = tarih ?? DateOnly.FromDateTime(DateTime.Now);
+            var gun = tarih ?? DateOnly.FromDateTime(Saat.Simdi);
             var satirlar = await veri.ListeAsync("""
                 select s.id, s.ad, s.alt_kurum, s.sozlesme_no, s.durum,
                        coalesce(d.ad, '') as alt_kurum_adi,
@@ -791,7 +792,7 @@ public static class BelgeUclari
 
     private static void BelgeTarihiSaatle(Dictionary<string, object?> belge)
     {
-        var simdi = DateTime.Now;
+        var simdi = Saat.Simdi;
         if (!belge.TryGetValue("belgeTarihi", out var deger) || deger is null)
         {
             belge["belgeTarihi"] = simdi;

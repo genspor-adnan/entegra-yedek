@@ -1,4 +1,5 @@
-﻿using Gentegre.Cekirdek.Bildirim;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Cekirdek.Bildirim;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 
@@ -103,7 +104,7 @@ public sealed class RandevuHatirlatmasi
         // GEÇMİŞ ZAMANA hatırlatma konmaz: aynı gün açılan randevuda mesaj
         //   "yarın" yerine anında giderdi. Randevuya 2 saatten az kaldıysa da
         //   hatırlatmanın anlamı yok.
-        if (planlanan <= DateTime.Now || r.Baslangic <= DateTime.Now.AddHours(2)) return;
+        if (Saat.AnOlarak(planlanan) <= Saat.An || Saat.AnOlarak(r.Baslangic) <= Saat.An.AddHours(2)) return;
 
         await _bildirim.KuyrugaEkleAsync(new BildirimIstegi(
                 SablonKodu: "randevu.hatirlatma",

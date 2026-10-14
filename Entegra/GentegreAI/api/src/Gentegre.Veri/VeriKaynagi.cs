@@ -10,16 +10,33 @@ namespace Gentegre.Veri;
 /// </summary>
 public sealed class VeriKaynagi : IAsyncDisposable
 {
-    private readonly NpgsqlDataSource _kaynak;
+    private readonly string _baglantiDizesi;
+
+    /// <summary>
+    /// SAAT DILIMI BASINA HAVUZ (1097): oturumun saat dilimi istegin SUBESININ dilimidir
+    /// (Saat.EtkinDilimAdi) - `current_date`, `::date`, to_char ve tarih -> timestamptz
+    /// donusumleri o subenin gununu gorur. Dilim baglanti dizesinde (Timezone=) verilir:
+    /// ayri havuz, her baglantida ek `SET` sorgusu yok. Kurulusta genelde tek dilim var.
+    /// Saklanan an her zaman UTC (timestamptz, veritabani UTC - 667/1097).
+    /// </summary>
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, NpgsqlDataSource> _kaynaklar =
+        new(StringComparer.Ordinal);
 
     public VeriKaynagi(string baglantiDizesi)
     {
-        var kurucu = new NpgsqlDataSourceBuilder(baglantiDizesi);
-        _kaynak = kurucu.Build();
+        _baglantiDizesi = baglantiDizesi;
     }
 
+    private NpgsqlDataSource Kaynak(string dilim) => _kaynaklar.GetOrAdd(dilim, d =>
+    {
+        var kurucu = new NpgsqlDataSourceBuilder(_baglantiDizesi);
+        // Baglanti dizesi kendi dilimini veriyorsa (test / ozel kurulum) ona dokunulmaz.
+        if (string.IsNullOrEmpty(kurucu.ConnectionStringBuilder.Timezone)) kurucu.ConnectionStringBuilder.Timezone = d;
+        return kurucu.Build();
+    });
+
     public async Task<NpgsqlConnection> AcAsync(CancellationToken iptal = default)
-        => await _kaynak.OpenConnectionAsync(iptal);
+        => await Kaynak(Gentegre.Cekirdek.Saat.EtkinDilimAdi).OpenConnectionAsync(iptal);
 
     // NOT (islem/transaction sarmalayicisi): 32 cagri yerinin hepsi
     //   `await using var islem = ... BeginTransactionAsync` + acik `CommitAsync`
@@ -86,7 +103,10 @@ public sealed class VeriKaynagi : IAsyncDisposable
         return await okuyucu.ReadAsync(iptal) ? cevir(okuyucu) : null;
     }
 
-    public ValueTask DisposeAsync() => _kaynak.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var k in _kaynaklar.Values) await k.DisposeAsync();
+    }
 }
 
 /// <summary>

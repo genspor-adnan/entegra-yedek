@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Gentegre.Cekirdek;
+using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -197,14 +198,14 @@ public static class KasaUclari
             BaglamCozucu cozucu, KasaDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            var kur = await depo.KurAsync(cins, tarih ?? DateTime.Today, yon ?? 1, iptal);
+            var kur = await depo.KurAsync(cins, tarih ?? Saat.Bugun, yon ?? 1, iptal);
             // Istenen tarihe kur yoksa onceki en yakin gun kullanilir; hangi gun
             //   oldugu de doner - ekran "bugunun kuru" diye eski kur gostermesin.
-            var kurTarihi = await depo.KurTarihiAsync(cins, tarih ?? DateTime.Today, iptal);
+            var kurTarihi = await depo.KurTarihiAsync(cins, tarih ?? Saat.Bugun, iptal);
             return Results.Ok(new
             {
                 dovizCinsi = cins,
-                tarih = (tarih ?? DateTime.Today).Date,
+                tarih = (tarih ?? Saat.Bugun).Date,
                 kurTarihi,
                 kur,
                 izlemeNo = baglam.IzlemeNo

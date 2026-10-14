@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -143,8 +144,8 @@ public static partial class TeleradUclari
                 //   günün değil - gecikmeli kesilen fatura yanlış aya düşerdi.
                 //   AMA İLERİ TARİH OLAMAZ (belge hattının kuralı): dönem
                 //   kapanmadan ara fatura kesilirse bugünün tarihi kullanılır.
-                ["belgeTarihi"] = istek.Bitis.Date > DateTime.Today
-                    ? DateTime.Today : istek.Bitis.Date,
+                ["belgeTarihi"] = Saat.Gun(istek.Bitis) > Saat.Bugun
+                    ? Saat.Bugun : istek.Bitis.Date,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["subeId"] = baglam.SubeId,

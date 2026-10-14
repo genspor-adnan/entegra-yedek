@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Its;
 using Gentegre.Cekirdek.Sozlesme;
@@ -96,7 +97,7 @@ public static partial class SatinalmaUclari
                  where s.kabul_id = @p0 and s.stok_id is not null
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // BİLDİRİM BİR KEZ AÇILIR, kutular ona eklenir. Her okutmada yeni
@@ -214,7 +215,7 @@ public static partial class SatinalmaUclari
                     if (eslesen["skt"] is DateTime beklenenSkt
                         && DateOnly.FromDateTime(beklenenSkt) != skt)
                         uyari = $"Satırdaki miad {beklenenSkt:dd.MM.yyyy}, kutuda {skt:dd.MM.yyyy}.";
-                    if (skt.ToDateTime(TimeOnly.MinValue).Date < DateTime.Today)
+                    if (skt.ToDateTime(TimeOnly.MinValue).Date < Saat.Bugun)
                         uyari = (uyari is null ? "" : uyari + " ") + "Kutunun miadı GEÇMİŞ.";
                 }
 

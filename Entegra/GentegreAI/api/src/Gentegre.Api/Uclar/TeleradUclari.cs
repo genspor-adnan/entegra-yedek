@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Cekirdek.Katalog;
@@ -44,7 +45,7 @@ public static partial class TeleradUclari
             // LİSTE İLE AYNI YETKİ: pano listenin özetidir, ayrı bir kapı değil.
             baglam.YetkiIste("teleradyoloji", Islem.Gor);
 
-            var tarih = (gun ?? DateTime.Today).Date;
+            var tarih = (gun ?? Saat.Bugun).Date;
             await using var baglanti = await veri.AcAsync(iptal);
 
             // --------------------------------------------------- sayaçlar ----

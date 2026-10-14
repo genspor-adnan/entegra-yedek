@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -1033,7 +1034,7 @@ public static class BankoOturumUclari
               from public.banko_oturum
              where tutanak_no like 'TT-' || to_char(now(), 'YYYY') || '-%'
             """, islem, [], iptal);
-        return $"TT-{DateTime.Now:yyyy}-{n:000000}";
+        return $"TT-{Gentegre.Cekirdek.Saat.Simdi:yyyy}-{n:000000}";
     }
 
     private static async Task<OturumOzeti?> OturumAsync(NpgsqlConnection b, string kosul,

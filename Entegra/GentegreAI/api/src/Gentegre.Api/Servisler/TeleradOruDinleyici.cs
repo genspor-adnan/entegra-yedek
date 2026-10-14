@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -171,7 +172,7 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
     /// <summary>ACK^R01 — MSA-1 kodu, MSA-3 açıklama.</summary>
     internal byte[] Ack(string kontrolNo, string kod, string aciklama)
     {
-        var zaman = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var zaman = Saat.Simdi.ToString("yyyyMMddHHmmss");
         var govde = $"MSH|^~\\&|GENTEGRE|AI|TELERAD|DIS|{zaman}||ACK|{zaman}|P|2.3.1\r"
                   + $"MSA|{kod}|{kontrolNo}|{aciklama.Replace('|', ' ')}\r";
         var veri = _kodlama.GetBytes(govde);

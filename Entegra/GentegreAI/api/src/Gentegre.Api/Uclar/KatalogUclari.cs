@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -272,7 +273,7 @@ public static class KatalogUclari
                 { kod = "BULUNAMADI", mesaj = "Ilac bulunamadi." } });
 
             var gun = DateOnly.TryParse(istek.Yururluk, out var g)
-                    ? g : DateOnly.FromDateTime(DateTime.Today);
+                    ? g : DateOnly.FromDateTime(Saat.Bugun);
             var s = await ilaclar.FiyatYazAsync(
                 [new(barkod, istek.Perakende, istek.Kdv ?? 10m)],
                 gun, "elle", baglam.KullaniciId, iptal);
@@ -309,7 +310,7 @@ public static class KatalogUclari
                     [new("icerik", "Sutunlar: barkod ; fiyat ; kdv(ops).")]);
 
             var s = await ilaclar.FiyatYazAsync(satirlar,
-                DateOnly.FromDateTime(DateTime.Today), "toplu", baglam.KullaniciId, iptal);
+                DateOnly.FromDateTime(Saat.Bugun), "toplu", baglam.KullaniciId, iptal);
             return Results.Ok(new { s.Okunan, s.Yazilan, s.StokGuncellenen, s.Eslesmeyen,
                                     izlemeNo = baglam.IzlemeNo });
         });

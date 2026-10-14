@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -374,7 +375,7 @@ public static partial class AmeliyathaneUclari
             {
                 ["tur"] = 4,                        // 4 = Stok Çıkış Fişi (carisiz)
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["cikisDepoId"] = depoId,
@@ -526,7 +527,7 @@ public static partial class AmeliyathaneUclari
             ["tarafUnvan"] = hasta["unvan"],
             ["tarafVkno"] = hasta["vkno"],
             ["tarafVd"] = hasta["vd"],
-            ["belgeTarihi"] = DateTime.Now,
+            ["belgeTarihi"] = Saat.Simdi,
             ["belgeDovizi"] = "TL",
             ["dovizKuru"] = 1m,
             ["fiyatListesiId"] = listeId,

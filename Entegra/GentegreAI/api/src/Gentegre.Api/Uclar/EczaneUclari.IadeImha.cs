@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -66,7 +67,7 @@ public static partial class EczaneUclari
             if (Convert.ToInt16(i["ambalajAcik"] ?? (short)0) == 1) engeller.Add("ambalaj açıldı");
             if (Convert.ToInt16(i["sulandirildi"] ?? (short)0) == 1) engeller.Add("sulandırıldı");
             if (Convert.ToInt16(i["sogukZincirBozuk"] ?? (short)0) == 1) engeller.Add("soğuk zincir bozuldu");
-            if (i["skt"] is DateTime sk && sk.Date < DateTime.Today)
+            if (i["skt"] is DateTime sk && Saat.Gun(sk) < Saat.Bugun)
                 engeller.Add($"miadı geçti ({sk:dd.MM.yyyy})");
 
             // KAÇIŞ YOK. Bkz. dosya başlığı.
@@ -75,7 +76,7 @@ public static partial class EczaneUclari
                     "Bu ilaç stoğa kabul edilemez: " + string.Join(", ", engeller) + ".",
                     new { engeller });
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             int? girisBelgeId = null;
             var uyarilar = new List<string>();
 
@@ -286,7 +287,7 @@ public static partial class EczaneUclari
             {
                 ["tur"] = 4,                       // 4 = Stok Çıkış Fişi (carisiz)
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["cikisDepoId"] = depoId,

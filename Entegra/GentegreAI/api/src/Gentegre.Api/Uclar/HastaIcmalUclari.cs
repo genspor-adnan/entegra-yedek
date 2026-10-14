@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -35,8 +36,8 @@ public static class HastaIcmalUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("hasta", Islem.Gor);
             baglam.YetkiIste("belge", Islem.Gor);
-            var baslangic = (bas ?? DateTime.Today.AddMonths(-12)).Date;
-            var bitis = (bit ?? DateTime.Today).Date.AddDays(1);
+            var baslangic = (bas ?? Saat.Bugun.AddMonths(-12)).Date;
+            var bitis = (bit ?? Saat.Bugun).Date.AddDays(1);
             var sube = baglam.SubeId ?? 0;
             await using var b = await veri.AcAsync(iptal);
 

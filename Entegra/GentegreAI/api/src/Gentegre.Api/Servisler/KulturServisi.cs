@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -183,7 +184,7 @@ public sealed class KulturServisi(VeriKaynagi veri, LabServisi lab)
             throw GentegreHatasi.IsKurali("Onaylı ya da iptal edilmiş kültüre okuma eklenemez.");
 
         var saat = istek.Saat ?? (short)Math.Max(24,
-            Math.Round((DateTime.Now - k.Ekim).TotalHours));
+            Math.Round((Saat.An - Saat.AnOlarak(k.Ekim)).TotalHours));
 
         await baglanti.CalistirAsync("""
             insert into public.lab_kultur_okuma

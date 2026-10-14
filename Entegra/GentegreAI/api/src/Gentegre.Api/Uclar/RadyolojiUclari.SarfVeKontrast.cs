@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -157,7 +158,7 @@ public static partial class RadyolojiUclari
                 // 4 = Stok Cikis Fisi: carisiz, yalniz stok yonu verir.
                 ["tur"] = 4,
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["cikisDepoId"] = depoId,

@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
@@ -404,7 +405,7 @@ public static class UretimUclari
             {
                 ["tur"] = BelgeTuru.UretimGirisi,
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["girisDepoId"] = emir.MamulDepoId,
@@ -481,7 +482,7 @@ public static class UretimUclari
             {
                 ["tur"] = BelgeTuru.FireCikisi,
                 ["tipi"] = 1,
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 ["dovizKuru"] = 1m,
                 ["cikisDepoId"] = depoId,
@@ -959,7 +960,7 @@ public static class UretimUclari
         {
             ["tur"] = BelgeTuru.SarfCikisi,
             ["tipi"] = 1,
-            ["belgeTarihi"] = DateTime.Now,
+            ["belgeTarihi"] = Saat.Simdi,
             ["belgeDovizi"] = "TL",
             ["dovizKuru"] = 1m,
             ["cikisDepoId"] = emir.SarfDepoId,

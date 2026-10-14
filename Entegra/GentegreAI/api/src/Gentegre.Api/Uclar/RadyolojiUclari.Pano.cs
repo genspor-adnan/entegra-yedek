@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -36,7 +37,7 @@ public static partial class RadyolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Gor);
 
-            var tarih = (gun ?? DateTime.Today).Date;
+            var tarih = (gun ?? Saat.Bugun).Date;
             await using var baglanti = await veri.AcAsync(iptal);
 
             // --------------------------------------------------- sayaclar ----

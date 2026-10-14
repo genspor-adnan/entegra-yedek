@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Gentegre.Cekirdek;
+using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -109,7 +110,7 @@ public sealed partial class BelgeDeposu
 
             // SKT GECMIS: engel degil UYARI - mal fiilen gelmis olabilir (iade,
             //   imha oncesi giris). Karar kullanicinin, ama kayit sessiz gecmez.
-            if (skt is { } sonGun && sonGun.Date < DateTime.Today)
+            if (skt is { } sonGun && Saat.Gun(sonGun) < Saat.Bugun)
                 uyarilar.Add($"{sira}. satır, lot {(lotNo.Length > 0 ? lotNo : seriNo)}: " +
                              $"son kullanma tarihi geçmiş ({sonGun:dd.MM.yyyy}).");
 

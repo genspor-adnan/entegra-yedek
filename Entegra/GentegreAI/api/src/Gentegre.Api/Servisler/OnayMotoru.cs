@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -294,7 +295,7 @@ public sealed class OnayMotoru
             throw GentegreHatasi.IsKurali(
                 "Bu basamak başka bir kullanıcıya atanmış; vekâletiniz yok.");
 
-        var simdi = DateTime.Now;
+        var simdi = Saat.Simdi;
 
         await baglanti.CalistirAsync("""
             update public.onay_adim

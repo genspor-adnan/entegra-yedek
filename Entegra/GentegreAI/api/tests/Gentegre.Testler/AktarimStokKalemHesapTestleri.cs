@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using Gentegre.Veri;
 using Npgsql;
 
@@ -112,9 +112,10 @@ public sealed class AktarimStokKalemHesapTestleri(VeritabaniOlgusu olgu) : IClas
         if (webBarkod is not null) Assert.Equal(1, Sayi(sonuc, "barkod_cakisma"));
         Assert.Equal("USD", await b.TekDegerAsync<string>(
             "select doviz_cinsi from public.stok_fiyat where aktarim_kaynak = 1 and aktarim_id = 990000901", t, [], ct));
-        // İstanbul gece yarısı UTC'de önceki gündür - tarih kolonu kaymamalı.
+        // İstanbul gece yarısı UTC'de önceki gündür - tarih kolonu kaymamalı. Gün, oturumun
+        //   (şubenin, 1097) saat diliminde okunur: saklanan an yerel gece yarısıdır.
         Assert.Equal(new DateTime(2027, 3, 31), await b.TekDegerAsync<DateTime>(
-            "select son_kullanma_tarihi from public.stok_seri_lot where aktarim_kaynak = 1 and aktarim_id = 990000951",
+            "select son_kullanma_tarihi::date from public.stok_seri_lot where aktarim_kaynak = 1 and aktarim_id = 990000951",
             t, [], ct));
 
         // Tekrar: hiçbir şey yazılmaz.

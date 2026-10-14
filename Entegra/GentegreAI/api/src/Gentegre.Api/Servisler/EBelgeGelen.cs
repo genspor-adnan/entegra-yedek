@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using Gentegre.Cekirdek;
+using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -391,7 +392,7 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
                   ?? throw GentegreHatasi.IsKurali("İrsaliye içeriği okunamadı.");
         var irsNo = kok.Element(Cbc + "ID")?.Value.Trim() ?? "";
         var irsTarih = DateTime.TryParse(kok.Element(Cbc + "IssueDate")?.Value, System.Globalization.CultureInfo.InvariantCulture,
-                                         System.Globalization.DateTimeStyles.None, out var it) ? it : DateTime.Today;
+                                         System.Globalization.DateTimeStyles.None, out var it) ? it : Saat.Bugun;
 
         // Irsaliyeyi gonderen (DespatchSupplierParty) - yanitin ALICISI.
         var p = kok.Element(Cac + "DespatchSupplierParty")?.Element(Cac + "Party");
@@ -453,7 +454,7 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
              where belge_turu = 9 and durum = 1 and length(btrim(seri)) = 3 order by sira, id limit 1
             """, null, null, iptal) ?? "IYN";
 
-        var zaman = DateTime.Now;
+        var zaman = Saat.Simdi;
         var uuid = Guid.NewGuid().ToString();
         await using var tx = await b.BeginTransactionAsync(iptal);
         var no = await EFatura.EFaturaServisi.NumaraUretAsync(b, tx, seri, zaman.Year, iptal);

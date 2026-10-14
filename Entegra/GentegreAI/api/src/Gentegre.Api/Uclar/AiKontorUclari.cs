@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -434,7 +435,7 @@ public static class AiKontorUclari
             return new SiparisSonucu(3, bakiye, "", hata.Length > 0 ? hata : "Ödeme alınamadı.");
         }
 
-        var faturaNo = $"GYZ-{DateTime.Now:yyyy}-{siparisId:000000}";
+        var faturaNo = $"GYZ-{Saat.Simdi:yyyy}-{siparisId:000000}";
         await b.CalistirAsync("""
             update public.ai_siparis set durum = 2, odeme_tarihi = now(), odeme_referans = @p1, fatura_no = @p2
              where id = @p0

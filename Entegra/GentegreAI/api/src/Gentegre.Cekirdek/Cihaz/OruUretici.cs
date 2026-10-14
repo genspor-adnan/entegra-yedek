@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace Gentegre.Cekirdek.Cihaz;
 
@@ -24,7 +24,7 @@ public sealed record OruVerisi
     public string GonderenTesis { get; init; } = "";
     public string AliciUygulama { get; init; } = "";
     public string AliciTesis { get; init; } = "";
-    public DateTime Zaman { get; init; } = DateTime.Now;
+    public DateTime Zaman { get; init; } = Saat.Simdi;
     public string KontrolNo { get; init; } = "";
     /// <summary>MSH-18: <c>UTF8</c> ya da <c>Windows1254</c>.</summary>
     public string Encoding { get; init; } = "UTF8";

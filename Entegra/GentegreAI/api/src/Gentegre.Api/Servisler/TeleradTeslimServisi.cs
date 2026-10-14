@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Cihaz;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -144,7 +145,7 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
                           : bakanlikMi ? "TELETIP" : "HBYS",
             AliciTesis = M("aliciTesis").Length > 0 ? M("aliciTesis")
                        : bakanlikMi ? "TELETIP" : M("kurumAdi"),
-            Zaman = DateTime.Now,
+            Zaman = Saat.Simdi,
             KontrolNo = kontrolNo,
             Encoding = S("mshEncoding") == 2 ? "Windows1254" : "UTF8",
 

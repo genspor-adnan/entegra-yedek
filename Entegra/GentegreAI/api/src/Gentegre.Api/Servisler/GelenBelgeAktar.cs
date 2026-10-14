@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Gentegre.Cekirdek;
+using System.Globalization;
 using System.Text.Json;
 using System.Xml.Linq;
 using Gentegre.Cekirdek.Sozlesme;
@@ -80,7 +81,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
         if (doviz.Equals("TRY", StringComparison.OrdinalIgnoreCase)) doviz = "TL";
 
         var tarih = Tarih(kok.Element(Cbc + "IssueDate")?.Value)
-                    ?? DateTime.Today;
+                    ?? Saat.Bugun;
 
         // BASLIK ham .NET degerleriyle kurulur (JsonElement DEGIL): BelgeDeposu
         //   basligi dogrudan parametreye baglar, uc katmani JSON'u zaten burada

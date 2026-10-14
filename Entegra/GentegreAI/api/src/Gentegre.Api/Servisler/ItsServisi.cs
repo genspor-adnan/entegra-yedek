@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -81,7 +82,7 @@ public sealed class ItsServisi
         await JetonKilidi.WaitAsync(iptal);
         try
         {
-            if (_jeton.Length > 0 && DateTime.Now < _jetonBitis) return _jeton;
+            if (_jeton.Length > 0 && Saat.Simdi < _jetonBitis) return _jeton;
 
             var istemci = _http.CreateClient("its");
             istemci.Timeout = TimeSpan.FromSeconds(30);
@@ -109,7 +110,7 @@ public sealed class ItsServisi
             _jeton = jeton;
             // Servis süreyi bildirmiyorsa 50 dakika: jetonun ömrü bir saat
             //   olarak belgelenmiş, sınıra dayanmamak için pay bırakılır.
-            _jetonBitis = DateTime.Now.AddMinutes(50);
+            _jetonBitis = Saat.Simdi.AddMinutes(50);
             return _jeton;
         }
         finally { JetonKilidi.Release(); }
@@ -267,7 +268,7 @@ public sealed class ItsServisi
         {
             senderGln = hesap.Gln,
             receiverGln = b.KarsiGln,
-            documentDate = (b.Tarih ?? DateTime.Today).ToString("yyyy-MM-dd"),
+            documentDate = (b.Tarih ?? Saat.Bugun).ToString("yyyy-MM-dd"),
             products = satirlar,
         });
 

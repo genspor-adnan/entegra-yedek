@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -49,7 +50,7 @@ public static class GelenBelgeUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
 
-            var bitis = istek?.Bitis ?? DateTime.Today;
+            var bitis = istek?.Bitis ?? Saat.Bugun;
             var baslangic = istek?.Baslangic ?? bitis.AddDays(-30);
 
             var s = await gelen.KutuCekAsync(baslangic, bitis, baglam.SubeId,

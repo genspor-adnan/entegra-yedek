@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -188,7 +189,7 @@ public static partial class YatanUclari
             if (doz.durum == 2)
                 throw GentegreHatasi.IsKurali("Bu doz zaten uygulanmış.");
 
-            var zaman = istek.UygulananZaman ?? DateTime.Now;
+            var zaman = istek.UygulananZaman ?? Saat.Simdi;
 
             // GECİKME SEBEBİ: 30 dakikayı geçen dozda sorulur. "Neden geç
             //   verildi" sorusunun cevabı sonradan hatırlanmaz; şimdi

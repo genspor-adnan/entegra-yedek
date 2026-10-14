@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -156,7 +157,7 @@ public static partial class YzTaniOnerisi
         int? yil = null, ay = null;
         if (m.Dogum is { } d)
         {
-            var bugun = DateTime.Today;
+            var bugun = Saat.Bugun;
             var aylar = (bugun.Year - d.Year) * 12 + bugun.Month - d.Month - (bugun.Day < d.Day ? 1 : 0);
             yil = aylar / 12; ay = aylar;
         }

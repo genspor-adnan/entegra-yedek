@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Gentegre.Api.AraKatman;
@@ -45,7 +46,7 @@ public static partial class SterilUclari
                 if (!bdVar && k.BdKurali == "engel") throw GentegreHatasi.IsKurali($"{cihaz.ad}: bugün Bowie-Dick testi kayıtlı değil; kurum kuralı döngüyü engelliyor.");
                 if (!bdVar && k.BdKurali == "onay" && bdOnay == "") throw GentegreHatasi.IsKurali($"{cihaz.ad}: bugün Bowie-Dick testi kayıtlı değil. Devam için sorumlu onay notu zorunlu (bdOnayNotu).", new { kod = "BD_ONAY" });
                 var sonBio = await b.TekDegerAsync<DateTime?>("select max(d.baslama) from public.steril_dongu d join public.steril_dongu_indikator i on i.dongu_id = d.id where d.cihaz_id = @p0 and i.tur = 6 and i.sonuc in (1, 2)", null, [cihaz.id], iptal);
-                var bioGun = sonBio is null ? 999 : (DateTime.Now - sonBio.Value).Days;
+                var bioGun = sonBio is null ? 999 : (Saat.An - sonBio.Value).Days;   // timestamptz -> UTC an (1097)
                 // Hiç biyolojik yapılmamış kurulumda engel değil uyarı (pano); yapılmış ve gecikmişse engel.
                 if (sonBio is not null && bioGun >= k.BioGecikmeEngelGun && string.IsNullOrWhiteSpace(g.BioLot))
                     throw GentegreHatasi.IsKurali($"{cihaz.ad}: biyolojik test {(sonBio is null ? "hiç yapılmadı" : bioGun + " gündür yapılmadı")}; bu döngüye biyolojik indikatör ekleyin (bioLot).");
@@ -81,7 +82,7 @@ public static partial class SterilUclari
             }
             else
             {
-                var n = 0; var tarihKodu = DateTime.Today.ToString("yyMMdd");
+                var n = 0; var tarihKodu = Saat.Bugun.ToString("yyMMdd");
                 foreach (var br in yuk)
                 {
                     n++;
@@ -129,7 +130,7 @@ public static partial class SterilUclari
             await using var b = await veri.AcAsync(iptal);
             var d = await b.TekAsync("select durum, sayac_no, cihaz_id from public.steril_dongu where id = @p0", null, [id], o => new { durum = o.GetInt16(0), no = o.GetInt32(1), cihazId = o.GetInt32(2) }, iptal) ?? throw GentegreHatasi.Bulunamadi("Döngü bulunamadı.");
             var mevcut = await b.TekDegerAsync<int?>("select id from public.steril_dongu_indikator where dongu_id = @p0 and tur = @p1 order by id desc limit 1", null, [id, g.Tur], iptal);
-            DateTime? inkubasyon = g.Sonuc == SonucInkubasyon ? DateTime.Now.AddHours(g.InkubasyonSaat ?? 24) : null;
+            DateTime? inkubasyon = g.Sonuc == SonucInkubasyon ? Saat.An.AddHours(g.InkubasyonSaat ?? 24) : null;   // UTC an (1097)
             int iid;
             if (mevcut is { } mid)
             {
@@ -217,11 +218,11 @@ public static partial class SterilUclari
                 foreach (var p in paketler)
                 {
                     var ay = p.rafAy > 0 ? p.rafAy : (k.RafOmru.TryGetValue(p.tur.ToString(), out var a) ? a : 6);
-                    DateTime? skt = ay > 0 ? (d.bitis ?? DateTime.Now).Date.AddMonths(ay) : null;
+                    DateTime? skt = ay > 0 ? (d.bitis ?? Saat.Simdi).Date.AddMonths(ay) : null;
                     await b.CalistirAsync("update public.steril_paket set durum = 3, skt = @p1, raf = case when raf = '' then @p3 else raf end, degistiren = @p2, degistirme_tarihi = now() where id = @p0", null, [p.id, skt, baglam.KullaniciId, Kirp(p.konum, 30)], iptal);
                     await b.CalistirAsync("update public.steril_birim set durum = 7, durum_zaman = now(), dongu_sayisi = dongu_sayisi + 1 where id = @p0", null, [p.birimId], iptal);
                     await OlayYazAsync(b, p.birimId, p.id, id, OlaySerbest, baglam.KullaniciId, $"Serbest bırakıldı · SKT {skt:dd.MM.yyyy}", iptal);
-                    etiketler.Add(new { paketId = p.id, barkod = p.barkod, icerik = p.icerik, cihaz = d.cihaz, donguNo = d.no, tarih = d.bitis ?? DateTime.Now, skt, operatorAdi = operatorAdi, raf = p.konum });
+                    etiketler.Add(new { paketId = p.id, barkod = p.barkod, icerik = p.icerik, cihaz = d.cihaz, donguNo = d.no, tarih = d.bitis ?? Saat.Simdi, skt, operatorAdi = operatorAdi, raf = p.konum });
                 }
                 await b.CalistirAsync("update public.steril_dongu set durum = 4, onaylayan_id = @p1, onay_zamani = now(), karar_notu = @p2, degistiren = @p1, degistirme_tarihi = now() where id = @p0", null, [id, baglam.KullaniciId, Kirp(g.Notu, 400)], iptal);
                 await OlayYazAsync(b, null, null, id, OlaySerbest, baglam.KullaniciId, $"Döngü #{d.no} serbest bırakıldı · {paketler.Count} paket", iptal);
@@ -376,7 +377,7 @@ public static partial class SterilUclari
             if (p.kullanilabilir == 0)
             {
                 var neden = p.durum switch { 1 => "döngü henüz serbest bırakılmadı", 4 => "paket daha önce kullanıldı", 5 => "başarısız döngü / iptal", 6 => "raf ömrü doldu", 7 => "geri çağırma ile BLOKE", 8 => "etiket bekliyor", 2 => "karantina (implant kiti kullanılamaz)", _ => $"durum {p.durum}" };
-                if (p.durum == 3 && p.skt is { } s && s < DateTime.Today) neden = $"raf ömrü doldu ({s:dd.MM.yyyy})";
+                if (p.durum == 3 && p.skt is { } s && Saat.Gun(s) < Saat.Bugun) neden = $"raf ömrü doldu ({s:dd.MM.yyyy})";
                 throw GentegreHatasi.IsKurali($"{p.barkod} ({p.icerik}) KULLANILAMAZ: {neden}.");
             }
             if (p.kullanilabilir == 2)
@@ -515,7 +516,7 @@ public static partial class SterilUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("steril.izleme", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            var bas = DateTime.TryParse((ay ?? "") + "-01", out var t) ? new DateTime(t.Year, t.Month, 1) : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var bas = DateTime.TryParse((ay ?? "") + "-01", out var t) ? new DateTime(t.Year, t.Month, 1) : new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var satirlar = await JsonListeAsync(b, """
                 select row_to_json(d)::text from public.v_steril_dongu d
                  where d.baslama >= @p0 and d.baslama < @p1 and d.durum in (4, 5, 6, 8) and (@p2::int is null or d.cihaz_id = @p2)

@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -126,7 +127,7 @@ public static partial class LabUclari
                 {
                     ["tur"] = 19, ["tipi"] = 30, ["tarafId"] = istek.HastaId,
                     ["tarafUnvan"] = hasta["unvan"], ["tarafVkno"] = hasta["vkno"],
-                    ["tarafVd"] = hasta["vd"], ["belgeTarihi"] = DateTime.Now,
+                    ["tarafVd"] = hasta["vd"], ["belgeTarihi"] = Saat.Simdi,
                     ["belgeDovizi"] = "TL", ["dovizKuru"] = 1m,
                     ["fiyatListesiId"] = listeId, ["kampanyaId"] = kampanyaId,
                     // Başvuru türü 5 = Laboratuvar / Görüntüleme; ödeyen = gönderen kurum.
@@ -554,12 +555,12 @@ public static partial class LabUclari
                     var bitis = baslangic is { } b && hedefDk > 0
                         ? b.AddMinutes(hedefDk) : (DateTime?)null;
                     var kalanDk = bitis is { } bt
-                        ? (int)Math.Round((bt - DateTime.Now).TotalMinutes) : (int?)null;
+                        ? (int)Math.Round((Saat.AnOlarak(bt) - Saat.An).TotalMinutes) : (int?)null;
                     // Yuzde = gecen sure / hedef. Kabul edilmemis istemde 0:
                     //   cubugun dolmasi icin once saatin baslamasi gerekir.
                     var yuzde = baslangic is { } b2 && hedefDk > 0
                         ? Math.Clamp((int)Math.Round(
-                            (DateTime.Now - b2).TotalMinutes / hedefDk * 100), 0, 100)
+                            (Saat.An - Saat.AnOlarak(b2)).TotalMinutes / hedefDk * 100), 0, 100)
                         : 0;
                     return new { Bolum = o.GetInt16(0), HedefDk = hedefDk,
                                  Baslangic = baslangic, Bitis = bitis, KalanDk = kalanDk,

@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -201,7 +202,7 @@ public static class IcmalUclari
                 ["tur"] = 15,
                 ["tarafId"] = icmal["kurumId"],
                 ["tarafUnvan"] = icmal["kurumAdi"],
-                ["belgeTarihi"] = DateTime.Now,
+                ["belgeTarihi"] = Saat.Simdi,
                 ["belgeDovizi"] = "TL",
                 // "Haric" DEGIL "Hariç" (373): c-sedilsiz yazim veriye ucuncu
                 //   bir varyant sokuyordu - kolon serbest metin oldugu icin

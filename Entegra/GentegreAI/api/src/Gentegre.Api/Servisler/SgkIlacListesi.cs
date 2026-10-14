@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Veri;
 
@@ -63,7 +64,7 @@ public sealed class SgkIlacListesi
         if (satirlar.Count == 0)
             throw new InvalidOperationException("Ek-4/A okundu ama satır bulunamadı.");
 
-        var gun = yururluk ?? DateOnly.FromDateTime(DateTime.Today);
+        var gun = yururluk ?? DateOnly.FromDateTime(Saat.Bugun);
         var kayitlar = satirlar
             .Select(h => new
             {

@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Cihaz;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -82,7 +83,10 @@ public sealed class TeleradGelenServisi(VeriKaynagi veri, ILogger<TeleradGelenSe
                    (kontrol_no, kaynak_ip, kaynak_tur, gonderen_skrs, accession_no,
                     hasta_tckn, radyolog_tckn, radyolog_ad, onay_zamani, durum,
                     istek_id, hata_metni, ham, sube_id)
-            select @p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10,
+            -- onay_zamani: HL7 göndericisinin DUVAR SAATİ (ofsetsiz) - isteğin şubesinin diliminde an (1097).
+            select @p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7,
+                   @p8::timestamp at time zone public.fn_sube_zaman_dilimi((select i.sube_id from public.telerad_istek i where i.id = @p10)),
+                   @p9, @p10,
                    left(@p11, 400), @p12,
                    (select i.sube_id from public.telerad_istek i where i.id = @p10)
             returning id
@@ -205,7 +209,8 @@ public sealed class TeleradGelenServisi(VeriKaynagi veri, ILogger<TeleradGelenSe
             values (@p0, 3, 1, @p1, @p2, @p1, @p2, @p3, @p4, @p5, 0)
             returning id
             """, islem,
-            [istemId, radyologId, coz.OnayZamani ?? DateTime.Now, ustRaporId,
+            // Duvar saati -> UTC an (kuruluş dilimi; HL7 alımı istek dışı). Yoksa şimdi (1097).
+            [istemId, radyologId, coz.OnayZamani is { } oz ? Saat.UtcYap(oz) : Saat.An, ustRaporId,
              coz.IstemNedeniPuan, coz.CekimKalitePuan], iptal);
 
         await b.CalistirAsync("""
@@ -214,7 +219,7 @@ public sealed class TeleradGelenServisi(VeriKaynagi veri, ILogger<TeleradGelenSe
                                    then public.fn_radyoloji_rapor_no(@p1::date)
                                    else rapor_no end
              where id = @p0
-            """, islem, [raporId, (coz.OnayZamani ?? DateTime.Now).Date], iptal);
+            """, islem, [raporId, (coz.OnayZamani ?? Saat.Simdi).Date], iptal);
 
         // BÖLÜMLER PARÇA NUMARASIYLA (809): geldiği gibi yazılır, başlık
         //   uydurulmaz. Parçalanamamış düz metin tek "Rapor" bölümüdür.

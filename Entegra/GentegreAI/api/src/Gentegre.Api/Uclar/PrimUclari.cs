@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -363,7 +364,7 @@ public static class PrimUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("prim.kendi", Islem.Gor);
 
-            var baslangic = bas?.Date ?? new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var baslangic = bas?.Date ?? new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var bitis = bit?.Date ?? baslangic.AddMonths(1).AddDays(-1);
             var kisi = baglam.KullaniciId;
 

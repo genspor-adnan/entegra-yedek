@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (557 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (558 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -428,6 +428,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_sube_gorsel` | `193_firma_kase.sql` | — |
 | `fn_sube_mali` | `192_mali_ayarlar.sql` | — |
 | `fn_sube_merkez_id` | `169_sube_ebelge_kimlik.sql` | — |
+| `fn_sube_zaman_dilimi` | `1097_kalan_timestamp_tz.sql` | — |
 | `fn_taraf_ad` | `940_personel_unvan_yalniz_onek.sql` | — |
 | `fn_taraf_kampanya` | `468_kurum_sozlesme_1n.sql` | 274_belge_kampanya.sql |
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |

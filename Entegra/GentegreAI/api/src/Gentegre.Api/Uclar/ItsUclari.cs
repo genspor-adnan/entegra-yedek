@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Its;
 using Gentegre.Cekirdek.Sozlesme;
@@ -97,7 +98,7 @@ public static class ItsUclari
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var tarih = DateOnly.TryParse(istek.IslemTarihi, out var g)
-                      ? g : DateOnly.FromDateTime(DateTime.Today);
+                      ? g : DateOnly.FromDateTime(Saat.Bugun);
 
             var bildirimId = await baglanti.TekDegerAsync<int>("""
                 insert into public.its_bildirim (tur, durum, sube_id, test_mi, belge_id,

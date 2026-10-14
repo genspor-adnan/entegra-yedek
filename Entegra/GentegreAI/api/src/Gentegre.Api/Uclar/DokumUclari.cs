@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -163,7 +164,7 @@ public static class DokumUclari
 
             var filtre = ParametreCozucu.Uygula(tanim.Filtre, tanim,
                 istek.Parametreler is null ? null : new Dictionary<string, object?>(istek.Parametreler, StringComparer.Ordinal),
-                DateTime.Now);
+                Saat.Simdi);
 
             if (id > 0) await depo.CalistirildiAsync(id, iptal);
 

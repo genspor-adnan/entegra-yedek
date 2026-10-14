@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -94,7 +95,7 @@ public static class EnabizUclari
             // Donem: "2026-09" -> ayin ilk gunu. Verilmezse icinde bulundugumuz ay.
             var bas = DateTime.TryParse((ay ?? "") + "-01", out var d)
                 ? new DateTime(d.Year, d.Month, 1)
-                : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                : new DateTime(Saat.Bugun.Year, Saat.Bugun.Month, 1);
             var son = bas.AddMonths(1);
 
             await using var baglanti = await veri.AcAsync(iptal);

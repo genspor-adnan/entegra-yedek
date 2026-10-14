@@ -2,7 +2,7 @@ BOŞ KURULUM DÜZELTMELERİ (yalnız -BosKurulum / sunucuda BOS=1 iken okunur)
 
 Göçler hiç düzenlenmez; ama göç zinciri canlı veritabanlarının tarihçesidir ve
 boş bir veritabanında baştan sona koşunca bazı adımlar anlamsızdır ya da kırılır
-(14.10.2026 ölçümü: 1078 dosyalık zincirde 5 dosya). Burada her biri için tek dosya:
+(14.10.2026 ölçümü: 1078 dosyalık zincirde 5 dosya; + 667 - veritabanı adı sabit yazılıydı). Burada her biri için tek dosya:
 
   once/<göç adı>        göçten HEMEN ÖNCE koşar (defter yazılmaz; idempotent olmalı)
   yerine/<göç adı>      göçün YERİNE koşar; deftere yontem = 'bos_yerine'

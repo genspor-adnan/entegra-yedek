@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -233,7 +234,7 @@ public static partial class LabUclari
             var tat = tatDk ?? 0;
             var atat = acilTatDk ?? 0;
             var ab  = acilBeklemez ?? 1;
-            var an  = kabul ?? DateTime.Now;
+            var an  = kabul ?? Saat.Simdi;
 
             // Deger NULL olabilir ("tanim eksik, bilmiyorum") - TekDegerAsync
             //   struct'ta da null donebilsin diye nullable T ile cagrilir.

@@ -1,4 +1,5 @@
-﻿using Gentegre.Veri;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Veri;
 
 namespace Gentegre.Api.Servisler;
 
@@ -125,7 +126,7 @@ public sealed class EnabizGunSonuServisi
     /// </summary>
     public async Task<string> DunuHesaplaAsync(CancellationToken iptal)
     {
-        var dun = DateOnly.FromDateTime(DateTime.Now.AddDays(-1));
+        var dun = DateOnly.FromDateTime(Saat.Simdi.AddDays(-1));
         // ŞUBE BAZLI: çok şubeli kurumda her tesis kendi gün sonunu gönderir.
         //   Şube yoksa (tek tesis) kurum geneli tek satır.
         var subeler = await _veri.ListeAsync(
@@ -228,7 +229,7 @@ public sealed class EnabizGunSonuServisi
     /// <summary>Zamanlı işin çağırdığı hâl: ÖNCEKİ ay (ayın 2'sinde çalışır).</summary>
     public async Task<string> OncekiAyiHesaplaAsync(CancellationToken iptal)
     {
-        var d = DateTime.Now.AddMonths(-1);
+        var d = Saat.Simdi.AddMonths(-1);
         var subeler = await _veri.ListeAsync(
             "select id from public.sube where coalesce(aktif, 1) = 1 order by id",
             [], o => o.GetInt32(0), iptal);

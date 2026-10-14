@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http.Headers;
@@ -174,7 +175,7 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
         var bitis = await _veri.TekDegerAsync<DateTime?>("""
             select bitis from public.sigorta_oturum where hesap_id = @p0
             """, [hesap.HesapId], iptal);
-        var kalan = bitis is { } t ? (int)Math.Max(0, (t - DateTime.Now).TotalMinutes) : 0;
+        var kalan = bitis is { } t ? (int)Math.Max(0, (Saat.AnOlarak(t) - Saat.An).TotalMinutes) : 0;
         return $"Jeton alındı ({hesap.Adres}), geçerlilik ~{kalan} dk.";
     }
 

@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Cekirdek;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
 
@@ -37,8 +38,8 @@ public static class StokDurumUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("stok", Islem.Gor);
 
-            var baslangic = (bas ?? new DateTime(DateTime.Today.Year, 1, 1)).Date;
-            var bitis = (bit ?? DateTime.Today).Date.AddDays(1);   // yarim acik aralik
+            var baslangic = (bas ?? new DateTime(Saat.Bugun.Year, 1, 1)).Date;
+            var bitis = (bit ?? Saat.Bugun).Date.AddDays(1);   // yarim acik aralik
             return Results.Ok(await depo.HareketAsync(stokId, baslangic, bitis, depoId, iptal));
         }).WithTags("Kart").RequireAuthorization();
 

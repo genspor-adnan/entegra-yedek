@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -803,7 +804,7 @@ public static class TeknikServisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("servis", Islem.Gor);
 
-            var gun = tarih ?? DateOnly.FromDateTime(DateTime.Today);
+            var gun = tarih ?? DateOnly.FromDateTime(Saat.Bugun);
 
             await using var baglanti = await veri.AcAsync(iptal);
 

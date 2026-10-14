@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -166,7 +167,7 @@ public static partial class SatinalmaUclari
                     : GentegreHatasi.IsKurali("Kuyruğa alınacak taslak bildirim yok.");
             }
 
-            var simdi = DateTime.Now;
+            var simdi = Saat.Simdi;
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // --- BU TUTANAĞA AİT OLMAYAN KUTULAR ÖNCE ÇIKARILIR.

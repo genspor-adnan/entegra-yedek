@@ -1,3 +1,4 @@
+﻿using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Bildirim;
 using Gentegre.Cekirdek.Sozlesme;
@@ -47,7 +48,7 @@ public static class HastaBorcTakipUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
-            var bugun = DateTime.Today;
+            var bugun = Saat.Bugun;
             var sube = baglam.SubeId ?? 0;
             await using var b = await veri.AcAsync(iptal);
 
@@ -164,7 +165,7 @@ public static class HastaBorcTakipUclari
             var sube = baglam.SubeId ?? 0;
             await using var b = await veri.AcAsync(iptal);
 
-            var borc = (await HastaBorcSorgusu.BasvurularAsync(b, DateTime.Today.AddDays(1), sube, ids, iptal))
+            var borc = (await HastaBorcSorgusu.BasvurularAsync(b, Saat.Bugun.AddDays(1), sube, ids, iptal))
                 .Where(x => x.Kalan > 0.005m).GroupBy(x => x.HastaId).ToDictionary(g => g.Key, g => g.Sum(x => x.Kalan));
             var kisiler = await b.ListeAsync("""
                 select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
@@ -218,7 +219,7 @@ public static class HastaBorcTakipUclari
             baglam.YetkiIste(Kod, Islem.Ekle);
             if (istek.Tur is not (TurSoz or TurPlan)) throw GentegreHatasi.Dogrulama("Tür ödeme sözü (2) ya da plan (3) olmalı.");
             if (istek.Tutar <= 0) throw GentegreHatasi.Dogrulama("Tutar sıfırdan büyük olmalı.");
-            if (istek.Vade.Date < DateTime.Today) throw GentegreHatasi.Dogrulama("Vade bugünden önce olamaz.");
+            if (istek.Vade.Date < Saat.Bugun) throw GentegreHatasi.Dogrulama("Vade bugünden önce olamaz.");
             if (istek.Tur == TurPlan && istek.TaksitSayisi is not (>= 2 and <= 36))
                 throw GentegreHatasi.Dogrulama("Ödeme planı 2 ile 36 taksit arasında olmalı.");
             await using var b = await veri.AcAsync(iptal);
