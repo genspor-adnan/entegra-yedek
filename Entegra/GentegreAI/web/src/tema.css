@@ -6536,6 +6536,13 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .anm-satir { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: baseline }
 .anm-b { font-size: 11.5px; color: var(--soluk) }
 .anm-d { white-space: pre-wrap; word-break: break-word; color: var(--yazi2) }
+/* Fizik muayene gösterim kipi (mockup v7 .fm): sistem + bulgu, yalnız bulgu girilmiş satırlar. */
+.fm-goster { width: 100%; border-collapse: collapse; margin: 4px 0 6px }
+.fm-goster td { padding: 4px 10px; border-bottom: 1px solid var(--cizgi); vertical-align: top; white-space: normal }
+.fm-goster tr:last-child td { border-bottom: 0 }
+.fm-goster td:first-child { width: 170px; font-weight: bold; color: #2c4a6b }
+.fm-bos { padding: 6px 10px 10px; color: var(--soluk); font-size: 12px }
+.fm-duzen { padding: 6px 8px 8px }
 
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
 .tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }

@@ -209,6 +209,11 @@ export function ListeKarti({
   useEffect(() => { setAnamnezDuzen(null) }, [kartId]);
   /** Kendiliğinden kip YÜKLEMEDE bir kez belirlenir - yazarken alan dolunca gösterime atlamasın. */
   const anamnezIlk = useRef<{ id: unknown; duzen: boolean } | null>(null);
+  /** FİZİK MUAYENE GÖSTERİM / DÜZENLEME (kullanıcı 15.10.2026, anamnez gibi): null = kendiliğinden -
+      bulgu girilmiş satır varsa gösterim (mockup v7 sade tablo), yoksa düzenleme. */
+  const [fizikDuzen, setFizikDuzen] = useState<boolean | null>(null);
+  useEffect(() => { setFizikDuzen(null) }, [kartId]);
+  const fizikIlk = useRef<{ id: unknown; duzen: boolean } | null>(null);
   const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
   useEffect(() => {
     if (!sekmesiz) return;
@@ -644,6 +649,28 @@ export function ListeKarti({
                               {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
                                                             onKapat={() => setVitalGrafik(null)} />}
                             </div>
+                            {(() => {
+                              // FİZİK MUAYENE ÇERÇEVESİ (kullanıcı 15.10.2026): sistem sorgusu (şablon
+                              //   düğmeleri + bulgu gridi) "Fizik muayene" başlıklı çerçevede. ✎ düzenleme,
+                              //   💾 gösterim: yalnız bulgu girilmiş satırlar, sistem + bulgu (mockup v7).
+                              const veri = parcalar?.detayVerisi('bulgular');
+                              const kodlar = veri?.meta.alanlar.find(a => a.ad === 'sablonAlanId')?.kodlar ?? {};
+                              const satirlar = (veri?.satirlar ?? []).map(s => {
+                                const metin = String(s.degerMetin ?? '').trim();
+                                const sayi = s.degerSayi != null && s.degerSayi !== '' ? String(s.degerSayi) : '';
+                                const bulgu = metin || sayi || (Number(s.normal) === 1 ? c('Normal') : '');
+                                return { id: String(s.id ?? s.sablonAlanId), sistem: kodlar[String(s.sablonAlanId)] ?? String(s.sablonAlanId ?? ''), bulgu };
+                              }).filter(s => s.bulgu);
+                              if (veri && deger.id != null && fizikIlk.current?.id !== kartId)
+                                fizikIlk.current = { id: kartId, duzen: satirlar.length === 0 };
+                              const duzen = fizikDuzen ?? fizikIlk.current?.duzen ?? true;
+                              return (
+                                <div className="kasira"><div className={`kagrup${duzen ? '' : ' katlanir-kapali'}`}>
+                                  <h6 className="katlanir-bas" onClick={() => setFizikDuzen(!duzen)}>
+                                    {c('Fizik muayene')}
+                                    <span className="katlanir-sag" title={duzen ? c('Gösterime dön · kart Kaydet ile yazılır') : c('Düzenle')}>
+                                      {duzen ? '💾' : '✎'}</span></h6>
+                                  {duzen ? <div className="fm-duzen">
                             {/* FIZIK MUAYENE DUGMELERI GRIDIN HEMEN USTUNDE (kullanici). */}
                             <div className="muayene-arac mfz-arac">
                               <button type="button" className="d"
@@ -663,12 +690,20 @@ export function ListeKarti({
                                 🧍 {c('Vücut şeması')}
                               </button>
                             </div>
+                            <div className="mfz-tek-satir">{parcalar?.tablolar.bulgular ?? icerik}</div>
+                                  </div> : satirlar.length > 0 ? (
+                                    <table className="fm-goster"><tbody>
+                                      {satirlar.map(s => <tr key={s.id}><td>{s.sistem}</td><td>{s.bulgu}</td></tr>)}
+                                    </tbody></table>
+                                  ) : <div className="fm-bos">{c('Bulgu girilmedi')}</div>}
+                                </div></div>
+                              );
+                            })()}
                             {vucutAcik && (
                               <VucutSemasi muayeneId={Number(kartId)}
                                 onKapat={() => setVucutAcik(false)}
                                 onKaydedildi={() => setKartTazele(t => t + 1)} />
                             )}
-                            <div className="mfz-tek-satir">{parcalar?.tablolar.bulgular ?? icerik}</div>
                             {/* DEĞERLENDİRME / SONUÇ EN ALTTA (mockup v7 sırası). */}
                             {parcalar?.altGrupCiz('Değerlendirme / Sonuç')}
                           </div>

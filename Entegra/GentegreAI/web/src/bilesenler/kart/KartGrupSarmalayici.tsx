@@ -215,6 +215,10 @@ export function KartGrupSarmalayici({
           alanlar: tam,
           tablolar: Object.fromEntries(gomulu.map((d, i) => [d.ad, tablolar[i]])),
           alanDegistir,
+          detayVerisi: ad => {
+            const d = (meta?.detaylar ?? []).find(x => x.ad === ad);
+            return d ? { meta: d, satirlar: (detaylar[ad] ?? bosDetay()).guncel } : null;
+          },
           altGrupCiz: (alt, baslik) => {
             const alanlar = aktif.alanlar.filter(a => (a.altGrup ?? '') === alt);
             return alanlar.length ? grupCiz({ ...aktif, alanlar }, baslik) : null;
