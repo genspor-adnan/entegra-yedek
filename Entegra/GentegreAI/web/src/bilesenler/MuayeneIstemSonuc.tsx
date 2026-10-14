@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -52,8 +52,12 @@ const sayiyaCevir = (v: unknown): number | null => {
 /** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
 type Kalem = { tur: 'lab' | 'radyoloji' | 'goz' | 'patoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
 
-export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
+export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, onSayi }: {
   muayeneId: number;
+  /** GÖSTERİM KİPİ (kullanıcı 15.10.2026): yalnız istem tablosu, düğme / seçim / sonuç paneli yok. */
+  gosterim?: boolean;
+  /** Yüklenince istem sayısı - çağıran çerçevenin açılış kipini seçer. */
+  onSayi?(n: number): void;
   /** Araç çubuğundaki "＋ İstem Sepeti" düğmesi (birleşik istem modalını açar). */
   onIstemAc?: () => void;
   /** İstem silinince kartın diğer sayaçlarını tazelemek için. */
@@ -80,6 +84,10 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   }, [muayeneId]);
 
   useEffect(() => { void yukle() }, [yukle]);
+  const onSayiRef = useRef(onSayi);
+  onSayiRef.current = onSayi;
+  const istemSayisi = veri ? veri.istemler.length + veri.radyoloji.length + (veri.goz?.length ?? 0) + (veri.patoloji?.length ?? 0) : -1;
+  useEffect(() => { if (istemSayisi >= 0) onSayiRef.current?.(istemSayisi) }, [istemSayisi]);
 
   const kalemler = useMemo<Kalem[]>(() => {
     if (!veri) return [];
@@ -172,7 +180,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
   const satirCiz = (k: Kalem) => {
     const sec = secili?.tur === k.tur && secili.id === k.id;
     const anahtar = `${k.tur}${k.id}`;
-    const ortak = {
+    const ortak = gosterim ? { className: k.panik ? 'panik' : '' } : {
       className: `secilebilir${sec ? ' secili' : ''}${k.panik ? ' panik' : ''}`,
       style: { cursor: 'pointer' },
       onClick: () => setSecili({ tur: k.tur, id: k.id }),
@@ -251,6 +259,37 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
     );
   };
 
+  const tablo = (
+    <table className={`detay-tablo${gosterim ? '' : ' secilebilir'}`}>
+      <thead>
+        <tr>
+          <th>{c('Tür')}</th><th>{c('Tetkik / İşlem')}</th>
+          <th className="hiza-orta">{c('Aciliyet')}</th>
+          <th className="hiza-orta">{c('İstem')}</th>
+          <th className="hiza-orta">{c('Durum')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {bagliKalemler.length > 0 && (
+          <tr className="isn-grup"><td colSpan={5}>{c('Bu muayenede istenen')}</td></tr>
+        )}
+        {bagliKalemler.map(satirCiz)}
+        {digerKalemler.length > 0 && (
+          <tr className="isn-grup"><td colSpan={5}>{c('Başvuruya gelen')}</td></tr>
+        )}
+        {digerKalemler.map(satirCiz)}
+      </tbody>
+    </table>
+  );
+  if (gosterim) return kalemler.length === 0
+    ? <div className="fm-bos">{c('İstem yok')}</div>
+    : (
+      <div className="fm-istem">
+        {panikVar && <div className="uyari-kutusu">{c('⚠ Bu başvuruda PANİK DEĞER var.')}</div>}
+        {tablo}
+      </div>
+    );
+
   return (
     <div className="istem-sonuc">
       {arac}
@@ -266,26 +305,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti }: {
 
       <div className="isn-iki">
         <div className="isn-sol">
-          <table className="detay-tablo secilebilir">
-            <thead>
-              <tr>
-                <th>{c('Tür')}</th><th>{c('Tetkik / İşlem')}</th>
-                <th className="hiza-orta">{c('Aciliyet')}</th>
-                <th className="hiza-orta">{c('İstem')}</th>
-                <th className="hiza-orta">{c('Durum')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bagliKalemler.length > 0 && (
-                <tr className="isn-grup"><td colSpan={5}>{c('Bu muayenede istenen')}</td></tr>
-              )}
-              {bagliKalemler.map(satirCiz)}
-              {digerKalemler.length > 0 && (
-                <tr className="isn-grup"><td colSpan={5}>{c('Başvuruya gelen')}</td></tr>
-              )}
-              {digerKalemler.map(satirCiz)}
-            </tbody>
-          </table>
+          {tablo}
         </div>
 
         <div className="isn-sag">

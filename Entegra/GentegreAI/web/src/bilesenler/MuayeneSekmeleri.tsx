@@ -80,7 +80,7 @@ function Kabuk({ hata, veri, children }:
  * reçete varsa üstte seçici çıkar. Hiç reçete yoksa boş durum: ilk ilaç
  * eklenince reçete sunucuda açılır.
  */
-export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, onIlacAraTamam }: {
+export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, onIlacAraTamam, kaydetRef }: {
   veri: SekmeVerisi | null; hata: string | null;
   muayeneId: number;
   tazele(): void;
@@ -88,6 +88,8 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, o
       araması, yoksa ilk ilacın araması (sunucu yeni taslak açar). */
   ilacAra?: boolean;
   onIlacAraTamam?(): void;
+  /** Gösterilen reçetenin dış kaydet bağlantısı (muayene çerçevesi 💾). */
+  kaydetRef?: { current: (() => Promise<void>) | null };
 }) {
   const [aramaAcik, setAramaAcik] = useState(false);
   /** Kullanıcının seçtiği reçete (birden çok reçetede); null = varsayılan. */
@@ -195,7 +197,7 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, o
           ilacAra={ilacAra && taslakGosteriliyor} onIlacAraTamam={onIlacAraTamam}
           ekAraclar={sayi(gosterilen.durum) === 1 ? sablonSecici : null}
           onKapat={() => { setSecilenId(null); tazele() }}
-          onDegisti={tazele} />
+          onDegisti={tazele} kaydetRef={kaydetRef} />
       ) : (
         // BOS DURUM: recete henuz yok - ilk ilac eklenince sunucuda acilir.
         <div className="kagrup rk-bos">
@@ -484,5 +486,39 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
         </div>
       </div>
     </Kabuk>
+  );
+}
+
+/** Muayenede gösterilen reçete: açık taslak, yoksa en son reçete (sekmeyle aynı kural). */
+export function gosterilenRecete(veri: SekmeVerisi | null) {
+  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayi(b.id) - sayi(a.id));
+  return receteler.find(r => sayi(r.durum) === 1) ?? receteler[0];
+}
+
+/**
+ * REÇETE GÖSTERİM KİPİ (kullanıcı 15.10.2026, mockup v7 "Reçete" tablosu): ilaç · doz · kutu
+ * ve reçete no / durum satırı. Düzenleme reçete kartının kendisi (MuayeneReceteSekmesi).
+ */
+export function ReceteGosterim({ veri }: { veri: SekmeVerisi | null }) {
+  const r = gosterilenRecete(veri);
+  const satirlar = r ? (veri?.receteSatirlari ?? []).filter(s => sayi(s.receteId) === sayi(r.id)) : [];
+  if (!r || satirlar.length === 0) return <div className="fm-bos">{c('Reçete yazılmadı')}</div>;
+  const imzali = sayi(r.durum) !== 1;
+  return (
+    <>
+      <table className="fm-goster fm-tablo">
+        <thead><tr><th>{c('İlaç')}</th><th>{c('Doz')}</th><th className="hiza-orta">{c('Kutu')}</th></tr></thead>
+        <tbody>
+          {satirlar.map((s, i) => (
+            <tr key={i}>
+              <td>{metin(s.ilac)}</td>
+              <td>{[metin(s.periyot), metin(s.doz)].filter(Boolean).join(' × ') || '—'}</td>
+              <td className="hiza-orta">{sayi(s.kutu) || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="fm-bos">{metin(r.receteNo)} · {imzali ? c('imzalı') : c('taslak · imzasız')}</div>
+    </>
   );
 }

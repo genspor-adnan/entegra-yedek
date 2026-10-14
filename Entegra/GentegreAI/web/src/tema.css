@@ -6543,6 +6543,10 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .fm-goster td:first-child { width: 170px; font-weight: bold; color: #2c4a6b }
 .fm-bos { padding: 6px 10px 10px; color: var(--soluk); font-size: 12px }
 .fm-duzen { padding: 6px 8px 8px }
+/* Gösterim tabloları (tanı / reçete): başlık satırlı sade tablo. */
+.fm-tablo th { text-align: left; font-size: 11.5px; font-weight: normal; color: var(--soluk); padding: 4px 10px; border-bottom: 1px solid var(--cizgi) }
+.fm-tablo td:first-child { width: auto; font-weight: normal; color: inherit }
+.fm-istem { padding: 4px 8px 8px }
 
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
 .tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }

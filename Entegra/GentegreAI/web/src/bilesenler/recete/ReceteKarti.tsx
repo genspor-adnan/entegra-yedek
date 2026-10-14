@@ -49,7 +49,7 @@ const zaman = (v: unknown) => {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam }: {
+export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam, kaydetRef }: {
   receteId: number;
   onKapat(): void;
   /** Reçete değişince (kayıt, imza, ilaç) çağırana haber. */
@@ -64,6 +64,8 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
       yüklenince taslaksa arama açılır; istek her durumda tüketilir. */
   ilacAra?: boolean;
   onIlacAraTamam?(): void;
+  /** DIŞ KAYDET (muayene çerçevesi 💾): kaydedilmemiş tür / açıklama varsa yazar. */
+  kaydetRef?: { current: (() => Promise<void>) | null };
 }) {
   const [kart, setKart] = useState<Record<string, unknown> | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
@@ -147,6 +149,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     setKart(y.kart); setSurum(y.kart.surum);
     onDegisti?.();
   });
+  if (kaydetRef) kaydetRef.current = degisti ? async () => { await kaydet() } : null;
 
   const imzala = () => guvenli(async () => {
     if (degisti) await api.kartGuncelle('recete', receteId, { surum, kart: { tur, aciklama } });

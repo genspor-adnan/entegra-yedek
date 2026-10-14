@@ -13,8 +13,9 @@ import { MuayeneHastaBandi, MuayeneSolMenu, MuayeneYanPanel, useMuayeneHastaBilg
 import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/gorunum';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
+import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import {
-  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi,
+  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi, ReceteGosterim, gosterilenRecete,
   MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
 } from '../../bilesenler/MuayeneSekmeleri';
 import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
@@ -215,6 +216,24 @@ export function ListeKarti({
   const [fizikDuzen, setFizikDuzen] = useState<boolean | null>(null);
   useEffect(() => { setFizikDuzen(null) }, [kartId]);
   const fizikIlk = useRef<{ id: unknown; duzen: boolean } | null>(null);
+  /** TANI / İSTEM / REÇETE ÇERÇEVE KİPLERİ (kullanıcı 15.10.2026: "aynı deseni yap"): seçilmediyse
+      açılışta bir kez - dolu bölüm gösterim, boş bölüm düzenleme. */
+  const [kipler, setKipler] = useState<Record<string, boolean>>({});
+  useEffect(() => { setKipler({}) }, [kartId]);
+  const kipIlk = useRef<{ id: unknown; m: Record<string, boolean> }>({ id: null, m: {} });
+  const kipOku = (ad: string, dolu: boolean | null) => {
+    if (kipIlk.current.id !== kartId) kipIlk.current = { id: kartId, m: {} };
+    if (dolu !== null && !(ad in kipIlk.current.m)) kipIlk.current.m[ad] = !dolu;
+    return kipler[ad] ?? kipIlk.current.m[ad] ?? true;
+  };
+  const kipYaz = (ad: string) => (v: boolean) => setKipler(k => ({ ...k, [ad]: v }));
+  /** İstem sayısı (istem bölümü yüklenince) - açılış kipi için. */
+  const [istemSayisi, setIstemSayisi] = useState<number | null>(null);
+  useEffect(() => { setIstemSayisi(null) }, [kartId]);
+  /** Reçete kartının dış kaydet bağlantısı (çerçeve 💾). */
+  const receteKaydetRef = useRef<(() => Promise<void>) | null>(null);
+  /** Kartı kapatmadan, değişiklik varsa kaydeder (istem / reçete çerçevesi 💾). */
+  const kartiKaydetKal = () => { void kartKaydetRef.current?.() };
   /** Sekmesizde değerlendirme / sonuç çerçevesinin reçeteden sonraki yeri (portal hedefi). */
   const [degerlendirmeYeri, setDegerlendirmeYeri] = useState<HTMLDivElement | null>(null);
   const [kontrol, setKontrol] = useState<KontrolMaddesi[] | null>(null);
@@ -535,7 +554,29 @@ export function ListeKarti({
                 //   ustte + e-Nabiz gonderim bilgisi. Vital izgarasi Sablon
                 //   Muayene sekmesinde. "Vital Bulgular" yeniden baslatilmamis
                 //   API icin taninir.
-                (baslik === 'Vital Bulgular' || baslik.startsWith('Tanı')) ? icerik
+                baslik.startsWith('Tanı') ? (() => {
+                  // TANI ÇERÇEVESİ (kullanıcı 15.10.2026): gösterimde mockup v7 tablosu - kod · tanı · tür.
+                  const veri = parcalar?.detayVerisi('tanilar');
+                  const turler = veri?.meta.alanlar.find(a => a.ad === 'tur')?.kodlar ?? {};
+                  const satirlar = veri?.satirlar ?? [];
+                  return (
+                    <KipCercevesi baslik="Tanılar" duzen={kipOku('tani', veri && deger.id != null ? satirlar.length > 0 : null)}
+                                  onDuzen={kipYaz('tani')} onKaydet={() => parcalar?.kaydet()}
+                                  gosterim={satirlar.length === 0 ? <div className="fm-bos">{c('Tanı girilmedi')}</div> : (
+                                    <table className="fm-goster fm-tablo">
+                                      <thead><tr><th>{c('Kod')}</th><th>{c('Tanı')}</th><th>{c('Tür')}</th></tr></thead>
+                                      <tbody>{satirlar.map((s, i) => (
+                                        <tr key={String(s.id ?? i)}>
+                                          <td>{i === 0 ? <b>{String(s.icdKod ?? '')}</b> : String(s.icdKod ?? '')}</td>
+                                          <td>{String(s.taniAd ?? '')}</td>
+                                          <td>{turler[String(s.tur ?? '')] ? <span className="rozet">{turler[String(s.tur)]}</span> : ''}</td>
+                                        </tr>))}</tbody>
+                                    </table>)}>
+                      {icerik}
+                    </KipCercevesi>
+                  );
+                })()
+                : baslik === 'Vital Bulgular' ? icerik
                 : baslik === 'Rapor' ? (
                   // MOCKUP RAPOR ARAC CUBUGU: rapor ekleme grid basliginda,
                   //   imza SUNUCU ucunda (eksik rapor reddedilir).
@@ -723,9 +764,13 @@ export function ListeKarti({
                         gibi arac cubugu + tek istem tablosu + ayrintilar. */}
                     {sablonMuayeneMi(baslik) ? null
                      : baslik.includes('Sonuç') ? (
-                      <MuayeneIstemSonuc muayeneId={Number(kartId)}
-                        onIstemAc={() => setIstem(Number(kartId))}
-                        onDegisti={() => setKartTazele(t => t + 1)} />
+                      <KipCercevesi baslik="İstemler" duzen={kipOku('istem', istemSayisi === null ? null : istemSayisi > 0)}
+                                    onDuzen={kipYaz('istem')} onKaydet={kartiKaydetKal}
+                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} gosterim onSayi={setIstemSayisi} />}>
+                        <MuayeneIstemSonuc muayeneId={Number(kartId)} onSayi={setIstemSayisi}
+                          onIstemAc={() => setIstem(Number(kartId))}
+                          onDegisti={() => setKartTazele(t => t + 1)} />
+                      </KipCercevesi>
                     ) : icerik}
                   </>
                 )
@@ -927,12 +972,20 @@ export function ListeKarti({
               //   sekmesini geri getir") - Muayene sekmesinden alindi.
               { anahtar: 'ozel:recete', baslik: 'e-Reçete',
                 ciz: () => (<>
+                  {/* REÇETE ÇERÇEVESİ (kullanıcı 15.10.2026): ✎ reçete kartı, 💾 reçete + muayene kaydı. */}
+                  <KipCercevesi baslik="Reçete"
+                    duzen={kipOku('recete', sekmeVerisi.veri ? (() => { const r = gosterilenRecete(sekmeVerisi.veri);
+                      return !!r && sekmeVerisi.veri.receteSatirlari.some(s => Number(s.receteId) === Number(r.id)) })() : null)}
+                    onDuzen={kipYaz('recete')}
+                    onKaydet={() => void (async () => { await receteKaydetRef.current?.(); await kartKaydetRef.current?.() })()}
+                    gosterim={<ReceteGosterim veri={sekmeVerisi.veri} />}>
                   <MuayeneReceteSekmesi
                     veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
                     muayeneId={Number(kartId)}
                     tazele={() => setKartTazele(t => t + 1)}
-                    ilacAra={receteIlacAra}
+                    ilacAra={receteIlacAra} kaydetRef={receteKaydetRef}
                     onIlacAraTamam={() => setReceteIlacAra(false)} />
+                  </KipCercevesi>
                   {/* Sekmesizde değerlendirme / sonuç çerçevesinin yeri (Muayene bölümünden portal). */}
                   {sekmesiz && <div ref={setDegerlendirmeYeri} className="mi-sol" />}
                 </>) },
