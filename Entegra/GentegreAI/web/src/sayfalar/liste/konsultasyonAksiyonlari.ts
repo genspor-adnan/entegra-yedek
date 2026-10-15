@@ -9,12 +9,16 @@ import { KONS_ISLEM_OLAYI } from '../konsultasyon/KonsultasyonPanelleri';
  * kendi sekmesinde açar (mockup "üstlen" yerine - kullanıcı). Yönlendir / Reddet gerekçeli
  * pencere ister: pencere listenin üst panelinde (KonsultasyonUstPanel), aksiyon olayla açar.
  */
+const KONS_AKSIYONLARI = new Set(['konsultasyon.yanitla', 'konsultasyon.yonlendir', 'konsultasyon.reddet', 'konsultasyon.gordum']);
+
 export async function konsultasyonAksiyonu(
   kod: string,
   satir: ListeSatiri | null | undefined,
   b: AksiyonBaglami,
 ): Promise<boolean> {
-  if (!kod.startsWith('konsultasyon.')) return false;
+  // YALNIZ KENDİ AKSİYONLARI: standart konsultasyon.yeni / .duzenle / .sil genel işleyicide kalır
+  //   (kullanıcı 15.10.2026: "yeni ekleyemedim - Önce bir konsültasyon seçin" - yeni de yakalanıyordu).
+  if (!KONS_AKSIYONLARI.has(kod)) return false;
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir konsültasyon seçin.'); return true }
   switch (kod) {

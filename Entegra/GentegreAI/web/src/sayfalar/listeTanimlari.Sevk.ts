@@ -9,6 +9,8 @@ export const SEVK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'sevk', rota: 'sevk', baslik: 'Sevk Listesi',
     yol: 'Muayene › Sevk Listesi',
     kartYolu: '/sevk', kartBaslik: 'Sevk', yeniSekmede: 'Yeni Sevk Kartı',
+    // YENİ / DÜZENLE / SİL (kullanıcı 15.10.2026): AksiyonKatalogu "sevk-liste".
+    aksiyonEkrani: 'sevk-liste',
     cipler: [
       { ad: 'Açık', filtre: { alan: 'acik', op: 'esit', deger: 1 } },
       { ad: 'Kurum dışı', filtre: { alan: 'tur', op: 'esit', deger: 1 } },

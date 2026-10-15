@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// KONSÜLTASYON İSTEK KARTI (1107) — mockup Ekranlar/Muayene/konsultasyon_karti.html (1).
@@ -22,7 +22,7 @@ public static partial class KartKatalogu
         Tablo: "public.konsultasyon",
         LogTabloId: KonsultasyonLog,
         SubeKolonu: "sube_id",
-        SilmeYok: true,
+        // SİLME AÇIK (kullanıcı 15.10.2026: listeye sil ekle) - yalnız TASLAK silinir, kural db/1111 tetiğinde.
         // ANAHTARLAR DB KOLON ADLARI (kart yazıcısı kolona yazar).
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

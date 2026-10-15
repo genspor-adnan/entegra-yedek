@@ -70,6 +70,10 @@ public static partial class AksiyonKatalogu
         EkleLab(s);
         EklePatoloji(s);   // patoloji (1104)
         EkleKonsultasyon(s);   // konsültasyon (1107)
+        // SEVK (1110): liste araç çubuğu standart ＋ Yeni / ✎ Düzenle / 🗑 Sil (kullanıcı 15.10.2026).
+        //   Sil yalnız taslakta (db/1111 tetiği); gönderilmiş sevk iptal edilir.
+        s["sevk-liste"] = Crud("sevk", "sevk", "muayene.sevk", ekleAdi: "＋ Yeni Sevk",
+                               silHedef: null, silIpucu: "Yalnız taslak sevk silinir");
         EkleTicari(s);
         Ekranlar = s;
     }

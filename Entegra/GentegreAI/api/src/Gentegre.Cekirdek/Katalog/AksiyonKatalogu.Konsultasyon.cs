@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Yetki;
+﻿using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Cekirdek.Katalog;
 
@@ -13,7 +13,9 @@ public static partial class AksiyonKatalogu
     {
         s["konsultasyon-liste"] =
         [
-            .. Crud("konsultasyon", "konsultasyon", "muayene.konsultasyon", ekleAdi: "＋ Yeni Konsültasyon İsteği"),
+            // 🗑 Sil araç çubuğunda (kullanıcı 15.10.2026); yalnız taslak istek silinir (db/1111).
+            .. Crud("konsultasyon", "konsultasyon", "muayene.konsultasyon", ekleAdi: "＋ Yeni Konsültasyon İsteği",
+                    silHedef: null, silIpucu: "Yalnız taslak istek silinir"),
             new("konsultasyon.yanitla", "✋ Yanıtla", "konsultasyon", Hedef: "araccubugu,sagtus,palet",
                 KaynakKodu: "muayene.konsultasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40,
                 Ipucu: "İsteği alır ve yanıt muayenesini açar"),

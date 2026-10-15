@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// SEVK KARTI (1110) — mockup Ekranlar/Muayene/sevk_karti_v2.html (sade).
@@ -18,7 +18,7 @@ public static partial class KartKatalogu
         Tablo: "public.sevk",
         LogTabloId: SevkLog,
         SubeKolonu: "sube_id",
-        SilmeYok: true,
+        // SİLME AÇIK (kullanıcı 15.10.2026: listeye sil ekle) - yalnız TASLAK silinir, kural db/1111 tetiğinde.
         // ANAHTARLAR DB KOLON ADLARI (kart yazıcısı kolona yazar).
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
