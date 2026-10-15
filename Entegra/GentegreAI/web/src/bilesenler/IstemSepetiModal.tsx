@@ -76,6 +76,9 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   onBitti(): void;
 }) {
   const [sekme, setSekme] = useState<Sekme>(baslangicSekme);
+  // GÖZ YALNIZ GÖZ KLİNİĞİNDEN (kullanıcı 15.10.2026: "göz kliniğinden çağrılmadıysa göz görünmesin,
+  //   sadece lab ve radyoloji"): göz muayene kartı ve göz panosu sepeti göz sekmesiyle açar.
+  const gozVar = baslangicSekme === 'goz';
   const [kategori, setKategori] = useState('');   // lab bölüm/'P' veya modalite
   const [arama, setArama] = useState('');
   const [satirlar, setSatirlar] = useState<{ satir: ListeSatiri; tur: KalemTur }[]>([]);
@@ -310,12 +313,12 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     fontWeight: sekme === s ? 700 : 500,
     background: sekme === s ? '#2b6cb0' : '#eef2f7',
     color: sekme === s ? '#fff' : '#33506e',
-    borderRadius: s === 'lab' ? '6px 0 0 0' : s === 'goz' ? '0 6px 0 0' : 0,
+    borderRadius: s === 'lab' ? '6px 0 0 0' : s === 'goz' || (s === 'radyoloji' && !gozVar) ? '0 6px 0 0' : 0,
   });
 
   return (
     // BÜYÜTME YOK (kullanıcı 15.10.2026: "tetkik istemi ekranında max kaldır").
-    <Modal baslik="🧾 Tetkik İstemi (Lab + Radyoloji + Göz)" onKapat={onKapat} buyutmeYok
+    <Modal baslik={gozVar ? '🧾 Tetkik İstemi (Lab + Radyoloji + Göz)' : '🧾 Tetkik İstemi (Lab + Radyoloji)'} onKapat={onKapat} buyutmeYok
       alt={<>
         <label style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
           <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
@@ -332,8 +335,10 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
               onClick={() => sekmeSec('lab')}>{ikonUst('🧪')}Lab{labSay > 0 ? ` (${labSay})` : ''}</button>
             <button type="button" style={sekmeDug('radyoloji')}
               onClick={() => sekmeSec('radyoloji')}>{ikonUst('📷')}Radyoloji{radSay > 0 ? ` (${radSay})` : ''}</button>
-            <button type="button" style={sekmeDug('goz')}
-              onClick={() => sekmeSec('goz')}>{ikonUst('👁')}Göz{gozSay > 0 ? ` (${gozSay})` : ''}</button>
+            {gozVar && (
+              <button type="button" style={sekmeDug('goz')}
+                onClick={() => sekmeSec('goz')}>{ikonUst('👁')}Göz{gozSay > 0 ? ` (${gozSay})` : ''}</button>
+            )}
           </div>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, overflowY: 'auto', maxHeight: 400,
             border: '1px solid #e5eaf0', borderTop: 0, borderRadius: '0 0 6px 6px', flex: 1 }}>
@@ -399,7 +404,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
           {/* ALT: ortak sepet (lab + radyoloji) */}
           <div style={{ marginTop: 8, borderTop: '2px solid #e5eaf0', paddingTop: 6 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#1a365d', marginBottom: 4 }}>
-              Seçilen İstemler ({sepet.size}) · Lab {labSay} · Radyoloji {radSay} · Göz {gozSay}</div>
+              Seçilen İstemler ({sepet.size}) · Lab {labSay} · Radyoloji {radSay}{gozVar ? ` · Göz ${gozSay}` : ''}</div>
             {sepet.size === 0
               ? <div style={{ fontSize: 12, color: '#9aa', padding: '2px 0' }}>
                   Sekme + kategori seç, tetkiğe tıkla — burada birikir (lab ve radyoloji birlikte).</div>
