@@ -87,7 +87,7 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
                 <span className="kns-acil-et">{c('Aciliyet')} *</span>
                 <div className="kns-secim kns-secim-kucuk">
                   {[1, 2, 3].map(a => (
-                    <button key={a} type="button" disabled={!duzenlenir} className={aciliyet === a ? 'on' : ''}
+                    <button key={a} type="button" disabled={!duzenlenir} className={`kns-acil${a}${aciliyet === a ? ' on' : ''}`}
                             title={c(KONS_ACILIYET[a])}
                             onClick={() => parcalar?.alanDegistir('aciliyet', a)}>{c(KONS_ACILIYET_KISA[a])}</button>
                   ))}
