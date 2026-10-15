@@ -76,8 +76,15 @@ public static partial class AksiyonKatalogu
                                silHedef: null, silIpucu: "Yalnız taslak sevk silinir");
         // REÇETE LİSTESİ (kullanıcı 15.10.2026): ＋ Yeni (önce hasta seçimi, istemcide) / ✎ / 🗑.
         //   Eskiden 'cari-liste' ekranını kullanıyordu (cari yetkisiyle). Sil yalnız taslakta.
-        s["recete-liste"] = Crud("recete", "recete", "muayene.recete", ekleAdi: "＋ Yeni Reçete",
-                                 silHedef: null, silIpucu: "Yalnız taslak reçete silinir");
+        //   SİL DEĞİŞTİR YETKİSİYLE (kullanıcı 15.10.2026, uzman doktor: "reçete listesi sil buton ekle"):
+        //   silinen yalnız taslaktır (db/1114); hekim kendi taslağını siler, başkasınınkini kart ucu
+        //   muayene silme hakkı olmadan reddeder.
+        s["recete-liste"] =
+        [
+            .. Crud("recete", "recete", "muayene.recete", ekleAdi: "＋ Yeni Reçete", sil: false),
+            new("recete.sil", "🗑 Sil", "recete", Kisayol: "Del", KaynakKodu: "muayene.recete",
+                Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, Ipucu: "Yalnız taslak reçete silinir"),
+        ];
         EkleTicari(s);
         Ekranlar = s;
     }
