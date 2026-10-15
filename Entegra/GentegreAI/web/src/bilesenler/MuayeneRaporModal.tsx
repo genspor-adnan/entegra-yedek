@@ -21,18 +21,22 @@ const yerelGun = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const bugun = () => yerelGun(new Date());
 
-export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: {
+export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi, rapor }: {
   muayeneId: number;
   ilkTur: number;
   onKapat(): void;
   onKaydedildi(): void;
+  /** DÜZENLEME (kullanıcı 15.10.2026: "＋ rapor ekranıyla çift tıklayıp düzenlenen ekran farklı"): mevcut
+      rapor satırı - aynı pencere değerleriyle açılır, kayıt güncelleme ucuna gider. */
+  rapor?: Record<string, unknown>;
 }) {
-  const [tur, setTur] = useState(ilkTur);
-  const [altTur, setAltTur] = useState(0);
-  const [baslangic, setBaslangic] = useState(bugun());
-  const [gun, setGun] = useState(1);
-  const [aciklama, setAciklama] = useState('');
-  const [icdKod, setIcdKod] = useState('');
+  const duzenle = rapor?.id != null;
+  const [tur, setTur] = useState(duzenle ? Number(rapor!.tur ?? ilkTur) : ilkTur);
+  const [altTur, setAltTur] = useState(duzenle ? Number(rapor!.altTur ?? 0) : 0);
+  const [baslangic, setBaslangic] = useState(duzenle && rapor!.baslangic ? String(rapor!.baslangic).slice(0, 10) : bugun());
+  const [gun, setGun] = useState(duzenle ? Number(rapor!.gun ?? 1) : 1);
+  const [aciklama, setAciklama] = useState(duzenle ? String(rapor!.aciklama ?? '') : '');
+  const [icdKod, setIcdKod] = useState(duzenle ? String(rapor!.icdKod ?? '') : '');
   const [mesgul, setMesgul] = useState(false);
 
   // Bitiş = başlangıç + gün - 1 (istirahat başlangıç günü dâhil).
@@ -44,12 +48,14 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: 
   }, [baslangic, gun]);
 
   const kaydet = async () => {
+    // ALT TÜR ZORUNLU (kullanıcı 15.10.2026) - SGK'ya giden raporda alt tür boş olamaz.
+    if (!altTur) { mesaj('Alt tür zorunlu.'); return }
     setMesgul(true);
     await guvenli(async () => {
-      const y = await api.muayeneRaporEkle(muayeneId, {
-        tur, altTur, baslangic, gun, bitis: bitis || undefined,
-        aciklama: aciklama.trim(), icdKod: icdKod.trim(),
-      });
+      const govde = { tur, altTur, baslangic, gun, bitis: bitis || undefined,
+                      aciklama: aciklama.trim(), icdKod: icdKod.trim() };
+      const y = duzenle ? await api.muayeneRaporGuncelle(Number(rapor!.id), govde)
+                        : await api.muayeneRaporEkle(muayeneId, govde);
       mesaj(y.mesaj);
       onKaydedildi();
       onKapat();
@@ -63,7 +69,7 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: 
     marginBottom: 3, display: 'block' };
 
   return (
-    <Modal baslik="📄 Rapor Ekle" onKapat={onKapat} dar buyutmeYok
+    <Modal baslik={duzenle ? '📄 Rapor' : '📄 Rapor Ekle'} onKapat={onKapat} dar buyutmeYok
       alt={<>
         <button className="d bir" disabled={mesgul} onClick={() => void kaydet()}>
           💾 Kaydet (Taslak)</button>
@@ -78,9 +84,9 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: 
           </select>
         </div>
         <div>
-          <label style={etiket}>Alt tür (SGK)</label>
+          <label style={etiket}>Alt tür (SGK) *</label>
           <select style={kutu} value={altTur} onChange={e => setAltTur(Number(e.target.value))}>
-            {ALT_TURLER.map(t => <option key={t.k} value={t.k}>{t.ad}</option>)}
+            {ALT_TURLER.map(t => <option key={t.k} value={t.k}>{t.k === 0 ? '— seçin —' : t.ad}</option>)}
           </select>
         </div>
         <div>

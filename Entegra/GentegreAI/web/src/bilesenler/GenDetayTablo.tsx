@@ -248,6 +248,9 @@ interface Props {
       birlikte gosterir. Veri akisi degismez - degisiklik yine kartin
       Kaydet'iyle gider. */
   modalDuzenle?: boolean;
+  /** SATIR AÇMA EKRANDA (kullanıcı 15.10.2026, muayene raporu: "＋ Rapor ekranıyla çift tıklayıp
+      düzenlenen ekran farklı"): verilirse ✎ / çift tık genel satır penceresi yerine bunu çağırır. */
+  onSatirAc?(satir: Record<string, unknown>): void;
   /** Modal taslaginda bir alan degisince EKRAN kurali calistirir: donen
       alanlar taslagin ustune yazilir (ör. fiyat listesi satirinda carpan
       degisince fiyat = taban x carpan ve Yazim = Manuel). Boylece turetilen
@@ -381,7 +384,7 @@ function oneriListesi(ham: unknown): string[] {
 }
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
-                               modalDuzenle, taslakKural, cipler, kutuSinif,
+                               modalDuzenle, taslakKural, cipler, kutuSinif, onSatirAc,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                silGizli, onYeni, kolonBaslikEk, baslikEk, ekKolon, oneriAlanlari,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
@@ -968,7 +971,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           title={secililer.size === 0 ? 'Önce satır seçin'
                                  : secililer.size > 1 ? 'Düzenleme tek satırda yapılır'
                                  : 'Seçili satırı düzenle'}
-                          onClick={() => secili !== null && modalAc(secili)}>✎</button>
+                          onClick={() => secili !== null && (onSatirAc ? onSatirAc(durum.guncel[secili]) : modalAc(secili))}>✎</button>
                   {!silGizli && (
                   <button type="button" className="d teh ikon-dugme"
                           disabled={secililer.size === 0}
@@ -1152,7 +1155,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   if ((e.target as HTMLElement).closest('input[type="checkbox"]')) return;
                   satirTikla(i, e);
                 }}
-                onDoubleClick={() => modalDuzenle && !saltOkunur && modalAc(i)}>
+                onDoubleClick={() => modalDuzenle && !saltOkunur && (onSatirAc ? onSatirAc(durum.guncel[i]) : modalAc(i))}>
               {/* COKLU SECIM (534): kutu isaretlemek oteki secimleri BOZMAZ;
                   satira tiklamak ise tek satira indirir (eski davranis). */}
               {modalDuzenle && !saltOkunur && (

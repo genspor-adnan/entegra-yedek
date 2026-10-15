@@ -74,6 +74,36 @@ public static partial class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // PUT /api/muayene/rapor/{raporId} - TASLAK raporu düzenle (kullanıcı 15.10.2026: "＋ Rapor ile gelen
+        //   ekranla çift tıklayıp düzenlenen ekran farklı" - düzenleme de "Rapor Ekle" penceresinden).
+        //   İmzalı rapor değişmez; bitiş başlangıç + gün - 1 (gün yoksa verilen bitiş).
+        grup.MapPut("/rapor/{raporId:int}", async (
+            int raporId, RaporEkleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var durum = await baglanti.TekDegerAsync<int?>(
+                "select durum from public.muayene_rapor where id = @p0", null, [raporId], iptal);
+            if (durum is null)
+                return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Rapor bulunamadı." } });
+            if (durum != 1)
+                throw GentegreHatasi.IsKurali("İmzalanmış/onaylı rapor değiştirilemez.");
+            var gun = istek.Gun ?? 0;
+            await baglanti.CalistirAsync(
+                "update public.muayene_rapor set tur = @p1::smallint, alt_tur = @p2::smallint, " +
+                "  baslangic = coalesce(@p3::date, baslangic), gun = @p4::smallint, " +
+                "  bitis = case when @p4 > 0 then coalesce(@p3::date, baslangic) + (@p4 - 1) else coalesce(@p5::date, bitis) end, " +
+                "  aciklama = @p6, icd_kod = @p7, degistiren = @p8, degistirme_tarihi = now() " +
+                " where id = @p0 and durum = 1",
+                null, [raporId, istek.Tur, istek.AltTur ?? 0,
+                       string.IsNullOrWhiteSpace(istek.Baslangic) ? null : istek.Baslangic, gun,
+                       string.IsNullOrWhiteSpace(istek.Bitis) ? null : istek.Bitis,
+                       istek.Aciklama ?? "", istek.IcdKod ?? "", baglam.KullaniciId], iptal);
+            return Results.Ok(new { raporId, mesaj = "Rapor güncellendi.", izlemeNo = baglam.IzlemeNo });
+        });
+
         // DELETE /api/muayene/rapor/{raporId} - TASLAK rapor sil (mockup "🗑").
         //   İmzalı/onaylı rapor silinmez (yasal kayıt).
         grup.MapDelete("/rapor/{raporId:int}", async (

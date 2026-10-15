@@ -213,7 +213,7 @@ export function ListeKarti({
   const dikteKaynak = useRef<{ oku(ad: string): string;
                                yaz(ad: string, v: string): void } | null>(null);
   // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
-  const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number } | null>(null);
+  const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number; rapor?: Record<string, unknown> } | null>(null);
   // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
   const [ozetModal, setOzetModal] = useState<number | null>(null);
   /** Kartın kaydedilmemiş değişikliğini yazan fonksiyon (GenForm.kaydetBagla). */
@@ -484,7 +484,7 @@ export function ListeKarti({
           onKapat={() => setDikteAcik(false)} />
       )}
       {raporModal && (
-        <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
+        <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur} rapor={raporModal.rapor}
           onKapat={() => setRaporModal(null)}
           onKaydedildi={() => { kipYaz('rapor')(false); setKartTazele(t => t + 1) }} />
       )}
@@ -1149,7 +1149,12 @@ export function ListeKarti({
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
         tazeleAnahtari={kartTazele}
-        detaySecenekleri={kartOzel.detaySecenekleri}
+        // RAPOR SATIRI ✎ / çift tık: "＋ Rapor" ile aynı pencere (kullanıcı 15.10.2026).
+        detaySecenekleri={tanim.kaynak === 'muayene' && typeof kartId === 'number'
+          ? { ...kartOzel.detaySecenekleri,
+              raporlar: { ...kartOzel.detaySecenekleri?.raporlar,
+                          satirAc: s => setRaporModal({ muayeneId: Number(kartId), tur: Number(s.tur ?? 1), rapor: s }) } }
+          : kartOzel.detaySecenekleri}
         sekmeSirasi={kartOzel.sekmeSirasi}
         // MOCKUP EK SEKMELERI (muayene_karti.html): e-Recete · Sevk /
         //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek

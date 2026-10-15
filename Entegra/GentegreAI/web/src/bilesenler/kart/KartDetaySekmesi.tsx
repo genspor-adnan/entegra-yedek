@@ -32,7 +32,8 @@ export interface KartDetaySekmesiOzellikleri {
                                       sade?: boolean; gridKipi?: boolean;
                                       salt?: boolean; ekleGizli?: boolean;
                                       /** YALNIZ gridde gizli - modalde durur. */
-                                      gridGizli?: string[] }>;
+                                      gridGizli?: string[];
+                                      satirAc?(satir: Record<string, unknown>): void }>;
   satirKategori: { id: number; agac: number[]; ad: string } | null;
   setSatirKategori(v: { id: number; agac: number[]; ad: string } | null): void;
   satirKategorileri?: Set<number>;
@@ -123,6 +124,7 @@ export function KartDetaySekmesi({
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          onSatirAc={ayar?.satirAc}
           // DOKUMAN: en dis cerceve YOK (kullanici) - sekme zaten bir
           //   cercevedir, grid'in kendi baslik seridiyle cift cizgi olusuyordu.
           kutuSinif={ayar?.sinif ?? (kaynak === 'dokuman' ? 'kutu-cercevesiz' : undefined)}

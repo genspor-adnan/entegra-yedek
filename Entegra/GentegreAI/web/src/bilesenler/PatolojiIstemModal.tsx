@@ -74,7 +74,7 @@ export function PatolojiIstemModal({ muayeneId, onKapat, onKaydedildi }: {
   };
 
   return (
-    <Modal baslik={`🔬 ${c('Patoloji İstemi')}`} onKapat={onKapat}
+    <Modal baslik={`🔬 ${c('Patoloji İstemi')}`} onKapat={onKapat} buyutmeYok
            alt={<>
              <button type="button" className="d bir" disabled={kaydediyor} onClick={() => void kaydet()}>💾 {c('İstemi Kaydet')}</button>
              <button type="button" className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>

@@ -190,7 +190,9 @@ interface Props {
                                       sade?: boolean; gridKipi?: boolean;
                                       salt?: boolean; ekleGizli?: boolean;
                                       /** YALNIZ gridde gizli - modalde durur. */
-                                      gridGizli?: string[] }>;
+                                      gridGizli?: string[];
+                                      /** Satır ✎ / çift tık: genel satır penceresi yerine ekranın penceresi. */
+                                      satirAc?(satir: Record<string, unknown>): void }>;
   /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
   gizliDetaylar?: string[];
   /**

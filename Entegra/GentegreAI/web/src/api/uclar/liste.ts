@@ -265,6 +265,11 @@ export const listeUclari = {
                      baslangic?: string; gun?: number; bitis?: string;
                      aciklama?: string; icdKod?: string }) =>
     gonder<{ raporId: number; mesaj: string }>(`/api/muayene/${muayeneId}/rapor`, govde),
+  /** Taslak raporu düzenle (aynı "Rapor" penceresi; imzalı rapor değişmez). */
+  muayeneRaporGuncelle: (raporId: number, govde: { tur: number; altTur?: number;
+                         baslangic?: string; gun?: number; bitis?: string;
+                         aciklama?: string; icdKod?: string }) =>
+    gonder<{ raporId: number; mesaj: string }>(`/api/muayene/rapor/${raporId}`, govde, 'PUT'),
 
   /** Taslak rapor sil (imzalı silinmez). */
   muayeneRaporSil: (raporId: number) =>
