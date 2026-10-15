@@ -468,6 +468,8 @@ export function ListeKarti({
                 : `${gecerli.filter(r => Number(r.sonucDurum ?? 0) === 2).length}/${gecerli.length}`;
             }
           : undefined}
+        // Konsültasyon kartı: Kaydet'in üstündeki "Konsültasyon Kartı — Yeni" satırı yok (kullanıcı 15.10.2026).
+        sayfaBaslikYok={tanim.kaynak === 'konsultasyon'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.

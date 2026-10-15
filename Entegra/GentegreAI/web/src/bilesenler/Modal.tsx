@@ -48,8 +48,10 @@ export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
  * dairesel import olurdu.
  */
 export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit, alt, dar, ekSinif, enUst,
-                       buyutmeYok, olcumYok, onKapat, sayfa, children }: {
+                       buyutmeYok, olcumYok, onKapat, sayfa, baslikYok, children }: {
   baslik: string;
+  /** Sayfa kipinde başlık satırı çizilmez (sekme başlığı zaten aynısını söylüyor). */
+  baslikYok?: boolean;
   /**
    * SAYFA KİPİ (ana ekran v3 - kart kendi ekran sekmesinde, kullanıcı: "kartın çerçevesini
    * kaldır"): portal / perde / pencere çerçevesi yok; kart sekmenin içine sayfa gibi oturur.
@@ -304,7 +306,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
         {/* Baslik cubugundan tutup FAREYLE TASINIR (kullanici): arkadaki listeyi
             gormek icin pencereyi kenara cekmek gerekiyordu. Cift tik ilk yerine
             dondurur; dugmeler/girdiler surukleme baslatmaz. */}
-        <div className={`kabas${sayfa ? ' kabas-sayfa' : ''}`}
+        {!(sayfa && baslikYok) && <div className={`kabas${sayfa ? ' kabas-sayfa' : ''}`}
              style={{ cursor: tamEkran ? 'default' : 'move', userSelect: 'none' }}
              onMouseDown={tamEkran ? undefined : surukleBasla}
              onDoubleClick={() => setKaydirma({ x: 0, y: 0 })}>
@@ -318,7 +320,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
                   onMouseDown={e => e.stopPropagation()}
                   onClick={tamEkranDegis}>{tamEkran ? '🗗' : '🗖'}</button>
           )}
-        </div>
+        </div>}
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>
         {ustSerit}

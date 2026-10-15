@@ -235,6 +235,8 @@ interface Props {
   /** Tek sayfada GİZLİ (ama çizilen) bölümler: içerik çizilir - ekran verisinin dolu olup
       olmadığını oradan öğrenir - yalnız görünmez (muayene sekmesiz: boş bölümler). */
   tekSayfaGizli?(baslik: string): boolean;
+  /** Sayfa kipinde kartın başlık satırı ("X Kartı — Yeni") çizilmez - sekme başlığı yeter. */
+  sayfaBaslikYok?: boolean;
   /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
       `git` başlığı verilen sekmeye/bölüme götürür. */
   gezintiEk?(git: (baslik: string) => void): React.ReactNode;
@@ -331,7 +333,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu, alanGirdisi }: Props) {
@@ -1703,6 +1705,7 @@ Yine de yeni kayıt eklensin mi?`);
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
       buyutmeYok={buyutmeYok || sayfaKipi}
       sayfa={sayfaKipi}
+      baslikYok={sayfaBaslikYok}
         // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
         //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
         //   sinifi tek basina her kartin "durum" alanini etkilerdi.
