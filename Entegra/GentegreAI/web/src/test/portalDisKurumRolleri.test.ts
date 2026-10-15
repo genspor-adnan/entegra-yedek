@@ -19,7 +19,7 @@ import { portalBolumleri, type MenuKaynagi } from '../sayfalar/portal/portalMenu
  */
 
 // db/824: rol_yetki içerikleri.
-const KLINIK = ['ai.rehber', 'hasta', 'lab', 'lab.numune', 'lab.sonuc', 'mesaj',
+const KLINIK = ['ai.rehber', 'hasta', 'hasta.liste', 'lab', 'lab.numune', 'lab.sonuc', 'mesaj',
                 'teleradyoloji'];
 const YONETICI = ['ai.rehber', 'mesaj', 'portal.mali'];
 

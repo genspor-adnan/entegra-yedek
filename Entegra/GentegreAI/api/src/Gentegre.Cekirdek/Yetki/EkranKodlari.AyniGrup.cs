@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Yetki;
+﻿namespace Gentegre.Cekirdek.Yetki;
 
 /// <summary>
 /// AYNI GRUPTA BİRDEN ÇOK EKRAN AÇAN KODLARIN BÖLÜNMESİ (1004 — kullanıcı
@@ -48,6 +48,8 @@ public static partial class EkranKodlari
         ("isg.icmal", "isg.pano"),
         ("kalite.icmal", "klinik_kalite.donem"),
         ("randevu.icmal", "randevu"),
+        ("hasta.liste", "hasta"),                               // Kayıt Kabul › Hasta Listesi (1115; veri `hasta`ta kalır)
+        ("basvuru.liste", "belge"),                             // Kayıt Kabul › Başvuru Listesi (1115; veri `belge`de kalır)
         ("belge.kurum_irsaliye", "belge.satis.irsaliye"),       // Kurumlar & Sigorta › Satış İrsaliyeleri (1038, HBYS ikizi)                // Finans › Fatura / e-Belge İcmali (1035)                        // Sterilizasyon › Sterilizasyon İcmali (1032)
         ("ayar.demo_verisi", "ayar"),                           // Yönetim › Veri Aktarımı › Demo Verisi
         ("ayar.iceri_alma", "ayar"),                            // Yönetim › Veri Aktarımı › Excel'den İçeri Alma

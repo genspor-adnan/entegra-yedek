@@ -18,6 +18,8 @@ const satir = (yetkiId: number, kod: string, ad: string, tur: number) => ({
 });
 const YETKILER = [
   satir(1, 'belge', 'Belgeler', 0),
+  // 1115: Başvuru Listesi menüsü kendi ekran kodunda (veri `belge`de).
+  satir(90, 'basvuru.liste', 'Başvuru Listesi (Kayıt Kabul)', 0),
   satir(2, 'belge.satis.fatura', 'Satış Faturaları (Satış)', 0),
   satir(3, 'belge.alis.fis', 'Alış Fişleri (Alış)', 0),
   satir(4, 'belge.kesinlestir', 'Belgeyi kesinleştir', 1),

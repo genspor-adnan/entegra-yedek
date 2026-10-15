@@ -261,7 +261,7 @@ public static partial class KaynakKatalogu
             // BOLUM HEKIMDEN ONCE (kullanici): calisma listesinde once hangi
             //   bolume, sonra hangi hekime bakiliyor - siralama okuma sirasi.
             new("bolumAdi",    "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 140),
-            new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 170),
+            new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Doktor", Genislik: 170),   // "Doktor" (kullanıcı 16.10.2026)
             new("kurumAdi",    "coalesce(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), 'Özel')", "metin", "Kurum", Genislik: 150),
             new("oncelikAdi",
                 "case bb.oncelik when 2 then 'Acil' when 1 then 'Öncelikli' else '' end",

@@ -26,7 +26,7 @@ const BANKO_YETKILERI = new Set([
   'sigorta', 'sigorta.iptal', 'sigorta.provizyon',
   'ai', 'ai.rehber', 'mesaj',
   'banko_oturum', 'hesap', 'kasa_islem', 'kasa.makbuz-yazdir',
-  'basvuru.iskonto', 'belge', 'hasta', 'iskonto_onay',
+  'basvuru.iskonto', 'belge', 'hasta', 'iskonto_onay', 'hasta.liste', 'basvuru.liste',   // 1115 ekran kodları
   'randevu', 'randevu.plan',
   'belge_satir', 'taraf',
 ]);

@@ -206,7 +206,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // HASTANIN KENDI YETKISI (684): liste `personel` yetkisine bagliydi -
     //   banko gorevlisine hasta listesi vermek icin personel ozluk kayitlarini
     //   da acmak gerekiyordu, matriste de "Kayit Kabul > Personel" gorunuyordu.
-    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🤕', yetkiKodu: 'hasta',
+    // EKRAN KODU (1115): hasta.liste - `hasta` hekimin muayenede okuduğu veriyi de açar.
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🤕', yetkiKodu: 'hasta.liste',
     menuSira: 10,
     urunModu: 2,
   },
@@ -293,7 +294,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   her zaman hastadir, "Cari" ERP dilidir.
     kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'Başvuru Listesi', ic: '♿', yetkiKodu: 'belge',
+    // EKRAN KODU (1115): basvuru.liste - `belge` muayenedeki başvuru / istem verisini de açar.
+    menuGrup: 'Kayıt Kabul', menuAd: 'Başvuru Listesi', ic: '♿', yetkiKodu: 'basvuru.liste',
     menuSira: 20,
   },
   {

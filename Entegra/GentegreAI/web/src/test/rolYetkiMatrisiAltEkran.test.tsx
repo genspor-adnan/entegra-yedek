@@ -20,6 +20,8 @@ const satir = (yetkiId: number, kod: string, ad: string, tur: number) => ({
 });
 const YETKILER = [
   satir(1, 'belge', 'Belgeler', 0),
+  // 1115: Başvuru Listesi menüsü kendi ekran kodunda (veri `belge`de).
+  satir(4, 'basvuru.liste', 'Başvuru Listesi (Kayıt Kabul)', 0),
   // 1003'ten beri Kurumlar & Sigorta › Faturalar kendi kodunu taşır.
   satir(2, 'belge.kurum_fatura', 'Kurum faturaları', 0),
   satir(3, 'belge.kesinlestir', 'Kesinleştir', 1),
@@ -59,8 +61,10 @@ describe('yetki matrisi - başka gruptaki alt ekran', () => {
     const satis = satirBul('Satış Faturası Listesi');
     const satisGor = satis.querySelector('input[type=checkbox]') as HTMLInputElement;
     expect(satisGor.checked).toBe(false);
+    // 1115: Başvuru Listesi kendi ekran kodunda (basvuru.liste); `belge.*` aksiyonları artık onun
+    //   altında değil, Kayıt Kabul'de ayrı satır - Başvuru tiki onları açmaz.
     const kes = satirBul('Kesinleştir');
     const kesGor = kes.querySelector('input[type=checkbox]') as HTMLInputElement;
-    expect(kesGor.checked).toBe(true);
+    expect(kesGor.checked).toBe(false);
   });
 });
