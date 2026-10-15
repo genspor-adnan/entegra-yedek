@@ -11,6 +11,8 @@ export const SEVK_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/sevk', kartBaslik: 'Sevk', yeniSekmede: 'Yeni Sevk Kartı',
     // YENİ / DÜZENLE / SİL (kullanıcı 15.10.2026): AksiyonKatalogu "sevk-liste".
     aksiyonEkrani: 'sevk-liste',
+    // Zorunlular (kullanıcı 15.10.2026: boş kayıt kaydedilip kapanıyordu).
+    zorunluKartAlanlari: ['tur', 'neden', 'notu'],
     cipler: [
       { ad: 'Açık', filtre: { alan: 'acik', op: 'esit', deger: 1 } },
       { ad: 'Kurum dışı', filtre: { alan: 'tur', op: 'esit', deger: 1 } },

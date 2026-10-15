@@ -13,6 +13,8 @@ export const KONSULTASYON_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/konsultasyon', kartBaslik: 'Konsültasyon', yeniSekmede: 'Yeni Konsültasyon Kartı',
     // İstek zamanı kartta aciliyetle aynı satırda (KonsultasyonIstekGovdesi) - grupta çizilmez.
     gizliKartAlanlari: ['istekZamani'],
+    // Zorunlular (kullanıcı 15.10.2026: boş kayıt kaydedilip kapanıyordu) - ListeKarti pencereleriyle aynı.
+    zorunluKartAlanlari: ['istekBolumId', 'isteyenHekimId', 'neden', 'hedefBolumId', 'karsilamaYeri', 'aciliyet', 'soru'],
     aksiyonEkrani: 'konsultasyon-liste',
     cipler: [
       { ad: 'Açık', filtre: { alan: 'durum', op: 'icinde', deger: [1, 2] } },

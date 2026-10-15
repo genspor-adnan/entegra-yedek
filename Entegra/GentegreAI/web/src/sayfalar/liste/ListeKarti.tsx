@@ -126,6 +126,13 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
 const VITAL_OLCUM_ALANLARI = ['sistolik', 'diyastolik', 'nabiz', 'spo2', 'ates', 'solunum', 'agriVas',
   'boyCm', 'kiloKg', 'bki', 'belCevresiCm', 'glukozParmak', 'gks'] as const;
 
+/** ZORUNLU ALANLAR (kullanıcı 15.10.2026: "kons seçip direk kaydet dedim, soru sormadan kapandı"):
+    kart doğrulaması yalnız ekranın listelediği alanlara bakar - bu kartlarda liste yoktu. */
+const KART_ZORUNLU: Record<string, string[]> = {
+  konsultasyon: ['istekBolumId', 'isteyenHekimId', 'neden', 'hedefBolumId', 'karsilamaYeri', 'aciliyet', 'soru'],
+  sevk: ['tur', 'neden', 'notu'],
+};
+
 /** Yeni kartı önce HASTA sorarak açılan kaynaklar (hasta kartın içinde seçilmez). */
 const HASTA_ILE_YENI = new Set(['konsultasyon', 'sevk']);
 
@@ -272,6 +279,15 @@ export function ListeKarti({
     bolumAc('sevk');
     setSevkPencere(y.id);
   });
+  /** Pencere kaydedilmeden kapandıysa ve taslak hâlâ BOŞSA (soru / not yok) silinir. */
+  const bosTaslakSil = async (kaynak: 'konsultasyon' | 'sevk', id: number | null, metinAlani: string) => {
+    if (id) try {
+      const y = await api.kartOku(kaynak, id);
+      const taslak = kaynak === 'konsultasyon' ? Number(y.kart.durum) === 6 : Number(y.kart.durum) === 1;
+      if (taslak && String(y.kart[metinAlani] ?? '').trim() === '') await api.kartSil(kaynak, id);
+    } catch { /* silinemezse taslak kalır - listeden silinebilir */ }
+    setKartTazele(t => t + 1);
+  };
   const konsultasyonIste = () => void guvenli(async () => {
     const y = await api.muayenedenKonsultasyon(Number(kartId));
     bolumAc('sevk');
@@ -566,16 +582,17 @@ export function ListeKarti({
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
                 {konsPencere !== null && (
                   <GenForm kaynak="konsultasyon" id={konsPencere} baslik={c('Konsültasyon İsteği')}
-                    gizliAlanlar={['istekZamani']}
-                    onKapat={() => { setKonsPencere(null); setKartTazele(t => t + 1) }}
+                    gizliAlanlar={['istekZamani']} zorunluAlanlar={KART_ZORUNLU.konsultasyon}
+                    // Kaydetmeden kapatılan BOŞ taslak silinir - her menü tıklaması satır bırakmasın.
+                    onKapat={() => { const id = konsPencere; setKonsPencere(null); void bosTaslakSil('konsultasyon', id, 'soru'); }}
                     // Kaydedince pencere kapanır; istek ortadaki çerçevede GÖSTERİM kipinde görünür.
                     onKaydedildi={() => { setKonsPencere(null); kipYaz('kons')(false); setKartTazele(t => t + 1) }}
                     sekmeSarmalayici={(_b, _i, d, _iz, p) => (
                       <KonsultasyonIstekGovdesi kartId={konsPencere} deger={d} parcalar={p} bantYok />)} />
                 )}
                 {sevkPencere !== null && (
-                  <GenForm kaynak="sevk" id={sevkPencere} baslik={c('Sevk')}
-                    onKapat={() => { setSevkPencere(null); setKartTazele(t => t + 1) }}
+                  <GenForm kaynak="sevk" id={sevkPencere} baslik={c('Sevk')} zorunluAlanlar={KART_ZORUNLU.sevk}
+                    onKapat={() => { const id = sevkPencere; setSevkPencere(null); void bosTaslakSil('sevk', id, 'notu'); }}
                     // Kaydedince / gönderince pencere kapanır; sevk ortadaki "Sevk" çerçevesinde görünür.
                     onKaydedildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }}
                     sekmeSarmalayici={(_b, _i, d, _iz, p) => (
