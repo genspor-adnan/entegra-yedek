@@ -6390,15 +6390,12 @@ textarea.fm-giris { resize: vertical }
 .ts-bolum:last-child { border-bottom: 0 }
 .ts-bas { margin: 0 0 10px; font-size: 13.5px; color: var(--baslik, var(--vurgu)) }
 
-.duzen-anahtar { display: inline-flex; margin-left: 8px; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; overflow: hidden; vertical-align: middle }
-.duzen-anahtar button { border: 0; background: transparent; color: inherit; font: inherit; font-size: 10.5px; padding: 1px 8px; cursor: pointer; opacity: .8 }
-.duzen-anahtar button.on { background: rgba(255,255,255,.25); font-weight: 600; opacity: 1 }
-/* Kapat'ın solu (araç çubuğu, açık zemin). */
+.duzen-anahtar { display: inline-flex; border: 1px solid #cbd5e0; border-radius: 4px; overflow: hidden; background: #fff; vertical-align: middle }
+.duzen-anahtar button { border: 0; background: transparent; color: #334; font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer }
+.duzen-anahtar button.on { background: #2f6db3; color: #fff; font-weight: 600 }
+/* Kapat'ın solu (araç çubuğu; muayene düzen anahtarı). */
 .katoolbar .kapat-solu { margin-left: auto; order: 98; display: inline-flex; align-items: center }
 .katoolbar .kapat-solu ~ .kapat-dugmesi { margin-left: 6px }
-.katoolbar .duzen-anahtar { margin-left: 0; border-color: #cbd5e0; background: #fff }
-.katoolbar .duzen-anahtar button { font-size: 12px; padding: 4px 10px; color: #334 }
-.katoolbar .duzen-anahtar button.on { background: #2f6db3; color: #fff }
 
 .kanav-ek { border-top: 1px solid var(--cizgi2); margin-top: 6px; padding-top: 4px }
 
