@@ -486,6 +486,12 @@ export function ListeKarti({
                   // Özet görünümünde bir bölüme gidilirse önce Detay'a geçilir (bölüm orada).
                   git={b => { if (b !== 'Özet' && etkinGorunum === 'ozet') { setSekmesizGorunum('detay'); setTimeout(() => git(b), 60) } else git(b) }}
                   muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
+                  // Eksik madde: seçme ekranı doğrudan (ICD arama · istem sepeti · ilaç arama).
+                  eylemler={{
+                    taniEkle: () => setIcdAramaAcik(true),
+                    istemAc: () => { bolumAc('istem'); setIstem(Number(kartId)) },
+                    ilacEkle: () => { bolumAc('recete'); setReceteIlacAra(true) },
+                  }}
                   islemler={[
                     { ad: 'Vital bulgular', ikon: '🫀', ac: () => cerceveAc('vital') },
                     // PATOLOJİK İSTEM (kullanıcı 15.10.2026): istem ikiye - tetkik istemi tamamlamada,

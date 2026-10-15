@@ -157,7 +157,7 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
 
 export interface KontrolMaddesi { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }
 
-export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler, gorunum, onGorunum }: {
+export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler, gorunum, onGorunum, eylemler }: {
   kontrol: KontrolMaddesi[] | null;
   /** ÖZET / DETAY (kullanıcı 14.10.2026): özet = orta kısımda yalnız özet; detay = özetsiz tüm
       bölümler. Varsayılan: muayene tamamlandıysa özet, değilse detay. */
@@ -168,11 +168,18 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
   /** İstem maddesinin yanında "3/5". */
   istemRozeti?: string;
   islemler: { ad: string; ikon: string; bilgi?: string; ac(): void }[];
+  /** Madde EKSİKSE doğrudan açılan ekleme ekranları (kullanıcı 15.10.2026: "ana tanı tıklayınca
+      veri varsa onun üzerine konumlansın yoksa seçme ekranı direkt açılsın; tetkik istem ve
+      reçete de aynı desen"). */
+  eylemler?: { taniEkle(): void; istemAc(): void; ilacEkle(): void };
 }) {
   // Kontrol maddesi → bölüm (Özet sekmesindeki eşlemenin aynısı).
-  const hedef: Record<string, () => void> = {
-    baslangic: muayeneyeAl, sikayet: () => git('Muayene'), fizik: () => git('Fizik muayene'), tanilar: () => git('Tanı'),
-    istem: () => git('İstem'), recete: () => git('e-Reçete'), karar: () => git('Muayene'),
+  const hedef: Record<string, (tamam: boolean) => void> = {
+    baslangic: muayeneyeAl, sikayet: () => git('Muayene'), fizik: () => git('Fizik muayene'),
+    tanilar: tamam => tamam || !eylemler ? git('Tanı') : eylemler.taniEkle(),
+    istem: tamam => tamam || !eylemler ? git('İstem') : eylemler.istemAc(),
+    recete: tamam => tamam || !eylemler ? git('e-Reçete') : eylemler.ilacEkle(),
+    karar: () => git('Muayene'),
     cikisSekli: () => git('Muayene'),
   };
   const eksik = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
@@ -188,7 +195,7 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
         <h6>{c('Tamamlama')}<i className={eksik === 0 ? 'tamam' : ''}>{kontrol === null ? '…' : eksik === 0 ? c('hazır') : `${eksik} ${c('eksik')}`}</i></h6>
         {(kontrol ?? []).map(k => (
           <div key={k.alan} className={`kanav-o smn-k${k.tamam ? ' ok' : k.zorunlu ? ' eksik' : ''}`}
-               title={k.tamam ? undefined : k.mesaj} onClick={hedef[k.alan]}>
+               title={k.tamam ? undefined : k.mesaj} onClick={() => hedef[k.alan]?.(k.tamam)}>
             {/* Mockup v7 dizini: dolu yuvarlak - tamam yeşil ✓, zorunlu eksik kırmızı !, isteğe bağlı eksik boş halka. */}
             <span className={`smn-d ${k.tamam ? 'smn-d-ok' : k.zorunlu ? 'smn-d-kir' : 'smn-d-bos'}`}>{k.tamam ? '✓' : k.zorunlu ? '!' : ''}</span>
             <span>{c(k.ad)}</span>
