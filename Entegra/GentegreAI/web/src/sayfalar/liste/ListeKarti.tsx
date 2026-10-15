@@ -1089,25 +1089,8 @@ export function ListeKarti({
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme'].includes(tanim.kaynak)}
         baslikEk={tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
-          ? (d) => {
-              const kod = String(d.durum ?? '');
-              const ad = MUAYENE_DURUM[Number(kod)] ?? '';
-              const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri'
-                          : kod === '2' ? 'uyari' : 'mavi';
-              return (
-                <>
-                  <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
-                  {ad && <span className={`rozet ${sinif}`}>{ad}</span>}
-                  {/* DÜZEN ANAHTARI: seçim tercihe yazılır, sonraki muayeneler de böyle açılır. */}
-                  <span className="duzen-anahtar" title={c('Muayene ekranı düzeni')}>
-                    <button type="button" className={muayeneDuzeni === 'sekmeli' ? 'on' : ''}
-                            onClick={() => duzenDegis('sekmeli')}>▤ {c('Sekmeli')}</button>
-                    <button type="button" className={muayeneDuzeni === 'sekmesiz' ? 'on' : ''}
-                            onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
-                  </span>
-                </>
-              );
-            }
+          // Durum rozeti Tamamla'nın sağında (kullanıcı 15.10.2026).
+          ? (d) => <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
           // LAB ISTEM NUMARASI BASLIKTA (kullanici: "kaydedince otomatik
           //   olsun, duzenle diye girince baslikta gorsun"). Numara artik
           //   yazilamiyor - tetikle uretiliyor (641) - ve kimlik seridindeki
@@ -1436,6 +1419,14 @@ export function ListeKarti({
         // GÖZLÜK REÇETESİ ARAÇ ÇUBUĞU (mockup): imzala · yazdır (A5) · optiğe ver · teslim.
         // GÖZ GÖRÜNTÜLEME ARAÇ ÇUBUĞU (974 mockup): çekildi (ödenmişse) · değerlendir ve imzala · yeniden çekim · yazdır.
         // DÖF (1050 mockup): kaynak kaydına git · DÖF formu (A4).
+        // DÜZEN ANAHTARI Kapat'ın solunda (kullanıcı 15.10.2026); seçim tercihe yazılır.
+        kapatSolu={tanim.kaynak === 'muayene' ? (
+          <span className="duzen-anahtar" title={c('Muayene ekranı düzeni')}>
+            <button type="button" className={muayeneDuzeni === 'sekmeli' ? 'on' : ''}
+                    onClick={() => duzenDegis('sekmeli')}>▤ {c('Sekmeli')}</button>
+            <button type="button" className={muayeneDuzeni === 'sekmesiz' ? 'on' : ''}
+                    onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
+          </span>) : undefined}
         ekAraclar={tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
           : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
           : tanim.kaynak === 'kys-toplanti' ? (d) => <ToplantiAraclari deger={d} />
@@ -1618,6 +1609,12 @@ export function ListeKarti({
                             if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
                             void aksiyon('muayene.tamamla', satir);
                           }}>✓ Tamamla</button>
+                  {(() => {
+                    const kod = String(d.durum ?? '');
+                    const ad = MUAYENE_DURUM[Number(kod)] ?? '';
+                    const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri' : kod === '2' ? 'uyari' : 'mavi';
+                    return ad ? <span key="muayene.durum" className={`rozet ${sinif}`} style={{ alignSelf: 'center' }}>{ad}</span> : null;
+                  })()}
                 </>
               ) : (
                 // GOZ MUAYENESI (mockup goz_detayli_muayene.html araç çubuğu):

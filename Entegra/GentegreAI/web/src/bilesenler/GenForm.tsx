@@ -91,6 +91,8 @@ interface Props {
       "Muayeneye Al · Tamamla · Istem Ac · Sablon"). Dugmeler yalnizca ucu
       cagirir; kural sunucuda kalir. */
   ekAraclar?(deger: Record<string, Deger>): React.ReactNode;
+  /** Araç çubuğunda Kapat'ın hemen solu (muayene sekmeli / sekmesiz anahtarı, kullanıcı 15.10.2026). */
+  kapatSolu?: React.ReactNode;
   /**
    * KIMLIK SERIDINI EKRANIN ISTEDIGI YERE TASIR. Verilirse serit kartin
    * ustunde cizilmez; sarmalayici dondurdugu dugumu nereye koyacagina karar
@@ -336,7 +338,7 @@ const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
 export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
-                          ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
+                          ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu, alanGirdisi }: Props) {
   const { kullanici } = useOturum();
@@ -2173,6 +2175,7 @@ Yine de yeni kayıt eklensin mi?`);
               )}
             </>
           )}
+          {kapatSolu && <span className="kapat-solu">{kapatSolu}</span>}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>{c('Kapat')}</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
