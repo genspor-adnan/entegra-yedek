@@ -130,12 +130,13 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
     if (!secili) { mesaj('Önce silinecek istemi seçin.'); return }
     if (!await onay('Seçili istem silinecek. Onaylıyor musunuz?', true)) return;
     const y = secili.tur === 'lab'
-      ? await api.labIstemSil(secili.id)
+      // Muayeneden: başvuruya işlenmiş istem kimseye silinmez (sunucu kuralı).
+      ? await api.labIstemSil(secili.id, true)
       : secili.tur === 'goz'
-        ? await api.gozGoruntulemeIptal(secili.id)
+        ? await api.gozGoruntulemeIptal(secili.id, true)
         : secili.tur === 'patoloji'
-          ? await api.patolojiIptal(secili.id)
-          : await api.radyolojiIstemSil(secili.id);
+          ? await api.patolojiIptal(secili.id, true)
+          : await api.radyolojiIstemSil(secili.id, true);
     mesaj(y.mesaj);
     setSecili(null);
     await yukle();

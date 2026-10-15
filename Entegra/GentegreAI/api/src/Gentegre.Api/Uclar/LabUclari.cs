@@ -601,12 +601,13 @@ public static partial class LabUclari
         // DELETE /api/lab/istem/{id} - yanlış açılan lab istemini sil (muayene
         //   grid'i "🗑"). Güvence: sonucu girilmiş / onaylı istem silinmez.
         grup.MapDelete("/istem/{id:int}", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("lab", Islem.Sil);
             await using var b = await veri.AcAsync(iptal);
+            // Lab yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
+            await IstemSahipligi.IsteAsync(baglam, b, "lab", Islem.Sil, "lab_istem", id, muayeneden == true, iptal);
 
             var durum = await b.TekDegerAsync<int?>(
                 "select durum from public.lab_istem where id = @p0", null, [id], iptal);

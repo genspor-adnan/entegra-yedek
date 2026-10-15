@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -180,13 +180,13 @@ public static partial class GozUclari
         });
 
         // İPTAL (hekimin İstem & Sonuç'undan sil): yalnız çekilmemiş istem; ücret satırı varsa banko iade eder.
-        grup.MapPost("/goruntuleme/{id:int}/iptal", async (int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+        grup.MapPost("/goruntuleme/{id:int}/iptal", async (int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("muayene", Islem.Degistir);
-            baglam.YazmaIste();
             await using var b = await veri.AcAsync(iptal);
+            // Göz görüntüleme yetkisi yoksa hekim yalnız kendi açtığı istemi iptal eder.
+            await IstemSahipligi.IsteAsync(baglam, b, "goz.goruntuleme", Islem.Degistir, "goz_goruntuleme", id, muayeneden == true, iptal);
             var r = await DurumOkuAsync(b, id, iptal);
             if (r.Durum != 1) throw GentegreHatasi.IsKurali("Çekilmiş görüntüleme istemi silinemez.");
             await using var islem = await b.BeginTransactionAsync(iptal);

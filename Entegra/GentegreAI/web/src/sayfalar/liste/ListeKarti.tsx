@@ -16,6 +16,7 @@ import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
+import { KonsultasyonIstekGovdesi, KonsultasyonYanitSeridi } from '../konsultasyon/KonsultasyonKarti';
 import {
   useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi, ReceteGosterim, gosterilenRecete,
   MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
@@ -395,6 +396,7 @@ export function ListeKarti({
           const metin = (x: unknown) => String(x ?? '').trim();
           const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
             || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
+            || (tanim.kaynak === 'konsultasyon' ? metin(d.no) : '')
             || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)
             || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
@@ -462,6 +464,8 @@ export function ListeKarti({
           ? git0 => {
               // Menüden basılan bölüm açılır (boş olsa da) ve oraya gidilir.
               const git = (b: string) => {
+                // Fizik muayene bir bölüm değil, Muayene bölümünde çerçeve: oraya kaydırılır.
+                if (b === 'Fizik muayene') { cerceveAc('fizik'); return }
                 const k = b.startsWith('İstem') ? 'istem' : b === 'e-Reçete' ? 'recete' : b === 'Rapor' ? 'rapor'
                   : b === 'Sevk' ? 'sevk' : b === 'İşlem' ? 'islem' : b === 'Geçmiş' ? 'gecmis'
                   : b === 'Dosyalar' ? 'dosyalar' : b === 'e-Nabız' ? 'enabiz' : null;
@@ -548,6 +552,10 @@ export function ListeKarti({
           // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
           ? (_baslik, _icerik, deger, _izgara, parcalar) => (
               <MetinMakroGovdesi id={kartId} deger={deger} alanDegistir={(ad, v) => parcalar?.alanDegistir(ad, v)} />)
+          : tanim.kaynak === 'konsultasyon' && kartId !== null
+          // KONSÜLTASYON İSTEK KARTI (1107, mockup konsultasyon_karti.html): İsteyen | Karşılayan.
+          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
+              <KonsultasyonIstekGovdesi kartId={kartId} deger={deger} parcalar={parcalar} />)
           : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
           // GÖZ MUAYENESİ (970): Tonometri sağında GİB eğilimi, Tanı & Plan sağında tanılar + işler.
           ? (baslik, icerik) => baslik === 'Tonometri & Pakimetri'
@@ -949,13 +957,15 @@ export function ListeKarti({
         //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
         ustBaglam={sekmesiz
           // BAŞLIK = HASTA BANDI (mockup hasta_bandi / v7) - yalnız sekmesiz düzende.
-          ? () => <MuayeneHastaBandi bilgi={hastaBilgisi} />
+          // Konsültasyon YANIT muayenesiyse bandın altında yanıt şeridi (1107).
+          ? () => <><MuayeneHastaBandi bilgi={hastaBilgisi} /><KonsultasyonYanitSeridi muayeneId={Number(kartId)} /></>
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => (
             <>
               <MuayeneBaglamSeridi muayeneId={Number(kartId)}
                                    onBugun={() => setMuayeneBilgiAcik(true)} />
               <MuayeneDurumSeridi muayeneId={Number(kartId)} />
+              <KonsultasyonYanitSeridi muayeneId={Number(kartId)} />
             </>
           )
           : undefined}

@@ -44,8 +44,9 @@ export const labUclari = {
              tetkikSayisi: number; mesaj: string }>('/api/lab/istem', govde),
 
   /** Yanlış açılan lab istemini sil (sonuçlanmış/onaylı silinemez). */
-  labIstemSil: (id: number) =>
-    istek<{ mesaj: string }>(`/api/lab/istem/${id}`, { method: 'DELETE' }),
+  /** `muayeneden`: başvuruya işlenmiş istem muayene ekranından kimseye silinmez. */
+  labIstemSil: (id: number, muayeneden = false) =>
+    istek<{ mesaj: string }>(`/api/lab/istem/${id}${muayeneden ? '?muayeneden=true' : ''}`, { method: 'DELETE' }),
 
   // ------------------------------------------------ AKILCI TEST İSTEMİ (873) --
   /** İstem göndermeden önce uyarılar (branş / tekrar süresi / basamak / kapalı) + SKRS gerekçe seçenekleri. */

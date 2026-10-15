@@ -171,7 +171,7 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
 }) {
   // Kontrol maddesi → bölüm (Özet sekmesindeki eşlemenin aynısı).
   const hedef: Record<string, () => void> = {
-    baslangic: muayeneyeAl, sikayet: () => git('Muayene'), tanilar: () => git('Tanı'),
+    baslangic: muayeneyeAl, sikayet: () => git('Muayene'), fizik: () => git('Fizik muayene'), tanilar: () => git('Tanı'),
     istem: () => git('İstem'), recete: () => git('e-Reçete'), karar: () => git('Muayene'),
     cikisSekli: () => git('Muayene'),
   };

@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -140,12 +140,12 @@ public static class PatolojiUclari
 
         // İPTAL: hekim istemden vazgeçti (muayeneden "🗑"). Yalnız hazırlanmamış, pakete
         //   girmemiş vaka; başvuruya düşen ücret satırı bankoda ayrıca kaldırılır.
-        grup.MapPost("/vaka/{id:int}/iptal", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapPost("/vaka/{id:int}/iptal", async (int id, bool? muayeneden, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            if (!baglam.Yetkiler.Var("patoloji.vaka", Islem.Degistir) && !baglam.Yetkiler.Var("muayene", Islem.Degistir))
-                throw GentegreHatasi.Yasak();
             await using var b = await veri.AcAsync(iptal);
+            // Patoloji yetkisi yoksa hekim yalnız kendi açtığı istemi iptal eder (IstemSahipligi).
+            await IstemSahipligi.IsteAsync(baglam, b, "patoloji.vaka", Islem.Degistir, "pat_vaka", id, muayeneden == true, iptal);
             var n = await b.CalistirAsync(
                 "update public.pat_vaka set durum = 0, degistiren = @p1, degistirme_tarihi = now() " +
                 " where id = @p0 and durum = 1 and gonderim_id is null", null, [id, baglam.KullaniciId], iptal);

@@ -8,6 +8,7 @@ import { kimlikUclari } from './uclar/kimlik';
 import { listeUclari } from './uclar/liste';
 import { labUclari } from './uclar/lab';
 import { patolojiUclari } from './uclar/patoloji';
+import { konsultasyonUclari } from './uclar/konsultasyon';
 import { sigortaUclari } from './uclar/sigorta';
 import { uretimUclari } from './uclar/uretim';
 import { kartUclari } from './uclar/kart';
@@ -116,6 +117,7 @@ export const api = {
   ...listeUclari,
   ...labUclari,
   ...patolojiUclari,
+  ...konsultasyonUclari,
   ...sigortaUclari,
   ...uretimUclari,
   ...kartUclari,

@@ -68,6 +68,8 @@ import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { patolojiAksiyonu } from './liste/patolojiAksiyonlari';
+import { konsultasyonAksiyonu } from './liste/konsultasyonAksiyonlari';
+import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from './konsultasyon/KonsultasyonPanelleri';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
@@ -502,6 +504,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const gozlukEkrani = tanim.kaynak === 'goz-gozluk-recete' && !portalda;
   const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
   const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
+  // KONSÜLTASYON (1107): sekmeler (bana / bölümüme gelen · istediklerim · bölüm) + özet kutuları.
+  const konsEkrani = tanim.kaynak === 'konsultasyon' && !portalda;
+  const konsSuzgec = useKonsultasyonSuzgeci(konsEkrani, yenile);
   // GÖZ CİHAZLARI (978): radyolojinin cihaz ekranıyla aynı adları taşıyor,
   //   bu yüzden göz önekli ayrı bileşen kümesi.
   const gozCihazEkrani = tanim.kaynak === 'goz-cihaz' && !portalda;
@@ -810,6 +815,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await disLabAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      // KONSÜLTASYON (1107): yanıtla (yanıt muayenesi açılır) · yönlendir / reddet (gerekçeli pencere).
+      if (await konsultasyonAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;
@@ -1153,7 +1164,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1305,6 +1316,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
         : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
+        : konsEkrani ? <KonsultasyonUstPanel s={konsSuzgec} />
         : gozCihazEkrani ? <GozCihazGostergesi veri={gozCihazGostergesi} s={gozCihazSuzgec} />
         : gorEkrani ? <GoruntulemeGostergesi veri={gorGostergesi} s={gorSuzgec} />
         : tanim.kaynak === 'yatak'
@@ -1441,6 +1453,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="yan" />
         : undefined}
       altPanel={portalda ? undefined
+        : konsEkrani ? (
+          <KonsultasyonOnizlemePaneli satir={seciliSatir ?? null} yenile={yenile}
+            onAc={id => gitKart(`/konsultasyon/${id}`)}
+            onYanitla={() => void aksiyon('konsultasyon.yanitla', seciliSatir)} />
+        )
         : labDetayVarMi(tanim.kaynak) && seciliSatir
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="ana" />
         // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin

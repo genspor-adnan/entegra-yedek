@@ -8,7 +8,6 @@ import type { SablonTercihleri } from '../api/uclar/liste';
 import { guvenli, mesaj } from './mesaj';
 import { tarihSaat, para } from './bicim';
 import { c } from '../dil/ceviri';
-import { MUAYENE_DURUM } from './muayeneKodlari';
 import { Modal } from './Modal';
 
 /**
@@ -220,9 +219,18 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, o
   );
 }
 
-/** SEVK / KONSÜLTASYON: karttaki sevk alanları + istenen konsültasyonlar. */
-export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
-  { veri: SekmeVerisi | null; hata: string | null; icerik?: React.ReactNode }) {
+/** Konsültasyon isteğinin durum adı (1107) - "üstlen" yok, "yanıt". */
+const KONS_DURUM: Record<number, string> = {
+  6: 'Taslak', 1: 'Yanıt bekliyor', 2: 'Yanıtlanıyor', 3: 'Yanıtlandı', 4: 'Görüldü', 9: 'Reddedildi', 0: 'İptal',
+};
+const KONS_ACIL: Record<number, string> = { 1: 'Rutin', 2: 'Acil', 3: 'Çok acil' };
+
+/**
+ * SEVK / KONSÜLTASYON: karttaki sevk alanları + bu muayeneden açılan konsültasyon
+ * istekleri (1107). "＋ Konsültasyon İste" taslak isteği açar, kart kendi sekmesinde.
+ */
+export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste }:
+  { veri: SekmeVerisi | null; hata: string | null; icerik?: React.ReactNode; onIste?(): void }) {
   const git = useNavigate();
   return (
     <Kabuk hata={hata} veri={veri}>
@@ -231,12 +239,16 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
         <h6>
           Konsültasyon isteği
           <span className="not">
-            kurum içi · {veri?.konsultasyonlar.length ?? 0} istek
+            {veri?.konsultasyonlar.length ?? 0} istek
           </span>
+          {onIste && <>
+            <span style={{ marginLeft: 'auto' }} />
+            <button type="button" className="d bir" onClick={onIste}>＋ {c('Konsültasyon İste')}</button>
+          </>}
         </h6>
         {veri?.ustMuayeneId ? (
           <p className="not ic">
-            Bu muayene bir konsültasyon isteğidir.{' '}
+            Bu muayene bir konsültasyon yanıtıdır.{' '}
             <button type="button" className="d"
                     onClick={() => git(`/muayene/${veri.ustMuayeneId}`)}>
               İsteyen muayeneyi aç
@@ -245,28 +257,30 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
         ) : null}
         {veri && veri.konsultasyonlar.length === 0 ? (
           <p className="not ic">
-            İstenen konsültasyon yok. Konsültasyon, hastayı başka bir bölüme
-            yönlendiren <b>yeni bir muayene</b> olarak açılır.
+            İstenen konsültasyon yok. İstek bölüme (ya da hekime) gider; bölümün hekimi
+            yanıtlar ve yanıt <b>ayrı bir muayene</b> olarak açılır.
           </p>
         ) : (
-          /* MOCKUP KOLONLARI: Brans / Hekim · Soru · Istem · Yanit · Durum.
-             Soru isteyen hekimin cumlesi, yanit cevaplayanin karari - ikisi de
-             konsultasyon muayenesinde durur. */
+          /* MOCKUP KOLONLARI: Hedef · Soru · İstek · Yanıt · Durum. Soru isteyen
+             hekimin cumlesi, yanit cevaplayanin karari (yanit muayenesi). */
           <table className="detay-tablo">
             <thead>
-              <tr><th>{c('Branş / Hekim')}</th><th>Soru</th>
-                  <th className="hiza-orta">İstem</th><th>Yanıt</th>
+              <tr><th>{c('Hedef / Yanıtlayan')}</th><th>Soru</th>
+                  <th className="hiza-orta">İstek</th><th>Yanıt</th>
                   <th className="hiza-orta">Durum</th><th /></tr>
             </thead>
             <tbody>
               {veri?.konsultasyonlar.map(k => {
-                const yanit = metin(k.yanit);
+                const yanit = metin(k.yanit) || metin(k.retGerekce);
+                const d = sayi(k.durum);
                 return (
                   <tr key={sayi(k.id)}>
                     <td>{metin(k.bolum) || '—'}
                       {metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}
                     </td>
-                    <td>{metin(k.soru) || <span className="sonuk">—</span>}</td>
+                    <td>{metin(k.soru) || <span className="sonuk">—</span>}
+                      {sayi(k.aciliyet) > 1 && <span className="rozet hata"> {KONS_ACIL[sayi(k.aciliyet)]}</span>}
+                    </td>
                     <td className="hiza-orta">{k.tarih ? tarihSaat(k.tarih) : '—'}</td>
                     <td>
                       {yanit ? yanit.slice(0, 120) : <span className="sonuk">bekliyor</span>}
@@ -277,13 +291,13 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
                       )}
                     </td>
                     <td className="hiza-orta">
-                      <span className={`rozet ${sayi(k.durum) === 3 ? 'olumlu' : 'uyari'}`}>
-                        {MUAYENE_DURUM[sayi(k.durum)] ?? ''}
+                      <span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>
+                        {c(KONS_DURUM[d] ?? '')}
                       </span>
                     </td>
                     <td>
                       <button type="button" className="d"
-                              onClick={() => git(`/muayene/${sayi(k.id)}`)}>Aç</button>
+                              onClick={() => git(`/konsultasyon/${sayi(k.id)}`)}>Aç</button>
                     </td>
                   </tr>
                 );

@@ -412,7 +412,7 @@ export const gozUclari = {
   gozGoruntulemeOnizleme: (id: number) => istek<GozGoruntulemeOnizleme>(`/api/goz/goruntuleme/${id}/onizleme`),
   gozGoruntulemeCekildi: (id: number) => gonder<{ id: number; durum: number }>(`/api/goz/goruntuleme/${id}/cekildi`, {}),
   gozGoruntulemeDegerlendir: (id: number) => gonder<{ id: number; durum: number }>(`/api/goz/goruntuleme/${id}/degerlendir`, {}),
-  gozGoruntulemeIptal: (id: number) => gonder<{ id: number; mesaj: string }>(`/api/goz/goruntuleme/${id}/iptal`, {}),
+  gozGoruntulemeIptal: (id: number, muayeneden = false) => gonder<{ id: number; mesaj: string }>(`/api/goz/goruntuleme/${id}/iptal${muayeneden ? '?muayeneden=true' : ''}`, {}),
   gozGoruntulemeYeniden: (id: number) => gonder<{ id: number; eskiId: number }>(`/api/goz/goruntuleme/${id}/yeniden`, {}),
   gozKontrol: (id: number) => istek<GozKontrol>(`/api/goz/muayene/${id}/kontrol`),
   gozOzetMetin: (id: number) => istek<{ bolumler: { baslik: string; metin: string }[] }>(`/api/goz/muayene/${id}/ozet-metin`),

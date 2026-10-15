@@ -14,7 +14,7 @@ export const patolojiUclari = {
     gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/lab-kabul`, { labVakaNo }),
   patolojiRet: (id: number, retNedeniId: number | null, aciklama: string) =>
     gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/ret`, { retNedeniId, aciklama }),
-  patolojiIptal: (id: number) => gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/iptal`, {}),
+  patolojiIptal: (id: number, muayeneden = false) => gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/iptal${muayeneden ? '?muayeneden=true' : ''}`, {}),
   patolojiGordum: (id: number) => gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/gordum`, {}),
   patolojiEkKarar: (id: number, karar: 'onayla' | 'reddet') =>
     gonder<{ mesaj: string }>(`/api/patoloji/vaka/${id}/ek-${karar}`, {}),

@@ -311,7 +311,7 @@ public static partial class MuayeneUclari
     /// </summary>
     private sealed record TamamlamaVerisi(short Durum, int? BelgeId, string Sikayet, string Karar,
         long AnaTani, long BekleyenIstem, bool Baslatildi, string CikisKodu, string Takip,
-        long Istem, long Recete);
+        long Istem, long Recete, long Fizik);
 
     /// <summary>Tamamlama kuralinin okudugu alanlar (Tamamla'da satir kilitli).</summary>
     private static Task<TamamlamaVerisi?> TamamlamaVerisiAsync(Npgsql.NpgsqlConnection baglanti,
@@ -334,13 +334,18 @@ public static partial class MuayeneUclari
                    (select count(*) from public.muayene_istem s where s.muayene_id = m.id),
                    (select count(*) from public.recete r
                      where r.muayene_id = m.id and r.durum <> 4
-                       and exists (select 1 from public.recete_satir rs where rs.recete_id = r.id))
+                       and exists (select 1 from public.recete_satir rs where rs.recete_id = r.id)),
+                   -- FİZİK MUAYENE (kullanıcı 15.10.2026, sol menüde şikâyet / hikâyenin altında):
+                   --   bulgu yazılmış ya da normal işaretlenmiş satır.
+                   (select count(*) from public.muayene_bulgu fb
+                     where fb.muayene_id = m.id
+                       and (fb.normal = 1 or btrim(coalesce(fb.deger_metin, '')) <> '' or fb.deger_sayi is not null))
               from public.muayene m where m.id = @p0
             """ + (kilitle ? " for update" : ""), islem, [id], o => new TamamlamaVerisi(
                 o.GetInt16(0), o.IsDBNull(1) ? null : o.GetInt32(1),
                 o.GetString(2), o.GetString(3), o.GetInt64(4), o.GetInt64(5),
                 o.GetBoolean(6), o.GetString(7), o.GetString(8),
-                o.GetInt64(9), o.GetInt64(10)), iptal);
+                o.GetInt64(9), o.GetInt64(10), o.GetInt64(11)), iptal);
 
     /// <summary>
     /// TAMAMLAMA KURALI (muayene sureci, adim 10) - TEK YER. Tamam olanlar da
@@ -359,6 +364,8 @@ public static partial class MuayeneUclari
             ("baslangic", "Muayeneye alındı", m.Baslatildi,
                 "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali.", true),
             ("sikayet", "Şikâyet / Hikâye", m.Sikayet.Length > 0, "Sikayet zorunlu.", true),
+            // ZORUNLU (kullanıcı 15.10.2026): en az bir sistemde bulgu ya da "normal" işareti.
+            ("fizik", "Fizik Muayene", m.Fizik > 0, "Fizik muayene zorunlu - en az bir sistemde bulgu yazın ya da normal işaretleyin.", true),
             ("tanilar", "Ana tanı", m.AnaTani > 0, "Ana tani zorunlu.", true),
             // "Tetkik İstem" (kullanıcı 15.10.2026: istem ikiye - patolojik istem menüde ayrı işlem).
             ("istem", "Tetkik İstem", m.Istem > 0, "Bu muayenede istem yok.", false),

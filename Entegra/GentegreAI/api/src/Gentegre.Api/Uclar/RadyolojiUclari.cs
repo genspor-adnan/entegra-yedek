@@ -266,12 +266,13 @@ public static partial class RadyolojiUclari
         // DELETE /api/radyoloji/istem/{id} - yanlış açılan görüntüleme istemini
         //   sil (muayene grid'i "🗑"). Güvence: çekilmiş/raporlanmış silinmez.
         grup.MapDelete("/istem/{id:int}", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Sil);
             await using var b = await veri.AcAsync(iptal);
+            // Radyoloji yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
+            await IstemSahipligi.IsteAsync(baglam, b, "radyoloji", Islem.Sil, "radyoloji_istem", id, muayeneden == true, iptal);
 
             var r = await b.TekAsync(
                 "select coalesce(durum,0), (cekim_tarihi is not null) as cekildi " +

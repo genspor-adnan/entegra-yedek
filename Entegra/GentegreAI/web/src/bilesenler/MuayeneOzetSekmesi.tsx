@@ -140,6 +140,7 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
   const tikla: Record<string, (tamam: boolean) => void> = {
     baslangic: () => eylemler.muayeneyeAl(),
     sikayet: () => git('Muayene'),
+    fizik: () => git('Muayene'),
     tanilar: tamam => { git('Tanı'); if (!tamam) eylemler.taniEkle() },
     istem: tamam => { git('İstem'); if (!tamam) eylemler.istemAc() },
     recete: tamam => { git('e-Reçete'); if (!tamam) eylemler.ilacEkle() },

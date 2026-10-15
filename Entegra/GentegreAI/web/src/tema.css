@@ -8189,3 +8189,47 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .muayene-ikili .mi-sol .vital-izgara-kip .alan.ikili input { grid-column: auto; width: 100%; min-width: 0 }
 /* Degerlendirme kutusu sol sutunda da etiketsiz, tam genislik (eski .mi-sag kurali). */
 .muayene-ikili .mi-sol .alan:has(> textarea[data-alan="karar"]) > .etiket { display: none }
+
+/* ---------------------------------------------------------- KONSÜLTASYON (1107) --
+   Mockup Ekranlar/Muayene/konsultasyon_listesi.html · konsultasyon_karti.html. */
+.kns-ust { display: grid; gap: 6px; margin-bottom: 6px }
+.kns-sekmeler { display: flex; gap: 2px; border-bottom: 1px solid var(--cizgi) }
+.kns-sekmeler button { border: 1px solid transparent; border-bottom: 0; background: none; padding: 6px 14px; border-radius: 4px 4px 0 0;
+  cursor: pointer; color: var(--soluk); font-size: 12px; display: inline-flex; gap: 6px; align-items: center }
+.kns-sekmeler button.on { background: var(--yuz); border-color: var(--cizgi); color: var(--vurgu, #2f6db3); font-weight: bold; margin-bottom: -1px }
+.kns-onizleme { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 6px 0 }
+.kns-onizleme.bos { display: block; color: var(--soluk); padding: 10px; font-size: 12px }
+@media (max-width: 1000px) { .kns-onizleme, .kns-iki { grid-template-columns: 1fr } }
+.kns-sat { display: grid; grid-template-columns: 110px 1fr; gap: 8px; padding: 3px 10px; font-size: 12px }
+.kns-sat > span { color: var(--soluk) }
+.kns-sat > b { font-weight: normal; color: var(--yazi2) }
+.kns-kir { color: #b3261e !important }
+.kns-alinti { margin: 8px 10px; padding: 8px 10px; border-left: 3px solid #2f6db3; background: #f5f9fe; font-size: 12px; line-height: 1.55; white-space: pre-wrap }
+.kns-alinti.cevap { border-left-color: #2e7d46; background: #f3faf5 }
+.kns-alinti small { display: block; color: var(--soluk); font-size: 10.5px; margin-bottom: 3px; white-space: normal }
+.kns-akis { display: flex; flex-wrap: wrap; padding: 8px 10px }
+.kns-ad { flex: 1; min-width: 78px; text-align: center; font-size: 11px; padding: 6px 4px; border: 1px solid var(--cizgi); background: #f8fafc; color: var(--soluk) }
+.kns-ad + .kns-ad { border-left: 0 }
+.kns-ad.ok { background: #e2f3e8; color: #2e7d46; font-weight: bold }
+.kns-ad.su { background: #eef4fc; color: #2f6db3; font-weight: bold; box-shadow: inset 0 -3px 0 #2f6db3 }
+.kns-ad.ret { background: #fdf1f0; color: #b3261e; font-weight: bold }
+.kns-kart { display: grid; gap: 10px }
+.kns-hasta-serit { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; padding: 6px 10px; font-size: 12px;
+  background: #fbfcfe; border: 1px solid var(--cizgi); border-radius: 3px }
+.kns-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.kns-satir { display: flex; align-items: center; gap: 8px; padding: 6px 2px; flex-wrap: wrap }
+.kns-satir > .etiket { font-size: 11px; color: var(--soluk); min-width: 84px; text-align: right }
+.kns-secim { display: inline-flex; gap: 4px; flex-wrap: wrap }
+.kns-secim button { border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 10px; font-size: 11.5px; background: var(--yuz); cursor: pointer }
+.kns-secim button.on { background: #2f6db3; border-color: #2f6db3; color: #fff; font-weight: bold }
+.kns-secim button:disabled { cursor: default; opacity: .7 }
+.kns-soru { display: grid; gap: 4px }
+.kns-soru > .etiket { font-size: 11px; color: var(--soluk) }
+.kns-soru textarea { width: 100%; min-height: 90px }
+.kns-araclar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 4px 0 }
+.kns-form { display: grid; grid-template-columns: 120px 1fr; gap: 8px 10px; align-items: center; padding: 6px 2px 10px }
+.kns-form label { font-size: 11px; color: var(--soluk); text-align: right }
+.kns-yanit { border: 1px solid #cfe0f5; border-radius: 4px; background: #fbfdff; margin: 6px 0 }
+.kns-yanit-bas { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid #e2ebf6; font-size: 12.5px; color: #1f4f86 }
+.kns-ysatir { display: flex; align-items: center; gap: 8px; padding: 4px 10px 8px; flex-wrap: wrap }
+.kns-ysatir > .etiket { font-size: 11px; color: var(--soluk); min-width: 60px; text-align: right }

@@ -288,6 +288,13 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /^Çalışıyor$/i, sinif: 'olumlu' },
   { desen: /^Ayrıldı/i, sinif: 'gri' },
   { desen: /sa sonra$/i, sinif: 'gri' },
+  // KONSÜLTASYON (1107, mockup konsultasyon_listesi): çok acil kırmızı; yanıt bekleyen sarı,
+  //   yanıtlanıyor mavi, yanıtlandı yeşil ("Yanıtlanıyor · 21:24 (Dr. X)" saatli metin).
+  { desen: /^Çok acil$/i, sinif: 'hata' },
+  { desen: /^Yanıt bekliyor$/i, sinif: 'uyari' },
+  { desen: /^Yanıtlanıyor/i, sinif: 'mavi' },
+  { desen: /^Yanıtlandı/i, sinif: 'olumlu' },
+  { desen: /^İsteyen gördü$/i, sinif: 'olumlu' },
 ];
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
