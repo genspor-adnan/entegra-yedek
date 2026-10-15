@@ -341,7 +341,9 @@ export function ListeKarti({
   }, [sekmesiz, kartId, kartTazele, kayitSayaci, istemTazele]);
   /** İstem sayısı (istem bölümü yüklenince) - açılış kipi için. */
   const [istemSayisi, setIstemSayisi] = useState<number | null>(null);
-  useEffect(() => { setIstemSayisi(null) }, [kartId]);
+  /** Patoloji istemi sayısı (tetkik istemlerinden ayrı çerçeve). */
+  const [patolojiSayisi, setPatolojiSayisi] = useState<number | null>(null);
+  useEffect(() => { setIstemSayisi(null); setPatolojiSayisi(null) }, [kartId]);
   /** Reçete kartının dış kaydet bağlantısı (çerçeve 💾). */
   const receteKaydetRef = useRef<(() => Promise<void>) | null>(null);
   /** Kartı kapatmadan, değişiklik varsa kaydeder (istem / reçete çerçevesi 💾). */
@@ -558,7 +560,7 @@ export function ListeKarti({
           // "Sevk / Konsültasyon" başlığı da yok (kullanıcı 15.10.2026) - Sevk ve Konsültasyon çerçeveleri başlıklı.
           || b.startsWith('Sevk') : undefined}
         tekSayfaGizli={sekmesiz && etkinGorunum === 'detay' ? b =>
-          b.startsWith('İstem') ? !bolumGorunur('istem', (istemSayisi ?? 0) > 0)
+          b.startsWith('İstem') ? !(bolumGorunur('istem', (istemSayisi ?? 0) > 0) || bolumGorunur('patoloji', (patolojiSayisi ?? 0) > 0))
           : b === 'Rapor' ? !bolumGorunur('rapor', doluluk.rapor)
           : b.startsWith('Sevk') ? !bolumGorunur('sevk', doluluk.sevk)
           : b.startsWith('İşlem') ? !bolumGorunur('islem', (sekmeVerisi.veri?.islemler.length ?? 0) > 0)
@@ -654,7 +656,7 @@ export function ListeKarti({
                         onGonderildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }} />)} />
                 )}
                 {patolojiIstemAcik && <PatolojiIstemModal muayeneId={Number(kartId)} onKapat={() => setPatolojiIstemAcik(false)}
-                  onKaydedildi={() => { setPatolojiIstemAcik(false); bolumAc('istem'); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />}
+                  onKaydedildi={() => { setPatolojiIstemAcik(false); bolumAc('patoloji'); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />}
               </>
               );
             }
@@ -1043,14 +1045,30 @@ export function ListeKarti({
                         gibi arac cubugu + tek istem tablosu + ayrintilar. */}
                     {sablonMuayeneMi(baslik) ? null
                      : baslik.includes('Sonuç') ? (
-                      <KipCercevesi baslik="İstemler" duzen={kipOku('istem', istemSayisi === null ? null : istemSayisi > 0)}
+                      // TETKİK VE PATOLOJİ AYRI (kullanıcı 15.10.2026: "patoloji istem ile tetkik istemi
+                      //   ayır - patolojik istem istedim, ortada + istem sepeti görünüyor"). Sekmesizde her
+                      //   çerçeve kendi kaydı varsa ya da menüden açıldıysa; sekmelide ikisi de.
+                      <>
+                      <div hidden={sekmesiz && !bolumGorunur('istem', (istemSayisi ?? 0) > 0)}>
+                      <KipCercevesi baslik="Tetkik İstemleri" duzen={kipOku('istem', istemSayisi === null ? null : istemSayisi > 0)}
                                     onDuzen={kipYaz('istem')} onKaydet={kartiKaydetKal}
-                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} gosterim onSayi={setIstemSayisi} tazele={istemTazele} />}>
-                        <MuayeneIstemSonuc muayeneId={Number(kartId)} onSayi={setIstemSayisi}
-                          tazele={istemTazele} patolojiDugmesiYok={sekmesiz}
+                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} kapsam="tetkik" gosterim onSayi={setIstemSayisi} tazele={istemTazele} />}>
+                        <MuayeneIstemSonuc muayeneId={Number(kartId)} kapsam="tetkik" onSayi={setIstemSayisi}
+                          tazele={istemTazele}
                           onIstemAc={() => setIstem(Number(kartId))}
                           onDegisti={() => setKartTazele(t => t + 1)} />
                       </KipCercevesi>
+                      </div>
+                      <div hidden={sekmesiz && !bolumGorunur('patoloji', (patolojiSayisi ?? 0) > 0)}>
+                      <KipCercevesi baslik="Patoloji İstemleri" duzen={kipOku('patoloji', patolojiSayisi === null ? null : patolojiSayisi > 0)}
+                                    onDuzen={kipYaz('patoloji')} onKaydet={kartiKaydetKal}
+                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} kapsam="patoloji" gosterim onSayi={setPatolojiSayisi} tazele={istemTazele} />}>
+                        <MuayeneIstemSonuc muayeneId={Number(kartId)} kapsam="patoloji" onSayi={setPatolojiSayisi}
+                          tazele={istemTazele}
+                          onDegisti={() => { setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />
+                      </KipCercevesi>
+                      </div>
+                      </>
                     ) : icerik}
                   </>
                 )

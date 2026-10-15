@@ -52,7 +52,7 @@ const sayiyaCevir = (v: unknown): number | null => {
 /** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
 type Kalem = { tur: 'lab' | 'radyoloji' | 'goz' | 'patoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
 
-export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, onSayi, patolojiDugmesiYok, tazele }: {
+export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, onSayi, patolojiDugmesiYok, tazele, kapsam = 'hepsi' }: {
   muayeneId: number;
   /** GÖSTERİM KİPİ (kullanıcı 15.10.2026): yalnız istem tablosu, düğme / seçim / sonuç paneli yok. */
   gosterim?: boolean;
@@ -62,6 +62,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
   patolojiDugmesiYok?: boolean;
   /** Dışarıda açılan istem (patoloji) kaydedilince liste yeniden okunur. */
   tazele?: number;
+  /** KAPSAM (kullanıcı 15.10.2026: "patoloji istem ile tetkik istemi ayır"): 'tetkik' = lab ·
+      radyoloji · göz (İstem Sepeti), 'patoloji' = yalnız patoloji (＋ Patoloji İstemi). */
+  kapsam?: 'hepsi' | 'tetkik' | 'patoloji';
   /** Araç çubuğundaki "＋ İstem Sepeti" düğmesi (birleşik istem modalını açar). */
   onIstemAc?: () => void;
   /** İstem silinince kartın diğer sayaçlarını tazelemek için. */
@@ -90,7 +93,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
   useEffect(() => { void yukle() }, [yukle, tazele]);
   const onSayiRef = useRef(onSayi);
   onSayiRef.current = onSayi;
-  const istemSayisi = veri ? veri.istemler.length + veri.radyoloji.length + (veri.goz?.length ?? 0) + (veri.patoloji?.length ?? 0) : -1;
+  const istemSayisi = !veri ? -1
+    : (kapsam !== 'patoloji' ? veri.istemler.length + veri.radyoloji.length + (veri.goz?.length ?? 0) : 0)
+      + (kapsam !== 'tetkik' ? (veri.patoloji?.length ?? 0) : 0);
   useEffect(() => { if (istemSayisi >= 0) onSayiRef.current?.(istemSayisi) }, [istemSayisi]);
 
   const kalemler = useMemo<Kalem[]>(() => {
@@ -114,8 +119,8 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
     const pat = (veri.patoloji ?? []).map(v => ({
       tur: 'patoloji' as const, id: Number(v.id), ham: v, bagli: Number(v.bagId ?? 0) > 0, panik: false,
     }));
-    return [...lab, ...rad, ...goz, ...pat];
-  }, [veri]);
+    return kapsam === 'tetkik' ? [...lab, ...rad, ...goz] : kapsam === 'patoloji' ? pat : [...lab, ...rad, ...goz, ...pat];
+  }, [veri, kapsam]);
 
   // VARSAYILAN SEÇİM: panikli istem varsa o (hekimin ilk görmesi gereken),
   //   yoksa listenin ilki. Seçili istem silinince/kaybolunca yeniden seçilir.
@@ -154,8 +159,8 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
 
   const arac = (
     <div className="muayene-arac" style={{ alignItems: 'center' }}>
-      {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>{c('＋ İstem Sepeti')}</button>}
-      {patolojiModulu && !patolojiDugmesiYok && <button type="button" className="d" onClick={() => setPatolojiAcik(true)}>🔬 {c('Patoloji İstemi')}</button>}
+      {onIstemAc && kapsam !== 'patoloji' && <button type="button" className="d bir" onClick={onIstemAc}>{c('＋ İstem Sepeti')}</button>}
+      {patolojiModulu && (kapsam === 'patoloji' || (kapsam === 'hepsi' && !patolojiDugmesiYok)) && <button type="button" className="d" onClick={() => setPatolojiAcik(true)}>🔬 {c('Patoloji İstemi')}</button>}
       {patolojiAcik && <PatolojiIstemModal muayeneId={muayeneId} onKapat={() => setPatolojiAcik(false)}
                          onKaydedildi={() => { setPatolojiAcik(false); void yukle(); onDegisti?.() }} />}
       <button type="button" className="d sil" title={c('Seçili istemi sil')}
