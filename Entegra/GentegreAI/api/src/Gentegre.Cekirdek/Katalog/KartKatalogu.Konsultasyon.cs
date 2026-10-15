@@ -27,7 +27,10 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["durum"] = (short)6, ["aciliyet"] = (short)1, ["merkez"] = (short)1,
-            ["karsilama_yeri"] = (short)1, ["neden"] = (short)1,
+            // Anahtarlar ALAN adı (camelCase) - "karsilama_yeri" yazımı etkisizdi.
+            ["karsilamaYeri"] = (short)1, ["neden"] = (short)1,
+            // İSTEK ZAMANI yeni kartta o an (kullanıcı 15.10.2026); kayıtta sunucu saatiyle çözülür.
+            ["istekZamani"] = "@simdi",
         },
         Alanlar: new KartAlani[]
         {
@@ -41,7 +44,7 @@ public static partial class KartKatalogu
 
             // İSTEYEN
             new("istekZamani", "istek_zamani", "zaman", Yazilabilir: false, Baslik: "İstek zamanı", Grup: "Konsültasyon", AltGrup: "İsteyen"),
-            new("istekBolumId", "istek_bolum_id", "kod", Zorunlu: true, KodTablosu: "public.v_departman_lookup",
+            new("istekBolumId", "istek_bolum_id", "kod", Zorunlu: true, KodTablosu: "public.v_tibbi_bolum_lookup" /* 1112: yalnız SKRS tıbbi bölümler */,
                 Baslik: "Bölüm / birim", Grup: "Konsültasyon", AltGrup: "İsteyen"),
             new("isteyenHekimId", "isteyen_hekim_id", "kod", Zorunlu: true, KodTablosu: "public.v_hekim_lookup",
                 Baslik: "İsteyen hekim", Grup: "Konsültasyon", AltGrup: "İsteyen"),
@@ -53,7 +56,7 @@ public static partial class KartKatalogu
             // KARŞILAYAN
             new("merkez", "merkez", "kod", SabitKodlar: KaynakKatalogu.KonsMerkezKodlari, Baslik: "Merkez", Grup: "Konsültasyon", AltGrup: "Karşılayan"),
             new("disMerkez", "dis_merkez", "metin", EnFazlaUzunluk: 160, Baslik: "Dış merkez", Grup: "Konsültasyon", AltGrup: "Karşılayan"),
-            new("hedefBolumId", "hedef_bolum_id", "kod", Zorunlu: true, KodTablosu: "public.v_departman_lookup",
+            new("hedefBolumId", "hedef_bolum_id", "kod", Zorunlu: true, KodTablosu: "public.v_tibbi_bolum_lookup" /* 1112: yalnız SKRS tıbbi bölümler */,
                 Baslik: "Bölüm", Grup: "Konsültasyon", AltGrup: "Karşılayan"),
             new("hedefHekimId", "hedef_hekim_id", "kod", KodTablosu: "public.v_hekim_lookup",
                 Baslik: "Hekim", Grup: "Konsültasyon", AltGrup: "Karşılayan"),

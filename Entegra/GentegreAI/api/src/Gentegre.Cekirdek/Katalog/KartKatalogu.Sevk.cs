@@ -42,7 +42,7 @@ public static partial class KartKatalogu
             new("tesisKodu", "tesis_kodu", "metin", EnFazlaUzunluk: 20, Baslik: "Tesis kodu", Grup: "Sevk", AltGrup: "Sevk"),
             new("tesisAd", "tesis_ad", "metin", EnFazlaUzunluk: 160, Baslik: "Tesis", Grup: "Sevk", AltGrup: "Sevk"),
             new("klinikId", "klinik_id", "kod", KodTablosu: "public.v_skrs_klinik_lookup", Baslik: "Klinik", Grup: "Sevk", AltGrup: "Sevk"),
-            new("hedefBolumId", "hedef_bolum_id", "kod", KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Sevk", AltGrup: "Sevk"),
+            new("hedefBolumId", "hedef_bolum_id", "kod", KodTablosu: "public.v_tibbi_bolum_lookup" /* 1112 */, Baslik: "Bölüm", Grup: "Sevk", AltGrup: "Sevk"),
             new("neden", "neden", "kod", Zorunlu: true, SabitKodlar: KaynakKatalogu.SevkNedenKodlari, Baslik: "Neden", Grup: "Sevk", AltGrup: "Sevk"),
             new("ulasim", "ulasim", "kod", SabitKodlar: KaynakKatalogu.SevkUlasimKodlari, Baslik: "Ulaşım", Grup: "Sevk", AltGrup: "Sevk"),
             new("notu", "notu", "metin", Zorunlu: true, EnFazlaUzunluk: 500, Baslik: "Not (karşı hekime)", Grup: "Sevk", AltGrup: "Not"),

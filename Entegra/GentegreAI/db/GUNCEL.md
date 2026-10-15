@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (574 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (576 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -507,6 +507,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
 | `tg_konsultasyon_gonderildi` | `1107_konsultasyon.sql` | — |
 | `tg_konsultasyon_kayit` | `1107_konsultasyon.sql` | — |
+| `tg_konsultasyon_silme` | `1111_sevk_kons_silme_kurali.sql` | — |
 | `tg_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |
 | `tg_kurum_sozlesme_kontrol` | `601_sgk_tarife_sut_listesi.sql` | 468_kurum_sozlesme_1n.sql, 493_kurum_turu_kurumu_oder.sql, 517_kurum_sozlesme_sgk_carisi.sql |
 | `tg_lab_istem_kurumu` | `827_lab_istem_kurumu.sql` | — |
@@ -567,6 +568,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_randevu_mesai_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql |
 | `tg_servis_toplam` | `773_teknik_servis.sql` | — |
 | `tg_sevk_kayit` | `1110_sevk.sql` | — |
+| `tg_sevk_silme` | `1111_sevk_kons_silme_kurali.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
@@ -583,7 +585,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (348 ad, 154 tanesi birden cok dosyada)
+## Gorunumler (349 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -927,6 +929,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_telerad_kurum_lookup` | `940_personel_unvan_yalniz_onek.sql` | 798_telerad_kart.sql |
 | `v_telerad_nobetci` | `940_personel_unvan_yalniz_onek.sql` | 801_telerad_nobet_ve_atama_kurali.sql |
 | `v_telerad_teslim` | `940_personel_unvan_yalniz_onek.sql` | 814_telerad_teslim_kuyrugu.sql |
+| `v_tibbi_bolum_lookup` | `1112_tibbi_bolum_lookup.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `429_uretim_v1.sql` | — |

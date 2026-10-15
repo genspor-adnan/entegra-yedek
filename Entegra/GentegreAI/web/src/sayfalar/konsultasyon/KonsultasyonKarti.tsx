@@ -52,6 +52,9 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
 
   return (
     <div className="kns-kart">
+      {/* ACİLİYET HASTANIN SAĞINDA (kullanıcı 15.10.2026): hasta (yeni kartta seçim, taslakta şerit) solda. */}
+      <div className="kns-ust">
+      <div className="kns-ust-sol">
       {yeni && <div className="kns-hasta">{parcalar?.altGrupCiz('Hasta')}</div>}
       {!yeni && v && (
         <div className="kns-hasta-serit">
@@ -64,6 +67,20 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
           {v.alerjiler.length > 0 && <span className="rozet hata" style={{ marginLeft: 'auto' }}>{c('Alerji')}: {v.alerjiler.join(', ')}</span>}
         </div>
       )}
+      </div>
+      <div className="kns-ust-sag">
+        <div className="kns-satir">
+          <span className="etiket">{c('Aciliyet')} *</span>
+          <div className="kns-secim">
+            {[1, 2, 3].map(a => (
+              <button key={a} type="button" disabled={!duzenlenir} className={aciliyet === a ? 'on' : ''}
+                    onClick={() => parcalar?.alanDegistir('aciliyet', a)}>{c(KONS_ACILIYET[a])}</button>
+            ))}
+          </div>
+        </div>
+        {deger.sonZaman ? <p className="not ic">{c('Yanıt süresi sonu')}: {tarihSaat(deger.sonZaman)}</p> : null}
+      </div>
+      </div>
       {!yeni && v && durum !== 6 && <KonsAkis v={v} />}
 
       <div className="kns-iki">
@@ -72,16 +89,6 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
         </div>
         <div>
           {parcalar?.altGrupCiz('Karşılayan', { ek: <span className="not">· {c('kime, nerede')}</span> })}
-          <div className="kns-satir">
-            <span className="etiket">{c('Aciliyet')} *</span>
-            <div className="kns-secim">
-              {[1, 2, 3].map(a => (
-                <button key={a} type="button" disabled={!duzenlenir} className={aciliyet === a ? 'on' : ''}
-                        onClick={() => parcalar?.alanDegistir('aciliyet', a)}>{c(KONS_ACILIYET[a])}</button>
-              ))}
-            </div>
-          </div>
-          {deger.sonZaman ? <p className="not ic">{c('Yanıt süresi sonu')}: {tarihSaat(deger.sonZaman)}</p> : null}
         </div>
       </div>
 
