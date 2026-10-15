@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (577 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (578 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -566,6 +566,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_randevu_izin_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql |
 | `tg_randevu_mesai_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql |
+| `tg_recete_sil_taslak` | `1114_recete_yalniz_taslak_silinir.sql` | — |
 | `tg_servis_toplam` | `773_teknik_servis.sql` | — |
 | `tg_sevk_kayit` | `1110_sevk.sql` | — |
 | `tg_sevk_nereye` | `1113_sevk_nereye_zorunlu.sql` | — |
