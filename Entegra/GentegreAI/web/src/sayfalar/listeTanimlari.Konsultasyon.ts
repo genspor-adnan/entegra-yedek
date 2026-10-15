@@ -11,6 +11,8 @@ export const KONSULTASYON_LISTELERI: ListeGirdisi[] = [
     kaynak: 'konsultasyon', rota: 'konsultasyon', baslik: 'Konsültasyon Listesi',
     yol: 'Muayene › Konsültasyon Listesi',
     kartYolu: '/konsultasyon', kartBaslik: 'Konsültasyon', yeniSekmede: 'Yeni Konsültasyon Kartı',
+    // İstek zamanı kartta aciliyetle aynı satırda (KonsultasyonIstekGovdesi) - grupta çizilmez.
+    gizliKartAlanlari: ['istekZamani'],
     aksiyonEkrani: 'konsultasyon-liste',
     cipler: [
       { ad: 'Açık', filtre: { alan: 'durum', op: 'icinde', deger: [1, 2] } },

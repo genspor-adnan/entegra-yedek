@@ -566,6 +566,7 @@ export function ListeKarti({
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
                 {konsPencere !== null && (
                   <GenForm kaynak="konsultasyon" id={konsPencere} baslik={c('Konsültasyon İsteği')}
+                    gizliAlanlar={['istekZamani']}
                     onKapat={() => { setKonsPencere(null); setKartTazele(t => t + 1) }}
                     // Kaydedince pencere kapanır; istek ortadaki çerçevede GÖSTERİM kipinde görünür.
                     onKaydedildi={() => { setKonsPencere(null); kipYaz('kons')(false); setKartTazele(t => t + 1) }}

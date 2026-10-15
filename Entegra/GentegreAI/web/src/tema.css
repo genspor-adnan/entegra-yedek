@@ -8218,9 +8218,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   background: #fbfcfe; border: 1px solid var(--cizgi); border-radius: 3px }
 .kns-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 /* Üst satır: hasta solda, aciliyet sağında (kullanıcı 15.10.2026). */
-.kns-ust { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap }
-.kns-ust-sol { flex: 1 1 420px; min-width: 0 }
-.kns-ust-sag { flex: 0 0 auto; padding-top: 4px }
+.kns-zaman { padding: 6px 4px 8px }
+.kns-zaman .kns-aciliyet-et { margin-left: 24px; min-width: 0 }
 .kns-satir { display: flex; align-items: center; gap: 8px; padding: 6px 2px; flex-wrap: wrap }
 .kns-satir > .etiket { font-size: 11px; color: var(--soluk); min-width: 84px; text-align: right }
 .kns-secim { display: inline-flex; gap: 4px; flex-wrap: wrap }
