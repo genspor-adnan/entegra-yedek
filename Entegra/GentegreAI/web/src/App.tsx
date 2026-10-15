@@ -181,18 +181,15 @@ function Yollar() {
   // Acilis ekrani artik PANEL (bkz. asagidaki "*" rotasi); eskiden yetkisi olan
   //   ILK liste aciliyordu ve kullanici nerede oldugunu anlamiyordu.
 
-  // Yetkisiz kullanici ana sayfaya dusmesin: ilk erisilebilir ekran.
-  const ilkErisilebilir = LISTELER.find(l =>
-    yetki(l.yetkiKodu) && !l.menuGizli
-    && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
-    && modulAcikMi(l, kullanici?.moduller));
-  const varsayilanYol = yetki('panel')
-    ? '/panel'
-    : `/${ilkErisilebilir?.rota ?? ilkErisilebilir?.kaynak ?? 'panel'}`;
+  // ANA SAYFA HERKESE (kullanıcı 15.10.2026, uzman doktor: "giriş sayfasında karşılama bilgileri ve
+  //   yetkili olduğum menüler yok"): karşılama + kişinin KENDİ yetkili menüleri; gösterge panelleri
+  //   sunucuda yetkiye göre süzülür. Ana Sayfa düğmesi / sekmesi herkeste vardı, yol ise "panel"
+  //   yetkisine bağlıydı - yetkisiz rolde boş sayfa.
+  const varsayilanYol = '/panel';
   // ACILIS EKRANI (kullanici ayarlari > calisma tercihleri): kisi kendi
   //   secmisse ve o ekrana yetkisi varsa oraya; yoksa varsayilan yol.
   const acilis = calismaOku().acilisEkran;
-  const acilisUygun = acilis === 'panel' ? yetki('panel')
+  const acilisUygun = acilis === 'panel' ? true
     : LISTELER.some(l => (l.rota ?? l.kaynak) === acilis && yetki(l.yetkiKodu)
         && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
         && modulAcikMi(l, kullanici?.moduller));
@@ -248,7 +245,7 @@ function Yollar() {
             giris sonrasi yine ana sayfa aciliyordu (kullanici). */}
         {/* BAŞLANGIÇ (1103): rolün kutucukları + yetkili gösterge panelleri. Önceki Ana
             Sayfa paneli "Genel" gösterge paneli olarak /gosterge/genel'de. */}
-        {yetki('panel') && <Route path="/panel" element={<Baslangic />} />}
+        <Route path="/panel" element={<Baslangic />} />
         <Route path="/gosterge/:kod" element={<GostergePaneli />} />
 
         {/* İletişim & AI (341): menude Ana Sayfa'nin hemen altinda, her iki

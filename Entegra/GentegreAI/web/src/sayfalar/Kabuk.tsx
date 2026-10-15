@@ -459,7 +459,7 @@ export function Kabuk() {
       <div className="govde">
         {menuGorur && <aside className="yan">
           <YanMenu satirlar={satirlar} bolgeliMenu={bolgeliMenu} tercih={tercih}
-                   panelYetkisi={yetki('panel')} aktifSubeAd={aktifSube?.ad}
+                   panelYetkisi /* ana sayfa herkese (15.10.2026) */ aktifSubeAd={aktifSube?.ad}
                    kullaniciKod={kullanici?.ad || kullanici?.kod} rolAdi={kullanici?.rolAdi}
                    kurumProfilAdi={kullanici?.kurumTipiAdi} />
         </aside>}
