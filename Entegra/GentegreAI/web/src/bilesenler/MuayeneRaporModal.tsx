@@ -59,11 +59,12 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: 
     marginBottom: 3, display: 'block' };
 
   return (
-    <Modal baslik="📄 Rapor Ekle" onKapat={onKapat} dar
+    <Modal baslik="📄 Rapor Ekle" onKapat={onKapat} dar buyutmeYok
       alt={<>
         <button className="d bir" disabled={mesgul} onClick={() => void kaydet()}>
           💾 Kaydet (Taslak)</button>
-        <button className="d" onClick={onKapat}>Vazgeç</button>
+        {/* "Kapat" sağa yaslı (kullanıcı 15.10.2026) - diğer kartlardaki gibi. */}
+        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>Kapat</button>
       </>}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '2px' }}>
         <div>

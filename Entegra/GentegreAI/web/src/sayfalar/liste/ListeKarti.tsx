@@ -485,7 +485,7 @@ export function ListeKarti({
       {raporModal && (
         <MuayeneRaporModal muayeneId={raporModal.muayeneId} ilkTur={raporModal.tur}
           onKapat={() => setRaporModal(null)}
-          onKaydedildi={() => setKartTazele(t => t + 1)} />
+          onKaydedildi={() => { kipYaz('rapor')(false); setKartTazele(t => t + 1) }} />
       )}
       {ozetModal !== null && (
         <MuayeneOzetiModal muayeneId={ozetModal} onKapat={() => setOzetModal(null)} />
@@ -620,7 +620,8 @@ export function ListeKarti({
                     ...((kullanici?.moduller ?? []).includes('patoloji')
                       ? [{ ad: 'Patolojik İstem', ikon: '🔬', bilgi: adet(sayaclar?.patoloji), ac: () => setPatolojiIstemAcik(true) }] : []),
                     { ad: 'Kendime Not', ikon: '📝', bilgi: adet(sayaclar?.not), ac: () => setNotAcik(true) },
-                    { ad: 'Rapor', ikon: '📄', bilgi: adet(sayaclar?.rapor), ac: () => git('Rapor') },
+                    // RAPOR (kullanıcı 15.10.2026): yeni rapor penceresi doğrudan; kaydedilince ortada (gösterim).
+                    { ad: 'Rapor', ikon: '📄', bilgi: adet(sayaclar?.rapor), ac: () => setRaporModal({ muayeneId: Number(kartId), tur: 1 }) },
                     { ad: 'Sevk', ikon: '↗', bilgi: adet(sayaclar?.sevk), ac: sevkIste },
                     { ad: 'Konsültasyon', ikon: '🤝', bilgi: adet(sayaclar?.kons), ac: konsultasyonIste },
                     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
