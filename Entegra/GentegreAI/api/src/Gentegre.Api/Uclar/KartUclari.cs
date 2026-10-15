@@ -301,7 +301,13 @@ public static class KartUclari
             if (tanim.SilmeYok)
                 throw GentegreHatasi.IsKurali(
                     "Bu kayıt silinmez; kullanımdan kaldırmak için 'Aktif' alanını kapatın.");
-            baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
+            // KENDİ TASLAĞI (kullanıcı 15.10.2026: "sevki silemedim"): silme hakkı olmasa da, kayıt
+            //   açma hakkı olan kullanıcı KENDİ açtığı taslak sevk / konsültasyonu siler - hekim
+            //   yanlış açtığı isteği temizleyebilsin. Başkasının ya da gönderilmiş kaydı değil.
+            if (!(baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Ekle)
+                  && await KendiTaslagiMiAsync(tanim.Ad, id, baglam.KullaniciId, veri, iptal)))
+                baglam.YetkiIste(tanim.YetkiKodu, Islem.Sil);
+            baglam.YazmaIste();
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, null, id, Islem.Sil, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
 
@@ -517,6 +523,19 @@ public static class KartUclari
     /// Alan metasi. "Yazilabilir" hem katalogdaki bayrak hem ALAN YETKISI ile
     /// belirlenir: okuma izni olup yazma izni olmayan alan formda salt okunur gelir.
     /// </summary>
+    /// <summary>Kayıt kullanıcının kendi açtığı TASLAK sevk / konsültasyon mu (kendi taslağını silme).</summary>
+    private static async Task<bool> KendiTaslagiMiAsync(string kaynak, long id, int kullaniciId,
+        VeriKaynagi veri, CancellationToken iptal)
+    {
+        var sql = kaynak switch
+        {
+            "sevk" => "select exists(select 1 from public.sevk where id = @p0 and ekleyen = @p1 and durum = 1)",
+            "konsultasyon" => "select exists(select 1 from public.konsultasyon where id = @p0 and ekleyen = @p1 and durum = 6)",
+            _ => null,
+        };
+        return sql is not null && await veri.TekDegerAsync<bool>(sql, [id, kullaniciId], iptal);
+    }
+
     private static KartAlanMeta Meta(KartAlani alan, KartTanimi tanim, IstekBaglami baglam,
         IReadOnlyDictionary<string, string>? kodTablosuSecenekleri = null,
         IReadOnlyDictionary<string, string>? ustHaritasi = null,
