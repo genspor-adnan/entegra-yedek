@@ -287,6 +287,9 @@ public static partial class RadyolojiUclari
                 throw GentegreHatasi.IsKurali("Çekilmiş/raporlanmış görüntüleme istemi silinemez.");
 
             await b.CalistirAsync("select public.fn_radyoloji_istem_sil(@p0)", null, [id], iptal);
+            // Muayene bağı iptal (1109): silinen istem "istem var / sonuç bekliyor" sayılmasın.
+            await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'radyoloji_istem' and hedef_id = @p0",
+                null, [id], iptal);
             return Results.Ok(new { id, mesaj = "Görüntüleme istemi silindi.", izlemeNo = baglam.IzlemeNo });
         });
 

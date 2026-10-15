@@ -119,6 +119,11 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
 ]);
 
 /** Vital özet kutusu alanı → geçmiş grafiği anahtarı (grafiği olmayan alan tıklanmaz). */
+/** VİTAL DOLULUĞU yalnız ölçüm alanlarından (kullanıcı 15.10.2026: "vital zorunlu değil, boşsa
+    ortada olmasın") - zaman / kaynak / ölçen her satırda dolu, "veri var" saydırıyordu. */
+const VITAL_OLCUM_ALANLARI = ['sistolik', 'diyastolik', 'nabiz', 'spo2', 'ates', 'solunum', 'agriVas',
+  'boyCm', 'kiloKg', 'bki', 'belCevresiCm', 'glukozParmak', 'gks'] as const;
+
 /** Anamnez gösterim kipinin satırları (alan, etiket) - katalogdaki sırayla. */
 const ANAMNEZ_ALANLARI: readonly (readonly [string, string])[] = [['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye']];
 
@@ -845,7 +850,7 @@ export function ListeKarti({
                             {/* VİTAL: fizik muayenenin altında (kullanıcı 15.10.2026), katlanır - ölçüm yoksa kapalı, varsa açık. */}
                             <div className="mi-vital" data-mfr="vital"
                                  hidden={sekmesiz && !bolumGorunur('vital', (parcalar?.detayVerisi('vitaller')?.satirlar ?? [])
-                                   .some(r => Object.entries(r).some(([k, v]) => k !== 'id' && !k.endsWith('Id') && v !== null && v !== '' && Number(v) !== 0)))}>
+                                   .some(r => VITAL_OLCUM_ALANLARI.some(k => r[k] !== null && r[k] !== undefined && r[k] !== '' && Number(r[k]) !== 0)))}>
                               {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
                               {/* GEÇMİŞ GRAFİĞİ kısayolları vital çerçevesinin İÇİNDE (kullanıcı 14.10.2026). */}
                               {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) },

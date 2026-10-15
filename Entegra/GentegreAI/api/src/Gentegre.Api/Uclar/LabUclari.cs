@@ -623,6 +623,9 @@ public static partial class LabUclari
                 throw GentegreHatasi.IsKurali("Sonucu girilmiş istem silinemez.");
 
             await b.CalistirAsync("select public.fn_lab_istem_sil(@p0)", null, [id], iptal);
+            // Muayene bağı iptal (1109): silinen istem "istem var / sonuç bekliyor" sayılmasın.
+            await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'lab_istem' and hedef_id = @p0",
+                null, [id], iptal);
             return Results.Ok(new { id, mesaj = "Lab istemi silindi.", izlemeNo = baglam.IzlemeNo });
         });
 
