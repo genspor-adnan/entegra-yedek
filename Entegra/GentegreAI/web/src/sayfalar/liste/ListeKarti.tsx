@@ -511,7 +511,9 @@ export function ListeKarti({
         //   başlıkları (Tanılar, Anamnez...) yeter.
         tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') || sablonMuayeneMi(b)
           // Çerçeveli bölümler (İstemler, Reçete, Raporlar) başlığını çerçevede taşır.
-          || b.startsWith('İstem') || b === 'e-Reçete' || b === 'Rapor' : undefined}
+          || b.startsWith('İstem') || b === 'e-Reçete' || b === 'Rapor'
+          // "Sevk / Konsültasyon" başlığı da yok (kullanıcı 15.10.2026) - Sevk ve Konsültasyon çerçeveleri başlıklı.
+          || b.startsWith('Sevk') : undefined}
         tekSayfaGizli={sekmesiz && etkinGorunum === 'detay' ? b =>
           b.startsWith('İstem') ? !bolumGorunur('istem', (istemSayisi ?? 0) > 0)
           : b === 'Rapor' ? !bolumGorunur('rapor', doluluk.rapor)
