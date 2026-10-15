@@ -197,7 +197,8 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
   const hedef: Record<string, (tamam: boolean) => void> = {
     baslangic: muayeneyeAl, sikayet: () => git('Muayene'), fizik: () => git('Fizik muayene'),
     tanilar: tamam => tamam || !eylemler ? git('Tanı') : eylemler.taniEkle(),
-    istem: tamam => tamam || !eylemler ? git('İstem') : eylemler.istemAc(),
+    // TETKİK İSTEM: istem olsa da yeni istem ekranı doğrudan (kullanıcı 15.10.2026); kaydedilince ortada.
+    istem: () => eylemler ? eylemler.istemAc() : git('İstem'),
     recete: tamam => tamam || !eylemler ? git('e-Reçete') : eylemler.ilacEkle(),
     // Değerlendirme / Sonuç çerçevesine (reçetenin altında) - kullanıcı 15.10.2026.
     karar: () => git('Değerlendirme'),

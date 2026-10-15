@@ -467,7 +467,8 @@ export function ListeKarti({
         <IstemSepetiModal muayeneId={istem}
           baslangicSekme={tanim.kaynak === 'goz-muayene' ? 'goz' : undefined}
           onKapat={() => setIstem(null)}
-          onBitti={() => setKartTazele(t => t + 1)} />
+          // Kaydedilen istem ortadaki Tetkik İstemleri çerçevesinde GÖSTERİM kipinde (kullanıcı 15.10.2026).
+          onBitti={() => { kipYaz('istem')(false); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />
       )}
       {dikteAcik && (
         <MuayeneDikte
@@ -610,7 +611,8 @@ export function ListeKarti({
                   // Eksik madde: seçme ekranı doğrudan (ICD arama · istem sepeti · ilaç arama).
                   eylemler={{
                     taniEkle: () => setIcdAramaAcik(true),
-                    istemAc: () => { bolumAc('istem'); setIstem(Number(kartId)) },
+                    // Çerçeve istem KAYDEDİLİNCE görünür (sayı > 0) - vazgeçilirse boş çerçeve kalmasın.
+                    istemAc: () => setIstem(Number(kartId)),
                     ilacEkle: () => { bolumAc('recete'); setReceteIlacAra(true) },
                   }}
                   islemler={[
