@@ -87,8 +87,12 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0 }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
+  /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
+  onSayi?(n: number): void;
+  /** Artınca "＋" basılmış gibi dosya seçme penceresi açılır (muayene sol menü "Dosyalar", dosya yokken). */
+  yeniIstegi?: number;
 }) {
   const [satirlar, setSatirlar] = useState<DokumanSatiri[] | null>(null);
   const [resimUrlleri, setResimUrlleri] = useState<Record<number, string>>({});
@@ -150,6 +154,11 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   };
 
   useEffect(() => { yenile() }, [kartAdi, kaynakId]);
+  const onSayiRef = useRef(onSayi);
+  onSayiRef.current = onSayi;
+  useEffect(() => { if (satirlar) onSayiRef.current?.(satirlar.length) }, [satirlar]);
+  // Dış "yeni dosya" isteği: kullanıcının menü tıklamasıyla aynı anda - tarayıcı seçme penceresine izin verir.
+  useEffect(() => { if (yeniIstegi > 0 && !saltOkunur) girdiRef.current?.click() }, [yeniIstegi, saltOkunur]);
 
   useEffect(() => {
     if (kartAdi !== 'personelMasraf' || !kaynakId) { setMasrafBelgeNolari([]); return }

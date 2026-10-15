@@ -243,6 +243,11 @@ export function ListeKarti({
     const d = dolulukRef.current;
     if (d.rapor !== doluluk.rapor || d.sevk !== doluluk.sevk) setDoluluk({ ...d });
   });
+  /** DOSYALAR (kullanıcı 15.10.2026: "sol menüde dosyalar tıklanınca yoksa + basılmış gibi, varsa
+      oraya konumlansın"): galerinin bildirdiği sayı ve "yeni dosya" isteği. */
+  const [dosyaSayisi, setDosyaSayisi] = useState<number | null>(null);
+  const [dosyaYeni, setDosyaYeni] = useState(0);
+  useEffect(() => { setDosyaSayisi(null); setDosyaYeni(0) }, [kartId]);
   /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
   const [patolojiIstemAcik, setPatolojiIstemAcik] = useState(false);
   const [istemTazele, setIstemTazele] = useState(0);
@@ -453,7 +458,7 @@ export function ListeKarti({
           : b.startsWith('Sevk') ? !bolumGorunur('sevk', doluluk.sevk)
           : b.startsWith('İşlem') ? !bolumGorunur('islem', (sekmeVerisi.veri?.islemler.length ?? 0) > 0)
           : b === 'Geçmiş' ? !bolumGorunur('gecmis', (sekmeVerisi.veri?.gecmis.length ?? 0) > 0)
-          : b === 'Dosyalar' ? !bolumGorunur('dosyalar', false)
+          : b === 'Dosyalar' ? !bolumGorunur('dosyalar', (dosyaSayisi ?? 0) > 0)
           : b === 'e-Nabız' ? !bolumGorunur('enabiz', false)
           : false : undefined}
         tekSayfaSuzgec={sekmesiz ? a => (a === 'ozel:ozet') === (etkinGorunum === 'ozet') : undefined}
@@ -504,7 +509,10 @@ export function ListeKarti({
                     { ad: 'Konsültasyon', ikon: '🤝', ac: () => git('Sevk') },
                     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
                     { ad: 'Geçmiş', ikon: '🕘', ac: () => git('Geçmiş') },
-                    { ad: 'Dosyalar', ikon: '📎', ac: () => git('Dosyalar') },
+                    // Dosya yoksa seçme penceresi doğrudan (＋ gibi); varsa bölüme gidilir.
+                    { ad: 'Dosyalar', ikon: '📎', ac: () => {
+                      if ((dosyaSayisi ?? 0) > 0) { git('Dosyalar'); return }
+                      bolumAc('dosyalar'); setDosyaYeni(n => n + 1); setTimeout(() => git0('Dosyalar'), 60) } },
                     { ad: 'e-Nabız', ikon: '🌐', ac: () => git('e-Nabız') },
                     { ad: 'Epikriz', ikon: '📄',
                       bilgi: epikrizDurum === 'imzali' ? c('imzalı') : epikrizDurum === 'taslak' ? c('taslak') : undefined,
@@ -1164,7 +1172,8 @@ export function ListeKarti({
               { anahtar: 'ozel:dosyalar', baslik: 'Dosyalar',
                 ciz: () => <DokumanGalerisi kartAdi="muayene"
                                             kaynakId={Number(kartId)}
-                                            saltOkunur={false} /> },
+                                            saltOkunur={false}
+                                            onSayi={setDosyaSayisi} yeniIstegi={dosyaYeni} /> },
               // EPİKRİZ (1100): YALNIZ İSTENİNCE (kullanıcı) - kayıt varsa ya da
               //   Özet › İşlemler › Epikriz'e basıldıysa. Mevcut sekmelere dokunulmaz.
               ...(epikrizDurum !== null || epikrizIstendi ? [{
