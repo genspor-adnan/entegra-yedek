@@ -8,6 +8,7 @@ import type { SablonTercihleri } from '../api/uclar/liste';
 import { guvenli, mesaj } from './mesaj';
 import { tarihSaat, para } from './bicim';
 import { c } from '../dil/ceviri';
+import { KipCercevesi } from './KipCercevesi';
 import { Modal } from './Modal';
 
 /**
@@ -229,9 +230,63 @@ const KONS_ACIL: Record<number, string> = { 1: 'Rutin', 2: 'Acil', 3: 'Çok acil
  * SEVK / KONSÜLTASYON: karttaki sevk alanları + bu muayeneden açılan konsültasyon
  * istekleri (1107). "＋ Konsültasyon İste" taslak isteği açar, kart kendi sekmesinde.
  */
-export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste }:
-  { veri: SekmeVerisi | null; hata: string | null; icerik?: React.ReactNode; onIste?(): void }) {
+export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, cerceve }:
+  { veri: SekmeVerisi | null; hata: string | null; icerik?: React.ReactNode; onIste?(): void;
+    /** İsteği açma (verilmezse kartına gidilir) - sekmesiz muayenede pencere. */
+    onAc?(id: number): void;
+    /** ÇERÇEVE KİPİ (kullanıcı 15.10.2026, sekmesiz): gösterim = sade tablo, ✎ düzenleme =
+        ＋ yeni istek ve satır düzenleme. */
+    cerceve?: { duzen: boolean; onDuzen(v: boolean): void };
+  }) {
   const git = useNavigate();
+  const ac = (id: number) => onAc ? onAc(id) : git(`/konsultasyon/${id}`);
+  if (cerceve) {
+    const liste = veri?.konsultasyonlar ?? [];
+    return (
+      <Kabuk hata={hata} veri={veri}>
+        {icerik}
+        <KipCercevesi baslik="Konsültasyon" duzen={cerceve.duzen} onDuzen={cerceve.onDuzen}
+          gosterim={liste.length === 0 ? <div className="fm-bos">{c('Konsültasyon istenmedi')}</div> : (
+            <table className="fm-goster fm-tablo">
+              <thead><tr><th>{c('Hedef')}</th><th>{c('Soru')}</th><th>{c('Aciliyet')}</th><th>{c('Durum')}</th></tr></thead>
+              <tbody>{liste.map(k => {
+                const d = sayi(k.durum);
+                return (
+                  <tr key={sayi(k.id)}>
+                    <td>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</td>
+                    <td>{metin(k.soru).slice(0, 120) || '—'}</td>
+                    <td>{KONS_ACIL[sayi(k.aciliyet)] ?? ''}</td>
+                    <td><span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          )}>
+          <div className="muayene-arac">
+            {onIste && <button type="button" className="d bir" onClick={onIste}>＋ {c('Yeni Konsültasyon İsteği')}</button>}
+          </div>
+          {liste.length > 0 && (
+            <table className="detay-tablo secilebilir">
+              <thead><tr><th>{c('Hedef')}</th><th>{c('Soru')}</th><th>{c('Aciliyet')}</th><th>{c('Durum')}</th><th /></tr></thead>
+              <tbody>{liste.map(k => {
+                const d = sayi(k.durum);
+                return (
+                  <tr key={sayi(k.id)} style={{ cursor: 'pointer' }} onClick={() => ac(sayi(k.id))}>
+                    <td>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</td>
+                    <td>{metin(k.soru) || '—'}</td>
+                    <td>{KONS_ACIL[sayi(k.aciliyet)] ?? ''}</td>
+                    <td><span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span></td>
+                    <td><button type="button" className="d" onClick={e => { e.stopPropagation(); ac(sayi(k.id)) }}>
+                      {d === 6 || d === 1 ? '✎ ' + c('Düzenle') : c('Aç')}</button></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          )}
+        </KipCercevesi>
+      </Kabuk>
+    );
+  }
   return (
     <Kabuk hata={hata} veri={veri}>
       {icerik}
@@ -297,7 +352,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste }:
                     </td>
                     <td>
                       <button type="button" className="d"
-                              onClick={() => git(`/konsultasyon/${sayi(k.id)}`)}>Aç</button>
+                              onClick={() => ac(sayi(k.id))}>Aç</button>
                     </td>
                   </tr>
                 );

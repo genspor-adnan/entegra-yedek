@@ -253,6 +253,15 @@ export function ListeKarti({
   const [dosyaSayisi, setDosyaSayisi] = useState<number | null>(null);
   const [dosyaYeni, setDosyaYeni] = useState(0);
   useEffect(() => { setDosyaSayisi(null); setDosyaYeni(0) }, [kartId]);
+  /** KONSÜLTASYON İSTEĞİ PENCERESİ (kullanıcı 15.10.2026: "soldaki menüden konsültasyon seçersem
+      yeni konsültasyon isteği ekranı açılmalı.. kaydedince ortada olmalı.. edit moda alırsam
+      düzenlenebilmeli"): açık isteğin id'si; sunucu taslağı hasta + isteyen hekimle açar. */
+  const [konsPencere, setKonsPencere] = useState<number | null>(null);
+  const konsultasyonIste = () => void guvenli(async () => {
+    const y = await api.muayenedenKonsultasyon(Number(kartId));
+    bolumAc('sevk');
+    setKonsPencere(y.id);
+  });
   /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
   const [patolojiIstemAcik, setPatolojiIstemAcik] = useState(false);
   const [istemTazele, setIstemTazele] = useState(0);
@@ -511,7 +520,7 @@ export function ListeKarti({
                     { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
                     { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
                     { ad: 'Sevk', ikon: '↗', ac: () => git('Sevk') },
-                    { ad: 'Konsültasyon', ikon: '🤝', ac: () => git('Sevk') },
+                    { ad: 'Konsültasyon', ikon: '🤝', ac: konsultasyonIste },
                     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
                     { ad: 'Geçmiş', ikon: '🕘', ac: () => git('Geçmiş') },
                     // Dosya yoksa seçme penceresi doğrudan (＋ gibi); varsa bölüme gidilir.
@@ -525,6 +534,14 @@ export function ListeKarti({
                                   else { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) } } },
                   ]} />
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
+                {konsPencere !== null && (
+                  <GenForm kaynak="konsultasyon" id={konsPencere} baslik={c('Konsültasyon İsteği')}
+                    onKapat={() => { setKonsPencere(null); setKartTazele(t => t + 1) }}
+                    // Kaydedince pencere kapanır; istek ortadaki çerçevede GÖSTERİM kipinde görünür.
+                    onKaydedildi={() => { setKonsPencere(null); kipYaz('kons')(false); setKartTazele(t => t + 1) }}
+                    sekmeSarmalayici={(_b, _i, d, _iz, p) => (
+                      <KonsultasyonIstekGovdesi kartId={konsPencere} deger={d} parcalar={p} />)} />
+                )}
                 {patolojiIstemAcik && <PatolojiIstemModal muayeneId={Number(kartId)} onKapat={() => setPatolojiIstemAcik(false)}
                   onKaydedildi={() => { setPatolojiIstemAcik(false); bolumAc('istem'); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />}
               </>
@@ -722,11 +739,15 @@ export function ListeKarti({
                   <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri}
                                               hata={sekmeVerisi.hata}
                                               icerik={icerik}
-                                              // ＋ KONSÜLTASYON İSTE (1107): taslak istek açılır, kart kendi sekmesinde.
-                                              onIste={() => void guvenli(async () => {
+                                              // ＋ KONSÜLTASYON İSTE (1107): sekmesizde taslak istek PENCEREDE açılır,
+                                              //   kaydedince bu bölümde; sekmelide kart kendi sekmesinde.
+                                              onIste={sekmesiz ? konsultasyonIste : () => void guvenli(async () => {
                                                 const y = await api.muayenedenKonsultasyon(Number(kartId));
                                                 git(`/konsultasyon/${y.id}`);
-                                              })} />
+                                              })}
+                                              onAc={sekmesiz ? id => setKonsPencere(id) : undefined}
+                                              cerceve={sekmesiz ? { duzen: kipOku('kons', sekmeVerisi.veri ? sekmeVerisi.veri.konsultasyonlar.length > 0 : null),
+                                                                    onDuzen: kipYaz('kons') } : undefined} />
                 )
                 : (
                   <>

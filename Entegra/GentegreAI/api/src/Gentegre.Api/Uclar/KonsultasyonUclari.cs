@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -118,8 +118,11 @@ public static class KonsultasyonUclari
                        k.taraf_id, k.isteyen_muayene_id, k.durum, k.hedef_bolum_id, k.sonuc,
                        k.yanitlama_zamani, k.hastada_zamani, k.yanit_zamani, k.gordu_zamani, k.yanit_muayene_id,
                        coalesce(public.fn_taraf_ad(yh.unvan, yh.ad, yh.soyad)::varchar(120), ''), coalesce(hb.ad, ''),
-                       k.ret_gerekce, k.yonlendirme_notu
+                       k.ret_gerekce, k.yonlendirme_notu,
+                       -- HASTA (kullanıcı 15.10.2026: "isteyen dr ve hastanın adları otomatik yeni ekrana geçmeli")
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), coalesce(h.kod, '')
                   from public.konsultasyon k
+                  left join public.taraf h on h.id = k.taraf_id
                   left join public.taraf ih on ih.id = k.isteyen_hekim_id
                   left join public.taraf sh on sh.id = k.sorumlu_hekim_id
                   left join public.taraf yh on yh.id = k.yanitlayan_id
@@ -141,6 +144,7 @@ public static class KonsultasyonUclari
                     yanitMuayeneId = o.IsDBNull(18) ? (int?)null : o.GetInt32(18),
                     yanitlayan = o.GetString(19), hedefBolum = o.GetString(20),
                     retGerekce = o.GetString(21), yonlendirmeNotu = o.GetString(22),
+                    hasta = o.GetString(23), hastaKod = o.GetString(24),
                 }, iptal) ?? throw GentegreHatasi.Bulunamadi("Konsültasyon bulunamadı.");
 
             var tanilar = k.isteyenMuayeneId is null ? new List<string>() : await b.ListeAsync("""

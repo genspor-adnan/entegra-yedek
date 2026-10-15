@@ -56,6 +56,9 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
       {!yeni && v && (
         <div className="kns-hasta-serit">
           <span><b>{v.k.no}</b></span>
+          {/* HASTA VE İSTEYEN HEKİM (kullanıcı 15.10.2026): taslak açılırken muayeneden gelir. */}
+          {v.k.hasta && <span>{c('Hasta')} <b>{v.k.hasta}</b>{v.k.hastaKod && <span className="not"> · {v.k.hastaKod}</span>}</span>}
+          {v.k.isteyen && <span>{c('İsteyen')} <b>{v.k.isteyen}</b></span>}
           {v.k.basvuruNo && <span>{c('Başvuru')} <b>{v.k.basvuruNo}</b></span>}
           <span>{c('Durum')} <b>{c(DURUM[durum] ?? '')}</b></span>
           {v.alerjiler.length > 0 && <span className="rozet hata" style={{ marginLeft: 'auto' }}>{c('Alerji')}: {v.alerjiler.join(', ')}</span>}

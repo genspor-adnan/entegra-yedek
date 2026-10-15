@@ -18,6 +18,7 @@ export interface KonsultasyonOnizleme {
     durum: number; hedefBolumId?: number | null; hedefBolum: string; sonuc: number;
     yanitlamaZamani?: string | null; hastadaZamani?: string | null; yanitZamani?: string | null; gorduZamani?: string | null;
     yanitMuayeneId?: number | null; yanitlayan: string; retGerekce: string; yonlendirmeNotu: string;
+    hasta?: string; hastaKod?: string;
   };
   tanilar: string[]; lab: string[]; ilaclar: string[]; alerjiler: string[];
   gecmis: { id: number; yanitlayan: string; zaman: string; yanit: string; bolum: string }[];

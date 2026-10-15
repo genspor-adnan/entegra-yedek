@@ -457,9 +457,9 @@ public static partial class KartKatalogu
             // VAKA TÜRÜ KALDIRILDI (kullanıcı 15.10.2026, db/1106): başvurunun "Geliş Nedeni"nde
             //   - e-Nabız'a giden SKRS VAKA TÜRÜ oradan. muayene.vaka_turu kolonu eski kayıtlar
             //   için durur; 1106 dolu değerleri başvuruya taşıdı.
-            new("konsultasyonSoru", "konsultasyon_soru", "metin", EnFazlaUzunluk: 500,
-                Baslik: "Konsültasyon sorusu", Grup: "Sevk / Konsültasyon",
-                AltGrup: "Konsültasyon"),
+            // "Konsültasyon sorusu" KALKTI (kullanıcı 15.10.2026: "buradaki konsültasyon alanına gerek yok
+            //   artık"): soru konsültasyon İSTEĞİNDE (1107, konsultasyon.soru). Kolon yanıt muayenesinde
+            //   (tür 3) e-Nabız 252 için durur; istek yanıtla ucunda oraya kopyalanır.
 
             // -------------------------------------------------- gönderim ----
             // SEKME ADI YINE "Tanı (ICD-10)" (kullanici 02.10.2026: "vital
