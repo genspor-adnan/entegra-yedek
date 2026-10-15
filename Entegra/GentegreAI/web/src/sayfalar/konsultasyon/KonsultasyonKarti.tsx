@@ -7,6 +7,7 @@ import type { Deger } from '../../bilesenler/kartAlanCizim';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../../bilesenler/MuayeneSekmesiz';
 import { KonsAkis, KonsAlinti, KONS_ACILIYET, KONS_KARSILAMA } from './KonsultasyonPanelleri';
 import { KonsultasyonIslemPenceresi, type KonsIslem } from './KonsultasyonIslemPenceresi';
 
@@ -50,8 +51,11 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
     parcalar?.kaydet();
   };
 
+  // HASTA BANDI (kullanıcı 15.10.2026): isteyen muayenenin bandı - sekmesiz muayenedeki ile aynı.
+  const bant = useMuayeneHastaBilgisi(Number(deger.isteyenMuayeneId ?? 0), 0);
   return (
     <div className="kns-kart">
+      {Number(deger.isteyenMuayeneId ?? 0) > 0 && <MuayeneHastaBandi bilgi={bant} />}
       {/* ACİLİYET HASTANIN SAĞINDA (kullanıcı 15.10.2026): hasta (yeni kartta seçim, taslakta şerit) solda. */}
       <div className="kns-ust">
       <div className="kns-ust-sol">

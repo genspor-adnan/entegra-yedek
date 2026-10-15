@@ -5,6 +5,7 @@ import type { SekmeParcalari } from '../../bilesenler/kartSekmeleri';
 import type { Deger } from '../../bilesenler/kartAlanCizim';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { c } from '../../dil/ceviri';
+import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../../bilesenler/MuayeneSekmesiz';
 
 /**
  * SEVK KARTI (1110) - mockup Ekranlar/Muayene/sevk_karti_v2.html (sade, tek panel).
@@ -67,8 +68,12 @@ export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi }: {
     });
   };
 
+  // HASTA BANDI (kullanıcı 15.10.2026: "yeni sevk ve konsültasyon kartı başına sekmesiz muayenedeki
+  //   hasta bandını getir"): sevkin açıldığı muayenenin bandı - ad, yaş, kurum, alerji, uyarılar.
+  const bant = useMuayeneHastaBilgisi(Number(deger.muayeneId ?? 0), 0);
   return (
     <div className="svk-kart">
+      {Number(deger.muayeneId ?? 0) > 0 && <MuayeneHastaBandi bilgi={bant} />}
       {ozet && (
         <div className="svk-serit">
           <span><b>{ozet.hasta}</b>{ozet.cinsiyetYas && ` · ${ozet.cinsiyetYas}`}{ozet.hastaKod && <span className="not"> · {ozet.hastaKod}</span>}</span>
