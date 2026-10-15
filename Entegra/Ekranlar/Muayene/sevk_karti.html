@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sevk Kartı — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .hasta-serit{display:flex;gap:18px;align-items:center;padding:8px 12px;background:#fbfcfe;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap;font-size:11.5px}
+  .hasta-serit b{color:var(--navy)}
+  .iki-taraf{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line2)}
+  .iki-taraf>div+div{border-left:1px solid var(--line2)}
+  .taraf-bas{padding:8px 12px 0;font-weight:bold;color:#2f6db3;font-size:12px;display:flex;gap:8px;align-items:center}
+  .taraf-bas .sonuk{font-weight:normal;font-size:11px}
+  .metin{min-height:84px;align-items:flex-start;line-height:1.55;white-space:normal}
+  .secim{display:inline-flex;gap:4px;flex-wrap:wrap}
+  .secim span{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff}
+  .secim span.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .akis{display:flex;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{flex:1;min-width:100px;text-align:center;font-size:11px;padding:6px 4px;border:1px solid var(--line2);
+    background:#f8fafc;color:var(--muted)}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad.ok{background:#e2f3e8;color:#2e7d46;font-weight:bold}
+  .akis .ad.su{background:#eef4fc;color:#2f6db3;font-weight:bold;box-shadow:inset 0 -3px 0 #2f6db3}
+  .ekler{display:flex;gap:6px;flex-wrap:wrap}
+  .ekler span{border:1px solid var(--line2);border-radius:10px;padding:2px 9px;font-size:11px;background:#f5f9fe}
+  .ekler span.yok{background:#fff;color:var(--muted);border-style:dashed}
+  @media(max-width:1000px){.iki-taraf{grid-template-columns:1fr}.iki-taraf>div+div{border-left:none}}
+</style>
+</head>
+<body>
+
+<!-- ============================================== 1) SEVK (sevk eden hekim) -->
+<div class="win" style="max-width:1100px">
+  <div class="title">↗ Sevk Kartı
+    <span class="sp">Muayene › Sevk · SV-2026-0412 · taslak</span></div>
+  <div class="hasta-serit">
+    <span>Başvuru <b>P-000162 · 15.10.2026 10:12 · SGK</b></span>
+    <span><b>Ahmet ŞEN</b> · E · 67 · Kardiyoloji poliklinik</span>
+    <span>Muayene <b>#19 · Dr. Aslı DEMİR</b></span>
+    <span style="margin-left:auto" class="rz kir">Alerji: yok · Antikoagülan: heparin 10:33</span>
+  </div>
+
+  <div class="akis">
+    <div class="ad su">Hazırlanıyor</div>
+    <div class="ad">e-İmza</div>
+    <div class="ad">Medula takip no</div>
+    <div class="ad">Ulaşım</div>
+    <div class="ad">Hasta çıktı</div>
+    <div class="ad">Karşı kurum kabul</div>
+    <div class="ad">Sonuç döndü</div>
+  </div>
+
+  <div class="alanlar">
+    <label>Sevk türü *</label>
+    <div class="secim"><span class="on">Kurum dışı sevk</span><span>Kurum içi sevk</span><span>Yatış önerisi</span></div>
+  </div>
+
+  <div class="iki-taraf">
+    <div>
+      <div class="taraf-bas">Sevk eden <span class="sonuk">· muayeneden gelir</span></div>
+      <div class="alanlar">
+        <label>Sevk zamanı *</label><div class="inp ro">15.10.2026 10:31 <span class="sonuk" style="margin-left:auto">otomatik</span></div>
+        <label>Hekim *</label><div class="inp ro">Dr. Aslı DEMİR · Kardiyoloji</div>
+        <label>Tanılar</label><div class="inp ro">I21.0 Ön duvar akut MI (ana) · I10 Esansiyel HT</div>
+        <label>Hasta durumu *</label>
+        <div class="secim"><span class="on">Stabil</span><span>Stabil değil</span><span>Entübe</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="taraf-bas">Sevk edilen <span class="sonuk">· kurum / klinik SKRS'den</span></div>
+      <div class="alanlar">
+        <label>Tesis *</label><div class="inp combo">Şehir Hastanesi <span class="sonuk" style="margin-left:6px">SKRS 112233 · 3. basamak</span></div>
+        <label>Klinik *</label><div class="inp combo">Kardiyoloji</div>
+        <label>Hekim</label><div class="inp combo"><span class="sonuk">Klinik yeter (nöbetçi kabul eder)</span></div>
+        <label>Sevk nedeni *</label><div class="inp combo">Uzman / cihaz yok (anjiyo)</div>
+        <label>Ön görüşme</label><div class="inp">Dr. K. Aras ile telefonla görüşüldü · 10:29</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alanlar">
+    <label>Ulaşım *</label>
+    <div class="secim"><span>Kendi imkânı</span><span>Kurum ambulansı</span><span class="on">112</span><span>Hava ambulansı</span></div>
+    <label>Ambulans saati</label><div class="inp">10:38 <span class="sonuk" style="margin-left:6px">112 çağrı no 4471</span></div>
+    <label>Refakatçi</label><div class="inp">Var · eşi <span class="sonuk" style="margin-left:6px">SGK'ya refakat bildirimi gerekmez (ayaktan)</span></div>
+    <label>Sevk notu (karşı hekime) *</label>
+    <div class="inp metin">Göğüs ağrısı 2 saattir, V1-V4 ST elevasyonu, troponin 412 ng/L. ASA 300 mg + klopidogrel 600 mg
+      yüklendi, heparin 5000 Ü. Primer PKG için sevk edildi.</div>
+    <label>Ekler</label>
+    <div class="ekler"><span>📄 Sevk epikrizi (oluşturulacak)</span><span>📈 EKG 10:29</span><span>🧪 Troponin 10:31</span>
+      <span class="yok">＋ Görüntüleme / belge ekle</span></div>
+  </div>
+
+  <div class="grp" style="margin-top:0">
+    <h4>Medula ve e-Nabız <span class="mini">kurum dışı sevkte zorunlu</span></h4>
+    <div class="ic">
+      <div class="sat"><span>Medula sevk takip no</span><b>e-imzadan sonra alınır · hasta karşı kurumda katılım payı ödemez</b></div>
+      <div class="sat"><span>e-Nabız</span><b>sevk bilgisi muayene paketinde (çıkış şekli: kurum dışı sevk)</b></div>
+      <div class="sat"><span>Çıkış şekli</span><b>Kurum dışı sevk <span class="sonuk">· muayeneye otomatik yazılır</span></b></div>
+    </div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div>Sevk e-imzalanınca değiştirilemez. Medula takip no alınamazsa sevk "hatalı" görünür ve listede en üste
+      çıkar; karşı kurum hastayı sevkli kabul edemez.</div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="sp"></div>
+    <div class="btn">🖨 Sevk formu</div>
+    <div class="btn">💾 Taslak</div>
+    <div class="btn primary">✍ e-İmzala ve gönder</div>
+  </div>
+</div>
+
+<!-- ============================================== 2) KURUM İÇİ SEVK (aynı kart, tür değişince) -->
+<div class="win" style="max-width:1100px;margin-top:18px">
+  <div class="title">↗ Sevk Kartı · Kurum içi
+    <span class="sp">SV-2026-0413 · Ayşe DEMİR · Kardiyoloji → Göğüs Hastalıkları</span></div>
+  <div class="alanlar">
+    <label>Sevk türü *</label>
+    <div class="secim"><span>Kurum dışı sevk</span><span class="on">Kurum içi sevk</span><span>Yatış önerisi</span></div>
+    <label>Hedef bölüm *</label><div class="inp combo">Göğüs Hastalıkları</div>
+    <label>Hekim</label><div class="inp combo">Dr. M. Kaya <span class="sonuk" style="margin-left:6px">bugün 4 hasta sırada</span></div>
+    <label>Ne zaman</label>
+    <div class="secim"><span class="on">Bugün (sıraya)</span><span>Randevu ver</span></div>
+    <label>Sevk nedeni *</label><div class="inp combo">Başka branş değerlendirmesi</div>
+    <label>Sevk notu *</label><div class="inp metin" style="min-height:56px">Efor dispnesi, KOAH şüphesi. SFT ve değerlendirme rica olunur.</div>
+  </div>
+  <div class="grp">
+    <h4>Kayıt ve ücret <span class="mini">kurum içi sevk yeni başvuru açar</span></h4>
+    <div class="ic">
+      <div class="sat"><span>Başvuru</span><b>Göğüs Hastalıkları'nda yeni başvuru · aynı gün kurum içi sevk</b></div>
+      <div class="sat"><span>Ücret</span><b>SUT kurum içi sevk kuralı · katılım payı yok</b></div>
+      <div class="sat"><span>Hasta</span><b>Çağrı ekranında sıraya girer · SMS ile bilgi</b></div>
+    </div>
+  </div>
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="sp"></div>
+    <div class="btn primary">↗ Sevk et (başvuru aç)</div>
+  </div>
+</div>
+
+<!-- ============================================== 3) GELEN SEVK KABULÜ / İPTAL -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">📥 Gelen Sevk <span class="sp">Devlet Hastanesi · Dahiliye → Kardiyoloji</span></div>
+    <div class="alanlar">
+      <label>Hasta</label><div class="inp ro">Hüseyin KOÇ · E 71 · Medula sevk S-2026-48233</div>
+      <label>Sevk notu</label><div class="inp metin" style="min-height:52px">Dispne, BNP 2.800. EF değerlendirmesi ve tedavi önerisi.</div>
+      <label>İşlem</label><div class="secim"><span class="on">Kabul et (başvuru aç)</span><span>Reddet</span></div>
+      <label>Ret gerekçesi</label><div class="inp" style="color:var(--muted)">yalnız retle zorunlu</div>
+    </div>
+    <div class="uyari mavi"><span>ℹ</span><div>Kabul edilince Medula sevk takip noyla başvuru açılır (Kayıt Kabul ile ortak);
+      ret gönderen kuruma e-Nabız / Medula üzerinden bildirilir.</div></div>
+    <div class="malt"><div class="btn">Vazgeç</div><div class="sp"></div><div class="btn primary">Kabul et</div></div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Sevk Kartı — tasarım notları</h4>
+  Bugünkü durum: sevk muayene kartında altı alandır (karar, tesis, klinik, neden, not, ambulans); sevkin
+  kendisi bir kayıt değildir. Kart sevki <b>ayrı bir kayıt</b> yapar - konsültasyon isteği (1107) deseniyle.
+  <ul>
+    <li><b>Muayeneden açılır:</b> sol menü "Sevk" ya da çıkış şeklinde "sevk" seçilince; hasta, hekim, tanı ve
+      başvuru muayeneden gelir. Kaydedince muayenenin ortasında "Sevk" çerçevesinde görünür.</li>
+    <li><b>Tür alanı akışı değiştirir:</b> kurum dışı = Medula + e-Nabız + ulaşım; kurum içi = hedef bölümde
+      başvuru (bugün sıraya ya da randevu); yatış önerisi = yatış kabul listesine düşer.</li>
+    <li><b>e-İmza sonrası değişmez;</b> yanlışsa iptal (gerekçeli) + yeni sevk. Medula takip no imzadan sonra alınır.</li>
+    <li><b>Ekler otomatik önerilir:</b> sevk epikrizi (1100 epikriz ekranından), son EKG / lab / görüntüleme;
+      karşı kurum bunları e-Nabız ya da çıktı ile görür.</li>
+    <li><b>Ulaşım ve refakatçi</b> sevk kağıdının ilk soruları; 112 çağrı numarası ve saati kayıtta.</li>
+    <li><b>Mevcut alanlar taşınır:</b> muayenedeki sevk alanları bu kaydın alanlarıdır; uygulamada muayene
+      kartından kalkar, eski kayıtlar göçle sevk kaydına dönüşür.</li>
+  </ul>
+</div>
+
+</body>
+</html>

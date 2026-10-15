@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sevk Listesi — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .not-h{white-space:normal;max-width:300px;color:#3a4a5a}
+  .onizleme{display:grid;grid-template-columns:1.2fr 1fr;border-top:1px solid var(--line)}
+  .onizleme>div+div{border-left:1px solid var(--line2)}
+  .alinti{margin:8px 12px;padding:8px 10px;border-left:3px solid #2f6db3;background:#f5f9fe;font-size:12px;line-height:1.55}
+  .alinti.donus{border-left-color:#2e7d46;background:#f3faf5}
+  .alinti small{display:block;color:var(--muted);font-size:10.5px;margin-bottom:3px}
+  .akis{display:flex;padding:8px 12px;flex-wrap:wrap}
+  .akis .ad{flex:1;min-width:96px;text-align:center;font-size:10.5px;padding:5px 3px;border:1px solid var(--line2);background:#f8fafc;color:var(--muted)}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad.ok{background:#e2f3e8;color:#2e7d46;font-weight:bold}
+  .akis .ad.su{background:#eef4fc;color:#2f6db3;font-weight:bold;box-shadow:inset 0 -3px 0 #2f6db3}
+  @media(max-width:1000px){.onizleme{grid-template-columns:1fr}.onizleme>div+div{border-left:none}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">↗ Sevkler
+    <span class="sp">Muayene › Sevk Listesi · Dr. Aslı DEMİR (Kardiyoloji) · 15.10.2026 14:20</span></div>
+
+  <div class="sekmeler">
+    <div class="sekme on">📤 Giden sevkler <span class="rz sari">2 imza bekliyor</span></div>
+    <div class="sekme">📥 Gelen sevkler <span class="rz">3</span></div>
+    <div class="sekme">🏥 Bölüm geneli (sorumlu)</div>
+  </div>
+
+  <div class="ozet">
+    <div class="k uy"><div class="bas">İmza bekleyen</div><div class="deg">2</div><div class="alt">sevk formu e-imza</div></div>
+    <div class="k teh"><div class="bas">Medula sevk hatası</div><div class="deg">1</div><div class="alt">takip no alınamadı</div></div>
+    <div class="k"><div class="bas">Ulaşım bekleyen</div><div class="deg">1</div><div class="alt">112 çağrıldı · 10:38</div></div>
+    <div class="k"><div class="bas">Bugün sevk</div><div class="deg">7</div><div class="alt">5 kurum dışı · 2 kurum içi</div></div>
+    <div class="k iyi"><div class="bas">Sonucu dönen</div><div class="deg">3</div><div class="alt">karşı kurum epikrizi geldi</div></div>
+    <div class="k"><div class="bas">e-Nabız</div><div class="deg">7 / 7</div><div class="alt">sevk bilgisi gönderildi</div></div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ara">🔍 Hasta, protokol, tesis, klinik, Medula sevk no…</div>
+    <div class="kutu combo" style="min-width:150px">Tarih: <b>Bugün + açıklar</b></div>
+    <span class="cip on">Açık</span>
+    <span class="cip">Kurum dışı</span>
+    <span class="cip">Kurum içi</span>
+    <span class="cip">Yatış önerisi</span>
+    <span class="sepv"></span>
+    <span class="cip">İmza bekliyor</span>
+    <span class="cip">Sonuç döndü</span>
+    <span class="cip">İptal</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">✍ e-İmzala</div>
+    <div class="btn">📤 Medula / e-Nabız gönder</div>
+    <div class="btn">🚑 Ulaşım iste</div>
+    <div class="btn">🖨 Sevk formu</div>
+    <div class="sepv"></div>
+    <div class="btn">↩ Dönüşü işle</div>
+    <div class="btn">✕ İptal (gerekçeli)</div>
+    <div class="sp"></div>
+    <span class="sonuk">Satır rengi: kırmızı = Medula hatası · sarı = imza bekliyor</span>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th>Tür</th><th>Tarih</th><th>Hasta</th><th>Sevk eden</th><th>Sevk edilen</th>
+        <th>Neden (SKRS)</th><th>Ulaşım</th><th>Medula sevk no</th><th>Durum</th>
+      </tr></thead>
+      <tbody>
+        <tr class="teh">
+          <td><span class="rz kir">Kurum dışı</span></td>
+          <td>13:55</td>
+          <td><b>Hüseyin KOÇ</b> · E 71</td>
+          <td>Dr. A. Demir · Kardiyoloji</td>
+          <td>Şehir Hastanesi · Kalp-Damar Cerrahisi</td>
+          <td class="not-h">İleri tetkik / tedavi için</td>
+          <td>Kurum ambulansı</td>
+          <td><span class="rz kir">alınamadı</span></td>
+          <td><span class="rz kir">Medula hatası</span></td>
+        </tr>
+        <tr class="sel">
+          <td><span class="rz kir">Kurum dışı</span></td>
+          <td>10:31</td>
+          <td><b>Ahmet ŞEN</b> · E 67</td>
+          <td>Dr. A. Demir · Kardiyoloji</td>
+          <td>Şehir Hastanesi · Kardiyoloji <span class="sonuk">· primer PKG</span></td>
+          <td class="not-h">Uzman / cihaz yok (anjiyo)</td>
+          <td>112 · 10:38</td>
+          <td>S-2026-48120</td>
+          <td><span class="rz mavi">Hasta çıktı · 10:52</span></td>
+        </tr>
+        <tr class="uy">
+          <td><span class="rz sari">Yatış önerisi</span></td>
+          <td>12:10</td>
+          <td><b>Fatma YILDIZ</b> · K 48</td>
+          <td>Dr. A. Demir · Kardiyoloji</td>
+          <td>Kurum içi · Kardiyoloji servisi</td>
+          <td class="not-h">Yatarak tedavi</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="rz sari">İmza bekliyor</span></td>
+        </tr>
+        <tr>
+          <td><span class="rz">Kurum içi</span></td>
+          <td>11:20</td>
+          <td><b>Ayşe DEMİR</b> · K 54</td>
+          <td>Dr. A. Demir · Kardiyoloji</td>
+          <td>Kurum içi · Göğüs Hastalıkları <span class="sonuk">· sıra 4</span></td>
+          <td class="not-h">Başka branş değerlendirmesi</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="rz mavi">Başvuru açıldı</span></td>
+        </tr>
+        <tr class="pasif">
+          <td><span class="rz kir">Kurum dışı</span></td>
+          <td>14.10 16:40</td>
+          <td><b>Kerem US</b> · E 45</td>
+          <td>Dr. A. Demir · Kardiyoloji</td>
+          <td>Üniversite Hastanesi · Elektrofizyoloji</td>
+          <td class="not-h">İleri tetkik / tedavi için</td>
+          <td>Kendi imkânı</td>
+          <td>S-2026-47911</td>
+          <td><span class="rz ok">Sonuç döndü · 15.10</span> <span class="rz mor">e-Nabız ✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="onizleme">
+    <div>
+      <div class="grp">
+        <h4>Seçili sevk · SV-2026-0412 <span class="mini">başvuru P-000162 · SGK · muayene #19</span></h4>
+        <div class="akis">
+          <div class="ad ok">Hazırlandı · 10:31</div>
+          <div class="ad ok">e-İmza · 10:33</div>
+          <div class="ad ok">Medula · S-2026-48120</div>
+          <div class="ad ok">Ulaşım · 112 10:38</div>
+          <div class="ad su">Hasta çıktı · 10:52</div>
+          <div class="ad">Karşı kurum kabul</div>
+          <div class="ad">Sonuç döndü</div>
+        </div>
+        <div class="alinti"><small>SEVK NOTU · karşı hekime · Dr. Aslı DEMİR · 10:31</small>
+          Göğüs ağrısı 2 saattir, V1-V4 ST elevasyonu, troponin 412 ng/L. ASA 300 mg + klopidogrel 600 mg
+          yüklendi, heparin 5000 Ü. Primer PKG için sevk edildi.</div>
+        <div class="ic">
+          <div class="sat"><span>Tanılar</span><b>I21.0 Ön duvar akut MI (ana) · I10 Esansiyel HT</b></div>
+          <div class="sat"><span>Ekler</span><b>Sevk epikrizi (imzalı) · EKG 10:29 · Troponin 10:31</b></div>
+          <div class="sat"><span>Hasta durumu</span><b>Bilinç açık · hemodinami stabil · refakatçi: eşi</b></div>
+          <div class="sat"><span>Çıkış şekli</span><b>Kurum dışı sevk <span class="sonuk">(sevkten otomatik)</span></b></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Dönüş <span class="mini">karşı kurumdan · e-Nabız</span></h4>
+        <div class="alinti donus"><small>ÖNCEKİ SEVK · Üniversite Hastanesi Elektrofizyoloji · 15.10.2026</small>
+          EFÇ yapıldı, AVNRT ablasyonu başarılı. Beta bloker kesildi, 1 ay sonra kontrol.</div>
+        <div class="not">Dönüş <b>karşı kurumun epikrizidir</b>: e-Nabız'dan okunur (erişim izinli, KVKK izi)
+          ya da hasta getirirse dosyaya eklenir. Hekim "Dönüşü işle" ile görür; sevk kapanır.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kurum dışı sevk: Medula sevk takip no + e-Nabız sevk bilgisi</span><span>·</span>
+    <span>Kurum içi sevk hedef bölümde başvuru açar</span><span>·</span>
+    <span>ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Sevk Listesi — tasarım notları</h4>
+  Bugün sevk yalnız muayene kartındaki alanlardır (karar, tesis, klinik, neden, not, ambulans):
+  kaydı, durumu ve listesi yok. Bu ekran sevki konsültasyon gibi <b>ayrı bir kayıt</b> yapar.
+  <ul>
+    <li><b>Üç tür, tek kayıt:</b> kurum dışı sevk (Medula + e-Nabız), kurum içi sevk (hedef bölümde
+      yeni başvuru), yatış önerisi (yatış kabulüne düşer). Muayenedeki "Karar" alanı türdür.</li>
+    <li><b>Durum zinciri:</b> hazırlandı → e-imza → Medula sevk takip no → ulaşım → hasta çıktı →
+      karşı kurum kabul → sonuç döndü. Hangi adımda takıldığı satırda görünür; "gitti mi" sorusu biter.</li>
+    <li><b>Medula hatası kırmızı ve en üstte:</b> takip no alınamazsa karşı kurum hastayı sevkli kabul
+      edemez, hasta katılım payı öder.</li>
+    <li><b>Gelen sevkler</b> sekmesi başka kurumdan / bölümden bize sevk edilenleri gösterir; kabul edilince
+      başvuru açılır (Kayıt Kabul ile ortak).</li>
+    <li><b>Çıkış şekli sevkten gelir:</b> kurum dışı sevk kaydı olan muayenede çıkış şekli "kurum dışı sevk"
+      olarak dolar; elle iki kez girilmez.</li>
+    <li><b>Konsültasyondan farkı:</b> konsültasyonda hasta bizde kalır, başka hekim görüş verir; sevkte
+      hastanın sorumluluğu başka bölüme / kuruma geçer.</li>
+  </ul>
+</div>
+
+</body>
+</html>
