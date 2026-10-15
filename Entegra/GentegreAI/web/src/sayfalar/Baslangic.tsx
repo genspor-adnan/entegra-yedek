@@ -21,6 +21,9 @@ function selam(): string {
 
 /** Öneri (rolün elle düzeni yoksa): menüden en fazla bu kadar kutucuk. */
 const ONERI_SINIRI = 12;
+/** AZ EKRANLI KULLANICI (kullanıcı 16.10.2026: "10 adet altında menü varsa bölümlü değil büyük
+    ikonlu göster"): bundan az ekranda gruplu kutular yerine büyük ikonlu karolar. */
+const BUYUK_IKON_SINIRI = 10;
 
 /**
  * BAŞLANGIÇ SEKMESİ (ana ekran v3 + mockup Ekranlar/Dashboard/gosterge_panelleri.html).
@@ -69,6 +72,10 @@ export function Baslangic() {
 
   const elle = (rolKutucuklari?.length ?? 0) > 0;
   const kutucuklar = elle ? rolKutucuklari! : oneri;
+  /** Menüdeki bütün ekranlar (grup sırasıyla) - az ise büyük ikonlu karolar. */
+  const ekranlar = useMemo(() => menu.flatMap(s => (s.tur === 'duz' ? [s.m] : s.alt))
+    .filter(m => m.yol !== '/panel'), [menu]);
+  const buyukIkon = ekranlar.length > 0 && ekranlar.length < BUYUK_IKON_SINIRI;
 
   return (
     <>
@@ -87,8 +94,24 @@ export function Baslangic() {
         </button>
 
         <div className="bsl-bolum">{c('Ekranlarım')}
-          {!elle && rolKutucuklari !== null && <span className="sonuk"> · {c('rolünüz için önerilen düzen')}</span>}
+          {!elle && !buyukIkon && rolKutucuklari !== null && <span className="sonuk"> · {c('rolünüz için önerilen düzen')}</span>}
         </div>
+        {buyukIkon ? (
+          <div className="bsl-karolar">
+            {ekranlar.map(m => (
+              <a key={m.yol} className="bsl-karo" onClick={() => git(m.yol)}>
+                <span className="bsl-karo-ic"><MenuIkon ic={m.ic || '📁'} /></span>
+                <span className="bsl-karo-ad">{c(m.ad)}</span>
+              </a>
+            ))}
+            {(paneller ?? []).map(p => (
+              <a key={p.kod} className="bsl-karo" onClick={() => git(`/gosterge/${p.kod}`)}>
+                <span className="bsl-karo-ic"><MenuIkon ic={p.ikon || '📊'} /></span>
+                <span className="bsl-karo-ad">{c(p.ad)}</span>
+              </a>
+            ))}
+          </div>
+        ) : (
         <div className="bsl-kutular">
           {(paneller?.length ?? 0) > 0 && (
             <div className="bsl-kutu bsl-gp">
@@ -114,6 +137,7 @@ export function Baslangic() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </>
   );

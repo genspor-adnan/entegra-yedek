@@ -6463,6 +6463,16 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-bolum { font-size: 10.5px; font-weight: 700; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px; margin: 0 0 8px }
 .bsl-bolum .sonuk { text-transform: none; letter-spacing: 0; font-weight: 400 }
 .bsl-kutular { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px }
+/* Az ekranlı kullanıcı: büyük ikonlu karolar (16.10.2026). */
+.bsl-karolar { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px }
+.bsl-karo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            min-height: 130px; padding: 16px 10px; border: 1px solid var(--cizgi); border-radius: 10px;
+            background: var(--yuz); color: var(--yazi); cursor: pointer; text-decoration: none; text-align: center }
+.bsl-karo:hover { border-color: var(--vurgu); color: var(--vurgu); box-shadow: 0 2px 8px rgba(0,0,0,.08) }
+.bsl-karo-ic { font-size: 40px; line-height: 1 }
+.bsl-karo-ic .ic { font-size: 40px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center }
+.bsl-karo-ic .ic svg, .bsl-karo-ic .ic-gorsel { width: 40px; height: 40px }
+.bsl-karo-ad { font-size: 13.5px; font-weight: 600 }
 .bsl-kutu { border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; background: var(--yuz) }
 .bsl-kb { display: flex; align-items: center; gap: 7px; padding: 8px 12px; font-weight: 700; color: var(--yazi2);
   background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
