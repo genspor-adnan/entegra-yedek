@@ -251,6 +251,7 @@ const adliBlok = (
             <div className="kagrup" key={altBaslik}>
               <h6 className={altBaslikEki?.tikla ? 'katlanir-bas' : undefined} onClick={altBaslikEki?.tikla}>
                 {c(altBaslik)}{altBaslikEki?.ek && <span className="katlanir-sag">{altBaslikEki.ek}</span>}</h6>
+              {altBaslikEki?.ic}
               <div className="alan-izgara tek-sutun">
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>

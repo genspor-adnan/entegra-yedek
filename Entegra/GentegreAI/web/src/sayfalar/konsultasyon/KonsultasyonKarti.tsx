@@ -23,6 +23,8 @@ import { KonsultasyonIslemPenceresi, type KonsIslem } from './KonsultasyonIslemP
  */
 
 const sayi = (v: unknown) => Number(v ?? 0);
+/** Aciliyetin kısa adı (küçük düğme; tam adı ipucunda). */
+const KONS_ACILIYET_KISA: Record<number, string> = { 1: 'Rutin', 2: 'Acil', 3: 'Çok acil' };
 
 /** Kartın İSTEK gövdesi (genel kartın içinde, alanlar kart değerine yazılır). */
 export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
@@ -71,25 +73,29 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
           {v.alerjiler.length > 0 && <span className="rozet hata" style={{ marginLeft: 'auto' }}>{c('Alerji')}: {v.alerjiler.join(', ')}</span>}
         </div>
       )}
-      {/* İSTEK ZAMANI + ACİLİYET TEK SATIR (kullanıcı 15.10.2026: "istek zamanı sağına aciliyet taşı").
-          İstek zamanı İsteyen grubundan gizli (gizliKartAlanlari) - burada salt gösterilir. */}
-      <div className="kns-satir kns-zaman">
-        <span className="etiket">{c('İstek zamanı')}</span>
-        <b>{deger.istekZamani ? tarihSaat(deger.istekZamani) : '—'}</b>
-        <span className="etiket kns-aciliyet-et">{c('Aciliyet')} *</span>
-        <div className="kns-secim">
-          {[1, 2, 3].map(a => (
-            <button key={a} type="button" disabled={!duzenlenir} className={aciliyet === a ? 'on' : ''}
-                    onClick={() => parcalar?.alanDegistir('aciliyet', a)}>{c(KONS_ACILIYET[a])}</button>
-          ))}
-        </div>
-        {deger.sonZaman ? <span className="not">{c('Yanıt süresi sonu')}: {tarihSaat(deger.sonZaman)}</span> : null}
-      </div>
       {!yeni && v && durum !== 6 && <KonsAkis v={v} />}
 
       <div className="kns-iki">
         <div>
-          {parcalar?.altGrupCiz('İsteyen', { ek: <span className="not">· {c('kim, neden soruyor')}</span> })}
+          {/* İSTEK ZAMANI ESKİ YERİNDE, KÜÇÜK ACİLİYET SAĞINDA (kullanıcı 15.10.2026). Alan grupta gizli
+              (gizliKartAlanlari) - aynı yerde, aciliyetle tek satır çizilir. */}
+          {parcalar?.altGrupCiz('İsteyen', { ek: <span className="not">· {c('kim, neden soruyor')}</span>, ic: (
+            <div className="alan-izgara tek-sutun"><div className="alan kns-zaman">
+              <span className="etiket">{c('İstek zamanı')}</span>
+              <div className="kns-zaman-ic">
+                <input readOnly disabled value={deger.istekZamani ? tarihSaat(deger.istekZamani) : ''} />
+                <span className="kns-acil-et">{c('Aciliyet')} *</span>
+                <div className="kns-secim kns-secim-kucuk">
+                  {[1, 2, 3].map(a => (
+                    <button key={a} type="button" disabled={!duzenlenir} className={aciliyet === a ? 'on' : ''}
+                            title={c(KONS_ACILIYET[a])}
+                            onClick={() => parcalar?.alanDegistir('aciliyet', a)}>{c(KONS_ACILIYET_KISA[a])}</button>
+                  ))}
+                </div>
+              </div>
+            </div></div>
+          ) })}
+          {deger.sonZaman ? <p className="not ic">{c('Yanıt süresi sonu')}: {tarihSaat(deger.sonZaman)}</p> : null}
         </div>
         <div>
           {parcalar?.altGrupCiz('Karşılayan', { ek: <span className="not">· {c('kime, nerede')}</span> })}

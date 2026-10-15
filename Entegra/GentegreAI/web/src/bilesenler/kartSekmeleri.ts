@@ -301,7 +301,9 @@ export function sekmeleriKur(secenek: {
 
 /** Alt grup başlığına ekran eki: tıklanabilir başlık + başlığın hemen sağına simge
     (muayene anamnez: düzenlemede 💾, tıklayınca gösterim kipine döner). */
-export interface AltGrupBaslik { tikla?(): void; ek?: ReactNode }
+export interface AltGrupBaslik { tikla?(): void; ek?: ReactNode;
+  /** Başlığın ALTINA, alanlardan önce ekran satırı (konsültasyon: istek zamanı + aciliyet). */
+  ic?: ReactNode }
 
 /** Grup sekmesinin parçaları: alan ızgarası ve gömülü detay tabloları - ekran
     bir tabloyu alanlardan ayrı bir panele koyabilsin (muayene: tanı gridi sağda). */
