@@ -551,7 +551,8 @@ export function ListeKarti({
             }
           : undefined}
         // Konsültasyon kartı: Kaydet'in üstündeki "Konsültasyon Kartı — Yeni" satırı yok (kullanıcı 15.10.2026).
-        sayfaBaslikYok={tanim.kaynak === 'konsultasyon'}
+        // Sekmesiz muayenede başlık satırı yok (kullanıcı 15.10.2026) - H / P no hasta bandında.
+        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || sekmesiz}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
@@ -852,11 +853,6 @@ export function ListeKarti({
                       </button>
                     </div>
                     {icerik}
-                    <div className="not ic">
-                      Türler: istirahat · sağlık durumu · ilaç kullanım (SUT) ·
-                      iş göremezlik. Bitiş tarihi başlangıç + süreden hesaplanır;
-                      imzalanan rapor değiştirilemez.
-                    </div>
                   </>
                   </KipCercevesi>
                 )
