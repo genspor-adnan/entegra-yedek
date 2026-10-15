@@ -314,7 +314,8 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   });
 
   return (
-    <Modal baslik="🧾 Tetkik İstemi (Lab + Radyoloji + Göz)" onKapat={onKapat}
+    // BÜYÜTME YOK (kullanıcı 15.10.2026: "tetkik istemi ekranında max kaldır").
+    <Modal baslik="🧾 Tetkik İstemi (Lab + Radyoloji + Göz)" onKapat={onKapat} buyutmeYok
       alt={<>
         <label style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
           <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
