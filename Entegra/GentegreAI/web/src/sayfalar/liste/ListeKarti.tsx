@@ -559,7 +559,7 @@ export function ListeKarti({
           // Çerçeveli bölümler (İstemler, Reçete, Raporlar) başlığını çerçevede taşır.
           || b.startsWith('İstem') || b === 'e-Reçete' || b === 'Rapor'
           // "Sevk / Konsültasyon" başlığı da yok (kullanıcı 15.10.2026) - Sevk ve Konsültasyon çerçeveleri başlıklı.
-          || b.startsWith('Sevk') : undefined}
+          || b.startsWith('Sevk') || b === 'Dosyalar' : undefined}
         tekSayfaGizli={sekmesiz && etkinGorunum === 'detay' ? b =>
           b.startsWith('İstem') ? !(bolumGorunur('istem', (istemSayisi ?? 0) > 0) || bolumGorunur('patoloji', (patolojiSayisi ?? 0) > 0))
           : b === 'Rapor' ? !bolumGorunur('rapor', doluluk.rapor)
@@ -1359,10 +1359,15 @@ export function ListeKarti({
                                         tazele={() => setKartTazele(t => t + 1)} />
                 ) },
               { anahtar: 'ozel:dosyalar', baslik: 'Dosyalar',
-                ciz: () => <DokumanGalerisi kartAdi="muayene"
-                                            kaynakId={Number(kartId)}
-                                            saltOkunur={false}
-                                            onSayi={setDosyaSayisi} yeniIstegi={dosyaYeni} /> },
+                // DOSYALAR ✎ / 💾 (kullanıcı 15.10.2026): gösterimde sade liste, düzenlemede galeri (＋ / sil).
+                ciz: () => (
+                  <KipCercevesi baslik="Dosyalar" duzen={kipOku('dosya', dosyaSayisi === null ? null : dosyaSayisi > 0)}
+                    onDuzen={kipYaz('dosya')}
+                    gosterim={<DokumanGalerisi kartAdi="muayene" kaynakId={Number(kartId)} saltOkunur gosterim
+                                               onSayi={setDosyaSayisi} />}>
+                    <DokumanGalerisi kartAdi="muayene" kaynakId={Number(kartId)} saltOkunur={false}
+                                     onSayi={setDosyaSayisi} yeniIstegi={dosyaYeni} />
+                  </KipCercevesi>) },
               // EPİKRİZ (1100): YALNIZ İSTENİNCE (kullanıcı) - kayıt varsa ya da
               //   Özet › İşlemler › Epikriz'e basıldıysa. Mevcut sekmelere dokunulmaz.
               ...(epikrizDurum !== null || epikrizIstendi ? [{

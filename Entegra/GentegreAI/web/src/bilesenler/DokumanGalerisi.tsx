@@ -87,12 +87,15 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0 }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, gosterim }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
   /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
   onSayi?(n: number): void;
   /** Artınca "＋" basılmış gibi dosya seçme penceresi açılır (muayene sol menü "Dosyalar", dosya yokken). */
   yeniIstegi?: number;
+  /** GÖSTERİM KİPİ (kullanıcı 15.10.2026, muayene "Dosyalar için de edit/save modu"): yalnız sade liste -
+      ad (tıkla: indir), tür, tarih; araç çubuğu ve önizleme yok. */
+  gosterim?: boolean;
 }) {
   const [satirlar, setSatirlar] = useState<DokumanSatiri[] | null>(null);
   const [resimUrlleri, setResimUrlleri] = useState<Record<number, string>>({});
@@ -273,6 +276,21 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
       setHata(hataMetni(h));
     }
   };
+
+  if (gosterim) return satirlarim.length === 0
+    ? <div className="fm-bos">{satirlar === null ? c('Yükleniyor…') : c('Dosya eklenmedi')}</div>
+    : (
+      <table className="fm-goster fm-tablo">
+        <thead><tr><th>{c('Dosya')}</th><th>{c('Tür')}</th><th>{c('Eklenme')}</th></tr></thead>
+        <tbody>{satirlarim.map(s => (
+          <tr key={s.id}>
+            <td><button type="button" className="baglanti" title={c('İndir')} onClick={() => void indir(s)}>{s.ad}</button></td>
+            <td>{s.belgeTuru || '—'}</td>
+            <td>{tarihYaz(s.eklemeTarihi)}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+    );
 
   return (
     <div className="kagrup">
