@@ -14,7 +14,8 @@ public static partial class KartKatalogu
 
     private static KartTanimi SevkKarti() => new(
         Ad: "sevk",
-        YetkiKodu: "muayene.sevk",
+        // Muayene yetkisi (16.10.2026) - muayene.sevk yalnız Sevk Listesi menüsü.
+        YetkiKodu: "muayene",
         Tablo: "public.sevk",
         LogTabloId: SevkLog,
         SubeKolonu: "sube_id",

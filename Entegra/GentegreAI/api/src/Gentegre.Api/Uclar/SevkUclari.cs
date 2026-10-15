@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -18,7 +18,9 @@ namespace Gentegre.Api.Uclar;
 public static class SevkUclari
 {
     private const int LogSevk = 1550;
-    private const string Yetki = "muayene.sevk";
+    // SEVK İŞİ MUAYENE YETKİSİYLE (kullanıcı 16.10.2026: uzman doktor Sevk Listesi'ni görmesin): muayene.sevk
+    //   yalnız Sevk Listesi menüsü / liste aksiyonları; hekim sevki muayeneden yazmaya devam eder.
+    private const string Yetki = "muayene";
 
     public sealed record GerekceIstegi(string? Gerekce);
 

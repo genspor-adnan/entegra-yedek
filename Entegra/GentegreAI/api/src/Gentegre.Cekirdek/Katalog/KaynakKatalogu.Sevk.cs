@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// SEVK LİSTESİ (1110) — mockup Ekranlar/Muayene/sevk_listesi_v2.html (sade).
@@ -34,7 +34,9 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi Sevk() => new(
         Ad: "sevk",
-        YetkiKodu: "muayene.sevk",
+        // Muayene yetkisi (16.10.2026): muayenedeki Sevk çerçevesi bu kaynağı okur; Sevk Listesi
+        //   menüsünü muayene.sevk açar.
+        YetkiKodu: "muayene",
         Kaynak: "public.sevk s "
               + "  join public.taraf h on h.id = s.taraf_id "
               + "  left join public.taraf_hasta th on th.id = h.id "
