@@ -15,7 +15,11 @@ import { RAPOR_ALT_TUR, RAPOR_TUR_SECENEK } from './muayeneKodlari';
 const TURLER = RAPOR_TUR_SECENEK;
 const ALT_TURLER = RAPOR_ALT_TUR;
 
-const bugun = () => new Date().toISOString().slice(0, 10);
+/** YEREL takvim günü "yyyy-mm-dd" (kullanıcı 15.10.2026: "başlama 15 ekim, bitiş 14 ekim geliyor") -
+    toISOString UTC'ye çevirir; +03'te yerel gece yarısı bir önceki güne kayıyordu. */
+const yerelGun = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const bugun = () => yerelGun(new Date());
 
 export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: {
   muayeneId: number;
@@ -36,7 +40,7 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi }: 
     if (!baslangic || gun <= 0) return '';
     const d = new Date(baslangic + 'T00:00:00');
     d.setDate(d.getDate() + gun - 1);
-    return d.toISOString().slice(0, 10);
+    return yerelGun(d);
   }, [baslangic, gun]);
 
   const kaydet = async () => {
