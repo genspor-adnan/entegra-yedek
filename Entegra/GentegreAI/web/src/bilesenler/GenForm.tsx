@@ -232,6 +232,9 @@ interface Props {
   tekSayfaSuzgec?(anahtar: string): boolean;
   /** Tek sayfada BÖLÜM BAŞLIĞI çizilmeyen sekmeler (içerik kendi çerçeve başlığını taşıyor). */
   tekSayfaBaslikYok?(baslik: string): boolean;
+  /** Tek sayfada GİZLİ (ama çizilen) bölümler: içerik çizilir - ekran verisinin dolu olup
+      olmadığını oradan öğrenir - yalnız görünmez (muayene sekmesiz: boş bölümler). */
+  tekSayfaGizli?(baslik: string): boolean;
   /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
       `git` başlığı verilen sekmeye/bölüme götürür. */
   gezintiEk?(git: (baslik: string) => void): React.ReactNode;
@@ -328,7 +331,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu, alanGirdisi }: Props) {
@@ -2218,7 +2221,8 @@ Yine de yeni kayıt eklensin mi?`);
       {/* TEK SAYFA: bütün sekmeler alt alta bölüm (aynı çizim, aynı alanlar). */}
       {tekSayfaKip
         ? sekmeler.filter(s => !tekSayfaSuzgec || tekSayfaSuzgec(s.anahtar)).map(s => (
-            <section key={s.anahtar} id={`ts-${s.anahtar}`} data-ts={s.anahtar} className="ts-bolum">
+            <section key={s.anahtar} id={`ts-${s.anahtar}`} data-ts={s.anahtar} className="ts-bolum"
+                     hidden={tekSayfaGizli?.(s.baslik) || undefined}>
               {!tekSayfaBaslikYok?.(s.baslik) && <h2 className="ts-bas">{c(s.baslik)}</h2>}
               {sekmeGovdesi(s)}
             </section>

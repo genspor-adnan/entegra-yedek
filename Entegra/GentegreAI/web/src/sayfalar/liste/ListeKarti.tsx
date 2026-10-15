@@ -228,6 +228,19 @@ export function ListeKarti({
     return kipler[ad] ?? kipIlk.current.m[ad] ?? true;
   };
   const kipYaz = (ad: string) => (v: boolean) => setKipler(k => ({ ...k, [ad]: v }));
+  /** SEKMESİZ GÖRÜNÜRLÜK (kullanıcı 15.10.2026): şikâyet/hikâye, tanı, değerlendirme her zaman
+      ortada; diğerleri VERİSİ VARSA ortada, yoksa yalnız sol menüden açılınca. Açılan bölüm bu
+      kart için açık kalır. Doluluk bölüm çizilirken öğrenilir (gizli bölüm de çizilir). */
+  const [acikBolumler, setAcikBolumler] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => { setAcikBolumler(new Set()) }, [kartId]);
+  const bolumGorunur = (k: string, dolu: boolean) => dolu || acikBolumler.has(k);
+  const bolumAc = (k: string) => setAcikBolumler(a => a.has(k) ? a : new Set(a).add(k));
+  const dolulukRef = useRef<{ rapor: boolean; sevk: boolean }>({ rapor: false, sevk: false });
+  const [doluluk, setDoluluk] = useState({ rapor: false, sevk: false });
+  useEffect(() => {
+    const d = dolulukRef.current;
+    if (d.rapor !== doluluk.rapor || d.sevk !== doluluk.sevk) setDoluluk({ ...d });
+  });
   /** İstem sayısı (istem bölümü yüklenince) - açılış kipi için. */
   const [istemSayisi, setIstemSayisi] = useState<number | null>(null);
   useEffect(() => { setIstemSayisi(null) }, [kartId]);
@@ -425,13 +438,39 @@ export function ListeKarti({
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
-        tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') || sablonMuayeneMi(b) : undefined}
+        tekSayfaBaslikYok={sekmesiz ? b => b.startsWith('Tanı') || sablonMuayeneMi(b)
+          // Çerçeveli bölümler (İstemler, Reçete, Raporlar) başlığını çerçevede taşır.
+          || b.startsWith('İstem') || b === 'e-Reçete' || b === 'Rapor' : undefined}
+        tekSayfaGizli={sekmesiz && etkinGorunum === 'detay' ? b =>
+          b.startsWith('İstem') ? !bolumGorunur('istem', (istemSayisi ?? 0) > 0)
+          : b === 'Rapor' ? !bolumGorunur('rapor', doluluk.rapor)
+          : b.startsWith('Sevk') ? !bolumGorunur('sevk', doluluk.sevk)
+          : b.startsWith('İşlem') ? !bolumGorunur('islem', (sekmeVerisi.veri?.islemler.length ?? 0) > 0)
+          : b === 'Geçmiş' ? !bolumGorunur('gecmis', (sekmeVerisi.veri?.gecmis.length ?? 0) > 0)
+          : b === 'Dosyalar' ? !bolumGorunur('dosyalar', false)
+          : b === 'e-Nabız' ? !bolumGorunur('enabiz', false)
+          : false : undefined}
         tekSayfaSuzgec={sekmesiz ? a => (a === 'ozel:ozet') === (etkinGorunum === 'ozet') : undefined}
         // SEKMESİZ SOL LİSTE ALTI (mockup v7): bölümü olmayan iki işlem. Rapor, Sevk...
         //   zaten bölüm olarak listede - ikinci kez konmaz.
         // SEKMESİZ SOL MENÜ (kullanıcı): tamamlama maddeleri hem menü hem kontrol, altında işlemler.
         gezintiOzel={sekmesiz
-          ? git => (
+          ? git0 => {
+              // Menüden basılan bölüm açılır (boş olsa da) ve oraya gidilir.
+              const git = (b: string) => {
+                const k = b.startsWith('İstem') ? 'istem' : b === 'e-Reçete' ? 'recete' : b === 'Rapor' ? 'rapor'
+                  : b === 'Sevk' ? 'sevk' : b === 'İşlem' ? 'islem' : b === 'Geçmiş' ? 'gecmis'
+                  : b === 'Dosyalar' ? 'dosyalar' : b === 'e-Nabız' ? 'enabiz' : null;
+                if (k && !acikBolumler.has(k)) { bolumAc(k); setTimeout(() => git0(b), 60) } else git0(b);
+              };
+              // Bölümü olmayan çerçeveler (vital, fizik): açılır ve çerçeveye kaydırılır.
+              const cerceveAc = (k: string) => {
+                bolumAc(k);
+                if (etkinGorunum === 'ozet') setSekmesizGorunum('detay');
+                setTimeout(() => document.querySelector(`.es-govde:not([hidden]) [data-mfr="${k}"]`)
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+              };
+              return (
               <>
                 <MuayeneSolMenu kontrol={kontrol}
                   gorunum={etkinGorunum}
@@ -440,6 +479,8 @@ export function ListeKarti({
                   git={b => { if (b !== 'Özet' && etkinGorunum === 'ozet') { setSekmesizGorunum('detay'); setTimeout(() => git(b), 60) } else git(b) }}
                   muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
                   islemler={[
+                    { ad: 'Vital bulgular', ikon: '🫀', ac: () => cerceveAc('vital') },
+                    { ad: 'Fizik muayene', ikon: '🩺', ac: () => cerceveAc('fizik') },
                     { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
                     { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
                     { ad: 'Sevk', ikon: '↗', ac: () => git('Sevk') },
@@ -455,7 +496,8 @@ export function ListeKarti({
                   ]} />
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
               </>
-            )
+              );
+            }
           : undefined}
         yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
@@ -589,6 +631,7 @@ export function ListeKarti({
                     onDuzen={kipYaz('rapor')} onKaydet={kartiKaydetKal}
                     gosterim={(() => {
                       const satirlar = detay?.satirlar ?? [];
+                      dolulukRef.current.rapor = satirlar.length > 0;
                       if (satirlar.length === 0) return <div className="fm-bos">{c('Rapor yazılmadı')}</div>;
                       const kod = (ad: string, v: unknown) =>
                         detay?.meta.alanlar.find(a => a.ad === ad)?.kodlar?.[String(v ?? '')] ?? '';
@@ -642,7 +685,12 @@ export function ListeKarti({
                   //   konsultasyonlar (mockup "Sevk / Konsultasyon").
                   <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri}
                                               hata={sekmeVerisi.hata}
-                                              icerik={icerik} />
+                                              icerik={icerik}
+                                              // ＋ KONSÜLTASYON İSTE (1107): taslak istek açılır, kart kendi sekmesinde.
+                                              onIste={() => void guvenli(async () => {
+                                                const y = await api.muayenedenKonsultasyon(Number(kartId));
+                                                git(`/konsultasyon/${y.id}`);
+                                              })} />
                 )
                 : (
                   <>
@@ -679,6 +727,10 @@ export function ListeKarti({
                             {(() => {
                               if (parcalar) dikteKaynak.current = {
                                 oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
+                              // Sevk bölümü doluluğu (sekmesiz görünürlük): karar, tesis ya da istenen konsültasyon.
+                              dolulukRef.current.sevk = Number(deger.yonlendirme ?? 0) > 0
+                                || String(deger.sevkTesisKodu ?? '').trim() !== ''
+                                || (sekmeVerisi.veri?.konsultasyonlar.length ?? 0) > 0;
                               return null;
                             })()}
                             {(() => {
@@ -707,7 +759,9 @@ export function ListeKarti({
                               );
                             })()}
                             {/* VİTAL: hikâyenin altında, katlanır - ölçüm yoksa kapalı, varsa açık. */}
-                            <div className="mi-vital">
+                            <div className="mi-vital" data-mfr="vital"
+                                 hidden={sekmesiz && !bolumGorunur('vital', (parcalar?.detayVerisi('vitaller')?.satirlar ?? [])
+                                   .some(r => Object.entries(r).some(([k, v]) => k !== 'id' && !k.endsWith('Id') && v !== null && v !== '' && Number(v) !== 0)))}>
                               {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
                               {/* GEÇMİŞ GRAFİĞİ kısayolları vital çerçevesinin İÇİNDE (kullanıcı 14.10.2026). */}
                               {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) },
@@ -737,6 +791,8 @@ export function ListeKarti({
                                 fizikIlk.current = { id: kartId, duzen: satirlar.length === 0 };
                               const duzen = fizikDuzen ?? fizikIlk.current?.duzen ?? true;
                               return (
+                                // Gizleme düz sarmalayıcıda: .kasira'nın display kuralı hidden'ı ezer.
+                                <div data-mfr="fizik" hidden={sekmesiz && !bolumGorunur('fizik', satirlar.length > 0)}>
                                 <div className="kasira"><div className={`kagrup${duzen ? '' : ' katlanir-kapali'}`}>
                                   <h6 className="katlanir-bas" onClick={() => { if (duzen) parcalar?.kaydet(); setFizikDuzen(!duzen) }}>
                                     {c('Fizik muayene')}
@@ -768,7 +824,7 @@ export function ListeKarti({
                                       {satirlar.map(s => <tr key={s.id}><td>{s.sistem}</td><td>{s.bulgu}</td></tr>)}
                                     </tbody></table>
                                   ) : <div className="fm-bos">{c('Bulgu girilmedi')}</div>}
-                                </div></div>
+                                </div></div></div>
                               );
                             })()}
                             {vucutAcik && (
@@ -1030,7 +1086,11 @@ export function ListeKarti({
               //   sekmesini geri getir") - Muayene sekmesinden alindi.
               { anahtar: 'ozel:recete', baslik: 'e-Reçete',
                 ciz: () => (<>
-                  {/* REÇETE ÇERÇEVESİ (kullanıcı 15.10.2026): ✎ reçete kartı, 💾 reçete + muayene kaydı. */}
+                  {/* REÇETE ÇERÇEVESİ (kullanıcı 15.10.2026): ✎ reçete kartı, 💾 reçete + muayene kaydı.
+                      Sekmesizde reçete yoksa yalnız menüden açılınca görünür (değerlendirme aynı bölümde, hep görünür). */}
+                  <div data-mfr="recete" hidden={sekmesiz && !bolumGorunur('recete', !!sekmeVerisi.veri && (() => {
+                    const r = gosterilenRecete(sekmeVerisi.veri);
+                    return !!r && sekmeVerisi.veri.receteSatirlari.some(s => Number(s.receteId) === Number(r.id)) })())}>
                   <KipCercevesi baslik="Reçete"
                     duzen={kipOku('recete', sekmeVerisi.veri ? (() => { const r = gosterilenRecete(sekmeVerisi.veri);
                       return !!r && sekmeVerisi.veri.receteSatirlari.some(s => Number(s.receteId) === Number(r.id)) })() : null)}
@@ -1044,6 +1104,7 @@ export function ListeKarti({
                     ilacAra={receteIlacAra} kaydetRef={receteKaydetRef}
                     onIlacAraTamam={() => setReceteIlacAra(false)} />
                   </KipCercevesi>
+                  </div>
                   {/* Sekmesizde değerlendirme / sonuç çerçevesinin yeri (Muayene bölümünden portal). */}
                   {/* Muayene bölümünün yerleşimi (etiket üstte tek satır, makro çipleri kutunun altında). */}
                   {sekmesiz && <div className="muayene-ikili msb-ikili msb-tek"><div ref={setDegerlendirmeYeri} className="mi-sol" /></div>}
