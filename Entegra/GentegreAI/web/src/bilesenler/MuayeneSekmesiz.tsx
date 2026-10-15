@@ -199,8 +199,9 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
     tanilar: tamam => tamam || !eylemler ? git('Tanı') : eylemler.taniEkle(),
     istem: tamam => tamam || !eylemler ? git('İstem') : eylemler.istemAc(),
     recete: tamam => tamam || !eylemler ? git('e-Reçete') : eylemler.ilacEkle(),
-    karar: () => git('Muayene'),
-    cikisSekli: () => git('Muayene'),
+    // Değerlendirme / Sonuç çerçevesine (reçetenin altında) - kullanıcı 15.10.2026.
+    karar: () => git('Değerlendirme'),
+    cikisSekli: () => git('Değerlendirme'),
   };
   const eksik = (kontrol ?? []).filter(k => k.zorunlu && !k.tamam).length;
   return (

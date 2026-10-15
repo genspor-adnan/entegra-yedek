@@ -551,8 +551,9 @@ export function ListeKarti({
           ? git0 => {
               // Menüden basılan bölüm açılır (boş olsa da) ve oraya gidilir.
               const git = (b: string) => {
-                // Fizik muayene bir bölüm değil, Muayene bölümünde çerçeve: oraya kaydırılır.
+                // Fizik muayene ve Değerlendirme / Sonuç bölüm değil, çerçeve: oraya kaydırılır.
                 if (b === 'Fizik muayene') { cerceveAc('fizik'); return }
+                if (b === 'Değerlendirme') { cerceveAc('degerlendirme'); return }
                 const k = b.startsWith('İstem') ? 'istem' : b === 'e-Reçete' ? 'recete' : b === 'Rapor' ? 'rapor'
                   : b === 'Sevk' ? 'sevk' : b === 'İşlem' ? 'islem' : b === 'Geçmiş' ? 'gecmis'
                   : b === 'Dosyalar' ? 'dosyalar' : b === 'e-Nabız' ? 'enabiz' : null;
@@ -1002,7 +1003,9 @@ export function ListeKarti({
                                     ) : <div className="fm-bos">{c('Değerlendirme girilmedi')}</div>}
                                   </div></div>
                                 );
-                              return sekmesiz && degerlendirmeYeri ? createPortal(govde, degerlendirmeYeri) : govde;
+                              // data-mfr: sol menü "Değerlendirme / Sonuç" ve "Çıkış şekli" buraya kaydırır.
+                              const sarili = <div data-mfr="degerlendirme">{govde}</div>;
+                              return sekmesiz && degerlendirmeYeri ? createPortal(sarili, degerlendirmeYeri) : sarili;
                             })()}
                           </div>
                         </div>

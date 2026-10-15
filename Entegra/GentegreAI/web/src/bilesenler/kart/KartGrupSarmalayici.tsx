@@ -207,7 +207,8 @@ export function KartGrupSarmalayici({
           return (
             <div className={ayar.sinif}>
               {ayar.katlanir
-                ? <KatlanirIzgara dolu={durum.guncel.length > 0} ciz={kutu} onKapandi={kaydetKal} />
+                // DOLU = gösterilecek ölçüm var (satırın yalnız zamanı / kaynağı dolu olabilir).
+                ? <KatlanirIzgara dolu={ozetKutulari(d, durum.guncel[0], ayar.alanSirasi).length > 0} ciz={kutu} onKapandi={kaydetKal} />
                 : kutu(true)}
             </div>
           );
@@ -237,7 +238,7 @@ export function KartGrupSarmalayici({
  * yoksa yalniz baslik, varsa acik. Baslik tiklaninca acilir/kapanir; sonradan
  * veri gelirse (kart tazelendi) kendiliginden acilir.
  */
-function KatlanirIzgara({ ciz, onKapandi }: {
+function KatlanirIzgara({ ciz, onKapandi, dolu }: {
   dolu: boolean;
   ciz(acik: boolean, tikla: () => void): ReactNode;
   /** Düzenlemeden kutulara dönünce (💾): kart kapanmadan kaydedilir (kullanıcı 15.10.2026). */
@@ -245,8 +246,12 @@ function KatlanirIzgara({ ciz, onKapandi }: {
 }) {
   // Kullanıcı 14.10.2026: varsayılan KUTU görünümü (doluysa ölçüm kutuları, boşsa yalnız
   //   başlık); başlığa tıklayınca düzenleme, tekrar tıklayınca kutular.
-  const [acik, setAcik] = useState(false);
-  return <>{ciz(acik, () => { if (acik) onKapandi?.(); setAcik(!acik) })}</>;
+  // KİP VERİYE GÖRE (kullanıcı 15.10.2026: "vital bulgu menüsüne basınca içinde bilgi yoksa edit
+  //   modda görünmeli"): kullanıcı başlığa tıklayıp seçmedikçe ölçüm yoksa düzenleme, varsa kutular.
+  //   Boş vital yalnız sol menüden açılınca görünür - o zaman doğrudan düzenlemede gelir.
+  const [secim, setSecim] = useState<boolean | null>(null);
+  const acik = secim ?? !dolu;
+  return <>{ciz(acik, () => { if (acik) onKapandi?.(); setSecim(!acik) })}</>;
 }
 
 /**
