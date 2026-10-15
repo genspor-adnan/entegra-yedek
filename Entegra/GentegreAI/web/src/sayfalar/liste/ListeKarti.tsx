@@ -1233,7 +1233,8 @@ export function ListeKarti({
                       })}
                       onAc={id => sekmesiz ? setSevkPencere(id) : git(`/sevk/${id}`)}
                       cerceve={sekmesiz ? { duzen: kipOku('sevk', sekmeVerisi.veri ? sekmeVerisi.veri.sevkler.length > 0 : null),
-                                            onDuzen: kipYaz('sevk') } : undefined} />}
+                                            onDuzen: kipYaz('sevk') } : undefined}
+                      onDegisti={() => setKartTazele(t => t + 1)} />}
                     // ＋ KONSÜLTASYON İSTE (1107): sekmesizde taslak istek PENCEREDE açılır,
                     //   kaydedince bu bölümde; sekmelide kart kendi sekmesinde.
                     onIste={sekmesiz ? konsultasyonIste : () => void guvenli(async () => {
@@ -1242,7 +1243,8 @@ export function ListeKarti({
                     })}
                     onAc={sekmesiz ? id => setKonsPencere(id) : undefined}
                     cerceve={sekmesiz ? { duzen: kipOku('kons', sekmeVerisi.veri ? sekmeVerisi.veri.konsultasyonlar.length > 0 : null),
-                                          onDuzen: kipYaz('kons') } : undefined} />
+                                          onDuzen: kipYaz('kons') } : undefined}
+                    onDegisti={() => setKartTazele(t => t + 1)} />
                 ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}

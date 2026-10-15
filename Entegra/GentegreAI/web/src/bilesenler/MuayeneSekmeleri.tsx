@@ -5,7 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import { KaynakArama } from './KaynakArama';
 import { ReceteKarti } from './recete/ReceteKarti';
 import type { SablonTercihleri } from '../api/uclar/liste';
-import { guvenli, mesaj } from './mesaj';
+import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat, para } from './bicim';
 import { c } from '../dil/ceviri';
 import { KipCercevesi } from './KipCercevesi';
@@ -232,13 +232,15 @@ const KONS_ACIL: Record<number, string> = { 1: 'Rutin', 2: 'Acil', 3: 'Çok acil
  * SEVK / KONSÜLTASYON: karttaki sevk alanları + bu muayeneden açılan konsültasyon
  * istekleri (1107). "＋ Konsültasyon İste" taslak isteği açar, kart kendi sekmesinde.
  */
-export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, cerceve }:
+export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, cerceve, onDegisti }:
   { veri: SekmeVerisi | null; hata: string | null; icerik?: React.ReactNode; onIste?(): void;
     /** İsteği açma (verilmezse kartına gidilir) - sekmesiz muayenede pencere. */
     onAc?(id: number): void;
     /** ÇERÇEVE KİPİ (kullanıcı 15.10.2026, sekmesiz): gösterim = sade tablo, ✎ düzenleme =
         ＋ yeni istek ve satır düzenleme. */
     cerceve?: { duzen: boolean; onDuzen(v: boolean): void };
+    /** Silme sonrası (sekme verisi yeniden okunsun). */
+    onDegisti?(): void;
   }) {
   const git = useNavigate();
   const ac = (id: number) => onAc ? onAc(id) : git(`/konsultasyon/${id}`);
@@ -264,27 +266,15 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
               })}</tbody>
             </table>
           )}>
-          <div className="muayene-arac">
-            {onIste && <button type="button" className="d bir" onClick={onIste}>＋ {c('Yeni Konsültasyon İsteği')}</button>}
-          </div>
-          {liste.length > 0 && (
-            <table className="detay-tablo secilebilir">
-              <thead><tr><th>{c('Hedef')}</th><th>{c('Soru')}</th><th>{c('Aciliyet')}</th><th>{c('Durum')}</th><th /></tr></thead>
-              <tbody>{liste.map(k => {
-                const d = sayi(k.durum);
-                return (
-                  <tr key={sayi(k.id)} style={{ cursor: 'pointer' }} onClick={() => ac(sayi(k.id))}>
-                    <td>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</td>
-                    <td>{metin(k.soru) || '—'}</td>
-                    <td>{KONS_ACIL[sayi(k.aciliyet)] ?? ''}</td>
-                    <td><span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span></td>
-                    <td><button type="button" className="d" onClick={e => { e.stopPropagation(); ac(sayi(k.id)) }}>
-                      {d === 6 || d === 1 ? '✎ ' + c('Düzenle') : c('Aç')}</button></td>
-                  </tr>
-                );
-              })}</tbody>
-            </table>
-          )}
+          <CerceveTablosu kaynak="konsultasyon" satirlar={liste} yeniAdi="Yeni Konsültasyon İsteği" onYeni={onIste}
+            onAc={ac} onDegisti={onDegisti}
+            kolonlar={['Hedef', 'Soru', 'Aciliyet', 'Durum']}
+            hucreler={k => {
+              const d = sayi(k.durum);
+              return [<>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</>,
+                      metin(k.soru) || '—', KONS_ACIL[sayi(k.aciliyet)] ?? '',
+                      <span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span>];
+            }} />
         </KipCercevesi>
       </Kabuk>
     );
@@ -378,9 +368,11 @@ const sevkSinif = (d: number) => d === 1 ? 'uyari' : d === 2 ? 'mavi' : d === 3 
  * (gösterim: tür · nereye · neden · durum; ✎ düzenleme: ＋ Yeni Sevk, satır pencerede);
  * sekmelide tablo + "＋ Sevk" (kart kendi sekmesinde).
  */
-export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve }: {
+export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve, onDegisti }: {
   veri: SekmeVerisi | null; onIste?(): void; onAc(id: number): void;
   cerceve?: { duzen: boolean; onDuzen(v: boolean): void };
+  /** Silme sonrası (sekme verisi yeniden okunsun). */
+  onDegisti?(): void;
 }) {
   const liste = veri?.sevkler ?? [];
   const tablo = (tikla: boolean) => (
@@ -401,12 +393,16 @@ export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve }: {
       })}</tbody>
     </table>
   );
-  const ekle = onIste && <div className="muayene-arac"><button type="button" className="d bir" onClick={onIste}>＋ {c('Yeni Sevk')}</button></div>;
   if (cerceve) return (
     <KipCercevesi baslik="Sevk" duzen={cerceve.duzen} onDuzen={cerceve.onDuzen}
       gosterim={liste.length === 0 ? <div className="fm-bos">{c('Sevk yapılmadı')}</div> : tablo(false)}>
-      {ekle}
-      {liste.length > 0 && tablo(true)}
+      <CerceveTablosu kaynak="sevk" satirlar={liste} yeniAdi="Yeni Sevk" onYeni={onIste} onAc={onAc} onDegisti={onDegisti}
+        kolonlar={['Tür', 'Nereye', 'Neden', 'Durum']}
+        hucreler={s => {
+          const d = sayi(s.durum);
+          return [c(SEVK_TUR[sayi(s.tur)] ?? ''), metin(s.nereye) || '—', c(SEVK_NEDEN[sayi(s.neden)] ?? ''),
+                  <span className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span>];
+        }} />
     </KipCercevesi>
   );
   return (
@@ -642,6 +638,77 @@ export function ReceteGosterim({ veri }: { veri: SekmeVerisi | null }) {
         </tbody>
       </table>
       <div className="fm-bos">{metin(r.receteNo)} · {imzali ? c('imzalı') : c('taslak · imzasız')}</div>
+    </>
+  );
+}
+
+
+/**
+ * ÇERÇEVE TABLOSU (kullanıcı 15.10.2026: "sevk ve konsültasyon çerçevelerinde yeni butonların
+ * sağına düzenle ve sil butonları ekle · grid sola da check seçme ekle"): düzenleme kipinde
+ * ＋ Yeni · ✎ Düzenle (tek seçim) · 🗑 Sil (seçilenler); solda onay kutusu, satıra tık seçer,
+ * çift tık açar. Silme kart ucuyla - yalnız taslak silinir (db/1111), gönderilmiş kayıtta
+ * sunucunun mesajı gösterilir.
+ */
+function CerceveTablosu({ kaynak, satirlar, kolonlar, hucreler, yeniAdi, onYeni, onAc, onDegisti }: {
+  kaynak: 'sevk' | 'konsultasyon';
+  satirlar: Satir[];
+  kolonlar: string[];
+  hucreler(s: Satir): React.ReactNode[];
+  yeniAdi: string;
+  onYeni?(): void;
+  onAc(id: number): void;
+  onDegisti?(): void;
+}) {
+  const [secili, setSecili] = useState<Set<number>>(new Set());
+  const idler = satirlar.map(s => sayi(s.id));
+  // Liste değişince artık olmayan seçimler düşer.
+  useEffect(() => { setSecili(o => new Set([...o].filter(i => idler.includes(i)))) },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [idler.join(',')]);
+  const degistir = (id: number) => setSecili(o => { const y = new Set(o); if (y.has(id)) y.delete(id); else y.add(id); return y });
+  const tumu = idler.length > 0 && idler.every(i => secili.has(i));
+  const sil = () => guvenli(async () => {
+    if (secili.size === 0) return;
+    if (!await onay(`${secili.size} ${c('kayıt silinecek. Yalnız taslak kayıtlar silinir. Onaylıyor musunuz?')}`, true)) return;
+    const hatalar: string[] = [];
+    for (const id of secili) {
+      try { await api.kartSil(kaynak, id) } catch (h) { hatalar.push(hataMetni(h)) }
+    }
+    setSecili(new Set());
+    onDegisti?.();
+    if (hatalar.length) mesaj([...new Set(hatalar)].join(' · '));
+  });
+  const tek = secili.size === 1 ? [...secili][0] : null;
+  return (
+    <>
+      <div className="muayene-arac">
+        {onYeni && <button type="button" className="d bir" onClick={onYeni}>＋ {c(yeniAdi)}</button>}
+        <button type="button" className="d" disabled={tek === null} title={tek === null ? c('Bir kayıt seçin') : undefined}
+                onClick={() => tek !== null && onAc(tek)}>✎ {c('Düzenle')}</button>
+        <button type="button" className="d sil" disabled={secili.size === 0} title={secili.size === 0 ? c('Silinecek kaydı seçin') : undefined}
+                onClick={() => void sil()}>🗑 {c('Sil')}</button>
+      </div>
+      {satirlar.length > 0 && (
+        <table className="detay-tablo secilebilir">
+          <thead><tr>
+            <th style={{ width: 28 }}><input type="checkbox" checked={tumu} aria-label={c('Tümünü seç')}
+              onChange={() => setSecili(tumu ? new Set() : new Set(idler))} /></th>
+            {kolonlar.map(k => <th key={k}>{c(k)}</th>)}
+          </tr></thead>
+          <tbody>{satirlar.map(s => {
+            const id = sayi(s.id);
+            return (
+              <tr key={id} className={secili.has(id) ? 'secili' : undefined} style={{ cursor: 'pointer' }}
+                  onClick={() => degistir(id)} onDoubleClick={() => onAc(id)}>
+                <td onClick={e => e.stopPropagation()}>
+                  <input type="checkbox" checked={secili.has(id)} onChange={() => degistir(id)} /></td>
+                {hucreler(s).map((h, i) => <td key={i}>{h}</td>)}
+              </tr>
+            );
+          })}</tbody>
+        </table>
+      )}
     </>
   );
 }
