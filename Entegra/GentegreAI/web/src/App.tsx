@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { EkranSekmesiBaglami } from './bilesenler/sekmeBaglami';
-import { ReceteKartiSayfa, OzelKartRota, OZEL_KART_SEKME_YOLLARI, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
+import { ReceteKartiSayfa, OzelKartRota, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
+import { OZEL_KART_SEKME_YOLLARI } from './sayfalar/ozelKartSekmeleri';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';

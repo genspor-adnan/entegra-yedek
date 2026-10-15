@@ -56,6 +56,42 @@ public static class ReceteUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/recete/hasta/{hastaId}/taslak - LİSTEDEN YENİ REÇETE (kullanıcı 15.10.2026: "reçete
+        //   listesinde yeni basılırsa önce jenerik hasta seçimi"). Reçete muayeneye bağlıdır: hastanın
+        //   bu şubedeki son AÇIK / SONUÇ BEKLEYEN muayenesi; onun taslağı varsa o, yoksa boş taslak.
+        grup.MapPost("/hasta/{hastaId:int}/taslak", async (
+            int hastaId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var m = await baglanti.TekAsync("""
+                select m.id, m.personel_id, m.sube_id
+                  from public.muayene m
+                 where m.taraf_id = @p0 and m.durum in (1, 2)
+                   and (@p1 = 0 or m.sube_id = @p1)
+                 order by m.id desc limit 1
+                """, islem, [hastaId, baglam.SubeId ?? 0], o => new
+                {
+                    Id = o.GetInt32(0), HekimId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1), SubeId = o.GetInt32(2),
+                }, iptal)
+                ?? throw GentegreHatasi.IsKurali("Hastanın açık muayenesi yok - reçete muayeneye yazılır.");
+            var receteId = await baglanti.TekDegerAsync<int?>("""
+                select r.id from public.recete r where r.muayene_id = @p0 and r.durum = 1
+                 order by r.id desc limit 1
+                """, islem, [m.Id], iptal);
+            var yeni = receteId is null;
+            receteId ??= await baglanti.TekDegerAsync<int>("""
+                insert into public.recete (muayene_id, hasta_id, hekim_id, tur, durum, sube_id, ekleyen, recete_no)
+                values (@p0, @p1, @p2, 0, 1, @p3, @p4,
+                        public.fn_numara_kimlik_uret(905, @p3, 'recete', 'recete_no', current_date))
+                returning id
+                """, islem, [m.Id, hastaId, m.HekimId, m.SubeId, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { receteId = receteId.Value, muayeneId = m.Id, yeni, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/recete/muayene/{muayeneId} - reçete aç (yoksa) ve ilaç ekle
         grup.MapPost("/muayene/{muayeneId:int}", async (
             int muayeneId, IlacIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,

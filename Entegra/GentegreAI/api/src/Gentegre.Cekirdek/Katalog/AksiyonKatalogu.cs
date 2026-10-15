@@ -74,6 +74,10 @@ public static partial class AksiyonKatalogu
         //   Sil yalnız taslakta (db/1111 tetiği); gönderilmiş sevk iptal edilir.
         s["sevk-liste"] = Crud("sevk", "sevk", "muayene.sevk", ekleAdi: "＋ Yeni Sevk",
                                silHedef: null, silIpucu: "Yalnız taslak sevk silinir");
+        // REÇETE LİSTESİ (kullanıcı 15.10.2026): ＋ Yeni (önce hasta seçimi, istemcide) / ✎ / 🗑.
+        //   Eskiden 'cari-liste' ekranını kullanıyordu (cari yetkisiyle). Sil yalnız taslakta.
+        s["recete-liste"] = Crud("recete", "recete", "muayene.recete", ekleAdi: "＋ Yeni Reçete",
+                                 silHedef: null, silIpucu: "Yalnız taslak reçete silinir");
         EkleTicari(s);
         Ekranlar = s;
     }

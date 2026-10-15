@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { Modal } from '../Modal';
-import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../MuayeneSekmesiz';
 import { GenGrid } from '../GenGrid';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, mesaj, onay } from '../mesaj';
@@ -50,7 +49,7 @@ const zaman = (v: unknown) => {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam, kaydetRef, sayfa }: {
+export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam, kaydetRef, sayfa, bantCiz, bosTaslakSil }: {
   receteId: number;
   onKapat(): void;
   /** Reçete değişince (kayıt, imza, ilaç) çağırana haber. */
@@ -70,6 +69,10 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
   /** KENDİ SEKMESİNDE (kullanıcı 15.10.2026: "Reçete Listesi çift tıklayınca içerik sekmede açılsın,
       üstte yeni hasta bandı gelsin"): pencere çerçevesi yok, üstte muayenedeki hasta bandı. */
   sayfa?: boolean;
+  /** Sayfa kipinde üst hasta bandı (çağıran çizer - MuayeneSekmesiz importu döngü kurardı). */
+  bantCiz?(muayeneId: number, hastaId: number): React.ReactNode;
+  /** Listeden "Yeni" ile açılan taslak: ilaç eklenmeden kapatılırsa silinir (boş taslak birikmesin). */
+  bosTaslakSil?: boolean;
 }) {
   const [kart, setKart] = useState<Record<string, unknown> | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
@@ -124,8 +127,6 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ilacAra, kart]);
 
-  const bant = useMuayeneHastaBilgisi(sayfa && kart ? sayi(kart.muayeneId) : 0, 0,
-                                      sayfa && kart ? sayi(kart.hastaId) : 0);
   const yenile = () => { setTazele(t => t + 1); setIsaretli([]); onDegisti?.() };
   const filtre = useMemo(() => ({ alan: 'receteId', op: 'esit' as const, deger: receteId }), [receteId]);
 
@@ -193,6 +194,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     mesaj(y.mesaj);
     yenile();
   });
+
+  const kapat = async () => {
+    if (bosTaslakSil && taslak && satirlar.length === 0) {
+      try { await api.kartSil('recete', receteId); onDegisti?.() } catch { /* silinemiyorsa kalır */ }
+    }
+    onKapat();
+  };
 
   const sil = () => guvenli(async () => {
     if (!await onay('Taslak reçete silinecek. Onaylıyor musunuz?')) return;
@@ -296,12 +304,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
           {gomulu && ekAraclar}
           <span style={{ marginLeft: 'auto' }} />
           {gomulu && <span className={`rozet ${d.sinif}`}>{d.ad}{receteNo ? ` · ${receteNo}` : ''}</span>}
-          {taslak && (
+          {/* Kart penceresinde / sekmesinde Sil YOK (kullanıcı 15.10.2026) - liste Sil'i ile. */}
+          {taslak && gomulu && (
             <button type="button" className="d teh" title={c('Taslak reçeteyi sil')}
-                    onClick={() => void sil()}>{gomulu ? '🗑' : `🗑 ${c('Sil')}`}</button>
+                    onClick={() => void sil()}>🗑</button>
           )}
           {!gomulu && (
-            <button type="button" className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
+            <button type="button" className="d kapat-dugmesi" onClick={() => void kapat()}>✖ {c('Kapat')}</button>
           )}
         </>);
 
@@ -429,14 +438,16 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
           <Modal
             baslik={`${c('Reçete')} — ${d.ad}${receteNo ? ` · ${receteNo}` : ''}`}
             ekSinif="kart-recete"
-            onKapat={onKapat}
+            onKapat={() => void kapat()}
             sayfa={sayfa} buyutmeYok={sayfa || undefined}
             // Sekmede: üstte hasta bandı (hasta adı / alerji bantta), altında reçetenin kendi rozetleri.
             ustSerit={sayfa ? (
               <>
-                {bant && <MuayeneHastaBandi bilgi={bant} />}
+                {bantCiz?.(muayeneId, sayi(kart.hastaId))}
                 <div className="rk-kimlik">
+                  {/* Muayene no sağında tarih, bölüm, hekim (kullanıcı 15.10.2026). */}
                   <span className="sonuk">{c('Muayene')} <b>#{muayeneId}</b>
+                    {zaman(muayene?.baslangic) && ` · ${zaman(muayene?.baslangic)}`}
                     {metin(muayene?.bolumAdi) && ` · ${metin(muayene?.bolumAdi)}`}
                     {metin(muayene?.hekimAdi) && ` · ${metin(muayene?.hekimAdi)}`}</span>
                   <span className="rk-bosluk" />

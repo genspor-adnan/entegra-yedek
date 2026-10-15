@@ -32,7 +32,8 @@ public static partial class KaynakKatalogu
             new("tarih",      "r.ekleme_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                               Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("hastaAdi",   "public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120)",      "metin", "Hasta", Genislik: 220),
-            new("hekimAdi",   "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
+            // "Doktor" (kullanıcı 15.10.2026: "reçete listesi hekim rename Doktor").
+            new("hekimAdi",   "coalesce(p.ad, '')", "metin", "Doktor", Genislik: 180),
             new("turAdi",
                 "case r.tur when 1 then 'Kırmızı' when 2 then 'Yeşil' when 3 then 'Mor' "
                 + "when 4 then 'Turuncu' else 'Normal' end",

@@ -35,7 +35,7 @@ import { LISTELER } from './Liste';
 import { TarafArama } from '../bilesenler/TarafArama';
 
 import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
-import { OZEL_KART_SEKME_YOLLARI } from './OzelKartSayfalari';
+import { OZEL_KART_SEKME_YOLLARI } from './ozelKartSekmeleri';
 import { KayitArama } from '../bilesenler/KayitArama';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 

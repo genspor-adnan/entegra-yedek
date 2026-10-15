@@ -101,6 +101,10 @@ export const listeUclari = {
     istek<{ uyarilar: { tur: string; metin: string }[] }>(
       `/api/recete/kontrol?hastaId=${hastaId}&barkod=${encodeURIComponent(barkod)}`),
 
+  /** Listeden yeni reçete: hastanın son açık muayenesinde taslak (varsa o) - 15.10.2026. */
+  receteHastaTaslak: (hastaId: number) =>
+    gonder<{ receteId: number; muayeneId: number; yeni: boolean }>(`/api/recete/hasta/${hastaId}/taslak`, {}),
+
   /** Receteye ilac ekler; recete yoksa acar. Uyari ENGEL degil - gerekce ile gecilir. */
   receteIlacEkle: (muayeneId: number, istek_: {
     barkod: string; doz?: string; periyot?: string; sureGun?: number;

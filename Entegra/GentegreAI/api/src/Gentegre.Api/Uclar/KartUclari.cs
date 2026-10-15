@@ -531,6 +531,8 @@ public static class KartUclari
         {
             "sevk" => "select exists(select 1 from public.sevk where id = @p0 and ekleyen = @p1 and durum = 1)",
             "konsultasyon" => "select exists(select 1 from public.konsultasyon where id = @p0 and ekleyen = @p1 and durum = 6)",
+            // Reçete (15.10.2026): kendi açtığı taslak (durum 1).
+            "recete" => "select exists(select 1 from public.recete where id = @p0 and ekleyen = @p1 and durum = 1)",
             _ => null,
         };
         return sql is not null && await veri.TekDegerAsync<bool>(sql, [id, kullaniciId], iptal);

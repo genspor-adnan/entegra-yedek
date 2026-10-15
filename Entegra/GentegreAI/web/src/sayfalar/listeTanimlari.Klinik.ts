@@ -488,7 +488,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     yol: 'Muayene › Reçete Listesi',
     // OZEL KART (mockup recete_karti.html): /recete/:id ReceteKarti acar.
     kartYolu: '/recete', kartBaslik: 'Reçete', ozelKart: true,
-    aksiyonEkrani: 'cari-liste',
+    // ＋ Yeni (önce hasta) / ✎ Düzenle / 🗑 Sil (yalnız taslak) - kullanıcı 15.10.2026.
+    aksiyonEkrani: 'recete-liste',
     tarihAlani: 'tarih',
     cipler: [
       { ad: 'Taslak',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
