@@ -238,7 +238,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
     onAc?(id: number): void;
     /** ÇERÇEVE KİPİ (kullanıcı 15.10.2026, sekmesiz): gösterim = sade tablo, ✎ düzenleme =
         ＋ yeni istek ve satır düzenleme. */
-    cerceve?: { duzen: boolean; onDuzen(v: boolean): void };
+    cerceve?: { duzen: boolean; onDuzen(v: boolean): void; /** Konsültasyon çerçevesi çizilmez (boş, açılmadı). */ gizli?: boolean };
     /** Silme sonrası (sekme verisi yeniden okunsun). */
     onDegisti?(): void;
   }) {
@@ -246,6 +246,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
   const ac = (id: number) => onAc ? onAc(id) : git(`/konsultasyon/${id}`);
   if (cerceve) {
     const liste = veri?.konsultasyonlar ?? [];
+    if (cerceve.gizli) return <Kabuk hata={hata} veri={veri}>{icerik}</Kabuk>;
     return (
       <Kabuk hata={hata} veri={veri}>
         {icerik}

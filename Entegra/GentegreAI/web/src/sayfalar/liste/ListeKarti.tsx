@@ -276,7 +276,7 @@ export function ListeKarti({
   const [sevkPencere, setSevkPencere] = useState<number | null>(null);
   const sevkIste = () => void guvenli(async () => {
     const y = await api.muayenedenSevk(Number(kartId));
-    bolumAc('sevk');
+    bolumAc('sevk'); bolumAc('sevkc');
     setSevkPencere(y.id);
   });
   /** Pencere kaydedilmeden kapandıysa ve taslak hâlâ BOŞSA (soru / not yok) silinir. */
@@ -290,7 +290,7 @@ export function ListeKarti({
   };
   const konsultasyonIste = () => void guvenli(async () => {
     const y = await api.muayenedenKonsultasyon(Number(kartId));
-    bolumAc('sevk');
+    bolumAc('sevk'); bolumAc('konsc');
     setKonsPencere(y.id);
   });
   /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
@@ -1225,7 +1225,10 @@ export function ListeKarti({
               { anahtar: 'ozel:sevk', baslik: 'Sevk / Konsültasyon',
                 ciz: () => (
                   <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
-                    icerik={<MuayeneSevkCercevesi veri={sekmeVerisi.veri}
+                    // ÇERÇEVELER AYRI AYRI (kullanıcı 15.10.2026: "kons ekledim, ortada sevk de göründü -
+                    //   sevk boş görünmemeli"): her çerçeve kendi verisi varsa ya da menüden açıldıysa.
+                    icerik={sekmesiz && !bolumGorunur('sevkc', (sekmeVerisi.veri?.sevkler.length ?? 0) > 0) ? undefined
+                      : <MuayeneSevkCercevesi veri={sekmeVerisi.veri}
                       // Sekmesizde pencere; sekmelide sevk kartı kendi sekmesinde.
                       onIste={sekmesiz ? sevkIste : () => void guvenli(async () => {
                         const y = await api.muayenedenSevk(Number(kartId));
@@ -1243,7 +1246,8 @@ export function ListeKarti({
                     })}
                     onAc={sekmesiz ? id => setKonsPencere(id) : undefined}
                     cerceve={sekmesiz ? { duzen: kipOku('kons', sekmeVerisi.veri ? sekmeVerisi.veri.konsultasyonlar.length > 0 : null),
-                                          onDuzen: kipYaz('kons') } : undefined}
+                                          onDuzen: kipYaz('kons'),
+                                          gizli: !bolumGorunur('konsc', (sekmeVerisi.veri?.konsultasyonlar.length ?? 0) > 0) } : undefined}
                     onDegisti={() => setKartTazele(t => t + 1)} />
                 ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
