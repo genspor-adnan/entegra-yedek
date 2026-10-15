@@ -35,6 +35,7 @@ import { LISTELER } from './Liste';
 import { TarafArama } from '../bilesenler/TarafArama';
 
 import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { OZEL_KART_SEKME_YOLLARI } from './OzelKartSayfalari';
 import { KayitArama } from '../bilesenler/KayitArama';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 
@@ -224,6 +225,8 @@ export function Kabuk() {
   const kartSekmeleri = useMemo(() => {
     const m: Record<string, string> = {};
     for (const l of LISTELER) if (kartSekmesiVar(l)) m[kartSekmeYolu(l)] ??= yeniSekmeBasligi(l);
+    // Özel kartlardan sekmede açılanlar (reçete, 15.10.2026) - "yeni" yolu yok, palete girmez.
+    for (const [yol, ad] of Object.entries(OZEL_KART_SEKME_YOLLARI)) m[yol] ??= ad;
     return m;
   }, []);
   const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari, kartSekmeleri });

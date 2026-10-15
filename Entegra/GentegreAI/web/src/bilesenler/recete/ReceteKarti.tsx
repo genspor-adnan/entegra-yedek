@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { Modal } from '../Modal';
+import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../MuayeneSekmesiz';
 import { GenGrid } from '../GenGrid';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, mesaj, onay } from '../mesaj';
@@ -49,7 +50,7 @@ const zaman = (v: unknown) => {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam, kaydetRef }: {
+export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, ilacAra, onIlacAraTamam, kaydetRef, sayfa }: {
   receteId: number;
   onKapat(): void;
   /** Reçete değişince (kayıt, imza, ilaç) çağırana haber. */
@@ -66,6 +67,9 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
   onIlacAraTamam?(): void;
   /** DIŞ KAYDET (muayene çerçevesi 💾): kaydedilmemiş tür / açıklama varsa yazar. */
   kaydetRef?: { current: (() => Promise<void>) | null };
+  /** KENDİ SEKMESİNDE (kullanıcı 15.10.2026: "Reçete Listesi çift tıklayınca içerik sekmede açılsın,
+      üstte yeni hasta bandı gelsin"): pencere çerçevesi yok, üstte muayenedeki hasta bandı. */
+  sayfa?: boolean;
 }) {
   const [kart, setKart] = useState<Record<string, unknown> | null>(null);
   const [surum, setSurum] = useState<string | undefined>();
@@ -120,6 +124,8 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ilacAra, kart]);
 
+  const bant = useMuayeneHastaBilgisi(sayfa && kart ? sayi(kart.muayeneId) : 0, 0,
+                                      sayfa && kart ? sayi(kart.hastaId) : 0);
   const yenile = () => { setTazele(t => t + 1); setIsaretli([]); onDegisti?.() };
   const filtre = useMemo(() => ({ alan: 'receteId', op: 'esit' as const, deger: receteId }), [receteId]);
 
@@ -128,7 +134,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
       return hata ? <div className="hata-kutusu">{hata}</div>
                   : <div className="yukleniyor-satir">{c('Yükleniyor…')}</div>;
     return (
-      <Modal baslik={c('Reçete')} buyutmeYok onKapat={onKapat}
+      <Modal baslik={c('Reçete')} buyutmeYok onKapat={onKapat} sayfa={sayfa}
              alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
         {hata ? <div className="hata-kutusu">{hata}</div> : <div className="yukleniyor-satir">{c('Yükleniyor…')}</div>}
       </Modal>
@@ -424,7 +430,20 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
             baslik={`${c('Reçete')} — ${d.ad}${receteNo ? ` · ${receteNo}` : ''}`}
             ekSinif="kart-recete"
             onKapat={onKapat}
-            ustSerit={kimlik}
+            sayfa={sayfa} buyutmeYok={sayfa || undefined}
+            // Sekmede: üstte hasta bandı (hasta adı / alerji bantta), altında reçetenin kendi rozetleri.
+            ustSerit={sayfa ? (
+              <>
+                {bant && <MuayeneHastaBandi bilgi={bant} />}
+                <div className="rk-kimlik">
+                  <span className="sonuk">{c('Muayene')} <b>#{muayeneId}</b>
+                    {metin(muayene?.bolumAdi) && ` · ${metin(muayene?.bolumAdi)}`}
+                    {metin(muayene?.hekimAdi) && ` · ${metin(muayene?.hekimAdi)}`}</span>
+                  <span className="rk-bosluk" />
+                  <span className={`rozet ${d.sinif}`}>{d.ad}</span>
+                  <span className="rozet gri">{turAdi} {c('reçete')}</span>
+                </div>
+              </>) : kimlik}
             alt={dugmeler}>
             {govde}
           </Modal>

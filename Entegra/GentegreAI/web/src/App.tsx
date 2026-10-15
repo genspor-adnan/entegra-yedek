@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { EkranSekmesiBaglami } from './bilesenler/sekmeBaglami';
-import { ReceteKartiSayfa, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
+import { ReceteKartiSayfa, OzelKartRota, OZEL_KART_SEKME_YOLLARI, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
@@ -426,10 +426,9 @@ function Yollar() {
           return rotalar.map(r => {
             const t = l(r.rota);
             return t && yetki(t.yetkiKodu) ? (
-              <Route key={`${r.rota}-ozel`} path={`/${r.rota}/:id`} element={<>
-                <Liste tanim={t} />
-                {r.kart}
-              </>} />
+              <Route key={`${r.rota}-ozel`} path={`/${r.rota}/:id`} element={
+                <OzelKartRota liste={<Liste tanim={t} />} kart={r.kart}
+                              sekmeli={!!OZEL_KART_SEKME_YOLLARI[`/${r.rota}`]} />} />
             ) : null;
           });
         })()}
