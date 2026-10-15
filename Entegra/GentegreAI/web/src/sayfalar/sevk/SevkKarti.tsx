@@ -25,10 +25,12 @@ const sayi = (v: unknown) => Number(v ?? 0);
 /** Kartın yazdığı alanlar (gönderden önce kaydedilir). */
 const YAZILAN = ['tur', 'tesisKodu', 'tesisAd', 'klinikId', 'hedefBolumId', 'neden', 'ulasim', 'notu'] as const;
 
-export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi }: {
+export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi, bantYok }: {
   kartId: number | 'yeni'; deger: Record<string, Deger>; parcalar?: SekmeParcalari;
   /** Gönderilince (pencere kapanır / liste tazelenir). */
   onGonderildi?(): void;
+  /** Muayenenin içinden açılan pencerede hasta bandı çizilmez. */
+  bantYok?: boolean;
 }) {
   const id = kartId === 'yeni' ? null : kartId;
   const durum = sayi(deger.durum) || 1;
@@ -70,10 +72,12 @@ export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi }: {
 
   // HASTA BANDI (kullanıcı 15.10.2026: "yeni sevk ve konsültasyon kartı başına sekmesiz muayenedeki
   //   hasta bandını getir"): sevkin açıldığı muayenenin bandı - ad, yaş, kurum, alerji, uyarılar.
-  const bant = useMuayeneHastaBilgisi(Number(deger.muayeneId ?? 0), 0);
+  //   PENCEREDE YOK (muayenenin içinden açılınca muayene bandı zaten üstte - kullanıcı); listeden
+  //   açılan kartta muayeneden, yoksa hastanın son muayenesinden.
+  const bant = useMuayeneHastaBilgisi(bantYok ? 0 : Number(deger.muayeneId ?? 0), 0, bantYok ? 0 : Number(deger.tarafId ?? 0));
   return (
     <div className="svk-kart">
-      {Number(deger.muayeneId ?? 0) > 0 && <MuayeneHastaBandi bilgi={bant} />}
+      {!bantYok && bant && <MuayeneHastaBandi bilgi={bant} />}
       {ozet && (
         <div className="svk-serit">
           <span><b>{ozet.hasta}</b>{ozet.cinsiyetYas && ` · ${ozet.cinsiyetYas}`}{ozet.hastaKod && <span className="not"> · {ozet.hastaKod}</span>}</span>
@@ -83,7 +87,7 @@ export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi }: {
           <span className={`rozet ${sevkDurumSinif(durum)}`}>{c(SEVK_DURUM[durum] ?? '')}</span>
         </div>
       )}
-      {id === null && <div className="svk-hasta">{parcalar?.altGrupCiz('Hasta')}</div>}
+      {/* Kart içi hasta seçimi YOK (kullanıcı): yeni kart önce hasta aramasıyla açılır (ListeKarti). */}
 
       <div className="svk-alanlar">
         <span className="etiket">{c('Tür')} *</span>

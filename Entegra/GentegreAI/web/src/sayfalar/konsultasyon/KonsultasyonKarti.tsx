@@ -25,8 +25,10 @@ import { KonsultasyonIslemPenceresi, type KonsIslem } from './KonsultasyonIslemP
 const sayi = (v: unknown) => Number(v ?? 0);
 
 /** Kartın İSTEK gövdesi (genel kartın içinde, alanlar kart değerine yazılır). */
-export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
+export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
   kartId: number | 'yeni'; deger: Record<string, Deger>; parcalar?: SekmeParcalari;
+  /** Muayenenin içinden açılan pencerede hasta bandı çizilmez. */
+  bantYok?: boolean;
 }) {
   const git = useNavigate();
   const durum = sayi(deger.durum);
@@ -52,14 +54,16 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar }: {
   };
 
   // HASTA BANDI (kullanıcı 15.10.2026): isteyen muayenenin bandı - sekmesiz muayenedeki ile aynı.
-  const bant = useMuayeneHastaBilgisi(Number(deger.isteyenMuayeneId ?? 0), 0);
+  //   PENCEREDE YOK (muayene bandı zaten üstte); listeden açılan kartta muayeneden ya da hastanın
+  //   son muayenesinden.
+  const bant = useMuayeneHastaBilgisi(bantYok ? 0 : Number(deger.isteyenMuayeneId ?? 0), 0, bantYok ? 0 : Number(deger.tarafId ?? 0));
   return (
     <div className="kns-kart">
-      {Number(deger.isteyenMuayeneId ?? 0) > 0 && <MuayeneHastaBandi bilgi={bant} />}
+      {!bantYok && bant && <MuayeneHastaBandi bilgi={bant} />}
       {/* ACİLİYET HASTANIN SAĞINDA (kullanıcı 15.10.2026): hasta (yeni kartta seçim, taslakta şerit) solda. */}
       <div className="kns-ust">
       <div className="kns-ust-sol">
-      {yeni && <div className="kns-hasta">{parcalar?.altGrupCiz('Hasta')}</div>}
+      {/* Kart içi hasta seçimi YOK (kullanıcı): yeni kart önce hasta aramasıyla açılır (ListeKarti). */}
       {!yeni && v && (
         <div className="kns-hasta-serit">
           <span><b>{v.k.no}</b></span>

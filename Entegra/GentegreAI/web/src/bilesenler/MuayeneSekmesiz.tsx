@@ -34,24 +34,42 @@ async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
 }
 
 /** Band ve sağ sütunun ORTAK verisi (tek yükleme). */
-export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number): MuayeneHastaBilgisi | null {
+export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number, hastaIdYedek = 0): MuayeneHastaBilgisi | null {
   const [b, setB] = useState<MuayeneHastaBilgisi | null>(null);
   useEffect(() => {
-    if (!(muayeneId > 0)) return;
+    if (!(muayeneId > 0) && !(hastaIdYedek > 0)) { setB(null); return }
     let iptal = false;
     void (async () => {
       let ust: Satir | null = null;
+      // MUAYENESİZ KART (listeden yeni sevk / konsültasyon, kullanıcı 15.10.2026): band hastanın
+      //   EN SON muayenesinden - ad, yaş, kurum, alerji, uyarılar oradan gelir.
+      let mid = muayeneId;
       try {
-        const y = await api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: muayeneId } });
+        const y = mid > 0
+          ? await api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: mid } })
+          : await api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'hastaId', op: 'esit', deger: hastaIdYedek },
+                                         sirala: [{ alan: 'muayeneTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }] });
         ust = (y.satirlar?.[0] ?? null) as Satir | null;
+        if (!(mid > 0)) mid = Number(ust?.id ?? 0);
       } catch { /* band zorunlu değil */ }
+      // HİÇ MUAYENESİ YOKSA band hasta kaydından: ad, dosya no, cinsiyet, yaş (+ alerji / kronik aşağıda).
+      if (!ust && hastaIdYedek > 0) {
+        try {
+          const y = await api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: hastaIdYedek } });
+          const h = y.satirlar?.[0] as Satir | undefined;
+          if (h) ust = { tarafId: h.id, hastaAdi: h.unvan, dosyaNo: h.kod, yasMetni: h.yas != null ? `${h.yas}y` : '',
+                         cinsiyetKisa: Number(h.cinsiyet) === 1 ? 'E' : Number(h.cinsiyet) === 2 ? 'K' : '' } as Satir;
+        } catch { /* band zorunlu değil */ }
+      }
+      if (!ust) { if (!iptal) setB(null); return }
+      const muayeneId2 = mid;
       const hastaId = Number(ust?.tarafId ?? 0);
       const [a, k, i, s, bd] = await Promise.all([
         hastaId > 0 ? listele('hasta-alerji', hastaId) : [],
         hastaId > 0 ? listele('hasta-kronik', hastaId) : [],
         hastaId > 0 ? listele('hasta-ilac', hastaId) : [],
-        api.muayeneSonSonuclar(muayeneId).catch(() => []),
-        api.muayeneBand(muayeneId).catch(() => ({})),
+        muayeneId2 > 0 ? api.muayeneSonSonuclar(muayeneId2).catch(() => []) : Promise.resolve([]),
+        muayeneId2 > 0 ? api.muayeneBand(muayeneId2).catch(() => ({})) : Promise.resolve({}),
       ]);
       if (iptal) return;
       setB({
@@ -63,7 +81,7 @@ export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number): Muaye
       });
     })();
     return () => { iptal = true };
-  }, [muayeneId, tazele]);
+  }, [muayeneId, tazele, hastaIdYedek]);
   return b;
 }
 

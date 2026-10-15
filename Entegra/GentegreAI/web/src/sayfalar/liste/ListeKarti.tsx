@@ -14,6 +14,7 @@ import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
+import { TarafArama } from '../../bilesenler/TarafArama';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
@@ -124,6 +125,9 @@ const GOZ_KISAYOL_KAYNAKLARI = new Set([
     ortada olmasın") - zaman / kaynak / ölçen her satırda dolu, "veri var" saydırıyordu. */
 const VITAL_OLCUM_ALANLARI = ['sistolik', 'diyastolik', 'nabiz', 'spo2', 'ates', 'solunum', 'agriVas',
   'boyCm', 'kiloKg', 'bki', 'belCevresiCm', 'glukozParmak', 'gks'] as const;
+
+/** Yeni kartı önce HASTA sorarak açılan kaynaklar (hasta kartın içinde seçilmez). */
+const HASTA_ILE_YENI = new Set(['konsultasyon', 'sevk']);
 
 /** Anamnez gösterim kipinin satırları (alan, etiket) - katalogdaki sırayla. */
 const ANAMNEZ_ALANLARI: readonly (readonly [string, string])[] = [['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye']];
@@ -254,6 +258,9 @@ export function ListeKarti({
   const [dosyaSayisi, setDosyaSayisi] = useState<number | null>(null);
   const [dosyaYeni, setDosyaYeni] = useState(0);
   useEffect(() => { setDosyaSayisi(null); setDosyaYeni(0) }, [kartId]);
+  /** Yeni sevk / konsültasyonda hasta araması seçimle kapandı mı (onKapat sekmeyi kapatmasın). */
+  const hastaSecildi = useRef(false);
+  useEffect(() => { if (!sorgu.get('tarafId')) hastaSecildi.current = false }, [kartId, sorgu]);
   /** KONSÜLTASYON İSTEĞİ PENCERESİ (kullanıcı 15.10.2026: "soldaki menüden konsültasyon seçersem
       yeni konsültasyon isteği ekranı açılmalı.. kaydedince ortada olmalı.. edit moda alırsam
       düzenlenebilmeli"): açık isteğin id'si; sunucu taslağı hasta + isteyen hekimle açar. */
@@ -352,6 +359,19 @@ export function ListeKarti({
   }, [muayeneKarti, kartId, kartTazele, makroTazele]);
 
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
+
+  // YENİ SEVK / KONSÜLTASYON ÖNCE HASTA SORAR (kullanıcı 15.10.2026: "listeden yeni dendiğinde direkt
+  //   önce hasta adı sorsun jenerik listeden, kaydı onunla açsın; içerdeki hasta seçmeyi kaldır").
+  //   Liste düğmesi, Ctrl+N ve palet aynı yoldan geçer. Vazgeçilirse sekme kapanır.
+  if (HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && !sorgu.get('tarafId')) {
+    return (
+      <TarafArama acik kaynaklar={['hasta']} kartYok
+        yerTutucu={c('Hasta ara (ad, dosya no, kimlik no, telefon)…')}
+        // Arama seçimden sonra da onKapat çağırır - seçildiyse sekme kapanmaz.
+        onKapat={() => { if (hastaSecildi.current) return; if (ekranSekmesi) ekranSekmesi.kapat(); else git(`/${tanim.rota}`) }}
+        onSec={h => { hastaSecildi.current = true; git(`${tanim.kartYolu}/yeni?tarafId=${h.id}`, { replace: true }) }} />
+    );
+  }
 
   return (
     <>
@@ -550,7 +570,7 @@ export function ListeKarti({
                     // Kaydedince pencere kapanır; istek ortadaki çerçevede GÖSTERİM kipinde görünür.
                     onKaydedildi={() => { setKonsPencere(null); kipYaz('kons')(false); setKartTazele(t => t + 1) }}
                     sekmeSarmalayici={(_b, _i, d, _iz, p) => (
-                      <KonsultasyonIstekGovdesi kartId={konsPencere} deger={d} parcalar={p} />)} />
+                      <KonsultasyonIstekGovdesi kartId={konsPencere} deger={d} parcalar={p} bantYok />)} />
                 )}
                 {sevkPencere !== null && (
                   <GenForm kaynak="sevk" id={sevkPencere} baslik={c('Sevk')}
@@ -558,7 +578,7 @@ export function ListeKarti({
                     // Kaydedince / gönderince pencere kapanır; sevk ortadaki "Sevk" çerçevesinde görünür.
                     onKaydedildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }}
                     sekmeSarmalayici={(_b, _i, d, _iz, p) => (
-                      <SevkKartGovdesi kartId={sevkPencere} deger={d} parcalar={p}
+                      <SevkKartGovdesi kartId={sevkPencere} deger={d} parcalar={p} bantYok
                         onGonderildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }} />)} />
                 )}
                 {patolojiIstemAcik && <PatolojiIstemModal muayeneId={Number(kartId)} onKapat={() => setPatolojiIstemAcik(false)}
@@ -1518,7 +1538,10 @@ export function ListeKarti({
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
         //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
-        yeniKayitVarsayilanlari={tanim.kaynak === 'metin-makro' && kartId === 'yeni' && sorgu.get('alan') !== null
+        yeniKayitVarsayilanlari={HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && sorgu.get('tarafId')
+          // Önce sorulan hasta (aşağıdaki hasta araması) kartın hastasıdır.
+          ? { ...tanim.yeniKayitVarsayilanlari, tarafId: Number(sorgu.get('tarafId')) }
+          : tanim.kaynak === 'metin-makro' && kartId === 'yeni' && sorgu.get('alan') !== null
           // Muayenedeki ＋'dan: hangi alanın altından açıldıysa o alan seçili gelir.
           ? { ...tanim.yeniKayitVarsayilanlari, alan: sorgu.get('alan')!, durum: 1 }
           : tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum') || sorgu.get('hastaId'))
