@@ -33,9 +33,52 @@ public static partial class MuayeneUclari
 
     private static void OlcumGecmisiUclariniEkle(RouteGroupBuilder grup)
     {
-        // GET /api/muayene/{id}/band - hasta bandının liste satırında olmayan üç bilgisi
+        // GET /api/muayene/{id}/band - hasta bandının liste satırında olmayan bilgileri
         //   (sekmesiz düzen, mockup hasta_bandi): kan grubu, kurum, AYNI AD sayısı
-        //   (aynı ad soyadlı başka hasta - yanlış hasta hatasının en sık sebebi).
+        //   (aynı ad soyadlı başka hasta - yanlış hasta hatasının en sık sebebi) ve
+        //   boy / kilo / BKİ (mockup v7 "174 cm · 86 kg · VKİ 28,4"): hastanın BÜTÜN
+        //   vital ölçümlerinden her birinin en son girilen değeri - boy her
+        //   muayenede ölçülmez, son ölçüm başka muayenede kalmış olabilir.
+        // GET /api/muayene/{id}/sayaclar - SOL MENÜ ADETLERİ (kullanıcı 15.10.2026: "soldaki menüde sağ
+        //   kısımda muayeneye alındı - süre, fizik muayene, ana tanı, tetkik istem, reçete, vital,
+        //   patolojik istem, kendime not, rapor, sevk, kons, dosyalar, epikriz karşısına adetleri;
+        //   istemler sonuç gelen / istenen"). Tek sorgu; iptal edilenler sayılmaz.
+        grup.MapGet("/{id:int}/sayaclar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+            var satir = (await veri.ListeAsync("""
+                select m.baslangic, coalesce(m.tamamlanma, m.bitis) as bitis,
+                       (select count(*) from public.muayene_bulgu b
+                         where b.muayene_id = m.id
+                           and (b.normal = 1 or btrim(coalesce(b.deger_metin, '')) <> '' or b.deger_sayi is not null))::int as fizik,
+                       (select count(*) from public.tani t where t.muayene_id = m.id)::int as tani,
+                       (select count(*) from public.muayene_istem i
+                         where i.muayene_id = m.id and i.sonuc_durum <> 3 and i.hedef_tablo <> 'pat_vaka')::int as istem,
+                       (select count(*) from public.muayene_istem i
+                         where i.muayene_id = m.id and i.sonuc_durum = 2 and i.hedef_tablo <> 'pat_vaka')::int as "istemSonuc",
+                       (select count(*) from public.recete_satir s join public.recete r on r.id = s.recete_id
+                         where r.muayene_id = m.id and r.durum <> 4)::int as recete,
+                       (select count(*) from public.muayene_vital v
+                         where v.muayene_id = m.id
+                           and num_nonnulls(v.sistolik, v.diyastolik, v.nabiz, v.spo2, v.ates, v.solunum,
+                                            v.boy_cm, v.kilo_kg, v.bel_cevresi_cm, v.glukoz_parmak, v.gks) > 0)::int as vital,
+                       (select count(*) from public.muayene_istem i join public.pat_vaka p on p.id = i.hedef_id
+                         where i.muayene_id = m.id and i.hedef_tablo = 'pat_vaka' and p.durum <> 0)::int as patoloji,
+                       (select count(*) from public.hekim_ozel_not n
+                         where n.kullanici_id = @p1 and n.hasta_id = m.taraf_id and btrim(coalesce(n.metin, '')) <> '')::int as "not",
+                       (select count(*) from public.muayene_rapor r where r.muayene_id = m.id)::int as rapor,
+                       (select count(*) from public.sevk s where s.muayene_id = m.id and s.durum <> 0)::int as sevk,
+                       (select count(*) from public.konsultasyon k where k.isteyen_muayene_id = m.id and k.durum <> 0)::int as kons,
+                       (select count(*) from public.dokuman d where d.kaynak = 'muayene' and d.kaynak_id = m.id)::int as dosya,
+                       (select count(*) from public.epikriz e where e.muayene_id = m.id)::int as epikriz
+                  from public.muayene m where m.id = @p0
+                """, [id, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal)).FirstOrDefault();
+            if (satir is null) return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Muayene bulunamadı." } });
+            return Results.Ok(satir);
+        });
+
         grup.MapGet("/{id:int}/band", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -52,7 +95,16 @@ public static partial class MuayeneUclari
                        coalesce(sz.ad, '') as sozlesme,
                        (select count(*) from public.taraf o
                          where o.hasta = 1 and o.id <> t.id and coalesce(t.ad, '') <> ''
-                           and lower(o.ad) = lower(t.ad) and lower(coalesce(o.soyad, '')) = lower(coalesce(t.soyad, '')))::int as "ayniAd"
+                           and lower(o.ad) = lower(t.ad) and lower(coalesce(o.soyad, '')) = lower(coalesce(t.soyad, '')))::int as "ayniAd",
+                       (select v.boy_cm from public.muayene_vital v join public.muayene vm on vm.id = v.muayene_id
+                         where vm.taraf_id = t.id and v.boy_cm > 0
+                         order by v.zaman desc nulls last, v.id desc limit 1) as "boyCm",
+                       (select v.kilo_kg from public.muayene_vital v join public.muayene vm on vm.id = v.muayene_id
+                         where vm.taraf_id = t.id and v.kilo_kg > 0
+                         order by v.zaman desc nulls last, v.id desc limit 1) as "kiloKg",
+                       (select v.bki from public.muayene_vital v join public.muayene vm on vm.id = v.muayene_id
+                         where vm.taraf_id = t.id and v.bki > 0
+                         order by v.zaman desc nulls last, v.id desc limit 1) as "bki"
                   from public.muayene m
                   join public.taraf t on t.id = m.taraf_id
                   left join public.taraf_hasta th on th.id = t.id

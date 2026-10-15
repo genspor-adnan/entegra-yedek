@@ -197,6 +197,8 @@ export const listeUclari = {
     gonder<{ imzali: boolean }>(`/api/muayene/${muayeneId}/epikriz/imzala`, {}),
 
   /** Hasta bandının ek bilgisi: kan grubu, kurum, aynı adlı başka hasta sayısı. */
+  /** Sol menü adetleri (sekmesiz muayene): süre, fizik, tanı, istem (sonuç / istenen), reçete... */
+  muayeneSayaclar: (muayeneId: number) => istek<MuayeneSayaclari>(`/api/muayene/${muayeneId}/sayaclar`),
   muayeneBand: (muayeneId: number) =>
     istek<{ kanGrubu?: string | null; kurum?: string; sozlesme?: string; ayniAd?: number;
             boyCm?: number | null; kiloKg?: number | null; bki?: number | null }>(`/api/muayene/${muayeneId}/band`),
@@ -305,3 +307,10 @@ export const listeUclari = {
   },
 
 };
+
+/** GET /api/muayene/{id}/sayaclar - sol menü adetleri (iptal edilenler sayılmaz). */
+export interface MuayeneSayaclari {
+  baslangic: string | null; bitis: string | null;
+  fizik: number; tani: number; istem: number; istemSonuc: number; recete: number; vital: number;
+  patoloji: number; not: number; rapor: number; sevk: number; kons: number; dosya: number; epikriz: number;
+}

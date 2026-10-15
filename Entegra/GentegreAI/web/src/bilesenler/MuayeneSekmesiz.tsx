@@ -175,7 +175,7 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
 
 export interface KontrolMaddesi { alan: string; ad: string; tamam: boolean; mesaj: string; zorunlu: boolean }
 
-export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler, gorunum, onGorunum, eylemler }: {
+export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemler, gorunum, onGorunum, eylemler, sayac }: {
   kontrol: KontrolMaddesi[] | null;
   /** ÖZET / DETAY (kullanıcı 14.10.2026): özet = orta kısımda yalnız özet; detay = özetsiz tüm
       bölümler. Varsayılan: muayene tamamlandıysa özet, değilse detay. */
@@ -190,6 +190,8 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
       veri varsa onun üzerine konumlansın yoksa seçme ekranı direkt açılsın; tetkik istem ve
       reçete de aynı desen"). */
   eylemler?: { taniEkle(): void; istemAc(): void; ilacEkle(): void };
+  /** MADDE ADETLERİ (kullanıcı 15.10.2026): kontrol maddesi alanı → sağdaki küçük yazı (yalnız varsa). */
+  sayac?: Record<string, string>;
 }) {
   // Kontrol maddesi → bölüm (Özet sekmesindeki eşlemenin aynısı).
   const hedef: Record<string, (tamam: boolean) => void> = {
@@ -217,7 +219,8 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
             {/* Mockup v7 dizini: dolu yuvarlak - tamam yeşil ✓, zorunlu eksik kırmızı !, isteğe bağlı eksik boş halka. */}
             <span className={`smn-d ${k.tamam ? 'smn-d-ok' : k.zorunlu ? 'smn-d-kir' : 'smn-d-bos'}`}>{k.tamam ? '✓' : k.zorunlu ? '!' : ''}</span>
             <span>{c(k.ad)}</span>
-            {k.alan === 'istem' && istemRozeti && <small>{istemRozeti}</small>}
+            {(sayac?.[k.alan] ?? (k.alan === 'istem' ? istemRozeti : undefined))
+              && <small>{sayac?.[k.alan] ?? istemRozeti}</small>}
           </div>
         ))}
       </div>

@@ -15,6 +15,7 @@ import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { TarafArama } from '../../bilesenler/TarafArama';
+import type { MuayeneSayaclari } from '../../api/uclar/liste';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
@@ -132,6 +133,17 @@ const KART_ZORUNLU: Record<string, string[]> = {
   konsultasyon: ['istekBolumId', 'isteyenHekimId', 'neden', 'hedefBolumId', 'karsilamaYeri', 'aciliyet', 'soru'],
   sevk: ['tur', 'neden', 'notu'],
 };
+
+/** Sol menü adedi: yalnız varsa (0 / yok = yazılmaz). */
+const adet = (n: number | undefined) => n && n > 0 ? String(n) : undefined;
+/** Muayeneye alındığından beri (tamamlandıysa bitişe kadar) geçen süre: "12 dk", "1 sa 5 dk", "2 gün". */
+function sureMetni(bas: string | null, bit: string | null): string {
+  if (!bas) return '';
+  const dk = Math.max(0, Math.round(((bit ? new Date(bit) : new Date()).getTime() - new Date(bas).getTime()) / 60000));
+  if (dk < 60) return `${dk} dk`;
+  if (dk < 24 * 60) return `${Math.floor(dk / 60)} sa${dk % 60 ? ` ${dk % 60} dk` : ''}`;
+  return `${Math.floor(dk / 1440)} gün`;
+}
 
 /** Yeni kartı önce HASTA sorarak açılan kaynaklar (hasta kartın içinde seçilmez). */
 const HASTA_ILE_YENI = new Set(['konsultasyon', 'sevk']);
@@ -293,9 +305,17 @@ export function ListeKarti({
     bolumAc('sevk'); bolumAc('konsc');
     setKonsPencere(y.id);
   });
+  /** SOL MENÜ ADETLERİ (kullanıcı 15.10.2026): sekmesizde, kayıt / değişiklikte yeniden okunur. */
+  const [sayaclar, setSayaclar] = useState<MuayeneSayaclari | null>(null);
   /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
   const [patolojiIstemAcik, setPatolojiIstemAcik] = useState(false);
   const [istemTazele, setIstemTazele] = useState(0);
+  useEffect(() => {
+    if (!sekmesiz) { setSayaclar(null); return }
+    let iptal = false;
+    void api.muayeneSayaclar(Number(kartId)).then(y => { if (!iptal) setSayaclar(y) }).catch(() => { /* adet yoksa yazılmaz */ });
+    return () => { iptal = true };
+  }, [sekmesiz, kartId, kartTazele, kayitSayaci, istemTazele]);
   /** İstem sayısı (istem bölümü yüklenince) - açılış kipi için. */
   const [istemSayisi, setIstemSayisi] = useState<number | null>(null);
   useEffect(() => { setIstemSayisi(null) }, [kartId]);
@@ -553,6 +573,14 @@ export function ListeKarti({
                   // Özet görünümünde bir bölüme gidilirse önce Detay'a geçilir (bölüm orada).
                   git={b => { if (b !== 'Özet' && etkinGorunum === 'ozet') { setSekmesizGorunum('detay'); setTimeout(() => git(b), 60) } else git(b) }}
                   muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
+                  // ADETLER (kullanıcı 15.10.2026): yalnız varsa; istem "sonuç gelen / istenen", alındı = süre.
+                  sayac={sayaclar ? Object.fromEntries(Object.entries({
+                    baslangic: sureMetni(sayaclar.baslangic, sayaclar.bitis),
+                    fizik: sayaclar.fizik > 0 ? String(sayaclar.fizik) : '',
+                    tanilar: sayaclar.tani > 0 ? String(sayaclar.tani) : '',
+                    istem: sayaclar.istem > 0 ? `${sayaclar.istemSonuc}/${sayaclar.istem}` : '',
+                    recete: sayaclar.recete > 0 ? String(sayaclar.recete) : '',
+                  }).filter(([, v]) => v)) : undefined}
                   // Eksik madde: seçme ekranı doğrudan (ICD arama · istem sepeti · ilaç arama).
                   eylemler={{
                     taniEkle: () => setIcdAramaAcik(true),
@@ -560,19 +588,19 @@ export function ListeKarti({
                     ilacEkle: () => { bolumAc('recete'); setReceteIlacAra(true) },
                   }}
                   islemler={[
-                    { ad: 'Vital bulgular', ikon: '🫀', ac: () => cerceveAc('vital') },
+                    { ad: 'Vital bulgular', ikon: '🫀', bilgi: adet(sayaclar?.vital), ac: () => cerceveAc('vital') },
                     // PATOLOJİK İSTEM (kullanıcı 15.10.2026): istem ikiye - tetkik istemi tamamlamada,
                     //   patolojik istem burada (modül açıksa).
                     ...((kullanici?.moduller ?? []).includes('patoloji')
-                      ? [{ ad: 'Patolojik İstem', ikon: '🔬', ac: () => setPatolojiIstemAcik(true) }] : []),
-                    { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
-                    { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
-                    { ad: 'Sevk', ikon: '↗', ac: sevkIste },
-                    { ad: 'Konsültasyon', ikon: '🤝', ac: konsultasyonIste },
+                      ? [{ ad: 'Patolojik İstem', ikon: '🔬', bilgi: adet(sayaclar?.patoloji), ac: () => setPatolojiIstemAcik(true) }] : []),
+                    { ad: 'Kendime Not', ikon: '📝', bilgi: adet(sayaclar?.not), ac: () => setNotAcik(true) },
+                    { ad: 'Rapor', ikon: '📄', bilgi: adet(sayaclar?.rapor), ac: () => git('Rapor') },
+                    { ad: 'Sevk', ikon: '↗', bilgi: adet(sayaclar?.sevk), ac: sevkIste },
+                    { ad: 'Konsültasyon', ikon: '🤝', bilgi: adet(sayaclar?.kons), ac: konsultasyonIste },
                     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
                     { ad: 'Geçmiş', ikon: '🕘', ac: () => git('Geçmiş') },
                     // Dosya yoksa seçme penceresi doğrudan (＋ gibi); varsa bölüme gidilir.
-                    { ad: 'Dosyalar', ikon: '📎', ac: () => {
+                    { ad: 'Dosyalar', ikon: '📎', bilgi: adet(sayaclar?.dosya), ac: () => {
                       if ((dosyaSayisi ?? 0) > 0) { git('Dosyalar'); return }
                       bolumAc('dosyalar'); setDosyaYeni(n => n + 1); setTimeout(() => git0('Dosyalar'), 60) } },
                     { ad: 'e-Nabız', ikon: '🌐', ac: () => git('e-Nabız') },
