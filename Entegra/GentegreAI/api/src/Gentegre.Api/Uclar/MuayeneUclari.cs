@@ -360,7 +360,8 @@ public static partial class MuayeneUclari
                 "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali.", true),
             ("sikayet", "Şikâyet / Hikâye", m.Sikayet.Length > 0, "Sikayet zorunlu.", true),
             ("tanilar", "Ana tanı", m.AnaTani > 0, "Ana tani zorunlu.", true),
-            ("istem", "İstem", m.Istem > 0, "Bu muayenede istem yok.", false),
+            // "Tetkik İstem" (kullanıcı 15.10.2026: istem ikiye - patolojik istem menüde ayrı işlem).
+            ("istem", "Tetkik İstem", m.Istem > 0, "Bu muayenede istem yok.", false),
             ("recete", "Reçete", m.Recete > 0, "Bu muayenede reçete yok.", false),
             ("karar", "Değerlendirme / Sonuç", m.Karar.Length > 0, "Degerlendirme / sonuc zorunlu.", true),
             ("cikisSekli", "Çıkış şekli", m.CikisKodu.Length > 0,

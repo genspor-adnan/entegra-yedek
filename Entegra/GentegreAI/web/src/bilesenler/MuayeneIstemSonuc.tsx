@@ -52,12 +52,16 @@ const sayiyaCevir = (v: unknown): number | null => {
 /** Sol listedeki tek satır: lab ve radyoloji aynı listede (hekim için tek kavram). */
 type Kalem = { tur: 'lab' | 'radyoloji' | 'goz' | 'patoloji'; id: number; ham: Satir; bagli: boolean; panik: boolean };
 
-export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, onSayi }: {
+export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, onSayi, patolojiDugmesiYok, tazele }: {
   muayeneId: number;
   /** GÖSTERİM KİPİ (kullanıcı 15.10.2026): yalnız istem tablosu, düğme / seçim / sonuç paneli yok. */
   gosterim?: boolean;
   /** Yüklenince istem sayısı - çağıran çerçevenin açılış kipini seçer. */
   onSayi?(n: number): void;
+  /** Patoloji istemi araç çubuğunda değil (sekmesiz muayene: sol menü İşlemler'de "Patolojik İstem"). */
+  patolojiDugmesiYok?: boolean;
+  /** Dışarıda açılan istem (patoloji) kaydedilince liste yeniden okunur. */
+  tazele?: number;
   /** Araç çubuğundaki "＋ İstem Sepeti" düğmesi (birleşik istem modalını açar). */
   onIstemAc?: () => void;
   /** İstem silinince kartın diğer sayaçlarını tazelemek için. */
@@ -83,7 +87,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
     catch (h) { setHata(hataMetni(h)) }
   }, [muayeneId]);
 
-  useEffect(() => { void yukle() }, [yukle]);
+  useEffect(() => { void yukle() }, [yukle, tazele]);
   const onSayiRef = useRef(onSayi);
   onSayiRef.current = onSayi;
   const istemSayisi = veri ? veri.istemler.length + veri.radyoloji.length + (veri.goz?.length ?? 0) + (veri.patoloji?.length ?? 0) : -1;
@@ -150,7 +154,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
   const arac = (
     <div className="muayene-arac" style={{ alignItems: 'center' }}>
       {onIstemAc && <button type="button" className="d bir" onClick={onIstemAc}>{c('＋ İstem Sepeti')}</button>}
-      {patolojiModulu && <button type="button" className="d" onClick={() => setPatolojiAcik(true)}>🔬 {c('Patoloji İstemi')}</button>}
+      {patolojiModulu && !patolojiDugmesiYok && <button type="button" className="d" onClick={() => setPatolojiAcik(true)}>🔬 {c('Patoloji İstemi')}</button>}
       {patolojiAcik && <PatolojiIstemModal muayeneId={muayeneId} onKapat={() => setPatolojiAcik(false)}
                          onKaydedildi={() => { setPatolojiAcik(false); void yukle(); onDegisti?.() }} />}
       <button type="button" className="d sil" title={c('Seçili istemi sil')}

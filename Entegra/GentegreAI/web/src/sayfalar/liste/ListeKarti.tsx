@@ -13,6 +13,7 @@ import { MuayeneHastaBandi, MuayeneSolMenu, MuayeneYanPanel, useMuayeneHastaBilg
 import { gorunumOku, gorunumKaydet, type MuayeneDuzeni } from '../../bilesenler/gorunum';
 import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
+import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
 import {
@@ -241,6 +242,9 @@ export function ListeKarti({
     const d = dolulukRef.current;
     if (d.rapor !== doluluk.rapor || d.sevk !== doluluk.sevk) setDoluluk({ ...d });
   });
+  /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
+  const [patolojiIstemAcik, setPatolojiIstemAcik] = useState(false);
+  const [istemTazele, setIstemTazele] = useState(0);
   /** İstem sayısı (istem bölümü yüklenince) - açılış kipi için. */
   const [istemSayisi, setIstemSayisi] = useState<number | null>(null);
   useEffect(() => { setIstemSayisi(null) }, [kartId]);
@@ -480,7 +484,10 @@ export function ListeKarti({
                   muayeneyeAl={() => void aksiyon('muayene.al', { id: Number(kartId) })}
                   islemler={[
                     { ad: 'Vital bulgular', ikon: '🫀', ac: () => cerceveAc('vital') },
-                    { ad: 'Fizik muayene', ikon: '🩺', ac: () => cerceveAc('fizik') },
+                    // PATOLOJİK İSTEM (kullanıcı 15.10.2026): istem ikiye - tetkik istemi tamamlamada,
+                    //   patolojik istem burada (modül açıksa).
+                    ...((kullanici?.moduller ?? []).includes('patoloji')
+                      ? [{ ad: 'Patolojik İstem', ikon: '🔬', ac: () => setPatolojiIstemAcik(true) }] : []),
                     { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
                     { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
                     { ad: 'Sevk', ikon: '↗', ac: () => git('Sevk') },
@@ -495,6 +502,8 @@ export function ListeKarti({
                                   else { setEpikrizIstendi(true); setEpikrizGit(n => n + 1) } } },
                   ]} />
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
+                {patolojiIstemAcik && <PatolojiIstemModal muayeneId={Number(kartId)} onKapat={() => setPatolojiIstemAcik(false)}
+                  onKaydedildi={() => { setPatolojiIstemAcik(false); bolumAc('istem'); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />}
               </>
               );
             }
@@ -758,23 +767,6 @@ export function ListeKarti({
                                 </div></div>
                               );
                             })()}
-                            {/* VİTAL: hikâyenin altında, katlanır - ölçüm yoksa kapalı, varsa açık. */}
-                            <div className="mi-vital" data-mfr="vital"
-                                 hidden={sekmesiz && !bolumGorunur('vital', (parcalar?.detayVerisi('vitaller')?.satirlar ?? [])
-                                   .some(r => Object.entries(r).some(([k, v]) => k !== 'id' && !k.endsWith('Id') && v !== null && v !== '' && Number(v) !== 0)))}>
-                              {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
-                              {/* GEÇMİŞ GRAFİĞİ kısayolları vital çerçevesinin İÇİNDE (kullanıcı 14.10.2026). */}
-                              {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) },
-                                <div className="olcum-kisayol">
-                                  <span className="not">📈 {c('Geçmiş')}:</span>
-                                  {VITAL_GRAFIKLERI.map(([k, ad]) => (
-                                    <button key={k} type="button" className="baglanti"
-                                            onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
-                                  ))}
-                                </div>)}
-                              {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
-                                                            onKapat={() => setVitalGrafik(null)} />}
-                            </div>
                             {(() => {
                               // FİZİK MUAYENE ÇERÇEVESİ (kullanıcı 15.10.2026): sistem sorgusu (şablon
                               //   düğmeleri + bulgu gridi) "Fizik muayene" başlıklı çerçevede. ✎ düzenleme,
@@ -791,8 +783,9 @@ export function ListeKarti({
                                 fizikIlk.current = { id: kartId, duzen: satirlar.length === 0 };
                               const duzen = fizikDuzen ?? fizikIlk.current?.duzen ?? true;
                               return (
-                                // Gizleme düz sarmalayıcıda: .kasira'nın display kuralı hidden'ı ezer.
-                                <div data-mfr="fizik" hidden={sekmesiz && !bolumGorunur('fizik', satirlar.length > 0)}>
+                                // FİZİK MUAYENE SABİT (kullanıcı 15.10.2026): şikâyet / hikâyenin hemen altında,
+                                //   dolu da boş da orta alanda.
+                                <div data-mfr="fizik">
                                 <div className="kasira"><div className={`kagrup${duzen ? '' : ' katlanir-kapali'}`}>
                                   <h6 className="katlanir-bas" onClick={() => { if (duzen) parcalar?.kaydet(); setFizikDuzen(!duzen) }}>
                                     {c('Fizik muayene')}
@@ -827,6 +820,23 @@ export function ListeKarti({
                                 </div></div></div>
                               );
                             })()}
+                            {/* VİTAL: fizik muayenenin altında (kullanıcı 15.10.2026), katlanır - ölçüm yoksa kapalı, varsa açık. */}
+                            <div className="mi-vital" data-mfr="vital"
+                                 hidden={sekmesiz && !bolumGorunur('vital', (parcalar?.detayVerisi('vitaller')?.satirlar ?? [])
+                                   .some(r => Object.entries(r).some(([k, v]) => k !== 'id' && !k.endsWith('Id') && v !== null && v !== '' && Number(v) !== 0)))}>
+                              {/* Özet kutusuna tıklayınca o ölçünün geçmiş grafiği (kullanıcı 14.10.2026). */}
+                              {/* GEÇMİŞ GRAFİĞİ kısayolları vital çerçevesinin İÇİNDE (kullanıcı 14.10.2026). */}
+                              {izgaraCiz?.('vitaller', ad => { const k = VITAL_ALAN_GRAFIK[ad]; if (k) setVitalGrafik(k) },
+                                <div className="olcum-kisayol">
+                                  <span className="not">📈 {c('Geçmiş')}:</span>
+                                  {VITAL_GRAFIKLERI.map(([k, ad]) => (
+                                    <button key={k} type="button" className="baglanti"
+                                            onClick={() => setVitalGrafik(k)}>{c(ad)}</button>
+                                  ))}
+                                </div>)}
+                              {vitalGrafik && <OlcumGrafigi muayeneId={Number(kartId)} secim={{ vital: vitalGrafik }}
+                                                            onKapat={() => setVitalGrafik(null)} />}
+                            </div>
                             {vucutAcik && (
                               <VucutSemasi muayeneId={Number(kartId)}
                                 onKapat={() => setVucutAcik(false)}
@@ -880,8 +890,9 @@ export function ListeKarti({
                      : baslik.includes('Sonuç') ? (
                       <KipCercevesi baslik="İstemler" duzen={kipOku('istem', istemSayisi === null ? null : istemSayisi > 0)}
                                     onDuzen={kipYaz('istem')} onKaydet={kartiKaydetKal}
-                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} gosterim onSayi={setIstemSayisi} />}>
+                                    gosterim={<MuayeneIstemSonuc muayeneId={Number(kartId)} gosterim onSayi={setIstemSayisi} tazele={istemTazele} />}>
                         <MuayeneIstemSonuc muayeneId={Number(kartId)} onSayi={setIstemSayisi}
+                          tazele={istemTazele} patolojiDugmesiYok={sekmesiz}
                           onIstemAc={() => setIstem(Number(kartId))}
                           onDegisti={() => setKartTazele(t => t + 1)} />
                       </KipCercevesi>
