@@ -331,7 +331,7 @@ public static partial class MuayeneUclari
                               where bb.id = m.belge_id), ''),
                    -- KONTROL LISTESI BILGI MADDELERI (istem / recete): zorunlu
                    --   degil, ozet sekmesinde "yapildi mi" diye gorunur.
-                   (select count(*) from public.muayene_istem s where s.muayene_id = m.id),
+                   (select count(*) from public.muayene_istem s where s.muayene_id = m.id and s.sonuc_durum <> 3),
                    (select count(*) from public.recete r
                      where r.muayene_id = m.id and r.durum <> 4
                        and exists (select 1 from public.recete_satir rs where rs.recete_id = r.id)),

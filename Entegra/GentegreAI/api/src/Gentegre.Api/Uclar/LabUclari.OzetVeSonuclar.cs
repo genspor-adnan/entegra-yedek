@@ -312,9 +312,10 @@ public static partial class LabUclari
                          where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id limit 1) as "hekimGordu"
                   from public.pat_vaka v
                   left join public.lab_dis_lab d on d.id = v.dis_lab_id
-                 where (v.basvuru_id = @p1 and @p1 is not null)
+                 where v.durum <> 0   -- iptal edilen (silinen) istem listede görünmez
+                   and ((v.basvuru_id = @p1 and @p1 is not null)
                     or exists (select 1 from public.muayene_istem mi
-                                where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id)
+                                where mi.muayene_id = @p0 and mi.hedef_tablo = 'pat_vaka' and mi.hedef_id = v.id))
                  order by v.id desc
                 """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 

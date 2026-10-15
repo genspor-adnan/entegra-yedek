@@ -150,6 +150,10 @@ public static class PatolojiUclari
                 "update public.pat_vaka set durum = 0, degistiren = @p1, degistirme_tarihi = now() " +
                 " where id = @p0 and durum = 1 and gonderim_id is null", null, [id, baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Hazırlanmış / gönderilmiş vaka iptal edilemez.");
+            // Muayene bağı da iptal (göz deseni): istem listesinden düşer, "istem var" sayılmaz
+            //   (kullanıcı 15.10.2026: "patoloji silemedim" - iptal vaka listede kalıyordu).
+            await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'pat_vaka' and hedef_id = @p0",
+                null, [id], iptal);
             await log.YazAsync(LogIslemi.Degistir, LogVaka, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "İptal" }, iptal: iptal);
             return Results.Ok(new { id, mesaj = "Patoloji istemi iptal edildi." });
         });
