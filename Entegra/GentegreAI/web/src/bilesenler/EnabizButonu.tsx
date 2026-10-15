@@ -49,6 +49,22 @@ const AKSIYON: Record<EnabizButonuTuru, string> = {
   mesaj: 'enabiz.mesaj',
 };
 
+/**
+ * e-Nabız sayfasını YENİ SEKMEDE açar (düğme ve sekmesiz muayene sol menüsü ortak). Sekme isteğin
+ * ÖNCESİNDE açılır - tıklamadan sonra gelen window.open pop-up engeline takılır.
+ */
+export async function enabizSekmedeAc(hastaId: number, muayeneId?: number | null, belgeId?: number | null) {
+  const sekme = window.open('', '_blank');
+  try {
+    const y = await api.enabizErisimAc({ hastaId, muayeneId: muayeneId ?? null, belgeId: belgeId ?? null });
+    if (sekme) sekme.location.href = y.adres;
+    else window.open(y.adres, '_blank');
+  } catch (h) {
+    sekme?.close();
+    mesaj(hataMetni(h));
+  }
+}
+
 export function EnabizButonu({ tur, hastaId, muayeneId, belgeId, onMesaj, kucuk }: {
   tur: EnabizButonuTuru;
   hastaId: number;
@@ -66,17 +82,8 @@ export function EnabizButonu({ tur, hastaId, muayeneId, belgeId, onMesaj, kucuk 
   if (!aksiyonVar(AKSIYON[tur]) || !(hastaId > 0)) return null;
 
   const erisimAc = async () => {
-    const sekme = window.open('', '_blank');
     setCalisiyor(true);
-    try {
-      const y = await api.enabizErisimAc({
-        hastaId, muayeneId: muayeneId ?? null, belgeId: belgeId ?? null });
-      if (sekme) sekme.location.href = y.adres;
-      else window.open(y.adres, '_blank');
-    } catch (h) {
-      sekme?.close();
-      mesaj(hataMetni(h));
-    } finally { setCalisiyor(false) }
+    try { await enabizSekmedeAc(hastaId, muayeneId, belgeId) } finally { setCalisiyor(false) }
   };
 
   return (

@@ -28,7 +28,7 @@ import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
 import { AsiUygulaModali } from '../../bilesenler/AsiUygulaModali';
 import { CocukIzlemModali } from '../../bilesenler/CocukIzlemModali';
 import { GebeIzlemModali } from '../../bilesenler/GebeIzlemModali';
-import { EnabizButonu } from '../../bilesenler/EnabizButonu';
+import { EnabizButonu, enabizSekmedeAc } from '../../bilesenler/EnabizButonu';
 import { MuayeneEnabizSekmesi } from '../../bilesenler/MuayeneEnabizSekmesi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
@@ -633,7 +633,11 @@ export function ListeKarti({
                     { ad: 'Dosyalar', ikon: '📎', bilgi: adet(sayaclar?.dosya), ac: () => {
                       if ((dosyaSayisi ?? 0) > 0) { git('Dosyalar'); return }
                       bolumAc('dosyalar'); setDosyaYeni(n => n + 1); setTimeout(() => git0('Dosyalar'), 60) } },
-                    { ad: 'e-Nabız', ikon: '🌐', ac: () => git('e-Nabız') },
+                    // e-NABIZ SEKMEDE (kullanıcı 15.10.2026: "e-nabız basınca sekmede açılsın"):
+                    //   Bakanlık sayfası yeni tarayıcı sekmesinde, araya panel girmez.
+                    { ad: 'e-Nabız', ikon: '🌐', ac: () => {
+                      const hasta = Number(hastaBilgisi?.ust?.tarafId ?? 0);
+                      if (hasta > 0) void enabizSekmedeAc(hasta, Number(kartId)); else git('e-Nabız') } },
                     { ad: 'Epikriz', ikon: '📄',
                       bilgi: epikrizDurum === 'imzali' ? c('imzalı') : epikrizDurum === 'taslak' ? c('taslak') : undefined,
                       ac: () => { if (epikrizDurum !== null || epikrizIstendi) git('Epikriz');
