@@ -49,6 +49,37 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
            : { anahtar: konum.pathname, baslik: konum.pathname.replace(/^\//, ''), ikon: '▫' };
 }
 
+/**
+ * AÇIK SEKMELER F5'TE GERİ GELİR (kullanıcı 15.10.2026: "F5 ile refresh yaptım liste kayboldu ama
+ * reçete kartı kaldı"): sekme listesi (adres, başlık, ikon) ve ekranların verdiği başlıklar tarayıcı
+ * OTURUMUNDA saklanır - sekme / tarayıcı kapanınca sıfırlanır. Geri gelen sekmenin ekranı ilk
+ * tıklamada kurulur. Depolama kapalıysa eski davranış (yalnız adresteki sekme).
+ */
+const DEPO_ANAHTARI = 'gentegre.ekranSekmeleri';
+type SakliSekme = Omit<Sekme, 'konum'> & { konum: Pick<Location, 'pathname' | 'search'> };
+function sekmeleriOku(): { sekmeler: Sekme[]; basliklar: Record<string, string> } {
+  try {
+    const d = JSON.parse(sessionStorage.getItem(DEPO_ANAHTARI) ?? 'null') as
+      { sekmeler?: SakliSekme[]; basliklar?: Record<string, string> } | null;
+    return {
+      sekmeler: (d?.sekmeler ?? []).map(x => ({ ...x, erisim: x.erisim || 0,
+        konum: { pathname: x.konum.pathname, search: x.konum.search ?? '', hash: '', state: null, key: 'sakli' } })),
+      basliklar: d?.basliklar ?? {},
+    };
+  } catch { return { sekmeler: [], basliklar: {} } }
+}
+function sekmeleriYaz(sekmeler: Sekme[], basliklar: Record<string, string>) {
+  try {
+    const yollar = new Set(sekmeler.map(x => x.konum.pathname));
+    sessionStorage.setItem(DEPO_ANAHTARI, JSON.stringify({
+      sekmeler: sekmeler.map(x => ({ anahtar: x.anahtar, baslik: x.baslik, ikon: x.ikon, ust: x.ust, erisim: x.erisim,
+                                     konum: { pathname: x.konum.pathname, search: x.konum.search } })),
+      // Yalnız açık sekmelerin başlıkları (kapanan kartların adları birikmesin).
+      basliklar: Object.fromEntries(Object.entries(basliklar).filter(([y]) => yollar.has(y))),
+    }));
+  } catch { /* depolama kapalı */ }
+}
+
 export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar, kartSekmeleri }: {
   satirlar: MenuSatiri[];
   /** Menüde olmayan ekranların sekme başlığı (yol -> ad, ikon). */
@@ -60,14 +91,16 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   outlet: React.ReactNode;
   git(yol: string, secenek?: { state?: unknown; replace?: boolean }): void;
 }) {
-  const [sekmeler, setSekmeler] = useState<Sekme[]>([]);
+  const [ilk] = useState(sekmeleriOku);
+  const [sekmeler, setSekmeler] = useState<Sekme[]>(ilk.sekmeler);
   const [bildirim, setBildirim] = useState('');
   /** Her sekmenin SON çizilen ekranı (gizliyken bu çizilir - durum korunur). */
   const ekranlar = useRef(new Map<string, React.ReactNode>());
 
   const simdiki = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
   /** Ekranın kendisinin verdiği sekme başlığı (ör. hasta kartında hastanın adı). */
-  const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>({});
+  const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>(ilk.basliklar);
+  useEffect(() => { sekmeleriYaz(sekmeler, ozelBaslik) }, [sekmeler, ozelBaslik]);
   // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
   const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[s.konum.pathname] ?? s.baslik;
   /** Kart sekmelerinin "kayıtsız değişiklik var mı" sorusu (bkz. kartaGit). */

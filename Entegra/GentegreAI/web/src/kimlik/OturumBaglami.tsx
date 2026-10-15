@@ -134,7 +134,11 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
       setBen(await api.ben());
     },
 
-    async cikisYap() { await api.cikis(); setBen(null); setOturumHatasi(null) },
+    async cikisYap() {
+      await api.cikis(); setBen(null); setOturumHatasi(null);
+      // Açık sekme listesi (EkranSekmeleri, F5'te geri gelir) sonraki girene kalmasın.
+      try { sessionStorage.removeItem('gentegre.ekranSekmeleri') } catch { /* depolama kapalı */ }
+    },
 
     async subeDegistir(subeId) {
       const yanit = await api.subeSec(subeId);
