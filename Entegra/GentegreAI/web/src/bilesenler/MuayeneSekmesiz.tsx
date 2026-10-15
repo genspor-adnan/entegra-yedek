@@ -98,6 +98,9 @@ function antropometri(bd: MuayeneHastaBilgisi['band'] | undefined): { boyKilo: s
   };
 }
 
+/** Banttaki rozet metni: ilk 14 harf, uzunsa "…" (tamamı title'da). */
+const kisa = (t: string) => (t.length > 15 ? `${t.slice(0, 14).trimEnd()}…` : t);
+
 export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null }) {
   const [alerjiAcik, setAlerjiAcik] = useState(false);
   const u = bilgi?.ust ?? null;
@@ -133,16 +136,24 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
         <div className="hbnd-b">{c('Alerji / Kronik')}</div>
         <div className="hbnd-rozetler">
           {bilgi && bilgi.alerji.length === 0 && <span className="rozet olumlu">{c('Alerji: yok')}</span>}
+          {/* KISA (kullanıcı 15.10.2026: "alerji/kronik bilgiler daha kısa gelsin"): ad kısaltılır,
+              tamamı ipucunda; kronikte en çok 2 rozet + kalan sayısı. */}
           {(bilgi?.alerji.length ?? 0) > 0 && (
-            <span className="rozet hata hbnd-tik" onClick={() => setAlerjiAcik(a => !a)}>
-              ⚠ {m(bilgi!.alerji[0].etken) || m(bilgi!.alerji[0].etkenMadde)}
+            <span className="rozet hata hbnd-tik"
+                  title={bilgi!.alerji.map(a => m(a.etken) || m(a.etkenMadde)).join(', ')}
+                  onClick={() => setAlerjiAcik(a => !a)}>
+              ⚠ {kisa(m(bilgi!.alerji[0].etken) || m(bilgi!.alerji[0].etkenMadde))}
               {bilgi!.alerji.length > 1 ? ` +${bilgi!.alerji.length - 1}` : ''}
             </span>
           )}
-          {(bilgi?.kronik ?? []).slice(0, 3).map((k, i) => (
-            <span key={i} className="rozet uyari" title={m(k.taniAd) || m(k.icdKod)}>{m(k.taniAd) || m(k.icdKod)}</span>
+          {(bilgi?.kronik ?? []).slice(0, 2).map((k, i) => (
+            <span key={i} className="rozet uyari" title={[m(k.icdKod), m(k.taniAd)].filter(Boolean).join(' ')}>
+              {kisa(m(k.taniAd) || m(k.icdKod))}</span>
           ))}
-          {(bilgi?.kronik.length ?? 0) > 3 && <span className="rozet gri">+{bilgi!.kronik.length - 3}</span>}
+          {(bilgi?.kronik.length ?? 0) > 2 && (
+            <span className="rozet gri" title={bilgi!.kronik.slice(2).map(k => m(k.taniAd) || m(k.icdKod)).join(', ')}>
+              +{bilgi!.kronik.length - 2}</span>
+          )}
         </div>
       </div>
       <div className="hbnd-blok hbnd-genis">
