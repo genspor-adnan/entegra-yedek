@@ -134,6 +134,29 @@ const KART_ZORUNLU: Record<string, string[]> = {
   sevk: ['tur', 'neden', 'notu'],
 };
 
+/**
+ * KONTROL İHTİYACI + GÜN (kullanıcı 15.10.2026: "kontrol gün soluna ekle: kontrol ihtiyacı Yok/Var;
+ * var seçilirse kontrol (gün) editi görünsün"). Ayrı kolon yok: Var = gün dolu. Yok seçilince gün
+ * temizlenir; Var seçilip gün yazılmadan bırakılırsa kayıtta Yok sayılır.
+ */
+function KontrolGunGirdisi({ deger, yaz, salt }: { deger: string; yaz(v: string): void; salt: boolean }) {
+  const doluMu = Number(deger) > 0;
+  const [varSecildi, setVarSecildi] = useState(doluMu);
+  const varMi = doluMu || varSecildi;
+  return (
+    <span className="kontrol-gun">
+      <span className="kns-secim">
+        <button type="button" disabled={salt} className={!varMi ? 'on' : ''}
+                onClick={() => { setVarSecildi(false); yaz('') }}>{c('Yok')}</button>
+        <button type="button" disabled={salt} className={varMi ? 'on' : ''}
+                onClick={() => setVarSecildi(true)}>{c('Var')}</button>
+      </span>
+      {varMi && <input data-alan="kontrolOnerisiGun" type="number" min={1} disabled={salt} value={doluMu ? deger : ''}
+                       placeholder={c('gün')} onChange={e => yaz(e.target.value)} />}
+    </span>
+  );
+}
+
 /** Sol menü adedi: yalnız varsa (0 / yok = yazılmaz). */
 const adet = (n: number | undefined) => n && n > 0 ? String(n) : undefined;
 /** Muayeneye alındığından beri (tamamlandıysa bitişe kadar) geçen süre: "12 dk", "1 sa 5 dk", "2 gün". */
@@ -661,7 +684,10 @@ export function ListeKarti({
         // MAKRO ROZETLİ METİN (kullanıcı 14.10.2026): makro alanları rozet tutabilen kutu; değer düz metin.
         alanGirdisi={muayeneKarti
           ? (ad, d, yaz, salt) => MAKRO_ALANLARI.has(ad)
-              ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt} /> : undefined
+              ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt} />
+              // KONTROL İHTİYACI (kullanıcı 15.10.2026): gün kutusunun solunda Yok / Var; gün yalnız Var'da.
+              : ad === 'kontrolOnerisiGun' ? <KontrolGunGirdisi deger={d} yaz={yaz} salt={salt} />
+              : undefined
           : undefined}
         alanIpucu={muayeneKarti
           ? (ad, yaz) => MAKRO_ALANLARI.has(ad)

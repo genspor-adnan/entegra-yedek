@@ -354,7 +354,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
         />
-      ) : (
+      ) : alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir) ?? (
         <input
           key={a.ad}
           data-alan={a.ad}

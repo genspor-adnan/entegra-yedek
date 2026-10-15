@@ -6548,6 +6548,9 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .fm-tablo th { text-align: left; font-size: 11.5px; font-weight: normal; color: var(--soluk); padding: 4px 10px; border-bottom: 1px solid var(--cizgi) }
 .fm-tablo td:first-child { width: auto; font-weight: normal; color: inherit }
 .fm-istem { padding: 4px 8px 8px }
+/* Kontrol ihtiyacı Yok / Var + gün (muayene değerlendirme). */
+.kontrol-gun { display: flex; align-items: center; gap: 8px }
+.kontrol-gun input { width: 90px }
 
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
 .tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }
