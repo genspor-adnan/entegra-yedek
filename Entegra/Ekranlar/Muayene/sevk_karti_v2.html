@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sevk Kartı v2 — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .serit{display:flex;gap:16px;padding:7px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);font-size:11.5px;flex-wrap:wrap}
+  .serit b{color:var(--navy)}
+  .secim{display:inline-flex;gap:4px;flex-wrap:wrap}
+  .secim span{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff}
+  .secim span.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .metin{min-height:64px;align-items:flex-start;line-height:1.55;white-space:normal}
+  .ekler{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .ekler span{border:1px solid var(--line2);border-radius:10px;padding:2px 9px;font-size:11px;background:#f5f9fe}
+  .durum{margin-left:auto}
+</style>
+</head>
+<body>
+
+<div class="win" style="max-width:760px">
+  <div class="title">↗ Sevk
+    <span class="sp">Ahmet ŞEN · muayene #19 · taslak</span></div>
+  <div class="serit">
+    <span><b>Ahmet ŞEN</b> · E 67</span>
+    <span>Dr. Aslı DEMİR · Kardiyoloji</span>
+    <span>I21.0 Akut MI</span>
+    <span class="durum rz sari">Taslak</span>
+  </div>
+
+  <div class="alanlar">
+    <label>Tür *</label>
+    <div class="secim"><span class="on">Kurum dışı</span><span>Kurum içi</span><span>Yatış</span></div>
+
+    <label>Nereye *</label><div class="inp combo">Şehir Hastanesi · Kardiyoloji</div>
+    <label>Neden *</label><div class="inp combo">Uzman / cihaz yok</div>
+
+    <label>Ulaşım</label>
+    <div class="secim"><span>Kendi</span><span>Ambulans</span><span class="on">112</span></div>
+
+    <label>Not (karşı hekime) *</label>
+    <div class="inp metin">Göğüs ağrısı 2 sa, V1-V4 ST elevasyonu, troponin 412. ASA + klopidogrel yüklendi. Primer PKG için.</div>
+
+    <label>Ekler</label>
+    <div class="ekler"><span>📄 Epikriz</span><span>📈 EKG</span><span>🧪 Troponin</span>
+      <span class="sonuk">otomatik eklenir</span></div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">✕ Kapat</div>
+    <div class="sp"></div>
+    <div class="btn">💾 Taslak</div>
+    <div class="btn primary">✍ İmzala ve gönder</div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Sevk Kartı v2 — sade</h4>
+  <ul>
+    <li><b>Altı alan:</b> tür, nereye, neden, ulaşım, not, ekler; hasta / hekim / tanı muayeneden gelir, gösterilir.</li>
+    <li><b>Nereye tek kutu:</b> kurum dışında "tesis · klinik", kurum içinde "bölüm", yatışta "servis".</li>
+    <li><b>Ekler sorulmaz:</b> epikriz ve son tetkikler kendiliğinden eklenir.</li>
+    <li><b>Medula / e-Nabız arka planda:</b> imzalayınca takip no alınır, çıkış şekli muayeneye yazılır;
+      ekranda yalnız durum rozeti (Taslak → Gönderildi → Sonuç döndü).</li>
+  </ul>
+</div>
+
+</body>
+</html>

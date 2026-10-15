@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sevk Listesi v2 — Mockup (Gentegre AI · Muayene)</title>
+<link rel="stylesheet" href="../Yatan/_yatan.css">
+<style>
+  .not-h{white-space:normal;max-width:320px;color:#3a4a5a}
+  .onizleme{padding:8px 12px;border-top:1px solid var(--line);font-size:12px;line-height:1.55}
+  .onizleme small{display:block;color:var(--muted);font-size:10.5px;margin-bottom:2px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">↗ Sevk Listesi
+    <span class="sp">Muayene › Sevk Listesi · Dr. Aslı DEMİR</span></div>
+
+  <div class="sekmeler">
+    <div class="sekme on">📤 Giden</div>
+    <div class="sekme">📥 Gelen <span class="rz">3</span></div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ara">🔍 Hasta, kurum, bölüm…</div>
+    <div class="kutu combo" style="min-width:120px">Bugün</div>
+    <span class="cip on">Açık</span>
+    <span class="cip">Kurum dışı</span>
+    <span class="cip">Kurum içi</span>
+    <span class="cip">Yatış</span>
+    <span class="cip">Tamamlanan</span>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr><th>Saat</th><th>Hasta</th><th>Tür</th><th>Nereye</th><th>Not</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel">
+          <td>10:31</td><td><b>Ahmet ŞEN</b> · E 67</td><td>Kurum dışı</td>
+          <td>Şehir Hastanesi · Kardiyoloji</td>
+          <td class="not-h">ST elevasyonu, primer PKG için</td>
+          <td><span class="rz mavi">Gönderildi</span></td>
+        </tr>
+        <tr>
+          <td>12:10</td><td><b>Fatma YILDIZ</b> · K 48</td><td>Yatış</td>
+          <td>Kardiyoloji servisi</td>
+          <td class="not-h">Yatarak tedavi</td>
+          <td><span class="rz sari">Taslak</span></td>
+        </tr>
+        <tr>
+          <td>11:20</td><td><b>Ayşe DEMİR</b> · K 54</td><td>Kurum içi</td>
+          <td>Göğüs Hastalıkları</td>
+          <td class="not-h">KOAH şüphesi, SFT</td>
+          <td><span class="rz mavi">Gönderildi</span></td>
+        </tr>
+        <tr class="pasif">
+          <td>14.10</td><td><b>Kerem US</b> · E 45</td><td>Kurum dışı</td>
+          <td>Üniversite Hastanesi · Elektrofizyoloji</td>
+          <td class="not-h">SVT, EFÇ için</td>
+          <td><span class="rz ok">Sonuç döndü</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="onizleme">
+    <small>SEÇİLİ · Ahmet ŞEN · Şehir Hastanesi Kardiyoloji · 112 · Medula S-2026-48120</small>
+    Göğüs ağrısı 2 sa, V1-V4 ST elevasyonu, troponin 412. ASA + klopidogrel yüklendi. Primer PKG için.
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Sevk Listesi v2 — sade</h4>
+  <ul>
+    <li><b>İki sekme:</b> giden / gelen. Özet kutuları yok; açık olanlar çiple.</li>
+    <li><b>Altı sütun:</b> saat, hasta, tür, nereye, not, durum. Medula no ve ulaşım ön izlemede.</li>
+    <li><b>Üç durum:</b> Taslak · Gönderildi · Sonuç döndü (hata olursa kırmızı "Gönderilemedi").</li>
+    <li>Satıra çift tık sevk kartını açar; gelen sevkte kartın altında Kabul / Ret.</li>
+  </ul>
+</div>
+
+</body>
+</html>
