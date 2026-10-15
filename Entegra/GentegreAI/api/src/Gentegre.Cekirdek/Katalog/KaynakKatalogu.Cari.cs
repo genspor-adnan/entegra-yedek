@@ -789,6 +789,24 @@ public static partial class KaynakKatalogu
                                    "tarih", "Son Başvuru", Hizalama: "orta",
                                    Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
                                    Filtrelenebilir: false),
+            // SON BÖLÜM / SON DOKTOR (kullanıcı 16.10.2026: "son başvuru sağına"): Son Başvuru ile AYNI
+            //   başvuru (tarih, sonra id).
+            new("sonBolum",
+                "coalesce((select d.ad from public.belge b "
+                + "   join public.belge_basvuru bb on bb.id = b.id "
+                + "   left join public.departman d on d.id = bb.bolum_id "
+                + "  where b.taraf_id = t.id and b.tur = 19 "
+                + "  order by b.belge_tarihi desc, b.id desc limit 1), '')",
+                                   "metin", "Son Bölüm", Genislik: 150,
+                                   Filtrelenebilir: false, Siralanabilir: false),
+            new("sonDoktor",
+                "coalesce((select public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120) from public.belge b "
+                + "   join public.belge_basvuru bb on bb.id = b.id "
+                + "   left join public.taraf h on h.id = bb.personel_id "
+                + "  where b.taraf_id = t.id and b.tur = 19 "
+                + "  order by b.belge_tarihi desc, b.id desc limit 1), '')",
+                                   "metin", "Son Doktor", Genislik: 160,
+                                   Filtrelenebilir: false, Siralanabilir: false),
             // VARSAYILAN ODEYEN KURUM (kullanici): basvuru acilirken hastanin
             //   kayitli kurumu kendiliginden secilsin - memur ayni bilgiyi her
             //   basvuruda yeniden aramasin. Listede gizli, yalniz kart kullanir.
