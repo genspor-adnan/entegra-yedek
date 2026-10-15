@@ -33,10 +33,11 @@ export interface KartOzellestirme {
   seritAlanlari?: GenFormProps['seritAlanlari'];
 }
 
-/** BKİ = kilo / boy(m)² - 1 ondalık; boy ya da kilo yoksa kayıtlı değer. */
+/** BKİ = kilo / boy(m)² - 1 ondalık; boy ya da kilo yoksa BOŞ (kullanıcı 15.10.2026: "boy kilo
+    silinince vki de silinsin" - eskiden kayıtlı değer gösteriliyordu). */
 function bkiHesapla(s: Record<string, unknown>): string {
   const boy = Number(s.boyCm ?? 0), kilo = Number(s.kiloKg ?? 0);
-  const v = boy > 0 && kilo > 0 ? kilo / ((boy / 100) ** 2) : Number(s.bki ?? 0);
+  const v = boy > 0 && kilo > 0 ? kilo / ((boy / 100) ** 2) : 0;
   return v > 0 ? v.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '';
 }
 

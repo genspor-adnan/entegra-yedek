@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (572 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (572 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -524,7 +524,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_konsultasyon_yanit` | `1107_konsultasyon.sql` | — |
 | `tg_muayene_rapor_bitis` | `464_muayene_rapor_mockup.sql` | — |
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
-| `tg_muayene_vital_bki` | `463_vital_bki.sql` | — |
+| `tg_muayene_vital_bki` | `1108_vital_bki_bosalt.sql` | 463_vital_bki.sql |
 | `tg_onay_adim_tek_imza` | `784_onay_tek_imza_ve_iskonto_rolu.sql` | — |
 | `tg_pat_gonderim_no` | `1104_patoloji.sql` | — |
 | `tg_pat_rapor_kilit` | `1104_patoloji.sql` | — |

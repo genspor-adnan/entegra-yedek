@@ -274,7 +274,8 @@ function ozetKutulari(d: { alanlar: { ad: string; baslik?: string | null }[] },
   const adlar = [...(sira ?? d.alanlar.map(a => a.ad))];
   // Boy + kilo TEK kutu ("180 / 77"); grafiği kilonun. BKİ girilen boy / kilodan anında.
   const boy = sayi(satir.boyCm), kilo = sayi(satir.kiloKg);
-  if (boy && kilo) satir = { ...satir, bki: Math.round(kilo / ((boy / 100) ** 2) * 10) / 10 };
+  // Boy ya da kilo yoksa BKİ de yok - kayıtlı eski değer gösterilmez.
+  satir = { ...satir, bki: boy && kilo ? Math.round(kilo / ((boy / 100) ** 2) * 10) / 10 : null };
   const kutular: { ad: string; baslik: string; deger: string; kir: boolean }[] = [];
   for (const ad of adlar) {
     if (ad === 'diyastolik' || ad === 'kiloKg') continue;
