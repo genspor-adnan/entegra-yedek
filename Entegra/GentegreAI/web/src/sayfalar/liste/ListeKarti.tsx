@@ -16,9 +16,10 @@ import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { KipCercevesi } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
+import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi, KonsultasyonYanitSeridi } from '../konsultasyon/KonsultasyonKarti';
 import {
-  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi, ReceteGosterim, gosterilenRecete,
+  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi, MuayeneSevkCercevesi, ReceteGosterim, gosterilenRecete,
   MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
 } from '../../bilesenler/MuayeneSekmeleri';
 import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
@@ -257,6 +258,13 @@ export function ListeKarti({
       yeni konsültasyon isteği ekranı açılmalı.. kaydedince ortada olmalı.. edit moda alırsam
       düzenlenebilmeli"): açık isteğin id'si; sunucu taslağı hasta + isteyen hekimle açar. */
   const [konsPencere, setKonsPencere] = useState<number | null>(null);
+  /** SEVK PENCERESİ (1110, mockup sevk_karti_v2): sekmesizde sol menü "Sevk" taslak açar, kart pencerede. */
+  const [sevkPencere, setSevkPencere] = useState<number | null>(null);
+  const sevkIste = () => void guvenli(async () => {
+    const y = await api.muayenedenSevk(Number(kartId));
+    bolumAc('sevk');
+    setSevkPencere(y.id);
+  });
   const konsultasyonIste = () => void guvenli(async () => {
     const y = await api.muayenedenKonsultasyon(Number(kartId));
     bolumAc('sevk');
@@ -415,7 +423,7 @@ export function ListeKarti({
           const metin = (x: unknown) => String(x ?? '').trim();
           const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
             || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
-            || (tanim.kaynak === 'konsultasyon' ? metin(d.no) : '')
+            || (tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'sevk' ? metin(d.no) : '')
             || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)
             || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
@@ -519,7 +527,7 @@ export function ListeKarti({
                       ? [{ ad: 'Patolojik İstem', ikon: '🔬', ac: () => setPatolojiIstemAcik(true) }] : []),
                     { ad: 'Kendime Not', ikon: '📝', ac: () => setNotAcik(true) },
                     { ad: 'Rapor', ikon: '📄', ac: () => git('Rapor') },
-                    { ad: 'Sevk', ikon: '↗', ac: () => git('Sevk') },
+                    { ad: 'Sevk', ikon: '↗', ac: sevkIste },
                     { ad: 'Konsültasyon', ikon: '🤝', ac: konsultasyonIste },
                     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },
                     { ad: 'Geçmiş', ikon: '🕘', ac: () => git('Geçmiş') },
@@ -541,6 +549,15 @@ export function ListeKarti({
                     onKaydedildi={() => { setKonsPencere(null); kipYaz('kons')(false); setKartTazele(t => t + 1) }}
                     sekmeSarmalayici={(_b, _i, d, _iz, p) => (
                       <KonsultasyonIstekGovdesi kartId={konsPencere} deger={d} parcalar={p} />)} />
+                )}
+                {sevkPencere !== null && (
+                  <GenForm kaynak="sevk" id={sevkPencere} baslik={c('Sevk')}
+                    onKapat={() => { setSevkPencere(null); setKartTazele(t => t + 1) }}
+                    // Kaydedince / gönderince pencere kapanır; sevk ortadaki "Sevk" çerçevesinde görünür.
+                    onKaydedildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }}
+                    sekmeSarmalayici={(_b, _i, d, _iz, p) => (
+                      <SevkKartGovdesi kartId={sevkPencere} deger={d} parcalar={p}
+                        onGonderildi={() => { setSevkPencere(null); kipYaz('sevk')(false); setKartTazele(t => t + 1) }} />)} />
                 )}
                 {patolojiIstemAcik && <PatolojiIstemModal muayeneId={Number(kartId)} onKapat={() => setPatolojiIstemAcik(false)}
                   onKaydedildi={() => { setPatolojiIstemAcik(false); bolumAc('istem'); setIstemTazele(t => t + 1); setKartTazele(t => t + 1) }} />}
@@ -588,6 +605,14 @@ export function ListeKarti({
           // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
           ? (_baslik, _icerik, deger, _izgara, parcalar) => (
               <MetinMakroGovdesi id={kartId} deger={deger} alanDegistir={(ad, v) => parcalar?.alanDegistir(ad, v)} />)
+          : tanim.kaynak === 'sevk' && kartId !== null
+          // SEVK KARTI (1110, mockup sevk_karti_v2 - sade): gönderince sekme kapanır, liste tazelenir.
+          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
+              <SevkKartGovdesi kartId={kartId} deger={deger} parcalar={parcalar}
+                onGonderildi={() => {
+                  window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: 'sevk' }));
+                  ekranSekmesi?.kapat();
+                }} />)
           : tanim.kaynak === 'konsultasyon' && kartId !== null
           // KONSÜLTASYON İSTEK KARTI (1107, mockup konsultasyon_karti.html): İsteyen | Karşılayan.
           ? (_baslik, _icerik, deger, _izgara, parcalar) => (
@@ -733,22 +758,6 @@ export function ListeKarti({
                   </>
                   </KipCercevesi>
                 )
-                : baslik.startsWith('Sevk') ? (
-                  // Sevk alanlarinin ALTINDA bu muayeneden istenen
-                  //   konsultasyonlar (mockup "Sevk / Konsultasyon").
-                  <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri}
-                                              hata={sekmeVerisi.hata}
-                                              icerik={icerik}
-                                              // ＋ KONSÜLTASYON İSTE (1107): sekmesizde taslak istek PENCEREDE açılır,
-                                              //   kaydedince bu bölümde; sekmelide kart kendi sekmesinde.
-                                              onIste={sekmesiz ? konsultasyonIste : () => void guvenli(async () => {
-                                                const y = await api.muayenedenKonsultasyon(Number(kartId));
-                                                git(`/konsultasyon/${y.id}`);
-                                              })}
-                                              onAc={sekmesiz ? id => setKonsPencere(id) : undefined}
-                                              cerceve={sekmesiz ? { duzen: kipOku('kons', sekmeVerisi.veri ? sekmeVerisi.veri.konsultasyonlar.length > 0 : null),
-                                                                    onDuzen: kipYaz('kons') } : undefined} />
-                )
                 : (
                   <>
                     {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
@@ -784,9 +793,8 @@ export function ListeKarti({
                             {(() => {
                               if (parcalar) dikteKaynak.current = {
                                 oku: ad => String(deger[ad] ?? ''), yaz: parcalar.alanDegistir };
-                              // Sevk bölümü doluluğu (sekmesiz görünürlük): karar, tesis ya da istenen konsültasyon.
-                              dolulukRef.current.sevk = Number(deger.yonlendirme ?? 0) > 0
-                                || String(deger.sevkTesisKodu ?? '').trim() !== ''
+                              // Sevk bölümü doluluğu (sekmesiz görünürlük): sevk kaydı (1110) ya da konsültasyon.
+                              dolulukRef.current.sevk = (sekmeVerisi.veri?.sevkler?.length ?? 0) > 0
                                 || (sekmeVerisi.veri?.konsultasyonlar.length ?? 0) > 0;
                               return null;
                             })()}
@@ -1170,6 +1178,30 @@ export function ListeKarti({
                   {/* Muayene bölümünün yerleşimi (etiket üstte tek satır, makro çipleri kutunun altında). */}
                   {sekmesiz && <div className="muayene-ikili msb-ikili msb-tek"><div ref={setDegerlendirmeYeri} className="mi-sol" /></div>}
                 </>) },
+              // SEVK / KONSÜLTASYON (1110): muayenenin sevk alanları sevk KAYDINA taşındı - bölüm
+              //   artık alan grubu değil, özel sekme: üstte sevkler, altta konsültasyon istekleri.
+              { anahtar: 'ozel:sevk', baslik: 'Sevk / Konsültasyon',
+                ciz: () => (
+                  <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
+                    icerik={<MuayeneSevkCercevesi veri={sekmeVerisi.veri}
+                      // Sekmesizde pencere; sekmelide sevk kartı kendi sekmesinde.
+                      onIste={sekmesiz ? sevkIste : () => void guvenli(async () => {
+                        const y = await api.muayenedenSevk(Number(kartId));
+                        git(`/sevk/${y.id}`);
+                      })}
+                      onAc={id => sekmesiz ? setSevkPencere(id) : git(`/sevk/${id}`)}
+                      cerceve={sekmesiz ? { duzen: kipOku('sevk', sekmeVerisi.veri ? sekmeVerisi.veri.sevkler.length > 0 : null),
+                                            onDuzen: kipYaz('sevk') } : undefined} />}
+                    // ＋ KONSÜLTASYON İSTE (1107): sekmesizde taslak istek PENCEREDE açılır,
+                    //   kaydedince bu bölümde; sekmelide kart kendi sekmesinde.
+                    onIste={sekmesiz ? konsultasyonIste : () => void guvenli(async () => {
+                      const y = await api.muayenedenKonsultasyon(Number(kartId));
+                      git(`/konsultasyon/${y.id}`);
+                    })}
+                    onAc={sekmesiz ? id => setKonsPencere(id) : undefined}
+                    cerceve={sekmesiz ? { duzen: kipOku('kons', sekmeVerisi.veri ? sekmeVerisi.veri.konsultasyonlar.length > 0 : null),
+                                          onDuzen: kipYaz('kons') } : undefined} />
+                ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },

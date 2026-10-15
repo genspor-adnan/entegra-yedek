@@ -206,30 +206,8 @@ public static partial class KartKatalogu
         ["0"] = "Bekliyor", ["1"] = "Kısmi", ["2"] = "Tamam", ["3"] = "İptal"
     };
 
-    /// <summary>Muayene sonu yonlendirme (409): sevk / yatis / acil.</summary>
-    /// <summary>SKRS sevk nedeni (465) - kodun kendisi e-Nabiz'a gider.</summary>
-    private static readonly Dictionary<string, string> SevkNedenKodlari = new()
-    {
-        ["0"] = "—", ["1"] = "İleri tetkik / tedavi", ["2"] = "Yatak yok",
-        ["3"] = "Uzman hekim yok", ["4"] = "Cihaz yok / arızalı",
-        ["5"] = "Hasta / yakını talebi", ["9"] = "Diğer",
-    };
-
-    /// <summary>Sevk ulasimi (465).</summary>
-    private static readonly Dictionary<string, string> AmbulansKodlari = new()
-    {
-        ["0"] = "—", ["1"] = "112 çağrıldı", ["2"] = "Kurum ambulansı",
-        ["3"] = "Hasta kendi imkânı",
-    };
-
     /// <summary>Evet / hayır sorusu (1099): boş = cevaplanmadı, "hayır"dan ayrı.</summary>
     private static readonly Dictionary<string, string> EvetHayirKodlari = new() { ["1"] = "Evet", ["0"] = "Hayır" };
-
-    private static readonly Dictionary<string, string> YonlendirmeKodlari = new()
-    {
-        ["0"] = "Yok", ["1"] = "Kurum İçi Sevk", ["2"] = "Kurum Dışı Sevk",
-        ["3"] = "Yatış Önerisi", ["4"] = "Acil"
-    };
 
     /// <summary>Lab bolumu (360).</summary>
     private static readonly Dictionary<string, string> LabBolumKodlari = new()
@@ -427,27 +405,9 @@ public static partial class KartKatalogu
             new("girisimPlani", "girisim_plani", "kod", SabitKodlar: EvetHayirKodlari,
                 Baslik: "Hastaya ameliyat ya da girişim planlıyor musunuz?", Grup: "Muayene",
                 AltGrup: "Değerlendirme / Sonuç"),
-            // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
-            //   "Sevk nedeni / notu" · "Ambulans".
-            new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
-                Baslik: "Karar", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk edilen tesis", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            new("sevkKlinikKod", "sevk_klinik_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Klinik", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            // SEVK NEDENI KODLU (SKRS): serbest cumle NOT alanina yazilir -
-            //   koda cumle yazilinca e-Nabiz'a gecersiz deger gidiyordu.
-            new("sevkNeden", "sevk_neden", "kod", SabitKodlar: SevkNedenKodlari,
-                Baslik: "Sevk nedeni", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            new("sevkNotu", "sevk_notu", "metin", EnFazlaUzunluk: 500,
-                Baslik: "Sevk notu (karşı hekime)", Grup: "Sevk / Konsültasyon",
-                AltGrup: "Sevk"),
-            // AMBULANS sevkin parcasi: hastanin kendi imkaniyla mi gittigi
-            //   yoksa 112 ile mi tasindigi sevk kagidinda sorulan ilk sey.
-            new("ambulans", "ambulans", "kod", SabitKodlar: AmbulansKodlari,
-                Baslik: "Ambulans", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            new("ambulansZaman", "ambulans_zaman", "zaman",
-                Baslik: "Ambulans saati", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+            // SEVK ALANLARI KALKTI (kullanıcı 15.10.2026, "ver 2'yi yap", db/1110): sevk ayrı kayıt
+            //   (KartKatalogu.Sevk). Kolonlar (yonlendirme, sevk_tesis_kodu, sevk_klinik_kod, sevk_neden,
+            //   sevk_notu, ambulans) durur - sevk "gönder" ucu onları senkron yazar, okuyucular değişmez.
             // KONTROL DEĞERLENDİRME / SONUÇ'TA (kullanıcı 15.10.2026: "kontrol gün ve kontrol
             //   randevu id'yi değerlendirme / sonuç kısmına taşı").
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",

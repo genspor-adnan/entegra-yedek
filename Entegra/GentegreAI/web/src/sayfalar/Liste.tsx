@@ -70,6 +70,7 @@ import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { patolojiAksiyonu } from './liste/patolojiAksiyonlari';
 import { konsultasyonAksiyonu } from './liste/konsultasyonAksiyonlari';
 import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from './konsultasyon/KonsultasyonPanelleri';
+import { SevkOnizlemePaneli, SevkUstPanel, useSevkSuzgeci } from './sevk/SevkPanelleri';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
@@ -507,6 +508,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // KONSÜLTASYON (1107): sekmeler (bana / bölümüme gelen · istediklerim · bölüm) + özet kutuları.
   const konsEkrani = tanim.kaynak === 'konsultasyon' && !portalda;
   const konsSuzgec = useKonsultasyonSuzgeci(konsEkrani, yenile);
+  // SEVK (1110): Giden / Gelen sekmeleri + kısa ön izleme (mockup v2, sade).
+  const sevkEkrani = tanim.kaynak === 'sevk' && !portalda;
+  const sevkSuzgec = useSevkSuzgeci(sevkEkrani);
   // GÖZ CİHAZLARI (978): radyolojinin cihaz ekranıyla aynı adları taşıyor,
   //   bu yüzden göz önekli ayrı bileşen kümesi.
   const gozCihazEkrani = tanim.kaynak === 'goz-cihaz' && !portalda;
@@ -1164,7 +1168,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(sevkSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1317,6 +1321,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
         : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
         : konsEkrani ? <KonsultasyonUstPanel s={konsSuzgec} />
+        : sevkEkrani ? <SevkUstPanel s={sevkSuzgec} />
         : gozCihazEkrani ? <GozCihazGostergesi veri={gozCihazGostergesi} s={gozCihazSuzgec} />
         : gorEkrani ? <GoruntulemeGostergesi veri={gorGostergesi} s={gorSuzgec} />
         : tanim.kaynak === 'yatak'
@@ -1458,6 +1463,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             onAc={id => gitKart(`/konsultasyon/${id}`)}
             onYanitla={() => void aksiyon('konsultasyon.yanitla', seciliSatir)} />
         )
+        : sevkEkrani ? <SevkOnizlemePaneli satir={seciliSatir ?? null} onAc={id => gitKart(`/sevk/${id}`)} />
         : labDetayVarMi(tanim.kaynak) && seciliSatir
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="ana" />
         // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin

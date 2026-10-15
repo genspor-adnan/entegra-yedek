@@ -129,6 +129,13 @@ public static partial class MuayeneUclari
                 " where k.isteyen_muayene_id = @p0 order by k.id desc",
                 null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // SEVK (1110): bu muayeneden açılan sevkler (taslak dahil) - mockup v2 gösterimi.
+            var sevkler = await baglanti.ListeAsync(
+                "select s.id, s.no, s.tur, s.durum, s.neden, s.ulasim, s.notu, s.sevk_zamani as tarih, " +
+                "       coalesce(" + Gentegre.Cekirdek.Katalog.KaynakKatalogu.SevkNereyeSql + ", '') as nereye " +
+                "  from public.sevk s where s.muayene_id = @p0 and s.durum <> 0 order by s.id desc",
+                null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
             // İŞLEM & ÜCRET: başvuru belgesinin satırları - muayene, tetkik ve
             //   işlemlerin ücreti başvuruda toplanır (tahakkuk oradan çıkar).
             var islemler = m.BelgeId is null
@@ -175,7 +182,7 @@ public static partial class MuayeneUclari
 
             return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId,
                                     ustMuayeneId = m.UstId, tanilar,
-                                    receteler, receteSatirlari, konsultasyonlar,
+                                    receteler, receteSatirlari, konsultasyonlar, sevkler,
                                     islemler, gecmis, izlemeNo = baglam.IzlemeNo });
         });
 

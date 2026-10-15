@@ -435,6 +435,7 @@ public static partial class KaynakKatalogu
         Ekle(LabDisLab());
         Ekle(PatolojiVaka()); Ekle(PatolojiGonderim()); Ekle(PatolojiMateryalTipi()); Ekle(PatolojiBoya()); Ekle(PatolojiRetNedeni());   // patoloji (1104)
         Ekle(Konsultasyon());   // konsültasyon isteği (1107)
+        Ekle(Sevk());           // sevk kaydı (1110)
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

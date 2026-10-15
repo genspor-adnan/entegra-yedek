@@ -33,6 +33,7 @@ import { KLINIK_LISTELERI } from './listeTanimlari.Klinik';
 import { LAB_LISTELERI } from './listeTanimlari.Laboratuvar';
 import { PATOLOJI_LISTELERI } from './listeTanimlari.Patoloji';
 import { KONSULTASYON_LISTELERI } from './listeTanimlari.Konsultasyon';
+import { SEVK_LISTELERI } from './listeTanimlari.Sevk';
 import { RADYOLOJI_LISTELERI } from './listeTanimlari.Radyoloji';
 import { TELERADYOLOJI_LISTELERI } from './listeTanimlari.Teleradyoloji';
 import { GOZ_LISTELERI } from './listeTanimlari.Goz';
@@ -119,6 +120,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...LAB_LISTELERI,
   ...PATOLOJI_LISTELERI,
   ...KONSULTASYON_LISTELERI,
+  ...SEVK_LISTELERI,
   ...RADYOLOJI_LISTELERI,
   // TELERADYOLOJI (797): radyolojinin hemen ardindan - ayni is, dis kurum.
   ...TELERADYOLOJI_LISTELERI,

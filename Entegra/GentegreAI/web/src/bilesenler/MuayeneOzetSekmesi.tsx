@@ -170,13 +170,13 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
 
   // İŞLEMLER LİSTESİ: sırası sekmesiz düzenin sol menüsüyle aynı. Konsültasyon
   //   alanları "Sevk / Konsültasyon" sekmesinde - ikisi de oraya götürür.
-  const yonlendirmeAd = baglam.meta?.alanlar.find(a => a.ad === 'yonlendirme')?.kodlar?.[m(d.yonlendirme)];
   const raporSay = baglam.detaySayisi('raporlar');
   const gecmisSay = (sekme?.gecmis ?? []).length;
   const islemler: { ad: string; ikon: string; bilgi?: string; ac(): void }[] = [
     { ad: 'Kendime Not', ikon: '📝', bilgi: notVar ? '🔒' : undefined, ac: () => setNotAcik(true) },
     { ad: 'Rapor', ikon: '📄', bilgi: raporSay > 0 ? String(raporSay) : undefined, ac: () => git('Rapor') },
-    { ad: 'Sevk', ikon: '↗', bilgi: sayi(d.yonlendirme) > 0 ? yonlendirmeAd : undefined, ac: () => git('Sevk') },
+    // Sevk muayene alanı değil, sevk kaydı (1110) - bilgi kayıt sayısından.
+    { ad: 'Sevk', ikon: '↗', bilgi: (sekme?.sevkler?.length ?? 0) > 0 ? `${sekme!.sevkler.length} ${c('sevk')}` : undefined, ac: () => git('Sevk') },
     // Muayenedeki "Konsültasyon sorusu" alanı kalktı (15.10.2026) - bilgi istek sayısından.
     { ad: 'Konsültasyon', ikon: '🤝', bilgi: (sekme?.konsultasyonlar.length ?? 0) > 0 ? `${sekme!.konsultasyonlar.length} ${c('istek')}` : undefined, ac: () => git('Sevk') },
     { ad: 'İşlem & Ücret', ikon: '₺', ac: () => git('İşlem') },

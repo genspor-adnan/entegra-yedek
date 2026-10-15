@@ -8233,3 +8233,23 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kns-yanit-bas { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid #e2ebf6; font-size: 12.5px; color: #1f4f86 }
 .kns-ysatir { display: flex; align-items: center; gap: 8px; padding: 4px 10px 8px; flex-wrap: wrap }
 .kns-ysatir > .etiket { font-size: 11px; color: var(--soluk); min-width: 60px; text-align: right }
+
+/* SEVK KARTI / LİSTESİ (1110, mockup sevk_karti_v2 · sevk_listesi_v2 - sade). */
+.svk-kart { display: grid; gap: 10px; max-width: 760px }
+.svk-serit { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 6px 10px; font-size: 12px;
+  background: #fbfcfe; border: 1px solid var(--cizgi); border-radius: 3px }
+.svk-no { margin-left: auto; color: var(--soluk) }
+.svk-alanlar { display: grid; grid-template-columns: 130px 1fr; gap: 8px 10px; align-items: center }
+.svk-alanlar > .etiket { font-size: 11px; color: var(--soluk); text-align: right }
+.svk-alanlar textarea { width: 100%; min-height: 64px }
+.svk-nereye { display: grid; grid-template-columns: 1.4fr 1fr; gap: 6px }
+.svk-secim { display: inline-flex; gap: 4px; flex-wrap: wrap }
+.svk-secim button { border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 12px; font-size: 11.5px; background: var(--yuz); cursor: pointer }
+.svk-secim button.on { background: #2f6db3; border-color: #2f6db3; color: #fff; font-weight: bold }
+.svk-secim button:disabled { cursor: default; opacity: .7 }
+.svk-ekler { display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.svk-ekler > span:not(.not) { border: 1px solid var(--cizgi); border-radius: 10px; padding: 2px 9px; font-size: 11px; background: #f5f9fe }
+.svk-araclar { display: flex; gap: 6px; align-items: center; padding: 4px 0 }
+.svk-onizleme { padding: 8px 10px; font-size: 12px; line-height: 1.55 }
+.svk-onizleme small { display: block; color: var(--soluk); font-size: 10.5px; margin-bottom: 2px }
+.svk-onizleme.bos { color: var(--soluk) }

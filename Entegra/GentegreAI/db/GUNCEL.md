@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (572 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (574 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -406,6 +406,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_servis_is_emri_topla` | `773_teknik_servis.sql` | — |
 | `fn_servis_periyodik_uret` | `776_servis_periyodik_uretim.sql` | — |
 | `fn_servis_sla_bitis` | `773_teknik_servis.sql` | — |
+| `fn_sevk_no` | `1110_sevk.sql` | — |
 | `fn_sgk_katilim_emanet_yaz` | `477_katilim_emanet_doviz.sql` | 473_katilim_emaneti.sql |
 | `fn_sigorta_durum_ekran` | `631_provizyon_durum_cevrimi.sql` | — |
 | `fn_sigorta_ozet_tazele` | `631_provizyon_durum_cevrimi.sql` | 430_sigorta_v1.sql |
@@ -565,6 +566,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_randevu_izin_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql |
 | `tg_randevu_mesai_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql |
 | `tg_servis_toplam` | `773_teknik_servis.sql` | — |
+| `tg_sevk_kayit` | `1110_sevk.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |

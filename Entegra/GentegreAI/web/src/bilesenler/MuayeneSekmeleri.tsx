@@ -35,6 +35,8 @@ export interface SekmeVerisi {
   receteler: Satir[];
   receteSatirlari: Satir[];
   konsultasyonlar: Satir[];
+  /** Bu muayeneden açılan sevkler (1110). */
+  sevkler: Satir[];
   islemler: Satir[];
   gecmis: Satir[];
 }
@@ -362,6 +364,58 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
         )}
       </div>
     </Kabuk>
+  );
+}
+
+const SEVK_TUR: Record<number, string> = { 1: 'Kurum dışı', 2: 'Kurum içi', 3: 'Yatış' };
+const SEVK_NEDEN: Record<number, string> = { 1: 'İleri tetkik / tedavi', 2: 'Yatak yok', 3: 'Uzman hekim yok',
+  4: 'Cihaz yok / arızalı', 5: 'Hasta / yakını talebi', 9: 'Diğer' };
+const SEVK_DURUM: Record<number, string> = { 1: 'Taslak', 2: 'Gönderildi', 3: 'Sonuç döndü', 9: 'Gönderilemedi', 0: 'İptal' };
+const sevkSinif = (d: number) => d === 1 ? 'uyari' : d === 2 ? 'mavi' : d === 3 ? 'olumlu' : d === 9 ? 'hata' : 'gri';
+
+/**
+ * SEVK (1110, mockup sevk_karti_v2): bu muayeneden açılan sevkler. Sekmesizde çerçeve
+ * (gösterim: tür · nereye · neden · durum; ✎ düzenleme: ＋ Yeni Sevk, satır pencerede);
+ * sekmelide tablo + "＋ Sevk" (kart kendi sekmesinde).
+ */
+export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve }: {
+  veri: SekmeVerisi | null; onIste?(): void; onAc(id: number): void;
+  cerceve?: { duzen: boolean; onDuzen(v: boolean): void };
+}) {
+  const liste = veri?.sevkler ?? [];
+  const tablo = (tikla: boolean) => (
+    <table className={tikla ? 'detay-tablo secilebilir' : 'fm-goster fm-tablo'}>
+      <thead><tr><th>{c('Tür')}</th><th>{c('Nereye')}</th><th>{c('Neden')}</th><th>{c('Durum')}</th>{tikla && <th />}</tr></thead>
+      <tbody>{liste.map(s => {
+        const d = sayi(s.durum);
+        return (
+          <tr key={sayi(s.id)} style={tikla ? { cursor: 'pointer' } : undefined} onClick={tikla ? () => onAc(sayi(s.id)) : undefined}>
+            <td>{c(SEVK_TUR[sayi(s.tur)] ?? '')}</td>
+            <td>{metin(s.nereye) || '—'}</td>
+            <td>{c(SEVK_NEDEN[sayi(s.neden)] ?? '')}</td>
+            <td><span className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span></td>
+            {tikla && <td><button type="button" className="d" onClick={e => { e.stopPropagation(); onAc(sayi(s.id)) }}>
+              {d === 1 ? '✎ ' + c('Düzenle') : c('Aç')}</button></td>}
+          </tr>
+        );
+      })}</tbody>
+    </table>
+  );
+  const ekle = onIste && <div className="muayene-arac"><button type="button" className="d bir" onClick={onIste}>＋ {c('Yeni Sevk')}</button></div>;
+  if (cerceve) return (
+    <KipCercevesi baslik="Sevk" duzen={cerceve.duzen} onDuzen={cerceve.onDuzen}
+      gosterim={liste.length === 0 ? <div className="fm-bos">{c('Sevk yapılmadı')}</div> : tablo(false)}>
+      {ekle}
+      {liste.length > 0 && tablo(true)}
+    </KipCercevesi>
+  );
+  return (
+    <div className="kagrup">
+      <h6>{c('Sevk')} <span className="not">{liste.length} {c('kayıt')}</span>
+        {onIste && <><span style={{ marginLeft: 'auto' }} /><button type="button" className="d bir" onClick={onIste}>＋ {c('Sevk')}</button></>}
+      </h6>
+      {liste.length === 0 ? <p className="not ic">{c('Bu muayeneden sevk yapılmadı.')}</p> : tablo(true)}
+    </div>
   );
 }
 
