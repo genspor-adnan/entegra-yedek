@@ -1366,7 +1366,8 @@ export function ListeKarti({
                     gosterim={<DokumanGalerisi kartAdi="muayene" kaynakId={Number(kartId)} saltOkunur gosterim
                                                onSayi={setDosyaSayisi} />}>
                     <DokumanGalerisi kartAdi="muayene" kaynakId={Number(kartId)} saltOkunur={false}
-                                     onSayi={setDosyaSayisi} yeniIstegi={dosyaYeni} />
+                                     onSayi={setDosyaSayisi} yeniIstegi={dosyaYeni}
+                                     onYeniAlindi={() => setDosyaYeni(0)} />
                   </KipCercevesi>) },
               // EPİKRİZ (1100): YALNIZ İSTENİNCE (kullanıcı) - kayıt varsa ya da
               //   Özet › İşlemler › Epikriz'e basıldıysa. Mevcut sekmelere dokunulmaz.

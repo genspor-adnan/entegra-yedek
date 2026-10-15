@@ -87,12 +87,15 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, gosterim }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
   /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
   onSayi?(n: number): void;
   /** Artınca "＋" basılmış gibi dosya seçme penceresi açılır (muayene sol menü "Dosyalar", dosya yokken). */
   yeniIstegi?: number;
+  /** İstek tüketildi: çağıran sayacı sıfırlar - yoksa galeri yeniden kurulduğunda (kart tazelenince)
+      seçme penceresi tekrar açılır (kullanıcı 15.10.2026: "fizik muayene save deyince dosya seçme ekranı"). */
+  onYeniAlindi?(): void;
   /** GÖSTERİM KİPİ (kullanıcı 15.10.2026, muayene "Dosyalar için de edit/save modu"): yalnız sade liste -
       ad (tıkla: indir), tür, tarih; araç çubuğu ve önizleme yok. */
   gosterim?: boolean;
@@ -161,7 +164,10 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   onSayiRef.current = onSayi;
   useEffect(() => { if (satirlar) onSayiRef.current?.(satirlar.length) }, [satirlar]);
   // Dış "yeni dosya" isteği: kullanıcının menü tıklamasıyla aynı anda - tarayıcı seçme penceresine izin verir.
-  useEffect(() => { if (yeniIstegi > 0 && !saltOkunur) girdiRef.current?.click() }, [yeniIstegi, saltOkunur]);
+  useEffect(() => {
+    if (yeniIstegi > 0 && !saltOkunur) { girdiRef.current?.click(); onYeniAlindi?.() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yeniIstegi, saltOkunur]);
 
   useEffect(() => {
     if (kartAdi !== 'personelMasraf' || !kaynakId) { setMasrafBelgeNolari([]); return }
