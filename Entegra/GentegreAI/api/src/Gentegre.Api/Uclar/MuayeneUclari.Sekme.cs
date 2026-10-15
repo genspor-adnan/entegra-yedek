@@ -111,24 +111,22 @@ public static partial class MuayeneUclari
                 " where r.muayene_id = @p0 order by s.recete_id desc, s.sira, s.id",
                 null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            // KONSÜLTASYON: bu muayeneden İSTENEN muayeneler (ust_muayene_id)
-            //   ve varsa bu muayeneyi İSTEYEN muayene.
+            // KONSÜLTASYON (1107): bu muayeneden açılan İSTEKLER (taslak dahil). Soru
+            //   isteğin, yanıt cevaplayanın kararı (yanıt muayenesi, 465) - ikisi aynı satırda.
             var konsultasyonlar = await baglanti.ListeAsync(
-                "select k.id, coalesce(d.ad, '') as bolum, coalesce(p.ad, '') as hekim, " +
-                "       k.muayene_tarihi as tarih, k.durum, " +
-                // SORU isteyen hekimin cumlesi, YANIT cevaplayanin karari:
-                //   ikisi de alt muayenede durur (465) - yaniti "sonuc geldi
-                //   mi" diye ayri bir yerde aramak gerekmesin.
-                "       coalesce(k.konsultasyon_soru, '') as soru, " +
-                "       coalesce(nullif(k.karar, ''), '') as yanit, " +
-                "       k.tamamlanma as \"yanitZamani\", " +
+                "select k.id, k.no, coalesce(d.ad, '') as bolum, " +
+                "       coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as hekim, " +
+                "       k.istek_zamani as tarih, k.durum, k.aciliyet, k.yanit_muayene_id as \"yanitMuayeneId\", " +
+                "       k.soru, coalesce(nullif(m.karar, ''), '') as yanit, " +
+                "       k.yanit_zamani as \"yanitZamani\", k.ret_gerekce as \"retGerekce\", " +
                 "       coalesce((select i.ad from public.tani t " +
                 "                   join public.icd i on i.kod = t.icd_kod " +
-                "                  where t.muayene_id = k.id and t.tur = 1 limit 1), '') as \"anaTani\" " +
-                "  from public.muayene k " +
-                "  left join public.v_departman_lookup d on d.id = k.bolum_id " +
-                "  left join public.v_personel_lookup p on p.id = k.personel_id " +
-                " where k.ust_muayene_id = @p0 order by k.id desc",
+                "                  where t.muayene_id = k.yanit_muayene_id and t.tur = 1 limit 1), '') as \"anaTani\" " +
+                "  from public.konsultasyon k " +
+                "  left join public.muayene m on m.id = k.yanit_muayene_id " +
+                "  left join public.v_departman_lookup d on d.id = k.hedef_bolum_id " +
+                "  left join public.taraf p on p.id = coalesce(k.yanitlayan_id, k.hedef_hekim_id) " +
+                " where k.isteyen_muayene_id = @p0 order by k.id desc",
                 null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // İŞLEM & ÜCRET: başvuru belgesinin satırları - muayene, tetkik ve

@@ -69,6 +69,7 @@ public static partial class AksiyonKatalogu
         EkleKlinik(s);
         EkleLab(s);
         EklePatoloji(s);   // patoloji (1104)
+        EkleKonsultasyon(s);   // konsültasyon (1107)
         EkleTicari(s);
         Ekranlar = s;
     }

@@ -476,6 +476,7 @@ public static partial class KartKatalogu
         //   ve "teslim edildi" zamani geriye donuk degistirilememeli.
         Ekle(LabDisLabKarti());
         Ekle(PatolojiVakaKarti()); Ekle(PatolojiGonderimKarti()); Ekle(PatolojiMateryalTipiKarti()); Ekle(PatolojiBoyaKarti()); Ekle(PatolojiRetNedeniKarti());   // patoloji (1104)
+        Ekle(KonsultasyonKarti());   // konsültasyon isteği (1107)
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

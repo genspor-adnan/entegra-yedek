@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (567 ad, 153 tanesi birden cok dosyada)
+## Fonksiyonlar (572 ad, 153 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -268,6 +268,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_klinik_gosterge_sonuc` | `711_klinik_kalite.sql` | — |
 | `fn_klinik_kalite_gece` | `714_klinik_kalite_gece.sql` | — |
 | `fn_klinik_kod_olay` | `713_klinik_kalite_motor.sql` | — |
+| `fn_kons_sure_metni` | `1107_konsultasyon.sql` | — |
+| `fn_konsultasyon_no` | `1107_konsultasyon.sql` | — |
 | `fn_kontrollu_defter_no` | `730_kontrollu_defter_no.sql` | — |
 | `fn_kontrollu_defter_silinmez` | `722_eczane.sql` | — |
 | `fn_kontrollu_sayim_uyum` | `722_eczane.sql` | — |
@@ -502,6 +504,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_aktiflik` | `527_profil_kategori.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
+| `tg_konsultasyon_gonderildi` | `1107_konsultasyon.sql` | — |
+| `tg_konsultasyon_kayit` | `1107_konsultasyon.sql` | — |
 | `tg_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |
 | `tg_kurum_sozlesme_kontrol` | `601_sgk_tarife_sut_listesi.sql` | 468_kurum_sozlesme_1n.sql, 493_kurum_turu_kurumu_oder.sql, 517_kurum_sozlesme_sgk_carisi.sql |
 | `tg_lab_istem_kurumu` | `827_lab_istem_kurumu.sql` | — |
@@ -517,6 +521,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
 | `tg_muayene_istem_patoloji` | `1105_patoloji_basvuru_kapisi.sql` | — |
 | `tg_muayene_istem_radyoloji` | `418_muayene_istem_bagi.sql` | — |
+| `tg_muayene_konsultasyon_yanit` | `1107_konsultasyon.sql` | — |
 | `tg_muayene_rapor_bitis` | `464_muayene_rapor_mockup.sql` | — |
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
 | `tg_muayene_vital_bki` | `463_vital_bki.sql` | — |
