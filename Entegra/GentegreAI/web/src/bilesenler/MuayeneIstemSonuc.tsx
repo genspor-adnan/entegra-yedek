@@ -165,9 +165,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
                          onKaydedildi={() => { setPatolojiAcik(false); void yukle(); onDegisti?.() }} />}
       <button type="button" className="d sil" title={c('Seçili istemi sil')}
         disabled={!secili} onClick={() => void sil()}>🗑</button>
-      <span className="not" style={{ marginLeft: 6 }}>
-        {kalemler.length} {c('istem · silmek için satırı seçin (sonuçlanmış/çekilmiş silinemez)')}
-      </span>
+      {/* Açıklama yazısı YOK (kullanıcı 15.10.2026): silinemeyen istemde sunucunun uyarısı mesajla gelir. */}
     </div>
   );
 
@@ -280,9 +278,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
         </tr>
       </thead>
       <tbody>
-        {bagliKalemler.length > 0 && (
-          <tr className="isn-grup"><td colSpan={5}>{c('Bu muayenede istenen')}</td></tr>
-        )}
+        {/* "Bu muayenede istenen" ara başlığı YOK (kullanıcı 15.10.2026); başvurudan gelenler ayrı başlıkla. */}
         {bagliKalemler.map(satirCiz)}
         {digerKalemler.length > 0 && (
           <tr className="isn-grup"><td colSpan={5}>{c('Başvuruya gelen')}</td></tr>
@@ -313,7 +309,9 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
         </div>
       )}
 
-      <div className="isn-iki">
+      {/* PATOLOJİDE YAN PANEL YOK (kullanıcı 15.10.2026: "sadece patoloji istem yaptım, ortada istem
+          yanında Anadolu Patoloji falan çıktı"): yalnız istem tablosu; vaka ayrıntısı patoloji kartında. */}
+      {kapsam === 'patoloji' ? tablo : <div className="isn-iki">
         <div className="isn-sol">
           {tablo}
         </div>
@@ -331,7 +329,7 @@ export function MuayeneIstemSonuc({ muayeneId, onIstemAc, onDegisti, gosterim, o
               ? <PatolojiPaneli v={secKalem.ham} onGordu={gordu} onAc={() => git(`/patoloji-vaka/${secKalem.id}`)} />
               : <RadyolojiPaneli r={secKalem.ham} onGordu={gordu} />}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
