@@ -811,6 +811,16 @@ public static partial class KaynakKatalogu
         var unvanSonu = kolonlar.FindIndex(k => k.Ad == "unvan") + 1;
         kolonlar.InsertRange(unvanSonu, ek);
 
+        // HASTA LİSTESİNDEN KALKANLAR (kullanıcı 16.10.2026: "İlçe, İl, Bugün, Kıdem, Kalan İzin, Talep,
+        //   Eksik Bilgi, Yönetici, Telefon, E-posta"). Personel durum kolonları (963, v_personel_durum)
+        //   personelden miras geliyordu - hastada anlamsız, hiç dönmez. İletişim / adres kolonları
+        //   kolon seçicide durur, varsayılan görünümde yok.
+        var personelDurum = new[] { "bugun", "bugunKod", "kidem", "kalanIzin", "hakToplam", "onaydaTalep",
+                                    "eksik", "yoneticiId", "yoneticiAdi" };
+        kolonlar.RemoveAll(k => personelDurum.Contains(k.Ad));
+        var gizli = new[] { "ilce", "il", "telefon", "cepTel", "eposta" };
+        kolonlar = kolonlar.Select(k => gizli.Contains(k.Ad) ? k with { Varsayilan = false } : k).ToList();
+
         return p with
         {
             Ad = "hasta",
