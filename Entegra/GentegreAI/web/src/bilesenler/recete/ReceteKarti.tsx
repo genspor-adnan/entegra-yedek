@@ -465,6 +465,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
           kaynak="ilac" baslik="İlaç ara (barkod / ad / etken madde)"
           kodAlani="barkod" adAlani="ad"
           ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+          kullanimIsaretle ilkSik
           // YZ ÖNERİSİ: etken madde -> katalog ürünleri; alerjiyle çakışan sunucuda
           //   elenir, doz önerilmez. Eklemede alerji/etkileşim uyarısı yine çalışır.
           yz={async () => {

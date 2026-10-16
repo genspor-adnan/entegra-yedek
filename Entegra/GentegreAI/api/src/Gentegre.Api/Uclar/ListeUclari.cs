@@ -81,28 +81,72 @@ public static class ListeUclari
 
             // Ad ALANI kataloğun kendisinden okunur; kaynak beyaz listede
             //   (KaynakKatalogu) olduğu için tablo adı istekten GELMEZ.
+            // İLAÇ (kullanıcı 16.10.2026: "ilaç ara ekranında parol ekledim, sık kullandıklarım boş"):
+            //   kod = barkod, ad ilaç kataloğundan; satır `barkod` da taşır (seçen ekran onu okur).
+            var adSql = kaynak == "ilac"
+                ? "coalesce((select x.ad from public.ilac x where x.barkod = k.kod limit 1), '')"
+                : "coalesce((select x.ad from public.icd x where x.kod = k.kod limit 1), '')";
             var sik = await veri.ListeAsync(
-                "select k.kod, coalesce(i.ad, '') as ad, k.say " +
+                "select k.kod, " + adSql + " as ad, k.say " +
                 "  from public.kullanici_katalog k " +
-                "  left join public.icd i on i.kod = k.kod " +
                 " where k.kullanici_id = @p0 and k.kaynak = @p1 " +
                 " order by k.say desc, k.son_tarih desc limit 10",
                 [baglam.KullaniciId, kaynak],
-                o => new { kod = o.GetString(0), ad = o.GetString(1), say = o.GetInt32(2) },
+                o => new { kod = o.GetString(0), barkod = o.GetString(0), ad = o.GetString(1), say = o.GetInt32(2) },
                 iptal);
 
             var son = await veri.ListeAsync(
-                "select k.kod, coalesce(i.ad, '') as ad, k.son_tarih " +
+                "select k.kod, " + adSql + " as ad, k.son_tarih " +
                 "  from public.kullanici_katalog k " +
-                "  left join public.icd i on i.kod = k.kod " +
                 " where k.kullanici_id = @p0 and k.kaynak = @p1 " +
                 " order by k.son_tarih desc limit 10",
                 [baglam.KullaniciId, kaynak],
-                o => new { kod = o.GetString(0), ad = o.GetString(1),
+                o => new { kod = o.GetString(0), barkod = o.GetString(0), ad = o.GetString(1),
                            tarih = o.GetDateTime(2) },
                 iptal);
 
-            return Results.Ok(new { kaynak, sik, son, izlemeNo = baglam.IzlemeNo });
+            // BÖLÜMCE SIK KULLANILAN (kullanıcı 16.10.2026: "Bölüm Kullanılan: bölümce sık kullanılan
+            //   listesi"): oturumun kişisiyle aynı bölümdeki (taraf.departman) kullanıcıların toplamı.
+            var bolum = await veri.ListeAsync(
+                "with ben as (select t.departman from public.taraf t where t.id = @p0) " +
+                "select k.kod, " + adSql + " as ad, sum(k.say)::int as say " +
+                "  from public.kullanici_katalog k " +
+                "  join public.taraf t on t.id = k.kullanici_id, ben " +
+                " where k.kaynak = @p1 and ben.departman is not null and t.departman = ben.departman " +
+                " group by k.kod order by 3 desc, max(k.son_tarih) desc limit 20",
+                [baglam.KullaniciId, kaynak],
+                o => new { kod = o.GetString(0), barkod = o.GetString(0), ad = o.GetString(1), say = o.GetInt32(2) },
+                iptal);
+
+            return Results.Ok(new { kaynak, sik, son, bolum, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/liste/{kaynak}/kullanim-sayilari - ARAMA PENCERESİ "Bölüm" / "Benim" kolonları
+        //   (kullanıcı 16.10.2026: "Bölüm: tüm bölümce seçilen adet, Benim: sadece benim seçtiğim adet").
+        //   Bölüm = oturumun kişisiyle AYNI bölümdeki (taraf.departman) kullanıcıların toplamı; bölümü
+        //   yoksa yalnız kendisi. En çok 200 kod.
+        grup.MapPost("/{kaynak}/kullanim-sayilari", async (
+            string kaynak, KullanimSayisiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
+            if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            var kodlar = (istek.Kodlar ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Distinct().Take(200).ToArray();
+            if (kodlar.Length == 0) return Results.Ok(new { sayilar = new Dictionary<string, object>() });
+            var satirlar = await veri.ListeAsync(
+                "with ben as (select t.departman from public.taraf t where t.id = @p0) " +
+                "select k.kod, " +
+                "       coalesce(sum(k.say) filter (where k.kullanici_id = @p0), 0)::int as benim, " +
+                "       coalesce(sum(k.say), 0)::int as bolum " +
+                "  from public.kullanici_katalog k " +
+                "  left join public.taraf t on t.id = k.kullanici_id, ben " +
+                " where k.kaynak = @p1 and k.kod = any(@p2) " +
+                "   and (k.kullanici_id = @p0 or (ben.departman is not null and t.departman = ben.departman)) " +
+                " group by k.kod",
+                [baglam.KullaniciId, kaynak, kodlar],
+                o => (Kod: o.GetString(0), Benim: o.GetInt32(1), Bolum: o.GetInt32(2)), iptal);
+            return Results.Ok(new { sayilar = satirlar.ToDictionary(x => x.Kod, x => new { benim = x.Benim, bolum = x.Bolum }) });
         });
 
         // POST /api/liste/{kaynak}/kullanilan/{kod} - katalog kullanım sayacı
@@ -213,4 +257,7 @@ public static class ListeUclari
                 kumeler.Add(kume);
         return kumeler;
     }
+
+    /// <summary>Arama penceresindeki kodlar (Bölüm / Benim sayıları).</summary>
+    public sealed record KullanimSayisiIstegi(string[]? Kodlar);
 }

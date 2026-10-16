@@ -1828,6 +1828,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     {icdAramaAcik && (icdMuayeneId !== null || (kartId !== null && kartId !== 'yeni')) && (
       <KaynakArama
         kaynak="icd" baslik="ICD-10 tanı ara"
+        // İlk açılışta sık kullanılanlar (ilaç aramasıyla aynı biçim, 16.10.2026).
+        ilkSik
         ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
         // ÖNCEKİ TANILAR bu HASTANIN başka muayenelerinden gelir - kronik
         //   hastada aynı tanı her muayenede yeniden yazılırken kod kayabilir.

@@ -22,7 +22,7 @@ type Satir = Record<string, unknown>;
 export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                               ekKosul, onceki, oncekiBaslik = 'Öncekiler',
                               sablon, sablonBaslik = 'Şablon', yz,
-                              acikKalir = false, ustSecimler, onSec, onKapat }: {
+                              acikKalir = false, ustSecimler, onSec, onKapat, kullanimIsaretle = false, ilkSik = false }: {
   kaynak: string;
   baslik: string;
   kodAlani?: string;
@@ -54,12 +54,17 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
   ustSecimler?: ReactNode;
   onSec(satir: Satir): void | Promise<unknown>;
   onKapat(): void;
+  /** SEÇİM SIK KULLANILANA YAZILIR (ilaç, 16.10.2026): çağıran işaretlemiyorsa (ICD'yi Liste işaretler). */
+  kullanimIsaretle?: boolean;
+  /** İLK AÇILIŞTA SIK KULLANILANLAR (kullanıcı 16.10.2026: "ilk açılışta sık kullandıkları gelsin"):
+      liste boş değilse pencere ⭐ Sık Kullandıklarım ile açılır. */
+  ilkSik?: boolean;
 }) {
   const [metin, setMetin] = useState('');
   /** Hazır listeler: '' arama · 'sik' · 'son' · 'onceki' (kullanıcı). */
   // 'son' listesi UÇTA duruyor ama düğmesi yok (kullanıcı): sık kullanılan
   //   zaten son kullanılanı kapsıyordu, iki düğme aynı işi yapıyordu.
-  const [kip, setKip] = useState<'' | 'sik' | 'onceki' | 'sablon' | 'yz'>('');
+  const [kip, setKip] = useState<'' | 'sik' | 'bolum' | 'onceki' | 'sablon' | 'yz'>('');
   /** YZ yanıtının notları (kırmızı bayrak, eksik bilgi) ve uyarısı. */
   const [yzNot, setYzNot] = useState<{ notlar: string[]; uyari: string } | null>(null);
   const [satirlar, setSatirlar] = useState<Satir[]>([]);
@@ -86,6 +91,23 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
   const [capa, setCapa] = useState(0);
   const [topluEkleniyor, setTopluEkleniyor] = useState(false);
   const kodu = (r: Satir) => String(r[kodAlani] ?? '');
+  /** BÖLÜM / BENİM KOLONLARI (kullanıcı 16.10.2026): listedeki kodların seçilme sayıları. */
+  const [sayilar, setSayilar] = useState<Record<string, { benim: number; bolum: number }>>({});
+  const isaretle = (r: Satir) => {
+    const k = kodu(r);
+    if (!kullanimIsaretle || !k) return;
+    void api.katalogKullanildi(kaynak, k).catch(() => {});
+    setSayilar(s => ({ ...s, [k]: { benim: (s[k]?.benim ?? 0) + 1, bolum: (s[k]?.bolum ?? 0) + 1 } }));
+  };
+  // İlk açılışta sık kullanılanlar (varsa).
+  useEffect(() => {
+    if (!ilkSik) return;
+    let iptal = false;
+    void api.katalogKullanilan(kaynak).then(y => { if (!iptal && y.sik.length > 0) setKip(k => (k === '' ? 'sik' : k)) })
+      .catch(() => {});
+    return () => { iptal = true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** Tek satırı ekler; başarıda true. Aynı kod ikinci kez gönderilmez. */
   const ekle = async (r: Satir) => {
@@ -94,6 +116,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
     setGonderilen(kod);
     try {
       await onSec(r);
+      isaretle(r);
       eklenenRef.current = [...eklenenRef.current, kod];
       setEklenen(eklenenRef.current);
       return true;
@@ -104,7 +127,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
   /** Çift tık: satırı ekler ve pencereyi KAPATIR (ekle = bitti, kullanıcı);
       hata alırsa açık kalır. */
   const sec = async (r: Satir) => {
-    if (!acikKalir) { onSec(r); return }
+    if (!acikKalir) { isaretle(r); onSec(r); return }
     if (gonderilen !== null || topluEkleniyor) return;
     if (await ekle(r)) onKapat();
     else kutu.current?.focus();
@@ -173,7 +196,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
           if (!iptal) setSatirlar(liste as unknown as Satir[]);
         } else {
           const y = await api.katalogKullanilan(kaynak);
-          if (!iptal) setSatirlar(y.sik as unknown as Satir[]);
+          if (!iptal) setSatirlar((kip === 'bolum' ? y.bolum ?? [] : y.sik) as unknown as Satir[]);
         }
         if (!iptal) setHata(null);
       } catch (h) { if (!iptal) setHata(hataMetni(h)) }
@@ -232,7 +255,8 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                  ✓ {c('Seçilenleri Ekle')} ({isaretli.size})
                </button>
              )}
-             <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+             {/* Kapat sağa yaslı (kullanıcı 16.10.2026). */}
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
            </>}>
       <div className="kaynak-arama">
         {ustSecimler && <div className="kaynak-arama-secim">{ustSecimler}</div>}
@@ -245,6 +269,11 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
           <button type="button" className={`d${kip === 'sik' ? ' bir' : ''}`}
                   onClick={() => { setMetin(''); setKip(kip === 'sik' ? '' : 'sik') }}>
             ⭐ Sık Kullandıklarım
+          </button>
+          {/* BÖLÜMCE SIK KULLANILAN (kullanıcı 16.10.2026; ikon aynı yıldız). */}
+          <button type="button" className={`d${kip === 'bolum' ? ' bir' : ''}`}
+                  onClick={() => { setMetin(''); setKip(kip === 'bolum' ? '' : 'bolum') }}>
+            ⭐ {c('Bölüm Kullanılan')}
           </button>
           {yz && (
             <button type="button" className={`d yz-dugme${kip === 'yz' ? ' bir' : ''}`}
@@ -303,6 +332,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
         )}
         {satirlar.length > 0 && (
           <table className="detay-tablo">
+            <SayiYukleyici kaynak={kaynak} kodlar={satirlar.map(kodu)} onSayilar={setSayilar} />
             <thead><tr>
               {acikKalir && (
                 <th style={{ width: 32 }} className="hiza-orta">
@@ -317,6 +347,8 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                 </th>
               )}
               <th style={{ width: 120 }}>Kod</th><th>Ad</th>
+              <th style={{ width: 64 }} className="hiza-sag" title={c('Bölümünüzde bu kodun kaç kez seçildiği')}>{c('Bölüm')}</th>
+              <th style={{ width: 64 }} className="hiza-sag" title={c('Sizin kaç kez seçtiğiniz')}>{c('Benim')}</th>
             </tr></thead>
             <tbody>
               {satirlar.map((r, i) => {
@@ -344,6 +376,8 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                       </span>
                     )}
                     {r.gerekce ? <div className="yz-gerekce">{String(r.gerekce)}</div> : null}</td>
+                  <td className="hiza-sag">{sayilar[kod]?.bolum || <span className="sonuk">—</span>}</td>
+                  <td className="hiza-sag">{sayilar[kod]?.benim || <span className="sonuk">—</span>}</td>
                 </tr>
                 );
               })}
@@ -353,4 +387,21 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
       </div>
     </Modal>
   );
+}
+
+/** Listedeki kodların Bölüm / Benim sayılarını okur (kod kümesi değişince); hata sessiz. */
+function SayiYukleyici({ kaynak, kodlar, onSayilar }: {
+  kaynak: string; kodlar: string[];
+  onSayilar(s: Record<string, { benim: number; bolum: number }>): void;
+}) {
+  const anahtar = kodlar.filter(Boolean).join('|');
+  useEffect(() => {
+    if (!anahtar) return;
+    let iptal = false;
+    void api.katalogKullanimSayilari(kaynak, anahtar.split('|'))
+      .then(y => { if (!iptal) onSayilar(y.sayilar) }).catch(() => {});
+    return () => { iptal = true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kaynak, anahtar]);
+  return null;
 }

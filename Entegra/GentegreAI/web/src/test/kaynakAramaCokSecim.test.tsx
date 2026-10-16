@@ -13,6 +13,8 @@ const kullanilan = vi.fn();
 vi.mock('../api/istemci', () => ({ api: {
   get liste() { return liste },
   katalogKullanilan: (...a: unknown[]) => kullanilan(...a),
+  // Bölüm / Benim kolonları (16.10.2026) - sayı yok.
+  katalogKullanimSayilari: () => Promise.resolve({ sayilar: {} }),
 } }));
 
 const { KaynakArama } = await import('../bilesenler/KaynakArama');

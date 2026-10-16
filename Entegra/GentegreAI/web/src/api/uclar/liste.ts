@@ -241,9 +241,15 @@ export const listeUclari = {
     }>(`/api/muayene/${muayeneId}/sekme-verisi`),
 
   /** Metin anahtarli katalogda (ICD...) kullanicinin SIK ve SON kullandiklari. */
+  /** Arama penceresi Bölüm / Benim sayıları (16.10.2026): kod -> { benim, bolum }. */
+  katalogKullanimSayilari: (kaynak: string, kodlar: string[]) =>
+    gonder<{ sayilar: Record<string, { benim: number; bolum: number }> }>(
+      `/api/liste/${kaynak}/kullanim-sayilari`, { kodlar }),
   katalogKullanilan: (kaynak: string) =>
     istek<{ sik: { kod: string; ad: string; say: number }[];
-            son: { kod: string; ad: string; tarih: string }[] }>(
+            son: { kod: string; ad: string; tarih: string }[];
+            /** Bölümce sık kullanılan (16.10.2026). */
+            bolum?: { kod: string; ad: string; say: number }[] }>(
       `/api/liste/${kaynak}/kullanilan`),
 
   /** Katalog kullanim sayaci (secim aninda). */
