@@ -382,6 +382,7 @@ uygulama.GelenBelgeUclariniEkle();
 uygulama.EFaturaUclariniEkle();
 uygulama.EFaturaIcmalUclariniEkle();
 uygulama.CeviriUclariniEkle();
+uygulama.HizliBulUclariniEkle();   // Ctrl+K kayıt numarasıyla açma (16.10.2026)
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();

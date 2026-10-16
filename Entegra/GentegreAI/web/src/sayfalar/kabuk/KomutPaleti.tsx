@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../../dil/ceviri';
 import { usePaletKomutlari } from './paletKomutlari';
+import { api } from '../../api/istemci';
 import type { MenuSatiri } from './menuAgaci';
 
 /**
@@ -94,17 +95,29 @@ interface Props {
   git(yol: string): void;
   /** Menüde olmayan ama aranabilen ekranlar (1103: gösterge panelleri, "gösterge" yazınca). */
   ekEkranlar?: PaletEkrani[];
+  /** Ekran açılma sayıları (yol -> adet): eşit eşleşmede sık açılan önce. */
+  ekranSayac?: Record<string, number>;
 }
+
+/** Hızlı bul türü -> kart yolu, ikon ve kartın liste rotası (menüde yoksa kullanıcı açamaz). */
+const KAYIT_YOLU: Record<string, { yol: (id: number) => string; liste: string; ikon: string }> = {
+  hasta:   { yol: id => `/hasta/${id}`,     liste: '/hasta',     ikon: '🧑' },
+  basvuru: { yol: id => `/basvuru/${id}`,   liste: '/basvuru',   ikon: '📝' },
+  muayene: { yol: id => `/muayene/${id}`,   liste: '/muayene',   ikon: '🩺' },
+  rapor:   { yol: id => `/muayene/${id}`,   liste: '/muayene',   ikon: '📄' },
+  recete:  { yol: id => `/recete/${id}`,    liste: '/recete',    ikon: '💊' },
+  lab:     { yol: id => `/lab-istem/${id}`, liste: '/lab-istem', ikon: '🧪' },
+};
 
 /** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
-type Bolum = 'Son açılanlar' | 'Ekranlar' | 'İşlemler';
+type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
   | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
-export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git, ekEkranlar }: Props) {
+export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git, ekEkranlar, ekranSayac }: Props) {
   const [arama, setArama] = useState('');
   const [secili, setSecili] = useState(0);
   const kutu = useRef<HTMLInputElement>(null);
@@ -129,6 +142,29 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   useEffect(() => { if (acik) { setArama(''); setSecili(0) } }, [acik]);
 
   const ekranlar = useMemo(() => [...paletEkranlari(satirlar), ...(ekEkranlar ?? [])], [satirlar, ekEkranlar]);
+
+  /**
+   * KAYIT NUMARASIYLA AÇMA (kullanıcı 16.10.2026, hızlı erişim): rakam içeren ≥4 karakterlik arama
+   * sunucuda dosya / TC / protokol / muayene / reçete / rapor / lab numarasına bakar; bulunan kayıt
+   * "Kayıtlar" bölümünde en üstte - Enter kartı açar. Kartın listesi menüde yoksa (yetki) gösterilmez.
+   */
+  const [kayitlar, setKayitlar] = useState<Oge[]>([]);
+  useEffect(() => {
+    const q = arama.trim();
+    if (!acik || q.length < 4 || !/\d/.test(q)) { setKayitlar([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      void api.hizliBul(q).then(y => {
+        if (iptal) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        setKayitlar(y.sonuclar
+          .filter(s => KAYIT_YOLU[s.tur] && menude.has(KAYIT_YOLU[s.tur].liste))
+          .map<Oge>(s => ({ bolum: 'Kayıtlar', tur: 'ekran', anahtar: `r${s.tur}${s.id}:${s.altId}`, ad: s.ad || s.bilgi,
+                            grup: s.bilgi, yol: KAYIT_YOLU[s.tur].yol(s.id), ikon: KAYIT_YOLU[s.tur].ikon })));
+      }).catch(() => { if (!iptal) setKayitlar([]) });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar]);
 
   const gorunen = useMemo<Oge[]>(() => {
     const q = arama.trim();
@@ -163,7 +199,8 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
       //   calisma listesini bekler, ayarlar ekranini degil - alfabetik sira
       //   "Telerad Kurumlari"ni one aliyordu. Menu sirasi isin onceligini
       //   zaten tasiyor (menuSira), palet de onu izlesin.
-      .sort((a, b) => a.puan - b.puan || a.i - b.i)
+      // KULLANIMA GÖRE (16.10.2026): eşit puanda sık açılan ekran önce, sonra menü sırası.
+      .sort((a, b) => a.puan - b.puan || (ekranSayac?.[b.e.yol] ?? 0) - (ekranSayac?.[a.e.yol] ?? 0) || a.i - b.i)
       .slice(0, 20)
       .map<Oge>(x => ({ bolum: x.e.islem ? 'İşlemler' : 'Ekranlar', tur: 'ekran', anahtar: 'e' + x.e.yol,
                          ad: x.e.ad, grup: x.e.grup, yol: x.e.yol, islem: x.e.islem, ikon: x.e.ikon }));
@@ -179,9 +216,9 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
     // EKRAN ÖNCE: kutunun işi "şu ekrana git"; komut aynı ada sahipse altında kalsın.
     //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
-    return [...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
+    return [...kayitlar, ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
-  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler]);
+  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, ekranSayac]);
 
   if (!acik) return null;
 
@@ -204,7 +241,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
           ref={kutu}
           autoFocus
           className="arama"
-          placeholder={c('Ekran ya da komut ara… (Ctrl+K)')}
+          placeholder={c('Ekran, komut ya da numara ara (dosya / TC / protokol)… (Ctrl+K)')}
           value={arama}
           onChange={e => { setArama(e.target.value); setSecili(0) }}
         />

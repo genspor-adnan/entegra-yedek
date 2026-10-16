@@ -124,7 +124,7 @@ export function Kabuk() {
     // KART ADRESİ LİSTE SAYILMAZ (16.10.2026): "/muayene/19" kayıtlı kart araması ya da bağlantıyla
     //   açılır - "Muayene Listesi" son açılanlara girmesin; kartın kendisi palet işlemiyle yazılır.
     const kartAdresi = !!eslesen && /^\/[^/]+$/.test(yol.slice(eslesen.yol.split('?')[0].length));
-    if (eslesen && !kartAdresi) tercih.sonKaydet(eslesen.yol);
+    if (eslesen && !kartAdresi) { tercih.sonKaydet(eslesen.yol); tercih.sayacArtir(eslesen.yol) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [konum.pathname, konum.state, satirlar]);
 
@@ -509,7 +509,7 @@ export function Kabuk() {
           karsiligi. Icerigi SOL MENUNUN KENDISI (ayni yetki/modul suzgeci) +
           acik ekranin dugmeleri. */}
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
-                   sonMenuler={tercih.sonMenuler} acik={paletAcik}
+                   sonMenuler={tercih.sonMenuler} ekranSayac={tercih.ekranSayac} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
                    git={paletGit}
                    ekEkranlar={panelEkranlari} />

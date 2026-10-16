@@ -120,6 +120,20 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
     catch { setSonMenuler([]) }
   }, [sonAnahtar]);
 
+  // EKRAN KULLANIM SAYACI (16.10.2026, hızlı erişim): ekran her açılışta +1 - palet eşit eşleşmede
+  //   sık açılanı öne alır. Kullanıcı başına tarayıcıda.
+  const sayacAnahtar = `ekranSayac.${kullaniciId ?? 0}`;
+  const [ekranSayac, setEkranSayac] = useState<Record<string, number>>({});
+  useEffect(() => {
+    try { setEkranSayac(JSON.parse(localStorage.getItem(sayacAnahtar) ?? '{}') as Record<string, number>) }
+    catch { setEkranSayac({}) }
+  }, [sayacAnahtar]);
+  const sayacArtir = (yol: string) => setEkranSayac(o => {
+    const y = { ...o, [yol]: (o[yol] ?? 0) + 1 };
+    try { localStorage.setItem(sayacAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
+    return y;
+  });
+
   const sonKaydet = (yol: string) => setSonMenuler(o => {
     const y = sonMenuEkle(o, yol) as string[];
     if (y === o) return o;                       // degismediyse yazma
@@ -127,7 +141,7 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
     return y;
   });
 
-  return { favoriler, favoriToggle, sonMenuler, sonKaydet, calismaAlani, calismaAlaniSec };
+  return { favoriler, favoriToggle, sonMenuler, sonKaydet, ekranSayac, sayacArtir, calismaAlani, calismaAlaniSec };
 }
 
 /**
