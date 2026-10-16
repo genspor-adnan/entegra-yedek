@@ -16,7 +16,7 @@ import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { TarafArama } from '../../bilesenler/TarafArama';
 import type { MuayeneSayaclari } from '../../api/uclar/liste';
-import { KipCercevesi } from '../../bilesenler/KipCercevesi';
+import { KipCercevesi, useKaydetKonumu } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi, KonsultasyonYanitSeridi } from '../konsultasyon/KonsultasyonKarti';
@@ -254,6 +254,8 @@ export function ListeKarti({
   const [kayitSayaci, setKayitSayaci] = useState(0);
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
+  // 💾 SONRASI AYNI KONUM (16.10.2026): çerçeve kaydedilince sayfa kaymasın.
+  useKaydetKonumu(tanim.kaynak === 'muayene' && typeof kartId === 'number');
   const hastaBilgisi = useMuayeneHastaBilgisi(sekmesiz ? Number(kartId) : 0, kartTazele * 1000 + kayitSayaci);
   /** SEKMESİZ ÖZET / DETAY (kullanıcı 14.10.2026): seçilmediyse muayene tamamlandıysa özet, değilse detay. */
   const [sekmesizGorunum, setSekmesizGorunum] = useState<'ozet' | 'detay' | null>(null);
