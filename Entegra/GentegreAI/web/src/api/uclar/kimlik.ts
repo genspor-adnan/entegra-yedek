@@ -41,7 +41,7 @@ export const kimlikUclari = {
    * MARKA (502): giris ekrani hangi urunun kapisi - oturum ACILMADAN sorulur.
    * Kurulusun urun modu (1 Gentegre AI / 2 GenoTIP AI) sunucudan gelir.
    */
-  marka: () => istek<{ urunModu: number }>('/api/kimlik/marka'),
+  marka: () => istek<{ urunModu: number; kurumAdi?: string; logoVar?: boolean }>('/api/kimlik/marka'),
 
   /** Parolamı unuttum (843) - 1. adım: kayıtlı telefona / e-postaya kod. Hesap yoksa da genel cevap. */
   parolaUnuttum: (kod: string) =>

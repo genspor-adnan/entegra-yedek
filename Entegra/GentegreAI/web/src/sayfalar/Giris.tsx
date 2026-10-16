@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { TABAN } from '../api/cekirdek';
 import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
@@ -41,6 +42,9 @@ export function Giris() {
   //   kod, kodla yeni parola. 1. adim kullanici kodu, 2. adim kod + parola.
   const [unuttumAdim, setUnuttumAdim] = useState<0 | 1 | 2>(0);
   const [dogrulamaKodu, setDogrulamaKodu] = useState('');
+  /** CAPS LOCK UYARISI (giriş v2): parola alanında büyük harf kilidi açıksa. */
+  const [capsAcik, setCapsAcik] = useState(false);
+  const capsIzle = (e: React.KeyboardEvent<HTMLInputElement>) => setCapsAcik(e.getModifierState('CapsLock'));
   /**
    * URUN ADI (502, kullanici: "login de Gentegre yazıyor, moda göre GenoTIP AI
    * veya Gentegre AI yazmalı"). Baslik sabitti; HBYS kurulumunda yanlis urunun
@@ -66,14 +70,12 @@ export function Giris() {
   }, []);
   const baslik = urunAdi(urunModu);
   useEffect(() => { document.title = baslik }, [baslik]);
-  /* Marka seridi: sembol + urun adi (kabuktaki ust seritle AYNI gorunum).
+  /* GİRİŞ PENCERESİ v2 (kullanıcı 16.10.2026, mockup Ekranlar/Ayarlar/giris_ekrani_v2.html): ortada
+     tek pencere - solda dar marka şeridi (sembol + ürün adı, slogan, "YZ destekli"), sağda form.
      BASE_URL: uygulama alt yolda yayinda (/genotipai) - mutlak "/..." 404 verir. */
-  const marka = (
-    <div className="giris-marka">
-      <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
-      <h1>{baslik}</h1>
-    </div>
-  );
+  const pencere = (form: React.ReactNode) => <GirisPenceresi baslik={baslik}>{form}</GirisPenceresi>;
+  /** Adım çubuğu: 1 kimlik + parola, 2 şube. */
+  const adimCubugu = (n: 1 | 2) => <div className="giris-adim"><i className="on" /><i className={n === 2 ? 'on' : ''} /></div>;
 
   const PAROLA_KURALI = 'En az 8 karakter; küçük harf, BÜYÜK harf, rakam ve '
                       + 'harf/rakam dışı bir karakter (ör. .!?*-_) içermeli.';
@@ -164,15 +166,14 @@ export function Giris() {
   }
 
   if (unuttumAdim > 0) {
-    return (
-      <div className="giris-sayfa">
-        {/* key: formlar ayni konumda; key'siz React "Parolami unuttum" dugmesinin
-            DOM dugumunu bu formun submit dugmesi olarak yeniden kullaniyor ve
-            tiklamanin varsayilan eylemi formu hemen gonderiyordu. */}
+    // key: formlar ayni konumda; key'siz React "Parolami unuttum" dugmesinin DOM dugumunu bu
+    //   formun submit dugmesi olarak yeniden kullaniyor ve tiklama formu hemen gonderiyordu.
+    return pencere(
         <form key="unuttum" className="giris-kart" onSubmit={parolaUnuttum}>
-          {marka}
+          <h1>{c('Şifremi unuttum')}</h1>
           <p className="alt-baslik">
-            {unuttumAdim === 1 ? 'Şifremi unuttum — hesabınızı yazın' : 'Şifremi unuttum — kodu ve yeni parolayı yazın'}
+            {unuttumAdim === 1 ? c('Kayıtlı telefonunuza ya da e-posta adresinize tek kullanımlık kod göndereceğiz.')
+                               : c('Gelen kodu ve yeni parolanızı yazın.')}
           </p>
           <label>
             Kimlik No/Telefon/E-Posta
@@ -214,18 +215,16 @@ export function Giris() {
           )}
           <button type="button" className="d" style={{ marginTop: 8 }}
                   onClick={() => { setUnuttumAdim(0); setHata(null); setBilgi(null) }}>
-            Girişe dön
+            ← Girişe dön
           </button>
         </form>
-      </div>
     );
   }
 
   if (ilkAdim > 0) {
-    return (
-      <div className="giris-sayfa">
+    return pencere(
         <form key="ilk-parola" className="giris-kart" onSubmit={ilkParola}>
-          {marka}
+          <h1>{c('Yeni parolanızı belirleyin')}</h1>
           <p className="alt-baslik">
             {ilkAdim === 1 ? c('İlk giriş — kimliğinizi doğrulayın')
                            : c('İlk giriş — kodu ve yeni parolayı yazın')}
@@ -278,19 +277,19 @@ export function Giris() {
           )}
           <button type="button" className="d" style={{ marginTop: 8 }}
                   onClick={() => { setIlkAdim(0); setHata(null) }}>
-            Girişe dön
+            ← Girişe dön
           </button>
         </form>
-      </div>
     );
   }
 
-  return (
-    <div className="giris-sayfa">
+  return pencere(
       <form key="giris" className="giris-kart" onSubmit={gonder}>
-        {marka}
+        {adimCubugu(subeler === null ? 1 : 2)}
+        <h1>{subeler === null ? c('Giriş yapın') : c('Şube seçin')}</h1>
         <p className="alt-baslik">
-          {subeler === null ? 'Kullanici adi ve parola' : 'Calisacaginiz subeyi secin'}
+          {subeler === null ? c('Kimlik numaranız, telefonunuz ya da e-posta adresinizle.')
+                            : c('Birden çok şubede yetkiniz var. Kayıtlar seçtiğiniz şubeye yazılır.')}
         </p>
 
         {subeler === null ? (
@@ -308,27 +307,32 @@ export function Giris() {
               Parola
               {/* Kod hazır geliyorsa imleç doğrudan parolada. */}
               <ParolaGirdisi value={parola} autoComplete="new-password"
-                     autoFocus={!!kod} onChange={e => setParola(e.target.value)} />
+                     autoFocus={!!kod} onChange={e => setParola(e.target.value)}
+                     onKeyUp={capsIzle} onKeyDown={capsIzle} onBlur={() => setCapsAcik(false)} />
+              {capsAcik && <span className="giris-caps">⇪ {c('Caps Lock açık')}</span>}
             </label>
           </>
         ) : (
-          <label>
-            Sube
-            <select value={subeId ?? ''} onChange={e => setSubeId(Number(e.target.value))}>
-              {subeler.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.ad}{s.varsayilan ? ' (varsayilan)' : ''}{s.yazma ? '' : ' — salt okuma'}
-                </option>
-              ))}
-            </select>
-          </label>
+          // ŞUBE KARTLARI (giriş v2): varsayılan / salt okuma rozetle; tık seçer.
+          <div className="giris-subeler" role="radiogroup">
+            {subeler.map(s => (
+              <button key={s.id} type="button" role="radio" aria-checked={s.id === subeId}
+                      className={`giris-sube${s.id === subeId ? ' on' : ''}`}
+                      onClick={() => setSubeId(s.id)}>
+                <span className="giris-sube-ic">🏥</span>
+                <b>{s.ad}</b>
+                {s.varsayilan && <span className="rozet olumlu">{c('varsayılan')}</span>}
+                {!s.yazma && <span className="rozet uyari">{c('salt okuma')}</span>}
+              </button>
+            ))}
+          </div>
         )}
 
         {hata && <div className="hata-kutusu">{hata}</div>}
         {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
         <button type="submit" disabled={bekliyor}>
-          {bekliyor ? 'Bekleyin…' : subeler === null ? 'Giris' : 'Devam'}
+          {bekliyor ? 'Bekleyin…' : subeler === null ? c('Giriş') : c('Devam')}
         </button>
         {subeler === null && (
           /* Metin bağlantısı (kullanıcı: "buton değil label olsun"). */
@@ -347,6 +351,49 @@ export function Giris() {
         )}
 
       </form>
+  );
+}
+
+/** Giriş penceresi (v2): solda marka şeridi, sağda form - giriş ve zorunlu parola ekranları ortak. */
+export function GirisPenceresi({ baslik, children }: { baslik: string; children: React.ReactNode }) {
+  // MÜŞTERİ ADI + LOGOSU (kullanıcı 16.10.2026): ana şubenin anteti, oturumsuz marka ucundan.
+  //   Son bilinen tarayıcıda saklanır - açılışta boş satır yanıp sönmesin.
+  const [kurum, setKurum] = useState<{ ad: string; logo: boolean }>(() => {
+    try { return JSON.parse(localStorage.getItem('gentegre.girisKurum') ?? '') } catch { return { ad: '', logo: false } }
+  });
+  useEffect(() => {
+    let iptal = false;
+    api.marka().then(y => {
+      if (iptal) return;
+      const k = { ad: y.kurumAdi ?? '', logo: !!y.logoVar };
+      setKurum(k);
+      try { localStorage.setItem('gentegre.girisKurum', JSON.stringify(k)) } catch { /* yoksay */ }
+    }).catch(() => { /* sunucu yoksa saklanan kalır */ });
+    return () => { iptal = true };
+  }, []);
+  return (
+    <div className="giris-sayfa">
+      <div className="giris-pencere">
+        <aside className="giris-serit">
+          <div className="giris-marka">
+            <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
+            <span>{baslik}</span>
+          </div>
+          {(kurum.ad || kurum.logo) && (
+            <div className="giris-kurum">
+              {kurum.logo
+                ? <img src={`${TABAN}/api/kimlik/marka/logo`} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                : <span className="giris-kurum-ic">🏥</span>}
+              <b>{kurum.ad}</b>
+            </div>
+          )}
+          <div className="giris-slogan">
+            <h2>{c("1990'da başladık,")}<br />{c('ilk günkü heyecanla yenileniyoruz.')}</h2>
+            <span>🤖 {c('YZ destekli')}</span>
+          </div>
+        </aside>
+        <div className="giris-sag">{children}</div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GirisPenceresi } from './Giris';
 import { api } from '../api/istemci';
 import { hataMetni, urunAdi } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -43,12 +44,9 @@ export function ParolaZorunlu() {
   }
 
   return (
-    <div className="giris-sayfa">
+    <GirisPenceresi baslik={urunAdi(kullanici?.urunModu)}>
       <form className="giris-kart" onSubmit={gonder}>
-        <div className="giris-marka">
-          <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
-          <h1>{urunAdi(kullanici?.urunModu)}</h1>
-        </div>
+        <h1>{c('Yeni parolanızı belirleyin')}</h1>
         <p className="alt-baslik">{c('İlk giriş — parolanızı değiştirin')}</p>
         <div className="bilgi-kutusu">
           <b>{kullanici?.ad}</b> · kullanıcı adı <b>{kullanici?.kod}</b>
@@ -79,6 +77,6 @@ export function ParolaZorunlu() {
           Çıkış
         </button>
       </form>
-    </div>
+    </GirisPenceresi>
   );
 }

@@ -132,7 +132,23 @@ public static class KimlikUclari
         {
             var mod = await veri.TekDegerAsync<int>(
                 "select public.fn_urun_modu(0)::int", [], iptal);
-            return Results.Ok(new { urunModu = mod });
+            // MÜŞTERİ ADI + LOGOSU (kullanıcı 16.10.2026: "müşteri logosu ve adı gelmedi login'e"):
+            //   kurumun ANA şubesinin anteti (v_sube_antet - çıktılarla aynı kaynak). Giriş ekranı
+            //   kamuya açıktır; antet ünvanı ve logosu zaten basılı belgelerde görünen bilgidir.
+            var kurum = await KurumAntetiAsync(veri, iptal);
+            return Results.Ok(new { urunModu = mod, kurumAdi = kurum?.Unvan ?? "", logoVar = kurum?.LogoId is not null });
+        });
+
+        // GET /api/kimlik/marka/logo (anonim): ana şubenin antet logosu - YALNIZ o belge.
+        grup.MapGet("/marka/logo", [AllowAnonymous] async (
+            VeriKaynagi veri, DokumanDeposu depo, CancellationToken iptal) =>
+        {
+            var kurum = await KurumAntetiAsync(veri, iptal);
+            if (kurum?.LogoId is not int id) return Results.NotFound();
+            var icerik = await depo.IcerikAsync(id, iptal);
+            return icerik is null || !icerik.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
+                ? Results.NotFound()
+                : Results.File(icerik.Veri, icerik.ContentType);
         });
 
         // ILK PAROLA (anonim, denetim 28.09.2026 #5): iki adim. TCKN son 4
@@ -330,4 +346,17 @@ public static class KimlikUclari
                    System.Globalization.CultureInfo.InvariantCulture, out var d) && d > 0
             ? d : 0m;
     }
+
+    /// <summary>Kurumun ana şubesi (varsayılan, yoksa üstü olmayan ilk aktif şube) anteti.</summary>
+    private sealed record KurumAnteti(string Unvan, int? LogoId);
+
+    private static Task<KurumAnteti?> KurumAntetiAsync(VeriKaynagi veri, CancellationToken iptal)
+        => veri.TekAsync("""
+            select coalesce(nullif(a.unvan, ''), s.ad, ''), a.logo_dokuman_id
+              from public.sube s
+              left join public.v_sube_antet a on a.sube_id = s.id
+             where s.aktif = 1
+             order by s.varsayilan desc, (s.ust_sube_id is null) desc, s.id
+             limit 1
+            """, [], o => new KurumAnteti(o.GetString(0), o.IsDBNull(1) ? null : o.GetInt32(1)), iptal);
 }
