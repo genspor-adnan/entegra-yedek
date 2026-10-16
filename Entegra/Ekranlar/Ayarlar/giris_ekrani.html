@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giriş Ekranı — Mockup (Gentegre AI · Ayarlar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:13px}
+
+  /* Mockup gezintisi (gerçek ekranda yok) */
+  .mk{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;gap:4px;flex-wrap:wrap;align-items:center;
+    padding:6px 10px;background:#24364d;color:#cfe0f3;font-size:11.5px}
+  .mk b{margin-right:6px;color:#fff}
+  .mk span{padding:3px 9px;border-radius:3px;cursor:pointer;background:rgba(255,255,255,.08)}
+  .mk span.on{background:#2f6db3;color:#fff;font-weight:bold}
+
+  /* Sayfa: solda marka, sağda kart */
+  .sayfa{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr);padding-top:30px}
+  .marka{position:relative;overflow:hidden;color:#fff;padding:56px 56px 40px;display:flex;flex-direction:column;
+    background:linear-gradient(150deg,#1c4374 0%,#2b5c95 55%,#3a78bd 100%)}
+  .marka::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,0) 70%)}
+  .logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:bold;letter-spacing:.3px}
+  .logo .isaret{width:44px;height:44px;border-radius:10px;background:#fff;color:#1c4374;display:flex;
+    align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  .kurum{margin-top:44px;display:flex;align-items:center;gap:14px}
+  .kurum .kl{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;font-size:26px}
+  .kurum b{display:block;font-size:17px}
+  .kurum small{opacity:.8}
+  .slogan{margin-top:auto;max-width:440px}
+  .slogan h2{font-size:24px;line-height:1.3;margin:0 0 10px}
+  .slogan p{opacity:.85;line-height:1.55;margin:0}
+  .ozellik{display:flex;gap:18px;margin-top:22px;flex-wrap:wrap;font-size:12px;opacity:.9}
+  .ozellik span{display:flex;align-items:center;gap:6px}
+  .alt-bilgi{margin-top:30px;font-size:11px;opacity:.7;display:flex;gap:14px;flex-wrap:wrap}
+
+  .sag{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;position:relative}
+  .dil{position:absolute;top:18px;right:22px;display:flex;gap:4px}
+  .dil span{border:1px solid var(--line);border-radius:4px;padding:3px 8px;font-size:11.5px;background:#fff;cursor:pointer;color:var(--muted)}
+  .dil span.on{border-color:var(--accent);color:var(--accent);font-weight:bold}
+  .kart{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 10px 34px rgba(20,40,70,.10);padding:30px 30px 24px}
+  .kart h1{font-size:20px;color:var(--navy);margin:0 0 4px}
+  .kart .alt{color:var(--muted);margin:0 0 20px;line-height:1.5}
+  .adim{display:flex;gap:6px;margin-bottom:18px}
+  .adim i{flex:1;height:4px;border-radius:2px;background:var(--line2)}
+  .adim i.on{background:var(--accent)}
+
+  label{display:block;font-size:12px;font-weight:bold;color:#3a4a5a;margin:0 0 5px}
+  .alan{margin-bottom:14px}
+  .kutu{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff}
+  .kutu:focus-within,.kutu.odak{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,109,179,.15)}
+  .kutu .ic{color:var(--muted)}
+  .kutu input,.kutu select{flex:1;border:none;outline:none;font:inherit;font-size:14px;background:transparent;color:var(--ink)}
+  .kutu .goz{cursor:pointer;color:var(--muted);font-size:13px}
+  .ipucu{font-size:11px;color:var(--muted);margin-top:4px}
+  .caps{font-size:11.5px;color:var(--uyari);margin-top:5px}
+  .satir{display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px;font-size:12px}
+  .satir label{display:flex;align-items:center;gap:6px;font-weight:normal;margin:0;color:var(--ink)}
+  a{color:var(--accent);text-decoration:none;cursor:pointer}
+  a:hover{text-decoration:underline}
+  .btn{width:100%;height:42px;border:none;border-radius:6px;font:inherit;font-size:14px;font-weight:bold;cursor:pointer;
+    background:linear-gradient(#3477c4,#2a62a6);color:#fff;box-shadow:0 2px 6px rgba(42,98,166,.3)}
+  .btn.ikincil{background:#fff;color:var(--navy);border:1px solid var(--line);box-shadow:none;font-weight:normal}
+  .ayrac{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11.5px;margin:18px 0 12px}
+  .ayrac::before,.ayrac::after{content:"";flex:1;height:1px;background:var(--line2)}
+  .alternatif{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .alternatif .btn{height:38px;font-size:12.5px}
+  .demo{margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--muted)}
+  .demo div{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .demo span{border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:var(--head);color:var(--navy);cursor:pointer}
+
+  .sube{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .sube .s{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer}
+  .sube .s.on{border-color:var(--accent);background:#f3f8fe;box-shadow:0 0 0 3px rgba(47,109,179,.12)}
+  .sube .s b{display:block}
+  .sube .s small{color:var(--muted)}
+  .sube .rz{margin-left:auto;font-size:10.5px;border-radius:10px;padding:2px 8px;background:var(--head);color:var(--muted)}
+  .sube .rz.v{background:#e6f2ea;color:var(--ok)}
+  .sube .rz.s{background:#fdf3df;color:var(--uyari)}
+  .hos{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;background:var(--head);margin-bottom:16px}
+  .hos .avt{width:38px;height:38px;border-radius:50%;background:#1c4374;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+  .hos small{display:block;color:var(--muted)}
+  .hos a{margin-left:auto;font-size:11.5px}
+
+  .kod{display:flex;gap:8px;justify-content:space-between;margin:6px 0 10px}
+  .kod span{width:46px;height:52px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:var(--navy)}
+  .kod span.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,109,179,.15)}
+
+  .uyari{border-radius:6px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+  .uyari.hata{background:#fbeceb;color:var(--kirmizi);border:1px solid #f1c9c6}
+  .uyari.bilgi{background:#eef5fd;color:#24527f;border:1px solid #cfe0f3}
+  .uyari.kilit{background:#fdf3df;color:var(--uyari);border:1px solid #f1dcae}
+  .guc{display:flex;gap:4px;margin-top:6px}
+  .guc i{flex:1;height:4px;border-radius:2px;background:var(--line2)}
+  .guc i.on{background:var(--ok)}
+  .kural{font-size:11.5px;color:var(--muted);margin:6px 0 14px;line-height:1.7}
+  .kural .ok{color:var(--ok)}
+
+  .kart-alt{margin-top:18px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6}
+  .notlar{max-width:1100px;margin:18px auto 30px;padding:0 20px;font-size:12px;color:#3a4a5a}
+  .notlar h4{color:var(--navy);margin:0 0 6px}
+  .notlar li{margin-bottom:4px;line-height:1.5}
+
+  @media(max-width:860px){
+    .sayfa{grid-template-columns:1fr}
+    .marka{padding:32px 24px;min-height:auto}
+    .slogan,.ozellik,.alt-bilgi{display:none}
+    .kurum{margin-top:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="mk"><b>Mockup durumu:</b>
+  <span data-d="giris" class="on">1 · Giriş</span>
+  <span data-d="sube">2 · Şube seçimi</span>
+  <span data-d="iki">2b · İki adımlı doğrulama</span>
+  <span data-d="unut">Şifremi unuttum</span>
+  <span data-d="hata">Hata / kilit</span>
+  <span data-d="ilk">İlk parola</span>
+</div>
+
+<div class="sayfa">
+  <!-- ================================================= SOL: marka ===== -->
+  <div class="marka">
+    <div class="logo"><span class="isaret">🧬</span> GenoTIP AI</div>
+    <div class="kurum">
+      <div class="kl">🏥</div>
+      <div><b>Örnek Şehir Hastanesi</b><small>Kurum logosu ve adı kurum profilinden gelir</small></div>
+    </div>
+    <div class="slogan">
+      <h2>Hasta, muayene ve faturalama<br>tek ekranda.</h2>
+      <p>Hastane bilgi yönetim sistemi ve ERP aynı veritabanında. Yetkiniz olan ekranlar girişten sonra açılır.</p>
+      <div class="ozellik">
+        <span>🔒 Uçtan uca şifreli</span>
+        <span>🏛 e-Nabız · Medula</span>
+        <span>🤖 YZ destekli</span>
+      </div>
+    </div>
+    <div class="alt-bilgi">
+      <span>Sürüm 26.10.16</span>
+      <span>Destek: 0850 000 00 00</span>
+      <a style="color:#fff;opacity:.9">KVKK aydınlatma metni</a>
+    </div>
+  </div>
+
+  <!-- ================================================= SAĞ: kart ====== -->
+  <div class="sag">
+    <div class="dil"><span class="on">TR</span><span>EN</span><span>AR</span></div>
+
+    <!-- 1 · GİRİŞ -->
+    <form class="kart" data-durum="giris">
+      <div class="adim"><i class="on"></i><i></i></div>
+      <h1>Giriş yapın</h1>
+      <p class="alt">Kimlik numaranız, telefonunuz ya da e-posta adresinizle.</p>
+      <div class="alan">
+        <label>Kimlik No / Telefon / E-posta</label>
+        <div class="kutu odak"><span class="ic">👤</span><input value="12345678901" autocomplete="off"></div>
+      </div>
+      <div class="alan">
+        <label>Parola</label>
+        <div class="kutu"><span class="ic">🔑</span><input type="password" value="parola123"><span class="goz" title="Göster">👁</span></div>
+        <div class="caps">⇪ Caps Lock açık</div>
+      </div>
+      <div class="satir">
+        <label><input type="checkbox" checked> Kimliğimi hatırla</label>
+        <a>Şifremi unuttum</a>
+      </div>
+      <button type="button" class="btn">Giriş</button>
+      <div class="ayrac">ya da</div>
+      <div class="alternatif">
+        <button type="button" class="btn ikincil">🪪 e-İmza ile</button>
+        <button type="button" class="btn ikincil">🏛 e-Devlet ile</button>
+      </div>
+      <div class="demo">Demo olarak dene
+        <div><span>Banko</span><span>Hekim</span><span>Laboratuvar</span><span>Yönetici</span></div>
+      </div>
+      <div class="kart-alt">Bu bilgisayar paylaşımlıysa işiniz bitince çıkış yapın.<br>Son 5 hatalı denemeden sonra hesap 15 dk kilitlenir.</div>
+    </form>
+
+    <!-- 2 · ŞUBE -->
+    <form class="kart" data-durum="sube" hidden>
+      <div class="adim"><i class="on"></i><i class="on"></i></div>
+      <h1>Şube seçin</h1>
+      <p class="alt">Birden çok şubede yetkiniz var. Kayıtlar seçtiğiniz şubeye yazılır.</p>
+      <div class="hos"><span class="avt">AD</span><div><b>Dr. Aslı Demir</b><small>Uzman Doktor · son giriş dün 18:44</small></div><a>Değiştir</a></div>
+      <div class="sube">
+        <div class="s on"><span>🏥</span><div><b>Merkez</b><small>Kardiyoloji · Dahiliye</small></div><span class="rz v">varsayılan</span></div>
+        <div class="s"><span>🏥</span><div><b>Hastane Ek Bina</b><small>Göz · KBB</small></div></div>
+        <div class="s"><span>🏬</span><div><b>Semt Polikliniği</b><small>yalnız görüntüleme</small></div><span class="rz s">salt okuma</span></div>
+      </div>
+      <div class="satir" style="margin-top:-4px">
+        <label><input type="checkbox"> Bundan sonra bu şubeyle aç</label>
+      </div>
+      <button type="button" class="btn">Devam</button>
+    </form>
+
+    <!-- 2b · İKİ ADIMLI -->
+    <form class="kart" data-durum="iki" hidden>
+      <div class="adim"><i class="on"></i><i class="on"></i></div>
+      <h1>Doğrulama kodu</h1>
+      <p class="alt">Doğrulama uygulamanızdaki 6 haneli kodu girin. Kod 30 saniyede bir yenilenir.</p>
+      <div class="kod"><span>4</span><span>8</span><span>1</span><span class="on">_</span><span></span><span></span></div>
+      <div class="satir"><label><input type="checkbox"> Bu cihazı 30 gün hatırla</label><a>SMS ile gönder</a></div>
+      <button type="button" class="btn">Doğrula</button>
+      <div class="kart-alt"><a>Uygulamaya erişemiyorum</a> · yedek kodla giriş</div>
+    </form>
+
+    <!-- ŞİFREMİ UNUTTUM -->
+    <form class="kart" data-durum="unut" hidden>
+      <h1>Şifremi unuttum</h1>
+      <p class="alt">Kayıtlı telefonunuza ya da e-posta adresinize tek kullanımlık kod göndereceğiz.</p>
+      <div class="alan">
+        <label>Kimlik No / Telefon / E-posta</label>
+        <div class="kutu odak"><span class="ic">👤</span><input value="0532 *** ** 18"></div>
+      </div>
+      <div class="uyari bilgi">Kod <b>0532 *** ** 18</b> numarasına gönderildi. 3 dk geçerli.</div>
+      <div class="alan">
+        <label>Doğrulama kodu</label>
+        <div class="kutu"><span class="ic">#</span><input placeholder="6 haneli kod"></div>
+        <div class="ipucu">Kod gelmedi mi? <a>Yeniden gönder (0:42)</a></div>
+      </div>
+      <button type="button" class="btn">Devam</button>
+      <button type="button" class="btn ikincil" style="margin-top:8px">← Girişe dön</button>
+    </form>
+
+    <!-- HATA / KİLİT -->
+    <form class="kart" data-durum="hata" hidden>
+      <div class="adim"><i class="on"></i><i></i></div>
+      <h1>Giriş yapın</h1>
+      <div class="uyari hata">Kimlik ya da parola hatalı. <b>2 deneme hakkınız</b> kaldı.</div>
+      <div class="uyari kilit">🔒 Çok sayıda hatalı deneme: hesap <b>14:32</b>'ye kadar kilitli. Yöneticiniz kilidi açabilir.</div>
+      <div class="alan">
+        <label>Kimlik No / Telefon / E-posta</label>
+        <div class="kutu"><span class="ic">👤</span><input value="12345678901"></div>
+      </div>
+      <div class="alan">
+        <label>Parola</label>
+        <div class="kutu" style="border-color:var(--kirmizi)"><span class="ic">🔑</span><input type="password" value=""><span class="goz">👁</span></div>
+      </div>
+      <button type="button" class="btn" disabled style="opacity:.55;cursor:not-allowed">Giriş</button>
+      <div class="kart-alt"><a>Şifremi unuttum</a></div>
+    </form>
+
+    <!-- İLK PAROLA -->
+    <form class="kart" data-durum="ilk" hidden>
+      <h1>Yeni parolanızı belirleyin</h1>
+      <p class="alt">İlk girişte (ya da parola sıfırlandıktan sonra) kendi parolanızı koyarsınız. Eski parola bir daha kullanılamaz.</p>
+      <div class="alan">
+        <label>Yeni parola</label>
+        <div class="kutu odak"><span class="ic">🔑</span><input type="password" value="Kardiyo!2026"><span class="goz">👁</span></div>
+        <div class="guc"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+      </div>
+      <div class="kural">
+        <span class="ok">✓ En az 8 karakter</span> · <span class="ok">✓ Büyük ve küçük harf</span> ·
+        <span class="ok">✓ Rakam</span> · ○ Kimlik numaranızı içermesin
+      </div>
+      <div class="alan">
+        <label>Yeni parola (tekrar)</label>
+        <div class="kutu"><span class="ic">🔑</span><input type="password" value="Kardiyo!2026"></div>
+      </div>
+      <button type="button" class="btn">Kaydet ve devam et</button>
+    </form>
+  </div>
+</div>
+
+<div class="notlar">
+  <h4>Giriş ekranı — tasarım notları</h4>
+  <ul>
+    <li><b>İki sütun:</b> solda kurum kimliği (ürün logosu, kurum logosu ve adı kurum profilinden, kısa tanıtım, sürüm, destek, KVKK); sağda tek iş yapan kart. Dar ekranda marka üste küçülür.</li>
+    <li><b>Adımlar:</b> 1 kimlik + parola → 2 şube seçimi (birden çok şubede yetki varsa; tek şubede atlanır). İki adımlı doğrulama açıksa şubeden önce kod sorulur. Üstteki çubuk adımı gösterir.</li>
+    <li><b>Kimlik alanı:</b> TC kimlik no, telefon ya da e-posta (bugünkü gibi). Tarayıcı kimlik önerisi kapalı; "Kimliğimi hatırla" yalnız kimliği saklar, parolayı asla.</li>
+    <li><b>Parola:</b> göster/gizle gözü, Caps Lock uyarısı. Hata mesajı hangisinin yanlış olduğunu söylemez; kalan deneme hakkı ve kilit süresi yazar.</li>
+    <li><b>Şube kartları:</b> varsayılan ve salt okuma rozetle; şubenin bölümleri altında. "Bundan sonra bu şubeyle aç" kişinin varsayılan şubesini değiştirir. Hoş geldin satırında son giriş zamanı (beklenmedik giriş fark edilsin).</li>
+    <li><b>e-İmza / e-Devlet:</b> kurumda entegrasyon hesabı tanımlıysa görünür; yoksa ayraç ve iki düğme çıkmaz.</li>
+    <li><b>Demo girişler:</b> yalnız demo kurulumunda (bugünkü gibi).</li>
+    <li><b>Dil:</b> sağ üstte TR / EN / AR; seçim girişten önce de uygulanır ve kullanıcı tercihine yazılır.</li>
+    <li><b>Şifremi unuttum ve ilk parola</b> aynı kartta, aynı görünümle; parola gücü çubuğu ve kurallar canlı işaretlenir.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelector('.mk').addEventListener('click', e => {
+  const s = e.target.closest('[data-d]'); if (!s) return;
+  document.querySelectorAll('.mk span').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('[data-durum]').forEach(k => k.hidden = k.dataset.durum !== s.dataset.d);
+});
+document.querySelectorAll('.sube .s').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.sube .s').forEach(x => x.classList.toggle('on', x === s));
+}));
+document.querySelectorAll('.goz').forEach(g => g.addEventListener('click', () => {
+  const i = g.parentElement.querySelector('input'); i.type = i.type === 'password' ? 'text' : 'password';
+}));
+</script>
+</body>
+</html>
