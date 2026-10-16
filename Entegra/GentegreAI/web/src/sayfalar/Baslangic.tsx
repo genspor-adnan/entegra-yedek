@@ -40,10 +40,12 @@ export function Baslangic() {
   const { kullanici, yetki } = useOturum();
   const [paneller, setPaneller] = useState<GostergePaneliOzet[] | null>(null);
   const [rolKutucuklari, setRolKutucuklari] = useState<BaslangicKutucugu[] | null>(null);
+  const [bekleyen, setBekleyen] = useState<Awaited<ReturnType<typeof api.baslangicBekleyen>> | null>(null);
 
   useEffect(() => {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
     void api.baslangic().then(setRolKutucuklari).catch(() => setRolKutucuklari([]));
+    void api.baslangicBekleyen().then(setBekleyen).catch(() => setBekleyen(null));
   }, [kullanici?.id, kullanici?.subeId]);
 
   const menu = useMemo(() => menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller),
@@ -111,6 +113,27 @@ export function Baslangic() {
           </button>
           {son.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
             <div className="bsl-kartlar bsl-tek-sira">{son.map(ekranKart)}</div></>}
+          {/* BEKLEYEN İŞLER (kullanıcı 16.10.2026): konsültasyon / sonucu gelen istem / bugünkü randevu;
+              kart ilgili ekrana gider (o ekrana yetki yoksa tıklanmaz). */}
+          {bekleyen && (() => {
+            const ekranVar = (yol: string) => ekranlar.some(e => e.yol.split('?')[0] === yol);
+            const isler = [
+              { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
+                y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor') },
+              { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi') },
+              { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
+                y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}` },
+            ];
+            return <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
+              <div className="bsl-kartlar">{isler.map(i => (
+                <a key={i.yol} className={`bsl-kart${ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
+                   onClick={() => { if (ekranVar(i.yol)) git(i.yol) }}>
+                  <span className="bsl-kart-i">{i.ic}</span>
+                  <span className="bsl-kart-a">{i.ad}</span>
+                  <span className="bsl-kart-y">{i.y}</span>
+                </a>))}
+              </div></>;
+          })()}
           <div className="bsl-bolum">{c('Ekranlarım')}</div>
           <div className="bsl-kartlar">
             {ekranlar.map(ekranKart)}

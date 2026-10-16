@@ -6477,6 +6477,8 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kart-a { font-weight: 700; color: var(--baslik, #14315a) }
 .bsl-kart-y { font-size: 10.5px; color: var(--soluk) }
 .bsl-kartlar.bsl-tek-sira { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+.bsl-kart.bsl-kart-pasif { cursor: default }
+.bsl-kart.bsl-kart-pasif:hover { border-color: var(--cizgi); background: var(--yuz) }
 .bsl-kutu { border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; background: var(--yuz) }
 .bsl-kb { display: flex; align-items: center; gap: 7px; padding: 8px 12px; font-weight: 700; color: var(--yazi2);
   background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }

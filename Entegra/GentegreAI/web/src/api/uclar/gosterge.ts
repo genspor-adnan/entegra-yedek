@@ -21,4 +21,7 @@ export const gostergeUclari = {
       `/api/gosterge/${encodeURIComponent(kod)}`),
   /** Rollerin elle düzenlenmiş Başlangıç kutucukları (boşsa ekran menüden öneri çizer). */
   baslangic: () => istek<BaslangicKutucugu[]>('/api/baslangic'),
+  /** Sade başlangıç "Bekleyen işler" - oturumun kişisine (16.10.2026). */
+  baslangicBekleyen: () => istek<{ konsultasyon: number; konsultasyonGecikmis: number; istemSonuc: number;
+                                   randevu: number; randevuBekleyen: number }>('/api/baslangic/bekleyen'),
 };

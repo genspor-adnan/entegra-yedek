@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -63,6 +63,42 @@ public static class GostergeUclari
                 """, null, [kod], iptal) ?? throw GentegreHatasi.Bulunamadi("Gösterge paneli bulunamadı.");
             return Results.Content(json, "application/json; charset=utf-8");
         });
+
+        // GET /api/baslangic/bekleyen - SADE BAŞLANGIÇ "Bekleyen işler" (kullanıcı 16.10.2026:
+        //   "bekleyen konsültasyonlar, sonucu gelen istemler, bugünkü randevular"). Hepsi OTURUMUN
+        //   KİŞİSİNE: konsültasyon bana ya da (hekim seçilmemişse) bölümüme gelen, yanıt bekleyen;
+        //   istem benim istediğim, son 7 günde sonucu gelen (lab sonuçlandı / onaylandı, radyoloji
+        //   onaylandı / teslim); randevu bugün benim, iptal / gelmedi dışı. Yetki: oturum yeter -
+        //   sayılar kişinin kendi işi; ekrana geçiş o ekranın yetkisine bağlı.
+        yol.MapGet("/api/baslangic/bekleyen", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            await using var b = await veri.AcAsync(iptal);
+            var json = await b.TekDegerAsync<string>("""
+                with ben as (select t.id, t.departman from public.taraf t where t.id = @p0)
+                select jsonb_build_object(
+                  'konsultasyon', (select count(*) from public.konsultasyon k, ben
+                                    where k.durum in (1, 2) and (@p1 = 0 or k.sube_id = @p1)
+                                      and (k.hedef_hekim_id = ben.id
+                                           or (k.hedef_hekim_id is null and k.hedef_bolum_id = ben.departman))),
+                  'konsultasyonGecikmis', (select count(*) from public.konsultasyon k, ben
+                                    where k.durum in (1, 2) and k.son_zaman < now() and (@p1 = 0 or k.sube_id = @p1)
+                                      and (k.hedef_hekim_id = ben.id
+                                           or (k.hedef_hekim_id is null and k.hedef_bolum_id = ben.departman))),
+                  'istemSonuc', (select count(*) from public.lab_istem li
+                                  where li.personel_id = @p0 and li.durum in (4, 5)
+                                    and li.sonuc_tarihi >= current_date - 6)
+                              + (select count(*) from public.radyoloji_istem ri
+                                  where ri.istek_hekim_id = @p0 and ri.durum in (5, 6)
+                                    and ri.degistirme_tarihi >= current_date - 6),
+                  'randevu', (select count(*) from public.randevu r
+                               where r.hekim_id = @p0 and r.baslangic::date = current_date and r.durum in (1, 2)),
+                  'randevuBekleyen', (select count(*) from public.randevu r
+                               where r.hekim_id = @p0 and r.baslangic::date = current_date and r.durum = 1)
+                )::text
+                """, null, [baglam.KullaniciId, baglam.SubeId ?? 0], iptal);
+            return Results.Content(json ?? "{}", "application/json; charset=utf-8");
+        }).WithTags("Gösterge panelleri").RequireAuthorization();
 
         // GET /api/baslangic - kullanıcının ROLLERİNİN elle düzenlenmiş Başlangıç kutucukları.
         //   Satır yoksa boş döner: ekran rolün yetkili menüsünden öneri çizer. Satırdaki
