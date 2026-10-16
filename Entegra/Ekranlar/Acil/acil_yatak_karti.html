@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acil Servis — Yatak Kartı — Mockup (GenoTIP AI · Acil)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  .durumlar{display:flex;gap:6px;flex-wrap:wrap}
+  .durumlar span{border:1px solid #cdd6e0;border-radius:4px;padding:4px 10px;font-size:11.5px;background:#fff;cursor:pointer}
+  .durumlar span.on{font-weight:bold}
+  .durumlar span.bos.on{background:#e6f2ea;border-color:#2e7d46;color:#2e7d46}
+  .durumlar span.dolu.on{background:#eef5fd;border-color:#2f6db3;color:#24527f}
+  .durumlar span.tem.on{background:#fdf3df;border-color:#c9a14a;color:#8a6218}
+  .durumlar span.kap.on{background:#fbeceb;border-color:#b3261e;color:#b3261e}
+  .alan-r{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .doluhasta{display:flex;align-items:center;gap:14px;padding:10px 12px;border:1px solid #cfe0f3;border-radius:6px;background:#f5f9fe;margin:8px 0}
+  .doluhasta .avt{width:40px;height:40px;border-radius:50%;background:#1c4374;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+  .doluhasta b{font-size:13px}
+  .doluhasta .sp{margin-left:auto;display:flex;gap:6px}
+  .donanim{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+  .donanim label{display:flex;align-items:center;gap:7px;border:1px solid #e3e9f0;border-radius:4px;padding:6px 9px;font-size:12px;background:#fff}
+  .donanim small{margin-left:auto;color:#6b7a8b}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🛏️ Acil Yatak Kartı — R-3</span>
+    <span class="sp"><span class="alan-r" style="background:#c62828"></span>Resüsitasyon · Dolu · 32 dk</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="sepv"></div>
+    <div class="btn">🔁 Hastayı Başka Yatağa Al</div>
+    <div class="btn">🧹 Temizliğe Al</div>
+    <div class="btn">⛔ Kullanım Dışı</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yatak Etiketi</div>
+    <div class="btn">Kapat</div>
+  </div>
+
+  <div class="hdr k6">
+    <div class="fld"><label>Kod *</label><div class="inp">R-3</div></div>
+    <div class="fld"><label>Ad *</label><div class="inp">Resüsitasyon 3</div></div>
+    <div class="fld"><label>Alan *</label><div class="inp combo"><span class="alan-r" style="background:#c62828"></span>Resüsitasyon (kırmızı)</div></div>
+    <div class="fld"><label>Sıra</label><div class="inp">3</div></div>
+    <div class="fld"><label>Şube</label><div class="inp ro">Merkez</div></div>
+    <div class="fld"><label>Aktif</label><div class="inp">☑ Kullanımda</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="durum">Durum</div>
+    <div class="sekme" data-s="donanim">Donanım<span class="sy">6</span></div>
+    <div class="sekme" data-s="gecmis">Kullanım Geçmişi<span class="sy">5</span></div>
+    <div class="sekme" data-s="temizlik">Temizlik &amp; Bakım<span class="sy">3</span></div>
+  </div>
+
+  <!-- ======================================================== DURUM ===== -->
+  <div class="pnl" data-s="durum">
+    <div class="grp">
+      <div class="gb">Yatak durumu <span class="sp">durum hasta yerleşince / çıkınca kendiliğinden değişir</span></div>
+      <div class="durumlar">
+        <span class="bos">🟢 Boş</span>
+        <span class="dolu on">🔵 Dolu</span>
+        <span class="tem">🟡 Temizlikte</span>
+        <span class="kap">🔴 Kullanım dışı</span>
+      </div>
+      <div class="doluhasta">
+        <span class="avt">AK</span>
+        <div><b>Ayten Koç</b> · 74 y · K · <span class="tri k2"></span>Triyaj 2<br>
+          <span class="sonuk">AC-2609-0338 · yerleşme 16:31 · Dr. Nöbetçi · İnme şüphesi</span></div>
+        <div class="sp">
+          <div class="btn mini">🗂️ Hasta Kartı</div>
+          <div class="btn mini">🔁 Taşı</div>
+        </div>
+      </div>
+    </div>
+    <div class="ozet">
+      <div class="kart"><div class="b">Bugün kullanım</div><div class="d">3 <small>hasta</small></div></div>
+      <div class="kart"><div class="b">Ort. kalış</div><div class="d">2 sa 10 <small>dk</small></div></div>
+      <div class="kart sari"><div class="b">Ort. boş bekleme</div><div class="d">18 <small>dk (temizlik dahil)</small></div></div>
+      <div class="kart"><div class="b">Doluluk (7 gün)</div><div class="d">%82</div></div>
+    </div>
+    <div class="statusbar">
+      <span>Temizlik bitmeden yatak <b>Boş</b> görünmez — triyaj ekranında atanamaz.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== DONANIM ===== -->
+  <div class="pnl" data-s="donanim" hidden>
+    <div class="grp">
+      <div class="gb">Yatak başı donanım <span class="sp">triyaj yatak önerisi bunu kullanır</span></div>
+      <div class="donanim">
+        <label><input type="checkbox" checked> Monitör <small>MN-114</small></label>
+        <label><input type="checkbox" checked> Ventilatör <small>VT-07</small></label>
+        <label><input type="checkbox" checked> Defibrilatör <small>DF-02</small></label>
+        <label><input type="checkbox" checked> Oksijen (duvar)</label>
+        <label><input type="checkbox" checked> Aspiratör</label>
+        <label><input type="checkbox" checked> İnfüzyon pompası <small>×2</small></label>
+        <label><input type="checkbox"> İzolasyon</label>
+        <label><input type="checkbox"> Pediatrik</label>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span>Cihaz kodu Biyomedikal envanterinden; bakımı geçmiş cihaz <b>kırmızı</b> görünür.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== GEÇMİŞ ====== -->
+  <div class="pnl" data-s="gecmis" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Hasta</th>
+          <th style="width:120px">Protokol</th>
+          <th style="width:110px" class="orta">Triyaj</th>
+          <th style="width:110px" class="orta">Giriş</th>
+          <th style="width:110px" class="orta">Çıkış</th>
+          <th style="width:90px" class="sag">Kalış</th>
+          <th>Çıkış şekli</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Ayten Koç</b></td><td>AC-2609-0338</td><td class="orta"><span class="tri k2"></span>2</td>
+            <td class="orta">16:31</td><td class="orta sonuk">—</td><td class="sag">32 dk</td><td class="sonuk">yatakta</td></tr>
+          <tr class="tik"><td>Hasan Er</td><td>AC-2609-0331</td><td class="orta"><span class="tri k1"></span>1</td>
+            <td class="orta">12:05</td><td class="orta">15:58</td><td class="sag">3 sa 53</td><td>Yatış — Koroner YB</td></tr>
+          <tr class="tik"><td>Melek Su</td><td>AC-2609-0322</td><td class="orta"><span class="tri k2"></span>2</td>
+            <td class="orta">08:40</td><td class="orta">11:30</td><td class="sag">2 sa 50</td><td>Taburcu</td></tr>
+          <tr class="tik"><td>Cem Tan</td><td>AC-2509-0517</td><td class="orta"><span class="tri k1"></span>1</td>
+            <td class="orta">dün 22:10</td><td class="orta">dün 23:55</td><td class="sag">1 sa 45</td><td>Sevk — Şehir Hst.</td></tr>
+          <tr class="tik"><td>Leyla Ak</td><td>AC-2509-0498</td><td class="orta"><span class="tri k2"></span>2</td>
+            <td class="orta">dün 17:20</td><td class="orta">dün 19:05</td><td class="sag">1 sa 45</td><td>Taburcu</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =================================================== TEMİZLİK ====== -->
+  <div class="pnl" data-s="temizlik" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px" class="orta">Başlama</th>
+          <th style="width:110px" class="orta">Bitiş</th>
+          <th style="width:130px">Tür</th>
+          <th style="width:150px">Yapan</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">15:58</td><td class="orta">16:20</td><td>Hasta sonrası temizlik</td><td>Pers. Aydın</td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td class="orta">11:30</td><td class="orta">11:52</td><td>Hasta sonrası temizlik</td><td>Pers. Aydın</td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td class="orta">14.10 09:00</td><td class="orta">14.10 10:15</td><td><span class="rz sari">Bakım</span></td><td>Biyomedikal</td><td class="sonuk">Monitör kalibrasyonu</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>"Temizliğe Al" süreyi başlatır; temizlik bitince yatak kendiliğinden <b>Boş</b> olur.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yatak: <b>R-3</b></span>
+    <span>Alan: <b>Resüsitasyon</b></span>
+    <span>Durum: <b>Dolu</b></span>
+    <span class="sp">Son değişiklik 16:31 · Hem. Deniz</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Tanım üstte, işletim sekmelerde.</b> Kod / ad / alan / sıra / aktif (bugünkü <code>acil_yatak</code>
+      kolonları) başlıkta; durum, donanım, geçmiş ve temizlik sekmelerde.</li>
+    <li><b>Dört durum:</b> Boş · Dolu · Temizlikte · Kullanım dışı. Dolu ve Boş elle seçilmez; hasta
+      yerleşince / çıkınca değişir. Temizlikte ve Kullanım dışı elle (düğmeyle) verilir.</li>
+    <li><b>Temizlik bitmeden yatak boş görünmez:</b> hasta çıkınca yatak Temizlikte'ye düşer; triyaj
+      yatak atamasında yalnız Boş yataklar listelenir.</li>
+    <li><b>Donanım triyaja öneri verir:</b> ventilatör / monitör / izolasyon işaretleri, kırmızı alan
+      hastasına uygun yatağı öne alır. Cihaz kodları Biyomedikal envanterinden.</li>
+    <li><b>Kullanım geçmişi ve süreler</b> takip panosundaki "yatak doluluk / boş bekleme" göstergelerinin
+      kaynağı.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
