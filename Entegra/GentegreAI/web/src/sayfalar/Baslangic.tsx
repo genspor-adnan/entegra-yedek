@@ -72,10 +72,56 @@ export function Baslangic() {
 
   const elle = (rolKutucuklari?.length ?? 0) > 0;
   const kutucuklar = elle ? rolKutucuklari! : oneri;
-  /** Menüdeki bütün ekranlar (grup sırasıyla) - az ise büyük ikonlu karolar. */
-  const ekranlar = useMemo(() => menu.flatMap(s => (s.tur === 'duz' ? [s.m] : s.alt))
+  /** Menüdeki bütün ekranlar (grup sırasıyla, grup adıyla) - az ise sade başlangıç. */
+  const ekranlar = useMemo(() => menu.flatMap(s => (s.tur === 'duz'
+      ? [{ ...s.m, grup: '' }] : s.alt.map(m => ({ ...m, grup: s.ad }))))
     .filter(m => m.yol !== '/panel'), [menu]);
-  const buyukIkon = ekranlar.length > 0 && ekranlar.length < BUYUK_IKON_SINIRI;
+  const sade = ekranlar.length > 0 && ekranlar.length < BUYUK_IKON_SINIRI;
+  /** Son açılanlar / favoriler (kabuk menü tercihleri, kullanıcı başına tarayıcıda). */
+  const yerelListe = (anahtar: string): string[] => {
+    try { const l = JSON.parse(localStorage.getItem(`${anahtar}.${kullanici?.id ?? 0}`) ?? '[]'); return Array.isArray(l) ? l : [] }
+    catch { return [] }
+  };
+  const ekranBul = (yol: string) => ekranlar.find(e => e.yol === yol || e.yol.split('?')[0] === yol.split('?')[0]);
+  const ekranKart = (e: { yol: string; ad: string; ic: string; grup: string }) => (
+    <a key={e.yol} className="bsl-kart" onClick={() => git(e.yol)}>
+      <span className="bsl-kart-i"><MenuIkon ic={e.ic || '📁'} /></span>
+      <span className="bsl-kart-a">{c(e.ad)}</span>
+      {e.grup && <span className="bsl-kart-y">{c(e.grup)}</span>}
+    </a>
+  );
+
+  // SADE BAŞLANGIÇ (kullanıcı 16.10.2026, mockup Ekranlar/Ayarlar/ana_ekran_sekmeli.html): az ekranlı
+  //   kullanıcıda ortalanmış tek sütun - selam, büyük arama, son açılanlar / sık kullandıklarım /
+  //   ekranlarım küçük kartlar (ikon · ad · grup).
+  if (sade) {
+    const son = yerelListe('sonMenuler').map(ekranBul).filter(Boolean).slice(0, 8) as typeof ekranlar;
+    const fav = yerelListe('favoriler').map(ekranBul).filter(Boolean) as typeof ekranlar;
+    return (
+      <div className="sahne bsl-sade">
+        <div className="bsl-sade-ic">
+          <h1>{selam()}, {kullanici?.ad ?? ''}</h1>
+          <div className="bsl-sade-alt">
+            {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            {kullanici?.rolAdi ? ` · ${kullanici.rolAdi}` : ''}
+            {' · '}{c('Açmak istediğiniz ekranı yazın; açtıklarınız üstte sekme olarak kalır.')}
+          </div>
+          <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
+            🔍 <span>{c('Ne açmak istiyorsunuz?')}</span><kbd>Ctrl K</kbd>
+          </button>
+          {son.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
+            <div className="bsl-kartlar">{son.map(ekranKart)}</div></>}
+          {fav.length > 0 && <><div className="bsl-bolum">{c('Sık kullandıklarım')}</div>
+            <div className="bsl-kartlar">{fav.map(ekranKart)}</div></>}
+          <div className="bsl-bolum">{c('Ekranlarım')}</div>
+          <div className="bsl-kartlar">
+            {ekranlar.map(ekranKart)}
+            {(paneller ?? []).map(p => ekranKart({ yol: `/gosterge/${p.kod}`, ad: p.ad, ic: p.ikon || '📊', grup: c('Gösterge Panelleri') }))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -94,24 +140,8 @@ export function Baslangic() {
         </button>
 
         <div className="bsl-bolum">{c('Ekranlarım')}
-          {!elle && !buyukIkon && rolKutucuklari !== null && <span className="sonuk"> · {c('rolünüz için önerilen düzen')}</span>}
+          {!elle && rolKutucuklari !== null && <span className="sonuk"> · {c('rolünüz için önerilen düzen')}</span>}
         </div>
-        {buyukIkon ? (
-          <div className="bsl-karolar">
-            {ekranlar.map(m => (
-              <a key={m.yol} className="bsl-karo" onClick={() => git(m.yol)}>
-                <span className="bsl-karo-ic"><MenuIkon ic={m.ic || '📁'} /></span>
-                <span className="bsl-karo-ad">{c(m.ad)}</span>
-              </a>
-            ))}
-            {(paneller ?? []).map(p => (
-              <a key={p.kod} className="bsl-karo" onClick={() => git(`/gosterge/${p.kod}`)}>
-                <span className="bsl-karo-ic"><MenuIkon ic={p.ikon || '📊'} /></span>
-                <span className="bsl-karo-ad">{c(p.ad)}</span>
-              </a>
-            ))}
-          </div>
-        ) : (
         <div className="bsl-kutular">
           {(paneller?.length ?? 0) > 0 && (
             <div className="bsl-kutu bsl-gp">
@@ -137,7 +167,6 @@ export function Baslangic() {
             </div>
           ))}
         </div>
-        )}
       </div>
     </>
   );
