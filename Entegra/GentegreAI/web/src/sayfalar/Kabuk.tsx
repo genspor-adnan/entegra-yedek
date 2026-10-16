@@ -1,5 +1,5 @@
 import { basHarfler as basHarfHesapla } from '../bilesenler/basHarfler';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { mesaj } from '../bilesenler/mesaj';
@@ -16,7 +16,7 @@ import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate, useNavigationType, useOutlet } from 'react-router-dom';
 import { useEkranSekmeleri } from './kabuk/EkranSekmeleri';
-import { PALET_AC_OLAYI } from './Baslangic';
+import { PALET_AC_OLAYI, PALET_GIT_OLAYI } from './Baslangic';
 import type { GostergePaneliOzet } from '../api/uclar/gosterge';
 import { gorunumOku, GORUNUM_OLAYI } from '../bilesenler/gorunum';
 import { menuYolu, yolEslesir } from '../bilesenler/taleplerim/personelTalebi';
@@ -121,7 +121,10 @@ export function Kabuk() {
     const eslesen = hepsi
       .filter(m => yolEslesir(yol, m.yol))
       .sort((a, b) => b.yol.length - a.yol.length)[0];
-    if (eslesen) tercih.sonKaydet(eslesen.yol);
+    // KART ADRESİ LİSTE SAYILMAZ (16.10.2026): "/muayene/19" kayıtlı kart araması ya da bağlantıyla
+    //   açılır - "Muayene Listesi" son açılanlara girmesin; kartın kendisi palet işlemiyle yazılır.
+    const kartAdresi = !!eslesen && /^\/[^/]+$/.test(yol.slice(eslesen.yol.split('?')[0].length));
+    if (eslesen && !kartAdresi) tercih.sonKaydet(eslesen.yol);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [konum.pathname, konum.state, satirlar]);
 
@@ -286,6 +289,26 @@ export function Kabuk() {
     const ac = () => setPaletAcik(true);
     window.addEventListener(PALET_AC_OLAYI, ac);
     return () => window.removeEventListener(PALET_AC_OLAYI, ac);
+  }, []);
+  /**
+   * PALET İŞLEMİ (ekran ya da "Kayıtlı ... Kartı"). KAYITLI KART ARAMASI SON AÇILANLARA GİRER
+   * (kullanıcı 16.10.2026: "aramada kayıtlı muayene kartı seçip açtım, son açılanlara girmedi") -
+   * rota değişimi yalnız menü ekranını yazıyordu. Başlangıç'taki son açılan kartı da buradan açar.
+   */
+  const paletGit = (yol: string) => {
+    if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
+    tercih.sonKaydet(yol);
+    const kartYol = yol.slice(KAYITLI_ONEK.length);
+    if (SABIT_ARAMA[kartYol]) { setKayitliArama(SABIT_ARAMA[kartYol]); return }
+    if (STOK_ARAMA[kartYol]) { setStokArama(STOK_ARAMA[kartYol]); return }
+    setKayitliListe(kartListeleri.find(l => kartSekmeYolu(l) === kartYol) ?? null);
+  };
+  const paletGitRef = useRef(paletGit);
+  paletGitRef.current = paletGit;
+  useEffect(() => {
+    const f = (e: Event) => { const yol = (e as CustomEvent<string>).detail; if (yol) paletGitRef.current(yol) };
+    window.addEventListener(PALET_GIT_OLAYI, f);
+    return () => window.removeEventListener(PALET_GIT_OLAYI, f);
   }, []);
 
   /** Bayraktan dil degistir - Kullanici Ayarlari'ndaki kutuyla ayni ucu cagirir. */
@@ -488,13 +511,7 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={yol => {
-                     if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
-                     const kartYol = yol.slice(KAYITLI_ONEK.length);
-                     if (SABIT_ARAMA[kartYol]) { setKayitliArama(SABIT_ARAMA[kartYol]); return }
-                     if (STOK_ARAMA[kartYol]) { setStokArama(STOK_ARAMA[kartYol]); return }
-                     setKayitliListe(kartListeleri.find(l => kartSekmeYolu(l) === kartYol) ?? null);
-                   }}
+                   git={paletGit}
                    ekEkranlar={panelEkranlari} />
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
       {stokArama && (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import type { BaslangicKutucugu, GostergePaneliOzet } from '../api/uclar/gosterge';
@@ -7,9 +7,15 @@ import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/menuAgaci';
 import { LISTELER } from './Liste';
+import { kartAdi, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
+import { SekmeGorunurBaglami } from '../bilesenler/sekmeBaglami';
 
 /** Başlangıç'taki büyük arama kutusu Kabuk'un komut paletini açar. */
 export const PALET_AC_OLAYI = 'gentegre-palet-ac';
+/** Palet işlemini çalıştırır (detail = palet yolu, ör. "#kayitli:/muayene") - Kabuk dinler. */
+export const PALET_GIT_OLAYI = 'gentegre-palet-git';
+/** Palet "Kayıtlı ... Kartı" işleminin öneki (Kabuk ile aynı). */
+const KAYITLI_ONEK = '#kayitli:';
 
 function selam(): string {
   const s = new Date().getHours();
@@ -84,9 +90,21 @@ export function Baslangic() {
     try { const l = JSON.parse(localStorage.getItem(`${anahtar}.${kullanici?.id ?? 0}`) ?? '[]'); return Array.isArray(l) ? l : [] }
     catch { return [] }
   };
-  const ekranBul = (yol: string) => ekranlar.find(e => e.yol === yol || e.yol.split('?')[0] === yol.split('?')[0]);
+  // Sekme her görününce yeniden çizilir: son açılanlar o anki tercihlerden okunur (sekme açık kalır).
+  useContext(SekmeGorunurBaglami);
+  const ekranBul = (yol: string) => {
+    // "Kayıtlı ... Kartı" palet işlemi: kartı sekmede açılan liste (menüde olan) - tıklayınca aynı arama.
+    if (yol.startsWith(KAYITLI_ONEK)) {
+      const kartYol = yol.slice(KAYITLI_ONEK.length);
+      const l = LISTELER.find(x => kartSekmesiVar(x) && kartSekmeYolu(x) === kartYol);
+      const menude = ekranlar.find(e => e.yol.split('?')[0] === `/${l?.rota ?? l?.kaynak}`);
+      return l && menude ? { yol, ad: `Kayıtlı ${kartAdi(l)}`, ic: '📂', grup: menude.grup } : undefined;
+    }
+    return ekranlar.find(e => e.yol === yol || e.yol.split('?')[0] === yol.split('?')[0]);
+  };
   const ekranKart = (e: { yol: string; ad: string; ic: string; grup: string }) => (
-    <a key={e.yol} className="bsl-kart" onClick={() => git(e.yol)}>
+    <a key={e.yol} className="bsl-kart" onClick={() => e.yol.startsWith(KAYITLI_ONEK)
+         ? window.dispatchEvent(new CustomEvent(PALET_GIT_OLAYI, { detail: e.yol })) : git(e.yol)}>
       <span className="bsl-kart-i"><MenuIkon ic={e.ic || '📁'} /></span>
       <span className="bsl-kart-a">{c(e.ad)}</span>
       {e.grup && <span className="bsl-kart-y">{c(e.grup)}</span>}
