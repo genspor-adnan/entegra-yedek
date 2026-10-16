@@ -1,7 +1,9 @@
 import { basHarfler } from './basHarfler';
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
+import { mesaj } from './mesaj';
 import { tarihSaat } from './bicim';
 import { OlcumGrafigi } from './OlcumGrafigi';
 import { OncekiKopyaPenceresi } from './MuayeneSekmeleri';
@@ -254,11 +256,70 @@ export function MuayeneSolMenu({ kontrol, git, muayeneyeAl, istemRozeti, islemle
 
 /* ========================================================== SAĞ SÜTUN ==== */
 
-export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi, tazele = 0 }: {
+/**
+ * KULLANDIĞI İLAÇLAR - ✎ / 💾 (kullanıcı 16.10.2026: "tıkladığımda edit moda geçmeli ve sürekli
+ * kullandığı ilaçları kısa isimlerle eklemeliyim"). Düzenlemede kısa adla yazılır ("Coraspin 100
+ * 1x1"), Enter ekler; sondaki "1x1" / "2x1" periyot olarak ayrılır. × ilacı BIRAKILDI yapar (kartın
+ * "Bıraktı"sı: aktif 0, uyum 3, bitiş bugün) - kayıt silinmez, geçmişte kalır.
+ */
+function IlacKutusu({ bilgi, onDegisti }: { bilgi: MuayeneHastaBilgisi | null; onDegisti?(): void }) {
+  const [duzen, setDuzen] = useState(false);
+  const [metin, setMetin] = useState('');
+  const [mesgul, setMesgul] = useState(false);
+  const hastaId = Number(bilgi?.ust?.tarafId ?? 0);
+  const ilaclar = bilgi?.ilac ?? [];
+  const ekle = async () => {
+    const t = metin.trim();
+    if (!t || !(hastaId > 0) || mesgul) return;
+    const p = /\s+(\d+\s*[x×]\s*\d+)$/i.exec(t);
+    setMesgul(true);
+    try {
+      await api.kartEkle('hasta-ilac', { kart: {
+        hastaId, ilacAd: p ? t.slice(0, p.index).trim() : t, periyot: p ? p[1].replace(/\s+/g, '').replace('×', 'x') : '',
+        kaynak: 2, uyum: 1, aktif: 1 } });
+      setMetin('');
+      onDegisti?.();
+    } catch (h) { mesaj(hataMetni(h)) }
+    finally { setMesgul(false) }
+  };
+  const birak = async (id: number) => {
+    setMesgul(true);
+    try {
+      const k = await api.kartOku('hasta-ilac', id);
+      await api.kartGuncelle('hasta-ilac', id, { surum: k.kart.surum as string | undefined,
+        kart: { aktif: 0, uyum: 3, bitis: new Date().toLocaleDateString('sv-SE') } });
+      onDegisti?.();
+    } catch (h) { mesaj(hataMetni(h)) }
+    finally { setMesgul(false) }
+  };
+  return (
+    <div className="myp-k">
+      <div className="myp-b myp-tik" onClick={() => setDuzen(d => !d)} title={duzen ? c('Gösterime dön') : c('Düzenle')}>
+        {c('Kullandığı ilaçlar')} <span className="not">{duzen ? '💾' : '✎'}</span></div>
+      {bilgi && ilaclar.length === 0 && !duzen && <div className="not">{c('Kayıtlı ilaç yok.')}</div>}
+      {ilaclar.map((i, n) => (
+        <div key={n} className="myp-s">{m(i.ilacAd)}
+          <span className="not">{[m(i.doz), m(i.periyot)].filter(Boolean).join(' ')}
+            {duzen && <button type="button" className="myp-x" disabled={mesgul} title={c('Bıraktı (listeden çıkar)')}
+                              onClick={() => void birak(Number(i.id))}>×</button>}</span></div>
+      ))}
+      {duzen && (
+        <input className="myp-ilac-gir" value={metin} disabled={mesgul} autoFocus
+               placeholder={c('Kısa adla ekle, Enter (ör. Coraspin 100 1x1)')}
+               onChange={e => setMetin(e.target.value)}
+               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void ekle() } else if (e.key === 'Escape') setDuzen(false) }} />
+      )}
+    </div>
+  );
+}
+
+export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi, onIlacDegisti, tazele = 0 }: {
   muayeneId: number;
   bilgi: MuayeneHastaBilgisi | null;
   gecmis: Satir[];
   onKopyalandi(): void;
+  /** Kullandığı ilaç eklendi / bırakıldı - hasta bilgisi yeniden okunsun. */
+  onIlacDegisti?(): void;
   /** İstem açılınca / kaydedilince bekleyen istemler yeniden okunur. */
   tazele?: number;
 }) {
@@ -286,13 +347,7 @@ export function MuayeneYanPanel({ muayeneId, bilgi, gecmis, onKopyalandi, tazele
   }, [muayeneId, tazele]);
   return (
     <div className="myp">
-      <div className="myp-k">
-        <div className="myp-b">{c('Kullandığı ilaçlar')}</div>
-        {bilgi && bilgi.ilac.length === 0 && <div className="not">{c('Kayıtlı ilaç yok.')}</div>}
-        {(bilgi?.ilac ?? []).map((i, n) => (
-          <div key={n} className="myp-s">{m(i.ilacAd)}<span className="not">{[m(i.doz), m(i.periyot)].filter(Boolean).join(' ')}</span></div>
-        ))}
-      </div>
+      <IlacKutusu bilgi={bilgi} onDegisti={onIlacDegisti} />
       <div className="myp-k">
         <div className="myp-b">{c('Son sonuçlar')} <span className="not">· {c('tıkla: grafik')}</span></div>
         {bilgi && bilgi.sonuclar.length === 0 && <div className="not">{c('Onaylı sonuç yok.')}</div>}

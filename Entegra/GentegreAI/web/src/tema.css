@@ -6478,6 +6478,9 @@ textarea.fm-giris { resize: vertical }
 .myp-s { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0 }
 .myp-s .not { margin-left: 6px; white-space: nowrap }
 .myp-tik { cursor: pointer; border-radius: 3px } .myp-tik:hover { background: var(--satirust) }
+/* Kullandığı ilaçlar düzenleme kipi (16 Ekim 2026): × bıraktı, kısa adla ekleme kutusu. */
+.myp-x { margin-left: 6px; border: 0; background: transparent; color: var(--hata, #b3261e); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px }
+.myp-ilac-gir { width: 100%; margin-top: 6px; height: 28px; padding: 0 8px; border: 1px solid var(--cizgi); border-radius: 4px; font-size: 12.5px }
 .myp-kir { color: var(--hata); font-weight: 600 }
 .myp-kopya { border: 0; background: none; cursor: pointer; color: var(--vurgu); font-size: 13px; padding: 0 4px }
 
