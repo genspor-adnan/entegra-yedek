@@ -107,6 +107,8 @@ export function Kabuk() {
   //   kendi kancasinda: kabuk/useMenuTercihleri.
   const tercih = useMenuTercihleri(kullanici?.id,
       { aktif: kullanici?.subeId, liste: kullanici?.subeler ?? [], degistir: subeDegistir });
+  /** Ekran sayacının son saydığı gezinme (adres anahtarı + ekran). */
+  const sayilanAdres = useRef('');
 
   /**
    * KAYIT NOKTASI ROTA DEGISIMI (menu tiklamasi DEGIL): ayni ekrana favoriden,
@@ -124,7 +126,13 @@ export function Kabuk() {
     // KART ADRESİ LİSTE SAYILMAZ (16.10.2026): "/muayene/19" kayıtlı kart araması ya da bağlantıyla
     //   açılır - "Muayene Listesi" son açılanlara girmesin; kartın kendisi palet işlemiyle yazılır.
     const kartAdresi = !!eslesen && /^\/[^/]+$/.test(yol.slice(eslesen.yol.split('?')[0].length));
-    if (eslesen && !kartAdresi) { tercih.sonKaydet(eslesen.yol); tercih.sayacArtir(eslesen.yol) }
+    if (eslesen && !kartAdresi) {
+      tercih.sonKaydet(eslesen.yol);
+      // SAYAÇ ADRES BAŞINA BİR KEZ: effect menü satırları yeniden kurulunca da çalışır; her seferinde
+      //   artırmak Kabuk'u yeniden çizip sonsuz döngüye sokuyordu ("Maximum update depth").
+      const anahtar = `${konum.key}|${eslesen.yol}`;
+      if (sayilanAdres.current !== anahtar) { sayilanAdres.current = anahtar; tercih.sayacArtir(eslesen.yol) }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [konum.pathname, konum.state, satirlar]);
 
