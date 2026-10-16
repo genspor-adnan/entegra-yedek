@@ -8354,3 +8354,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ay-baslik { display: inline-flex; align-items: center; gap: 14px; flex: 1 }
 .ay-baslik-sag { margin-left: auto; font-size: 12px; font-weight: normal; color: var(--soluk); display: inline-flex; align-items: center; gap: 4px }
 .ay-alan { display: inline-block; width: 10px; height: 10px; border-radius: 2px }
+.ay-donanim { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px }
+.ay-donanim label { display: flex; align-items: center; gap: 7px; border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 4px; padding: 6px 9px; font-size: 12px; background: var(--yuz); cursor: pointer }
+.ay-donanim label.on { border-color: #9fc0e6; background: #f5f9fe }
+.ay-donanim small { margin-left: auto; color: var(--soluk); display: inline-flex; align-items: center; gap: 3px }
+.ay-donanim small input { width: 46px; height: 22px; padding: 0 4px }
+

@@ -4,7 +4,7 @@ import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOze
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
-import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi,
+import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDonanimSekmesi, AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi,
          AcilYatakTemizlikSekmesi } from '../../bilesenler/acil/AcilYatakSekmeleri';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
@@ -1176,6 +1176,8 @@ export function ListeKarti({
               { anahtar: 'ozel:ay-durum', baslik: 'Durum',
                 ciz: b => <AcilYatakDurumSekmesi yatakId={kartId} durum={Number(b.deger.durum ?? 0)} tazele={kartTazele}
                                                  onDegisti={() => setKartTazele(t => t + 1)} git={git} /> },
+              // Donanım: katalog grubu yerine mockup karoları (aynı kart alanları).
+              { anahtar: 'ozel:ay-donanim', baslik: 'Donanım', ciz: b => <AcilYatakDonanimSekmesi b={b} /> },
               { anahtar: 'ozel:ay-gecmis', baslik: 'Kullanım Geçmişi',
                 ciz: () => <AcilYatakGecmisSekmesi yatakId={kartId} tazele={kartTazele} git={git} /> },
               { anahtar: 'ozel:ay-temizlik', baslik: 'Temizlik & Bakım',

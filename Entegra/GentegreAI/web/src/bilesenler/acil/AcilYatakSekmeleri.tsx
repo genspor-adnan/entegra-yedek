@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { AcilYatakAyrinti } from '../../api/uclar/acil';
+import type { EkSekmeBaglami } from '../GenForm';
 import { c } from '../../dil/ceviri';
 import { tarihSaat } from '../bicim';
 import { guvenli, listeSor, mesaj, metinSor } from '../mesaj';
@@ -120,6 +121,48 @@ export function AcilYatakAraclari({ yatakId, deger, tazele, onDegisti }: {
         : <button type="button" className="d" disabled={!!hasta} onClick={() => void degistir(3)}>⛔ {c('Kullanım Dışı')}</button>}
       <button type="button" className="d" onClick={etiket}>🖨️ {c('Yatak Etiketi')}</button>
     </>
+  );
+}
+
+/**
+ * DONANIM SEKMESİ (mockup): "Yatak başı donanım" kutusunda karolar - işaret + ad; infüzyon
+ * pompasında adet. Değerler kart alanlarına yazılır (Kaydet ile kalıcı).
+ */
+const DONANIM: { ad: string; baslik: string; adet?: boolean }[] = [
+  { ad: 'monitor', baslik: 'Monitör' }, { ad: 'ventilator', baslik: 'Ventilatör' },
+  { ad: 'defibrilator', baslik: 'Defibrilatör' }, { ad: 'oksijen', baslik: 'Oksijen (duvar)' },
+  { ad: 'aspirator', baslik: 'Aspiratör' }, { ad: 'infuzyon', baslik: 'İnfüzyon pompası', adet: true },
+  { ad: 'izolasyon', baslik: 'İzolasyon' }, { ad: 'pediatrik', baslik: 'Pediatrik' },
+];
+export function AcilYatakDonanimSekmesi({ b }: { b: EkSekmeBaglami }) {
+  const acik = (v: unknown) => v === true || Number(v ?? 0) > 0;
+  // Mantık alanı kartta boolean ya da 0/1 gelebilir - gelen biçimde geri yazılır.
+  const yaz = (ad: string, isaret: boolean) =>
+    b.alanYaz(ad, typeof b.deger[ad] === 'boolean' ? isaret : (isaret ? 1 : 0));
+  return (
+    <div className="ay-sekme">
+      <div className="kagrup">
+        <h6>{c('Yatak başı donanım')} <span className="not">· {c('triyaj yatak önerisi ve pano bunu kullanır')}</span></h6>
+        <div className="ay-donanim">
+          {DONANIM.map(d => {
+            const v = b.deger[d.ad];
+            return (
+              <label key={d.ad} className={acik(v) ? 'on' : ''}>
+                <input type="checkbox" checked={acik(v)} disabled={b.saltOkunur}
+                       onChange={e => d.adet ? b.alanYaz(d.ad, e.target.checked ? Math.max(1, Number(v ?? 0)) : 0) : yaz(d.ad, e.target.checked)} />
+                {c(d.baslik)}
+                {d.adet && acik(v) && (
+                  <small>× <input type="number" min={1} max={20} value={Number(v ?? 0)} disabled={b.saltOkunur}
+                                  onClick={e => e.stopPropagation()}
+                                  onChange={e => b.alanYaz(d.ad, Math.max(0, Number(e.target.value || 0)))} /></small>
+                )}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+      <p className="not">{c('Değişiklik Kaydet ile yazılır. Cihaz kodları ileride Biyomedikal envanterinden bağlanacak.')}</p>
+    </div>
   );
 }
 
