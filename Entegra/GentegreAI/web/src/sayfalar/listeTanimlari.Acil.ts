@@ -80,7 +80,9 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
     kaynak: 'acilYatak', rota: 'acil-yatak',
     baslik: 'Acil Yatakı Listesi',
     yol: 'Acil › Yatak Listesi',
-    kartYolu: '/acil-yatak', kartBaslik: 'Acil Yatağı',
+    kartYolu: '/acil-yatak', kartBaslik: 'Acil Yatak',
+    // Tanım üst şeritte; "Kimlik" grubunun kalanı (durum) Durum sekmesinde - ayrı sekme açılmaz.
+    gizliKartSekmeleri: ['Kimlik'],
     aksiyonEkrani: 'acil-yatak-liste',
     cipler: [
       { ad: 'Boş',   filtre: { alan: 'durum', op: 'esit', deger: 0 } },

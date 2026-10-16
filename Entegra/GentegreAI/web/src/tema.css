@@ -8351,4 +8351,6 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ay-ozet > div { border: 1px solid var(--cizgi); border-radius: 6px; padding: 8px 10px; background: var(--yuz); display: flex; flex-direction: column; gap: 2px }
 .ay-ozet span { font-size: 11px; color: var(--soluk) }
 .ay-ozet b { font-size: 16px; color: var(--yazi2) }
-
+.ay-baslik { display: inline-flex; align-items: center; gap: 14px; flex: 1 }
+.ay-baslik-sag { margin-left: auto; font-size: 12px; font-weight: normal; color: var(--soluk); display: inline-flex; align-items: center; gap: 4px }
+.ay-alan { display: inline-block; width: 10px; height: 10px; border-radius: 2px }

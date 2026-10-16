@@ -121,15 +121,16 @@ public static partial class KartKatalogu
         SubeKolonu: "sube_id",
         Alanlar: new KartAlani[]
         {
-            new("kod", "kod", "metin", Zorunlu: true, Baslik: "Yatak Kodu", EnFazlaUzunluk: 20),
-            new("ad", "ad", "metin", Baslik: "Ad", EnFazlaUzunluk: 80),
+            // TANIM ŞERİTTE (mockup): kimlik grubu kartın üstünde hep görünür, ayrı "Genel" sekmesi yok.
+            new("kod", "kod", "metin", Zorunlu: true, Baslik: "Kod", EnFazlaUzunluk: 20, Grup: "Kimlik"),
+            new("ad", "ad", "metin", Baslik: "Ad", EnFazlaUzunluk: 80, Grup: "Kimlik"),
             new("alan", "alan", "kod", Zorunlu: true, Baslik: "Alan",
-                SabitKodlar: AcKartAlanKodlari),
+                SabitKodlar: AcKartAlanKodlari, Grup: "Kimlik"),
             // DURUM ELLE YAZILMAZ (1118, mockup acil_yatak_karti): Dolu / Boş hasta yerleşince / çıkınca
             //   değişir; Temizlikte / Kullanım dışı kartın Durum sekmesindeki düğmelerle (ucu loglar).
-            new("durum", "durum", "kod", Baslik: "Durum", SabitKodlar: AcKartYatakDurumKodlari, Yazilabilir: false),
-            new("sira", "sira", "sayi", Baslik: "Sıra"),
-            new("aktif", "aktif", "mantik", Baslik: "Aktif"),
+            new("durum", "durum", "kod", Baslik: "Durum", SabitKodlar: AcKartYatakDurumKodlari, Yazilabilir: false, Grup: "Kimlik"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Kimlik"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
             // YATAK BAŞI DONANIM (1118): triyajın yatak önerisi ve panonun "uygun yatak" bilgisi.
             new("monitor", "monitor", "mantik", Baslik: "Monitör", Grup: "Donanım"),
             new("ventilator", "ventilator", "mantik", Baslik: "Ventilatör", Grup: "Donanım"),

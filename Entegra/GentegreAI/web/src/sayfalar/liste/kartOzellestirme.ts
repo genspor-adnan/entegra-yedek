@@ -54,6 +54,11 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   'goz-goruntuleme': {
     sekmeSirasi: ['Görüntü & ölçümler', 'Karşılaştırma', 'Ölçüm girişi', 'Biyometri / IOL', 'Değerlendirme'],
   },
+  // ACİL YATAK (mockup Ekranlar/Acil/acil_yatak_karti): tanım üstte şeritte, sekmeler işletim.
+  'acilYatak': {
+    seritAlanlari: ['kod', 'ad', 'alan', 'sira', 'aktif'],
+    sekmeSirasi: ['Durum', 'Donanım', 'Kullanım Geçmişi', 'Temizlik & Bakım'],
+  },
   'yatis-order': {
     seritAlanlari: ['tur', 'ad', 'baslangic', 'bitis', 'hekimId', 'durum'],
     sekmeSirasi: ['Order', 'Doz planı', 'Uygulamalar', 'Güvenlik kontrolleri', 'Geçmiş'],

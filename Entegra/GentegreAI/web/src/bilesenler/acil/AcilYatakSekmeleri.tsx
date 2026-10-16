@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import type { AcilYatakAyrinti } from '../../api/uclar/acil';
 import { c } from '../../dil/ceviri';
 import { tarihSaat } from '../bicim';
-import { guvenli, mesaj, metinSor } from '../mesaj';
+import { guvenli, listeSor, mesaj, metinSor } from '../mesaj';
 import { ACIL_CIKIS_SEKLI, ACIL_TRIYAJ_RENK } from './acilKodlari';
 
 /**
@@ -24,7 +24,8 @@ const gunSaat = (z: string | null | undefined) => {
   return new Date(z).toDateString() === new Date().toDateString() ? t.slice(11, 16) : `${t.slice(0, 5)} ${t.slice(11, 16)}`;
 };
 const sure = (dk: number | null | undefined) =>
-  dk == null ? '—' : dk >= 60 ? `${Math.floor(dk / 60)} sa ${dk % 60}` : `${dk} dk`;
+  dk == null ? '—' : dk >= 1440 ? `${Math.floor(dk / 1440)} gün ${Math.floor((dk % 1440) / 60)} sa`
+  : dk >= 60 ? `${Math.floor(dk / 60)} sa ${dk % 60} dk` : `${dk} dk`;
 
 function useAyrinti(yatakId: number, tazele: number) {
   const [a, setA] = useState<AcilYatakAyrinti | null>(null);
@@ -34,6 +35,92 @@ function useAyrinti(yatakId: number, tazele: number) {
     return () => { iptal = true };
   }, [yatakId, tazele]);
   return a;
+}
+
+/** Alan renk / ad (acil_yatak.alan: 1 resüsitasyon · 2 müşahede · 3 yeşil · 4 izolasyon · 5 travma). */
+export const ACIL_ALAN: Record<number, { ad: string; renk: string }> = {
+  1: { ad: 'Resüsitasyon', renk: '#c62828' }, 2: { ad: 'Müşahede', renk: '#f9a825' },
+  3: { ad: 'Yeşil alan', renk: '#2e7d32' }, 4: { ad: 'İzolasyon', renk: '#6a1b9a' }, 5: { ad: 'Travma', renk: '#d84315' },
+};
+const durumAdi = (d: number) => DURUM.find(x => x.kod === d)?.ad ?? '';
+
+/** Hastayı başka (boş, aktif) yatağa taşır - acil başvurunun yatak ucu; eski yatak temizliğe düşer. */
+async function hastayiTasi(basvuruId: number, yatakId: number): Promise<boolean> {
+  const y = await api.liste('acilYatak', { sayfa: 1, boyut: 200, filtre: { op: 'and', kosullar: [
+    { alan: 'durum', op: 'esit', deger: 0 }, { alan: 'aktif', op: 'esit', deger: 1 }] } });
+  const bos = y.satirlar.filter(s => Number(s.id) !== yatakId);
+  if (bos.length === 0) { mesaj(c('Boş yatak yok.')); return false }
+  const sec = await listeSor(c('Hasta hangi yatağa taşınsın?'),
+    bos.map(s => ({ kod: String(s.id), ad: `${String(s.kod ?? '')} · ${String(s.ad ?? '')} · ${String(s.alanAdi ?? '')}` })),
+    String(bos[0].id), c('Yatak'));
+  if (!sec) return false;
+  await api.acilYatak(basvuruId, Number(sec));
+  return true;
+}
+
+/**
+ * BAŞLIK EKİ (mockup): "— R-3" ve sağda alan rengi · durum · dolu yatakta süre. Durum yataktaki
+ * hastadan okunur (kayıttaki durum eski olabilir).
+ */
+export function AcilYatakBaslik({ yatakId, deger, tazele }: { yatakId: number; deger: Record<string, unknown>; tazele: number }) {
+  const a = useAyrinti(yatakId, tazele);
+  const alan = ACIL_ALAN[Number(deger.alan ?? 0)];
+  const durum = a?.hasta ? 1 : Number(deger.durum ?? 0);
+  const yer = a?.hasta?.yerlesme ?? a?.hasta?.giris;
+  const dk = durum === 1 && yer ? Math.max(0, Math.round((Date.now() - new Date(yer).getTime()) / 60000)) : null;
+  return (
+    <span className="ay-baslik">
+      <b>— {String(deger.kod ?? '')}</b>
+      <span className="ay-baslik-sag">
+        {alan && <><span className="ay-alan" style={{ background: alan.renk }} />{c(alan.ad)}</>}
+        {' · '}{c(durumAdi(durum))}{dk !== null ? ` · ${sure(dk)}` : ''}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * ARAÇ ÇUBUĞU (mockup): Hastayı Başka Yatağa Al · Temizliğe Al · Kullanım Dışı / Kullanıma Aç ·
+ * Yatak Etiketi. Kural uçta da var; düğme yalnız uygun durumda etkin.
+ */
+export function AcilYatakAraclari({ yatakId, deger, tazele, onDegisti }: {
+  yatakId: number; deger: Record<string, unknown>; tazele: number; onDegisti(): void;
+}) {
+  const a = useAyrinti(yatakId, tazele);
+  const hasta = a?.hasta ?? null;
+  const durum = hasta ? 1 : Number(deger.durum ?? 0);
+  const degistir = (yeni: 0 | 2 | 3) => guvenli(async () => {
+    let not: string | undefined;
+    if (yeni === 3) {
+      const n = await metinSor(c('Yatak kullanım dışı yapılsın - triyajda atanamaz. Neden?'), '', c('Arıza / bakım / kapatma'));
+      if (n === null) return;
+      not = n.trim() || undefined;
+    }
+    await api.acilYatakDurum(yatakId, yeni, not);
+    onDegisti();
+  });
+  const etiket = () => {
+    const alan = ACIL_ALAN[Number(deger.alan ?? 0)];
+    const w = window.open('', '_blank', 'width=420,height=300');
+    if (!w) return;
+    w.document.write(`<html><head><title>${String(deger.kod ?? '')}</title></head><body style="font-family:Trebuchet MS,sans-serif;text-align:center;padding:24px">
+      <div style="font-size:64px;font-weight:bold">${String(deger.kod ?? '')}</div>
+      <div style="font-size:20px">${String(deger.ad ?? '')}</div>
+      <div style="font-size:16px;margin-top:6px;color:${alan?.renk ?? '#333'}">${alan?.ad ?? ''}</div></body></html>`);
+    w.document.close(); w.focus(); w.print();
+  };
+  return (
+    <>
+      <button type="button" className="d" disabled={!hasta}
+              onClick={() => void guvenli(async () => { if (hasta && await hastayiTasi(hasta.basvuruId, yatakId)) onDegisti() })}>
+        🔁 {c('Hastayı Başka Yatağa Al')}</button>
+      <button type="button" className="d" disabled={!!hasta || durum !== 0} onClick={() => void degistir(2)}>🧹 {c('Temizliğe Al')}</button>
+      {durum === 2 || durum === 3
+        ? <button type="button" className="d onay" onClick={() => void degistir(0)}>✓ {c(durum === 2 ? 'Temizlik Bitti' : 'Kullanıma Aç')}</button>
+        : <button type="button" className="d" disabled={!!hasta} onClick={() => void degistir(3)}>⛔ {c('Kullanım Dışı')}</button>}
+      <button type="button" className="d" onClick={etiket}>🖨️ {c('Yatak Etiketi')}</button>
+    </>
+  );
 }
 
 /** Durum sekmesi: dört durum, yataktaki hasta, günlük özet. */
@@ -82,8 +169,12 @@ export function AcilYatakDurumSekmesi({ yatakId, durum, tazele, onDegisti, git }
               <div className="not">{[hasta.protokolNo, hasta.yerlesme ? `${c('yerleşme')} ${saat(hasta.yerlesme)}` : `${c('geliş')} ${gunSaat(hasta.giris)}`,
                                     hasta.hekimAd, hasta.sikayet].filter(Boolean).join(' · ')}</div>
             </div>
-            <button type="button" className="d" style={{ marginLeft: 'auto' }}
-                    onClick={() => git(`/acil-basvuru/${hasta.basvuruId}`)}>🗂️ {c('Hasta Kartı')}</button>
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+              <button type="button" className="d" onClick={() => git(`/acil-basvuru/${hasta.basvuruId}`)}>🗂️ {c('Hasta Kartı')}</button>
+              <button type="button" className="d"
+                      onClick={() => void guvenli(async () => { if (await hastayiTasi(hasta.basvuruId, yatakId)) onDegisti() })}>
+                🔁 {c('Taşı')}</button>
+            </span>
           </div>
         )}
       </div>

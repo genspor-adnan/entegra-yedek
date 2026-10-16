@@ -4,7 +4,8 @@ import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOze
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
-import { AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi, AcilYatakTemizlikSekmesi } from '../../bilesenler/acil/AcilYatakSekmeleri';
+import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi,
+         AcilYatakTemizlikSekmesi } from '../../bilesenler/acil/AcilYatakSekmeleri';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
@@ -503,7 +504,8 @@ export function ListeKarti({
         // KART KENDİ SEKMESİNDE: çerçevesiz, ilk alana odak; sekme başlığı = kaydın adı.
         sayfaKipi={yeniSekmede}
         // HASTA KARTI: Sil ve Hesap İcmali kartta yok (kullanıcı 14.10.2026) - listede durur.
-        silYok={tanim.kaynak === 'hasta'}
+        // ACİL YATAK KARTI: Sil kartta yok (mockup) - listede durur.
+        silYok={tanim.kaynak === 'hasta' || tanim.kaynak === 'acilYatak'}
         onYuklendi={yeniSekmede ? d => {
           // SEKME BAŞLIĞI = kaydın adı: unvan, ad + soyad, sonra kaynakların ortak ad alanları;
           //   hiçbiri yoksa "Randevu Kartı #30" (kart adı + kayıt no).
@@ -520,7 +522,7 @@ export function ListeKarti({
         sekmeGruplari={tanim.kaynak === 'goz-muayene' ? GOZ_SEKME_GRUPLARI : undefined}
         // Başlık rozetleri (kullanıcı): H hasta no · P protokol no.
         // DÖF (1050): başlıkta '#id' yok - numara baslikEk rozetinde.
-        baslikRozet={(tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim') && kartId !== 'yeni' ? <></> : tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
+        baslikRozet={(tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' || tanim.kaynak === 'acilYatak') && kartId !== 'yeni' ? <></> : tanim.kaynak === 'goz-goruntuleme' && gorOnizleme ? (
           <>
             {String(gorOnizleme.kayit.hastaNo ?? '') && <span className="rozet gri" title={c('Hasta no')}>No {String(gorOnizleme.kayit.hastaNo)}</span>}
             {String(gorOnizleme.kayit.protokol ?? '') && <span className="rozet gri" title={c('Protokol no')}>Prt {String(gorOnizleme.kayit.protokol)}</span>}
@@ -1097,7 +1099,9 @@ export function ListeKarti({
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak'].includes(tanim.kaynak)}
-        baslikEk={tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
+        baslikEk={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+          ? d => <AcilYatakBaslik yatakId={kartId} deger={d} tazele={kartTazele} />
+          : tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
           // Durum rozeti Tamamla'nın sağında (kullanıcı 15.10.2026).
           ? (d) => <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
           // LAB ISTEM NUMARASI BASLIKTA (kullanici: "kaydedince otomatik
@@ -1449,7 +1453,10 @@ export function ListeKarti({
             <button type="button" className={muayeneDuzeni === 'sekmesiz' ? 'on' : ''}
                     onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
           </span>) : undefined}
-        ekAraclar={tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
+        // ACİL YATAK (mockup araç çubuğu): taşı · temizliğe al · kullanım dışı / kullanıma aç · etiket.
+        ekAraclar={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+          ? d => <AcilYatakAraclari yatakId={kartId} deger={d} tazele={kartTazele} onDegisti={() => setKartTazele(t => t + 1)} />
+          : tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
           : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
           : tanim.kaynak === 'kys-toplanti' ? (d) => <ToplantiAraclari deger={d} />
           : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
