@@ -136,6 +136,9 @@ export function Baslangic() {
           {bekleyen && (() => {
             const ekranVar = (yol: string) => ekranlar.some(e => e.yol.split('?')[0] === yol);
             const isler = [
+              // ONAY (kullanıcı 16.10.2026): yalnız onay bekleyen varsa - kart Onayımdakiler'e gider.
+              ...(bekleyen.onay > 0 ? [{ yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
+                y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler') }] : []),
               { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
                 y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor') },
               { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi') },

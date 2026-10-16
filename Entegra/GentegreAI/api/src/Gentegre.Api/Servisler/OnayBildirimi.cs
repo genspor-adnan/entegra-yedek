@@ -342,7 +342,7 @@ public sealed class OnayBildirimi
     }
 
     /// <summary>Karar ucundakiyle AYNI eşleme (tek kaynak olmalı).</summary>
-    private static string AksiyonKodu(string akisKod, short rol) => akisKod switch
+    internal static string AksiyonKodu(string akisKod, short rol) => akisKod switch
     {
         "satinalma.talep" => rol switch
         {

@@ -23,5 +23,7 @@ export const gostergeUclari = {
   baslangic: () => istek<BaslangicKutucugu[]>('/api/baslangic'),
   /** Sade başlangıç "Bekleyen işler" - oturumun kişisine (16.10.2026). */
   baslangicBekleyen: () => istek<{ konsultasyon: number; konsultasyonGecikmis: number; istemSonuc: number;
-                                   randevu: number; randevuBekleyen: number }>('/api/baslangic/bekleyen'),
+                                   randevu: number; randevuBekleyen: number;
+                                   /** Onayımdakiler: kararı bende olan basamaklar (+ geciken). */
+                                   onay: number; onayGeciken: number }>('/api/baslangic/bekleyen'),
 };

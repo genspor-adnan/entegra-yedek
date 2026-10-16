@@ -1,4 +1,5 @@
 ﻿using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -97,7 +98,31 @@ public static class GostergeUclari
                                where r.hekim_id = @p0 and r.baslangic::date = current_date and r.durum = 1)
                 )::text
                 """, null, [baglam.KullaniciId, baglam.SubeId ?? 0], iptal);
-            return Results.Content(json ?? "{}", "application/json; charset=utf-8");
+
+            // ONAY BEKLEYENLER (kullanıcı 16.10.2026: "bekleyen işlere onaylanacak bir şey varsa onlar da
+            //   gelmeli"): Onayımdakiler kutusunun (v_onay_kutusu) karar sırası bende olan basamakları -
+            //   bana / vekâletle bana atanmış, ya da rol basamağında karar aksiyonu yetkim olan. Rol
+            //   eşlemesi bildirimdekiyle aynı (OnayBildirimi.AksiyonKodu).
+            var onaylar = await b.ListeAsync("""
+                select coalesce(v.akis_kod, ''), coalesce(v.rol, 0)::smallint, (v.atanan_kullanici_id is not null) as kisiye,
+                       count(*)::int as adet, count(*) filter (where v.gecikme_gun > 0)::int as geciken
+                  from public.v_onay_kutusu v
+                 where v.durum = 0 and (@p1 = 0 or v.sube_id = @p1)
+                   and (v.atanan_kullanici_id is null
+                        or v.atanan_kullanici_id = @p0
+                        or exists (select 1 from public.onay_vekalet k
+                                    where k.devreden_id = v.atanan_kullanici_id and k.devralan_id = @p0 and k.aktif = 1
+                                      and current_date between k.baslangic and k.bitis))
+                 group by 1, 2, 3
+                """, null, [baglam.KullaniciId, baglam.SubeId ?? 0],
+                o => (Akis: o.GetString(0), Rol: o.GetInt16(1), Kisiye: o.GetBoolean(2), Adet: o.GetInt32(3), Geciken: o.GetInt32(4)),
+                iptal);
+            var benim = onaylar.Where(x => x.Kisiye
+                || (OnayBildirimi.AksiyonKodu(x.Akis, x.Rol) is { Length: > 0 } kod && baglam.Yetkiler.AksiyonVar(kod))).ToList();
+            var nesne = System.Text.Json.Nodes.JsonNode.Parse(json ?? "{}")!.AsObject();
+            nesne["onay"] = benim.Sum(x => x.Adet);
+            nesne["onayGeciken"] = benim.Sum(x => x.Geciken);
+            return Results.Content(nesne.ToJsonString(), "application/json; charset=utf-8");
         }).WithTags("Gösterge panelleri").RequireAuthorization();
 
         // GET /api/baslangic - kullanıcının ROLLERİNİN elle düzenlenmiş Başlangıç kutucukları.
