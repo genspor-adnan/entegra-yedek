@@ -95,7 +95,8 @@ export function Baslangic() {
   //   kullanıcıda ortalanmış tek sütun - selam, büyük arama, son açılanlar / ekranlarım küçük kartlar
   //   (ikon · ad · grup). "Sık kullandıklarım" yok (kullanıcı 16.10.2026: "gerek yok").
   if (sade) {
-    const son = yerelListe('sonMenuler').map(ekranBul).filter(Boolean).slice(0, 8) as typeof ekranlar;
+    // Son açılanlar tek sıra: 4 ekran (kullanıcı 16.10.2026).
+    const son = yerelListe('sonMenuler').map(ekranBul).filter(Boolean).slice(0, 4) as typeof ekranlar;
     return (
       <div className="sahne bsl-sade">
         <div className="bsl-sade-ic">
@@ -109,7 +110,7 @@ export function Baslangic() {
             🔍 <span>{c('Ne açmak istiyorsunuz?')}</span><kbd>Ctrl K</kbd>
           </button>
           {son.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
-            <div className="bsl-kartlar">{son.map(ekranKart)}</div></>}
+            <div className="bsl-kartlar bsl-tek-sira">{son.map(ekranKart)}</div></>}
           <div className="bsl-bolum">{c('Ekranlarım')}</div>
           <div className="bsl-kartlar">
             {ekranlar.map(ekranKart)}
