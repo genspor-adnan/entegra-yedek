@@ -3,7 +3,7 @@ import { api } from '../api/istemci';
 import { TABAN } from '../api/cekirdek';
 import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { c } from '../dil/ceviri';
+import { aktifDil, c, ceviriDinle, ceviriYukle } from '../dil/ceviri';
 import { sonKullaniciOku } from '../kimlik/sonKullanici';
 import { ParolaGirdisi } from '../bilesenler/ParolaGirdisi';
 
@@ -14,7 +14,7 @@ import { ParolaGirdisi } from '../bilesenler/ParolaGirdisi';
  * kullanici hangi subede calistigini bilerek girsin.)
  */
 export function Giris() {
-  const { girisYap } = useOturum();
+  const { girisYap, dilDegistir } = useOturum();
   // Son başarılı girişin kodu öntanımlı; hiç giriş yoksa eski varsayılan.
   const [kod, setKod] = useState(() => sonKullaniciOku() ?? 'admin');
   const [parola, setParola] = useState('');
@@ -42,6 +42,25 @@ export function Giris() {
   //   kod, kodla yeni parola. 1. adim kullanici kodu, 2. adim kod + parola.
   const [unuttumAdim, setUnuttumAdim] = useState<0 | 1 | 2>(0);
   const [dogrulamaKodu, setDogrulamaKodu] = useState('');
+  /**
+   * DİL SEÇİMİ (kullanıcı 16.10.2026: "login üste dil seçimi gelmeli"): sözlük oturumsuz iner
+   * (/api/ceviri). Seçim tarayıcıda saklanır; girişten sonra kullanıcının tercihine yazılır.
+   */
+  const [, yeniden] = useState(0);
+  useEffect(() => ceviriDinle(() => yeniden(n => n + 1)), []);
+  const girisDili = (() => { try { const v = localStorage.getItem('gentegre.girisDil'); return v === null ? null : Number(v) } catch { return null } })();
+  useEffect(() => { if (girisDili !== null) void ceviriYukle(girisDili) }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  const dilSec = (d: number) => {
+    try { localStorage.setItem('gentegre.girisDil', String(d)) } catch { /* yoksay */ }
+    void ceviriYukle(d);
+  };
+  const dilSecici = (
+    <div className="giris-dil" role="group" aria-label="Dil / Language">
+      {[[0, 'TR'], [1, 'EN'], [2, 'DE']].map(([d, ad]) => (
+        <button key={d} type="button" className={aktifDil() === d ? 'on' : ''} onClick={() => dilSec(Number(d))}>{ad}</button>
+      ))}
+    </div>
+  );
   /** CAPS LOCK UYARISI (giriş v2): parola alanında büyük harf kilidi açıksa. */
   const [capsAcik, setCapsAcik] = useState(false);
   const capsIzle = (e: React.KeyboardEvent<HTMLInputElement>) => setCapsAcik(e.getModifierState('CapsLock'));
@@ -73,7 +92,7 @@ export function Giris() {
   /* GİRİŞ PENCERESİ v2 (kullanıcı 16.10.2026, mockup Ekranlar/Ayarlar/giris_ekrani_v2.html): ortada
      tek pencere - solda dar marka şeridi (sembol + ürün adı, slogan, "YZ destekli"), sağda form.
      BASE_URL: uygulama alt yolda yayinda (/genotipai) - mutlak "/..." 404 verir. */
-  const pencere = (form: React.ReactNode) => <GirisPenceresi baslik={baslik}>{form}</GirisPenceresi>;
+  const pencere = (form: React.ReactNode) => <GirisPenceresi baslik={baslik} ust={dilSecici}>{form}</GirisPenceresi>;
   /** Adım çubuğu: 1 kimlik + parola, 2 şube. */
   const adimCubugu = (n: 1 | 2) => <div className="giris-adim"><i className="on" /><i className={n === 2 ? 'on' : ''} /></div>;
 
@@ -83,7 +102,7 @@ export function Giris() {
   async function ilkParola(e: React.FormEvent) {
     e.preventDefault();
     setHata(null); setBilgi(null);
-    if (ilkAdim === 2 && yeni1 !== yeni2) { setHata('Parolalar aynı değil.'); return }
+    if (ilkAdim === 2 && yeni1 !== yeni2) { setHata(c('Parolalar aynı değil.')); return }
     setBekliyor(true);
     try {
       if (ilkAdim === 1) {
@@ -119,7 +138,7 @@ export function Giris() {
         setUnuttumAdim(2);
         return;
       }
-      if (yeni1 !== yeni2) { setHata('Parolalar aynı değil.'); return }
+      if (yeni1 !== yeni2) { setHata(c('Parolalar aynı değil.')); return }
       const y = await api.parolaUnuttumDogrula(kod, dogrulamaKodu, yeni1);
       setBilgi(y.mesaj);
       setUnuttumAdim(0);
@@ -130,6 +149,9 @@ export function Giris() {
       setBekliyor(false);
     }
   }
+
+  /** Girişte dil seçildiyse kullanıcının tercihine yazılır (oturum açılınca kabuk o dili yükler). */
+  const dilTercihiYaz = () => { if (girisDili !== null) void dilDegistir(girisDili).catch(() => {}) };
 
   async function gonder(e: React.FormEvent) {
     e.preventDefault();
@@ -145,9 +167,11 @@ export function Giris() {
           return;
         }
         await girisYap(kod, parola);
+        dilTercihiYaz();
       } else {
         // 2. adim: secilen sube ile giris
         await girisYap(kod, parola, subeId ?? undefined);
+        dilTercihiYaz();
       }
     } catch (h) {
       // Hesap var ama parolasi HIC tanimlanmamis: dogrudan parola belirleme
@@ -176,18 +200,18 @@ export function Giris() {
                                : c('Gelen kodu ve yeni parolanızı yazın.')}
           </p>
           <label>
-            Kimlik No/Telefon/E-Posta
+            {c('Kimlik No/Telefon/E-Posta')}
             <input value={kod} onChange={e => setKod(e.target.value)} autoFocus={unuttumAdim === 1}
                    autoComplete="off" readOnly={unuttumAdim === 2} />
           </label>
           {unuttumAdim === 1 ? (
             <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>
-              Hesabınızda kayıtlı cep telefonuna (yoksa e-posta adresine) 6 haneli doğrulama kodu gönderilir.
+              {c('Hesabınızda kayıtlı cep telefonuna (yoksa e-posta adresine) 6 haneli doğrulama kodu gönderilir.')}
             </p>
           ) : (
             <>
               <label>
-                Doğrulama kodu
+                {c('Doğrulama kodu')}
                 <input value={dogrulamaKodu} maxLength={6} inputMode="numeric" autoFocus autoComplete="one-time-code"
                        onChange={e => setDogrulamaKodu(e.target.value.replace(/\D/g, ''))} />
               </label>
@@ -195,27 +219,27 @@ export function Giris() {
                        onChange={e => setYeni1(e.target.value)} />
               </label>
               <label>
-                Yeni parola (tekrar)
+                {c('Yeni parola (tekrar)')}
                 <ParolaGirdisi value={yeni2} autoComplete="new-password"
                        onChange={e => setYeni2(e.target.value)} />
               </label>
-              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{c(PAROLA_KURALI)}</p>
             </>
           )}
           {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
           {hata && <div className="hata-kutusu">{hata}</div>}
           <button type="submit" disabled={bekliyor}>
-            {bekliyor ? 'Bekleyin…' : unuttumAdim === 1 ? 'Kod Gönder' : 'Parolayı Değiştir'}
+            {bekliyor ? c('Bekleyin…') : unuttumAdim === 1 ? c('Kod Gönder') : c('Parolayı Değiştir')}
           </button>
           {unuttumAdim === 2 && (
             <button type="button" className="d" style={{ marginTop: 8 }}
                     onClick={() => { setUnuttumAdim(1); setHata(null); setBilgi(null) }}>
-              Kodu yeniden iste
+              {c('Kodu yeniden iste')}
             </button>
           )}
           <button type="button" className="d" style={{ marginTop: 8 }}
                   onClick={() => { setUnuttumAdim(0); setHata(null); setBilgi(null) }}>
-            ← Girişe dön
+            ← {c('Girişe dön')}
           </button>
         </form>
     );
@@ -230,26 +254,25 @@ export function Giris() {
                            : c('İlk giriş — kodu ve yeni parolayı yazın')}
           </p>
           <label>
-            Kullanıcı (sicil no)
+            {c('Kullanıcı (sicil no)')}
             <input value={kod} onChange={e => setKod(e.target.value)} autoFocus={ilkAdim === 1}
                    readOnly={ilkAdim === 2} />
           </label>
           {ilkAdim === 1 ? (
             <>
               <label>
-                Kimlik No — son 4 hane
+                {c('Kimlik No — son 4 hane')}
                 <input value={tcknSon4} maxLength={4} inputMode="numeric"
                        onChange={e => setTcknSon4(e.target.value.replace(/\D/g, ''))} />
               </label>
               <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>
-                Bilgiler doğruysa hesabınızda kayıtlı cep telefonuna (yoksa e-posta adresine)
-                6 haneli doğrulama kodu gönderilir. Kayıtlı iletişim bilginiz yoksa yöneticinize başvurun.
+                {c('Bilgiler doğruysa hesabınızda kayıtlı cep telefonuna (yoksa e-posta adresine) 6 haneli doğrulama kodu gönderilir. Kayıtlı iletişim bilginiz yoksa yöneticinize başvurun.')}
               </p>
             </>
           ) : (
             <>
               <label>
-                Doğrulama kodu
+                {c('Doğrulama kodu')}
                 <input value={dogrulamaKodu} maxLength={6} inputMode="numeric" autoFocus autoComplete="one-time-code"
                        onChange={e => setDogrulamaKodu(e.target.value.replace(/\D/g, ''))} />
               </label>
@@ -257,27 +280,27 @@ export function Giris() {
                        onChange={e => setYeni1(e.target.value)} />
               </label>
               <label>
-                Yeni parola (tekrar)
+                {c('Yeni parola (tekrar)')}
                 <ParolaGirdisi value={yeni2} autoComplete="new-password"
                        onChange={e => setYeni2(e.target.value)} />
               </label>
-              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+              <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{c(PAROLA_KURALI)}</p>
             </>
           )}
           {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
           {hata && <div className="hata-kutusu">{hata}</div>}
           <button type="submit" disabled={bekliyor}>
-            {bekliyor ? 'Bekleyin…' : ilkAdim === 1 ? 'Kod Gönder' : 'Parolayı Belirle'}
+            {bekliyor ? c('Bekleyin…') : ilkAdim === 1 ? c('Kod Gönder') : c('Parolayı Belirle')}
           </button>
           {ilkAdim === 2 && (
             <button type="button" className="d" style={{ marginTop: 8 }}
                     onClick={() => { setIlkAdim(1); setHata(null); setBilgi(null) }}>
-              Kodu yeniden iste
+              {c('Kodu yeniden iste')}
             </button>
           )}
           <button type="button" className="d" style={{ marginTop: 8 }}
                   onClick={() => { setIlkAdim(0); setHata(null) }}>
-            ← Girişe dön
+            ← {c('Girişe dön')}
           </button>
         </form>
     );
@@ -295,7 +318,7 @@ export function Giris() {
         {subeler === null ? (
           <>
             <label>
-              Kimlik No/Telefon/E-Posta
+              {c('Kimlik No/Telefon/E-Posta')}
               {/* OTOMATIK TAMAMLAMA KAPALI (780, kullanici): kullanici adi
                   ve parola alanlarinda tarayicinin kayitli kimlik onerisi
                   cikmasin. Paroladaki "new-password", Chrome/Edge'in
@@ -304,7 +327,7 @@ export function Giris() {
                      autoComplete="off" />
             </label>
             <label>
-              Parola
+              {c('Parola')}
               {/* Kod hazır geliyorsa imleç doğrudan parolada. */}
               <ParolaGirdisi value={parola} autoComplete="new-password"
                      autoFocus={!!kod} onChange={e => setParola(e.target.value)}
@@ -332,13 +355,13 @@ export function Giris() {
         {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
         <button type="submit" disabled={bekliyor}>
-          {bekliyor ? 'Bekleyin…' : subeler === null ? c('Giriş') : c('Devam')}
+          {bekliyor ? c('Bekleyin…') : subeler === null ? c('Giriş Yap') : c('Devam')}
         </button>
         {subeler === null && (
           /* Metin bağlantısı (kullanıcı: "buton değil label olsun"). */
           <a href="#" className="giris-baglanti"
              onClick={e => { e.preventDefault(); setUnuttumAdim(1); setHata(null); setBilgi(null) }}>
-            Şifremi Unuttum
+            {c('Şifremi Unuttum')}
           </a>
         )}
         {subeler === null && demoGirisler.length > 0 && (
@@ -355,7 +378,7 @@ export function Giris() {
 }
 
 /** Giriş penceresi (v2): solda marka şeridi, sağda form - giriş ve zorunlu parola ekranları ortak. */
-export function GirisPenceresi({ baslik, children }: { baslik: string; children: React.ReactNode }) {
+export function GirisPenceresi({ baslik, children, ust }: { baslik: string; children: React.ReactNode; ust?: React.ReactNode }) {
   // MÜŞTERİ ADI + LOGOSU (kullanıcı 16.10.2026): ana şubenin anteti, oturumsuz marka ucundan.
   //   Son bilinen tarayıcıda saklanır - açılışta boş satır yanıp sönmesin.
   const [kurum, setKurum] = useState<{ ad: string; logo: boolean }>(() => {
@@ -392,7 +415,7 @@ export function GirisPenceresi({ baslik, children }: { baslik: string; children:
             <span>🤖 {c('YZ destekli')}</span>
           </div>
         </aside>
-        <div className="giris-sag">{children}</div>
+        <div className="giris-sag">{ust}{children}</div>
       </div>
     </div>
   );
