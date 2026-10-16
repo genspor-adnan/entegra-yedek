@@ -222,7 +222,8 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     //   Açıklama · İmza · Durum. Rapor no ve bitiş gizli - bitiş başlangıç +
     //   süreden hesaplanıyor (db/464).
     detaySecenekleri: {
-      raporlar: { gizli: ['raporNo', 'bitis'], sinif: 'rapor-gridi', sade: true },
+      // Rapor No görünür (1117: şablondan otomatik, kullanıcı 16.10.2026).
+      raporlar: { gizli: ['bitis'], sinif: 'rapor-gridi', sade: true },
     },
     seritAlanlari: ['bolumId', 'personelId', 'tur', 'ustMuayeneId',
                     'baslangic', 'bitis'],

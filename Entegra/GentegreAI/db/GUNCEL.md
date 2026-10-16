@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (578 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (579 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -526,6 +526,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_konsultasyon_yanit` | `1107_konsultasyon.sql` | — |
 | `tg_muayene_rapor_bitis` | `464_muayene_rapor_mockup.sql` | — |
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
+| `tg_muayene_rapor_no` | `1117_muayene_rapor_no.sql` | — |
 | `tg_muayene_vital_bki` | `1108_vital_bki_bosalt.sql` | 463_vital_bki.sql |
 | `tg_onay_adim_tek_imza` | `784_onay_tek_imza_ve_iskonto_rolu.sql` | — |
 | `tg_pat_gonderim_no` | `1104_patoloji.sql` | — |
@@ -827,7 +828,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_numara_tedarik` | `731_tedarik_numaralari.sql` | — |
 | `v_numara_turu_alis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
 | `v_numara_turu_ik` | `767_ik_talep_numaralari.sql` | — |
-| `v_numara_turu_kimlik` | `719_ameliyathane_acil_akis.sql` | 358_numara_sablonu_elle_girilir.sql, 633_lab_istem_no_ayari.sql, 634_hasta_belge_numaralari.sql, 635_recete_no_numaralandirma.sql |
+| `v_numara_turu_kimlik` | `1117_muayene_rapor_no.sql` | 358_numara_sablonu_elle_girilir.sql, 633_lab_istem_no_ayari.sql, 634_hasta_belge_numaralari.sql, 635_recete_no_numaralandirma.sql, 719_ameliyathane_acil_akis.sql |
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_satis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
 | `v_numara_turu_servis` | `773_teknik_servis.sql` | — |
