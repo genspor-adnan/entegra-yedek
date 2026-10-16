@@ -10,7 +10,11 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
  *   * istem ekranı muayenenin şablon panelleriyle açılır, seçilen panel sepete girer.
  */
 const api = { liste: vi.fn(), muayeneSablonTercihleri: vi.fn(), muayeneIstemAc: vi.fn(), muayeneYzTetkikOnerisi: vi.fn(),
-              makroKullanim: vi.fn(() => Promise.resolve({})) };
+              makroKullanim: vi.fn(() => Promise.resolve({})),
+              // Adet sistemi (16.10.2026): sık kullanılan yok, sayı yok.
+              katalogKullanilan: vi.fn(() => Promise.resolve({ sik: [], son: [], bolum: [] })),
+              katalogKullanimSayilari: vi.fn(() => Promise.resolve({ sayilar: {} })),
+              katalogKullanildi: vi.fn(() => Promise.resolve({})) };
 vi.mock('../api/istemci', () => ({ api }));
 vi.mock('../bilesenler/mesaj', () => ({
   mesaj: () => {}, onay: () => Promise.resolve(true), guvenli: (f: () => Promise<void>) => f(),

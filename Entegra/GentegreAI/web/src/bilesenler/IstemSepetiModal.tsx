@@ -34,6 +34,12 @@ const anahtar = (k: { tur: KalemTur; id: number }) => `${k.tur[0]}${k.id}`;
 const SABLON = 'S';
 /** YZ önerisi kategorisi (iki sekmede de; lab + görüntüleme birlikte). */
 const YZ = 'YZ';
+/** ADET SİSTEMİ (kullanıcı 16.10.2026: "ilaç ve tanı için yaptığın adet sistemini tetkik istem için de
+    yap"): sık kullanılan / bölümce kullanılan kategorileri ve Bölüm / Benim kolonları. Sayaç kaynağı
+    kalem türüne göre; göz tetkiklerinin katalog kaydı yok - sayılmaz. */
+const SIK = '__sik';
+const BOLUM = '__bolum';
+const SAYAC_KAYNAK: Record<KalemTur, string | null> = { tetkik: 'lab-tetkik', panel: 'lab-panel', radyoloji: 'hizmet', goz: null };
 const LAB_BOLUMLER = [
   { kod: '', ad: 'Tümü', ikon: '📋' },
   { kod: 'P', ad: 'Paneller', ikon: '📦' },
@@ -100,6 +106,8 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   const [gozTetkikler, setGozTetkikler] = useState<{ tetkik: number; kod: string; hizmetAd: string }[] | null>(null);
   /** Göz istemlerinin klinik sorusu (teknisyen + değerlendiren hekim görür). */
   const [gozSoru, setGozSoru] = useState('');
+  /** Bölüm / Benim sayıları: `${tur}:${id}`. */
+  const [sayilar, setSayilar] = useState<Record<string, { benim: number; bolum: number }>>({});
 
   useEffect(() => {
     let iptal = false;
@@ -107,8 +115,14 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
       if (iptal) return;
       const p = y.paneller.map(x => ({ id: x.id, kod: x.kod, ad: x.ad }) as ListeSatiri);
       setSablonPanel(p);
-      if (p.length > 0 && !elleSecti.current && baslangicSekme === 'lab') setKategori(SABLON);
+      if (p.length > 0 && !elleSecti.current && baslangicSekme === 'lab') setKategori(k => (k === SIK ? k : SABLON));
     }).catch(() => { /* şablon paneli yoksa kategori çıkmaz */ });
+    // İLK AÇILIŞTA SIK KULLANILANLAR (varsa) - şablon panelinden önce gelir.
+    if (baslangicSekme !== 'goz') {
+      const kaynaklar = baslangicSekme === 'radyoloji' ? ['hizmet'] : ['lab-tetkik', 'lab-panel'];
+      void Promise.all(kaynaklar.map(k => api.katalogKullanilan(k).catch(() => ({ sik: [] }))))
+        .then(l => { if (!iptal && !elleSecti.current && l.some(y => y.sik.length > 0)) setKategori(SIK) });
+    }
     return () => { iptal = true };
   }, [muayeneId, baslangicSekme]);
 
@@ -132,6 +146,24 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         ? { op: 'or', kosullar: ['kod', 'ad', 'kisaAd'].map(alan => ({
             alan, op: 'icerir' as const, deger: metin })) }
         : undefined;
+
+      if ((kategori === SIK || kategori === BOLUM) && sekme !== 'goz') {
+        const turler: KalemTur[] = sekme === 'radyoloji' ? ['radyoloji'] : ['panel', 'tetkik'];
+        const k = metin.toLocaleLowerCase('tr');
+        const parcalar = await Promise.all(turler.map(async tur => {
+          const kaynak = SAYAC_KAYNAK[tur]!;
+          const y = await api.katalogKullanilan(kaynak);
+          const idler = (kategori === SIK ? y.sik : y.bolum ?? []).map(x => Number(x.kod)).filter(n => n > 0);
+          if (idler.length === 0) return [];
+          const l = await api.liste(kaynak, { sayfa: 1, boyut: 100, filtre: { alan: 'id', op: 'icinde', deger: idler } });
+          const sira = new Map(idler.map((id, i) => [id, i]));
+          return [...l.satirlar].sort((a, b) => (sira.get(Number(a.id)) ?? 0) - (sira.get(Number(b.id)) ?? 0))
+            .filter(r => !k || `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.toLocaleLowerCase('tr').includes(k))
+            .map(r => ({ satir: r, tur }));
+        }));
+        setSatirlar(parcalar.flat());
+        return;
+      }
 
       if (sekme === 'goz') {
         let liste = gozTetkikler;
@@ -282,6 +314,12 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         } catch (h) { hatalar.push(`${k.ad} (${hataMetni(h)})`); }
       }
 
+      // SAYAÇ: açılan istemlerin kalemleri sık kullanılana yazılır (başarısız olan sayılmaz).
+      for (const k of kalemler) {
+        const kaynak = SAYAC_KAYNAK[k.tur];
+        if (kaynak && !hatalar.includes(k.ad || k.kod) && !(k.grup === 'lab' && hatalar.includes('laboratuvar')))
+          void api.katalogKullanildi(kaynak, String(k.id)).catch(() => {});
+      }
       mesaj(hatalar.length === 0
         ? `${acildi} istem açıldı.`
         : `${acildi} istem açıldı; başarısız: ${hatalar.join(', ')}.`);
@@ -291,7 +329,9 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   };
 
   const yzKategori = { kod: YZ, ad: 'YZ Önerisi', ikon: '🤖' };
-  const kategoriler = [yzKategori, ...(sekme === 'lab'
+  const adetKategorileri = sekme === 'goz' ? [] : [
+    { kod: SIK, ad: 'Sık Kullandıklarım', ikon: '⭐' }, { kod: BOLUM, ad: 'Bölüm Kullanılan', ikon: '⭐' }];
+  const kategoriler = [yzKategori, ...adetKategorileri, ...(sekme === 'lab'
     ? (sablonPanel.length > 0
         ? [{ kod: SABLON, ad: `Şablon Panelleri (${sablonPanel.length})`, ikon: '⭐' }, ...LAB_BOLUMLER]
         : LAB_BOLUMLER)
@@ -301,6 +341,20 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     ? (yz?.satirlar ?? []).filter(({ satir: r }) => !arama.trim()
         || `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.toLocaleLowerCase('tr').includes(arama.trim().toLocaleLowerCase('tr')))
     : satirlar;
+  // Bölüm / Benim sayıları: görünen satırların kaynak başına kodları.
+  const sayiAnahtari = gorunenSatirlar.map(x => `${x.tur}:${x.satir.id}`).join('|');
+  useEffect(() => {
+    if (!sayiAnahtari) return;
+    let iptal = false;
+    const gruplar = new Map<KalemTur, string[]>();
+    for (const x of gorunenSatirlar) if (SAYAC_KAYNAK[x.tur]) gruplar.set(x.tur, [...(gruplar.get(x.tur) ?? []), String(x.satir.id)]);
+    void Promise.all([...gruplar.entries()].map(([tur, idler]) =>
+      api.katalogKullanimSayilari(SAYAC_KAYNAK[tur]!, idler)
+        .then(y => Object.fromEntries(Object.entries(y.sayilar).map(([id, v]) => [`${tur}:${id}`, v]))).catch(() => ({}))))
+      .then(l => { if (!iptal) setSayilar(Object.assign({}, ...l)) });
+    return () => { iptal = true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sayiAnahtari]);
   const sepetListe = useMemo(() => [...sepet.entries()], [sepet]);
   const labSay = useMemo(() => [...sepet.values()].filter(k => k.grup === 'lab').length, [sepet]);
   const gozSay = useMemo(() => [...sepet.values()].filter(k => k.grup === 'goz').length, [sepet]);
@@ -375,6 +429,15 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
             {!yukleniyor && gorunenSatirlar.length === 0 && !(kategori === YZ && (yzHata || yz)) &&
               <div style={{ padding: 12, color: '#889' }}>Sonuç yok.</div>}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              {gorunenSatirlar.length > 0 && (
+                <thead><tr style={{ color: '#667', fontSize: 11.5, textAlign: 'left' }}>
+                  <th colSpan={4} />
+                  <th style={{ width: 52, padding: '3px 8px', textAlign: 'right', fontWeight: 600 }}
+                      title="Bölümünüzde kaç kez istendiği">Bölüm</th>
+                  <th style={{ width: 52, padding: '3px 8px', textAlign: 'right', fontWeight: 600 }}
+                      title="Sizin kaç kez istediğiniz">Benim</th>
+                </tr></thead>
+              )}
               <tbody>
                 {gorunenSatirlar.map(({ satir: r, tur }) => {
                   const k = kalemYap(r, tur);
@@ -392,9 +455,10 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
                       <td style={{ padding: '5px 6px' }}>{String(r.ad ?? '')}
                         {tur === 'goz' && r.hizmetAd ? <div style={{ fontSize: 11, color: '#889' }}>{String(r.hizmetAd)}</div> : null}
                         {r.gerekce ? <div className="yz-gerekce">{String(r.gerekce)}</div> : null}</td>
-                      <td style={{ width: 52, padding: '5px 8px', textAlign: 'right', color: '#9aa' }}
-                        title="Bugüne kadar istenme sayısı">
-                        {tur === 'tetkik' ? (Number(r.istemSay ?? 0) || '') : ''}</td>
+                      <td style={{ width: 52, padding: '5px 8px', textAlign: 'right', color: '#667' }}>
+                        {sayilar[`${tur}:${r.id}`]?.bolum || <span style={{ color: '#bbc' }}>—</span>}</td>
+                      <td style={{ width: 52, padding: '5px 8px', textAlign: 'right', color: '#667' }}>
+                        {sayilar[`${tur}:${r.id}`]?.benim || <span style={{ color: '#bbc' }}>—</span>}</td>
                     </tr>
                   );
                 })}
