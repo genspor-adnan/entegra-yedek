@@ -77,7 +77,7 @@ export function Baslangic() {
       ? [{ ...s.m, grup: '' }] : s.alt.map(m => ({ ...m, grup: s.ad }))))
     .filter(m => m.yol !== '/panel'), [menu]);
   const sade = ekranlar.length > 0 && ekranlar.length < BUYUK_IKON_SINIRI;
-  /** Son açılanlar / favoriler (kabuk menü tercihleri, kullanıcı başına tarayıcıda). */
+  /** Son açılanlar (kabuk menü tercihleri, kullanıcı başına tarayıcıda). */
   const yerelListe = (anahtar: string): string[] => {
     try { const l = JSON.parse(localStorage.getItem(`${anahtar}.${kullanici?.id ?? 0}`) ?? '[]'); return Array.isArray(l) ? l : [] }
     catch { return [] }
@@ -92,11 +92,10 @@ export function Baslangic() {
   );
 
   // SADE BAŞLANGIÇ (kullanıcı 16.10.2026, mockup Ekranlar/Ayarlar/ana_ekran_sekmeli.html): az ekranlı
-  //   kullanıcıda ortalanmış tek sütun - selam, büyük arama, son açılanlar / sık kullandıklarım /
-  //   ekranlarım küçük kartlar (ikon · ad · grup).
+  //   kullanıcıda ortalanmış tek sütun - selam, büyük arama, son açılanlar / ekranlarım küçük kartlar
+  //   (ikon · ad · grup). "Sık kullandıklarım" yok (kullanıcı 16.10.2026: "gerek yok").
   if (sade) {
     const son = yerelListe('sonMenuler').map(ekranBul).filter(Boolean).slice(0, 8) as typeof ekranlar;
-    const fav = yerelListe('favoriler').map(ekranBul).filter(Boolean) as typeof ekranlar;
     return (
       <div className="sahne bsl-sade">
         <div className="bsl-sade-ic">
@@ -111,8 +110,6 @@ export function Baslangic() {
           </button>
           {son.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
             <div className="bsl-kartlar">{son.map(ekranKart)}</div></>}
-          {fav.length > 0 && <><div className="bsl-bolum">{c('Sık kullandıklarım')}</div>
-            <div className="bsl-kartlar">{fav.map(ekranKart)}</div></>}
           <div className="bsl-bolum">{c('Ekranlarım')}</div>
           <div className="bsl-kartlar">
             {ekranlar.map(ekranKart)}
