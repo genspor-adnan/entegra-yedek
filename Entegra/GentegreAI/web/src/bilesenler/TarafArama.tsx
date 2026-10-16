@@ -17,9 +17,9 @@ interface TarafSatiri {
   cinsiyet: string;
   yas: string;
   telefon: string;
-  ilce: string;
-  il: string;
   sonBasvuru: string;
+  /** Son başvurunun bölümü (hasta listesi `sonBolum`). */
+  sonBolum: string;
   /** DIS HEKIM duzeni (305): brans, kurum ve gonderdigi tetkik sayisi. */
   brans: string;
   kurum: string;
@@ -91,9 +91,8 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   cinsiyet: String(s.cinsiyetAdi ?? ''),
   yas: s.yas != null && s.yas !== '' ? String(s.yas) : '',
   telefon: String(s.cepTel ?? ''),
-  ilce: String(s.ilce ?? ''),
-  il: String(s.il ?? ''),
   sonBasvuru: gun(s.sonBasvuru),
+  sonBolum: String(s.sonBolum ?? ''),
   brans: String(s.bransAdi ?? ''),
   kurum: String(s.kurum ?? ''),
   istemSayisi: s.istemSayisi != null ? String(s.istemSayisi) : '',
@@ -497,12 +496,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
                   <>
                     <th style={{ width: 96 }}>Dosya No</th>
                     <th className="genis">Ad Soyad</th>
-                    <th style={{ width: 74 }}>Cinsiyet</th>
-                    <th style={{ width: 46 }} className="hiza-sag">Yaş</th>
+                    {/* Cinsiyet + yaş tek kolon "E 50y" (kullanıcı 16.10.2026). */}
+                    <th style={{ width: 80 }}>Cins. / Yaş</th>
                     <th style={{ width: 132 }}>Telefon</th>
-                    <th style={{ width: 104 }}>İlçe</th>
-                    <th style={{ width: 104 }}>İl</th>
+                    {/* İlçe / İl yerine son başvuru tarihi + bölümü (kullanıcı 16.10.2026). */}
                     <th style={{ width: 96 }}>Son Başvuru</th>
+                    <th style={{ width: 190 }}>Son Bölüm</th>
                   </>
                 ) : hekimDuzeni ? (
                   <>
@@ -553,12 +552,11 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
                     <>
                       <td>{satir.kod}</td>
                       <td>{satir.unvan}</td>
-                      <td>{satir.cinsiyet}</td>
-                      <td className="hiza-sag">{satir.yas}</td>
+                      <td>{[satir.cinsiyet.slice(0, 1), satir.yas ? `${satir.yas}y` : ''].filter(Boolean).join(' ')
+                           || <span className="sonuk">—</span>}</td>
                       <td>{satir.telefon}</td>
-                      <td>{satir.ilce}</td>
-                      <td>{satir.il}</td>
                       <td>{satir.sonBasvuru || <span className="sonuk">—</span>}</td>
+                      <td>{satir.sonBolum || <span className="sonuk">—</span>}</td>
                     </>
                   ) : hekimDuzeni ? (
                     <>
