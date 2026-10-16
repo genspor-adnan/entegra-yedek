@@ -35,8 +35,9 @@ export function KendimeNotPenceresi({ muayeneId, onKapat, onKaydedildi }: {
   return (
     <Modal baslik={`🔒 ${c('Kendime Not')}`} dar enUst buyutmeYok onKapat={onKapat}
            alt={<>
-             <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
              <button type="button" className="d bir" onClick={kaydet} disabled={metin === null}>{c('Kaydet')}</button>
+             {/* "Kapat" sağa yaslı (kullanıcı 16.10.2026). */}
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
            </>}>
       <textarea className="moz-not" value={metin ?? ''} maxLength={4000} autoFocus disabled={metin === null}
                 placeholder={c('Bu hastaya dair yalnız sizin göreceğiniz not…')}

@@ -320,12 +320,13 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
     // BÜYÜTME YOK (kullanıcı 15.10.2026: "tetkik istemi ekranında max kaldır").
     <Modal baslik={gozVar ? '🧾 Tetkik İstemi (Lab + Radyoloji + Göz)' : '🧾 Tetkik İstemi (Lab + Radyoloji)'} onKapat={onKapat} buyutmeYok
       alt={<>
-        <label style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-          <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
-        </label>
+        {/* İstem Aç solda, hemen sağında Acil; Kapat sağa yaslı (kullanıcı 16.10.2026). */}
         <button className="d bir" disabled={mesgul || sepet.size === 0}
           onClick={() => void istemAc()}>✓ İstem Aç ({sepet.size})</button>
-        <button className="d" onClick={onKapat}>Kapat</button>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginLeft: 8 }}>
+          <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
+        </label>
+        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>Kapat</button>
       </>}>
       <div style={{ display: 'flex', gap: 10, minHeight: 430 }}>
         {/* SOL: sekme + kategoriler */}

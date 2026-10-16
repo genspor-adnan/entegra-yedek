@@ -646,6 +646,8 @@ export function ListeKarti({
                 {notAcik && <KendimeNotPenceresi muayeneId={Number(kartId)} onKapat={() => setNotAcik(false)} />}
                 {konsPencere !== null && (
                   <GenForm kaynak="konsultasyon" id={konsPencere} baslik={c('Konsültasyon İsteği')}
+                    // Büyütme düğmesi yok (kullanıcı 16.10.2026: "kons isteği max kapat").
+                    buyutmeYok
                     gizliAlanlar={['istekZamani']} zorunluAlanlar={KART_ZORUNLU.konsultasyon}
                     // Kaydetmeden kapatılan BOŞ taslak silinir - her menü tıklaması satır bırakmasın.
                     onKapat={() => { const id = konsPencere; setKonsPencere(null); void bosTaslakSil('konsultasyon', id, 'soru'); }}
