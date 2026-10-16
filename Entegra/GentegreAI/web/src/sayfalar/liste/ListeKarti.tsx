@@ -4,6 +4,7 @@ import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOze
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
+import { AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi, AcilYatakTemizlikSekmesi } from '../../bilesenler/acil/AcilYatakSekmeleri';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
@@ -1095,7 +1096,7 @@ export function ListeKarti({
         // SURUM YERINE DOSYA + PROTOKOL NO (kullanici): numaralar hasta
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
-        surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme'].includes(tanim.kaynak)}
+        surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak'].includes(tanim.kaynak)}
         baslikEk={tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
           // Durum rozeti Tamamla'nın sağında (kullanıcı 15.10.2026).
           ? (d) => <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
@@ -1164,7 +1165,19 @@ export function ListeKarti({
         // GÖZLÜK REÇETESİ (972): tek "Reçete" sekmesi (yeni kayıtta da) - değerler kart alanlarına yazılır.
         // ORDER (968): Doz planı · Güvenlik kontrolleri · Geçmiş (kayıtlı order'da).
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
-        ekSekmeler={tanim.kaynak === 'goz-cihaz'
+        ekSekmeler={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+          // ACİL YATAK KARTI (1118, mockup acil_yatak_karti): Durum · Kullanım Geçmişi · Temizlik & Bakım
+          //   (Donanım katalog grubu). Durum düğmeleri kartı tazeler.
+          ? [
+              { anahtar: 'ozel:ay-durum', baslik: 'Durum',
+                ciz: b => <AcilYatakDurumSekmesi yatakId={kartId} durum={Number(b.deger.durum ?? 0)} tazele={kartTazele}
+                                                 onDegisti={() => setKartTazele(t => t + 1)} git={git} /> },
+              { anahtar: 'ozel:ay-gecmis', baslik: 'Kullanım Geçmişi',
+                ciz: () => <AcilYatakGecmisSekmesi yatakId={kartId} tazele={kartTazele} git={git} /> },
+              { anahtar: 'ozel:ay-temizlik', baslik: 'Temizlik & Bakım',
+                ciz: () => <AcilYatakTemizlikSekmesi yatakId={kartId} tazele={kartTazele} /> },
+            ]
+          : tanim.kaynak === 'goz-cihaz'
           // GÖZ CİHAZI (978 mockup): Tetkikler · Ölçüm eşlemesi (jsonb kolonları
           //   TABLO olarak düzenlenir - kullanıcıya JSON yazdırmak, bir virgül
           //   hatasında cihazın bütün ölçümlerini susturmak demekti) ·

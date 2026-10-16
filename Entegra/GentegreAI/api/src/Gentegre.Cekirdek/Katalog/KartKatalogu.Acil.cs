@@ -125,9 +125,20 @@ public static partial class KartKatalogu
             new("ad", "ad", "metin", Baslik: "Ad", EnFazlaUzunluk: 80),
             new("alan", "alan", "kod", Zorunlu: true, Baslik: "Alan",
                 SabitKodlar: AcKartAlanKodlari),
-            new("durum", "durum", "kod", Baslik: "Durum", SabitKodlar: AcKartYatakDurumKodlari),
+            // DURUM ELLE YAZILMAZ (1118, mockup acil_yatak_karti): Dolu / Boş hasta yerleşince / çıkınca
+            //   değişir; Temizlikte / Kullanım dışı kartın Durum sekmesindeki düğmelerle (ucu loglar).
+            new("durum", "durum", "kod", Baslik: "Durum", SabitKodlar: AcKartYatakDurumKodlari, Yazilabilir: false),
             new("sira", "sira", "sayi", Baslik: "Sıra"),
             new("aktif", "aktif", "mantik", Baslik: "Aktif"),
+            // YATAK BAŞI DONANIM (1118): triyajın yatak önerisi ve panonun "uygun yatak" bilgisi.
+            new("monitor", "monitor", "mantik", Baslik: "Monitör", Grup: "Donanım"),
+            new("ventilator", "ventilator", "mantik", Baslik: "Ventilatör", Grup: "Donanım"),
+            new("defibrilator", "defibrilator", "mantik", Baslik: "Defibrilatör", Grup: "Donanım"),
+            new("oksijen", "oksijen", "mantik", Baslik: "Oksijen (duvar)", Grup: "Donanım"),
+            new("aspirator", "aspirator", "mantik", Baslik: "Aspiratör", Grup: "Donanım"),
+            new("infuzyon", "infuzyon", "sayi", Baslik: "İnfüzyon pompası (adet)", Grup: "Donanım"),
+            new("izolasyon", "izolasyon", "mantik", Baslik: "İzolasyon", Grup: "Donanım"),
+            new("pediatrik", "pediatrik", "mantik", Baslik: "Pediatrik", Grup: "Donanım"),
         },
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
@@ -180,6 +191,6 @@ public static partial class KartKatalogu
 
     private static readonly Dictionary<string, string> AcKartYatakDurumKodlari = new()
     {
-        ["0"] = "Boş", ["1"] = "Dolu", ["2"] = "Temizlikte", ["3"] = "Arızalı",
+        ["0"] = "Boş", ["1"] = "Dolu", ["2"] = "Temizlikte", ["3"] = "Kullanım dışı",
     };
 }

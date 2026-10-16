@@ -8334,3 +8334,21 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .svk-onizleme { padding: 8px 10px; font-size: 12px; line-height: 1.55 }
 .svk-onizleme small { display: block; color: var(--soluk); font-size: 10.5px; margin-bottom: 2px }
 .svk-onizleme.bos { color: var(--soluk) }
+
+/* ACİL YATAK KARTI (1118, mockup Ekranlar/Acil/acil_yatak_karti). */
+.ay-sekme { display: flex; flex-direction: column; gap: 10px }
+.ay-durumlar { display: flex; gap: 6px; flex-wrap: wrap }
+.ay-d { border: 1px solid var(--cizgi); border-radius: 4px; padding: 5px 11px; font-size: 12px; background: var(--yuz); color: var(--yazi); cursor: pointer }
+.ay-d:disabled { opacity: .45; cursor: default }
+.ay-d.on { font-weight: 700; opacity: 1 }
+.ay-d.bos.on { background: #e6f2ea; border-color: #2e7d46; color: #2e7d46 }
+.ay-d.dolu.on { background: #eef5fd; border-color: #2f6db3; color: #24527f }
+.ay-d.tem.on { background: #fdf3df; border-color: #c9a14a; color: #8a6218 }
+.ay-d.kap.on { background: #fbeceb; border-color: #b3261e; color: #b3261e }
+.ay-hasta { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 10px 12px; border: 1px solid #cfe0f3; border-radius: 6px; background: #f5f9fe }
+.ay-avt { width: 38px; height: 38px; border-radius: 50%; background: #1c4374; color: #fff; display: grid; place-items: center; font-weight: 700; flex: none }
+.ay-ozet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px }
+.ay-ozet > div { border: 1px solid var(--cizgi); border-radius: 6px; padding: 8px 10px; background: var(--yuz); display: flex; flex-direction: column; gap: 2px }
+.ay-ozet span { font-size: 11px; color: var(--soluk) }
+.ay-ozet b { font-size: 16px; color: var(--yazi2) }
+

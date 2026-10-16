@@ -176,7 +176,7 @@ public static partial class KaynakKatalogu
                 Varsayilan: false, Kodlar: AcAlanKodlari),
             new("durumAdi",
                 "case y.durum when 0 then 'Boş' when 1 then 'Dolu'" +
-                " when 2 then 'Temizlikte' when 3 then 'Arızalı' else '' end",
+                " when 2 then 'Temizlikte' when 3 then 'Kullanım dışı' else '' end",
                 "metin", "Durum", Hizalama: "orta", Genislik: 110, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("durum",  "y.durum","kod",   "Durum Kodu", Hizalama: "orta",
@@ -209,7 +209,7 @@ public static partial class KaynakKatalogu
 
     private static readonly Dictionary<string, string> AcYatakDurumKodlari = new()
     {
-        ["0"] = "Boş", ["1"] = "Dolu", ["2"] = "Temizlikte", ["3"] = "Arızalı",
+        ["0"] = "Boş", ["1"] = "Dolu", ["2"] = "Temizlikte", ["3"] = "Kullanım dışı",
     };
 
     private static readonly Dictionary<string, string> AcEvetHayirKodlari = new()

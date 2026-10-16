@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (579 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (581 ad, 154 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -464,6 +464,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_yatak_ucreti_tahakkuk` | `700_yatis_tahakkuk.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
+| `tg_acil_basvuru_yatak_olay` | `1118_acil_yatak_karti.sql` | — |
+| `tg_acil_yatak_durum_olay` | `1118_acil_yatak_karti.sql` | — |
 | `tg_ariza_talep_cozum` | `954_ariza_talep_takip.sql` | — |
 | `tg_ariza_talep_hareket` | `956_ariza_hareket_devral.sql` | 954_ariza_talep_takip.sql |
 | `tg_banko_pos_varsayilan` | `985_banko_tanimi.sql` | — |

@@ -56,4 +56,20 @@ export const acilUclari = {
   /** Temizliği biten yatağı boşa döndürür - kim yaptığı loglanır. */
   acilYatakTemizlendi: (yatakId: number) =>
     gonder<{ durum: number }>(`/api/acil/yatak/${yatakId}/temizlendi`, {}),
+
+  /** Yatak kartı düğmesi (1118): 0 kullanıma aç / temizlik bitti · 2 temizliğe al · 3 kullanım dışı. */
+  acilYatakDurum: (yatakId: number, durum: 0 | 2 | 3, not?: string) =>
+    gonder<{ durum: number }>(`/api/acil/yatak/${yatakId}/durum`, { durum, not }),
+
+  /** Yatak kartı sekmeleri (1118): yataktaki hasta, özet, kullanım geçmişi, temizlik / bakım. */
+  acilYatakAyrinti: (yatakId: number) => istek<AcilYatakAyrinti>(`/api/acil/yatak/${yatakId}/ayrinti`),
 };
+
+export interface AcilYatakAyrinti {
+  hasta: { basvuruId: number; protokolNo: string; triyaj: number; hastaAd: string; hekimAd: string;
+           sikayet: string; giris: string | null; yerlesme: string | null } | null;
+  ozet: { bugunKullanim: number; ortKalisDk: number | null; ortTemizlikDk: number | null; doluluk7: number | null };
+  gecmis: { basvuruId: number; giris: string; cikis: string | null; kalisDk: number | null; protokolNo: string;
+            triyaj: number; cikisSekli: number; tasindi: boolean; hastaAd: string }[];
+  temizlik: { tur: number; baslama: string; bitis: string | null; sureDk: number | null; not: string; yapan: string }[];
+}

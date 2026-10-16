@@ -49,6 +49,13 @@ public static class AcilUclari
         public DateTime? Zaman { get; set; }
     }
 
+    /// <summary>Yatak kartı durum düğmesi (1118): 0 boş · 2 temizlikte · 3 kullanım dışı.</summary>
+    public sealed class YatakDurumIstegi
+    {
+        public short Durum { get; set; }
+        public string? Not { get; set; }
+    }
+
     public sealed class YatakIstegi
     {
         /// <summary>Boş/null ise yatak BOŞALTILIR.</summary>
@@ -130,6 +137,117 @@ public static class AcilUclari
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { durum = 0, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/acil/yatak/{id}/durum - YATAK KARTI DÜĞMELERİ (1118, mockup acil_yatak_karti):
+        //   2 Temizliğe Al (yalnız boş yatak) · 3 Kullanım Dışı (hastasız yatak) · 0 Kullanıma Aç /
+        //   Temizlik Bitti (temizlikte ya da kullanım dışı yatak). Dolu / boş hastadan gelir, elle
+        //   verilmez. Olay günlüğünü tetik yazar (acil_yatak_olay).
+        grup.MapPost("/yatak/{id:int}/durum", async (
+            int id, YatakDurumIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("acil.yatak", Islem.Degistir);
+            if (istek.Durum is not (0 or 2 or 3))
+                throw GentegreHatasi.Dogrulama("Durum 0 (boş), 2 (temizlikte) ya da 3 (kullanım dışı) olmalı.");
+            await using var baglanti = await veri.AcAsync(iptal);
+            var simdiki = await baglanti.TekDegerAsync<short?>(
+                "select durum from public.acil_yatak where id = @p0", null, [id], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Yatak bulunamadı.");
+            var hastali = await baglanti.TekDegerAsync<int>("""
+                select count(*) from public.acil_basvuru b where b.yatak_id = @p0 and b.cikis_zamani is null
+                """, null, [id], iptal) > 0;
+            if (hastali) throw GentegreHatasi.IsKurali("Bu yatakta hasta var; önce hastayı çıkarın ya da taşıyın.");
+            if (istek.Durum == 2 && simdiki != 0)
+                throw GentegreHatasi.IsKurali("Yalnız boş yatak temizliğe alınır.");
+            if (istek.Durum == 0 && simdiki is not (2 or 3))
+                throw GentegreHatasi.IsKurali("Yatak zaten kullanımda.");
+            if (istek.Durum == simdiki) return Results.Ok(new { durum = simdiki, izlemeNo = baglam.IzlemeNo });
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("""
+                update public.acil_yatak set durum = @p1, degistiren = @p2, degistirme_tarihi = (now())::timestamp
+                 where id = @p0
+                """, islem, [id, istek.Durum, baglam.KullaniciId], iptal);
+            if (!string.IsNullOrWhiteSpace(istek.Not))
+                await baglanti.CalistirAsync("""
+                    update public.acil_yatak_olay set not_metni = left(@p1, 200)
+                     where id = (select max(o.id) from public.acil_yatak_olay o where o.yatak_id = @p0)
+                    """, islem, [id, istek.Not.Trim()], iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloYatak, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = istek.Durum, onceki = simdiki, not = istek.Not ?? "" }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { durum = istek.Durum, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/acil/yatak/{id}/ayrinti - YATAK KARTI SEKMELERİ: yataktaki hasta, özet (bugün kullanım,
+        //   ort. kalış, ort. temizlik, 7 gün doluluk), kullanım geçmişi ve temizlik / bakım (olay günlüğü).
+        grup.MapGet("/yatak/{id:int}/ayrinti", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("acil.yatak", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var json = await baglanti.TekDegerAsync<string>("""
+                with olay as (
+                    select o.* from public.acil_yatak_olay o where o.yatak_id = @p0
+                ),
+                -- Yerleşme -> çıkış çiftleri (aynı başvuru, sıradaki çıkış).
+                kalis as (
+                    select g.basvuru_id, g.zaman as giris,
+                           (select min(c.zaman) from olay c where c.tur = 2 and c.basvuru_id = g.basvuru_id and c.zaman >= g.zaman) as cikis
+                      from olay g where g.tur = 1
+                ),
+                temiz as (
+                    select t.id, t.tur, t.zaman as baslama, t.not_metni, t.kullanici_id,
+                           (select min(b.zaman) from olay b
+                             where b.tur = case t.tur when 3 then 4 else 6 end and b.zaman >= t.zaman) as bitis
+                      from olay t where t.tur in (3, 5)
+                )
+                select jsonb_build_object(
+                  'hasta', (select jsonb_build_object(
+                              'basvuruId', b.id, 'protokolNo', b.protokol_no, 'triyaj', b.triyaj,
+                              'hastaAd', coalesce(nullif(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), nullif(b.gecici_ad, ''), '—'),
+                              'hekimAd', coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), ''),
+                              'sikayet', coalesce(b.sikayet, ''), 'giris', b.giris_zamani,
+                              'yerlesme', (select max(o.zaman) from olay o where o.tur = 1 and o.basvuru_id = b.id))
+                              from public.acil_basvuru b
+                              left join public.taraf h on h.id = b.hasta_id
+                              left join public.taraf hk on hk.id = b.hekim_id
+                             where b.yatak_id = @p0 and b.cikis_zamani is null
+                             order by b.id desc limit 1),
+                  'ozet', jsonb_build_object(
+                      'bugunKullanim', (select count(*) from olay where tur = 1 and zaman >= current_date),
+                      'ortKalisDk', (select round(avg(extract(epoch from (cikis - giris)) / 60))
+                                       from kalis where cikis is not null and giris >= now() - interval '7 days'),
+                      'ortTemizlikDk', (select round(avg(extract(epoch from (bitis - baslama)) / 60))
+                                          from temiz where tur = 3 and bitis is not null and baslama >= now() - interval '7 days'),
+                      'doluluk7', (select round(100.0 * sum(extract(epoch from (least(coalesce(cikis, now()), now())
+                                                     - greatest(giris, now() - interval '7 days')))) / (7 * 86400))
+                                     from kalis where coalesce(cikis, now()) >= now() - interval '7 days')),
+                  'gecmis', coalesce((select jsonb_agg(x order by x->>'giris' desc) from (
+                      select jsonb_build_object(
+                          'basvuruId', k.basvuru_id, 'giris', k.giris, 'cikis', k.cikis,
+                          'kalisDk', case when k.cikis is not null then round(extract(epoch from (k.cikis - k.giris)) / 60) end,
+                          'protokolNo', b.protokol_no, 'triyaj', b.triyaj, 'cikisSekli', b.cikis_sekli,
+                          'tasindi', (b.yatak_id is distinct from @p0),
+                          'hastaAd', coalesce(nullif(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''), nullif(b.gecici_ad, ''), '—')) as x
+                        from kalis k
+                        left join public.acil_basvuru b on b.id = k.basvuru_id
+                        left join public.taraf h on h.id = b.hasta_id
+                       order by k.giris desc limit 50) s), '[]'::jsonb),
+                  'temizlik', coalesce((select jsonb_agg(x order by x->>'baslama' desc) from (
+                      select jsonb_build_object(
+                          'tur', t.tur, 'baslama', t.baslama, 'bitis', t.bitis, 'not', t.not_metni,
+                          'sureDk', case when t.bitis is not null then round(extract(epoch from (t.bitis - t.baslama)) / 60) end,
+                          'yapan', coalesce(public.fn_taraf_ad(u.unvan, u.ad, u.soyad)::varchar(120), '')) as x
+                        from temiz t left join public.taraf u on u.id = t.kullanici_id
+                       order by t.baslama desc limit 50) s), '[]'::jsonb)
+                )::text
+                """, null, [id], iptal);
+            return Results.Content(json ?? "{}", "application/json; charset=utf-8");
         });
     }
 
