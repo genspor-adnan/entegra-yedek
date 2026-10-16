@@ -101,7 +101,7 @@ function antropometri(bd: MuayeneHastaBilgisi['band'] | undefined): { boyKilo: s
 /** Banttaki rozet metni: ilk 14 harf, uzunsa "…" (tamamı title'da). */
 const kisa = (t: string) => (t.length > 15 ? `${t.slice(0, 14).trimEnd()}…` : t);
 
-export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null }) {
+export function MuayeneHastaBandi({ bilgi, onSuAn }: { bilgi: MuayeneHastaBilgisi | null; onSuAn?(): void }) {
   const [alerjiAcik, setAlerjiAcik] = useState(false);
   const u = bilgi?.ust ?? null;
   const ad = m(u?.hastaAdi);
@@ -164,8 +164,11 @@ export function MuayeneHastaBandi({ bilgi }: { bilgi: MuayeneHastaBilgisi | null
           {panik.length === 0 && !m(u?.uyari) && <span className="not">—</span>}
         </div>
       </div>
-      <div className="hbnd-blok hbnd-simdi">
-        <div className="hbnd-b">{c('Şu an')}</div>
+      {/* "Şu an" tıklanır (onSuAn verilirse): muayene bilgisi (bölüm / hekim / tür) penceresi -
+          sekmeli muayenede eski bağlam şeridinin "Bugün ✎" kutusunun yerini tutar (16.10.2026). */}
+      <div className={`hbnd-blok hbnd-simdi${onSuAn ? ' hbnd-tik' : ''}`} onClick={onSuAn}
+           role={onSuAn ? 'button' : undefined} title={onSuAn ? c('Muayene bilgisini düzenle') : undefined}>
+        <div className="hbnd-b">{c('Şu an')}{onSuAn && ' ✎'}</div>
         <div><b>{m(u?.bolumAdi) || '—'}</b></div>
         <div className="hbnd-alt">{m(u?.hekimAdi)}{u?.baslangic ? ` · ${tarihSaat(u.baslangic).slice(11)}` : ''}</div>
       </div>

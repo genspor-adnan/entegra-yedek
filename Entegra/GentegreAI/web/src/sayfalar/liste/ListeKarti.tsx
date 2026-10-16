@@ -3,7 +3,7 @@ import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../../bilesenler/lab/LabCalismaTakvimi';
-import { MuayeneBaglamSeridi, MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
+import { MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
@@ -256,7 +256,9 @@ export function ListeKarti({
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
   // 💾 SONRASI AYNI KONUM (16.10.2026): çerçeve kaydedilince sayfa kaymasın.
   useKaydetKonumu(tanim.kaynak === 'muayene' && typeof kartId === 'number');
-  const hastaBilgisi = useMuayeneHastaBilgisi(sekmesiz ? Number(kartId) : 0, kartTazele * 1000 + kayitSayaci);
+  // Hasta bandı her iki düzende (sekmeli de standart band, kullanıcı 16.10.2026).
+  const hastaBilgisi = useMuayeneHastaBilgisi(tanim.kaynak === 'muayene' && typeof kartId === 'number' ? Number(kartId) : 0,
+                                              kartTazele * 1000 + kayitSayaci);
   /** SEKMESİZ ÖZET / DETAY (kullanıcı 14.10.2026): seçilmediyse muayene tamamlandıysa özet, değilse detay. */
   const [sekmesizGorunum, setSekmesizGorunum] = useState<'ozet' | 'detay' | null>(null);
   useEffect(() => { setSekmesizGorunum(null) }, [kartId]);
@@ -553,8 +555,9 @@ export function ListeKarti({
             }
           : undefined}
         // Konsültasyon kartı: Kaydet'in üstündeki "Konsültasyon Kartı — Yeni" satırı yok (kullanıcı 15.10.2026).
-        // Sekmesiz muayenede başlık satırı yok (kullanıcı 15.10.2026) - H / P no hasta bandında.
-        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || sekmesiz}
+        // Muayenede başlık satırı yok - sekmesiz (15.10.2026) ve sekmeli (16.10.2026, kullanıcı: "kaydet
+        //   butonu ile sekme arasındaki alanı kaldır").
+        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
@@ -1115,10 +1118,11 @@ export function ListeKarti({
           // Konsültasyon YANIT muayenesiyse bandın altında yanıt şeridi (1107).
           ? () => <><MuayeneHastaBandi bilgi={hastaBilgisi} /><KonsultasyonYanitSeridi muayeneId={Number(kartId)} /></>
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          // SEKMELİ DE STANDART HASTA BANDI (kullanıcı 16.10.2026: "hasta bandını da yeni standart hasta
+          //   bandı yap"): eski bağlam şeridi yerine sekmesizdeki band; "Şu an" ✎ muayene bilgisini açar.
           ? () => (
             <>
-              <MuayeneBaglamSeridi muayeneId={Number(kartId)}
-                                   onBugun={() => setMuayeneBilgiAcik(true)} />
+              <MuayeneHastaBandi bilgi={hastaBilgisi} onSuAn={() => setMuayeneBilgiAcik(true)} />
               <MuayeneDurumSeridi muayeneId={Number(kartId)} />
               <KonsultasyonYanitSeridi muayeneId={Number(kartId)} />
             </>
