@@ -24,6 +24,11 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'muayene.liste': 'muayene',
   'ftr.seans.liste': 'ftr.seans',
   'medula.fatura.liste': 'medula.fatura',
+  // Kartı başka ekranda olan listeler (göç 1132).
+  'radyoloji.kritik': 'radyoloji',
+  'radyoloji.konsultasyon': 'radyoloji',
+  'radyoloji.teslim': 'radyoloji',
+  'servis.is_emri': 'servis',
   // Ortak kodlu listeler (göç 1131).
   'ftr.program.liste': 'ftr.program',
   'isg.calisan.liste': 'isg.calisan',

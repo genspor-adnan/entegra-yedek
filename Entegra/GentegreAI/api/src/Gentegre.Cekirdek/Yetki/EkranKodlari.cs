@@ -163,6 +163,11 @@ public static partial class EkranKodlari
         ["muayene.liste"]                = "muayene",
         ["ftr.seans.liste"]              = "ftr.seans",
         ["medula.fatura.liste"]          = "medula.fatura",
+        // KARTI BAŞKA EKRANDA (göç 1132, grup 3): ortak kaynağı tam açan aşama 1 kodları - yalnız Gör.
+        ["radyoloji.kritik"] = "radyoloji",
+        ["radyoloji.konsultasyon"] = "radyoloji",
+        ["radyoloji.teslim"] = "radyoloji",
+        ["servis.is_emri"] = "servis",
         // ORTAK KODLU LİSTELER (göç 1131, grup 2): kodun bütün liste ekranları; "(kart)" ekranı kartta.
         ["ftr.program.liste"] = "ftr.program",
         ["isg.calisan.liste"] = "isg.calisan",
@@ -426,6 +431,7 @@ public static partial class EkranKodlari
         // Kayıt Kabul listeleri (1115 aşama 2) ve eski liste kodları (1130): veri kapısını yalnız
         //   Gör'de açar - YalnizGorListe.
         "hasta.liste", "basvuru.liste", "muayene.liste", "ftr.seans.liste", "medula.fatura.liste",
+        "radyoloji.kritik", "radyoloji.konsultasyon", "radyoloji.teslim", "servis.is_emri",   // 1132
         "hesap.tanim.banka_tanim",   // banka kaynağı + kartı
         "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
         "kasa.finans.vade",          // plan-vade kaynağı
