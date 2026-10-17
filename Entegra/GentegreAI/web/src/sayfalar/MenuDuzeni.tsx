@@ -74,6 +74,9 @@ const turNo = (tur: 'bolge' | 'grup' | 'ekran') =>
 /** Üst düğümün türü sabittir: ekranın üstü grup, grubun üstü bölge. */
 const ustTuru = (tur: 'bolge' | 'grup' | 'ekran') => (tur === 'ekran' ? 'grup' : 'bolge');
 
+/** Sanal grup: gösterge panelleri (menüde değil; ana sayfa / Ctrl+K). */
+const GOSTERGE_GRUBU = 'Gösterge Panelleri';
+
 function suzgecCoz(yol: string): string | undefined {
   const e = /[?&]grup=([^&]+)/.exec(yol);
   return e ? decodeURIComponent(e[1]) : undefined;
@@ -111,6 +114,14 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   const [sunucudaki, setSunucudaki] = useState<MenuDuzenSatiri[]>([]);
   const [mesaj, setMesaj] = useState('');
   const [yukleniyor, setYukleniyor] = useState(true);
+  /**
+   * GÖSTERGE PANELLERİ EN BAŞTA (kullanıcı 17.10.2026: "genprofil'de menü düzenine gösterge panelleri de
+   * gelmeli en başa"). Paneller menü ağacında değil (ana sayfa ve Ctrl+K'den açılır); burada sanal bir
+   * grup olarak çizilir, satır kodu `gosterge.<kod>` - gizlenen panel ana sayfada, Ctrl+K'de, panel
+   * adresinde ve yetki matrisinde görünmez (sunucu menu_duzen ekran kapısıyla süzer).
+   */
+  const [paneller, setPaneller] = useState<{ kod: string; ad: string; ikon: string }[]>([]);
+  useEffect(() => { api.gostergePanelTumu().then(setPaneller).catch(() => setPaneller([])) }, []);
 
   // Varsayılan ağaç: menüyü çizen AYNI kuruluş (menuSatirlariKur) - ekranda
   //   başka bir sıralama göstermek, kaydedilen düzenin menüde farklı çıkması
@@ -138,6 +149,14 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
       sayac.set(kod, n);
       return n === 1 ? kod : `${kod}#${n}`;
     };
+    if (paneller.length > 0) {
+      const gIc = icKod('grup', GOSTERGE_GRUBU);
+      d.push({ tur: 'grup', kod: gIc, sistemAd: GOSTERGE_GRUBU, ad: c(GOSTERGE_GRUBU), ikon: '📊', derinlik: 1 });
+      paneller.forEach((p, i) => d.push({
+        tur: 'ekran', kod: icKod('ekran', `gosterge.${p.kod}`), sistemAd: p.ad, ad: c(p.ad),
+        ikon: p.ikon || '📊', ustKod: gIc, derinlik: 2, yol: `/gosterge/${p.kod}`, sira: i + 1,
+      }));
+    }
     const gruplar = satirlar.filter(s => s.tur === 'grup') as Extract<MenuSatiri, { tur: 'grup' }>[];
     const duzOgeler = satirlar.filter(s => s.tur === 'duz') as Extract<MenuSatiri, { tur: 'duz' }>[];
 
@@ -166,7 +185,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
         ikon: s.m.ic, derinlik: 1, yol: s.m.yol,
       });
     return d;
-  }, [satirlar]);
+  }, [satirlar, paneller]);
 
   useEffect(() => {
     let iptal = false;
@@ -280,6 +299,8 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
    * kaldırıldı) - liste boş döner ve alan salt okunur kalır.
    */
   const ustSecenekleri = (dugum: Dugum): string[] => {
+    // Panel satırı başka gruba taşınmaz (menüde değil, kendi kutusunda).
+    if (dugum.kod.startsWith(`e|gosterge.`)) return [];
     if (dugum.tur === 'ekran')
       return dugumler.filter(x => x.tur === 'grup').map(x => x.kod);
     return [];

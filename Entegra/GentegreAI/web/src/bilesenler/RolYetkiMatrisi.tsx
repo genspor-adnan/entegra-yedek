@@ -176,7 +176,10 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   // Alanlar savunmaci okunur: eski API surumu tur/grup gondermeyebilir.
   const guvenli = satirlar.map(s => ({ ...s, tur: s.tur ?? 0, grup: s.grup ?? '' }));
   // Delphi (eski program) yetkileri agacta GOSTERILMEZ - web urununde karsiligi yok.
-  const yeni = guvenli.filter(s => !s.grup.startsWith('eski'));
+  // MENÜ DÜZENİNDE GİZLENEN PANEL (17.10.2026, `gosterge.<kod>`) matriste de çizilmez.
+  const gizliPanel = new Set(duzen.filter(r => r.dugumTur === DUGUM.ekran && r.gizli === 1
+                                                && r.sistemKod.startsWith('gosterge.')).map(r => r.sistemKod));
+  const yeni = guvenli.filter(s => !s.grup.startsWith('eski') && !gizliPanel.has(s.kod));
 
   // 1) Modul yetkileri (kodunda '.' yok) grubuna yerlesir.
   //

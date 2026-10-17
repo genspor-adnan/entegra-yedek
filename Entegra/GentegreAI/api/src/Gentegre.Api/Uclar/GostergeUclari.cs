@@ -39,13 +39,29 @@ public static class GostergeUclari
                     ilk = o.IsDBNull(4) ? (System.Text.Json.JsonElement?)null
                                         : System.Text.Json.JsonDocument.Parse(o.GetString(4)).RootElement.Clone(),
                 }, iptal);
-            return Results.Ok(paneller.Where(p => baglam.Yetkiler.Var("gosterge." + p.kod, Islem.Gor)));
+            // MENÜ DÜZENİ (17.10.2026): kurum profilinde gizlenen panel (menu_duzen `gosterge.<kod>`) listelenmez.
+            return Results.Ok(paneller.Where(p => baglam.Yetkiler.Var("gosterge." + p.kod, Islem.Gor)
+                                                  && !baglam.GizliEkranlar.Contains("gosterge." + p.kod)));
+        });
+
+        // GET /api/gosterge/tumu - MENÜ DÜZENİ editörü için bütün aktif paneller (yetkiden bağımsız;
+        //   GenProfil'de teknisyen profilin hangi panelleri göstereceğini seçer).
+        grup.MapGet("/tumu", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("menu.duzen", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var paneller = await b.ListeAsync(
+                "select kod, ad, ikon from public.gosterge_paneli where aktif = 1 order by sira, ad", null, [],
+                o => new { kod = o.GetString(0), ad = o.GetString(1), ikon = o.GetString(2) }, iptal);
+            return Results.Ok(paneller);
         });
 
         // GET /api/gosterge/{kod} - panelin kutu ve bloklarının güncel değerleri.
         grup.MapGet("/{kod}", async (string kod, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.MenuAcikIste("gosterge." + kod);
             if (!baglam.Yetkiler.Var("gosterge." + kod, Islem.Gor))
                 throw GentegreHatasi.Yasak("Bu gösterge paneline yetkiniz yok.");
             await using var b = await veri.AcAsync(iptal);

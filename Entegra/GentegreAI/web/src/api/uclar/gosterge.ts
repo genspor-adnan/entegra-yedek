@@ -18,6 +18,8 @@ export interface BaslangicKutucugu {
 export const gostergeUclari = {
   /** Kullanıcının rol yetki matrisine göre görebildiği paneller (+ ilk gösterge). */
   gostergeler: () => istek<GostergePaneliOzet[]>('/api/gosterge'),
+  /** Menü düzeni editörü: bütün aktif paneller (yetkiden bağımsız, menu.duzen ister). */
+  gostergePanelTumu: () => istek<{ kod: string; ad: string; ikon: string }[]>('/api/gosterge/tumu'),
   gostergePaneli: (kod: string) =>
     istek<{ kod: string; ad: string; ikon: string; aciklama: string; kutular: GostergeKutu[]; bloklar: GostergeBlok[] }>(
       `/api/gosterge/${encodeURIComponent(kod)}`),
