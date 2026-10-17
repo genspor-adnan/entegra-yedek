@@ -46,6 +46,8 @@ const KAYITLI_ONEK = '#kayitli:';
 const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru' | 'muayene'> = { '/hasta': 'hasta', '/basvuru': 'basvuru', '/muayene': 'muayene' };
 /** Stok ve hizmet: belgedeki genel stok arama penceresi (kart açma kipi). */
 const STOK_ARAMA: Record<string, 'stok' | 'hizmet'> = { '/stok': 'stok', '/hizmet': 'hizmet' };
+/** KAYITLI PERSONEL KARTI (kullanıcı 17.10.2026): liste tablosu değil jenerik personel araması. */
+const KISI_ARAMA: Record<string, string> = { '/personel': 'personel' };
 /** Kartı sekmede açılan listeler, kart yolu başına bir tane. */
 const kartListeleri = LISTELER.filter(l => kartSekmesiVar(l) && !l.menuYol)
   .filter((l, i, a) => a.findIndex(x => kartSekmeYolu(x) === kartSekmeYolu(l)) === i);
@@ -209,6 +211,8 @@ export function Kabuk() {
   const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | 'muayene' | null>(null);
   /** Genel "Kayıtlı X Kartı" araması (listenin kendi kaynağı ve kolonları). */
   const [kayitliListe, setKayitliListe] = useState<ListeGirdisi | null>(null);
+  /** Kayıtlı personel kartı araması: kart yolu (/personel). */
+  const [kisiArama, setKisiArama] = useState<string | null>(null);
   /** "Kayıtlı Stok / Hizmet Kartı": belgedeki genel stok arama penceresi (kart açma kipi). */
   const [stokArama, setStokArama] = useState<'stok' | 'hizmet' | null>(null);
   /** Ekran kullanıcının (yetkili) menüsünde mi. */
@@ -309,6 +313,7 @@ export function Kabuk() {
     const kartYol = yol.slice(KAYITLI_ONEK.length);
     if (SABIT_ARAMA[kartYol]) { setKayitliArama(SABIT_ARAMA[kartYol]); return }
     if (STOK_ARAMA[kartYol]) { setStokArama(STOK_ARAMA[kartYol]); return }
+    if (KISI_ARAMA[kartYol]) { setKisiArama(kartYol); return }
     setKayitliListe(kartListeleri.find(l => kartSekmeYolu(l) === kartYol) ?? null);
   };
   const paletGitRef = useRef(paletGit);
@@ -527,6 +532,11 @@ export function Kabuk() {
                             onKapat={() => setStokArama(null)}
                             onSec={r => { setStokArama(null); kartaGit(`/${r.tip === 'hizmet' ? 'hizmet' : 'stok'}/${r.id}`) }} />
       )}
+      {/* KAYITLI PERSONEL KARTI (17.10.2026): jenerik personel araması -> kart kendi sekmesinde. */}
+      <TarafArama acik={kisiArama !== null} kaynaklar={kisiArama ? [KISI_ARAMA[kisiArama]] : ['personel']} kartYok
+                  yerTutucu={c('Personel ara (ad, sicil, kimlik no, telefon)…')}
+                  onKapat={() => setKisiArama(null)}
+                  onSec={p => { const yol = kisiArama; setKisiArama(null); if (yol) kartaGit(`${yol}/${p.id}`) }} />
       <KayitArama acik={!!kayitliListe} baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
                   kaynak={kayitliListe?.kaynak ?? ''} sabitFiltre={kayitliListe?.sabitFiltre}
                   onKapat={() => setKayitliListe(null)}
