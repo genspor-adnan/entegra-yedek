@@ -7,7 +7,8 @@ describe('kys eğitim listeleri', () => {
     const gorunen = KYS_EGITIM_LISTELERI.filter(l => !l.menuGizli);
     expect(gorunen.map(l => l.kaynak)).toEqual(['kys-egitimler']);
     expect(gorunen[0].ozelSayfa).toBe(true);
-    expect(KYS_EGITIM_LISTELERI.every(l => l.yetkiKodu === 'kys.egitim' && l.modul === 'kys')).toBe(true);
+    // 1131: liste ekranlari kys.egitim.liste (yalniz Gor), kart kys.egitim.
+    expect(KYS_EGITIM_LISTELERI.every(l => l.yetkiKodu === 'kys.egitim.liste' && l.modul === 'kys')).toBe(true);
   });
 
   it('her sekme var olan bir listeye gider ve ilk cip süzgeçtir', () => {

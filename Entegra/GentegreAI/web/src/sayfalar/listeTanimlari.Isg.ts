@@ -32,7 +32,7 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'isg',
-    menuGrup: 'İşyeri Hekimliği', menuAd: 'Çalışan Listesi', ic: '👷', yetkiKodu: 'isg.calisan', menuSira: 30,
+    menuGrup: 'İşyeri Hekimliği', menuAd: 'Çalışan Listesi', ic: '👷', yetkiKodu: 'isg.calisan.liste', menuSira: 30,
   },
   {
     // GENERIC ÇALIŞAN KARTI (menüde gizli): özel modal görüntüler; alan

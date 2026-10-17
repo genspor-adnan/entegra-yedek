@@ -25,7 +25,7 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kys-egitimler', rota: 'kys-egitimler', ozelSayfa: true, baslik: 'Eğitim & Yetkinlik Kaydı Listesi',
     yol: 'Kalite › Eğitim',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Eğitim', ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 80,
+    menuGrup: 'Kalite', menuAd: 'Eğitim', ic: '🎓', yetkiKodu: 'kys.egitim.liste', menuSira: 80,
   },
   {
     kaynak: 'kys-egitim', rota: 'kys-egitim', aksiyonEkrani: 'kys-egitim-liste', baslik: 'Eğitim & Yetkinlik Kaydı Listesi',
@@ -38,7 +38,7 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
       ...SEKMELER,
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Eğitim Listesi', menuGizli: true, ic: '🎓', yetkiKodu: 'kys.egitim', menuSira: 81,
+    menuGrup: 'Kalite', menuAd: 'Eğitim Listesi', menuGizli: true, ic: '🎓', yetkiKodu: 'kys.egitim.liste', menuSira: 81,
   },
   {
     kaynak: 'kys-egitim-eksik', rota: 'kys-egitim-eksik', baslik: 'Eksik Zorunlu Eğitim',
@@ -51,7 +51,7 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Yaklaşıyor',   filtre: { alan: 'durumAdi', op: 'esit', deger: 'Yaklaşıyor' } },
       ...SEKMELER,
     ],
-    modul: 'kys', menuGrup: 'Kalite', menuGizli: true, yetkiKodu: 'kys.egitim',
+    modul: 'kys', menuGrup: 'Kalite', menuGizli: true, yetkiKodu: 'kys.egitim.liste',
   },
   {
     kaynak: 'kys-zorunlu-egitim', rota: 'kys-zorunlu-egitim', aksiyonEkrani: 'kys-zorunlu-egitim-liste', baslik: 'Zorunlu Eğitim Listesi',
@@ -63,6 +63,6 @@ export const KYS_EGITIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
       ...SEKMELER,
     ],
-    modul: 'kys', menuGrup: 'Kalite', menuGizli: true, yetkiKodu: 'kys.egitim',
+    modul: 'kys', menuGrup: 'Kalite', menuGizli: true, yetkiKodu: 'kys.egitim.liste',
   },
 ];

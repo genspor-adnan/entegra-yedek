@@ -37,7 +37,7 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAd: 'Tedavi Programı Listesi', ic: '📋', yetkiKodu: 'ftr.program', menuSira: 30,
+    menuGrup: 'FTR', menuAd: 'Tedavi Programı Listesi', ic: '📋', yetkiKodu: 'ftr.program.liste', menuSira: 30,
   },
   {
     // GENERIC PROGRAM KARTI (menude gizli): ozel modal goruntuler/planlar,

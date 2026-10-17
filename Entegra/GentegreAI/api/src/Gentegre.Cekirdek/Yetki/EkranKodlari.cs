@@ -163,6 +163,17 @@ public static partial class EkranKodlari
         ["muayene.liste"]                = "muayene",
         ["ftr.seans.liste"]              = "ftr.seans",
         ["medula.fatura.liste"]          = "medula.fatura",
+        // ORTAK KODLU LİSTELER (göç 1131, grup 2): kodun bütün liste ekranları; "(kart)" ekranı kartta.
+        ["ftr.program.liste"] = "ftr.program",
+        ["isg.calisan.liste"] = "isg.calisan",
+        ["cagri.kayit.liste"] = "cagri.kayit",
+        ["cagri.kampanya.liste"] = "cagri.kampanya",
+        ["steril.dongu.liste"] = "steril.dongu",
+        ["kys.denetim.liste"] = "kys.denetim",
+        ["kys.gosterge.liste"] = "kys.gosterge",
+        ["kys.toplanti.liste"] = "kys.toplanti",
+        ["kys.egitim.liste"] = "kys.egitim",
+        ["fiyat_listesi.liste"] = "fiyat_listesi",
         // KALAN GRUPLAR (göç 1129, kullanıcı: "kalan grupları da tek göçle yap"): aday üretici seçti -
         //   menüde, kartı kendi rotasında, kodu tek ekranda, listesi kodla ya da köprüyle açılan listeler.
         ["asi.katalog.liste"] = "asi.katalog",

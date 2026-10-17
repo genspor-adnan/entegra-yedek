@@ -18,7 +18,7 @@ export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kys-hedefler', rota: 'kys-hedefler', ozelSayfa: true, baslik: 'Kalite Politikası & Hedef Listesi',
     yol: 'Kalite › Politika & Hedefler',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 60,
+    menuGrup: 'Kalite', menuAd: 'Politika & Hedefler', ic: '📈', yetkiKodu: 'kys.gosterge.liste', menuSira: 60,
   },
   {
     kaynak: 'kys-gosterge', rota: 'kys-gosterge', aksiyonEkrani: 'kys-gosterge-liste', baslik: 'Kalite Politikası & Hedef Listesi',
@@ -31,6 +31,6 @@ export const KYS_GOSTERGE_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Hedef Listesi', menuGizli: true, ic: '📈', yetkiKodu: 'kys.gosterge', menuSira: 61,
+    menuGrup: 'Kalite', menuAd: 'Hedef Listesi', menuGizli: true, ic: '📈', yetkiKodu: 'kys.gosterge.liste', menuSira: 61,
   },
 ];

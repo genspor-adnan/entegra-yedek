@@ -33,7 +33,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı Kaydı Listesi', ic: '📞', yetkiKodu: 'cagri.kayit', menuSira: 30,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Çağrı Kaydı Listesi', ic: '📞', yetkiKodu: 'cagri.kayit.liste', menuSira: 30,
   },
   {
     // GENERIC ÇAĞRI KARTI (menüde gizli): alan düzenleme (konu / sonuç / not) ve
@@ -54,7 +54,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Listesi', ic: '📣', yetkiKodu: 'cagri.kampanya', menuSira: 40,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Listesi', ic: '📣', yetkiKodu: 'cagri.kampanya.liste', menuSira: 40,
   },
   {
     kaynak: 'cagri-kampanya-kisi', rota: 'cagri-kampanya-kisi', aksiyonEkrani: 'cagri-kampanya-kisi-liste', baslik: 'Kampanya Kişisi Listesi',
@@ -67,7 +67,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'cagri',
-    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Kişisi Listesi', menuGizli: true, ic: '👥', yetkiKodu: 'cagri.kampanya', menuSira: 41,
+    menuGrup: 'Çağrı Merkezi', menuAd: 'Kampanya Kişisi Listesi', menuGizli: true, ic: '👥', yetkiKodu: 'cagri.kampanya.liste', menuSira: 41,
   },
   {
     kaynak: 'cagri-supervizor', ozelSayfa: true, baslik: 'Süpervizör Panosu', yol: 'Çağrı Merkezi › Süpervizör Panosu',

@@ -66,14 +66,14 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   (kullanici): fiyat listesi de stok/hizmetin tanim ekrani - Yonetim
     //   altinda ararken bulunmuyordu.
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Fiyat Listeleri',
-    ic: '🏷️', yetkiKodu: 'fiyat_listesi', menuSira: 91, erpMenuGrup: 'Satış',
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi.liste', menuSira: 91, erpMenuGrup: 'Satış',
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
     //   rahat gezilmiyor. Menude gizli - listeden "Satırları Aç" ile gelinir.
     kaynak: 'fiyat-listesi-satir', baslik: 'Fiyat Listesi Satırları',
     yol: 'Yönetim › Fiyat Listesi Satırları', aksiyonEkrani: 'fiyat-listesi-satir-liste',
-    urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'fiyat_listesi', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
+    urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'fiyat_listesi.liste', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
   },
   {
     // ÜTS askidaki/gelen urunler (223): karsi kurumlarin bize VERDIGI tekil

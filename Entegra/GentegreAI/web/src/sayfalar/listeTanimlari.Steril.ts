@@ -31,7 +31,7 @@ export const STERIL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Döngü Listesi', ic: '♨️', yetkiKodu: 'steril.dongu', menuSira: 71,
+    menuGrup: 'Diş', menuAltGrup: 'Sterilizasyon', menuAd: 'Döngü Listesi', ic: '♨️', yetkiKodu: 'steril.dongu.liste', menuSira: 71,
   },
   {
     // GENERİC DÖNGÜ KARTI (menüde gizli): parametre / not / indikatör düzeltme ve silme GenForm'da;

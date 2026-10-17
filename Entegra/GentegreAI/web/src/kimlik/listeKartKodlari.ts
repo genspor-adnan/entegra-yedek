@@ -24,6 +24,17 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'muayene.liste': 'muayene',
   'ftr.seans.liste': 'ftr.seans',
   'medula.fatura.liste': 'medula.fatura',
+  // Ortak kodlu listeler (göç 1131).
+  'ftr.program.liste': 'ftr.program',
+  'isg.calisan.liste': 'isg.calisan',
+  'cagri.kayit.liste': 'cagri.kayit',
+  'cagri.kampanya.liste': 'cagri.kampanya',
+  'steril.dongu.liste': 'steril.dongu',
+  'kys.denetim.liste': 'kys.denetim',
+  'kys.gosterge.liste': 'kys.gosterge',
+  'kys.toplanti.liste': 'kys.toplanti',
+  'kys.egitim.liste': 'kys.egitim',
+  'fiyat_listesi.liste': 'fiyat_listesi',
   // Kalan gruplar (göç 1129).
   'asi.katalog.liste': 'asi.katalog',
   'sigorta.tanim.kod_esleme.liste': 'sigorta.tanim.kod_esleme',

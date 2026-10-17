@@ -8,7 +8,7 @@ describe('kurumsal kalite göstergeler / toplantılar', () => {
     for (const l of hepsi) {
       expect(l.menuGrup).toBe('Kalite');
       expect(l.modul).toBe('kys');
-      expect(l.yetkiKodu).toMatch(/^kys\.(gosterge|toplanti|karar)$/);
+      expect(l.yetkiKodu).toMatch(/^kys\.(gosterge|toplanti|karar)(\.liste)?$/);   // 1131: liste ekranı kodu
       expect(l.urunModu).toBeUndefined();
     }
   });

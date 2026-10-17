@@ -18,7 +18,7 @@ export const KYS_TOPLANTI_LISTELERI: ListeGirdisi[] = [
     //   Kararlar" adıyla aranınca bulunmuyordu).
     yol: 'Kalite › Toplantı & Kararlar',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Toplantı & Kararlar', ic: '👥', yetkiKodu: 'kys.toplanti', menuSira: 70,
+    menuGrup: 'Kalite', menuAd: 'Toplantı & Kararlar', ic: '👥', yetkiKodu: 'kys.toplanti.liste', menuSira: 70,
   },
   {
     kaynak: 'kys-toplanti', rota: 'kys-toplanti', aksiyonEkrani: 'kys-toplanti-liste', baslik: 'Kalite Toplantısı Listesi (Komite / YGG)',
@@ -26,7 +26,7 @@ export const KYS_TOPLANTI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/kys-toplanti', kartBaslik: 'Toplantı',
     tarihAlani: 'tarih',
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Toplantı Listesi', menuGizli: true, ic: '🏛️', yetkiKodu: 'kys.toplanti', menuSira: 72,
+    menuGrup: 'Kalite', menuAd: 'Toplantı Listesi', menuGizli: true, ic: '🏛️', yetkiKodu: 'kys.toplanti.liste', menuSira: 72,
   },
   {
     kaynak: 'kys-karar', rota: 'kys-karar', aksiyonEkrani: 'kys-karar-liste', baslik: 'Karar Takibi',
@@ -39,6 +39,6 @@ export const KYS_TOPLANTI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Karar Takibi', menuGizli: true, ic: '📌', yetkiKodu: 'kys.toplanti', menuSira: 73,
+    menuGrup: 'Kalite', menuAd: 'Karar Takibi', menuGizli: true, ic: '📌', yetkiKodu: 'kys.toplanti.liste', menuSira: 73,
   },
 ];

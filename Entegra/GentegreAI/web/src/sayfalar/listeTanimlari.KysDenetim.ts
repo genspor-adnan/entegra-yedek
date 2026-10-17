@@ -15,7 +15,7 @@ export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'İç Denetim Listesi', ic: '🔎', yetkiKodu: 'kys.denetim', menuSira: 40,
+    menuGrup: 'Kalite', menuAd: 'İç Denetim Listesi', ic: '🔎', yetkiKodu: 'kys.denetim.liste', menuSira: 40,
   },
   // DENETİM BULGULARI (1059): kart detay satırında düğme yok - "DÖF aç"
   //   (kaynak 1) bu listenin satır aksiyonu. Menüde görünmez (tek kod tek
@@ -30,6 +30,6 @@ export const KYS_DENETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Denetim Bulgusu Listesi', menuGizli: true, ic: '📋', yetkiKodu: 'kys.denetim', menuSira: 41,
+    menuGrup: 'Kalite', menuAd: 'Denetim Bulgusu Listesi', menuGizli: true, ic: '📋', yetkiKodu: 'kys.denetim.liste', menuSira: 41,
   },
 ];
