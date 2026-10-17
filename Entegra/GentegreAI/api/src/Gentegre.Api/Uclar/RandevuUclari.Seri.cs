@@ -25,7 +25,17 @@ public static partial class RandevuUclari
 
     /// <summary>Baslangiclar şubenin yerel saatinde. Boş alanlar kaynaktan (randevu / program) gelir.</summary>
     public sealed record SeriIstegi(List<DateTime> Baslangiclar, bool Kaydet, int? KaynakRandevuId = null,
-        int? FtrProgramId = null, int? HekimId = null, int? KabinId = null, short? SureDk = null);
+        int? FtrProgramId = null, int? HekimId = null, int? KabinId = null, short? SureDk = null,
+        SeriSablonGirdi? Sablon = null);
+
+    /// <summary>
+    /// KAYDEDİLMEMİŞ KARTIN DEĞERLERİ (kullanıcı 17.10.2026: "ilk randevu ile birlikte 5 seans tekrarlı
+    /// randevu vermek istiyorum ama ilk randevuyu kaydetmeden tekrarlı çıkmadı"): yalnız ÖNİZLEME için -
+    /// kayıtta önce ilk randevu yazılır, tekrarlar onun üzerinden (kaynakRandevuId) açılır.
+    /// </summary>
+    public sealed record SeriSablonGirdi(int HastaId, int? HekimId = null, int? CihazId = null, short? Bolum = null,
+        int? HizmetId = null, short? SureDk = null, int? GonderenId = null, short? Tip = null, short? Kaynak = null,
+        string? Aciklama = null);
 
     private sealed record SeriSablon(int SubeId, short Bolum, int? HekimId, int HastaId, short SureDk, string Aciklama,
         int? HizmetId, short Tip, short Kaynak, int? CihazId, int? GonderenId, int? KabinId);
@@ -39,8 +49,11 @@ public static partial class RandevuUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("randevu", Islem.Ekle);
             if (istek.FtrProgramId is not null) baglam.YetkiIste("ftr.program", Islem.Degistir);
-            if ((istek.KaynakRandevuId is null) == (istek.FtrProgramId is null))
-                throw GentegreHatasi.Dogrulama("Kaynak randevu ya da FTR programı verilmeli.");
+            if ((istek.KaynakRandevuId is not null ? 1 : 0) + (istek.FtrProgramId is not null ? 1 : 0)
+                + (istek.Sablon is not null ? 1 : 0) != 1)
+                throw GentegreHatasi.Dogrulama("Kaynak randevu, FTR programı ya da randevu değerleri verilmeli.");
+            if (istek.Sablon is not null && istek.Kaydet)
+                throw GentegreHatasi.Dogrulama("Kaydedilmemiş randevunun tekrarı önce randevu kaydedilerek yazılır.");
             var tarihler = (istek.Baslangiclar ?? []).Distinct().Order().ToList();
             if (tarihler.Count == 0) throw GentegreHatasi.Dogrulama("Tarih yok.");
             if (tarihler.Count > 60) throw GentegreHatasi.Dogrulama("Tek seferde en çok 60 randevu.");
@@ -48,7 +61,10 @@ public static partial class RandevuUclari
                 throw GentegreHatasi.Bulunamadi("Randevu bulunamadı.");
 
             await using var b = await veri.AcAsync(iptal);
-            var s = await SablonOkuAsync(b, istek, iptal);
+            var s = istek.Sablon is { } g
+                ? new SeriSablon(baglam.SubeId ?? 0, g.Bolum ?? 0, g.HekimId, g.HastaId, g.SureDk ?? 15, (g.Aciklama ?? "").Trim(),
+                                 g.HizmetId, g.Tip ?? 1, g.Kaynak ?? 1, g.CihazId, g.GonderenId, null)
+                : await SablonOkuAsync(b, istek, iptal);
             var dilim = await b.TekDegerAsync<string>(
                 "select coalesce((select nullif(zaman_dilimi, '') from public.sube where id = @p0), 'Europe/Istanbul')",
                 null, [s.SubeId], iptal) ?? "Europe/Istanbul";

@@ -70,6 +70,10 @@ export interface CalismaIstisnaListe {
   ozet: { onayBekleyen: number; enEskiGun: number; islemBekleyenRandevu: number; bugunYok: string[]; otuzGun: number; otuzGunTur: Record<string, number> };
 }
 
+/** Kaydedilmemiş randevu kartının değerleri - seri önizlemesi (yalnız kaydet=false). */
+export interface RandevuSeriSablonu { hastaId: number; hekimId?: number | null; cihazId?: number | null; bolum?: number | null;
+  hizmetId?: number | null; sureDk?: number; gonderenId?: number | null; tip?: number; kaynak?: number; aciklama?: string }
+
 /** Randevu bolumleri, ayarlar, zamanli isler, katalog, bildirim, tercih, ÜTS. */
 export const ayarUclari = {
   // ------------------------------------------------ randevu bolumleri ----
@@ -83,7 +87,7 @@ export const ayarUclari = {
     gonder<{ id: number; ertelenen: number }>(`/api/randevu/${id}/ertele`, g),
   /** SERİ RANDEVU (tekrarla / FTR seansları): kaydet=false yalnız dener; satır başına uygun mu + öneri. */
   randevuSeri: (g: { baslangiclar: string[]; kaydet: boolean; kaynakRandevuId?: number; ftrProgramId?: number;
-                     hekimId?: number; kabinId?: number; sureDk?: number }) =>
+                     hekimId?: number; kabinId?: number; sureDk?: number; sablon?: RandevuSeriSablonu }) =>
     gonder<{ kaydedildi: boolean; uygun: number;
              satirlar: { baslangic: string; tamam: boolean; mesaj: string; oneri?: string | null }[] }>('/api/randevu/seri', g),
   /** Hekim çalışma planı (711): türetilmiş bloklar ve bugün çalışanlar. */

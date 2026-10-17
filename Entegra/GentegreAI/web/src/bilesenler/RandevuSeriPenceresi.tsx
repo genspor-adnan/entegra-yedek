@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { mesaj } from './mesaj';
 import { c } from '../dil/ceviri';
 import { Modal } from './Modal';
+import type { RandevuSeriSablonu } from '../api/uclar/ayar';
 
 const GUN_ADLARI = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 /** ISO gün: 1 Pzt … 7 Paz. */
@@ -28,9 +30,18 @@ interface Satir { tarih: string; saat: string; tamam?: boolean; mesaj?: string; 
  * saat satırda değiştirilebilir. Kaydet uygun satırları tek işlemde yazar (FTR'de seansları da).
  */
 export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, sureDk, adet: ilkAdet, gunler: ilkGunler,
-                                       hekimId, ustAlan, onKapat, onKaydedildi }: {
+                                       hekimId, ustAlan, onceKaydet, ilkDahil, onKapat, onKaydedildi }: {
   baslik: string;
-  kaynak: { kaynakRandevuId: number } | { ftrProgramId: number };
+  /** sablon: kaydedilmemiş yeni randevu - yalnız önizleme; kayıtta önce ilk randevu yazılır (onceKaydet). */
+  kaynak: { kaynakRandevuId: number } | { ftrProgramId: number } | { sablon: RandevuSeriSablonu };
+  /**
+   * YENİ KARTTA TEKRARLA (kullanıcı 17.10.2026): Kaydet önce ilk randevuyu kartın kendi kaydıyla yazar,
+   * verilen işi (tekrarlar) onun id'siyle çalıştırır; kart sonra kapanır.
+   */
+  onceKaydet?(sonra: (ilkId: number) => Promise<void>): Promise<void>;
+  /** TEKRARLA (kullanıcı 17.10.2026: "ilk dahil kaç seçtiysem o kadar olacak"): sayı ilk randevuyu da
+   *  içerir - üretilen tekrar sayısı bir eksiktir. FTR'de yok (orada sayı seans sayısı). */
+  ilkDahil?: boolean;
   ilkTarih: string;
   saat: string;
   sureDk: number;
@@ -57,15 +68,34 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
   /** Tarih listesini kurallardan üret (kontrol durumu sıfırlanır). */
   const uret = () => {
     const l: Satir[] = [];
-    for (let i = 0, t = baslangic; l.length < adet && i < 400; i++, t = gunEkle(t, 1))
+    const hedef = ilkDahil ? adet - 1 : adet;
+    for (let i = 0, t = baslangic; l.length < hedef && i < 400; i++, t = gunEkle(t, 1))
       if (gunler.includes(isoGunu(t))) l.push({ tarih: t, saat });
     setSatirlar(l); setKontrollu(false);
     return l;
   };
 
   const gonder = async (kaydet: boolean, liste: Satir[]) => {
-    if (liste.length === 0) { setHata(c('Önce tarihleri üretin (en az bir gün seçin).')); return }
+    if (liste.length === 0) {
+      setHata(ilkDahil && adet <= 1 ? c('Toplam en az 2 olmalı (ilk randevu dahil).') : c('Önce tarihleri üretin (en az bir gün seçin).'));
+      return;
+    }
     setHata(null); setMesgul(true);
+    if (kaydet && onceKaydet) {
+      // İlk randevu + tekrarlar: kart kaydedilir, tekrarlar ilk randevunun id'siyle yazılır.
+      try {
+        await onceKaydet(async ilkId => {
+          const y = await api.randevuSeri({ kaynakRandevuId: ilkId, sureDk: sure, kaydet: true,
+                                            baslangiclar: liste.map(s => `${s.tarih}T${s.saat}`) });
+          const kalan = y.satirlar.filter(s => !s.tamam);
+          mesaj(`${c('İlk randevu')} + ${y.uygun} ${c('tekrar kaydedildi.')}`
+                + (kalan.length ? ` ${kalan.length} ${c('satır uygun değildi')}: ${kalan.map(s => s.baslangic.replace('T', ' ')).join(', ')}` : ''));
+          onKaydedildi(y.uygun);
+        });
+      } catch (h) { setHata(hataMetni(h)) }
+      finally { setMesgul(false) }
+      return;
+    }
     try {
       const y = await api.randevuSeri({ ...kaynak, sureDk: sure, kaydet, hekimId: hekimId ?? undefined,
                                         baslangiclar: liste.map(s => `${s.tarih}T${s.saat}`) });
@@ -107,7 +137,7 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
           <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{c('Süre (dk)')}
             <input type="number" min={5} step={5} style={{ ...kutu, width: 70 }} value={sure}
                    onChange={e => { setSure(Number(e.target.value) || 0); setKontrollu(false) }} /></label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{c('Seans / tekrar sayısı')}
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{ilkDahil ? c('Toplam randevu (ilk dahil)') : c('Seans sayısı')}
             <span style={{ display: 'flex', gap: 4 }}>
               {[5, 10, 15, 20].map(n => (
                 <button key={n} type="button" className={`d${adet === n ? ' bir' : ''}`}
@@ -127,6 +157,7 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
           <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={() => uret()}>🗓 {c('Tarihleri Üret')}</button>
         </div>
 
+        {ilkDahil && satirlar.length > 0 && <div className="not" style={{ margin: 0 }}>{c('1. randevu: karttaki randevu. Aşağıdakiler tekrarlar.')}</div>}
         {satirlar.length > 0 && (
           <div style={{ maxHeight: 360, overflowY: 'auto', border: '1px solid var(--cizgi)', borderRadius: 4 }}>
             <table className="grid" style={{ width: '100%' }}>
@@ -134,7 +165,7 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
               <tbody>
                 {satirlar.map((s, i) => (
                   <tr key={`${s.tarih}-${i}`}>
-                    <td>{i + 1}</td>
+                    <td>{i + (ilkDahil ? 2 : 1)}</td>
                     <td>{GUN_ADLARI[isoGunu(s.tarih) - 1]} {s.tarih.split('-').reverse().join('.')}</td>
                     <td><input type="time" style={{ ...kutu, width: 96 }} value={s.saat} onChange={e => saatDegis(i, e.target.value)} /></td>
                     <td>

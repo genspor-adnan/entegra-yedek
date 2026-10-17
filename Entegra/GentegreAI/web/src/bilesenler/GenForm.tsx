@@ -1225,8 +1225,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   //   baska kartin degisikligi buraya sizmasin.
   useEffect(() => { ekKaydetTemizle(); return () => ekKaydetTemizle() }, [kaynak, id]);
 
-  /** `acikKal`: kayittan sonra kart kapanmaz, yeni surumle yeniden yuklenir. */
-  async function kaydet(acikKal = false) {
+  /**
+   * `acikKal`: kayittan sonra kart kapanmaz, yeni surumle yeniden yuklenir.
+   * `sonra`: kayit basarili olunca, kart kapanmadan once calisan is (yeni randevuda Tekrarla:
+   *   tekrarlar ilk randevunun id'siyle yazilir). Hatasi kaydi geri almaz - mesajla bildirilir.
+   */
+  async function kaydet(acikKal = false, sonra?: (id: number) => Promise<void>) {
     // ADAY HASTA (266): dosya no CEP NUMARASI, unvan ad+soyad. Ikisi de kartta
   //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
   // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
@@ -1357,6 +1361,11 @@ Yine de yeni kayıt eklensin mi?`);
       // Kartin AYRI uca yazan bolumleri (personel > yetkili subeler) tek
       //   Kaydet'e baglidir: kart yazildiktan sonra kuyruk calisir.
       await ekKaydetleriCalistir();
+
+      if (sonra) {
+        try { await sonra(Number(yanit.kart.id)) }
+        catch (h) { bilgiMesaji(`${c('Kayıt yapıldı ama sonraki adım tamamlanamadı')}: ${hataAyristir(h).mesaj}`) }
+      }
 
       kayitBasarili.current = true;
       onKaydedildi?.(Number(yanit.kart.id), acikKal && !yeniMi);
@@ -2122,11 +2131,15 @@ Yine de yeni kayıt eklensin mi?`);
                         onClick={() => setErteleAcik(true)}>{c('⏭ Ertele')}</button>
               )}
               {/* TEKRARLA (kullanıcı 17.10.2026): aynı randevudan seri - gün / sayı seçilir, çakışma kontrollü. */}
-              {!yeniMi && (
-                <button className="d" disabled={kaydedilmemisDegisiklikVar}
-                        title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
-                        onClick={() => setTekrarAcik(true)}>{c('🔁 Tekrarla')}</button>
-              )}
+              {/* Yeni kartta da (17.10.2026): pencerenin Kaydet'i önce bu randevuyu yazar. */}
+              <button className="d" disabled={!yeniMi && kaydedilmemisDegisiklikVar}
+                      title={!yeniMi && kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
+                      onClick={() => {
+                        if (yeniMi && (!Number(deger.hastaId) || !String(deger.baslangic ?? ''))) {
+                          bilgiMesaji(c('Önce hasta ve ilk randevunun tarih / saatini seçin.')); return;
+                        }
+                        setTekrarAcik(true);
+                      }}>{c('🔁 Tekrarla')}</button>
             </>
           )}
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
@@ -2291,18 +2304,26 @@ Yine de yeni kayıt eklensin mi?`);
             onErtelendi={yeniId => { setErteleAcik(false); onKaydedildi?.(yeniId); onKapat?.() }} />
         );
       })()}
-      {kaynak === 'randevu' && tekrarAcik && id != null && (() => {
+      {kaynak === 'randevu' && tekrarAcik && (() => {
         const bas = String(deger.baslangic ?? '');
         const t = bas.slice(0, 10);
         const g = new Date(`${t}T12:00`).getDay();
         const ertesi = new Date(`${t}T12:00`); ertesi.setDate(ertesi.getDate() + 1);
         const ertesiMetin = `${ertesi.getFullYear()}-${String(ertesi.getMonth() + 1).padStart(2, '0')}-${String(ertesi.getDate()).padStart(2, '0')}`;
         return (
-          <RandevuSeriPenceresi baslik={`🔁 ${c('Randevuyu Tekrarla')}`} kaynak={{ kaynakRandevuId: Number(id) }}
+          <RandevuSeriPenceresi baslik={`🔁 ${c('Randevuyu Tekrarla')}`}
+                                kaynak={yeniMi
+                                  ? { sablon: { hastaId: Number(deger.hastaId), hekimId: Number(deger.hekimId) || null,
+                                                cihazId: Number(deger.cihazId) || null, bolum: Number(deger.bolum) || null,
+                                                hizmetId: Number(deger.hizmetId) || null, sureDk: Number(deger.sureDk) || 15,
+                                                gonderenId: Number(deger.gonderenId) || null, tip: Number(deger.tip) || 1,
+                                                kaynak: Number(deger.kaynak) || 1, aciklama: String(deger.aciklama ?? '') } }
+                                  : { kaynakRandevuId: Number(id) }}
+                                onceKaydet={yeniMi ? sonra => kaydet(false, sonra) : undefined} ilkDahil
                                 ilkTarih={ertesiMetin} saat={bas.slice(11, 16)} sureDk={Number(deger.sureDk) || 15}
                                 adet={5} gunler={[g === 0 ? 7 : g]}
                                 onKapat={() => setTekrarAcik(false)}
-                                onKaydedildi={n => { bilgiMesaji(`${n} ${c('randevu oluşturuldu.')}`) }} />
+                                onKaydedildi={n => { if (!yeniMi) bilgiMesaji(`${n} ${c('randevu oluşturuldu.')}`) }} />
         );
       })()}
       {kaynak === 'kisi' && (
