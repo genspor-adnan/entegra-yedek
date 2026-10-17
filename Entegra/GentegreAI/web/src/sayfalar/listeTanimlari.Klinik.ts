@@ -129,6 +129,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   al; bunlar hbys icin gecerli"). Grup sirasi bu dizideki ILK gorulme
     //   sirasindan gelir - bu yuzden Hasta/Kayıt Kabul girdisinden ONCE durur.
     kaynak: 'randevu', baslik: 'Randevu Listesi', yol: 'Randevu › Randevu Listesi',
+    // HASTANIN TELEFONU / KİMLİK NOSU İLE ARAMA (kullanıcı 16.10.2026) - kolonlar gizli.
+    aramaEkAlanlari: ['telefonHam', 'vknoHam'],
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',
     cipler: [

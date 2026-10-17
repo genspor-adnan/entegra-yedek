@@ -374,11 +374,16 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   ], [kolonlar, tumKolonlar, aramaEkAlanlari]);
   /** ARAMA KUTUSU İPUCU (kullanıcı 16.10.2026: "arama editinde aranacak alanlar görünmesi daha iyi"). */
   const aramaIpucu = useMemo(() => {
-    const adlar = [...new Set(aramaKolonlari.filter(k => k.tip === 'metin' && k.filtrelenebilir)
-      .map(k => cev(k.baslik.replace(/\s*\(ham\)\s*$/i, ''))))];
+    const ad = (k: (typeof aramaKolonlari)[number]) => cev(k.baslik.replace(/\s*\(ham\)\s*$/i, ''));
+    const metinler = aramaKolonlari.filter(k => k.tip === 'metin' && k.filtrelenebilir);
+    // EK ALANLAR ÖNDE (randevu: "Ara: Bölüm, Hekim, Cihaz, Hasta, Saat…" telefon / kimlik no'yu
+    //   gizliyordu): ilk üç görünen kolon, ardından gizli ek alanlar, sonra kalanlar.
+    const ekler = metinler.filter(k => aramaEkAlanlari?.includes(k.ad) && !kolonlar.some(x => x.ad === k.ad));
+    const gorunenler = metinler.filter(k => !ekler.includes(k));
+    const adlar = [...new Set([...gorunenler.slice(0, 3), ...ekler, ...gorunenler.slice(3)].map(ad))];
     return adlar.length === 0 ? cev('Bu listede ara…')
       : `${cev('Ara')}: ${adlar.slice(0, 5).join(', ')}${adlar.length > 5 ? '…' : ''}`;
-  }, [aramaKolonlari]);
+  }, [aramaKolonlari, aramaEkAlanlari, kolonlar]);
 
   // LISTE VERISI (yukleme · sayfalama · siralama · arama · CSV) kendi
   //   kancasinda: grid/useListeVerisi.
