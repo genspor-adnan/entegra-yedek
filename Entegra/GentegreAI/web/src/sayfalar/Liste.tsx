@@ -1014,6 +1014,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         git: yol => git(yol),
         setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId, setErtele: setErtelenecek,
         hastaTamamla: hid => new Promise(coz => setHastaTamamla({ id: hid, coz })),
+        gonderenModu: (kullanici?.hekimRolu ?? 4) === 1,
       })) return;
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) {
@@ -1916,7 +1917,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       <BelgeKarti key={String(kartId)} sayfa
                   {...(kartId === 'yeni' ? { tur: tanim.yeniBelgeTuru,
                         // Hasta kartından "＋ Yeni Başvuru": hasta seçili gelir.
-                        tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined }
+                        tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined,
+                        // Randevudan başvuru (17.10.2026): gönderen / bölüm dolu, kayıtta randevu bağlanır.
+                        randevuId: Number(sorgu.get('randevuId')) || undefined,
+                        onDolguPersonel: Number(sorgu.get('personelId'))
+                          ? { id: Number(sorgu.get('personelId')), ad: sorgu.get('personelAd') ?? '' } : undefined,
+                        onDolguBolumId: Number(sorgu.get('bolumId')) || undefined }
                      : { id: Number(kartId) })}
                   onKapat={() => ekranSekmesi!.kapat()}
                   onKaydedildi={() => window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }))} />

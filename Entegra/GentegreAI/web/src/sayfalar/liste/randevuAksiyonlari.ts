@@ -33,6 +33,11 @@ export interface RandevuBaglam {
    * hastaya geçilirse { id, mevcut: true }, kapatılırsa null.
    */
   hastaTamamla?(hastaId: number): Promise<{ id: number; mevcut?: boolean } | null>;
+  /**
+   * GÖNDEREN MODU (kullanıcı hekim rolü 1 - görüntüleme / lab merkezi): başvurunun "Doktor / Personel"
+   * alanı hastayı GÖNDEREN dış doktordur; diğer kurumlarda hastayı görecek iç doktordur.
+   */
+  gonderenModu?: boolean;
 }
 
 export async function randevuAksiyonu(
@@ -124,14 +129,6 @@ export async function randevuAksiyonu(
     let hastaId = Number(satir.hastaId) || 0;
     const hizmetId = Number(satir.hizmetId) || 0;
     if (!hastaId) { mesaj('Randevuda hasta yok.'); return }
-    // Basvuru en az bir kalemle acilir (sunucu bos belgeyi reddediyor):
-    //   randevunun hizmeti yoksa once o secilmeli.
-    if (!Number(satir.hizmetId)) {
-      mesaj('Randevuda hizmet seçili değil — başvuru kalemi oluşturulamıyor. '
-          + 'Randevu kartından "Hizmet / İşlem" seçip tekrar deneyin.');
-      b.git(`/randevu/${Number(satir.id)}`);
-      return;
-    }
     if (satir.belgeId) {
       // Zaten donusmus: yeni belge acmak yerine mevcut basvuruyu ac - ayni
       //   randevudan iki basvuru cikmasin.
@@ -174,6 +171,25 @@ export async function randevuAksiyonu(
       hasta = await hastaOku(hastaId);
     }
     const odeyenKurumId = hasta.kurumId;
+    // Başvurunun kişisi kurum moduna göre: gönderen modunda dış GÖNDEREN, değilse randevunun DOKTORU.
+    const basvuruKisisi = (b.gonderenModu ? Number(satir.gonderenId) : Number(satir.hekimId)) || 0;
+
+    // İŞLEM SEÇİLİ DEĞİLSE (kullanıcı 17.10.2026: "bilgiler ne kadar varsa onunla dönüşmeli"): sunucu
+    //   kalemsiz başvuruyu kabul etmez - YENİ BAŞVURU KARTI randevudaki bilgilerle (hasta, gönderen /
+    //   doktor, bölüm) kendi sekmesinde açılır; işlem orada eklenir, ilk kayıtta randevu bağlanır.
+    if (!hizmetId) {
+      const kisi = basvuruKisisi;
+      const kisiAd = String((kisi && kisi === Number(satir.gonderenId) ? satir.gonderen : satir.hekim) ?? '');
+      const q = new URLSearchParams({
+        tarafId: String(hastaId),
+        tarafUnvan: String((hasta.kart as { unvan?: unknown } | null)?.unvan ?? satir.hasta ?? ''),
+        randevuId: String(Number(satir.id)),
+        ...(kisi ? { personelId: String(kisi), personelAd: kisiAd } : {}),
+        ...(Number(satir.bolum) ? { bolumId: String(Number(satir.bolum)) } : {}),
+      });
+      b.git(`/basvuru/yeni?${q.toString()}`);
+      return;
+    }
 
     // FIYAT: liste BAZ, kampanya INDIRIM (274). Baz liste belge kartinin
     //   kuralindan gelir (205: carinin listesi > varsayilan satis);
@@ -231,7 +247,7 @@ export async function randevuAksiyonu(
         subeId: b.oturumSubeId,
         fiyatListesiId,
         // GÖNDEREN ve BÖLÜM randevudan (17.10.2026): gönderen (dış) doktor, yoksa randevunun doktoru.
-        personelId: Number(satir.gonderenId) || Number(satir.hekimId) || null,
+        personelId: basvuruKisisi || null,
         bolumId: Number(satir.bolum) || null,
         aciklama: `Randevu #${satir.id}`
                   + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),

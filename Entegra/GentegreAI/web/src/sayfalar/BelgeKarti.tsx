@@ -79,10 +79,19 @@ interface Props {
    * sekme başlığı protokol no + hasta.
    */
   sayfa?: boolean;
+  /**
+   * RANDEVUDAN BAŞVURU (kullanıcı 17.10.2026: "randevuda işlem seçili olmadığı için başvuruya
+   * dönüşemedi - bilgiler ne kadar varsa onunla dönüşmeli"): yeni başvuru gönderen doktor ve bölümle
+   * dolu açılır; İLK KAYITTA randevu bu başvuruya bağlanır ve "Geldi" olur.
+   */
+  randevuId?: number;
+  onDolguPersonel?: { id: number; ad: string };
+  onDolguBolumId?: number;
 }
 
 export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
-                            tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa }: Props = {}) {
+                            tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa,
+                            randevuId, onDolguPersonel, onDolguBolumId }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
@@ -477,6 +486,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const eBelgeYok = !bilgi.eBelge;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = etkinBelgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+  // RANDEVU BAĞI (17.10.2026): yeni başvuru ilk kez kaydedilince randevu ona bağlanır ve Geldi olur.
+  const randevuBaglandi = useRef(false);
+  useEffect(() => {
+    if (!randevuId || belgeId || kayitliId <= 0 || randevuBaglandi.current) return;
+    randevuBaglandi.current = true;
+    void (async () => {
+      try {
+        const r = await api.kartOku('randevu', randevuId);
+        if (!r.kart.belgeId)
+          await api.kartGuncelle('randevu', randevuId, { surum: r.kart.surum, kart: { belgeId: kayitliId, durum: 2 } });
+      } catch (h) { setHata(`${c('Başvuru kaydedildi ama randevuya bağlanamadı')}: ${hataMetni(h)}`) }
+    })();
+  }, [randevuId, belgeId, kayitliId]);
 
   /** DOKTOR İSTEMİ (banko): hekimin muayenede açtığı bekleyen (ücretlendirilmemiş)
    *  lab/radyoloji istemleri. Varsa araç çubuğunda "Doktor İstemi" düğmesi aktif;
@@ -675,6 +697,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     setBasvuruBilgi(o => ({ ...o, gelisSekli: gelisSekliKarari(true) }));
     void bolumuHekimdenDoldur(id);
   };
+  // RANDEVUDAN AÇILAN YENİ BAŞVURU (17.10.2026): gönderen doktor ve bölüm kartın kendi işleyicisiyle dolar
+  //   (kendi isteği / geliş şekli kuralları da çalışsın diye); yalnız ilk açılışta.
+  const onDolguYapildi = useRef(false);
+  useEffect(() => {
+    if (belgeId || onDolguYapildi.current || (!onDolguPersonel && !onDolguBolumId)) return;
+    onDolguYapildi.current = true;
+    if (onDolguPersonel?.id) personelSecildi(onDolguPersonel.id, onDolguPersonel.ad);
+    if (onDolguBolumId) setBolumId(onDolguBolumId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [belgeId, onDolguPersonel?.id, onDolguBolumId]);
 
 
   /* BASVURUNUN KENDILIGINDEN DOLAN ALANLARI kendi kancasinda
@@ -1665,7 +1697,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             kendiIstegi={Number(basvuruBilgi.kendiIstegi ?? 0) === 1}
             onKendiIstegi={kendiIstegiDegisti}
             randevuBilgi={sonuc?.belge.randevuOzet
-              ? String(sonuc.belge.randevuOzet) : undefined}
+              ? String(sonuc.belge.randevuOzet)
+              // Randevudan açılan yeni başvuru (17.10.2026): bağ ilk kayıtta kurulur.
+              : randevuId && !belgeId ? `#${randevuId} ${c('(kayıtta bağlanır)')}` : undefined}
           />
         )}
 
