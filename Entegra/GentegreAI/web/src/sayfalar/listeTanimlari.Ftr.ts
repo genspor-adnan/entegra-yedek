@@ -62,7 +62,7 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAd: 'Seans Listesi', ic: '🏃', yetkiKodu: 'ftr.seans.liste.liste', menuSira: 40,
+    menuGrup: 'FTR', menuAd: 'Seans Listesi', ic: '🏃', yetkiKodu: 'ftr.seans.liste', menuSira: 40,
   },
   {
     kaynak: 'ftr-olcek', rota: 'ftr-olcek', aksiyonEkrani: 'ftr-olcek-liste', baslik: 'Ölçek Listesi',

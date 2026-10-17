@@ -158,6 +158,11 @@ public static partial class EkranKodlari
         ["teleradyoloji.nobet.liste"]    = "teleradyoloji.nobet",
         ["teleradyoloji.kural.liste"]    = "teleradyoloji.kural",
         ["teleradyoloji.sozlesme.liste"] = "teleradyoloji.sozlesme",
+        // ESKİ AŞAMA 1 LİSTE KODLARI (göç 1130, grup 1): liste ekranı için zaten bölünmüştü ama tam
+        //   yetki taşıyordu; kart = aşama 1'in eski kodu (KendiKapisi'nde de - tam köprü kalktı).
+        ["muayene.liste"]                = "muayene",
+        ["ftr.seans.liste"]              = "ftr.seans",
+        ["medula.fatura.liste"]          = "medula.fatura",
         // KALAN GRUPLAR (göç 1129, kullanıcı: "kalan grupları da tek göçle yap"): aday üretici seçti -
         //   menüde, kartı kendi rotasında, kodu tek ekranda, listesi kodla ya da köprüyle açılan listeler.
         ["asi.katalog.liste"] = "asi.katalog",
@@ -167,7 +172,6 @@ public static partial class EkranKodlari
         ["muayene.sablon.liste"] = "muayene.sablon",
         ["bzbh.hastalik.liste"] = "bzbh.hastalik",
         ["muayene.makro.liste"] = "muayene.makro",
-        ["muayene.liste.liste"] = "muayene.liste",
         ["lab.liste"] = "lab",
         ["lab.tetkik.liste"] = "lab.tetkik",
         ["lab.tetkik.panel.liste"] = "lab.tetkik.panel",
@@ -215,7 +219,6 @@ public static partial class EkranKodlari
         ["dis.unit.liste"] = "dis.unit",
         ["dis.unit.lab.liste"] = "dis.unit.lab",
         ["ftr.degerlendirme.liste"] = "ftr.degerlendirme",
-        ["ftr.seans.liste.liste"] = "ftr.seans.liste",
         ["ftr.olcek.liste"] = "ftr.olcek",
         ["ftr.unite.liste"] = "ftr.unite",
         ["form.sablon.liste"] = "form.sablon",
@@ -234,7 +237,6 @@ public static partial class EkranKodlari
         ["steril.ayar.program.liste"] = "steril.ayar.program",
         ["steril.ayar.bakim.liste"] = "steril.ayar.bakim",
         ["medula.recete.rapor.liste"] = "medula.recete.rapor",
-        ["medula.fatura.liste.liste"] = "medula.fatura.liste",
         ["medula.fatura.donem.liste"] = "medula.fatura.donem",
         ["medula.fatura.kesinti.liste"] = "medula.fatura.kesinti",
         ["klinik_kalite.donem.liste"] = "klinik_kalite.donem",
@@ -410,8 +412,9 @@ public static partial class EkranKodlari
     /// </summary>
     private static readonly HashSet<string> KendiKapisi = new(StringComparer.Ordinal)
     {
-        // Kayıt Kabul listeleri (1115 aşama 2): veri kapısını yalnız Gör'de açar - YalnizGorListe.
-        "hasta.liste", "basvuru.liste",
+        // Kayıt Kabul listeleri (1115 aşama 2) ve eski liste kodları (1130): veri kapısını yalnız
+        //   Gör'de açar - YalnizGorListe.
+        "hasta.liste", "basvuru.liste", "muayene.liste", "ftr.seans.liste", "medula.fatura.liste",
         "hesap.tanim.banka_tanim",   // banka kaynağı + kartı
         "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
         "kasa.finans.vade",          // plan-vade kaynağı

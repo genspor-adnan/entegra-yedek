@@ -249,8 +249,11 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
    * Listesi aktif menüdeyse kart bu iki yoldan ayrılır ve listesinin hemen ardına konur.
    */
   const yeniKodlar = new Set(yeni.map(x => x.kod));
+  // Kart kodu kendisi de bir menü ekranının koduysa (muayene = Muayene › Çalışma Listesi, 1130) kendi
+  //   menü yerinde kalır - taşınsa o ekranın satırı kaybolurdu.
   const kartBekler = (s: { kod: string }) =>
-    !!VERI_KAPISI_ALTI[s.kod] && harita.has(VERI_KAPISI_ALTI[s.kod]) && yeniKodlar.has(VERI_KAPISI_ALTI[s.kod]);
+    !!VERI_KAPISI_ALTI[s.kod] && harita.has(VERI_KAPISI_ALTI[s.kod]) && yeniKodlar.has(VERI_KAPISI_ALTI[s.kod])
+    && !harita.has(s.kod);
   for (const s of yeni.filter(x => (!x.kod.includes('.') || ayriEkran(x)) && !kartBekler(x))) {
     const yer = harita.get(s.kod);
     // GİZLENMİŞ EKRANIN YETKİSİ ÇİZİLMEZ: menüde karşılığı VAR ama aktif

@@ -96,7 +96,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['yerelTutar', 'medulaTutar', 'katilim', 'kesinti'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste.liste', menuSira: 60,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
   },
   {
     kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemi Listesi',

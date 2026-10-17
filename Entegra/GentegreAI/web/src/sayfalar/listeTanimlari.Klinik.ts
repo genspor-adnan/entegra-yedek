@@ -701,6 +701,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayene Listesi', ic: '🩺', yetkiKodu: 'muayene.liste.liste',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayene Listesi', ic: '🩺', yetkiKodu: 'muayene.liste',
   },
 ];
