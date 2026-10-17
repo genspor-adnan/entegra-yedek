@@ -6,6 +6,7 @@ import { gostergeDegeri } from '../bilesenler/GostergeIcerik';
 import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/menuAgaci';
+import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
 import { kartAdi, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
 import { SekmeGorunurBaglami } from '../bilesenler/sekmeBaglami';
@@ -55,8 +56,23 @@ export function Baslangic() {
     void api.baslangicBekleyen().then(setBekleyen).catch(() => setBekleyen(null));
   }, [kullanici?.id, kullanici?.subeId]);
 
-  const menu = useMemo(() => menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller),
-                       [yetki, kullanici?.urunModu, kullanici?.moduller]);
+  /**
+   * MENÜ DÜZENİ BURADA DA (kullanıcı 17.10.2026: "genprofil'de 13 aktif 6 pasif grup var, admin olarak
+   * girdiğimde tüm gruplar aktif geldi"): kutular düzensiz ağaçtan kuruluyordu - kurumun gizlediği
+   * grup / ekran ana sayfada görünüyordu. Sol menüyle (Kabuk) aynı okuma ve aynı uygulama.
+   */
+  const [menuDuzen, setMenuDuzen] = useState<MenuDuzenSatiri[]>([]);
+  useEffect(() => {
+    if (!kullanici?.id) return;
+    let iptal = false;
+    const oku = () => api.menuDuzen().then(y => { if (!iptal) setMenuDuzen(y.satirlar) }).catch(() => {});
+    oku();
+    window.addEventListener(MENU_DUZEN_OLAYI, oku);
+    return () => { iptal = true; window.removeEventListener(MENU_DUZEN_OLAYI, oku) };
+  }, [kullanici?.id, kullanici?.subeId]);
+  const menu = useMemo(() => menuDuzeniUygula(
+                         menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller), menuDuzen),
+                       [yetki, kullanici?.urunModu, kullanici?.moduller, menuDuzen]);
   /** MENÜ İKONLARI (kullanıcı 14.10.2026: "açılış ekrandaki menülere ikonlar gelsin"): satırın
       ikonu sol menüdeki ikonudur (yola göre) - rolün elle düzenlediği kutucuklarda da. */
   const ikonlar = useMemo(() => {
