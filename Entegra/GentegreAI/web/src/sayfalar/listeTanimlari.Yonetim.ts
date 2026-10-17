@@ -36,7 +36,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Güvenlik', menuSira: 100,
-    menuAd: 'Kullanıcı Listesi', ic: '👤', yetkiKodu: 'kullanici',
+    menuAd: 'Kullanıcı Listesi', ic: '👤', yetkiKodu: 'kullanici.liste',
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
@@ -59,7 +59,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // PERSONEL İZİNLERDEN ÖNCE (kullanıcı: "menüde personel ve izinler yer
     //   değiştir"): ikisi de sıra 10 iken diziye önce giren İzinler üste
     //   düşüyordu - kadro listesi İK menüsünün ilk maddesi olmalı.
-    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 5,
+    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel.liste', menuSira: 5,
   },
   // PRIM (kullanici): ana menude kendi basina grup degil, IK'nin ALTINDA
   //   ve Personel Listesi'nden SONRA. menuSira 20/30/40 personelin 10'unun
@@ -73,7 +73,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
     menuGrup: 'İK', menuAd: 'Prim Planı Listesi', ic: '🎯',
-    yetkiKodu: 'prim.plan', menuSira: 40, urunModu: 2,
+    yetkiKodu: 'prim.plan.liste', menuSira: 40, urunModu: 2,
   },
   {
     // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
@@ -146,7 +146,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',
     kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
     // Sekmeler 1006'dan beri gerçek (kart detayları) - yer tutucu kalmadı.
-    menuGrup: 'Sabit Varlıklar', menuSira: 10, menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
+    menuGrup: 'Sabit Varlıklar', menuSira: 10, menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas.liste',
   },
   {
     // ZİMMET / HAREKETLER (1007, mockup Ekranlar/Demirbas/demirbas_zimmet_hareketleri.html):
@@ -192,7 +192,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // ORTAK MOD (kullanici): urunModu VERILMEZ - dokuman yonetimi hem ERP
     //   hem HBYS'de ayni; moda baglamak, ayni tabloyu bir urunde gorunmez
     //   kilardi.
-    menuGrup: 'Doküman', menuSira: 10, menuAd: 'Doküman Listesi', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman',
+    menuGrup: 'Doküman', menuSira: 10, menuAd: 'Doküman Listesi', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman.liste',
   },
   {
     // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
@@ -217,7 +217,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Kategoriler/Klasorler AYARDIR: yol zaten "Doküman › Ayarlar › ..." -
     //   gunluk listelerle ayni duzeyde durmasinlar.
     menuGrup: 'Doküman', menuSira: 30, menuAltGrup: 'Ayarlar',
-    menuAd: 'Kategori Listesi', ic: '🏷️', yetkiKodu: 'dokuman.kategori',
+    menuAd: 'Kategori Listesi', ic: '🏷️', yetkiKodu: 'dokuman.kategori.liste',
   },
   {
     // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
@@ -231,7 +231,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Doküman', menuSira: 31, menuAltGrup: 'Ayarlar',
-    menuAd: 'Klasör Listesi', ic: '🗂️', yetkiKodu: 'dokuman.klasor',
+    menuAd: 'Klasör Listesi', ic: '🗂️', yetkiKodu: 'dokuman.klasor.liste',
   },
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
@@ -316,7 +316,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'onam-metni', baslik: 'Onam Metni Listesi', yol: 'Yonetim › Onam Metni Listesi',
     kartYolu: '/onam-metni', cipler: DURUM_CIPLERI,
     menuGrup: 'Platform', menuSira: 113,
-    menuAd: 'Onam Metni Listesi', ic: '📜', yetkiKodu: 'onam',
+    menuAd: 'Onam Metni Listesi', ic: '📜', yetkiKodu: 'onam.liste',
   },
   {
     // VERILEN ONAMLAR (398): salt gorunum - onam kart ekranindan degil, akisin
@@ -333,7 +333,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'bildirim-sablon-liste',
     cipler: DURUM_CIPLERI,
     menuGrup: 'Platform', menuSira: 110,
-    menuAd: 'Bildirim Şablonu Listesi', ic: '💬', yetkiKodu: 'bildirim_sablon',
+    menuAd: 'Bildirim Şablonu Listesi', ic: '💬', yetkiKodu: 'bildirim_sablon.liste',
   },
   {
     // BILDIRIM KUYRUGU (399): "gitti mi" sorusunun TEK yeri. Cipler durum
@@ -356,7 +356,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Yonetim › Ortak Platform › Zamanlanmış İş Listesi', kartYolu: '/zamanli-is',
     aksiyonEkrani: 'zamanli-is-liste',
     menuGrup: 'Platform', menuSira: 112,
-    menuAd: 'Zamanlanmış İş Listesi', ic: '⏱️', yetkiKodu: 'zamanli_is',
+    menuAd: 'Zamanlanmış İş Listesi', ic: '⏱️', yetkiKodu: 'zamanli_is.liste',
   },
   {
     // AKTARIM DURUMU (1090, mockup Ekranlar/aktarim_durumu.html): Delphi ERP -> web
@@ -417,7 +417,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
     //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
     //   menuSira 15: Personel Listesi (10) ile Prim grubunun (20+) arasi.
-    menuGrup: 'Güvenlik', menuAd: 'Rol Listesi', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
+    menuGrup: 'Güvenlik', menuAd: 'Rol Listesi', ic: '🛡️', yetkiKodu: 'rol.liste', menuSira: 103,
   },
   {
     // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.

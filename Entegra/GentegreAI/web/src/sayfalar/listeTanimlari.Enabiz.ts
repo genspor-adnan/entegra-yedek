@@ -66,7 +66,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'enabiz',
     menuGrup: 'e-Nabız', menuAltGrup: 'Ayarlar', menuAd: 'Kod Eşleme', ic: '🔗',
-    yetkiKodu: 'entegrasyon.kod_esleme', menuSira: 90,
+    yetkiKodu: 'entegrasyon.kod_esleme.liste', menuSira: 90,
   },
 
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).

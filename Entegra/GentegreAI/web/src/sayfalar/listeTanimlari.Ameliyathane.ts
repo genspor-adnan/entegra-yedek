@@ -69,7 +69,7 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Ameliyathane', menuAd: 'Bekleyen Talep Listesi', ic: '📋',
-    yetkiKodu: 'ameliyathane.talep', menuSira: 20,
+    yetkiKodu: 'ameliyathane.talep.liste', menuSira: 20,
   },
   {
     kaynak: 'ameliyatSalon', rota: 'ameliyat-salon',
@@ -83,7 +83,7 @@ export const AMELIYATHANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Ameliyathane', menuAltGrup: 'Ayarlar', menuAd: 'Salon Listesi', ic: '🚪',
-    yetkiKodu: 'ameliyathane.salon', menuSira: 90,
+    yetkiKodu: 'ameliyathane.salon.liste', menuSira: 90,
   },
   {
     // AMELİYATHANE İCMALİ (1040, mockup İcmal/ameliyathane_icmali.html): salon doluluğu, süre disiplini,

@@ -20,7 +20,7 @@ export const FORM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'form',
-    menuGrup: 'Formlar', menuAd: 'Form Şablonu Listesi', ic: '🗂', yetkiKodu: 'form.sablon', menuSira: 10,
+    menuGrup: 'Formlar', menuAd: 'Form Şablonu Listesi', ic: '🗂', yetkiKodu: 'form.sablon.liste', menuSira: 10,
   },
   {
     kaynak: 'form-kutuphane', ozelSayfa: true, baslik: 'Form Kütüphanesi', yol: 'Formlar › Kütüphane',
@@ -46,6 +46,6 @@ export const FORM_LISTELERI: ListeGirdisi[] = [
     yol: 'Formlar › Kurallar',
     kartYolu: '/form-kural', kartBaslik: 'Form Kuralı',
     urunModu: 2, modul: 'form',
-    menuGrup: 'Formlar', menuAd: 'Kural Listesi (tetikleyiciler)', ic: '⚡', yetkiKodu: 'form.kural', menuSira: 40,
+    menuGrup: 'Formlar', menuAd: 'Kural Listesi (tetikleyiciler)', ic: '⚡', yetkiKodu: 'form.kural.liste', menuSira: 40,
   },
 ];

@@ -92,6 +92,6 @@ export const ACIL_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Acil', menuAltGrup: 'Ayarlar', menuAd: 'Yatak Listesi', ic: '🛏️',
-    yetkiKodu: 'acil.yatak', menuSira: 90,
+    yetkiKodu: 'acil.yatak.liste', menuSira: 90,
   },
 ];

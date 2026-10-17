@@ -538,7 +538,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Kasa Listesi', yol: 'Kasa › Kasa Hesaplari',
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim',
+    menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim.liste',
   },
   // --- BANKOLAR (985, Ekranlar/Kayit Kabul/banko_tanimi_v2.html): kasa /
   //     karsilama NOKTASI - kasasi, POS'u ve donanimi olan fiziksel yer.
@@ -572,7 +572,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Finans', menuSira: 45, menuAd: 'Banko Listesi', ic: '🏧',
-    yetkiKodu: 'banko',
+    yetkiKodu: 'banko.liste',
     // OTURUMLAR SEKMESİ (mockup banko_tanimi_v2.html, kullanıcı 09.10.2026):
     //   bankonun vardiya geçmişi - içi GenForm'da salt okunur GenGrid.
     yerTutucuSekmeler: ['Oturumlar'],
@@ -631,7 +631,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Banka Hesabı Listesi', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesabı Listesi', ic: '🏦', yetkiKodu: 'hesap.tanim.banka',
+    menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesabı Listesi', ic: '🏦', yetkiKodu: 'hesap.tanim.banka.liste',
   },
   {
     kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -639,7 +639,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Kredi Listesi', yol: 'Banka › Kredi Listesi',
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 35, menuAd: 'Kredi Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.kredi',
+    menuGrup: 'Finans', menuSira: 35, menuAd: 'Kredi Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.kredi.liste',
   },
   {
     kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -647,7 +647,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'POS Hesabı Listesi', yol: 'Banka › POS',
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap.tanim.pos',
+    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
   },
   {
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -655,7 +655,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Kredi Kartı Listesi', yol: 'Banka › Kredi Kartlari',
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap.tanim.kredi_karti',
+    menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap.tanim.kredi_karti.liste',
   },
   {
     // BANKA TANIMLARI (db/109): hesap ve cek/senet kartlarindaki banka secimini
@@ -666,7 +666,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Finans', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Banka Tanımı Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.banka_tanim',
+    menuGrup: 'Finans', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Banka Tanımı Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.banka_tanim.liste',
   },
   // CEK ve SENET AYRI listeler (kullanici karari): ayni `cek-senet` kaynagi,
   //   sabit filtre tur=1 / tur=2. Ikisi ayni tabloda durur cunku portfoy,
@@ -686,7 +686,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Finans', menuSira: 60, menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
+    menuGrup: 'Finans', menuSira: 60, menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet.liste',
   },
   {
     kaynak: 'cek-senet', rota: 'senet', baslik: 'Senet Listesi', yol: 'Banka › Senet Listesi',
@@ -701,7 +701,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Finans', menuSira: 65, menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet.senet',
+    menuGrup: 'Finans', menuSira: 65, menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet.senet.liste',
   },
   {
     // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid

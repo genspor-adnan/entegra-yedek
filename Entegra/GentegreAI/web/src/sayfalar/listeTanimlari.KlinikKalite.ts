@@ -58,7 +58,7 @@ export const KLINIK_KALITE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Klinik Kalite', menuAd: 'Klinik Kalite Dönem Sonucu Listesi',
-    ic: '📊', yetkiKodu: 'klinik_kalite.donem', menuSira: 61,
+    ic: '📊', yetkiKodu: 'klinik_kalite.donem.liste', menuSira: 61,
   },
   {
     kaynak: 'klinikGostergeKod', rota: 'klinik-gosterge-kod',

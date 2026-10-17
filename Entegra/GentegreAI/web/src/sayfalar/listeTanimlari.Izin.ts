@@ -33,7 +33,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'İzin Listesi', ic: '🌴',
-    yetkiKodu: 'ik.izin', modul: 'ik', menuSira: 10,
+    yetkiKodu: 'ik.izin.liste', modul: 'ik', menuSira: 10,
   },
   {
     kaynak: 'izinBakiye', rota: 'izin-bakiye',
@@ -72,7 +72,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'Avans Listesi', ic: '💸',
-    yetkiKodu: 'ik.avans', modul: 'ik', menuSira: 14,
+    yetkiKodu: 'ik.avans.liste', modul: 'ik', menuSira: 14,
   },
   {
     // MASRAF BEYANI (764): cepten yapılan iş harcamasının geri ödeme talebi.
@@ -95,7 +95,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'Masraf Beyanı Listesi', ic: '🧾',
-    yetkiKodu: 'ik.masraf', modul: 'ik', menuSira: 15,
+    yetkiKodu: 'ik.masraf.liste', modul: 'ik', menuSira: 15,
   },
   {
     // BELGE TALEBİ (765): çalışma/maaş/vize yazısı. Asıl iş onay değil
@@ -117,7 +117,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'Belge Talebi Listesi', ic: '📄',
-    yetkiKodu: 'ik.belge_talep', modul: 'ik', menuSira: 16,
+    yetkiKodu: 'ik.belge_talep.liste', modul: 'ik', menuSira: 16,
   },
   {
     // RESMÎ TATİL (749): iş günü hesabının dayandığı takvim. İK
@@ -144,7 +144,7 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'Resmî Tatil Listesi', ic: '📅',
-    yetkiKodu: 'ik.tatil', modul: 'ik', menuSira: 13,
+    yetkiKodu: 'ik.tatil.liste', modul: 'ik', menuSira: 13,
   },
   {
     // HAKEDİŞ AYRI EKRAN ve ayrı yetki: bakiyeyi okumak bir iş, hakkı
@@ -155,6 +155,6 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/personel-izin-hak', kartBaslik: 'İzin Hakedişi',
     aksiyonEkrani: 'personel-izin-hak-liste',
     menuGrup: 'İK', menuAd: 'İzin Hakedişi', ic: '🧮',
-    yetkiKodu: 'ik.izin_hak', modul: 'ik', menuSira: 12, menuGizli: true,
+    yetkiKodu: 'ik.izin_hak.liste', modul: 'ik', menuSira: 12, menuGizli: true,
   },
 ];

@@ -27,7 +27,7 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAd: 'Patoloji Vaka Listesi', menuSira: 10,
-    ic: '🔬', yetkiKodu: 'patoloji.vaka',
+    ic: '🔬', yetkiKodu: 'patoloji.vaka.liste',
   },
   {
     kaynak: 'patoloji-gonderim', rota: 'patoloji-gonderim', baslik: 'Dış Lab Gönderim Listesi',
@@ -44,7 +44,7 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAd: 'Dış Lab Gönderim Listesi', menuSira: 20,
-    ic: '🚚', yetkiKodu: 'patoloji.gonderim',
+    ic: '🚚', yetkiKodu: 'patoloji.gonderim.liste',
   },
   {
     // DIŞ LABORATUVARLAR: Lab ile ORTAK kart (aynı lab hem biyokimya hem patoloji);
@@ -59,7 +59,7 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAltGrup: 'Ayarlar', menuAd: 'Dış Laboratuvar Listesi', menuSira: 210,
-    ic: '🏥', yetkiKodu: 'patoloji.dislab',
+    ic: '🏥', yetkiKodu: 'patoloji.dislab.liste',
   },
   {
     kaynak: 'patoloji-materyal-tipi', rota: 'patoloji-materyal-tipi', baslik: 'Materyal Tipi Listesi',
@@ -73,7 +73,7 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAltGrup: 'Ayarlar', menuAd: 'Materyal Tipi Listesi', menuSira: 220,
-    ic: '🧫', yetkiKodu: 'patoloji.tanim.materyal',
+    ic: '🧫', yetkiKodu: 'patoloji.tanim.materyal.liste',
   },
   {
     kaynak: 'patoloji-boya', rota: 'patoloji-boya', baslik: 'Boya ve Antikor Listesi',
@@ -88,7 +88,7 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAltGrup: 'Ayarlar', menuAd: 'Boya ve Antikor Listesi', menuSira: 230,
-    ic: '🎨', yetkiKodu: 'patoloji.tanim.boya',
+    ic: '🎨', yetkiKodu: 'patoloji.tanim.boya.liste',
   },
   {
     kaynak: 'patoloji-ret-nedeni', rota: 'patoloji-ret-nedeni', baslik: 'Ret Nedeni Listesi',
@@ -101,6 +101,6 @@ export const PATOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'patoloji',
     menuGrup: 'Patoloji', menuAltGrup: 'Ayarlar', menuAd: 'Ret Nedeni Listesi', menuSira: 240,
-    ic: '⛔', yetkiKodu: 'patoloji.tanim.ret',
+    ic: '⛔', yetkiKodu: 'patoloji.tanim.ret.liste',
   },
 ];

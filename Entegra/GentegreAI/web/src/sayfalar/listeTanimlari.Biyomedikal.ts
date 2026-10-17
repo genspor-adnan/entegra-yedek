@@ -65,7 +65,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Sabit Varlıklar', menuAd: 'Kalibrasyon', ic: '📐',
-    yetkiKodu: 'demirbas.kalibrasyon', menuSira: 30,
+    yetkiKodu: 'demirbas.kalibrasyon.liste', menuSira: 30,
   },
   {
     kaynak: 'demirbasIsEmri', rota: 'demirbas-is-emri',
@@ -85,6 +85,6 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Sabit Varlıklar', menuAd: 'Bakım / Arıza', ic: '🛠',
-    yetkiKodu: 'demirbas.isemri', menuSira: 40,
+    yetkiKodu: 'demirbas.isemri.liste', menuSira: 40,
   },
 ];

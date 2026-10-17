@@ -58,7 +58,7 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'isg',
-    menuGrup: 'İşyeri Hekimliği', menuAd: 'Ek-2 Muayenesi Listesi', ic: '🩺', yetkiKodu: 'isg.muayene', menuSira: 40,
+    menuGrup: 'İşyeri Hekimliği', menuAd: 'Ek-2 Muayenesi Listesi', ic: '🩺', yetkiKodu: 'isg.muayene.liste', menuSira: 40,
   },
   {
     kaynak: 'isg-ziyaret', rota: 'isg-ziyaret', aksiyonEkrani: 'isg-ziyaret-liste', baslik: 'İşyeri Ziyareti Listesi',
@@ -73,7 +73,7 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'isg',
-    menuGrup: 'İşyeri Hekimliği', menuAd: 'Ziyaret Listesi', ic: '🧾', yetkiKodu: 'isg.ziyaret', menuSira: 50,
+    menuGrup: 'İşyeri Hekimliği', menuAd: 'Ziyaret Listesi', ic: '🧾', yetkiKodu: 'isg.ziyaret.liste', menuSira: 50,
   },
   {
     kaynak: 'isg-olay', rota: 'isg-olay', aksiyonEkrani: 'isg-olay-liste', baslik: 'İş Kazası ve Olay Listesi',
@@ -88,7 +88,7 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'isg',
-    menuGrup: 'İşyeri Hekimliği', menuAd: 'Olay Listesi (Kaza · Bildirim)', ic: '🚨', yetkiKodu: 'isg.olay', menuSira: 60,
+    menuGrup: 'İşyeri Hekimliği', menuAd: 'Olay Listesi (Kaza · Bildirim)', ic: '🚨', yetkiKodu: 'isg.olay.liste', menuSira: 60,
   },
   {
     kaynak: 'isg-firma', rota: 'isg-firma', aksiyonEkrani: 'isg-firma-liste', baslik: 'Firma Listesi (İşverenler)',
@@ -100,7 +100,7 @@ export const ISG_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'isg',
-    menuGrup: 'İşyeri Hekimliği', menuAltGrup: 'Ayarlar', menuAd: 'Firma Listesi (işveren, bölüm)', ic: '🏢', yetkiKodu: 'isg.firma', menuSira: 90,
+    menuGrup: 'İşyeri Hekimliği', menuAltGrup: 'Ayarlar', menuAd: 'Firma Listesi (işveren, bölüm)', ic: '🏢', yetkiKodu: 'isg.firma.liste', menuSira: 90,
   },
   {
     // İSG / OSGB İCMALİ (1044, mockup İcmal/isg_osgb_icmali.html): hizmet süresi, Ek-2 muayene, geciken

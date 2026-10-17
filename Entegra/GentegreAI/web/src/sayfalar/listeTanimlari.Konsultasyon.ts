@@ -27,6 +27,6 @@ export const KONSULTASYON_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 25, menuGrup: 'Muayene', menuAd: 'Konsültasyon Listesi', ic: '🧑‍⚕️', yetkiKodu: 'muayene.konsultasyon',
+    menuSira: 25, menuGrup: 'Muayene', menuAd: 'Konsültasyon Listesi', ic: '🧑‍⚕️', yetkiKodu: 'muayene.konsultasyon.liste',
   },
 ];

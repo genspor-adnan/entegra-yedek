@@ -62,6 +62,22 @@ public sealed class ListeYalnizGorTestleri
     public void Standart_sablon_liste_kodunu_kartindan_uretir(string liste, string kart)
         => Assert.Equal(kart, EkranKodlari.KopyaKaynagi(liste));
 
+    /// <summary>Tablodaki HER liste kodu (1126 / 1128 / 1129): kartını yalnız okur, işlem vermez.</summary>
+    [Fact]
+    public void Her_liste_kodu_kartini_yalniz_okumada_acar()
+    {
+        Assert.True(EkranKodlari.YalnizGorKodlari.Count >= 158);
+        foreach (var liste in EkranKodlari.YalnizGorKodlari)
+        {
+            var kart = EkranKodlari.KopyaKaynagi(liste)!;
+            var s = Set((liste, true, true, true, true));
+            Assert.True(s.Var(kart, Islem.Gor), liste);
+            Assert.False(s.Var(kart, Islem.Ekle), liste);
+            Assert.False(s.Var(kart, Islem.Degistir), liste);
+            Assert.False(s.Var(kart, Islem.Sil), liste);
+        }
+    }
+
     [Fact]
     public void Liste_kodu_kapaliyken_veri_kapisi_acilmaz()
     {

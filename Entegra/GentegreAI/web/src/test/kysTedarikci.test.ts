@@ -28,7 +28,7 @@ describe('kurumsal kalite tedarikçi değerlendirme', () => {
     for (const l of KYS_TEDARIKCI_LISTELERI) {
       expect(l.menuGrup).toBe('Kalite');
       expect(l.modul).toBe('kys');
-      expect(l.yetkiKodu).toBe('kys.tedarikci');
+      expect(l.yetkiKodu).toBe('kys.tedarikci.liste');   // 1129: liste yalnız Gör, kart kys.tedarikci
       expect(l.urunModu).toBeUndefined();
     }
   });

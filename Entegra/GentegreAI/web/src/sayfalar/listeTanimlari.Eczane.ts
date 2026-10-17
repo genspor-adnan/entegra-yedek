@@ -37,7 +37,7 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'Eczacı Kontrolü', ic: '⚕️',
-    yetkiKodu: 'eczane.order', menuSira: 10,
+    yetkiKodu: 'eczane.order.liste', menuSira: 10,
   },
   {
     kaynak: 'eczaneDoz', rota: 'eczane-doz',
@@ -54,7 +54,7 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'Ünite Doz', ic: '💊',
-    yetkiKodu: 'eczane.doz', menuSira: 20,
+    yetkiKodu: 'eczane.doz.liste', menuSira: 20,
   },
   {
     kaynak: 'eczaneHazirlama', rota: 'eczane-hazirlama',
@@ -75,7 +75,7 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'Hazırlama', ic: '🧪',
-    yetkiKodu: 'eczane.hazirlama', menuSira: 30,
+    yetkiKodu: 'eczane.hazirlama.liste', menuSira: 30,
   },
   {
     kaynak: 'eczaneIade', rota: 'eczane-iade',
@@ -91,7 +91,7 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'İade Listesi', ic: '↩️',
-    yetkiKodu: 'eczane.iade', menuSira: 40,
+    yetkiKodu: 'eczane.iade.liste', menuSira: 40,
   },
   {
     kaynak: 'eczaneImha', rota: 'eczane-imha',
@@ -108,7 +108,7 @@ export const ECZANE_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Eczane', menuAd: 'İmha', ic: '🗑',
-    yetkiKodu: 'eczane.imha', menuSira: 50,
+    yetkiKodu: 'eczane.imha.liste', menuSira: 50,
   },
   {
     // KART YOK (kartYolu verilmedi): defter satırı silinemez ve düzeltme ayrı

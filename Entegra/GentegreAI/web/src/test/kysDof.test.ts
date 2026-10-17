@@ -6,7 +6,7 @@ describe('kurumsal kalite DÖF listesi', () => {
   it('Kalite menüsünde, kys modülünde, generic kartla', () => {
     expect(t.menuGrup).toBe('Kalite');
     expect(t.modul).toBe('kys');
-    expect(t.yetkiKodu).toBe('kys.dof');
+    expect(t.yetkiKodu).toBe('kys.dof.liste');   // 1129: liste yalnız Gör, kart kys.dof
     expect(t.kartYolu).toBe('/kys-dof');
     expect(t.ozelKart).toBeFalsy();
   });

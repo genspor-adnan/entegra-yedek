@@ -22,7 +22,7 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/ftr-degerlendirme', kartBaslik: 'FTR Değerlendirme',
     tarihAlani: 'tarih',
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAd: 'Değerlendirme Listesi', ic: '🩺', yetkiKodu: 'ftr.degerlendirme', menuSira: 20,
+    menuGrup: 'FTR', menuAd: 'Değerlendirme Listesi', ic: '🩺', yetkiKodu: 'ftr.degerlendirme.liste', menuSira: 20,
   },
   {
     kaynak: 'ftr-program', rota: 'ftr-program', aksiyonEkrani: 'ftr-program-liste', baslik: 'Tedavi Programı Listesi (Kür)',
@@ -62,7 +62,7 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAd: 'Seans Listesi', ic: '🏃', yetkiKodu: 'ftr.seans.liste', menuSira: 40,
+    menuGrup: 'FTR', menuAd: 'Seans Listesi', ic: '🏃', yetkiKodu: 'ftr.seans.liste.liste', menuSira: 40,
   },
   {
     kaynak: 'ftr-olcek', rota: 'ftr-olcek', aksiyonEkrani: 'ftr-olcek-liste', baslik: 'Ölçek Listesi',
@@ -70,14 +70,14 @@ export const FTR_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/ftr-olcek', kartBaslik: 'Ölçek Kaydı',
     tarihAlani: 'tarih',
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAd: 'Ölçek Listesi', ic: '📈', yetkiKodu: 'ftr.olcek', menuSira: 50,
+    menuGrup: 'FTR', menuAd: 'Ölçek Listesi', ic: '📈', yetkiKodu: 'ftr.olcek.liste', menuSira: 50,
   },
   {
     kaynak: 'ftr-unite', rota: 'ftr-unite', aksiyonEkrani: 'ftr-unite-liste', baslik: 'Üniteler & Kabinler',
     yol: 'FTR › Ayarlar › Üniteler',
     kartYolu: '/ftr-unite', kartBaslik: 'FTR Ünitesi',
     urunModu: 2, modul: 'ftr',
-    menuGrup: 'FTR', menuAltGrup: 'Ayarlar', menuAd: 'Üniteler & Kabinler', ic: '🚪', yetkiKodu: 'ftr.unite', menuSira: 90,
+    menuGrup: 'FTR', menuAltGrup: 'Ayarlar', menuAd: 'Üniteler & Kabinler', ic: '🚪', yetkiKodu: 'ftr.unite.liste', menuSira: 90,
   },
   {
     // FTR İCMALİ (1043, mockup İcmal/ftr_icmali.html): kür / seans / devam, fizyoterapist, ödeyen,

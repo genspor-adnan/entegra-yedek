@@ -56,7 +56,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     ],
     kolonSirasi: ['kod', 'ad', 'turAdi', 'istasyonAdi', 'cihaz', 'sahip', 'sayi', 'suAn', 'aktif'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Oda / Cihaz Tanımı', ic: '🚪', yetkiKodu: 'goz.kaynak',
+    menuGrup: 'Göz', menuAd: 'Oda / Cihaz Tanımı', ic: '🚪', yetkiKodu: 'goz.kaynak.liste',
     menuSira: 90,
   },
   {
@@ -82,7 +82,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['dilate', 'tarih'],
     kolonSirasi: ['saat', 'hasta', 'turAdi', 'bcvaOd', 'gibOd', 'tani', 'hekim', 'kontrol', 'durumAdi', 'uyari'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Muayene Listesi', ic: '👁️', yetkiKodu: 'goz.muayene', menuSira: 20,
+    menuGrup: 'Göz', menuAd: 'Muayene Listesi', ic: '👁️', yetkiKodu: 'goz.muayene.liste', menuSira: 20,
   },
   {
     // GÖRÜNTÜLEME - OCT, görme alanı, biyometri, fundus foto TEK listede:
@@ -106,7 +106,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['cihaz', 'istemZamani', 'cekimZamani'],
     kolonSirasi: ['istemSaat', 'hasta', 'tetkikAdi', 'goz', 'durumAdi', 'kalite', 'anaOd', 'degerlendiren', 'beklemeDk', 'uyari'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Görüntüleme & Test Listesi', ic: '🔬', yetkiKodu: 'goz.goruntuleme',
+    menuGrup: 'Göz', menuAd: 'Görüntüleme & Test Listesi', ic: '🔬', yetkiKodu: 'goz.goruntuleme.liste',
     menuSira: 30,
   },
   {
@@ -125,7 +125,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'İşlem Listesi', ic: '💉', yetkiKodu: 'goz.islem', menuSira: 40,
+    menuGrup: 'Göz', menuAd: 'İşlem Listesi', ic: '💉', yetkiKodu: 'goz.islem.liste', menuSira: 40,
   },
   {
     // GÖZLÜK REÇETELERİ - reçete muayenenin alanı değil kendi kaydı: hastaya
@@ -153,7 +153,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     // Değerler kartın kendi "Reçete" sekmesinde (GozlukReceteFormu) - katalog grubu gizli.
     gizliKartSekmeleri: ['Değerler'],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Gözlük Reçetesi Listesi', ic: '👓', yetkiKodu: 'goz.recete', menuSira: 50,
+    menuGrup: 'Göz', menuAd: 'Gözlük Reçetesi Listesi', ic: '👓', yetkiKodu: 'goz.recete.liste', menuSira: 50,
   },
   {
     // HASTALIK TAKİBİ - bu liste "kim geldi"yi değil KİM GELMEDİ'yi sorar:
@@ -171,7 +171,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Hastalık Takibi', ic: '📈', yetkiKodu: 'goz.takip', menuSira: 60,
+    menuGrup: 'Göz', menuAd: 'Hastalık Takibi', ic: '📈', yetkiKodu: 'goz.takip.liste', menuSira: 60,
   },
   {
     // GÖZ HASTA ÖZETİ - satır bir HASTA, kayıt değil. Göz hekiminin hastayı
@@ -202,7 +202,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Göz', menuAd: 'Kontakt Lens', ic: '🔵', yetkiKodu: 'goz.recete.kontakt_lens', menuSira: 55,
+    menuGrup: 'Göz', menuAd: 'Kontakt Lens', ic: '🔵', yetkiKodu: 'goz.recete.kontakt_lens.liste', menuSira: 55,
   },
   {
     // İŞLEM PROTOKOLLERİ AYARDIR: postop kontrol planı bir ŞABLON - işleme
@@ -216,7 +216,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'İşlem Protokolü Listesi', ic: '📋',
-    yetkiKodu: 'goz.islem.protokol', menuSira: 91,
+    yetkiKodu: 'goz.islem.protokol.liste', menuSira: 91,
   },
   {
     // CİHAZ MESAJLARI bir İŞ KUYRUĞUDUR, hata günlüğü değil: hasta eşleşmesi
@@ -261,7 +261,7 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     gizliKartSekmeleri: ['Bağlantı'],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Listesi', ic: '🛠️',
-    yetkiKodu: 'goz.cihaz', menuSira: 90,
+    yetkiKodu: 'goz.cihaz.liste', menuSira: 90,
   },
   {
     // DİKTE SÖZLÜĞÜ (705): terim, sesli komut ve sık cümle VERİDİR - yeni bir
@@ -279,6 +279,6 @@ export const GOZ_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Göz', menuAltGrup: 'Ayarlar', menuAd: 'Dikte Sözlüğü', ic: '🎙',
-    yetkiKodu: 'goz.dikte_sozluk', menuSira: 94,
+    yetkiKodu: 'goz.dikte_sozluk.liste', menuSira: 94,
   },
 ];

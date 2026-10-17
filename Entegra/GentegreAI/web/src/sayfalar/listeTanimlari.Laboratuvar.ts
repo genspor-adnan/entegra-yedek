@@ -40,7 +40,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAd: 'İstem Listesi', menuSira: 10,
     // Enjektor (kullanici): grup ikonu zaten tup (🧪), istem satiri ayrisiyor.
-    ic: '💉', yetkiKodu: 'lab',
+    ic: '💉', yetkiKodu: 'lab.liste',
   },
   {
     // NUMUNE KABUL (433): laboratuvarin giris kapisi. Varsayilan cip
@@ -103,7 +103,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     varsayilanGrup: 'bolumAdi',
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Tetkik Kataloğu', menuSira: 200,
-    ic: '📚', yetkiKodu: 'lab.tetkik',
+    ic: '📚', yetkiKodu: 'lab.tetkik.liste',
   },
   {
     // PANELLER (433): istemde tek kalemde acilan tetkik gruplari.
@@ -118,7 +118,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Panel Listesi', menuSira: 201,
-    ic: '🧬', yetkiKodu: 'lab.tetkik.panel',
+    ic: '🧬', yetkiKodu: 'lab.tetkik.panel.liste',
   },
   {
     // PANİK DEĞERLER (894, KTS L2): açık panikler, en uzun bekleyen üstte.
@@ -201,7 +201,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Arşiv Konumu Listesi',
     menuSira: 204,
-    ic: '\u{1F5C4}', yetkiKodu: 'lab.arsiv_konum',
+    ic: '\u{1F5C4}', yetkiKodu: 'lab.arsiv_konum.liste',
   },
   {
     // SAKLAMA SÜRELERİ (890): imha hedefi buradan hesaplanır. Politika
@@ -218,7 +218,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Saklama Süresi Listesi',
     menuSira: 205,
-    ic: '⏳', yetkiKodu: 'lab.saklama_politika',
+    ic: '⏳', yetkiKodu: 'lab.saklama_politika.liste',
   },
   {
     // NUMUNE RET KRİTERLERİ (879, KTS L6): laboratuvar kendi kabul/ret
@@ -236,7 +236,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Numune Ret Kriteri Listesi',
     menuSira: 203,
-    ic: '\u26D4', yetkiKodu: 'lab.ret_nedeni',
+    ic: '\u26D4', yetkiKodu: 'lab.ret_nedeni.liste',
   },
   {
     // AKILCI TEST İSTEM KURALLARI (873): Bakanlık listesi + SKRS süresi; kurum düzeltir.
@@ -254,7 +254,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Akılcı İstem Kuralı Listesi', menuSira: 202,
-    ic: '📏', yetkiKodu: 'lab.tetkik.akilci_kural',
+    ic: '📏', yetkiKodu: 'lab.tetkik.akilci_kural.liste',
   },
   {
     // REFLEKS TEST KURALLARI (873 §6): eşik aşılınca ikincil tetkik otomatik eklenir.
@@ -268,7 +268,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Refleks Test Kuralı Listesi', menuSira: 203,
-    ic: '🔁', yetkiKodu: 'lab.tetkik.refleks_kural',
+    ic: '🔁', yetkiKodu: 'lab.tetkik.refleks_kural.liste',
   },
   {
     // AKILCI İSTEM KARARLARI (873): hekim gerekçeleri / vazgeçmeler / refleks-reflektif izi.
@@ -396,7 +396,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Dış Kalite', menuSira: 102,
-    ic: '🌍', yetkiKodu: 'lab.kk.dkk',
+    ic: '🌍', yetkiKodu: 'lab.kk.dkk.liste',
   },
   {
     // KONTROL LOTLARI (442): hedef/SD lot basinadir, kart detayinda.
@@ -411,7 +411,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kontrol Lotu Listesi', menuSira: 101,
-    ic: '🧴', yetkiKodu: 'lab.kk.lot',
+    ic: '🧴', yetkiKodu: 'lab.kk.lot.liste',
   },
   {
     // DIS LAB GONDERIMLERI (445) - numune binadan cikinca elimizdeki tek iz.
@@ -445,7 +445,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Dış Laboratuvar Listesi', menuSira: 210,
-    ic: '🏥', yetkiKodu: 'lab.dislab.tanim',
+    ic: '🏥', yetkiKodu: 'lab.dislab.tanim.liste',
   },
   {
     // SERUM INDEKSI ESIKLERI (444): test bazli HIL sinirlari. Potasyum
@@ -462,7 +462,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Serum İndeksi', menuSira: 202,
-    ic: '🩸', yetkiKodu: 'lab.tetkik.indeks',
+    ic: '🩸', yetkiKodu: 'lab.tetkik.indeks.liste',
   },
   {
     // WESTGARD KURAL SETI (442): tetkik bos = varsayilan set.
@@ -477,7 +477,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Westgard Kuralı Listesi', menuSira: 203,
-    ic: '⚙️', yetkiKodu: 'lab.kk.kural',
+    ic: '⚙️', yetkiKodu: 'lab.kk.kural.liste',
   },
   {
     // CIHAZ OLAYLARI (442): LJ'deki kaymanin nedeni cogu zaman burada.
@@ -494,7 +494,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Olayı Listesi', menuSira: 105,
-    ic: '🔧', yetkiKodu: 'lab.kk.cihaz_olay',
+    ic: '🔧', yetkiKodu: 'lab.kk.cihaz_olay.liste',
   },
   {
     // GEN KATALOGU (439): transkript zorunlu - HGVS gosterimi ona goredir.
@@ -509,7 +509,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Gen Listesi', menuSira: 208,
-    ic: '🧬', yetkiKodu: 'lab.gen',
+    ic: '🧬', yetkiKodu: 'lab.gen.liste',
   },
   {
     // GENETIK PANEL KATALOGU (439): gen listesi raporun ekidir.
@@ -524,7 +524,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Genetik Paneli Listesi', menuSira: 209,
-    ic: '🗂️', yetkiKodu: 'lab.gen.panel',
+    ic: '🗂️', yetkiKodu: 'lab.gen.panel.liste',
   },
   {
     // ORGANIZMA KATALOGU (436): rapor ve direnc surveyansi buna dayanir.
@@ -540,7 +540,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Organizma Listesi', menuSira: 205,
-    ic: '🧫', yetkiKodu: 'lab.mikro',
+    ic: '🧫', yetkiKodu: 'lab.mikro.liste',
   },
   {
     // ANTIBIYOTIK KATALOGU (436): "basamak" kademeli bildirimi yonetir.
@@ -556,7 +556,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Antibiyotik Listesi', menuSira: 206,
-    ic: '💊', yetkiKodu: 'lab.mikro.antibiyotik',
+    ic: '💊', yetkiKodu: 'lab.mikro.antibiyotik.liste',
   },
   {
     // BESIYERI KATALOGU (436): okuma plani buradaki saatlerden kurulur.
@@ -571,7 +571,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Besiyeri Listesi', menuSira: 207,
-    ic: '🧪', yetkiKodu: 'lab.mikro.besiyeri',
+    ic: '🧪', yetkiKodu: 'lab.mikro.besiyeri.liste',
   },
   {
     // CIHAZ TEST ESLEME (434): kayit YALNIZ cihaz kodu tetkik kodundan
@@ -588,7 +588,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Eşleme', menuSira: 204,
-    ic: '🔌', yetkiKodu: 'lab.cihaz',
+    ic: '🔌', yetkiKodu: 'lab.cihaz.liste',
   },
   {
     // LABORATUVAR İCMALİ (1026, mockup İcmal/laboratuvar_icmali.html): tetkik

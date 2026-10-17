@@ -47,7 +47,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Satınalma', menuAd: 'Talep Listesi', ic: '📝',
-    yetkiKodu: 'satinalma.talep', menuSira: 10,
+    yetkiKodu: 'satinalma.talep.liste', menuSira: 10,
   },
   {
     kaynak: 'satinalmaTeklif', rota: 'satinalma-teklif',
@@ -66,7 +66,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Satınalma', menuAd: 'Teklif Listesi', ic: '⚖️',
-    yetkiKodu: 'satinalma.teklif', menuSira: 20,
+    yetkiKodu: 'satinalma.teklif.liste', menuSira: 20,
   },
   {
     kaynak: 'satinalmaSiparis', rota: 'satinalma-siparis',
@@ -117,7 +117,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Satınalma', menuAd: 'Mal Kabul', ic: '🚚',
-    yetkiKodu: 'satinalma.kabul', menuSira: 35,
+    yetkiKodu: 'satinalma.kabul.liste', menuSira: 35,
   },
   {
     kaynak: 'satinalmaFatura', rota: 'satinalma-fatura',
@@ -171,6 +171,6 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: '%90 üstü', filtre: { alan: 'kullanimYuzde', op: 'buyukEsit', deger: 90 } },
     ],
     menuGrup: 'Satınalma', menuAd: 'Bütçe', ic: '💰',
-    yetkiKodu: 'satinalma.butce', menuSira: 60,
+    yetkiKodu: 'satinalma.butce.liste', menuSira: 60,
   },
 ];

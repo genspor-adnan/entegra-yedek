@@ -51,7 +51,7 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['toplam', 'indirim', 'net', 'yapilanTutar', 'tahsil', 'bakiye'],
     urunModu: 2,
-    menuGrup: 'Diş', menuAd: 'Tedavi Planı Listesi', ic: '📋', yetkiKodu: 'dis.plan', menuSira: 30,
+    menuGrup: 'Diş', menuAd: 'Tedavi Planı Listesi', ic: '📋', yetkiKodu: 'dis.plan.liste', menuSira: 30,
   },
   {
     kaynak: 'dis-seans', rota: 'dis-seans', aksiyonEkrani: 'dis-seans-liste', baslik: 'Seans Listesi',
@@ -64,7 +64,7 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Diş', menuAd: 'Seans Listesi', ic: '⏱️', yetkiKodu: 'dis.seans', menuSira: 40,
+    menuGrup: 'Diş', menuAd: 'Seans Listesi', ic: '⏱️', yetkiKodu: 'dis.seans.liste', menuSira: 40,
   },
   {
     // LAB İŞ EMİRLERİ - varsayılan sıralama gecikenler üstte (görünüm).
@@ -82,7 +82,7 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['labFiyat'],
     urunModu: 2,
-    menuGrup: 'Diş', menuAd: 'Lab İş Emiri Listesi', ic: '🧪', yetkiKodu: 'dis.lab', menuSira: 50,
+    menuGrup: 'Diş', menuAd: 'Lab İş Emiri Listesi', ic: '🧪', yetkiKodu: 'dis.lab.liste', menuSira: 50,
   },
   {
     kaynak: 'dis-odeme-plani', rota: 'dis-odeme-plani', aksiyonEkrani: 'dis-odeme-plani-liste',
@@ -96,21 +96,21 @@ export const DIS_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['toplam', 'pesinat', 'odenen'],
     urunModu: 2,
-    menuGrup: 'Diş', menuAd: 'Ödeme Planı Listesi', ic: '💳', yetkiKodu: 'dis.odeme', menuSira: 60,
+    menuGrup: 'Diş', menuAd: 'Ödeme Planı Listesi', ic: '💳', yetkiKodu: 'dis.odeme.liste', menuSira: 60,
   },
   {
     kaynak: 'dis-unit', rota: 'dis-unit', aksiyonEkrani: 'dis-unit-liste', baslik: 'Ünit Listesi',
     yol: 'Diş › Ayarlar › Ünit Listesi',
     kartYolu: '/dis-unit', kartBaslik: 'Ünit',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Ünit Listesi', ic: '🪑', yetkiKodu: 'dis.unit', menuSira: 90,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Ünit Listesi', ic: '🪑', yetkiKodu: 'dis.unit.liste', menuSira: 90,
   },
   {
     kaynak: 'dis-lab', rota: 'dis-lab', aksiyonEkrani: 'dis-lab-liste', baslik: 'Laboratuvar Listesi',
     yol: 'Diş › Ayarlar › Laboratuvar Listesi',
     kartYolu: '/dis-lab', kartBaslik: 'Laboratuvar',
     urunModu: 2,
-    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Laboratuvar Listesi', ic: '🏭', yetkiKodu: 'dis.unit.lab', menuSira: 91,
+    menuGrup: 'Diş', menuAltGrup: 'Ayarlar', menuAd: 'Laboratuvar Listesi', ic: '🏭', yetkiKodu: 'dis.unit.lab.liste', menuSira: 91,
   },
   {
     // DİŞ İCMALİ (1041, mockup İcmal/dis_icmali.html): hekim ciro / sarf / lab / kâr, plan hunisi,

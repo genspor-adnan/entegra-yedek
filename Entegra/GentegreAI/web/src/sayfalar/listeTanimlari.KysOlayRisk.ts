@@ -19,7 +19,7 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Olay Bildirimi Listesi', ic: '⚠️', yetkiKodu: 'kys.olay', menuSira: 20,
+    menuGrup: 'Kalite', menuAd: 'Olay Bildirimi Listesi', ic: '⚠️', yetkiKodu: 'kys.olay.liste', menuSira: 20,
   },
   {
     kaynak: 'kys-risk', rota: 'kys-risk', baslik: '🎯 Risk Listesi',
@@ -34,6 +34,6 @@ export const KYS_OLAY_RISK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Risk Listesi', ic: '🎯', yetkiKodu: 'kys.risk', menuSira: 50,
+    menuGrup: 'Kalite', menuAd: 'Risk Listesi', ic: '🎯', yetkiKodu: 'kys.risk.liste', menuSira: 50,
   },
 ];

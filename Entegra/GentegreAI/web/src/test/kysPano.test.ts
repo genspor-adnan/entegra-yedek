@@ -18,7 +18,7 @@ describe('Kalite panosu (1055)', () => {
   it('kart hedefi: tanımsız rota ya da yetkisiz liste tıklanmaz', () => {
     expect(kysPanoHedefi('yok-boyle-bir-ekran', () => true)).toBeNull();
     expect(kysPanoHedefi('kys-dof', () => false)).toBeNull();
-    expect(kysPanoHedefi('kys-dof', k => k === 'kys.dof')).toBe('/kys-dof');
+    expect(kysPanoHedefi('kys-dof', k => k === 'kys.dof.liste')).toBe('/kys-dof');   // 1129: liste ekran kodu
   });
 });
 

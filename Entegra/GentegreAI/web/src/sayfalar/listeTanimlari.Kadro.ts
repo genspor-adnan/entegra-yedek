@@ -30,6 +30,6 @@ export const KADRO_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'İK', menuAd: 'Kadro Hareketi Listesi', ic: '🪜',
-    yetkiKodu: 'ik.kadro', modul: 'ik', menuSira: 12,
+    yetkiKodu: 'ik.kadro.liste', modul: 'ik', menuSira: 12,
   },
 ];

@@ -20,6 +20,6 @@ export const KYS_KALIBRASYON_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Kalibrasyon', ic: '📏', yetkiKodu: 'kys.kalibrasyon', menuSira: 110,
+    menuGrup: 'Kalite', menuAd: 'Kalibrasyon', ic: '📏', yetkiKodu: 'kys.kalibrasyon.liste', menuSira: 110,
   },
 ];

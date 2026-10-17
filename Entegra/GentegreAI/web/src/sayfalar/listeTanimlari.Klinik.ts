@@ -111,7 +111,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'asi',
     menuGrup: 'Muayene', menuAltGrup: 'Ayarlar', menuAd: 'Aşı Kataloğu',
     menuSira: 80,
-    ic: '\u{1F48A}', yetkiKodu: 'asi.katalog',
+    ic: '\u{1F48A}', yetkiKodu: 'asi.katalog.liste',
   },
   {
     kaynak: 'mesajlar', rota: 'mesajlar', baslik: 'Mesajlar',
@@ -411,7 +411,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'sigorta-kod-esleme-liste',
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar',
-    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta.tanim.kod_esleme', menuSira: 90,
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta.tanim.kod_esleme.liste', menuSira: 90,
   },
   {
     // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
@@ -447,7 +447,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   zorluyordu. Sira lab ekranlarinin ARDINDAN (70/80).
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihaz Listesi', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 103,
+    menuAd: 'Cihaz Listesi', ic: '🔌', yetkiKodu: 'cihaz.liste', menuSira: 103,
   },
   {
     // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
@@ -505,7 +505,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçete Listesi', ic: '💊', yetkiKodu: 'muayene.recete',
+    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçete Listesi', ic: '💊', yetkiKodu: 'muayene.recete.liste',
   },
   {
     // HAKEDISLERIM (mockup Ekranlar/Muayene/hekim_hakedislerim.html):
@@ -611,7 +611,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene.sablon',
+    menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene.sablon.liste',
   },
   {
     // BZBH BILDIRIM PANOSU (882, KTS H5): ozel sayfa - bekleyen vaka
@@ -637,7 +637,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Muayene', menuAltGrup: 'Ayarlar', menuAd: 'BZBH Hastalık Listesi',
-    ic: '\ud83e\uddec', yetkiKodu: 'bzbh.hastalik', menuSira: 95,
+    ic: '\ud83e\uddec', yetkiKodu: 'bzbh.hastalik.liste', menuSira: 95,
   },
   {
     // METIN MAKROLARI (411) - kisayoldan hazir metin. Sablon ALAN tanimlar,
@@ -652,7 +652,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 91, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
-    menuAd: 'Metin Makrosu Listesi', ic: '⌨️', yetkiKodu: 'muayene.makro',
+    menuAd: 'Metin Makrosu Listesi', ic: '⌨️', yetkiKodu: 'muayene.makro.liste',
   },
   {
     // HEKIM CALISMA LISTESI (410, Faz 1) - hekimin gun icindeki isi.
@@ -701,6 +701,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayene Listesi', ic: '🩺', yetkiKodu: 'muayene.liste',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayene Listesi', ic: '🩺', yetkiKodu: 'muayene.liste.liste',
   },
 ];

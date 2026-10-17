@@ -20,6 +20,6 @@ export const KYS_TEDARIKCI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'Tedarikçi Değerlendirme', ic: '🚚', yetkiKodu: 'kys.tedarikci', menuSira: 100,
+    menuGrup: 'Kalite', menuAd: 'Tedarikçi Değerlendirme', ic: '🚚', yetkiKodu: 'kys.tedarikci.liste', menuSira: 100,
   },
 ];

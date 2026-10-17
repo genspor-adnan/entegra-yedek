@@ -25,7 +25,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // 'ÜTS Bilgileri' artik yer tutucu DEGIL - stok_uts (119) detayi olarak geliyor.
     yerTutucuSekmeler: ['Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
-    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok.liste',
     menuSira: 10,
   },
   {
@@ -43,7 +43,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   kod ve ad okunuyor.
     // Kisa Ad, Ad'in SOLUNDA (549, kullanici).
     kolonSirasi: ['kategoriAdi', 'kod', 'kisaAd', 'ad', 'durum'],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet.liste',
     menuSira: 20,
   },
   {
@@ -204,7 +204,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAd: 'Ürün Ağacı Listesi', menuSira: 20,
-    ic: '🌳', yetkiKodu: 'uretim.urun_agaci',
+    ic: '🌳', yetkiKodu: 'uretim.urun_agaci.liste',
   },
   {
     // URETIM EMIRLERI (429).
@@ -226,7 +226,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     toplam: ['adet', 'uretilenAdet', 'gercekToplam'],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAd: 'Üretim Emiri Listesi', menuSira: 10,
-    ic: '🏭', yetkiKodu: 'uretim',
+    ic: '🏭', yetkiKodu: 'uretim.liste',
   },
   {
     // IS MERKEZLERI (429) - saat ucreti iscilik maliyetinin kaynagi.
@@ -241,6 +241,6 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezi Listesi', menuSira: 90,
-    ic: '⚙️', yetkiKodu: 'uretim.is_merkezi',
+    ic: '⚙️', yetkiKodu: 'uretim.is_merkezi.liste',
   },
 ];

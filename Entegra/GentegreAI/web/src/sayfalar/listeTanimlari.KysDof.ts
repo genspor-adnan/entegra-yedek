@@ -23,6 +23,6 @@ export const KYS_DOF_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'kys',
-    menuGrup: 'Kalite', menuAd: 'DÖF', ic: '🛠️', yetkiKodu: 'kys.dof', menuSira: 30,
+    menuGrup: 'Kalite', menuAd: 'DÖF', ic: '🛠️', yetkiKodu: 'kys.dof.liste', menuSira: 30,
   },
 ];

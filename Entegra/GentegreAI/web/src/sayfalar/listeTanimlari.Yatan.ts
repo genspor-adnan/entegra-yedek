@@ -31,7 +31,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAd: 'Yatan Hasta Listesi', ic: '🛏️',
-    yetkiKodu: 'yatan', menuSira: 10,
+    yetkiKodu: 'yatan.liste', menuSira: 10,
   },
   {
     // YATAK PANOSU - "yer var mı" sorusu. Satır YATAKTIR, hasta değil:
@@ -75,7 +75,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     kolonSirasi: ['yatak', 'hasta', 'ad', 'turAdi', 'surec', 'bugunDozlar', 'hekim', 'durumAdi', 'uyari'],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAd: 'Order', ic: '🩺',
-    yetkiKodu: 'yatan.order', menuSira: 30,
+    yetkiKodu: 'yatan.order.liste', menuSira: 30,
   },
   {
     // DOZ KUYRUĞU (eMAR) - "hangi doz ne zaman, verildi mi". Satır PLANLANAN
@@ -147,7 +147,7 @@ export const YATAN_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Yatan Hasta', menuAltGrup: 'Ayarlar', menuAd: 'Oda Listesi', ic: '🚪',
-    yetkiKodu: 'yatan.yatak', menuSira: 90,
+    yetkiKodu: 'yatan.yatak.liste', menuSira: 90,
   },
   {
     // YATAN HASTA DÖNEM İCMALİ (1028, mockup İcmal/yatan_hasta_icmali.html): servis

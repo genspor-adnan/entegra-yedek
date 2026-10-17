@@ -71,7 +71,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Hata',         filtre: { alan: 'durum', op: 'esit', deger: 5 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'e-Rapor', ic: '📄', yetkiKodu: 'medula.recete.rapor', menuSira: 45,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'e-Rapor', ic: '📄', yetkiKodu: 'medula.recete.rapor.liste', menuSira: 45,
   },
   {
     kaynak: 'medula-fatura-donem', rota: 'medula-fatura-donem', ozelSayfa: true, baslik: 'Medula Fatura & Dönem',
@@ -96,13 +96,13 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['yerelTutar', 'medulaTutar', 'katilim', 'kesinti'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste.liste', menuSira: 60,
   },
   {
     kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemi Listesi',
     yol: 'Medula › Dönem Listesi', kartYolu: '/medula-donem', kartBaslik: 'Dönem',
     toplam: ['toplam', 'kesinti', 'net', 'odenen', 'kalan'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönem Listesi', ic: '📅', yetkiKodu: 'medula.fatura.donem', menuSira: 65,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Dönem Listesi', ic: '📅', yetkiKodu: 'medula.fatura.donem.liste', menuSira: 65,
   },
   {
     kaynak: 'medula-kesinti', rota: 'medula-kesinti', aksiyonEkrani: 'medula-kesinti-liste', baslik: 'Medula Kesintisi Listesi',
@@ -114,7 +114,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['tutar', 'iade'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Kesinti / İtiraz', ic: '⚖️', yetkiKodu: 'medula.fatura.kesinti', menuSira: 70,
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Kesinti / İtiraz', ic: '⚖️', yetkiKodu: 'medula.fatura.kesinti.liste', menuSira: 70,
   },
   {
     kaynak: 'medula-kuyruk-ayar', rota: 'medula-kuyruk-ayar', ozelSayfa: true, baslik: 'Medula Gönderim Kuyruğu & Ayarlar',
