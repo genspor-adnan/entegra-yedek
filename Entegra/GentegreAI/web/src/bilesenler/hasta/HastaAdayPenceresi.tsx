@@ -3,7 +3,10 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
 import { useOturum } from '../../kimlik/OturumBaglami';
+import { telefonGecerliMi } from '../alanBicim';
+import { telefonBicimle } from '../bicim';
 import { Modal } from '../Modal';
+import { TelefonGirdi } from '../TelefonGirdi';
 
 /**
  * KÜÇÜK HASTA ADAY EKRANI (kullanıcı 16.10.2026: "randevu için liste aramadaki yeni butonu küçük bir
@@ -24,7 +27,8 @@ export function HastaAdayPenceresi({ aranan = '', onKapat, onKaydedildi }: {
   const [ilkAd, ...kalan] = rakam ? [''] : aranan.trim().split(/\s+/);
   const [ad, setAd] = useState(ilkAd ?? '');
   const [soyad, setSoyad] = useState(kalan.join(' '));
-  const [tel, setTel] = useState(rakam ? aranan.trim() : '');
+  // Telefon kartlardaki gibi ülke kodlu ve gruplu ("+90 532 418 77 20", kullanıcı 16.10.2026).
+  const [tel, setTel] = useState(rakam ? telefonBicimle(aranan) : '');
   const [dogum, setDogum] = useState('');
   const [cinsiyet, setCinsiyet] = useState('');
   const [hata, setHata] = useState<string | null>(null);
@@ -32,14 +36,16 @@ export function HastaAdayPenceresi({ aranan = '', onKapat, onKaydedildi }: {
 
   const kaydet = async () => {
     if (!ad.trim() || !soyad.trim()) { setHata(c('Ad ve soyad zorunlu.')); return }
-    if (tel.replace(/\D/g, '').length < 10) { setHata(c('Telefon zorunlu (en az 10 rakam).')); return }
+    if (!tel.replace(/\D/g, '').replace(/^90/, '')) { setHata(c('Telefon zorunlu.')); return }
+    if (!telefonGecerliMi(tel)) { setHata(c('Telefon numarası hatalı (ör. 532 418 77 20).')); return }
     if (!!dogum !== !!cinsiyet) { setHata(c('Doğum tarihi ve cinsiyet birlikte girilir - ikisini de girin ya da ikisini de boş bırakın.')); return }
     setHata(null); setMesgul(true);
     try {
       const unvan = `${ad.trim()} ${soyad.trim()}`;
+      const cep = telefonBicimle(tel);
       const y = await api.kartEkle('hasta-aday', {
         kart: {
-          ad: ad.trim(), soyad: soyad.trim(), unvan, cepTel: tel.trim(), kod: tel.trim(),
+          ad: ad.trim(), soyad: soyad.trim(), unvan, cepTel: cep, kod: cep,
           grup: 101, hasta: 1, musteri: 1, durum: 2, subeId: kullanici?.subeId ?? null,
         },
         // Hasta bilgisi satırı (taraf_hasta) YALNIZ ikisi birlikte varsa: veritabanı satırda cinsiyet
@@ -64,8 +70,7 @@ export function HastaAdayPenceresi({ aranan = '', onKapat, onKaydedildi }: {
         <label style={etiket}>{c('Ad')} *<input style={kutu} value={ad} autoFocus={!ad} onChange={e => setAd(e.target.value)} maxLength={50} /></label>
         <label style={etiket}>{c('Soyad')} *<input style={kutu} value={soyad} onChange={e => setSoyad(e.target.value)} maxLength={60} /></label>
         <label style={{ ...etiket, gridColumn: '1 / -1' }}>{c('Telefon')} *
-          <input style={kutu} value={tel} inputMode="tel" autoFocus={!!ad && !tel} placeholder="05xx xxx xx xx"
-                 onChange={e => setTel(e.target.value)} maxLength={30} /></label>
+          <div className="aday-tel"><TelefonGirdi value={tel} onChange={setTel} /></div></label>
         <label style={etiket}>{c('Doğum tarihi')}<input style={kutu} type="date" value={dogum} onChange={e => setDogum(e.target.value)} /></label>
         <label style={etiket}>{c('Cinsiyet')}
           <select style={kutu} value={cinsiyet} onChange={e => setCinsiyet(e.target.value)}>

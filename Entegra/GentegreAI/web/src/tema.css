@@ -919,6 +919,10 @@ tr.panel-basligi .d.mini {
 .tel-girdi { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
 .tel-girdi select { flex: none; width: 78px }
 .tel-girdi input { flex: 1; min-width: 0 }
+/* Küçük hasta aday ekranı (randevu): kutular penceredeki diğer alanlarla aynı boyda. */
+.aday-tel .tel-girdi select, .aday-tel .tel-girdi input {
+  height: 32px; padding: 0 8px; border: 1px solid #cbd5e0; border-radius: 5px; font-size: 13px; font-weight: normal;
+}
 .tel-girdi button.mini {
   flex: none; width: 23px; height: 23px; border: 1px solid var(--cizgi); border-radius: 2px;
   background: var(--yuz); color: var(--soluk); cursor: pointer; line-height: 1; padding: 0;
