@@ -2108,6 +2108,13 @@ Yine de yeni kayıt eklensin mi?`);
                       onClick={() => alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
               <button className="d" disabled={Number(deger.durum) === 4}
                       onClick={() => alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
+              {/* GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı (Kaydet'le yazılır).
+                  Başvuruya dönüşmüş ya da ertelenmiş randevuda yok. */}
+              {[2, 3, 4].includes(Number(deger.durum)) && (
+                <button className="d" disabled={!!deger.belgeId}
+                        title={deger.belgeId ? c('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.') : c('Durumu Planlandı yap')}
+                        onClick={() => alanDegistir('durum', '1')}>{c('↩ Geri Al')}</button>
+              )}
               {/* ERTELE (1119): kayıtlı, planlanmış randevu; kaydedilmemiş değişiklik varken kapalı. */}
               {!yeniMi && (
                 <button className="d" disabled={Number(deger.durum) !== 1 || kaydedilmemisDegisiklikVar}

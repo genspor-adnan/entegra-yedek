@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ErtelenecekRandevu } from '../../bilesenler/RandevuErtelePenceresi';
 import { kampanyaKalemFiyati } from '../belgeKalem';
@@ -35,7 +35,25 @@ export async function randevuAksiyonu(
   b: RandevuBaglam,
 ): Promise<boolean> {
   if (kod !== 'randevu.geldi' && kod !== 'randevu.gelmedi'
-      && kod !== 'randevu.iptal' && kod !== 'randevu.basvuru' && kod !== 'randevu.ertele') return false;
+      && kod !== 'randevu.iptal' && kod !== 'randevu.basvuru' && kod !== 'randevu.ertele'
+      && kod !== 'randevu.geri-al') return false;
+
+  // GERİ AL (kullanıcı 17.10.2026: "yanlışlıkla geldi/gelmedi/iptal işaretlersem nasıl geri alırım"):
+  //   durum Planlandı'ya döner; saat yeniden denetlenir (tetik), hatırlatma kart güncellemesinde kurulur.
+  if (kod === 'randevu.geri-al') {
+    if (!satir) return true;
+    const d = Number(satir.durum);
+    if (d === 1) { mesaj('Randevu zaten planlandı durumunda.'); return true }
+    if (d === 5) { mesaj('Ertelenen randevu geri alınmaz - ertelemeyle açılan yeni randevuyu iptal edin.'); return true }
+    if (satir.belgeId) { mesaj('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.'); return true }
+    if (!await onay(`Randevu "${String(satir.durumAdi ?? '')}" durumundan Planlandı'ya geri alınsın mı?`)) return true;
+    await guvenli(async () => {
+      const mevcut = await api.kartOku('randevu', Number(satir.id));
+      await api.kartGuncelle('randevu', Number(satir.id), { surum: mevcut.kart.surum, kart: { durum: 1 } });
+      b.tazele();
+    });
+    return true;
+  }
 
   // ERTELE (1119): yalniz planlanmis randevu; pencere yeni saati ve nedeni sorar.
   if (kod === 'randevu.ertele') {
