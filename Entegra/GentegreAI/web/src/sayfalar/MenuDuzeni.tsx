@@ -103,6 +103,8 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
   /** Sürüklenen satır ve grubu - yalnız AYNI grup içinde yer değiştirir (17.10.2026). */
   const [surukle, setSurukle] = useState<{ kod: string; grup: string } | null>(null);
+  /** Sürüklenen GRUP (kutu başlığından) - gruplar kendi aralarında yer değiştirir (17.10.2026). */
+  const [surukleGrup, setSurukleGrup] = useState<string | null>(null);
   const dosyaGirdi = useRef<HTMLInputElement>(null);
   const aktarimGirdi = useRef<HTMLInputElement>(null);
   /** Sunucudaki hal: kaydedilmemiş değişiklik var mı, buradan anlaşılır. */
@@ -534,6 +536,15 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     sira.splice(i < 0 ? sira.length : i, 0, kaynakKod);
     sira.forEach((k, n) => { const dd = dugumler.find(x => x.kod === k); if (dd) farkYaz(dd, { sira: (n + 1) * 10 }) });
   };
+  /** GRUP SÜRÜKLE-BIRAK: kaynak grup hedefin önüne girer, bütün gruplara yeni sıra yazılır. */
+  const grupSiraDegis = (kaynakKod: string, hedefKod: string) => {
+    if (kaynakKod === hedefKod) return;
+    const sira = yerlesim.filter(x => x.derinlik === 1 && x.d.tur === 'grup').map(x => x.d.kod)
+      .filter(k => k !== kaynakKod);
+    const i = sira.indexOf(hedefKod);
+    sira.splice(i < 0 ? sira.length : i, 0, kaynakKod);
+    sira.forEach((k, n) => { const dd = dugumler.find(x => x.kod === k); if (dd) farkYaz(dd, { sira: (n + 1) * 10 }) });
+  };
   /** Kutular: gruplar sırasıyla; grupsuz (düz) ekranlar en sonda "Diğer" kutusunda. */
   const kutular = useMemo(() => {
     const kok = yerlesim.filter(x => x.derinlik === 1).map(x => x.d);
@@ -542,6 +553,19 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     const duzler = kok.filter(x => x.tur === 'ekran');
     return { gruplar, duzler };
   }, [yerlesim, duzen]);
+
+  /**
+   * AKTİF / PASİF GRUPLAR (kullanıcı 17.10.2026: "kaydet yapıldığında bir grup tümüyle pasifse alt bölgeye
+   * kaysın, grup içinden en az 1 menü aktifse üst bölgeye geçsin"). Bölüm KAYDEDİLMİŞ duruma göre
+   * belirlenir (yükleme ve Kaydet anında) - düzenlerken kutular yer değiştirmez.
+   */
+  const [pasifGruplar, setPasifGruplar] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    setPasifGruplar(new Set(kutular.gruplar
+      .filter(({ g, satirlar: s }) => gizliMi(g) || (s.length > 0 && s.every(x => gizliMi(x))))
+      .map(x => x.g.kod)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sunucudaki, dugumler]);
 
   return (
     <div className="mn-ekran">
@@ -597,13 +621,19 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
 
       {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
       {/* KUTULAR (ana sayfa düzeni): her grup bir kutu; başlıkta ve satırlarda işaret. */}
-      <div className="mn-kutular">
-        {kutular.gruplar.map(({ g, satirlar: sat }) => {
+      {(() => {
+      const grupKutusu = ({ g, satirlar: sat }: { g: Dugum; satirlar: Dugum[] }) => {
           const gGorunur = !gizliMi(g);
           const isaretli = sat.filter(s => !gizliMi(s)).length;
           return (
-            <div key={g.kod} className={`mn-kutu-grup${gGorunur ? '' : ' kapali'}`}>
-              <div className="mn-kb">
+            <div key={g.kod} className={`mn-kutu-grup${gGorunur ? '' : ' kapali'}${surukleGrup === g.kod ? ' surukle' : ''}`}
+                 onDragOver={ev => { if (surukleGrup) ev.preventDefault() }}
+                 onDrop={() => { if (surukleGrup) grupSiraDegis(surukleGrup, g.kod); setSurukleGrup(null) }}>
+              <div className="mn-kb" draggable={duzenleyebilir}
+                   onDragStart={ev => { ev.stopPropagation(); setSurukleGrup(g.kod) }}
+                   onDragEnd={() => setSurukleGrup(null)}
+                   title={duzenleyebilir ? c('Başlıktan sürükleyerek grubun yerini değiştir') : undefined}>
+                {duzenleyebilir && <span className="mn-tut">⠿</span>}
                 <input type="checkbox" checked={gGorunur} disabled={!duzenleyebilir}
                        ref={el => { if (el) el.indeterminate = gGorunur && isaretli > 0 && isaretli < sat.length }}
                        title={c('Grubu ve bütün satırlarını profilde göster / gizle')}
@@ -668,7 +698,13 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
               </div>
             </div>
           );
-        })}
+        };
+      const aktif = kutular.gruplar.filter(x => !pasifGruplar.has(x.g.kod));
+      const pasif = kutular.gruplar.filter(x => pasifGruplar.has(x.g.kod));
+      return (<>
+      <div className="mn-bolum-bas">{c('AKTİF GRUPLAR')} <span className="sonuk">· {aktif.length}</span></div>
+      <div className="mn-kutular">
+        {aktif.map(grupKutusu)}
         {kutular.duzler.length > 0 && (
           <div className="mn-kutu-grup">
             <div className="mn-kb"><span className="mn-ad">📁 {c('Diğer')}</span></div>
@@ -686,6 +722,12 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
           </div>
         )}
       </div>
+      <div className="mn-bolum-bas pasif">{c('PASİF GRUPLAR')} <span className="sonuk">· {pasif.length}</span></div>
+      {pasif.length > 0
+        ? <div className="mn-kutular">{pasif.map(grupKutusu)}</div>
+        : <div className="sonuk" style={{ padding: '6px 2px' }}>{c('Tümüyle pasif grup yok. Bütün menüleri kapatılan grup kaydedilince buraya iner.')}</div>}
+      </>);
+      })()}
 
       {/* ÖZELLİK PENCERESİ: satır ya da grup adına tıklanınca. Değişiklik ekranda birikir; menüye
           Kaydet & Uygula (gömülüde Kurum Profili'nin Kaydet'i) ile geçer. */}

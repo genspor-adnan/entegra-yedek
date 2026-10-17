@@ -8155,19 +8155,22 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mn-kutular { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 8px }
 .mn-kutu-grup { border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz); overflow: hidden }
 .mn-kutu-grup.kapali { opacity: .6 }
+.mn-bolum-bas { margin: 14px 0 0; padding-bottom: 4px; font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--soluk) }
+.mn-bolum-bas.pasif { margin-top: 22px; padding-top: 12px; border-top: 2px solid var(--cizgi) }
 .mn-kb { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi); font-weight: 700 }
 .mn-kb .rozet { margin-left: auto }
 .mn-satirlar { max-height: 178px; overflow-y: auto }
 .mn-sat { display: flex; align-items: center; gap: 6px; padding: 5px 10px; min-height: 0 }
 .mn-sat:hover { background: var(--satirust) }
 .mn-sat input[type=checkbox], .mn-kb input[type=checkbox] { width: auto; height: auto; margin: 0; flex: none }
-.mn-sat .mn-ad { line-height: 1.35 }
 .mn-sat.alt { padding-left: 28px }   /* menü düzeninde açılan alt grup satırı */
 .mn-sat .mn-tut { cursor: grab; color: var(--soluk); font-size: 11px }
 .mn-sat.surukle { opacity: .4 }
-.mn-kutular .mn-ad .ic { padding: 0; width: 18px; text-align: center; flex: none }   /* .kt-kok .ic (kurum profili) ezmesin */
-.mn-sat.kapali .mn-ad { color: var(--soluk); text-decoration: line-through }
-.mn-ad { border: 0; background: transparent; padding: 0; cursor: pointer; text-align: left; color: inherit; font: inherit; display: inline-flex; align-items: center; gap: 6px; min-width: 0 }
+.mn-kutu-grup.surukle { opacity: .4 }
+.mn-kb .mn-tut { cursor: grab; color: var(--soluk); font-size: 11px; font-weight: 400 }
+.mn-kutular button .ic { padding: 0; width: 18px; text-align: center; flex: none }   /* .kt-kok .ic (kurum profili) ezmesin */
+.mn-sat.kapali > button { color: var(--soluk); text-decoration: line-through }
+.mn-ad { border: 0; background: transparent; padding: 0; cursor: pointer; text-align: left; color: inherit; font: inherit; display: inline-flex; align-items: center; gap: 6px; min-width: 0; line-height: 1.35 }
 .mn-ad:hover { color: var(--vurgu) }
 @media (max-width: 1200px) { .mn-govde { grid-template-columns: minmax(0, 1fr) } }
 
