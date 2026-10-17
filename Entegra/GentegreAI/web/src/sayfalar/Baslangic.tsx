@@ -9,6 +9,7 @@ import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/me
 import { SURUM_ETIKET } from '../surum';
 import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
 import { duyuruOkuAc } from '../bilesenler/duyuru/DuyuruOrtak';
+import { bekleme, gelenGruplari, iskontoKararAc, onayIkon } from '../bilesenler/taleplerim/GelenIsler';
 import { PALET_SESLI_OLAYI, sesliGirisVar } from '../bilesenler/sesliGiris';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
@@ -179,6 +180,47 @@ export function Baslangic() {
   ] as Is[] : duyuruIsi).filter(i => i.sabit || (i.sayi ?? 0) > 0);
 
   /**
+   * BİLDİRİMLER (kullanıcı 18.10.2026: "home'da bildirimler de bekleyen işler altında görünsün"): zilin
+   * (Bana gelenler) içeriği - acil / atanmamış / bendeki arıza, iskonto onayı, onayımı bekleyen. Aynı
+   * bağlamdan (ikinci istek yok), en çok 8 satır; satır zildeki gibi kaydı açar. Boşsa bölüm yok.
+   */
+  const bildirimGruplari = talep ? gelenGruplari(talep.gelen, talep.veri?.onaylar ?? [], talep.iskontolar) : [];
+  const bildirimler = bildirimGruplari.flatMap(g => g.ogeler.map(o => ({ g, o }))).slice(0, 8);
+  const bildirimToplam = bildirimGruplari.reduce((t, g) => t + g.ogeler.length, 0);
+  const bildirimBolumu = bildirimler.length > 0 && (
+    <>
+      <div className="bsl-bolum">{c('Bildirimler')} <span className="sonuk">· {bildirimToplam}</span></div>
+      <div className="bsl-bildirim">
+        {bildirimler.map(({ g, o }) => {
+          const ac = () => o.tip === 'iskonto' ? iskontoKararAc(o.t) : git(`/taleplerim?sekme=gelen&sec=${o.anahtar}`);
+          return o.tip === 'iskonto' ? (
+            <a key={o.anahtar} onClick={ac}>
+              <span className="bsl-bil-i">％</span>
+              <span className="bsl-bil-a"><b>{c('İskonto onayı')} · %{o.t.oran}</b> · {o.t.hasta || o.t.belgeNo}</span>
+              <span className="bsl-bil-y">{o.t.isteyen} · {bekleme(o.t.istekTs)}</span>
+            </a>
+          ) : o.tip === 'ariza' ? (
+            <a key={o.anahtar} onClick={ac} className={g.kod === 'acil' ? 'acil' : undefined}>
+              <span className="bsl-bil-i">{g.kod === 'acil' ? '🚨' : '🧰'}</span>
+              <span className="bsl-bil-a"><b>{o.a.talepNo}</b> · {o.a.aciklama}</span>
+              <span className="bsl-bil-y">{c(g.ad)} · {bekleme(o.a.eklemeTarihi)} {c('önce')}</span>
+            </a>
+          ) : (
+            <a key={o.anahtar} onClick={ac}>
+              <span className="bsl-bil-i">{onayIkon(o.o)}</span>
+              <span className="bsl-bil-a"><b>{o.o.konu}</b> · {o.o.talepEden}</span>
+              <span className={`bsl-bil-y${o.o.gecikmeGun > 0 ? ' gec' : ''}`}>{o.o.adimAd} · {bekleme(o.o.baslama)}{o.o.gecikmeGun > 0 ? ` · ${c('termin geçti')}` : ''}</span>
+            </a>
+          );
+        })}
+        {bildirimToplam > bildirimler.length && (
+          <a className="tumu" onClick={() => git('/taleplerim?sekme=gelen')}>{c('Tümü')} ({bildirimToplam}) →</a>
+        )}
+      </div>
+    </>
+  );
+
+  /**
    * ÜST ŞERİT: son açılanlar (tek sıra, 4 ekran) + bekleyen işler. KUTULU GÖRÜNÜMDE DE AYNI (kullanıcı
    * 17.10.2026: "kutulu olan ekranlarda da Son açılanlar ve Bekleyen işler üstte, 10 adetten az olan gibi
    * görünsün") - iki görünüm tek çizimi kullanır. KUTULU GÖRÜNÜMDE 8 (kullanıcı 17.10.2026: "son açılan
@@ -198,6 +240,7 @@ export function Baslangic() {
             <span className={`bsl-kart-y${i.acil ? ' bsl-kart-acil' : ''}`}>{i.y}</span>
           </a>))}
         </div></>}
+      {bildirimBolumu}
     </>
   );
 

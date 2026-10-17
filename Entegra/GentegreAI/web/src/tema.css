@@ -8520,3 +8520,19 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .renk-ornek { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 4px; border: 1px solid var(--cizgi); border-radius: 14px; background: var(--yuz) }
 .renk-ornek span { width: 16px; height: 16px; border-radius: 50% }
 .renk-ornek.secili { border-color: var(--vurgu); box-shadow: 0 0 0 2px color-mix(in srgb, var(--vurgu) 25%, transparent); font-weight: 700 }
+/* ANA SAYFA BİLDİRİMLER (18.10.2026): Bekleyen işlerin altında, zilin içeriği - tek sütun satırlar. */
+.bsl-bildirim { max-width: 980px; margin: 0 auto 20px; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden }
+.bsl-bildirim a { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--cizgi2); color: var(--yazi); cursor: pointer; text-decoration: none }
+.bsl-bildirim a:last-child { border-bottom: 0 }
+.bsl-bildirim a:hover { background: var(--satirust) }
+.bsl-bildirim a.acil { background: var(--hatazem) }
+.bsl-bildirim a.tumu { justify-content: center; color: var(--vurgu); font-weight: 700 }
+.bsl-bil-i { width: 20px; text-align: center; flex: none }
+.bsl-bil-a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.bsl-bil-y { flex: none; color: var(--soluk); font-size: 11px }
+.bsl-bil-y.gec { color: var(--hata); font-weight: 700 }
+/* Kendi resmi seçiliyken bölüm başlıkları / tarih satırı resmin üstünde okunur kalsın: yarı saydam zemin. */
+:root[data-ana-arka="resim"] .bsl .bsl-bolum, :root[data-ana-arka="resim"] .bsl-sade .bsl-bolum,
+:root[data-ana-arka="resim"] .bsl .bsl-sade-alt, :root[data-ana-arka="resim"] .bsl-sade .bsl-sade-alt {
+  display: table; margin-left: auto; margin-right: auto; padding: 2px 12px; border-radius: 10px;
+  background: color-mix(in srgb, var(--yuz) 82%, transparent); color: var(--yazi) }
