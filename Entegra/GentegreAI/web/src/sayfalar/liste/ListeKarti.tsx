@@ -430,6 +430,22 @@ export function ListeKarti({
   // YENİ SEVK / KONSÜLTASYON ÖNCE HASTA SORAR (kullanıcı 15.10.2026: "listeden yeni dendiğinde direkt
   //   önce hasta adı sorsun jenerik listeden, kaydı onunla açsın; içerdeki hasta seçmeyi kaldır").
   //   Liste düğmesi, Ctrl+N ve palet aynı yoldan geçer. Vazgeçilirse sekme kapanır.
+  // YENİ RANDEVU ÖNCE HASTA (kullanıcı 16.10.2026: "yeni randevu kartı açılırken jenerik hasta arama
+  //   çıksın"): takvimden gelen saat / hekim / bölüm / cihaz parametreleri korunur, hasta eklenir.
+  if (tanim.kaynak === 'randevu' && kartId === 'yeni' && !sorgu.get('hastaId')) {
+    return (
+      // "＋ Yeni" görünür (kullanıcı 16.10.2026): kayıtlı değilse hasta burada açılır, kaydedilince seçilir.
+      <TarafArama acik kaynaklar={['hasta']}
+        yerTutucu={c('Randevu kimin için? Hasta ara (ad, dosya no, kimlik no, telefon)…')}
+        onKapat={() => { if (hastaSecildi.current) return; if (ekranSekmesi) ekranSekmesi.kapat(); else git(`/${tanim.rota ?? tanim.kaynak}`) }}
+        onSec={h => {
+          hastaSecildi.current = true;
+          // hastaAd: kartın Hasta kutusu adı göstersin (yeniSecilenAdlar) - yoksa "seçiniz" kalıyordu.
+          const q = new URLSearchParams(sorgu); q.set('hastaId', String(h.id)); q.set('hastaAd', h.unvan);
+          git(`${tanim.kartYolu}/yeni?${q.toString()}`, { replace: true });
+        }} />
+    );
+  }
   if (HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && !sorgu.get('tarafId')) {
     return (
       <TarafArama acik kaynaklar={['hasta']} kartYok
