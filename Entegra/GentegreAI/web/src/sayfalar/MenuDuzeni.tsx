@@ -121,7 +121,12 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
    * adresinde ve yetki matrisinde görünmez (sunucu menu_duzen ekran kapısıyla süzer).
    */
   const [paneller, setPaneller] = useState<{ kod: string; ad: string; ikon: string }[]>([]);
-  useEffect(() => { api.gostergePanelTumu().then(setPaneller).catch(() => setPaneller([])) }, []);
+  // Eski sunucuda (/tumu yok) oturumun görebildiği panellere düşülür - kutu boş kalmasın.
+  useEffect(() => {
+    api.gostergePanelTumu().then(setPaneller)
+      .catch(() => api.gostergeler().then(l => setPaneller(l.map(p => ({ kod: p.kod, ad: p.ad, ikon: p.ikon }))))
+        .catch(() => setPaneller([])));
+  }, []);
 
   // Varsayılan ağaç: menüyü çizen AYNI kuruluş (menuSatirlariKur) - ekranda
   //   başka bir sıralama göstermek, kaydedilen düzenin menüde farklı çıkması
@@ -351,8 +356,10 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
    */
   const yerlesim = useMemo(() => {
     const dogal = new Map(dugumler.map((d, i) => [d.kod, i]));
-    const siraNo = (d: Dugum) =>
-      fark(d.kod)?.sira ?? d.sira ?? ((dogal.get(d.kod) ?? 0) + 1) * 1000;
+    // GÖSTERGE PANELLERİ HEP EN BAŞTA (kullanıcı 17.10.2026: "başa al"): kurumun gruplara verdiği sıra
+    //   (10, 20...) onu geride bırakmasın.
+    const siraNo = (d: Dugum) => d.kod === icKod('grup', GOSTERGE_GRUBU) ? -1e9
+      : fark(d.kod)?.sira ?? d.sira ?? ((dogal.get(d.kod) ?? 0) + 1) * 1000;
     // Gizliler DE yerleşimde durur: sol ağaç onları 🚫 ile çizmeli, süzme
     //   yalnız önizlemede yapılır.
     const cocuklar = (ust: string | undefined) => dugumler
@@ -568,9 +575,11 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   /** GRUP SÜRÜKLE-BIRAK: kaynak grup hedefin önüne girer, bütün gruplara yeni sıra yazılır. */
   const grupSiraDegis = (kaynakKod: string, hedefKod: string) => {
     if (kaynakKod === hedefKod) return;
+    const sabit = icKod('grup', GOSTERGE_GRUBU);
+    if (kaynakKod === sabit) return;          // panel grubu en başta sabit
     const sira = yerlesim.filter(x => x.derinlik === 1 && x.d.tur === 'grup').map(x => x.d.kod)
-      .filter(k => k !== kaynakKod);
-    const i = sira.indexOf(hedefKod);
+      .filter(k => k !== kaynakKod && k !== sabit);
+    const i = hedefKod === sabit ? 0 : sira.indexOf(hedefKod);   // panellerin üstüne = ilk sıra
     sira.splice(i < 0 ? sira.length : i, 0, kaynakKod);
     sira.forEach((k, n) => { const dd = dugumler.find(x => x.kod === k); if (dd) farkYaz(dd, { sira: (n + 1) * 10 }) });
   };
