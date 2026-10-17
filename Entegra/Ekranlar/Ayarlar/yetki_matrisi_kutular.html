@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rol Yetki Matrisi — Kutular (Mockup, GenoTIP AI)</title>
+<link rel="stylesheet" href="../Radyoloji/_rad_tanim_ortak.css">
+<style>
+  /* MOCKUP (kullanıcı 17.10.2026: "yetki matrisini de kutular şeklinde yapsak nasıl olur" → "mockup yap").
+     Menü düzeni kutularıyla aynı dil: kutu = menü grubu, satır = ekran. Satırda Gör işareti + işlem
+     rozetleri (E D S Y); satıra tıklanınca ayrıntı penceresi (bütün işlemler, aksiyonlar, alan yetkisi). */
+  body{background:#f3f6fa}
+  .ust{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line2)}
+  .ust h2{margin:0;font-size:15px;color:var(--navy)}
+  .ust .yol{color:var(--muted);font-size:11px}
+  .ust .bosluk{flex:1}
+  .ust select{border:1px solid var(--line);border-radius:3px;padding:4px 8px;font-size:12px;min-width:200px}
+  .d{border:1px solid var(--line);background:#fff;border-radius:3px;padding:4px 10px;font-size:11.5px;cursor:pointer}
+  .d.bir{background:#2f6db3;border-color:#2f6db3;color:#fff}
+  .d.mini{padding:2px 7px;font-size:10.5px}
+  .sekme{display:flex;gap:0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .sekme button{border:0;background:#fff;padding:4px 12px;font-size:11.5px;cursor:pointer}
+  .sekme button.on{background:#2f6db3;color:#fff}
+  .serit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;font-size:11.5px;background:#fff8e6;border-bottom:1px solid #f0d9a8}
+  .serit b{color:var(--navy)}
+  .serit .ayrac{width:1px;height:18px;background:#e2c88f}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;border:1px solid #d6e2ef;background:#eef3f9;color:var(--navy)}
+  .rozet.ok{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46}
+  .rozet.uy{background:#fff1d6;border-color:#f0d9a8;color:#8a5a00}
+  .bolum{margin:14px 14px 0;font-size:11px;font-weight:bold;letter-spacing:.6px;color:var(--muted)}
+  .kutular{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:8px 14px 14px}
+  .kutu{border:1px solid var(--line2);border-radius:6px;background:#fff;overflow:hidden}
+  .kb{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-weight:bold;font-size:12px}
+  .kb .say{margin-left:auto}
+  .kb .uc{cursor:pointer;border:1px solid var(--line);border-radius:3px;background:#fff;width:18px;height:18px;line-height:16px;text-align:center;font-size:11px;padding:0}
+  .kb .uc.yok{color:#c0c8d2}.kb .uc.gor{color:#2f6db3}.kb .uc.tam{color:#fff;background:#2e7d46;border-color:#2e7d46}
+  .sat{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;border-bottom:1px solid #f2f5f8}
+  .sat:hover{background:#f5f9fe}
+  .sat .ad{flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sat .ad:hover{color:#2f6db3}
+  .sat.kapali .ad{color:#9aa7b4}
+  .satirlar{max-height:182px;overflow-y:auto}
+  .alt{padding-left:26px}
+  .altbas{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;border-bottom:1px solid #f2f5f8;cursor:pointer;color:#44546a}
+  .ic{width:16px;text-align:center}
+  /* İŞLEM ROZETLERİ: E(kle) D(eğiştir) S(il) Y(azdır). Gör kapalıyken pasif. */
+  .isl{display:flex;gap:3px}
+  .isl span{width:18px;height:18px;line-height:16px;text-align:center;font-size:10px;font-weight:bold;border:1px solid var(--line);border-radius:3px;cursor:pointer;color:#9aa7b4;background:#fff;user-select:none}
+  .isl span.on{background:#2f6db3;border-color:#2f6db3;color:#fff}
+  .isl span.i-s.on{background:#c0392b;border-color:#c0392b}
+  .sat.kapali .isl span{opacity:.35;cursor:default}
+  .aks{font-size:10px;color:var(--muted)}
+  /* PENCERE */
+  .perde{position:fixed;inset:0;background:rgba(20,30,45,.35);display:none;align-items:flex-start;justify-content:center;padding-top:60px}
+  .perde.acik{display:flex}
+  .pen{background:#fff;border-radius:6px;width:620px;max-width:95vw;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
+  .pen .bas{background:#2c5f9e;color:#fff;padding:9px 12px;font-weight:bold;font-size:12.5px;display:flex}
+  .pen .bas span{margin-left:auto;font-weight:normal;font-size:11px;opacity:.85}
+  .pen .ic2{padding:12px}
+  .pen h5{margin:10px 0 6px;font-size:11px;color:var(--muted);letter-spacing:.4px}
+  .izgara{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .cb{display:flex;gap:6px;align-items:center;font-size:11.5px;padding:4px 6px;border:1px solid var(--line2);border-radius:4px}
+  .not{font-size:10.5px;color:var(--muted);margin-top:8px;padding:6px 8px;background:#f5f8fb;border-radius:4px}
+  .tablo{padding:14px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="ust">
+  <h2>Rol Yetki Matrisi</h2><span class="yol">Yönetim › Güvenlik › Roller</span>
+  <span class="bosluk"></span>
+  <select><option>Banko Görevlisi</option><option>Radyoloji Teknisyeni</option><option>Radyolog</option><option>Yönetici</option></select>
+  <div class="sekme"><button class="on" onclick="sekme(this,'kutu')">▦ Kutular</button><button onclick="sekme(this,'tablo')">☰ Tablo</button></div>
+  <button class="d bir">💾 Kaydet</button>
+</div>
+<div class="serit">
+  <b>Toplu:</b>
+  <button class="d mini" onclick="toplu('g',1)">Tüm Gör</button>
+  <button class="d mini" onclick="toplu('e',1)">Tüm Ekle</button>
+  <button class="d mini" onclick="toplu('d',1)">Tüm Değiştir</button>
+  <button class="d mini" onclick="toplu('s',1)">Tüm Sil</button>
+  <button class="d mini" onclick="toplu('y',1)">Tüm Yazdır</button>
+  <span class="ayrac"></span>
+  <button class="d mini" onclick="toplu('*',0)">Hepsini kaldır</button>
+  <span class="ayrac"></span>
+  <span>Grup başı: <b>☐</b> yok → <b>👁</b> yalnız gör → <b>✔</b> tam yetki</span>
+  <span class="bosluk" style="flex:1"></span>
+  <span id="ozet" class="rozet ok"></span>
+</div>
+
+<div id="kutuGorunum">
+  <div class="bolum">MENÜ GRUPLARI · menü düzeniyle aynı sıra (gizli gruplar burada yok)</div>
+  <div class="kutular" id="kutular"></div>
+</div>
+<div id="tabloGorunum" class="tablo" style="display:none">Bugünkü tablo görünümü burada kalır (rol karşılaştırma ve sütunca toplu işlem için).</div>
+
+<div class="perde" id="perde" onclick="if(event.target===this)kapat()">
+  <div class="pen">
+    <div class="bas" id="pBas"></div>
+    <div class="ic2">
+      <h5>İŞLEMLER</h5>
+      <div class="izgara" id="pIslem"></div>
+      <h5>EKRANA ÖZEL AKSİYONLAR</h5>
+      <div class="izgara" id="pAksiyon"></div>
+      <h5>ALAN (KOLON) YETKİSİ</h5>
+      <div class="izgara">
+        <label class="cb"><input type="checkbox" checked> Tutarlar</label>
+        <label class="cb"><input type="checkbox" checked> Telefon</label>
+        <label class="cb"><input type="checkbox"> Kimlik No</label>
+      </div>
+      <h5>ŞUBE</h5>
+      <div class="izgara"><label class="cb"><input type="radio" name="sb" checked> Tüm şubeler</label><label class="cb"><input type="radio" name="sb"> Yalnız kendi şubesi</label></div>
+      <div class="not">Satıra tıklanınca açılır. Kutudaki E / D / S / Y rozetleri buradaki işlemlerin kısayoludur; aksiyonlar ve alan yetkisi yalnız burada.</div>
+      <div style="text-align:right;margin-top:10px"><button class="d bir" onclick="kapat()">✔ Tamam</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ÖRNEK VERİ - görüntüleme merkezinde "Banko Görevlisi" rolü.
+const GRUPLAR = [
+  { ad:'Gösterge Panelleri', ic:'📊', ekranlar:[['Genel (Ana Sayfa)','🏠'],['Banko & Vezne','🧾'],['Yönetici Özeti','📈']] },
+  { ad:'Randevu', ic:'📅', ekranlar:[['Randevu Listesi','📅',['Ertele','Tekrarla','Başvuruya Dönüştür']],['Çalışma Planları','🗓'],['Randevu / Poliklinik İcmali','📊'],['Çalışma Şablonları','📋','','Ayarlar'],['Çalışma İstisnaları','📋','','Ayarlar']] },
+  { ad:'Kayıt Kabul', ic:'🚑', ekranlar:[['Hasta Listesi','🧑'],['Başvuru Listesi','📄',['İptal','İskonto Talebi']],['Banko Onayları','✅'],['Banko Oturumu Listesi','🧾'],['Vezne İcmali','📊']] },
+  { ad:'Radyoloji', ic:'☢️', ekranlar:[['Çalışma Listesi','🖥'],['Pano','📊'],['Görüntüleme İcmali','📊'],['Kritik Bulgu Listesi','⚠️'],['Telerad Panosu','🛰','','Teleradyoloji']] },
+  { ad:'Finans', ic:'💰', ekranlar:[['Kasa İşlemleri','💵',['Gün Sonu','Avans']],['Banka Hareketleri','🏦'],['Hesap Listesi','📒']] },
+  { ad:'Yönetim', ic:'🧭', ekranlar:[['Duyurular','📣'],['Firma / Şubeler','🏢'],['Genel','⚙️'],['Demo Verisi','🧪','','Veri Aktarımı']] },
+];
+// durum: g e d s y (0/1)
+const D = {};
+GRUPLAR.forEach((g,gi)=>g.ekranlar.forEach((e,ei)=>{ const k=gi+'/'+ei; D[k]={g:gi<3?1:0,e:gi<3?1:0,d:gi===2?1:0,s:0,y:gi<2?1:0} }));
+const acikAlt = new Set();
+
+function grupDurum(gi){ const ks=GRUPLAR[gi].ekranlar.map((_,i)=>gi+'/'+i);
+  if (ks.every(k=>D[k].g&&D[k].e&&D[k].d&&D[k].s&&D[k].y)) return 'tam';
+  if (ks.some(k=>D[k].g)) return 'gor'; return 'yok'; }
+function grupCevir(gi){ const s=grupDurum(gi); const ks=GRUPLAR[gi].ekranlar.map((_,i)=>gi+'/'+i);
+  ks.forEach(k=>{ if(s==='yok'){D[k]={g:1,e:0,d:0,s:0,y:0}} else if(s==='gor'){D[k]={g:1,e:1,d:1,s:1,y:1}} else {D[k]={g:0,e:0,d:0,s:0,y:0}} }); ciz(); }
+function satCevir(k,a){ if(a!=='g' && !D[k].g) return; D[k][a]=D[k][a]?0:1; if(a==='g'&&!D[k].g){D[k]={g:0,e:0,d:0,s:0,y:0}} ciz(); }
+function toplu(a,v){ Object.keys(D).forEach(k=>{ if(a==='*'){D[k]={g:0,e:0,d:0,s:0,y:0}} else { if(a!=='g'&&v) D[k].g=1; D[k][a]=v } }); ciz(); }
+function satir(gi,ei,e,alt){ const k=gi+'/'+ei, d=D[k];
+  const r=(a,h)=>`<span class="i-${a}${d[a]?' on':''}" title="${({e:'Ekle',d:'Değiştir',s:'Sil',y:'Yazdır'})[a]}" onclick="satCevir('${k}','${a}')">${h}</span>`;
+  return `<div class="sat${d.g?'':' kapali'}${alt?' alt':''}">
+    <input type="checkbox" ${d.g?'checked':''} onclick="satCevir('${k}','g')" title="Gör">
+    <span class="ic">${e[1]}</span><span class="ad" onclick="ac(${gi},${ei})">${e[0]}${e[2]&&e[2].length?` <span class="aks">· ${e[2].length} aksiyon</span>`:''}</span>
+    <span class="isl">${r('e','E')}${r('d','D')}${r('s','S')}${r('y','Y')}</span></div>`; }
+function ciz(){ let h='', top=0, acik=0;
+  GRUPLAR.forEach((g,gi)=>{ const s=grupDurum(gi); const n=g.ekranlar.filter((_,i)=>D[gi+'/'+i].g).length; top+=g.ekranlar.length; acik+=n;
+    let govde=''; const altlar={};
+    g.ekranlar.forEach((e,ei)=>{ if(e[3]){ (altlar[e[3]]=altlar[e[3]]||[]).push(ei); if(altlar[e[3]].length>1) return;
+        const anahtar=gi+'/'+e[3], ac=acikAlt.has(anahtar);
+        govde+=`<div class="altbas" onclick="altCevir('${anahtar}')"><span class="ic">${ac?'▾':'▸'}</span>${e[3]} <span class="aks">(alt grup)</span></div>`;
+        govde+=`<div id="alt-${gi}-${e[3]}" style="display:${ac?'block':'none'}"></div>`; return }
+      govde+=satir(gi,ei,e,false); });
+    h+=`<div class="kutu"><div class="kb"><button class="uc ${s}" onclick="grupCevir(${gi})" title="Yok → Yalnız gör → Tam yetki">${s==='tam'?'✔':s==='gor'?'👁':''}</button>
+      <span class="ic">${g.ic}</span>${g.ad}<span class="say rozet ${n===g.ekranlar.length?'ok':n?'uy':''}">${n}/${g.ekranlar.length}</span></div>
+      <div class="satirlar">${govde}</div></div>`;
+    window['alt'+gi]=altlar; });
+  document.getElementById('kutular').innerHTML=h;
+  GRUPLAR.forEach((g,gi)=>{ const altlar=window['alt'+gi]; Object.keys(altlar).forEach(a=>{ const el=document.getElementById(`alt-${gi}-${a}`); if(el) el.innerHTML=altlar[a].map(ei=>satir(gi,ei,g.ekranlar[ei],true)).join('') }) });
+  document.getElementById('ozet').textContent=`${acik} / ${top} ekran açık`; }
+function altCevir(a){ acikAlt.has(a)?acikAlt.delete(a):acikAlt.add(a); ciz(); }
+function ac(gi,ei){ const e=GRUPLAR[gi].ekranlar[ei], k=gi+'/'+ei, d=D[k];
+  document.getElementById('pBas').innerHTML=`${GRUPLAR[gi].ad} › ${e[0]}<span>Esc ile kapanır</span>`;
+  document.getElementById('pIslem').innerHTML=[['g','Gör'],['e','Ekle'],['d','Değiştir'],['s','Sil'],['y','Yazdır'],['x','Dışa aktar']]
+    .map(([a,t])=>`<label class="cb"><input type="checkbox" ${d[a]?'checked':''} onclick="satCevir('${k}','${a}')"> ${t}</label>`).join('');
+  const aks=(e[2]||[]); document.getElementById('pAksiyon').innerHTML=aks.length?aks.map(a=>`<label class="cb"><input type="checkbox" checked> ${a}</label>`).join(''):'<span class="aks">Bu ekranın ayrı aksiyonu yok.</span>';
+  document.getElementById('perde').classList.add('acik'); }
+function kapat(){ document.getElementById('perde').classList.remove('acik') }
+function sekme(b,t){ document.querySelectorAll('.sekme button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  document.getElementById('kutuGorunum').style.display=t==='kutu'?'':'none'; document.getElementById('tabloGorunum').style.display=t==='tablo'?'':'none'; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') kapat() });
+ciz();
+</script>
+</body>
+</html>
