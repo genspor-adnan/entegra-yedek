@@ -48,6 +48,7 @@ import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 import { RandevuErtelePenceresi } from './RandevuErtelePenceresi';
+import { RandevuSeriPenceresi } from './RandevuSeriPenceresi';
 
 interface Props {
   kaynak: string;
@@ -668,6 +669,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
   /** Randevu kartında Ertele penceresi (1119). */
   const [erteleAcik, setErteleAcik] = useState(false);
+  /** Randevu kartında Tekrarla (seri randevu) penceresi. */
+  const [tekrarAcik, setTekrarAcik] = useState(false);
   /**
    * JENERIK ARAMA EKRANI ile secilen alanlar (260): hangi alan icin hangi
    * arama acik + secilen kaydin adi. Ad, lookup haritasinda olmayabilir
@@ -2111,6 +2114,12 @@ Yine de yeni kayıt eklensin mi?`);
                         title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
                         onClick={() => setErteleAcik(true)}>{c('⏭ Ertele')}</button>
               )}
+              {/* TEKRARLA (kullanıcı 17.10.2026): aynı randevudan seri - gün / sayı seçilir, çakışma kontrollü. */}
+              {!yeniMi && (
+                <button className="d" disabled={kaydedilmemisDegisiklikVar}
+                        title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
+                        onClick={() => setTekrarAcik(true)}>{c('🔁 Tekrarla')}</button>
+              )}
             </>
           )}
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
@@ -2273,6 +2282,20 @@ Yine de yeni kayıt eklensin mi?`);
             }}
             onKapat={() => setErteleAcik(false)}
             onErtelendi={yeniId => { setErteleAcik(false); onKaydedildi?.(yeniId); onKapat?.() }} />
+        );
+      })()}
+      {kaynak === 'randevu' && tekrarAcik && id != null && (() => {
+        const bas = String(deger.baslangic ?? '');
+        const t = bas.slice(0, 10);
+        const g = new Date(`${t}T12:00`).getDay();
+        const ertesi = new Date(`${t}T12:00`); ertesi.setDate(ertesi.getDate() + 1);
+        const ertesiMetin = `${ertesi.getFullYear()}-${String(ertesi.getMonth() + 1).padStart(2, '0')}-${String(ertesi.getDate()).padStart(2, '0')}`;
+        return (
+          <RandevuSeriPenceresi baslik={`🔁 ${c('Randevuyu Tekrarla')}`} kaynak={{ kaynakRandevuId: Number(id) }}
+                                ilkTarih={ertesiMetin} saat={bas.slice(11, 16)} sureDk={Number(deger.sureDk) || 15}
+                                adet={5} gunler={[g === 0 ? 7 : g]}
+                                onKapat={() => setTekrarAcik(false)}
+                                onKaydedildi={n => { bilgiMesaji(`${n} ${c('randevu oluşturuldu.')}`) }} />
         );
       })()}
       {kaynak === 'kisi' && (

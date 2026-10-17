@@ -10,6 +10,7 @@ import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
 import { FTR_EGZERSIZ_YER, FTR_SEANS_ROZET, FTR_YANIT, ftrAsamaAraligi } from './ftrKodlari';
+import { RandevuSeriPenceresi, sikliktanGunler } from '../../bilesenler/RandevuSeriPenceresi';
 
 /**
  * FTR TEDAVİ PROGRAMI (KÜR) KARTI (719) — mockup `Ekranlar/FTR/ftr_program_karti.html`.
@@ -39,6 +40,10 @@ export function FtrProgramKarti() {
   const [sekme, setSekme] = useState<Sekme>('uyg');
   const [ara, setAra] = useState<{ acik: boolean; q: string; sonuc: { id: number; sutKodu: string; ad: string }[]; ad: string; sure: string; parametre: string; cihaz: string }>({ acik: false, q: '', sonuc: [], ad: '', sure: '15', parametre: '', cihaz: '' });
   const [yeniHasta, setYeniHasta] = useState<{ id: number; ad: string } | null>(null);
+  /** SEANSLARI PLANLA = SERİ RANDEVU (kullanıcı 17.10.2026): seanslar randevulu, çakışma kontrollü. */
+  const [planlaAcik, setPlanlaAcik] = useState(false);
+  /** Planlamada seçilen fizyoterapist (boşsa programdaki). */
+  const [planDr, setPlanDr] = useState<{ id: number; ad: string } | null>(null);
 
   const yukle = useCallback(async () => {
     if (!id) return;
@@ -52,11 +57,10 @@ export function FtrProgramKarti() {
   const geriBurasi = konum.pathname;
 
   const seansAc = async () => { if (!p) return; await guvenli(async () => { const y = await api.ftrSeansAc(p.id); git(`/ftr-seans/${y.id}`, { state: { geri: geriBurasi, ustGeri: geri } }) }) };
-  const planla = async () => {
-    if (!p) return;
-    if (!await onay(`${p.seans_sayisi} seans, haftada ${p.siklik_haftalik} gün, ${p.saat} saatine planlansın mı? (mevcut planlı seanslar korunur)`)) return;
-    await guvenli(async () => { const y = await api.ftrPlanla(p.id); mesaj(`${y.eklenen} seans planlandı.`); await yukle() });
-  };
+  const planla = async () => { if (p) setPlanlaAcik(true) };
+  // Listeden "Seansları Planla" (?planla=1) pencereyi doğrudan açar.
+  const planlaIstegi = sorgu.get('planla') === '1';
+  useEffect(() => { if (planlaIstegi && p && p.durum <= 3) setPlanlaAcik(true) }, [planlaIstegi, p]);
   const sonlandir = async () => {
     if (!p) return;
     const not = await metinSor('Kür sonu / sonlandırma notu:'); if (not === null) return;
@@ -102,7 +106,27 @@ export function FtrProgramKarti() {
     ['Kür sonu', p.durum >= 4, p.durum >= 4],
   ];
 
-  return (
+  // Kalan seans: iptal (5) dışındakiler sayılır; ilk tarih son seansın ertesi (yoksa program başı / bugün).
+  const etkinSeans = k.seanslar.filter(s => s.durum !== 5);
+  const sonTarih = etkinSeans.map(s => String(s.tarih).slice(0, 10)).sort().pop();
+  const ilkTarih = (() => {
+    if (!sonTarih) return String(p.baslangic).slice(0, 10);
+    const t = new Date(`${sonTarih}T12:00`); t.setDate(t.getDate() + 1);
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  })();
+  const planlaPenceresi = planlaAcik && (
+    <RandevuSeriPenceresi baslik={`🗓 ${c('Seansları Planla')} — ${p.program_no} · ${p.hasta_adi}`}
+                          kaynak={{ ftrProgramId: p.id }} ilkTarih={ilkTarih} saat={p.saat} sureDk={p.seans_sure_dk}
+                          adet={Math.max(1, p.seans_sayisi - etkinSeans.length)} gunler={sikliktanGunler(p.siklik_haftalik)}
+                          hekimId={planDr?.id ?? p.fizyoterapist_id ?? null}
+                          ustAlan={<TarafSecici etiket={c('Fizyoterapist')} deger={planDr?.ad ?? p.fizyoterapist_adi ?? ''}
+                                                kaynaklar={['personel']} onSec={h => setPlanDr({ id: h.id, ad: h.unvan })}
+                                                onTemizle={() => setPlanDr(null)} />}
+                          onKapat={() => setPlanlaAcik(false)}
+                          onKaydedildi={n => { mesaj(`${n} ${c('seans randevusuyla planlandı.')}`); void yukle() }} />
+  );
+
+  return (<>
     <Perde baslik={<>
       <span>📋 Tedavi Programı — {p.program_no} · {p.hasta_adi} · {p.bolge_adi} · {p.seans_sayisi} seans</span>
       <span className="ds-kabas-yol">{p.hekim_adi || 'uzman —'} · {p.fizyoterapist_adi || 'fzt —'} · {p.unite_adi || 'ünite —'}{p.kabin_adi ? ` / ${p.kabin_adi}` : ''} · FTR › Tedavi Programları</span>
@@ -240,5 +264,7 @@ export function FtrProgramKarti() {
         </div>
       )}
     </Perde>
-  );
+    {/* Pencere Perde'nin DIŞINDA: Perde her çizimde yeniden kurulur, içindeki durum kaybolurdu. */}
+    {planlaPenceresi}
+  </>);
 }

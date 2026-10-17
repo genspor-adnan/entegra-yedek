@@ -9,11 +9,8 @@ export async function ftrAksiyonu(kod: string, satir: ListeSatiri | null | undef
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir satır seçin.'); return true }
 
-  if (kod === 'ftr.program-planla') {
-    if (!await onay('Seanslar sıklığa göre planlansın mı? (mevcut planlı seanslar korunur)')) return true;
-    await guvenli(async () => { const y = await api.ftrPlanla(id); mesaj(`${y.eklenen} seans planlandı.`); b.tazele() });
-    return true;
-  }
+  // SEANSLARI PLANLA (17.10.2026): randevulu seri penceresi program kartında açılır.
+  if (kod === 'ftr.program-planla') { b.git(`/ftr-program/${id}?planla=1`); return true }
   if (kod === 'ftr.program-seans-ac') {
     await guvenli(async () => { const y = await api.ftrSeansAc(id); b.git(`/ftr-seans/${y.id}`) });
     return true;
