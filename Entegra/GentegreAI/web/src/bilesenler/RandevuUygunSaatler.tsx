@@ -15,6 +15,11 @@ import { c } from '../dil/ceviri';
  * hekimin kendi ayarı → bölümün ayarı → Genel Ayarlar. Kartın kendi süresi slot adımını değiştirmez; süre
  * yalnız DOLULUK hesabında kullanılır (20 dk'lık randevu iki 15 dk'lık slotu
  * kapatır).
+ *
+ * CİHAZ SEÇİLİYSE (kullanıcı 16.10.2026: "randevu kartı açarken cihaz seçiliydi.. onun saatleri
+ * gelmeli"): kaynak cihazdır - saatler cihazın mesaisi / öğlesi / slotu ve çalışma günlerinden,
+ * doluluk o cihazın randevularından; cihaz kapatmaları (bakım / arıza) kapalı, eşzaman kadar
+ * randevu aynı slota sığar. Hekim planı bakılmaz.
  */
 interface Ayar {
   baslangicSaat: string;
@@ -36,9 +41,12 @@ const dk = (saat: string) => {
 const saatMetni = (t: number) =>
   `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 
-export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, seciliSaat,
+export function RandevuUygunSaatler({ hekimId, hekimAdi, cihazId = null, cihazAdi, bolum, tarih, sureDk, seciliSaat,
                                       hariçId, saltOkunur, onSec }: {
   hekimId: number | null;
+  /** Randevunun cihazı - doluysa saatler hekimden değil cihazdan. */
+  cihazId?: number | null;
+  cihazAdi?: string;
   /** Baslikta gosterilir (mockup: "Uygun Saatler — 02.09.2026 · Uzm. Dr. ..."). */
   hekimAdi?: string;
   bolum: number | null;
@@ -64,8 +72,48 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   const [hata, setHata] = useState('');
   /** Doktorun o gunku plan bloklari; planli=false ise ayarlar kullanilir. */
   const [plan, setPlan] = useState<{ planli: boolean; bloklar: CalismaBlok[] } | null>(null);
+  /** Cihaz modu: cihazın randevu ayarı + o günün kapatmaları. */
+  const [cihaz, setCihaz] = useState<{ ayar: Ayar & { eszaman: number; gunler: number[]; randevuVerilir: boolean };
+                                       kapatma: { bas: number; bit: number; metin: string }[] } | null>(null);
   useEffect(() => {
-    if (!hekimId || !tarih) { setPlan(null); return }
+    if (!cihazId || !tarih) { setCihaz(null); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const [a, k] = await Promise.all([
+          api.radyolojiCihazRandevuAyar(cihazId),
+          api.radyolojiCihazKapatma(`${tarih}T00:00`, `${tarih}T23:59`).catch(() => ({ kapatmalar: [], ogleArasi: [] })),
+        ]);
+        if (iptal) return;
+        const x = a.cihaz;
+        setCihaz({
+          ayar: {
+            baslangicSaat: x.baslangicSaat, bitisSaat: x.bitisSaat,
+            ogleBaslangic: x.ogleBaslangic, ogleBitis: x.ogleBitis, slotDk: Number(x.slotDk) || 15,
+            eszaman: Math.max(1, Number(x.eszaman) || 1), randevuVerilir: Number(x.randevuVerilir) === 1,
+            gunler: x.calismaGunleri.split(',').map(g => Number(g.trim())).filter(g => g >= 1 && g <= 7),
+          },
+          // Cok gunluk kapatma gun sinirina kirpilir (takvimdeki gibi).
+          kapatma: k.kapatmalar.filter(r => Number(r.cihazId) === cihazId).map(r => {
+            const b = String(r.baslangic ?? ''), s = String(r.bitis ?? '');
+            return { bas: b.slice(0, 10) === tarih ? dk(b.slice(11, 16)) : 0,
+                     bit: s.slice(0, 10) === tarih ? dk(s.slice(11, 16)) : 24 * 60,
+                     metin: String(r.aciklama ?? c('Kapalı')) };
+          }),
+        });
+      } catch (h) { if (!iptal) { setCihaz(null); setHata(hataMetni(h)) } }
+    })();
+    return () => { iptal = true };
+  }, [cihazId, tarih]);
+  /** Cihaz o gün çalışıyor mu (1 Pzt … 7 Paz; gün listesi boşsa her gün). */
+  const cihazGunu = (() => {
+    if (!cihaz || !tarih) return true;
+    const g = new Date(`${tarih}T12:00`).getDay();
+    return cihaz.ayar.gunler.length === 0 || cihaz.ayar.gunler.includes(g === 0 ? 7 : g);
+  })();
+
+  useEffect(() => {
+    if (!hekimId || !tarih || cihazId) { setPlan(null); return }
     let iptal = false;
     api.calismaPlani({ bas: tarih, bit: tarih, hekimId })
       .then(y => { if (!iptal) setPlan({ planli: y.hekimler.some(h => h.id === hekimId)
@@ -73,8 +121,8 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
                                          bloklar: y.bloklar.filter(b => b.hekimId === hekimId) }) })
       .catch(() => { if (!iptal) setPlan(null) /* plan okunamazsa ayarlar */ });
     return () => { iptal = true };
-  }, [hekimId, tarih]);
-  const planli = !!plan?.planli;
+  }, [hekimId, tarih, cihazId]);
+  const planli = !cihazId && !!plan?.planli;
   const calisma = (plan?.bloklar ?? []).filter(b => b.saatBas && b.saatBit);
   const kapaliGun = planli && calisma.length === 0
     ? (plan?.bloklar ?? []).find(b => b.kaynak === 3 || b.kaynak === 4) : undefined;
@@ -104,6 +152,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
 
   /** Hekim → bölüm → genel: ilk dolu değer kazanır. */
   const ayar = useMemo<Ayar>(() => {
+    if (cihaz) return cihaz.ayar;
     const bolumDugum = agac.find(d => d.departmanId === bolum)
       ?? agac.find(d => d.hekimler.some(h => h.hekimId === hekimId));
     const hekimAyar = bolumDugum?.hekimler.find(h => h.hekimId === hekimId);
@@ -119,18 +168,19 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
                             genel.ogleBitis) ?? ''),
       slotDk: Number(ilk(hekimAyar?.slotDk, bolumDugum?.ayar.slotDk, genel.slotDk)) || 15,
     };
-  }, [agac, bolum, hekimId, genel]);
+  }, [agac, bolum, hekimId, genel, cihaz]);
 
   // O hekimin o günkü randevuları (iptaller hariç).
   const yukle = useCallback(async () => {
-    if (!hekimId || !tarih) { setDolu([]); return }
+    if ((!hekimId && !cihazId) || !tarih) { setDolu([]); return }
     try {
       const y = await api.liste('randevu', {
         sayfa: 1, boyut: 200,
         filtre: {
           op: 'and',
           kosullar: [
-            { alan: 'hekimId', op: 'esit', deger: hekimId },
+            // Cihaz seçiliyse doluluk CİHAZIN randevuları (hekimden bağımsız).
+            cihazId ? { alan: 'cihazId', op: 'esit', deger: cihazId } : { alan: 'hekimId', op: 'esit', deger: hekimId },
             { alan: 'tarih', op: 'esit', deger: tarih },
             { alan: 'durum', op: 'esitDegil', deger: 4 },
           ],
@@ -144,7 +194,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
         })
         .filter(x => Number.isFinite(x.bas)));
     } catch (h) { setHata(hataMetni(h)) }
-  }, [hekimId, tarih, hariçId]);
+  }, [hekimId, cihazId, tarih, hariçId]);
 
   useEffect(() => { void yukle() }, [yukle]);
 
@@ -161,10 +211,11 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
     const bas = dk(ayar.baslangicSaat);
     const bit = dk(ayar.bitisSaat);
     if (!Number.isFinite(bas) || !Number.isFinite(bit)) return [];
+    if (cihaz && (!cihazGunu || !cihaz.ayar.randevuVerilir)) return [];
     const liste: number[] = [];
     for (let t = bas; t < bit; t += ayar.slotDk) liste.push(t);
     return liste;
-  }, [ayar, planli, calisma]);
+  }, [ayar, planli, calisma, cihaz, cihazGunu]);
 
   const secili = dk(seciliSaat);
   /** Slotun kendi adımı (planlı doktorda bloğun slotu). */
@@ -193,6 +244,11 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
       if (!calisma.some(b => t >= dk(String(b.saatBas)) && son <= dk(String(b.saatBit)))) return true;
     } else if (Number.isFinite(ogleBas) && Number.isFinite(ogleBit)
         && t < ogleBit && son > ogleBas) return true;
+    if (cihaz) {
+      if (cihaz.kapatma.some(k => t < k.bit && son > k.bas)) return true;
+      // EŞZAMAN: cihaz aynı anda N hasta alıyorsa slot N randevuya kadar açık.
+      return dolu.filter(d => t < d.bit && son > d.bas).length >= cihaz.ayar.eszaman;
+    }
     return dolu.some(d => t < d.bit && son > d.bas);
   };
 
@@ -220,7 +276,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
     onSec(saatMetni(t), a);                                                     // yeniden seç
   };
 
-  if (!hekimId) {
+  if (!hekimId && !cihazId) {
     return (
       <div className="kagrup" style={{ marginTop: 12 }}>
         <div className="numaralama-bas bitisik"><h6>{c('Uygun Saatler')}</h6></div>
@@ -236,7 +292,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
       <div className="numaralama-bas bitisik">
         <h6>
           Uygun Saatler — {tarih.split('-').reverse().join('.')}
-          {hekimAdi ? ` · ${hekimAdi}` : ''}
+          {cihazId ? (cihazAdi ? ` · ${cihazAdi}` : '') : hekimAdi ? ` · ${hekimAdi}` : ''}
         </h6>
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -256,7 +312,9 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
         })}
         {slotlar.length === 0 && (
           <span style={{ fontSize: 11.5, opacity: .7 }}>
-            {kapaliGun ? `${kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? c('İzinli') : c('Kapalı'))} — ${c('bu gün randevu verilemez.')}`
+            {cihaz ? (!cihaz.ayar.randevuVerilir ? c('Bu cihaza randevu verilmiyor.')
+                      : !cihazGunu ? c('Cihaz bu gün çalışmıyor.') : c('Bu cihaz için mesai saati tanımlı değil.'))
+             : kapaliGun ? `${kapaliGun.aciklama || (kapaliGun.kaynak === 4 ? c('İzinli') : c('Kapalı'))} — ${c('bu gün randevu verilemez.')}`
              : planli ? c('Doktorun bu gün çalışma planı yok.')
              : c('Bu doktor için çalışma saati tanımlı değil.')}
           </span>

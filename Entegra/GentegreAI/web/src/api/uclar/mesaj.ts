@@ -183,6 +183,12 @@ export const mesajUclari = {
       `/api/radyoloji/cihaz-kapatma?bas=${encodeURIComponent(bas)}`
       + `&bit=${encodeURIComponent(bit)}`),
 
+  /** Cihazin randevu ayari (randevu kartinin Uygun Saatler seridi, 16.10.2026) - randevu yetkisiyle. */
+  radyolojiCihazRandevuAyar: (id: number) =>
+    istek<{ cihaz: { id: number; ad: string; randevuVerilir: number; baslangicSaat: string; bitisSaat: string;
+                     ogleBaslangic: string; ogleBitis: string; slotDk: number; eszaman: number;
+                     calismaGunleri: string } }>(`/api/radyoloji/cihaz/${id}/randevu-ayar`),
+
   /** Takvimden cihaz kapatma (318) - etkilenen randevu sayisi doner. */
   radyolojiKapatmaEkle: (cihazId: number,
                          govde: { baslangic: string; bitis: string;

@@ -104,6 +104,8 @@ export function KartGrupSarmalayici({
                 slotlari; bos saate tiklamak kartin baslangicini tasir. */}
             <RandevuUygunSaatler
               hekimId={Number(deger.hekimId) || null}
+              cihazId={Number(deger.cihazId) || null}
+              cihazAdi={meta.alanlar.find(a => a.ad === 'cihazId')?.kodlar?.[String(deger.cihazId ?? '')]}
               hekimAdi={meta.alanlar.find(a => a.ad === 'hekimId')
                             ?.kodlar?.[String(deger.hekimId ?? '')]}
               bolum={Number(deger.bolum) || null}

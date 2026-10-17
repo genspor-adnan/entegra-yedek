@@ -306,6 +306,29 @@ public static partial class RadyolojiUclari
             return Results.Ok(new { kapatmalar = satirlar, ogleArasi = cihazlar });
         });
 
+        // CİHAZIN RANDEVU AYARI (kullanıcı 16.10.2026: "randevu kartı açarken cihaz seçiliydi.. onun
+        //   saatleri gelmeli"): kartın Uygun Saatler şeridi cihaz seçiliyken hekim planı yerine cihazın
+        //   mesaisini, öğlesini, slotunu, eşzamanını ve çalışma günlerini kullanır. Randevu yetkisiyle
+        //   okunur - cihaz kartının (radyoloji) yetkisi gerekmez.
+        grup.MapGet("/cihaz/{id:int}/randevu-ayar", async (int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("randevu", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var c = await b.TekAsync("""
+                select c.id, c.ad, coalesce(c.randevu_verilir, 0) as "randevuVerilir",
+                       coalesce(c.baslangic_saat, '') as "baslangicSaat", coalesce(c.bitis_saat, '') as "bitisSaat",
+                       coalesce(c.ogle_baslangic, '') as "ogleBaslangic", coalesce(c.ogle_bitis, '') as "ogleBitis",
+                       greatest(coalesce(c.slot_dk, 15), 5) as "slotDk", greatest(coalesce(c.eszaman, 1), 1) as eszaman,
+                       coalesce(c.calisma_gunleri, '') as "calismaGunleri"
+                  from public.radyoloji_cihaz c
+                 where c.id = @p0 and (@p1::int is null or c.sube_id = @p1)
+                """, null, [id, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
+            return Results.Ok(new { cihaz = c, izlemeNo = baglam.IzlemeNo });
+        });
+
         // KAPATMA EKLEME (318): takvimden "Cihazı Kapat". Aralıga düsen
         //   randevular SAYILIR ve kullaniciya bildirilir - tetik yalniz
         //   yeni/degisen randevuyu denetler, mevcutlar kapali saatte kalir.
