@@ -61,10 +61,16 @@ describe('yetki matrisi - başka gruptaki alt ekran', () => {
     const satis = satirBul('Satış Faturası Listesi');
     const satisGor = satis.querySelector('input[type=checkbox]') as HTMLInputElement;
     expect(satisGor.checked).toBe(false);
-    // 1115: Başvuru Listesi kendi ekran kodunda (basvuru.liste); `belge.*` aksiyonları artık onun
-    //   altında değil, Kayıt Kabul'de ayrı satır - Başvuru tiki onları açmaz.
+    // 1115 + 17.10.2026: veri kapısı `belge` (Başvuru Kartı) ve onun `belge.*` aksiyonları Başvuru
+    //   Listesi'nin ALTINDA (kullanıcı: "başvuru listesi altında olsun alt menü olsun") - dalın tiki
+    //   onları da açar (tablodaki üst satır kuralı). Başka gruptaki Satış açılmaz (yukarıda).
     const kes = satirBul('Kesinleştir');
     const kesGor = kes.querySelector('input[type=checkbox]') as HTMLInputElement;
-    expect(kesGor.checked).toBe(false);
+    expect(kesGor.checked).toBe(true);
+    // Sıra: Başvuru Listesi, altında Belgeler (veri kapısı), altında Kesinleştir.
+    const sira = [...k.container.querySelectorAll('tr')].map(tr => tr.textContent ?? '');
+    const i = (m: string) => sira.findIndex(t => t.includes(m));
+    expect(i('Başvuru Listesi')).toBeLessThan(i('Belgeler'));
+    expect(i('Belgeler')).toBeLessThan(i('Kesinleştir'));
   });
 });

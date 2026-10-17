@@ -47,6 +47,14 @@ const UST_KOD: Record<string, string> = {
   veri: 'ayar', log: 'islem_log',
 };
 
+/**
+ * VERİ KAPISI EKRANININ ALTINDA (kullanıcı 17.10.2026: "başvuru kartı başvuru listesi altında olsun alt
+ * menü olsun"). 1115 Kayıt Kabul listelerini kendi ekran koduna böldü; eski kod artık o ekranın
+ * kartının / verisinin kapısı. Matriste ayrı, menüsüz bir satır olarak duruyordu - listesinin altına
+ * alt satır olarak girer (veri kodu -> ekran kodu).
+ */
+const VERI_KAPISI_ALTI: Record<string, string> = { belge: 'basvuru.liste', hasta: 'hasta.liste' };
+
 /** Menude listesi olmayan ama yetkisi olan ekranlar (kod -> agac grubu). */
 const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa', 'kabuk.menu': 'Ana Sayfa' };   // 1102: sol menü
 const ANA_SAYFA = 'Ana Sayfa';
@@ -301,6 +309,17 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     //   aksiyonları "Diğer" altında görünür).
     else if (!menuluKodlar.has(ustKod))
       kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer')?.cocuklar.push(d);
+  }
+
+  for (const [veri, ekran] of Object.entries(VERI_KAPISI_ALTI)) {
+    const v = modulDugumu.get(veri), hedef = modulDugumu.get(ekran);
+    if (!v || !hedef || v === hedef) continue;
+    const cikar = (liste: Dugum[]): boolean => {
+      const i = liste.indexOf(v);
+      if (i >= 0) { liste.splice(i, 1); return true }
+      return liste.some(x => cikar(x.cocuklar));
+    };
+    if (cikar(kokler)) hedef.cocuklar.unshift(v);
   }
 
   // Kokler menu sirasiyla; menude olmayan basliklar sonda.
@@ -733,11 +752,16 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
     return y;
   });
 
-  const satirCiz = (d: Dugum, alt: boolean) => {
+  /** Ekranın ALT EKRANLARI (tür 0 çocuk, ör. Başvuru Listesi › Başvuru Kartı) satır olarak çizilir;
+   *  aksiyonlar (tür 1) yalnız pencerede. */
+  const altEkranlar = (d: Dugum) => d.cocuklar.filter(c => c.satir && c.satir.tur !== 1);
+  const aksiyonlar = (d: Dugum) => d.cocuklar.filter(c => !c.satir || c.satir.tur === 1);
+  const satirCiz = (d: Dugum, derinlik: number): React.ReactNode[] => {
     const s = d.satir!;
-    const aksiyonSayi = d.cocuklar.length;
-    return (
-      <div key={d.anahtar} className={`ym-sat${s.gor ? '' : ' kapali'}${alt ? ' alt' : ''}`}>
+    const aksiyonSayi = aksiyonlar(d).length;
+    return [
+      <div key={d.anahtar} className={`ym-sat${s.gor ? '' : ' kapali'}${derinlik ? ' alt' : ''}`}
+           style={derinlik > 1 ? { paddingLeft: 10 + derinlik * 18 } : undefined}>
         <input type="checkbox" checked={s.gor} disabled={saltOkunur} title={cev('Gör')}
                onChange={e => degistir(idler(yapraklar(d)), 'gor', e.target.checked)} />
         {d.ic && <MenuIkon ic={d.ic} />}
@@ -757,8 +781,9 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
             ))}
           </span>
         )}
-      </div>
-    );
+      </div>,
+      ...altEkranlar(d).filter(suzgecte).flatMap(c => satirCiz(c, derinlik + 1)),
+    ];
   };
 
   const kutuCiz = (kok: Dugum, yetkisizBolumde: boolean) => {
@@ -770,7 +795,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
     const govde: React.ReactNode[] = [];
     for (const c of kok.cocuklar) {
       if (!suzgecte(c)) continue;
-      if (c.satir) { govde.push(satirCiz(c, false)); continue }
+      if (c.satir) { govde.push(...satirCiz(c, 0)); continue }
       const ac = acikAlt.has(c.anahtar) || !!suzgec;
       const altEkran = c.cocuklar.filter(x => x.satir);
       govde.push(
@@ -778,7 +803,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
           <span className="ic">{ac ? '▾' : '▸'}</span>{c.ic && <MenuIkon ic={c.ic} />}{c.ad}
           <span className="ym-aks"> ({altEkran.filter(x => x.satir!.gor).length}/{altEkran.length})</span>
         </button>);
-      if (ac) for (const x of c.cocuklar) if (x.satir && suzgecte(x)) govde.push(satirCiz(x, true));
+      if (ac) for (const x of c.cocuklar) if (x.satir && suzgecte(x)) govde.push(...satirCiz(x, 1));
     }
     return (
       <div key={kok.anahtar}
@@ -863,11 +888,11 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
               </>
             )}
             <h5>{cev('EKRANA ÖZEL AKSİYONLAR')}</h5>
-            {sec.cocuklar.length === 0
+            {aksiyonlar(sec).length === 0
               ? <div className="ym-aks">{cev('Bu ekranın ayrı aksiyonu yok.')}</div>
               : (
                 <div className="ym-izgara">
-                  {sec.cocuklar.flatMap(c => yapraklar(c)).map(s => (
+                  {aksiyonlar(sec).flatMap(c => yapraklar(c)).map(s => (
                     <label key={s.yetkiId} className="ym-cb" title={s.kod}>
                       <input type="checkbox" checked={s.gor} disabled={saltOkunur}
                              onChange={e => degistir(new Set([s.yetkiId]), 'gor', e.target.checked)} />
