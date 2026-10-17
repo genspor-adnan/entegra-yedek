@@ -6539,6 +6539,8 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kutu a.bsl-alt { padding-left: 30px }   /* ana sayfada açılan alt menü satırı */
 .bsl-kutu a .s { color: var(--soluk); font-size: 10.5px; white-space: nowrap }
 .bsl-kutu a .s.k { color: var(--hata); font-weight: 700 }
+.bsl-kutu a.bsl-satir-pasif { cursor: default; color: var(--soluk) }   /* bekleyen iş: ekranı menüde yok */
+.bsl-kutu a.bsl-satir-pasif:hover { background: transparent; color: var(--soluk) }
 .bsl-gp { border-color: var(--vurgu) }
 .gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }

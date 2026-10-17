@@ -130,12 +130,32 @@ export function Baslangic() {
     </a>
   );
 
+  /** Son açılanlar (en yeni önce) - sade görünümde tek sıra, kutulu görünümde kendi kutusu. */
+  const sonAcilanlar = yerelListe('sonMenuler').map(ekranBul).filter(Boolean) as typeof ekranlar;
+  /**
+   * BEKLEYEN İŞLER (kullanıcı 16.10.2026): konsültasyon / sonucu gelen istem / bugünkü randevu; kart
+   * ilgili ekrana gider (o ekrana yetki yoksa tıklanmaz). Sade ve kutulu görünüm aynı listeyi çizer.
+   */
+  const ekranVar = (yol: string) => ekranlar.some(e => e.yol.split('?')[0] === yol);
+  const bekleyenIsler = bekleyen ? [
+    // ONAY (kullanıcı 16.10.2026): yalnız onay bekleyen varsa - kart Onayımdakiler'e gider.
+    ...(bekleyen.onay > 0 ? [{ yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
+      y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler'),
+      acil: bekleyen.onayGeciken > 0 }] : []),
+    { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
+      y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor'),
+      acil: bekleyen.konsultasyonGecikmis > 0 },
+    { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi'), acil: false },
+    { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
+      y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}`, acil: false },
+  ] : [];
+
   // SADE BAŞLANGIÇ (kullanıcı 16.10.2026, mockup Ekranlar/Ayarlar/ana_ekran_sekmeli.html): az ekranlı
   //   kullanıcıda ortalanmış tek sütun - selam, büyük arama, son açılanlar / ekranlarım küçük kartlar
   //   (ikon · ad · grup). "Sık kullandıklarım" yok (kullanıcı 16.10.2026: "gerek yok").
   if (sade) {
     // Son açılanlar tek sıra: 4 ekran (kullanıcı 16.10.2026).
-    const son = yerelListe('sonMenuler').map(ekranBul).filter(Boolean).slice(0, 4) as typeof ekranlar;
+    const son = sonAcilanlar.slice(0, 4);
     return (
       <div className="sahne bsl-sade">
         <div className="bsl-sade-ic">
@@ -150,20 +170,8 @@ export function Baslangic() {
           </button>
           {son.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
             <div className="bsl-kartlar bsl-tek-sira">{son.map(ekranKart)}</div></>}
-          {/* BEKLEYEN İŞLER (kullanıcı 16.10.2026): konsültasyon / sonucu gelen istem / bugünkü randevu;
-              kart ilgili ekrana gider (o ekrana yetki yoksa tıklanmaz). */}
           {bekleyen && (() => {
-            const ekranVar = (yol: string) => ekranlar.some(e => e.yol.split('?')[0] === yol);
-            const isler = [
-              // ONAY (kullanıcı 16.10.2026): yalnız onay bekleyen varsa - kart Onayımdakiler'e gider.
-              ...(bekleyen.onay > 0 ? [{ yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
-                y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler') }] : []),
-              { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
-                y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor') },
-              { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi') },
-              { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
-                y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}` },
-            ];
+            const isler = bekleyenIsler;
             return <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
               <div className="bsl-kartlar">{isler.map(i => (
                 <a key={i.yol} className={`bsl-kart${ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
@@ -216,6 +224,38 @@ export function Baslangic() {
                     {gostergeDegeri(p.ilk)} · {c(p.ilk.baslik).toLocaleLowerCase('tr')}</span>}
                 </a>
               ))}
+              </div>
+            </div>
+          )}
+          {/* BEKLEYEN İŞLER + SON AÇILANLAR KUTULARI (kullanıcı 17.10.2026: "home da kutulu olan ekranlara
+              da Son açılanlar ve Bekleyen işler ekranları ekle"): sade görünümdeki iki bölümün kutu hali,
+              Gösterge Panelleri'nin hemen ardında. Yetkisi olmayan iş satırı tıklanmaz (sade görünümle aynı). */}
+          {bekleyenIsler.length > 0 && (
+            <div className="bsl-kutu">
+              <div className="bsl-kb">⏳ {c('Bekleyen İşler')}</div>
+              <div className="bsl-satirlar">
+                {bekleyenIsler.map(i => (
+                  <a key={i.yol} className={ekranVar(i.yol) ? undefined : 'bsl-satir-pasif'}
+                     title={ekranVar(i.yol) ? undefined : c('Bu ekran menünüzde yok')}
+                     onClick={() => { if (ekranVar(i.yol)) git(i.yol) }}>
+                    <span className="bsl-ad"><span className="ic">{i.ic}</span>{i.ad}</span>
+                    <span className={`s ${i.acil ? 'k' : ''}`}>{i.y}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+          {sonAcilanlar.length > 0 && (
+            <div className="bsl-kutu">
+              <div className="bsl-kb">🕘 {c('Son Açılanlar')}</div>
+              <div className="bsl-satirlar">
+                {sonAcilanlar.map(s => (
+                  <a key={s.yol} onClick={() => s.yol.startsWith(KAYITLI_ONEK)
+                       ? window.dispatchEvent(new CustomEvent(PALET_GIT_OLAYI, { detail: s.yol })) : git(s.yol)}>
+                    <span className="bsl-ad"><MenuIkon ic={s.ic || '📁'} />{c(s.ad)}</span>
+                    {s.grup && <span className="s">{c(s.grup)}</span>}
+                  </a>
+                ))}
               </div>
             </div>
           )}
