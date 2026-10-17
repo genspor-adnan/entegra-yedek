@@ -1505,6 +1505,7 @@ export function ListeKarti({
                           // Satır listedekiyle AYNI biçimde okunur (hasta adı, bölüm, hizmet) - aksiyon tek kod.
                           const y = await api.liste('randevu', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: kartId } });
                           if (y.satirlar[0]) await aksiyon('randevu.basvuru', y.satirlar[0]);
+                          else mesaj(c('Randevu okunamadı (başka şubede olabilir).'));
                           setKartTazele(t => t + 1);
                         })()}>{belgeli ? c('📄 Başvuruyu Aç') : c('➜ Başvuruya Dönüştür')}</button>
               );

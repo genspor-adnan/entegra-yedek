@@ -66,5 +66,6 @@ public static partial class RandevuUclari
 
         ErteleUcunuEkle(grup);
         SeriUcunuEkle(grup);
+        AdayTasiUcunuEkle(grup);
     }
 }

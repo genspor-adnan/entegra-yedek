@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { hataMetni } from '../../api/sozlesme';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ErtelenecekRandevu } from '../../bilesenler/RandevuErtelePenceresi';
 import { kampanyaKalemFiyati } from '../belgeKalem';
@@ -27,6 +28,11 @@ export interface RandevuBaglam {
   oturumSubeId?: number;
   /** ERTELE (1119): erteleme penceresini acar. */
   setErtele?(r: ErtelenecekRandevu): void;
+  /**
+   * ADAY HASTAYI TAMAMLA (17.10.2026): hasta kartını açar; kaydedilince { id }, aynı kimlikte mevcut
+   * hastaya geçilirse { id, mevcut: true }, kapatılırsa null.
+   */
+  hastaTamamla?(hastaId: number): Promise<{ id: number; mevcut?: boolean } | null>;
 }
 
 export async function randevuAksiyonu(
@@ -111,15 +117,11 @@ export async function randevuAksiyonu(
 
   // kod === 'randevu.basvuru'
   if (!satir) return true;
-  // CIHAZLI (radyoloji) randevu: duz basvuru yerine kabul ekrani (317) -
-  //   basvuru orada da acilir, ustune ISTEM ve accession uretilir.
-  if (Number(satir.cihazId) > 0 && !satir.belgeId) {
-    if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return true }
-    radyolojiKabulu(satir);
-    return true;
-  }
+  // CİHAZLI randevu da BAŞVURUYA döner (kullanıcı 17.10.2026: "başvuruya dönüştür deyince radyoloji
+  //   istem ekranı değil başvuru sekmesi açılmalı, buradaki bilgiler oraya geçmeli"): istem / accession
+  //   başvuru kartının kendi istem penceresinden yapılır. Kabul ekranı yalnız "Geldi"de (317) kalır.
   await guvenli(async () => {
-    const hastaId = Number(satir.hastaId) || 0;
+    let hastaId = Number(satir.hastaId) || 0;
     const hizmetId = Number(satir.hizmetId) || 0;
     if (!hastaId) { mesaj('Randevuda hasta yok.'); return }
     // Basvuru en az bir kalemle acilir (sunucu bos belgeyi reddediyor):
@@ -133,22 +135,45 @@ export async function randevuAksiyonu(
     if (satir.belgeId) {
       // Zaten donusmus: yeni belge acmak yerine mevcut basvuruyu ac - ayni
       //   randevudan iki basvuru cikmasin.
-      b.setAcikBelgeId(Number(satir.belgeId));
+      b.git(`/basvuru/${Number(satir.belgeId)}`);
       return;
     }
     // HASTANIN KURUMU (266) basvurunun ODEYENI olur ve FIYATI belirler (274):
     //   hasta basvurusu her zaman kurum + kampanya uzerinden. Kart okunamazsa
     //   donusum yine yapilir - kurumsuz, hasta kendi oder.
-    let hastaKart: { surum?: string; durum?: unknown } | null = null;
-    let odeyenKurumId: number | null = null;
-    try {
-      const hk = await api.kartOku('hasta', hastaId);
-      hastaKart = hk.kart;
-      // Kurum kartin KENDI alani degil "ozluk" detayindadir (taraf_hasta,
-      //   266): kart kokunden okunursa hep bos gelir - basvuru odeyensiz ve
-      //   kampanyasiz aciliyordu.
-      odeyenKurumId = Number(hk.detaylar?.ozluk?.[0]?.kurumId) || null;
-    } catch { /* hasta okunamazsa kurumsuz devam */ }
+    // HASTANIN KURUMU (266) basvurunun ODEYENI olur ve FIYATI belirler (274) - kurum "ozluk"
+    //   detayindadir (taraf_hasta). Kart okunamazsa donusum kurumsuz yapilir (hasta kendi oder).
+    const hastaOku = async (hid: number) => {
+      try {
+        const hk = await api.kartOku('hasta', hid);
+        return { kart: hk.kart as { surum?: string; durum?: unknown }, kurumId: Number(hk.detaylar?.ozluk?.[0]?.kurumId) || null };
+      } catch { return { kart: null, kurumId: null } }
+    };
+    let hasta = await hastaOku(hastaId);
+
+    // ADAY HASTA AKTİFE (kullanıcı 17.10.2026: "hasta kartı da adaydan aktife geçmeli · hasta kartındaki
+    //   zorunlu alanları tamamlamak gerekiyor - kimlik no, cins, doğum · aynı kimlik no ile kart varsa
+    //   açılmamalı"): HASTA KARTI açılır, kendi kurallarıyla (zorunlu alanlar + kimlik no + mükerrer
+    //   kimlik) kaydedilir. Aynı kimlikte aktif hasta varsa kart kaydetmez, "mevcut karta geç" der -
+    //   seçilirse randevu O HASTAYA bağlanır ve başvuru onunla açılır. Kart kapatılırsa başvuru açılmaz.
+    if (hasta.kart && Number(hasta.kart.durum) === 2) {
+      if (!b.hastaTamamla) { mesaj('Hasta aday kayıtlı - önce hasta kartını tamamlayıp aktif yapın.'); return }
+      const r = await b.hastaTamamla(hastaId);
+      if (!r) return;
+      if (r.mevcut && r.id !== hastaId) {
+        // Aynı kimlikte gerçek kart var: adayın BÜTÜN randevuları ona geçer, aday kart silinir.
+        const t = await api.randevuAdayTasi(hastaId, r.id);
+        try { await api.kartSil('hasta', hastaId) }
+        catch (h) { mesaj(`${t.tasinan} randevu gerçek karta taşındı; aday kart silinemedi: ${hataMetni(h)}`) }
+        hastaId = r.id;
+      } else {
+        const hk = await api.kartOku('hasta', hastaId);
+        if (Number(hk.kart.durum) === 2)
+          await api.kartGuncelle('hasta', hastaId, { surum: hk.kart.surum, kart: { durum: 1 } });
+      }
+      hasta = await hastaOku(hastaId);
+    }
+    const odeyenKurumId = hasta.kurumId;
 
     // FIYAT: liste BAZ, kampanya INDIRIM (274). Baz liste belge kartinin
     //   kuralindan gelir (205: carinin listesi > varsayilan satis);
@@ -205,6 +230,9 @@ export async function randevuAksiyonu(
         belgeTarihi: yerelZamanDamgasi(),
         subeId: b.oturumSubeId,
         fiyatListesiId,
+        // GÖNDEREN ve BÖLÜM randevudan (17.10.2026): gönderen (dış) doktor, yoksa randevunun doktoru.
+        personelId: Number(satir.gonderenId) || Number(satir.hekimId) || null,
+        bolumId: Number(satir.bolum) || null,
         aciklama: `Randevu #${satir.id}`
                   + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
       },
@@ -214,23 +242,16 @@ export async function randevuAksiyonu(
                    iskonto, kampanyaSatirId }],
     });
     const belgeId = Number((y as { belge?: { id?: number } }).belge?.id) || 0;
-    // ADAY hasta (266) basvuruya donusunce AKTIF olur: randevu sirasinda hizli
-    //   acilmis kayit, hasta gelince gercek hastaya doner.
-    try {
-      if (hastaKart && Number(hastaKart.durum) === 2) {
-        await api.kartGuncelle('hasta', hastaId,
-                               { surum: hastaKart.surum, kart: { durum: 1 } });
-      }
-    } catch { /* durum guncellenemezse donusum yine de tamamlanir */ }
+    // ADAY -> AKTİF yukarıda, başvurudan ÖNCE yapıldı (eksik bilgi sorularak).
     // Randevu artik basvuruya bagli ve "Geldi" - hasta muayeneye alindi.
     //   Kart guncellemesi SURUM ister (iyimser kilit): once oku.
     const mevcut = await api.kartOku('randevu', Number(satir.id));
     await api.kartGuncelle('randevu', Number(satir.id),
                            { surum: mevcut.kart.surum, kart: { belgeId, durum: 2 } });
     b.tazele();
-    // Basvuru kartI MODAL acilir (belge kartinin rotasi yok, her listede bu
-    //   bilesenle aciliyor).
-    if (belgeId) b.setAcikBelgeId(belgeId);
+    // BAŞVURU KARTI KENDİ SEKMESİNDE (kullanıcı 17.10.2026; kart sekmesi deseni): Başvuru Listesi'nin
+    //   kart rotası - ücret, istem ve tahsilat oradan sürer.
+    if (belgeId) b.git(`/basvuru/${belgeId}`);
   });
   return true;
 }

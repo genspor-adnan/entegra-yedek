@@ -342,6 +342,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
   /** RANDEVU ERTELE penceresi (1119). */
   const [ertelenecek, setErtelenecek] = useState<ErtelenecekRandevu | null>(null);
+  /** ADAY HASTA TAMAMLAMA (17.10.2026): başvuruya dönüştürürken hasta kartı; sonuç aksiyona döner. */
+  const [hastaTamamla, setHastaTamamla] = useState<{ id: number; coz(s: { id: number; mevcut?: boolean } | null): void } | null>(null);
   // BANKO OTURUMU listeden MODAL olarak açılır (kullanıcı: "bankolar dan
   //   seçilerek Oturum Aç butonuyla girilsin"): açılış, gün içi ve gün sonu
   //   AYNI modalda - görevliyi iki ayrı yere göndermemek için.
@@ -1011,6 +1013,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
         setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId, setErtele: setErtelenecek,
+        hastaTamamla: hid => new Promise(coz => setHastaTamamla({ id: hid, coz })),
       })) return;
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) {
@@ -1649,6 +1652,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {acikBelgeId !== null && (
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
+    )}
+    {hastaTamamla && (
+      // Hasta kartının KENDİ kuralları: zorunlu alanlar, kimlik no (bu akışta zorunlu), mükerrer kimlik.
+      <GenForm kaynak="hasta" id={hastaTamamla.id} baslik={c('Hasta Kartı - başvuru için tamamlayın')}
+               cariyeBaglaGizli zorunluAlanlar={['vkno']}
+               onKaydedildi={hid => { hastaTamamla.coz({ id: hid }); setHastaTamamla(null) }}
+               onMevcutKayit={hid => { hastaTamamla.coz({ id: hid, mevcut: true }); setHastaTamamla(null) }}
+               onKapat={() => { hastaTamamla.coz(null); setHastaTamamla(null) }} />
     )}
     {ertelenecek && (
       <RandevuErtelePenceresi randevu={ertelenecek} onKapat={() => setErtelenecek(null)}

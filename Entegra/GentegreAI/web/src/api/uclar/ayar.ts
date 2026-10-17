@@ -81,6 +81,9 @@ export const ayarUclari = {
   //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.
   randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
   /** Ayar kapıları (1121): randevu ekranında gönderen doktor / bölüm-doktor alanları açık mı. */
+  /** ADAY → GERÇEK HASTA (17.10.2026): adayın bütün randevuları hedef hastaya taşınır. */
+  randevuAdayTasi: (adayId: number, hedefId: number) =>
+    gonder<{ tasinan: number }>('/api/randevu/aday-tasi', { adayId, hedefId }),
   randevuKapilari: () => istek<{ gonderenDoktor: boolean; bolumDoktor: boolean }>('/api/randevu/kapilar'),
   /** RANDEVU ERTELE (1119): eski "Ertelendi" kalır, yeni randevu açılır. baslangic şube saatinde "yyyy-MM-ddTHH:mm". */
   randevuErtele: (id: number, g: { baslangic: string; neden: string; sureDk?: number }) =>
