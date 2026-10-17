@@ -68,6 +68,14 @@ const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa', 'kabuk.menu': 'Ana
 const ANA_SAYFA = 'Ana Sayfa';
 /** GÖSTERGE PANELLERİ (1103): her panel `gosterge.<kod>` - menüde değil, matriste kendi başlığında. */
 const GOSTERGE = 'Gösterge Panelleri';
+/**
+ * TEMEL YETKİLER (kullanıcı 17.10.2026: "banko görevlisi olarak girdim hasta ve başvuru listeleri gör
+ * olduğu halde gelmedi"). Yetki tablosunun `Sistem` grubundaki, menüde EKRANI OLMAYAN çekirdek
+ * yetkiler (Sol menüyü görür, Kartlar, Belge satırları, Bölüm seçimi...). Menü grubu Sistem → Yönetim
+ * olunca bunlar Yönetim kutusuna düşmüştü: "Yönetim'i yetkisiz yap" sol menüyü ve başvuruya ücret
+ * eklemeyi de kapatıyordu. Kendi kutularında dururlar; Yönetim kutusu yalnız Yönetim ekranlarıdır.
+ */
+const TEMEL = 'Temel Yetkiler';
 
 interface Dugum {
   anahtar: string;
@@ -175,7 +183,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
    * açılıyordu. Kök ancak aktif menüde varsa (grup, bölge ya da Ana Sayfa)
    * oluşur; yoksa o yetki satırı çizilmez.
    */
-  const aktifBasliklar = new Set<string>([...grupSirasi, ...bolgeSirasi, ANA_SAYFA, GOSTERGE]);
+  const aktifBasliklar = new Set<string>([...grupSirasi, ...bolgeSirasi, ANA_SAYFA, GOSTERGE, TEMEL]);
 
   const kokBul = (ad: string, ic?: string): Dugum | null => {
     if (!aktifBasliklar.has(ad)) return null;
@@ -259,14 +267,14 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     const sunucuGrubu = GRUP_ADI[s.grup] ?? s.grup;
     const menuGruplari = yer?.gruplu.map(g => g.grup) ?? [];
     const hamGrup = menuGruplari.length === 0
-      ? EK_GRUP[s.kod] ?? sunucuGrubu ?? 'Diğer'
+      ? EK_GRUP[s.kod] ?? (s.grup === 'Sistem' ? TEMEL : sunucuGrubu) ?? 'Diğer'
       : menuGruplari.includes(sunucuGrubu) ? sunucuGrubu : yer!.grup;
     const grupAdi = duzenH.bul(hamGrup, DUGUM.grup)?.gorunenAd || hamGrup;
     // BÖLGE BAŞLIĞI (HBYS): menü bölgeli çiziliyorsa matris de bölge › grup ›
     //   yetki olarak çizilir - "aynı şekilde görünmesi" istenen yapı bu.
     //   Bölgesi olmayan grup (kurum "en üst"e almış ya da ERP) kök kalır.
     const bolgeAdi = bolgeli ? grupBolge.get(grupAdi) : undefined;
-    const grupIk = grupIkonu.get(grupAdi) ?? yer?.ic
+    const grupIk = grupIkonu.get(grupAdi) ?? yer?.ic ?? (grupAdi === TEMEL ? '🔑' : undefined)
                    ?? (EK_GRUP[s.kod] ? '🏠' : undefined);
     // Grup kökü YALNIZ bölgesizse açılır: ikisini de çağırmak, bölgenin
     //   altına giren grubun bir kopyasını kök listesinde boş bırakıyordu.
@@ -316,7 +324,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     //   alınmış demektir: aksiyonu da çizmeyiz (yoksa gizlenen ekranın
     //   aksiyonları "Diğer" altında görünür).
     else if (!menuluKodlar.has(ustKod))
-      kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer')?.cocuklar.push(d);
+      (s.grup === 'Sistem' ? kokBul(TEMEL, '🔑') : kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer'))?.cocuklar.push(d);
   }
 
   for (const [veri, ekran] of Object.entries(VERI_KAPISI_ALTI)) {
@@ -345,6 +353,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   function sira(d: Dugum) {
     if (d.ad === ANA_SAYFA) return -1;      // en basta (kullanici)
     if (d.ad === GOSTERGE) return -0.5;     // Ana Sayfa'nın hemen altında
+    if (d.ad === TEMEL) return -0.4;        // Gösterge Panelleri'nin ardında
     // Bölge ve grup aynı dizide sıralanır: bölgeli menüde kök düğümler
     //   bölgelerdir, bölgesiz gruplar menüde olduğu gibi onların arasında.
     const b = bolgeSirasi.indexOf(d.ad);
