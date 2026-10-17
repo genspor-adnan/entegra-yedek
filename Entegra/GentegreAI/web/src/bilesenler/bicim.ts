@@ -321,12 +321,25 @@ function anParcala(ham: string) {
   if (!b) {
     b = new Intl.DateTimeFormat('tr-TR', {
       timeZone: dilim, year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false,
+      // h23: gece yarisi "24:00" degil "00:00" (hour12:false kimi motorda 24 verir).
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
     });
     bicimOnbellek.set(dilim, b);
   }
   const p = Object.fromEntries(b.formatToParts(t).map(x => [x.type, x.value]));
   return { gun: p.day, ay: p.month, yil: p.year, saat: p.hour, dakika: p.minute };
+}
+
+/**
+ * AN -> GIRDI METNI (kullanici 16.10.2026: "randevu düzenle dedim saat 7 göründü, slotlar gelmedi"):
+ * sunucu "zaman" alanini UTC an olarak yollar ("2026-10-17T07:00:00Z"); datetime-local kutusu ve
+ * saat seridi "2026-10-17T10:00" (SUBENIN saati) bekler. Dilimsiz metin oldugu gibi doner - kayitta
+ * sunucu bu metni subenin diliminde yorumlar (DegerCevirici, 666).
+ */
+export function anGirdiMetni(ham: unknown): string {
+  const metin = String(ham ?? '');
+  const p = anParcala(metin);
+  return p ? `${p.yil}-${p.ay}-${p.gun}T${p.saat}:${p.dakika}` : metin;
 }
 
 /**

@@ -12,7 +12,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
-import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
+import { yerelAnMetni, bugunIso, hamSayi, kidemMetni, anGirdiMetni } from './bicim';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
@@ -796,7 +796,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
         const gelen: Record<string, Deger> = {};
         m.alanlar.forEach(a => {
           const d = k.kart[a.ad];
-          gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? '' : String(d));
+          gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? ''
+            // ZAMAN alani subenin saatinde (sunucu UTC an yollar) - kutu ve randevu saat seridi yerel saat bekler.
+            : a.tip === 'zaman' ? anGirdiMetni(d) : String(d));
         });
         // UNVAN ONEKI (844): personelde de ad/soyadin onunde saklanir -
         //   "Uzm.Dr. Ali Yildirim". Ham unvan hook'a verilir, hook bilinen

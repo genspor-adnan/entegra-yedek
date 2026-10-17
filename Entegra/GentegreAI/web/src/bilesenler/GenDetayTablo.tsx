@@ -1,3 +1,4 @@
+import { anGirdiMetni } from './bicim';
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { agacSecenekleri } from './agacSecenek';
 import { grupluSecenekler } from './grupluSecenek';
@@ -1498,7 +1499,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     // Zaman alani (randevu baslangici) ham "2026-09-01T10:00:00"
                     //   metni olarak cizilyordu; datetime-local saniyeyi atar.
                     <input type="datetime-local"
-                      value={String(satir[a.ad] ?? '').slice(0, 16)}
+                      // UTC an -> subenin saati (anGirdiMetni); duzenlenen deger zaten yerel metin.
+                      value={anGirdiMetni(satir[a.ad]).slice(0, 16)}
                       disabled={saltOkunur || !a.yazilabilir}
                       onChange={e => hucreDegis(i, a.ad, e.target.value)}
                     />
