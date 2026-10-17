@@ -47,6 +47,7 @@ import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
+import { RandevuErtelePenceresi } from './RandevuErtelePenceresi';
 
 interface Props {
   kaynak: string;
@@ -665,6 +666,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const [cakisma, setCakisma] = useState<{ alanlar: string[]; guncel: Record<string, unknown> } | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
   const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
+  /** Randevu kartında Ertele penceresi (1119). */
+  const [erteleAcik, setErteleAcik] = useState(false);
   /**
    * JENERIK ARAMA EKRANI ile secilen alanlar (260): hangi alan icin hangi
    * arama acik + secilen kaydin adi. Ad, lookup haritasinda olmayabilir
@@ -2084,7 +2087,7 @@ Yine de yeni kayıt eklensin mi?`);
           {kaynak === 'hasta-aday' && (
             <span className={`rozet ${Number(deger.durum) === 1 ? 'ok'
                               : Number(deger.durum) === 2 ? 'mavi'
-                              : Number(deger.durum) === 3 ? 'hata' : 'gri'}`}
+                              : Number(deger.durum) === 3 ? 'hata' : Number(deger.durum) === 5 ? 'uyari' : 'gri'}`}
                   style={{ alignSelf: 'center' }}>
               {meta.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
                ?? 'Aday'}
@@ -2102,6 +2105,12 @@ Yine de yeni kayıt eklensin mi?`);
                       onClick={() => alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
               <button className="d" disabled={Number(deger.durum) === 4}
                       onClick={() => alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
+              {/* ERTELE (1119): kayıtlı, planlanmış randevu; kaydedilmemiş değişiklik varken kapalı. */}
+              {!yeniMi && (
+                <button className="d" disabled={Number(deger.durum) !== 1 || kaydedilmemisDegisiklikVar}
+                        title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
+                        onClick={() => setErteleAcik(true)}>{c('⏭ Ertele')}</button>
+              )}
             </>
           )}
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
@@ -2251,6 +2260,21 @@ Yine de yeni kayıt eklensin mi?`);
           ))
         : sekmeGovdesi(aktif)}
 
+      {kaynak === 'randevu' && erteleAcik && id != null && (() => {
+        const bas = String(deger.baslangic ?? '');
+        const ad = (alan: string) => meta?.alanlar.find(a => a.ad === alan)?.kodlar?.[String(deger[alan] ?? '')];
+        return (
+          <RandevuErtelePenceresi
+            randevu={{
+              id: Number(id), hekimId: Number(deger.hekimId) || null, hekimAdi: ad('hekimId'),
+              cihazId: Number(deger.cihazId) || null, cihazAdi: ad('cihazId'),
+              bolum: Number(deger.bolum) || null, sureDk: Number(deger.sureDk) || 15,
+              tarih: bas.slice(0, 10), saat: bas.slice(11, 16),
+            }}
+            onKapat={() => setErteleAcik(false)}
+            onErtelendi={yeniId => { setErteleAcik(false); onKaydedildi?.(yeniId); onKapat?.() }} />
+        );
+      })()}
       {kaynak === 'kisi' && (
         <TarafArama
           acik={cariyeBaglaAcik}

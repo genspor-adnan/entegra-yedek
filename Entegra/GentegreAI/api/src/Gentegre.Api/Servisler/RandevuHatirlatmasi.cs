@@ -39,8 +39,8 @@ public sealed class RandevuHatirlatmasi
     /// <summary>Bildirim kaynağı: 4 = randevu (kuyruk `kaynak_tur`).</summary>
     private const short KaynakRandevu = 4;
 
-    /// <summary>Hatırlatma gönderilmeyecek randevu durumları: 3 iptal · 4 gelmedi.</summary>
-    private static readonly short[] KapaliDurumlar = [3, 4];
+    /// <summary>Hatırlatma gönderilmeyecek randevu durumları: 3 gelmedi · 4 iptal · 5 ertelendi (1119).</summary>
+    private static readonly short[] KapaliDurumlar = [3, 4, 5];
 
     public async Task TazeleAsync(long randevuId, int kullaniciId, CancellationToken iptal)
     {

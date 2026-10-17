@@ -495,6 +495,9 @@ public static partial class AksiyonKatalogu
             //   basvurusu acilir, randevunun hizmeti kalem olur.
             new("randevu.basvuru",  "➜ Başvuruya Dönüştür", "belge",
                 KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 45, Bicim: "sari"),
+            // ERTELE (1119): eski randevu "Ertelendi" kalır, yeni saatle yeni randevu açılır.
+            new("randevu.ertele",   "⏭ Ertele",  "randevu",
+                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 47),
             new("randevu.iptal",    "⊘ İptal",   "randevu", Hedef: "sagtus,palet",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
             new("randevu.sil",      "🗑 Sil",    "randevu", Hedef: "sagtus,palet", Kisayol: "Del",

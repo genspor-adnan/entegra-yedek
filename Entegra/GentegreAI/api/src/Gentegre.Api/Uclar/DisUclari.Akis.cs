@@ -96,11 +96,11 @@ public static partial class DisUclari
             //   gelmemiş iş emirleri; onay bekleyen = sunulmuş planlar.
             var ozet = await baglanti.TekAsync("""
                 select (select count(*) from public.randevu r where r.baslangic >= @p0 and r.baslangic < @p1
-                          and (r.bolum = 2 or r.unit_id is not null) and r.durum <> 4 and (r.sube_id = @p2 or @p2 = 0))::int as randevu,
+                          and (r.bolum = 2 or r.unit_id is not null) and r.durum not in (4, 5) and (r.sube_id = @p2 or @p2 = 0))::int as randevu,
                        (select count(*) from public.dis_seans s where s.baslangic >= @p0 and s.baslangic < @p1
                           and s.randevu_id is null and (s.sube_id = @p2 or @p2 = 0))::int as randevusuz,
                        (select coalesce(sum(r.sure_dk), 0) from public.randevu r where r.baslangic >= @p0 and r.baslangic < @p1
-                          and r.unit_id is not null and r.durum <> 4 and (r.sube_id = @p2 or @p2 = 0))::int as randevu_dk,
+                          and r.unit_id is not null and r.durum not in (4, 5) and (r.sube_id = @p2 or @p2 = 0))::int as randevu_dk,
                        (select count(*) from public.dis_unit u where u.aktif = 1 and (u.sube_id = @p2 or @p2 = 0))::int as unit_sayisi,
                        (select coalesce(round(avg(s.sure_dk)), 0) from public.dis_seans s where s.baslangic >= @p0 and s.baslangic < @p1
                           and s.durum = 2 and s.sure_dk > 0)::int as ort_seans_dk,

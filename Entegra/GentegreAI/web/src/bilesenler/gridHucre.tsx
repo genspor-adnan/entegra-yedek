@@ -111,7 +111,7 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Satış': 'gri', 'Alış': 'gri',
   'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi',
   // Randevu durumlari (243, kullanici: "randevu listesi durum rozet olsun").
-  'Planlandı': 'bilgi', 'Geldi': 'ok', 'Gelmedi': 'hata',
+  'Planlandı': 'bilgi', 'Geldi': 'ok', 'Gelmedi': 'hata', 'Ertelendi': 'uyari',
   'Bilinmiyor': 'hata',
   // Entegrasyon hesaplari (336-340): ortam TEST sari / CANLI yesil - yanlis
   //   ortamda gonderim en pahali hata, listede bir bakista ayrilsin.

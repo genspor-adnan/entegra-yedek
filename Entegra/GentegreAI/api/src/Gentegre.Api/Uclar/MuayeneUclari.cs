@@ -115,7 +115,7 @@ public static partial class MuayeneUclari
 
             var randevu = await baglanti.TekAsync("""
                 select count(*) as "randevu",
-                       count(*) filter (where r.durum = 4) as "gelmedi"
+                       count(*) filter (where r.durum = 3) as "gelmedi"
                   from public.randevu r
                  where r.baslangic >= @p0 and r.baslangic < @p0 + interval '1 day'
                    and (@p1 = 0 or r.sube_id = @p1)

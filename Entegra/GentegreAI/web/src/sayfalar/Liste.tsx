@@ -139,6 +139,7 @@ import { useTaniEkleTercihi } from '../bilesenler/taniEkleTercihi';
 import { usePortalBaslik, usePortaldaMi } from './portal/portalBaslik';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
 import { randevuAksiyonu } from './liste/randevuAksiyonlari';
+import { RandevuErtelePenceresi, type ErtelenecekRandevu } from '../bilesenler/RandevuErtelePenceresi';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
@@ -339,6 +340,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     useState<{ id: number; unvan: string } | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
+  /** RANDEVU ERTELE penceresi (1119). */
+  const [ertelenecek, setErtelenecek] = useState<ErtelenecekRandevu | null>(null);
   // BANKO OTURUMU listeden MODAL olarak açılır (kullanıcı: "bankolar dan
   //   seçilerek Oturum Aç butonuyla girilsin"): açılış, gün içi ve gün sonu
   //   AYNI modalda - görevliyi iki ayrı yere göndermemek için.
@@ -1007,7 +1010,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await randevuAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
-        setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId,
+        setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId, setErtele: setErtelenecek,
       })) return;
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) {
@@ -1645,6 +1648,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     {acikBelgeId !== null && (
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
+    )}
+    {ertelenecek && (
+      <RandevuErtelePenceresi randevu={ertelenecek} onKapat={() => setErtelenecek(null)}
+                              onErtelendi={() => { setErtelenecek(null); setYenile(t => t + 1) }} />
     )}
     {acikOturumId !== null && (
       <BankoOturumModali oturumId={acikOturumId} onKapat={() => {

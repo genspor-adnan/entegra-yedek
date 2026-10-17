@@ -159,7 +159,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
           op: 'and',
           kosullar: [
             { alan: 'tarih', op: 'arasinda', deger: [gunler[0], gunler[gunler.length - 1]] },
-            { alan: 'durum', op: 'esitDegil', deger: 4 },
+            // İptal (4) ve ertelenen (5, 1119) takvimde yer tutmaz.
+            { alan: 'durum', op: 'icinde', deger: [1, 2, 3] },
             ...(bolum ? [{ alan: 'bolum', op: 'esit' as const, deger: bolum }] : []),
             ...(hekimId ? [{ alan: 'hekimId', op: 'esit' as const, deger: hekimId }] : []),
           ],

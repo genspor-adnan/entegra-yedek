@@ -23,7 +23,7 @@ import { DIS_LAB_ASAMA_KISA, DIS_PLAN_DURUM_KISA } from '../../bilesenler/dis/di
  */
 
 const SAAT_BAS = 8, SAAT_SON = 19;
-const RD: Record<number, [string, string]> = { 1: ['Planlı', 'gri'], 2: ['Ünitte', 'mavi'], 3: ['Gelmedi', 'hata'], 4: ['İptal', 'gri'] };
+const RD: Record<number, [string, string]> = { 1: ['Planlı', 'gri'], 2: ['Ünitte', 'mavi'], 3: ['Gelmedi', 'hata'], 4: ['İptal', 'gri'], 5: ['Ertelendi', 'uyari'] };
 
 function saatMetni(iso: string) {
   const d = new Date(iso);

@@ -9,7 +9,7 @@ namespace Gentegre.Api.Uclar;
 /// bolumdeki hekimler ve her ikisinin randevu duzeni. Kart/liste sozlesmesine
 /// sigmayan bir MASTER-DETAIL ekran oldugu icin kendi uclari var.
 /// </summary>
-public static class RandevuUclari
+public static partial class RandevuUclari
 {
     /// <summary>HekimIdleri: penceredeki isaretli doktorlar; bos = sablonu olmayan herkes.</summary>
     public sealed record BolumIstegi(int DepartmanId, bool BolumMu, int[]? HekimIdleri = null);
@@ -49,5 +49,7 @@ public static class RandevuUclari
             var liste = await depo.BolumDoktorlariAsync(departmanId, iptal);
             return Results.Ok(new { doktorlar = liste.Select(d => new { id = d.Id, ad = d.Ad, sablonVar = d.SablonVar }) });
         });
+
+        ErteleUcunuEkle(grup);
     }
 }

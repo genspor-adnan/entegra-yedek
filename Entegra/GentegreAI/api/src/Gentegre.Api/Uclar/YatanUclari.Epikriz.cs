@@ -245,7 +245,7 @@ public static partial class YatanUclari
         //   takvimde iki kez görünürdü.
         var varOlan = await baglanti.TekDegerAsync<int?>("""
             select id from public.randevu
-             where hasta_id = @p0 and baslangic::date = @p1::date and durum <> 0
+             where hasta_id = @p0 and baslangic::date = @p1::date and durum not in (4, 5)
              limit 1
             """, islem, [hastaId, kontrol.tarih], iptal);
         if (varOlan is int mevcut) return mevcut;

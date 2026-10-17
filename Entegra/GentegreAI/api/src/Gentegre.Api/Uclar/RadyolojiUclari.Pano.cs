@@ -46,7 +46,7 @@ public static partial class RadyolojiUclari
                   (select count(*) from public.randevu r
                     where r.cihaz_id is not null
                       and r.baslangic::date = @p0
-                      and coalesce(r.durum, 1) <> 4
+                      and coalesce(r.durum, 1) not in (4, 5)
                       and (@p1::int is null or r.sube_id = @p1))          as "randevu",
                   (select count(*) from public.radyoloji_istem i
                     where i.durum = 1 and i.serbest = 1
@@ -115,7 +115,7 @@ public static partial class RadyolojiUclari
                                    from public.randevu r
                                   where r.cihaz_id = m.id
                                     and r.baslangic::date = @p0
-                                    and coalesce(r.durum, 1) not in (3, 4)), 0)::int as "doluDk",
+                                    and coalesce(r.durum, 1) not in (3, 4, 5)), 0)::int as "doluDk",
                        (select count(*) from public.radyoloji_istem i
                          where i.cihaz_id = m.id and i.durum > 0
                            and coalesce(i.cekim_tarihi, i.ekleme_tarihi)::date = @p0)

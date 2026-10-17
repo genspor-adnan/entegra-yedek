@@ -226,7 +226,7 @@ public static partial class KartKatalogu
                 new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
                 // MOCKUP 6 KOLON (kullanıcı): etkilenen randevu + durum, salt okunur.
                 new("etkilenen",
-                    "(select count(*) from public.randevu r where r.cihaz_id = radyoloji_cihaz_kapatma.cihaz_id and r.durum <> 4 " +
+                    "(select count(*) from public.randevu r where r.cihaz_id = radyoloji_cihaz_kapatma.cihaz_id and r.durum not in (4, 5) " +
                     "   and r.baslangic >= radyoloji_cihaz_kapatma.baslangic and r.baslangic < radyoloji_cihaz_kapatma.bitis)",
                     "sayi", Yazilabilir: false, Baslik: "Etkilenen randevu"),
                 new("durumAdi",

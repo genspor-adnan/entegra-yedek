@@ -138,6 +138,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Geldi',     filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Gelmedi',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'İptal',     filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Ertelendi', filtre: { alan: 'durum', op: 'esit', deger: 5 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2,

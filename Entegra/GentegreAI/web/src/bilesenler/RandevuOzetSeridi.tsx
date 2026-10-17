@@ -10,15 +10,27 @@ import { c } from '../dil/ceviri';
  * verirken hastanın geçmişini ve borcunu görsün. Hasta seçili değilken şerit
  * hiç çizilmez - boş etiketler bilgi değil gürültüdür.
  */
-export function RandevuOzetSeridi({ hastaId, hariçId, olusturan }: {
+export function RandevuOzetSeridi({ hastaId, hariçId, olusturan, ertelemeIzi }: {
   hastaId: number | null;
   /** Düzenlenen randevu, "son randevu" hesabına katılmaz. */
   hariçId?: number | null;
   /** Kartın ekleme tarihi (katalog alanı) - mockup'taki "Oluşturan" bilgisi. */
   olusturan?: string;
+  /** Randevu ertelendi ya da ertelemeyle açıldı (1119): izi listedeki "Erteleme" kolonundan okunur. */
+  ertelemeIzi?: boolean;
 }) {
   const [hasta, setHasta] = useState<{ kod: string; bakiye: number } | null>(null);
   const [son, setSon] = useState<string>('');
+  const [erteleme, setErteleme] = useState('');
+
+  useEffect(() => {
+    if (!ertelemeIzi || !hariçId) { setErteleme(''); return }
+    let iptal = false;
+    api.liste('randevu', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: hariçId } })
+      .then(y => { if (!iptal) setErteleme(String(y.satirlar[0]?.erteleme ?? '')) })
+      .catch(() => { /* iz bilgisi zorunlu degil */ });
+    return () => { iptal = true };
+  }, [ertelemeIzi, hariçId]);
 
   useEffect(() => {
     if (!hastaId) { setHasta(null); setSon(''); return }
@@ -37,7 +49,7 @@ export function RandevuOzetSeridi({ hastaId, hariçId, olusturan }: {
               op: 'and',
               kosullar: [
                 { alan: 'hastaId', op: 'esit', deger: hastaId },
-                { alan: 'durum', op: 'esitDegil', deger: 4 },
+                { alan: 'durum', op: 'icinde', deger: [1, 2, 3] },
               ],
             },
           }),
@@ -64,6 +76,7 @@ export function RandevuOzetSeridi({ hastaId, hariçId, olusturan }: {
       <span>{c('Açık Bakiye:')}<b>
         {(hasta?.bakiye ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
       </b></span>
+      {erteleme && <span>{c('Erteleme:')}<b>{erteleme}</b></span>}
       {olusturan && (
         <span>{c('Oluşturma:')}<b>{olusturan.slice(0, 10).split('-').reverse().join('.')}</b></span>
       )}

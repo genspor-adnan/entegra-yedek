@@ -53,6 +53,10 @@ public static partial class KaynakKatalogu
             new("durumAdi", RandevuKatalog.DurumAdi, "metin", "Durum", Hizalama: "orta",
                 Bicim: "rozet"),
             new("durum",      "rv.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
+            // ERTELEME İZİ (1119): ertelenende "neden → yeni saat", yeni randevuda "← eski saat".
+            new("erteleme", RandevuKatalog.Erteleme, "metin", "Erteleme", Genislik: 190),
+            new("ertelemeNedeni", "rv.erteleme_nedeni", "metin", "Erteleme Nedeni", Varsayilan: false),
+            new("oncekiRandevuId", "rv.onceki_randevu_id", "sayi", "Önceki Randevu Id", Varsayilan: false),
             new("baslangic",  "rv.baslangic", "zaman", "Başlama", Varsayilan: false),
             new("hizmet",     "coalesce(hz.ad, '')", "metin", "Hizmet", Genislik: 180),
             new("hizmetId",   "rv.hizmet_id", "sayi", "Hizmet Id", Varsayilan: false),
@@ -84,6 +88,14 @@ public static partial class KaynakKatalogu
 
         public const string DurumAdi =
             "case rv.durum when 1 then 'Planlandı' when 2 then 'Geldi' " +
-            "              when 3 then 'Gelmedi'   when 4 then 'İptal' else '' end";
+            "              when 3 then 'Gelmedi'   when 4 then 'İptal' when 5 then 'Ertelendi' else '' end";
+
+        /// <summary>Erteleme izi (1119): eski satırda neden + yeni saat, yeni satırda eski saat.</summary>
+        public const string Erteleme =
+            "case when rv.durum = 5 then rv.erteleme_nedeni || coalesce(' → ' || (select to_char(y.baslangic, 'DD.MM.YYYY HH24:MI') " +
+            "          from public.randevu y where y.onceki_randevu_id = rv.id order by y.id desc limit 1), '') " +
+            "     when rv.onceki_randevu_id is not null then '← ' || coalesce((select to_char(o.baslangic, 'DD.MM.YYYY HH24:MI') " +
+            "          from public.randevu o where o.id = rv.onceki_randevu_id), '') " +
+            "     else '' end";
     }
 }

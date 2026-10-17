@@ -77,5 +77,8 @@ public static partial class KartKatalogu
             // GİZLİ (kullanıcı 16.10.2026: "genel sekmesi ne için? - kaldır"): grupsuz tek alan kartta
             //   boş bir "Genel" sekmesi açıyordu; değer özet şeridinde "Oluşturma" olarak gösterilir.
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false, Gizli: true),
+            // ERTELEME İZİ (1119) - yalnız ertele ucu yazar; kart özet şeridinde gösterilir.
+            new("oncekiRandevuId", "onceki_randevu_id", "sayi", Yazilabilir: false, Gizli: true),
+            new("ertelemeNedeni", "erteleme_nedeni", "metin", Yazilabilir: false, Gizli: true),
         });
 }

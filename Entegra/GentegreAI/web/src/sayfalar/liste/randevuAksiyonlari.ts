@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
+import type { ErtelenecekRandevu } from '../../bilesenler/RandevuErtelePenceresi';
 import { kampanyaKalemFiyati } from '../belgeKalem';
 import { yerelZamanDamgasi } from './zaman';
 
@@ -23,6 +24,8 @@ export interface RandevuBaglam {
   setAcikBelgeId(id: number): void;
   /** Belge olusturmada sube: oturumun calisma subesi. */
   oturumSubeId?: number;
+  /** ERTELE (1119): erteleme penceresini acar. */
+  setErtele?(r: ErtelenecekRandevu): void;
 }
 
 export async function randevuAksiyonu(
@@ -31,7 +34,21 @@ export async function randevuAksiyonu(
   b: RandevuBaglam,
 ): Promise<boolean> {
   if (kod !== 'randevu.geldi' && kod !== 'randevu.gelmedi'
-      && kod !== 'randevu.iptal' && kod !== 'randevu.basvuru') return false;
+      && kod !== 'randevu.iptal' && kod !== 'randevu.basvuru' && kod !== 'randevu.ertele') return false;
+
+  // ERTELE (1119): yalniz planlanmis randevu; pencere yeni saati ve nedeni sorar.
+  if (kod === 'randevu.ertele') {
+    if (!satir) return true;
+    if (Number(satir.durum) !== 1) { mesaj('Yalnız planlanmış randevu ertelenir.'); return true }
+    b.setErtele?.({
+      id: Number(satir.id), hasta: String(satir.hasta ?? ''),
+      hekimId: Number(satir.hekimId) || null, hekimAdi: String(satir.hekim ?? '') || undefined,
+      cihazId: Number(satir.cihazId) || null, cihazAdi: String(satir.cihaz ?? '') || undefined,
+      bolum: Number(satir.bolum) || null, sureDk: Number(satir.sureDk) || 15,
+      tarih: String(satir.tarih ?? '').slice(0, 10), saat: String(satir.saat ?? ''),
+    });
+    return true;
+  }
 
   /**
    * RADYOLOJI RANDEVUSUNDA "GELDI" = KABUL (317).

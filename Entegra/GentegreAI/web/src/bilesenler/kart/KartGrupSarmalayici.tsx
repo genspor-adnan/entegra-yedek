@@ -125,6 +125,7 @@ export function KartGrupSarmalayici({
               hastaId={Number(deger.hastaId) || null}
               hariçId={yeniMi ? null : Number(id)}
               olusturan={String(deger.eklemeTarihi ?? '')}
+              ertelemeIzi={!yeniMi && (Number(deger.durum) === 5 || !!Number(deger.oncekiRandevuId))}
             />
           </>
         ) : govde;

@@ -475,7 +475,7 @@ public static partial class CalismaPlaniUclari
         }, iptal);
         var dolu = await b.ListeAsync($"""
             select {YerelSql}, {YerelSql} + make_interval(mins => greatest(r.sure_dk, 1)::int)
-              from public.randevu r where r.hekim_id = @p0 and r.durum <> 4 and {YerelSql}::date between @p1 and @p2
+              from public.randevu r where r.hekim_id = @p0 and r.durum not in (4, 5) and {YerelSql}::date between @p1 and @p2
             """, islem, [hekimId, ilk, son],
             o => (bas: o.GetDateTime(0), bit: o.GetDateTime(1)), iptal);
         if (verilen.TryGetValue(hekimId, out var v)) dolu.AddRange(v);

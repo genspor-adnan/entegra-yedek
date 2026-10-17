@@ -64,7 +64,7 @@ public static partial class RadyolojiUclari
             var saatlik = await b.ListeAsync("""
                 select extract(hour from r.baslangic at time zone 'Europe/Istanbul')::int as saat, count(*) as adet
                   from public.randevu r
-                 where r.cihaz_id = @p0 and r.durum <> 4
+                 where r.cihaz_id = @p0 and r.durum not in (4, 5)
                    and (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
                  group by 1 order by 1
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -75,14 +75,14 @@ public static partial class RadyolojiUclari
                                        (now() at time zone 'Europe/Istanbul')::date + c.bitis_saat::time,
                                        make_interval(mins => greatest(c.slot_dk, 5))) g(t)
                  where c.id = @p0 and c.randevu_verilir = 1 and c.bitis_saat ~ '^\d{1,2}:\d{2}$'
-                   and not exists (select 1 from public.randevu r where r.cihaz_id = c.id and r.durum <> 4
+                   and not exists (select 1 from public.randevu r where r.cihaz_id = c.id and r.durum not in (4, 5)
                                      and (r.baslangic at time zone 'Europe/Istanbul') <= g.t
                                      and (r.baslangic at time zone 'Europe/Istanbul') + make_interval(mins => greatest(coalesce(r.sure_dk, c.slot_dk), 1)) > g.t)
                  order by g.t limit 1
                 """, null, [id], iptal);
             var kapatma = await b.TekAsync("""
                 select k.baslangic, k.bitis, k.neden_tur as "nedenTur", coalesce(k.aciklama, '') as aciklama,
-                       (select count(*) from public.randevu r where r.cihaz_id = k.cihaz_id and r.durum <> 4
+                       (select count(*) from public.randevu r where r.cihaz_id = k.cihaz_id and r.durum not in (4, 5)
                           and r.baslangic < k.bitis and r.baslangic >= k.baslangic) as etkilenen
                   from public.radyoloji_cihaz_kapatma k
                  where k.cihaz_id = @p0 and k.bitis > now() order by k.baslangic limit 1
@@ -188,7 +188,7 @@ public static partial class RadyolojiUclari
                 """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime(), istek.NedenTur,
                              (istek.Aciklama ?? "").Trim(), baglam.KullaniciId], iptal);
             var etkilenen = await b.TekDegerAsync<long>("""
-                select count(*) from public.randevu where cihaz_id = @p0 and durum <> 4 and baslangic >= @p1 and baslangic < @p2
+                select count(*) from public.randevu where cihaz_id = @p0 and durum not in (4, 5) and baslangic >= @p1 and baslangic < @p2
                 """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime()], iptal);
             await log.YazAsync(b, islem, Gentegre.Veri.Depolar.LogIslemi.Ekle, 1282, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { neden = istek.NedenTur, baslangic = istek.Baslangic, bitis = istek.Bitis, istek.Aciklama, etkilenen },
@@ -215,7 +215,7 @@ public static partial class RadyolojiUclari
             var pzt = (DateTime)c["pazartesi"]!;
             var randevular = await b.ListeAsync("""
                 select (baslangic at time zone 'Europe/Istanbul') as t from public.randevu
-                 where cihaz_id = @p0 and durum <> 4
+                 where cihaz_id = @p0 and durum not in (4, 5)
                    and (baslangic at time zone 'Europe/Istanbul') >= @p1 and (baslangic at time zone 'Europe/Istanbul') < @p1 + interval '7 days'
                 """, null, [id, pzt], o => o.GetDateTime(0), iptal);
             var kapatmalar = await b.ListeAsync("""
@@ -347,7 +347,7 @@ public static partial class RadyolojiUclari
             var etkilenen = await baglanti.TekDegerAsync<int>("""
                 select count(*) from public.randevu r
                  where r.cihaz_id = @p0
-                   and coalesce(r.durum, 1) not in (3, 4)
+                   and coalesce(r.durum, 1) not in (3, 4, 5)
                    and r.baslangic < @p2
                    and (r.baslangic + make_interval(mins => greatest(coalesce(r.sure_dk, 0), 1)))
                        > @p1

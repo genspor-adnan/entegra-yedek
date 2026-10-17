@@ -41,7 +41,7 @@ public static class DemoUclari
             var sahne = await b.TekAsync("""
                 select (select count(*) from public.randevu r
                          where (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
-                           and r.durum <> 4) as "bugunRandevu",
+                           and r.durum not in (4, 5)) as "bugunRandevu",
                        (select count(*) from public.randevu r
                          where (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
                            and r.durum = 1 and r.baslangic > now()) as "bekleyen",

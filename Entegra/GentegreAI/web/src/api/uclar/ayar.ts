@@ -76,6 +76,9 @@ export const ayarUclari = {
   // Randevu Ayarlari > Bolumler (251): randevu verilen bolumler, hekimleri ve
   //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.
   randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
+  /** RANDEVU ERTELE (1119): eski "Ertelendi" kalır, yeni randevu açılır. baslangic şube saatinde "yyyy-MM-ddTHH:mm". */
+  randevuErtele: (id: number, g: { baslangic: string; neden: string; sureDk?: number }) =>
+    gonder<{ id: number; ertelenen: number }>(`/api/randevu/${id}/ertele`, g),
   /** Hekim çalışma planı (711): türetilmiş bloklar ve bugün çalışanlar. */
   calismaPlani: (g: { bas?: string; bit?: string; hekimId?: number | null; departmanId?: number | null; sube?: number | null; ozet?: number } = {}) =>
     istek<CalismaPlaniYaniti>('/api/calisma-plani?' + Object.entries(g).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')),
