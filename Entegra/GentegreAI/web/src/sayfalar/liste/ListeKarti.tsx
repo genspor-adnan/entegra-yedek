@@ -1491,6 +1491,24 @@ export function ListeKarti({
         // ACİL YATAK (mockup araç çubuğu): taşı · temizliğe al · kullanım dışı / kullanıma aç · etiket.
         ekAraclar={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
           ? d => <AcilYatakAraclari yatakId={kartId} deger={d} tazele={kartTazele} onDegisti={() => setKartTazele(t => t + 1)} />
+          // RANDEVU KARTINDA BAŞVURUYA DÖNÜŞTÜR (kullanıcı 17.10.2026: "takvimdeyken işaretleyip başvuruya
+          //   dönüştür diyemiyorum, hemen kart açılıyor - kartın içine de buton ekle"): listedeki aksiyonun
+          //   AYNISI - cihazlı randevuda kabul ekranı, diğerinde başvuru; dönüşmüşse mevcut başvuru açılır.
+          : tanim.kaynak === 'randevu' && typeof kartId === 'number'
+          ? (d) => {
+              const durum = Number(d.durum ?? 1);
+              if (durum === 4 || durum === 5) return null;
+              const belgeli = !!Number(d.belgeId);
+              return (
+                <button type="button" className="d sari"
+                        onClick={() => void (async () => {
+                          // Satır listedekiyle AYNI biçimde okunur (hasta adı, bölüm, hizmet) - aksiyon tek kod.
+                          const y = await api.liste('randevu', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: kartId } });
+                          if (y.satirlar[0]) await aksiyon('randevu.basvuru', y.satirlar[0]);
+                          setKartTazele(t => t + 1);
+                        })()}>{belgeli ? c('📄 Başvuruyu Aç') : c('➜ Başvuruya Dönüştür')}</button>
+              );
+            }
           : tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
           : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
           : tanim.kaynak === 'kys-toplanti' ? (d) => <ToplantiAraclari deger={d} />
