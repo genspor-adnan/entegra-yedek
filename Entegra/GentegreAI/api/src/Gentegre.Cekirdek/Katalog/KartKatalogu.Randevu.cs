@@ -35,6 +35,9 @@ public static partial class KartKatalogu
                 Baslik: "Hasta", Grup: "Kimlik"),
             new("baslangic", "baslangic", "zaman", Zorunlu: true,
                 Baslik: "Tarih / Saat", Grup: "Kimlik"),
+            // SÜRE SAATİN SAĞINDA (kullanıcı 16.10.2026): randevunun aralığı tek bakışta okunsun.
+            new("sureDk",    "sure_dk",   "sayi",  Zorunlu: true,
+                Baslik: "Süre (dk)", Grup: "Kimlik"),
             new("durum",     "durum",     "kod",   KodListesi: "randevu.durum",
                 Baslik: "Durum", Grup: "Kimlik"),
 
@@ -61,8 +64,6 @@ public static partial class KartKatalogu
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",
                 Baslik: "Hizmet / İşlem", Grup: "Randevu"),
-            new("sureDk",    "sure_dk",   "sayi",  Zorunlu: true,
-                Baslik: "Süre (dk)", Grup: "Randevu"),
             new("tip",       "tip",       "kod",   KodListesi: "randevu.tip",
                 Baslik: "Randevu Tipi", Grup: "Randevu"),
             new("kaynak",    "kaynak",    "kod",   KodListesi: "randevu.kaynak",

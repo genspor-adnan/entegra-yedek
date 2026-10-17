@@ -2094,9 +2094,10 @@ Yine de yeni kayıt eklensin mi?`);
               standardindan sapmamak icin ayri bir istek yapilmaz. */}
           {kaynak === 'randevu' && !salt && (
             <>
-              <button className="d" disabled={Number(deger.durum) === 2}
+              {/* Renkler listedekiyle aynı (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı. */}
+              <button className="d onay" disabled={Number(deger.durum) === 2}
                       onClick={() => alanDegistir('durum', '2')}>✔ Geldi İşaretle</button>
-              <button className="d" disabled={Number(deger.durum) === 3}
+              <button className="d ret" disabled={Number(deger.durum) === 3}
                       onClick={() => alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
               <button className="d" disabled={Number(deger.durum) === 4}
                       onClick={() => alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
