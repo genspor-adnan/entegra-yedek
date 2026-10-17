@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 public static partial class KartKatalogu
 {
@@ -73,6 +73,8 @@ public static partial class KartKatalogu
             // Basvuruya donusunce (265) buraya belge id yazilir - kart
             //   ekraninda gorunmez ama yazilabilir olmali.
             new("belgeId",   "belge_id",  "sayi",  Gizli: true),
-            new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false),
+            // GİZLİ (kullanıcı 16.10.2026: "genel sekmesi ne için? - kaldır"): grupsuz tek alan kartta
+            //   boş bir "Genel" sekmesi açıyordu; değer özet şeridinde "Oluşturma" olarak gösterilir.
+            new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false, Gizli: true),
         });
 }
