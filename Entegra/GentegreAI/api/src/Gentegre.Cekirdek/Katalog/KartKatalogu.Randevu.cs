@@ -52,13 +52,16 @@ public static partial class KartKatalogu
                 KodTablosu: "public.v_randevu_bolum_lookup",
                 Baslik: "Bölüm / Poliklinik", Grup: "Randevu", AyarKapisi: "randevu.bolum_doktor",
                 // ZORUNLU (kullanıcı 17.10.2026): görüntüleme / lab dışında bölüm ve doktor, onlarda gönderen.
-                ZorunluKapisi: "randevu.bolum_doktor"),
+                //   Cihaz seçiliyse bölüm de doktor da zorunlu değil (radyoloji randevusu cihaza).
+                ZorunluKapisi: "randevu.bolum_doktor", ZorunluMuafAlan: "cihazId"),
             new("hekimId",   "hekim_id",  "kod",
                 // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
                 //   olanlar (252) - muhasebeciye randevu verilmez.
                 KodTablosu: "public.v_hekim_lookup", Baslik: "Doktor", Grup: "Randevu",
                 // Görüntüleme merkezinde bölüm / doktor yok - randevu cihaza (1121 kapısı).
-                AyarKapisi: "randevu.bolum_doktor", ZorunluKapisi: "randevu.bolum_doktor"),   // "Doktor" (kullanıcı 17.10.2026)
+                AyarKapisi: "randevu.bolum_doktor", ZorunluKapisi: "randevu.bolum_doktor",
+                // Cihaz seçiliyse doktor zorunlu değil (kullanıcı 17.10.2026).
+                ZorunluMuafAlan: "cihazId"),   // "Doktor" (kullanıcı 17.10.2026)
             // RADYOLOJI randevusunun kaynagi (316): cihaz doluysa hekim/bolum
             //   bos kalir, takvimde cihaz sutununda cizilir.
             new("cihazId",   "cihaz_id",  "kod",

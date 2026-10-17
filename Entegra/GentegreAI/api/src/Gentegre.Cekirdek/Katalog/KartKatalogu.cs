@@ -106,7 +106,12 @@ public sealed record KartAlani(
     /// ("!anahtar"). Ör. randevuda bölüm / doktor görüntüleme dışında, gönderen yalnız görüntüleme /
     /// lab'da zorunlu. Metada yıldız ve yeni kayıt denetimi buna göre; otomatik yollar (seri, pano) dışı.
     /// </summary>
-    string? ZorunluKapisi = null
+    string? ZorunluKapisi = null,
+    /// <summary>
+    /// ZORUNLULUKTAN MUAF (17.10.2026: "cihaz seçiliyse doktor zorunlu olmasın"): bu alan doluysa
+    /// kapıyla gelen zorunluluk kalkar. Ekran da aynı bilgiyle yıldızı kaldırır.
+    /// </summary>
+    string? ZorunluMuafAlan = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

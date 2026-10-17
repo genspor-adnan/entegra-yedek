@@ -106,7 +106,9 @@ public sealed record KartAlanMeta(
     /// </summary>
     bool YalnizYeniKayitta = false,
     /// <summary>Kilitli alanin yaninda gosterilen kisa aciklama.</summary>
-    string? Ipucu = null);
+    string? Ipucu = null,
+    /// <summary>Bu alan DOLUYSA zorunluluk kalkar (randevu: cihaz seçiliyse doktor zorunlu değil).</summary>
+    string? ZorunluMuafAlan = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

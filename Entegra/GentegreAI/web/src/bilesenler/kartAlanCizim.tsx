@@ -97,6 +97,10 @@ export function alanCizici(b: AlanCizimBaglami) {
           bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc,
           listeDuzenle, alanIpucu, alanGirdisi } = b;
 
+  /** Yıldız: zorunlu ve muaf alanı boş (17.10.2026: randevuda cihaz seçiliyse doktor zorunlu değil). */
+  const zorunluGoster = (a: { zorunlu: boolean; zorunluMuafAlan?: string | null }) =>
+    a.zorunlu && !(a.zorunluMuafAlan && !['', '0', 'null', 'undefined'].includes(String(deger[a.zorunluMuafAlan] ?? '')));
+
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
       const harita = new Map<string, KartAlanMeta[]>();
@@ -416,11 +420,11 @@ export function alanCizici(b: AlanCizimBaglami) {
         {listeDuzenle && a.kodListesi && !salt && a.yazilabilir ? (
           <span className="etiket etiket-liste" title={c('Listeyi düzenle')}
                 onClick={e => { e.preventDefault(); listeDuzenle(a) }}>
-            {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
+            {c(a.baslik)}{zorunluGoster(a) && <b className="zorunlu"> *</b>}
           </span>
         ) : (
         <span className="etiket">
-          {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
+          {c(a.baslik)}{zorunluGoster(a) && <b className="zorunlu"> *</b>}
         </span>
         )}
         {renderGirdi(a)}
@@ -489,7 +493,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           return (
             <label key={a.ad} className={`alan tip-${durumRozetiMi(kaynak, a) ? 'kod' : a.tip} alan-${a.ad}`}>
               <span className="etiket">
-                {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
+                {c(a.baslik)}{zorunluGoster(a) && <b className="zorunlu"> *</b>}
               </span>
               <div className="ikili">{renderGirdi(a)}{renderGirdi(hedef)}</div>
               {(alanHatalari[a.ad] || alanHatalari[hedef.ad]) && (

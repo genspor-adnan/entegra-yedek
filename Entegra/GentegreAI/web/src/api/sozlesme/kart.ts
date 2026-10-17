@@ -130,6 +130,8 @@ export interface KartAlanMeta {
   eslesAlan?: string | null;
   yazilabilir: boolean;
   zorunlu: boolean;
+  /** Bu alan doluysa zorunluluk kalkar (randevu: cihaz seçiliyse doktor). */
+  zorunluMuafAlan?: string | null;
   enFazlaUzunluk?: number | null;
   kodlar?: Record<string, string> | null;
   /** Formda cizilmez ama degeri tasinir (arka plan alani - or. cek/senet "Tür"). */

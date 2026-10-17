@@ -575,7 +575,8 @@ public static class KartUclari
             // KILITLI ALAN (840): karar EKRANDA verilir - alan metasi kayittan
             //   bagimsiz cekiliyor (`/alanlar`), "yeni mi" bilgisi orada yok.
             alan.YalnizYeniKayitta,
-            alan.Ipucu);
+            alan.Ipucu,
+            alan.ZorunluMuafAlan);
 
 
     /// <summary>
@@ -637,6 +638,11 @@ public static class KartUclari
     /// ZORUNLULUK KAPISI (17.10.2026): "anahtar" kapı açıkken, "!anahtar" kapalıyken zorunlu. Alan kendi
     /// AyarKapisi'yla gizliyse zorunlu sayılmaz - görünmeyen alanı doldurmak istenemez.
     /// </summary>
+    /// <summary>Değer dolu mu: null, boş metin ve 0 boştur.</summary>
+    private static bool Dolu(object? v)
+        => v is not null && Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture) is { Length: > 0 } s
+           && s.Trim() != "" && s != "0";
+
     private static bool KapiylaZorunlu(KartAlani alan, IReadOnlySet<string>? kapaliKapilar)
     {
         if (alan.ZorunluKapisi is not { Length: > 0 } zk) return false;
@@ -697,12 +703,17 @@ public static class KartUclari
 
         if (yeni)
             foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu || KapiylaZorunlu(a, kapaliKapilar)))
-                if (!sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null ||
-                    (d is string m && m.Trim().Length == 0) ||
-                    // Kapıyla zorunlu KOD alanında 0 da boştur (randevu bölümü varsayılan 0 gelir).
-                    (zorunlu.ZorunluKapisi is not null && zorunlu.Tip == "kod" && Convert.ToString(d, System.Globalization.CultureInfo.InvariantCulture) == "0"))
+            {
+                // MUAF: muaf alan doluysa (ör. randevuda cihaz seçili) bu alan istenmez.
+                if (zorunlu.ZorunluMuafAlan is { } muaf && Dolu(sonuc.GetValueOrDefault(muaf))) continue;
+                var bos = !sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null
+                          || (d is string m && m.Trim().Length == 0)
+                          // Kapıyla zorunlu KOD alanında 0 da boştur (randevu bölümü varsayılan 0 gelir).
+                          || (zorunlu.ZorunluKapisi is not null && zorunlu.Tip == "kod" && !Dolu(d));
+                if (bos)
                     throw GentegreHatasi.Dogrulama($"{zorunlu.Etiket} zorunlu.",
                         new AlanHatasi(zorunlu.Ad, $"{zorunlu.Etiket} boş bırakılamaz."));
+            }
 
         return sonuc;
     }
