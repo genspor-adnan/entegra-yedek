@@ -117,8 +117,10 @@ public sealed class EkranKoduBolmeTestleri
         foreach (var (yeni, eski) in EkranKodlari.AyniGrupEkranlari)
         {
             Assert.Equal(eski, EkranKodlari.KopyaKaynagi(yeni));
-            // Aşama 2'ye geçen ekran kendi kaynağına bağlı; eski kapıyı açmaz.
-            Assert.Equal(!EkranKodlari.KendiKapisinda(yeni), Set(yeni).Var(eski, Islem.Gor));
+            // Aşama 2'ye geçen ekran kendi kaynağına bağlı; eski kapıyı açmaz. İstisna: liste ekranı
+            //   (1115 aşama 2) veri kapısını YALNIZ OKUMADA açar - ListeYalnizGorTestleri.
+            Assert.Equal(!EkranKodlari.KendiKapisinda(yeni) || EkranKodlari.YalnizGor(yeni),
+                         Set(yeni).Var(eski, Islem.Gor));
         }
         // Ana ekran eski kodu korur; alt ekran kodu ana ekranın kapısını açar.
         Assert.True(Set("muayene.recete").Var("muayene", Islem.Gor));

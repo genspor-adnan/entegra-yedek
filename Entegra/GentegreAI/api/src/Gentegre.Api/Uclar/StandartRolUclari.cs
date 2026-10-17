@@ -1305,7 +1305,10 @@ public static class StandartRolUclari
                 // "%" gibi geniş desen aksiyonları (tur 1) kapsamaz: aksiyon açıkça istenir.
                 if (k.Desen.Contains('%') && y.tur == 1 && !k.Desen.Contains('.')) continue;
                 if (!k.Gor) { sonuc.Remove(y.id); continue; }
-                sonuc[y.id] = (y.id, y.tur, k.Gor, k.Ekle, k.Degistir, k.Sil);
+                // Liste ekranı yalnız Gör taşır (1115 aşama 2): kart hakları veri kodunda.
+                sonuc[y.id] = EkranKodlari.YalnizGor(y.kod)
+                    ? (y.id, y.tur, true, false, false, false)
+                    : (y.id, y.tur, k.Gor, k.Ekle, k.Degistir, k.Sil);
             }
         }
         return [.. sonuc.Values];

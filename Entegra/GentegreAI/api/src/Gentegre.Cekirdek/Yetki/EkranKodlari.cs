@@ -126,6 +126,31 @@ public static partial class EkranKodlari
         ["katalog"]       = ["belge_satir"],
     };
 
+    /// <summary>
+    /// LİSTE EKRANI YALNIZ GÖR (1115 aşama 2 - kullanıcı 17.10.2026: "Hasta Listesi yetkisi sade
+    /// Gör/Görme ve hasta kartı yetkisi Gör/ekle/değiş/sil"). Liste ekran kodu yalnız GÖR taşır: menüde
+    /// ekranı açar ve veri kodunu yalnız OKUMADA açar (liste satırları, kartı salt okunur açma). Kart
+    /// işlemleri (ekle / değiştir / sil, liste araç çubuğundaki Yeni / Sil dahil) yalnız VERİ koduna
+    /// bakar. Kodun Ekle / Değiştir / Sil'i hiçbir yerde sayılmaz (<see cref="YetkiSeti.VarTam"/>).
+    /// Aşama 1'de liste kodu veri kodunun kapısını BÜTÜN işlemlerde açıyordu: listeye verilen Ekle
+    /// fiilen hasta kartına verilmiş oluyordu. Desen başarılı olursa öteki listelere yayılacak.
+    /// </summary>
+    private static readonly Dictionary<string, string> YalnizGorListe = new(StringComparer.Ordinal)
+    {
+        ["hasta.liste"]   = "hasta",   // Kayıt Kabul › Hasta Listesi   - kart / veri: hasta
+        ["basvuru.liste"] = "belge",   // Kayıt Kabul › Başvuru Listesi - kart / veri: belge (başvuru)
+    };
+
+    /// <summary>Kod yalnız Gör taşıyan bir liste ekranı mı (Ekle / Değiştir / Sil'i yok sayılır).</summary>
+    public static bool YalnizGor(string kod) => YalnizGorListe.ContainsKey(kod);
+
+    /// <summary>Liste ekran kodlarının hepsi (matris / şablon / göç aynı listeyi kullanır).</summary>
+    public static IReadOnlyCollection<string> YalnizGorKodlari => YalnizGorListe.Keys;
+
+    /// <summary>Bu veri kodunu YALNIZ OKUMADA açan liste ekran kodları (yoksa boş).</summary>
+    public static IReadOnlyList<string> ListeGorAltlari(string veriKodu)
+        => YalnizGorListe.Where(x => x.Value == veriKodu).Select(x => x.Key).ToArray();
+
     /// <summary>Bu kaynağı yalnız görme işleminde açan kodlar (yoksa boş).</summary>
     public static IReadOnlyList<string> GorKapisiAltlari(string veriKodu)
         => GorKapisi.TryGetValue(veriKodu, out var a) ? a : [];
@@ -220,6 +245,8 @@ public static partial class EkranKodlari
     /// </summary>
     private static readonly HashSet<string> KendiKapisi = new(StringComparer.Ordinal)
     {
+        // Kayıt Kabul listeleri (1115 aşama 2): veri kapısını yalnız Gör'de açar - YalnizGorListe.
+        "hasta.liste", "basvuru.liste",
         "hesap.tanim.banka_tanim",   // banka kaynağı + kartı
         "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
         "kasa.finans.vade",          // plan-vade kaynağı

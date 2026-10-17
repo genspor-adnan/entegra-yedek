@@ -54,6 +54,13 @@ const UST_KOD: Record<string, string> = {
  * alt satır olarak girer (veri kodu -> ekran kodu).
  */
 const VERI_KAPISI_ALTI: Record<string, string> = { belge: 'basvuru.liste', hasta: 'hasta.liste' };
+/**
+ * LİSTE EKRANI YALNIZ GÖR (1115 aşama 2, sunucu EkranKodlari.YalnizGorListe): liste satırında
+ * Ekle / Değiştir / Sil yok - kart işlemleri altındaki veri satırında (Hasta Verisi, Başvuru Kartı).
+ */
+const YALNIZ_GOR = new Set(Object.values(VERI_KAPISI_ALTI));
+/** Satırda Ekle / Değiştir / Sil sütunları anlamlı mı (aksiyon ve liste ekranında değil). */
+const islemSutunlu = (s: YetkiSatiri) => s.tur !== 1 && !YALNIZ_GOR.has(s.kod);
 
 /** Menude listesi olmayan ama yetkisi olan ekranlar (kod -> agac grubu). */
 const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa', 'kabuk.menu': 'Ana Sayfa' };   // 1102: sol menü
@@ -441,6 +448,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur, ilkGorunum }: {
   const degistir = (idler: Set<number>, sutun: Sutun, deger: boolean) => {
     setSatirlar(s => s?.map(satir => {
       if (!idler.has(satir.yetkiId)) return satir;
+      if (sutun !== 'gor' && YALNIZ_GOR.has(satir.kod)) return satir;
       // "Gör" kapatilirsa Ekle/Degistir/Sil de anlamsiz - birlikte kapanir.
       if (sutun === 'gor' && !deger)
         return { ...satir, gor: false, ekle: false, degistir: false, sil: false };
@@ -531,13 +539,13 @@ export function RolYetkiMatrisi({ rolId, saltOkunur, ilkGorunum }: {
       // Yaprakta kendi degeri; ust dugumde daldaki TUM satirlarin ozeti.
       const hedef = d.satir && !cocukVar ? [d.satir] : altSatirlar;
       // Aksiyon yetkisinde yalniz izin (gor) anlamli.
-      const uygun = hedef.filter(x => x.tur !== 1 || s === 'gor');
+      const uygun = hedef.filter(x => s === 'gor' || islemSutunlu(x));
       // TIRE 1 - SÜTUN GEÇERSİZ: aksiyon yetkisinde (tür 1) yalnız "Gör"
       //   anlamlı; Ekle/Değiştir/Sil orada hiç yok. Boş kutu çizmek "kapalı"
       //   sanılırdı, tire "burada böyle bir şey yok" diyor.
       if (uygun.length === 0)
         return <span style={{ opacity: .3 }}
-                     title="Bu sütun bu yetki için geçerli değil (aksiyon yetkisinde yalnız Gör)">–</span>;
+                     title="Bu sütun bu yetki için geçerli değil (aksiyon ve liste ekranında yalnız Gör)">–</span>;
       const acikSayi = uygun.filter(x => x[s]).length;
       const hepsi = acikSayi === uygun.length;
       // TIRE 2 - KISMİ SEÇİM: grup satırında bazı alt yetkiler açık, bazıları
@@ -717,7 +725,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
 
   const tumYapraklar = useMemo(() => agac.flatMap(k => yapraklar(k)), [agac]);
   const idler = (liste: YetkiSatiri[]) => new Set(liste.map(s => s.yetkiId));
-  const islemli = (liste: YetkiSatiri[]) => liste.filter(s => s.tur !== 1);
+  const islemli = (liste: YetkiSatiri[]) => liste.filter(islemSutunlu);
 
   /** Kökte EKRAN satırı sayılan düğümler: kökün ve alt gruplarının satırlı çocukları. */
   const ekranlar = (kok: Dugum): Dugum[] =>
@@ -726,7 +734,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
   const durum = (kok: Dugum): 'yok' | 'gor' | 'tam' => {
     const y = yapraklar(kok);
     if (!y.some(s => s.gor)) return 'yok';
-    return y.every(s => s.gor && (s.tur === 1 || (s.ekle && s.degistir && s.sil))) ? 'tam' : 'gor';
+    return y.every(s => s.gor && (!islemSutunlu(s) || (s.ekle && s.degistir && s.sil))) ? 'tam' : 'gor';
   };
   const kokCevir = (kok: Dugum) => {
     const y = yapraklar(kok);
@@ -771,7 +779,8 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
           {aksiyonSayi > 0 && <span className="ym-aks"> · {aksiyonSayi} {cev('aksiyon')}</span>}
           {s.degerAlir && <span className="ym-aks"> · {cev('sınır')}{s.deger ? ` ${s.deger}` : ''}</span>}
         </button>
-        {s.tur === 1 ? <span className="rozet gri">{cev('aksiyon')}</span> : (
+        {s.tur === 1 ? <span className="rozet gri">{cev('aksiyon')}</span>
+          : !islemSutunlu(s) ? <span className="ym-aks" title={cev('Liste ekranı yalnız Gör; kart işlemleri alttaki satırda')}>{cev('yalnız gör')}</span> : (
           <span className="ym-isl">
             {ROZETLER.map(r => (
               <button key={r.ad} type="button" title={cev(r.baslik)}
@@ -871,7 +880,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
           <div className="ym-pencere">
             <h5>{cev('İŞLEMLER')}</h5>
             <div className="ym-izgara">
-              {(sec.satir!.tur === 1 ? SUTUNLAR.filter(x => x.ad === 'gor') : SUTUNLAR).map(x => (
+              {(islemSutunlu(sec.satir!) ? SUTUNLAR : SUTUNLAR.filter(x => x.ad === 'gor')).map(x => (
                 <label key={x.ad} className="ym-cb">
                   <input type="checkbox" checked={sec.satir![x.ad]} disabled={saltOkunur}
                          onChange={e => degistir(new Set([sec.satir!.yetkiId]), x.ad, e.target.checked)} />

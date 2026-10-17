@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using Gentegre.Cekirdek.Yetki;
+using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -82,9 +83,13 @@ public sealed class RolYetkiDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
+        // LİSTE EKRANI YALNIZ GÖR (1115 aşama 2): liste kodlarının Ekle / Değiştir / Sil'i yazılmaz.
+        var yalnizGor = (await baglanti.ListeAsync("select id from public.yetki where kod = any(@p0)", islem,
+                            [EkranKodlari.YalnizGorKodlari.ToArray()], o => o.GetInt32(0), iptal)).ToHashSet();
 
-        foreach (var s in satirlar)
+        foreach (var s0 in satirlar)
         {
+            var s = yalnizGor.Contains(s0.YetkiId) ? s0 with { Ekle = false, Degistir = false, Sil = false } : s0;
             await using var komut = baglanti.Komut("""
                 insert into public.rol_yetki (rol_id, yetki_id, gor, ekle, degistir, sil, deger, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p7, @p6)

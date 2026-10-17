@@ -109,7 +109,8 @@ public static partial class KaynakKatalogu
 
     /// <summary>Yetki kodundan belge kümesi (çekirdek `belge` = başvuru, ERP kodu = kendisi).</summary>
     public static string? BelgeKumesi(string yetkiKodu)
-        => yetkiKodu == "belge" ? BelgeKumeBasvuru
+        // Kayıt Kabul › Başvuru Listesi (1115 aşama 2) başvuruları OKUR - yazma kapısı VarTam'da kapalı.
+        => yetkiKodu is "belge" or "basvuru.liste" ? BelgeKumeBasvuru
          : BelgeKumeTurleri.ContainsKey(yetkiKodu) ? yetkiKodu
          : null;
 
@@ -128,5 +129,5 @@ public static partial class KaynakKatalogu
     /// başka kümeyi açmaz.
     /// </summary>
     public static IReadOnlyList<string> BelgeYetkiKodlari { get; } =
-        new[] { "belge" }.Concat(BelgeKumeTurleri.Keys).ToArray();
+        new[] { "belge", "basvuru.liste" }.Concat(BelgeKumeTurleri.Keys).ToArray();
 }

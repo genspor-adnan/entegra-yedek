@@ -56,8 +56,13 @@ public sealed class YetkiSeti
             if (VarTam(alt, islem)) return true;
         // Seçim kapısı yalnız okumada (ücret girerken hizmet / fiyat arama).
         if (islem == Islem.Gor)
+        {
             foreach (var alt in EkranKodlari.GorKapisiAltlari(kaynakKodu))
                 if (VarTam(alt, Islem.Ekle) || VarTam(alt, Islem.Degistir)) return true;
+            // Liste ekranı (1115 aşama 2) veri kodunu yalnız okumada açar.
+            foreach (var alt in EkranKodlari.ListeGorAltlari(kaynakKodu))
+                if (VarTam(alt, Islem.Gor)) return true;
+        }
         return false;
     }
 
@@ -69,6 +74,8 @@ public sealed class YetkiSeti
     public bool VarTam(string kaynakKodu, Islem islem)
     {
         if (!_yetkiler.TryGetValue(kaynakKodu, out var y)) return false;
+        // LİSTE EKRANI YALNIZ GÖR (1115 aşama 2): satırda Ekle / Değiştir / Sil kalmış olsa da sayılmaz.
+        if (islem != Islem.Gor && EkranKodlari.YalnizGor(kaynakKodu)) return false;
         return islem switch
         {
             Islem.Gor      => y.Gor,
