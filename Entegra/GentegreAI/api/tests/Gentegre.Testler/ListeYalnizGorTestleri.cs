@@ -55,6 +55,13 @@ public sealed class ListeYalnizGorTestleri
         Assert.False(s.Var(kaynak, Islem.Degistir));
     }
 
+    [Theory]
+    [InlineData("randevu.liste", "randevu")]
+    [InlineData("teleradyoloji.kurum.liste", "teleradyoloji.kurum")]
+    [InlineData("hasta.liste", "hasta")]          // 1115 AyniGrup kopyası önce gelir
+    public void Standart_sablon_liste_kodunu_kartindan_uretir(string liste, string kart)
+        => Assert.Equal(kart, EkranKodlari.KopyaKaynagi(liste));
+
     [Fact]
     public void Liste_kodu_kapaliyken_veri_kapisi_acilmaz()
     {

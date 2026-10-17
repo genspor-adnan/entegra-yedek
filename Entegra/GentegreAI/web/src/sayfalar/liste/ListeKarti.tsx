@@ -415,7 +415,7 @@ export function ListeKarti({
     if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
     await aksiyon('goz.muayene-tamamla', { id: Number(kartId) } as ListeSatiri);
   };
-  const { aksiyonVar } = useOturum();
+  const { aksiyonVar, yetki: oturumYetki } = useOturum();
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
@@ -1502,6 +1502,8 @@ export function ListeKarti({
               const durum = Number(d.durum ?? 1);
               if (durum === 4 || durum === 5) return null;
               const belgeli = !!Number(d.belgeId);
+              // YETKİ (pilot denetimi 17.10.2026): dönüştürmek Başvuru Kartı EKLE, açmak GÖR ister.
+              if (!oturumYetki('belge', belgeli ? 'gor' : 'ekle')) return null;
               return (
                 <button type="button" className="d sari"
                         onClick={() => void (async () => {
