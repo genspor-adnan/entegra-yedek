@@ -9,7 +9,8 @@ import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/me
 import { SURUM_ETIKET } from '../surum';
 import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
 import { duyuruOkuAc } from '../bilesenler/duyuru/DuyuruOrtak';
-import { bekleme, gelenGruplari, iskontoKararAc, onayIkon } from '../bilesenler/taleplerim/GelenIsler';
+import { GelenEylemler, bekleme, gelenGruplari, iskontoKararAc, onayIkon, type GelenGrup } from '../bilesenler/taleplerim/GelenIsler';
+import { Modal } from '../bilesenler/Modal';
 import { PALET_SESLI_OLAYI, sesliGirisVar } from '../bilesenler/sesliGiris';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
@@ -54,6 +55,8 @@ export function Baslangic() {
   /** ALT MENÜ (kullanıcı 17.10.2026: "kutulardaki menülerde alt menü varsa ok ile açılabilsin, default
       kapalı"): açık alt başlıklar - anahtar "kutu/altbaşlık". */
   const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
+  /** Ayrıntısı açık bildirim grubu (kart tıklanınca). */
+  const [bildirimDetay, setBildirimDetay] = useState<GelenGrup['kod'] | null>(null);
 
   useEffect(() => {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
@@ -180,44 +183,69 @@ export function Baslangic() {
   ] as Is[] : duyuruIsi).filter(i => i.sabit || (i.sayi ?? 0) > 0);
 
   /**
-   * BİLDİRİMLER (kullanıcı 18.10.2026: "home'da bildirimler de bekleyen işler altında görünsün"): zilin
-   * (Bana gelenler) içeriği - acil / atanmamış / bendeki arıza, iskonto onayı, onayımı bekleyen. Aynı
-   * bağlamdan (ikinci istek yok), en çok 8 satır; satır zildeki gibi kaydı açar. Boşsa bölüm yok.
+   * BİLDİRİMLER (kullanıcı 18.10.2026: "home'da bildirimler de bekleyen işler altında görünsün" -> "kutu
+   * olarak görünsün, basılınca detay gelsin"): zilin (Bana gelenler) içeriği TÜR TÜR KART - acil /
+   * atanmamış / bendeki arıza, iskonto onayı, onayımı bekleyen; kart sayıyı ve en eskinin bekleme süresini
+   * gösterir. Karta basınca o türün kayıtları pencerede: satır kaydı açar, zildeki hızlı işlem düğmeleri
+   * de orada. Aynı bağlamdan (ikinci istek yok); boş tür kartı yok.
    */
   const bildirimGruplari = talep ? gelenGruplari(talep.gelen, talep.veri?.onaylar ?? [], talep.iskontolar) : [];
-  const bildirimler = bildirimGruplari.flatMap(g => g.ogeler.map(o => ({ g, o }))).slice(0, 8);
-  const bildirimToplam = bildirimGruplari.reduce((t, g) => t + g.ogeler.length, 0);
-  const bildirimBolumu = bildirimler.length > 0 && (
-    <>
-      <div className="bsl-bolum">{c('Bildirimler')} <span className="sonuk">· {bildirimToplam}</span></div>
-      <div className="bsl-bildirim">
-        {bildirimler.map(({ g, o }) => {
-          const ac = () => o.tip === 'iskonto' ? iskontoKararAc(o.t) : git(`/taleplerim?sekme=gelen&sec=${o.anahtar}`);
-          return o.tip === 'iskonto' ? (
-            <a key={o.anahtar} onClick={ac}>
-              <span className="bsl-bil-i">％</span>
-              <span className="bsl-bil-a"><b>{c('İskonto onayı')} · %{o.t.oran}</b> · {o.t.hasta || o.t.belgeNo}</span>
-              <span className="bsl-bil-y">{o.t.isteyen} · {bekleme(o.t.istekTs)}</span>
-            </a>
-          ) : o.tip === 'ariza' ? (
-            <a key={o.anahtar} onClick={ac} className={g.kod === 'acil' ? 'acil' : undefined}>
-              <span className="bsl-bil-i">{g.kod === 'acil' ? '🚨' : '🧰'}</span>
-              <span className="bsl-bil-a"><b>{o.a.talepNo}</b> · {o.a.aciklama}</span>
-              <span className="bsl-bil-y">{c(g.ad)} · {bekleme(o.a.eklemeTarihi)} {c('önce')}</span>
-            </a>
-          ) : (
-            <a key={o.anahtar} onClick={ac}>
-              <span className="bsl-bil-i">{onayIkon(o.o)}</span>
-              <span className="bsl-bil-a"><b>{o.o.konu}</b> · {o.o.talepEden}</span>
-              <span className={`bsl-bil-y${o.o.gecikmeGun > 0 ? ' gec' : ''}`}>{o.o.adimAd} · {bekleme(o.o.baslama)}{o.o.gecikmeGun > 0 ? ` · ${c('termin geçti')}` : ''}</span>
+  const BILDIRIM_KART: Record<GelenGrup['kod'], { ic: string; ad: string }> = {
+    acil: { ic: '🚨', ad: 'acil arıza' }, atanmamis: { ic: '🧰', ad: 'atanmamış arıza' },
+    bende: { ic: '🔧', ad: 'bendeki arıza' }, iskonto: { ic: '％', ad: 'iskonto onayı' },
+    onay: { ic: '⏳', ad: 'onayımı bekleyen' },
+  };
+  const ogeZamani = (o: GelenGrup['ogeler'][number]) =>
+    o.tip === 'iskonto' ? o.t.istekTs : o.tip === 'ariza' ? o.a.eklemeTarihi : o.o.baslama;
+  // AYRI BÖLÜM YOK (kullanıcı 18.10.2026: "bekleyen işler altında olsun, yeni bölüm ekleme"): kartlar
+  //   Bekleyen işler şeridinin içinde, işlerin ardından.
+  const bildirimKartlari = bildirimGruplari.map(g => {
+          const k = BILDIRIM_KART[g.kod];
+          const enEski = g.ogeler.map(ogeZamani).filter(Boolean).sort()[0];
+          return (
+            <a key={g.kod} className="bsl-kart" onClick={() => setBildirimDetay(g.kod)}>
+              <span className="bsl-kart-i">{k.ic}</span>
+              <span className="bsl-kart-a">{g.ogeler.length} {c(k.ad)}</span>
+              <span className={`bsl-kart-y${g.kod === 'acil' ? ' bsl-kart-acil' : ''}`}>
+                {enEski ? `${c('en eskisi')} ${bekleme(enEski)}` : c('ayrıntı')}</span>
             </a>
           );
+        });
+  const detayGrup = bildirimGruplari.find(g => g.kod === bildirimDetay);
+  const bildirimPenceresi = detayGrup && (
+    <Modal baslik={`${BILDIRIM_KART[detayGrup.kod].ic} ${c(detayGrup.ad)} · ${detayGrup.ogeler.length}`} dar buyutmeYok
+           onKapat={() => setBildirimDetay(null)}
+           alt={<><span className="ck-bosluk" />
+             <button type="button" className="d" onClick={() => { setBildirimDetay(null); git('/taleplerim?sekme=gelen') }}>{c('Tümünü aç')} →</button>
+             <button type="button" className="d" onClick={() => setBildirimDetay(null)}>{c('Kapat')}</button></>}>
+      <ul className="tl-son tl-gelen bsl-bil-liste">
+        {detayGrup.ogeler.map(o => {
+          const kapatAc = () => { setBildirimDetay(null); if (o.tip === 'iskonto') iskontoKararAc(o.t); else git(`/taleplerim?sekme=gelen&sec=${o.anahtar}`) };
+          return o.tip === 'iskonto' ? (
+            <li key={o.anahtar} onClick={kapatAc}>
+              <span>％</span>
+              <span><b>%{o.t.oran}</b> · {o.t.hasta || o.t.belgeNo}
+                <small>{c('isteyen')}: {o.t.isteyen} · {bekleme(o.t.istekTs)}{o.t.gerekce ? ` · “${o.t.gerekce}”` : ''}</small></span>
+              <GelenEylemler oge={o} sonra={() => setBildirimDetay(null)} />
+            </li>
+          ) : o.tip === 'ariza' ? (
+            <li key={o.anahtar} className={detayGrup.kod === 'acil' ? 'tl-li-acil' : ''} onClick={kapatAc}>
+              <span>🧰</span>
+              <span><b>{o.a.talepNo} · {o.a.aciklama}</b>{o.a.konum ? ` · ${o.a.konum}` : ''}
+                <small>{o.a.talepEdenAdi}{o.a.telefon ? ` · ☎ ${o.a.telefon}` : ''} · {bekleme(o.a.eklemeTarihi)} {c('önce')}{o.a.benim ? ` · ${o.a.durumAdi}` : ''}</small></span>
+              <GelenEylemler oge={o} ata={false} />
+            </li>
+          ) : (
+            <li key={o.anahtar} onClick={kapatAc}>
+              <span>{onayIkon(o.o)}</span>
+              <span><b>{o.o.konu}</b> · {o.o.talepEden}
+                <small>{o.o.adimAd} · {bekleme(o.o.baslama)}{o.o.gecikmeGun > 0 ? ` · ${c('termin geçti')}` : ''}</small></span>
+              <GelenEylemler oge={o} />
+            </li>
+          );
         })}
-        {bildirimToplam > bildirimler.length && (
-          <a className="tumu" onClick={() => git('/taleplerim?sekme=gelen')}>{c('Tümü')} ({bildirimToplam}) →</a>
-        )}
-      </div>
-    </>
+      </ul>
+    </Modal>
   );
 
   /**
@@ -231,7 +259,7 @@ export function Baslangic() {
     <>
       {sonAcilanlar.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
         <div className={`bsl-kartlar bsl-kartlar-orta bsl-tek-sira${adet === 8 ? ' bsl-sekizli' : ''}`}>{sonAcilanlar.slice(0, adet).map(ekranKart)}</div></>}
-      {bekleyenIsler.length > 0 && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
+      {(bekleyenIsler.length > 0 || bildirimKartlari.length > 0) && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
         <div className={`bsl-kartlar bsl-kartlar-orta${adet === 8 ? ' bsl-sekizli' : ' bsl-dortlu'}`}>{bekleyenIsler.map(i => (
           <a key={i.yol} className={`bsl-kart${i.tikla || ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
              onClick={() => { if (i.tikla) i.tikla(); else if (ekranVar(i.yol)) git(i.yol) }}>
@@ -239,8 +267,9 @@ export function Baslangic() {
             <span className="bsl-kart-a">{i.ad}</span>
             <span className={`bsl-kart-y${i.acil ? ' bsl-kart-acil' : ''}`}>{i.y}</span>
           </a>))}
+          {bildirimKartlari}
         </div></>}
-      {bildirimBolumu}
+      {bildirimPenceresi}
     </>
   );
 
