@@ -48,10 +48,10 @@ const UST_KOD: Record<string, string> = {
 };
 
 /**
- * VERİ KAPISI EKRANININ ALTINDA (kullanıcı 17.10.2026: "başvuru kartı başvuru listesi altında olsun alt
- * menü olsun"). 1115 Kayıt Kabul listelerini kendi ekran koduna böldü; eski kod artık o ekranın
- * kartının / verisinin kapısı. Matriste ayrı, menüsüz bir satır olarak duruyordu - listesinin altına
- * alt satır olarak girer (veri kodu -> ekran kodu).
+ * KART SATIRI LİSTESİNİN YANINDA (kullanıcı 17.10.2026). 1115 Kayıt Kabul listelerini kendi ekran
+ * koduna böldü; eski kod artık o ekranın KARTININ kapısı. Matriste grubun bir yerinde ayrı satır
+ * olarak duruyordu - listesinin hemen ardına, aynı düzeye ve listenin ikonuyla girer
+ * (veri kodu -> liste ekran kodu).
  */
 const VERI_KAPISI_ALTI: Record<string, string> = { belge: 'basvuru.liste', hasta: 'hasta.liste' };
 /**
@@ -59,6 +59,7 @@ const VERI_KAPISI_ALTI: Record<string, string> = { belge: 'basvuru.liste', hasta
  * Ekle / Değiştir / Sil yok - kart işlemleri altındaki veri satırında (Hasta Verisi, Başvuru Kartı).
  */
 const YALNIZ_GOR = new Set(Object.values(VERI_KAPISI_ALTI));
+
 /** Satırda Ekle / Değiştir / Sil sütunları anlamlı mı (aksiyon ve liste ekranında değil). */
 const islemSutunlu = (s: YetkiSatiri) => s.tur !== 1 && !YALNIZ_GOR.has(s.kod);
 
@@ -326,7 +327,17 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
       if (i >= 0) { liste.splice(i, 1); return true }
       return liste.some(x => cikar(x.cocuklar));
     };
-    if (cikar(kokler)) hedef.cocuklar.unshift(v);
+    if (!cikar(kokler)) continue;
+    // ALT SATIR DEĞİL, YANINDA (kullanıcı 17.10.2026: "hasta kartı / başvuru kartı alt menü olmasına
+    //   gerek yok, listesi altında olsun eşit düzeyde"): kart satırı listenin HEMEN ARDINA, aynı
+    //   düzeye girer. İKON LİSTENİN İKONU ("kartların ikonları da liste ile aynı olsun").
+    v.ic = hedef.ic;
+    const yerlestir = (liste: Dugum[]): boolean => {
+      const i = liste.indexOf(hedef);
+      if (i >= 0) { liste.splice(i + 1, 0, v); return true }
+      return liste.some(x => yerlestir(x.cocuklar));
+    };
+    if (!yerlestir(kokler)) hedef.cocuklar.unshift(v);
   }
 
   // Kokler menu sirasiyla; menude olmayan basliklar sonda.
