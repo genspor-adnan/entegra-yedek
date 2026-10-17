@@ -296,7 +296,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, cihazId = null, cihazAd
       <div className="kagrup" style={{ marginTop: 12 }}>
         <div className="numaralama-bas bitisik"><h6>{c('Uygun Saatler')}</h6></div>
         <div style={{ padding: '8px 12px', fontSize: 11.5, opacity: .7 }}>
-          Hekim seçilince o günün uygun saatleri listelenir.
+          Doktor seçilince o günün uygun saatleri listelenir.
         </div>
       </div>
     );

@@ -339,6 +339,8 @@ public sealed partial class KartDeposu
             "public.v_personel_grup_lookup",
             // Randevu verilebilir personel (252) - randevu kartindaki hekim.
             "public.v_hekim_lookup",
+            // Randevu: gönderen (dış) doktor (1120).
+            "public.v_dis_hekim_lookup",
             // Kampanya (268) - kurum sozlesmesinde secilir.
             "public.v_kampanya_lookup",
             // GOZ (693): cihaz, tetkik (yalniz goz hizmetleri), postop

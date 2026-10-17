@@ -42,7 +42,7 @@ const gun = (v: unknown): string => {
 };
 
 export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
-                              randevuId, onSeciliHizmetId, onKapat, onTamam }: {
+                              randevuId, onSeciliHizmetId, onSeciliGonderen, onKapat, onTamam }: {
   acik: boolean;
   hastaId: number;
   hastaAdi: string;
@@ -58,6 +58,8 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   randevuId?: number | null;
   /** Randevunun tetkiki - acilista secili gelir, kabul masasi yeniden aramaz. */
   onSeciliHizmetId?: number | null;
+  /** Randevudaki GÖNDEREN (dış) hekim (1120) - isteyen hekim seçili gelir. */
+  onSeciliGonderen?: { id: number; ad: string } | null;
   onKapat(): void;
   onTamam?(accessionlar: string[], sonuc?: { belgeId: number | null }): void;
 }) {
@@ -137,6 +139,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   }, [hastaId]);
 
   useEffect(() => { if (acik) void yukle() }, [acik, yukle]);
+  // Randevudan kabul (1120): gönderen hekim randevuda seçiliyse isteme de geçer.
+  const gonderenId = onSeciliGonderen?.id ?? null, gonderenAd = onSeciliGonderen?.ad ?? '';
+  useEffect(() => {
+    if (acik && gonderenId) isteyen.hekimSec(gonderenId, gonderenAd);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [acik, gonderenId, gonderenAd]);
 
   // HASTANIN AKTIF POLICESI (248): kabul masasi police numarasini elle
   //   yazmasin - hasta kartinda duruyorsa oradan gelir, gerekirse duzeltilir.

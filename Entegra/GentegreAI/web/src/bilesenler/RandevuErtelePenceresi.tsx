@@ -20,7 +20,7 @@ export interface ErtelenecekRandevu {
   saat: string;
 }
 
-const HAZIR_NEDENLER = ['Hasta istedi', 'Hekim izinli / programı değişti', 'Cihaz arızası / bakım', 'Kurum kaynaklı'];
+const HAZIR_NEDENLER = ['Hasta istedi', 'Doktor izinli / programı değişti', 'Cihaz arızası / bakım', 'Kurum kaynaklı'];
 
 /**
  * RANDEVU ERTELE PENCERESİ (1119; kullanıcı 17.10.2026: "randevu ertelemeyi nasıl yapacağız?" → "ilk yol").

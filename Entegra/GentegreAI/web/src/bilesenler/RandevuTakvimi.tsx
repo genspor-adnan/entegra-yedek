@@ -13,7 +13,15 @@ import { istisnaKisaAdi } from './calisma/calismaKodlari';
  * Hücreye tıklamak o saat için yeni randevu açar; dolu randevuya tıklamak
  * kartı açar - liste görünümüyle aynı kart, ikinci bir ekran yok.
  */
-type Gorunum = 'gun' | 'hafta' | 'hekim' | 'cihaz';
+/**
+ * GÖRÜNÜM = ZAMAN × KAYNAK (kullanıcı 17.10.2026: "günlük - cihaz, günlük - dr, haftalık - cihaz,
+ * haftalık - dr seçilebilir"; iki grup arasında ayraç). 'hekim' / 'cihaz' günlük kaynak görünümü,
+ * 'hafta-hekim' / 'hafta-cihaz' haftalığı (sütun = gün × kaynak); 'gun' / 'hafta' kaynaksız.
+ */
+type Gorunum = 'gun' | 'hafta' | 'hekim' | 'cihaz' | 'hafta-hekim' | 'hafta-cihaz';
+type Kaynak = 'hekim' | 'cihaz' | null;
+const birlestir = (haftalik: boolean, k: Kaynak): Gorunum =>
+  k === null ? (haftalik ? 'hafta' : 'gun') : (haftalik ? `hafta-${k}` : k);
 
 interface Ayarlar {
   baslangicSaat: string;
@@ -120,8 +128,16 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     Object.entries(ayarlar ?? {}).filter(([, v]) => v !== undefined)) } as typeof VARSAYILAN;
   // Kisitli hekimde kayitli "doktor" gorunumu gunluge duser (o dugme yok).
   const [gorunum, setGorunumIc] = useState<Gorunum>(
-    hekimSabit && gorunumBaslangic === 'hekim' ? 'gun' : (gorunumBaslangic ?? 'gun'));
+    hekimSabit && gorunumBaslangic === 'hekim' ? 'gun'
+    : hekimSabit && gorunumBaslangic === 'hafta-hekim' ? 'hafta' : (gorunumBaslangic ?? 'gun'));
   const setGorunum = (g: Gorunum) => { setGorunumIc(g); onGorunumDegisti?.(g) };
+  const haftalik = gorunum === 'hafta' || gorunum.startsWith('hafta-');
+  const kaynakKip: Kaynak = gorunum === 'hekim' || gorunum === 'hafta-hekim' ? 'hekim'
+    : gorunum === 'cihaz' || gorunum === 'hafta-cihaz' ? 'cihaz' : null;
+  /** Kaynak düğmesi tekrar basılınca bırakılır (kaynaksız gün / hafta). */
+  const kaynakSec = (k: Exclude<Kaynak, null>) => setGorunum(birlestir(haftalik, kaynakKip === k ? null : k));
+  /** Haftalık cihazda sütun sayısı gün × cihaz - tek cihaza daraltılabilir. */
+  const [cihazSecim, setCihazSecim] = useState<number | ''>('');
   const [gun, setGun] = useState(() => isoGun(new Date()));
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [hata, setHata] = useState('');
@@ -139,14 +155,14 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     // Hekim gorunumu de TEK GUNluktur (sutunlar hekimlerdir) - haftalik dala
     //   dusunce veri araligi haftaya cikiyor ve secili gun calisma gunu
     //   degilse (Pazar) listeden tamamen eleniyordu.
-    if (gorunum !== 'hafta') return [gun];
+    if (!haftalik) return [gun];
     const bas = haftaBasi(new Date(gun));
     return Array.from({ length: 7 }, (_, i) => {
       const t = new Date(bas);
       t.setDate(bas.getDate() + i);
       return isoGun(t);
     });
-  }, [gorunum, gun]);
+  }, [haftalik, gun]);
 
   const yukle = useCallback(async () => {
     if (gunler.length === 0) return;
@@ -171,13 +187,13 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
   }, [gunler, bolum, hekimId]);
 
   const planYukle = useCallback(async () => {
-    if (gunler.length === 0 || gorunum === 'cihaz') { setBloklar([]); return }
+    if (gunler.length === 0 || kaynakKip === 'cihaz') { setBloklar([]); return }
     try {
       const y = await api.calismaPlani({ bas: gunler[0], bit: gunler[gunler.length - 1],
                                          hekimId: hekimId ?? null, departmanId: bolum ?? null });
       setBloklar(y.bloklar);
     } catch { setBloklar([]) /* plan okunamazsa takvim ayarlarla calisir */ }
-  }, [gunler, gorunum, bolum, hekimId]);
+  }, [gunler, kaynakKip, bolum, hekimId]);
 
   useEffect(() => { void yukle() }, [yukle, yenile]);
   useEffect(() => { void planYukle() }, [planYukle, yenile]);
@@ -244,13 +260,13 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * gunler + randevusu olan gunler. Plan yoksa eski ayar (calisma gunleri).
    */
   const gorunenGunler = useMemo(() => {
-    if (gorunum !== 'hafta') return gunler;
+    if (!haftalik) return gunler;
     const planli = new Set(bloklar.map(b => String(b.gun).slice(0, 10)));
     const dolu = new Set(satirlar.map(r => String(r.tarih ?? '').slice(0, 10)));
     return gunler.filter((g, i) => planVar
       ? planli.has(g) || dolu.has(g)
       : ayar.calismaGunleri.includes(i + 1) || dolu.has(g));
-  }, [gorunum, gunler, bloklar, satirlar, planVar, ayar.calismaGunleri]);
+  }, [haftalik, gunler, bloklar, satirlar, planVar, ayar.calismaGunleri]);
 
   /**
    * SUTUNLAR: gunluk/haftalik gorunumde GUN, hekim gorunumunde HEKIM. Hucre
@@ -258,23 +274,28 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * sutunun kendisinde tasiniyor.
    */
   const sutunlar = useMemo<Sutun[]>(() => {
-    if (gorunum === 'cihaz') {
-      return cihazlar.map(c => ({ anahtar: `c${c.id}`, baslik: c.ad, gun, cihaz: c.id }));
-    }
-    if (gorunum === 'hekim') {
-      const liste = hekimId ? hekimler.filter(h => h.id === hekimId) : hekimler;
-      return liste.map(h => ({ anahtar: `h${h.id}`, baslik: h.ad, gun, hekim: h.id }));
-    }
-    return gorunenGunler.map(g => {
+    const gunBaslik = (g: string) => {
       const t = new Date(g);
-      return {
-        anahtar: g,
-        baslik: `${GUN_AD[(t.getDay() + 6) % 7]} ${g.slice(8, 10)}.${g.slice(5, 7)}`,
-        gun: g,
-        hekim: undefined,
-      };
-    });
-  }, [gorunum, gorunenGunler, gun, hekimler, hekimId, cihazlar]);
+      return `${GUN_AD[(t.getDay() + 6) % 7]} ${g.slice(8, 10)}.${g.slice(5, 7)}`;
+    };
+    // Haftalık kaynak görünümünde sütun = gün × kaynak; tek kaynakta başlık yalnız gün.
+    const gunListesi = haftalik ? gorunenGunler : [gun];
+    if (kaynakKip === 'cihaz') {
+      const liste = cihazSecim ? cihazlar.filter(c => c.id === cihazSecim) : cihazlar;
+      return gunListesi.flatMap(g => liste.map(c => ({
+        anahtar: `${g}c${c.id}`, gun: g, cihaz: c.id,
+        baslik: !haftalik ? c.ad : liste.length > 1 ? `${gunBaslik(g)} · ${c.ad}` : gunBaslik(g),
+      })));
+    }
+    if (kaynakKip === 'hekim') {
+      const liste = hekimId ? hekimler.filter(h => h.id === hekimId) : hekimler;
+      return gunListesi.flatMap(g => liste.map(h => ({
+        anahtar: `${g}h${h.id}`, gun: g, hekim: h.id,
+        baslik: !haftalik ? h.ad : liste.length > 1 ? `${gunBaslik(g)} · ${h.ad}` : gunBaslik(g),
+      })));
+    }
+    return gorunenGunler.map(g => ({ anahtar: g, baslik: gunBaslik(g), gun: g, hekim: undefined }));
+  }, [haftalik, kaynakKip, gorunenGunler, gun, hekimler, hekimId, cihazlar, cihazSecim]);
 
   /**
    * KAPALI ARALIKLAR (318): cihazin bakim/ariza/tatil kapatmalari ve ogle
@@ -418,7 +439,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
 
   const kaydir = (yon: number) => {
     const t = new Date(gun);
-    t.setDate(t.getDate() + (gorunum === 'gun' ? yon : yon * 7));
+    t.setDate(t.getDate() + (!haftalik ? yon : yon * 7));
     setGun(isoGun(t));
   };
 
@@ -428,23 +449,31 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     <div className="kagrup" style={{ marginTop: 16 }}>
       <div className="numaralama-bas bitisik">
         <h6>{cev('Takvim')}</h6>
-        <button type="button" className={`cip${gorunum === 'gun' ? ' on' : ''}`}
-                onClick={() => setGorunum('gun')}>Günlük</button>
-        <button type="button" className={`cip${gorunum === 'hafta' ? ' on' : ''}`}
-                onClick={() => setGorunum('hafta')}>{cev('Haftalık')}</button>
+        <button type="button" className={`cip${!haftalik ? ' on' : ''}`}
+                onClick={() => setGorunum(birlestir(false, kaynakKip))}>Günlük</button>
+        <button type="button" className={`cip${haftalik ? ' on' : ''}`}
+                onClick={() => setGorunum(birlestir(true, kaynakKip))}>{cev('Haftalık')}</button>
+        {/* AYRAÇ (kullanıcı 17.10.2026): zaman ile kaynak ayrı gruplar - ikisi birlikte seçilir. */}
+        {!hekimSabit && <span className="durumseg-ayrac" style={{ alignSelf: 'center', height: 20, margin: '0 6px' }} />}
         {/* Doktor gorunumu: secili GUN icin sutunlar doktorlardir (kullanici).
             Kisitli hekimde YOK (kullanici: "uzman doktor rolunde Doktor filtre
             butonu gorunmez") - yalniz kendi randevularini goruyor. */}
         {!hekimSabit && (
-          <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
-                  onClick={() => setGorunum('hekim')}>{cev('Doktor')}</button>
+          <button type="button" className={`cip${kaynakKip === 'hekim' ? ' on' : ''}`}
+                  onClick={() => kaynakSec('hekim')}>{cev('Doktor')}</button>
         )}
         {/* CIHAZ gorunumu yalniz cihaz tanimliysa (316) - poliklinik
             kurulumunda bu buton hic cikmaz. */}
         {/* Kisitli hekimde (uzman doktor) yok - kullanici. */}
         {cihazlar.length > 0 && !hekimSabit && (
-          <button type="button" className={`cip${gorunum === 'cihaz' ? ' on' : ''}`}
-                  onClick={() => setGorunum('cihaz')}>Cihaz</button>
+          <button type="button" className={`cip${kaynakKip === 'cihaz' ? ' on' : ''}`}
+                  onClick={() => kaynakSec('cihaz')}>Cihaz</button>
+        )}
+        {kaynakKip === 'cihaz' && cihazlar.length > 1 && (
+          <select value={cihazSecim} onChange={e => setCihazSecim(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">{cev('Tüm Cihazlar')}</option>
+            {cihazlar.map(c => <option key={c.id} value={c.id}>{c.ad}</option>)}
+          </select>
         )}
         <button type="button" className="d" onClick={() => kaydir(-1)}>‹</button>
         <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
@@ -453,7 +482,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
           Bugün
         </button>
         {/* CIHAZI KAPAT (318): once aralik isaretlenir, sonra buton. */}
-        {onKapatmaIste && gorunum === 'cihaz' && (
+        {onKapatmaIste && kaynakKip === 'cihaz' && (
           <button type="button" className="d"
                   disabled={!secim || secim.cihaz === undefined || secim.bas === secim.bit}
                   title={secim && secim.cihaz !== undefined && secim.bas !== secim.bit
@@ -484,12 +513,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         <div className="takvim-yan">
           <button type="button" className="d takvim-yan-gizle" onClick={() => setYanAcik(false)}
                   title={cev('Paneli gizle - takvim tam genişlikte açılır')}>◂ {cev('Gizle')}</button>
-          {gorunum !== 'cihaz' && cihazlar.length > 0 && (
+          {kaynakKip !== 'cihaz' && cihazlar.length > 0 && (
             // Panelden sürüklenen istem yalnız cihaz sütununa düşer - başka
             //   görünümdeyken kullanıcı boşuna uğraşmasın.
             <div className="takvim-yan-uyari">
               Bırakmak için cihaz görünümü gerekir.
-              <button type="button" className="d" onClick={() => setGorunum('cihaz')}>
+              <button type="button" className="d" onClick={() => setGorunum(birlestir(haftalik, 'cihaz'))}>
                 Cihaz görünümü
               </button>
             </div>

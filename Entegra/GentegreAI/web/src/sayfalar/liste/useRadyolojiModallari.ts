@@ -16,7 +16,9 @@ export function useRadyolojiModallari() {
   const [istem, setIstem] = useState<
     { hastaId: number; hastaAdi: string; disIstem: boolean;
       /** Randevudan kabul (317): istem randevuya bağlanır, tetkik ön seçili gelir. */
-      randevuId?: number; hizmetId?: number } | null>(null);
+      randevuId?: number; hizmetId?: number;
+      /** Randevudaki gönderen (dış) hekim (1120). */
+      gonderen?: { id: number; ad: string } } | null>(null);
   /** Radyoloji: secili isteme randevu verme (316). */
   const [randevu, setRandevu] = useState<
     { istemId: number; accessionNo: string; tetkikAdi: string;

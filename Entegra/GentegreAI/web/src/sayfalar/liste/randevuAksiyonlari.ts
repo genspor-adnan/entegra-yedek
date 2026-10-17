@@ -19,7 +19,8 @@ export interface RandevuBaglam {
   git(yol: string): void;
   /** Kabul ekrani (317): istem modali randevuya bagli acilir. */
   setIstemModali(m: { hastaId: number; hastaAdi: string; disIstem: boolean;
-                      randevuId?: number; hizmetId?: number }): void;
+                      randevuId?: number; hizmetId?: number;
+                      gonderen?: { id: number; ad: string } }): void;
   /** Acilan/var olan basvuru MODAL gosterilir - belge kartinin rotasi yok. */
   setAcikBelgeId(id: number): void;
   /** Belge olusturmada sube: oturumun calisma subesi. */
@@ -66,6 +67,8 @@ export async function randevuAksiyonu(
       disIstem: true,
       randevuId: Number(s.id),
       hizmetId: Number(s.hizmetId) || undefined,
+      // GÖNDEREN HEKİM (1120): randevuda seçilen dış hekim istemin isteyeni olur.
+      gonderen: Number(s.gonderenId) ? { id: Number(s.gonderenId), ad: String(s.gonderen ?? '') } : undefined,
     });
   };
 

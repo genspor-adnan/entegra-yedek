@@ -16,6 +16,7 @@ public static partial class KaynakKatalogu
             left join public.belge b  on b.id = rv.belge_id
             left join public.hizmet hz on hz.id = rv.hizmet_id
             left join public.radyoloji_cihaz cz on cz.id = rv.cihaz_id
+            left join public.taraf gh on gh.id = rv.gonderen_id
             """,
         SubeKolonu: "rv.sube_id",
         // PORTAL (794): hasta KENDI randevusunu gorur (ve alir). Dis doktor /
@@ -36,6 +37,9 @@ public static partial class KaynakKatalogu
             new("cihazId",    "rv.cihaz_id",  "sayi",  "Cihaz Id", Varsayilan: false),
             new("hekimId",    "rv.hekim_id",  "sayi",  "Hekim Id", Varsayilan: false),
             new("hasta",      "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 170),
+            // GÖNDEREN (dış) HEKİM (1120) - görüntüleme merkezinde hastayı gönderen.
+            new("gonderen",   "coalesce(public.fn_taraf_ad(gh.unvan, gh.ad, gh.soyad)::varchar(120), '')", "metin", "Gönderen Doktor", Genislik: 160),
+            new("gonderenId", "rv.gonderen_id", "sayi", "Gönderen Id", Varsayilan: false),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
             // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): hastanın ham telefonu (cep + sabit,
             //   yalnız rakam) ve kimlik nosu - listede gizli, hızlı arama bunlarda da bakar.

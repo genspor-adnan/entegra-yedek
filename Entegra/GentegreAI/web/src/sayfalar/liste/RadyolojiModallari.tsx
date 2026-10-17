@@ -40,6 +40,7 @@ export function RadyolojiModallari(
           disIstem={m.istem.disIstem}
           randevuId={m.istem.randevuId ?? null}
           onSeciliHizmetId={m.istem.hizmetId ?? null}
+          onSeciliGonderen={m.istem.gonderen ?? null}
           onKapat={() => m.setIstem(null)}
           onTamam={(_a, sonuc) => {
             // RANDEVUDAN KABUL (317): acilan basvuru randevuya baglanir, randevu

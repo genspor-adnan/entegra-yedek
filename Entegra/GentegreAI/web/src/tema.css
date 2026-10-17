@@ -1775,7 +1775,7 @@ input.skt-gecmis {
    cakisiyordu. */
 .randevu-alanlar .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
 .randevu-alanlar .alan .etiket { text-align: left; width: 100% }
-.randevu-alanlar > .alan:last-child { grid-column: 1 / -1 }
+/* Son alan (Açıklama) artık tam satır değil: Kaynak'ın sağında (kullanıcı 17.10.2026). */
 
 /* Randevu durum rozeti "Planlandı" - mockup'taki mavi chip (.c-plan). */
 .rozet.mavi { background: #e3ecfa; color: #2f5c9e; border: 1px solid #bcd2ef }
@@ -1836,7 +1836,7 @@ input.skt-gecmis {
    `.alan .ikili input { flex: 1 }` kuralindan daha ozgul olmali. */
 /* Saat kutusu: yuzde degil SABIT genislik - tarih sutunu daralinca (175px)
    yuzdeyle "22:07" kirpiliyordu. */
-.alan .ikili input.yari { flex: 0 0 78px; max-width: 78px }
+.alan .ikili input.yari { flex: 0 0 92px; max-width: 92px }   /* 78px saatte "10:0" kırpıyordu (17.10.2026) */
 
 /* Randevu kimlik seridi (mockup: 1fr 210px 150px): HASTA genis, tarih/saat ve
    durum kadar yer kaplamasin - hasta adi + TC + telefon tek satira sigsin. */
@@ -1847,7 +1847,7 @@ input.skt-gecmis {
 /* Tarih sutunu 250 -> 205: %30 daraltmada (175) tarih kutusu "29.08.20" diye
    kirpiliyordu - tarih + 78px saat icin en az bu kadar yer gerekiyor. */
 /* Hasta · Tarih/Saat · Süre (dk, 16.10.2026) · Durum */
-.kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 600px) 205px 80px 150px }
+.kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 600px) 225px 80px 150px }   /* saat kırpılıyordu (17.10.2026) */
 /* PRIM PLANI KIMLIK SERIDI: satirda TAM 5 alan (kullanici) - on alan iki esit
    sirada okunsun. Serit varsayilani auto-fill'di ve pencere genisligine gore
    3-4-5 arasi degisiyordu; "kimlik / kapsam" ayrimi her ekranda baska yerden

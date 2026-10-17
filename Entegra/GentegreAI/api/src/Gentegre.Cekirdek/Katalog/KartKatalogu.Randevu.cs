@@ -54,12 +54,17 @@ public static partial class KartKatalogu
             new("hekimId",   "hekim_id",  "kod",
                 // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
                 //   olanlar (252) - muhasebeciye randevu verilmez.
-                KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Randevu"),
+                KodTablosu: "public.v_hekim_lookup", Baslik: "Doktor", Grup: "Randevu"),   // "Doktor" (kullanıcı 17.10.2026)
             // RADYOLOJI randevusunun kaynagi (316): cihaz doluysa hekim/bolum
             //   bos kalir, takvimde cihaz sutununda cizilir.
             new("cihazId",   "cihaz_id",  "kod",
                 KodTablosu: "public.v_radyoloji_cihaz_lookup",
                 Baslik: "Cihaz (radyoloji)", Grup: "Randevu"),
+            // GÖNDEREN HEKİM (1120; kullanıcı 17.10.2026: "görüntüleme merkezinde dış dr gönderiyor"):
+            //   dış hekim kartından aramayla. Yalnız bilgi - randevu yine cihaza / hekime verilir.
+            new("gonderenId", "gonderen_id", "kod",
+                KodTablosu: "public.v_dis_hekim_lookup", AramaKaynagi: "dis-hekim",
+                Baslik: "Gönderen Doktor", Grup: "Randevu"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",

@@ -340,6 +340,14 @@ public static partial class RadyolojiUclari
                 [baglam.SubeId ?? istem["subeId"], istem["hastaId"], istek.CihazId,
                  istem["hizmetId"], istek.Baslangic, sure, istek.Aciklama ?? "",
                  baglam.KullaniciId], iptal);
+            // GÖNDEREN HEKİM (1120): istemi yazan DIŞ hekim randevuda da görünsün.
+            await baglanti.CalistirAsync("""
+                update public.randevu
+                   set gonderen_id = (select i.istek_hekim_id from public.radyoloji_istem i
+                                        join public.taraf_personel p on p.id = i.istek_hekim_id and p.dis_hekim = 1
+                                       where i.id = @p1)
+                 where id = @p0
+                """, islem, [randevuId, id], iptal);
 
             await baglanti.CalistirAsync("""
                 update public.radyoloji_istem

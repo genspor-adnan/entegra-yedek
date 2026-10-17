@@ -14,7 +14,7 @@ export interface RandevuTercihi {
   cip?: number;
   bolum?: number | '';
   hekim?: number | '';
-  gorunum?: 'gun' | 'hafta' | 'hekim' | 'cihaz';
+  gorunum?: 'gun' | 'hafta' | 'hekim' | 'cihaz' | 'hafta-hekim' | 'hafta-cihaz';
   /** Liste mi takvim mi (GenGrid gorunumu; takvim = 'ek'). */
   liste?: 'liste' | 'grup' | 'analiz' | 'ek';
 }
