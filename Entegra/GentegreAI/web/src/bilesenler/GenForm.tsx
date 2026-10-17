@@ -1942,7 +1942,8 @@ Yine de yeni kayıt eklensin mi?`);
             </button>
           )}
           {!yeniMi && yetki.sil && !silYok && (
-            <button className="d teh" onClick={() => void sil()}>Sil</button>
+            // Randevu kartında Sil renksiz: renkler Geldi / Gelmedi için (kullanıcı 17.10.2026).
+            <button className={kaynak === 'randevu' ? 'd' : 'd teh'} onClick={() => void sil()}>Sil</button>
           )}
           {/* FIYAT GUNCELLE (kullanici: "özel fiyat tipinde Sil butonu
               sağına Fiyat Güncelle; modalde Artır/Azalt combosu ve yüzde
