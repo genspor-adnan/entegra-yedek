@@ -529,11 +529,19 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
    * GRUP İÇİ SÜRÜKLE-BIRAK (kullanıcı 17.10.2026: "menüler kendi grup içinde sürükle bırak ile yer
    * değişebilir olsun"): kaynak hedefin önüne girer, grubun bütün satırlarına yeni sıra (10, 20...) yazılır.
    */
-  const siraDegis = (g: Dugum, kaynakKod: string, hedefKod: string) => {
-    if (kaynakKod === hedefKod) return;
-    const sira = grupCocuklari(g).map(x => x.kod).filter(k => k !== kaynakKod);
-    const i = sira.indexOf(hedefKod);
-    sira.splice(i < 0 ? sira.length : i, 0, kaynakKod);
+  /** `kaynak` tek satır ya da ALT GRUP BLOĞU (`alt:<ad>` - altındaki satırlar birlikte taşınır);
+   *  `hedef` satır kodu ya da `alt:<ad>` (o alt grubun ilk satırının önü). */
+  const siraDegis = (g: Dugum, kaynak: string, hedef: string) => {
+    if (kaynak === hedef) return;
+    const cocuk = grupCocuklari(g);
+    const coz = (k: string) => k.startsWith('alt:')
+      ? cocuk.filter(x => x.altGrup === k.slice(4)).map(x => x.kod) : [k];
+    const tasinan = coz(kaynak);
+    const hedefIlk = coz(hedef)[0];
+    if (!hedefIlk || tasinan.includes(hedefIlk)) return;
+    const sira = cocuk.map(x => x.kod).filter(k => !tasinan.includes(k));
+    const i = sira.indexOf(hedefIlk);
+    sira.splice(i < 0 ? sira.length : i, 0, ...tasinan);
     sira.forEach((k, n) => { const dd = dugumler.find(x => x.kod === k); if (dd) farkYaz(dd, { sira: (n + 1) * 10 }) });
   };
   /** GRUP SÜRÜKLE-BIRAK: kaynak grup hedefin önüne girer, bütün gruplara yeni sıra yazılır. */
@@ -681,7 +689,14 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
                     const isa = liste.filter(s => !gizliMi(s)).length;
                     return (
                       <div key={`a-${x}`}>
-                        <div className="mn-sat">
+                        <div className={`mn-sat${surukle?.kod === `alt:${x}` ? ' surukle' : ''}`}
+                             draggable={duzenleyebilir}
+                             onDragStart={() => setSurukle({ kod: `alt:${x}`, grup: g.kod })}
+                             onDragEnd={() => setSurukle(null)}
+                             onDragOver={ev => { if (surukle?.grup === g.kod) ev.preventDefault() }}
+                             onDrop={() => { if (surukle?.grup === g.kod) siraDegis(g, surukle.kod, `alt:${x}`); setSurukle(null) }}
+                             title={duzenleyebilir ? c('Sürükleyerek alt grubu (altındakilerle) sırala') : undefined}>
+                          {duzenleyebilir && <span className="mn-tut">⠿</span>}
                           <input type="checkbox" checked={isa > 0} disabled={!duzenleyebilir}
                                  ref={el => { if (el) el.indeterminate = isa > 0 && isa < liste.length }}
                                  onChange={e => { for (const s of liste) satirIsaretle(s, e.target.checked) }} />
