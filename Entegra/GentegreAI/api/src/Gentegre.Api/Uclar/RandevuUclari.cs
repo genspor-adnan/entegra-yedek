@@ -50,6 +50,20 @@ public static partial class RandevuUclari
             return Results.Ok(new { doktorlar = liste.Select(d => new { id = d.Id, ad = d.Ad, sablonVar = d.SablonVar }) });
         });
 
+        // AYAR KAPILARI (1121): randevu ekranı bölüm / doktor seçicilerini ve takvimin Doktor
+        //   görünümünü buna göre çizer (kart / liste alanları zaten sunucuda süzülür).
+        grup.MapGet("/kapilar", async (BaglamCozucu cozucu, KurumProfilDeposu profil, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("randevu", Islem.Gor);
+            var kapali = await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal);
+            return Results.Ok(new
+            {
+                gonderenDoktor = !kapali.Contains("randevu.gonderen_doktor"),
+                bolumDoktor = !kapali.Contains("randevu.bolum_doktor"),
+            });
+        });
+
         ErteleUcunuEkle(grup);
         SeriUcunuEkle(grup);
     }

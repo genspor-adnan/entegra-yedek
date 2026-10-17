@@ -95,7 +95,12 @@ public sealed record KartAlani(
     /// gelen `dogrulama` alanini arayuz de kontrol eder, kaydetmeyi beklemez.
     /// Zorunluluktan AYRI: bos deger gecerlidir (kimligi belirsiz hasta).
     /// </summary>
-    string? Dogrulama = null
+    string? Dogrulama = null,
+    /// <summary>
+    /// AYAR KAPISI (1121): verilirse alan yalniz bu ayar ACIKSA metaya girer (fn_ayar_kapilari -
+    /// referans degeri, yoksa kurum tipi varsayilani). Kapaliysa urun modu gibi HIC gonderilmez.
+    /// </summary>
+    string? AyarKapisi = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

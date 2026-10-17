@@ -93,7 +93,8 @@ public static class KartUclari
             // EKRAN SATIR KISITI (1003): kısıt dışı kayıt "bulunamadı".
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, null, id, Islem.Gor, iptal);
 
-            var (okunabilir, gizli) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
+            var (okunabilir, gizli) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                                              await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
 
             // PORTAL (795): dis kurum / dis doktor / hasta yalniz KENDI kaydini
             //   acabilir; baskasinin karti "bulunamadi" doner.
@@ -199,7 +200,8 @@ public static class KartUclari
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
                     .LogError(h, "Lab istem {Id}: dis kurum basvurusu acilamadi.", yeniId); }
 
-            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
+            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                                              await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
             var govde = new Dictionary<string, object?>(kart!.Value.Kart, StringComparer.Ordinal)
             {
@@ -234,7 +236,8 @@ public static class KartUclari
                     new AlanHatasi("surum", "Kart okunurken donen surum geri gonderilmeli."));
 
             var uyarilar = new List<string>();
-            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
+            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                                              await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
             // EKRAN SATIR KISITI (1003): kısıt dışı kayıt değişmez, kayıt
             //   kısıtın dışına da çıkarılamaz (tedarikçi işareti kapatılamaz).
@@ -375,7 +378,7 @@ public static class KartUclari
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var urunModu = await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal);
-            var (okunabilir, gizli) = Alanlar(tanim, baglam, urunModu);
+            var (okunabilir, gizli) = Alanlar(tanim, baglam, urunModu, await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
 
             // KodTablosu (kendi tablosu) + KodListesi (kod_liste/kod_deger) alanlarinin
             //   TAM secenek listesi - kodAd yalniz kartta KULLANILAN tek degeri cozer.
@@ -606,7 +609,7 @@ public static class KartUclari
 
     /// <summary>Alan yetkisi: gizli alan gövdeye hiç girmez, adi bilgi olarak doner (§3.1).</summary>
     private static (List<KartAlani> Okunabilir, List<string> Gizli) Alanlar(
-        KartTanimi tanim, IstekBaglami baglam, int urunModu = 0)
+        KartTanimi tanim, IstekBaglami baglam, int urunModu = 0, IReadOnlySet<string>? kapaliKapilar = null)
     {
         var okunabilir = new List<KartAlani>();
         var gizli = new List<string>();
@@ -618,6 +621,8 @@ public static class KartUclari
             //   kavram yok; combo'yu gostermek "bunu ne yapacagim" sorusu
             //   uretiyordu. Deger yine DB'de (yeni liste "Özel" acilir).
             if (!UrunModlari.Uyar(alan.UrunModu, urunModu)) continue;
+            // AYAR KAPISI (1121): kapali ayarin alani karta hic girmez (or. goruntuleme merkezinde bolum / doktor).
+            if (alan.AyarKapisi is { } kapi && kapaliKapilar?.Contains(kapi) == true) continue;
 
             if (baglam.Yetkiler.AlanOkunur(tanim.Ad, alan.Ad)) okunabilir.Add(alan);
             else gizli.Add(alan.Ad);

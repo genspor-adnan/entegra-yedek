@@ -577,6 +577,13 @@ public sealed partial class KartDeposu
         return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal) ?? 1);
     }
 
+    /// <summary>Kapali ayar kapilari (1121) - kart metasi suzgeci icin; KurumProfilDeposu ile ayni sorgu.</summary>
+    public async Task<HashSet<string>> KapaliKapilarAsync(int subeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KurumProfilDeposu.KapaliKapilarAsync(baglanti, subeId, iptal);
+    }
+
     /// <summary>
     /// DOVIZ UCGENI (katalogdaki DovizKurali): kur ve yerel karsilik SUNUCUDA
     /// belirlenir.

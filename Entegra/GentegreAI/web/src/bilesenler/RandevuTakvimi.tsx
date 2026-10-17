@@ -67,10 +67,12 @@ function haftaBasi(t: Date) {
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                  bolum, hekimId, hekimler = [], cihazlar = [],
                                  yanPanel, onBirak, onKapatmaIste,
-                                 gorunumBaslangic, onGorunumDegisti, hekimSabit }: {
+                                 gorunumBaslangic, onGorunumDegisti, hekimSabit, doktorYok }: {
   ayarlar?: Partial<Ayarlar>;
   /** Kullanici kisitli hekim: doktor sutunlu gorunum yok (kendi adi sabit). */
   hekimSabit?: boolean;
+  /** Bölüm / doktor kapısı kapalı (1121, görüntüleme merkezi): Doktor görünümü yok. */
+  doktorYok?: boolean;
   /** Son secilen gorunum (kullanicinin kaldigi yer - randevuTercihi). */
   gorunumBaslangic?: Gorunum;
   /** Gorunum degisince haber verir (son secim saklansin diye). */
@@ -136,6 +138,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     : gorunum === 'cihaz' || gorunum === 'hafta-cihaz' ? 'cihaz' : null;
   /** Kaynak düğmesi tekrar basılınca bırakılır (kaynaksız gün / hafta). */
   const kaynakSec = (k: Exclude<Kaynak, null>) => setGorunum(birlestir(haftalik, kaynakKip === k ? null : k));
+  // Doktor görünümü kapalıysa (1121) kayıtlı "doktor" görünümü kaynaksıza düşer.
+  useEffect(() => { if (doktorYok && kaynakKip === 'hekim') setGorunumIc(birlestir(haftalik, null)) }, [doktorYok, kaynakKip, haftalik]);
   /** Haftalık cihazda sütun sayısı gün × cihaz - tek cihaza daraltılabilir. */
   const [cihazSecim, setCihazSecim] = useState<number | ''>('');
   const [gun, setGun] = useState(() => isoGun(new Date()));
@@ -454,11 +458,11 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         <button type="button" className={`cip${haftalik ? ' on' : ''}`}
                 onClick={() => setGorunum(birlestir(true, kaynakKip))}>{cev('Haftalık')}</button>
         {/* AYRAÇ (kullanıcı 17.10.2026): zaman ile kaynak ayrı gruplar - ikisi birlikte seçilir. */}
-        {!hekimSabit && <span className="durumseg-ayrac" style={{ alignSelf: 'center', height: 20, margin: '0 6px' }} />}
+        {!hekimSabit && (!doktorYok || cihazlar.length > 0) && <span className="durumseg-ayrac" style={{ alignSelf: 'center', height: 20, margin: '0 6px' }} />}
         {/* Doktor gorunumu: secili GUN icin sutunlar doktorlardir (kullanici).
             Kisitli hekimde YOK (kullanici: "uzman doktor rolunde Doktor filtre
             butonu gorunmez") - yalniz kendi randevularini goruyor. */}
-        {!hekimSabit && (
+        {!hekimSabit && !doktorYok && (
           <button type="button" className={`cip${kaynakKip === 'hekim' ? ' on' : ''}`}
                   onClick={() => kaynakSec('hekim')}>{cev('Doktor')}</button>
         )}

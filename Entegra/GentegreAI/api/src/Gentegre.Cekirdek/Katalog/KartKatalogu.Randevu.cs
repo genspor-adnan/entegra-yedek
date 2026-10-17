@@ -50,11 +50,13 @@ public static partial class KartKatalogu
                 // Yalniz randevu_verilebilir departmanlar (251) - Muhasebe'ye
                 //   randevu verilmez.
                 KodTablosu: "public.v_randevu_bolum_lookup",
-                Baslik: "Bölüm / Poliklinik", Grup: "Randevu"),
+                Baslik: "Bölüm / Poliklinik", Grup: "Randevu", AyarKapisi: "randevu.bolum_doktor"),
             new("hekimId",   "hekim_id",  "kod",
                 // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
                 //   olanlar (252) - muhasebeciye randevu verilmez.
-                KodTablosu: "public.v_hekim_lookup", Baslik: "Doktor", Grup: "Randevu"),   // "Doktor" (kullanıcı 17.10.2026)
+                KodTablosu: "public.v_hekim_lookup", Baslik: "Doktor", Grup: "Randevu",
+                // Görüntüleme merkezinde bölüm / doktor yok - randevu cihaza (1121 kapısı).
+                AyarKapisi: "randevu.bolum_doktor"),   // "Doktor" (kullanıcı 17.10.2026)
             // RADYOLOJI randevusunun kaynagi (316): cihaz doluysa hekim/bolum
             //   bos kalir, takvimde cihaz sutununda cizilir.
             new("cihazId",   "cihaz_id",  "kod",
@@ -64,7 +66,7 @@ public static partial class KartKatalogu
             //   dış hekim kartından aramayla. Yalnız bilgi - randevu yine cihaza / hekime verilir.
             new("gonderenId", "gonderen_id", "kod",
                 KodTablosu: "public.v_dis_hekim_lookup", AramaKaynagi: "dis-hekim",
-                Baslik: "Gönderen Doktor", Grup: "Randevu"),
+                Baslik: "Gönderen Doktor", Grup: "Randevu", AyarKapisi: "randevu.gonderen_doktor"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",

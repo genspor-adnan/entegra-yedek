@@ -31,7 +31,8 @@ public static class ListeUclari
             //   (fiyat listesinde "Tarife") gridde bos bir sutun olarak
             //   duruyordu. Iki ucun ayni kolon kumesini gormesi sart.
             var kolonlar = GorunurKolonlar(tanim, baglam,
-                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal));
+                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                    await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
             if (kolonlar.Count == 0) throw GentegreHatasi.Yasak("Bu listede gorebileceginiz kolon yok.");
 
             // HEKIM KISITI: hekim yalniz kendine gelen hastalari gorur; banko /
@@ -199,7 +200,8 @@ public static class ListeUclari
             if (!tanim.HerkesOkur) baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var kolonlar = GorunurKolonlar(tanim, baglam,
-                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal))
+                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                    await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal))
                 .Select(k => new KolonMeta(k.Ad, k.Baslik, k.Tip, k.Hizalama, k.Bicim,
                                            k.Varsayilan, k.Siralanabilir, k.Filtrelenebilir, k.Genislik,
                                            k.SadeceGrupToplami, k.Kodlar))
@@ -234,9 +236,11 @@ public static class ListeUclari
     /// degeri gosteren olu bir sutundu.
     /// </summary>
     private static List<KolonTanimi> GorunurKolonlar(KaynakTanimi tanim,
-        IstekBaglami baglam, int urunModu = 0)
+        IstekBaglami baglam, int urunModu = 0, IReadOnlySet<string>? kapaliKapilar = null)
         => tanim.Kolonlar
                 .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu)
+                            // AYAR KAPISI (1121): kapali ayarin kolonu listeye hic girmez.
+                            && (k.AyarKapisi is null || kapaliKapilar?.Contains(k.AyarKapisi) != true)
                             && baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
                 .ToList();
 

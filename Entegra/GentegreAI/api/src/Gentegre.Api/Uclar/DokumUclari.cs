@@ -37,12 +37,13 @@ public static class DokumUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokum", Islem.Gor);
             var urunModu = await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal);
+            var kapaliKapilar = await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal);
             var kaynaklar = KaynakKatalogu.Tumu
                 .Where(k => baglam.Yetkiler.Var(k.YetkiKodu, Islem.Gor))
                 // Urun modu: uretim kaynaklari HBYS'de listelenmez (10.10.2026).
                 .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu))
                 .Select(k => new KaynakMeta(k.Ad, k.YetkiKodu, KaynakBasligi(k),
-                    GorunurKolonlar(k, baglam, urunModu)
+                    GorunurKolonlar(k, baglam, urunModu, kapaliKapilar)
                         .Select(c => new KolonBoyutMeta(c.Ad, c.Baslik, c.Tip, c.Filtrelenebilir,
                             c.Siralanabilir, OlcuKatalogu.Gruplanabilir(c), OlcuKatalogu.Olculebilir(c), c.Kodlar))
                         .ToList()))
@@ -123,7 +124,8 @@ public static class DokumUclari
             baglam.YetkiIste(kaynak.YetkiKodu, Islem.Gor);
             kayit.Kaynak = kaynak.Ad;
             DokumDogrulayici.Dogrula(kayit.Tanim,
-                GorunurKolonlar(kaynak, baglam, await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal)));
+                GorunurKolonlar(kaynak, baglam, await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                                await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal)));
             // Kurum geneli paylaşımı yalnız Degistir yetkisi olan (yönetici) açar.
             if (kayit.Gorunurluk == 2 && !baglam.Yetkiler.Var("dokum", Islem.Degistir))
                 throw GentegreHatasi.Yasak("Kurum geneli paylaşım için yönetici yetkisi gerekir.");
@@ -159,7 +161,8 @@ public static class DokumUclari
 
             var kaynak = KaynakBul(tanim.Kaynak);
             baglam.YetkiIste(kaynak.YetkiKodu, Islem.Gor);
-            var kolonlar = GorunurKolonlar(kaynak, baglam, await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal));
+            var kolonlar = GorunurKolonlar(kaynak, baglam, await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal),
+                                           await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
             DokumDogrulayici.Dogrula(tanim, kolonlar);
 
             var filtre = ParametreCozucu.Uygula(tanim.Filtre, tanim,
@@ -206,9 +209,11 @@ public static class DokumUclari
            ?? throw GentegreHatasi.Dogrulama($"Bilinmeyen kaynak: {ad}", new AlanHatasi("kaynak", "Katalogda yok."));
 
     /// <summary>ListeUclari.GorunurKolonlar ile aynı kural: alan yetkisi + ürün modu.</summary>
-    private static List<KolonTanimi> GorunurKolonlar(KaynakTanimi tanim, IstekBaglami baglam, int urunModu)
+    private static List<KolonTanimi> GorunurKolonlar(KaynakTanimi tanim, IstekBaglami baglam, int urunModu,
+        IReadOnlySet<string>? kapaliKapilar = null)
         => tanim.Kolonlar
                 .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu)
+                            && (k.AyarKapisi is null || kapaliKapilar?.Contains(k.AyarKapisi) != true)
                             && baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
                 .ToList();
 

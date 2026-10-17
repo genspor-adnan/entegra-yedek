@@ -41,14 +41,20 @@ export function useRandevuEkrani(
   //   randevulari gorur - sadece kendi adi gelsin ve degisemesin"): secici
   //   kendi adina SABIT. Suzme sunucuda (HekimKisiti); burasi yalniz gorunum.
   const kendiHekim = kullanici?.hekimKisitli ? kullanici.id : null;
-  const hekim: number | '' = kendiHekim ?? secilenHekim;
+  /**
+   * BÖLÜM / DOKTOR KAPISI (1121; kullanıcı 17.10.2026: "görüntüleme merkezinde randevu kartında ve
+   * listesinde bölüm ve doktor alanlarına gerek yok"): kapalıysa seçiciler çizilmez ve kayıtlı son
+   * seçim süzgece girmez - görünmeyen bir doktor süzgeci listeyi gizlice daraltmasın.
+   */
+  const [bolumDoktorAcik, setBolumDoktorAcik] = useState(true);
+  const hekim: number | '' = kendiHekim ?? (bolumDoktorAcik ? secilenHekim : '');
   const setHekim = (h: number | '') => { if (kendiHekim === null) setSecilenHekim(h) };
   // KISITLI HEKIMIN BOLUMU (kullanici: "bolumler combosunda sadece giren
   //   hekimin bolumu gorunsun ve disable olsun"): secenekler yalniz onun
   //   bolum(ler)i; tek bolumse secici kilitli ve o bolum secili.
   const kendiBolumleri = useMemo(() => kendiHekim === null ? null
     : agac.filter(d => d.hekimler.some(h => h.hekimId === kendiHekim)), [agac, kendiHekim]);
-  const bolum: number | '' = kendiBolumleri === null ? bolumSecim
+  const bolum: number | '' = kendiBolumleri === null ? (bolumDoktorAcik ? bolumSecim : '')
     : kendiBolumleri.some(d => d.departmanId === bolumSecim) ? bolumSecim : (kendiBolumleri[0]?.departmanId ?? '');
   const bolumSecenekleri = kendiBolumleri ?? agac;
   const bolumSabit = kendiBolumleri !== null && kendiBolumleri.length <= 1;
@@ -72,6 +78,9 @@ export function useRandevuEkrani(
     api.randevuBolumleri()
       .then(y => { if (!iptal) setAgac(y) })
       .catch(() => { /* bolum listesi okunamazsa suzgecler bos kalir */ });
+    api.randevuKapilari()
+      .then(k => { if (!iptal) setBolumDoktorAcik(k.bolumDoktor) })
+      .catch(() => { /* okunamazsa acik kalir */ });
     return () => { iptal = true };
   }, [randevuEkrani]);
 
@@ -214,6 +223,7 @@ export function useRandevuEkrani(
   };
 
   return { gecmisGun, agac, bolum, setBolum, bolumSecenekleri, bolumSabit, hekim, setHekim, hekimSabit: kendiHekim !== null, aralik, setAralik,
+           bolumDoktorAcik: bolumDoktorAcik || kendiHekim !== null,
            cihazlar, bekleyenSecili, setBekleyenSecili,
            filtre, takvimAyarlari, hekimSecenekleri, hekimBolumu, bekleyeneRandevuVer };
 }

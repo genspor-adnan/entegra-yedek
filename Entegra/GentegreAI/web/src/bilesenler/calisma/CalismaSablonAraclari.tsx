@@ -129,12 +129,15 @@ interface Varsayilan {
   bas: string; ogleBas: string; ogleBit: string; bit: string;
   slot: number;
   mesaiDisi: string; izinli: string;
+  /** Ayar kapıları (1121): '' kurum tipine göre · '1' göster · '0' gizle. */
+  gonderen: string; bolumDoktor: string;
 }
 
 const ANAHTAR = {
   gunler: 'randevu.calisma_gunleri', bas: 'randevu.baslangic_saat', bit: 'randevu.bitis_saat',
   ogleBas: 'randevu.ogle_baslangic', ogleBit: 'randevu.ogle_bitis', slot: 'randevu.slot_dk',
   mesaiDisi: 'randevu.mesai_disi', izinli: 'randevu.izinli_hekim',
+  gonderen: 'randevu.gonderen_doktor', bolumDoktor: 'randevu.bolum_doktor',
 } as const;
 
 function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
@@ -154,6 +157,7 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
         ogleBas: al(ANAHTAR.ogleBas, ''), ogleBit: al(ANAHTAR.ogleBit, ''),
         slot: Number(al(ANAHTAR.slot, '15')) || 15,
         mesaiDisi: al(ANAHTAR.mesaiDisi, '0'), izinli: al(ANAHTAR.izinli, '0'),
+        gonderen: ham[ANAHTAR.gonderen], bolumDoktor: ham[ANAHTAR.bolumDoktor],
       });
     }).catch(h => setHata(hataMetni(h)));
   }, []);
@@ -169,6 +173,7 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
       [ANAHTAR.gunler]: [...v.gunler].sort().join(','), [ANAHTAR.bas]: v.bas, [ANAHTAR.bit]: v.bit,
       [ANAHTAR.ogleBas]: v.ogleBas, [ANAHTAR.ogleBit]: v.ogleBit, [ANAHTAR.slot]: String(v.slot),
       [ANAHTAR.mesaiDisi]: v.mesaiDisi, [ANAHTAR.izinli]: v.izinli,
+      [ANAHTAR.gonderen]: v.gonderen, [ANAHTAR.bolumDoktor]: v.bolumDoktor,
     };
     // Yalniz degisenler yazilir (her ayar ayri kayit, ayri log satiri).
     for (const [a, d] of Object.entries(yeni)) if (d !== ilk[a]) await api.ayarYaz(a, d);
@@ -180,6 +185,16 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
     <div className="cipler">
       {[['0', 'Engelle'], ['1', 'Yalnız uyar']].map(([k, ad]) => (
         <button key={k} type="button" className={`cip${v[anahtar] === k ? ' on' : ''}`}
+                onClick={() => setV({ ...v, [anahtar]: k })}>{c(ad)}</button>
+      ))}
+    </div>
+  );
+
+  /** Alan göster / gizle (1121): boş = kurum tipinin varsayılanı. */
+  const kapi = (anahtar: 'gonderen' | 'bolumDoktor') => v && (
+    <div className="cipler">
+      {[['', 'Kurum tipine göre'], ['1', 'Göster'], ['0', 'Gizle']].map(([k, ad]) => (
+        <button key={k || 'v'} type="button" className={`cip${v[anahtar] === k ? ' on' : ''}`}
                 onClick={() => setV({ ...v, [anahtar]: k })}>{c(ad)}</button>
       ))}
     </div>
@@ -226,6 +241,10 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
           <h6>{c('Randevu kuralları')}</h6>
           <div className="cs-alan"><span>{c('Mesai dışına randevu')}</span>{kural('mesaiDisi')}</div>
           <div className="cs-alan"><span>{c('İzinli doktora randevu')}</span>{kural('izinli')}</div>
+          <h6>{c('Randevu kartı ve listesi')}</h6>
+          <div className="cs-alan"><span>{c('Gönderen doktor alanı')}</span>{kapi('gonderen')}</div>
+          <div className="cs-alan"><span>{c('Bölüm / doktor alanları')}</span>{kapi('bolumDoktor')}</div>
+          <div className="not">{c('"Kurum tipine göre": görüntüleme ve laboratuvarda bölüm / doktor gizli; muayenehane, diş, OSGB ve ERP’de gönderen doktor gizli.')}</div>
         </div>
       )}
     </Modal>

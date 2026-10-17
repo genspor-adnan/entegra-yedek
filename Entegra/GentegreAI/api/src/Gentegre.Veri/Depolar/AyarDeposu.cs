@@ -79,6 +79,8 @@ public sealed class AyarDeposu
         // RANDEVU KURALLARI (748/943): izinli doktora ve calisma plani disina
         //   randevu - 0 engelle, 1 yalniz uyar. Calisma Sablonlari > Varsayilanlar.
         "randevu.izinli_hekim", "randevu.mesai_disi",
+        // AYAR KAPILARI (1121): randevu kartı / listesinde alan göster (1) / gizle (0); boş = kurum tipi.
+        "randevu.gonderen_doktor", "randevu.bolum_doktor",
         // RANDEVU HATIRLATMASI (399): acik mi ve randevudan KAC SAAT once.
         //   Kapatilabilir olmasi sart - SMS ucretli, her kurum istemez.
         "randevu.hatirlatma_acik", "randevu.hatirlatma_saat",

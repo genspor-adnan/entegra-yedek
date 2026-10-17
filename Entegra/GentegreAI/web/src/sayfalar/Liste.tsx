@@ -1250,8 +1250,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         </>
       ) : tanim.kaynak === 'randevu' ? (
         // Bolum/hekim suzgeci TARIH ARALIGININ SAGINDA (kullanici) - grid ve
-        //   altindaki takvim ayni secimi kullanir.
-        <>
+        //   altindaki takvim ayni secimi kullanir. Bölüm / doktor kapısı kapalıysa (1121) hiç yok.
+        !randevuEkran.bolumDoktorAcik ? null : <>
           <select value={randevuEkran.bolum} title="Bölüm" disabled={randevuEkran.bolumSabit}
                   onChange={e => { randevuEkran.setBolum(e.target.value ? Number(e.target.value) : '');
                                    randevuEkran.setHekim('') }}>
@@ -1523,6 +1523,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             gorunumBaslangic={randevuTercihiOku(kullanici?.id).gorunum}
             onGorunumDegisti={g => randevuTercihiYaz(kullanici?.id, { gorunum: g })}
             hekimSabit={randevuEkran.hekimSabit}
+            doktorYok={!randevuEkran.bolumDoktorAcik}
             bolum={randevuEkran.bolum === '' ? undefined : randevuEkran.bolum}
             hekimId={randevuEkran.hekim === '' ? undefined : randevuEkran.hekim}
             yenile={yenile}

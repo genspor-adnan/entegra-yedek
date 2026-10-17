@@ -37,7 +37,12 @@ public sealed record KolonTanimi(
     /// HIC gorunmesin diye var: bos combo gostermek "bunu ne yapacagim"
     /// sorusu uretiyor.
     /// </summary>
-    int UrunModu = 0
+    int UrunModu = 0,
+    /// <summary>
+    /// AYAR KAPISI (1121): verilirse alan yalniz bu ayar ACIKSA metaya girer (fn_ayar_kapilari -
+    /// referans degeri, yoksa kurum tipi varsayilani). Kapaliysa urun modu gibi HIC gonderilmez.
+    /// </summary>
+    string? AyarKapisi = null
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;

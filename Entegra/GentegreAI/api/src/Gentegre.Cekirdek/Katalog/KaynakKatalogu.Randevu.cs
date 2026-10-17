@@ -28,9 +28,12 @@ public static partial class KaynakKatalogu
         {
             new("id",         "rv.id",        "sayi",  "Id", Varsayilan: false),
             // BOLUM ve HEKIM en basta (kullanici).
-            new("bolumAdi", RandevuKatalog.BolumAdi, "metin", "Bölüm", Genislik: 130),
+            // Görünen Bölüm / Doktor / Gönderen kolonları AYAR KAPISINDA (1121); id kolonları kapısız -
+            //   süzgeçler (takvim, doktor combosu) onlarla çalışır.
+            new("bolumAdi", RandevuKatalog.BolumAdi, "metin", "Bölüm", Genislik: 130, AyarKapisi: "randevu.bolum_doktor"),
             new("bolum",      "rv.bolum",     "sayi",  "Bölüm Kodu", Varsayilan: false),
-            new("hekim",      "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hekim", Genislik: 160),
+            new("hekim",      "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Doktor", Genislik: 160,
+                AyarKapisi: "randevu.bolum_doktor"),
             // KAYNAK (316): poliklinikte hekim, radyolojide cihaz. Tek kolonda
             //   birlesik gostermek listeyi okunur tutuyor.
             new("cihaz",      "coalesce(cz.ad, '')", "metin", "Cihaz", Genislik: 160),
@@ -38,7 +41,8 @@ public static partial class KaynakKatalogu
             new("hekimId",    "rv.hekim_id",  "sayi",  "Hekim Id", Varsayilan: false),
             new("hasta",      "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 170),
             // GÖNDEREN (dış) HEKİM (1120) - görüntüleme merkezinde hastayı gönderen.
-            new("gonderen",   "coalesce(public.fn_taraf_ad(gh.unvan, gh.ad, gh.soyad)::varchar(120), '')", "metin", "Gönderen Doktor", Genislik: 160),
+            new("gonderen",   "coalesce(public.fn_taraf_ad(gh.unvan, gh.ad, gh.soyad)::varchar(120), '')", "metin", "Gönderen Doktor", Genislik: 160,
+                AyarKapisi: "randevu.gonderen_doktor"),
             new("gonderenId", "rv.gonderen_id", "sayi", "Gönderen Id", Varsayilan: false),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
             // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): hastanın ham telefonu (cep + sabit,

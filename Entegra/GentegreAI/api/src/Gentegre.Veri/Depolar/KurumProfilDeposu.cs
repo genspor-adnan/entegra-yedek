@@ -302,6 +302,27 @@ public sealed class KurumProfilDeposu
                 okuyucu.IsDBNull(2) ? (short)0 : okuyucu.GetInt16(2));
     }
 
+    /// <summary>
+    /// KAPALI AYAR KAPILARI (1121): katalogda AyarKapisi verilmis alan / kolonlardan bu subede
+    /// KAPALI olanlarin anahtarlari - meta suzgeci bunlari hic gondermez.
+    /// </summary>
+    public async Task<HashSet<string>> KapaliKapilarAsync(int subeId = 0, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KapaliKapilarAsync(baglanti, subeId, iptal);
+    }
+
+    public static async Task<HashSet<string>> KapaliKapilarAsync(NpgsqlConnection baglanti,
+        int subeId = 0, CancellationToken iptal = default)
+    {
+        var sonuc = new HashSet<string>(StringComparer.Ordinal);
+        await using var komut = baglanti.Komut(
+            "select anahtar from public.fn_ayar_kapilari(@p0) where acik = 0", null, subeId);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) sonuc.Add(o.GetString(0));
+        return sonuc;
+    }
+
     public static async Task<int> UrunModuAsync(NpgsqlConnection baglanti,
         int subeId = 0, CancellationToken iptal = default)
     {
