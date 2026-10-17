@@ -339,9 +339,19 @@ const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
-                          resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
-                          gizliAlanlar, gizliSekmeler, zorunluAlanlar, alanIpucu, alanGirdisi }: Props) {
+                          resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
+                          gizliAlanlar, gizliSekmeler, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
   const { kullanici } = useOturum();
+  // İÇERİĞE GÖRE SABİT (kullanıcı 16.10.2026: "hizmet ara ekranında yazdıklarım gitti.. belli aralıklarla
+  //   refresh oluyor"): çağıranlar bu nesneleri çizimde yeniden kuruyor (URL'den gelen randevu saati /
+  //   hekimi, önce sorulan hasta...). Yükleme etkisi bunlara bağlı olduğu için her üst çizimde - ör. 20 sn'lik
+  //   bildirim yoklaması - kart baştan yükleniyor, açık arama penceresi ve girilenler kayboluyordu.
+  const varsayilanAnahtari = JSON.stringify(yeniKayitVarsayilanlariHam ?? null);
+  const zorunluAnahtari = JSON.stringify(zorunluAlanlarHam ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const yeniKayitVarsayilanlari = useMemo(() => yeniKayitVarsayilanlariHam, [varsayilanAnahtari]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const zorunluAlanlar = useMemo(() => zorunluAlanlarHam, [zorunluAnahtari]);
   const yeniMi = id === 'yeni';
   // Dis hekim (305) de ad/soyad ile calisir: unvan gosterilmez, ad+soyaddan
   //   turetilir - personel/hasta kartlariyla ayni kural.
