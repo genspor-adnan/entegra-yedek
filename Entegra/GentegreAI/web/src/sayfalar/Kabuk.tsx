@@ -155,10 +155,12 @@ export function Kabuk() {
   //   kurulur. Dil degisimi nadir ve bilincli bir eylem; sayfa yenilemekle
   //   ayni etkiyi verir ama oturum ve konum korunur.
   useEffect(() => { void ceviriYukle(kullanici?.dil ?? 0) }, [kullanici?.dil]);
-  /** Sol menu acik/kapali - tercih tarayicida kalir (dar ekranda kapali calisilir). */
-  const [menuKapaliKalici, setMenuKapaliKalici] = useState<boolean>(() => {
-    try { return localStorage.getItem('gentegre.menu') === 'kapali' } catch { return false }
-  });
+  /**
+   * Sol menu acik/kapali. ACILISTA HEP KAPALI (kullanici 17.10.2026: "program açılışta sol menü her
+   * zaman kapalı olsun.. istersek açalım"): eskiden son tercih tarayicida saklanip geri yukleniyordu.
+   * Oturum icinde ☰ / Ctrl+B ile acilir ve acik kalir; sayfa yeniden acilinca yine kapali baslar.
+   */
+  const [menuKapaliKalici, setMenuKapaliKalici] = useState(true);
   /**
    * ANA EKRAN v3 TERCİHLERİ (gorunum): ekran sekmeleri ve sol menü davranışı.
    * "Seçince kapansın" (menuSabit=false): menü kapalı başlar, ☰ / Ctrl+B geçici
@@ -177,10 +179,7 @@ export function Kabuk() {
   const menuCevir = () => {
     if (!menuGorur) return;
     if (!gorunum.menuSabit) { setGeciciAcik(a => !a); return }
-    setMenuKapaliKalici(k => {
-      try { localStorage.setItem('gentegre.menu', k ? 'acik' : 'kapali') } catch { /* gizli sekme */ }
-      return !k;
-    });
+    setMenuKapaliKalici(k => !k);
   };
   // Geçici açılan menü ekran seçilince kapanır.
   useEffect(() => { setGeciciAcik(false) }, [konum.key]);
