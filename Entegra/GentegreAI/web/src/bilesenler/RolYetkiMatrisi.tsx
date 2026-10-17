@@ -62,6 +62,15 @@ const VERI_KAPISI_ALTI: Record<string, string> =
  */
 const YALNIZ_GOR = new Set(Object.values(VERI_KAPISI_ALTI));
 
+/**
+ * WEB'DE KULLANILMAYAN YETKİLER MATRİSTE YOK (kullanıcı 17.10.2026: "kullanılmayanları kaldır").
+ * Sunucuda bu kodlara bağlı bir ekran ya da kapı yok; yalnız rol şablonlarında, Delphi senkronunda
+ * (kredi.*) ve aktarım tablosunda (doviz_kur) geçiyorlar. Yetki satırları veritabanında durur -
+ * silmek Delphi senkronunu / aktarımı bozardı; matris yalnız çizmez. Bir kod web'de kullanılmaya
+ * başlayınca buradan çıkarılır.
+ */
+const KULLANILMAYAN = new Set(['doviz_kur', 'kasa_kapatma', 'kod_liste', 'kredi', 'kredi.taksit-ode']);
+
 /** Satırda Ekle / Değiştir / Sil sütunları anlamlı mı (aksiyon ve liste ekranında değil). */
 const islemSutunlu = (s: YetkiSatiri) => s.tur !== 1 && !YALNIZ_GOR.has(s.kod);
 
@@ -208,7 +217,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
   // MENÜ DÜZENİNDE GİZLENEN PANEL (17.10.2026, `gosterge.<kod>`) matriste de çizilmez.
   const gizliPanel = new Set(duzen.filter(r => r.dugumTur === DUGUM.ekran && r.gizli === 1
                                                 && r.sistemKod.startsWith('gosterge.')).map(r => r.sistemKod));
-  const yeni = guvenli.filter(s => !s.grup.startsWith('eski') && !gizliPanel.has(s.kod));
+  const yeni = guvenli.filter(s => !s.grup.startsWith('eski') && !gizliPanel.has(s.kod) && !KULLANILMAYAN.has(s.kod));
 
   // 1) Modul yetkileri (kodunda '.' yok) grubuna yerlesir.
   //
@@ -614,6 +623,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur, ilkGorunum }: {
           {d.ic && <MenuIkon ic={d.ic} />}{d.ic ? ' ' : ''}
           <span style={{ fontWeight: d.satir ? 400 : 600 }} title={d.ipucu}>{d.ad}</span>
           {aksiyon && <span className="rozet gri" style={{ marginLeft: 6 }}>aksiyon</span>}
+
           {!d.satir && (
             <span style={{ opacity: .55, marginLeft: 6, fontSize: 12 }}>
               ({altSatirlar.length})
@@ -811,6 +821,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
           {d.ad}
           {aksiyonSayi > 0 && <span className="ym-aks"> · {aksiyonSayi} {cev('aksiyon')}</span>}
           {s.degerAlir && <span className="ym-aks"> · {cev('sınır')}{s.deger ? ` ${s.deger}` : ''}</span>}
+
         </button>
         {s.tur === 1 ? <span className="rozet gri">{cev('aksiyon')}</span>
           : !islemSutunlu(s) ? <span className="ym-aks" title={cev('Liste ekranı yalnız Gör; kart işlemleri alttaki satırda')}>{cev('yalnız gör')}</span> : (
