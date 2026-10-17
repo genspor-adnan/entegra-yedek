@@ -88,6 +88,11 @@ interface Props {
   /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
   cipSonu?: React.ReactNode;
   /**
+   * EK ARAMA ALANLARI (16.10.2026, hasta: "telefon / kimlik no ile de arayabilmeliyim"): hızlı arama
+   * görünen metin kolonlarına ek olarak bu (gizli olabilen) kolonlarda da arar - ör. telefonHam, vknoHam.
+   */
+  aramaEkAlanlari?: string[];
+  /**
    * KOD KOLONUNA GORE SUZEN COMBO (492): ciplerin sagina cizilir, secim
    * sunucuya filtre olarak gider. Secenekler kolonun KENDI meta sozlugunden
    * (`kodlar`) gelir - istemci ikinci bir etiket listesi tutmaz.
@@ -258,7 +263,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
-                          seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
+                          seciliBaslangicId, cipSonu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
@@ -362,6 +367,19 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const filtreSatiriFiltresi = useCallback(
     () => filtreSatiriKosulu(filtreDeger, kolonlar), [filtreDeger, kolonlar]);
 
+  /** Hızlı aramanın kolonları: görünen + ek arama alanları (gizli de olsa). */
+  const aramaKolonlari = useMemo(() => [
+    ...kolonlar,
+    ...tumKolonlar.filter(k => aramaEkAlanlari?.includes(k.ad) && !kolonlar.some(x => x.ad === k.ad)),
+  ], [kolonlar, tumKolonlar, aramaEkAlanlari]);
+  /** ARAMA KUTUSU İPUCU (kullanıcı 16.10.2026: "arama editinde aranacak alanlar görünmesi daha iyi"). */
+  const aramaIpucu = useMemo(() => {
+    const adlar = [...new Set(aramaKolonlari.filter(k => k.tip === 'metin' && k.filtrelenebilir)
+      .map(k => cev(k.baslik.replace(/\s*\(ham\)\s*$/i, ''))))];
+    return adlar.length === 0 ? cev('Bu listede ara…')
+      : `${cev('Ara')}: ${adlar.slice(0, 5).join(', ')}${adlar.length > 5 ? '…' : ''}`;
+  }, [aramaKolonlari]);
+
   // LISTE VERISI (yukleme · sayfalama · siralama · arama · CSV) kendi
   //   kancasinda: grid/useListeVerisi.
   const { satirlar, toplamKayit, toplamlar, gruplar, grupKolonu,
@@ -370,7 +388,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           yukleniyor, hata, sureMs,
           yukle, csvIndir, sonSayfa } =
     useListeVerisi({
-      kaynak, baslik, kolonlar, sabitFiltre: sabitFiltreSekmeli, toplam, sayfaBoyu, cipler, cipIndeks,
+      kaynak, baslik, kolonlar, aramaKolonlari, sabitFiltre: sabitFiltreSekmeli, toplam, sayfaBoyu, cipler, cipIndeks,
       kodSuzgeci, kodSuzgecDeger, tarihAlani, tarihBas, tarihBit, varsayilanGrup,
       yenile, odaklaSonEklenen, filtreSatiriFiltresi,
     });
@@ -662,7 +680,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
         <div className="ara-kutu dar">
           <span>🔍</span>
           <input type="search"
-            placeholder={cev('Bu listede ara…')}
+            placeholder={aramaIpucu} title={aramaIpucu}
             onChange={e => aramaDegisti(e.target.value)}
           />
         </div>

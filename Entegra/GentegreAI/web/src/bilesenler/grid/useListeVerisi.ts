@@ -16,6 +16,8 @@ export interface ListeVerisiGirdisi {
   /** Ekran basligi - CSV dosya adinda kullanilir. */
   baslik?: string;
   kolonlar: KolonMeta[];
+  /** Hızlı aramanın baktığı kolonlar (görünenler + listenin gizli ek arama alanları); yoksa görünenler. */
+  aramaKolonlari?: KolonMeta[];
   sabitFiltre?: Kosul;
   /** Toplami istenen kolonlar (sunucu hesaplar). */
   toplam?: string[];
@@ -71,7 +73,7 @@ export function useListeVerisi(g: ListeVerisiGirdisi) {
   const [sureMs, setSureMs] = useState(0);
 
   const aramaFiltresi = useCallback(
-    () => aramaKosulu(arama, kolonlar), [arama, kolonlar]);
+    () => aramaKosulu(arama, g.aramaKolonlari ?? kolonlar), [arama, kolonlar, g.aramaKolonlari]);
 
   /** Listeleme ve disa aktarmanin ORTAK kosulu - ikisi ayrisamaz. */
   const filtreKur = useCallback(() => filtreBirlestir([

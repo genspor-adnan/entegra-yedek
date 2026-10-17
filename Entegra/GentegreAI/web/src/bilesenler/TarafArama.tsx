@@ -47,6 +47,8 @@ const KAYNAK_EK_ARAMA: Record<string, string[]> = {
   //   ekleniyor - maskeli `vkno` ile aramak "123 45" yazan kullaniciyi
   //   bulamazdi.
   personel: ['rolAdi', 'departmanAdi', 'gorev', 'vknoHam'],
+  // HASTA KİMLİK NO İLE (kullanıcı 16.10.2026): ham TCKN'de - maskeli kolonla aranmaz.
+  hasta: ['vknoHam'],
 };
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {

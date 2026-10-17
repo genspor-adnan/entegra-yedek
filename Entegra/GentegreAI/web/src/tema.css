@@ -103,7 +103,8 @@ input, select { font: inherit; color: inherit }
   padding: 0 10px; border: 1px solid var(--cizgi); border-radius: 12px;
   background: var(--yuz); color: var(--yazi);
 }
-.ara-kutu.dar { max-width: 225px }
+/* Liste araması geniş (kullanıcı 16 Ekim 2026: "aramadaki edit alanı genişlet") - ipucunda aranan alanlar yazıyor. */
+.ara-kutu.dar { max-width: 380px; flex: 0 1 380px }
 .ara-kutu.genis { max-width: 320px }
 /* Stok/hizmet arama penceresi (kullanici: "arama butonu %50 daha genislet"):
    kalem adlari uzun ("BIRINCI BASAMAKTAN SEVK HALINDE POLIKLINIK MUAYENESI");

@@ -188,6 +188,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
     // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
     kaynak: 'hasta', baslik: 'Hasta Listesi', yol: 'Hasta › Hasta Listesi', kartYolu: '/hasta', yeniSekmede: 'Yeni Hasta Kartı',
+    // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): kolonlar listede gizli; ham alanlarda aranır.
+    aramaEkAlanlari: ['telefonHam', 'vknoHam'],
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
     // Acik borc HASTA SERIDI icin katalogda duruyor (basvuru kartinin
     //   ustundeki serit onu okuyor) ama gridde gosterilmez.

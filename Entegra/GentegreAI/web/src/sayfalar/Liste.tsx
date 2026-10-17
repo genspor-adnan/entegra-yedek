@@ -1149,6 +1149,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
       key={tanim.rota ?? tanim.kaynak}
       kaynak={tanim.kaynak}
+      aramaEkAlanlari={tanim.aramaEkAlanlari}
       // PORTALDA BASLIK MENU ADIYLA AYNI (796 V2); portal disinda degismez.
       //   Kirintili yol (Randevu > Randevular) portalda GIZLENIR: kurum ici
       //   menu agacini anlatiyor, portal kullanicisinda karsiligi yok.

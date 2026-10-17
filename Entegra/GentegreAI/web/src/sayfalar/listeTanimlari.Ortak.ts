@@ -111,6 +111,8 @@ export interface ListeTanimi {
       (sunucu e-Belge aksiyonu donduruyorsa). */
   /** `sekme`: rotali cip ANA SEKME olarak (Delphi PageControl) listenin ustunde cizilir. */
   cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean; ayracOnce?: boolean }[];
+  /** Hızlı aramanın GİZLİ kolonlarda da baktığı alanlar (ör. hasta: telefonHam, vknoHam - 16.10.2026). */
+  aramaEkAlanlari?: string[];
   /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
   menuGizli?: boolean;
   /**
