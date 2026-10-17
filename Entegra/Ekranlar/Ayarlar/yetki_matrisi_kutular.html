@@ -28,6 +28,11 @@
   .rozet.ok{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46}
   .rozet.uy{background:#fff1d6;border-color:#f0d9a8;color:#8a5a00}
   .bolum{margin:14px 14px 0;font-size:11px;font-weight:bold;letter-spacing:.6px;color:var(--muted)}
+  /* YETKİSİZ GRUPLAR: ayraçla ayrılır; yer değişimi yalnız Kaydet'te ve rol değişince (işaretlerken kutu kaçmasın). */
+  .bolum.alt{margin-top:22px;padding-top:12px;border-top:2px solid var(--line2)}
+  .bos{padding:6px 14px 14px;color:var(--muted);font-size:11.5px}
+  .kutu.yetkisiz{opacity:.75}
+  .bekliyor{outline:2px dashed #e0a43a;outline-offset:-2px}
   .kutular{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:8px 14px 14px}
   .kutu{border:1px solid var(--line2);border-radius:6px;background:#fff;overflow:hidden}
   .kb{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-weight:bold;font-size:12px}
@@ -68,9 +73,9 @@
 <div class="ust">
   <h2>Rol Yetki Matrisi</h2><span class="yol">Yönetim › Güvenlik › Roller</span>
   <span class="bosluk"></span>
-  <select><option>Banko Görevlisi</option><option>Radyoloji Teknisyeni</option><option>Radyolog</option><option>Yönetici</option></select>
+  <select onchange="bolumle();ciz()"><option>Banko Görevlisi</option><option>Radyoloji Teknisyeni</option><option>Radyolog</option><option>Yönetici</option></select>
   <div class="sekme"><button class="on" onclick="sekme(this,'kutu')">▦ Kutular</button><button onclick="sekme(this,'tablo')">☰ Tablo</button></div>
-  <button class="d bir">💾 Kaydet</button>
+  <button class="d bir" onclick="kaydet()">💾 Kaydet</button>
 </div>
 <div class="serit">
   <b>Toplu:</b>
@@ -88,8 +93,11 @@
 </div>
 
 <div id="kutuGorunum">
-  <div class="bolum">MENÜ GRUPLARI · menü düzeniyle aynı sıra (gizli gruplar burada yok)</div>
+  <div class="bolum">YETKİLİ GRUPLAR <span id="sayY" class="rozet ok"></span> · menü düzeniyle aynı sıra (profilde gizli gruplar burada yok)</div>
   <div class="kutular" id="kutular"></div>
+  <div class="bolum alt">YETKİSİZ GRUPLAR <span id="sayN" class="rozet"></span> · bu rolde hiçbir ekranı açık değil · Kaydet'te yer değiştirir</div>
+  <div class="kutular" id="kutularN"></div>
+  <div class="bos" id="bosN" style="display:none">Yetkisiz grup yok - rolün bütün gruplarda en az bir ekranı açık.</div>
 </div>
 <div id="tabloGorunum" class="tablo" style="display:none">Bugünkü tablo görünümü burada kalır (rol karşılaştırma ve sütunca toplu işlem için).</div>
 
@@ -144,6 +152,7 @@ function satir(gi,ei,e,alt){ const k=gi+'/'+ei, d=D[k];
     <span class="ic">${e[1]}</span><span class="ad" onclick="ac(${gi},${ei})">${e[0]}${e[2]&&e[2].length?` <span class="aks">· ${e[2].length} aksiyon</span>`:''}</span>
     <span class="isl">${r('e','E')}${r('d','D')}${r('s','S')}${r('y','Y')}</span></div>`; }
 function ciz(){ let h='', top=0, acik=0;
+  let hN='';
   GRUPLAR.forEach((g,gi)=>{ const s=grupDurum(gi); const n=g.ekranlar.filter((_,i)=>D[gi+'/'+i].g).length; top+=g.ekranlar.length; acik+=n;
     let govde=''; const altlar={};
     g.ekranlar.forEach((e,ei)=>{ if(e[3]){ (altlar[e[3]]=altlar[e[3]]||[]).push(ei); if(altlar[e[3]].length>1) return;
@@ -151,13 +160,26 @@ function ciz(){ let h='', top=0, acik=0;
         govde+=`<div class="altbas" onclick="altCevir('${anahtar}')"><span class="ic">${ac?'▾':'▸'}</span>${e[3]} <span class="aks">(alt grup)</span></div>`;
         govde+=`<div id="alt-${gi}-${e[3]}" style="display:${ac?'block':'none'}"></div>`; return }
       govde+=satir(gi,ei,e,false); });
-    h+=`<div class="kutu"><div class="kb"><button class="uc ${s}" onclick="grupCevir(${gi})" title="Yok → Yalnız gör → Tam yetki">${s==='tam'?'✔':s==='gor'?'👁':''}</button>
+    const yetkisizBolumde = YETKISIZ.has(gi);
+    // Kutunun bulunduğu bölüm kaydedilmiş duruma göre; işaret değiştiyse "Kaydet'te yer değiştirecek" çizgisi.
+    const bekler = yetkisizBolumde === (n > 0);
+    const kutuHtml=`<div class="kutu${yetkisizBolumde?' yetkisiz':''}${bekler?' bekliyor':''}" title="${bekler?(n>0?'Kaydet’te YETKİLİ gruplara çıkacak':'Kaydet’te YETKİSİZ gruplara inecek'):''}"><div class="kb"><button class="uc ${s}" onclick="grupCevir(${gi})" title="Yok → Yalnız gör → Tam yetki">${s==='tam'?'✔':s==='gor'?'👁':''}</button>
       <span class="ic">${g.ic}</span>${g.ad}<span class="say rozet ${n===g.ekranlar.length?'ok':n?'uy':''}">${n}/${g.ekranlar.length}</span></div>
       <div class="satirlar">${govde}</div></div>`;
+    if (yetkisizBolumde) hN+=kutuHtml; else h+=kutuHtml;
     window['alt'+gi]=altlar; });
   document.getElementById('kutular').innerHTML=h;
+  document.getElementById('kutularN').innerHTML=hN;
+  document.getElementById('bosN').style.display=hN?'none':'block';
+  document.getElementById('sayY').textContent=GRUPLAR.length-YETKISIZ.size;
+  document.getElementById('sayN').textContent=YETKISIZ.size;
   GRUPLAR.forEach((g,gi)=>{ const altlar=window['alt'+gi]; Object.keys(altlar).forEach(a=>{ const el=document.getElementById(`alt-${gi}-${a}`); if(el) el.innerHTML=altlar[a].map(ei=>satir(gi,ei,g.ekranlar[ei],true)).join('') }) });
   document.getElementById('ozet').textContent=`${acik} / ${top} ekran açık`; }
+/** Bölümler KAYDEDİLMİŞ duruma göre: açılışta, Kaydet'te ve rol değişince hesaplanır. */
+let YETKISIZ = new Set();
+function bolumle(){ YETKISIZ = new Set(GRUPLAR.map((g,gi)=>gi).filter(gi=>!g_acikVar(gi))); }
+function g_acikVar(gi){ return GRUPLAR[gi].ekranlar.some((_,i)=>D[gi+'/'+i].g) }
+function kaydet(){ bolumle(); ciz(); const o=document.getElementById('ozet'); o.textContent='Kaydedildi · '+o.textContent; }
 function altCevir(a){ acikAlt.has(a)?acikAlt.delete(a):acikAlt.add(a); ciz(); }
 function ac(gi,ei){ const e=GRUPLAR[gi].ekranlar[ei], k=gi+'/'+ei, d=D[k];
   document.getElementById('pBas').innerHTML=`${GRUPLAR[gi].ad} › ${e[0]}<span>Esc ile kapanır</span>`;
@@ -169,7 +191,7 @@ function kapat(){ document.getElementById('perde').classList.remove('acik') }
 function sekme(b,t){ document.querySelectorAll('.sekme button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
   document.getElementById('kutuGorunum').style.display=t==='kutu'?'':'none'; document.getElementById('tabloGorunum').style.display=t==='tablo'?'':'none'; }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') kapat() });
-ciz();
+bolumle(); ciz();
 </script>
 </body>
 </html>
