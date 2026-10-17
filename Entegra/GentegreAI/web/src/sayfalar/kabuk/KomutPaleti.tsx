@@ -3,7 +3,7 @@ import { c } from '../../dil/ceviri';
 import { usePaletKomutlari } from './paletKomutlari';
 import { api } from '../../api/istemci';
 import type { MenuSatiri } from './menuAgaci';
-import { useSesliGiris } from '../../bilesenler/sesliGiris';
+import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -125,8 +125,14 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   //   erken `return`'den (palet kapalı) ÖNCE - kanca sırası her çizimde aynı kalmalı.
   const ses = useSesliGiris(metin => { setArama(metin); setSecili(0) });
   // Palet kapanınca mikrofon açık kalmasın.
-  const { durdur: sesDurdur } = ses;
+  const { durdur: sesDurdur, baslat: sesBaslat } = ses;
   useEffect(() => { if (!acik) sesDurdur() }, [acik, sesDurdur]);
+  // Ana sayfadaki 🎤: paleti aç ve hemen dinle.
+  useEffect(() => {
+    const sesli = () => { onAc(); sesBaslat() };
+    window.addEventListener(PALET_SESLI_OLAYI, sesli);
+    return () => window.removeEventListener(PALET_SESLI_OLAYI, sesli);
+  }, [onAc, sesBaslat]);
   const kutu = useRef<HTMLInputElement>(null);
   const ekranKomutlari = usePaletKomutlari();
 

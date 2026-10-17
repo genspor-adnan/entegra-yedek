@@ -25,6 +25,9 @@ const sinif = () => {
   return p.SpeechRecognition ?? p.webkitSpeechRecognition;
 };
 
+/** Komut paletini AÇIP hemen dinlemeye başlatır (ana sayfa arama kutusundaki 🎤). */
+export const PALET_SESLI_OLAYI = 'gentegre-palet-sesli';
+
 /** Tarayıcı ses tanımayı destekliyor mu (Firefox desteklemez). */
 export const sesliGirisVar = () => typeof window !== 'undefined' && !!sinif();
 

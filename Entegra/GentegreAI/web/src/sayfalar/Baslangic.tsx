@@ -9,6 +9,7 @@ import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/me
 import { SURUM_ETIKET } from '../surum';
 import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
 import { duyuruOkuAc } from '../bilesenler/duyuru/DuyuruOrtak';
+import { PALET_SESLI_OLAYI, sesliGirisVar } from '../bilesenler/sesliGiris';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
 import { kartAdi, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
@@ -150,26 +151,32 @@ export function Baslangic() {
   // SAYI OKUNMAMIŞ DUYURU (kullanıcı 17.10.2026: "okudum'a basınca duyuru sayısını 0 yapsın"): okudum
   //   denmemiş ya da okunduktan sonra güncellenmiş olanlar.
   const okunmamis = duyurular.filter(x => !x.okudu || x.eskiSurumOkundu);
-  const duyuruIsi = duyurular.length > 0 ? [{
+  // DUYURU VE ONAY HEP GÖRÜNÜR, ötekiler sayı 0'dan büyükse (kullanıcı 17.10.2026: "bekleyen işlerde
+  //   duyuru ve onay sabit kalsın, diğerleri sayı 0'dan büyük olursa gelsin").
+  type Is = { yol: string; ic: string; ad: string; y: string; acil?: boolean; tikla?: () => void; sabit?: boolean; sayi?: number };
+  const duyuruIsi: Is[] = [{
     yol: '#duyuru', ic: '📣', ad: `${okunmamis.length} ${c('duyuru')}`,
     y: (talep?.kritikBekleyen.length ?? 0) > 0 ? `${talep!.kritikBekleyen.length} ${c('kritik, okunmadı')}`
-      : okunmamis.length > 0 ? c('okunmadı') : c('hepsi okundu'),
+      : okunmamis.length > 0 ? c('okunmadı') : duyurular.length > 0 ? c('hepsi okundu') : c('duyuru yok'),
     acil: (talep?.kritikBekleyen.length ?? 0) > 0,
-    tikla: () => duyuruOkuAc((okunmamis[0] ?? duyurular[0]).id),
-  }] : [];
-  const bekleyenIsler: { yol: string; ic: string; ad: string; y: string; acil?: boolean; tikla?: () => void }[] = bekleyen ? [
+    // Duyuru yoksa açılacak bir şey yok - kart soluk durur.
+    tikla: duyurular.length > 0 ? () => duyuruOkuAc((okunmamis[0] ?? duyurular[0]).id) : undefined,
+    sabit: true,
+  }];
+  const bekleyenIsler: Is[] = (bekleyen ? [
     ...duyuruIsi,
-    // ONAY (kullanıcı 16.10.2026): yalnız onay bekleyen varsa - kart Onayımdakiler'e gider.
-    ...(bekleyen.onay > 0 ? [{ yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
+    // ONAY HEP GÖRÜNÜR (17.10.2026) - kart Onayımdakiler'e gider.
+    { yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
       y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler'),
-      acil: bekleyen.onayGeciken > 0 }] : []),
-    { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
+      acil: bekleyen.onayGeciken > 0, sabit: true },
+    { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`, sayi: bekleyen.konsultasyon,
       y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor'),
       acil: bekleyen.konsultasyonGecikmis > 0 },
-    { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi') },
+    { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi'),
+      sayi: bekleyen.istemSonuc },
     { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
-      y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}` },
-  ] : duyuruIsi;
+      y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}`, sayi: bekleyen.randevu },
+  ] as Is[] : duyuruIsi).filter(i => i.sabit || (i.sayi ?? 0) > 0);
 
   /**
    * ÜST ŞERİT: son açılanlar (tek sıra, 4 ekran) + bekleyen işler. KUTULU GÖRÜNÜMDE DE AYNI (kullanıcı
@@ -210,6 +217,8 @@ export function Baslangic() {
           </div>
           <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
             🔍 <span>{c('Ne açmak istiyorsunuz?')}</span><kbd>Ctrl K</kbd>
+            {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}
+                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}>🎤</span>}
           </button>
           {ustSerit(4)}
           <div className="bsl-bolum">{c('Ekranlarım')}</div>
@@ -238,6 +247,8 @@ export function Baslangic() {
         </div>
         <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
           🔍 <span>{c('Ne açmak istiyorsunuz? (ekran, hasta, gösterge paneli…)')}</span><kbd>Ctrl K</kbd>
+          {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}
+                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}>🎤</span>}
         </button>
 
         {ustSerit(8)}
