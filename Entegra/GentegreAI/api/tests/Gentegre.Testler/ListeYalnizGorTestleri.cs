@@ -78,6 +78,20 @@ public sealed class ListeYalnizGorTestleri
         }
     }
 
+    [Theory]
+    [InlineData("muayene.sevk", "muayene")]
+    [InlineData("medula.recete", "muayene")]
+    [InlineData("klinik_kalite.olgu", "klinik_kalite")]
+    [InlineData("kasa.finans", "kasa_islem")]
+    public void Okuma_koprusu_kaynagi_yalniz_okumada_acar_kodun_kendi_haklari_kalir(string ekran, string kaynak)
+    {
+        var s = Set((ekran, true, true, true, true));
+        Assert.True(s.Var(kaynak, Islem.Gor));
+        Assert.False(s.Var(kaynak, Islem.Ekle));
+        Assert.False(s.Var(kaynak, Islem.Degistir));
+        Assert.True(s.VarTam(ekran, Islem.Degistir));   // yalnız-Gör listesi DEĞİL: e-Reçete gönderme vb. sürer
+    }
+
     [Fact]
     public void Liste_kodu_kapaliyken_veri_kapisi_acilmaz()
     {

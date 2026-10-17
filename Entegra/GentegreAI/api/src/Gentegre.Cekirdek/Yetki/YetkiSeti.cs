@@ -68,6 +68,9 @@ public sealed class YetkiSeti
             foreach (var ekran in EkranKodlari.VeriKapisiAltlari(kaynakKodu))
                 foreach (var alt in EkranKodlari.ListeGorAltlari(ekran))
                     if (VarTam(alt, Islem.Gor)) return true;
+            // Okuma köprüsü (grup 4): listesi bu kaynağı gösteren ama ona bağlanmamış ekran kodları.
+            foreach (var alt in EkranKodlari.OkumaKapisiAltlari(kaynakKodu))
+                if (VarTam(alt, Islem.Gor)) return true;
         }
         return false;
     }

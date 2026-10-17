@@ -334,6 +334,24 @@ public static partial class EkranKodlari
     public static IReadOnlyList<string> ListeGorAltlari(string veriKodu)
         => YalnizGorListe.Where(x => x.Value == veriKodu).Select(x => x.Key).ToArray();
 
+    /// <summary>
+    /// OKUMA KÖPRÜSÜ (liste / kart ayrımı grup 4, 17.10.2026). Bu ekranların listesi BAŞKA bir kaynağın
+    /// verisini gösteriyor ama ekran kodu o kaynağa hiç bağlanmamıştı: menüde görünen liste, yalnız o
+    /// ekran yetkisi olan kullanıcıda 403 veriyordu (Sevk, e-Reçete, Klinik Kalite Göstergesi, Kasa
+    /// İşlemleri). Ekran kodu kaynağı YALNIZ OKUMADA açar; kodun kendi hakları (e-Reçete gönderme,
+    /// Klinik Kalite kartı) ve kaynağın kartı değişmez - yazmak için kaynağın kendi yetkisi gerekir.
+    /// </summary>
+    private static readonly Dictionary<string, string[]> OkumaKapisi = new(StringComparer.Ordinal)
+    {
+        ["muayene"]       = ["muayene.sevk", "medula.recete"],   // Muayene › Sevk Listesi, Medula › e-Reçete
+        ["klinik_kalite"] = ["klinik_kalite.olgu"],             // Klinik Kalite › Gösterge Listesi
+        ["kasa_islem"]    = ["kasa.finans"],                    // Finans › Kasa İşlemi Listesi
+    };
+
+    /// <summary>Bu kaynağı yalnız okumada açan ekran kodları (yoksa boş).</summary>
+    public static IReadOnlyList<string> OkumaKapisiAltlari(string veriKodu)
+        => OkumaKapisi.TryGetValue(veriKodu, out var a) ? a : [];
+
     /// <summary>Bu kaynağı yalnız görme işleminde açan kodlar (yoksa boş).</summary>
     public static IReadOnlyList<string> GorKapisiAltlari(string veriKodu)
         => GorKapisi.TryGetValue(veriKodu, out var a) ? a : [];
