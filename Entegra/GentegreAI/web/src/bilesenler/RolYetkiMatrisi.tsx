@@ -11,6 +11,7 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
 import { c as cev } from '../dil/ceviri';
 import { Modal } from './Modal';
+import { LISTE_KART_KODU } from '../kimlik/listeKartKodlari';
 
 type Sutun = 'gor' | 'ekle' | 'degistir' | 'sil';
 const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
@@ -53,7 +54,8 @@ const UST_KOD: Record<string, string> = {
  * olarak duruyordu - listesinin hemen ardına, aynı düzeye ve listenin ikonuyla girer
  * (veri kodu -> liste ekran kodu).
  */
-const VERI_KAPISI_ALTI: Record<string, string> = { belge: 'basvuru.liste', hasta: 'hasta.liste' };
+const VERI_KAPISI_ALTI: Record<string, string> =
+  Object.fromEntries(Object.entries(LISTE_KART_KODU).map(([liste, kart]) => [kart, liste]));
 /**
  * LİSTE EKRANI YALNIZ GÖR (1115 aşama 2, sunucu EkranKodlari.YalnizGorListe): liste satırında
  * Ekle / Değiştir / Sil yok - kart işlemleri altındaki veri satırında (Hasta Verisi, Başvuru Kartı).
@@ -240,7 +242,16 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     if (!s.kod.includes('.') || s.tur !== 0) return false;
     return harita.has(s.kod);
   };
-  for (const s of yeni.filter(x => !x.kod.includes('.') || ayriEkran(x))) {
+  /**
+   * KART SATIRI LİSTESİNİN YANINDA (1115 aşama 2 / 1128). Kart kodu menüden çıktı (menüde liste kodu):
+   * olağan yolda noktalı kart kodu aksiyon sanılıp üst modülün altına giriyor (Çalışma Şablonu Kartı ->
+   * Randevu Kartı'nın altı), menülü kod ise "gizlenmiş ekran" sayılıp hiç çizilmiyordu (Teleradyoloji).
+   * Listesi aktif menüdeyse kart bu iki yoldan ayrılır ve listesinin hemen ardına konur.
+   */
+  const yeniKodlar = new Set(yeni.map(x => x.kod));
+  const kartBekler = (s: { kod: string }) =>
+    !!VERI_KAPISI_ALTI[s.kod] && harita.has(VERI_KAPISI_ALTI[s.kod]) && yeniKodlar.has(VERI_KAPISI_ALTI[s.kod]);
+  for (const s of yeni.filter(x => (!x.kod.includes('.') || ayriEkran(x)) && !kartBekler(x))) {
     const yer = harita.get(s.kod);
     // GİZLENMİŞ EKRANIN YETKİSİ ÇİZİLMEZ: menüde karşılığı VAR ama aktif
     //   menüde yok demek - kurum o ekranı pasife almış. Menüde hiç ekranı
@@ -298,9 +309,25 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
     ust.cocuklar.push(d);
     modulDugumu.set(s.kod, d);
   }
+  // 1b) Kartlar listelerinin yanına - aksiyonlar (2) kartın altına girsin diye ondan ÖNCE.
+  //   ALT SATIR DEĞİL, YANINDA (kullanıcı 17.10.2026: "alt menü olmasına gerek yok, listesi altında
+  //   olsun eşit düzeyde"); İKON LİSTENİN İKONU ("kartların ikonları da liste ile aynı olsun").
+  for (const s of yeni.filter(kartBekler)) {
+    const liste = modulDugumu.get(VERI_KAPISI_ALTI[s.kod]);
+    if (!liste) continue;
+    const d: Dugum = { anahtar: `y:${s.yetkiId}`, ad: s.ad, ic: liste.ic, satir: s, cocuklar: [] };
+    const yerlestir = (dizi: Dugum[]): boolean => {
+      const i = dizi.indexOf(liste);
+      if (i >= 0) { dizi.splice(i + 1, 0, d); return true }
+      return dizi.some(x => yerlestir(x.cocuklar));
+    };
+    if (!yerlestir(kokler)) liste.cocuklar.unshift(d);
+    modulDugumu.set(s.kod, d);
+  }
+
   // 2) Aksiyon yetkileri (belge.kesinlestir, uts.bildir...) ait olduklari
   //    modulun ALTINA girer; modul yoksa kendi grubunda durur.
-  for (const s of yeni.filter(x => x.kod.includes('.') && !ayriEkran(x))) {
+  for (const s of yeni.filter(x => x.kod.includes('.') && !ayriEkran(x) && !kartBekler(x))) {
     // AKTİF MENÜDE OLMAYAN EKRAN ÇİZİLMEZ (kullanıcı 09.10.2026: "yetki
     //   matrisinde başvuruların altında erp menüleri var"). HBYS'de Satış /
     //   Alış ekranları menüde yok; kodları (`belge.satis.fatura`) haritada
@@ -327,26 +354,9 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
       (s.grup === 'Sistem' ? kokBul(TEMEL, '🔑') : kokBul(GRUP_ADI[s.grup] ?? s.grup ?? 'Diğer'))?.cocuklar.push(d);
   }
 
-  for (const [veri, ekran] of Object.entries(VERI_KAPISI_ALTI)) {
-    const v = modulDugumu.get(veri), hedef = modulDugumu.get(ekran);
-    if (!v || !hedef || v === hedef) continue;
-    const cikar = (liste: Dugum[]): boolean => {
-      const i = liste.indexOf(v);
-      if (i >= 0) { liste.splice(i, 1); return true }
-      return liste.some(x => cikar(x.cocuklar));
-    };
-    if (!cikar(kokler)) continue;
-    // ALT SATIR DEĞİL, YANINDA (kullanıcı 17.10.2026: "hasta kartı / başvuru kartı alt menü olmasına
-    //   gerek yok, listesi altında olsun eşit düzeyde"): kart satırı listenin HEMEN ARDINA, aynı
-    //   düzeye girer. İKON LİSTENİN İKONU ("kartların ikonları da liste ile aynı olsun").
-    v.ic = hedef.ic;
-    const yerlestir = (liste: Dugum[]): boolean => {
-      const i = liste.indexOf(hedef);
-      if (i >= 0) { liste.splice(i + 1, 0, v); return true }
-      return liste.some(x => yerlestir(x.cocuklar));
-    };
-    if (!yerlestir(kokler)) hedef.cocuklar.unshift(v);
-  }
+  // Kartı listesinin yanına taşınınca boş kalan kök (ör. Temel Yetkiler'de tek kart vardı) çizilmez.
+  for (let i = kokler.length - 1; i >= 0; i--)
+    if (!kokler[i].satir && kokler[i].cocuklar.length === 0) kokler.splice(i, 1);
 
   // Kokler menu sirasiyla; menude olmayan basliklar sonda.
   kokler.sort((a, b) => sira(a) - sira(b));

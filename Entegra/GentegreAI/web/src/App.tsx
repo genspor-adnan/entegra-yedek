@@ -5,6 +5,7 @@ import { OZEL_KART_SEKME_YOLLARI } from './sayfalar/ozelKartSekmeleri';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
+import { kartKodu } from './kimlik/listeKartKodlari';
 import { kartSekmesiVar } from './sayfalar/listeTanimlari.Ortak';
 import { DOKUM_KODLARI } from './sayfalar/listeTanimlari.Dokumler';
 import { modUyar } from './api/sozlesme';
@@ -210,7 +211,10 @@ function Yollar() {
             zorunlu olarak - ayni kaynak ('cari') Musteri/Tedarikci gibi birden fazla
             ekranda farkli `rota` ile kullanilabilir, o yuzden path `rota ?? kaynak`dan
             uretilir. */}
-        {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa
+        {/* LİSTE / KART AYRIMI (kimlik/listeKartKodlari): liste rotası liste koduyla, KART rotası
+            liste YA DA kart koduyla açılır - kartı görebilen ama listesi olmayan (hekim: Hasta Kartı
+            var, Hasta Listesi yok) kartı başka ekrandan açabilmeli. */}
+        {LISTELER.filter(l => (yetki(l.yetkiKodu) || yetki(kartKodu(l.yetkiKodu))) && !l.ozelSayfa
           // Urun modu suzmesi (215): moda ozel ekranlar (Kayit Kabul = GenoTIP)
           //   diger urunde rotasiyla birlikte yok olur.
           && (!l.urunModu || modUyar(l.urunModu, kullanici.urunModu))
@@ -223,7 +227,7 @@ function Yollar() {
           && !l.menuYol).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
-            <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
+            ...(yetki(l.yetkiKodu) ? [<Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />] : []),
             // KART SEKMESİ: belge kartı da /<rota>/:id ile kendi sekmesinde açılır.
             ...((l.kartYolu || kartSekmesiVar(l)) && !l.ozelKart ? [
               <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
@@ -426,7 +430,7 @@ function Yollar() {
           ];
           return rotalar.map(r => {
             const t = l(r.rota);
-            return t && yetki(t.yetkiKodu) ? (
+            return t && (yetki(t.yetkiKodu) || yetki(kartKodu(t.yetkiKodu))) ? (
               <Route key={`${r.rota}-ozel`} path={`/${r.rota}/:id`} element={
                 <OzelKartRota liste={<Liste tanim={t} />} kart={r.kart}
                               sekmeli={!!OZEL_KART_SEKME_YOLLARI[`/${r.rota}`]} />} />

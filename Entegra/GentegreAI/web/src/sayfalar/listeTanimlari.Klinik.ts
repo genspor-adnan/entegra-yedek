@@ -142,7 +142,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAd: 'Randevu Listesi', ic: '📅', yetkiKodu: 'randevu',
+    menuGrup: 'Randevu', menuAd: 'Randevu Listesi', ic: '📅', yetkiKodu: 'randevu.liste',
     menuSira: 10,
   },
   {
@@ -171,7 +171,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan.sablon', menuSira: 80,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan.sablon.liste', menuSira: 80,
   },
   {
     // OZEL LISTE (mockup izin_istisnalar_listesi.html).
@@ -185,7 +185,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma İstisnaları', ic: '🗓', yetkiKodu: 'randevu.plan.istisna', menuSira: 85,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma İstisnaları', ic: '🗓', yetkiKodu: 'randevu.plan.istisna.liste', menuSira: 85,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta

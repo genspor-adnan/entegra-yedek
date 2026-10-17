@@ -42,7 +42,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   acarsa menü on üç başlıkta kalmaz.
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji',
     menuAd: 'Teleradyoloji Listesi', ic: '🛰', menuSira: 40,
-    yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+    yetkiKodu: 'teleradyoloji.liste', modul: 'teleradyoloji', urunModu: 2,
   },
   {
     // PANO (801): modülün "bugün ne durumdayız" ekranı - liste değil
@@ -67,7 +67,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/telerad-kurum', kartBaslik: 'Teleradyoloji Kurumu',
     aksiyonEkrani: 'telerad-kurum-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Kurumu Listesi',
-    ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum', modul: 'teleradyoloji', urunModu: 2,
+    ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum.liste', modul: 'teleradyoloji', urunModu: 2,
   },
   {
     // DÖNEM FATURASI (803): kurumun dönemdeki onaylı işleri TEK satış
@@ -93,7 +93,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Nöbet Çizelgesi',
-    ic: '🌙', menuSira: 46, yetkiKodu: 'teleradyoloji.nobet',
+    ic: '🌙', menuSira: 46, yetkiKodu: 'teleradyoloji.nobet.liste',
     modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -104,7 +104,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/telerad-kural', kartBaslik: 'Atama Kuralı',
     aksiyonEkrani: 'telerad-kural-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Atama Kuralı Listesi',
-    ic: '🤖', menuSira: 48, yetkiKodu: 'teleradyoloji.kural',
+    ic: '🤖', menuSira: 48, yetkiKodu: 'teleradyoloji.kural.liste',
     modul: 'teleradyoloji', urunModu: 2,
   },
   {
@@ -116,7 +116,7 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/telerad-sozlesme', kartBaslik: 'Teleradyoloji Sözleşmesi',
     aksiyonEkrani: 'telerad-sozlesme-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Sözleşmesi Listesi',
-    ic: '📜', menuSira: 44, yetkiKodu: 'teleradyoloji.sozlesme', modul: 'teleradyoloji', urunModu: 2,
+    ic: '📜', menuSira: 44, yetkiKodu: 'teleradyoloji.sozlesme.liste', modul: 'teleradyoloji', urunModu: 2,
   },
   {
     // TESLİM KUYRUĞU (814): hangi rapor, hangi hedefe, kaçıncı denemede.

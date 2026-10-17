@@ -15,7 +15,11 @@ const YETKILER = [
   { yetkiId: 1, kod: 'hasta', ad: 'Hasta Listesi', grup: 'Kayıt Kabul', tur: 0,
     gor: true, ekle: false, degistir: false, sil: false, degerAlir: false, deger: '',
     kapsamAlir: false, kapsam: 0, urunModu: 0, modul: '' },
-  { yetkiId: 2, kod: 'randevu', ad: 'Randevular', grup: 'Randevu', tur: 0,
+  { yetkiId: 2, kod: 'randevu.liste', ad: 'Randevu Listesi', grup: 'Randevu', tur: 0,
+    gor: false, ekle: false, degistir: false, sil: false, degerAlir: false, deger: '',
+    kapsamAlir: false, kapsam: 0, urunModu: 0, modul: '' },
+  // 1128: kart ayrı kod, listesinin yanında.
+  { yetkiId: 3, kod: 'randevu', ad: 'Randevu Kartı', grup: 'Randevu', tur: 0,
     gor: false, ekle: false, degistir: false, sil: false, degerAlir: false, deger: '',
     kapsamAlir: false, kapsam: 0, urunModu: 0, modul: '' },
 ];
@@ -76,7 +80,11 @@ describe('yetki matrisi kutular', () => {
 
   it('Gör kapalıyken rozet kilitli, açıkken rozet işlemi açar', async () => {
     const k = await ciz();
-    const kilitli = kutu(k, 'Randevu Listesi').querySelector('.ym-r.ym-e') as HTMLButtonElement;
+    const satirBul = (metin: string) => [...k.container.querySelectorAll('.ym-sat')]
+      .find(x => x.textContent?.includes(metin)) as HTMLElement;
+    // Liste ekranı yalnız Gör: rozeti yok.
+    expect(satirBul('Randevu Listesi').querySelector('.ym-r')).toBeNull();
+    const kilitli = satirBul('Randevu Kartı').querySelector('.ym-r.ym-e') as HTMLButtonElement;
     expect(kilitli.disabled).toBe(true);
     const ekle = kutu(k, 'Hasta Listesi').querySelector('.ym-r.ym-e') as HTMLButtonElement;
     expect(ekle.disabled).toBe(false);

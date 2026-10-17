@@ -62,6 +62,12 @@ public sealed class YetkiSeti
             // Liste ekranı (1115 aşama 2) veri kodunu yalnız okumada açar.
             foreach (var alt in EkranKodlari.ListeGorAltlari(kaynakKodu))
                 if (VarTam(alt, Islem.Gor)) return true;
+            // ZİNCİR (1128): ekran kodu ortak kaynağın kapısını açıyorsa (aşama 1, ör. radyoloji.cihaz ->
+            //   radyoloji) o ekranın LİSTE kodu da kaynağı okumada açar - yoksa yalnız listesi olan
+            //   kullanıcı Cihaz Listesi'ni boş görürdü.
+            foreach (var ekran in EkranKodlari.VeriKapisiAltlari(kaynakKodu))
+                foreach (var alt in EkranKodlari.ListeGorAltlari(ekran))
+                    if (VarTam(alt, Islem.Gor)) return true;
         }
         return false;
     }

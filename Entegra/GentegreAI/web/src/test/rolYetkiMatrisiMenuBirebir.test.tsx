@@ -21,7 +21,7 @@ const satir = (yetkiId: number, kod: string, grup: string, gor = true) => ({
 const YETKILER = [
   satir(1, 'panel', 'Sistem'),
   satir(2, 'gorev', 'CRM'),
-  satir(3, 'radyoloji-istem', 'Sistem'),
+  satir(3, 'radyoloji-istem.liste', 'Radyoloji'),   // 1128: Çalışma Listesi ekran kodu
   satir(4, 'klinik_kalite.olgu', 'Klinik Kalite'),
   // Sunucu rolün TÜM yetki satırlarını döndürür; alt ekranın üst kodu da
   //   listede (kapalı) durur.
@@ -53,7 +53,7 @@ describe('yetki matrisi - menüdeki her ekran matriste', () => {
       expect(tr, ad).toBeTruthy();
       expect((tr!.querySelector('input[type=checkbox]') as HTMLInputElement).checked, ad).toBe(true);
     }
-    // Radyoloji grubu da açılır (çalışma listesi `radyoloji-istem` ile).
+    // Radyoloji grubu da açılır (çalışma listesi `radyoloji-istem.liste` ile, 1128).
     expect(k.container.textContent).toContain('Radyoloji');
   });
 });

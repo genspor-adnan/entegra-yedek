@@ -44,6 +44,17 @@ public sealed class ListeYalnizGorTestleri
         Assert.False(s.Var(veri, Islem.Sil));
     }
 
+    [Theory]
+    [InlineData("radyoloji.cihaz.liste", "radyoloji")]          // kaynak üst kodda (aşama 1 köprüsü)
+    [InlineData("randevu.plan.sablon.liste", "randevu.plan")]
+    public void Liste_kodu_ortak_kaynagi_zincirle_yalniz_okumada_acar(string liste, string kaynak)
+    {
+        var s = Set((liste, true, true, true, true));
+        Assert.True(s.Var(kaynak, Islem.Gor));
+        Assert.False(s.Var(kaynak, Islem.Ekle));
+        Assert.False(s.Var(kaynak, Islem.Degistir));
+    }
+
     [Fact]
     public void Liste_kodu_kapaliyken_veri_kapisi_acilmaz()
     {
@@ -60,6 +71,25 @@ public sealed class ListeYalnizGorTestleri
         var s = Set(("basvuru.liste", true, true, true, true));
         // Satış belgesi kodu verilmedi: ERP kümesi kapalı.
         Assert.False(s.Var("belge.satis", Islem.Gor));
+    }
+
+    /// <summary>
+    /// Web tablosu (web/src/kimlik/listeKartKodlari.ts) sunucunun tablosuyla AYNI: biri eksik
+    /// kalırsa menü / matris liste kodunu gösterir ama sunucu onu tam yetki sayar (ya da tersi).
+    /// </summary>
+    [Fact]
+    public void Web_liste_kart_tablosu_sunucuyla_ayni()
+    {
+        var dizin = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dizin is not null && !Directory.Exists(Path.Combine(dizin.FullName, "web", "src", "kimlik")))
+            dizin = dizin.Parent;
+        Assert.NotNull(dizin);
+        var metin = File.ReadAllText(Path.Combine(dizin!.FullName, "web", "src", "kimlik", "listeKartKodlari.ts"));
+        var web = System.Text.RegularExpressions.Regex.Matches(metin, @"'([a-z0-9._-]+)':\s*'([a-z0-9._-]+)'")
+            .ToDictionary(x => x.Groups[1].Value, x => x.Groups[2].Value);
+        Assert.Equal(EkranKodlari.YalnizGorKodlari.OrderBy(x => x), web.Keys.OrderBy(x => x));
+        foreach (var (liste, kart) in web)
+            Assert.Equal([liste], EkranKodlari.ListeGorAltlari(kart).Where(x => x == liste));
     }
 
     [Fact]

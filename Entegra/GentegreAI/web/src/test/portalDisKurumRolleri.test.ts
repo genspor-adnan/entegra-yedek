@@ -20,7 +20,7 @@ import { portalBolumleri, type MenuKaynagi } from '../sayfalar/portal/portalMenu
 
 // db/824: rol_yetki içerikleri.
 const KLINIK = ['ai.rehber', 'hasta', 'hasta.liste', 'lab', 'lab.numune', 'lab.sonuc', 'mesaj',
-                'teleradyoloji'];
+                'teleradyoloji', 'teleradyoloji.liste'];   // 1128: liste ekranı ayrı kod
 const YONETICI = ['ai.rehber', 'mesaj', 'portal.mali'];
 
 /** Rolün yetkileriyle portal menüsünde çıkan ekran yolları. */

@@ -85,6 +85,9 @@ public static partial class EkranKodlari
     /// <summary>Ekran kodunun haklarını kopyaladığı eski kod; bölünmemiş kodda null.</summary>
     public static string? KopyaKaynagi(string kod)
         => Kopya.TryGetValue(kod, out var k) ? k
+         // Liste ekranı kartının kodunu izler (şablon "randevu" diyorsa Randevu Listesi de gelir -
+         //   yalnız Gör, bkz. StandartRolUclari.Eslestir).
+         : YalnizGorListe.TryGetValue(kod, out var l) && !AyniGrupKopya.Value.ContainsKey(kod) ? l
          : AyniGrupKopya.Value.TryGetValue(kod, out var a) ? a
          : kod.StartsWith("dokum.", StringComparison.Ordinal) ? "dokum"
          : null;
@@ -139,6 +142,22 @@ public static partial class EkranKodlari
     {
         ["hasta.liste"]   = "hasta",   // Kayıt Kabul › Hasta Listesi   - kart / veri: hasta
         ["basvuru.liste"] = "belge",   // Kayıt Kabul › Başvuru Listesi - kart / veri: belge (başvuru)
+        // PİLOT YAYILIM (göç 1128, kullanıcı 17.10.2026: "deseni diğer liste/kart özelliği olan menülere
+        //   uygula" -> "önce pilot grup"): Randevu + Radyoloji'nin kartını KENDİ koduyla açan listeleri.
+        //   Kod adı bilinçli olarak açık tablo - `.liste` soneki başka anlamda da kullanılıyor
+        //   (muayene.liste, ftr.seans.liste, medula.fatura.liste aşama 1 bölme kodları).
+        ["randevu.liste"]                = "randevu",
+        ["randevu.plan.sablon.liste"]    = "randevu.plan.sablon",
+        ["randevu.plan.istisna.liste"]   = "randevu.plan.istisna",
+        ["radyoloji-istem.liste"]        = "radyoloji-istem",
+        ["radyoloji.sablon.liste"]       = "radyoloji.sablon",
+        ["radyoloji.protokol.liste"]     = "radyoloji.protokol",
+        ["radyoloji.cihaz.liste"]        = "radyoloji.cihaz",
+        ["teleradyoloji.liste"]          = "teleradyoloji",
+        ["teleradyoloji.kurum.liste"]    = "teleradyoloji.kurum",
+        ["teleradyoloji.nobet.liste"]    = "teleradyoloji.nobet",
+        ["teleradyoloji.kural.liste"]    = "teleradyoloji.kural",
+        ["teleradyoloji.sozlesme.liste"] = "teleradyoloji.sozlesme",
     };
 
     /// <summary>Kod yalnız Gör taşıyan bir liste ekranı mı (Ekle / Değiştir / Sil'i yok sayılır).</summary>

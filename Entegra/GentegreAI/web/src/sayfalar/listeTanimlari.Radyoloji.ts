@@ -43,7 +43,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // DAR YETKI (796): calisma listesi `radyoloji-istem` yetkisine bagli -
     //   `radyoloji` yedi ekrani birden aciyor, dis hekim portali icin
     //   kurumun butun radyoloji ayarlarini acmak gerekiyordu.
-    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji-istem',
+    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji-istem.liste',
     menuSira: 10,
   },
   {
@@ -68,7 +68,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     kolonSirasi: ['yildiz', 'kod', 'ad', 'modaliteAdi', 'tetkik', 'bolumSayisi', 'alanSayisi', 'makroSayisi', 'surumAdi', 'kullanim30', 'durum'],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonu Listesi', ic: '📄', yetkiKodu: 'radyoloji.sablon',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonu Listesi', ic: '📄', yetkiKodu: 'radyoloji.sablon.liste',
     menuSira: 90,
   },
   {
@@ -95,7 +95,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     kolonSirasi: ['tetkikAdi', 'modaliteAdi', 'sureDk', 'kontrastAdi', 'seriAdi', 'hazirlik', 'kontrolSayisi', 'malzemeSayisi', 'cihazlar', 'eksik', 'durum'],
     menuGrup: 'Radyoloji', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Çekim Protokolü Listesi', ic: '⚙️',
-    yetkiKodu: 'radyoloji.protokol', urunModu: 2,
+    yetkiKodu: 'radyoloji.protokol.liste', urunModu: 2,
   },
   {
     // CİHAZLAR (283/315): radyolojinin kaynağı - randevu ona verilir, MWL
@@ -120,7 +120,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['modalite', 'subeId', 'cihazAlt', 'suAnKod', 'yuzTavan', 'qaGeciken', 'goruntuEksik'],
     kolonSirasi: ['kod', 'ad', 'modaliteAdi', 'oda', 'suAn', 'bugun', 'sirada', 'doluluk', 'protokolSayisi', 'baglanti', 'qa', 'durum'],
     menuGrup: 'Radyoloji', menuSira: 92, menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Listesi', ic: '🖥️',
-    yetkiKodu: 'radyoloji.cihaz', urunModu: 2,
+    yetkiKodu: 'radyoloji.cihaz.liste', urunModu: 2,
   },
   {
     // RADYOLOJİ PANOSU (320): modülün "bugün ne durumdayız" ekranı. Liste

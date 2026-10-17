@@ -21,7 +21,7 @@ const YETKILER = [
   { yetkiId: 1, kod: 'hasta', ad: 'Hasta Listesi', grup: 'Kayıt Kabul', tur: 0,
     gor: true, ekle: false, degistir: false, sil: false, degerAlir: false, deger: '',
     kapsamAlir: false, kapsam: 0, urunModu: 0, modul: '' },
-  { yetkiId: 2, kod: 'randevu', ad: 'Randevular', grup: 'Kayıt Kabul', tur: 0,
+  { yetkiId: 2, kod: 'randevu.liste', ad: 'Randevu Listesi', grup: 'Kayıt Kabul', tur: 0,
     gor: true, ekle: true, degistir: false, sil: false, degerAlir: false, deger: '',
     kapsamAlir: false, kapsam: 0, urunModu: 0, modul: '' },
 ];
