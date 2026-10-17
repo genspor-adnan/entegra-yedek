@@ -2319,7 +2319,10 @@ Yine de yeni kayıt eklensin mi?`);
                                                 gonderenId: Number(deger.gonderenId) || null, tip: Number(deger.tip) || 1,
                                                 kaynak: Number(deger.kaynak) || 1, aciklama: String(deger.aciklama ?? '') } }
                                   : { kaynakRandevuId: Number(id) }}
-                                onceKaydet={yeniMi ? sonra => kaydet(false, sonra) : undefined} ilkDahil
+                                onceKaydet={yeniMi ? sonra => kaydet(false, sonra) : undefined}
+                                // Sayı: YENİ kartta ilk randevu dahil toplam; KAYITLI kartta bundan sonraki tekrar
+                                //   sayısı (kullanıcı 17.10.2026).
+                                ilkDahil={yeniMi}
                                 ilkTarih={ertesiMetin} saat={bas.slice(11, 16)} sureDk={Number(deger.sureDk) || 15}
                                 adet={5} gunler={[g === 0 ? 7 : g]}
                                 onKapat={() => setTekrarAcik(false)}

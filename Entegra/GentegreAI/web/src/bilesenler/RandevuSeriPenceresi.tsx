@@ -39,8 +39,8 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
    * verilen işi (tekrarlar) onun id'siyle çalıştırır; kart sonra kapanır.
    */
   onceKaydet?(sonra: (ilkId: number) => Promise<void>): Promise<void>;
-  /** TEKRARLA (kullanıcı 17.10.2026: "ilk dahil kaç seçtiysem o kadar olacak"): sayı ilk randevuyu da
-   *  içerir - üretilen tekrar sayısı bir eksiktir. FTR'de yok (orada sayı seans sayısı). */
+  /** YENİ KARTTA TEKRARLA (kullanıcı 17.10.2026): sayı kaydedilmemiş ilk randevuyu da içerir - üretilen
+   *  tekrar bir eksiktir. Kayıtlı randevuda sayı bundan sonraki tekrar sayısıdır; FTR'de seans sayısı. */
   ilkDahil?: boolean;
   ilkTarih: string;
   saat: string;
@@ -137,7 +137,7 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
           <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{c('Süre (dk)')}
             <input type="number" min={5} step={5} style={{ ...kutu, width: 70 }} value={sure}
                    onChange={e => { setSure(Number(e.target.value) || 0); setKontrollu(false) }} /></label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{ilkDahil ? c('Toplam randevu (ilk dahil)') : c('Seans sayısı')}
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{ilkDahil ? c('Toplam randevu (ilk dahil)') : 'kaynakRandevuId' in kaynak ? c('Tekrar sayısı (bundan sonra)') : c('Seans sayısı')}
             <span style={{ display: 'flex', gap: 4 }}>
               {[5, 10, 15, 20].map(n => (
                 <button key={n} type="button" className={`d${adet === n ? ' bir' : ''}`}
