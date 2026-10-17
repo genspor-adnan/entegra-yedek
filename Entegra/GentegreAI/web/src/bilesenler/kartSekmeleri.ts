@@ -244,7 +244,11 @@ export function sekmeleriKur(secenek: {
   //   listesi x Gor/Ekle/Degistir/Sil checkbox'lari) - ayri "ozel" sekme. Yeni kayitta
   //   henuz rolId yok, kart once kaydedilmeli (Kisi'nin İlgili Kişiler'iyle ayni kural).
   if (kaynak === 'rol' && !yeniMi) {
-    s.push({ tur: 'ozel', anahtar: 'ozel:yetkiler', baslik: 'Yetki Matrisi' });
+    // YETKİ MATRİSİ İLK SEKME (kullanıcı 17.10.2026: "yetki matrisi ve kullanıcılar sekmesini yer
+    //   değiş"): Kullanıcılar (Genel grubu) dizide önce geliyordu; matris onun önüne girer.
+    const genelSira = s.findIndex(x => x.tur === 'grup' && x.baslik === 'Genel');
+    const matris = { tur: 'ozel', anahtar: 'ozel:yetkiler', baslik: 'Yetki Matrisi' } as const;
+    if (genelSira >= 0) s.splice(genelSira, 0, matris); else s.push(matris);
     // Kullanicilar AYRI SEKME DEGIL (kullanici): Genel sekmesinde, alanlarin
     //   altinda gomulu grid - bkz. KartGrupSekmesi.
     //

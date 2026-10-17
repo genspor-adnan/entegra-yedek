@@ -541,7 +541,8 @@ export function ListeKarti({
           // SEKME BAŞLIĞI = kaydın adı: unvan, ad + soyad, sonra kaynakların ortak ad alanları;
           //   hiçbiri yoksa "Randevu Kartı #30" (kart adı + kayıt no).
           const metin = (x: unknown) => String(x ?? '').trim();
-          const ad = metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
+          // ROL KARTI: sekmede kart adı (kullanıcı 17.10.2026: "rol kartı sekmesi başlığına Rol Kartı yaz").
+          const ad = tanim.kaynak === 'rol' ? kartAdi(tanim) : metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
             || metin(d.hastaAdi) || metin(d.tarafUnvan) || metin(d.adi) || metin(d.baslik) || metin(d.konu)
             || (tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'sevk' ? metin(d.no) : '')
             || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)
@@ -592,7 +593,9 @@ export function ListeKarti({
         // Muayenede başlık satırı yok - sekmesiz (15.10.2026) ve sekmeli (16.10.2026, kullanıcı: "kaydet
         //   butonu ile sekme arasındaki alanı kaldır").
         // Randevu kartında da yok (kullanıcı 16.10.2026, aynı istek) - kart adı sekme başlığında.
-        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'randevu'
+        // Rol kartında da yok (kullanıcı 17.10.2026: "kaydet ile üst sekmeler arasındaki rol kartı ile
+        //   başlayan bölümü kaldır").
+        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'randevu' || tanim.kaynak === 'rol'
                         || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
