@@ -191,6 +191,8 @@ export function Baslangic() {
           {(paneller?.length ?? 0) > 0 && (
             <div className="bsl-kutu bsl-gp">
               <div className="bsl-kb">📊 {c('Gösterge Panelleri')}<span className="rozet mavi">{paneller!.length}</span></div>
+              {/* 6 PANEL GÖRÜNÜR, FAZLASI KAYDIRILIR (kullanıcı 17.10.2026) - diğer kutularla aynı. */}
+              <div className="bsl-satirlar">
               {paneller!.map(p => (
                 <a key={p.kod} onClick={() => git(`/gosterge/${p.kod}`)}>
                   <span>{p.ikon} {c(p.ad)}</span>
@@ -198,6 +200,7 @@ export function Baslangic() {
                     {gostergeDegeri(p.ilk)} · {c(p.ilk.baslik).toLocaleLowerCase('tr')}</span>}
                 </a>
               ))}
+              </div>
             </div>
           )}
           {kutucuklar.map((k, i) => (
