@@ -3,6 +3,7 @@ import { c } from '../../dil/ceviri';
 import { usePaletKomutlari } from './paletKomutlari';
 import { api } from '../../api/istemci';
 import type { MenuSatiri } from './menuAgaci';
+import { useSesliGiris } from '../../bilesenler/sesliGiris';
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -120,6 +121,12 @@ type Oge = { bolum: Bolum } & (
 export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, onAc, git, ekEkranlar, ekranSayac }: Props) {
   const [arama, setArama] = useState('');
   const [secili, setSecili] = useState(0);
+  // MİKROFON (kullanıcı 17.10.2026): söylenen arama kutusuna yazılır, liste anında süzülür. Kanca
+  //   erken `return`'den (palet kapalı) ÖNCE - kanca sırası her çizimde aynı kalmalı.
+  const ses = useSesliGiris(metin => { setArama(metin); setSecili(0) });
+  // Palet kapanınca mikrofon açık kalmasın.
+  const { durdur: sesDurdur } = ses;
+  useEffect(() => { if (!acik) sesDurdur() }, [acik, sesDurdur]);
   const kutu = useRef<HTMLInputElement>(null);
   const ekranKomutlari = usePaletKomutlari();
 
@@ -237,14 +244,25 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(s => Math.max(s - 1, 0)) }
         else if (e.key === 'Enter' && gorunen[secili]) { e.preventDefault(); sec(gorunen[secili]) }
       }}>
-        <input
-          ref={kutu}
-          autoFocus
-          className="arama"
-          placeholder={c('Ekran, komut ya da numara ara (dosya / TC / protokol)… (Ctrl+K)')}
-          value={arama}
-          onChange={e => { setArama(e.target.value); setSecili(0) }}
-        />
+        <div className="palet-arama">
+          <input
+            ref={kutu}
+            autoFocus
+            className="arama"
+            placeholder={ses.dinliyor ? c('Dinliyorum… söyleyin') : c('Ekran, komut ya da numara ara (dosya / TC / protokol)… (Ctrl+K)')}
+            value={arama}
+            onChange={e => { setArama(e.target.value); setSecili(0) }}
+          />
+          {ses.destek && (
+            <button type="button" className={`palet-mik${ses.dinliyor ? ' acik' : ''}`}
+                    title={ses.dinliyor ? c('Dinlemeyi durdur') : c('Sesle ara (konuşun, söylediğiniz yazılır)')}
+                    aria-pressed={ses.dinliyor}
+                    onClick={() => { if (ses.dinliyor) ses.durdur(); else { ses.baslat(); kutu.current?.focus() } }}>
+              🎤
+            </button>
+          )}
+        </div>
+        {ses.hata && <div className="palet-ses-hata">{c(ses.hata)}</div>}
         <div className="palet-liste">
           {gorunen.map((o, i) => (<Fragment key={o.anahtar}>
             {(i === 0 || gorunen[i - 1].bolum !== o.bolum) && <div className="palet-bolum">{c(o.bolum)}</div>}
