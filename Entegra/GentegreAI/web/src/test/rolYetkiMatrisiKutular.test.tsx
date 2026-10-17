@@ -76,12 +76,12 @@ describe('yetki matrisi kutular', () => {
 
   it('Gör kapalıyken rozet kilitli, açıkken rozet işlemi açar', async () => {
     const k = await ciz();
-    const kilitli = kutu(k, 'Randevu Listesi').querySelector('.ym-r.ekle') as HTMLButtonElement;
+    const kilitli = kutu(k, 'Randevu Listesi').querySelector('.ym-r.ym-e') as HTMLButtonElement;
     expect(kilitli.disabled).toBe(true);
-    const ekle = kutu(k, 'Hasta Listesi').querySelector('.ym-r.ekle') as HTMLButtonElement;
+    const ekle = kutu(k, 'Hasta Listesi').querySelector('.ym-r.ym-e') as HTMLButtonElement;
     expect(ekle.disabled).toBe(false);
     await act(async () => { fireEvent.click(ekle) });
-    expect((kutu(k, 'Hasta Listesi').querySelector('.ym-r.ekle') as HTMLElement).classList.contains('on')).toBe(true);
+    expect((kutu(k, 'Hasta Listesi').querySelector('.ym-r.ym-e') as HTMLElement).classList.contains('on')).toBe(true);
   });
 });
 

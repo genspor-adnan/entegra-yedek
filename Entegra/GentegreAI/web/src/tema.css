@@ -8413,8 +8413,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ym-isl { display: inline-flex; gap: 3px; flex: none }
 .ym-r { width: 20px; height: 20px; padding: 0; line-height: 18px; text-align: center; font-size: 10.5px; font-weight: 700; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); color: var(--soluk); cursor: pointer }
 .ym-r.on { background: var(--vurgu); border-color: var(--vurgu); color: #fff }
-.ym-r.sil.on { background: var(--hata); border-color: var(--hata) }
-.ym-r.ekle.on { background: var(--ok); border-color: var(--ok) }   /* E yeşil, S kırmızı (kullanıcı 17.10.2026) */
+.ym-r.ym-s.on { background: var(--hata); border-color: var(--hata) }
+.ym-r.ym-e.on { background: var(--ok); border-color: var(--ok) }   /* E yeşil, S kırmızı (kullanıcı isteği) */
 .ym-r:disabled { opacity: .35; cursor: default }
 .ym-altbas { display: flex; width: 100%; align-items: center; gap: 6px; padding: 4px 10px; border: 0; border-bottom: 1px solid var(--cizgi2, var(--cizgi)); background: transparent; color: var(--yazi2, inherit); font: inherit; cursor: pointer; text-align: left }
 .ym-bos { padding: 8px 2px; color: var(--soluk) }

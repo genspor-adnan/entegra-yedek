@@ -795,7 +795,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
           <span className="ym-isl">
             {ROZETLER.map(r => (
               <button key={r.ad} type="button" title={cev(r.baslik)}
-                      className={`ym-r ${r.ad}${s[r.ad] ? ' on' : ''}`}
+                      className={`ym-r ym-${r.harf.toLowerCase()}${s[r.ad] ? ' on' : ''}`}
                       disabled={saltOkunur || !s.gor}
                       onClick={() => degistir(new Set([s.yetkiId]), r.ad, !s[r.ad])}>{r.harf}</button>
             ))}
