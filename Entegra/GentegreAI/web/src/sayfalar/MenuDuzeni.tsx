@@ -3,8 +3,9 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
+import { Modal } from '../bilesenler/Modal';
 import { LISTELER } from './Liste';
-import { MenuIkon, menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
+import { MenuIkon, menuSatirlariKur, GRUP_IKON, GRUP_IKON_CEV, type MenuSatiri } from './kabuk/menuAgaci';
 import { DUGUM } from './kabuk/menuDuzenHarita';
 import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
          type MenuDuzenSatiri } from './kabuk/menuDuzeni';
@@ -16,8 +17,11 @@ import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
  * sunucuda `menu_duzen` olarak saklar. Satırı olmayan düğüm varsayılan yerinde
  * çıkar - yeni bir modül eklendiğinde şube düzeni onu gizlemez.
  *
- * <b>Gizlemek yetki değildir:</b> menüden kaldırılan ekran, yetkisi olan
- * kullanıcıya adresten yine açılır. Ekranda bu uyarı yazılı durur.
+ * KUTU GÖRÜNÜMÜ (kullanıcı 17.10.2026: "genprofil'deki menü düzenini admin home sayfasındaki kutucuklar
+ * gibi yap; grup ve satır başlarına check koy; check olanlar o profilde görünecek ve yetki matrisine
+ * girecek; grup başı işaretlenince alt satırlar da aynı şekilde işaretlenir; satır tıklanınca özellik
+ * modalı açılır - adı, ikonu, grubu vb. değişip kaydedilebilir"). Eski ağaç + pasif menü + sürükle-bırak
+ * görünümünün yerini aldı; kayıt modeli (fark satırları, `gizli`, sıra, üst başlık) aynı.
  */
 type Dugum = {
   tur: 'bolge' | 'grup' | 'ekran';
@@ -36,6 +40,8 @@ type Dugum = {
   derinlik: number;
   /** Ekran düğümünde rota - "nereye gider" sütunu. */
   yol?: string;
+  /** Menüdeki alt başlık (ör. Ayarlar) - kutuda okla açılan alt grup (17.10.2026). */
+  altGrup?: string;
 };
 
 /**
@@ -91,21 +97,16 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   const [subeId, setSubeId] = useState<number>(kullanici?.subeId ?? 0);
   const [duzen, setDuzen] = useState<MenuDuzenSatiri[]>([]);
   const [subeyeOzel, setSubeyeOzel] = useState(0);
+  /** Özellik penceresi açık düğüm (iç kod). */
   const [secili, setSecili] = useState<string | null>(null);
-  const [surukle, setSurukle] = useState<string | null>(null);
-  /**
-   * AĞAÇ KATLANIR, VARSAYILAN KAPALI (kullanıcı 06.10.2026: "grup kapanır
-   * açılır olsun", "gruplar kapalı olsun default"): tam menü ~330 düğüm -
-   * hepsi açıkken aranan satır ekrana sığmıyordu.
-   */
+  /** Açık alt gruplar ("grup iç kodu/alt başlık"); varsayılan kapalı. */
+  const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
+  /** Sürüklenen satır ve grubu - yalnız AYNI grup içinde yer değiştirir (17.10.2026). */
+  const [surukle, setSurukle] = useState<{ kod: string; grup: string } | null>(null);
   const dosyaGirdi = useRef<HTMLInputElement>(null);
   const aktarimGirdi = useRef<HTMLInputElement>(null);
-  const [acik, setAcik] = useState<Record<string, boolean>>({});
-  const [pasifAcik, setPasifAcik] = useState<Record<string, boolean>>({});
   /** Sunucudaki hal: kaydedilmemiş değişiklik var mı, buradan anlaşılır. */
   const [sunucudaki, setSunucudaki] = useState<MenuDuzenSatiri[]>([]);
-  const acikMi = (kod: string) => acik[kod] === true;
-  const ac = (kod: string) => setAcik(o => ({ ...o, [kod]: !o[kod] }));
   const [mesaj, setMesaj] = useState('');
   const [yukleniyor, setYukleniyor] = useState(true);
 
@@ -149,7 +150,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
           tur: 'ekran', kod: icKod('ekran', benzersiz(ogeKoduBaglamli(m, kod, cakisan))),
           sistemAd: m.adHam ?? m.ad, ad: m.ad, sira: m.sira,
           modul: m.modul, suzgec: suzgecCoz(m.yol),
-          ikon: m.ic, ustKod: ic, derinlik: ustIc ? 3 : 2, yol: m.yol,
+          ikon: m.ic, ustKod: ic, derinlik: ustIc ? 3 : 2, yol: m.yol, altGrup: m.altGrup,
         });
     };
 
@@ -353,87 +354,6 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   }, [dugumler, duzen]);
 
   /**
-   * PASİF MENÜ (kullanıcı 07.10.2026): "kullanmayacaklarımı sağdaki pasif
-   * menüye taşısam, sadece kullanacağım aktifler sol menüde kalsa; ihtiyaç
-   * olduğunda sağdan sola taşıyıp yerine yerleştirsem".
-   *
-   * Sağ panel artık önizleme değil, **gizlenenlerin listesi**: aktif menüden
-   * çıkarılan düğümler oraya düşer, sürükleyerek geri alınır. Gizleme modeli
-   * aynı (`gizli = 1`) - değişen yalnız nasıl gösterildiği.
-   */
-  const pasifSatirlari = useMemo(() => {
-    const derinlikH = new Map(yerlesim.map(({ d, derinlik }) => [d.kod, derinlik]));
-    const cikti: { d: Dugum; derinlik: number; baslik?: boolean }[] = [];
-    const eklendi = new Set<string>();
-    /**
-     * ÜST BAŞLIK PASİFTE DE ÇİZİLİR (kullanıcı 07.10.2026: "bir ekranı
-     * aktiften pasife aldığımda o ekranın üst menüsü yoksa pasifte üst menü
-     * oluşturup altına girsin").
-     *
-     * Tek bir ekranı pasife almak onu köksüz bırakıyordu: listede "Dökümler"
-     * yazıyor, hangi grubun dökümü olduğu görünmüyordu. Üst zincir YER
-     * GÖSTERGESİ olarak eklenir (`baslik`) - o başlık aktif menüde duruyor,
-     * burada yalnız ekranın nereden geldiğini söyler: sürüklenmez, geri
-     * alınmaz, yalnız katlanır.
-     */
-    const ustEkle = (d: Dugum) => {
-      const u = etkinUst(d);
-      if (!u) return;
-      const ust = dugumler.find(x => x.kod === u);
-      if (!ust) return;
-      ustEkle(ust);
-      if (eklendi.has(ust.kod)) return;
-      eklendi.add(ust.kod);
-      cikti.push({ d: ust, derinlik: derinlikH.get(ust.kod) ?? 1, baslik: !gizliMi(ust) });
-    };
-    for (const { d, derinlik } of yerlesim) {
-      if (!gizliMi(d)) continue;
-      ustEkle(d);
-      if (eklendi.has(d.kod)) continue;
-      eklendi.add(d.kod);
-      cikti.push({ d, derinlik });
-    }
-    return cikti;
-  }, [yerlesim, duzen]);
-
-  /**
-   * Pasif menüde açık başlıklar. Varsayılan KAPALI: pasife alınan bir bölge
-   * altındaki onlarca satırı birden açmak listeyi okunmaz yapıyordu.
-   */
-  const pasifAcikMi = (kod: string) => pasifAcik[kod] === true;
-  const pasifAc = (kod: string) =>
-    setPasifAcik(o => ({ ...o, [kod]: !pasifAcikMi(kod) }));
-
-  /** Pasif panelde çizilecek satırlar: üst zinciri kapalıysa gösterilmez. */
-  const pasifGorunur = pasifSatirlari.filter(({ d }) => {
-    let k = etkinUst(d);
-    const gorulen = new Set<string>();
-    while (k && !gorulen.has(k)) {
-      gorulen.add(k);
-      // Üst, pasif listesinde yer gösterge satırı olarak da olabilir; listede
-      //   hiç yoksa zincir orada biter.
-      if (!pasifSatirlari.some(x => x.d.kod === k)) break;
-      if (!pasifAcikMi(k)) return false;
-      const ust = dugumler.find(x => x.kod === k);
-      k = ust ? etkinUst(ust) : undefined;
-    }
-    return true;
-  });
-
-  /** Sol ağaç: AKTİF menü - gizlenenler burada çizilmez, pasif panelde durur. */
-  const agacSatirlari = yerlesim.filter(({ d }) => !gizliMi(d)).filter(({ d }) => {
-    let k = etkinUst(d);
-    const gorulen = new Set<string>();
-    while (k && !gorulen.has(k)) {
-      gorulen.add(k);
-      if (!acikMi(k)) return false;
-      const ust = dugumler.find(x => x.kod === k);
-      k = ust ? etkinUst(ust) : undefined;
-    }
-    return true;
-  });
-
-  /**
    * KAYDEDİLECEK SATIRLAR = kurumun düzenlemeleri + TÜRETİLMİŞ ERİŞİM KAPILARI.
    *
    * Gizlemek erişimi kapatır (kullanıcı 07.10.2026: "Erişimi KAPATIR: adresi
@@ -582,95 +502,46 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     } catch (h) { setMesaj(hataMetni(h)) }
   };
 
-  /** Aktiften PASİFE: panelin üstüne bırakılan düğüm gizlenir. */
-  const pasifeBirak = () => {
-    if (!surukle) return;
-    const kaynak = dugumler.find(x => x.kod === surukle);
-    setSurukle(null);
-    if (!kaynak || !duzenleyebilir) return;
-    if (gizliMi(kaynak)) return;              // zaten pasifte
-    farkYaz(kaynak, { gizli: 1 });
-    setMesaj(`${c('Pasife alındı')}: ${fark(kaynak.kod)?.gorunenAd || kaynak.ad}`);
-  };
-
   /**
-   * Sürükle-bırak: aynı üstteki kardeşler arasında SIRA değiştirir.
-   * PASİFTEN GELEN düğüm ayrıca aktife alınır ve hedefin üst başlığına
-   * taşınır - kullanıcı "yerine yerleştirsem kaydırarak" dediği için bırakılan
-   * nokta hem görünürlüğü hem sırayı belirler.
+   * GRUP VE SATIR İŞARETİ = GÖRÜNÜRLÜK (`gizli`). İşaretli olan profilde görünür ve yetki matrisine girer.
+   * GRUP BAŞI bütün alt satırlara AYNI değeri yazar; grup kapalıyken bir satır işaretlenirse grup da açılır
+   * (öteki satırlar kendi işaretinde kalır).
    */
-  const birak = (hedef: Dugum) => {
-    if (!surukle || surukle === hedef.kod) { setSurukle(null); return }
-    const kaynak = dugumler.find(x => x.kod === surukle);
-    if (kaynak && gizliMi(kaynak) && kaynak.tur === hedef.tur) {
-      setSurukle(null);
-      // Önce aktife al ve hedefin üstüne taşı; sıra bir sonraki adımda
-      //   kardeşler yeniden numaralanırken verilir.
-      farkYaz(kaynak, { gizli: 0, ustKod: etkinUst(hedef) ?? '' });
-      setMesaj(`${c('Aktife alındı')}: ${fark(kaynak.kod)?.gorunenAd || kaynak.ad}`);
-      return;
-    }
-    setSurukle(null);
-    if (!kaynak) return;
-
-    // BAŞKA BAŞLIĞA SÜRÜKLEME (kullanıcı 07.10.2026: "grup ya da bölge
-    //   taşıdığımda alt alanları ile birlikte taşınmalıdır"): eskiden yalnız
-    //   kardeş sırası değişiyordu, başka bölgeye bırakmak uyarı veriyordu.
-    //
-    //   ALT ÖĞELER KENDİLİĞİNDEN GELİR: ekranın üstü GRUP kodudur, grubun üstü
-    //   bölge adıdır - taşınan düğümün kodu değişmediği için zinciri koparan
-    //   bir şey yok. Bu yüzden yalnız taşınan düğüme satır yazılır; alt
-    //   satırlara yazmak, üstü geri taşındığında onları yerinde bırakırdı.
-    const hedefUst = etkinUst(hedef);
-    const yeniUst = kaynak.tur === hedef.tur ? hedefUst          // kardeş olarak araya gir
-      : kaynak.tur === 'ekran' && hedef.tur === 'grup' ? hedef.kod   // grubun altına
-      : undefined;
-    if (yeniUst === undefined && kaynak.tur !== hedef.tur) {
-      setMesaj(c('Bu düğüm oraya taşınamaz: ekran bir gruba taşınır, gruplar kendi aralarında sıralanır.'));
-      return;
-    }
-    if (kaynak.tur !== hedef.tur) {
-      farkYaz(kaynak, { ustKod: yeniUst ?? '' });
-      setMesaj(`${fark(kaynak.kod)?.gorunenAd || kaynak.ad} → ${
-        fark(hedef.kod)?.gorunenAd || hedef.ad}`);
-      return;
-    }
-    // Aynı tür ama BAŞKA üst: önce taşı, sonra hedefin kardeşleri arasında
-    //   sırala - bırakılan nokta sırayı da belirlesin.
-    const tasiniyor = etkinUst(kaynak) !== hedefUst;
-    if (tasiniyor) farkYaz(kaynak, { ustKod: hedefUst ?? '' });
-    // KARDEŞ SIRASI YERLEŞİMDEN: koddaki dizi sırası değil, ekranda GÖRÜLEN
-    //   sıra - yoksa bir kez sürükledikten sonraki her sürükleme eski sıraya
-    //   göre hesaplanıp düğümü geri atardı.
-    const kardes = yerlesim.map(({ d }) => d)
-      .filter(x => x.tur === kaynak.tur
-                   && (x.kod === kaynak.kod || etkinUst(x) === hedefUst));
-    const sira = kardes.map(x => x.kod).filter(k => k !== kaynak.kod);
-    const i = sira.indexOf(hedef.kod);
-    sira.splice(i < 0 ? sira.length : i, 0, kaynak.kod);
-    setDuzen(onceki => {
-      let sonuc = [...onceki];
-      sira.forEach((ic, indeks) => {
-        const d = dugumler.find(x => x.kod === ic)!;
-        const tur = turNo(d.tur);
-        const kod = dbKod(ic);
-        const mevcut = sonuc.find(x => x.sistemKod === kod && x.dugumTur === tur);
-        const ustIc = ic === kaynak.kod ? hedefUst : (etkinUst(d) ?? undefined);
-        const yeni: MenuDuzenSatiri = {
-          dugumTur: tur,
-          sistemKod: kod,
-          gorunenAd: '', ikon: '', gizli: 0, acilistaAcik: 0,
-          ...mevcut,
-          // Taşınan düğümün üstü HEDEFİN üstüdür (mevcut kayıt eski üstü
-          //   taşıyor olabilir: `...mevcut` onu geri yazardı).
-          ustKod: ustIc != null ? dbKod(ustIc) : (ic === kaynak.kod ? '' : mevcut?.ustKod ?? null),
-          sira: (indeks + 1) * 10,
-        };
-        sonuc = [...sonuc.filter(x => !(x.sistemKod === kod && x.dugumTur === tur)), yeni];
-      });
-      return sonuc;
-    });
+  const grupCocuklari = (g: Dugum) => yerlesim.map(x => x.d).filter(x => etkinUst(x) === g.kod);
+  const grupIsaretle = (g: Dugum, gorunur: boolean) => {
+    farkYaz(g, { gizli: gorunur ? 0 : 1 });
+    for (const ch of grupCocuklari(g)) farkYaz(ch, { gizli: gorunur ? 0 : 1 });
   };
+  const satirIsaretle = (s: Dugum, gorunur: boolean) => {
+    farkYaz(s, { gizli: gorunur ? 0 : 1 });
+    const ustKod = etkinUst(s);
+    const ust = ustKod ? dugumler.find(x => x.kod === ustKod) : undefined;
+    if (gorunur && ust && fark(ust.kod)?.gizli === 1) {
+      farkYaz(ust, { gizli: 0 });
+      // Grup açılınca diğer satırlar kendi işaretini korusun: işaretsiz kalanlara açık "gizli" yazılır.
+      for (const ch of grupCocuklari(ust))
+        if (ch.kod !== s.kod && fark(ch.kod)?.gizli !== 0) farkYaz(ch, { gizli: 1 });
+    }
+  };
+  /**
+   * GRUP İÇİ SÜRÜKLE-BIRAK (kullanıcı 17.10.2026: "menüler kendi grup içinde sürükle bırak ile yer
+   * değişebilir olsun"): kaynak hedefin önüne girer, grubun bütün satırlarına yeni sıra (10, 20...) yazılır.
+   */
+  const siraDegis = (g: Dugum, kaynakKod: string, hedefKod: string) => {
+    if (kaynakKod === hedefKod) return;
+    const sira = grupCocuklari(g).map(x => x.kod).filter(k => k !== kaynakKod);
+    const i = sira.indexOf(hedefKod);
+    sira.splice(i < 0 ? sira.length : i, 0, kaynakKod);
+    sira.forEach((k, n) => { const dd = dugumler.find(x => x.kod === k); if (dd) farkYaz(dd, { sira: (n + 1) * 10 }) });
+  };
+  /** Kutular: gruplar sırasıyla; grupsuz (düz) ekranlar en sonda "Diğer" kutusunda. */
+  const kutular = useMemo(() => {
+    const kok = yerlesim.filter(x => x.derinlik === 1).map(x => x.d);
+    const gruplar = kok.filter(x => x.tur === 'grup')
+      .map(g => ({ g, satirlar: yerlesim.map(x => x.d).filter(x => etkinUst(x) === g.kod) }));
+    const duzler = kok.filter(x => x.tur === 'ekran');
+    return { gruplar, duzler };
+  }, [yerlesim, duzen]);
 
   return (
     <div className="mn-ekran">
@@ -724,226 +595,180 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
         + 'matrisinde görünmez. Erişimi KAPATIR: adresi bilen yetkili kullanıcı da ekranı '
         + 'açamaz. Yetki kaydı silinmez - ekranı yeniden gösterince eski yetkileriyle döner.')}</div>
 
-      <div className="mn-govde">
-        {/* AĞAÇ */}
-        <div className="mn-agac">
-          <div className="mn-agac-bas">{c('Sürükleyerek sırala · göz ile gizle')}
-            <span className="sonuk"> · {dugumler.length} {c('düğüm')}</span>
-            <span className="mn-bosluk" />
-            <button type="button" className="d mini" onClick={() => setAcik(
-              Object.fromEntries(dugumler.filter(x => dugumler.some(y => etkinUst(y) === x.kod))
-                                         .map(x => [x.kod, true])))}>⤢ {c('Tümünü aç')}</button>
-            <button type="button" className="d mini" onClick={() => setAcik({})}>⤡ {c('Kapat')}</button>
-          </div>
-          {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
-          {agacSatirlari.map(({ d, derinlik }) => {
-            // Bu listede yalnız AKTİF düğümler var (gizliler pasif panelde),
-            //   bu yüzden ayrı bir "gizli" durumu çizilmiyor.
-            const f = fark(d.kod);
-            return (
-              <div key={d.kod}
-                   className={`mn-dugum d${derinlik}${secili === d.kod ? ' sec' : ''}`
-                              + `${surukle === d.kod ? ' surukle' : ''}`}
-                   draggable={duzenleyebilir}
-                   onDragStart={() => setSurukle(d.kod)}
-                   onDragOver={e => e.preventDefault()}
-                   onDrop={() => birak(d)}
-                   onClick={() => setSecili(d.kod)}>
-                <span className="tut">⠿</span>
-                {dugumler.some(x => etkinUst(x) === d.kod) ? (
-                  <button type="button" className="d mini mn-ok"
-                          title={acikMi(d.kod) ? c('Kapat') : c('Aç')}
-                          onClick={e => { e.stopPropagation(); ac(d.kod) }}>
-                    {acikMi(d.kod) ? '▾' : '▸'}</button>
-                ) : <span className="mn-ok-bos" />}
-                {d.ikon && <span className="ikon">{d.ikon}</span>}
-                <span className="ad">{f?.gorunenAd || d.ad}</span>
-                <span className="sag">
-                  <span className="rozet gri">{c(d.tur === 'bolge' ? 'bölge' : d.tur === 'grup' ? 'grup' : 'ekran')}</span>
-                  {/* SAĞA OK = PASİFE AL (kullanıcı 07.10.2026: "aktif menüde göz
-                      yerine sağa ok tuşu ikon yap"): aktif ağaçta yalnız görünen
-                      düğümler var, düğmenin tek işi onları sağdaki pasif menüye
-                      göndermek - göz ikonu iki yönlüydü ve bu panelde yönün
-                      hangisi olduğu belirsizdi. */}
-                  <button type="button" className="d mini mn-pasife"
-                          disabled={!duzenleyebilir}
-                          title={c('Pasif menüye al')}
-                          onClick={e => { e.stopPropagation(); farkYaz(d, { gizli: 1 }) }}>
-                    →</button>
-                </span>
+      {yukleniyor && <div className="sonuk" style={{ padding: 10 }}>{c('yükleniyor')}…</div>}
+      {/* KUTULAR (ana sayfa düzeni): her grup bir kutu; başlıkta ve satırlarda işaret. */}
+      <div className="mn-kutular">
+        {kutular.gruplar.map(({ g, satirlar: sat }) => {
+          const gGorunur = !gizliMi(g);
+          const isaretli = sat.filter(s => !gizliMi(s)).length;
+          return (
+            <div key={g.kod} className={`mn-kutu-grup${gGorunur ? '' : ' kapali'}`}>
+              <div className="mn-kb">
+                <input type="checkbox" checked={gGorunur} disabled={!duzenleyebilir}
+                       ref={el => { if (el) el.indeterminate = gGorunur && isaretli > 0 && isaretli < sat.length }}
+                       title={c('Grubu ve bütün satırlarını profilde göster / gizle')}
+                       onChange={e => grupIsaretle(g, e.target.checked)} />
+                <button type="button" className="mn-ad" onClick={() => setSecili(g.kod)} title={c('Özellikler')}>
+                  <MenuIkon ic={fark(g.kod)?.ikon || g.ikon || GRUP_IKON[g.sistemAd] || GRUP_IKON_CEV[g.ad] || '📁'} /> {fark(g.kod)?.gorunenAd || g.ad}
+                </button>
+                <span className="rozet gri">{isaretli}/{sat.length}</span>
               </div>
-            );
-          })}
-        </div>
-
-        {/* ÖZELLİKLER */}
-        <div className="mn-ozellik">
-          {!seciliDugum ? (
-            <div className="sonuk">{c('Düzenlemek için soldan bir düğüm seçin.')}</div>
-          ) : (
-            <>
-              <h5>{c('Seçili düğüm')} · {c(seciliDugum.tur === 'bolge' ? 'bölge'
-                : seciliDugum.tur === 'grup' ? 'grup' : 'ekran')}</h5>
-              <div className="mn-izgara">
-                <label className="mn-kutu"><span>{c('Sistem adı (değişmez)')}</span>
-                  <div className="mn-inp pasif">{seciliDugum.sistemAd}</div></label>
-                <label className="mn-kutu"><span>{c('Görünen ad')}</span>
-                  <input className="mn-inp" disabled={!duzenleyebilir}
-                         value={fark(seciliDugum.kod)?.gorunenAd ?? ''}
-                         placeholder={seciliDugum.ad}
-                         onChange={e => farkYaz(seciliDugum, { gorunenAd: e.target.value })} /></label>
-                {/* İKON: emoji metni YA DA yüklenen görsel (980, kullanıcı
-                    "ikon da yükleyebilirim"). Görsel seçilince 64x64 PNG'ye
-                    küçültülüp `data:` URL olarak saklanır - ayrı dosya deposu
-                    menüyü her çizimde bir sorgu daha pahalı yapardı. */}
-                <label className="mn-kutu"><span>{c('İkon')}</span>
-                  <div className="mn-ikon-satir">
-                    {ikonGorsel ? (
-                      <img src={ikonGorsel} alt="" className="mn-ikon-onizle" />
-                    ) : (
-                      <input className="mn-inp" disabled={!duzenleyebilir}
-                             value={fark(seciliDugum.kod)?.ikon ?? ''}
-                             placeholder={seciliDugum.ikon ?? '—'}
-                             onChange={e => farkYaz(seciliDugum, { ikon: e.target.value })} />
-                    )}
-                    <input ref={dosyaGirdi} type="file" accept="image/*" hidden
-                           onChange={e => ikonYukle(e.target.files?.[0])} />
-                    <button type="button" className="d mini" disabled={!duzenleyebilir}
-                            onClick={() => dosyaGirdi.current?.click()}
-                            title={c('Görsel yükle (en çok 64 KB, 64x64 ölçülür)')}>⬆</button>
-                    {(fark(seciliDugum.kod)?.ikon ?? '') !== '' && (
-                      <button type="button" className="d mini" disabled={!duzenleyebilir}
-                              onClick={() => farkYaz(seciliDugum, { ikon: '' })}
-                              title={c('İkonu varsayılana döndür')}>↺</button>
-                    )}
-                  </div></label>
-                {/* ÜST BAŞLIK DEĞİŞTİRİLEBİLİR (kullanıcı 06.10.2026): ekran başka
-                    grubun, grup da başka bölgenin altına taşınabilir. Seçenekler
-                    ağacın kendisinden gelir - elle kod yazdırmak, var olmayan bir
-                    başlığa taşıyıp ekranı menüden düşürmek demekti.
-                    "en üst" seçimi BOŞ DİZE gönderir ve aynen saklanır: `|| null`
-                    yazıldığında kayıt boş sayılıp siliniyor, grup bölgesine geri
-                    dönüyordu. */}
-                <label className="mn-kutu"><span>{c('Üst başlık')}</span>
-                  {ustSecenekleri(seciliDugum).length === 0 ? (
-                    <div className="mn-inp pasif">{seciliDugum.ustKod ? c(seciliDugum.ustKod) : '—'}</div>
-                  ) : (
-                    <select className="mn-inp" disabled={!duzenleyebilir}
-                            // DEĞER DE İÇ KOD (07.10.2026 hatası): seçenekler iç
-                            //   kod (`b|Yönetim`), değer ise veritabanı kodu
-                            //   (`Yönetim`) olarak veriliyordu; eşleşmeyince
-                            //   tarayıcı ilk seçeneği ("en üst") gösteriyor ve
-                            //   grup bölge altındayken kök gibi görünüyordu.
-                            value={etkinUst(seciliDugum) ?? ''}
-                            onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value })}>
-                      {ustSecenekleri(seciliDugum).map(u => (
-                        <option key={u || '-kok-'} value={u}>
-                          {/* ETİKET VERİTABANI KODU: değer iç kod (`b|Yönetim`)
-                              ama kullanıcı "b|" önekini görmemeli. */}
-                          {u === '' ? `— ${c('en üst')} —` : c(dbKod(u))}</option>
-                      ))}
-                    </select>
-                  )}</label>
-                <label className="mn-kutu"><span>{c('Sıra')}</span>
-                  {/* SIRA ELLE DE GİRİLİR: sürüklemek bitişik taşımak için iyi,
-                      "en sona al" için on kez sürüklemek gerekiyordu. Boş = varsayılan. */}
-                  <input className="mn-inp" type="number" disabled={!duzenleyebilir}
-                         value={fark(seciliDugum.kod)?.sira ?? ''}
-                         placeholder={c('varsayılan')}
-                         onChange={e => farkYaz(seciliDugum,
-                           { sira: e.target.value === '' ? null : Number(e.target.value) })} /></label>
-                <label className="mn-kutu"><span>{c('Derinlik')}</span>
-                  <div className="mn-inp pasif">{seciliDugum.derinlik}</div></label>
-                <label className="mn-kutu"><span>{c('Durum')}</span>
-                  <select className="mn-inp"
-                          disabled={!duzenleyebilir || (fark(seciliDugum.kod)?.gizli !== 1 && ustGizli(seciliDugum))}
-                          value={fark(seciliDugum.kod)?.gizli === 1 ? '1' : '0'}
-                          onChange={e => farkYaz(seciliDugum, { gizli: Number(e.target.value) })}>
-                    <option value="0">{c('Görünür')}</option>
-                    <option value="1">{c('Gizli')}</option>
-                  </select></label>
-                {/* HANGİ MODÜLE AİT (kullanıcı 07.10.2026: "eğer önemliyse hangi
-                    modüle ait olduğunu gösteren bir alan ekle"): paylaşılan
-                    ekranlarda - Dökümler, Ayarlar - başlığın hangi veriyi
-                    açtığı yalnız bu iki alandan anlaşılır. */}
-                {seciliDugum.tur === 'ekran' && (
-                  <label className="mn-kutu"><span>{c('Modül')}</span>
-                    <div className="mn-inp pasif">{seciliDugum.modul
-                      ? c(seciliDugum.modul, 'kod') : c('modülsüz (her kurulumda)')}</div></label>
-                )}
-                {seciliDugum.suzgec && (
-                  <label className="mn-kutu"><span>{c('Veri süzgeci')}</span>
-                    <div className="mn-inp pasif" title={c('Bu başlık taşındığında süzgeç de '
-                      + 'yeni grubuna çevrilir')}>{c('grup')} = {c(seciliDugum.suzgec)}</div></label>
-                )}
-                {seciliDugum.yol && (
-                  <label className="mn-kutu"><span>{c('Rota')}</span>
-                    <div className="mn-inp pasif">{seciliDugum.yol}</div></label>
-                )}
+              <div className="mn-satirlar">
+                {(() => {
+                  const satirCiz = (s: Dugum, alt = false) => {
+                    const gorunur = !gizliMi(s);
+                    return (
+                      <div key={s.kod}
+                           className={`mn-sat${gorunur ? '' : ' kapali'}${alt ? ' alt' : ''}${surukle?.kod === s.kod ? ' surukle' : ''}`}
+                           draggable={duzenleyebilir}
+                           onDragStart={() => setSurukle({ kod: s.kod, grup: g.kod })}
+                           onDragEnd={() => setSurukle(null)}
+                           onDragOver={ev => { if (surukle?.grup === g.kod) ev.preventDefault() }}
+                           onDrop={() => { if (surukle?.grup === g.kod) siraDegis(g, surukle.kod, s.kod); setSurukle(null) }}
+                           title={duzenleyebilir ? c('Sürükleyerek grup içinde sırala') : undefined}>
+                        {duzenleyebilir && <span className="mn-tut">⠿</span>}
+                        <input type="checkbox" checked={gorunur} disabled={!duzenleyebilir}
+                               onChange={e => satirIsaretle(s, e.target.checked)} />
+                        <button type="button" className="mn-ad" onClick={() => setSecili(s.kod)} title={c('Özellikler')}>
+                          <MenuIkon ic={fark(s.kod)?.ikon || s.ikon || '•'} /> {fark(s.kod)?.gorunenAd || s.ad}
+                          {s.suzgec && <span className="sonuk"> · {c(s.suzgec)}</span>}
+                        </button>
+                      </div>
+                    );
+                  };
+                  // ALT GRUPLAR (kullanıcı 17.10.2026: "alt grup varsa ok ile açılır kapanır, default kapalı"):
+                  //   menüdeki gibi ilk göründüğü yerde tek başlık; başlık işareti altındakileri birlikte işaretler.
+                  const sira: (Dugum | string)[] = [];
+                  const altlar = new Map<string, Dugum[]>();
+                  for (const s of sat) {
+                    if (!s.altGrup) { sira.push(s); continue }
+                    if (!altlar.has(s.altGrup)) { altlar.set(s.altGrup, []); sira.push(s.altGrup) }
+                    altlar.get(s.altGrup)!.push(s);
+                  }
+                  return sira.map(x => {
+                    if (typeof x !== 'string') return satirCiz(x);
+                    const liste = altlar.get(x)!, anahtar = `${g.kod}/${x}`, acik = acikAlt.has(anahtar);
+                    const isa = liste.filter(s => !gizliMi(s)).length;
+                    return (
+                      <div key={`a-${x}`}>
+                        <div className="mn-sat">
+                          <input type="checkbox" checked={isa > 0} disabled={!duzenleyebilir}
+                                 ref={el => { if (el) el.indeterminate = isa > 0 && isa < liste.length }}
+                                 onChange={e => { for (const s of liste) satirIsaretle(s, e.target.checked) }} />
+                          <button type="button" className="mn-ad"
+                                  onClick={() => setAcikAlt(o => { const y = new Set(o); if (acik) y.delete(anahtar); else y.add(anahtar); return y })}>
+                            <span className="ic">{acik ? '▾' : '▸'}</span> {c(x)} <span className="sonuk">({isa}/{liste.length})</span>
+                          </button>
+                        </div>
+                        {acik && liste.map(s => satirCiz(s, true))}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
-              <div className="mn-bilgi">{c('Sistem adı değişmez: rota, yetki ve kod eşlemesi ona bağlıdır. '
-                + 'Değiştirilen yalnız görünen addır. Sıra sürükleyerek değişir; boş bırakılan alan '
-                + 'varsayılana döner ve kayıttan düşer.')}</div>
-            </>
-          )}
-        </div>
-
-        {/* PASİF MENÜ: aktif menüden çıkarılanlar. Panelin ÜSTÜNE bırakmak
-            gizler, oradan sol ağaçtaki bir satırın üstüne bırakmak geri alır
-            ve o sıraya yerleştirir. Sol menünün görünümünde çizilir -
-            kullanıcı aynı menüyü iki kutuda görsün. */}
-        <div className={`mn-onizle${surukle ? ' mn-hedef' : ''}`}
-             onDragOver={e => { if (surukle) e.preventDefault() }}
-             onDrop={() => pasifeBirak()}>
-          <div className="mn-onizle-bas">{c('Pasif menü')}
-            <span className="sonuk"> · {pasifSatirlari.length}</span>
-          </div>
-          {pasifSatirlari.length === 0 && (
-            <div className="mn-pasif-bos">
-              {c('Kullanmadığınız başlıkları buraya sürükleyin.')}
             </div>
-          )}
-          {pasifGorunur.map(({ d, derinlik, baslik }) => {
-            const ad = fark(d.kod)?.gorunenAd || d.ad;
-            const ik = fark(d.kod)?.ikon || d.ikon;
-            // Üstü gizli olan satır KENDİ başına geri alınamaz: önce üst
-            //   başlığı aktife taşınmalı, yoksa menüde yeri olmayan bir ekran
-            //   "aktif" sayılırdı.
-            // `baslik` = düğümün kendisi AKTİF, burada yalnız yer göstergesi.
-            const mirasla = !baslik && fark(d.kod)?.gizli !== 1;
-            const cocukVar = pasifSatirlari.some(x => etkinUst(x.d) === d.kod);
-            const tasinabilir = duzenleyebilir && !mirasla && !baslik;
-            return (
-              <div key={`p-${d.kod}`}
-                   className={`mn-oge d${derinlik}${mirasla ? ' mn-miras' : ''}`
-                              + `${baslik ? ' mn-yer' : ''}`}
-                   draggable={tasinabilir}
-                   onDragStart={() => setSurukle(d.kod)}
-                   title={baslik ? c('Bu başlık aktif menüde - burada yalnız yerini gösterir')
-                          : mirasla ? c('Üst başlığı pasifte - önce onu aktife taşıyın')
-                                    : c('Aktif menüdeki yerine sürükleyin')}>
-                {/* BÖLGE VE GRUPLAR AÇILIR-KAPANIR (kullanıcı 07.10.2026):
-                    pasife alınan bir bölge altındaki her şeyi getiriyor
-                    (onlarca satır); kapalı başlık listeyi okunur tutuyor. */}
-                {cocukVar ? (
-                  <button type="button" className="d mini mn-ok"
-                          title={pasifAcikMi(d.kod) ? c('Kapat') : c('Aç')}
-                          onClick={e => { e.stopPropagation(); pasifAc(d.kod) }}>
-                    {pasifAcikMi(d.kod) ? '▾' : '▸'}</button>
-                ) : <span className="mn-ok-bos" />}
-                {tasinabilir && <span className="tut">⠿</span>}
-                {ik && <MenuIkon ic={ik} />} {ad}
-                {!mirasla && !baslik && (
-                  <button type="button" className="d mini mn-geri"
-                          disabled={!duzenleyebilir}
-                          title={c('Aktif menüye al')}
-                          onClick={() => farkYaz(d, { gizli: 0 })}>←</button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          );
+        })}
+        {kutular.duzler.length > 0 && (
+          <div className="mn-kutu-grup">
+            <div className="mn-kb"><span className="mn-ad">📁 {c('Diğer')}</span></div>
+            <div className="mn-satirlar">
+              {kutular.duzler.map(s => (
+                <div key={s.kod} className={`mn-sat${gizliMi(s) ? ' kapali' : ''}`}>
+                  <input type="checkbox" checked={!gizliMi(s)} disabled={!duzenleyebilir}
+                         onChange={e => satirIsaretle(s, e.target.checked)} />
+                  <button type="button" className="mn-ad" onClick={() => setSecili(s.kod)}>
+                    <MenuIkon ic={fark(s.kod)?.ikon || s.ikon || '•'} /> {fark(s.kod)?.gorunenAd || s.ad}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* ÖZELLİK PENCERESİ: satır ya da grup adına tıklanınca. Değişiklik ekranda birikir; menüye
+          Kaydet & Uygula (gömülüde Kurum Profili'nin Kaydet'i) ile geçer. */}
+      {seciliDugum && (
+        <Modal baslik={`${c(seciliDugum.tur === 'grup' ? 'Grup' : 'Ekran')} · ${fark(seciliDugum.kod)?.gorunenAd || seciliDugum.ad}`}
+               dar enUst buyutmeYok onKapat={() => setSecili(null)}
+               alt={<button type="button" className="d bir" onClick={() => setSecili(null)}>✔ {c('Tamam')}</button>}>
+          <div className="mn-izgara">
+            <label className="mn-kutu"><span>{c('Sistem adı (değişmez)')}</span>
+              <div className="mn-inp pasif">{seciliDugum.sistemAd}</div></label>
+            <label className="mn-kutu"><span>{c('Görünen ad')}</span>
+              <input className="mn-inp" disabled={!duzenleyebilir}
+                     value={fark(seciliDugum.kod)?.gorunenAd ?? ''}
+                     placeholder={seciliDugum.ad}
+                     onChange={e => farkYaz(seciliDugum, { gorunenAd: e.target.value })} /></label>
+            {/* İKON: emoji metni YA DA yüklenen görsel (980) - 64x64 PNG'ye küçültülüp `data:` URL. */}
+            <label className="mn-kutu"><span>{c('İkon')}</span>
+              <div className="mn-ikon-satir">
+                {ikonGorsel ? (
+                  <img src={ikonGorsel} alt="" className="mn-ikon-onizle" />
+                ) : (
+                  <input className="mn-inp" disabled={!duzenleyebilir}
+                         value={fark(seciliDugum.kod)?.ikon ?? ''}
+                         placeholder={seciliDugum.ikon ?? '—'}
+                         onChange={e => farkYaz(seciliDugum, { ikon: e.target.value })} />
+                )}
+                <input ref={dosyaGirdi} type="file" accept="image/*" hidden
+                       onChange={e => ikonYukle(e.target.files?.[0])} />
+                <button type="button" className="d mini" disabled={!duzenleyebilir}
+                        onClick={() => dosyaGirdi.current?.click()}
+                        title={c('Görsel yükle (en çok 64 KB, 64x64 ölçülür)')}>⬆</button>
+                {(fark(seciliDugum.kod)?.ikon ?? '') !== '' && (
+                  <button type="button" className="d mini" disabled={!duzenleyebilir}
+                          onClick={() => farkYaz(seciliDugum, { ikon: '' })}
+                          title={c('İkonu varsayılana döndür')}>↺</button>
+                )}
+              </div></label>
+            {/* GRUBU: ekran başka gruba taşınabilir - seçenekler ağacın kendisinden. */}
+            <label className="mn-kutu"><span>{c('Grubu')}</span>
+              {ustSecenekleri(seciliDugum).length === 0 ? (
+                <div className="mn-inp pasif">{seciliDugum.ustKod ? c(dbKod(seciliDugum.ustKod)) : '—'}</div>
+              ) : (
+                <select className="mn-inp" disabled={!duzenleyebilir}
+                        value={etkinUst(seciliDugum) ?? ''}
+                        onChange={e => farkYaz(seciliDugum, { ustKod: e.target.value })}>
+                  {ustSecenekleri(seciliDugum).map(u => (
+                    <option key={u || '-kok-'} value={u}>{u === '' ? `— ${c('en üst')} —` : c(dbKod(u))}</option>
+                  ))}
+                </select>
+              )}</label>
+            <label className="mn-kutu"><span>{c('Sıra')}</span>
+              <input className="mn-inp" type="number" disabled={!duzenleyebilir}
+                     value={fark(seciliDugum.kod)?.sira ?? ''}
+                     placeholder={c('varsayılan')}
+                     onChange={e => farkYaz(seciliDugum,
+                       { sira: e.target.value === '' ? null : Number(e.target.value) })} /></label>
+            <label className="mn-kutu"><span>{c('Durum')}</span>
+              <select className="mn-inp" disabled={!duzenleyebilir}
+                      value={gizliMi(seciliDugum) ? '1' : '0'}
+                      onChange={e => seciliDugum.tur === 'grup'
+                        ? grupIsaretle(seciliDugum, e.target.value === '0')
+                        : satirIsaretle(seciliDugum, e.target.value === '0')}>
+                <option value="0">{c('Görünür')}</option>
+                <option value="1">{c('Gizli')}</option>
+              </select></label>
+            {seciliDugum.tur === 'ekran' && (
+              <label className="mn-kutu"><span>{c('Modül')}</span>
+                <div className="mn-inp pasif">{seciliDugum.modul
+                  ? c(seciliDugum.modul, 'kod') : c('modülsüz (her kurulumda)')}</div></label>
+            )}
+            {seciliDugum.suzgec && (
+              <label className="mn-kutu"><span>{c('Veri süzgeci')}</span>
+                <div className="mn-inp pasif">{c('grup')} = {c(seciliDugum.suzgec)}</div></label>
+            )}
+            {seciliDugum.yol && (
+              <label className="mn-kutu"><span>{c('Rota')}</span>
+                <div className="mn-inp pasif">{seciliDugum.yol}</div></label>
+            )}
+          </div>
+          <div className="mn-bilgi">{c('Sistem adı değişmez: rota, yetki ve kod eşlemesi ona bağlıdır. '
+            + 'Boş bırakılan alan varsayılana döner. Değişiklik Kaydet & Uygula ile menüye geçer.')}</div>
+        </Modal>
+      )}
     </div>
   );
 }
