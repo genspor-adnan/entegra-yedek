@@ -35,9 +35,19 @@ export interface GorunumTercihi {
   /** Sol menü her zaman açık (true) ya da ☰ / Ctrl+B ile geçici açılıp seçimden
       sonra kapanır (false, v3). Varsayılan true - bugünkü davranış. */
   menuSabit: boolean;
+  /** RENK TEMASI (kullanıcı 18.10.2026): bütün ekranların vurgu / üst şerit rengi; aydınlık seçiminden bağımsız. */
+  renkTemasi: RenkTemasi;
   /** ANA SAYFA ARKA PLANI (kullanıcı 17.10.2026: "home için background tema olsun"). */
   anaSayfaArka: AnaSayfaArka;
 }
+
+export type RenkTemasi = 'mavi' | 'zumrut' | 'mor' | 'mercan' | 'bordo' | 'arduvaz' | 'turkuaz';
+export const RENK_TEMASI_SECENEKLERI: { deger: RenkTemasi; ad: string; renk: string }[] = [
+  { deger: 'mavi', ad: 'Mavi', renk: '#2f6db3' }, { deger: 'zumrut', ad: 'Zümrüt', renk: '#1f7a55' },
+  { deger: 'mor', ad: 'Mor', renk: '#6a45b8' }, { deger: 'mercan', ad: 'Mercan', renk: '#c2552f' },
+  { deger: 'bordo', ad: 'Bordo', renk: '#9b2c45' }, { deger: 'arduvaz', ad: 'Arduvaz', renk: '#4a6178' },
+  { deger: 'turkuaz', ad: 'Turkuaz', renk: '#0f8a94' },
+];
 
 export type AnaSayfaArka = 'duz'
   | 'mavi' | 'nane' | 'seftali' | 'lavanta' | 'kum' | 'deniz' | 'gunbatimi'
@@ -116,7 +126,7 @@ export const GRID_CIZGI_SECENEKLERI: { deger: GridCizgi; ad: string }[] = [
 
 const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince',
                                      muayeneDuzeni: 'sekmeli', ekranSekmeleri: true, menuSabit: true,
-                                     anaSayfaArka: 'duz' };
+                                     renkTemasi: 'mavi', anaSayfaArka: 'duz' };
 const AYNA = 'gentegre.gorunum';
 /** Görünüm tercihi değişti (uygulandı) olayı. */
 export const GORUNUM_OLAYI = 'gentegre-gorunum';
@@ -145,6 +155,7 @@ function duzelt(h: unknown): GorunumTercihi {
     muayeneDuzeni: o.muayeneDuzeni === 'sekmesiz' ? 'sekmesiz' : 'sekmeli',
     ekranSekmeleri: o.ekranSekmeleri !== false,
     menuSabit: o.menuSabit !== false,
+    renkTemasi: RENK_TEMASI_SECENEKLERI.some(s => s.deger === o.renkTemasi) ? o.renkTemasi! : 'mavi',
     anaSayfaArka: ANA_SAYFA_ARKA_SECENEKLERI.some(s => s.deger === o.anaSayfaArka) ? o.anaSayfaArka! : 'duz',
   };
 }
@@ -156,6 +167,8 @@ export function gorunumUygula(t: GorunumTercihi) {
   mevcut = t;
   document.documentElement.dataset.yogunluk = t.yogunluk;
   document.documentElement.dataset.grid = t.gridCizgi;
+  if (t.renkTemasi === 'mavi') delete document.documentElement.dataset.renk;
+  else document.documentElement.dataset.renk = t.renkTemasi;
   document.documentElement.dataset.anaArka = t.anaSayfaArka;
   if (t.anaSayfaArka === 'resim') anaResimYukle();
   document.documentElement.dataset.anaArkaKoyu =

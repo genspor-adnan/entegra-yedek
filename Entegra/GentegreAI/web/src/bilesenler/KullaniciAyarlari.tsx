@@ -18,6 +18,7 @@ import {
   gorunumOku, gorunumKaydet, LISTE_SATIR_SECENEKLERI, YAZI_BOYU_SECENEKLERI,
   GRID_CIZGI_SECENEKLERI, type GorunumTercihi, type Yogunluk, type YaziBoyu, type GridCizgi, type MuayeneDuzeni,
   ANA_SAYFA_ARKA_SECENEKLERI, type AnaSayfaArka, anaResimKaydet, anaResimKaldir,
+  RENK_TEMASI_SECENEKLERI,
 } from './gorunum';
 import {
   bildirimOku, bildirimKaydet, olaylar, masaustuIzniIste, denemeBildirimi,
@@ -513,6 +514,17 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
               <option value="1">{c('Her zaman açık')}</option>
               <option value="0">{c('Seçince kapansın (☰ / Ctrl+B ile açılır)')}</option>
             </select>
+            {/* RENK TEMASI (18.10.2026): renk örnekleriyle seçilir; aydınlık (Sistem/Gündüz/Gece) üst şeritteki düğmede. */}
+            <label>{c('Renk teması')}</label>
+            <div className="renk-secim" role="radiogroup" aria-label={c('Renk teması')}>
+              {RENK_TEMASI_SECENEKLERI.map(s => (
+                <button key={s.deger} type="button" role="radio" aria-checked={g.renkTemasi === s.deger}
+                        className={`renk-ornek${g.renkTemasi === s.deger ? ' secili' : ''}`} title={c(s.ad)}
+                        onClick={() => void yaz({ ...g, renkTemasi: s.deger })}>
+                  <span style={{ background: s.renk }} />{c(s.ad)}
+                </button>
+              ))}
+            </div>
             <label>{c('Ana sayfa arka planı')}</label>
             <select value={g.anaSayfaArka} onChange={e => void yaz({ ...g, anaSayfaArka: e.target.value as AnaSayfaArka })}>
               {(['Düz', 'Açık renkler', 'Koyu renkler', 'Dokular', 'Resim'] as const).map(g2 => (
