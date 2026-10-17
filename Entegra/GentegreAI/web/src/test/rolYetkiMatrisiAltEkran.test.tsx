@@ -43,7 +43,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
 
 describe('yetki matrisi - başka gruptaki alt ekran', () => {
   it('Başvurular satırı başka gruptaki fatura ekranını kapsamaz', async () => {
-    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} />);
+    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} ilkGorunum="tablo" />);
     await act(async () => { await Promise.resolve() });
     await act(async () => { fireEvent.click(k.getByText('Tümünü Aç')) });
 

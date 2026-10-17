@@ -44,7 +44,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
 
 describe('yetki matrisi - menüdeki her ekran matriste', () => {
   it('menüyü açan yetki matriste menü adıyla ve işaretli çizilir', async () => {
-    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} />);
+    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} ilkGorunum="tablo" />);
     await act(async () => { await Promise.resolve() });
     await act(async () => { fireEvent.click(k.getByText('Tümünü Aç')) });
 

@@ -5,11 +5,12 @@ import { hataMetni } from '../api/sozlesme';
 import { LISTELER } from '../sayfalar/listeTanimlari';
 import type { MenuDuzenSatiri } from '../api/sozlesme';
 import { duzenHaritasi, DUGUM } from '../sayfalar/kabuk/menuDuzenHarita';
-import { menuSatirlariKur } from '../sayfalar/kabuk/menuAgaci';
+import { menuSatirlariKur, MenuIkon } from '../sayfalar/kabuk/menuAgaci';
 import { menuDuzeniUygula } from '../sayfalar/kabuk/menuDuzeni';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
 import { c as cev } from '../dil/ceviri';
+import { Modal } from './Modal';
 
 type Sutun = 'gor' | 'ekle' | 'degistir' | 'sil';
 const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
@@ -331,7 +332,15 @@ function yapraklar(d: Dugum, biriktir: YetkiSatiri[] = []): YetkiSatiri[] {
  * kutu o dalın tamamını açar/kapatır (üç durumlu: hepsi / bazısı / hiç).
  * Kaydet YALNIZ değişen satırları gönderir.
  */
-export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkunur: boolean }) {
+/** GÖRÜNÜM (kullanıcı 17.10.2026, mockup Ekranlar/Ayarlar/yetki_matrisi_kutular.html): kutular ya da ağaç tablo. */
+type Gorunum = 'kutu' | 'tablo';
+const GORUNUM_ANAHTAR = 'rolYetkiGorunum';
+
+export function RolYetkiMatrisi({ rolId, saltOkunur, ilkGorunum }: {
+  rolId: number; saltOkunur: boolean;
+  /** Verilmezse kullanıcının son seçimi (tarayıcıda), o da yoksa kutular. */
+  ilkGorunum?: Gorunum;
+}) {
   const { kullanici } = useOturum();
   const [satirlar, setSatirlar] = useState<YetkiSatiri[] | null>(null);
   const [ilk, setIlk] = useState<Map<number, YetkiSatiri>>(new Map());
@@ -342,6 +351,14 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
   // Kullanici: matris VARSAYILAN KAPALI acilsin - istenen dal elle acilir.
   const [kapali, setKapali] = useState<Set<string>>(new Set());
   const [arama, setArama] = useState('');
+  const [gorunum, setGorunumIc] = useState<Gorunum>(() => {
+    if (ilkGorunum) return ilkGorunum;
+    try { return localStorage.getItem(GORUNUM_ANAHTAR) === 'tablo' ? 'tablo' : 'kutu' } catch { return 'kutu' }
+  });
+  const setGorunum = (g: Gorunum) => {
+    setGorunumIc(g);
+    try { localStorage.setItem(GORUNUM_ANAHTAR, g) } catch { /* şart değil */ }
+  };
 
   const yerlestir = (liste: YetkiSatiri[]) => {
     setSatirlar(liste);
@@ -534,7 +551,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
               {acik ? '▾' : '▸'}
             </button>
           ) : <span style={{ display: 'inline-block', width: 21 }} />}
-          {d.ic ? `${d.ic} ` : ''}
+          {d.ic && <MenuIkon ic={d.ic} />}{d.ic ? ' ' : ''}
           <span style={{ fontWeight: d.satir ? 400 : 600 }} title={d.ipucu}>{d.ad}</span>
           {aksiyon && <span className="rozet gri" style={{ marginLeft: 6 }}>aksiyon</span>}
           {!d.satir && (
@@ -590,17 +607,32 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
             placeholder={cev('Yetki ara…')} value={arama}
             onChange={e => setArama(e.target.value)} />
         </div>
-        <button type="button" className="d" onClick={() => setKapali(new Set())}>
-          Tümünü Aç
-        </button>
-        <button type="button" className="d"
-                onClick={() => setKapali(new Set(agac.flatMap(k => tumAnahtarlar(k))))}>
-          Tümünü Kapat
-        </button>
+        <div className="ym-gorunum" role="group" aria-label={cev('Görünüm')}>
+          <button type="button" className={gorunum === 'kutu' ? 'on' : undefined}
+                  onClick={() => setGorunum('kutu')}>▦ {cev('Kutular')}</button>
+          <button type="button" className={gorunum === 'tablo' ? 'on' : undefined}
+                  onClick={() => setGorunum('tablo')}>☰ {cev('Tablo')}</button>
+        </div>
+        {gorunum === 'tablo' && (
+          <>
+            <button type="button" className="d" onClick={() => setKapali(new Set())}>
+              Tümünü Aç
+            </button>
+            <button type="button" className="d"
+                    onClick={() => setKapali(new Set(agac.flatMap(k => tumAnahtarlar(k))))}>
+              Tümünü Kapat
+            </button>
+          </>
+        )}
       </div>
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
       {bilgi && <div className="bilgi-kutusu" style={{ margin: '0 10px 10px' }}>{bilgi}</div>}
-      <table className="detay-tablo">
+      {gorunum === 'kutu' && (
+        <YetkiKutulari agac={agac} ilk={ilk} suzgec={suzgec} saltOkunur={saltOkunur}
+                       yukleniyor={yukleniyor} bos={satirlar?.length === 0}
+                       degistir={degistir} degerDegistir={degerDegistir} />
+      )}
+      {gorunum === 'tablo' && <table className="detay-tablo">
         <thead>
           <tr>
             <th>Yetki</th>
@@ -618,7 +650,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
           )}
           {agac.flatMap(k => cizDugum(k, 0))}
         </tbody>
-      </table>
+      </table>}
     </div>
   );
 }
@@ -626,4 +658,230 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
 function tumAnahtarlar(d: Dugum, biriktir: string[] = []): string[] {
   if (d.cocuklar.length > 0) { biriktir.push(d.anahtar); d.cocuklar.forEach(c => tumAnahtarlar(c, biriktir)) }
   return biriktir;
+}
+
+/** Kutudaki işlem rozetleri: E(kle) D(eğiştir) S(il) - aksiyon yetkisinde (tür 1) yok. */
+const ROZETLER: { ad: Exclude<Sutun, 'gor'>; harf: string; baslik: string }[] = [
+  { ad: 'ekle', harf: 'E', baslik: 'Ekle' },
+  { ad: 'degistir', harf: 'D', baslik: 'Değiştir' },
+  { ad: 'sil', harf: 'S', baslik: 'Sil' },
+];
+
+/**
+ * KUTULAR GÖRÜNÜMÜ (kullanıcı 17.10.2026: "yetki matrisini de kutular şeklinde yapsak" → mockup →
+ * "uygula"). Menü düzeni kutularıyla aynı dil: kutu = menü kökü (grup), satır = ekran.
+ *
+ * - Satır başı kutu = Gör; sağdaki E / D / S rozetleri işlemleri açar-kapatır. Gör kapalıyken rozetler
+ *   kilitli. Gör kutusu ekranla birlikte aksiyonlarını da açar/kapatır (tablodaki üst düğüm kuralı).
+ * - Kutu başı düğme üç adım döner: yok → yalnız gör → tam yetki → yok.
+ * - Satır adına tıklanınca pencere: bütün işlemler, ekranın aksiyonları, sayısal sınır.
+ * - YETKİLİ / YETKİSİZ GRUPLAR: bölüm KAYDEDİLMİŞ duruma (`ilk`) göre seçilir - işaretlerken kutu yer
+ *   değiştirmez (tıklanan yer elden kaçmasın); kaydedince ya da rol değişince yerine geçer. Yer
+ *   değiştirecek kutu kesikli çerçeveyle işaretlenir.
+ */
+function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degistir, degerDegistir }: {
+  agac: Dugum[];
+  ilk: Map<number, YetkiSatiri>;
+  suzgec: Set<number> | null;
+  saltOkunur: boolean;
+  yukleniyor: boolean;
+  bos: boolean;
+  degistir: (idler: Set<number>, sutun: Sutun, deger: boolean) => void;
+  degerDegistir: (yetkiId: number, deger: string) => void;
+}) {
+  // Alt gruplar varsayılan KAPALI (menü düzeni ve ana sayfa kutularıyla aynı).
+  const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
+  const [secili, setSecili] = useState<string | null>(null);
+
+  const tumYapraklar = useMemo(() => agac.flatMap(k => yapraklar(k)), [agac]);
+  const idler = (liste: YetkiSatiri[]) => new Set(liste.map(s => s.yetkiId));
+  const islemli = (liste: YetkiSatiri[]) => liste.filter(s => s.tur !== 1);
+
+  /** Kökte EKRAN satırı sayılan düğümler: kökün ve alt gruplarının satırlı çocukları. */
+  const ekranlar = (kok: Dugum): Dugum[] =>
+    kok.cocuklar.flatMap(c => (c.satir ? [c] : c.cocuklar.filter(x => x.satir)));
+
+  const durum = (kok: Dugum): 'yok' | 'gor' | 'tam' => {
+    const y = yapraklar(kok);
+    if (!y.some(s => s.gor)) return 'yok';
+    return y.every(s => s.gor && (s.tur === 1 || (s.ekle && s.degistir && s.sil))) ? 'tam' : 'gor';
+  };
+  const kokCevir = (kok: Dugum) => {
+    const y = yapraklar(kok);
+    const s = durum(kok);
+    if (s === 'yok') degistir(idler(y), 'gor', true);
+    else if (s === 'gor') for (const a of ['ekle', 'degistir', 'sil'] as const) degistir(idler(islemli(y)), a, true);
+    else degistir(idler(y), 'gor', false);
+  };
+  const toplu = (sutun: Sutun, deger: boolean) =>
+    degistir(idler(sutun === 'gor' ? tumYapraklar : islemli(tumYapraklar)), sutun, deger);
+
+  /** KAYITLI durumda en az bir yetkisi açık mı - bölüm seçimi bununla. */
+  const kayitliYetkili = (kok: Dugum) => yapraklar(kok).some(s => ilk.get(s.yetkiId)?.gor);
+  const suzgecte = (d: Dugum) => !suzgec || yapraklar(d).some(s => suzgec.has(s.yetkiId));
+
+  const seciliDugum = useMemo(() => {
+    if (!secili) return null;
+    const bul = (d: Dugum): Dugum | null =>
+      d.anahtar === secili ? d : d.cocuklar.map(bul).find(Boolean) ?? null;
+    return agac.map(bul).find(Boolean) ?? null;
+  }, [secili, agac]);
+
+  const altCevir = (anahtar: string) => setAcikAlt(t => {
+    const y = new Set(t);
+    if (y.has(anahtar)) y.delete(anahtar); else y.add(anahtar);
+    return y;
+  });
+
+  const satirCiz = (d: Dugum, alt: boolean) => {
+    const s = d.satir!;
+    const aksiyonSayi = d.cocuklar.length;
+    return (
+      <div key={d.anahtar} className={`ym-sat${s.gor ? '' : ' kapali'}${alt ? ' alt' : ''}`}>
+        <input type="checkbox" checked={s.gor} disabled={saltOkunur} title={cev('Gör')}
+               onChange={e => degistir(idler(yapraklar(d)), 'gor', e.target.checked)} />
+        {d.ic && <MenuIkon ic={d.ic} />}
+        <button type="button" className="ym-ad" title={d.ipucu ?? cev('Ayrıntı')}
+                onClick={() => setSecili(d.anahtar)}>
+          {d.ad}
+          {aksiyonSayi > 0 && <span className="ym-aks"> · {aksiyonSayi} {cev('aksiyon')}</span>}
+          {s.degerAlir && <span className="ym-aks"> · {cev('sınır')}{s.deger ? ` ${s.deger}` : ''}</span>}
+        </button>
+        {s.tur === 1 ? <span className="rozet gri">{cev('aksiyon')}</span> : (
+          <span className="ym-isl">
+            {ROZETLER.map(r => (
+              <button key={r.ad} type="button" title={cev(r.baslik)}
+                      className={`ym-r ${r.ad}${s[r.ad] ? ' on' : ''}`}
+                      disabled={saltOkunur || !s.gor}
+                      onClick={() => degistir(new Set([s.yetkiId]), r.ad, !s[r.ad])}>{r.harf}</button>
+            ))}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const kutuCiz = (kok: Dugum, yetkisizBolumde: boolean) => {
+    const s = durum(kok);
+    const ek = ekranlar(kok);
+    const acik = ek.filter(x => x.satir!.gor).length;
+    const acikYetki = yapraklar(kok).some(x => x.gor);
+    const yerDegisir = yetkisizBolumde === acikYetki;
+    const govde: React.ReactNode[] = [];
+    for (const c of kok.cocuklar) {
+      if (!suzgecte(c)) continue;
+      if (c.satir) { govde.push(satirCiz(c, false)); continue }
+      const ac = acikAlt.has(c.anahtar) || !!suzgec;
+      const altEkran = c.cocuklar.filter(x => x.satir);
+      govde.push(
+        <button key={c.anahtar} type="button" className="ym-altbas" onClick={() => altCevir(c.anahtar)}>
+          <span className="ic">{ac ? '▾' : '▸'}</span>{c.ic && <MenuIkon ic={c.ic} />}{c.ad}
+          <span className="ym-aks"> ({altEkran.filter(x => x.satir!.gor).length}/{altEkran.length})</span>
+        </button>);
+      if (ac) for (const x of c.cocuklar) if (x.satir && suzgecte(x)) govde.push(satirCiz(x, true));
+    }
+    return (
+      <div key={kok.anahtar}
+           className={`ym-kutu${yetkisizBolumde ? ' yetkisiz' : ''}${yerDegisir ? ' bekliyor' : ''}`}
+           title={yerDegisir
+             ? (acikYetki ? cev('Kaydedince YETKİLİ GRUPLAR bölümüne çıkacak')
+                          : cev('Kaydedince YETKİSİZ GRUPLAR bölümüne inecek'))
+             : undefined}>
+        <div className="ym-kb">
+          <button type="button" className={`ym-uc ${s}`} disabled={saltOkunur}
+                  title={cev('Yok → Yalnız gör → Tam yetki')}
+                  onClick={() => kokCevir(kok)}>{s === 'tam' ? '✔' : s === 'gor' ? '👁' : ''}</button>
+          {kok.ic && <MenuIkon ic={kok.ic} />}
+          <span>{kok.ad}</span>
+          <span className={`rozet ${ek.length && acik === ek.length ? 'ok' : acik ? 'uyari' : 'gri'}`}>
+            {acik}/{ek.length}
+          </span>
+        </div>
+        <div className="ym-satirlar">{govde}</div>
+      </div>
+    );
+  };
+
+  if (yukleniyor) return <div className="ym-bos">{cev('Yükleniyor…')}</div>;
+  if (bos) return <div className="ym-bos">{cev('Tanımlı yetki yok.')}</div>;
+
+  const gorunen = agac.filter(suzgecte);
+  const yetkili = gorunen.filter(kayitliYetkili);
+  const yetkisiz = gorunen.filter(k => !kayitliYetkili(k));
+  const toplamEkran = agac.reduce((t, k) => t + ekranlar(k).length, 0);
+  const acikEkran = agac.reduce((t, k) => t + ekranlar(k).filter(x => x.satir!.gor).length, 0);
+  const sec = seciliDugum?.satir ? seciliDugum : null;
+
+  return (
+    <div className="ym-kok">
+      <div className="ym-serit">
+        {!saltOkunur && (
+          <>
+            <b>{cev('Toplu')}:</b>
+            <button type="button" className="d" onClick={() => toplu('gor', true)}>{cev('Tüm Gör')}</button>
+            <button type="button" className="d" onClick={() => toplu('ekle', true)}>{cev('Tüm Ekle')}</button>
+            <button type="button" className="d" onClick={() => toplu('degistir', true)}>{cev('Tüm Değiştir')}</button>
+            <button type="button" className="d" onClick={() => toplu('sil', true)}>{cev('Tüm Sil')}</button>
+            <button type="button" className="d" onClick={() => toplu('gor', false)}>{cev('Hepsini kaldır')}</button>
+            <span className="ym-aks">{cev('Grup başı')}: ☐ {cev('yok')} → 👁 {cev('yalnız gör')} → ✔ {cev('tam yetki')}</span>
+          </>
+        )}
+        <span className="rozet ok ym-ozet">{acikEkran} / {toplamEkran} {cev('ekran açık')}</span>
+      </div>
+      <div className="ym-bolum-bas">{cev('YETKİLİ GRUPLAR')} <span className="rozet ok">{yetkili.length}</span></div>
+      {yetkili.length > 0
+        ? <div className="ym-kutular">{yetkili.map(k => kutuCiz(k, false))}</div>
+        : <div className="ym-bos">{cev('Bu rolde açık yetki yok.')}</div>}
+      <div className="ym-bolum-bas yetkisiz">
+        {cev('YETKİSİZ GRUPLAR')} <span className="rozet gri">{yetkisiz.length}</span>
+        <span className="ym-aks"> · {cev('hiçbir ekranı açık değil · kaydedince yer değiştirir')}</span>
+      </div>
+      {yetkisiz.length > 0
+        ? <div className="ym-kutular">{yetkisiz.map(k => kutuCiz(k, true))}</div>
+        : <div className="ym-bos">{cev('Yetkisiz grup yok.')}</div>}
+
+      {sec && (
+        <Modal baslik={sec.ad} dar enUst buyutmeYok onKapat={() => setSecili(null)}
+               alt={<button type="button" className="d bir" onClick={() => setSecili(null)}>✔ {cev('Tamam')}</button>}>
+          <div className="ym-pencere">
+            <h5>{cev('İŞLEMLER')}</h5>
+            <div className="ym-izgara">
+              {(sec.satir!.tur === 1 ? SUTUNLAR.filter(x => x.ad === 'gor') : SUTUNLAR).map(x => (
+                <label key={x.ad} className="ym-cb">
+                  <input type="checkbox" checked={sec.satir![x.ad]} disabled={saltOkunur}
+                         onChange={e => degistir(new Set([sec.satir!.yetkiId]), x.ad, e.target.checked)} />
+                  {cev(x.baslik)}
+                </label>
+              ))}
+            </div>
+            {sec.satir!.degerAlir && (
+              <>
+                <h5>{cev('SAYISAL SINIR')}</h5>
+                <input className="hiza-sag" style={{ width: 90 }} value={sec.satir!.deger ?? ''}
+                       disabled={saltOkunur} placeholder="—" title={cev('Boş / 0 = yetki yok')}
+                       onChange={e => degerDegistir(sec.satir!.yetkiId, e.target.value)} />
+              </>
+            )}
+            <h5>{cev('EKRANA ÖZEL AKSİYONLAR')}</h5>
+            {sec.cocuklar.length === 0
+              ? <div className="ym-aks">{cev('Bu ekranın ayrı aksiyonu yok.')}</div>
+              : (
+                <div className="ym-izgara">
+                  {sec.cocuklar.flatMap(c => yapraklar(c)).map(s => (
+                    <label key={s.yetkiId} className="ym-cb" title={s.kod}>
+                      <input type="checkbox" checked={s.gor} disabled={saltOkunur}
+                             onChange={e => degistir(new Set([s.yetkiId]), 'gor', e.target.checked)} />
+                      {s.ad}
+                    </label>
+                  ))}
+                </div>
+              )}
+            <div className="ym-not">
+              {cev('Kutudaki E / D / S rozetleri buradaki işlemlerin kısayoludur. Değişiklik rol kartının Kaydet’i ile yazılır.')}
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
 }

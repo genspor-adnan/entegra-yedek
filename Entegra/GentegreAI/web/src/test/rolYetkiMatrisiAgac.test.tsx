@@ -42,7 +42,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
 }));
 
 const ciz = async () => {
-  const a = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} />);
+  const a = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} ilkGorunum="tablo" />);
   // Yetki ve menü düzeni istekleri mikro-görev kuyruğunda.
   await act(async () => { await Promise.resolve() });
   return a;

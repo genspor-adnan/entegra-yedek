@@ -8382,3 +8382,44 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ay-donanim small { margin-left: auto; color: var(--soluk); display: inline-flex; align-items: center; gap: 3px }
 .ay-donanim small input { width: 46px; height: 22px; padding: 0 4px }
 
+/* ROL YETKİ MATRİSİ - KUTULAR (17.10.2026, mockup Ekranlar/Ayarlar/yetki_matrisi_kutular.html). */
+.ym-gorunum { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 4px; overflow: hidden }
+.ym-gorunum button { border: 0; background: var(--yuz); color: var(--yazi); padding: 4px 12px; cursor: pointer; font: inherit }
+.ym-gorunum button.on { background: var(--vurgu); color: #fff }
+.ym-kok { margin: 0 10px 10px }
+.ym-serit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; border: 1px solid var(--uyarikenar); background: var(--uyarizem); border-radius: 4px }
+.ym-serit .ym-ozet { margin-left: auto }
+.ym-bolum-bas { margin: 14px 0 0; padding-bottom: 4px; font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--soluk) }
+.ym-bolum-bas.yetkisiz { margin-top: 22px; padding-top: 12px; border-top: 2px solid var(--cizgi) }
+.ym-kutular { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; margin-top: 6px }
+.ym-kutu { border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz); overflow: hidden }
+.ym-kutu.yetkisiz { opacity: .75 }
+.ym-kutu.bekliyor { outline: 2px dashed var(--uyari); outline-offset: -2px; opacity: 1 }
+.ym-kb { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi); font-weight: 700 }
+.ym-kb .rozet { margin-left: auto }
+.ym-uc { width: 20px; height: 20px; padding: 0; line-height: 18px; text-align: center; font-size: 11px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); cursor: pointer; flex: none }
+.ym-uc.gor { color: var(--vurgu) }
+.ym-uc.tam { color: #fff; background: var(--ok); border-color: var(--ok) }
+.ym-satirlar { max-height: 182px; overflow-y: auto }
+.ym-sat { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-bottom: 1px solid var(--cizgi2, var(--cizgi)) }
+.ym-sat:hover { background: var(--satirust) }
+.ym-sat.alt { padding-left: 28px }
+.ym-sat input[type=checkbox] { width: auto; height: auto; margin: 0; flex: none }
+.ym-sat .ic, .ym-kb .ic, .ym-altbas .ic { width: 16px; padding: 0; text-align: center; flex: none }
+.ym-ad { flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; padding: 0; color: inherit; font: inherit; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ym-ad:hover { color: var(--vurgu) }
+.ym-sat.kapali { color: var(--soluk) }   /* ad düğmesi rengi miras alır */
+.ym-aks { font-size: 11px; color: var(--soluk); font-weight: 400 }
+.ym-isl { display: inline-flex; gap: 3px; flex: none }
+.ym-r { width: 20px; height: 20px; padding: 0; line-height: 18px; text-align: center; font-size: 10.5px; font-weight: 700; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); color: var(--soluk); cursor: pointer }
+.ym-r.on { background: var(--vurgu); border-color: var(--vurgu); color: #fff }
+.ym-r.sil.on { background: var(--hata); border-color: var(--hata) }
+.ym-r:disabled { opacity: .35; cursor: default }
+.ym-altbas { display: flex; width: 100%; align-items: center; gap: 6px; padding: 4px 10px; border: 0; border-bottom: 1px solid var(--cizgi2, var(--cizgi)); background: transparent; color: var(--yazi2, inherit); font: inherit; cursor: pointer; text-align: left }
+.ym-bos { padding: 8px 2px; color: var(--soluk) }
+.ym-pencere h5 { margin: 10px 0 6px; font-size: 11px; color: var(--soluk); letter-spacing: .4px }
+.ym-pencere h5:first-child { margin-top: 0 }
+.ym-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px }
+.ym-cb { display: flex; gap: 6px; align-items: center; padding: 4px 6px; border: 1px solid var(--cizgi); border-radius: 4px }
+.ym-cb input[type=checkbox] { width: auto; height: auto; margin: 0 }
+.ym-not { margin-top: 10px; padding: 6px 8px; border-radius: 4px; background: var(--yuz2); color: var(--soluk); font-size: 11px }

@@ -41,7 +41,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
 
 describe('yetki matrisi - aktif menüde olmayan ekran', () => {
   it('HBYS matrisinde ERP ekranları Başvurular altında çıkmaz, aksiyon çıkar', async () => {
-    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} />);
+    const k = render(<RolYetkiMatrisi rolId={1} saltOkunur={false} ilkGorunum="tablo" />);
     await act(async () => { await Promise.resolve() });
     await act(async () => { fireEvent.click(k.getByText('Tümünü Aç')) });
     const metin = k.container.textContent ?? '';
