@@ -7,6 +7,8 @@ import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/menuAgaci';
 import { SURUM_ETIKET } from '../surum';
+import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
+import { duyuruOkuAc } from '../bilesenler/duyuru/DuyuruOrtak';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
 import { kartAdi, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
@@ -138,16 +140,36 @@ export function Baslangic() {
    * ilgili ekrana gider (o ekrana yetki yoksa tıklanmaz). Sade ve kutulu görünüm aynı listeyi çizer.
    */
   const ekranVar = (yol: string) => ekranlar.some(e => e.yol.split('?')[0] === yol);
-  const bekleyenIsler = bekleyen ? [
+  /**
+   * DUYURU (kullanıcı 17.10.2026: "bekleyen işlerde duyuru varsa o da görünsün"): zil panelinin zaten
+   * okuduğu liste (Taleplerim bağlamı) - ikinci istek yok. Kart okunmamış en yeni duyuruyu açar; hepsi
+   * okunduysa en yenisini. Okunmamış kritik duyuru varsa alt satır kırmızı.
+   */
+  const talep = useTaleplerim();
+  const duyurular = talep?.duyurular ?? [];
+  // SAYI OKUNMAMIŞ DUYURU (kullanıcı 17.10.2026: "okudum'a basınca duyuru sayısını 0 yapsın"): okudum
+  //   denmemiş ya da okunduktan sonra güncellenmiş olanlar.
+  const okunmamis = duyurular.filter(x => !x.okudu || x.eskiSurumOkundu);
+  const duyuruIsi = duyurular.length > 0 ? [{
+    yol: '#duyuru', ic: '📣', ad: `${okunmamis.length} ${c('duyuru')}`,
+    y: (talep?.kritikBekleyen.length ?? 0) > 0 ? `${talep!.kritikBekleyen.length} ${c('kritik, okunmadı')}`
+      : okunmamis.length > 0 ? c('okunmadı') : c('hepsi okundu'),
+    acil: (talep?.kritikBekleyen.length ?? 0) > 0,
+    tikla: () => duyuruOkuAc((okunmamis[0] ?? duyurular[0]).id),
+  }] : [];
+  const bekleyenIsler: { yol: string; ic: string; ad: string; y: string; acil?: boolean; tikla?: () => void }[] = bekleyen ? [
+    ...duyuruIsi,
     // ONAY (kullanıcı 16.10.2026): yalnız onay bekleyen varsa - kart Onayımdakiler'e gider.
     ...(bekleyen.onay > 0 ? [{ yol: '/onay-kutusu', ic: '✍️', ad: `${bekleyen.onay} ${c('onay bekliyor')}`,
-      y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler') }] : []),
+      y: bekleyen.onayGeciken > 0 ? `${bekleyen.onayGeciken} ${c('tanesi gecikti')}` : c('Onayımdakiler'),
+      acil: bekleyen.onayGeciken > 0 }] : []),
     { yol: '/konsultasyon', ic: '🤝', ad: `${bekleyen.konsultasyon} ${c('konsültasyon')}`,
-      y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor') },
+      y: bekleyen.konsultasyonGecikmis > 0 ? `${bekleyen.konsultasyonGecikmis} ${c('tanesinin süresi geçti')}` : c('yanıt bekliyor'),
+      acil: bekleyen.konsultasyonGecikmis > 0 },
     { yol: '/hekim-listesi', ic: '🧪', ad: `${bekleyen.istemSonuc} ${c('istem sonucu')}`, y: c('son 7 günde geldi') },
     { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
       y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}` },
-  ] : [];
+  ] : duyuruIsi;
 
   /**
    * ÜST ŞERİT: son açılanlar (tek sıra, 4 ekran) + bekleyen işler. KUTULU GÖRÜNÜMDE DE AYNI (kullanıcı
@@ -162,11 +184,11 @@ export function Baslangic() {
         <div className={`bsl-kartlar bsl-kartlar-orta bsl-tek-sira${adet === 8 ? ' bsl-sekizli' : ''}`}>{sonAcilanlar.slice(0, adet).map(ekranKart)}</div></>}
       {bekleyenIsler.length > 0 && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
         <div className={`bsl-kartlar bsl-kartlar-orta${adet === 8 ? ' bsl-sekizli' : ' bsl-dortlu'}`}>{bekleyenIsler.map(i => (
-          <a key={i.yol} className={`bsl-kart${ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
-             onClick={() => { if (ekranVar(i.yol)) git(i.yol) }}>
+          <a key={i.yol} className={`bsl-kart${i.tikla || ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
+             onClick={() => { if (i.tikla) i.tikla(); else if (ekranVar(i.yol)) git(i.yol) }}>
             <span className="bsl-kart-i">{i.ic}</span>
             <span className="bsl-kart-a">{i.ad}</span>
-            <span className="bsl-kart-y">{i.y}</span>
+            <span className={`bsl-kart-y${i.acil ? ' bsl-kart-acil' : ''}`}>{i.y}</span>
           </a>))}
         </div></>}
     </>

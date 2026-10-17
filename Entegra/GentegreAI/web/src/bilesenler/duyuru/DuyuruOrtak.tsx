@@ -61,11 +61,16 @@ function DuyuruOkuModali({ id, onKapat }: { id: number; onKapat(): void }) {
       .catch(e => setHata(hataMetni(e)));
     api.dokumanlar('duyuru', id).then(setEkler).catch(() => setEkler([]));
   }, [id]);
-  const onayGerek = !!d?.okumaOnayi && !d.okudu && d.durum === 1;
+  /**
+   * ✔ OKUDUM HER YAYINDAKİ DUYURUDA, SOL BAŞTA (kullanıcı 17.10.2026: "duyuru gelen ekranda sol başa
+   * okudum butonu ekle, basınca hem kapansın hem duyuru sayısını 0 yapsın"). Önceden yalnız okuma onayı
+   * istenen duyuruda vardı; okunmamış sayısı (ana sayfa, zil) okuma kaydından hesaplanır.
+   */
+  const okunabilir = d?.durum === 1;
   const okudum = () => guvenli(async () => { await api.duyuruOkudum(id); talepleriYenile(); onKapat() });
   const alt = (
     <>
-      {onayGerek && <button type="button" className="d tl-ok" onClick={() => void okudum()}>✔ {c('Okudum')}</button>}
+      {okunabilir && <button type="button" className="d tl-ok" onClick={() => void okudum()}>✔ {c('Okudum')}</button>}
       <span className="ck-bosluk" />
       <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
     </>
