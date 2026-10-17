@@ -8456,3 +8456,24 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ym-cb { display: flex; gap: 6px; align-items: center; padding: 4px 6px; border: 1px solid var(--cizgi); border-radius: 4px }
 .ym-cb input[type=checkbox] { width: auto; height: auto; margin: 0 }
 .ym-not { margin-top: 10px; padding: 6px 8px; border-radius: 4px; background: var(--yuz2); color: var(--soluk); font-size: 11px }
+
+/* ANA SAYFA ARKA PLANI (kullanıcı 17.10.2026: "home için background tema olsun"): Kullanıcı
+   Ayarları › Görünüm › Ana sayfa arka planı. Kaydırılan alanın (sahne) arkası; kartlar kendi zemininde
+   okunur kalır. Gece temasında aynı seçimin koyu karşılığı. */
+:root[data-ana-arka="mavi"] .bsl, :root[data-ana-arka="mavi"] .bsl-sade {
+  background: linear-gradient(180deg, #e3eefb 0%, #f2f7fd 45%, var(--zem) 100%) }
+:root[data-ana-arka="doku"] .bsl, :root[data-ana-arka="doku"] .bsl-sade {
+  background-color: var(--zem);
+  background-image: radial-gradient(rgba(47, 109, 179, .10) 1px, transparent 1.4px);
+  background-size: 16px 16px }
+:root[data-ana-arka="lacivert"] .bsl, :root[data-ana-arka="lacivert"] .bsl-sade {
+  background: linear-gradient(180deg, #14315a 0%, #1d4275 55%, #24508a 100%) }
+:root[data-ana-arka="lacivert"] .bsl .bsl-selam, :root[data-ana-arka="lacivert"] .bsl-sade h1 { color: #fff }
+:root[data-ana-arka="lacivert"] .bsl .bsl-sade-alt, :root[data-ana-arka="lacivert"] .bsl-sade .bsl-sade-alt,
+:root[data-ana-arka="lacivert"] .bsl .bsl-bolum, :root[data-ana-arka="lacivert"] .bsl-sade .bsl-bolum { color: #c9d8ee }
+:root[data-tema="gece"][data-ana-arka="mavi"] .bsl, :root[data-tema="gece"][data-ana-arka="mavi"] .bsl-sade {
+  background: linear-gradient(180deg, #16263c 0%, #141c26 60%) }
+:root[data-tema="gece"][data-ana-arka="doku"] .bsl, :root[data-tema="gece"][data-ana-arka="doku"] .bsl-sade {
+  background-image: radial-gradient(rgba(120, 160, 220, .12) 1px, transparent 1.4px) }
+:root[data-tema="gece"][data-ana-arka="lacivert"] .bsl, :root[data-tema="gece"][data-ana-arka="lacivert"] .bsl-sade {
+  background: linear-gradient(180deg, #0c1a2f 0%, #10233f 100%) }

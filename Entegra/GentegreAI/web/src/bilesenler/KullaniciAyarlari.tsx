@@ -17,6 +17,7 @@ import { telefonAyir, telefonBirlestir, ulkeEtiketi, ULKE_KODLARI } from './tele
 import {
   gorunumOku, gorunumKaydet, LISTE_SATIR_SECENEKLERI, YAZI_BOYU_SECENEKLERI,
   GRID_CIZGI_SECENEKLERI, type GorunumTercihi, type Yogunluk, type YaziBoyu, type GridCizgi, type MuayeneDuzeni,
+  ANA_SAYFA_ARKA_SECENEKLERI, type AnaSayfaArka,
 } from './gorunum';
 import {
   bildirimOku, bildirimKaydet, olaylar, masaustuIzniIste, denemeBildirimi,
@@ -511,6 +512,10 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
             <select value={g.menuSabit ? '1' : '0'} onChange={e => void yaz({ ...g, menuSabit: e.target.value === '1' })}>
               <option value="1">{c('Her zaman açık')}</option>
               <option value="0">{c('Seçince kapansın (☰ / Ctrl+B ile açılır)')}</option>
+            </select>
+            <label>{c('Ana sayfa arka planı')}</label>
+            <select value={g.anaSayfaArka} onChange={e => void yaz({ ...g, anaSayfaArka: e.target.value as AnaSayfaArka })}>
+              {ANA_SAYFA_ARKA_SECENEKLERI.map(s => <option key={s.deger} value={s.deger}>{c(s.ad)}</option>)}
             </select>
           </div>
           <div className="kanot">

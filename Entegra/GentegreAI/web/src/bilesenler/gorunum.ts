@@ -35,7 +35,15 @@ export interface GorunumTercihi {
   /** Sol menü her zaman açık (true) ya da ☰ / Ctrl+B ile geçici açılıp seçimden
       sonra kapanır (false, v3). Varsayılan true - bugünkü davranış. */
   menuSabit: boolean;
+  /** ANA SAYFA ARKA PLANI (kullanıcı 17.10.2026: "home için background tema olsun"). */
+  anaSayfaArka: AnaSayfaArka;
 }
+
+export type AnaSayfaArka = 'duz' | 'mavi' | 'doku' | 'lacivert';
+export const ANA_SAYFA_ARKA_SECENEKLERI: { deger: AnaSayfaArka; ad: string }[] = [
+  { deger: 'duz', ad: 'Düz' }, { deger: 'mavi', ad: 'Yumuşak mavi' },
+  { deger: 'doku', ad: 'Açık doku' }, { deger: 'lacivert', ad: 'Lacivert' },
+];
 
 export type MuayeneDuzeni = 'sekmeli' | 'sekmesiz';
 
@@ -48,7 +56,8 @@ export const GRID_CIZGI_SECENEKLERI: { deger: GridCizgi; ad: string }[] = [
 ];
 
 const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince',
-                                     muayeneDuzeni: 'sekmeli', ekranSekmeleri: true, menuSabit: true };
+                                     muayeneDuzeni: 'sekmeli', ekranSekmeleri: true, menuSabit: true,
+                                     anaSayfaArka: 'duz' };
 const AYNA = 'gentegre.gorunum';
 /** Görünüm tercihi değişti (uygulandı) olayı. */
 export const GORUNUM_OLAYI = 'gentegre-gorunum';
@@ -77,6 +86,7 @@ function duzelt(h: unknown): GorunumTercihi {
     muayeneDuzeni: o.muayeneDuzeni === 'sekmesiz' ? 'sekmesiz' : 'sekmeli',
     ekranSekmeleri: o.ekranSekmeleri !== false,
     menuSabit: o.menuSabit !== false,
+    anaSayfaArka: ANA_SAYFA_ARKA_SECENEKLERI.some(s => s.deger === o.anaSayfaArka) ? o.anaSayfaArka! : 'duz',
   };
 }
 
@@ -87,6 +97,7 @@ export function gorunumUygula(t: GorunumTercihi) {
   mevcut = t;
   document.documentElement.dataset.yogunluk = t.yogunluk;
   document.documentElement.dataset.grid = t.gridCizgi;
+  document.documentElement.dataset.anaArka = t.anaSayfaArka;
   // ZOOM: tema px ile yazilmis, kok font-size'i buyutmek hicbir seyi
   //   olceklemezdi. `zoom` Chromium/Edge/Firefox 126+ 'da calisir; eski
   //   Firefox'ta yok sayilir - ayar bozmaz, sadece etkisiz kalir.
