@@ -527,7 +527,7 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
             </div>
             <label>{c('Ana sayfa arka planı')}</label>
             <select value={g.anaSayfaArka} onChange={e => void yaz({ ...g, anaSayfaArka: e.target.value as AnaSayfaArka })}>
-              {(['Düz', 'Açık renkler', 'Koyu renkler', 'Dokular', 'Resim'] as const).map(g2 => (
+              {(['Resim', 'Düz', 'Açık renkler', 'Koyu renkler', 'Dokular'] as const).map(g2 => (
                 <optgroup key={g2} label={c(g2)}>
                   {ANA_SAYFA_ARKA_SECENEKLERI.filter(s => s.grup === g2).map(s => <option key={s.deger} value={s.deger}>{c(s.ad)}</option>)}
                 </optgroup>

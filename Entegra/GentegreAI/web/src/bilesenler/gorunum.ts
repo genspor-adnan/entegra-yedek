@@ -73,7 +73,7 @@ export const ANA_SAYFA_ARKA_SECENEKLERI: { deger: AnaSayfaArka; ad: string; grup
   { deger: 'izgara', ad: 'Izgara', grup: 'Dokular' },
   { deger: 'kareli', ad: 'Kareli', grup: 'Dokular' },
   { deger: 'dalga', ad: 'Dalga', grup: 'Dokular' },
-  { deger: 'resim', ad: 'Kendi resmim', grup: 'Resim' },
+  { deger: 'resim', ad: 'Resim Yükle', grup: 'Resim' },
 ];
 
 /**
