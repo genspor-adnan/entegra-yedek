@@ -251,6 +251,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         else if (e.key === 'Enter' && gorunen[secili]) { e.preventDefault(); sec(gorunen[secili]) }
       }}>
         <div className="palet-arama">
+          <div className="palet-kutu">
           <input
             ref={kutu}
             autoFocus
@@ -259,6 +260,12 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             value={arama}
             onChange={e => { setArama(e.target.value); setSecili(0) }}
           />
+          {/* TEMİZLE kutunun İÇİNDE, sağda (kullanıcı 17.10.2026: "edit içinde sağda olsun x"). */}
+          {arama && (
+            <button type="button" className="palet-temizle" title={c('Aramayı temizle')}
+                    onClick={() => { ses.durdur(); setArama(''); setSecili(0); kutu.current?.focus() }}>✕</button>
+          )}
+          </div>
           {ses.destek && (
             <button type="button" className={`palet-mik${ses.dinliyor ? ' acik' : ''}`}
                     title={ses.dinliyor ? c('Dinlemeyi durdur') : c('Sesle ara (konuşun, söylediğiniz yazılır)')}
@@ -266,11 +273,6 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
                     onClick={() => { if (ses.dinliyor) ses.durdur(); else { ses.baslat(); kutu.current?.focus() } }}>
               🎤
             </button>
-          )}
-          {/* TEMİZLE (kullanıcı 17.10.2026: "arama edit en sağda clear için x ekle"). */}
-          {arama && (
-            <button type="button" className="palet-temizle" title={c('Aramayı temizle')}
-                    onClick={() => { ses.durdur(); setArama(''); setSecili(0); kutu.current?.focus() }}>✕</button>
           )}
         </div>
         {ses.hata && <div className="palet-ses-hata">{c(ses.hata)}</div>}

@@ -1111,7 +1111,9 @@ input.skt-gecmis {
 .palet-mik.acik { background: var(--hatazem); animation: palet-mik-nabiz 1.1s ease-in-out infinite }
 @keyframes palet-mik-nabiz { 50% { box-shadow: 0 0 0 4px rgba(178, 59, 59, .18) } }
 .palet-ses-hata { font-size: 11.5px; color: var(--hata) }
-.palet-temizle { flex: none; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--soluk); cursor: pointer; font-size: 13px }
+.palet-kutu { position: relative; flex: 1; min-width: 0 }
+.palet-kutu .arama { padding-right: 30px }
+.palet-temizle { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--soluk); cursor: pointer; font-size: 12px }
 .palet-temizle:hover { background: var(--yuz2); color: var(--yazi) }
 .lookup-pencere .arama, .palet .arama {
   width: 100%; border: 1px solid var(--cizgi); border-radius: 3px; height: 32px; padding: 0 11px;
