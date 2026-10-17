@@ -267,6 +267,11 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
               🎤
             </button>
           )}
+          {/* TEMİZLE (kullanıcı 17.10.2026: "arama edit en sağda clear için x ekle"). */}
+          {arama && (
+            <button type="button" className="palet-temizle" title={c('Aramayı temizle')}
+                    onClick={() => { ses.durdur(); setArama(''); setSecili(0); kutu.current?.focus() }}>✕</button>
+          )}
         </div>
         {ses.hata && <div className="palet-ses-hata">{c(ses.hata)}</div>}
         <div className="palet-liste">
