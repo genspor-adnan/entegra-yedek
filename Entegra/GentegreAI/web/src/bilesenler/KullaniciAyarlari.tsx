@@ -17,7 +17,7 @@ import { telefonAyir, telefonBirlestir, ulkeEtiketi, ULKE_KODLARI } from './tele
 import {
   gorunumOku, gorunumKaydet, LISTE_SATIR_SECENEKLERI, YAZI_BOYU_SECENEKLERI,
   GRID_CIZGI_SECENEKLERI, type GorunumTercihi, type Yogunluk, type YaziBoyu, type GridCizgi, type MuayeneDuzeni,
-  ANA_SAYFA_ARKA_SECENEKLERI, type AnaSayfaArka,
+  ANA_SAYFA_ARKA_SECENEKLERI, type AnaSayfaArka, anaResimKaydet, anaResimKaldir,
 } from './gorunum';
 import {
   bildirimOku, bildirimKaydet, olaylar, masaustuIzniIste, denemeBildirimi,
@@ -515,8 +515,28 @@ function Gorunum({ c, tema, setTema, seciliDil, setSeciliDil, kilitli }: {
             </select>
             <label>{c('Ana sayfa arka planı')}</label>
             <select value={g.anaSayfaArka} onChange={e => void yaz({ ...g, anaSayfaArka: e.target.value as AnaSayfaArka })}>
-              {ANA_SAYFA_ARKA_SECENEKLERI.map(s => <option key={s.deger} value={s.deger}>{c(s.ad)}</option>)}
+              {(['Düz', 'Açık renkler', 'Koyu renkler', 'Dokular', 'Resim'] as const).map(g2 => (
+                <optgroup key={g2} label={c(g2)}>
+                  {ANA_SAYFA_ARKA_SECENEKLERI.filter(s => s.grup === g2).map(s => <option key={s.deger} value={s.deger}>{c(s.ad)}</option>)}
+                </optgroup>
+              ))}
             </select>
+            {g.anaSayfaArka === 'resim' && (<>
+              <label>{c('Arka plan resmi')}</label>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                <label className="d" style={{ cursor: 'pointer' }}>
+                  📁 {c('Resim seç…')}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }}
+                         onChange={async e => {
+                           const f = e.target.files?.[0]; e.target.value = '';
+                           if (!f) return;
+                           try { await anaResimKaydet(f); setHata('') } catch (h) { setHata(h instanceof Error ? h.message : hataMetni(h)) }
+                         }} />
+                </label>
+                <button type="button" className="d" onClick={() => void anaResimKaldir().catch(h => setHata(hataMetni(h)))}>{c('Kaldır')}</button>
+                <span className="sonuk">{c('Full HD boyutuna küçültülür; yalnız sizin ana sayfanızda görünür.')}</span>
+              </div>
+            </>)}
           </div>
           <div className="kanot">
             {c('“Sıkışık” aynı ekrana daha çok satır sığdırır — veznede ekran küçük, listede satır sayısı kararı hızlandırır. Yazı boyu tüm arayüzü ölçekler.')}

@@ -25,6 +25,16 @@ public static class TercihUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // BÜYÜK tercih (ana sayfa resmi): toplu okumada yok, burada tek tek.
+        grup.MapGet("/{anahtar}", async (
+            string anahtar, BaglamCozucu cozucu, TercihDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            if (!TercihDeposu.Anahtarlar.Contains(anahtar))
+                return Results.BadRequest(new { hata = "DOGRULAMA", mesaj = $"Bilinmeyen tercih: {anahtar}", izlemeNo = baglam.IzlemeNo });
+            return Results.Ok(new { deger = await depo.TekOkuAsync(baglam.KullaniciId, anahtar, iptal) });
+        });
+
         grup.MapPut("/{anahtar}", async (
             string anahtar, TercihIstegi istek, BaglamCozucu cozucu, TercihDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>
@@ -39,10 +49,15 @@ public static class TercihUclari
                 return Results.BadRequest(new { hata = "DOGRULAMA",
                                                 mesaj = $"Bilinmeyen tercih: {anahtar}",
                                                 izlemeNo = baglam.IzlemeNo });
-            if (deger.Length > TercihDeposu.EnFazlaUzunluk)
+            if (deger.Length > TercihDeposu.SinirOf(anahtar))
                 return Results.BadRequest(new { hata = "DOGRULAMA",
                                                 mesaj = "Tercih değeri çok uzun.",
                                                 izlemeNo = baglam.IzlemeNo });
+
+            // Resim tercihi yalnız resim data URL'i olabilir (boş = kaldır).
+            if (anahtar == "anaSayfaResim" && deger != ""
+                && !System.Text.RegularExpressions.Regex.IsMatch(deger, "^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$"))
+                return Results.BadRequest(new { hata = "DOGRULAMA", mesaj = "Geçersiz resim.", izlemeNo = baglam.IzlemeNo });
 
             await depo.YazAsync(baglam.KullaniciId, anahtar, deger, iptal);
             return Results.Ok(new { izlemeNo = baglam.IzlemeNo });

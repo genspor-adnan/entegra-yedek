@@ -30,7 +30,21 @@ public sealed class TercihDeposu
             // ICD arama penceresinde SON secilen kesinlik/taraf (kullanici: "en
             //   son ne secili biraktiysa ekran acildiginda o secili gelsin").
             "taniEkle",  // {kesinlik, taraf}
+            // ANA SAYFA ARKA PLAN RESMİ (kullanıcı 17.10.2026: "resim yükleme de ekle"): küçültülmüş
+            //   JPEG / PNG / WebP data URL'i. BÜYÜK - toplu okumaya girmez, kendi ucundan okunur.
+            "anaSayfaResim",
         };
+
+    /// <summary>
+    /// BÜYÜK ANAHTARLAR: kendi üst sınırı var ve toplu okumada (OkuAsync) DÖNMEZ - her açılışta
+    /// yüzlerce KB inmesin; ekran gerektiğinde TekOkuAsync ile alır.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, int> BuyukAnahtarlar =
+        new Dictionary<string, int>(StringComparer.Ordinal) { ["anaSayfaResim"] = 700_000 };
+
+    /// <summary>Anahtarın değer üst sınırı.</summary>
+    public static int SinirOf(string anahtar)
+        => BuyukAnahtarlar.TryGetValue(anahtar, out var s) ? s : EnFazlaUzunluk;
 
     /// <summary>Bir degerin ust siniri: favori listesi birkac yuz bayttir.</summary>
     public const int EnFazlaUzunluk = 8000;
@@ -38,6 +52,12 @@ public sealed class TercihDeposu
     private const string ListeSql = """
         select anahtar, deger from public.kullanici_tercih
          where kullanici_id = @p0
+           and anahtar <> all(@p1)
+        """;
+
+    private const string TekSql = """
+        select deger from public.kullanici_tercih
+         where kullanici_id = @p0 and anahtar = @p1
         """;
 
     private const string YazSql = """
@@ -51,12 +71,17 @@ public sealed class TercihDeposu
     public async Task<Dictionary<string, string>> OkuAsync(
         int kullaniciId, CancellationToken iptal = default)
     {
-        var satirlar = await _veri.ListeAsync(ListeSql, new object?[] { kullaniciId },
+        var satirlar = await _veri.ListeAsync(ListeSql, new object?[] { kullaniciId, BuyukAnahtarlar.Keys.ToArray() },
             o => (Anahtar: o.GetString(0), Deger: o.GetString(1)), iptal);
         var sonuc = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var s in satirlar) sonuc[s.Anahtar] = s.Deger;
         return sonuc;
     }
+
+    /// <summary>Tek tercih (büyük anahtarlar için); yoksa boş.</summary>
+    public async Task<string> TekOkuAsync(int kullaniciId, string anahtar, CancellationToken iptal = default)
+        => (await _veri.ListeAsync(TekSql, new object?[] { kullaniciId, anahtar }, o => o.GetString(0), iptal))
+           .FirstOrDefault() ?? "";
 
     public Task YazAsync(int kullaniciId, string anahtar, string deger,
                          CancellationToken iptal = default)

@@ -268,6 +268,9 @@ export const ayarUclari = {
       Deger istemcinin yazdigi JSON metni - sunucu yorumlamaz, saklar. */
   tercihler: () =>
     istek<{ tercihler: Record<string, string> }>('/api/tercih').then(y => y.tercihler),
+  /** BÜYÜK tek tercih (ana sayfa resmi) - toplu okumada yok. */
+  tercihOku: (anahtar: string) =>
+    istek<{ deger: string }>(`/api/tercih/${encodeURIComponent(anahtar)}`).then(y => y.deger),
   tercihYaz: (anahtar: string, deger: string) =>
     gonder<{ izlemeNo?: string }>(`/api/tercih/${encodeURIComponent(anahtar)}`,
                                   { deger }, 'PUT'),

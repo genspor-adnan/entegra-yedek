@@ -39,11 +39,70 @@ export interface GorunumTercihi {
   anaSayfaArka: AnaSayfaArka;
 }
 
-export type AnaSayfaArka = 'duz' | 'mavi' | 'doku' | 'lacivert';
-export const ANA_SAYFA_ARKA_SECENEKLERI: { deger: AnaSayfaArka; ad: string }[] = [
-  { deger: 'duz', ad: 'Düz' }, { deger: 'mavi', ad: 'Yumuşak mavi' },
-  { deger: 'doku', ad: 'Açık doku' }, { deger: 'lacivert', ad: 'Lacivert' },
+export type AnaSayfaArka = 'duz'
+  | 'mavi' | 'nane' | 'seftali' | 'lavanta' | 'kum' | 'deniz' | 'gunbatimi'
+  | 'lacivert' | 'orman' | 'murdum' | 'arduvaz'
+  | 'doku' | 'cizgili' | 'izgara' | 'kareli' | 'dalga'
+  | 'resim';
+/** Grup: ayar ekranında optgroup; KOYU olanlarda selam / başlık yazısı açık renge döner. */
+export const ANA_SAYFA_ARKA_SECENEKLERI: { deger: AnaSayfaArka; ad: string; grup: 'Düz' | 'Açık renkler' | 'Koyu renkler' | 'Dokular' | 'Resim' }[] = [
+  { deger: 'duz', ad: 'Düz', grup: 'Düz' },
+  { deger: 'mavi', ad: 'Yumuşak mavi', grup: 'Açık renkler' },
+  { deger: 'nane', ad: 'Nane', grup: 'Açık renkler' },
+  { deger: 'seftali', ad: 'Şeftali', grup: 'Açık renkler' },
+  { deger: 'lavanta', ad: 'Lavanta', grup: 'Açık renkler' },
+  { deger: 'kum', ad: 'Kum', grup: 'Açık renkler' },
+  { deger: 'deniz', ad: 'Deniz', grup: 'Açık renkler' },
+  { deger: 'gunbatimi', ad: 'Gün batımı', grup: 'Açık renkler' },
+  { deger: 'lacivert', ad: 'Lacivert', grup: 'Koyu renkler' },
+  { deger: 'orman', ad: 'Orman', grup: 'Koyu renkler' },
+  { deger: 'murdum', ad: 'Mürdüm', grup: 'Koyu renkler' },
+  { deger: 'arduvaz', ad: 'Arduvaz', grup: 'Koyu renkler' },
+  { deger: 'doku', ad: 'Noktalı', grup: 'Dokular' },
+  { deger: 'cizgili', ad: 'Çizgili', grup: 'Dokular' },
+  { deger: 'izgara', ad: 'Izgara', grup: 'Dokular' },
+  { deger: 'kareli', ad: 'Kareli', grup: 'Dokular' },
+  { deger: 'dalga', ad: 'Dalga', grup: 'Dokular' },
+  { deger: 'resim', ad: 'Kendi resmim', grup: 'Resim' },
 ];
+
+/**
+ * ANA SAYFA RESMİ (kullanıcı 17.10.2026: "resim yükleme de ekle"): hesapta ayrı büyük tercih
+ * (`anaSayfaResim`, sunucuda toplu okumaya girmez). Yalnız "Kendi resmim" seçiliyken ve bir kez
+ * indirilir; CSS'e `--ana-arka-resim` değişkeniyle verilir.
+ */
+let resimIndi = false;
+function resimDegiskeni(dataUrl: string) {
+  document.documentElement.style.setProperty('--ana-arka-resim', dataUrl ? `url("${dataUrl}")` : 'none');
+}
+function anaResimYukle() {
+  if (resimIndi) return;
+  resimIndi = true;
+  void api.tercihOku('anaSayfaResim').then(resimDegiskeni).catch(() => { resimIndi = false });
+}
+/** Seçilen dosyayı Full HD'ye küçültüp JPEG'e çevirir, hesaba yazar ve hemen uygular. */
+export async function anaResimKaydet(dosya: File): Promise<void> {
+  const url = await new Promise<string>((tamam, hata) => {
+    const r = new FileReader(); r.onload = () => tamam(String(r.result)); r.onerror = () => hata(r.error); r.readAsDataURL(dosya);
+  });
+  const img = await new Promise<HTMLImageElement>((tamam, hata) => {
+    const i = new Image(); i.onload = () => tamam(i); i.onerror = () => hata(new Error('Resim okunamadı.')); i.src = url;
+  });
+  const olcek = Math.min(1, 1920 / img.width, 1080 / img.height);
+  const tuval = document.createElement('canvas');
+  tuval.width = Math.round(img.width * olcek); tuval.height = Math.round(img.height * olcek);
+  tuval.getContext('2d')!.drawImage(img, 0, 0, tuval.width, tuval.height);
+  // Sunucu sınırı ~700 KB: sığana kadar kaliteyi düşür.
+  let kalite = 0.8, sonuc = tuval.toDataURL('image/jpeg', kalite);
+  while (sonuc.length > 690_000 && kalite > 0.35) { kalite -= 0.1; sonuc = tuval.toDataURL('image/jpeg', kalite) }
+  if (sonuc.length > 690_000) throw new Error('Resim çok büyük - daha küçük bir resim seçin.');
+  await api.tercihYaz('anaSayfaResim', sonuc);
+  resimIndi = true; resimDegiskeni(sonuc);
+}
+export async function anaResimKaldir(): Promise<void> {
+  await api.tercihYaz('anaSayfaResim', '');
+  resimIndi = true; resimDegiskeni('');
+}
 
 export type MuayeneDuzeni = 'sekmeli' | 'sekmesiz';
 
@@ -98,6 +157,9 @@ export function gorunumUygula(t: GorunumTercihi) {
   document.documentElement.dataset.yogunluk = t.yogunluk;
   document.documentElement.dataset.grid = t.gridCizgi;
   document.documentElement.dataset.anaArka = t.anaSayfaArka;
+  if (t.anaSayfaArka === 'resim') anaResimYukle();
+  document.documentElement.dataset.anaArkaKoyu =
+    ANA_SAYFA_ARKA_SECENEKLERI.find(s => s.deger === t.anaSayfaArka)?.grup === 'Koyu renkler' ? '1' : '0';
   // ZOOM: tema px ile yazilmis, kok font-size'i buyutmek hicbir seyi
   //   olceklemezdi. `zoom` Chromium/Edge/Firefox 126+ 'da calisir; eski
   //   Firefox'ta yok sayilir - ayar bozmaz, sadece etkisiz kalir.

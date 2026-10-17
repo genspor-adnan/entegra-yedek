@@ -8457,23 +8457,32 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ym-cb input[type=checkbox] { width: auto; height: auto; margin: 0 }
 .ym-not { margin-top: 10px; padding: 6px 8px; border-radius: 4px; background: var(--yuz2); color: var(--soluk); font-size: 11px }
 
-/* ANA SAYFA ARKA PLANI (kullanıcı 17.10.2026: "home için background tema olsun"): Kullanıcı
-   Ayarları › Görünüm › Ana sayfa arka planı. Kaydırılan alanın (sahne) arkası; kartlar kendi zemininde
-   okunur kalır. Gece temasında aynı seçimin koyu karşılığı. */
-:root[data-ana-arka="mavi"] .bsl, :root[data-ana-arka="mavi"] .bsl-sade {
-  background: linear-gradient(180deg, #e3eefb 0%, #f2f7fd 45%, var(--zem) 100%) }
-:root[data-ana-arka="doku"] .bsl, :root[data-ana-arka="doku"] .bsl-sade {
-  background-color: var(--zem);
-  background-image: radial-gradient(rgba(47, 109, 179, .10) 1px, transparent 1.4px);
-  background-size: 16px 16px }
-:root[data-ana-arka="lacivert"] .bsl, :root[data-ana-arka="lacivert"] .bsl-sade {
-  background: linear-gradient(180deg, #14315a 0%, #1d4275 55%, #24508a 100%) }
-:root[data-ana-arka="lacivert"] .bsl .bsl-selam, :root[data-ana-arka="lacivert"] .bsl-sade h1 { color: #fff }
-:root[data-ana-arka="lacivert"] .bsl .bsl-sade-alt, :root[data-ana-arka="lacivert"] .bsl-sade .bsl-sade-alt,
-:root[data-ana-arka="lacivert"] .bsl .bsl-bolum, :root[data-ana-arka="lacivert"] .bsl-sade .bsl-bolum { color: #c9d8ee }
-:root[data-tema="gece"][data-ana-arka="mavi"] .bsl, :root[data-tema="gece"][data-ana-arka="mavi"] .bsl-sade {
-  background: linear-gradient(180deg, #16263c 0%, #141c26 60%) }
-:root[data-tema="gece"][data-ana-arka="doku"] .bsl, :root[data-tema="gece"][data-ana-arka="doku"] .bsl-sade {
-  background-image: radial-gradient(rgba(120, 160, 220, .12) 1px, transparent 1.4px) }
-:root[data-tema="gece"][data-ana-arka="lacivert"] .bsl, :root[data-tema="gece"][data-ana-arka="lacivert"] .bsl-sade {
-  background: linear-gradient(180deg, #0c1a2f 0%, #10233f 100%) }
+/* ANA SAYFA ARKA PLANI (kullanıcı 17.10.2026: "home için background tema olsun" -> "daha fazla renk
+   seçeneği ve doku ekle"): Kullanıcı Ayarları › Görünüm › Ana sayfa arka planı. Kaydırılan alanın
+   (sahne) arkası; kartlar kendi zemininde okunur kalır.
+   AÇIK RENKLER ve DOKULAR yarı saydam - sayfa zemininin (--zem) üstüne biner, gece temasında da
+   kendiliğinden doğru görünür. KOYU RENKLER düz geçiş; yazılar data-ana-arka-koyu ile açık renge döner. */
+:root[data-ana-arka="mavi"]      :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, rgba(120, 170, 235, .38) 0%, rgba(120, 170, 235, .10) 50%, transparent 100%), var(--zem) }
+:root[data-ana-arka="nane"]      :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, rgba(110, 200, 160, .36) 0%, rgba(110, 200, 160, .08) 55%, transparent 100%), var(--zem) }
+:root[data-ana-arka="seftali"]   :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, rgba(250, 170, 130, .38) 0%, rgba(250, 170, 130, .08) 55%, transparent 100%), var(--zem) }
+:root[data-ana-arka="lavanta"]   :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, rgba(170, 145, 225, .36) 0%, rgba(170, 145, 225, .08) 55%, transparent 100%), var(--zem) }
+:root[data-ana-arka="kum"]       :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, rgba(220, 195, 145, .40) 0%, rgba(220, 195, 145, .10) 55%, transparent 100%), var(--zem) }
+:root[data-ana-arka="deniz"]     :is(.bsl, .bsl-sade) { background: linear-gradient(160deg, rgba(80, 190, 200, .34) 0%, rgba(90, 140, 230, .22) 45%, transparent 100%), var(--zem) }
+:root[data-ana-arka="gunbatimi"] :is(.bsl, .bsl-sade) { background: linear-gradient(160deg, rgba(255, 180, 110, .40) 0%, rgba(240, 120, 150, .24) 45%, transparent 100%), var(--zem) }
+:root[data-ana-arka="lacivert"]  :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, #14315a 0%, #1d4275 55%, #24508a 100%) }
+:root[data-ana-arka="orman"]     :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, #123b2c 0%, #1b5440 55%, #24694f 100%) }
+:root[data-ana-arka="murdum"]    :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, #3a1a3f 0%, #52275a 55%, #663372 100%) }
+:root[data-ana-arka="arduvaz"]   :is(.bsl, .bsl-sade) { background: linear-gradient(180deg, #263341 0%, #33475b 55%, #3f5770 100%) }
+:root[data-ana-arka="doku"]      :is(.bsl, .bsl-sade) { background: radial-gradient(rgba(47, 109, 179, .13) 1px, transparent 1.4px) 0 0 / 16px 16px, var(--zem) }
+:root[data-ana-arka="cizgili"]   :is(.bsl, .bsl-sade) { background: repeating-linear-gradient(135deg, rgba(47, 109, 179, .07) 0 2px, transparent 2px 14px), var(--zem) }
+:root[data-ana-arka="izgara"]    :is(.bsl, .bsl-sade) { background: linear-gradient(rgba(47, 109, 179, .08) 1px, transparent 1px) 0 0 / 24px 24px,
+                                                                    linear-gradient(90deg, rgba(47, 109, 179, .08) 1px, transparent 1px) 0 0 / 24px 24px, var(--zem) }
+:root[data-ana-arka="kareli"]    :is(.bsl, .bsl-sade) { background: conic-gradient(rgba(47, 109, 179, .06) 25%, transparent 0 50%, rgba(47, 109, 179, .06) 0 75%, transparent 0) 0 0 / 28px 28px, var(--zem) }
+:root[data-ana-arka="dalga"]     :is(.bsl, .bsl-sade) { background: radial-gradient(circle at 50% 0, transparent 14px, rgba(47, 109, 179, .08) 15px 16px, transparent 17px) 0 0 / 32px 18px, var(--zem) }
+:root[data-ana-arka="resim"]     :is(.bsl, .bsl-sade) {
+  /* Kendi resmi: üstte zeminin yarı saydam örtüsü - yazılar her resimde okunur kalır. */
+  background: linear-gradient(color-mix(in srgb, var(--zem) 55%, transparent), color-mix(in srgb, var(--zem) 55%, transparent)),
+              var(--ana-arka-resim, none) center / cover no-repeat, var(--zem) }
+:root[data-ana-arka-koyu="1"] .bsl .bsl-selam, :root[data-ana-arka-koyu="1"] .bsl-sade h1 { color: #fff }
+:root[data-ana-arka-koyu="1"] .bsl .bsl-sade-alt, :root[data-ana-arka-koyu="1"] .bsl-sade .bsl-sade-alt,
+:root[data-ana-arka-koyu="1"] .bsl .bsl-bolum, :root[data-ana-arka-koyu="1"] .bsl-sade .bsl-bolum { color: #d3deec }
