@@ -45,6 +45,9 @@ export function Baslangic() {
   const [paneller, setPaneller] = useState<GostergePaneliOzet[] | null>(null);
   const [rolKutucuklari, setRolKutucuklari] = useState<BaslangicKutucugu[] | null>(null);
   const [bekleyen, setBekleyen] = useState<Awaited<ReturnType<typeof api.baslangicBekleyen>> | null>(null);
+  /** ALT MENÜ (kullanıcı 17.10.2026: "kutulardaki menülerde alt menü varsa ok ile açılabilsin, default
+      kapalı"): açık alt başlıklar - anahtar "kutu/altbaşlık". */
+  const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
@@ -70,7 +73,7 @@ export function Baslangic() {
     for (const s of satirlar) {
       if (s.tur === 'duz') { if (s.m.yol !== '/panel') duzler.push({ yol: s.m.yol, ad: s.m.ad }); continue }
       kutular.push({ ad: s.ad, ikon: s.ikon ?? GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁',
-                     satirlar: s.alt.map(m => ({ yol: m.yol, ad: m.ad })) });
+                     satirlar: s.alt.map(m => ({ yol: m.yol, ad: m.ad, altGrup: m.altGrup })) });
     }
     if (duzler.length) kutular.push({ ad: c('Diğer'), ikon: '📁', satirlar: duzler });
     // GRUP SINIRI YOK (kullanıcı 17.10.2026: "admin ile girdim, gelmeyen menüler var - doküman, kalite,
@@ -202,12 +205,35 @@ export function Baslangic() {
               <div className="bsl-kb"><MenuIkon ic={k.ikon || '📁'} /> {c(k.ad)}</div>
               {/* 6 SATIR GÖRÜNÜR, FAZLASI KAYDIRILIR (kullanıcı 17.10.2026). */}
               <div className="bsl-satirlar">
-              {k.satirlar.map((s, j) => (
-                <a key={j} onClick={() => git(s.yol)}>
-                  <span className="bsl-ad">{ikonlar.get(s.yol) && <MenuIkon ic={ikonlar.get(s.yol)!} />}{c(s.ad)}</span>
-                  {s.deger && <span className={`s ${s.deger.vurgu === 'tehlike' ? 'k' : ''}`}>{gostergeDegeri(s.deger)}</span>}
-                </a>
-              ))}
+              {(() => {
+                const satir = (s: typeof k.satirlar[number], j: string | number, alt = false) => (
+                  <a key={j} onClick={() => git(s.yol)} className={alt ? 'bsl-alt' : undefined}>
+                    <span className="bsl-ad">{ikonlar.get(s.yol) && <MenuIkon ic={ikonlar.get(s.yol)!} />}{c(s.ad)}</span>
+                    {s.deger && <span className={`s ${s.deger.vurgu === 'tehlike' ? 'k' : ''}`}>{gostergeDegeri(s.deger)}</span>}
+                  </a>
+                );
+                // Alt başlığı olan satırlar menüdeki gibi tek başlık altında toplanır (ilk göründüğü yerde).
+                const sira: (string | typeof k.satirlar[number])[] = [];
+                const altlar = new Map<string, typeof k.satirlar>();
+                for (const s of k.satirlar) {
+                  if (!s.altGrup) { sira.push(s); continue }
+                  if (!altlar.has(s.altGrup)) { altlar.set(s.altGrup, []); sira.push(s.altGrup) }
+                  altlar.get(s.altGrup)!.push(s);
+                }
+                return sira.map((x, j) => {
+                  if (typeof x !== 'string') return satir(x, j);
+                  const anahtar = `${k.ad}/${x}`, acik = acikAlt.has(anahtar);
+                  return (
+                    <div key={`a-${x}`}>
+                      <a onClick={() => setAcikAlt(o => { const y = new Set(o); if (acik) y.delete(anahtar); else y.add(anahtar); return y })}>
+                        <span className="bsl-ad"><span className="ic">{acik ? '▾' : '▸'}</span>{c(x)}</span>
+                        <span className="s">{altlar.get(x)!.length}</span>
+                      </a>
+                      {acik && altlar.get(x)!.map((s, i) => satir(s, `${x}-${i}`, true))}
+                    </div>
+                  );
+                });
+              })()}
               </div>
             </div>
           ))}

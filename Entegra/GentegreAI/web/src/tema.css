@@ -6536,6 +6536,7 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kutu a:hover { background: var(--satirust); color: var(--vurgu) }
 /* Ana sayfa kutusu: 6 satır görünür, fazlası kutunun içinde kaydırılır (17.10.2026). */
 .bsl-satirlar { max-height: 178px; overflow-y: auto }
+.bsl-kutu a.bsl-alt { padding-left: 30px }   /* ana sayfada açılan alt menü satırı */
 .bsl-kutu a .s { color: var(--soluk); font-size: 10.5px; white-space: nowrap }
 .bsl-kutu a .s.k { color: var(--hata); font-weight: 700 }
 .bsl-gp { border-color: var(--vurgu) }

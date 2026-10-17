@@ -10,7 +10,9 @@ export interface GostergeBlok {
 export interface GostergePaneliOzet { kod: string; ad: string; ikon: string; aciklama: string; ilk: GostergeKutu | null }
 export interface BaslangicKutucugu {
   ad: string; ikon: string;
-  satirlar: { yol: string; ad: string; gosterge?: string; deger?: GostergeKutu | null }[];
+  satirlar: { yol: string; ad: string; gosterge?: string; deger?: GostergeKutu | null;
+              /** Menüdeki alt başlık (ör. Ayarlar) - ana sayfada okla açılan alt menü (17.10.2026). */
+              altGrup?: string }[];
 }
 
 export const gostergeUclari = {
