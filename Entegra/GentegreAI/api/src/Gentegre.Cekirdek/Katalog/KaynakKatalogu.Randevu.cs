@@ -37,6 +37,10 @@ public static partial class KaynakKatalogu
             new("hekimId",    "rv.hekim_id",  "sayi",  "Hekim Id", Varsayilan: false),
             new("hasta",      "coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 170),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
+            // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): hastanın ham telefonu (cep + sabit,
+            //   yalnız rakam) ve kimlik nosu - listede gizli, hızlı arama bunlarda da bakar.
+            new("telefonHam", TarafKatalog.TelefonHam.Replace("t.", "p."), "metin", "Telefon (ham)", Varsayilan: false),
+            new("vknoHam",    "p.vkno",       "metin", "Kimlik No (ham)", Varsayilan: false),
             new("tarih",      "rv.baslangic::date", "tarih", "Tarih", Hizalama: "orta"),
             new("saat",       "to_char(rv.baslangic, 'HH24:MI')", "metin", "Saat",
                 Hizalama: "orta", Genislik: 70),

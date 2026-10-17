@@ -486,14 +486,15 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "randevu", Islem: Islem.Ekle, Sira: 10),
             new("randevu.duzenle",  "✎ Düzenle", "randevu", Kisayol: "Enter",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            // RENKLER (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı, Başvuruya Dönüştür sarı.
             new("randevu.geldi",    "✔ Geldi",   "randevu",
-                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, Bicim: "onay"),
             new("randevu.gelmedi",  "✖ Gelmedi", "randevu",
-                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, Bicim: "ret"),
             // Randevudan BASVURUYA (265): hasta geldiginde poliklinik
             //   basvurusu acilir, randevunun hizmeti kalem olur.
             new("randevu.basvuru",  "➜ Başvuruya Dönüştür", "belge",
-                KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 45),
+                KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 45, Bicim: "sari"),
             new("randevu.iptal",    "⊘ İptal",   "randevu", Hedef: "sagtus,palet",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
             new("randevu.sil",      "🗑 Sil",    "randevu", Hedef: "sagtus,palet", Kisayol: "Del",
