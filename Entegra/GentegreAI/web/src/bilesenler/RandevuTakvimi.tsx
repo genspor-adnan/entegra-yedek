@@ -608,10 +608,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           {/* YAPILACAK İŞLEM hastanın sağında parantezde (kullanıcı 17.10.2026). */}
                           <b>{String(r.hasta ?? '')}</b>{r.hizmet ? <span style={{ opacity: .85 }}> ({String(r.hizmet)})</span> : null}
                           <div style={{ opacity: .75 }}>
-                            {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.hekim ? ` · ${String(r.hekim)}` : ''}
+                            {/* GÖNDEREN saatin sağında parantezde (kullanıcı 17.10.2026) - kolon kapalıysa (1121) gelmez. */}
+                            {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.gonderen ? ` (${String(r.gonderen)})` : ''}{r.hekim ? ` · ${String(r.hekim)}` : ''}
                           </div>
-                          {/* GÖNDEREN (kullanıcı 17.10.2026) - kolon kapalıysa (1121) gelmez. */}
-                          {!!r.gonderen && <div style={{ opacity: .75 }}>↪ {String(r.gonderen)}</div>}
                         </div>
                       ))}
                     </td>
