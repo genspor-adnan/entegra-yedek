@@ -25,8 +25,6 @@ function selam(): string {
   return c('İyi akşamlar');
 }
 
-/** Öneri (rolün elle düzeni yoksa): menüden en fazla bu kadar kutucuk. */
-const ONERI_SINIRI = 12;
 /** AZ EKRANLI KULLANICI (kullanıcı 16.10.2026: "10 adet altında menü varsa bölümlü değil büyük
     ikonlu göster"): bundan az ekranda gruplu kutular yerine büyük ikonlu karolar. */
 const BUYUK_IKON_SINIRI = 10;
@@ -72,10 +70,12 @@ export function Baslangic() {
     for (const s of satirlar) {
       if (s.tur === 'duz') { if (s.m.yol !== '/panel') duzler.push({ yol: s.m.yol, ad: s.m.ad }); continue }
       kutular.push({ ad: s.ad, ikon: s.ikon ?? GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁',
-                     satirlar: s.alt.slice(0, 6).map(m => ({ yol: m.yol, ad: m.ad })) });
+                     satirlar: s.alt.map(m => ({ yol: m.yol, ad: m.ad })) });
     }
-    if (duzler.length) kutular.push({ ad: c('Diğer'), ikon: '📁', satirlar: duzler.slice(0, 6) });
-    return kutular.slice(0, ONERI_SINIRI);
+    if (duzler.length) kutular.push({ ad: c('Diğer'), ikon: '📁', satirlar: duzler });
+    // GRUP SINIRI YOK (kullanıcı 17.10.2026: "admin ile girdim, gelmeyen menüler var - doküman, kalite,
+    //   yönetim"): 12 kutu sınırı geniş yetkili rolde sondaki grupları kesiyordu.
+    return kutular;
   }, [menu]);
 
   const elle = (rolKutucuklari?.length ?? 0) > 0;
@@ -200,12 +200,15 @@ export function Baslangic() {
           {kutucuklar.map((k, i) => (
             <div key={i} className="bsl-kutu">
               <div className="bsl-kb"><MenuIkon ic={k.ikon || '📁'} /> {c(k.ad)}</div>
+              {/* 6 SATIR GÖRÜNÜR, FAZLASI KAYDIRILIR (kullanıcı 17.10.2026). */}
+              <div className="bsl-satirlar">
               {k.satirlar.map((s, j) => (
                 <a key={j} onClick={() => git(s.yol)}>
                   <span className="bsl-ad">{ikonlar.get(s.yol) && <MenuIkon ic={ikonlar.get(s.yol)!} />}{c(s.ad)}</span>
                   {s.deger && <span className={`s ${s.deger.vurgu === 'tehlike' ? 'k' : ''}`}>{gostergeDegeri(s.deger)}</span>}
                 </a>
               ))}
+              </div>
             </div>
           ))}
         </div>

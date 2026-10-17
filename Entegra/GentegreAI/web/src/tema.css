@@ -6545,6 +6545,8 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kb .rozet { margin-left: auto }
 .bsl-kutu a { display: flex; justify-content: space-between; gap: 8px; padding: 6px 12px; color: var(--yazi); cursor: pointer; text-decoration: none }
 .bsl-kutu a:hover { background: var(--satirust); color: var(--vurgu) }
+/* Ana sayfa kutusu: 6 satır görünür, fazlası kutunun içinde kaydırılır (17.10.2026). */
+.bsl-satirlar { max-height: 178px; overflow-y: auto }
 .bsl-kutu a .s { color: var(--soluk); font-size: 10.5px; white-space: nowrap }
 .bsl-kutu a .s.k { color: var(--hata); font-weight: 700 }
 .bsl-gp { border-color: var(--vurgu) }
