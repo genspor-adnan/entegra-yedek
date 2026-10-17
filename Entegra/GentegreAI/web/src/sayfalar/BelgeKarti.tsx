@@ -305,8 +305,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   korunur; fatura/irsaliyede kilit surer - kalemi degistirmek hedef belgeyi
   //   ve muhasebe fisini tutarsiz birakirdi.
   const siparisTuru = tur === 9 || tur === 19;
+  /**
+   * BAŞVURU KARTI DEĞİŞTİR YETKİSİ (kullanıcı 17.10.2026: "banko görevlisi başvuru kartı düzenleme
+   * yetkisi yok ama değiştirdi"). Kart yalnız e-Belge / fatura durumuna bakıyordu; Değiştir'i olmayan
+   * kullanıcı kayıtlı başvuruyu düzenlenebilir görüyor, kaydette sunucudan ret alıyordu. Başvuru tek
+   * kodda (`belge`, 1115 aşama 2 - Başvuru Listesi yalnız Gör); ERP türleri kendi ekran kodlarında,
+   * onlarda sunucu karar verir. Kartı BU OTURUMDA açan (acilanId) devam eder: ilk kayıttan sonra
+   * ücret girişi aynı karttan sürer.
+   */
+  const basvuruDegistiremez = tur === 19 && kullanici?.urunModu === URUN_GENOTIP
+                              && !!belgeId && !yetki('belge', 'degistir');
   const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi
-                         && (!faturalandi || siparisTuru);
+                         && (!faturalandi || siparisTuru) && !basvuruDegistiremez;
   const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
   // Turun EKRAN DAVRANISI tek yerden gelir (belgeTuru.ts): hangi alan cizilir,
   //   kalem satiri nasil gorunur, kayittan sonra ne olur. Eskiden bu kararlar

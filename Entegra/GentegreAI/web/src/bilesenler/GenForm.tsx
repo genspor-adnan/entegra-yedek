@@ -343,7 +343,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
-  const { kullanici } = useOturum();
+  const { kullanici, yetki: oturumYetki } = useOturum();
   // İÇERİĞE GÖRE SABİT (kullanıcı 16.10.2026: "hizmet ara ekranında yazdıklarım gitti.. belli aralıklarla
   //   refresh oluyor"): çağıranlar bu nesneleri çizimde yeniden kuruyor (URL'den gelen randevu saati /
   //   hekimi, önce sorulan hasta...). Yükleme etkisi bunlara bağlı olduğu için her üst çizimde - ör. 20 sn'lik
@@ -2056,17 +2056,23 @@ Yine de yeni kayıt eklensin mi?`);
               bir dugme, bozuk bir dugmeden daha kotu. */}
           {kaynak === 'hasta' && !yeniMi && (
             <>
-              <button className="d" type="button"
-                      title={c('Kimlik bilgilerini MERNİS\'ten günceller')}
-                      onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
-                MERNİS'ten getir
-              </button>
+              {/* YETKİ (kullanıcı 17.10.2026: "hasta kartını da kontrol et"): MERNİS kimliği GÜNCELLER -
+                  salt okunur kartta yok; Yeni Başvuru Başvuru Kartı'nın EKLE hakkına bağlı. */}
+              {!salt && (
+                <button className="d" type="button"
+                        title={c('Kimlik bilgilerini MERNİS\'ten günceller')}
+                        onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
+                  MERNİS'ten getir
+                </button>
+              )}
               <button className="d" type="button"
                       title={c('SGK provizyon / müstehaklık sorgusu')}
                       onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
                 Provizyon/Müstehaklık Sorgula
               </button>
-              <button className="d yesil" type="button" onClick={() => basvuruAc()}>{c('＋ Yeni Başvuru')}</button>
+              {oturumYetki('belge', 'ekle') && (
+                <button className="d yesil" type="button" onClick={() => basvuruAc()}>{c('＋ Yeni Başvuru')}</button>
+              )}
             </>
           )}
           {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
