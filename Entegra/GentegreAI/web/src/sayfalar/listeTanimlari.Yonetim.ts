@@ -294,7 +294,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   formunda), kurum YZ ayarlari. Liste degil, ozel sayfa.
     kaynak: 'yz-kontor', rota: 'yz-kontor', ozelSayfa: true,
     baslik: 'YZ Kontör & Kullanım', yol: 'Yönetim › YZ Kontör & Kullanım',
-    menuGrup: 'Sistem', menuSira: 15, menuAd: 'YZ Kontör & Kullanım', ic: '🤖', yetkiKodu: 'ai.kontor',
+    menuGrup: 'Yönetim', menuSira: 15, menuAd: 'YZ Kontör & Kullanım', ic: '🤖', yetkiKodu: 'ai.kontor',
   },
   {
     // DOKUMLER & ISTATISTIK (686): kosul verilerek tasarlanan, kaydedilip
@@ -428,7 +428,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   altinda bir tablodur (165 / FirmaBilgileri.tsx).
     kaynak: 'sube', baslik: 'Firma / Şubeler', yol: 'Yönetim › Firma / Şubeler',
     ozelSayfa: true,
-    menuGrup: 'Sistem', menuSira: 30, menuAd: 'Firma / Şubeler', ic: '🏢', yetkiKodu: 'sube',
+    menuGrup: 'Yönetim', menuSira: 30, menuAd: 'Firma / Şubeler', ic: '🏢', yetkiKodu: 'sube',
   },
   // KURUM PROFİLİ EKRANI BU ÜRÜNDE YOK (kullanıcı 07.10.2026: "projedeki
   //   kurum-profili'ni kaldır", "genprofil yeterli"): kurulum ekranı artık
@@ -444,7 +444,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,
-    menuGrup: 'Sistem', menuAd: 'Genel', menuSira: 40,
+    menuGrup: 'Yönetim', menuAd: 'Genel', menuSira: 40,
     ic: '⚙️', yetkiKodu: 'ayar',
   },
   {
@@ -490,7 +490,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ayar degil VERI ISI - cari/stok/hizmet kartlarini yaziyor.
     kaynak: 'demo-verisi', rota: 'demo-verisi', baslik: 'Demo Verisi',
     yol: 'Yonetim › Veri Aktarımı › Demo Verisi', ozelSayfa: true,
-    menuGrup: 'Sistem', menuAltGrup: 'Veri Aktarımı', menuAd: 'Demo Verisi',
+    menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: 'Demo Verisi',
     menuSira: 9, ic: '🧪', yetkiKodu: 'ayar.demo_verisi',
   },
   {
@@ -498,7 +498,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   tanıtım kurulumunun verisi - yalnız DEMO kurulumda yazar.
     kaynak: 'iceri-alma', rota: 'iceri-alma', baslik: "Excel'den İçeri Alma",
     yol: 'Yonetim › Veri Aktarımı › İçeri Alma', ozelSayfa: true,
-    menuGrup: 'Sistem', menuAltGrup: 'Veri Aktarımı', menuAd: "Excel'den İçeri Alma",
+    menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: "Excel'den İçeri Alma",
     menuSira: 1, ic: '⬆', yetkiKodu: 'ayar.iceri_alma',
   },
   {

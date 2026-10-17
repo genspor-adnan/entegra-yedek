@@ -49,7 +49,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     kaynak: 'duyurular', rota: 'duyurular', ozelSayfa: true,
     baslik: 'Duyurular',
     yol: 'Yönetim › Duyurular',
-    menuGrup: 'Sistem', menuAd: 'Duyurular', ic: '📣',
+    menuGrup: 'Yönetim', menuAd: 'Duyurular', ic: '📣',
     yetkiKodu: 'duyuru', menuSira: 2,
   },
   {

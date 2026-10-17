@@ -23,7 +23,8 @@ export const GRUP_SIRA_HBYS: string[] = [
   'Finans', 'Muhasebe', 'Cari & CRM',
   // Tedarik & teknik (722-724, 773): eczane, satınalma, depo, biyomedikal aynı zincirin halkaları.
   'Eczane', 'Satınalma', 'Stok & Hizmet', 'Sabit Varlıklar', 'Teknik Servis',
-  // Yönetim - Kalite Onay'dan önce; Sistem (eski "Yönetim" grubu) ve Dökümler en sonda.
+  // Yönetim - Kalite Onay'dan önce; Yönetim (kurum ayarları; 10.10'da bölgeyle çakıştığı için
+  //   "Sistem" olmuştu, bölgeler kalkınca 17.10.2026'da adı geri döndü) ve Dökümler en sonda.
   'İK', 'Doküman', 'Kalite', 'Klinik Kalite', 'Onay', 'Güvenlik', 'Formlar', 'Platform',
-  'Sistem', 'Dökümler',
+  'Yönetim', 'Dökümler',
 ];

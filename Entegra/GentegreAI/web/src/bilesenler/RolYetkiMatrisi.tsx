@@ -29,6 +29,8 @@ const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
 const GRUP_ADI: Record<string, string> = {
   kart: 'Kartlar', stok: 'Stok & Hizmet', belge: 'Belgeler', mali: 'Kasa & Muhasebe',
   ebelge: 'e-Belge', yonetim: 'Yönetim', genel: 'Genel',
+  // Yetki tablosunda 'Sistem' grubu (18 yetki): menü grubu 17.10.2026'da yeniden 'Yönetim' oldu.
+  Sistem: 'Yönetim',
 };
 
 /**

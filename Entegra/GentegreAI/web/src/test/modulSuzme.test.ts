@@ -43,8 +43,8 @@ describe('modül süzmesi', () => {
     const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK',
                             'Kurumlar & Sigorta', 'Demirbaş', 'Medula',
                             'Klinik Kalite', 'Güvenlik', 'Platform', 'Onay',
-                            // 10.10.2026: Yönetim grubu Sistem oldu; Dökümler (tasarımcı) ayrı grup.
-                            'Sistem', 'Dökümler']);
+                            // Yönetim grubu (10.10'da Sistem olmuştu, 17.10.2026'da adı geri döndü); Dökümler ayrı grup.
+                            'Yönetim', 'Dökümler']);
     const gruplar = new Set(LISTELER.map(l => l.menuGrup).filter(Boolean) as string[]);
 
     for (const g of gruplar) {

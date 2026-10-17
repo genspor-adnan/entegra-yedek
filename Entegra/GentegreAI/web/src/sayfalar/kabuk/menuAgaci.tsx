@@ -251,7 +251,8 @@ export const GRUP_IKON: Record<string, string> = {
   //   🛞 (tekerlek - lastik gibi cizilir). ⎈ (U+2388) anlamca dogru ama
   //   cogu yazi tipinde bos kare. Pusula denizcilik cagrisimini koruyor
   //   ve her platformda ayni cizilir.
-  // 'Yönetim' grubu 10.10.2026'da 'Sistem' oldu; simge aynı.
+  // 'Yönetim' grubu 10.10'da 'Sistem' olmuştu, 17.10.2026'da adı geri döndü; simge aynı.
+  'Yönetim': '🧭',
   'Sistem': '🧭',
   'Dökümler': '📊',
   // 10.10.2026: Yönetim'in alt başlıklarıyken ALTGRUP_IKON'daydılar - ayrı
@@ -397,7 +398,7 @@ export function menuSatirlariKur(
 
   // EN SONDA: Sistem (eski Yönetim grubu), ardından Dökümler (10.10.2026).
   //   Çevrilmiş adlar da sayılır.
-  for (const adlar of [['Sistem', 'System', 'Administration', 'Verwaltung'], ['Dökümler', 'Reports', 'Berichte']]) {
+  for (const adlar of [['Yönetim', 'Sistem', 'System', 'Administration', 'Verwaltung'], ['Dökümler', 'Reports', 'Berichte']]) {
     const i = satirlar.findIndex(s => s.tur === 'grup' && adlar.includes(s.ad));
     if (i >= 0) satirlar.push(...satirlar.splice(i, 1));
   }
