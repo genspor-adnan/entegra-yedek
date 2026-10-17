@@ -148,7 +148,8 @@ public static class KartUclari
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Ekle);
 
             var uyarilar = new List<string>();
-            var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
+            var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true,
+                                    await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
             // EKRAN SATIR KISITI (1003): yeni kayıt kısıtın dışında açılamaz.
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, degerler, null, Islem.Ekle, iptal);
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
@@ -623,12 +624,26 @@ public static class KartUclari
             if (!UrunModlari.Uyar(alan.UrunModu, urunModu)) continue;
             // AYAR KAPISI (1121): kapali ayarin alani karta hic girmez (or. goruntuleme merkezinde bolum / doktor).
             if (alan.AyarKapisi is { } kapi && kapaliKapilar?.Contains(kapi) == true) continue;
+            var etkin = KapiylaZorunlu(alan, kapaliKapilar) && !alan.Zorunlu ? alan with { Zorunlu = true } : alan;
 
-            if (baglam.Yetkiler.AlanOkunur(tanim.Ad, alan.Ad)) okunabilir.Add(alan);
+            if (baglam.Yetkiler.AlanOkunur(tanim.Ad, alan.Ad)) okunabilir.Add(etkin);
             else gizli.Add(alan.Ad);
         }
 
         return (okunabilir, gizli);
+    }
+
+    /// <summary>
+    /// ZORUNLULUK KAPISI (17.10.2026): "anahtar" kapı açıkken, "!anahtar" kapalıyken zorunlu. Alan kendi
+    /// AyarKapisi'yla gizliyse zorunlu sayılmaz - görünmeyen alanı doldurmak istenemez.
+    /// </summary>
+    private static bool KapiylaZorunlu(KartAlani alan, IReadOnlySet<string>? kapaliKapilar)
+    {
+        if (alan.ZorunluKapisi is not { Length: > 0 } zk) return false;
+        if (alan.AyarKapisi is { } kendi && kapaliKapilar?.Contains(kendi) == true) return false;
+        var ters = zk[0] == '!';
+        var acik = kapaliKapilar?.Contains(ters ? zk[1..] : zk) != true;
+        return ters ? !acik : acik;
     }
 
     /// <summary>
@@ -637,7 +652,8 @@ public static class KartUclari
     /// Yazilamayan ya da yetkisiz alan gelirse SESSIZCE YOK SAYILMAZ - hata verilir.
     /// </summary>
     private static Dictionary<string, object?> Degerler(KartTanimi tanim,
-        Dictionary<string, JsonElement>? gelen, IstekBaglami baglam, bool yeni)
+        Dictionary<string, JsonElement>? gelen, IstekBaglami baglam, bool yeni,
+        IReadOnlySet<string>? kapaliKapilar = null)
     {
         var sonuc = new Dictionary<string, object?>(StringComparer.Ordinal);
         if (gelen is null) return sonuc;
@@ -680,9 +696,11 @@ public static class KartUclari
         }
 
         if (yeni)
-            foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu))
+            foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu || KapiylaZorunlu(a, kapaliKapilar)))
                 if (!sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null ||
-                    (d is string m && m.Trim().Length == 0))
+                    (d is string m && m.Trim().Length == 0) ||
+                    // Kapıyla zorunlu KOD alanında 0 da boştur (randevu bölümü varsayılan 0 gelir).
+                    (zorunlu.ZorunluKapisi is not null && zorunlu.Tip == "kod" && Convert.ToString(d, System.Globalization.CultureInfo.InvariantCulture) == "0"))
                     throw GentegreHatasi.Dogrulama($"{zorunlu.Etiket} zorunlu.",
                         new AlanHatasi(zorunlu.Ad, $"{zorunlu.Etiket} boş bırakılamaz."));
 

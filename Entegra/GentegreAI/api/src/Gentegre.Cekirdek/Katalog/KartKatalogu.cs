@@ -100,7 +100,13 @@ public sealed record KartAlani(
     /// AYAR KAPISI (1121): verilirse alan yalniz bu ayar ACIKSA metaya girer (fn_ayar_kapilari -
     /// referans degeri, yoksa kurum tipi varsayilani). Kapaliysa urun modu gibi HIC gonderilmez.
     /// </summary>
-    string? AyarKapisi = null
+    string? AyarKapisi = null,
+    /// <summary>
+    /// ZORUNLULUK KAPISI (17.10.2026): alan bu ayar kapısı AÇIKSA zorunlu ("anahtar"), KAPALIYSA zorunlu
+    /// ("!anahtar"). Ör. randevuda bölüm / doktor görüntüleme dışında, gönderen yalnız görüntüleme /
+    /// lab'da zorunlu. Metada yıldız ve yeni kayıt denetimi buna göre; otomatik yollar (seri, pano) dışı.
+    /// </summary>
+    string? ZorunluKapisi = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>
