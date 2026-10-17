@@ -6526,6 +6526,24 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kart-a { font-weight: 700; color: var(--baslik, #14315a) }
 .bsl-kart-y { font-size: 10.5px; color: var(--soluk) }
 .bsl-kartlar.bsl-tek-sira { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+/* Kutulu ana sayfa: üst şeritler satırda 8 kart (kullanıcı 17.10.2026); dar ekranda 4. */
+.bsl-kartlar.bsl-sekizli { grid-template-columns: repeat(8, minmax(0, 1fr)) }
+@media (max-width: 1100px) { .bsl-kartlar.bsl-sekizli { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+/* ANA SAYFA ORTALI (kullanıcı 17.10.2026: "sola yanaşık değil ortalı yap hepsini"): selam, alt satır,
+   arama, bölüm başlıkları ortada; kart şeritleri eksik satırda da ortaya toplanır (ızgara yerine
+   ortalı sarma, aynı kart genişliği). Kutulu görünüm geniş tek sütunda. */
+.bsl-orta { max-width: 1480px; margin: 0 auto; padding-top: 22px }
+.bsl-orta .bsl-selam { font-size: 20px; color: var(--baslik, #14315a); margin: 0 0 4px; text-align: center }
+.bsl-orta .bsl-sade-alt, .bsl-sade-ic .bsl-sade-alt, .bsl-sade-ic h1 { text-align: center }
+.bsl-orta .bsl-ara, .bsl-sade-ic .bsl-ara { margin-left: auto; margin-right: auto }
+.bsl-orta .bsl-ara { margin-bottom: 14px }
+.bsl-orta .bsl-bolum, .bsl-sade-ic .bsl-bolum { text-align: center }
+.bsl-kartlar-orta { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px }   /* sonraki bölüm başlığı yapışmasın */
+.bsl-kartlar-orta > * { flex: 0 0 170px; min-width: 0 }
+.bsl-kartlar-orta.bsl-sekizli > * { flex-basis: calc((100% - 7 * 8px) / 8) }
+.bsl-kartlar-orta.bsl-tek-sira:not(.bsl-sekizli) > *, .bsl-kartlar-orta.bsl-dortlu > * { flex-basis: calc((100% - 3 * 8px) / 4) }
+@media (max-width: 1100px) { .bsl-kartlar-orta.bsl-sekizli > * { flex-basis: calc((100% - 3 * 8px) / 4) } }
+.bsl-surum { font-family: Consolas, monospace; font-size: 11px }
 .bsl-kart.bsl-kart-pasif { cursor: default }
 .bsl-kart.bsl-kart-pasif:hover { border-color: var(--cizgi); background: var(--yuz) }
 .bsl-kutu { border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; background: var(--yuz) }
@@ -6539,8 +6557,6 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-kutu a.bsl-alt { padding-left: 30px }   /* ana sayfada açılan alt menü satırı */
 .bsl-kutu a .s { color: var(--soluk); font-size: 10.5px; white-space: nowrap }
 .bsl-kutu a .s.k { color: var(--hata); font-weight: 700 }
-.bsl-kutu a.bsl-satir-pasif { cursor: default; color: var(--soluk) }   /* bekleyen iş: ekranı menüde yok */
-.bsl-kutu a.bsl-satir-pasif:hover { background: transparent; color: var(--soluk) }
 .bsl-gp { border-color: var(--vurgu) }
 .gosterge-ust { display: flex; justify-content: flex-end; padding: 8px 20px 0 }
 .gosterge-ust select, .basrow .sag select { border: 1px solid var(--cizgi); border-radius: var(--r); padding: 3px 6px; font: inherit; background: var(--yuz); color: var(--yazi) }

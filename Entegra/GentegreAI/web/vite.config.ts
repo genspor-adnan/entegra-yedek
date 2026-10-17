@@ -3,6 +3,20 @@
 //   UserConfigExport" ile kirar.
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { execSync } from 'node:child_process'
+
+/**
+ * UYGULAMA SÜRÜMÜ DERLEMEDE ÜRETİLİR (kullanıcı 17.10.2026: "projenin versiyonunu ekle"). Biçim
+ * src/surum.ts'deki kural: YIL(2).AY.GÜN.BUILD, BUILD = git commit sayısı. Elle yazılan sürüm
+ * yayınlarda güncellenmeyip eskiyordu (28.09'da kalmıştı). Git yoksa (paket dışı derleme) build 0.
+ */
+const surum = (() => {
+  const g = new Date();
+  const iki = (n: number) => String(n).padStart(2, '0');
+  let say = '0';
+  try { say = execSync('git rev-list --count HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() } catch { /* git yok */ }
+  return `${iki(g.getFullYear() % 100)}.${iki(g.getMonth() + 1)}.${iki(g.getDate())}.${say}`;
+})();
 
 // TESTLER KURUM SAATINDE KOSAR (13.10.2026): tarih testleri (bugunIso "yerel
 //   gun, UTC degil") Istanbul saatini varsayiyor. CI sunucusu UTC'de calisinca
@@ -16,6 +30,7 @@ if (process.env.VITEST) process.env.TZ = 'Europe/Istanbul'
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
+  define: { __SURUM__: JSON.stringify(surum) },
   // 500 kB uyarisi STDERR'e yaziliyor, PowerShell bunu hata sayip yayinla.ps1'i
   //   durduruyordu. Paket tek parca (SPA, tamami girişte gerekiyor) - siniri
   //   gercek boyutun uzerine alip uyariyi susturuyoruz.
