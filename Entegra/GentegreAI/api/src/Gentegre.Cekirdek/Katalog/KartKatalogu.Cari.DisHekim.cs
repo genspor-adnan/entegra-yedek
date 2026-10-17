@@ -204,11 +204,12 @@ public static partial class KartKatalogu
             new DetayTanimi("ozluk", "public.taraf_hasta", "id", new KartAlani[]
             {
                 new("id",          "id",           "sayi",  Yazilabilir: false),
-                // Hasta acilirken bile ZORUNLU: yas/cinsiyet olmadan tetkik
-                //   referansi ve hizmet uygunlugu kararlastirilamaz.
-                new("cinsiyet",    "cinsiyet",     "kod",   Zorunlu: true,
+                // ADAYDA ZORUNLU DEĞİL (kullanıcı 16.10.2026: randevu aday ekranı "doğum tar ve cinsiyet
+                //   zorunlu olmayan"): aday henüz hasta değil - tam hasta kartında (ve kayıt kabulde)
+                //   yaş / cinsiyet zorunludur, tetkik referansı oradan kararlaştırılır.
+                new("cinsiyet",    "cinsiyet",     "kod",
                     KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
-                new("dogumTarihi", "dogum_tarihi", "tarih", Zorunlu: true,
+                new("dogumTarihi", "dogum_tarihi", "tarih",
                     Baslik: "Doğum Tarihi"),
                 // Kurum KIMLIK SERIDINDE cizilir (266) - burada yalniz veri
                 //   tasiyicisi olarak duruyor, ekranda tekrar gosterilmez.

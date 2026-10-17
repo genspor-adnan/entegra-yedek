@@ -17,6 +17,7 @@ import { MuayeneDurumSeridi } from '../../bilesenler/MuayeneDurumSeridi';
 import { MuayeneIstemSonuc } from '../../bilesenler/MuayeneIstemSonuc';
 import { PatolojiIstemModal } from '../../bilesenler/PatolojiIstemModal';
 import { TarafArama } from '../../bilesenler/TarafArama';
+import { HastaAdayPenceresi } from '../../bilesenler/hasta/HastaAdayPenceresi';
 import type { MuayeneSayaclari } from '../../api/uclar/liste';
 import { KipCercevesi, useKaydetKonumu } from '../../bilesenler/KipCercevesi';
 import { tarihYaz } from '../../bilesenler/bicim';
@@ -308,6 +309,16 @@ export function ListeKarti({
   useEffect(() => { setDosyaSayisi(null); setDosyaYeni(0) }, [kartId]);
   /** Yeni sevk / konsültasyonda hasta araması seçimle kapandı mı (onKapat sekmeyi kapatmasın). */
   const hastaSecildi = useRef(false);
+  /** Yeni randevu: hasta aramasındaki "＋ Yeni" küçük aday ekranı (aranan metin ön dolu). */
+  const [adayPencere, setAdayPencere] = useState<string | null>(null);
+  /** Randevu hastası seçildi (aramadan ya da aday ekranından): saat / hekim parametreleri korunur.
+      hastaAd: kartın Hasta kutusu adı göstersin (yeniSecilenAdlar) - yoksa "seçiniz" kalıyordu. */
+  const randevuHastaSec = (h: { id: number; unvan: string }) => {
+    hastaSecildi.current = true;
+    setAdayPencere(null);
+    const q = new URLSearchParams(sorgu); q.set('hastaId', String(h.id)); q.set('hastaAd', h.unvan);
+    git(`${tanim.kartYolu}/yeni?${q.toString()}`, { replace: true });
+  };
   useEffect(() => { if (!sorgu.get('tarafId')) hastaSecildi.current = false }, [kartId, sorgu]);
   /** KONSÜLTASYON İSTEĞİ PENCERESİ (kullanıcı 15.10.2026: "soldaki menüden konsültasyon seçersem
       yeni konsültasyon isteği ekranı açılmalı.. kaydedince ortada olmalı.. edit moda alırsam
@@ -434,16 +445,20 @@ export function ListeKarti({
   //   çıksın"): takvimden gelen saat / hekim / bölüm / cihaz parametreleri korunur, hasta eklenir.
   if (tanim.kaynak === 'randevu' && kartId === 'yeni' && !sorgu.get('hastaId')) {
     return (
-      // "＋ Yeni" görünür (kullanıcı 16.10.2026): kayıtlı değilse hasta burada açılır, kaydedilince seçilir.
-      <TarafArama acik kaynaklar={['hasta']}
+      <>
+      {/* "＋ Yeni" KÜÇÜK ADAY EKRANI açar (kullanıcı 16.10.2026): ad soyad + telefon zorunlu, doğum / cinsiyet
+          isteğe bağlı; kaydedilince seçilmiş gibi kart açılır. Pasif / vefat hasta aramada çıkmaz. */}
+      <TarafArama acik={adayPencere === null} kaynaklar={['hasta']}
+        ekFiltre={{ op: 'or', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }, { alan: 'durum', op: 'esit', deger: 2 }] }}
         yerTutucu={c('Randevu kimin için? Hasta ara (ad, dosya no, kimlik no, telefon)…')}
-        onKapat={() => { if (hastaSecildi.current) return; if (ekranSekmesi) ekranSekmesi.kapat(); else git(`/${tanim.rota ?? tanim.kaynak}`) }}
-        onSec={h => {
-          hastaSecildi.current = true;
-          // hastaAd: kartın Hasta kutusu adı göstersin (yeniSecilenAdlar) - yoksa "seçiniz" kalıyordu.
-          const q = new URLSearchParams(sorgu); q.set('hastaId', String(h.id)); q.set('hastaAd', h.unvan);
-          git(`${tanim.kartYolu}/yeni?${q.toString()}`, { replace: true });
-        }} />
+        onYeni={a => setAdayPencere(a)}
+        onKapat={() => { if (hastaSecildi.current || adayPencere !== null) return; if (ekranSekmesi) ekranSekmesi.kapat(); else git(`/${tanim.rota ?? tanim.kaynak}`) }}
+        onSec={randevuHastaSec} />
+      {adayPencere !== null && (
+        <HastaAdayPenceresi aranan={adayPencere} onKapat={() => setAdayPencere(null)}
+                            onKaydedildi={h => randevuHastaSec(h)} />
+      )}
+      </>
     );
   }
   if (HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && !sorgu.get('tarafId')) {

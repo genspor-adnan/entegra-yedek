@@ -164,6 +164,9 @@ interface Props {
   secimDenetimi?(secilen: { kaynak: string; id: number; unvan: string }): string | null;
   onKapat(): void;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
+  /** "＋ Yeni" tam kart yerine ÇAĞIRANIN penceresini açar (randevu: küçük hasta aday ekranı, 16.10.2026);
+      aranan metin verilir (ad / telefon ön dolsun). */
+  onYeni?(aranan: string): void;
 }
 
 /**
@@ -174,7 +177,7 @@ interface Props {
  * arar (Tip/Bağlı Kurum/Görev-Rol gibi taraf-ortak kolonlarla) ve disaridan (ör. toolbar
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
-export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre,
+export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre, onYeni,
                              yerTutucu, baslangicMetni, baslangicYeni,
                              cokluSecim = false, onSecCoklu, secimDenetimi,
                              onKapat, onSec }: Props) {
@@ -441,7 +444,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           {kaynaklar.length === 1 && !hekimDuzeni && !kartYok && (
             <>
               <button type="button" className="d"
-                onClick={() => setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
+                onClick={() => onYeni ? onYeni(arama) : setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
                 ＋ Yeni
               </button>
               <button type="button" className="d" disabled={!satirlar[secili]}
