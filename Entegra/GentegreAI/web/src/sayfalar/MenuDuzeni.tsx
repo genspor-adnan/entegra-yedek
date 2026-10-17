@@ -5,7 +5,6 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 import { LISTELER } from './Liste';
 import { MenuIkon, menuSatirlariKur, type MenuSatiri } from './kabuk/menuAgaci';
-import { BOLGE_HBYS } from './kabuk/menuBolgeleri';
 import { DUGUM } from './kabuk/menuDuzenHarita';
 import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
          type MenuDuzenSatiri } from './kabuk/menuDuzeni';
@@ -117,9 +116,8 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     () => menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller),
     [yetki, kullanici?.urunModu, kullanici?.moduller]);
 
-  const bolgeli = kullanici?.urunModu === 2 && kullanici?.menuBolgeli === 1;
-
-  /** Ağacı düz listeye açar: bölge › grup › ekran (mockup soldaki ağaç). */
+  /** Ağacı düz listeye açar: grup › ekran (mockup soldaki ağaç). BÖLGELER KALDIRILDI (17.10.2026):
+   *  menü tek seviye grup - bu editör GenProfil'de de aynı bileşenle açılır. */
   const dugumler: Dugum[] = useMemo(() => {
     const d: Dugum[] = [];
     // ÇAKIŞAN KAYNAK GRUP BAĞLAMI ALIR: "Dökümler" her grubun altında aynı
@@ -155,24 +153,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
         });
     };
 
-    if (bolgeli) {
-      for (const b of BOLGE_HBYS) {
-        d.push({ tur: 'bolge', kod: icKod('bolge', b.ad), sistemAd: b.ad,
-                 ad: c(b.ad), derinlik: 1 });
-        for (const g of b.gruplar) {
-          const sat = gruplar.find(x => grupKodu(x) === g);
-          if (sat) grupEkle(sat, icKod('bolge', b.ad));
-        }
-      }
-      // Bölgeye yazılmamış grup: Yönetim bölgesinin altına düşer (menuBolgeleri
-      //   kuralı) - burada da aynı yere konur ki ekran menüyle aynı şeyi göstersin.
-      const yazilanlar = new Set(BOLGE_HBYS.flatMap(b => b.gruplar));
-      for (const sat of gruplar)
-        if (!yazilanlar.has(grupKodu(sat)))
-          grupEkle(sat, icKod('bolge', BOLGE_HBYS[BOLGE_HBYS.length - 1].ad));
-    } else {
-      for (const sat of gruplar) grupEkle(sat);
-    }
+    for (const sat of gruplar) grupEkle(sat);
     for (const s of duzOgeler)
       d.push({
         tur: 'ekran',
@@ -182,7 +163,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
         ikon: s.m.ic, derinlik: 1, yol: s.m.yol,
       });
     return d;
-  }, [satirlar, bolgeli]);
+  }, [satirlar]);
 
   useEffect(() => {
     let iptal = false;
@@ -292,18 +273,12 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
   };
 
   /**
-   * Düğümün taşınabileceği üst başlıklar: ekran GRUPLARA, grup (bölgeli
-   * düzende) BÖLGELERE taşınır. Bölge düğümünün üstü yoktur - liste boş döner
-   * ve alan salt okunur kalır.
+   * Düğümün taşınabileceği üst başlıklar: ekran GRUPLARA taşınır. Grubun üstü yoktur (bölgeler
+   * kaldırıldı) - liste boş döner ve alan salt okunur kalır.
    */
   const ustSecenekleri = (dugum: Dugum): string[] => {
     if (dugum.tur === 'ekran')
       return dugumler.filter(x => x.tur === 'grup').map(x => x.kod);
-    // GRUP BÖLGE DIŞINA DA ÇIKAR: boş dize "en üst" demek - grup bölgelerin
-    //   üstünde, derinlik 1'de çizilir (kullanıcı: "derinlik 2 olan bir grubu
-    //   en üste derinlik 1'e alamadım").
-    if (dugum.tur === 'grup' && bolgeli)
-      return ['', ...dugumler.filter(x => x.tur === 'bolge').map(x => x.kod)];
     return [];
   };
 
@@ -649,10 +624,9 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     const hedefUst = etkinUst(hedef);
     const yeniUst = kaynak.tur === hedef.tur ? hedefUst          // kardeş olarak araya gir
       : kaynak.tur === 'ekran' && hedef.tur === 'grup' ? hedef.kod   // grubun altına
-      : kaynak.tur === 'grup' && hedef.tur === 'bolge' ? hedef.kod   // bölgenin altına
       : undefined;
     if (yeniUst === undefined && kaynak.tur !== hedef.tur) {
-      setMesaj(c('Bu düğüm oraya taşınamaz: ekran bir gruba, grup bir bölgeye taşınır.'));
+      setMesaj(c('Bu düğüm oraya taşınamaz: ekran bir gruba taşınır, gruplar kendi aralarında sıralanır.'));
       return;
     }
     if (kaynak.tur !== hedef.tur) {

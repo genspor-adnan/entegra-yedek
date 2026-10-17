@@ -1,12 +1,11 @@
 import { GRUP_IKON, GRUP_IKON_CEV, type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import type { MenuDuzenSatiri } from '../../api/sozlesme';
 import { duzenHaritasi, DUGUM } from './menuDuzenHarita';
-import { grupBolgesi } from './menuBolgeleri';
 
 /**
  * MENÜ DÜZENİ FARKI (979, mockup `Ekranlar/Ayarlar/menu_duzenleme_v2.html`).
  *
- * Menünün kendisi KODDADIR (`listeTanimlari*.ts` + `menuBolgeleri.ts`); kurum
+ * Menünün kendisi KODDADIR (`listeTanimlari*.ts` + `menuGrupSirasi.ts`); kurum
  * yalnız <b>farkı</b> saklar (sunucuda `menu_duzen`). Burası o farkı kurulmuş
  * ağacın üstüne uygular.
  *
@@ -126,12 +125,6 @@ export function menuDuzeniUygula(
       const m = ogeDuzenle(sat.m);
       if (!m) continue;
       const d = h.bul(ogeKodu(sat.m));
-      // GRUPSUZ ÖĞE DE BİR BÖLGEDE DURUR (YanMenu: `grupBolgesi(adHam)`):
-      //   bölgesi gizlenmişse çizilmez, yoksa bütün grupları düşmüş bir bölge
-      //   tek bir öğe yüzünden menüde kalırdı.
-      const duzBolge = d?.ustKod === '' ? ''
-        : (d?.ustKod && d.ustKod.length > 0 ? d.ustKod : grupBolgesi(sat.m.adHam).ad);
-      if (duzBolge !== '' && h.bul(duzBolge, DUGUM.bolge)?.gizli === 1) continue;
       if (d?.ustKod) {
         const liste = tasinan.get(d.ustKod) ?? [];
         liste.push(yolTasi(m, d.ustKod));
@@ -144,19 +137,8 @@ export function menuDuzeniUygula(
 
     const kod = grupKodu(sat);
     const dg = h.bul(kod, DUGUM.grup);
-    // BÖLGE GİZLENDİYSE ALTINDAKİ GRUPLAR DA ÇİZİLMEZ (kullanıcı 07.10.2026:
-    //   "kaydet&uygula dedim soldaki menüye uygulandı ama ana menüye
-    //   uygulanmadı"). Düzenleme ekranı basamaklı gizlemeyi kendi ağacında
-    //   hesaplıyordu; menüyü kuran bu fonksiyon ise yalnız grup ve ekran
-    //   satırlarına bakıyor, bölge satırını (dugumTur 1) hiç görmüyordu -
-    //   bölgesi gizlenen grup menüde olduğu gibi kalıyordu.
-    //
-    //   Alt satırlara kayıt YAZILMADIĞI için (bölge geri açılınca hepsi
-    //   dönsün diye) kontrol burada, çizim anında yapılır.
-    const bolgeAd = dg?.ustKod === '' ? ''                 // '' = en üst, bölgesiz
-      : (dg?.ustKod && dg.ustKod.length > 0 ? dg.ustKod : grupBolgesi(kod).ad);
-    const bolgeGizli = bolgeAd !== '' && h.bul(bolgeAd, DUGUM.bolge)?.gizli === 1;
-    if (dg?.gizli === 1 || bolgeGizli) continue;
+    // BÖLGELER KALDIRILDI (17.10.2026): eski bölge satırları (dugumTur 1) artık yok sayılır.
+    if (dg?.gizli === 1) continue;
 
     const alt: MenuOgesi[] = [];
     for (const m of sat.alt) {
@@ -180,12 +162,6 @@ export function menuDuzeniUygula(
     sonuc.push({
       tur: 'grup',
       ad: yeniAd,
-      // GRUP BAŞKA BÖLGEYE TAŞINDI: bölge haritası (menuBolgeleri) koddadır ve
-      //   statiktir; kurumun taşıması burada satıra yazılır, menüyü çizen
-      //   YanMenu önce bu alana bakar.
-      //   BOŞ DİZE = EN ÜST (bölgesiz, kök seviye); undefined = kurum
-      //   dokunmadı, koddaki harita geçerli.
-      bolge: dg?.ustKod === null || dg?.ustKod === undefined ? undefined : dg.ustKod,
       ikon: dg?.ikon && dg.ikon.length > 0 ? dg.ikon
             : (yeniAd !== sat.ad ? (GRUP_IKON[sat.ad] ?? GRUP_IKON_CEV[sat.ad]) : undefined),
       alt,

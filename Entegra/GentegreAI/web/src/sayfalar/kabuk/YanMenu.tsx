@@ -1,8 +1,7 @@
 /**
- * SOL MENU (yan serit icerigi): Ana Sayfa, calisma alani, Favori, En Son,
- * bolgeler/gruplar/ogeler ve oturum bilgisi. Kabuk.tsx'ten cikarildi
- * (kullanici: "refaktor") - acik/kapali grup, bolge accordion ve calisma
- * alani durumu buraya ait; Kabuk ust seridi ve pencereleri yonetir.
+ * SOL MENU (yan serit icerigi): Ana Sayfa, Favori, gruplar/ogeler ve oturum bilgisi.
+ * Kabuk.tsx'ten cikarildi (kullanici: "refaktor") - acik/kapali grup durumu buraya ait;
+ * Kabuk ust seridi ve pencereleri yonetir. BOLGELER YOK (17.10.2026): menu tek seviye grup.
  *
  * Menu satirlari HAZIR gelir (kabuk/menuAgaci.menuSatirlariKur); tercihler
  * (favori, en son, calisma alani) Kabuk'un kancasindan (useMenuTercihleri)
@@ -11,21 +10,17 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
-/** Bölgede tek satır olarak çizilen gruplar (içinde tek ekran). */
+/** Tek satır olarak çizilen gruplar (içinde tek ekran). */
 const TEK_SATIR_GRUPLAR = new Set(['Dökümler']);
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c, cm } from '../../dil/ceviri';
 import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
          type MenuOgesi, type MenuSatiri } from './menuAgaci';
-import { BOLGE_HBYS, GRUP_SIRA_HBYS, grupBolgesi,
-         type MenuBolgesi } from './menuBolgeleri';
 import { SURUM_ETIKET } from '../../surum';
 import type { useMenuTercihleri } from './useMenuTercihleri';
 
 export interface YanMenuProps {
   satirlar: MenuSatiri[];
-  /** HBYS (urun modu 2): bolgeler + calisma alani; ERP duz grup listesi. */
-  bolgeliMenu: boolean;
   tercih: ReturnType<typeof useMenuTercihleri>;
   panelYetkisi: boolean;
   aktifSubeAd?: string;
@@ -35,7 +30,7 @@ export interface YanMenuProps {
   kurumProfilAdi?: string;
 }
 
-export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd,
+export function YanMenu({ satirlar, tercih, panelYetkisi, aktifSubeAd,
                           kullaniciKod, rolAdi, kurumProfilAdi }: YanMenuProps) {
   const konum = useLocation();
   // SEÇİLİ MADDE: talep kartı personel listesinden açıldıysa personel listesi;
@@ -61,46 +56,6 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
   const grupAcikMi = (ad: string, alt: MenuOgesi[]) =>
     ad in acikGruplar ? acikGruplar[ad] : alt.some(m => secili(m.yol));
 
-  // BOLGE ACCORDION (V2): HBYS'de gruplar 7 bolge altinda; ayni anda TEK bolge
-  //   acik, digerleri kapali - menu hicbir zaman bir ekrani asmaz. Kullanici
-  //   secmedikce aktif rotayi iceren bolge acik gelir; hicbiri icermiyorsa
-  //   ilk bolge (Hasta Akisi). Tekrar tiklaninca kapanir ('' = hicbiri).
-  const [acikBolge, setAcikBolge] = useState<string | null>(null);
-  // Satirin bolgesi: grup satiri grup adiyla, grupsuz DUZ oge (Demirbas) kendi
-  //   adiyla bulunur; bolge listesinde olmayan duz oge bolgelerin ustunde kalir.
-  const satirBolgesi = (s: MenuSatiri): MenuBolgesi | undefined =>
-    s.tur === 'grup'
-      // Kurumun tasidigi bolge once (979): menu duzeninde grup baska bolgeye
-      //   alinmissa koddaki harita degil, o gecerli. BOS DIZE = EN UST: grup
-      //   hicbir bolgeye girmez, bolgelerin ustunde kok seviyede cizilir
-      //   (kullanici: "derinlik 2 olan grubu en uste derinlik 1'e alamadim").
-      ? s.bolge === '' ? undefined
-        : (s.bolge ? BOLGE_HBYS.find(b => b.ad === s.bolge) : undefined)
-          ?? grupBolgesi(s.alt.find(m => m.grupHam)?.grupHam)
-      : GRUP_SIRA_HBYS.includes(s.m.adHam ?? '') ? grupBolgesi(s.m.adHam) : undefined;
-  const satirAktifMi = (s: MenuSatiri) => s.tur === 'grup'
-    ? s.alt.some(m => secili(m.yol)) : secili(s.m.yol);
-  const tumBolgeler = bolgeliMenu
-    ? BOLGE_HBYS.map(b => ({ b, satirlar: satirlar.filter(s => satirBolgesi(s)?.ad === b.ad) }))
-      .filter(x => x.satirlar.length > 0)
-    : [];
-  const bolgeAktifMi = (b: MenuBolgesi) =>
-    satirlar.some(s => satirBolgesi(s)?.ad === b.ad && satirAktifMi(s));
-  // TUM BOLGELER GORUNUR (kullanici): calisma-alanina gore bolge gizleme ve
-  //   "Diger bolgeler" satiri kaldirildi - hicbir profilde cikmasin. Bolge
-  //   modu zaten yalniz hastane/tip merkezinde acik (Kabuk: bolgeliMenu);
-  //   orada da tum bolgeler alt alta, accordion ile tek acik durur.
-  const bolgeler = tumBolgeler;
-  // Ayni rota iki bolgede olabilir (Medula Kabul: Kayit Kabul + Medula) - kullanici
-  //   secmediyse ILK aktif bolge acilir; bolge icine her tiklama (grup ya da oge)
-  //   o bolgeyi sabitler, geldigi yer acik kalir.
-  const bolgeAcikMi = (b: MenuBolgesi) => {
-    if (acikBolge !== null) return acikBolge === b.ad;
-    const ilkAktif = bolgeler.find(x => bolgeAktifMi(x.b))?.b.ad ?? bolgeler[0]?.b.ad;
-    return ilkAktif === b.ad;
-  };
-  const bolgeCevir = (b: MenuBolgesi) => setAcikBolge(bolgeAcikMi(b) ? '' : b.ad);
-
   /** Grupsuz duz oge (Ana Sayfa disinda or. Demirbas). */
   const duzCiz = (m: MenuOgesi) => (
     <NavLink key={m.yol} to={m.yol}
@@ -110,10 +65,10 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
       {yildiz(m.yol)}
     </NavLink>
   );
-  /** Grup satiri (acilir-kapanir ana menu + alt gruplari) - bolgeli ve bolgesiz menude ortak. */
+  /** Grup satiri (acilir-kapanir ana menu + alt gruplari). */
   const grupCiz = (s: Extract<MenuSatiri, { tur: 'grup' }>) =>
     // TEK SATIRLIK GRUP (kullanıcı 10.10.2026: Dökümler "tek tıklık giriş"):
-    //   grup bölgedeki yerini korur (sıra, menü düzeni), ama açılır başlık
+    //   grup menüdeki yerini korur (sıra, menü düzeni), ama açılır başlık
     //   yerine doğrudan ekrana giden tek satır çizilir - grup adı ve ikonuyla.
     s.alt.length === 1 && TEK_SATIR_GRUPLAR.has(s.alt[0].grupHam ?? '')
       ? duzCiz({ ...s.alt[0], ad: s.ad, ic: s.ikon ?? GRUP_IKON[s.ad] ?? s.alt[0].ic })
@@ -223,35 +178,8 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                 uzatiyordu. Son kullanim bilgisi DURUYOR - komut paleti
                 (Ctrl+K) siralamasinda kullaniliyor. */}
 
-            {/* "Calisma alani" bolum basligi kaldirildi (kullanici). */}
-            {/* BOLGESIZ (ERP) ya da bolgeye girmeyen duz ogeler. */}
-            {/* BOLGESIZ SATIRLAR USTTE: duz ogeler ve kurumun EN USTE aldigi
-                gruplar (menu duzeni ust baslik = "en ust"). */}
-            {satirlar.filter(s => !bolgeliMenu || !satirBolgesi(s)).map(s => s.tur === 'duz' ? (
-              <NavLink
-                key={s.m.yol}
-                to={s.m.yol}
-                className={() => `mi ${secili(s.m.yol) ? 'on' : ''}`}
-              >
-                <MenuIkon ic={s.m.ic} />
-                <span>{s.m.ad}</span>
-                {yildiz(s.m.yol)}
-              </NavLink>
-            ) : grupCiz(s))}
-
-            {/* BOLGELER (V2, HBYS): renkli baslik + accordion; grup satirlari
-                bolgesiz menuyle AYNI cizimdir (grupCiz). */}
-            {bolgeler.map(({ b, satirlar: alt }) => (
-              <div key={b.ad} onClickCapture={() => { if (bolgeAcikMi(b)) setAcikBolge(b.ad) }}>
-                <button type="button" className="mn-bolge" onClick={() => bolgeCevir(b)}
-                        title={c(bolgeAcikMi(b) ? 'Bölgeyi kapat' : 'Bölgeyi aç')}>
-                  <i style={{ background: b.renk }} />
-                  <span>{cm(b.ad)}</span>
-                  <span className="rz">{bolgeAcikMi(b) ? '▾' : '▸'}</span>
-                </button>
-                {bolgeAcikMi(b) && alt.map(s => s.tur === 'grup' ? grupCiz(s) : duzCiz(s.m))}
-              </div>
-            ))}
+            {/* GRUPLAR VE DUZ OGELER tek seviyede, menu sirasiyla (bolgeler kaldirildi 17.10.2026). */}
+            {satirlar.map(s => s.tur === 'duz' ? duzCiz(s.m) : grupCiz(s))}
             <div className="bolum">{cm('Oturum')}</div>
             <div className="mi" style={{ cursor: 'default' }}>
               <span className="ic">🏢</span>

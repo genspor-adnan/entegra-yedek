@@ -87,11 +87,6 @@ export function Kabuk() {
   const satirlar = useMemo(() => menuDuzeniUygula(kodSatirlari, menuDuzen),
                            [kodSatirlari, menuDuzen]);
 
-  // BOLGE (V2) BASLIKLARI PROFILDEN (905, kullanici: "menü tipini profillere
-  //   kaydet"): "Hasta Akisi"/"Klinikler" gibi bolge basliklari cok bransli
-  //   kurum menusudur. Karar artik kodda degil kurum profilinde (menuBolgeli;
-  //   NULL ise sunucu kurum tipine gore cozer - hastane/tip_merkezi bolgeli).
-  const bolgeliMenu = kullanici?.urunModu === 2 && kullanici?.menuBolgeli === 1;
 
   /**
    * FAVORILER (kullanici): alt menu ogelerinin sagindaki yildiz ☆ tiklaninca
@@ -497,7 +492,7 @@ export function Kabuk() {
 
       <div className="govde">
         {menuGorur && <aside className="yan">
-          <YanMenu satirlar={satirlar} bolgeliMenu={bolgeliMenu} tercih={tercih}
+          <YanMenu satirlar={satirlar} tercih={tercih}
                    panelYetkisi /* ana sayfa herkese (15.10.2026) */ aktifSubeAd={aktifSube?.ad}
                    kullaniciKod={kullanici?.ad || kullanici?.kod} rolAdi={kullanici?.rolAdi}
                    kurumProfilAdi={kullanici?.kurumTipiAdi} />

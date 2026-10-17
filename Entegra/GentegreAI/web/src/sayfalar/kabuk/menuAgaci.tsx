@@ -7,7 +7,7 @@
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
-import { GRUP_SIRA_HBYS } from './menuBolgeleri';
+import { GRUP_SIRA_HBYS } from './menuGrupSirasi';
 import type { LISTELER } from '../Liste';
 
 export interface MenuOgesi {
@@ -58,9 +58,8 @@ export interface MenuOgesi {
  * 18 grup -> 15: Kasa+Banka = Finans · Cari+CRM = Cari & CRM · Dokuman ve
  * Roller Yonetim altina · Mesajlar/AI ust cubuga (arac, is akisi degil).
  */
-// GRUP_SIRA_HBYS artik kabuk/menuBolgeleri.ts'te: HBYS gruplari 7 BOLGE altinda
-//   (V2, mockup Ekranlar/Dashboard/hastane_menu_v2.html); sira bolgelerin
-//   duzlestirilmis halidir, iki yerde bakim edilmez.
+// GRUP_SIRA_HBYS kabuk/menuGrupSirasi.ts'te (bolgeler 17.10.2026'da kaldirildi; sira eski
+//   bolgelerin duzlestirilmis hali olarak korundu).
 
 /**
  * ERP'de sira TICARI AKISTIR: cari -> satis -> alis -> stok -> uretim -> para.
@@ -81,10 +80,7 @@ export type MenuSatiri =
    * tablodan bulunuyor (GRUP_IKON), kurum grubu yeniden adlandırınca eşleşme
    * düşüp varsayılan klasör çiziliyordu.
    */
-  | { tur: 'grup'; ad: string; ikon?: string; alt: MenuOgesi[];
-      /** Menü düzeniyle BAŞKA BÖLGEYE taşındıysa o bölgenin adı (979).
-          Boşsa bölge koddaki haritadan (menuBolgeleri) bulunur. */
-      bolge?: string };
+  | { tur: 'grup'; ad: string; ikon?: string; alt: MenuOgesi[] };
 
 /** Sira korunarak grupla: her benzersiz grup adi ILK gorundugu yerde acilir. */
 /**

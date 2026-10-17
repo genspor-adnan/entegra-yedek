@@ -196,17 +196,6 @@ input, select { font: inherit; color: inherit }
 /* Eczane (781): cizilmis Hygieia kasesi - emoji gibi hizalansin. */
 .ic-eczane { display: inline-flex; align-items: center; justify-content: center }
 .mi .rz { margin-left: auto; font-size: 15px; line-height: 1; color: var(--soluk) }
-/* MENU BOLGESI (V2, kabuk/menuBolgeleri.ts): HBYS gruplarinin ustundeki renkli
-   baslik; tiklaninca bolge acilir, otekiler kapanir. Ekran ACMAZ. */
-.mn-bolge {
-  display: flex; align-items: center; gap: 7px; width: 100%; border: 0; background: transparent;
-  cursor: pointer; text-align: left; margin-top: 6px; padding: 8px 8px 4px;
-  border-top: 1px solid var(--cizgi); font-size: 10px; letter-spacing: .5px;
-  text-transform: uppercase; font-weight: 700; color: var(--soluk);
-}
-.mn-bolge:hover { color: var(--yazi2) }
-.mn-bolge i { width: 8px; height: 8px; border-radius: 2px; flex: none }
-.mn-bolge .rz { margin-left: auto; font-size: 15px; line-height: 1 }
 .mn-diger { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px }
 /* CALISMA ALANI secici (menu V2): sol menude Ana Sayfa'nin altinda kucuk select. */
 .mn-alan { padding-top: 3px; padding-bottom: 3px }

@@ -7,7 +7,6 @@ import type { MenuDuzenSatiri } from '../api/sozlesme';
 import { duzenHaritasi, DUGUM } from '../sayfalar/kabuk/menuDuzenHarita';
 import { menuSatirlariKur } from '../sayfalar/kabuk/menuAgaci';
 import { menuDuzeniUygula } from '../sayfalar/kabuk/menuDuzeni';
-import { grupBolgesi } from '../sayfalar/kabuk/menuBolgeleri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
 import { c as cev } from '../dil/ceviri';
@@ -69,7 +68,7 @@ interface Dugum {
  * ekranlar menüde yok, yetki ağacında da başlık açmazlar.
  */
 function menuHaritasi(urunModu: number, moduller: string[] | undefined,
-                     duzen: MenuDuzenSatiri[], bolgeli: boolean) {
+                     duzen: MenuDuzenSatiri[]) {
   // AKTIF MENÜYE BAĞLI (kullanıcı 06.10.2026): ağaç, kurumun o anda GÖRDÜĞÜ
   //   menüden kurulur - kapalı modülün ekranları hiç çizilmez, kurumun
   //   yeniden adlandırdığı grup/ekran kendi adıyla görünür.
@@ -109,17 +108,7 @@ function menuHaritasi(urunModu: number, moduller: string[] | undefined,
     if (sat.tur !== 'grup') continue;
     const grupAd = sat.ad;
     if (!grupSirasi.includes(grupAd)) grupSirasi.push(grupAd);
-    // BÖLGE: kurum taşıdıysa o, boş dize ise bölgesiz (en üst), yoksa koddaki
-    //   harita - menüyü çizen YanMenu ile aynı kural.
-    if (bolgeli) {
-      const bolgeAd = sat.bolge === '' ? ''
-        : (sat.bolge && sat.bolge.length > 0 ? sat.bolge
-           : grupBolgesi(sat.alt.find(m => m.grupHam)?.grupHam).ad);
-      if (bolgeAd !== '') {
-        grupBolge.set(grupAd, bolgeAd);
-        if (!bolgeSirasi.includes(bolgeAd)) bolgeSirasi.push(bolgeAd);
-      }
-    }
+    // BÖLGELER KALDIRILDI (17.10.2026): matris de menü gibi tek seviye grup; harita boş kalır.
     for (const m of sat.alt) {
       if (!m.yetkiKodu) continue;
       if (m.ic && !grupIkonu.has(grupAd)) grupIkonu.set(grupAd, m.ic);
@@ -154,7 +143,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number,
                 moduller: string[] | undefined, duzen: MenuDuzenSatiri[],
                 bolgeli: boolean): Dugum[] {
   const { harita, grupSirasi, grupIkonu, grupBolge, bolgeSirasi, menuluKodlar } =
-    menuHaritasi(urunModu, moduller, duzen, bolgeli);
+    menuHaritasi(urunModu, moduller, duzen);
   // `d` adı bu fonksiyonda düğüm değişkeni - harita ayrı adla durur.
   const duzenH = duzenHaritasi(duzen);
   const kokler: Dugum[] = [];
@@ -375,10 +364,9 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
   const agac = useMemo(
     () => (satirlar
       ? agacKur(satirlar, kullanici?.urunModu ?? 1, kullanici?.moduller, menuDuzen,
-                kullanici?.urunModu === 2 && kullanici?.menuBolgeli === 1)
+                false)
       : []),
-    [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen,
-     kullanici?.menuBolgeli]);
+    [satirlar, kullanici?.urunModu, kullanici?.moduller, menuDuzen]);
 
   /**
    * AĞACIN YAPI İMZASI: düğüm anahtarlarının birleşimi. Yetki kutusu
