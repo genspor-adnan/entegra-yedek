@@ -596,7 +596,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
-                             title={`${String(r.hekim ?? '')} · ${String(r.bolumAdi ?? '')}`}
+                             title={[r.hizmet, r.gonderen ? `${cev('Gönderen')}: ${String(r.gonderen)}` : '', r.hekim, r.bolumAdi, r.aciklama]
+                                      .map(x => String(x ?? '')).filter(Boolean).join(' · ')}
                              style={{
                                background: Number(r.durum) === 2 ? 'var(--okzem)'
                                           : Number(r.durum) === 3 ? 'var(--hatazem)'
@@ -604,10 +605,13 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                border: '1px solid var(--cizgi)', borderRadius: 4,
                                padding: '2px 6px', marginBottom: 2, fontSize: 11.5,
                              }}>
-                          <b>{String(r.hasta ?? '')}</b>
+                          {/* YAPILACAK İŞLEM hastanın sağında parantezde (kullanıcı 17.10.2026). */}
+                          <b>{String(r.hasta ?? '')}</b>{r.hizmet ? <span style={{ opacity: .85 }}> ({String(r.hizmet)})</span> : null}
                           <div style={{ opacity: .75 }}>
-                            {String(r.saat ?? '')}–{String(r.bitis ?? '')} · {String(r.hekim ?? '')}
+                            {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.hekim ? ` · ${String(r.hekim)}` : ''}
                           </div>
+                          {/* GÖNDEREN (kullanıcı 17.10.2026) - kolon kapalıysa (1121) gelmez. */}
+                          {!!r.gonderen && <div style={{ opacity: .75 }}>↪ {String(r.gonderen)}</div>}
                         </div>
                       ))}
                     </td>
