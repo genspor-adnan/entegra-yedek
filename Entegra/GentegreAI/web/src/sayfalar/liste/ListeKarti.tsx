@@ -591,7 +591,9 @@ export function ListeKarti({
         // Konsültasyon kartı: Kaydet'in üstündeki "Konsültasyon Kartı — Yeni" satırı yok (kullanıcı 15.10.2026).
         // Muayenede başlık satırı yok - sekmesiz (15.10.2026) ve sekmeli (16.10.2026, kullanıcı: "kaydet
         //   butonu ile sekme arasındaki alanı kaldır").
-        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
+        // Randevu kartında da yok (kullanıcı 16.10.2026, aynı istek) - kart adı sekme başlığında.
+        sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'randevu'
+                        || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
