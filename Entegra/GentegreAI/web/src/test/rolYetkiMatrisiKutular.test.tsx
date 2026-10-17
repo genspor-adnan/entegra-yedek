@@ -84,3 +84,17 @@ describe('yetki matrisi kutular', () => {
     expect((kutu(k, 'Hasta Listesi').querySelector('.ym-r.ekle') as HTMLElement).classList.contains('on')).toBe(true);
   });
 });
+
+describe('grup başı düğmesi', () => {
+  it('açık grupta basınca bütün yetkiler kapanır (tam yetkiye geçmez)', async () => {
+    const k = await ciz();
+    const hasta = () => kutu(k, 'Hasta Listesi');
+    await act(async () => { fireEvent.click(hasta().querySelector('.ym-uc')!) });
+    expect((hasta().querySelector('.ym-sat input[type=checkbox]') as HTMLInputElement).checked).toBe(false);
+    expect(hasta().querySelector('.ym-r.on')).toBeNull();
+    // Kapalı grupta basınca yalnız Gör açılır.
+    await act(async () => { fireEvent.click(hasta().querySelector('.ym-uc')!) });
+    expect((hasta().querySelector('.ym-sat input[type=checkbox]') as HTMLInputElement).checked).toBe(true);
+    expect(hasta().querySelector('.ym-r.on')).toBeNull();
+  });
+});

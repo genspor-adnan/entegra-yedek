@@ -673,7 +673,10 @@ const ROZETLER: { ad: Exclude<Sutun, 'gor'>; harf: string; baslik: string }[] = 
  *
  * - Satır başı kutu = Gör; sağdaki E / D / S rozetleri işlemleri açar-kapatır. Gör kapalıyken rozetler
  *   kilitli. Gör kutusu ekranla birlikte aksiyonlarını da açar/kapatır (tablodaki üst düğüm kuralı).
- * - Kutu başı düğme üç adım döner: yok → yalnız gör → tam yetki → yok.
+ * - Kutu başı düğme AÇ / KAPA (kullanıcı 17.10.2026: "yönetim grubunu yetkisiz yapmak istiyorum.. göz
+ *   ikona bastım ama kapanmadı"): grupta açık bir yetki varsa HEPSİNİ kapatır, hiç yoksa yalnız Gör
+ *   verir. Eskiden üç adım dönüyordu (yok → gör → tam): "gör"deki gruba basmak kapatmak yerine tam
+ *   yetki veriyordu. Tam yetki satır rozetlerinden ve toplu şeritten verilir.
  * - Satır adına tıklanınca pencere: bütün işlemler, ekranın aksiyonları, sayısal sınır.
  * - YETKİLİ / YETKİSİZ GRUPLAR: bölüm KAYDEDİLMİŞ duruma (`ilk`) göre seçilir - işaretlerken kutu yer
  *   değiştirmez (tıklanan yer elden kaçmasın); kaydedince ya da rol değişince yerine geçer. Yer
@@ -708,10 +711,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
   };
   const kokCevir = (kok: Dugum) => {
     const y = yapraklar(kok);
-    const s = durum(kok);
-    if (s === 'yok') degistir(idler(y), 'gor', true);
-    else if (s === 'gor') for (const a of ['ekle', 'degistir', 'sil'] as const) degistir(idler(islemli(y)), a, true);
-    else degistir(idler(y), 'gor', false);
+    degistir(idler(y), 'gor', durum(kok) === 'yok');
   };
   const toplu = (sutun: Sutun, deger: boolean) =>
     degistir(idler(sutun === 'gor' ? tumYapraklar : islemli(tumYapraklar)), sutun, deger);
@@ -789,7 +789,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
              : undefined}>
         <div className="ym-kb">
           <button type="button" className={`ym-uc ${s}`} disabled={saltOkunur}
-                  title={cev('Yok → Yalnız gör → Tam yetki')}
+                  title={s === 'yok' ? cev('Grubu aç (yalnız Gör)') : cev('Grubun bütün yetkilerini kapat')}
                   onClick={() => kokCevir(kok)}>{s === 'tam' ? '✔' : s === 'gor' ? '👁' : ''}</button>
           {kok.ic && <MenuIkon ic={kok.ic} />}
           <span>{kok.ad}</span>
@@ -823,7 +823,7 @@ function YetkiKutulari({ agac, ilk, suzgec, saltOkunur, yukleniyor, bos, degisti
             <button type="button" className="d" onClick={() => toplu('degistir', true)}>{cev('Tüm Değiştir')}</button>
             <button type="button" className="d" onClick={() => toplu('sil', true)}>{cev('Tüm Sil')}</button>
             <button type="button" className="d" onClick={() => toplu('gor', false)}>{cev('Hepsini kaldır')}</button>
-            <span className="ym-aks">{cev('Grup başı')}: ☐ {cev('yok')} → 👁 {cev('yalnız gör')} → ✔ {cev('tam yetki')}</span>
+            <span className="ym-aks">{cev('Grup başı düğmesi')}: {cev('açıksa hepsini kapatır, kapalıysa Gör verir')} · 👁 {cev('kısmi')} · ✔ {cev('tam yetki')}</span>
           </>
         )}
         <span className="rozet ok ym-ozet">{acikEkran} / {toplamEkran} {cev('ekran açık')}</span>
