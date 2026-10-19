@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Dosyası v2 (sekmesiz) — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1440px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+
+  .serit{display:flex;gap:14px;align-items:center;padding:9px 14px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;flex:none}
+  .kim .ad{font-size:15px;font-weight:bold;color:var(--navy)}
+  .kim .alt{color:var(--muted);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap}
+  .kim .alt b{color:var(--ink);font-weight:normal}
+
+  /* ÜÇ SÜTUN */
+  .govde{display:grid;grid-template-columns:270px minmax(0,1fr) 300px;min-height:640px}
+  .sol{border-right:1px solid var(--line2);background:#f8fafc;display:flex;flex-direction:column;min-width:0}
+  .orta{min-width:0;display:flex;flex-direction:column}
+  .sag{border-left:1px solid var(--line2);background:#fcfcfd;min-width:0}
+  .bb{padding:7px 10px;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line2);
+    font-weight:bold;color:#2c4a6b;font-size:11px;display:flex;gap:8px;align-items:center}
+  .bb .sp{font-weight:normal;color:var(--muted)}
+
+  /* SOL: kronoloji */
+  .suz{display:flex;gap:4px;padding:6px 8px;flex-wrap:wrap;border-bottom:1px solid var(--line2)}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:10.5px;background:#fff;color:var(--muted);cursor:pointer}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .kro{overflow-y:auto;flex:1;padding:4px 0 10px}
+  .yil{padding:8px 12px 3px;font-weight:bold;color:var(--navy);font-size:11.5px}
+  .gel{position:relative;margin:0 8px 0 18px;padding:7px 9px 7px 14px;border-left:2px solid #d5dfea;cursor:pointer;border-radius:0 4px 4px 0}
+  .gel::before{content:"";position:absolute;left:-7px;top:11px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #2f6db3}
+  .gel.acil::before{border-color:#b3261e} .gel.yatan::before{border-color:#6a3fb5} .gel.devam::before{background:#2f6db3;box-shadow:0 0 0 3px rgba(47,109,179,.2)}
+  .gel:hover{background:#eef4fc}
+  .gel.sec{background:#dfeafa}
+  .gel .t{color:var(--muted);font-size:10.5px;display:flex;gap:6px;align-items:center}
+  .gel .b{font-weight:bold;margin-top:1px}
+  .gel .d{color:#4d5d6e;font-size:10.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ORTA: epikriz */
+  .ep-bas{padding:10px 16px;border-bottom:1px solid var(--line2);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fff}
+  .ep-bas .bas{font-size:14px;font-weight:bold;color:var(--navy)}
+  .ep-bas .alt{color:var(--muted)}
+  .ep{padding:6px 16px 16px;overflow-y:auto}
+  .tl{display:flex;padding:14px 4px 6px;gap:0;overflow-x:auto;border:1px solid #cfe0f5;border-radius:5px;background:linear-gradient(#f7fbff,#fff);margin:10px 0}
+  .ad1{flex:1;min-width:110px;position:relative;text-align:center;padding:0 4px}
+  .ad1::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:3px;background:#cfd9e4}
+  .ad1:first-child::before{display:none}
+  .ad1.bitti::before,.ad1.devam::before{background:#5cb87a}
+  .nok{width:24px;height:24px;border-radius:50%;margin:0 auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
+    font-size:11px;border:3px solid #cfd9e4;background:#fff;color:#8a99a8}
+  .bitti .nok{background:#3f9a5e;border-color:#3f9a5e;color:#fff}
+  .devam .nok{border-color:#2f6db3;color:#2f6db3;animation:nabiz 1.6s infinite}
+  .bekle .nok{border-color:#d9a12b;color:#d9a12b}
+  .uyar .nok{border-color:#b3261e;background:#fbe9e7;color:#b3261e}
+  @keyframes nabiz{0%,100%{box-shadow:0 0 0 3px rgba(47,109,179,.20)}50%{box-shadow:0 0 0 7px rgba(47,109,179,.06)}}
+  .ad1 .ba{font-weight:bold;margin-top:5px;font-size:11px}
+  .ad1 .sa{color:var(--muted);font-size:10px;margin-top:1px}
+  .ad1 .du{margin-top:4px}
+  .bol{margin-top:12px}
+  .bol h4{margin:0 0 5px;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#3a5573;border-bottom:1px solid var(--line2);padding-bottom:3px;display:flex;gap:8px;align-items:center}
+  .bol h4 .sp{font-weight:normal;text-transform:none;letter-spacing:0;color:var(--muted)}
+  .bol p{margin:3px 0;line-height:1.55}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+  .vt{display:flex;gap:6px;flex-wrap:wrap}
+  .vt span{border:1px solid var(--line2);border-radius:4px;padding:4px 9px;background:#fbfcfe}
+  .vt b{display:block;font-size:13px;color:var(--navy)}
+  .vt small{color:var(--muted);font-size:10px}
+  table.k{border-collapse:collapse;width:100%}
+  table.k th{text-align:left;font-size:10.5px;color:var(--muted);font-weight:normal;padding:3px 6px;border-bottom:1px solid var(--line2)}
+  table.k td{padding:4px 6px;border-bottom:1px dashed var(--line2)}
+  .sag-h{text-align:right}
+  .yuk{color:#b3261e;font-weight:bold} .dus{color:#2f6db3;font-weight:bold}
+  .imza{margin-top:14px;padding-top:8px;border-top:1px solid var(--line2);color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+
+  /* SAĞ: dikkat */
+  .dk{padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+  .dkk{border:1px solid var(--line2);border-left:4px solid #9fb2c6;border-radius:4px;padding:6px 9px;background:#fff}
+  .dkk .b{font-weight:bold;display:flex;gap:6px;align-items:center}
+  .dkk .s{color:#4d5d6e;font-size:11px;margin-top:2px;line-height:1.45}
+  .dkk.kir{border-left-color:#b3261e;background:#fffafa} .dkk.kir .b{color:#b3261e}
+  .dkk.sari{border-left-color:#d9a12b;background:#fffdf7} .dkk.sari .b{color:#8a6218}
+  .dkk.mor{border-left-color:#6a3fb5} .dkk.mor .b{color:#6a3fb5}
+  .dkk.mavi{border-left-color:#2f6db3} .dkk.mavi .b{color:#2f6db3}
+  .dkk.yesil{border-left-color:#3f9a5e} .dkk.yesil .b{color:#2e7d46}
+  .dk-baslik{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px 0}
+  .bar{height:5px;background:#e7edf4;border-radius:3px;overflow:hidden;margin-top:5px}
+  .bar i{display:block;height:100%;background:linear-gradient(#4d8fd6,#2f6db3)}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1440px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  @media (max-width:1100px){.govde{grid-template-columns:230px minmax(0,1fr)}.sag{grid-column:1/-1;border-left:none;border-top:1px solid var(--line2)}}
+  @media (max-width:760px){.govde{grid-template-columns:1fr}.sol{max-height:280px}.iki{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📁 Hasta Dosyası — Ercan TEMEL <span class="rz mavi" style="font-weight:normal">v2 · sekmesiz</span><span class="sp">Gentegre AI · Kayıt Kabul · Dosya No 104 233</span></div>
+
+  <div class="toolbar">
+    <button class="btn">✏ Hasta Kartı</button>
+    <button class="btn ok">＋ Yeni Başvuru</button>
+    <button class="btn">📅 Randevu Ver</button>
+    <div class="sepv"></div>
+    <button class="btn">🖨 Bu Gelişi Yazdır (Epikriz)</button>
+    <button class="btn">🖨 Tüm Dosya Özeti</button>
+    <div class="sp"></div>
+    <span class="rz mavi">Erişim loglanır — KVKK</span>
+    <button class="btn">Kapat</button>
+  </div>
+
+  <div class="serit">
+    <div class="avatar">ET</div>
+    <div class="kim">
+      <div class="ad">Ercan TEMEL <span class="rz ok">Aktif</span></div>
+      <div class="alt">
+        <span>TC <b>123•••••146</b></span>
+        <span>Doğum <b>14.03.1979 · 47 y · ♂ E</b></span>
+        <span>Kan <b>A Rh+</b></span>
+        <span>Kurum <b>SGK — 4A</b></span>
+        <span>Tel <b>0532 ••• 12 34</b></span>
+        <span>23 başvuru · ilk 02.06.2019</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="govde">
+    <!-- SOL: KRONOLOJİ (sondan başa) -->
+    <div class="sol">
+      <div class="bb">🕘 Başvurular <span class="sp">yeniden eskiye · 23</span></div>
+      <div class="suz" id="suz">
+        <span class="chip on" data-t="hep">Tümü</span>
+        <span class="chip" data-t="ayak">Ayaktan</span>
+        <span class="chip" data-t="acil">Acil</span>
+        <span class="chip" data-t="yatan">Yatan</span>
+      </div>
+      <div class="kro" id="kro">
+        <div class="yil">2026</div>
+        <div class="gel devam sec" data-g="g1" data-t="ayak"><div class="t">bugün 08:52 <span class="rz mavi">devam</span></div><div class="b">Dahiliye</div><div class="d">Uzm.Dr. Selin KAYA · baş ağrısı, yorgunluk</div></div>
+        <div class="gel" data-g="g2" data-t="ayak"><div class="t">12.08.2026</div><div class="b">Göz</div><div class="d">Op.Dr. Kemal ARI · diyabetik göz taraması</div></div>
+        <div class="gel" data-g="g3" data-t="ayak"><div class="t">03.05.2026</div><div class="b">Dahiliye — kontrol</div><div class="d">Uzm.Dr. Selin KAYA · DM / HT takip</div></div>
+        <div class="yil">2025</div>
+        <div class="gel acil" data-g="g4" data-t="acil"><div class="t">11.11.2025 <span class="rz kir">acil</span></div><div class="b">Acil Servis</div><div class="d">Dr. Onur ÇAM · hipoglisemi</div></div>
+        <div class="gel" data-g="g5" data-t="ayak"><div class="t">07.07.2025</div><div class="b">Gastroenteroloji</div><div class="d">Doç.Dr. Ece TUNA · karın ağrısı</div></div>
+        <div class="yil">2024</div>
+        <div class="gel yatan" data-g="g6" data-t="yatan"><div class="t">18–20.03.2024 <span class="rz mor">yatış</span></div><div class="b">Genel Cerrahi</div><div class="d">Op.Dr. Murat EREN · laparoskopik kolesistektomi</div></div>
+        <div class="yil">2019 – 2023</div>
+        <div class="gel" data-t="ayak" style="cursor:default"><div class="t">17 başvuru daha</div><div class="d"><u>yükle</u></div></div>
+      </div>
+    </div>
+
+    <!-- ORTA: EPİKRİZ -->
+    <div class="orta">
+      <div class="ep-bas" id="epBas"></div>
+      <div class="ep" id="ep"></div>
+    </div>
+
+    <!-- SAĞ: DİKKAT -->
+    <div class="sag">
+      <div class="bb">⚑ Dikkat <span class="sp">hasta geneli + bu geliş</span></div>
+      <div class="dk">
+        <div class="dkk kir"><div class="b">⚠ Alerji — Penisilin (anafilaksi)</div><div class="s">Sülfonamid: döküntü. Reçete / order ekranında engel olarak sorulur.</div></div>
+        <div class="dkk kir"><div class="b">▲ Açlık kan şekeri 168 mg/dL</div><div class="s">Bugün · ref 70–100 · önceki 142. HbA1c sonucu bekleniyor.</div></div>
+        <div class="dkk kir"><div class="b">⏱ Radyoloji raporu gecikti</div><div class="s">PA akciğer · çekim 10:02 · 63 dk (hedef 45). Radyoloğa hatırlatma gönder.</div></div>
+        <div class="dkk sari"><div class="b">▲ Tansiyon 150 / 95</div><div class="s">Son 3 ölçümün 3'ü hedef üstü — Ramipril dozu gözden geçirilebilir.</div></div>
+        <div class="dkk sari"><div class="b">⚠ Hipoglisemi öyküsü</div><div class="s">11.11.2025 acil (KŞ 48). Sülfonilüre başlarken dikkat.</div></div>
+
+        <div class="dk-baslik">Devam eden işler</div>
+        <div class="dkk mavi"><div class="b">🧪 Lab 3 / 5</div><div class="s">HbA1c, TSH · tahmini 11:30</div><div class="bar"><i style="width:60%"></i></div></div>
+        <div class="dkk sari"><div class="b">⏳ EKG sırada</div><div class="s">2 hasta önde · tahmini 10:55</div></div>
+
+        <div class="dk-baslik">Takip / idari</div>
+        <div class="dkk mor"><div class="b">💊 Sürekli ilaç 3 — reçete bitiyor</div><div class="s">Son e-reçete 03.05.2026 (3 ay) → süresi doldu.</div></div>
+        <div class="dkk mavi"><div class="b">📅 Planlı randevu</div><div class="s">04.11.2026 10:20 Dahiliye kontrol</div></div>
+        <div class="dkk yesil"><div class="b">💉 Grip aşısı zamanı</div><div class="s">Son 20.01.2026 — yeni sezon dozu uygun.</div></div>
+        <div class="dkk sari"><div class="b">💳 Açık bakiye 180,00 ₺</div><div class="s">2024 yatış — özel oda farkı.</div></div>
+        <div class="dkk"><div class="b">👪 Acil kişi</div><div class="s">Eşi Melek TEMEL · 0533 ••• 45 67</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Hasta: Ercan TEMEL · Dosya 104 233</span>
+    <span id="durumSec"></span>
+    <span class="sp">Bu ekrana erişim işlem loguna yazılır</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Hasta Dosyası v2 — sekmesiz.</b> Üç sütun:<br>
+  • <b>Sol</b> — başvuruların <b>kronolojisi, yeniden eskiye</b>; yıl başlıkları, tür süzgeci (ayaktan / acil / yatan). Devam eden geliş en üstte, dolu mavi noktayla.<br>
+  • <b>Orta</b> — seçili gelişin <b>epikriz biçiminde</b> tamamı: şikayet, öykü, bulgular, vitaller, tanılar, laboratuvar, görüntüleme, işlemler, reçete, sonuç / plan, hekim imzası. Devam eden gelişte üstte iş akışı zaman çizelgesi; "Bu Gelişi Yazdır" bu bölümü epikriz olarak basar.<br>
+  • <b>Sağ</b> — <b>dikkat paneli</b>: alerji, anormal sonuç, geciken iş, hedef dışı ölçüm, riskli öykü; altında devam eden işler ve takip / idari hatırlatmalar. Kırmızı = hemen bak, sarı = gözden geçir, mor / mavi / yeşil = bilgi. Sunucu kurallarla üretir; ekran hesaplamaz.<br>
+  • Görünen bölümler yetkiye göre gelir (ör. mali bilgi yetkisiz kullanıcıda yok). v1 (sekmeli) <code>hasta_dosyasi.html</code>.
+</div>
+
+<script>
+const G = {
+  g1: { bas: 'Dahiliye — Ayaktan', alt: 'bugün 08:52 · Uzm.Dr. Selin KAYA · Başvuru 2026-48 113 · SGK takip 9F3K21', rz: '<span class="rz mavi">Devam ediyor</span>',
+    tl: [['bitti','✓','Kayıt / Provizyon','08:52','<span class="rz ok">Tamam</span>'],['bitti','✓','Muayene','09:14','<span class="rz ok">Tamam</span>'],
+         ['devam','🧪','Laboratuvar','09:40 numune','<span class="rz mavi">3/5</span>'],['bekle','⏳','EKG','istem 09:33','<span class="rz sari">Sırada</span>'],
+         ['uyar','!','Radyoloji','10:02 çekim','<span class="rz kir">Rapor gecikti</span>'],['','○','Sonuç Kontrol','planlı','<span class="rz pas">Bekliyor</span>'],
+         ['','○','Reçete / Çıkış','—','<span class="rz pas">Bekliyor</span>']],
+    govde: `
+    <div class="bol"><h4>Şikayet</h4><p>3 gündür baş ağrısı, halsizlik, yorgunluk.</p></div>
+    <div class="bol"><h4>Hikaye</h4><p>Tip 2 DM (2021) ve HT (2022) tanılı. Son 1 haftadır sabah ölçümlerinde TA 150/95 civarı. İlaç uyumu iyi olduğunu belirtiyor. Göğüs ağrısı, nefes darlığı yok.</p></div>
+    <div class="bol"><h4>Vitaller <span class="sp">09:10 · Hem. Esra KOÇ</span></h4><div class="vt">
+      <span><small>TA</small><b class="yuk">150/95</b></span><span><small>Nabız</small><b>82</b></span><span><small>Ateş</small><b>36,6</b></span>
+      <span><small>SpO₂</small><b>%97</b></span><span><small>Kilo</small><b>91 kg</b></span><span><small>VKİ</small><b>28,7</b></span></div></div>
+    <div class="bol"><h4>Fizik muayene</h4><p>Genel durum iyi, bilinç açık. Kardiyak: ritmik, ek ses / üfürüm yok. Akciğer: bilateral solunum sesleri doğal. Nörolojik: defisit yok.</p></div>
+    <div class="bol"><h4>Tanılar</h4><table class="k"><tr><th>ICD-10</th><th>Tanı</th><th>Tür</th></tr>
+      <tr><td>R51</td><td>Baş ağrısı</td><td><span class="rz mavi">Ön</span></td></tr>
+      <tr><td>I10</td><td>Esansiyel hipertansiyon</td><td><span class="rz kir">Kronik</span></td></tr>
+      <tr><td>E11</td><td>Tip 2 diabetes mellitus</td><td><span class="rz kir">Kronik</span></td></tr></table></div>
+    <div class="bol"><h4>Laboratuvar <span class="sp">numune 09:40 · 3 / 5 sonuçlandı</span></h4><table class="k">
+      <tr><th>Test</th><th class="sag-h">Sonuç</th><th class="sag-h">Önceki</th><th>Referans</th></tr>
+      <tr><td>Açlık kan şekeri</td><td class="sag-h yuk">168 ▲</td><td class="sag-h">142</td><td>70–100 mg/dL</td></tr>
+      <tr><td>LDL</td><td class="sag-h">96</td><td class="sag-h">118</td><td>&lt;100 mg/dL</td></tr>
+      <tr><td>Hemoglobin</td><td class="sag-h">14,6</td><td class="sag-h">14,9</td><td>13,5–17,5 g/dL</td></tr>
+      <tr><td>HbA1c</td><td class="sag-h"><span class="rz mavi">çalışılıyor</span></td><td class="sag-h">7,4</td><td>&lt;6,5 %</td></tr>
+      <tr><td>TSH</td><td class="sag-h"><span class="rz mavi">çalışılıyor</span></td><td class="sag-h">2,1</td><td>0,4–4,0</td></tr></table></div>
+    <div class="bol"><h4>Görüntüleme / Tetkik</h4><table class="k"><tr><th>Tetkik</th><th>Durum</th><th>Sonuç</th></tr>
+      <tr><td>Akciğer grafisi PA</td><td><span class="rz kir">Rapor gecikti</span></td><td>—</td></tr>
+      <tr><td>EKG</td><td><span class="rz sari">Sırada</span></td><td>—</td></tr></table></div>
+    <div class="bol"><h4>Plan</h4><p>Sonuçlar tamamlanınca kontrol muayenesi. HbA1c'ye göre tedavi düzenlemesi; TA takibi. Sürekli ilaç reçetesi yenilenecek.</p></div>
+    <div class="imza"><span>Hekim: Uzm.Dr. Selin KAYA (Dahiliye)</span><span>Muayene 09:14 – 09:31</span><span>Taslak — geliş kapanınca epikriz kesinleşir</span></div>` },
+  g2: { bas: 'Göz — Ayaktan', alt: '12.08.2026 · Op.Dr. Kemal ARI · Başvuru 2026-31 402', rz: '<span class="rz ok">Kapandı</span>', govde: `
+    <div class="bol"><h4>Şikayet</h4><p>Diyabetik göz taraması (dahiliye sevki).</p></div>
+    <div class="bol"><h4>Muayene</h4><div class="iki"><p><b>Görme keskinliği:</b> Sağ 1,0 · Sol 0,9</p><p><b>GİB:</b> Sağ 15 · Sol 16 mmHg</p>
+      <p><b>Ön segment:</b> doğal</p><p><b>Fundus (dilate):</b> diyabetik retinopati yok</p></div></div>
+    <div class="bol"><h4>Tanılar</h4><table class="k"><tr><td>E11.3</td><td>DM — göz komplikasyonu taraması (bulgu yok)</td></tr></table></div>
+    <div class="bol"><h4>Plan</h4><p>1 yıl sonra kontrol (randevu 12.08.2027 verildi).</p></div>
+    <div class="imza"><span>Hekim: Op.Dr. Kemal ARI</span><span>Epikriz kesin</span></div>` },
+  g3: { bas: 'Dahiliye — Kontrol', alt: '03.05.2026 · Uzm.Dr. Selin KAYA · Başvuru 2026-17 088', rz: '<span class="rz ok">Kapandı</span>', govde: `
+    <div class="bol"><h4>Şikayet</h4><p>DM / HT rutin kontrol, şikayeti yok.</p></div>
+    <div class="bol"><h4>Vitaller</h4><div class="vt"><span><small>TA</small><b class="yuk">145/90</b></span><span><small>Nabız</small><b>78</b></span><span><small>Kilo</small><b>92 kg</b></span></div></div>
+    <div class="bol"><h4>Laboratuvar</h4><table class="k"><tr><th>Test</th><th class="sag-h">Sonuç</th><th>Referans</th></tr>
+      <tr><td>HbA1c</td><td class="sag-h yuk">7,4 ▲</td><td>&lt;6,5 %</td></tr><tr><td>Açlık kan şekeri</td><td class="sag-h yuk">142 ▲</td><td>70–100</td></tr>
+      <tr><td>Kreatinin</td><td class="sag-h">0,94</td><td>0,7–1,2</td></tr><tr><td>LDL</td><td class="sag-h yuk">118 ▲</td><td>&lt;100</td></tr></table></div>
+    <div class="bol"><h4>Reçete <span class="sp">e-Reçete 3K9-22F · 3 ay</span></h4><table class="k">
+      <tr><td>Metformin 1000 mg</td><td>2×1</td></tr><tr><td>Ramipril 5 mg</td><td>1×1</td></tr><tr><td>Atorvastatin 20 mg</td><td>1×1 akşam</td></tr></table></div>
+    <div class="bol"><h4>Plan</h4><p>Diyet, egzersiz. 6 ay sonra kontrol; göz taraması için sevk.</p></div>
+    <div class="imza"><span>Hekim: Uzm.Dr. Selin KAYA</span><span>Epikriz kesin</span></div>` },
+  g4: { bas: 'Acil Servis', alt: '11.11.2025 02:14 · Dr. Onur ÇAM · Başvuru 2025-44 910 · Triyaj: Sarı', rz: '<span class="rz ok">Taburcu</span>', govde: `
+    <div class="bol"><h4>Şikayet</h4><p>Gece terleme, titreme, bilinç bulanıklığı (eşi getirdi).</p></div>
+    <div class="bol"><h4>Bulgular</h4><div class="vt"><span><small>Kan şekeri</small><b class="dus">48 ▼</b></span><span><small>TA</small><b>130/80</b></span><span><small>Nabız</small><b>108</b></span><span><small>GKS</small><b>14</b></span></div></div>
+    <div class="bol"><h4>Tanılar</h4><table class="k"><tr><td>E16.0</td><td>İlaca bağlı hipoglisemi</td></tr></table></div>
+    <div class="bol"><h4>İşlemler</h4><p>IV %20 dekstroz 100 mL, ardından %5 dekstroz infüzyonu. 4 saat gözlem; kontrol KŞ 112 → 134.</p></div>
+    <div class="bol"><h4>Çıkış</h4><p>Taburcu. Akşam öğününü atlamaması, glukagon kiti reçete edildi. Dahiliye kontrolü önerildi.</p></div>
+    <div class="imza"><span>Hekim: Dr. Onur ÇAM (Acil)</span><span>Gözlem 02:20 – 06:35</span></div>` },
+  g5: { bas: 'Gastroenteroloji', alt: '07.07.2025 · Doç.Dr. Ece TUNA · Başvuru 2025-27 551', rz: '<span class="rz ok">Kapandı</span>', govde: `
+    <div class="bol"><h4>Şikayet</h4><p>Yemek sonrası şişkinlik, sağ üst kadranda hafif ağrı.</p></div>
+    <div class="bol"><h4>Görüntüleme</h4><table class="k"><tr><td>Batın USG</td><td>Grade 1 hepatosteatoz; safra kesesi opere</td></tr></table></div>
+    <div class="bol"><h4>Laboratuvar</h4><table class="k"><tr><td>ALT</td><td class="sag-h yuk">52 ▲</td><td>&lt;41</td></tr><tr><td>AST</td><td class="sag-h">34</td><td>&lt;40</td></tr></table></div>
+    <div class="bol"><h4>Tanılar</h4><table class="k"><tr><td>K76.0</td><td>Yağlı karaciğer</td></tr></table></div>
+    <div class="bol"><h4>Plan</h4><p>Kilo verme, diyet. 6 ayda karaciğer enzimleri.</p></div>
+    <div class="imza"><span>Hekim: Doç.Dr. Ece TUNA</span><span>Epikriz kesin</span></div>` },
+  g6: { bas: 'Genel Cerrahi — Yatış', alt: '18.03.2024 – 20.03.2024 · Op.Dr. Murat EREN · 2 gün · Servis 3B / 12', rz: '<span class="rz ok">Taburcu</span>', govde: `
+    <div class="bol"><h4>Yatış nedeni</h4><p>Semptomatik kolelitiazis (USG: 14 mm taş), tekrarlayan biliyer kolik.</p></div>
+    <div class="bol"><h4>Ameliyat <span class="sp">18.03.2024 10:40 – 11:35</span></h4><p>Laparoskopik kolesistektomi. Genel anestezi (ASA II). Komplikasyon yok. Patoloji: kronik kolesistit.</p></div>
+    <div class="bol"><h4>Servis seyri</h4><p>Postop 1. gün oral başlandı, ağrı kontrolü iyi. Dren 2. gün çekildi.</p></div>
+    <div class="bol"><h4>Tanılar</h4><table class="k"><tr><td>K80.2</td><td>Kolesistit olmadan safra kesesi taşı</td></tr></table></div>
+    <div class="bol"><h4>Taburcu reçetesi</h4><table class="k"><tr><td>Parasetamol 500 mg</td><td>3×1, 5 gün</td></tr><tr><td>Lansoprazol 30 mg</td><td>1×1, 14 gün</td></tr></table></div>
+    <div class="bol"><h4>Öneriler</h4><p>7. gün pansuman / dikiş kontrolü. 2 hafta ağır kaldırmama.</p></div>
+    <div class="imza"><span>Sorumlu hekim: Op.Dr. Murat EREN</span><span>Epikriz kesin · e-Nabız gönderildi</span></div>` },
+};
+function goster(k) {
+  const g = G[k]; if (!g) return;
+  document.querySelectorAll('.gel').forEach(x => x.classList.toggle('sec', x.dataset.g === k));
+  document.getElementById('epBas').innerHTML = `<span class="bas">${g.bas}</span>${g.rz}<span class="alt">${g.alt}</span>`;
+  const tl = g.tl ? '<div class="tl">' + g.tl.map(([s, n, b, t, d]) =>
+    `<div class="ad1 ${s}"><div class="nok">${n}</div><div class="ba">${b}</div><div class="sa">${t}</div><div class="du">${d}</div></div>`).join('') + '</div>' : '';
+  document.getElementById('ep').innerHTML = tl + g.govde;
+  document.getElementById('durumSec').textContent = 'Seçili geliş: ' + g.alt.split(' · ')[0];
+}
+document.querySelectorAll('.gel[data-g]').forEach(x => x.onclick = () => goster(x.dataset.g));
+document.querySelectorAll('#suz .chip').forEach(c => c.onclick = () => {
+  document.querySelectorAll('#suz .chip').forEach(x => x.classList.toggle('on', x === c));
+  document.querySelectorAll('#kro .gel').forEach(o => o.hidden = c.dataset.t !== 'hep' && o.dataset.t !== c.dataset.t);
+});
+goster('g1');
+</script>
+</body>
+</html>
