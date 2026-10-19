@@ -11,5 +11,7 @@ public static partial class AksiyonKatalogu
     {
         s["kys-egitim-liste"] = Crud("kys-egitim", "kys", "kys.egitim", ekleAdi: "＋ Eğitim Kaydı", sil: false);
         s["kys-zorunlu-egitim-liste"] = Crud("kys-zorunlu-egitim", "kys", "kys.egitim", ekleAdi: "＋ Zorunlu Eğitim", yazdir: false, silHedef: null);
+        // PERSONEL BELGE TAKİBİ (1135): belge türü tanımları.
+        s["personel-belge-turu-liste"] = Crud("personel-belge-turu", "ik", "ik.belge_takip", ekleAdi: "＋ Belge Türü", yazdir: false, silHedef: null);
     }
 }

@@ -473,6 +473,29 @@ public static partial class KartKatalogu
                 new("tarih",       "tarih",       "metin", EnFazlaUzunluk: 10, Baslik: "Tarih/Yıl"),
                 new("gecerlilik",  "gecerlilik",  "metin", EnFazlaUzunluk: 60, Baslik: "Geçerlilik")
             }, Sirala: "tarih desc nulls last, id desc", LogTabloId: 905, Baslik: "Eğitim / Sertifika"),
+            // BELGE TAKİBİ (1135, mockup Ekranlar/IK/personel_belge_takibi.html): elindeki özlük belgeleri.
+            //   Geçerlilik boş bırakılırsa belge tarihi + türün süresi (tetik).
+            new DetayTanimi("belgeler", "public.personel_belge", "taraf_id", new KartAlani[]
+            {
+                new("id",               "id",                "sayi",  Yazilabilir: false),
+                new("belgeTuruId",      "belge_turu_id",     "kod",   KodTablosu: "public.v_personel_belge_turu_lookup", Baslik: "Belge", Zorunlu: true),
+                new("belgeTarihi",      "belge_tarihi",      "tarih", Baslik: "Belge tarihi"),
+                new("gecerlilikTarihi", "gecerlilik_tarihi", "tarih", Baslik: "Geçerlilik (boş = türden)"),
+                new("belgeNo",          "belge_no",          "metin", EnFazlaUzunluk: 60, Baslik: "Belge no"),
+                new("aciklama",         "aciklama",          "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama"),
+            }, Sirala: "belge_tarihi desc nulls last, id desc", LogTabloId: LogPersonelBelge, Baslik: "Belgeler"),
+            // DURUM (salt okunur): şablona göre eksik / süresi doldu / yaklaşıyor / tamam.
+            new DetayTanimi("belgeDurumu", "public.v_personel_belge_durum", "personel_id", new KartAlani[]
+            {
+                new("id",               "id",                "sayi",  Yazilabilir: false),
+                new("grupAdi",          "grup_adi",          "metin", Yazilabilir: false, Baslik: "Grup"),
+                new("belge",            "belge",             "metin", Yazilabilir: false, Baslik: "Belge"),
+                new("zorunlu",          "zorunlu",           "mantik", Yazilabilir: false, Baslik: "Zorunlu"),
+                new("durumAdi",         "durum_adi",         "metin", Yazilabilir: false, Baslik: "Durum"),
+                new("belgeTarihi",      "belge_tarihi",      "tarih", Yazilabilir: false, Baslik: "Belge tarihi"),
+                new("gecerlilikTarihi", "gecerlilik_tarihi", "tarih", Yazilabilir: false, Baslik: "Geçerlilik"),
+                new("kalanGun",         "kalan_gun",         "sayi",  Yazilabilir: false, Baslik: "Kalan gün"),
+            }, Sirala: "durum, grup, belge", SubeKolonu: null, SaltOkunur: true, Baslik: "Belge Durumu"),
             // HEKIMIN RANDEVU DUZENI SEKMESI KALDIRILDI: randevu saatleri artik
             //   CALISMA PLANINDAN gelir (hekim_calisma_sablon) - randevu_bolum_ayar
             //   satirlari yalniz plani olmayan doktorun eski yedek duzenidir.

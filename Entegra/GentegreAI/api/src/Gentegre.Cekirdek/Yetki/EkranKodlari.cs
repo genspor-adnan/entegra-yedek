@@ -309,6 +309,7 @@ public static partial class EkranKodlari
         ["ik.masraf.liste"] = "ik.masraf",
         ["ik.belge_talep.liste"] = "ik.belge_talep",
         ["ik.tatil.liste"] = "ik.tatil",
+        ["ik.belge_takip.liste"] = "ik.belge_takip",   // personel belge takibi (1135)
         ["ik.izin_hak.liste"] = "ik.izin_hak",
         ["kullanici.liste"] = "kullanici",
         ["personel.liste"] = "personel",

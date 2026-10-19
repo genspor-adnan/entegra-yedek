@@ -169,6 +169,7 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'ik.masraf.liste': 'ik.masraf',
   'ik.belge_talep.liste': 'ik.belge_talep',
   'ik.tatil.liste': 'ik.tatil',
+  'ik.belge_takip.liste': 'ik.belge_takip',
   'ik.izin_hak.liste': 'ik.izin_hak',
   'kullanici.liste': 'kullanici',
   'personel.liste': 'personel',

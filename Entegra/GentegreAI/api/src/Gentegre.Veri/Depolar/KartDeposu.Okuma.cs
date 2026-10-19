@@ -329,6 +329,8 @@ public sealed partial class KartDeposu
             "public.v_departman_agac_lookup",
             // Personel gorevi (255) - departmana bagli combo.
             "public.v_gorev_lookup",
+            // Personel belge turu (1135) - personel kartı Belgeler sekmesi.
+            "public.v_personel_belge_turu_lookup",
             // GOREV AGACI (570/571): ust_id GERCEK ust gorevi tasir;
             //   v_gorev_lookup ise departmani gosterir - iki ayri soru.
             "public.v_gorev_agac_lookup",

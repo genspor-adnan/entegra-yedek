@@ -48,6 +48,7 @@ import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
 import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
 import { KYS_AYAR_LISTELERI } from './listeTanimlari.KysAyar';
 import { KYS_EGITIM_LISTELERI } from './listeTanimlari.KysEgitim';
+import { PERSONEL_BELGE_LISTELERI } from './listeTanimlari.PersonelBelge';
 import { KYS_KALIBRASYON_LISTELERI } from './listeTanimlari.KysKalibrasyon';
 import { KYS_PANO_LISTELERI } from './listeTanimlari.KysPano';
 import { KYS_TEDARIKCI_LISTELERI } from './listeTanimlari.KysTedarikci';
@@ -143,6 +144,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...KYS_PANO_LISTELERI,
   ...KYS_KALIBRASYON_LISTELERI,
   ...KYS_EGITIM_LISTELERI,
+  ...PERSONEL_BELGE_LISTELERI,
   ...KYS_AYAR_LISTELERI,
   ...AMELIYATHANE_LISTELERI,
   ...ACIL_LISTELERI,
