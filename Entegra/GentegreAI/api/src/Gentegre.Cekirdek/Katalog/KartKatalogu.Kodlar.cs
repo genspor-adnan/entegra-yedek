@@ -93,6 +93,8 @@ public static partial class KartKatalogu
             ["SKRS"]   = "SKRS / Sağlık.NET Kod Sunucusu",
             ["ENABIZ"] = "e-Nabız",
             ["MEDULA"] = "MEDULA (SGK)",
+            // KPS (19.10.2026): NVİ Kimlik Paylaşım Sistemi - hasta kartında "MERNİS'ten getir".
+            ["KPS"]    = "KPS / MERNİS (NVİ Kimlik Paylaşım)",
             ["SMS"]    = "SMS Sağlayıcı",
             // E-POSTA (SMTP) AYRI BIR KOD: bildirim kuyrugu saglayiciyi
             //   `ayarlar.bildirim_kanal` ile buluyor ama kod, listede hangi
@@ -108,7 +110,7 @@ public static partial class KartKatalogu
     /// hem kart metasi hem kaydetme kurali bunu okur.
     /// </summary>
     public static readonly IReadOnlySet<string> SaglikEntegrasyonlari =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA" };
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA", "KPS" };
 
     /// <summary>Urun moduna gore gecerli entegrasyon kodlari (342).</summary>
     /// Mod 3 ("ikisi") saglik kodlarini da icerir (492).

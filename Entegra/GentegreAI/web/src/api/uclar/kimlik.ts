@@ -43,6 +43,14 @@ export const kimlikUclari = {
    */
   marka: () => istek<{ urunModu: number; kurumAdi?: string; logoVar?: boolean }>('/api/kimlik/marka'),
   /** HIZLI BUL (16.10.2026): Ctrl+K'ya yazılan numarayla kayıt (dosya / TC / protokol / muayene / reçete / rapor / lab no). */
+  /** MERNİS / KPS (19.10.2026): kanal (kps / sgk / simulasyon / yok), kimlikten getir, NVİ doğrulama. */
+  mernisDurum: () => istek<{ kanal: string; aciklama: string }>('/api/mernis/durum'),
+  mernisGetir: (kimlikNo: string) =>
+    gonder<{ kanal: string; aciklama: string; kimlikNo: string; ad: string; soyad: string; dogumTarihi: string | null;
+             cinsiyet: string; babaAdi: string; anaAdi: string; dogumYeri: string; simulasyon: boolean }>(
+      '/api/mernis/getir', { kimlikNo }),
+  mernisDogrula: (govde: { kimlikNo: string; ad: string; soyad: string; dogumYili: number }) =>
+    gonder<{ dogru: boolean | null; ulasilamadi: boolean }>('/api/mernis/dogrula', govde),
   /** Cümle komutu ("Ercan Temel başvuru kartı aç"): hastanın o modüldeki EN SON kaydı. */
   hizliBulSon: (ad: string, modul: string) =>
     istek<{ sonuc: { tur: string; id: number; altId: number; ad: string; bilgi: string } | null }>(

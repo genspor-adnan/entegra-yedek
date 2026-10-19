@@ -1000,6 +1000,45 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     return parcalar.join('   ');
   }, [detaylar.ozluk]);
 
+  /** MERNİS'TEN GETİR (19.10.2026): kart alanları + özlük (doğum, cinsiyet, anne / baba adı, doğum yeri). */
+  const [mernisYuk, setMernisYuk] = useState(false);
+  const mernisGetir = async () => {
+    const tc = String(deger.vkno ?? '').trim();
+    if (!/^\d{11}$/.test(tc)) { setHata(c('Önce 11 haneli kimlik no girin.')); return }
+    setMernisYuk(true); setHata(null);
+    try {
+      const k = await api.mernisGetir(tc);
+      alanDegistir('ad', k.ad); alanDegistir('soyad', k.soyad);
+      setDetaylar(t => {
+        const d = t.ozluk ?? bosDetay();
+        const s0 = d.guncel[0] ?? {};
+        const dolu = (v: string | null | undefined, eski: unknown) => (v ? v : eski) as Satir[string];
+        const yeni = { ...s0, dogumTarihi: dolu(k.dogumTarihi, s0.dogumTarihi), cinsiyet: dolu(k.cinsiyet, s0.cinsiyet),
+                       babaAdi: dolu(k.babaAdi, s0.babaAdi), anaAdi: dolu(k.anaAdi, s0.anaAdi),
+                       dogumYeri: dolu(k.dogumYeri, s0.dogumYeri) };
+        return { ...t, ozluk: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
+      });
+      await bilgiMesaji(k.simulasyon
+        ? c('SİMÜLASYON verisi getirildi (demo / eğitim kurulumu) - gerçek kişi değildir. Kaydetmeden önce kontrol edin.')
+        : `${k.aciklama}: ${c('kimlik bilgileri getirildi. Kaydetmeden önce kontrol edin.')}`);
+    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
+  };
+  /** KİMLİĞİ DOĞRULA (NVİ herkese açık servis): kimlik no + ad + soyad + doğum yılı eşleşiyor mu. */
+  const mernisDogrula = async () => {
+    const tc = String(deger.vkno ?? '').trim();
+    const yil = Number(String((detaylar.ozluk?.guncel[0]?.dogumTarihi as string | undefined) ?? '').slice(0, 4));
+    if (!/^\d{11}$/.test(tc) || !String(deger.ad ?? '').trim() || !String(deger.soyad ?? '').trim() || !yil) {
+      setHata(c('Doğrulama için kimlik no, ad, soyad ve doğum tarihi gerekli.')); return
+    }
+    setMernisYuk(true); setHata(null);
+    try {
+      const s = await api.mernisDogrula({ kimlikNo: tc, ad: String(deger.ad), soyad: String(deger.soyad), dogumYili: yil });
+      await bilgiMesaji(s.ulasilamadi ? c('NVİ doğrulama servisine şu an ulaşılamadı - daha sonra yeniden deneyin.')
+        : s.dogru ? c('✔ Kimlik bilgileri NVİ kayıtlarıyla uyuşuyor.')
+        : c('✖ Kimlik bilgileri NVİ kayıtlarıyla UYUŞMUYOR - kimlik no, ad, soyad ve doğum yılını kontrol edin.'));
+    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
+  };
+
   const kimlikAlanlari = useMemo(
     () => {
       const grup = gruplar.find(([ad]) => ad === KIMLIK_GRUP)?.[1] ?? [];
@@ -2054,17 +2093,26 @@ Yine de yeni kayıt eklensin mi?`);
               servisler henuz bagli DEGIL, dugmeler yerlesimde duruyor ve
               basilinca bunu acikca soyluyor - sessizce hicbir sey yapmayan
               bir dugme, bozuk bir dugmeden daha kotu. */}
+          {/* MERNİS / KPS (kullanıcı 19.10.2026: "yeni hasta kartı bilgilerini MERNİS'ten getirebilmemiz
+              lazım"): YENİ kartta da. Getir kimlik nodan ad / soyad / doğum / cinsiyet / anne-baba adı /
+              doğum yerini doldurur (kanal sunucuda: KPS → SGK → benzetim); Doğrula elle girileni NVİ'ye
+              denetletir. Salt okunur kartta yok. */}
+          {kaynak === 'hasta' && !salt && (
+            <>
+              <button className="d" type="button" disabled={mernisYuk}
+                      title={c('Kimlik nodan ad, soyad, doğum tarihi / yeri, cinsiyet ve anne / baba adını getirir')}
+                      onClick={() => void mernisGetir()}>
+                🆔 {mernisYuk ? c('Getiriliyor…') : c('MERNİS\'ten getir')}
+              </button>
+              <button className="d" type="button" disabled={mernisYuk}
+                      title={c('Kimlik no, ad, soyad ve doğum yılını NVİ kayıtlarıyla doğrular')}
+                      onClick={() => void mernisDogrula()}>
+                ✔ {c('Kimliği doğrula')}
+              </button>
+            </>
+          )}
           {kaynak === 'hasta' && !yeniMi && (
             <>
-              {/* YETKİ (kullanıcı 17.10.2026: "hasta kartını da kontrol et"): MERNİS kimliği GÜNCELLER -
-                  salt okunur kartta yok; Yeni Başvuru Başvuru Kartı'nın EKLE hakkına bağlı. */}
-              {!salt && (
-                <button className="d" type="button"
-                        title={c('Kimlik bilgilerini MERNİS\'ten günceller')}
-                        onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
-                  MERNİS'ten getir
-                </button>
-              )}
               <button className="d" type="button"
                       title={c('SGK provizyon / müstehaklık sorgusu')}
                       onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>

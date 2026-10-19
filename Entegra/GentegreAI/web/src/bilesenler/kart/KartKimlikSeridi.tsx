@@ -148,6 +148,9 @@ export function KartKimlikSeridi({
                   </select>
                 </label>
               )}
+              {/* HASTADA KİMLİK NO EN BAŞTA (kullanıcı 19.10.2026: "kartta kimlik no ile ad soyad yer
+                  değişse daha iyi") - önce kimlik no yazılır, "MERNİS'ten getir" ad / soyadı doldurur. */}
+              {kaynak === 'hasta' && renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'vkno'))}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
                 && !(kaynak === 'hasta' && a.ad === 'kod')
@@ -168,7 +171,8 @@ export function KartKimlikSeridi({
               {/* DURUM burada DEGIL, seridin EN SAGINDA (kullanici) - once
                   kimlik alanlari okunur, durum kartin ozeti olarak sona kalir. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
-                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}
+                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)
+                && !(kaynak === 'hasta' && a.ad === 'vkno')))}
               {/* DOGUM TARIHI / YAS - TC No'nun saginda, SALT OKUNUR
                   (kullanici): uc bilgi tek hucrede "14.03.1979 ♂ E 47 y".
                   Kaynak ozluk detayi; duzenlemesi Kimlik Bilgileri kutusunda -

@@ -153,6 +153,9 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberModeli>();
 // ODEME (934): iyzico Odeme Formu - anahtarlar IYZICO_API_KEY / IYZICO_SECRET_KEY ya da
 //   gizli/iyzico-anahtar.txt; Odeme:Saglayici = iyzico | simulasyon (varsayilan).
 kurucu.Services.AddHttpClient("odeme");
+// MERNİS / KPS (19.10.2026): NVİ herkese açık doğrulama + (ileride) KPS. Dış servis - kısa zaman aşımı.
+kurucu.Services.AddHttpClient("mernis", i => i.Timeout = TimeSpan.FromSeconds(15));
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MernisServisi>();
 kurucu.Services.AddSingleton(kurucu.Configuration.GetSection("Odeme:Iyzico")
     .Get<Gentegre.Api.Servisler.IyzicoSecenekleri>() ?? new Gentegre.Api.Servisler.IyzicoSecenekleri());
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IyzicoIstemcisi>();
@@ -382,6 +385,7 @@ uygulama.GelenBelgeUclariniEkle();
 uygulama.EFaturaUclariniEkle();
 uygulama.EFaturaIcmalUclariniEkle();
 uygulama.CeviriUclariniEkle();
+uygulama.MernisUclariniEkle();     // MERNİS / KPS - hasta kartında kimlikten getir / doğrula (19.10.2026)
 uygulama.HizliBulUclariniEkle();   // Ctrl+K kayıt numarasıyla açma (16.10.2026)
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
