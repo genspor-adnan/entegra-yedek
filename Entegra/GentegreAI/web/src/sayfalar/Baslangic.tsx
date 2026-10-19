@@ -16,6 +16,7 @@ import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabu
 import { LISTELER } from './Liste';
 import { kartAdi, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
 import { SekmeGorunurBaglami } from '../bilesenler/sekmeBaglami';
+import { MikrofonIkon } from '../bilesenler/MikrofonIkon';
 
 /** Başlangıç'taki büyük arama kutusu Kabuk'un komut paletini açar. */
 export const PALET_AC_OLAYI = 'gentegre-palet-ac';
@@ -290,7 +291,7 @@ export function Baslangic() {
           <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
             🔍 <span>{c('Ne açmak istiyorsunuz?')}</span><kbd>Ctrl K</kbd>
             {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}
-                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}>🎤</span>}
+                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}><MikrofonIkon /></span>}
           </button>
           {ustSerit(4)}
           <div className="bsl-bolum">{c('Ekranlarım')}</div>
@@ -320,7 +321,7 @@ export function Baslangic() {
         <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
           🔍 <span>{c('Ne açmak istiyorsunuz? (ekran, hasta, gösterge paneli…)')}</span><kbd>Ctrl K</kbd>
           {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}
-                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}>🎤</span>}
+                onClick={e => { e.stopPropagation(); window.dispatchEvent(new Event(PALET_SESLI_OLAYI)) }}><MikrofonIkon /></span>}
         </button>
 
         {ustSerit(8)}

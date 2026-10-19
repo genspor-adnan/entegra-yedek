@@ -4,6 +4,7 @@ import { usePaletKomutlari } from './paletKomutlari';
 import { api } from '../../api/istemci';
 import type { MenuSatiri } from './menuAgaci';
 import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
+import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -271,7 +272,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
                     title={ses.dinliyor ? c('Dinlemeyi durdur') : c('Sesle ara (konuşun, söylediğiniz yazılır)')}
                     aria-pressed={ses.dinliyor}
                     onClick={() => { if (ses.dinliyor) ses.durdur(); else { ses.baslat(); kutu.current?.focus() } }}>
-              🎤
+              <MikrofonIkon />
             </button>
           )}
         </div>
