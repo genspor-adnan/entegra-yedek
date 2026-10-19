@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Bandı — 5 Tasarım + Ayarlar — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --kir:#b3261e; --sari:#8a6218; --mor:#6a3fb5; --yesil:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{max-width:1400px;margin:18px auto 6px;font-size:13px;color:var(--navy)}
+  h2 small{font-weight:normal;color:var(--muted);margin-left:6px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .rz{display:inline-flex;gap:3px;align-items:center;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.kir{background:#fbe9e7;color:var(--kir);border-color:#f3c4bf}
+  .rz.sari{background:#fdf6e3;color:var(--sari);border-color:#f2ddbf}
+  .rz.mor{background:#f1ecfa;color:var(--mor);border-color:#ddd0f2}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.ok{background:#e2f3e8;color:var(--yesil);border-color:#bfe3cb}
+  .sonuk{color:var(--muted)}
+  .ekran-alt{padding:14px 16px;color:var(--muted);background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 10px,#f5f7fa 10px,#f5f7fa 20px);min-height:70px;border-top:1px solid var(--line2)}
+
+  /* ---------- 1 KOMPAKT ŞERİT ---------- */
+  .b1{display:flex;align-items:center;gap:14px;padding:6px 12px;background:#f7fafd;border-bottom:1px solid var(--line2);flex-wrap:wrap;font-size:11.5px}
+  .b1 .ad{font-weight:bold;color:var(--navy);font-size:12.5px}
+  .b1 .ay{width:1px;height:14px;background:var(--line)}
+  .b1 .sp{margin-left:auto;display:flex;gap:5px}
+
+  /* ---------- 2 KARTVİZİT ---------- */
+  .b2{display:flex;align-items:center;gap:14px;padding:10px 14px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .b2 .av{width:50px;height:50px;border-radius:50%;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;flex:none;position:relative}
+  .b2 .av i{position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#b3261e;border:2px solid #fff;font-style:normal;font-size:9px;display:flex;align-items:center;justify-content:center}
+  .b2 .ad{font-size:15px;font-weight:bold;color:var(--navy);display:flex;gap:8px;align-items:center}
+  .b2 .alt{color:var(--muted);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap}
+  .b2 .alt b{color:var(--ink);font-weight:normal}
+  .b2 .uy{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  .uyari{border-radius:4px;padding:5px 9px;font-size:11px;font-weight:bold;display:flex;gap:5px;align-items:center}
+  .uyari.kir{background:#fbe9e7;color:var(--kir);border:1px solid #f3c4bf}
+  .uyari.sari{background:#fdf6e3;color:var(--sari);border:1px solid #f2ddbf}
+  .uyari.mor{background:#f1ecfa;color:var(--mor);border:1px solid #ddd0f2}
+
+  /* ---------- 3 KLİNİK GÜVENLİK ---------- */
+  .b3{display:grid;grid-template-columns:auto 1fr auto;border-bottom:1px solid var(--line2)}
+  .b3 .sol{background:#b3261e;color:#fff;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:92px;font-weight:bold;font-size:11px;text-align:center;gap:2px}
+  .b3 .sol b{font-size:20px;line-height:1}
+  .b3 .orta{padding:8px 14px;display:flex;flex-direction:column;gap:4px;justify-content:center}
+  .b3 .orta .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .b3 .orta .alt{display:flex;gap:12px;color:var(--muted);flex-wrap:wrap}
+  .b3 .orta .alt b{color:var(--ink);font-weight:normal}
+  .b3 .ikonlar{display:flex;gap:6px;padding:8px 12px;align-items:center;flex-wrap:wrap;background:#fffafa;border-left:1px solid #f3c4bf}
+  .ik{width:48px;height:46px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px;border:1px solid var(--line2);background:#fff;gap:1px}
+  .ik small{font-size:9px;color:var(--muted)}
+  .ik.kir{border-color:#f3c4bf;background:#fbe9e7} .ik.kir small{color:var(--kir);font-weight:bold}
+  .ik.sari{border-color:#f2ddbf;background:#fdf6e3} .ik.sari small{color:var(--sari);font-weight:bold}
+  .ik.mor{border-color:#ddd0f2;background:#f1ecfa} .ik.mor small{color:var(--mor);font-weight:bold}
+  .ik.pas{opacity:.35}
+
+  /* ---------- 4 GELİŞ / AKIŞ ---------- */
+  .b4{border-bottom:1px solid var(--line2)}
+  .b4 .ust{display:flex;align-items:center;gap:12px;padding:7px 12px;background:linear-gradient(#f7fbff,#eef4fc);flex-wrap:wrap}
+  .b4 .ust .ad{font-weight:bold;color:var(--navy);font-size:13.5px}
+  .b4 .ust .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .b4 .akis{display:flex;align-items:center;gap:0;padding:5px 12px 7px;overflow-x:auto;background:#fff}
+  .ad1{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;color:var(--muted)}
+  .ad1 .n{width:16px;height:16px;border-radius:50%;border:2px solid #cfd9e4;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;background:#fff}
+  .ad1.bitti .n{background:#3f9a5e;border-color:#3f9a5e}
+  .ad1.devam{color:#2f6db3;font-weight:bold} .ad1.devam .n{border-color:#2f6db3;box-shadow:0 0 0 3px rgba(47,109,179,.18)}
+  .ad1.uyar{color:var(--kir);font-weight:bold} .ad1.uyar .n{border-color:#b3261e;background:#fbe9e7;color:var(--kir)}
+  .ad1.bekle{color:var(--sari)} .ad1.bekle .n{border-color:#d9a12b}
+  .cizgi{width:28px;height:2px;background:#cfd9e4;margin:0 6px;flex:none}
+  .cizgi.ok{background:#5cb87a}
+
+  /* ---------- 5 İNCE YAPIŞKAN ---------- */
+  .b5{display:flex;align-items:center;gap:10px;padding:3px 12px;background:#14315a;color:#dbe6f3;font-size:11px;position:relative;cursor:pointer;flex-wrap:wrap}
+  .b5 b{color:#fff}
+  .b5 .nok{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px}
+  .b5 .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .b5 .kirmizi{background:#ff6b5e} .b5 .sari{background:#f0c05a}
+  .b5-ac{display:none;padding:8px 12px;background:#1c3d6b;color:#dbe6f3;gap:18px;flex-wrap:wrap;font-size:11.5px}
+  .b5-ac b{color:#fff;font-weight:normal}
+  .b5-kap:hover .b5-ac,.b5-kap.acik .b5-ac{display:flex}
+
+  /* ---------- AYARLAR ---------- */
+  .ayar{display:grid;grid-template-columns:260px minmax(0,1fr) 300px;min-height:520px}
+  .ayar .k1{border-right:1px solid var(--line2);background:#f8fafc;padding:10px}
+  .ayar .k2{padding:12px;min-width:0}
+  .ayar .k3{border-left:1px solid var(--line2);padding:10px;background:#fcfcfd}
+  .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:4px 2px 6px}
+  .stil{border:1px solid var(--line2);border-radius:5px;padding:7px 9px;margin-bottom:6px;cursor:pointer;background:#fff}
+  .stil:hover{border-color:#9dbbe0}
+  .stil.on{border-color:#2f6db3;box-shadow:0 0 0 2px rgba(47,109,179,.18);background:#f2f7fd}
+  .stil b{display:block} .stil small{color:var(--muted)}
+  .onizleme{border:1px dashed #9dbbe0;border-radius:5px;overflow:hidden;background:#fff}
+  .onizleme .cerceve{background:#e7edf4;padding:4px 10px;font-size:10.5px;color:var(--muted);border-bottom:1px solid var(--line2);display:flex;gap:8px}
+  .alanlar{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:10px}
+  .alanlar label{display:flex;gap:6px;align-items:center;padding:3px 0;cursor:pointer}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin-top:12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b}
+  .grp .ic{padding:8px 10px}
+  .satir{display:flex;gap:8px;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line2)}
+  .satir:last-child{border-bottom:none}
+  .satir span:first-child{flex:1}
+  select,input[type=text]{border:1px solid var(--line);border-radius:3px;padding:3px 6px;font:inherit;background:#fff}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg span{padding:3px 10px;cursor:pointer;background:#fff;border-right:1px solid var(--line)}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:#2f6db3;color:#fff;font-weight:bold}
+  .not{max-width:1400px;margin:10px auto 30px;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  @media (max-width:1050px){.ayar{grid-template-columns:1fr}.ayar .k1,.ayar .k3{border:none}}
+</style>
+</head>
+<body>
+
+<h2>1 · Kompakt şerit <small>tek satır, en az yer — banko, vezne, listeden açılan kartlar</small></h2>
+<div class="win">
+  <div class="title">Örnek ekran: Başvuru Kartı <span class="sp">bant ekranın en üstünde, sabit</span></div>
+  <div class="b1" data-bant>
+    <span class="ad">Ercan TEMEL</span><span class="ay"></span>
+    <span data-a="tc">TC 123•••••146</span><span class="ay" data-a="tc"></span>
+    <span data-a="yas">47 y · ♂</span><span class="ay" data-a="yas"></span>
+    <span data-a="dosya">Dosya 104 233</span><span class="ay" data-a="dosya"></span>
+    <span data-a="kurum">SGK 4A</span><span class="ay" data-a="kurum"></span>
+    <span data-a="kan">A Rh+</span>
+    <span class="sp">
+      <span class="rz kir" data-a="alerji">⚠ Penisilin</span>
+      <span class="rz sari" data-a="kronik">DM · HT</span>
+      <span class="rz mor" data-a="izolasyon">🛡 Temas izol.</span>
+      <span class="rz mavi" data-a="gelis">▶ Dahiliye · 2 sa</span>
+    </span>
+  </div>
+  <div class="ekran-alt">… ekranın kendi içeriği …</div>
+</div>
+
+<h2>2 · Kartvizit <small>avatar + iki satır, uyarılar sağda — hasta kartı, hasta dosyası</small></h2>
+<div class="win">
+  <div class="title">Örnek ekran: Hasta Kartı</div>
+  <div class="b2" data-bant>
+    <div class="av">ET<i data-a="alerji">!</i></div>
+    <div>
+      <div class="ad">Ercan TEMEL <span class="rz ok">Aktif</span> <span class="rz mor" data-a="vip">🔒 Mahremiyet</span></div>
+      <div class="alt">
+        <span data-a="tc">TC <b>123•••••146</b></span>
+        <span data-a="yas">Doğum <b>14.03.1979 · 47 y · ♂ E</b></span>
+        <span data-a="kan">Kan <b>A Rh+</b></span>
+        <span data-a="kurum">Kurum <b>SGK — 4A</b></span>
+        <span data-a="tel">Tel <b>0532 ••• 12 34</b></span>
+        <span data-a="dosya">Dosya <b>104 233</b></span>
+      </div>
+    </div>
+    <div class="uy">
+      <span class="uyari kir" data-a="alerji">⚠ Alerji: Penisilin · Sülfonamid</span>
+      <span class="uyari sari" data-a="kronik">🩺 Kronik: DM · HT</span>
+      <span class="uyari mor" data-a="izolasyon">🛡 Temas izolasyonu</span>
+    </div>
+  </div>
+  <div class="ekran-alt">… ekranın kendi içeriği …</div>
+</div>
+
+<h2>3 · Klinik güvenlik <small>risk ikonları önde — muayene, order, ilaç uygulama, ameliyathane, yatan hasta</small></h2>
+<div class="win">
+  <div class="title">Örnek ekran: İlaç Uygulama</div>
+  <div class="b3" data-bant>
+    <div class="sol" data-a="alerji"><b>⚠</b>ALERJİ<span style="font-weight:normal;font-size:10px">Penisilin</span></div>
+    <div class="orta">
+      <div class="ad">Ercan TEMEL <span class="sonuk" style="font-weight:normal;font-size:12px" data-a="yas">· 47 y ♂ · 91 kg · 178 cm</span></div>
+      <div class="alt">
+        <span data-a="tc">TC <b>123•••••146</b></span>
+        <span data-a="dosya">Protokol <b>2026-48 113</b></span>
+        <span data-a="kan">Kan <b>A Rh+</b></span>
+        <span data-a="gelis">Servis <b>3B / Yatak 12</b> · Uzm.Dr. Selin KAYA</span>
+      </div>
+    </div>
+    <div class="ikonlar">
+      <div class="ik kir" data-a="alerji">⚠<small>Alerji</small></div>
+      <div class="ik mor" data-a="izolasyon">🛡<small>Temas</small></div>
+      <div class="ik sari" data-a="risk">🚶<small>Düşme</small></div>
+      <div class="ik pas" data-a="risk">🩹<small>Bası</small></div>
+      <div class="ik sari" data-a="kronik">💉<small>DM</small></div>
+      <div class="ik pas" data-a="gebelik">🤰<small>Gebe</small></div>
+      <div class="ik kir" data-a="dnr">🚫<small>DNR</small></div>
+    </div>
+  </div>
+  <div class="ekran-alt">… ekranın kendi içeriği …</div>
+</div>
+
+<h2>4 · Geliş / akış <small>bu gelişin adımları bandın içinde — sonuç bekleyen hasta, hemşire / koordinatör</small></h2>
+<div class="win">
+  <div class="title">Örnek ekran: Muayene</div>
+  <div class="b4" data-bant>
+    <div class="ust">
+      <span class="ad">Ercan TEMEL</span>
+      <span data-a="yas" class="sonuk">47 y · ♂</span>
+      <span data-a="tc" class="sonuk">TC 123•••••146</span>
+      <span data-a="kurum" class="sonuk">SGK · takip 9F3K21</span>
+      <span class="rz kir" data-a="alerji">⚠ Penisilin</span>
+      <span class="rz sari" data-a="kronik">DM · HT</span>
+      <span class="sp"><span class="rz mavi" data-a="gelis">Dahiliye · Uzm.Dr. Selin KAYA</span><b style="color:#2f6db3">⏱ 2 sa 14 dk</b></span>
+    </div>
+    <div class="akis" data-a="gelis">
+      <span class="ad1 bitti"><span class="n">✓</span>Kayıt</span><span class="cizgi ok"></span>
+      <span class="ad1 bitti"><span class="n">✓</span>Muayene</span><span class="cizgi ok"></span>
+      <span class="ad1 devam"><span class="n"></span>Lab 3/5</span><span class="cizgi"></span>
+      <span class="ad1 bekle"><span class="n"></span>EKG sırada</span><span class="cizgi"></span>
+      <span class="ad1 uyar"><span class="n">!</span>Radyoloji rapor gecikti</span><span class="cizgi"></span>
+      <span class="ad1"><span class="n"></span>Sonuç kontrol</span><span class="cizgi"></span>
+      <span class="ad1"><span class="n"></span>Çıkış</span>
+    </div>
+  </div>
+  <div class="ekran-alt">… ekranın kendi içeriği …</div>
+</div>
+
+<h2>5 · İnce yapışkan <small>tek ince koyu çizgi; üstüne gelince / tıklayınca açılır — yoğun veri ekranları, raporlar, küçük ekran</small></h2>
+<div class="win">
+  <div class="title">Örnek ekran: Lab Sonuç Girişi</div>
+  <div class="b5-kap" id="b5kap">
+    <div class="b5" data-bant onclick="document.getElementById('b5kap').classList.toggle('acik')">
+      <b>Ercan TEMEL</b><span data-a="yas">47 ♂</span><span data-a="tc">123•••••146</span><span data-a="dosya">#104233</span>
+      <span class="sp">
+        <span data-a="alerji"><i class="nok kirmizi"></i>Alerji</span>
+        <span data-a="izolasyon"><i class="nok sari"></i>İzolasyon</span>
+        <span data-a="kronik"><i class="nok sari"></i>DM·HT</span>
+        <span style="opacity:.7">▾</span>
+      </span>
+    </div>
+    <div class="b5-ac">
+      <span>Alerji <b>Penisilin (anafilaksi), Sülfonamid</b></span>
+      <span>Kan <b>A Rh+</b></span><span>Kurum <b>SGK 4A</b></span>
+      <span>Geliş <b>Dahiliye · bugün 08:52</b></span><span>Tel <b>0532 ••• 12 34</b></span>
+    </div>
+  </div>
+  <div class="ekran-alt">… ekranın kendi içeriği …</div>
+</div>
+
+<h2>Ayarlar <small>Kullanıcı Ayarları › Hasta Bandı (kurum varsayılanı: Genel Ayarlar)</small></h2>
+<div class="win">
+  <div class="title">⚙ Hasta Bandı Ayarları <span class="sp">değişiklik anında önizlemede görünür</span></div>
+  <div class="ayar">
+    <div class="k1">
+      <div class="bas">Bant tasarımı</div>
+      <div class="stil" data-s="1"><b>1 · Kompakt şerit</b><small>tek satır, en az yer</small></div>
+      <div class="stil on" data-s="2"><b>2 · Kartvizit</b><small>avatar + iki satır</small></div>
+      <div class="stil" data-s="3"><b>3 · Klinik güvenlik</b><small>risk ikonları önde</small></div>
+      <div class="stil" data-s="4"><b>4 · Geliş / akış</b><small>bu gelişin adımları</small></div>
+      <div class="stil" data-s="5"><b>5 · İnce yapışkan</b><small>açılır ince çizgi</small></div>
+      <div class="bas" style="margin-top:12px">Kaynak</div>
+      <div class="seg" id="kaynak"><span class="on">Benim ayarım</span><span>Kurum varsayılanı</span></div>
+      <div class="sonuk" style="margin-top:6px;line-height:1.5">Kurum varsayılanını yönetici belirler; kullanıcı kendi ayarıyla ezebilir. "Kilitli" alanlar (alerji) kapatılamaz.</div>
+    </div>
+
+    <div class="k2">
+      <div class="bas">Önizleme</div>
+      <div class="onizleme"><div class="cerceve">● ● ● <span id="onBaslik">Hasta Kartı</span></div><div id="onizleme"></div><div class="ekran-alt" style="min-height:40px">…</div></div>
+
+      <div class="bas" style="margin-top:12px">Bantta görünecek bilgiler</div>
+      <div class="alanlar" id="alanlar">
+        <label><input type="checkbox" checked disabled data-k="alerji"> ⚠ Alerji <span class="rz kir">kilitli</span></label>
+        <label><input type="checkbox" checked data-k="tc"> T.C. kimlik no</label>
+        <label><input type="checkbox" checked data-k="yas"> Yaş / cinsiyet / doğum</label>
+        <label><input type="checkbox" checked data-k="dosya"> Dosya / protokol no</label>
+        <label><input type="checkbox" checked data-k="kurum"> Kurum / sigorta</label>
+        <label><input type="checkbox" checked data-k="kan"> Kan grubu</label>
+        <label><input type="checkbox" checked data-k="kronik"> Kronik hastalık</label>
+        <label><input type="checkbox" checked data-k="izolasyon"> İzolasyon</label>
+        <label><input type="checkbox" checked data-k="risk"> Düşme / bası riski</label>
+        <label><input type="checkbox" checked data-k="gelis"> Aktif geliş (bölüm, hekim, süre)</label>
+        <label><input type="checkbox" data-k="tel"> Telefon</label>
+        <label><input type="checkbox" checked data-k="vip"> Mahremiyet / VIP</label>
+        <label><input type="checkbox" checked data-k="gebelik"> Gebelik</label>
+        <label><input type="checkbox" checked data-k="dnr"> DNR / yaşam desteği kararı</label>
+      </div>
+      <div class="grp"><div class="gb">Gösterim</div><div class="ic">
+        <div class="satir"><span>T.C. / telefon maskeleme</span><span class="seg" data-seg><span class="on">Maskeli</span><span>Açık</span><span>Üstüne gelince</span></span></div>
+        <div class="satir"><span>Yaş biçimi</span><span class="seg" data-seg><span class="on">47 y</span><span>47 y 7 ay</span><span>bebekte gün / ay</span></span></div>
+        <div class="satir"><span>Yoğunluk</span><span class="seg" data-seg><span>Sıkı</span><span class="on">Normal</span><span>Geniş</span></span></div>
+        <div class="satir"><span>Kaydırınca</span><span class="seg" data-seg><span class="on">Sabit kalsın</span><span>İnce banda dönüşsün</span><span>Gizlensin</span></span></div>
+        <div class="satir"><span>Alerji yoksa</span><span class="seg" data-seg><span class="on">"Alerji yok" yaz</span><span>Hiç gösterme</span></span></div>
+        <div class="satir"><span>Bilgi alınmadıysa</span><span class="seg" data-seg><span class="on">"Sorgulanmadı" (sarı)</span><span>Boş</span></span></div>
+      </div></div>
+    </div>
+
+    <div class="k3">
+      <div class="bas">Ekrana göre tasarım</div>
+      <div class="sonuk" style="margin-bottom:6px">Boş = yukarıdaki seçim.</div>
+      <div class="satir"><span>Banko / Kayıt Kabul</span><select><option>1 · Kompakt</option><option>(genel)</option></select></div>
+      <div class="satir"><span>Hasta Kartı / Dosyası</span><select><option>(genel)</option></select></div>
+      <div class="satir"><span>Muayene</span><select><option>4 · Geliş / akış</option></select></div>
+      <div class="satir"><span>Order / Reçete</span><select><option>3 · Klinik güvenlik</option></select></div>
+      <div class="satir"><span>İlaç uygulama</span><select><option>3 · Klinik güvenlik</option></select></div>
+      <div class="satir"><span>Ameliyathane</span><select><option>3 · Klinik güvenlik</option></select></div>
+      <div class="satir"><span>Lab / Radyoloji</span><select><option>5 · İnce yapışkan</option></select></div>
+      <div class="satir"><span>Vezne / Tahsilat</span><select><option>1 · Kompakt</option></select></div>
+      <div class="bas" style="margin-top:12px">Tıklayınca</div>
+      <div class="satir"><span>Ada tıklayınca</span><select><option>Hasta dosyasını aç</option><option>Hasta kartını aç</option><option>Hiçbir şey</option></select></div>
+      <div class="satir"><span>Uyarıya tıklayınca</span><select><option>Ayrıntı penceresi</option><option>İlgili kartı aç</option></select></div>
+      <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn primary">💾 Kaydet</button>
+        <button class="btn">↺ Kurum varsayılanına dön</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Hasta bandı</b> hastayla ilgili her ekranın en üstünde aynı bileşen; içerik sunucudan tek uçla gelir (alerji, kronik, izolasyon, risk skorları, aktif geliş), ekran kendisi hesaplamaz.<br>
+  • <b>Alerji kilitli</b>: hiçbir tasarımda ve ayarda kapatılamaz; alerji sorgulanmamışsa sarı "Alerji sorgulanmadı" görünür.<br>
+  • Görünen bilgi yetkiye bağlı: mali / kurum bilgisi yetkisi olmayan kullanıcıda bantta da yok; mahremiyet işaretli hastada ad kısaltılabilir (kurum ayarı).<br>
+  • <b>Ayar sırası</b>: kurum varsayılanı → kullanıcı ayarı → ekran bazlı seçim. Ayarlar kullanıcı tercihi olarak saklanır (tercih deposu), cihazdan bağımsız.<br>
+  • Önizlemede tasarıma tıklayın, alanları açıp kapatın — bant anında değişir.
+</div>
+
+<script>
+const kaynaklar = [...document.querySelectorAll('[data-bant]')];
+const sablon = n => { const k = kaynaklar[n - 1]; return (k.closest('.b5-kap') ?? k).outerHTML; };
+const basliklar = { 1: 'Başvuru Kartı', 2: 'Hasta Kartı', 3: 'İlaç Uygulama', 4: 'Muayene', 5: 'Lab Sonuç Girişi' };
+let secili = 2;
+function ciz() {
+  const on = document.getElementById('onizleme');
+  on.innerHTML = sablon(secili).replace('id="b5kap"', 'id="b5onz"').replace("getElementById('b5kap')", "getElementById('b5onz')");
+  document.getElementById('onBaslik').textContent = basliklar[secili];
+  document.querySelectorAll('#alanlar input').forEach(i => {
+    on.querySelectorAll(`[data-a="${i.dataset.k}"]`).forEach(e => e.hidden = !i.checked);
+  });
+}
+document.querySelectorAll('.stil').forEach(s => s.onclick = () => {
+  document.querySelectorAll('.stil').forEach(x => x.classList.toggle('on', x === s));
+  secili = Number(s.dataset.s); ciz();
+});
+document.querySelectorAll('#alanlar input').forEach(i => i.onchange = ciz);
+document.querySelectorAll('[data-seg], #kaynak').forEach(g => g.querySelectorAll('span').forEach(s => s.onclick = () =>
+  g.querySelectorAll('span').forEach(x => x.classList.toggle('on', x === s))));
+// Telefon başta kapalı: örnek bantlarda da gizle (ayardaki varsayılan).
+ciz();
+</script>
+</body>
+</html>
