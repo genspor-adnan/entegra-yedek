@@ -229,7 +229,16 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
           // BULUNAMADI da söylenir: kullanıcı (özellikle sesle) cümlenin anlaşıldığını görsün.
           : [{ bolum: 'Kayıtlar', tur: 'komut', anahtar: 'c-yok', ad: `${cz.ad}: ${c(cz.modulAd)} ${c('bulunamadı')}`,
                grup: '', kod: '', aktif: false }]);
-      }).catch(() => { if (!iptal) setCumleKaydi([]) });
+      }).catch(h => {
+        if (iptal) return;
+        // YETKİ YOK (kullanıcı 19.10.2026): sunucu sorguyu hiç çalıştırmadan 403 verir - sessiz kalmak
+        //   "cümle anlaşılmadı" sanılıyordu. Hasta adı / kayıt yine dönmez, yalnız neden söylenir.
+        const durum = (h as { durum?: number })?.durum;
+        setCumleKaydi(durum === 403
+          ? [{ bolum: 'Kayıtlar', tur: 'komut', anahtar: 'c-yetki', ad: `${c(cz.modulAd)}: ${c('bu kayıt türüne yetkiniz yok')}`,
+               grup: '', kod: '', aktif: false }]
+          : []);
+      });
     }, 250);
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
