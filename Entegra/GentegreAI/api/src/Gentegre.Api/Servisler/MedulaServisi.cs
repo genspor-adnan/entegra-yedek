@@ -372,6 +372,17 @@ public sealed class MedulaSimulasyonKapisi : IMedulaKapisi
 
         switch (islem)
         {
+            case "kimlikSorgu":
+            {
+                // KİMLİK (19.10.2026, MERNİS'i olmayan kurum): SGK kimlik nodan ad / soyad / doğum tarihi /
+                //   cinsiyet verir - anne / baba adı ve doğum yeri SGK'da yok. Simülasyon: kimlikten
+                //   türetilmiş sabit kişi (MernisServisi.Simulasyon ile aynı).
+                var tc = MedulaServisi.Metin(istek, "tckn");
+                if (!MernisServisi.TcGecerli(tc)) return new("1001", "TC kimlik numarası geçersiz", null);
+                var k = MernisServisi.Simulasyon(tc);
+                return new("0000", "Kişi bulundu", new() { ["ad"] = k.Ad, ["soyad"] = k.Soyad,
+                    ["dogumTarihi"] = k.DogumTarihi?.ToString("yyyy-MM-dd"), ["cinsiyet"] = k.Cinsiyet, ["sigortaTuru"] = "4/a" });
+            }
             case "mustehaklikSorgu":
             {
                 // Müstehak = hastanın aktif SGK kurum kaydı (taraf_hasta_kurum.tur = 3).

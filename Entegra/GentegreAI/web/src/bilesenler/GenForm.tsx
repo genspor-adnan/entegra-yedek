@@ -1018,9 +1018,22 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
                        dogumYeri: dolu(k.dogumYeri, s0.dogumYeri) };
         return { ...t, ozluk: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
       });
-      await bilgiMesaji(k.simulasyon
-        ? c('SİMÜLASYON verisi getirildi (demo / eğitim kurulumu) - gerçek kişi değildir. Kaydetmeden önce kontrol edin.')
-        : `${k.aciklama}: ${c('kimlik bilgileri getirildi. Kaydetmeden önce kontrol edin.')}`);
+      const sgkNotu = k.kanal === 'sgk' ? ' ' + c('SGK anne / baba adı ve doğum yerini vermez - bunları elle girin.') : '';
+      await bilgiMesaji((k.simulasyon
+        ? `${c('SİMÜLASYON verisi getirildi')} (${k.aciklama}) - ${c('gerçek kişi değildir. Kaydetmeden önce kontrol edin.')}`
+        : `${k.aciklama}: ${c('kimlik bilgileri getirildi. Kaydetmeden önce kontrol edin.')}`) + sgkNotu);
+    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
+  };
+  /** MÜSTEHAKLIK SORGUSU (MEDULA): kayıtlı hastada; sonuç mesajla. */
+  const mustehaklikSorgula = async () => {
+    if (typeof id !== 'number') return;
+    setMernisYuk(true); setHata(null);
+    try {
+      const s = await api.medulaMustehaklik({ hastaId: id });
+      const y = (s.yanit ?? {}) as Record<string, unknown>;
+      await bilgiMesaji(s.bekliyor ? c('SGK şu an yanıt vermiyor - sorgu kuyrukta, MEDULA ekranından izlenebilir.')
+        : s.kabul ? `✔ ${c('Müstehak')}${y.sigortaTuru ? ` · ${y.sigortaTuru}` : ''}${y.kapsam ? ` · ${y.kapsam}` : ''}${y.yakinlik ? ` · ${y.yakinlik}` : ''}`
+        : `✖ ${s.mesaj} (${s.kod})`);
     } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
   };
   /** KİMLİĞİ DOĞRULA (NVİ herkese açık servis): kimlik no + ad + soyad + doğum yılı eşleşiyor mu. */
@@ -2113,11 +2126,14 @@ Yine de yeni kayıt eklensin mi?`);
           )}
           {kaynak === 'hasta' && !yeniMi && (
             <>
-              <button className="d" type="button"
-                      title={c('SGK provizyon / müstehaklık sorgusu')}
-                      onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
-                Provizyon/Müstehaklık Sorgula
-              </button>
+              {/* MÜSTEHAKLIK (19.10.2026): MEDULA kapısı - yetki medula.provizyon Gör (sunucuda da). */}
+              {oturumYetki('medula.provizyon', 'gor') && (
+                <button className="d" type="button" disabled={mernisYuk}
+                        title={c('SGK provizyon / müstehaklık sorgusu')}
+                        onClick={() => void mustehaklikSorgula()}>
+                  Provizyon/Müstehaklık Sorgula
+                </button>
+              )}
               {oturumYetki('belge', 'ekle') && (
                 <button className="d yesil" type="button" onClick={() => basvuruAc()}>{c('＋ Yeni Başvuru')}</button>
               )}
