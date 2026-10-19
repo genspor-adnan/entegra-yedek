@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personel Belge Takibi — Mockup (Gentegre AI · İK)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.k{padding:2px 7px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+
+  .idstrip{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.pasif{background:#f4f6f9;color:#4d5d6e}
+
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer;display:flex;gap:5px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme.pasif{opacity:.55;cursor:default}
+  .sekme .say{border-radius:8px;padding:0 6px;font-size:10px;font-weight:bold;background:#d5dfea;color:#3a5573}
+  .sekme .say.kir{background:#b3261e;color:#fff}
+  .ic-sek{display:flex;gap:6px;padding:10px 12px 0}
+  .isk{border:1px solid var(--line);border-radius:14px;padding:4px 14px;background:#fff;cursor:pointer;color:#4d5d6e;font-size:11.5px}
+  .isk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .panel{padding:10px 12px 14px}
+
+  .ozet{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .kart{flex:1;min-width:130px;border:1px solid var(--line2);border-left:4px solid #9fb2c6;border-radius:4px;padding:7px 10px;background:#fbfcfe;cursor:pointer}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:18px;font-weight:bold;color:var(--navy);margin-top:1px}
+  .kart.kir{border-left-color:#b3261e} .kart.kir .d{color:#b3261e}
+  .kart.sari{border-left-color:#d9a12b} .kart.sari .d{color:#8a6218}
+  .kart.ok{border-left-color:#3f9a5e} .kart.ok .d{color:#2e7d46}
+  .kart.on{box-shadow:0 0 0 2px #2f6db3 inset}
+  .ilerleme{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .bar{flex:1;height:9px;background:#e7edf4;border-radius:5px;overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+
+  .duzen{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}
+  .dg{border:1px solid var(--line2);border-radius:4px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tr.eksik td{background:#fffafa}
+  .dg tr.dolan td{background:#fffdf5}
+  .dg tr:hover td{background:#f2f7fd}
+  .sonuk{color:var(--muted)} .yuk{color:#b3261e;font-weight:bold}
+  .zor{color:#b3261e;font-weight:bold}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:#fff;margin-bottom:10px}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{font-weight:normal;color:var(--muted)}
+  .grp .ic{padding:8px 10px}
+  .liste{margin:0;padding:0;list-style:none}
+  .liste li{padding:5px 0;border-bottom:1px dashed var(--line2);display:flex;gap:8px;align-items:center}
+  .liste li:last-child{border-bottom:none}
+  .liste.duz li{display:block;line-height:1.5}
+  .liste .t{color:var(--muted);font-size:10.5px;min-width:68px}
+  .zaman{position:relative;padding-left:16px}
+  .zaman::before{content:"";position:absolute;left:5px;top:3px;bottom:3px;width:2px;background:#d5dfea}
+  .zaman div{position:relative;margin-bottom:7px}
+  .zaman div::before{content:"";position:absolute;left:-15px;top:4px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #2f6db3}
+  .zaman div.kir::before{border-color:#b3261e} .zaman div.sari::before{border-color:#d9a12b} .zaman div.ok::before{border-color:#3f9a5e;background:#3f9a5e}
+  .zaman small{color:var(--muted)}
+
+  .vize-bas{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 12px;padding:10px;border:1px solid #cfe0f5;border-radius:5px;background:linear-gradient(#f7fbff,#fff);margin-bottom:10px}
+  .kaynak{font-size:10.5px}
+  .kaynak.pers{color:#6a3fb5} .kaynak.kurum{color:#2f6db3} .kaynak.edev{color:#0f8b8d}
+  .kutu{display:inline-flex;width:15px;height:15px;border:1.5px solid #9fb2c6;border-radius:3px;align-items:center;justify-content:center;font-size:11px;color:#fff;vertical-align:middle}
+  .kutu.on{background:#3f9a5e;border-color:#3f9a5e}
+  .kutu.yari{background:#d9a12b;border-color:#d9a12b}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:4px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .ust-baslik{max-width:1400px;margin:16px auto 6px;font-weight:bold;color:var(--navy);font-size:13px}
+  @media (max-width:1000px){.duzen{grid-template-columns:1fr}.idstrip,.vize-bas{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="ust-baslik">1 · Personel Kartı › Belgeler sekmesi</div>
+<div class="win">
+  <div class="title">👤 Personel Kartı — Prof.Dr. Aslı DEMİR <span class="sp">İK › Personel · Kardiyoloji · Uzman Doktor</span></div>
+  <div class="toolbar">
+    <button class="btn primary">💾 Kaydet</button>
+    <div class="sepv"></div>
+    <button class="btn">📤 Eksikleri personele bildir</button>
+    <button class="btn">🖨 Özlük dosyası kontrol listesi</button>
+    <button class="btn sp">Kapat</button>
+  </div>
+  <div class="idstrip">
+    <div class="fld"><label>Ad Soyad</label><div class="inp big">Prof.Dr. Aslı DEMİR</div></div>
+    <div class="fld"><label>Sicil No</label><div class="inp pasif">P-00412</div></div>
+    <div class="fld"><label>Görev</label><div class="inp combo">Uzman Doktor</div></div>
+    <div class="fld"><label>Belge şablonu</label><div class="inp combo">Hekim — tam zamanlı</div></div>
+    <div class="fld"><label>Belge durumu</label><div class="inp"><span class="rz kir">3 eksik</span><span class="rz sari">2 yaklaşıyor</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme pasif">Genel</div><div class="sekme pasif">İş Bilgileri</div><div class="sekme pasif">Eğitim</div>
+    <div class="sekme on">📎 Belgeler <span class="say kir">5</span></div>
+    <div class="sekme pasif">İzinler</div><div class="sekme pasif">Kadro Geçmişi</div>
+  </div>
+
+  <div class="ic-sek" id="icsek">
+    <span class="isk on" data-p="ozluk">🗂 Özlük belgeleri</span>
+    <span class="isk" data-p="vize">✈ Vize başvurusu <span class="rz sari" style="margin-left:4px">1 açık</span></span>
+    <span class="isk" data-p="gecmis">🕘 Hareketler</span>
+  </div>
+
+  <!-- ÖZLÜK -->
+  <div class="panel" data-panel="ozluk">
+    <div class="ozet" id="ozet">
+      <div class="kart on" data-f="hep"><div class="b">Şablondaki belge</div><div class="d">18</div></div>
+      <div class="kart ok" data-f="tamam"><div class="b">Tamam</div><div class="d">13</div></div>
+      <div class="kart kir" data-f="eksik"><div class="b">Eksik</div><div class="d">3</div></div>
+      <div class="kart kir" data-f="doldu"><div class="b">Süresi doldu</div><div class="d">1</div></div>
+      <div class="kart sari" data-f="yakin"><div class="b">60 gün içinde dolacak</div><div class="d">2</div></div>
+    </div>
+    <div class="ilerleme"><span class="sonuk">Özlük dosyası</span>
+      <div class="bar"><i style="width:72%;background:#5cb87a"></i><i style="width:11%;background:#e5a83a"></i><i style="width:17%;background:#e06a5e"></i></div>
+      <b>%72</b></div>
+
+    <div class="duzen">
+      <div class="dg"><table id="tablo">
+        <tr><th>Belge</th><th>Zorunlu</th><th>Durum</th><th>Belge tarihi</th><th>Geçerlilik</th><th>Kalan</th><th>Dosya</th><th></th></tr>
+        <tr class="grup"><td colspan="8">Kimlik ve işe giriş</td></tr>
+        <tr data-d="tamam"><td>Nüfus cüzdanı fotokopisi</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>02.01.2018</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr data-d="tamam"><td>Adli sicil kaydı</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>15.12.2017</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr data-d="tamam"><td>SGK işe giriş bildirgesi</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>02.01.2018</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr class="eksik" data-d="eksik"><td>İkametgâh (yerleşim yeri) belgesi</td><td class="zor">✔</td><td><span class="rz kir">Eksik</span></td><td>—</td><td>—</td><td></td><td></td><td><button class="btn k">⬆ Yükle</button> <button class="btn k">🏛 e-Devlet</button></td></tr>
+        <tr data-d="tamam"><td>Vesikalık fotoğraf</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>02.01.2018</td><td class="sonuk">süresiz</td><td></td><td>🖼</td><td></td></tr>
+        <tr class="grup"><td colspan="8">Mesleki</td></tr>
+        <tr data-d="tamam"><td>Tıp fakültesi diploması (onaylı)</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>1998</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr data-d="tamam"><td>Uzmanlık belgesi — Kardiyoloji</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>2005</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr data-d="tamam"><td>ÇKYS / diploma tescil kaydı</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>2018</td><td class="sonuk">süresiz</td><td></td><td>🔗</td><td></td></tr>
+        <tr class="dolan" data-d="yakin"><td>Tabip odası kayıt belgesi</td><td>✔</td><td><span class="rz sari">Yenilenecek</span></td><td>01.12.2025</td><td>01.12.2026</td><td class="yuk" style="color:#8a6218">43 gün</td><td>📄</td><td><button class="btn k">🔔 Hatırlat</button></td></tr>
+        <tr class="eksik" data-d="doldu"><td>Mesleki sorumluluk sigortası poliçesi</td><td class="zor">✔</td><td><span class="rz kir">Süresi doldu</span></td><td>05.10.2025</td><td>05.10.2026</td><td class="yuk">−14 gün</td><td>📄</td><td><button class="btn k">⬆ Yeni poliçe</button></td></tr>
+        <tr data-d="tamam"><td>İleri kardiyak yaşam desteği sertifikası</td><td></td><td><span class="rz ok">Tamam</span></td><td>11.03.2025</td><td>11.03.2027</td><td class="sonuk">143 gün</td><td>📄</td><td></td></tr>
+        <tr class="grup"><td colspan="8">Sağlık / İSG</td></tr>
+        <tr class="eksik" data-d="eksik"><td>İşe giriş sağlık raporu (işyeri hekimi)</td><td class="zor">✔</td><td><span class="rz kir">Eksik</span></td><td>—</td><td>—</td><td></td><td></td><td><button class="btn k">➜ İSG'ye istem</button></td></tr>
+        <tr class="dolan" data-d="yakin"><td>Periyodik muayene (yıllık)</td><td>✔</td><td><span class="rz sari">Yaklaşıyor</span></td><td>20.11.2025</td><td>20.11.2026</td><td style="color:#8a6218;font-weight:bold">32 gün</td><td>📄</td><td><button class="btn k">📅 Randevu</button></td></tr>
+        <tr data-d="tamam"><td>Hepatit B aşı / antikor kaydı</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>2019</td><td class="sonuk">süresiz</td><td></td><td>🔗</td><td></td></tr>
+        <tr data-d="tamam"><td>Temel İSG eğitimi sertifikası</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>14.02.2025</td><td>14.02.2028</td><td class="sonuk">483 gün</td><td>📄</td><td></td></tr>
+        <tr class="grup"><td colspan="8">İdari</td></tr>
+        <tr data-d="tamam"><td>İş sözleşmesi (imzalı)</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>02.01.2018</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr data-d="tamam"><td>KVKK aydınlatma / açık rıza</td><td>✔</td><td><span class="rz ok">Tamam</span></td><td>24.05.2024</td><td class="sonuk">süresiz</td><td></td><td>📄</td><td></td></tr>
+        <tr class="eksik" data-d="eksik"><td>Banka IBAN bilgi formu</td><td class="zor">✔</td><td><span class="rz kir">Eksik</span></td><td>—</td><td>—</td><td></td><td></td><td><button class="btn k">📱 Portaldan iste</button></td></tr>
+      </table></div>
+
+      <div>
+        <div class="grp"><div class="gb">⚑ Dikkat</div><div class="ic"><ul class="liste">
+          <li><span class="rz kir">!</span> Sorumluluk sigortası 14 gün önce doldu — <b>nöbet / ameliyat listesine yazılırken uyarı verilir</b>.</li>
+          <li><span class="rz kir">!</span> İşe giriş sağlık raporu yok (İSG mevzuatı).</li>
+          <li><span class="rz sari">⏱</span> Periyodik muayene 32 gün, tabip odası 43 gün.</li>
+        </ul></div></div>
+        <div class="grp"><div class="gb">🔔 Hatırlatma kuralı <span class="sp">şablondan</span></div><div class="ic"><ul class="liste">
+          <li><span class="t">60 gün önce</span> personele + İK'ya bildirim</li>
+          <li><span class="t">15 gün önce</span> bölüm sorumlusuna</li>
+          <li><span class="t">süre dolunca</span> görev kuralı: uyarı / engel</li>
+        </ul></div></div>
+        <div class="grp"><div class="gb">📱 Personel portalı</div><div class="ic">
+          Personel eksiklerini portalda görür ve dosyayı kendisi yükler; İK <b>onaylayınca</b> "Tamam"a geçer.
+          <div style="margin-top:6px"><span class="rz mavi">1 yükleme onay bekliyor</span> IBAN formu · bugün 09:12</div>
+          <div style="margin-top:6px"><button class="btn k ok">✔ Onayla</button> <button class="btn k">✖ Reddet</button> <button class="btn k">👁 Gör</button></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VİZE -->
+  <div class="panel" data-panel="vize" hidden>
+    <div class="vize-bas">
+      <div class="fld"><label>Başvuru</label><div class="inp pasif">VZ-2026-0007</div></div>
+      <div class="fld"><label>Ülke / tür</label><div class="inp combo">🇩🇪 Almanya — Schengen C</div></div>
+      <div class="fld"><label>Amaç</label><div class="inp combo">Kongre (ESC 2026)</div></div>
+      <div class="fld"><label>Seyahat</label><div class="inp">12.12 – 18.12.2026</div></div>
+      <div class="fld"><label>Konsolosluk / VFS randevu</label><div class="inp">06.11.2026 10:30 · İstanbul</div></div>
+      <div class="fld"><label>Durum</label><div class="inp"><span class="rz sari">Belge toplanıyor · 7/11</span></div></div>
+    </div>
+    <div class="ilerleme"><span class="sonuk">Randevuya 18 gün</span>
+      <div class="bar"><i style="width:64%;background:#5cb87a"></i><i style="width:18%;background:#e5a83a"></i><i style="width:18%;background:#e06a5e"></i></div>
+      <b>7 / 11</b></div>
+    <div class="duzen">
+      <div class="dg"><table>
+        <tr><th></th><th>Belge (ülke şablonu)</th><th>Kim sağlar</th><th>Durum</th><th>Not</th><th></th></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>Pasaport (≥ 3 ay geçerli, 2 boş sayfa)</td><td class="kaynak pers">Personel</td><td><span class="rz ok">Tamam</span></td><td class="sonuk">geçerlilik 2031</td><td></td></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>Biyometrik fotoğraf (35×45)</td><td class="kaynak pers">Personel</td><td><span class="rz ok">Tamam</span></td><td class="sonuk">özlükten alındı · 6 aydan eski değil</td><td></td></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>Vize başvuru formu (imzalı)</td><td class="kaynak pers">Personel</td><td><span class="rz ok">Tamam</span></td><td></td><td></td></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>Çalışma belgesi (görev, giriş tarihi)</td><td class="kaynak kurum">Kurum → Belge talebi</td><td><span class="rz ok">Teslim edildi</span></td><td class="sonuk">BT-2026-0055</td><td>📄</td></tr>
+        <tr><td><span class="kutu yari">…</span></td><td>İzin yazısı (seyahat tarihleri + dönüş)</td><td class="kaynak kurum">Kurum → Belge talebi</td><td><span class="rz mavi">Hazırlanıyor</span></td><td class="sonuk">izin talebi onaylı · BT-2026-0061</td><td></td></tr>
+        <tr><td><span class="kutu yari">…</span></td><td>Maaş yazısı / son 3 bordro</td><td class="kaynak kurum">Kurum → Belge talebi</td><td><span class="rz mavi">Onayda</span></td><td class="sonuk">BT-2026-0062</td><td></td></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>SGK hizmet dökümü (barkodlu)</td><td class="kaynak edev">e-Devlet</td><td><span class="rz ok">Tamam</span></td><td class="sonuk">17.10.2026</td><td>📄</td></tr>
+        <tr><td><span class="kutu"></span></td><td>Banka hesap dökümü (son 3 ay, kaşeli)</td><td class="kaynak pers">Personel</td><td><span class="rz kir">Eksik</span></td><td></td><td><button class="btn k">📱 Portaldan iste</button></td></tr>
+        <tr><td><span class="kutu"></span></td><td>Seyahat sağlık sigortası (≥ 30 000 €)</td><td class="kaynak pers">Personel</td><td><span class="rz kir">Eksik</span></td><td></td><td><button class="btn k">📱 Portaldan iste</button></td></tr>
+        <tr><td><span class="kutu on">✓</span></td><td>Davet / kongre kayıt belgesi</td><td class="kaynak pers">Personel</td><td><span class="rz ok">Tamam</span></td><td class="sonuk">ESC kayıt onayı</td><td>📄</td></tr>
+        <tr><td><span class="kutu"></span></td><td>Uçak + otel rezervasyonu</td><td class="kaynak pers">Personel</td><td><span class="rz kir">Eksik</span></td><td class="sonuk">kurum öderse: satınalma talebi</td><td></td></tr>
+      </table></div>
+      <div>
+        <div class="grp"><div class="gb">ℹ Nasıl çalışır</div><div class="ic"><ul class="liste duz">
+          <li>Ülke + vize türü seçilince belge listesi <b>ülke şablonundan</b> gelir (İK tanımlar).</li>
+          <li><b>Kurum</b> satırları otomatik <b>Belge talebi</b> açar; hazırlanınca burada tiklenir.</li>
+          <li><b>Personel</b> satırları portalda görünür, yüklenince İK onaylar.</li>
+          <li>Özlükte geçerli belge (pasaport, fotoğraf) varsa <b>yeniden istenmez</b>.</li>
+        </ul></div></div>
+        <div class="grp"><div class="gb">🕘 Başvuru akışı</div><div class="ic"><div class="zaman">
+          <div class="ok">Başvuru açıldı <small>· 10.10.2026 · İK</small></div>
+          <div class="ok">İzin talebi onaylandı <small>· 12.10</small></div>
+          <div class="ok">Çalışma belgesi teslim <small>· 14.10</small></div>
+          <div class="sari">Eksik 3 belge — personele hatırlatıldı <small>· bugün</small></div>
+          <div>Konsolosluk randevusu <small>· 06.11 10:30</small></div>
+          <div>Sonuç: pasaport teslim / vize no gir</div>
+        </div></div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn primary">📦 Dosyayı hazırla (PDF + kapak listesi)</button>
+          <button class="btn">✔ Vize sonucu gir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAREKETLER -->
+  <div class="panel" data-panel="gecmis" hidden>
+    <div class="dg"><table>
+      <tr><th>Tarih</th><th>Belge</th><th>İşlem</th><th>Yapan</th></tr>
+      <tr><td>bugün 09:12</td><td>Banka IBAN bilgi formu</td><td>Portaldan yüklendi — onay bekliyor</td><td>Personel</td></tr>
+      <tr><td>bugün 08:00</td><td>Vize VZ-2026-0007</td><td>3 eksik belge için hatırlatma</td><td>Sistem</td></tr>
+      <tr><td>05.10.2026</td><td>Mesleki sorumluluk sigortası</td><td>Süresi doldu — İK + bölüm sorumlusuna bildirim</td><td>Sistem</td></tr>
+      <tr><td>17.10.2026</td><td>SGK hizmet dökümü</td><td>e-Devlet'ten eklendi</td><td>İK — Merve S.</td></tr>
+      <tr><td>01.12.2025</td><td>Tabip odası kayıt belgesi</td><td>Yenilendi (2026)</td><td>İK — Merve S.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="statusbar"><span>Şablon: Hekim — tam zamanlı (18 belge)</span><span>Son kontrol: bugün 08:00</span><span class="sp">Belge erişimi loglanır</span></div>
+</div>
+
+<div class="ust-baslik">2 · İK › Belge Takip Listesi (tüm personel)</div>
+<div class="win">
+  <div class="title">📋 Belge Takip — Eksik / Süresi Dolan <span class="sp">İK › Personel › Belge Takibi</span></div>
+  <div class="toolbar">
+    <span class="rz kir">Eksik 41</span><span class="rz kir">Süresi doldu 9</span><span class="rz sari">60 gün içinde 23</span><span class="rz mavi">Onay bekleyen yükleme 6</span><span class="rz mor">Açık vize başvurusu 2</span>
+    <div class="sp"></div>
+    <button class="btn">📤 Seçililere hatırlat</button><button class="btn">⬇ Excel</button>
+  </div>
+  <div class="dg" style="border:none;border-radius:0"><table>
+    <tr><th>Personel</th><th>Bölüm</th><th>Şablon</th><th>Tamamlanma</th><th>Eksik</th><th>Doldu</th><th>Yaklaşan</th><th>En acil</th></tr>
+    <tr><td>Prof.Dr. Aslı DEMİR</td><td>Kardiyoloji</td><td>Hekim</td><td>%72</td><td class="yuk">3</td><td class="yuk">1</td><td>2</td><td><span class="rz kir">Sorumluluk sigortası −14 gün</span></td></tr>
+    <tr><td>Hem. Esra KOÇ</td><td>Dahiliye</td><td>Hemşire</td><td>%88</td><td class="yuk">1</td><td>0</td><td>1</td><td><span class="rz sari">Hepatit B antikor 21 gün</span></td></tr>
+    <tr><td>Tek. Burak ŞEN</td><td>Radyoloji</td><td>Radyoloji teknisyeni</td><td>%65</td><td class="yuk">2</td><td class="yuk">1</td><td>0</td><td><span class="rz kir">Dozimetre raporu doldu</span></td></tr>
+    <tr><td>Ayşe DURMAZ</td><td>Banko</td><td>İdari</td><td>%94</td><td class="yuk">1</td><td>0</td><td>0</td><td><span class="rz kir">İkametgâh eksik</span></td></tr>
+    <tr><td>Dr. Lena WEBER</td><td>Acil</td><td>Hekim — yabancı uyruklu</td><td>%80</td><td>0</td><td>0</td><td>1</td><td><span class="rz sari">Çalışma izni 55 gün</span></td></tr>
+  </table></div>
+  <div class="statusbar"><span>5 / 214 personel gösteriliyor — yalnız eksiği olanlar</span></div>
+</div>
+
+<div class="not">
+  <b>Kurgu.</b> Belge listesi personele elle yazılmaz: <b>belge şablonu</b> (görev / unvan / çalışma şekline bağlı — hekim, hemşire, radyoloji teknisyeni, yabancı uyruklu…) neyin zorunlu olduğunu, geçerlilik süresini ve
+  hatırlatma kuralını verir. Personel kartının <b>Belgeler</b> sekmesi şablonla eldeki belgeleri karşılaştırır: <span class="rz ok">tamam</span> <span class="rz kir">eksik / doldu</span> <span class="rz sari">yaklaşıyor</span>.<br>
+  • <b>Süresi dolan zorunlu belge</b> için görev kuralı tanımlanabilir: nöbet / ameliyat / çalışma planına yazarken uyarı ya da engel.<br>
+  • <b>Vize başvurusu</b>: ülke + vize türü şablonu; "Kurum" satırları <code>Belge Talebi</code> (mevcut İK modülü) açar, "Personel" satırları portalda istenir, "e-Devlet" barkodlu belgedir. Özlükte geçerli olan yeniden istenmez. "Dosyayı hazırla" hepsini kapak listesiyle tek PDF yapar.<br>
+  • Dosyalar mevcut belge deposunda; her erişim ve onay işlem loguna yazılır. Liste (2) İK'nın günlük kontrol ekranı.
+</div>
+
+<script>
+  document.querySelectorAll('#icsek .isk').forEach(s => s.onclick = () => {
+    document.querySelectorAll('#icsek .isk').forEach(x => x.classList.toggle('on', x === s));
+    document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== s.dataset.p);
+  });
+  document.querySelectorAll('#ozet .kart').forEach(k => k.onclick = () => {
+    document.querySelectorAll('#ozet .kart').forEach(x => x.classList.toggle('on', x === k));
+    const f = k.dataset.f;
+    document.querySelectorAll('#tablo tr[data-d]').forEach(r => r.hidden = f !== 'hep' && r.dataset.d !== f);
+    document.querySelectorAll('#tablo tr.grup').forEach(g => {
+      let n = g.nextElementSibling, gorunur = false;
+      while (n && !n.classList.contains('grup')) { if (!n.hidden) gorunur = true; n = n.nextElementSibling; }
+      g.hidden = !gorunur;
+    });
+  });
+</script>
+</body>
+</html>
