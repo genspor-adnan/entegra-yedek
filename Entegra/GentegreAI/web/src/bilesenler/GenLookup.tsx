@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
+import { SesDugmesi } from './SesDugmesi';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'stok' ... */
@@ -149,6 +150,8 @@ export function GenLookup({
                   defaultValue=""
                   onChange={e => yaz(e.target.value)}
                 />
+                {/* SESLE ARA (19.10.2026): söylenen kutuya yazılır, arama aynen çalışır. */}
+                <SesDugmesi onMetin={m => { if (kutu.current) kutu.current.value = m; yaz(m) }} />
               </div>
             </div>
 

@@ -26,6 +26,7 @@ import { EFaturaMenusu } from './efatura/EFaturaMenusu';
 import { GelenMenusu } from './efatura/GelenMenusu';
 import { useListeVerisi } from './grid/useListeVerisi';
 import { useKolonTercihi } from './grid/kolonTercihi';
+import { SesDugmesi } from './SesDugmesi';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'belge', 'stok' ... */
@@ -289,6 +290,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const [kullaniciGrup, setKullaniciGrup] = useState<string | null>(varsayilanGrup ?? null);
   /** Kod suzgeci combosunun secimi ('' = tumu). Disaridan verilmisse o gecer. */
   const [kodIcDeger, setKodIcDeger] = useState('');
+  /** Liste arama kutusu - sesle aramada değer buraya yazılır (kutu denetimsiz). */
+  const aramaKutusu = useRef<HTMLInputElement | null>(null);
   const kodSuzgecDeger = kodDisDeger ?? kodIcDeger;
   const setKodSuzgecDeger = (v: string) => (onKodSuzgec ? onKodSuzgec(v) : setKodIcDeger(v));
   // Tarayicida saklanan tercihler (satir yuksekligi + yan panel) kendi
@@ -684,10 +687,12 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
         {!aramaGizli && (
         <div className="ara-kutu dar">
           <span>🔍</span>
-          <input type="search"
+          <input type="search" ref={aramaKutusu}
             placeholder={aramaIpucu} title={aramaIpucu}
             onChange={e => aramaDegisti(e.target.value)}
           />
+          {/* SESLE ARA (19.10.2026, kullanıcı: "hasta listesi aramada mic olsun") - bütün listelerde. */}
+          <SesDugmesi onMetin={m => { if (aramaKutusu.current) aramaKutusu.current.value = m; aramaDegisti(m) }} />
         </div>
         )}
 

@@ -41,7 +41,8 @@ const HATA: Record<string, string> = {
 };
 
 /** `onMetin` her ara ve son sonuçta söylenenin tamamıyla çağrılır. */
-export function useSesliGiris(onMetin: (metin: string) => void) {
+export function useSesliGiris(onMetin: (metin: string) => void, ayar?: { surekli?: boolean }) {
+  const surekli = !!ayar?.surekli;
   const [dinliyor, setDinliyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const t = useRef<Taniyici | null>(null);
@@ -54,7 +55,8 @@ export function useSesliGiris(onMetin: (metin: string) => void) {
     if (!S) { setHata('Bu tarayıcı ses tanımayı desteklemiyor (Chrome ya da Edge kullanın).'); return }
     t.current?.abort();
     const r = new S();
-    r.lang = 'tr-TR'; r.continuous = false; r.interimResults = true;
+    // SÜREKLİ (uzun metin diktesi): konuşma arası durmaz, kullanıcı yeniden basınca durur.
+    r.lang = 'tr-TR'; r.continuous = surekli; r.interimResults = true;
     r.onresult = o => {
       let metin = '';
       for (let i = 0; i < o.results.length; i++) metin += o.results[i][0].transcript;
@@ -64,7 +66,7 @@ export function useSesliGiris(onMetin: (metin: string) => void) {
     r.onend = () => { setDinliyor(false); if (t.current === r) t.current = null };
     t.current = r; setHata(null); setDinliyor(true);
     try { r.start() } catch { setDinliyor(false) }
-  }, []);
+  }, [surekli]);
   // Bileşen kapanırken dinleme sürmesin (mikrofon açık kalmasın).
   useEffect(() => () => { t.current?.abort() }, []);
   return { dinliyor, hata, baslat, durdur, destek: sesliGirisVar() };

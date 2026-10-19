@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { makroKullanildi, type Makro } from './muayeneMakro';
 import { c } from '../dil/ceviri';
+import { SesDugmesi } from './SesDugmesi';
 
 /**
  * MAKROLU METİN KUTUSU (kullanıcı 14.10.2026: "metin makrosu edite rozet içinde gelse ve sağında
@@ -58,13 +59,18 @@ function imleciKoy(dugum: Node, ofset: number) {
   sec.removeAllRanges(); sec.addRange(r);
 }
 
-export function MakroluMetin({ alan, deger, yaz, makrolar, salt }: {
+export function MakroluMetin({ alan, deger, yaz, makrolar, salt, ses }: {
   alan: string;
   deger: string;
   yaz(v: string): void;
   makrolar: readonly Makro[];
   salt?: boolean;
+  /** MİKROFON (kullanıcı 19.10.2026: "muayenede şikâyet ve hikâyede mikrofon"): kutunun içinde sağda;
+      söylenen mevcut metnin SONUNA eklenir (sürekli dikte, yeniden basınca durur). */
+  ses?: boolean;
 }) {
+  /** Dikte başladığında kutudaki metin - söylenen bunun ardına eklenir. */
+  const dikteTabani = useRef<string | null>(null);
   const kok = useRef<HTMLDivElement | null>(null);
   /** Son yazdığımız değer: dışarıdan gelen değişikliği kendi yazdığımızdan ayırmak için. */
   const sonYazilan = useRef<string | null>(null);
@@ -139,7 +145,7 @@ export function MakroluMetin({ alan, deger, yaz, makrolar, salt }: {
     makroKoy(m, r);
   };
 
-  return (
+  const kutu = (
     <div ref={kok} className={`mlm${salt ? ' salt' : ''}`} data-alan={alan}
          contentEditable={!salt} suppressContentEditableWarning role="textbox" aria-multiline="true"
          // ETİKET ETKİNLEŞMESİ YOK: kutu <label> içinde ve form girdisi değil - tık etiketin
@@ -147,5 +153,19 @@ export function MakroluMetin({ alan, deger, yaz, makrolar, salt }: {
          onClick={e => e.preventDefault()}
          onInput={bildir} onKeyDown={tus}
          onPaste={e => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')) }} />
+  );
+  if (!ses || salt) return kutu;
+  return (
+    <div className="mlm-ses">
+      {kutu}
+      <SesDugmesi surekli baslik="Konuşarak yaz (söylenen sona eklenir)"
+                  // Her yeni dikte o anki metinden başlar (önceki diktenin üstüne yazmaz).
+                  onBasla={() => { dikteTabani.current = kok.current ? metneCevir(kok.current) : deger }}
+                  onMetin={metin => {
+                    if (dikteTabani.current === null) dikteTabani.current = deger;
+                    const taban = dikteTabani.current.replace(/\s+$/, '');
+                    yaz(taban ? `${taban} ${metin}` : metin);
+                  }} />
+    </div>
   );
 }

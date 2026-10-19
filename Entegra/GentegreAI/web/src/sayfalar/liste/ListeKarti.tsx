@@ -741,7 +741,8 @@ export function ListeKarti({
         // MAKRO ROZETLİ METİN (kullanıcı 14.10.2026): makro alanları rozet tutabilen kutu; değer düz metin.
         alanGirdisi={muayeneKarti
           ? (ad, d, yaz, salt) => MAKRO_ALANLARI.has(ad)
-              ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt} />
+              ? <MakroluMetin alan={ad} deger={d} yaz={yaz} makrolar={makrolar} salt={salt}
+                             ses={ad === 'sikayet' || ad === 'hikaye'} />
               // KONTROL İHTİYACI (kullanıcı 15.10.2026): gün kutusunun solunda Yok / Var; gün yalnız Var'da.
               : ad === 'kontrolOnerisiGun' ? <KontrolGunGirdisi deger={d} yaz={yaz} salt={salt} />
               : undefined

@@ -8527,3 +8527,11 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 :root[data-ana-arka="resim"] .bsl .bsl-sade-alt, :root[data-ana-arka="resim"] .bsl-sade .bsl-sade-alt {
   display: table; margin-left: auto; margin-right: auto; padding: 2px 12px; border-radius: 10px;
   background: color-mix(in srgb, var(--yuz) 82%, transparent); color: var(--yazi) }
+/* SESLE YAZ DÜĞMESİ (19.10.2026): arama kutularının ve uzun metin alanlarının içinde, sağda. */
+.ses-dugme { flex: none; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center }
+.ses-dugme:hover { background: var(--yuz2) }
+.ses-dugme.acik { background: var(--hatazem); animation: palet-mik-nabiz 1.1s ease-in-out infinite }
+.ses-dugme.hatali { box-shadow: 0 0 0 1px var(--hata) inset }
+.mlm-ses { position: relative }
+.mlm-ses > .ses-dugme { position: absolute; top: 3px; right: 3px }
+.mlm-ses > .mlm { padding-right: 32px }
