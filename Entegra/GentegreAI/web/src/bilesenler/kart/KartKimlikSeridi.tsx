@@ -128,6 +128,8 @@ export function KartKimlikSeridi({
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: kaynak === 'personel'
                    ? '0.5fr repeat(5, minmax(0, 1fr))'
+                   // HASTADA ilk sütun Kimlik No - %40 dar (kullanıcı 19.10.2026: "kimlikno editi %40 azalt").
+                   : kaynak === 'hasta' ? 'minmax(0, 0.6fr) repeat(4, minmax(0, 1fr))'
                    : 'repeat(5, minmax(0, 1fr))' }}>
               {/* HASTADA "Dosya No" EDITI HIC YOK (kullanici): numara
                   OTOMATIK verilir - yeni kayitta da sorulmaz. Kayitli kartta
