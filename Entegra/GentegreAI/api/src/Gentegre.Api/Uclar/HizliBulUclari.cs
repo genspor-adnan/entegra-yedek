@@ -1,4 +1,5 @@
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 
@@ -85,6 +86,80 @@ public static class HizliBulUclari
                 o => new { tur = o.GetString(0), id = o.GetInt32(1), altId = o.GetInt32(2), ad = o.GetString(3), bilgi = o.GetString(4) },
                 iptal);
             return Results.Ok(new { sonuclar = sonuclar.Take(15) });
+        }).RequireAuthorization().WithTags("Hızlı bul");
+
+        // ------------------------------------------------------------ cümle komutu --
+        // "ERCAN TEMEL HASTA KARTI AÇ" (kullanıcı 19.10.2026: "ctrl k aramada 'Ercan Temel hasta kartı aç'
+        //   deyince açsın.. en son gelen", "hep o modülle ilgili son işlemi getirmeli"). Ad kelime kelime
+        //   eşleşir (fn_ara_metin: Türkçe harf duyarsız, liste aramasıyla aynı); modül o hastanın EN SON
+        //   kaydını verir. Birden çok hasta eşleşirse o modülde en son işlemi olan kazanır. Her modül kendi
+        //   veri yetkisine bağlı; şube kolonu olan kayıt aktif şubeyle süzülür.
+        yol.MapGet("/api/hizli-bul/son", async (string? ad, string? modul, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var kelimeler = (ad ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(k => k.Length >= 2).Take(5).ToList();
+            if (kelimeler.Count == 0) return Results.Ok(new { sonuc = (object?)null });
+            var y = baglam.Yetkiler;
+            var (yetki, sql) = (modul ?? "") switch
+            {
+                "hasta" => ("hasta", """
+                    select 'hasta', h.id, h.ad, 'Hasta · ' || h.kod
+                      from h
+                     order by (select max(b.belge_tarihi) from public.belge b
+                                where b.taraf_id = h.id and b.tur = 19 and b.tipi = 30) desc nulls last, h.id desc
+                     limit 1
+                    """),
+                "basvuru" => ("belge", """
+                    select 'basvuru', b.id, h.ad, 'Son başvuru · ' || b.belge_no || ' · ' || to_char(b.belge_tarihi, 'DD.MM.YYYY')
+                      from public.belge b join h on h.id = b.taraf_id
+                     where b.tur = 19 and b.tipi = 30 and (@p0 = 0 or b.sube_id = @p0)
+                     order by b.belge_tarihi desc, b.id desc limit 1
+                    """),
+                "randevu" => ("randevu", """
+                    select 'randevu', r.id, h.ad, 'Son randevu · ' || to_char(r.baslangic, 'DD.MM.YYYY HH24:MI')
+                      from public.randevu r join h on h.id = r.hasta_id
+                     where (@p0 = 0 or r.sube_id = @p0)
+                     order by r.baslangic desc, r.id desc limit 1
+                    """),
+                "muayene" => ("muayene", """
+                    select 'muayene', m.id, h.ad, 'Son muayene · ' || m.muayene_no
+                      from public.muayene m join h on h.id = m.taraf_id
+                     where m.tur <> 3 and (@p0 = 0 or m.sube_id = @p0)
+                     order by m.id desc limit 1
+                    """),
+                "recete" => ("muayene", """
+                    select 'recete', r.id, h.ad, 'Son reçete · ' || r.recete_no
+                      from public.recete r join h on h.id = r.hasta_id
+                     where (@p0 = 0 or r.sube_id = @p0)
+                     order by r.id desc limit 1
+                    """),
+                "lab" => ("lab", """
+                    select 'lab', l.id, h.ad, 'Son lab istemi · ' || l.istem_no
+                      from public.lab_istem l join h on h.id = l.taraf_id
+                     where (@p0 = 0 or l.sube_id = @p0)
+                     order by l.id desc limit 1
+                    """),
+                _ => ("", ""),
+            };
+            if (sql == "") throw GentegreHatasi.Dogrulama("Bilinmeyen modül.");
+            if (!y.Var(yetki, Islem.Gor)) throw GentegreHatasi.Yasak("Bu kayda yetkiniz yok.");
+
+            // Hasta adayları: her kelime adın / soyadın / unvanın içinde (sabit SQL, kelimeler parametre).
+            var kosul = string.Join(" and ", kelimeler.Select((_, i) =>
+                $"public.fn_ara_metin(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '') || ' ' || coalesce(t.unvan, '')) like '%' || public.fn_ara_metin(@p{i + 1}) || '%'"));
+            var tam = $"""
+                with h as (select t.id, t.kod, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as ad
+                             from public.taraf t where t.hasta = 1 and {kosul})
+                {sql}
+                """;
+            var par = new List<object?> { baglam.SubeId ?? 0 };
+            par.AddRange(kelimeler);
+            var sonuc = (await veri.ListeAsync(tam, par,
+                o => new { tur = o.GetString(0), id = o.GetInt32(1), altId = 0, ad = o.GetString(2), bilgi = o.GetString(3) },
+                iptal)).FirstOrDefault();
+            return Results.Ok(new { sonuc });
         }).RequireAuthorization().WithTags("Hızlı bul");
     }
 }

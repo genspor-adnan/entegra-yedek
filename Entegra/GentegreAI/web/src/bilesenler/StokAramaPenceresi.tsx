@@ -8,6 +8,7 @@ import { aramaSirala } from './aramaSirasi';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { onay } from './mesaj';
 import { c } from '../dil/ceviri';
+import { SesDugmesi } from './SesDugmesi';
 
 
 /** Satir turu: yalniz ikon gosterilir, adi baslikta (title) kalir. */
@@ -567,6 +568,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                 onChange={e => yaz(e.target.value)}
                 onKeyDown={tus}
               />
+              {/* SESLE ARA (kullanıcı 19.10.2026: "stok hizmet aramada mic gelmemiş"). */}
+              <SesDugmesi onMetin={m => { yaz(m); kutu.current?.focus() }} />
             </div>
 
             {yukleniyor && <span className="arama-bekliyor">{c('Aranıyor…')}</span>}

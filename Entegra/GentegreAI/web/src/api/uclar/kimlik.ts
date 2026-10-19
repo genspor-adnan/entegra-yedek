@@ -43,6 +43,10 @@ export const kimlikUclari = {
    */
   marka: () => istek<{ urunModu: number; kurumAdi?: string; logoVar?: boolean }>('/api/kimlik/marka'),
   /** HIZLI BUL (16.10.2026): Ctrl+K'ya yazılan numarayla kayıt (dosya / TC / protokol / muayene / reçete / rapor / lab no). */
+  /** Cümle komutu ("Ercan Temel başvuru kartı aç"): hastanın o modüldeki EN SON kaydı. */
+  hizliBulSon: (ad: string, modul: string) =>
+    istek<{ sonuc: { tur: string; id: number; altId: number; ad: string; bilgi: string } | null }>(
+      `/api/hizli-bul/son?ad=${encodeURIComponent(ad)}&modul=${encodeURIComponent(modul)}`).then(y => y.sonuc),
   hizliBul: (q: string) => istek<{ sonuclar: { tur: string; id: number; altId: number; ad: string; bilgi: string }[] }>(
     `/api/hizli-bul?q=${encodeURIComponent(q)}`),
 

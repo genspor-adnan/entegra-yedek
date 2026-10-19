@@ -109,7 +109,37 @@ const KAYIT_YOLU: Record<string, { yol: (id: number) => string; liste: string; i
   rapor:   { yol: id => `/muayene/${id}`,   liste: '/muayene',   ikon: '📄' },
   recete:  { yol: id => `/recete/${id}`,    liste: '/recete',    ikon: '💊' },
   lab:     { yol: id => `/lab-istem/${id}`, liste: '/lab-istem', ikon: '🧪' },
+  randevu: { yol: id => `/randevu/${id}`,   liste: '/randevu',   ikon: '📅' },
 };
+
+/**
+ * CÜMLE KOMUTU (kullanıcı 19.10.2026: "'Ercan Temel hasta kartı aç' deyince açsın.. en son gelen",
+ * "'Ercan Temel başvuru kartı aç' veya randevu kartı aç da diyebilirim", "hep o modülle ilgili son
+ * işlemi getirmeli"). Yazılan ya da mikrofonla söylenen "<ad soyad> <modül> [kartı] [aç]" tanınır;
+ * sunucu hastanın o modüldeki EN SON kaydını verir (/api/hizli-bul/son). Sonuç "Kayıtlar"ın en üstünde.
+ */
+const CUMLE_MODUL: Record<string, { modul: string; ad: string }> = {
+  hasta: { modul: 'hasta', ad: 'hasta kartı' },
+  basvuru: { modul: 'basvuru', ad: 'son başvuru' }, kabul: { modul: 'basvuru', ad: 'son başvuru' },
+  randevu: { modul: 'randevu', ad: 'son randevu' },
+  muayene: { modul: 'muayene', ad: 'son muayene' },
+  recete: { modul: 'recete', ad: 'son reçete' },
+  lab: { modul: 'lab', ad: 'son lab istemi' }, laboratuvar: { modul: 'lab', ad: 'son lab istemi' },
+  tahlil: { modul: 'lab', ad: 'son lab istemi' },
+};
+/** "ercan temel başvuru kartı aç" -> { ad: 'ercan temel', modul: 'basvuru' }; kalıp değilse null. */
+export function cumleCoz(metin: string): { ad: string; modul: string; modulAd: string } | null {
+  const sade = metin.toLocaleLowerCase('tr').replace(/[.!?,]+$/g, '').trim()
+    .replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ı/g, 'i');
+  const e = /^(.+?)\s+(hasta|basvuru|kabul|randevu|muayene|recete|lab|laboratuvar|tahlil)(?:\s+kart\S*)?(?:\s+(?:ac|goster|getir))?$/.exec(sade);
+  if (!e) return null;
+  const ad = e[1].trim();
+  if (ad.replace(/\s/g, '').length < 3) return null;
+  const m = CUMLE_MODUL[e[2]];
+  // Ad orijinal yazımıyla gider (sunucu fn_ara_metin ile eşleştirir): ilk N kelime.
+  const kelime = ad.split(/\s+/).length;
+  return { ad: metin.trim().split(/\s+/).slice(0, kelime).join(' '), modul: m.modul, modulAd: m.ad };
+}
 
 /** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
@@ -180,6 +210,26 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
 
+  const [cumleKaydi, setCumleKaydi] = useState<Oge[]>([]);
+  useEffect(() => {
+    const cz = acik ? cumleCoz(arama) : null;
+    if (!cz) { setCumleKaydi([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      void api.hizliBulSon(cz.ad, cz.modul).then(s => {
+        if (iptal) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        setCumleKaydi(s && KAYIT_YOLU[s.tur] && menude.has(KAYIT_YOLU[s.tur].liste)
+          ? [{ bolum: 'Kayıtlar', tur: 'ekran', anahtar: `c${s.tur}${s.id}`, ad: `${s.ad} — ${c(cz.modulAd)}`,
+               grup: s.bilgi, yol: KAYIT_YOLU[s.tur].yol(s.id), ikon: KAYIT_YOLU[s.tur].ikon }]
+          // BULUNAMADI da söylenir: kullanıcı (özellikle sesle) cümlenin anlaşıldığını görsün.
+          : [{ bolum: 'Kayıtlar', tur: 'komut', anahtar: 'c-yok', ad: `${cz.ad}: ${c(cz.modulAd)} ${c('bulunamadı')}`,
+               grup: '', kod: '', aktif: false }]);
+      }).catch(() => { if (!iptal) setCumleKaydi([]) });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar]);
+
   const gorunen = useMemo<Oge[]>(() => {
     const q = arama.trim();
     const komutlar = ekranKomutlari?.komutlar ?? [];
@@ -230,9 +280,9 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
     // EKRAN ÖNCE: kutunun işi "şu ekrana git"; komut aynı ada sahipse altında kalsın.
     //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
-    return [...kayitlar, ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
+    return [...cumleKaydi, ...kayitlar, ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
-  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, ekranSayac]);
+  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, ekranSayac]);
 
   if (!acik) return null;
 

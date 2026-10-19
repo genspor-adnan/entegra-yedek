@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { Modal } from './Modal';
 import { c } from '../dil/ceviri';
+import { SesDugmesi } from './SesDugmesi';
 
 /**
  * KAYNAK ARAMA PENCERESİ — bir liste kaynağında (ICD, ilaç, tetkik…) arayıp
@@ -265,6 +266,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
             <span>🔍</span>
             <input type="search" ref={kutu} value={metin} placeholder={c('Kod ya da ad…')}
                    onChange={e => { setMetin(e.target.value); setKip('') }} />
+            <SesDugmesi onMetin={m => { setMetin(m); setKip('') }} />
           </span>
           <button type="button" className={`d${kip === 'sik' ? ' bir' : ''}`}
                   onClick={() => { setMetin(''); setKip(kip === 'sik' ? '' : 'sik') }}>
