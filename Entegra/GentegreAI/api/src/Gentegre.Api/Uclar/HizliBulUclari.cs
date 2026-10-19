@@ -147,8 +147,22 @@ public static class HizliBulUclari
             if (!y.Var(yetki, Islem.Gor)) throw GentegreHatasi.Yasak("Bu kayda yetkiniz yok.");
 
             // Hasta adayları: her kelime adın / soyadın / unvanın içinde (sabit SQL, kelimeler parametre).
-            var kosul = string.Join(" and ", kelimeler.Select((_, i) =>
-                $"public.fn_ara_metin(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '') || ' ' || coalesce(t.unvan, '')) like '%' || public.fn_ara_metin(@p{i + 1}) || '%'"));
+            // NUMARA (kullanıcı 19.10.2026: "hasta adı dışında kimlik no veya tel no da olabilir"): ad yerine
+            //   rakam içeren bir değer yazıldıysa (TC kimlik, telefon, dosya no) kelimeler birleşip tek değer
+            //   olur: kimlik no TAM, dosya no TAM, telefon rakamları (cep / sabit) İÇİNDE.
+            var numara = kelimeler.Any(k => k.Any(char.IsDigit));
+            string kosul;
+            if (numara)
+            {
+                var deger = string.Concat(kelimeler);
+                kelimeler = [deger];
+                kosul = "(t.vkno = @p1 or upper(t.kod) = upper(@p1)"
+                      + " or (length(public.fn_telefon_rakam(@p1)) >= 7 and (public.fn_telefon_rakam(t.cep_tel) like '%' || public.fn_telefon_rakam(@p1) || '%'"
+                      + " or public.fn_telefon_rakam(t.telefon) like '%' || public.fn_telefon_rakam(@p1) || '%')))";
+            }
+            else
+                kosul = string.Join(" and ", kelimeler.Select((_, i) =>
+                    $"public.fn_ara_metin(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '') || ' ' || coalesce(t.unvan, '')) like '%' || public.fn_ara_metin(@p{i + 1}) || '%'"));
             var tam = $"""
                 with h as (select t.id, t.kod, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as ad
                              from public.taraf t where t.hasta = 1 and {kosul})

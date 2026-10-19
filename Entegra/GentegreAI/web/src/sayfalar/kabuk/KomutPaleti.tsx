@@ -131,11 +131,15 @@ const CUMLE_MODUL: Record<string, { modul: string; ad: string }> = {
 export function cumleCoz(metin: string): { ad: string; modul: string; modulAd: string } | null {
   const sade = metin.toLocaleLowerCase('tr').replace(/[.!?,]+$/g, '').trim()
     .replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ı/g, 'i');
-  const e = /^(.+?)\s+(hasta|basvuru|kabul|randevu|muayene|recete|lab|laboratuvar|tahlil)(?:\s+kart\S*)?(?:\s+(?:ac|goster|getir))?$/.exec(sade);
+  // KISALTMA (kullanıcı 19.10.2026: "erhan savaş ran aç da diyebilirim"): modül sözcüğünün en az ilk
+  //   3 harfi yeter - ran, baş, mua, reç, has, tah; "lab" zaten tam.
+  const e = /^(.+?)\s+([a-z]{3,})(?:\s+kart\S*)?(?:\s+(?:ac|goster|getir))?$/.exec(sade);
   if (!e) return null;
   const ad = e[1].trim();
   if (ad.replace(/\s/g, '').length < 3) return null;
-  const m = CUMLE_MODUL[e[2]];
+  const anahtar = Object.keys(CUMLE_MODUL).find(k => k.startsWith(e[2]));
+  if (!anahtar) return null;
+  const m = CUMLE_MODUL[anahtar];
   // Ad orijinal yazımıyla gider (sunucu fn_ara_metin ile eşleştirir): ilk N kelime.
   const kelime = ad.split(/\s+/).length;
   return { ad: metin.trim().split(/\s+/).slice(0, kelime).join(' '), modul: m.modul, modulAd: m.ad };
