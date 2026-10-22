@@ -488,9 +488,15 @@ public static partial class KartKatalogu
                     "sayi", Yazilabilir: false, Baslik: "Dosya"),
             }, Sirala: "belge_tarihi desc nulls last, id desc", LogTabloId: LogPersonelBelge, Baslik: "Belgeler"),
             // DURUM (salt okunur): şablona göre eksik / süresi doldu / yaklaşıyor / tamam.
+            //   Ayrı sekme DEĞİL (kullanıcı 22.10.2026 "tek olsun"): Belgeler sekmesinin
+            //   üstünde özet + liste olarak çizilir (web PersonelBelgePaneli).
             new DetayTanimi("belgeDurumu", "public.v_personel_belge_durum", "personel_id", new KartAlani[]
             {
                 new("id",               "id",                "sayi",  Yazilabilir: false),
+                new("belgeTuruId",      "belge_turu_id",     "sayi",  Yazilabilir: false),
+                new("belgeId",          "belge_id",          "sayi",  Yazilabilir: false),
+                new("durum",            "durum",             "sayi",  Yazilabilir: false),
+                new("grup",             "grup",              "sayi",  Yazilabilir: false),
                 new("grupAdi",          "grup_adi",          "metin", Yazilabilir: false, Baslik: "Grup"),
                 new("belge",            "belge",             "metin", Yazilabilir: false, Baslik: "Belge"),
                 new("zorunlu",          "zorunlu",           "mantik", Yazilabilir: false, Baslik: "Zorunlu"),

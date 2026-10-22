@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import type { KartAlanMeta, KartDetayMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 import type { Deger } from './kartAlanCizim';
 
@@ -194,6 +194,9 @@ export function sekmeleriKur(secenek: {
     //   kimlik bilgisinin sagina al") - Genel sekmesinde, PersonelKimlikOzet
     //   icinde ciziliyor.
     if (personelGibiKart && d.ad === 'ozluk') return;
+    // BELGE DURUMU AYRI SEKME DEGIL (kullanici 22.10.2026 "tek olsun", mockup
+    //   personel_belge_takibi.html): Belgeler sekmesinin ustunde ozet + liste.
+    if (kaynak === 'personel' && d.ad === 'belgeDurumu') return;
     // Personel'de acil kişiler ik_karti.html mockup'ta İletişim sekmesinin altında
     // gömülü grid; ayrı sekme açılmasın.
     // YAKINLAR SEKME DEGIL (kullanici): hastada Genel sekmesinde grid,

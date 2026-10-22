@@ -40,7 +40,7 @@ import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
 import { DokumanGalerisi } from './DokumanGalerisi';
-import { PersonelBelgeDosyalari } from './kart/PersonelBelgeDosyalari';
+import { PersonelBelgePaneli } from './kart/PersonelBelgePaneli';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
@@ -1564,6 +1564,19 @@ Yine de yeni kayıt eklensin mi?`);
         />
       )}
 
+      {/* BELGELER (1135-1136, kullanici "tek olsun"): Belge Durumu ayri sekme
+          degil - ozet + sablon listesi + dosyalar gridin USTUNDE. */}
+      {aktif?.tur === 'detay' && kaynak === 'personel' && aktif.detay.ad === 'belgeler' && (
+        <PersonelBelgePaneli
+          durumlar={detaylar.belgeDurumu?.guncel ?? []}
+          saltOkunur={salt}
+          onEkle={turId => setDetaylar(t => {
+            const d = t.belgeler ?? bosDetay();
+            return { ...t, belgeler: { ...d, guncel: [...d.guncel, { belgeTuruId: turId }] } };
+          })}
+        />
+      )}
+
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
         && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
         // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
@@ -1588,14 +1601,6 @@ Yine de yeni kayıt eklensin mi?`);
         />
       )}
 
-      {/* PERSONEL BELGE DOSYASI (1136): kayıtlı belgelerin taraması. */}
-      {aktif?.tur === 'detay' && kaynak === 'personel' && aktif.detay.ad === 'belgeler' && (
-        <PersonelBelgeDosyalari
-          meta={aktif.detay}
-          satirlar={detaylar.belgeler?.guncel ?? []}
-          saltOkunur={salt}
-        />
-      )}
 
       {/* DETAY IZGARASI (mockup vital bulgular): en ustteki satir etiket+kutu
           izgarasinda duzenlenir, gecmis satirlar altta salt gorunum. */}
