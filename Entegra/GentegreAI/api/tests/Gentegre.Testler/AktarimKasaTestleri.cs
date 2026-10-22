@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using Gentegre.Veri;
 using Npgsql;
 
@@ -99,7 +99,7 @@ public sealed class AktarimKasaTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
         await t.RollbackAsync();
     }
 
-    // 1099: TL tahsilat, cari dolar ekstreli (EKSTREDEKULLAN=1, DOVIZ_KURU $); web'de karşılığı
+    // 1142: TL tahsilat, cari dolar ekstreli (EKSTREDEKULLAN=1, DOVIZ_KURU $); web'de karşılığı
     // olmayan iki Delphi türü - 81 Kupon Virmanı (yalnız cari) ve 37 Kasa Eksiği (kasa, cari yok).
     private const string KasaDoviz = """
         {"U": {"KASA": [

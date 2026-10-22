@@ -1,5 +1,5 @@
 ﻿/*
-  Update_SQL_216 - Gentegre AI aktarimi: LOKASYON ve STOKDURUM degisiklik izlemeye eklendi.
+  Update_SQL_216 - Gentegre AI aktarimi: LOKASYON, STOKDURUM, CEKLER, CEKHAREKET degisiklik izlemeye eklendi.
 
   Web aktarimi recete operasyonlarinin is merkezini LOKASYON'dan, depo stok
   bakiyesini STOKDURUM'dan okur, ama 209'daki tablo listesinde ikisi de yoktu
@@ -11,7 +11,7 @@
 
   BU BETIK HICBIR AYARI DEGISTIRMEZ. CT acik kurumda bir kez daha cagrilir:
     EXEC dbo.sp_Aktarim_Hazirla @Ac = 1
-  (acik tablolar 'zaten acik' der, yalniz yeni iki tablo acilir ve izin verilir).
+  (acik tablolar 'zaten acik' der, yalniz yeni tablolar acilir ve izin verilir).
 */
 CREATE OR ALTER PROCEDURE dbo.sp_Aktarim_Hazirla
   @Ac        bit = 1,          -- 1 ac, 0 kapat
@@ -31,7 +31,10 @@ BEGIN
     ('URETIMRECETE'), ('URETIMRECETEDETAY'), ('URETIMRECETEOPR'),
     -- 216: 209'da eksik kalan iki tablo - recete operasyonlarinin lokasyonu
     --      (is merkezi) ve depo stok bakiyesi (web stok bakiyesi acilisi)
-    ('LOKASYON'), ('STOKDURUM');
+    ('LOKASYON'), ('STOKDURUM'),
+    -- 216: cek/senet - ajanin cari bakiye mutabakati Delphi cari listesindeki
+    --      gibi cek hareketini de sayar (web'e bir kerelik ek aktarimla gelir)
+    ('CEKLER'), ('CEKHAREKET');
 
   DECLARE @Sonuc TABLE (TABLO sysname, DURUM varchar(60));
   DECLARE @Ad sysname, @Sql nvarchar(max);

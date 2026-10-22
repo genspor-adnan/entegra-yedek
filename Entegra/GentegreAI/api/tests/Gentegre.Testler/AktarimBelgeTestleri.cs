@@ -8,7 +8,7 @@ namespace Gentegre.Testler;
 /// DELPHI AKTARIMI - BELGE (1084): FATBASLIK + FATURA + STOKIZLEME, faturanın cari satırı, STOKDURUM.
 ///
 /// Delphi faturaya KASA satırı yazmaz; web ekstresi yalnız mali_hareket okur, cari
-/// satırını aktarım yazar: tutar ve dövizi Delphi cari bakiyesindeki gibi (1099:
+/// satırını aktarım yazar: tutar ve dövizi Delphi cari bakiyesindeki gibi (1142:
 /// EKSTREDEKULLAN=1 ise DOVIZ_TUTARI/DOVIZ_CINSI, değilse FATURA_TUTARI/KUR); Delphi
 /// iadesi (yön türden, 15/2 = alış iadesi) web'de karşı türün iadesi olur. Satış satırında
 /// yalnız masraf olarak bilinen kalemin hizmet karşılığı açılır; döviz ISO, KDV'li

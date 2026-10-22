@@ -1,5 +1,5 @@
 -- =============================================================================
---  1098  DELPHI AKTARIMI - PROJE KODU 40 KARAKTER (FETA geçişi)
+--  1141  DELPHI AKTARIMI - PROJE KODU 40 KARAKTER (FETA geçişi)
 --
 --  fn_aktar_proje kodu 60 karaktere kırpıyordu ama proje.kod varchar(40) -
 --  FETA'da 46 karakterlik PROJEKODU aktarımı durdurdu ("value too long for type

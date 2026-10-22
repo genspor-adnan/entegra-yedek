@@ -1,5 +1,5 @@
 -- =============================================================================
---  1099  DELPHI AKTARIMI - CARİ BAKİYESİ DÖVİZ CİNSİNDE DELPHI'DEKİ GİBİ  (FETA geçişi)
+--  1142  DELPHI AKTARIMI - CARİ BAKİYESİ DÖVİZ CİNSİNDE DELPHI'DEKİ GİBİ  (FETA geçişi)
 --
 --  FETA'da (22.10.2026) cari bakiyeleri döviz bazında Delphi'den farklı çıktı:
 --  1.591 fatura TL kesilmiş, yalnız RAPOR dövizi $ (EKSTREDEKULLAN=0). Delphi cari
@@ -128,11 +128,11 @@ begin
                                  coalesce(nullif(f.dovizkur, 0), 1) as kuru,
                                  case when coalesce(btrim(f.rapordoviz), '') = '' then public.fn_doviz_iso(f.faturadovizi)
                                       else public.fn_doviz_iso(f.rapordoviz) end as rapor,
-                                 -- 1099: cari bakiyesinin dövizi (Delphi sp_Prog_Cari_Liste / fn_Cari_Ekstre)
+                                 -- 1142: cari bakiyesinin dövizi (Delphi sp_Prog_Cari_Liste / fn_Cari_Ekstre)
                                  case when f.ekstredekullan = 1 and coalesce(btrim(f.doviz_cinsi), '') <> ''
                                       then public.fn_aktarim_doviz(f.doviz_cinsi)
                                       else public.fn_aktarim_doviz(f.kur) end as ekstre) d
-      -- 1099: İADE BELGESİ KARŞI TÜRE. Delphi'de yön TÜRDEN gelir, iadeyi malı geri
+      -- 1142: İADE BELGESİ KARŞI TÜRE. Delphi'de yön TÜRDEN gelir, iadeyi malı geri
       --   gönderen keser (GİB): 15/2 = tedarikçiye iade (alış iadesi), 11/2 = müşteriden
       --   iade (satış iadesi). Web'de iade AYNI türde ters yöndür (BelgeTuru.CikisMi):
       --   alış iadesi 11/2, satış iadesi 15/2. Depolar da yer değiştirir (web depoyu
@@ -312,7 +312,7 @@ begin
       join _fb f on f.id = w.aktarim_id
       join public.kasa_islem_turu t on t.kod = x.tur and t.cari_etkiler = 1
       cross join lateral (select public.fn_belge_cikis_mi(x.tur, x.tipi) as cikis) c
-      -- 1099: Delphi cari bakiyesi (sp_Prog_Cari_Liste): EKSTREDEKULLAN=1 ise DOVIZ_TUTARI
+      -- 1142: Delphi cari bakiyesi (sp_Prog_Cari_Liste): EKSTREDEKULLAN=1 ise DOVIZ_TUTARI
       --   (DOVIZ_CINSI), değilse FATURA_TUTARI (KUR). Yerel (TL) karşılık: KUR TL ise
       --   FATURA_TUTARI, döviz faturada TL rapor tutarı (DOVIZ_TUTARI), yoksa kurla.
       cross join lateral (
@@ -355,7 +355,7 @@ begin
 end $$;
 
 comment on function public.fn_aktar_belge(jsonb) is
-    '1084/1085/1088/1093/1099: Delphi FATBASLIK (+FATURA, +STOKIZLEME) -> belge / belge_satir / stok_izleme + faturanın cari satırı.';
+    '1084/1085/1088/1093/1142: Delphi FATBASLIK (+FATURA, +STOKIZLEME) -> belge / belge_satir / stok_izleme + faturanın cari satırı.';
 
 create or replace function public.fn_aktar_kasa(p jsonb)
 returns jsonb language plpgsql as $$
@@ -382,7 +382,7 @@ begin
         delete from _kas k where coalesce(k.islemtarihi, k.eklemetarihi) < v_bas;
         get diagnostics v_eski = row_count;
     end if;
-    -- 1099: web'de karşılığı olmayan Delphi türü (FETA: 37 Kasa Eksiği, 81 Kupon Virmanı,
+    -- 1142: web'de karşılığı olmayan Delphi türü (FETA: 37 Kasa Eksiği, 81 Kupon Virmanı,
     --   0 Mutabakat, 28/29 hediye/iade çeki tahsilatı, 39 iade çeki ödemesi, 26xx kupon
     --   tahsilatı) atılmaz: hesap türü ve yöne göre en yakın web türüne (alacak = tahsilat,
     --   borç = ödeme; yalnız cari satırı Cari Virman 49), Delphi tür adı açıklamanın başına.
@@ -472,7 +472,7 @@ begin
        and ref.gun = (r.islem_tarihi at time zone 'Europe/Istanbul')::date;
     get diagnostics v_kur112 = row_count;
 
-    -- 1099: cari bacağın dövizi Delphi cari bakiyesindeki gibi (sp_Prog_Cari_Liste):
+    -- 1142: cari bacağın dövizi Delphi cari bakiyesindeki gibi (sp_Prog_Cari_Liste):
     --   EKSTREDEKULLAN=1 ve DOVIZ_KURU dolu, işlem dövizinden farklıysa cari bu
     --   dövizde DOVIZ_TUTARI ile borçlanır/alacaklanır (ör. TL tahsilat, $ cari).
     --   Kasa/banka bacağı işlem dövizinde kalır; yerel (TL) tutar değişmez.

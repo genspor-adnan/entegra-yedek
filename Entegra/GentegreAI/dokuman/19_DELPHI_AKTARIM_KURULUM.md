@@ -106,6 +106,31 @@ Büyük veritabanında ilk kurulumu mesai dışında yapın.
 | Hareket başlangıcını değiştirme | Veri Kaynağı sekmesi → ajan hareket tablolarını yeni tarihten yeniden yükler. İleri alınırsa önceki hareketler web'de kalır. |
 | Aktarımı bitirme | Veri Kaynağı → **Web**: ajan anahtarları pasifleşir, aktarılan kayıtlar web'de yeniden düzenlenebilir olur. Sonra `servis_kur.ps1 -Kaldir`. |
 
+## 5b. Kalıcı geçiş (Delphi kapanıyor — ilk örnek FETA, 22.10.2026)
+
+Ajan yalnız çekirdek ERP'yi (cari, stok, belge, kasa, reçete) taşır. Delphi tamamen
+bırakılırken geri kalanı **bir kez** `db/araclar/aktar_ek.ps1` taşır (1143..1149):
+kullanıcılar + personel + izin + ilgili kişiler, görev / aktivite / notlar, döküman +
+ekler (IMAJ, ZLib açılır, diskteki `.OBJ` okunur) + e-Belge geçmişi (GENDEPO),
+çek / senet (+ cari etkisi), teklif, hesap planı, demirbaş. Tekrar çalıştırmak güvenli.
+
+1. Delphi'ye giriş kapatılır, son yedek alınır (FETA: geliştirme makinesinde geri yüklendi).
+2. MSSQL: `Update_SQL_216` + `mssql_hazirla.sql` (salt okur rol, CT).
+3. Yerel PG'de boş kurulum: `kur.ps1 -SadeceSema -Urun erp -Db <DB>`; `aktarim_ayar.hareket_baslangic`
+   = `1900-01-01` (bütün yıllar); `fn_aktarim_ajan_ekle(...)` → ajan `--tek-tur` (tam yükleme).
+4. `aktar_ek.ps1 -Db <DB> -MssqlDb <Delphi DB> [-DepoDb <..._GENDEPO>] [-DokumanKlasoru <GenDokuman>]`.
+5. Ajan `--mutabakat`: kayıt sayıları eşit, cari bakiye farkları açıklanmış olmalı (bkz. aşağı).
+6. `stg` şeması boşaltılır (Delphi ham verisi — geri çözülebilir parolalar dahil), veritabanı
+   dökülür, sunucuda `yayin/feta-hazirla.sh` geri yükler + nginx; sonra `yayinla.ps1 -Kurulum <ad>`.
+
+Taşınmayan / dikkat: Delphi parolaları (geri çözülebilir XOR — taşınmaz, yönetici parola atar;
+ilk girişte admin parolasını değiştirir), YETKI satırları (web ekran bazlı yetki; Delphi
+yöneticisi `yonetici`, diğerleri `atanmamis`), PDKS / vardiya / nakliye / proje aşaması /
+TEKLIFHAREKET (web'de karşılığı yok), diskte bulunmayan döküman içeriği (`icerik_yok` —
+klasör sonradan verilince 4. adım yeniden çalışır). FETA'da bilinen cari bakiye farkı:
+Delphi'de cari kartı olarak tutulan krediler (web'de kredi hesabında) ve Delphi'de silinmiş
+cariye bağlı yetim satırlar.
+
 ## 6. Sorun giderme
 
 | Belirti | Sebep / çözüm |

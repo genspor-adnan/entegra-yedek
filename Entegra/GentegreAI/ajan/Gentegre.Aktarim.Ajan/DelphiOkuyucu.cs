@@ -146,7 +146,18 @@ public sealed class DelphiOkuyucu(string baglanti)
                                       ELSE F.FATURA_TUTARI * ISNULL(NULLIF(F.DOVIZKUR, 0), 1) END
                 FROM dbo.FATBASLIK F
                WHERE F.FATURATARIH >= @bas AND F.TUR IN (8, 11, 12, 13, 15, 16, 17)
-                 AND ISNULL(F.DURUM, 0) <> 6 AND F.REHBERID >= 0) x
+                 AND ISNULL(F.DURUM, 0) <> 6 AND F.REHBERID >= 0
+              UNION ALL
+              -- Cek/senet hareketi (Delphi cari listesi): 130/141 alacak, digerleri borc.
+              --   Web'e bir kerelik ek aktarimla gelir (aktar_ek.ps1, 1147).
+              SELECT H.REHBERID, CASE WHEN H.ISLEM IN (130, 141) THEN -1 ELSE 1 END
+                               * CASE WHEN H.EKSTREDEKULLAN = 1 THEN H.TUTAR
+                                      WHEN ISNULL(C.KUR, 'TL') IN ('TL', '') THEN C.TUTAR
+                                      WHEN C.DOVIZ_KURU = 'TL' AND ISNULL(C.DOVIZ_TUTARI, 0) <> 0 THEN C.DOVIZ_TUTARI
+                                      ELSE C.TUTAR END
+                FROM dbo.CEKHAREKET H JOIN dbo.CEKLER C ON C.ID = H.CEKSENETLERID
+               WHERE H.TARIH >= @bas AND H.REHBERID > 0
+                 AND H.ISLEM IN (130, 131, 132, 134, 137, 140, 141)) x
             GROUP BY x.REHBERID
             """, new SqlParameter("@bas", bas));
         var l = new List<(long, decimal)>();

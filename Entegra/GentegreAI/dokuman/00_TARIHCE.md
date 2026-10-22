@@ -7,6 +7,17 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 22.10.2026 — FETA: Delphi'den web'e kalıcı geçiş (1141-1149, Update_SQL_216)
+
+Kullanıcı: *"46.36.201.170/feta ya son erp yi kur.. mssql de FETA ve FETA_GENDEPO dan dataları da aktar.. müşteri artık delphi/mssql yerine bu adresten devam edecek.. DB adını da FETA ver"*. Kapsam: çekirdek ERP + görevler, dökümanlar + e-Belge, personel ve diğerleri (hepsi).
+
+- Prova FETA yedeğinde aktarım hataları çıktı ve düzeltildi: proje kodu 40 karakter (1141); cari satırı Delphi cari bakiyesi kuralıyla — `EKSTREDEKULLAN`, döviz faturanın yereli (1142); **Delphi iade belgesi karşı türe** (Delphi'de yön türden: 15/2 tedarikçiye iade = web alış iadesi 11/2 — 1084'teki "bilerek farklı" kararı geri alındı, BILIM'de 203 belge cariyi ters etkiliyordu); web'de karşılığı olmayan kasa türü atılmaz (1142); LOKASYON / STOKDURUM / CEKLER / CEKHAREKET salt okur role (Update_SQL_216).
+- Ek modüller bir kerelik: `aktar_ek.ps1` + `fn_aktar_ek()` (1143-1149). Çek hareketinin cari satırı Delphi cari listesi kuralıyla yazılır (Delphi KASA'ya yazmaz).
+- FETA sonucu: kayıtlar eşit (FATBASLIK 9.684, KASA 11.161…), cari bakiye 821 cariden 14 fark (krediler, yetim satırlar); 94 kullanıcı (parolasız), 4.016 ilgili kişi, 1.139 görev/aktivite, 292 döküman + 89 ek (215 dökümanın içeriği müşterinin diskinde), 228 e-Belge, 132 çek, 86 teklif.
+- Kurulum `yayinla.ps1 -Kurulum feta` (`/feta/`, DB `FETA`, port 5183), sunucu hazırlığı `yayin/feta-hazirla.sh` (döküm geri yükleme + nginx).
+
+---
+
 ## 11.10.2026 — Giden e-Fatura / e-Arşiv Delphi'ye göre yeniden (1033)
 
 Kullanıcı: *"başvuru da belgeye dönüşüm sekmesinde e-Fatura butonu ekle.. Hazırla, önizle, gönder, pdf kaydet.. daha önce bunları yapmıştın.. onları tamamen sil.. delphi projesine bakarak bu sistemi yeniden yaz"*; *"tüm tiplere göre olsun"*.
