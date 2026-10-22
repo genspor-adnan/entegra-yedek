@@ -3,7 +3,6 @@ import { EkranSekmesiBaglami } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
 import { PersonelTalepleri } from './taleplerim/PersonelTalepleri';
 import { api, oturum } from '../api/istemci';
-import { dokumanDosyaAdi, dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
@@ -21,7 +20,7 @@ import { kartGovdesiKur } from './kart/kartGovdesi';
 import { PaketSekmesi } from './PaketSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
-import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
+import { mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
 import {
   degisenAlanlar as degisenAlanlarHesapla, kartDegistiMi,
 } from './kartDegisim';
@@ -48,9 +47,9 @@ import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
-import { RandevuErtelePenceresi } from './RandevuErtelePenceresi';
-import { RandevuSeriPenceresi } from './RandevuSeriPenceresi';
 import { KartHatirlat } from './hatirlatma/KartHatirlat';
+import { useFiyatListesiToplu } from './kart/useFiyatListesiToplu';
+import { kartAracGrubu, kartSagAraclari, type KartAracBaglami } from './kart/KartAracGruplari';
 
 interface Props {
   kaynak: string;
@@ -347,7 +346,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
-  const { kullanici, yetki: oturumYetki } = useOturum();
+  const { kullanici } = useOturum();
   // İÇERİĞE GÖRE SABİT (kullanıcı 16.10.2026: "hizmet ara ekranında yazdıklarım gitti.. belli aralıklarla
   //   refresh oluyor"): çağıranlar bu nesneleri çizimde yeniden kuruyor (URL'den gelen randevu saati /
   //   hekimi, önce sorulan hasta...). Yükleme etkisi bunlara bağlı olduğu için her üst çizimde - ör. 20 sn'lik
@@ -413,64 +412,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const [detaySayfa, setDetaySayfa] = useState<Record<string, number>>({});
   const [detayToplam, setDetayToplam] = useState<Record<string, number>>({});
   const [detaySayfaYuk, setDetaySayfaYuk] = useState<string | null>(null);
-  /** Satir gridinde secili satirlar (534) - toplu islem dugmesi ust arac
-      cubugunda, secim ise gridde yasiyor. */
-  const [seciliSatirlar, setSeciliSatirlar] = useState<ReadonlySet<number>>(new Set());
-  /** Acik toplu deger penceresi (534). */
-  const [topluCarpan, setTopluCarpan] = useState(false);
-  const [topluCarpanDeger, setTopluCarpanDeger] = useState('');
-  /** "Durum Değiştir" acilir menusu (534). */
-  const [durumMenusu, setDurumMenusu] = useState(false);
-  /** Toplu "Katkı Gir" penceresi (541). */
-  const [topluKatki, setTopluKatki] = useState(false);
-  const [topluKatkiOran, setTopluKatkiOran] = useState('');
-  /** Toplu "Fiyat Güncelle" penceresi (kullanici, Özel tarife). */
-  const [fiyatGuncelle, setFiyatGuncelle] = useState(false);
-  const [fiyatYonu, setFiyatYonu] = useState<'artir' | 'azalt'>('artir');
-  const [fiyatYuzde, setFiyatYuzde] = useState('');
-  /** SKRS tazeleme surerken dugme kilitli (535). */
-  const [skrsCalisiyor, setSkrsCalisiyor] = useState(false);
-
-  /**
-   * SUT LISTESINI SKRS AMBARINDAN TAZELE (535). Kaydedilmemis satir
-   * degisikligi varsa once sorulur: tazeleme sunucuda yapiliyor ve kart
-   * yeniden okunuyor - ekrandaki duzenleme kaybolurdu.
-   */
-  const skrsGuncelle = async () => {
-    if (typeof id !== 'number') return;
-    const durum = detaylar.satirlar;
-    if (durum) {
-      const fark = detayFarki(durum);
-      if (fark.eklenen || fark.degisen || fark.silinen) {
-        const devam = await onaySor(
-          'Kaydedilmemiş satır değişiklikleri var. SKRS güncellemesi kartı '
-          + 'yeniden okur ve bu değişiklikler kaybolur. Devam edilsin mi?');
-        if (!devam) return;
-      }
-    }
-    setSkrsCalisiyor(true);
-    try {
-      const s2 = await api.fiyatSutGuncelle(id);
-      await bilgiMesaji(s2.mesaj);
-      await yukle();
-    } catch (h) {
-      await bilgiMesaji(hataMetni(h));
-    } finally {
-      setSkrsCalisiyor(false);
-    }
-  };
-
-  /** Secili satirlarin DURUMUNU topluca yazar (534). 1 Aktif · 0 Pasif. */
-  const topluDurum = (yeni: number) => {
-    setDetaylar(t => {
-      const d = t.satirlar ?? bosDetay();
-      const guncel = d.guncel.map((s2, i) =>
-        seciliSatirlar.has(i) ? { ...s2, durum: yeni } : s2);
-      return { ...t, satirlar: { ...d, guncel } };
-    });
-    setDurumMenusu(false);
-  };
-
   /**
    * SAYFALI DETAYDA SAYFA DEGISIMI (525).
    *
@@ -549,121 +490,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     return kume;
   }, [kaynak, detaylar]);
 
-  /** Toplu uygulama sunucuya giderken dugmeler kilitli. */
-  const [topluCalisiyor, setTopluCalisiyor] = useState(false);
-
-  /**
-   * TOPLU SATIR DEGERI - SUNUCUDA (kullanici: "modalde 3 buton: seçili
-   * satıra uygula · <kategori> uygula · tüm listeye uygula").
-   *
-   * NEDEN SUNUCUDA: satir gridi 200'erlik sayfalarla geliyor (526). Kategori
-   * ve "tüm liste" kapsamlari ekranda YUKLU OLMAYAN satirlari da kapsiyor -
-   * istemcide yapilsaydi 14 bin satirlik listede yalnizca gorunen sayfa
-   * degisir, kullanici "uygulandi" mesajini gorup eksik listeyle devam
-   * ederdi. Seçili kapsam da ayni yoldan gider: uc dugmenin biri kaydedilmis,
-   * ikisi kaydedilmemis degisiklik uretseydi "Kaydet" belirsizlesirdi.
-   */
-  const topluUygula = async (
-    islem: 'carpan' | 'katki' | 'fiyat-yuzde',
-    deger: number,
-    kapsam: 'secili' | 'kategori' | 'tumu',
-    yon?: 'artir' | 'azalt',
-  ): Promise<boolean> => {
-    if (typeof id !== 'number' || !Number.isFinite(deger) || deger <= 0) return false;
-    const durum = detaylar['satirlar'];
-    // Sunucuda yazip kartI yeniden okuyoruz: ekrandaki kaydedilmemis
-    //   duzenleme kaybolur - once sorulur (SKRS tazelemesiyle ayni kural).
-    if (durum) {
-      const fark = detayFarki(durum);
-      if (fark.eklenen || fark.degisen || fark.silinen) {
-        const devam = await onaySor(
-          'Kaydedilmemiş satır değişiklikleri var. Toplu uygulama satırları '
-          + 'sunucuda günceller ve bu değişiklikler kaybolur. Devam edilsin mi?');
-        if (!devam) return false;
-      }
-    }
-    if (kapsam === 'tumu') {
-      const devam = await onaySor(
-        `Listenin TAMAMINA uygulanacak (${(detayToplam['satirlar']
-          ?? durum?.guncel.length ?? 0).toLocaleString('tr')} satır). Devam edilsin mi?`);
-      if (!devam) return false;
-    }
-    const satirIdler = kapsam === 'secili'
-      ? [...seciliSatirlar].map(i => Number(durum?.guncel[i]?.id)).filter(x => x > 0)
-      : undefined;
-    if (kapsam === 'secili' && !satirIdler?.length) {
-      await bilgiMesaji('Seçili satırların henüz kaydedilmemiş olanları toplu '
-                        + 'uygulamaya giremez - önce Kaydet.');
-      return false;
-    }
-    setTopluCalisiyor(true);
-    try {
-      const s2 = await api.fiyatTopluDeger(id, {
-        islem, deger, kapsam, satirIdler,
-        kategoriId: kapsam === 'kategori' ? satirKategori?.id : undefined, yon,
-      });
-      await bilgiMesaji(s2.mesaj);
-      setSeciliSatirlar(new Set());
-      await detaySayfaCek('satirlar', detaySayfa['satirlar'] ?? 1);
-      return true;
-    } catch (h) {
-      await bilgiMesaji(hataMetni(h));
-      return false;
-    } finally {
-      setTopluCalisiyor(false);
-    }
-  };
-
-  /**
-   * TOPLU PENCERELERIN ARAC CUBUGU: uc kapsam dugmesi sola, Kapat saga
-   * (kullanici). Hangi dugmeye basildiysa kapsam odur - pencerede ayrica
-   * "kapsam" secmek gerekmiyor.
-   */
-  const topluButonlar = (gecerli: boolean,
-                         calistir: (kapsam: 'secili' | 'kategori' | 'tumu') => void,
-                         kapat: () => void) => {
-    // DEGER BOSKEN DUGMELER PASIF DEGIL (kullanici: "butonlar da pasif
-    //   geliyor"): pencere acildiginda kutu zaten bos oluyordu ve UC dugme
-    //   birden gri geliyor, ekran bozuk gorunuyordu. Eksik deger tiklanınca
-    //   SOYLENIR - kapsam dugmesi yalniz KENDI on kosulu yoksa kilitlenir
-    //   (satir secilmemis / kategori secilmemis).
-    const dogrula = (kapsam: 'secili' | 'kategori' | 'tumu') => {
-      if (!gecerli) { void bilgiMesaji('Önce geçerli bir değer girin.'); return }
-      if (kapsam === 'secili' && seciliSatirlar.size === 0) {
-        void bilgiMesaji('Önce satırlar sekmesinden satır seçin.'); return;
-      }
-      if (kapsam === 'kategori' && !satirKategori) {
-        void bilgiMesaji('Önce satırlar sekmesindeki kategori combosundan bir dal seçin.');
-        return;
-      }
-      calistir(kapsam);
-    };
-    return (
-    <>
-      <button type="button" className="d bir"
-              disabled={topluCalisiyor}
-              title={seciliSatirlar.size === 0 ? 'Gridde satır seçilmedi' : undefined}
-              onClick={() => dogrula('secili')}>
-        {seciliSatirlar.size} satıra uygula
-      </button>
-      <button type="button" className="d"
-              disabled={topluCalisiyor}
-              title={satirKategori
-                     ? `"${satirKategori.ad}" ve alt kategorilerindeki tüm satırlar`
-                     : 'Satırlar sekmesinde kategori seçin'}
-              onClick={() => dogrula('kategori')}>
-        {satirKategori ? `${satirKategori.ad} uygula` : 'Kategoriye uygula'}
-      </button>
-      <button type="button" className="d" disabled={topluCalisiyor}
-              title="Listedeki bütün satırlar (ekranda görünmeyenler dâhil)"
-              onClick={() => dogrula('tumu')}>
-        Tüm listeye uygula
-      </button>
-      <button type="button" className="d kapat-dugmesi" onClick={kapat}>{c('Kapat')}</button>
-    </>
-    );
-  };
-
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
@@ -671,10 +497,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   const [cakisma, setCakisma] = useState<{ alanlar: string[]; guncel: Record<string, unknown> } | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
   const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
-  /** Randevu kartında Ertele penceresi (1119). */
-  const [erteleAcik, setErteleAcik] = useState(false);
-  /** Randevu kartında Tekrarla (seri randevu) penceresi. */
-  const [tekrarAcik, setTekrarAcik] = useState(false);
   /**
    * JENERIK ARAMA EKRANI ile secilen alanlar (260): hangi alan icin hangi
    * arama acik + secilen kaydin adi. Ad, lookup haritasinda olmayabilir
@@ -868,6 +690,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     }
   }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari, zorunluAlanlar, tazeleAnahtari]);
 
+  // FİYAT LİSTESİ TOPLU İŞLEMLERİ (534 / 535 / 541): düğmeler, pencereler, sunucu çağrıları kendi kancasında.
+  const { setSeciliSatirlar, araclar: fiyatTopluAraclari, pencereler: fiyatTopluPencereleri } =
+    useFiyatListesiToplu({
+      etkin: kaynak === 'fiyat-listesi', id, yeniMi, tarifeTipi: Number(deger.tarifeTipi),
+      detaylar, setDetaylar, satirToplam: detayToplam['satirlar'], satirSayfa: detaySayfa['satirlar'],
+      satirKategori, yukle, detaySayfaCek,
+    });
+
   useEffect(() => { void yukle() }, [yukle]);
 
   // BELGE TAKİBİ (1137): sunucuda belge + dosya eklendi -> kartı yeniden açmadan yalnız
@@ -1024,58 +854,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     }
     return parcalar.join('   ');
   }, [detaylar.ozluk]);
-
-  /** MERNİS'TEN GETİR (19.10.2026): kart alanları + özlük (doğum, cinsiyet, anne / baba adı, doğum yeri). */
-  const [mernisYuk, setMernisYuk] = useState(false);
-  const mernisGetir = async () => {
-    const tc = String(deger.vkno ?? '').trim();
-    if (!/^\d{11}$/.test(tc)) { setHata(c('Önce 11 haneli kimlik no girin.')); return }
-    setMernisYuk(true); setHata(null);
-    try {
-      const k = await api.mernisGetir(tc);
-      alanDegistir('ad', k.ad); alanDegistir('soyad', k.soyad);
-      setDetaylar(t => {
-        const d = t.ozluk ?? bosDetay();
-        const s0 = d.guncel[0] ?? {};
-        const dolu = (v: string | null | undefined, eski: unknown) => (v ? v : eski) as Satir[string];
-        const yeni = { ...s0, dogumTarihi: dolu(k.dogumTarihi, s0.dogumTarihi), cinsiyet: dolu(k.cinsiyet, s0.cinsiyet),
-                       babaAdi: dolu(k.babaAdi, s0.babaAdi), anaAdi: dolu(k.anaAdi, s0.anaAdi),
-                       dogumYeri: dolu(k.dogumYeri, s0.dogumYeri) };
-        return { ...t, ozluk: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
-      });
-      const sgkNotu = k.kanal === 'sgk' ? ' ' + c('SGK anne / baba adı ve doğum yerini vermez - bunları elle girin.') : '';
-      await bilgiMesaji((k.simulasyon
-        ? `${c('SİMÜLASYON verisi getirildi')} (${k.aciklama}) - ${c('gerçek kişi değildir. Kaydetmeden önce kontrol edin.')}`
-        : `${k.aciklama}: ${c('kimlik bilgileri getirildi. Kaydetmeden önce kontrol edin.')}`) + sgkNotu);
-    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
-  };
-  /** MÜSTEHAKLIK SORGUSU (MEDULA): kayıtlı hastada; sonuç mesajla. */
-  const mustehaklikSorgula = async () => {
-    if (typeof id !== 'number') return;
-    setMernisYuk(true); setHata(null);
-    try {
-      const s = await api.medulaMustehaklik({ hastaId: id });
-      const y = (s.yanit ?? {}) as Record<string, unknown>;
-      await bilgiMesaji(s.bekliyor ? c('SGK şu an yanıt vermiyor - sorgu kuyrukta, MEDULA ekranından izlenebilir.')
-        : s.kabul ? `✔ ${c('Müstehak')}${y.sigortaTuru ? ` · ${y.sigortaTuru}` : ''}${y.kapsam ? ` · ${y.kapsam}` : ''}${y.yakinlik ? ` · ${y.yakinlik}` : ''}`
-        : `✖ ${s.mesaj} (${s.kod})`);
-    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
-  };
-  /** KİMLİĞİ DOĞRULA (NVİ herkese açık servis): kimlik no + ad + soyad + doğum yılı eşleşiyor mu. */
-  const mernisDogrula = async () => {
-    const tc = String(deger.vkno ?? '').trim();
-    const yil = Number(String((detaylar.ozluk?.guncel[0]?.dogumTarihi as string | undefined) ?? '').slice(0, 4));
-    if (!/^\d{11}$/.test(tc) || !String(deger.ad ?? '').trim() || !String(deger.soyad ?? '').trim() || !yil) {
-      setHata(c('Doğrulama için kimlik no, ad, soyad ve doğum tarihi gerekli.')); return
-    }
-    setMernisYuk(true); setHata(null);
-    try {
-      const s = await api.mernisDogrula({ kimlikNo: tc, ad: String(deger.ad), soyad: String(deger.soyad), dogumYili: yil });
-      await bilgiMesaji(s.ulasilamadi ? c('NVİ doğrulama servisine şu an ulaşılamadı - daha sonra yeniden deneyin.')
-        : s.dogru ? c('✔ Kimlik bilgileri NVİ kayıtlarıyla uyuşuyor.')
-        : c('✖ Kimlik bilgileri NVİ kayıtlarıyla UYUŞMUYOR - kimlik no, ad, soyad ve doğum yılını kontrol edin.'));
-    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
-  };
 
   const kimlikAlanlari = useMemo(
     () => {
@@ -1825,6 +1603,13 @@ Yine de yeni kayıt eklensin mi?`);
     </>
   );
 
+  // KAYNAĞA ÖZEL ARAÇ GRUPLARI (kart/KartAracGruplari): Sil'in sağı ve Kapat'ın sağı.
+  const aracBaglami: KartAracBaglami = {
+    kaynak, id, yeniMi, salt, meta, deger, setDeger, alanDegistir, detaylar, setDetaylar, setHata,
+    kaydedilmemisDegisiklikVar, kaydet, basvuruAc, onKaydedildi, onKapat, gizliAlanlar, cariyeBaglaGizli,
+    cariyeBagla: () => setCariyeBaglaAcik(true),
+  };
+
   return (
     <Modal
       baslik={`${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`}
@@ -2077,92 +1862,7 @@ Yine de yeni kayıt eklensin mi?`);
             // Randevu kartında Sil renksiz: renkler Geldi / Gelmedi için (kullanıcı 17.10.2026).
             <button className={kaynak === 'randevu' ? 'd' : 'd teh'} onClick={() => void sil()}>Sil</button>
           )}
-          {/* FIYAT GUNCELLE (kullanici: "özel fiyat tipinde Sil butonu
-              sağına Fiyat Güncelle; modalde Artır/Azalt combosu ve yüzde
-              editi"). Yalniz OZEL tarifede: TTB fiyati katsayi x carpan'dan,
-              SUT fiyati SKRS ambarindan dogar - orada fiyata elle yuzde
-              uygulamak bir sonraki turetmede geri alinirdi. Secili satirlara
-              calisir, oteki toplu dugmelerle ayni kural. */}
-          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 1 && (
-            <button type="button" className="d"
-                    disabled={seciliSatirlar.size === 0}
-                    title={seciliSatirlar.size === 0
-                           ? 'Önce satırlardan seçim yapın'
-                           : `Seçili ${seciliSatirlar.size} satırın fiyatını yüzdeyle güncelle`}
-                    onClick={() => { setFiyatYuzde(''); setFiyatYonu('artir');
-                                     setFiyatGuncelle(true) }}>
-              ↕ Fiyat Güncelle{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
-            </button>
-          )}
-          {/* TOPLU CARPAN (534, kullanici: "sil butonu sagina Çarpan Gir
-              butonu ekle, sadece TTB/HUV'da gorunsun" · "carpan butonu
-              ustteki silin sagina al"): donem carpani binlerce satirda ayni -
-              tek tek yazmak is degil. Secim gridde, dugme burada. */}
-          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 2 && (
-            <button type="button" className="d"
-                    disabled={seciliSatirlar.size === 0}
-                    title={seciliSatirlar.size === 0
-                           ? 'Önce satırlardan seçim yapın'
-                           : `Seçili ${seciliSatirlar.size} satıra çarpan yaz`}
-                    onClick={() => { setTopluCarpanDeger(''); setTopluCarpan(true) }}>
-              ✖ Çarpan Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
-            </button>
-          )}
-          {/* KATKI GIR (541, kullanici: "TTB ve SUT turlerinde durum degis
-              butonu soluna Katkı Gir ekle; gelen modalde girilen orani fiyat
-              ile carpip hasta katkiyi guncelle"). Hastadan alinacak tutar
-              tarifeye gore fiyatin sabit bir orani oluyor (TSS hastasinda
-              TTB'nin, SGK'da SUT'un) - 14 bin satirda tek tek yazilmaz.
-              Ozel tarifede YOK: orada hastanin odedigi zaten fiyatin
-              kendisidir, ayrica bir katki alinmaz. */}
-          {!yeniMi && kaynak === 'fiyat-listesi'
-            && [2, 3].includes(Number(deger.tarifeTipi)) && (
-            <button type="button" className="d"
-                    disabled={seciliSatirlar.size === 0}
-                    title={seciliSatirlar.size === 0
-                           ? 'Önce satırlardan seçim yapın'
-                           : `Seçili ${seciliSatirlar.size} satıra katkı yaz`}
-                    onClick={() => { setTopluKatkiOran(''); setTopluKatki(true) }}>
-              ◈ Katkı Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
-            </button>
-          )}
-          {/* DURUM DEGISTIR (534, kullanici: "ustteki sil sagina 'Durum
-              Değiştir' butonu gir, altina menu gelsin Aktif ve Pasif,
-              secince isaretli satirlari aktif/pasif yapsin"). Fiyat listesi
-              buyuk (14 bin satir): kalemi tek tek acip durum kutusunu
-              cevirmek is degil - kategori kapatmadan da bir grup satir
-              gecici olarak kapatilabilmeli. */}
-          {!yeniMi && kaynak === 'fiyat-listesi' && (
-            <span className="durum-sec">
-              <button type="button" className="d"
-                      disabled={seciliSatirlar.size === 0}
-                      title={seciliSatirlar.size === 0
-                             ? 'Önce satırlardan seçim yapın'
-                             : `Seçili ${seciliSatirlar.size} satırın durumu`}
-                      onClick={() => setDurumMenusu(a => !a)}>
-                ◐ Durum Değiştir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''} ▾
-              </button>
-              {durumMenusu && (
-                <span className="durum-menu">
-                  <button type="button" className="durum-oge"
-                          onClick={() => topluDurum(1)}>✓ Aktif</button>
-                  <button type="button" className="durum-oge"
-                          onClick={() => topluDurum(0)}>⊘ Pasif</button>
-                </span>
-              )}
-            </span>
-          )}
-          {/* SKRS'DEN GUNCELLE (535, kullanici: "SUT fiyat tipi icin durum
-              degis saginda 'SKRS'den Güncelle' ekle, basinca SKRS'den
-              guncellesin"): SUT fiyati elle degismez (518/533) - tek mesru
-              yazma yolu bu. Ambardan okur (520), servise gitmez. */}
-          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 3 && (
-            <button type="button" className="d" disabled={skrsCalisiyor}
-                    title={c('SUT fiyatlarını SKRS ambarından tazele')}
-                    onClick={() => { void skrsGuncelle() }}>
-              {skrsCalisiyor ? '⏳ Güncelleniyor…' : '⭳ SKRS’den Güncelle'}
-            </button>
-          )}
+          {fiyatTopluAraclari}
           {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
               cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}
           {!yeniMi && ekAraclar?.(deger)}
@@ -2175,232 +1875,10 @@ Yine de yeni kayıt eklensin mi?`);
                               || deger.belgeNo || deger.kod || `#${id}`);
             return <KartHatirlat kaynak={rota} id={Number(id)} ad={ad.slice(0, 200)} />;
           })()}
-          {/* HASTA KARTI EYLEM DUGMELERI (kullanici) - Sil'in saginda.
-              MERNIS ve provizyon/mustehaklik sorgusu DIS SERVISE gider; o
-              servisler henuz bagli DEGIL, dugmeler yerlesimde duruyor ve
-              basilinca bunu acikca soyluyor - sessizce hicbir sey yapmayan
-              bir dugme, bozuk bir dugmeden daha kotu. */}
-          {/* MERNİS / KPS (kullanıcı 19.10.2026: "yeni hasta kartı bilgilerini MERNİS'ten getirebilmemiz
-              lazım"): YENİ kartta da. Getir kimlik nodan ad / soyad / doğum / cinsiyet / anne-baba adı /
-              doğum yerini doldurur (kanal sunucuda: KPS → SGK → benzetim); Doğrula elle girileni NVİ'ye
-              denetletir. Salt okunur kartta yok. */}
-          {kaynak === 'hasta' && !salt && (
-            <>
-              <button className="d" type="button" disabled={mernisYuk}
-                      title={c('Kimlik nodan ad, soyad, doğum tarihi / yeri, cinsiyet ve anne / baba adını getirir')}
-                      onClick={() => void mernisGetir()}>
-                🆔 {mernisYuk ? c('Getiriliyor…') : c('MERNİS\'ten getir')}
-              </button>
-              <button className="d" type="button" disabled={mernisYuk}
-                      title={c('Kimlik no, ad, soyad ve doğum yılını NVİ kayıtlarıyla doğrular')}
-                      onClick={() => void mernisDogrula()}>
-                ✔ {c('Kimliği doğrula')}
-              </button>
-            </>
-          )}
-          {kaynak === 'hasta' && !yeniMi && (
-            <>
-              {/* MÜSTEHAKLIK (19.10.2026): MEDULA kapısı - yetki medula.provizyon Gör (sunucuda da). */}
-              {oturumYetki('medula.provizyon', 'gor') && (
-                <button className="d" type="button" disabled={mernisYuk}
-                        title={c('SGK provizyon / müstehaklık sorgusu')}
-                        onClick={() => void mustehaklikSorgula()}>
-                  Provizyon/Müstehaklık Sorgula
-                </button>
-              )}
-              {oturumYetki('belge', 'ekle') && (
-                <button className="d yesil" type="button" onClick={() => basvuruAc()}>{c('＋ Yeni Başvuru')}</button>
-              )}
-            </>
-          )}
-          {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
-              tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
-              dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali. */}
-          {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && !deger.bagId && (
-            <button className="d" onClick={() => setCariyeBaglaAcik(true)}>🔗 Cariye Bağla</button>
-          )}
-          {/* Cek/senede ozel: YON (alinan / verilen) arac cubugunda, Kaydet'in
-              saginda (kullanici). Tek secimlik ve kagidin tum anlamini
-              belirleyen alan - kimlik seridinde yer kaplamasin diye buraya
-              alindi; karttaki alan Gizli, deger buradan yazilir. */}
-          {kaynak === 'cek-senet' && meta.alanlar.some(a => a.ad === 'yon') && (
-            <label className="satir-ici" style={{ fontSize: 13, gap: 8 }}
-                   title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
-              Yön
-              {/* Arac cubugundaki tek secim - kutu ve yazi biraz daha buyuk
-                  (kullanici): kagidin yonunu belirleyen alan goze carpsin. */}
-              <select value={String(deger.yon ?? 1)} disabled={salt}
-                      style={{ width: 150, height: 28, fontSize: 13 }}
-                      onChange={e => setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
-                <option value={1}>{c('Alınan')}</option>
-                <option value={2}>{c('Verilen')}</option>
-              </select>
-            </label>
-          )}
-          {/* ADAY HASTA (266): durum arac cubugunda ROZET - Kaydet ile Kapat
-              arasinda (kullanici). Aday yesil degil MAVI: henuz gercek hasta
-              degil, basvuruya donusunce Aktif olur. */}
-          {kaynak === 'hasta-aday' && (
-            <span className={`rozet ${Number(deger.durum) === 1 ? 'ok'
-                              : Number(deger.durum) === 2 ? 'mavi'
-                              : Number(deger.durum) === 3 ? 'hata' : Number(deger.durum) === 5 ? 'uyari' : 'gri'}`}
-                  style={{ alignSelf: 'center' }}>
-              {meta.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
-               ?? 'Aday'}
-            </span>
-          )}
-          {/* RANDEVU akis dugmeleri (mockup): durum comboyla degil bu
-              dugmelerle degisir. Kaydet'e basilinca yazilir - kart
-              standardindan sapmamak icin ayri bir istek yapilmaz. */}
-          {kaynak === 'randevu' && !salt && (
-            <>
-              {/* Renkler listedekiyle aynı (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı. */}
-              <button className="d onay" disabled={Number(deger.durum) === 2}
-                      onClick={() => alanDegistir('durum', '2')}>✔ Geldi İşaretle</button>
-              <button className="d ret" disabled={Number(deger.durum) === 3}
-                      onClick={() => alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
-              <button className="d" disabled={Number(deger.durum) === 4}
-                      onClick={() => alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
-              {/* GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı (Kaydet'le yazılır).
-                  Başvuruya dönüşmüş ya da ertelenmiş randevuda yok. */}
-              {[2, 3, 4].includes(Number(deger.durum)) && (
-                <button className="d" disabled={!!deger.belgeId}
-                        title={deger.belgeId ? c('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.') : c('Durumu Planlandı yap')}
-                        onClick={() => alanDegistir('durum', '1')}>{c('↩ Geri Al')}</button>
-              )}
-              {/* ERTELE (1119): kayıtlı, planlanmış randevu; kaydedilmemiş değişiklik varken kapalı. */}
-              {!yeniMi && (
-                <button className="d" disabled={Number(deger.durum) !== 1 || kaydedilmemisDegisiklikVar}
-                        title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
-                        onClick={() => setErteleAcik(true)}>{c('⏭ Ertele')}</button>
-              )}
-              {/* TEKRARLA (kullanıcı 17.10.2026): aynı randevudan seri - gün / sayı seçilir, çakışma kontrollü. */}
-              {/* Yeni kartta da (17.10.2026): pencerenin Kaydet'i önce bu randevuyu yazar. */}
-              <button className="d" disabled={!yeniMi && kaydedilmemisDegisiklikVar}
-                      title={!yeniMi && kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
-                      onClick={() => {
-                        if (yeniMi && (!Number(deger.hastaId) || !String(deger.baslangic ?? ''))) {
-                          bilgiMesaji(c('Önce hasta ve ilk randevunun tarih / saatini seçin.')); return;
-                        }
-                        setTekrarAcik(true);
-                      }}>{c('🔁 Tekrarla')}</button>
-            </>
-          )}
-          {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
-              Surum/onay dongusu KARTTAN yurumeli: kullanici dosyayi acip
-              inceledikten sonra listeye donup aksiyon aramasin.
-
-              "Yeni Surum Yukle" BURADA YOK: dosya secimi ve icerik yukleme
-              kart galerisinin isi; buraya ikinci bir yukleme yolu koymak ayni
-              dosyayi iki akistan gecirmek olurdu. */}
-          {kaynak === 'dokuman' && !yeniMi && (
-            <>
-              <button className="d" onClick={() => void guvenli(async () => {
-                // Icerik ucu KIMLIK ister; adresi yeni sekmede acmak token
-                //   tasimadigi icin 401 doner - blob olarak cekilir.
-                const url = await api.dokumanIcerikUrl(Number(id));
-                window.open(url, '_blank');
-              })}>📂 Aç / Önizle</button>
-
-              <button className="d" onClick={() => void guvenli(async () => {
-                const url = await api.dokumanIcerikUrl(Number(id));
-                // DOKUMAN ADIYLA iner; ad uzantisizsa icerik tipinden
-                //   tamamlanir (uzantisiz dosya acilamiyor).
-                dosyaIndirUrl(url, dokumanDosyaAdi(String(deger.ad ?? ''),
-                                                   String(deger.contentType ?? '')), true);
-              })}>{c('⬇ İndir')}</button>
-
-              {/* ONAYA GONDERILEN SURUMDUR, dokuman degil: taslak surum yoksa
-                  gonderilecek bir sey de yok. */}
-              {Number(deger.surumlu) === 1 && (
-                <button className="d" onClick={() => void guvenli(async () => {
-                  const k = await api.kartOku('dokuman', Number(id));
-                  const taslak = (k.detaylar?.surumler ?? [])
-                    .find(x => Number(x.durum) === 1);
-                  if (!taslak) {
-                    bilgiMesaji('Onaya gönderilecek taslak sürüm yok. '
-                              + 'Önce yeni sürüm yükleyin.');
-                    return;
-                  }
-                  const y = await api.dokumanOnayaGonder(Number(taslak.id));
-                  bilgiMesaji(y.mesaj);
-                })}>{c('✔ Onaya Gönder')}</button>
-              )}
-
-              {/* PAYLASIM LINKI (424): sureli ve sayacli. Ozel nitelikli
-                  dokumanda ayri yetki gerekir - sunucu reddeder. */}
-              <button className="d" onClick={() => void guvenli(async () => {
-                const y = await api.dokumanPaylasimUret(Number(id), { gunSayisi: 30 });
-                // Kod PANOYA kopyalanir: kullanicidan 32 haneli bir dizeyi
-                //   ekrandan elle yazmasini beklemek gercekci degil.
-                const adres = `${location.origin}/api/dokuman-paylasim/${y.kod}`;
-                try { await navigator.clipboard.writeText(adres) } catch { /* yoksay */ }
-                bilgiMesaji(`Paylaşım linki üretildi (30 gün):\n\n${adres}\n\n`
-                          + 'Adres panoya kopyalandı.');
-              })}>{c('🔗 Paylaş')}</button>
-
-              <button className="d" onClick={() => void guvenli(async () => {
-                const d = await api.dokumanDepo();
-                const mb = (b: number) => (b / 1024 / 1024).toFixed(1) + ' MB';
-                bilgiMesaji(`Depo kullanımı\n\nFiziksel: ${mb(d.fizikselBayt)}\n`
-                          + `Mantıksal: ${mb(d.mantikselBayt)}\n`
-                          + `Dedup tasarrufu: ${mb(d.tasarrufBayt)}`);
-              })}>📊 Depo</button>
-            </>
-          )}
-
-          {/* ENTEGRASYON HESABI (336-340) - mockup'taki kart arac cubugu:
-              hesap kaydedildikten sonra AYNI ekrandan sinanabilsin, kullanici
-              listeye donmek zorunda kalmasin. SKRS senkronu yalniz SKRS
-              hesabinda anlamli. */}
-          {kaynak === 'entegrasyon-hesap' && !yeniMi && (
-            <>
-              <button className="d" onClick={() => void guvenli(async () => {
-                const y = await api.entegrasyonSina(Number(id));
-                bilgiMesaji(y.mesaj);
-              })}>{c('🔌 Bağlantıyı Sına')}</button>
-              {/* SKRS senkronu YALNIZ HBYS kurulumunda (345): ERP'de eski bir
-                  SKRS satiri duruyor olsa da dugme gosterilmez. */}
-              {String(deger.kod ?? '') === 'SKRS' && kullanici?.urunModu === 2 && (
-                <button className="d" onClick={() => void guvenli(async () => {
-                  if (!await onaySor('SKRS kod listeleri servisten çekilip yerel '
-                                     + 'listeler güncellenecek. Devam edilsin mi?')) return;
-                  const y = await api.skrsListeSenkron(Number(id));
-                  bilgiMesaji(y.mesaj);
-                })}>{c('⟳ SKRS Listelerini Güncelle')}</button>
-              )}
-            </>
-          )}
+          {kartAracGrubu(aracBaglami)}
           {kapatSolu && <span className="kapat-solu">{kapatSolu}</span>}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>{c('Kapat')}</button>
-          {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
-              Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
-              alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}
-          {/* Musteri/Tedarikci kutulari: ADAY ekraninda YOK (kullanici karari) -
-              aday henuz ne musteri ne tedarikci; rolu donusumde belirlenir. */}
-          {kaynak === 'cari' && !gizliAlanlar?.includes('musteri')
-            && meta.alanlar.some(a => a.ad === 'musteri') && (
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: 12, alignItems: 'center' }}>
-              <label className="satir-ici">
-                <input
-                  type="checkbox"
-                  checked={Boolean(deger.musteri)}
-                  disabled={salt}
-                  onChange={e => setDeger(d => ({ ...d, musteri: e.target.checked }))}
-                />
-                Müşteri
-              </label>
-              <label className="satir-ici">
-                <input
-                  type="checkbox"
-                  checked={Boolean(deger.tedarikci)}
-                  disabled={salt}
-                  onChange={e => setDeger(d => ({ ...d, tedarikci: e.target.checked }))}
-                />
-                Tedarikçi
-              </label>
-            </span>
-          )}
+          {kartSagAraclari(aracBaglami)}
         </>
       }
     >
@@ -2433,46 +1911,6 @@ Yine de yeni kayıt eklensin mi?`);
           ))
         : sekmeGovdesi(aktif)}
 
-      {kaynak === 'randevu' && erteleAcik && id != null && (() => {
-        const bas = String(deger.baslangic ?? '');
-        const ad = (alan: string) => meta?.alanlar.find(a => a.ad === alan)?.kodlar?.[String(deger[alan] ?? '')];
-        return (
-          <RandevuErtelePenceresi
-            randevu={{
-              id: Number(id), hekimId: Number(deger.hekimId) || null, hekimAdi: ad('hekimId'),
-              cihazId: Number(deger.cihazId) || null, cihazAdi: ad('cihazId'),
-              bolum: Number(deger.bolum) || null, sureDk: Number(deger.sureDk) || 15,
-              tarih: bas.slice(0, 10), saat: bas.slice(11, 16),
-            }}
-            onKapat={() => setErteleAcik(false)}
-            onErtelendi={yeniId => { setErteleAcik(false); onKaydedildi?.(yeniId); onKapat?.() }} />
-        );
-      })()}
-      {kaynak === 'randevu' && tekrarAcik && (() => {
-        const bas = String(deger.baslangic ?? '');
-        const t = bas.slice(0, 10);
-        const g = new Date(`${t}T12:00`).getDay();
-        const ertesi = new Date(`${t}T12:00`); ertesi.setDate(ertesi.getDate() + 1);
-        const ertesiMetin = `${ertesi.getFullYear()}-${String(ertesi.getMonth() + 1).padStart(2, '0')}-${String(ertesi.getDate()).padStart(2, '0')}`;
-        return (
-          <RandevuSeriPenceresi baslik={`🔁 ${c('Randevuyu Tekrarla')}`}
-                                kaynak={yeniMi
-                                  ? { sablon: { hastaId: Number(deger.hastaId), hekimId: Number(deger.hekimId) || null,
-                                                cihazId: Number(deger.cihazId) || null, bolum: Number(deger.bolum) || null,
-                                                hizmetId: Number(deger.hizmetId) || null, sureDk: Number(deger.sureDk) || 15,
-                                                gonderenId: Number(deger.gonderenId) || null, tip: Number(deger.tip) || 1,
-                                                kaynak: Number(deger.kaynak) || 1, aciklama: String(deger.aciklama ?? '') } }
-                                  : { kaynakRandevuId: Number(id) }}
-                                onceKaydet={yeniMi ? sonra => kaydet(false, sonra) : undefined}
-                                // Sayı: YENİ kartta ilk randevu dahil toplam; KAYITLI kartta bundan sonraki tekrar
-                                //   sayısı (kullanıcı 17.10.2026).
-                                ilkDahil={yeniMi}
-                                ilkTarih={ertesiMetin} saat={bas.slice(11, 16)} sureDk={Number(deger.sureDk) || 15}
-                                adet={5} gunler={[g === 0 ? 7 : g]}
-                                onKapat={() => setTekrarAcik(false)}
-                                onKaydedildi={n => { if (!yeniMi) bilgiMesaji(`${n} ${c('randevu oluşturuldu.')}`) }} />
-        );
-      })()}
       {kaynak === 'kisi' && (
         <TarafArama
           acik={cariyeBaglaAcik}
@@ -2595,101 +2033,7 @@ Yine de yeni kayıt eklensin mi?`);
           }} />
       )}
 
-      {/* KATKI PENCERESI (541): oran x fiyat = hastadan alinacak katki.
-          Oran CARPAN olarak okunur (0,80 -> fiyatin %80'i) - 518'deki
-          `fn_fiyat_katki_uret` ile ayni dil, iki yerde iki anlam olmasin. */}
-      {topluKatki && (
-        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
-               onKapat={() => setTopluKatki(false)}
-               alt={topluButonlar(
-                 Number.isFinite(Number(topluKatkiOran.replace(',', '.')))
-                 && topluKatkiOran.trim() !== '',
-                 kapsam => {
-                   const oran = Number(topluKatkiOran.replace(',', '.'));
-                   void topluUygula('katki', oran, kapsam)
-                     .then(oldu => { if (oldu) setTopluKatki(false) });
-                 },
-                 () => setTopluKatki(false))}>
-          <div className="toplu-kutu">
-            <label className="alan tip-para">
-              <span className="etiket">{c('Fiyatın Oranını Girin')}</span>
-              <input autoFocus inputMode="decimal" value={topluKatkiOran}
-                     onChange={e => setTopluKatkiOran(e.target.value)} />
-            </label>
-            <div className="ic sonuk">
-              Hasta katkısı = fiyat × oran. Örnek: <b>0,80</b> girilirse
-              fiyatın %80'i katkı olarak yazılır.
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* FIYAT GUNCELLE PENCERESI (kullanici): yon (artir/azalt) + yuzde.
-          Fiyat = fiyat x (1 ± yuzde/100), kurusa yuvarlanir. Katki/carpan
-          ELLENMEZ: Ozel tarifede katki kullanilmiyor, carpan ise TTB'nin. */}
-      {fiyatGuncelle && (() => {
-        const yuzde = Number(fiyatYuzde.replace(',', '.'));
-        const gecerli = fiyatYuzde.trim() !== '' && Number.isFinite(yuzde) && yuzde > 0;
-        return (
-        <Modal baslik={`Fiyat Güncelle — ${seciliSatirlar.size} satır`} dar enUst
-               ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
-               onKapat={() => setFiyatGuncelle(false)}
-               alt={topluButonlar(gecerli, kapsam => {
-                 void topluUygula('fiyat-yuzde', yuzde, kapsam, fiyatYonu)
-                   .then(oldu => { if (oldu) setFiyatGuncelle(false) });
-               }, () => setFiyatGuncelle(false))}>
-          <div className="toplu-kutu">
-            <label className="alan">
-              <span className="etiket">İşlem</span>
-              <select value={fiyatYonu}
-                      onChange={e => setFiyatYonu(e.target.value as 'artir' | 'azalt')}>
-                <option value="artir">{c('Artır')}</option>
-                <option value="azalt">{c('Azalt')}</option>
-              </select>
-            </label>
-            <label className="alan tip-para">
-              <span className="etiket">% giriniz</span>
-              <input autoFocus inputMode="decimal" value={fiyatYuzde}
-                     onChange={e => setFiyatYuzde(e.target.value)} />
-            </label>
-            <div className="ic sonuk">
-              Yeni fiyat = fiyat {fiyatYonu === 'azalt' ? '−' : '+'} %{fiyatYuzde || '…'}.
-              Örnek: 100,00 fiyat <b>10</b> ile{' '}
-              <b>{fiyatYonu === 'azalt' ? '90,00' : '110,00'}</b> olur.
-              Kuruşa yuvarlanır; kaydedene kadar sunucuya yazılmaz.
-            </div>
-          </div>
-        </Modal>
-        );
-      })()}
-
-      {/* TOPLU CARPAN PENCERESI (534): tek sayi, secilen kapsamdaki
-          satirlara yazilir; fiyat = katsayi x carpan olarak SUNUCUDA
-          yeniden dogar (uc de ayni kurali isletir). */}
-      {topluCarpan && (
-        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
-               onKapat={() => setTopluCarpan(false)}
-               alt={topluButonlar(
-                 Number.isFinite(Number(topluCarpanDeger.replace(',', '.')))
-                 && topluCarpanDeger.trim() !== '',
-                 kapsam => {
-                   const sayi = Number(topluCarpanDeger.replace(',', '.'));
-                   void topluUygula('carpan', sayi, kapsam)
-                     .then(oldu => { if (oldu) setTopluCarpan(false) });
-                 },
-                 () => setTopluCarpan(false))}>
-          <div className="toplu-kutu">
-            <label className="alan tip-para">
-              <span className="etiket">Çarpan</span>
-              <input autoFocus inputMode="decimal" value={topluCarpanDeger}
-                     onChange={e => setTopluCarpanDeger(e.target.value)} />
-            </label>
-            <div className="ic sonuk">
-              Fiyat = katsayı × çarpan olarak yeniden hesaplanır.
-            </div>
-          </div>
-        </Modal>
-      )}
+      {fiyatTopluPencereleri}
 
       {kapatmaUyarisi && (
         <div className="mesaj-perde" onMouseDown={e => e.stopPropagation()}>
