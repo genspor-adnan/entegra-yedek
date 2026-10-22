@@ -10,11 +10,9 @@ import { GenForm } from '../bilesenler/GenForm';
 import { kartOzellestirme } from './liste/kartOzellestirme';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import { useMuayeneSekmeVerisi } from '../bilesenler/MuayeneSekmeleri';
-import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni,
 } from '../api/sozlesme';
-import { LabTetkikOzeti } from '../bilesenler/lab/LabTetkikOzeti';
 import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
 import { api } from '../api/istemci';
@@ -35,6 +33,7 @@ import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
 import { belgeTuruAksiyonu } from './liste/belgeTuruAksiyonlari';
+import { listePaneli, useListeEkrani, type ListeEkranBaglami } from './liste/listeEkranlari';
 import { entegrasyonAksiyonu } from './liste/entegrasyonAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
@@ -42,9 +41,6 @@ import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
 import { kysDokumanAksiyonu } from './liste/kysDokumanAksiyonlari';
 import { kysKalibrasyonAksiyonu } from './liste/kysKalibrasyonAksiyonlari';
 import { kysDofBagAksiyonu } from './liste/kysGostergeAksiyonlari';
-import { KysPolitikaSeridi } from './liste/KysPolitikaSeridi';
-import { KysOlayPaneli } from './kys/olay/KysOlayPaneli';
-import { KysRiskPaneli } from './kys/risk/KysRiskPaneli';
 import { kysTedarikciAksiyonu } from './liste/kysTedarikciAksiyonlari';
 import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
 import { acilAksiyonu } from './liste/acilAksiyonlari';
@@ -72,30 +68,11 @@ import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { patolojiAksiyonu } from './liste/patolojiAksiyonlari';
 import { konsultasyonAksiyonu } from './liste/konsultasyonAksiyonlari';
-import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from './konsultasyon/KonsultasyonPanelleri';
-import { SevkOnizlemePaneli, SevkUstPanel, useSevkSuzgeci } from './sevk/SevkPanelleri';
-import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
-import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
-import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
-import { TeleradGelenPaneli } from '../bilesenler/TeleradGelenPaneli';
-import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
-import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
-import { BelgeTakipOzetSeridi } from '../bilesenler/BelgeTakipOzetSeridi';
-import { BelgeTuruOzetSeridi } from '../bilesenler/BelgeTuruOzetSeridi';
 import { BelgeTuruSiraModali } from '../bilesenler/BelgeTuruSiraModali';
-import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
-import { GozHastaPaneli } from '../bilesenler/GozHastaPaneli';
-import { GozUniteKanban } from '../bilesenler/goz/GozUniteKanban';
-import { GozUniteOzeti } from '../bilesenler/goz/GozUniteOzeti';
-import { GozUniteTablolari } from '../bilesenler/goz/GozUniteTablolari';
 import { GozSemasi } from '../bilesenler/goz/GozSemasi';
 import { GozDikte } from '../bilesenler/goz/GozDikte';
 import { IstemSepetiModal } from '../bilesenler/IstemSepetiModal';
-import { YatakPanosu } from '../bilesenler/YatakPanosu';
 import { YatisKabulModali } from '../bilesenler/yatan/YatisKabulModali';
-import { EmarCizelgesi } from '../bilesenler/yatan/EmarCizelgesi';
-import { HemsireIzlem } from '../bilesenler/yatan/HemsireIzlem';
-import { YatanIcmal } from '../bilesenler/yatan/YatanIcmal';
 import { DozSatirModali } from '../bilesenler/yatan/DozSatirModali';
 import { NakilModali } from '../bilesenler/yatan/NakilModali';
 import { TaburcuModali } from '../bilesenler/yatan/TaburcuModali';
@@ -124,17 +101,6 @@ import { usePersonelSuzgeci } from './liste/usePersonelSuzgeci';
 import { BasvuruSeridi } from './liste/BasvuruSeridi';
 import { PrimSeridi } from './liste/PrimSeridi';
 import { PersonelSeridi } from './liste/PersonelSeridi';
-import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from './radyoloji/RadyolojiTanimPanelleri';
-import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from './radyoloji/CihazPanelleri';
-import { GozCihazGostergesi, GozCihazOnizlemePaneli, GozCihazSolPanel,
-         useGozCihazGostergesi, useGozCihazSuzgeci } from './goz/GozCihazPanelleri';
-import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from './yatan/OrderPanelleri';
-import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from './goz/GozlukPanelleri';
-import { GoruntulemeGostergesi, GoruntulemeOnizlemePaneli, GoruntulemeSolPanel, useGoruntulemeGostergesi, useGoruntulemeSuzgeci } from './goz/GozGoruntulemePanelleri';
-import { GozPanoSolPanel, GozPanoTazeleSeridi, useGozPanoOzeti, useGozPanoSuzgeci } from './goz/GozPanoPanelleri';
-import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from './goz/GozMuayenePanelleri';
-import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
-  usePersonelGostergesi } from './liste/PersonelPanelleri';
 import { belgeAksiyonu } from './liste/belgeAksiyonlari';
 import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
@@ -502,49 +468,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const personelSuzgec = usePersonelSuzgeci(
     tanim.bolumSuzgeci, tanim.rolSuzgeci, tanim.kaynak);
   const rolSuzgeciVar = personelSuzgec.rolSuzgeciVar;
-  // PERSONEL LİSTESİ (963, mockup Ekranlar/IK/personel_listesi.html): gösterge
-  //   şeridi + bölüm ağacı aynı veriden; önizleme sağda, Kart / Organizasyon ek görünüm.
-  const personelEkrani = tanim.kaynak === 'personel' && !portalda;
-  // RADYOLOJİ TANIMLARI (965): solda bölge, sağda önizleme.
-  const radTanim = (tanim.kaynak === 'radyoloji-sablon' || tanim.kaynak === 'radyoloji-protokol') && !portalda;
-  const radBolge = useBolgeSuzgeci(radTanim);
-  // RADYOLOJİ CİHAZLARI (967): gösterge + konum / durum süzgeci, önizleme.
-  const radCihaz = tanim.kaynak === 'radyoloji-cihaz' && !portalda;
-  // ORDER LİSTESİ (968): gösterge + servis / oda / tür süzgeci, önizleme.
-  const orderEkrani = tanim.kaynak === 'yatis-order' && !portalda;
-  // GÖZ MUAYENELERİ (970): gösterge + tür / hekim süzgeci, önizleme.
-  const gozMuayeneEkrani = tanim.kaynak === 'goz-muayene' && !portalda;
-  // GÖZLÜK REÇETELERİ (973): gösterge + tür / durum / optik süzgeci, önizleme.
-  const gozlukEkrani = tanim.kaynak === 'goz-gozluk-recete' && !portalda;
-  const gozlukSuzgec = useGozlukSuzgeci(gozlukEkrani);
-  const gozlukGostergesi = useGozlukGostergesi(gozlukEkrani, yenile);
-  // KONSÜLTASYON (1107): sekmeler (bana / bölümüme gelen · istediklerim · bölüm) + özet kutuları.
-  const konsEkrani = tanim.kaynak === 'konsultasyon' && !portalda;
-  const konsSuzgec = useKonsultasyonSuzgeci(konsEkrani, yenile);
-  // SEVK (1110): Giden / Gelen sekmeleri + kısa ön izleme (mockup v2, sade).
-  const sevkEkrani = tanim.kaynak === 'sevk' && !portalda;
-  const sevkSuzgec = useSevkSuzgeci(sevkEkrani);
-  // GÖZ CİHAZLARI (978): radyolojinin cihaz ekranıyla aynı adları taşıyor,
-  //   bu yüzden göz önekli ayrı bileşen kümesi.
-  const gozCihazEkrani = tanim.kaynak === 'goz-cihaz' && !portalda;
-  const gozCihazSuzgec = useGozCihazSuzgeci(gozCihazEkrani);
-  const gozCihazGostergesi = useGozCihazGostergesi(gozCihazEkrani, yenile);
-  // 974 GÖZ GÖRÜNTÜLEME: gösterge (ödeme / sıra / değerlendirme), tetkik-cihaz (sol), önizleme (sağ).
-  // GÖZ ÜNİTE PANOSU (976): 30 sn otomatik tazeleme + istasyon / hekim / kaynak
-  //   süzgeci; şerit, kanban ve alt tablolar TEK isteği paylaşıyor.
-  const panoEkrani = tanim.kaynak === 'goz-akis' && !portalda;
-  const panoSuzgec = useGozPanoSuzgeci(panoEkrani);
-  const panoDurum = useGozPanoOzeti(panoEkrani, yenile, () => setYenile(t => t + 1));
-  const gorEkrani = tanim.kaynak === 'goz-goruntuleme' && !portalda;
-  const gorSuzgec = useGoruntulemeSuzgeci(gorEkrani);
-  const gorGostergesi = useGoruntulemeGostergesi(gorEkrani, yenile);
-  const gozSuzgec = useGozMuayeneSuzgeci(gozMuayeneEkrani);
-  const gozGostergesi = useGozMuayeneGostergesi(gozMuayeneEkrani, yenile);
-  const orderSuzgec = useOrderSuzgeci(orderEkrani);
-  const orderGostergesi = useOrderGostergesi(orderEkrani, yenile);
-  const cihazSuzgec = useCihazSuzgeci(radCihaz);
-  const cihazGostergesi = useCihazGostergesi(radCihaz, yenile);
-  const personelGostergesi = usePersonelGostergesi(personelEkrani, personelSuzgec, yenile);
+  // EKRAN ÇEVRESİ (refaktör 22.10.2026, liste/listeEkranlari): süzgeç + gösterge taşıyan ekranlar
+  //   (personel, radyoloji, order, göz, konsültasyon, sevk) tek kancada; durumsuz şerit / paneller
+  //   kaynak tablosunda. Gridin üst / sol / yan / alt panelleri ve sabit filtre buradan.
+  const ekranBaglami: ListeEkranBaglami = {
+    kaynak: tanim.kaynak, portalda, yenile, tazele: () => setYenile(t => t + 1),
+    seciliSatir, git, gitKart, aksiyon: (kod, satir) => aksiyon(kod, satir), setCip: setCipIndeks,
+    personelSuzgec,
+    panoCipFiltresi: cipler?.[cipIndeks]?.filtre,
+    panoSeciliId: Number(gozAkisSecili?.id ?? 0) || null, panoSec: setGozAkisSecili,
+  };
+  const ekran = useListeEkrani(ekranBaglami);
+  /** Etkin ekranın süzgeci (yoksa dokunmaz). */
+  const ekranFiltresi = (t: Kosul | undefined) => ekran ? ekran.filtre(t) : t;
+  const panel = listePaneli(tanim.kaynak);
 
   // HAKEDIS SATIRLARI (prim rolu + kisi) SERIT SUZGECI kendi kancasinda.
   const primSuzgec = usePrimSuzgeci(tanim.primSuzgeci, tanim.kaynak);
@@ -1204,7 +1141,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       varsayilanGrup={tanim.varsayilanGrup}
       grupBirimi={tanim.grupBirimi}
       sabitFiltre={onCipliFiltre(agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(sevkSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))))))}
+        primSuzgec.filtre(personelSuzgec.filtre(ekranFiltresi(kategoriliFiltre(randevuEkran.filtre))))))))}
       cipOnu={tanim.onCipler ? (
         <>{tanim.onCipler.map((oc, i) => (
           <button key={oc.ad} type="button" className={i === onCipIndeks ? 'on' : ''}
@@ -1317,7 +1254,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         <PrimSeridi s={primSuzgec} />
       ) : (tanim.bolumSuzgeci || rolSuzgeciVar) ? (
         // Personel listesinde bölüm SOLDAKİ AĞAÇTA (963) - combo çizilmez.
-        <PersonelSeridi s={personelSuzgec} bolumSuzgeci={tanim.bolumSuzgeci && !personelEkrani} />
+        <PersonelSeridi s={personelSuzgec} bolumSuzgeci={tanim.bolumSuzgeci && ekran?.kod !== 'personel'} />
       ) : tanim.ekstre && (
         <button
           disabled={!seciliSatir}
@@ -1339,15 +1276,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // KULLANICILAR (mockup kullanicilar.html `.ozet`): sayaclar ARAMANIN
       //   USTUNDE (kullanici: "arama editi ustune daha iyi") - ekrana girince
       //   ilk okunan satir "neye bakmam gerek" olsun.
-      ustSerit={tanim.kaynak === 'kullanici'
-        ? <KullaniciOzetSeridi yenile={yenile} onCip={setCipIndeks} />
-        // KURUMSAL KALİTE (1059): Politika & Hedefler listesinin üstünde politika / kapsam.
-        : tanim.kaynak === 'kys-gosterge' ? <KysPolitikaSeridi />
-        // İK BELGE TAKİBİ (1137, mockup personel_belge_takibi.html (2)): eksik / doldu / yaklaşan sayaçları.
-        : tanim.kaynak === 'personel-belge-ozet' ? <BelgeTakipOzetSeridi yenile={yenile} onCip={setCipIndeks} />
-        // İK BELGE TÜRLERİ (1138, mockup personel_belge_turu.html (1)): aktif / zorunlu / süreli / eksiği olan / isteğe bağlı.
-        : tanim.kaynak === 'personel-belge-turu' ? <BelgeTuruOzetSeridi yenile={yenile} onCip={setCipIndeks} />
-        : undefined}
+      ustSerit={panel?.ustSerit?.(ekranBaglami)}
       // GOZ UNITE AKISI (mockup goz_hasta_listesi.html `.kanban`): bes
       //   istasyon yan yana - grid "kim var"i, kanban "hangi masada yigilma
       //   var"i cevaplar. Ikisi AYNI kaynagi okur (goz-akis).
@@ -1360,66 +1289,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   kuraliyla suzuluyor ama SERIT kendi sorgusunu yapiyor - hasta
       //   portalinda laboratuvarin butun kuyrugu gorunuyordu. Kapsam disi
       //   sayilari gostermek, kaydin kendisini gostermekle ayni sinifta.
-      ustPanel={portalda ? undefined
-        : personelEkrani ? <PersonelGostergesi veri={personelGostergesi} s={personelSuzgec} />
-        : radCihaz ? <CihazGostergesi veri={cihazGostergesi} s={cihazSuzgec} />
-        : orderEkrani ? <OrderGostergesi veri={orderGostergesi} s={orderSuzgec} />
-        : gozMuayeneEkrani ? <GozMuayeneGostergesi veri={gozGostergesi} s={gozSuzgec} />
-        : gozlukEkrani ? <GozlukGostergesi veri={gozlukGostergesi} s={gozlukSuzgec} />
-        : konsEkrani ? <KonsultasyonUstPanel s={konsSuzgec} />
-        : sevkEkrani ? <SevkUstPanel s={sevkSuzgec} />
-        : gozCihazEkrani ? <GozCihazGostergesi veri={gozCihazGostergesi} s={gozCihazSuzgec} />
-        : gorEkrani ? <GoruntulemeGostergesi veri={gorGostergesi} s={gorSuzgec} />
-        : tanim.kaynak === 'yatak'
-        ? <YatakPanosu yenile={yenile} />
-        // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
-        //   servis genelindeki doz kuyrugu. Ayni veri, iki ayri soru.
-        : tanim.kaynak === 'order-uygulama'
-        ? <EmarCizelgesi yenile={yenile} onDegisti={() => setYenile(t => t + 1)} />
-        // HEMSIRE IZLEMI (699): ustte nobet ekrani (olcum girisi + egri + sivi
-        //   + risk), altta servis genelindeki olcum satirlari.
-        : tanim.kaynak === 'yatis-izlem'
-        ? <HemsireIzlem yenile={yenile} onDegisti={() => setYenile(t => t + 1)} />
-        // HIZMET ICMALI (700): ustte tek yatisin icmali, altta servis
-        //   genelindeki gun sonu tahakkuklari (faturalanmamis olanlar).
-        : tanim.kaynak === 'yatis-tahakkuk'
-        ? <YatanIcmal yenile={yenile} />
-        : tanim.kaynak === 'goz-akis'
-        // ÖNCE SAYAÇ ŞERİDİ, SONRA KANBAN (mockup goz_unite_panosu.html):
-        //   şerit "ünite tıkalı mı", kanban "kim nerede" sorusunu cevaplıyor -
-        //   önce durum, sonra ayrıntı.
-        ? <><GozPanoTazeleSeridi d={panoDurum} onYenile={() => setYenile(t => t + 1)} />
-             <GozUniteOzeti veri={panoDurum.veri} />
-             <GozUniteKanban yenile={yenile}
-                             seciliId={Number(gozAkisSecili?.id ?? 0) || null}
-                             // ÇİPLER VE SOL PANEL KANBANI DA SÜZER (976):
-                             //   gridi süzüp kanbanı dolu bırakmak, kullanıcı
-                             //   için süzgeç çalışmıyor demekti. Çip koşulu
-                             //   gridin iç durumundan (cipIndeks) okunuyor -
-                             //   ikinci bir çip durumu iki ekranı ayrıştırırdı.
-                             filtre={panoSuzgec.filtre(cipler?.[cipIndeks]?.filtre)}
-                             onSec={sat => setGozAkisSecili(sat as unknown as ListeSatiri)}
-                             // SÜRÜKLE-BIRAK: kart sütuna bırakılınca hasta o
-                             //   istasyona alınır. Kararı sunucu veriyor -
-                             //   dilatasyon uyarısı da oradan geliyor.
-                             onTasi={(sat, istasyon) => void guvenli(async () => {
-                               const y = await api.gozIstasyonaAl(sat.id, { istasyon });
-                               mesaj(y.tamamlandi
-                                 ? `${y.hasta} · ziyaret tamamlandı.`
-                                 : `${y.hasta} → ${y.istasyon}`
-                                   + (y.uyari ? ` — ${y.uyari}` : '')
-                                   + (y.muayeneYeni ? ` · göz muayenesi #${y.gozMuayeneId} açıldı` : ''));
-                               setGozAkisSecili(null);
-                               setYenile(t => t + 1);
-                             })} />
-             <GozUniteTablolari veri={panoDurum.veri} /></>
-        : tanim.kaynak === 'lab-sonuc'
-        ? <LabOzetSeridi yenile={yenile} onCip={setCipIndeks} />
-        // MUAYENE LISTESI OZET SERIDI (461, mockup muayene_listesi.html):
-        //   poliklinigin o gunku hali - kac muayene, ort. sure, bekleyen,
-        //   sonuc gelen, tanisiz tamamlanan, e-Nabiz.
-        : tanim.kaynak === 'muayene' ? <MuayeneOzetSeridi />
-        : undefined}
+      ustPanel={portalda ? undefined : ekran?.ustPanel ?? panel?.ustPanel?.(ekranBaglami)}
       // LABORATUVAR (446): mockup'larda tablo ile secili kaydin ayrintisi
       //   AYNI ekranda durur (tetkik/tup plani, antibiyogram, varyantlar).
       //   Teknisyen listeyi kaybetmeden ayrintiya bakabilmeli.
@@ -1447,114 +1317,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       ) : undefined}
       solPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
-        : personelEkrani ? <PersonelBolumAgaci veri={personelGostergesi} s={personelSuzgec} />
-        : radTanim ? <BolgePaneli kaynak={tanim.kaynak} s={radBolge} yenile={yenile} />
-        : radCihaz ? <CihazSolPanel veri={cihazGostergesi} s={cihazSuzgec} />
-        : orderEkrani ? <OrderSolPanel veri={orderGostergesi} s={orderSuzgec} />
-        : gozMuayeneEkrani ? <GozMuayeneSolPanel veri={gozGostergesi} s={gozSuzgec} />
-        : gozlukEkrani ? <GozlukSolPanel veri={gozlukGostergesi} s={gozlukSuzgec} />
-        : gozCihazEkrani ? <GozCihazSolPanel veri={gozCihazGostergesi} s={gozCihazSuzgec} />
-        : panoEkrani ? <GozPanoSolPanel veri={panoDurum.veri} s={panoSuzgec} />
-        : gorEkrani ? <GoruntulemeSolPanel veri={gorGostergesi} s={gorSuzgec} />
-        : undefined}
+        : ekran?.solPanel}
       // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
-      yanPanel={portalda ? undefined
-        : personelEkrani ? <PersonelOnizleme satir={seciliSatir} yenile={yenile} />
-        // KURUMSAL KALİTE (1060, mockup Kalite2/olay_bildirim.html): liste + sağda kart.
-        : tanim.kaynak === 'kys-olay' ? <KysOlayPaneli satir={seciliSatir} yenile={() => setYenile(t => t + 1)} />
-        // RİSK (1062, mockup Kalite2/risk_listesi.html): liste + yanda kart.
-        : tanim.kaynak === 'kys-risk' ? <KysRiskPaneli satir={seciliSatir} yenile={() => setYenile(t => t + 1)} />
-        : tanim.kaynak === 'radyoloji-sablon' ? <SablonOnizlemePaneli satir={seciliSatir} />
-        : tanim.kaynak === 'radyoloji-protokol' ? <ProtokolOnizlemePaneli satir={seciliSatir} />
-        : radCihaz ? <CihazOnizlemePaneli satir={seciliSatir} yenile={yenile} />
-        : orderEkrani ? <OrderOnizlemePaneli satir={seciliSatir} yenile={yenile} />
-        : gozMuayeneEkrani ? (
-          <GozMuayeneOnizleme satir={seciliSatir} yenile={yenile}
-                              onAc={id => git(`/goz-muayene/${id}`)}
-                              onTamamla={() => void aksiyon('goz.muayene-tamamla', seciliSatir)}
-                              onGozluk={() => void aksiyon('goz.gozluk-recete', seciliSatir)}
-                              onIstem={() => void aksiyon('goz.goruntuleme-istem', seciliSatir)} />
-        )
-        : gozlukEkrani ? (
-          <GozlukOnizlemePaneli satir={seciliSatir} yenile={yenile}
-                                onAc={id => git(`/goz-gozluk-recete/${id}`)}
-                                onImzala={() => void aksiyon('goz.gozluk-imzala', seciliSatir)}
-                                onBildir={() => void aksiyon('goz.gozluk-bildir', seciliSatir)}
-                                onOptik={() => void aksiyon('goz.gozluk-optik', seciliSatir)}
-                                onTeslim={() => void aksiyon('goz.gozluk-teslim', seciliSatir)} />
-        )
-        : gozCihazEkrani ? (
-          <GozCihazOnizlemePaneli satir={seciliSatir} yenile={yenile}
-                                  onSina={() => void aksiyon('goz.cihaz-sina', seciliSatir)}
-                                  onMesajlar={() => void aksiyon('goz.cihaz-mesajlar', seciliSatir)}
-                                  onDemirbas={() => void aksiyon('goz.cihaz-demirbas', seciliSatir)} />
-        )
-        : gorEkrani ? (
-          // HIZLI İŞLEM düğmeleri araç çubuğunun AYNI yolunu kullanır
-          //   (gozAkisAksiyonu): ikinci bir kod yolu, ödeme / durum
-          //   kontrollerinin birinde eksik kalması demekti.
-          <GoruntulemeOnizlemePaneli satir={seciliSatir} yenile={yenile}
-                                     onAc={id => git(`/goz-goruntuleme/${id}`)}
-                                     onDegerlendir={() => void aksiyon('goz.gor-degerlendir', seciliSatir)}
-                                     onMuayene={() => void aksiyon('goz.gor-muayene', seciliSatir)} />
-        )
-        : tanim.kaynak === 'lab-tetkik'
-        ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
-        : labYanVarMi(tanim.kaynak)
-        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="yan" />
-        : undefined}
-      altPanel={portalda ? undefined
-        : konsEkrani ? (
-          <KonsultasyonOnizlemePaneli satir={seciliSatir ?? null} yenile={yenile}
-            onAc={id => gitKart(`/konsultasyon/${id}`)}
-            onYanitla={() => void aksiyon('konsultasyon.yanitla', seciliSatir)} />
-        )
-        : sevkEkrani ? <SevkOnizlemePaneli satir={seciliSatir ?? null} onAc={id => gitKart(`/sevk/${id}`)} />
-        : labDetayVarMi(tanim.kaynak) && seciliSatir
-        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="ana" />
-        // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin
-        //   alanlarinda. Kart yerine grid alti: kuyrukta calisan kisi
-        //   listeyi kaybetmeden hangi alanin bos oldugunu gormeli.
-        : tanim.kaynak === 'enabiz-paket' && seciliSatir
-            && Number(seciliSatir.id ?? 0) > 0
-        ? <EnabizPaketPaneli paketId={Number(seciliSatir.id)} />
-        // TESLIM KUYRUGU (814): "gitti mi, gitmediyse neden" sorusunun cevabi
-        //   denemelerde. Ham ORU ve ham ACK satirin altinda acilir - kuyrukta
-        //   calisan kisi listeyi kaybetmeden nedeni gorur (e-Nabiz deseni).
-        : tanim.kaynak === 'telerad-teslim' && seciliSatir
-            && Number(seciliSatir.id ?? 0) > 0
-        ? <TeleradTeslimIzi teslimId={Number(seciliSatir.id)} />
-        // GELEN RAPOR (817): "eslesmedi" yazan satirin cevabi ham mesajdadir.
-        : tanim.kaynak === 'telerad-gelen' && seciliSatir
-            && Number(seciliSatir.id ?? 0) > 0
-        ? <TeleradGelenPaneli gelenId={Number(seciliSatir.id)} />
-        // KULLANICILAR (mockup `.sekmeler` + `.alt`): secili hesabin rolleri,
-        //   acik oturumlari, giris hareketleri ve HESABA yapilan islemler.
-        //   Yonetici satir satir geziyor - her satir icin kart acip kapatmak
-        //   ayni soruyu her seferinde bastan sordururdu.
-        : tanim.kaynak === 'kullanici' && seciliSatir
-            && Number(seciliSatir.id ?? 0) > 0
-        // Yetki SUNUCUDA olculur (rol atama ayri bir yetkidir ve islem_log'a
-        //   yazilir) - panel dugmeleri istemcide karartilmaz, yetkisiz istek
-        //   403 doner ve sebebi panelde yazar.
-        ? <KullaniciAltPanel kullaniciId={Number(seciliSatir.id)} saltOkunur={false} />
-        // GOZ HASTA OZETI (691): satir bir HASTADIR; OD/OS son degerler, takip
-        //   plani, ziyaretler, islemler ve receteler altta acilir - goz
-        //   hekiminin ilk sordugu uc soru tek ekranda toplanir.
-        : tanim.kaynak === 'goz-hasta-ozet' && seciliSatir
-            && Number(seciliSatir.id ?? 0) > 0
-        ? <GozHastaPaneli hastaId={Number(seciliSatir.id)} />
-        : undefined}
+      yanPanel={portalda ? undefined : ekran?.yanPanel ?? panel?.yanPanel?.(ekranBaglami)}
+      altPanel={portalda ? undefined : ekran?.altPanel ?? panel?.altPanel?.(ekranBaglami)}
       // LAB KANBAN (711): Lab Is Emirleri listesinin "Kanban" gorunumu -
       //   kolon = asama, surukle-birak = asama gecisi.
       // RANDEVU: Liste / Takvim secimi de kaldigi yerden (randevuTercihi).
       gorunumBaslangic={tanim.kaynak === 'randevu' ? randevuTercihiOku(kullanici?.id).liste : undefined}
       onGorunumDegisti={tanim.kaynak === 'randevu' ? g => randevuTercihiYaz(kullanici?.id, { liste: g }) : undefined}
-      ekGorunumler={personelEkrani ? [
-        { ad: 'Kart', ik: '▦', icerik: <PersonelKartlari filtre={personelSuzgec.filtre(undefined)} yenile={yenile} /> },
-        { ad: 'Organizasyon', ik: '⛬', icerik: <PersonelOrganizasyon filtre={personelSuzgec.filtre(undefined)} yenile={yenile} /> },
-      ] : undefined}
-      grupAnalizGizli={personelEkrani}
+      ekGorunumler={ekran?.ekGorunumler}
+      grupAnalizGizli={!!ekran?.grupAnalizGizli}
       ekGorunum={tanim.kaynak === 'dis-lab-isemri' ? { ad: 'Kanban', ik: '🗂', icerik: <DisLabPano yenile={yenile} /> }
       : tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',
