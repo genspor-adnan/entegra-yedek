@@ -29,15 +29,18 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",            "id",            "sayi",  Yazilabilir: false),
-            new("ad",            "ad",            "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Belge adı", Grup: "Belge türü"),
-            new("grup",          "grup",          "kod",   SabitKodlar: PersonelBelgeGrupKodlari, Zorunlu: true, Baslik: "Grup", Grup: "Belge türü"),
-            new("gecerlilikAy",  "gecerlilik_ay", "sayi",  Baslik: "Geçerlilik, ay (boş = süresiz)", Grup: "Belge türü"),
-            new("hatirlatGun",   "hatirlat_gun",  "sayi",  Zorunlu: true, Baslik: "Kaç gün önce uyarılsın", Grup: "Belge türü"),
+            // Mockup personel_belge_turu.html (2): şeritte ad · grup · durum; "Genel" sekmesinde
+            //   üç kutu (Belge türü · Geçerlilik · Kayıt kuralları). Süreli / süresiz anahtarı ekranda
+            //   (gecerlilikAy boş = süresiz).
+            new("ad",            "ad",            "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Belge adı", Grup: "Kimlik"),
+            new("grup",          "grup",          "kod",   SabitKodlar: PersonelBelgeGrupKodlari, Zorunlu: true, Baslik: "Grup", Grup: "Kimlik"),
+            new("aktif",         "aktif",         "kod",   SabitKodlar: KysAktifKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("sira",          "sira",          "sayi",  Baslik: "Sıra", Grup: "Genel", AltGrup: "Belge türü"),
+            new("aciklama",      "aciklama",      "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Belge türü"),
+            new("gecerlilikAy",  "gecerlilik_ay", "sayi",  Baslik: "Geçerlilik (ay)", Grup: "Genel", AltGrup: "Geçerlilik"),
+            new("hatirlatGun",   "hatirlat_gun",  "sayi",  Zorunlu: true, Baslik: "Kaç gün önce uyarılsın", Grup: "Genel", AltGrup: "Geçerlilik"),
             // 1136: dosyası (tarama) yüklenmeyen belge eksik sayılır.
-            new("dosyaZorunlu",  "dosya_zorunlu", "mantik", Baslik: "Dosyası zorunlu", Grup: "Belge türü"),
-            new("sira",          "sira",          "sayi",  Baslik: "Sıra", Grup: "Belge türü"),
-            new("aktif",         "aktif",         "kod",   SabitKodlar: KysAktifKodlari, Baslik: "Durum", Grup: "Belge türü"),
-            new("aciklama",      "aciklama",      "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama", Grup: "Belge türü"),
+            new("dosyaZorunlu",  "dosya_zorunlu", "mantik", Baslik: "Dosyası zorunlu", Grup: "Genel", AltGrup: "Kayıt kuralları"),
         },
         Detaylar: new[]
         {

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (581 ad, 154 tanesi birden cok dosyada)
+## Fonksiyonlar (586 ad, 156 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -52,6 +52,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ariza_otomatik_kapat` | `954_ariza_talep_takip.sql` | — |
 | `fn_ariza_talep_ac` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql |
 | `fn_avans_iade_toplam` | `780_avans_iadesi.sql` | — |
+| `fn_ayar_kapilari` | `1121_ayar_kapilari.sql` | — |
 | `fn_banko_acik_oturum` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
 | `fn_banko_devir` | `987_banko_oturum.sql` | — |
 | `fn_banko_oturum_gerekli` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
@@ -204,8 +205,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
 | `fn_gelen_mesajlar` | `189_gelen_mesajlar.sql` | — |
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
-| `fn_gosterge_blok` | `1103_gosterge_paneli.sql` | — |
-| `fn_gosterge_kutu` | `1103_gosterge_paneli.sql` | — |
+| `fn_gosterge_blok` | `1119_randevu_erteleme.sql` | 1103_gosterge_paneli.sql |
+| `fn_gosterge_kutu` | `1119_randevu_erteleme.sql` | 1103_gosterge_paneli.sql |
 | `fn_hakedis_kapat` | `388_prim_kademe_baglandi.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql |
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `fn_hata_ozet_metin` | `1078_hata_gunluk_ozet.sql` | — |
@@ -361,12 +362,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_numara_sirada` | `152_numara_sablonu.sql` | — |
 | `fn_order_doz_gunluk` | `698_order_doz_uretimi.sql` | — |
 | `fn_order_uygulama_uret` | `969_order_doz_yerel_saat.sql` | 698_order_doz_uretimi.sql |
-| `fn_panel_profil` | `940_personel_unvan_yalniz_onek.sql` | 508_panel_kurum_profili.sql, 512_panel_tip_merkezi_tam.sql, 513_panel_blok_sirasi.sql |
+| `fn_panel_profil` | `1119_randevu_erteleme.sql` | 508_panel_kurum_profili.sql, 512_panel_tip_merkezi_tam.sql, 513_panel_blok_sirasi.sql, 940_personel_unvan_yalniz_onek.sql |
 | `fn_para_tr` | `769_para_bicimi_tr.sql` | — |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_pat_no` | `1104_patoloji.sql` | — |
 | `fn_patoloji_sonuc_durumu` | `1105_patoloji_basvuru_kapisi.sql` | — |
+| `fn_personel_belge_dosya_tasi` | `1136_personel_belge_dosya.sql` | — |
+| `fn_personel_belge_gecerlilik` | `1135_personel_belge_takibi.sql` | — |
 | `fn_personel_kadro` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_gunluk` | `840_personel_hareket.sql` | — |
 | `fn_personel_kadro_uygula` | `843_kadro_ana_rol.sql` | 840_personel_hareket.sql, 841_kadro_bolum_gorev_senkron.sql |
@@ -566,9 +569,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
-| `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
-| `tg_randevu_izin_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql |
-| `tg_randevu_mesai_kontrol` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql |
+| `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
+| `tg_randevu_durum_geri` | `1122_randevu_geri_al_kurali.sql` | — |
+| `tg_randevu_izin_kontrol` | `1119_randevu_erteleme.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
+| `tg_randevu_mesai_kontrol` | `1119_randevu_erteleme.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
 | `tg_recete_sil_taslak` | `1114_recete_yalniz_taslak_silinir.sql` | — |
 | `tg_servis_toplam` | `773_teknik_servis.sql` | — |
 | `tg_sevk_kayit` | `1110_sevk.sql` | — |
@@ -576,6 +580,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_sevk_silme` | `1111_sevk_kons_silme_kurali.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
+| `tg_taraf_aday_aktif_dosya_no` | `1123_aday_aktif_dosya_no.sql` | — |
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
@@ -590,7 +595,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (349 ad, 154 tanesi birden cok dosyada)
+## Gorunumler (353 ad, 157 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -656,7 +661,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_dis_hekim_lookup` | `940_personel_unvan_yalniz_onek.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql, 309_dis_hekim_kurum_taraf_bag.sql |
 | `v_dis_icon_skor` | `940_personel_unvan_yalniz_onek.sql` | 875_dis_ortodonti_icon.sql |
 | `v_dis_islem_lookup` | `706_dis_modulu.sql` | — |
-| `v_dis_lab_isemri` | `940_personel_unvan_yalniz_onek.sql` | 706_dis_modulu.sql |
+| `v_dis_lab_isemri` | `1119_randevu_erteleme.sql` | 706_dis_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_dis_lab_isemri_etiket` | `940_personel_unvan_yalniz_onek.sql` | 874_dis_protez_barkot.sql |
 | `v_dis_lab_lookup` | `706_dis_modulu.sql` | — |
 | `v_dis_plan_lookup` | `940_personel_unvan_yalniz_onek.sql` | 706_dis_modulu.sql |
@@ -851,7 +856,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_pat_materyal_tipi_lookup` | `1104_patoloji.sql` | — |
 | `v_pat_ret_nedeni_lookup` | `1104_patoloji.sql` | — |
 | `v_personel_avans` | `940_personel_unvan_yalniz_onek.sql` | 753_avans_modulu.sql, 755_avans_kaynak_tur_duzeltmesi.sql |
+| `v_personel_belge_durum` | `1136_personel_belge_dosya.sql` | 1135_personel_belge_takibi.sql |
+| `v_personel_belge_ozet` | `1135_personel_belge_takibi.sql` | — |
 | `v_personel_belge_talep` | `940_personel_unvan_yalniz_onek.sql` | 765_personel_belge_talebi.sql |
+| `v_personel_belge_turu` | `1138_personel_belge_turu_liste.sql` | 1135_personel_belge_takibi.sql, 1136_personel_belge_dosya.sql |
+| `v_personel_belge_turu_lookup` | `1135_personel_belge_takibi.sql` | — |
 | `v_personel_durum` | `963_personel_listesi.sql` | — |
 | `v_personel_grup_lookup` | `940_personel_unvan_yalniz_onek.sql` | 848_personel_bolum_gruplu_lookup.sql |
 | `v_personel_hareket` | `940_personel_unvan_yalniz_onek.sql` | 840_personel_hareket.sql, 843_kadro_ana_rol.sql |
@@ -874,7 +883,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_rad_protokol_lookup` | `967_radyoloji_cihaz_kart.sql` | — |
 | `v_rad_sablon_lookup` | `800_telerad_kurum_sozlesme_karti.sql` | — |
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
-| `v_radyoloji_cihaz_durum` | `967_radyoloji_cihaz_kart.sql` | — |
+| `v_radyoloji_cihaz_durum` | `1119_randevu_erteleme.sql` | 967_radyoloji_cihaz_kart.sql |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
 | `v_radyoloji_kritik_takip` | `940_personel_unvan_yalniz_onek.sql` | 318_radyoloji_takip_listeleri.sql |
 | `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |

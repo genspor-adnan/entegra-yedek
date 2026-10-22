@@ -32,6 +32,8 @@ export interface ListeTanimi {
   kodSuzgeci?: { alan: string; etiket: string };
   /** Acilista uygulanan gruplama kolonu (492: tetkik katalogu -> bolum). */
   varsayilanGrup?: string;
+  /** Grup başlığındaki adet birimi ("· 5 tür"); verilince toplamsız grubun boş ara toplam satırı çizilmez. */
+  grupBirimi?: string;
   /**
    * Ciplerin sagina ROL combosu koyar: kullanici hesabinin yetki rolu
    * (taraf_kullanici.rol_id). Rol listesi `rol` yetkisi ister - yetkisi

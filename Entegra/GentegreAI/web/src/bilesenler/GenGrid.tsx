@@ -122,6 +122,8 @@ interface Props {
    * Kullanici uc-nokta menusunden degistirebilir; bu yalnizca BASLANGIC.
    */
   varsayilanGrup?: string;
+  /** Grup başlığındaki adet birimi (GridTablo). */
+  grupBirimi?: string;
   /**
    * Gridin ALTINA, ayni kaydirma alaninin (.sahne) icine eklenecek panel -
    * randevu takvimi gibi. GenGrid'in DISINA kardes olarak konursa `.sahne`
@@ -267,7 +269,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
                           seciliBaslangicId, cipSonu, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
-                          onKodSuzgec, varsayilanGrup, solPanel, bosEk,
+                          onKodSuzgec, varsayilanGrup, grupBirimi, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
                           onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
@@ -983,7 +985,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                   ? kolonlar.filter(k => !dovizsizGizle.includes(k.ad))
                   : kolonlar}
                 satirlar={agacSatirlari} yukleniyor={yukleniyor}
-                gruplar={gruplar} grupKolonu={kullaniciGrup ?? grupKolonu}
+                gruplar={gruplar} grupKolonu={kullaniciGrup ?? grupKolonu} grupBirimi={grupBirimi}
                 satirBoyu={satirBoyu}
                 gorunenToplamlar={gorunenToplamlar} toplamSeridiVar={toplamSeridiVar}
                 sayfa={sayfa} sonSayfa={sonSayfa}

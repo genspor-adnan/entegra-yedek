@@ -65,6 +65,8 @@ import { GozGibEgilimi, GozGoruntulerSekmesi, GozKarsilastirmaSekmesi, GozTaniPl
 import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKutusu, OrderPlanSekmesi } from '../yatan/OrderPanelleri';
 import { randevuTercihiYaz } from './randevuTercihi';
 import { api } from '../../api/istemci';
+import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSekmesi, BelgeTuruHatirlatmaSekmesi,
+         BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import { kartAdi, kartSekmesiVar } from '../listeTanimlari.Ortak';
@@ -255,6 +257,14 @@ export function ListeKarti({
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   const [kayitSayaci, setKayitSayaci] = useState(0);
+  /** BELGE TÜRÜ (mockup personel_belge_turu.html): "Personel durumu" sekme rozeti - eksik + süresi dolan. */
+  const [belgeTuruSorun, setBelgeTuruSorun] = useState<number | null>(null);
+  useEffect(() => {
+    if (tanim.kaynak !== 'personel-belge-turu' || typeof kartId !== 'number') { setBelgeTuruSorun(null); return }
+    let iptal = false;
+    api.belgeTuruKartOzet(kartId).then(o => { if (!iptal) setBelgeTuruSorun(o.eksik + o.doldu) }, () => { /* rozet zorunlu değil */ });
+    return () => { iptal = true };
+  }, [tanim.kaynak, kartId, kartTazele, kayitSayaci]);
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
   // 💾 SONRASI AYNI KONUM (16.10.2026): çerçeve kaydedilince sayfa kaymasın.
@@ -756,7 +766,16 @@ export function ListeKarti({
                            onDuzenle={m => m.kaynak === 'k' && m.id ? git(`/metin-makro/${m.id}`)
                              : mesaj(c('Bu makro bir muayene şablonuna ait - Muayene › Ayarlar › Muayene Şablonları’ndan düzenlenir.'))} /> : null
           : undefined}
-        sekmeSarmalayici={tanim.kaynak === 'metin-makro' && kartId !== null
+        sekmeSarmalayici={tanim.kaynak === 'personel-belge-turu' && kartId !== null
+          // BELGE TÜRÜ (mockup personel_belge_turu.html (2)): Genel üç kutu + sağda özet;
+          //   Kime zorunlu gridinin sağında kaydetmeden kapsam önizlemesi.
+          ? (baslik, icerik, deger, _izgara, parcalar, detay) => detay?.meta.ad === 'kapsam'
+              ? <BelgeTuruKapsam id={typeof kartId === 'number' ? kartId : null} grid={icerik} satirlar={detay.satirlar} />
+              : baslik === 'Genel'
+              ? <BelgeTuruGenel id={typeof kartId === 'number' ? kartId : null} deger={deger} parcalar={parcalar}
+                                tazele={kartTazele * 1000 + kayitSayaci} />
+              : icerik
+          : tanim.kaynak === 'metin-makro' && kartId !== null
           // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
           ? (_baslik, _icerik, deger, _izgara, parcalar) => (
               <MetinMakroGovdesi id={kartId} deger={deger} alanDegistir={(ad, v) => parcalar?.alanDegistir(ad, v)} />)
@@ -1136,7 +1155,9 @@ export function ListeKarti({
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak'].includes(tanim.kaynak)}
-        baslikEk={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+        baslikEk={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
+          ? () => <BelgeTuruBaslik id={kartId} tazele={kartTazele * 1000 + kayitSayaci} />
+          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
           ? d => <AcilYatakBaslik yatakId={kartId} deger={d} tazele={kartTazele} />
           : tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
           // Durum rozeti Tamamla'nın sağında (kullanıcı 15.10.2026).
@@ -1206,7 +1227,22 @@ export function ListeKarti({
         // GÖZLÜK REÇETESİ (972): tek "Reçete" sekmesi (yeni kayıtta da) - değerler kart alanlarına yazılır.
         // ORDER (968): Doz planı · Güvenlik kontrolleri · Geçmiş (kayıtlı order'da).
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
-        ekSekmeler={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+        ekSekmeler={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
+          // BELGE TÜRÜ (mockup personel_belge_turu.html (2)): Personel durumu · Hatırlatma · Hareketler.
+          ? [
+              { anahtar: 'ozel:bt-personel', baslik: 'Personel durumu',
+                rozet: belgeTuruSorun ? { metin: String(belgeTuruSorun), hata: true } : undefined,
+                ciz: b => <BelgeTuruPersonelSekmesi id={kartId} hatirlatGun={Number(b.deger.hatirlatGun ?? 60)}
+                                                    tazele={kartTazele * 1000 + kayitSayaci} git={git}
+                                                    saltOkunur={b.saltOkunur} onSayilar={setBelgeTuruSorun} /> },
+              { anahtar: 'ozel:bt-hatirlatma', baslik: 'Hatırlatma',
+                ciz: b => <BelgeTuruHatirlatmaSekmesi git={git}
+                            gecerlilikAy={b.deger.gecerlilikAy == null || b.deger.gecerlilikAy === '' ? null : Number(b.deger.gecerlilikAy)}
+                            hatirlatGun={Number(b.deger.hatirlatGun ?? 60)} /> },
+              { anahtar: 'ozel:bt-gecmis', baslik: 'Hareketler',
+                ciz: () => <BelgeTuruHareketSekmesi id={kartId} tazele={kartTazele * 1000 + kayitSayaci} /> },
+            ]
+          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
           // ACİL YATAK KARTI (1118, mockup acil_yatak_karti): Durum · Kullanım Geçmişi · Temizlik & Bakım
           //   (Donanım katalog grubu). Durum düğmeleri kartı tazeler.
           ? [
@@ -1493,7 +1529,9 @@ export function ListeKarti({
                     onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
           </span>) : undefined}
         // ACİL YATAK (mockup araç çubuğu): taşı · temizliğe al · kullanım dışı / kullanıma aç · etiket.
-        ekAraclar={tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
+        ekAraclar={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
+          ? d => <BelgeTuruAraclari id={kartId} ad={String(d.ad ?? '')} git={git} saltOkunur={false} />
+          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
           ? d => <AcilYatakAraclari yatakId={kartId} deger={d} tazele={kartTazele} onDegisti={() => setKartTazele(t => t + 1)} />
           // RANDEVU KARTINDA BAŞVURUYA DÖNÜŞTÜR (kullanıcı 17.10.2026: "takvimdeyken işaretleyip başvuruya
           //   dönüştür diyemiyorum, hemen kart açılıyor - kartın içine de buton ekle"): listedeki aksiyonun

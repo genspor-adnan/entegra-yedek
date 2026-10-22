@@ -42,6 +42,11 @@ function bkiHesapla(s: Record<string, unknown>): string {
 }
 
 export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
+  // ------------------------------------------ İK belge türü (1135-1138) ----
+  // Mockup Ekranlar/IK/personel_belge_turu.html (2): şeritte ad · grup · durum; sekmeler mockup sırasıyla.
+  'personel-belge-turu': {
+    sekmeSirasi: ['Genel', 'Kime zorunlu', 'Personel durumu', 'Hatırlatma', 'Hareketler'],
+  },
   // ------------------------------------------- radyoloji tanımları (965) ----
   // Mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html · radyoloji_protokol_karti.html:
   //   kimlik şeridi + sekmeler (Önizleme / Sürümler / Kullanım ekranın ek sekmeleri).

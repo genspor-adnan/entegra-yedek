@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belge Türleri — Mockup (Gentegre AI · İK)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.k{padding:2px 7px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+
+  .idstrip{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.pasif{background:#f4f6f9;color:#4d5d6e}
+
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer;display:flex;gap:5px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme.pasif{opacity:.55;cursor:default}
+  .sekme .say{border-radius:8px;padding:0 6px;font-size:10px;font-weight:bold;background:#d5dfea;color:#3a5573}
+  .sekme .say.kir{background:#b3261e;color:#fff}
+  .ic-sek{display:flex;gap:6px;padding:10px 12px 0}
+  .isk{border:1px solid var(--line);border-radius:14px;padding:4px 14px;background:#fff;cursor:pointer;color:#4d5d6e;font-size:11.5px}
+  .isk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .panel{padding:10px 12px 14px}
+
+  .ozet{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .kart{flex:1;min-width:130px;border:1px solid var(--line2);border-left:4px solid #9fb2c6;border-radius:4px;padding:7px 10px;background:#fbfcfe;cursor:pointer}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:18px;font-weight:bold;color:var(--navy);margin-top:1px}
+  .kart.kir{border-left-color:#b3261e} .kart.kir .d{color:#b3261e}
+  .kart.sari{border-left-color:#d9a12b} .kart.sari .d{color:#8a6218}
+  .kart.ok{border-left-color:#3f9a5e} .kart.ok .d{color:#2e7d46}
+  .kart.on{box-shadow:0 0 0 2px #2f6db3 inset}
+  .ilerleme{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .bar{flex:1;height:9px;background:#e7edf4;border-radius:5px;overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+
+  .duzen{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}
+  .dg{border:1px solid var(--line2);border-radius:4px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tr.eksik td{background:#fffafa}
+  .dg tr.dolan td{background:#fffdf5}
+  .dg tr:hover td{background:#f2f7fd}
+  .sonuk{color:var(--muted)} .yuk{color:#b3261e;font-weight:bold}
+  .zor{color:#b3261e;font-weight:bold}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:#fff;margin-bottom:10px}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{font-weight:normal;color:var(--muted)}
+  .grp .ic{padding:8px 10px}
+  .liste{margin:0;padding:0;list-style:none}
+  .liste li{padding:5px 0;border-bottom:1px dashed var(--line2);display:flex;gap:8px;align-items:center}
+  .liste li:last-child{border-bottom:none}
+  .liste.duz li{display:block;line-height:1.5}
+  .liste .t{color:var(--muted);font-size:10.5px;min-width:68px}
+  .zaman{position:relative;padding-left:16px}
+  .zaman::before{content:"";position:absolute;left:5px;top:3px;bottom:3px;width:2px;background:#d5dfea}
+  .zaman div{position:relative;margin-bottom:7px}
+  .zaman div::before{content:"";position:absolute;left:-15px;top:4px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #2f6db3}
+  .zaman div.kir::before{border-color:#b3261e} .zaman div.sari::before{border-color:#d9a12b} .zaman div.ok::before{border-color:#3f9a5e;background:#3f9a5e}
+  .zaman small{color:var(--muted)}
+
+  .vize-bas{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 12px;padding:10px;border:1px solid #cfe0f5;border-radius:5px;background:linear-gradient(#f7fbff,#fff);margin-bottom:10px}
+  .kaynak{font-size:10.5px}
+  .kaynak.pers{color:#6a3fb5} .kaynak.kurum{color:#2f6db3} .kaynak.edev{color:#0f8b8d}
+  .kutu{display:inline-flex;width:15px;height:15px;border:1.5px solid #9fb2c6;border-radius:3px;align-items:center;justify-content:center;font-size:11px;color:#fff;vertical-align:middle}
+  .kutu.on{background:#3f9a5e;border-color:#3f9a5e}
+  .kutu.yari{background:#d9a12b;border-color:#d9a12b}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:4px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .ust-baslik{max-width:1400px;margin:16px auto 6px;font-weight:bold;color:var(--navy);font-size:13px}
+  @media (max-width:1000px){.duzen{grid-template-columns:1fr}.idstrip,.vize-bas{grid-template-columns:1fr 1fr}}
+  .cipler{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:14px;padding:3px 12px;background:#fff;cursor:pointer;color:#4d5d6e;font-size:11.5px}
+  .cip.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .ara{border:1px solid var(--line);border-radius:3px;padding:4px 8px;min-width:220px;color:var(--muted);background:#fff}
+  .dg tr.sec td{background:var(--sel)!important}
+  .dg tr.pas td{color:#8a97a5}
+  .dg td.s{text-align:right}
+  #ltablo tr[data-g]:not(.grup){cursor:pointer}
+  .form{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px}
+  .form .g2{grid-column:span 2} .form .g4{grid-column:1/-1}
+  .sec-k{display:flex;gap:6px;flex-wrap:wrap}
+  .sec-k span{border:1px solid var(--line);border-radius:3px;padding:4px 10px;background:#fff;cursor:pointer}
+  .sec-k span.on{background:#eef4fc;border-color:#2f6db3;color:#14315a;font-weight:bold}
+  .chk{display:flex;gap:7px;align-items:flex-start;padding:5px 0}
+  .chk small{display:block;color:var(--muted)}
+  .oneri{display:inline-block;margin-left:5px;border-radius:3px;padding:0 5px;font-size:9.5px;font-weight:bold;background:#f1ecfa;color:#6a3fb5;border:1px solid #ddd0f2;vertical-align:middle}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:11.5px}
+  .kv b{color:var(--muted);font-weight:normal}
+  .sablon{border:1px dashed #b9c8d8;border-radius:4px;background:#fbfcfe;padding:8px 10px;white-space:pre-wrap;line-height:1.55;font-size:11.5px}
+  .sablon i{background:#fdf6e3;color:#8a6218;font-style:normal;border-radius:3px;padding:0 3px}
+  .cizelge{margin:8px 30px 0;position:relative;height:52px}
+  .cizelge .h{position:absolute;left:0;right:0;top:30px;height:5px;border-radius:3px;background:linear-gradient(90deg,#3f9a5e 0 70%,#d9a12b 70% 85%,#b3261e 85%)}
+  .cizelge .n{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .bilgi{border:1px solid #cfe0f5;background:#f5f9fe;border-radius:4px;padding:7px 10px;color:#2c4a6b;font-size:11.5px;margin-bottom:10px;line-height:1.5}
+  .bilgi.sari{border-color:#f2ddbf;background:#fdf9ef;color:#8a6218}
+  .ic-bar{display:flex;gap:4px;padding:5px 8px;background:var(--head);border:1px solid var(--line2);border-bottom:none;border-radius:4px 4px 0 0;align-items:center;flex-wrap:wrap}
+  @media (max-width:1000px){.form{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ======================================================== 1 · LİSTE -->
+<div class="ust-baslik">1 · İK › Tanımlar › Belge Türleri (liste)</div>
+<div class="win">
+  <div class="title">🗂 Belge Türleri <span class="sp">İK › Tanımlar · satıra çift tık = kartı aç</span></div>
+  <div class="toolbar">
+    <button class="btn primary" onclick="kartAc('Yeni belge türü', true)">＋ Yeni</button>
+    <button class="btn" onclick="kartAc()">✎ Aç</button>
+    <button class="btn">⧉ Kopyala</button>
+    <button class="btn">⏸ Pasife al</button>
+    <div class="sepv"></div>
+    <button class="btn">↕ Sırayı düzenle</button>
+    <div class="sp"></div>
+    <button class="btn">🖨 Yazdır</button><button class="btn">⬇ Excel</button>
+  </div>
+  <div class="ozet" style="padding:10px 10px 0;margin:0" id="lozet">
+    <div class="kart on" data-c="hep"><div class="b">Aktif tür</div><div class="d">16</div></div>
+    <div class="kart" data-c="zor"><div class="b">Zorunlu (kapsamı tanımlı)</div><div class="d">13</div></div>
+    <div class="kart" data-c="sure"><div class="b">Süreli (yenilenen)</div><div class="d">4</div></div>
+    <div class="kart kir" data-c="eks"><div class="b">Personelde eksiği olan</div><div class="d">8</div></div>
+    <div class="kart sari" data-c="kap"><div class="b">İsteğe bağlı (kapsamsız)</div><div class="d">3</div></div>
+  </div>
+  <div class="cipler" id="lcip">
+    <span class="cip on" data-c="hep">Tümü</span>
+    <span class="cip" data-c="1">Kimlik / işe giriş</span><span class="cip" data-c="2">Mesleki</span>
+    <span class="cip" data-c="3">Sağlık / İSG</span><span class="cip" data-c="4">İdari</span>
+    <span class="cip" data-c="pas">Pasifler</span>
+    <div class="sp"></div><span class="ara">🔍 Belge adı ara…</span>
+  </div>
+  <div class="dg" style="border:none;border-radius:0"><table id="ltablo">
+    <tr><th>Sıra</th><th>Belge adı</th><th>Geçerlilik</th><th>Uyarı</th><th>Dosya</th><th>Kime zorunlu</th><th>Personel</th><th>Tamam</th><th>Eksik</th><th>Doldu</th><th>Yaklaşan</th><th>Durum</th></tr>
+    <tr class="grup"><td colspan="12">Kimlik / işe giriş <span class="sonuk">· 5 tür</span></td></tr>
+    <tr data-g="1" data-z="1"><td class="s">10</td><td>Nüfus cüzdanı fotokopisi</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">209</td><td class="s yuk">5</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="1" data-z="1"><td class="s">20</td><td>Adli sicil kaydı</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">201</td><td class="s yuk">13</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="1" data-z="1"><td class="s">30</td><td>İkametgâh (yerleşim yeri) belgesi</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td>Tüm personel</td><td class="s">214</td><td class="s">206</td><td class="s yuk">8</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="1" data-z="1"><td class="s">40</td><td>SGK işe giriş bildirgesi</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">214</td><td class="s">0</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="1" data-k="1"><td class="s">50</td><td>Vesikalık fotoğraf</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td><span class="rz sari">İsteğe bağlı</span></td><td class="s sonuk">—</td><td class="s">188</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr class="grup"><td colspan="12">Mesleki <span class="sonuk">· 4 tür</span></td></tr>
+    <tr data-g="2" data-z="1"><td class="s">10</td><td>Diploma (onaylı)</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Hekim, Hemşire, Ebe, Teknisyen</td><td class="s">131</td><td class="s">131</td><td class="s">0</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="2" data-z="1"><td class="s">20</td><td>Uzmanlık belgesi</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Uzman Doktor</td><td class="s">38</td><td class="s">36</td><td class="s yuk">2</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="2" data-z="1" data-s="1" class="sec"><td class="s">30</td><td>Meslek odası kayıt belgesi</td><td>12 ay</td><td>60 gün</td><td>📄 zorunlu</td><td>Hekim · Diş Hekimi</td><td class="s">52</td><td class="s">41</td><td class="s yuk">3</td><td class="s yuk">2</td><td class="s">6</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="2" data-z="1" data-s="1"><td class="s">40</td><td>Mesleki sorumluluk sigortası poliçesi</td><td>12 ay</td><td>30 gün</td><td>📄 zorunlu</td><td>Hekim · Diş Hekimi</td><td class="s">58</td><td class="s">49</td><td class="s yuk">1</td><td class="s yuk">4</td><td class="s">4</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr class="grup"><td colspan="12">Sağlık / İSG <span class="sonuk">· 4 tür</span></td></tr>
+    <tr data-g="3" data-z="1"><td class="s">10</td><td>İşe giriş sağlık raporu</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">210</td><td class="s yuk">4</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="3" data-z="1" data-s="1"><td class="s">20</td><td>Periyodik sağlık muayenesi</td><td>12 ay</td><td>45 gün</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">180</td><td class="s">0</td><td class="s yuk">3</td><td class="s">31</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="3" data-k="1"><td class="s">30</td><td>Hepatit B aşı / antikor kaydı</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td><span class="rz sari">İsteğe bağlı</span></td><td class="s sonuk">—</td><td class="s">97</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="3" data-z="1" data-s="1"><td class="s">40</td><td>Temel İSG eğitimi sertifikası</td><td>36 ay</td><td>60 gün</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">196</td><td class="s">0</td><td class="s">0</td><td class="s">18</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr class="grup"><td colspan="12">İdari <span class="sonuk">· 3 tür</span></td></tr>
+    <tr data-g="4" data-z="1"><td class="s">10</td><td>İş sözleşmesi (imzalı)</td><td>Süresiz</td><td class="sonuk">—</td><td>📄 zorunlu</td><td>Tüm personel</td><td class="s">214</td><td class="s">214</td><td class="s">0</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="4" data-k="1"><td class="s">20</td><td>KVKK aydınlatma / açık rıza</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td><span class="rz sari">İsteğe bağlı</span></td><td class="s sonuk">—</td><td class="s">201</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td class="s sonuk">—</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr data-g="4" data-z="1"><td class="s">30</td><td>Banka IBAN bilgi formu</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td>Tüm personel</td><td class="s">214</td><td class="s">214</td><td class="s">0</td><td class="s">0</td><td class="s">0</td><td><span class="rz ok">Aktif</span></td></tr>
+    <tr class="grup" hidden><td colspan="12">Pasif <span class="sonuk">· 1 tür</span></td></tr>
+    <tr data-g="pas" class="pas" hidden><td class="s">90</td><td>Askerlik durum belgesi</td><td>Süresiz</td><td class="sonuk">—</td><td class="sonuk">isteğe bağlı</td><td class="sonuk">—</td><td class="s">—</td><td class="s">12</td><td class="s">—</td><td class="s">—</td><td class="s">—</td><td><span class="rz pas">Pasif</span></td></tr>
+  </table></div>
+  <div class="statusbar"><span id="lsay">16 / 17 tür gösteriliyor</span><span>Sayılar aktif personel üzerinden · Eksik = zorunlu olup girilmemiş ya da dosyası yok</span><span class="sp">Eksik / Doldu / Yaklaşan hücresine tık = Belge Takip listesi o türle süzülü açılır</span></div>
+</div>
+
+<!-- ======================================================== 2 · KART -->
+<div class="ust-baslik">2 · Belge Türü Kartı (kendi sekmesinde açılır — sekmeler tıklanır)</div>
+<div class="win" id="kart">
+  <div class="title">🗂 Belge Türü — <span id="kad">Meslek odası kayıt belgesi</span> <span class="sp">İK › Tanımlar › Belge Türleri</span></div>
+  <div class="toolbar">
+    <button class="btn primary">💾 Kaydet</button>
+    <button class="btn">⧉ Kopyala</button>
+    <div class="sepv"></div>
+    <button class="btn" onclick="sekmeAc('personel')">📤 Eksiği olanlara hatırlat</button>
+    <button class="btn">📋 Belge Takip listesinde aç</button>
+    <button class="btn sp">Kapat</button>
+  </div>
+  <div class="idstrip">
+    <div class="fld"><label>Belge adı *</label><div class="inp big" id="kad2">Meslek odası kayıt belgesi</div></div>
+    <div class="fld"><label>Grup *</label><div class="inp combo">Mesleki</div></div>
+    <div class="fld"><label>Geçerlilik</label><div class="inp">12 ay <span class="sonuk">· 60 gün önce uyar</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo"><span class="rz ok">Aktif</span></div></div>
+    <div class="fld"><label>Personel durumu</label><div class="inp"><span class="rz kir">5 eksik / doldu</span><span class="rz sari">6 yaklaşıyor</span></div></div>
+  </div>
+
+  <div class="sekmeler" id="ksek">
+    <div class="sekme on" data-p="genel">📝 Genel</div>
+    <div class="sekme" data-p="kapsam">🎯 Kime zorunlu <span class="say">2</span></div>
+    <div class="sekme" data-p="personel">👥 Personel durumu <span class="say kir">5</span></div>
+    <div class="sekme" data-p="hatirlatma">🔔 Hatırlatma</div>
+    <div class="sekme" data-p="gecmis">🕘 Hareketler</div>
+  </div>
+
+  <!-- ---------------------------------------------------- Genel -->
+  <div class="panel" data-kp="genel">
+    <div class="duzen">
+      <div>
+        <div class="grp"><div class="gb">Belge türü</div><div class="ic"><div class="form">
+          <div class="fld g2"><label>Belge adı *</label><div class="inp">Meslek odası kayıt belgesi</div></div>
+          <div class="fld"><label>Grup *</label><div class="inp combo">Mesleki</div></div>
+          <div class="fld"><label>Sıra</label><div class="inp">30</div></div>
+          <div class="fld g4"><label>Açıklama</label><div class="inp" style="min-height:44px;align-items:flex-start">Tabip odası / diş hekimleri odası güncel kayıt belgesi. Her yıl ocak ayında yenilenir; e-Devlet barkodlu çıktı kabul edilir.</div></div>
+        </div></div></div>
+
+        <div class="grp"><div class="gb">Geçerlilik</div><div class="ic"><div class="form">
+          <div class="fld g2"><label>Süre</label><div class="sec-k" id="sure"><span data-v="0">Süresiz</span><span data-v="1" class="on">Süreli</span></div></div>
+          <div class="fld sureli"><label>Geçerlilik (ay)</label><div class="inp">12</div></div>
+          <div class="fld sureli"><label>Kaç gün önce uyarılsın *</label><div class="inp">60</div></div>
+          <div class="fld g4 sonuk" style="font-size:11px" id="sureNot">Geçerlilik tarihi girilmezse belge tarihi + 12 ay olarak hesaplanır.</div>
+        </div></div></div>
+
+        <div class="grp"><div class="gb">Kayıt kuralları</div><div class="ic">
+          <label class="chk"><span class="kutu on">✓</span><span><b>Dosyası zorunlu</b><small>Taraması yüklenmeyen belge "Dosya yok" sayılır, eksik listesine girer.</small></span></label>
+          <label class="chk"><span class="kutu"></span><span><b>Belge no zorunlu</b> <span class="oneri">ÖNERİ</span><small>Sicil / poliçe / sertifika no girilmeden kayıt olmaz.</small></span></label>
+          <label class="chk"><span class="kutu"></span><span><b>Personel portalından yüklenebilir</b> <span class="oneri">ÖNERİ</span><small>Personelin yüklediği dosya İK onayına düşer; onaylanınca belge kaydı oluşur.</small></span></label>
+          <div class="form" style="margin-top:6px">
+            <div class="fld g2"><label>Kaynak <span class="oneri">ÖNERİ</span></label><div class="sec-k"><span class="on">Personel getirir</span><span>Kurum düzenler</span><span>e-Devlet</span></div></div>
+            <div class="fld g2"><label>Süresi dolunca <span class="oneri">ÖNERİ</span></label><div class="inp combo">Yalnız uyar</div></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div>
+        <div class="grp"><div class="gb">Özet</div><div class="ic"><div class="kv">
+          <b>Kime zorunlu</b><span>Hekim (tüm birimler) · Diş Hekimi / Ağız ve Diş Sağlığı</span>
+          <b>Kapsamdaki personel</b><span>52</span>
+          <b>Belgesi tamam</b><span style="color:#2e7d46;font-weight:bold">41</span>
+          <b>Eksik / dosya yok</b><span class="yuk">3</span>
+          <b>Süresi doldu</b><span class="yuk">2</span>
+          <b>60 gün içinde dolacak</b><span style="color:#8a6218;font-weight:bold">6</span>
+        </div>
+        <div class="bar" style="margin-top:10px"><i style="width:79%;background:#3f9a5e"></i><i style="width:11%;background:#d9a12b"></i><i style="width:10%;background:#b3261e"></i></div>
+        <div style="margin-top:8px"><button class="btn k" onclick="sekmeAc('personel')">👥 Personel durumunu göster</button></div>
+        </div></div>
+        <div class="bilgi sari">⚠ Geçerlilik süresini değiştirmek girilmiş belgelerin geçerlilik tarihlerini <b>değiştirmez</b>; yalnız yeni girilen ve tarihi boş bırakılan belgeler yeni süreyle hesaplanır.</div>
+        <div class="grp"><div class="gb">Kayıt</div><div class="ic"><div class="kv">
+          <b>Ekleyen</b><span>Sistem (kurulum) · 14.10.2026</span>
+          <b>Son değiştiren</b><span>Zeynep ARSLAN · 21.10.2026 10:42</span>
+          <b>Geçerli olduğu yer</b><span>Kurum geneli (tüm şubeler)</span>
+        </div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------- Kime zorunlu -->
+  <div class="panel" data-kp="kapsam" hidden>
+    <div class="bilgi">Satırda <b>birim</b> ve/veya <b>görev</b> seçilir. İkisi boş satır = <b>tüm personel</b>. Hiç satır yoksa belge <b>isteğe bağlıdır</b>: girilebilir, eksik sayılmaz.</div>
+    <div class="duzen">
+      <div>
+        <div class="ic-bar">
+          <button class="btn k">＋ Satır ekle</button><button class="btn k">＋ Tüm personel</button><button class="btn k">✕ Satırı sil</button>
+          <div class="sp"></div><span class="sonuk">2 kural</span>
+        </div>
+        <div class="dg" style="border-radius:0 0 4px 4px"><table>
+          <tr><th style="width:28px">#</th><th>Birim (boş = hepsi)</th><th>Görev (boş = hepsi)</th><th>Eşleşen personel</th><th>Eksik</th></tr>
+          <tr class="sec"><td>1</td><td><div class="inp combo pasif">(tüm birimler)</div></td><td><div class="inp combo">Hekim</div></td><td class="s">44</td><td class="s yuk">4</td></tr>
+          <tr><td>2</td><td><div class="inp combo">Ağız ve Diş Sağlığı</div></td><td><div class="inp combo">Diş Hekimi</div></td><td class="s">8</td><td class="s yuk">1</td></tr>
+          <tr><td class="sonuk">＋</td><td class="sonuk">yeni satır…</td><td></td><td></td><td></td></tr>
+        </table></div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Kapsam önizleme <span class="sp">kaydetmeden hesaplanır</span></div><div class="ic"><div class="kv">
+          <b>Kapsama giren</b><span><b style="color:var(--navy)">52</b> aktif personel</span>
+          <b>Kayıtla yeni eksik çıkacak</b><span class="yuk">+0</span>
+          <b>Kapsamdan çıkacak</b><span>0</span>
+        </div></div></div>
+        <div class="grp"><div class="gb">Birim dağılımı</div><div class="ic"><ul class="liste">
+          <li><span style="flex:1">Kardiyoloji</span><span class="rz">9</span></li>
+          <li><span style="flex:1">Dahiliye</span><span class="rz">8</span></li>
+          <li><span style="flex:1">Ağız ve Diş Sağlığı</span><span class="rz">8</span></li>
+          <li><span style="flex:1">Acil</span><span class="rz">7</span></li>
+          <li><span style="flex:1">Diğer 9 birim</span><span class="rz">20</span></li>
+        </ul></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------- Personel durumu -->
+  <div class="panel" data-kp="personel" hidden>
+    <div class="ozet" id="pozet">
+      <div class="kart on" data-f="hep"><div class="b">Kapsamdaki personel</div><div class="d">52</div></div>
+      <div class="kart ok" data-f="ok"><div class="b">Tamam</div><div class="d">41</div></div>
+      <div class="kart kir" data-f="eks"><div class="b">Eksik / dosya yok</div><div class="d">3</div></div>
+      <div class="kart kir" data-f="dol"><div class="b">Süresi doldu</div><div class="d">2</div></div>
+      <div class="kart sari" data-f="yak"><div class="b">60 gün içinde</div><div class="d">6</div></div>
+    </div>
+    <div class="ic-bar">
+      <label class="chk" style="padding:0"><span class="kutu on">✓</span> Tümünü seç</label>
+      <div class="sepv"></div>
+      <button class="btn k">📤 Seçililere hatırlat</button><button class="btn k">⬇ Excel</button>
+      <div class="sp"></div><span class="sonuk">Satıra çift tık = personel kartı Belgeler sekmesinde açılır</span>
+    </div>
+    <div class="dg" style="border-radius:0"><table id="ptablo">
+      <tr><th style="width:24px"></th><th>Personel</th><th>Birim</th><th>Görev</th><th>Belge tarihi</th><th>Geçerlilik</th><th>Kalan</th><th>Dosya</th><th>Son hatırlatma</th><th>Durum</th></tr>
+      <tr data-d="dol" class="eksik"><td><span class="kutu on">✓</span></td><td>Prof.Dr. Aslı DEMİR</td><td>Kardiyoloji</td><td>Uzman Doktor</td><td>08.10.2025</td><td>08.10.2026</td><td class="yuk">−14 gün</td><td>📄</td><td class="sonuk">20.10.2026 · e-posta</td><td><span class="rz kir">Süresi doldu</span></td></tr>
+      <tr data-d="dol" class="eksik"><td><span class="kutu on">✓</span></td><td>Dr. Kemal YURT</td><td>Acil</td><td>Hekim</td><td>01.09.2025</td><td>01.09.2026</td><td class="yuk">−51 gün</td><td>📄</td><td class="sonuk">—</td><td><span class="rz kir">Süresi doldu</span></td></tr>
+      <tr data-d="eks" class="eksik"><td><span class="kutu on">✓</span></td><td>Dr. Lena WEBER</td><td>Acil</td><td>Hekim</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td><span class="rz kir">Eksik</span></td></tr>
+      <tr data-d="eks" class="eksik"><td><span class="kutu on">✓</span></td><td>Dt. Selin AKAR</td><td>Ağız ve Diş Sağlığı</td><td>Diş Hekimi</td><td>15.01.2026</td><td>15.01.2027</td><td>85 gün</td><td class="yuk">yok</td><td class="sonuk">—</td><td><span class="rz kir">Dosya yok</span></td></tr>
+      <tr data-d="eks" class="eksik"><td><span class="kutu on">✓</span></td><td>Dr. Murat ÖZ</td><td>Dahiliye</td><td>Hekim</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">18.10.2026 · SMS</td><td><span class="rz kir">Eksik</span></td></tr>
+      <tr data-d="yak" class="dolan"><td><span class="kutu"></span></td><td>Doç.Dr. Hakan TEKİN</td><td>Kardiyoloji</td><td>Uzman Doktor</td><td>12.11.2025</td><td>12.11.2026</td><td style="color:#8a6218;font-weight:bold">21 gün</td><td>📄</td><td class="sonuk">—</td><td><span class="rz sari">Yaklaşıyor</span></td></tr>
+      <tr data-d="yak" class="dolan"><td><span class="kutu"></span></td><td>Dr. Elif KARA</td><td>Göz</td><td>Hekim</td><td>02.12.2025</td><td>02.12.2026</td><td style="color:#8a6218;font-weight:bold">41 gün</td><td>📄</td><td class="sonuk">—</td><td><span class="rz sari">Yaklaşıyor</span></td></tr>
+      <tr data-d="ok"><td><span class="kutu"></span></td><td>Uzm.Dr. Can ERDEM</td><td>Dahiliye</td><td>Uzman Doktor</td><td>05.03.2026</td><td>05.03.2027</td><td style="color:#2e7d46">134 gün</td><td>📄</td><td class="sonuk">—</td><td><span class="rz ok">Tamam</span></td></tr>
+      <tr data-d="ok"><td><span class="kutu"></span></td><td>Dr. Deniz AYDIN</td><td>Acil</td><td>Hekim</td><td>10.04.2026</td><td>10.04.2027</td><td style="color:#2e7d46">170 gün</td><td>📄</td><td class="sonuk">—</td><td><span class="rz ok">Tamam</span></td></tr>
+    </table></div>
+    <div class="statusbar" style="border:1px solid var(--line2);border-top:none"><span id="psay">9 / 52 personel gösteriliyor</span><span>5 seçili</span></div>
+  </div>
+
+  <!-- ---------------------------------------------------- Hatırlatma -->
+  <div class="panel" data-kp="hatirlatma" hidden>
+    <div class="duzen">
+      <div>
+        <div class="grp"><div class="gb">Zaman çizelgesi <span class="sp">12 ay geçerli · 60 gün önce uyar</span></div><div class="ic">
+          <div class="cizelge"><div class="h"></div>
+            <div class="n" style="left:0">Belge tarihi<br>&nbsp;</div>
+            <div class="n" style="left:70%">−60 gün<br><b style="color:#8a6218">Yaklaşıyor</b></div>
+            <div class="n" style="left:85%">Geçerlilik sonu<br><b style="color:#b3261e">Doldu</b></div>
+          </div>
+          <div class="sonuk" style="margin-top:6px">Yeşil = tamam · sarı = yaklaşıyor (personel kartında ve listede uyarı) · kırmızı = doldu (eksik sayılır).</div>
+        </div></div>
+        <div class="grp"><div class="gb">Otomatik hatırlatma <span class="oneri">ÖNERİ</span></div><div class="ic"><div class="form">
+          <div class="fld g4"><label>Personele gönder</label><div class="sec-k"><span>Kapalı</span><span class="on">Yaklaşınca</span><span>Yaklaşınca + dolunca</span></div></div>
+          <div class="fld"><label>Tekrar</label><div class="inp combo">7 günde bir</div></div>
+          <div class="fld"><label>En çok</label><div class="inp">5 hatırlatma</div></div>
+          <div class="fld"><label>Kanal</label><div class="inp combo">E-posta, yoksa SMS</div></div>
+          <div class="fld"><label>Ayrıca bilgilendir</label><div class="inp combo">Birim sorumlusu</div></div>
+        </div>
+        <div class="sonuk" style="margin-top:8px">Bugün yalnız elle hatırlatma var (liste / kart "Hatırlat"); aynı kişiye 24 saatte bir.</div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">E-posta şablonu <span class="sp">personel.belge.hatirlatma.eposta</span></div><div class="ic">
+          <div class="sablon"><b>Konu:</b> <i>{{kurum}}</i> - özlük dosyanızda eksik belgeler
+
+Sayın <i>{{personel_ad}}</i>,
+
+Özlük dosyanızda tamamlanması ya da yenilenmesi gereken belgeler:
+
+<i>{{belgeler}}</i>
+
+Belgelerinizi İnsan Kaynakları birimine iletmenizi rica ederiz.</div>
+        </div></div>
+        <div class="grp"><div class="gb">SMS şablonu <span class="sp">personel.belge.hatirlatma</span></div><div class="ic">
+          <div class="sablon">Sayın <i>{{personel_ad}}</i>, özlük dosyanızda tamamlanması gereken belgeler: <i>{{belgeler}}</i>. İnsan Kaynakları - <i>{{kurum}}</i></div>
+          <div style="margin-top:6px"><button class="btn k">✎ Şablonu düzenle</button> <span class="sonuk">Bildirim şablonları ekranında açılır (tüm türlerde ortak).</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------- Hareketler -->
+  <div class="panel" data-kp="gecmis" hidden>
+    <div class="duzen">
+      <div class="dg"><table>
+        <tr><th>Zaman</th><th>İşlem</th><th>Ayrıntı</th><th>Kullanıcı</th></tr>
+        <tr><td>21.10.2026 10:42</td><td><span class="rz mavi">Değiştirildi</span></td><td>Uyarı günü: 30 → 60</td><td>Zeynep ARSLAN</td></tr>
+        <tr><td>21.10.2026 10:42</td><td><span class="rz mavi">Kapsam eklendi</span></td><td>Ağız ve Diş Sağlığı · Diş Hekimi</td><td>Zeynep ARSLAN</td></tr>
+        <tr><td>20.10.2026 16:05</td><td><span class="rz mor">Hatırlatma</span></td><td>4 personele kuyruğa alındı (1 atlandı: iletişim bilgisi yok)</td><td>Zeynep ARSLAN</td></tr>
+        <tr><td>15.10.2026 09:12</td><td><span class="rz mavi">Değiştirildi</span></td><td>Dosyası zorunlu: Hayır → Evet</td><td>Murat ÇELİK</td></tr>
+        <tr><td>14.10.2026 08:00</td><td><span class="rz ok">Eklendi</span></td><td>Kurulum başlangıç listesi</td><td>Sistem</td></tr>
+      </table></div>
+      <div class="grp"><div class="gb">Not</div><div class="ic sonuk" style="line-height:1.6">Tür ve kapsam değişiklikleri işlem loguna yazılır (1600 / 1601). Hatırlatmalar bildirim kuyruğundan gelir. Personel bazında belge hareketleri personel kartı › Belgeler › Hareketler'de.</div></div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Kayıt #8</span><span>Kurum geneli</span><span class="sp">Kullanımdaki tür silinemez — pasife alınır</span></div>
+</div>
+
+<div class="not">
+  <b>Kurgu.</b> Liste günlük tanım ekranı: hangi belge kime zorunlu, ne kadar geçerli, şu an kaç personelde eksik — tek bakışta. Sayaç kartları ve grup çipleri süzer; sayı hücresi Belge Takip listesine süzülü atlar.<br>
+  • <b>Kart sekmeleri</b>: <b>Genel</b> (bugünkü alanlar: ad, grup, sıra, geçerlilik ay, uyarı günü, dosya zorunlu, durum, açıklama) · <b>Kime zorunlu</b> (bugünkü kapsam detayı + eşleşen personel önizlemesi) · <b>Personel durumu</b> (bu türün kurum geneli durumu, seçililere hatırlat) · <b>Hatırlatma</b> (zaman çizelgesi + 1137 şablonları) · <b>Hareketler</b> (log).<br>
+  • <span class="oneri">ÖNERİ</span> işaretli alanlar bugün yok: belge no zorunlu, portaldan yükleme, kaynak (personel / kurum / e-Devlet), süresi dolunca davranış (uyar / görev planında engelle), otomatik hatırlatma. İşaretsiz her şey mevcut veriden çıkar.<br>
+  • Kullanımdaki tür silinmez, pasife alınır (pasif tür kapsam hesabına girmez).
+</div>
+
+<script>
+  // Kart sekmeleri
+  function sekmeAc(p) {
+    document.querySelectorAll('#ksek .sekme').forEach(x => x.classList.toggle('on', x.dataset.p === p));
+    document.querySelectorAll('[data-kp]').forEach(x => x.hidden = x.dataset.kp !== p);
+  }
+  document.querySelectorAll('#ksek .sekme').forEach(s => s.onclick = () => sekmeAc(s.dataset.p));
+
+  // Süreli / süresiz
+  document.querySelectorAll('#sure span').forEach(s => s.onclick = () => {
+    document.querySelectorAll('#sure span').forEach(x => x.classList.toggle('on', x === s));
+    const sureli = s.dataset.v === '1';
+    document.querySelectorAll('.sureli').forEach(f => f.style.opacity = sureli ? 1 : .35);
+    document.getElementById('sureNot').textContent = sureli
+      ? 'Geçerlilik tarihi girilmezse belge tarihi + 12 ay olarak hesaplanır.'
+      : 'Süresiz belge: bir kez girilir, yaklaşma / dolma uyarısı yok.';
+  });
+
+  // Listeden kart aç
+  function kartAc(ad, yeni) {
+    const sec = document.querySelector('#ltablo tr.sec td:nth-child(2)');
+    ad = ad || (sec ? sec.textContent : 'Meslek odası kayıt belgesi');
+    document.getElementById('kad').textContent = ad;
+    document.getElementById('kad2').textContent = yeni ? '' : ad;
+    sekmeAc('genel');
+    document.getElementById('kart').scrollIntoView({ behavior: 'smooth' });
+  }
+  document.querySelectorAll('#ltablo tr[data-g]').forEach(r => {
+    r.onclick = () => document.querySelectorAll('#ltablo tr').forEach(x => x.classList.toggle('sec', x === r));
+    r.ondblclick = () => kartAc(r.children[1].textContent);
+  });
+
+  // Liste süzme: grup çipleri + sayaç kartları
+  let lGrup = 'hep', lSayac = 'hep';
+  function listeSuz() {
+    let n = 0;
+    document.querySelectorAll('#ltablo tr[data-g]').forEach(r => {
+      const g = r.dataset.g;
+      let gor = lGrup === 'pas' ? g === 'pas' : (g !== 'pas' && (lGrup === 'hep' || g === lGrup));
+      if (gor && lSayac === 'zor') gor = !!r.dataset.z;
+      if (gor && lSayac === 'sure') gor = !!r.dataset.s;
+      if (gor && lSayac === 'kap') gor = !!r.dataset.k;
+      if (gor && lSayac === 'eks') gor = r.querySelectorAll('td.yuk').length > 0;
+      r.hidden = !gor; if (gor) n++;
+    });
+    document.querySelectorAll('#ltablo tr.grup').forEach(g => {
+      let x = g.nextElementSibling, v = false;
+      while (x && !x.classList.contains('grup')) { if (!x.hidden) v = true; x = x.nextElementSibling; }
+      g.hidden = !v;
+    });
+    document.getElementById('lsay').textContent = n + ' / 17 tür gösteriliyor';
+  }
+  document.querySelectorAll('#lcip .cip').forEach(c => c.onclick = () => {
+    document.querySelectorAll('#lcip .cip').forEach(x => x.classList.toggle('on', x === c));
+    lGrup = c.dataset.c; listeSuz();
+  });
+  document.querySelectorAll('#lozet .kart').forEach(k => k.onclick = () => {
+    document.querySelectorAll('#lozet .kart').forEach(x => x.classList.toggle('on', x === k));
+    lSayac = k.dataset.c; listeSuz();
+  });
+
+  // Personel durumu süzme
+  document.querySelectorAll('#pozet .kart').forEach(k => k.onclick = () => {
+    document.querySelectorAll('#pozet .kart').forEach(x => x.classList.toggle('on', x === k));
+    let n = 0;
+    document.querySelectorAll('#ptablo tr[data-d]').forEach(r => { r.hidden = k.dataset.f !== 'hep' && r.dataset.d !== k.dataset.f; if (!r.hidden) n++; });
+    document.getElementById('psay').textContent = n + ' / 52 personel gösteriliyor';
+  });
+</script>
+</body>
+</html>

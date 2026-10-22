@@ -114,7 +114,7 @@ export function GridTablo(p: GridTabloProps) {
             <td className="cbk" />
             <td colSpan={kolonlar.length}>
               <b>{grupDeger || '—'}</b>
-              {ozet && <span className="sonuk"> · {ozet.adet} hareket</span>}
+              {ozet && <span className="sonuk"> · {ozet.adet} {p.grupBirimi ?? 'hareket'}</span>}
               {oncekiGrup !== null && oncekiGrup !== grupDeger && ''}
             </td>
           </tr>
@@ -180,7 +180,8 @@ export function GridTablo(p: GridTabloProps) {
             );
           })}
         </tr>
-        {grupBitiyor && ozet && (
+        {/* Birimi verilen gruplama (tanım listeleri) toplam taşımıyorsa boş "toplamı" satırı yazılmaz. */}
+        {grupBitiyor && ozet && !(p.grupBirimi && !Object.values(ozet.toplamlar ?? {}).some(v => v !== null && v !== undefined)) && (
           <tr className="grup-toplam">
             <td className="cbk" />
             {kolonlar.map((k, ki) => {
@@ -239,6 +240,8 @@ export interface GridTabloProps {
   /** Sunucudan gelen grup ozetleri (grupli listelerde ara toplam satirlari). */
   gruplar: ListeYaniti['gruplar'];
   grupKolonu: string | null;
+  /** Grup başlığındaki adet birimi (varsayılan "hareket" - ekstre); belge türleri "tür". */
+  grupBirimi?: string;
   /** Satir yuksekligi tercihi (uc nokta menusu) - tabloya sinif olarak gecer. */
   satirBoyu?: 'sik' | 'normal' | 'genis';
   /** Alt toplam seridi: gorunen toplam degerleri ve seridin cizilip cizilmeyecegi. */

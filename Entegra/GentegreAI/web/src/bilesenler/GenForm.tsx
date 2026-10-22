@@ -210,6 +210,8 @@ interface Props {
     anahtar: string; baslik: string;
     /** Yeni (kaydedilmemiş) kayıtta da açılsın (965: şablon Önizleme / Sürümler / Kullanım). */
     yenideDe?: boolean;
+    /** Sekme adının yanındaki sayı rozeti; `hata` kırmızı (belge türü "Personel durumu"). */
+    rozet?: { metin: string; hata?: boolean };
     /**
      * Sekmeyi cizer. BAGLAM (kartin o anki degerleri, metasi ve detay satir
      * adetleri) ekranin elinde YOK - kart GenForm'un icinde yasiyor. Mikro
@@ -2046,6 +2048,10 @@ Yine de yeni kayıt eklensin mi?`);
                 ?? (detayToplam[s.detay.ad]
                   ?? (detaylar[s.detay.ad] ?? bosDetay()).guncel.length).toLocaleString('tr')
               }</span>}
+              {s.tur === 'ozel' && (() => {
+                const r = ekSekmeler?.find(e => e.anahtar === s.anahtar)?.rozet;
+                return r ? <span className="b" style={r.hata ? { background: 'var(--hata)', color: '#fff' } : undefined}>{r.metin}</span> : null;
+              })()}
             </div>
           ))}
           {/* SEKMEYI BUYUT: sekme hizasinda, SAGA yanasik. */}

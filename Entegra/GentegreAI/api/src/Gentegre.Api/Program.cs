@@ -428,6 +428,7 @@ uygulama.VezneIcmalUclariniEkle();   // vezne / kasa konsolide icmali (10.10.202
 uygulama.AlacakYaslandirmaUclariniEkle();   // alacak yaşlandırma (10.10.2026)
 uygulama.HastaBorcTakipUclariniEkle();   // hasta borç takibi (10.10.2026)
 uygulama.PersonelBelgeTakipUclariniEkle();   // İK belge takibi: özet şerit + hatırlatma (22.10.2026)
+uygulama.PersonelBelgeTurUclariniEkle();      // İK belge türleri: sayaç, personel durumu, kapsam önizleme, kopyala/pasif/sıra (22.10.2026)
 uygulama.HekimPerformansUclariniEkle();   // hekim / bölüm performans icmali (10.10.2026)
 uygulama.IskontoIcmalUclariniEkle();   // iskonto ve ücretsiz hizmet icmali (10.10.2026)
 uygulama.MaliyetIcmalUclariniEkle();   // hasta başı maliyet / sarf icmali (10.10.2026)

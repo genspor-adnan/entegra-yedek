@@ -34,6 +34,7 @@ import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
+import { belgeTuruAksiyonu } from './liste/belgeTuruAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
@@ -79,6 +80,8 @@ import { TeleradGelenPaneli } from '../bilesenler/TeleradGelenPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
 import { BelgeTakipOzetSeridi } from '../bilesenler/BelgeTakipOzetSeridi';
+import { BelgeTuruOzetSeridi } from '../bilesenler/BelgeTuruOzetSeridi';
+import { BelgeTuruSiraModali } from '../bilesenler/BelgeTuruSiraModali';
 import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
 import { GozHastaPaneli } from '../bilesenler/GozHastaPaneli';
 import { GozUniteKanban } from '../bilesenler/goz/GozUniteKanban';
@@ -250,6 +253,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [yatisKabul, setYatisKabul] =
     useState<{ hastaId?: number; hastaAdi?: string } | null>(null);
   const [yatisNakil, setYatisNakil] = useState<number | null>(null);
+  /** İK › Belge Türleri "↕ Sırayı düzenle" penceresi. */
+  const [belgeTuruSira, setBelgeTuruSira] = useState(false);
   // Göz şeması ve dikte (705): ikisi de açık muayeneye bulgu yazar.
   const [gozSema, setGozSema] = useState<number | null>(null);
   const [gozDikte, setGozDikte] = useState<number | null>(null);
@@ -957,6 +962,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await belgeTakipAksiyonu(kod, satir, secililer)) return;
+      if (await belgeTuruAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        kartAc: id => { if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${id}`) },
+        siraAc: () => setBelgeTuruSira(true),
+      })) return;
 
       if (await bildirimAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
@@ -1187,6 +1197,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ? (v => setAgacSecim(o => ({ ...o, bolum: v, panelIdleri: null, panelAdi: '' })))
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
+      grupBirimi={tanim.grupBirimi}
       sabitFiltre={onCipliFiltre(agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
         primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(sevkSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))))))}
       cipOnu={tanim.onCipler ? (
@@ -1329,6 +1340,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : tanim.kaynak === 'kys-gosterge' ? <KysPolitikaSeridi />
         // İK BELGE TAKİBİ (1137, mockup personel_belge_takibi.html (2)): eksik / doldu / yaklaşan sayaçları.
         : tanim.kaynak === 'personel-belge-ozet' ? <BelgeTakipOzetSeridi yenile={yenile} onCip={setCipIndeks} />
+        // İK BELGE TÜRLERİ (1138, mockup personel_belge_turu.html (1)): aktif / zorunlu / süreli / eksiği olan / isteğe bağlı.
+        : tanim.kaynak === 'personel-belge-turu' ? <BelgeTuruOzetSeridi yenile={yenile} onCip={setCipIndeks} />
         : undefined}
       // GOZ UNITE AKISI (mockup goz_hasta_listesi.html `.kanban`): bes
       //   istasyon yan yana - grid "kim var"i, kanban "hangi masada yigilma
@@ -1786,6 +1799,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         onKapat={() => setDonemModali(null)}
         onTamam={() => setYenile(x => x + 1)}
       />
+    )}
+    {belgeTuruSira && (
+      <BelgeTuruSiraModali onKapat={() => setBelgeTuruSira(false)}
+                           onKaydedildi={() => { setBelgeTuruSira(false); setYenile(t => t + 1) }} />
     )}
     {yatisKabul && (
       <YatisKabulModali
