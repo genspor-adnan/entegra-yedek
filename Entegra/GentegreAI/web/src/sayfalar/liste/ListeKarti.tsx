@@ -1,11 +1,6 @@
 import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
-import { LabCalismaTakvimi, type CalismaDuzeni }
-  from '../../bilesenler/lab/LabCalismaTakvimi';
-import { MuayeneBaslikNumaralari } from '../../bilesenler/MuayeneBaglamSeridi';
-import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDonanimSekmesi, AcilYatakDurumSekmesi, AcilYatakGecmisSekmesi,
-         AcilYatakTemizlikSekmesi } from '../../bilesenler/acil/AcilYatakSekmeleri';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
 import { VucutSemasi } from '../../bilesenler/VucutSemasi';
 import { OlcumGrafigi } from '../../bilesenler/OlcumGrafigi';
@@ -50,9 +45,8 @@ import { MakroIpucu } from '../../bilesenler/MakroIpucu';
 const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
 import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
 import { c } from '../../dil/ceviri';
-import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
-import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
-import { GozlukHastaBandi, GozlukReceteFormu, gozlukYazdir, useGozlukKaynak } from '../goz/GozlukPanelleri';
+import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { GozlukHastaBandi, GozlukReceteFormu, useGozlukKaynak } from '../goz/GozlukPanelleri';
 import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
 import { BaglantiAyarSekmesi, CihazYanPaneli, KalibrasyonSekmesi, MesajGunluguSekmesi,
          OlcumEslemeSekmesi, TetkikEslemeSekmesi } from '../goz/GozCihazSekmeleri';
@@ -61,22 +55,17 @@ import { GOZ_TARAF, GOZ_TETKIK } from '../../bilesenler/goz/gozKodlari';
 import { MUAYENE_DURUM } from '../../bilesenler/muayeneKodlari';
 import { GOZ_SEKME_GRUPLARI, GozKuralSeridi, GozOykuV4Sekmesi, GozOzetSekmesi, GozSagOzet, useGozKontrol } from '../goz/GozKartV4';
 import { GozKartinaGit, GozReceteSekmesi, GozTaniSekmesi, GozUcretSekmesi } from '../goz/GozSurecSekmeleri';
-import { GozGibEgilimi, GozGoruntulerSekmesi, GozKarsilastirmaSekmesi, GozTaniPlanPaneli } from '../goz/GozMuayenePanelleri';
-import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKutusu, OrderPlanSekmesi } from '../yatan/OrderPanelleri';
+import { GozGoruntulerSekmesi, GozKarsilastirmaSekmesi } from '../goz/GozMuayenePanelleri';
 import { randevuTercihiYaz } from './randevuTercihi';
+import { HASTA_ILE_YENI, yeniKartVarsayilanlari } from './kartVarsayilanlari';
+import { KART_EKLENTILERI, type KartEklentiBaglami } from './kartEklentileri';
 import { api } from '../../api/istemci';
-import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSekmesi, BelgeTuruHatirlatmaSekmesi,
-         BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import { kartAdi, kartSekmesiVar } from '../listeTanimlari.Ortak';
-import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
 import type { KartOzellestirme } from './kartOzellestirme';
-import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
-import { BulguDofHucresi, DenetimAraclari, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
-import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
-import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
-import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKapatModali, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
+import { BulguDofHucresi, useBulguDoflari } from '../kys/denetim/kysDenetimKarti';
+import { CihazKapatModali } from '../radyoloji/CihazPanelleri';
 
 
 
@@ -116,15 +105,10 @@ export interface ListeKartiOzellikleri {
  * muayene kartinin sekme sarmalayicilari, baglam seridi, ek sekmeleri ve
  * eylem dugmeleri ile lab tetkik kartinin calisma takvimi burada yasiyor.
  * Davranis degismedi - yalniz yeri degisti.
+ *
+ * Yerel duruma (muayene pencereleri, göz kontrol verisi...) bağlı OLMAYAN ekran-özel parçalar
+ * `kartEklentileri.tsx` tablosunda; yeni kartın URL ön dolgusu `kartVarsayilanlari.ts`'de.
  */
-/**
- * Goz muayene kartindaki kisayollarin actigi kartlar (691). Bu uc
- * kaynak URL'den `hastaId` / `muayeneId` on dolgusu kabul eder.
- */
-const HASTA_KAYIT_KAYNAKLARI = new Set(['hasta-alerji', 'hasta-kronik', 'hasta-ilac', 'hasta-gecmis', 'ftr-degerlendirme', 'ftr-program', 'ftr-olcek', 'isg-calisan']);
-const GOZ_KISAYOL_KAYNAKLARI = new Set([
-  'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
-]);
 
 /** Vital özet kutusu alanı → geçmiş grafiği anahtarı (grafiği olmayan alan tıklanmaz). */
 /** VİTAL DOLULUĞU yalnız ölçüm alanlarından (kullanıcı 15.10.2026: "vital zorunlu değil, boşsa
@@ -174,7 +158,6 @@ function sureMetni(bas: string | null, bit: string | null): string {
 }
 
 /** Yeni kartı önce HASTA sorarak açılan kaynaklar (hasta kartın içinde seçilmez). */
-const HASTA_ILE_YENI = new Set(['konsultasyon', 'sevk']);
 
 /** Anamnez gösterim kipinin satırları (alan, etiket) - katalogdaki sırayla. */
 const ANAMNEZ_ALANLARI: readonly (readonly [string, string])[] = [['sikayet', 'Şikâyet'], ['hikaye', 'Hikâye']];
@@ -257,14 +240,16 @@ export function ListeKarti({
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   const [kayitSayaci, setKayitSayaci] = useState(0);
-  /** BELGE TÜRÜ (mockup personel_belge_turu.html): "Personel durumu" sekme rozeti - eksik + süresi dolan. */
-  const [belgeTuruSorun, setBelgeTuruSorun] = useState<number | null>(null);
+  /** KART EKLENTİSİ (kartEklentileri.tsx): bu kaynağın ekran-özel parçaları - yoksa zincir. */
+  const eklenti = KART_EKLENTILERI[tanim.kaynak];
+  /** Eklentinin sekme rozeti (ör. belge türü "Personel durumu": eksik + süresi dolan). */
+  const [kartRozeti, setKartRozeti] = useState<number | null>(null);
   useEffect(() => {
-    if (tanim.kaynak !== 'personel-belge-turu' || typeof kartId !== 'number') { setBelgeTuruSorun(null); return }
+    if (!eklenti?.rozetYukle || typeof kartId !== 'number') { setKartRozeti(null); return }
     let iptal = false;
-    api.belgeTuruKartOzet(kartId).then(o => { if (!iptal) setBelgeTuruSorun(o.eksik + o.doldu) }, () => { /* rozet zorunlu değil */ });
+    eklenti.rozetYukle(kartId).then(n => { if (!iptal) setKartRozeti(n) }, () => { /* rozet zorunlu değil */ });
     return () => { iptal = true };
-  }, [tanim.kaynak, kartId, kartTazele, kayitSayaci]);
+  }, [eklenti, kartId, kartTazele, kayitSayaci]);
   /** SEKMESİZ DÜZEN (mockup v7): band, sol menü (tamamlama + işlemler), sağ sütun - yalnız bu düzende. */
   const sekmesiz = tanim.kaynak === 'muayene' && typeof kartId === 'number' && muayeneDuzeni === 'sekmesiz';
   // 💾 SONRASI AYNI KONUM (16.10.2026): çerçeve kaydedilince sayfa kaymasın.
@@ -426,6 +411,16 @@ export function ListeKarti({
     await aksiyon('goz.muayene-tamamla', { id: Number(kartId) } as ListeSatiri);
   };
   const { aksiyonVar, yetki: oturumYetki } = useOturum();
+  const eb: KartEklentiBaglami = {
+    tanim, kartId, git, tazele: kartTazele, tazeleKayit: kartTazele * 1000 + kayitSayaci,
+    kartiTazele: () => setKartTazele(t => t + 1),
+    listeyiTazele: () => setYenile(t => t + 1),
+    kartiKaydet: async () => !kartKaydetRef.current || await kartKaydetRef.current(),
+    aksiyon: (kod, satir) => aksiyon(kod, satir as ListeSatiri | null | undefined),
+    yetki: (kod, islem) => oturumYetki(kod, islem),
+    sekmeyiKapat: ekranSekmesi ? () => ekranSekmesi.kapat() : undefined,
+    rozet: kartRozeti, rozetYaz: setKartRozeti,
+  };
   /** METİN MAKROLARI (931): bölüm/doktor şablonları + kurum makroları. Kart
       tazelenince yeniden okunur (şablon uygulanınca kapsam değişebilir). */
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
@@ -766,69 +761,7 @@ export function ListeKarti({
                            onDuzenle={m => m.kaynak === 'k' && m.id ? git(`/metin-makro/${m.id}`)
                              : mesaj(c('Bu makro bir muayene şablonuna ait - Muayene › Ayarlar › Muayene Şablonları’ndan düzenlenir.'))} /> : null
           : undefined}
-        sekmeSarmalayici={tanim.kaynak === 'entegrasyon-hesap'
-          // ENTEGRASYON HESABI (mockup entegrasyon_hesaplari.html kart altı kutuları): test / canlı
-          //   ayrımı ve hesap çözüm zinciri kartın kendisinde yazılı - kullanıcı belgeye çıkmadan görsün.
-          ? (baslik, icerik) => baslik !== 'Genel' ? icerik : (
-              <>
-                {icerik}
-                <div className="uyari-kutusu" style={{ margin: '10px 12px' }}>
-                  <b>{c('Test ve canlı AYRI SATIRDIR.')}</b> Kurum canlıya geçerken test hesabını silmez — test
-                  satırının “Aktif” kutusunu kaldırır, canlı satırınkini işaretler. Aynı entegrasyon + şube +
-                  ortam üçlüsünden ikinci satır açılamaz.
-                </div>
-                <div className="not" style={{ margin: '0 12px 12px' }}>
-                  <b>{c('Hesap çözümü:')}</b> şubenin kendi satırı → baz alınan şubenin satırı → kurum geneli
-                  satır (şube boş) → varsayılan şube (yalnız ÜTS). e-Fatura'da varsayılan şubeye düşülmez:
-                  “merkezin kimliğiyle gönder” kararı şube kartında verilir. Şifre listede gösterilmez —
-                  yalnız “dolu mu” işareti.
-                </div>
-              </>
-            )
-          : tanim.kaynak === 'personel-belge-turu' && kartId !== null
-          // BELGE TÜRÜ (mockup personel_belge_turu.html (2)): Genel üç kutu + sağda özet;
-          //   Kime zorunlu gridinin sağında kaydetmeden kapsam önizlemesi.
-          ? (baslik, icerik, deger, _izgara, parcalar, detay) => detay?.meta.ad === 'kapsam'
-              ? <BelgeTuruKapsam id={typeof kartId === 'number' ? kartId : null} grid={icerik} satirlar={detay.satirlar} />
-              : baslik === 'Genel'
-              ? <BelgeTuruGenel id={typeof kartId === 'number' ? kartId : null} deger={deger} parcalar={parcalar}
-                                tazele={kartTazele * 1000 + kayitSayaci} />
-              : icerik
-          : tanim.kaynak === 'metin-makro' && kartId !== null
-          // METİN MAKROSU KARTI (kullanıcı 14.10.2026): mockup düzeni - kaydet / yetki genel kartta.
-          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
-              <MetinMakroGovdesi id={kartId} deger={deger} alanDegistir={(ad, v) => parcalar?.alanDegistir(ad, v)} />)
-          : tanim.kaynak === 'sevk' && kartId !== null
-          // SEVK KARTI (1110, mockup sevk_karti_v2 - sade): gönderince sekme kapanır, liste tazelenir.
-          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
-              <SevkKartGovdesi kartId={kartId} deger={deger} parcalar={parcalar}
-                onGonderildi={() => {
-                  window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: 'sevk' }));
-                  ekranSekmesi?.kapat();
-                }} />)
-          : tanim.kaynak === 'konsultasyon' && kartId !== null
-          // KONSÜLTASYON İSTEK KARTI (1107, mockup konsultasyon_karti.html): İsteyen | Karşılayan.
-          ? (_baslik, _icerik, deger, _izgara, parcalar) => (
-              <KonsultasyonIstekGovdesi kartId={kartId} deger={deger} parcalar={parcalar} />)
-          : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
-          // GÖZ MUAYENESİ (970): Tonometri sağında GİB eğilimi, Tanı & Plan sağında tanılar + işler.
-          ? (baslik, icerik) => baslik === 'Tonometri & Pakimetri'
-              ? <div className="gz-iki"><div>{icerik}</div><GozGibEgilimi id={Number(kartId)} yenile={kartTazele} /></div>
-              : baslik === 'Tanı & Plan'
-              ? <div className="gz-iki"><div>{icerik}</div><GozTaniPlanPaneli id={Number(kartId)} yenile={kartTazele} /></div>
-              : icerik
-          : tanim.kaynak === 'kys-dof'
-          // DÖF (1050, mockup Kalite2/dof_karti.html): sorun / kök neden ->
-          //   faaliyetler -> doğrulama. Varsayılan sıra tabloyu en alta koyardı.
-          ? (_baslik, icerik, _d, _izgara, p) => p
-              ? <><div className="kys-dof-yanyana">{p.altGrupCiz('Sorun')}</div>{p.tablolar.faaliyetler}<div className="kys-dof-yanyana">{p.altGrupCiz('Doğrulama')}</div></>
-              : icerik
-          : tanim.kaynak === 'yatis-order'
-          // ORDER (968): Order sekmesinin sağında özet (toplam / verilen / sonraki doz).
-          ? (baslik, icerik) => baslik === 'Order' && kartId !== 'yeni' && kartId !== null
-              ? <div className="od-iki"><div>{icerik}</div><OrderOzetKutusu id={Number(kartId)} yenile={kartTazele} /></div>
-              : icerik
-          : tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number'
+        sekmeSarmalayici={eklenti?.sekmeSarmalayici ? eklenti.sekmeSarmalayici(eb) : tanim.kaynak === 'goz-cihaz' && typeof kartId === 'number'
           // GÖZ CİHAZI (978 mockup ③): sağ sütun - durum · son 24 saat ·
           //   tetkik dağılımı · hızlı işlem. GenForm'un `yanPanel`i yalnız
           //   DİKEY gezinti kipinde çiziliyor (sekmeGruplari şart), mockup ise
@@ -840,23 +773,6 @@ export function ListeKarti({
                                   onSina={() => void cihazSina(kartId)}
                                   onDemirbas={id => git(`/demirbas/${id}`)} /></div>
               : icerik
-          : tanim.kaynak === 'radyoloji-cihaz'
-          // CİHAZ (967): Randevu ayarları altında kapasite, sağında bu hafta ızgarası.
-          // Bağlantı testi araç çubuğunda (tek yer).
-          ? (baslik, icerik, deger) => baslik === 'Randevu ayarları'
-              // SAĞDA "BU HAFTA KAPASİTE" (mockup, kullanıcı): gün x saat boş slot ızgarası.
-              ? <div className="rc-randevu"><div>{icerik}<CihazKapasite deger={deger as Record<string, unknown>} /></div>
-                  {kartId !== 'yeni' && kartId !== null && <CihazHaftaKapasite id={Number(kartId)} yenile={kartTazele} />}</div>
-              : icerik
-          : tanim.kaynak === 'radyoloji-protokol'
-          // SMS ÖNİZLEME (965): hasta hazırlığı metni randevu SMS'inde nasıl görünür.
-          ? (baslik, icerik, deger) => baslik === 'Hasta hazırlığı'
-              ? <>{icerik}<SmsOnizleme deger={deger as Record<string, unknown>} /></> : icerik
-          : tanim.kaynak === 'lab-tetkik'
-          ? (baslik, icerik, deger) => (
-              baslik.includes('Çalışma Zamanları')
-                ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
-                : icerik)
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? (baslik, icerik, deger, izgaraCiz, parcalar, detay) => (
             // MAKRO: bütün muayene sekmelerinde kısayol + boşluk metne açılır.
@@ -1174,25 +1090,7 @@ export function ListeKarti({
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
         surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak'].includes(tanim.kaynak)}
-        baslikEk={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
-          ? () => <BelgeTuruBaslik id={kartId} tazele={kartTazele * 1000 + kayitSayaci} />
-          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
-          ? d => <AcilYatakBaslik yatakId={kartId} deger={d} tazele={kartTazele} />
-          : tanim.kaynak === 'kys-dof' || tanim.kaynak === 'kys-denetim' ? dofBaslikEk : tanim.kaynak === 'muayene'
-          // Durum rozeti Tamamla'nın sağında (kullanıcı 15.10.2026).
-          ? (d) => <MuayeneBaslikNumaralari muayeneId={Number(d.id ?? 0)} />
-          // LAB ISTEM NUMARASI BASLIKTA (kullanici: "kaydedince otomatik
-          //   olsun, duzenle diye girince baslikta gorsun"). Numara artik
-          //   yazilamiyor - tetikle uretiliyor (641) - ve kimlik seridindeki
-          //   yerini Kaynak aldi. Yazilamayan bir numaraya alan izgarasinda
-          //   kutu tutmak yerine basligda rozet: yeni kayitta hic cikmaz,
-          //   kaydedilince gorunur.
-          : tanim.kaynak === 'lab-istem'
-          ? (d) => {
-              const no = String(d.istemNo ?? '');
-              return no ? <span className="rozet mavi">{no}</span> : null;
-            }
-          : undefined}
+        baslikEk={eklenti?.baslikEk?.(eb)}
         // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
         //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
         //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
@@ -1246,36 +1144,7 @@ export function ListeKarti({
         // GÖZLÜK REÇETESİ (972): tek "Reçete" sekmesi (yeni kayıtta da) - değerler kart alanlarına yazılır.
         // ORDER (968): Doz planı · Güvenlik kontrolleri · Geçmiş (kayıtlı order'da).
         // GÖZ MUAYENESİ (970): Karşılaştırma · Görüntüler & Belgeler.
-        ekSekmeler={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
-          // BELGE TÜRÜ (mockup personel_belge_turu.html (2)): Personel durumu · Hatırlatma · Hareketler.
-          ? [
-              { anahtar: 'ozel:bt-personel', baslik: 'Personel durumu',
-                rozet: belgeTuruSorun ? { metin: String(belgeTuruSorun), hata: true } : undefined,
-                ciz: b => <BelgeTuruPersonelSekmesi id={kartId} hatirlatGun={Number(b.deger.hatirlatGun ?? 60)}
-                                                    tazele={kartTazele * 1000 + kayitSayaci} git={git}
-                                                    saltOkunur={b.saltOkunur} onSayilar={setBelgeTuruSorun} /> },
-              { anahtar: 'ozel:bt-hatirlatma', baslik: 'Hatırlatma',
-                ciz: b => <BelgeTuruHatirlatmaSekmesi git={git}
-                            gecerlilikAy={b.deger.gecerlilikAy == null || b.deger.gecerlilikAy === '' ? null : Number(b.deger.gecerlilikAy)}
-                            hatirlatGun={Number(b.deger.hatirlatGun ?? 60)} /> },
-              { anahtar: 'ozel:bt-gecmis', baslik: 'Hareketler',
-                ciz: () => <BelgeTuruHareketSekmesi id={kartId} tazele={kartTazele * 1000 + kayitSayaci} /> },
-            ]
-          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
-          // ACİL YATAK KARTI (1118, mockup acil_yatak_karti): Durum · Kullanım Geçmişi · Temizlik & Bakım
-          //   (Donanım katalog grubu). Durum düğmeleri kartı tazeler.
-          ? [
-              { anahtar: 'ozel:ay-durum', baslik: 'Durum',
-                ciz: b => <AcilYatakDurumSekmesi yatakId={kartId} durum={Number(b.deger.durum ?? 0)} tazele={kartTazele}
-                                                 onDegisti={() => setKartTazele(t => t + 1)} git={git} /> },
-              // Donanım: katalog grubu yerine mockup karoları (aynı kart alanları).
-              { anahtar: 'ozel:ay-donanim', baslik: 'Donanım', ciz: b => <AcilYatakDonanimSekmesi b={b} /> },
-              { anahtar: 'ozel:ay-gecmis', baslik: 'Kullanım Geçmişi',
-                ciz: () => <AcilYatakGecmisSekmesi yatakId={kartId} tazele={kartTazele} git={git} /> },
-              { anahtar: 'ozel:ay-temizlik', baslik: 'Temizlik & Bakım',
-                ciz: () => <AcilYatakTemizlikSekmesi yatakId={kartId} tazele={kartTazele} /> },
-            ]
-          : tanim.kaynak === 'goz-cihaz'
+        ekSekmeler={eklenti?.ekSekmeler ? eklenti.ekSekmeler(eb) : tanim.kaynak === 'goz-cihaz'
           // GÖZ CİHAZI (978 mockup): Tetkikler · Ölçüm eşlemesi (jsonb kolonları
           //   TABLO olarak düzenlenir - kullanıcıya JSON yazdırmak, bir virgül
           //   hatasında cihazın bütün ölçümlerini susturmak demekti) ·
@@ -1335,27 +1204,6 @@ export function ListeKarti({
               { anahtar: 'ozel:gz-kars', baslik: 'Karşılaştırma', ciz: () => <GozKarsilastirmaSekmesi id={Number(kartId)} yenile={kartTazele} /> },
               { anahtar: 'ozel:gz-gor', baslik: 'Görüntüler',
                 ciz: (b) => <GozGoruntulerSekmesi id={Number(kartId)} muayeneId={Number(b.deger.muayeneId ?? 0)} yenile={kartTazele} /> },
-            ]
-          : tanim.kaynak === 'yatis-order' && kartId !== 'yeni' && kartId !== null
-          ? [
-              { anahtar: 'ozel:od-plan', baslik: 'Doz planı', ciz: () => <OrderPlanSekmesi id={Number(kartId)} yenile={kartTazele} /> },
-              { anahtar: 'ozel:od-guv', baslik: 'Güvenlik kontrolleri', ciz: () => <OrderGuvenlikSekmesi id={Number(kartId)} yenile={kartTazele} /> },
-              { anahtar: 'ozel:od-gecmis', baslik: 'Geçmiş', ciz: () => <OrderGecmisSekmesi id={Number(kartId)} yenile={kartTazele} /> },
-            ]
-          : tanim.kaynak === 'radyoloji-cihaz' && kartId !== 'yeni' && kartId !== null
-          ? [
-              { anahtar: 'ozel:rc-doz', baslik: 'Doz', ciz: () => <CihazDozSekmesi id={Number(kartId)} /> },
-              { anahtar: 'ozel:rc-kul', baslik: 'Kullanım', ciz: () => <CihazKullanimSekmesi id={Number(kartId)} /> },
-              { anahtar: 'ozel:rc-belge', baslik: 'Belgeler',
-                ciz: () => <DokumanGalerisi kartAdi="radyoloji-cihaz" kaynakId={Number(kartId)} saltOkunur={false} /> },
-            ]
-          : tanim.kaynak === 'radyoloji-sablon' && kartId !== null
-          ? [
-              { anahtar: 'ozel:rt-oniz', baslik: 'Önizleme', yenideDe: true, ciz: baglam => <SablonOnizlemeSekmesi baglam={baglam} /> },
-              { anahtar: 'ozel:rt-surum', baslik: 'Sürümler', yenideDe: true,
-                ciz: () => kartId === 'yeni' ? <KayitSonraDolar /> : <SablonSurumSekmesi id={Number(kartId)} tazele={() => setKartTazele(t => t + 1)} /> },
-              { anahtar: 'ozel:rt-kul', baslik: 'Kullanım', yenideDe: true,
-                ciz: () => kartId === 'yeni' ? <KayitSonraDolar /> : <SablonKullanimSekmesi id={Number(kartId)} /> },
             ]
           : labMikroOzetiVar(tanim.kaynak)
             && kartId !== 'yeni' && kartId !== null
@@ -1503,17 +1351,11 @@ export function ListeKarti({
         // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
         //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
         //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
-        seritSarmalayici={tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
+        seritSarmalayici={eklenti?.seritSarmalayici ? eklenti.seritSarmalayici(eb) : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
           ? (serit) => <><GoruntulemeHastaBandi r={gorOnizleme} />{serit}</>
           : tanim.kaynak === 'goz-gozluk-recete'
           // Hasta bandı kimlik şeridinin ÜSTÜNDE (göz kartıyla aynı düzen).
           ? (serit, d) => <><GozlukHastaBandi k={gozlukKaynak} durum={Number(d.durum ?? 1)} />{serit}</>
-          : tanim.kaynak === 'goz-muayene' && kartId !== 'yeni' && kartId !== null
-          // GÖZ KARTI v4 (kullanıcı): hasta bandı ÜSTTE, muayene türü / dilatasyon bandı altında.
-          ? (serit) => <><GozMuayeneSeridi gozMuayeneId={Number(kartId)} yenile={kartTazele} />{serit}</>
-          : tanim.kaynak === 'yatis-order' && kartId !== 'yeni' && kartId !== null
-          // ORDER (968 mockup): kimlik şeridinin üstünde hasta şeridi (alerji, tanı...).
-          ? (serit) => <><OrderHastaSeridi id={Number(kartId)} yenile={kartTazele} />{serit}</>
           : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? (serit) => (muayeneBilgiAcik ? (
               <Modal baslik="Muayene bilgileri" dar enUst
@@ -1548,102 +1390,7 @@ export function ListeKarti({
                     onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
           </span>) : undefined}
         // ACİL YATAK (mockup araç çubuğu): taşı · temizliğe al · kullanım dışı / kullanıma aç · etiket.
-        ekAraclar={tanim.kaynak === 'personel-belge-turu' && typeof kartId === 'number'
-          ? d => <BelgeTuruAraclari id={kartId} ad={String(d.ad ?? '')} git={git} saltOkunur={false} />
-          : tanim.kaynak === 'acilYatak' && typeof kartId === 'number'
-          ? d => <AcilYatakAraclari yatakId={kartId} deger={d} tazele={kartTazele} onDegisti={() => setKartTazele(t => t + 1)} />
-          // RANDEVU KARTINDA BAŞVURUYA DÖNÜŞTÜR (kullanıcı 17.10.2026: "takvimdeyken işaretleyip başvuruya
-          //   dönüştür diyemiyorum, hemen kart açılıyor - kartın içine de buton ekle"): listedeki aksiyonun
-          //   AYNISI - cihazlı randevuda kabul ekranı, diğerinde başvuru; dönüşmüşse mevcut başvuru açılır.
-          : tanim.kaynak === 'randevu' && typeof kartId === 'number'
-          ? (d) => {
-              const durum = Number(d.durum ?? 1);
-              if (durum === 4 || durum === 5) return null;
-              const belgeli = !!Number(d.belgeId);
-              // YETKİ (pilot denetimi 17.10.2026): dönüştürmek Başvuru Kartı EKLE, açmak GÖR ister.
-              if (!oturumYetki('belge', belgeli ? 'gor' : 'ekle')) return null;
-              return (
-                <button type="button" className="d sari"
-                        onClick={() => void (async () => {
-                          // Satır listedekiyle AYNI biçimde okunur (hasta adı, bölüm, hizmet) - aksiyon tek kod.
-                          const y = await api.liste('randevu', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: kartId } });
-                          if (y.satirlar[0]) await aksiyon('randevu.basvuru', y.satirlar[0]);
-                          else mesaj(c('Randevu okunamadı (başka şubede olabilir).'));
-                          setKartTazele(t => t + 1);
-                        })()}>{belgeli ? c('📄 Başvuruyu Aç') : c('➜ Başvuruya Dönüştür')}</button>
-              );
-            }
-          : tanim.kaynak === 'kys-dof' ? (d) => <DofAraclari deger={d} />
-          : tanim.kaynak === 'kys-denetim' ? (d) => <DenetimAraclari deger={d} />
-          : tanim.kaynak === 'kys-toplanti' ? (d) => <ToplantiAraclari deger={d} />
-          : tanim.kaynak === 'goz-goruntuleme' && typeof kartId === 'number'
-          ? (d) => {
-              const durum = Number(d.durum ?? 1), serbest = Number(d.serbest ?? 1);
-              const islem = (f: () => Promise<unknown>) => void guvenli(async () => { await f(); setKartTazele(t => t + 1); setYenile(t => t + 1) });
-              return (
-                <>
-                  {durum === 1 && serbest === 0 && <span className="rozet hata" title={c('Bankoda ücretlendirilip başvuru kaydedilmeden çekim yapılamaz')}>{c('Ödeme bekliyor')}</span>}
-                  {durum === 1 && serbest === 1 && <button type="button" className="d" onClick={() => islem(async () => {
-                    if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
-                    await api.gozGoruntulemeCekildi(kartId);
-                  })}>📷 {c('Çekildi')}</button>}
-                  {durum === 2 && <button type="button" className="d bir" onClick={() => islem(async () => {
-                    if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
-                    if (!await onay(c('Değerlendirme imzalansın mı? İmzadan sonra sonuç değiştirilemez; muayene kartına düşer.'))) return;
-                    await api.gozGoruntulemeDegerlendir(kartId);
-                  })}>✍ {c('Değerlendir ve imzala')}</button>}
-                  {durum === 2 && <button type="button" className="d" onClick={() => void guvenli(async () => {
-                    if (!await onay(c('Yeniden çekim istensin mi? Bu çekim iptal edilir, yeni kayıt ücretsiz sıraya düşer.'))) return;
-                    const y = await api.gozGoruntulemeYeniden(kartId);
-                    git(`/goz-goruntuleme/${y.id}`, { replace: true });
-                  })}>↻ {c('Yeniden çekim iste')}</button>}
-                  <button type="button" className="d" onClick={() => window.print()}>🖨 {c('Rapor yazdır')}</button>
-                </>
-              );
-            }
-          : tanim.kaynak === 'goz-gozluk-recete' && typeof kartId === 'number'
-          ? (d) => {
-              const durum = Number(d.durum ?? 1);
-              const islem = (f: () => Promise<unknown>) => void guvenli(async () => { await f(); setKartTazele(t => t + 1); setYenile(t => t + 1) });
-              return (
-                <>
-                  {durum === 1 && <button type="button" className="d" onClick={() => islem(async () => {
-                    if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
-                    if (!await onay(c('Reçete imzalansın mı? İmzadan sonra değerler değiştirilemez.'))) return;
-                    await api.gozlukImzala(kartId);
-                  })}>✍ {c('İmzala')}</button>}
-                  <button type="button" className="d" onClick={() => gozlukYazdir()}>🖨 {c('Yazdır (A5)')}</button>
-                  {durum === 2 && <button type="button" className="d" onClick={() => islem(() => api.gozlukDurum(kartId, 3))}>🏪 {c('Optike gönder')}</button>}
-                  {(durum === 2 || durum === 3) && <button type="button" className="d" onClick={() => islem(() => api.gozlukDurum(kartId, 4))}>✔ {c('Teslim edildi')}</button>}
-                </>
-              );
-            }
-          : kartId !== 'yeni' && kartId !== null && tanim.kaynak === 'yatis-order'
-          ? (d) => {
-              const id = Number(kartId);
-              const dd = d as Record<string, unknown>;
-              const aktif = Number(dd.durum) === 1;
-              const imzasiz = (dd.sozelOrder === true || Number(dd.sozelOrder) === 1) && !dd.onayTarihi;
-              const kopyala = (durdur: boolean) => void guvenli(async () => {
-                if (durdur && !await onay('Bu order durdurulup aynı bilgilerle yeni order açılsın mı? Yeni order kartında dozu değiştirip kaydedin.')) return;
-                const y = await api.orderKopyala(id, durdur);
-                git(`/yatis-order/${y.id}`);
-              });
-              return (
-                <>
-                  {imzasiz && <button type="button" className="d" onClick={() => void guvenli(async () => {
-                    await api.orderImzala(id); setKartTazele(t => t + 1); void mesaj('Sözel order onaylandı.');
-                  })}>✔ Hekim onayı</button>}
-                  {aktif && <button type="button" className="d" onClick={() => void guvenli(async () => {
-                    if (!await onay('Order durdurulsun mu? Gelecekteki bekleyen dozlar düşer, uygulanmış dozlar kalır.')) return;
-                    await api.orderDurdur(id); setKartTazele(t => t + 1);
-                  })}>⏸ Durdur</button>}
-                  {aktif && <button type="button" className="d" onClick={() => kopyala(true)}>✎ Doz değiştir</button>}
-                  <button type="button" className="d" onClick={() => kopyala(false)}>⟳ Tekrarla</button>
-                </>
-              );
-            }
-          : kartId !== 'yeni' && tanim.kaynak === 'radyoloji-cihaz'
+        ekAraclar={eklenti?.ekAraclar ? eklenti.ekAraclar(eb) : kartId !== 'yeni' && tanim.kaynak === 'radyoloji-cihaz'
           ? () => (
               <>
                 <button type="button" className="d" onClick={() => void guvenli(async () => {
@@ -1796,87 +1543,8 @@ export function ListeKarti({
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
         //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
-        yeniKayitVarsayilanlari={(tanim.kaynak === 'hasta' || tanim.kaynak === 'personel') && kartId === 'yeni'
-            && (sorgu.get('vkno') || sorgu.get('cepTel'))
-          // CTRL+K "TC / telefon + yeni hasta / personel" (22.10.2026): kayıtlı değilse yeni kart numara dolu.
-          ? { ...tanim.yeniKayitVarsayilanlari,
-              ...(sorgu.get('vkno') ? { vkno: sorgu.get('vkno')! } : {}),
-              ...(sorgu.get('cepTel') ? { cepTel: sorgu.get('cepTel')! } : {}) }
-          : HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && sorgu.get('tarafId')
-          // Önce sorulan hasta (aşağıdaki hasta araması) kartın hastasıdır.
-          ? { ...tanim.yeniKayitVarsayilanlari, tarafId: Number(sorgu.get('tarafId')) }
-          : tanim.kaynak === 'metin-makro' && kartId === 'yeni' && sorgu.get('alan') !== null
-          // Muayenedeki ＋'dan: hangi alanın altından açıldıysa o alan seçili gelir.
-          ? { ...tanim.yeniKayitVarsayilanlari, alan: sorgu.get('alan')!, durum: 1 }
-          : tanim.kaynak === 'randevu' && (sorgu.get('baslangic') || sorgu.get('hekim') || sorgu.get('bolum') || sorgu.get('hastaId'))
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              ...(sorgu.get('baslangic') ? { baslangic: sorgu.get('baslangic')! } : {}),
-              ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
-              ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
-              ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
-              ...(sorgu.get('cihaz') ? { cihazId: Number(sorgu.get('cihaz')) } : {}),
-              // KONTROL RANDEVUSU (göz süreci v2): muayene Tamamla'dan hasta ön dolu.
-              ...(sorgu.get('hastaId') ? { hastaId: Number(sorgu.get('hastaId')) } : {}),
-            }
-          // GOZ MUAYENESI KISAYOLLARI (691): recete / goruntuleme / islem
-          //   karti muayeneden acildiysa hasta ve muayene bagi ON DOLGU
-          //   gelir - hekim ayni bilgiyi ikinci kez secmesin, bag da
-          //   unutulmasin. Parametre yoksa kart normal bos acilir.
-          : GOZ_KISAYOL_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              hastaId: Number(sorgu.get('hastaId')),
-              ...(sorgu.get('muayeneId')
-                  ? { muayeneId: Number(sorgu.get('muayeneId')) } : {}),
-            }
-          // DIS LAB IS EMRI (708, kullanici: "seansta lab is emri basilinca o
-          //   hasta adina acilsin"): seans kartindan hasta, hekim, plan satiri
-          //   ve dis on dolgu gelir; kaydet/kapat `geri` ile seansa doner.
-          : tanim.kaynak === 'dis-lab-isemri' && sorgu.get('hastaId')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              hastaId: Number(sorgu.get('hastaId')),
-              ...(sorgu.get('hekimId') ? { hekimId: Number(sorgu.get('hekimId')) } : {}),
-              ...(sorgu.get('planSatirId') ? { planSatirId: Number(sorgu.get('planSatirId')) } : {}),
-              ...(sorgu.get('disNolar') ? { disNolar: sorgu.get('disNolar')! } : {}),
-            }
-          // DIS ODEME PLANI (kullanici: odontogramdaki dugme yoksa yeni plan acsin):
-          //   plan ve toplam on dolu; kaydet/kapat `geri` ile odontograma doner.
-          // HASTA KAYITLARI (alerji / kronik / ilac / gecmis): odontogram ya da baska
-          //   ekrandan hasta on dolu acilir; kaydet/kapat `geri` ile doner.
-          // CALISMA PLANI (711): plandan acilan istisna/sablon karti hekim on dolu.
-          // ISG (741): olay / ziyaret firma ve calisan on dolu (calisan karti, pano).
-          : tanim.kaynak.startsWith('isg-') && (sorgu.get('firmaId') || sorgu.get('calisanId'))
-          ? { ...tanim.yeniKayitVarsayilanlari, ...(sorgu.get('firmaId') ? { firmaId: Number(sorgu.get('firmaId')) } : {}), ...(sorgu.get('calisanId') ? { calisanId: Number(sorgu.get('calisanId')) } : {}) }
-          // KURUMSAL KALİTE (1050): olay / risk / denetim bulgusundan açılan DÖF kaynağı dolu.
-          : tanim.kaynak === 'kys-dof' && sorgu.get('kaynakTur')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              kaynakTur: Number(sorgu.get('kaynakTur')),
-              ...(sorgu.get('kaynakId') ? { kaynakId: Number(sorgu.get('kaynakId')) } : {}),
-              ...(sorgu.get('kaynakNo') ? { kaynakNo: sorgu.get('kaynakNo')! } : {}),
-              ...(sorgu.get('birimId') ? { departmanId: Number(sorgu.get('birimId')) } : {}),
-              ...(sorgu.get('tanim') ? { tanim: sorgu.get('tanim')! } : {}),
-            }
-          // KURUMSAL KALİTE (1057): "Yeniden değerlendir" tedarikçi dolu.
-          : tanim.kaynak === 'kys-tedarikci' && sorgu.get('tarafId')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              tarafId: Number(sorgu.get('tarafId')),
-              ...(sorgu.get('neAliniyor') ? { neAliniyor: sorgu.get('neAliniyor')! } : {}),
-            }
-          : tanim.kaynak.startsWith('calisma-') && sorgu.get('hekimId')
-          ? { ...tanim.yeniKayitVarsayilanlari, hekimId: Number(sorgu.get('hekimId')) }
-          : HASTA_KAYIT_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')
-          ? { ...tanim.yeniKayitVarsayilanlari, hastaId: Number(sorgu.get('hastaId')), ...(sorgu.get('programId') ? { programId: Number(sorgu.get('programId')) } : {}) }
-          : tanim.kaynak === 'dis-odeme-plani' && sorgu.get('planId')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              planId: Number(sorgu.get('planId')),
-              ...(sorgu.get('toplam') ? { toplam: Number(sorgu.get('toplam')) } : {}),
-            }
-          : tanim.yeniKayitVarsayilanlari}
+        // Takvim / seans / pano / Ctrl+K'dan gelen URL parametreleri yeni kartın ön dolgusu (kartVarsayilanlari).
+        yeniKayitVarsayilanlari={yeniKartVarsayilanlari(tanim, kartId, sorgu)}
         // `geri`: kart baska bir ekrandan (seans) acildiysa kaydet/kapat oraya
         //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
