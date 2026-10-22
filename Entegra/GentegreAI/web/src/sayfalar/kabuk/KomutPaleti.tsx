@@ -5,6 +5,8 @@ import { api } from '../../api/istemci';
 import type { MenuSatiri } from './menuAgaci';
 import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
+import { telefonBicimle } from '../../bilesenler/bicim';
+import { mesaj } from '../../bilesenler/mesaj';
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -145,11 +147,43 @@ export function cumleCoz(metin: string): { ad: string; modul: string; modulAd: s
   return { ad: metin.trim().split(/\s+/).slice(0, kelime).join(' '), modul: m.modul, modulAd: m.ad };
 }
 
+/**
+ * KİMLİK / TELEFON NİYETİ (kullanıcı 22.10.2026: "ctrl k aramada kimlikno/telno verip yeni hasta/yeni
+ * başvuru/yeni personel diyebilirim yoksa yeni kart oluşturmalı"). "12345678901 yeni hasta",
+ * "0532 444 55 66 yeni personel", "5354441122 başvuru": numara TC (11 hane, 0'la başlamaz) ya da cep
+ * telefonu (5xx - 10 hane; 0 / 90 önekli de olur). Niyet sözcüğünün ilk 3 harfi yeter (has, baş / kab,
+ * per); "yeni" isteğe bağlı. Niyet yoksa üçü birden önerilir. Kayıtlı ise kart / yeni başvuru, değilse
+ * yeni kart TC / telefonu dolu açılır.
+ */
+export type KimlikNiyeti = 'hasta' | 'basvuru' | 'personel';
+export function kimlikNiyetCoz(metin: string): { rakam: string; tur: 'tc' | 'tel'; niyet: KimlikNiyeti | null } | null {
+  const n = /[+\d][\d\s().-]{8,}\d/.exec(metin);
+  if (!n) return null;
+  const rakam = n[0].replace(/\D/g, '');
+  const tc = rakam.length === 11 && rakam[0] !== '0';
+  const tel = !tc && ((rakam.length === 10 && rakam[0] === '5') || (rakam.length === 11 && rakam.startsWith('05'))
+                      || (rakam.length === 12 && rakam.startsWith('905')));
+  if (!tc && !tel) return null;
+  const kalan = paletSadelestir((metin.slice(0, n.index) + ' ' + metin.slice(n.index + n[0].length)).trim())
+    .split(/\s+/).filter(k => k && k !== 'yeni' && !/^kart/.test(k) && k !== 'ac' && k !== 'olustur');
+  let niyet: KimlikNiyeti | null = null;
+  for (const k of kalan) {
+    if (k.length < 3) return null;
+    if ('hasta'.startsWith(k)) niyet = 'hasta';
+    else if ('basvuru'.startsWith(k) || 'kabul'.startsWith(k)) niyet = 'basvuru';
+    else if ('personel'.startsWith(k)) niyet = 'personel';
+    else return null;     // tanınmayan sözcük: kimlik komutu değil (eski arama sürer)
+  }
+  return { rakam, tur: tc ? 'tc' : 'tel', niyet };
+}
+
 /** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
 type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
-  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string }
+  | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string;
+      /** Kayıtlı hastaya YENİ BAŞVURU: açık başvurusu varsa o açılır (Liste.basvuruAc ile aynı kural). */
+      basvuruTaraf?: { id: number; ad: string } }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
@@ -216,7 +250,8 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
   const [cumleKaydi, setCumleKaydi] = useState<Oge[]>([]);
   useEffect(() => {
-    const cz = acik ? cumleCoz(arama) : null;
+    // Numara + niyet ('11111111110 yeni hasta') cümle komutu değil - kimlik niyeti karşılar.
+    const cz = acik && !kimlikNiyetCoz(arama) ? cumleCoz(arama) : null;
     if (!cz) { setCumleKaydi([]); return }
     let iptal = false;
     const zaman = window.setTimeout(() => {
@@ -239,6 +274,49 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
                grup: '', kod: '', aktif: false }]
           : []);
       });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar]);
+
+  const [kimlikOgeleri, setKimlikOgeleri] = useState<Oge[]>([]);
+  useEffect(() => {
+    const kz = acik ? kimlikNiyetCoz(arama) : null;
+    if (!kz) { setKimlikOgeleri([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      void api.hizliBulKimlik(kz.rakam).then(y => {
+        if (iptal || !y.tur) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        const etiket = y.tur === 'tc' ? `TC ${y.deger}` : `Tel ${telefonBicimle(y.deger)}`;
+        // Yeni kart ön dolgusu: TC -> vkno, telefon -> cepTel (kartlar +90 biçimini okur).
+        const dolgu = y.tur === 'tc' ? `vkno=${y.deger}` : `cepTel=${encodeURIComponent(telefonBicimle(y.deger))}`;
+        const niyetler: KimlikNiyeti[] = kz.niyet ? [kz.niyet] : ['hasta', 'basvuru', 'personel'];
+        const l: Oge[] = [];
+        for (const n of niyetler) {
+          if (n === 'personel') {
+            if (!menude.has('/personel')) continue;
+            if (y.personeller.length) y.personeller.forEach(p => l.push({ bolum: 'Kayıtlar', tur: 'ekran', anahtar: `kp${p.id}`,
+              ad: `${p.ad} — ${c('personel kartı')}`, grup: `${p.bilgi} · ${etiket}`, yol: `/personel/${p.id}`, ikon: '👤' }));
+            else l.push({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'kp-yeni', ad: `${c('Yeni personel kartı')} — ${etiket}`,
+              grup: c('kayıtlı personel yok'), yol: `/personel/yeni?${dolgu}`, islem: true, ikon: '👤' });
+            continue;
+          }
+          if (!menude.has('/hasta')) continue;
+          if (n === 'basvuru' && !menude.has('/basvuru')) continue;
+          if (y.hastalar.length) y.hastalar.forEach(h => l.push(n === 'hasta'
+            ? { bolum: 'Kayıtlar', tur: 'ekran', anahtar: `kh${h.id}`, ad: `${h.ad} — ${c('hasta kartı')}`,
+                grup: `${h.bilgi} · ${etiket}`, yol: `/hasta/${h.id}`, ikon: '🧑' }
+            : { bolum: 'Kayıtlar', tur: 'ekran', anahtar: `kb${h.id}`, ad: `${h.ad} — ${c('yeni başvuru')}`,
+                grup: `${h.bilgi} · ${etiket}`, yol: `/basvuru/yeni?tarafId=${h.id}&tarafUnvan=${encodeURIComponent(h.ad)}`,
+                ikon: '📝', basvuruTaraf: { id: h.id, ad: h.ad } }));
+          else if (!l.some(o => o.anahtar === 'kh-yeni'))
+            // Kayıtlı hasta yok: başvuru da önce hasta kartı ister - yeni hasta kartı numara dolu açılır.
+            l.push({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'kh-yeni',
+              ad: `${c('Yeni hasta kartı')} — ${etiket}${n === 'basvuru' ? ` (${c('başvuru için')})` : ''}`,
+              grup: c('kayıtlı hasta yok'), yol: `/hasta/yeni?${dolgu}`, islem: true, ikon: '🧑' });
+        }
+        setKimlikOgeleri(l);
+      }).catch(() => { if (!iptal) setKimlikOgeleri([]) });
     }, 250);
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
@@ -293,13 +371,33 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
     // EKRAN ÖNCE: kutunun işi "şu ekrana git"; komut aynı ada sahipse altında kalsın.
     //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
-    return [...cumleKaydi, ...kayitlar, ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
+    // KİMLİK NİYETİ ÖNCE (Enter onu çalıştırır); aynı hastayı numara araması da bulduysa ikinci kez çizilmez.
+    const kimlikYollari = new Set(kimlikOgeleri.map(o => o.tur === 'ekran' ? o.yol : ''));
+    return [...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
+            ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
-  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, ekranSayac]);
+  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, ekranSayac]);
 
   if (!acik) return null;
 
   const sec = (o: Oge) => {
+    if (o.tur === 'ekran' && o.basvuruTaraf) {
+      // AÇIK BAŞVURU VARSA O (Liste.basvuruAc ile aynı): tamamlanmamış en yeni başvuru açılır.
+      const t = o.basvuruTaraf;
+      onKapat();
+      void api.liste('belge', {
+        sayfa: 1, boyut: 1,
+        sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
+        filtre: { op: 'and', kosullar: [
+          { alan: 'tarafId', op: 'esit', deger: t.id }, { alan: 'tur', op: 'esit', deger: 19 },
+          { alan: 'tipi', op: 'esit', deger: 30 }, { alan: 'tamamlanma', op: 'kucuk', deger: 100 }] },
+      }).then(y => {
+        const acikId = Number(y.satirlar[0]?.id ?? 0);
+        if (acikId) { mesaj(c('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.')); git(`/basvuru/${acikId}`) }
+        else git(o.yol);
+      }, () => git(o.yol));
+      return;
+    }
     if (o.tur === 'ekran') { git(o.yol); onKapat(); return }
     if (!o.aktif) return;
     ekranKomutlari?.calistir(o.kod);

@@ -55,6 +55,10 @@ export const kimlikUclari = {
   hizliBulSon: (ad: string, modul: string) =>
     istek<{ sonuc: { tur: string; id: number; altId: number; ad: string; bilgi: string } | null }>(
       `/api/hizli-bul/son?ad=${encodeURIComponent(ad)}&modul=${encodeURIComponent(modul)}`).then(y => y.sonuc),
+  /** Ctrl+K "TC / telefon + yeni hasta / başvuru / personel": o numaralı kayıtlı hasta ve personel. */
+  hizliBulKimlik: (q: string) => istek<{ tur: '' | 'tc' | 'tel'; deger: string;
+    hastalar: { id: number; ad: string; bilgi: string }[]; personeller: { id: number; ad: string; bilgi: string }[] }>(
+    `/api/hizli-bul/kimlik?q=${encodeURIComponent(q)}`),
   hizliBul: (q: string) => istek<{ sonuclar: { tur: string; id: number; altId: number; ad: string; bilgi: string }[] }>(
     `/api/hizli-bul?q=${encodeURIComponent(q)}`),
 

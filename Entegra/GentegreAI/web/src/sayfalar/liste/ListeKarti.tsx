@@ -1796,7 +1796,13 @@ export function ListeKarti({
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
         //   Saat secilmeden "Yeni" de suzgecteki bolum / doktoru tasir.
-        yeniKayitVarsayilanlari={HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && sorgu.get('tarafId')
+        yeniKayitVarsayilanlari={(tanim.kaynak === 'hasta' || tanim.kaynak === 'personel') && kartId === 'yeni'
+            && (sorgu.get('vkno') || sorgu.get('cepTel'))
+          // CTRL+K "TC / telefon + yeni hasta / personel" (22.10.2026): kayıtlı değilse yeni kart numara dolu.
+          ? { ...tanim.yeniKayitVarsayilanlari,
+              ...(sorgu.get('vkno') ? { vkno: sorgu.get('vkno')! } : {}),
+              ...(sorgu.get('cepTel') ? { cepTel: sorgu.get('cepTel')! } : {}) }
+          : HASTA_ILE_YENI.has(tanim.kaynak) && kartId === 'yeni' && sorgu.get('tarafId')
           // Önce sorulan hasta (aşağıdaki hasta araması) kartın hastasıdır.
           ? { ...tanim.yeniKayitVarsayilanlari, tarafId: Number(sorgu.get('tarafId')) }
           : tanim.kaynak === 'metin-makro' && kartId === 'yeni' && sorgu.get('alan') !== null

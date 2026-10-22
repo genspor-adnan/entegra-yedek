@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -86,6 +86,49 @@ public static class HizliBulUclari
                 o => new { tur = o.GetString(0), id = o.GetInt32(1), altId = o.GetInt32(2), ad = o.GetString(3), bilgi = o.GetString(4) },
                 iptal);
             return Results.Ok(new { sonuclar = sonuclar.Take(15) });
+        }).RequireAuthorization().WithTags("Hızlı bul");
+
+        // ------------------------------------------------------ kimlik / telefon --
+        // "12345678901 yeni hasta" · "0532 444 55 66 yeni personel" (kullanıcı 22.10.2026: "ctrl k aramada
+        //   kimlikno/telno verip yeni hasta/yeni başvuru/yeni personel diyebilirim yoksa yeni kart
+        //   oluşturmalı"). TC (11 hane) ya da cep telefonu (son 10 hane) ile KAYITLI hasta ve personel:
+        //   varsa palet onu açar (başvuruda o hastaya yeni başvuru), yoksa yeni kartı dolu açar. Kayıtlı
+        //   telefon biçimi serbest ("+90 535 ...", "0532 ...") - rakamlarının son 10 hanesi karşılaştırılır.
+        //   Her tür kendi veri yetkisine bağlı; personel kayıt erişimiyle (birim / şube) süzülür.
+        yol.MapGet("/api/hizli-bul/kimlik", async (string? q, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var rakam = new string((q ?? "").Where(char.IsAsciiDigit).ToArray());
+            var tc = rakam.Length == 11 && rakam[0] != '0';
+            var tel = !tc && rakam.Length >= 10 ? rakam[^10..] : "";
+            if (!tc && (tel.Length != 10 || tel[0] != '5'))
+                return Results.Ok(new { tur = "", deger = "", hastalar = Array.Empty<object>(), personeller = Array.Empty<object>() });
+            const string Kosul = """
+                (@p1 and t.vkno = @p0)
+                 or (not @p1 and right(regexp_replace(coalesce(t.cep_tel, ''), '[^0-9]', '', 'g'), 10) = @p0)
+                """;
+            object[] par = [tc ? rakam : tel, tc];
+            var hastalar = baglam.Yetkiler.Var("hasta", Islem.Gor)
+                ? await veri.ListeAsync($$"""
+                    select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
+                           'Hasta · ' || coalesce(t.kod, '')
+                      from public.taraf t
+                     where t.hasta = 1 and t.durum = 1 and ({{Kosul}})
+                     order by t.id desc limit 5
+                    """, par, o => new { id = o.GetInt32(0), ad = o.GetString(1), bilgi = o.GetString(2) }, iptal)
+                : [];
+            var personeller = new List<object>();
+            if (baglam.Yetkiler.Var("personel", Islem.Gor))
+                foreach (var p in await veri.ListeAsync($$"""
+                    select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
+                           'Personel · ' || coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), '')
+                      from public.taraf t
+                     where t.personel = 1 and ({{Kosul}})
+                     order by t.durum desc, t.id desc limit 5
+                    """, par, o => new { id = o.GetInt32(0), ad = o.GetString(1), bilgi = o.GetString(2) }, iptal))
+                    if (await erisim.GorunurAsync(baglam, "personel", p.id, iptal)) personeller.Add(p);
+            return Results.Ok(new { tur = tc ? "tc" : "tel", deger = tc ? rakam : tel, hastalar, personeller });
         }).RequireAuthorization().WithTags("Hızlı bul");
 
         // ------------------------------------------------------------ cümle komutu --
