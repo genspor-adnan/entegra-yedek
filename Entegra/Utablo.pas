@@ -7171,8 +7171,25 @@ begin
               Tablo.UyariGoster(Uyari, BildirimYapilmisDegisemez);
         end;;
     end;
-    IzlemDlg.ShowModal;
-    FreeAndNil(IzlemDlg);
+    // A8 eksigi (22.10.2026): bu yol ekrani YalnizSecim'siz aciyordu; eskiden
+    //   yazmayi FormDestroy yapardi, o kaldirilinca secim sessizce kayboldu
+    //   (irsaliye 13144 / satir 3276). Artik secim JSON alinip burada yazilir.
+    IzlemDlg.YalnizSecim := True;
+    try
+      IzlemDlg.ShowModal;
+      if (IzlemDlg.ModalResult = mrOk) and (not IzlemDlg.Degisemez) then
+        IzlemeSecimYaz(IzlemDlg.SecimJson,
+          FATBASLIK.FieldByName('TUR').AsInteger,
+          FATBASLIK.FieldByName('TIPI').AsInteger,
+          FATBASLIK.FieldByName('ID').AsInteger,
+          FATURA.FieldByName('ID').AsInteger,
+          IzlemDlg.StokID, IzlemDlg.IzlemTur,
+          FATBASLIK.FieldByName('GIRISDEPO').AsInteger,
+          FATBASLIK.FieldByName('CIKISDEPO').AsInteger,
+          IzlemDlg.StokDurumDegis, IzlemDlg.KaynakSatirID);
+    finally
+      FreeAndNil(IzlemDlg);
+    end;
   end;
 end;
 Function TTablo.EAN13Hesapla( Bar12Hane:String ):String;
@@ -12723,7 +12740,7 @@ begin
     //   karakterler KAYBOLUR (sunucuya bos/'?' gider). SP parametresi
     //   NVARCHAR(MAX); ftWideMemo + AsWideString ile tam Unicode gonderilir.
     ATab.ParamByName('Kosullar').DataType := ftWideMemo;
-    ATab.ParamByName('Kosullar').AsWideString := AKosullar.ToJSON;
+    ATab.ParamByName('Kosullar').AsWideMemo := AKosullar.ToJSON;   // AsWideString tipi ftWideString'e cevirir -> 4000 sinir
   finally
     FreeAndNil(AKosullar);
   end;
@@ -13278,7 +13295,7 @@ begin
         LQ.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Kosullar=:Kosullar';
       // UNICODE: bkz. ListeSPJson - AsString ANSI baglar, emoji kaybolur.
       LQ.ParamByName('Kosullar').DataType := ftWideMemo;
-      LQ.ParamByName('Kosullar').AsWideString := AKosullar.ToJSON;
+      LQ.ParamByName('Kosullar').AsWideMemo := AKosullar.ToJSON;   // AsWideString tipi ftWideString'e cevirir -> 4000 sinir (FireDAC -345)
       try
         LQ.Open;
       except

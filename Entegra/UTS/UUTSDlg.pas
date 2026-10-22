@@ -2325,6 +2325,7 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
 
     function IzlemSatirOlustur:integer;
     var SeriLotId:integer;
+    var SktKosul:string;
         Komut : string;
         Procedure DepoInsert(IzlemId,DepoId, Miktars:Integer);
         begin
@@ -2344,8 +2345,14 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
            GirisDepoId := DepoId;
         end;
 
+        // Ayni lot no farkli SKT ile ayri tanimdir (Update_SQL_215): seri no'suz
+        //   lotta SKT de tutmali; yoksa asagida bu SKT ile yeni tanim acilir.
+        //   SKT bos/gecersizse eskisi gibi yalniz lot no ile aranir.
+        SktKosul := '';
+        if (SNO = '') and (SKT <> '') and (SKT <> '1990-01-01') then
+          SktKosul := ' and (TRY_CAST('''+SKT+''' as date) is null or cast(SKT as date)=TRY_CAST('''+SKT+''' as date)) ';
         Tablo.TablodanSorguAc(5, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+IntToStr(StokID)+
-          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' '+DbSinir(1));
+          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' '+SktKosul+' order by ID '+DbSinir(1));
         if not Tablo.Query5.IsEmpty then
            SeriLotId := Tablo.Query5.Fields[0].AsInteger
         else begin
