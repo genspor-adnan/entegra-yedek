@@ -138,6 +138,33 @@ public static class GostergeUclari
             var nesne = System.Text.Json.Nodes.JsonNode.Parse(json ?? "{}")!.AsObject();
             nesne["onay"] = benim.Sum(x => x.Adet);
             nesne["onayGeciken"] = benim.Sum(x => x.Geciken);
+
+            // ÖZLÜK BELGELERİ (kullanıcı 22.10.2026: "bir personelin eksik belgesi varsa giriş ekranında
+            //   bekleyen işler altında gösterilmeli"). İki kart: oturumun KENDİ eksik / süresi dolan /
+            //   yaklaşan belgeleri (kendi verisi, yetki gerekmez) ve belge takip yetkilisine kurum geneli
+            //   eksiği olan personel sayısı. Kural v_personel_belge_durum'la aynı (1135-1136).
+            var belgeler = await b.ListeAsync("""
+                select x.belge, x.durum, x.durum_adi, x.kalan_gun
+                  from public.v_personel_belge_durum x
+                 where x.personel_id = @p0 and ((x.zorunlu = 1 and x.durum = 1) or x.durum in (2, 3))
+                 order by x.durum, x.kalan_gun nulls first, x.belge
+                """, null, [baglam.KullaniciId],
+                o => new { belge = o.GetString(0), durum = o.GetInt16(1), durumAdi = o.GetString(2),
+                           kalanGun = o.IsDBNull(3) ? (int?)null : o.GetInt32(3) }, iptal);
+            nesne["belgeEksik"] = belgeler.Count(x => x.durum is 1 or 2);
+            nesne["belgeYaklasan"] = belgeler.Count(x => x.durum == 3);
+            nesne["belgeler"] = System.Text.Json.JsonSerializer.SerializeToNode(belgeler,
+                new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            if (baglam.Yetkiler.Var("ik.belge_takip.liste", Islem.Gor) || baglam.Yetkiler.Var("ik.belge_takip", Islem.Gor))
+            {
+                var ik = await b.TekAsync("""
+                    select count(distinct x.personel_id) filter (where (x.zorunlu = 1 and x.durum = 1) or x.durum = 2)::int,
+                           count(distinct x.personel_id) filter (where x.durum = 2)::int
+                      from public.v_personel_belge_durum x
+                    """, null, [], o => new { kisi = o.GetInt32(0), doldu = o.GetInt32(1) }, iptal);
+                nesne["ikBelgeEksikKisi"] = ik?.kisi ?? 0;
+                nesne["ikBelgeDolduKisi"] = ik?.doldu ?? 0;
+            }
             return Results.Content(nesne.ToJsonString(), "application/json; charset=utf-8");
         }).WithTags("Gösterge panelleri").RequireAuthorization();
 

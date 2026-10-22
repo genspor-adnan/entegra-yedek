@@ -11,6 +11,7 @@ import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
 import { duyuruOkuAc } from '../bilesenler/duyuru/DuyuruOrtak';
 import { GelenEylemler, bekleme, gelenGruplari, iskontoKararAc, onayIkon, type GelenGrup } from '../bilesenler/taleplerim/GelenIsler';
 import { Modal } from '../bilesenler/Modal';
+import { mesaj } from '../bilesenler/mesaj';
 import { PALET_SESLI_OLAYI, sesliGirisVar } from '../bilesenler/sesliGiris';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { LISTELER } from './Liste';
@@ -181,6 +182,17 @@ export function Baslangic() {
       sayi: bekleyen.istemSonuc },
     { yol: '/randevu', ic: '📅', ad: `${bekleyen.randevu} ${c('randevu')}`,
       y: `${c('bugün')} · ${bekleyen.randevuBekleyen} ${c('bekliyor')}`, sayi: bekleyen.randevu },
+    // ÖZLÜK BELGELERİM (kullanıcı 22.10.2026): eksik / süresi dolan belgesi varsa kart; basınca liste.
+    { yol: '#belgelerim', ic: '📎', ad: `${bekleyen.belgeEksik || bekleyen.belgeYaklasan} ${c(bekleyen.belgeEksik ? 'eksik belgem' : 'belgemin süresi yaklaşıyor')}`,
+      y: bekleyen.belgeEksik && bekleyen.belgeYaklasan ? `${bekleyen.belgeYaklasan} ${c('tanesinin süresi yaklaşıyor')}` : c('özlük dosyam'),
+      acil: bekleyen.belgeEksik > 0, sayi: bekleyen.belgeEksik + bekleyen.belgeYaklasan,
+      tikla: () => mesaj(`${c('Özlük dosyanızda tamamlanması gereken belgeler')}:\n\n`
+        + bekleyen.belgeler.map(x => `• ${x.belge} - ${x.durum === 3 && x.kalanGun !== null ? `${x.kalanGun} ${c('gün kaldı')}` : x.durumAdi}`).join('\n')
+        + `\n\n${c('Belgelerinizi İnsan Kaynakları birimine iletin.')}`) },
+    // İK: kurum geneli eksiği olan personel (yalnız belge takip yetkilisine gelir).
+    { yol: '/personel-belge-ozet', ic: '🗂', ad: `${bekleyen.ikBelgeEksikKisi ?? 0} ${c('personelde eksik belge')}`,
+      y: (bekleyen.ikBelgeDolduKisi ?? 0) > 0 ? `${bekleyen.ikBelgeDolduKisi} ${c('kişide süresi doldu')}` : c('Belge Takibi'),
+      acil: (bekleyen.ikBelgeDolduKisi ?? 0) > 0, sayi: bekleyen.ikBelgeEksikKisi ?? 0 },
   ] as Is[] : duyuruIsi).filter(i => i.sabit || (i.sayi ?? 0) > 0);
 
   /**

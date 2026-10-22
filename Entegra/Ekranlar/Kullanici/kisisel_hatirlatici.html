@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kişisel Hatırlatıcı — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.k{padding:2px 7px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+
+  .idstrip{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.pasif{background:#f4f6f9;color:#4d5d6e}
+
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer;display:flex;gap:5px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme.pasif{opacity:.55;cursor:default}
+  .sekme .say{border-radius:8px;padding:0 6px;font-size:10px;font-weight:bold;background:#d5dfea;color:#3a5573}
+  .sekme .say.kir{background:#b3261e;color:#fff}
+  .ic-sek{display:flex;gap:6px;padding:10px 12px 0}
+  .isk{border:1px solid var(--line);border-radius:14px;padding:4px 14px;background:#fff;cursor:pointer;color:#4d5d6e;font-size:11.5px}
+  .isk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .panel{padding:10px 12px 14px}
+
+  .ozet{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .kart{flex:1;min-width:130px;border:1px solid var(--line2);border-left:4px solid #9fb2c6;border-radius:4px;padding:7px 10px;background:#fbfcfe;cursor:pointer}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:18px;font-weight:bold;color:var(--navy);margin-top:1px}
+  .kart.kir{border-left-color:#b3261e} .kart.kir .d{color:#b3261e}
+  .kart.sari{border-left-color:#d9a12b} .kart.sari .d{color:#8a6218}
+  .kart.ok{border-left-color:#3f9a5e} .kart.ok .d{color:#2e7d46}
+  .kart.on{box-shadow:0 0 0 2px #2f6db3 inset}
+  .ilerleme{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .bar{flex:1;height:9px;background:#e7edf4;border-radius:5px;overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+
+  .duzen{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}
+  .dg{border:1px solid var(--line2);border-radius:4px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tr.eksik td{background:#fffafa}
+  .dg tr.dolan td{background:#fffdf5}
+  .dg tr:hover td{background:#f2f7fd}
+  .sonuk{color:var(--muted)} .yuk{color:#b3261e;font-weight:bold}
+  .zor{color:#b3261e;font-weight:bold}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:#fff;margin-bottom:10px}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{font-weight:normal;color:var(--muted)}
+  .grp .ic{padding:8px 10px}
+  .liste{margin:0;padding:0;list-style:none}
+  .liste li{padding:5px 0;border-bottom:1px dashed var(--line2);display:flex;gap:8px;align-items:center}
+  .liste li:last-child{border-bottom:none}
+  .liste.duz li{display:block;line-height:1.5}
+  .liste .t{color:var(--muted);font-size:10.5px;min-width:68px}
+  .zaman{position:relative;padding-left:16px}
+  .zaman::before{content:"";position:absolute;left:5px;top:3px;bottom:3px;width:2px;background:#d5dfea}
+  .zaman div{position:relative;margin-bottom:7px}
+  .zaman div::before{content:"";position:absolute;left:-15px;top:4px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #2f6db3}
+  .zaman div.kir::before{border-color:#b3261e} .zaman div.sari::before{border-color:#d9a12b} .zaman div.ok::before{border-color:#3f9a5e;background:#3f9a5e}
+  .zaman small{color:var(--muted)}
+
+  .vize-bas{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 12px;padding:10px;border:1px solid #cfe0f5;border-radius:5px;background:linear-gradient(#f7fbff,#fff);margin-bottom:10px}
+  .kaynak{font-size:10.5px}
+  .kaynak.pers{color:#6a3fb5} .kaynak.kurum{color:#2f6db3} .kaynak.edev{color:#0f8b8d}
+  .kutu{display:inline-flex;width:15px;height:15px;border:1.5px solid #9fb2c6;border-radius:3px;align-items:center;justify-content:center;font-size:11px;color:#fff;vertical-align:middle}
+  .kutu.on{background:#3f9a5e;border-color:#3f9a5e}
+  .kutu.yari{background:#d9a12b;border-color:#d9a12b}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:4px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .ust-baslik{max-width:1400px;margin:16px auto 6px;font-weight:bold;color:var(--navy);font-size:13px}
+  @media (max-width:1000px){.duzen{grid-template-columns:1fr}.idstrip,.vize-bas{grid-template-columns:1fr 1fr}}
+  .ust-bar{background:linear-gradient(#23364d,#1a2a3d);color:#fff;display:flex;align-items:center;gap:14px;padding:8px 14px;position:relative}
+  .ust-bar .logo{font-weight:bold;font-size:14px}
+  .ust-bar .ara{flex:0 0 280px;background:#2c4560;border-radius:4px;padding:5px 10px;color:#b9c8d8;font-size:11.5px}
+  .ust-bar .sag{margin-left:auto;display:flex;gap:16px;align-items:center}
+  .zil{position:relative;cursor:pointer;font-size:16px}
+  .zil .say{position:absolute;top:-7px;right:-10px;background:#d9534f;color:#fff;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .zil-panel{position:absolute;right:60px;top:42px;width:380px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:5px;box-shadow:0 10px 30px rgba(20,40,70,.25);z-index:5}
+  .zil-panel .zb{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);background:var(--head)}
+  .zil-panel .zb span{padding:5px 10px;font-size:11.5px;cursor:pointer;border-radius:4px 4px 0 0;color:#4d5d6e}
+  .zil-panel .zb span.on{background:#fff;border:1px solid var(--line);border-bottom:none;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .zil-panel .bas{padding:6px 10px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hat{display:flex;gap:9px;padding:8px 10px;border-bottom:1px solid var(--line2);align-items:flex-start}
+  .hat:hover{background:#f5f9fe}
+  .hat .ik{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef4fc;flex:none}
+  .hat .ik.kir{background:#fbe9e7} .hat .ik.sari{background:#fdf6e3} .hat .ik.ok{background:#e2f3e8}
+  .hat .ic{flex:1;min-width:0}
+  .hat .ic b{display:block;font-size:12px}
+  .hat .ic small{color:var(--muted);display:block;margin-top:1px}
+  .hat .ic .bag{color:#2f6db3;font-size:11px}
+  .hat .eyl{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap}
+  .zil-alt{display:flex;justify-content:space-between;padding:7px 10px;font-size:11.5px;color:#2f6db3}
+  .cipler{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);border-radius:14px;padding:3px 12px;background:#fff;cursor:pointer;color:#4d5d6e;font-size:11.5px}
+  .cip.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .ara2{border:1px solid var(--line);border-radius:3px;padding:4px 8px;min-width:220px;color:var(--muted);background:#fff}
+  .dg tr.sec td{background:var(--sel)!important}
+  .dg tr.gec td{background:#fffafa}
+  .dg tr.tam td{color:#8a97a5}
+  .dg tr.tam td.bas2{text-decoration:line-through}
+  .dg tr[data-d]{cursor:pointer}
+  .bag{color:#2f6db3}
+  .oncelik{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .form{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px}
+  .form .g2{grid-column:span 2} .form .g3{grid-column:span 3} .form .g4{grid-column:1/-1}
+  .sec-k{display:flex;gap:6px;flex-wrap:wrap}
+  .sec-k span{border:1px solid var(--line);border-radius:3px;padding:4px 10px;background:#fff;cursor:pointer}
+  .sec-k span.on{background:#eef4fc;border-color:#2f6db3;color:#14315a;font-weight:bold}
+  .gunler{display:flex;gap:4px}
+  .gunler span{width:30px;text-align:center;border:1px solid var(--line);border-radius:3px;padding:4px 0;cursor:pointer;background:#fff}
+  .gunler span.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .chk{display:flex;gap:7px;align-items:flex-start;padding:4px 0;cursor:pointer}
+  .chk small{display:block;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:11.5px}
+  .kv b{color:var(--muted);font-weight:normal}
+  .modal-arka{background:rgba(20,40,70,.12);padding:22px 0;border-radius:4px}
+  .modal{max-width:900px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 14px 40px rgba(20,40,70,.25);overflow:hidden}
+  .pop{position:absolute;width:330px;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 10px 30px rgba(20,40,70,.22);padding:10px;z-index:3}
+  .pop::before{content:"";position:absolute;top:-7px;left:40px;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+  .hizli{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:6px 0}
+  .hizli span{border:1px solid var(--line);border-radius:3px;padding:5px 8px;cursor:pointer;background:#fbfcfe;font-size:11.5px}
+  .hizli span:hover,.hizli span.on{background:#eef4fc;border-color:#2f6db3}
+  .hizli span small{display:block;color:var(--muted);font-size:10.5px}
+  .tost{width:360px;background:#fff;border:1px solid var(--line);border-left:5px solid #2f6db3;border-radius:5px;box-shadow:0 12px 34px rgba(20,40,70,.28);padding:10px 12px}
+  .tost.kir{border-left-color:#b3261e}
+  .tost .ust{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted)}
+  .tost .ust .x{margin-left:auto;cursor:pointer}
+  .tost b{display:block;font-size:13px;margin:4px 0 2px}
+  .tost .eyl{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+  .sahne{background:#e9eef4;border:1px dashed #b9c8d8;border-radius:4px;padding:16px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;position:relative;min-height:240px}
+  .mini-kart{flex:1;min-width:420px;background:#fff;border:1px solid var(--line);border-radius:4px;overflow:visible;position:relative}
+  .takvim{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px;text-align:center}
+  .takvim .g{padding:4px 0;color:var(--muted);font-weight:bold}
+  .takvim .t{padding:5px 0;border-radius:3px;cursor:pointer;position:relative}
+  .takvim .t.bos{color:#c3ccd6}
+  .takvim .t.bugun{background:#2f6db3;color:#fff;font-weight:bold}
+  .takvim .t.var::after{content:"";position:absolute;left:50%;bottom:1px;width:4px;height:4px;border-radius:50%;background:#d9a12b;transform:translateX(-50%)}
+  .takvim .t.gecvar::after{background:#b3261e}
+  .yan{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0}
+  .yan > .sagp{border-left:1px solid var(--line);background:#fbfcfe;padding:10px}
+  @media (max-width:1000px){.yan{grid-template-columns:1fr}.yan > .sagp{border-left:none;border-top:1px solid var(--line)}.form{grid-template-columns:1fr 1fr}.mini-kart{min-width:0}}
+</style>
+</head>
+<body>
+
+<!-- ======================================================== 1 · ZİL -->
+<div class="ust-baslik">1 · Üst bar › 🔔 zil — bildirimler ve hatırlatmalarım tek panelde</div>
+<div class="win" style="overflow:visible">
+  <div class="ust-bar">
+    <span class="logo">GenoTIP AI</span>
+    <span class="ara">🔍 Ara ya da komut yaz…  <span style="float:right;opacity:.7">Ctrl K</span></span>
+    <div class="sag">
+      <span title="Yeni hatırlatma (Alt+H)" style="cursor:pointer" onclick="modalAc()">⏰＋</span>
+      <span class="zil" id="zil" onclick="zilDegis()">🔔<span class="say">3</span></span>
+      <span style="opacity:.85">?</span><span style="background:#4d6680;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:11px">SY</span>
+    </div>
+    <div class="zil-panel" id="zilPanel">
+      <div class="zb" id="zilSek"><span class="on" data-z="hat">⏰ Hatırlatmalarım <span class="rz kir" style="padding:0 6px">3</span></span><span data-z="bil">🔔 Bildirimler <span class="rz" style="padding:0 6px">5</span></span></div>
+      <div data-zp="hat">
+        <div class="bas">Gecikmiş</div>
+        <div class="hat">
+          <div class="ik kir">⏰</div>
+          <div class="ic"><b>Medikal Ltd. — teklif dönüşünü sor</b><small>Dün 16:00 · <span style="color:#b3261e">18 saat gecikti</span></small><span class="bag">🏢 Cari: Medikal Ltd. Şti.</span>
+            <div class="eyl"><button class="btn k">✓ Tamam</button><button class="btn k">⏱ 1 saat</button><button class="btn k">⏱ Yarın 09:00</button><button class="btn k">↗ Kaydı aç</button></div></div>
+        </div>
+        <div class="bas">Bugün</div>
+        <div class="hat">
+          <div class="ik sari">⏰</div>
+          <div class="ic"><b>Ahmet KAYA'yı ara — tahlil sonucu</b><small>14:30 · 25 dk sonra · 15 dk önce uyarılacak</small><span class="bag">🧑 Hasta: Ahmet KAYA (P-20418)</span>
+            <div class="eyl"><button class="btn k">✓ Tamam</button><button class="btn k">⏱ Ertele ▾</button><button class="btn k">↗ Kaydı aç</button></div></div>
+        </div>
+        <div class="hat">
+          <div class="ik">🔁</div>
+          <div class="ic"><b>Haftalık stok sayım raporunu kontrol et</b><small>17:00 · her cuma</small></div>
+        </div>
+        <div class="bas">Yarın</div>
+        <div class="hat">
+          <div class="ik">⏰</div>
+          <div class="ic"><b>e-Fatura DEF2026…5 iade süresi</b><small>Yarın 10:00</small><span class="bag">📄 Fatura: DEF2026000000005</span></div>
+        </div>
+        <div class="zil-alt"><span style="cursor:pointer" onclick="modalAc()">＋ Yeni hatırlatma</span><span>Tümünü gör →</span></div>
+      </div>
+      <div data-zp="bil" hidden>
+        <div class="hat"><div class="ik">📋</div><div class="ic"><b>İzin talebiniz onaylandı</b><small>10 dk önce · Zeynep ARSLAN</small></div></div>
+        <div class="hat"><div class="ik ok">✓</div><div class="ic"><b>Lab sonucu hazır — Ahmet KAYA</b><small>35 dk önce</small></div></div>
+        <div class="zil-alt"><span>Tümünü okundu say</span><span>Bildirim ayarları →</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="height:440px;background:#f6f8fb;padding:14px;color:var(--muted)">
+    <i>(ekranın geri kalanı)</i><br><br>
+    • Zil sayısı = gecikmiş + 1 saat içindeki hatırlatma + okunmamış bildirim.<br>
+    • Hatırlatma sekmesi önce açılır; gecikmiş varsa zil kırmızı nokta taşır.<br>
+    • <b>⏰＋</b> (Alt+H) her ekrandan boş hatırlatma kartı açar; kayıt ekranındaysanız o kayıt bağlı gelir.
+  </div>
+</div>
+
+<!-- ======================================================== 2 · LİSTE -->
+<div class="ust-baslik">2 · Hatırlatmalarım (liste) — Kullanıcı menüsü › Hatırlatmalarım</div>
+<div class="win">
+  <div class="title">⏰ Hatırlatmalarım <span class="sp">Kullanıcı › Hatırlatmalarım · çift tık = kartı aç</span></div>
+  <div class="toolbar">
+    <button class="btn primary" onclick="modalAc()">＋ Yeni</button>
+    <button class="btn">✓ Tamamlandı</button>
+    <button class="btn">⏱ Ertele ▾</button>
+    <button class="btn">⧉ Kopyala</button>
+    <button class="btn">🗑 Sil</button>
+    <div class="sp"></div>
+    <button class="btn">📅 Takvimde göster</button><button class="btn">🖨 Yazdır</button>
+  </div>
+  <div class="ozet" style="padding:10px 10px 0;margin:0" id="lozet">
+    <div class="kart kir" data-c="gec"><div class="b">Gecikmiş</div><div class="d">2</div></div>
+    <div class="kart sari on" data-c="bugun"><div class="b">Bugün</div><div class="d">4</div></div>
+    <div class="kart" data-c="hafta"><div class="b">Bu hafta</div><div class="d">9</div></div>
+    <div class="kart" data-c="tekrar"><div class="b">Tekrarlayan</div><div class="d">3</div></div>
+    <div class="kart ok" data-c="tam"><div class="b">Bu ay tamamlanan</div><div class="d">27</div></div>
+  </div>
+  <div class="cipler" id="lcip">
+    <span class="cip on" data-c="acik">Açık</span><span class="cip" data-c="gec">Gecikmiş</span><span class="cip" data-c="bugun">Bugün</span>
+    <span class="cip" data-c="hafta">Bu hafta</span><span class="cip" data-c="tekrar">Tekrarlayan</span><span class="cip" data-c="paylasilan">Benimle paylaşılan</span>
+    <span class="cip" data-c="tam">Tamamlanan</span><span class="cip" data-c="hep">Tümü</span>
+    <div class="sp"></div><span class="ara2">🔍 Başlık, not ya da bağlı kayıt ara…</span>
+  </div>
+  <div class="yan">
+    <div class="dg" style="border:none;border-radius:0"><table id="ltablo">
+      <tr><th></th><th>Zaman</th><th>Başlık</th><th>Bağlı kayıt</th><th>Tekrar</th><th>Uyarı</th><th>Kanal</th><th>Kimden</th><th>Durum</th></tr>
+      <tr data-d="gec" class="gec"><td><span class="oncelik" style="background:#b3261e"></span></td><td class="yuk">21.10 16:00</td><td class="bas2"><b>Medikal Ltd. — teklif dönüşünü sor</b></td><td class="bag">🏢 Medikal Ltd. Şti.</td><td class="sonuk">—</td><td>15 dk önce</td><td>🔔 ✉</td><td class="sonuk">kendim</td><td><span class="rz kir">18 sa gecikti</span></td></tr>
+      <tr data-d="gec" class="gec"><td><span class="oncelik" style="background:#d9a12b"></span></td><td class="yuk">22.10 09:00</td><td class="bas2">Kalibrasyon firmasına PO gönder</td><td class="bag">🛒 Satınalma talebi #812</td><td class="sonuk">—</td><td>zamanında</td><td>🔔</td><td class="sonuk">kendim</td><td><span class="rz kir">5 sa gecikti</span></td></tr>
+      <tr data-d="bugun" class="sec"><td><span class="oncelik" style="background:#d9a12b"></span></td><td>22.10 14:30</td><td class="bas2"><b>Ahmet KAYA'yı ara — tahlil sonucu</b></td><td class="bag">🧑 Ahmet KAYA (P-20418)</td><td class="sonuk">—</td><td>15 dk önce</td><td>🔔 📱</td><td class="sonuk">kendim</td><td><span class="rz sari">25 dk sonra</span></td></tr>
+      <tr data-d="bugun"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>22.10 15:00</td><td class="bas2">Sterilizasyon devir teslim notunu oku</td><td class="sonuk">—</td><td class="sonuk">—</td><td>zamanında</td><td>🔔</td><td>Hem. Esra KOÇ</td><td><span class="rz mavi">bugün</span></td></tr>
+      <tr data-d="bugun" data-t="1"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>22.10 17:00</td><td class="bas2">Haftalık stok sayım raporunu kontrol et</td><td class="bag">📊 Stok sayım listesi</td><td>🔁 her cuma</td><td>30 dk önce</td><td>🔔</td><td class="sonuk">kendim</td><td><span class="rz mavi">bugün</span></td></tr>
+      <tr data-d="bugun"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>22.10 18:00</td><td class="bas2">Nöbet listesini onayla</td><td class="bag">📅 Çalışma planı Kasım</td><td class="sonuk">—</td><td>1 sa önce</td><td>🔔 ✉</td><td class="sonuk">kendim</td><td><span class="rz mavi">bugün</span></td></tr>
+      <tr data-d="hafta"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>23.10 10:00</td><td class="bas2">e-Fatura iade süresi</td><td class="bag">📄 DEF2026000000005</td><td class="sonuk">—</td><td>1 gün önce</td><td>🔔 ✉</td><td class="sonuk">kendim</td><td><span class="rz">yarın</span></td></tr>
+      <tr data-d="hafta" data-t="1"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>27.10 09:00</td><td class="bas2">Kalite toplantısı gündemi</td><td class="sonuk">—</td><td>🔁 ayın son pazartesi</td><td>1 gün önce</td><td>🔔</td><td class="sonuk">kendim</td><td><span class="rz">5 gün</span></td></tr>
+      <tr data-d="hafta" data-t="1"><td><span class="oncelik" style="background:#9fb2c6"></span></td><td>28.10 08:30</td><td class="bas2">Kan şekeri — tansiyon ölçümü</td><td class="bag">🧑 Ayşe DURMAZ</td><td>🔁 her gün, 31.10'a kadar</td><td>zamanında</td><td>🔔 📱</td><td class="sonuk">kendim</td><td><span class="rz">6 gün</span></td></tr>
+      <tr data-d="tam" class="tam" hidden><td></td><td>20.10 11:00</td><td class="bas2">Diploma onayını İK'ya ilet</td><td class="bag">👤 Dr. Lena WEBER</td><td class="sonuk">—</td><td>zamanında</td><td>🔔</td><td class="sonuk">kendim</td><td><span class="rz ok">✓ 20.10 11:12</span></td></tr>
+    </table></div>
+    <div class="sagp">
+      <div class="takvim" id="takvim">
+        <div class="g" style="grid-column:1/-1;text-align:left;color:var(--navy);font-size:12px">Ekim 2026 <span style="float:right;color:var(--muted)">‹ ›</span></div>
+        <div class="g">Pt</div><div class="g">Sa</div><div class="g">Ça</div><div class="g">Pe</div><div class="g">Cu</div><div class="g">Ct</div><div class="g">Pz</div>
+      </div>
+      <div class="grp" style="margin-top:10px"><div class="gb">Seçili: Ahmet KAYA'yı ara</div><div class="ic"><div class="kv">
+        <b>Zaman</b><span>22.10.2026 14:30 · 25 dk sonra</span>
+        <b>Uyarı</b><span>14:15 · zil + SMS</span>
+        <b>Bağlı kayıt</b><span class="bag">🧑 Ahmet KAYA (P-20418) ↗</span>
+        <b>Not</b><span>Hemoglobin düşük çıktı, kontrole çağır. Cep: 0532 *** 18</span>
+        <b>Ertelendi</b><span>1 kez (13:00 → 14:30)</span>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap"><button class="btn k ok">✓ Tamam</button><button class="btn k">⏱ 15 dk</button><button class="btn k">⏱ 1 saat</button><button class="btn k">⏱ Yarın</button><button class="btn k" onclick="modalAc()">✎ Düzenle</button></div>
+      </div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span id="lsay">9 açık hatırlatma</span><span>Yalnız kendi hatırlatmalarınız ve sizinle paylaşılanlar görünür</span><span class="sp">Gecikmiş satır kırmızı · tamamlanan soluk</span></div>
+</div>
+
+<!-- ======================================================== 3 · KART -->
+<div class="ust-baslik">3 · Hatırlatma kartı (pencere — her ekrandan açılır, sekmeler tıklanır)</div>
+<div class="modal-arka" id="modal">
+<div class="modal">
+  <div class="title">⏰ Hatırlatma — <span id="mbas">Ahmet KAYA'yı ara — tahlil sonucu</span> <span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <button class="btn primary">💾 Kaydet</button>
+    <button class="btn ok">✓ Tamamlandı</button>
+    <button class="btn">⏱ Ertele ▾</button>
+    <div class="sepv"></div>
+    <button class="btn">⧉ Kopyala</button><button class="btn">🗑 Sil</button>
+    <button class="btn sp">Kapat</button>
+  </div>
+  <div class="idstrip" style="grid-template-columns:2fr 1fr .8fr 1.4fr">
+    <div class="fld"><label>Başlık *</label><div class="inp big">Ahmet KAYA'yı ara — tahlil sonucu</div></div>
+    <div class="fld"><label>Tarih *</label><div class="inp">22.10.2026</div></div>
+    <div class="fld"><label>Saat *</label><div class="inp">14:30</div></div>
+    <div class="fld"><label>Öncelik</label><div class="sec-k" id="onc"><span>Düşük</span><span class="on">Normal</span><span>Yüksek</span></div></div>
+  </div>
+  <div class="sekmeler" id="msek">
+    <div class="sekme on" data-p="genel">📝 Genel</div>
+    <div class="sekme" data-p="tekrar">🔁 Tekrar &amp; uyarı</div>
+    <div class="sekme" data-p="bag">🔗 Bağlı kayıt <span class="say">1</span></div>
+    <div class="sekme" data-p="paylas">👥 Paylaşım</div>
+    <div class="sekme" data-p="gecmis">🕘 Geçmiş <span class="say">3</span></div>
+  </div>
+
+  <div class="panel" data-mp="genel">
+    <div class="form">
+      <div class="fld g4"><label>Hızlı zaman</label>
+        <div class="hizli" style="grid-template-columns:repeat(6,1fr)" id="hz">
+          <span>15 dk sonra<small>13:20</small></span><span>1 saat sonra<small>14:05</small></span><span>Bu akşam<small>18:00</small></span>
+          <span>Yarın sabah<small>23.10 09:00</small></span><span>Pazartesi<small>27.10 09:00</small></span><span class="on">Özel<small>22.10 14:30</small></span>
+        </div></div>
+      <div class="fld g4"><label>Not</label><div class="inp" style="min-height:70px;align-items:flex-start">Hemoglobin düşük çıktı (9,8). Kontrole çağır, demir tedavisini sor.</div></div>
+      <div class="fld g2"><label>Etiket</label><div class="inp">🏷 Hasta takibi <span class="sonuk">· ＋</span></div></div>
+      <div class="fld g2"><label>Renk</label><div class="sec-k"><span style="background:#fbe9e7">●</span><span class="on" style="background:#fdf6e3">●</span><span style="background:#e2f3e8">●</span><span style="background:#eef4fc">●</span></div></div>
+    </div>
+  </div>
+
+  <div class="panel" data-mp="tekrar" hidden>
+    <div class="form">
+      <div class="fld g4"><label>Tekrar</label><div class="sec-k" id="tk"><span class="on" data-v="yok">Yok</span><span data-v="gun">Her gün</span><span data-v="hafta">Haftalık</span><span data-v="ay">Aylık</span><span data-v="yil">Yıllık</span><span data-v="is">İş günleri</span></div></div>
+      <div class="fld g2 tk-hafta" hidden><label>Günler</label><div class="gunler"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span class="on">Cu</span><span>Ct</span><span>Pz</span></div></div>
+      <div class="fld g2 tk-ay" hidden><label>Ayın</label><div class="inp combo">22. günü</div></div>
+      <div class="fld tk-var" hidden><label>Her</label><div class="inp">1 <span class="sonuk">· hafta</span></div></div>
+      <div class="fld tk-var" hidden><label>Bitiş</label><div class="inp combo">Hiç bitmesin</div></div>
+      <div class="fld g4"><label>Uyar</label><div class="sec-k"><span>Zamanında</span><span>5 dk önce</span><span class="on">15 dk önce</span><span>1 saat önce</span><span>1 gün önce</span><span>Özel…</span></div></div>
+      <div class="fld g4"><label>Kanal</label>
+        <label class="chk"><span class="kutu on">✓</span><span><b>Uygulama (zil + açılır uyarı)</b><small>Oturum açıksa ekranın sağ altında uyarı çıkar; değilse zilde bekler.</small></span></label>
+        <label class="chk"><span class="kutu on">✓</span><span><b>SMS</b> <span class="sonuk">· 0532 *** 18 (profilinizdeki cep)</span><small>Bildirim kuyruğundan gider; kontör düşer.</small></span></label>
+        <label class="chk"><span class="kutu"></span><span><b>E-posta</b> <span class="sonuk">· s.yilmaz@kurum.com</span></span></label>
+      </div>
+      <div class="fld g4 sonuk" id="tkNot">Tek seferlik: tamamlanınca listeden düşer (Tamamlanan çipinde kalır).</div>
+    </div>
+  </div>
+
+  <div class="panel" data-mp="bag" hidden>
+    <div class="yan" style="grid-template-columns:minmax(0,1fr) 280px;border:1px solid var(--line2);border-radius:4px">
+      <div style="padding:10px"><div class="form">
+        <div class="fld"><label>Kayıt türü</label><div class="inp combo">🧑 Hasta</div></div>
+        <div class="fld g3"><label>Kayıt</label><div class="inp">Ahmet KAYA · P-20418 · 1978 <span class="sonuk" style="margin-left:auto">🔍 ✕</span></div></div>
+        <div class="fld g4 sonuk" style="font-size:11px">Kayıt türleri: Hasta · Cari · Personel · Kişi · Fatura / belge · Randevu · Görev · Satınalma talebi · Stok · Liste (kayıtlı arama). Bağlı kaydı görme yetkiniz yoksa yalnız başlık görünür.</div>
+      </div></div>
+      <div class="sagp">
+        <div class="grp"><div class="gb">Kayıt önizleme</div><div class="ic"><div class="kv">
+          <b>Hasta</b><span>Ahmet KAYA (46 y, E)</span><b>Son başvuru</b><span>21.10 · Dahiliye</span><b>Cep</b><span>0532 *** 18</span>
+        </div><div style="margin-top:8px"><button class="btn k">↗ Kaydı aç</button> <button class="btn k">📞 Ara</button></div></div></div>
+        <div class="sonuk" style="font-size:11px">Kartta da görünür: hastanın kartında "⏰ 1 hatırlatma" rozeti (yalnız size).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" data-mp="paylas" hidden>
+    <div class="form">
+      <div class="fld g4"><label>Kime</label><div class="sec-k"><span class="on">Yalnız ben</span><span>Ben + seçtiklerim</span><span>Rol / birim</span></div></div>
+      <div class="fld g4"><label>Paylaşılanlar</label><div class="inp">👤 Hem. Esra KOÇ ✕ &nbsp; 👤 Dr. Kemal YURT ✕ <span class="sonuk" style="margin-left:auto">＋ kişi ekle</span></div></div>
+      <div class="fld g4">
+        <label class="chk"><span class="kutu on">✓</span><span><b>Herhangi biri tamamlayınca herkes için kapansın</b><small>İşaretsizse her kişi kendi kopyasını kapatır.</small></span></label>
+        <label class="chk"><span class="kutu"></span><span><b>Paylaşılanlar düzenleyebilsin</b><small>İşaretsizse yalnız görür, erteler, tamamlar.</small></span></label>
+      </div>
+      <div class="fld g4 bilgi" style="border:1px solid #cfe0f5;background:#f5f9fe;border-radius:4px;padding:7px 10px;color:#2c4a6b">Başkasına <b>iş vermek</b> için Görev kullanılır (sorumlu, son tarih, onay). Hatırlatma yalnız haber verir; atanan kişinin iş listesine girmez.</div>
+    </div>
+  </div>
+
+  <div class="panel" data-mp="gecmis" hidden>
+    <div class="dg"><table>
+      <tr><th>Zaman</th><th>Olay</th><th>Ayrıntı</th></tr>
+      <tr><td>22.10 13:00</td><td><span class="rz sari">Ertelendi</span></td><td>13:00 → 14:30 (zilden "1,5 saat")</td></tr>
+      <tr><td>22.10 12:45</td><td><span class="rz mavi">Uyarı gönderildi</span></td><td>Zil + SMS (0532 *** 18) · iletildi</td></tr>
+      <tr><td>21.10 17:20</td><td><span class="rz ok">Oluşturuldu</span></td><td>Lab sonucu ekranından "⏰ Hatırlat" ile · hasta bağlandı</td></tr>
+    </table></div>
+  </div>
+  <div class="statusbar"><span>Kayıt #4471</span><span>Sahibi: Sistem Yoneticisi</span><span class="sp">Zaman şubenin saat diliminde (Europe/Istanbul)</span></div>
+</div>
+</div>
+
+<!-- ======================================================== 4 · HIZLI -->
+<div class="ust-baslik">4 · Kayıttan hızlı hatırlatma — kart araç çubuğu "⏰ Hatırlat" ve liste satırı sağ tık</div>
+<div class="sahne">
+  <div class="mini-kart">
+    <div class="title">🏢 Cari Kartı — Medikal Ltd. Şti. <span class="sp">#1204</span></div>
+    <div class="toolbar"><button class="btn primary">💾 Kaydet</button><button class="btn">📄 Ekstre</button><button class="btn" style="border-color:#2f6db3;background:#eef4fc">⏰ Hatırlat</button><span class="rz sari" style="margin-left:6px">⏰ 1</span><button class="btn sp">Kapat</button></div>
+    <div style="height:220px;padding:10px;color:var(--muted)"><i>(kart alanları)</i></div>
+    <div class="pop" style="left:150px;top:78px">
+      <b style="font-size:12px">⏰ Hatırlat — Medikal Ltd. Şti.</b>
+      <div class="inp" style="margin-top:6px">Teklif dönüşünü sor</div>
+      <div class="hizli">
+        <span>1 saat sonra<small>14:05</small></span><span class="on">Yarın sabah<small>23.10 09:00</small></span>
+        <span>Pazartesi<small>27.10 09:00</small></span><span>1 hafta sonra<small>29.10 09:00</small></span>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center"><button class="btn k primary">Kaydet</button><button class="btn k" onclick="modalAc()">Ayrıntılı…</button><span class="sonuk" style="margin-left:auto;font-size:10.5px">Enter = kaydet</span></div>
+    </div>
+  </div>
+  <div style="flex:0 0 300px">
+    <div class="grp"><div class="gb">Nereden açılır</div><div class="ic"><ul class="liste duz">
+      <li>• Kart araç çubuğu <b>⏰ Hatırlat</b> (cari, hasta, personel, belge, randevu, görev…)</li>
+      <li>• Liste satırında sağ tık › <b>⏰ Hatırlat</b> (seçili kayıt bağlı gelir)</li>
+      <li>• Üst bar <b>⏰＋</b> / Alt+H (bağlantısız)</li>
+      <li>• Lab sonucu, e-posta, mesaj: "bunu sonra hatırlat"</li>
+    </ul></div></div>
+    <div class="sonuk" style="font-size:11px;line-height:1.6">Kartta <span class="rz sari">⏰ 1</span> rozeti: bu kayda bağlı açık hatırlatmanız var — tıklayınca listesi açılır.</div>
+  </div>
+</div>
+
+<!-- ======================================================== 5 · UYARI -->
+<div class="ust-baslik">5 · Zamanı gelince — ekranın sağ altında açılır uyarı</div>
+<div class="sahne" style="justify-content:flex-end;min-height:0">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="tost">
+      <div class="ust">⏰ Hatırlatma · 14:15 <span class="rz sari" style="padding:0 6px">15 dk kaldı</span><span class="x">✕</span></div>
+      <b>Ahmet KAYA'yı ara — tahlil sonucu</b>
+      <div class="sonuk" style="font-size:11.5px">Hemoglobin düşük çıktı (9,8). Kontrole çağır…</div>
+      <div class="bag" style="font-size:11.5px;margin-top:3px">🧑 Ahmet KAYA (P-20418)</div>
+      <div class="eyl"><button class="btn k ok">✓ Tamam</button><button class="btn k">⏱ 10 dk</button><button class="btn k">⏱ 1 saat</button><button class="btn k">⏱ Yarın</button><button class="btn k">↗ Kaydı aç</button></div>
+    </div>
+    <div class="tost kir">
+      <div class="ust">⏰ Gecikmiş · dün 16:00<span class="x">✕</span></div>
+      <b>Medikal Ltd. — teklif dönüşünü sor</b>
+      <div class="eyl"><button class="btn k ok">✓ Tamam</button><button class="btn k">⏱ Yarın 09:00</button><button class="btn k">↗ Kaydı aç</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Kurgu.</b> Hatırlatma <b>kişiye özeldir</b>: sahibi (ve paylaştıkları) görür; yetki = kendi kaydı. Başkasına iş vermek <b>Görev</b>'dir (sorumlu, son tarih, onay); hasta notu <b>Kendime Not</b>'tur. Hatırlatma ikisini de sadece "zamanında haber ver" ile tamamlar.<br>
+  • <b>Zil</b> tek giriş: gecikmiş + yakın hatırlatmalar ve bildirimler iki sekmede. <b>Açılır uyarı</b> oturum açıkken uyarı anında; Tamam / Ertele / Kaydı aç oradan.<br>
+  • <b>Uyarı motoru</b> mevcut zamanlanmış iş + bildirim kuyruğu (SMS / e-posta kanalları, kontör) üzerinden; uygulama içi uyarı aynı kayıttan okunur. Tekrarlayan hatırlatma tamamlanınca bir sonraki tarih üretilir.<br>
+  • <b>Bağlı kayıt</b> tek alan (tür + id); kayıt kartında "⏰ N" rozeti yalnız sahibine görünür. Bağlı kaydı görme yetkisi yoksa başlık görünür, kayıt açılmaz.<br>
+  • Zaman şubenin saat diliminde girilir, UTC saklanır. Ertele ve tamamla geçmişe yazılır.
+</div>
+
+<script>
+  function zilDegis() { const z = document.getElementById('zilPanel'); z.hidden = !z.hidden; }
+  document.querySelectorAll('#zilSek span').forEach(s => s.onclick = e => {
+    e.stopPropagation();
+    document.querySelectorAll('#zilSek span').forEach(x => x.classList.toggle('on', x === s));
+    document.querySelectorAll('[data-zp]').forEach(p => p.hidden = p.dataset.zp !== s.dataset.z);
+  });
+  function modalAc() { msekAc('genel'); document.getElementById('modal').scrollIntoView({ behavior: 'smooth' }); }
+  function msekAc(p) {
+    document.querySelectorAll('#msek .sekme').forEach(x => x.classList.toggle('on', x.dataset.p === p));
+    document.querySelectorAll('[data-mp]').forEach(x => x.hidden = x.dataset.mp !== p);
+  }
+  document.querySelectorAll('#msek .sekme').forEach(s => s.onclick = () => msekAc(s.dataset.p));
+  // tek seçimli düğme grupları
+  document.querySelectorAll('.sec-k, .hizli').forEach(g => g.querySelectorAll('span').forEach(s => s.addEventListener('click', () => {
+    g.querySelectorAll('span').forEach(x => x.classList.toggle('on', x === s));
+  })));
+  document.querySelectorAll('.gunler span').forEach(s => s.onclick = () => s.classList.toggle('on'));
+  // tekrar seçenekleri
+  document.querySelectorAll('#tk span').forEach(s => s.addEventListener('click', () => {
+    const v = s.dataset.v;
+    document.querySelectorAll('.tk-hafta').forEach(x => x.hidden = v !== 'hafta');
+    document.querySelectorAll('.tk-ay').forEach(x => x.hidden = v !== 'ay');
+    document.querySelectorAll('.tk-var').forEach(x => x.hidden = v === 'yok');
+    document.getElementById('tkNot').textContent = v === 'yok'
+      ? 'Tek seferlik: tamamlanınca listeden düşer (Tamamlanan çipinde kalır).'
+      : 'Tamamlayınca bir sonraki tarih kendiliğinden kurulur; geçmişte her tekrar ayrı satır.';
+  }));
+  // liste süzme
+  function suz(c) {
+    let n = 0;
+    document.querySelectorAll('#ltablo tr[data-d]').forEach(r => {
+      const d = r.dataset.d;
+      const g = c === 'hep' ? true : c === 'acik' ? d !== 'tam' : c === 'tekrar' ? !!r.dataset.t
+        : c === 'hafta' ? ['bugun', 'hafta'].includes(d) : c === 'paylasilan' ? r.children[7].textContent !== 'kendim' : d === c;
+      r.hidden = !g; if (g) n++;
+    });
+    document.getElementById('lsay').textContent = n + ' hatırlatma gösteriliyor';
+  }
+  document.querySelectorAll('#lcip .cip').forEach(c => c.onclick = () => {
+    document.querySelectorAll('#lcip .cip').forEach(x => x.classList.toggle('on', x === c)); suz(c.dataset.c);
+  });
+  document.querySelectorAll('#lozet .kart').forEach(k => k.onclick = () => {
+    document.querySelectorAll('#lozet .kart').forEach(x => x.classList.toggle('on', x === k));
+    document.querySelectorAll('#lcip .cip').forEach(x => x.classList.toggle('on', x.dataset.c === k.dataset.c));
+    suz(k.dataset.c);
+  });
+  document.querySelectorAll('#ltablo tr[data-d]').forEach(r => {
+    r.onclick = () => document.querySelectorAll('#ltablo tr').forEach(x => x.classList.toggle('sec', x === r));
+    r.ondblclick = () => { document.getElementById('mbas').textContent = r.children[2].textContent; modalAc(); };
+  });
+  // mini takvim
+  const tv = document.getElementById('takvim');
+  const ilk = 3; // 1 Ekim 2026 perşembe
+  for (let i = 0; i < ilk; i++) tv.insertAdjacentHTML('beforeend', '<div class="t bos">' + (28 + i) + '</div>');
+  const varG = { 21: 'gecvar', 22: 'var', 23: 'var', 27: 'var', 28: 'var', 29: 'var', 30: 'var', 31: 'var', 24: 'var' };
+  for (let g = 1; g <= 31; g++) tv.insertAdjacentHTML('beforeend', `<div class="t ${g === 22 ? 'bugun' : ''} ${varG[g] ?? ''}">${g}</div>`);
+  suz('acik');
+</script>
+</body>
+</html>

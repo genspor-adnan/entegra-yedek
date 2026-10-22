@@ -29,5 +29,10 @@ export const gostergeUclari = {
   baslangicBekleyen: () => istek<{ konsultasyon: number; konsultasyonGecikmis: number; istemSonuc: number;
                                    randevu: number; randevuBekleyen: number;
                                    /** Onayımdakiler: kararı bende olan basamaklar (+ geciken). */
-                                   onay: number; onayGeciken: number }>('/api/baslangic/bekleyen'),
+                                   onay: number; onayGeciken: number;
+                                   /** Kendi özlük belgelerim: eksik / süresi dolan ve yaklaşan (1135). */
+                                   belgeEksik: number; belgeYaklasan: number;
+                                   belgeler: { belge: string; durum: number; durumAdi: string; kalanGun: number | null }[];
+                                   /** Yalnız belge takip yetkilisine: eksiği olan / süresi dolan personel sayısı. */
+                                   ikBelgeEksikKisi?: number; ikBelgeDolduKisi?: number }>('/api/baslangic/bekleyen'),
 };
