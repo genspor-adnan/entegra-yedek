@@ -43,6 +43,8 @@ import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 
 /** Komut paletinde "Kayıtlı ... Kartı" - yol değil, arama penceresini açar: `#kayitli:<kart yolu>`. */
 const KAYITLI_ONEK = '#kayitli:';
+/** Palet işlemi: yeni kişisel hatırlatma penceresi (rota değil). */
+const HATIRLATMA_YENI = '#hatirlatma:yeni';
 /** Hasta ve başvuru: genel HASTA araması (başvuruda hastanın son başvurusu); boş palette hep görünür. */
 // Muayene (kullanıcı 15.10.2026): hasta aranır, hastanın SON muayenesi açılır.
 const SABIT_ARAMA: Record<string, 'hasta' | 'basvuru' | 'muayene'> = { '/hasta': 'hasta', '/basvuru': 'basvuru', '/muayene': 'muayene' };
@@ -216,6 +218,10 @@ export function Kabuk() {
     sat.tur === 'duz' ? sat.m.yol === yol : sat.alt.some(m => m.yol === yol)), [kodSatirlari]);
   const panelEkranlari = useMemo(() => [
     ...paneller.map(p => ({ yol: `/gosterge/${p.kod}`, ad: p.ad, grup: 'Gösterge Panelleri' })),
+    // KİŞİSEL HATIRLATICI (1139, kullanıcı 22.10.2026: "ctrl k aramada Hatırlatmalarım da gelsin"): ekran
+    //   menüde değil (kullanıcı menüsü / zil), yetki kodu yok - herkese. Yeni hatırlatma işlemi kartı açar.
+    { yol: '/hatirlatmalarim', ad: 'Hatırlatmalarım', grup: 'Kullanıcı' },
+    { yol: HATIRLATMA_YENI, ad: 'Yeni Hatırlatma', grup: 'Kullanıcı', islem: true, ikon: '⏰' },
     // YENİ / KAYITLI KART (kullanıcı: "aramada hasta ve başvuru kartı deseninde yeni açma ve kayıtlı
     //   getirme olmalı"): kartı sekmede açılan HER liste için iki işlem; yalnız listesi menüsünde olan
     //   (yetkili) kullanıcıya. Aynı kart yolunu paylaşan listelerden ilki. Boş palette yalnız son
@@ -304,6 +310,7 @@ export function Kabuk() {
    * rota değişimi yalnız menü ekranını yazıyordu. Başlangıç'taki son açılan kartı da buradan açar.
    */
   const paletGit = (yol: string) => {
+    if (yol === HATIRLATMA_YENI) { hatirlatmaPenceresiAc(); return }
     if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
     tercih.sonKaydet(yol);
     const kartYol = yol.slice(KAYITLI_ONEK.length);
