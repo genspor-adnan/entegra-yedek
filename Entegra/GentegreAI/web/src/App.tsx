@@ -97,6 +97,7 @@ const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi'
 const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
 const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
+const Hatirlatmalarim = tembel(() => import('./sayfalar/Hatirlatmalarim'), 'Hatirlatmalarim');
 const ArizaEkipleri = tembel(() => import('./sayfalar/ariza/ArizaEkipleri'), 'ArizaEkipleri');
 const Duyurular = tembel(() => import('./sayfalar/Duyurular'), 'Duyurular');
 const IzinTalepKarti = tembel(() => import('./sayfalar/ik/IzinTalepKarti'), 'IzinTalepKarti');
@@ -387,6 +388,8 @@ function Yollar() {
         )}
         {/* TALEPLERIM: yetki kapisi yok - herkes yalniz kendi taleplerini gorur. */}
         <Route path="/taleplerim" element={<Taleplerim />} />
+        {/* KİŞİSEL HATIRLATICI (1139): kişiye özel, yetki kodu yok. */}
+        <Route path="/hatirlatmalarim" element={<Hatirlatmalarim />} />
         {yetki('ariza.ekip') && <Route path="/ariza-ekipleri" element={<ArizaEkipleri />} />}
         {yetki('duyuru') && <Route path="/duyurular" element={<Duyurular />} />}
         {/* IZIN TALEP KARTI (959): liste arkada, ozel kart modal. */}

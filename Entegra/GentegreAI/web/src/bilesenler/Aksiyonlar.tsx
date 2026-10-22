@@ -135,10 +135,12 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi }
 interface SagTusProps extends CalistirProps {
   konum: { x: number; y: number } | null;
   onKapat(): void;
+  /** Katalog dışı, ekranın eklediği satırlar (ör. "⏰ Hatırlat" - 1139). Aksiyonlardan sonra. */
+  ek?: { ad: string; tikla(): void }[];
 }
 
 /** Sag tus menusu — ayni katalogdan, yalniz "sagtus" hedefli aksiyonlar. */
-export function GenSagTus({ aksiyonlar, calistir, konum, onKapat }: SagTusProps) {
+export function GenSagTus({ aksiyonlar, calistir, konum, onKapat, ek }: SagTusProps) {
   useEffect(() => {
     if (!konum) return;
     const kapat = () => onKapat();
@@ -150,7 +152,7 @@ export function GenSagTus({ aksiyonlar, calistir, konum, onKapat }: SagTusProps)
   if (!konum) return null;
   // Ayrac satirlari ("*.ayrac*") menude CIZGI olarak cizilir - tiklanamaz.
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'sagtus'));
-  if (gorunen.length === 0) return null;
+  if (gorunen.length === 0 && !ek?.length) return null;
 
   return (
     <div className="sag-tus" style={{ left: konum.x, top: konum.y }}>
@@ -165,6 +167,9 @@ export function GenSagTus({ aksiyonlar, calistir, konum, onKapat }: SagTusProps)
           {a.kisayol && <span className="kisayol">{a.kisayol}</span>}
           {!a.aktif && a.pasifSebep && <span className="pasif-sebep">{a.pasifSebep}</span>}
         </button>
+      ))}
+      {ek?.map(e => (
+        <button key={e.ad} onClick={() => { e.tikla(); onKapat() }}><span>{e.ad}</span></button>
       ))}
     </div>
   );

@@ -24,6 +24,8 @@ import { TaleplerimBaglami, TaleplerimPaneli, KullaniciMenusu, BanaGelenlerPanel
 import { useTaleplerimOzeti } from '../bilesenler/taleplerim/useTaleplerimOzeti';
 import { YeniTalepKatmani } from '../bilesenler/taleplerim/YeniTalepModali';
 import { TalepBildirimleri } from '../bilesenler/taleplerim/TalepBildirimleri';
+import { HatirlatmaYoneticisi } from '../bilesenler/hatirlatma/HatirlatmaYoneticisi';
+import { hatirlatmaPenceresiAc } from '../bilesenler/hatirlatma/hatirlatmaDeposu';
 import { IskontoKararKatmani } from '../bilesenler/taleplerim/GelenIsler';
 import { DuyuruKatmani } from '../bilesenler/duyuru/DuyuruOrtak';
 import { Bayrak } from '../bilesenler/Bayrak';
@@ -446,6 +448,8 @@ export function Kabuk() {
 
           {/* ZIL = BANA GELENLER: bana gelen ariza, onayimi bekleyen, iskonto
               onayi - tek tik islemle (taleplerim/TaleplerimPaneli). */}
+          {/* YENİ HATIRLATMA (mockup kisisel_hatirlatici.html (1)): her ekrandan, Alt+H ile de. */}
+          <button type="button" className="ib" title={c('Yeni hatırlatma (Alt+H)')} onClick={() => hatirlatmaPenceresiAc()}>⏰</button>
           <BanaGelenlerPaneli />
 
           {/* "?" bulunduğu ekranın yardımını açar (AiRehberPaneli dinler). */}
@@ -571,6 +575,8 @@ export function Kabuk() {
       <YeniTalepKatmani />
       {/* ANLIK BILDIRIM (gelen_talepler mockup): yeni is acik ekranin sol altina. */}
       <TalepBildirimleri />
+      {/* KİŞİSEL HATIRLATICI (1139): kart penceresi, açılır uyarılar, Alt+H. */}
+      <HatirlatmaYoneticisi />
       <IskontoKararKatmani />
       {/* DUYURU (957): okuma / yayinla penceresi + kritik duyuru tam ekran. */}
       <DuyuruKatmani />

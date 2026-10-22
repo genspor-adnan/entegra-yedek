@@ -1178,6 +1178,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
       key={tanim.rota ?? tanim.kaynak}
       kaynak={tanim.kaynak}
+      // SAĞ TIK "⏰ Hatırlat" (1139): kartı olan listede seçili kayda bağlı hatırlatma.
+      hatirlatKarti={tanim.kartYolu ? { yol: tanim.kartYolu, baslik: tanim.kartBaslik } : undefined}
       aramaEkAlanlari={tanim.aramaEkAlanlari}
       // PORTALDA BASLIK MENU ADIYLA AYNI (796 V2); portal disinda degismez.
       //   Kirintili yol (Randevu > Randevular) portalda GIZLENIR: kurum ici

@@ -50,6 +50,7 @@ import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 import { RandevuErtelePenceresi } from './RandevuErtelePenceresi';
 import { RandevuSeriPenceresi } from './RandevuSeriPenceresi';
+import { KartHatirlat } from './hatirlatma/KartHatirlat';
 
 interface Props {
   kaynak: string;
@@ -2165,6 +2166,15 @@ Yine de yeni kayıt eklensin mi?`);
           {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
               cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}
           {!yeniMi && ekAraclar?.(deger)}
+          {/* KAYITTAN HIZLI HATIRLATMA (1139, mockup kisisel_hatirlatici.html (4)): her kayıtlı kartta.
+              Bağlı kayıt = kartın rotası (adres çubuğu /<rota>/<id>; değilse kaynak adı) + id. */}
+          {!yeniMi && Number(id) > 0 && (() => {
+            const yol = window.location.pathname.replace(/^\/+/, '');
+            const rota = yol.endsWith(`/${id}`) ? yol.slice(0, -String(id).length - 1) : kaynak;
+            const ad = String(deger.unvan || [deger.ad, deger.soyad].filter(Boolean).join(' ') || deger.baslik
+                              || deger.belgeNo || deger.kod || `#${id}`);
+            return <KartHatirlat kaynak={rota} id={Number(id)} ad={ad.slice(0, 200)} />;
+          })()}
           {/* HASTA KARTI EYLEM DUGMELERI (kullanici) - Sil'in saginda.
               MERNIS ve provizyon/mustehaklik sorgusu DIS SERVISE gider; o
               servisler henuz bagli DEGIL, dugmeler yerlesimde duruyor ve

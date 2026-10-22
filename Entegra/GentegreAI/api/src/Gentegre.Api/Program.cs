@@ -68,6 +68,8 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimHesaplari>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimGondericiFabrikasi>();
 kurucu.Services.AddHttpClient("bildirim");
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
+// KİŞİSEL HATIRLATICI (1139): dakikada bir uyarı anı gelen hatırlatmaların SMS / e-postasını kuyruğa koyar.
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.HatirlatmaIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
@@ -429,6 +431,7 @@ uygulama.AlacakYaslandirmaUclariniEkle();   // alacak yaşlandırma (10.10.2026)
 uygulama.HastaBorcTakipUclariniEkle();   // hasta borç takibi (10.10.2026)
 uygulama.PersonelBelgeTakipUclariniEkle();   // İK belge takibi: özet şerit + hatırlatma (22.10.2026)
 uygulama.PersonelBelgeTurUclariniEkle();      // İK belge türleri: sayaç, personel durumu, kapsam önizleme, kopyala/pasif/sıra (22.10.2026)
+uygulama.HatirlatmaUclariniEkle();            // Kişisel hatırlatıcı: liste, zil, kart, tamamla / ertele (1139)
 uygulama.HekimPerformansUclariniEkle();   // hekim / bölüm performans icmali (10.10.2026)
 uygulama.IskontoIcmalUclariniEkle();   // iskonto ve ücretsiz hizmet icmali (10.10.2026)
 uygulama.MaliyetIcmalUclariniEkle();   // hasta başı maliyet / sarf icmali (10.10.2026)

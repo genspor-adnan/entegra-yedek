@@ -47,7 +47,7 @@ export function BelgeTuruSiraModali({ onKapat, onKaydedildi }: { onKapat(): void
     <Modal baslik="↕ Belge türlerinin sırası" dar enUst onKapat={onKapat}
            alt={<>
              <button type="button" className="d" onClick={onKapat}>Vazgeç</button>
-             <button type="button" className="d mavi" disabled={!degisti} onClick={kaydet}>💾 Kaydet</button>
+             <button type="button" className="d bir" disabled={!degisti} onClick={kaydet}>💾 Kaydet</button>
            </>}>
       {!turler ? <div style={{ padding: 12 }}>Yükleniyor…</div> : (
         <div style={{ padding: '6px 4px', maxHeight: '60vh', overflow: 'auto' }}>

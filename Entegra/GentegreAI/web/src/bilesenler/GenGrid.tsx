@@ -5,6 +5,7 @@ import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { gorunumOku } from './gorunum';
+import { hatirlatmaPenceresiAc } from './hatirlatma/hatirlatmaDeposu';
 import { GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { SekmeGorunurBaglami } from './sekmeBaglami';
@@ -45,6 +46,8 @@ interface Props {
   onSatirAc?(satir: ListeSatiri): void;
   /** Aksiyon katalogu ekrani ("cari-liste"); verilirse arac cubugu + sag tus + palet gelir. */
   aksiyonEkrani?: string;
+  /** Sağ tık "⏰ Hatırlat" (1139): satır kartının rotası ve adı - verilirse seçili kayda bağlı hatırlatma açılır. */
+  hatirlatKarti?: { yol: string; baslik?: string };
   /**
    * AGAC KIPI (kullanici: "+ gibi alt dallar acilir yap"). Deger, ust kaydi
    * gosteren ALAN ADI ("ustbirimId"). Verilirse satirlar agac sirasinda
@@ -261,7 +264,7 @@ function KatlaOku({ yon }: { yon: 'sol' | 'sag' }) {
 const COKLU_AKSIYONLAR = new Set(['gelen.kabul', 'gelen.red', 'gelen.aktar']);
 
 export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
-                          aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
+                          aksiyonEkrani, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
                           tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan,
@@ -1046,6 +1049,12 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             calistir={aksiyonCalistir}
             konum={sagTusKonumu}
             onKapat={() => setSagTusKonumu(null)}
+            ek={hatirlatKarti && seciliSatir?.id != null ? [{ ad: '⏰ Hatırlat', tikla: () => {
+              const s = seciliSatir;
+              const ad = String(s.unvan || s.ad || s.baslik || s.belgeNo || s.kod || `#${s.id}`);
+              hatirlatmaPenceresiAc({ kaynak: hatirlatKarti.yol.replace(/^\/+/, ''), kaynakId: Number(s.id),
+                                      kaynakAd: (hatirlatKarti.baslik ? `${hatirlatKarti.baslik}: ${ad}` : ad).slice(0, 200) });
+            } }] : undefined}
           />
         </>
       )}

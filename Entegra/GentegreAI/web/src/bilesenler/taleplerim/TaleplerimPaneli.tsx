@@ -11,6 +11,8 @@ import { yeniTalepAc, type YeniTalepTuru } from './YeniTalepModali';
 import { GelenEylemler, bekleme, gelenGruplari, iskontoKararAc, onayIkon } from './GelenIsler';
 import { GRUP_SINIF, TUR_IKON, gunYaz, talepleriYenile } from './useTaleplerimOzeti';
 import type { TalepSatiri } from '../../api/uclar/izin';
+import { hatirlatmaPenceresiAc, useHatirlatmaZil, zilSayisi } from '../hatirlatma/hatirlatmaDeposu';
+import { HatirlatmaZilListesi } from '../hatirlatma/HatirlatmaZilListesi';
 
 /**
  * TALEPLER ERİŞİMİ (mockup taleplerim.html bölüm 0 + gelen_talepler.html):
@@ -131,15 +133,19 @@ export function BanaGelenlerPaneli() {
   const git = useNavigate();
   const { yetki } = useOturum();
   const [acik, setAcik] = useState(false);
-  const [sekme, setSekme] = useState<'gelen' | 'duyuru'>('gelen');
+  const [sekme, setSekme] = useState<'hat' | 'gelen' | 'duyuru'>('gelen');
+  // KİŞİSEL HATIRLATMALAR (1139, mockup kisisel_hatirlatici.html (1)): zilin ilk sekmesi.
+  const hatirlatmalar = useHatirlatmaZil();
+  const hatSayi = zilSayisi(hatirlatmalar);
   const kapat = () => setAcik(false);
   useDisariKapat(acik, kapat);
   if (!oz) return null;
-  const { veri, gelen, islemBekleyen, nabiz, duyurular, duyuruYeni } = oz;
+  const { veri, gelen, nabiz, duyurular, duyuruYeni } = oz;
+  const islemBekleyen = oz.islemBekleyen;
   const gruplar = gelenGruplari(gelen, veri?.onaylar ?? [], oz.iskontolar);
   // AÇILIŞ SEKMESİ: işlem bekleyen varsa iş, yoksa okunmamış duyuru varsa duyurular.
   const ac = () => {
-    setSekme(islemBekleyen > 0 || duyuruYeni === 0 ? 'gelen' : 'duyuru');
+    setSekme(hatSayi > 0 ? 'hat' : islemBekleyen > 0 || duyuruYeni === 0 ? 'gelen' : 'duyuru');
     setAcik(true); oz.nabziSondur(); void oz.yukle();
   };
 
@@ -148,21 +154,26 @@ export function BanaGelenlerPaneli() {
       <button type="button" className={`ib${acik ? ' on' : ''}`} title={c('Bildirimler')}
               onClick={e => { e.stopPropagation(); if (acik) kapat(); else ac() }}>
         🔔
-        {islemBekleyen > 0 && <span className={`zil-rozet${nabiz ? ' tl-nabiz' : ''}`} title={c('İşlem bekleyen')}>{islemBekleyen}</span>}
+        {islemBekleyen + hatSayi > 0 && <span className={`zil-rozet${nabiz ? ' tl-nabiz' : ''}`}
+              title={c('İşlem bekleyen ve yaklaşan hatırlatma')}>{islemBekleyen + hatSayi}</span>}
         {duyuruYeni > 0 && <span className="dy-mavi" title={c('Okunmamış duyuru')}>{duyuruYeni}</span>}
       </button>
       {acik && (
         <div className="zil-panel tl-panel" onClick={e => e.stopPropagation()}>
           <div className="zil-baslik tl-pb">🔔 {c('Bildirimler')}
-            <span>{[islemBekleyen > 0 ? `${islemBekleyen} ${c('işlem bekliyor')}` : '',
+            <span>{[hatSayi > 0 ? `${hatSayi} ${c('hatırlatma')}` : '',
+                    islemBekleyen > 0 ? `${islemBekleyen} ${c('işlem bekliyor')}` : '',
                     duyuruYeni > 0 ? `${duyuruYeni} ${c('okunmamış duyuru')}` : ''].filter(Boolean).join(' · ')}</span></div>
           <div className="tl-psek">
+            <button type="button" className={sekme === 'hat' ? 'on' : ''} onClick={() => setSekme('hat')}>
+              ⏰ {c('Hatırlatmalarım')}{hatSayi > 0 && <b>{hatSayi}</b>}</button>
             <button type="button" className={sekme === 'gelen' ? 'on' : ''} onClick={() => setSekme('gelen')}>
               {c('Bana gelenler')}{islemBekleyen > 0 && <b>{islemBekleyen}</b>}</button>
             <button type="button" className={sekme === 'duyuru' ? 'on' : ''} onClick={() => setSekme('duyuru')}>
               {c('Duyurular')}{duyuruYeni > 0 && <b className="dy-b">{duyuruYeni}</b>}</button>
           </div>
-          {sekme === 'duyuru' ? <DuyuruListesi satirlar={duyurular} sonra={kapat} /> : <>
+          {sekme === 'hat' ? <HatirlatmaZilListesi satirlar={hatirlatmalar} sonra={kapat} git={git} />
+            : sekme === 'duyuru' ? <DuyuruListesi satirlar={duyurular} sonra={kapat} /> : <>
             <ul className="tl-son tl-gelen">
               {gruplar.length === 0 && <li className="tl-bos">{c('Bekleyen işiniz yok.')} ✔</li>}
               {gruplar.map(g => [
@@ -194,10 +205,14 @@ export function BanaGelenlerPaneli() {
             </ul>
           </>}
           <div className="tl-pa">
-            {sekme === 'duyuru' && yetki('duyuru', 'ekle')
+            {sekme === 'hat'
+              ? <button type="button" className="tl-link" onClick={() => { kapat(); hatirlatmaPenceresiAc() }}>＋ {c('Yeni hatırlatma')}</button>
+              : sekme === 'duyuru' && yetki('duyuru', 'ekle')
               ? <button type="button" className="tl-link" onClick={() => { kapat(); duyuruKartAc() }}>＋ {c('Duyuru yayınla')}</button>
               : <span />}
-            {sekme === 'duyuru'
+            {sekme === 'hat'
+              ? <button type="button" className="tl-link" onClick={() => { kapat(); git('/hatirlatmalarim') }}>{c('Tümünü gör')} →</button>
+              : sekme === 'duyuru'
               ? (yetki('duyuru') ? <button type="button" className="tl-link" onClick={() => { kapat(); git('/duyurular') }}>{c('Tüm duyurular')} →</button> : <span />)
               : <button type="button" className="tl-link" onClick={() => { kapat(); git('/taleplerim?sekme=gelen') }}>{c('Tümünü gör')} →</button>}
           </div>
@@ -260,6 +275,7 @@ export function KullaniciMenusu({ ad, rolAdi, avatar, aktifSubeAd, cokSube,
               💸 {c('Avans / masraf')}<span className="tl-km-sag">{odenecek > 0 ? `${para.format(odenecek)} ${c('ödenecek')}` : '—'}</span></button>
           )}
           <i className="ayr" />
+          <button type="button" onClick={sec(() => git('/hatirlatmalarim'))}>⏰ {c('Hatırlatmalarım')}</button>
           <button type="button" onClick={sec(onProfil)}>👤 {c('Profilim')}</button>
           <button type="button" onClick={sec(onAyarlar)}>⚙ {c('Kullanıcı ayarlarım')}</button>
           <button type="button" onClick={sec(onParola)}>🔑 {c('Parola değiştir')}</button>
