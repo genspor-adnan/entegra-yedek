@@ -99,6 +99,61 @@ public sealed class AktarimKasaTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
         await t.RollbackAsync();
     }
 
+    // 1099: TL tahsilat, cari dolar ekstreli (EKSTREDEKULLAN=1, DOVIZ_KURU $); web'de karşılığı
+    // olmayan iki Delphi türü - 81 Kupon Virmanı (yalnız cari) ve 37 Kasa Eksiği (kasa, cari yok).
+    private const string KasaDoviz = """
+        {"U": {"KASA": [
+          {"id": 990004111, "tur": 21, "hesapturu": "K", "hesapid": 990004001, "rehberid": 990004201,
+           "borc": 0, "alacak": 4000, "kur": "TL", "doviz_kuru": "$", "doviz_tutari": 100, "ekstredekullan": 1,
+           "islemtarihi": "2026-03-04T11:00:00"},
+          {"id": 990004112, "tur": 81, "hesapturu": "", "rehberid": 990004201, "borc": 250, "alacak": 0,
+           "kur": "TL", "aciklama": "kupon", "islemtarihi": "2026-03-05T11:00:00"},
+          {"id": 990004113, "tur": 37, "hesapturu": "K", "hesapid": 990004001, "rehberid": 0, "borc": 30,
+           "alacak": 0, "kur": "TL", "islemtarihi": "2026-03-06T11:00:00"}]}}
+        """;
+
+    [VtFact]
+    public async Task Cari_bacagi_ekstre_dovizinde_bilinmeyen_tur_en_yakin_web_turune()
+    {
+        if (!_olgu.Baglandi(nameof(Cari_bacagi_ekstre_dovizinde_bilinmeyen_tur_en_yakin_web_turune))) return;
+        await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
+        await using var t = await b.BeginTransactionAsync();
+        var ct = CancellationToken.None;
+
+        await b.CalistirAsync(
+            "update public.aktarim_ayar set deger = '2026-01-01' where anahtar = 'hareket_baslangic'", t, [], ct);
+        await AktarAsync(b, t, "fn_aktar_cari", """
+            {"U": {"REHBER": [{"id": 990004201, "kod": "AKT-K-CARI", "firma": "Aktarım Kasa Carisi", "durum": 1,
+                               "vno": "9900000031"}]}}
+            """);
+        await AktarAsync(b, t, "fn_aktar_hesap", """
+            {"U": {"KASALAR": [{"id": 990004001, "kasakodu": "AKT-K-KASA", "kasaadi": "Aktarım kasası", "kur": "TL", "durum": 1}]}}
+            """);
+
+        var sonuc = await AktarAsync(b, t, "fn_aktar_kasa", KasaDoviz);
+        Assert.Equal(2, Sayi(sonuc, "tur_eslenen"));
+        Assert.Equal(0, Sayi(sonuc, "tursuz"));
+
+        // Kasa bacağı TL'de (4000), cari bacağı dolarda 100 ALACAK; TL karşılığı iki bacakta aynı.
+        Assert.Equal("K:TL:4000.0000/0.0000:4000.0000 C:USD:0.0000/100.0000:4000.0000", await b.TekDegerAsync<string>("""
+            select string_agg(m.hesap_turu || ':' || m.doviz_cinsi || ':' || m.borc || '/' || m.alacak || ':'
+                              || (m.yerel_borc + m.yerel_alacak), ' ' order by m.sira)
+              from public.mali_hareket m join public.kasa_islem i on i.id = m.kasa_islem_id
+             where i.aktarim_kaynak = 1 and i.aktarim_tablo = 'KASA' and i.aktarim_id = 990004111
+            """, t, [], ct));
+
+        // 81 yalnız cari satırı -> Cari Virman (49), Delphi tür adı açıklamada; tutar aynen.
+        Assert.Equal("49/250.0000/[Delphi: Kupon Virmanı] kupon", await b.TekDegerAsync<string>("""
+            select m.tur || '/' || m.borc || '/' || m.aciklama from public.mali_hareket m
+             where m.aktarim_kaynak = 1 and m.aktarim_tablo = 'KASA' and m.aktarim_id = 990004112
+            """, t, [], ct));
+        // 37 kasadan çıkış (borç) -> Nakit Ödeme (31).
+        Assert.Equal(31, await b.TekDegerAsync<int>(
+            "select tur from public.kasa_islem where aktarim_kaynak = 1 and aktarim_tablo = 'KASA' and aktarim_id = 990004113",
+            t, [], ct));
+        await t.RollbackAsync();
+    }
+
     [VtFact]
     public async Task Alis_belgesi_Tanimsiz_Cari_ye_baglanir_carisi_tedarikci_olur()
     {

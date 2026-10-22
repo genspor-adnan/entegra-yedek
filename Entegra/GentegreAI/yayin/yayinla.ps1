@@ -40,7 +40,7 @@ param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
-    [ValidateSet('hepsi','hbys','erp','delphi','profiller',
+    [ValidateSet('hepsi','hbys','erp','delphi','feta','profiller',
                  'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
@@ -76,6 +76,15 @@ $KURULUMLAR = @(
         Ad = 'delphi'; Etiket = 'Gentegre AI (ERP - Delphi aktarimi pilotu)';
         Yol = '/gentegreai/delphi/'; Kok = 'gentegre-erp-delphi';
         Db = 'gentegre_erp_delphi'; Kap = 'gentegre-api-erp-delphi'; Port = 5182; Urun = 'erp'
+    },
+    # FETA (22.10.2026, kullanici: "46.36.201.170/feta ya son erp yi kur ... musteri artik
+    #   delphi yerine bu adresten devam edecek, DB adi FETA"): Delphi FETA + FETA_GENDEPO
+    #   verisi yerelde aktarilip dogrulandi, sunucuya dump ile gelir (yayin/feta-hazirla.sh).
+    #   Gocler veritabaninda uygulanmis - yayin yalniz yeni gocleri calistirir.
+    [ordered]@{
+        Ad = 'feta'; Etiket = 'FETA (ERP)';
+        Yol = '/feta/'; Kok = 'gentegre-feta';
+        Db = 'FETA'; Kap = 'gentegre-api-feta'; Port = 5183; Urun = 'erp'
     }
 )
 

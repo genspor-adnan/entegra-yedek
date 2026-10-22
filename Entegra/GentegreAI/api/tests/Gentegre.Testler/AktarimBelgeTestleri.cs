@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using Gentegre.Veri;
 using Npgsql;
 
@@ -8,7 +8,9 @@ namespace Gentegre.Testler;
 /// DELPHI AKTARIMI - BELGE (1084): FATBASLIK + FATURA + STOKIZLEME, faturanın cari satırı, STOKDURUM.
 ///
 /// Delphi faturaya KASA satırı yazmaz; web ekstresi yalnız mali_hareket okur, cari
-/// satırını aktarım web'in kaydetme kuralıyla yazar (iade ters yön). Satış satırında
+/// satırını aktarım yazar: tutar ve dövizi Delphi cari bakiyesindeki gibi (1099:
+/// EKSTREDEKULLAN=1 ise DOVIZ_TUTARI/DOVIZ_CINSI, değilse FATURA_TUTARI/KUR); Delphi
+/// iadesi (yön türden, 15/2 = alış iadesi) web'de karşı türün iadesi olur. Satış satırında
 /// yalnız masraf olarak bilinen kalemin hizmet karşılığı açılır; döviz ISO, KDV'li
 /// tutarlar CHECK toleransında; yıl sınırından eski belge atlanır; pakette olmayan
 /// satır silinir; aynı paket ikinci kez hiçbir şey yazmaz. İşlem içinde, geri alınır.
@@ -29,15 +31,15 @@ public sealed class AktarimBelgeTestleri(VeritabaniOlgusu olgu) : IClassFixture<
           "STOKSERILOT": [{"id": 990003051, "stokid": 990003001, "lotno": "AKT-LOT"}]}}
         """;
 
-    // Satış faturası (USD, iki satır: stok + yalnız masraf olarak bilinen kalem), satış iadesi,
-    // yıl sınırından eski bir fatura.
+    // Satış faturası (USD, ekstrede döviz; iki satır: stok + yalnız masraf olarak bilinen kalem),
+    // Delphi iade faturası 15/2 (tedarikçiye iade = web alış iadesi 11/2), yıl sınırından eski bir fatura.
     private const string Belgeler = """
         {"U": {
           "FATBASLIK": [
             {"id": 990003101, "tur": 15, "tipi": 1, "rehberid": 990003201, "faturatarih": "2026-05-04T10:00:00",
              "eklemetarihi": "2026-05-04T10:05:00", "faturano": "AKT2026000000001", "baslik": "Aktarım Müşterisi",
              "fatura_matrahi": 300, "kdv_tutari": 60, "fatura_tutari": 360, "faturadovizi": "$", "rapordoviz": "$",
-             "dovizkur": 40, "doviz_tutari": 9, "kdvdurum": "Haric"},
+             "dovizkur": 40, "doviz_tutari": 9, "doviz_cinsi": "$", "ekstredekullan": 1, "kdvdurum": "Haric"},
             {"id": 990003102, "tur": 15, "tipi": 2, "rehberid": 990003201, "faturatarih": "2026-05-06T10:00:00",
              "fatura_tutari": 120, "fatura_matrahi": 100, "kdv_tutari": 20},
             {"id": 990003103, "tur": 15, "tipi": 1, "rehberid": 990003201, "faturatarih": "2025-12-30T10:00:00",
@@ -55,9 +57,9 @@ public sealed class AktarimBelgeTestleri(VeritabaniOlgusu olgu) : IClassFixture<
         """;
 
     [VtFact]
-    public async Task Fatura_cari_satiri_web_kuraliyla_iade_ters_kalem_karsiligi_acilir_tekrar_yazmaz()
+    public async Task Fatura_cari_satiri_Delphi_bakiyesiyle_iade_karsi_ture_kalem_karsiligi_acilir_tekrar_yazmaz()
     {
-        if (!_olgu.Baglandi(nameof(Fatura_cari_satiri_web_kuraliyla_iade_ters_kalem_karsiligi_acilir_tekrar_yazmaz))) return;
+        if (!_olgu.Baglandi(nameof(Fatura_cari_satiri_Delphi_bakiyesiyle_iade_karsi_ture_kalem_karsiligi_acilir_tekrar_yazmaz))) return;
         await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
         await using var t = await b.BeginTransactionAsync();
         var ct = CancellationToken.None;
@@ -85,18 +87,21 @@ public sealed class AktarimBelgeTestleri(VeritabaniOlgusu olgu) : IClassFixture<
         const string belge = "select id from public.belge where aktarim_kaynak = 1 and aktarim_tablo = 'FATBASLIK' and aktarim_id = ";
         var fatura = await b.TekDegerAsync<int>(belge + "990003101", t, [], ct);
 
-        // Başlık: ISO, ekstre dövizi = rapor dövizi, KDV durumu düzgün, gönderici şubeden.
+        // Başlık: ISO, ekstre dövizi EKSTREDEKULLAN=1 -> DOVIZ_CINSI, KDV durumu düzgün.
         Assert.Equal("USD/USD/Hariç", await b.TekDegerAsync<string>(
             "select belge_dovizi || '/' || ekstre_dovizi || '/' || kdv_durum from public.belge where id = @p0", t, [fatura], ct));
 
-        // Cari satırı: ekstre dövizinde 9 USD borç, TL karşılığı 360; iade ALACAK.
+        // Cari satırı: ekstre dövizinde 9 USD borç, TL karşılığı 360 (KUR TL -> FATURA_TUTARI).
         Assert.Equal("9.0000/0.0000/360.0000/USD", await b.TekDegerAsync<string>("""
             select borc || '/' || alacak || '/' || yerel_borc || '/' || doviz_cinsi from public.mali_hareket
              where aktarim_kaynak = 1 and aktarim_tablo = 'FATBASLIK' and aktarim_id = 990003101 and hesap_turu = 'C'
             """, t, [], ct));
-        Assert.Equal("0.0000/120.0000", await b.TekDegerAsync<string>("""
-            select borc || '/' || alacak from public.mali_hareket
-             where aktarim_kaynak = 1 and aktarim_tablo = 'FATBASLIK' and aktarim_id = 990003102
+        // Delphi 15/2 tedarikçiye iade: web'de alış iadesi (11/2), cariyi Delphi'deki gibi
+        //   BORÇLANDIRIR; ekstre dövizi KUR (boş = TL).
+        Assert.Equal("11/2/120.0000/0.0000/TL", await b.TekDegerAsync<string>("""
+            select x.tur || '/' || x.tipi || '/' || m.borc || '/' || m.alacak || '/' || m.doviz_cinsi
+              from public.mali_hareket m join public.belge x on x.id = m.belge_id
+             where m.aktarim_kaynak = 1 and m.aktarim_tablo = 'FATBASLIK' and m.aktarim_id = 990003102
             """, t, [], ct));
 
         // Satırlar: stok satırının dövizi ve KDV'li tutarı; kalem satırı hizmete bağlı (satış).

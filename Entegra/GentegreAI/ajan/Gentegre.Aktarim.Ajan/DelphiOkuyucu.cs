@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using Microsoft.Data.SqlClient;
@@ -131,14 +131,19 @@ public sealed class DelphiOkuyucu(string baglanti)
         await using var b = await AcAsync(iptal);
         await using var k = Komut(b, $"""
             SELECT x.REHBERID, CAST(SUM(x.t) AS decimal(19, 2)) FROM (
-              SELECT K.REHBERID, CASE WHEN ISNULL(K.KUR, 'TL') IN ('TL', '') THEN K.BORC - K.ALACAK
+              SELECT K.REHBERID, CASE WHEN ISNULL(K.KUR, 'TL') IN ('TL', '') OR ISNULL(K.DOVIZ_TUTARI, 0) = 0
+                                      THEN K.BORC - K.ALACAK
                                       WHEN K.BORC <> 0 THEN K.DOVIZ_TUTARI ELSE -K.DOVIZ_TUTARI END t
                 FROM dbo.KASA K
                WHERE K.ISLEMTARIHI >= @bas{haric}
                  AND (K.REHBERID > 0 OR (K.REHBERID = 0 AND ISNULL(K.HESAPTURU, '') IN ('', '1', 'C')))
               UNION ALL
+              -- Yon TURDEN (Delphi'de iadeyi mali geri gonderen keser: 15/2 alis iadesi).
+              --   Yerel: KUR TL ise FATURA_TUTARI, doviz faturada TL rapor tutari, yoksa kurla.
               SELECT F.REHBERID, CASE WHEN F.TUR IN (15, 16, 17) THEN 1 ELSE -1 END
-                               * CASE WHEN F.TIPI = 2 THEN -1 ELSE 1 END * F.FATURA_TUTARI
+                               * CASE WHEN ISNULL(F.KUR, 'TL') IN ('TL', '') THEN F.FATURA_TUTARI
+                                      WHEN F.DOVIZ_CINSI = 'TL' AND ISNULL(F.DOVIZ_TUTARI, 0) <> 0 THEN F.DOVIZ_TUTARI
+                                      ELSE F.FATURA_TUTARI * ISNULL(NULLIF(F.DOVIZKUR, 0), 1) END
                 FROM dbo.FATBASLIK F
                WHERE F.FATURATARIH >= @bas AND F.TUR IN (8, 11, 12, 13, 15, 16, 17)
                  AND ISNULL(F.DURUM, 0) <> 6 AND F.REHBERID >= 0) x
