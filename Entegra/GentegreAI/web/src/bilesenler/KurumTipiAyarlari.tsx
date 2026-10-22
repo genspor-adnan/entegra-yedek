@@ -880,7 +880,8 @@ export function KurumTipiAyarlari({ kaydetBagla }: {
                   <td className="sonuk uzun">{e.sonSonuc || '—'}</td>
                   <td>
                     <div className="btn" style={{ display: 'inline-flex' }}
-                         onClick={() => git('/genel-ayarlar')}>
+                         // Bağımsız Entegrasyon Hesapları ekranı (22.10.2026); hesap yoksa yeni kart.
+                         onClick={() => git(e.durum === 0 ? '/entegrasyon-hesap/yeni' : '/entegrasyon-hesap')}>
                       ▶ {e.durum === 0 ? 'Hesap tanımla' : 'Hesabı aç'}
                     </div>
                   </td>
@@ -893,7 +894,7 @@ export function KurumTipiAyarlari({ kaydetBagla }: {
               )}
             </tbody></table></div>
           <div className="ic sonuk">
-            Hesaplar <b>{c('Yönetim › Modül Ayarları › Genel')}</b> ekranındaki{' '}
+            Hesaplar <b>{c('Yönetim › Entegrasyonlar')}</b> ekranındaki{' '}
             <code>entegrasyon_hesap</code> kayıtlarıdır; şube hesabı varsa o,
             yoksa kurum geneli okunur. Zorunlu olup hesabı olmayanlar{' '}
             <b>{c('Özet &amp; Kurulum')}</b> listesinde de bekleyen adım olarak görünür.

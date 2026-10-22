@@ -448,6 +448,30 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     ic: '⚙️', yetkiKodu: 'ayar',
   },
   {
+    // ENTEGRASYON HESAPLARI (336) BAĞIMSIZ LİSTE / KART (kullanıcı 22.10.2026: "genel ayarlarda
+    //   entegrasyonlar sekmesini bağımsız liste / kart modeline getir"). Eskiden Genel Ayarlar'ın
+    //   sekmesinde gömülü grid + pencere karttı. Liste / kart yetki ayrımı (1128 deseni, göç 1140):
+    //   liste ekranı `entegrasyon.liste` (yalnız Gör), kart / veri `entegrasyon`.
+    //   Mockup Ekranlar/Ayarlar/entegrasyon_hesaplari.html. Şifre listede yalnız "dolu mu".
+    kaynak: 'entegrasyon-hesap', rota: 'entegrasyon-hesap', baslik: 'Entegrasyon Hesapları',
+    yol: 'Yönetim › Ayarlar › Entegrasyonlar', aksiyonEkrani: 'entegrasyon-liste',
+    kartYolu: '/entegrasyon-hesap', kartBaslik: 'Entegrasyon Hesabı',
+    // Yeni kayitta combo BOS acilmasin (kullanici): baz sube "Kendisi" (0), ortam TEST, kayit aktif -
+    //   sunucudaki YeniKayitVarsayilanlari ile ayni.
+    yeniKayitVarsayilanlari: { bazSubeId: 0, testMi: true, aktif: true },
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Aktif', filtre: { alan: 'aktif',  op: 'esit', deger: 1 } },
+      { ad: 'Test',  filtre: { alan: 'testMi', op: 'esit', deger: 1 } },
+      { ad: 'Canlı', filtre: { alan: 'testMi', op: 'esit', deger: 0 } },
+    ],
+    kolonSirasi: ['kodAdi', 'ad', 'sube', 'bazSube', 'ortam', 'kullaniciAdi', 'sifreVar', 'uygulamaKodu',
+                  'entegratorAdi', 'aktif', 'sonKullanim', 'sonSonuc'],
+    gizliKolonlar: ['kod', 'testMi'],
+    menuGrup: 'Yönetim', menuAd: 'Entegrasyonlar', menuSira: 41,
+    ic: '🔌', yetkiKodu: 'entegrasyon.liste',
+  },
+  {
     // KAYIT KABUL ayarlari (kullanici): Genel / Hasta / Başvuru sekmeleri.
     //   Basvuru sekmesindeki "Tahsilatta POS" ayari POS tahsilatindan sonra
     //   satis fisi kesilip kesilmeyecegini belirler.

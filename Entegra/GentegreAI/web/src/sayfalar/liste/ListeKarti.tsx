@@ -766,7 +766,26 @@ export function ListeKarti({
                            onDuzenle={m => m.kaynak === 'k' && m.id ? git(`/metin-makro/${m.id}`)
                              : mesaj(c('Bu makro bir muayene şablonuna ait - Muayene › Ayarlar › Muayene Şablonları’ndan düzenlenir.'))} /> : null
           : undefined}
-        sekmeSarmalayici={tanim.kaynak === 'personel-belge-turu' && kartId !== null
+        sekmeSarmalayici={tanim.kaynak === 'entegrasyon-hesap'
+          // ENTEGRASYON HESABI (mockup entegrasyon_hesaplari.html kart altı kutuları): test / canlı
+          //   ayrımı ve hesap çözüm zinciri kartın kendisinde yazılı - kullanıcı belgeye çıkmadan görsün.
+          ? (baslik, icerik) => baslik !== 'Genel' ? icerik : (
+              <>
+                {icerik}
+                <div className="uyari-kutusu" style={{ margin: '10px 12px' }}>
+                  <b>{c('Test ve canlı AYRI SATIRDIR.')}</b> Kurum canlıya geçerken test hesabını silmez — test
+                  satırının “Aktif” kutusunu kaldırır, canlı satırınkini işaretler. Aynı entegrasyon + şube +
+                  ortam üçlüsünden ikinci satır açılamaz.
+                </div>
+                <div className="not" style={{ margin: '0 12px 12px' }}>
+                  <b>{c('Hesap çözümü:')}</b> şubenin kendi satırı → baz alınan şubenin satırı → kurum geneli
+                  satır (şube boş) → varsayılan şube (yalnız ÜTS). e-Fatura'da varsayılan şubeye düşülmez:
+                  “merkezin kimliğiyle gönder” kararı şube kartında verilir. Şifre listede gösterilmez —
+                  yalnız “dolu mu” işareti.
+                </div>
+              </>
+            )
+          : tanim.kaynak === 'personel-belge-turu' && kartId !== null
           // BELGE TÜRÜ (mockup personel_belge_turu.html (2)): Genel üç kutu + sağda özet;
           //   Kime zorunlu gridinin sağında kaydetmeden kapsam önizlemesi.
           ? (baslik, icerik, deger, _izgara, parcalar, detay) => detay?.meta.ad === 'kapsam'

@@ -179,6 +179,8 @@ public static partial class EkranKodlari
         ["kys.toplanti.liste"] = "kys.toplanti",
         ["kys.egitim.liste"] = "kys.egitim",
         ["fiyat_listesi.liste"] = "fiyat_listesi",
+        // ENTEGRASYON HESAPLARI (göç 1140, 22.10.2026): Genel Ayarlar sekmesinden bağımsız liste / kart.
+        ["entegrasyon.liste"] = "entegrasyon",
         // KALAN GRUPLAR (göç 1129, kullanıcı: "kalan grupları da tek göçle yap"): aday üretici seçti -
         //   menüde, kartı kendi rotasında, kodu tek ekranda, listesi kodla ya da köprüyle açılan listeler.
         ["asi.katalog.liste"] = "asi.katalog",

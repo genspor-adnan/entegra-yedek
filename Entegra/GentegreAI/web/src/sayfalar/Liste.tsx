@@ -35,6 +35,7 @@ import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
 import { belgeTuruAksiyonu } from './liste/belgeTuruAksiyonlari';
+import { entegrasyonAksiyonu } from './liste/entegrasyonAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
@@ -962,6 +963,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await belgeTakipAksiyonu(kod, satir, secililer)) return;
+      // ENTEGRASYON HESAPLARI (bağımsız liste, 22.10.2026): sına / test mesajı / SKRS işlemleri.
+      if (await entegrasyonAksiyonu(kod, satir, () => setYenile(t => t + 1))) return;
       if (await belgeTuruAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         kartAc: id => { if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${id}`) },

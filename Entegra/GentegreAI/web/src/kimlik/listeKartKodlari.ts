@@ -40,6 +40,8 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'kys.toplanti.liste': 'kys.toplanti',
   'kys.egitim.liste': 'kys.egitim',
   'fiyat_listesi.liste': 'fiyat_listesi',
+  // Entegrasyon hesapları (göç 1140): Genel Ayarlar sekmesinden bağımsız liste / kart.
+  'entegrasyon.liste': 'entegrasyon',
   // Kalan gruplar (göç 1129).
   'asi.katalog.liste': 'asi.katalog',
   'sigorta.tanim.kod_esleme.liste': 'sigorta.tanim.kod_esleme',

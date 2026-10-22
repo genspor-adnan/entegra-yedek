@@ -1,21 +1,16 @@
 import { useState } from 'react';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
-import { api } from '../api/istemci';
-import { type ListeSatiri } from '../api/sozlesme';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 import { BelgeYaziSekmesi } from '../bilesenler/BelgeYaziSekmesi';
-import { GenGrid } from '../bilesenler/GenGrid';
-import { GenForm } from '../bilesenler/GenForm';
-import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 
 const SEKMELER = [
-  // Guvenlik 2. sirada, Entegrasyon onun SAGINDA (kullanici).
+  // Guvenlik 2. sirada (kullanici). ENTEGRASYON sekmesi kalkti (22.10.2026): hesaplar bagimsiz
+  //   liste / kart ekraninda - Yonetim › Entegrasyonlar (/entegrasyon-hesap).
   { anahtar: 'genel',       baslik: 'Genel' },
   { anahtar: 'guvenlik',    baslik: 'Güvenlik' },
-  { anahtar: 'entegrasyon', baslik: 'Entegrasyon' },
   { anahtar: 'numaralama',  baslik: 'Belge No' },
   // Belge No'nun SAGINDA (768): ikisi de "belge nasil ciksin" ayari -
   //   biri numarayi, oteki metni belirler.
@@ -31,111 +26,17 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
  * (AyarDeposu). Alan cizimi/kayit AyarAlani'nda ortak: etiket ustte, "?" ikonu
  * saginda, kayit aninda.
  *
- * ENTEGRASYON sekmesi (336) — dis servis hesaplari (SKRS/Saglik.NET, e-Nabiz,
- * MEDULA, UTS, e-Belge, SMS) tek yerde. Her satir bir (entegrasyon · sube ·
- * ortam) ucludur; subesi bos kayit kurum genelidir. Sifreler listede
- * GOSTERILMEZ - yalniz "dolu mu" isareti. Once Kayit Kabul ayarlarindaydi,
- * kullanici istegiyle buraya Guvenlik'in SAGINA tasindi (entegrasyon yalniz
- * kayit kabule ait degil).
+ * ENTEGRASYON HESAPLARI artik burada degil: bagimsiz liste / kart ekrani
+ * (Yonetim › Entegrasyonlar, listeTanimlari.Yonetim - 22.10.2026).
  */
 export function GenelAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
   const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
   const { yetki } = useOturum();
 
-  // Entegrasyon hesaplari ayri yetkiye bagli - sekme de o yetkiyle cikar.
-  const entegrasyonGorur = yetki('entegrasyon');
   // Belge yazisi sablonlari IK yetkisine bagli: satis kullanicisi personel
   //   yazisi sablonunu duzenlememeli.
-  const sekmeler = SEKMELER.filter(s =>
-    (s.anahtar !== 'entegrasyon'  || entegrasyonGorur)
- && (s.anahtar !== 'belge-yazisi' || yetki('ik.belge_talep')));
-
-  const [kart, setKart] = useState<number | 'yeni' | null>(null);
-  const [yenile, setYenile] = useState(0);
-
-  async function entegrasyonAksiyon(kod: string, satir: ListeSatiri | null) {
-    switch (kod) {
-      case 'entegrasyon.yeni':    setKart('yeni'); return;
-      case 'entegrasyon.duzenle': if (satir) setKart(Number(satir.id)); return;
-      case 'entegrasyon.sil':
-        if (!satir) return;
-        if (!await onay(`"${String(satir.kodAdi ?? satir.kod ?? '')}" hesabı silinecek. `
-                        + 'Onaylıyor musunuz?')) return;
-        await guvenli(async () => {
-          await api.kartSil('entegrasyon-hesap', Number(satir.id));
-          setYenile(t => t + 1);
-        });
-        return;
-      // BAGLANTI SINAMA: kimlik dogru mu, adres ayakta mi - kayit degismez.
-      case 'entegrasyon.sina':
-        if (!satir) return;
-        await guvenli(async () => {
-          const y = await api.entegrasyonSina(Number(satir.id));
-          mesaj(y.mesaj);
-          setYenile(t => t + 1);
-        });
-        return;
-      // KANAL SINAMASI (820): SMS/e-posta hesabina GERCEK mesaj gonderir.
-      //   "Baglantiyi Sina" sunucunun ayakta olduguna bakiyor; kullanici adi
-      //   yanlis ya da XML govdesi saglayicinin bekledigi bicimde degilse
-      //   yine "basarili" derdi - kanalin calistiginin tek kaniti ULASAN
-      //   mesajdir.
-      case 'entegrasyon.test-bildirim': {
-        if (!satir) return;
-        const kanal = String(satir.kod ?? '');
-        const smsMi = kanal === 'SMS';
-        const alici = await metinSor(
-          smsMi ? 'Test SMS hangi numaraya gitsin?' : 'Test e-postası hangi adrese gitsin?',
-          '', smsMi ? 'Numara (905XXXXXXXXX)' : 'E-posta adresi');
-        if (!alici || !alici.trim()) return;
-        // DISARIYA GIDER: SMS ucretli, e-posta gercek bir kutuya duser.
-        if (!await onay(smsMi
-          ? `${alici} numarasına GERÇEK bir test SMS'i gönderilecek (ücretlidir). Devam?`
-          : `${alici} adresine gerçek bir test e-postası gönderilecek. Devam?`)) return;
-        await guvenli(async () => {
-          const y = await api.bildirimSina(Number(satir.id), alici.trim());
-          mesaj(y.mesaj + (y.saglayiciRef ? ` · sağlayıcı: ${y.saglayiciRef}` : ''));
-          setYenile(t => t + 1);
-        });
-        return;
-      }
-      // SKRS listelerini servisten cekip YEREL kod listelerini tazeler.
-      case 'entegrasyon.skrs-senkron':
-        if (!satir) return;
-        if (String(satir.kod ?? '') !== 'SKRS') {
-          mesaj('Bu işlem yalnız SKRS hesabında çalışır.');
-          return;
-        }
-        if (!await onay('SKRS kod listeleri servisten çekilip yerel listeler '
-                        + 'güncellenecek. Devam edilsin mi?')) return;
-        await guvenli(async () => {
-          const y = await api.skrsListeSenkron(Number(satir.id));
-          mesaj(y.mesaj);
-          setYenile(t => t + 1);
-        });
-        return;
-      // SKRS klinik kodlarini BOLUM KODUNA yazar (455). Dolu kod korunur:
-      //   kurum kendi kodlamasini yapmis olabilir.
-      case 'entegrasyon.skrs-klinik':
-        if (!satir) return;
-        if (String(satir.kod ?? '') !== 'SKRS') {
-          mesaj('Bu işlem yalnız SKRS hesabında çalışır.');
-          return;
-        }
-        if (!await onay('Kodu BOŞ olan bölümlere SKRS klinik kodu yazılacak '
-                        + '(dolu kodlara dokunulmaz). Devam edilsin mi?')) return;
-        await guvenli(async () => {
-          const y = await api.skrsKlinikEsle(Number(satir.id));
-          mesaj(y.eslesmeyen.length > 0
-            ? `${y.mesaj} Eşleşmeyen: `
-              + y.eslesmeyen.slice(0, 8).map(b => b.ad).join(', ')
-            : y.mesaj);
-          setYenile(t => t + 1);
-        });
-        return;
-    }
-  }
+  const sekmeler = SEKMELER.filter(s => s.anahtar !== 'belge-yazisi' || yetki('ik.belge_talep'));
 
   const alan = (anahtar: string, etiket: string,
                 ek?: Partial<Parameters<typeof AyarAlani>[0]>) => (
@@ -262,76 +163,6 @@ export function GenelAyarlar() {
         ) : aktif === 'belge-yazisi' ? (
           // Belge talebinde uretilen resmi yazinin sablonlari (768).
           <BelgeYaziSekmesi />
-        ) : aktif === 'entegrasyon' ? (
-          <>
-            {/* Mockup: Ekranlar/Ayarlar/entegrasyon_hesaplari.html - arama +
-                cipler serit halinde, kolon sirasi mockup'la ayni.
-                ARAC CUBUGU SAGA yanasik (kullanici): `aracCubuguSol`
-                verilmez, gridin ust sag kosesinde durur. */}
-            <GenGrid
-              key="entegrasyon"
-              kaynak="entegrasyon-hesap"
-              gomulu
-              aramaGorunumGizli
-              aramaGizli
-              aracCubuguSeritte
-              gorunumSecimGizli
-              aksiyonEkrani="entegrasyon-liste"
-              cipler={[
-                { ad: 'Tümü' },
-                { ad: 'Aktif', filtre: { alan: 'aktif',  op: 'esit', deger: 1 } },
-                { ad: 'Test',  filtre: { alan: 'testMi', op: 'esit', deger: 1 } },
-                { ad: 'Canlı', filtre: { alan: 'testMi', op: 'esit', deger: 0 } },
-              ]}
-              kolonSirasi={['kodAdi', 'ad', 'sube', 'bazSube', 'ortam', 'kullaniciAdi',
-                            'sifreVar', 'uygulamaKodu', 'entegratorAdi', 'aktif',
-                            'sonKullanim', 'sonSonuc']}
-              gizliKolonlar={['kod', 'testMi']}
-              yenile={yenile}
-              onSatirAc={satir => setKart(Number(satir.id))}
-              onAksiyon={(kod, satir) => { void entegrasyonAksiyon(kod, satir) }}
-            />
-            <div className="not">
-              Şifre değeri listede gösterilmez — yalnız “dolu mu” işareti; gerçek
-              değer kartı açan yetkili kullanıcıya gider. <b>{c('Şube boş = Tümü')}</b>
-              (kurum geneli hesap). <b>{c('Baz Şube')}</b> dolu ise o şubenin işlemleri
-              baz alınan şubenin hesabıyla gider. Hesap çözümü: şubenin kendi
-              satırı → baz şube → kurum geneli → (yalnız ÜTS) varsayılan şube.
-            </div>
-            {kart !== null && (
-              <GenForm
-                kaynak="entegrasyon-hesap"
-                id={kart}
-                baslik="Entegrasyon Hesabı"
-                // Yeni kayitta combo BOS acilmasin (kullanici): baz sube
-                //   varsayilani "Kendisi" (0); ortam TEST, kayit aktif -
-                //   sunucudaki YeniKayitVarsayilanlari ile ayni degerler.
-                yeniKayitVarsayilanlari={{ bazSubeId: 0, testMi: true, aktif: true }}
-                onKapat={() => setKart(null)}
-                onKaydedildi={() => { setKart(null); setYenile(t => t + 1) }}
-                // Mockup'taki kart altı kutuları (uyarı + çözüm zinciri):
-                //   test/canlı ayrımı ve hangi satırın kullanılacağı kartın
-                //   kendisinde yazılı olsun - kullanıcı belgeye çıkmadan görsün.
-                sekmeSarmalayici={(baslik, icerik) => baslik !== 'Genel' ? icerik : (
-                  <>
-                    {icerik}
-                    <div className="uyari-kutusu" style={{ margin: '10px 12px' }}>
-                      <b>{c('Test ve canlı AYRI SATIRDIR.')}</b> Kurum canlıya geçerken test
-                      hesabını silmez — test satırının “Aktif” kutusunu kaldırır, canlı
-                      satırınkini işaretler. Aynı entegrasyon + şube + ortam üçlüsünden
-                      ikinci satır açılamaz.
-                    </div>
-                    <div className="not" style={{ margin: '0 12px 12px' }}>
-                      <b>{c('Hesap çözümü:')}</b> şubenin kendi satırı → baz alınan şubenin
-                      satırı → kurum geneli satır (şube boş) → varsayılan şube
-                      (yalnız ÜTS). e-Fatura'da varsayılan şubeye düşülmez: “merkezin
-                      kimliğiyle gönder” kararı şube kartında verilir.
-                    </div>
-                  </>
-                )}
-              />
-            )}
-          </>
         ) : (
           <>
             <div className="kagrup">
