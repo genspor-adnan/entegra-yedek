@@ -228,6 +228,9 @@ public static class DokumanUclari
         "personelAvans" => "avans",
         // BELGE TALEBİ EKİ (962): kaynak_id belge talebi.
         "personelBelgeTalep" => "belge-talep",
+        // ÖZLÜK BELGESİ DOSYASI (1136): diploma, rapor taraması... kaynak_id
+        //   personel_belge satırı (personel kartı "Belgeler" sekmesi).
+        "personelBelge" => "personel-belge",
         // CİHAZ BELGELERİ (967): kaynak_id radyoloji cihazı.
         "radyoloji-cihaz" => "rad-cihaz",
         // DEMİRBAŞ BELGELERİ (10.10.2026): fatura, garanti, servis raporu,
@@ -291,6 +294,8 @@ public static class DokumanUclari
         "personelIzin" => "ik.izin",
         "personelAvans" => "ik.avans",
         "personelBelgeTalep" => "ik.belge_talep",
+        // Özlük belgesi personel kartının sekmesi: kartın yetkisiyle.
+        "personelBelge" => "personel",
         "radyoloji-cihaz" => "radyoloji",
         "kys-kalibrasyon" => "kys.kalibrasyon",
         "kys-egitim" => "kys.egitim",

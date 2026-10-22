@@ -135,6 +135,22 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
             return;
         }
 
+        // ÖZLÜK BELGESİ DOSYASI (1136): kaynak_id personel_belge satırı.
+        //   Personel kendi belgesinin dosyasını GÖRÜR (yükleme/silme İK'da);
+        //   başkası personel kartı yetkisi + o personelin kayıt kapsamıyla.
+        if (kaynak == "personel-belge")
+        {
+            var sahip = await veri.TekDegerAsync<int?>(
+                "select taraf_id from public.personel_belge where id = @p0", [(int)kaynakId], iptal);
+            if (sahip is null) throw GentegreHatasi.Bulunamadi(yok);
+            if (islem == Islem.Gor && sahip == baglam.KullaniciId) return;
+            if (!baglam.Yetkiler.Var("personel", islem)) throw GentegreHatasi.Bulunamadi(yok);
+            if (islem != Islem.Gor) baglam.YazmaIste();
+            if (!await erisim.GorunurAsync(baglam, "personel", sahip.Value, iptal))
+                throw GentegreHatasi.Bulunamadi(yok);
+            return;
+        }
+
         // DUYURU EKİ (957): duyuruyu gören okur; yükleme / silme `duyuru` yetkisiyle.
         if (kaynak == "duyuru")
         {

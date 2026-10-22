@@ -40,6 +40,7 @@ import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
 import { DokumanGalerisi } from './DokumanGalerisi';
+import { PersonelBelgeDosyalari } from './kart/PersonelBelgeDosyalari';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
@@ -1584,6 +1585,15 @@ Yine de yeni kayıt eklensin mi?`);
           satirKategorileri={satirKategorileri}
           setSeciliSatirlar={setSeciliSatirlar}
           sekmeSarmalayici={sekmeSarmalayici}
+        />
+      )}
+
+      {/* PERSONEL BELGE DOSYASI (1136): kayıtlı belgelerin taraması. */}
+      {aktif?.tur === 'detay' && kaynak === 'personel' && aktif.detay.ad === 'belgeler' && (
+        <PersonelBelgeDosyalari
+          meta={aktif.detay}
+          satirlar={detaylar.belgeler?.guncel ?? []}
+          saltOkunur={salt}
         />
       )}
 

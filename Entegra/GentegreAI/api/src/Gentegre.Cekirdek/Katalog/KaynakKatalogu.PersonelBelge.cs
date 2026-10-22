@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// PERSONEL BELGE TAKİBİ (1135) — İK takip listesi (personel başına satır) ve belge türü listesi.
@@ -45,6 +45,7 @@ public static partial class KaynakKatalogu
             new("grupAdi",       "t.grup_adi",       "metin", "Grup", Genislik: 130),
             new("gecerlilikAdi", "t.gecerlilik_adi", "metin", "Geçerlilik", Genislik: 90),
             new("hatirlatGun",   "t.hatirlat_gun",   "sayi",  "Uyarı (gün)", Hizalama: "orta"),
+            new("dosyaZorunlu",  "t.dosya_zorunlu",  "mantik", "Dosya zorunlu", Hizalama: "orta"),
             new("kapsam",        "t.kapsam",         "metin", "Kime zorunlu", Genislik: 260),
             new("eksik",         "t.eksik",          "sayi",  "Eksik kişi", Hizalama: "orta"),
             new("aktifAdi",      "t.aktif_adi",      "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 80, Filtrelenebilir: false),

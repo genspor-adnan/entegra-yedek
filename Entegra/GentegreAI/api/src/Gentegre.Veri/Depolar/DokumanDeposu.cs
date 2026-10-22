@@ -56,11 +56,13 @@ public sealed class DokumanDeposu
         //   belgeler sekmeleri "Bilinmeyen kaynak" ile 500 veriyordu. Yetki
         //   DokumanErisimi'nde - liste yalnız tablo kaynağı adını sınırlar.
         //   "kys-egitim" (1065): kalite eğitimi katılım listesi / sertifika.
+        //   "personel-belge" (1136): özlük belgesinin taraması - kaynak_id
+        //   personel_belge satırı (belge takibi "dosya yok" buna bakar).
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
               "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge",
               "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
-              "kys-egitim" };
+              "kys-egitim", "personel-belge" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

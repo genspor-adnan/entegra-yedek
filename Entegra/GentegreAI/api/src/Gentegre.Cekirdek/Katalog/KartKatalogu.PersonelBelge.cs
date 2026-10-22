@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// PERSONEL BELGE TAKİBİ (1135) — belge türü tanım kartı + kapsam (kime zorunlu).
@@ -24,7 +24,7 @@ public static partial class KartKatalogu
         LogTabloId: LogPersonelBelgeTuru,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
-            ["aktif"] = (short)1, ["grup"] = (short)5, ["hatirlatGun"] = (short)60,
+            ["aktif"] = (short)1, ["grup"] = (short)5, ["hatirlatGun"] = (short)60, ["dosyaZorunlu"] = (short)0,
         },
         Alanlar: new KartAlani[]
         {
@@ -33,6 +33,8 @@ public static partial class KartKatalogu
             new("grup",          "grup",          "kod",   SabitKodlar: PersonelBelgeGrupKodlari, Zorunlu: true, Baslik: "Grup", Grup: "Belge türü"),
             new("gecerlilikAy",  "gecerlilik_ay", "sayi",  Baslik: "Geçerlilik, ay (boş = süresiz)", Grup: "Belge türü"),
             new("hatirlatGun",   "hatirlat_gun",  "sayi",  Zorunlu: true, Baslik: "Kaç gün önce uyarılsın", Grup: "Belge türü"),
+            // 1136: dosyası (tarama) yüklenmeyen belge eksik sayılır.
+            new("dosyaZorunlu",  "dosya_zorunlu", "mantik", Baslik: "Dosyası zorunlu", Grup: "Belge türü"),
             new("sira",          "sira",          "sayi",  Baslik: "Sıra", Grup: "Belge türü"),
             new("aktif",         "aktif",         "kod",   SabitKodlar: KysAktifKodlari, Baslik: "Durum", Grup: "Belge türü"),
             new("aciklama",      "aciklama",      "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama", Grup: "Belge türü"),

@@ -483,6 +483,9 @@ public static partial class KartKatalogu
                 new("gecerlilikTarihi", "gecerlilik_tarihi", "tarih", Baslik: "Geçerlilik (boş = türden)"),
                 new("belgeNo",          "belge_no",          "metin", EnFazlaUzunluk: 60, Baslik: "Belge no"),
                 new("aciklama",         "aciklama",          "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama"),
+                // 1136: satırın dosyaları sekmenin altındaki panelde (dokuman 'personel-belge').
+                new("dosyaSayisi",      "(select count(*)::integer from public.dokuman dk where dk.kaynak = 'personel-belge' and dk.kaynak_id = personel_belge.id)",
+                    "sayi", Yazilabilir: false, Baslik: "Dosya"),
             }, Sirala: "belge_tarihi desc nulls last, id desc", LogTabloId: LogPersonelBelge, Baslik: "Belgeler"),
             // DURUM (salt okunur): şablona göre eksik / süresi doldu / yaklaşıyor / tamam.
             new DetayTanimi("belgeDurumu", "public.v_personel_belge_durum", "personel_id", new KartAlani[]
@@ -495,6 +498,7 @@ public static partial class KartKatalogu
                 new("belgeTarihi",      "belge_tarihi",      "tarih", Yazilabilir: false, Baslik: "Belge tarihi"),
                 new("gecerlilikTarihi", "gecerlilik_tarihi", "tarih", Yazilabilir: false, Baslik: "Geçerlilik"),
                 new("kalanGun",         "kalan_gun",         "sayi",  Yazilabilir: false, Baslik: "Kalan gün"),
+                new("dosyaSayisi",      "dosya_sayisi",      "sayi",  Yazilabilir: false, Baslik: "Dosya"),
             }, Sirala: "durum, grup, belge", SubeKolonu: null, SaltOkunur: true, Baslik: "Belge Durumu"),
             // HEKIMIN RANDEVU DUZENI SEKMESI KALDIRILDI: randevu saatleri artik
             //   CALISMA PLANINDAN gelir (hekim_calisma_sablon) - randevu_bolum_ayar
