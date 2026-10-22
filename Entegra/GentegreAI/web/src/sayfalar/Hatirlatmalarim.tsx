@@ -110,7 +110,7 @@ export function Hatirlatmalarim() {
         <h2 style={{ margin: 0 }}>⏰ Hatırlatmalarım</h2><span className="hk-soluk">Kullanıcı › Hatırlatmalarım · çift tık = kartı aç</span>
         <span className="ht-arac" style={{ marginLeft: 'auto', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           <button type="button" className="d bir" onClick={() => hatirlatmaPenceresiAc()}>＋ Yeni</button>
-          <button type="button" className="d" disabled={!sec?.acik} onClick={() => sec && eylem(() => api.hatirlatmaTamamla(sec.id))}>✓ Tamamlandı</button>
+          <button type="button" className="d yesil" disabled={!sec?.acik} onClick={() => sec && eylem(() => api.hatirlatmaTamamla(sec.id))}>✓ Tamamlandı</button>
           <span className="hk-ertele-sar">
             <button type="button" className="d" disabled={!sec} onClick={() => setErteleAcik(a => !a)}>⏱ Ertele ▾</button>
             {erteleAcik && sec && <div className="hk-menu asagi">{erteleSecenekleri().map(e => (
