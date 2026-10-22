@@ -33,6 +33,7 @@ import { gelenBelgeAksiyonu, gelenCokluAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
+import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { kysOlayRiskAksiyonu } from './liste/kysOlayRiskAksiyonlari';
@@ -77,6 +78,7 @@ import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
 import { TeleradGelenPaneli } from '../bilesenler/TeleradGelenPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
+import { BelgeTakipOzetSeridi } from '../bilesenler/BelgeTakipOzetSeridi';
 import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
 import { GozHastaPaneli } from '../bilesenler/GozHastaPaneli';
 import { GozUniteKanban } from '../bilesenler/goz/GozUniteKanban';
@@ -954,6 +956,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         kartAc: id => { if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${id}`) },
       })) return;
 
+      if (await belgeTakipAksiyonu(kod, satir, secililer)) return;
+
       if (await bildirimAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
       })) return;
@@ -1323,6 +1327,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ? <KullaniciOzetSeridi yenile={yenile} onCip={setCipIndeks} />
         // KURUMSAL KALİTE (1059): Politika & Hedefler listesinin üstünde politika / kapsam.
         : tanim.kaynak === 'kys-gosterge' ? <KysPolitikaSeridi />
+        // İK BELGE TAKİBİ (1137, mockup personel_belge_takibi.html (2)): eksik / doldu / yaklaşan sayaçları.
+        : tanim.kaynak === 'personel-belge-ozet' ? <BelgeTakipOzetSeridi yenile={yenile} onCip={setCipIndeks} />
         : undefined}
       // GOZ UNITE AKISI (mockup goz_hasta_listesi.html `.kanban`): bes
       //   istasyon yan yana - grid "kim var"i, kanban "hangi masada yigilma

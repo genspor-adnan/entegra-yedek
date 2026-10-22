@@ -295,6 +295,9 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /^Yanıtlanıyor/i, sinif: 'mavi' },
   { desen: /^Yanıtlandı/i, sinif: 'olumlu' },
   { desen: /^İsteyen gördü$/i, sinif: 'olumlu' },
+  // İK BELGE TAKİBİ "En acil" (1135-1137): "Belge - Süresi doldu (-14 gün)".
+  { desen: / - (Eksik|Süresi doldu|Dosya yok)/, sinif: 'hata' },
+  { desen: / - Yaklaşıyor/, sinif: 'uyari' },
 ];
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {

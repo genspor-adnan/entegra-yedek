@@ -18,14 +18,16 @@ public static partial class KaynakKatalogu
         {
             new("id",          "x.id",          "sayi",  "Id", Varsayilan: false),
             new("ad",          "x.ad",          "metin", "Personel", Genislik: 200),
-            new("birim",       "x.birim",       "metin", "Birim", Genislik: 170),
+            new("birim",       "x.birim",       "metin", "Bölüm", Genislik: 170),
             new("gorev",       "x.gorev",       "metin", "Görev", Genislik: 150),
             new("tamamlanma",  "x.tamamlanma",  "sayi",  "Tamamlanma", Genislik: 110, Bicim: "yuzde"),
-            new("zorunlu",     "x.zorunlu",     "sayi",  "Zorunlu", Hizalama: "orta"),
-            new("eksik",       "x.eksik",       "sayi",  "Eksik", Hizalama: "orta"),
-            new("doldu",       "x.doldu",       "sayi",  "Süresi doldu", Hizalama: "orta"),
+            new("zorunlu",     "x.zorunlu",     "sayi",  "Zorunlu", Hizalama: "orta", Varsayilan: false),
+            // Mockup (2): eksik / doldu sıfırdan büyükse vurgulu (sayaç rozeti), yaklaşan düz.
+            new("eksik",       "x.eksik",       "sayi",  "Eksik", Hizalama: "orta", Bicim: "sayac"),
+            new("doldu",       "x.doldu",       "sayi",  "Doldu", Hizalama: "orta", Bicim: "sayac"),
             new("yaklasan",    "x.yaklasan",    "sayi",  "Yaklaşan", Hizalama: "orta"),
-            new("enAcil",      "x.en_acil",     "metin", "En acil", Genislik: 280),
+            // "Belge - Süresi doldu (-14 gün)": durum rengi rozette (web gridHucre ROZET_DESENI).
+            new("enAcil",      "x.en_acil",     "metin", "En acil", Genislik: 300, Bicim: "rozet"),
             new("departmanId", "x.departman_id", "sayi", "Birim Id", Varsayilan: false),
             new("satirRengi",  "case when x.eksik + x.doldu > 0 then 'kritik' when x.yaklasan > 0 then 'uyari' end",
                 "metin", "", Varsayilan: false, Filtrelenebilir: false),

@@ -34,6 +34,7 @@ import { aktarimProfilUclari, aktarimUclari } from './uclar/aktarim';
 import { gostergeUclari } from './uclar/gosterge';
 import { alacakYaslandirmaUclari } from './uclar/alacakYaslandirma';
 import { hastaBorcUclari } from './uclar/hastaBorc';
+import { belgeTakipUclari } from './uclar/belgeTakip';
 import { hekimPerformansUclari } from './uclar/hekimPerformans';
 import { iskontoIcmalUclari } from './uclar/iskontoIcmal';
 import { maliyetIcmalUclari } from './uclar/maliyetIcmal';
@@ -145,6 +146,7 @@ export const api = {
   ...gostergeUclari,
   ...alacakYaslandirmaUclari,
   ...hastaBorcUclari,
+  ...belgeTakipUclari,
   ...hekimPerformansUclari,
   ...iskontoIcmalUclari,
   ...maliyetIcmalUclari,
