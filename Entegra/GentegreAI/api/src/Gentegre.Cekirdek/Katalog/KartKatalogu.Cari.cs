@@ -505,7 +505,10 @@ public static partial class KartKatalogu
                 new("gecerlilikTarihi", "gecerlilik_tarihi", "tarih", Yazilabilir: false, Baslik: "Geçerlilik"),
                 new("kalanGun",         "kalan_gun",         "sayi",  Yazilabilir: false, Baslik: "Kalan gün"),
                 new("dosyaSayisi",      "dosya_sayisi",      "sayi",  Yazilabilir: false, Baslik: "Dosya"),
-            }, Sirala: "durum, grup, belge", SubeKolonu: null, SaltOkunur: true, Baslik: "Belge Durumu"),
+                new("hatirlatGun",      "(select bt.hatirlat_gun from public.personel_belge_turu bt where bt.id = v_personel_belge_durum.belge_turu_id)",
+                    "sayi",  Yazilabilir: false),
+            // Sıra = görünümün id'si (grup, tür sırası, ad): mockup grup grup listeler.
+            }, Sirala: "id", SubeKolonu: null, SaltOkunur: true, Baslik: "Belge Durumu"),
             // HEKIMIN RANDEVU DUZENI SEKMESI KALDIRILDI: randevu saatleri artik
             //   CALISMA PLANINDAN gelir (hekim_calisma_sablon) - randevu_bolum_ayar
             //   satirlari yalniz plani olmayan doktorun eski yedek duzenidir.

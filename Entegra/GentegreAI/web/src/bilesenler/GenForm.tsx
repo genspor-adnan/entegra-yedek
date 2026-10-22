@@ -867,6 +867,27 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
 
   useEffect(() => { void yukle() }, [yukle]);
 
+  // BELGE TAKİBİ (1137): sunucuda belge + dosya eklendi -> kartı yeniden açmadan yalnız
+  //   belge detaylarını tazele. Gridde kaydedilmemiş düzenleme KORUNUR: yeni satır hem
+  //   `ilk`e hem `guncel`e eklenir (fark hesabı onu silinmiş saymaz), dosya sayısı güncellenir.
+  const belgeleriTazele = useCallback(async () => {
+    if (yeniMi) return;
+    const k = await api.kartOku(kaynak, id as number);
+    const sunucu = (k.detaylar?.belgeler ?? []) as Satir[];
+    setDetaylar(t => {
+      const d = t.belgeler ?? bosDetay();
+      const bilinen = new Set(d.ilk.map(x => Number(x.id)));
+      const yeni = sunucu.filter(x => !bilinen.has(Number(x.id)) && !d.silinen.includes(Number(x.id)));
+      const sayi = new Map(sunucu.map(x => [Number(x.id), x.dosyaSayisi]));
+      const tazele = (x: Satir) => sayi.has(Number(x.id)) ? { ...x, dosyaSayisi: sayi.get(Number(x.id)) } : x;
+      return {
+        ...t,
+        belgeDurumu: bosDetay((k.detaylar?.belgeDurumu ?? []) as Satir[]),
+        belgeler: { ...d, ilk: [...d.ilk.map(tazele), ...yeni], guncel: [...d.guncel.map(tazele), ...yeni] },
+      };
+    });
+  }, [kaynak, id, yeniMi]);
+
   // ------------------------------------------------------------ doviz ------
   // Kartta para birimi/kur/tutar ucgeni varsa (katalog: DovizKurali), yerel para
   //   disinda bir birim SECILDIGINDE kur o tarihin kurundan cekilir ve yerel
@@ -1564,19 +1585,6 @@ Yine de yeni kayıt eklensin mi?`);
         />
       )}
 
-      {/* BELGELER (1135-1136, kullanici "tek olsun"): Belge Durumu ayri sekme
-          degil - ozet + sablon listesi + dosyalar gridin USTUNDE. */}
-      {aktif?.tur === 'detay' && kaynak === 'personel' && aktif.detay.ad === 'belgeler' && (
-        <PersonelBelgePaneli
-          durumlar={detaylar.belgeDurumu?.guncel ?? []}
-          saltOkunur={salt}
-          onEkle={turId => setDetaylar(t => {
-            const d = t.belgeler ?? bosDetay();
-            return { ...t, belgeler: { ...d, guncel: [...d.guncel, { belgeTuruId: turId }] } };
-          })}
-        />
-      )}
-
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
         && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
         // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
@@ -1585,7 +1593,8 @@ Yine de yeni kayıt eklensin mi?`);
         // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
         //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
         && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar')
-        && !detayIzgara?.[aktif.detay.ad] && (
+        && !detayIzgara?.[aktif.detay.ad] && (() => {
+        const grid = (
         <KartDetaySekmesi
           aktif={aktif} kaynak={kaynak} salt={salt}
           deger={deger} alanHatalari={alanHatalari}
@@ -1599,7 +1608,23 @@ Yine de yeni kayıt eklensin mi?`);
           setSeciliSatirlar={setSeciliSatirlar}
           sekmeSarmalayici={sekmeSarmalayici}
         />
-      )}
+        );
+        // BELGELER (1135-1137, kullanici "tek olsun" + "mockup gibi"): durum ozeti /
+        //   liste / dosyalar ust panelde; duzenlenebilir grid onun "Belge kayitlari" ic sekmesi.
+        if (kaynak === 'personel' && aktif.detay.ad === 'belgeler' && !yeniMi)
+          return (
+            <PersonelBelgePaneli
+              personelId={Number(id)}
+              personelAd={[deger.ad, deger.soyad].filter(Boolean).join(' ')}
+              durumlar={detaylar.belgeDurumu?.guncel ?? []}
+              kayitlar={grid}
+              kayitSayisi={(detaylar.belgeler ?? bosDetay()).guncel.length}
+              saltOkunur={salt}
+              onYenile={belgeleriTazele}
+            />
+          );
+        return grid;
+      })()}
 
 
       {/* DETAY IZGARASI (mockup vital bulgular): en ustteki satir etiket+kutu
@@ -1862,6 +1887,16 @@ Yine de yeni kayıt eklensin mi?`);
                     Kıdem {kidem}
                   </span>
                 )}
+                {/* BELGE DURUMU (mockup personel_belge_takibi.html): hangi sekmede olursan ol. */}
+                {kaynak === 'personel' && (() => {
+                  const d = detaylar.belgeDurumu?.guncel ?? [];
+                  const eksik = d.filter(x => (Number(x.durum) === 1 && Number(x.zorunlu) === 1) || Number(x.durum) === 2).length;
+                  const yakin = d.filter(x => Number(x.durum) === 3).length;
+                  return <>
+                    {eksik > 0 && <span className="rozet hata" title="Eksik / süresi dolan belge">{eksik} eksik belge</span>}
+                    {yakin > 0 && <span className="rozet uyari" title="Süresi yaklaşan belge">{yakin} yaklaşıyor</span>}
+                  </>;
+                })()}
               </span>
             );
           })()}
@@ -1998,8 +2033,16 @@ Yine de yeni kayıt eklensin mi?`);
               {c(s.baslik)}
               {/* SAYFALI DETAYDA ROZET TOPLAMI GOSTERIR (525): ekranda 200
                   satir duruyor olsa da sekmenin sordugu "kac tane var". */}
-              {s.tur === 'detay' && <span className="b">{
+              {s.tur === 'detay' && <span className="b" style={kaynak === 'personel' && s.detay.ad === 'belgeler'
+                  && (detaylar.belgeDurumu?.guncel ?? []).some(x =>
+                    (Number(x.durum) === 1 && Number(x.zorunlu) === 1) || Number(x.durum) === 2)
+                  ? { background: 'var(--hata)', color: '#fff' } : undefined}>{
                 detayRozeti?.(s.detay.ad, (detaylar[s.detay.ad] ?? bosDetay()).guncel)
+                // BELGELER (1137, mockup): rozet satir sayisi degil SORUN sayisi (eksik / doldu / yaklasan).
+                ?? (kaynak === 'personel' && s.detay.ad === 'belgeler' && detaylar.belgeDurumu
+                    ? String((detaylar.belgeDurumu.guncel).filter(x =>
+                        (Number(x.durum) === 1 && Number(x.zorunlu) === 1) || [2, 3].includes(Number(x.durum))).length)
+                    : undefined)
                 ?? (detayToplam[s.detay.ad]
                   ?? (detaylar[s.detay.ad] ?? bosDetay()).guncel.length).toLocaleString('tr')
               }</span>}

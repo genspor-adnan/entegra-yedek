@@ -1,3 +1,4 @@
+using Gentegre.Cekirdek;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Bildirim;
 using Gentegre.Cekirdek.Sozlesme;
@@ -22,6 +23,8 @@ public static class PersonelBelgeTakipUclari
 {
     /// <summary>bildirim.kaynak_tur - personel belge takibi (40-48 dolu).</summary>
     private const short KaynakBelgeTakip = 49;
+    /// <summary>islem_log: personel belgesi (KartKatalogu.PersonelBelge 1602), üst kayıt personel kartı (73).</summary>
+    private const int LogPersonelBelge = 1602, LogPersonel = 73;
 
     public sealed record HatirlatIstegi(int[] PersonelIds);
 
@@ -51,6 +54,118 @@ public static class PersonelBelgeTakipUclari
                     personel = r.GetInt32(6),
                 }, iptal);
             return Results.Ok(o);
+        });
+
+        // ------------------------------------------------------ hareketler --
+        // Personel kartı Belgeler › "🕘 Hareketler" (mockup (1)): belge kaydı ekle / değiştir / sil
+        //   (islem_log 1602, üst kayıt personel), dosya yüklemeleri ve gönderilen hatırlatmalar tek
+        //   zaman çizelgesinde. Yalnız okuma - kayıtlar kendi defterlerinde.
+        grup.MapGet("/{personelId:int}/hareketler", async (int personelId, VeriKaynagi veri, KayitErisimi erisim,
+            BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("personel", Islem.Gor);
+            if (!await erisim.GorunurAsync(baglam, "personel", personelId, iptal))
+                throw GentegreHatasi.Bulunamadi("Personel bulunamadı.");
+            var satirlar = await veri.ListeAsync("""
+                select * from (
+                  select l.tarih as zaman,
+                         case l.islem_tipi when 1 then 'Belge eklendi' when 2 then 'Belge değiştirildi' else 'Belge silindi' end as islem,
+                         coalesce(bt.ad, l.bilgi->>'belge', bt2.ad, '') as belge,
+                         coalesce(l.bilgi->>'dosya', '') as ayrinti,
+                         l.kullanici_id
+                    from public.islem_log l
+                    left join public.personel_belge pb on pb.id = l.kayit_id
+                    left join public.personel_belge_turu bt on bt.id = pb.belge_turu_id
+                    left join public.personel_belge_turu bt2
+                           on bt2.id::text = coalesce(l.bilgi->>'belgeTuruId', l.bilgi->>'belge_turu_id')
+                   where l.tablo_id = @p1 and l.ust_tablo_id = @p2 and l.ust_kayit_id = @p0
+                  union all
+                  select d.ekleme_tarihi, 'Dosya yüklendi', coalesce(bt.ad, ''), d.ad, d.ekleyen
+                    from public.dokuman d
+                    join public.personel_belge pb on pb.id = d.kaynak_id and pb.taraf_id = @p0
+                    left join public.personel_belge_turu bt on bt.id = pb.belge_turu_id
+                   where d.kaynak = 'personel-belge'
+                  union all
+                  select n.ekleme_tarihi,
+                         case n.kanal when 2 then 'Hatırlatma (e-posta)' else 'Hatırlatma (SMS)' end,
+                         '', case n.durum when 3 then 'gönderildi' when 4 then 'hata' when 5 then 'iptal'
+                                          when 6 then 'vazgeçildi' else 'kuyrukta' end, n.ekleyen
+                    from public.bildirim n
+                   where n.taraf_id = @p0 and n.kaynak_tur = @p3
+                ) x
+                order by x.zaman desc
+                limit 200
+                """, [personelId, LogPersonelBelge, LogPersonel, KaynakBelgeTakip], r => new
+                {
+                    zaman = r.GetFieldValue<DateTimeOffset>(0),
+                    islem = r.GetString(1),
+                    belge = r.GetString(2),
+                    ayrinti = r.GetString(3),
+                    kullaniciId = r.GetInt32(4),
+                }, iptal);
+            var kisiler = satirlar.Select(s => s.kullaniciId).Where(x => x > 0).Distinct().ToArray();
+            var adlar = kisiler.Length == 0 ? new Dictionary<int, string>() : (await veri.ListeAsync("""
+                select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')
+                  from public.taraf t where t.id = any(@p0)
+                """, [kisiler], r => (id: r.GetInt32(0), ad: r.GetString(1)), iptal)).ToDictionary(x => x.id, x => x.ad);
+            return Results.Ok(satirlar.Select(s => new
+            {
+                s.zaman, s.islem, s.belge, s.ayrinti, kullanici = adlar.GetValueOrDefault(s.kullaniciId, ""),
+            }));
+        });
+
+        // ---------------------------------------------------- belge yükle --
+        // Personel kartı Belgeler sekmesi "⬆ Yükle" / "⬆ Yenile" (mockup (1)): belge satırı + dosyası
+        //   TEK adımda. Eksik belgede satır yoktu - önce gride satır ekleyip kartı kaydetmek, sonra
+        //   dosya için kartı yeniden açmak gerekiyordu. Geçerlilik boşsa türden (tetik, 1135).
+        grup.MapPost("/{personelId:int}/belge", async (int personelId, VeriKaynagi veri, DokumanDeposu depo,
+            KayitErisimi erisim, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("personel", Islem.Degistir);
+            if (!await erisim.GorunurAsync(baglam, "personel", personelId, iptal))
+                throw GentegreHatasi.Bulunamadi("Personel bulunamadı.");
+
+            var form = await ctx.Request.ReadFormAsync(iptal);
+            if (!int.TryParse(form["belgeTuruId"], out var turId) || turId <= 0)
+                throw GentegreHatasi.Dogrulama("Belge türü gerekli.", new AlanHatasi("belgeTuruId", "Seçilmedi."));
+            static DateTime? Tarih(string? s) => DateTime.TryParse(s, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var t) ? t.Date : null;
+            var belgeTarihi = Tarih(form["belgeTarihi"]);
+            var gecerlilik = Tarih(form["gecerlilikTarihi"]);
+            if (belgeTarihi is { } bt && bt > Saat.Bugun)
+                throw GentegreHatasi.Dogrulama("Belge tarihi bugünden sonra olamaz.", new AlanHatasi("belgeTarihi", "İleri tarih."));
+            var belgeNo = form["belgeNo"].ToString().Trim();
+            if (belgeNo.Length > 60) belgeNo = belgeNo[..60];
+            var dosya = form.Files.GetFile("dosya")
+                ?? throw GentegreHatasi.Dogrulama("Dosya gerekli.", new AlanHatasi("dosya", "Dosya seçilmedi."));
+
+            await using var b = await veri.AcAsync(iptal);
+            var tur = await b.TekDegerAsync<string>(
+                "select ad from public.personel_belge_turu where id = @p0", null, [turId], iptal)
+                ?? throw GentegreHatasi.Dogrulama("Belge türü bulunamadı.", new AlanHatasi("belgeTuruId", "Yok."));
+            var id = await b.TekDegerAsync<int>("""
+                insert into public.personel_belge (taraf_id, belge_turu_id, belge_no, belge_tarihi, gecerlilik_tarihi, sube_id, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6) returning id
+                """, null, [personelId, turId, belgeNo, belgeTarihi, gecerlilik, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+            await log.YazAsync(LogIslemi.Ekle, LogPersonelBelge, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { belgeTuruId = turId, belge = tur, belgeNo, belgeTarihi, gecerlilikTarihi = gecerlilik, dosya = dosya.FileName },
+                ustTabloId: LogPersonel, ustKayitId: personelId, tarafId: personelId, iptal: iptal);
+
+            using var akis = new MemoryStream();
+            await dosya.CopyToAsync(akis, iptal);
+            try
+            {
+                await depo.EkleAsync("personel-belge", id, dosya.FileName, dosya.ContentType, akis.ToArray(), false, baglam.Yazma, iptal);
+            }
+            catch
+            {
+                // Dosya reddedildiyse (tip / boyut) dosyasız satır bırakma: kullanıcı "yüklendi" sanmasın.
+                await b.CalistirAsync("delete from public.personel_belge where id = @p0", null, [id], iptal);
+                throw;
+            }
+            return Results.Ok(new { id });
         });
 
         grup.MapPost("/hatirlat", async (HatirlatIstegi istek, VeriKaynagi veri, BildirimDeposu bildirim,
