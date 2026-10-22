@@ -58,6 +58,32 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Equal("en", EkranBaglamiCozucu.DilNormalle("EN"));
     }
 
+    /// <summary>Hasta Listesi satırı 1126'dan beri liste kodunu (yalnız Gör) taşır.</summary>
+    private static readonly EkranBaglamiCozucu.EkranSatiri HastaListesiEkrani =
+        new("hasta", "/hasta", "Hasta Listesi", "Kayıt Kabul › Hasta Listesi", "Kayıt Kabul", "kayit_kabul",
+            "hasta.liste", "hasta-liste", "/hasta", 2);
+
+    [Fact]
+    public void Liste_kart_ayriminda_liste_adresi_liste_kodunu_kart_adresi_kart_kodunu_ister()
+    {
+        // Yalnız KART kodu: listeye yetkisiz, kart adresinde (/hasta/5057) yetkili.
+        var kartci = Baglam(null, "hasta");
+        Assert.False(EkranBaglamiCozucu.Coz(HastaListesiEkrani, new IstemciBaglami("/hasta", "hasta", null),
+                                            "/hasta", null, kartci, 2, "tr").Yetkili);
+        Assert.True(EkranBaglamiCozucu.Coz(HastaListesiEkrani, new IstemciBaglami("/hasta/5057", "hasta", 5057),
+                                           "/hasta/5057", 5057, kartci, 2, "tr").Yetkili);
+        // Yalnız LİSTE kodu: listede yetkili; kartı da OKUR (yalnız-Gör köprüsü).
+        var listeci = Baglam(null, "hasta.liste");
+        Assert.True(EkranBaglamiCozucu.Coz(HastaListesiEkrani, new IstemciBaglami("/hasta", "hasta", null),
+                                           "/hasta", null, listeci, 2, "tr").Yetkili);
+        Assert.True(EkranBaglamiCozucu.Coz(HastaListesiEkrani, new IstemciBaglami("/hasta/5057", "hasta", 5057),
+                                           "/hasta/5057", 5057, listeci, 2, "tr").Yetkili);
+        // İkisi de yok: hiçbir adreste yetkili değil.
+        var yabanci = Baglam(null, "stok");
+        Assert.False(EkranBaglamiCozucu.Coz(HastaListesiEkrani, new IstemciBaglami("/hasta/5057", "hasta", 5057),
+                                            "/hasta/5057", 5057, yabanci, 2, "tr").Yetkili);
+    }
+
     [Fact]
     public void Istemcinin_KAYNAK_iddiasi_katalogla_tutmazsa_atilir()
     {

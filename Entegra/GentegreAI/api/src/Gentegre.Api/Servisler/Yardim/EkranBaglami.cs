@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -177,8 +177,14 @@ public static class EkranBaglamiCozucu
             && !string.Equals(ik.Trim(), kaynak, StringComparison.OrdinalIgnoreCase))
             red.Add("kaynak");
 
-        var yetkili = string.IsNullOrEmpty(ekran.YetkiKodu)
-                      || baglam.Yetkiler.Var(ekran.YetkiKodu, Islem.Gor);
+        // KART ADRESİ (/hasta/123) KARTIN KODUNU İSTER (liste / kart ayrımı 1126-1140): ekran satırı
+        //   listenin yalnız-Gör kodunu taşır (hasta.liste); kartı açan kullanıcıda liste kodu olmayabilir
+        //   (Ctrl+K, başka karttan geçiş). Liste kodu olan zaten kartı okuyabilir (YetkiSeti köprüsü).
+        var yetkiKodu = rotaId is > 0 && EkranKodlari.YalnizGor(ekran.YetkiKodu)
+            ? EkranKodlari.KopyaKaynagi(ekran.YetkiKodu) ?? ekran.YetkiKodu
+            : ekran.YetkiKodu;
+        var yetkili = string.IsNullOrEmpty(yetkiKodu)
+                      || baglam.Yetkiler.Var(yetkiKodu, Islem.Gor);
 
         // Yetkisiz ekran: kimlik bilgisi kalır (kullanıcıya "bu ekrana yetkiniz
         //   yok" denebilsin), içerik listeleri ve kayıt numarası gider.

@@ -127,7 +127,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         {
             var y = await Servis(veri, saglayici).CevaplaAsync(
                 new RehberServisi.Istek("demirbaş zimmet nasıl devredilir", null, null, null),
-                Baglam("demirbas"), CancellationToken.None);
+                Baglam("demirbas", "demirbas.liste"), CancellationToken.None);
 
             Assert.True(y.ModelKullanildi, "model cevabı kullanılmadı");
             Assert.Equal(5, y.KaynakTuru);
@@ -165,7 +165,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         {
             var y = await Servis(veri, saglayici).CevaplaAsync(
                 new RehberServisi.Istek("demirbaş zimmet nasıl devredilir", null, null, null),
-                Baglam("demirbas"), CancellationToken.None);
+                Baglam("demirbas", "demirbas.liste"), CancellationToken.None);
 
             // Ödeyemeyeceğimiz çağrı hiç yapılmaz; asistan da susmaz.
             Assert.Equal(0, saglayici.Cagri);
@@ -188,7 +188,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
         {
             var y = await Servis(veri, saglayici).CevaplaAsync(
                 new RehberServisi.Istek("demirbaş zimmet nasıl devredilir", null, null, null),
-                Baglam("demirbas"), CancellationToken.None);
+                Baglam("demirbas", "demirbas.liste"), CancellationToken.None);
 
             Assert.Equal(1, saglayici.Cagri);
             Assert.False(y.ModelKullanildi);
@@ -223,7 +223,7 @@ public class ModelTestleri : IClassFixture<VeritabaniOlgusu>
             var yetkisiz = new SahteSaglayici(GecerliCevap);
             await Servis(veri, yetkisiz).CevaplaAsync(
                 new RehberServisi.Istek("demirbaş doküman", null, null, null),
-                Baglam("demirbas"), CancellationToken.None);
+                Baglam("demirbas", "demirbas.liste"), CancellationToken.None);
 
             Assert.Contains("/dokuman", yetkili.SonBaglam, StringComparison.Ordinal);
             Assert.DoesNotContain("/dokuman", yetkisiz.SonBaglam, StringComparison.Ordinal);

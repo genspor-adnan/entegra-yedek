@@ -62,8 +62,9 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         var y = await servis.CevaplaAsync(
             new RehberServisi.Istek("Yeni hasta kaydı nasıl açılır?", null, "/panel", null),
-            // 871/873: /hasta ekranı ve hasta-kayit konusu 'hasta' yetkisiyle.
-            Baglam("personel", "hasta", "belge"), CancellationToken.None);
+            // 871/873: hasta-kayit konusu 'hasta' yetkisiyle; Hasta Listesi ekranı (/hasta) 1126'dan beri
+            //   liste kodu 'hasta.liste' ister (liste / kart ayrımı) - menüde de öyle.
+            Baglam("personel", "hasta", "hasta.liste", "belge"), CancellationToken.None);
 
         Assert.Equal("hasta-kayit", y.KonuKod);
         Assert.Equal(1, y.KaynakTuru);
