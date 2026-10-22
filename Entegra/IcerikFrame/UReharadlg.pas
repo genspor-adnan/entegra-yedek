@@ -196,6 +196,7 @@ type
     GridCariEkstreViewKOD: TcxGridDBColumn;
     GridCariEkstreViewAD: TcxGridDBColumn;
     GridCariEkstreViewACIKLAMA: TcxGridDBColumn;
+    GridCariEkstreViewILETISIMAD: TcxGridDBColumn;
     GridCariEkstreViewHESAPKODU: TcxGridDBColumn;
     GridCariEkstreViewHESAPADI: TcxGridDBColumn;
     GridCariEkstreViewBORC: TcxGridDBColumn;
@@ -737,6 +738,7 @@ type
     GridAliasViewALIAS: TcxGridDBColumn;
     GridAliasViewVARSAYILAN: TcxGridDBColumn;
     GridAliasViewAKTIF: TcxGridDBColumn;
+    GridAliasViewEPOSTA: TcxGridDBColumn;
     GridAliasViewILKKAYITTARIHI: TcxGridDBColumn;
     GridAliasViewSONKONTROLTARIHI: TcxGridDBColumn;
     GridAliasViewPASIFTARIHI: TcxGridDBColumn;
@@ -2152,6 +2154,9 @@ begin
   DataSet.FieldByName('ALIAS').AsString            := '';
   DataSet.FieldByName('VARSAYILAN').AsBoolean      := False;
   DataSet.FieldByName('AKTIF').AsBoolean           := True;
+  // e-Arsiv faturasi bu adrese e-posta ile gonderilsin mi (Update_SQL_214, varsayilan evet).
+  if DataSet.FindField('EPOSTA') <> nil then
+    DataSet.FieldByName('EPOSTA').AsBoolean        := True;
   DataSet.FieldByName('ILKKAYITTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
   DataSet.FieldByName('SONKONTROLTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
 end;
@@ -3083,8 +3088,13 @@ var
   TahTutar:Currency;
   TahTutarSt, Kur, Karsilik: String[25];
   Tarih : TDateTime;
+  IletAd, Bulunamayan: string;
+  IletID, VarsIletID: Integer;
 begin
   ShowMessage(CRAktarim_Kosullari);
+  Bulunamayan := '';
+  // 9.sutun(I): iletisim adi. Bos ya da caride bulunamazsa varsayilan iletisim.
+  VarsIletID := VarsayilanIletisimID(REHBER.FieldByName('ID').AsInteger);
   if OpenDialog1.Execute then begin
     ExcellBelge := CreateOleObject('Excel.Application');
     try
@@ -3113,13 +3123,28 @@ begin
           Kur :=StringReplace(Kur, ',', '.', [rfReplaceAll]);
           Karsilik :=  VarToStrDef(sayfa.Cells[j,7].Value, '1');
           Karsilik :=StringReplace(Karsilik, ',', '.', [rfReplaceAll]);
+
+          IletAd := Trim(VarToStrDef(sayfa.Cells[j,9].Value, ''));
+          IletID := VarsIletID;
+          if IletAd <> '' then begin
+            IletID := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+              'select top 1 ID from REHBERILETISIM where REHBERID = &R and ltrim(rtrim(AD)) = N&A ' +
+              'order by case when VARSAYILAN = 1 then 0 else 1 end, ID',
+              ['&R', '&A'], [REHBER.FieldByName('ID').AsInteger, IletAd], True)), 0);
+            if IletID <= 0 then begin
+              IletID := VarsIletID;
+              if Pos(#13#10 + IletAd + #13#10, #13#10 + Bulunamayan) = 0 then
+                Bulunamayan := Bulunamayan + IletAd + #13#10;
+            end;
+          end;
+
           veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
             'insert into FATBASLIK(TARIH,TUR,REHBERID,FATURATARIH,FATURANO,FATURA_TUTARI,KUR,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR,'+
-            'RAPORDOVIZ,TIPI,EKSTREDEKULLAN, MASRAFID,YERI, ACIKLAMA,DIL,SUBEID) '+
+            'RAPORDOVIZ,TIPI,EKSTREDEKULLAN, MASRAFID,YERI, ACIKLAMA,DIL,SUBEID,REHBERILETID) '+
             'values(&TARIH,&TUR,&REHBERID,&FATURATARIH,&FATURANO,&FATURA_TUTARI,&KUR,&DOVIZ_TUTARI,&DOVIZ_CINSI,&DOVIZKUR,'+
-            '&RAPORDOVIZ, &TIPI, &EKSTREDEKULLAN, &MASRAFID, &YERI, &ACIKLAMA,&DIL,&SUBEID) '
+            '&RAPORDOVIZ, &TIPI, &EKSTREDEKULLAN, &MASRAFID, &YERI, &ACIKLAMA,&DIL,&SUBEID,&ILETID) '
           ,['&TARIH','&TUR','&REHBERID','&FATURATARIH','&FATURANO','&FATURA_TUTARI','&KUR','&DOVIZ_TUTARI','&DOVIZ_CINSI','&DOVIZKUR',
-             '&RAPORDOVIZ', '&TIPI', '&EKSTREDEKULLAN', '&MASRAFID', '&YERI','&ACIKLAMA','&DIL','&SUBEID']
+             '&RAPORDOVIZ', '&TIPI', '&EKSTREDEKULLAN', '&MASRAFID', '&YERI','&ACIKLAMA','&DIL','&SUBEID','&ILETID']
           ,[  FormatDateTime('YYYY-mm-DD HH:NN', Tarih),
               TahTur,
               REHBER.FieldByName('ID').AsInteger,
@@ -3133,7 +3158,7 @@ begin
               VarToStrDef(sayfa.Cells[j,8].Value,CariDoviz),
               1,0,0,1,
               StringReplace(sayfa.Cells[j,5].Value,'''','',[rfReplaceAll]),
-              -1,SubeId ]);
+              -1,SubeId, IletID ]);
           inc(j);
         end;
         //sayfa.Cells[j,6].Value := 'Eksik Bilgi';
@@ -3148,6 +3173,8 @@ begin
         //FreeAndNil(ExcellBelge);
         ExcellBelge:=Unassigned;
         showmessage(BAktarim_tamam);
+        if Bulunamayan <> '' then
+          ShowMessage('Caride bulunamayan iletişim adları (varsayılan iletişim atandı):' + #13#10 + Bulunamayan);
       end;
     end;
   end;
@@ -3422,7 +3449,7 @@ begin
 
       //if SQLVersion2008 then begin
           select := 'select SIRANO,CEKID,TARIH,AKSIYONTARIH,NO,TUR,BASLIK,TURAD,REHBERID,KOD,AD,ACIKLAMA,HESAPID,HESAPKODU,HESAPADI,DURUM,BORC,'+
-                    '  ALACAK,KUR,YERELKUR,MASRAFID,MASRAFKOD,MASRAFAD,BORCBAKIYE,ALACAKBAKIYE,ABS(YERELTUTAR) AS YERELTUTAR,YERELBAKIYE,SUBEID,VADETARIHI,ADET,BIRIM,BIRIMFIYAT from ';
+                    '  ALACAK,KUR,YERELKUR,MASRAFID,MASRAFKOD,MASRAFAD,BORCBAKIYE,ALACAKBAKIYE,ABS(YERELTUTAR) AS YERELTUTAR,YERELBAKIYE,SUBEID,VADETARIHI,ADET,BIRIM,BIRIMFIYAT,ILETISIMAD from ';
           if CheckDetayli.Checked then
                TabCariListe.SQL.Text := select+' dbo.fn_Cari_Detayli_Ekstre '+s
           else

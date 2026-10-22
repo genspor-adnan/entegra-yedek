@@ -47,6 +47,8 @@ type
     BankaMasrafMerkezi: TcxButtonEdit;
     lblMasrafTutar: TcxLabel;
     LabelSRM: TcxLabel;
+    LblIletisim: TcxLabel;
+    ComboIletisim: TcxDBImageComboBox;
     EditSRMMerkezi: TcxButtonEdit;
     LabelKarsilik: TcxLabel;
     AltPanel: TPanel;
@@ -138,6 +140,7 @@ type
       AButtonIndex: Integer);
     procedure LabelCokluClick(Sender: TObject);
   private
+    procedure IletisimHazirla(AVarsayilanAta: Boolean);
     { Private declarations }
     procedure Kaydet;
     procedure IslemTarihiChange(Field: TField);
@@ -218,10 +221,18 @@ begin
       if TabKasa.State = dsBrowse then
          TabKasa.Edit;
       TabKasa.FieldByName('REHBERID').AsInteger := RehberId;
+      IletisimHazirla(True);   // cari degisti -> yeni carinin varsayilan iletisimi
       // ComboILGILI.Text := '';
       //TabKasa.FieldByName('ILGILI').AsInteger  := -1;
       //FirmaBilgileri
    end;
+end;
+
+procedure TNakitDlg.IletisimHazirla(AVarsayilanAta: Boolean);
+begin
+  ComboIletisim.Visible := IletisimComboDoldur(ComboIletisim,
+    TabKasa.FieldByName('REHBERID').AsInteger, AVarsayilanAta);
+  LblIletisim.Visible := ComboIletisim.Visible;
 end;
 
 procedure TNakitDlg.TabKasaAfterOpen(DataSet: TDataSet);
@@ -1034,6 +1045,8 @@ begin
   LabelAd.Caption := cariad;
   Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
+  // Musteri iletisim adi: yeni kayitta carinin varsayilan iletisimi secili gelir.
+  IletisimHazirla(TabKasa.State = dsInsert);
 
 
 {  if TabKasa.FieldByName('ID').AsString='' then begin

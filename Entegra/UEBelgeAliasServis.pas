@@ -613,6 +613,25 @@ begin
   end;
 end;
 
+const
+  // e-Arsiv'de "e-posta gonderilmesin" denince acilan alias kaydinin ALIAS degeri.
+  EArsivEPostaYok = 'yok';
+
+// e-Arsiv: carinin aktif 150 kaydinda "e-posta gonderilsin" isareti (REHBERALIAS.EPOSTA,
+//   Update_SQL_214). Kayit yoksa / kolon yoksa evet - eski davranis.
+function EArsivEPostaVarsayilan(AConnection: TFDConnection; ARehberID: Integer): Boolean;
+begin
+  Result := True;
+  try
+    Result := VarToStrDef(Veritabani.BasitKomutÇalıştır(AConnection,
+      'select top 1 cast(EPOSTA as int) from REHBERALIAS ' +
+      'where REHBERID=&R and BELGETURU=&B and AKTIF=1 order by VARSAYILAN desc, ID desc',
+      ['&R', '&B'], [ARehberID, RAlias_EArsiv], True), '1') <> '0';
+  except
+    Result := True;
+  end;
+end;
+
 // Birden fazla alias bulundugunda kullanicidan secim ister (combo, index bazli).
 // Iptal -> False. Secilirse ASecilen'e alias yazilir.
 // ATarihler: her alias'in GIB aktivasyon/kayit zamani (0 = servis vermedi -> yazilmaz).
@@ -888,8 +907,48 @@ begin
     Result.Mesaj := 'e-Irsaliye 140 (GIB Portal)';
   end else begin
     // EFatura akisinda mukellef DEGIL � e-Arsiv flow (mail)
+    // ONCE SOR (kullanici 16.10.2026): e-posta gonderilsin mi? Varsayilan cevap
+    //   carinin alias kaydindaki E-Posta isareti. Hayir: adres sorulmaz, belge
+    //   alias'siz (KAGIT gonderim, izibiz mail atmaz) hazirlanir ve isaret 0 olur.
+    var LEPosta: Boolean := EArsivEPostaVarsayilan(AConnection, ARehberID);
+    var LVarsayilanDugme: TMsgDlgBtn := mbYes;
+    if not LEPosta then LVarsayilanDugme := mbNo;
+    case MessageDlg(ACariAdi + sLineBreak + sLineBreak +
+                    'e-Arşiv faturası müşteriye e-posta ile gönderilsin mi?' + sLineBreak + sLineBreak +
+                    '  EVET  = e-posta adresi sorulur, fatura e-posta ile (elektronik) gider' + sLineBreak +
+                    '  HAYIR = e-posta gönderilmez, fatura kağıt gönderim olarak kesilir',
+                    mtConfirmation, [mbYes, mbNo, mbCancel], 0, LVarsayilanDugme) of
+      mrYes: ;
+      mrNo: begin
+        // e-Arsiv kaydi yoksa YINE ACILIR (kullanici): ALIAS 'yok', E-Posta kapali.
+        //   Sonradan Alias gridinde adres yazilip E-Posta isaretlenebilir.
+        if not (LVar and (LMevcutBelgeTuru = LKodGenel)) then begin
+          var LEskiID3: Integer := 0;
+          if LVar then LEskiID3 := LMevcutID;
+          RAliasUpsert(AConnection, ARehberID, LKodGenel, EArsivEPostaYok, LEskiID3);
+        end;
+        try
+          Veritabani.BasitKomutÇalıştır(AConnection,
+            'update REHBERALIAS set EPOSTA=0 where REHBERID=&R and BELGETURU=&B and AKTIF=1',
+            ['&R', '&B'], [ARehberID, LKodGenel]);
+        except
+          // EPOSTA kolonu yok (Update_SQL_214 calismamis): bu belge yine kagit gider.
+        end;
+        Result.Basari := True;
+        Result.BelgeTuru := LKodGenel;
+        Result.Alias := '';
+        Result.Mesaj := 'e-Arsiv: e-posta gonderilmeyecek (kagit gonderim)';
+        Exit;
+      end;
+    else
+      Result.Basari := False;
+      Result.Mesaj := 'Kullanici iptal etti';
+      Exit;
+    end;
+
     var LMevcutMail: string := '';
-    if LVar and (LMevcutBelgeTuru = LKodGenel) then
+    if LVar and (LMevcutBelgeTuru = LKodGenel) and
+       not SameText(Trim(LMevcutAlias), EArsivEPostaYok) then
       LMevcutMail := LMevcutAlias
     else
       LMevcutMail := ARehberMail;
@@ -897,6 +956,13 @@ begin
       var LEskiID2: Integer := 0;
       if LVar then LEskiID2 := LMevcutID;
       RAliasUpsert(AConnection, ARehberID, LKodGenel, LYeniMail, LEskiID2);
+      try
+        Veritabani.BasitKomutÇalıştır(AConnection,
+          'update REHBERALIAS set EPOSTA=1 where REHBERID=&R and BELGETURU=&B and ALIAS=&A',
+          ['&R', '&B', '&A'], [ARehberID, LKodGenel, LYeniMail]);
+      except
+        // EPOSTA kolonu yok (Update_SQL_214 calismamis): eski davranis, mail gider.
+      end;
       Result.Basari := True;
       Result.BelgeTuru := LKodGenel;
       Result.Alias := LYeniMail;

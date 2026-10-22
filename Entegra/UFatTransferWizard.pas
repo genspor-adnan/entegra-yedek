@@ -633,6 +633,8 @@ var
   LEskiTarih: Variant;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
+  BelgeNoKayittaAta(TabFatBaslik, 20, 'FATURANO', '', 'KOCANNO',
+    TabFatBaslik.FieldByName('FATURATARIH').AsDateTime);
   // Tarih ALANINA dokunuldu mu? (geriye donuk sinir yalniz yeni kayit/degisen tarihte)
   LEskiTarih := TabFatBaslik.FieldByName('FATURATARIH').OldValue;
   LTransferTarihiDegisti := VarIsNull(LEskiTarih) or VarIsEmpty(LEskiTarih) or
@@ -989,13 +991,12 @@ begin
 end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikNewRecord(DataSet: TDataSet);
-var
- belgeno : TBelgeNo;
 begin
   TabFatBaslik.FieldByname('FATURATARIH').Value := Tablo.GENINI.BugunTrhSaat;
   TabFatBaslik.FieldByname('TARIH').Value := TabFatBaslik.FieldByname('FATURATARIH').Value;
-  belgeno:= SiradakiBelgeNumarasi(20,TabFatBaslik.FieldByName('FATURATARIH').AsDateTime);
-  TabFatBaslik.FieldByName('FATURANO').AsString := belgeno.belgeno; //FatNo;
+  // Numara acilista alinmaz: ilk kayitta TabFatBaslikBeforePost'ta koçandan atomik ayrilir.
+  TabFatBaslik.FieldByName('FATURANO').AsString := '';
+  OtomatikNoIpucu(EditFatNo);
  // TabFatBaslik.FieldByName('FATURASERI').AsString := belgeno.serino; //seri
   TabFatBaslik.FieldByName('KOCANNO').AsInteger := KocannoBul(20); //KOCAN numaras?
 

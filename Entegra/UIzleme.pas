@@ -1425,6 +1425,29 @@ var Fark : Real;
                Result := False;
          end;
     end;
+    {function LotNoKontrolu : boolean;
+    //var I,say : integer;
+        //Lotno, Girilen : string;
+    begin
+         Result := True;
+         //sonra önceki girişlere de bakalım bu lotnodan girilmiş mi
+         Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from STOKSERILOT SI where SI.STOKID='+IntToStr(StokID)+
+             ' and LOTNO='''+TabIzlem.FieldByName('LOTNO').AsString+''' '+DbSinir(1));
+         if (Tablo.Query1.RecordCount > 0) and //daha önceden girilmiş lot bulundu
+            (Tablo.Query1.FieldByName('SKT').AsDateTime-TabIzlem.FieldByName('SKT').AsDateTime<>0)and
+            (Tablo.Query1.FieldByName('URT').AsDateTime-TabIzlem.FieldByName('URT').AsDateTime<>0) then begin
+            if Application.MessageBox(PChar('Bu lot üründe tarih uyuşmazlığı var. Önceki girilen alınsın mı?'+#13#10+
+               ' (SKT:'+FormatDateTime('dd/mm/yyyy', Tablo.Query1.FieldByName('SKT').AsDateTime)+
+               ' ÜRT:'+FormatDateTime('dd/mm/yyyy', Tablo.Query1.FieldByName('URT').AsDateTime)+')'),
+               PChar('UYARI!'), MB_YESNO)=ID_YES then begin
+               TabIzlem.FieldByName('SKT').AsDateTime := Tablo.Query1.FieldByName('SKT').AsDateTime;
+               TabIzlem.FieldByName('URT').AsDateTime := Tablo.Query1.FieldByName('URT').AsDateTime;
+            end
+            else
+               Result := False;
+         end;
+    end;}
+
     function SeriNoKontrolu : boolean;
     var I,say : integer;
         Serino, Girilen : string;
@@ -1716,17 +1739,17 @@ begin
             .AddPair('izlemId',       TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
             .AddPair('serilotId',     TJSONNumber.Create(TabIzlem.FieldByName('SERILOTID').AsInteger))
             .AddPair('adet',          TJSONNumber.Create(LAdet));
-          // Seri/lot karti HENUZ YOKSA (giriste kullanici yeni lot yazar)
-          //   tanimlayici alanlar da gonderilir; karti yazan SP acar.
-          if TabIzlem.FieldByName('SERILOTID').AsInteger <= 0 then
-          begin
-            LSatir.AddPair('seriNo', TabIzlem.FieldByName('SERINO').AsString);
-            LSatir.AddPair('lotNo',  TabIzlem.FieldByName('LOTNO').AsString);
-            if not TabIzlem.FieldByName('SKT').IsNull then
-              LSatir.AddPair('skt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('SKT').AsDateTime));
-            if not TabIzlem.FieldByName('URT').IsNull then
-              LSatir.AddPair('urt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('URT').AsDateTime));
-          end;
+          // Tanimlayici alanlar HER ZAMAN gonderilir: kart yoksa (giriste yeni
+          //   lot) SP onu acar; kart varken kullanici seri/lot no'yu
+          //   degistirdiyse SP metni esas alip yeni karta baglar
+          //   (Update_SQL_209). Eskiden yalniz serilotId gidiyor, degisiklik
+          //   kaybediliyordu.
+          LSatir.AddPair('seriNo', TabIzlem.FieldByName('SERINO').AsString);
+          LSatir.AddPair('lotNo',  TabIzlem.FieldByName('LOTNO').AsString);
+          if not TabIzlem.FieldByName('SKT').IsNull then
+            LSatir.AddPair('skt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('SKT').AsDateTime));
+          if not TabIzlem.FieldByName('URT').IsNull then
+            LSatir.AddPair('urt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('URT').AsDateTime));
           LDizi.Add(LSatir);
         end;
         TabIzlem.Next;

@@ -2256,6 +2256,9 @@ end;
 procedure TSiparisWizardDlg.TabSiparisBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: siparis post -> yakala
+  if DataSet = TabSiparis then
+    BelgeNoKayittaAta(TabSiparis, SiparisTur, 'SIPARISNO', 'SIPARISSERI', 'KOCANNO',
+      TabSiparis.FieldByName('SIPARISTARIH').AsDateTime);
   BoslukKontrolu;
   //Bu cariden bu sipari? no ile daha önce sipari? al?nm?? m? kontrolü yapal?m
   //Tablo.TablodanSorguAc(2,'select ID from SIPARIS where ')
@@ -2744,7 +2747,7 @@ var
 begin
   case IslemOp of
     'E':begin
-       belgeno := SiradakiBelgeNumarasi(19,Tablo.GENINI.BugunTrh);
+       belgeno := BelgeNoRezerveEt(19,Tablo.GENINI.BugunTrh);
 
        Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
        TabloYenile(Tablo.tabCariBilgileri, [RehberId,REHBERILETID]);
@@ -2777,7 +2780,6 @@ end;
 procedure TSiparisWizardDlg.TabSiparisNewRecord(DataSet: TDataSet);
 var
   seri, FatNo : string;
-  belgeno : TBelgeNo;
   Etiketler,Bilgiler : TArrayOfString;
   REHBERILETID:integer;
   REHBERILETAD,REHBERILETADHINT:String;
@@ -2793,17 +2795,22 @@ begin
     /////İletişim
    end else begin
     Tablo.FaturaBaslik(TabSiparis,-1);
-    TabSiparis.FieldByName('REHBERILETID').AsInteger :=0;
+    // Verilen sipariste de carinin varsayilan iletisimi gelsin (eskiden 0).
+    TabSiparis.FieldByName('REHBERILETID').AsInteger := VarsayilanIletisimID(RehberId);
+    if TabSiparis.FieldByName('REHBERILETID').AsInteger > 0 then
+      btnSevkAdresi.Text := Tablo.AciklamaGetir('REHBERILETISIM', 'AD',
+        TabSiparis.FieldByName('REHBERILETID').AsInteger);
     TabSiparis.FieldByName('GIRISDEPO').AsInteger:= VarsDepo
   end;
   TabSiparis.FieldByName('SATICIKODU').AsString:=Kullanan;
 //  cbSatici.Text := Tablo.AciklamaGetir('REHBER','FIRMA', TabSiparis.FieldByName('SATICIKODU').AsString);
 
   TabSiparis.FieldByName('SIPARISTARIH').Value := Tablo.GENINI.BugunTrhSaat;
-  belgeno:= SiradakiBelgeNumarasi(SiparisTur,TabSiparis.FieldByName('SIPARISTARIH').AsDateTime);
-  TabSiparis.FieldByName('SIPARISSERI').AsString := belgeno.serino; //seri
-  TabSiparis.FieldByName('SIPARISNO').AsString := belgeno.belgeno; //FatNo;
+  // Numara acilista alinmaz (ekranda "Otomatik"): ilk kayitta TabSiparisBeforePost'ta
+  //   koçandan atomik ayrilir -> ayni anda siparis acan iki kullanici ayni numarayi alamaz.
+  TabSiparis.FieldByName('SIPARISNO').AsString := '';
   TabSiparis.FieldByName('KOCANNO').AsInteger := KocannoBul(SiparisTur); //KOCAN numarası
+  OtomatikNoIpucu(EditFatNo);
   TabSiparis.FieldByName('TARIH').Value := Tablo.GENINI.BugunTrh;
   TabSiparis.FieldByName('REHBERID').AsInteger := RehberId;
   TabSiparis.FieldByName('SUBEID').AsInteger := SubeID;
@@ -2947,10 +2954,11 @@ begin
     Abort;
   if not TarihKontrol(EditFatTarih.Date, Belge + KontrolTarihi) then
      Abort;
-  if not BoslukKontrol(EditFatNo.Text, Belge+' No') then
+  if not BoslukKontrol(TabSiparis.FieldByName('SIPARISNO').AsString, Belge+' No') then
     Abort;
 
-  EditFatNo.Text := trim(EditFatNo.Text);
+  if TabSiparis.FieldByName('SIPARISNO').AsString <> Trim(TabSiparis.FieldByName('SIPARISNO').AsString) then
+    TabSiparis.FieldByName('SIPARISNO').AsString := Trim(TabSiparis.FieldByName('SIPARISNO').AsString);
 
 
 {  if (YeniYilDevriVar)and(YearOf(Tablo.GENINI.BugunTrh) <> YearOf(TabSiparis.FieldByName('SIPARISTARIH').AsDateTime)) then begin
@@ -2962,7 +2970,7 @@ begin
   end; }
 
   if SiparisTur in [14, 15, 16] then begin
-     i := StrToIntdef(EditFatNo.Text, 0);
+     i := StrToIntdef(TabSiparis.FieldByName('SIPARISNO').AsString, 0);
      if i=0 then begin
         ShowMessage(Yanlis_karakter);
         Abort;

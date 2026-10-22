@@ -121,7 +121,6 @@ object UretimWizardDlg: TUretimWizardDlg
           Left = 3
           Top = 3
           Width = 1204
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -231,19 +230,17 @@ object UretimWizardDlg: TUretimWizardDlg
           end
         end
         object PageControlUst: TcxPageControl
-          Properties.Images = Tablo.PNGImageList2
           Left = 0
-          Top = 32
+          Top = 35
           Width = 1210
-          Height = 113
+          Height = 110
           Align = alClient
           TabOrder = 1
           Properties.ActivePage = cxTabSheet1
           Properties.CustomButtons.Buttons = <>
+          Properties.Images = Tablo.PNGImageList2
           OnChange = PageControlUstChange
-          ExplicitTop = 35
-          ExplicitHeight = 110
-          ClientRectBottom = 109
+          ClientRectBottom = 106
           ClientRectLeft = 4
           ClientRectRight = 1206
           ClientRectTop = 27
@@ -252,7 +249,7 @@ object UretimWizardDlg: TUretimWizardDlg
             Color = clWhite
             ImageIndex = 22
             ParentColor = False
-            ExplicitHeight = 79
+            ExplicitHeight = 82
             object Label19: TcxLabel
               Left = 529
               Top = 2
@@ -908,7 +905,6 @@ object UretimWizardDlg: TUretimWizardDlg
         Width = 485
       end
       object PageControlAlt: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 486
         Width = 1210
@@ -917,11 +913,12 @@ object UretimWizardDlg: TUretimWizardDlg
         TabOrder = 7
         Properties.ActivePage = TabSheetGenel
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         OnChange = PageControlAltChange
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1206
-        ClientRectTop = 24
+        ClientRectTop = 25
         object TabSheetGenel: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 11
@@ -1045,10 +1042,6 @@ object UretimWizardDlg: TUretimWizardDlg
         object TabIsVeZaman: TcxTabSheet
           Caption = #304#351' Zaman'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Panel9: TPanel
             Left = 0
             Top = 0
@@ -1152,9 +1145,10 @@ object UretimWizardDlg: TUretimWizardDlg
             Left = 0
             Top = 23
             Width = 1202
-            Height = 121
+            Height = 120
             Align = alClient
             TabOrder = 1
+            ExplicitHeight = 121
             object GridIsZamanView: TcxGridDBTableView
               PopupMenu = PopupIsZamanPer
               OnDblClick = IsZamanDuzenleClick

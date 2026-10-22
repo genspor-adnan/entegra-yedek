@@ -217,7 +217,7 @@ var
   begin
      if KulFatbasID = 0 then begin
         KocanNo := KocannoBul(IslemTur);
-        BelgeNo := SiradakiBelgeNumarasi(IslemTur, Tablo.GENINI.BugunTrhSaat);
+        BelgeNo := BelgeNoRezerveEt(IslemTur, Tablo.GENINI.BugunTrhSaat);
         Tablo.TablodanSorguAc(0,'select ID from REHBERILETISIM where REHBERID=-1 order by VARSAYILAN desc');
         RehberId := -1;
         TabloYenile(Tablo.tabCariBilgileri, [RehberId,Tablo.Query0.FieldByName('ID').AsInteger]);

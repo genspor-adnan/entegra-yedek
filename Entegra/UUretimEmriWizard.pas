@@ -577,6 +577,7 @@ type
     procedure TabUretimOperasyonCalcFields(DataSet: TDataSet);
   private
     FDetSnap: TObjectDictionary<Integer, TStringList>;   // detay log snapshot (ULog)
+    FOprPersKolonlar: string;   // URETIMOPERASYONPERSONEL gercek kolonlari (,A,B,)
     BilesenAraDlg,UrunAraDlg:TStokHizmetAraDlg;
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
@@ -1353,9 +1354,10 @@ end;
 
 procedure TUretimEmriWizardDlg.TabUretimEmriBeforePost(DataSet: TDataSet);
 var s:string;
-    belgeno : Tbelgeno;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: kart post = gercek degisiklik -> snapshot'i yakala
+  BelgeNoKayittaAta(TabUretimEmri, 166, 'EMIRNO', 'SERINO', 'KOCANNO',
+    TabUretimEmri.FieldByName('TALEPTARIHI').AsDateTime);
   BoslukKontrolu;
   TabUretimEmri.FieldByName('MIKTAR').AsFloat := TabUretimEmri.FieldByName('ADET').AsFloat;
 
@@ -1367,8 +1369,8 @@ begin
      Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where EMIRNO='''+TabUretimEmri.FieldByName('EMIRNO').AsString+''''+s) ;
      if not Tablo.Query1.IsEmpty then begin
         ShowMessage(MGEmirNovar+' '+ BGBelge_tarihi+' : '+FormatDateTime('dd/mm/yyyy', TabUretimEmri.FieldByName('BASTAR').AsDateTime));
-        belgeno := SiradakiBelgeNumarasi(166,TabUretimEmri.FieldByName('TALEPTARIHI').AsDateTime);
-        TabUretimEmri.FieldByName('EMIRNO').AsString := belgeno.belgeno; // FatNo;
+        // Elle yazilan no kullanilmis: alani bosalt, sonraki kayitta koçandan yeni no ayrilir.
+        TabUretimEmri.FieldByName('EMIRNO').AsString := '';
         Abort;
      end;
   end;
@@ -1842,7 +1844,7 @@ begin
       //Fatba?l??a kay?t at?l?r..
       ProjeId := TabUretimEmri.FieldByName('PROJEID').AsInteger;
 
-      belgeno:= SiradakiBelgeNumarasi(TMenuItem(Sender).Tag ,Tablo.GENINI.BugunTrhSaat);
+      belgeno:= BelgeNoRezerveEt(TMenuItem(Sender).Tag ,Tablo.GENINI.BugunTrhSaat);
                                       //101 sat?nalma 105 stok talebi
 
       Tablo.Query1.Close;
@@ -2215,7 +2217,7 @@ begin
 
       //Fatba?l??a kay?t at?l?r..
       ProjeId := TabUretimEmri.FieldByName('PROJEID').AsInteger;
-      belgeno:= SiradakiBelgeNumarasi(6, Tablo.GENINI.BugunTrhSaat);
+      belgeno:= BelgeNoRezerveEt(6, Tablo.GENINI.BugunTrhSaat);
       //birimi alal?m
       Tablo.TablodanSorguAc(3,'select S.ANABIRIM from STOKLAR S where S.ID='+TabUretimEmri.FieldByName('STOKID').AsString);
                                                              //UretimNoGetir
@@ -2665,15 +2667,13 @@ begin
 end;
 
 procedure TUretimEmriWizardDlg.TabUretimEmriNewRecord(DataSet: TDataSet);
-var
-    belgeno: TBelgeNo;
 begin
   TabUretimEmri.FieldByname('BASTAR').AsDateTime := Tablo.GENINI.BugunTrhSaat;
   TabUretimEmri.FieldByname('BITTAR').Value := TabUretimEmri.FieldByname('BASTAR').AsDateTime;
   TabUretimEmri.FieldByname('TALEPTARIHI').Value := TabUretimEmri.FieldByname('BASTAR').AsDateTime;
-  belgeno := SiradakiBelgeNumarasi(166,TabUretimEmri.FieldByName('TALEPTARIHI').AsDateTime);
-  TabUretimEmri.FieldByName('SERINO').AsString := belgeno.SeriNo; // seri
-  TabUretimEmri.FieldByName('EMIRNO').AsString := belgeno.belgeno; // FatNo;
+  // Numara acilista alinmaz: ilk kayitta TabUretimEmriBeforePost'ta koçandan atomik ayrilir.
+  TabUretimEmri.FieldByName('EMIRNO').AsString := '';
+  OtomatikNoIpucu(EditEmirNo);
   TabUretimEmri.FieldByName('KOCANNO').AsInteger :=  KocannoBul(166); // KOCAN numaras?   belgeno.kocanno;//
 
   TabUretimEmri.FieldByname('ONAY').AsBoolean := False;
@@ -2735,8 +2735,35 @@ begin
 end;
 
 procedure TUretimEmriWizardDlg.TabUretimOperasyonPersonelAfterOpen(DataSet: TDataSet);
+var
+  LAlan: TField;
+  LKolon: Integer;
 begin
    IsZamanSil.Visible := not TabUretimOperasyonPersonel.IsEmpty;
+
+   // Sorgu UOU.* ile URETIMOPERASYONPERSONEL_USER kolonlarini (ADET, BIRIM...) ve
+   // hesaplanmis alanlari da getiriyor. UpdateTableName URETIMOPERASYONPERSONEL
+   // oldugu icin bunlar UPDATE'e girip "Invalid column name" veriyordu; yalniz
+   // tablonun gercek kolonlari guncellemeye katilsin.
+   if FOprPersKolonlar = '' then
+     FOprPersKolonlar := VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+       'select (select '','' + UPPER(name) from sys.columns ' +
+       'where object_id = object_id(''URETIMOPERASYONPERSONEL'') for xml path(''''))', [], [], True)) + ',';
+   if Length(FOprPersKolonlar) < 3 then
+     Exit;   // kolon listesi okunamadi: hicbir seyi disarida birakma
+   for LAlan in DataSet.Fields do
+     if (LAlan.FieldKind = fkData) and
+        (Pos(',' + UpperCase(LAlan.FieldName) + ',', FOprPersKolonlar) = 0) then
+       LAlan.ProviderFlags := [];
+   // DFM'de kalici alani OLMAYAN sonuc kolonlari (UOU.* -> ADET, BIRIM, LOTU...)
+   //   TField'siz kalir; FireDAC bunlarin guncelleme bayragini kolonun kendi
+   //   seceneklerinden alir (varsayilan coInUpdate) ve UPDATE'e yazar. Onlari
+   //   DatS kolonu uzerinden disarida birak.
+   for LKolon := 0 to TabUretimOperasyonPersonel.Table.Columns.Count - 1 do
+     with TabUretimOperasyonPersonel.Table.Columns[LKolon] do
+       if (DataType <> dtRowRef) and (DataType <> dtParentRowRef) and
+          (Pos(',' + UpperCase(Name) + ',', FOprPersKolonlar) = 0) then
+         Options := Options - [coInUpdate, coInWhere, coInKey];
 end;
 
 procedure TUretimEmriWizardDlg.TabUretimOperasyonPersonelCalcFields(DataSet: TDataSet);
@@ -2776,7 +2803,7 @@ begin
       //Fatba?l??a kay?t at?l?r..
       ProjeId := TabUretimEmri.FieldByName('PROJEID').AsInteger;
 
-      belgeno:= SiradakiBelgeNumarasi(TMenuItem(Sender).Tag ,Tablo.GENINI.BugunTrhSaat);
+      belgeno:= BelgeNoRezerveEt(TMenuItem(Sender).Tag ,Tablo.GENINI.BugunTrhSaat);
                                       //101 sat?nalma 105 stok talebi
 
       Tablo.Query1.Close;

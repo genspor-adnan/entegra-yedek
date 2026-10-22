@@ -43,6 +43,8 @@ type
     BeditBagliGorev: TcxButtonEdit;
     LabelProje: TcxLabel;
     LabelAktivite: TcxLabel;
+    LblIletisim: TcxLabel;
+    ComboIletisim: TcxDBImageComboBox;
     EditProje: TcxButtonEdit;
     cbIrsaliyeli: TcxDBCheckBox;
     PanelKarsilik: TPanel;
@@ -122,6 +124,7 @@ type
     procedure LabelKarsiligiClick(Sender: TObject);
   private
     procedure FirmaBilgileri(IDS:Integer);
+    procedure IletisimHazirla(AVarsayilanAta: Boolean);
     { Private declarations }
   public
     ID, RehberId, MasrafMerkezi,DemirbasID : Integer;
@@ -520,8 +523,8 @@ begin
   end;
   { else if IslemOp='K' then begin     dışarı alındıııı
 
-   ID := Tablo.SQLSatiriKopyala('FATBASLIK',ID,['TARIH', 'FATURATARIH', 'EKLEYEN', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
-            [Tablo.GENINI.BugunTrh, Tablo.GENINI.BugunTrhSaat, Kullanan,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
+   ID := Tablo.SQLSatiriKopyala('FATBASLIK',ID,['TARIH', 'FATURATARIH', 'EKLEYEN', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI', 'MUHAKTAR'],
+            [Tablo.GENINI.BugunTrh, Tablo.GENINI.BugunTrhSaat, Kullanan,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat, 0]);
     TabFatBaslik.Close;
     TabFatBaslik.Params[0].Value := ID;
     TabFatBaslik.Open;
@@ -542,6 +545,8 @@ begin
      FirmaBilgileri(RehberId);
 //     ComboKur.EditValue := CariDoviz;
   end;
+  // Musteri iletisim adi: yeni kayitta carinin varsayilan iletisimi secili gelir.
+  IletisimHazirla(TabFatBaslik.State = dsInsert);
 
    ////Masraf açıklama
    ///
@@ -649,7 +654,15 @@ begin
     if TabFatBaslik.State = dsBrowse then
       TabFatBaslik.Edit;
     TabFatBaslik.FieldByName('REHBERID').AsInteger := RehberId;
+    IletisimHazirla(True);   // cari degisti -> yeni carinin varsayilan iletisimi
   end;
+end;
+
+procedure TTahakkukDlg.IletisimHazirla(AVarsayilanAta: Boolean);
+begin
+  ComboIletisim.Visible := IletisimComboDoldur(ComboIletisim,
+    TabFatBaslik.FieldByName('REHBERID').AsInteger, AVarsayilanAta);
+  LblIletisim.Visible := ComboIletisim.Visible;
 end;
 procedure TTahakkukDlg.cxButtonEdit1PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 var

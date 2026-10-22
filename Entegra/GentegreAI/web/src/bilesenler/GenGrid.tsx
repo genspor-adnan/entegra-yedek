@@ -93,6 +93,8 @@ interface Props {
    * görünen metin kolonlarına ek olarak bu (gizli olabilen) kolonlarda da arar - ör. telefonHam, vknoHam.
    */
   aramaEkAlanlari?: string[];
+  /** Ciplerin SOLUNA eklenecek ikinci cip grubu (ör. Metin Makrosu: alan suzgeci). */
+  cipOnu?: React.ReactNode;
   /**
    * KOD KOLONUNA GORE SUZEN COMBO (492): ciplerin sagina cizilir, secim
    * sunucuya filtre olarak gider. Secenekler kolonun KENDI meta sozlugunden
@@ -264,7 +266,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
-                          seciliBaslangicId, cipSonu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
+                          seciliBaslangicId, cipSonu, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
@@ -762,7 +764,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
             "Tum Liste / Son / Sik" dugmeleriyle birlikte o combolar da
             kaybolurdu. */}
-        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0 || !!cipSonu) && (
+        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0 || !!cipSonu || !!cipOnu) && (
           // Kutu varken serit tam genislik: `width: fit-content` saga yanasmayi
           //   engelliyordu (kullanici: "Tümü/Sık/Son hizasinda saga yanasik").
           <div className={`durumseg${ebelgeKombo.length > 0 ? ' genis' : ''}`}>
@@ -792,6 +794,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             </button>
             </>)}
             <span className="durumseg-ayrac" />
+            {cipOnu && <>{cipOnu}<span className="durumseg-ayrac" /></>}
             {/* e-BELGEYE BAGLI CIPLER: sunucu ebelge aksiyonu dondurmuyorsa
                 (sube mukellef degil) hic cizilmez - tiklaninca bos ekran
                 acan sekme gostermeyelim. Indeksler ciplerin KENDI dizisinden

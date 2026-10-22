@@ -646,6 +646,17 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     yol: 'Muayene › Muayene Ayarları › Metin Makrosu Listesi',
     kartYolu: '/metin-makro', kartBaslik: 'Metin Makrosu',
     aksiyonEkrani: 'cari-liste',
+    // ALAN SÜZGECİ (kullanıcı 14.10.2026): Aktif/Tümü'nün SOLUNDA, ondan bağımsız.
+    //   "Genel" = alanı boş, bütün alanlarda açılan makrolar. Kodlar katalogdaki
+    //   MakroAlanKodlari ile aynı.
+    onCipler: [
+      { ad: 'Tüm Alanlar' },
+      { ad: 'Genel',             filtre: { alan: 'alan', op: 'esit', deger: '' } },
+      { ad: 'Şikâyet',           filtre: { alan: 'alan', op: 'esit', deger: 'sikayet' } },
+      { ad: 'Hikâye',            filtre: { alan: 'alan', op: 'esit', deger: 'hikaye' } },
+      { ad: 'Muayene Bulguları', filtre: { alan: 'alan', op: 'esit', deger: 'bulguOzet' } },
+      { ad: 'Değerlendirme',     filtre: { alan: 'alan', op: 'esit', deger: 'karar' } },
+    ],
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },

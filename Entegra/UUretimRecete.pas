@@ -89,16 +89,10 @@ type
     cxLabel4: TcxLabel;
     cxDBLabel3: TcxDBLabel;
     cxDBLabel4: TcxDBLabel;
-    cxLabel5: TcxLabel;
-    cxDBLabel5: TcxDBCurrencyEdit;
     cxDBLabel6: TcxDBCurrencyEdit;
     cxLabel6: TcxLabel;
     cxLabel7: TcxLabel;
-    cxLabel8: TcxLabel;
-    EditEkVergi: TcxDBCurrencyEdit;
     cxDBImageComboBox1: TcxDBImageComboBox;
-    cxDBLabel7: TcxDBCurrencyEdit;
-    cxLabel9: TcxLabel;
     LabelTarih: TcxLabel;
     ToolBarSol: TToolBar;
     ReceteEkleBtn: TToolButton;

@@ -2032,7 +2032,7 @@ begin
        //Teklifin ?imdiki durumunu "Olu?turma", tarihi ?imdi ve haz?rlayan? da giren ki?i yapal?m
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update TEKLIF set DURUM=1, REVIZEID='+IntToStr(RevID+1)+', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',HAZIRLAYAN='+Kullanan+' where Id=&id ',['&id'],[YeniTeklifID]);
    end else begin //Kopyalama
-       belgeno := SiradakiBelgeNumarasi(80,TabTeklif.FieldByName('TARIH').AsDateTime);
+       belgeno := BelgeNoRezerveEt(80,TabTeklif.FieldByName('TARIH').AsDateTime);
        RehIletID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc '+DbSinir(1)+' ',[],[],true);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update TEKLIF set REHBERID=&RID, REHBERILETID=&RIlet, TEKLIFNO=&TNo , TEKLIFSERI=&TSeri, KOCANNO=&KcnNo, TARIH='''+Formatdatetime('yyyy-mm-dd hh:mm:nn.zzz', Tablo.GENINI.BugunTrhSaat)+''',DURUM=&Drm,REVIZEID=&Rvz,HAZIRLAYAN=&Hzr where Id=&id '
                                   ,['&RID','&RIlet','&TNo','&TSeri','&KcnNo','&Drm','&Rvz','&Hzr','&id']
@@ -2268,6 +2268,8 @@ var
   RehID:Integer;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: teklif post -> yakala
+  BelgeNoKayittaAta(TabTeklif, 80, 'TEKLIFNO', 'TEKLIFSERI', 'KOCANNO',
+    TabTeklif.FieldByName('TARIH').AsDateTime);
   BoslukKontrolu;
   if TabTeklif.FieldByName('TEKLIF_DOVIZI').AsString='' then
      TabTeklif.FieldByName('TEKLIF_DOVIZI').AsString:=CariDoviz;
@@ -2605,7 +2607,7 @@ var
 begin
   case IslemOp of
     'E':begin
-       belgeno := SiradakiBelgeNumarasi(81,Tablo.GENINI.BugunTrh);
+       belgeno := BelgeNoRezerveEt(81,Tablo.GENINI.BugunTrh);
 
        Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
 
@@ -2629,12 +2631,11 @@ var
   etiketler,bilgiler:TArrayOfString;
   REHBERILETID:integer;
   REHBERILETAD,REHBERILETADHINT:String;
-  belgeno: TBelgeNo;
 begin
   TabTeklif.FieldByName('TARIH').Value := Tablo.GENINI.BugunTrh;
-  belgeno := SiradakiBelgeNumarasi(80,TabTeklif.FieldByName('TARIH').AsDateTime);
-  TabTeklif.FieldByName('TEKLIFSERI').AsString := belgeno.SeriNo; // seri
-  TabTeklif.FieldByName('TEKLIFNO').AsString := belgeno.belgeno; // FatNo;
+  // Numara acilista alinmaz: ilk kayitta TabTeklifBeforePost'ta koçandan atomik ayrilir.
+  TabTeklif.FieldByName('TEKLIFNO').AsString := '';
+  OtomatikNoIpucu(EditTeklifNo);
   TabTeklif.FieldByName('KOCANNO').AsInteger := KocannoBul(80); // KOCAN numaras?
   TabTeklif.FieldByName('REVIZEID').AsInteger := 1;
 //  TabTeklif.FieldByName('GIRISKAYNAK').AsInteger := Windows_Sekme_Giris;

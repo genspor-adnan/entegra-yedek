@@ -243,7 +243,6 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       end
     end
     object PageHareketSeriLot: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 966
       Top = 1
       Width = 270
@@ -253,10 +252,11 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       Visible = False
       Properties.ActivePage = cxTabSheet4
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       ClientRectBottom = 495
       ClientRectLeft = 4
       ClientRectRight = 266
-      ClientRectTop = 24
+      ClientRectTop = 25
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
         ImageIndex = 19

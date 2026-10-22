@@ -297,6 +297,29 @@ object TahakkukDlg: TTahakkukDlg
       Style.IsFontAssigned = True
       Transparent = True
     end
+    object LblIletisim: TcxLabel
+      Left = 5
+      Top = 212
+      Caption = #304'leti'#351'im'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -11
+      Style.Font.Name = 'Trebuchet MS'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object ComboIletisim: TcxDBImageComboBox
+      Left = 114
+      Top = 211
+      DataBinding.DataField = 'REHBERILETID'
+      DataBinding.DataSource = DtsFatBaslik
+      Properties.ClearKey = 46
+      Properties.Items = <>
+      TabOrder = 28
+      Width = 366
+    end
     object EditProje: TcxButtonEdit
       Left = 114
       Top = 165
@@ -414,7 +437,7 @@ object TahakkukDlg: TTahakkukDlg
       Top = 82
       DataBinding.DataField = 'FATURANO'
       DataBinding.DataSource = DtsFatBaslik
-      TabOrder = 18
+      TabOrder = 17
       Width = 120
     end
     object EditTarih: TcxDBDateEdit
@@ -423,7 +446,7 @@ object TahakkukDlg: TTahakkukDlg
       DataBinding.DataField = 'FATURATARIH'
       DataBinding.DataSource = DtsFatBaslik
       Properties.Kind = ckDateTime
-      TabOrder = 19
+      TabOrder = 18
       Width = 120
     end
     object LabelTarih: TcxLabel
@@ -460,7 +483,7 @@ object TahakkukDlg: TTahakkukDlg
       DataBinding.DataSource = DtsFatBaslik
       Properties.DisplayFormat = '0;-0'
       Properties.MaxValue = 255.000000000000000000
-      TabOrder = 22
+      TabOrder = 21
       Width = 120
     end
     object EditDemirbas: TcxButtonEdit
@@ -477,7 +500,7 @@ object TahakkukDlg: TTahakkukDlg
           Kind = bkText
         end>
       Properties.OnButtonClick = EditDemirbasPropertiesButtonClick
-      TabOrder = 23
+      TabOrder = 22
       Width = 241
     end
     object lblDemirbas: TcxLabel
@@ -511,7 +534,7 @@ object TahakkukDlg: TTahakkukDlg
         
           ' from PROJEBUTCE PB inner join MASRAFGELIR M on M.ID = PB.MASRAF' +
           'ID ')
-      TabOrder = 25
+      TabOrder = 24
       Visible = False
     end
     object LabelCoklu: TcxLabel
@@ -605,7 +628,7 @@ object TahakkukDlg: TTahakkukDlg
       Properties.ImmediateUpdateText = True
       Properties.ReadOnly = False
       Properties.OnCloseUp = ComboKurPropertiesCloseUp
-      TabOrder = 27
+      TabOrder = 26
       Width = 52
     end
   end

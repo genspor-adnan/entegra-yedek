@@ -3497,8 +3497,8 @@ begin
   if TabCariListe.FieldByName('TUR').AsInteger in [13,17] then begin
 
 
-    ID := Tablo.SQLSatiriKopyala('FATBASLIK',TabCariListe.FieldByName('CEKID').AsInteger,['TARIH', 'FATURATARIH', 'EKLEYEN', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
-            [Tablo.GENINI.BugunTrh, Tablo.GENINI.BugunTrhSaat, Kullanan,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
+    ID := Tablo.SQLSatiriKopyala('FATBASLIK',TabCariListe.FieldByName('CEKID').AsInteger,['TARIH', 'FATURATARIH', 'EKLEYEN', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI', 'MUHAKTAR'],
+            [Tablo.GENINI.BugunTrh, Tablo.GENINI.BugunTrhSaat, Kullanan,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat, 0]);
        //TabFatBaslik.Close;
        //TabFatBaslik.Params[0].Value := ID;
        //TabFatBaslik.Open;

@@ -951,7 +951,7 @@ begin
 
   if IslemOp='K' then begin
     Tablo.TablodanSorguAc(3,'select * from SIPARISDETAY where SIPARISID=' + inttostr(SiparisIdsi));
-    belgeno := SiradakiBelgeNumarasi(SiparisTur, SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
+    belgeno := BelgeNoRezerveEt(SiparisTur, SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
     SiparisIdsi := Tablo.SQLSatiriKopyala('SIPARIS', SiparisIdsi,['TARIH', 'SIPARISTARIH', 'EKLEYEN','SIPARISSERI', 'KOCANNO', 'SIPARISNO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','ONAYLAYAN'],
           [Tablo.GENINI.BugunTrh, Tablo.GENINI.BugunTrhSaat, Kullanan,belgeno.SeriNo,KocannoBul(SiparisTur), belgeno.belgeno,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0]);
     while not Tablo.Query3.Eof do begin
@@ -1418,6 +1418,9 @@ end;
 procedure TStokTalepWizard.SIPARISBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: stok talep post -> yakala
+  if DataSet = SIPARIS then
+    BelgeNoKayittaAta(SIPARIS, 105, 'SIPARISNO', 'SIPARISSERI', '',
+      SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
 
   // TALEP TARIHI ileri olamaz (opsiyondan BAGIMSIZ; stok transferindeki kural ile ayni).
   //   BoslukKontrolu'ndan ONCE: oradaki TarihKontrol genel opsiyona bagli (-10088); opsiyon
@@ -1827,7 +1830,7 @@ var
 begin
   case IslemOp of
     'E':begin
-       belgeno := SiradakiBelgeNumarasi(19,Tablo.GENINI.BugunTrh);
+       belgeno := BelgeNoRezerveEt(19,Tablo.GENINI.BugunTrh);
 
        Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
        TabloYenile(Tablo.tabCariBilgileri, [RehberId,REHBERILETID]);
@@ -1860,7 +1863,6 @@ end;
 procedure TStokTalepWizard.SIPARISNewRecord(DataSet: TDataSet);
 var
   seri, FatNo : string;
-  belgeno : TBelgeNo;
   Etiketler,Bilgiler : TArrayOfString;
   REHBERILETID:integer;
   REHBERILETAD,REHBERILETADHINT:String;
@@ -1873,9 +1875,10 @@ begin
 //  cbSatici.Text := Tablo.AciklamaGetir('REHBER','FIRMA', SIPARIS.FieldByName('SATICIKODU').AsString);
 
   SIPARIS.FieldByName('SIPARISTARIH').Value := Tablo.GENINI.BugunTrhSaat;
-  belgeno:= SiradakiBelgeNumarasi(105,SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
-  SIPARIS.FieldByName('SIPARISSERI').AsString := belgeno.serino; //seri
-  SIPARIS.FieldByName('SIPARISNO').AsString := belgeno.belgeno; //FatNo;
+  // Numara acilista alinmaz (ekranda "Otomatik"): ilk kayitta SIPARISBeforePost'ta
+  //   koçandan atomik ayrilir -> ayni anda belge acan iki kullanici ayni numarayi alamaz.
+  SIPARIS.FieldByName('SIPARISNO').AsString := '';
+  OtomatikNoIpucu(EditFatNo);
   SIPARIS.FieldByName('KOCANNO').AsInteger := KocannoBul(SiparisTur); //KOCAN numaras?
   SIPARIS.FieldByName('TARIH').Value := Tablo.GENINI.BugunTrh;
   SIPARIS.FieldByName('REHBERID').AsInteger := RehberId;
@@ -1974,14 +1977,15 @@ begin
     Abort;
   if not TarihKontrol(EditFatTarih.Date, Belge + KontrolTarihi) then
      Abort;
-  if not BoslukKontrol(EditFatNo.Text, Belge+' No') then
+  if not BoslukKontrol(SIPARIS.FieldByName('SIPARISNO').AsString, Belge+' No') then
     Abort;
   if not BoslukKontrol(cbStokDepo.Text, FTWGirisDeposuBosOlamaz) then
     Abort;
   if not BoslukKontrol(cbCikDepo.Text, FTWCikisDeposuBosOlamaz) then
     Abort;
 
-  EditFatNo.Text := trim(EditFatNo.Text);
+  if SIPARIS.FieldByName('SIPARISNO').AsString <> Trim(SIPARIS.FieldByName('SIPARISNO').AsString) then
+    SIPARIS.FieldByName('SIPARISNO').AsString := Trim(SIPARIS.FieldByName('SIPARISNO').AsString);
 
   Tablo.Query3.SQL.Text := 'select 1 from SIPARIS where REHBERID='+SIPARIS.FieldByName('REHBERID').AsString
                             +' and TUR='+SIPARIS.FieldByName('TUR').AsString

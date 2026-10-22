@@ -609,6 +609,9 @@ type
     FKullaniciSkinAdi: string;
     FSkinOrijinaller: TStringList;  // LookAndFeel, grid stili ve toolbar ozgun degerleri
     FSkinUygulananlar: TStringList; // Ayni skin icin tekrar frame/form taramasini atlar
+    FSonSecim: TStringList;         // ListedenBilgiGetir son secilen satir ('ALAN=Deger')
+    procedure SonSecimDoldur(ADataSet: TDataSet; ASecildi: Boolean);
+    function SonSecimGetir(const AAlan: string): string;
     { Private declarations }
     function SkinNesneOzelligi(AObject: TObject; const APropName: string): TObject;
     function SkinYolNesnesi(AObject: TObject; const AYol: string): TObject;
@@ -768,12 +771,15 @@ type
     procedure KasadanSil(Sirano: Integer);
     function ListedenBilgiGetir(Baslik, Komut: string; Sonuc: TStringList; RepositoryList: array of TcxEditRepositoryItem;EkranYazdirAdi: string=''; YaziciYazTus: TNotifyEvent = nil; Conn: TFDConnection = nil; YeniClick: TNotifyEvent = nil): Boolean;overload;
     function ListedenBilgiGetir(Baslik:string; Komut: TArrayOfString; Sonuc: TStringList; RepositoryList: array of TcxEditRepositoryItem;EkranYazdirAdi: string='';YaziciYazTus: TNotifyEvent = nil; Conn: TFDConnection = nil; YeniClick: TNotifyEvent = nil): Boolean;overload;
+    // ListedenBilgiGetir ile son secilen satirin degeri, alan (SQL alias) adiyla; kolon
+    //   sirasindan bagimsiz. Yalniz son secimi tutar - secimden hemen sonra okuyun.
+    property SonSecim[const AAlan: string]: string read SonSecimGetir;
     function ListedenCokluSecim(Baslik, Komut: string; RepositoryList: array of TcxEditRepositoryItem; CaptionList: array of string): TStringList;
     function HizliGirisListedenBilgiGetir(Baslik:string; Komut: String; Sonuc: TStringList; ShowCaptions:Boolean; VisibilityList: array of Boolean; RepositoryList: array of TcxEditRepositoryItem ): Boolean;
     procedure NavTusGoruntule(Dts: TDataSource; EkleTus, SilTus, KaydetTus, IptalTus: TToolButton);
     function GetInetFile(const fileURL, filename: String): Boolean;
     procedure FaturaBaslik(Tablo1: TFDQuery; RehberId: Integer);
-    procedure BelgeNoIslemleri(FATBASLIK: TFDQuery; Tur: Integer; Irsaliyeli:boolean=False);
+    procedure BelgeNoIslemleri(FATBASLIK: TFDQuery; Tur: Integer; Irsaliyeli:boolean=False; Rezerve:boolean=True);
     procedure FATBASLIKYeniKayit(FATBASLIK: TFDQuery; RehberId,Tur,Tipi: Integer; GirDepo: Integer=-1; CikDepo: Integer=-1;  Irsaliyeli:boolean=False;MasrafMerkezi:integer=-1; ServisID:integer=-1; ProjeId:integer=-1; AktiviteId:integer=-1);
     function TicariBilgiGetir(Yeri, YerId, VARSAYILAN: Integer): string;
     function TCNOveyaVKNOdanRehberIDBul(TCNO, VKNO: string): Integer;
@@ -1197,6 +1203,12 @@ type
   function DovizKuruBul(Tarih, Kur, Fiyatadi: string): Currency;
   procedure TabloYenile(TabloAdi: TFDQuery; p: array of Variant;LocateID:integer=0; IDTur:String='ID');
   function SiradakiBelgeNumarasi(Tur: Integer; Tarih: TDateTime): TBelgeNo;
+  function BelgeNoRezerveEt(Tur: Integer; Tarih: TDateTime): TBelgeNo;
+  procedure BelgeNoKayittaAta(DS: TDataSet; Tur: Integer; const NoAlan, SeriAlan, KocanAlan: string; Tarih: TDateTime);
+  procedure OtomatikNoIpucu(AEdit: TcxCustomTextEdit; AOtomatik: Boolean = True);
+  function IletisimComboDoldur(ACombo: TcxDBImageComboBox; ARehberId: Integer;
+    AVarsayilanAta: Boolean): Boolean;
+  function VarsayilanIletisimID(ARehberId: Integer): Integer;
   function SiradakiMakbuzNumarasi(tur:integer):string;
   function KocannoBul(Tur: integer): integer;
   function TarihKontrol(Tarih:TDateTime; Ad: String): Boolean;
@@ -1998,7 +2010,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
 {    if TView<>nil then
       TView.ApplyBestFit(nil)
     else if Tree1<>nil then
-      Tree1.ApplyBestFit();  }
+       Tree1.ApplyBestFit();  }
     str.Free;
     str2.Free;
   finally
@@ -2006,7 +2018,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
   end;
 end;
 
-function TTablo.BelgeKopyala(ID, Tur, RehberId : integer; Tarih : TDateTime): integer;
+function  TTablo.BelgeKopyala(ID, Tur, RehberId : integer; Tarih : TDateTime): integer;
 // BELGE KLONU - TAMAMEN SUNUCUDA (GenDepoUpdate140 + 142).
 //   FATBASLIK tabanli belgeler  -> sp_Api_Belge_Klonla_Json         -> sp_Api_Belge_Kaydet_Json
 //   Siparis (TUR 9/19/101)      -> sp_Api_Belge_Siparis_Klonla_Json -> sp_Api_Belge_Siparis_Kaydet_Json
@@ -2095,7 +2107,7 @@ var
 begin
   Result := 0;
   if BaslikTur in [KasaTur_GiderPusulasi, KasaTur_SatisIrsaliyesi, KasaTur_SatisFaturasi, KasaTur_SatisFisi, KasaTur_Uretim, KasaTur_Giden_Konsinye, KasaTur_StokTransferi] then
-     BelgeNo := SiradakiBelgeNumarasi(BaslikTur, Tablo.GENINI.BugunTrhSaat);
+     BelgeNo := BelgeNoRezerveEt(BaslikTur, Tablo.GENINI.BugunTrhSaat);
 {  if basliktablosu='SIPARIS' then
      Doviz:='DOVIZ_CINSI'
   else
@@ -2966,7 +2978,7 @@ begin
         AFiyat:=IntToStr(StrToIntDef(tablo.inidenDegerGetir(IntToStr(Ops_FiyatListeAdi),bilgiler[0]),VarsAlisFiyatID));
         AVade := IntToStr(StrToIntDef(bilgiler[1],0));
         FirmaRehID:=-1; //Kendi Firma bilgilerimiz
-        belgeno:= SiradakiBelgeNumarasi(Tur,GENINI.BugunTrh);
+        belgeno:= BelgeNoRezerveEt(Tur,GENINI.BugunTrh);
         DepoField:='[GIRISDEPO]';
         Aciklama := Veritabani.BasitKomutÇalıştır(FDCnn,'select FIRMA from REHBER where ID=(select REHBERID from TEKLIF where ID='+IntToStr(KaynakBaslikId)+')',[],[],True);
       end;
@@ -2976,7 +2988,7 @@ begin
         FirmaRehID:= RehID;
         AFiyat:='[FIYAT_LISTESI]';
         AVade := '[VADE]';
-        belgeno:= SiradakiBelgeNumarasi(Tur,GENINI.BugunTrh);
+        belgeno:= BelgeNoRezerveEt(Tur,GENINI.BugunTrh);
         DepoField:='[CIKISDEPO]';
         Aciklama:='';
       end;
@@ -5835,21 +5847,34 @@ begin
   end;
 end;
 
-procedure TTablo.BelgeNoIslemleri(FATBASLIK: TFDQuery; Tur: Integer; Irsaliyeli:boolean=False);
+procedure TTablo.BelgeNoIslemleri(FATBASLIK: TFDQuery; Tur: Integer; Irsaliyeli:boolean=False; Rezerve:boolean=True);
+// Rezerve=False: yeni belge acilisi - kagit belgede numara ALINMAZ, FATURANO bos kalir
+//   (ekranda "Otomatik"); baslik ilk kez kaydedilirken Rezerve=True ile koçandan atomik
+//   ayrilir (BelgeNoRezerveEt). Boylece ayni anda belge acan iki kullanici ayni numarayi alamaz.
 var
   t:Integer;
   belgeno: TBelgeNo;
+  LEBelge: Boolean;
 begin
   FATBASLIK.Edit;
   if (Tur=15) and (Irsaliyeli) then
     t := 222
   else
     t := Tur;
-  belgeno := SiradakiBelgeNumarasi(t,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
+  LEBelge := ((Tur = 15) and (EFaturaKullanimda > 0)) or ((Tur = 14) and EIrsaliyeKullanimda);
+  if not Rezerve and not LEBelge then begin
+    FATBASLIK.FieldByName('FATURANO').AsString := '';
+    FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(t);
+    Exit;
+  end;
+  if Rezerve and not LEBelge then
+    belgeno := BelgeNoRezerveEt(t,FATBASLIK.FieldByName('FATURATARIH').AsDateTime)
+  else
+    belgeno := SiradakiBelgeNumarasi(t,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
   FATBASLIK.FieldByName('FATURASERI').AsString := belgeno.SeriNo; // seri
   // e-Fatura (Tur=15) / e-Irsaliye (Tur=14) aktifse numarayi GIB/izibiz atar ->
   //   FATURANO=0, kocan da gereksiz (KOCANNO=0). Kagit belgede kocandan gelir.
-  if ((Tur = 15) and (EFaturaKullanimda > 0)) or ((Tur = 14) and EIrsaliyeKullanimda) then
+  if LEBelge then
   begin
     FATBASLIK.FieldByName('FATURANO').AsString := '0';
     FATBASLIK.FieldByName('KOCANNO').AsInteger := 0;
@@ -5880,6 +5905,10 @@ begin
   FATBASLIK.FieldByName('SATICIKODU').AsInteger := StrToIntDef(Tablo.AciklamaGetir('REHBER','TEMSILCI', RehberId), -9999);
 
   FATBASLIK.FieldByName('FATURA_MALIYETI_ORT').AsCurrency:= 0;
+  // Muhasebe aktarim bayragi: dataset INSERT'i alani acikca NULL gonderir (DB DEFAULT 0
+  //   devreye girmez) -> aktarim programi NULL'u "aktarilmamis" (0) olarak gormez.
+  if FATBASLIK.FindField('MUHAKTAR') <> nil then
+    FATBASLIK.FieldByName('MUHAKTAR').AsInteger := 0;
   // varsayılan iskonto bilgilerine bakalım...
   Tablo.RehberEkBilgileriniGetir(RehberId, 2, [RehVars_FiyatListeAdi,
                        RehVars_Stok_Vade, RehVars_GLN, RehVars_FiyatListeAdiAlis], etiketler,bilgiler);
@@ -5912,7 +5941,7 @@ begin
   // 8 gider pusulası alım türü evrak olmasına rağmen belge nosu çıkan evraklar gibi otomatik üretilecek
   // bu yüzden ayrı bir if bloğu oluşturuldu.
   if (FATBASLIK.FieldByName('FATURANO').AsString = '') and (Tur in [3,4,8,10, 14, 15, 16,110, 119]) then //efatura varsa fatura no oluşmaz
-      BelgeNoIslemleri(FATBASLIK, Tur, Irsaliyeli);
+      BelgeNoIslemleri(FATBASLIK, Tur, Irsaliyeli, False);   // numara kayitta ayrilir
   if Tur in [4,14, 15, 16, 119] then begin // çıkış
     Tablo.FaturaBaslik(FATBASLIK, RehberId);
     //Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
@@ -5929,7 +5958,8 @@ begin
     FATBASLIK.FieldByName('FATURASERI').AsString := '';
     if Tur in [3, 4, 6, 8, 10, 11, 12, 109] then
        Tablo.FaturaBaslik(FATBASLIK, SubeId);
-    FATBASLIK.FieldByName('REHBERILETID').AsInteger :=0;
+    // Giris belgelerinde de carinin varsayilan iletisimi gelsin (eskiden 0).
+    FATBASLIK.FieldByName('REHBERILETID').AsInteger := VarsayilanIletisimID(RehberId);
   end;
 //  FATBASLIK.FieldByName('GIRISKAYNAK').AsInteger := Windows_Sekme_Giris;
   FATBASLIK.FieldByName('REHBERID').AsInteger := RehberId;
@@ -6396,6 +6426,117 @@ var belgeno:TBelgeno;
 begin
   belgeno := SiradakiBelgeNumarasi(tur,Tablo.GENINI.BugunTrh);
   Result := belgeno.Serino+belgeno.BelgeNo;
+end;
+
+function BelgeNoRezerveEt(Tur: Integer; Tarih: TDateTime): TBelgeNo;
+// Numarayi sayactan KALICI ayirir (sp_BelgeNoGetir @Rezerve=1, Update_SQL_206): iki kullanici
+//   ayni numarayi alamaz. Yalniz belge gercekten kaydedilirken cagrilmali - her cagri bir
+//   numara harcar. Ekranda gostermek icin SiradakiBelgeNumarasi kullanilmaz; numara alani
+//   bos birakilir ("Otomatik") ve BelgeNoKayittaAta ilk Post'ta doldurur.
+begin
+   if (Tur=15)and(EFaturaKullanimda>0) then begin
+      Result.Serino :='';
+      Result.BelgeNo:='0';
+   end else begin
+      Tablo.TablodanSorguAc(5,' exec [dbo].[sp_BelgeNoGetir] '+IntToStr(Tur)+','+IntToStr(SubeID)+','+IntToStr(KocannoBul(Tur))+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tarih)+''',1 ');
+      Result.KocanNo := Tablo.Query5.Fields[0].AsString;
+      Result.Serino := Tablo.Query5.Fields[1].AsString;
+      Result.BelgeNo := Tablo.Query5.Fields[2].AsString;
+   end;
+end;
+
+procedure BelgeNoKayittaAta(DS: TDataSet; Tur: Integer; const NoAlan, SeriAlan, KocanAlan: string; Tarih: TDateTime);
+// Baslik dataset'inin BeforePost'undan cagrilir: numara alani bossa (yeni belge, kullanici
+//   elle numara yazmamis) koçandan numara ayirir ve seri/kocan alanlarini doldurur.
+//   Kullanicinin yazdigi numaraya dokunulmaz. Kocan tanimsizsa SP bos doner, alan bos kalir.
+var
+  LNo: TBelgeNo;
+begin
+  if not (DS.State in [dsInsert, dsEdit]) then Exit;
+  if Trim(DS.FieldByName(NoAlan).AsString) <> '' then Exit;
+  LNo := BelgeNoRezerveEt(Tur, Tarih);
+  if LNo.BelgeNo = '' then Exit;
+  DS.FieldByName(NoAlan).AsString := LNo.BelgeNo;
+  if (SeriAlan <> '') and (Trim(DS.FieldByName(SeriAlan).AsString) = '') then
+    DS.FieldByName(SeriAlan).AsString := LNo.Serino;
+  if KocanAlan <> '' then
+    DS.FieldByName(KocanAlan).AsInteger := StrToIntDef(LNo.KocanNo, 0);
+end;
+
+type
+  TcxTextEditIpucuErisim = class(TcxCustomTextEdit);
+
+procedure OtomatikNoIpucu(AEdit: TcxCustomTextEdit; AOtomatik: Boolean);
+// Numara alani bosken "Otomatik" yazar (numara ilk kayitta BelgeNoKayittaAta ile gelir).
+//   TcxDBTextEdit TextHint'i yayinlamiyor (protected) -> erisim sinifi uzerinden.
+begin
+  if AOtomatik then
+    TcxTextEditIpucuErisim(AEdit).TextHint := 'Otomatik'
+  else
+    TcxTextEditIpucuErisim(AEdit).TextHint := '';
+end;
+
+function VarsayilanIletisimID(ARehberId: Integer): Integer;
+// Carinin varsayilan iletisimi (VARSAYILAN=1, yoksa ilk kayit); hic yoksa 0.
+//   RehberIletisimAD'den farki: iletisim yoksa "Merkez" kaydi ACMAZ.
+begin
+  Result := 0;
+  if ARehberId <= 0 then
+    Exit;
+  Result := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'select top 1 ID from REHBERILETISIM where REHBERID = &R ' +
+    'order by case when VARSAYILAN = 1 then 0 else 1 end, ID',
+    ['&R'], [ARehberId], True)), 0);
+end;
+
+function IletisimComboDoldur(ACombo: TcxDBImageComboBox; ARehberId: Integer;
+  AVarsayilanAta: Boolean): Boolean;
+// Carinin iletisim adlarini (REHBERILETISIM) combo'ya doldurur; combo'nun bagli
+//   oldugu alan (REHBERILETID) iletisim ID'sini tutar. AVarsayilanAta (yeni kayit
+//   ya da cari degisti): alan bossa veya bu cariye ait degilse VARSAYILAN=1
+//   iletisim (yoksa ilk) yazilir. Cari yoksa/iletisimi yoksa False doner.
+var
+  LItem: TcxImageComboBoxItem;
+  LVarsayilan: Variant;
+  LDS: TDataSet;
+  LAlan: TField;
+begin
+  ACombo.Properties.Items.Clear;
+  LVarsayilan := Null;
+  if ARehberId > 0 then
+  begin
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'select ID, AD from REHBERILETISIM where REHBERID=' + IntToStr(ARehberId) +
+      ' order by case when VARSAYILAN = 1 then 0 else 1 end, AD';
+    Tablo.Query1.Open;
+    while not Tablo.Query1.Eof do
+    begin
+      LItem := ACombo.Properties.Items.Add;
+      LItem.Value := Tablo.Query1.Fields[0].AsInteger;
+      LItem.Description := Tablo.Query1.Fields[1].AsString;
+      if VarIsNull(LVarsayilan) then
+        LVarsayilan := Tablo.Query1.Fields[0].AsInteger;   // siralama: once varsayilan
+      Tablo.Query1.Next;
+    end;
+    Tablo.Query1.Close;
+  end;
+  Result := ACombo.Properties.Items.Count > 0;
+
+  if not AVarsayilanAta or (ACombo.DataBinding.DataSource = nil) then
+    Exit;
+  LDS := ACombo.DataBinding.DataSource.DataSet;
+  if (LDS = nil) or not (LDS.State in [dsInsert, dsEdit]) then
+    Exit;
+  LAlan := LDS.FindField(ACombo.DataBinding.DataField);
+  if LAlan = nil then
+    Exit;
+  if (LAlan.AsInteger <= 0) or (ACombo.Properties.FindItemByValue(LAlan.AsInteger) = nil) then
+  begin
+    if VarIsNull(LVarsayilan) then
+      LAlan.Clear
+    else
+      LAlan.AsInteger := LVarsayilan;
+  end;
 end;
 
 function SiradakiBelgeNumarasi(Tur: Integer; Tarih: TDateTime): TBelgeNo;
@@ -6913,6 +7054,12 @@ begin
 end;
 function TTablo.IzlemBildirimSayisi(Tur, FatBasId, FatSatirId:Integer; BelgeTarih:TDateTime):Integer;
 begin
+  // HENUZ KAYDEDILMEMIS SATIR (yeni satir, ID 0): bakilacak lot yok. Filtresiz sorgu
+  //   belge tarihinden sonraki BUTUN izlemeli cikislari sayiyor ve yeni urun
+  //   eklerken her secimde "Lot/Seri No lu urun cikisi yapilmis" diyordu.
+  Result := 0;
+  if (FatBasId <= 0) and (FatSatirId <= 0) then
+    Exit;
 //burada giren bir ürün çıkış yapılmış mı bakıyoruz
    if Tur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi, KasaTur_Uretim, KasaTur_Uretim_Urun, KasaTur_Uretim_Sarf,
               KasaTur_StokTransferi, KasaTur_StokSayimIslemi] then begin
@@ -7883,8 +8030,8 @@ begin
 
         // ANAKAYITID = iade edilen ORIJINAL fatura FATBASLIK.ID (guvenilir referans; ACIKLAMA
         //   metni hatali olabiliyor). IadeKontrolEt ve e-belge BillingReference bunu kullanir.
-        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','TIPI','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN', 'FATURANO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM','ANAKAYITID'],
-            [ 11,2,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan, VarToStr(YeniFatNo),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0,Tablo1.FieldByName('ID').AsInteger]);
+        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','TIPI','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN', 'FATURANO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM','ANAKAYITID','MUHAKTAR'],
+            [ 11,2,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan, VarToStr(YeniFatNo),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0,Tablo1.FieldByName('ID').AsInteger,0]);
 
        while not Tablo.Query3.Eof do begin
         Tablo.SQLSatiriKopyala('FATURA', Tablo.Query3.FieldByName('ID').AsInteger, ['EKLEYEN', 'FATBASID','YERI','YERID', 'EKLEMETARIHI','DEGISTIREN', 'DEGISTIRMETARIHI','STOKDURUMDEGIS'],
@@ -7895,12 +8042,12 @@ begin
        Tablo.FaturaSihirbazBaslat('D',11,-1, FaturaIDsi, Tablo1.AsInteger['REHBERID']);
      end;
    5:begin
-      belgeno := SiradakiBelgeNumarasi(8, Tablo1.FieldByName('FATURATARIH').AsDateTime);
+      belgeno := BelgeNoRezerveEt(8, Tablo1.FieldByName('FATURATARIH').AsDateTime);
 
          Tablo.TablodanSorguAc(3,'select * from FATURA where FATBASID=' + Tablo1.FieldByName('ID').AsString);
 
-        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN','FATURASERI', 'FATURANO','KOCANNO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM'],
-            [ 8,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan,belgeno.SeriNo, belgeno.Serino,IntToStr(KocannoBul(8)),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0]);
+        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN','FATURASERI', 'FATURANO','KOCANNO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM','MUHAKTAR'],
+            [ 8,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan,belgeno.SeriNo, belgeno.Serino,IntToStr(KocannoBul(8)),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0,0]);
 
        while not Tablo.Query3.Eof do begin
         Tablo.SQLSatiriKopyala('FATURA', Tablo.Query3.FieldByName('ID').AsInteger, ['EKLEYEN', 'FATBASID', 'EKLEMETARIHI','DEGISTIREN', 'DEGISTIRMETARIHI','STOKDURUMDEGIS'],
@@ -8029,7 +8176,7 @@ var
       if Tablo.Query1.Fields[0].AsFloat<0.01 then
          exit;
 
-      belgeno:= SiradakiBelgeNumarasi(16, StrToDateTime(Tablo.Query0.Fields[0].asstring));
+      belgeno:= BelgeNoRezerveEt(16, StrToDateTime(Tablo.Query0.Fields[0].asstring));
       SubeIDYaz:=IntToStr(abs(Tablo.Query0.FieldByName('SUBEID').asinteger));
       if Length(SubeIDYaz)=1 then SubeIDYaz:='0'+SubeIDYaz;
 
@@ -8800,7 +8947,7 @@ begin
   Delete(Ek, 1, 1);
   Tablo.TablodanSorguAc(3, 'select DEGER = 0 union select isnull(DEGER,-1) from GENINI where DIL='+IntToStr(Dil)+' AND   BOLUM=-1011 and ANAHTAR like ''%(' + Ek + ')%'' order by 1 desc');
 
-  belgeno:= SiradakiBelgeNumarasi(250, Tablo.GENINI.BugunTrhSaat);
+  belgeno:= BelgeNoRezerveEt(250, Tablo.GENINI.BugunTrhSaat);
 
   if AktifVeriMotor = vmPG then
     Tablo.TablodanSorguAc(1, '/*PGX*/ insert into DOKUMAN (ID, TARIH, BELGENO,YON, KATEGORI, AD, TUR, KLASOR,SUBEID,GIZLILIKDERECESI,'+
@@ -10266,7 +10413,7 @@ var sServis  : string;
     belgeno  : TBelgeNo;
     ServisId, HareketId : Integer;
 begin
-     belgeno := SiradakiBelgeNumarasi(TabNo_SERVIS,Tablo.GENINI.BugunTrhSaat);
+     belgeno := BelgeNoRezerveEt(TabNo_SERVIS,Tablo.GENINI.BugunTrhSaat);
      Tablo.TablodanSorguAc(1, 'select isnull(min(KAYNAKDURUM),0) from DURUMBAGLANTI where YERI=83');
      //LabelServisNo.Caption := belgeno.belgeno;
      sServis   := 'insert into SERVIS (REHBERID,KONUSU,KOCANNO,SERVISNO,TARIH,SERVISSERI,EKLEYEN,SUBEID,GIRISKAYNAK, YERI, YERID,PROJEID,DURUM,ACKAPA)values ';
@@ -10807,6 +10954,7 @@ begin
     for i := 0 to TabloGirisDlg.Query1.FieldCount - 1 do
       Sonuc.Add(TabloGirisDlg.Query1.Fields[i].AsString);
   Result := TabloGirisDlg.ModalResult = mrOk;
+  SonSecimDoldur(TabloGirisDlg.Query1, Result);
   TabloGirisDlg.destroy;
 end;
 
@@ -10846,7 +10994,28 @@ begin
      for i := 0 to TabloGirisDlg.Query1.FieldCount - 1 do
          Sonuc.Add(TabloGirisDlg.Query1.Fields[i].AsString);
   Result := TabloGirisDlg.ModalResult = mrOk;
+  SonSecimDoldur(TabloGirisDlg.Query1, Result);
   TabloGirisDlg.destroy;
+end;
+
+procedure TTablo.SonSecimDoldur(ADataSet: TDataSet; ASecildi: Boolean);
+var
+  i: Integer;
+begin
+  if FSonSecim = nil then
+    FSonSecim := TStringList.Create;
+  FSonSecim.Clear;
+  if ASecildi then
+    for i := 0 to ADataSet.FieldCount - 1 do
+      FSonSecim.Values[ADataSet.Fields[i].FieldName] := ADataSet.Fields[i].AsString;
+end;
+
+function TTablo.SonSecimGetir(const AAlan: string): string;
+begin
+  if FSonSecim = nil then
+    Result := ''
+  else
+    Result := FSonSecim.Values[AAlan];
 end;
 
 function TTablo.ConnectionStringOlustur(ServerName, UserN, Pass, DBName: string)
@@ -15864,6 +16033,7 @@ begin
   FreeAndNil(FSkinUygulananlar);
   FreeAndNil(FSkinOrijinaller);
   FreeAndNil(FUserTabloDurum);   // _USER varlik cache'i (UserAlanYazdirmaEkle)
+  FreeAndNil(FSonSecim);
   if FDCnn.Connected = True then
     VeriTabani.BasitKomutÇalıştır(FDCnn,'delete from master.dbo.GLogins where ID='+IntToStr(UserSessionID),[],[]);
   FDCnn.Connected := False;

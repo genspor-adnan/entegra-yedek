@@ -566,6 +566,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
          : { op: 'and', kosullar };
   }, [agacSecim]);
 
+  /** IKINCI CIP GRUBU (tanim.onCipler): secimi ana ciplerden bagimsiz, filtresi AND'lenir. */
+  const [onCipIndeks, setOnCipIndeks] = useState(0);
+  const onCipliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    const f = tanim.onCipler?.[onCipIndeks]?.filtre;
+    if (!f) return temel;
+    return temel ? { op: 'and', kosullar: [temel, f] } : f;
+  }, [tanim.onCipler, onCipIndeks]);
+
   /** Kategori secimi sabit filtreye AND'lenir - cip ve arama ile birlikte. */
   const kategoriliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (!kategoriDal || kategoriDal.agac.length === 0) return temel;
@@ -1175,8 +1183,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ? (v => setAgacSecim(o => ({ ...o, bolum: v, panelIdleri: null, panelAdi: '' })))
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
-      sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
-        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(sevkSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))))))))))))}
+      sabitFiltre={onCipliFiltre(agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
+        primSuzgec.filtre(personelSuzgec.filtre(konsSuzgec.filtre(sevkSuzgec.filtre(radBolge.filtre(cihazSuzgec.filtre(orderSuzgec.filtre(gozSuzgec.filtre(gozlukSuzgec.filtre(gozCihazSuzgec.filtre(gorSuzgec.filtre(panoSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre)))))))))))))))))}
+      cipOnu={tanim.onCipler ? (
+        <>{tanim.onCipler.map((oc, i) => (
+          <button key={oc.ad} type="button" className={i === onCipIndeks ? 'on' : ''}
+                  onClick={() => setOnCipIndeks(i)}>{cm(oc.ad)}</button>
+        ))}</>
+      ) : undefined}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}

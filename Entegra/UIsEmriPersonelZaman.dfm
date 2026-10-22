@@ -156,6 +156,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetCalisma: TcxTabSheet
       Caption = #199'al'#305#351'ma'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GroupDetay: TcxGroupBox
         Left = 169
         Top = 0
@@ -974,6 +978,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetEkAlan111: TcxTabSheet
       Caption = 'Ek Alan1'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TabSheetEkAlan1: TPanel
         Left = 0
         Top = 0
@@ -987,6 +995,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetEkAlan222: TcxTabSheet
       Caption = 'Ek Alan 2'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TabSheetEkAlan2: TPanel
         Left = 0
         Top = 0

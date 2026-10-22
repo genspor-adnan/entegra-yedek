@@ -2952,7 +2952,7 @@ end;
 function THizliGirisDlg.BelgeNoIslemleri:TBelgeno;
 begin
     TabFatBasDetay.Edit;
-    Result := SiradakiBelgeNumarasi(FatTur,TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime);
+    Result := BelgeNoRezerveEt(FatTur,TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime);
     TabFatBasDetay.FieldByName('FATURASERI').AsString := Result.SeriNo; // seri
     TabFatBasDetay.FieldByName('FATURANO').AsString := Result.belgeno; // FatNo;
     TabFatBasDetay.FieldByName('KOCANNO').AsInteger := KocannoBul(FatTur); // KOCAN numarası

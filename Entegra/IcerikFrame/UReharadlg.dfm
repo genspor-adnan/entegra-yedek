@@ -13,15 +13,17 @@ object RehberAraDlg: TRehberAraDlg
   TabOrder = 0
   object CariGrid: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 1044
-    Height = 253
+    Height = 250
     Align = alClient
     PopupMenu = PopupMenuREHBER
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 32
+    ExplicitHeight = 253
     object CariGridView: TcxGridDBTableView
       OnDblClick = CariGridDBTableView1DblClick
       Navigator.Buttons.CustomButtons = <>
@@ -410,7 +412,6 @@ object RehberAraDlg: TRehberAraDlg
     Left = 3
     Top = 3
     Width = 1038
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -438,6 +439,7 @@ object RehberAraDlg: TRehberAraDlg
     TabOrder = 0
     Transparent = True
     Wrapable = False
+    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -588,7 +590,6 @@ object RehberAraDlg: TRehberAraDlg
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
-    ExplicitWidth = 8
   end
   object PageControlSekme: TcxPageControl
     Left = 0
@@ -597,7 +598,7 @@ object RehberAraDlg: TRehberAraDlg
     Height = 259
     Align = alBottom
     TabOrder = 4
-    Properties.ActivePage = TabSheetIlet
+    Properties.ActivePage = TabSheetTicari
     Properties.CustomButtons.Buttons = <>
     Properties.Images = Tablo.PNGImageList2
     OnChange = PageControlSekmeChange
@@ -1278,10 +1279,6 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetTicari: TcxTabSheet
       Caption = 'Ticari Bilgiler'
       ImageIndex = 11
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
@@ -1299,9 +1296,6 @@ object RehberAraDlg: TRehberAraDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Temel Bilgiler'
           ImageIndex = 22
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar7: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1636,6 +1630,10 @@ object RehberAraDlg: TRehberAraDlg
                 Caption = 'Aktif'
                 DataBinding.FieldName = 'AKTIF'
               end
+              object GridAliasViewEPOSTA: TcxGridDBColumn
+                Caption = 'E-Posta'
+                DataBinding.FieldName = 'EPOSTA'
+              end
               object GridAliasViewILKKAYITTARIHI: TcxGridDBColumn
                 Caption = #304'lk Kay'#305't'
                 DataBinding.FieldName = 'ILKKAYITTARIHI'
@@ -1739,18 +1737,18 @@ object RehberAraDlg: TRehberAraDlg
               Caption = 'E-'#304'rsaliye XSLT'
             end
             object ButtonFaturaDipNotu: TcxButton
-              Left = 678
+              Left = 656
               Top = 6
-              Width = 147
+              Width = 145
               Height = 25
               Caption = 'Fatura Dip Notu'
               TabOrder = 6
               OnClick = ButtonFaturaDipNotuClick
             end
             object ButtonIrsaliyeDipNotu: TcxButton
-              Left = 831
+              Left = 840
               Top = 6
-              Width = 147
+              Width = 137
               Height = 25
               Caption = #304'rsaliye Dip Notu'
               TabOrder = 7
@@ -2355,6 +2353,12 @@ object RehberAraDlg: TRehberAraDlg
             DataBinding.IsNullValueType = True
             BestFitMaxWidth = 80
             Width = 128
+          end
+          object GridCariEkstreViewILETISIMAD: TcxGridDBColumn
+            Caption = #304'leti'#351'im'
+            DataBinding.FieldName = 'ILETISIMAD'
+            DataBinding.IsNullValueType = True
+            Width = 90
           end
           object GridCariEkstreViewHESAPKODU: TcxGridDBColumn
             Caption = 'Hesap Kodu'

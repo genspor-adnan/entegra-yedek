@@ -2960,11 +2960,11 @@ begin
   LabelFIYAT_LISTESI.visible := ComboFIYAT_LISTESI.visible;
   if (Tur = 4)and(TabFatbaslik.FieldByName('TIPI').AsInteger = 12) then begin //??k?? fi?i ve imha ise gerek??e almam?z laz?m
       LabelFIYAT_LISTESI.Caption := 'Gerekçe';
-      ComboFIYAT_LISTESI.Width := 288;
+      ComboFIYAT_LISTESI.Width := 100;
       Tablo.GENINI.ReadImageSection(Ops_RepImhaGerekce, Tablo.RepImhaGerekce.Properties.Items, False);
       ComboFIYAT_LISTESI.RepositoryItem := Tablo.RepImhaGerekce;
       lbSatici.caption := 'Sorumlu';
-      cbSatici.Width := 288;
+      cbSatici.Width := 100;
   end;
 
   //DateFATURA_GON_TARIHI.visible := False;//Tur in [11, 15];
@@ -4294,6 +4294,10 @@ var
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
   PgFatbaslikIdHazirla;
+  // Yeni kayitta MUHAKTAR NULL gitmesin (DB DEFAULT, acik NULL gonderildiginde calismaz).
+  if (TabFatbaslik.State = dsInsert) and (TabFatbaslik.FindField('MUHAKTAR') <> nil) and
+     TabFatbaslik.FieldByName('MUHAKTAR').IsNull then
+    TabFatbaslik.FieldByName('MUHAKTAR').AsInteger := 0;
   // VKN/TCKN SON SAVUNMA: alan elle de doldurulabiliyor ("12 23 545 871"). Kayda
   //   yalniz rakam gitsin; aksi halde e-Belge alias sorgusu bulamaz, XML/JSON'daki
   //   numara gecersiz olur ve VKN/TCKN sema secimi (uzunluga bakar) yanilir.
@@ -4305,6 +4309,12 @@ begin
   end;
   if (TabFatbaslik.State <> dsInsert)and(cbIrsaliyeli.Checked)and(TabFatbaslik.FieldByName('IRSALIYELI').OldValue<>TabFatbaslik.FieldByName('IRSALIYELI').NewValue) then
       Tablo.BelgeNoIslemleri(TabFatbaslik, Tur, cbIrsaliyeli.Checked);
+  // Yeni belgede numara acilista alinmaz (ekranda "Otomatik"); kullanici elle yazmadiysa
+  //   koçandan BURADA, ilk kayitta atomik ayrilir -> es zamanli iki kullanici ayni numarayi alamaz.
+  if (Trim(TabFatbaslik.FieldByName('FATURANO').AsString) = '') and (Tur in [3,4,8,10,14,15,16,110,119]) then begin
+    Tablo.BelgeNoIslemleri(TabFatbaslik, Tur, cbIrsaliyeli.Checked);
+    FKocanVerilenNo := TabFatbaslik.FieldByName('FATURANO').AsString;
+  end;
   BoslukKontrolu;
   if KilitKontrolEt(1,TabFatbaslik.FieldByName('TUR').AsInteger,TabFatbaslik.FieldByName('FATURATARIH').AsDateTime,1) then
      Abort;
@@ -4576,7 +4586,7 @@ begin
              FIzlemSecimJson := '';
              FIzlemBekliyor  := False;
              TabFatura.Cancel;
-             if (TabFatura.recordcount>0)and(TabFatura.FieldByName('ADET').AsInteger=0) then
+             if (TabFatura.recordcount>0)and(TabFatura.FieldByName('ADET').AsInteger <= 0) then
                  TabFatura.Delete;
              Abort;
           end;
@@ -5026,7 +5036,7 @@ var
   KalanAdet, SevkAdet : Extended;
   Miktar : Variant;
   MikAdet : string[10];
-  LotluUrunler, LotAlanlari : boolean;
+  LotluUrunler, LotAlanlari, KalanAlani : boolean;
 begin
   LotAlanlari := False;
   if TabFatbaslik.State in [dsEdit, dsInsert] then begin
@@ -5098,6 +5108,13 @@ begin
   if TabFatbaslik.FieldByName('TUR').AsInteger = 10 then
     SQLStr[8] := '			BelgeNo=COALESCE(NULLIF(FB.IRSALIYENO,''''),NULLIF(FB.FATURANO,''''),''''),Tarih=FB.FATURATARIH, '+
                  'Adet=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI IN (408,'+IntToStr(TabNo_IADE_ALISBELGE)+') AND F2.YERID=F.ID AND F2.ADET>0),0), ';
+  // Iade alis/satis faturasi: alis irsaliyesi iadesindeki gibi Adet'in yaninda Kalan gosterilir
+  //   (kaynak satirdan daha once iade edilenler dusulur; ADET=-1 gecici kopya satirlari sayilmaz).
+  KalanAlani := ((TabFatbaslik.FieldByName('TUR').AsInteger in [11,12]) and (DonusumYeri = TabNo_IADE_ALISBELGE)) or
+                ((TabFatbaslik.FieldByName('TUR').AsInteger in [15,16]) and (DonusumYeri = TabNo_IADE_SATISBELGE));
+  if KalanAlani then
+    SQLStr[8] := SQLStr[8] + 'Kalan=F.ADET-ISNULL((SELECT SUM(F2.ADET) FROM FATURA F2 WHERE F2.YERI='+
+                 IntToStr(DonusumYeri)+' AND F2.YERID=F.ID AND F2.ADET>0),0), ';
   //SQLStr[8] := '		  Adet=F.ADET-isnull((select sum(F2.ADET) from FATURA F2 inner join FATBASLIK FB2 on F2.FATBASID=FB2.ID where FB2.TIPI=2 and F2.TUR=1 and F2.YERI in (416,417) and F2.YERID=F.ID),0.0), ';
   SQLStr[9] := '      Birim=F.BIRIM,Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,   Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
   // Seçim listesinde birim kodu yerine açıklaması gösterilir; lot/seri birimin hemen yanında tutulur.
@@ -5164,6 +5181,8 @@ begin
   SQLStr[17] := '     ) as asd ';
   SQLStr[18] := ' where ';
   SQLStr[19] := '   Adet>0.0 and ';
+  if KalanAlani then
+    SQLStr[19] := '   Adet>0.0 and Kalan>0.0 and ';
   SQLStr[20] := '	  (  (asd.BelgeNo like ''%<ara>%'')or ';
   SQLStr[21] := '	     (asd.Kod like ''%<ara>%'')or  (asd.UrunNo like ''%<ara>%'')or ';
   SQLStr[22] := '	     (asd.Ad like ''%<ara>%'')or  (asd.Barkod like ''%<ara>%''))  '+DbSinir(100);
@@ -5175,20 +5194,25 @@ begin
     SQLStr[22] := '	     (asd.Ad like ''%<ara>%'')or (asd.Barkod like ''%<ara>%''))  '+DbSinir(100);
   // SQLStr[23] := '	     (asd.Barkod like ''%<ara>%'')) ';
   st := Tstringlist.create;
-  if Tablo.ListedenBilgiGetir(HizmetUrunSec,SQLStr,st,[nil,nil,nil,nil,nil,nil,nil,Tablo.repStokAnaBirim,nil,nil,nil,nil,nil,nil,nil],'FaturaWizardHizmetUrunSec') then begin
-     IadeOlanUrununSatisTarihi := StrToDateTimeDef(st[5], Tablo.GENINI.BugunTrh-1000);
-     if LotAlanlari then begin
-        FatBasID := StrToIntDef(st[0],0);
-        FatSatirID := StrToIntDef(st[1],0);
-     end else begin
-        FatBasID := StrToIntDef(st[0],0);
-        FatSatirID := StrToIntDef(st[1],0);
-     end;
-     KalanAdet  := StrToFloatDef(st[8],1);
-     if LotAlanlari then
-        DepoIade := StrToIntDef(st[15],0)
+  // RepList yalniz kolon sayisi tutarsa uygulanir; Kalan ile kolon sayisi 15 olur ve
+  //   repStokAnaBirim Tarih kolonuna oturur -> Kalan'li listede repository verilmez.
+  var LSecildi: Boolean;
+  if KalanAlani then
+    LSecildi := Tablo.ListedenBilgiGetir(HizmetUrunSec,SQLStr,st,[],'FaturaWizardHizmetUrunSec')
+  else
+    LSecildi := Tablo.ListedenBilgiGetir(HizmetUrunSec,SQLStr,st,[nil,nil,nil,nil,nil,nil,nil,Tablo.repStokAnaBirim,nil,nil,nil,nil,nil,nil,nil],'FaturaWizardHizmetUrunSec');
+  if LSecildi then begin
+     // Kolon sirasi lot/kalan dallarina gore degistigi icin degerler alan adiyla okunur.
+     IadeOlanUrununSatisTarihi := StrToDateTimeDef(Tablo.SonSecim['Tarih'], Tablo.GENINI.BugunTrh-1000);
+     FatBasID := StrToIntDef(Tablo.SonSecim['FBID'],0);
+     FatSatirID := StrToIntDef(Tablo.SonSecim['FID'],0);
+     if KalanAlani then
+        KalanAdet := StrToFloatDef(Tablo.SonSecim['Kalan'],1)
      else
-       DepoIade := StrToIntDef(st[12],0);
+        KalanAdet := StrToFloatDef(Tablo.SonSecim['Adet'],1);
+     DepoIade := StrToIntDef(Tablo.SonSecim['DepoID'],0);
+     var LIadeBelgeNo: string := Tablo.SonSecim['BelgeNo'];
+     var LIadeBelgeTarih: string := Tablo.SonSecim['Tarih'];
      //iade olan depoya bakalım konsinye giriş veya ıçıkış olamaz
      Tablo.TablodanSorguAc(1,'select VARSAYILAN from DEPOLAR where ID = '+IntToStr(DepoIade));
      if TabFatura.IsEmpty then begin ///eğer iade depo konsinye ise  veya bağlıktaki depodan farklıysa
@@ -5251,23 +5275,24 @@ begin
       //   faturasini karsi taraf duzenler; kaynak no'su GIB formatinda olmak zorunda degil.
       if ((EFaturaKullanimda > 0) or EIrsaliyeKullanimda) and
          not (TabFatbaslik.FieldByName('TUR').AsInteger in [10, 11, 12, 109]) then begin
-        var LBelgeNo := Trim(st[4]);
+        var LBelgeNo := Trim(LIadeBelgeNo);
         var LRakamSay := 0;
         for var K := Low(string) to High(LBelgeNo) do
           if CharInSet(LBelgeNo[K], ['0'..'9']) then Inc(LRakamSay);
         if LRakamSay <> 13 then
           Application.MessageBox(
-            PChar('İade edilen belge numarası "' + st[4] + '" GİB formatında değil (' +
+            PChar('İade edilen belge numarası "' + LIadeBelgeNo + '" GİB formatında değil (' +
               IntToStr(LRakamSay) + ' rakam var, 13 olmalı). e-Belge gönderiminde GİB reddedebilir.'),
             PChar('Uyarı'), MB_ICONWARNING or MB_OK);
       end;
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
                       'UPDATE FATBASLIK SET YERI=&Yeri,YERID=&Yer_ID,ANAKAYITID=&Yer_ID '
-                      +',ACIKLAMA='''+st[4]+' nolu, '+st[5]+' tarihli belgeden iade'''
+                      +',ACIKLAMA=&Aciklama'
                       +' where ID=&FatBasID'
-                      ,['&FatBasID','&Yeri','&Yer_ID']
-                      ,[TabFatbaslik.FieldByName('ID').AsInteger,DonusumYeri,FatBasID]);
+                      ,['&FatBasID','&Yeri','&Yer_ID','&Aciklama']
+                      ,[TabFatbaslik.FieldByName('ID').AsInteger,DonusumYeri,FatBasID,
+                        LIadeBelgeNo+' nolu, '+FormatDateTime('dd.mm.yyyy', StrToDateTimeDef(LIadeBelgeTarih, 0))+' tarihli belgeden iade']);
 
       FreeAndNil(St);
 
@@ -5282,7 +5307,9 @@ begin
             TabFatura.Post;
       end;
     end;
-  end;
+  end
+  else
+     exit; //adet girmeden kapattıysa
 end;
 
 procedure TFaturaWizardDlg.FaturaTipiDuzenle;
@@ -5474,14 +5501,19 @@ begin
   OncekiFaturaNo := '';
   Tablo.FATBASLIKYeniKayit(TabFatbaslik, RehberId, Tur, Tipi, -1,-1,cbIrsaliyeli.Checked,MasrafMerkezi, ServisId, ProjeId, AktiviteId);
   PgFatbaslikIdHazirla;
-  FKocanVerilenNo := TabFatbaslik.FieldByName('FATURANO').AsString;   // BelgeNoIslemleri'nin kocandan verdigi no
+  FKocanVerilenNo := '';   // kocandan verilen no; numara artik ilk kayitta (FATBASLIKBeforePost) ayrilir
+  OtomatikNoIpucu(EditFatNo, (TabFatbaslik.FieldByName('FATURANO').AsString = '') and (Tur in [3,4,8,10,14,15,16,110,119]));
 
   if Tur in [4,14, 15, 16, 119] then begin // ??k??
      Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
      TabFatbaslik.FieldByName('REHBERILETID').AsInteger := REHBERILETID ;
      EditButtonSevkAdresi.Text := REHBERILETAD;
      EditButtonSevkAdresi.Hint := REHBERILETADHINT;
-  end;
+  end
+  else if TabFatbaslik.FieldByName('REHBERILETID').AsInteger > 0 then
+     // Giris belgesi: varsayilan iletisim FATBASLIKYeniKayit'ta atandi.
+     EditButtonSevkAdresi.Text := Tablo.AciklamaGetir('REHBERILETISIM', 'AD',
+       TabFatbaslik.FieldByName('REHBERILETID').AsInteger);
 
   if Tur in [14,15] then begin //çıkan irs veya fatura
      if TabFatbaslik.FieldByName('VNO').AsString = '' then begin//eğer vergi no boş ise ekrandan hemen alalım
@@ -5951,6 +5983,9 @@ begin
     LKocanRef := FKocanVerilenNo;
     if LKocanRef = '' then LKocanRef := OncekiFaturaNo;
     if (LKocanRef <> '') and (LKocanRef <> '0') and (Trim(TabFatbaslik.FieldByName('FATURANO').AsString) <> Trim(LKocanRef)) then
+      TabFatbaslik.FieldByName('KOCANNO').AsInteger := 0
+    // Yeni belge, numara koçandan verilmedi (kullanici ilk kayittan once kendisi yazdi).
+    else if (LKocanRef = '') and (TabFatbaslik.State = dsInsert) then
       TabFatbaslik.FieldByName('KOCANNO').AsInteger := 0;
   end;
   BoslukKontrolu := False;

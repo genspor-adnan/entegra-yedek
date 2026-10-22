@@ -296,7 +296,7 @@ begin
     if not FATBASLIK.Active then
        TabloYenile(FATBASLIK, [-1]);
     FATBASLIK.Append;
-    belgeno:= SiradakiBelgeNumarasi(8,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
+    belgeno:= BelgeNoRezerveEt(8,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
     FATBASLIK.FieldByName('FATURASERI').AsString := belgeno.serino; //seri
     FATBASLIK.FieldByName('FATURANO').AsString := belgeno.belgeno; //FatNo;
     FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(8); //KOCAN numarası

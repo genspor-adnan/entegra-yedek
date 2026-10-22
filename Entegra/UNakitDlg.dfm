@@ -190,8 +190,6 @@ object NakitDlg: TNakitDlg
     Height = 290
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 109
-    ExplicitHeight = 293
     object Label15: TcxLabel
       Left = 3
       Top = 68
@@ -383,6 +381,29 @@ object NakitDlg: TNakitDlg
       Style.IsFontAssigned = True
       Transparent = True
       Visible = False
+    end
+    object LblIletisim: TcxLabel
+      Left = 4
+      Top = 263
+      Caption = #304'leti'#351'im'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -11
+      Style.Font.Name = 'Trebuchet MS'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object ComboIletisim: TcxDBImageComboBox
+      Left = 86
+      Top = 262
+      DataBinding.DataField = 'REHBERILETID'
+      DataBinding.DataSource = DtsKasa
+      Properties.ClearKey = 46
+      Properties.Items = <>
+      TabOrder = 20
+      Width = 191
     end
     object LabelSRM: TcxLabel
       Left = 4
@@ -695,8 +716,8 @@ object NakitDlg: TNakitDlg
       Width = 248
     end
     object SqlMemoMasrafKalemi: TMemo
-      Left = 81
-      Top = 260
+      Left = 160
+      Top = 186
       Width = 436
       Height = 30
       Lines.Strings = (
@@ -801,7 +822,6 @@ object NakitDlg: TNakitDlg
     ShowCaptions = True
     TabOrder = 3
     Transparent = True
-    ExplicitHeight = 29
     object YaziciYaz: TToolButton
       Left = 0
       Top = 0
@@ -840,12 +860,12 @@ object NakitDlg: TNakitDlg
       'SELECT * FROM KASA'
       'WHERE ID = :PID ')
     Left = 35
-    Top = 252
+    Top = 164
   end
   object DtsKasa: TDataSource
     DataSet = TabKasa
-    Left = 83
-    Top = 277
+    Left = 99
+    Top = 93
   end
   object PopupMenuYaz: TPopupMenu
     Images = Tablo.PNGImageList2
@@ -951,7 +971,7 @@ object NakitDlg: TNakitDlg
         'and BOLUM=-1005)'
       'FROM KASA K'
       'WHERE K.ID = :PID ')
-    Left = 219
-    Top = 268
+    Left = 227
+    Top = 204
   end
 end

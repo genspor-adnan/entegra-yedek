@@ -201,6 +201,7 @@ type
     procedure Sorumlu(Edit1:TcxButtonEdit; Tablo1:TFDQuery);
     procedure Lokasyon(Edit1:TcxButtonEdit; Tablo1:TFDQuery);
     procedure Kaynak(Edit1:TcxButtonEdit; Tablo1:TFDQuery);
+    procedure KonusuzOlcumleriSil;
   public
     { Public declarations }
     OperasyonId, Id, Cagiran, UrtReceteKltId : Integer;
@@ -315,10 +316,6 @@ end;
 procedure TIsEmriPersonelZamanDlg.EditOlcumKonusuPropertiesButtonClick(
   Sender: TObject; AButtonIndex: Integer);
 begin
-   if TabOlcum.state in [dsEdit, dsInsert] then begin
-      TabOlcum.Post;
-      TabOlcum.Edit;
-   end;
    Konusu(Lokasyon_Uretim_OlcumKonu, TabOlcum);
 end;
 
@@ -473,7 +470,29 @@ end;
 
 procedure TIsEmriPersonelZamanDlg.IptalTusClick(Sender: TObject);
 begin
+   if TabOlcum.State in [dsEdit, dsInsert] then
+      TabOlcum.Cancel;
+   KonusuzOlcumleriSil;
    TabUretimOperasyonPersonel.Cancel;
+end;
+
+procedure TIsEmriPersonelZamanDlg.KonusuzOlcumleriSil;
+// Olcum "Yeni" ile hemen kaydedilir (sablon detaylari AfterPost'ta acilir);
+//   konusu girilmeden birakilan olcumler bos kayit olarak kaliyordu. Uygula
+//   ve Kapat'ta bu personel satirinin konusuz olcumleri detaylariyla silinir.
+var
+  LPersID: Integer;
+begin
+   LPersID := TabUretimOperasyonPersonel.FieldByName('ID').AsInteger;
+   if LPersID  <= 0 then
+      Exit;
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'delete from URETIMOLCUMDETAY where URETIMOLCUMID in ' +
+      '  (select ID from URETIMOLCUM where OPERASYONPERSONELID = &P ' +
+      '     and isnull(ltrim(rtrim(KONUSU)), '''') = ''''); ' +
+      'delete from URETIMOLCUM where OPERASYONPERSONELID = &P ' +
+      '  and isnull(ltrim(rtrim(KONUSU)), '''') = ''''',
+      ['&P'], [LPersID]);
 end;
 
 procedure TIsEmriPersonelZamanDlg.KaydetTusClick(Sender: TObject);
@@ -488,6 +507,9 @@ begin
    end;
 
 
+   if TabOlcum.State in [dsEdit, dsInsert] then
+      TabOlcum.Post;   // girilmis ama kaydedilmemis konu silinmesin
+
    if TabUretimOperasyonPersonel.State in [dsEdit, dsInsert] then begin
       TabUretimOperasyonPersonel.Post;
       if OncekiPersonel <> TabUretimOperasyonPersonel.FieldByName('PERSONEL').AsInteger then
@@ -497,12 +519,15 @@ begin
    // Ek alanlar (_USER) kart post edildikten SONRA yazilir; hicbiri doldurulmadiysa
    //   UserDataSourceKaydet satiri hic olusturmaz/siler.
    Tablo.UserDataSourceKaydet(TIsEmriPersonelZamanDlg(Self), CUserTablo);
+   KonusuzOlcumleriSil;
    Close;
 end;
 
 procedure TIsEmriPersonelZamanDlg.OlcumEkleBtnClick(Sender: TObject);
 begin
    TabOlcum.Append;
+   TabOlcum.Post;
+   TabOlcum.Edit;
 end;
 
 procedure TIsEmriPersonelZamanDlg.OlcumIptalBtnClick(Sender: TObject);

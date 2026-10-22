@@ -7,7 +7,9 @@
 --   Kolonlar: SILINEBILIR(0/1), NEDEN, BELGEAD, BELGETARIH, BELGENO.
 --   Kontroller: EBELGE(oncelik) / KULLANIM / IZLEME / UTSBILDIRIM / DONUSUM / IADE.
 --   @KilitKaldirildi=1 -> e-belge (islem goren) engelini ATLA (wizard admin override).
---   Satirin kaynak belgesi (iade -> iade edilen satis) engel sayilmaz.
+--   Satirin kaynak belgesi (iade -> iade edilen satis) engel sayilmaz; kaynagin da
+--   kaynagi (satis faturasi <- satis irsaliyesi) dahil, donusum zinciri boyunca
+--   (Update_SQL_210).
 --   NOT: KILIT (MODUL/devir) app-side KilitKontrolEt'te (helper cagirir) - burada YOK.
 -- ============================================================================
 CREATE OR ALTER PROCEDURE dbo.sp_Prog_Fatura_Silinebilir_Mi
@@ -18,14 +20,42 @@ AS
 BEGIN
   SET NOCOUNT ON;
 
+  -- Donusum zinciri ATALARI (Update_SQL_210): satirin izleme kaydindan DONUSID
+  --   ile geriye (iade <- satis faturasi <- satis irsaliyesi). Bunlar satirin
+  --   KAYNAGIDIR, asagi-akis cikisi degil; IZLEME kontrolunde haric tutulur.
+  --   Eskiden yalniz dogrudan kaynak haric tutuluyordu: irsaliyeden donusmus
+  --   faturanin iadesi, ayni gun kesilen irsaliye yuzunden silinemiyordu.
+  DECLARE @Ata TABLE (KOKSATIRID int NOT NULL, IZLEMID int NOT NULL,
+                      PRIMARY KEY (KOKSATIRID, IZLEMID));
+  ;WITH Zincir AS (
+    SELECT SI.SATIRID AS KOKSATIRID, SI.DONUSID AS IZLEMID, 1 AS DERINLIK
+    FROM STOKIZLEME SI
+    INNER JOIN FATURA F ON F.ID = SI.SATIRID
+    WHERE ((@SatirID > 0 AND F.ID = @SatirID) OR (@SatirID = 0 AND F.FATBASID = @FatBasID))
+      AND ISNULL(SI.DONUSID, 0) > 0
+    UNION ALL
+    SELECT Z.KOKSATIRID, P.DONUSID, Z.DERINLIK + 1
+    FROM Zincir Z
+    INNER JOIN STOKIZLEME P ON P.ID = Z.IZLEMID
+    WHERE ISNULL(P.DONUSID, 0) > 0 AND Z.DERINLIK < 20
+  )
+  INSERT @Ata (KOKSATIRID, IZLEMID)
+  SELECT DISTINCT KOKSATIRID, IZLEMID FROM Zincir
+  OPTION (MAXRECURSION 25);
+
   ;WITH Satirlar AS (
     SELECT F.ID AS SATIRID, F.FATBASID, F.URUNID, F.IZLEME, F.ADET,
            FB.TUR, FB.FATURATARIH, FB.EFATURADURUM,
            -- Satirin KAYNAK belgesi (iade: YERID=iade edilen satis satiri, ANAKAYITID=satis
            -- basligi). Kaynak belge asagi-akis cikis DEGILDIR -> KULLANIM/IZLEME'de haric.
-           ISNULL(F.YERID, 0) AS KAYNAKSATIRID, ISNULL(FB.ANAKAYITID, 0) AS KAYNAKBASID
+           ISNULL(F.YERID, 0) AS KAYNAKSATIRID, ISNULL(FB.ANAKAYITID, 0) AS KAYNAKBASID,
+           -- Kaynagin kaynagi: kaynak satir irsaliyeden donusmusse (408/411) o
+           -- irsaliye satiri da kaynaktir (Update_SQL_210; izlemesiz KULLANIM icin).
+           ISNULL(FK.YERID, 0) AS KAYNAK2SATIRID
     FROM FATURA F
     INNER JOIN FATBASLIK FB ON FB.ID = F.FATBASID
+    LEFT JOIN FATURA FK ON FK.ID = F.YERID AND F.YERI IN (416, 417)
+                       AND FK.YERI IN (408, 411)
     WHERE (@SatirID > 0 AND F.ID = @SatirID)
        OR (@SatirID = 0 AND F.FATBASID = @FatBasID)
   )
@@ -56,6 +86,7 @@ BEGIN
       AND CAST(FB2.FATURATARIH AS date) >= CAST(S.FATURATARIH AS date)
       AND FB2.ID <> S.FATBASID
       AND F2.ID <> S.KAYNAKSATIRID AND FB2.ID <> S.KAYNAKBASID
+      AND F2.ID <> S.KAYNAK2SATIRID
 
     UNION ALL
     -- 2) IZLEME: izlemeli satir; seri/lot asagi-akista cikmis
@@ -75,6 +106,8 @@ BEGIN
       AND CAST(FBz.FATURATARIH AS date) >= CAST(S.FATURATARIH AS date)
       AND FBz.ID <> S.FATBASID
       AND Fz.ID <> S.KAYNAKSATIRID AND FBz.ID <> S.KAYNAKBASID
+      AND NOT EXISTS (SELECT 1 FROM @Ata A
+                      WHERE A.KOKSATIRID = S.SATIRID AND A.IZLEMID = SI1.ID)
 
     UNION ALL
     -- 3) UTS BILDIRIM: izlemeli satirin STOKIZLEME kaydinda YER/YERID dolu (bildirilmis)

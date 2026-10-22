@@ -37,7 +37,7 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object PanelSagUst: TPanel
       Left = 1
-      Top = 104
+      Top = 84
       Width = 602
       Height = 32
       Align = alTop
@@ -45,6 +45,7 @@ object UretimReceteDlg: TUretimReceteDlg
       ParentBackground = False
       TabOrder = 2
       Visible = False
+      ExplicitTop = 104
       object cxLabel1: TcxLabel
         Left = 4
         Top = 6
@@ -80,7 +81,7 @@ object UretimReceteDlg: TUretimReceteDlg
       Left = 1
       Top = 1
       Width = 602
-      Height = 103
+      Height = 83
       Align = alTop
       Color = clSilver
       ParentBackground = False
@@ -133,37 +134,6 @@ object UretimReceteDlg: TUretimReceteDlg
         Height = 39
         Width = 180
       end
-      object cxLabel5: TcxLabel
-        Left = 257
-        Top = 58
-        Caption = 'Liste Fiyat'#305
-        Transparent = True
-      end
-      object cxDBLabel5: TcxDBCurrencyEdit
-        Left = 318
-        Top = 59
-        DataBinding.DataField = 'LISTE_SATIS'
-        DataBinding.DataSource = DtsRecete
-        ParentColor = True
-        ParentFont = False
-        Properties.DisplayFormat = ',0.00;(,0.00)'
-        Properties.ReadOnly = True
-        Style.Edges = []
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clNavy
-        Style.Font.Height = -11
-        Style.Font.Name = 'Tahoma'
-        Style.Font.Style = [fsBold]
-        Style.LookAndFeel.NativeStyle = False
-        Style.TransparentBorder = True
-        Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.NativeStyle = False
-        StyleFocused.LookAndFeel.NativeStyle = False
-        StyleHot.LookAndFeel.NativeStyle = False
-        StyleReadOnly.LookAndFeel.NativeStyle = False
-        TabOrder = 5
-        Width = 43
-      end
       object cxDBLabel6: TcxDBCurrencyEdit
         Left = 736
         Top = 33
@@ -186,7 +156,7 @@ object UretimReceteDlg: TUretimReceteDlg
         StyleFocused.LookAndFeel.NativeStyle = False
         StyleHot.LookAndFeel.NativeStyle = False
         StyleReadOnly.LookAndFeel.NativeStyle = False
-        TabOrder = 6
+        TabOrder = 4
         Visible = False
         Width = 57
       end
@@ -202,31 +172,6 @@ object UretimReceteDlg: TUretimReceteDlg
         Top = 33
         Caption = 'T'#252'r'
         Transparent = True
-      end
-      object cxLabel8: TcxLabel
-        Left = 460
-        Top = 58
-        Caption = 'Tavsiye %'
-        Transparent = True
-      end
-      object EditEkVergi: TcxDBCurrencyEdit
-        Left = 523
-        Top = 55
-        DataBinding.DataField = 'TAVSIYE_SATIS_ORANI'
-        DataBinding.DataSource = DtsRecete
-        ParentColor = True
-        ParentFont = False
-        Properties.DisplayFormat = ',0.00;(,0.00)'
-        Properties.ReadOnly = False
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clNavy
-        Style.Font.Height = -11
-        Style.Font.Name = 'Tahoma'
-        Style.Font.Style = [fsBold]
-        Style.TextColor = clBlack
-        Style.IsFontAssigned = True
-        TabOrder = 10
-        Width = 54
       end
       object cxDBImageComboBox1: TcxDBImageComboBox
         Left = 522
@@ -259,39 +204,8 @@ object UretimReceteDlg: TUretimReceteDlg
         Style.TransparentBorder = True
         Style.ButtonTransparency = ebtNone
         Style.IsFontAssigned = True
-        TabOrder = 11
+        TabOrder = 7
         Width = 93
-      end
-      object cxDBLabel7: TcxDBCurrencyEdit
-        Left = 318
-        Top = 83
-        DataBinding.DataField = 'KAR'
-        DataBinding.DataSource = DtsRecete
-        ParentColor = True
-        ParentFont = False
-        Properties.DisplayFormat = ',0.00;(,0.00)'
-        Properties.ReadOnly = True
-        Style.Edges = []
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clNavy
-        Style.Font.Height = -11
-        Style.Font.Name = 'Tahoma'
-        Style.Font.Style = [fsBold]
-        Style.LookAndFeel.NativeStyle = False
-        Style.TransparentBorder = True
-        Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.NativeStyle = False
-        StyleFocused.LookAndFeel.NativeStyle = False
-        StyleHot.LookAndFeel.NativeStyle = False
-        StyleReadOnly.LookAndFeel.NativeStyle = False
-        TabOrder = 12
-        Width = 43
-      end
-      object cxLabel9: TcxLabel
-        Left = 275
-        Top = 81
-        Caption = ' Kar %'
-        Transparent = True
       end
       object ToolBarSag: TToolBar
         Left = 1
@@ -321,7 +235,7 @@ object UretimReceteDlg: TUretimReceteDlg
         ParentColor = False
         ParentFont = False
         ShowCaptions = True
-        TabOrder = 14
+        TabOrder = 8
         Transparent = True
         object BilesenEkleBtn: TToolButton
           Left = 0
@@ -374,10 +288,10 @@ object UretimReceteDlg: TUretimReceteDlg
       end
       object CheckKDV: TcxCheckBox
         Left = 520
-        Top = 80
+        Top = 57
         Caption = 'KDV Hari'#231
         Properties.OnEditValueChanged = CheckKDVPropertiesEditValueChanged
-        TabOrder = 15
+        TabOrder = 9
         OnClick = CheckKDVClick
       end
       object cxDBLabel8: TcxDBLabel
@@ -405,31 +319,35 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object PageControlOpr: TcxPageControl
       Left = 1
-      Top = 136
+      Top = 116
       Width = 602
-      Height = 416
+      Height = 436
       Align = alClient
       TabOrder = 5
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
       Properties.Images = Tablo.PNGImageList2
       OnChange = PageControlOprChange
-      ClientRectBottom = 412
+      ExplicitTop = 136
+      ExplicitHeight = 416
+      ClientRectBottom = 432
       ClientRectLeft = 4
       ClientRectRight = 598
       ClientRectTop = 25
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
         ImageIndex = 12
+        ExplicitHeight = 387
         object GridUretim: TcxGrid
           Left = 0
           Top = 0
           Width = 594
-          Height = 387
+          Height = 407
           Align = alClient
           PopupMenu = PopupMenuDetay
           TabOrder = 0
           LookAndFeel.ScrollbarMode = sbmClassic
+          ExplicitHeight = 387
           object GridUretimDBTableView1: TcxGridDBTableView
             Navigator.Buttons.CustomButtons = <>
             ScrollbarAnnotations.CustomAnnotations = <>
@@ -584,6 +502,7 @@ object UretimReceteDlg: TUretimReceteDlg
       object cxTabSheet2: TcxTabSheet
         Caption = 'Operasyon Konu'
         ImageIndex = 19
+        ExplicitHeight = 387
         object PanelOprUst: TPanel
           Left = 0
           Top = 0
@@ -769,9 +688,10 @@ object UretimReceteDlg: TUretimReceteDlg
           Left = 0
           Top = 249
           Width = 594
-          Height = 138
+          Height = 158
           Align = alClient
           TabOrder = 2
+          ExplicitHeight = 138
           object ToolBar1: TToolBar
             AlignWithMargins = True
             Left = 4
@@ -843,7 +763,7 @@ object UretimReceteDlg: TUretimReceteDlg
             Left = 1
             Top = 28
             Width = 592
-            Height = 109
+            Height = 129
             Align = alClient
             Font.Charset = TURKISH_CHARSET
             Font.Color = clWindowText
@@ -853,6 +773,7 @@ object UretimReceteDlg: TUretimReceteDlg
             ParentFont = False
             TabOrder = 1
             LookAndFeel.ScrollbarMode = sbmClassic
+            ExplicitHeight = 109
             object GridKaliteSablonView: TcxGridDBTableView
               PopupMenu = PopupMenuTest
               Navigator.Buttons.CustomButtons = <>

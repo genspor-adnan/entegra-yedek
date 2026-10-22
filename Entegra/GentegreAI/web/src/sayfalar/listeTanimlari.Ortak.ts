@@ -113,6 +113,10 @@ export interface ListeTanimi {
   cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge'; sekme?: boolean; ayracOnce?: boolean }[];
   /** Hızlı aramanın GİZLİ kolonlarda da baktığı alanlar (ör. hasta: telefonHam, vknoHam - 16.10.2026). */
   aramaEkAlanlari?: string[];
+  /** IKINCI CIP GRUBU: ana ciplerin SOLUNDA, onlardan BAGIMSIZ secilir; filtresi
+      ana cip ve diger suzgeclerle AND'lenir. Ilk oge acilista secili (ör. Metin
+      Makrosu Listesi: alan suzgeci "Tüm Alanlar · Şikâyet · Hikâye ..."). */
+  onCipler?: { ad: string; filtre?: Kosul }[];
   /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
   menuGizli?: boolean;
   /**

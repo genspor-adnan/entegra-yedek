@@ -712,6 +712,7 @@ resourcestring
               '     * sütun6(F):Kur(Nümerik),'+#13+#10+
               '     * sütun7(G):Karşılığı(Nümerik),'+#13+#10+
               '     * sütun8(H):Karşılığı Para Birimi (Nümerik),'+#13+#10+
+              '     * sütun9(I):İletişim Adı (Yazı; boşsa carinin varsayılan iletişimi),'+#13+#10+
               '   öğelerine sahip olmalıdır.' ;
     CRKart_bulunamadi='Cari kartı bulunamadı!';
     CRAlan_silinsinmi=' alanını silmek istiyor musunuz ?' ;

@@ -1380,6 +1380,9 @@ end;
 
 procedure TSatinAlmaWizard2.SIPARISBeforePost(DataSet: TDataSet);
 begin
+  if DataSet = SIPARIS then
+    BelgeNoKayittaAta(SIPARIS, SiparisTur, 'SIPARISNO', 'SIPARISSERI', 'KOCANNO',
+      SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
   BoslukKontrolu;
   //Bu cariden bu sipariş no ile daha önce sipariş alınmış mı kontrolü yapalım
   //Tablo.TablodanSorguAc(2,'select ID from SIPARIS where ')
@@ -1728,7 +1731,7 @@ var
 begin
   case IslemOp of
     'E':begin
-       belgeno := SiradakiBelgeNumarasi(19,Tablo.GENINI.BugunTrh);
+       belgeno := BelgeNoRezerveEt(19,Tablo.GENINI.BugunTrh);
 
        Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
        TabloYenile(Tablo.tabCariBilgileri, [RehberId,REHBERILETID]);
@@ -1761,7 +1764,6 @@ end;
 procedure TSatinAlmaWizard2.SIPARISNewRecord(DataSet: TDataSet);
 var
   seri, FatNo : string;
-  belgeno : TBelgeNo;
   Etiketler,Bilgiler : TArrayOfString;
   REHBERILETID:integer;
   REHBERILETAD,REHBERILETADHINT:String;
@@ -1773,9 +1775,10 @@ begin
 //  cbSatici.Text := Tablo.AciklamaGetir('REHBER','FIRMA', SIPARIS.FieldByName('SATICIKODU').AsString);
 
   SIPARIS.FieldByName('SIPARISTARIH').Value := Tablo.GENINI.BugunTrhSaat;
-  belgeno:= SiradakiBelgeNumarasi(SiparisTur,SIPARIS.FieldByName('SIPARISTARIH').AsDateTime);
-  SIPARIS.FieldByName('SIPARISSERI').AsString := belgeno.serino; //seri
-  SIPARIS.FieldByName('SIPARISNO').AsString := belgeno.belgeno; //FatNo;
+  // Numara acilista alinmaz (ekranda "Otomatik"): ilk kayitta SIPARISBeforePost'ta
+  //   koçandan atomik ayrilir -> ayni anda belge acan iki kullanici ayni numarayi alamaz.
+  SIPARIS.FieldByName('SIPARISNO').AsString := '';
+  OtomatikNoIpucu(EditFatNo);
   SIPARIS.FieldByName('KOCANNO').AsInteger := KocannoBul(SiparisTur); //KOCAN numarası
   SIPARIS.FieldByName('TARIH').Value := Tablo.GENINI.BugunTrh;
   SIPARIS.FieldByName('REHBERID').AsInteger := RehberId;
@@ -1877,10 +1880,11 @@ begin
     Abort;
   if not TarihKontrol(EditFatTarih.Date, Belge + KontrolTarihi) then
      Abort;
-  if not BoslukKontrol(EditFatNo.Text, Belge+' No') then
+  if not BoslukKontrol(SIPARIS.FieldByName('SIPARISNO').AsString, Belge+' No') then
     Abort;
 
-  EditFatNo.Text := trim(EditFatNo.Text);
+  if SIPARIS.FieldByName('SIPARISNO').AsString <> Trim(SIPARIS.FieldByName('SIPARISNO').AsString) then
+    SIPARIS.FieldByName('SIPARISNO').AsString := Trim(SIPARIS.FieldByName('SIPARISNO').AsString);
 
 
 {  if (YearOf(SIPARIS.FieldByName('TARIH').AsDateTime) <> YearOf(SIPARIS.FieldByName('SIPARISTARIH').AsDateTime)) then begin

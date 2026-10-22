@@ -823,6 +823,8 @@ end;
 procedure TUretimWizardDlg.TabUretimBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: kart post = gercek degisiklik -> snapshot'i yakala
+  BelgeNoKayittaAta(TabUretim, 6, 'FATURANO', '', 'KOCANNO',
+    TabUretim.FieldByName('TARIH').AsDateTime);
   BoslukKontrolu;
   if TabUretim.FieldByName('GIRISDEPO').AsInteger<=0 then begin
     Application.MessageBox(PChar(FTWGirisDeposuBosOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
@@ -1246,6 +1248,15 @@ begin
   FIptalOnaylandi := False;
   YeniMiktar := 1;
   PageControlAlt.ActivePageIndex:=0;
+
+  // Is zaman sorgusundaki hesaplanmis kolonlar (SORUMLUADI, ADET...) tabloda yok;
+  // silme/guncelleme SQL'ine girmesinler, yoksa "Invalid column name".
+  TabIsZaman.UpdateOptions.UpdateTableName := 'URETIMOPERASYONPERSONEL';
+  TabIsZaman.UpdateOptions.KeyFields := 'ID';
+  TabIsZaman.UpdateOptions.UpdateChangedFields := False;
+  for var LAlan in ['SORUMLUADI', 'LOKASYONADI', 'KAYNAKADI', 'ADET', 'BIRIM'] do
+    if TabIsZaman.FindField(LAlan) <> nil then
+      TabIsZaman.FindField(LAlan).ProviderFlags := [];
 end;
 
 procedure TUretimWizardDlg.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2083,17 +2094,16 @@ begin
   TabUretimDetay.FieldByName('BIRIMFIYAT').OnChange:=nil;
   TabUretimDetay.FieldByName('BIRIM').OnChange:=nil;
 //  if (TabUretimDetay.FieldByName('ADET').AsString <> '') and (TabUretimDetay.FieldByName('BIRIMFIYAT').AsString <> '') then
-//      TabUretimDetay.FieldByName('TUTAR').AsCurrency := (100 - TabUretimDetay.FieldByName('ISKONTO').AsFloat) * TabUretimDetay.FieldByName('ADET').AsFloat * TabUretimDetay.FieldByName('BIRIMFIYAT').AsFloat / 100;
+//       TabUretimDetay.FieldByName('TUTAR').AsCurrency := (100 - TabUretimDetay.FieldByName('ISKONTO').AsFloat) * TabUretimDetay.FieldByName('ADET').AsFloat * TabUretimDetay.FieldByName('BIRIMFIYAT').AsFloat / 100;
   TabUretimDetay.FieldByName('MIKTAR').AsFloat := TabUretimDetay.FieldByName('ADET').AsFloat * Tablo.StokCarpan(TabUretimDetay.FieldByName('URUNID').AsInteger, TabUretimDetay.FieldByName('BIRIM').AsInteger);
 end;
 
 procedure TUretimWizardDlg.TabUretimNewRecord(DataSet: TDataSet);
-var
-   belgeno : TBelgeNo;
 begin
   TabUretim.FieldByname('TARIH').Value := Tablo.GENINI.BugunTrhSaat;    //BASLAMA_TARIHI= TARIH
-  belgeno:= SiradakiBelgeNumarasi(6,TabUretim.FieldByName('TARIH').AsDateTime);
-  TabUretim.FieldByName('FATURANO').AsString := belgeno.belgeno; //UretimNoGetir;   URETIMNO=FATURANO
+  // Numara acilista alinmaz: ilk kayitta TabUretimBeforePost'ta koçandan atomik ayrilir.
+  TabUretim.FieldByName('FATURANO').AsString := ''; //URETIMNO=FATURANO
+  OtomatikNoIpucu(EditFatNo);
   TabUretim.FieldByName('KOCANNO').AsInteger := KocannoBul(6); //KOCAN numarası
   TabUretim.FieldByname('REHBERID').AsInteger := RehberId;
   Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc '+DbSinir(1));

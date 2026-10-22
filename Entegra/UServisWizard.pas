@@ -2319,6 +2319,9 @@ begin
   ULog.OturumYakala(FOturumID);   // LAZY: servis/detay post -> yakala
   if not TarihKontrol(TabServis.FieldByName('TARIH').AsDateTime, 'Servis Tarihi') then
     Abort;
+  if DataSet = TabServis then
+    BelgeNoKayittaAta(TabServis, TabNo_SERVIS, 'SERVISNO', 'SERVISSERI', 'KOCANNO',
+      TabServis.FieldByName('TARIH').AsDateTime);
   EkleyenDegistiren(TabServis);
 end;
 
@@ -2326,7 +2329,6 @@ procedure TServisWizardDlg.TabServisNewRecord(DataSet: TDataSet);
 var
   //etiketler,bilgiler:TArrayOfString;
   Adi, Kodu : string;
-  belgeno : TBelgeNo;
 begin
   TabServis.FieldByName('ACIL').Value := False;
   TabServis.FieldByName('ONEMLI').Value := False;
@@ -2356,10 +2358,10 @@ begin
   TabServis.FieldByName('NOTLAR').AsString := '';
   TabServis.FieldByName('EKLEYEN').AsString := Kullanan;
   TabServis.FieldByName('KABUL_EDEN').AsString  := Kullanan;
-  belgeno:= SiradakiBelgeNumarasi(TabNo_SERVIS,Tablo.GENINI.BugunTrhSaat);
+  // Numara acilista alinmaz: ilk kayitta TabServisBeforePost'ta koçandan atomik ayrilir.
   TabServis.FieldByName('KOCANNO').AsInteger := KocannoBul(TabNo_SERVIS);
-  TabServis.FieldByName('SERVISNO').AsString := belgeno.belgeno;
-  TabServis.FieldByName('SERVISSERI').AsString := belgeno.serino;
+  TabServis.FieldByName('SERVISNO').AsString := '';
+  OtomatikNoIpucu(EditServisNo);
   TabServis.FieldByName('SUBEID').AsInteger := SubeID;
 end;
 

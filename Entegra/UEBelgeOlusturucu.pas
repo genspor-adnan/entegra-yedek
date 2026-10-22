@@ -1027,6 +1027,22 @@ begin
   end;
 end;
 
+// e-Arsiv alias satirinda "e-posta gonderilsin" isareti (REHBERALIAS.EPOSTA). Satir
+//   ya da kolon yoksa True (eski davranis). Local query: Query1 mesgul olabilir.
+function EArsivEPostaAcik(ARehberID: Integer; const AAlias: string): Boolean;
+begin
+  Result := True;
+  if ARehberID <= 0 then Exit;
+  try
+    Result := VarToStrDef(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'select top 1 cast(EPOSTA as int) from REHBERALIAS ' +
+      'where REHBERID=&R and BELGETURU=&B and ALIAS=&A order by AKTIF desc, ID desc',
+      ['&R', '&B', '&A'], [ARehberID, RAlias_EArsiv, Trim(AAlias)], True), '1') <> '0';
+  except
+    Result := True;
+  end;
+end;
+
 // Alici (cari) iletisim: e-posta + telefon REHBERILETISIM/REHBERBILGI (YERI=1)
 // iletisim sisteminden okunur (REHBER'de EMAIL/telefon kolonu YOK; EPOSTA bit'tir).
 // izibiz JSON customerParty.address email/telephone alanlarina gider (e-Arsiv'de
@@ -1630,7 +1646,9 @@ var
   LSatirID: Integer;
   LKimlikQuery: TFDQuery;
   LIhracatJson: string;
-  LSatirNavlun, LSatirSigorta, LDovizToplam, LDovizOrani: Currency;
+  LSatirNavlun, LSatirSigorta, LDovizToplam: Currency;
+  LDovizOrani: Double;   // Currency (4 hane) DEGIL: 110/5413,76=0,0203 kirpilip KDV 10 -> 9,99 cikiyordu
+  LSatirDoviz: Boolean;  // satir tutarlari doviz mi (SP EBELGETUTAR dondurdu mu)
 begin
   ABaslik := Default(TEBelgeBaslik);
   SetLength(ASatirlar, 0);
@@ -1678,6 +1696,14 @@ begin
     AlanStr(Tablo.Query1, 'FATURADOVIZI'));
   ABaslik.DovizKur := AlanCurrency(Tablo.Query1, 'DOVIZKUR');
   ABaslik.AliciAlias := AlanStr(Tablo.Query1, 'ALICIALIAS');
+  // e-ARSIV E-POSTA KAPALI (REHBERALIAS.EPOSTA=0, Update_SQL_214): hazirlamadan sonra
+  //   carinin alias gridinde "E-Posta" kaldirilmissa da mail gitmesin - alias bos
+  //   sayilir: KAGIT gonderim, mailFlag yok.
+  //   'yok' = e-posta istenmedi kaydi (AliasIslemiYap'in actigi yer tutucu).
+  if ABaslik.EArsivMi and (Trim(ABaslik.AliciAlias) <> '') and
+     (SameText(Trim(ABaslik.AliciAlias), 'yok') or
+      not EArsivEPostaAcik(ABaslik.RehberID, ABaslik.AliciAlias)) then
+    ABaslik.AliciAlias := '';
   ABaslik.GondericiAlias := AlanStr(Tablo.Query1, 'GONDERICIALIAS');
   ABaslik.UUID := AlanStr(Tablo.Query1, 'EBUUID');
   ABaslik.Matrah := AlanCurrency(Tablo.Query1, 'FATURA_MATRAHI');
@@ -1692,9 +1718,10 @@ begin
     if (LDovizToplam = 0) and (ABaslik.DovizKur > 0) then
       LDovizToplam := ABaslik.Toplam / ABaslik.DovizKur;
     if (LDovizToplam <> 0) and (ABaslik.Toplam <> 0) then begin
+      // Oran tam hassasiyetle hesaplanir, sonuc kurusa yuvarlanir (UBL tutarlari 2 hane).
       LDovizOrani := LDovizToplam / ABaslik.Toplam;
-      ABaslik.Matrah := ABaslik.Matrah * LDovizOrani;
-      ABaslik.KDV := ABaslik.KDV * LDovizOrani;
+      ABaslik.Matrah := Round(ABaslik.Matrah * LDovizOrani * 100) / 100;
+      ABaslik.KDV := Round(ABaslik.KDV * LDovizOrani * 100) / 100;
       ABaslik.Toplam := LDovizToplam;
     end;
   end;
@@ -1706,6 +1733,7 @@ begin
   SGKBilgisiOku(AFatBaslikID, ABaslik);
 
   Tablo.TablodanSorguAc(1, EBelgeGidenDetaySQL(AFatBaslikID));
+  LSatirDoviz := Assigned(Tablo.Query1.FindField('EBELGETUTAR'));
   try
     while not Tablo.Query1.Eof do begin
       LSatir := Default(TEBelgeSatir);
@@ -1788,6 +1816,24 @@ begin
       SetLength(ASatirlar, Length(ASatirlar) + 1);
       ASatirlar[High(ASatirlar)] := LSatir;
       Tablo.Query1.Next;
+    end;
+
+    // DOVIZLI fatura: dip matrah/KDV TL'den cevrilmez, DOGRUDAN doviz satirlarindan toplanir
+    //   (satir Tutar = EBELGETUTAR, doviz). TL->doviz cevirisi kur/oran yuvarlamasi tasir
+    //   (KDV 10,00 yerine 9,99) ve XML/JSON 0,02 tolerans icinde dip-toplami esas aldigi
+    //   icin hata belgeye gecerdi. Toplam = DOVIZ_TUTARI (yukarida). Satir yoksa yukaridaki
+    //   oranli ceviri yedek olarak kalir.
+    if (not ParaBirimiTRYmi(ABaslik.ParaBirimi)) and LSatirDoviz and (Length(ASatirlar) > 0) then begin
+      var LDovMatrah: Currency := 0;
+      var LDovKDV: Currency := 0;
+      for var K := 0 to High(ASatirlar) do begin
+        LDovMatrah := LDovMatrah + ASatirlar[K].Tutar;
+        LDovKDV := LDovKDV + SatirKDVBrut(ASatirlar[K]);
+      end;
+      ABaslik.Matrah := Round(LDovMatrah * 100) / 100;
+      ABaslik.KDV := Round(LDovKDV * 100) / 100;
+      if ABaslik.Toplam = 0 then
+        ABaslik.Toplam := ABaslik.Matrah + ABaslik.KDV;
     end;
 
     if SatirlardaTamIskontoVar(ASatirlar) and (ABaslik.PlanID > 0) and
@@ -2571,8 +2617,9 @@ begin
   LAlici.Ilce := ABaslik.Ilce;
   LAlici.Il := ABaslik.Il;
   LAlici.Ulke := 'Turkiye';
-  // e-Arsiv: alici e-postasi (REHBERALIAS 150) -> Contact/ElectronicMail
-  if ABaslik.EArsivMi then
+  // e-Arsiv: alici e-postasi (REHBERALIAS 150) -> Contact/ElectronicMail.
+  //   Alias bos = e-posta istenmedi (kagit gonderim): adres yazilmaz.
+  if ABaslik.EArsivMi and (Trim(ABaslik.AliciAlias) <> '') then
     LAlici.EPosta := AliciEArsivEPostaGetir(ABaslik.RehberID);
   KamuOdemeHesabiZorunlu(ABaslik, LOdemeHesabi);
   LTevkifatVar := (ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar);
@@ -5592,13 +5639,12 @@ begin
     LRoot.AddPair('documentAction', 'SEND');
     // EArsiv: alici e-postasina iletim izibiz REST'te mailFlag+mailAdress ile TETIKLENIR
     // (documentAction:SEND altinda; customerParty.address.email/SendingType tek basina
-    // posta gondermiyor). E-posta = AliciAlias (e-arsiv'de mail adresi), yoksa cari REHBER.
+    // posta gondermiyor). E-posta = AliciAlias (e-arsiv'de mail adresi).
+    // CARI E-POSTASINA DUSULMEZ (kullanici 16.10.2026): alias bos = hazirlamada
+    //   "e-posta gonderilsin mi?" sorusuna Hayir denmis ya da alias gridinde
+    //   E-Posta kaldirilmis -> mail gitmez, gonderim sekli KAGIT.
     if LIsArsiv then begin
       var LArsivMail: string := Trim(ABaslik.AliciAlias);
-      if LArsivMail = '' then begin
-        var LArsivTel: string := '';
-        AliciIletisimGetir(ABaslik.RehberID, LArsivMail, LArsivTel);
-      end;
       if LArsivMail <> '' then begin
         LRoot.AddPair('mailFlag', TJSONBool.Create(True));
         var LMailArr: TJSONArray := TJSONArray.Create;
@@ -5981,7 +6027,9 @@ begin
       var LAliciMail: string := '';
       var LAliciTel: string := '';
       AliciIletisimGetir(ABaslik.RehberID, LAliciMail, LAliciTel);
-      if (LAliciMail <> '') and (LCustomerAdr.GetValue('email') = nil) then
+      // Cari e-postasi YALNIZ e-posta gonderimi isteniyorsa (alias dolu) yazilir.
+      if (LAliciMail <> '') and (Trim(ABaslik.AliciAlias) <> '') and
+         (LCustomerAdr.GetValue('email') = nil) then
         LCustomerAdr.AddPair('email', LAliciMail);
       if LAliciTel <> '' then
         LCustomerAdr.AddPair('telephone', LAliciTel);

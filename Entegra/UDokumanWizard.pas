@@ -1386,6 +1386,7 @@ end;
 procedure TDokumanWizard.TabDokumanBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: dokuman post -> yakala
+   BelgeNoKayittaAta(TabDokuman, 250, 'BELGENO', '', '', DateTarih.Date);
    BoslukKontrolu;
    TabDokuman.FieldByName('DEGISTIREN').AsString := Kullanan;
    TabDokuman.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
@@ -1402,7 +1403,7 @@ end;
 function TDokumanWizard.BoslukKontrolu: Boolean;
 begin
    BoslukKontrolu := True;
-   if not BoslukKontrol(EditBelgeNo.Text, KontrolDokumanNo) then Abort;
+   if not BoslukKontrol(TabDokuman.FieldByName('BELGENO').AsString, KontrolDokumanNo) then Abort;
    if not BoslukKontrol(EditSurum.text, KontrolSurum) then Abort;
    if not BoslukKontrol(ComboYonu.Text, KontrolYonu) then Abort;
   // if not BoslukKontrol(EditAD.text, KontrolDokumanAd) then Abort;
@@ -1411,7 +1412,6 @@ begin
    BoslukKontrolu := False;
 end;
 procedure TDokumanWizard.TabDokumanNewRecord(DataSet: TDataSet);
-var belgeno : TBelgeNo;
 begin
    DateTarih.Date := Tablo.GENINI.BugunTrh;
    EditSurum.Text :='1.0';
@@ -1428,8 +1428,9 @@ begin
    Tabdokuman.FieldByName('MODULID').AsInteger:=ModulID;
    Tabdokuman.FieldByName('REHBERID').AsInteger:=RehberID;
    Tabdokuman.FieldByName('YON').AsInteger:=1;
-   belgeno:= SiradakiBelgeNumarasi(250, DateTarih.Date );
-   Tabdokuman.FieldByName('BELGENO').AsString := belgeno.belgeno;
+   // Numara acilista alinmaz: ilk kayitta TabDokumanBeforePost'ta koçandan atomik ayrilir.
+   Tabdokuman.FieldByName('BELGENO').AsString := '';
+   OtomatikNoIpucu(EditBelgeNo);
    TabDokuman.FieldByName('EKLEYEN').AsString := Kullanan;
 end;
 
