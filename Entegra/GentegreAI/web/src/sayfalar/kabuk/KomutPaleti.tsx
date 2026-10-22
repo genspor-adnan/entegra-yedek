@@ -165,7 +165,9 @@ export function kimlikNiyetCoz(metin: string): { rakam: string; tur: 'tc' | 'tel
                       || (rakam.length === 12 && rakam.startsWith('905')));
   if (!tc && !tel) return null;
   const kalan = paletSadelestir((metin.slice(0, n.index) + ' ' + metin.slice(n.index + n[0].length)).trim())
-    .split(/\s+/).filter(k => k && k !== 'yeni' && !/^kart/.test(k) && k !== 'ac' && k !== 'olustur');
+    // Harf içermeyen parça (numaranın parantezi, tire) sözcük değildir: "(0532) 444-55-66".
+    .split(/\s+/).map(k => k.replace(/[^a-z]/g, ''))
+    .filter(k => k && k !== 'yeni' && !/^kart/.test(k) && k !== 'ac' && k !== 'olustur');
   let niyet: KimlikNiyeti | null = null;
   for (const k of kalan) {
     if (k.length < 3) return null;

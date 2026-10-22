@@ -91,7 +91,7 @@ public static class HizliBulUclari
         // ------------------------------------------------------ kimlik / telefon --
         // "12345678901 yeni hasta" · "0532 444 55 66 yeni personel" (kullanıcı 22.10.2026: "ctrl k aramada
         //   kimlikno/telno verip yeni hasta/yeni başvuru/yeni personel diyebilirim yoksa yeni kart
-        //   oluşturmalı"). TC (11 hane) ya da cep telefonu (son 10 hane) ile KAYITLI hasta ve personel:
+        //   oluşturmalı"). TC (11 hane) ya da cep telefonu (son 10 hane) ile KAYITLI hasta ve personel (pasif de):
         //   varsa palet onu açar (başvuruda o hastaya yeni başvuru), yoksa yeni kartı dolu açar. Kayıtlı
         //   telefon biçimi serbest ("+90 535 ...", "0532 ...") - rakamlarının son 10 hanesi karşılaştırılır.
         //   Her tür kendi veri yetkisine bağlı; personel kayıt erişimiyle (birim / şube) süzülür.
@@ -113,9 +113,12 @@ public static class HizliBulUclari
                 ? await veri.ListeAsync($$"""
                     select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                            'Hasta · ' || coalesce(t.kod, '')
+                             || case t.durum when 0 then ' · Pasif' when 2 then ' · Aday' when 3 then ' · Vefat' else '' end
                       from public.taraf t
-                     where t.hasta = 1 and t.durum = 1 and ({{Kosul}})
-                     order by t.id desc limit 5
+                     -- DURUMDAN BAĞIMSIZ: pasif / aday hasta da kayıtlıdır - "yok" deyip aynı TC ile ikinci
+                     --   kart açtırmak mükerrer hasta demek (test 22.10.2026 yakaladı). Aktif önce.
+                     where t.hasta = 1 and ({{Kosul}})
+                     order by (t.durum = 1) desc, t.id desc limit 5
                     """, par, o => new { id = o.GetInt32(0), ad = o.GetString(1), bilgi = o.GetString(2) }, iptal)
                 : [];
             var personeller = new List<object>();
@@ -123,6 +126,7 @@ public static class HizliBulUclari
                 foreach (var p in await veri.ListeAsync($$"""
                     select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
                            'Personel · ' || coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), '')
+                             || case when t.durum <> 1 then ' · Pasif' else '' end
                       from public.taraf t
                      where t.personel = 1 and ({{Kosul}})
                      order by t.durum desc, t.id desc limit 5
