@@ -7,14 +7,16 @@ describe('listePaneli', () => {
     expect(listePaneli('kisi')).toBeUndefined();
   });
 
-  it('müşteri listesi (1150): gösterge + önizleme; aynı kaynağın Tedarikçi Listesi (rota) çizmez', () => {
+  it('müşteri listesi (1150): gösterge + önizleme; Tedarikçi Listesi (1162) kendi şeridi; başka rota çizmez', () => {
     const p = listePaneli('cari')!;
     const b = { rota: undefined, yenile: 0, seciliSatir: null, setCip: () => {}, tazele: () => {},
                 git: () => {}, gitKart: () => {} } as unknown as Parameters<NonNullable<typeof p.ustPanel>>[0];
     expect(p.ustPanel!(b)).toBeTruthy();
     expect(p.yanPanel!(b)).toBeTruthy();
-    expect(p.ustPanel!({ ...b, rota: 'tedarikci' })).toBeUndefined();
-    expect(p.yanPanel!({ ...b, rota: 'tedarikci' })).toBeUndefined();
+    expect(p.ustPanel!({ ...b, rota: 'tedarikci' })).toBeTruthy();
+    expect(p.yanPanel!({ ...b, rota: 'tedarikci' })).toBeTruthy();
+    expect(p.ustPanel!({ ...b, rota: 'kurum' })).toBeUndefined();
+    expect(p.yanPanel!({ ...b, rota: 'kurum' })).toBeUndefined();
   });
 
   it('kullanıcılar: üstte sayaç şeridi, altta seçili hesabın paneli', () => {

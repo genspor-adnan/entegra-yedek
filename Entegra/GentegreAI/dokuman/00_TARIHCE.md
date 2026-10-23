@@ -25,6 +25,67 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 24.10.2026 — Tedarikçi Listesi / Kartı V3 (1162)
+
+Kullanıcı: *"tedarikçi listesi ve kartı için de V3 mockup yap"* → *"v3 tedarikçi listesi ve kartı mockup'larını koda dök"* (mockup `Ekranlar/tedarikci_listesi_ver3.html` + `tedarikci_karti_ver3.html`).
+
+- **Şema (1162 + 1163):** `taraf_tedarikci` (017'deki çekirdek tablo genişletildi — 1162'nin `create table if not exists`'i var olan tabloya çarpıp sütun eklemedi, 1163 ekledi; satınalma koşulları — `taraf_musteri`'nin karşılığı: vade, ödeme şekli / günü, erken ödeme iskontosu, alış fiyat listesi, tedarik süresi, minimum sipariş, teslim şekli, sözleşme, bize tanınan kredi limiti, onay durumu A/B/C, tedarikçi türü, yerli / ithal, satınalmacı); `v_cari_ozet` tedarikçi sütunları (`vadesi_gecen_odeme`, `odenecek_30` — alacak tarafına aynı FIFO yaklaşımı, alış belgesinde vade günü `taraf_tedarikci`'den —, `son_alis`, `son_odeme`, 12 ay / bu yıl / geçen yıl alım, `alis_egri`). Müşteri sütunları aynen.
+- **Liste** (`tedarikci`): gösterge şeridi (aktif, toplam borcumuz, vadesi geçen ödeme, 30 günde ödenecek + 7 günde çek, 90 gündür alım yok, bu yıl alım) → akıllı çipler; kolonlar bakiye (A = borcumuz) · vadesi geçen ödeme · 30 günde ödenecek · son alım · alım eğrisi · onay; sağ önizleme tedarikçi gözüyle (ödeme durumu, alım eğilimi, hızlı Alış Faturası · Sipariş · Ödeme). `GET /api/cari/tedarikci-gosterge`.
+- **Kart** (`/tedarikci/{id}`, aynı `cari` kartı): yalnız tedarikçi rolünde özet şeridi tedarikçi gözüyle (borcumuz, vadesi geçen ödeme, 30 günde ödenecek, açık sipariş, verilen çek, bu yıl alım, son alım / ödeme); **Satınalma Koşulları** sekmesi (tek kayıt formu, Satış & Risk gizli); Finansal'da **Ödeme Yaşlandırması** (vadesi geçen / 30 gün / sonrası + vadesi geçen alış belgeleri) ve **Verilen Çekler**. `kart-ozet` ucu tedarikçi alanlarını da döndürür.
+- Yapılmayan (mockup'ta vardı): Ürünler & Fiyatlar ve Performans sekmeleri (zamanında teslim %, A/B/C puan hesaplama — veri yok), ödeme listesi / banka talimatı, teklif isteme (RFQ), tek kaynak çipi, IBAN değişikliğinde iki kişilik onay.
+
+## 24.10.2026 — Kasa Listesi / Kartı V3 (1161)
+
+Kullanıcı: *"kasa kartı ve listesi mockup yap"* → *"kasa liste ve kartı koda dök, harekete gerek yok yerine yine ekstre butonu ekle"* (mockup `Ekranlar/kasa_listesi_ver3.html` + `kasa_karti_ver3.html`).
+
+- **Şema (1161):** `hesap` limit / sayım kuralları (`guvenlik_limiti`, `gunluk_odeme_limiti`, `tek_islem_limiti`, `eksi_bakiye_yasak`, `sayim_zorunlu`, `sayim_saati`, `fark_toleransi`, `kupur_zorunlu`); `hesap_yetki` (kasaya işleyebilen kullanıcı / rol × görüntüle · tahsilat · ödeme · virman · sayım · limit üstü onay — tanım; uygulama kapısı ayrı iş); `v_kasa_ozet` (bugün giriş / çıkış, son sayım + fark, bugün sayıldı mı, son 7 gün net, açık banko oturumu — günler Europe/Istanbul, KasaGunSonu ile aynı).
+- **Liste** (`kasa-hesap`): gösterge şeridi (toplam nakit TL, sayım bekleyen [sayım zorunlu kasalar], sayım farkı, limit aşan, açık oturum, bugün tahsilat / ödeme) → akıllı çipler; kolonlar bakiye · bugün giriş / çıkış · son sayım · fark · limit % çubuğu · son 7 gün eğrisi; sağda önizleme (durum / son hareketler / sayım, hızlı Tahsilat · Ödeme · Yatır · Sayım · Ekstre). `GET /api/kasa/gosterge`. Kolonlar `hesap` kaynağında (`v_kasa_ozet` join) — öteki hesap listeleri `kolonSirasi` dışında bırakır.
+- **Kart:** özet şeridi (bakiye, günün akışı, son sayım, güvenlik limiti %, son bankaya yatırma, ay neti, yetkili); sekmeler Genel · **Limitler & Kurallar** · **Sayım / Gün Sonu** (sayım geçmişi sistem / sayılan / fark / açıklama, 30 gün fark eğilimi) · **Yetkiler** (detay grid) · Resim / Doküman. `GET /api/kasa/{id}/ozet`. Hareketler sekmesi yok — Hatırlat'ın sağında 📄 Ekstre ve 💼 Devir / Açılış (hesap kartlarının ortak araç grubu). Banka / POS / kredi kartları Limitler ve Sayım sekmelerini gizler.
+- Yapılmayan (mockup'ta vardı): kupür dökümü (kasa sayımında kupür tablosu yok), sayımı yapılmadan tahsilat engeli / limit üstü onay akışı (kurallar tanım olarak duruyor), kasa yetkisinin tahsilat penceresine uygulanması, Grup / Analiz görünümleri.
+
+## 24.10.2026 — Devir Girişi: tek ekran (1160)
+
+Kullanıcı: *"ekranlar dizinindeki jenerik devir girişi mockup'ı kodla"* (mockup `Ekranlar/devir_girisi.html`; 1156 cari devrinin genelleşmişi).
+
+- **Neden tek:** cari devri `mali_hareket` tür 2 satırıydı, kasa / banka / POS / kredi devri ise karttaki `hesap.acilis_bakiye` alanı — ve o alanı hiçbir bakiye okumuyordu (`v_hesap_bakiye`, Ekstre devri, gün sonu yalnız hareket toplar). Artık her tür için tür 2 "Devir" satırı: cari'de `taraf_id`, hesapta `hesap_turu` + `hesap_id`. Ekstre (1158), hesap bakiyesi, gün sonu, banka sistem bakiyesi (1157), cari icmali (1154) devri değişiklik gerektirmeden görür.
+- **Uç `DevirUclari`** (`CariDevirUclari` kalktı): `GET/PUT /api/devir/{tur}/{id}` (`tur=hesap` hesabın türünü bulur), `GET /api/devir/kur`, `POST /api/devir/toplu` (ilk sütun tür; cari kod / VKN / ünvan, hesap kod / ad eşleşmesi), `GET /api/devir/acilis-bakiyeleri` + `POST /api/devir/acilis-cevir` (karttaki eski açılış bakiyesi → devir satırı; alan sıfırlanır). Eski `/api/cari/{id}/devir` uçları takma ad. Hesap satırının para birimi hesabınki olmak zorunda; hesap devri yazılınca `acilis_bakiye` sıfırlanır (çift sayım olmasın). Günlük 1610 (kayıt = hesap / cari).
+- **Ekran `/devir?tur=&id=`** (`sayfalar/devir/Devir.tsx` + `DevirFormu.tsx`): Ekstre deseni — tür seçici (yalnız yetkili türler), hesap seçici (cari: jenerik cari arama), üç görünüm: Tek Hesap (türe özgü giriş: cari yön + tek / açık belgeler; kasa tutar; banka tutar + yön + "Bankadan al"; POS tek tutar ya da gün başına brüt · komisyon · net · valör; kredi kalan ana para + kalan taksit; kredi kartı dönem borcu + ekstreye yansımamış), Toplu (Excel, tür sütunu), Açılış Bakiyeleri (çevir). Kontroller: ilk hareket, devir var, risk (cari), banka API bakiyesi farkı, karttaki açılış alanı. `DevirPenceresi` (modal) aynı formu kartlarda açar: cari kartı, hesap kartları (Hatırlat'ın sağında "💼 Devir / Açılış"), Ekstre.
+- **Yetki / menü:** ekran `finans.cari_devir` → `finans.devir` (1160, haklar aynen); veri türün kodu (Ekstre kuralı). Menü maddesi `cari-devir` koduyla kalır (GenProfil), adı "Devir Girişi", yolu `/devir`; `/cari-devir` yönlenir (sekme sistemi de aynı sekme). Hesap kartlarında `acilisBakiye` / `acilisTarihi` alanları gizli (`gizliKartAlanlari`).
+- Yapılmayan: POS devrinde aktarımın (44) devir satırını kapatması; kredi ödeme planının devirden üretilmesi; kasa sayım fişi eki; Delphi aktarımının (1082) açılış bakiyesini doğrudan tür 2 yazması.
+
+## 23.10.2026 — Ekstre: tek ekran (1158)
+
+Kullanıcı: *"müşteri/tedarikçi/kasa/banka/pos modülleri tek ekstre listesi kullanabilir mi"* → *"tek ekstre ekranı için mockup hazırla"* → *"genel ekstre mockup uygula"* (mockup `Ekranlar/ekstre_tek_ekran.html`).
+
+- **Tek ekran `/ekstre?tur=&id=`** (`web/src/sayfalar/ekstre/Ekstre.tsx`): Cari (müşteri / tedarikçi), Kasa, Banka, POS, Kredi, Kredi Kartı aynı ekranda; tür seçici yalnız kullanıcının veri yetkisi olan türleri çizer. Hesap seçici (yazdıkça sunucudan), dönem, **Liste / Detay (cari: belge kalemleri) / Aylık** görünümü, çift tık → hareketi üreten kasa işlemi ya da belge, A4 çıktı (CiktiMenusu). Cari'de Borç / Alacak ve B / A, vade sütunu, Devir / Açılış penceresi (1156), Cari İcmali; kasa'da Gün Sonu, banka'da Banka Hareketleri bağlantısı.
+- **Uç `GET /api/ekstre`** (`EkstreUclari.cs`): küme Kasa › Cari Ekstre / Hesap Ekstresi listeleriyle aynı (`v_mali_hareket_ek`, şube süzgeci listedeki gibi); farkı para birimi başına **dönem başı devir** ve ondan yürüyen bakiye — eski listede bakiye tüm geçmişin kümülatifiydi, devir görünmüyordu. `tur=hesap` hesabın türünü kendisi bulur (eski `/hesap-ekstre?hesapId=` yolu). `GET /api/ekstre/hesaplar` seçici.
+- **Yetki iki katlı:** ekran `finans.ekstre` (1158, `kasa.finans`'tan kopya); veri türün kendi kodu (cari `mali_hareket`; hesap `hesap.tanim` / `.banka` / `.pos` / `.kredi` / `.kredi_karti` — `hesap-ekstre` kaynağının satır kısıtıyla aynı).
+- **Menü (kullanıcı: "menüde cari ekstre rename Ekstre"):** *Cari Ekstre* maddesi ESKİ kaynak koduyla (`cari-ekstre`) kalır - GenProfil menü düzenleri ekranı bu kodla tutuyor, yeni kod eklense görünmezdi - adı "Ekstre", hedefi `/ekstre` (`menuYol`), yetki `finans.ekstre`. *Hesap Ekstresi* menüden kalktı. Yardım kataloğu 1159 ile aynı hizaya getirildi; `/cari-ekstre?tarafId=` ve `/hesap-ekstre?hesapId=` yolları `/ekstre`'ye yönlenir (sekme sistemi yönlendirme anında da Ekstre sekmesini kullanır). Kaynaklar (`cari-ekstre`, `hesap-ekstre`) duruyor: kart panellerinin "son 5 hareket"i ve hasta / kurum listelerinin yerinde ekstresi onları okur.
+- Liste ve kartlardaki "📄 Ekstre": müşteri / tedarikçi listeleri, cari kartı (araç çubuğu + özet şeridi + yan panel), Cari İcmali ve kasa / banka / POS / kredi / kredi kartı listeleri (`yeniSekme`) yeni ekranı hesapla açar; sekme anahtarı yol olduğundan açık Ekstre sekmesi yeniden kullanılır.
+- Yapılmayan (mockup'ta vardı): banka satırında eşleşme sütunu (1157 banka hareketleriyle), POS komisyon / valör sütunu, kredi taksit / ana para ayrımı, mutabakat mektubu düğmesi (Cari İcmali'nde). Banka / kasa kartlarına Ekstre düğmesi eklenmedi (banka kartı başka oturumda).
+
+## 23.10.2026 — Cari devir / açılış bakiyesi (1156)
+
+Kullanıcı: *"yeni müşteri veya tedarikçi kartı oluştuğunda ona devir gireceğimiz ekran tasarla"* → *"devir girişini koda dök"* (mockup `Ekranlar/cari_devir_girisi.html`).
+
+- Kayıt ayrı belge değil: carinin `mali_hareket` satırı, tür 2 "Devir" (açılış grubu; kasa işlemi başlığı yok — Delphi aktarımının devirleriyle aynı biçim). Ekstre, cari icmali, liste bakiyesi, risk ve yaşlandırma değişiklik gerektirmeden görür. Her satır kendi vadesiyle (`plan_tarihi`); döviz kendi para biriminde, TL karşılığı girilen kurla (boşsa `fn_doviz_kur_getir` TCMB alış).
+- Uçlar (`CariDevirUclari`, ekran kodu `finans.cari_devir` ← `kasa.finans`): `GET/PUT /api/cari/{id}/devir` (PUT web devrini baştan yazar, boş liste = kaldır; Delphi satırlarına dokunmaz), `GET /api/cari/devir-kur`, `POST /api/cari/devir/toplu` (kontrol → yaz; cari kod / VKN / ünvan eşleşmesi). Bir cariye tek devir; devir tarihi ilk hareketten sonraysa onay (`ILK_HAREKET`); veri kaynağı Delphi ise kapalı; günlük tablo 1610 (silinen satırlar tam).
+- Ekran: yeni cari kaydedilince kart `?devirSor=1` ile açık kalır ve "açılış bakiyesi var mı?" bandını gösterir; kartın Finansal sekmesinde "💼 Devir / Açılış Bakiyesi"; pencerede tek tutar ya da açık belgeler (ters satır = avans, Excel'den yapıştır), kontroller. Toplu: Finans › Cari Devir Girişi (`/cari-devir`).
+- Muhasebe fişi kesilmez (açılış fişi mali müşavirle) — mockup'taki açık soru varsayılanla kapatıldı.
+
+---
+
+## 23.10.2026 — Cari İcmali (1154) + BILIM pilotu sunucuda
+
+Kullanıcı: *"müşteri ve/veya tedarikçi için icmal olur mu"* → *"tek ekran olsun, mockup hazırla"* → *"koda dök"* (mockup `Ekranlar/İcmal/cari_icmali.html`).
+
+- `/cari-icmali` (Finans, ekran kodu `finans.cari_icmali` ← `kasa.finans`, 1154): ERP'de Müşteri / Tedarikçi / İkisi; HBYS'de sunucu kapsamı tedarikçiye sabitler ("Tedarikçi İcmali" - müşteri tarafı orada hasta / kurum icmalleri). Dönem, temsilci. Cari başına devir, dönem borç / alacak, bakiye, vadesi geçen, en eski gecikme, risk %; hem müşteri hem tedarikçi olan cari tek satır (bakiye yönüne göre grup). Kaynak Kasa › Cari Ekstre kümesi (`v_cari_ekstre`), yaşlandırma FIFO (vade = plan tarihi, yoksa işlem + vade günü) tek SQL'de; personel cariler kapsam dışı.
+- Sekmeler: Cari Bazında (seçim çıktıları süzer, çift tık ekstre), Yaşlandırma (alacak + borç, 8 hafta nakit beklentisi + çek vadeleri), Kırılımlar (temsilci, para, grup, il), Dikkat (limit aşan, 90 gün tahsilatsız, alacaklı müşteri, 7 gün içindeki ödemelerimiz). Çıktı: A4 icmal ve cari başına mutabakat mektubu.
+- Ekran sekmesinde `@icmal` ikonu metin olarak yazılıyordu (bütün icmallerde) — menüdeki ikon çiziliyor.
+- BILIM pilotu sunucuda (`/gentegreai/delphi/`, DB `gentegre_erp_delphi`): yeni kodla bütün yıllar yeniden aktarıldı (80.249 belge, 121.808 kasa, kayıtlar eşit) + ek modüller (2.455 çek, 350 kullanıcı, 1.046 hesap, 837 demirbaş; döküman içerikleri hariç). Cari bakiye 2.242'den 4 fark: Delphi kasa virmanını personel carisine sayıyor. `1151`: Delphi'de mükerrer DEMIRBASNO demirbaş modülünü düşürüyordu — ilki kodu alır.
+
+---
+
 ## 23.10.2026 — Müşteri Kartı Ver3
 
 Kullanıcı: *"kart mockup3 uygula"* (mockup `Ekranlar/musteri_karti_ver3.html`). Kart eklentisi `cari` (`kartEklentileri.tsx`, parçalar `sayfalar/cari/CariKartParcalari.tsx`), tek uç `GET /api/cari/{id}/kart-ozet`.

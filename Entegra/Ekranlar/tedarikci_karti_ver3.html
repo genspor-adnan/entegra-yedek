@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tedarikçi Kartı — Ver3 (ERP)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.kir{border-color:#c0413d;color:#b3261e}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .btn.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+
+  /* KIMLIK BASLIGI */
+  .bas{display:flex;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line2)}
+  .avatar{width:52px;height:52px;border-radius:10px;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+  .avatar small{position:absolute;bottom:-6px;right:-6px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:9.5px;color:var(--muted);padding:0 4px}
+  .kim .ad{font-size:17px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .kim .ad .kalem{font-size:11px;color:var(--muted);font-weight:normal;cursor:pointer}
+  .kim .alt{color:var(--muted);font-size:11.5px;margin-top:3px}
+  .kim .alt b{color:var(--ink);font-weight:normal}
+  .kim .rzlar{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
+  .bas .islem{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gez{display:flex;gap:2px;margin-right:6px}
+  .gez span{border:1px solid var(--line);border-radius:3px;padding:3px 7px;color:var(--muted);font-size:11px;background:#fff}
+
+  /* HIZLI ISLEMLER */
+  .hizli{display:flex;gap:4px;padding:6px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+
+  /* OZET SERIDI: her sekmede gorunur */
+  .ozet{display:grid;grid-template-columns:1.2fr 1fr 1.4fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2);cursor:pointer}
+  .ozet > div:last-child{border-right:none}
+  .ozet > div:hover{background:#f4f8fd}
+  .ozet span{display:block;font-size:10.5px;color:var(--muted)}
+  .ozet b{font-size:15px}
+  .ozet small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+  .bar{height:7px;border-radius:4px;background:#e7edf4;overflow:hidden;margin:5px 0 2px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#5cb87a,#e0a33a 70%,#d0473d)}
+
+  /* GOVDE */
+  .govde{display:grid;grid-template-columns:1fr 330px;min-height:600px}
+  .ana{min-width:0;border-right:1px solid var(--line)}
+  .tabs{display:flex;gap:0;padding:0 8px;border-bottom:1px solid var(--line);background:#fff;overflow-x:auto}
+  .tab{padding:8px 12px;color:var(--muted);font-size:12px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:5px;align-items:center}
+  .tab .n{background:#eef2f7;border-radius:8px;padding:0 6px;font-size:10px}
+  .tab.on{color:var(--navy);font-weight:bold;border-bottom-color:var(--accent)}
+  .tab.uyar::after{content:"●";color:#d0473d;font-size:9px}
+  .pane{display:none;padding:12px}
+  .pane.on{display:block}
+
+  .grp{border:1px solid var(--line2);border-radius:5px;margin-bottom:12px;background:#fff}
+  .grp > h4{margin:0;padding:7px 10px;font-size:11.5px;color:#3a5573;background:linear-gradient(#f7f9fc,#eef3f8);border-bottom:1px solid var(--line2);border-radius:5px 5px 0 0;display:flex;align-items:center;gap:8px}
+  .grp > h4 .sp{display:flex;gap:4px}
+  .grp .ic{padding:10px}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .f{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 12px}
+  .f.k3{grid-template-columns:repeat(3,1fr)} .f.k2{grid-template-columns:repeat(2,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .fld.g2{grid-column:span 2} .fld.g4{grid-column:span 4}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:25px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp .ek{margin-left:auto;font-size:10.5px;color:var(--accent);cursor:pointer}
+  .inp.uzun{min-height:52px;align-items:flex-start}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:6px}
+  .ipucu.ok{color:var(--ok)}
+
+  .dg{border:1px solid var(--line2);border-radius:3px;overflow:auto}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f4f8fd}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tr.devir td{background:#fbfcfe;font-style:italic;color:#4d5d6e}
+  .dg tfoot td{background:#f3f6fa;font-weight:bold;border-top:2px solid var(--line)}
+  .dg .det{display:none}
+  .detayli .dg .det{display:table-cell}
+  .serit{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .serit input[type=date]{border:1px solid var(--line);border-radius:3px;font:inherit;font-size:11px;padding:2px 4px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 11px;font-size:11px;background:#fff;color:#4d5d6e;cursor:pointer}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  .kisi{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line2)}
+  .kisi .av{width:28px;height:28px;border-radius:50%;background:#e7eef6;color:#2f6db3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex:none}
+  .kisi b{display:block;font-size:11.5px}
+  .kisi small{color:var(--muted);font-size:10.5px}
+  .kisi .ik{margin-left:auto;display:flex;gap:3px}
+
+  /* YAN SUTUN */
+  .yan{background:#fbfcfe;padding:10px 12px;overflow:auto}
+  .yan h6{margin:12px 0 6px;font-size:11px;color:#3a5573;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center}
+  .yan h6:first-child{margin-top:2px}
+  .yan h6 a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:normal;cursor:pointer}
+  .uyari{border:1px solid #f3c4bf;background:#fdf1ef;border-radius:4px;padding:7px 9px;color:#8a2a22;font-size:11.5px;margin-bottom:6px}
+  .uyari.sari{border-color:#f2ddbf;background:#fdf8ec;color:#7a5512}
+  .pin{border:1px solid #f2ddbf;background:#fffbea;border-radius:4px;padding:7px 9px;font-size:11.5px;line-height:1.5}
+  .pin small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+  .zaman{border-left:2px solid #cfe0f5;margin-left:6px;padding-left:10px}
+  .zaman div{position:relative;padding:4px 0 7px;font-size:11.5px}
+  .zaman div::before{content:"";position:absolute;left:-15px;top:8px;width:8px;height:8px;border-radius:50%;background:#9cc4ee;border:2px solid #fbfcfe}
+  .zaman div.k::before{background:#5cb87a} .zaman div.r::before{background:#d0473d}
+  .zaman small{display:block;color:var(--muted);font-size:10.5px}
+  .yasl{display:flex;height:16px;border-radius:3px;overflow:hidden;border:1px solid var(--line2)}
+  .yasl i{display:block;height:100%}
+  .yl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:10px;color:var(--muted);margin-top:3px}
+  .yl b{display:block;color:var(--ink);font-size:11px}
+
+  .altbar{display:flex;gap:16px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1480px;margin:12px auto;color:#5b6a7a;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 16px}
+  .not h3{margin:4px 0 6px;font-size:13px;color:var(--navy)}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .not ul{margin:4px 0 8px 18px;padding:0}
+  .not table{border-collapse:collapse;margin:4px 0 8px}
+  .not td,.not th{border:1px solid var(--line2);padding:3px 8px;text-align:left;font-size:11px}
+  .not th{background:var(--head)}
+  .yesil{color:var(--ok)}
+  .grp > h4 .sp.sonuk{font-weight:normal;font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust"><b>Gentegre AI</b><span class="yol">Stok &amp; Hizmet › Tedarikçi Listesi › Kart</span>
+    <span class="sag"><span>🏢 Merkez</span><span>👤 Murat Ş. (Satınalma)</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>🚚 Tedarikçi Listesi</span><span class="on">🏭 Marmara Ambalaj…</span><span>＋</span></div>
+
+  <div class="bas">
+    <div class="avatar" style="background:linear-gradient(#7a5bc4,#5a3fa0)">MA<small>Ambalaj</small></div>
+    <div class="kim">
+      <div class="ad">Marmara Ambalaj San. A.Ş. <span class="kalem">✎</span></div>
+      <div class="alt">Kod <b>T-00008</b> · VKN <b>6120045501</b> (Gebze VD) · Satınalmacı <b>Murat Ş.</b> · Tedarikçi 2017'den beri</div>
+      <div class="rzlar">
+        <span class="rz ok">● Aktif</span>
+        <span class="rz mor">Tedarikçi</span><span class="rz">Müşteri değil</span>
+        <span class="rz ok">e‑Fatura</span>
+        <span class="rz ok">Puan A · onaylı</span>
+        <span class="rz mavi">ISO 9001 · 2027'ye kadar</span>
+        <span class="rz kir">Vadesi geçen ödeme</span>
+      </div>
+    </div>
+    <div class="islem">
+      <span class="gez" title="Listede önceki / sonraki"><span>◀</span><span>1 / 9</span><span>▶</span></span>
+      <span class="btn">⋯</span><span class="btn">Kapat</span><span class="btn primary">💾 Kaydet</span>
+    </div>
+  </div>
+
+  <div class="hizli">
+    <span class="btn">🧾 Alış Faturası</span>
+    <span class="btn">📝 Satınalma Siparişi</span>
+    <span class="btn">📨 Teklif İste</span>
+    <span class="btn">↩ Alış İadesi</span>
+    <span class="sepv"></span>
+    <span class="btn">💸 Ödeme ▾</span>
+    <span class="btn">📄 Ekstre</span>
+    <span class="btn">🤝 Mutabakat</span>
+    <span class="sepv"></span>
+    <span class="btn">✅ Görev</span>
+    <span class="btn">📞 Görüşme notu</span>
+    <span class="btn">⏰ Hatırlat</span>
+    <span class="sp"></span>
+    <span class="btn">✉ E‑posta</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <!-- ÖZET ŞERİDİ: tedarikçi gözüyle - borcumuz, ödeme takvimi, gelecek mal, teslim. -->
+  <div class="ozet">
+    <div data-git="finans"><span>Borcumuz</span><b class="borc">₺ 542.400,00 A</b><small>+ $ 0,00 (dövizli yok)</small></div>
+    <div data-git="finans"><span>Vadesi geçen ödeme</span><b class="borc">₺ 118.000,00</b><small>en eski 19 gün</small></div>
+    <div data-git="finans"><span>30 günde ödenecek</span><b>₺ 284.000,00</b><small>6 fatura · 2 verilen çek</small><div class="bar"><i style="width:52%"></i></div></div>
+    <div data-git="belgeler"><span>Açık sipariş (gelecek mal)</span><b>₺ 105.600,00</b><small>2 sipariş · 1'i gecikti</small></div>
+    <div data-git="finans"><span>Verilen çek</span><b>₺ 170.000,00</b><small>3 çek · ilk vade 27.10</small></div>
+    <div data-git="belgeler"><span>Bu yıl alım</span><b>₺ 1.948.000</b><small class="yesil">geçen yıl ₺ 1,72 M · %13 ↑</small></div>
+    <div data-git="perf"><span>Zamanında teslim</span><b>%94</b><small>son 12 ay · 46 sipariş</small></div>
+  </div>
+
+  <div class="govde">
+    <div class="ana">
+      <div class="tabs" id="tabs">
+        <span class="tab on" data-t="genel">Genel</span>
+        <span class="tab" data-t="adres">Adres &amp; Fatura</span>
+        <span class="tab" data-t="kosul">Satınalma Koşulları</span>
+        <span class="tab uyar" data-t="finans">Finansal</span>
+        <span class="tab" data-t="belgeler">Belgeler <span class="n">212</span></span>
+        <span class="tab" data-t="urun">Ürünler &amp; Fiyatlar <span class="n">38</span></span>
+        <span class="tab" data-t="perf">Performans</span>
+        <span class="tab" data-t="kisiler">İlgili Kişiler <span class="n">3</span></span>
+        <span class="tab" data-t="banka">Banka / IBAN</span>
+        <span class="tab" data-t="dokuman">Doküman <span class="n">6</span></span>
+        <span class="tab" data-t="gecmis">Geçmiş</span>
+      </div>
+
+      <div class="pane on" data-p="genel">
+        <div class="grp"><h4>Kimlik &amp; Sınıflandırma</h4><div class="ic f">
+          <div class="fld"><label class="req">Kod</label><div class="inp">T-00008</div></div>
+          <div class="fld g2"><label class="req">Ünvan</label><div class="inp">Marmara Ambalaj San. A.Ş.</div></div>
+          <div class="fld"><label>Kısa Ad</label><div class="inp">Marmara Amb.</div></div>
+          <div class="fld"><label>Ürün grubu</label><div class="inp combo">Ambalaj</div></div>
+          <div class="fld"><label>Tedarikçi türü</label><div class="inp combo">Üretici</div></div>
+          <div class="fld"><label>Satınalmacı</label><div class="inp combo">Murat Ş.</div></div>
+          <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+          <div class="fld"><label>Onay durumu</label><div class="inp combo">Onaylı tedarikçi (A)</div></div>
+          <div class="fld"><label>Yerli / İthal</label><div class="inp combo">Yerli</div></div>
+          <div class="fld"><label>Etiketler</label><div class="inp"><span class="rz mavi">Ana tedarikçi</span><span class="ek">＋</span></div></div>
+          <div class="fld"><label>Rol</label><div class="inp"><label><input type="checkbox"> Müşteri</label>&nbsp;<label><input type="checkbox" checked> Tedarikçi</label></div></div>
+        </div></div>
+        <div class="iki">
+          <div class="grp"><h4>İletişim</h4><div class="ic f k2">
+            <div class="fld"><label>Telefon</label><div class="inp">0262 744 10 10 <span class="ek">📞</span></div></div>
+            <div class="fld"><label>Sipariş e‑postası</label><div class="inp">siparis@marmaraambalaj.com <span class="ek">✉</span></div></div>
+            <div class="fld"><label>Fatura e‑postası</label><div class="inp">fatura@marmaraambalaj.com</div></div>
+            <div class="fld"><label>Web</label><div class="inp">marmaraambalaj.com</div></div>
+          </div></div>
+          <div class="grp"><h4>Not</h4><div class="ic">
+            <div class="inp uzun">Siparişler e‑posta ile, sipariş formu PDF ekli gönderilir. Palet iadesi her ay sonu irsaliyeyle. Fiyat güncellemesi yılda iki kez (Ocak, Temmuz).</div>
+            <div class="ipucu">📌 Sabit not sağ sütunda ve sipariş açılırken uyarı olarak görünür.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="pane" data-p="adres">
+        <div class="grp"><h4>Fatura / Vergi Kimliği <span class="sp"><span class="btn mini">🔎 GİB'den doğrula</span></span></h4><div class="ic f">
+          <div class="fld g2"><label>Fatura Ünvanı</label><div class="inp">MARMARA AMBALAJ SANAYİ A.Ş.</div></div>
+          <div class="fld"><label class="req">VKN</label><div class="inp">6120045501</div></div>
+          <div class="fld"><label>Vergi Dairesi</label><div class="inp combo">Gebze</div></div>
+          <div class="fld"><label>e‑Belge</label><div class="inp ro">e‑Fatura mükellefi</div></div>
+          <div class="fld"><label>Gelen e‑Fatura eşleşmesi</label><div class="inp ro">VKN ile otomatik</div></div>
+        </div></div>
+        <div class="grp"><h4>Adresler</h4><div class="ic"><div class="dg"><table>
+          <thead><tr><th>Tip</th><th>Adres</th><th>İl / İlçe</th><th class="orta">Varsayılan</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rz mavi">Fatura</span></td><td>GOSB 1200. Sok. No:8</td><td>Kocaeli / Gebze</td><td class="orta">✓</td></tr>
+            <tr><td><span class="rz ok">Yükleme</span></td><td>GOSB Depo B‑2</td><td>Kocaeli / Gebze</td><td class="orta">✓</td></tr>
+          </tbody></table></div></div></div>
+      </div>
+
+      <!-- SATINALMA KOŞULLARI: müşteri kartındaki Satış & Risk'in karşılığı (taraf_tedarikci). -->
+      <div class="pane" data-p="kosul">
+        <div class="iki">
+          <div class="grp"><h4>Ödeme Koşulları</h4><div class="ic f k2">
+            <div class="fld"><label>Vade (gün)</label><div class="inp">45</div></div>
+            <div class="fld"><label>Ödeme şekli</label><div class="inp combo">Havale / Çek</div></div>
+            <div class="fld"><label>Para birimi</label><div class="inp combo">TL</div></div>
+            <div class="fld"><label>Erken ödeme iskontosu</label><div class="inp">%2 · 10 gün içinde</div></div>
+            <div class="fld"><label>Ödeme günü</label><div class="inp combo">Her ayın 15'i ve 30'u</div></div>
+            <div class="fld"><label>Tevkifat</label><div class="inp combo">Yok</div></div>
+          </div></div>
+          <div class="grp"><h4>Tedarik Koşulları</h4><div class="ic f k2">
+            <div class="fld"><label>Alış fiyat listesi</label><div class="inp combo">Marmara 2026‑2</div></div>
+            <div class="fld"><label>Tedarik süresi (gün)</label><div class="inp">5</div></div>
+            <div class="fld"><label>Minimum sipariş</label><div class="inp">₺ 10.000</div></div>
+            <div class="fld"><label>Teslim şekli</label><div class="inp combo">Tedarikçi teslim (DAP)</div></div>
+            <div class="fld"><label>Sözleşme</label><div class="inp">SZL‑2026‑014 · 31.12.2026'ya kadar</div></div>
+            <div class="fld"><label>Kredi limitimiz (bize tanınan)</label><div class="inp">₺ 750.000 · kullanım %72</div></div>
+          </div></div>
+        </div>
+        <div class="ipucu" style="padding:0 2px">Vade günü, vade tarihi girilmemiş alış faturasında ödeme vadesini belirler → vadesi geçen ödeme, ödeme takvimi ve yaşlandırma.</div>
+      </div>
+
+      <div class="pane" data-p="finans">
+        <div class="iki">
+          <div class="grp"><h4>Hesap Özeti <span class="sp"><span class="btn mini">＋ Devir / Açılış Bakiyesi</span></span></h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Para</th><th class="sag">Borç</th><th class="sag">Alacak</th><th class="sag">Bakiye</th></tr></thead>
+              <tbody><tr><td>TL</td><td class="sag">3.214.600,00</td><td class="sag">3.757.000,00</td><td class="sag borc">542.400,00 A</td></tr></tbody>
+            </table></div>
+            <div class="f k3" style="margin-top:10px">
+              <div class="fld"><label>Muhasebe hesabı</label><div class="inp ro">320.01.008</div></div>
+              <div class="fld"><label>Ort. ödeme süresi</label><div class="inp ro">38 gün (vade 45)</div></div>
+              <div class="fld"><label>Son ödeme</label><div class="inp ro">15.10.2026 · ₺ 120.000</div></div>
+            </div>
+          </div></div>
+          <div class="grp"><h4>Ödeme Yaşlandırması</h4><div class="ic">
+            <div class="yasl"><i style="width:26%;background:#c0413d"></i><i style="width:52%;background:#e0a33a"></i><i style="width:22%;background:#9cc4ee"></i></div>
+            <div class="yl"><span>Vadesi geçen<b class="borc">₺ 118.000</b></span><span>30 gün içinde<b>₺ 284.000</b></span><span>30+ gün<b>₺ 140.400</b></span><span></span></div>
+            <div class="dg" style="margin-top:10px"><table>
+              <thead><tr><th>Ödenecek belge</th><th>Vade</th><th class="orta">Durum</th><th class="sag">Kalan</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Alış Fat. MRA…0812</td><td>04.10.2026</td><td class="orta borc">19 gün geçti</td><td class="sag">62.000,00</td><td><span class="btn mini">💸 Öde</span></td></tr>
+                <tr><td>Alış Fat. MRA…0829</td><td>12.10.2026</td><td class="orta borc">11 gün geçti</td><td class="sag">56.000,00</td><td><span class="btn mini">💸 Öde</span></td></tr>
+                <tr><td>Verilen çek 7781204</td><td>27.10.2026</td><td class="orta">4 gün</td><td class="sag">95.000,00</td><td class="sonuk">çek</td></tr>
+                <tr><td>Alış Fat. MRA…0861</td><td>22.11.2026</td><td class="orta">30 gün</td><td class="sag">74.300,00</td><td><span class="btn mini">💸 Öde</span></td></tr>
+              </tbody></table></div>
+          </div></div>
+        </div>
+        <div class="grp"><h4>Verilen Çekler</h4><div class="ic"><div class="dg"><table>
+          <thead><tr><th>Seri No</th><th>Banka</th><th>Vade</th><th>Durum</th><th class="sag">Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>7781204</td><td>İş Bankası · Kozyatağı</td><td>27.10.2026</td><td><span class="rz sari">Ödenecek</span></td><td class="sag">95.000,00</td></tr>
+            <tr><td>7781215</td><td>İş Bankası · Kozyatağı</td><td>15.11.2026</td><td><span class="rz mavi">Verildi</span></td><td class="sag">40.000,00</td></tr>
+            <tr><td>7781221</td><td>İş Bankası · Kozyatağı</td><td>30.11.2026</td><td><span class="rz mavi">Verildi</span></td><td class="sag">35.000,00</td></tr>
+          </tbody></table></div></div></div>
+      </div>
+
+      <div class="pane" data-p="belgeler">
+        <div class="serit">
+          <span class="chip on">Tümü 212</span><span class="chip">Alış Faturaları 141</span><span class="chip">Siparişler 46</span><span class="chip">İrsaliyeler 19</span><span class="chip">İadeler 6</span>
+          <span class="sp"></span><span class="chip">Yalnız açık</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th>Tarih</th><th>Tür</th><th>Belge No</th><th>Açıklama</th><th>Durum</th><th>e‑Belge</th><th class="sag">Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>22.10.2026</td><td>Satınalma Siparişi</td><td>SAS‑2026‑0322</td><td>Etiket + streç</td><td><span class="rz mavi">Yolda</span></td><td></td><td class="sag">21.600,00</td></tr>
+            <tr><td>20.10.2026</td><td>Alış Faturası</td><td>MRA2026000882</td><td>Koli (4.000 adet)</td><td><span class="rz sari">Ödenecek</span></td><td><span class="rz ok">e‑Fatura ✓ kabul</span></td><td class="sag">96.000,00</td></tr>
+            <tr><td>13.10.2026</td><td>Satınalma Siparişi</td><td>SAS‑2026‑0311</td><td>Ambalaj 12 kalem</td><td><span class="rz kir">3 gün gecikti</span></td><td></td><td class="sag">84.000,00</td></tr>
+            <tr><td>25.09.2026</td><td>Alış İadesi</td><td>AIA2026000012</td><td>Hatalı baskı 200 koli</td><td><span class="rz ok">Kapandı</span></td><td><span class="rz ok">e‑Fatura ✓</span></td><td class="sag">3.100,00</td></tr>
+          </tbody></table></div>
+      </div>
+
+      <!-- ÜRÜNLER & FİYATLAR: bu tedarikçiden alınan stoklar; son fiyat, değişim, alternatif tedarikçi. -->
+      <div class="pane" data-p="urun">
+        <div class="grp"><h4>Tedarik Edilen Ürünler <span class="sp"><span class="btn mini">📨 Seçililer için teklif iste</span></span></h4><div class="ic"><div class="dg"><table>
+          <thead><tr><th style="width:24px"><input type="checkbox"></th><th>Stok</th><th>Tedarikçi kodu</th><th class="sag">Son fiyat</th><th class="sag">Değişim (12 ay)</th><th>Son alım</th><th class="sag">Alım (12 ay)</th><th>Alternatif</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>Koli 40×30×30</td><td>MA‑K403030</td><td class="sag">₺ 18,40</td><td class="sag borc">▲ %14</td><td>20.10.2026</td><td class="sag">48.000 adet</td><td><span class="rz">2 tedarikçi</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>Streç film 23µ</td><td>MA‑SF23</td><td class="sag">₺ 112,00</td><td class="sag">▲ %4</td><td>22.10.2026</td><td class="sag">640 rulo</td><td><span class="rz">1 tedarikçi</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>Baskılı etiket A5</td><td>MA‑ETA5</td><td class="sag">₺ 540,00</td><td class="sag yesil">▼ %2</td><td>08.10.2026</td><td class="sag">92 kutu</td><td><span class="rz kir">Tek kaynak</span></td></tr>
+          </tbody></table></div>
+          <div class="ipucu">"Tek kaynak": stoğu başka tedarikçiden hiç alınmamış — tedarik riski. Fiyat değişimi alış faturalarının birim fiyatından (iskonto sonrası).</div></div></div>
+      </div>
+
+      <!-- PERFORMANS: teslim, kalite, fiyat -> puan. -->
+      <div class="pane" data-p="perf">
+        <div class="iki">
+          <div class="grp"><h4>Teslim Performansı <span class="sp sonuk">son 12 ay</span></h4><div class="ic">
+            <div class="f k3">
+              <div class="fld"><label>Zamanında teslim</label><div class="inp ro"><b>%94</b> · 43 / 46 sipariş</div></div>
+              <div class="fld"><label>Ort. gecikme</label><div class="inp ro">2,3 gün (geciken 3 sipariş)</div></div>
+              <div class="fld"><label>Eksik teslim</label><div class="inp ro">%1,8 (kalem bazında)</div></div>
+            </div>
+            <div class="dg" style="margin-top:10px"><table>
+              <thead><tr><th>Ay</th><th class="sag">Sipariş</th><th class="sag">Zamanında</th><th class="sag">Gecikme</th></tr></thead>
+              <tbody><tr><td>Ekim</td><td class="sag">5</td><td class="sag">4</td><td class="sag borc">1 · 3 gün</td></tr><tr><td>Eylül</td><td class="sag">4</td><td class="sag">4</td><td class="sag">—</td></tr><tr><td>Ağustos</td><td class="sag">3</td><td class="sag">3</td><td class="sag">—</td></tr></tbody>
+            </table></div>
+          </div></div>
+          <div class="grp"><h4>Kalite &amp; Puan</h4><div class="ic">
+            <div class="f k3">
+              <div class="fld"><label>İade / ret oranı</label><div class="inp ro">%0,6 (₺ 3.100)</div></div>
+              <div class="fld"><label>Fiyat istikrarı</label><div class="inp ro">orta (▲ %9 ort.)</div></div>
+              <div class="fld"><label>Toplam puan</label><div class="inp ro"><span class="rz ok">A · 88 / 100</span></div></div>
+            </div>
+            <div class="ipucu">Puan = teslim %50 + kalite %30 + fiyat %20. A ≥ 80 · B 65–79 · C &lt; 65 (izleme). Yılda bir değerlendirme formu (form motoru) ile ayrıca onaylanır.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="pane" data-p="kisiler"><div class="grp"><h4>İlgili Kişiler</h4><div class="ic"><div class="dg"><table>
+        <thead><tr><th>Ad Soyad</th><th>Görev</th><th>Telefon</th><th>E‑posta</th><th>Rol</th></tr></thead>
+        <tbody>
+          <tr><td><b>Kerem Bulut</b></td><td>Satış Müdürü</td><td>0532 410 22 11</td><td>kerem@marmaraambalaj.com</td><td><span class="rz mor">Fiyat / teklif</span></td></tr>
+          <tr><td><b>Aslı Kara</b></td><td>Muhasebe</td><td>0262 744 10 14</td><td>muhasebe@marmaraambalaj.com</td><td><span class="rz mavi">Ekstre / mutabakat</span></td></tr>
+          <tr><td><b>Orhan Ece</b></td><td>Sevkiyat</td><td>0533 222 18 18</td><td>—</td><td><span class="rz ok">Teslim</span></td></tr>
+        </tbody></table></div></div></div></div>
+
+      <div class="pane" data-p="banka"><div class="grp"><h4>Banka Hesapları <span class="sp sonuk">ödeme talimatı bu IBAN'a</span></h4><div class="ic"><div class="dg"><table>
+        <thead><tr><th>Banka</th><th>IBAN</th><th>Döviz</th><th class="orta">Varsayılan</th></tr></thead>
+        <tbody><tr><td>Garanti BBVA · Gebze</td><td>TR56 0006 2000 4440 0006 2987 11</td><td>TL</td><td class="orta">✓</td></tr></tbody></table></div>
+        <div class="ipucu ok">✓ IBAN doğrulandı · ünvan eşleşti. IBAN değişikliği iki kişilik onay ister (ödeme dolandırıcılığına karşı).</div></div></div></div>
+
+      <div class="pane" data-p="dokuman"><div class="grp"><h4>Doküman</h4><div class="ic"><div class="dg"><table>
+        <thead><tr><th>Ad</th><th>Tür</th><th>Geçerlilik</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td>📄 Tedarik sözleşmesi 2026.pdf</td><td>Sözleşme</td><td>31.12.2026</td><td><span class="rz sari">69 gün kaldı</span></td></tr>
+          <tr><td>📄 ISO 9001 sertifikası.pdf</td><td>Kalite belgesi</td><td>14.05.2027</td><td><span class="rz ok">Geçerli</span></td></tr>
+          <tr><td>📄 Tedarikçi değerlendirme formu 2026.pdf</td><td>Değerlendirme</td><td>—</td><td><span class="rz ok">A · 88</span></td></tr>
+        </tbody></table></div></div></div></div>
+
+      <div class="pane" data-p="gecmis"><div class="grp"><h4>Değişiklik Geçmişi</h4><div class="ic"><div class="dg"><table>
+        <thead><tr><th>Tarih</th><th>Kullanıcı</th><th>Alan</th><th>Eski</th><th>Yeni</th></tr></thead>
+        <tbody>
+          <tr><td>02.07.2026 11:20</td><td>Murat Ş.</td><td>Alış fiyat listesi</td><td>Marmara 2026‑1</td><td>Marmara 2026‑2</td></tr>
+          <tr><td>14.01.2026 09:02</td><td>Selin Y.</td><td>Vade (gün)</td><td>30</td><td>45</td></tr>
+        </tbody></table></div></div></div></div>
+    </div>
+
+    <div class="yan">
+      <h6>Dikkat</h6>
+      <div class="uyari">⛔ ₺ 118.000 ödeme vadesi geçti · en eski 19 gün.</div>
+      <div class="uyari sari">🚚 SAS‑2026‑0311 teslimi 3 gün gecikti.</div>
+      <div class="uyari sari">📈 Koli fiyatı 12 ayda %14 arttı — alternatif teklif önerilir.</div>
+      <div class="uyari sari">📄 Tedarik sözleşmesi 69 gün sonra bitiyor.</div>
+
+      <h6>Sabit not <a>✎</a></h6>
+      <div class="pin">Siparişler e‑posta ile, sipariş formu PDF ekli. Palet iadesi ay sonu irsaliyeyle.<small>Murat Ş. · 14.01.2026</small></div>
+
+      <h6>Ödeme takvimi <a>Tümü</a></h6>
+      <div class="zaman">
+        <div class="r">Vadesi geçti · ₺ 118.000<small>2 fatura · 04.10 / 12.10</small></div>
+        <div>27.10 · Verilen çek ₺ 95.000<small>İş Bankası 7781204</small></div>
+        <div>15.11 · Verilen çek ₺ 40.000<small>İş Bankası 7781215</small></div>
+        <div>22.11 · Fatura ₺ 74.300<small>MRA…0861</small></div>
+      </div>
+
+      <h6>Ana kişiler <a>Tümü</a></h6>
+      <div class="kisi"><span class="av">KB</span><div><b>Kerem Bulut</b><small>Satış · fiyat / teklif</small></div><span class="ik"><span class="btn mini">📞</span><span class="btn mini">✉</span></span></div>
+      <div class="kisi"><span class="av">AK</span><div><b>Aslı Kara</b><small>Muhasebe · ekstre</small></div><span class="ik"><span class="btn mini">📞</span><span class="btn mini">✉</span></span></div>
+
+      <h6>Son olaylar</h6>
+      <div class="zaman">
+        <div>Sipariş SAS‑2026‑0322 · ₺ 21.600<small>22.10 · Murat Ş.</small></div>
+        <div>Alış fat. MRA…0882 · ₺ 96.000<small>20.10 · e‑Fatura kabul edildi</small></div>
+        <div class="k">Ödeme · ₺ 120.000<small>15.10 · Garanti EFT</small></div>
+        <div class="r">İade AIA…0012 · ₺ 3.100<small>25.09 · hatalı baskı</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="altbar"><span>Oluşturan: Aktarım · 03.03.2017</span><span>Son değişiklik: Murat Ş. · 02.07.2026</span><span>Şube: Merkez</span>
+    <span class="sp">Kaydedilmemiş değişiklik yok</span></div>
+</div>
+
+<div class="not">
+  <h3>Tedarikçi Kartı V3 — Müşteri V3'ten farkı</h3>
+  <ul>
+    <li><b>Aynı iskelet</b> (kimlik başlığı, özet şeridi, sağ sütun, sekmeler) — kart aynı (<code>cari</code>), tedarikçi rolünde özet ve sekmeler tedarikçi gözüyle çizilir.</li>
+    <li><b>Özet şeridi:</b> borcumuz (A), vadesi geçen ödeme, 30 günde ödenecek (fatura + verilen çek), açık sipariş (gelecek mal), verilen çek, bu yıl alım, zamanında teslim %.</li>
+    <li><b>Satınalma Koşulları</b> (müşterideki Satış &amp; Risk'in karşılığı): vade, ödeme şekli / günü, erken ödeme iskontosu, alış fiyat listesi, tedarik süresi, minimum sipariş, sözleşme, bize tanınan kredi limiti.</li>
+    <li><b>Finansal:</b> ödeme yaşlandırması (vadesi geçen / 30 gün / sonrası) ve satırdan <b>💸 Öde</b>; verilen çekler; Hesap Özeti başlığında <b>＋ Devir / Açılış Bakiyesi</b> (cari_devir_girisi.html).</li>
+    <li><b>Yeni sekmeler:</b> <b>Ürünler &amp; Fiyatlar</b> (alınan stoklar, son fiyat, 12 ay değişim, tek kaynak / alternatif, seçililerden teklif iste) ve <b>Performans</b> (zamanında teslim, gecikme, eksik teslim, iade oranı, fiyat istikrarı → A/B/C puanı).</li>
+    <li><b>Banka:</b> ödeme talimatı varsayılan IBAN'a; IBAN değişikliği iki kişilik onay (ödeme dolandırıcılığı riski).</li>
+  </ul>
+  <b>Açık sorular:</b> (1) Satınalma koşulları için yeni 1:1 tablo (<code>taraf_tedarikci</code>) mı, <code>taraf_musteri</code>'nin genişletilmesi mi? (2) Puan hesaplanan mı, değerlendirme formuyla mı? (3) "Bize tanınan kredi limiti" takip edilsin mi (aşımda sipariş uyarısı)?
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+function git(t){
+  tabs.forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.dataset.p === t));
+}
+tabs.forEach(x => x.addEventListener('click', () => git(x.dataset.t)));
+document.querySelectorAll('[data-git]').forEach(x => x.addEventListener('click', () => git(x.dataset.git)));
+document.querySelectorAll('.serit').forEach(s => s.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  s.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); c.classList.add('on');
+})));
+</script>
+</body>
+</html>

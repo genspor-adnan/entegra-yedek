@@ -155,6 +155,8 @@ export interface ListeTanimi {
   gizliKartAlanlari?: string[];
   /** Bu ekranda acilmayacak kart sekmeleri (ör. Aday kartinda "Fatura Bilgileri"). */
   gizliKartSekmeleri?: string[];
+  /** Bu ekranda gizlenecek DETAY sekmeleri (detay adı; ör. tedarikçi kartında 'satisKosul', 1162). */
+  gizliDetaylar?: string[];
   /** Bu ekranda ONE alinacak kolon sirasi (soldan saga). */
   kolonSirasi?: string[];
   /** Bu ekranda zorunlu sayilacak kart alanlari (ör. Aday: Temsilci). */

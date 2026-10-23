@@ -348,9 +348,9 @@ Bu işlem geri alınamaz. `
       b.setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
       return true;
 
-    // Secili hesabin ekstresi - ayni ekran, hesapId sorgu parametresiyle.
+    // Secili hesabin ekstresi: TEK EKSTRE ekrani (1158) hesabin turunu kendisi bulur.
     case 'hesap.ekstre':
-      if (satir) b.git(`/hesap-ekstre?hesapId=${satir.id}`);
+      if (satir) b.git(`/ekstre?tur=hesap&id=${satir.id}`);
       return true;
 
     // ADAY -> MÜŞTERİ (122): kayit TASINMAZ, yalniz rol bayragi degisir.

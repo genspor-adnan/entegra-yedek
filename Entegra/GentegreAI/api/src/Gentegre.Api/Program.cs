@@ -375,6 +375,14 @@ uygulama.TaleplerimUclariniEkle();
 uygulama.PersonelListeUclariniEkle();
 // MUSTERI LISTESI VER3 (1150): gosterge seridi.
 uygulama.CariListeUclariniEkle();
+// CARI ICMALI (1154): musteri + tedarikci bakiye, yaslandirma, kirilim.
+uygulama.CariIcmalUclariniEkle();
+// DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
+uygulama.DevirUclariniEkle();
+// KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.
+uygulama.KasaListeUclariniEkle();
+// TEK EKSTRE (1158): cari / kasa / banka / POS / kredi hareketleri, devir + yuruyen bakiye.
+uygulama.EkstreUclariniEkle();
 uygulama.DemoUclariniEkle();
 // DUYURULAR (957): zil > Duyurular, yayinla, yonetim listesi.
 uygulama.DuyuruUclariniEkle();

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ekstre — Tek Ekran (Cari · Kasa · Banka · POS · Kredi)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  /* Dilim grafigi (yigilmis cubuk) */
+  .grafik{background:#fff;padding:12px 14px}
+  .gs{display:grid;grid-template-columns:90px minmax(0,1fr) 90px;gap:10px;align-items:center;margin:8px 0}
+  .ga{color:#3a5573;font-size:11.5px}
+  .gc{height:16px;border-radius:4px;background:#eef2f7;display:flex;overflow:hidden}
+  .gc i{display:block;height:100%}
+  .gc i.k,.lejant i.k{background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .gc i.h,.lejant i.h{background:linear-gradient(90deg,#f0b24a,#c98a1c)}
+  .gt{text-align:right;font-weight:bold;font-size:11.5px}
+  .lejant{display:flex;gap:14px;align-items:center;margin-top:10px;font-size:11px}
+  .lejant i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  /* Mektup govdesi (A4) */
+  .a4 .mektup p{margin:6px 0;font-size:9px}
+
+  /* CARI ICMALI eklentileri */
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b;font-size:11.5px}
+  tr.ara td{background:#f7f9fc;font-weight:bold;border-top:1px solid var(--line2)}
+  .ok-y{color:var(--ok)}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .iki > .grp{margin:12px 6px 12px 12px}
+  .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .bar{display:flex;height:14px;margin:8px 10px;border-radius:3px;overflow:hidden;border:1px solid var(--line2)}
+  .bar i{display:block;height:100%}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .onz{flex-wrap:wrap;gap:16px}
+
+  /* TEK EKSTRE eklentileri */
+  tr.ci-grp td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.devir td{background:#fbfcfe;font-style:italic;color:#4d5d6e}
+  tr.plan td{color:#8a98a8;font-style:italic}
+  .sec-hesap{min-width:320px}
+  .ay-cubuk{display:inline-block;width:110px;height:8px;background:#eef2f7;border-radius:4px;overflow:hidden;vertical-align:middle}
+  .ay-cubuk i{display:block;height:100%}
+  .ay-cubuk i.art{background:#e0a33a} .ay-cubuk i.az{background:#5cb87a}
+  .ozet{grid-template-columns:repeat(8,1fr)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📄 Ekstre — <span id="tBaslik"></span>
+    <span class="sp">Gentegre AI · Finans › Ekstre · Merkez · 23.10.2026</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Çıktı ▾ <small style="opacity:.8">(Önizleme · Yazdır · PDF · Excel)</small></div>
+    <div class="btn"><span>📂</span> Belge / İşlem Aç</div>
+    <div class="sepv"></div>
+    <div class="btn tur" data-tur="cari"><span>🤝</span> Mutabakat Mektubu</div>
+    <div class="btn tur" data-tur="cari"><span>💼</span> Devir / Açılış</div>
+    <div class="btn tur" data-tur="kasa"><span>🧮</span> Gün Sonu Sayımı</div>
+    <div class="btn tur" data-tur="banka"><span>🔗</span> Banka Hareketiyle Eşleştir</div>
+    <div class="btn tur" data-tur="pos"><span>🏦</span> POS Mutabakatı</div>
+    <div class="btn tur" data-tur="kredi"><span>📅</span> Ödeme Planı</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🗂</span> <span id="kartDug">Kartı Aç</span></div>
+    <div class="btn"><span>↩</span> Geri</div>
+  </div>
+
+  <!-- ŞERİT: hesap türü + hesap seçimi + dönem. Liste ekranlarının "📄 Ekstre" düğmesi bu ekranı
+       türü ve hesabı seçili açar (/ekstre?tur=cari&id=4412). -->
+  <div class="serit">
+    <div class="seg" id="turSec">
+      <span data-t="cari" class="on">👥 Cari</span><span data-t="kasa">💵 Kasa</span><span data-t="banka">🏦 Banka</span>
+      <span data-t="pos">💳 POS</span><span data-t="kredi">📑 Kredi</span>
+    </div>
+    <div class="sel sec-hesap">🔍 <b id="hesapAd"></b> <span class="rz" id="hesapKod"></span> ▾</div>
+    <div class="sel">📅 Dönem: <b>01.01.2026 – 23.10.2026</b> <span class="rz">Bu yıl</span> ▾</div>
+    <div class="sel">💱 Para: <b>Tümü</b> <small>(birim başına grup)</small> ▾</div>
+    <div class="seg" id="gorSec"><span class="on" data-g="liste">☰ Liste</span><span data-g="detay">🧾 Detay</span><span data-g="aylik">📆 Aylık</span></div>
+    <span class="sp"></span>
+    <span class="rz" id="bakiyeRz"></span>
+  </div>
+
+  <div class="ozet" id="ozet"></div>
+
+  <div class="pnl-ana">
+    <div class="grp">
+      <h4><span id="gBaslik"></span> <span class="mini" id="gNot"></span></h4>
+      <div class="dg"><table id="tablo"></table></div>
+      <div class="ipucu" id="ipucu"></div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <h3>Tek Ekstre — tasarım notları</h3>
+  <ul>
+    <li><b>Tek ekran, beş hesap türü:</b> Cari (müşteri + tedarikçi), Kasa, Banka, POS, Kredi. Veri tek kaynaktan — <code>mali_hareket</code> (hesap türü C / K / B / P / R); bugünkü <code>cari-ekstre</code> ve <code>hesap-ekstre</code> kaynakları tek ekranın iki kipi olur. Yetki seçilen türe göre sunucuda (cari: <code>mali_hareket</code>, kasa / banka / POS / kredi: kasa yetkileri).</li>
+    <li><b>Ortak olan:</b> hesap seçici (arama + son açılanlar), dönem, para birimi grupları (önce yerel, sonra USD, EUR…), <b>Devir</b> satırı (dönem başı bakiye), yürüyen bakiye, grup ve genel toplam (TL karşılığı), çift tık → hareketi üreten belge / kasa işlemi, <b>Çıktı ▾</b> (icmallerin menüsü: Baskı Önizleme · Yazdır · PDF · Word · Excel · HTML), Liste / Detay (cari) / <b>Aylık</b> görünümü — Aylık: ay başı bakiye, ayın borç / alacak (giriş / çıkış) toplamı, ay sonu bakiye, hareket sayısı; aya tıklayınca o ayın hareketleri.</li>
+    <li><b>Yön ve dil türe göre:</b> Cari'de <b>Borç / Alacak</b> ve bakiye <b>B / A</b>; Kasa, Banka, POS, Kredi'de <b>Giriş / Çıkış</b>. Sütun adları ve toplanan sütunlar seçili türden gelir — aynı ızgara.</li>
+    <li><b>Türe özgü:</b> Cari — vade sütunu, vadesi geçen kutusu, mutabakat mektubu, devir / açılış, Detay görünümünde belge kalemleri. Kasa — cari / karşı hesap sütunu, gün sonu sayımı ve fark. Banka — karşı hesap, <b>eşleşme</b> sütunu (banka hareketiyle — API / ekstre dosyası), bloke. POS — komisyon, valör, bankaya geçen. Kredi — taksit no, ana para / faiz ayrımı, ödeme planı.</li>
+    <li><b>Giriş yolları:</b> Müşteri / Tedarikçi / Kasa / Banka / POS / Kredi listelerinin "📄 Ekstre" düğmesi ve kartlardaki "📄 Ekstre" bu ekranı ilgili hesapla yeni sekmede açar; menüde tek madde <b>Finans › Ekstre</b>. Bugünkü Kasa › Cari Ekstre ve hesap ekstresi rotaları buraya yönlenir.</li>
+  </ul>
+  <b>Açık sorular:</b> (1) Kasa / Banka / POS'ta "tüm hesaplar" tek ekstrede (hesap sütunuyla) gösterilsin mi, yoksa her zaman tek hesap mı? (2) Cari'de müşteri ve tedarikçi rolü olan cari için ekstre tek mi (bugün olduğu gibi) — evet önerilir. (3) Kur değerlemesi (bugünün kuruyla bakiye) bu ekranda seçenek mi, yalnız icmalde mi?
+</div>
+
+<script>
+const T = {
+  cari: {
+    baslik: 'Cari — Ege Tarım Ürünleri Koop.', hesap: 'Ege Tarım Ürünleri Koop.', kod: 'M-00044 · Müşteri', kart: 'Cari Kartı',
+    rz: ['rz kir', 'Bakiye ₺ 184.320,00 B'],
+    ozet: [['Devir (01.01)', '98.420,00', '₺ · B', ''], ['Dönem Borç', '512.700,00', '38 hareket', ''], ['Dönem Alacak', '426.800,00', '21 hareket', 'iyi'],
+           ['Bakiye', '184.320,00 B', '+ $ 1.250,00 B', 'teh'], ['Vadesi Geçen', '142.000,00', 'en eski 61 gün', 'uy'], ['Son Tahsilat', '09.10.2026', '₺ 60.000 · Havale', ''],
+           ['Ort. Tahsil', '52 gün', 'vade 60', ''], ['Risk', '%123', 'limit ₺ 150.000', 'teh']],
+    kolon: ['Tarih', 'Belge No', 'İşlem', 'Açıklama', 'Vade', 'Borç', 'Alacak', 'Bakiye'], sag: [5, 6, 7],
+    satir: [
+      ['grup', 'TL · 7 hareket'],
+      ['devir', '01.01.2026', '', 'Devir', 'Dönem başı bakiye', '', '', '', '98.420,00 B'],
+      ['', '15.07.2026', 'GEN…0014', 'Satış İrsaliyesi', 'Sevkiyat (faturalandı)', '', '9.200,00', '', '107.620,00 B'],
+      ['', '08.08.2026', 'MKB‑2210', 'Tahsilat — Havale', 'Garanti EFT', '', '', '40.000,00', '67.620,00 B'],
+      ['', '28.09.2026', 'GNT…0384', 'Satış Faturası', 'Gübre + tohum (14 kalem)', '27.11.2026', '58.900,00', '', '126.520,00 B'],
+      ['', '02.10.2026', 'GNT…0398', 'Satış Faturası', 'Sulama ekipmanı', '01.12.2026', '31.750,00', '', '158.270,00 B'],
+      ['', '14.10.2026', 'GNT…0412', 'Satış Faturası', 'Ambalaj malzemesi', '13.12.2026', '48.200,00', '', '206.470,00 B'],
+      ['', '18.10.2026', 'GIA…0021', 'Satış İadesi', 'Hasarlı 3 koli', '', '', '4.120,00', '202.350,00 B'],
+      ['', '21.10.2026', 'MKB‑2302', 'Çek Girişi', 'Ziraat 1234567 · vade 05.11', '', '', '18.030,00', '184.320,00 B'],
+      ['top', 'TL toplamı', '', '', '', '', '148.050,00', '62.150,00', '184.320,00 B'],
+      ['grup', 'USD · 2 hareket'],
+      ['', '04.06.2026', 'EXP…0007', 'Satış Faturası', 'Damla sulama seti', '03.08.2026', '8.250,00', '', '8.250,00 B'],
+      ['', '12.08.2026', 'MKB‑1987', 'Tahsilat — Döviz havale', 'İş Bankası USD', '', '', '7.000,00', '1.250,00 B'],
+      ['top', 'USD toplamı', '', '', '', '', '8.250,00', '7.000,00', '1.250,00 B'],
+      ['genel', 'GENEL TOPLAM (TL karşılığı, hareket kuru)', '', '', '', '', '485.140,00', '348.970,00', '235.820,00 B'],
+    ],
+    detay: true,
+    not: 'Borç: cari bize borçlandı (satış, iade alımı) · Alacak: tahsilat, iade, çek. Vade sütunu yaşlandırmayı besler.',
+    ipucu: '🧾 <b>Detay</b> görünümü: her belge hareketinin altında kalemleri (kod, ad, miktar, fiyat, tutar) — mutabakatta "hangi fatura" sorusu ekstreden çıkmadan cevaplanır.',
+  },
+  kasa: {
+    baslik: 'Kasa — Merkez TL Kasası', hesap: 'Merkez TL Kasası', kod: 'K-01 · TL', kart: 'Kasa Hesabı',
+    rz: ['rz ok', 'Bakiye ₺ 48.320,50'],
+    ozet: [['Devir (01.01)', '12.400,00', '₺', ''], ['Giriş', '1.284.600,00', '412 hareket', 'iyi'], ['Çıkış', '1.248.679,50', '388 hareket', 'teh'],
+           ['Bakiye', '48.320,50', 'TL', ''], ['Son Sayım', '22.10.2026', 'fark −15,00 · açıklandı', 'uy'], ['Bankaya Yatırılan', '920.000,00', 'dönem', ''],
+           ['Açık Oturum', '1', 'Banko 2 · Ayşe K.', 'uy'], ['Günlük Ort.', '₺ 4.380', 'nakit tahsilat', '']],
+    kolon: ['Tarih', 'Makbuz No', 'İşlem', 'Cari / Karşı Hesap', 'Açıklama', 'Giriş', 'Çıkış', 'Bakiye'], sag: [5, 6, 7],
+    satir: [
+      ['grup', 'TL · 6 hareket'],
+      ['devir', '22.10.2026', '', 'Devir', '', 'Gün başı bakiye', '', '', '41.200,00'],
+      ['', '22.10.2026 09:12', 'MKB‑2311', 'Nakit Tahsilat', 'Ege Tarım Ürünleri Koop.', 'Fatura GNT…0398 kısmi', '12.000,00', '', '53.200,00'],
+      ['', '22.10.2026 11:40', 'MKB‑2314', 'Nakit Ödeme', 'Özkan Nakliyat', 'Navlun', '', '3.500,00', '49.700,00'],
+      ['', '22.10.2026 14:05', 'VRM‑0412', 'Kasadan Bankaya', '→ Garanti BBVA TL', 'Günlük yatırma', '', '30.000,00', '19.700,00'],
+      ['', '22.10.2026 16:30', 'MKB‑2320', 'Nakit Tahsilat', 'Perakende satış', 'Fiş 0144', '28.635,50', '', '48.335,50'],
+      ['', '22.10.2026 18:02', 'SAY‑1022', 'Sayım Farkı', '—', 'Gün sonu sayım (Ayşe K.)', '', '15,00', '48.320,50'],
+      ['genel', 'GENEL TOPLAM', '', '', '', '', '40.635,50', '33.515,00', '48.320,50'],
+    ],
+    not: 'Giriş: tahsilat, bankadan çekme · Çıkış: ödeme, bankaya yatırma, masraf. Cari sütunu işlemin karşı tarafı.',
+    ipucu: '🧮 Gün sonu sayımı ve fark açıklaması bu ekstreden açılır (Kasa Gün Sonu ile aynı kayıt). Sayım farkı ayrı satır olarak görünür.',
+  },
+  banka: {
+    baslik: 'Banka — Garanti BBVA TL (…2987)', hesap: 'Garanti BBVA TL', kod: 'TR56 …2987 11 · TL', kart: 'Banka Hesabı',
+    rz: ['rz ok', 'Bakiye ₺ 1.842.300,00'],
+    ozet: [['Devir (01.01)', '612.000,00', '₺', ''], ['Giriş', '18.420.000,00', '1.204 hareket', 'iyi'], ['Çıkış', '17.189.700,00', '962 hareket', 'teh'],
+           ['Bakiye (kayıt)', '1.842.300,00', 'banka: 1.845.910,00', ''], ['Eşleşmeyen', '3', 'fark ₺ 3.610,00', 'uy'], ['Bloke', '0,00', '—', ''],
+           ['Bekleyen Talimat', '2', '₺ 96.000 · 27.10', ''], ['Son Banka Çekimi', '23.10 09:30', 'API ✓', 'iyi']],
+    kolon: ['Tarih', 'Dekont / No', 'İşlem', 'Cari / Karşı Hesap', 'Açıklama', 'Giriş', 'Çıkış', 'Bakiye', 'Eşleşme'], sag: [5, 6, 7],
+    satir: [
+      ['grup', 'TL · 5 hareket'],
+      ['devir', '20.10.2026', '', 'Devir', '', 'Dönem başı', '', '', '1.780.100,00', ''],
+      ['', '20.10.2026', 'EFT‑88123', 'Gelen Havale', 'Ege Tarım Ürünleri Koop.', 'Fat. GNT…0384', '60.000,00', '', '1.840.100,00', '<span class="rz ok">✓ eşleşti</span>'],
+      ['', '21.10.2026', 'EFT‑88190', 'Giden EFT', 'Marmara Ambalaj San. A.Ş.', 'Fat. MRA…0812', '', '62.000,00', '1.778.100,00', '<span class="rz ok">✓ eşleşti</span>'],
+      ['', '22.10.2026', 'VRM‑0412', 'Kasadan Bankaya', '← Merkez TL Kasası', 'Günlük yatırma', '30.000,00', '', '1.808.100,00', '<span class="rz ok">✓ eşleşti</span>'],
+      ['', '22.10.2026', 'POS‑1022', 'POS Geçişi', '← Garanti POS 01', 'Valör 22.10', '34.200,00', '', '1.842.300,00', '<span class="rz sari">bankada 37.810 — fark</span>'],
+      ['genel', 'GENEL TOPLAM', '', '', '', '', '124.200,00', '62.000,00', '1.842.300,00', ''],
+    ],
+    not: 'Giriş: gelen havale / EFT, kasadan yatırma, POS geçişi · Çıkış: giden EFT, ödeme, masraf.',
+    ipucu: '🔗 <b>Eşleşme</b> sütunu banka hareketleriyle (Garanti BBVA API / ekstre dosyası): eşleşmeyen satır sarı; "Banka Hareketiyle Eşleştir" farkı açar (POS komisyonu, banka masrafı → tek tıkla kayıt).',
+  },
+  pos: {
+    baslik: 'POS — Garanti POS 01', hesap: 'Garanti POS 01', kod: 'Terminal 10044512 · → Garanti BBVA TL', kart: 'POS Hesabı',
+    rz: ['rz sari', 'Bankaya geçmemiş ₺ 41.250,00'],
+    ozet: [['Devir (01.01)', '0,00', '', ''], ['Tahsilat', '2.418.300,00', '1.884 işlem', 'iyi'], ['Komisyon', '43.530,00', '%1,80 ort.', 'teh'],
+           ['Bankaya Geçen', '2.333.520,00', 'valör ile', ''], ['Bekleyen Valör', '41.250,00', '3 gün', 'uy'], ['İade / İptal', '6.200,00', '4 işlem', ''],
+           ['Taksitli', '%22', 'tahsilatın', ''], ['Son Batch', '22.10 23:59', '64 işlem', '']],
+    kolon: ['Tarih', 'Provizyon / Batch', 'İşlem', 'Cari', 'Açıklama', 'Giriş', 'Çıkış', 'Komisyon', 'Valör', 'Bakiye'], sag: [5, 6, 7, 9],
+    satir: [
+      ['grup', 'TL · 5 hareket'],
+      ['devir', '21.10.2026', '', 'Devir', '', '', '', '', '', '', '7.050,00'],
+      ['', '22.10.2026 10:14', '845221', 'POS Tahsilat', 'Perakende', 'Tek çekim', '12.400,00', '', '223,20', '23.10', '19.226,80'],
+      ['', '22.10.2026 15:40', '845367', 'POS Tahsilat', 'Yıldız Kırtasiye', '3 taksit', '24.000,00', '', '696,00', '25.10', '42.530,80'],
+      ['', '22.10.2026 16:02', '845370', 'POS İade', 'Perakende', 'İade fiş 0139', '', '1.200,00', '−21,60', '23.10', '41.352,40'],
+      ['', '22.10.2026', 'BATCH‑1022', 'Bankaya Geçiş', '→ Garanti BBVA TL', 'Valör 22.10', '', '34.200,00', '', '', '7.152,40'],
+      ['genel', 'GENEL TOPLAM', '', '', '', '', '36.400,00', '35.400,00', '897,60', '', '7.152,40'],
+    ],
+    not: 'Giriş: POS tahsilatı · Çıkış: iade ve bankaya geçiş. Komisyon ve valör POS tanımından (taksit sayısına göre).',
+    ipucu: '🏦 <b>POS Mutabakatı</b>: batch toplamı ↔ banka hesabına geçen tutar; fark komisyon ya da eksik geçiştir (Banka ekstresindeki sarı satırla aynı fark).',
+  },
+  kredi: {
+    baslik: 'Kredi — İş Bankası Ticari Kredi (2026‑01)', hesap: 'İş Bankası Ticari Kredi', kod: '24 ay · %3,15 aylık', kart: 'Kredi Kartı',
+    rz: ['rz kir', 'Kalan anapara ₺ 1.650.000,00'],
+    ozet: [['Kullanılan', '2.400.000,00', '15.01.2026', ''], ['Ödenen Ana Para', '750.000,00', '9 taksit', 'iyi'], ['Ödenen Faiz', '596.400,00', '+ BSMV / KKDF', 'teh'],
+           ['Kalan Ana Para', '1.650.000,00', '15 taksit', 'teh'], ['Sonraki Taksit', '15.11.2026', '₺ 149.600,00', 'uy'], ['Gecikmiş', '0', '—', 'iyi'],
+           ['Toplam Maliyet', '%45,4', 'yıllık efektif', ''], ['Teminat', 'Kefalet', '—', '']],
+    kolon: ['Tarih', 'Taksit', 'İşlem', 'Açıklama', 'Ana Para', 'Faiz + Vergi', 'Giriş', 'Çıkış', 'Kalan'], sag: [4, 5, 6, 7, 8],
+    satir: [
+      ['grup', 'TL'],
+      ['devir', '15.08.2026', '', 'Devir', 'Kalan ana para', '', '', '', '', '1.825.000,00'],
+      ['', '15.09.2026', '8 / 24', 'Taksit Ödemesi', 'Garanti BBVA TL', '87.500,00', '62.100,00', '', '149.600,00', '1.737.500,00'],
+      ['', '15.10.2026', '9 / 24', 'Taksit Ödemesi', 'Garanti BBVA TL', '87.500,00', '62.100,00', '', '149.600,00', '1.650.000,00'],
+      ['plan', '15.11.2026', '10 / 24', 'Plan', 'Ödenecek', '87.500,00', '62.100,00', '', '149.600,00', '1.562.500,00'],
+      ['genel', 'GENEL TOPLAM', '', '', '', '175.000,00', '124.200,00', '', '299.200,00', '1.650.000,00'],
+    ],
+    not: 'Çıkış: taksit (ana para + faiz + BSMV/KKDF) · Giriş: kredi kullanımı. Plan satırları (gelecek taksit) soluk.',
+    ipucu: '📅 <b>Ödeme Planı</b> kalan taksitleri ve erken kapama tutarını gösterir; plan satırları "Plan" tipinde, kayıt değil.',
+  },
+};
+// Detay görünümü: belge kalemleri (örnek).
+const KALEM = {
+  'GNT…0384': '120.03 Gübre 25 kg × 40 · 1.150,00 = 46.000,00 &nbsp;·&nbsp; 150.11 Tohum paketi × 12 · 1.075,00 = 12.900,00',
+  'GNT…0398': '310.02 Damla boru 16 mm × 50 rulo · 635,00 = 31.750,00',
+  'GNT…0412': '410.01 Koli 40×30×30 × 2.000 · 18,40 = 36.800,00 &nbsp;·&nbsp; 410.07 Streç film × 100 · 114,00 = 11.400,00',
+  'GIA…0021': '120.03 Gübre 25 kg × −3 koli · 1.373,33 = −4.120,00 (hasarlı)',
+  'EXP…0007': '310.09 Damla sulama seti × 15 · $ 550,00 = $ 8.250,00',
+};
+const AYLIK = {"cari": {"TL": {"devir": 98420, "b": [51691.52, 44551.83, 65192.26, 41315.43, 60443.61, 53419.09, 40719.54, 59269.52, 39873.29, 56223.91], "a": [31347.69, 32002.56, 42483.1, 55115.17, 33041.45, 36163.48, 48854.0, 58909.73, 47273.78, 41609.04], "n": [5, 4, 6, 5, 7, 6, 8, 6, 7, 5]}, "USD": {"devir": 0, "b": [0, 0, 0, 0, 0, 8250, 0, 0, 0, 0], "a": [0, 0, 0, 0, 0, 0, 0, 7000, 0, 0], "n": [0, 0, 0, 0, 0, 1, 0, 1, 0, 0]}}, "kasa": {"TL": {"devir": 12400, "b": [179847.86, 92071.05, 168726.81, 115016.87, 101292.98, 98794.44, 116798.76, 164729.0, 104736.49, 142585.74], "a": [148495.03, 123246.75, 139858.17, 93916.12, 93614.12, 107479.24, 152425.24, 128475.61, 117728.43, 143440.79], "n": [78, 74, 82, 80, 85, 79, 88, 84, 81, 69]}}, "banka": {"TL": {"devir": 612000, "b": [1723419.88, 1532067.28, 2148981.64, 2030010.91, 1462631.26, 1874637.83, 1813238.31, 2249708.53, 2067991.29, 1517313.07], "a": [2303288.66, 1262979.6, 1625059.15, 2034153.1, 1303909.44, 1710542.28, 1167820.84, 1926847.0, 2043118.82, 1811981.11], "n": [210, 198, 226, 215, 230, 221, 240, 232, 219, 175]}}, "pos": {"TL": {"devir": 0, "b": [277463.87, 191069.41, 249751.7, 234229.3, 232003.09, 212979.51, 272002.41, 288107.38, 215731.46, 244961.87], "a": [272731.05, 187810.26, 245491.58, 230233.95, 228045.71, 209346.63, 267362.75, 283193.01, 212051.63, 240783.43], "n": [180, 172, 190, 185, 198, 188, 205, 196, 190, 180]}}, "kredi": {"TL": {"devir": 0, "b": [2400000, 0, 0, 0, 0, 0, 0, 0, 0, 0], "a": [0, 83333.33, 83333.33, 83333.33, 83333.33, 83333.33, 83333.33, 83333.33, 83333.33, 83333.36], "n": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}}};
+const AYLAR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim'];
+const tlf = n => n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/** AYLIK görünüm: ay başı bakiye · ayın borç/giriş · alacak/çıkış · ay sonu bakiye · hareket sayısı (para birimi başına). */
+function aylikCiz(d){
+  const cari = tur === 'cari', kredi = tur === 'kredi';
+  const k1 = cari ? 'Borç' : kredi ? 'Kullanım' : 'Giriş', k2 = cari ? 'Alacak' : kredi ? 'Ana Para Ödemesi' : 'Çıkış';
+  const ba = v => cari ? `${tlf(Math.abs(v))} ${v > 0.005 ? 'B' : v < -0.005 ? 'A' : ''}` : tlf(v);
+  let h = `<thead><tr><th>Ay</th><th class="sag">Ay Başı</th><th class="sag">${k1}</th><th class="sag">${k2}</th><th class="sag">Net</th><th class="sag">Ay Sonu</th><th class="sag">Hareket</th><th>Değişim</th></tr></thead><tbody>`;
+  for (const [para, v] of Object.entries(AYLIK[tur])) {
+    let bak = v.devir, tb = 0, ta = 0, tn = 0;
+    const enb = Math.max(...v.b.map((x, i) => Math.abs(x - v.a[i])), 1);
+    h += `<tr class="ci-grp"><td colspan="8">${para}</td></tr><tr class="devir"><td>Devir (01.01)</td><td></td><td></td><td></td><td></td><td class="sag">${ba(bak)}</td><td></td><td></td></tr>`;
+    AYLAR.forEach((ay, i) => {
+      const bas = bak, net = v.b[i] - v.a[i]; bak += net; tb += v.b[i]; ta += v.a[i]; tn += v.n[i];
+      const g = Math.round(Math.abs(net) / enb * 100);
+      h += `<tr class="ac"><td>${ay} 2026</td><td class="sag">${ba(bas)}</td><td class="sag">${v.b[i] ? tlf(v.b[i]) : '—'}</td><td class="sag">${v.a[i] ? tlf(v.a[i]) : '—'}</td>
+        <td class="sag ${net > 0.005 ? (cari ? 'kir' : '') : ''}">${net ? (net > 0 ? '+' : '−') + tlf(Math.abs(net)) : '—'}</td><td class="sag"><b>${ba(bak)}</b></td><td class="sag">${v.n[i] || '—'}</td>
+        <td><span class="ay-cubuk"><i class="${net >= 0 ? 'art' : 'az'}" style="width:${g}%"></i></span></td></tr>`;
+    });
+    h += `<tr class="ara"><td>${para} toplamı</td><td class="sag">${ba(v.devir)}</td><td class="sag">${tlf(tb)}</td><td class="sag">${tlf(ta)}</td><td class="sag">${(tb - ta >= 0 ? '+' : '−') + tlf(Math.abs(tb - ta))}</td><td class="sag">${ba(bak)}</td><td class="sag">${tn}</td><td></td></tr>`;
+  }
+  return h + '</tbody>';
+}
+let tur = 'cari', gor = 'liste';
+function ciz(){
+  const d = T[tur];
+  document.getElementById('tBaslik').textContent = d.baslik;
+  document.getElementById('hesapAd').textContent = d.hesap;
+  document.getElementById('hesapKod').textContent = d.kod;
+  document.getElementById('kartDug').textContent = d.kart + ' Aç';
+  const rz = document.getElementById('bakiyeRz'); rz.className = d.rz[0]; rz.textContent = d.rz[1];
+  document.getElementById('ozet').innerHTML = d.ozet.map(([b, v, a, s]) =>
+    `<div class="kutu ${s}"><div class="bas">${b}</div><div class="deg">${v}</div><div class="alt">${a}</div></div>`).join('');
+  document.querySelectorAll('.btn.tur').forEach(b => b.hidden = b.dataset.tur !== tur);
+  document.getElementById('gBaslik').textContent = tur === 'cari' ? 'Cari Hesap Ekstresi' : 'Hesap Ekstresi';
+  document.getElementById('gNot').textContent = d.not;
+  document.getElementById('ipucu').innerHTML = d.ipucu;
+  if (gor === 'aylik') {
+    document.getElementById('tablo').innerHTML = aylikCiz(d);
+    document.getElementById('gNot').textContent = 'Ay ay toplam: ay başı bakiye, ayın hareketleri, ay sonu bakiye. Aya tıklayınca o ayın hareketleri (Liste) açılır.';
+    document.querySelectorAll('#turSec span').forEach(s => s.classList.toggle('on', s.dataset.t === tur));
+    document.querySelectorAll('#gorSec span').forEach(s => { s.classList.toggle('on', s.dataset.g === gor); s.hidden = s.dataset.g === 'detay' && tur !== 'cari'; });
+    return;
+  }
+  const n = d.kolon.length;
+  let h = '<thead><tr>' + d.kolon.map((k, i) => `<th class="${d.sag.includes(i) || /Bakiye|Kalan|Komisyon/.test(k) ? 'sag' : ''}">${k}</th>`).join('') + '</tr></thead><tbody>';
+  for (const r of d.satir) {
+    if (r[0] === 'grup') { h += `<tr class="ci-grp"><td colspan="${n}">${r[1]}</td></tr>`; continue; }
+    const hucre = r.slice(1);
+    const cls = r[0] === 'devir' ? 'devir' : r[0] === 'top' ? 'ara' : r[0] === 'genel' ? 'toplam' : r[0] === 'plan' ? 'plan' : 'ac';
+    h += `<tr class="${cls}">` + hucre.map((v, i) => {
+      const sag = d.sag.includes(i) || i === hucre.length - 1 && tur !== 'banka' || (tur === 'banka' && i === 7);
+      const renk = tur === 'cari' && i === hucre.length - 1 && /B$/.test(v) ? ' kir' : '';
+      return `<td class="${sag ? 'sag' : ''}${renk}">${v}</td>`;
+    }).join('') + '</tr>';
+    if (gor === 'detay' && d.detay && cls === 'ac' && /Fatura|İade|İrsaliye/.test(r[3]))
+      h += `<tr class="det"><td></td><td colspan="${n - 1}">↳ ${KALEM[r[2]] ?? '120.03 Gübre 25 kg × 8 · 1.150,00 = 9.200,00'}</td></tr>`;
+  }
+  document.getElementById('tablo').innerHTML = h + '</tbody>';
+  document.querySelectorAll('#turSec span').forEach(s => s.classList.toggle('on', s.dataset.t === tur));
+  document.querySelectorAll('#gorSec span').forEach(s => { s.classList.toggle('on', s.dataset.g === gor); s.hidden = s.dataset.g === 'detay' && tur !== 'cari'; });
+}
+document.querySelectorAll('#turSec span').forEach(s => s.addEventListener('click', () => { tur = s.dataset.t; if (tur !== 'cari' && gor === 'detay') gor = 'liste'; ciz(); }));
+document.querySelectorAll('#gorSec span').forEach(s => s.addEventListener('click', () => { gor = s.dataset.g; ciz(); }));
+// Aylık görünümde aya tıklayınca Liste'ye o ayla döner (mockup: yalnız Liste'ye geçer).
+document.getElementById('tablo').addEventListener('click', e => { if (gor === 'aylik' && e.target.closest('tr.ac')) { gor = 'liste'; ciz(); } });
+ciz();
+</script>
+</body>
+</html>

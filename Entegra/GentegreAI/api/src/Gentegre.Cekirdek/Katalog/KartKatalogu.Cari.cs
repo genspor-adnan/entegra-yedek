@@ -158,6 +158,34 @@ public static partial class KartKatalogu
                     { ["1"] = "Yalnız uyar", ["2"] = "Sevkiyat onaya düşer", ["3"] = "Satış engellenir" }),
                 new("teminat",      "teminat",       "metin",   EnFazlaUzunluk: 200, Baslik: "Teminat")
             }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true),
+            // SATINALMA KOŞULLARI (1162 / 1163, mockup tedarikci_karti_ver3.html): taraf_tedarikci (017) 1:1 - müşterideki
+            //   Satış & Risk'in karşılığı. Vade günü alış belgelerinin vadesini (v_cari_ozet vadesi geçen ödeme,
+            //   30 günde ödenecek) besler. Müşteri listesi sekmeyi gizler.
+            new DetayTanimi("satinalmaKosul", "public.taraf_tedarikci", "id", new KartAlani[]
+            {
+                new("id",                 "id",                    "sayi",    Yazilabilir: false),
+                new("vadeGun",            "vade_gun",              "sayi",    Baslik: "Vade (gün)"),
+                new("odemeSekli",         "odeme_kosulu",          "kod",     Baslik: "Ödeme Şekli", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Nakit", ["2"] = "Havale / EFT", ["3"] = "Çek", ["4"] = "Senet", ["5"] = "Kredi kartı", ["6"] = "Çek / Havale" }),
+                new("odemeGunu",          "odeme_gunu",            "metin",   EnFazlaUzunluk: 60, Baslik: "Ödeme Günü"),
+                new("erkenOdemeIskonto",  "erken_odeme_iskonto",   "ondalik", Baslik: "Erken Ödeme İskontosu %"),
+                new("erkenOdemeGun",      "erken_odeme_gun",       "sayi",    Baslik: "Erken Ödeme (gün içinde)"),
+                new("alisFiyatListesiId", "alis_fiyat_listesi_id", "kod",     KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Alış Fiyat Listesi"),
+                new("tedarikSuresiGun",   "temin_suresi_gun",      "sayi",    Baslik: "Tedarik Süresi (gün)"),
+                new("minSiparis",         "min_siparis",           "para",    Baslik: "Minimum Sipariş"),
+                new("teslimSekli",        "teslim_sekli",          "kod",     Baslik: "Teslim Şekli", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Tedarikçi teslim (DAP)", ["2"] = "Kargo", ["3"] = "Ambar / nakliye", ["4"] = "Biz alırız (EXW)" }),
+                new("sozlesmeNo",         "sozlesme_no",           "metin",   EnFazlaUzunluk: 40, Baslik: "Sözleşme No"),
+                new("sozlesmeBitis",      "sozlesme_bitis",        "tarih",   Baslik: "Sözleşme Bitiş"),
+                new("krediLimiti",        "kredi_limiti",          "para",    Baslik: "Bize Tanınan Kredi Limiti"),
+                new("onayDurumu",         "onay_durumu",           "kod",     Baslik: "Onay Durumu", SabitKodlar: new Dictionary<string, string>
+                    { ["0"] = "—", ["1"] = "A · onaylı", ["2"] = "B", ["3"] = "C · izlemede" }),
+                new("tedarikciTuru",      "tedarikci_turu",        "kod",     Baslik: "Tedarikçi Türü", SabitKodlar: new Dictionary<string, string>
+                    { ["0"] = "—", ["1"] = "Üretici", ["2"] = "Distribütör", ["3"] = "Toptancı", ["4"] = "Hizmet", ["5"] = "İthalatçı" }),
+                new("yerliIthal",         "yerli_ithal",           "kod",     Baslik: "Yerli / İthal", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Yerli", ["2"] = "İthal" }),
+                new("satinalmaciId",      "satinalmaci_id",        "kod",     KodTablosu: "public.v_personel_lookup", Baslik: "Satınalmacı"),
+            }, SubeKolonu: null, Baslik: "Satınalma Koşulları", LogTabloId: 1612, TekSatir: true),
             // BANKA / IBAN (1153, kullanici: "banka Iban ekleyemedim" - sekme yer tutucuydu):
             //   carinin banka hesaplari. IBAN ulke kodu + mod-97 ile denetlenir; tek varsayilan.
             new DetayTanimi("bankalar", "public.taraf_banka", "taraf_id", new KartAlani[]

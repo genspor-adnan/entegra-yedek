@@ -13,7 +13,7 @@ import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDonanimSekmesi, AcilYatakD
 import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSekmesi, BelgeTuruHatirlatmaSekmesi,
          BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
-import { CariBelgeler, CariCrm, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
+import { CariBelgeler, CariCrm, CariDevirSorusu, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi } from '../konsultasyon/KonsultasyonKarti';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
@@ -23,7 +23,8 @@ import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKu
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { DenetimAraclari } from '../kys/denetim/kysDenetimKarti';
 import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
-import { BankaBaglantiRozeti, BankaHesapHareketleri } from '../banka/BankaHareketPanelleri';
+import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
+import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
@@ -87,13 +88,15 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   //   Tedarikçi kartı da aynı kaynak (`cari`) - özet onda da geçerli.
   cari: {
     seritSarmalayici: b => kayitli(b.kartId)
-      ? (serit, d) => <>{serit}<CariOzetSeridi id={b.kartId as number} tazele={b.tazeleKayit}
-                                                ad={String(d.unvan ?? '')} git={b.git} /></>
+      ? (serit, d) => <>{serit}<CariDevirSorusu id={b.kartId as number} onDegisti={b.kartiTazele} />
+                         <CariOzetSeridi id={b.kartId as number} tazele={b.tazeleKayit}
+                                         ad={String(d.unvan ?? '')} git={b.git}
+                                         tedarikci={Number(d.tedarikci ?? 0) === 1 && Number(d.musteri ?? 0) !== 1} /></>
       : undefined,
     yanPanel: b => kayitli(b.kartId)
       ? <CariYanPanel id={b.kartId} tazele={b.tazeleKayit} git={b.git} gitKart={b.git} /> : undefined,
     ekSekmeler: b => kayitli(b.kartId) ? [
-      { anahtar: 'ozel:cari-finans', baslik: 'Finansal', ciz: () => <CariFinansal id={b.kartId as number} tazele={b.tazeleKayit} /> },
+      { anahtar: 'ozel:cari-finans', baslik: 'Finansal', ciz: () => <CariFinansal id={b.kartId as number} tazele={b.tazeleKayit} onDegisti={b.kartiTazele} /> },
       { anahtar: 'ozel:cari-belge', baslik: 'Belgeler', ciz: () => <CariBelgeler id={b.kartId as number} /> },
       { anahtar: 'ozel:cari-crm', baslik: 'CRM', ciz: () => <CariCrm id={b.kartId as number} gitKart={b.git} /> },
     ] : undefined,
@@ -104,12 +107,16 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   },
 
   // ----------------------------------------- Banka Hesabı Kartı (1157) ----
-  // Mockup banka_hareketleri.html: Genel · Banka Bilgileri · Banka Bağlantısı · Hareketler. Aynı
-  //   kaynağı kullanan Kasa / POS / Kredi kartlarında Hareketler sekmesi yok.
+  // Mockup banka_hareketleri.html: Genel · Banka Bilgileri · Banka Bağlantısı. "Hareketler" sekmesi
+  //   kaldırıldı (kullanıcı 23.10.2026: "banka kartında hareketler sekmesini kaldır, hatırlat
+  //   butonu sağına Ekstre butonu ekle") - hareketler tek Ekstre ekranında (KartAracGruplari › hesap).
   hesap: {
-    ekSekmeler: b => kayitli(b.kartId) && b.tanim.kartYolu === '/banka-hesap' ? [
-      { anahtar: 'ozel:banka-hareket', baslik: 'Hareketler',
-        ciz: () => <BankaHesapHareketleri hesapId={b.kartId as number} git={b.git} /> },
+    // KASA KARTI V3 (1161, mockup kasa_karti_ver3.html): özet şeridi + "Sayım / Gün Sonu" sekmesi.
+    seritSarmalayici: b => kayitli(b.kartId) && b.tanim.kartYolu === '/kasa-hesap'
+      ? serit => <>{serit}<KasaOzetSeridi id={b.kartId as number} tazele={b.tazeleKayit} git={b.git} /></> : undefined,
+    ekSekmeler: b => kayitli(b.kartId) && b.tanim.kartYolu === '/kasa-hesap' ? [
+      { anahtar: 'ozel:kasa-sayim', baslik: 'Sayım / Gün Sonu',
+        ciz: () => <KasaSayimSekmesi id={b.kartId as number} tazele={b.tazeleKayit} git={b.git} /> },
     ] : undefined,
     // Banka Bağlantısı sekmesinin altında onay notu (mockup).
     sekmeSarmalayici: b => b.tanim.kartYolu !== '/banka-hesap' ? undefined : (baslik, icerik) => baslik !== 'Banka Bağlantısı' ? icerik : (

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cari İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  /* Donem durumu adimlari: Acik > Kesinlesti > Faturalandi > Tahsil edildi */
+  .adim{display:flex;align-items:center;gap:0;font-size:11px}
+  .adim span{padding:3px 10px;border:1px solid var(--line);background:#f4f6f9;color:#8592a1;margin-left:-1px}
+  .adim span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+  .adim span:last-child{border-radius:0 12px 12px 0}
+  .adim span.bitti{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .adim span.simdi{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.red td{color:#8a98a8}
+  tr.sel td{background:var(--sel)}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .kir{color:var(--kirmizi)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:120px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .ikili{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  /* A4 onizleme SEKMESI (hasta icmalindeki gibi ayri sekme - tabloyu sikistirmaz) */
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .tablolar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .tablolar code{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:1px 6px;color:#2c4a6b}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.ikili{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  /* Dilim grafigi (yigilmis cubuk) */
+  .grafik{background:#fff;padding:12px 14px}
+  .gs{display:grid;grid-template-columns:90px minmax(0,1fr) 90px;gap:10px;align-items:center;margin:8px 0}
+  .ga{color:#3a5573;font-size:11.5px}
+  .gc{height:16px;border-radius:4px;background:#eef2f7;display:flex;overflow:hidden}
+  .gc i{display:block;height:100%}
+  .gc i.k,.lejant i.k{background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .gc i.h,.lejant i.h{background:linear-gradient(90deg,#f0b24a,#c98a1c)}
+  .gt{text-align:right;font-weight:bold;font-size:11.5px}
+  .lejant{display:flex;gap:14px;align-items:center;margin-top:10px;font-size:11px}
+  .lejant i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  /* Mektup govdesi (A4) */
+  .a4 .mektup p{margin:6px 0;font-size:9px}
+
+  /* CARI ICMALI eklentileri */
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b;font-size:11.5px}
+  tr.ara td{background:#f7f9fc;font-weight:bold;border-top:1px solid var(--line2)}
+  .ok-y{color:var(--ok)}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .iki > .grp{margin:12px 6px 12px 12px}
+  .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .bar{display:flex;height:14px;margin:8px 10px;border-radius:3px;overflow:hidden;border:1px solid var(--line2)}
+  .bar i{display:block;height:100%}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .onz{flex-wrap:wrap;gap:16px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📒 Cari İcmali — 01.01.2026 – 23.10.2026
+    <span class="sp">Gentegre AI · İcmal · Tüm şubeler · 23.10.2026 · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır (A4 Cari İcmali)</div>
+    <div class="btn"><span>📊</span> Excel</div>
+    <div class="sepv"></div>
+    <div class="btn ok"><span>🤝</span> Mutabakat Mektubu (seçililere)</div>
+    <div class="btn"><span>✉</span> Hatırlatma (e-posta / SMS)</div>
+    <div class="sp"></div>
+    <div class="btn"><span>👥</span> Müşteri Listesi</div>
+    <div class="btn"><span>📄</span> Kasa › Cari Ekstre</div>
+    <div class="btn"><span>↩</span> Geri Dön</div>
+  </div>
+
+  <!-- SERIT: kimin icmali, hangi donem. Bakiye/devir donem sinirindan; vade bugune gore. -->
+  <div class="serit">
+    <div class="seg"><span>👥 Müşteri</span><span>🚚 Tedarikçi</span><span class="on">⇄ İkisi</span></div>
+    <div class="sel">📅 Dönem: <b>01.01.2026 – 23.10.2026</b> <span class="rz">Bu yıl</span> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">👤 Temsilci: <b>Tümü</b> ▾</div>
+    <div class="sel">🏷 Grup: <b>Tümü</b> ▾</div>
+    <div class="sel">💱 Para: <b>TL karşılığı</b> ▾</div>
+    <label class="chk"><input type="checkbox" checked> Bakiyesi sıfır olanları gizle</label>
+    <label class="chk"><input type="checkbox"> Pasifler dahil</label>
+    <span class="sp"></span>
+    <span class="rz kir">Vadesi geçen net: 813.900,00 ₺</span>
+  </div>
+
+  <!-- OZET: alacak (musteri) ve borc (tedarikci) yan yana; net = alacak - borc. -->
+  <div class="ozet">
+    <div class="kutu iyi"><div class="bas">Alacağımız</div><div class="deg">4.862.410 ₺</div>
+      <div class="alt">642 müşteri borçlu</div></div>
+    <div class="kutu teh"><div class="bas">Borcumuz</div><div class="deg">2.115.300 ₺</div>
+      <div class="alt">118 tedarikçiye</div></div>
+    <div class="kutu mor"><div class="bas">Net Pozisyon</div><div class="deg">+2.747.110 ₺</div>
+      <div class="alt">alacak − borç</div></div>
+    <div class="kutu uy"><div class="bas">Vadesi Geçen Alacak</div><div class="deg">1.126.300 ₺</div>
+      <div class="alt">87 müşteri · ort. 34 gün</div></div>
+    <div class="kutu teh"><div class="bas">Vadesi Geçen Borç</div><div class="deg">312.400 ₺</div>
+      <div class="alt">21 tedarikçi · ort. 12 gün</div></div>
+    <div class="kutu"><div class="bas">Dönem Satış / Tahsilat</div><div class="deg">38,4 M / 35,1 M</div>
+      <div class="alt">tahsil oranı %91 · KDV dahil</div></div>
+    <div class="kutu"><div class="bas">Dönem Alış / Ödeme</div><div class="deg">21,3 M / 20,6 M</div>
+      <div class="alt">ödeme oranı %97</div></div>
+    <div class="kutu"><div class="bas">Çek / Senet</div><div class="deg">1,84 M / 0,92 M</div>
+      <div class="alt">portföyde 64 alınan · 31 verilen</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="cari">Cari Bazında <span class="rz">760</span></div>
+    <div class="sekme" data-s="yas">Yaşlandırma</div>
+    <div class="sekme" data-s="kir">Kırılımlar</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">23</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SEKME: CARI BAZINDA ============ -->
+  <div class="pnl" data-s="cari">
+    <div class="grp">
+      <h4>Cari Hesap İcmali <span class="mini">devir = dönem başı bakiye · borç / alacak = dönem içi hareket · satıra tıkla: para birimi kırılımı · çift tık: ekstre</span></h4>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Kod</th><th>Ünvan</th><th>Tür</th><th>Temsilci</th>
+            <th class="sag">Devir</th><th class="sag">Dönem Borç</th><th class="sag">Dönem Alacak</th><th class="sag">Bakiye</th>
+            <th class="sag">Vadesi Geçen</th><th class="orta">En Eski</th><th>Son Hareket</th><th class="orta">Risk</th></tr></thead>
+          <tbody>
+            <tr class="grs"><td colspan="13">👥 Müşteriler · 642 cari</td></tr>
+            <tr class="ac" data-d="m1"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>M-00012</td><td><span class="lnk">Akdeniz Yapı Market A.Ş.</span></td>
+              <td><span class="rz mavi">M</span></td><td>Ahmet K.</td>
+              <td class="sag">96.300,00</td><td class="sag">1.284.600,00</td><td class="sag">968.100,00</td>
+              <td class="sag kir"><b>412.800,00 B</b></td><td class="sag kir">186.400,00</td><td class="orta kir">61 gün</td><td>21.10.2026</td><td class="orta"><span class="rz kir">%103</span></td></tr>
+            <tr class="det" data-p="m1" hidden><td colspan="13">TL: devir 96.300,00 · borç 1.284.600,00 · alacak 968.100,00 · bakiye 412.800,00 B &nbsp;—&nbsp; tek para birimi</td></tr>
+            <tr class="ac" data-d="m2"><td><input type="checkbox"></td><td><span class="ok-ic">▸</span>M-00057</td><td><span class="lnk">Kuzey Otomotiv San. Tic. A.Ş.</span></td>
+              <td><span class="rz mavi">M</span></td><td>Selin Y.</td>
+              <td class="sag">812.000,00</td><td class="sag">2.940.500,00</td><td class="sag">2.001.300,00</td>
+              <td class="sag kir"><b>1.751.200,00 B</b></td><td class="sag kir">494.400,00</td><td class="orta">24 gün</td><td>19.10.2026</td><td class="orta"><span class="rz sari">%71</span></td></tr>
+            <tr class="det" data-p="m2" hidden><td colspan="13">TL: bakiye 0,00 &nbsp;·&nbsp; USD: devir 19.700,00 · borç 71.300,00 · alacak 48.500,00 · bakiye <b>42.500,00 B</b> (kur 41,2040 → 1.751.200,00 ₺)</td></tr>
+            <tr><td><input type="checkbox"></td><td>M-00063</td><td><span class="lnk">Anadolu Hastaneleri Grubu</span></td>
+              <td><span class="rz mavi">M</span></td><td>Elif T.</td>
+              <td class="sag">12.400,00</td><td class="sag">2.410.000,00</td><td class="sag">2.458.000,00</td>
+              <td class="sag ok-y"><b>35.600,00 A</b></td><td class="sag sonuk">—</td><td class="orta sonuk">—</td><td>22.10.2026</td><td class="orta sonuk">—</td></tr>
+            <tr><td><input type="checkbox"></td><td>M-00044</td><td><span class="lnk">Ege Tarım Ürünleri Koop.</span></td>
+              <td><span class="rz mavi">M</span></td><td>Ahmet K.</td>
+              <td class="sag">51.200,00</td><td class="sag">402.700,00</td><td class="sag">269.580,00</td>
+              <td class="sag kir"><b>184.320,00 B</b></td><td class="sag kir">142.000,00</td><td class="orta kir">61 gün</td><td>21.10.2026</td><td class="orta"><span class="rz kir">%123</span></td></tr>
+            <tr class="red"><td><input type="checkbox"></td><td>M-00102</td><td>Karadeniz Gıda Paz. Ltd.</td>
+              <td><span class="rz mavi">M</span></td><td>Elif T.</td>
+              <td class="sag">48.000,00</td><td class="sag">0,00</td><td class="sag">48.000,00</td>
+              <td class="sag">0,00</td><td class="sag">—</td><td class="orta">—</td><td>12.06.2026</td><td class="orta">—</td></tr>
+            <tr class="ara"><td></td><td colspan="4">Müşteriler toplamı (642)</td>
+              <td class="sag">3.118.900,00</td><td class="sag">38.402.150,00</td><td class="sag">36.658.640,00</td>
+              <td class="sag"><b>4.862.410,00 B</b></td><td class="sag">1.126.300,00</td><td colspan="3"></td></tr>
+
+            <tr class="grs"><td colspan="13">🚚 Tedarikçiler · 118 cari</td></tr>
+            <tr><td><input type="checkbox"></td><td>T-00008</td><td><span class="lnk">Marmara Ambalaj San. A.Ş.</span></td>
+              <td><span class="rz mor">T</span></td><td>—</td>
+              <td class="sag">-210.000,00</td><td class="sag">1.880.000,00</td><td class="sag">2.212.400,00</td>
+              <td class="sag ok-y"><b>542.400,00 A</b></td><td class="sag kir">118.000,00</td><td class="orta kir">19 gün</td><td>20.10.2026</td><td class="orta sonuk">—</td></tr>
+            <tr><td><input type="checkbox"></td><td>T-00021</td><td><span class="lnk">Çukurova Gübre Dağıtım Ltd.</span></td>
+              <td><span class="rz mor">T</span></td><td>—</td>
+              <td class="sag">-96.000,00</td><td class="sag">640.000,00</td><td class="sag">702.300,00</td>
+              <td class="sag ok-y"><b>158.300,00 A</b></td><td class="sag sonuk">—</td><td class="orta sonuk">—</td><td>18.10.2026</td><td class="orta sonuk">—</td></tr>
+            <tr><td><input type="checkbox"></td><td>M-00031</td><td><span class="lnk">Boğaziçi Lojistik Ltd. Şti.</span></td>
+              <td><span class="rz mavi">M</span> <span class="rz mor">T</span></td><td>Elif T.</td>
+              <td class="sag">14.000,00</td><td class="sag">236.000,00</td><td class="sag">520.150,00</td>
+              <td class="sag ok-y"><b>270.150,00 A</b></td><td class="sag sonuk">—</td><td class="orta sonuk">—</td><td>22.10.2026</td><td class="orta sonuk">—</td></tr>
+            <tr class="ara"><td></td><td colspan="4">Tedarikçiler toplamı (118)</td>
+              <td class="sag">-1.740.200,00</td><td class="sag">20.615.900,00</td><td class="sag">20.991.000,00</td>
+              <td class="sag"><b>2.115.300,00 A</b></td><td class="sag">312.400,00</td><td colspan="3"></td></tr>
+            <tr class="toplam"><td></td><td colspan="4">Net (760 cari)</td>
+              <td class="sag">1.378.700,00</td><td class="sag">59.018.050,00</td><td class="sag">57.649.640,00</td>
+              <td class="sag">2.747.110,00 B</td><td class="sag">813.900,00</td><td colspan="3"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ipucu">Hem müşteri hem tedarikçi olan cari (Boğaziçi Lojistik) TEK satırdır: borç bakiyesi varsa Müşteriler, alacak bakiyesi varsa Tedarikçiler grubunda — iki kez sayılmaz. Dövizli cari TL karşılığıyla toplanır; satır açılınca kendi para biriminde görünür.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: YASLANDIRMA ============ -->
+  <div class="pnl" data-s="yas">
+    <div class="iki">
+      <div class="grp">
+        <h4>Alacak Yaşlandırma (müşteriler) <span class="mini">tahsilat önce en eski vadeyi kapatır</span></h4>
+        <div class="bar"><i style="width:77%;background:#9cc4ee"></i><i style="width:12%;background:#e0a33a"></i><i style="width:6%;background:#d9783a"></i><i style="width:3%;background:#c96a3a"></i><i style="width:2%;background:#c0413d"></i></div>
+        <div class="dg"><table>
+          <thead><tr><th>Dilim</th><th class="sag">Tutar</th><th class="orta">Cari</th><th class="sag">Pay</th><th>En büyük</th></tr></thead>
+          <tbody>
+            <tr><td>Vadesi gelmemiş</td><td class="sag">3.736.110,00</td><td class="orta">590</td><td class="sag">%76,8</td><td>Kuzey Otomotiv · 1.256.800</td></tr>
+            <tr><td>0 – 30 gün</td><td class="sag">584.200,00</td><td class="orta">58</td><td class="sag">%12,0</td><td>Kuzey Otomotiv · 494.400</td></tr>
+            <tr><td>31 – 60 gün</td><td class="sag">301.600,00</td><td class="orta">19</td><td class="sag">%6,2</td><td>Akdeniz Yapı · 124.900</td></tr>
+            <tr><td>61 – 90 gün</td><td class="sag">146.300,00</td><td class="orta">7</td><td class="sag">%3,0</td><td>Ege Tarım · 83.100</td></tr>
+            <tr><td class="kir">90+ gün</td><td class="sag kir">94.200,00</td><td class="orta">3</td><td class="sag">%1,9</td><td>Delta GmbH · 778.800 (€18.900)</td></tr>
+            <tr class="toplam"><td>Toplam</td><td class="sag">4.862.410,00</td><td class="orta">642</td><td class="sag">%100</td><td></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Borç Yaşlandırma (tedarikçiler) <span class="mini">ödememiz önce en eski vadeyi kapatır</span></h4>
+        <div class="bar"><i style="width:85%;background:#9cc4ee"></i><i style="width:13%;background:#e0a33a"></i><i style="width:2%;background:#c0413d"></i></div>
+        <div class="dg"><table>
+          <thead><tr><th>Dilim</th><th class="sag">Tutar</th><th class="orta">Cari</th><th class="sag">Pay</th><th>En büyük</th></tr></thead>
+          <tbody>
+            <tr><td>Vadesi gelmemiş</td><td class="sag">1.802.900,00</td><td class="orta">97</td><td class="sag">%85,2</td><td>Marmara Ambalaj · 424.400</td></tr>
+            <tr><td>0 – 30 gün</td><td class="sag">268.200,00</td><td class="orta">18</td><td class="sag">%12,7</td><td>Marmara Ambalaj · 118.000</td></tr>
+            <tr><td>31 – 60 gün</td><td class="sag">44.200,00</td><td class="orta">3</td><td class="sag">%2,1</td><td>Özkan Nakliyat · 21.500</td></tr>
+            <tr><td>61 – 90 gün</td><td class="sag sonuk">—</td><td class="orta">0</td><td class="sag">—</td><td></td></tr>
+            <tr><td>90+ gün</td><td class="sag sonuk">—</td><td class="orta">0</td><td class="sag">—</td><td></td></tr>
+            <tr class="toplam"><td>Toplam</td><td class="sag">2.115.300,00</td><td class="orta">118</td><td class="sag">%100</td><td></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Nakit beklentisi — önümüzdeki 8 hafta <span class="mini">vadesi gelecek alacak (tahsilat) ve borç (ödeme), haftalık</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Hafta</th><th class="sag">Beklenen tahsilat</th><th class="sag">Yapılacak ödeme</th><th class="sag">Fark</th><th class="sag">Portföy çek vadesi</th><th class="sag">Verilen çek vadesi</th></tr></thead>
+        <tbody>
+          <tr><td>26.10 – 01.11</td><td class="sag">612.400,00</td><td class="sag">288.000,00</td><td class="sag ok-y">+324.400,00</td><td class="sag">180.000,00</td><td class="sag">95.000,00</td></tr>
+          <tr><td>02.11 – 08.11</td><td class="sag">498.100,00</td><td class="sag">402.300,00</td><td class="sag ok-y">+95.800,00</td><td class="sag">246.080,00</td><td class="sag">120.000,00</td></tr>
+          <tr><td>09.11 – 15.11</td><td class="sag">374.900,00</td><td class="sag">511.700,00</td><td class="sag kir">−136.800,00</td><td class="sag">90.000,00</td><td class="sag">210.000,00</td></tr>
+          <tr><td>…</td><td class="sag sonuk">…</td><td class="sag sonuk">…</td><td class="sag sonuk">…</td><td class="sag sonuk">…</td><td class="sag sonuk">…</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: KIRILIMLAR ============ -->
+  <div class="pnl" data-s="kir">
+    <div class="iki">
+      <div class="grp"><h4>Temsilci bazında (müşteri)</h4><div class="dg"><table>
+        <thead><tr><th>Temsilci</th><th class="orta">Cari</th><th class="sag">Dönem satış</th><th class="sag">Tahsilat</th><th class="sag">Bakiye</th><th class="sag">Vadesi geçen</th></tr></thead>
+        <tbody>
+          <tr><td>Ahmet K.</td><td class="orta">214</td><td class="sag">14.920.000</td><td class="sag">13.410.000</td><td class="sag">2.011.400</td><td class="sag kir">498.200</td></tr>
+          <tr><td>Elif T.</td><td class="orta">188</td><td class="sag">12.480.000</td><td class="sag">11.960.000</td><td class="sag">1.044.900</td><td class="sag kir">214.700</td></tr>
+          <tr><td>Selin Y.</td><td class="orta">171</td><td class="sag">9.810.000</td><td class="sag">8.820.000</td><td class="sag">1.721.300</td><td class="sag kir">402.100</td></tr>
+          <tr><td class="sonuk">(temsilcisiz)</td><td class="orta">69</td><td class="sag">1.190.000</td><td class="sag">910.000</td><td class="sag">84.810</td><td class="sag kir">11.300</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Para birimi bazında</h4><div class="dg"><table>
+        <thead><tr><th>Para</th><th class="orta">Cari</th><th class="sag">Alacak</th><th class="sag">Borç</th><th class="sag">Net (kendi)</th><th class="sag">TL karşılığı</th></tr></thead>
+        <tbody>
+          <tr><td>TL</td><td class="orta">731</td><td class="sag">2.814.010,00</td><td class="sag">1.904.200,00</td><td class="sag">909.810,00</td><td class="sag">909.810,00</td></tr>
+          <tr><td>USD</td><td class="orta">22</td><td class="sag">42.700,00</td><td class="sag">5.120,00</td><td class="sag">37.580,00</td><td class="sag">1.548.450,00</td></tr>
+          <tr><td>EUR</td><td class="orta">7</td><td class="sag">18.900,00</td><td class="sag">12.900,00</td><td class="sag">6.000,00</td><td class="sag">288.850,00</td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="orta">760</td><td colspan="3"></td><td class="sag">2.747.110,00</td></tr>
+        </tbody></table></div>
+        <div class="ipucu">TL karşılığı: bugünün kuru (kur değerlemesi). Cari Bazında sekmesi hareketin kendi kuruyla — iki rakam bilerek farklı olabilir; seçim şeritte (💱 Para).</div></div>
+      <div class="grp"><h4>Grup bazında</h4><div class="dg"><table>
+        <thead><tr><th>Grup</th><th class="orta">Cari</th><th class="sag">Bakiye</th><th class="sag">Vadesi geçen</th><th class="sag">Pay</th></tr></thead>
+        <tbody>
+          <tr><td>Bayi</td><td class="orta">142</td><td class="sag">2.204.500</td><td class="sag kir">612.300</td><td class="sag">%45</td></tr>
+          <tr><td>Kurumsal</td><td class="orta">96</td><td class="sag">2.311.800</td><td class="sag kir">494.400</td><td class="sag">%48</td></tr>
+          <tr><td>Perakende</td><td class="orta">371</td><td class="sag">218.400</td><td class="sag kir">19.600</td><td class="sag">%4</td></tr>
+          <tr><td>Kamu</td><td class="orta">33</td><td class="sag">127.710</td><td class="sag">—</td><td class="sag">%3</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>İl bazında (ilk 5)</h4><div class="dg"><table>
+        <thead><tr><th>İl</th><th class="orta">Cari</th><th class="sag">Bakiye</th><th class="sag">Dönem satış</th></tr></thead>
+        <tbody>
+          <tr><td>İstanbul</td><td class="orta">248</td><td class="sag">1.914.200</td><td class="sag">14.880.000</td></tr>
+          <tr><td>Bursa</td><td class="orta">61</td><td class="sag">1.802.400</td><td class="sag">5.120.000</td></tr>
+          <tr><td>İzmir</td><td class="orta">74</td><td class="sag">412.900</td><td class="sag">4.310.000</td></tr>
+          <tr><td>Antalya</td><td class="orta">39</td><td class="sag">448.100</td><td class="sag">2.940.000</td></tr>
+          <tr><td>Ankara</td><td class="orta">58</td><td class="sag">-12.300</td><td class="sag">3.770.000</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: DIKKAT ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="iki">
+      <div class="grp"><h4>⛔ Risk limiti aşanlar <span class="mini">bakiye / risk limiti · sevkiyat onaya düşer</span></h4><div class="dg"><table>
+        <thead><tr><th>Cari</th><th class="sag">Bakiye</th><th class="sag">Limit</th><th class="orta">Kullanım</th></tr></thead>
+        <tbody>
+          <tr><td>Toros Mobilya — Ayşe Toros</td><td class="sag">15.420,00</td><td class="sag">10.000,00</td><td class="orta"><span class="rz kir">%154</span></td></tr>
+          <tr><td>Delta Elektronik GmbH</td><td class="sag">€ 18.900,00</td><td class="sag">€ 15.000,00</td><td class="orta"><span class="rz kir">%126</span></td></tr>
+          <tr><td>Ege Tarım Ürünleri Koop.</td><td class="sag">184.320,00</td><td class="sag">150.000,00</td><td class="orta"><span class="rz kir">%123</span></td></tr>
+          <tr><td>Akdeniz Yapı Market A.Ş.</td><td class="sag">412.800,00</td><td class="sag">400.000,00</td><td class="orta"><span class="rz kir">%103</span></td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>⏱ 90 gündür tahsilat yok <span class="mini">borcu var, son alacak hareketi 90+ gün önce</span></h4><div class="dg"><table>
+        <thead><tr><th>Cari</th><th class="sag">Bakiye</th><th>Son tahsilat</th><th>Temsilci</th></tr></thead>
+        <tbody>
+          <tr><td>Delta Elektronik GmbH</td><td class="sag">€ 18.900,00</td><td class="kir">12.06.2026 · 133 gün</td><td>Selin Y.</td></tr>
+          <tr><td>Marmara Belediyesi</td><td class="sag">96.400,00</td><td class="kir">17.07.2026 · 98 gün</td><td>Selin Y.</td></tr>
+          <tr><td>Yeşil Vadi Peyzaj</td><td class="sag">12.800,00</td><td class="kir">02.07.2026 · 113 gün</td><td>Ahmet K.</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>↩ Alacak bakiyesi veren müşteriler <span class="mini">fazla ödeme / iade / avans — mahsup ya da iade</span></h4><div class="dg"><table>
+        <thead><tr><th>Cari</th><th class="sag">Alacak bakiye</th><th>Son hareket</th><th>Muhtemel sebep</th></tr></thead>
+        <tbody>
+          <tr><td>Anadolu Hastaneleri Grubu</td><td class="sag ok-y">35.600,00 A</td><td>22.10.2026 · Havale</td><td>Fazla ödeme</td></tr>
+          <tr><td>Başak Kırtasiye</td><td class="sag ok-y">4.120,00 A</td><td>18.10.2026 · Satış iadesi</td><td>İade, mahsup edilmedi</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>📆 Önümüzdeki 7 günde vadesi gelen ödemelerimiz</h4><div class="dg"><table>
+        <thead><tr><th>Tedarikçi</th><th>Vade</th><th>Belge</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>Marmara Ambalaj San. A.Ş.</td><td>27.10.2026</td><td>Alış Fat. MRA…0882</td><td class="sag">96.000,00</td></tr>
+          <tr><td>Çukurova Gübre Dağıtım</td><td>29.10.2026</td><td>Verilen çek 7781204</td><td class="sag">75.000,00</td></tr>
+          <tr><td>Özkan Nakliyat</td><td>30.10.2026</td><td>Alış Fat. OZK…0141</td><td class="sag">21.500,00</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ SEKME: ONIZLEME (A4) ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>GENTEGRE TİCARET A.Ş.</b><br><span style="font-size:8px;color:#6b7a8b">Merkez · Ataşehir / İstanbul</span></div></div>
+          <div style="text-align:right;font-size:8px">Tarih: 23.10.2026<br>Sayfa 1 / 14</div></div>
+        <h1>CARİ HESAP İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.01.2026 – 23.10.2026</span><span>Kapsam: Müşteri + Tedarikçi</span>
+          <span>Şube: Tümü · Temsilci: Tümü</span><span>Para: TL karşılığı (hareket kuru)</span></div>
+        <table>
+          <thead><tr><th>Kod</th><th>Ünvan</th><th>Devir</th><th>Borç</th><th>Alacak</th><th>Bakiye</th><th>Vadesi geçen</th></tr></thead>
+          <tbody>
+            <tr><td colspan="7"><b>MÜŞTERİLER</b></td></tr>
+            <tr><td>M-00012</td><td>Akdeniz Yapı Market A.Ş.</td><td>96.300,00</td><td>1.284.600,00</td><td>968.100,00</td><td>412.800,00 B</td><td>186.400,00</td></tr>
+            <tr><td>M-00057</td><td>Kuzey Otomotiv San. Tic. A.Ş.</td><td>812.000,00</td><td>2.940.500,00</td><td>2.001.300,00</td><td>1.751.200,00 B</td><td>494.400,00</td></tr>
+            <tr><td>M-00063</td><td>Anadolu Hastaneleri Grubu</td><td>12.400,00</td><td>2.410.000,00</td><td>2.458.000,00</td><td>35.600,00 A</td><td>—</td></tr>
+            <tr><td colspan="7" style="color:#8a98a8">… 639 müşteri daha</td></tr>
+            <tr><td colspan="7"><b>TEDARİKÇİLER</b></td></tr>
+            <tr><td>T-00008</td><td>Marmara Ambalaj San. A.Ş.</td><td>-210.000,00</td><td>1.880.000,00</td><td>2.212.400,00</td><td>542.400,00 A</td><td>118.000,00</td></tr>
+            <tr><td colspan="7" style="color:#8a98a8">… 117 tedarikçi daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Alacağımız (müşteri)</span><span>4.862.410,00</span></div>
+          <div><span>Borcumuz (tedarikçi)</span><span>2.115.300,00</span></div>
+          <div><span>Vadesi geçen alacak / borç</span><span>1.126.300,00 / 312.400,00</span></div>
+          <div class="b"><span>NET POZİSYON</span><span>2.747.110,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Hazırlayan<br>Selin YILMAZ</div><div>Onaylayan<br>Mali İşler Müdürü</div></div>
+        <div class="dip">Gentegre AI · Cari İcmali · bakiye cari ekstresiyle aynı kümeden; yaşlandırma FIFO (vade sırası)</div>
+      </div>
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>GENTEGRE TİCARET A.Ş.</b><br><span style="font-size:8px;color:#6b7a8b">Merkez · Ataşehir / İstanbul</span></div></div>
+          <div style="text-align:right;font-size:8px">Tarih: 23.10.2026</div></div>
+        <h1>CARİ HESAP MUTABAKAT MEKTUBU</h1>
+        <div class="mektup">
+          <p><b>Sayın Ege Tarım Ürünleri Koop.</b></p>
+          <p>Şirketimiz kayıtlarında 30.09.2026 tarihi itibarıyla cari hesabınız <b>184.320,00 TL BORÇ</b> bakiye vermektedir.</p>
+          <p>Mutabık olduğunuz takdirde bu mektubun bir örneğini imzalayarak, mutabık değilseniz hesap ekstrenizle birlikte 15 gün içinde tarafımıza iletmenizi rica ederiz.</p>
+          <table><thead><tr><th>Para</th><th>Bakiye</th><th>B/A</th></tr></thead>
+            <tbody><tr><td>TL</td><td>184.320,00</td><td>B</td></tr></tbody></table>
+          <p style="margin-top:14px">☐ Mutabıkız &nbsp;&nbsp; ☐ Mutabık değiliz (ekstre ektedir)</p>
+        </div>
+        <div class="imza"><div>Gentegre Ticaret A.Ş.</div><div>Ege Tarım Ürünleri Koop.<br>Kaşe / İmza</div></div>
+        <div class="dip">Seçili cariler için toplu üretilir (PDF tek dosya ya da cari başına e-posta).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Cari İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Tek ekran:</b> şeritteki <b>Müşteri / Tedarikçi / İkisi</b> seçimi hem özet kutularını hem tabloları süzer. Hem müşteri hem tedarikçi olan cari tek satırdır, bakiyesinin yönüne göre gruba düşer.</li>
+    <li><b>Kaynak:</b> bakiye, devir ve dönem borç/alacak Kasa › Cari Ekstre ile aynı hareket kümesinden (<code>v_cari_ekstre</code>); vadesi geçen / yaşlandırma <code>v_cari_ozet</code>'in FIFO kuralıyla (vade = belge vadesi, yoksa işlem + carinin vade günü). Rakamlar sunucuda; ekran hesap yapmaz.</li>
+    <li><b>Devir:</b> dönem başından önceki bakiye. Dönem içi borç + alacak + devir = bakiye (satırda tutarlı).</li>
+    <li><b>Para:</b> varsayılan hareketin kendi kuruyla TL karşılığı (ekstreyle aynı). "Bugünün kuru" seçilirse kur değerlemesi — Kırılımlar sekmesindeki para tablosu bunu gösterir.</li>
+    <li><b>Dikkat:</b> limit aşımı, 90 gündür tahsilat yok, alacak bakiyesi veren müşteri, 7 gün içinde vadesi gelen ödemelerimiz — kurallar sunucuda.</li>
+    <li><b>Çıktı:</b> A4 icmal (yazdır / PDF / Excel, diğer icmallerin menüsü) ve seçili carilere toplu mutabakat mektubu.</li>
+  </ul>
+  <b>Açık sorular:</b>
+  <ul>
+    <li>Mutabakat mektubu tarihi: dönem sonu mu, ay sonu mu (BA/BS dönemi)?</li>
+    <li>Nakit beklentisi (8 hafta) bu ekranda kalsın mı, ayrı bir "Nakit Akış" icmaline mi taşınsın?</li>
+    <li>Personel cari hesapları (avans) kapsama girsin mi? Önerim: hayır, İK tarafında.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(e){
+  if(e.target.type==='checkbox') return;
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  document.querySelectorAll('.seg span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

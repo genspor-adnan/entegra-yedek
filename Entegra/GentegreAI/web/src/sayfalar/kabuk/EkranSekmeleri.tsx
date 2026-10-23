@@ -4,7 +4,7 @@ import { EkranSekmesiBaglami, SekmeGorunurBaglami } from '../../bilesenler/sekme
 import { PALET_AC_OLAYI } from '../Baslangic';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c } from '../../dil/ceviri';
-import type { MenuSatiri } from './menuAgaci';
+import { MenuIkon, type MenuSatiri } from './menuAgaci';
 
 /**
  * EKRAN SEKMELERİ (ana ekran v3, mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html).
@@ -26,20 +26,26 @@ interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location
                  /** Kart sekmesinin listesi (kartYolu): sekme listenin HEMEN YANINDA açılır. */
                  ust?: string }
 
+const SEKME_TAKMA: Record<string, string> = { '/cari-ekstre': '/ekstre', '/hesap-ekstre': '/ekstre', '/cari-devir': '/devir' };
+
 function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, { ad: string; ikon: string }>,
-                  kartSekmeleri?: Record<string, string>) {
+                  kartSekmeleri?: Record<string, { ad: string; ikon: string }>) {
   // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): "/hasta/yeni" ve "/hasta/123" ayrı
   //   sekme; yeni kayıt tanımdaki başlıkla, kayıtlı kart (ad kart yüklenince gelir) "Kart".
-  for (const [kartYolu, yeniBaslik] of Object.entries(kartSekmeleri ?? {})) {
+  // KART İKONU = LİSTENİN İKONU (kullanıcı 23.10.2026: "sekmelerde kart logoları o kartla ilgili
+  //   listenin ikonu ile aynı olsun"): yeni kayıt da kayıtlı kart da listenin ikonunu taşır.
+  for (const [kartYolu, { ad: yeniBaslik, ikon }] of Object.entries(kartSekmeleri ?? {})) {
     const kalan = konum.pathname.startsWith(kartYolu + '/') ? konum.pathname.slice(kartYolu.length + 1) : '';
     const m = kalan && !kalan.includes('/') ? [kalan, kalan] : null;
     // TEK KART SEKMESİ (kullanıcı: "tek hasta kartı açık olsun.. yeni hasta tıklandığında diğerini
     //   kapatıp yerine bunu koysun"): anahtar listenin kart sekmesidir, kaydın kendisi değil -
     //   başka kart açılınca aynı sekme, aynı yerde yeni kartla dolar.
-    if (m) return m[1] === 'yeni' ? { anahtar: `${kartYolu}#kart`, baslik: yeniBaslik, ikon: '＋', ust: kartYolu }
-                                   : { anahtar: `${kartYolu}#kart`, baslik: 'Kart', ikon: '📝', ust: kartYolu };
+    if (m) return m[1] === 'yeni' ? { anahtar: `${kartYolu}#kart`, baslik: yeniBaslik, ikon, ust: kartYolu }
+                                   : { anahtar: `${kartYolu}#kart`, baslik: 'Kart', ikon, ust: kartYolu };
   }
-  const yol = menuYolu(konum.pathname, konum.state);
+  // ESKİ EKSTRE YOLLARI (1158): /cari-ekstre ve /hesap-ekstre /ekstre'ye yönlenir - yönlendirme
+  //   anındaki sekme de Ekstre sekmesi sayılsın; yoksa boş bir "Hesap Ekstresi" sekmesi kalıyordu.
+  const yol = SEKME_TAKMA[konum.pathname] ?? menuYolu(konum.pathname, konum.state);
   if (yol === '/' || yolEslesir(yol, BASLANGIC)) return { anahtar: BASLANGIC, baslik: 'Başlangıç', ikon: '🏠' };
   // Menüde olmayan bilinen ekran (gösterge paneli) kendi adıyla.
   if (ek?.[konum.pathname]) return { anahtar: konum.pathname, baslik: ek[konum.pathname].ad, ikon: ek[konum.pathname].ikon };
@@ -85,7 +91,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   /** Menüde olmayan ekranların sekme başlığı (yol -> ad, ikon). */
   ekBasliklar?: Record<string, { ad: string; ikon: string }>;
   /** Kartı kendi sekmesinde açılan listeler: kartYolu -> yeni kayıt sekme başlığı. */
-  kartSekmeleri?: Record<string, string>;
+  kartSekmeleri?: Record<string, { ad: string; ikon: string }>;
   konum: Location;
   navTuru: NavigationType;
   outlet: React.ReactNode;
@@ -215,7 +221,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
              title={c(ad(s))}
              onClick={() => ac(s)}
              onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapatIste(s.anahtar) } }}>
-          <span className="es-ikon">{s.ikon}</span>
+          {/* Menüdeki ikonun AYNISI: '@icmal' ve yüklenen görsel ikonlar metin değil (sekmede "@icmal" yazıyordu). */}
+          <span className="es-ikon">{s.ikon.startsWith('@') || s.ikon.startsWith('data:image/') ? <MenuIkon ic={s.ikon} /> : s.ikon}</span>
           {s.anahtar !== BASLANGIC && <span className="es-ad">{c(ad(s))}</span>}
           {s.anahtar !== BASLANGIC && (
             <span className="es-x" title={c('Kapat (Alt+W)')}

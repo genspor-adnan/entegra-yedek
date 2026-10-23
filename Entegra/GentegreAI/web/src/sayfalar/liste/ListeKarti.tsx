@@ -1333,7 +1333,7 @@ export function ListeKarti({
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum TANI sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
-        gizliDetaylar={kartOzel.gizliDetaylar}
+        gizliDetaylar={[...(kartOzel.gizliDetaylar ?? []), ...(tanim.gizliDetaylar ?? [])]}
         detayGrupta={tanim.kaynak === 'muayene' && kartOzel.detayGrupta?.tanilar
           ? { ...kartOzel.detayGrupta,
               // TANI ＋ = ICD arama (grid başlığında, düzenle/sil ile aynı bar).
@@ -1558,6 +1558,14 @@ export function ListeKarti({
           if (acikKal) {
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
             setKayitSayaci(t => t + 1);
+            return;
+          }
+          // YENİ MÜŞTERİ / TEDARİKÇİ (cari_devir_girisi.html): kart kapanmaz, kayıtlı haliyle açık
+          //   kalır ve bir kez "açılış bakiyesi var mı?" diye sorar (CariDevirSorusu).
+          if (kartId === 'yeni' && tanim.kaynak === 'cari' && yeniId) {
+            window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            setYenile(t => t + 1);
+            git(`${tanim.kartYolu}/${yeniId}?devirSor=1`, { replace: true });
             return;
           }
           // KART KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, KOMŞU sekmeye

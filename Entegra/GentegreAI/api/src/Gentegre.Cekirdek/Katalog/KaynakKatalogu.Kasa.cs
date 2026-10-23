@@ -70,6 +70,7 @@ public static partial class KaynakKatalogu
             left join public.hesap bh on bh.id = h.bagli_hesap_id
             left join public.v_banka_hesap_durum bd on bd.hesap_id = h.id
             left join public.banka bk on bk.id = h.banka_id
+            left join public.v_kasa_ozet ko on ko.hesap_id = h.id
             """,
         SubeKolonu: "h.sube_id",
         VarsayilanSirala: "h.tur asc, h.kod asc, h.ad asc",
@@ -123,6 +124,22 @@ public static partial class KaynakKatalogu
             new("bankaKaynak",   "h.banka_kaynak", "sayi", "Hareket Kaynağı", Varsayilan: false),
             new("bankaDikkat",   "case when h.banka_kaynak = 1 and (h.banka_onay_bitis < current_date or h.banka_son_sonuc like 'Hata%') then 1 else 0 end",
                                                   "sayi", "Dikkat", Siralanabilir: false, Varsayilan: false),
+            // KASA LİSTESİ V3 (1161, mockup kasa_listesi_ver3.html): v_kasa_ozet - yalnız Kasa Listesi'nde
+            //   görünür (öteki hesap listeleri gizler). Sayım / fark / limit / oturum çipleri bu kolonlara.
+            new("altTur",        "h.alt_tur",      "sayi",  "Alt Tür", Varsayilan: false),
+            new("bugunGiris",    "coalesce(ko.bugun_giris, 0)", "para", "Bugün Giriş", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("bugunCikis",    "coalesce(ko.bugun_cikis, 0)", "para", "Bugün Çıkış", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("sonSayim",      "ko.son_sayim_zaman", "zaman", "Son Sayım", Hizalama: "orta", Bicim: "dd.MM HH:mm", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("sonFark",       "ko.son_fark",    "para",  "Fark", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Varsayilan: false),
+            new("bugunSayildi",  "coalesce(ko.bugun_sayildi, 0)", "sayi", "Bugün Sayıldı", Siralanabilir: false, Varsayilan: false),
+            new("sayimZorunlu",  "h.sayim_zorunlu", "sayi", "Sayım Zorunlu", Varsayilan: false),
+            new("guvenlikLimiti","h.guvenlik_limiti", "para", "Güvenlik Limiti", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            new("limitYuzde",    "case when h.guvenlik_limiti > 0 then round(greatest(coalesce(b.bakiye, 0), 0) * 100 / h.guvenlik_limiti) end",
+                                                  "sayi", "Limit %", Hizalama: "sag", Bicim: "risk:guvenlikLimiti", Siralanabilir: false, Varsayilan: false),
+            new("son7",          "coalesce(ko.son7, '')", "metin", "Son 7 Gün", Bicim: "egri", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("acikOturum",    "coalesce(ko.acik_oturum, 0)", "sayi", "Açık Oturum", Hizalama: "orta", Siralanabilir: false, Varsayilan: false),
+            new("oturumKisiler", "coalesce(ko.oturum_kisiler, '')", "metin", "Oturumu Açan", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("dovizli",       "case when h.doviz_cinsi <> public.fn_yerel_para() then 1 else 0 end", "sayi", "Dövizli", Siralanabilir: false, Varsayilan: false),
             new("bankaDurum",    "case when h.banka_kaynak = 1 and h.banka_onay_bitis < current_date then 'Onay yenilenmeli'"
                                  + " when h.banka_son_sonuc like 'Hata%' then 'Çekim hatası'"
                                  + " when coalesce(bd.bekleyen, 0) > 0 then 'Bekleyen var'"

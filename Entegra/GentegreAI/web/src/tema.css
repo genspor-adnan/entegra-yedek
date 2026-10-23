@@ -8606,6 +8606,13 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mk-uyari-kirmizi { border-color: var(--hatakenar); background: var(--hatazem); color: var(--hata) }
 .mk-not { border: 1px solid var(--uyarikenar); background: var(--uyarizem); border-radius: 4px; padding: 6px 8px;
   font-size: 11.5px; line-height: 1.5; white-space: pre-wrap }
+/* Yeni kart: "açılış bakiyesi var mı?" bandı (cari_devir_girisi.html) */
+.mk-soru { display: flex; gap: 10px; align-items: center; margin: 8px 12px; padding: 10px 12px; border: 1px solid var(--uyarikenar);
+  background: var(--uyarizem); border-radius: 6px; font-size: 12px }
+.mk-soru > div { flex: 1; display: flex; flex-direction: column; gap: 2px; line-height: 1.5 }
+.mk-soru > div b { color: var(--uyari); font-size: 13px }
+.mk-soru > div span { color: var(--yazi2) }
+.mk-soru-ic { font-size: 24px }
 .mk-yasl { display: flex; height: 14px; border-radius: 3px; overflow: hidden; border: 1px solid var(--cizgi2) }
 .mk-yasl-buyuk { height: 18px }
 .mk-yasl > i { display: block; height: 100% }

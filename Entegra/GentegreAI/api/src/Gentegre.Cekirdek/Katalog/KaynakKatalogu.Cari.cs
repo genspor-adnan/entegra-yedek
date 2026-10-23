@@ -53,7 +53,8 @@ public static partial class KaynakKatalogu
         /// </summary>
         public const string CariOzetJoin =
             "left join public.v_cari_ozet o on o.taraf_id = t.id " +
-            "left join public.taraf_musteri tm on tm.id = t.id";
+            "left join public.taraf_musteri tm on tm.id = t.id " +
+            "left join public.taraf_tedarikci tt on tt.id = t.id";   // 1162: tedarikçi koşulları
 
         public const string DepartmanAdi =
             "coalesce((select dp.ad from public.departman dp where dp.id = t.departman), '')";
@@ -144,6 +145,22 @@ public static partial class KaynakKatalogu
             new("ciroEgri",     "coalesce(o.ciro_egri, '')", "metin", "Satış Eğilimi",
                                                     Bicim: "egri:ciro12Ay", Varsayilan: false,
                                                     Siralanabilir: false, Filtrelenebilir: false),
+            // ---- TEDARİKÇİ GÖZÜ (1162, Tedarikçi Listesi Ver3) - varsayılan GİZLİ; Tedarikçi Listesi kolonSirasi'yla açar.
+            new("vadesiGecenOdeme", "coalesce(o.vadesi_gecen_odeme, 0)", "para", "Vadesi Geçen Ödeme", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            new("odenecek30",   "coalesce(o.odenecek_30, 0)", "para", "30 Günde Ödenecek", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            new("sonAlisGun",   "(current_date - o.son_alis::date)",
+                                                    "sayi", "Son Alım", Hizalama: "orta", Bicim: "gun", Varsayilan: false),
+            new("sonOdeme",     "o.son_odeme",     "tarih", "Son Ödeme", Hizalama: "orta",
+                                                    Bicim: "dd.MM.yyyy", Varsayilan: false),
+            new("alis12Ay",     "coalesce(o.alis_12ay, 0)", "para", "Alım (12 ay)", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            new("alisEgri",     "coalesce(o.alis_egri, '')", "metin", "Alım Eğilimi",
+                                                    Bicim: "egri:alis12Ay", Varsayilan: false,
+                                                    Siralanabilir: false, Filtrelenebilir: false),
+            new("onayDurumu",   "case coalesce(tt.onay_durumu, 0) when 1 then 'A' when 2 then 'B' when 3 then 'C' else '' end",
+                                                    "metin", "Onay", Hizalama: "orta", Varsayilan: false, Filtrelenebilir: false),
             new("subeId",       "t.sube_id",       "sayi",  "Sube",          Varsayilan: false),
             new("eklemeTarihi", "t.ekleme_tarihi", "tarih", "Eklendi",       Hizalama: "orta",
                                                                             Bicim: "dd.MM.yyyy", Varsayilan: false)

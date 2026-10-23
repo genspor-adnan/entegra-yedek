@@ -8,7 +8,8 @@ import { LabTetkikOzeti } from '../../bilesenler/lab/LabTetkikOzeti';
 import { KysPolitikaSeridi } from './KysPolitikaSeridi';
 import { KysOlayPaneli } from '../kys/olay/KysOlayPaneli';
 import { KysRiskPaneli } from '../kys/risk/KysRiskPaneli';
-import { MusteriGostergesi, MusteriOnizleme } from './MusteriPanelleri';
+import { MusteriGostergesi, MusteriOnizleme, TedarikciGostergesi } from './MusteriPanelleri';
+import { KasaGostergesi, KasaOnizleme } from '../kasa/KasaPanelleri';
 import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from '../konsultasyon/KonsultasyonPanelleri';
 import { SevkOnizlemePaneli, SevkUstPanel, useSevkSuzgeci } from '../sevk/SevkPanelleri';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../../bilesenler/LabDetayPaneli';
@@ -276,7 +277,14 @@ const PANELLER: Record<string, ListePaneli> = {
   // BANKA HAREKETLERİ (1157, mockup banka_hareketleri.html): üstte hesap + çek + sayaçlar, sağda karar.
   // BANKA HESABI LİSTESİ (1157, mockup): hesap / bağlı / dosyadan / bekleyen / dikkat / toplam. Aynı
   //   kaynağı kullanan Kasa / POS / Kredi listeleri çizmez.
-  hesap: { ustSerit: b => b.rota === 'banka-hesap' ? <BankaHesapSeridi yenile={b.yenile} onCip={b.setCip} cip={b.cipIndeks} /> : undefined },
+  // hesap kaynağı: Banka Hesabı Listesi (1157) şerit; Kasa Listesi V3 (1161, mockup kasa_listesi_ver3.html)
+  //   gösterge şeridi + sağda önizleme. Rota ile ayrılır (POS / kredi listeleri çizmez).
+  hesap: {
+    ustSerit: b => b.rota === 'banka-hesap' ? <BankaHesapSeridi yenile={b.yenile} onCip={b.setCip} cip={b.cipIndeks} /> : undefined,
+    ustPanel: b => b.rota === 'kasa-hesap' ? <KasaGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} /> : undefined,
+    yanPanel: b => b.rota === 'kasa-hesap'
+      ? <KasaOnizleme satir={b.seciliSatir} yenile={b.yenile} tazele={b.tazele} git={b.git} gitKart={b.gitKart} /> : undefined,
+  },
   'banka-hareket': {
     ustSerit: b => <BankaOzetSeridi yenile={b.yenile} onCip={b.setCip} onYenile={b.tazele} />,
     yanPanel: b => <BankaHareketYanPanel satir={b.seciliSatir} yenile={b.yenile} onIslendi={b.tazele} />,
@@ -286,11 +294,13 @@ const PANELLER: Record<string, ListePaneli> = {
   'kys-risk': { yanPanel: b => <KysRiskPaneli satir={b.seciliSatir} yenile={b.tazele} /> },
   // MÜŞTERİ LİSTESİ VER3 (1150, mockup musteri_listesi_ver3.html): gösterge şeridi + sağda önizleme.
   //   Aynı kaynağı kullanan Tedarikçi Listesi (rota 'tedarikci') çizmez - sayılar müşteri kümesidir.
+  //   TEDARİKÇİ LİSTESİ VER3 (1162, mockup tedarikci_listesi_ver3.html): rota 'tedarikci' kendi şeridi + önizleme.
   cari: {
-    ustPanel: b => b.rota ? undefined
+    ustPanel: b => b.rota === 'tedarikci' ? <TedarikciGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} />
+      : b.rota ? undefined
       : <MusteriGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} />,
-    yanPanel: b => b.rota ? undefined
-      : <MusteriOnizleme satir={b.seciliSatir} yenile={b.yenile} tazele={b.tazele} git={b.git} gitKart={b.gitKart} />,
+    yanPanel: b => b.rota && b.rota !== 'tedarikci' ? undefined
+      : <MusteriOnizleme satir={b.seciliSatir} yenile={b.yenile} tazele={b.tazele} git={b.git} gitKart={b.gitKart} tedarikci={b.rota === 'tedarikci'} />,
   },
   // İK BELGE TAKİBİ (1137 / 1138): eksik / doldu / yaklaşan · aktif / zorunlu / süreli / eksiği olan.
   'personel-belge-ozet': { ustSerit: b => <BelgeTakipOzetSeridi yenile={b.yenile} onCip={b.setCip} /> },

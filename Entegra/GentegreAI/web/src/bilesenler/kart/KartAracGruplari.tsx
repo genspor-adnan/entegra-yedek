@@ -10,6 +10,7 @@ import type { Deger } from '../kartAlanCizim';
 import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from '../mesaj';
 import { RandevuErtelePenceresi } from '../RandevuErtelePenceresi';
 import { RandevuSeriPenceresi } from '../RandevuSeriPenceresi';
+import { DevirPenceresi } from '../../sayfalar/cari/CariDevirPenceresi';
 
 /**
  * KART ARAÇ ÇUBUĞU - KAYNAĞA ÖZEL GRUPLAR (refaktör 22.10.2026, GenForm'dan ayrıldı).
@@ -47,6 +48,7 @@ export function kartAracGrubu(b: KartAracBaglami): ReactNode {
   switch (b.kaynak) {
     case 'hasta': return <HastaKimlikAraclari b={b} />;
     case 'cari': return b.yeniMi ? null : <CariEkstreDugmesi tarafId={Number(b.id)} ad={String(b.deger.unvan ?? '')} />;
+    case 'hesap': return b.yeniMi ? null : <HesapAraclari hesapId={Number(b.id)} tur={String(b.deger.tur ?? '')} />;
     // Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
     //   tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
     //   dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali.
@@ -393,6 +395,29 @@ function EntegrasyonKartAraclari({ b }: { b: KartAracBaglami }) {
 }
 
 /*
+ * HESAP EKSTRESİ (kasa / banka / POS / kredi / kredi kartı kartı; kullanıcı 23.10.2026: "banka kartında
+ * hareketler sekmesini kaldır, hatırlat butonu sağına Ekstre butonu ekle"): tek Ekstre ekranı (1158)
+ * hesabın türüyle açılır. Türün veri yetkisi yoksa düğme yok (hesap-ekstre kaynağının satır kısıtı).
+ */
+function HesapAraclari({ hesapId, tur }: { hesapId: number; tur: string }) {
+  const { yetki: oturumYetki } = useOturum();
+  const git = useNavigate();
+  const [devir, setDevir] = useState(false);
+  const kod = ({ K: 'hesap.tanim', B: 'hesap.tanim.banka', P: 'hesap.tanim.pos', R: 'hesap.tanim.kredi', V: 'hesap.tanim.kredi_karti' } as Record<string, string>)[tur];
+  if (!kod || !oturumYetki(kod, 'gor')) return null;
+  return (
+    <>
+      <button className="d" type="button" title={c('Ekstre ekranında bu hesabın hareketleri')}
+              onClick={() => git(`/ekstre?tur=hesap&id=${hesapId}`)}>📄 {c('Ekstre')}</button>
+      {/* DEVİR / AÇILIŞ (1160): karttaki açılış bakiyesi alanı yerine hesabın devir hareketi. */}
+      {oturumYetki('finans.devir', 'gor') && (
+        <button className="d" type="button" title={c('Açılış bakiyesi (devir hareketi)')} onClick={() => setDevir(true)}>💼 {c('Devir / Açılış')}</button>)}
+      {devir && <DevirPenceresi tur="hesap" id={hesapId} onKapat={() => setDevir(false)} onKaydedildi={() => setDevir(false)} />}
+    </>
+  );
+}
+
+/*
  * CARİ EKSTRE (kullanıcı 23.10.2026: "müşteri kartındaki ekstre sekmeyi kaldır, onun yerine üste
  * Ekstre butonu ekle"): kartta ayrı bir ekstre yok - Kasa › Cari Ekstre listesi bu cariye süzülmüş
  * olarak açılır (sekme düzeninde kendi sekmesinde). Listeye erişimi olmayana düğme yok.
@@ -402,8 +427,8 @@ function CariEkstreDugmesi({ tarafId, ad }: { tarafId: number; ad: string }) {
   const git = useNavigate();
   if (!oturumYetki('mali_hareket', 'gor')) return null;
   return (
-    <button className="d" type="button" title={c('Cari Ekstre listesinde bu carinin hareketleri')}
-            onClick={() => git(`/cari-ekstre?tarafId=${tarafId}&ad=${encodeURIComponent(ad)}`)}>📄 {c('Ekstre')}</button>
+    <button className="d" type="button" title={`${c('Ekstre ekranında bu carinin hareketleri')} - ${ad}`}
+            onClick={() => git(`/ekstre?tur=cari&id=${tarafId}`)}>📄 {c('Ekstre')}</button>
   );
 }
 

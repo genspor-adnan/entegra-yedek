@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useOturum } from '../../kimlik/OturumBaglami';
+import { CariDevirPenceresi } from './CariDevirPenceresi';
 import { api } from '../../api/istemci';
 import type { CariKartOzeti } from '../../api/uclar/cariListe';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
@@ -55,7 +58,7 @@ const kisaTarih = (t: string | null | undefined) => (t ? tarihSaat(t).slice(0, 1
 const gunOnce = (t: string | null) => (t ? Math.max(0, Math.round((Date.now() - new Date(t).getTime()) / 86400000)) : null);
 
 // ------------------------------------------------------------ özet şeridi ----
-export function CariOzetSeridi({ id, tazele, git, ad }: { id: number; tazele: number; ad: string; git(yol: string): void }) {
+export function CariOzetSeridi({ id, tazele, git, ad, tedarikci }: { id: number; tazele: number; ad: string; git(yol: string): void; tedarikci?: boolean }) {
   const { veri, hata } = useCariKartOzeti(id, tazele);
   if (hata) return <div className="hata-kutusu" style={{ margin: '6px 12px' }}>{hata}</div>;
   const o = veri?.ozet;
@@ -63,10 +66,41 @@ export function CariOzetSeridi({ id, tazele, git, ad }: { id: number; tazele: nu
   const degisim = o && o.ciroGecenYil > 0 ? Math.round((o.ciroBuYil / o.ciroGecenYil - 1) * 100) : null;
   const sonSatis = gunOnce(o?.sonSatis ?? null);
   const risk = Number(o?.riskYuzde ?? 0);
+  // TEDARİKÇİ GÖZÜ (1162, mockup tedarikci_karti_ver3.html): borcumuz, vadesi geçen ödeme, 30 günde
+  //   ödenecek, verilen çek, bu yıl alım, son alım / ödeme. Yalnız tedarikçi rolündeki cari.
+  const ted = !!tedarikci || (!!o && Number(o.tedarikci) === 1 && Number(o.musteri) !== 1);
+  if (ted) {
+    const alisDegisim = o && o.alisGecenYil > 0 ? Math.round((o.alisBuYil / o.alisGecenYil - 1) * 100) : null;
+    const sonAlis = gunOnce(o?.sonAlis ?? null);
+    return (
+      <div className="mk-ozet">
+        <button type="button" title={`${c('Cari ekstresini aç')} - ${ad}`} onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>
+          <span>{c('Borcumuz')}</span>
+          <b className={o && o.bakiye < -0.005 ? 'ml-borc' : o && o.bakiye > 0.005 ? 'ml-alacak' : undefined}>
+            {o ? `${para.format(Math.abs(o.bakiye))}${isaret(o.bakiye)}` : '…'}</b>
+          <small>{dovizli.length ? dovizBakiyeMetni(dovizli.map(d => `${d.doviz}:${d.bakiye}`).join(';')) : c('A = biz borçluyuz · TL karşılığı')}</small>
+        </button>
+        <div><span>{c('Vadesi geçen ödeme')}</span>
+          <b className={o && o.vadesiGecenOdeme > 0.005 ? 'ml-borc' : undefined}>{o ? para.format(o.vadesiGecenOdeme) : '…'}</b>
+          <small>{o?.tedVadeGun ? `${c('vade')} ${o.tedVadeGun} ${c('gün')}` : c('vade günü tanımsız (Satınalma Koşulları)')}</small></div>
+        <div><span>{c('30 günde ödenecek')}</span><b>{o ? para.format(o.odenecek30) : '…'}</b>
+          <small>{o?.krediLimiti ? `${c('bize tanınan limit')} ${para.format(o.krediLimiti)}` : c('alış faturaları, vadeye göre')}</small></div>
+        <div><span>{c('Açık sipariş (gelecek mal)')}</span><b>{o ? para.format(o.acikSiparis) : '…'}</b>
+          <small>{o ? `${sayi.format(o.acikSiparisAdet)} ${c('sipariş')}` : ''}</small></div>
+        <div><span>{c('Verilen çek')}</span><b>{o ? para.format(o.verilenCekTutar) : '…'}</b>
+          <small>{o?.verilenCekAdet ? `${o.verilenCekAdet} ${c('çek')} · ${c('ilk vade')} ${kisaTarih(o.verilenCekIlkVade)}` : c('yok')}</small></div>
+        <div><span>{c('Bu yıl alım')}</span><b>{o ? para.format(o.alisBuYil) : '…'}</b>
+          <small className={alisDegisim !== null && alisDegisim < 0 ? 'ml-borc' : undefined}>
+            {alisDegisim !== null ? `${c('geçen yıl')} ${para.format(o!.alisGecenYil)} · ${alisDegisim >= 0 ? '↑' : '↓'} %${Math.abs(alisDegisim)}` : c('KDV dahil')}</small></div>
+        <div><span>{c('Son alım')}</span><b>{sonAlis !== null ? `${sayi.format(sonAlis)} ${c('gün')}` : '—'}</b>
+          <small>{c('Son ödeme')} {kisaTarih(o?.sonOdeme)}</small></div>
+      </div>
+    );
+  }
   return (
     <div className="mk-ozet">
-      <button type="button" title={c('Cari ekstresini aç')}
-              onClick={() => git(`/cari-ekstre?tarafId=${id}&ad=${encodeURIComponent(ad)}`)}>
+      <button type="button" title={`${c('Cari ekstresini aç')} - ${ad}`}
+              onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>
         <span>{c('Bakiye')}</span>
         <b className={o && o.bakiye > 0.005 ? 'ml-borc' : o && o.bakiye < -0.005 ? 'ml-alacak' : undefined}>
           {o ? `${para.format(Math.abs(o.bakiye))}${isaret(o.bakiye)}` : '…'}</b>
@@ -147,7 +181,7 @@ export function CariYanPanel({ id, tazele, git, gitKart }: { id: number; tazele:
           ))}
       </div>
       <div className="pl-bl"><h5>{c('Son olaylar')}
-        <button type="button" className="pl-bag" onClick={() => git(`/cari-ekstre?tarafId=${id}`)}>{c('Ekstre')} ›</button></h5>
+        <button type="button" className="pl-bag" onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>{c('Ekstre')} ›</button></h5>
         {olaylar === null ? <div className="sonuk">…</div> : olaylar.length === 0 ? <div className="sonuk">{c('Hareket yok.')}</div>
           : <div className="mk-zaman">{olaylar.map(o => {
               const b = Number(o.borc ?? 0), a = Number(o.alacak ?? 0);
@@ -163,19 +197,56 @@ export function CariYanPanel({ id, tazele, git, gitKart }: { id: number; tazele:
   );
 }
 
+// ------------------------------------------------------ devir sorusu ----
+/**
+ * YENİ KART KAYDEDİLDİ (mockup cari_devir_girisi.html › 1): kayıttan sonra kart `?devirSor=1` ile
+ * açık kalır ve bir kez sorar. "Bakiyesi yok" / "Sonra" parametreyi kaldırır - kalıcı giriş yeri
+ * Finansal sekmesi.
+ */
+export function CariDevirSorusu({ id, onDegisti }: { id: number; onDegisti(): void }) {
+  const [arama, setArama] = useSearchParams();
+  const { yetki } = useOturum();
+  const [acik, setAcik] = useState(false);
+  if (arama.get('devirSor') !== '1' || !yetki('finans.devir', 'ekle')) return null;
+  const kapat = () => { const y = new URLSearchParams(arama); y.delete('devirSor'); setArama(y, { replace: true }) };
+  return (
+    <div className="mk-soru">
+      <span className="mk-soru-ic">💼</span>
+      <div><b>{c('Bu carinin açılış bakiyesi var mı?')}</b>
+        <span>{c('Firma bizimle daha önce çalışıyorduysa (eski programda ya da elle tutulan hesapta) devreden borç / alacağını şimdi girin — ekstre, vadesi geçen, risk ve cari icmali bu tutardan başlar.')}</span></div>
+      <button type="button" className="d bir" onClick={() => setAcik(true)}>＋ {c('Devir Bakiyesi Gir')}</button>
+      <button type="button" className="d" onClick={kapat}>{c('Bakiyesi yok')}</button>
+      <button type="button" className="d" onClick={kapat}>{c('Sonra')}</button>
+      {acik && <CariDevirPenceresi tarafId={id} onKapat={() => setAcik(false)} onKaydedildi={() => { kapat(); onDegisti() }} />}
+    </div>
+  );
+}
+
 // ----------------------------------------------------------- Finansal ----
-export function CariFinansal({ id, tazele }: { id: number; tazele: number }) {
+export function CariFinansal({ id, tazele, onDegisti }: { id: number; tazele: number; onDegisti?(): void }) {
   const { veri, hata } = useCariKartOzeti(id, tazele);
+  const { yetki } = useOturum();
   const [belge, setBelge] = useState<number | null>(null);
+  const [devir, setDevir] = useState(false);
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!veri) return <div className="yukleniyor">{c('Yükleniyor')}…</div>;
   const y = veri.yaslandirma;
   const toplam = y.gelmemis + y.d30 + y.d60 + y.d90;
   const yerelToplam = veri.dovizler.reduce((t, d) => t + Number(d.yerel), 0);
   const pay = (n: number) => `${toplam > 0 ? (n / toplam) * 100 : 0}%`;
+  // TEDARİKÇİ (1162): ödeme yaşlandırması (vadesi geçen / 30 gün / sonrası) ve verilen çekler.
+  const ted = Number(veri.ozet.tedarikci) === 1 && Number(veri.ozet.musteri) !== 1;
+  const oy = veri.odemeYaslandirma;
+  const oyToplam = oy.gecen + oy.d30 + oy.sonra;
+  const oyPay = (n: number) => `${oyToplam > 0 ? (n / oyToplam) * 100 : 0}%`;
   return (
     <div className="mk-finans">
-      <div className="kagrup"><h6>{c('Hesap Özeti')}</h6>
+      <div className="kagrup"><h6 style={{ display: 'flex', alignItems: 'center' }}>{c('Hesap Özeti')}
+        {/* DEVİR / AÇILIŞ BAKİYESİ (cari_devir_girisi.html): kartta kalıcı giriş yeri. */}
+        {yetki('finans.devir', 'gor') && (
+          <button type="button" className="d mini" style={{ marginLeft: 'auto' }} onClick={() => setDevir(true)}>
+            💼 {c('Devir / Açılış Bakiyesi')}</button>
+        )}</h6>
         <table className="detay-tablo">
           <thead><tr><th>{c('Para birimi')}</th><th className="hiza-sag">{c('Borç')}</th><th className="hiza-sag">{c('Alacak')}</th>
             <th className="hiza-sag">{c('Bakiye')}</th><th className="hiza-sag">{c('TL karşılığı')}</th></tr></thead>
@@ -195,7 +266,48 @@ export function CariFinansal({ id, tazele }: { id: number; tazele: number }) {
         <div className="not">{c('Son tahsilat')}: {kisaTarih(veri.ozet.sonTahsilat)}</div>
       </div>
 
-      <div className="kagrup"><h6>{c('Yaşlandırma')}</h6>
+      {ted && (
+        <div className="kagrup"><h6>{c('Ödeme Yaşlandırması')}</h6>
+          {oyToplam < 0.005 ? <div className="sonuk">{c('Ödenecek açık alış belgesi yok.')}</div> : (<>
+            <div className="mk-yasl mk-yasl-buyuk">
+              <i style={{ width: oyPay(oy.gecen), background: '#c0413d' }} /><i style={{ width: oyPay(oy.d30), background: '#e0a33a' }} />
+              <i style={{ width: oyPay(oy.sonra), background: '#9cc4ee' }} />
+            </div>
+            <div className="mk-yl">
+              <span>{c('Vadesi geçen')}<b className="ml-borc">{para.format(oy.gecen)}</b></span><span>{c('30 gün içinde')}<b>{para.format(oy.d30)}</b></span>
+              <span>{c('30+ gün')}<b>{para.format(oy.sonra)}</b></span>
+            </div>
+          </>)}
+          {veri.vadesiGecenOdemeler.length > 0 && (
+            <table className="detay-tablo" style={{ marginTop: 10 }}>
+              <thead><tr><th>{c('Vadesi geçen belge')}</th><th>{c('Tarih')}</th><th>{c('Vade')}</th>
+                <th className="hiza-orta">{c('Gecikme')}</th><th className="hiza-sag">{c('Kalan')}</th></tr></thead>
+              <tbody>{veri.vadesiGecenOdemeler.map((g, i) => (
+                <tr key={i} onDoubleClick={() => g.belgeId && setBelge(g.belgeId)} title={g.belgeId ? c('Çift tıkla: belgeyi aç') : undefined}>
+                  <td>{g.turAdi} <b>{g.belgeNo}</b></td><td>{kisaTarih(g.tarih)}</td><td>{kisaTarih(g.vade)}</td>
+                  <td className={`hiza-orta ${g.gecikme > 60 ? 'ml-borc' : ''}`}>{sayi.format(g.gecikme)} {c('gün')}</td>
+                  <td className="hiza-sag">{para.format(g.kalan)}</td></tr>
+              ))}</tbody>
+            </table>
+          )}
+          <div className="not">{c('Ödeme önce vadesi en eski borcumuzu kapatır; vade = alış belgesinin vadesi, yoksa işlem tarihi + Satınalma Koşulları vade günü.')}</div>
+        </div>
+      )}
+      {ted && (
+        <div className="kagrup"><h6>{c('Verilen Çekler')}</h6>
+          {veri.verilenCekler.length === 0 ? <div className="sonuk">{c('Ödenmemiş verilen çek / senet yok.')}</div> : (
+            <table className="detay-tablo">
+              <thead><tr><th>{c('Tür')}</th><th>{c('Seri No')}</th><th>{c('Banka')}</th><th>{c('Vade')}</th><th className="hiza-sag">{c('Tutar')}</th></tr></thead>
+              <tbody>{veri.verilenCekler.map(k => (
+                <tr key={k.id}><td>{k.tur === 2 ? c('Senet') : c('Çek')}</td><td>{k.seriNo}</td><td>{k.banka}</td><td>{kisaTarih(k.vade)}</td>
+                  <td className="hiza-sag">{para.format(k.tutar)}{k.doviz && k.doviz !== 'TL' ? ` (${para.format(k.dovizTutar)} ${k.doviz})` : ''}</td></tr>
+              ))}</tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      <div className="kagrup"><h6>{ted ? c('Alacak Yaşlandırması (iade / avans)') : c('Yaşlandırma')}</h6>
         {toplam < 0.005 ? <div className="sonuk">{c('Açık borç yok.')}</div> : (<>
           <div className="mk-yasl mk-yasl-buyuk">
             <i style={{ width: pay(y.gelmemis), background: '#9cc4ee' }} /><i style={{ width: pay(y.d30), background: '#e0a33a' }} />
@@ -236,6 +348,7 @@ export function CariFinansal({ id, tazele }: { id: number; tazele: number }) {
         )}
       </div>
       {belge !== null && <BelgeKarti id={belge} onKapat={() => setBelge(null)} />}
+      {devir && <CariDevirPenceresi tarafId={id} onKapat={() => setDevir(false)} onKaydedildi={onDegisti} />}
     </div>
   );
 }

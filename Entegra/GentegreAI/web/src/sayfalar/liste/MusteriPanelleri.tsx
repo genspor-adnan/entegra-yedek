@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
-import type { MusteriGostergesi as Gosterge } from '../../api/uclar/cariListe';
+import type { MusteriGostergesi as Gosterge, TedarikciGostergesi as TedGosterge } from '../../api/uclar/cariListe';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { para, sayi, tarihSaat } from '../../bilesenler/bicim';
 import { Avatar, dovizBakiyeMetni, Egri } from '../../bilesenler/grid/satirHucre';
@@ -59,11 +59,45 @@ export function MusteriGostergesi({ yenile, cipIndeks, onCip }:
   );
 }
 
-type Yeni = { tur: 'belge'; belgeTuru: number } | { tur: 'tahsilat' } | { tur: 'kayit'; kasa?: number; belge?: number };
+/** Tedarikçi Listesi çip sırası (listeTanimlari.Cari): Aktif 0, Pasif 1, Tümü 2, Borçlu olduğumuz 3, Vadesi geçen ödeme 4, 30 günde ödenecek 5, Alım yok 6, Dövizli 7. */
+const TED_CIP = { aktif: 0, tumu: 2, borclu: 3, vadeli: 4, odenecek: 5, uyuyan: 6 } as const;
 
-export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart }: {
+/** TEDARİKÇİ LİSTESİ VER3 (1162, mockup tedarikci_listesi_ver3.html): borcumuz, ödeme takvimi, alım. */
+export function TedarikciGostergesi({ yenile, cipIndeks, onCip }:
+                                    { yenile: number; cipIndeks?: number; onCip(i: number): void }) {
+  const [g, setG] = useState<TedGosterge | null>(null);
+  useEffect(() => { api.tedarikciGosterge().then(y => setG(y.gosterge)).catch(() => setG(null)) }, [yenile]);
+  const degisim = g && g.alisGecenYil > 0 ? Math.round((g.alisBuYil / g.alisGecenYil - 1) * 100) : null;
+  const kutular: { cip: number | null; deger: string; ad: string; ek?: string; sinif?: string }[] = [
+    { cip: TED_CIP.aktif, deger: g ? sayi.format(g.aktif) : '…', ad: 'Aktif tedarikçi', ek: g?.yeniBuAy ? `+${g.yeniBuAy} ${c('bu ay')}` : undefined },
+    { cip: TED_CIP.borclu, deger: g ? kisa(g.borc) : '…', ad: 'Toplam borcumuz', ek: g ? `${sayi.format(g.borclu)} ${c('tedarikçiye')}` : undefined, sinif: g?.borc ? 'kirmizi' : undefined },
+    { cip: TED_CIP.vadeli, deger: g ? kisa(g.vadesiGecen) : '…', ad: 'Vadesi geçen ödeme', ek: g ? `${sayi.format(g.vadeli)} ${c('tedarikçi')}` : undefined, sinif: g?.vadesiGecen ? 'kirmizi' : undefined },
+    { cip: TED_CIP.odenecek, deger: g ? kisa(g.odenecek30) : '…', ad: '30 gün içinde ödenecek', ek: g ? `${sayi.format(g.odenecekCari)} ${c('tedarikçi')} · ${c('7 günde çek')} ${kisa(g.cekHafta)}` : undefined, sinif: g?.odenecek30 ? 'uyari' : undefined },
+    { cip: TED_CIP.uyuyan, deger: g ? sayi.format(g.uyuyan) : '…', ad: '90 gündür alım yok' },
+    { cip: null, deger: g ? kisa(g.alisBuYil) : '…', ad: 'Bu yıl alım (KDV dahil)',
+      ek: degisim !== null ? `${c('geçen yıla göre')} ${degisim >= 0 ? '↑' : '↓'} %${Math.abs(degisim)}` : undefined },
+  ];
+  return (
+    <div className="pl-kpi ml-kpi">
+      {kutular.map(k => (
+        <button key={k.ad} type="button" disabled={k.cip === null}
+                className={`pl-k${k.cip !== null && cipIndeks === k.cip ? ' on' : ''}${k.sinif ? ` ${k.sinif}` : ''}`}
+                title={k.cip !== null ? c('Listeyi bu kümeye süz (tekrar tıkla: tümü)') : undefined}
+                onClick={() => k.cip !== null && onCip(cipIndeks === k.cip ? TED_CIP.tumu : k.cip)}>
+          <b>{k.deger}</b><span>{c(k.ad)}{k.ek ? ` · ${k.ek}` : ''}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+type Yeni = { tur: 'belge'; belgeTuru: number } | { tur: 'tahsilat' } | { tur: 'odeme' } | { tur: 'kayit'; kasa?: number; belge?: number };
+
+export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci }: {
   satir: ListeSatiri | null; yenile: number; tazele(): void;
   git(yol: string): void; gitKart(yol: string): void;
+  /** Tedarikçi Listesi (1162): etiketler ve hızlı işlemler tedarikçi gözüyle (alış faturası, ödeme). */
+  tedarikci?: boolean;
 }) {
   const { yetki } = useOturum();
   const id = satir ? Number(satir.id) : 0;
@@ -78,14 +112,15 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart }: {
        .then(y => setHareket(y.satirlar)).catch(() => setHareket([]));
   }, [id, yenile, ekstreYetkisi]);
 
-  if (!(id > 0) || !satir) return <div className="pl-oniz bos sonuk">{c('Önizleme için bir müşteri seçin.')}</div>;
+  if (!(id > 0) || !satir) return <div className="pl-oniz bos sonuk">{tedarikci ? c('Önizleme için bir tedarikçi seçin.') : c('Önizleme için bir müşteri seçin.')}</div>;
   const ad = String(satir.unvan ?? '');
   const bakiye = Number(satir.bakiye ?? 0), vade = Number(satir.vadesiGecen ?? 0);
   const limit = Number(satir.riskLimiti ?? 0), risk = satir.riskYuzde;
   const doviz = dovizBakiyeMetni(satir.dovizBakiye);
-  const egri = String(satir.ciroEgri ?? '').split(',').filter(Boolean).map(Number);
+  const egri = String((tedarikci ? satir.alisEgri : satir.ciroEgri) ?? '').split(',').filter(Boolean).map(Number);
   const kapat = () => { setAcik(null); tazele() };
-  const kart = () => gitKart(`/cari/${id}`);
+  const kart = () => gitKart(tedarikci ? `/tedarikci/${id}` : `/cari/${id}`);
+  const vadeOdeme = Number(satir.vadesiGecenOdeme ?? 0), odenecek = Number(satir.odenecek30 ?? 0);
 
   return (
     <div className="pl-oniz">
@@ -95,39 +130,50 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart }: {
           <small>{Number(satir.efatura) === 1 ? 'e-Fatura' : 'e-Arşiv'}{Number(satir.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}</small></div></div>
 
       <div className="ml-hizli">
-        {yetki('belge', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 15 })}>🧾 {c('Fatura')}</button>}
+        {yetki('belge', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: tedarikci ? 11 : 15 })}>🧾 {tedarikci ? c('Alış Fat.') : c('Fatura')}</button>}
         {yetki('belge', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 19 })}>📝 {c('Sipariş')}</button>}
-        {yetki('kasa_islem', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'tahsilat' })}>💰 {c('Tahsilat')}</button>}
+        {yetki('kasa_islem', 'ekle') && (tedarikci
+          ? <button type="button" className="d" onClick={() => setAcik({ tur: 'odeme' })}>💸 {c('Ödeme')}</button>
+          : <button type="button" className="d" onClick={() => setAcik({ tur: 'tahsilat' })}>💰 {c('Tahsilat')}</button>)}
         {ekstreYetkisi && <button type="button" className="d"
-                onClick={() => git(`/cari-ekstre?tarafId=${id}&ad=${encodeURIComponent(ad)}`)}>📄 {c('Ekstre')}</button>}
+                onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>📄 {c('Ekstre')}</button>}
         <button type="button" className="d bir" onClick={kart}>{c('Kartı Aç')} ↗</button>
       </div>
 
-      <div className="pl-bl"><h5>{c('Mali durum')}</h5>
+      <div className="pl-bl"><h5>{tedarikci ? c('Ödeme durumu') : c('Mali durum')}</h5>
         <div className="ml-mali">
-          <div><span>{c('Bakiye')}</span>
-            <b className={bakiye > 0.005 ? 'ml-borc' : bakiye < -0.005 ? 'ml-alacak' : undefined}>
+          <div><span>{tedarikci ? c('Borcumuz') : c('Bakiye')}</span>
+            <b className={bakiye > 0.005 ? (tedarikci ? 'ml-alacak' : 'ml-borc') : bakiye < -0.005 ? (tedarikci ? 'ml-borc' : 'ml-alacak') : undefined}>
               {para.format(Math.abs(bakiye))} {bakiye > 0.005 ? 'B' : bakiye < -0.005 ? 'A' : ''}</b></div>
-          <div><span>{c('Vadesi geçen')}</span><b className={vade > 0.005 ? 'ml-borc' : undefined}>{para.format(vade)}</b></div>
-          <div><span>{c('Risk limiti')}</span>
-            <b>{limit > 0 ? `${para.format(limit)} · %${sayi.format(Number(risk ?? 0))}` : c('limitsiz')}</b></div>
-          <div><span>{c('Son tahsilat')}</span><b>{satir.sonTahsilat ? tarihSaat(satir.sonTahsilat).slice(0, 10) : '—'}</b></div>
+          {tedarikci ? <>
+            <div><span>{c('Vadesi geçen ödeme')}</span><b className={vadeOdeme > 0.005 ? 'ml-borc' : undefined}>{para.format(vadeOdeme)}</b></div>
+            <div><span>{c('30 günde ödenecek')}</span><b>{para.format(odenecek)}</b></div>
+            <div><span>{c('Son ödeme')}</span><b>{satir.sonOdeme ? tarihSaat(satir.sonOdeme).slice(0, 10) : '—'}</b></div>
+          </> : <>
+            <div><span>{c('Vadesi geçen')}</span><b className={vade > 0.005 ? 'ml-borc' : undefined}>{para.format(vade)}</b></div>
+            <div><span>{c('Risk limiti')}</span>
+              <b>{limit > 0 ? `${para.format(limit)} · %${sayi.format(Number(risk ?? 0))}` : c('limitsiz')}</b></div>
+            <div><span>{c('Son tahsilat')}</span><b>{satir.sonTahsilat ? tarihSaat(satir.sonTahsilat).slice(0, 10) : '—'}</b></div>
+          </>}
         </div>
         {doviz && <div className="sonuk pl-kucuk" style={{ marginTop: 4 }}>{c('Döviz')}: {doviz}</div>}
       </div>
 
       {egri.length > 1 && egri.some(x => x) && (
-        <div className="pl-bl"><h5>{c('Satış eğilimi (12 ay)')} · {para.format(Number(satir.ciro12Ay ?? 0))}</h5>
+        <div className="pl-bl"><h5>{tedarikci ? c('Alım eğilimi (12 ay)') : c('Satış eğilimi (12 ay)')} · {para.format(Number((tedarikci ? satir.alis12Ay : satir.ciro12Ay) ?? 0))}</h5>
           <Egri degerler={egri} genislik={300} yukseklik={40} />
-          {satir.sonSatisGun !== null && satir.sonSatisGun !== undefined &&
-            <div className="sonuk pl-kucuk">{c('Son satış')}: {sayi.format(Number(satir.sonSatisGun))} {c('gün önce')}</div>}
+          {tedarikci
+            ? (satir.sonAlisGun !== null && satir.sonAlisGun !== undefined &&
+               <div className="sonuk pl-kucuk">{c('Son alım')}: {sayi.format(Number(satir.sonAlisGun))} {c('gün önce')}</div>)
+            : (satir.sonSatisGun !== null && satir.sonSatisGun !== undefined &&
+               <div className="sonuk pl-kucuk">{c('Son satış')}: {sayi.format(Number(satir.sonSatisGun))} {c('gün önce')}</div>)}
         </div>
       )}
 
       {ekstreYetkisi && (
         <div className="pl-bl"><h5>{c('Son hareketler')}
           <button type="button" className="pl-bag"
-                  onClick={() => git(`/cari-ekstre?tarafId=${id}&ad=${encodeURIComponent(ad)}`)}>{c('Tam ekstre')} ›</button></h5>
+                  onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>{c('Tam ekstre')} ›</button></h5>
           {hareket === null ? <div className="sonuk">{c('yükleniyor')}…</div>
             : hareket.length === 0 ? <div className="sonuk">{c('Hareket yok.')}</div> : (
             <table className="ml-hareket"><tbody>
@@ -165,6 +211,10 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart }: {
       {acik?.tur === 'tahsilat' && (
         // 21 = nakit tahsilat; kart açıkken tür şeridinden banka / POS / çek seçilir.
         <KasaIslemKarti acilis={{ tur: 21, tarafId: id, tarafUnvan: ad }} onKapat={kapat} onKaydedildi={tazele} />
+      )}
+      {acik?.tur === 'odeme' && (
+        // 31 = nakit ödeme (tedarikçi); tür şeridinden banka / çek seçilir.
+        <KasaIslemKarti acilis={{ tur: 31, tarafId: id, tarafUnvan: ad }} onKapat={kapat} onKaydedildi={tazele} />
       )}
       {acik?.tur === 'kayit' && acik.kasa && <KasaIslemKarti kayitIdProp={acik.kasa} onKapat={kapat} />}
       {acik?.tur === 'kayit' && acik.belge && <BelgeKarti id={acik.belge} onKapat={kapat} />}

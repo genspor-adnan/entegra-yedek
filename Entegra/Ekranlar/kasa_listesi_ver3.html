@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kasa Listesi V3 — Mockup</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+
+  /* ust kabuk */
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust b{font-size:13.5px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  /* KPI seridi */
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .kp{border:1px solid var(--line2);border-radius:5px;padding:7px 10px;background:#fff;cursor:pointer;position:relative}
+  .kp:hover{border-color:#9cc4ee}
+  .kp.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+  .kp .e{font-size:10.5px;color:var(--muted)}
+  .kp .d{font-size:17px;font-weight:bold;margin-top:2px}
+  .kp .a{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .kp.kir .d{color:var(--kir)} .kp.sari .d{color:var(--uyari)} .kp.yesil .d{color:var(--ok)}
+  .kp .ipucu{position:absolute;right:8px;top:6px;font-size:10px;color:#9aa8b6}
+
+  /* arac cubugu */
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+
+  /* arama + cipler */
+  .arama{display:flex;gap:6px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kutu{flex:0 1 330px;border:1px solid var(--line);border-radius:14px;background:#fff;height:27px;display:flex;align-items:center;padding:0 10px;gap:6px}
+  .kutu input{border:none;outline:none;flex:1;font:inherit;font-size:12px;background:transparent}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 11px;font-size:11px;background:#fff;color:#4d5d6e;white-space:nowrap;cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+  .chip .n{background:#eef2f7;border-radius:8px;padding:0 6px;font-size:10px;color:var(--muted)}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .chip.on .n{background:rgba(255,255,255,.25);color:#fff}
+  .chip.ak{border-style:dashed}
+  .ayrac{width:1px;height:18px;background:var(--line);margin:0 3px}
+  .secim{border:1px solid var(--line);border-radius:3px;background:#fff;height:25px;font:inherit;font-size:11.5px;padding:0 4px;color:var(--ink)}
+  .gorunum{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .gorunum span{padding:3px 10px;font-size:11px;color:var(--muted);background:#fff;border-right:1px solid var(--line2);cursor:pointer}
+  .gorunum span:last-child{border-right:none}
+  .gorunum span.on{background:#4a5d73;color:#fff;font-weight:bold}
+
+  /* toplu islem seridi */
+  .toplu{display:none;gap:6px;align-items:center;padding:6px 10px;background:#fff8e6;border-bottom:1px solid #f0dcae;color:#7a5512;font-size:11.5px}
+  .toplu.acik{display:flex}
+
+  /* govde: grid + onizleme */
+  .govde{display:grid;grid-template-columns:1fr 360px;min-height:560px}
+  .dg{overflow:auto;border-right:1px solid var(--line)}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{position:sticky;top:0;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 7px;font-size:11px;color:#3a5573;white-space:nowrap;z-index:1}
+  .dg th.s::after{content:" ▾";color:#9aa8b6}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;white-space:nowrap;vertical-align:middle}
+  .dg tr:hover td{background:#f4f8fd;cursor:pointer}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.pasif td{color:#9aa8b6}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tfoot td{background:#f3f6fa;font-weight:bold;border-top:2px solid var(--line)}
+  .sag{text-align:right}.orta{text-align:center}.sonuk{color:var(--muted)}
+  .unvan b{display:block;font-size:12px}
+  .unvan small{color:var(--muted);font-size:10.5px}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)}
+  .rz{display:inline-block;border-radius:9px;padding:0 7px;font-size:10px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;margin-left:3px}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .limit{display:flex;align-items:center;gap:5px;min-width:96px}
+  .limit i{flex:1;height:6px;border-radius:3px;background:#e7edf4;overflow:hidden;display:block}
+  .limit i b{display:block;height:100%;background:#5cb87a}
+  .limit i b.y{background:#e0a33a} .limit i b.k{background:#d0473d}
+  .limit em{font-style:normal;font-size:10px;color:var(--muted);width:30px;text-align:right}
+  .spark{display:inline-block;vertical-align:middle}
+  .gun{font-size:10.5px}
+  .gun.k{color:var(--kir);font-weight:bold} .gun.y{color:var(--uyari)}
+
+  /* onizleme paneli */
+  .onz{background:#fbfcfe;display:flex;flex-direction:column;min-width:0}
+  .onz .bas{padding:10px 12px;border-bottom:1px solid var(--line2);background:#fff}
+  .onz .bas .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .onz .bas .alt{color:var(--muted);font-size:11px;margin-top:2px}
+  .onz .bas .rzlar{margin-top:5px}
+  .onz .bas .rzlar .rz{margin:0 3px 0 0}
+  .hizli{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .hizli .btn{justify-content:center;font-size:11px;padding:5px 4px}
+  .ost{display:flex;border-bottom:1px solid var(--line);padding:0 8px;background:#fff}
+  .ost span{padding:6px 9px;font-size:11.5px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+  .ost span.on{color:var(--navy);font-weight:bold;border-bottom-color:var(--accent)}
+  .ops{padding:10px 12px;overflow:auto;flex:1}
+  .mali{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .mali div{border:1px solid var(--line2);border-radius:4px;padding:5px 8px;background:#fff}
+  .mali div span{display:block;font-size:10px;color:var(--muted)}
+  .mali div b{font-size:13px}
+  .yaslandirma{display:flex;height:16px;border-radius:3px;overflow:hidden;margin:4px 0 2px;border:1px solid var(--line2)}
+  .yaslandirma i{display:block;height:100%}
+  .yl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:10px}
+  h6{margin:10px 0 5px;font-size:11px;color:#3a5573;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center}
+  h6 a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);text-decoration:none;font-weight:normal;cursor:pointer}
+  .mini-ek{width:100%;border-collapse:collapse;font-size:11px;background:#fff;border:1px solid var(--line2)}
+  .mini-ek td{padding:4px 6px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .satir{display:flex;gap:6px;padding:4px 0;border-bottom:1px dashed var(--line2);font-size:11.5px}
+  .satir span:first-child{color:var(--muted);width:92px;flex:none}
+  .akt{border-left:3px solid #cfe0f5;padding:4px 8px;margin-bottom:6px;background:#fff;font-size:11.5px}
+  .akt small{color:var(--muted);display:block;font-size:10.5px}
+
+  .statusbar{display:flex;gap:16px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .statusbar b{color:var(--ink)}
+  .statusbar .sp{display:flex;gap:6px;align-items:center}
+
+  .not{max-width:1480px;margin:12px auto;color:#5b6a7a;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 16px}
+  .not h3{margin:4px 0 6px;font-size:13px;color:var(--navy)}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .not ul{margin:4px 0 8px 18px;padding:0}
+  .not table{border-collapse:collapse;margin:4px 0 8px}
+  .not td,.not th{border:1px solid var(--line2);padding:3px 8px;text-align:left;font-size:11px}
+  .not th{background:var(--head)}
+
+  /* KASA satır renkleri (eski kasa_listesi.html ile aynı dil) */
+  .dg tr.yok td{background:#f7cfcf;color:#7d1f1f}
+  .dg tr.kri td{background:#fbe6ae;color:#7a5407}
+  .dg tr.skt td{background:#f6d9c0;color:#8a4a12}
+  .dg tr.pas td{background:#e9e9e9;color:#7a7a7a}
+  .dg tr.sel.yok td,.dg tr.sel.kri td,.dg tr.sel.skt td,.dg tr.sel.pas td{background:var(--sel)}
+  .limit{min-width:150px;display:inline-block}
+  .dg th:nth-child(13){min-width:165px}
+  .mini-ek th{text-align:left;font-weight:600;color:#4d5d6e;padding:2px 4px;border-bottom:1px solid #e3e9f0}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="ust">
+    <b>Gentegre AI</b><span class="yol">Finans › Kasa Listesi</span>
+    <span class="sag"><span>🏢 Merkez</span><span>👤 Ayşe K. (Muhasebe)</span></span>
+  </div>
+  <div class="sekmeler"><span>🏠</span><span class="on">💵 Kasa Listesi</span><span>📄 Ekstre</span><span>＋</span></div>
+
+  <!-- KPI: kasa gözüyle - eldeki nakit, sayım disiplini, limit, günün akışı. Kutu = süzgeç. -->
+  <div class="kpi" id="kpi">
+    <div class="kp" data-f="aktif"><span class="ipucu">süz</span><div class="e">Toplam nakit (TL karşılığı)</div><div class="d">₺ 486.320</div><div class="a">9 aktif kasa · 3 şube</div></div>
+    <div class="kp kir" data-f="sayimyok"><span class="ipucu">süz</span><div class="e">Bugün sayımı yapılmamış</div><div class="d">3</div><div class="a">gün sonu bekleyen kasa</div></div>
+    <div class="kp kir" data-f="fark"><span class="ipucu">süz</span><div class="e">Sayım farkı olan</div><div class="d">2</div><div class="a">toplam fark ₺ −215,00</div></div>
+    <div class="kp sari" data-f="limit"><span class="ipucu">süz</span><div class="e">Güvenlik limitini aşan</div><div class="d">1</div><div class="a">Merkez TL Kasası · ₺ 48.320 / 40.000</div></div>
+    <div class="kp sari" data-f="oturum"><span class="ipucu">süz</span><div class="e">Açık banko oturumu</div><div class="d">2</div><div class="a">Banko 1 · Banko 2</div></div>
+    <div class="kp yesil"><div class="e">Bugün tahsilat / ödeme</div><div class="d">₺ 61.900 / 12.400</div><div class="a">net +49.500 · 184 işlem</div></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="btn ok">＋ Yeni Kasa</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">🗑 Sil</span>
+    <span class="sepv"></span>
+    <span class="btn">💰 Tahsilat</span>
+    <span class="btn">💸 Ödeme</span>
+    <span class="btn">🏦 Bankaya Yatır</span>
+    <span class="btn">🔁 Kasalar Arası Virman</span>
+    <span class="sepv"></span>
+    <span class="btn">🧮 Gün Sonu Sayımı</span>
+    <span class="btn">📄 Ekstre</span>
+    <span class="btn">⏰ Hatırlat</span>
+    <span class="sp"></span>
+    <span class="btn">💼 Açılış Bakiyesi</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <div class="arama">
+    <span class="kutu">🔍 <input placeholder="Ara: kod, kasa adı, şube, sorumlu…" value=""><span title="Sesle ara">🎤</span></span>
+    <span class="chip on" data-f="tumu">Tümü <span class="n">11</span></span>
+    <span class="chip" data-f="aktif">Aktif <span class="n">9</span></span>
+    <span class="chip" data-f="pasif">Pasif <span class="n">2</span></span>
+    <span class="ayrac"></span>
+    <span class="chip" data-f="sayimyok">Sayım bekleyen</span>
+    <span class="chip" data-f="fark">Sayım farkı</span>
+    <span class="chip" data-f="limit">Limit aşan</span>
+    <span class="chip" data-f="oturum">Açık oturum</span>
+    <span class="chip" data-f="doviz">Dövizli</span>
+    <span class="chip" data-f="banko">Banko kasaları</span>
+    <span class="ayrac"></span>
+    <select class="secim"><option>Tür: Tümü</option><option>Merkez</option><option>Satış / Banko</option><option>İş avans</option><option>Maaş avans</option><option>Kupon</option></select>
+    <select class="secim"><option>Şube: Tümü</option><option>Merkez</option><option>Kadıköy</option><option>Depo</option></select>
+    <select class="secim"><option>Para: Tümü</option><option>TL</option><option>USD</option><option>EUR</option></select>
+    <span class="chip ak" title="Kayıtlı görünümler">⭐ Görünümlerim ▾</span>
+    <span class="sp"></span>
+    <span class="gorunum"><span class="on">☰ Liste</span><span>▦ Grup</span><span>📊 Analiz</span></span>
+  </div>
+
+  <div class="toplu" id="toplu">
+    <b id="topluSayi">0 kasa seçili</b> ·
+    <span class="btn mini">🧮 Sayım başlat</span>
+    <span class="btn mini">🏦 Bankaya yatır</span>
+    <span class="btn mini">📄 Toplu ekstre (PDF)</span>
+    <span class="btn mini">🖨 Kasa raporu</span>
+    <span class="btn mini">⛔ Pasife al</span>
+    <span class="sp"></span><span id="topluBakiye"></span>
+  </div>
+
+  <div class="govde">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:26px"><input type="checkbox" id="hepsi"></th>
+          <th class="s">Kod</th>
+          <th class="s">Kasa</th>
+          <th>Tür</th>
+          <th class="orta">Para</th>
+          <th>Şube</th>
+          <th>Sorumlu</th>
+          <th class="sag s">Bakiye</th>
+          <th class="sag">Bugün Giriş</th>
+          <th class="sag">Bugün Çıkış</th>
+          <th class="orta">Son Sayım</th>
+          <th class="sag">Fark</th>
+          <th>Güvenlik Limiti</th>
+          <th>Son 7 gün</th>
+          <th class="orta">Durum</th>
+        </tr></thead>
+        <tbody id="satirlar"></tbody>
+        <tfoot><tr>
+          <td></td><td colspan="6" id="altSayi"></td>
+          <td class="sag" id="altBakiye"></td><td class="sag" id="altGiris"></td><td class="sag" id="altCikis"></td>
+          <td colspan="5" class="sonuk" style="font-weight:normal">Bakiye kasanın kendi para birimi; toplam TL karşılığı (günün kuru). Eksi bakiye = kasaya girmeyen çıkış - kırmızı.</td>
+        </tr></tfoot>
+      </table>
+    </div>
+
+    <div class="onz">
+      <div class="bas">
+        <div class="ad" id="oAd"></div>
+        <div class="alt" id="oAlt"></div>
+        <div class="rzlar" id="oRz"></div>
+      </div>
+      <div class="hizli">
+        <span class="btn">💰 Tahsilat</span><span class="btn">💸 Ödeme</span><span class="btn">🏦 Yatır</span>
+        <span class="btn">🧮 Sayım</span><span class="btn">📄 Ekstre</span><span class="btn primary">Kartı Aç ↗</span>
+      </div>
+      <div class="ost" id="ost">
+        <span class="on" data-o="durum">Durum</span><span data-o="ekstre">Son Hareketler</span>
+        <span data-o="sayim">Sayım</span><span data-o="yetki">Yetkili</span>
+      </div>
+      <div class="ops" id="ops"></div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt: <b id="sbSayi"></b></span>
+    <span>Seçili: <b id="sbSecili">0</b></span>
+    <span>Sıralama: Bakiye ↓</span>
+    <span class="sp" style="margin-left:auto">⟳ 0,06 sn · son yenileme 09:42 · kurlar TCMB 23.10</span>
+  </div>
+</div>
+
+<div class="not">
+  <h3>Kasa Listesi V3 — tasarım notları</h3>
+  <ul>
+    <li><b>Kasa gözüyle KPI:</b> müşteri listesindeki alacak / risk kutularının yerini eldeki nakit, sayım disiplini ve limit alır: toplam nakit (TL karşılığı), bugün sayımı yapılmamış kasa, sayım farkı olan, güvenlik limitini aşan, açık banko oturumu, günün tahsilat / ödemesi. Kutuya tıklamak listeyi süzer.</li>
+    <li><b>Satır renkleri</b> (eski kasa listesiyle aynı dil): kırmızı = eksi bakiye; sarı = bugün sayımı yok ya da fark var; turuncu = güvenlik limiti aşıldı; gri = pasif. Fark sütunu son sayımın farkı, açıklandıysa yeşil ✓.</li>
+    <li><b>Güvenlik limiti</b> çubuğu: kasada tutulabilecek azami nakit (kasa kartı). Aşınca sarı, 1,25 katını geçince kırmızı; "Bankaya Yatır" doğrudan virman açar.</li>
+    <li><b>Banko kasaları</b> (satış kasası, oturumlu): açık oturum rozeti ve oturumu açan kullanıcı; gün sonu sayımı oturumu kapatır (Kasa › Gün Sonu ile aynı kayıt).</li>
+    <li><b>Sağ önizleme:</b> seçili kasanın durumu (bakiye, günün girişi / çıkışı, kupür dağılımı), son hareketler, sayım geçmişi, kasaya işleyebilen kullanıcılar. "Ekstre" tek Ekstre ekranını kasayla açar.</li>
+    <li><b>Grup görünümü:</b> şube › kasa; <b>Analiz:</b> kasa başına günlük giriş / çıkış, sayım farkı eğilimi, bankaya yatırma sıklığı.</li>
+    <li><b>Dövizli kasa:</b> bakiye kendi para biriminde; toplam ve KPI günün TCMB kuruyla TL. Kasanın para birimi değiştirilemez (hareketi varsa).</li>
+  </ul>
+</div>
+
+<script>
+const M = [
+  {kod:'K-01',ad:'Merkez TL Kasası',tur:'Merkez',kur:'TL',sube:'Merkez',sor:'Ayşe K.',bak:48320.5,gir:28635.5,cik:33515,sayim:'22.10 18:02',fark:-15,farkOk:true,limit:40000,g7:[31,28,44,39,52,47,48],otur:false},
+  {kod:'K-02',ad:'Banko 1 Kasası',tur:'Satış / Banko',kur:'TL',sube:'Merkez',sor:'Elif T.',bak:9140,gir:9140,cik:0,sayim:'22.10 18:10',fark:0,farkOk:true,limit:15000,g7:[8,11,9,12,10,7,9],otur:true,oturan:'Elif T. · 08:55'},
+  {kod:'K-03',ad:'Banko 2 Kasası',tur:'Satış / Banko',kur:'TL',sube:'Merkez',sor:'Can D.',bak:6420,gir:7020,cik:600,sayim:'21.10 18:20',fark:-200,farkOk:false,limit:15000,g7:[6,9,7,8,11,6,6],otur:true,oturan:'Can D. · 09:02'},
+  {kod:'K-04',ad:'Merkez USD Kasası',tur:'Merkez',kur:'USD',sube:'Merkez',sor:'Ayşe K.',bak:3250,gir:0,cik:0,sayim:'22.10 18:05',fark:0,farkOk:true,limit:5000,g7:[3,3,3,3,3,3,3],otur:false},
+  {kod:'K-05',ad:'Merkez EUR Kasası',tur:'Merkez',kur:'EUR',sube:'Merkez',sor:'Ayşe K.',bak:1180,gir:0,cik:120,sayim:'20.10 18:00',fark:0,farkOk:true,limit:3000,g7:[1.3,1.3,1.3,1.2,1.2,1.2,1.2],otur:false},
+  {kod:'K-11',ad:'Kadıköy Şube Kasası',tur:'Merkez',kur:'TL',sube:'Kadıköy',sor:'Mert A.',bak:22870,gir:14200,cik:4100,sayim:'—',fark:0,farkOk:true,limit:30000,g7:[18,21,19,24,20,23,23],otur:false,sayimYok:true},
+  {kod:'K-12',ad:'Kadıköy Banko Kasası',tur:'Satış / Banko',kur:'TL',sube:'Kadıköy',sor:'Seda Y.',bak:3105,gir:3105,cik:0,sayim:'22.10 18:30',fark:0,farkOk:true,limit:10000,g7:[3,4,3,5,4,3,3],otur:false},
+  {kod:'K-21',ad:'Depo Kasası',tur:'Merkez',kur:'TL',sube:'Depo',sor:'Hakan B.',bak:-380,gir:0,cik:380,sayim:'—',fark:0,farkOk:true,limit:5000,g7:[1,1,0.5,0.2,0,0,-0.4],otur:false,sayimYok:true},
+  {kod:'K-31',ad:'İş Avans Kasası',tur:'İş avans',kur:'TL',sube:'Merkez',sor:'Ayşe K.',bak:12500,gir:0,cik:2500,sayim:'—',fark:0,farkOk:true,limit:0,g7:[15,15,15,13,13,12.5,12.5],otur:false,sayimYok:true,sayimsiz:true},
+  {kod:'K-32',ad:'Maaş Avans Kasası',tur:'Maaş avans',kur:'TL',sube:'Merkez',sor:'Ayşe K.',bak:0,gir:0,cik:0,sayim:'—',fark:0,farkOk:true,limit:0,g7:[0,0,0,0,0,0,0],otur:false,sayimsiz:true,pasif:true},
+  {kod:'K-90',ad:'Eski Banko 3',tur:'Satış / Banko',kur:'TL',sube:'Merkez',sor:'—',bak:0,gir:0,cik:0,sayim:'14.06 18:00',fark:0,farkOk:true,limit:10000,g7:[0,0,0,0,0,0,0],otur:false,pasif:true},
+];
+const tl = n => n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const SEMBOL = {TL:'₺',USD:'$',EUR:'€'};
+const KUR = {TL:1,USD:41.2,EUR:47.9};
+const FILTRE = {
+  tumu: m => true, aktif: m => !m.pasif, pasif: m => m.pasif,
+  sayimyok: m => m.sayimYok && !m.pasif, fark: m => m.fark !== 0, limit: m => m.limit > 0 && m.bak > m.limit,
+  oturum: m => m.otur, doviz: m => m.kur !== 'TL', banko: m => m.tur === 'Satış / Banko',
+};
+let filtre = 'tumu', seciliKod = 'K-01', isaretli = new Set(), sekme = 'durum';
+
+function spark(a, w = 70, h = 18){
+  const mx = Math.max(...a.map(Math.abs), 1);
+  const p = a.map((v,i) => `${(i*(w/(a.length-1))).toFixed(1)},${(h-2-(Math.max(v,0)/mx)*(h-4)).toFixed(1)}`).join(' ');
+  const renk = a[a.length-1] >= a[0] ? '#2f6db3' : '#8a98a8';
+  return `<svg class="spark" width="${w}" height="${h}"><polyline fill="none" stroke="${renk}" stroke-width="1.5" points="${p}"/></svg>`;
+}
+function limitBar(m){
+  if (!m.limit) return '<span class="sonuk">—</span>';
+  const o = Math.min(140, Math.round(m.bak / m.limit * 100));
+  const r = o > 125 ? 'k' : o > 100 ? 'y' : '';
+  return `<span class="limit"><i><b class="${r}" style="width:${Math.min(o,100)}%"></b></i><em>${o}% · ₺ ${tl(m.limit)}</em></span>`;
+}
+function satirSinifi(m){
+  if (m.pasif) return 'pas';
+  if (m.bak < 0) return 'yok';
+  if (m.limit && m.bak > m.limit) return 'skt';
+  if (m.sayimYok || m.fark !== 0) return 'kri';
+  return '';
+}
+function durum(m){
+  if (m.pasif) return '<span class="rz">Pasif</span>';
+  if (m.otur) return `<span class="rz mavi" title="${m.oturan}">Oturum açık</span>`;
+  if (m.sayimYok && !m.sayimsiz) return '<span class="rz sari">Sayım bekliyor</span>';
+  return '<span class="rz ok">● Aktif</span>';
+}
+function ciz(){
+  const l = M.filter(FILTRE[filtre]);
+  document.getElementById('satirlar').innerHTML = l.map(m => `
+    <tr class="${satirSinifi(m)}${m.kod === seciliKod ? ' sel' : ''}" data-kod="${m.kod}">
+      <td><input type="checkbox" ${isaretli.has(m.kod) ? 'checked' : ''}></td>
+      <td>${m.kod}</td>
+      <td><b>${m.ad}</b>${m.otur ? ` <span class="rz mavi" style="font-size:9.5px">● ${m.oturan.split(' · ')[0]}</span>` : ''}</td>
+      <td>${m.tur}</td>
+      <td class="orta">${m.kur}</td>
+      <td>${m.sube}</td>
+      <td>${m.sor}</td>
+      <td class="sag ${m.bak < 0 ? 'borc' : ''}"><b>${SEMBOL[m.kur]} ${tl(m.bak)}</b></td>
+      <td class="sag">${m.gir ? tl(m.gir) : ''}</td>
+      <td class="sag">${m.cik ? tl(m.cik) : ''}</td>
+      <td class="orta">${m.sayimsiz ? '<span class="sonuk">sayımsız</span>' : m.sayim}</td>
+      <td class="sag ${m.fark ? (m.farkOk ? '' : 'borc') : ''}">${m.fark ? tl(m.fark) + (m.farkOk ? ' <span class="rz ok" title="Açıklandı">✓</span>' : '') : ''}</td>
+      <td>${limitBar(m)}</td>
+      <td>${spark(m.g7)}</td>
+      <td class="orta">${durum(m)}</td>
+    </tr>`).join('');
+  const aktif = l.filter(m => !m.pasif);
+  document.getElementById('altSayi').textContent = `${l.length} kasa · ${aktif.length} aktif · TL karşılığı toplam`;
+  document.getElementById('altBakiye').textContent = '₺ ' + tl(aktif.reduce((t,m) => t + m.bak * KUR[m.kur], 0));
+  document.getElementById('altGiris').textContent = tl(aktif.reduce((t,m) => t + m.gir * KUR[m.kur], 0));
+  document.getElementById('altCikis').textContent = tl(aktif.reduce((t,m) => t + m.cik * KUR[m.kur], 0));
+  document.getElementById('sbSayi').textContent = l.length;
+  document.getElementById('sbSecili').textContent = isaretli.size;
+  document.querySelectorAll('#satirlar tr').forEach(tr => {
+    tr.addEventListener('click', e => { if (e.target.type === 'checkbox') return; seciliKod = tr.dataset.kod; isaretli = new Set([seciliKod]); ciz(); onizle(); });
+    tr.querySelector('input').addEventListener('change', e => { e.target.checked ? isaretli.add(tr.dataset.kod) : isaretli.delete(tr.dataset.kod); toplu(); });
+  });
+  toplu();
+}
+function toplu(){
+  const t = document.getElementById('toplu'); t.classList.toggle('acik', isaretli.size > 0);
+  document.getElementById('topluSayi').textContent = `${isaretli.size} kasa seçili`;
+  const top = [...isaretli].map(k => M.find(m => m.kod === k)).reduce((s,m) => s + m.bak * KUR[m.kur], 0);
+  document.getElementById('topluBakiye').textContent = isaretli.size ? `Seçili nakit (TL): ₺ ${tl(top)}` : '';
+  document.getElementById('sbSecili').textContent = isaretli.size;
+}
+function onizle(){
+  const m = M.find(x => x.kod === seciliKod); if (!m) return;
+  document.getElementById('oAd').textContent = m.ad;
+  document.getElementById('oAlt').textContent = `${m.kod} · ${m.tur} · ${m.kur} · ${m.sube} · Sorumlu ${m.sor}`;
+  document.getElementById('oRz').innerHTML = [durum(m), m.limit && m.bak > m.limit ? '<span class="rz sari">Limit aşıldı</span>' : '',
+    m.fark && !m.farkOk ? '<span class="rz kir">Sayım farkı açıklanmadı</span>' : '', m.kur !== 'TL' ? '<span class="rz mor">Dövizli</span>' : ''].join('');
+  const ops = document.getElementById('ops');
+  if (sekme === 'durum') ops.innerHTML = `
+      <div class="mali">
+        <div><span>Bakiye</span><b class="${m.bak < 0 ? 'borc' : ''}">${SEMBOL[m.kur]} ${tl(m.bak)}</b></div>
+        <div><span>Bugün giriş</span><b>${tl(m.gir)}</b></div>
+        <div><span>Bugün çıkış</span><b>${tl(m.cik)}</b></div>
+        <div><span>Güvenlik limiti</span><b>${m.limit ? '₺ ' + tl(m.limit) : '—'}</b></div>
+      </div>
+      <table class="mini-ek">
+        <tr><td>Kupür dökümü (son sayım)</td><td class="sag">200×180 · 100×95 · 50×22 · 20×31 · bozuk 212,50</td></tr>
+        <tr><td>Son bankaya yatırma</td><td class="sag">22.10 · ₺ 30.000 · Garanti BBVA TL</td></tr>
+        <tr><td>Bu ay net</td><td class="sag">+ ₺ 142.600</td></tr>
+        <tr><td>Muhasebe hesabı</td><td class="sag">100.01.001</td></tr>
+      </table>
+      <div class="sonuk" style="font-size:10.5px;margin-top:6px">${m.sayimsiz ? 'Avans kasası: gün sonu sayımı yapılmaz, bakiye personel avanslarının toplamıdır.' : 'Gün sonu sayımı kasayı kapatır; fark açıklanmadan ertesi gün tahsilat alınamaz (opsiyon).'}</div>`;
+  else if (sekme === 'ekstre') ops.innerHTML = `
+      <table class="mini-ek">
+        <tr><td>23.10 09:12</td><td>Nakit Tahsilat · Ege Tarım</td><td class="sag">12.000,00</td></tr>
+        <tr><td>23.10 08:40</td><td>Perakende satış · Fiş 0151</td><td class="sag">2.635,50</td></tr>
+        <tr><td>22.10 18:02</td><td>Sayım farkı (açıklandı)</td><td class="sag borc">−15,00</td></tr>
+        <tr><td>22.10 14:05</td><td>Kasadan bankaya · Garanti TL</td><td class="sag borc">−30.000,00</td></tr>
+        <tr><td>22.10 11:40</td><td>Nakit Ödeme · Özkan Nakliyat</td><td class="sag borc">−3.500,00</td></tr>
+      </table>
+      <div class="sonuk" style="font-size:10.5px;margin-top:6px">Tamamı: 📄 Ekstre (tek ekran, kasa seçili açılır).</div>`;
+  else if (sekme === 'sayim') ops.innerHTML = `
+      <table class="mini-ek">
+        <tr><th>Tarih</th><th>Sayan</th><th class="sag">Sistem</th><th class="sag">Sayılan</th><th class="sag">Fark</th></tr>
+        <tr><td>22.10 18:02</td><td>Ayşe K.</td><td class="sag">48.335,50</td><td class="sag">48.320,50</td><td class="sag borc">−15,00 ✓</td></tr>
+        <tr><td>21.10 18:00</td><td>Ayşe K.</td><td class="sag">41.200,00</td><td class="sag">41.200,00</td><td class="sag">0,00</td></tr>
+        <tr><td>20.10 18:05</td><td>Elif T.</td><td class="sag">37.950,00</td><td class="sag">38.000,00</td><td class="sag">+50,00 ✓</td></tr>
+      </table>
+      <div class="sonuk" style="font-size:10.5px;margin-top:6px">Fark açıklaması zorunlu; açıklanan fark "Sayım Farkı" hareketi olarak kasaya işlenir.</div>`;
+  else ops.innerHTML = `
+      <table class="mini-ek">
+        <tr><th>Kullanıcı</th><th>Rol</th><th>Yetki</th></tr>
+        <tr><td>Ayşe K.</td><td>Muhasebe</td><td>Tahsilat · Ödeme · Virman · Sayım</td></tr>
+        <tr><td>Elif T.</td><td>Banko</td><td>Tahsilat · Sayım</td></tr>
+        <tr><td>Mert A.</td><td>Şube Müdürü</td><td>Görüntüle</td></tr>
+      </table>
+      <div class="sonuk" style="font-size:10.5px;margin-top:6px">Kasa yetkisi kart › Yetkiler sekmesinden; sorumlu olmayan kullanıcı kasayı listede görmez (opsiyon).</div>`;
+}
+document.querySelectorAll('#kpi .kp[data-f], .chip[data-f]').forEach(k => k.addEventListener('click', () => {
+  filtre = filtre === k.dataset.f && k.classList.contains('kp') ? 'tumu' : k.dataset.f;
+  document.querySelectorAll('#kpi .kp').forEach(x => x.classList.toggle('on', x.dataset.f === filtre));
+  document.querySelectorAll('.chip[data-f]').forEach(x => x.classList.toggle('on', x.dataset.f === filtre));
+  ciz();
+}));
+document.getElementById('hepsi').addEventListener('change', e => { isaretli = e.target.checked ? new Set(M.filter(FILTRE[filtre]).map(m => m.kod)) : new Set(); ciz(); });
+document.querySelectorAll('#ost span').forEach(s => s.addEventListener('click', () => { sekme = s.dataset.o; document.querySelectorAll('#ost span').forEach(x => x.classList.toggle('on', x === s)); onizle(); }));
+ciz(); onizle();
+</script>
+</body>
+</html>

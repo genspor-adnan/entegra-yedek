@@ -57,6 +57,40 @@ public static class CariListeUclari
             return Results.Ok(new { gosterge, izlemeNo = baglam.IzlemeNo });
         });
 
+        // TEDARİKÇİ GÖSTERGESİ (1162, mockup tedarikci_listesi_ver3.html): borcumuz, vadesi geçen ödeme,
+        //   7 gün içinde ödenecek (30 günlük kümenin yaklaşık payı yerine aynı sütun), bu yıl alım.
+        grup.MapGet("/tedarikci-gosterge", async (BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("cari", Islem.Gor);
+            if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak("Bu gösterge portalda kullanılamaz.");
+            await using var b = await veri.AcAsync(iptal);
+            var gosterge = await b.TekAsync("""
+                select count(*) filter (where t.durum = 1)                                       as aktif,
+                       count(*) filter (where t.durum = 1
+                                          and t.ekleme_tarihi >= date_trunc('month', now()))    as "yeniBuAy",
+                       count(*) filter (where o.bakiye < -0.005)                                 as borclu,
+                       coalesce(-sum(o.bakiye) filter (where o.bakiye < -0.005), 0)              as borc,
+                       count(*) filter (where o.vadesi_gecen_odeme > 0.005)                      as vadeli,
+                       coalesce(sum(o.vadesi_gecen_odeme), 0)                                    as "vadesiGecen",
+                       count(*) filter (where o.odenecek_30 > 0.005)                             as "odenecekCari",
+                       coalesce(sum(o.odenecek_30), 0)                                           as odenecek30,
+                       count(*) filter (where t.durum = 1
+                                          and o.son_alis < now() - interval '90 days')          as uyuyan,
+                       coalesce(sum(o.alis_bu_yil), 0)                                           as "alisBuYil",
+                       coalesce(sum(o.alis_gecen_yil), 0)                                        as "alisGecenYil",
+                       (select coalesce(sum(c.yerel_tutar), 0) from public.cek_senet c
+                         where c.yon = 2 and c.durum not in (0, 50, 60, 70)
+                           and c.vade < current_date + 7)                                        as "cekHafta"
+                  from public.taraf t
+                  left join public.v_cari_ozet o on o.taraf_id = t.id
+                 where t.tedarikci = 1
+                   and (cardinality(@p0::int[]) = 0 or t.id = any(@p0::int[]))
+                """, null, [baglam.Kapsam.ToArray()], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { gosterge, izlemeNo = baglam.IzlemeNo });
+        });
+
         // KART ÖZETİ (mockup Ekranlar/musteri_karti_ver3.html): özet şeridi, sağ sütun
         //   (dikkat, yaşlandırma) ve Finansal sekmesi TEK istekten. Bakiye / vade / ciro
         //   listeyle aynı görünümden (v_cari_ozet); yaşlandırma aynı FIFO kuralıyla burada
@@ -94,10 +128,25 @@ public static class CariListeUclari
                        -- SATIS & RISK (1152): sevk edilmis ama faturalanmamis satis irsaliyesi (14).
                        (select coalesce(sum(s.genel_toplam), 0) from public.belge s
                          where s.taraf_id = t.id and s.tur = 14 and s.durum <> 2
-                           and coalesce(s.kapanma_durum, 0) < 2)                       as "irsaliyeAcik"
+                           and coalesce(s.kapanma_durum, 0) < 2)                       as "irsaliyeAcik",
+                       -- TEDARİKÇİ GÖZÜ (1162): borcumuz tarafı, alımlar, verilen çekler, satınalma koşulları.
+                       t.musteri, t.tedarikci,
+                       coalesce(o.vadesi_gecen_odeme, 0) as "vadesiGecenOdeme", coalesce(o.odenecek_30, 0) as "odenecek30",
+                       coalesce(o.alis_bu_yil, 0) as "alisBuYil", coalesce(o.alis_gecen_yil, 0) as "alisGecenYil",
+                       coalesce(o.alis_12ay, 0) as "alis12Ay", coalesce(o.alis_egri, '') as "alisEgri",
+                       o.son_alis as "sonAlis", o.son_odeme as "sonOdeme",
+                       coalesce(tt.vade_gun, 0) as "tedVadeGun", coalesce(tt.kredi_limiti, 0) as "krediLimiti",
+                       coalesce(tt.onay_durumu, 0) as "onayDurumu", coalesce(tt.temin_suresi_gun, 0) as "tedarikSuresiGun",
+                       (select count(*) from public.cek_senet c
+                         where c.taraf_id = t.id and c.yon = 2 and c.durum not in (0, 50, 60, 70)) as "verilenCekAdet",
+                       (select coalesce(sum(c.yerel_tutar), 0) from public.cek_senet c
+                         where c.taraf_id = t.id and c.yon = 2 and c.durum not in (0, 50, 60, 70)) as "verilenCekTutar",
+                       (select min(c.vade) from public.cek_senet c
+                         where c.taraf_id = t.id and c.yon = 2 and c.durum not in (0, 50, 60, 70)) as "verilenCekIlkVade"
                   from public.taraf t
                   left join public.v_cari_ozet o on o.taraf_id = t.id
                   left join public.taraf_musteri tm on tm.id = t.id
+                  left join public.taraf_tedarikci tt on tt.id = t.id
                  where t.id = @p0 and (t.musteri = 1 or t.tedarikci = 1 or t.aday = 1 or t.kurum = 1)
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Cari bulunamadı.");
@@ -149,6 +198,28 @@ public static class CariListeUclari
                  where c.taraf_id = @p0 and c.yon = 1 and c.durum in (10, 30, 40)
                  order by c.vade
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            // VERİLEN ÇEKLER (1162, tedarikçi kartı Finansal): henüz ödenmemiş çeklerimiz.
+            var verilenCekler = await b.ListeAsync("""
+                select c.id, c.tur, c.seri_no as "seriNo", coalesce(nullif(c.banka_adi, ''), '') as banka,
+                       c.vade, c.durum, c.yerel_tutar as tutar, c.doviz_cinsi as doviz, c.tutar as "dovizTutar"
+                  from public.cek_senet c
+                 where c.taraf_id = @p0 and c.yon = 2 and c.durum not in (0, 50, 60, 70)
+                 order by c.vade
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            // ÖDEME YAŞLANDIRMASI (1162): alacak tarafı - ödemeler (borç) önce vadesi en eski borcumuzu kapatır.
+            var kalanOdeme = hareket.Sum(h => h.borc);
+            var odemeDilim = new decimal[3];   // vadesi geçen · 30 gün içinde · 30+ gün
+            var gecenOdemeler = new List<object>();
+            foreach (var h in hareket.Where(h => h.alacak > 0).OrderBy(h => h.vade).ThenBy(h => h.tarih))
+            {
+                var kapanan = Math.Min(kalanOdeme, h.alacak);
+                kalanOdeme -= kapanan;
+                var kalan = h.alacak - kapanan;
+                if (kalan < 0.005m) continue;
+                var gun = (int)(h.vade.Date - bugun).TotalDays;
+                odemeDilim[gun < 0 ? 0 : gun <= 30 ? 1 : 2] += kalan;
+                if (gun < 0) gecenOdemeler.Add(new { h.tarih, h.vade, belgeNo = h.no, turAdi = h.tur, h.belgeId, gecikme = -gun, kalan });
+            }
 
             // DİKKAT: kural sunucuda - ekran yalnız metni gösterir.
             var uyarilar = new List<object>();
@@ -166,7 +237,9 @@ public static class CariListeUclari
             {
                 ozet, dovizler,
                 yaslandirma = new { gelmemis = dilim[0], d30 = dilim[1], d60 = dilim[2], d90 = dilim[3] },
-                vadesiGecenler = gecenler, cekler, uyarilar, izlemeNo = baglam.IzlemeNo,
+                vadesiGecenler = gecenler, cekler, uyarilar,
+                odemeYaslandirma = new { gecen = odemeDilim[0], d30 = odemeDilim[1], sonra = odemeDilim[2] },
+                vadesiGecenOdemeler = gecenOdemeler, verilenCekler, izlemeNo = baglam.IzlemeNo,
             });
         });
     }

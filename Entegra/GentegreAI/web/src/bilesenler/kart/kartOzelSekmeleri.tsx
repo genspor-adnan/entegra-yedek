@@ -57,6 +57,13 @@ const OZEL_DETAYLAR: Record<string, Record<string, (b: OzelDetayBaglami) => Reac
   //   vade günü vadesi geçen hesabını besler.
   //   Mockup'ın iki kutusu (Satış Koşulları · Risk / Limit) + risk kalemleri dökümü (1152).
   cari: {
+    // Tedarikçi kartı "Satınalma Koşulları" (tedarikci_karti_ver3.html, 1162): taraf_tedarikci 1:1 - tek kayıt formu.
+    satinalmaKosul: b => (
+      <TekKayit meta={b.detay} durum={b.durum} saltOkunur={b.salt || b.detay.saltOkunur}
+                onDegis={b.onDegis} baslik="Satınalma Koşulları"
+                not={<>Vade günü, vade tarihi girilmemiş alış faturasında ödeme vadesini belirler → vadesi geçen ödeme,
+                     ödeme takvimi ve yaşlandırma. Bize tanınan kredi limiti bilgi amaçlıdır (sipariş uyarısı ayrı iş).</>} />
+    ),
     satisKosul: b => (
       <CariSatisRiskSekmesi id={b.id} yeniMi={b.yeniMi} detay={b.detay} durum={b.durum} salt={b.salt}
                             onDegis={b.onDegis} anaAlanlar={b.anaAlanlar}

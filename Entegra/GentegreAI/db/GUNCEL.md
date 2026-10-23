@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (598 ad, 157 tanesi birden cok dosyada)
+## Fonksiyonlar (619 ad, 158 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -19,7 +19,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_ek` | `1149_aktarim_ek_toplu.sql` | — |
 | `fn_aktar_ek_cek` | `1147_aktarim_ek_cek.sql` | — |
-| `fn_aktar_ek_demirbas` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
+| `fn_aktar_ek_demirbas` | `1151_aktarim_demirbas_mukerrer_kod.sql` | 1148_aktarim_ek_teklif_hesap_demirbas.sql |
 | `fn_aktar_ek_dokuman` | `1146_aktarim_ek_dokuman.sql` | — |
 | `fn_aktar_ek_ebelge` | `1146_aktarim_ek_dokuman.sql` | — |
 | `fn_aktar_ek_gorev` | `1145_aktarim_ek_gorev.sql` | — |
@@ -65,6 +65,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ariza_talep_ac` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql |
 | `fn_avans_iade_toplam` | `780_avans_iadesi.sql` | — |
 | `fn_ayar_kapilari` | `1121_ayar_kapilari.sql` | — |
+| `fn_banka_hareket_kasa_iptal` | `1157_banka_hareket.sql` | — |
+| `fn_banka_iban` | `1157_banka_hareket.sql` | — |
+| `fn_banka_oneri` | `1157_banka_hareket.sql` | — |
+| `fn_banka_oneri_yenile` | `1157_banka_hareket.sql` | — |
 | `fn_banko_acik_oturum` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
 | `fn_banko_devir` | `987_banko_oturum.sql` | — |
 | `fn_banko_oturum_gerekli` | `997_banko_oturum_tahsilat_damgasi.sql` | — |
@@ -479,6 +483,23 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_yatak_ucreti_tahakkuk` | `700_yatis_tahakkuk.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
+| `fn_yil_devri_adim_bitir` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_adim1` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_adim2` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_adim3` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_adim4` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_adim5` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_degerleme` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_fis_ac` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_fis_kapat` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_geri_al` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_hesap` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_kontrol` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_kur` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_mizan` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_satir` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_sira` | `1155_yil_devri.sql` | — |
+| `fn_yil_devri_yansitma` | `1155_yil_devri.sql` | — |
 | `tg_acil_basvuru_yatak_olay` | `1118_acil_yatak_karti.sql` | — |
 | `tg_acil_yatak_durum_olay` | `1118_acil_yatak_karti.sql` | — |
 | `tg_ariza_talep_cozum` | `954_ariza_talep_takip.sql` | — |
@@ -607,7 +628,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (354 ad, 157 tanesi birden cok dosyada)
+## Gorunumler (357 ad, 158 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -625,6 +646,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ariza_talep` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_asi_skrs_eksik` | `898_asi_modulu.sql` | — |
 | `v_asi_uygulama` | `940_personel_unvan_yalniz_onek.sql` | 898_asi_modulu.sql |
+| `v_banka_hareket` | `1157_banka_hareket.sql` | — |
+| `v_banka_hesap_durum` | `1157_banka_hareket.sql` | — |
 | `v_banka_lookup` | `109_banka.sql` | — |
 | `v_banka_sube_lookup` | `110_banka_sube_bagli_ve_kur.sql` | 109_banka.sql |
 | `v_banko_lookup` | `985_banko_tanimi.sql` | — |
@@ -656,7 +679,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cagri_kuyruk_lookup` | `839_cagri_merkezi.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `940_personel_unvan_yalniz_onek.sql` | 037_kisi_karti.sql, 122_aday_musteri.sql |
-| `v_cari_ozet` | `1150_cari_ozet.sql` | — |
+| `v_cari_ozet` | `1162_tedarikci_v3.sql` | 1150_cari_ozet.sql |
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |
@@ -798,6 +821,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kalite_zorunlu_egitim` | `1056_kys_egitim.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
+| `v_kasa_ozet` | `1161_kasa_v3.sql` | — |
 | `v_kategori_lookup` | `505_skrs_liste_duzeltme_kategori_tur.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql, 347_sonomed_rad_kategori.sql |
 | `v_klinik_gosterge_lookup` | `711_klinik_kalite.sql` | — |
 | `v_klinik_olgu_lookup` | `712_klinik_olgu_lookup.sql` | — |

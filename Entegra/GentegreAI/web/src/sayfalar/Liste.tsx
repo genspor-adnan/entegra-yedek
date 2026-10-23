@@ -1275,12 +1275,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           onClick={() => {
             if (!seciliSatir) return;
             const hesap = { id: Number(seciliSatir.id), ad: String(seciliSatir.ad ?? seciliSatir.unvan ?? seciliSatir.id) };
-            // YENİ SEKMEDE (hasta, 23.10.2026): ekstre kaynağının kendi listesi (Kasa › Cari Ekstre)
-            //   hesaba süzülmüş açılır, liste yerinde kalır. Sekmesiz çalışmada / liste yoksa eski mod.
+            // YENİ SEKMEDE (23.10.2026): TEK EKSTRE ekranı (1158) hesaba süzülmüş açılır, liste
+            //   yerinde kalır - cari listeleri tarafı, hesap listeleri hesabın türünü ekrana bırakır.
+            //   Sekmesiz çalışmada eski yerinde-ekstre modu.
             const e = tanim.ekstre;
-            const hedef = e?.yeniSekme && ekranSekmesi
-              ? LISTELER.find(l => l.kaynak === e.kaynak && l.urlFiltreAlani === e.alan) : undefined;
-            if (e && hedef) git(`/${hedef.rota ?? hedef.kaynak}?${e.alan}=${hesap.id}&ad=${encodeURIComponent(hesap.ad)}`);
+            if (e?.yeniSekme && ekranSekmesi) git(`/ekstre?tur=${e.kaynak === 'cari-ekstre' ? 'cari' : 'hesap'}&id=${hesap.id}`);
             else setEkstre(hesap);
           }}
         >

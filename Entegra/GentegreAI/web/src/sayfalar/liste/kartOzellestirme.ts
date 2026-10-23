@@ -45,13 +45,15 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html sırası; Finansal / Belgeler / CRM kart eklentisinin sekmeleri.
   cari: {
-    sekmeSirasi: ['Genel', 'Adres / Fatura Bilgisi', 'Satış & Risk', 'Finansal', 'Belgeler', 'CRM',
+    sekmeSirasi: ['Genel', 'Adres / Fatura Bilgisi', 'Satış & Risk', 'Satınalma Koşulları', 'Finansal', 'Belgeler', 'CRM',
                   'Banka / IBAN', 'Resim / Doküman', 'Ek Alanlar'],
   },
   // ------------------------------------------ banka hesabı (1157) ----
-  // Mockup banka_hareketleri.html "Banka Hesabı Kartı" sırası; Hareketler kart eklentisinin sekmesi.
+  // Kasa kartı V3 (1161): Genel · Limitler & Kurallar · Sayım / Gün Sonu · Yetkiler · Doküman; banka kartı
+  //   (1157) Genel · Banka Bağlantısı · Doküman (Hareketler sekmesi kalktı - Ekstre). Listede olmayan
+  //   sekme sırayı bozmaz.
   hesap: {
-    sekmeSirasi: ['Genel', 'Banka Bağlantısı', 'Hareketler', 'Resim / Doküman'],
+    sekmeSirasi: ['Genel', 'Limitler & Kurallar', 'Sayım / Gün Sonu', 'Yetkiler', 'Banka Bağlantısı', 'Resim / Doküman'],
   },
   // ------------------------------------------ İK belge türü (1135-1138) ----
   // Mockup Ekranlar/IK/personel_belge_turu.html (2): şeritte ad · grup · durum; sekmeler mockup sırasıyla.

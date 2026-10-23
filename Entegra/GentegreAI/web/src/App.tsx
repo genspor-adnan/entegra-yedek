@@ -39,6 +39,11 @@ const VezneIcmal = tembel(() => import('./sayfalar/vezne/VezneIcmal'), 'VezneIcm
 const MedulaMutabakat = tembel(() => import('./sayfalar/medula/MedulaMutabakat'), 'MedulaMutabakat');
 const AktarimDurumu = tembel(() => import('./sayfalar/aktarim/AktarimDurumu'), 'AktarimDurumu');
 const AlacakYaslandirma = tembel(() => import('./sayfalar/yaslandirma/AlacakYaslandirma'), 'AlacakYaslandirma');
+const CariIcmali = tembel(() => import('./sayfalar/cariIcmal/CariIcmali'), 'CariIcmali');
+const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
+const DevirYonlendir = tembel(() => import('./sayfalar/devir/Devir'), 'DevirYonlendir');
+const Ekstre = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'Ekstre');
+const EkstreYonlendir = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'EkstreYonlendir');
 const HastaBorcTakibi = tembel(() => import('./sayfalar/borc/HastaBorcTakibi'), 'HastaBorcTakibi');
 const HekimPerformans = tembel(() => import('./sayfalar/performans/HekimPerformans'), 'HekimPerformans');
 const IskontoIcmal = tembel(() => import('./sayfalar/iskontoIcmal/IskontoIcmal'), 'IskontoIcmal');
@@ -281,6 +286,16 @@ function Yollar() {
         {yetki('medula.mutabakat') && <Route path="/medula-mutabakat" element={<MedulaMutabakat />} />}
         {yetki('aktarim.durum') && <Route path="/aktarim-durumu" element={<AktarimDurumu />} />}
         {yetki('finans.alacak_yaslandirma') && <Route path="/alacak-yaslandirma" element={<AlacakYaslandirma />} />}
+        {/* CARİ İCMALİ (1154): müşteri + tedarikçi bakiye, yaşlandırma, mutabakat mektubu. */}
+        {yetki('finans.cari_icmali') && <Route path="/cari-icmali" element={<CariIcmali />} />}
+        {/* CARİ DEVİR GİRİŞİ (1156): toplu açılış bakiyesi (Excel'den yapıştır). */}
+        {/* DEVİR GİRİŞİ - TEK EKRAN (1160): cari + kasa / banka / POS / kredi; eski /cari-devir yönlenir. */}
+        {yetki('finans.devir') && <Route path="/devir" element={<Devir />} />}
+        <Route path="/cari-devir" element={<DevirYonlendir />} />
+        {/* TEK EKSTRE (1158): eski Kasa › Cari Ekstre ve Hesap Ekstresi yolları buraya yönlenir. */}
+        {yetki('finans.ekstre') && <Route path="/ekstre" element={<Ekstre />} />}
+        <Route path="/cari-ekstre" element={<EkstreYonlendir tur="cari" alan="tarafId" />} />
+        <Route path="/hesap-ekstre" element={<EkstreYonlendir tur="hesap" alan="hesapId" />} />
         {yetki('hasta.borc_takip') && <Route path="/hasta-borc-takibi" element={<HastaBorcTakibi />} />}
         {yetki('prim.hekim_performans') && <Route path="/hekim-performans" element={<HekimPerformans />} />}
         {yetki('iskonto.icmal') && <Route path="/iskonto-icmali" element={<IskontoIcmal />} />}

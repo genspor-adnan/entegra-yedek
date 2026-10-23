@@ -51,6 +51,15 @@ public static partial class KartKatalogu
             new("acilisBakiye",    "acilis_bakiye",     "para",  Baslik: "Açılış Bakiyesi", Grup: "Genel", AltGrup: "Muhasebe"),
             new("acilisTarihi",    "acilis_tarihi",     "tarih", Baslik: "Açılış Tarihi", Grup: "Genel", AltGrup: "Muhasebe"),
             new("muhHesapId",      "muh_hesap_id",      "kod",   KodTablosu: "public.v_hesap_plani_lookup", Baslik: "Muhasebe Hesabı", Grup: "Genel", AltGrup: "Muhasebe"),
+            // LİMİTLER & KURALLAR (1161, mockup kasa_karti_ver3.html) - yalnız Kasa kartında (öteki listeler sekmeyi gizler).
+            new("guvenlikLimiti",    "guvenlik_limiti",     "para",   Baslik: "Güvenlik limiti (azami nakit)", Grup: "Limitler & Kurallar", AltGrup: "Nakit Limitleri"),
+            new("gunlukOdemeLimiti", "gunluk_odeme_limiti", "para",   Baslik: "Günlük ödeme limiti", Grup: "Limitler & Kurallar", AltGrup: "Nakit Limitleri"),
+            new("tekIslemLimiti",    "tek_islem_limiti",    "para",   Baslik: "Tek işlem ödeme limiti (üstü onaylı)", Grup: "Limitler & Kurallar", AltGrup: "Nakit Limitleri"),
+            new("eksiBakiyeYasak",   "eksi_bakiye_yasak",   "mantik", Baslik: "Eksi bakiye yasak (ödeme engellenir)", Grup: "Limitler & Kurallar", AltGrup: "Nakit Limitleri"),
+            new("sayimZorunlu",      "sayim_zorunlu",       "mantik", Baslik: "Gün sonu sayımı zorunlu (her gün)", Grup: "Limitler & Kurallar", AltGrup: "Sayım Kuralları"),
+            new("sayimSaati",        "sayim_saati",         "metin",  EnFazlaUzunluk: 5, Baslik: "Sayım saati (ss:dd)", Grup: "Limitler & Kurallar", AltGrup: "Sayım Kuralları"),
+            new("farkToleransi",     "fark_toleransi",      "para",   Baslik: "Fark toleransı", Grup: "Limitler & Kurallar", AltGrup: "Sayım Kuralları"),
+            new("kupurZorunlu",      "kupur_zorunlu",       "mantik", Baslik: "Kupür girişi zorunlu", Grup: "Limitler & Kurallar", AltGrup: "Sayım Kuralları"),
             new("subeId",          "sube_id",           "sayi",  Yazilabilir: false, Baslik: "Şube"),
             new("eklemeTarihi",    "ekleme_tarihi",     "tarih", Yazilabilir: false),
             // BANKA BAĞLANTISI (1157, mockup Ekranlar/ERP/banka_hareketleri.html): hesaba özel - API
@@ -70,6 +79,22 @@ public static partial class KartKatalogu
             new("bankaSonCekim",     "banka_son_cekim",     "zaman",  Yazilabilir: false, Baslik: "Son Çekim", Grup: "Banka Bağlantısı", AltGrup: "Çekme ve Öneriler"),
             new("bankaSonSonuc",     "banka_son_sonuc",     "metin",  Yazilabilir: false, Baslik: "Son Sonuç", Grup: "Banka Bağlantısı", AltGrup: "Çekme ve Öneriler"),
             new("bankaBakiye",       "banka_bakiye",        "para",   Yazilabilir: false, Baslik: "Banka Bakiyesi", Grup: "Banka Bağlantısı", AltGrup: "Çekme ve Öneriler"),
+        },
+        // YETKİLER (1161): kasaya işleyebilen kullanıcı / rol ve işlem türleri - rol yetkisinin üstüne daraltma.
+        Detaylar: new[]
+        {
+            new DetayTanimi("yetkiler", "public.hesap_yetki", "hesap_id", new KartAlani[]
+            {
+                new("id",          "id",           "sayi",   Yazilabilir: false),
+                new("kullaniciId", "kullanici_id", "kod",    KodTablosu: "public.v_kullanici_lookup", Baslik: "Kullanıcı"),
+                new("rolId",       "rol_id",       "kod",    KodTablosu: "public.v_rol_lookup", Baslik: "Rol"),
+                new("gor",         "gor",          "mantik", Baslik: "Görüntüle"),
+                new("tahsilat",    "tahsilat",     "mantik", Baslik: "Tahsilat"),
+                new("odeme",       "odeme",        "mantik", Baslik: "Ödeme"),
+                new("virman",      "virman",       "mantik", Baslik: "Virman"),
+                new("sayim",       "sayim",        "mantik", Baslik: "Sayım"),
+                new("limitOnay",   "limit_onay",   "mantik", Baslik: "Limit üstü onay"),
+            }, Sirala: "id", LogTabloId: 1611, Baslik: "Yetkiler")
         },
         SilmeEngelleri: new[]
         {

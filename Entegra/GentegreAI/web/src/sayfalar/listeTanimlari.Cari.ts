@@ -79,7 +79,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
     yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
     // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
-    gizliKartSekmeleri: ['Satış Koşulları'],
+    //   Satınalma Koşulları (1162) tedarikçi kartının sekmesi.
+    gizliKartSekmeleri: ['Satış Koşulları'], gizliDetaylar: ['satinalmaKosul'],
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
@@ -91,7 +92,23 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // ayni kart, farkli `rota`/kartYolu ('/tedarikci') + ters sabitFiltre.
     kaynak: 'cari', rota: 'tedarikci', baslik: 'Tedarikçi Listesi', yol: 'Cari › Tedarikçi Listesi',
     kartYolu: '/tedarikci',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // VER3 (1162, mockup tedarikci_listesi_ver3.html): yön ters - bakiye çoğunlukla A (biz borçluyuz).
+    //   Akıllı çipler v_cari_ozet'in tedarikçi sütunları; gösterge şeridi İNDEKSLE açar
+    //   (MusteriPanelleri.TED_CIP) - sıra değişirse orası da değişmeli.
+    aksiyonEkrani: 'cari-liste', cipler: [
+      ...(DURUM_CIPLERI ?? []),
+      { ad: 'Borçlu olduğumuz', filtre: { alan: 'bakiye', op: 'kucuk', deger: -0.005 }, ayracOnce: true },
+      { ad: 'Vadesi geçen ödeme', filtre: { alan: 'vadesiGecenOdeme', op: 'buyuk', deger: 0.005 } },
+      { ad: '30 günde ödenecek', filtre: { alan: 'odenecek30', op: 'buyuk', deger: 0.005 } },
+      { ad: 'Alım yok 90+ gün', filtre: { op: 'and', kosullar: [
+        { alan: 'durum', op: 'esit', deger: 1 }, { alan: 'sonAlisGun', op: 'buyukEsit', deger: 90 }] } },
+      { ad: 'Dövizli', filtre: { alan: 'dovizli', op: 'esit', deger: 1 } },
+    ],
+    kolonSirasi: ['kod', 'unvan', 'il', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
+                  'sonAlisGun', 'alisEgri', 'onayDurumu', 'efatura', 'durum'],
+    kolonBasliklari: { temsilci: 'Satınalmacı', bakiye: 'Bakiye (A = borcumuz)' },
+    gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci', 'vadesiGecen', 'riskYuzde', 'sonSatisGun', 'ciroEgri'],
+    toplam: ['bakiye', 'vadesiGecenOdeme', 'odenecek30'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
     //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
@@ -102,8 +119,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
     yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
-    // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
-    gizliKartSekmeleri: ['Satış Koşulları'],
+    // Tedarikçi kartı (1162): Satış & Risk yerine Satınalma Koşulları (taraf_tedarikci).
+    gizliKartSekmeleri: ['Satış Koşulları'], gizliDetaylar: ['satisKosul'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
     ic: '🚚', yetkiKodu: 'cari.tedarikci.liste',   // 1003: menü yeri kendi kodu
   },
