@@ -449,6 +449,7 @@ uygulama.YatanDonemIcmalUclariniEkle();   // yatan hasta / servis dönem icmali 
 uygulama.KasaGunSonuUclariniEkle();   // kasa / gün sonu mutabakatı (11.10.2026)
 uygulama.YilDevriUclariniEkle();      // yıl sonu / başı devri (1155, 23.10.2026)
 uygulama.BankaHareketUclariniEkle();  // banka hareketleri (1157, 23.10.2026)
+uygulama.GarantiOrnekUclariniEkle();  // Garanti örnek sunucusu - yalnız geliştirme / demo (1157)
 uygulama.CagriIcmalUclariniEkle();   // çağrı merkezi icmali (11.10.2026)
 uygulama.SterilIcmalUclariniEkle();   // sterilizasyon icmali (11.10.2026)
 uygulama.AmeliyathaneIcmalUclariniEkle();   // ameliyathane icmali (12.10.2026)

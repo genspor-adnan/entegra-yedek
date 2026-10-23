@@ -19,7 +19,9 @@ namespace Gentegre.Api.Servisler;
 /// bakiyesi hesabın "banka bakiyesi" olur. Yeni hareketlere öneri (fn_banka_oneri) üretilir; hesapta
 /// otomatik işleme açıksa %95+ öneriler kendiliğinden işlenir.</para>
 /// <para><b>Benzetim:</b> entegrasyon TEST ortamında ve anahtarı boşsa bankaya gidilmez, örnek hareket
-/// üretilir (kaynak 3) - MERNİS / Medula deseni. Ekranda "benzetim" yazar; gerçek banka verisi değildir.</para>
+/// üretilir (kaynak 3) - MERNİS / Medula deseni. Ekranda "benzetim" yazar; gerçek banka verisi değildir.
+/// <b>Örnek sunucu:</b> test adresi API'nin kendi Garanti taklidi (GarantiOrnekUclari, yalnız geliştirme /
+/// demo) ise gerçek istemci yolu (jeton, sayfalama, yanıt çözümü) uçtan uca çalışır; yine kaynak 3.</para>
 /// <para><b>İşle:</b> kararla (öneri ya da kullanıcı seçimi) kasa işlemi yazılır - kasa akışının KENDİSİ
 /// (KasaDeposu.KaydetAsync, kesin): tahsilat 22, ödeme 32, virman 43, POS aktarımı 44, masraf 32 + kalem.
 /// Virmanın karşı bacağı (kendi öteki hesabındaki ters hareket) aynı kasa işlemine bağlanır - iki kez
@@ -65,8 +67,12 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
             ?? bag.IlkTarih ?? Saat.Simdi.Date.AddDays(-7)).Date;
         if ((bitis - baslangic).TotalDays > 92) baslangic = bitis.Date.AddDays(-92);   // banka sınırı: 3 ay
 
+        // Gerçek banka verisi olmayan iki yol: anahtarsız test hesabı (yerinde benzetim) ve yerel örnek sunucu
+        //   (GarantiOrnekUclari - gerçek istemci yolu, bankanın yanıt biçimi). İkisi de kaynak 3.
         var benzetim = bag.Test && (bag.ClientId == "" || bag.Secret == "");
-        List<Hareket> hareketler;
+        var ornek = !benzetim && bag.Kod == "GARANTI" && OrnekSunucu((bag.Test && bag.TestUrl != "" ? bag.TestUrl : bag.Url).TrimEnd('/'));
+        var sahte = benzetim || ornek;
+        List<BankaHareketSatiri> hareketler;
         try
         {
             hareketler = benzetim ? Benzetim(bag, baslangic, bitis, await BenzetimOrnekAsync(b, bag.HesapId, iptal))
@@ -91,7 +97,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
                     values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15::jsonb)
                     on conflict (hesap_id, banka_islem_no) do nothing
                     returning id
-                    """, tx, [hesapId, bag.SubeId, (short)(benzetim ? 3 : 1), x.IslemNo, x.Tarih, x.Valor, x.Tutar,
+                    """, tx, [hesapId, bag.SubeId, (short)(sahte ? 3 : 1), x.IslemNo, x.Tarih, x.Valor, x.Tutar,
                               x.Doviz == "" ? bag.Doviz : x.Doviz, x.Bakiye, Kisa(x.Aciklama, 500), Kisa(x.KarsiAd, 200),
                               Kisa(x.KarsiIban, 34), Kisa(x.KarsiVkn, 11), Kisa(x.Fatura, 200), Kisa(x.Sinif, 60), x.Ham], iptal);
                 if (id is { } y) { yeni++; yeniIdler.Add(y); }
@@ -103,7 +109,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
                 update public.hesap set banka_son_cekim = now(), banka_son_sonuc = @p1,
                        banka_bakiye = coalesce(@p2, banka_bakiye), banka_bakiye_zaman = case when @p2 is null then banka_bakiye_zaman else now() end
                  where id = @p0
-                """, tx, [hesapId, Kisa($"{(benzetim ? "Benzetim · " : "")}{hareketler.Count} hareket, {yeni} yeni", 300), son?.Bakiye], iptal);
+                """, tx, [hesapId, Kisa($"{(benzetim ? "Benzetim · " : ornek ? "Örnek sunucu · " : "")}{hareketler.Count} hareket, {yeni} yeni", 300), son?.Bakiye], iptal);
             await tx.CommitAsync(iptal);
         }
 
@@ -118,23 +124,31 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
                     try { await OneriyiIsleAsync(id, kullanici, bag.SubeId, iptal); islenen++; }
                     catch (Exception h) { gunluk.LogWarning(h, "Otomatik işleme atlandı (hareket {Id}).", id); }
             }
-        return new CekimSonucu(hesapId, yeni, hareketler.Count, islenen, benzetim,
+        return new CekimSonucu(hesapId, yeni, hareketler.Count, islenen, sahte,
             $"{bag.HesapAd}: {hareketler.Count} hareket, {yeni} yeni" + (islenen > 0 ? $", {islenen} otomatik işlendi" : "")
-            + (benzetim ? " (BENZETİM - gerçek banka verisi değil)" : ""));
+            + (benzetim ? " (BENZETİM - gerçek banka verisi değil)" : ornek ? " (ÖRNEK SUNUCU - gerçek banka verisi değil)" : ""));
     }
 
-    private sealed record Hareket(string IslemNo, DateTime Tarih, DateTime? Valor, decimal Tutar, string Doviz,
-        decimal? Bakiye, string Aciklama, string KarsiAd, string KarsiIban, string KarsiVkn, string Fatura, string Sinif,
-        string Ham);
+    /// <summary>Çekilecek adres: test ortamında test adresi. Yerel örnek sunucu (GarantiOrnekUclari) dışında HTTPS şart.</summary>
+    private static string Kok(Baglanti bag)
+    {
+        var kok = (bag.Test && bag.TestUrl != "" ? bag.TestUrl : bag.Url).TrimEnd('/');
+        if (!kok.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && !(bag.Test && OrnekSunucu(kok)))
+            throw GentegreHatasi.IsKurali("Garanti adresi HTTPS olmalı (yalnız yerel örnek sunucu http olabilir).");
+        return kok;
+    }
+
+    /// <summary>Adres API'nin kendi örnek sunucusu mu (http://localhost…/api/banka-ornek/garanti) - gerçek banka verisi değil.</summary>
+    private static bool OrnekSunucu(string kok)
+        => Uri.TryCreate(kok, UriKind.Absolute, out var u) && u.IsLoopback
+           && u.AbsolutePath.TrimEnd('/').EndsWith(Uclar.GarantiOrnekUclari.YolKoku, StringComparison.OrdinalIgnoreCase);
 
     // ------------------------------------------------------------- Garanti --
-    private async Task<List<Hareket>> GarantiAsync(Baglanti bag, DateTime bas, DateTime bit, CancellationToken iptal)
+    private async Task<List<BankaHareketSatiri>> GarantiAsync(Baglanti bag, DateTime bas, DateTime bit, CancellationToken iptal)
     {
         if (bag.OnayNo == "") throw GentegreHatasi.IsKurali($"{bag.HesapAd}: onay no (consentId) girilmemiş.");
         if (bag.ClientId == "" || bag.Secret == "") throw GentegreHatasi.IsKurali("Garanti entegrasyonunda Client ID / Secret boş.");
-        var kok = (bag.Test && bag.TestUrl != "" ? bag.TestUrl : bag.Url).TrimEnd('/');
-        if (!kok.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            throw GentegreHatasi.IsKurali("Garanti adresi HTTPS olmalı.");
+        var kok = Kok(bag);
         var istemci = http.CreateClient("banka");
         istemci.Timeout = TimeSpan.FromSeconds(60);
 
@@ -156,7 +170,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
             return j.RootElement.GetProperty("access_token").GetString() ?? throw new InvalidOperationException("jeton boş");
         }
 
-        var sonuc = new List<Hareket>();
+        var sonuc = new List<BankaHareketSatiri>();
         const int Boyut = 100;
         for (var sayfa = 1; sayfa <= 100; sayfa++)
         {
@@ -179,38 +193,11 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
             if (!yanit.IsSuccessStatusCode)
                 throw new InvalidOperationException($"hareket servisi {(int)yanit.StatusCode}: {Kisa(govde, 200)}");
             using var j = JsonDocument.Parse(govde);
-            if (!j.RootElement.TryGetProperty("transactions", out var liste) || liste.ValueKind != JsonValueKind.Array) break;
-            var adet = 0;
-            foreach (var x in liste.EnumerateArray()) { sonuc.Add(GarantiSatiri(x)); adet++; }
-            if (adet < Boyut) break;
+            var sayfaSatirlari = GarantiCevirici.Liste(j.RootElement);   // yanıt biçimi: GarantiCevirici
+            sonuc.AddRange(sayfaSatirlari);
+            if (sayfaSatirlari.Count < Boyut) break;
         }
         return sonuc;
-    }
-
-    private static Hareket GarantiSatiri(JsonElement x)
-    {
-        string S(string ad) => x.TryGetProperty(ad, out var v) && v.ValueKind != JsonValueKind.Null ? v.ToString() : "";
-        decimal D(string ad) => decimal.TryParse(S(ad), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0;
-        DateTime? T(string ad) => DateTime.TryParse(S(ad), CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
-        // Zenginleştirme: CORRACNT (karşı IBAN), MUS (karşı ad), DTS (fatura metni).
-        string karsiIban = "", karsiAd = "", fatura = "";
-        if (x.TryGetProperty("enrichmentInformation", out var zen))
-            foreach (var m in zen.ValueKind == JsonValueKind.Array ? zen.EnumerateArray() : Enumerable.Repeat(zen, 1))
-            {
-                string Z(string ad) => m.TryGetProperty(ad, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
-                karsiIban = karsiIban == "" ? Z("corrIBAN") : karsiIban;
-                karsiAd = karsiAd == "" ? Z("corrNameSurnameText") : karsiAd;
-                fatura = fatura == "" ? Z("relatedInvText1") : fatura;
-            }
-        var tutar = Math.Abs(D("amount"));
-        var borc = S("txtnCreditDebitIndicator").StartsWith("D", StringComparison.OrdinalIgnoreCase)
-                   || S("txtnCreditDebitIndicator") == "B" || S("txtnCreditDebitIndicator") == "-";
-        return new Hareket(
-            S("transactionReferenceId") is { Length: > 0 } r ? r : S("transactionInstanceId") + "|" + S("amount"),
-            T("activityDate") ?? DateTime.Now, T("valueDate"), borc ? -tutar : tutar, S("currencyCode"),
-            x.TryGetProperty("balanceAfterTransaction", out _) ? D("balanceAfterTransaction") : null,
-            S("explanation"), karsiAd, karsiIban, S("corrVKN") is { Length: > 0 } v ? v : S("corrTCKN"), fatura,
-            S("clasificationCode"), x.GetRawText());
     }
 
     // ------------------------------------------------------------ benzetim --
@@ -237,9 +224,9 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
                 o.GetString(4), o.GetString(5), o.GetString(6)), iptal)
            ?? new BenzetimOrnegi("ORNEK MUSTERI AS", "", "", "ORNEK TEDARIKCI LTD", "", "", "");
 
-    private static List<Hareket> Benzetim(Baglanti bag, DateTime bas, DateTime bit, BenzetimOrnegi o)
+    private static List<BankaHareketSatiri> Benzetim(Baglanti bag, DateTime bas, DateTime bit, BenzetimOrnegi o)
     {
-        var liste = new List<Hareket>();
+        var liste = new List<BankaHareketSatiri>();
         var gun = bit.Date;
         var ornek = new (int saat, decimal tutar, string aciklama, string ad, string iban, string vkn)[]
         {
@@ -257,7 +244,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
             foreach (var (saat, tutar, aciklama, ad, iban, vkn) in ornek)
             {
                 bakiye += tutar;
-                liste.Add(new Hareket($"BNZ-{bag.HesapId}-{d:yyyyMMdd}-{saat}", d.AddHours(saat), d, tutar, bag.Doviz, bakiye,
+                liste.Add(new BankaHareketSatiri($"BNZ-{bag.HesapId}-{d:yyyyMMdd}-{saat}", d.AddHours(saat), d, tutar, bag.Doviz, bakiye,
                     aciklama, ad, iban, vkn, "", "BENZETIM", "{\"benzetim\": true}"));
             }
         }

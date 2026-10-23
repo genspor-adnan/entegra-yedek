@@ -101,6 +101,10 @@ public static partial class KartKatalogu
             //   hesabin ne icin oldugunu soyleyen tek isarettir. Yoksa SMTP
             //   hesabi eklemek icin SQL yazmak gerekiyordu.
             ["EPOSTA"] = "E-Posta (SMTP) Sağlayıcı",
+            // BANKA HAREKETLERI (1157): banka basina BIR satir - butun hesaplari (TL / USD / POS)
+            //   bunu kullanir. Kullanici adi = Client ID, sifre = Client Secret (bankanin
+            //   gelistirici portalindan). Listede olmayan kod kartta EBELGE'ye dusuyordu.
+            ["GARANTI"] = "Garanti BBVA API (banka hareketleri)",
         };
 
     /// <summary>

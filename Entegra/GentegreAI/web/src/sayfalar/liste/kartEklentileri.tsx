@@ -117,7 +117,9 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
         {icerik}
         <div className="not" style={{ margin: '0 12px 12px' }}>
           {c('Onay no, müşterinin bankada "Hesap Hareketleri API" hizmetine verdiği onaydan gelir (internet şubesi / şube). '
-             + 'Onay süresi dolunca ekran uyarır, çekme durur. API anahtarı Entegrasyonlar\'daki banka satırındadır.')}
+             + 'Onay süresi dolunca ekran uyarır, çekme durur. API anahtarı Entegrasyonlar\'daki banka satırındadır. '
+             + 'Geliştirme / demo kurulumunda entegrasyonun test adresi API\'nin örnek Garanti sunucusu olabilir '
+             + '(…/api/banka-ornek/garanti): bankaya gitmeden aynı biçimde örnek hareket döner, kaynak "benzetim" yazar.')}
         </div>
       </>
     ),
