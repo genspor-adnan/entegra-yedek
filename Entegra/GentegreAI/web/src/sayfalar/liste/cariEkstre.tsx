@@ -50,16 +50,15 @@ export function useCariEkstreEkrani(etkin: boolean, sorgu: URLSearchParams,
     onTarihAraligi: etkin ? onTarihAraligi : undefined,
     kayitAc,
     basSag: etkin ? <CariEkstreCiktisi tarafId={tarafId} ad={ad} bas={aralik.bas} bit={aralik.bit} /> : undefined,
+    // DETAY (kullanıcı 23.10.2026: "analiz sağına Detay butonu ekle" - belge kalemleri): ek görünüm.
+    ekGorunumler: etkin ? [{ ad: 'Detay', ik: '🧾',
+      icerik: <CariEkstreDetay tarafId={tarafId} bas={aralik.bas} bit={aralik.bit} onAc={kayitAc} /> }] : undefined,
   };
 }
 
-/** A4 ekstre + çıktı menüsü. Cari seçilmeden (tüm carilerin hareketi) menü kapalı. */
-function CariEkstreCiktisi({ tarafId, ad, bas, bit }: { tarafId: number; ad: string; bas: string; bit: string }) {
-  const { kullanici } = useOturum();
+/** Ekstre kümesini (cari + tarih aralığı) tek istekte çeker - A4 ve Detay görünümü ortak. */
+function useEkstreKumesi(tarafId: number, bas: string, bit: string) {
   const [veri, setVeri] = useState<ListeYaniti | null>(null);
-  const [antet, setAntet] = useState<Record<string, unknown> | null>(null);
-
-  useEffect(() => { api.dokumAntet().then(a => setAntet(a.kurum)).catch(() => setAntet(null)) }, []);
   useEffect(() => {
     setVeri(null);
     if (!tarafId) return;
@@ -67,10 +66,95 @@ function CariEkstreCiktisi({ tarafId, ad, bas, bit }: { tarafId: number; ad: str
       { alan: 'tarafId', op: 'esit', deger: tarafId } as Kosul,
       tarihKosulu('islemTarihi', bas, bit),
     ]);
-    // Döküm TÜM aralık: grid sayfalı, kâğıt sayfasız (bir carinin dönem hareketi birkaç yüz satır).
+    // TÜM aralık: grid sayfalı, kâğıt / detay sayfasız (bir carinin dönem hareketi birkaç yüz satır).
     api.liste('cari-ekstre', { sayfa: 1, boyut: 5000, filtre, toplam: ['borc', 'alacak'] })
        .then(setVeri).catch(h => mesaj(hataMetni(h)));
   }, [tarafId, bas, bit]);
+  return veri;
+}
+
+/** Belgenin KENDİ hareketi mi (tahsilat değil) - kalemleri o satırın altına gelir. */
+const belgeHareketi = (s: ListeSatiri) => Number(s.belgeId ?? 0) > 0 && !Number(s.kasaIslemId ?? 0);
+
+/**
+ * DETAY GÖRÜNÜMÜ: ekstre satırları, her belge hareketinin altında o belgenin kalemleri (kod, ad,
+ * miktar, KDV'li birim fiyat, KDV, tutar). Kalemler mevcut belge ucundan (belge başına bir istek,
+ * en çok 200 belge). Satıra çift tık: kaydı açar.
+ */
+function CariEkstreDetay({ tarafId, bas, bit, onAc }: {
+  tarafId: number; bas: string; bit: string; onAc(s: ListeSatiri): void;
+}) {
+  const veri = useEkstreKumesi(tarafId, bas, bit);
+  const [kalemler, setKalemler] = useState<Record<number, Record<string, unknown>[]>>({});
+  useEffect(() => {
+    setKalemler({});
+    if (!veri) return;
+    const idler = [...new Set(veri.satirlar.filter(belgeHareketi).map(s => Number(s.belgeId)))].slice(0, 200);
+    let iptal = false;
+    void (async () => {
+      for (let i = 0; i < idler.length; i += 8) {
+        const parca = await Promise.all(idler.slice(i, i + 8).map(id =>
+          api.belgeOku(id).then(y => [id, y.satirlar ?? []] as const).catch(() => [id, []] as const)));
+        if (iptal) return;
+        setKalemler(k => ({ ...k, ...Object.fromEntries(parca) }));
+      }
+    })();
+    return () => { iptal = true };
+  }, [veri]);
+
+  if (!tarafId) return <div className="not" style={{ padding: 20 }}>Detay için bir cari seçin (listeden "📄 Ekstre").</div>;
+  if (!veri) return <div className="not" style={{ padding: 20 }}>Yükleniyor…</div>;
+  const p = (n: number) => para.format(n);
+  return (
+    <div className="ce-detay">
+      <style>{DETAY_STILI}</style>
+      <table>
+        <thead><tr><th>Tarih</th><th>Belge No</th><th>İşlem / Kalem</th><th>Açıklama</th>
+          <th className="s">Miktar</th><th className="s">Birim Fiyat</th><th className="s">Borç</th>
+          <th className="s">Alacak</th><th className="s">Bakiye</th></tr></thead>
+        <tbody>
+          {veri.satirlar.length === 0 && <tr><td colSpan={9} className="bos">Bu dönemde hareket yok.</td></tr>}
+          {veri.satirlar.map((x, i) => {
+            const k = belgeHareketi(x) ? kalemler[Number(x.belgeId)] : undefined;
+            return [
+              <tr key={`h${String(x.id ?? i)}`} className="hareket" onDoubleClick={() => onAc(x)}
+                  title="Çift tık: kaydı aç">
+                <td>{tarihKisa(String(x.islemTarihi ?? ''))}</td><td>{String(x.belgeNo ?? '')}</td>
+                <td><b>{String(x.turAdi ?? '')}</b></td><td>{String(x.aciklama ?? '')}</td>
+                <td /><td />
+                <td className="s">{sayi(x.borc) ? p(sayi(x.borc)) : ''}</td>
+                <td className="s">{sayi(x.alacak) ? p(sayi(x.alacak)) : ''}</td>
+                <td className="s">{p(sayi(x.bakiye))}</td>
+              </tr>,
+              ...(belgeHareketi(x) && !k
+                ? [<tr key={`y${i}`} className="kalem"><td /><td /><td colSpan={7} className="soluk">kalemler yükleniyor…</td></tr>]
+                : []),
+              ...(k ?? []).map((r, j) => (
+                <tr key={`k${i}-${j}`} className="kalem">
+                  <td /><td className="soluk">{String(r.stokKodu ?? '')}</td>
+                  <td>↳ {String(r.stokAdi || r.hizmetAdi || r.masrafAdi || r.aciklama || '')}</td>
+                  <td className="soluk">{r.kdv != null ? `KDV %${sayi(r.kdv)}` : ''}</td>
+                  <td className="s">{sayi(r.miktar).toLocaleString('tr-TR')}</td>
+                  <td className="s">{p(sayi(r.birimFiyatKdvli ?? r.birimFiyat))}</td>
+                  {/* KDV DAHİL: üstteki borç / alacak KDV'li - kalem toplamı ona eşit görünsün. */}
+                  <td className="s soluk">{p(Math.round(sayi(r.tutar) * (1 + sayi(r.kdv) / 100) * 100) / 100)}</td><td /><td />
+                </tr>
+              )),
+            ];
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** A4 ekstre + çıktı menüsü. Cari seçilmeden (tüm carilerin hareketi) menü kapalı. */
+function CariEkstreCiktisi({ tarafId, ad, bas, bit }: { tarafId: number; ad: string; bas: string; bit: string }) {
+  const { kullanici } = useOturum();
+  const veri = useEkstreKumesi(tarafId, bas, bit);
+  const [antet, setAntet] = useState<Record<string, unknown> | null>(null);
+
+  useEffect(() => { api.dokumAntet().then(a => setAntet(a.kurum)).catch(() => setAntet(null)) }, []);
 
   const etiket = 'Cari Ekstre';
   return (
@@ -84,6 +168,20 @@ function CariEkstreCiktisi({ tarafId, ad, bas, bit }: { tarafId: number; ad: str
 }
 
 const sayi = (v: unknown) => Number(v ?? 0) || 0;
+/** Detay görünümü: hareket satırı çizgili, kalemler girintili ve soluk. */
+const DETAY_STILI = `
+.ce-detay { background:var(--kart, #fff); border:1px solid var(--cizgi, #d9dee5); border-radius:6px; overflow:auto; }
+.ce-detay table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.ce-detay th { position:sticky; top:0; background:var(--baslik-zemin, #f1f4f8); text-align:left; padding:6px 8px; font-weight:600; border-bottom:1px solid var(--cizgi, #d9dee5); }
+.ce-detay td { padding:4px 8px; border-bottom:1px solid var(--cizgi-acik, #eef1f5); }
+.ce-detay .s { text-align:right; white-space:nowrap; }
+.ce-detay tr.hareket td { border-top:1px solid var(--cizgi, #d9dee5); }
+.ce-detay tr.hareket:hover { background:var(--secili-zemin, #eef4fb); cursor:pointer; }
+.ce-detay tr.kalem td { font-size:12px; }
+.ce-detay tr.kalem td:nth-child(3) { padding-left:22px; }
+.ce-detay .soluk { color:var(--soluk, #6b7785); }
+.ce-detay .bos { text-align:center; padding:18px; color:var(--soluk, #6b7785); }
+`;
 /** İşlem ve Açıklama metin kolonu - icmal tablosu 3. kolondan sonrasını sağa yaslar. */
 const EKSTRE_A4_STILI = `
 .ce-a4t th:nth-child(3), .ce-a4t td:nth-child(3), .ce-a4t th:nth-child(4), .ce-a4t td:nth-child(4) { text-align:left; }

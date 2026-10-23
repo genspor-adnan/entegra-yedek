@@ -1341,7 +1341,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // RANDEVU: Liste / Takvim secimi de kaldigi yerden (randevuTercihi).
       gorunumBaslangic={tanim.kaynak === 'randevu' ? randevuTercihiOku(kullanici?.id).liste : undefined}
       onGorunumDegisti={tanim.kaynak === 'randevu' ? g => randevuTercihiYaz(kullanici?.id, { liste: g }) : undefined}
-      ekGorunumler={ekran?.ekGorunumler}
+      ekGorunumler={ekran?.ekGorunumler ?? cariEkstre.ekGorunumler}
       grupAnalizGizli={!!ekran?.grupAnalizGizli}
       ekGorunum={tanim.kaynak === 'dis-lab-isemri' ? { ad: 'Kanban', ik: '🗂', icerik: <DisLabPano yenile={yenile} /> }
       : tanim.kaynak === 'randevu' ? {
