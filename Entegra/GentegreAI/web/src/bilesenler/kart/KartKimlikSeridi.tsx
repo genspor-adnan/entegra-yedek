@@ -323,6 +323,8 @@ export function KartKimlikSeridi({
                             + (kaynak === 'yatis-order' ? ' kaid-order' : '')
                             // GÖZ MUAYENESİ (970 mockup): hasta geniş.
                             + (kaynak === 'goz-muayene' ? ' kaid-gozm' : '')
+                            // MÜŞTERİ / TEDARİKÇİ (kullanıcı 23.10.2026: "müşteri kartında kod %50 küçült").
+                            + (kaynak === 'cari' ? ' kaid-cari' : '')
                             // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
                             //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
                             //   serit 4x2 duzenli bir izgara. Otomatik akista

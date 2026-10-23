@@ -7787,6 +7787,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* Rapor şablonu kimlik şeridi (kullanıcı): kod %40 dar (0,6), şablon adı 2 kat, sürüm %70 dar (0,3); sıra kod · ad · modalite · bölge · sürüm · durum. */
 .alan-izgara.kaid-radsablon { display: grid; grid-template-columns: minmax(0, .6fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .3fr) minmax(0, 1fr); gap: 8px 12px }
 @media (max-width: 900px) { .alan-izgara.kaid-radsablon { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+/* MÜŞTERİ / TEDARİKÇİ KARTI (kullanıcı 23.10.2026): Kod öteki alanların yarısı - Kod · Ünvan · Temsilci · Durum. */
+.alan-izgara.kaid-cari { display: grid; grid-template-columns: minmax(0, .5fr) repeat(3, minmax(0, 1fr)); gap: 8px 12px }
+@media (max-width: 900px) { .alan-izgara.kaid-cari { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
 
 /* =====================================================================
    RADYOLOJİ CİHAZ LİSTESİ + KARTI (967). rc- öneki.
