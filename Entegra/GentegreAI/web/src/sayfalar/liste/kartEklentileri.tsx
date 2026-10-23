@@ -13,6 +13,7 @@ import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDonanimSekmesi, AcilYatakD
 import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSekmesi, BelgeTuruHatirlatmaSekmesi,
          BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
+import { CariBelgeler, CariCrm, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi } from '../konsultasyon/KonsultasyonKarti';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
@@ -68,6 +69,8 @@ export interface KartEklentisi {
   seritSarmalayici?(b: KartEklentiBaglami): GenFormProps['seritSarmalayici'];
   ekAraclar?(b: KartEklentiBaglami): GenFormProps['ekAraclar'];
   baslikEk?(b: KartEklentiBaglami): GenFormProps['baslikEk'];
+  /** Gövdenin sağında hep görünen panel (yalnız kayıtlı kartta). */
+  yanPanel?(b: KartEklentiBaglami): GenFormProps['yanPanel'];
   /** Kayıtlı kartta sekme rozeti sayısı - açılışta ve her kayıt / tazelemede okunur. */
   rozetYukle?(id: number): Promise<number>;
 }
@@ -75,6 +78,30 @@ export interface KartEklentisi {
 const kayitli = (id: KartEklentiBaglami['kartId']): id is number => typeof id === 'number';
 
 export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
+  // ------------------------------------------- müşteri kartı Ver3 (1150) ----
+  // Mockup musteri_karti_ver3.html: kimlik şeridinin altında özet şeridi, sağda dikkat /
+  //   yaşlandırma / kişiler / son olaylar, Finansal · Belgeler · CRM sekmeleri, araç
+  //   çubuğunda bu cariyle dolu Fatura / Sipariş / Teklif / Tahsilat. Ekstre sekme DEĞİL
+  //   (kullanıcı 23.10.2026): üstteki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
+  //   Tedarikçi kartı da aynı kaynak (`cari`) - özet onda da geçerli.
+  cari: {
+    seritSarmalayici: b => kayitli(b.kartId)
+      ? (serit, d) => <>{serit}<CariOzetSeridi id={b.kartId as number} tazele={b.tazeleKayit}
+                                                ad={String(d.unvan ?? '')} git={b.git} /></>
+      : undefined,
+    yanPanel: b => kayitli(b.kartId)
+      ? <CariYanPanel id={b.kartId} tazele={b.tazeleKayit} git={b.git} gitKart={b.git} /> : undefined,
+    ekSekmeler: b => kayitli(b.kartId) ? [
+      { anahtar: 'ozel:cari-finans', baslik: 'Finansal', ciz: () => <CariFinansal id={b.kartId as number} tazele={b.tazeleKayit} /> },
+      { anahtar: 'ozel:cari-belge', baslik: 'Belgeler', ciz: () => <CariBelgeler id={b.kartId as number} /> },
+      { anahtar: 'ozel:cari-crm', baslik: 'CRM', ciz: () => <CariCrm id={b.kartId as number} gitKart={b.git} /> },
+    ] : undefined,
+    ekAraclar: b => kayitli(b.kartId)
+      ? d => <CariHizliIslemler id={b.kartId as number} ad={String(d.unvan ?? '')} yetki={b.yetki}
+                                tazele={b.kartiTazele} />
+      : undefined,
+  },
+
   // ---------------------------------------------- İK belge türü (1135-1138) ----
   // Mockup personel_belge_turu.html (2): Genel üç kutu + özet, Kime zorunlu önizlemesi,
   //   Personel durumu (rozet = eksik + süresi dolan) · Hatırlatma · Hareketler.

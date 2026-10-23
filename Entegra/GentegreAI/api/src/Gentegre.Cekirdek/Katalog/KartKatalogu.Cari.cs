@@ -129,7 +129,18 @@ public static partial class KartKatalogu
                 new("postaKodu",  "posta_kodu",  "metin", EnFazlaUzunluk: 10),
                 new("varsayilan", "varsayilan",  "mantik"),
                 new("aktif",      "aktif",       "mantik")
-            }, Sirala: "varsayilan desc, id", LogTabloId: 901)   // yeni tablo - eski karsiligi yok
+            }, Sirala: "varsayilan desc, id", LogTabloId: 901),  // yeni tablo - eski karsiligi yok
+            // SATIS & RISK (musteri_karti_ver3.html): taraf_musteri 1:1 uzanti. Risk
+            //   limiti Musteri Listesi'nin "Risk Limiti %" kolonunu ve "Limit aşan"
+            //   cipini, vade gunu vadesi gecen hesabini (v_cari_ozet, 1150) besler:
+            //   vadesi olmayan hareketin vadesi = islem tarihi + vade gunu.
+            new DetayTanimi("satisKosul", "public.taraf_musteri", "id", new KartAlani[]
+            {
+                new("id",           "id",            "sayi",    Yazilabilir: false),
+                new("riskLimiti",   "risk_limiti",   "para",    Baslik: "Risk Limiti (0 = limitsiz)"),
+                new("vadeGun",      "vade_gun",      "sayi",    Baslik: "Vade (gün)"),
+                new("iskontoOrani", "iskonto_orani", "ondalik", Baslik: "İskonto Oranı %")
+            }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true)
         },
         SilmeEngelleri: new[]
         {

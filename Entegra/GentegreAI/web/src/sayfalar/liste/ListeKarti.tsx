@@ -720,7 +720,7 @@ export function ListeKarti({
               );
             }
           : undefined}
-        yanPanel={tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
+        yanPanel={eklenti?.yanPanel ? eklenti.yanPanel(eb) : tanim.kaynak === 'goz-muayene' && typeof kartId === 'number'
           ? <GozSagOzet id={kartId} yenile={kartTazele * 1000 + kayitSayaci} />
           : sekmesiz
           ? <MuayeneYanPanel muayeneId={Number(kartId)} bilgi={hastaBilgisi}

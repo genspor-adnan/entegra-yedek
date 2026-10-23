@@ -7591,6 +7591,32 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   font-size: 10.5px; font-weight: 700; text-align: center }
 .gh-uyari { color: #b3261e; font-size: 11px; white-space: nowrap }
 .gh-sonuk { color: var(--soluk) }
+/* MÜŞTERİ LİSTESİ VER3 (1150, mockup musteri_listesi_ver3.html) */
+.gh-bakiye { align-items: flex-end; white-space: nowrap }
+.gh-bakiye .borc, .ml-borc { color: var(--hata) }
+.gh-bakiye .alacak, .ml-alacak { color: var(--ok) }
+.gh-bakiye > span small { font-size: 9.5px; color: inherit; opacity: .8 }
+.gh-risk .yol { width: 64px; height: 6px }
+.gh-risk .yol > span.sari { background: #e0a33a }
+.gh-risk .yol > span.kir { background: #d0473d }
+.gh-gun { font-size: 11px; white-space: nowrap }
+.gh-gun.sari { color: var(--uyari) }
+.gh-gun.kir { color: var(--hata); font-weight: 700 }
+.gh-egri { display: block }
+.ml-kpi { grid-template-columns: repeat(6, minmax(0, 1fr)) }
+.ml-kpi b { font-size: 16px }
+.ml-hizli { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2) }
+.ml-hizli .d { justify-content: center; font-size: 11px; padding: 4px }
+.ml-mali { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
+.ml-mali > div { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 4px 8px; background: var(--yuz) }
+.ml-mali > div span { display: block; font-size: 10px; color: var(--soluk) }
+.ml-mali > div b { font-size: 12.5px }
+.ml-hareket { width: 100%; border-collapse: collapse; font-size: 11px }
+.ml-hareket td { padding: 3px 4px; border-bottom: 1px solid var(--cizgi2); white-space: nowrap }
+.ml-hareket td:nth-child(2) { white-space: normal; max-width: 150px; overflow: hidden; text-overflow: ellipsis }
+.ml-hareket tr { cursor: pointer }
+.ml-hareket tr:hover td { background: var(--yuz2) }
+@media (max-width: 900px) { .ml-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 
 .pl-kpi { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px }
 .pl-k { border: 1px solid var(--cizgi2); border-radius: 6px; padding: 7px 10px; background: var(--yuz); text-align: left;
@@ -7861,6 +7887,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kawin.genis.kart-dikey.tam { height: auto }
 .kadikey { display: flex; flex: 1; min-height: 0; border-top: 1px solid var(--cizgi2) }
 .kadikey > .kagov { flex: 1; min-width: 0 }
+/* Yatay sekmeli kartta sağ sütun (müşteri kartı Ver3): gövde + panel yan yana. */
+.kayatay { display: flex; flex: 1; min-height: 0 }
+.kayatay > .kagov { flex: 1; min-width: 0 }
+.kayan-ic.kayan-genis { width: 300px }
 .kanav { width: 215px; flex: none; overflow: auto; background: #f6f8fb; border-right: 1px solid var(--cizgi2); padding: 6px 0 10px }
 .kanav-g h6 { margin: 10px 12px 4px; font-size: 10px; letter-spacing: .4px; color: var(--soluk); text-transform: uppercase; display: flex; justify-content: space-between }
 .kanav-g h6 i { font-style: normal; color: #b06d0a } .kanav-g h6 i.tamam { color: #2e7d46 }
@@ -8535,3 +8565,42 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mlm-ses { position: relative }
 .mlm-ses > .ses-dugme { position: absolute; top: 3px; right: 3px }
 .mlm-ses > .mlm { padding-right: 32px }
+
+/* =====================================================================
+   MÜŞTERİ KARTI VER3 (mockup Ekranlar/musteri_karti_ver3.html) - mk- = müşteri kartı.
+   ===================================================================== */
+.mk-ozet { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr 1fr 1fr 1.2fr 1fr; border-top: 1px solid var(--cizgi2);
+  border-bottom: 1px solid var(--cizgi); background: var(--yuz2) }
+.mk-ozet > div, .mk-ozet > button { padding: 7px 12px; border: 0; border-right: 1px solid var(--cizgi2); background: none;
+  text-align: left; font: inherit; color: inherit; min-width: 0; display: flex; flex-direction: column; gap: 1px }
+.mk-ozet > :last-child { border-right: 0 }
+.mk-ozet > button { cursor: pointer }
+.mk-ozet > button:hover { background: var(--yuz) }
+.mk-ozet span { font-size: 10.5px; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mk-ozet b { font-size: 15px; white-space: nowrap }
+.mk-ozet small { font-size: 10px; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mk-bar { display: block; height: 6px; border-radius: 3px; background: var(--cizgi2); overflow: hidden; margin: 4px 0 1px }
+.mk-bar > i { display: block; height: 100%; background: #5cb87a }
+.mk-bar > i.mk-bar-sari { background: #e0a33a }
+.mk-bar > i.mk-bar-kir { background: #d0473d }
+.mk-uyari { border: 1px solid var(--uyarikenar); background: var(--uyarizem); border-radius: 4px; padding: 6px 8px;
+  font-size: 11.5px; margin-bottom: 5px }
+.mk-uyari-kirmizi { border-color: var(--hatakenar); background: var(--hatazem); color: var(--hata) }
+.mk-not { border: 1px solid var(--uyarikenar); background: var(--uyarizem); border-radius: 4px; padding: 6px 8px;
+  font-size: 11.5px; line-height: 1.5; white-space: pre-wrap }
+.mk-yasl { display: flex; height: 14px; border-radius: 3px; overflow: hidden; border: 1px solid var(--cizgi2) }
+.mk-yasl-buyuk { height: 18px }
+.mk-yasl > i { display: block; height: 100% }
+.mk-yl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 10px; color: var(--soluk); margin-top: 3px }
+.mk-yl b { display: block; color: var(--yazi); font-size: 11px }
+.mk-kisi { display: flex; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px dashed var(--cizgi2); cursor: default }
+.mk-kisi > span:last-child { display: flex; flex-direction: column; min-width: 0; font-size: 11.5px }
+.mk-kisi small { color: var(--soluk); font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.mk-zaman { border-left: 2px solid var(--cizgi); margin-left: 5px; padding-left: 10px }
+.mk-zaman > div { position: relative; padding: 3px 0 6px; font-size: 11.5px }
+.mk-zaman > div::before { content: ""; position: absolute; left: -15px; top: 7px; width: 8px; height: 8px; border-radius: 50%;
+  background: #9cc4ee }
+.mk-zaman > div.mk-z-ok::before { background: #5cb87a }
+.mk-zaman small { display: block; color: var(--soluk); font-size: 10.5px }
+.mk-finans { display: flex; flex-direction: column; gap: 4px }
+@media (max-width: 1100px) { .mk-ozet { grid-template-columns: repeat(4, minmax(0, 1fr)) } }

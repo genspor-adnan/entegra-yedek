@@ -7,6 +7,29 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 23.10.2026 — Müşteri Kartı Ver3
+
+Kullanıcı: *"kart mockup3 uygula"* (mockup `Ekranlar/musteri_karti_ver3.html`). Kart eklentisi `cari` (`kartEklentileri.tsx`, parçalar `sayfalar/cari/CariKartParcalari.tsx`), tek uç `GET /api/cari/{id}/kart-ozet`.
+
+- Kimlik şeridinin altında **özet şeridi**: bakiye (döviz alt satırda; tıklayınca Cari Ekstre), vadesi geçen, risk limiti doluluk çubuğu, açık sipariş (19/1, faturalanmamış), portföydeki çek (alınan, portföy / tahsil / teminat), bu yıl ciro (geçen yılın aynı dönemiyle), son satış.
+- **Sağ sütun**: sunucu kurallı dikkat uyarıları (limit aşımı, vadesi geçen + en eski gün, ciro %20+ düşüş, vadesi geçmiş portföy çeki), not, yaşlandırma (FIFO, toplamı `v_cari_ozet.vadesi_gecen`), satış eğrisi, ana kişiler, son 5 hareket. Yatay sekmeli kartta da sağ panel için `Modal.yanPanelYatay` (+ gövde ölçümü sarmalayıcıyı tanır).
+- **Sekmeler**: Satış & Risk (`taraf_musteri` 1:1 — risk limiti, vade günü, iskonto; tek kayıt formu), Finansal ("Mali Durum" yer tutucusunun yerine: para birimi özeti, yaşlandırma + vadesi geçen belgeler, çek portföyü), Belgeler (carinin bütün belgeleri, tür çipleri), CRM (görevler — `gorev` kaynağına `tarafId` — ve satış fırsatları). Ekstre sekme değil (aynı gün kararı): üstteki "📄 Ekstre".
+- Araç çubuğu: Satış Faturası / Sipariş / Teklif / Tahsilat bu cariyle dolu açılır.
+- Mockup'tan yapılmayan: avatar başlık (mevcut kimlik şeridi kaldı), Geçmiş sekmesi, İYS izin alanları, GİB doğrulama düğmesi.
+
+---
+
+## 23.10.2026 — Müşteri Listesi Ver3 (1150)
+
+Kullanıcı: *"ver3 müşteri listeyi koda dök"* (mockup `Ekranlar/musteri_listesi_ver3.html`).
+
+- `v_cari_ozet` (1150): cari başına bakiye (TL karşılığı, cari ekstresiyle aynı küme), döviz bakiyeleri, **vadesi geçen** (FIFO: vadesi geçmiş borç − toplam alacak; vade = hareketin plan tarihi, yoksa işlem tarihi + `taraf_musteri.vade_gun`), son satış / son tahsilat, 12 ay ciro (KDV dahil, cari hareketinden, iade düşer) ve aylık eğri. Şube ayrımı yok — cari ana veri; çok şubeli kurulumda Cari Ekstre (aktif şube) ile fark olabilir.
+- `cari` kaynağına kolonlar: bakiye, dövizBakiye, dövizli, vadesiGeçen, riskLimiti, riskYüzde (bakiye / `taraf_musteri.risk_limiti`, 0 = limitsiz), sonSatışGün, sonTahsilat, ciro12Ay, ciroEğri — varsayılan gizli, Müşteri Listesi `kolonSirasi` ile açar (Tedarikçi Listesi aynı kaynak). Hücre biçimleri `satirHucre`: `bakiye:` `risk:` `gun` `egri:`.
+- Akıllı çipler: Borçlu · Vadesi geçen · Limit aşan · Satış yok 90+ gün · Dövizli. Üstte gösterge şeridi (`GET /api/cari/musteri-gosterge`, kapsam süzgeçli, portala kapalı) — kutu ilgili çipi açar, sayılar aynı koşuldan. Sağda önizleme: mali durum, 12 ay eğri, son 5 cari hareket (Tam ekstre → Kasa › Cari Ekstre), iletişim; Fatura / Sipariş / Tahsilat müşteriyle dolu açılır.
+- FETA'da (Delphi REHBER'de karşılığı yok) vade günü, fatura vadesi ve risk limiti boş: orada vadesi geçen = bakiye, risk "limitsiz" — kartın "Satış & Risk" sekmesinden girilir (Müşteri Kartı Ver3).
+
+---
+
 ## 22.10.2026 — FETA: Delphi'den web'e kalıcı geçiş (1141-1149, Update_SQL_216)
 
 Kullanıcı: *"46.36.201.170/feta ya son erp yi kur.. mssql de FETA ve FETA_GENDEPO dan dataları da aktar.. müşteri artık delphi/mssql yerine bu adresten devam edecek.. DB adını da FETA ver"*. Kapsam: çekirdek ERP + görevler, dökümanlar + e-Belge, personel ve diğerleri (hepsi).

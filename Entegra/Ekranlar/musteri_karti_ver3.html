@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Müşteri Kartı — Ver3 (ERP)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.kir{border-color:#c0413d;color:#b3261e}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .btn.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+
+  /* KIMLIK BASLIGI */
+  .bas{display:flex;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line2)}
+  .avatar{width:52px;height:52px;border-radius:10px;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+  .avatar small{position:absolute;bottom:-6px;right:-6px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:9.5px;color:var(--muted);padding:0 4px}
+  .kim .ad{font-size:17px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .kim .ad .kalem{font-size:11px;color:var(--muted);font-weight:normal;cursor:pointer}
+  .kim .alt{color:var(--muted);font-size:11.5px;margin-top:3px}
+  .kim .alt b{color:var(--ink);font-weight:normal}
+  .kim .rzlar{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
+  .bas .islem{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gez{display:flex;gap:2px;margin-right:6px}
+  .gez span{border:1px solid var(--line);border-radius:3px;padding:3px 7px;color:var(--muted);font-size:11px;background:#fff}
+
+  /* HIZLI ISLEMLER */
+  .hizli{display:flex;gap:4px;padding:6px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+
+  /* OZET SERIDI: her sekmede gorunur */
+  .ozet{display:grid;grid-template-columns:1.2fr 1fr 1.4fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2);cursor:pointer}
+  .ozet > div:last-child{border-right:none}
+  .ozet > div:hover{background:#f4f8fd}
+  .ozet span{display:block;font-size:10.5px;color:var(--muted)}
+  .ozet b{font-size:15px}
+  .ozet small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+  .bar{height:7px;border-radius:4px;background:#e7edf4;overflow:hidden;margin:5px 0 2px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#5cb87a,#e0a33a 70%,#d0473d)}
+
+  /* GOVDE */
+  .govde{display:grid;grid-template-columns:1fr 330px;min-height:600px}
+  .ana{min-width:0;border-right:1px solid var(--line)}
+  .tabs{display:flex;gap:0;padding:0 8px;border-bottom:1px solid var(--line);background:#fff;overflow-x:auto}
+  .tab{padding:8px 12px;color:var(--muted);font-size:12px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:5px;align-items:center}
+  .tab .n{background:#eef2f7;border-radius:8px;padding:0 6px;font-size:10px}
+  .tab.on{color:var(--navy);font-weight:bold;border-bottom-color:var(--accent)}
+  .tab.uyar::after{content:"●";color:#d0473d;font-size:9px}
+  .pane{display:none;padding:12px}
+  .pane.on{display:block}
+
+  .grp{border:1px solid var(--line2);border-radius:5px;margin-bottom:12px;background:#fff}
+  .grp > h4{margin:0;padding:7px 10px;font-size:11.5px;color:#3a5573;background:linear-gradient(#f7f9fc,#eef3f8);border-bottom:1px solid var(--line2);border-radius:5px 5px 0 0;display:flex;align-items:center;gap:8px}
+  .grp > h4 .sp{display:flex;gap:4px}
+  .grp .ic{padding:10px}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .f{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 12px}
+  .f.k3{grid-template-columns:repeat(3,1fr)} .f.k2{grid-template-columns:repeat(2,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .fld.g2{grid-column:span 2} .fld.g4{grid-column:span 4}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:25px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp .ek{margin-left:auto;font-size:10.5px;color:var(--accent);cursor:pointer}
+  .inp.uzun{min-height:52px;align-items:flex-start}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:6px}
+  .ipucu.ok{color:var(--ok)}
+
+  .dg{border:1px solid var(--line2);border-radius:3px;overflow:auto}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f4f8fd}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tr.devir td{background:#fbfcfe;font-style:italic;color:#4d5d6e}
+  .dg tfoot td{background:#f3f6fa;font-weight:bold;border-top:2px solid var(--line)}
+  .dg .det{display:none}
+  .detayli .dg .det{display:table-cell}
+  .serit{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .serit input[type=date]{border:1px solid var(--line);border-radius:3px;font:inherit;font-size:11px;padding:2px 4px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 11px;font-size:11px;background:#fff;color:#4d5d6e;cursor:pointer}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  .kisi{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line2)}
+  .kisi .av{width:28px;height:28px;border-radius:50%;background:#e7eef6;color:#2f6db3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex:none}
+  .kisi b{display:block;font-size:11.5px}
+  .kisi small{color:var(--muted);font-size:10.5px}
+  .kisi .ik{margin-left:auto;display:flex;gap:3px}
+
+  /* YAN SUTUN */
+  .yan{background:#fbfcfe;padding:10px 12px;overflow:auto}
+  .yan h6{margin:12px 0 6px;font-size:11px;color:#3a5573;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center}
+  .yan h6:first-child{margin-top:2px}
+  .yan h6 a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:normal;cursor:pointer}
+  .uyari{border:1px solid #f3c4bf;background:#fdf1ef;border-radius:4px;padding:7px 9px;color:#8a2a22;font-size:11.5px;margin-bottom:6px}
+  .uyari.sari{border-color:#f2ddbf;background:#fdf8ec;color:#7a5512}
+  .pin{border:1px solid #f2ddbf;background:#fffbea;border-radius:4px;padding:7px 9px;font-size:11.5px;line-height:1.5}
+  .pin small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+  .zaman{border-left:2px solid #cfe0f5;margin-left:6px;padding-left:10px}
+  .zaman div{position:relative;padding:4px 0 7px;font-size:11.5px}
+  .zaman div::before{content:"";position:absolute;left:-15px;top:8px;width:8px;height:8px;border-radius:50%;background:#9cc4ee;border:2px solid #fbfcfe}
+  .zaman div.k::before{background:#5cb87a} .zaman div.r::before{background:#d0473d}
+  .zaman small{display:block;color:var(--muted);font-size:10.5px}
+  .yasl{display:flex;height:16px;border-radius:3px;overflow:hidden;border:1px solid var(--line2)}
+  .yasl i{display:block;height:100%}
+  .yl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:10px;color:var(--muted);margin-top:3px}
+  .yl b{display:block;color:var(--ink);font-size:11px}
+
+  .altbar{display:flex;gap:16px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1480px;margin:12px auto;color:#5b6a7a;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 16px}
+  .not h3{margin:4px 0 6px;font-size:13px;color:var(--navy)}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .not ul{margin:4px 0 8px 18px;padding:0}
+  .not table{border-collapse:collapse;margin:4px 0 8px}
+  .not td,.not th{border:1px solid var(--line2);padding:3px 8px;text-align:left;font-size:11px}
+  .not th{background:var(--head)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust"><b>Gentegre AI</b><span class="yol">Cari &amp; CRM › Müşteri Listesi › Kart</span>
+    <span class="sag"><span>🏢 Merkez</span><span>👤 Selin Y.</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>👥 Müşteri Listesi</span><span class="on">🏢 Ege Tarım Ürünleri…</span><span>＋</span></div>
+
+  <!-- KIMLIK BASLIGI: kim oldugu tek bakista. Unvan/kod/durum burada duzenlenir. -->
+  <div class="bas">
+    <div class="avatar">ET<small>Bayi</small></div>
+    <div class="kim">
+      <div class="ad">Ege Tarım Ürünleri Koop. <span class="kalem">✎</span></div>
+      <div class="alt">Kod <b>M-00044</b> · VKN <b>3310457710</b> (Torbalı VD) · Temsilci <b>Ahmet K.</b> · Müşteri 2019'dan beri</div>
+      <div class="rzlar">
+        <span class="rz ok">● Aktif</span>
+        <span class="rz mavi">Müşteri</span><span class="rz">Tedarikçi değil</span>
+        <span class="rz ok">e‑Arşiv</span>
+        <span class="rz mavi">Bayi</span><span class="rz sari">Takip</span>
+        <span class="rz kir">Limit aşıldı %123</span>
+      </div>
+    </div>
+    <div class="islem">
+      <span class="gez" title="Listede önceki / sonraki"><span>◀</span><span>3 / 12</span><span>▶</span></span>
+      <span class="btn">⋯</span>
+      <span class="btn">Kapat</span>
+      <span class="btn primary">💾 Kaydet</span>
+    </div>
+  </div>
+
+  <!-- HIZLI ISLEMLER: bu musteriyle onceden dolu acilir -->
+  <div class="hizli">
+    <span class="btn">🧾 Satış Faturası</span>
+    <span class="btn">📝 Sipariş</span>
+    <span class="btn">📋 Teklif</span>
+    <span class="btn">🚚 İrsaliye</span>
+    <span class="sepv"></span>
+    <span class="btn">💰 Tahsilat ▾</span>
+    <span class="btn">📄 Ekstre</span>
+    <span class="btn">🤝 Mutabakat</span>
+    <span class="sepv"></span>
+    <span class="btn">✅ Görev</span>
+    <span class="btn">📞 Görüşme notu</span>
+    <span class="btn">⏰ Hatırlat</span>
+    <span class="sp"></span>
+    <span class="btn">✉ E‑posta</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <!-- OZET SERIDI: her sekmede ayni. Kutuya basmak ilgili sekmeye gider. -->
+  <div class="ozet">
+    <div data-git="ekstre"><span>Bakiye</span><b class="borc">₺ 184.320,00 B</b><small>+ $ 1.250,00 B (dövizli)</small></div>
+    <div data-git="finans"><span>Vadesi geçen</span><b class="borc">₺ 142.000,00</b><small>en eski 61 gün</small></div>
+    <div data-git="risk"><span>Risk limiti · ₺ 150.000</span><b class="borc">%123</b><div class="bar"><i style="width:100%"></i></div><small>bakiye + açık sipariş + portföy çeki</small></div>
+    <div data-git="belgeler"><span>Açık sipariş</span><b>₺ 33.177,60</b><small>2 sipariş · 1'i sevke hazır</small></div>
+    <div data-git="finans"><span>Portföydeki çek</span><b>₺ 46.080,00</b><small>3 çek · ilk vade 05.11</small></div>
+    <div data-git="belgeler"><span>Bu yıl ciro</span><b>₺ 1.284.600</b><small class="borc">geçen yıl ₺ 1,62 M · %21 ↓</small></div>
+    <div data-git="belgeler"><span>Son satış</span><b>48 gün</b><small>Ort. tahsil süresi 52 gün</small></div>
+  </div>
+
+  <div class="govde">
+    <div class="ana">
+      <div class="tabs" id="tabs">
+        <span class="tab on" data-t="genel">Genel</span>
+        <span class="tab" data-t="adres">Adres &amp; Fatura</span>
+        <span class="tab uyar" data-t="risk">Satış &amp; Risk</span>
+        <span class="tab" data-t="finans">Finansal</span>
+        <span class="tab" data-t="ekstre">Ekstre</span>
+        <span class="tab" data-t="belgeler">Belgeler <span class="n">146</span></span>
+        <span class="tab" data-t="crm">CRM <span class="n">5</span></span>
+        <span class="tab" data-t="kisiler">İlgili Kişiler <span class="n">4</span></span>
+        <span class="tab" data-t="banka">Banka / IBAN</span>
+        <span class="tab" data-t="dokuman">Doküman <span class="n">7</span></span>
+        <span class="tab" data-t="ek">Ek Alanlar</span>
+        <span class="tab" data-t="gecmis">Geçmiş</span>
+      </div>
+
+      <!-- GENEL -->
+      <div class="pane on" data-p="genel">
+        <div class="grp"><h4>Kimlik &amp; Sınıflandırma</h4><div class="ic f">
+          <div class="fld"><label class="req">Kod</label><div class="inp">M-00044</div></div>
+          <div class="fld g2"><label class="req">Ünvan</label><div class="inp">Ege Tarım Ürünleri Koop.</div></div>
+          <div class="fld"><label>Kısa Ad</label><div class="inp">Ege Tarım</div></div>
+          <div class="fld"><label>Tür</label><div class="inp combo">Tüzel kişi</div></div>
+          <div class="fld"><label>Grup</label><div class="inp combo">Bayi</div></div>
+          <div class="fld"><label>Sektör</label><div class="inp combo">Tarım / Gıda</div></div>
+          <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+          <div class="fld"><label>Temsilci</label><div class="inp combo">Ahmet K.</div></div>
+          <div class="fld"><label>Bölge</label><div class="inp combo">Ege</div></div>
+          <div class="fld"><label>Kaynak</label><div class="inp combo">Fuar 2019</div></div>
+          <div class="fld"><label>Etiketler</label><div class="inp"><span class="rz mavi">Bayi</span><span class="rz sari">Takip</span><span class="ek">＋</span></div></div>
+          <div class="fld"><label>Rol</label><div class="inp"><label><input type="checkbox" checked> Müşteri</label>&nbsp;<label><input type="checkbox"> Tedarikçi</label></div></div>
+        </div></div>
+        <div class="iki">
+          <div class="grp"><h4>İletişim</h4><div class="ic f k2">
+            <div class="fld"><label>Telefon</label><div class="inp">0232 853 11 20 <span class="ek">📞</span></div></div>
+            <div class="fld"><label>Cep</label><div class="inp">0532 600 12 34 <span class="ek">💬</span></div></div>
+            <div class="fld"><label>E‑posta</label><div class="inp">ege.tarim@example.com <span class="ek">✉</span></div></div>
+            <div class="fld"><label>Web</label><div class="inp">egetarim.coop</div></div>
+            <div class="fld"><label>İletişim izni (İYS)</label><div class="inp"><span class="rz ok">E‑posta ✓</span><span class="rz ok">SMS ✓</span><span class="rz">Arama ✗</span></div></div>
+            <div class="fld"><label>Tercih edilen dil</label><div class="inp combo">Türkçe</div></div>
+          </div></div>
+          <div class="grp"><h4>Not</h4><div class="ic">
+            <div class="inp uzun">Sevkiyatlar yalnız hafta içi 08:00–16:00. Fatura ile birlikte irsaliye kopyası isteniyor. Kooperatif yönetim kurulu yılda bir değişiyor — yetkili listesini Ocak'ta güncelle.</div>
+            <div class="ipucu">📌 Sabitlenen not sağ sütunda ve fatura kesilirken uyarı olarak görünür.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- ADRES & FATURA -->
+      <div class="pane" data-p="adres">
+        <div class="grp"><h4>Fatura / Vergi Kimliği <span class="sp"><span class="btn mini">🔎 GİB'den doğrula</span></span></h4><div class="ic f">
+          <div class="fld g2"><label>Fatura Ünvanı</label><div class="inp">EGE TARIM ÜRÜNLERİ KOOPERATİFİ</div></div>
+          <div class="fld"><label class="req">VKN / TCKN</label><div class="inp">3310457710</div></div>
+          <div class="fld"><label>Vergi Dairesi</label><div class="inp combo">Torbalı</div></div>
+          <div class="fld"><label>e‑Belge</label><div class="inp ro">e‑Arşiv (mükellef değil)</div></div>
+          <div class="fld"><label>Fatura e‑postası</label><div class="inp">fatura@egetarim.coop</div></div>
+          <div class="fld"><label>Senaryo</label><div class="inp ro">—</div></div>
+          <div class="fld"><label>Son GİB sorgusu</label><div class="inp ro">21.10.2026 · değişiklik yok</div></div>
+        </div><div class="ipucu ok" style="padding:0 10px 10px">✓ e‑Fatura mükellefi değil; faturalar e‑Arşiv olarak kesilir ve fatura e‑postasına gönderilir.</div></div>
+        <div class="grp"><h4>Adresler <span class="sp"><span class="btn mini">＋ Adres</span></span></h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Tip</th><th>Adres</th><th>İl / İlçe</th><th>Posta</th><th>Yetkili</th><th class="orta">Varsayılan</th></tr></thead>
+            <tbody>
+              <tr><td><span class="rz mavi">Fatura</span></td><td>Ayrancılar Mah. 2. Sanayi Sok. No:14</td><td>İzmir / Torbalı</td><td>35870</td><td>—</td><td class="orta">✓</td></tr>
+              <tr><td><span class="rz ok">Sevk</span></td><td>Pancar OSB 5. Cad. Depo C‑3</td><td>İzmir / Torbalı</td><td>35860</td><td>Depo — Kemal U.</td><td class="orta">✓</td></tr>
+              <tr><td><span class="rz ok">Sevk</span></td><td>Ödemiş yolu 8. km Soğuk hava deposu</td><td>İzmir / Ödemiş</td><td>35750</td><td>Hasan Y.</td><td class="orta"></td></tr>
+            </tbody>
+          </table></div>
+        </div></div>
+      </div>
+
+      <!-- SATIS & RISK -->
+      <div class="pane" data-p="risk">
+        <div class="iki">
+          <div class="grp"><h4>Satış Koşulları</h4><div class="ic f k2">
+            <div class="fld"><label>Fiyat Listesi</label><div class="inp combo">Bayi Fiyat Listesi 2026</div></div>
+            <div class="fld"><label>İskonto Grubu</label><div class="inp combo">Bayi B (%8)</div></div>
+            <div class="fld"><label>Vade (gün)</label><div class="inp">60</div></div>
+            <div class="fld"><label>Ödeme Şekli</label><div class="inp combo">Çek / Havale</div></div>
+            <div class="fld"><label>Para Birimi</label><div class="inp combo">TL</div></div>
+            <div class="fld"><label>Sevk Şekli</label><div class="inp combo">Kendi aracımız</div></div>
+            <div class="fld"><label>KDV Durumu</label><div class="inp combo">Normal</div></div>
+            <div class="fld"><label>Tevkifat</label><div class="inp combo">Yok</div></div>
+          </div></div>
+          <div class="grp"><h4>Risk / Limit</h4><div class="ic">
+            <div class="f k2">
+              <div class="fld"><label>Risk Limiti</label><div class="inp">₺ 150.000,00</div></div>
+              <div class="fld"><label>Aşımda</label><div class="inp combo">Sevkiyat onaya düşer</div></div>
+              <div class="fld"><label>Teminat</label><div class="inp">Banka teminat mektubu ₺ 100.000 · 31.12.2026</div></div>
+              <div class="fld"><label>Risk Durumu</label><div class="inp ro"><span class="rz kir">Aşıldı</span></div></div>
+            </div>
+            <div class="dg" style="margin-top:10px"><table>
+              <thead><tr><th>Risk kalemi</th><th class="sag">Tutar</th></tr></thead>
+              <tbody>
+                <tr><td>Cari bakiye (borç)</td><td class="sag">₺ 184.320,00</td></tr>
+                <tr><td>Açık sipariş (sevk edilmemiş)</td><td class="sag">₺ 33.177,60</td></tr>
+                <tr><td>Portföydeki müşteri çeki</td><td class="sag">₺ 46.080,00</td></tr>
+                <tr><td>İrsaliyeli, faturalanmamış</td><td class="sag">₺ 0,00</td></tr>
+              </tbody>
+              <tfoot><tr><td>Toplam risk / limit</td><td class="sag borc">₺ 263.577,60 / 150.000 · %176*</td></tr></tfoot>
+            </table></div>
+            <div class="ipucu">* Kalemler kurum ayarından seçilir (Delphi RISKLIMIT kuralı). Özet şeritteki % yalnız seçili kalemleri sayar.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- FINANSAL -->
+      <div class="pane" data-p="finans">
+        <div class="iki">
+          <div class="grp"><h4>Hesap Özeti</h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Para birimi</th><th class="sag">Borç</th><th class="sag">Alacak</th><th class="sag">Bakiye</th><th class="sag">TL karşılığı</th></tr></thead>
+              <tbody>
+                <tr><td>TL</td><td class="sag">2.418.900,00</td><td class="sag">2.234.580,00</td><td class="sag borc">184.320,00 B</td><td class="sag">184.320,00</td></tr>
+                <tr><td>USD</td><td class="sag">8.250,00</td><td class="sag">7.000,00</td><td class="sag borc">1.250,00 B</td><td class="sag">51.500,00</td></tr>
+              </tbody>
+              <tfoot><tr><td>Toplam</td><td></td><td></td><td></td><td class="sag borc">₺ 235.820,00</td></tr></tfoot>
+            </table></div>
+            <div class="f k3" style="margin-top:10px">
+              <div class="fld"><label>Muhasebe hesabı</label><div class="inp ro">120.01.044</div></div>
+              <div class="fld"><label>Ort. tahsil süresi</label><div class="inp ro">52 gün (vade 60)</div></div>
+              <div class="fld"><label>Son tahsilat</label><div class="inp ro">09.10.2026 · ₺ 60.000</div></div>
+            </div>
+          </div></div>
+          <div class="grp"><h4>Yaşlandırma</h4><div class="ic">
+            <div class="yasl"><i style="width:23%;background:#9cc4ee"></i><i style="width:32%;background:#e0a33a"></i><i style="width:28%;background:#d9783a"></i><i style="width:17%;background:#c0413d"></i></div>
+            <div class="yl"><span>Vadesi gelmemiş<b>₺ 42.320</b></span><span>0–30 gün<b>₺ 58.900</b></span><span>31–60 gün<b>₺ 51.600</b></span><span>60+ gün<b class="borc">₺ 31.500</b></span></div>
+            <div class="dg" style="margin-top:10px"><table>
+              <thead><tr><th>Vadesi geçen belge</th><th>Vade</th><th class="orta">Gecikme</th><th class="sag">Kalan</th></tr></thead>
+              <tbody>
+                <tr><td>Satış Fat. GNT…0331</td><td>23.08.2026</td><td class="orta borc">61 gün</td><td class="sag">31.500,00</td></tr>
+                <tr><td>Satış Fat. GNT…0360</td><td>05.09.2026</td><td class="orta">48 gün</td><td class="sag">51.600,00</td></tr>
+                <tr><td>Satış Fat. GNT…0384</td><td>28.09.2026</td><td class="orta">25 gün</td><td class="sag">58.900,00</td></tr>
+              </tbody>
+            </table></div>
+          </div></div>
+        </div>
+        <div class="grp"><h4>Çek / Senet Portföyü <span class="sp"><span class="btn mini">＋ Çek al</span></span></h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Tür</th><th>Seri No</th><th>Banka / Keşideci</th><th>Vade</th><th>Durum</th><th class="sag">Tutar</th></tr></thead>
+            <tbody>
+              <tr><td>Çek</td><td>1234567</td><td>Ziraat · Torbalı</td><td>05.11.2026</td><td><span class="rz mavi">Portföyde</span></td><td class="sag">18.080,00</td></tr>
+              <tr><td>Çek</td><td>1234590</td><td>Garanti · Ege Tarım</td><td>20.11.2026</td><td><span class="rz mavi">Portföyde</span></td><td class="sag">15.000,00</td></tr>
+              <tr><td>Çek</td><td>7788120</td><td>Halkbank · Yılmaz Gıda (ciro)</td><td>01.12.2026</td><td><span class="rz sari">Tahsile verildi</span></td><td class="sag">13.000,00</td></tr>
+            </tbody>
+          </table></div>
+        </div></div>
+      </div>
+
+      <!-- EKSTRE: EkstreGrid ozet / detayli -->
+      <div class="pane" data-p="ekstre" id="ekstre">
+        <div class="serit">
+          📅 <input type="date" value="2026-01-01"> – <input type="date" value="2026-10-23">
+          <span class="chip on">Tümü</span><span class="chip">Faturalar</span><span class="chip">Tahsilatlar</span><span class="chip">Çek / Senet</span>
+          <span class="sp"></span>
+          <span class="btn mini" id="detayBtn">🔎 Detaylı Ekstre</span>
+          <span class="btn mini">📊 CSV</span><span class="btn mini">🖨 Yazdır</span><span class="btn mini">✉ Gönder</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th>Tarih</th><th>Belge No</th><th>İşlem</th><th>Açıklama</th><th class="det">Vade</th><th class="det">Kur</th>
+            <th class="sag">Borç</th><th class="sag">Alacak</th><th class="det sag">Yerel Borç</th><th class="det sag">Yerel Alacak</th><th class="sag">Bakiye</th></tr></thead>
+          <tbody>
+            <tr class="grup"><td colspan="11">TL · 7 hareket</td></tr>
+            <tr class="devir"><td>01.01.2026</td><td></td><td>Devir</td><td>Önceki dönem</td><td class="det"></td><td class="det"></td><td class="sag"></td><td class="sag"></td><td class="det"></td><td class="det"></td><td class="sag">98.420,00</td></tr>
+            <tr><td>25.09.2026</td><td>GRT‑441</td><td>Çek Girişi</td><td>Ziraat 1234567</td><td class="det">05.11.2026</td><td class="det">1</td><td class="sag"></td><td class="sag">18.080,00</td><td class="det"></td><td class="det sag">18.080,00</td><td class="sag">80.340,00</td></tr>
+            <tr><td>28.09.2026</td><td>GNT…0384</td><td>Satış Faturası</td><td>Gübre + tohum (14 kalem)</td><td class="det">27.11.2026</td><td class="det">1</td><td class="sag">58.900,00</td><td class="sag"></td><td class="det sag">58.900,00</td><td class="det sag"></td><td class="sag">139.240,00</td></tr>
+            <tr><td>02.10.2026</td><td>GNT…0398</td><td>Satış Faturası</td><td>Sulama ekipmanı</td><td class="det">01.12.2026</td><td class="det">1</td><td class="sag">31.750,00</td><td class="sag"></td><td class="det sag">31.750,00</td><td class="det"></td><td class="sag">170.990,00</td></tr>
+            <tr><td>09.10.2026</td><td>MKB‑2210</td><td>Tahsilat — Havale</td><td>Garanti EFT</td><td class="det"></td><td class="det">1</td><td class="sag"></td><td class="sag">60.000,00</td><td class="det"></td><td class="det sag">60.000,00</td><td class="sag">110.990,00</td></tr>
+            <tr><td>14.10.2026</td><td>GNT…0412</td><td>Satış Faturası</td><td>Ambalaj malzemesi</td><td class="det">13.12.2026</td><td class="det">1</td><td class="sag">48.200,00</td><td class="sag"></td><td class="det sag">48.200,00</td><td class="det"></td><td class="sag">159.190,00</td></tr>
+            <tr><td>18.10.2026</td><td>GIA…0021</td><td>Satış İadesi</td><td>Hasarlı 3 koli</td><td class="det"></td><td class="det">1</td><td class="sag"></td><td class="sag">4.120,00</td><td class="det"></td><td class="det sag">4.120,00</td><td class="sag">155.070,00</td></tr>
+            <tr><td>21.10.2026</td><td>GNT…0420</td><td>Satış Faturası</td><td>Gübre (6 kalem)</td><td class="det">20.12.2026</td><td class="det">1</td><td class="sag">29.250,00</td><td class="sag"></td><td class="det sag">29.250,00</td><td class="det"></td><td class="sag borc">184.320,00 B</td></tr>
+            <tr class="grup"><td colspan="11">USD · 2 hareket</td></tr>
+            <tr><td>04.06.2026</td><td>EXP…0007</td><td>Satış Faturası</td><td>Damla sulama seti</td><td class="det">03.08.2026</td><td class="det">38,9200</td><td class="sag">8.250,00</td><td class="sag"></td><td class="det sag">321.090,00</td><td class="det"></td><td class="sag">8.250,00</td></tr>
+            <tr><td>12.08.2026</td><td>MKB‑1987</td><td>Tahsilat — Döviz havale</td><td>İş Bankası USD</td><td class="det"></td><td class="det">40,6100</td><td class="sag"></td><td class="sag">7.000,00</td><td class="det"></td><td class="det sag">284.270,00</td><td class="sag borc">1.250,00 B</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4">Genel toplam (TL karşılığı)</td><td class="det"></td><td class="det"></td><td class="sag"></td><td class="sag"></td><td class="det sag">489.190,00</td><td class="det sag">366.470,00</td><td class="sag borc">₺ 235.820,00 B</td></tr></tfoot>
+        </table></div>
+        <div class="ipucu">Satıra çift tık: hareketi üreten belge / tahsilat açılır. "Detaylı" vade, kur ve yerel karşılıkları ekler; liste ekranındaki "📄 Ekstre" ile aynı bileşen.</div>
+      </div>
+
+      <!-- BELGELER -->
+      <div class="pane" data-p="belgeler">
+        <div class="serit">
+          <span class="chip on">Tümü 146</span><span class="chip">Faturalar 98</span><span class="chip">Siparişler 21</span><span class="chip">Teklifler 9</span><span class="chip">İrsaliyeler 14</span><span class="chip">İadeler 4</span>
+          <span class="sp"></span><span class="chip">Yalnız açık</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th>Tarih</th><th>Tür</th><th>Belge No</th><th>Açıklama</th><th>Durum</th><th>e‑Belge</th><th class="sag">Tutar</th><th class="sag">Kalan</th></tr></thead>
+          <tbody>
+            <tr><td>22.10.2026</td><td>Sipariş</td><td>SIP‑2026‑0518</td><td>Kasım gübre siparişi</td><td><span class="rz sari">Sevke hazır</span></td><td></td><td class="sag">21.400,00</td><td class="sag">21.400,00</td></tr>
+            <tr><td>21.10.2026</td><td>Satış Faturası</td><td>GNT2026000000420</td><td>Gübre (6 kalem)</td><td><span class="rz mavi">Açık</span></td><td><span class="rz ok">e‑Arşiv ✓</span></td><td class="sag">29.250,00</td><td class="sag">29.250,00</td></tr>
+            <tr><td>18.10.2026</td><td>Satış İadesi</td><td>GIA2026000000021</td><td>Hasarlı 3 koli</td><td><span class="rz ok">Kapandı</span></td><td><span class="rz ok">e‑Arşiv ✓</span></td><td class="sag">4.120,00</td><td class="sag">0,00</td></tr>
+            <tr><td>15.10.2026</td><td>Teklif</td><td>TKL‑2026‑118</td><td>2027 bayi fiyat listesi</td><td><span class="rz mavi">Gönderildi</span></td><td></td><td class="sag">245.000,00</td><td class="sag sonuk">—</td></tr>
+            <tr><td>14.10.2026</td><td>Satış Faturası</td><td>GNT2026000000412</td><td>Ambalaj malzemesi</td><td><span class="rz mavi">Açık</span></td><td><span class="rz ok">e‑Arşiv ✓</span></td><td class="sag">48.200,00</td><td class="sag">48.200,00</td></tr>
+            <tr><td>08.10.2026</td><td>Sipariş</td><td>SIP‑2026‑0497</td><td>Damla sulama yedek parça</td><td><span class="rz">Kısmi sevk</span></td><td></td><td class="sag">11.777,60</td><td class="sag">11.777,60</td></tr>
+          </tbody>
+        </table></div>
+        <div class="ipucu">Belgeye çift tık: belge kartı ayrı sekmede açılır. Ürün bazlı satış analizi için "📊 Analiz" görünümü (en çok alınan ürünler, ay bazlı ciro).</div>
+      </div>
+
+      <!-- CRM -->
+      <div class="pane" data-p="crm">
+        <div class="iki">
+          <div class="grp"><h4>Açık İşler <span class="sp"><span class="btn mini">＋ Görev</span><span class="btn mini">＋ Fırsat</span></span></h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Tür</th><th>Konu</th><th>Sorumlu</th><th>Tarih</th><th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td>Görev</td><td>Vadesi geçen faturalar için ödeme planı</td><td>Ahmet K.</td><td>24.10.2026</td><td><span class="rz sari">Yarın</span></td></tr>
+                <tr><td>Fırsat</td><td>2027 yıllık gübre anlaşması · ₺ 1,8 M</td><td>Ahmet K.</td><td>30.11.2026</td><td><span class="rz mavi">Teklif aşaması %60</span></td></tr>
+                <tr><td>Görev</td><td>Yetkili listesi güncelle</td><td>Selin Y.</td><td>10.01.2027</td><td><span class="rz">Planlı</span></td></tr>
+              </tbody>
+            </table></div>
+          </div></div>
+          <div class="grp"><h4>Temas Geçmişi <span class="sp"><span class="btn mini">📞 Görüşme notu</span></span></h4><div class="ic">
+            <div class="zaman">
+              <div>Telefon — ödeme planı konuşuldu, Kasım başı çek verilecek<small>Ahmet K. · 20.10.2026 14:10</small></div>
+              <div class="k">Ziyaret — yeni sulama ürünleri tanıtıldı, numune bırakıldı<small>Ahmet K. · 11.10.2026</small></div>
+              <div>E‑posta — 2027 fiyat listesi teklifi gönderildi<small>Sistem · 15.10.2026</small></div>
+              <div class="r">Şikâyet — hasarlı teslimat (3 koli), iade alındı<small>Destek · 17.10.2026</small></div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- ILGILI KISILER -->
+      <div class="pane" data-p="kisiler">
+        <div class="grp"><h4>İlgili Kişiler <span class="sp"><span class="btn mini">＋ Kişi</span><span class="btn mini">🔗 Var olan kişiyi bağla</span></span></h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Ad Soyad</th><th>Görev</th><th>Telefon</th><th>E‑posta</th><th>Rol</th><th class="orta">İzin</th></tr></thead>
+            <tbody>
+              <tr><td><b>Hasan Yılmaz</b></td><td>Genel Müdür</td><td>0532 600 12 34</td><td>hasan@egetarim.coop</td><td><span class="rz mor">Karar verici</span></td><td class="orta">✉ 💬</td></tr>
+              <tr><td><b>Fatma Demir</b></td><td>Muhasebe</td><td>0232 853 11 22</td><td>muhasebe@egetarim.coop</td><td><span class="rz mavi">Ekstre / mutabakat</span></td><td class="orta">✉</td></tr>
+              <tr><td><b>Kemal Uçar</b></td><td>Depo Sorumlusu</td><td>0533 410 77 88</td><td>—</td><td><span class="rz ok">Sevkiyat</span></td><td class="orta">💬</td></tr>
+              <tr><td><b>Murat Şen</b></td><td>Satınalma</td><td>0232 853 11 25</td><td>satinalma@egetarim.coop</td><td><span class="rz mavi">Sipariş</span></td><td class="orta">✉ 💬</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ipucu">Kişi Kişi Listesi'yle ortaktır (taraf, kişi rolü). "Rol" ekstre/mutabakat e‑postasının, sevkiyat SMS'inin kime gideceğini belirler.</div>
+        </div></div>
+      </div>
+
+      <!-- BANKA -->
+      <div class="pane" data-p="banka">
+        <div class="grp"><h4>Banka Hesapları <span class="sp"><span class="btn mini">＋ IBAN</span></span></h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Banka</th><th>Şube</th><th>IBAN</th><th>Döviz</th><th class="orta">Varsayılan</th></tr></thead>
+            <tbody>
+              <tr><td>Ziraat Bankası</td><td>Torbalı</td><td>TR12 0001 0012 3456 7890 1234 56</td><td>TL</td><td class="orta">✓</td></tr>
+              <tr><td>İş Bankası</td><td>Kemalpaşa Ticari</td><td>TR45 0006 4000 0012 3456 7890 12</td><td>USD</td><td class="orta"></td></tr>
+            </tbody>
+          </table></div>
+          <div class="ipucu ok">✓ IBAN sağlama toplamı geçerli. Gelen havalede bu IBAN'lar cariyi otomatik eşleştirir.</div>
+        </div></div>
+      </div>
+
+      <!-- DOKUMAN -->
+      <div class="pane" data-p="dokuman">
+        <div class="grp"><h4>Resim / Doküman <span class="sp"><span class="btn mini">⬆ Yükle</span><span class="btn mini">📷 Tara</span></span></h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Ad</th><th>Tür</th><th>Bağlı olduğu</th><th>Yükleyen</th><th>Tarih</th><th class="sag">Boyut</th></tr></thead>
+            <tbody>
+              <tr><td>📄 Vergi levhası 2026.pdf</td><td>Resmî evrak</td><td>Kart</td><td>Selin Y.</td><td>12.03.2026</td><td class="sag">240 KB</td></tr>
+              <tr><td>📄 Bayilik sözleşmesi.pdf</td><td>Sözleşme</td><td>Kart</td><td>Ahmet K.</td><td>05.01.2026</td><td class="sag">1,2 MB</td></tr>
+              <tr><td>🖼 Teminat mektubu.jpg</td><td>Teminat</td><td>Risk / Limit</td><td>Selin Y.</td><td>02.01.2026</td><td class="sag">880 KB</td></tr>
+              <tr><td>📄 İmza sirküleri.pdf</td><td>Resmî evrak</td><td>Kart</td><td>Selin Y.</td><td>02.01.2026</td><td class="sag">310 KB</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ipucu sari">⚠ Vergi levhası 2026 yüklü; teminat mektubu 31.12.2026'da bitiyor — 30 gün kala hatırlatma kurulu.</div>
+        </div></div>
+      </div>
+
+      <!-- EK ALANLAR -->
+      <div class="pane" data-p="ek">
+        <div class="grp"><h4>Ek Alanlar <span class="sp"><span class="btn mini">⚙ Alan tanımla</span></span></h4><div class="ic f k3">
+          <div class="fld"><label>Kooperatif ortak sayısı</label><div class="inp">412</div></div>
+          <div class="fld"><label>Kargo anlaşması</label><div class="inp combo">Aras — anlaşmalı</div></div>
+          <div class="fld"><label>Sözleşme No</label><div class="inp">SZL‑2026‑448</div></div>
+        </div><div class="ipucu" style="padding:0 10px 10px">Yalnız gerçekten serbest alanlar; tanımlar kurum ayarından gelir (alan tipi, zorunluluk, liste kolonu olarak gösterim).</div></div>
+      </div>
+
+      <!-- GECMIS -->
+      <div class="pane" data-p="gecmis">
+        <div class="grp"><h4>Değişiklik Geçmişi</h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Tarih</th><th>Kullanıcı</th><th>İşlem</th><th>Alan</th><th>Eski</th><th>Yeni</th></tr></thead>
+            <tbody>
+              <tr><td>21.10.2026 10:12</td><td>Selin Y.</td><td>Değişti</td><td>Risk limiti</td><td>200.000,00</td><td>150.000,00</td></tr>
+              <tr><td>21.10.2026 10:12</td><td>Selin Y.</td><td>Değişti</td><td>Etiketler</td><td>Bayi</td><td>Bayi, Takip</td></tr>
+              <tr><td>03.05.2026 16:40</td><td>Ahmet K.</td><td>Değişti</td><td>Vade (gün)</td><td>45</td><td>60</td></tr>
+              <tr><td>14.02.2019 09:05</td><td>Aktarım</td><td>Eklendi</td><td colspan="3" class="sonuk">Delphi REHBER #4211'den aktarıldı</td></tr>
+            </tbody>
+          </table></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- YAN SUTUN: dikkat edilecekler + sabit not + son olaylar -->
+    <div class="yan">
+      <h6>Dikkat</h6>
+      <div class="uyari">⛔ Risk limiti %123 — yeni sevkiyat onaya düşer.</div>
+      <div class="uyari">⏱ ₺ 142.000 vadesi geçmiş · en eski 61 gün.</div>
+      <div class="uyari sari">📉 Bu yıl ciro geçen yıla göre %21 düşük.</div>
+      <div class="uyari sari">📄 Teminat mektubu 31.12.2026'da bitiyor.</div>
+
+      <h6>Sabit not <a>✎</a></h6>
+      <div class="pin">Sevkiyatlar yalnız hafta içi 08:00–16:00. Fatura ile birlikte irsaliye kopyası isteniyor.<small>Ahmet K. · 03.05.2026</small></div>
+
+      <h6>Yaşlandırma</h6>
+      <div class="yasl"><i style="width:23%;background:#9cc4ee"></i><i style="width:32%;background:#e0a33a"></i><i style="width:28%;background:#d9783a"></i><i style="width:17%;background:#c0413d"></i></div>
+      <div class="yl"><span>Gelmemiş<b>42 K</b></span><span>0–30<b>59 K</b></span><span>31–60<b>52 K</b></span><span>60+<b class="borc">32 K</b></span></div>
+
+      <h6>Ana kişiler <a>Tümü</a></h6>
+      <div class="kisi"><span class="av">HY</span><div><b>Hasan Yılmaz</b><small>Genel Müdür</small></div><span class="ik"><span class="btn mini">📞</span><span class="btn mini">✉</span></span></div>
+      <div class="kisi"><span class="av">FD</span><div><b>Fatma Demir</b><small>Muhasebe · ekstre</small></div><span class="ik"><span class="btn mini">📞</span><span class="btn mini">✉</span></span></div>
+
+      <h6>Son olaylar <a>Tümü</a></h6>
+      <div class="zaman">
+        <div>Sipariş SIP‑2026‑0518 · ₺ 21.400<small>22.10 · Ahmet K.</small></div>
+        <div>Fatura GNT…0420 · ₺ 29.250<small>21.10 · e‑Arşiv gönderildi</small></div>
+        <div class="k">Görüşme: ödeme planı<small>20.10 · Ahmet K.</small></div>
+        <div class="r">İade GIA…0021 · ₺ 4.120<small>18.10</small></div>
+        <div class="k">Tahsilat · ₺ 60.000<small>09.10 · Garanti EFT</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="altbar">
+    <span>Oluşturan: Aktarım · 14.02.2019</span><span>Son değişiklik: Selin Y. · 21.10.2026 10:12</span><span>Şube: Merkez</span>
+    <span class="sp">Kaydedilmemiş değişiklik yok</span>
+  </div>
+</div>
+
+<div class="not">
+  <h3>Kart Ver3: ne değişti, neden</h3>
+  <ul>
+    <li><b>Kimlik başlığı + özet şeridi her sekmede.</b> Kim (ünvan, kod, VKN, temsilci, rozetler) ve "bu müşteriyle durumum ne" (bakiye, vadesi geçen, risk %, açık sipariş, portföy çeki, ciro eğilimi, son satış) sekme değiştirmeden görünür. Şerit kutusuna basmak ilgili sekmeyi açar.</li>
+    <li><b>Hızlı işlemler kartın üstünde:</b> Fatura / Sipariş / Teklif / İrsaliye / Tahsilat bu müşteriyle önceden dolu açılır; Ekstre, Mutabakat, Görev, Görüşme notu, Hatırlat aynı satırda.</li>
+    <li><b>Sağ sütun "dikkat" paneli:</b> limit aşımı, vadesi geçen, ciro düşüşü, biten teminat gibi uyarılar sunucudan kural olarak gelir; sabit not fatura keserken de uyarı olur.</li>
+    <li><b>Sekmeler iş akışına göre yeniden gruplandı:</b> Genel (kimlik + iletişim + not) · Adres &amp; Fatura (GİB doğrulama, e‑Belge) · Satış &amp; Risk (koşullar + risk kalemleri dökümü) · Finansal (para birimi bazlı özet, yaşlandırma, vadesi geçen belgeler, çek portföyü) · Ekstre · <b>Belgeler</b> (yeni: tüm satış belgeleri tek listede, türe göre cip) · <b>CRM</b> (yeni: açık işler + temas geçmişi) · İlgili Kişiler (rol: ekstre/sevkiyat kime gider) · Banka · Doküman · Ek Alanlar · <b>Geçmiş</b> (ISLEMLOG karşılığı, alan bazlı).</li>
+    <li><b>Ekstre sekmesi</b> uygulanan EkstreGrid'in görünümü: tarih + tür cipleri, para birimine göre gruplu, devir satırı; "Detaylı" vade/kur/yerel karşılık kolonlarını açar (deneyin).</li>
+    <li>Sekmede kırmızı nokta = o sekmede dikkat gerektiren durum (Satış &amp; Risk: limit aşımı).</li>
+  </ul>
+  <h3>Veri karşılıkları (web)</h3>
+  <table>
+    <tr><th>Bölüm</th><th>Kaynak</th><th>Durum</th></tr>
+    <tr><td>Kimlik, iletişim, adres, fatura, banka, ek alanlar</td><td><code>taraf</code> + detayları (kart kaynağı <code>cari</code>)</td><td>var</td></tr>
+    <tr><td>Bakiye, ekstre, yaşlandırma</td><td><code>v_cari_ekstre</code>, <code>mali_hareket.plan_tarihi</code></td><td>bakiye/ekstre var; yaşlandırma yeni</td></tr>
+    <tr><td>Risk dökümü</td><td>bakiye + açık sipariş (<code>belge</code> 19) + portföy çeki (<code>cek_senet</code> durum 10)</td><td>yeni; kural kurum ayarı</td></tr>
+    <tr><td>Belgeler sekmesi</td><td><code>belge</code> (taraf_id), tür cipleri</td><td>var olan liste kaynağı, cariye süzülmüş</td></tr>
+    <tr><td>CRM</td><td><code>gorev</code>, <code>aktivite</code>, teklif (<code>belge</code> 18)</td><td>tablolar var, sekme yeni</td></tr>
+    <tr><td>Dikkat paneli</td><td>sunucu kural listesi (limit, vade, ciro, teminat bitişi)</td><td>yeni</td></tr>
+    <tr><td>Geçmiş</td><td>işlem logu (kart değişiklikleri)</td><td>var</td></tr>
+  </table>
+  <b>Açık sorular:</b> (1) Risk toplamına hangi kalemler girsin (Delphi kuralı)? (2) Dikkat paneli kuralları sabit mi, kurum ayarı mı? (3) Belgeler sekmesinde alış belgeleri de görünsün mü (müşteri aynı zamanda tedarikçiyse)?
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+function git(t){
+  tabs.forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.dataset.p === t));
+}
+tabs.forEach(x => x.addEventListener('click', () => git(x.dataset.t)));
+document.querySelectorAll('[data-git]').forEach(x => x.addEventListener('click', () => git(x.dataset.git)));
+const eks = document.getElementById('ekstre'), db = document.getElementById('detayBtn');
+db.addEventListener('click', () => {
+  const d = eks.classList.toggle('detayli');
+  db.textContent = d ? '◀ Özet Görünüm' : '🔎 Detaylı Ekstre';
+  db.classList.toggle('on', d);
+});
+document.querySelectorAll('.serit').forEach(s => s.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  s.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); c.classList.add('on');
+})));
+</script>
+</body>
+</html>

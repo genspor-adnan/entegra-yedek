@@ -4,7 +4,17 @@ import { listePaneli } from '../sayfalar/liste/listeEkranlari';
 /** LİSTE PANELLERİ (refaktör 22.10.2026): Liste.tsx zincirlerinden ayrılan durumsuz şerit / panel tablosu. */
 describe('listePaneli', () => {
   it('panelsiz kaynak: yok', () => {
-    expect(listePaneli('cari')).toBeUndefined();
+    expect(listePaneli('kisi')).toBeUndefined();
+  });
+
+  it('müşteri listesi (1150): gösterge + önizleme; aynı kaynağın Tedarikçi Listesi (rota) çizmez', () => {
+    const p = listePaneli('cari')!;
+    const b = { rota: undefined, yenile: 0, seciliSatir: null, setCip: () => {}, tazele: () => {},
+                git: () => {}, gitKart: () => {} } as unknown as Parameters<NonNullable<typeof p.ustPanel>>[0];
+    expect(p.ustPanel!(b)).toBeTruthy();
+    expect(p.yanPanel!(b)).toBeTruthy();
+    expect(p.ustPanel!({ ...b, rota: 'tedarikci' })).toBeUndefined();
+    expect(p.yanPanel!({ ...b, rota: 'tedarikci' })).toBeUndefined();
   });
 
   it('kullanıcılar: üstte sayaç şeridi, altta seçili hesabın paneli', () => {

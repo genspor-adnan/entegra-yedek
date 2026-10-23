@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (586 ad, 157 tanesi birden cok dosyada)
+## Fonksiyonlar (598 ad, 157 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,17 +13,26 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
-| `fn_aktar_belge` | `1093_aktarim_metin_kirp.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql |
+| `fn_aktar_belge` | `1142_aktarim_cari_doviz.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_ek` | `1149_aktarim_ek_toplu.sql` | — |
+| `fn_aktar_ek_cek` | `1147_aktarim_ek_cek.sql` | — |
+| `fn_aktar_ek_demirbas` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
+| `fn_aktar_ek_dokuman` | `1146_aktarim_ek_dokuman.sql` | — |
+| `fn_aktar_ek_ebelge` | `1146_aktarim_ek_dokuman.sql` | — |
+| `fn_aktar_ek_gorev` | `1145_aktarim_ek_gorev.sql` | — |
+| `fn_aktar_ek_hesap_plani` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
+| `fn_aktar_ek_kisi` | `1144_aktarim_ek_kisi.sql` | — |
+| `fn_aktar_ek_teklif` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
-| `fn_aktar_kasa` | `1093_aktarim_metin_kirp.sql` | 1085_aktarim_kasa.sql |
+| `fn_aktar_kasa` | `1142_aktarim_cari_doviz.sql` | 1085_aktarim_kasa.sql, 1093_aktarim_metin_kirp.sql |
 | `fn_aktar_masraf_merkezi` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_paket` | `1089_aktarim_salt_okunur.sql` | 1086_aktarim_paket.sql |
-| `fn_aktar_proje` | `1095_aktarim_proje_ayni_kod.sql` | 1082_aktarim_stok_kalem_hesap.sql |
+| `fn_aktar_proje` | `1141_aktarim_proje_kod_40.sql` | 1082_aktarim_stok_kalem_hesap.sql, 1095_aktarim_proje_ayni_kod.sql |
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |
@@ -34,7 +43,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_cari_id` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_doviz` | `1085_aktarim_kasa.sql` | — |
 | `fn_aktarim_esitle` | `1084_aktarim_belge.sql` | — |
+| `fn_aktarim_icerik_tipi` | `1146_aktarim_ek_dokuman.sql` | — |
 | `fn_aktarim_kaynak_isaretle` | `1082_aktarim_stok_kalem_hesap.sql` | 1080_aktarim_kaynak_kimligi.sql |
+| `fn_aktarim_kisi_id` | `1143_aktarim_ek_moduller_sema.sql` | — |
+| `fn_aktarim_kullanici_kod` | `1144_aktarim_ek_kisi.sql` | — |
 | `fn_aktarim_mutabakat` | `1091_aktarim_mutabakat.sql` | — |
 | `fn_aktarim_salt_okunur` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
@@ -595,7 +607,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (353 ad, 157 tanesi birden cok dosyada)
+## Gorunumler (354 ad, 157 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -644,6 +656,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cagri_kuyruk_lookup` | `839_cagri_merkezi.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `940_personel_unvan_yalniz_onek.sql` | 037_kisi_karti.sql, 122_aday_musteri.sql |
+| `v_cari_ozet` | `1150_cari_ozet.sql` | — |
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |

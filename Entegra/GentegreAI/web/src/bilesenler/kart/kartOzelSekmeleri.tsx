@@ -47,6 +47,17 @@ const OZEL_DETAYLAR: Record<string, Record<string, (b: OzelDetayBaglami) => Reac
                 onDegis={b.onDegis} baslik="Hekim Bilgisi" />
     ),
   },
+  // Müşteri kartı "Satış & Risk" (musteri_karti_ver3.html): taraf_musteri 1:1 uzantı -
+  //   grid değil tek kayıt formu. Risk limiti listedeki "Risk Limiti %" ve "Limit aşan"ı,
+  //   vade günü vadesi geçen hesabını besler.
+  cari: {
+    satisKosul: b => (
+      <TekKayit meta={b.detay} durum={b.durum} saltOkunur={b.salt || b.detay.saltOkunur}
+                onDegis={b.onDegis} baslik="Satış & Risk"
+                not={<>Risk limiti 0 ise limitsiz. Vade günü, vade tarihi girilmemiş faturalarda
+                     vadeyi belirler (vadesi geçen tutarı ve yaşlandırmayı etkiler).</>} />
+    ),
+  },
   stok: {
     // Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
     //   Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu.

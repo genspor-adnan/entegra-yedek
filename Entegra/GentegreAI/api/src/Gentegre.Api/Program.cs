@@ -369,6 +369,8 @@ uygulama.BelgeTalebiUclariniEkle();
 // TALEPLERIM: kisinin kendi talepleri (izin/avans/masraf/belge/ariza/malzeme).
 uygulama.TaleplerimUclariniEkle();
 uygulama.PersonelListeUclariniEkle();
+// MUSTERI LISTESI VER3 (1150): gosterge seridi.
+uygulama.CariListeUclariniEkle();
 uygulama.DemoUclariniEkle();
 // DUYURULAR (957): zil > Duyurular, yayinla, yonetim listesi.
 uygulama.DuyuruUclariniEkle();

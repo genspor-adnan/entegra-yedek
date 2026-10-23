@@ -476,8 +476,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   (personel, radyoloji, order, göz, konsültasyon, sevk) tek kancada; durumsuz şerit / paneller
   //   kaynak tablosunda. Gridin üst / sol / yan / alt panelleri ve sabit filtre buradan.
   const ekranBaglami: ListeEkranBaglami = {
-    kaynak: tanim.kaynak, portalda, yenile, tazele: () => setYenile(t => t + 1),
-    seciliSatir, git, gitKart, aksiyon: (kod, satir) => aksiyon(kod, satir), setCip: setCipIndeks,
+    kaynak: tanim.kaynak, rota: tanim.rota, portalda, yenile, tazele: () => setYenile(t => t + 1),
+    seciliSatir, git, gitKart, aksiyon: (kod, satir) => aksiyon(kod, satir), setCip: setCipIndeks, cipIndeks,
     personelSuzgec,
     panoCipFiltresi: cipler?.[cipIndeks]?.filtre,
     panoSeciliId: Number(gozAkisSecili?.id ?? 0) || null, panoSec: setGozAkisSecili,

@@ -47,7 +47,26 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // kaynagi farkli `rota` ile kullanir. Ekran artik SADECE musteri=1 gosterir
     // (sabitFiltre) - Tedarikci Listesi ayrildigi icin "ikisi birden" gorunumu gerekmiyor.
     kaynak: 'cari', baslik: 'Müşteri Listesi', yol: 'Cari › Müşteri Listesi', kartYolu: '/cari',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // VER3 (1150, mockup musteri_listesi_ver3.html): durum ciplerinin yaninda
+    //   AKILLI CIPLER - her biri sunucuda kolon kosulu. Gosterge seridinin
+    //   kutulari bu ciplerin INDEKSINI acar (MusteriGostergesi.CIP) - sira
+    //   degisirse orasi da degismeli.
+    aksiyonEkrani: 'cari-liste', cipler: [
+      ...(DURUM_CIPLERI ?? []),
+      { ad: 'Borçlu', filtre: { alan: 'bakiye', op: 'buyuk', deger: 0.005 }, ayracOnce: true },
+      { ad: 'Vadesi geçen', filtre: { alan: 'vadesiGecen', op: 'buyuk', deger: 0.005 } },
+      { ad: 'Limit aşan', filtre: { alan: 'riskYuzde', op: 'buyuk', deger: 100 } },
+      { ad: 'Satış yok 90+ gün', filtre: { op: 'and', kosullar: [
+        { alan: 'durum', op: 'esit', deger: 1 }, { alan: 'sonSatisGun', op: 'buyukEsit', deger: 90 }] } },
+      { ad: 'Dövizli', filtre: { alan: 'dovizli', op: 'esit', deger: 1 } },
+    ],
+    // Para kolonlari ERP'nin sorusuna gore (mockup): bakiye (B/A, doviz alti),
+    //   vadesi gecen, risk limiti kullanimi, son satistan bu yana gun, 12 ay
+    //   egri. Iletisim kolonlari onizleme panelinde - kolon seciciden acilir.
+    kolonSirasi: ['kod', 'unvan', 'il', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
+                  'sonSatisGun', 'ciroEgri', 'efatura', 'durum'],
+    gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci'],
+    toplam: ['bakiye', 'vadesiGecen'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
     //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
@@ -56,7 +75,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
+    yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
@@ -76,7 +96,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
+    yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
     ic: '🚚', yetkiKodu: 'cari.tedarikci.liste',   // 1003: menü yeri kendi kodu
   },

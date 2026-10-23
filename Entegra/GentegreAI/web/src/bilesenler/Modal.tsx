@@ -47,7 +47,13 @@ export function useEscIleKapat(kapat: (() => void) | undefined, enUst = false) {
  * kullanip GenForm tarafindan da cizildigi icin, ayni dosyada kalsa
  * dairesel import olurdu.
  */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit, alt, dar, ekSinif, enUst,
+/** Gövdenin penceresi (`.kawin`): yatay sağ sütunda gövde `.kayatay` sarmalayıcısının içinde. */
+function pencereBul(govde: HTMLElement | null): HTMLElement | null {
+  const ust = govde?.parentElement ?? null;
+  return ust?.classList.contains('kayatay') ? ust.parentElement : ust;
+}
+
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, yanPanelYatay, altSerit, alt, dar, ekSinif, enUst,
                        buyutmeYok, olcumYok, onKapat, sayfa, baslikYok, children }: {
   baslik: string;
   /** Sayfa kipinde başlık satırı çizilmez (sekme başlığı zaten aynısını söylüyor). */
@@ -62,6 +68,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
   sekmeBar?: React.ReactNode;
   /** Gövdenin SAĞINDA hep görünen panel (göz kartı v4 OD/OS özeti). */
   yanPanel?: React.ReactNode;
+  /** Sekmeler ÜSTTE kalırken gövdenin sağındaki panel (müşteri kartı Ver3 sağ sütunu). */
+  yanPanelYatay?: React.ReactNode;
   /** Gövdenin ALTINDA sabit şerit (göz kartı v4 tamamlama koşulları). */
   altSerit?: React.ReactNode;
   alt: React.ReactNode;
@@ -139,7 +147,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
   const [merkez, setMerkez] = useState<{ x: number; y: number } | null>(null);
   useLayoutEffect(() => {
     const hesapla = () => {
-      const pencere = govdeRef.current?.parentElement;
+      const pencere = pencereBul(govdeRef.current);
       // EKRAN SEKMELERİ: içerik alanı aktif sekmenin gövdesidir (sekme çubuğu hariç).
       const ana = document.querySelector('div.es-govde:not([hidden])') ?? document.querySelector('main.ana, main.pk-icerik');
       if (!pencere || !ana) { setMerkez(null); return }
@@ -155,7 +163,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
       setMerkez(o => (o && o.x === x && o.y === y ? o : { x, y }));
     };
     hesapla();
-    const pencere = govdeRef.current?.parentElement;
+    const pencere = pencereBul(govdeRef.current);
     const gozlem = pencere && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(hesapla) : null;
     if (pencere) gozlem?.observe(pencere);
     window.addEventListener('resize', hesapla);
@@ -181,14 +189,17 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
     const uygula = () => {
       const el = govdeRef.current;
       if (!el || olcumYok) return;
-      const pencere = el.parentElement;            // .kawin
+      // YATAY SAĞ SÜTUN (müşteri kartı Ver3): gövde `.kayatay` sarmalayıcısında - pencerenin
+      //   çocuğu sarmalayıcıdır; şerit toplamı ona göre hesaplanır, yan panel aynı tavanı alır.
+      const kap = el.parentElement?.classList.contains('kayatay') ? el.parentElement : el;
+      const pencere = kap.parentElement;            // .kawin
       // Govde disinda kalan sabit seritler (baslik/toolbar/ustSerit/sekme).
       // Govde DISINDAKI seritlerin toplami. Pencere yuksekliginden govdeyi
       //   cikarmak YANLIS olur: govde tavanindan kucukse aradaki BOSLUK da
       //   "serit" sayilip tavani her olcumde biraz daha kisiyordu.
       const disi = pencere
         ? Array.from(pencere.children).reduce(
-            (t, c) => t + (c === el ? 0 : (c as HTMLElement).offsetHeight), 0)
+            (t, c) => t + (c === kap ? 0 : (c as HTMLElement).offsetHeight), 0)
         : 0;
       // PENCERENIN GERCEK TAVANI: normalde `max-height: 88vh`, TAM EKRANDA
       //   ise ekranin tamami eksi 8px kenar (`.kawin.tam` top/bottom: 8px).
@@ -245,6 +256,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
       if (el.style.minHeight !== yeniMin) el.style.minHeight = yeniMin;
       if (el.style.maxHeight !== yeniMax) el.style.maxHeight = yeniMax;
       if (el.scrollTop !== eskiKaydirma) el.scrollTop = eskiKaydirma;
+      const yan = kap !== el ? (kap.querySelector(':scope > .kayan') as HTMLElement | null) : null;
+      if (yan && yan.style.maxHeight !== yeniMax) yan.style.maxHeight = yeniMax;
     };
     uygula();
     // Pencere boyutu degisince tavan da degisir (kilit ekrana sigmali).
@@ -331,6 +344,15 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, altSerit
             <div className="kagov" ref={govdeRef}>{children}</div>
             {yanPanel && <aside className="kayan">{yanPanel}</aside>}
           </div>
+        ) : yanPanelYatay ? (
+          // YATAY SEKMELİ KARTTA SAĞ SÜTUN (müşteri kartı Ver3): sekmeler üstte, panel gövdenin sağında.
+          <>
+            {sekmeBar}
+            <div className="kayatay">
+              <div className="kagov" ref={govdeRef}>{children}</div>
+              <aside className="kayan">{yanPanelYatay}</aside>
+            </div>
+          </>
         ) : (
           <>
             {sekmeBar}

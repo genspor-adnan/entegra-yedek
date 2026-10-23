@@ -46,6 +46,15 @@ public static partial class KaynakKatalogu
             "               '[^0-9]', '', 'g')";
 
         /// <summary>taraf.departman artik departman TABLOSUNA isaret eder (251).</summary>
+        /// <summary>
+        /// CARI OZETI (1150): bakiye / vade / ciro kolonlarinin (o.*) ve risk
+        /// limitinin (tm.*) join'i. Cari kolonlarini kullanan HER kaynak (Aday,
+        /// Kurum) bunu eklemeli - kolonlar o / tm takma adlarini okur.
+        /// </summary>
+        public const string CariOzetJoin =
+            "left join public.v_cari_ozet o on o.taraf_id = t.id " +
+            "left join public.taraf_musteri tm on tm.id = t.id";
+
         public const string DepartmanAdi =
             "coalesce((select dp.ad from public.departman dp where dp.id = t.departman), '')";
     }
@@ -54,7 +63,10 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Cari() => new(
         Ad: "cari",
         YetkiKodu: "cari",
-        Kaynak: "public.taraf t",
+        // CARI OZETI (1150, Musteri Listesi Ver3): bakiye / vade / ciro kolonlari
+        //   v_cari_ozet'ten, risk limiti taraf_musteri'den. Ozeti olmayan cari
+        //   (hic hareketi yok) left join'de bos kalir - kolonlar 0 / bos gosterir.
+        Kaynak: "public.taraf t " + TarafKatalog.CariOzetJoin,
         SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1)",
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         KapsamKolonu: "t.id",
@@ -101,6 +113,37 @@ public static partial class KaynakKatalogu
                                                     "metin", "Temsilci",      Varsayilan: false),
             new("efatura",      "t.efatura",       "mantik","e-Fatura",      Hizalama: "orta"),
             new("durum",        "t.durum",         "kod",   "Durum",         Hizalama: "orta"),
+            // ---- CARI OZETI (1150, Musteri Listesi Ver3) - varsayilan GIZLI: ayni
+            //   kaynagi Tedarikci Listesi de kullanir; Musteri Listesi kolonSirasi'yla
+            //   acar. Bicim satirHucre'ye (web) nasil cizilecegini soyler.
+            // Bakiye TL karsiligi (+ borc / - alacak); altinda doviz bakiyeleri.
+            new("bakiye",       "coalesce(o.bakiye, 0)", "para", "Bakiye", Hizalama: "sag",
+                                                    Bicim: "bakiye:dovizBakiye", Varsayilan: false),
+            new("dovizBakiye",  "coalesce(o.doviz_bakiye, '')", "metin", "Döviz Bakiyesi",
+                                                    Varsayilan: false, Siralanabilir: false, Filtrelenebilir: false),
+            new("dovizli",      "case when coalesce(o.doviz_bakiye, '') <> '' then 1 else 0 end",
+                                                    "mantik", "Dövizli", Hizalama: "orta", Varsayilan: false),
+            new("vadesiGecen",  "coalesce(o.vadesi_gecen, 0)", "para", "Vadesi Geçen", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            new("riskLimiti",   "coalesce(tm.risk_limiti, 0)", "para", "Risk Limiti", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            // Limit kullanimi %: borc bakiyesi / risk limiti. Limit 0 = limitsiz (bos).
+            new("riskYuzde",    "case when coalesce(tm.risk_limiti, 0) > 0 " +
+                                "     then round(greatest(coalesce(o.bakiye, 0), 0) * 100 / tm.risk_limiti) end",
+                                                    "sayi", "Risk Limiti %", Bicim: "risk:riskLimiti",
+                                                    Genislik: 120, Varsayilan: false),
+            // Son satistan bu yana gecen gun (satis faturasi / fisi / tahakkuku).
+            new("sonSatisGun",  "(current_date - o.son_satis::date)",
+                                                    "sayi", "Son Satış", Hizalama: "orta", Bicim: "gun",
+                                                    Varsayilan: false),
+            new("sonTahsilat",  "o.son_tahsilat",  "tarih", "Son Tahsilat", Hizalama: "orta",
+                                                    Bicim: "dd.MM.yyyy", Varsayilan: false),
+            new("ciro12Ay",     "coalesce(o.ciro_12ay, 0)", "para", "Ciro (12 ay)", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
+            // 12 aylik ciro egrisi (virgullu, eskiden yeniye) - gridde mini cizgi.
+            new("ciroEgri",     "coalesce(o.ciro_egri, '')", "metin", "Satış Eğilimi",
+                                                    Bicim: "egri:ciro12Ay", Varsayilan: false,
+                                                    Siralanabilir: false, Filtrelenebilir: false),
             new("subeId",       "t.sube_id",       "sayi",  "Sube",          Varsayilan: false),
             new("eklemeTarihi", "t.ekleme_tarihi", "tarih", "Eklendi",       Hizalama: "orta",
                                                                             Bicim: "dd.MM.yyyy", Varsayilan: false)
@@ -238,6 +281,8 @@ public static partial class KaynakKatalogu
                                             "metin", "Gecikme", Hizalama: "orta"),
             new("ilerleme",  "g.ilerleme",  "sayi",  "İlerleme %", Hizalama: "sag"),
             new("cari",      "coalesce(public.fn_taraf_ad(ta.unvan, ta.ad, ta.soyad)::varchar(120), '')", "metin", "İlgili Cari", Genislik: 200),
+            // Cari kartinin CRM sekmesi bu kolonla suzer (musteri_karti_ver3.html).
+            new("tarafId",   "g.taraf_id",  "sayi",  "Cari Id", Varsayilan: false),
             new("proje",     "coalesce(pr.ad, '')",    "metin", "Proje", Varsayilan: false),
             new("aciklama",  "g.aciklama",  "metin", "Açıklama", Genislik: 240, Varsayilan: false),
         });
@@ -656,7 +701,7 @@ public static partial class KaynakKatalogu
         var c = Cari();
         // Sozlesme basligi 1:1 - alt sorgu yerine LEFT JOIN, kolon basina
         //   tekrar sorgu acmasin.
-        var kaynak = "public.taraf t left join public.taraf_kurum k on k.id = t.id";
+        var kaynak = "public.taraf t left join public.taraf_kurum k on k.id = t.id " + TarafKatalog.CariOzetJoin;
         var kolonlar = c.Kolonlar.Select(x => x.Ad switch
         {
             "kod"   => x with { Baslik = "Kurum Kodu" },

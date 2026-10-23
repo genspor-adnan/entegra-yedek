@@ -8,6 +8,7 @@ import { LabTetkikOzeti } from '../../bilesenler/lab/LabTetkikOzeti';
 import { KysPolitikaSeridi } from './KysPolitikaSeridi';
 import { KysOlayPaneli } from '../kys/olay/KysOlayPaneli';
 import { KysRiskPaneli } from '../kys/risk/KysRiskPaneli';
+import { MusteriGostergesi, MusteriOnizleme } from './MusteriPanelleri';
 import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from '../konsultasyon/KonsultasyonPanelleri';
 import { SevkOnizlemePaneli, SevkUstPanel, useSevkSuzgeci } from '../sevk/SevkPanelleri';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../../bilesenler/LabDetayPaneli';
@@ -58,6 +59,8 @@ import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizl
 
 export interface ListeEkranBaglami {
   kaynak: string;
+  /** Aynı kaynağı kullanan ikinci ekran (Tedarikçi Listesi `cari` + rota 'tedarikci'). */
+  rota?: string;
   portalda: boolean;
   yenile: number;
   tazele(): void;
@@ -68,6 +71,8 @@ export interface ListeEkranBaglami {
   aksiyon(kod: string, satir?: ListeSatiri | null): void | Promise<void>;
   /** Üst şerit kutusu listeyi o çiple açar. */
   setCip(i: number): void;
+  /** Seçili çip - kutunun "seçili" görünümü için. */
+  cipIndeks?: number;
   personelSuzgec: ReturnType<typeof usePersonelSuzgeci>;
   /** GÖZ ÜNİTE PANOSU (976): kanban da gridin çipiyle süzülür; seçimi aksiyonlara geçer. */
   panoCipFiltresi?: Kosul;
@@ -270,6 +275,14 @@ const PANELLER: Record<string, ListePaneli> = {
   // KURUMSAL KALİTE (1060 / 1062, mockup Kalite2 olay_bildirim · risk_listesi): liste + sağda kart.
   'kys-olay': { yanPanel: b => <KysOlayPaneli satir={b.seciliSatir} yenile={b.tazele} /> },
   'kys-risk': { yanPanel: b => <KysRiskPaneli satir={b.seciliSatir} yenile={b.tazele} /> },
+  // MÜŞTERİ LİSTESİ VER3 (1150, mockup musteri_listesi_ver3.html): gösterge şeridi + sağda önizleme.
+  //   Aynı kaynağı kullanan Tedarikçi Listesi (rota 'tedarikci') çizmez - sayılar müşteri kümesidir.
+  cari: {
+    ustPanel: b => b.rota ? undefined
+      : <MusteriGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} />,
+    yanPanel: b => b.rota ? undefined
+      : <MusteriOnizleme satir={b.seciliSatir} yenile={b.yenile} tazele={b.tazele} git={b.git} gitKart={b.gitKart} />,
+  },
   // İK BELGE TAKİBİ (1137 / 1138): eksik / doldu / yaklaşan · aktif / zorunlu / süreli / eksiği olan.
   'personel-belge-ozet': { ustSerit: b => <BelgeTakipOzetSeridi yenile={b.yenile} onCip={b.setCip} /> },
   'personel-belge-turu': { ustSerit: b => <BelgeTuruOzetSeridi yenile={b.yenile} onCip={b.setCip} /> },

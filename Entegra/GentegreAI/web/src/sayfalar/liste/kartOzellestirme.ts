@@ -42,6 +42,12 @@ function bkiHesapla(s: Record<string, unknown>): string {
 }
 
 export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
+  // ------------------------------------------- müşteri kartı Ver3 (1150) ----
+  // Mockup musteri_karti_ver3.html sırası; Finansal / Belgeler / CRM kart eklentisinin sekmeleri.
+  cari: {
+    sekmeSirasi: ['Genel', 'Adres / Fatura Bilgisi', 'Satış & Risk', 'Finansal', 'Belgeler', 'CRM',
+                  'Banka / IBAN', 'Resim / Doküman', 'Ek Alanlar'],
+  },
   // ------------------------------------------ İK belge türü (1135-1138) ----
   // Mockup Ekranlar/IK/personel_belge_turu.html (2): şeritte ad · grup · durum; sekmeler mockup sırasıyla.
   'personel-belge-turu': {

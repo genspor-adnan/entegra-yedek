@@ -1501,6 +1501,13 @@ Yine de yeni kayıt eklensin mi?`);
             ? <div className="kayan-dar"><button type="button" className="kanav-katla" title={c('Paneli aç')} onClick={yanDegis}>◀</button></div>
             : <div className="kayan-ic"><button type="button" className="kanav-katla" title={c('Paneli kapat')} onClick={yanDegis}>▶</button>{yanPanel}</div>
         ) : null) : undefined}
+        // YATAY SEKMELİ kartta da sağ panel (müşteri kartı Ver3): yalnız kayıtlı kartta,
+        //   aynı katla / aç düğmesiyle.
+        yanPanelYatay={!dikeyGezinti && yanPanel && !yeniMi ? (
+          yanKapali
+            ? <div className="kayan-dar"><button type="button" className="kanav-katla" title={c('Paneli aç')} onClick={yanDegis}>◀</button></div>
+            : <div className="kayan-ic kayan-genis"><button type="button" className="kanav-katla" title={c('Paneli kapat')} onClick={yanDegis}>▶</button>{yanPanel}</div>
+        ) : undefined}
         // Dikey kipte gövde yüksekliği CSS'ten (pencere sabit 88vh): Modal'ın ölçümü gövdenin
         //   üst öğesini pencere sayar, dikey sarmalayıcıda tavanı yanlış hesaplardı.
         olcumYok={dikeyGezinti || undefined}
