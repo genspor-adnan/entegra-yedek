@@ -646,7 +646,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
                   'bankaFark', 'bankaBekleyen', 'bankaDurum'],
     kolonBasliklari: { ad: 'Hesap', bakiye: 'Sistem Bakiyesi' },
     // Banka kartında "POS / Kart" kutusu yok (kullanıcı 23.10.2026) - o alanlar POS / kredi kartı kartlarında.
-    gizliKartAlanlari: ['komisyonOrani', 'komisyonMasrafId', 'komisyonZamani', 'valorGun', 'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
+    // Hesap Türü sorulmaz, arka planda Banka (kullanıcı 23.10.2026).
+    yeniKayitVarsayilanlari: { tur: 'B' },
+    gizliKartAlanlari: ['tur', 'komisyonOrani', 'komisyonMasrafId', 'komisyonZamani', 'valorGun', 'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
     // Mockup: Aktif / Pasif ayrı kolon değil (çipte), TL karşılığı şeritte - toplam satırı yok.
     gizliKolonlar: ['atamaAdi', 'durumAdi', 'yerelBakiye'],
     menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesabı Listesi', ic: '🏦', yetkiKodu: 'hesap.tanim.banka.liste',
