@@ -88,6 +88,9 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
         ? await api.belgeGuncelle(b.etkinBelgeId, govde)
         : await api.belgeEkle(govde);
       b.setSonuc(yanit);
+      // SUNUCU UYARILARI (ör. "Belge tarihi 7 günden eski", 23.10.2026): kayıt yapıldı ama
+      //   kullanıcı bilmeli - kart Kaydet'le kapandığı için karttaki listede kalmaz, mesajla.
+      if (!otomatik && yanit.uyarilar?.length) mesaj(yanit.uyarilar.join('\n'));
       if (yanit.satirlar?.length)
         b.setSatirlar(yanittanSatirlar(yanit.satirlar, b.yerelPara));
       // Kayit sonrasi kart TEMIZ sayilir (kaydedilmemis degisiklik uyarisi).

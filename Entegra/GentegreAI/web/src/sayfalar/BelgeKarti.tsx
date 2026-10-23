@@ -144,6 +144,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     !belgeId && onDolguTarafId ? { id: onDolguTarafId, unvan: onDolguUnvan ?? '' } : null);
   // Tarih SAATIYLE tutulur: ayni gun icindeki hareket sirasi buna gore.
   const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
+  /** Kayıtlı belgenin açılıştaki tarihi - değişmediyse tarih penceresi sorulmaz (belgeDogrula). */
+  const [kayitliTarih, setKayitliTarih] = useState<string | undefined>(undefined);
   const [seri, setSeri] = useState('WEB');
   /** Ayardan gelen geriye donuk gun siniri (0 = sinir yok). */
   /** Ayardan gelen yerel (defter) para birimi. */
@@ -753,6 +755,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         setTur(d.tur);
         setCari(d.cari);
         setTarih(d.tarih);
+        setKayitliTarih(d.tarih);
         setSeri(d.seri);
         setVadeGun(d.vadeGun);
         setAciklama(d.aciklama);
@@ -967,7 +970,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const girdiKur = (): BelgeGirdisi => (
     {
-      tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
+      tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, kayitliTarih, seri, belgeNo, vadeGun, faturaTipi,
       // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
       //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
       ...(basvuruMu

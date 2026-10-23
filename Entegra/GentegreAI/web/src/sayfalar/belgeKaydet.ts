@@ -41,6 +41,8 @@ export interface BelgeGirdisi {
   tarihEnGec: string;
   tarihEnErken: string | undefined;
   geriGun: number;
+  /** Kayıtlı belgenin açılıştaki tarihi: değişmediyse tarih penceresi sorulmaz (yeni kayıtta yok). */
+  kayitliTarih?: string;
   seri: string;
   belgeNo: string;
   vadeGun: string;
@@ -132,7 +134,7 @@ export interface BelgeGirdisi {
  */
 export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
-          tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
+          tarihEnGec, kayitliTarih, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
           odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli,
           muayeneAcik } = g;
@@ -154,12 +156,16 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
     return { belgeTarihi: 'Belge tarihi zorunlu.' };
   }
   // Tarih penceresi (tum belge turleri): ileri tarih ve 7 gunden eski yasak.
-  if (tarih > tarihEnGec) {
+  //   YENI TARIH GIRISI icin (kullanici 23.10.2026: 30.09 tarihli basvuruya tahsilat ekleyip
+  //   Kaydet -> "Belge tarihi 7 günden eski olamaz"): kayitli belgenin tarihi degismediyse
+  //   sorulmaz - eski belgenin duzenlenmesini sunucudaki belge.duzenleme_gun siniri belirler.
+  const tarihDegismedi = kayitliTarih !== undefined && tarih === kayitliTarih;
+  if (!tarihDegismedi && tarih > tarihEnGec) {
     return { belgeTarihi: 'Belge ileri tarihli olamaz.' };
   }
-  if (tarihEnErken && tarih < tarihEnErken) {
-    return { belgeTarihi: `Belge tarihi ${geriGun} gün` + 'den eski olamaz.' };
-  }
+  // 7 GUNDEN ESKI TARIH ENGEL DEGIL, UYARI (kullanici 23.10.2026: "tarih kurali uyari versin
+  //   kaydi engellemesin"): sunucu kaydeder, uyariyi yanitta doner (kayittan sonra mesaj).
+  //   (tarihEnErken / geriGun tarih kutusunun sinirini cizer.)
   if (talepMi) {
     if (!depo) { return { cikisDepoId: 'İstenen depo seçilmeli.' } }
     if (!teslimAlan) { return { teslimAlanId: 'Talep eden seçilmeli.' } }

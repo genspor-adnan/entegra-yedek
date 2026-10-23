@@ -189,14 +189,17 @@ public sealed partial class BelgeDeposu
         // 667: belge tarihi veritabanindan UTC AN olarak gelir; "kac gun once"
         //   sorusu KURULUS gunune gore sorulur (gece 01:00'deki bir belge UTC'de
         //   onceki gune duser).
+        // UYARI, ENGEL DEGIL (kullanici 23.10.2026: "tarih kurali uyari versin kaydi
+        //   engellemesin" - 30.09 tarihli basvuruya tahsilat eklenince kaydedilemiyordu):
+        //   eski belge duzenlenir, yanitta uyari doner. e-Fatura / turetilmis belge kilitleri
+        //   ve "duzenleme kapali" (0) ayari yukarida ENGEL olarak kalir.
+        var uyarilar = new List<string>();
         if (duzenlemeGun > 0 &&
             Saat.BugunDilim(baglam.ZamanDilimi) >
                 Saat.Yerel(belgeTarihi, baglam.ZamanDilimi).Date.AddDays(duzenlemeGun))
-            throw GentegreHatasi.IsKurali(
-                $"Belge tarihinden {duzenlemeGun} gun gecti; kayit kilitlendi.");
+            uyarilar.Add($"Belge tarihinden {duzenlemeGun} günden fazla geçti - eski tarihli belge değiştirildi.");
 
         // --------------------------------- 2) eski etkiyi geri al (stok + cari) ----
-        var uyarilar = new List<string>();
         if (eskiDurum == 0)                            // taslak stok/cari yazmaz
         {
             await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
@@ -298,7 +301,8 @@ public sealed partial class BelgeDeposu
         belge["id"] = belgeId;
         var (_, yeniUyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
                                                     secenekler, baglam, iptal, belgeId,
-                                                    korunanSayisi: korunan.Count);
+                                                    korunanSayisi: korunan.Count,
+                                                    eskiBelgeTarihi: Saat.Yerel(belgeTarihi, baglam.ZamanDilimi));
         uyarilar.AddRange(yeniUyarilar);
 
         await islem.CommitAsync(iptal);
@@ -366,7 +370,10 @@ public sealed partial class BelgeDeposu
         //   yine de bos degildir. Sayilmazsa "Belgede en az bir satir olmali"
         //   diyerek fisin kaydini reddediyordu (kullanici: fisi acip
         //   "Değişiklikleri Kaydet" deyince belge kayboldu).
-        int korunanSayisi = 0)
+        int korunanSayisi = 0,
+        // MEVCUT BELGENIN TARIHI (subenin yerel saati): tarih degismediyse geriye
+        //   donuk sinir uygulanmaz - bkz. BelgeTarihiKontrolAsync.
+        DateTime? eskiBelgeTarihi = null)
     {
         var uyarilar = new List<string>();
 
@@ -430,7 +437,9 @@ public sealed partial class BelgeDeposu
         //   gecmise donuk degistirilirse kapanmis gunun raporu tutmaz; ileri tarih
         //   ise e-Belge'de GIB tarafindan zaten reddedilir.
         //   Saat de tasinir: ayni gun icindeki hareket sirasi (stok dokumu) buna gore.
-        await BelgeTarihiKontrolAsync(baglanti, islem, belge, iptal, baglam.ZamanDilimi);
+        if (await BelgeTarihiKontrolAsync(baglanti, islem, belge, iptal, baglam.ZamanDilimi, eskiBelgeTarihi)
+            is { } tarihUyarisi)
+            uyarilar.Add(tarihUyarisi);
 
         // ---------------------------------------------- 1) taraf bilgisini DONDUR ----
         // Belge, kartin O ANDAKI halini tasir: kart sonradan degisse de belge degismez.
@@ -686,22 +695,22 @@ public sealed partial class BelgeDeposu
         => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
 
     /// <summary>
-    /// Belge tarihi penceresi: bugunden ileri YOK, N gunden eski YOK.
+    /// Belge tarihi penceresi: bugunden ileri YOK (engel), N gunden eski UYARI (23.10.2026).
     /// N = Genel Ayarlar'daki `belge.geri_gun_siniri` (db/102, varsayilan 7).
     /// 0 girilirse geriye donuk sinir KAPANIR - ileri tarih yasagi ayarla
     /// kapatilamaz, onu GIB zaten reddeder.
     /// </summary>
-    private static async Task BelgeTarihiKontrolAsync(
+    private static async Task<string?> BelgeTarihiKontrolAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction islem,
         IDictionary<string, object?> belge, CancellationToken iptal,
-        string? zamanDilimi = null)
+        string? zamanDilimi = null, DateTime? eskiTarih = null)
     {
-        if (!belge.TryGetValue("belgeTarihi", out var ham) || ham is null) return;
+        if (!belge.TryGetValue("belgeTarihi", out var ham) || ham is null) return null;
         if (ham is not DateTime tarih)
         {
             if (!DateTime.TryParse(Convert.ToString(ham, CultureInfo.InvariantCulture),
                                    CultureInfo.InvariantCulture, DateTimeStyles.None, out tarih))
-                return;
+                return null;
         }
 
         // SUBENIN saati (666): konteyner UTC calisirken kullanicinin yerel
@@ -714,14 +723,26 @@ public sealed partial class BelgeDeposu
             throw GentegreHatasi.Dogrulama("Belge tarihi ileri tarihli olamaz.",
                 new AlanHatasi("belgeTarihi", $"En fazla {simdi:dd.MM.yyyy HH:mm} olabilir."));
 
-        var geriGun = await AyarDeposu.SayiAsync(baglanti, islem, "belge.geri_gun_siniri", iptal);
-        if (geriGun <= 0) return;                       // 0 = geriye donuk sinir yok
+        // KAYITLI BELGE, TARIHI DEGISMEDI (kullanici 23.10.2026: 30.09 tarihli basvuruya tahsilat
+        //   eklenip Kaydet'e basilinca "Belge tarihi 7 günden eski olamaz"): sinir YENI tarih
+        //   girisi icindir. Eski belgenin duzenlenmesini ayri kural sinirlar (belge.duzenleme_gun,
+        //   GuncelleAsync) - ayni belge bugun acilip kaydedilince tarihi yeniden sorgulanmaz.
+        //   Dakika hassasiyeti: istemci saniyesiz gonderir.
+        if (eskiTarih is { } eski &&
+            new DateTime(tarih.Ticks - tarih.Ticks % TimeSpan.TicksPerMinute) ==
+            new DateTime(eski.Ticks - eski.Ticks % TimeSpan.TicksPerMinute))
+            return null;
 
+        var geriGun = await AyarDeposu.SayiAsync(baglanti, islem, "belge.geri_gun_siniri", iptal);
+        if (geriGun <= 0) return null;                  // 0 = geriye donuk sinir yok
+
+        // UYARI, ENGEL DEGIL (kullanici 23.10.2026: "tarih kurali uyari versin kaydi
+        //   engellemesin"): eski tarihli belge kaydedilir, yanitta uyari doner. Ileri tarih
+        //   yasagi yukarida ENGEL olarak kalir (GIB reddeder).
         var enEski = simdi.Date.AddDays(-geriGun);
-        if (tarih < enEski)
-            throw GentegreHatasi.Dogrulama(
-                $"Belge tarihi {geriGun} günden eski olamaz.",
-                new AlanHatasi("belgeTarihi", $"En erken {enEski:dd.MM.yyyy} olabilir."));
+        return tarih < enEski
+            ? $"Belge tarihi {geriGun} günden eski ({tarih:dd.MM.yyyy}) - geçmiş güne kayıt yapıldı."
+            : null;
     }
 
     /// <summary>

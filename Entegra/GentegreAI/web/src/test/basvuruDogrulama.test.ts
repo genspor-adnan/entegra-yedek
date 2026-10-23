@@ -139,3 +139,16 @@ describe('basvuru turu (779)', () => {
     }))).toBeNull();
   });
 });
+
+/** TARİH KURALI UYARI, ENGEL DEĞİL (kullanıcı 23.10.2026): eski tarih kaydı durdurmaz; ileri tarih durdurur. */
+describe('belge tarihi penceresi', () => {
+  const pencere = { tarihEnGec: '2026-10-23T12:00', tarihEnErken: '2026-10-16T00:00' };
+  it('7 günden eski tarih kaydı engellemez (uyarıyı sunucu döner)', () => {
+    expect(belgeDogrula(g({ ...pencere, tarih: '2026-10-01T01:03' }))).toBeNull();
+  });
+  it('ileri tarih engellenir; kayıtlı belgenin değişmemiş tarihi sorulmaz', () => {
+    expect(belgeDogrula(g({ ...pencere, tarih: '2026-10-24T09:00' }))).toEqual(
+      { belgeTarihi: 'Belge ileri tarihli olamaz.' });
+    expect(belgeDogrula(g({ ...pencere, tarih: '2026-10-24T09:00', kayitliTarih: '2026-10-24T09:00' }))).toBeNull();
+  });
+});
