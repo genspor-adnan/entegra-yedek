@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yıl Sonu Devri — 2026 → 2027</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) - musteri_karti_ver3.html ile aynı değişkenler */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.kir{border-color:#c0413d;color:#b3261e}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+
+  /* BASLIK: donem gecisi */
+  .bas{display:flex;gap:18px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line2)}
+  .gecis{display:flex;align-items:center;gap:10px}
+  .yilk{border:1px solid var(--line);border-radius:6px;padding:6px 12px;min-width:150px;background:#fbfcfe}
+  .yilk .y{font-size:20px;font-weight:bold;color:var(--navy)}
+  .yilk .a{font-size:11px;color:var(--muted)}
+  .ok-ok{font-size:22px;color:var(--accent)}
+  .bas .bilgi{color:var(--muted);font-size:11.5px;line-height:1.55}
+  .bas .islem{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .alan{display:flex;flex-direction:column;gap:2px}
+  .alan label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:4px 8px;background:#fff;min-width:150px}
+  .inp.combo::after{content:"▾";float:right;color:var(--muted);margin-left:8px}
+
+  /* ADIMLAR + ICERIK */
+  .govde{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;min-height:640px}
+  .adimlar{border-right:1px solid var(--line);background:#f8fafc;padding:10px 0}
+  .adim{display:flex;gap:10px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;align-items:flex-start}
+  .adim:hover{background:#eef4fc}
+  .adim.on{background:#fff;border-left-color:var(--accent)}
+  .adim .no{width:24px;height:24px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11.5px;border:1px solid var(--line);background:#fff;color:var(--muted)}
+  .adim.tamam .no{background:#3f9a5e;border-color:#3f9a5e;color:#fff}
+  .adim.on .no{background:var(--accent);border-color:var(--accent);color:#fff}
+  .adim .ad{font-weight:bold;color:var(--navy)}
+  .adim .alt{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .adimlar .ayr{border-top:1px solid var(--line2);margin:8px 14px}
+  .adimlar .kural{padding:4px 14px;font-size:10.5px;color:var(--muted);line-height:1.5}
+
+  .icerik{padding:12px 14px;min-width:0}
+  .pane{display:none}
+  .pane.on{display:block}
+  .pbas{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .pbas h3{margin:0;font-size:14px;color:var(--navy)}
+  .pbas .sp{display:flex;gap:6px}
+  .grp{border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden}
+  .grp h4{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);font-size:12px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .grp h4 .sp{font-weight:normal}
+  .grp .ic{padding:10px}
+  .iki{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+
+  table{width:100%;border-collapse:collapse}
+  .dg th{background:var(--head);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px;color:#4d5d6e;white-space:nowrap}
+  .dg td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .dg tr:hover td{background:#f6f9fd}
+  .dg tfoot td{font-weight:bold;background:#fbfcfe;border-top:2px solid var(--line)}
+  .dg .bas2 td{background:#f3f6fa;font-weight:bold;color:var(--navy)}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .kutu-ust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:4px;margin-bottom:12px;background:#fbfcfe}
+  .kutu-ust > div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .kutu-ust > div:last-child{border-right:none}
+  .kutu-ust .b{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu-ust .d{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu-ust .x{font-size:10.5px;color:var(--muted)}
+  .chk{display:inline-flex;gap:6px;align-items:center}
+  .chk i{width:13px;height:13px;border:1px solid #8ea0b4;border-radius:2px;display:inline-block;background:#fff;font-style:normal;font-size:10px;line-height:11px;text-align:center}
+  .chk i.v::before{content:"✓";color:var(--accent);font-weight:bold}
+  .uyari-serit{border:1px solid #f2ddbf;background:#fdf6e3;color:#6d4c12;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .bilgi-serit{border:1px solid #cfe0f5;background:#eef4fc;color:#24508a;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .kir-serit{border:1px solid #f3c4bf;background:#fbe9e7;color:#8c1d17;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .link{color:var(--accent);cursor:pointer;text-decoration:underline dotted}
+  .fis{font-family:Consolas,"Courier New",monospace;font-size:11px}
+
+  /* SAG SUTUN: ozet + gunluk */
+  .yan{border-left:1px solid var(--line);background:#fbfcfe;padding:10px 12px}
+  .yan h5{margin:4px 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .yan .sat{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line2)}
+  .yan .sat b{font-weight:normal;color:var(--ink)}
+  .gunluk{margin:0;padding:0 0 0 14px;list-style:none;border-left:2px solid var(--line2)}
+  .gunluk li{position:relative;padding:0 0 9px 6px;line-height:1.45}
+  .gunluk li::before{content:"";position:absolute;left:-20px;top:4px;width:9px;height:9px;border-radius:5px;background:#9fb1c4}
+  .gunluk li.ok::before{background:#3f9a5e} .gunluk li.uy::before{background:#d6a23b}
+  .gunluk small{color:var(--muted)}
+  .alt-cubuk{display:flex;gap:6px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:var(--head)}
+
+  /* NOTLAR (tasarim aciklamasi) */
+  .notlar{max-width:1480px;margin:14px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 16px;line-height:1.6}
+  .notlar h2{font-size:14px;color:var(--navy);margin:0 0 6px}
+  .notlar li{margin-bottom:4px}
+  .notlar table th,.notlar table td{border:1px solid var(--line2);padding:4px 8px;text-align:left;vertical-align:top}
+  .notlar table th{background:var(--head)}
+  code{background:#f1f4f8;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">🗓️ <b>Yıl Sonu Devri</b> <span class="yol">Muhasebe › Mali Dönemler › Yıl Devri</span>
+    <span class="sag"><span>Merkez Şube</span><span>Ayşe Kaya · Mali İşler</span><span>08.01.2027 14:05</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>📒 Mali Dönemler</span><span class="on">🗓️ Yıl Devri 2026 → 2027</span><span>＋</span></div>
+
+  <!-- BASLIK: hangi donemden hangisine, kapsam -->
+  <div class="bas">
+    <div class="gecis">
+      <div class="yilk"><div class="y">2026</div><div class="a">01.01 – 31.12.2026 · <span class="rz sari">Açık · devir sürüyor</span></div></div>
+      <div class="ok-ok">➜</div>
+      <div class="yilk"><div class="y">2027</div><div class="a">01.01 – 31.12.2027 · <span class="rz mavi">Hazırlanıyor</span></div></div>
+    </div>
+    <div class="alan"><label>Kapsam</label><div class="inp combo">Merkez Şube</div></div>
+    <div class="alan"><label>Hesap planı</label><div class="inp combo">Tek Düzen · 7/A</div></div>
+    <div class="bilgi">Devir <b>2. adımda</b> · son işlem 07.01.2027 16:40<br>Başlatan: Ayşe Kaya · Onaylayacak: Mehmet Demir (Mali Müşavir)</div>
+    <div class="islem">
+      <button class="btn">📄 Devir Raporu ▾</button>
+      <button class="btn">⟲ Son adımı geri al</button>
+    </div>
+  </div>
+
+  <div class="govde">
+    <!-- ADIMLAR -->
+    <div class="adimlar">
+      <div class="adim tamam" data-a="kontrol"><div class="no">1</div><div><div class="ad">Ön Kontrol</div><div class="alt">Açık işler, fişlenmemiş belgeler, eksik kurlar · <span class="rz ok">2 engel çözüldü</span></div></div></div>
+      <div class="adim on" data-a="deger"><div class="no">2</div><div><div class="ad">Değerleme</div><div class="alt">31.12 kuruyla döviz değerlemesi, stok envanteri</div></div></div>
+      <div class="adim" data-a="kapanis"><div class="no">3</div><div><div class="ad">Kapanış</div><div class="alt">Gelir tablosu hesapları kapanır, dönem kârı 590/591</div></div></div>
+      <div class="adim" data-a="yeni"><div class="no">4</div><div><div class="ad">Yeni Yıl</div><div class="alt">2027 dönemi, belge serileri, izin hakları</div></div></div>
+      <div class="adim" data-a="acilis"><div class="no">5</div><div><div class="ad">Açılış &amp; Kilit</div><div class="alt">01.01 açılış fişi, 2026 kilidi, rapor</div></div></div>
+      <div class="ayr"></div>
+      <div class="kural"><b>Sıra zorunlu:</b> bir adım bitmeden sonraki açılmaz. Her adım tek tek geri alınabilir — 5. adımdaki kilide kadar.</div>
+      <div class="kural"><b>Sıfırlanmayanlar:</b> cari, kasa, banka, stok ve çek bakiyeleri. Ekstreler kesintisizdir; 2027 ekstresinin "Devir" satırı hesaplanır, kayıt taşınmaz.</div>
+    </div>
+
+    <!-- ICERIK -->
+    <div class="icerik">
+
+      <!-- 1) ON KONTROL -->
+      <div class="pane" data-p="kontrol">
+        <div class="pbas"><h3>1 · Ön Kontrol</h3><span class="rz ok">Engel yok</span>
+          <span class="sp"><button class="btn">⟳ Yeniden Tara</button></span></div>
+        <div class="bilgi-serit">Devirden önce 2026'da yarım kalan işler. <b>Engel</b> olanlar bitmeden 2. adım açılmaz; <b>uyarı</b> olanlar devri durdurmaz ama rapora yazılır.</div>
+        <div class="grp"><h4>Kontrol listesi <span class="sp sonuk">son tarama 07.01.2027 16:32</span></h4>
+          <div class="dg"><table>
+            <thead><tr><th>Kontrol</th><th>Tür</th><th class="sag">Adet</th><th>Durum</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Muhasebeye aktarılamayan (fişlenemeyen) belge</td><td>Engel</td><td class="sag">0</td><td><span class="rz ok">Temiz</span> <span class="sonuk">· 34'tü, 07.01'de çözüldü</span></td><td><span class="link">Listeyi aç</span></td></tr>
+              <tr><td>Taslak (kesinleşmemiş) satış / alış belgesi</td><td>Engel</td><td class="sag">0</td><td><span class="rz ok">Temiz</span></td><td><span class="link">Listeyi aç</span></td></tr>
+              <tr><td>Kapatılmamış kasa günü</td><td>Engel</td><td class="sag">0</td><td><span class="rz ok">Temiz</span> <span class="sonuk">· 2 gün kapatıldı</span></td><td><span class="link">Gün kapanışı</span></td></tr>
+              <tr><td>31.12.2026 döviz kuru (TCMB efektif / döviz alış)</td><td>Engel</td><td class="sag">3</td><td><span class="rz ok">USD · EUR · GBP girildi</span></td><td><span class="link">Kurlar</span></td></tr>
+              <tr><td>Açık banko oturumu (HBYS vezne)</td><td>Engel</td><td class="sag">0</td><td><span class="rz ok">Temiz</span></td><td><span class="link">Banko oturumları</span></td></tr>
+              <tr><td>e-Fatura / e-Arşiv: hazırlanmış ama gönderilmemiş</td><td>Uyarı</td><td class="sag">2</td><td><span class="rz sari">2 belge · 30.12 tarihli</span></td><td><span class="link">e-Belge listesi</span></td></tr>
+              <tr><td>Sayım farkı işlenmemiş stok sayımı</td><td>Uyarı</td><td class="sag">1</td><td><span class="rz sari">Ana depo · 28.12 sayımı</span></td><td><span class="link">Sayımlar</span></td></tr>
+              <tr><td>Açık sipariş / faturalanmamış irsaliye</td><td>Bilgi</td><td class="sag">17</td><td><span class="rz mavi">2027'ye devreder · ₺ 412.880</span></td><td><span class="link">Listeyi aç</span></td></tr>
+              <tr><td>Portföydeki / tahsildeki çek–senet</td><td>Bilgi</td><td class="sag">23</td><td><span class="rz mavi">Vadesine göre izlenir · ₺ 286.400</span></td><td><span class="link">Portföy</span></td></tr>
+              <tr><td>Medula: faturalanmamış dönem (HBYS)</td><td>Uyarı</td><td class="sag">1</td><td><span class="rz sari">Aralık 2026 SGK dönemi açık</span></td><td><span class="link">Medula dönemi</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="ip ipucu" style="padding:0 10px 10px">Tarama yalnız okur, hiçbir kaydı değiştirmez. "Listeyi aç", ilgili listeyi kendi sekmesinde ve süzülmüş açar.</div>
+        </div>
+      </div>
+
+      <!-- 2) DEGERLEME -->
+      <div class="pane on" data-p="deger">
+        <div class="pbas"><h3>2 · Değerleme</h3><span class="rz sari">Önizleme · henüz fiş yok</span>
+          <span class="sp"><button class="btn">🔍 Fiş önizleme</button><button class="btn primary">✔ Değerleme fişlerini kes</button></span></div>
+        <div class="kutu-ust">
+          <div><div class="b">Değerleme tarihi</div><div class="d">31.12.2026</div><div class="x">TCMB döviz alış (VUK 280)</div></div>
+          <div><div class="b">Kur farkı geliri</div><div class="d alacak">₺ 38.420,15</div><div class="x">646 Kambiyo Kârları</div></div>
+          <div><div class="b">Kur farkı gideri</div><div class="d borc">₺ 12.906,40</div><div class="x">656 Kambiyo Zararları</div></div>
+          <div><div class="b">Net etki</div><div class="d">₺ 25.513,75</div><div class="x">dönem kârına eklenir</div></div>
+        </div>
+
+        <div class="grp"><h4>Dövizli hesaplar <span class="sp"><span class="chk"><i class="v"></i>Bakiyesi sıfır olanları gizle</span></span></h4>
+          <div class="dg"><table>
+            <thead><tr><th>Hesap</th><th>Tür</th><th>Döviz</th><th class="sag">Döviz bakiye</th><th class="sag">Kayıtlı TL</th><th class="sag">31.12 kuru</th><th class="sag">Değerlenmiş TL</th><th class="sag">Kur farkı</th><th>Belge</th></tr></thead>
+            <tbody>
+              <tr class="bas2"><td colspan="9">Cari hesaplar (7)</td></tr>
+              <tr><td>Ege Tarım Ürünleri A.Ş.</td><td>Müşteri</td><td>USD</td><td class="sag">1.250,00 B</td><td class="sag">51.500,00</td><td class="sag">42,6150</td><td class="sag">53.268,75</td><td class="sag alacak">+1.768,75</td><td><span class="rz mavi">Kur farkı faturası</span></td></tr>
+              <tr><td>Anadolu Medikal Ltd.</td><td>Tedarikçi</td><td>EUR</td><td class="sag">8.400,00 A</td><td class="sag">392.700,00</td><td class="sag">48,2210</td><td class="sag">405.056,40</td><td class="sag borc">−12.356,40</td><td><span class="rz">Dekont</span></td></tr>
+              <tr><td class="sonuk">… 5 cari daha</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="sag">+21.410,00</td><td></td></tr>
+              <tr class="bas2"><td colspan="9">Banka / kasa (3)</td></tr>
+              <tr><td>Ziraat USD Vadesiz</td><td>Banka</td><td>USD</td><td class="sag">3.200,00</td><td class="sag">130.880,00</td><td class="sag">42,6150</td><td class="sag">136.368,00</td><td class="sag alacak">+5.488,00</td><td><span class="rz">Dekont</span></td></tr>
+              <tr><td>Döviz Kasası EUR</td><td>Kasa</td><td>EUR</td><td class="sag">200,00</td><td class="sag">9.094,40</td><td class="sag">48,2210</td><td class="sag">9.644,20</td><td class="sag alacak">+549,80</td><td><span class="rz">Dekont</span></td></tr>
+              <tr><td>İş Bankası GBP</td><td>Banka</td><td>GBP</td><td class="sag">1.000,00</td><td class="sag">56.300,00</td><td class="sag">55,7500</td><td class="sag">55.750,00</td><td class="sag borc">−550,00</td><td><span class="rz">Dekont</span></td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="7">Net kur farkı</td><td class="sag">+25.513,75</td><td></td></tr></tfoot>
+          </table></div>
+          <div class="ipucu" style="padding:0 10px 10px">Müşteri lehine / aleyhine kur farkı için <b>kur farkı faturası</b> (e-Fatura) ya da yalnız dekont seçilir — cari başına. Değerleme fişi 31.12.2026 tarihli, açıklama "Yıl sonu kur değerlemesi" ile kesilir; ekstrede ayrı satır olarak görünür.</div>
+        </div>
+
+        <div class="iki">
+          <div class="grp"><h4>Stok envanteri (dönem sonu)</h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Depo</th><th class="sag">Kalem</th><th class="sag">Miktar</th><th class="sag">Maliyet (ağırlıklı ort.)</th></tr></thead>
+              <tbody>
+                <tr><td>Ana Depo</td><td class="sag">1.284</td><td class="sag">46.210</td><td class="sag">₺ 2.418.300,00</td></tr>
+                <tr><td>Eczane</td><td class="sag">612</td><td class="sag">18.044</td><td class="sag">₺ 386.120,00</td></tr>
+                <tr><td>Ameliyathane</td><td class="sag">148</td><td class="sag">2.906</td><td class="sag">₺ 211.460,00</td></tr>
+              </tbody>
+              <tfoot><tr><td>Toplam</td><td class="sag">2.044</td><td></td><td class="sag">₺ 3.015.880,00</td></tr></tfoot>
+            </table></div>
+            <div class="ipucu">Envanter yalnız raporlanır (153 bakiyesiyle karşılaştırma); stok miktarı sıfırlanmaz. Fark: <span class="borc">₺ 4.120,00</span> — <span class="link">farkı göster</span>.</div>
+          </div></div>
+          <div class="grp"><h4>Değerleme seçenekleri</h4><div class="ic">
+            <div class="chk"><i class="v"></i>Dövizli cariler (müşteri + tedarikçi)</div><br>
+            <div class="chk"><i class="v"></i>Döviz banka ve kasa hesapları</div><br>
+            <div class="chk"><i></i>Dövizli çek / senet portföyü</div><br>
+            <div class="chk"><i></i>Şüpheli alacak karşılığı önerisi (vadesi 1 yılı geçen, 128/654)</div>
+            <div class="ipucu">Kur kaynağı: 31.12 TCMB döviz alış (girilmemişse 1. adım engel). Elle kur verilirse rapora "elle" yazılır.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- 3) KAPANIS -->
+      <div class="pane" data-p="kapanis">
+        <div class="pbas"><h3>3 · Kapanış</h3><span class="rz">Bekliyor</span>
+          <span class="sp"><button class="btn">🔍 Fiş önizleme</button><button class="btn primary" disabled>✔ Kapanış fişlerini kes</button></span></div>
+        <div class="uyari-serit">Kapanış fişleri kesildikten sonra 2026'ya yeni kayıt girilirse fişler yeniden üretilmelidir — ekran bunu kendisi söyler ("kapanış eskidi").</div>
+        <div class="iki">
+          <div class="grp"><h4>Gelir tablosu hesapları → 690 → 692</h4>
+            <div class="dg"><table>
+              <thead><tr><th>Adım</th><th class="sag">Tutar</th></tr></thead>
+              <tbody>
+                <tr><td>7/A yansıtma: 710–770 → 711–771 (maliyet hesapları)</td><td class="sag">₺ 18.420.600,00</td></tr>
+                <tr><td>Gelir hesapları (600–649) → 690</td><td class="sag alacak">₺ 31.508.220,00</td></tr>
+                <tr><td>Gider hesapları (610–689) → 690</td><td class="sag borc">₺ 27.946.115,00</td></tr>
+                <tr><td>Dönem kârı / zararı 690 → 691 (vergi karşılığı %25)</td><td class="sag">₺ 890.526,25</td></tr>
+                <tr><td>691 → 692 Dönem net kârı</td><td class="sag alacak">₺ 2.671.578,75</td></tr>
+              </tbody>
+              <tfoot><tr><td>692 → 590 Dönem Net Kârı (bilanço)</td><td class="sag">₺ 2.671.578,75</td></tr></tfoot>
+            </table></div>
+          </div>
+          <div class="grp"><h4>Bilanço kapanış fişi (31.12.2026)</h4><div class="ic">
+            <div class="dg fis"><table>
+              <thead><tr><th>Hesap</th><th class="sag">Borç</th><th class="sag">Alacak</th></tr></thead>
+              <tbody>
+                <tr><td>100 Kasa</td><td></td><td class="sag">184.220,00</td></tr>
+                <tr><td>102 Bankalar</td><td></td><td class="sag">2.946.010,00</td></tr>
+                <tr><td>120 Alıcılar</td><td></td><td class="sag">5.118.400,00</td></tr>
+                <tr><td>153 Ticari Mallar</td><td></td><td class="sag">3.015.880,00</td></tr>
+                <tr><td>320 Satıcılar</td><td class="sag">4.402.300,00</td><td></td></tr>
+                <tr><td>500 Sermaye</td><td class="sag">2.000.000,00</td><td></td></tr>
+                <tr><td>590 Dönem Net Kârı</td><td class="sag">2.671.578,75</td><td></td></tr>
+                <tr><td class="sonuk">… 38 hesap daha</td><td></td><td></td></tr>
+              </tbody>
+              <tfoot><tr><td>Toplam (eşit olmalı)</td><td class="sag">14.882.310,00</td><td class="sag">14.882.310,00</td></tr></tfoot>
+            </table></div>
+            <div class="ipucu">Kapanış fişi isteğe bağlıdır (seçenek). Kesilmezse 4. adımın açılış fişi doğrudan 31.12 bakiyelerinden üretilir.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- 4) YENI YIL -->
+      <div class="pane" data-p="yeni">
+        <div class="pbas"><h3>4 · Yeni Yıl</h3><span class="rz">Bekliyor</span>
+          <span class="sp"><button class="btn primary" disabled>✔ 2027'yi hazırla</button></span></div>
+        <div class="grp"><h4>Mali dönem 2027</h4><div class="ic">
+          <div class="dg"><table>
+            <thead><tr><th>Dönem</th><th>Başlangıç</th><th>Bitiş</th><th>Tür</th><th>Aylık dönemler</th><th>Durum</th></tr></thead>
+            <tbody><tr><td>2027 — Normal hesap dönemi</td><td>01.01.2027</td><td>31.12.2027</td><td>Normal</td><td>12 ay (Ocak–Aralık)</td><td><span class="rz mavi">Oluşturulacak</span></td></tr></tbody>
+          </table></div>
+        </div></div>
+
+        <div class="grp"><h4>Belge numaraları ve e-Belge serileri <span class="sp"><span class="chk"><i class="v"></i>Önekteki yılı değiştir (2026 → 2027)</span></span></h4>
+          <div class="dg"><table>
+            <thead><tr><th>Belge türü</th><th>2026 önek</th><th class="sag">Son no</th><th>2027 önek</th><th class="sag">Başlangıç</th><th>Başlama tarihi</th></tr></thead>
+            <tbody>
+              <tr><td>Satış Faturası (e-Fatura)</td><td>GEN2026</td><td class="sag">000000004218</td><td><b>GEN2027</b></td><td class="sag">000000000001</td><td>01.01.2027</td></tr>
+              <tr><td>e-Arşiv Fatura</td><td>EAR2026</td><td class="sag">000000018744</td><td><b>EAR2027</b></td><td class="sag">000000000001</td><td>01.01.2027</td></tr>
+              <tr><td>e-İrsaliye</td><td>IRS2026</td><td class="sag">000000002116</td><td><b>IRS2027</b></td><td class="sag">000000000001</td><td>01.01.2027</td></tr>
+              <tr><td>Başvuru / Protokol (HBYS)</td><td>2026-</td><td class="sag">000184</td><td><b>2027-</b></td><td class="sag">000001</td><td>01.01.2027</td></tr>
+              <tr><td>Tahsilat makbuzu</td><td>—</td><td class="sag">00000082</td><td><span class="sonuk">sürer (yılsız)</span></td><td class="sag">—</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ipucu" style="padding:0 10px 10px">GİB e-Belge numarası yıl içerir (seri + yıl + 9 hane) ve her yıl 1'den başlar — 2027 serisi tanımlanmadan 01.01'de fatura kesilemez. Yılsız numaralar (makbuz, kasa işlem no) sürer.</div>
+        </div>
+
+        <div class="iki">
+          <div class="grp"><h4>Yıllık izin devri (İK)</h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Kalem</th><th class="sag">Personel</th><th class="sag">Gün</th></tr></thead>
+              <tbody>
+                <tr><td>2026'dan kalan izin (devreden)</td><td class="sag">61</td><td class="sag">418</td></tr>
+                <tr><td>2027 yeni hak (kıdeme göre 14 / 20 / 26)</td><td class="sag">94</td><td class="sag">1.612</td></tr>
+                <tr><td>Kullanılmayan izin uyarısı (&gt; 30 gün)</td><td class="sag">3</td><td class="sag">104</td></tr>
+              </tbody>
+            </table></div>
+            <div class="ipucu">Hak tarihi işe giriş yıldönümüyse yıl devri dokunmaz; yalnız takvim yılı kuralındaki personel için çalışır (kurum ayarı).</div>
+          </div></div>
+          <div class="grp"><h4>2027'ye devreden açık işler (bilgi)</h4><div class="ic">
+            <div class="dg"><table>
+              <thead><tr><th>Kayıt</th><th class="sag">Adet</th><th class="sag">Tutar</th></tr></thead>
+              <tbody>
+                <tr><td>Açık satış siparişi</td><td class="sag">11</td><td class="sag">₺ 328.640</td></tr>
+                <tr><td>Faturalanmamış irsaliye</td><td class="sag">6</td><td class="sag">₺ 84.240</td></tr>
+                <tr><td>Portföydeki çek / senet</td><td class="sag">23</td><td class="sag">₺ 286.400</td></tr>
+                <tr><td>Açık görev / CRM işi</td><td class="sag">42</td><td class="sag">—</td></tr>
+              </tbody>
+            </table></div>
+            <div class="ipucu">Bunlar taşınmaz — kayıt yerinde kalır, 2027'de kapanır.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- 5) ACILIS & KILIT -->
+      <div class="pane" data-p="acilis">
+        <div class="pbas"><h3>5 · Açılış &amp; Kilit</h3><span class="rz">Bekliyor</span>
+          <span class="sp"><button class="btn primary" disabled>✔ Açılış fişini kes</button><button class="btn kir" disabled>🔒 2026'yı kilitle</button></span></div>
+        <div class="kir-serit"><b>Kilit geri alınamaz gibi düşünün:</b> 2026'nın 12 ayı kilitlenir, 2026 tarihli kayıt girilemez / değiştirilemez. Açmak yalnız "Mali dönem kilidini aç" yetkisiyle ve gerekçe yazılarak yapılır; açılan her kilit rapora düşer.</div>
+        <div class="iki">
+          <div class="grp"><h4>Açılış fişi (01.01.2027)</h4><div class="ic">
+            <div class="dg fis"><table>
+              <thead><tr><th>Hesap</th><th class="sag">Borç</th><th class="sag">Alacak</th></tr></thead>
+              <tbody>
+                <tr><td>100 Kasa</td><td class="sag">184.220,00</td><td></td></tr>
+                <tr><td>102 Bankalar</td><td class="sag">2.946.010,00</td><td></td></tr>
+                <tr><td>120 Alıcılar</td><td class="sag">5.118.400,00</td><td></td></tr>
+                <tr><td>153 Ticari Mallar</td><td class="sag">3.015.880,00</td><td></td></tr>
+                <tr><td>320 Satıcılar</td><td></td><td class="sag">4.402.300,00</td></tr>
+                <tr><td>590 → 570 Geçmiş Yıllar Kârları</td><td></td><td class="sag">2.671.578,75</td></tr>
+                <tr><td class="sonuk">… 38 hesap daha</td><td></td><td></td></tr>
+              </tbody>
+              <tfoot><tr><td>Toplam</td><td class="sag">14.882.310,00</td><td class="sag">14.882.310,00</td></tr></tfoot>
+            </table></div>
+            <div class="ipucu">590 Dönem Net Kârı açılışta 570'e aktarılır (kâr dağıtım kararı genel kurulda, ayrı fiş).</div>
+          </div></div>
+          <div class="grp"><h4>Kilit ve rapor</h4><div class="ic">
+            <div class="chk"><i class="v"></i>2026 aylık dönemleri (12) kilitlensin</div><br>
+            <div class="chk"><i class="v"></i>Mali dönem 2026 "Kapandı" olsun</div><br>
+            <div class="chk"><i class="v"></i>Devir raporu PDF olarak Doküman'a kaydedilsin</div><br>
+            <div class="chk"><i></i>Mali müşavire e-posta ile gönderilsin (mehmet@demirsmmm.com)</div>
+            <div class="ipucu">Rapor: ön kontrol sonuçları, değerleme listesi, kapanış / açılış fişleri, yeni seriler, izin devri ve her adımı kimin ne zaman yaptığı.</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG SUTUN -->
+    <div class="yan">
+      <h5>Devir özeti</h5>
+      <div class="sat"><span>Ön kontrol</span><b><span class="rz ok">Tamam</span></b></div>
+      <div class="sat"><span>Değerleme</span><b><span class="rz sari">Önizleme</span></b></div>
+      <div class="sat"><span>Kapanış fişleri</span><b class="sonuk">—</b></div>
+      <div class="sat"><span>2027 dönemi / seriler</span><b class="sonuk">—</b></div>
+      <div class="sat"><span>Açılış fişi</span><b class="sonuk">—</b></div>
+      <div class="sat"><span>2026 kilidi</span><b class="sonuk">Açık</b></div>
+      <h5 style="margin-top:14px">Rakamlar</h5>
+      <div class="sat"><span>2026 net satış</span><b>₺ 31.508.220</b></div>
+      <div class="sat"><span>Dönem net kârı (tahmini)</span><b class="alacak">₺ 2.671.579</b></div>
+      <div class="sat"><span>Net kur farkı</span><b>₺ 25.514</b></div>
+      <div class="sat"><span>Açık alacak</span><b class="borc">₺ 5.118.400</b></div>
+      <h5 style="margin-top:14px">Günlük</h5>
+      <ul class="gunluk">
+        <li class="ok">Ön kontrol tamam <br><small>07.01.2027 16:32 · Ayşe Kaya</small></li>
+        <li class="ok">34 fişlenemeyen belge yeniden fişlendi <br><small>07.01.2027 15:10 · Ayşe Kaya</small></li>
+        <li class="uy">31.12 kurları TCMB'den alındı (GBP elle düzeltildi) <br><small>07.01.2027 14:55 · Ayşe Kaya</small></li>
+        <li>Devir başlatıldı <br><small>07.01.2027 14:40 · Ayşe Kaya</small></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alt-cubuk">
+    <button class="btn">◀ Önceki adım</button>
+    <span class="sonuk">Adım 2 / 5 · Değerleme fişleri kesilince 3. adım açılır.</span>
+    <span class="sp"></span>
+    <button class="btn">Kapat</button>
+    <button class="btn primary">Sonraki adım ▶</button>
+  </div>
+</div>
+
+<!-- TASARIM NOTLARI -->
+<div class="notlar">
+  <h2>Tasarım notları — Yıl sonu / yıl başı devri</h2>
+  <ul>
+    <li><b>Ne taşınır, ne taşınmaz:</b> Gentegre AI'da cari, kasa, banka, stok ve çek kayıtları tek veritabanında kesintisiz akar; Delphi'deki gibi yeni yıl DB'si açılıp bakiye taşınmaz. Ekstrelerde "Devir" satırı tarih süzgecinden hesaplanır. Devir bu yüzden <b>muhasebe ve dönem işi</b>dir: değerleme, kapanış, açılış, seri ve kilit.</li>
+    <li><b>Sihirbaz, sıralı ve geri alınabilir:</b> beş adım (Ön Kontrol · Değerleme · Kapanış · Yeni Yıl · Açılış &amp; Kilit). Her adım önce önizleme gösterir, onaylanınca fiş/kayıt üretir; son kilide kadar her adım tek tuşla geri alınır (üretilen fişler silinir, günlüğe yazılır).</li>
+    <li><b>Ön kontrol yalnız okur:</b> engel / uyarı / bilgi ayrımı; her satırdan ilgili liste süzülmüş açılır. Engeller: fişlenemeyen belge (<code>muhasebe_fis_hata</code>), taslak belge, kapanmamış kasa günü (<code>kasa_gun_kapanis</code>), açık banko oturumu, 31.12 kuru.</li>
+    <li><b>Değerleme:</b> dövizli cari, banka, kasa (isteğe bağlı çek/senet) 31.12 TCMB döviz alış kuruyla; kur farkı 646/656. Cari başına "kur farkı faturası" ya da dekont. Stok envanteri yalnız rapor ve 153 karşılaştırması.</li>
+    <li><b>Kapanış:</b> 7/A yansıtma, 6xx → 690 → 691/692 → 590; bilanço kapanış fişi seçenek. 2026'ya sonradan kayıt girilirse ekran "kapanış eskidi" der, fiş yeniden üretilir.</li>
+    <li><b>Yeni yıl:</b> 2027 <code>mali_donem</code> + 12 <code>muhasebe_donem</code>; yıl içeren numara şablonları ve e-Belge serileri (GİB: seri + yıl + 9 hane, her yıl 1'den) yeni başlama tarihiyle kopyalanır; yıllık izin devri (<code>personel_izin_hak</code>, takvim yılı kuralındaki personel). Açık sipariş, irsaliye, çek, görev taşınmaz — bilgi.</li>
+    <li><b>Açılış &amp; kilit:</b> 01.01 açılış fişi (590 → 570), 2026 aylarının kilidi ve <code>mali_donem.durum</code> = 1 Kapandı / 2 Kilitli, devir raporu Doküman'a. Kilidi açmak ayrı yetki + gerekçe.</li>
+    <li><b>Şube:</b> kapsam şube bazında (<code>mali_donem.sube_id</code>); "Tüm şubeler" seçilirse adımlar şube şube yürür, özet birleşik.</li>
+  </ul>
+  <table>
+    <tr><th>Ekran parçası</th><th>Veri kaynağı</th><th>Durum</th></tr>
+    <tr><td>Dönemler, kilit</td><td><code>mali_donem</code> (192, <code>devir_fis_id</code>, durum 0/1/2), <code>muhasebe_donem</code> (aylık kilit)</td><td>tablolar var; devir ekranı yok</td></tr>
+    <tr><td>Ön kontrol</td><td><code>muhasebe_fis_hata</code>, <code>belge</code> (taslak, e-belge durumu), <code>kasa_gun_kapanis</code>, banko oturumu, kur tablosu, <code>medula_donem</code></td><td>okuma sorguları</td></tr>
+    <tr><td>Değerleme</td><td><code>v_cari_ekstre</code> (döviz bakiye), kasa/banka hesapları, kur</td><td>yeni: değerleme fişi üretimi</td></tr>
+    <tr><td>Kapanış / açılış fişleri</td><td>muhasebe fiş tabloları, hesap planı</td><td>yeni: fiş şablonu</td></tr>
+    <tr><td>Numara / seri</td><td><code>numara_sablonu</code> (başlama tarihi + önek), <code>ebelge_seri</code></td><td>yeni: yıl kopyalama</td></tr>
+    <tr><td>İzin devri</td><td><code>personel_izin_hak</code>, <code>v_personel_izin_bakiye</code></td><td>yeni: yıl hak üretimi</td></tr>
+    <tr><td>Günlük / rapor</td><td>ISLEMLOG karşılığı + yeni devir adım tablosu</td><td>yeni</td></tr>
+  </table>
+  <p><b>Açık sorular:</b> (1) Kapanış fişi zorunlu mu, yoksa açılış doğrudan bakiyeden mi (mali müşavir tercihi)? (2) Kur farkı faturası hangi carilerde otomatik — ayar mı, cari kartında mı (Satış &amp; Risk)? (3) Devri kim onaylar — iki kişilik onay (hazırlayan + mali müşavir) gerekli mi? (4) Yıllık izin devri bu ekranda mı, İK'nın kendi yıl sonu ekranında mı? (5) HBYS'de Medula Aralık dönemi açıkken devir engel mi uyarı mı?</p>
+</div>
+
+<script>
+  // Adım tıklanınca ilgili pane (mockup gezinmesi).
+  document.querySelectorAll('.adim').forEach(a => a.addEventListener('click', () => {
+    document.querySelectorAll('.adim').forEach(x => x.classList.toggle('on', x === a));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.dataset.p === a.dataset.a));
+  }));
+</script>
+</body>
+</html>
