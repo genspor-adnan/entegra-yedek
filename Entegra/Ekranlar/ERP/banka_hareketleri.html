@@ -120,16 +120,16 @@
   <div class="ust">🏦 <b>Banka Hareketleri</b> <span class="yol">Finans › Banka › Banka Hareketleri</span>
     <span class="sag"><span>FETA · Merkez</span><span>Ayşe Kaya · Muhasebe</span><span>23.10.2026 15:20</span></span></div>
   <div class="sekmeler">
-    <span>🏠</span><span data-g="liste">📊 Banka Listesi</span>
+    <span>🏠</span><span data-g="liste">📊 Banka Hesabı Listesi</span>
     <span class="on" data-g="hareket">🏦 Banka Hareketleri</span>
-    <span data-g="kart">🏦 Banka Kartı</span>
+    <span data-g="kart">🏦 Banka Hesabı Kartı</span>
     <span data-g="entegrasyon">🔌 Entegrasyonlar</span><span>＋</span>
   </div>
 
   <!-- ====================================================== LİSTE ==== -->
   <div class="gorunum" data-p="liste">
     <div class="arac">
-      <b style="font-size:14px;color:var(--navy)">Banka Listesi</b><span class="sonuk">Finans › Banka › Banka Listesi</span>
+      <b style="font-size:14px;color:var(--navy)">Banka Hesabı Listesi</b><span class="sonuk">Finans › Banka Hesabı Listesi · mevcut liste, yeni kolonlarla</span>
       <span class="sp"></span>
       <button class="btn">＋ Yeni Banka Hesabı</button><button class="btn">✎ Düzenle</button>
       <button class="btn primary">⟳ Tümünü Çek</button><button class="btn">🏦 Hareketler</button><button class="btn">📄 Ekstre</button><button class="btn">🖨️ Yazdır ▾</button>
@@ -363,7 +363,7 @@
   <div class="gorunum" data-p="kart">
     <div class="ic">
       <div class="bilgi-serit">Hesaba özel bağlantı bilgisi <b>banka hesap kartındaki yeni "Banka Bağlantısı" sekmesinde</b>: hareket kaynağı, kullanılacak entegrasyon (Entegrasyonlar'daki satır), onay no, şube / hesap no, IBAN, çekme sıklığı.</div>
-      <div class="grp" style="max-width:980px"><h4>🏦 Banka Kartı — Garanti BBVA · TL Vadesiz <span class="sp"></span><span class="rz ok">API · 30 dk</span></h4>
+      <div class="grp" style="max-width:980px"><h4>🏦 Banka Hesabı Kartı — Garanti BBVA · TL Vadesiz <span class="sp"></span><span class="rz ok">API · 30 dk</span></h4>
         <div class="sekmeler kart-sek" style="background:#f6f8fb"><span data-k="genel">Genel</span><span data-k="bilgi">Banka Bilgileri</span><span class="on" data-k="bag">🔗 Banka Bağlantısı</span><span data-k="har">Hareketler</span><span data-k="dok">Resim / Doküman</span></div>
         <div class="gi kart-pane" data-k="genel" style="display:none">
           <div class="f">
@@ -435,7 +435,7 @@
 <div class="notlar">
   <h2>Tasarım notları — Banka hareketleri (Garanti BBVA API + dosya)</h2>
   <ul>
-    <li><b>Banka Listesi:</b> mevcut Banka listesi (hesap kaynağı) üç kolonla genişler: bağlantı (API / dosya / kapalı + sıklık), son çekim, banka bakiyesi ve fark; bekleyen hareket sayısı ve dikkat durumu (onay süresi doldu, çekim hatası, uzun süredir dosya yok). "Tümünü Çek" bağlı bütün hesapları çeker; çift tık hesabın Banka Hareketleri'ni açar.</li>
+    <li><b>Banka Hesabı Listesi ve Kartı DEĞİŞİR, yeni ekran olmaz:</b> mevcut <code>/banka-hesap</code> listesi (hesap kaynağı, tür B) genişler; kartın mevcut Genel / Banka Bilgileri alanları kalır, <b>Banka Bağlantısı</b> ve <b>Hareketler</b> sekmeleri eklenir. Liste: bağlantı (API / dosya / kapalı + sıklık), son çekim, banka bakiyesi ve fark; bekleyen hareket sayısı ve dikkat durumu (onay süresi doldu, çekim hatası, uzun süredir dosya yok). "Tümünü Çek" bağlı bütün hesapları çeker; çift tık hesabın Banka Hareketleri'ni açar.</li>
     <li><b>Akış:</b> çek → öner → işle. Bankadan gelen her hareket <code>banka_hareket</code> satırı olur (banka işlem no tekil — aynı hareket iki kez gelmez); öneri motoru kuralları sırayla dener; kullanıcı onaylayınca kasa işlemi (tahsilat / tediye / virman / masraf) oluşur ve harekete bağlanır.</li>
     <li><b>Eşleştirmenin gücü bankanın zenginleştirme bilgisinde:</b> Garanti yanıtında karşı tarafın IBAN'ı (CORRACNT), adı (MUS), VKN/TCKN'si ve fatura metni (DTS) gelir. IBAN, cari kartının Banka / IBAN listesiyle (1153), VKN cari kaydıyla, fatura no açık faturayla eşleşir; güven puanı yanında gösterilir.</li>
     <li><b>Mutabakat:</b> banka bakiyesi (son hareketin <code>balanceAfterTransaction</code>'ı) ile sistemdeki hesap bakiyesi yan yana; fark = işlenmemiş hareketler. Hepsi işlenince fark sıfır olmalı.</li>
