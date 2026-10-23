@@ -51,7 +51,24 @@ public static partial class KartKatalogu
             new("acilisTarihi",    "acilis_tarihi",     "tarih", Baslik: "Açılış Tarihi", Grup: "Genel", AltGrup: "Muhasebe"),
             new("muhHesapId",      "muh_hesap_id",      "kod",   KodTablosu: "public.v_hesap_plani_lookup", Baslik: "Muhasebe Hesabı", Grup: "Genel", AltGrup: "Muhasebe"),
             new("subeId",          "sube_id",           "sayi",  Yazilabilir: false, Baslik: "Şube"),
-            new("eklemeTarihi",    "ekleme_tarihi",     "tarih", Yazilabilir: false)
+            new("eklemeTarihi",    "ekleme_tarihi",     "tarih", Yazilabilir: false),
+            // BANKA BAĞLANTISI (1157, mockup Ekranlar/ERP/banka_hareketleri.html): hesaba özel - API
+            //   anahtarı Entegrasyonlar'daki satırda (banka başına bir kez). Yalnız Banka Hesabı kartında
+            //   görünür (öteki hesap listeleri sekmeyi gizler).
+            new("bankaKaynak",       "banka_kaynak",        "kod",    SabitKodlar: new Dictionary<string, string>
+                { ["0"] = "Kapalı", ["1"] = "Banka API", ["2"] = "Dosyadan (MT940 / Excel)" }, Baslik: "Hareket Kaynağı", Grup: "Banka Bağlantısı"),
+            new("bankaEntegrasyonId", "banka_entegrasyon_id", "kod",  KodTablosu: "public.v_entegrasyon_hesap_lookup", Baslik: "Entegrasyon", Grup: "Banka Bağlantısı"),
+            new("bankaOnayNo",       "banka_onay_no",       "metin",  EnFazlaUzunluk: 80, Baslik: "Onay No (consentId)", Grup: "Banka Bağlantısı"),
+            new("bankaOnayBitis",    "banka_onay_bitis",    "tarih",  Baslik: "Onay Geçerlilik", Grup: "Banka Bağlantısı"),
+            new("bankaSubeKodu",     "banka_sube_kodu",     "metin",  EnFazlaUzunluk: 10, Baslik: "Şube No (banka)", Grup: "Banka Bağlantısı"),
+            new("bankaCekmeDk",      "banka_cekme_dk",      "kod",    SabitKodlar: new Dictionary<string, string>
+                { ["0"] = "Elle", ["30"] = "30 dakikada bir (08-20)", ["60"] = "Saatte bir (08-20)", ["240"] = "4 saatte bir", ["1440"] = "Günde bir" },
+                Baslik: "Otomatik Çekme", Grup: "Banka Bağlantısı"),
+            new("bankaIlkTarih",     "banka_ilk_tarih",     "tarih",  Baslik: "İlk Çekim Tarihi", Grup: "Banka Bağlantısı"),
+            new("bankaOtomatikIsle", "banka_otomatik_isle", "mantik", Baslik: "%95 üstü güvenli eşleşmeleri otomatik işle", Grup: "Banka Bağlantısı"),
+            new("bankaSonCekim",     "banka_son_cekim",     "zaman",  Yazilabilir: false, Baslik: "Son Çekim", Grup: "Banka Bağlantısı"),
+            new("bankaSonSonuc",     "banka_son_sonuc",     "metin",  Yazilabilir: false, Baslik: "Son Sonuç", Grup: "Banka Bağlantısı"),
+            new("bankaBakiye",       "banka_bakiye",        "para",   Yazilabilir: false, Baslik: "Banka Bakiyesi", Grup: "Banka Bağlantısı"),
         },
         SilmeEngelleri: new[]
         {

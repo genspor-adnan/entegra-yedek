@@ -354,6 +354,8 @@ public static partial class KaynakKatalogu
         Ekle(Kullanici());
         // Kasa alt sistemi (071-080)
         Ekle(Hesap());
+        Ekle(BankaHareket());   // 1157
+        Ekle(BankaKural());     // 1157
         Ekle(CekSenet());
         Ekle(Proje());
         Ekle(Gorev());

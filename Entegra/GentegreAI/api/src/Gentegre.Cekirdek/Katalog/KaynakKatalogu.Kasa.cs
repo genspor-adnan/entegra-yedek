@@ -68,6 +68,7 @@ public static partial class KaynakKatalogu
             public.hesap h
             left join public.v_hesap_bakiye b on b.hesap_id = h.id
             left join public.hesap bh on bh.id = h.bagli_hesap_id
+            left join public.v_banka_hesap_durum bd on bd.hesap_id = h.id
             """,
         SubeKolonu: "h.sube_id",
         VarsayilanSirala: "h.tur asc, h.kod asc, h.ad asc",
@@ -100,7 +101,23 @@ public static partial class KaynakKatalogu
                                                   Genislik: 90, Filtrelenebilir: false),
             new("durum",       "h.durum",         "kod",   "Durum Kodu", Hizalama: "orta",
                                                   Varsayilan: false),
-            new("subeId",      "h.sube_id",       "sayi",  "Sube",    Varsayilan: false)
+            new("subeId",      "h.sube_id",       "sayi",  "Sube",    Varsayilan: false),
+            // BANKA BAĞLANTISI (1157): Banka Hesabı Listesi'nde görünür (öteki hesap listeleri gizler).
+            new("bankaBaglanti", "case h.banka_kaynak when 1 then 'API' || case when h.banka_cekme_dk > 0 then ' · ' ||"
+                                 + " case when h.banka_cekme_dk >= 1440 then 'günde 1' else h.banka_cekme_dk || ' dk' end else ' · elle' end"
+                                 + " when 2 then 'Dosya' else '' end",
+                                                  "metin", "Bağlantı", Hizalama: "orta", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("bankaSonCekim", "h.banka_son_cekim", "zaman", "Son Çekim", Hizalama: "orta", Bicim: "dd.MM HH:mm", Varsayilan: false),
+            new("bankaBakiye",   "h.banka_bakiye",    "para",  "Banka Bakiyesi", Hizalama: "sag", Bicim: "#,##0.00",
+                                                  Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("bankaFark",     "case when h.banka_bakiye is null then null else h.banka_bakiye - coalesce(b.bakiye, 0) end",
+                                                  "para",  "Fark", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("bankaBekleyen", "coalesce(bd.bekleyen, 0)", "sayi", "Bekleyen", Hizalama: "sag", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("bankaDurum",    "case when h.banka_kaynak = 1 and h.banka_onay_bitis < current_date then 'Onay süresi doldu'"
+                                 + " when h.banka_son_sonuc like 'Hata%' then 'Çekim hatası'"
+                                 + " when coalesce(bd.bekleyen, 0) > 0 then 'Bekleyen var'"
+                                 + " when h.banka_kaynak > 0 then 'Mutabık' else '' end",
+                                                  "metin", "Banka Durumu", Hizalama: "orta", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false)
         });
 
     // ----------------------------------------------------------- cek/senet ----

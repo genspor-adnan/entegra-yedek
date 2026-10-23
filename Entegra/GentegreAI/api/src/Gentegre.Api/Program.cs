@@ -70,6 +70,10 @@ kurucu.Services.AddHttpClient("bildirim");
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
 // KİŞİSEL HATIRLATICI (1139): dakikada bir uyarı anı gelen hatırlatmaların SMS / e-postasını kuyruğa koyar.
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.HatirlatmaIscisi>();
+// BANKA HAREKETLERİ (1157): Garanti BBVA API çekme / öneri / işleme + otomatik çekme işçisi.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.BankaHareketServisi>();
+kurucu.Services.AddHttpClient("banka");
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Uclar.BankaCekmeIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
@@ -444,6 +448,7 @@ uygulama.DisaAktarUclariniEkle();   // çıktı menüsü: Excel (10.10.2026)
 uygulama.YatanDonemIcmalUclariniEkle();   // yatan hasta / servis dönem icmali (10.10.2026)
 uygulama.KasaGunSonuUclariniEkle();   // kasa / gün sonu mutabakatı (11.10.2026)
 uygulama.YilDevriUclariniEkle();      // yıl sonu / başı devri (1155, 23.10.2026)
+uygulama.BankaHareketUclariniEkle();  // banka hareketleri (1157, 23.10.2026)
 uygulama.CagriIcmalUclariniEkle();   // çağrı merkezi icmali (11.10.2026)
 uygulama.SterilIcmalUclariniEkle();   // sterilizasyon icmali (11.10.2026)
 uygulama.AmeliyathaneIcmalUclariniEkle();   // ameliyathane icmali (12.10.2026)

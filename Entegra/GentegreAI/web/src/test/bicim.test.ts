@@ -197,3 +197,22 @@ describe('tariheEkle (raf omru)', () => {
     expect(tariheEkle('2026-01-15', 0, 1, 1)).toBe('');
   });
 });
+
+/**
+ * GRID HÜCRESİNDE ZAMAN DİLİMİ: timestamptz "...Z" gelir (DB UTC, 1097). Hücre metni kesip
+ * yazınca İstanbul 17:00 "14:00", şube gece yarısı bir önceki gün görünüyordu (banka hareketleri).
+ */
+describe('liste hucresi zaman dilimli deger', () => {
+  const zaman = { ad: 'islemTarihi', tip: 'zaman', baslik: 'Tarih' } as Parameters<typeof bicimle>[1];
+  const tarih = { ad: 'islemTarihi', tip: 'tarih', baslik: 'Tarih', bicim: 'dd.MM.yyyy' } as Parameters<typeof bicimle>[1];
+
+  it('UTC degeri subenin saatinde yazar', () => {
+    expect(bicimle('2026-10-23T14:00:00Z', zaman)).toBe('23.10.2026 17:00');
+  });
+  it('sube gece yarisi onceki gune dusmez', () => {
+    expect(bicimle('2026-10-22T21:00:00Z', tarih)).toBe('23.10.2026');
+  });
+  it('dilimsiz gun degeri aynen kalir', () => {
+    expect(bicimle('2026-10-22', tarih)).toBe('22.10.2026');
+  });
+});

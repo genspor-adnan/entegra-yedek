@@ -247,6 +247,14 @@ export function bicimle(deger: unknown, kolon: KolonMeta, kaynak?: string): stri
     case 'tarih': {
       const metin = String(deger);
       const saatli = kolon.tip === 'zaman' || !!kolon.bicim?.includes('HH');
+      // ZAMAN DİLİMLİ değer ("...Z", timestamptz - 1097'den beri DB UTC): ŞUBENİN saatinde
+      //   yazılır (tarihSaat ile aynı). Metin kesilince 17:00 İstanbul "14:00" görünüyor,
+      //   şube gece yarısı (UTC 21:00) bir önceki güne düşüyordu.
+      const an = anParcala(metin);
+      if (an) {
+        const sadeceTarih = parcaDiz(an);
+        return saatli ? `${sadeceTarih} ${an.saat}:${an.dakika}` : sadeceTarih;
+      }
       const parca = tarihParcala(metin);
       if (parca) {
         const sadeceTarih = parcaDiz(parca);

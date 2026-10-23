@@ -536,6 +536,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Kasa Listesi', yol: 'Kasa › Kasa Hesaplari',
+    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim.liste',
@@ -630,6 +631,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Banka Hesabı Listesi', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
+    // BANKA BAĞLANTISI (1157, mockup banka_hareketleri.html): bağlantı, son çekim, banka bakiyesi, fark, bekleyen.
+    kolonSirasi: ['kod', 'ad', 'dovizCinsi', 'atamaAdi', 'bakiye', 'yerelBakiye', 'bankaBaglanti', 'bankaSonCekim',
+                  'bankaBakiye', 'bankaFark', 'bankaBekleyen', 'bankaDurum', 'durumAdi'],
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesabı Listesi', ic: '🏦', yetkiKodu: 'hesap.tanim.banka.liste',
   },
@@ -637,6 +641,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Kredi Listesi', yol: 'Banka › Kredi Listesi',
+    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 35, menuAd: 'Kredi Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.kredi.liste',
@@ -645,6 +650,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'POS Hesabı Listesi', yol: 'Banka › POS',
+    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
@@ -653,6 +659,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Kredi Kartı Listesi', yol: 'Banka › Kredi Kartlari',
+    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap.tanim.kredi_karti.liste',

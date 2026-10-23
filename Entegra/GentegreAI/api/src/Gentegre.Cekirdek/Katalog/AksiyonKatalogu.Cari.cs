@@ -15,6 +15,25 @@ public static partial class AksiyonKatalogu
     {
         // KASA › CARI EKSTRE (23.10.2026): sag ustte "📄 Belge Aç" - satiri ureten kasa islemi /
         //   belge. Cikti menusu (Önizle / Yazdır / Kaydet) istemcide (icmal deseni), aksiyon degil.
+        // BANKA HAREKETLERİ (1157): çek · seçilileri işle · önerilenleri işle · yoksay / geri al · öneri yenile.
+        s["banka-hareket-liste"] =
+        [
+            new("banka.cek", "⟳ Bankadan Çek", "banka-hareket", Hedef: "araccubugu,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Ekle, Sira: 10),
+            new("banka.isle", "✔ İşle", "banka-hareket", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            new("banka.toplu-isle", "✔ Önerilenleri İşle", "banka-hareket", Hedef: "araccubugu,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Degistir, Sira: 30),
+            new("banka.yoksay", "⊘ Yoksay", "banka-hareket", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+            new("banka.geri-al", "↩ Yoksaymayı geri al", "banka-hareket", Hedef: "sagtus,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+            new("banka.oneri-yenile", "⟲ Önerileri yenile", "banka-hareket", Hedef: "araccubugu2,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Degistir, Sira: 60),
+            Yazdir(),
+        ];
+        s["banka-kural-liste"] = Crud("banka-kural", "banka-hareket", "banka.kural", "＋ Kural", yazdir: false);
+
         s["cari-ekstre-liste"] =
         [
             new("ekstre.belge-ac", "📄 Belge Aç", "mali_hareket", Hedef: "araccubugu,sagtus,palet",

@@ -350,6 +350,7 @@ public static partial class KartKatalogu
 
         Ekle(PrimPlani());
         Ekle(EntegrasyonHesap());
+        Ekle(BankaKural());     // 1157
         Ekle(RadyolojiCihaz());
 
         // GOZ (691/693): olcumler DETAY SEKMESIDIR, kart alani degil - ayni

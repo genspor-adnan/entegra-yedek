@@ -44,6 +44,7 @@ import { FORM_LISTELERI } from './listeTanimlari.Form';
 import { ISG_LISTELERI } from './listeTanimlari.Isg';
 import { CAGRI_LISTELERI } from './listeTanimlari.Cagri';
 import { STERIL_LISTELERI } from './listeTanimlari.Steril';
+import { BANKA_LISTELERI } from './listeTanimlari.Banka';
 import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
 import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
 import { KYS_AYAR_LISTELERI } from './listeTanimlari.KysAyar';
@@ -133,6 +134,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...ISG_LISTELERI,
   ...CAGRI_LISTELERI,
   ...STERIL_LISTELERI,
+  ...BANKA_LISTELERI,
   ...MEDULA_LISTELERI,
   ...KLINIK_KALITE_LISTELERI,
   ...KYS_OLAY_RISK_LISTELERI,

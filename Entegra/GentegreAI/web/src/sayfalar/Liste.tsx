@@ -29,6 +29,7 @@ import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
 import { efaturaCalistir } from '../bilesenler/efatura/efaturaIslem';
 import { gelenBelgeAksiyonu, gelenCokluAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
+import { bankaAksiyonu } from './banka/BankaHareketPanelleri';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
@@ -633,6 +634,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         setUtsHazirla: utsModal.setHazirla, setUtsKullanim: utsModal.setKullanim,
         setUtsGenel: utsModal.setGenel, setUtsAlma: utsModal.setAlma,
+      })) return;
+
+      if (await bankaAksiyonu(kod, satir, secililer, {
+        tazele: () => setYenile(t => t + 1), hesapId: Number(sorgu.get('hesapId')) || null,
       })) return;
 
       if (await zamanliIsAksiyonu(kod, satir, {
