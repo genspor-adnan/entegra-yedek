@@ -15,7 +15,7 @@ import {
 } from '../api/sozlesme';
 import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
-import { api } from '../api/istemci';
+import { api, oturum } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { BankoOturumModali } from '../bilesenler/banko/BankoOturumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
@@ -494,7 +494,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   odeyen/bolum/doktor) kendi kancasinda.
   const basvuruSuzgec = useBasvuruSuzgeci(tanim.basvuruSuzgeci, tanim.kaynak);
   /** Belge olusturmada sube: oturumun calisma subesi. */
-  const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
+  const oturumSubeId = oturum.subeId ?? undefined;   // kurulum başına anahtar (api/cekirdek)
   /**
    * TETKIK KATALOGU SOL PANELI (492): bolum ya da panel secimi. Ikisi de
    * SUNUCU filtresine cevrilir - panel uyeligi tetkik kimlikleriyle gelir,

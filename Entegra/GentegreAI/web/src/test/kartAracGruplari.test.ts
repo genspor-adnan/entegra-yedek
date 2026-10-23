@@ -47,7 +47,7 @@ describe('karta özel sekme gövdeleri ve başlık parçaları (refaktör 23.10.
     expect(ozelYerTutucuGovdesi('banko', 'Kontrol Listesi')).toBeUndefined();
     expect(ozelSekmeGovdesi('rol', 'ozel:yetkiler')).toBeTypeOf('function');
     expect(ozelSekmeGovdesi('personel', 'ozel:yetkiler')).toBeUndefined();
-  });
+  }, 30_000);   // dinamik içe aktarma: tam koşuda yük altında 5 sn yetmiyor
 
   it('başlık rozeti ve üst şerit yeni kartta yok', async () => {
     const { kartBaslikRozeti, kartUstSeridi } = await import('../bilesenler/kart/kartBasligi');
@@ -58,5 +58,5 @@ describe('karta özel sekme gövdeleri ve başlık parçaları (refaktör 23.10.
     expect(kartUstSeridi('yatan', 'yeni')).toBeNull();
     expect(isValidElement(kartUstSeridi('radyoloji-istem', 7))).toBe(true);
     expect(kartUstSeridi('cari', 7)).toBeNull();
-  });
+  }, 30_000);
 });

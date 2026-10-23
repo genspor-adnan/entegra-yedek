@@ -24,10 +24,19 @@ export function tabanAyarla(adres: string) {
   TABAN = adres.trim().replace(/\/+$/, '').replace(/\/api$/i, '');
 }
 
+/**
+ * OTURUM ANAHTARLARI KURULUM BAŞINA (kullanıcı 23.10.2026: "feta da sürekli: Oturum gecersiz ya da
+ * suresi dolmus"): sunucudaki kurulumlar AYNI ADRESTE alt yollarda (/feta/, /genotipai/hastane/,
+ * /gentegreai/) - tarayıcı deposu adres başına tek. Ortak anahtarda başka kurulumda açılan oturum
+ * FETA'nınkini eziyor, FETA yabancı jetonu reddedip çıkış yaptırıyordu. Kökte (geliştirme,
+ * tek kurulum) eski adlar - oturumlar düşmez.
+ */
+const KURULUM = (import.meta.env.BASE_URL ?? '/').replace(/^\/+|\/+$/g, '');
+const ek = KURULUM ? `@${KURULUM}` : '';
 const ANAHTAR = {
-  access: 'gentegre.access',
-  refresh: 'gentegre.refresh',
-  sube: 'gentegre.sube',
+  access: `gentegre.access${ek}`,
+  refresh: `gentegre.refresh${ek}`,
+  sube: `gentegre.sube${ek}`,
 } as const;
 
 export const oturum = {
