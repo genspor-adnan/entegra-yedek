@@ -7,6 +7,24 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 23.10.2026 — Banka hareketleri: Garanti BBVA API, öneri, işleme (1157)
+
+Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekranlar/ERP/banka_hareketleri.html` → *"mockup'a göre yap"* → liste / kart 3 tur karşılaştırma → *"garanti entegrasyonu yap örnek"*.
+
+- **Model (1157):** `hesap` banka bağlantı alanları (kaynak API / dosya / kapalı, entegrasyon, onay no + geçerlilik, şube / hesap no, çekme sıklığı, otomatik işleme, son çekim / sonuç / banka bakiyesi); `banka_hareket` (hesap + banka işlem no tekil, ham yanıt jsonb, durum bekliyor / öneri hazır / işlendi / yoksayıldı / seçim bekliyor); `banka_kural` (4 sistem kuralı: karşı IBAN carinin IBAN listesinde, VKN / TCKN cari kaydında, açıklamada açık fatura no, karşı IBAN kurumun kendi hesabı = virman; kullanıcı kuralı "açıklama içerir" → cari / hesap / masraf). `fn_banka_oneri` güven puanıyla öneri; kasa işlemi iptal / silinince hareket bekleyene döner (silmede BEFORE tetik — FK SET NULL AFTER'dan önce koşuyordu).
+- **Servis:** ÇEK (her istekte yeni OAuth jetonu, 3 ay sınırı, sayfalama; son hareketin bakiyesi hesabın banka bakiyesi) → ÖNER → İŞLE (kasa akışının kendisi `KasaDeposu.KaydetAsync`: tahsilat 22, tediye 32, virman 43 — karşı bacak aynı işleme bağlı, POS 44, masraf açık bacaklarla). Otomatik çekme işçisi (`banka_cekme_dk`, 08-20). Yetki `banka.hareket` (gör = banka hesabı listesi; ekle / değiştir kasa işlemi ekleyebilen rolden) ve `banka.kural`.
+- **Ekranlar:** Finans › Banka Hareketleri (özet şeridi, hesap seçici, çipler, sağda öneri / karar paneli, toplu işle); Banka Hesabı Listesi (banka ikonu, bağlantı / durum rozetleri, banka bakiyesi + fark + bekleyen, "Bankadan Çek (tümü)"); Banka Hesabı Kartı (Genel: Banka Bilgileri · Tanımlama · Muhasebe; Banka Bağlantısı sekmesi iki kutu + not; Hesap Türü gizli, arka planda Banka; şerit Kod / Para Birimi / Durum yarım; POS / Kart kutusu yok); Yönetim › Banka Eşleştirme Kuralları. Kasa / POS / kredi kartları aynı kaynağı kullanır, banka sekmelerini görmez. Zaman dilimli liste hücresi (`bicimle` → şube dilimi; "14:00" yerine "17:00").
+- **Garanti örnek entegrasyonu:** `/api/banka-ornek/garanti` bankanın API'sinin yerel taklidi (`Banka/api.json` örneğiyle birebir: Basic kimlikli tek kullanımlık jeton, `gettransactions` sayfalama + zenginleştirme; karşı taraflar kurumun kendi kayıtlarından). Yalnız geliştirme / demo kurulumunda. Yanıt çözümünde gerçek hata bulundu: şema `txtnCreditDebitIndicator` / düz zenginleştirme yazar, gerçek yanıt `txnCreditDebitIndicator` (A giriş / B çıkış) ve `{enrichmentCode, enrichmentValue}` — eski kod karşı IBAN / adı hiç bulamazdı. Entegrasyon kodlarına GARANTI eklendi (kart EBELGE'ye düşürüyordu). Anahtarsız test hesabında yerinde benzetim (kaynak 3) duruyor.
+- **Yapılmayan / eksik:**
+  - Gerçek Garanti canlı denemesi yok (Client ID / Secret / onay no müşteriden); ilk canlı çekimde yanıt biçimi (`endDate` / `endtDate`, tarih hassasiyeti) doğrulanmalı. `Banka/UGaranti.pas` içindeki açık anahtarlar kullanılmadı, bankada yenilenmeli; Client Secret `entegrasyon_hesap`'ta düz metin (genel durum, şifreleme ayrı iş).
+  - Dosyadan içe aktarma (MT940 / Excel ekstre, kaynak 2) seçilebiliyor ama yükleme yolu yok. Başka banka istemcisi (İş, Akbank, Yapı Kredi) yok.
+  - Onay süresi yaklaşınca bildirim yok (yalnız liste / kart rozeti); banka bakiyesi − sistem bakiyesi farkı gösterim, mutabakat raporu yok.
+  - Mockup'taki POS "POS GUN SONU" kuralı sistem kuralı değil, kullanıcı girer. Ekstre'de banka satırı eşleşme sütunu (1158) yapılmadı.
+  - Kartın "Hareketler" sekmesi başka oturumda kaldırıldı (hareketler tek Ekstre ekranında, kartta Ekstre düğmesi).
+  - Delphi tarafı (mockup notu: Delphi müşterisi için aynı akış) yok. FETA'ya 1155 / 1157 dağıtılmadı.
+
+---
+
 ## 23.10.2026 — Müşteri Kartı Ver3
 
 Kullanıcı: *"kart mockup3 uygula"* (mockup `Ekranlar/musteri_karti_ver3.html`). Kart eklentisi `cari` (`kartEklentileri.tsx`, parçalar `sayfalar/cari/CariKartParcalari.tsx`), tek uç `GET /api/cari/{id}/kart-ozet`.
