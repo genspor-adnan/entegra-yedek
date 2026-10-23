@@ -31,3 +31,29 @@ describe('kartAracGrubu', () => {
     expect(kartAracGrubu(b('kisi', { salt: true }))).toBeNull();
   });
 });
+
+describe('karta özel sekme gövdeleri ve başlık parçaları (refaktör 23.10.2026)', () => {
+  it('özel detay / yer tutucu / ozel: sekme yalnız kendi kaynağında', async () => {
+    const { ozelDetayGovdesi, ozelYerTutucuGovdesi, ozelSekmeGovdesi } = await import('../bilesenler/kart/kartOzelSekmeleri');
+    for (const [k, d] of [['dis-hekim', 'hekim'], ['stok', 'uts'], ['stok', 'paket'], ['hizmet', 'fiyatlar']])
+      expect(ozelDetayGovdesi(k, d), `${k}.${d}`).toBeTypeOf('function');
+    expect(ozelDetayGovdesi('cari', 'uts')).toBeUndefined();
+    expect(ozelDetayGovdesi('stok', 'barkodlar')).toBeUndefined();
+    for (const [k, s] of [['radyoloji-istem', 'Kontrol Listesi'], ['dis-hekim', 'Gönderim Geçmişi'], ['banko', 'Oturumlar']])
+      expect(ozelYerTutucuGovdesi(k, s), `${k}.${s}`).toBeTypeOf('function');
+    expect(ozelYerTutucuGovdesi('banko', 'Kontrol Listesi')).toBeUndefined();
+    expect(ozelSekmeGovdesi('rol', 'ozel:yetkiler')).toBeTypeOf('function');
+    expect(ozelSekmeGovdesi('personel', 'ozel:yetkiler')).toBeUndefined();
+  });
+
+  it('başlık rozeti ve üst şerit yeni kartta yok', async () => {
+    const { kartBaslikRozeti, kartUstSeridi } = await import('../bilesenler/kart/kartBasligi');
+    const bb = { id: 'yeni' as const, yeniMi: true, deger: {}, meta: null, detaylar: {} };
+    for (const k of ['hasta', 'personel', 'dokuman']) expect(kartBaslikRozeti({ ...bb, kaynak: k }), k).toBeNull();
+    expect(isValidElement(kartBaslikRozeti({ ...bb, kaynak: 'hasta', id: 3, yeniMi: false }))).toBe(true);
+    expect(kartBaslikRozeti({ ...bb, kaynak: 'dis-hekim', id: 3, yeniMi: false })).toBeNull();
+    expect(kartUstSeridi('yatan', 'yeni')).toBeNull();
+    expect(isValidElement(kartUstSeridi('radyoloji-istem', 7))).toBe(true);
+    expect(kartUstSeridi('cari', 7)).toBeNull();
+  });
+});

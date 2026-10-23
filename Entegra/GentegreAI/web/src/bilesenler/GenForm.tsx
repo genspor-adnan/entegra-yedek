@@ -11,13 +11,12 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
-import { yerelAnMetni, bugunIso, hamSayi, kidemMetni, anGirdiMetni } from './bicim';
+import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni } from './bicim';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
 import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
 import { kartGovdesiKur } from './kart/kartGovdesi';
-import { PaketSekmesi } from './PaketSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
 import { mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
@@ -29,20 +28,13 @@ import {
   KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi, type SekmeParcalari,
 } from './kartSekmeleri';
 import { TekKayit } from './TekKayit';
-import { GenGrid } from './GenGrid';
-import { HekimGonderimOzeti } from './radyoloji/HekimGonderimOzeti';
-import { IstemAkisi } from './radyoloji/IstemAkisi';
-import { YatisSeridi } from './yatan/YatisSeridi';
-import { KontrolListesi } from './radyoloji/KontrolListesi';
 export { Modal };
-import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { PersonelBelgePaneli } from './kart/PersonelBelgePaneli';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
-import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
@@ -50,6 +42,8 @@ import { BelgeKarti } from '../sayfalar/BelgeKarti';
 import { KartHatirlat } from './hatirlatma/KartHatirlat';
 import { useFiyatListesiToplu } from './kart/useFiyatListesiToplu';
 import { kartAracGrubu, kartSagAraclari, type KartAracBaglami } from './kart/KartAracGruplari';
+import { ozelDetayGovdesi, ozelSekmeGovdesi, ozelYerTutucuGovdesi } from './kart/kartOzelSekmeleri';
+import { kartBaslikRozeti, kartUstSeridi } from './kart/kartBasligi';
 
 interface Props {
   kaynak: string;
@@ -1328,52 +1322,15 @@ Yine de yeni kayıt eklensin mi?`);
         />
       )}
 
-      {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
-          Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}
-      {/* DIS HEKIM "Hekim Bilgisi" (305): 1:1 uzanti - satir ekle/sil'li grid
-          degil TEK KAYIT formu (kullanici: "mockup gibi label ve edit olsun").
-          Ikinci satir DB'de zaten yazilamaz; grid yanlis bir vaat. */}
-      {aktif?.tur === 'detay' && kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim' && (
-        <TekKayit
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          baslik="Hekim Bilgisi"
-        />
-      )}
-
-      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'uts' && (
-        <TekKayit
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          baslik="ÜTS / Medikal Bilgileri"
-          not={<>ÜTS REF ve GTIN, ÜTS bildiriminde ürün eşleştirmesinde kullanılır.
-               Menşei ülke listesi ülke tablosundan gelir.</>}
-        />
-      )}
-
-      {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
-          gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
-      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
-        <PaketSekmesi
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-        />
-      )}
+      {/* KARTA ÖZEL DETAY GÖVDESİ (kart/kartOzelSekmeleri): diş hekimi bilgisi, stok ÜTS / paket,
+          hizmet fiyatları - kayıt varsa generic grid çizilmez. */}
+      {aktif?.tur === 'detay' && ozelDetayGovdesi(kaynak, aktif.detay.ad)?.({
+        detay: aktif.detay, durum: detaylar[aktif.detay.ad] ?? bosDetay(), salt, yeniMi, id,
+        onDegis: yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni })),
+      })}
 
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
-        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
-        // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
-        //   ayrica cizilirse ayni detay iki kez gorunur.
-        && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
-        // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
-        //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
-        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar')
+        && !ozelDetayGovdesi(kaynak, aktif.detay.ad)
         && !detayIzgara?.[aktif.detay.ad] && (() => {
         const grid = (
         <KartDetaySekmesi
@@ -1454,17 +1411,6 @@ Yine de yeni kayıt eklensin mi?`);
         );
       })()}
 
-      {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
-          (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
-          hizmet_fiyat gridi kaldirildi). */}
-      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar' && (
-        yeniMi
-          ? <div className="not" style={{ marginTop: 12 }}>
-              Fiyatlar kart kaydedildikten sonra fiyat listelerinden gelir.
-            </div>
-          : <HizmetListeFiyatlari hizmetId={id as number} />
-      )}
-
       {/* EKRANA OZEL EK SEKME (mockup muayene karti): icerigi ekran cizer. */}
       {aktif?.tur === 'ozel'
         && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz({
@@ -1480,9 +1426,7 @@ Yine de yeni kayıt eklensin mi?`);
              saltOkunur: salt,
            })}
 
-      {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
-        <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
-      )}
+      {aktif?.tur === 'ozel' && ozelSekmeGovdesi(kaynak, aktif.anahtar)?.({ salt, yeniMi, id })}
 
 
       {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
@@ -1523,82 +1467,12 @@ Yine de yeni kayıt eklensin mi?`);
         <StokHareketSekmesi stokId={id as number} />
       )}
 
-      {/* DIS HEKIM "Gönderim Geçmişi" (305): kart DETAYI degil - baska bir
-          ekranin kayitlari (radyoloji istemleri). Duzenlenebilir satir gridi
-          yerine liste ekranlarindaki GenGrid, SALT OKUNUR ve hekim filtreli.
-          Sekme yer tutucu olarak aciliyor, icini burasi dolduruyor. */}
-      {/* Cekim oncesi kontrol listesi (310) - yer tutucu sekme. */}
-      {aktif?.tur === 'yerTutucu' && kaynak === 'radyoloji-istem'
-       && aktif.baslik === 'Kontrol Listesi' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            İstem kaydedildikten sonra kontrol listesi doldurulur.
-          </div>
-        ) : (
-          <KontrolListesi istemId={id as number} saltOkunur={salt} />
-        )
-      )}
-
-      {aktif?.tur === 'yerTutucu' && kaynak === 'dis-hekim'
-       && aktif.baslik === 'Gönderim Geçmişi' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            Hekim kaydedildikten sonra gönderdiği tetkikler burada listelenir.
-          </div>
-        ) : (
-          <>
-            {/* Ozet + modalite dagilimi GRIDIN USTUNDE: satirlar "hangi
-                tetkik", ozet "ne kadar / hangi cihaz" sorusunu cevaplar. */}
-            <HekimGonderimOzeti hekimId={id as number} />
-            <GenGrid
-              kaynak="radyoloji-istem"
-              gomulu
-              seritGizli
-              boyut={25}
-              sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
-            />
-          </>
-        )
-      )}
-
-      {/* BANKO "Oturumlar" (mockup banko_tanimi_v2.html): bankonun vardiya
-          geçmişi. Oturum = banko + görevli; fark eğilimi buradan okunur.
-          Kart detayı değil, Banko Oturumları listesinin bu bankoya süzülmüş
-          hali - salt okunur. */}
-      {aktif?.tur === 'yerTutucu' && kaynak === 'banko' && aktif.baslik === 'Oturumlar' && (
-        yeniMi ? (
-          <div className="not" style={{ padding: 20 }}>
-            Banko kaydedildikten sonra açılan oturumlar burada listelenir.
-          </div>
-        ) : (
-          <GenGrid
-            kaynak="bankoOturum"
-            gomulu
-            seritGizli
-            boyut={25}
-            sabitFiltre={{ alan: 'bankoId', op: 'esit', deger: id as number }}
-            kolonSirasi={['id', 'acilisTs', 'gorevli', 'devirTutar', 'nakitTahsilat',
-                          'posTutar', 'kapanisSayim', 'kapanisFark', 'teslimAlan', 'durumAdi']}
-            cipler={[
-              { ad: 'Tümü' },
-              { ad: 'Açık', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-              { ad: 'Farklı kapananlar', filtre: { op: 'and', kosullar: [
-                { alan: 'durum', op: 'esit', deger: 4 },
-                { alan: 'kapanisFark', op: 'esitDegil', deger: 0 },
-              ] } },
-            ]}
-          />
-        )
-      )}
-
-      {aktif?.tur === 'yerTutucu'
-       && !(kaynak === 'banko' && aktif.baslik === 'Oturumlar')
-       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi')
-       && !(kaynak === 'radyoloji-istem' && aktif.baslik === 'Kontrol Listesi') && (
+      {/* YER TUTUCU SEKME: ekranın kendi gövdesi (kart/kartOzelSekmeleri) ya da "yakında". */}
+      {aktif?.tur === 'yerTutucu' && (ozelYerTutucuGovdesi(kaynak, aktif.baslik)?.({ salt, yeniMi, id }) ?? (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
           {aktif.baslik} sekmesi yakında.
         </div>
-      )}
+      ))}
 
     </>
   );
@@ -1634,79 +1508,9 @@ Yine de yeni kayıt eklensin mi?`);
       ustBilgi={
         <>
           {baslikRozet}
-          {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
-              cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
-              "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
-          {/* DIS HEKIMDE baslik rozeti YOK (kullanici): durum seritte combo -
-              ayni bilgiyi iki yerde gostermek gereksiz. */}
-          {/* HASTADA BASLIK ROZETI YOK (kullanici): durum artik SERITTE combo
-              (dort degerli: Aktif/Pasif/Aday/Vefat) - ayni bilgiyi iki yerde
-              gostermek gereksiz. Yerine DOSYA NO yaziyor: kartin kimligi
-              "Hasta #123" degil hastanenin verdigi dosya numarasidir. */}
-          {kaynak === 'hasta' && !yeniMi && (
-            <span style={{ margin: '0 auto', fontWeight: 400, fontSize: 12 }}>
-              Dosya No : <b>{String(deger.kod ?? '') || '—'}</b>
-            </span>
-          )}
-          {personelGibiKart && kaynak !== 'hasta' && kaynak !== 'dis-hekim' && !yeniMi && (() => {
-            const ozluk = detaylar.ozluk?.guncel[0];
-            const cikis = String((ozluk?.istenCikisTarihi as string | undefined) ?? '');
-            const pasif = cikis.length > 0 || Number(deger.durum) === 0;
-            // Kidem rozetin SAGINDA duz yazi (kullanici; "Özet" kutusu kalkti).
-            const kidem = kidemMetni(
-              String((ozluk?.iseGirisTarihi as string | undefined) ?? ''), cikis || null);
-            return (
-              <span style={{ margin: '0 auto', display: 'flex', gap: 8,
-                             alignItems: 'center' }}>
-                <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
-                      title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
-                  {pasif ? 'Pasif' : 'Aktif'}
-                </span>
-                {/* Görev de basliktan gorunsun (kullanici): kod -> ad. */}
-                {(() => {
-                  const kod = String(deger.gorevId ?? '');
-                  const ad = kod
-                    ? meta?.alanlar.find(a => a.ad === 'gorevId')?.kodlar?.[kod]
-                    : null;
-                  return ad ? <span className="rozet gri">{ad}</span> : null;
-                })()}
-                {kidem && (
-                  <span style={{ fontWeight: 400, fontSize: 11.5, opacity: .9 }}>
-                    Kıdem {kidem}
-                  </span>
-                )}
-                {/* BELGE DURUMU (mockup personel_belge_takibi.html): hangi sekmede olursan ol. */}
-                {kaynak === 'personel' && (() => {
-                  const d = detaylar.belgeDurumu?.guncel ?? [];
-                  const eksik = d.filter(x => (Number(x.durum) === 1 && Number(x.zorunlu) === 1) || Number(x.durum) === 2).length;
-                  const yakin = d.filter(x => Number(x.durum) === 3).length;
-                  return <>
-                    {eksik > 0 && <span className="rozet hata" title="Eksik / süresi dolan belge">{eksik} eksik belge</span>}
-                    {yakin > 0 && <span className="rozet uyari" title="Süresi yaklaşan belge">{yakin} yaklaşıyor</span>}
-                  </>;
-                })()}
-              </span>
-            );
-          })()}
-          {/* DOKUMAN DURUM ROZETI UST BASLIKTA (kullanici): "Yayında v1"
-              kartin kimligidir - hangi sekmede olursan ol gorunmeli. Arac
-              cubugunda dururken Kaydet/Kapat dugmelerinin arasinda kayboluyordu.
-              HASH GOSTERILMEZ (kullanici): 64 haneli ozet kullaniciya bir sey
-              anlatmiyor; icerik kimligi gerektiginde Icerik sekmesinde. */}
-          {kaynak === 'dokuman' && !yeniMi && (
-            <span style={{ margin: '0 auto', display: 'flex', gap: 6,
-                           alignItems: 'center' }}>
-              <span className={`rozet ${Number(deger.durum) === 3 ? 'ok'
-                                : Number(deger.durum) === 2 ? 'mavi'
-                                : Number(deger.durum) === 4 ? 'gri' : 'uyari'}`}>
-                {meta?.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
-                 ?? 'Taslak'} v{String(deger.surumNo ?? 1)}
-              </span>
-              {Number(deger.onaydakiSurum) > 0 && (
-                <span className="rozet mavi">v{String(deger.onaydakiSurum)} onayda</span>
-              )}
-            </span>
-          )}
+          {/* KAYNAĞA ÖZEL BAŞLIK ROZETİ (kart/kartBasligi): hasta dosya no, personel durumu / görev /
+              kıdem / belge, doküman sürümü. */}
+          {kartBaslikRozeti({ kaynak, id, yeniMi, deger, meta, detaylar })}
           {surum && !surumGizli && <span className="rozet gri">surum {surum}</span>}
           {baslikEk?.(deger)}
           {disKaynak
@@ -1744,15 +1548,8 @@ Yine de yeni kayıt eklensin mi?`);
               : undefined}
           />
         )}
-        {/* RADYOLOJI ISTEMI (310): akis seridi + ozet KIMLIK SERIDININ ALTINDA,
-            sekmelerin USTUNDE - hangi sekmede olursan ol "istem nerede"
-            gorunmeli (mockup radyoloji_istem_karti.html). Yeni kayitta yok. */}
-        {kaynak === 'radyoloji-istem' && !yeniMi && <IstemAkisi istemId={id as number} />}
-        {/* YATIS KARTI (695, mockup yatis_karti.html): kimlik + son vital
-            seridi SEKMELERIN DISINDA - yatan hastada "kim, nerede, kacinci
-            gun, nasil" her kararin onkosulu; sekmeye gomulurse hekim her
-            seferinde tiklar. */}
-        {kaynak === 'yatan' && !yeniMi && <YatisSeridi yatisId={id as number} />}
+        {/* KAYNAĞA ÖZEL ÜST ŞERİT (kart/kartBasligi): radyoloji istem akışı, yatış şeridi. */}
+        {kartUstSeridi(kaynak, id)}
         {/* GOZ MUAYENESI (691, mockup goz_detayli_muayene.html): kimlik +
             baglam kutulari (sikayet, sistemik/ilac, on tetkik, aile) +
             tamamlanma cubugu SEKMELERIN USTUNDE - hekim olcume baslamadan
