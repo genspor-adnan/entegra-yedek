@@ -123,7 +123,6 @@
     <span>🏠</span><span data-g="liste">📊 Banka Listesi</span>
     <span class="on" data-g="hareket">🏦 Banka Hareketleri</span>
     <span data-g="kart">🏦 Banka Kartı</span>
-    <span data-g="kural">🧩 Eşleştirme Kuralları</span>
     <span data-g="entegrasyon">🔌 Entegrasyonlar</span><span>＋</span>
   </div>
 
@@ -313,7 +312,7 @@
   <!-- ============================================ ENTEGRASYONLAR ==== -->
   <div class="gorunum" data-p="entegrasyon">
     <div class="ic">
-      <div class="bilgi-serit">Banka API anahtarı mevcut <b>Yönetim › Ayarlar › Entegrasyonlar</b> listesine yeni satır olarak girer — banka başına <b>bir kez</b>. Aynı bankanın bütün hesapları (TL, USD, POS) bu tek satırı kullanır; ikinci banka (Akbank…) ikinci satırdır.</div>
+      <div class="bilgi-serit">Banka API anahtarı mevcut <b>Yönetim › Ayarlar › Entegrasyonlar</b> listesine yeni satır olarak girer — banka başına <b>bir kez</b>. Aynı bankanın bütün hesapları (TL, USD, POS) bu tek satırı kullanır; ikinci banka (Akbank…) ikinci satırdır. <b>Eşleştirme kuralları</b> da burada — bütün banka entegrasyonları için ortak.</div>
       <div class="grp"><h4>🔌 Entegrasyonlar <span class="sp"></span><button class="btn mini">＋ Yeni Entegrasyon</button></h4>
         <table class="dg">
           <thead><tr><th>Kod</th><th>Ad</th><th>Tür</th><th>Ortam</th><th>Kullanan</th><th>Son sınama</th><th>Durum</th></tr></thead>
@@ -325,7 +324,8 @@
           </tbody>
         </table>
       </div>
-      <div style="max-width:760px">
+      <div class="iki">
+      <div>
         <div class="grp"><h4>🔌 Entegrasyon Kartı — Garanti BBVA API <span class="sp"></span><span class="rz ok">Bağlı · token 14:59</span></h4><div class="gi">
           <div class="f">
             <div class="fld"><label>Sağlayıcı</label><div class="inp combo">Garanti BBVA (apis.garantibbva.com.tr)</div></div>
@@ -338,6 +338,24 @@
           <div class="ipucu">Anahtar Garanti geliştirici portalından (developer.garantibbva.com.tr) alınır. Ekranda yalnız ilk / son haneler görünür; değiştirmek için yeniden girilir. Her istek için yeni erişim jetonu alınır (bankanın kuralı).</div>
         </div></div>
       </div>
+      <div>
+      <div class="grp"><h4>🧩 Eşleştirme kuralları (banka entegrasyonları) <span class="sp"></span><button class="btn mini">＋ Kural</button></h4>
+        <table class="dg">
+          <thead><tr><th>Sıra</th><th>Koşul</th><th>Yön</th><th>Sonuç</th><th>Hedef</th><th class="sag">Son 30 gün</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Karşı IBAN carinin Banka / IBAN listesinde</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari · açık fatura varsa kapat</td><td class="sag">64</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>2</td><td>Karşı VKN / TCKN cari kaydında</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari</td><td class="sag">31</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>3</td><td>Açıklamada açık fatura no geçiyor</td><td>+</td><td>Tahsilat</td><td>faturanın carisi · fatura kapanır</td><td class="sag">22</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>4</td><td>Karşı IBAN kurumun kendi hesabı</td><td>+ / −</td><td>Virman</td><td>o banka / kasa hesabı</td><td class="sag">6</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>5</td><td>Açıklama içerir "POS GUN SONU"</td><td>+</td><td>POS → banka virmanı</td><td>Garanti POS hesabı</td><td class="sag">19</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+            <tr><td>6</td><td>Açıklama içerir "ISLETIM UCRETI" / "KOMISYON"</td><td>−</td><td>Masraf</td><td>780 Banka masrafları</td><td class="sag">4</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+            <tr><td>7</td><td>Açıklama içerir "BLOKE"</td><td>0</td><td>Yoksay</td><td>—</td><td class="sag">5</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+          </tbody>
+        </table>
+        <div class="ipucu" style="padding:0 10px 10px">Kurallar sırayla denenir; ilk tutan öneriyi verir. Sistem kuralları kapatılabilir ama silinmez. "Açıklamadan kural oluştur" sağ paneldeki işaretten de eklenir.</div>
+      </div>
+      </div>
+      </div>
     </div>
   </div>
 
@@ -346,8 +364,52 @@
     <div class="ic">
       <div class="bilgi-serit">Hesaba özel bağlantı bilgisi <b>banka hesap kartındaki yeni "Banka Bağlantısı" sekmesinde</b>: hareket kaynağı, kullanılacak entegrasyon (Entegrasyonlar'daki satır), onay no, şube / hesap no, IBAN, çekme sıklığı.</div>
       <div class="grp" style="max-width:980px"><h4>🏦 Banka Kartı — Garanti BBVA · TL Vadesiz <span class="sp"></span><span class="rz ok">API · 30 dk</span></h4>
-        <div class="sekmeler" style="background:#f6f8fb"><span>Genel</span><span>Banka Bilgileri</span><span class="on">🔗 Banka Bağlantısı</span><span>Hareketler</span><span>Resim / Doküman</span></div>
-        <div class="gi">
+        <div class="sekmeler kart-sek" style="background:#f6f8fb"><span data-k="genel">Genel</span><span data-k="bilgi">Banka Bilgileri</span><span class="on" data-k="bag">🔗 Banka Bağlantısı</span><span data-k="har">Hareketler</span><span data-k="dok">Resim / Doküman</span></div>
+        <div class="gi kart-pane" data-k="genel" style="display:none">
+          <div class="f">
+            <div class="fld"><label>Hesap kodu</label><div class="inp">102.01</div></div>
+            <div class="fld"><label>Hesap adı</label><div class="inp">Garanti TL Vadesiz</div></div>
+            <div class="fld"><label>Tür</label><div class="inp combo">Banka</div></div>
+            <div class="fld"><label>Para birimi</label><div class="inp combo">TL</div></div>
+            <div class="fld"><label>Muhasebe hesabı</label><div class="inp combo">102.01 Garanti TL Vadesiz</div></div>
+            <div class="fld"><label>Şube (kurum)</label><div class="inp combo">Merkez</div></div>
+            <div class="fld"><label>Sorumlu</label><div class="inp combo">Ayşe Kaya</div></div>
+            <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+            <div class="fld gen"><label>Açıklama</label><div class="inp">Tahsilat ve tedarikçi ödemeleri ana hesabı</div></div>
+          </div>
+        </div>
+        <div class="gi kart-pane" data-k="bilgi" style="display:none">
+          <div class="f">
+            <div class="fld"><label>Banka</label><div class="inp combo">Garanti BBVA</div></div>
+            <div class="fld"><label>Banka şubesi</label><div class="inp combo">295 · Ankara Kurumsal</div></div>
+            <div class="fld gen"><label>IBAN</label><div class="inp">TR62 0006 2000 2950 0006 2912 96</div></div>
+            <div class="fld"><label>Hesap no</label><div class="inp">6291296</div></div>
+            <div class="fld"><label>Valör (gün)</label><div class="inp">0</div></div>
+            <div class="fld"><label>Komisyon oranı %</label><div class="inp">0,00</div></div>
+            <div class="fld"><label>Limit (KMH)</label><div class="inp">₺ 250.000,00</div></div>
+            <div class="fld"><label>Açılış bakiyesi</label><div class="inp">₺ 0,00 · 01.01.2026</div></div>
+            <div class="fld"><label>Hesap kesim günü</label><div class="inp">—</div></div>
+          </div>
+        </div>
+        <div class="gi kart-pane" data-k="har" style="display:none">
+          <table class="dg">
+            <thead><tr><th>Tarih</th><th>Açıklama (banka)</th><th class="sag">Tutar</th><th class="sag">Bakiye</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>23.10 14:52</td><td>FAST GELEN EGE TARIM URUNLERI AS GEN2026000004180</td><td class="sag alacak">+48.000,00</td><td class="sag">1.284.420,50</td><td><span class="rz ok">Öneri hazır</span></td></tr>
+              <tr><td>23.10 11:08</td><td>HAVALE MARMARA MEDIKAL LTD FT 3352</td><td class="sag alacak">+12.500,00</td><td class="sag">1.236.420,50</td><td><span class="rz ok">Öneri hazır</span></td></tr>
+              <tr><td>22.10 10:15</td><td>EFT GIDEN ANADOLU AMBALAJ SAN FATURA 2026-118</td><td class="sag borc">−22.680,00</td><td class="sag">1.214.080,50</td><td><span class="rz ok">Öneri hazır</span></td></tr>
+              <tr><td>20.10 09:02</td><td>VIRMAN GARANTI USD HESABIMIZA</td><td class="sag borc">−42.615,00</td><td class="sag">1.234.023,00</td><td><span class="rz">İşlendi</span></td></tr>
+            </tbody>
+          </table>
+          <div class="ipucu">Son çekilen banka hareketleri — tamamı ve işleme "🏦 Banka Hareketleri" ekranında.</div>
+        </div>
+        <div class="gi kart-pane" data-k="dok" style="display:none">
+          <div class="dg"><table><thead><tr><th>Dosya</th><th>Tür</th><th>Tarih</th></tr></thead><tbody>
+            <tr><td>📄 Garanti_hesap_acilis_sozlesmesi.pdf</td><td>Sözleşme</td><td>12.01.2026</td></tr>
+            <tr><td>📄 API_onay_formu_2026.pdf</td><td>Hesap hareketleri API onayı</td><td>30.09.2026</td></tr>
+          </tbody></table></div>
+        </div>
+        <div class="gi kart-pane" data-k="bag">
         <div><div>
           <div class="f">
             <div class="fld"><label>Hareket kaynağı</label><div class="radyo"><span class="on">Banka API</span><span>Dosyadan (MT940 / Excel)</span><span>Kapalı</span></div></div>
@@ -368,27 +430,6 @@
     </div>
   </div>
 
-  <!-- ======================================== EŞLEŞTİRME KURALLARI == -->
-  <div class="gorunum" data-p="kural">
-    <div class="ic">
-      <div class="bilgi-serit">Kurallar <b>Finans › Banka › Ayarlar › Eşleştirme Kuralları</b> listesinde — bütün banka hesapları için ortak; bir kural istenirse tek hesaba daraltılır. Banka Hareketleri'nin sağ panelindeki "Açıklamadan kural oluştur" da buraya satır ekler.</div>
-      <div class="grp"><h4>🧩 Eşleştirme kuralları <span class="sp"></span><button class="btn mini">＋ Kural</button></h4>
-        <table class="dg">
-          <thead><tr><th>Sıra</th><th>Koşul</th><th>Yön</th><th>Sonuç</th><th>Hedef</th><th class="sag">Son 30 gün</th><th>Durum</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>Karşı IBAN carinin Banka / IBAN listesinde</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari · açık fatura varsa kapat</td><td class="sag">64</td><td><span class="rz ok">Sistem</span></td></tr>
-            <tr><td>2</td><td>Karşı VKN / TCKN cari kaydında</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari</td><td class="sag">31</td><td><span class="rz ok">Sistem</span></td></tr>
-            <tr><td>3</td><td>Açıklamada açık fatura no geçiyor</td><td>+</td><td>Tahsilat</td><td>faturanın carisi · fatura kapanır</td><td class="sag">22</td><td><span class="rz ok">Sistem</span></td></tr>
-            <tr><td>4</td><td>Karşı IBAN kurumun kendi hesabı</td><td>+ / −</td><td>Virman</td><td>o banka / kasa hesabı</td><td class="sag">6</td><td><span class="rz ok">Sistem</span></td></tr>
-            <tr><td>5</td><td>Açıklama içerir "POS GUN SONU"</td><td>+</td><td>POS → banka virmanı</td><td>Garanti POS hesabı</td><td class="sag">19</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
-            <tr><td>6</td><td>Açıklama içerir "ISLETIM UCRETI" / "KOMISYON"</td><td>−</td><td>Masraf</td><td>780 Banka masrafları</td><td class="sag">4</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
-            <tr><td>7</td><td>Açıklama içerir "BLOKE"</td><td>0</td><td>Yoksay</td><td>—</td><td class="sag">5</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
-          </tbody>
-        </table>
-        <div class="ipucu" style="padding:0 10px 10px">Kurallar sırayla denenir; ilk tutan öneriyi verir. Sistem kuralları kapatılabilir ama silinmez. "Açıklamadan kural oluştur" sağ paneldeki işaretten de eklenir.</div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="notlar">
@@ -420,6 +461,11 @@
     document.querySelectorAll('.gorunum').forEach(v => v.classList.toggle('on', v.dataset.p === g));
   };
   document.querySelectorAll('.sekmeler [data-g]').forEach(s => s.addEventListener('click', () => ac(s.dataset.g)));
+  // Banka kartı alt sekmeleri.
+  document.querySelectorAll('.kart-sek [data-k]').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.kart-sek [data-k]').forEach(x => x.classList.toggle('on', x === t));
+    document.querySelectorAll('.kart-pane').forEach(p => p.style.display = p.dataset.k === t.dataset.k ? '' : 'none');
+  }));
   // Banka Listesi: çift tık hesabın hareketlerini açar.
   document.querySelectorAll('[data-p=liste] tbody tr').forEach(r => r.addEventListener('dblclick', () => ac('hareket')));
 </script>
