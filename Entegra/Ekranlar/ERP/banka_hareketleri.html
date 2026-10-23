@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banka Hareketleri — Garanti BBVA API</title>
+<style>
+  /* Gentegre AI ekran dili (musteri_karti_ver3.html / yil_sonu_devir.html ile aynı değişkenler) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1520px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px;cursor:pointer}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.mini{padding:2px 7px;font-size:10.5px}
+  .btn.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  .sp{margin-left:auto}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+  .gorunum{display:none} .gorunum.on{display:block}
+
+  /* ARAÇ + SÜZGEÇ */
+  .arac{display:flex;gap:6px;align-items:center;padding:8px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .alan{display:flex;flex-direction:column;gap:2px}
+  .alan label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:4px 8px;background:#fff;min-width:120px}
+  .inp.combo::after{content:"▾";float:right;color:var(--muted);margin-left:8px}
+  .inp.ro{background:#f6f8fb;color:#4d5d6e}
+  .cekim{display:flex;flex-direction:column;font-size:10.5px;color:var(--muted);line-height:1.35}
+
+  /* ÖZET KUTULARI */
+  .ozet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2);cursor:pointer}
+  .ozet > div:last-child{border-right:none}
+  .ozet .b{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .ozet .d{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .ozet .x{font-size:10.5px;color:var(--muted)}
+  .ozet .sec{background:#eef4fc;box-shadow:inset 0 -2px 0 var(--accent)}
+
+  /* GÖVDE */
+  .govde{display:grid;grid-template-columns:minmax(0,1fr) 380px}
+  .liste{min-width:0;border-right:1px solid var(--line)}
+  .cipler{display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid var(--line2);align-items:center}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#fff;color:var(--muted);cursor:pointer}
+  .cip.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  table{width:100%;border-collapse:collapse}
+  .dg th{background:var(--head);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px;color:#4d5d6e;white-space:nowrap}
+  .dg td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+  .dg tr:hover td{background:#f6f9fd}
+  .dg tr.sec td{background:var(--sel)}
+  .dg .ac{max-width:260px}
+  .dg .ac b{font-weight:normal;color:var(--ink)}
+  .dg .ac small{display:block;color:var(--muted)}
+  .oneri{display:flex;flex-direction:column;gap:2px}
+  .oneri .neden{font-size:10.5px;color:var(--muted)}
+  .guven{display:inline-block;width:42px;height:5px;border-radius:3px;background:#e3e9f0;position:relative;vertical-align:middle;margin-left:4px}
+  .guven i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#3f9a5e}
+  .alt-satir{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:var(--head)}
+
+  /* SAĞ PANEL */
+  .yan{padding:10px 12px;background:#fbfcfe}
+  .yan h5{margin:10px 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .yan h5:first-child{margin-top:2px}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px;margin-bottom:8px;line-height:1.5}
+  .kutu .sat{display:flex;justify-content:space-between;gap:10px}
+  .kutu .sat span{color:var(--muted)}
+  .kutu .sat b{font-weight:normal;text-align:right}
+  .secenek{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid var(--line2);border-radius:4px;margin-bottom:5px;background:#fff;cursor:pointer}
+  .secenek.on{border-color:#9cc4ee;background:#f4f9ff}
+  .secenek input{margin-top:2px}
+  .fis{font-family:Consolas,"Courier New",monospace;font-size:11px}
+  .fis td{padding:3px 6px;border-bottom:1px solid var(--line2)}
+
+  /* BAĞLANTI GÖRÜNÜMÜ */
+  .ic{padding:12px 14px}
+  .iki{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+  .grp{border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden;background:#fff}
+  .grp h4{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);font-size:12px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .grp .gi{padding:10px}
+  .f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+  .f .fld{display:flex;flex-direction:column;gap:2px}
+  .f .fld label{font-size:10.5px;color:var(--muted)}
+  .f .gen{grid-column:1 / -1}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .bilgi-serit{border:1px solid #cfe0f5;background:#eef4fc;color:#24508a;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .uyari-serit{border:1px solid #f2ddbf;background:#fdf6e3;color:#6d4c12;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .radyo{display:flex;gap:6px;flex-wrap:wrap}
+  .radyo span{border:1px solid var(--line);border-radius:3px;padding:3px 9px;background:#fff;cursor:pointer}
+  .radyo span.on{border-color:#2f6db3;background:#eef4fc;color:#2f6db3;font-weight:bold}
+
+  .notlar{max-width:1520px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 16px;line-height:1.6}
+  .notlar h2{font-size:14px;color:var(--navy);margin:0 0 6px}
+  .notlar li{margin-bottom:4px}
+  .notlar table th,.notlar table td{border:1px solid var(--line2);padding:4px 8px;text-align:left;vertical-align:top}
+  .notlar table th{background:var(--head)}
+  code{background:#f1f4f8;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">🏦 <b>Banka Hareketleri</b> <span class="yol">Finans › Banka › Banka Hareketleri</span>
+    <span class="sag"><span>FETA · Merkez</span><span>Ayşe Kaya · Muhasebe</span><span>23.10.2026 15:20</span></span></div>
+  <div class="sekmeler">
+    <span>🏠</span><span>📊 Banka Listesi</span>
+    <span class="on" data-g="hareket">🏦 Banka Hareketleri</span>
+    <span data-g="baglanti">🔌 Banka Bağlantısı</span><span>＋</span>
+  </div>
+
+  <!-- ===================================================== HAREKETLER == -->
+  <div class="gorunum on" data-p="hareket">
+    <div class="arac">
+      <div class="alan"><label>Banka hesabı</label><div class="inp combo" style="min-width:300px">🟢 Garanti BBVA · TL Vadesiz · TR62 0006 2000 2950 0006 2912 96</div></div>
+      <div class="alan"><label>Tarih aralığı</label><div style="display:flex;gap:4px"><div class="inp">01.10.2026</div><div class="inp">23.10.2026</div></div></div>
+      <button class="btn primary">⟳ Bankadan Çek</button>
+      <div class="cekim"><span>Son çekim: <b>23.10.2026 15:00</b> · otomatik, 30 dk'da bir</span><span>18 yeni hareket · 0 hata · API yanıtı 1,2 sn</span></div>
+      <span class="sp"></span>
+      <button class="btn">📥 Dosyadan Al (MT940 / Excel)</button>
+      <button class="btn">📄 Ekstre ▾</button>
+    </div>
+
+    <div class="ozet">
+      <div><div class="b">Çekilen</div><div class="d">146</div><div class="x">01.10 – 23.10</div></div>
+      <div class="sec"><div class="b">Bekleyen</div><div class="d">23</div><div class="x">işlenmemiş</div></div>
+      <div><div class="b">Öneri hazır</div><div class="d alacak">17</div><div class="x">güvenli eşleşme</div></div>
+      <div><div class="b">İşlendi</div><div class="d">118</div><div class="x">kasa işlemi oluştu</div></div>
+      <div><div class="b">Yoksayılan</div><div class="d">5</div><div class="x">bloke / iç transfer</div></div>
+      <div><div class="b">Banka bakiyesi</div><div class="d">₺ 1.284.420,50</div><div class="x">son hareket sonrası</div></div>
+      <div><div class="b">Sistem bakiyesi</div><div class="d borc">₺ 1.271.180,50</div><div class="x">fark ₺ 13.240,00 = bekleyenler</div></div>
+    </div>
+
+    <div class="govde">
+      <div class="liste">
+        <div class="cipler">
+          <span class="cip on">Bekleyen (23)</span><span class="cip">Öneri hazır (17)</span><span class="cip">Gelen (+)</span><span class="cip">Giden (−)</span>
+          <span class="cip">İşlendi</span><span class="cip">Yoksayılan</span><span class="cip">Tümü</span>
+          <span class="sp"></span>
+          <button class="btn mini ok">✔ Önerilenleri işle (17)</button>
+        </div>
+        <table class="dg">
+          <thead><tr><th><input type="checkbox"></th><th>Tarih / Valör</th><th>Açıklama (banka)</th><th>Karşı taraf</th><th class="sag">Tutar</th><th class="sag">Bakiye</th><th>Öneri</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr class="sec"><td><input type="checkbox" checked></td><td>23.10.2026 14:52<br><small class="sonuk">valör 23.10</small></td>
+              <td class="ac"><b>FAST GELEN EGE TARIM URUNLERI AS GEN2026000004180 ODEMESI</b><small>EFT/FAST · ref 8812300421</small></td>
+              <td>Ege Tarım Ürünleri A.Ş.<br><small class="sonuk">TR33 0001 0012 …4815 · VKN 3250…</small></td>
+              <td class="sag alacak">+48.000,00</td><td class="sag">1.284.420,50</td>
+              <td><div class="oneri"><span>🧾 Tahsilat · Ege Tarım <span class="guven"><i style="width:96%"></i></span></span><span class="neden">IBAN + VKN eşleşti · fatura GEN2026000004180 açık (48.000)</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox" checked></td><td>23.10.2026 11:08</td>
+              <td class="ac"><b>HAVALE MARMARA MEDIKAL LTD FT 3352</b><small>Havale · ref 8812290017</small></td>
+              <td>Marmara Medikal Ltd.<br><small class="sonuk">VKN 6120… (cari kayıtta)</small></td>
+              <td class="sag alacak">+12.500,00</td><td class="sag">1.236.420,50</td>
+              <td><div class="oneri"><span>🧾 Tahsilat · Marmara Medikal <span class="guven"><i style="width:82%"></i></span></span><span class="neden">VKN eşleşti · açık bakiye 15.300 (kısmi)</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>22.10.2026 17:30</td>
+              <td class="ac"><b>POS GUN SONU 41203388 22.10 BLOKESIZ</b><small>POS · üye işyeri 41203388</small></td>
+              <td class="sonuk">— (POS)</td>
+              <td class="sag alacak">+9.840,00</td><td class="sag">1.223.920,50</td>
+              <td><div class="oneri"><span>💳 POS'tan bankaya virman <span class="guven"><i style="width:90%"></i></span></span><span class="neden">kural: "POS GUN SONU" → Garanti POS hesabı</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>22.10.2026 10:15</td>
+              <td class="ac"><b>EFT GIDEN ANADOLU AMBALAJ SAN FATURA 2026-118</b><small>EFT · ref 8812270990</small></td>
+              <td>Anadolu Ambalaj San.<br><small class="sonuk">TR52 0006 4000 …0217</small></td>
+              <td class="sag borc">−22.680,00</td><td class="sag">1.214.080,50</td>
+              <td><div class="oneri"><span>📤 Tediye · Anadolu Ambalaj <span class="guven"><i style="width:94%"></i></span></span><span class="neden">karşı IBAN carinin Banka/IBAN'ında · alış faturası 2026-118</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>21.10.2026 23:59</td>
+              <td class="ac"><b>HESAP ISLETIM UCRETI EKIM</b><small>Masraf · BSMV dahil</small></td>
+              <td class="sonuk">Garanti BBVA</td>
+              <td class="sag borc">−262,50</td><td class="sag">1.236.760,50</td>
+              <td><div class="oneri"><span>🧮 Masraf · Banka masrafları (780) <span class="guven"><i style="width:88%"></i></span></span><span class="neden">kural: "ISLETIM UCRETI"</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>21.10.2026 14:40</td>
+              <td class="ac"><b>FAST GELEN MEHMET YILMAZ</b><small>FAST · ref 8812250114</small></td>
+              <td>Mehmet Yılmaz<br><small class="sonuk">TCKN 1234…</small></td>
+              <td class="sag alacak">+3.000,00</td><td class="sag">1.237.023,00</td>
+              <td><div class="oneri"><span>❓ 2 aday cari</span><span class="neden">ad benzer: "Mehmet Yılmaz" (2 kayıt) — TCKN kayıtta yok</span></div></td>
+              <td><span class="rz sari">Seçim bekliyor</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>20.10.2026 09:02</td>
+              <td class="ac"><b>VIRMAN GARANTI USD HESABIMIZA</b><small>Virman · kendi hesap</small></td>
+              <td class="sonuk">FETA (kendi hesabı)</td>
+              <td class="sag borc">−42.615,00</td><td class="sag">1.234.023,00</td>
+              <td><div class="oneri"><span>🔁 Virman · Garanti USD <span class="guven"><i style="width:99%"></i></span></span><span class="neden">karşı IBAN kurumun kendi hesabı</span></div></td>
+              <td><span class="rz ok">Öneri hazır</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>19.10.2026 16:11</td>
+              <td class="ac"><b>KREDI KARTI EKSTRE ODEMESI 5406…</b><small>Kart ödemesi</small></td>
+              <td class="sonuk">—</td>
+              <td class="sag borc">−8.410,00</td><td class="sag">1.276.638,00</td>
+              <td><div class="oneri"><span class="sonuk">Öneri yok</span><span class="neden">kural tanımlı değil</span></div></td>
+              <td><span class="rz">Bekliyor</span></td></tr>
+            <tr><td><input type="checkbox"></td><td>18.10.2026 12:00</td>
+              <td class="ac"><b>BLOKE COZUM KREDI KARTI POS</b><small>Bloke çözümü (bilgi)</small></td>
+              <td class="sonuk">—</td>
+              <td class="sag sonuk">0,00</td><td class="sag">1.285.048,00</td>
+              <td><span class="sonuk">—</span></td>
+              <td><span class="rz">Yoksayıldı</span></td></tr>
+          </tbody>
+        </table>
+        <div class="alt-satir">
+          <span class="sonuk">Seçili 2 hareket · +60.500,00</span><span class="sp"></span>
+          <button class="btn">⊘ Yoksay</button><button class="btn">🔗 Elle eşle…</button><button class="btn ok">✔ Seçilileri işle</button>
+        </div>
+      </div>
+
+      <!-- SAĞ: seçili hareket -->
+      <div class="yan">
+        <h5>Seçili hareket</h5>
+        <div class="kutu">
+          <div class="sat"><span>Tutar</span><b class="alacak">+48.000,00 TL</b></div>
+          <div class="sat"><span>İşlem / valör</span><b>23.10.2026 14:52 · 23.10</b></div>
+          <div class="sat"><span>Banka işlem no</span><b>8812300421</b></div>
+          <div class="sat"><span>Sınıf (banka)</span><b>EFT/FAST gelen</b></div>
+        </div>
+        <h5>Bankanın verdiği bilgi (zenginleştirme)</h5>
+        <div class="kutu">
+          <div class="sat"><span>Gönderen</span><b>EGE TARIM URUNLERI AS</b></div>
+          <div class="sat"><span>Gönderen IBAN</span><b>TR33 0001 0012 3456 7890 4815</b></div>
+          <div class="sat"><span>Gönderen VKN</span><b>3250xxxxxx</b></div>
+          <div class="sat"><span>Fatura metni</span><b>GEN2026000004180</b></div>
+        </div>
+        <h5>Ne yapılsın?</h5>
+        <label class="secenek on"><input type="radio" checked><div><b>Tahsilat · Ege Tarım Ürünleri A.Ş.</b><br><small class="sonuk">IBAN carinin Banka/IBAN listesinde · VKN tutuyor · fatura GEN2026000004180 açık 48.000 → kapanır</small></div></label>
+        <label class="secenek"><input type="radio"><div><b>Tahsilat · başka cari…</b><br><small class="sonuk">cari ara</small></div></label>
+        <label class="secenek"><input type="radio"><div><b>Avans (faturasız)</b><br><small class="sonuk">carinin avans hesabına</small></div></label>
+        <h5>Oluşacak kayıt</h5>
+        <div class="kutu fis"><table>
+          <tr><td>Kasa işlemi</td><td>Banka Tahsilatı · makbuz otomatik</td></tr>
+          <tr><td>Hesap</td><td>Garanti TL Vadesiz (102.01)</td></tr>
+          <tr><td>Cari</td><td>Ege Tarım Ürünleri A.Ş. (120.01.044)</td></tr>
+          <tr><td>Belge bağı</td><td>GEN2026000004180 → kapandı</td></tr>
+          <tr><td>Açıklama</td><td>FAST · ref 8812300421</td></tr>
+        </table></div>
+        <label style="display:flex;gap:6px;align-items:center;margin:6px 0"><input type="checkbox"> Bu gönderen IBAN'ını carinin Banka/IBAN listesine ekle</label>
+        <label style="display:flex;gap:6px;align-items:center;margin:0 0 8px"><input type="checkbox"> Açıklamadan kural oluştur ("EGE TARIM" → bu cari)</label>
+        <button class="btn ok" style="width:100%;justify-content:center">✔ İşle — tahsilatı kaydet</button>
+        <div class="ipucu">İşlenen hareket kasa işlemine bağlanır; aynı banka işlem no ikinci kez işlenemez. Kasa işlemi iptal edilirse hareket yeniden "Bekleyen"e döner.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================== BAĞLANTI == -->
+  <div class="gorunum" data-p="baglanti">
+    <div class="ic">
+      <div class="bilgi-serit">Banka bağlantısı <b>banka başına bir kez</b> (API anahtarı), <b>hesap başına</b> (onay no + IBAN) tanımlanır. API'si olmayan banka ya da onay vermemiş müşteri için aynı ekran <b>dosyadan içe aktarma</b> (MT940 / Excel ekstre) ile çalışır — eşleştirme ve işleme aynı.</div>
+      <div class="iki">
+        <div class="grp"><h4>🔌 Entegrasyon hesabı — Garanti BBVA API <span class="sp"></span><span class="rz ok">Bağlı · token 14:59</span></h4><div class="gi">
+          <div class="f">
+            <div class="fld"><label>Sağlayıcı</label><div class="inp combo">Garanti BBVA (apis.garantibbva.com.tr)</div></div>
+            <div class="fld"><label>Ortam</label><div class="radyo"><span class="on">Canlı</span><span>Test (sandbox)</span></div></div>
+            <div class="fld"><label>Client ID</label><div class="inp">a1b2c3…9f0e (örnek)</div></div>
+            <div class="fld"><label>Client Secret</label><div class="inp">•••••••••••••••• <span class="sonuk">(sunucuda şifreli)</span></div></div>
+            <div class="fld gen"><label>Kapsam (scope)</label><div class="inp ro">oob · balancesandmovements/accountinformation</div></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px"><button class="btn">🔌 Bağlantıyı Sına</button><button class="btn">📜 Son istekler</button></div>
+          <div class="ipucu">Anahtar Garanti geliştirici portalından (developer.garantibbva.com.tr) alınır. Ekranda yalnız ilk / son haneler görünür; değiştirmek için yeniden girilir. Her istek için yeni erişim jetonu alınır (bankanın kuralı).</div>
+        </div></div>
+
+        <div class="grp"><h4>🏦 Banka hesabı kartı › Banka Bağlantısı sekmesi <span class="sp"></span><span class="rz mavi">Garanti TL Vadesiz</span></h4><div class="gi">
+          <div class="f">
+            <div class="fld"><label>Hareket kaynağı</label><div class="radyo"><span class="on">Banka API</span><span>Dosyadan (MT940 / Excel)</span><span>Kapalı</span></div></div>
+            <div class="fld"><label>Entegrasyon</label><div class="inp combo">Garanti BBVA API</div></div>
+            <div class="fld"><label>Onay no (consentId)</label><div class="inp">3e09da8a-…-c61531729dbe</div></div>
+            <div class="fld"><label>Onay geçerlilik</label><div class="inp ro">31.12.2027 · <span class="rz ok">geçerli</span></div></div>
+            <div class="fld"><label>Şube no</label><div class="inp">295</div></div>
+            <div class="fld"><label>Hesap no</label><div class="inp">6291296</div></div>
+            <div class="fld gen"><label>IBAN</label><div class="inp">TR62 0006 2000 2950 0006 2912 96</div></div>
+            <div class="fld"><label>Otomatik çekme</label><div class="inp combo">30 dakikada bir (08:00–20:00)</div></div>
+            <div class="fld"><label>İlk çekim tarihi</label><div class="inp">01.10.2026</div></div>
+            <div class="fld gen"><label>Öneriler</label><div class="radyo"><span class="on">Yalnız öner — kullanıcı işler</span><span>%95 üstü güvenli eşleşmeleri otomatik işle</span></div></div>
+          </div>
+          <div class="ipucu">Onay no, müşterinin Garanti'de "Hesap Hareketleri API" hizmetine verdiği onaydan gelir (internet şubesi / şube). Onay süresi dolunca ekran uyarır, çekme durur.</div>
+        </div></div>
+      </div>
+
+      <div class="grp"><h4>🧩 Eşleştirme kuralları <span class="sp"></span><button class="btn mini">＋ Kural</button></h4>
+        <table class="dg">
+          <thead><tr><th>Sıra</th><th>Koşul</th><th>Yön</th><th>Sonuç</th><th>Hedef</th><th class="sag">Son 30 gün</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Karşı IBAN carinin Banka / IBAN listesinde</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari · açık fatura varsa kapat</td><td class="sag">64</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>2</td><td>Karşı VKN / TCKN cari kaydında</td><td>+ / −</td><td>Tahsilat / Tediye</td><td>o cari</td><td class="sag">31</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>3</td><td>Açıklamada açık fatura no geçiyor</td><td>+</td><td>Tahsilat</td><td>faturanın carisi · fatura kapanır</td><td class="sag">22</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>4</td><td>Karşı IBAN kurumun kendi hesabı</td><td>+ / −</td><td>Virman</td><td>o banka / kasa hesabı</td><td class="sag">6</td><td><span class="rz ok">Sistem</span></td></tr>
+            <tr><td>5</td><td>Açıklama içerir "POS GUN SONU"</td><td>+</td><td>POS → banka virmanı</td><td>Garanti POS hesabı</td><td class="sag">19</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+            <tr><td>6</td><td>Açıklama içerir "ISLETIM UCRETI" / "KOMISYON"</td><td>−</td><td>Masraf</td><td>780 Banka masrafları</td><td class="sag">4</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+            <tr><td>7</td><td>Açıklama içerir "BLOKE"</td><td>0</td><td>Yoksay</td><td>—</td><td class="sag">5</td><td><span class="rz mavi">Kullanıcı</span></td></tr>
+          </tbody>
+        </table>
+        <div class="ipucu" style="padding:0 10px 10px">Kurallar sırayla denenir; ilk tutan öneriyi verir. Sistem kuralları kapatılabilir ama silinmez. "Açıklamadan kural oluştur" sağ paneldeki işaretten de eklenir.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — Banka hareketleri (Garanti BBVA API + dosya)</h2>
+  <ul>
+    <li><b>Akış:</b> çek → öner → işle. Bankadan gelen her hareket <code>banka_hareket</code> satırı olur (banka işlem no tekil — aynı hareket iki kez gelmez); öneri motoru kuralları sırayla dener; kullanıcı onaylayınca kasa işlemi (tahsilat / tediye / virman / masraf) oluşur ve harekete bağlanır.</li>
+    <li><b>Eşleştirmenin gücü bankanın zenginleştirme bilgisinde:</b> Garanti yanıtında karşı tarafın IBAN'ı (CORRACNT), adı (MUS), VKN/TCKN'si ve fatura metni (DTS) gelir. IBAN, cari kartının Banka / IBAN listesiyle (1153), VKN cari kaydıyla, fatura no açık faturayla eşleşir; güven puanı yanında gösterilir.</li>
+    <li><b>Mutabakat:</b> banka bakiyesi (son hareketin <code>balanceAfterTransaction</code>'ı) ile sistemdeki hesap bakiyesi yan yana; fark = işlenmemiş hareketler. Hepsi işlenince fark sıfır olmalı.</li>
+    <li><b>Müşteri durumuna göre üç kaynak:</b> Banka API (Garanti, sonra İş / Akbank / Yapı Kredi…), dosyadan içe aktarma (MT940 / Excel ekstre — API'si ya da onayı olmayan), kapalı. Eşleştirme ve işleme kaynaktan bağımsız aynı ekran.</li>
+    <li><b>Otomatik çekme:</b> hesap başına (ör. 30 dk'da bir, mesai saatinde) arka plan işi; hata / onay süresi dolması bildirim olarak düşer. Otomatik işleme isteğe bağlı ve yalnız çok güvenli (%95+) eşleşmeler için.</li>
+    <li><b>Güvenlik:</b> Client Secret sunucuda şifreli saklanır, ekrana / loga yazılmaz; Delphi denemesindeki (<code>Banka/UGaranti.pas</code>) açık metin anahtarlar kullanılmayacak, yenilenmeli. İstekler HTTPS.</li>
+    <li><b>Delphi (müşteri durumuna göre):</b> Delphi ERP kullanan müşteri için aynı akış Delphi'de banka hareketi aktarım ekranı olarak; tanımlar (onay no, IBAN, kurallar) aynı alanlarla.</li>
+  </ul>
+  <table>
+    <tr><th>Ekran parçası</th><th>Veri kaynağı</th><th>Durum</th></tr>
+    <tr><td>API anahtarı</td><td>Entegrasyon Hesabı kartı (<code>entegrasyon_hesap</code>, 336-340) — yeni tür "Garanti BBVA"</td><td>kart var, tür yeni</td></tr>
+    <tr><td>Hesap bağlantısı</td><td>Banka hesabı kartı (<code>hesap</code>: IBAN, banka) + yeni bağlantı alanları (kaynak, onay no, şube/hesap no, sıklık)</td><td>yeni sekme</td></tr>
+    <tr><td>Hareketler</td><td>yeni <code>banka_hareket</code> (banka işlem no tekil, ham yanıt jsonb, durum, bağlı kasa işlemi)</td><td>yeni</td></tr>
+    <tr><td>Eşleştirme</td><td><code>taraf_banka</code> (IBAN, 1153), <code>taraf.vkno</code>, açık faturalar (<code>belge</code>), yeni <code>banka_kural</code></td><td>yeni motor</td></tr>
+    <tr><td>İşleme</td><td>kasa işlemi (tahsilat / tediye / virman / masraf) — mevcut kasa akışı</td><td>var</td></tr>
+  </table>
+  <p><b>Açık sorular:</b> (1) Garanti'den başka hangi bankalar öncelikli? (2) Otomatik işleme hiç olmasın mı (her hareketi kullanıcı onaylasın)? (3) Çek / senet tahsilatları (banka tahsile verilen çek ödendi) bu ekranda mı işlensin? (4) Dövizli hesaplarda kur: bankanın işlem kuru mu, TCMB mi? (5) Delphi tarafı şimdi mi, web sonrası mı?</p>
+</div>
+
+<script>
+  document.querySelectorAll('.sekmeler [data-g]').forEach(s => s.addEventListener('click', () => {
+    document.querySelectorAll('.sekmeler [data-g]').forEach(x => x.classList.toggle('on', x === s));
+    document.querySelectorAll('.gorunum').forEach(g => g.classList.toggle('on', g.dataset.p === s.dataset.g));
+  }));
+</script>
+</body>
+</html>
