@@ -48,6 +48,7 @@ const LabIcmal = tembel(() => import('./sayfalar/labIcmal/LabIcmal'), 'LabIcmal'
 const GoruntulemeIcmal = tembel(() => import('./sayfalar/goruntulemeIcmal/GoruntulemeIcmal'), 'GoruntulemeIcmal');
 const YatanIcmal = tembel(() => import('./sayfalar/yatanIcmal/YatanIcmal'), 'YatanIcmal');
 const KasaGunSonu = tembel(() => import('./sayfalar/kasaGunSonu/KasaGunSonu'), 'KasaGunSonu');
+const YilDevri = tembel(() => import('./sayfalar/yilDevri/YilDevri'), 'YilDevri');
 const CagriIcmal = tembel(() => import('./sayfalar/cagriIcmal/CagriIcmal'), 'CagriIcmal');
 const SterilIcmal = tembel(() => import('./sayfalar/sterilIcmal/SterilIcmal'), 'SterilIcmal');
 const EFaturaIcmal = tembel(() => import('./sayfalar/efaturaIcmal/EFaturaIcmal'), 'EFaturaIcmal');
@@ -289,6 +290,8 @@ function Yollar() {
         {yetki('radyoloji.icmal') && <Route path="/goruntuleme-icmal" element={<GoruntulemeIcmal />} />}
         {yetki('yatan.donem_icmal') && <Route path="/yatan-icmal" element={<YatanIcmal />} />}
         {yetki('kasa.gun_sonu') && <Route path="/kasa-gun-sonu" element={<KasaGunSonu />} />}
+        {/* YIL SONU / BAŞI DEVRİ (1155, mockup Ekranlar/Muhasebe/yil_sonu_devir.html). */}
+        {yetki('muhasebe.yil_devri') && <Route path="/yil-devri" element={<YilDevri />} />}
         {yetki('cagri.icmal') && <Route path="/cagri-icmal" element={<CagriIcmal />} />}
         {yetki('steril.icmal') && <Route path="/steril-icmal" element={<SterilIcmal />} />}
         {yetki('efatura.icmal') && <Route path="/efatura-icmal" element={<EFaturaIcmal />} />}

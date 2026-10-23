@@ -275,6 +275,13 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     menuSira: 10,
   },
   {
+    // YIL SONU / BAŞI DEVRİ (1155, mockup Ekranlar/Muhasebe/yil_sonu_devir.html): beş adımlı
+    //   sihirbaz - ön kontrol, değerleme, kapanış, yeni yıl, açılış & kilit.
+    kaynak: 'yil-devri', rota: 'yil-devri', ozelSayfa: true,
+    baslik: 'Yıl Sonu Devri', yol: 'Muhasebe › Yıl Sonu Devri',
+    menuGrup: 'Muhasebe', menuSira: 90, menuAd: 'Yıl Sonu Devri', ic: '🗓️', yetkiKodu: 'muhasebe.yil_devri',
+  },
+  {
     kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırı Listesi', yol: 'Yonetim › Fis Satirlari',
     // Belgeden "Muhasebe Fişini Aç" bu ekrana fisId ile gelir.
     urlFiltreAlani: 'fisId',
