@@ -120,9 +120,60 @@
   <div class="ust">🏦 <b>Banka Hareketleri</b> <span class="yol">Finans › Banka › Banka Hareketleri</span>
     <span class="sag"><span>FETA · Merkez</span><span>Ayşe Kaya · Muhasebe</span><span>23.10.2026 15:20</span></span></div>
   <div class="sekmeler">
-    <span>🏠</span><span>📊 Banka Listesi</span>
+    <span>🏠</span><span data-g="liste">📊 Banka Listesi</span>
     <span class="on" data-g="hareket">🏦 Banka Hareketleri</span>
     <span data-g="baglanti">🔌 Banka Bağlantısı</span><span>＋</span>
+  </div>
+
+  <!-- ====================================================== LİSTE ==== -->
+  <div class="gorunum" data-p="liste">
+    <div class="arac">
+      <b style="font-size:14px;color:var(--navy)">Banka Listesi</b><span class="sonuk">Finans › Banka › Banka Listesi</span>
+      <span class="sp"></span>
+      <button class="btn">＋ Yeni Banka Hesabı</button><button class="btn">✎ Düzenle</button>
+      <button class="btn primary">⟳ Tümünü Çek</button><button class="btn">🏦 Hareketler</button><button class="btn">📄 Ekstre</button><button class="btn">🖨️ Yazdır ▾</button>
+    </div>
+    <div class="ozet" style="grid-template-columns:repeat(6,minmax(0,1fr))">
+      <div><div class="b">Hesap</div><div class="d">7</div><div class="x">5 TL · 2 döviz</div></div>
+      <div><div class="b">Bağlı (API)</div><div class="d alacak">4</div><div class="x">Garanti 3 · Akbank 1</div></div>
+      <div><div class="b">Dosyadan</div><div class="d">2</div><div class="x">İş Bankası · Ziraat</div></div>
+      <div class="sec"><div class="b">Bekleyen hareket</div><div class="d">31</div><div class="x">işlenmemiş</div></div>
+      <div><div class="b">Dikkat</div><div class="d borc">2</div><div class="x">onay süresi · çekim hatası</div></div>
+      <div><div class="b">Toplam (TL karşılığı)</div><div class="d">₺ 3.912.640,20</div><div class="x">sistem bakiyesi</div></div>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Aktif (7)</span><span class="cip">Bağlı (API)</span><span class="cip">Bekleyeni olan</span><span class="cip">Dikkat</span><span class="cip">Pasif</span><span class="cip">Tümü</span>
+      <span class="sp"></span><span class="sonuk">Çift tık: hesabın hareketleri</span>
+    </div>
+    <table class="dg">
+      <thead><tr><th>Banka</th><th>Hesap</th><th>IBAN</th><th>Döviz</th><th>Bağlantı</th><th>Son çekim</th>
+        <th class="sag">Sistem bakiyesi</th><th class="sag">Banka bakiyesi</th><th class="sag">Fark</th><th class="sag">Bekleyen</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr class="sec"><td>🟢 Garanti BBVA</td><td><b>TL Vadesiz</b><br><small class="sonuk">102.01 · şube 295</small></td><td>TR62 0006 2000 2950 0006 2912 96</td><td>TL</td>
+          <td><span class="rz ok">API · 30 dk</span></td><td>23.10 15:00</td>
+          <td class="sag">1.271.180,50</td><td class="sag">1.284.420,50</td><td class="sag borc">13.240,00</td><td class="sag"><b>23</b></td><td><span class="rz sari">Bekleyen var</span></td></tr>
+        <tr><td>🟢 Garanti BBVA</td><td><b>USD Vadesiz</b><br><small class="sonuk">102.02 · şube 295</small></td><td>TR15 0006 2000 2950 0009 0012 44</td><td>USD</td>
+          <td><span class="rz ok">API · 30 dk</span></td><td>23.10 15:00</td>
+          <td class="sag">$ 18.400,00</td><td class="sag">$ 18.400,00</td><td class="sag">0,00</td><td class="sag">0</td><td><span class="rz ok">Mutabık</span></td></tr>
+        <tr><td>🟢 Garanti BBVA</td><td><b>POS Hesabı</b><br><small class="sonuk">108.01 · üye işyeri 41203388</small></td><td>TR40 0006 2000 2950 0006 2988 17</td><td>TL</td>
+          <td><span class="rz ok">API · 30 dk</span></td><td>23.10 15:00</td>
+          <td class="sag">96.240,00</td><td class="sag">96.240,00</td><td class="sag">0,00</td><td class="sag">0</td><td><span class="rz ok">Mutabık</span></td></tr>
+        <tr><td>🔴 Akbank</td><td><b>TL Ticari</b><br><small class="sonuk">102.03</small></td><td>TR08 0004 6000 1188 8000 1234 56</td><td>TL</td>
+          <td><span class="rz kir">API · onay süresi doldu</span></td><td class="borc">15.10 09:30</td>
+          <td class="sag">412.300,00</td><td class="sag sonuk">—</td><td class="sag sonuk">?</td><td class="sag">—</td><td><span class="rz kir">Onay yenilenmeli</span></td></tr>
+        <tr><td>📄 İş Bankası</td><td><b>TL Vadesiz</b><br><small class="sonuk">102.04</small></td><td>TR33 0006 4000 0011 2340 0567 89</td><td>TL</td>
+          <td><span class="rz mavi">Dosya · MT940</span></td><td>22.10 17:40 <small class="sonuk">(dosya)</small></td>
+          <td class="sag">1.824.410,00</td><td class="sag">1.826.110,00</td><td class="sag borc">1.700,00</td><td class="sag"><b>8</b></td><td><span class="rz sari">Bekleyen var</span></td></tr>
+        <tr><td>📄 Ziraat Bankası</td><td><b>Kamu Tahsilat</b><br><small class="sonuk">102.05</small></td><td>TR21 0001 0012 3400 5678 9000 11</td><td>TL</td>
+          <td><span class="rz mavi">Dosya · Excel</span></td><td>01.10 10:00 <small class="sonuk">(dosya)</small></td>
+          <td class="sag">213.640,00</td><td class="sag">213.640,00</td><td class="sag">0,00</td><td class="sag">0</td><td><span class="rz sari">22 gündür dosya yok</span></td></tr>
+        <tr><td>⚪ Yapı Kredi</td><td><b>Kredi Hesabı</b><br><small class="sonuk">300.01</small></td><td>TR77 0006 7010 0000 0012 3456 78</td><td>TL</td>
+          <td><span class="rz">Kapalı</span></td><td class="sonuk">—</td>
+          <td class="sag borc">−750.000,00</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag">—</td><td><span class="rz">Bağlantı yok</span></td></tr>
+      </tbody>
+    </table>
+    <div class="alt-satir"><span class="sonuk">7 hesap · seçili: Garanti TL Vadesiz</span><span class="sp"></span>
+      <span class="sonuk">Banka bakiyesi = son çekilen hareketin işlem sonrası bakiyesi · Fark = işlenmemiş hareketler</span></div>
   </div>
 
   <!-- ===================================================== HAREKETLER == -->
@@ -312,6 +363,7 @@
 <div class="notlar">
   <h2>Tasarım notları — Banka hareketleri (Garanti BBVA API + dosya)</h2>
   <ul>
+    <li><b>Banka Listesi:</b> mevcut Banka listesi (hesap kaynağı) üç kolonla genişler: bağlantı (API / dosya / kapalı + sıklık), son çekim, banka bakiyesi ve fark; bekleyen hareket sayısı ve dikkat durumu (onay süresi doldu, çekim hatası, uzun süredir dosya yok). "Tümünü Çek" bağlı bütün hesapları çeker; çift tık hesabın Banka Hareketleri'ni açar.</li>
     <li><b>Akış:</b> çek → öner → işle. Bankadan gelen her hareket <code>banka_hareket</code> satırı olur (banka işlem no tekil — aynı hareket iki kez gelmez); öneri motoru kuralları sırayla dener; kullanıcı onaylayınca kasa işlemi (tahsilat / tediye / virman / masraf) oluşur ve harekete bağlanır.</li>
     <li><b>Eşleştirmenin gücü bankanın zenginleştirme bilgisinde:</b> Garanti yanıtında karşı tarafın IBAN'ı (CORRACNT), adı (MUS), VKN/TCKN'si ve fatura metni (DTS) gelir. IBAN, cari kartının Banka / IBAN listesiyle (1153), VKN cari kaydıyla, fatura no açık faturayla eşleşir; güven puanı yanında gösterilir.</li>
     <li><b>Mutabakat:</b> banka bakiyesi (son hareketin <code>balanceAfterTransaction</code>'ı) ile sistemdeki hesap bakiyesi yan yana; fark = işlenmemiş hareketler. Hepsi işlenince fark sıfır olmalı.</li>
@@ -332,10 +384,13 @@
 </div>
 
 <script>
-  document.querySelectorAll('.sekmeler [data-g]').forEach(s => s.addEventListener('click', () => {
-    document.querySelectorAll('.sekmeler [data-g]').forEach(x => x.classList.toggle('on', x === s));
-    document.querySelectorAll('.gorunum').forEach(g => g.classList.toggle('on', g.dataset.p === s.dataset.g));
-  }));
+  const ac = g => {
+    document.querySelectorAll('.sekmeler [data-g]').forEach(x => x.classList.toggle('on', x.dataset.g === g));
+    document.querySelectorAll('.gorunum').forEach(v => v.classList.toggle('on', v.dataset.p === g));
+  };
+  document.querySelectorAll('.sekmeler [data-g]').forEach(s => s.addEventListener('click', () => ac(s.dataset.g)));
+  // Banka Listesi: çift tık hesabın hareketlerini açar.
+  document.querySelectorAll('[data-p=liste] tbody tr').forEach(r => r.addEventListener('dblclick', () => ac('hareket')));
 </script>
 </body>
 </html>
