@@ -157,7 +157,23 @@ public static partial class KartKatalogu
                 new("riskAsim",     "risk_asim",     "kod",     Baslik: "Aşımda", SabitKodlar: new Dictionary<string, string>
                     { ["1"] = "Yalnız uyar", ["2"] = "Sevkiyat onaya düşer", ["3"] = "Satış engellenir" }),
                 new("teminat",      "teminat",       "metin",   EnFazlaUzunluk: 200, Baslik: "Teminat")
-            }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true)
+            }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true),
+            // BANKA / IBAN (1153, kullanici: "banka Iban ekleyemedim" - sekme yer tutucuydu):
+            //   carinin banka hesaplari. IBAN ulke kodu + mod-97 ile denetlenir; tek varsayilan.
+            new DetayTanimi("bankalar", "public.taraf_banka", "taraf_id", new KartAlani[]
+            {
+                new("id",          "id",           "sayi",  Yazilabilir: false),
+                new("bankaAdi",    "banka_adi",    "metin", EnFazlaUzunluk: 80,  Baslik: "Banka", Zorunlu: true),
+                new("subeAdi",     "sube_adi",     "metin", EnFazlaUzunluk: 80,  Baslik: "Şube"),
+                new("iban",        "iban",         "metin", EnFazlaUzunluk: 34,  Baslik: "IBAN",
+                    Dogrulama: KimlikDogrulama.IbanTuru),
+                new("hesapNo",     "hesap_no",     "metin", EnFazlaUzunluk: 40,  Baslik: "Hesap No"),
+                new("dovizCinsi",  "doviz_cinsi",  "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi"),
+                new("hesapSahibi", "hesap_sahibi", "metin", EnFazlaUzunluk: 120, Baslik: "Hesap Sahibi"),
+                new("aciklama",    "aciklama",     "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
+                new("varsayilan",  "varsayilan",   "mantik", Baslik: "Varsayılan"),
+                new("aktif",       "aktif",        "mantik", Baslik: "Aktif")
+            }, Sirala: "varsayilan desc, id", SubeKolonu: null, Baslik: "Banka / IBAN", LogTabloId: 1386)
         },
         SilmeEngelleri: new[]
         {

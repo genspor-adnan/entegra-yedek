@@ -106,6 +106,13 @@ export function bicimHatasi(dogrulama: string | null | undefined,
     }
   }
 
+  // IBAN (1153): ülkeden bağımsız ISO 13616 - sunucu (KimlikDogrulama.IbanGecerli) aynı kural.
+  if (dogrulama === 'iban') {
+    return ibanGecerliMi(deger)
+      ? null
+      : 'IBAN geçersiz - ülke kodu ve kontrol haneleri tutmuyor (TR IBAN 26 karakter).';
+  }
+
   if (dogrulama !== 'tckn') return null;
   // TR DISI SUBEDE TCKN KONTROLU YOK (666): T.C. kimlik numarasi Turkiye'ye
   //   ozgudur - Alman hastanin numarasi bu algoritmayi saglamaz ve kayit HIC
@@ -114,4 +121,18 @@ export function bicimHatasi(dogrulama: string | null | undefined,
   return tcknGecerliMi(deger)
     ? null
     : 'Kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.';
+}
+
+/** IBAN: boşluksuz, 2 harf ülke + 2 hane kontrol, TR ise 26 karakter, mod-97 = 1. Boş geçerli. */
+export function ibanGecerliMi(deger: string | null | undefined): boolean {
+  const s = (deger ?? '').replace(/\s+/g, '').toUpperCase();
+  if (s.length === 0) return true;
+  if (s.length < 15 || s.length > 34 || !/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(s)) return false;
+  if (s.startsWith('TR') && s.length !== 26) return false;
+  let kalan = 0;
+  for (const ch of s.slice(4) + s.slice(0, 4)) {
+    const k = ch >= 'A' && ch <= 'Z' ? String(ch.charCodeAt(0) - 55) : ch;
+    for (const d of k) kalan = (kalan * 10 + Number(d)) % 97;
+  }
+  return kalan === 1;
 }

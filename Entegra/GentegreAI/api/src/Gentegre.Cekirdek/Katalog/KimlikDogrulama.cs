@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// T.C. KİMLİK NUMARASI DOĞRULAMASI (NVİ algoritması).
@@ -44,6 +44,36 @@ public static class KimlikDogrulama
         for (var i = 0; i < 10; i++) ilkOn += h[i];
         return ilkOn % 10 == h[10];
     }
+
+    /// <summary>IBAN doğrulama türü (1153, cari banka hesapları).</summary>
+    public const string IbanTuru = "iban";
+
+    /// <summary>
+    /// IBAN: boşluklar atılır, 2 harf ülke + 2 hane kontrol + 11-30 alfasayısal; TR ise 26 hane.
+    /// ISO 13616 mod-97: ilk dört karakter sona alınır, harfler 10-35 olur, kalan 1 olmalı. Boş geçerli.
+    /// </summary>
+    public static bool IbanGecerli(string? deger)
+    {
+        var s = (deger ?? "").Replace(" ", "").ToUpperInvariant();
+        if (s.Length == 0) return true;
+        if (s.Length < 15 || s.Length > 34) return false;
+        if (!char.IsAsciiLetterUpper(s[0]) || !char.IsAsciiLetterUpper(s[1])
+            || !char.IsAsciiDigit(s[2]) || !char.IsAsciiDigit(s[3])) return false;
+        if (s.StartsWith("TR") && s.Length != 26) return false;
+        var kalan = 0;
+        foreach (var c in s[4..] + s[..4])
+        {
+            if (char.IsAsciiDigit(c)) kalan = (kalan * 10 + (c - '0')) % 97;
+            else if (char.IsAsciiLetterUpper(c)) kalan = (kalan * 100 + (c - 'A' + 10)) % 97;
+            else return false;
+        }
+        return kalan == 1;
+    }
+
+    /// <summary>IBAN geçersizse kullanıcıya gidecek mesaj.</summary>
+    public static string? IbanHata(object? deger)
+        => IbanGecerli(deger?.ToString()) ? null
+           : "IBAN geçersiz - ülke kodu ve kontrol haneleri tutmuyor (TR IBAN 26 karakter).";
 
     /// <summary>Alan doğrulaması - geçersizse kullanıcıya gidecek mesaj, geçerliyse null.</summary>
     public static string? Hata(string? tur, object? deger)

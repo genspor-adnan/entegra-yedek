@@ -190,6 +190,10 @@ public static class DegerCevirici
             && (kimlikKurali ?? KimlikKurali.Varsayilan).Hata(deger?.ToString()) is { } mesaj)
             throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {mesaj}",
                 new AlanHatasi(alanYolu, mesaj));
+        // IBAN (1153): ülkeden bağımsız ISO 13616 - yanlış IBAN ödeme talimatında geri döner.
+        if (alan.Dogrulama == KimlikDogrulama.IbanTuru && KimlikDogrulama.IbanHata(deger) is { } ibanHata)
+            throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {ibanHata}",
+                new AlanHatasi(alanYolu, ibanHata));
     }
 
     /// <summary>jsonb alanina yazilacak metin gercekten JSON mu.</summary>

@@ -76,7 +76,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
-    yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
+    yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
     // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
     gizliKartSekmeleri: ['Satış Koşulları'],
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
@@ -99,7 +100,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
-    yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
+    yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
     // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
     gizliKartSekmeleri: ['Satış Koşulları'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
