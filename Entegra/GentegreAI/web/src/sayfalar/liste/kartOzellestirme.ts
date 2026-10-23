@@ -51,7 +51,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // ------------------------------------------ banka hesabı (1157) ----
   // Mockup banka_hareketleri.html "Banka Hesabı Kartı" sırası; Hareketler kart eklentisinin sekmesi.
   hesap: {
-    sekmeSirasi: ['Genel', 'Banka Bilgileri', 'Banka Bağlantısı', 'Hareketler', 'Resim / Doküman'],
+    sekmeSirasi: ['Genel', 'Banka Bağlantısı', 'Hareketler', 'Resim / Doküman'],
   },
   // ------------------------------------------ İK belge türü (1135-1138) ----
   // Mockup Ekranlar/IK/personel_belge_turu.html (2): şeritte ad · grup · durum; sekmeler mockup sırasıyla.

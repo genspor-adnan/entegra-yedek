@@ -30,23 +30,24 @@ public static partial class KartKatalogu
             //   iki alan doldurmak gereksizdi. Deger -1 ise ana kasa, pozitifse
             //   personel kimligi, bos ise siradan kasa.
             //   ANA KASA subede TEKTIR (kismi tekil index); ikincisi eklenemez.
+            // Banka Bilgileri kutusu Tanımlama'nın SOLUNDA (kullanıcı 23.10.2026) - alt grup sırası alan sırasıdır.
+            new("bankaId",         "banka_id",          "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("bankaSubeId",     "banka_sube_id",     "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("hesapNo",         "hesap_no",          "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("iban",            "iban",              "metin", EnFazlaUzunluk: 34, Baslik: "IBAN", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("atama",           "atama",             "kod",   KodTablosu: "public.v_hesap_atama_lookup", Baslik: "Atama", Grup: "Genel", AltGrup: "Tanımlama"),
             new("bagliHesapId",    "bagli_hesap_id",    "kod",   KodTablosu: "public.v_hesap_lookup", Baslik: "Bağlı Hesap", Grup: "Genel", AltGrup: "Tanımlama"),
             new("altTur",          "alt_tur",           "kod",   KodListesi: "hesap.alt_tur", Baslik: "Alt Tür", Grup: "Genel", AltGrup: "Tanımlama"),
             new("aciklama",        "aciklama",          "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Tanımlama"),
             // Banka ve sube artik TANIM tablosundan secilir (109): elle yazilinca ayni
             //   banka uc farkli yazimla kaydediliyordu ("Ziraat", "T.C. Ziraat...").
-            new("bankaId",         "banka_id",          "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Banka Bilgileri", AltGrup: "Banka"),
-            new("bankaSubeId",     "banka_sube_id",     "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Banka Bilgileri", AltGrup: "Banka"),
-            new("hesapNo",         "hesap_no",          "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Banka Bilgileri", AltGrup: "Banka"),
-            new("iban",            "iban",              "metin", EnFazlaUzunluk: 34, Baslik: "IBAN", Grup: "Banka Bilgileri", AltGrup: "Banka"),
-            new("komisyonOrani",   "komisyon_orani",    "para",  Baslik: "Komisyon %", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("komisyonMasrafId","komisyon_masraf_id","kod",   KodTablosu: "public.v_masraf_lookup", Baslik: "Komisyon Gider Kalemi", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("komisyonZamani",  "komisyon_zamani",   "kod",   SabitKodlar: KomisyonZamaniKodlari, Baslik: "Komisyon Kesimi", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("valorGun",        "valor_gun",         "sayi",  Baslik: "Valör (gün)", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("hesapKesimGunu",  "hesap_kesim_gunu",  "sayi",  Baslik: "Hesap Kesim Günü", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("sonOdemeGunu",    "son_odeme_gunu",    "sayi",  Baslik: "Son Ödeme Günü", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
-            new("limitTutar",      "limit_tutar",       "para",  Baslik: "Limit", Grup: "Banka Bilgileri", AltGrup: "POS / Kart"),
+            new("komisyonOrani",   "komisyon_orani",    "para",  Baslik: "Komisyon %", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("komisyonMasrafId","komisyon_masraf_id","kod",   KodTablosu: "public.v_masraf_lookup", Baslik: "Komisyon Gider Kalemi", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("komisyonZamani",  "komisyon_zamani",   "kod",   SabitKodlar: KomisyonZamaniKodlari, Baslik: "Komisyon Kesimi", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("valorGun",        "valor_gun",         "sayi",  Baslik: "Valör (gün)", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("hesapKesimGunu",  "hesap_kesim_gunu",  "sayi",  Baslik: "Hesap Kesim Günü", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("sonOdemeGunu",    "son_odeme_gunu",    "sayi",  Baslik: "Son Ödeme Günü", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("limitTutar",      "limit_tutar",       "para",  Baslik: "Limit", Grup: "Genel", AltGrup: "POS / Kart"),
             new("acilisBakiye",    "acilis_bakiye",     "para",  Baslik: "Açılış Bakiyesi", Grup: "Genel", AltGrup: "Muhasebe"),
             new("acilisTarihi",    "acilis_tarihi",     "tarih", Baslik: "Açılış Tarihi", Grup: "Genel", AltGrup: "Muhasebe"),
             new("muhHesapId",      "muh_hesap_id",      "kod",   KodTablosu: "public.v_hesap_plani_lookup", Baslik: "Muhasebe Hesabı", Grup: "Genel", AltGrup: "Muhasebe"),

@@ -536,7 +536,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Kasa Listesi', yol: 'Kasa › Kasa Hesaplari',
-    gizliKartSekmeleri: ['Banka Bağlantısı', 'Banka Bilgileri'],   // 1157: kasa banka bilgisi taşımaz
+    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
+    gizliKartAlanlari: ['bankaId', 'bankaSubeId', 'hesapNo', 'iban'],   // kasa banka bilgisi taşımaz
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim.liste',
