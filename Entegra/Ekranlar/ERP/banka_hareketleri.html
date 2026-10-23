@@ -122,7 +122,9 @@
   <div class="sekmeler">
     <span>🏠</span><span data-g="liste">📊 Banka Listesi</span>
     <span class="on" data-g="hareket">🏦 Banka Hareketleri</span>
-    <span data-g="baglanti">🔌 Banka Bağlantısı</span><span>＋</span>
+    <span data-g="kart">🏦 Banka Kartı</span>
+    <span data-g="kural">🧩 Eşleştirme Kuralları</span>
+    <span data-g="entegrasyon">🔌 Entegrasyonlar</span><span>＋</span>
   </div>
 
   <!-- ====================================================== LİSTE ==== -->
@@ -308,11 +310,23 @@
   </div>
 
   <!-- ====================================================== BAĞLANTI == -->
-  <div class="gorunum" data-p="baglanti">
+  <!-- ============================================ ENTEGRASYONLAR ==== -->
+  <div class="gorunum" data-p="entegrasyon">
     <div class="ic">
-      <div class="bilgi-serit">Banka bağlantısı <b>banka başına bir kez</b> (API anahtarı), <b>hesap başına</b> (onay no + IBAN) tanımlanır. API'si olmayan banka ya da onay vermemiş müşteri için aynı ekran <b>dosyadan içe aktarma</b> (MT940 / Excel ekstre) ile çalışır — eşleştirme ve işleme aynı.</div>
-      <div class="iki">
-        <div class="grp"><h4>🔌 Entegrasyon hesabı — Garanti BBVA API <span class="sp"></span><span class="rz ok">Bağlı · token 14:59</span></h4><div class="gi">
+      <div class="bilgi-serit">Banka API anahtarı mevcut <b>Yönetim › Ayarlar › Entegrasyonlar</b> listesine yeni satır olarak girer — banka başına <b>bir kez</b>. Aynı bankanın bütün hesapları (TL, USD, POS) bu tek satırı kullanır; ikinci banka (Akbank…) ikinci satırdır.</div>
+      <div class="grp"><h4>🔌 Entegrasyonlar <span class="sp"></span><button class="btn mini">＋ Yeni Entegrasyon</button></h4>
+        <table class="dg">
+          <thead><tr><th>Kod</th><th>Ad</th><th>Tür</th><th>Ortam</th><th>Kullanan</th><th>Son sınama</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>SKRS</td><td>SKRS Kod Listeleri</td><td>Sağlık Bakanlığı</td><td>Canlı</td><td>—</td><td>20.10 08:00</td><td><span class="rz ok">Aktif</span></td></tr>
+            <tr><td>IZIBIZ</td><td>izibiz e-Fatura / e-Arşiv</td><td>e-Belge</td><td>Canlı</td><td>e-Belge</td><td>23.10 09:12</td><td><span class="rz ok">Aktif</span></td></tr>
+            <tr class="sec"><td><b>GARANTI</b></td><td><b>Garanti BBVA API</b> <span class="rz mor">yeni</span></td><td>Banka hareketleri</td><td>Canlı</td><td>3 banka hesabı</td><td>23.10 14:59</td><td><span class="rz ok">Bağlı</span></td></tr>
+            <tr><td>AKBANK</td><td>Akbank API</td><td>Banka hareketleri</td><td>Canlı</td><td>1 banka hesabı</td><td class="borc">15.10 09:30</td><td><span class="rz kir">Onay süresi doldu</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="max-width:760px">
+        <div class="grp"><h4>🔌 Entegrasyon Kartı — Garanti BBVA API <span class="sp"></span><span class="rz ok">Bağlı · token 14:59</span></h4><div class="gi">
           <div class="f">
             <div class="fld"><label>Sağlayıcı</label><div class="inp combo">Garanti BBVA (apis.garantibbva.com.tr)</div></div>
             <div class="fld"><label>Ortam</label><div class="radyo"><span class="on">Canlı</span><span>Test (sandbox)</span></div></div>
@@ -323,8 +337,18 @@
           <div style="display:flex;gap:6px;margin-top:10px"><button class="btn">🔌 Bağlantıyı Sına</button><button class="btn">📜 Son istekler</button></div>
           <div class="ipucu">Anahtar Garanti geliştirici portalından (developer.garantibbva.com.tr) alınır. Ekranda yalnız ilk / son haneler görünür; değiştirmek için yeniden girilir. Her istek için yeni erişim jetonu alınır (bankanın kuralı).</div>
         </div></div>
+      </div>
+    </div>
+  </div>
 
-        <div class="grp"><h4>🏦 Banka hesabı kartı › Banka Bağlantısı sekmesi <span class="sp"></span><span class="rz mavi">Garanti TL Vadesiz</span></h4><div class="gi">
+  <!-- ============================================== BANKA KARTI ===== -->
+  <div class="gorunum" data-p="kart">
+    <div class="ic">
+      <div class="bilgi-serit">Hesaba özel bağlantı bilgisi <b>banka hesap kartındaki yeni "Banka Bağlantısı" sekmesinde</b>: hareket kaynağı, kullanılacak entegrasyon (Entegrasyonlar'daki satır), onay no, şube / hesap no, IBAN, çekme sıklığı.</div>
+      <div class="grp" style="max-width:980px"><h4>🏦 Banka Kartı — Garanti BBVA · TL Vadesiz <span class="sp"></span><span class="rz ok">API · 30 dk</span></h4>
+        <div class="sekmeler" style="background:#f6f8fb"><span>Genel</span><span>Banka Bilgileri</span><span class="on">🔗 Banka Bağlantısı</span><span>Hareketler</span><span>Resim / Doküman</span></div>
+        <div class="gi">
+        <div><div>
           <div class="f">
             <div class="fld"><label>Hareket kaynağı</label><div class="radyo"><span class="on">Banka API</span><span>Dosyadan (MT940 / Excel)</span><span>Kapalı</span></div></div>
             <div class="fld"><label>Entegrasyon</label><div class="inp combo">Garanti BBVA API</div></div>
@@ -339,8 +363,15 @@
           </div>
           <div class="ipucu">Onay no, müşterinin Garanti'de "Hesap Hareketleri API" hizmetine verdiği onaydan gelir (internet şubesi / şube). Onay süresi dolunca ekran uyarır, çekme durur.</div>
         </div></div>
+        </div>
       </div>
+    </div>
+  </div>
 
+  <!-- ======================================== EŞLEŞTİRME KURALLARI == -->
+  <div class="gorunum" data-p="kural">
+    <div class="ic">
+      <div class="bilgi-serit">Kurallar <b>Finans › Banka › Ayarlar › Eşleştirme Kuralları</b> listesinde — bütün banka hesapları için ortak; bir kural istenirse tek hesaba daraltılır. Banka Hareketleri'nin sağ panelindeki "Açıklamadan kural oluştur" da buraya satır ekler.</div>
       <div class="grp"><h4>🧩 Eşleştirme kuralları <span class="sp"></span><button class="btn mini">＋ Kural</button></h4>
         <table class="dg">
           <thead><tr><th>Sıra</th><th>Koşul</th><th>Yön</th><th>Sonuç</th><th>Hedef</th><th class="sag">Son 30 gün</th><th>Durum</th></tr></thead>
