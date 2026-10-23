@@ -7787,6 +7787,18 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* Rapor şablonu kimlik şeridi (kullanıcı): kod %40 dar (0,6), şablon adı 2 kat, sürüm %70 dar (0,3); sıra kod · ad · modalite · bölge · sürüm · durum. */
 .alan-izgara.kaid-radsablon { display: grid; grid-template-columns: minmax(0, .6fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .3fr) minmax(0, 1fr); gap: 8px 12px }
 @media (max-width: 900px) { .alan-izgara.kaid-radsablon { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+/* MÜŞTERİ KARTI SATIŞ & RİSK (musteri_karti_ver3.html `.iki` + `.f.k2`): iki kutu yan yana, kutuda iki sütun. */
+.cari-sr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start }
+.cari-sr .alan-izgara.cari-sr-k2 { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 10px }
+.cari-sr-tablo { margin: 0 10px 10px }
+.cari-sr-tablo table { width: 100%; border-collapse: collapse; font-size: 12.5px }
+.cari-sr-tablo th { text-align: left; padding: 5px 8px; background: var(--baslikzem, #f1f4f8); border-bottom: 1px solid var(--cizgi2) }
+.cari-sr-tablo td { padding: 4px 8px; border-bottom: 1px solid var(--cizgi2) }
+.cari-sr-tablo .s { text-align: right; white-space: nowrap }
+.cari-sr-tablo tfoot td { font-weight: 600; border-top: 2px solid var(--cizgi2) }
+.cari-sr-tablo .borc { color: var(--hata) }
+.cari-sr-tablo .not { margin-top: 6px }
+@media (max-width: 1000px) { .cari-sr { grid-template-columns: minmax(0, 1fr) } }
 /* MÜŞTERİ / TEDARİKÇİ KARTI (kullanıcı 23.10.2026): Kod öteki alanların yarısı - Kod · Ünvan · Temsilci · Durum. */
 .alan-izgara.kaid-cari { display: grid; grid-template-columns: minmax(0, .5fr) repeat(3, minmax(0, 1fr)); gap: 8px 12px }
 @media (max-width: 900px) { .alan-izgara.kaid-cari { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }

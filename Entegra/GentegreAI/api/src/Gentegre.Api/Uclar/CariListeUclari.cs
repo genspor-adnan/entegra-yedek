@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -90,7 +90,11 @@ public static class CariListeUclari
                        (select coalesce(sum(c.yerel_tutar), 0) from public.cek_senet c
                          where c.taraf_id = t.id and c.yon = 1 and c.durum in (10, 30, 40)) as "cekTutar",
                        (select min(c.vade) from public.cek_senet c
-                         where c.taraf_id = t.id and c.yon = 1 and c.durum in (10, 30, 40)) as "cekIlkVade"
+                         where c.taraf_id = t.id and c.yon = 1 and c.durum in (10, 30, 40)) as "cekIlkVade",
+                       -- SATIS & RISK (1152): sevk edilmis ama faturalanmamis satis irsaliyesi (14).
+                       (select coalesce(sum(s.genel_toplam), 0) from public.belge s
+                         where s.taraf_id = t.id and s.tur = 14 and s.durum <> 2
+                           and coalesce(s.kapanma_durum, 0) < 2)                       as "irsaliyeAcik"
                   from public.taraf t
                   left join public.v_cari_ozet o on o.taraf_id = t.id
                   left join public.taraf_musteri tm on tm.id = t.id

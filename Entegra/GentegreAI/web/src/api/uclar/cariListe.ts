@@ -21,6 +21,8 @@ export interface CariKartOzeti {
     riskYuzde: number | null; ciroBuYil: number; ciroGecenYil: number; ciro12Ay: number; ciroEgri: string;
     sonSatis: string | null; sonTahsilat: string | null; durum: number; notlar: string; notTarihi: string | null;
     acikSiparisAdet: number; acikSiparis: number; cekAdet: number; cekTutar: number; cekIlkVade: string | null;
+    /** Sevk edilmiş, faturalanmamış satış irsaliyesi toplamı (Satış & Risk, 1152). */
+    irsaliyeAcik?: number;
   };
   dovizler: { doviz: string; borc: number; alacak: number; bakiye: number; yerel: number }[];
   yaslandirma: { gelmemis: number; d30: number; d60: number; d90: number };

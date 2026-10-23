@@ -76,10 +76,12 @@ public static partial class KartKatalogu
             //   listesi gecerli - her cariye tek tek atamak gerekmez.
             new("satisFiyatListesiId", "satis_fiyat_listesi_id", "kod",
                 KodTablosu: "public.v_fiyat_listesi_satis_lookup",
-                Baslik: "Satış Fiyat Listesi", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
+                // SATIS & RISK sekmesinde (Satış Koşulları kutusu, musteri_karti_ver3.html) cizilir;
+                //   grubun kendi sekmesi gizli (listeTanimlari.Cari gizliKartSekmeleri).
+                Baslik: "Satış Fiyat Listesi", Grup: "Satış Koşulları"),
             new("alisFiyatListesiId",  "alis_fiyat_listesi_id",  "kod",
                 KodTablosu: "public.v_fiyat_listesi_alis_lookup",
-                Baslik: "Alış Fiyat Listesi", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
+                Baslik: "Alış Fiyat Listesi", Grup: "Satış Koşulları"),
             // KAMPANYA (274): listenin YERINE gecmez, USTUNE isler - liste baz
             //   fiyati, kampanya indirimi verir. Bos ise genel kampanya (varsa)
             //   gecerli olur; anlasmali kurumda kampanya sozlesmeden gelir ve
@@ -137,9 +139,24 @@ public static partial class KartKatalogu
             new DetayTanimi("satisKosul", "public.taraf_musteri", "id", new KartAlani[]
             {
                 new("id",           "id",            "sayi",    Yazilabilir: false),
-                new("riskLimiti",   "risk_limiti",   "para",    Baslik: "Risk Limiti (0 = limitsiz)"),
+                // Satış Koşulları kutusu (1152).
+                new("iskontoOrani", "iskonto_orani", "ondalik", Baslik: "İskonto Oranı %"),
                 new("vadeGun",      "vade_gun",      "sayi",    Baslik: "Vade (gün)"),
-                new("iskontoOrani", "iskonto_orani", "ondalik", Baslik: "İskonto Oranı %")
+                new("odemeSekli",   "odeme_sekli",   "kod",     Baslik: "Ödeme Şekli", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Nakit", ["2"] = "Havale / EFT", ["3"] = "Çek", ["4"] = "Senet", ["5"] = "Kredi kartı", ["6"] = "Çek / Havale" }),
+                new("dovizCinsi",   "doviz_cinsi",   "kod",     Baslik: "Para Birimi", SabitKodlar: DovizKodlari),
+                new("sevkSekli",    "sevk_sekli",    "kod",     Baslik: "Sevk Şekli", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Kendi aracımız", ["2"] = "Kargo", ["3"] = "Ambar / nakliye", ["4"] = "Müşteri teslim alır" }),
+                new("kdvDurumu",    "kdv_durumu",    "kod",     Baslik: "KDV Durumu", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Normal", ["2"] = "KDV istisnalı", ["3"] = "İhraç kayıtlı", ["4"] = "Tam muaf" }),
+                new("tevkifat",     "tevkifat",      "kod",     Baslik: "Tevkifat", SabitKodlar: new Dictionary<string, string>
+                    { ["0"] = "Yok", ["2"] = "2/10", ["3"] = "3/10", ["4"] = "4/10", ["5"] = "5/10",
+                      ["7"] = "7/10", ["9"] = "9/10", ["10"] = "Tam" }),
+                // Risk / Limit kutusu.
+                new("riskLimiti",   "risk_limiti",   "para",    Baslik: "Risk Limiti"),   // 0 = limitsiz (sekmenin notu)
+                new("riskAsim",     "risk_asim",     "kod",     Baslik: "Aşımda", SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Yalnız uyar", ["2"] = "Sevkiyat onaya düşer", ["3"] = "Satış engellenir" }),
+                new("teminat",      "teminat",       "metin",   EnFazlaUzunluk: 200, Baslik: "Teminat")
             }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true)
         },
         SilmeEngelleri: new[]

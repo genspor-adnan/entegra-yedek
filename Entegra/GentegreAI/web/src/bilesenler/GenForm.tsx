@@ -1327,6 +1327,8 @@ Yine de yeni kayıt eklensin mi?`);
       {aktif?.tur === 'detay' && ozelDetayGovdesi(kaynak, aktif.detay.ad)?.({
         detay: aktif.detay, durum: detaylar[aktif.detay.ad] ?? bosDetay(), salt, yeniMi, id,
         onDegis: yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni })),
+        anaAlanlar: adlar => renderAlanListesi((meta?.alanlar ?? []).filter(a => adlar.includes(a.ad))),
+        deger,
       })}
 
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')

@@ -8,6 +8,7 @@ import { HekimGonderimOzeti } from '../radyoloji/HekimGonderimOzeti';
 import { KontrolListesi } from '../radyoloji/KontrolListesi';
 import { RolYetkiMatrisi } from '../RolYetkiMatrisi';
 import { TekKayit } from '../TekKayit';
+import { CariSatisRiskSekmesi } from './CariSatisRiskSekmesi';
 
 /**
  * KARTA ÖZEL SEKME GÖVDELERİ (refaktör 23.10.2026, GenForm'dan ayrıldı).
@@ -25,6 +26,10 @@ export interface OzelDetayBaglami {
   yeniMi: boolean;
   id: number | 'yeni';
   onDegis(yeni: DetayDurumu): void;
+  /** Kartın KENDİ alanlarını (detay değil) kartın çiziciyle çizer - bkz. cari Satış & Risk. */
+  anaAlanlar?(adlar: string[]): ReactNode;
+  /** Kartın ana kaydı (salt okuma). */
+  deger?: Record<string, unknown>;
 }
 
 /** Yer tutucu / özel sekme gövdesinin ihtiyacı. */
@@ -50,12 +55,12 @@ const OZEL_DETAYLAR: Record<string, Record<string, (b: OzelDetayBaglami) => Reac
   // Müşteri kartı "Satış & Risk" (musteri_karti_ver3.html): taraf_musteri 1:1 uzantı -
   //   grid değil tek kayıt formu. Risk limiti listedeki "Risk Limiti %" ve "Limit aşan"ı,
   //   vade günü vadesi geçen hesabını besler.
+  //   Mockup'ın iki kutusu (Satış Koşulları · Risk / Limit) + risk kalemleri dökümü (1152).
   cari: {
     satisKosul: b => (
-      <TekKayit meta={b.detay} durum={b.durum} saltOkunur={b.salt || b.detay.saltOkunur}
-                onDegis={b.onDegis} baslik="Satış & Risk"
-                not={<>Risk limiti 0 ise limitsiz. Vade günü, vade tarihi girilmemiş faturalarda
-                     vadeyi belirler (vadesi geçen tutarı ve yaşlandırmayı etkiler).</>} />
+      <CariSatisRiskSekmesi id={b.id} yeniMi={b.yeniMi} detay={b.detay} durum={b.durum} salt={b.salt}
+                            onDegis={b.onDegis} anaAlanlar={b.anaAlanlar}
+                            tedarikci={!!b.deger?.tedarikci} />
     ),
   },
   stok: {

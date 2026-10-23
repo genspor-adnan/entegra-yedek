@@ -77,6 +77,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
+    gizliKartSekmeleri: ['Satış Koşulları'],
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
@@ -98,6 +100,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     yerTutucuSekmeler: ['Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
+    // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
+    gizliKartSekmeleri: ['Satış Koşulları'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
     ic: '🚚', yetkiKodu: 'cari.tedarikci.liste',   // 1003: menü yeri kendi kodu
   },
