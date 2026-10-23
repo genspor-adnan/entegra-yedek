@@ -32,6 +32,16 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "banka.hareket", Islem: Islem.Degistir, Sira: 60),
             Yazdir(),
         ];
+        // BANKA HESABI LİSTESİ (mockup "Banka Hesabı Listesi"): hesap CRUD + bütün bağlı hesapları çek +
+        //   seçili hesabın hareketleri. Öteki hesap listeleri (kasa / POS / kredi) 'hesap-liste'de kalır.
+        s["banka-hesap-liste"] =
+        [
+            .. Crud("hesap", "hesap", "hesap", "＋ Yeni Banka Hesabı", silHedef: null),
+            new("banka.cek-tumu", "⟳ Tümünü Çek", "banka-hareket", Hedef: "araccubugu,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Ekle, Sira: 40),
+            new("banka.hesap-hareket", "🏦 Hareketler", "banka-hareket", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "banka.hareket", Islem: Islem.Gor, KayitGerekir: true, Sira: 41),
+        ];
         s["banka-kural-liste"] = Crud("banka-kural", "banka-hareket", "banka.kural", "＋ Kural", yazdir: false);
 
         s["cari-ekstre-liste"] =

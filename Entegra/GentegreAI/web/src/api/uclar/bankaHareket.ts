@@ -36,7 +36,13 @@ export interface BankaKarar {
   ibanEkle?: boolean; kural?: string;
 }
 
+export interface BankaHesapOzeti {
+  hesap: number; tl: number; doviz: number; api: number; apiBankalar: string; dosya: number; dosyaBankalar: string;
+  bekleyen: number; dikkat: number; toplam: number;
+}
+
 export const bankaHareketUclari = {
+  bankaHesapOzet: () => istek<BankaHesapOzeti>('/api/banka-hareket/hesap-ozet'),
   bankaOzet: (hesapId?: number | null) =>
     istek<BankaOzeti>(`/api/banka-hareket/ozet${hesapId ? `?hesapId=${hesapId}` : ''}`),
   bankaHareket: (id: number) => istek<BankaHareketDetayi>(`/api/banka-hareket/${id}`),

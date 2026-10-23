@@ -536,7 +536,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Kasa Listesi', yol: 'Kasa › Kasa Hesaplari',
-    gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında
+    gizliKartSekmeleri: ['Banka Bağlantısı', 'Banka Bilgileri'],   // 1157: kasa banka bilgisi taşımaz
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim.liste',
@@ -627,14 +627,27 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {
-    kaynak: 'hesap', rota: 'banka-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    kaynak: 'hesap', rota: 'banka-hesap', aksiyonEkrani: 'banka-hesap-liste',
+    // Mockup çipleri (şerit kutuları da bunları açar: Aktif 0 · Bağlı 1 · Bekleyeni olan 2 · Dikkat 3).
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Bağlı (API)', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }, { alan: 'bankaKaynak', op: 'esit', deger: 1 }] } },
+      { ad: 'Bekleyeni olan', filtre: { alan: 'bankaBekleyen', op: 'buyuk', deger: 0 } },
+      { ad: 'Dikkat', filtre: { alan: 'bankaDikkat', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi' }, baslik: 'Banka Hesabı Listesi', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     // BANKA BAĞLANTISI (1157, mockup banka_hareketleri.html): bağlantı, son çekim, banka bakiyesi, fark, bekleyen.
-    kolonSirasi: ['kod', 'ad', 'dovizCinsi', 'atamaAdi', 'bakiye', 'yerelBakiye', 'bankaBaglanti', 'bankaSonCekim',
-                  'bankaBakiye', 'bankaFark', 'bankaBekleyen', 'bankaDurum', 'durumAdi'],
-    toplam: ['yerelBakiye'],
+    kolonSirasi: ['bankaGosterim', 'ad', 'kod', 'iban', 'dovizCinsi', 'bankaBaglanti', 'bankaSonCekim', 'bakiye', 'bankaBakiye',
+                  'bankaFark', 'bankaBekleyen', 'bankaDurum'],
+    kolonBasliklari: { ad: 'Hesap', bakiye: 'Sistem Bakiyesi' },
+    // Banka kartında "POS / Kart" kutusu yok (kullanıcı 23.10.2026) - o alanlar POS / kredi kartı kartlarında.
+    gizliKartAlanlari: ['komisyonOrani', 'komisyonMasrafId', 'komisyonZamani', 'valorGun', 'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
+    // Mockup: Aktif / Pasif ayrı kolon değil (çipte), TL karşılığı şeritte - toplam satırı yok.
+    gizliKolonlar: ['atamaAdi', 'durumAdi', 'yerelBakiye'],
     menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesabı Listesi', ic: '🏦', yetkiKodu: 'hesap.tanim.banka.liste',
   },
   {

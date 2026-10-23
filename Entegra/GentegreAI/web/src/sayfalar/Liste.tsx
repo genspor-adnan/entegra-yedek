@@ -637,7 +637,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await bankaAksiyonu(kod, satir, secililer, {
-        tazele: () => setYenile(t => t + 1), hesapId: Number(sorgu.get('hesapId')) || null,
+        tazele: () => setYenile(t => t + 1), hesapId: Number(sorgu.get('hesapId')) || null, git: yol => git(yol),
       })) return;
 
       if (await zamanliIsAksiyonu(kod, satir, {

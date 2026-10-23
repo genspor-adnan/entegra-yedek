@@ -125,7 +125,8 @@ export function sekmeleriKur(secenek: {
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
           gizliDetaylar, ekSekmeler, sekmeSirasi,
           detaySatirlari = () => [] } = secenek;
-  const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
+  // HESAP (1157, mockup banka_hareketleri.html): banka sözleşmesi / API onay formu.
+  const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
   const s: SekmeTanimi[] = gruplar
     // Serit alanlari acikca verilmisse Kimlik grubu sekme olarak da cizilir;

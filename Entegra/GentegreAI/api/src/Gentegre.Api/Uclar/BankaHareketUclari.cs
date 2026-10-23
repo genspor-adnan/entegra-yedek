@@ -68,6 +68,39 @@ public static class BankaHareketUclari
             return Results.Ok(new { sayac, hesap, hesaplar });
         });
 
+        // BANKA HESABI LİSTESİ özet şeridi (mockup): hesap · bağlı (API) · dosyadan · bekleyen · dikkat · toplam.
+        //   Yetki listenin kendisi - bankadan hareket yetkisi olmayan da sayıları görür.
+        grup.MapGet("/hesap-ozet", async (VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("hesap.tanim.banka.liste", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var o = await b.TekAsync("""
+                with x as (
+                    select h.id, h.banka_kaynak, coalesce(nullif(h.doviz_cinsi, ''), 'TL') as doviz,
+                           coalesce(nullif(bk.ad, ''), nullif(h.banka_adi, ''), split_part(h.ad, '_', 1)) as banka,
+                           (h.banka_kaynak = 1 and (h.banka_onay_bitis < current_date or h.banka_son_sonuc like 'Hata%')) as dikkat,
+                           coalesce(vb.yerel_bakiye, 0) as yerel
+                      from public.hesap h
+                      left join public.banka bk on bk.id = h.banka_id
+                      left join public.v_hesap_bakiye vb on vb.hesap_id = h.id
+                     where h.tur = 'B' and coalesce(h.durum, 1) = 1 and (h.sube_id is null or h.sube_id = @p0))
+                select count(*)::int as hesap,
+                       count(*) filter (where doviz in ('TL', 'TRY'))::int as tl,
+                       count(*) filter (where doviz not in ('TL', 'TRY'))::int as doviz,
+                       count(*) filter (where banka_kaynak = 1)::int as api,
+                       coalesce((select string_agg(banka || ' ' || n, ' · ') from (select banka, count(*) n from x
+                                  where banka_kaynak = 1 group by banka order by count(*) desc, banka) a), '') as "apiBankalar",
+                       count(*) filter (where banka_kaynak = 2)::int as dosya,
+                       coalesce((select string_agg(distinct banka, ' · ') from x where banka_kaynak = 2), '') as "dosyaBankalar",
+                       (select count(*)::int from public.banka_hareket bh join x on x.id = bh.hesap_id where bh.durum in (0, 1, 4)) as bekleyen,
+                       count(*) filter (where dikkat)::int as dikkat,
+                       coalesce(sum(yerel), 0) as toplam
+                  from x
+                """, null, [baglam.SubeId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(o);
+        });
+
         // Tek hareket: banka bilgisi, öneri, seçenekler (hesaplar / masraf kalemleri) - yan panel.
         grup.MapGet("/{id:long}", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {

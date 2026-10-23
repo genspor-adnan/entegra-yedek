@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import {
-  bankaHareketUclari as api, type BankaHareketDetayi, type BankaKarar, type BankaOzeti,
+  bankaHareketUclari as api, type BankaHareketDetayi, type BankaHesapOzeti, type BankaKarar, type BankaOzeti,
 } from '../../api/uclar/bankaHareket';
 import { listeUclari } from '../../api/uclar/liste';
 import { para, tarihSaat } from '../../bilesenler/bicim';
@@ -26,6 +26,7 @@ export const BH_STILI = `
 .bh-kutular { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); border:1px solid var(--cizgi2); border-radius:var(--r); background:var(--kartzem) }
 .bh-kutular > div { padding:7px 11px; border-right:1px solid var(--cizgi2); cursor:pointer }
 .bh-kutular > div:last-child { border-right:none }
+.bh-kutular > div.on { background:#eef5fd; box-shadow:inset 0 -2px 0 #2f6fb5 }
 .bh-kutular .b { font-size:10.5px; color:var(--soluk); text-transform:uppercase; letter-spacing:.3px }
 .bh-kutular .deg { font-size:16px; font-weight:bold; margin-top:2px }
 .bh-kutular .x { font-size:10.5px; color:var(--soluk) }
@@ -41,6 +42,10 @@ export const BH_STILI = `
 .bh-secenek.on { border-color:#9cc4ee; background:#f4f9ff }
 .bh-secenek select { width:100%; margin-top:4px }
 .bh-yan .tam { width:100%; justify-content:center; margin-top:6px }
+.bh-tablo { width:100%; border-collapse:collapse; font-size:12px; background:#fff }
+.bh-tablo th { text-align:left; font-weight:normal; color:var(--soluk); border-bottom:1px solid var(--cizgi2); padding:5px 8px; background:#f4f7fb }
+.bh-tablo td { border-bottom:1px solid var(--cizgi2); padding:5px 8px }
+.bh-tablo .sag { text-align:right }
 .bh-borc { color:var(--hata) } .bh-alacak { color:var(--ok) } .bh-soluk { color:var(--soluk) }
 `;
 
@@ -102,6 +107,87 @@ export function BankaOzetSeridi({ yenile, onCip, onYenile }: { yenile: number; o
                 fark != null && Math.abs(fark) >= 0.005 ? 'bh-borc' : '')}
         </div>
       )}
+    </div>
+  );
+}
+
+// ------------------------------------------- Banka Hesabı Listesi şeridi --
+/** Mockup "Banka Hesabı Listesi" özeti: kutu tıklanınca o çip (Aktif 0 · Bağlı 1 · Bekleyeni olan 2 · Dikkat 3). */
+export function BankaHesapSeridi({ yenile, onCip, cip }: { yenile: number; onCip(i: number): void; cip?: number }) {
+  const [o, setO] = useState<BankaHesapOzeti | null>(null);
+  useEffect(() => { api.bankaHesapOzet().then(setO, () => setO(null)) }, [yenile]);
+  if (!o) return null;
+  const kutu = (b: string, d: React.ReactNode, x: string, k?: number, sinif = '') => (
+    <div onClick={() => k !== undefined && onCip(k)} className={k !== undefined && k === cip ? 'on' : ''}
+         style={k === undefined ? { cursor: 'default' } : undefined}>
+      <div className="b">{c(b)}</div><div className={`deg ${sinif}`}>{d}</div><div className="x">{x}</div></div>
+  );
+  return (
+    <div className="bh-serit">
+      <style>{BH_STILI}</style>
+      <div className="bh-kutular" style={{ gridTemplateColumns: 'repeat(6, minmax(0,1fr))' }}>
+        {kutu('Hesap', o.hesap, `${o.tl} TL · ${o.doviz} ${c('döviz')}`, 0)}
+        {kutu('Bağlı (API)', o.api, o.apiBankalar || '—', 1, 'bh-alacak')}
+        {kutu('Dosyadan', o.dosya, o.dosyaBankalar || '—')}
+        {kutu('Bekleyen hareket', o.bekleyen, c('işlenmemiş'), 2)}
+        {kutu('Dikkat', o.dikkat, c('onay süresi · çekim hatası'), 3, o.dikkat ? 'bh-borc' : '')}
+        {kutu('Toplam (TL karşılığı)', `₺ ${tl(o.toplam)}`, c('sistem bakiyesi'))}
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------- Banka Hesabı Kartı başlığı --
+/** Kart başlığındaki bağlantı hapı: API · sıklık / onay süresi doldu · Dosya · Kapalı. */
+export function BankaBaglantiRozeti({ deger }: { deger: Record<string, unknown> }) {
+  const kaynak = Number(deger.bankaKaynak ?? 0), dk = Number(deger.bankaCekmeDk ?? 0);
+  const bitis = deger.bankaOnayBitis ? new Date(String(deger.bankaOnayBitis)) : null;
+  const doldu = kaynak === 1 && bitis !== null && bitis < new Date();
+  const [sinif, metin] = kaynak === 1
+    ? doldu ? ['hata', c('API · onay süresi doldu')]
+      : ['ok', `API · ${dk >= 1440 ? c('günde 1') : dk > 0 ? `${dk} dk` : c('elle')}`]
+    : kaynak === 2 ? ['mavi', c('Dosya')] : ['gri', c('Bağlantı kapalı')];
+  return <span className={`rozet ${sinif}`} style={{ marginLeft: 8 }}>{metin}</span>;
+}
+
+// ----------------------------------------- Banka Hesabı Kartı › Hareketler --
+const DURUM_SINIF: Record<string, string> = { 'Öneri hazır': 'ok', 'İşlendi': 'mavi', 'Seçim bekliyor': 'uyari' };
+
+/** Kartın "Hareketler" sekmesi: son çekilen 20 hareket; tamamı ve işleme Banka Hareketleri ekranında. */
+export function BankaHesapHareketleri({ hesapId, git }: { hesapId: number; git(yol: string): void }) {
+  const [satirlar, setSatirlar] = useState<ListeSatiri[] | null>(null);
+  useEffect(() => {
+    listeUclari.liste('banka-hareket', { sayfa: 1, boyut: 20, filtre: { alan: 'hesapId', op: 'esit', deger: hesapId } })
+      .then(y => setSatirlar(y.satirlar), h => { mesaj(hataMetni(h)); setSatirlar([]) });
+  }, [hesapId]);
+  return (
+    <div style={{ padding: '10px 12px' }}>
+      <style>{BH_STILI}</style>
+      {satirlar === null ? <div className="bh-soluk">{c('Yükleniyor…')}</div>
+        : satirlar.length === 0 ? <div className="bh-soluk">{c('Bu hesaba henüz bankadan hareket çekilmedi.')}</div>
+        : (
+          <table className="bh-tablo">
+            <thead><tr><th>{c('Tarih')}</th><th>{c('Açıklama (banka)')}</th><th className="sag">{c('Tutar')}</th>
+              <th className="sag">{c('Bakiye')}</th><th>{c('Durum')}</th></tr></thead>
+            <tbody>{satirlar.map(s => {
+              const t = Number(s.tutar ?? 0);
+              return (
+                <tr key={String(s.id)}>
+                  <td style={{ whiteSpace: 'nowrap' }}>{tarihSaat(s.islemTarihi)}</td>
+                  <td>{String(s.aciklama ?? '')}</td>
+                  <td className={`sag ${t > 0 ? 'bh-alacak' : 'bh-borc'}`}>{t > 0 ? '+' : ''}{tl(t)}</td>
+                  <td className="sag">{s.bakiye == null ? '' : tl(Number(s.bakiye))}</td>
+                  <td><span className={`rozet ${DURUM_SINIF[String(s.durumAdi ?? '')] ?? 'gri'}`}>{c(String(s.durumAdi ?? ''), 'kod')}</span></td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+        <span className="bh-soluk">{c('Son çekilen banka hareketleri - tamamı ve işleme "Banka Hareketleri" ekranında.')}</span>
+        <span style={{ flex: 1 }} />
+        <button className="d bir" type="button" onClick={() => git(`/banka-hareket?hesapId=${hesapId}`)}>🏦 {c('Banka Hareketleri')}</button>
+      </div>
     </div>
   );
 }
@@ -252,12 +338,17 @@ export function BankaHareketYanPanel({ satir, yenile, onIslendi }: { satir: List
 // ---------------------------------------------------------------- aksiyonlar --
 /** Banka Hareketleri araç çubuğu. true: kod bu ekranındı. */
 export async function bankaAksiyonu(kod: string, satir: ListeSatiri | null | undefined, secililer: ListeSatiri[] | undefined,
-                                    ctx: { tazele(): void; hesapId: number | null }): Promise<boolean> {
+                                    ctx: { tazele(): void; hesapId: number | null; git(yol: string): void }): Promise<boolean> {
   if (!kod.startsWith('banka.')) return false;
   const id = Number(satir?.id ?? 0);
   try {
-    if (kod === 'banka.cek') {
-      const y = await api.bankaCek(ctx.hesapId);
+    if (kod === 'banka.hesap-hareket') {
+      // Banka Hesabı Listesi: seçili hesabın hareketleri (satır = hesap).
+      if (id) ctx.git(`/banka-hareket?hesapId=${id}`);
+      return true;
+    }
+    if (kod === 'banka.cek' || kod === 'banka.cek-tumu') {
+      const y = await api.bankaCek(kod === 'banka.cek-tumu' ? null : ctx.hesapId);
       mesaj(y.sonuclar.map(s => s.mesaj ?? s.hata ?? '').filter(Boolean).join('\n') || c('Bağlı hesap yok.'));
     } else if (kod === 'banka.isle') {
       const idler = (secililer?.length ? secililer : satir ? [satir] : []).map(s => Number(s.id)).filter(x => x > 0);

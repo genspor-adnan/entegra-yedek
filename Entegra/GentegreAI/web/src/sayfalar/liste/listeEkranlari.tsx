@@ -35,7 +35,7 @@ import { GozCihazGostergesi, GozCihazOnizlemePaneli, GozCihazSolPanel,
 import { OrderGostergesi, OrderOnizlemePaneli, OrderSolPanel, useOrderGostergesi, useOrderSuzgeci } from '../yatan/OrderPanelleri';
 import { GozlukGostergesi, GozlukOnizlemePaneli, GozlukSolPanel, useGozlukGostergesi, useGozlukSuzgeci } from '../goz/GozlukPanelleri';
 import { GoruntulemeGostergesi, GoruntulemeOnizlemePaneli, GoruntulemeSolPanel, useGoruntulemeGostergesi, useGoruntulemeSuzgeci } from '../goz/GozGoruntulemePanelleri';
-import { BankaHareketYanPanel, BankaOzetSeridi } from '../banka/BankaHareketPanelleri';
+import { BankaHareketYanPanel, BankaHesapSeridi, BankaOzetSeridi } from '../banka/BankaHareketPanelleri';
 import { GozPanoSolPanel, GozPanoTazeleSeridi, useGozPanoOzeti, useGozPanoSuzgeci } from '../goz/GozPanoPanelleri';
 import { GozMuayeneGostergesi, GozMuayeneOnizleme, GozMuayeneSolPanel, useGozMuayeneGostergesi, useGozMuayeneSuzgeci } from '../goz/GozMuayenePanelleri';
 import { PersonelBolumAgaci, PersonelGostergesi, PersonelKartlari, PersonelOnizleme, PersonelOrganizasyon,
@@ -274,6 +274,9 @@ const PANELLER: Record<string, ListePaneli> = {
   // KURUMSAL KALİTE (1059): Politika & Hedefler listesinin üstünde politika / kapsam.
   'kys-gosterge': { ustSerit: () => <KysPolitikaSeridi /> },
   // BANKA HAREKETLERİ (1157, mockup banka_hareketleri.html): üstte hesap + çek + sayaçlar, sağda karar.
+  // BANKA HESABI LİSTESİ (1157, mockup): hesap / bağlı / dosyadan / bekleyen / dikkat / toplam. Aynı
+  //   kaynağı kullanan Kasa / POS / Kredi listeleri çizmez.
+  hesap: { ustSerit: b => b.rota === 'banka-hesap' ? <BankaHesapSeridi yenile={b.yenile} onCip={b.setCip} cip={b.cipIndeks} /> : undefined },
   'banka-hareket': {
     ustSerit: b => <BankaOzetSeridi yenile={b.yenile} onCip={b.setCip} onYenile={b.tazele} />,
     yanPanel: b => <BankaHareketYanPanel satir={b.seciliSatir} yenile={b.yenile} onIslendi={b.tazele} />,

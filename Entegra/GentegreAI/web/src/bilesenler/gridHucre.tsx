@@ -295,6 +295,14 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /^Yanıtlanıyor/i, sinif: 'mavi' },
   { desen: /^Yanıtlandı/i, sinif: 'olumlu' },
   { desen: /^İsteyen gördü$/i, sinif: 'olumlu' },
+  // BANKA HESABI / HAREKETLERİ (1157, mockup banka_hareketleri.html): bağlantı ve mutabakat hapları.
+  { desen: /^API – (onay|çekim)/, sinif: 'hata' },
+  { desen: /^API – /, sinif: 'olumlu' },
+  { desen: /^Dosya – /, sinif: 'mavi' },
+  { desen: /^(Mutabık|Öneri hazır)$/, sinif: 'olumlu' },
+  { desen: /^(Bekleyen var|Seçim bekliyor)$/, sinif: 'uyari' },
+  { desen: /^(Onay yenilenmeli|Çekim hatası)$/, sinif: 'hata' },
+  { desen: /^İşlendi$/, sinif: 'mavi' },
   // İK BELGE TAKİBİ "En acil" (1135-1137): "Belge - Süresi doldu (-14 gün)".
   { desen: / - (Eksik|Süresi doldu|Dosya yok)/, sinif: 'hata' },
   { desen: / - Yaklaşıyor/, sinif: 'uyari' },

@@ -39,7 +39,7 @@ public static partial class KaynakKatalogu
             new("oneriGuven",  "h.oneri_guven",  "sayi",  "Güven", Hizalama: "sag", Varsayilan: false),
             new("durumAdi",    "case h.durum when 0 then 'Bekliyor' when 1 then 'Öneri hazır' when 2 then 'İşlendi'"
                                + " when 3 then 'Yoksayıldı' else 'Seçim bekliyor' end",
-                                                 "metin", "Durum", Hizalama: "orta", Genislik: 110, Filtrelenebilir: false),
+                                                 "metin", "Durum", Hizalama: "orta", Genislik: 110, Bicim: "rozet", Filtrelenebilir: false),
             new("durum",       "h.durum",        "sayi",  "Durum Kodu", Varsayilan: false),
             new("kasaIslemId", "h.kasa_islem_id","sayi",  "Kasa İşlemi", Varsayilan: false),
             new("kasaIslemNo", "h.kasa_islem_no","metin", "Makbuz", Varsayilan: false),

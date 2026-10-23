@@ -23,6 +23,7 @@ import { OrderGecmisSekmesi, OrderGuvenlikSekmesi, OrderHastaSeridi, OrderOzetKu
 import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { DenetimAraclari } from '../kys/denetim/kysDenetimKarti';
 import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
+import { BankaBaglantiRozeti, BankaHesapHareketleri } from '../banka/BankaHareketPanelleri';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 
@@ -100,6 +101,28 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
       ? d => <CariHizliIslemler id={b.kartId as number} ad={String(d.unvan ?? '')} yetki={b.yetki}
                                 tazele={b.kartiTazele} />
       : undefined,
+  },
+
+  // ----------------------------------------- Banka Hesabı Kartı (1157) ----
+  // Mockup banka_hareketleri.html: Genel · Banka Bilgileri · Banka Bağlantısı · Hareketler. Aynı
+  //   kaynağı kullanan Kasa / POS / Kredi kartlarında Hareketler sekmesi yok.
+  hesap: {
+    ekSekmeler: b => kayitli(b.kartId) && b.tanim.kartYolu === '/banka-hesap' ? [
+      { anahtar: 'ozel:banka-hareket', baslik: 'Hareketler',
+        ciz: () => <BankaHesapHareketleri hesapId={b.kartId as number} git={b.git} /> },
+    ] : undefined,
+    // Banka Bağlantısı sekmesinin altında onay notu (mockup).
+    sekmeSarmalayici: b => b.tanim.kartYolu !== '/banka-hesap' ? undefined : (baslik, icerik) => baslik !== 'Banka Bağlantısı' ? icerik : (
+      <>
+        {icerik}
+        <div className="not" style={{ margin: '0 12px 12px' }}>
+          {c('Onay no, müşterinin bankada "Hesap Hareketleri API" hizmetine verdiği onaydan gelir (internet şubesi / şube). '
+             + 'Onay süresi dolunca ekran uyarır, çekme durur. API anahtarı Entegrasyonlar\'daki banka satırındadır.')}
+        </div>
+      </>
+    ),
+    // Başlıkta bağlantı hapı (mockup "API · 30 dk").
+    baslikEk: b => b.tanim.kartYolu === '/banka-hesap' ? d => <BankaBaglantiRozeti deger={d} /> : undefined,
   },
 
   // ---------------------------------------------- İK belge türü (1135-1138) ----
