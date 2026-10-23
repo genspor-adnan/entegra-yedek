@@ -33,6 +33,7 @@ import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { belgeTakipAksiyonu } from './liste/belgeTakipAksiyonlari';
 import { belgeTuruAksiyonu } from './liste/belgeTuruAksiyonlari';
+import { useCariEkstreEkrani } from './liste/cariEkstre';
 import { listePaneli, useListeEkrani, type ListeEkranBaglami } from './liste/listeEkranlari';
 import { entegrasyonAksiyonu } from './liste/entegrasyonAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
@@ -340,6 +341,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [kasaTuru, setKasaTuru] = useState<number | null>(null);
   // Ekstre satirindan acilan MEVCUT kasa islemi (salt gorunum/duzenleme).
   const [acikKasaId, setAcikKasaId] = useState<number | null>(null);
+  // KASA › CARİ EKSTRE (23.10.2026): tarih aralığı, satırın kaydını açma, sağ üstte çıktı menüsü.
+  const cariEkstre = useCariEkstreEkrani(tanim.kaynak === 'cari-ekstre', sorgu,
+    h => h.tur === 'kasa' ? setAcikKasaId(h.id) : setAcikBelgeId(h.id));
   /** Cek/senet ile tahsilat-odemede once acilan KIYMET KARTININ turu (23/24/33/34). */
   const [cekTuru, setCekTuru] = useState<number | null>(null);
   /** HASTA AVANSI (779): avans damgasiyla acilan tahsilat kartinin turu. */
@@ -899,6 +903,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         kartAc: id => { if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${id}`) },
       })) return;
 
+      if (kod === 'ekstre.belge-ac') { cariEkstre.kayitAc(satir); return }
       if (await belgeTakipAksiyonu(kod, satir, secililer)) return;
       // ENTEGRASYON HESAPLARI (bağımsız liste, 22.10.2026): sına / test mesajı / SKRS işlemleri.
       if (await entegrasyonAksiyonu(kod, satir, () => setYenile(t => t + 1))) return;
@@ -1149,7 +1154,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ))}</>
       ) : undefined}
       tarihVarsayilan={tanim.tarihVarsayilan}
-      onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
+      onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : cariEkstre.onTarihAraligi}
+      basSag={cariEkstre.basSag}
       aksiyonEkrani={tanim.aksiyonEkrani}
       aracCubuguAltSatir={tanim.aracCubuguAltSatir}
       ebelgeMenusu={tanim.ebelgeMenusu}
@@ -1183,6 +1189,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         }
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
+        // CARİ EKSTRE: satırı üreten kayıt (kasa işlemi, yoksa belge).
+        else if (tanim.kaynak === 'cari-ekstre') cariEkstre.kayitAc(satir);
         // BANKO OTURUMU cift tikta MODAL (kullanici 08.10.2026: "Banko
         //   Oturumlari cift tiklayinca duzenle acilsin") - "Duzenle"
         //   aksiyonuyla ayni davranis, akis tek yerde.
@@ -1267,7 +1275,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             const e = tanim.ekstre;
             const hedef = e?.yeniSekme && ekranSekmesi
               ? LISTELER.find(l => l.kaynak === e.kaynak && l.urlFiltreAlani === e.alan) : undefined;
-            if (e && hedef) git(`/${hedef.rota ?? hedef.kaynak}?${e.alan}=${hesap.id}`);
+            if (e && hedef) git(`/${hedef.rota ?? hedef.kaynak}?${e.alan}=${hesap.id}&ad=${encodeURIComponent(hesap.ad)}`);
             else setEkstre(hesap);
           }}
         >

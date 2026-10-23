@@ -13,6 +13,14 @@ public static partial class AksiyonKatalogu
 {
     private static void EkleCari(Dictionary<string, IReadOnlyList<AksiyonTanimi>> s)
     {
+        // KASA › CARI EKSTRE (23.10.2026): sag ustte "📄 Belge Aç" - satiri ureten kasa islemi /
+        //   belge. Cikti menusu (Önizle / Yazdır / Kaydet) istemcide (icmal deseni), aksiyon degil.
+        s["cari-ekstre-liste"] =
+        [
+            new("ekstre.belge-ac", "📄 Belge Aç", "mali_hareket", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "mali_hareket", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+        ];
+
         s["cari-liste"] =
         [
             .. Crud("cari", "kart", "cari"),

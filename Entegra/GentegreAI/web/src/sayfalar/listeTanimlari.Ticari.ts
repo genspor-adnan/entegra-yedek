@@ -715,6 +715,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'cari-ekstre', baslik: 'Cari Ekstre', yol: 'Kasa › Cari Ekstre',
     urlFiltreAlani: 'tarafId', toplam: ['borc', 'alacak', 'yerelBorc', 'yerelAlacak'],
+    // TARİH ARALIĞI + "📄 Belge Aç" + sağ üstte çıktı menüsü (kullanıcı 23.10.2026; liste/cariEkstre).
+    tarihAlani: 'islemTarihi', tarihVarsayilan: 'yilbasindanBugune', aksiyonEkrani: 'cari-ekstre-liste',
     menuGrup: 'Finans', menuSira: 74, menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
   },
   {

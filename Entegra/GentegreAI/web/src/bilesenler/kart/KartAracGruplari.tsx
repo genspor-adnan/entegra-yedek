@@ -46,7 +46,7 @@ export interface KartAracBaglami {
 export function kartAracGrubu(b: KartAracBaglami): ReactNode {
   switch (b.kaynak) {
     case 'hasta': return <HastaKimlikAraclari b={b} />;
-    case 'cari': return b.yeniMi ? null : <CariEkstreDugmesi tarafId={Number(b.id)} />;
+    case 'cari': return b.yeniMi ? null : <CariEkstreDugmesi tarafId={Number(b.id)} ad={String(b.deger.unvan ?? '')} />;
     // Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
     //   tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
     //   dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali.
@@ -397,13 +397,13 @@ function EntegrasyonKartAraclari({ b }: { b: KartAracBaglami }) {
  * Ekstre butonu ekle"): kartta ayrı bir ekstre yok - Kasa › Cari Ekstre listesi bu cariye süzülmüş
  * olarak açılır (sekme düzeninde kendi sekmesinde). Listeye erişimi olmayana düğme yok.
  */
-function CariEkstreDugmesi({ tarafId }: { tarafId: number }) {
+function CariEkstreDugmesi({ tarafId, ad }: { tarafId: number; ad: string }) {
   const { yetki: oturumYetki } = useOturum();
   const git = useNavigate();
   if (!oturumYetki('mali_hareket', 'gor')) return null;
   return (
     <button className="d" type="button" title={c('Cari Ekstre listesinde bu carinin hareketleri')}
-            onClick={() => git(`/cari-ekstre?tarafId=${tarafId}`)}>📄 {c('Ekstre')}</button>
+            onClick={() => git(`/cari-ekstre?tarafId=${tarafId}&ad=${encodeURIComponent(ad)}`)}>📄 {c('Ekstre')}</button>
   );
 }
 

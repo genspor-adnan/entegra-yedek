@@ -91,6 +91,8 @@ interface Props {
   seciliBaslangicId?: number | null;
   /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
   cipSonu?: React.ReactNode;
+  /** Baslik satirinin SAG USTUNDE, aksiyon dugmelerinin sagina (ör. cikti menusu - icmal deseni). */
+  basSag?: React.ReactNode;
   /**
    * EK ARAMA ALANLARI (16.10.2026, hasta: "telefon / kimlik no ile de arayabilmeliyim"): hızlı arama
    * görünen metin kolonlarına ek olarak bu (gizli olabilen) kolonlarda da arar - ör. telefonHam, vknoHam.
@@ -271,7 +273,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
-                          seciliBaslangicId, cipSonu, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
+                          seciliBaslangicId, cipSonu, basSag, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, grupBirimi, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
@@ -665,6 +667,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
               {aksiyonEkrani && <GenToolbar aksiyonlar={aracCubuguAltSatir ? aksiyonlar.filter(x => !altSatirda(x.kod)) : aksiyonlar}
                                             calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler}
                                             yazdirOncesi={efaturaMenusu} />}
+              {basSag}
             </div>
           </div>
           {aracCubuguAltSatir && aksiyonEkrani && (
@@ -769,7 +772,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
             "Tum Liste / Son / Sik" dugmeleriyle birlikte o combolar da
             kaybolurdu. */}
-        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0 || !!cipSonu || !!cipOnu) && (
+        {/* TARIH ARALIGI da seridi acar (23.10.2026, Cari Ekstre): cipsiz listede tarihAlani
+            tanimli oldugu halde kutular cizilmiyordu - varsayilan aralik gorunmeden uygulaniyordu. */}
+        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0 || !!cipSonu || !!cipOnu || !!tarihAlani) && (
           // Kutu varken serit tam genislik: `width: fit-content` saga yanasmayi
           //   engelliyordu (kullanici: "Tümü/Sık/Son hizasinda saga yanasik").
           <div className={`durumseg${ebelgeKombo.length > 0 ? ' genis' : ''}`}>
