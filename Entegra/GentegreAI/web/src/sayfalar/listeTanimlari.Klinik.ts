@@ -204,7 +204,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
               tarihAlani: 'islemTarihi',
-              kolonBasliklari: { belgeNo: 'Protokol No' } },
+              kolonBasliklari: { belgeNo: 'Protokol No' },
+              // Kasa › Cari Ekstre listesi yeni sekmede (kullanıcı 23.10.2026): hasta listesi yerinde kalır.
+              yeniSekme: true },
     // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
     // HASTA LISTESI BASVURULARDAN ONCE (kullanici): kayit kabulde is once
     //   hastayi bulmakla baslar - basvuru ondan sonra acilir.

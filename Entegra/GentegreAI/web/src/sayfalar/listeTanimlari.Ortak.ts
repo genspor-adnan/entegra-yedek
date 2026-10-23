@@ -179,6 +179,10 @@ export interface ListeTanimi {
     /** Ekstre gridinde ekrana ozel kolon basliklari (bkz. kolonBasliklari):
         hasta ekstresinde "Belge No" PROTOKOL NUMARASIDIR. */
     kolonBasliklari?: Record<string, string>;
+    /** Ekstre düğmesi listeyi yerinde ekstreye çevirmez: ekstre kaynağının KENDİ LİSTESİNİ
+        (ör. Kasa › Cari Ekstre) hesaba süzülmüş olarak YENİ SEKMEDE açar - ayrı bir ekstre
+        ekranı yok. Sekmeler kapalıysa ya da o liste yoksa eski davranış. */
+    yeniSekme?: boolean;
   };
   /** Liste ekraninda tarih araligi filtresi (cip seridinde iki tarih kutusu). */
   tarihAlani?: string;

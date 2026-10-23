@@ -20,6 +20,9 @@ describe('kartAracGrubu', () => {
     for (const k of ['hasta', 'cek-senet', 'hasta-aday', 'randevu', 'dokuman', 'entegrasyon-hesap', 'kisi'])
       expect(isValidElement(kartAracGrubu(b(k))), k).toBe(true);
     expect(isValidElement(kartSagAraclari(b('cari')))).toBe(true);
+    // Cari kartında ekstre SEKMESİ yok, üstte Ekstre düğmesi (Kasa › Cari Ekstre) - yeni kartta yok.
+    expect(isValidElement(kartAracGrubu(b('cari')))).toBe(true);
+    expect(kartAracGrubu(b('cari', { yeniMi: true, id: 'yeni' }))).toBeNull();
   });
 
   it('eski koşullar korunur: yeni kartta doküman / entegrasyon yok, salt randevuda akış yok, bağlı kişide Cariye Bağla yok', () => {

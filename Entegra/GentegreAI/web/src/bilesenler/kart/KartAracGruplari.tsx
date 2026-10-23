@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni, type KartMetaYaniti } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
@@ -45,6 +46,7 @@ export interface KartAracBaglami {
 export function kartAracGrubu(b: KartAracBaglami): ReactNode {
   switch (b.kaynak) {
     case 'hasta': return <HastaKimlikAraclari b={b} />;
+    case 'cari': return b.yeniMi ? null : <CariEkstreDugmesi tarafId={Number(b.id)} />;
     // Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
     //   tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
     //   dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali.
@@ -387,6 +389,21 @@ function EntegrasyonKartAraclari({ b }: { b: KartAracBaglami }) {
         })}>{c('⟳ SKRS Listelerini Güncelle')}</button>
       )}
     </>
+  );
+}
+
+/*
+ * CARİ EKSTRE (kullanıcı 23.10.2026: "müşteri kartındaki ekstre sekmeyi kaldır, onun yerine üste
+ * Ekstre butonu ekle"): kartta ayrı bir ekstre yok - Kasa › Cari Ekstre listesi bu cariye süzülmüş
+ * olarak açılır (sekme düzeninde kendi sekmesinde). Listeye erişimi olmayana düğme yok.
+ */
+function CariEkstreDugmesi({ tarafId }: { tarafId: number }) {
+  const { yetki: oturumYetki } = useOturum();
+  const git = useNavigate();
+  if (!oturumYetki('mali_hareket', 'gor')) return null;
+  return (
+    <button className="d" type="button" title={c('Cari Ekstre listesinde bu carinin hareketleri')}
+            onClick={() => git(`/cari-ekstre?tarafId=${tarafId}`)}>📄 {c('Ekstre')}</button>
   );
 }
 

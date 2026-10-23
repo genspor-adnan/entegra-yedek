@@ -51,11 +51,12 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
     //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
-              tarihAlani: 'islemTarihi' },
+              tarihAlani: 'islemTarihi', yeniSekme: true },
     sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
@@ -71,10 +72,11 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
     //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
-              tarihAlani: 'islemTarihi' },
+              tarihAlani: 'islemTarihi', yeniSekme: true },
     sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ek Alanlar'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
     ic: '🚚', yetkiKodu: 'cari.tedarikci.liste',   // 1003: menü yeri kendi kodu
   },

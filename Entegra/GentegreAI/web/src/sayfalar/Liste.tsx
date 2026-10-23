@@ -1259,10 +1259,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         <button
           disabled={!seciliSatir}
           title={seciliSatir ? 'Seçili hesabın ekstresi' : 'Önce bir satır seçin'}
-          onClick={() => seciliSatir && setEkstre({
-            id: Number(seciliSatir.id),
-            ad: String(seciliSatir.ad ?? seciliSatir.unvan ?? seciliSatir.id),
-          })}
+          onClick={() => {
+            if (!seciliSatir) return;
+            const hesap = { id: Number(seciliSatir.id), ad: String(seciliSatir.ad ?? seciliSatir.unvan ?? seciliSatir.id) };
+            // YENİ SEKMEDE (hasta, 23.10.2026): ekstre kaynağının kendi listesi (Kasa › Cari Ekstre)
+            //   hesaba süzülmüş açılır, liste yerinde kalır. Sekmesiz çalışmada / liste yoksa eski mod.
+            const e = tanim.ekstre;
+            const hedef = e?.yeniSekme && ekranSekmesi
+              ? LISTELER.find(l => l.kaynak === e.kaynak && l.urlFiltreAlani === e.alan) : undefined;
+            if (e && hedef) git(`/${hedef.rota ?? hedef.kaynak}?${e.alan}=${hesap.id}`);
+            else setEkstre(hesap);
+          }}
         >
           📄 Ekstre
         </button>
