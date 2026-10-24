@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { AcilisBakiyesi, Devir as Veri, DevirTuru, TopluDevirSonucu } from '../../api/uclar/devir';
 import { para, tutarOku } from '../../bilesenler/bicim';
 import { mesaj, onay } from '../../bilesenler/mesaj';
+import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { c } from '../../dil/ceviri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { HesapSecici } from '../ekstre/Ekstre';
@@ -42,6 +43,9 @@ export function Devir() {
   const [v, setV] = useState<Veri | null>(null);
   const [turler, setTurler] = useState<DevirTuru[]>([]);
   const [yenile, setYenile] = useState(0);
+  /** Kaydet / Devri Kaldır araç çubuğunda solda (kullanıcı 24.10.2026: "sekmede de kaydet yukarda olsun"). */
+  const [dugmeYeri, setDugmeYeri] = useState<HTMLSpanElement | null>(null);
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const degistir = (d: Record<string, string>) => {
     const yeni = new URLSearchParams(arama);
     for (const [k, x] of Object.entries(d)) { if (x) yeni.set(k, x); else yeni.delete(k) }
@@ -67,11 +71,14 @@ export function Devir() {
       </div>
 
       <div className="hi-arac">
+        <span ref={setDugmeYeri} style={{ display: 'contents' }} />
         <span className="sp" />
         {h && yetki('finans.ekstre', 'gor') && <button type="button" onClick={() => git(`/ekstre?tur=${gercekTur}&id=${h.id}`)}>📄 {c('Ekstre')}</button>}
         {h && <button type="button" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
         <button type="button" className={gor === 'toplu' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'toplu' ? '' : 'toplu' })}>📋 {c('Toplu Giriş')}</button>
         <button type="button" className={gor === 'acilis' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'acilis' ? '' : 'acilis' })}>⇄ {c('Açılış Bakiyeleri')}</button>
+        {/* Standart desen: Kaydet solda, Kapat sağda (sekmeyi kapatır). */}
+        <button type="button" onClick={() => (ekranSekmesi ? ekranSekmesi.kapat() : git('/panel'))}>{c('Kapat')}</button>
       </div>
 
       {gor === 'tek' && (
@@ -92,7 +99,7 @@ export function Devir() {
 
       <div className="hi-govde">
         {gor === 'tek' && (id > 0
-          ? <div className="dv-kutu"><DevirFormu key={`${tur}-${id}-${yenile}`} tur={tur} id={id} onYuklendi={setV} onKaydedildi={() => setYenile(t => t + 1)} /></div>
+          ? <div className="dv-kutu"><DevirFormu key={`${tur}-${id}-${yenile}`} tur={tur} id={id} onYuklendi={setV} onKaydedildi={() => setYenile(t => t + 1)} dugmeYeri={dugmeYeri} /></div>
           : <div className="ek-bos">{c('Devir girilecek')} {TUR_AD[gercekTur].toLocaleLowerCase('tr-TR')} {c('hesabını yukarıdaki kutudan seçin; ya da Toplu Giriş ile Excel\'den yapıştırın.')}</div>)}
         {gor === 'toplu' && <TopluGiris turler={turler} git={git} />}
         {gor === 'acilis' && <AcilisBakiyeleri />}

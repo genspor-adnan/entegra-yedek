@@ -45,8 +45,8 @@ type Gun = { tarih: string; brut: string; komisyon: string; valor: string };
 export function DevirFormu({ tur, id, onKaydedildi, onKapat, onYuklendi, dugmeYeri }: {
   tur: DevirTuru | 'hesap'; id: number; onKaydedildi?(): void; onKapat?(): void; onYuklendi?(v: Devir): void;
   /**
-   * PENCEREDE düğmelerin yeri (kullanıcı 24.10.2026, standart pencere deseni): üst bant - Kaydet
-   * solda, Kapat sağda. Verilmezse (Devir Girişi sekmesi) düğmeler formun altında.
+   * Düğmelerin yeri (kullanıcı 24.10.2026, standart desen): üst bant / araç çubuğu - Kaydet solda,
+   * Kapat sağda. Pencere de Devir Girişi sekmesi de verir; verilmezse düğmeler formun altında.
    */
   dugmeYeri?: HTMLElement | null;
 }) {
