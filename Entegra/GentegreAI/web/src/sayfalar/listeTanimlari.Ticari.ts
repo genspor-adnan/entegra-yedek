@@ -714,7 +714,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
     // Hesap Türü sorulmaz, arka planda POS (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
     yeniKayitVarsayilanlari: { tur: 'P' },
-    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
+    // POS / Kart kutusunda kesim günü / son ödeme / limit yok (kullanıcı 24.10.2026): komisyon ve valör kalır.
+    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi',   // 1160: açılış = devir hareketi
+                        'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 40, menuAd: 'POS Listesi', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
