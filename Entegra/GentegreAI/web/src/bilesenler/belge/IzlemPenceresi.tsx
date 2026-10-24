@@ -197,6 +197,17 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
           <button className="d onay" onClick={kaydet}>💾 Tamam</button>
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
+          {/* TOPLAM OZETI UST BANTTA, TAMAM ILE KAPAT ARASINDA ORTADA (kullanici 24.10.2026): gereken (kalem
+              miktari) · girilen (lot toplami) · kalan - uzun listede alttaki "Dağıtılmayan miktar" gorunmuyordu. */}
+          <span style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 18, alignItems: 'baseline' }}>
+            {([
+              [c('Gereken'), miktar, ''],
+              [c('Girilen'), toplam, ''],
+              [fark < 0 ? c('Fazla') : c('Kalan'), Math.abs(fark), fark === 0 ? 'ml-alacak' : 'ml-borc'],
+            ] as const).map(([ad, deger, sinif]) => (
+              <span key={ad}><span className="sonuk">{ad}</span>{' '}
+                <b className={sinif || undefined} style={{ fontSize: 16 }}>{deger.toLocaleString('tr-TR')}</b></span>))}
+          </span>
           <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
