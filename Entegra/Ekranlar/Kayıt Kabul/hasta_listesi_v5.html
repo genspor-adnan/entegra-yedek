@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Listesi — v5 (HBYS)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+
+  /* ust kabuk */
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust b{font-size:13.5px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  /* KPI seridi */
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .kp{border:1px solid var(--line2);border-radius:5px;padding:7px 10px;background:#fff;cursor:pointer;position:relative}
+  .kp:hover{border-color:#9cc4ee}
+  .kp.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+  .kp .e{font-size:10.5px;color:var(--muted)}
+  .kp .d{font-size:17px;font-weight:bold;margin-top:2px}
+  .kp .a{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .kp.kir .d{color:var(--kir)} .kp.sari .d{color:var(--uyari)} .kp.yesil .d{color:var(--ok)}
+  .kp .ipucu{position:absolute;right:8px;top:6px;font-size:10px;color:#9aa8b6}
+
+  /* arac cubugu */
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+
+  /* arama + cipler */
+  .arama{display:flex;gap:6px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kutu{flex:0 1 330px;border:1px solid var(--line);border-radius:14px;background:#fff;height:27px;display:flex;align-items:center;padding:0 10px;gap:6px}
+  .kutu input{border:none;outline:none;flex:1;font:inherit;font-size:12px;background:transparent}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 11px;font-size:11px;background:#fff;color:#4d5d6e;white-space:nowrap;cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+  .chip .n{background:#eef2f7;border-radius:8px;padding:0 6px;font-size:10px;color:var(--muted)}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .chip.on .n{background:rgba(255,255,255,.25);color:#fff}
+  .chip.ak{border-style:dashed}
+  .ayrac{width:1px;height:18px;background:var(--line);margin:0 3px}
+  .secim{border:1px solid var(--line);border-radius:3px;background:#fff;height:25px;font:inherit;font-size:11.5px;padding:0 4px;color:var(--ink)}
+  .gorunum{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .gorunum span{padding:3px 10px;font-size:11px;color:var(--muted);background:#fff;border-right:1px solid var(--line2);cursor:pointer}
+  .gorunum span:last-child{border-right:none}
+  .gorunum span.on{background:#4a5d73;color:#fff;font-weight:bold}
+
+  /* toplu islem seridi */
+  .toplu{display:none;gap:6px;align-items:center;padding:6px 10px;background:#fff8e6;border-bottom:1px solid #f0dcae;color:#7a5512;font-size:11.5px}
+  .toplu.acik{display:flex}
+
+  /* govde: grid + onizleme */
+  .govde{display:grid;grid-template-columns:1fr 360px;min-height:560px}
+  .dg{overflow:auto;border-right:1px solid var(--line)}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{position:sticky;top:0;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 7px;font-size:11px;color:#3a5573;white-space:nowrap;z-index:1}
+  .dg th.s::after{content:" ▾";color:#9aa8b6}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;white-space:nowrap;vertical-align:middle}
+  .dg tr:hover td{background:#f4f8fd;cursor:pointer}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.pasif td{color:#9aa8b6}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg tfoot td{background:#f3f6fa;font-weight:bold;border-top:2px solid var(--line)}
+  .sag{text-align:right}.orta{text-align:center}.sonuk{color:var(--muted)}
+  .unvan b{display:block;font-size:12px}
+  .unvan small{color:var(--muted);font-size:10.5px}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)}
+  .rz{display:inline-block;border-radius:9px;padding:0 7px;font-size:10px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;margin-left:3px}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .limit{display:flex;align-items:center;gap:5px;min-width:96px}
+  .limit i{flex:1;height:6px;border-radius:3px;background:#e7edf4;overflow:hidden;display:block}
+  .limit i b{display:block;height:100%;background:#5cb87a}
+  .limit i b.y{background:#e0a33a} .limit i b.k{background:#d0473d}
+  .limit em{font-style:normal;font-size:10px;color:var(--muted);width:30px;text-align:right}
+  .spark{display:inline-block;vertical-align:middle}
+  .gun{font-size:10.5px}
+  .gun.k{color:var(--kir);font-weight:bold} .gun.y{color:var(--uyari)}
+
+  /* onizleme paneli */
+  .onz{background:#fbfcfe;display:flex;flex-direction:column;min-width:0}
+  .onz .bas{padding:10px 12px;border-bottom:1px solid var(--line2);background:#fff}
+  .onz .bas .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .onz .bas .alt{color:var(--muted);font-size:11px;margin-top:2px}
+  .onz .bas .rzlar{margin-top:5px}
+  .onz .bas .rzlar .rz{margin:0 3px 0 0}
+  .hizli{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .hizli .btn{justify-content:center;font-size:11px;padding:5px 4px}
+  .ost{display:flex;border-bottom:1px solid var(--line);padding:0 8px;background:#fff}
+  .ost span{padding:6px 9px;font-size:11.5px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+  .ost span.on{color:var(--navy);font-weight:bold;border-bottom-color:var(--accent)}
+  .ops{padding:10px 12px;overflow:auto;flex:1}
+  .mali{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .mali div{border:1px solid var(--line2);border-radius:4px;padding:5px 8px;background:#fff}
+  .mali div span{display:block;font-size:10px;color:var(--muted)}
+  .mali div b{font-size:13px}
+  .yaslandirma{display:flex;height:16px;border-radius:3px;overflow:hidden;margin:4px 0 2px;border:1px solid var(--line2)}
+  .yaslandirma i{display:block;height:100%}
+  .yl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:10px}
+  h6{margin:10px 0 5px;font-size:11px;color:#3a5573;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center}
+  h6 a{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--accent);text-decoration:none;font-weight:normal;cursor:pointer}
+  .mini-ek{width:100%;border-collapse:collapse;font-size:11px;background:#fff;border:1px solid var(--line2)}
+  .mini-ek td{padding:4px 6px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .satir{display:flex;gap:6px;padding:4px 0;border-bottom:1px dashed var(--line2);font-size:11.5px}
+  .satir span:first-child{color:var(--muted);width:92px;flex:none}
+  .akt{border-left:3px solid #cfe0f5;padding:4px 8px;margin-bottom:6px;background:#fff;font-size:11.5px}
+  .akt small{color:var(--muted);display:block;font-size:10.5px}
+
+  .statusbar{display:flex;gap:16px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .statusbar b{color:var(--ink)}
+  .statusbar .sp{display:flex;gap:6px;align-items:center}
+
+  .not{max-width:1480px;margin:12px auto;color:#5b6a7a;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 16px}
+  .not h3{margin:4px 0 6px;font-size:13px;color:var(--navy)}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .not ul{margin:4px 0 8px 18px;padding:0}
+  .not table{border-collapse:collapse;margin:4px 0 8px}
+  .not td,.not th{border:1px solid var(--line2);padding:3px 8px;text-align:left;font-size:11px}
+  .not th{background:var(--head)}
+
+  /* HASTA LİSTESİ v5 eklentileri */
+  .dg td.hasta{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .hav{width:28px;height:28px;border-radius:50%;background:#2f6db3;color:#fff;font-size:10.5px;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .hav.k{background:#a8458f} .hav.b{width:40px;height:40px;font-size:14px}
+  .hb b{display:block;font-size:12px} .hb small{color:var(--muted);font-size:10.5px}
+  .dg td.sb b{display:block;font-weight:normal} .dg td.sb small{color:var(--muted);font-size:10.5px}
+  .ran{font-size:11px;color:#2c4a6b}
+  .ik span{margin:0 2px;font-size:13px} .ik .yok{filter:grayscale(1);opacity:.25}
+  .hbas{display:flex;gap:10px;align-items:center}
+  .kuyari{border:1px solid #f3c4bf;background:#fdf1ef;border-radius:4px;padding:7px 9px;color:#8a2a22;font-size:11.5px;margin-bottom:6px}
+  .kuyari small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+  .kuyari.yok{border-color:#bfe3cb;background:#f2faf4;color:#2e7d46}
+  .hizli .btn.primary{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">
+    <b>Gentegre AI</b><span class="yol">Hasta › Hasta Listesi</span>
+    <span class="sag"><span>🏥 Merkez</span><span>👤 Selin Y. · Kayıt Kabul</span></span>
+  </div>
+  <div class="sekmeler"><span>🏠</span><span class="on">🧑‍⚕️ Hasta Listesi</span><span>📋 Başvuru Listesi</span><span>📅 Randevu</span><span>＋</span></div>
+
+  <!-- KPI: her kutu bir süzgeç (çiple aynı). Sunucudan tek sorgu, şube süzgeçli. -->
+  <div class="kpi" id="kpi">
+    <div class="kp" data-f="bugun"><span class="ipucu">süz</span><div class="e">Bugün gelen</div><div class="d">142</div><div class="a">18 yeni hasta · 11 bekliyor</div></div>
+    <div class="kp" data-f="randevu"><span class="ipucu">süz</span><div class="e">Yarın randevusu olan</div><div class="d">96</div><div class="a">SMS hatırlatma 18:00'de</div></div>
+    <div class="kp kir" data-f="borclu"><span class="ipucu">süz</span><div class="e">Açık hasta borcu</div><div class="d">₺ 286.410</div><div class="a">214 hasta · 31'i 90+ gün</div></div>
+    <div class="kp sari" data-f="kimlik"><span class="ipucu">süz</span><div class="e">Kimliği doğrulanmamış</div><div class="d">37</div><div class="a">MERNİS / KPS sorgulanmadı</div></div>
+    <div class="kp sari" data-f="mustehak"><span class="ipucu">süz</span><div class="e">Müstehaklık sorunlu</div><div class="d">12</div><div class="a">SGK provizyon alınamadı</div></div>
+    <div class="kp yesil" data-f="portal"><span class="ipucu">süz</span><div class="e">Portal üyesi</div><div class="d">%41</div><div class="a">8.212 / 20.034 hasta</div></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="btn ok">＋ Yeni Hasta</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn">🗑 Sil</span>
+    <span class="sepv"></span>
+    <span class="btn primary">📋 Başvuru Aç</span>
+    <span class="btn">📅 Randevu</span>
+    <span class="btn">💰 Tahsilat</span>
+    <span class="btn">📊 Hesap İcmali</span>
+    <span class="sepv"></span>
+    <span class="btn">🪪 MERNİS'ten getir</span>
+    <span class="btn">🛡 Müstehaklık</span>
+    <span class="btn">🩺 e‑Nabız</span>
+    <span class="sp"></span>
+    <span class="btn">🔀 Mükerrer birleştir</span>
+    <span class="btn">⬇ İçeri Al</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+  </div>
+
+  <div class="arama">
+    <span class="kutu">🔍 <input placeholder="Ara: dosya no, ad soyad, kimlik no, telefon, kurum…" value=""><span title="Kimlik kartı / karekod okut">🪪</span><span title="Sesle ara">🎤</span></span>
+    <span class="chip on" data-f="tumu">Tümü <span class="n">20.034</span></span>
+    <span class="chip" data-f="aktif">Aktif <span class="n">19.880</span></span>
+    <span class="chip" data-f="pasif">Pasif <span class="n">154</span></span>
+    <span class="ayrac"></span>
+    <span class="chip" data-f="bugun">Bugün gelen</span>
+    <span class="chip" data-f="borclu">Borçlu</span>
+    <span class="chip" data-f="alerji">⚠ Alerjisi var</span>
+    <span class="chip" data-f="kronik">Kronik hasta</span>
+    <span class="chip" data-f="kimlik">Kimlik doğrulanmamış</span>
+    <span class="chip" data-f="yabanci">Yabancı / Kimliksiz</span>
+    <span class="chip" data-f="vefat">Vefat</span>
+    <span class="ayrac"></span>
+    <select class="secim"><option>Kurum: Tümü</option><option>SGK</option><option>Özel (Ücretli)</option><option>Özel sigorta</option><option>Anlaşmalı kurum</option></select>
+    <select class="secim"><option>Bölüm: Tümü</option><option>İç Hastalıkları</option><option>Kardiyoloji</option><option>Göz</option><option>KBB</option></select>
+    <select class="secim"><option>Doktor: Tümü</option><option>Benim hastalarım</option><option>Dr. Aslı Demir</option></select>
+    <select class="secim"><option>Yaş: Tümü</option><option>0–17</option><option>18–64</option><option>65+</option></select>
+    <span class="chip ak" title="Kayıtlı görünümler: süzgeç + kolon + sıralama">⭐ Görünümlerim ▾</span>
+    <span class="sp"></span>
+    <span class="gorunum"><span class="on">☰ Liste</span><span>▦ Grup</span><span>📊 Analiz</span></span>
+  </div>
+
+  <div class="toplu" id="toplu">
+    <b id="topluSayi">0 hasta seçili</b> ·
+    <span class="btn mini">💬 SMS</span>
+    <span class="btn mini">📲 Portal daveti</span>
+    <span class="btn mini">🏷 Etiket</span>
+    <span class="btn mini">🏥 Kurum değiştir</span>
+    <span class="btn mini">🪪 Toplu MERNİS doğrula</span>
+    <span class="btn mini">🔀 Birleştir (2 kayıt)</span>
+    <span class="btn mini">⛔ Pasife al</span>
+    <span class="sp"></span><span id="topluBakiye"></span>
+  </div>
+
+  <div class="govde">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:26px"><input type="checkbox" id="hepsi"></th>
+          <th class="s">Dosya No</th>
+          <th class="s">Hasta</th>
+          <th class="orta">Yaş / Cins.</th>
+          <th>Kurum / Ödeyen</th>
+          <th class="s">Son Başvuru</th>
+          <th>Sonraki Randevu</th>
+          <th class="sag s">Bakiye</th>
+          <th class="orta" title="Kimlik doğrulama · e‑Nabız · portal">Durum</th>
+        </tr></thead>
+        <tbody id="satirlar"></tbody>
+        <tfoot><tr>
+          <td></td><td colspan="6" id="altSayi"></td>
+          <td class="sag" id="altBakiye"></td><td></td>
+        </tr></tfoot>
+      </table>
+    </div>
+
+    <!-- ÖNİZLEME: seçili hasta; kart açmadan klinik uyarılar, başvurular, mali durum -->
+    <div class="onz">
+      <div class="bas">
+        <div class="hbas"><span class="hav" id="oAv"></span>
+          <div><div class="ad" id="oAd"></div><div class="alt" id="oAlt"></div></div></div>
+        <div class="rzlar" id="oRz"></div>
+      </div>
+      <div class="hizli">
+        <span class="btn primary">📋 Başvuru</span><span class="btn">📅 Randevu</span><span class="btn">💰 Tahsilat</span>
+        <span class="btn">📊 İcmal</span><span class="btn">🩺 e‑Nabız</span><span class="btn">Kartı Aç ↗</span>
+      </div>
+      <div class="ost" id="ost">
+        <span class="on" data-o="klinik">Klinik Özet</span><span data-o="basvuru">Başvurular</span>
+        <span data-o="mali">Mali</span><span data-o="iletisim">İletişim</span>
+      </div>
+      <div class="ops" id="ops"></div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt: <b id="sbSayi"></b></span>
+    <span>Seçili: <b id="sbSecili">0</b></span>
+    <span>Sayfa 1 / 401 · 50 satır</span>
+    <span>Sıralama: Son başvuru ↓</span>
+    <span>🔒 Kimlik no ve telefon maskeli · göster = loglu</span>
+    <span class="sp" style="margin-left:auto">⟳ 0,19 sn · son yenileme 09:42</span>
+  </div>
+</div>
+
+<div class="not">
+  <h3>Hasta Listesi v5: ne değişti, neden</h3>
+  <ul>
+    <li><b>Müşteri / Tedarikçi / Kasa Ver3 diliyle aynı iskelet:</b> KPI şeridi (tıklanır süzgeç) · araç çubuğu · arama + akıllı çipler · grid + sağda önizleme · durum çubuğu. Kullanıcı ERP'den HBYS'ye geçince aynı yerde aynı şeyi bulur.</li>
+    <li><b>KPI kutuları kayıt kabulün sorusu:</b> bugün gelen / bekleyen, yarın randevulu (SMS), açık hasta borcu, kimliği doğrulanmamış (MERNİS/KPS), müstehaklık sorunlu (SGK provizyon), portal üyeliği. Kutuya basmak listeyi o kümeye daraltır.</li>
+    <li><b>Akıllı çipler:</b> Bugün gelen · Borçlu · ⚠ Alerjisi var · Kronik · Kimlik doğrulanmamış · Yabancı / Kimliksiz · Vefat. Her biri sunucuda katalog koşulu; URL'de saklanır.</li>
+    <li><b>Hasta hücresi tek bakışta kim:</b> avatar (cinsiyet rengi), ad soyad, maskeli kimlik no, rozetler (⚠ alerji kırmızı, kronik, VIP / mahremiyet, yabancı, vefat). Mahremiyetli hastada ad yetkisiz kullanıcıya baş harflerle gelir (sunucu).</li>
+    <li><b>Klinik kolonlar:</b> son başvuru (tarih + bölüm + doktor tek hücrede), sonraki randevu, hasta bakiyesi (avans yeşil), durum ikonları: 🪪 kimlik doğrulandı · 🩺 e‑Nabız onamı · 📲 portal.</li>
+    <li><b>Sağda önizleme:</b> Klinik Özet (alerji, kronik tanı, aktif ilaç, uyarılar), son 5 başvuru, mali (bakiye, avans, açık provizyon), iletişim + yakın. Hızlı işlemler seçili hastayla önceden dolu: Başvuru, Randevu, Tahsilat, İcmal, e‑Nabız.</li>
+    <li><b>Toplu işlem şeridi:</b> SMS, portal daveti, etiket, kurum değiştir, toplu MERNİS doğrulama, <b>mükerrer birleştir</b> (iki kayıt seçiliyken), pasife al.</li>
+    <li><b>Arama kimlik kartı / karekod okutur</b> (🪪): TC kimlik kartı çipinden ya da e‑Devlet karekodundan hasta bulunur, yoksa "Yeni hasta" ön dolu açılır (CTRL+K deseniyle aynı).</li>
+  </ul>
+  <h3>Veri karşılıkları (web)</h3>
+  <table>
+    <tr><th>Kolon / kutu</th><th>Kaynak</th><th>Durum</th></tr>
+    <tr><td>Dosya no, ad soyad, kimlik no, yaş, cinsiyet, durum</td><td><code>taraf</code> (hasta=1) + <code>taraf_hasta</code></td><td>var (kaynak <code>hasta</code>)</td></tr>
+    <tr><td>Kurum / ödeyen</td><td><code>taraf_hasta.kurum_id</code> + kurum detayı (poliçe, geçerlilik)</td><td>var</td></tr>
+    <tr><td>Son başvuru / bölüm / doktor</td><td>başvuru belgesi (son kayıt)</td><td>var (bugünkü kolonlar tek hücrede)</td></tr>
+    <tr><td>Sonraki randevu</td><td><code>randevu</code> (gelecek, iptal değil)</td><td>yeni kolon</td></tr>
+    <tr><td>Bakiye / avans</td><td><code>mali_hareket</code> (hasta tarafı)</td><td>var (Hesap İcmali); liste kolonu yeni</td></tr>
+    <tr><td>Alerji / kronik rozeti, Klinik Özet</td><td>alerji, kronik tanı, ilaç kaydı kartları</td><td>var; rozet kolonu yeni</td></tr>
+    <tr><td>Kimlik doğrulandı, müstehaklık</td><td>MERNİS/KPS sorgu kaydı, Medula müstehaklık</td><td>var; KPI ve çip yeni</td></tr>
+    <tr><td>Portal / e‑Nabız onamı</td><td>portal hesabı, e‑Nabız onam</td><td>var</td></tr>
+  </table>
+  <b>Açık sorular:</b> (1) Mahremiyetli (VIP) hastada listede ad tamamen mi gizlensin, baş harf mi? (2) Önizleme paneli kayıt kabulde varsayılan açık, hekimde kapalı mı olsun? (3) "Mükerrer birleştir" yetkisi kimde — yalnız tıbbi kayıt birimi mi?
+</div>
+
+<script>
+// Örnek veri - yalnız görünüm için.
+const H = [
+  {no:'H-0004812',ad:'Ercan Temel',tc:'184*****210',c:'E',yas:63,kurum:'SGK',mus:'ok',son:'14.10.2026 21:40',bol:'Kardiyoloji',dr:'Dr. Aslı Demir',ran:'28.10.2026 10:30',bak:1850,alerji:['Penisilin'],kronik:['Hipertansiyon','Tip 2 DM'],ilac:['Metformin 1000 mg','Ramipril 5 mg'],kim:true,en:true,por:true,tel:'0532 *** ** 11',yakin:'Ayşe Temel (eşi) · 0533 *** ** 42',bugun:true,etk:['Kronik']},
+  {no:'H-0004790',ad:'Ramiz Ongun',tc:'301*****884',c:'E',yas:74,kurum:'SGK',mus:'kir',son:'03.10.2026 15:47',bol:'KBB',dr:'Dr. Ceren Çelik',ran:'',bak:0,alerji:[],kronik:['KOAH'],ilac:['Tiotropium'],kim:true,en:true,por:false,tel:'0505 *** ** 78',yakin:'Oğlu Mert · 0532 *** ** 19',etk:['65+']},
+  {no:'H-0004775',ad:'Ertuğrul Karaköse',tc:'—',c:'E',yas:53,kurum:'Özel (Ücretli)',mus:'',son:'30.09.2026 22:03',bol:'İç Hastalıkları',dr:'Dr. Barış Güneş',ran:'02.11.2026 09:00',bak:12400,alerji:[],kronik:[],ilac:[],kim:false,en:false,por:false,tel:'0544 *** ** 03',yakin:'—',etk:[]},
+  {no:'H-0004761',ad:'Merve Semir',tc:'422*****106',c:'K',yas:44,kurum:'Allianz Sağlık',mus:'ok',son:'28.09.2026 14:24',bol:'İç Hastalıkları',dr:'Dr. Nazlı Bulut',ran:'',bak:-500,alerji:['Lateks','Kontrast madde'],kronik:[],ilac:[],kim:true,en:true,por:true,tel:'0530 *** ** 65',yakin:'Eşi Kaan · 0532 *** ** 70',etk:['Özel sigorta']},
+  {no:'H-0004750',ad:'Zeki Çelik',tc:'117*****552',c:'E',yas:70,kurum:'SGK',mus:'ok',son:'27.09.2026 13:44',bol:'İç Hastalıkları',dr:'Dr. Nazlı Bulut',ran:'24.10.2026 14:15',bak:0,alerji:[],kronik:['KKY','AF'],ilac:['Varfarin 5 mg','Bisoprolol'],kim:true,en:true,por:false,tel:'0535 *** ** 21',yakin:'Kızı Elif · 0532 *** ** 88',bugun:true,etk:['Antikoagülan']},
+  {no:'H-0004744',ad:'S*** C***',tc:'***********',c:'K',yas:25,kurum:'Özel (Ücretli)',mus:'',son:'09.10.2026 18:23',bol:'Göz Hastalıkları',dr:'Dr. Ece Korkmaz',ran:'',bak:0,alerji:[],kronik:[],ilac:[],kim:true,en:false,por:true,tel:'*** *** ** **',yakin:'—',vip:true,etk:[]},
+  {no:'H-0004731',ad:'Demir Ağ',tc:'290*****718',c:'E',yas:78,kurum:'SGK',mus:'ok',son:'20.09.2026 03:00',bol:'KBB',dr:'Dr. Ayşe Kaya',ran:'',bak:640,alerji:['Aspirin'],kronik:['Alzheimer'],ilac:['Donepezil'],kim:true,en:true,por:false,tel:'0312 *** ** 40',yakin:'Oğlu Can (vasi) · 0532 *** ** 11',etk:['Vasi']},
+  {no:'H-0004720',ad:'Ahmad Al‑Hassan',tc:'99*******14',c:'E',yas:36,kurum:'Geçici koruma',mus:'sari',son:'19.10.2026 11:02',bol:'Acil',dr:'Dr. Murat Şahin',ran:'',bak:0,alerji:[],kronik:[],ilac:[],kim:false,en:false,por:false,tel:'0551 *** ** 90',yakin:'Tercüman gerekli (Arapça)',yabanci:true,etk:['Yabancı']},
+  {no:'H-0004712',ad:'Hanife Şimşek',tc:'356*****430',c:'K',yas:58,kurum:'SGK',mus:'ok',son:'19.09.2026 10:24',bol:'Kadın Hastalıkları',dr:'Dr. Sibel Yılmaz',ran:'05.11.2026 11:00',bak:3210,alerji:[],kronik:['Hipotiroidi'],ilac:['Levotiroksin 75 mcg'],kim:true,en:true,por:true,tel:'0532 *** ** 57',yakin:'—',etk:[]},
+  {no:'H-0004703',ad:'Bebek Kaya (Elif Kaya bebeği)',tc:'—',c:'K',yas:0,kurum:'SGK (anne üzerinden)',mus:'ok',son:'23.10.2026 06:12',bol:'Yenidoğan',dr:'Dr. Fatma Öztürk',ran:'30.10.2026 10:00',bak:0,alerji:[],kronik:[],ilac:[],kim:false,en:true,por:false,tel:'Anne: 0533 *** ** 14',yakin:'Anne Elif Kaya',kimliksiz:true,bugun:true,etk:['Yenidoğan']},
+  {no:'H-0004688',ad:'Murat Koç',tc:'211*****963',c:'E',yas:47,kurum:'Özel (Ücretli)',mus:'',son:'19.09.2026 10:34',bol:'Çocuk Sağlığı',dr:'Dr. Fatma Öztürk',ran:'',bak:8900,alerji:[],kronik:[],ilac:[],kim:true,en:false,por:false,tel:'0542 *** ** 26',yakin:'—',etk:['Takip']},
+  {no:'H-0004610',ad:'Şerife Kara',tc:'188*****045',c:'K',yas:91,kurum:'SGK',mus:'',son:'02.06.2026 08:40',bol:'Dahiliye',dr:'Dr. Merve Özdemir',ran:'',bak:0,alerji:[],kronik:['KBY'],ilac:[],kim:true,en:true,por:false,tel:'—',yakin:'Kızı Nur · 0532 *** ** 66',vefat:true,pasif:true,etk:[]},
+];
+const tl = n => n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const FILTRE = {
+  tumu: h => true, aktif: h => !h.pasif, pasif: h => h.pasif, bugun: h => h.bugun, randevu: h => !!h.ran,
+  borclu: h => h.bak > 0, alerji: h => h.alerji.length > 0, kronik: h => h.kronik.length > 0,
+  kimlik: h => !h.kim, mustehak: h => h.mus === 'kir' || h.mus === 'sari', yabanci: h => h.yabanci || h.kimliksiz,
+  vefat: h => h.vefat, portal: h => h.por,
+};
+let filtre = 'tumu', secili = 'H-0004812', isaretli = new Set(), sekme = 'klinik';
+const bas = ad => ad.split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+function rozetler(h){
+  return (h.alerji.length ? `<span class="rz kir">⚠ ${h.alerji[0]}${h.alerji.length > 1 ? ' +' + (h.alerji.length - 1) : ''}</span>` : '')
+    + h.kronik.slice(0, 1).map(k => `<span class="rz mor">${k}</span>`).join('')
+    + (h.vip ? '<span class="rz sari">🔒 Mahremiyet</span>' : '')
+    + (h.yabanci ? '<span class="rz mavi">Yabancı</span>' : '')
+    + (h.kimliksiz ? '<span class="rz">Kimliksiz</span>' : '')
+    + (h.vefat ? '<span class="rz">✝ Vefat</span>' : '');
+}
+function kurumHtml(h){
+  const m = h.mus === 'ok' ? '<span class="rz ok" title="Müstehaklık sorgusu bugün">müstehak ✓</span>'
+          : h.mus === 'kir' ? '<span class="rz kir" title="SGK: provizyon alınamadı">müstehak değil</span>'
+          : h.mus === 'sari' ? '<span class="rz sari">sorgulanmadı</span>' : '';
+  return `${h.kurum} ${m}`;
+}
+function bakHtml(h){
+  if (!h.bak) return '<span class="sonuk">0,00</span>';
+  return h.bak > 0 ? `<span class="borc">₺ ${tl(h.bak)}</span>` : `<span class="alacak">₺ ${tl(-h.bak)} <small>avans</small></span>`;
+}
+function ciz(){
+  const liste = H.filter(FILTRE[filtre]);
+  document.getElementById('satirlar').innerHTML = liste.map(h => `
+    <tr data-k="${h.no}" class="${h.no===secili?'sel':''} ${h.pasif?'pasif':''}">
+      <td><input type="checkbox" ${isaretli.has(h.no)?'checked':''}></td>
+      <td>${h.no}</td>
+      <td class="hasta"><span class="hav ${h.c==='K'?'k':''}">${h.vip?'🔒':bas(h.ad)}</span>
+        <span class="hb"><b>${h.ad}</b><small>${h.tc}${rozetler(h)}</small></span></td>
+      <td class="orta">${h.yas === 0 ? '<span class="rz mavi">0 g</span>' : h.yas} · ${h.c}</td>
+      <td>${kurumHtml(h)}</td>
+      <td class="sb"><b>${h.son}</b><small>${h.bol} · ${h.dr}</small></td>
+      <td>${h.ran ? `<span class="ran">📅 ${h.ran}</span>` : '<span class="sonuk">—</span>'}</td>
+      <td class="sag">${bakHtml(h)}</td>
+      <td class="orta ik">${h.kim?'<span title="Kimlik MERNİS ile doğrulandı">🪪</span>':'<span class="yok" title="Kimlik doğrulanmadı">🪪</span>'}${h.en?'<span title="e‑Nabız onamı var">🩺</span>':'<span class="yok">🩺</span>'}${h.por?'<span title="Portal üyesi">📲</span>':'<span class="yok">📲</span>'}</td>
+    </tr>`).join('');
+  const borc = liste.reduce((t,h) => t + Math.max(0,h.bak), 0), avans = liste.reduce((t,h) => t + Math.max(0,-h.bak), 0);
+  document.getElementById('altSayi').textContent = `${liste.length} hasta · ${liste.filter(h=>h.alerji.length).length} alerjili · ${liste.filter(h=>h.ran).length} randevulu`;
+  document.getElementById('altBakiye').innerHTML = `<span class="borc">₺ ${tl(borc)}</span><br><small class="alacak">avans ₺ ${tl(avans)}</small>`;
+  document.getElementById('sbSayi').textContent = liste.length;
+  document.querySelectorAll('[data-f]').forEach(e => e.classList.toggle('on', e.dataset.f === filtre));
+  onizleme(); topluCiz();
+}
+function topluCiz(){
+  document.getElementById('toplu').classList.toggle('acik', isaretli.size > 0);
+  document.getElementById('topluSayi').textContent = `${isaretli.size} hasta seçili`;
+  const top = H.filter(h => isaretli.has(h.no)).reduce((s,h) => s + Math.max(0,h.bak), 0);
+  document.getElementById('topluBakiye').innerHTML = `Seçili borç: <b>₺ ${tl(top)}</b>`;
+  document.getElementById('sbSecili').textContent = isaretli.size;
+}
+function onizleme(){
+  const h = H.find(x => x.no === secili) || H[0];
+  const av = document.getElementById('oAv'); av.textContent = h.vip ? '🔒' : bas(h.ad); av.className = 'hav b ' + (h.c==='K'?'k':'');
+  document.getElementById('oAd').textContent = h.ad;
+  document.getElementById('oAlt').textContent = `${h.no} · ${h.yas === 0 ? 'yenidoğan' : h.yas + ' yaş'} · ${h.c==='K'?'Kadın':'Erkek'} · ${h.kurum}`;
+  document.getElementById('oRz').innerHTML = rozetler(h)
+    + (h.kim ? '<span class="rz ok">🪪 MERNİS ✓</span>' : '<span class="rz sari">🪪 Kimlik doğrulanmadı</span>')
+    + (h.bak > 0 ? `<span class="rz kir">Borç ₺ ${tl(h.bak)}</span>` : '');
+  const o = document.getElementById('ops');
+  if (sekme === 'klinik') {
+    o.innerHTML = `
+      ${h.alerji.length ? `<div class="kuyari">⚠ <b>Alerji:</b> ${h.alerji.join(', ')}<small>Reçete ve order'da uyarı verir</small></div>` : '<div class="kuyari yok">Bilinen alerji yok <small>son sorgu 14.10.2026 · Dr. Aslı Demir</small></div>'}
+      <h6>Kronik tanılar <a>＋</a></h6>
+      ${h.kronik.length ? h.kronik.map(k => `<div class="satir"><span>${k}</span><span class="sonuk">ICD‑10 · 2021'den beri</span></div>`).join('') : '<div class="sonuk">—</div>'}
+      <h6>Aktif ilaçlar <a>＋</a></h6>
+      ${h.ilac.length ? h.ilac.map(k => `<div class="satir"><span>💊 ${k}</span><span class="sonuk">günde 1 · e‑Reçete</span></div>`).join('') : '<div class="sonuk">—</div>'}
+      <h6>Dikkat</h6>
+      ${h.etk.includes('Antikoagülan') ? '<div class="akt">Varfarin kullanıyor — girişim öncesi INR<small>Kural: aktif ilaç antikoagülan</small></div>' : ''}
+      ${h.yas >= 65 ? '<div class="akt">65+ · düşme riski değerlendirmesi<small>Son değerlendirme 3 ay önce</small></div>' : ''}
+      ${h.mus === 'kir' ? '<div class="akt">SGK müstehaklık yok — özel ücretli kabul edilir<small>Medula 4003 · bugün 09:12</small></div>' : ''}
+      ${h.yabanci ? '<div class="akt">Tercüman gerekli: Arapça<small>Kayıt notu</small></div>' : ''}`;
+  } else if (sekme === 'basvuru') {
+    o.innerHTML = `
+      <h6>Son 5 başvuru <a>Tümü ↗</a></h6>
+      <table class="mini-ek">
+        <tr><td>${h.son.slice(0,10)}</td><td>${h.bol}</td><td>${h.dr}</td><td><span class="rz ok">Kapandı</span></td></tr>
+        <tr><td>22.08.2026</td><td>${h.bol}</td><td>${h.dr}</td><td><span class="rz ok">Kapandı</span></td></tr>
+        <tr><td>04.06.2026</td><td>Laboratuvar</td><td>—</td><td><span class="rz mavi">Sonuç hazır</span></td></tr>
+        <tr><td>11.03.2026</td><td>Acil</td><td>Dr. Murat Şahin</td><td><span class="rz ok">Kapandı</span></td></tr>
+        <tr><td>02.01.2026</td><td>Göz Hastalıkları</td><td>Dr. Ece Korkmaz</td><td><span class="rz ok">Kapandı</span></td></tr>
+      </table>
+      <h6>Randevular</h6>
+      ${h.ran ? `<div class="akt">📅 ${h.ran} · ${h.bol}<small>${h.dr} · SMS gönderildi</small></div>` : '<div class="sonuk">Gelecek randevu yok</div>'}`;
+  } else if (sekme === 'mali') {
+    o.innerHTML = `
+      <div class="mali">
+        <div><span>Bakiye</span><b class="${h.bak>0?'borc':h.bak<0?'alacak':''}">₺ ${tl(Math.abs(h.bak))} ${h.bak>0?'borç':h.bak<0?'avans':''}</b></div>
+        <div><span>Açık provizyon</span><b>${h.kurum.startsWith('SGK') ? '2 takip' : '—'}</b></div>
+        <div><span>Bu yıl tahsilat</span><b>₺ ${tl(4820)}</b></div>
+        <div><span>Kurum payı (bu yıl)</span><b>₺ ${tl(h.kurum.startsWith('SGK') ? 18640 : 0)}</b></div>
+      </div>
+      <h6>Son hareketler <a>📊 Hesap İcmali ↗</a></h6>
+      <table class="mini-ek">
+        <tr><td>${h.son.slice(0,10)}</td><td>Muayene + EKG</td><td class="sag borc">${tl(1850)}</td></tr>
+        <tr><td>22.08.2026</td><td>Tahsilat — Kredi kartı</td><td class="sag alacak">${tl(1200)}</td></tr>
+        <tr><td>22.08.2026</td><td>Muayene (katkı payı)</td><td class="sag borc">${tl(1200)}</td></tr>
+      </table>`;
+  } else {
+    o.innerHTML = [
+      ['Telefon', h.tel + ' <a class="btn mini">📞</a> <a class="btn mini">💬</a>'], ['Yakın / acil', h.yakin],
+      ['Kimlik No', h.tc + ' <a class="btn mini" title="Göster - loglanır">👁</a>'], ['Adres', 'Çankaya / Ankara'],
+      ['İletişim izni', '<span class="rz ok">SMS ✓</span><span class="rz">E‑posta ✗</span>'], ['Portal', h.por ? '<span class="rz ok">Üye</span>' : '<a class="btn mini">📲 Davet gönder</a>'],
+    ].map(([a,b]) => `<div class="satir"><span>${a}</span><span>${b}</span></div>`).join('');
+  }
+  document.querySelectorAll('#ost span').forEach(e => e.classList.toggle('on', e.dataset.o === sekme));
+}
+document.getElementById('satirlar').addEventListener('click', e => {
+  const tr = e.target.closest('tr'); if (!tr) return;
+  if (e.target.type === 'checkbox') { e.target.checked ? isaretli.add(tr.dataset.k) : isaretli.delete(tr.dataset.k); topluCiz(); return }
+  secili = tr.dataset.k; ciz();
+});
+document.getElementById('hepsi').addEventListener('change', e => {
+  H.filter(FILTRE[filtre]).forEach(h => e.target.checked ? isaretli.add(h.no) : isaretli.delete(h.no)); ciz();
+});
+document.querySelectorAll('[data-f]').forEach(e => e.addEventListener('click', () => { filtre = e.dataset.f; ciz() }));
+document.querySelectorAll('#ost span').forEach(e => e.addEventListener('click', () => { sekme = e.dataset.o; onizleme() }));
+ciz();
+</script>
+</body>
+</html>
