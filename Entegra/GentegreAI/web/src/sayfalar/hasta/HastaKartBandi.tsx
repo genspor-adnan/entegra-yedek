@@ -18,7 +18,7 @@ export interface HastaKartOzeti {
   sonrakiRandevu: string | null; randevuBolum: string; randevuHekim: string;
   bakiye: number; alerjiSayisi: number; alerjiSiddet: number; alerjiler: string[];
   kronikSayisi: number; kronikler: string[]; ilacSayisi: number; bekleyenSonuc: number;
-  kayitTarihi: string | null;
+  kayitTarihi: string | null; ilaclar: string[];
 }
 
 const tarih = (s: string | null, saat = false) => {
@@ -39,11 +39,18 @@ const yas = (s: string | null) => {
 const BIRLER = ['', 'den', 'den', 'ten', 'ten', 'ten', 'dan', 'den', 'den', 'dan'];
 const ONLAR = ['', 'dan', 'den', 'dan', 'tan', 'den', 'tan', 'ten', 'den', 'dan'];
 const yildan = (yil: number) => `${yil}'${yil % 10 ? BIRLER[yil % 10] : yil % 100 ? ONLAR[(yil % 100) / 10] : 'den'}`;
+// Bant rozetleri KISA (kullanıcı 24.10.2026): uzun SKRS / ilaç adı kesilir, tamamı title'da.
+const kisalt = (s: string, n = 22) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
+// "AKLAV BID 1000 MG FILM KAPLI TABLET, 14 ADET" -> "AKLAV BID": ilk rakam / virgülden önce.
+const ilacKisa = (s: string) => kisalt(s.split(/[\d,(]/)[0].trim() || s, 18);
 const maskele = (tc: string) => (tc.length >= 8 ? `${tc.slice(0, 3)}${'*'.repeat(tc.length - 6)}${tc.slice(-3)}` : tc);
 
 const STIL = `
 .hkb { display: flex; gap: 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--cizgi2) }
 .hkb .gh-av.buyuk { width: 52px; height: 52px; font-size: 19px; flex: none }
+.hkb-foto { position: relative; flex: none }
+.hkb-foto small { position: absolute; bottom: -6px; right: -10px; background: var(--zemin, #fff); border: 1px solid var(--cizgi2);
+  border-radius: 8px; font-size: 9.5px; color: var(--soluk); padding: 0 4px; white-space: nowrap }
 .hkb-ad { font-size: 17px; font-weight: bold; color: var(--lacivert, #14315a) }
 .hkb-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
 .hkb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
@@ -74,11 +81,14 @@ export function HastaKartBandi({ id, deger, git }: {
   const tc = String(deger.vkno ?? '');
   const y = yas(o?.dogumTarihi ?? null);
   const aktif = Number(deger.durum ?? 1) === 1;
+  // Avatar köşesi (mockup "E · 63"): cinsiyet harfi + yaş.
+  const cins = o?.cinsiyet === 1 ? 'E' : o?.cinsiyet === 2 ? 'K' : '';
+  const kose = [cins, y ?? ''].filter(x => x !== '').join(' · ');
   return (
     <>
       <style>{STIL}</style>
       <div className="hkb">
-        <Avatar ad={ad} buyuk soluk={!aktif} />
+        <span className="hkb-foto"><Avatar ad={ad} buyuk soluk={!aktif} />{kose && <small>{kose}</small>}</span>
         <div>
           <div className="hkb-ad">{ad || '—'}</div>
           <div className="hkb-alt">
@@ -94,9 +104,12 @@ export function HastaKartBandi({ id, deger, git }: {
             <span className={`rozet ${aktif ? 'ok' : 'gri'}`}>● {c(aktif ? 'Aktif' : 'Pasif')}</span>
             {o?.kurum && <span className="rozet mavi">{o.kurum}</span>}
             {o && o.alerjiSayisi > 0 && (
-              <span className="rozet hata buyuk" title={o.alerjiler.join(', ')}>
-                ⚠ {c('ALERJİ')}: {o.alerjiler[0]}{o.alerjiSayisi > 1 ? ` +${o.alerjiSayisi - 1}` : ''}</span>)}
-            {o?.kronikler.map(k => <span key={k} className="rozet mor">{k}</span>)}
+              <span className="rozet hata buyuk" title={`${c('Alerji')}: ${o.alerjiler.join(', ')}`}>
+                ⚠ {c('Alerji')}: {kisalt(o.alerjiler[0] ?? '', 16)}{o.alerjiSayisi > 1 ? ` +${o.alerjiSayisi - 1}` : ''}</span>)}
+            {o && o.ilacSayisi > 0 && (
+              <span className="rozet mavi" title={`${c('Kullandığı ilaç')}: ${o.ilaclar.join(', ')}`}>
+                💊 {ilacKisa(o.ilaclar[0] ?? '')}{o.ilacSayisi > 1 ? ` +${o.ilacSayisi - 1}` : ''}</span>)}
+            {o?.kronikler.map(k => <span key={k} className="rozet mor" title={k}>{kisalt(k)}</span>)}
             {o?.vefat === 1 && <span className="rozet gri">✝ {c('Vefat')}</span>}
           </div>
         </div>

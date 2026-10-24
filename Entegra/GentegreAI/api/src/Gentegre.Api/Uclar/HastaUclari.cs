@@ -84,7 +84,7 @@ public static class HastaUclari
         DateTime? SonrakiRandevu, string RandevuBolum, string RandevuHekim,
         decimal Bakiye, int AlerjiSayisi, short AlerjiSiddet, IReadOnlyList<string> Alerjiler,
         int KronikSayisi, IReadOnlyList<string> Kronikler, int IlacSayisi, int BekleyenSonuc,
-        DateTime? KayitTarihi);
+        DateTime? KayitTarihi, IReadOnlyList<string> Ilaclar);
 
     // Bekleyen sonuç: son 90 günün istendi / numune / çalışılıyor durumundaki lab istemleri.
     // Kronik: bitmemiş; alerji ve ilaç: aktif. Randevu: şu andan sonraki planlı / ertelenmiş (1, 5).
@@ -108,12 +108,15 @@ public static class HastaUclari
                     where a.hasta_id = t.id and a.aktif = 1 order by a.siddet desc, a.id limit 3) x), '{}'),
                (select count(*)::int from public.hasta_kronik_tani k where k.hasta_id = t.id and k.bitis is null),
                coalesce((select array_agg(x.ad order by x.id) from (
-                   select k.id, coalesce(nullif(k.tani_ad, ''), k.icd_kod) ad from public.hasta_kronik_tani k
+                   select k.id, trim(coalesce(k.icd_kod, '') || ' ' || coalesce(k.tani_ad, '')) ad from public.hasta_kronik_tani k
                     where k.hasta_id = t.id and k.bitis is null order by k.id limit 3) x), '{}'),
                (select count(*)::int from public.hasta_ilac i where i.hasta_id = t.id and i.aktif = 1),
                (select count(*)::int from public.lab_istem l where l.taraf_id = t.id and l.durum in (1, 2, 3)
                    and l.istem_tarihi > now() - interval '90 days'),
-               least(t.ekleme_tarihi, (select min(b.belge_tarihi) from public.belge b where b.taraf_id = t.id and b.tur = 19))
+               least(t.ekleme_tarihi, (select min(b.belge_tarihi) from public.belge b where b.taraf_id = t.id and b.tur = 19)),
+               coalesce((select array_agg(x.ad order by x.id) from (
+                   select i.id, coalesce(nullif(i.ilac_ad, ''), i.etken_madde, '') ad from public.hasta_ilac i
+                    where i.hasta_id = t.id and i.aktif = 1 order by i.id limit 3) x), '{}')
           from public.taraf t
           left join public.taraf_hasta h on h.id = t.id
           left join lateral (
@@ -138,7 +141,7 @@ public static class HastaUclari
         o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetString(10), o.GetString(11),
         o.GetDecimal(12), o.GetInt32(13), o.GetInt16(14), o.GetFieldValue<string[]>(15),
         o.GetInt32(16), o.GetFieldValue<string[]>(17), o.GetInt32(18), o.GetInt32(19),
-        o.IsDBNull(20) ? null : o.GetDateTime(20));
+        o.IsDBNull(20) ? null : o.GetDateTime(20), o.GetFieldValue<string[]>(21));
 
     /// <summary>
     /// Kart ucu (ekle / güncelle) SERT KURALI: aynı kimlik numaralı başka bir
