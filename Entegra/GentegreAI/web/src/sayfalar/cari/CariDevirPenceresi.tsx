@@ -13,12 +13,19 @@ export function DevirPenceresi({ tur, id, onKapat, onKaydedildi }: {
   tur: DevirTuru | 'hesap'; id: number; onKapat(): void; onKaydedildi?(): void;
 }) {
   const [v, setV] = useState<Devir | null>(null);
+  /** Üst bant (katoolbar): Kaydet / Kaldır solda - formdan portal - Kapat sağda. */
+  const [yer, setYer] = useState<HTMLSpanElement | null>(null);
   const baslik = v ? `${c('Devir / Açılış Bakiyesi')} — ${v.hesap.ad}` : c('Devir / Açılış Bakiyesi');
   return (
     <Modal baslik={baslik} ustBilgi={v ? `${TUR_AD[v.tur]} · ${[v.hesap.kod, v.hesap.altBilgi].filter(Boolean).join(' · ')}` : undefined}
-           onKapat={onKapat} enUst ekSinif="cd-pencere" alt={null}>
+           onKapat={onKapat} enUst ekSinif="cd-pencere"
+           alt={<>
+             <span ref={setYer} style={{ display: 'contents' }} />
+             <span style={{ marginLeft: 'auto' }} />
+             <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+           </>}>
       <style>{'.cd-pencere { width:min(1100px, 96vw); }'}</style>
-      <DevirFormu tur={tur} id={id} onKapat={onKapat} onKaydedildi={onKaydedildi} onYuklendi={setV} />
+      <DevirFormu tur={tur} id={id} onKapat={onKapat} onKaydedildi={onKaydedildi} onYuklendi={setV} dugmeYeri={yer} />
     </Modal>
   );
 }

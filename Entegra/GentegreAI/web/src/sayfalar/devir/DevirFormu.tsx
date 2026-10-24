@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import type { Devir, DevirGirdisi, DevirTuru } from '../../api/uclar/devir';
@@ -41,8 +42,13 @@ export const TUR_AD: Record<DevirTuru, string> = { cari: 'Cari', kasa: 'Kasa', b
 
 type Gun = { tarih: string; brut: string; komisyon: string; valor: string };
 
-export function DevirFormu({ tur, id, onKaydedildi, onKapat, onYuklendi }: {
+export function DevirFormu({ tur, id, onKaydedildi, onKapat, onYuklendi, dugmeYeri }: {
   tur: DevirTuru | 'hesap'; id: number; onKaydedildi?(): void; onKapat?(): void; onYuklendi?(v: Devir): void;
+  /**
+   * PENCEREDE düğmelerin yeri (kullanıcı 24.10.2026, standart pencere deseni): üst bant - Kaydet
+   * solda, Kapat sağda. Verilmezse (Devir Girişi sekmesi) düğmeler formun altında.
+   */
+  dugmeYeri?: HTMLElement | null;
 }) {
   const [v, setV] = useState<Devir | null>(null);
   const [hata, setHata] = useState('');
@@ -369,13 +375,18 @@ export function DevirFormu({ tur, id, onKaydedildi, onKapat, onYuklendi }: {
               : c('Muhasebe: açılış fişi mali müşavirle; devir hesabın "Devir" hareketidir, ekstre ve bakiyeler buradan beslenir.')}</div>
           </div>
 
+          {dugmeYeri ? createPortal(<>
+            <button type="button" className="d bir" disabled={kaydediliyor} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
+            {mevcut && <button type="button" className="d teh" disabled={kaydediliyor}
+              onClick={async () => { if (await onay('Devir silinsin mi?', true)) void kaydet(false, true) }}>🗑 {c('Devri Kaldır')}</button>}
+          </>, dugmeYeri) : (
           <div className="dv-dugmeler">
             <span className="sp" />
             {mevcut && <button type="button" className="d teh" disabled={kaydediliyor}
               onClick={async () => { if (await onay('Devir silinsin mi?', true)) void kaydet(false, true) }}>🗑 {c('Devri Kaldır')}</button>}
             {onKapat && <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>}
             <button type="button" className="d bir" disabled={kaydediliyor} onClick={() => void kaydet()}>💾 {c('Devri Kaydet')}</button>
-          </div>
+          </div>)}
         </div>
       )}
     </div>
