@@ -252,7 +252,16 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
         </>
       }
     >
-      <>
+      {/* ENTER = TAMAM (kullanici 24.10.2026: "stok hizmet ara'da enter bastım ama satırı eklemedi" - arama ->
+          kalem penceresi Enter'la geciliyor, lot ekraninda Enter hicbir sey yapmiyordu). Dugme / acilir liste
+          kendi Enter'ini isler; raf omru penceresi olayi burada durdurur. */}
+      <div onKeyDown={e => {
+        if (e.key !== 'Enter' || e.shiftKey || e.defaultPrevented) return;
+        const hedef = e.target as HTMLElement;
+        if (hedef.tagName === 'BUTTON' || hedef.tagName === 'SELECT' || hedef.tagName === 'TEXTAREA') return;
+        e.preventDefault();
+        kaydet();
+      }}>
         {hata && <div className="hata-kutusu">{hata}</div>}
         {yukleniyor && <div className="yukleniyor">{c('Lotlar yükleniyor…')}</div>}
         {rafDuzenle && (
@@ -265,7 +274,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', padding: 4 }}>
               <input className="hiza-sag" style={{ width: 70 }} autoFocus value={rafTaslak.sure} placeholder={c('Süre')}
                      onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))}
-                     onKeyDown={e => { if (e.key === 'Enter') { void rafKaydet(); setRafDuzenle(false) } }} />
+                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); void rafKaydet(); setRafDuzenle(false) } }} />
               <select value={rafTaslak.birim} onChange={e => setRafTaslak(t => ({ ...t, birim: e.target.value }))}>
                 <option value="1">{c('Gün')}</option>
                 <option value="2">{c('Ay')}</option>
@@ -357,7 +366,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
             </tfoot>
           </table>
         </div>
-      </>
+      </div>
     </Modal>
   );
 }
