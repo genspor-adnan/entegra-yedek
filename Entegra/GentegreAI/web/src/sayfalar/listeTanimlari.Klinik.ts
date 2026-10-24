@@ -201,6 +201,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   bagli kurum (sigortaAdi) sunucuda varsayilan-disi - burada GIZLENMEZ:
     //   yeni kolonu bilmeyen API'de listenin Kurum'u o kolondur.
     gizliKolonlar: ['acikBorc'],
+    // "Kadro Geçmişi" personel detayı (kadro) - hasta kartında yok (kullanıcı 24.10.2026).
+    gizliDetaylar: ['kadro'],
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
               tarihAlani: 'islemTarihi',
