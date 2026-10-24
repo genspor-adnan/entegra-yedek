@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
 import { PersonelTalepleri } from './taleplerim/PersonelTalepleri';
@@ -1040,6 +1041,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   }, [kaydedilmemisDegisiklikVar, onKapat]);
   // SAYFA KİPİ: sekmenin × / Alt+W'si bu Kapat'ı çağırır (kayıtsız değişiklik sorusu dahil).
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const git = useNavigate();
   const kapatIstendiRef = useRef(kapatIstendi);
   kapatIstendiRef.current = kapatIstendi;
   const kirliRef = useRef(kaydedilmemisDegisiklikVar);
@@ -1432,8 +1434,8 @@ Yine de yeni kayıt eklensin mi?`);
 
 
       {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
-          basvuru gecmisi. Cift tik basvuruyu KARTIN USTUNDE acar - liste
-          ekranina gitmek hasta kartindan kopmak demekti. */}
+          basvuru gecmisi. Tiklanan basvuru KENDI SEKMESINDE acilir (kullanici
+          24.10.2026) - hasta karti sekmesi acik kalir; yeni basvuru kartin ustunde. */}
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:talepler' && (
         <PersonelTalepleri tarafId={id as number}
           // Personelde unvan yalnız önek (Dr.) - görünen ad önek + ad + soyad.
@@ -1441,7 +1443,7 @@ Yine de yeni kayıt eklensin mi?`);
       )}
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:basvurular' && (
         <OncekiBasvurular tarafId={id as number} baslik="Başvuru Geçmişi"
-                          onAc={b => setAcilanBasvuru(b)}
+                          onAc={b => git(`/basvuru/${b}`)}
                           onYeni={() => setAcilanBasvuru(0)} />
       )}
       {/* 0 = YENI basvuru (bu hastayla acilir), >0 = mevcut basvuru. */}

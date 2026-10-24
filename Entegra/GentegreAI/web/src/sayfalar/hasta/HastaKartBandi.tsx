@@ -18,6 +18,7 @@ export interface HastaKartOzeti {
   sonrakiRandevu: string | null; randevuBolum: string; randevuHekim: string;
   bakiye: number; alerjiSayisi: number; alerjiSiddet: number; alerjiler: string[];
   kronikSayisi: number; kronikler: string[]; ilacSayisi: number; bekleyenSonuc: number;
+  kayitTarihi: string | null;
 }
 
 const tarih = (s: string | null, saat = false) => {
@@ -34,6 +35,10 @@ const yas = (s: string | null) => {
   if (b.getMonth() < d.getMonth() || (b.getMonth() === d.getMonth() && b.getDate() < d.getDate())) y--;
   return y >= 0 && y < 130 ? y : null;
 };
+// "2019'dan", "2020'den", "2023'ten": ek, yılın okunuşundaki son sözcüğe göre (dokuz / yirmi / üç...).
+const BIRLER = ['', 'den', 'den', 'ten', 'ten', 'ten', 'dan', 'den', 'den', 'dan'];
+const ONLAR = ['', 'dan', 'den', 'dan', 'tan', 'den', 'tan', 'ten', 'den', 'dan'];
+const yildan = (yil: number) => `${yil}'${yil % 10 ? BIRLER[yil % 10] : yil % 100 ? ONLAR[(yil % 100) / 10] : 'den'}`;
 const maskele = (tc: string) => (tc.length >= 8 ? `${tc.slice(0, 3)}${'*'.repeat(tc.length - 6)}${tc.slice(-3)}` : tc);
 
 const STIL = `
@@ -69,7 +74,6 @@ export function HastaKartBandi({ id, deger, git }: {
   const tc = String(deger.vkno ?? '');
   const y = yas(o?.dogumTarihi ?? null);
   const aktif = Number(deger.durum ?? 1) === 1;
-  const cins = o?.cinsiyet === 1 ? 'E' : o?.cinsiyet === 2 ? 'K' : '';
   return (
     <>
       <style>{STIL}</style>
@@ -81,8 +85,9 @@ export function HastaKartBandi({ id, deger, git }: {
             {c('Dosya')} <b>{String(deger.kod ?? '') || '—'}</b>
             {tc && <> · TC <b>{tcAcik ? tc : maskele(tc)}</b>
               <span className="hkb-goz" title={c(tcAcik ? 'Gizle' : 'Göster')} onClick={() => setTcAcik(x => !x)}>👁</span></>}
-            {o?.dogumTarihi && <> · {c('Doğum')} <b>{tarih(o.dogumTarihi)}</b>{y !== null ? ` (${y} y${cins ? ' · ' + cins : ''})` : ''}</>}
+            {o?.dogumTarihi && <> · {c('Doğum')} <b>{tarih(o.dogumTarihi)}</b>{y !== null ? ` (${y} y)` : ''}</>}
             {o?.kanGrubu && <> · {c('Kan')} <b>{o.kanGrubu}</b></>}
+            {o?.kayitTarihi && <> · {c('Kayıt')} <b>{yildan(new Date(o.kayitTarihi).getFullYear())}</b> {c('beri')}</>}
             {o && <> · <b>{sayi.format(o.basvuruSayisi)}</b> {c('başvuru')}</>}
           </div>
           <div className="hkb-rz">

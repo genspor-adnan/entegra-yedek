@@ -83,10 +83,12 @@ public static class HastaUclari
         DateTime? SonBasvuru, string SonBolum, string SonDoktor, int BasvuruSayisi,
         DateTime? SonrakiRandevu, string RandevuBolum, string RandevuHekim,
         decimal Bakiye, int AlerjiSayisi, short AlerjiSiddet, IReadOnlyList<string> Alerjiler,
-        int KronikSayisi, IReadOnlyList<string> Kronikler, int IlacSayisi, int BekleyenSonuc);
+        int KronikSayisi, IReadOnlyList<string> Kronikler, int IlacSayisi, int BekleyenSonuc,
+        DateTime? KayitTarihi);
 
     // Bekleyen sonuç: son 90 günün istendi / numune / çalışılıyor durumundaki lab istemleri.
     // Kronik: bitmemiş; alerji ve ilaç: aktif. Randevu: şu andan sonraki planlı / ertelenmiş (1, 5).
+    // Kayıt: kartın ekleme tarihi ile ilk başvurudan erken olanı (aktarılan hastada ekleme = aktarım günü).
     private const string KartOzetiSql = """
         select h.dogum_tarihi, coalesce(h.cinsiyet, 0)::smallint,
                coalesce((select d.ad from public.kod_deger d join public.kod_liste l on l.id = d.liste_id
@@ -110,7 +112,8 @@ public static class HastaUclari
                     where k.hasta_id = t.id and k.bitis is null order by k.id limit 3) x), '{}'),
                (select count(*)::int from public.hasta_ilac i where i.hasta_id = t.id and i.aktif = 1),
                (select count(*)::int from public.lab_istem l where l.taraf_id = t.id and l.durum in (1, 2, 3)
-                   and l.istem_tarihi > now() - interval '90 days')
+                   and l.istem_tarihi > now() - interval '90 days'),
+               least(t.ekleme_tarihi, (select min(b.belge_tarihi) from public.belge b where b.taraf_id = t.id and b.tur = 19))
           from public.taraf t
           left join public.taraf_hasta h on h.id = t.id
           left join lateral (
@@ -134,7 +137,8 @@ public static class HastaUclari
         o.IsDBNull(5) ? null : o.GetDateTime(5), o.GetString(6), o.GetString(7), o.GetInt32(8),
         o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetString(10), o.GetString(11),
         o.GetDecimal(12), o.GetInt32(13), o.GetInt16(14), o.GetFieldValue<string[]>(15),
-        o.GetInt32(16), o.GetFieldValue<string[]>(17), o.GetInt32(18), o.GetInt32(19));
+        o.GetInt32(16), o.GetFieldValue<string[]>(17), o.GetInt32(18), o.GetInt32(19),
+        o.IsDBNull(20) ? null : o.GetDateTime(20));
 
     /// <summary>
     /// Kart ucu (ekle / güncelle) SERT KURALI: aynı kimlik numaralı başka bir
