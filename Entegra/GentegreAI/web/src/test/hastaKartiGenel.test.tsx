@@ -65,14 +65,20 @@ describe('hasta kartinda Yakınlar gridi', () => {
       .toEqual(expect.arrayContaining([expect.stringContaining('Genel')])));
   });
 
-  it('YAKINLAR gridi GENEL sekmesinde (ayri sekme DEGIL - kullanici)', async () => {
+  it('YAKINLAR AYRI SEKME, Adres / Fatura Bilgisi sekmesinin saginda, Genel sekmesinde grid yok (kullanici 24.10.2026)', async () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
-    await waitFor(() => expect([...document.querySelectorAll('table')].some(t =>
-      (t.textContent ?? '').includes('Yakınlık'))).toBe(true));
-    // Sekme olarak DA cizilmemeli - ayni grid iki yerde olmasin.
-    expect([...document.querySelectorAll('.kat')].map(x => x.textContent ?? '')
-      .some(x => x.includes('Acil Durumda Aranacak'))).toBe(false);
+    const sekmeler = await waitFor(() => {
+      const k = [...document.querySelectorAll('.kat')].map(x => x.textContent ?? '');
+      if (!k.some(x => x.startsWith('Yakınlar'))) throw new Error('Yakınlar sekmesi yok');
+      return k;
+    });
+    expect(sekmeler.findIndex(x => x.startsWith('Yakınlar')))
+      .toBe(sekmeler.findIndex(x => x.startsWith('Adres / Fatura Bilgisi')) + 1);
+    expect(sekmeler.some(x => x.includes('Acil Durumda Aranacak'))).toBe(false);
+    // Genel sekmesi acikken Yakinlar gridi cizilmez - ayni grid iki yerde olmasin.
+    expect([...document.querySelectorAll('table')].some(t =>
+      (t.textContent ?? '').includes('Yakınlık'))).toBe(false);
   });
 
   it('KIMLIK DETAYI kutusu KALDIRILDI (kullanici)', async () => {
@@ -101,22 +107,6 @@ describe('hasta kartinda Yakınlar gridi', () => {
     expect(ulke?.textContent).toContain('Uyruk');
   });
 
-  it('YAKINLAR kutusu FLEX SATIRININ DISINDA - kendi satirinda', async () => {
-    ciz();
-    await waitFor(() => expect(kartOku).toHaveBeenCalled());
-    // ASIL HATA BUYDU: kutu ".kasira" (sarmayan flex satiri) icindeyken
-    //   Iletisim/Kimlik/Fotograf'in yanina ucuncu sutun olarak diziliyor ve
-    //   kartin gorunur alanindan tasiyordu. DOM SIRASI DOGRUYDU - bu yuzden
-    //   sadece sirayi olcen test uc kez yesil kalirken ekranda grid yoktu.
-    const kutu = await waitFor(() => {
-      const k = [...document.querySelectorAll('.kagrup')].find(x =>
-        (x.querySelector('h6')?.textContent ?? '').startsWith('Yakınlar'));
-      if (!k) throw new Error('Yakınlar kutusu yok');
-      return k;
-    });
-    expect(kutu.closest('.kasira')).toBeNull();
-  });
-
   it('SUBE ve EKLEME TARIHI cizilmez (kullanici)', async () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
@@ -137,12 +127,5 @@ describe('hasta kartinda Yakınlar gridi', () => {
     });
     expect(basliklar.indexOf('İletişim'))
       .toBeLessThan(basliklar.indexOf('Kimlik Bilgileri'));
-    // YAKINLAR ILETISIM / KIMLIK / FOTOGRAF SATIRININ ALTINDA (kullanici).
-    //   Gorunurlugu saglayan sey sira DEGIL, kutunun .kasira satirinin
-    //   DISINDA olmasi - onu ayri test tutuyor.
-    // GenDetayTablo basligi eylem dugmelerini de tasiyor - tam esitlik degil,
-    //   ONEK aranir.
-    expect(basliklar.findIndex(x => x.startsWith('Yakınlar')))
-      .toBeGreaterThan(basliklar.indexOf('Kimlik Bilgileri'));
   });
 });

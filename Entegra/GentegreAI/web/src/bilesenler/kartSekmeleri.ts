@@ -217,8 +217,13 @@ export function sekmeleriKur(secenek: {
     if (kaynak === 'personel' && d.ad === 'belgeDurumu') return;
     // Personel'de acil kişiler ik_karti.html mockup'ta İletişim sekmesinin altında
     // gömülü grid; ayrı sekme açılmasın.
-    // YAKINLAR SEKME DEGIL (kullanici): hastada Genel sekmesinde grid,
-    //   personelde Iletisim sekmesine gomulu.
+    // YAKINLAR: personelde Iletisim sekmesine gomulu. HASTADA SEKME (kullanici 24.10.2026
+    //   "rename Yakınlar ve adres ten sonra sekme olarak ekle") - eskiden Genel'in altinda grid.
+    if (kaynak === 'hasta' && d.ad === 'acilKisiler') {
+      const yd = { ...d, baslik: 'Yakınlar' };
+      s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: yd.baslik, detay: yd });
+      return;
+    }
     if (personelGibiKart && d.ad === 'acilKisiler') return;
     // Sube kartinda depolar "Depolar" GRUP sekmesine gomulu cizilir (merkez
     //   deposu kutusuyla birlikte, 173) - ayni adla iki sekme acilmasin.
@@ -243,6 +248,12 @@ export function sekmeleriKur(secenek: {
   //   hasta_kimlik_karti.html). Kartin DETAYI DEGIL - baska bir ekranin
   //   kayitlari (bu hastanin basvuru belgeleri), salt okunur liste; cift tik
   //   basvuruyu acar. Yeni kayitta hasta id'si yok, hic cizilmez.
+  // Hasta Yakınlar sekmesi "Adres / Fatura Bilgisi"nin hemen sağında.
+  if (kaynak === 'hasta') {
+    const yi = s.findIndex(x => x.tur === 'detay' && x.detay.ad === 'acilKisiler');
+    const ai = s.findIndex(x => x.baslik === 'Adres / Fatura Bilgisi');
+    if (yi >= 0 && ai >= 0) { const [y] = s.splice(yi, 1); s.splice((ai > yi ? ai - 1 : ai) + 1, 0, y) }
+  }
   if (kaynak === 'hasta' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:basvurular', baslik: 'Başvurular' });
     // Mockup hasta_karti_v5 (kullanıcı 24.10.2026): Belgeler / Belge Durumu yerine Randevular · Mali ·

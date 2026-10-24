@@ -471,30 +471,8 @@ const adliBlok = (
         )}
       </div>
     )}
-    {/* YAKINLAR (kullanici: ayri sekme OLMASIN) - Iletisim / Kimlik /
-        Fotograf satirinin ALTINDA ama .kasira SATIRININ DISINDA.
-
-        .kasira BIR FLEX SATIRIDIR ve SARMAZ: bu kutu oranin icindeyken
-        digerlerinin YANINA dorduncu sutun olarak diziliyor, genislik
-        kalmayinca kartin gorunur alanindan tasiyordu - grid DOM'da vardi ama
-        ekranda yoktu (kullanici uc kez "görünmüyor" dedi; DOM sirasina bakan
-        test bunu GOREMEZ, cunku sira dogruydu). Satirin disinda oldugu icin
-        artik kendi tam-genislikte satirinda. */}
-      {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-      // GenDetayTablo KENDI `.kagrup` kutusunu ve basligini cizer - ustune
-      //   ikinci bir kutu koymak IC ICE IKI CERCEVE demekti (kullanici: "dış
-      //   çerçeve duruyor" - benim kaldirdigim DIS kutuydu, ekranda gorunen
-      //   gridin KENDI kutusu). Sarmalayici kaldirildi; baslik meta uzerinden.
-      <GenDetayTablo
-        key="Yakinlar"
-        kutuSinif="yakinlar-kutusu"
-        meta={{ ...acilDetay, baslik: 'Yakınlar / Acil Durumda Aranacak' }}
-        durum={detaylar[acilDetay.ad] ?? bosDetay()}
-        saltOkunur={salt || acilDetay.saltOkunur}
-        hatalar={alanHatalari}
-        onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
-      />
-      )}
+    {/* YAKINLAR artık Genel'de değil, "Adres / Fatura Bilgisi"nin sağında kendi sekmesi
+        (kullanıcı 24.10.2026) - kartSekmeleri acilKisiler detayını 'Yakınlar' başlığıyla ekler. */}
   </>
 );
 // SubeId/EklemeTarihi (salt-okunur meta alanlar) EN ALTTA (kullanici: kisi kartinda
