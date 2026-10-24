@@ -18,7 +18,7 @@ export function DevirPenceresi({ tur, id, onKapat, onKaydedildi }: {
   const baslik = v ? `${c('Devir / Açılış Bakiyesi')} — ${v.hesap.ad}` : c('Devir / Açılış Bakiyesi');
   return (
     <Modal baslik={baslik} ustBilgi={v ? `${TUR_AD[v.tur]} · ${[v.hesap.kod, v.hesap.altBilgi].filter(Boolean).join(' · ')}` : undefined}
-           onKapat={onKapat} enUst ekSinif="cd-pencere"
+           onKapat={onKapat} enUst buyutmeYok ekSinif="cd-pencere"
            alt={<>
              <span ref={setYer} style={{ display: 'contents' }} />
              <span style={{ marginLeft: 'auto' }} />

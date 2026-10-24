@@ -46,6 +46,8 @@ export function Devir() {
   /** Kaydet / Devri Kaldır araç çubuğunda solda (kullanıcı 24.10.2026: "sekmede de kaydet yukarda olsun"). */
   const [dugmeYeri, setDugmeYeri] = useState<HTMLSpanElement | null>(null);
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  /** Sekmeyi kapat (Kapat düğmesi; Kaydet / Devri Kaldır sonrası da - kullanıcı 24.10.2026). */
+  const sekmeyiKapat = () => (ekranSekmesi ? ekranSekmesi.kapat() : git('/panel'));
   const degistir = (d: Record<string, string>) => {
     const yeni = new URLSearchParams(arama);
     for (const [k, x] of Object.entries(d)) { if (x) yeni.set(k, x); else yeni.delete(k) }
@@ -78,7 +80,7 @@ export function Devir() {
         <button type="button" className={gor === 'toplu' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'toplu' ? '' : 'toplu' })}>📋 {c('Toplu Giriş')}</button>
         <button type="button" className={gor === 'acilis' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'acilis' ? '' : 'acilis' })}>⇄ {c('Açılış Bakiyeleri')}</button>
         {/* Standart desen: Kaydet solda, Kapat sağda (sekmeyi kapatır). */}
-        <button type="button" onClick={() => (ekranSekmesi ? ekranSekmesi.kapat() : git('/panel'))}>{c('Kapat')}</button>
+        <button type="button" onClick={sekmeyiKapat}>{c('Kapat')}</button>
       </div>
 
       {gor === 'tek' && (
@@ -99,7 +101,7 @@ export function Devir() {
 
       <div className="hi-govde">
         {gor === 'tek' && (id > 0
-          ? <div className="dv-kutu"><DevirFormu key={`${tur}-${id}-${yenile}`} tur={tur} id={id} onYuklendi={setV} onKaydedildi={() => setYenile(t => t + 1)} dugmeYeri={dugmeYeri} /></div>
+          ? <div className="dv-kutu"><DevirFormu key={`${tur}-${id}-${yenile}`} tur={tur} id={id} onYuklendi={setV} onKaydedildi={() => setYenile(t => t + 1)} onKapat={sekmeyiKapat} dugmeYeri={dugmeYeri} /></div>
           : <div className="ek-bos">{c('Devir girilecek')} {TUR_AD[gercekTur].toLocaleLowerCase('tr-TR')} {c('hesabını yukarıdaki kutudan seçin; ya da Toplu Giriş ile Excel\'den yapıştırın.')}</div>)}
         {gor === 'toplu' && <TopluGiris turler={turler} git={git} />}
         {gor === 'acilis' && <AcilisBakiyeleri />}
