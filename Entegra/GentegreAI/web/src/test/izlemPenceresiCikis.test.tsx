@@ -57,3 +57,50 @@ describe('Seri No sutunu (kullanici 24.10.2026)', () => {
   });
 });
 
+describe('Ürt. Tarihi + SKT sutunlari (kullanici 24.10.2026)', () => {
+  const ciz = (izleme: number, satirlar: IzlemSatiri[] = []) => render(
+    <IzlemPenceresi stokAdi="X" stokId={null} depoId={1} izleme={izleme} miktar={1} satirlar={satirlar}
+                    cikis={false} onKapat={() => {}} onKaydet={() => {}} />);
+  const basliklar = () => [...document.body.querySelectorAll('th')].map(t => t.textContent ?? '');
+  const tarihVar = () => basliklar().some(b => b.startsWith('SKT')) && basliklar().some(b => b.startsWith('Ürt.'));
+  const tarihYok = () => !basliklar().some(b => b.startsWith('SKT') || b.startsWith('Ürt.'));
+  it('Lot No stokta yok', () => { ciz(2); expect(tarihYok()).toBe(true) });
+  it('Seri No + Lot No stokta yok', () => { ciz(6); expect(tarihYok()).toBe(true) });
+  it('Lot No + SKT stokta var', () => { ciz(5); expect(tarihVar()).toBe(true) });
+  it('Karekod stokta var', () => { ciz(4); expect(tarihVar()).toBe(true) });
+  it('eski satirda SKT girilmisse gizlenmez', () => {
+    ciz(2, [{ lotNo: 'L', seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '2030-01-01', durum: 0, miktar: '1' }]);
+    expect(tarihVar()).toBe(true);
+  });
+});
+
+describe('cikista miktar azaltilip yeniden artirilinca (kullanici 24.10.2026)', () => {
+  it('oturumda birakilan kayitli lotlar yeniden secilebilir', async () => {
+    const { api } = await import('../api/istemci');
+    // Kayitli: A, B, C, D (1'er) - hepsi bu belgeyle cikmis, depoda yoklar. Depoda baska lot E (3).
+    (api.stokLotlari as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { seriLotId: 15, lotNo: 'E', seriNo: '', kalan: 3, uretimTarihi: null, sonKullanmaTarihi: null },
+    ]);
+    const lot = (id: number, ad: string, miktar: string, kalan?: number): IzlemSatiri =>
+      ({ seriLotId: id, lotNo: ad, seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar,
+         ...(kalan !== undefined ? { kalan } : {}) });
+    const kayitliLotlar = [lot(11, 'A', '1'), lot(12, 'B', '1'), lot(13, 'C', '1'), lot(14, 'D', '1')];
+    // 4 -> 2'ye dusurulup Tamam denmis: guncel secim A, B (oturumda kalan'li).
+    const guncel = [lot(11, 'A', '1', 1), lot(12, 'B', '1', 1)];
+    const onKaydet = vi.fn();
+    render(<IzlemPenceresi stokAdi="X" stokId={1} depoId={1} izleme={2} miktar={4} satirlar={guncel}
+                           kayitli={kayitliLotlar} cikis onKapat={() => {}} onKaydet={onKaydet} />);
+    await waitFor(() => expect(screen.getByDisplayValue('E')).toBeTruthy());
+    for (const ad of ['A', 'B', 'C', 'D']) expect(screen.getByDisplayValue(ad)).toBeTruthy();
+    // C ve D'yi yeniden sec: miktar kutulari (hiza-sag) satir sirasiyla.
+    const satirlar = [...document.body.querySelectorAll('tbody tr')];
+    const kutu = (ad: string) => satirlar.find(r => (r.querySelector('input') as HTMLInputElement)?.value === ad)!
+      .querySelector('input.hiza-sag') as HTMLInputElement;
+    fireEvent.change(kutu('C'), { target: { value: '1' } });
+    fireEvent.change(kutu('D'), { target: { value: '1' } });
+    fireEvent.click(screen.getAllByText(/Tamam/)[0]);
+    expect(onKaydet).toHaveBeenCalledTimes(1);
+    expect(onKaydet.mock.calls[0][0].map((z: IzlemSatiri) => z.lotNo).sort()).toEqual(['A', 'B', 'C', 'D']);
+  });
+});
+

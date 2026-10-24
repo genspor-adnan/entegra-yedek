@@ -36,6 +36,9 @@ export interface SatirDagilimi {
 export interface SatirDurumu {
   /** GECICI (kaydedilmez): kalem penceresi LOT EKRANIYLA acilsin - lot gridinde cift tik (24.10.2026). */
   lotEkrani?: boolean;
+  /** Satirin SUNUCUDAKI lotlari (okumada dolar, kalem duzenlemesi degistirmez) - lot ekrani cikista
+   *  secilebilir kalani bununla kurar. Kaydedilmez. */
+  kayitliIzlemler?: IzlemSatiri[];
   anahtar: number;
   /** 1 stok · 2 hizmet · 3 masraf (belge_satir.tur). */
   satirTur: number;
@@ -217,6 +220,16 @@ export function izlemKurali(izleme: number) {
  */
 export const seriSutunuVar = (izleme: number, satirlar: { seriNo?: string }[] = []) =>
   izlemKurali(izleme).seri || izleme === 4 || satirlar.some(z => !!z.seriNo?.trim());
+
+/**
+ * ÜRT. TARİHİ + SKT SUTUNLARI (kullanici 24.10.2026: "SKT sütunu da izleme türüne göre olsun" + "ÜRT de
+ * öyle"): izleme turu SKT iceriyorsa (SKT, Lot No + SKT, Karekod) ya da satirda tarih zaten girilmisse.
+ * Ikisi birlikte: ÜRT <-> SKT raf omrunden birbirine cevrilir.
+ */
+export const tarihSutunuVar = (izleme: number,
+                               satirlar: { uretimTarihi?: string; sonKullanmaTarihi?: string }[] = []) =>
+  izlemKurali(izleme).skt || izleme === 4
+  || satirlar.some(z => !!z.uretimTarihi?.trim() || !!z.sonKullanmaTarihi?.trim());
 export const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
   adet: '1', birimFiyat: '', fiyatDovizi: '', dovizFiyat: '', kur: '1',
@@ -343,7 +356,7 @@ export function yanittanSatirlar(
       durum: Number(z.durum ?? 0),
       miktar: String(z.miktar ?? 0),
     })),
-  }));
+  })).map(s => ({ ...s, kayitliIzlemler: s.izlemler }));
 }
 
 /**

@@ -3,7 +3,7 @@ import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import {
-  type IzlemSatiri, bosIzlem, izlemKurali, seriSutunuVar, tariheEkle, RAF_BIRIM,
+  type IzlemSatiri, bosIzlem, izlemKurali, seriSutunuVar, tarihSutunuVar, tariheEkle, RAF_BIRIM,
 } from '../../sayfalar/belgeSatir';
 import { bugunIso, hamSayi as sayi } from '../bicim';
 import { c } from '../../dil/ceviri';
@@ -22,7 +22,7 @@ import { c } from '../../dil/ceviri';
  * Durum GIRISTE 0 ("Girişte"); karantina/bloke gibi durumlar kod listesi
  * tanimlandiginda burada secilebilir olacak (db/114).
  */
-export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cikis,
+export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cikis, kayitli,
                          onKapat, onKaydet }: {
   stokAdi: string;
   stokId: number | null;
@@ -34,6 +34,8 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   satirlar: IzlemSatiri[];
   /** CIKIS belgesi: lot GIRILMEZ, stoktakilerden secilir. */
   cikis: boolean;
+  /** Satirin SUNUCUDAKI (kayitli) lotlari - cikista secilebilir kalan bunlarla geri eklenir. */
+  kayitli?: IzlemSatiri[];
   onKapat(): void;
   onKaydet(satirlar: IzlemSatiri[]): void;
 }) {
@@ -45,6 +47,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   const [yukleniyor, setYukleniyor] = useState(cikis);
   const kural = izlemKurali(izleme);
   const seriVar = seriSutunuVar(izleme, satirlar);
+  const tarihVar = tarihSutunuVar(izleme, satirlar);
 
   // RAF OMRU (stok karti): ÜRT <-> SKT donusumu bununla yapilir. Kartta yoksa
   //   kullanicidan BURADA sorulur ve karta yazilir - lot girisini yarida kesip
@@ -52,7 +55,6 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   const [rafSure, setRafSure] = useState(0);
   const [rafBirim, setRafBirim] = useState(0);
   const [rafSurum, setRafSurum] = useState<string | undefined>();
-  const [rafSoruluyor, setRafSoruluyor] = useState(false);
   const [rafTaslak, setRafTaslak] = useState({ sure: '', birim: '2' });
   const [rafNot, setRafNot] = useState<string | null>(null);
 
@@ -66,19 +68,23 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
         const birim = Number(k.kart.rafOmruBirim ?? 0) || 0;
         setRafSure(sure); setRafBirim(birim);
         setRafSurum(k.kart.surum as string | undefined);
-        // Tanimsizsa hemen sor: SKT hesabi buna bagli.
-        if (sure <= 0 || birim <= 0) setRafSoruluyor(true);
+        // Ust bantta duzenlenir (kullanici 24.10.2026 "başlığa yine raf ömrü gelsin").
+        setRafTaslak({ sure: sure > 0 ? String(sure) : '', birim: birim > 0 ? String(birim) : '2' });
       })
       .catch(() => { /* kart okunamazsa raf omru sorulmaz, elle girilir */ });
     return () => { iptal = true };
   }, [cikis, stokId]);
 
-  /** Raf omru kullanicidan alindi: STOK KARTINA yazilir, sonra hesaplama acilir. */
-  async function rafKaydet() {
-    const sure = sayi(rafTaslak.sure);
-    const birim = Number(rafTaslak.birim) || 0;
-    if (sure <= 0 || birim <= 0) { setHata('Raf ömrü ve birimi girilmeli.'); return }
-    setRafSure(sure); setRafBirim(birim); setRafSoruluyor(false); setHata(null);
+  /**
+   * Bantta raf omru degisti (kutudan cikinca / birim secilince): hesaplama HEMEN yeni sureyle calisir ve
+   * STOK KARTINA yazilir - lot girisini yarida kesip stok kartina gitmek gerekmesin. Bos = hesap yok.
+   */
+  async function rafKaydet(t = rafTaslak) {
+    const sure = sayi(t.sure);
+    const birim = Number(t.birim) || 0;
+    if (sure === rafSure && birim === rafBirim) return;
+    if (sure <= 0 || birim <= 0) { setRafSure(0); return }
+    setRafSure(sure); setRafBirim(birim); setHata(null);
     if (!stokId) return;
     try {
       const y = await api.kartGuncelle('stok', stokId,
@@ -102,33 +108,50 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       .then(lotlar => {
         if (iptal) return;
         setListe(eski => {
-          // Bu oturumda listeden secilmis (kalan'i dolu) - kalem yeniden acildi, secim aynen kalir.
-          if (eski.length > 0 && eski.every(z => z.kalan !== undefined)) return eski;
-          // KAYITLI BELGEDEN GELEN SECIM (kullanici 24.10.2026: "satış irs de lotno değiştiremedim"):
-          //   eskiden yalniz secili lotlar listeleniyor, kalanlari bos geldigi icin "Tamam" her
-          //   seferinde "lotunda kaldi" diyordu. Artik depodaki lotlar + secili lotlar birlikte;
-          //   secili lotun kalanina BU BELGENIN dustugu miktar eklenir - duzenlemede sunucu
-          //   once eski dusumu geri alir, o miktar yeniden secilebilir.
-          const anahtar = (z: { seriLotId?: number; lotNo: string; seriNo: string }) =>
+          // DEPO LOTLARI + BU SATIRIN KAYITLI DUSUMU + GUNCEL SECIM (kullanici 24.10.2026: "satış irs de lotno
+          //   değiştiremedim" + "adeti 20'den 18'e düşürüp sonra 20'ye çıkardım, boştaki lotlar gelmedi").
+          //   Sunucunun stok kalani KAYITLI belgenin dusumunu icerir; duzenlemede sunucu once o dusumu geri
+          //   alir. Bu yuzden her lotun secilebilir kalani = depodaki kalan + bu satirin KAYITLI miktari.
+          //   Kayitli liste ayri tutulur (`kayitli`) - guncel secimden turetilirse oturumda birakilan lotlar
+          //   (20 -> 18'de dusenler) depoda da secimde de olmadigi icin listeden kayboluyordu.
+          const kimlik = (z: { seriLotId?: number; lotNo: string; seriNo: string }) =>
             z.seriLotId ? `#${z.seriLotId}` : `${z.lotNo}|${z.seriNo}`;
-          const secili = new Map(eski.map(z => [anahtar(z), z]));
+          const ikiAnahtar = (z: { seriLotId?: number; lotNo: string; seriNo: string }) =>
+            [kimlik(z), `${z.lotNo}|${z.seriNo}`];
+          const kayitliListe = kayitli ?? eski.filter(z => z.kalan === undefined);
+          const geriGelen = new Map<string, { z: IzlemSatiri; m: number }>();
+          for (const k of kayitliListe) {
+            const var_ = geriGelen.get(kimlik(k));
+            const kayit = var_ ?? { z: k, m: 0 };
+            kayit.m += sayi(k.miktar);
+            ikiAnahtar(k).forEach(a => geriGelen.set(a, kayit));
+          }
+          const secim = new Map<string, string>();
+          eski.forEach(z => ikiAnahtar(z).forEach(a => secim.set(a, z.miktar)));
+          const kullanilan = new Set<{ z: IzlemSatiri; m: number }>();
+          const bul = <T,>(m: Map<string, T>, z: { seriLotId?: number; lotNo: string; seriNo: string }) =>
+            ikiAnahtar(z).map(a => m.get(a)).find(x => x !== undefined);
           const birlesik: IzlemSatiri[] = lotlar.map(l => {
-            const s = secili.get(anahtar(l)) ?? secili.get(`${l.lotNo}|${l.seriNo}`);
-            if (s) secili.delete(anahtar(s));
+            const g = bul(geriGelen, l);
+            if (g) kullanilan.add(g);
             return {
               seriLotId: l.seriLotId,
-              kalan: l.kalan + (s ? sayi(s.miktar) : 0),
+              kalan: l.kalan + (g?.m ?? 0),
               lotNo: l.lotNo,
               seriNo: l.seriNo,
               uretimTarihi: (l.uretimTarihi ?? '').slice(0, 10),
               sonKullanmaTarihi: (l.sonKullanmaTarihi ?? '').slice(0, 10),
               durum: 0,
-              miktar: s ? s.miktar : '',
+              miktar: bul(secim, l) ?? '',
             };
           });
-          // Depoda kalani SIFIR olan secili lotlar (tamami bu belgeyle cikmis) listede yok - basa eklenir.
-          const tukenmis = [...secili.values()].map(z => ({ ...z, kalan: sayi(z.miktar) }));
-          return [...tukenmis, ...birlesik];
+          // Depoda kalani SIFIR olan kayitli lotlar (tamami bu belgeyle cikmis) depo listesinde yok - basa eklenir.
+          const tukenmis = [...new Set(geriGelen.values())].filter(g => !kullanilan.has(g))
+            .map(g => ({ ...g.z, kalan: g.m, miktar: bul(secim, g.z) ?? '' }));
+          const bilinen = new Set([...tukenmis, ...birlesik].flatMap(ikiAnahtar));
+          // Bu oturumda secilmis ama ne depoda ne kayitta olan (olmamali) - secim kaybolmasin.
+          const yetim = eski.filter(z => sayi(z.miktar) > 0 && !ikiAnahtar(z).some(a => bilinen.has(a)));
+          return [...tukenmis, ...yetim, ...birlesik];
         });
       })
       .catch(h => setHata(hataMetni(h)))
@@ -198,6 +221,23 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
           <button className="d onay" onClick={kaydet}>💾 Tamam</button>
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
+          {/* RAF OMRU UST BANTTA (kullanici 24.10.2026): ÜRT girilince SKT, SKT girilince ÜRT bu sureden. */}
+          {!cikis && tarihVar && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8 }}
+                  title={c('Üretim tarihi girilince SKT, SKT girilince üretim tarihi bu süreden hesaplanır; stok kartına yazılır.')}>
+              <span className="sonuk">{c('Raf ömrü')}</span>
+              <input className="hiza-sag" style={{ width: 48 }} value={rafTaslak.sure} placeholder="—"
+                     onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))}
+                     onBlur={() => void rafKaydet()}
+                     onKeyDown={e => { if (e.key === 'Enter') void rafKaydet() }} />
+              <select value={rafTaslak.birim}
+                      onChange={e => { const t = { ...rafTaslak, birim: e.target.value }; setRafTaslak(t); void rafKaydet(t) }}>
+                <option value="1">{c('Gün')}</option>
+                <option value="2">{c('Ay')}</option>
+                <option value="3">{c('Yıl')}</option>
+              </select>
+            </span>
+          )}
           {/* TOPLAM OZETI UST BANTTA, TAMAM ILE KAPAT ARASINDA ORTADA (kullanici 24.10.2026): gereken (kalem
               miktari) · girilen (lot toplami) · kalan - uzun listede alttaki "Dağıtılmayan miktar" gorunmuyordu. */}
           <span style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 18, alignItems: 'baseline' }}>
@@ -217,33 +257,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
         {hata && <div className="hata-kutusu">{hata}</div>}
         {yukleniyor && <div className="yukleniyor">{c('Lotlar yükleniyor…')}</div>}
 
-        {/* RAF OMRU kartta tanimli degil: burada sorulur, karta yazilir.
-            Lot girisini birakip stok kartina gitmeye gerek kalmasin. */}
-        {rafSoruluyor && (
-          <div className="bilgi-kutusu">
-            <b>{c('Bu stokta raf ömrü tanımlı değil.')}</b> Girilirse üretim tarihinden SKT
-            (ya da SKT'den üretim tarihi) otomatik hesaplanır ve stok kartına yazılır.
-            <div className="ikili" style={{ marginTop: 6, maxWidth: 320 }}>
-              <input className="hiza-sag" placeholder="Süre" value={rafTaslak.sure}
-                     onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))} />
-              <select value={rafTaslak.birim}
-                      onChange={e => setRafTaslak(t => ({ ...t, birim: e.target.value }))}>
-                <option value="1">Gün</option>
-                <option value="2">{c('Ay')}</option>
-                <option value="3">Yıl</option>
-              </select>
-              <button type="button" className="d bir" onClick={() => void rafKaydet()}>Kaydet</button>
-              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>{c('Şimdilik Geç')}</button>
-            </div>
-          </div>
-        )}
         {rafNot && <div className="bilgi-kutusu">{rafNot}</div>}
-        {!cikis && !rafSoruluyor && rafSure > 0 && rafBirim > 0 && (
-          <div className="not">
-            Raf ömrü <b>{rafSure} {RAF_BIRIM[rafBirim as 1 | 2 | 3]}</b> — üretim tarihi
-            girilince SKT, SKT girilince üretim tarihi otomatik hesaplanır.
-          </div>
-        )}
         {cikis && !yukleniyor && liste.length === 0 && (
           <div className="bilgi-kutusu">Bu stokta kalan lot yok — önce giriş yapılmalı.</div>
         )}
@@ -255,8 +269,8 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                     stoktan gelir, kullanici doldurmaz. */}
                 <th>Lot No{!cikis && kural.lot && <b className="zorunlu"> *</b>}</th>
                 {seriVar && <th>Seri No{!cikis && kural.seri && <b className="zorunlu"> *</b>}</th>}
-                <th>{c('Ürt. Tarihi')}</th>
-                <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>
+                {tarihVar && <th>{c('Ürt. Tarihi')}</th>}
+                {tarihVar && <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>}
                 {/* Giriste DURUM (girişte 0), cikista o lottan KALAN gosterilir. */}
                 <th>{cikis ? 'Kalan' : 'Durum'}</th>
                 <th className="hiza-sag">Miktar</th>
@@ -271,15 +285,15 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                              onChange={e => degis(i, 'lotNo', e.target.value)} /></td>
                   {seriVar && <td><input value={z.seriNo} readOnly={cikis} disabled={cikis}
                              onChange={e => degis(i, 'seriNo', e.target.value)} /></td>}
-                  <td><input type="date" value={z.uretimTarihi} readOnly={cikis} disabled={cikis}
-                             onChange={e => degis(i, 'uretimTarihi', e.target.value)} /></td>
-                  <td>
+                  {tarihVar && <td><input type="date" value={z.uretimTarihi} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'uretimTarihi', e.target.value)} /></td>}
+                  {tarihVar && <td>
                     <input type="date" value={z.sonKullanmaTarihi} readOnly={cikis} disabled={cikis}
                            className={z.sonKullanmaTarihi && z.sonKullanmaTarihi < bugunIso() ? 'skt-gecmis' : undefined}
                            title={z.sonKullanmaTarihi && z.sonKullanmaTarihi < bugunIso()
                              ? 'Son kullanma tarihi GEÇMİŞ' : undefined}
                            onChange={e => degis(i, 'sonKullanmaTarihi', e.target.value)} />
-                  </td>
+                  </td>}
                   {cikis
                     ? <td className="hiza-sag">{(z.kalan ?? 0).toLocaleString('tr-TR')}</td>
                     /* Giriste tek durum var; kod listesi genisleyince combo olur. */
@@ -300,7 +314,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={seriVar ? 5 : 4}>
+                <td colSpan={2 + (seriVar ? 1 : 0) + (tarihVar ? 2 : 0)}>
                   {/* SKT gecmisse ENGEL DEGIL UYARI: mal fiilen gelmis olabilir
                       (iade, imha oncesi giris) - karar kullanicinin. */}
                   {gecmisSkt > 0 && (

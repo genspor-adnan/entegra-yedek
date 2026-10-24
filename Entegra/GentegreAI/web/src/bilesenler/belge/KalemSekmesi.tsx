@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { mesaj } from '../mesaj';
 import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
-import { iskonatoMetni, satirTutari, seriSutunuVar, type SatirDurumu } from '../../sayfalar/belgeSatir';
+import { iskonatoMetni, satirTutari, seriSutunuVar, tarihSutunuVar, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
 import {
@@ -739,8 +739,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                     <tr>
                       <th>{c('Lot No')}</th>
                       {seriSutunuVar(r.izleme, lotlar) && <th>Seri No</th>}
-                      <th>{c('Ürt. Tarihi')}</th>
-                      <th>SKT</th>
+                      {tarihSutunuVar(r.izleme, lotlar) && <th>{c('Ürt. Tarihi')}</th>}
+                      {tarihSutunuVar(r.izleme, lotlar) && <th>SKT</th>}
                       <th className="hiza-sag">Miktar</th>
                     </tr>
                   </thead>
@@ -751,8 +751,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                           onDoubleClick={() => duzenle(r, true)}>
                         <td><code>{z.lotNo || '—'}</code></td>
                         {seriSutunuVar(r.izleme, lotlar) && <td>{z.seriNo || '—'}</td>}
-                        <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
-                        <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>
+                        {tarihSutunuVar(r.izleme, lotlar) && <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>}
+                        {tarihSutunuVar(r.izleme, lotlar) && <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>}
                         <td className="hiza-sag">
                           {(sayi(z.miktar)).toLocaleString('tr-TR')}
                         </td>

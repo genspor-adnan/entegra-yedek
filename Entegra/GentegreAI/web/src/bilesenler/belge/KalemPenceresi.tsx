@@ -769,6 +769,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             izleme={r.izleme}
             miktar={adet}
             satirlar={r.izlemler}
+            kayitli={r.kayitliIzlemler}
             onKapat={() => setIzlemAcik(false)}
             onKaydet={izlemler => {
               setIzlemAcik(false);
