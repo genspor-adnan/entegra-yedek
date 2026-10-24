@@ -42,3 +42,18 @@ describe('cikista kayitli lot secimi', () => {
       .toEqual([[9, '1'], [3, '3']]);
   });
 });
+
+describe('Seri No sutunu (kullanici 24.10.2026)', () => {
+  const ciz = (izleme: number, satirlar: IzlemSatiri[] = []) => render(
+    <IzlemPenceresi stokAdi="X" stokId={null} depoId={1} izleme={izleme} miktar={1} satirlar={satirlar}
+                    cikis={false} onKapat={() => {}} onKaydet={() => {}} />);
+  const baslikVar = () => [...document.body.querySelectorAll('th')].some(t => (t.textContent ?? '').startsWith('Seri No'));
+  it('Lot No + SKT stokta yok', () => { ciz(5); expect(baslikVar()).toBe(false) });
+  it('Seri No + Lot No stokta var', () => { ciz(6); expect(baslikVar()).toBe(true) });
+  it('Karekod stokta var', () => { ciz(4); expect(baslikVar()).toBe(true) });
+  it('eski satirda seri girilmisse gizlenmez', () => {
+    ciz(5, [{ lotNo: 'L', seriNo: 'S1', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar: '1' }]);
+    expect(baslikVar()).toBe(true);
+  });
+});
+

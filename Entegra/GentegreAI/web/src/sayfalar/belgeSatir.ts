@@ -209,6 +209,14 @@ export function izlemKurali(izleme: number) {
     skt:  izleme === 3 || izleme === 5,
   };
 }
+
+/**
+ * SERI NO SUTUNU GORUNUR MU (kullanici 24.10.2026: "stok kartında izlemde seri no yazmıyorsa seri no
+ * sütunu olmasın"): izleme turu seri iceriyorsa (Seri No, Seri No + Lot No, Karekod - GS1 karekodu seri
+ * tasir) ya da satirda zaten seri girilmisse (eski veri gizlenmesin).
+ */
+export const seriSutunuVar = (izleme: number, satirlar: { seriNo?: string }[] = []) =>
+  izlemKurali(izleme).seri || izleme === 4 || satirlar.some(z => !!z.seriNo?.trim());
 export const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
   adet: '1', birimFiyat: '', fiyatDovizi: '', dovizFiyat: '', kur: '1',

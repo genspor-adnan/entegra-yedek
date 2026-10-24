@@ -3,7 +3,7 @@ import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import {
-  type IzlemSatiri, bosIzlem, izlemKurali, tariheEkle, RAF_BIRIM,
+  type IzlemSatiri, bosIzlem, izlemKurali, seriSutunuVar, tariheEkle, RAF_BIRIM,
 } from '../../sayfalar/belgeSatir';
 import { bugunIso, hamSayi as sayi } from '../bicim';
 import { c } from '../../dil/ceviri';
@@ -44,6 +44,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(cikis);
   const kural = izlemKurali(izleme);
+  const seriVar = seriSutunuVar(izleme, satirlar);
 
   // RAF OMRU (stok karti): ÜRT <-> SKT donusumu bununla yapilir. Kartta yoksa
   //   kullanicidan BURADA sorulur ve karta yazilir - lot girisini yarida kesip
@@ -253,7 +254,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                 {/* Zorunluluk yildizi yalniz GIRISTE: cikista bu alanlar
                     stoktan gelir, kullanici doldurmaz. */}
                 <th>Lot No{!cikis && kural.lot && <b className="zorunlu"> *</b>}</th>
-                <th>Seri No{!cikis && kural.seri && <b className="zorunlu"> *</b>}</th>
+                {seriVar && <th>Seri No{!cikis && kural.seri && <b className="zorunlu"> *</b>}</th>}
                 <th>{c('Ürt. Tarihi')}</th>
                 <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>
                 {/* Giriste DURUM (girişte 0), cikista o lottan KALAN gosterilir. */}
@@ -268,8 +269,8 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                   {/* CIKISTA lot bilgisi stoktan gelir - yalniz miktar girilir. */}
                   <td><input value={z.lotNo} autoFocus={!cikis && i === 0} readOnly={cikis} disabled={cikis}
                              onChange={e => degis(i, 'lotNo', e.target.value)} /></td>
-                  <td><input value={z.seriNo} readOnly={cikis} disabled={cikis}
-                             onChange={e => degis(i, 'seriNo', e.target.value)} /></td>
+                  {seriVar && <td><input value={z.seriNo} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'seriNo', e.target.value)} /></td>}
                   <td><input type="date" value={z.uretimTarihi} readOnly={cikis} disabled={cikis}
                              onChange={e => degis(i, 'uretimTarihi', e.target.value)} /></td>
                   <td>
@@ -299,7 +300,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={5}>
+                <td colSpan={seriVar ? 5 : 4}>
                   {/* SKT gecmisse ENGEL DEGIL UYARI: mal fiilen gelmis olabilir
                       (iade, imha oncesi giris) - karar kullanicinin. */}
                   {gecmisSkt > 0 && (

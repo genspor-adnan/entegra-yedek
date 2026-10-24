@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { mesaj } from '../mesaj';
 import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
-import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
+import { iskonatoMetni, satirTutari, seriSutunuVar, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
 import {
@@ -738,7 +738,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                   <thead>
                     <tr>
                       <th>{c('Lot No')}</th>
-                      <th>Seri No</th>
+                      {seriSutunuVar(r.izleme, lotlar) && <th>Seri No</th>}
                       <th>{c('Ürt. Tarihi')}</th>
                       <th>SKT</th>
                       <th className="hiza-sag">Miktar</th>
@@ -750,7 +750,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                       <tr key={z.seriLotId ?? li} className="tiklanir" title={c('Lotları değiştirmek için çift tıklayın')}
                           onDoubleClick={() => duzenle(r, true)}>
                         <td><code>{z.lotNo || '—'}</code></td>
-                        <td>{z.seriNo || '—'}</td>
+                        {seriSutunuVar(r.izleme, lotlar) && <td>{z.seriNo || '—'}</td>}
                         <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
                         <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>
                         <td className="hiza-sag">
