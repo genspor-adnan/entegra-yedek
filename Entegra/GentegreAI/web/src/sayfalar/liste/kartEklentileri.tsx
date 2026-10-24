@@ -27,6 +27,7 @@ import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
 import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
+import { HastaKartBandi } from '../hasta/HastaKartBandi';
 
 /**
  * KART EKLENTİLERİ — ekran-özel kart parçaları KAYNAK BAŞINA tek kayıtta (refaktör 22.10.2026).
@@ -71,6 +72,8 @@ export interface KartEklentisi {
   seritSarmalayici?(b: KartEklentiBaglami): GenFormProps['seritSarmalayici'];
   ekAraclar?(b: KartEklentiBaglami): GenFormProps['ekAraclar'];
   baslikEk?(b: KartEklentiBaglami): GenFormProps['baslikEk'];
+  /** Araç çubuğunun altında, sekmelerin üstünde (kimlik şeridinin yerinde) - ör. hasta isim bandı. */
+  ustBaglam?(b: KartEklentiBaglami): GenFormProps['ustBaglam'];
   /** Gövdenin sağında hep görünen panel (yalnız kayıtlı kartta). */
   yanPanel?(b: KartEklentiBaglami): GenFormProps['yanPanel'];
   /** Kayıtlı kartta sekme rozeti sayısı - açılışta ve her kayıt / tazelemede okunur. */
@@ -80,6 +83,13 @@ export interface KartEklentisi {
 const kayitli = (id: KartEklentiBaglami['kartId']): id is number => typeof id === 'number';
 
 export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
+  // ------------------------------------------------ hasta kartı v5 (24.10.2026) ----
+  // Mockup Kayıt Kabul/hasta_karti_v5.html: etiketli kimlik şeridi yok (alanlar Genel › Kimlik),
+  //   yerinde isim bandı + sayı kutuları.
+  hasta: {
+    ustBaglam: b => kayitli(b.kartId)
+      ? d => <HastaKartBandi id={b.kartId as number} deger={d} git={b.git} /> : undefined,
+  },
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html: kimlik şeridinin altında özet şeridi, sağda dikkat /
   //   yaşlandırma / kişiler / son olaylar, Finansal · Belgeler · CRM sekmeleri, araç

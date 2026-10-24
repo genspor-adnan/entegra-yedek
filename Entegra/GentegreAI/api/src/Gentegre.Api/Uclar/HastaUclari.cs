@@ -64,7 +64,77 @@ public static class HastaUclari
             var epostaL = await EpostaBulAsync(b, rolKol, eposta, haric, iptal);
             return Results.Ok(new MukerrerYaniti(kimlik, telefon, epostaL));
         });
+
+        // KART ÖZETİ (kullanıcı 24.10.2026, mockup Kayıt Kabul/hasta_karti_v5.html): kartın üstündeki
+        //   isim bandı ve sayı kutuları tek sorguda. Bakiye cari ekstreyle aynı kural (acikBorc kolonu).
+        grup.MapGet("/{id:int}/kart-ozeti", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("hasta", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var o = await b.TekAsync(KartOzetiSql, null, [id], OzetOku, iptal);
+            return o is null ? Results.NotFound() : Results.Ok(o);
+        });
     }
+
+    public sealed record HastaKartOzeti(
+        DateTime? DogumTarihi, short Cinsiyet, string KanGrubu, short Vefat, string Kurum,
+        DateTime? SonBasvuru, string SonBolum, string SonDoktor, int BasvuruSayisi,
+        DateTime? SonrakiRandevu, string RandevuBolum, string RandevuHekim,
+        decimal Bakiye, int AlerjiSayisi, short AlerjiSiddet, IReadOnlyList<string> Alerjiler,
+        int KronikSayisi, IReadOnlyList<string> Kronikler, int IlacSayisi, int BekleyenSonuc);
+
+    // Bekleyen sonuç: son 90 günün istendi / numune / çalışılıyor durumundaki lab istemleri.
+    // Kronik: bitmemiş; alerji ve ilaç: aktif. Randevu: şu andan sonraki planlı / ertelenmiş (1, 5).
+    private const string KartOzetiSql = """
+        select h.dogum_tarihi, coalesce(h.cinsiyet, 0)::smallint,
+               coalesce((select d.ad from public.kod_deger d join public.kod_liste l on l.id = d.liste_id
+                          where l.kod = 'taraf.kan_grubu' and d.dil = 0 and d.deger = h.kan_grubu limit 1), ''),
+               coalesce(h.vefat, 0)::smallint,
+               coalesce((select public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120) from public.taraf k where k.id = h.kurum_id), ''),
+               sb.belge_tarihi, coalesce(sb.bolum, ''), coalesce(sb.doktor, ''),
+               (select count(*)::int from public.belge b where b.taraf_id = t.id and b.tur = 19),
+               rn.baslangic, coalesce(rn.bolum, ''), coalesce(rn.hekim, ''),
+               (select coalesce(sum(case when e.bakiye_dahil = 1 then e.yerel_borc - e.yerel_alacak else 0 end), 0)
+                  from public.v_mali_hareket_ek e
+                 where e.taraf_id = t.id and e.hesap_turu = 'C' and e.cari_ekstre = 1 and e.islem_durum in (1, 2)),
+               (select count(*)::int from public.hasta_alerji a where a.hasta_id = t.id and a.aktif = 1),
+               coalesce((select max(a.siddet) from public.hasta_alerji a where a.hasta_id = t.id and a.aktif = 1), 0)::smallint,
+               coalesce((select array_agg(x.etken order by x.siddet desc, x.id) from (
+                   select a.id, a.siddet, coalesce(nullif(a.etken, ''), a.etken_madde) etken from public.hasta_alerji a
+                    where a.hasta_id = t.id and a.aktif = 1 order by a.siddet desc, a.id limit 3) x), '{}'),
+               (select count(*)::int from public.hasta_kronik_tani k where k.hasta_id = t.id and k.bitis is null),
+               coalesce((select array_agg(x.ad order by x.id) from (
+                   select k.id, coalesce(nullif(k.tani_ad, ''), k.icd_kod) ad from public.hasta_kronik_tani k
+                    where k.hasta_id = t.id and k.bitis is null order by k.id limit 3) x), '{}'),
+               (select count(*)::int from public.hasta_ilac i where i.hasta_id = t.id and i.aktif = 1),
+               (select count(*)::int from public.lab_istem l where l.taraf_id = t.id and l.durum in (1, 2, 3)
+                   and l.istem_tarihi > now() - interval '90 days')
+          from public.taraf t
+          left join public.taraf_hasta h on h.id = t.id
+          left join lateral (
+                select b.belge_tarihi, dp.ad bolum, public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) doktor
+                  from public.belge b join public.belge_basvuru bb on bb.id = b.id
+                  left join public.departman dp on dp.id = bb.bolum_id
+                  left join public.taraf p on p.id = bb.personel_id
+                 where b.taraf_id = t.id and b.tur = 19 order by b.belge_tarihi desc, b.id desc limit 1) sb on true
+          left join lateral (
+                select r.baslangic, dp.ad bolum, public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) hekim
+                  from public.randevu r
+                  left join public.departman dp on dp.id = r.bolum
+                  left join public.taraf p on p.id = r.hekim_id
+                 where r.hasta_id = t.id and r.durum in (1, 5) and r.baslangic > now()
+                 order by r.baslangic limit 1) rn on true
+         where t.id = @p0 and t.hasta = 1
+        """;
+
+    private static HastaKartOzeti OzetOku(NpgsqlDataReader o) => new(
+        o.IsDBNull(0) ? null : o.GetDateTime(0), o.GetInt16(1), o.GetString(2), o.GetInt16(3), o.GetString(4),
+        o.IsDBNull(5) ? null : o.GetDateTime(5), o.GetString(6), o.GetString(7), o.GetInt32(8),
+        o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetString(10), o.GetString(11),
+        o.GetDecimal(12), o.GetInt32(13), o.GetInt16(14), o.GetFieldValue<string[]>(15),
+        o.GetInt32(16), o.GetFieldValue<string[]>(17), o.GetInt32(18), o.GetInt32(19));
 
     /// <summary>
     /// Kart ucu (ekle / güncelle) SERT KURALI: aynı kimlik numaralı başka bir

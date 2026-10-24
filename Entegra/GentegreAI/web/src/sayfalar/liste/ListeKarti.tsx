@@ -1094,7 +1094,7 @@ export function ListeKarti({
         // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
         //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
         //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
-        ustBaglam={sekmesiz
+        ustBaglam={eklenti?.ustBaglam?.(eb) ?? (sekmesiz
           // BAŞLIK = HASTA BANDI (mockup hasta_bandi / v7) - yalnız sekmesiz düzende.
           // Konsültasyon YANIT muayenesiyse bandın altında yanıt şeridi (1107).
           ? () => <><MuayeneHastaBandi bilgi={hastaBilgisi} /><KonsultasyonYanitSeridi muayeneId={Number(kartId)} /></>
@@ -1108,7 +1108,7 @@ export function ListeKarti({
               <KonsultasyonYanitSeridi muayeneId={Number(kartId)} />
             </>
           )
-          : undefined}
+          : undefined)}
         // PENCEREDEKI ALAN SIRASI (kullanici): once hekimin sectikleri
         //   (bolum, hekim, tur, isteyen muayene), EN ALTTA sistemin yazdigi
         //   baslama/bitis damgalari. `seritAlanlari` hem listeyi hem SIRAYI

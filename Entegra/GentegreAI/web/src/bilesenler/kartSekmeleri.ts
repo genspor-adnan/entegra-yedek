@@ -152,6 +152,20 @@ export function sekmeleriKur(secenek: {
     }
   }
 
+  // HASTA KARTI v5 (24.10.2026): şerit boş - Kimlik grubu ayrı sekme değil, Genel'in başında "Kimlik" kutusu.
+  if (kaynak === 'hasta' && seritAlanlari?.length === 0) {
+    const ki = s.findIndex(x => x.tur === 'grup' && x.baslik === KIMLIK_GRUP);
+    const ge = s.findIndex(x => x.tur === 'grup' && x.baslik === 'Genel');
+    if (ki >= 0 && ge >= 0) {
+      const kimlik = s[ki] as Extract<SekmeTanimi, { tur: 'grup' }>;
+      const genel = s[ge] as Extract<SekmeTanimi, { tur: 'grup' }>;
+      const sira = ['vkno', 'ad', 'soyad', 'kod', 'durum'];
+      const k = [...kimlik.alanlar].sort((x, y) => (sira.indexOf(x.ad) + 99) % 99 - (sira.indexOf(y.ad) + 99) % 99);
+      s[ge] = { ...genel, alanlar: [...k.map(a => ({ ...a, altGrup: a.altGrup ?? KIMLIK_GRUP })), ...genel.alanlar] };
+      s.splice(ki, 1);
+    }
+  }
+
   if (kaynak === 'cari' || kaynak === 'hasta') {
     const genel = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Genel');
     const fatura = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Adres / Fatura Bilgisi');

@@ -166,6 +166,17 @@ const adliBlok = (
         PersonelKimlikOzet/TekAdres gibi ozel bilesenler AltGrup'a bagli DEGIL, asagida
         bu blogun icinde render ediliyor (bug: "genel sekmesinde sadece 2 alan var" -
         adli.length===0 oldugu icin butun kasira hic acilmiyordu). */}
+    {/* HASTA KARTI v5 (kullanıcı 24.10.2026): eski etiketli kimlik şeridinin alanları (Kimlik No · Ad ·
+        Soyad · Dosya No · Durum) Genel'in başında tek satır "Kimlik" kutusu - kartSekmeleri buraya taşır. */}
+    {kaynak === 'hasta' && aktif.baslik === 'Genel' && (() => {
+      const k = adli.find(([b]) => b === 'Kimlik')?.[1];
+      return k && k.length > 0 ? (
+        <div className="kagrup" style={{ margin: '0 0 10px' }}>
+          <h6>Kimlik</h6>
+          <div className="alan-izgara" style={{ display: 'grid', gridTemplateColumns: `repeat(${k.length}, minmax(0, 1fr))`, gap: '8px 12px' }}>
+            {renderAlanListesi(k)}</div>
+        </div>) : null;
+    })()}
     {(adli.length > 0 || personelGibiKart) && (
       <div className="kasira">
         {iletisim && (

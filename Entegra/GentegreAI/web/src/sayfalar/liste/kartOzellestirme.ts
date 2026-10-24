@@ -42,6 +42,9 @@ function bkiHesapla(s: Record<string, unknown>): string {
 }
 
 export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
+  // HASTA KARTI v5 (kullanıcı 24.10.2026): etiketli kimlik şeridi yok - Kimlik No / Ad / Soyad / Dosya No /
+  //   Durum Genel sekmesinin "Kimlik" kutusunda (kartSekmeleri), üstte isim bandı (kartEklentileri).
+  hasta: { seritAlanlari: [] },
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html sırası; Finansal / Belgeler / CRM kart eklentisinin sekmeleri.
   cari: {
