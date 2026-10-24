@@ -18,8 +18,11 @@ import { MenuIkon, type MenuSatiri } from './menuAgaci';
  *    karta geçiş aynı sekmede kalır. Menüde olmayan yol kendi adresiyle sekmedir.
  *  - Başlangıç (/panel) sabit, kapanmaz.
  *  - En fazla SEKME_SINIRI sekme: aşınca en uzun süredir bakılmayan kapanır, söylenir.
+ *  - Aynı listenin kartı en fazla KART_SEKME_SINIRI sekmede (bkz. kartYuvasiSec).
  */
 export const SEKME_SINIRI = 8;
+/** Aynı tür kart için yan yana açık sekme sayısı (kullanıcı 24.10.2026: "3 tedarikçi kartı yan yana"). */
+export const KART_SEKME_SINIRI = 3;
 const BASLANGIC = '/panel';
 
 interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location; erisim: number;
@@ -37,9 +40,8 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
   for (const [kartYolu, { ad: yeniBaslik, ikon }] of Object.entries(kartSekmeleri ?? {})) {
     const kalan = konum.pathname.startsWith(kartYolu + '/') ? konum.pathname.slice(kartYolu.length + 1) : '';
     const m = kalan && !kalan.includes('/') ? [kalan, kalan] : null;
-    // TEK KART SEKMESİ (kullanıcı: "tek hasta kartı açık olsun.. yeni hasta tıklandığında diğerini
-    //   kapatıp yerine bunu koysun"): anahtar listenin kart sekmesidir, kaydın kendisi değil -
-    //   başka kart açılınca aynı sekme, aynı yerde yeni kartla dolar.
+    // KART SEKMESİ YUVASI: anahtar listenin kart sekmesidir (`…#kart`), kaydın kendisi değil;
+    //   hangi yuvaya (#0..#2) düşeceğini useEkranSekmeleri seçer (kartYuvasiSec).
     if (m) return m[1] === 'yeni' ? { anahtar: `${kartYolu}#kart`, baslik: yeniBaslik, ikon, ust: kartYolu }
                                    : { anahtar: `${kartYolu}#kart`, baslik: 'Kart', ikon, ust: kartYolu };
   }
@@ -56,6 +58,29 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
 }
 
 /**
+ * KART YUVASI SEÇİMİ. Önce "tek kart sekmesi" vardı (kullanıcı: "yeni hasta tıklandığında diğerini
+ * kapatıp yerine bunu koysun"); 24.10.2026'dan beri aynı listenin kartı KART_SEKME_SINIRI sekmeye
+ * kadar yan yana açılır, sınır dolunca en uzun süredir bakılmayan yuva yeni kartla dolar.
+ *  1. Kayıt zaten bir yuvada açıksa o yuva (aynı kart ikinci kez açılmaz).
+ *  2. Aynı listenin kartındayken gelinen adres (yeni → kayıt, karttan karta) aynı yuvada kalır
+ *     (kart kirli değilse).
+ *  3. Boş yuva varsa o.
+ *  4. Yoksa kayıtsız değişikliği olmayan en eski yuva; hepsi kirliyse null (kartaGit uyarır).
+ */
+export function kartYuvasiSec(taban: string, yolu: string, sekmeler: { anahtar: string; konum: { pathname: string }; erisim: number }[],
+                              oncekiAktif: string | undefined, kirliMi: (anahtar: string) => boolean): string | null {
+  const grup = sekmeler.filter(s => s.anahtar.startsWith(taban + '#'));
+  const ayni = grup.find(s => s.konum.pathname === yolu);
+  if (ayni) return ayni.anahtar;
+  // Kirli kartın yerine başka kayıt konmaz - öteki yuvalara bakılır.
+  if (oncekiAktif?.startsWith(taban + '#') && !kirliMi(oncekiAktif)) return oncekiAktif;
+  for (let i = 0; i < KART_SEKME_SINIRI; i++)
+    if (!grup.some(s => s.anahtar === `${taban}#${i}`)) return `${taban}#${i}`;
+  const temiz = grup.filter(s => !kirliMi(s.anahtar)).sort((a, b) => a.erisim - b.erisim)[0];
+  return temiz?.anahtar ?? null;
+}
+
+/**
  * AÇIK SEKMELER F5'TE GERİ GELİR (kullanıcı 15.10.2026: "F5 ile refresh yaptım liste kayboldu ama
  * reçete kartı kaldı"): sekme listesi (adres, başlık, ikon) ve ekranların verdiği başlıklar tarayıcı
  * OTURUMUNDA saklanır - sekme / tarayıcı kapanınca sıfırlanır. Geri gelen sekmenin ekranı ilk
@@ -68,7 +93,9 @@ function sekmeleriOku(): { sekmeler: Sekme[]; basliklar: Record<string, string> 
     const d = JSON.parse(sessionStorage.getItem(DEPO_ANAHTARI) ?? 'null') as
       { sekmeler?: SakliSekme[]; basliklar?: Record<string, string> } | null;
     return {
-      sekmeler: (d?.sekmeler ?? []).map(x => ({ ...x, erisim: x.erisim || 0,
+      // Tek kart sekmesi döneminden kalan anahtar ('…#kart') ilk yuvadır.
+      sekmeler: (d?.sekmeler ?? []).map(x => ({ ...x, anahtar: x.anahtar.endsWith('#kart') ? x.anahtar + '#0' : x.anahtar,
+                                                erisim: x.erisim || 0,
         konum: { pathname: x.konum.pathname, search: x.konum.search ?? '', hash: '', state: null, key: 'sakli' } })),
       basliklar: d?.basliklar ?? {},
     };
@@ -103,14 +130,34 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   /** Her sekmenin SON çizilen ekranı (gizliyken bu çizilir - durum korunur). */
   const ekranlar = useRef(new Map<string, React.ReactNode>());
 
-  const simdiki = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
+  /** Kart sekmelerinin "kayıtsız değişiklik var mı" sorusu (bkz. kartaGit). */
+  const kirliler = useRef(new Map<string, () => boolean>());
+  const kirliMi = (anahtar: string) => !!kirliler.current.get(anahtar)?.();
+  /** Adres (konum.key) -> seçilen kart yuvası: aynı adres her çizimde aynı sekmede kalsın. */
+  const yuvalar = useRef(new Map<string, string>());
+  /** Bu adresten önce öndeki sekme (yuva kuralı 2). */
+  const sonAktif = useRef<string | undefined>(undefined);
+  const bulunan = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
+  let simdiki = bulunan;
+  if (bulunan.ust) {
+    // Dışarıdan history.pushState edilen adreslerin key'i hep 'default' - adres de anahtarda.
+    const yuvaAnahtari = `${konum.key}|${konum.pathname}${konum.search}`;
+    let anahtar = yuvalar.current.get(yuvaAnahtari);
+    if (!anahtar) {
+      anahtar = kartYuvasiSec(bulunan.anahtar, konum.pathname, sekmeler, sonAktif.current, kirliMi)
+        // Hepsi kirliyken dışarıdan gelinirse (kartaGit dışı yol) en eskisi - adres zaten değişti.
+        ?? sekmeler.filter(s => s.anahtar.startsWith(bulunan.anahtar + '#')).sort((a, b) => a.erisim - b.erisim)[0]?.anahtar
+        ?? `${bulunan.anahtar}#0`;
+      yuvalar.current.set(yuvaAnahtari, anahtar);
+    }
+    simdiki = { ...bulunan, anahtar };
+  }
+  useEffect(() => { sonAktif.current = simdiki.anahtar });
   /** Ekranın kendisinin verdiği sekme başlığı (ör. hasta kartında hastanın adı). */
   const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>(ilk.basliklar);
   useEffect(() => { sekmeleriYaz(sekmeler, ozelBaslik) }, [sekmeler, ozelBaslik]);
   // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
   const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[s.konum.pathname] ?? s.baslik;
-  /** Kart sekmelerinin "kayıtsız değişiklik var mı" sorusu (bkz. kartaGit). */
-  const kirliler = useRef(new Map<string, () => boolean>());
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
@@ -123,7 +170,10 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
         // KART SEKMESİ listesinin hemen yanına (kullanıcı: "hasta kartı hemen yanına yeni sekme
         //   olarak açılacak"); liste yoksa sona. Diğer ekranlar sona.
         const yeniSekme: Sekme = { ...simdiki, konum, erisim: Date.now() };
-        const listeI = simdiki.ust ? onceki.findIndex(s => s.anahtar === simdiki.ust) : -1;
+        //   Aynı listenin öteki kartları varsa onların ardına (liste · kart 1 · kart 2 · kart 3).
+        const taban = simdiki.ust ? `${simdiki.ust}#kart#` : '';
+        const listeI = simdiki.ust ? onceki.reduce((son, s, i) =>
+          (s.anahtar === simdiki.ust || s.anahtar.startsWith(taban) ? i : son), -1) : -1;
         yeni = listeI >= 0 ? [...onceki.slice(0, listeI + 1), yeniSekme, ...onceki.slice(listeI + 1)] : [...onceki, yeniSekme];
       }
       const kapanabilir = yeni.filter(s => s.anahtar !== BASLANGIC);
@@ -168,17 +218,17 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     if (s && anahtar !== simdiki.anahtar) { ac(s); setTimeout(f, 50) } else f();
   };
   /**
-   * KARTA GİT - KİRLİ KART KORUNUR (tek kart sekmesi, "yerine bunu koysun"): açık kartta kayıtsız
-   * değişiklik varken aynı kart sekmesine başka kayıt AÇILMAZ - o kart öne alınır, kullanıcı
-   * uyarılır. Gezinmeden ÖNCE sorulur: gelen adresle kart yeniden çizilirse değişiklik kaybolurdu.
+   * KARTA GİT - KİRLİ KART KORUNUR: yeni kart dolu yuvaya düşecekse (yuvalar dolu) kayıtsız
+   * değişikliği olan yuva seçilmez; hepsi kirliyse başka kayıt AÇILMAZ - en eskisi öne alınır,
+   * kullanıcı uyarılır. Gezinmeden ÖNCE sorulur: kart yeniden çizilirse değişiklik kaybolurdu.
    */
   const kartaGit = (yol: string) => {
     const [yolu, sorgu = ''] = yol.split('?');
     const hedef = sekmeBul(satirlar, { pathname: yolu, search: sorgu ? `?${sorgu}` : '', hash: '', state: null, key: '' },
                            ekBasliklar, kartSekmeleri);
-    const s = liste.find(x => x.anahtar === hedef.anahtar);
-    if (s && hedef.ust && s.konum.pathname !== yolu && kirliler.current.get(s.anahtar)?.()) {
-      ac(s);
+    if (hedef.ust && kartYuvasiSec(hedef.anahtar, yolu, liste, simdiki.anahtar, kirliMi) === null) {
+      const s = liste.filter(x => x.anahtar.startsWith(hedef.anahtar + '#')).sort((a, b) => a.erisim - b.erisim)[0];
+      if (s) ac(s);
       setBildirim(c('Açık kartta kaydedilmemiş değişiklik var - önce kaydedin ya da kapatın.'));
       return;
     }
