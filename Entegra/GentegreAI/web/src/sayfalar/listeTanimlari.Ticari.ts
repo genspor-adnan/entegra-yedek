@@ -710,14 +710,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
-              tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'POS Hesabı Listesi', yol: 'Banka › POS',
+              tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'POS Listesi', yol: 'Banka › POS',
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
     // Hesap Türü sorulmaz, arka planda POS (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
     yeniKayitVarsayilanlari: { tur: 'P' },
     gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
+    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS Listesi', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
   },
   {
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -726,7 +726,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
     // Hesap Türü sorulmaz, arka planda Kredi Kartı (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
     yeniKayitVarsayilanlari: { tur: 'V' },
-    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
+    // POS / Kart kutusunda komisyon ve valör yok (kullanıcı 24.10.2026): kesim günü / son ödeme / limit kalır.
+    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi',   // 1160: açılış = devir hareketi
+                        'komisyonOrani', 'komisyonMasrafId', 'komisyonZamani', 'valorGun'],
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap.tanim.kredi_karti.liste',
